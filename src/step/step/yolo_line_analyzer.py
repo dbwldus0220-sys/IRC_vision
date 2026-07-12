@@ -234,6 +234,45 @@ class YoloLineAnalyzer(Node):
         )
 
         # ====================================================
+        # Path continuity filtering
+        # ====================================================
+
+        self.declare_parameter(
+            "path_continuity_filter_enabled",
+            True,
+        )
+
+        self.declare_parameter(
+            "min_path_vertical_progress_px",
+            12.0,
+        )
+
+        self.declare_parameter(
+            "max_path_jump_px",
+            320.0,
+        )
+
+        self.declare_parameter(
+            "max_path_dx_px",
+            240.0,
+        )
+
+        self.declare_parameter(
+            "max_path_angle_change_deg",
+            55.0,
+        )
+
+        self.declare_parameter(
+            "max_path_lateral_to_vertical_ratio",
+            2.2,
+        )
+
+        self.declare_parameter(
+            "min_path_continuity_score",
+            0.50,
+        )
+
+        # ====================================================
         # Segment filtering
         # ====================================================
 
@@ -428,6 +467,54 @@ class YoloLineAnalyzer(Node):
             self.get_parameter(
                 "max_points"
             ).value
+        )
+
+        self.path_continuity_filter_enabled = bool(
+            self.get_parameter(
+                "path_continuity_filter_enabled"
+            ).value
+        )
+
+        self.min_path_vertical_progress_px = float(
+            self.get_parameter(
+                "min_path_vertical_progress_px"
+            ).value
+        )
+
+        self.max_path_jump_px = float(
+            self.get_parameter(
+                "max_path_jump_px"
+            ).value
+        )
+
+        self.max_path_dx_px = float(
+            self.get_parameter(
+                "max_path_dx_px"
+            ).value
+        )
+
+        self.max_path_angle_change_deg = float(
+            self.get_parameter(
+                "max_path_angle_change_deg"
+            ).value
+        )
+
+        self.max_path_lateral_to_vertical_ratio = float(
+            self.get_parameter(
+                "max_path_lateral_to_vertical_ratio"
+            ).value
+        )
+
+        self.min_path_continuity_score = float(
+            np.clip(
+                float(
+                    self.get_parameter(
+                        "min_path_continuity_score"
+                    ).value
+                ),
+                0.0,
+                1.0,
+            )
         )
 
         self.min_segment_dy_px = float(
@@ -688,14 +775,41 @@ class YoloLineAnalyzer(Node):
                 )
             )
 
+            raw_line_point_count = len(
+                points
+            )
+
             points = (
                 self._remove_near_duplicates(
                     points
                 )
             )
 
+            deduplicated_line_point_count = len(
+                points
+            )
+
+            (
+                points,
+                continuity_debug,
+            ) = self._filter_path_continuity(
+                points
+            )
+
             result = self._analyze_line(
                 points
+            )
+
+            result.update(
+                {
+                    "raw_line_point_count":
+                        raw_line_point_count,
+
+                    "deduplicated_line_point_count":
+                        deduplicated_line_point_count,
+
+                    **continuity_debug,
+                }
             )
 
             result["processing_ms"] = round(
@@ -933,6 +1047,338 @@ class YoloLineAnalyzer(Node):
         )
 
         return accepted
+
+    # ========================================================
+    # Path continuity filtering
+    # ========================================================
+
+    @staticmethod
+    def _limit_score(
+        value: float,
+        good_limit: float,
+        bad_limit: float,
+    ) -> float:
+        """Score 1.0 near the good limit and 0.0 past bad limit."""
+
+        if bad_limit <= good_limit:
+            return 1.0 if value <= good_limit else 0.0
+
+        if value <= good_limit:
+            return 1.0
+
+        if value >= bad_limit:
+            return 0.0
+
+        return float(
+            1.0
+            - (
+                value
+                - good_limit
+            )
+            / (
+                bad_limit
+                - good_limit
+            )
+        )
+
+    def _path_segment_angle(
+        self,
+        near_point: LinePoint,
+        far_point: LinePoint,
+    ) -> float:
+        """Return image-space angle from a near point to a far point."""
+
+        dx = (
+            far_point.x
+            - near_point.x
+        )
+
+        dy = max(
+            near_point.y
+            - far_point.y,
+            1e-6,
+        )
+
+        return math.degrees(
+            math.atan2(
+                dx,
+                dy,
+            )
+        )
+
+    def _calculate_continuity_score(
+        self,
+        previous_point: LinePoint,
+        candidate: LinePoint,
+        previous_angle: float | None,
+    ) -> tuple[
+        float,
+        float,
+    ]:
+        """Score whether candidate continues the current path."""
+
+        dx = abs(
+            candidate.x
+            - previous_point.x
+        )
+
+        dy = (
+            previous_point.y
+            - candidate.y
+        )
+
+        distance = math.hypot(
+            dx,
+            dy,
+        )
+
+        angle = self._path_segment_angle(
+            previous_point,
+            candidate,
+        )
+
+        lateral_to_vertical_ratio = (
+            dx
+            / max(
+                dy,
+                1e-6,
+            )
+        )
+
+        distance_score = self._limit_score(
+            distance,
+            self.max_path_jump_px * 0.65,
+            self.max_path_jump_px,
+        )
+
+        lateral_score = self._limit_score(
+            dx,
+            self.max_path_dx_px * 0.65,
+            self.max_path_dx_px,
+        )
+
+        vertical_score = float(
+            np.clip(
+                dy
+                / max(
+                    self.min_path_vertical_progress_px,
+                    1e-6,
+                ),
+                0.0,
+                1.0,
+            )
+        )
+
+        ratio_score = self._limit_score(
+            lateral_to_vertical_ratio,
+            self.max_path_lateral_to_vertical_ratio * 0.65,
+            self.max_path_lateral_to_vertical_ratio,
+        )
+
+        if previous_angle is None:
+            angle_score = 1.0
+
+        else:
+            angle_change = abs(
+                angle
+                - previous_angle
+            )
+
+            angle_score = self._limit_score(
+                angle_change,
+                self.max_path_angle_change_deg,
+                90.0,
+            )
+
+        continuity_score = (
+            angle_score * 0.30
+            + distance_score * 0.20
+            + lateral_score * 0.20
+            + vertical_score * 0.15
+            + ratio_score * 0.15
+        )
+
+        # A sudden near-horizontal bridge to a far candidate is
+        # usually an isolated YOLO line detection, not the real path.
+        if (
+            previous_angle is not None
+            and dx > self.max_path_dx_px * 0.35
+            and abs(angle) > 70.0
+            and abs(
+                angle
+                - previous_angle
+            ) > 25.0
+        ):
+            continuity_score = min(
+                continuity_score,
+                0.25,
+            )
+
+        return (
+            float(
+                np.clip(
+                    continuity_score,
+                    0.0,
+                    1.0,
+                )
+            ),
+            angle,
+        )
+
+    def _filter_path_continuity(
+        self,
+        points: list[LinePoint],
+    ) -> tuple[
+        list[LinePoint],
+        dict[str, Any],
+    ]:
+        """
+        Remove isolated line points that do not continue the path.
+
+        The input is already sorted near -> far. The filter keeps
+        gradual turns, but rejects sudden lateral jumps that would
+        corrupt far-heading and turn analysis.
+        """
+
+        debug: dict[str, Any] = {
+            "path_continuity_filter_enabled":
+                bool(
+                    self.path_continuity_filter_enabled
+                ),
+
+            "path_filtered_line_point_count":
+                len(points),
+
+            "path_rejected_point_count":
+                0,
+
+            "path_rejected_points_px":
+                [],
+        }
+
+        if (
+            not self.path_continuity_filter_enabled
+            or len(points) <= 2
+        ):
+            return (
+                points,
+                debug,
+            )
+
+        accepted: list[LinePoint] = [
+            points[0]
+        ]
+
+        rejected: list[LinePoint] = []
+
+        previous_angle: float | None = None
+
+        remaining = list(
+            points[1:]
+        )
+
+        while remaining:
+            scored_candidates: list[
+                tuple[float, float, int, LinePoint]
+            ] = []
+
+            for index, candidate in enumerate(
+                remaining
+            ):
+                if (
+                    accepted[-1].y
+                    - candidate.y
+                ) <= 0.0:
+                    continue
+
+                (
+                    continuity_score,
+                    angle,
+                ) = self._calculate_continuity_score(
+                    accepted[-1],
+                    candidate,
+                    previous_angle,
+                )
+
+                scored_candidates.append(
+                    (
+                        continuity_score,
+                        angle,
+                        index,
+                        candidate,
+                    )
+                )
+
+            if not scored_candidates:
+                rejected.extend(
+                    remaining
+                )
+                break
+
+            (
+                best_score,
+                best_angle,
+                best_index,
+                best_candidate,
+            ) = max(
+                scored_candidates,
+                key=lambda item: item[0],
+            )
+
+            if (
+                best_score
+                < self.min_path_continuity_score
+            ):
+                rejected.extend(
+                    remaining
+                )
+                break
+
+            rejected.extend(
+                remaining[:best_index]
+            )
+
+            accepted.append(
+                best_candidate
+            )
+
+            previous_angle = best_angle
+
+            remaining = remaining[
+                best_index + 1:
+            ]
+
+        debug.update(
+            {
+                "path_filtered_line_point_count":
+                    len(accepted),
+
+                "path_rejected_point_count":
+                    len(rejected),
+
+                "path_rejected_points_px":
+                    [
+                        [
+                            int(
+                                round(
+                                    point.x
+                                )
+                            ),
+                            int(
+                                round(
+                                    point.y
+                                )
+                            ),
+                        ]
+                        for point in rejected
+                    ],
+            }
+        )
+
+        return (
+            accepted,
+            debug,
+        )
 
     # ========================================================
     # Segment geometry

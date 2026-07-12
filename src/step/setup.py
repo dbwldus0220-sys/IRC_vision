@@ -32,6 +32,8 @@ setup(
             'yolo_line_analyzer=step.yolo_line_analyzer:main',
             'line_debug_monitor=step.line_debug_monitor:main',
             'line_path_visualizer=step.line_path_visualizer:main',
+            'mission_state_estimator=step.mission_state_estimator:main',
+            'mission_map_visualizer=step.mission_map_visualizer:main',
         ],
     },
 )

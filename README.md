@@ -1,15 +1,16 @@
 # IRC 로봇 주행 비전
 
-ROS 2 카메라 영상에서 바닥의 흰색 테이프를 검출하고 로봇의 진행 방향과 조향 각도를 계산하는 OpenCV 기반 비전 프로젝트입니다.
+ROS 2와 Intel RealSense D435i 영상에서 YOLO26 객체를 탐지하고, 라인 주행 정보와 경기장 미니맵 상태를 계산하는 IRC 휴머노이드 로봇 대회용 비전 프로젝트입니다.
 
 ## 주요 기능
 
-- ROS 2 컬러 이미지 토픽 구독
-- 관심 영역(ROI) 기반 영상 처리
-- 이진화와 모폴로지 연산을 이용한 노이즈 제거
-- 흰색 테이프의 윤곽선, 중심점과 각도 검출
-- 여러 테이프 중심을 이용한 이동 경로 계산
-- 좌회전, 직진, 우회전 방향 시각화
+- RealSense RGB 이미지 토픽 구독
+- YOLO26 ONNX 기반 `line`, `ball`, `goal`, `backboard`, `hurdle` 탐지
+- YOLO `line` 중심점 기반 경로 분석
+- 오검출 line 점 제거용 path continuity filter
+- heading, lateral offset, curve, quality 정보 계산
+- line debug monitor와 path visualizer 제공
+- 경기장 ㄹ자 미니맵과 mission state 시각화
 
 ## 실행 환경
 
@@ -20,6 +21,7 @@ ROS 2 카메라 영상에서 바닥의 흰색 테이프를 검출하고 로봇�
 - cv_bridge
 - OpenCV
 - NumPy
+- ONNX Runtime
 - 컬러 이미지 토픽을 제공하는 카메라 노드
 
 기본 구독 토픽은 `/camera/camera/color/image_raw`입니다.
@@ -27,61 +29,117 @@ ROS 2 카메라 영상에서 바닥의 흰색 테이프를 검출하고 로봇�
 ## 빌드
 
 ```bash
-source /opt/ros/<ros-distro>/setup.bash
-colcon build --symlink-install
-source install/setup.bash
+cd ~/my_cv
+source /opt/ros/humble/setup.bash
+colcon build --packages-select step --symlink-install
+source ~/my_cv/install/setup.bash
 ```
 
-`<ros-distro>`를 설치된 ROS 2 배포판 이름으로 변경하세요.
+현재 개발 환경은 ROS 2 Humble 기준입니다.
 
 ## 실행
 
-먼저 RealSense 등의 카메라 노드를 실행한 뒤, 다른 터미널에서 원하는 비전 노드를 실행합니다.
+기본 실행은 RealSense, YOLO26 detector, line analyzer, visualizer, mission state, minimap을 나누어 실행합니다.
+
+터미널 1에서 RealSense를 실행합니다.
 
 ```bash
-source /opt/ros/<ros-distro>/setup.bash
-source install/setup.bash
-ros2 run step find_ddirect
+source /opt/ros/humble/setup.bash
+ros2 launch realsense2_camera rs_launch.py
 ```
 
-사용 가능한 실행 노드는 다음과 같습니다.
+터미널 2에서 YOLO26 detector를 실행합니다.
 
 ```bash
-ros2 run step look_ground
-ros2 run step look_gground
-ros2 run step find_direct
-ros2 run step find_ddirect
+cd ~/my_cv
+source /opt/ros/humble/setup.bash
+source ~/my_cv/install/setup.bash
+ros2 run step yolo26_detector --ros-args \
+  -p device:=cpu \
+  -p display:=false \
+  -p publish_annotated_image:=false \
+  -p max_fps:=30.0
+```
+
+터미널 3에서 Line Analyzer를 실행합니다.
+
+```bash
+cd ~/my_cv
+source /opt/ros/humble/setup.bash
+source ~/my_cv/install/setup.bash
+ros2 run step yolo_line_analyzer
+```
+
+터미널 4에서 Line Path Visualizer를 실행합니다.
+
+```bash
+cd ~/my_cv
+source /opt/ros/humble/setup.bash
+source ~/my_cv/install/setup.bash
+ros2 run step line_path_visualizer
+```
+
+터미널 5에서 Mission State Estimator를 실행합니다.
+
+```bash
+cd ~/my_cv
+source /opt/ros/humble/setup.bash
+source ~/my_cv/install/setup.bash
+ros2 run step mission_state_estimator
+```
+
+터미널 6에서 Mission Map Visualizer를 실행합니다.
+
+```bash
+cd ~/my_cv
+source /opt/ros/humble/setup.bash
+source ~/my_cv/install/setup.bash
+ros2 run step mission_map_visualizer
+```
+
+선택으로 터미널 디버그 모니터를 실행할 수 있습니다.
+
+```bash
+cd ~/my_cv
+source /opt/ros/humble/setup.bash
+source ~/my_cv/install/setup.bash
+ros2 run step line_debug_monitor
 ```
 
 ## 노드 설명
 
-- `look_ground`: 전체 영상에서 테이프 중심과 각도 검출
-- `look_gground`: 동적 ROI를 적용한 테이프 검출
-- `find_direct`: 여러 테이프 중심의 평균을 이용한 진행 방향 계산
-- `find_ddirect`: 테이프 중심 경로와 상대 각도를 이용한 진행 방향 계산
+- `yolo26_detector`: RealSense RGB 영상에서 YOLO26 객체를 탐지하고 `/vision/detections` 발행
+- `yolo_line_analyzer`: `/vision/detections`에서 `line`만 분석하여 `/vision/line_info` 발행
+- `line_debug_monitor`: `/vision/line_info`를 터미널에서 읽기 쉽게 표시
+- `line_path_visualizer`: line 경로, heading, offset, quality를 OpenCV 창에 표시
+- `mission_state_estimator`: line/object 정보를 이용해 현재 mission state를 `/vision/mission_state`로 발행
+- `mission_map_visualizer`: ㄹ자 경기장 미니맵, 공/골대 위치, start/finish, mission flow를 표시
 
 ## 조정 항목
 
-조명, 카메라 높이와 각도에 따라 각 Python 파일의 다음 값을 조정할 수 있습니다.
+조명, 카메라 높이와 각도에 따라 다음 값을 조정할 수 있습니다.
 
-- 이진화 임계값
-- ROI 범위
-- 윤곽선 최소/최대 면적
-- 테이프 종횡비 범위
-- 좌회전, 직진, 우회전 판정 각도
+- YOLO confidence threshold
+- Line analyzer ROI 범위
+- Path continuity filter threshold
+- Temporal filter window와 EMA alpha
+- Mission state 전환 조건
 
 ## 주의
 
-- 현재 코드는 검출 결과와 방향을 OpenCV 창에 표시합니다.
-- 로봇 구동부에 실제 제어 명령을 발행하는 기능은 포함되어 있지 않습니다.
+- 현재 코드는 비전 상태를 계산하고 시각화합니다.
+- 로봇 구동부에 실제 제어 명령을 발행하는 기능은 아직 포함되어 있지 않습니다.
 - 실행 전에 카메라 토픽이 정상적으로 발행되는지 확인하세요.
+- `mission_state_estimator`는 현재 기본 FSM 뼈대이며, 실제 경기장 테스트 후 전환 조건을 더 구체화해야 합니다.
 
 ## 포함 파일
 
-- `src/step/step/look_ground.py`: 기본 테이프 검출
-- `src/step/step/look_gground.py`: ROI 기반 테이프 검출
-- `src/step/step/find_direct.py`: 평균 중심 기반 진행 방향 계산
-- `src/step/step/find_ddirect.py`: 경로 상대 각도 기반 진행 방향 계산
+- `src/step/step/yolo26_detector.py`: YOLO26 ONNX 객체 탐지와 ROS 토픽 발행
+- `src/step/step/yolo_line_analyzer.py`: YOLO26 `line` 탐지 결과를 경로와 방향 정보로 정리
+- `src/step/step/line_debug_monitor.py`: `/vision/line_info`를 터미널에서 요약 표시
+- `src/step/step/line_path_visualizer.py`: `/vision/line_info`와 카메라 이미지를 시각화
+- `src/step/step/mission_state_estimator.py`: 현재 mission state 추정
+- `src/step/step/mission_map_visualizer.py`: 경기장 미니맵과 mission flow 시각화
 - `src/step/setup.py`: ROS 2 Python 노드 등록
 - `src/step/package.xml`: ROS 2 패키지 정보와 의존성
 
@@ -114,70 +172,36 @@ yolo_line_analyzer
     ↓
 /vision/line_info
     ├── line_debug_monitor
-    └── line_path_visualizer
+    ├── line_path_visualizer
+    └── mission_state_estimator
+            ↓
+       /vision/mission_state
+            ↓
+       mission_map_visualizer
 ```
 
-## YOLO26 실행 순서
+## 미니맵과 미션 상태
 
-현재 YOLO26 파이프라인은 5개 터미널로 실행합니다.
+현재 경기장 미니맵은 1칸을 `1m x 1m`로 보는 격자 기반입니다.
 
-- 터미널 1 = RealSense
-- 터미널 2 = YOLO26 detector
-- 터미널 3 = Line Analyzer
-- 터미널 4 = Line Debug Monitor
-- 터미널 5 = Line Path Visualizer
+- 공 위치는 `BALL A`, `BALL B`로 표시합니다.
+- 골대 위치는 `GOAL A`, `GOAL B`로 표시합니다.
+- 시작선과 도착선은 각 끝선에서 0.5m 떨어진 보라색 선으로 표시합니다.
+- Mission flow는 다음 순서를 기본으로 둡니다.
 
-먼저 빌드합니다.
-
-```bash
-cd ~/my_cv
-source /opt/ros/humble/setup.bash
-colcon build --packages-select step --symlink-install
-source ~/my_cv/install/setup.bash
+```text
+START
+-> WALK_TO_BALL_A
+-> PICK_BALL_A
+-> SCORE_GOAL_A
+-> WALK_TO_BALL_B
+-> PICK_BALL_B
+-> SCORE_GOAL_B
+-> WALK_TO_FINISH
+-> FINISH
 ```
 
-터미널 1에서 RealSense를 실행합니다.
-
-```bash
-source /opt/ros/humble/setup.bash
-ros2 launch realsense2_camera rs_launch.py
-```
-
-터미널 2에서 YOLO26 detector를 실행합니다.
-
-```bash
-cd ~/my_cv
-source /opt/ros/humble/setup.bash
-source ~/my_cv/install/setup.bash
-ros2 run step yolo26_detector --ros-args -p device:=cpu
-```
-
-터미널 3에서 Line Analyzer를 실행합니다.
-
-```bash
-cd ~/my_cv
-source /opt/ros/humble/setup.bash
-source ~/my_cv/install/setup.bash
-ros2 run step yolo_line_analyzer
-```
-
-터미널 4에서 Line Debug Monitor를 실행합니다.
-
-```bash
-cd ~/my_cv
-source /opt/ros/humble/setup.bash
-source ~/my_cv/install/setup.bash
-ros2 run step line_debug_monitor
-```
-
-터미널 5에서 Line Path Visualizer를 실행합니다.
-
-```bash
-cd ~/my_cv
-source /opt/ros/humble/setup.bash
-source ~/my_cv/install/setup.bash
-ros2 run step line_path_visualizer
-```
+현재는 line/object detection을 이용한 기본 상태 추정만 구현되어 있습니다. 실제 로봇 주행 알고리즘과 연결할 때는 deadband, hysteresis, command smoothing을 적용해야 합니다.
 
 ## YOLO26 실행 참고
 
@@ -199,10 +223,3 @@ ros2 run step yolo26_detector --ros-args \
 ```
 
 Jetson Orin Nano에서는 추후 `cuda` 또는 `tensorrt` 실행을 테스트할 예정입니다.
-
-## YOLO26 관련 파일
-
-- `src/step/step/yolo26_detector.py`: YOLO26 ONNX 객체 탐지와 ROS 토픽 발행
-- `src/step/step/yolo_line_analyzer.py`: YOLO26 `line` 탐지 결과를 경로와 방향 정보로 정리
-- `src/step/step/line_debug_monitor.py`: `/vision/line_info`를 터미널에서 요약 표시
-- `src/step/step/line_path_visualizer.py`: `/vision/line_info`와 카메라 이미지를 시각화
