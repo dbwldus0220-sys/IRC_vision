@@ -97,6 +97,15 @@ source ~/my_cv/install/setup.bash
 ros2 run step mission_map_visualizer
 ```
 
+이미 RealSense, YOLO26 detector, line analyzer, line path visualizer, mission state estimator를 켜둔 상태에서 맵 창만 추가로 열고 싶다면 새 터미널 하나를 더 열고 아래만 실행하면 됩니다.
+
+```bash
+cd ~/my_cv
+source /opt/ros/humble/setup.bash
+source ~/my_cv/install/setup.bash
+ros2 run step mission_map_visualizer
+```
+
 선택으로 터미널 디버그 모니터를 실행할 수 있습니다.
 
 ```bash
