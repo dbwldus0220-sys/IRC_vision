@@ -28,6 +28,10 @@ setup(
             'look_gground=step.look_gground:main',
             'find_direct=step.find_direct:main',
             'find_ddirect=step.find_ddirect:main',
+            'yolo26_detector=step.yolo26_detector:main',
+            'yolo_line_analyzer=step.yolo_line_analyzer:main',
+            'line_debug_monitor=step.line_debug_monitor:main',
+            'line_path_visualizer=step.line_path_visualizer:main',
         ],
     },
 )
