@@ -11,6 +11,7 @@ ROS 2와 Intel RealSense D435i 영상에서 YOLO26 객체를 탐지하고, 라�
 - heading, lateral offset, curve, quality 정보 계산
 - line debug monitor와 path visualizer 제공
 - 경기장 ㄹ자 미니맵과 mission state 시각화
+- RealSense D435i IMU gyro와 line 정보를 이용한 실시간 robot pose 추정
 
 ## 실행 환경
 
@@ -42,10 +43,13 @@ source ~/my_cv/install/setup.bash
 기본 실행은 RealSense, YOLO26 detector, line analyzer, visualizer, mission state, minimap을 나누어 실행합니다.
 
 터미널 1에서 RealSense를 실행합니다.
+IMU 기반 위치추정을 같이 테스트하려면 `enable_gyro:=true`, `enable_accel:=true`를 함께 켭니다.
 
 ```bash
 source /opt/ros/humble/setup.bash
-ros2 launch realsense2_camera rs_launch.py
+ros2 launch realsense2_camera rs_launch.py \
+  enable_gyro:=true \
+  enable_accel:=true
 ```
 
 터미널 2에서 YOLO26 detector를 실행합니다.
@@ -79,7 +83,17 @@ source ~/my_cv/install/setup.bash
 ros2 run step line_path_visualizer
 ```
 
-터미널 5에서 Mission State Estimator를 실행합니다.
+터미널 5에서 IMU + Line Pose Estimator를 실행합니다.
+처음 1.5초 정도는 gyro bias 보정을 위해 카메라/로봇을 가만히 두는 것이 좋습니다.
+
+```bash
+cd ~/my_cv
+source /opt/ros/humble/setup.bash
+source ~/my_cv/install/setup.bash
+ros2 run step imu_line_pose_estimator
+```
+
+터미널 6에서 Mission State Estimator를 실행합니다.
 
 ```bash
 cd ~/my_cv
@@ -88,7 +102,7 @@ source ~/my_cv/install/setup.bash
 ros2 run step mission_state_estimator
 ```
 
-터미널 6에서 Mission Map Visualizer를 실행합니다.
+터미널 7에서 Mission Map Visualizer를 실행합니다.
 
 ```bash
 cd ~/my_cv
@@ -97,7 +111,7 @@ source ~/my_cv/install/setup.bash
 ros2 run step mission_map_visualizer
 ```
 
-이미 RealSense, YOLO26 detector, line analyzer, line path visualizer, mission state estimator를 켜둔 상태에서 맵 창만 추가로 열고 싶다면 새 터미널 하나를 더 열고 아래만 실행하면 됩니다.
+이미 RealSense, YOLO26 detector, line analyzer, line path visualizer, IMU pose estimator, mission state estimator를 켜둔 상태에서 맵 창만 추가로 열고 싶다면 새 터미널 하나를 더 열고 아래만 실행하면 됩니다.
 
 ```bash
 cd ~/my_cv
@@ -121,8 +135,9 @@ ros2 run step line_debug_monitor
 - `yolo_line_analyzer`: `/vision/detections`에서 `line`만 분석하여 `/vision/line_info` 발행
 - `line_debug_monitor`: `/vision/line_info`를 터미널에서 읽기 쉽게 표시
 - `line_path_visualizer`: line 경로, heading, offset, quality를 OpenCV 창에 표시
+- `imu_line_pose_estimator`: RealSense gyro와 line 정보를 이용해 `/vision/robot_pose` 발행
 - `mission_state_estimator`: line/object 정보를 이용해 현재 mission state를 `/vision/mission_state`로 발행
-- `mission_map_visualizer`: ㄹ자 경기장 미니맵, 공/골대 위치, start/finish, mission flow를 표시
+- `mission_map_visualizer`: ㄹ자 경기장 미니맵, 공/골대 위치, start/finish, robot pose, mission flow를 표시
 
 ## 조정 항목
 
@@ -147,6 +162,7 @@ ros2 run step line_debug_monitor
 - `src/step/step/yolo_line_analyzer.py`: YOLO26 `line` 탐지 결과를 경로와 방향 정보로 정리
 - `src/step/step/line_debug_monitor.py`: `/vision/line_info`를 터미널에서 요약 표시
 - `src/step/step/line_path_visualizer.py`: `/vision/line_info`와 카메라 이미지를 시각화
+- `src/step/step/imu_line_pose_estimator.py`: RealSense gyro와 line 기반 실시간 위치추정
 - `src/step/step/mission_state_estimator.py`: 현재 mission state 추정
 - `src/step/step/mission_map_visualizer.py`: 경기장 미니맵과 mission flow 시각화
 - `src/step/setup.py`: ROS 2 Python 노드 등록
@@ -182,11 +198,131 @@ yolo_line_analyzer
 /vision/line_info
     ├── line_debug_monitor
     ├── line_path_visualizer
+    ├── imu_line_pose_estimator
     └── mission_state_estimator
             ↓
        /vision/mission_state
             ↓
        mission_map_visualizer
+
+RealSense D435i IMU
+    ↓
+/camera/camera/gyro/sample
+    ↓
+imu_line_pose_estimator
+    ↓
+/vision/robot_pose
+    ↓
+mission_map_visualizer
+```
+
+## IMU 기반 위치추정
+
+`imu_line_pose_estimator`는 RealSense D435i의 gyro/accel, `/vision/line_info`, `/vision/detections`를 함께 사용해 경기장 미니맵 위의 로봇 위치를 추정합니다.
+
+현재 방식은 완전한 SLAM이 아니라 대회 맵 테스트용 lightweight estimator입니다.
+
+- gyro z축을 적분해서 짧은 시간의 yaw 변화를 추정합니다.
+- accel/gyro 변화량으로 실제 카메라 또는 로봇이 움직였는지 판단합니다.
+- 기본 실행에서는 line quality와 일정 시간 이상 지속되는 IMU 움직임을 이용해 맵 경로 위 진행도를 추정합니다.
+- 짧은 손떨림은 무시하기 위해 `motion_start_sec`, `motion_score_start_threshold`, `motion_score_stop_threshold`로 움직임 판단을 디바운스합니다.
+- 실제 이동 거리는 `nominal_forward_speed_mps` 파라미터로 임시 추정합니다.
+- line lateral offset을 이용해 점선 경로 중심에서 좌우로 벗어난 추정 위치를 미니맵에 표시합니다.
+- `ball`, `goal`, `backboard` landmark 보정은 기본값으로 꺼져 있으며, 필요할 때만 켭니다.
+- 결과는 `/vision/robot_pose` JSON 토픽으로 발행됩니다.
+- `mission_map_visualizer`는 `/vision/robot_pose`가 들어오면 미니맵 위에 실시간 로봇 위치와 heading 화살표를 표시합니다.
+
+실행 명령어는 다음과 같습니다.
+
+```bash
+ros2 run step imu_line_pose_estimator
+```
+
+RealSense IMU 토픽 이름이 다르면 `imu_topic`을 직접 지정합니다.
+
+```bash
+ros2 run step imu_line_pose_estimator --ros-args \
+  -p imu_topic:=/camera/camera/gyro/sample
+```
+
+accel 토픽 이름이 다르면 `accel_topic`도 지정합니다.
+
+```bash
+ros2 run step imu_line_pose_estimator --ros-args \
+  -p imu_topic:=/camera/camera/gyro/sample \
+  -p accel_topic:=/camera/camera/accel/sample
+```
+
+로봇의 실제 보행 속도에 맞춰 미니맵 진행 속도를 바꾸고 싶으면 아래처럼 조정합니다.
+
+```bash
+ros2 run step imu_line_pose_estimator --ros-args \
+  -p nominal_forward_speed_mps:=0.05 \
+  -p max_estimated_speed_mps:=0.08
+```
+
+카메라를 가만히 두었는데도 맵이 전진하면 motion threshold를 올리거나 추정 속도를 더 낮춥니다.
+
+```bash
+ros2 run step imu_line_pose_estimator --ros-args \
+  -p accel_motion_threshold_mps2:=0.6 \
+  -p gyro_motion_threshold_rad_s:=0.12 \
+  -p motion_start_sec:=0.5 \
+  -p motion_score_start_threshold:=0.7 \
+  -p nominal_forward_speed_mps:=0.03 \
+  -p max_estimated_speed_mps:=0.05
+```
+
+맵 진행을 완전히 멈추고 lateral offset과 heading만 보고 싶으면 아래처럼 실행합니다.
+
+```bash
+ros2 run step imu_line_pose_estimator --ros-args \
+  -p enable_route_progress:=false
+```
+
+주의: IMU만으로는 시간이 지날수록 위치 오차가 쌓입니다. 최종 대회용으로는 공/골대 depth 거리, 발걸음/보행 상태, 체크포인트 통과 조건을 함께 사용해 보정해야 합니다.
+
+현재 미니맵의 `x_m`, `y_m`은 실제 절대 위치가 아니라 route progress와 line lateral offset을 합친 추정 위치입니다. 점선 밖으로 벗어나는지는 `lateral_offset_m`과 `path_deviation_status`로 확인합니다.
+
+라인 기준 좌우가 실제와 반대로 보이면 `lateral_offset_sign`을 바꿉니다.
+
+```bash
+ros2 run step imu_line_pose_estimator --ros-args \
+  -p lateral_offset_sign:=1.0
+```
+
+미니맵의 시선 화살표가 실제 카메라 방향과 반대로 꺾이면 `line_heading_sign`을 바꿉니다.
+
+```bash
+ros2 run step imu_line_pose_estimator --ros-args \
+  -p line_heading_sign:=1.0
+```
+
+현재 landmark 보정은 기본값으로 꺼져 있습니다. `enable_landmark_correction:=true`를 켜면 객체가 보였을 때 맵상의 고정된 공/골대 위치 근처로 `route_progress_m`을 조금씩 당깁니다. depth 없이 켜면 공/골대가 보이는 순간 위치가 튈 수 있으므로, 실제 주행 전에는 꺼둔 상태로 테스트하는 것을 권장합니다.
+
+## Fake motion step 테스트
+
+아직 실제 알고리즘/모션 파트가 없을 때는 `step_motion_pose_test`로 가짜 보행 피드백을 흉내낼 수 있습니다.
+
+이 노드는 `/vision/line_info`를 보고 라인이 안정적으로 보이면, 알고리즘과 모션 파트가 `walk_forward` 명령을 수행했고 한 걸음이 완료되었다고 가정합니다.
+
+- 기본 한 걸음 보폭은 `0.15m`입니다.
+- 기본 fake step 주기는 `0.8초`입니다.
+- 한 걸음이 완료될 때마다 `/vision/robot_pose`의 `route_progress_m`이 `0.15m` 증가합니다.
+- 나중에 실제 모션 파트가 생기면 fake step 대신 실제 step feedback 토픽으로 교체하면 됩니다.
+
+실행할 때는 `imu_line_pose_estimator` 대신 아래 노드를 실행합니다.
+
+```bash
+ros2 run step step_motion_pose_test
+```
+
+보폭이나 걸음 주기를 바꾸고 싶으면 아래처럼 실행합니다.
+
+```bash
+ros2 run step step_motion_pose_test --ros-args \
+  -p fake_step_length_m:=0.15 \
+  -p fake_step_period_sec:=0.8
 ```
 
 ## 미니맵과 미션 상태

@@ -23,6 +23,7 @@ class MissionMapVisualizer(Node):
 
         self.declare_parameter("mission_state_topic", "/vision/mission_state")
         self.declare_parameter("line_info_topic", "/vision/line_info")
+        self.declare_parameter("robot_pose_topic", "/vision/robot_pose")
         self.declare_parameter("window_name", "IRC MISSION MAP")
         self.declare_parameter("publish_rate_hz", 10.0)
 
@@ -32,6 +33,9 @@ class MissionMapVisualizer(Node):
         line_info_topic = str(
             self.get_parameter("line_info_topic").value
         )
+        robot_pose_topic = str(
+            self.get_parameter("robot_pose_topic").value
+        )
         self.window_name = str(
             self.get_parameter("window_name").value
         )
@@ -40,6 +44,8 @@ class MissionMapVisualizer(Node):
         self.latest_mission_time: float | None = None
         self.latest_line_info: dict[str, Any] | None = None
         self.latest_line_time: float | None = None
+        self.latest_robot_pose: dict[str, Any] | None = None
+        self.latest_robot_pose_time: float | None = None
 
         self.mission_subscription = self.create_subscription(
             String,
@@ -52,6 +58,13 @@ class MissionMapVisualizer(Node):
             String,
             line_info_topic,
             self._line_info_callback,
+            10,
+        )
+
+        self.robot_pose_subscription = self.create_subscription(
+            String,
+            robot_pose_topic,
+            self._robot_pose_callback,
             10,
         )
 
@@ -75,18 +88,7 @@ class MissionMapVisualizer(Node):
             (4, 3), (4, 2), (4, 1), (4, 0),
         ]
 
-        self.path_points_grid = [
-            (0.5, 4.5),
-            (0.5, 1.0),
-            (0.9, 0.5),
-            (2.1, 0.5),
-            (2.5, 1.0),
-            (2.5, 4.0),
-            (2.9, 4.5),
-            (4.1, 4.5),
-            (4.5, 4.0),
-            (4.5, 0.5),
-        ]
+        self.path_points_grid = self._build_route_points()
 
         self.zone_points = {
             "START": self._grid_to_px(0.5, 4.5),
@@ -104,13 +106,10 @@ class MissionMapVisualizer(Node):
 
         self.checkpoints = [
             ("START", (0.5, 4.5)),
-            ("WALK", (0.5, 2.7)),
             ("PICK A", (0.2, 0.2)),
             ("GOAL A", (3.15, 0.4)),
-            ("WALK", (2.5, 2.7)),
             ("PICK B", (2.2, 4.8)),
             ("GOAL B", (5.0, 4.55)),
-            ("WALK", (4.5, 2.3)),
             ("FINISH", (4.5, 0.5)),
         ]
 
@@ -137,6 +136,47 @@ class MissionMapVisualizer(Node):
             f"Subscribing mission state: {mission_state_topic}"
         )
         self.get_logger().info(f"Subscribing line info: {line_info_topic}")
+        self.get_logger().info(f"Subscribing robot pose: {robot_pose_topic}")
+
+    @staticmethod
+    def _quarter_arc_points(
+        center: tuple[float, float],
+        radius: float,
+        start_deg: float,
+        end_deg: float,
+        steps: int = 8,
+    ) -> list[tuple[float, float]]:
+        """Build points along a quarter-circle arc in grid coordinates."""
+
+        return [
+            (
+                center[0] + math.cos(math.radians(angle_deg)) * radius,
+                center[1] + math.sin(math.radians(angle_deg)) * radius,
+            )
+            for angle_deg in np.linspace(start_deg, end_deg, steps)
+        ]
+
+    def _build_route_points(self) -> list[tuple[float, float]]:
+        """Build the route as straight lines connected by quarter arcs."""
+
+        points: list[tuple[float, float]] = []
+
+        points.extend(
+            [
+                (0.5, 4.5),
+                (0.5, 1.0),
+            ]
+        )
+        points.extend(self._quarter_arc_points((1.0, 1.0), 0.5, 180.0, 270.0)[1:])
+        points.extend([(2.0, 0.5)])
+        points.extend(self._quarter_arc_points((2.0, 1.0), 0.5, 270.0, 360.0)[1:])
+        points.extend([(2.5, 4.0)])
+        points.extend(self._quarter_arc_points((3.0, 4.0), 0.5, 180.0, 90.0)[1:])
+        points.extend([(4.0, 4.5)])
+        points.extend(self._quarter_arc_points((4.0, 4.0), 0.5, 90.0, 0.0)[1:])
+        points.extend([(4.5, 0.5)])
+
+        return points
 
     def _mission_state_callback(self, message: String) -> None:
         """Store latest mission-state JSON."""
@@ -166,6 +206,21 @@ class MissionMapVisualizer(Node):
         except (json.JSONDecodeError, TypeError, ValueError) as exc:
             self.get_logger().warning(
                 f"Invalid line info: {type(exc).__name__}: {exc}"
+            )
+
+    def _robot_pose_callback(self, message: String) -> None:
+        """Store latest robot-pose JSON from imu_line_pose_estimator."""
+
+        try:
+            payload = json.loads(message.data)
+            if not isinstance(payload, dict):
+                raise ValueError("robot_pose JSON must be an object")
+            self.latest_robot_pose = payload
+            self.latest_robot_pose_time = time.monotonic()
+
+        except (json.JSONDecodeError, TypeError, ValueError) as exc:
+            self.get_logger().warning(
+                f"Invalid robot pose: {type(exc).__name__}: {exc}"
             )
 
     @staticmethod
@@ -358,45 +413,6 @@ class MissionMapVisualizer(Node):
             self.zone_points["UNKNOWN"],
         )
 
-        for label, (grid_x, grid_y) in self.checkpoints:
-            x, y = self._grid_to_px(
-                grid_x,
-                grid_y,
-            )
-            distance_to_active = math.hypot(
-                x - active_point[0],
-                y - active_point[1],
-            )
-            is_active = distance_to_active < 90.0
-            fill = (35, 145, 65) if is_active else (45, 48, 58)
-            border = (80, 255, 130) if is_active else (125, 135, 150)
-
-            cv2.circle(
-                image,
-                (x, y),
-                24 if is_active else 18,
-                fill,
-                -1,
-                cv2.LINE_AA,
-            )
-            cv2.circle(
-                image,
-                (x, y),
-                24 if is_active else 18,
-                border,
-                2,
-                cv2.LINE_AA,
-            )
-
-            self._put_text(
-                image,
-                label,
-                (x - 24, y - 30),
-                scale=0.43,
-                color=(30, 35, 45),
-                thickness=1,
-            )
-
         for label, (grid_x, grid_y), color in self.landmarks:
             x, y = self._grid_to_px(
                 grid_x,
@@ -433,26 +449,83 @@ class MissionMapVisualizer(Node):
         zone: str,
         heading_error_deg: float | None,
         lateral_offset_norm: float | None,
+        robot_pose: dict[str, Any] | None = None,
     ) -> None:
-        """Draw a robot marker on the active zone."""
+        """Draw a robot marker from robot_pose, or fallback to active zone."""
 
-        x, y = self.zone_points.get(
-            zone,
-            self.zone_points["UNKNOWN"],
-        )
+        using_pose = robot_pose is not None
+
+        if using_pose:
+            grid_x = float(robot_pose.get("x_m", 0.5) or 0.5)
+            grid_y = float(robot_pose.get("y_m", 4.5) or 4.5)
+            x, y = self._grid_to_px(grid_x, grid_y)
+            route_x = float(
+                robot_pose.get("route_center_x_m", grid_x) or grid_x
+            )
+            route_y = float(
+                robot_pose.get("route_center_y_m", grid_y) or grid_y
+            )
+            route_px = self._grid_to_px(route_x, route_y)
+            heading = float(robot_pose.get("heading_deg", -90.0) or -90.0)
+            confidence = float(robot_pose.get("confidence", 0.0) or 0.0)
+            marker_color = (
+                0,
+                int(150 + 105 * np.clip(confidence, 0.0, 1.0)),
+                255,
+            )
+            path_status = str(
+                robot_pose.get("path_deviation_status", "unknown")
+            )
+            if path_status == "off_path_estimated":
+                marker_color = (0, 80, 255)
+            elif path_status == "near_edge_estimated":
+                marker_color = (0, 190, 255)
+        else:
+            x, y = self.zone_points.get(
+                zone,
+                self.zone_points["UNKNOWN"],
+            )
+            route_px = (x, y)
+            heading = -90.0 + float(heading_error_deg or 0.0)
+            marker_color = (0, 240, 255)
+
+        if using_pose:
+            cv2.line(
+                image,
+                route_px,
+                (x, y),
+                (0, 165, 255),
+                2,
+                cv2.LINE_AA,
+            )
+            cv2.circle(
+                image,
+                route_px,
+                6,
+                (255, 255, 255),
+                -1,
+                cv2.LINE_AA,
+            )
 
         cv2.circle(
             image,
             (x, y),
             13,
-            (0, 240, 255),
+            marker_color,
             -1,
             cv2.LINE_AA,
         )
+        cv2.circle(
+            image,
+            (x, y),
+            18,
+            (250, 250, 250),
+            2,
+            cv2.LINE_AA,
+        )
 
-        heading = float(heading_error_deg or 0.0)
         angle_rad = math.radians(
-            -90.0 + heading
+            heading
         )
         arrow_len = 58
         end = (
@@ -470,32 +543,25 @@ class MissionMapVisualizer(Node):
             tipLength=0.32,
         )
 
-        offset = float(lateral_offset_norm or 0.0)
-        offset_x = int(
-            np.clip(offset, -1.0, 1.0) * 70.0
-        )
-        cv2.line(
-            image,
-            (x - 70, y + 78),
-            (x + 70, y + 78),
-            (90, 90, 95),
-            5,
-            cv2.LINE_AA,
-        )
-        cv2.circle(
-            image,
-            (x + offset_x, y + 78),
-            9,
-            (0, 170, 255),
-            -1,
-            cv2.LINE_AA,
-        )
+        if using_pose:
+            progress_norm = float(
+                robot_pose.get("route_progress_norm", 0.0) or 0.0
+            )
+            self._put_text(
+                image,
+                f"VIEW {progress_norm * 100.0:.1f}%",
+                (x + 18, y - 18),
+                scale=0.45,
+                color=(0, 255, 255),
+                thickness=1,
+            )
 
     def _draw_side_panel(
         self,
         image: np.ndarray,
         mission_state: dict[str, Any] | None,
         line_info: dict[str, Any] | None,
+        robot_pose: dict[str, Any] | None,
     ) -> None:
         """Draw current state values on the right side."""
 
@@ -505,14 +571,14 @@ class MissionMapVisualizer(Node):
         cv2.rectangle(
             image,
             (900, 25),
-            (1270, 690),
+            (1270, 935),
             (34, 37, 43),
             -1,
         )
         cv2.rectangle(
             image,
             (900, 25),
-            (1270, 690),
+            (1270, 935),
             (95, 105, 120),
             1,
         )
@@ -577,10 +643,41 @@ class MissionMapVisualizer(Node):
                 color=(170, 180, 190),
             )
 
-        step_y = 525
+        if robot_pose is not None:
+            pose_y = 505
+            self._put_text(
+                image,
+                "ROBOT POSE",
+                (x, pose_y),
+                scale=0.50,
+                color=(0, 255, 255),
+                thickness=1,
+            )
+            pose_rows = [
+                ("x,y", f"{robot_pose.get('x_m')}, {robot_pose.get('y_m')} m"),
+                ("lat_off", f"{robot_pose.get('lateral_offset_m')} m"),
+                ("path", robot_pose.get("path_deviation_status")),
+                ("heading", f"{robot_pose.get('heading_deg')} deg"),
+                ("speed", f"{robot_pose.get('estimated_speed_mps')} m/s"),
+                ("motion", robot_pose.get("motion_score")),
+                ("progress", f"{robot_pose.get('route_progress_m')} m"),
+                ("landmark", ",".join(robot_pose.get("visible_landmarks", []))),
+                ("correct", robot_pose.get("correction_source")),
+                ("moving", robot_pose.get("moving")),
+            ]
+            for index, (label, value) in enumerate(pose_rows):
+                self._put_text(
+                    image,
+                    f"{label:>8}: {value}",
+                    (x, pose_y + 24 + index * 20),
+                    scale=0.39,
+                    color=(200, 215, 225),
+                )
+
+        step_y = 735
         self._put_text(
             image,
-            "MISSION FLOW",
+            "CHECKLIST",
             (x, step_y),
             scale=0.55,
             color=(0, 255, 255),
@@ -590,16 +687,26 @@ class MissionMapVisualizer(Node):
         active_zone = str(
             mission_state.get("zone", "")
         )
+        active_index = (
+            self.mission_steps.index(active_zone)
+            if active_zone in self.mission_steps
+            else -1
+        )
 
         for index, step in enumerate(
             self.mission_steps
         ):
-            marker = ">" if step == active_zone else " "
+            if index < active_index:
+                marker = "[x]"
+            elif index == active_index:
+                marker = "[>]"
+            else:
+                marker = "[ ]"
             self._put_text(
                 image,
                 f"{marker} {step}",
-                (x, step_y + 28 + index * 24),
-                scale=0.41,
+                (x, step_y + 24 + index * 18),
+                scale=0.35,
                 color=(
                     (80, 255, 130)
                     if step == active_zone
@@ -611,7 +718,7 @@ class MissionMapVisualizer(Node):
         """Render one minimap frame."""
 
         image = np.zeros(
-            (720, 1280, 3),
+            (960, 1280, 3),
             dtype=np.uint8,
         )
         image[:] = (24, 27, 32)
@@ -625,6 +732,12 @@ class MissionMapVisualizer(Node):
         line_info = (
             self.latest_line_info
             if self._fresh(self.latest_line_time)
+            else None
+        )
+
+        robot_pose = (
+            self.latest_robot_pose
+            if self._fresh(self.latest_robot_pose_time)
             else None
         )
 
@@ -654,8 +767,19 @@ class MissionMapVisualizer(Node):
             thickness=2,
         )
         self._draw_course(image, active_zone)
-        self._draw_robot(image, active_zone, heading_error, lateral_offset)
-        self._draw_side_panel(image, mission_state, line_info)
+        self._draw_robot(
+            image,
+            active_zone,
+            heading_error,
+            lateral_offset,
+            robot_pose,
+        )
+        self._draw_side_panel(
+            image,
+            mission_state,
+            line_info,
+            robot_pose,
+        )
 
         cv2.imshow(
             self.window_name,
