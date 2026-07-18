@@ -163,7 +163,7 @@ class YoloLineAnalyzer(Node):
 
         self.declare_parameter(
             "image_topic",
-            "/camera/camera/color/image_raw",
+            "/camera/color/image_raw",
         )
 
         self.declare_parameter(

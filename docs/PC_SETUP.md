@@ -31,6 +31,8 @@
 
 ```text
 my_cv/
+├── archive/
+│   └── legacy_opencv/     # 현재 사용하지 않는 초기 OpenCV 실험
 ├── docs/
 │   ├── PC_SETUP.md
 │   └── JETSON_SETUP.md
@@ -39,12 +41,12 @@ my_cv/
 │   └── step/
 │       ├── setup.py
 │       ├── package.xml
+│       ├── models/
+│       │   └── best.onnx
 │       └── step/
-│           ├── look_ground.py
-│           ├── look_gground.py
-│           ├── find_direct.py
-│           ├── find_ddirect.py
-│           └── yolo26_detector.py
+│           ├── yolo26_detector.py
+│           ├── unified_vision_node.py
+│           └── motion_decision_node.py
 │
 ├── build/
 ├── install/
@@ -59,7 +61,7 @@ my_cv/
 
 ```bash
 source /opt/ros/humble/setup.bash
-ros2 launch realsense2_camera rs_launch.py
+ros2 launch realsense2_camera rs_launch.py align_depth.enable:=true
 ```
 
 정상적으로 실행되면 다음과 같은 이미지 토픽을 확인할 수 있다.
@@ -71,7 +73,7 @@ ros2 topic list | grep camera
 대표적인 컬러 이미지 토픽:
 
 ```text
-/camera/camera/color/image_raw
+/camera/color/image_raw
 ```
 
 현재 비전 노드들은 기본적으로 이 컬러 이미지 토픽을 구독한다.
@@ -100,30 +102,9 @@ source install/setup.bash
 
 ---
 
-## 5. 기존 OpenCV 비전 노드 실행
+## 5. 기존 OpenCV 비전 노드 보관
 
-RealSense를 먼저 실행한 상태에서 다른 터미널에서 다음 중 하나를 실행한다.
-
-```bash
-cd ~/my_cv
-source /opt/ros/humble/setup.bash
-source install/setup.bash
-ros2 run step look_ground
-```
-
-```bash
-ros2 run step look_gground
-```
-
-```bash
-ros2 run step find_direct
-```
-
-```bash
-ros2 run step find_ddirect
-```
-
-기존 OpenCV 기반 노드는 흰색 테이프를 threshold, contour, ROI 등의 방식으로 처리한다.
+초기 `look_ground`, `look_gground`, `find_direct`, `find_ddirect`는 흰색 테이프를 threshold, contour, ROI로 처리하던 프로토타입입니다. 현재는 `archive/legacy_opencv`에 보관하며 ROS 2 `console_scripts`에서는 제거했습니다. 경기용 실행에는 사용하지 않습니다.
 
 ---
 
@@ -153,7 +134,8 @@ hurdle
 YOLO26 모델 기본 경로:
 
 ```text
-/home/geonwoo/Desktop/realsense/dataset/best.onnx
+src/step/models/best.onnx
+→ 빌드 후 share/step/models/best.onnx
 ```
 
 ---
@@ -331,36 +313,30 @@ NumPy 1.26.4
 
 ---
 
-## 11. OpenCV와 YOLO26은 둘 다 실행 가능
+## 11. 현재 통합 실행 구조
 
-현재 설정에서는 기존 OpenCV 비전 노드와 YOLO26 비전 노드를 모두 사용할 수 있다.
-
-공통 구조:
+현재 경기용 구조는 YOLO26 detector, 통합 analyzer 실행, 통합 motion decision으로 구성합니다.
 
 ```text
 Intel RealSense
         ↓
 ROS 2 이미지 토픽
         ↓
-/camera/camera/color/image_raw
+/camera/color/image_raw
         ↓
-┌─────────────────────┐
-│ OpenCV 기반 노드     │
-│ 또는                │
-│ YOLO26 기반 노드     │
-└─────────────────────┘
+/vision/detections
+        ↓
+unified_vision_node
+        ↓
+motion_decision_node
 ```
 
-OpenCV 실행 예:
-
-```bash
-ros2 run step find_ddirect
-```
-
-YOLO26 실행 예:
+각 노드는 별도 터미널에서 실행합니다.
 
 ```bash
 ros2 run step yolo26_detector --ros-args -p device:=cpu
+ros2 run step unified_vision_node
+ros2 run step motion_decision_node
 ```
 
 RealSense 실행 명령은 OpenCV와 YOLO26에서 동일하다.
@@ -398,7 +374,7 @@ ros2 launch realsense2_camera rs_launch.py
 기본 구독 토픽:
 
 ```text
-/camera/camera/color/image_raw
+/camera/color/image_raw
 ```
 
 ---
@@ -472,15 +448,6 @@ cd ~/my_cv
 source /opt/ros/humble/setup.bash
 source install/setup.bash
 ros2 run step yolo26_detector --ros-args -p device:=cpu
-```
-
-또는 기존 OpenCV 노드:
-
-```bash
-cd ~/my_cv
-source /opt/ros/humble/setup.bash
-source install/setup.bash
-ros2 run step find_ddirect
 ```
 
 ---

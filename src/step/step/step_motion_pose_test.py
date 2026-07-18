@@ -293,7 +293,6 @@ class StepMotionPoseTest(Node):
 
     def _publish_pose(self) -> None:
         now = time.monotonic()
-        dt = max(0.0, now - self.latest_publish_time)
         self.latest_publish_time = now
 
         line_detected = bool(self._line_value("detected", False))
