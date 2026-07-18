@@ -3,7 +3,7 @@
 <package format="3">
   <name>step</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>ROS 2 mission vision for the IRC STEP humanoid robot</description>
   <maintainer email="geonwoo@todo.todo">geonwoo</maintainer>
   <license>TODO: License declaration</license>
 
@@ -11,6 +11,7 @@
   <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>cv_bridge</depend>
+  <depend>ament_index_python</depend>
   <exec_depend>python3-numpy</exec_depend>
   <exec_depend>python3-opencv</exec_depend>
 

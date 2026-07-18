@@ -711,7 +711,7 @@ class YoloLineAnalyzer(Node):
             angles,
             vertical_spans,
         )
-    
+
         def _calculate_immediate_heading(
             self,
             segment_angles: list[float],
@@ -852,7 +852,7 @@ class YoloLineAnalyzer(Node):
                         1.0,
                     )
                 ),
-            }    
+            }
 
     # =========================================================
     # Robust fitting
@@ -1599,7 +1599,7 @@ class YoloLineAnalyzer(Node):
                     near_heading,
                     3,
                 ),
-                
+
             "near_fit_heading_deg":
                 (
                     round(

@@ -4,12 +4,16 @@ ROS 2 debug visualizer for YOLO line-path analysis.
 
 Inputs
 ------
-/camera/camera/color/image_raw
+/camera/color/image_raw
     sensor_msgs/msg/Image
 
 /vision/line_info
     std_msgs/msg/String
     JSON output from yolo_line_analyzer
+
+/navigation/line_command
+    std_msgs/msg/String
+    JSON output from line_navigation_controller
 
 Outputs
 -------
@@ -26,14 +30,13 @@ OpenCV window showing:
 - Connected path polyline
 - Immediate heading arrow
 - Lateral offset
-- Raw / filtered navigation values
-- Turn information
-- Quality information
+- Final tracking or RECOVER_LEFT / RECOVER_RIGHT decision
+- Target linear/angular speed, travel distance, and rotation
+- Compact steering calculation inputs
 
-Important
----------
-This node does NOT make navigation decisions.
-It is a development/debug visualization node only.
+This node does not make navigation decisions. It displays the decision made by
+line_navigation_controller together with the detected path.
+
 """
 
 from __future__ import annotations
@@ -65,12 +68,17 @@ class LinePathVisualizer(Node):
 
         self.declare_parameter(
             "image_topic",
-            "/camera/camera/color/image_raw",
+            "/camera/color/image_raw",
         )
 
         self.declare_parameter(
             "line_info_topic",
             "/vision/line_info",
+        )
+
+        self.declare_parameter(
+            "navigation_command_topic",
+            "/navigation/line_command",
         )
 
         self.declare_parameter(
@@ -94,7 +102,7 @@ class LinePathVisualizer(Node):
 
         self.declare_parameter(
             "window_name",
-            "LINE PATH DEBUG",
+            "LINE NAVIGATION",
         )
 
         # ====================================================
@@ -104,6 +112,11 @@ class LinePathVisualizer(Node):
         # Ignore line_info older than this many seconds.
         self.declare_parameter(
             "max_line_info_age_sec",
+            0.5,
+        )
+
+        self.declare_parameter(
+            "max_navigation_command_age_sec",
             0.5,
         )
 
@@ -128,12 +141,17 @@ class LinePathVisualizer(Node):
 
         self.declare_parameter(
             "show_point_numbers",
-            True,
+            False,
         )
 
         self.declare_parameter(
             "show_all_metrics",
-            True,
+            False,
+        )
+
+        self.declare_parameter(
+            "show_geometry_labels",
+            False,
         )
 
         # ====================================================
@@ -157,6 +175,12 @@ class LinePathVisualizer(Node):
         self.max_line_info_age_sec = float(
             self.get_parameter(
                 "max_line_info_age_sec"
+            ).value
+        )
+
+        self.max_navigation_command_age_sec = float(
+            self.get_parameter(
+                "max_navigation_command_age_sec"
             ).value
         )
 
@@ -186,12 +210,24 @@ class LinePathVisualizer(Node):
             ).value
         )
 
+        self.show_geometry_labels = bool(
+            self.get_parameter(
+                "show_geometry_labels"
+            ).value
+        )
+
         image_topic = str(
             self.get_parameter("image_topic").value
         )
 
         line_info_topic = str(
             self.get_parameter("line_info_topic").value
+        )
+
+        navigation_command_topic = str(
+            self.get_parameter(
+                "navigation_command_topic"
+            ).value
         )
 
         annotated_image_topic = str(
@@ -210,6 +246,10 @@ class LinePathVisualizer(Node):
 
         self.latest_line_info_time: float | None = None
 
+        self.latest_navigation_command: dict[str, Any] | None = None
+
+        self.latest_navigation_command_time: float | None = None
+
         # ====================================================
         # ROS publisher / subscribers
         # ====================================================
@@ -218,6 +258,13 @@ class LinePathVisualizer(Node):
             String,
             line_info_topic,
             self._line_info_callback,
+            10,
+        )
+
+        self.navigation_command_subscription = self.create_subscription(
+            String,
+            navigation_command_topic,
+            self._navigation_command_callback,
             10,
         )
 
@@ -250,6 +297,11 @@ class LinePathVisualizer(Node):
         )
 
         self.get_logger().info(
+            "Navigation command topic: "
+            f"{navigation_command_topic}"
+        )
+
+        self.get_logger().info(
             f"Display: {self.display}"
         )
 
@@ -267,7 +319,6 @@ class LinePathVisualizer(Node):
         message: String,
     ) -> None:
         """Store latest line-analysis JSON."""
-
         try:
             payload = json.loads(message.data)
 
@@ -289,12 +340,37 @@ class LinePathVisualizer(Node):
                 f"{type(exc).__name__}: {exc}"
             )
 
+    def _navigation_command_callback(
+        self,
+        message: String,
+    ) -> None:
+        """Store latest navigation-command JSON."""
+        try:
+            payload = json.loads(message.data)
+
+            if not isinstance(payload, dict):
+                raise ValueError(
+                    "navigation command JSON must be an object"
+                )
+
+            self.latest_navigation_command = payload
+            self.latest_navigation_command_time = time.monotonic()
+
+        except (
+            json.JSONDecodeError,
+            TypeError,
+            ValueError,
+        ) as exc:
+            self.get_logger().warning(
+                "Invalid navigation-command message: "
+                f"{type(exc).__name__}: {exc}"
+            )
+
     def _image_callback(
         self,
         message: Image,
     ) -> None:
         """Draw latest line data over current camera image."""
-
         try:
             frame = self.bridge.imgmsg_to_cv2(
                 message,
@@ -316,6 +392,10 @@ class LinePathVisualizer(Node):
 
         line_info = self._get_fresh_line_info()
 
+        navigation_command = (
+            self._get_fresh_navigation_command()
+        )
+
         if line_info is None:
             self._draw_no_data_message(
                 annotated,
@@ -333,15 +413,23 @@ class LinePathVisualizer(Node):
                 "LINE NOT DETECTED",
             )
 
-            self._draw_filtered_history(
+            self._draw_status_panel(
                 annotated,
                 line_info,
+                navigation_command,
             )
 
         else:
             self._draw_detected_line(
                 annotated,
                 line_info,
+                navigation_command,
+            )
+
+        if navigation_command is not None:
+            self._draw_navigation_arrow(
+                annotated,
+                navigation_command,
             )
 
         if (
@@ -390,7 +478,6 @@ class LinePathVisualizer(Node):
         self,
     ) -> dict[str, Any] | None:
         """Return latest line info only when sufficiently fresh."""
-
         if (
             self.latest_line_info is None
             or self.latest_line_info_time is None
@@ -407,6 +494,26 @@ class LinePathVisualizer(Node):
 
         return self.latest_line_info
 
+    def _get_fresh_navigation_command(
+        self,
+    ) -> dict[str, Any] | None:
+        """Return latest navigation command only while it is fresh."""
+        if (
+            self.latest_navigation_command is None
+            or self.latest_navigation_command_time is None
+        ):
+            return None
+
+        age = (
+            time.monotonic()
+            - self.latest_navigation_command_time
+        )
+
+        if age > self.max_navigation_command_age_sec:
+            return None
+
+        return self.latest_navigation_command
+
     # ========================================================
     # Main drawing
     # ========================================================
@@ -415,9 +522,9 @@ class LinePathVisualizer(Node):
         self,
         frame: np.ndarray,
         data: dict[str, Any],
+        navigation_command: dict[str, Any] | None,
     ) -> None:
         """Draw all valid detected-line information."""
-
         height, width = frame.shape[:2]
 
         points = self._parse_center_points(
@@ -443,15 +550,17 @@ class LinePathVisualizer(Node):
             data,
         )
 
-        self._draw_heading_arrow(
-            frame,
-            data,
-            points,
-        )
+        if self.show_all_metrics:
+            self._draw_heading_arrow(
+                frame,
+                data,
+                points,
+            )
 
         self._draw_status_panel(
             frame,
             data,
+            navigation_command,
         )
 
         # Small image dimensions reference.
@@ -473,12 +582,11 @@ class LinePathVisualizer(Node):
     # Camera center
     # ========================================================
 
-    @staticmethod
     def _draw_camera_center(
+        self,
         frame: np.ndarray,
     ) -> None:
         """Draw camera/image center reference."""
-
         height, width = frame.shape[:2]
 
         center_x = width // 2
@@ -492,19 +600,20 @@ class LinePathVisualizer(Node):
             cv2.LINE_AA,
         )
 
-        cv2.putText(
-            frame,
-            "CAMERA CENTER",
-            (
-                center_x + 10,
-                25,
-            ),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.6,
-            (255, 255, 0),
-            2,
-            cv2.LINE_AA,
-        )
+        if self.show_geometry_labels:
+            cv2.putText(
+                frame,
+                "CAMERA CENTER",
+                (
+                    center_x + 10,
+                    25,
+                ),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.6,
+                (255, 255, 0),
+                2,
+                cv2.LINE_AA,
+            )
 
     # ========================================================
     # Point parsing
@@ -515,7 +624,6 @@ class LinePathVisualizer(Node):
         raw_points: Any,
     ) -> list[tuple[int, int]]:
         """Safely parse JSON center-point list."""
-
         if not isinstance(
             raw_points,
             list,
@@ -573,7 +681,6 @@ class LinePathVisualizer(Node):
 
             nearest -> farthest
         """
-
         if len(points) < 2:
             return
 
@@ -614,7 +721,6 @@ class LinePathVisualizer(Node):
         points: list[tuple[int, int]],
     ) -> None:
         """Draw each path point and its near-to-far index."""
-
         for index, point in enumerate(points):
             x, y = point
 
@@ -660,38 +766,39 @@ class LinePathVisualizer(Node):
                     cv2.LINE_AA,
                 )
 
-        # Label first point explicitly.
-        near_x, near_y = points[0]
+        if self.show_geometry_labels:
+            # Label first and last point explicitly in detailed mode.
+            near_x, near_y = points[0]
 
-        cv2.putText(
-            frame,
-            "NEAR",
-            (
-                near_x + 15,
-                near_y + 25,
-            ),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.6,
-            (0, 0, 255),
-            2,
-            cv2.LINE_AA,
-        )
+            cv2.putText(
+                frame,
+                "NEAR",
+                (
+                    near_x + 15,
+                    near_y + 25,
+                ),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.6,
+                (0, 0, 255),
+                2,
+                cv2.LINE_AA,
+            )
 
-        far_x, far_y = points[-1]
+            far_x, far_y = points[-1]
 
-        cv2.putText(
-            frame,
-            "FAR",
-            (
-                far_x + 15,
-                far_y - 15,
-            ),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.6,
-            (255, 0, 255),
-            2,
-            cv2.LINE_AA,
-        )
+            cv2.putText(
+                frame,
+                "FAR",
+                (
+                    far_x + 15,
+                    far_y - 15,
+                ),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.6,
+                (255, 0, 255),
+                2,
+                cv2.LINE_AA,
+            )
 
     # ========================================================
     # Heading arrow
@@ -704,7 +811,6 @@ class LinePathVisualizer(Node):
         points: list[tuple[int, int]],
     ) -> None:
         """Draw filtered/current heading from nearest line point."""
-
         heading = data.get(
             "filtered_heading_error_deg"
         )
@@ -794,13 +900,12 @@ class LinePathVisualizer(Node):
     # Lateral offset
     # ========================================================
 
-    @staticmethod
     def _draw_lateral_offset(
+        self,
         frame: np.ndarray,
         data: dict[str, Any],
     ) -> None:
         """Draw camera center to predicted line offset."""
-
         offset_px = data.get(
             "lateral_offset_px"
         )
@@ -860,206 +965,245 @@ class LinePathVisualizer(Node):
             cv2.LINE_AA,
         )
 
-        cv2.putText(
-            frame,
-            f"OFFSET {offset_value:+.1f}px",
-            (
-                min(
-                    center_x,
-                    line_x,
+        if self.show_geometry_labels:
+            cv2.putText(
+                frame,
+                f"OFFSET {offset_value:+.1f}px",
+                (
+                    min(
+                        center_x,
+                        line_x,
+                    ),
+                    eval_y - 15,
                 ),
-                eval_y - 15,
-            ),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.6,
-            (0, 165, 255),
-            2,
-            cv2.LINE_AA,
-        )
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.6,
+                (0, 165, 255),
+                2,
+                cv2.LINE_AA,
+            )
 
     # ========================================================
-    # Status panel
+    # Final navigation command
     # ========================================================
+
+    @staticmethod
+    def _motion_color(motion: str) -> tuple[int, int, int]:
+        """Return a stable BGR color for each final motion."""
+        return {
+            "STRAIGHT": (0, 220, 0),
+            "LEFT": (255, 160, 0),
+            "RIGHT": (0, 165, 255),
+            "RECOVER_LEFT": (255, 255, 0),
+            "RECOVER_RIGHT": (255, 255, 0),
+            "STOP": (0, 0, 255),
+        }.get(motion, (180, 180, 180))
+
+    def _draw_navigation_arrow(
+        self,
+        frame: np.ndarray,
+        command: dict[str, Any],
+    ) -> None:
+        """Draw the final steering target from the robot/camera center."""
+        motion = str(command.get("motion", "STOP")).upper()
+        color = self._motion_color(motion)
+        height, width = frame.shape[:2]
+        start = (width // 2, int(height * 0.93))
+
+        if motion == "STOP" or not bool(command.get("valid", False)):
+            radius = 32
+            cv2.circle(frame, start, radius, color, 5, cv2.LINE_AA)
+            cv2.line(
+                frame,
+                (start[0] - 20, start[1] - 20),
+                (start[0] + 20, start[1] + 20),
+                color,
+                5,
+                cv2.LINE_AA,
+            )
+            cv2.line(
+                frame,
+                (start[0] + 20, start[1] - 20),
+                (start[0] - 20, start[1] + 20),
+                color,
+                5,
+                cv2.LINE_AA,
+            )
+            return
+
+        if motion in {"RECOVER_LEFT", "RECOVER_RIGHT"}:
+            direction = -1 if motion == "RECOVER_LEFT" else 1
+            arrow_length = int(width * 0.18)
+            end = (start[0] + direction * arrow_length, start[1])
+            cv2.arrowedLine(
+                frame,
+                start,
+                end,
+                (0, 0, 0),
+                12,
+                cv2.LINE_AA,
+                tipLength=0.20,
+            )
+            cv2.arrowedLine(
+                frame,
+                start,
+                end,
+                color,
+                7,
+                cv2.LINE_AA,
+                tipLength=0.20,
+            )
+            cv2.putText(
+                frame,
+                motion.replace("RECOVER_", "RETURN "),
+                (min(start[0], end[0]), end[1] - 20),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.8,
+                color,
+                3,
+                cv2.LINE_AA,
+            )
+            return
+
+        try:
+            steering_deg = float(command.get("steering_error_deg", 0.0))
+        except (TypeError, ValueError):
+            steering_deg = 0.0
+
+        steering_deg = max(-50.0, min(50.0, steering_deg))
+        angle_rad = math.radians(steering_deg)
+        arrow_length = int(min(width, height) * 0.24)
+        end = (
+            int(round(start[0] + arrow_length * math.sin(angle_rad))),
+            int(round(start[1] - arrow_length * math.cos(angle_rad))),
+        )
+
+        cv2.arrowedLine(
+            frame,
+            start,
+            end,
+            (0, 0, 0),
+            12,
+            cv2.LINE_AA,
+            tipLength=0.20,
+        )
+        cv2.arrowedLine(
+            frame,
+            start,
+            end,
+            color,
+            7,
+            cv2.LINE_AA,
+            tipLength=0.20,
+        )
+        cv2.putText(
+            frame,
+            motion,
+            (end[0] + 12, end[1]),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.9,
+            color,
+            3,
+            cv2.LINE_AA,
+        )
 
     def _draw_status_panel(
         self,
         frame: np.ndarray,
         data: dict[str, Any],
+        command: dict[str, Any] | None,
     ) -> None:
-        """Draw compact navigation values."""
+        """Draw only final command and the inputs that produced it."""
+        if command is None:
+            lines = [
+                "NAVIGATION : WAITING",
+                "Start line_navigation_controller",
+                f"LINE POINTS: {data.get('line_count', 0)}",
+            ]
+            self._draw_text_panel(frame, lines, (180, 180, 180))
+            return
 
-        raw_heading = self._format_number(
-            data.get(
-                "heading_error_deg"
-            ),
+        motion = str(command.get("motion", "STOP")).upper()
+        speed = self._format_number(command.get("linear_speed_mps"), 3)
+        lateral_speed = self._format_number(
+            command.get("lateral_speed_mps"),
+            3,
+        )
+        turn_rate = self._format_number(
+            command.get("angular_speed_rad_s"),
+            3,
+        )
+        distance = self._format_number(command.get("travel_distance_m"), 3)
+        lateral_distance = self._format_number(
+            command.get("lateral_travel_distance_m"),
+            3,
+        )
+        rotation = self._format_number(
+            command.get("target_heading_change_deg"),
+            1,
+        )
+        duration = self._format_number(
+            command.get("command_duration_sec"),
             2,
         )
-
-        filtered_heading = self._format_number(
-            data.get(
-                "filtered_heading_error_deg"
-            ),
-            2,
+        steering = self._format_number(command.get("steering_error_deg"), 1)
+        heading_part = self._format_number(
+            command.get("heading_component_deg"),
+            1,
         )
-
-        raw_offset = self._format_number(
-            data.get(
-                "lateral_offset_norm"
-            ),
-            3,
+        offset_part = self._format_number(
+            command.get("offset_component_deg"),
+            1,
         )
-
-        filtered_offset = self._format_number(
-            data.get(
-                "filtered_lateral_offset_norm"
-            ),
-            3,
+        preview_part = self._format_number(
+            command.get("preview_component_deg"),
+            1,
         )
+        quality = self._format_number(command.get("line_quality"), 2)
 
-        consistency = self._format_number(
-            data.get(
-                "turn_consistency"
-            ),
-            3,
-        )
-
-        angle_change = self._format_number(
-            data.get(
-                "angle_change_mean_deg"
-            ),
-            2,
-        )
-
-        heading_quality = self._format_number(
-            data.get(
-                "heading_quality"
-            ),
-            3,
-        )
-
-        geometry_quality = self._format_number(
-            data.get(
-                "geometry_quality"
-            ),
-            3,
-        )
-
-        lines = [
-            (
-                "LINE "
-                f"{data.get('line_count', 0)}"
-                " | "
-                f"FILTER "
-                f"{'READY' if data.get('filter_ready') else 'WAIT'}"
-            ),
-            (
-                f"RAW H       : {raw_heading} deg"
-            ),
-            (
-                f"FILTER H    : {filtered_heading} deg"
-            ),
-            (
-                f"RAW OFFSET  : {raw_offset}"
-            ),
-            (
-                f"FILTER OFF  : {filtered_offset}"
-            ),
-            (
-                f"TURN CONS   : {consistency}"
-            ),
-            (
-                f"ANGLE CHANGE: {angle_change} deg"
-            ),
-            (
-                f"HEADING Q   : {heading_quality}"
-            ),
-            (
-                f"GEOMETRY Q  : {geometry_quality}"
-            ),
-        ]
+        if motion in {"RECOVER_LEFT", "RECOVER_RIGHT"}:
+            lines = [
+                f"NAVIGATION : {motion}",
+                f"SIDE SPEED {lateral_speed} m/s  |  FORWARD STOP",
+                f"SIDE MOVE {lateral_distance} m  |  {duration} s",
+                "MODE : RETURN TO LINE CENTER",
+                "CURVE PREVIEW DISABLED DURING RECOVERY",
+                "QUALITY "
+                f"{quality}  |  LINE POINTS {data.get('line_count', 0)}",
+            ]
+        else:
+            lines = [
+                f"NAVIGATION : {motion}",
+                f"SPEED {speed} m/s  |  TURN {turn_rate} rad/s",
+                f"NEXT {distance} m  |  ROTATE {rotation} deg  |  "
+                f"{duration} s",
+                f"STEERING : {steering} deg",
+                f"= HEADING {heading_part} + OFFSET {offset_part} "
+                f"+ CURVE {preview_part}",
+                "QUALITY "
+                f"{quality}  |  LINE POINTS {data.get('line_count', 0)}",
+            ]
 
         if self.show_all_metrics:
             lines.extend(
                 [
-                    (
-                        "FAR H       : "
-                        + self._format_number(
-                            data.get(
-                                "far_heading_deg"
-                            ),
-                            2,
-                        )
-                        + " deg"
-                    ),
-                    (
-                        "TURN ANGLE  : "
-                        + self._format_number(
-                            data.get(
-                                "turn_angle_deg"
-                            ),
-                            2,
-                        )
-                        + " deg"
-                    ),
-                    (
-                        "PROCESS     : "
-                        + self._format_number(
-                            data.get(
-                                "processing_ms"
-                            ),
-                            3,
-                        )
-                        + " ms"
-                    ),
+                    "RAW H/OFF: "
+                    + self._format_number(data.get("heading_error_deg"), 1)
+                    + " deg / "
+                    + self._format_number(data.get("lateral_offset_norm"), 3),
+                    "FAR/TURN: "
+                    + self._format_number(data.get("far_heading_deg"), 1)
+                    + " / "
+                    + self._format_number(data.get("turn_angle_deg"), 1)
+                    + " deg",
+                    "REASON: " + str(command.get("reason", "unknown")),
                 ]
             )
 
         self._draw_text_panel(
             frame,
             lines,
-        )
-
-    # ========================================================
-    # Previous filtered history when no line is detected
-    # ========================================================
-
-    def _draw_filtered_history(
-        self,
-        frame: np.ndarray,
-        data: dict[str, Any],
-    ) -> None:
-        """Show retained filter state during temporary line loss."""
-
-        lines = [
-            "LINE NOT DETECTED",
-            (
-                "FILTER H : "
-                + self._format_number(
-                    data.get(
-                        "filtered_heading_error_deg"
-                    ),
-                    2,
-                )
-                + " deg"
-            ),
-            (
-                "FILTER O : "
-                + self._format_number(
-                    data.get(
-                        "filtered_lateral_offset_norm"
-                    ),
-                    3,
-                )
-            ),
-            (
-                "MISSED   : "
-                f"{data.get('missed_line_frames', 0)}"
-            ),
-        ]
-
-        self._draw_text_panel(
-            frame,
-            lines,
+            self._motion_color(motion),
         )
 
     # ========================================================
@@ -1070,18 +1214,21 @@ class LinePathVisualizer(Node):
     def _draw_text_panel(
         frame: np.ndarray,
         lines: list[str],
+        title_color: tuple[int, int, int],
     ) -> None:
         """Draw readable semi-transparent status panel."""
-
         if not lines:
             return
 
-        x = 20
-        y = 40
+        x = 24
+        y = 48
 
-        line_height = 29
+        line_height = 32
 
-        panel_width = 360
+        panel_width = min(
+            590,
+            frame.shape[1] - 20,
+        )
 
         panel_height = (
             len(lines) * line_height
@@ -1121,9 +1268,9 @@ class LinePathVisualizer(Node):
                 text,
                 (x, text_y),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.62,
-                (255, 255, 255),
-                2,
+                0.78 if index == 0 else 0.56,
+                title_color if index == 0 else (255, 255, 255),
+                3 if index == 0 else 2,
                 cv2.LINE_AA,
             )
 
@@ -1133,7 +1280,6 @@ class LinePathVisualizer(Node):
         message: str,
     ) -> None:
         """Draw centered warning message."""
-
         height, width = frame.shape[:2]
 
         cv2.putText(
@@ -1159,7 +1305,6 @@ class LinePathVisualizer(Node):
         decimals: int,
     ) -> str:
         """Safely format optional numeric value."""
-
         if value is None:
             return "null"
 
@@ -1180,7 +1325,6 @@ class LinePathVisualizer(Node):
 
     def destroy_node(self) -> bool:
         """Close OpenCV windows before node shutdown."""
-
         if self.display:
             try:
                 cv2.destroyAllWindows()

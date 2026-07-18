@@ -408,11 +408,6 @@ class MissionMapVisualizer(Node):
             thickness=1,
         )
 
-        active_point = self.zone_points.get(
-            active_zone,
-            self.zone_points["UNKNOWN"],
-        )
-
         for label, (grid_x, grid_y), color in self.landmarks:
             x, y = self._grid_to_px(
                 grid_x,

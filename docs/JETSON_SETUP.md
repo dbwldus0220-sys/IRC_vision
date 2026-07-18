@@ -189,14 +189,14 @@ ros2 topic list | grep camera
 기본 컬러 이미지 토픽:
 
 ```text
-/camera/camera/color/image_raw
+/camera/color/image_raw
 ```
 
 기본 Depth 관련 토픽 예:
 
 ```text
-/camera/camera/depth/image_rect_raw
-/camera/camera/aligned_depth_to_color/image_raw
+/camera/depth/image_rect_raw
+/camera/aligned_depth_to_color/image_raw
 ```
 
 실제 토픽 이름은 Jetson의 RealSense ROS 설정에 따라 확인해야 한다.
@@ -325,27 +325,26 @@ CPU fallback
 
 ## 12. 모델 파일 관리
 
-현재 기본 모델 경로는 다음과 같이 설정되어 있다.
+모델은 ROS 패키지에 포함되어 빌드 시 함께 설치된다.
 
 ```text
-/home/geonwoo/Desktop/realsense/dataset/best.onnx
+src/step/models/best.onnx
+→ install/step/share/step/models/best.onnx
 ```
 
-이 경로는 개발 PC 전용 경로이므로 Jetson에서는 사용할 수 없다.
-
-따라서 Jetson에서는 모델 파일을 저장소 내부 또는 별도의 고정 경로에 배치하는 것이 좋다.
+따라서 저장소를 clone하고 `colcon build`하면 Jetson에서도 별도 절대경로 수정 없이 기본 모델을 찾습니다.
 
 예:
 
 ```text
-~/my_cv/models/best.onnx
+~/my_cv/src/step/models/best.onnx
 ```
 
 권장 구조:
 
 ```text
 my_cv/
-├── models/
+├── src/step/models/
 │   └── best.onnx
 ├── docs/
 ├── src/
