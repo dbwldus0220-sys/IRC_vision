@@ -13,6 +13,7 @@ class GoalNavigationConfig:
     """Provisional goal alignment and scoring thresholds."""
 
     min_confidence: float = 0.35
+    control_start_depth_m: float = 0.50
     score_target_depth_m: float = 0.25
     score_depth_tolerance_m: float = 0.05
     score_center_tolerance_norm: float = 0.10
@@ -112,6 +113,8 @@ class GoalNavigationPlanner:
         depth = _number(goal_info, "depth_m")
         if not bool(goal_info.get("depth_valid", False)) or depth is None:
             return self.wait("missing_valid_goal_depth")
+        if depth > self.config.control_start_depth_m:
+            return self.wait("goal_outside_control_range")
 
         distance = _number(goal_info, "distance_m")
         bearing = _number(goal_info, "bearing_deg")
@@ -123,14 +126,26 @@ class GoalNavigationPlanner:
         depth_in_range = (
             abs(depth_error) <= self.config.score_depth_tolerance_m
         )
-        score_now = centered and depth_in_range
+        ready_geometry = centered and depth_in_range
+        analyzer_score_now = goal_info.get("score_now")
+        score_now = bool(
+            ready_geometry
+            and (
+                ready_geometry
+                if analyzer_score_now is None
+                else analyzer_score_now
+            )
+        )
 
         if score_now:
-            action = "SCORE_GOAL"
+            action = "SHOT"
             reason = "goal_centered_at_scoring_depth"
         elif not centered:
             action = "ALIGN_RIGHT" if offset > 0.0 else "ALIGN_LEFT"
             reason = "align_goal_horizontally"
+        elif ready_geometry:
+            action = "WAIT_SCORE_CONFIRMATION"
+            reason = "waiting_for_stable_score_condition"
         elif depth_error > self.config.score_depth_tolerance_m:
             action = "APPROACH_GOAL"
             reason = "goal_too_far"

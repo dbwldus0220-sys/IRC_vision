@@ -18,6 +18,8 @@ from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import CameraInfo, Image
 from std_msgs.msg import String
 
+from .temporal_confirmation import TemporalConfirmationFilter
+
 
 @dataclass(frozen=True)
 class HurdleCandidate:
@@ -39,6 +41,9 @@ class HurdleCandidate:
     depth_m: float | None
     horizontal_distance_m: float | None
     distance_m: float | None
+    ground_gap_m: float | None
+    camera_bottom_gap_px: int | None
+    camera_bottom_gap_m: float | None
     lateral_offset_m: float | None
     estimated_width_m: float | None
     left_depth_m: float | None
@@ -72,6 +77,9 @@ class HurdleInfo:
     depth_m: float | None
     horizontal_distance_m: float | None
     distance_m: float | None
+    ground_gap_m: float | None
+    camera_bottom_gap_px: int | None
+    camera_bottom_gap_m: float | None
     lateral_offset_m: float | None
     estimated_width_m: float | None
     left_depth_m: float | None
@@ -79,9 +87,9 @@ class HurdleInfo:
     hurdle_angle_deg: float | None
     depth_valid: bool
     depth_sample_count: int
-    is_centered: bool
-    depth_in_go_range: bool
-    go_depth_error_m: float | None
+    is_parallel: bool
+    ground_gap_in_go_range: bool
+    go_ground_gap_error_m: float | None
     go_now: bool
     target_priority_score: float
     candidate_count: int
@@ -114,10 +122,20 @@ class HurdleAnalyzer(Node):
         self.declare_parameter("depth_timeout_sec", 0.7)
         self.declare_parameter("depth_window_px", 9)
         self.declare_parameter("max_valid_depth_m", 4.0)
-        self.declare_parameter("go_target_depth_m", 0.80)
-        self.declare_parameter("go_depth_tolerance_m", 0.10)
-        self.declare_parameter("go_center_tolerance_norm", 0.12)
+        self.declare_parameter("camera_height_m", 0.70)
+        self.declare_parameter("hurdle_reference_height_m", 0.10)
+        self.declare_parameter("go_target_ground_gap_m", 0.10)
+        self.declare_parameter("go_ground_gap_tolerance_m", 0.10)
+        self.declare_parameter("go_max_camera_bottom_gap_m", 0.05)
+        self.declare_parameter("go_angle_tolerance_deg", 8.0)
         self.declare_parameter("direction_deadband_norm", 0.04)
+        self.declare_parameter("confirmation_window_size", 7)
+        self.declare_parameter("confirmation_required_hits", 5)
+        self.declare_parameter("confirmation_max_missed_frames", 2)
+        self.declare_parameter("confirmation_max_center_shift_norm", 0.20)
+        self.declare_parameter("confirmation_min_area_ratio", 0.40)
+        self.declare_parameter("go_confirmation_window_size", 7)
+        self.declare_parameter("go_confirmation_required_hits", 5)
         self.declare_parameter("publish_empty_when_missing", True)
 
         self.detections_topic = self._string_parameter("detections_topic")
@@ -142,16 +160,29 @@ class HurdleAnalyzer(Node):
         self.max_valid_depth_m = self._float_parameter(
             "max_valid_depth_m"
         )
-        self.go_target_depth_m = self._float_parameter(
-            "go_target_depth_m"
-        )
-        self.go_depth_tolerance_m = max(
+        self.camera_height_m = max(
             0.0,
-            self._float_parameter("go_depth_tolerance_m"),
+            self._float_parameter("camera_height_m"),
         )
-        self.go_center_tolerance_norm = max(
+        self.hurdle_reference_height_m = max(
             0.0,
-            self._float_parameter("go_center_tolerance_norm"),
+            self._float_parameter("hurdle_reference_height_m"),
+        )
+        self.go_target_ground_gap_m = max(
+            0.0,
+            self._float_parameter("go_target_ground_gap_m"),
+        )
+        self.go_ground_gap_tolerance_m = max(
+            0.0,
+            self._float_parameter("go_ground_gap_tolerance_m"),
+        )
+        self.go_max_camera_bottom_gap_m = max(
+            0.0,
+            self._float_parameter("go_max_camera_bottom_gap_m"),
+        )
+        self.go_angle_tolerance_deg = max(
+            0.0,
+            self._float_parameter("go_angle_tolerance_deg"),
         )
         self.direction_deadband_norm = max(
             0.0,
@@ -160,6 +191,38 @@ class HurdleAnalyzer(Node):
         self.publish_empty_when_missing = bool(
             self.get_parameter("publish_empty_when_missing").value
         )
+
+        self.confirmation_filter = TemporalConfirmationFilter(
+            window_size=int(
+                self.get_parameter("confirmation_window_size").value
+            ),
+            required_hits=int(
+                self.get_parameter("confirmation_required_hits").value
+            ),
+            max_missed_frames=int(
+                self.get_parameter("confirmation_max_missed_frames").value
+            ),
+            max_center_shift_norm=float(
+                self.get_parameter(
+                    "confirmation_max_center_shift_norm"
+                ).value
+            ),
+            min_area_ratio=float(
+                self.get_parameter("confirmation_min_area_ratio").value
+            ),
+        )
+        self.go_confirmation_filter = TemporalConfirmationFilter(
+            window_size=int(
+                self.get_parameter("go_confirmation_window_size").value
+            ),
+            required_hits=int(
+                self.get_parameter("go_confirmation_required_hits").value
+            ),
+            max_missed_frames=0,
+            spatial_matching=False,
+        )
+        self.confirmation_fields: dict[str, object] = {}
+        self.go_confirmation_fields: dict[str, object] = {}
 
         self.bridge = CvBridge()
         self.latest_depth_image: np.ndarray | None = None
@@ -357,11 +420,15 @@ class HurdleAnalyzer(Node):
         lateral: float | None = None
         horizontal_distance: float | None = None
         distance: float | None = None
+        ground_gap: float | None = None
+        camera_bottom_gap_px: int | None = None
+        camera_bottom_gap: float | None = None
         estimated_width: float | None = None
         hurdle_angle: float | None = None
         if self.fx and self.fy and self.cx is not None and self.cy is not None:
             x_ratio = (center_x - self.cx) / self.fx
-            y_ratio = (center_y - self.cy) / self.fy
+            depth_sample_y = int(round(top + height_px * 0.55))
+            y_ratio = (depth_sample_y - self.cy) / self.fy
             bearing = math.degrees(math.atan(x_ratio))
             elevation = math.degrees(math.atan(y_ratio))
             if depth is not None:
@@ -371,6 +438,21 @@ class HurdleAnalyzer(Node):
                 distance = math.sqrt(
                     lateral * lateral + vertical * vertical + depth * depth
                 )
+                vertical_separation = max(
+                    self.camera_height_m - self.hurdle_reference_height_m,
+                    0.0,
+                )
+                ground_square = (
+                    distance * distance
+                    - vertical_separation * vertical_separation
+                )
+                if ground_square >= 0.0:
+                    ground_gap = math.sqrt(ground_square)
+                if image_height is not None:
+                    camera_bottom_gap_px = max(0, image_height - bottom)
+                    camera_bottom_gap = (
+                        camera_bottom_gap_px * depth / self.fy
+                    )
                 estimated_width = width_px * depth / self.fx
                 if (
                     left_depth is not None
@@ -392,7 +474,11 @@ class HurdleAnalyzer(Node):
             direction = "CENTER"
 
         area_px = width_px * height_px
-        center_score = max(0.0, 1.0 - abs(offset_x_norm))
+        angle_score = (
+            max(0.0, 1.0 - abs(hurdle_angle) / 45.0)
+            if hurdle_angle is not None
+            else 0.0
+        )
         depth_score = (
             max(0.0, 1.0 - depth / self.max_valid_depth_m)
             if depth is not None
@@ -401,7 +487,7 @@ class HurdleAnalyzer(Node):
         area_score = min(1.0, math.sqrt(area_px) / 250.0)
         priority = (
             confidence * 0.50
-            + center_score * 0.25
+            + angle_score * 0.25
             + depth_score * 0.15
             + area_score * 0.10
         )
@@ -429,6 +515,15 @@ class HurdleAnalyzer(Node):
             ),
             distance_m=(
                 round(distance, 3) if distance is not None else None
+            ),
+            ground_gap_m=(
+                round(ground_gap, 3) if ground_gap is not None else None
+            ),
+            camera_bottom_gap_px=camera_bottom_gap_px,
+            camera_bottom_gap_m=(
+                round(camera_bottom_gap, 3)
+                if camera_bottom_gap is not None
+                else None
             ),
             lateral_offset_m=(
                 round(lateral, 3) if lateral is not None else None
@@ -458,46 +553,79 @@ class HurdleAnalyzer(Node):
         self,
         target: HurdleCandidate,
     ) -> tuple[str, bool, bool, float | None, bool, str]:
-        centered = (
-            abs(target.offset_x_norm) <= self.go_center_tolerance_norm
+        parallel = (
+            target.hurdle_angle_deg is not None
+            and abs(target.hurdle_angle_deg)
+            <= self.go_angle_tolerance_deg
         )
-        if not target.depth_valid or target.depth_m is None:
+        if (
+            not target.depth_valid
+            or target.depth_m is None
+            or target.camera_bottom_gap_m is None
+        ):
             return (
-                "NO_DEPTH",
-                centered,
+                "NO_GROUND_DISTANCE",
+                parallel,
                 False,
                 None,
                 False,
-                "hurdle_detected_without_valid_depth",
+                "hurdle_detected_without_valid_bottom_gap",
             )
-        error = target.depth_m - self.go_target_depth_m
-        depth_in_range = (
-            abs(error) <= self.go_depth_tolerance_m + 1e-9
+        if target.hurdle_angle_deg is None:
+            return (
+                "NO_ANGLE",
+                False,
+                False,
+                None,
+                False,
+                "hurdle_parallel_angle_unavailable",
+            )
+        error = (
+            target.ground_gap_m - self.go_target_ground_gap_m
+            if target.ground_gap_m is not None
+            else None
         )
-        go_now = centered and depth_in_range
+        ground_gap_in_range = (
+            error is None
+            or abs(error) <= self.go_ground_gap_tolerance_m + 1e-9
+        )
+        bottom_gap_in_range = (
+            target.camera_bottom_gap_m
+            <= self.go_max_camera_bottom_gap_m + 1e-9
+        )
+        go_now = parallel and ground_gap_in_range and bottom_gap_in_range
         if go_now:
             return (
                 "GO_READY",
-                centered,
+                parallel,
                 True,
                 error,
                 True,
-                "hurdle_centered_at_jump_depth",
+                "hurdle_parallel_at_close_ground_gap",
             )
-        if not centered:
+        if not parallel:
             return (
-                "ALIGN",
+                "ALIGN_ANGLE",
                 False,
-                depth_in_range,
+                ground_gap_in_range,
                 error,
                 False,
-                "align_hurdle_horizontally",
+                "align_robot_parallel_to_hurdle",
             )
-        if error > self.go_depth_tolerance_m:
+        if (
+            not bottom_gap_in_range
+            or (
+                error is not None
+                and error > self.go_ground_gap_tolerance_m
+            )
+        ):
             return "APPROACH", True, False, error, False, "hurdle_too_far"
-        return "TOO_CLOSE", True, False, error, False, "hurdle_too_close"
+        return "GO_READY", True, True, error, True, "hurdle_close_enough"
 
-    def _empty_info(self) -> HurdleInfo:
+    def _empty_info(
+        self,
+        note: str = "no_hurdle_detection",
+    ) -> HurdleInfo:
         age = self._depth_age_sec()
         return HurdleInfo(
             detected=False,
@@ -519,6 +647,9 @@ class HurdleAnalyzer(Node):
             depth_m=None,
             horizontal_distance_m=None,
             distance_m=None,
+            ground_gap_m=None,
+            camera_bottom_gap_px=None,
+            camera_bottom_gap_m=None,
             lateral_offset_m=None,
             estimated_width_m=None,
             left_depth_m=None,
@@ -526,9 +657,9 @@ class HurdleAnalyzer(Node):
             hurdle_angle_deg=None,
             depth_valid=False,
             depth_sample_count=0,
-            is_centered=False,
-            depth_in_go_range=False,
-            go_depth_error_m=None,
+            is_parallel=False,
+            ground_gap_in_go_range=False,
+            go_ground_gap_error_m=None,
             go_now=False,
             target_priority_score=0.0,
             candidate_count=0,
@@ -537,13 +668,16 @@ class HurdleAnalyzer(Node):
             image_height=self.latest_image_height,
             camera_info_ready=self.fx is not None,
             depth_age_sec=round(age, 3) if age is not None else None,
-            note="no_hurdle_detection",
+            note=note,
         )
 
     def _publish(self, info: HurdleInfo) -> None:
         message = String()
+        payload = asdict(info)
+        payload.update(self.confirmation_fields)
+        payload.update(self.go_confirmation_fields)
         message.data = json.dumps(
-            asdict(info),
+            payload,
             ensure_ascii=True,
             separators=(",", ":"),
         )
@@ -577,12 +711,44 @@ class HurdleAnalyzer(Node):
                 candidates.append(candidate)
         candidates.sort(key=lambda item: item.score, reverse=True)
         if not candidates:
+            confirmation = self.confirmation_filter.update(False)
+            go_confirmation = self.go_confirmation_filter.update(False)
+            self.confirmation_fields = confirmation.as_dict()
+            self.go_confirmation_fields = go_confirmation.as_dict(
+                "go_confirmation"
+            )
             if self.publish_empty_when_missing:
                 self._publish(self._empty_info())
             return
 
         target = candidates[0]
-        state, centered, in_range, error, go_now, note = self._state(target)
+        confirmation = self.confirmation_filter.update(
+            True,
+            bbox=target.bbox,
+            image_width=image_width,
+            image_height=image_height,
+        )
+        self.confirmation_fields = confirmation.as_dict()
+        if not confirmation.confirmed:
+            go_confirmation = self.go_confirmation_filter.update(False)
+            self.go_confirmation_fields = go_confirmation.as_dict(
+                "go_confirmation"
+            )
+            if self.publish_empty_when_missing:
+                self._publish(
+                    self._empty_info("hurdle_confirmation_pending")
+                )
+            return
+
+        state, parallel, in_range, error, go_now, note = self._state(target)
+        raw_go_now = go_now
+        go_confirmation = self.go_confirmation_filter.update(raw_go_now)
+        self.go_confirmation_fields = go_confirmation.as_dict(
+            "go_confirmation"
+        )
+        go_now = raw_go_now and go_confirmation.confirmed
+        if raw_go_now and not go_now:
+            note = "go_confirmation_pending"
         age = self._depth_age_sec()
         self._publish(
             HurdleInfo(
@@ -605,6 +771,9 @@ class HurdleAnalyzer(Node):
                 depth_m=target.depth_m,
                 horizontal_distance_m=target.horizontal_distance_m,
                 distance_m=target.distance_m,
+                ground_gap_m=target.ground_gap_m,
+                camera_bottom_gap_px=target.camera_bottom_gap_px,
+                camera_bottom_gap_m=target.camera_bottom_gap_m,
                 lateral_offset_m=target.lateral_offset_m,
                 estimated_width_m=target.estimated_width_m,
                 left_depth_m=target.left_depth_m,
@@ -612,9 +781,9 @@ class HurdleAnalyzer(Node):
                 hurdle_angle_deg=target.hurdle_angle_deg,
                 depth_valid=target.depth_valid,
                 depth_sample_count=target.depth_sample_count,
-                is_centered=centered,
-                depth_in_go_range=in_range,
-                go_depth_error_m=(
+                is_parallel=parallel,
+                ground_gap_in_go_range=in_range,
+                go_ground_gap_error_m=(
                     round(error, 3) if error is not None else None
                 ),
                 go_now=go_now,

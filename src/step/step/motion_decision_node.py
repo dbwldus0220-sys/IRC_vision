@@ -12,6 +12,7 @@ from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 from std_msgs.msg import String
 
+from .motion_decision_planner import MotionDecisionConfig
 from .motion_decision_planner import MotionDecisionPlanner
 
 
@@ -37,8 +38,81 @@ class MotionDecisionNode(Node):
         self.declare_parameter("ball_timeout_sec", 0.50)
         self.declare_parameter("goal_timeout_sec", 0.50)
         self.declare_parameter("hurdle_timeout_sec", 0.50)
+        self.declare_parameter("enable_ball_lost_recovery", False)
+        self.declare_parameter("ball_tracking_range_m", 3.0)
+        self.declare_parameter("ball_control_range_m", 0.9)
+        self.declare_parameter("ball_lost_stop_sec", 0.35)
+        self.declare_parameter("ball_recovery_timeout_sec", 8.0)
+        self.declare_parameter("ball_recovery_turn_rad_s", 0.22)
+        self.declare_parameter("ball_recovery_command_sec", 0.40)
+        self.declare_parameter("ball_reacquire_center_deg", 5.0)
+        self.declare_parameter("ball_reacquire_center_norm", 0.08)
+        self.declare_parameter("goal_tracking_range_m", 3.0)
+        self.declare_parameter("goal_control_range_m", 0.5)
+        self.declare_parameter("goal_lost_stop_sec", 0.35)
+        self.declare_parameter("goal_recovery_timeout_sec", 8.0)
+        self.declare_parameter("goal_recovery_turn_rad_s", 0.22)
+        self.declare_parameter("goal_recovery_command_sec", 0.40)
+        self.declare_parameter("goal_reacquire_center_deg", 5.0)
+        self.declare_parameter("goal_reacquire_center_norm", 0.10)
 
-        self.planner = MotionDecisionPlanner()
+        self.planner = MotionDecisionPlanner(
+            MotionDecisionConfig(
+                enable_ball_lost_recovery=bool(
+                    self.get_parameter(
+                        "enable_ball_lost_recovery"
+                    ).value
+                ),
+                ball_tracking_range_m=self._float_parameter(
+                    "ball_tracking_range_m"
+                ),
+                ball_control_range_m=self._float_parameter(
+                    "ball_control_range_m"
+                ),
+                ball_lost_stop_sec=self._float_parameter(
+                    "ball_lost_stop_sec"
+                ),
+                ball_recovery_timeout_sec=self._float_parameter(
+                    "ball_recovery_timeout_sec"
+                ),
+                ball_recovery_turn_rad_s=self._float_parameter(
+                    "ball_recovery_turn_rad_s"
+                ),
+                ball_recovery_command_sec=self._float_parameter(
+                    "ball_recovery_command_sec"
+                ),
+                ball_reacquire_center_deg=self._float_parameter(
+                    "ball_reacquire_center_deg"
+                ),
+                ball_reacquire_center_norm=self._float_parameter(
+                    "ball_reacquire_center_norm"
+                ),
+                goal_tracking_range_m=self._float_parameter(
+                    "goal_tracking_range_m"
+                ),
+                goal_control_range_m=self._float_parameter(
+                    "goal_control_range_m"
+                ),
+                goal_lost_stop_sec=self._float_parameter(
+                    "goal_lost_stop_sec"
+                ),
+                goal_recovery_timeout_sec=self._float_parameter(
+                    "goal_recovery_timeout_sec"
+                ),
+                goal_recovery_turn_rad_s=self._float_parameter(
+                    "goal_recovery_turn_rad_s"
+                ),
+                goal_recovery_command_sec=self._float_parameter(
+                    "goal_recovery_command_sec"
+                ),
+                goal_reacquire_center_deg=self._float_parameter(
+                    "goal_reacquire_center_deg"
+                ),
+                goal_reacquire_center_norm=self._float_parameter(
+                    "goal_reacquire_center_norm"
+                ),
+            )
+        )
         self.mission_phase = str(
             self.get_parameter("initial_mission_phase").value
         ).strip().upper()
@@ -91,6 +165,9 @@ class MotionDecisionNode(Node):
         )
         self.get_logger().info(f"Mission phase: {self.mission_phase}")
         self.get_logger().info(f"Unified command: {command_topic}")
+
+    def _float_parameter(self, name: str) -> float:
+        return float(self.get_parameter(name).value)
 
     def _info_callback(self, source: str):
         def callback(message: String) -> None:
@@ -168,6 +245,8 @@ class MotionDecisionNode(Node):
                 "request_latched": decision.requires_ack,
                 "sdk_motion_id": None,
                 "input_age_sec": ages,
+                "ball_tracking": self.planner.ball_tracking_status(),
+                "goal_tracking": self.planner.goal_tracking_status(),
                 "source_node": "motion_decision_node",
             }
         )

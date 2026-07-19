@@ -143,7 +143,7 @@ ros2 topic echo /navigation/motion_command
 
 YOLO의 `metrics_mode:=auto` 화면은 `/navigation/motion_command`의 실제 `source`를 우선 표시합니다. line planner가 선택되면 `LINE METRICS`와 현재 `STRAIGHT`, `LEFT`, `RIGHT` 등의 action이 표시됩니다.
 
-`PICKUP_NOW`, `SCORE_GOAL`, `GO`는 조건에 처음 진입할 때만 `sdk_motion_requested: true`가 한 번 발생합니다. 현재 `sdk_motion_id`는 `null`이며 알고리즘/SDK 담당자와 모션 번호 계약을 확정한 뒤 매핑해야 합니다.
+`PICKUP_NOW`, `SHOT`, `GO`는 조건에 처음 진입할 때만 `sdk_motion_requested: true`가 한 번 발생합니다. 현재 `sdk_motion_id`는 `null`이며 알고리즘/SDK 담당자와 모션 번호 계약을 확정한 뒤 매핑해야 합니다.
 
 터미널 1에서 RealSense를 실행합니다.
 IMU 기반 위치추정을 같이 테스트하려면 `enable_gyro:=true`, `enable_accel:=true`를 함께 켭니다.
@@ -168,6 +168,25 @@ ros2 run step yolo26_detector --ros-args \
   -p publish_annotated_image:=false \
   -p max_fps:=30.0
 ```
+
+화면을 보면서 RGB 카메라 값을 실시간으로 조정하려면 `display`를 켭니다. 별도 설정 프로그램 없이 기존 YOLO 창 아래의 2열 카메라 패널을 조작하면 RealSense 카메라 노드의 파라미터가 즉시 갱신됩니다.
+
+```bash
+ros2 run step yolo26_detector --ros-args \
+  -p device:=cpu \
+  -p display:=true \
+  -p metrics_mode:=auto
+```
+
+조정 가능한 항목은 `Auto Exposure`, `Exposure`, `Gain`, `Brightness`, `Contrast`, `Saturation`, `Sharpness`, `Auto White Balance`, `White Balance`, `Power Line`입니다. 두 자동 항목은 긴 슬라이더가 아닌 `ON/OFF` 버튼이며, `Power Line`은 `OFF/50/60/AUTO` 네 버튼 중 하나를 선택합니다. 나머지 연속값만 짧고 동일한 길이의 슬라이더로 표시합니다. `Exposure` 또는 `Gain`을 직접 움직이면 자동 노출이 꺼지고, `White Balance`를 움직이면 자동 화이트밸런스가 꺼집니다. 국내 60 Hz 환경에서는 `Power Line`을 보통 `60` 또는 `AUTO`로 사용합니다. YOLO 창에 포커스를 둔 채 `R` 키를 누르면 기본값으로 돌아갑니다.
+
+카메라 조정 패널이 필요 없으면 다음 파라미터를 추가합니다.
+
+```bash
+-p show_camera_controls:=false
+```
+
+기본 RealSense 노드 이름은 `/camera/camera`입니다. 카메라 노드 이름을 바꿔 실행했다면 YOLO에도 `-p camera_node_name:=/변경한/노드이름`을 전달해야 합니다. 이 패널은 탐지 영상의 밝기와 색을 보정하는 RGB 센서 설정만 다루며, 거리값을 만드는 depth 센서의 노출·레이저 출력은 변경하지 않습니다.
 
 터미널 3에서 Line Analyzer를 실행합니다.
 
@@ -225,7 +244,7 @@ source ~/my_cv/install/setup.bash
 ros2 run step hurdle_navigation_controller
 ```
 
-현재 임시 `GO` 조건은 depth `0.80m ± 0.10m`, 수평 중심 오차 `±0.12`입니다. 실제 허들 모션 위치가 정해지면 `go_target_depth_m`, `go_depth_tolerance_m`, `go_center_tolerance_norm` 파라미터로 조정합니다.
+현재 임시 `GO` 조건은 카메라 바로 아래 바닥점과 허들 사이 거리 `0.10m ±0.10m`, 화면 하단과 허들 bbox 하단의 depth 환산 간격 `0.05m 이하`, 카메라와 허들의 평행 오차 `±8°`입니다. 허들은 화면 중앙으로 맞출 필요가 없습니다. 바닥 거리는 카메라 높이 `0.70m`, 허들 depth 측정점 높이 `0.10m`와 depth 기반 3D 직선거리를 피타고라스 정리에 적용해 계산합니다. 실제 치수와 모션 위치가 정해지면 `camera_height_m`, `hurdle_reference_height_m`, `go_target_ground_gap_m`, `go_ground_gap_tolerance_m`, `go_max_camera_bottom_gap_m`, `go_angle_tolerance_deg` 파라미터로 조정합니다.
 
 터미널 6에서 RGB-D Visual Odometry 실험 노드를 실행합니다.
 이 노드는 공/골대 같은 고정 객체가 안 보이는 구간에서 주변 특징점으로 상대 이동을 추정하는 테스트용입니다.
@@ -312,6 +331,7 @@ ros2 run step line_debug_monitor
 - Path continuity filter threshold
 - Temporal filter window와 EMA alpha
 - Mission state 전환 조건
+- YOLO 화면 아래 RGB 카메라 실시간 조정 패널
 
 ## 주의
 
@@ -515,6 +535,9 @@ is_close
 approach_ready
 pickup_ready
 pickup_now
+is_in_pickup_window
+pickup_target_x_ratio, pickup_target_y_ratio
+pickup_x_tolerance_norm, pickup_y_tolerance_ratio
 target_priority_score
 candidate_count
 ```
@@ -522,17 +545,19 @@ candidate_count
 초기 거리 기준은 다음처럼 잡았습니다.
 
 ```text
-detect_depth_m        2.0m 이하이면 가까운 공으로 판단
-approach_depth_m      1.4m 이하이면 공 방향 접근 후보
+detect_depth_m        3.0m 이하이면 추적 기억을 시작
+approach_depth_m      0.90m 이하이면 공 제어 전환 후보
 pickup_ready_depth_m  0.9m 이하 + 화면 중앙이면 집기 자세 준비
-pickup_now_depth_m    공 줍기 기준 depth 0.80m 이하
-pickup_depth_tolerance_m depth 상한 허용오차 +0.05m
+pickup_now_depth_m    공 줍기 기준 depth 0.80m
+pickup_depth_tolerance_m depth 양방향 허용오차 ±0.05m
 pickup_center_tolerance_norm 화면 중심 허용오차 ±0.08
+pickup_target_y_ratio 화면 위에서 아래로 0.82 지점
+pickup_y_tolerance_ratio 세로 목표 허용오차 ±0.12
 horizontal_deadband_px 화면 중심 ±20px는 방향을 CENTER로 판단
 center_tolerance_px   화면 중심 ±140px 이내이면 중앙 정렬로 판단
 ```
 
-공이 보이더라도 `pickup_ready`는 가까운 depth와 화면 중앙 조건이 맞아야만 `true`가 됩니다. `pickup_now`는 depth가 0.85m 이하이고 수평 중심 오차가 `±0.08` 이내일 때 `true`가 됩니다. 조건이 맞으면 YOLO 화면에 `PICK UP BALL` 문구가 표시됩니다.
+공이 보이더라도 `pickup_ready`는 가까운 depth와 화면 내부의 집기 목표 범위 조건이 맞아야만 `true`가 됩니다. 계산상 임시 목표점은 화면 가로 중앙, 화면 높이의 82% 지점이지만 일반 실행 화면에는 별도의 `PICKUP TARGET` 사각형을 표시하지 않습니다. `pickup_now`는 depth가 `0.80m ±0.05m`, 수평 오차가 `±0.08`, 세로 위치가 `0.82 ±0.12`에 모두 들어올 때만 `true`가 되고, 이때 `PICK UP BALL` 문구가 표시됩니다. 카메라 목 각도와 실제 집기 자세가 확정되면 세로 목표값은 반드시 실측 조정해야 합니다.
 
 다만 최종 모션 실행 여부는 이 노드가 아니라 mission/behavior 쪽에서 결정해야 합니다. 예를 들어 현재 미션이 `SCORE_GOAL_A`이면 `ball_info.pickup_ready`가 true여도 공줍기 명령을 무시하고, 현재 미션이 `PICK_BALL_A` 또는 `PICK_BALL_B`일 때만 공 모션을 허용하는 방식이 안전합니다.
 
@@ -556,7 +581,9 @@ ros2 run step ball_analyzer --ros-args \
   -p pickup_ready_depth_m:=0.9 \
   -p pickup_now_depth_m:=0.8 \
   -p pickup_depth_tolerance_m:=0.05 \
-  -p pickup_center_tolerance_norm:=0.08
+  -p pickup_center_tolerance_norm:=0.08 \
+  -p pickup_target_y_ratio:=0.82 \
+  -p pickup_y_tolerance_ratio:=0.12
 ```
 
 ### 공 접근 명령
@@ -579,7 +606,7 @@ ball_navigation_controller    timeout과 주기 발행 담당
 ```text
 valid                       명령 사용 가능 여부
 motion                      STOP / TURN_LEFT / TURN_RIGHT / APPROACH /
-                            SLOW_APPROACH / PICKUP_NOW
+                            SLOW_APPROACH / FINE_FORWARD_STEP / PICKUP_NOW
 reason                      명령 또는 정지 이유
 linear_speed_mps             목표 전진속도
 lateral_speed_mps            현재 0.0, 향후 옆걸음 확장용
@@ -603,11 +630,37 @@ ros2 run step ball_navigation_controller
 ros2 topic echo /navigation/ball_command
 ```
 
-기본 동작은 공이 좌우로 벗어나면 제자리 정렬하고, 정렬 후 접근하며,
-1.0m 안쪽에서 감속합니다. 0.80m 목표 범위에서는 전진을 멈추고
-`PICKUP_NOW` 후보를 냅니다. 이 출력은 로봇을 직접 움직이지 않으며,
+기본 동작은 공이 0.90m 안으로 들어온 뒤에만 시작합니다. 공이 좌우로
+벗어나면 `TURN_LEFT/RIGHT`로 제자리 정렬하고, 정렬 후 `APPROACH`로
+직진하며, 1.0m 안쪽에서 감속합니다. 0.95m 안쪽에서는 연속 보행 대신
+`FINE_FORWARD_STEP` 잔발걸음 후보를 내고, 화면 목표 영역과
+`0.80m ±0.05m` 조건을 모두 만족하면 전진을 멈추고 `PICKUP_NOW`
+후보를 냅니다. 이 출력은 로봇을 직접 움직이지 않으며,
 추후 behavior/FSM이 공 미션일 때만 선택해야 합니다. 매핑 및 위치추정
 코드와는 연결하지 않았습니다.
+
+### 공 거리 우선순위와 비활성화된 분실 복구
+
+통합 `motion_decision_node`는 공을 처음 보았다는 이유만으로 라인보다
+공을 우선하지 않습니다. 현재 거리 기반 전환 순서는 다음과 같습니다.
+
+```text
+공 미검출                       → line 주행
+공 검출, 거리 3.0m 초과         → line 주행, 추적 시작 안 함
+공 검출, Depth > 0.90m         → line 주행 유지
+공 검출, Depth <= 0.90m        → ball planner로 전환
+공이 화면에서 사라짐             → 즉시 line 판단으로 복귀
+```
+
+0.90m 공 제어 전환은 화면의 `Depth Z`와 동일한 `depth_m`을 기준으로
+판단합니다. 테스트 중 공이 화면에서 사라질 때마다 제자리 탐색하는 것을
+막기 위해 `enable_ball_lost_recovery=false`가 기본값입니다. 나중에
+복구 전략이 확정되면 `true`로 다시 켤 수 있으며 관련 설정은
+`motion_decision_node`의
+`ball_tracking_range_m`, `ball_control_range_m`, `ball_lost_stop_sec`,
+`ball_recovery_timeout_sec`, `ball_recovery_turn_rad_s`,
+`ball_reacquire_center_deg`, `ball_reacquire_center_norm` 파라미터로
+조정할 수 있습니다.
 
 ## 골대 분석과 SDK 행동 신호
 
@@ -652,15 +705,39 @@ score_now
 실제 골넣기 모션이 정해지기 전까지 임시 조건은 다음과 같습니다.
 
 ```text
+goal_tracking_range_m          3.0m 이내에서 backboard 위치 기억
+control_start_depth_m          0.50m 이내에서 골대 보행/정렬 우선
 score_target_depth_m          0.25m
 score_depth_tolerance_m       ±0.05m
 score_center_tolerance_norm   ±0.10
 ```
 
 거리와 중심 조건이 모두 맞으면 `score_now=true`가 되고 최종 명령은
-`action=SCORE_GOAL`, `sdk_motion_requested=true`가 됩니다. 그 외에는
+`action=SHOT`, `sdk_motion_requested=true`가 됩니다. 그 외에는
 `ALIGN_LEFT`, `ALIGN_RIGHT`, `APPROACH_GOAL`, `RETREAT_GOAL`, `WAIT` 중
 하나를 내지만 속도값은 만들지 않습니다.
+
+통합 판단의 골대 상태 흐름은 다음과 같습니다.
+
+```text
+Depth Z > 3.0m               → 골대 기억 안 함, line 주행
+0.50m < Depth Z <= 3.0m     → backboard 좌우 위치 기억, line 주행 유지
+Depth Z <= 0.50m            → goal planner 우선
+중앙에서 벗어남              → ALIGN_LEFT / ALIGN_RIGHT
+중앙이고 0.30m보다 멂        → APPROACH_GOAL 보행모션 후보
+중앙이고 0.25m ±0.05m       → SHOT 단발 모션 요청
+기억한 골대 분실 직후         → GOAL_LOST_STOP, 선속도 0
+0.35초 후에도 미검출          → RECOVER_GOAL_TURN_LEFT / RIGHT
+골대 재검출, 중앙 밖          → 중앙 정렬까지 제자리 회전 유지
+8초 동안 재검출 실패          → 골대 기억 해제 후 line 복귀
+```
+
+기억과 정렬은 큰 `goal` bbox가 아니라 가능하면 내부 `backboard`의
+`depth_m`, `bearing_deg`, `offset_x_norm`을 사용합니다. 통합 출력의
+`goal_tracking`에서 활성 여부, 분실 시간과 마지막 방향을 확인할 수
+있습니다. 공을 집은 뒤 골대 단계에서는 `/mission/phase`를
+`GOAL_SEARCH`로 지정해야 이전 공 기억보다 골대 탐색을 확실하게
+우선할 수 있습니다.
 
 ```bash
 ros2 run step goal_analyzer
@@ -676,7 +753,7 @@ ros2 topic echo /navigation/goal_command
 
 ## 허들 분석과 넘기 준비 신호
 
-허들도 공과 동일하게 영상 중심 정렬과 aligned depth를 사용하지만, 허들은 가로로 긴 물체이므로 폭과 좌우 depth 차이까지 계산합니다.
+허들은 화면 중앙 위치를 정렬 기준으로 사용하지 않습니다. 가로로 긴 bbox의 좌우 depth 차이로 카메라와 허들의 평행 오차를 계산하고, 이 각도와 대표 depth만으로 접근 및 넘기 준비를 판단합니다.
 
 ```text
 /vision/detections + aligned depth + camera info
@@ -697,32 +774,33 @@ SDK behavior/FSM
 ```text
 detected, state, confidence
 center_x, center_y, bbox
-offset_x_px, offset_x_norm       화면 중앙 기준 수평 오차
-horizontal_direction            LEFT / CENTER / RIGHT
-bearing_deg                     카메라 정면 기준 각도
 depth_m                         카메라 광축 Z 거리
-horizontal_distance_m           카메라 기준 XZ 평면 거리
-distance_m                      카메라와 측정점 사이 3D 직선거리
-lateral_offset_m                카메라 중심축 기준 실제 좌우거리
+distance_m                      depth와 픽셀 좌표로 복원한 3D 직선거리
+ground_gap_m                    카메라 아래 바닥점과 허들 사이 거리
+camera_bottom_gap_px            화면 하단과 hurdle bbox 하단의 픽셀 간격
+camera_bottom_gap_m             위 픽셀 간격을 depth로 환산한 길이
 estimated_width_m               bbox 폭과 depth로 계산한 허들 추정 폭
 left_depth_m, right_depth_m      허들 좌우 대표 depth
-hurdle_angle_deg                좌우 depth 차이로 계산한 상대 기울기
+hurdle_angle_deg                좌우 depth 차이로 계산한 평행 오차
 depth_sample_count              유효한 가로 depth 측정점 개수
-is_centered
-depth_in_go_range
-go_depth_error_m
+is_parallel
+ground_gap_in_go_range
+go_ground_gap_error_m
 go_now
 ```
 
 현재 임시 넘기 준비 조건은 다음과 같습니다.
 
 ```text
-go_target_depth_m           0.80m
-go_depth_tolerance_m        ±0.10m  → 허용 범위 0.70~0.90m
-go_center_tolerance_norm    ±0.12
+camera_height_m                  0.70m
+hurdle_reference_height_m        0.10m
+go_target_ground_gap_m           0.10m
+go_ground_gap_tolerance_m        ±0.10m → 허용 범위 0.00~0.20m
+go_max_camera_bottom_gap_m       0.05m
+go_angle_tolerance_deg           ±8.0°
 ```
 
-허들이 중앙에 있고 depth가 허용 범위이면 `state=GO_READY`, `go_now=true`, planner의 `action=GO`가 됩니다. 정렬이 안 되어 있으면 `ALIGN_LEFT/ALIGN_RIGHT`, 멀면 `APPROACH_HURDLE`, 너무 가까우면 `RETREAT_HURDLE`, depth가 없으면 `WAIT`를 사용합니다.
+카메라–허들 3D 직선거리를 빗변, `camera_height_m - hurdle_reference_height_m`를 세로변으로 두고 피타고라스 정리로 `ground_gap_m`을 계산합니다. 빗변이 세로변보다 짧게 측정되는 불가능한 기하 상태는 절대 0m로 자르지 않고 `N/A`로 처리합니다. 이때도 잘못된 조기 `GO`를 막기 위해 화면 하단부터 허들 bbox 하단까지의 픽셀 간격을 `depth / fy` 비율로 실제 길이로 환산한 `camera_bottom_gap_m`이 반드시 0.05m 이하인지 함께 검사합니다. 허들이 카메라와 평행하고 거리 조건들이 모두 맞아야 `state=GO_READY`, `go_now=true`, planner의 `action=GO`가 됩니다. 평행하지 않으면 `ALIGN_LEFT/ALIGN_RIGHT`, 하단 간격 또는 바닥 간격이 크면 `APPROACH_HURDLE`, 필수 depth·하단 간격·좌우 각도를 계산할 수 없으면 `WAIT`를 사용합니다. 허들의 화면 좌우 위치는 이 판단에 영향을 주지 않습니다.
 
 통합 `motion_decision_node`는 `GO` 조건이 여러 프레임 유지되더라도 `sdk_motion_requested=true`를 최초 진입 시 한 번만 발행합니다. 실제 모션 ID는 아직 정해지지 않아 `sdk_motion_id=null`입니다.
 
@@ -733,7 +811,7 @@ ros2 topic echo /vision/hurdle_info
 ros2 topic echo /navigation/hurdle_command
 ```
 
-현재 0.80m 조건은 임시값입니다. 최종 허들 모션이 느리게 접근해 허들에 가깝게 붙은 뒤 시작하는 방식으로 정해지면 다음 로직을 추가해야 합니다.
+현재 바닥 간격 `0.10m ±0.10m` 조건과 카메라·허들 높이는 임시값입니다. 실제 장착 높이와 최종 허들 모션의 시작 위치가 정해지면 파라미터를 실측 보정해야 합니다. 모션이 느리게 접근해 허들에 완전히 붙은 뒤 시작하는 방식으로 정해지면 다음 로직을 추가할 수 있습니다.
 
 ```text
 ALIGN
@@ -767,11 +845,19 @@ HurdleAnalyzer
 
 | phase 형태 | 동작 |
 |---|---|
-| `AUTO` | 검출된 대상 중 ball → goal → hurdle → line 우선순위로 선택하는 시험 모드 |
-| `BALL_SEARCH`, `GOAL_SEARCH`, `HURDLE_SEARCH` | 목표가 보이면 해당 planner, 아직 안 보이면 line planner로 주행하며 탐색 |
+| `AUTO` | 공은 0.90m, 골대는 0.50m 안에서만 우선; 공이 사라지면 line으로 즉시 복귀 |
+| `BALL_SEARCH` | 0.90m 밖에서는 line 주행, 0.90m 안에서 ball planner 전환; 기본 분실 회전 없음 |
+| `GOAL_SEARCH` | 0.50~3m backboard는 기억하면서 line 주행, 0.50m 안에서 goal planner 전환, 분실 시 마지막 방향 회전 |
+| `HURDLE_SEARCH` | 목표가 보이면 hurdle planner, 아직 안 보이면 line planner로 주행하며 탐색 |
 | `BALL_APPROACH`, `GOAL_APPROACH`, `HURDLE_APPROACH` | 해당 객체 planner에 집중 |
 | `LINE_TRACK` | line planner만 사용 |
 | `PICK_LOCK`, `SHOOT_LOCK`, `HURDLE_LOCK` | C++ SDK 모션이 끝날 때까지 `WAIT`; 새 이동 판단 차단 |
+
+확정된 허들이 보이면 화면 중앙 여부와 관계없이 공·골대보다 hurdle
+planner를 먼저 선택합니다. 허들을 화면 중앙으로 옮기는 대신 좌우 depth
+차이로 계산한 `hurdle_angle_deg`가 허용 범위에 들도록 제자리 회전하고,
+그 다음 depth를 맞춥니다. SDK 모션이 이미 실행 중인 `*_LOCK` 상태는
+이 우선순위보다 먼저 적용됩니다.
 
 모든 입력은 기본 0.5초 timeout을 사용합니다. 오래된 정보는 선택 대상에서 제외하므로 멈춘 analyzer의 마지막 검출값으로 계속 움직이는 것을 방지합니다.
 
@@ -789,6 +875,8 @@ sdk_motion_requested        단발 SDK 요청; 조건 진입 첫 프레임만 tr
 request_latched             단발 이벤트 조건이 현재 유지 중인지 여부
 sdk_motion_id               현재 null; C++ SDK 계약 후 설정
 input_age_sec               네 입력 토픽의 최신 데이터 나이
+ball_tracking               현재 기본 비활성; 향후 분실 복구용 상태
+goal_tracking               3m backboard 기억, 분실 시간, 마지막 좌우 방향
 ```
 
 현재 통합 노드는 친구가 설계한 전체 `motion_decision`의 입력/선택 뼈대입니다. 아래 항목은 SDK 인터페이스가 확정된 뒤 추가해야 합니다.
@@ -805,10 +893,54 @@ input_age_sec               네 입력 토픽의 최신 데이터 나이
 
 YOLO 화면의 `metrics_mode=auto`는 `/navigation/motion_command`의 실제 `source`를 우선합니다.
 
-- line 선택: line bbox 글자를 숨기고 가까운 점부터 먼 점까지 초록 경로, 점 번호, `NEAR/FAR`, 카메라 중심선, heading, lateral offset, planner action 표시
-- ball 선택: 거리, depth, 화면 중심 오차, bearing, lateral 위치와 `PICK UP BALL` 표시
-- goal 선택: backboard 우선 중심, 거리, depth, 정렬 상태와 `SCORE GOAL` 표시
-- hurdle 선택: 거리, depth, 중심 오차, 폭, 기울기와 `GO!` 표시
+- line 선택: line bbox 글자를 숨기고 가까운 점부터 먼 점까지 초록 경로, 점 번호, `NEAR/FAR`, 카메라 중심선, heading, lateral offset을 표시. 실제 planner action인 `STRAIGHT`, `LEFT`, `RIGHT`, `RECOVER LINE LEFT/RIGHT`, `STOP`은 화면 위쪽의 큰 청록 배너로도 표시
+- ball 선택: 거리, depth, 화면 중심 오차를 표시. 실제 planner action인 `BALL TURN LEFT/RIGHT`, `BALL APPROACH`, `BALL SLOW APPROACH`, `BALL FINE STEP`, `BALL STOP`은 큰 주황 배너, 최종 `PICK UP BALL`은 `GO!`, `SHOT`과 같은 초록 실행 배너로 표시. 공 분실 복구 중에는 BALL 패널을 유지하면서 검출된 line 경로를 배경에 함께 표시
+- goal 선택: backboard 우선 중심, 거리, depth, 정렬 상태와 `SHOT` 표시
+- hurdle 선택: Depth Z, 계산된 바닥 간격, 화면 하단-허들 간격, 좌우 depth, 폭, 카메라-허들 평행 오차와 `GO!` 표시. 화면 중심 오차와 좌우 위치는 표시하지 않음
+
+### 공통 연속 프레임 객체 확정
+
+단일 프레임의 오검출이 planner 또는 SDK 모션 요청으로 이어지지 않도록
+`temporal_confirmation.py`의 `TemporalConfirmationFilter`를 line, ball,
+goal, hurdle analyzer가 공통으로 사용합니다.
+
+```text
+line             최근 3프레임 중 2회 유효 경로
+ball             최근 5프레임 중 3회 같은 위치·크기의 bbox
+goal/backboard   최근 5프레임 중 3회 같은 위치·크기의 bbox
+hurdle           최근 7프레임 중 5회 같은 위치·크기의 bbox
+PICKUP_NOW       최근 5프레임 중 3회 조건 유지
+SHOT             최근 5프레임 중 3회 조건 유지
+GO               최근 7프레임 중 5회 조건 유지
+```
+
+공·골대·허들은 bbox 중심 이동량과 면적 비율도 비교하므로 전혀 다른
+위치나 크기의 오검출은 같은 객체의 누적으로 계산하지 않습니다. 짧은
+미검출은 기본 2프레임까지 기록을 보존하지만, 현재 프레임에 객체가 없을
+때는 stale 위치로 움직이지 않도록 `detected=false`를 발행합니다.
+
+YOLO 원본 bbox에는 확정 단계를 다음처럼 표시합니다.
+
+```text
+RAW             analyzer confidence/형상 조건을 아직 통과하지 못함
+CANDIDATE 2/5   연속 프레임 확인 진행 중
+CONFIRMED       planner 입력으로 사용할 수 있는 확정 객체
+```
+
+공통 판정 알고리즘은 `src/step/step/temporal_confirmation.py` 한 파일에서
+관리합니다. 대상별 강도는 각 analyzer의 다음 ROS 파라미터로 실행 중
+설정할 수 있습니다.
+
+```text
+confirmation_window_size
+confirmation_required_hits
+confirmation_max_missed_frames
+confirmation_max_center_shift_norm   # line 제외
+confirmation_min_area_ratio          # line 제외
+```
+
+최종 모션 유지 프레임 수는 `pickup_confirmation_*`,
+`score_confirmation_*`, `go_confirmation_*` 파라미터로 별도 조정합니다.
 
 이 시각화는 기존 analyzer/planner 결과를 그리기만 하며 별도의 판단을 만들지 않습니다. OpenCV 선과 글자 렌더링 비용은 YOLO ONNX 추론보다 작고, 통합 모드에서는 별도 `line_path_visualizer` 창을 켜지 않아도 됩니다.
 

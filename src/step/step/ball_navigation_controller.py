@@ -35,8 +35,11 @@ class BallNavigationController(Node):
         self.declare_parameter("turn_enter_deg", 5.0)
         self.declare_parameter("turn_exit_deg", 2.5)
         self.declare_parameter("fallback_half_fov_deg", 35.0)
+        self.declare_parameter("control_start_depth_m", 0.90)
         self.declare_parameter("slowdown_depth_m", 1.0)
+        self.declare_parameter("fine_step_depth_m", 0.95)
         self.declare_parameter("pickup_depth_m", 0.80)
+        self.declare_parameter("pickup_depth_tolerance_m", 0.05)
         self.declare_parameter("command_duration_sec", 0.40)
 
         config = BallNavigationConfig(
@@ -62,8 +65,15 @@ class BallNavigationController(Node):
             fallback_half_fov_deg=self._float_parameter(
                 "fallback_half_fov_deg"
             ),
+            control_start_depth_m=self._float_parameter(
+                "control_start_depth_m"
+            ),
             slowdown_depth_m=self._float_parameter("slowdown_depth_m"),
+            fine_step_depth_m=self._float_parameter("fine_step_depth_m"),
             pickup_depth_m=self._float_parameter("pickup_depth_m"),
+            pickup_depth_tolerance_m=self._float_parameter(
+                "pickup_depth_tolerance_m"
+            ),
             command_duration_sec=self._float_parameter(
                 "command_duration_sec"
             ),

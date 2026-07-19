@@ -18,6 +18,8 @@ from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import CameraInfo, Image
 from std_msgs.msg import String
 
+from .temporal_confirmation import TemporalConfirmationFilter
+
 
 @dataclass(frozen=True)
 class BallCandidate:
@@ -76,6 +78,11 @@ class BallInfo:
     approach_ready: bool
     pickup_ready: bool
     pickup_now: bool
+    is_in_pickup_window: bool
+    pickup_target_x_ratio: float
+    pickup_target_y_ratio: float
+    pickup_x_tolerance_norm: float
+    pickup_y_tolerance_ratio: float
     target_priority_score: float
     candidate_count: int
     candidates: list[BallCandidate]
@@ -115,15 +122,23 @@ class BallAnalyzer(Node):
         self.declare_parameter("depth_timeout_sec", 0.7)
         self.declare_parameter("depth_window_px", 9)
         self.declare_parameter("max_valid_depth_m", 4.0)
-        self.declare_parameter("detect_depth_m", 2.0)
-        self.declare_parameter("approach_depth_m", 1.4)
+        self.declare_parameter("detect_depth_m", 3.0)
+        self.declare_parameter("approach_depth_m", 0.9)
         self.declare_parameter("pickup_ready_depth_m", 0.9)
         self.declare_parameter("pickup_now_depth_m", 0.8)
         self.declare_parameter("pickup_depth_tolerance_m", 0.05)
         self.declare_parameter("pickup_center_tolerance_norm", 0.08)
+        self.declare_parameter("pickup_target_y_ratio", 0.82)
+        self.declare_parameter("pickup_y_tolerance_ratio", 0.12)
         self.declare_parameter("horizontal_deadband_px", 20)
         self.declare_parameter("center_tolerance_px", 140)
-        self.declare_parameter("center_y_min_ratio_for_pickup", 0.45)
+        self.declare_parameter("confirmation_window_size", 5)
+        self.declare_parameter("confirmation_required_hits", 3)
+        self.declare_parameter("confirmation_max_missed_frames", 2)
+        self.declare_parameter("confirmation_max_center_shift_norm", 0.18)
+        self.declare_parameter("confirmation_min_area_ratio", 0.40)
+        self.declare_parameter("pickup_confirmation_window_size", 5)
+        self.declare_parameter("pickup_confirmation_required_hits", 3)
         self.declare_parameter("publish_empty_when_missing", True)
 
         self.detections_topic = str(
@@ -172,6 +187,13 @@ class BallAnalyzer(Node):
                 self.get_parameter("pickup_center_tolerance_norm").value
             ),
         )
+        self.pickup_target_y_ratio = float(
+            self.get_parameter("pickup_target_y_ratio").value
+        )
+        self.pickup_y_tolerance_ratio = max(
+            0.0,
+            float(self.get_parameter("pickup_y_tolerance_ratio").value),
+        )
         self.horizontal_deadband_px = max(
             0,
             int(self.get_parameter("horizontal_deadband_px").value),
@@ -179,12 +201,45 @@ class BallAnalyzer(Node):
         self.center_tolerance_px = int(
             self.get_parameter("center_tolerance_px").value
         )
-        self.center_y_min_ratio_for_pickup = float(
-            self.get_parameter("center_y_min_ratio_for_pickup").value
-        )
         self.publish_empty_when_missing = bool(
             self.get_parameter("publish_empty_when_missing").value
         )
+
+        self.confirmation_filter = TemporalConfirmationFilter(
+            window_size=int(
+                self.get_parameter("confirmation_window_size").value
+            ),
+            required_hits=int(
+                self.get_parameter("confirmation_required_hits").value
+            ),
+            max_missed_frames=int(
+                self.get_parameter("confirmation_max_missed_frames").value
+            ),
+            max_center_shift_norm=float(
+                self.get_parameter(
+                    "confirmation_max_center_shift_norm"
+                ).value
+            ),
+            min_area_ratio=float(
+                self.get_parameter("confirmation_min_area_ratio").value
+            ),
+        )
+        self.pickup_confirmation_filter = TemporalConfirmationFilter(
+            window_size=int(
+                self.get_parameter(
+                    "pickup_confirmation_window_size"
+                ).value
+            ),
+            required_hits=int(
+                self.get_parameter(
+                    "pickup_confirmation_required_hits"
+                ).value
+            ),
+            max_missed_frames=0,
+            spatial_matching=False,
+        )
+        self.confirmation_fields: dict[str, object] = {}
+        self.pickup_confirmation_fields: dict[str, object] = {}
 
         self.bridge = CvBridge()
         self.latest_depth_image: np.ndarray | None = None
@@ -504,7 +559,7 @@ class BallAnalyzer(Node):
         self,
         candidate: BallCandidate,
         image_height: int | None,
-    ) -> tuple[str, bool, bool, bool, bool, bool, str]:
+    ) -> tuple[str, bool, bool, bool, bool, bool, bool, str]:
         centered = abs(candidate.offset_x_px) <= self.center_tolerance_px
         close = (
             candidate.depth_valid
@@ -517,11 +572,14 @@ class BallAnalyzer(Node):
             and candidate.depth_m <= self.approach_depth_m
         )
 
-        low_enough = True
+        in_pickup_window = False
         if image_height:
             center_y_ratio = candidate.center[1] / max(image_height, 1)
-            low_enough = (
-                center_y_ratio >= self.center_y_min_ratio_for_pickup
+            in_pickup_window = (
+                abs(candidate.offset_x_norm)
+                <= self.pickup_center_tolerance_norm
+                and abs(center_y_ratio - self.pickup_target_y_ratio)
+                <= self.pickup_y_tolerance_ratio
             )
 
         pickup_ready = (
@@ -529,16 +587,14 @@ class BallAnalyzer(Node):
             and candidate.depth_m is not None
             and candidate.depth_m <= self.pickup_ready_depth_m
             and centered
-            and low_enough
+            and in_pickup_window
         )
         pickup_now = (
             candidate.depth_valid
             and candidate.depth_m is not None
-            and candidate.depth_m
-            <= self.pickup_now_depth_m + self.pickup_depth_tolerance_m
-            and abs(candidate.offset_x_norm)
-            <= self.pickup_center_tolerance_norm
-            and low_enough
+            and abs(candidate.depth_m - self.pickup_now_depth_m)
+            <= self.pickup_depth_tolerance_m
+            and in_pickup_window
         )
 
         if pickup_now:
@@ -549,6 +605,7 @@ class BallAnalyzer(Node):
                 approach_ready,
                 pickup_ready,
                 pickup_now,
+                in_pickup_window,
                 "close_centered_ball_ready_to_pick",
             )
         if pickup_ready:
@@ -559,6 +616,7 @@ class BallAnalyzer(Node):
                 approach_ready,
                 pickup_ready,
                 pickup_now,
+                in_pickup_window,
                 "slow_down_and_prepare_pickup",
             )
         if approach_ready:
@@ -569,6 +627,7 @@ class BallAnalyzer(Node):
                 approach_ready,
                 pickup_ready,
                 pickup_now,
+                in_pickup_window,
                 "ball_close_enough_to_approach",
             )
         if close:
@@ -579,6 +638,7 @@ class BallAnalyzer(Node):
                 approach_ready,
                 pickup_ready,
                 pickup_now,
+                in_pickup_window,
                 "ball_visible_with_depth",
             )
         if candidate.depth_valid:
@@ -589,6 +649,7 @@ class BallAnalyzer(Node):
                 approach_ready,
                 pickup_ready,
                 pickup_now,
+                in_pickup_window,
                 "ball_detected_but_far",
             )
         return (
@@ -598,13 +659,17 @@ class BallAnalyzer(Node):
             approach_ready,
             pickup_ready,
             pickup_now,
+            in_pickup_window,
             "ball_detected_without_valid_depth",
         )
 
     def _publish(self, info: BallInfo) -> None:
         message = String()
+        payload = asdict(info)
+        payload.update(self.confirmation_fields)
+        payload.update(self.pickup_confirmation_fields)
         message.data = json.dumps(
-            asdict(info),
+            payload,
             ensure_ascii=True,
             separators=(",", ":"),
         )
@@ -640,6 +705,11 @@ class BallAnalyzer(Node):
             approach_ready=False,
             pickup_ready=False,
             pickup_now=False,
+            is_in_pickup_window=False,
+            pickup_target_x_ratio=0.5,
+            pickup_target_y_ratio=self.pickup_target_y_ratio,
+            pickup_x_tolerance_norm=self.pickup_center_tolerance_norm,
+            pickup_y_tolerance_ratio=self.pickup_y_tolerance_ratio,
             target_priority_score=0.0,
             candidate_count=0,
             candidates=[],
@@ -693,11 +763,37 @@ class BallAnalyzer(Node):
 
         candidates.sort(key=lambda item: item.score, reverse=True)
         if not candidates:
+            confirmation = self.confirmation_filter.update(False)
+            pickup_confirmation = self.pickup_confirmation_filter.update(
+                False
+            )
+            self.confirmation_fields = confirmation.as_dict()
+            self.pickup_confirmation_fields = pickup_confirmation.as_dict(
+                "pickup_confirmation"
+            )
             if self.publish_empty_when_missing:
                 self._publish(self._empty_info())
             return
 
         target = candidates[0]
+        confirmation = self.confirmation_filter.update(
+            True,
+            bbox=target.bbox,
+            image_width=image_width,
+            image_height=image_height,
+        )
+        self.confirmation_fields = confirmation.as_dict()
+        if not confirmation.confirmed:
+            pickup_confirmation = self.pickup_confirmation_filter.update(
+                False
+            )
+            self.pickup_confirmation_fields = pickup_confirmation.as_dict(
+                "pickup_confirmation"
+            )
+            if self.publish_empty_when_missing:
+                self._publish(self._empty_info("ball_confirmation_pending"))
+            return
+
         (
             state,
             centered,
@@ -705,8 +801,19 @@ class BallAnalyzer(Node):
             approach_ready,
             pickup_ready,
             pickup_now,
+            in_pickup_window,
             note,
         ) = self._state_for_candidate(target, image_height)
+        raw_pickup_now = pickup_now
+        pickup_confirmation = self.pickup_confirmation_filter.update(
+            raw_pickup_now
+        )
+        self.pickup_confirmation_fields = pickup_confirmation.as_dict(
+            "pickup_confirmation"
+        )
+        pickup_now = raw_pickup_now and pickup_confirmation.confirmed
+        if raw_pickup_now and not pickup_now:
+            note = "pickup_confirmation_pending"
         age = self._depth_age_sec()
 
         self._publish(
@@ -738,6 +845,13 @@ class BallAnalyzer(Node):
                 approach_ready=approach_ready,
                 pickup_ready=pickup_ready,
                 pickup_now=pickup_now,
+                is_in_pickup_window=in_pickup_window,
+                pickup_target_x_ratio=0.5,
+                pickup_target_y_ratio=self.pickup_target_y_ratio,
+                pickup_x_tolerance_norm=(
+                    self.pickup_center_tolerance_norm
+                ),
+                pickup_y_tolerance_ratio=self.pickup_y_tolerance_ratio,
                 target_priority_score=target.score,
                 candidate_count=len(candidates),
                 candidates=candidates[:5],

@@ -18,6 +18,8 @@ from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import CameraInfo, Image
 from std_msgs.msg import String
 
+from .temporal_confirmation import TemporalConfirmationFilter
+
 
 @dataclass(frozen=True)
 class GoalCandidate:
@@ -110,11 +112,18 @@ class GoalAnalyzer(Node):
         self.declare_parameter("depth_timeout_sec", 0.7)
         self.declare_parameter("depth_window_px", 11)
         self.declare_parameter("max_valid_depth_m", 6.0)
-        self.declare_parameter("approach_depth_m", 2.0)
+        self.declare_parameter("approach_depth_m", 0.5)
         self.declare_parameter("score_target_depth_m", 0.25)
         self.declare_parameter("score_depth_tolerance_m", 0.05)
         self.declare_parameter("score_center_tolerance_norm", 0.10)
         self.declare_parameter("direction_deadband_norm", 0.04)
+        self.declare_parameter("confirmation_window_size", 5)
+        self.declare_parameter("confirmation_required_hits", 3)
+        self.declare_parameter("confirmation_max_missed_frames", 2)
+        self.declare_parameter("confirmation_max_center_shift_norm", 0.18)
+        self.declare_parameter("confirmation_min_area_ratio", 0.40)
+        self.declare_parameter("score_confirmation_window_size", 5)
+        self.declare_parameter("score_confirmation_required_hits", 3)
         self.declare_parameter("publish_empty_when_missing", True)
 
         self.detections_topic = self._string_parameter("detections_topic")
@@ -162,6 +171,38 @@ class GoalAnalyzer(Node):
         self.publish_empty_when_missing = bool(
             self.get_parameter("publish_empty_when_missing").value
         )
+
+        self.confirmation_filter = TemporalConfirmationFilter(
+            window_size=int(
+                self.get_parameter("confirmation_window_size").value
+            ),
+            required_hits=int(
+                self.get_parameter("confirmation_required_hits").value
+            ),
+            max_missed_frames=int(
+                self.get_parameter("confirmation_max_missed_frames").value
+            ),
+            max_center_shift_norm=float(
+                self.get_parameter(
+                    "confirmation_max_center_shift_norm"
+                ).value
+            ),
+            min_area_ratio=float(
+                self.get_parameter("confirmation_min_area_ratio").value
+            ),
+        )
+        self.score_confirmation_filter = TemporalConfirmationFilter(
+            window_size=int(
+                self.get_parameter("score_confirmation_window_size").value
+            ),
+            required_hits=int(
+                self.get_parameter("score_confirmation_required_hits").value
+            ),
+            max_missed_frames=0,
+            spatial_matching=False,
+        )
+        self.confirmation_fields: dict[str, object] = {}
+        self.score_confirmation_fields: dict[str, object] = {}
 
         self.bridge = CvBridge()
         self.latest_depth_image: np.ndarray | None = None
@@ -518,8 +559,11 @@ class GoalAnalyzer(Node):
 
     def _publish(self, info: GoalInfo) -> None:
         message = String()
+        payload = asdict(info)
+        payload.update(self.confirmation_fields)
+        payload.update(self.score_confirmation_fields)
         message.data = json.dumps(
-            asdict(info),
+            payload,
             ensure_ascii=True,
             separators=(",", ":"),
         )
@@ -640,11 +684,33 @@ class GoalAnalyzer(Node):
                 candidates.append(candidate)
         candidates.sort(key=lambda item: item.score, reverse=True)
         if not candidates:
+            confirmation = self.confirmation_filter.update(False)
+            score_confirmation = self.score_confirmation_filter.update(False)
+            self.confirmation_fields = confirmation.as_dict()
+            self.score_confirmation_fields = score_confirmation.as_dict(
+                "score_confirmation"
+            )
             if self.publish_empty_when_missing:
                 self._publish(self._empty_info())
             return
 
         target = candidates[0]
+        confirmation = self.confirmation_filter.update(
+            True,
+            bbox=target.aim_bbox,
+            image_width=image_width,
+            image_height=image_height,
+        )
+        self.confirmation_fields = confirmation.as_dict()
+        if not confirmation.confirmed:
+            score_confirmation = self.score_confirmation_filter.update(False)
+            self.score_confirmation_fields = score_confirmation.as_dict(
+                "score_confirmation"
+            )
+            if self.publish_empty_when_missing:
+                self._publish(self._empty_info("goal_confirmation_pending"))
+            return
+
         (
             state,
             centered,
@@ -653,6 +719,16 @@ class GoalAnalyzer(Node):
             score_now,
             note,
         ) = self._goal_state(target)
+        raw_score_now = score_now
+        score_confirmation = self.score_confirmation_filter.update(
+            raw_score_now
+        )
+        self.score_confirmation_fields = score_confirmation.as_dict(
+            "score_confirmation"
+        )
+        score_now = raw_score_now and score_confirmation.confirmed
+        if raw_score_now and not score_now:
+            note = "score_confirmation_pending"
         age = self._depth_age_sec()
         self._publish(
             GoalInfo(

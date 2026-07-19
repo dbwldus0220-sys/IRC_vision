@@ -13,9 +13,10 @@ class HurdleNavigationConfig:
     """Provisional hurdle alignment and jump thresholds."""
 
     min_confidence: float = 0.35
-    go_target_depth_m: float = 0.80
-    go_depth_tolerance_m: float = 0.10
-    go_center_tolerance_norm: float = 0.12
+    go_target_ground_gap_m: float = 0.10
+    go_ground_gap_tolerance_m: float = 0.10
+    go_max_camera_bottom_gap_m: float = 0.05
+    go_angle_tolerance_deg: float = 8.0
 
 
 @dataclass(frozen=True)
@@ -29,12 +30,12 @@ class HurdleActionCommand:
     confidence: float
     depth_m: float | None
     distance_m: float | None
-    depth_error_m: float | None
-    bearing_error_deg: float | None
-    offset_x_norm: float | None
+    ground_gap_m: float | None
+    camera_bottom_gap_m: float | None
+    ground_gap_error_m: float | None
     hurdle_angle_deg: float | None
-    is_centered: bool
-    depth_in_go_range: bool
+    is_parallel: bool
+    ground_gap_in_go_range: bool
     go_now: bool
 
     def to_dict(self) -> dict[str, Any]:
@@ -47,18 +48,21 @@ class HurdleActionCommand:
             "confidence": round(self.confidence, 4),
             "depth_m": _round_optional(self.depth_m, 3),
             "distance_m": _round_optional(self.distance_m, 3),
-            "depth_error_m": _round_optional(self.depth_error_m, 3),
-            "bearing_error_deg": _round_optional(
-                self.bearing_error_deg,
+            "ground_gap_m": _round_optional(self.ground_gap_m, 3),
+            "camera_bottom_gap_m": _round_optional(
+                self.camera_bottom_gap_m,
                 3,
             ),
-            "offset_x_norm": _round_optional(self.offset_x_norm, 6),
+            "ground_gap_error_m": _round_optional(
+                self.ground_gap_error_m,
+                3,
+            ),
             "hurdle_angle_deg": _round_optional(
                 self.hurdle_angle_deg,
                 3,
             ),
-            "is_centered": self.is_centered,
-            "depth_in_go_range": self.depth_in_go_range,
+            "is_parallel": self.is_parallel,
+            "ground_gap_in_go_range": self.ground_gap_in_go_range,
             "go_now": self.go_now,
         }
 
@@ -99,12 +103,12 @@ class HurdleNavigationPlanner:
             confidence=0.0,
             depth_m=None,
             distance_m=None,
-            depth_error_m=None,
-            bearing_error_deg=None,
-            offset_x_norm=None,
+            ground_gap_m=None,
+            camera_bottom_gap_m=None,
+            ground_gap_error_m=None,
             hurdle_angle_deg=None,
-            is_centered=False,
-            depth_in_go_range=False,
+            is_parallel=False,
+            ground_gap_in_go_range=False,
             go_now=False,
         )
 
@@ -118,33 +122,65 @@ class HurdleNavigationPlanner:
         depth = _number(hurdle_info, "depth_m")
         if not bool(hurdle_info.get("depth_valid", False)) or depth is None:
             return self.wait("missing_valid_hurdle_depth")
-        offset = _number(hurdle_info, "offset_x_norm")
-        if offset is None:
-            return self.wait("invalid_hurdle_alignment")
-
         distance = _number(hurdle_info, "distance_m")
-        bearing = _number(hurdle_info, "bearing_deg")
-        hurdle_angle = _number(hurdle_info, "hurdle_angle_deg")
-        centered = abs(offset) <= self.config.go_center_tolerance_norm
-        depth_error = depth - self.config.go_target_depth_m
-        depth_in_range = (
-            abs(depth_error)
-            <= self.config.go_depth_tolerance_m + 1e-9
+        ground_gap = _number(hurdle_info, "ground_gap_m")
+        camera_bottom_gap = _number(
+            hurdle_info,
+            "camera_bottom_gap_m",
         )
-        go_now = centered and depth_in_range
+        if camera_bottom_gap is None:
+            return self.wait("missing_hurdle_bottom_gap")
+        hurdle_angle = _number(hurdle_info, "hurdle_angle_deg")
+        if hurdle_angle is None:
+            return self.wait("missing_hurdle_parallel_angle")
+        parallel = (
+            abs(hurdle_angle) <= self.config.go_angle_tolerance_deg
+        )
+        ground_gap_error = (
+            ground_gap - self.config.go_target_ground_gap_m
+            if ground_gap is not None
+            else None
+        )
+        ground_gap_in_range = (
+            ground_gap_error is None
+            or abs(ground_gap_error)
+            <= self.config.go_ground_gap_tolerance_m + 1e-9
+        )
+        bottom_gap_in_range = (
+            camera_bottom_gap
+            <= self.config.go_max_camera_bottom_gap_m + 1e-9
+        )
+        ready_geometry = (
+            parallel and ground_gap_in_range and bottom_gap_in_range
+        )
+        analyzer_go_now = hurdle_info.get("go_now")
+        go_now = bool(
+            ready_geometry
+            and (
+                ready_geometry
+                if analyzer_go_now is None
+                else analyzer_go_now
+            )
+        )
 
         if go_now:
             action = "GO"
-            reason = "hurdle_centered_at_jump_depth"
-        elif not centered:
-            action = "ALIGN_RIGHT" if offset > 0.0 else "ALIGN_LEFT"
-            reason = "align_hurdle_horizontally"
-        elif depth_error > self.config.go_depth_tolerance_m:
+            reason = "hurdle_parallel_at_close_ground_gap"
+        elif not parallel:
+            action = "ALIGN_LEFT" if hurdle_angle > 0.0 else "ALIGN_RIGHT"
+            reason = "align_robot_parallel_to_hurdle"
+        elif ready_geometry:
+            action = "WAIT_GO_CONFIRMATION"
+            reason = "waiting_for_stable_hurdle_condition"
+        elif not bottom_gap_in_range or (
+            ground_gap_error is not None
+            and ground_gap_error > self.config.go_ground_gap_tolerance_m
+        ):
             action = "APPROACH_HURDLE"
             reason = "hurdle_too_far"
         else:
-            action = "RETREAT_HURDLE"
-            reason = "hurdle_too_close"
+            action = "WAIT_GO_CONFIRMATION"
+            reason = "waiting_for_stable_hurdle_condition"
 
         return HurdleActionCommand(
             valid=True,
@@ -154,11 +190,11 @@ class HurdleNavigationPlanner:
             confidence=confidence,
             depth_m=depth,
             distance_m=distance,
-            depth_error_m=depth_error,
-            bearing_error_deg=bearing,
-            offset_x_norm=offset,
+            ground_gap_m=ground_gap,
+            camera_bottom_gap_m=camera_bottom_gap,
+            ground_gap_error_m=ground_gap_error,
             hurdle_angle_deg=hurdle_angle,
-            is_centered=centered,
-            depth_in_go_range=depth_in_range,
+            is_parallel=parallel,
+            ground_gap_in_go_range=ground_gap_in_range,
             go_now=go_now,
         )

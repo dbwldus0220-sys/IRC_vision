@@ -116,15 +116,18 @@ ball bbox 중심 주변 depth patch의 median을 사용합니다. 카메라 intr
 SEARCH → NO_DEPTH/FAR/TRACK/APPROACH → PICKUP_READY → PICKUP_NOW
 ```
 
-현재 기본값:
+현재 기본값과 우선순위:
 
-- 탐지 거리: 2.0m 이하
-- 접근 준비: 1.4m 이하
-- 집기 준비: 0.9m 이하 + 중앙 정렬
-- 집기 후보: depth 0.80m, 상한 오차 +0.05m
-- 중심 허용: 정규화 오차 ±0.08
+- Depth Z 3.0m 안에서 처음 인식하면 마지막 bearing/화면 좌우 위치를 기억
+- Depth Z 0.90~3.0m에서는 공이 보여도 line 주행을 유지
+- Depth Z 0.90m 안에서 ball planner로 전환
+- 좌우 오차가 크면 제자리 `TURN_LEFT/RIGHT`
+- 정렬되면 `APPROACH`, 1.0m 안에서 감속, 0.95m 안에서 `FINE_FORWARD_STEP`
+- 집기 목표: depth 0.80m ±0.05m
+- 화면 목표: 가로 중앙 ±0.08, 화면 높이 0.82 ±0.12
+- 조건 충족 시 `PICKUP_NOW`
 
-Planner 명령은 `TURN_LEFT/RIGHT`, `APPROACH`, `SLOW_APPROACH`, `PICKUP_NOW`, `STOP`입니다. 아직 실제 공 줍기 SDK를 호출하지 않습니다.
+현재 테스트 단계에서는 `enable_ball_lost_recovery=false`가 기본값입니다. 공이 화면에서 사라지면 `BALL_LOST_STOP`이나 `RECOVER_TURN_LEFT/RIGHT`를 실행하지 않고 즉시 line 판단으로 돌아갑니다. 기존 분실 복구 구현은 삭제하지 않았으며 추후 전략이 확정되면 파라미터로 다시 활성화할 수 있습니다. 아직 실제 공 줍기 SDK를 호출하지 않습니다.
 
 ## 8. Goal 로직
 
@@ -132,23 +135,29 @@ Planner 명령은 `TURN_LEFT/RIGHT`, `APPROACH`, `SLOW_APPROACH`, `PICKUP_NOW`, 
 
 현재 임시 득점 조건:
 
+- Depth Z 3.0m 안에서 backboard 위치 기억
+- Depth Z 0.50~3.0m에서는 line 주행 유지
+- Depth Z 0.50m 안에서 goal planner로 전환
 - 목표 depth: 0.25m
 - 거리 허용오차: ±0.05m
 - 중심 허용오차: ±0.10
 
-Planner 명령은 `ALIGN_LEFT/RIGHT`, `APPROACH_GOAL`, `RETREAT_GOAL`, `SCORE_GOAL`, `WAIT`입니다. 조건 충족 시 화면에 `SCORE GOAL`이 표시됩니다.
+Planner 명령은 `ALIGN_LEFT/RIGHT`, `APPROACH_GOAL`, `RETREAT_GOAL`, `SHOT`, `WAIT`입니다. 조건 충족 시 화면에 `SHOT`이 표시됩니다.
+
+추적한 골대를 잃으면 `GOAL_LOST_STOP`으로 정지한 뒤 마지막 backboard 방향으로 `RECOVER_GOAL_TURN_LEFT/RIGHT` 제자리 회전을 수행합니다. 재검출 후에도 중앙 `bearing ±5deg` 안에 올 때까지 회전하며, 8초 동안 찾지 못하면 기억을 해제하고 line으로 돌아갑니다.
 
 ## 9. Hurdle 로직
 
-허들 bbox 가로 방향 5개 depth를 측정해 대표 depth, 좌우 depth, 추정 폭과 상대 기울기를 계산합니다.
+허들 bbox 가로 방향 5개 depth를 측정해 대표 depth, 좌우 depth, 추정 폭과 카메라-허들 평행 오차를 계산합니다. depth와 픽셀 좌표로 카메라-허들 3D 직선거리를 구한 뒤, 카메라 높이 0.70m와 허들 측정점 임시 높이 0.10m를 이용해 피타고라스 정리로 카메라 바로 아래 바닥점부터 허들까지의 간격을 계산합니다. 불가능한 기하 상태를 0m로 처리하지 않으며, 화면 하단과 허들 bbox 하단의 픽셀 간격도 depth로 길이 환산해 조기 GO를 차단합니다. 허들은 로봇이 화면 중앙으로 통과할 필요가 없으므로 bbox 중심과 카메라 중심 사이의 수평 오차는 정렬 조건으로 사용하지 않습니다.
 
 현재 임시 GO 조건:
 
-- 목표 depth: 0.80m
-- 허용오차: ±0.10m
-- 중심 허용오차: ±0.12
+- 목표 바닥 간격: 0.10m
+- 바닥 간격 허용오차: ±0.10m
+- 화면 하단-허들 depth 환산 간격: 0.05m 이하
+- 평행 각도 허용오차: ±8°
 
-Planner 명령은 `ALIGN_LEFT/RIGHT`, `APPROACH_HURDLE`, `RETREAT_HURDLE`, `GO`, `WAIT`입니다.
+Planner는 좌우 끝 depth 차이로 계산한 평행 오차가 ±8°를 벗어나면 `ALIGN_LEFT/RIGHT`, 평행한 상태에서 바닥 간격이 크면 `APPROACH_HURDLE`, 평행하면서 바닥 간격이 0~0.20m에 들어오면 `GO`를 냅니다. 허들의 화면 좌우 위치는 이 판단에 영향을 주지 않습니다.
 
 최종 모션이 허들에 가까이 붙어서 천천히 넘는 방식으로 정해지면 `LOOK_DOWN → CREEP → bottom_gap_px → GO` 상태를 추가할 예정입니다. `bottom_gap_px`는 카메라 자세를 고정했을 때 화면 하단과 hurdle bbox 하단 사이의 픽셀 간격입니다.
 
@@ -159,9 +168,9 @@ Planner 명령은 `ALIGN_LEFT/RIGHT`, `APPROACH_HURDLE`, `RETREAT_HURDLE`, `GO`,
 - `*_SEARCH`: 목표가 없으면 line을 따라가며 탐색
 - `*_APPROACH`: 해당 객체에 집중
 - `*_LOCK`: SDK 모션 완료를 기다리며 새 명령 차단
-- `AUTO`: ball → goal → hurdle → line 우선순위의 시험 모드
+- `AUTO`: 공은 0.90m, 골대는 0.50m 안에서만 line보다 우선하며 각각 3m 안에서는 위치만 기억하는 시험 모드
 
-`PICKUP_NOW`, `SCORE_GOAL`, `GO`가 여러 프레임 유지돼도 `sdk_motion_requested=true`는 조건 진입 시 한 번만 발행합니다. `command_id`와 `event_id`로 연속 제어 명령과 단발 모션 요청을 구분합니다.
+`PICKUP_NOW`, `SHOT`, `GO`가 여러 프레임 유지돼도 `sdk_motion_requested=true`는 조건 진입 시 한 번만 발행합니다. `command_id`와 `event_id`로 연속 제어 명령과 단발 모션 요청을 구분합니다.
 
 ## 11. 시연 실행
 

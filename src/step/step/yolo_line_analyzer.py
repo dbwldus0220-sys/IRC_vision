@@ -56,6 +56,8 @@ from rclpy.node import Node
 from sensor_msgs.msg import Image
 from std_msgs.msg import String
 
+from .temporal_confirmation import TemporalConfirmationFilter
+
 
 # ============================================================
 # Data classes
@@ -405,6 +407,21 @@ class YoloLineAnalyzer(Node):
             5,
         )
 
+        self.declare_parameter(
+            "confirmation_window_size",
+            3,
+        )
+
+        self.declare_parameter(
+            "confirmation_required_hits",
+            2,
+        )
+
+        self.declare_parameter(
+            "confirmation_max_missed_frames",
+            2,
+        )
+
         # ====================================================
         # Read parameters
         # ====================================================
@@ -625,6 +642,25 @@ class YoloLineAnalyzer(Node):
             ),
         )
 
+        self.confirmation_filter = TemporalConfirmationFilter(
+            window_size=int(
+                self.get_parameter(
+                    "confirmation_window_size"
+                ).value
+            ),
+            required_hits=int(
+                self.get_parameter(
+                    "confirmation_required_hits"
+                ).value
+            ),
+            max_missed_frames=int(
+                self.get_parameter(
+                    "confirmation_max_missed_frames"
+                ).value
+            ),
+            spatial_matching=False,
+        )
+
         # ====================================================
         # Camera resolution
         # ====================================================
@@ -799,6 +835,36 @@ class YoloLineAnalyzer(Node):
             result = self._analyze_line(
                 points
             )
+
+            raw_detected = bool(
+                result.get(
+                    "detected",
+                    False,
+                )
+            )
+
+            confirmation = (
+                self.confirmation_filter.update(
+                    raw_detected,
+                )
+            )
+
+            result.update(
+                confirmation.as_dict()
+            )
+
+            result["detected"] = bool(
+                raw_detected
+                and confirmation.confirmed
+            )
+
+            if (
+                raw_detected
+                and not confirmation.confirmed
+            ):
+                result["confirmation_note"] = (
+                    "line_confirmation_pending"
+                )
 
             result.update(
                 {

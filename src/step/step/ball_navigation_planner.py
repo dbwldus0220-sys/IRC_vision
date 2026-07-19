@@ -22,8 +22,11 @@ class BallNavigationConfig:
     turn_enter_deg: float = 5.0
     turn_exit_deg: float = 2.5
     fallback_half_fov_deg: float = 35.0
+    control_start_depth_m: float = 0.90
     slowdown_depth_m: float = 1.0
+    fine_step_depth_m: float = 0.95
     pickup_depth_m: float = 0.80
+    pickup_depth_tolerance_m: float = 0.05
     command_duration_sec: float = 0.40
 
 
@@ -177,6 +180,12 @@ class BallNavigationPlanner:
         pickup_ready = bool(ball_info.get("pickup_ready", False))
         pickup_now = bool(ball_info.get("pickup_now", False))
 
+        if not depth_valid or depth is None:
+            return self.stop("missing_valid_ball_depth")
+
+        if depth > self.config.control_start_depth_m:
+            return self.stop("ball_outside_control_range")
+
         turn_motion = self._classify_turn(steering_error)
         if turn_motion is not None:
             return self._moving_command(
@@ -195,9 +204,6 @@ class BallNavigationPlanner:
                 pickup_now=pickup_now,
             )
 
-        if not depth_valid or depth is None:
-            return self.stop("missing_valid_ball_depth")
-
         if pickup_now:
             return self._pickup_command(
                 bearing,
@@ -208,17 +214,27 @@ class BallNavigationPlanner:
                 pickup_ready,
             )
 
+        if depth < (
+            self.config.pickup_depth_m
+            - self.config.pickup_depth_tolerance_m
+        ):
+            return self.stop("ball_too_close_for_safe_pickup")
+
         speed = self._approach_speed(depth, pickup_ready)
-        slow_approach = (
-            pickup_ready or depth <= self.config.slowdown_depth_m
-        )
+        fine_step = depth <= self.config.fine_step_depth_m
+        slow_approach = depth <= self.config.slowdown_depth_m
+        if fine_step:
+            motion = "FINE_FORWARD_STEP"
+            reason = "fine_step_into_pickup_window"
+        elif slow_approach:
+            motion = "SLOW_APPROACH"
+            reason = "close_ball_slow_approach"
+        else:
+            motion = "APPROACH"
+            reason = "ball_aligned_approach"
         return self._moving_command(
-            motion="SLOW_APPROACH" if slow_approach else "APPROACH",
-            reason=(
-                "close_ball_slow_approach"
-                if slow_approach
-                else "ball_aligned_approach"
-            ),
+            motion=motion,
+            reason=reason,
             linear_speed_mps=speed,
             steering_error_deg=steering_error,
             dt_sec=dt_sec,
