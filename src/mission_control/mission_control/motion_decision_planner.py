@@ -78,6 +78,7 @@ class MotionDecisionPlanner:
         self,
         config: MotionDecisionConfig | None = None,
     ) -> None:
+        """Initialize the planner with configuration and internal state."""
         self.config = config or MotionDecisionConfig()
         self.line_planner = LineNavigationPlanner()
         self.ball_planner = BallNavigationPlanner()

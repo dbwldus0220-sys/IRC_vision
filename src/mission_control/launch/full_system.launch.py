@@ -68,6 +68,14 @@ def generate_launch_description() -> LaunchDescription:
         parameters=[{"initial_mission_phase": initial_mission_phase}],
     )
 
+    motion_command_bridge = Node(
+        package="mission_control",
+        executable="motion_command_bridge_node",
+        name="motion_command_bridge_node",
+        output="screen",
+        emulate_tty=True,
+    )   
+
     return LaunchDescription(
         [
             DeclareLaunchArgument(
@@ -104,5 +112,6 @@ def generate_launch_description() -> LaunchDescription:
             detector,
             analyzers,
             motion_decision,
+            motion_command_bridge,
         ]
     )

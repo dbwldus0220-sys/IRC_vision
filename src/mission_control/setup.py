@@ -33,6 +33,8 @@ setup(
         "console_scripts": [
             "motion_decision_node="
             "mission_control.motion_decision_node:main",
+            "motion_command_bridge_node="
+            "mission_control.motion_command_bridge_node:main",
         ],
     },
 )
