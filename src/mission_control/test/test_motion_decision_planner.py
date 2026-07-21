@@ -1,7 +1,7 @@
 """Unit tests for unified mission command selection."""
 
-from step.motion_decision_planner import MotionDecisionConfig
-from step.motion_decision_planner import MotionDecisionPlanner
+from mission_control.motion_decision_planner import MotionDecisionConfig
+from mission_control.motion_decision_planner import MotionDecisionPlanner
 
 
 def line_info():

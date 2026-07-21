@@ -165,7 +165,7 @@ source install/setup.bash
 ```bash
 cd ~/my_cv
 source /opt/ros/humble/setup.bash
-colcon build --packages-select step --symlink-install
+colcon build --packages-select step mission_control --symlink-install
 source install/setup.bash
 ```
 

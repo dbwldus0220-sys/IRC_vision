@@ -163,7 +163,7 @@ Planner는 좌우 끝 depth 차이로 계산한 평행 오차가 ±8°를 벗어
 
 ## 10. 통합 의사결정
 
-`motion_decision_node`는 네 입력의 최신성을 검사하고 `/mission/phase`에 맞는 planner를 선택합니다.
+`mission_control` 패키지의 `motion_decision_node`는 네 입력의 최신성을 검사하고 `/mission/phase`에 맞는 planner를 선택합니다. 카메라·YOLO·기하 계산은 `step`, 미션 우선순위와 단일 명령 선택은 `mission_control`이 담당합니다.
 
 - `*_SEARCH`: 목표가 없으면 line을 따라가며 탐색
 - `*_APPROACH`: 해당 객체에 집중
@@ -204,7 +204,7 @@ ros2 run step unified_vision_node
 cd ~/my_cv
 source /opt/ros/humble/setup.bash
 source install/setup.bash
-ros2 run step motion_decision_node
+ros2 run mission_control motion_decision_node
 ```
 
 ```bash

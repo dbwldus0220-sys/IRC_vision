@@ -38,14 +38,17 @@ my_cv/
 │   └── JETSON_SETUP.md
 │
 ├── src/
-│   └── step/
-│       ├── setup.py
+│   ├── step/                # 카메라, YOLO, analyzer, 객체별 planner
+│   │   ├── setup.py
+│   │   ├── package.xml
+│   │   ├── models/
+│   │   │   └── best.onnx
+│   │   └── step/
+│   │       ├── yolo26_detector.py
+│   │       └── unified_vision_node.py
+│   └── mission_control/     # 미션 우선순위와 단일 모션 명령
 │       ├── package.xml
-│       ├── models/
-│       │   └── best.onnx
-│       └── step/
-│           ├── yolo26_detector.py
-│           ├── unified_vision_node.py
+│       └── mission_control/
 │           └── motion_decision_node.py
 │
 ├── build/
@@ -96,7 +99,7 @@ source install/setup.bash
 ```bash
 cd ~/my_cv
 source /opt/ros/humble/setup.bash
-colcon build --packages-select step --symlink-install
+colcon build --packages-select step mission_control --symlink-install
 source install/setup.bash
 ```
 
@@ -336,7 +339,7 @@ motion_decision_node
 ```bash
 ros2 run step yolo26_detector --ros-args -p device:=cpu
 ros2 run step unified_vision_node
-ros2 run step motion_decision_node
+ros2 run mission_control motion_decision_node
 ```
 
 RealSense 실행 명령은 OpenCV와 YOLO26에서 동일하다.

@@ -13,10 +13,21 @@ ROS 2와 Intel RealSense D435i 영상에서 YOLO26 객체를 탐지하고, 라�
 3. 여러 개의 `line` 검출 중심점을 가까운 순서로 연결해 경로, heading, lateral offset, curve, quality를 계산했습니다.
 4. RealSense aligned depth와 camera intrinsics를 결합해 공·골대·허들의 거리와 좌우 위치를 계산했습니다.
 5. 인식과 행동 판단을 분리하기 위해 각 미션을 `analyzer → planner → controller` 구조로 구성했습니다.
-6. 네 analyzer를 한 프로세스에서 실행하는 `unified_vision_node`와, 네 planner 중 하나만 선택하는 `motion_decision_node`를 추가했습니다.
+6. 네 analyzer를 한 프로세스에서 실행하는 `step/unified_vision_node`와, 네 planner 중 하나만 선택하는 `mission_control/motion_decision_node`를 추가했습니다.
 7. YOLO 화면이 실제 선택된 planner를 따라 line 전체 경로 또는 객체별 metrics를 자동 표시하도록 통합했습니다.
 
 현재까지 완성된 범위는 **비전 인식, 기하 정보 계산, 추상 행동 판단, 통합 토픽 발행, 화면 시각화**입니다. 실제 STEP SDK 모션 번호와 C++ 모션 완료/실패 신호 연결은 다음 단계입니다.
+
+## 패키지 역할 분리
+
+- `step`: 카메라·YOLO·analyzer와 line/ball/goal/hurdle별 planner의 원본
+- `mission_control`: `step`의 planner를 import하여 미션 우선순위와 최종 명령 하나를 선택
+
+의존 방향은 `mission_control → step` 한쪽입니다. 따라서 `step`은 단독으로
+계속 빌드하고 시험할 수 있으며, planner의 경로·클래스명·입출력 계약을
+바꾸지 않는 내부 로직 수정은 `mission_control`에도 그대로 반영됩니다.
+두 패키지는 별도 Git 저장소가 아니라 같은 `my_cv` 저장소에서 함께
+커밋하고 push합니다.
 
 단위 규칙은 다음과 같습니다.
 
@@ -64,7 +75,7 @@ ROS 2와 Intel RealSense D435i 영상에서 YOLO26 객체를 탐지하고, 라�
 ```bash
 cd ~/my_cv
 source /opt/ros/humble/setup.bash
-colcon build --packages-select step --symlink-install
+colcon build --packages-select step mission_control --symlink-install
 source ~/my_cv/install/setup.bash
 ```
 
@@ -78,7 +89,7 @@ YOLO ONNX 모델은 `src/step/models/best.onnx`에 포함되어 있고 빌드 �
 git clone https://github.com/geonwoo0407/IRC_vision.git my_cv
 cd ~/my_cv
 source /opt/ros/humble/setup.bash
-colcon build --packages-select step --symlink-install
+colcon build --packages-select step mission_control --symlink-install
 source ~/my_cv/install/setup.bash
 ```
 
@@ -87,6 +98,21 @@ source ~/my_cv/install/setup.bash
 ## 실행
 
 기본 실행은 RealSense, YOLO26 detector, line analyzer, visualizer, mission state, minimap을 나누어 실행합니다.
+
+전체 경기용 노드는 다음 launch 명령 하나로 실행할 수 있습니다.
+
+```bash
+cd ~/my_cv
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+ros2 launch mission_control full_system.launch.py
+```
+
+카메라를 별도로 실행 중이면 `enable_camera:=false`를 지정합니다.
+
+```bash
+ros2 launch mission_control full_system.launch.py enable_camera:=false
+```
 
 ### 경기용 통합 실행
 
@@ -101,7 +127,7 @@ unified_vision_node (한 프로세스)
     ├── goal_analyzer
     └── hurdle_analyzer
     ↓ /vision/*_info
-motion_decision_node (단일 판단 노드)
+mission_control/motion_decision_node (단일 판단 노드)
     ↓ /navigation/motion_command
 SDK/C++ motion node
 ```
@@ -121,7 +147,7 @@ ros2 run step unified_vision_node
 cd ~/my_cv
 source /opt/ros/humble/setup.bash
 source ~/my_cv/install/setup.bash
-ros2 run step motion_decision_node
+ros2 run mission_control motion_decision_node
 ```
 
 미션 단계는 `/mission/phase`로 지정합니다. `AUTO`는 시험용이며 실제 경기에서는 명시적인 단계를 보내는 것이 안전합니다.
@@ -317,7 +343,7 @@ ros2 run step line_debug_monitor
 - `hurdle_analyzer`: hurdle과 aligned depth를 점프 준비 정보로 정리
 - `hurdle_navigation_controller`: hurdle 정보를 SDK 점프 행동 후보로 변환
 - `unified_vision_node`: 기존 네 analyzer를 한 프로세스에서 실행
-- `motion_decision_node`: 네 planner 중 현재 미션에 맞는 하나를 선택해 통합 명령 발행
+- `mission_control/motion_decision_node`: 네 planner 중 현재 미션에 맞는 하나를 선택해 통합 명령 발행
 - `imu_line_pose_estimator`: RealSense gyro와 line 정보를 이용해 `/vision/robot_pose` 발행
 - `mission_state_estimator`: line/object 정보를 이용해 현재 mission state를 `/vision/mission_state`로 발행
 - `mission_map_visualizer`: ㄹ자 경기장 미니맵, 공/골대 위치, start/finish, robot pose, mission flow를 표시
@@ -359,8 +385,9 @@ ros2 run step line_debug_monitor
 - `src/step/step/hurdle_navigation_planner.py`: SDK용 허들 정렬/거리/GO 판단
 - `src/step/step/hurdle_navigation_controller.py`: `/navigation/hurdle_command` 발행
 - `src/step/step/unified_vision_node.py`: 기존 analyzer 파일을 한 프로세스로 구성
-- `src/step/step/motion_decision_planner.py`: 미션 단계별 planner 선택과 명령 정규화
-- `src/step/step/motion_decision_node.py`: `/navigation/motion_command` 단일 발행
+- `src/mission_control/mission_control/motion_decision_planner.py`: 미션 단계별 planner 선택과 명령 정규화
+- `src/mission_control/mission_control/motion_decision_node.py`: `/navigation/motion_command` 단일 발행
+- `src/mission_control/docs/MOTION_DECISION_SPEC.md`: SDK 연동을 포함한 판단 FSM 구현 범위와 후속 계약
 - `src/step/step/imu_line_pose_estimator.py`: RealSense gyro와 line 기반 실시간 위치추정
 - `src/step/step/mission_state_estimator.py`: 현재 mission state 추정
 - `src/step/step/mission_map_visualizer.py`: 경기장 미니맵과 mission flow 시각화
@@ -839,7 +866,7 @@ HurdleAnalyzer
 
 따라서 알고리즘 파일은 개별 테스트에 사용할 수 있고, 경기 실행 시에는 `ros2 run step unified_vision_node` 한 명령만 사용합니다. 현재 방식은 **한 프로세스 안의 네 ROS Node 구성**이며, 완전히 하나의 ROS Node로 바꾸려면 각 analyzer에서 ROS 구독부와 순수 계산부를 `Core` 클래스로 추가 분리해야 합니다.
 
-### `motion_decision_node`
+### `mission_control/motion_decision_node`
 
 `motion_decision_node`는 `/vision/line_info`, `/vision/ball_info`, `/vision/goal_info`, `/vision/hurdle_info`를 한 곳에서 받고 현재 `/mission/phase`에 해당하는 planner 하나만 실행합니다.
 

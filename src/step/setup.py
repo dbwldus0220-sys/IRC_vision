@@ -34,7 +34,6 @@ setup(
             'hurdle_analyzer=step.hurdle_analyzer:main',
             'hurdle_navigation_controller=step.hurdle_navigation_controller:main',
             'unified_vision_node=step.unified_vision_node:main',
-            'motion_decision_node=step.motion_decision_node:main',
             'rgbd_visual_odometry=step.rgbd_visual_odometry:main',
             'line_debug_monitor=step.line_debug_monitor:main',
             'line_path_visualizer=step.line_path_visualizer:main',
