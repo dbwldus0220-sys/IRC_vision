@@ -68,13 +68,13 @@ def generate_launch_description() -> LaunchDescription:
         parameters=[{"initial_mission_phase": initial_mission_phase}],
     )
 
-    motion_command_bridge = Node(
-        package='mission_control',
-        executable='motion_command_bridge_node',
-        name='motion_command_bridge',
+    sdk_motion_stub = Node(
+        package="mission_control",
+        executable="sdk_motion_stub_node",
+        name="sdk_motion_stub_node",
         output="screen",
         emulate_tty=True,
-    )   
+    )
 
     return LaunchDescription(
         [
@@ -112,6 +112,6 @@ def generate_launch_description() -> LaunchDescription:
             detector,
             analyzers,
             motion_decision,
-            motion_command_bridge,
+            sdk_motion_stub,
         ]
     )
