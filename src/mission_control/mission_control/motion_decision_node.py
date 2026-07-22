@@ -34,23 +34,6 @@ class MotionDecisionNode(Node):
     }
 
 
-    class MotionDecisionNode(Node):
-        """Select one command from mission observations."""
-
-        SOURCES = ("line", "ball", "goal", "hurdle")
-
-        SPECIAL_ACTIONS = {
-            "PICKUP_NOW",
-            "SHOT",
-            "GO",
-        }
-
-        SPECIAL_COMPLETION_PHASES = {
-            "PICKUP_NOW": "GOAL_APPROACH",
-            "SHOT": "AUTO",
-            "GO": "AUTO",
-        }
-
     def __init__(self) -> None:
         """Initialize mission decision state, topics, and timers."""
         super().__init__("motion_decision_node")
