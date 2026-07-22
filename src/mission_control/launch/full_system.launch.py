@@ -69,9 +69,9 @@ def generate_launch_description() -> LaunchDescription:
     )
 
     motion_command_bridge = Node(
-        package="mission_control",
-        executable="motion_command_bridge_node",
-        name="motion_command_bridge_node",
+        package='mission_control',
+        executable='motion_command_bridge_node',
+        name='motion_command_bridge',
         output="screen",
         emulate_tty=True,
     )   

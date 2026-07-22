@@ -27,8 +27,34 @@ class MotionDecisionNode(Node):
         "GO",
     }
 
+    SPECIAL_COMPLETION_PHASES = {
+        "PICKUP_NOW": "GOAL_APPROACH",
+        "SHOT": "AUTO",
+        "GO": "AUTO",
+    }
+
+
+    class MotionDecisionNode(Node):
+        """Select one command from mission observations."""
+
+        SOURCES = ("line", "ball", "goal", "hurdle")
+
+        SPECIAL_ACTIONS = {
+            "PICKUP_NOW",
+            "SHOT",
+            "GO",
+        }
+
+        SPECIAL_COMPLETION_PHASES = {
+            "PICKUP_NOW": "GOAL_APPROACH",
+            "SHOT": "AUTO",
+            "GO": "AUTO",
+        }
+
     def __init__(self) -> None:
         """Initialize mission decision state, topics, and timers."""
+        super().__init__("motion_decision_node")
+
         self.declare_parameter("line_info_topic", "/vision/line_info")
         self.declare_parameter("ball_info_topic", "/vision/ball_info")
         self.declare_parameter("goal_info_topic", "/vision/goal_info")
@@ -426,11 +452,25 @@ class MotionDecisionNode(Node):
             f"event_id={completed_event_id}"
         )
 
-        # terminal_latch is intentionally kept.
-        #
-        # The next mission phase is not defined yet. Clearing the latch here
-        # could immediately request the same PICKUP_NOW, SHOT, or GO motion
-        # again while the same visual condition remains true.
+        if status == "SUCCEEDED":
+            next_phase = self.SPECIAL_COMPLETION_PHASES.get(
+                completed_action,
+                "AUTO",
+            )
+        else:
+            next_phase = "AUTO"
+
+        previous_phase = self.mission_phase
+        self.mission_phase = next_phase
+        self.terminal_latch = None
+
+        self.get_logger().info(
+            "Mission phase advanced after special motion: "
+            f"status={status}, "
+            f"action={completed_action}, "
+            f"previous_phase={previous_phase}, "
+            f"next_phase={self.mission_phase}"
+        )
 
     def _fresh_observations(
         self,
