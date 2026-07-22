@@ -44,11 +44,13 @@ class MotionDecision:
 class MotionDecisionConfig:
     """Tunable mission-selection and lost-ball recovery limits."""
 
-    enable_ball_lost_recovery: bool = False
+    enable_ball_lost_recovery: bool = True
     ball_tracking_range_m: float = 3.0
     ball_control_range_m: float = 0.9
-    ball_lost_stop_sec: float = 0.35
-    ball_recovery_timeout_sec: float = 8.0
+    ball_lost_stop_sec: float = 0.5
+    ball_recovery_timeout_sec: float = 2.5
+    ball_recovery_max_distance_m: float = 1.0
+    ball_reacquire_confirm_frames: int = 3
     ball_recovery_turn_rad_s: float = 0.22
     ball_recovery_command_sec: float = 0.40
     ball_recovery_direction_deadband_deg: float = 1.0
@@ -86,7 +88,8 @@ class MotionDecisionPlanner:
         self.hurdle_planner = HurdleNavigationPlanner()
         self.previous_source = "none"
         self.ball_tracking_active = False
-        self.ball_recovery_centering = False
+        self.ball_scan_active = False
+        self.ball_reacquire_count = 0
         self.ball_lost_elapsed_sec = 0.0
         self.last_ball_bearing_deg: float | None = None
         self.last_ball_offset_x_norm: float | None = None
@@ -191,8 +194,13 @@ class MotionDecisionPlanner:
                 if self._ball_is_inside_control_range(target):
                     return "ball"
                 if (
+                    self.ball_reacquire_count
+                    >= self.config.ball_reacquire_confirm_frames
+                ):
+                    return "ball"
+                if (
                     self.config.enable_ball_lost_recovery
-                    and self.ball_recovery_centering
+                    and self.ball_scan_active
                 ):
                     return "ball"
                 if (
@@ -231,8 +239,13 @@ class MotionDecisionPlanner:
         if self._ball_is_inside_control_range(ball):
             return "ball"
         if (
+            self.ball_reacquire_count
+            >= self.config.ball_reacquire_confirm_frames
+        ):
+            return "ball"
+        if (
             self.config.enable_ball_lost_recovery
-            and self.ball_recovery_centering
+            and self.ball_scan_active
         ):
             return "ball"
         if (
@@ -280,23 +293,14 @@ class MotionDecisionPlanner:
                 else self.line_planner.plan(info, dt_sec)
             )
         elif source == "ball":
-            if (
-                self.config.enable_ball_lost_recovery
-                and not self._is_detected_ball(info)
-                and self.ball_tracking_active
-            ):
+            if self.config.enable_ball_lost_recovery and self.ball_scan_active:
                 return self._lost_ball_recovery_command()
-            if (
-                self.config.enable_ball_lost_recovery
-                and self.ball_recovery_centering
-                and self._is_detected_ball(info)
-            ):
-                return self._reacquired_ball_centering_command(info)
             command = (
                 self.ball_planner.stop("waiting_for_ball_info")
                 if info is None
                 else self.ball_planner.plan(info, dt_sec)
             )
+            self.ball_reacquire_count = 0
         elif source == "goal":
             if not self._is_detected_goal(info) and self.goal_tracking_active:
                 return self._lost_goal_recovery_command()
@@ -362,6 +366,35 @@ class MotionDecisionPlanner:
         confidence = self._number(info, "confidence")
         reliable = detected and confidence is not None and confidence >= 0.35
 
+        if self.ball_scan_active:
+            ball_range = self._ball_range_m(info)
+            reacquire_candidate = (
+                reliable
+                and bool(info.get("depth_valid", False))
+                and ball_range is not None
+                and ball_range <= self.config.ball_recovery_max_distance_m
+            )
+            if reacquire_candidate:
+                self.ball_reacquire_count += 1
+            else:
+                self.ball_reacquire_count = 0
+
+            if (
+                self.ball_reacquire_count
+                >= self.config.ball_reacquire_confirm_frames
+            ):
+                self.ball_scan_active = False
+                self.ball_lost_elapsed_sec = 0.0
+                return
+
+            self.ball_lost_elapsed_sec += max(0.0, dt_sec)
+            if (
+                self.ball_lost_elapsed_sec
+                > self.config.ball_recovery_timeout_sec
+            ):
+                self._clear_ball_tracking()
+            return
+
         if reliable:
             bearing = self._number(info, "bearing_deg")
             offset = self._number(info, "offset_x_norm")
@@ -389,15 +422,13 @@ class MotionDecisionPlanner:
                 self.ball_tracking_active = True
             if self.ball_tracking_active:
                 self.ball_lost_elapsed_sec = 0.0
-                if self.ball_recovery_centering and self._ball_is_centered(
-                    info
-                ):
-                    self.ball_recovery_centering = False
+                self.ball_reacquire_count = 0
             return
 
         if not self.ball_tracking_active:
             return
-        self.ball_recovery_centering = True
+        self.ball_scan_active = True
+        self.ball_reacquire_count = 0
         self.ball_lost_elapsed_sec += max(0.0, dt_sec)
         if (
             self.ball_lost_elapsed_sec
@@ -406,35 +437,43 @@ class MotionDecisionPlanner:
             self._clear_ball_tracking()
 
     def _lost_ball_recovery_command(self) -> dict[str, Any]:
-        """Stop first, then rotate toward the last observed ball side."""
+        """Keep the body stopped while issuing one timed head scan."""
         direction = self.last_ball_turn_direction
-        stopping = (
-            self.ball_lost_elapsed_sec <= self.config.ball_lost_stop_sec
-        )
-        if stopping:
+        elapsed = self.ball_lost_elapsed_sec
+        if elapsed <= self.config.ball_lost_stop_sec:
             motion = "BALL_LOST_STOP"
-            angular_speed = 0.0
-            reason = "ball_lost_stop_before_search"
+            reason = "ball_lost_stop_before_head_scan"
+            duration = self.config.ball_lost_stop_sec
+        elif elapsed <= 1.1:
+            motion = "HEAD_SCAN_LEFT"
+            reason = "scan_head_left_for_ball"
+            duration = 0.6
+        elif elapsed <= 2.0:
+            motion = "HEAD_SCAN_RIGHT"
+            reason = "scan_head_right_for_ball"
+            duration = 0.9
         else:
-            motion = f"RECOVER_TURN_{direction}"
-            sign = 1.0 if direction == "RIGHT" else -1.0
-            angular_speed = sign * self.config.ball_recovery_turn_rad_s
-            reason = "turn_toward_last_seen_ball_side"
+            motion = "HEAD_CENTER"
+            reason = "return_head_to_center"
+            duration = max(
+                0.0,
+                self.config.ball_recovery_timeout_sec - 2.0,
+            )
 
-        duration = self.config.ball_recovery_command_sec
         return {
             "valid": True,
             "motion": motion,
             "reason": reason,
+            "sdk_motion_requested": False,
             "linear_speed_mps": 0.0,
             "lateral_speed_mps": 0.0,
-            "angular_speed_rad_s": round(angular_speed, 4),
+            "angular_speed_rad_s": 0.0,
             "angular_accel_rad_s2": 0.0,
             "command_duration_sec": round(duration, 3),
             "travel_distance_m": 0.0,
             "lateral_travel_distance_m": 0.0,
             "target_heading_change_deg": round(
-                math.degrees(angular_speed * duration),
+                0.0,
                 3,
             ),
             "bearing_error_deg": self.last_ball_bearing_deg,
@@ -451,66 +490,10 @@ class MotionDecisionPlanner:
             "last_seen_direction": direction,
         }
 
-    def _ball_is_centered(self, info: dict[str, Any] | None) -> bool:
-        bearing = self._number(info, "bearing_deg")
-        if bearing is not None:
-            return abs(bearing) <= self.config.ball_reacquire_center_deg
-        offset = self._number(info, "offset_x_norm")
-        return bool(
-            offset is not None
-            and abs(offset) <= self.config.ball_reacquire_center_norm
-        )
-
-    def _reacquired_ball_centering_command(
-        self,
-        info: dict[str, Any],
-    ) -> dict[str, Any]:
-        """Keep rotating after reacquisition until the ball is centered."""
-        bearing = self._number(info, "bearing_deg")
-        offset = self._number(info, "offset_x_norm")
-        direction_value = bearing
-        if direction_value is None and offset is not None:
-            direction_value = offset * 35.0
-        if direction_value is not None and direction_value < 0.0:
-            direction = "LEFT"
-            sign = -1.0
-        else:
-            direction = "RIGHT"
-            sign = 1.0
-        angular_speed = sign * self.config.ball_recovery_turn_rad_s
-        duration = self.config.ball_recovery_command_sec
-        return {
-            "valid": True,
-            "motion": f"RECOVER_TURN_{direction}",
-            "reason": "reacquired_ball_centering_in_place",
-            "linear_speed_mps": 0.0,
-            "lateral_speed_mps": 0.0,
-            "angular_speed_rad_s": round(angular_speed, 4),
-            "angular_accel_rad_s2": 0.0,
-            "command_duration_sec": round(duration, 3),
-            "travel_distance_m": 0.0,
-            "lateral_travel_distance_m": 0.0,
-            "target_heading_change_deg": round(
-                math.degrees(angular_speed * duration),
-                3,
-            ),
-            "bearing_error_deg": bearing,
-            "offset_x_norm": offset,
-            "depth_m": self._number(info, "depth_m"),
-            "distance_m": self._number(info, "distance_m"),
-            "distance_error_m": None,
-            "confidence": self._number(info, "confidence") or 0.0,
-            "depth_valid": bool(info.get("depth_valid", False)),
-            "pickup_ready": False,
-            "pickup_now": False,
-            "tracking_active": True,
-            "lost_elapsed_sec": 0.0,
-            "last_seen_direction": direction,
-        }
-
     def _clear_ball_tracking(self) -> None:
         self.ball_tracking_active = False
-        self.ball_recovery_centering = False
+        self.ball_scan_active = False
+        self.ball_reacquire_count = 0
         self.ball_lost_elapsed_sec = 0.0
         self.last_ball_bearing_deg = None
         self.last_ball_offset_x_norm = None
@@ -519,14 +502,32 @@ class MotionDecisionPlanner:
         """Expose remembered-ball state for debugging and behavior logs."""
         return {
             "active": self.ball_tracking_active,
-            "recovery_centering": self.ball_recovery_centering,
+            "scan_active": self.ball_scan_active,
+            "reacquire_count": self.ball_reacquire_count,
             "tracking_range_m": self.config.ball_tracking_range_m,
             "control_range_m": self.config.ball_control_range_m,
+            "recovery_timeout_sec": self.config.ball_recovery_timeout_sec,
+            "recovery_max_distance_m": (
+                self.config.ball_recovery_max_distance_m
+            ),
+            "recovery_stage": self._ball_recovery_stage(),
             "lost_elapsed_sec": round(self.ball_lost_elapsed_sec, 3),
             "last_bearing_deg": self.last_ball_bearing_deg,
             "last_offset_x_norm": self.last_ball_offset_x_norm,
             "last_direction": self.last_ball_turn_direction,
         }
+
+    def _ball_recovery_stage(self) -> str:
+        """Return the current time-based head scan stage."""
+        if not self.ball_scan_active:
+            return "INACTIVE"
+        if self.ball_lost_elapsed_sec <= self.config.ball_lost_stop_sec:
+            return "STOP"
+        if self.ball_lost_elapsed_sec <= 1.1:
+            return "HEAD_SCAN_LEFT"
+        if self.ball_lost_elapsed_sec <= 2.0:
+            return "HEAD_SCAN_RIGHT"
+        return "HEAD_CENTER"
 
     @staticmethod
     def _is_detected_goal(info: dict[str, Any] | None) -> bool:

@@ -75,11 +75,13 @@ class MotionDecisionNode(Node):
         self.declare_parameter("hurdle_timeout_sec", 0.50)
         self.declare_parameter("finish_timeout_sec", 0.50)
 
-        self.declare_parameter("enable_ball_lost_recovery", False)
+        self.declare_parameter("enable_ball_lost_recovery", True)
         self.declare_parameter("ball_tracking_range_m", 3.0)
         self.declare_parameter("ball_control_range_m", 0.9)
-        self.declare_parameter("ball_lost_stop_sec", 0.35)
-        self.declare_parameter("ball_recovery_timeout_sec", 8.0)
+        self.declare_parameter("ball_lost_stop_sec", 0.5)
+        self.declare_parameter("ball_recovery_timeout_sec", 2.5)
+        self.declare_parameter("ball_recovery_max_distance_m", 1.0)
+        self.declare_parameter("ball_reacquire_confirm_frames", 3)
         self.declare_parameter("ball_recovery_turn_rad_s", 0.22)
         self.declare_parameter("ball_recovery_command_sec", 0.40)
         self.declare_parameter("ball_reacquire_center_deg", 5.0)
@@ -112,6 +114,17 @@ class MotionDecisionNode(Node):
                 ),
                 ball_recovery_timeout_sec=self._float_parameter(
                     "ball_recovery_timeout_sec"
+                ),
+                ball_recovery_max_distance_m=self._float_parameter(
+                    "ball_recovery_max_distance_m"
+                ),
+                ball_reacquire_confirm_frames=max(
+                    1,
+                    int(
+                        self.get_parameter(
+                            "ball_reacquire_confirm_frames"
+                        ).value
+                    ),
                 ),
                 ball_recovery_turn_rad_s=self._float_parameter(
                     "ball_recovery_turn_rad_s"
