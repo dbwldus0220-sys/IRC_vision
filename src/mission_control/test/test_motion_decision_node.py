@@ -31,9 +31,19 @@ class FakeDecisionNode:
     )
     SPECIAL_ACTION_SOURCES = MotionDecisionNode.SPECIAL_ACTION_SOURCES
 
-    def __init__(self, mission_phase='AUTO'):
+    def __init__(
+        self,
+        mission_phase='AUTO',
+        required_pickups=2,
+        required_shots=2,
+    ):
         """Initialize the minimal state used by node callback tests."""
         self.mission_phase = mission_phase
+        self.required_pickups = required_pickups
+        self.required_shots = required_shots
+        self.pickups_completed = 0
+        self.shots_completed = 0
+        self.finish_enabled = False
         self.terminal_latch = ('test', 'terminal')
         self.terminal_action_armed = {
             source: True
@@ -51,6 +61,13 @@ class FakeDecisionNode:
     def get_logger(self):
         """Return the fake logger."""
         return self.logger
+
+    def _update_successful_action_progress(self, completed_action):
+        """Delegate progress updates to the real node implementation."""
+        MotionDecisionNode._update_successful_action_progress(
+            self,
+            completed_action,
+        )
 
 
 def status_message(
@@ -80,6 +97,31 @@ def send_status(node, **kwargs):
     MotionDecisionNode._motion_status_callback(
         node,
         status_message(**kwargs),
+    )
+
+
+def complete_motion(
+    node,
+    action,
+    event_id,
+    status='SUCCEEDED',
+):
+    """Send matching RUNNING and terminal statuses for one event."""
+    send_status(
+        node,
+        status='RUNNING',
+        action=action,
+        command_id=event_id,
+        event_id=event_id,
+        dynamics_command=0,
+    )
+    send_status(
+        node,
+        status=status,
+        action=action,
+        command_id=event_id,
+        event_id=event_id,
+        dynamics_command=0,
     )
 
 
@@ -205,6 +247,8 @@ def test_failed_or_timed_out_special_motion_returns_to_auto(status):
     assert node.special_motion_running is False
     assert node.mission_phase == 'AUTO'
     assert node.terminal_latch is None
+    assert node.pickups_completed == 0
+    assert node.shots_completed == 0
 
 
 @pytest.mark.parametrize(
@@ -298,3 +342,79 @@ def test_terminal_targets_rearm_independently_on_observation_timeout():
         'goal': False,
         'hurdle': True,
     }
+
+
+def test_pickup_success_increments_once_and_duplicate_is_ignored():
+    """Count one pickup and ignore its retransmitted terminal status."""
+    node = FakeDecisionNode()
+    complete_motion(node, 'PICKUP_NOW', event_id=501)
+
+    assert node.pickups_completed == 1
+    assert node.shots_completed == 0
+
+    send_status(
+        node,
+        status='SUCCEEDED',
+        action='PICKUP_NOW',
+        command_id=501,
+        event_id=501,
+        dynamics_command=0,
+    )
+
+    assert node.pickups_completed == 1
+
+
+def test_failed_shot_does_not_increment_progress():
+    """Do not count a shot whose terminal status is FAILED."""
+    node = FakeDecisionNode('GOAL_APPROACH')
+    complete_motion(node, 'SHOT', event_id=502, status='FAILED')
+
+    assert node.shots_completed == 0
+    assert node.finish_enabled is False
+    assert node.mission_phase == 'AUTO'
+
+
+def test_one_shot_after_two_pickups_keeps_finish_disabled():
+    """Stay in AUTO until the required second shot succeeds."""
+    node = FakeDecisionNode()
+    complete_motion(node, 'PICKUP_NOW', event_id=503)
+    complete_motion(node, 'PICKUP_NOW', event_id=504)
+    complete_motion(node, 'SHOT', event_id=505)
+
+    assert node.pickups_completed == 2
+    assert node.shots_completed == 1
+    assert node.finish_enabled is False
+    assert node.mission_phase == 'AUTO'
+
+
+def test_two_shots_after_two_pickups_enable_walk_to_finish():
+    """Enable finish walking when both completion requirements are met."""
+    node = FakeDecisionNode()
+    complete_motion(node, 'PICKUP_NOW', event_id=506)
+    complete_motion(node, 'PICKUP_NOW', event_id=507)
+    complete_motion(node, 'SHOT', event_id=508)
+    complete_motion(node, 'SHOT', event_id=509)
+
+    assert node.pickups_completed == 2
+    assert node.shots_completed == 2
+    assert node.finish_enabled is True
+    assert node.mission_phase == 'WALK_TO_FINISH'
+
+    complete_motion(node, 'PICKUP_NOW', event_id=511)
+    complete_motion(node, 'SHOT', event_id=512)
+
+    assert node.pickups_completed == 2
+    assert node.shots_completed == 2
+    assert node.finish_enabled is True
+    assert node.mission_phase == 'WALK_TO_FINISH'
+
+
+def test_go_success_does_not_change_pickup_or_shot_progress():
+    """Keep pickup and shot counters unchanged after a successful GO."""
+    node = FakeDecisionNode('HURDLE_APPROACH')
+    complete_motion(node, 'GO', event_id=510)
+
+    assert node.pickups_completed == 0
+    assert node.shots_completed == 0
+    assert node.finish_enabled is False
+    assert node.mission_phase == 'AUTO'

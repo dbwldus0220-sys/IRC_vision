@@ -61,6 +61,8 @@ class MotionDecisionNode(Node):
 
         self.declare_parameter("initial_mission_phase", "AUTO")
         self.declare_parameter("publish_rate_hz", 10.0)
+        self.declare_parameter("required_pickups", 2)
+        self.declare_parameter("required_shots", 2)
 
         self.declare_parameter("line_timeout_sec", 0.50)
         self.declare_parameter("ball_timeout_sec", 0.50)
@@ -147,6 +149,17 @@ class MotionDecisionNode(Node):
         self.mission_phase = str(
             self.get_parameter("initial_mission_phase").value
         ).strip().upper()
+        self.required_pickups = max(
+            0,
+            int(self.get_parameter("required_pickups").value),
+        )
+        self.required_shots = max(
+            0,
+            int(self.get_parameter("required_shots").value),
+        )
+        self.pickups_completed = 0
+        self.shots_completed = 0
+        self.finish_enabled = False
 
         self.latest_info: dict[str, dict[str, Any] | None] = {
             source: None for source in self.SOURCES
@@ -446,10 +459,13 @@ class MotionDecisionNode(Node):
         )
 
         if status == "SUCCEEDED":
+            self._update_successful_action_progress(completed_action)
             next_phase = self.SPECIAL_COMPLETION_PHASES.get(
                 completed_action,
                 "AUTO",
             )
+            if completed_action == "SHOT" and self.finish_enabled:
+                next_phase = "WALK_TO_FINISH"
         else:
             next_phase = "AUTO"
 
@@ -464,6 +480,45 @@ class MotionDecisionNode(Node):
             f"previous_phase={previous_phase}, "
             f"next_phase={self.mission_phase}"
         )
+
+    def _update_successful_action_progress(
+        self,
+        completed_action: str | None,
+    ) -> None:
+        """Record one validated successful pickup or shot completion."""
+        previous_pickups = self.pickups_completed
+        previous_shots = self.shots_completed
+
+        if completed_action == "PICKUP_NOW":
+            self.pickups_completed = min(
+                self.pickups_completed + 1,
+                self.required_pickups,
+            )
+        elif completed_action == "SHOT":
+            self.shots_completed = min(
+                self.shots_completed + 1,
+                self.required_shots,
+            )
+            if (
+                self.shots_completed >= self.required_shots
+                and self.pickups_completed >= self.required_pickups
+            ):
+                self.finish_enabled = True
+
+        counters_changed = (
+            self.pickups_completed != previous_pickups
+            or self.shots_completed != previous_shots
+        )
+        if counters_changed:
+            self.get_logger().info(
+                "Mission progress updated: "
+                f"completed_action={completed_action}, "
+                f"pickups={self.pickups_completed}/"
+                f"{self.required_pickups}, "
+                f"shots={self.shots_completed}/"
+                f"{self.required_shots}, "
+                f"finish_enabled={self.finish_enabled}"
+            )
 
     def _fresh_observations(
         self,
