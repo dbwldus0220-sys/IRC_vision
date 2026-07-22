@@ -22,6 +22,28 @@ class FakeLogger:
         pass
 
 
+class FakePlanner:
+    """Return deterministic line or lock decisions for node-level tests."""
+
+    def plan(self, phase, _observations, _dt_sec):
+        """Return WAIT for locks and STRAIGHT for normal line planning."""
+        locked = phase.endswith('_LOCK')
+        return MotionDecision(
+            phase=phase,
+            source='none' if locked else 'line',
+            action='WAIT' if locked else 'STRAIGHT',
+            valid=not locked,
+            reason=(
+                'mission_locked_waiting_for_motion_status'
+                if locked
+                else 'line_ready'
+            ),
+            sdk_motion_requested=False,
+            requires_ack=False,
+            source_command={},
+        )
+
+
 class FakeDecisionNode:
     """Provide only the state required by the motion-status callback."""
 
@@ -44,6 +66,8 @@ class FakeDecisionNode:
         self.pickups_completed = 0
         self.shots_completed = 0
         self.finish_enabled = False
+        self.mission_complete = False
+        self.finish_min_confidence = 0.70
         self.terminal_latch = ('test', 'terminal')
         self.terminal_action_armed = {
             source: True
@@ -55,6 +79,7 @@ class FakeDecisionNode:
         self.active_special_command_id = None
         self.active_special_event_id = None
         self.active_special_dynamics_command = None
+        self.planner = FakePlanner()
 
         self.logger = FakeLogger()
 
@@ -67,6 +92,13 @@ class FakeDecisionNode:
         MotionDecisionNode._update_successful_action_progress(
             self,
             completed_action,
+        )
+
+    def _finish_crossing_ready(self, finish_info):
+        """Delegate finish validation to the real node implementation."""
+        return MotionDecisionNode._finish_crossing_ready(
+            self,
+            finish_info,
         )
 
 
@@ -136,6 +168,23 @@ def terminal_decision(source, action, phase):
         sdk_motion_requested=True,
         requires_ack=True,
         source_command={},
+    )
+
+
+def select_decision(node, finish=None, **observations):
+    """Run the real node priority selection with deterministic inputs."""
+    inputs = {
+        'line': None,
+        'ball': None,
+        'goal': None,
+        'hurdle': None,
+        'finish': finish,
+    }
+    inputs.update(observations)
+    return MotionDecisionNode._select_mission_decision(
+        node,
+        inputs,
+        0.1,
     )
 
 
@@ -418,3 +467,197 @@ def test_go_success_does_not_change_pickup_or_shot_progress():
     assert node.shots_completed == 0
     assert node.finish_enabled is False
     assert node.mission_phase == 'AUTO'
+
+
+def finish_info(**overrides):
+    """Create one confirmed finish observation."""
+    info = {
+        'detected': True,
+        'confidence': 0.95,
+        'confirmed': True,
+        'distance_m': 0.25,
+    }
+    info.update(overrides)
+    return info
+
+
+def test_finish_detection_is_ignored_until_finish_is_enabled():
+    """Keep normal phase planning when mission progress is incomplete."""
+    node = FakeDecisionNode('WALK_TO_FINISH')
+    decision = select_decision(node, finish=finish_info())
+
+    assert decision.phase == 'WALK_TO_FINISH'
+    assert decision.action == 'STRAIGHT'
+    assert decision.source == 'line'
+    assert decision.requires_ack is False
+
+
+def test_confirmed_finish_requests_cross_finish():
+    """Request acknowledged crossing for an enabled confirmed finish."""
+    node = FakeDecisionNode('WALK_TO_FINISH')
+    node.finish_enabled = True
+    decision = select_decision(node, finish=finish_info())
+
+    assert decision.phase == 'WALK_TO_FINISH'
+    assert decision.source == 'finish'
+    assert decision.action == 'CROSS_FINISH'
+    assert decision.sdk_motion_requested is True
+    assert decision.requires_ack is True
+
+
+def test_continuous_finish_detection_does_not_retrigger_crossing():
+    """Suppress CROSS_FINISH while the same finish target is disarmed."""
+    node = FakeDecisionNode('WALK_TO_FINISH')
+    node.finish_enabled = True
+    decision = select_decision(node, finish=finish_info())
+    node.terminal_action_armed['finish'] = False
+
+    suppressed = MotionDecisionNode._suppress_duplicate_terminal_action(
+        node,
+        decision,
+    )
+
+    assert suppressed.action == 'WAIT'
+    assert suppressed.reason == 'duplicate_terminal_action_suppressed'
+    assert suppressed.sdk_motion_requested is False
+    assert suppressed.requires_ack is False
+
+
+@pytest.mark.parametrize(
+    'observation',
+    [
+        finish_info(confirmed=False),
+        finish_info(confidence=0.69),
+        None,
+    ],
+)
+def test_unready_or_stale_finish_keeps_line_command(observation):
+    """Continue line walking until a fresh confirmed finish is ready."""
+    node = FakeDecisionNode('WALK_TO_FINISH')
+    node.finish_enabled = True
+    decision = select_decision(node, finish=observation)
+
+    assert decision.phase == 'WALK_TO_FINISH'
+    assert decision.source == 'line'
+    assert decision.action == 'STRAIGHT'
+    assert decision.requires_ack is False
+
+
+def test_finish_observation_timeout_removes_stale_input():
+    """Exclude finish information older than its configured timeout."""
+    node = FakeDecisionNode('WALK_TO_FINISH')
+    node.finish_enabled = True
+    node.SOURCES = MotionDecisionNode.SOURCES
+    node.latest_info = {
+        source: None for source in node.SOURCES
+    }
+    node.latest_time = {
+        source: None for source in node.SOURCES
+    }
+    node.timeouts = {
+        source: 0.5 for source in node.SOURCES
+    }
+    node.latest_info['finish'] = finish_info()
+    node.latest_time['finish'] = 1.0
+
+    observations, _ages = MotionDecisionNode._fresh_observations(
+        node,
+        now=1.6,
+    )
+    decision = select_decision(
+        node,
+        finish=observations['finish'],
+    )
+
+    assert observations['finish'] is None
+    assert decision.action == 'STRAIGHT'
+
+
+def test_cross_finish_running_blocks_other_commands():
+    """Use the existing special lock while finish crossing is running."""
+    node = FakeDecisionNode('WALK_TO_FINISH')
+    node.finish_enabled = True
+    send_status(
+        node,
+        status='RUNNING',
+        action='CROSS_FINISH',
+        command_id=601,
+        event_id=601,
+        dynamics_command=0,
+    )
+
+    decision = select_decision(
+        node,
+        finish=finish_info(),
+        ball={'detected': True},
+        goal={'detected': True},
+        hurdle={'detected': True},
+    )
+
+    assert decision.action == 'WAIT'
+    assert decision.reason == 'mission_locked_waiting_for_motion_status'
+
+
+def test_cross_finish_success_enters_finished_and_ignores_duplicate():
+    """Complete once and ignore a retransmitted finish success."""
+    node = FakeDecisionNode('WALK_TO_FINISH')
+    node.finish_enabled = True
+    complete_motion(node, 'CROSS_FINISH', event_id=602)
+
+    assert node.mission_complete is True
+    assert node.mission_phase == 'FINISHED'
+
+    send_status(
+        node,
+        status='SUCCEEDED',
+        action='CROSS_FINISH',
+        command_id=602,
+        event_id=602,
+        dynamics_command=0,
+    )
+
+    assert node.mission_complete is True
+    assert node.mission_phase == 'FINISHED'
+
+
+def test_finished_always_stops_even_with_special_targets():
+    """Prioritize mission-complete STOP over every perception target."""
+    node = FakeDecisionNode('FINISHED')
+    node.mission_complete = True
+    decision = select_decision(
+        node,
+        finish=finish_info(),
+        ball={'detected': True},
+        goal={'detected': True},
+        hurdle={'detected': True},
+    )
+
+    assert decision.phase == 'FINISHED'
+    assert decision.source == 'none'
+    assert decision.action == 'STOP'
+    assert decision.valid is True
+    assert decision.reason == 'mission_complete_stop'
+    assert decision.sdk_motion_requested is False
+    assert decision.requires_ack is False
+
+
+@pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT'])
+def test_cross_finish_failure_returns_to_walk_and_allows_retry(status):
+    """Return to finish walking and re-arm crossing after failure."""
+    node = FakeDecisionNode('WALK_TO_FINISH')
+    node.finish_enabled = True
+    node.terminal_action_armed['finish'] = False
+    complete_motion(
+        node,
+        'CROSS_FINISH',
+        event_id=603,
+        status=status,
+    )
+
+    assert node.mission_complete is False
+    assert node.mission_phase == 'WALK_TO_FINISH'
+    assert node.terminal_action_armed['finish'] is True
+
+    retry = select_decision(node, finish=finish_info())
+    assert retry.action == 'CROSS_FINISH'
+    assert retry.requires_ack is True

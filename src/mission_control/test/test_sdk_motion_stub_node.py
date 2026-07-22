@@ -7,9 +7,9 @@ import pytest
 
 rclpy = pytest.importorskip("rclpy")
 
-from std_msgs.msg import String
+from std_msgs.msg import String  # noqa: E402
 
-from mission_control.sdk_motion_stub_node import SdkMotionStubNode
+from mission_control.sdk_motion_stub_node import SdkMotionStubNode  # noqa: E402
 
 
 @pytest.fixture
@@ -140,6 +140,39 @@ def test_duplicate_special_motion_is_not_started_again(node):
 
     node.complete_active_motion()
     assert node.active_payload is None
+
+    node.command_callback(message)
+
+    assert node.active_payload is None
+
+
+def test_cross_finish_publishes_running_then_succeeded(node):
+    """Treat CROSS_FINISH like the other acknowledged special motions."""
+    statuses = []
+
+    def capture_status(*, status, payload, reason):
+        statuses.append((status, payload['action'], reason))
+
+    node.publish_status = capture_status
+    message = make_message(
+        {
+            "valid": True,
+            "action": "CROSS_FINISH",
+            "command_id": 7,
+            "event_id": 7,
+            "sdk_motion_requested": True,
+        }
+    )
+
+    node.command_callback(message)
+    assert node.active_payload is not None
+
+    node.complete_active_motion()
+
+    assert statuses == [
+        ("RUNNING", "CROSS_FINISH", "sdk_stub_started"),
+        ("SUCCEEDED", "CROSS_FINISH", "sdk_stub_completed"),
+    ]
 
     node.command_callback(message)
 

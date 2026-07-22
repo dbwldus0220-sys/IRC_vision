@@ -20,24 +20,27 @@ from .motion_decision_planner import MotionDecisionPlanner
 class MotionDecisionNode(Node):
     """Replace four navigation controllers with one command publisher."""
 
-    SOURCES = ("line", "ball", "goal", "hurdle")
+    SOURCES = ("line", "ball", "goal", "hurdle", "finish")
 
     SPECIAL_ACTIONS = {
         "PICKUP_NOW",
         "SHOT",
         "GO",
+        "CROSS_FINISH",
     }
 
     SPECIAL_COMPLETION_PHASES = {
         "PICKUP_NOW": "GOAL_APPROACH",
         "SHOT": "AUTO",
         "GO": "AUTO",
+        "CROSS_FINISH": "FINISHED",
     }
 
     SPECIAL_ACTION_SOURCES = {
         "PICKUP_NOW": "ball",
         "SHOT": "goal",
         "GO": "hurdle",
+        "CROSS_FINISH": "finish",
     }
 
     def __init__(self) -> None:
@@ -48,6 +51,7 @@ class MotionDecisionNode(Node):
         self.declare_parameter("ball_info_topic", "/vision/ball_info")
         self.declare_parameter("goal_info_topic", "/vision/goal_info")
         self.declare_parameter("hurdle_info_topic", "/vision/hurdle_info")
+        self.declare_parameter("finish_info_topic", "/vision/finish_info")
 
         self.declare_parameter("mission_phase_topic", "/mission/phase")
         self.declare_parameter(
@@ -63,11 +67,13 @@ class MotionDecisionNode(Node):
         self.declare_parameter("publish_rate_hz", 10.0)
         self.declare_parameter("required_pickups", 2)
         self.declare_parameter("required_shots", 2)
+        self.declare_parameter("finish_min_confidence", 0.70)
 
         self.declare_parameter("line_timeout_sec", 0.50)
         self.declare_parameter("ball_timeout_sec", 0.50)
         self.declare_parameter("goal_timeout_sec", 0.50)
         self.declare_parameter("hurdle_timeout_sec", 0.50)
+        self.declare_parameter("finish_timeout_sec", 0.50)
 
         self.declare_parameter("enable_ball_lost_recovery", False)
         self.declare_parameter("ball_tracking_range_m", 3.0)
@@ -160,6 +166,14 @@ class MotionDecisionNode(Node):
         self.pickups_completed = 0
         self.shots_completed = 0
         self.finish_enabled = False
+        self.mission_complete = False
+        self.finish_min_confidence = max(
+            0.0,
+            min(
+                1.0,
+                self._float_parameter("finish_min_confidence"),
+            ),
+        )
 
         self.latest_info: dict[str, dict[str, Any] | None] = {
             source: None for source in self.SOURCES
@@ -466,8 +480,16 @@ class MotionDecisionNode(Node):
             )
             if completed_action == "SHOT" and self.finish_enabled:
                 next_phase = "WALK_TO_FINISH"
+            elif completed_action == "CROSS_FINISH":
+                self.mission_complete = True
+                next_phase = "FINISHED"
         else:
-            next_phase = "AUTO"
+            if completed_action == "CROSS_FINISH":
+                self.mission_complete = False
+                self.terminal_action_armed["finish"] = True
+                next_phase = "WALK_TO_FINISH"
+            else:
+                next_phase = "AUTO"
 
         previous_phase = self.mission_phase
         self.mission_phase = next_phase
@@ -575,27 +597,10 @@ class MotionDecisionNode(Node):
 
         self._rearm_absent_terminal_targets(observations)
 
-        planning_phase = self.mission_phase
-
-        if self.special_motion_running:
-            if planning_phase.endswith("_LOCK"):
-                locked_phase = planning_phase
-            else:
-                locked_phase = (
-                    f"{planning_phase}_LOCK"
-                )
-
-            decision = self.planner.plan(
-                locked_phase,
-                observations,
-                dt_sec,
-            )
-        else:
-            decision = self.planner.plan(
-                planning_phase,
-                observations,
-                dt_sec,
-            )
+        decision = self._select_mission_decision(
+            observations,
+            dt_sec,
+        )
 
         decision = self._suppress_duplicate_terminal_action(
             decision
@@ -675,6 +680,94 @@ class MotionDecisionNode(Node):
         )
 
         self.publisher.publish(output)
+
+    def _select_mission_decision(
+        self,
+        observations: dict[str, dict[str, Any] | None],
+        dt_sec: float,
+    ) -> MotionDecision:
+        """Apply finish priorities before falling back to normal planning."""
+        if self.mission_complete or self.mission_phase == "FINISHED":
+            return MotionDecision(
+                phase="FINISHED",
+                source="none",
+                action="STOP",
+                valid=True,
+                reason="mission_complete_stop",
+                sdk_motion_requested=False,
+                requires_ack=False,
+                source_command={},
+            )
+
+        planning_phase = self.mission_phase
+        if self.special_motion_running:
+            locked_phase = (
+                planning_phase
+                if planning_phase.endswith("_LOCK")
+                else f"{planning_phase}_LOCK"
+            )
+            return self.planner.plan(
+                locked_phase,
+                observations,
+                dt_sec,
+            )
+
+        finish_info = observations.get("finish")
+        if self._finish_crossing_ready(finish_info):
+            return MotionDecision(
+                phase="WALK_TO_FINISH",
+                source="finish",
+                action="CROSS_FINISH",
+                valid=True,
+                reason="confirmed_finish_ready",
+                sdk_motion_requested=True,
+                requires_ack=True,
+                source_command=dict(finish_info or {}),
+            )
+
+        if planning_phase == "WALK_TO_FINISH":
+            line_decision = self.planner.plan(
+                "LINE_TRACK",
+                observations,
+                dt_sec,
+            )
+            return MotionDecision(
+                phase="WALK_TO_FINISH",
+                source=line_decision.source,
+                action=line_decision.action,
+                valid=line_decision.valid,
+                reason=line_decision.reason,
+                sdk_motion_requested=line_decision.sdk_motion_requested,
+                requires_ack=line_decision.requires_ack,
+                source_command=line_decision.source_command,
+            )
+
+        return self.planner.plan(
+            planning_phase,
+            observations,
+            dt_sec,
+        )
+
+    def _finish_crossing_ready(
+        self,
+        finish_info: dict[str, Any] | None,
+    ) -> bool:
+        """Return whether a fresh finish observation can trigger crossing."""
+        if (
+            self.mission_phase != "WALK_TO_FINISH"
+            or not self.finish_enabled
+            or finish_info is None
+            or not bool(finish_info.get("detected", False))
+            or not bool(finish_info.get("confirmed", False))
+        ):
+            return False
+
+        confidence = finish_info.get("confidence")
+        return (
+            isinstance(confidence, (int, float))
+            and not isinstance(confidence, bool)
+            and float(confidence) >= self.finish_min_confidence
+        )
 
     def _rearm_absent_terminal_targets(
         self,

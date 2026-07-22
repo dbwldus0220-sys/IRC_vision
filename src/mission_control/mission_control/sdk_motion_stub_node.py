@@ -22,6 +22,7 @@ class SdkMotionStubNode(Node):
         'PICKUP_NOW',
         'SHOT',
         'GO',
+        'CROSS_FINISH',
     }
 
     def __init__(self) -> None:
