@@ -12,6 +12,7 @@ from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 from std_msgs.msg import String
 
+from .motion_decision_planner import MotionDecision
 from .motion_decision_planner import MotionDecisionConfig
 from .motion_decision_planner import MotionDecisionPlanner
 
@@ -33,6 +34,11 @@ class MotionDecisionNode(Node):
         "GO": "AUTO",
     }
 
+    SPECIAL_ACTION_SOURCES = {
+        "PICKUP_NOW": "ball",
+        "SHOT": "goal",
+        "GO": "hurdle",
+    }
 
     def __init__(self) -> None:
         """Initialize mission decision state, topics, and timers."""
@@ -167,6 +173,10 @@ class MotionDecisionNode(Node):
         self.command_id = 0
         self.event_id = 0
         self.terminal_latch: tuple[str, str] | None = None
+        self.terminal_action_armed = {
+            source: True
+            for source in self.SPECIAL_ACTION_SOURCES.values()
+        }
 
         # Special SDK/Dynamics motion lock state.
         self.special_motion_running = False
@@ -508,6 +518,8 @@ class MotionDecisionNode(Node):
             now
         )
 
+        self._rearm_absent_terminal_targets(observations)
+
         planning_phase = self.mission_phase
 
         if self.special_motion_running:
@@ -530,6 +542,10 @@ class MotionDecisionNode(Node):
                 dt_sec,
             )
 
+        decision = self._suppress_duplicate_terminal_action(
+            decision
+        )
+
         terminal_key = (
             decision.source,
             decision.action,
@@ -541,6 +557,12 @@ class MotionDecisionNode(Node):
             if self.terminal_latch != terminal_key:
                 self.event_id += 1
                 trigger = True
+
+                source = self.SPECIAL_ACTION_SOURCES.get(
+                    decision.action
+                )
+                if source is not None:
+                    self.terminal_action_armed[source] = False
 
             self.terminal_latch = terminal_key
 
@@ -598,6 +620,41 @@ class MotionDecisionNode(Node):
         )
 
         self.publisher.publish(output)
+
+    def _rearm_absent_terminal_targets(
+        self,
+        observations: dict[str, dict[str, Any] | None],
+    ) -> None:
+        """Re-arm a target only after it is absent or explicitly lost."""
+        for source in self.terminal_action_armed:
+            info = observations.get(source)
+            if info is None or not bool(info.get("detected", False)):
+                self.terminal_action_armed[source] = True
+
+    def _suppress_duplicate_terminal_action(
+        self,
+        decision: MotionDecision,
+    ) -> MotionDecision:
+        """Replace a disarmed target's repeated terminal action with WAIT."""
+        source = self.SPECIAL_ACTION_SOURCES.get(decision.action)
+        if (
+            source is None
+            or decision.source != source
+            or not decision.requires_ack
+            or self.terminal_action_armed[source]
+        ):
+            return decision
+
+        return MotionDecision(
+            phase=decision.phase,
+            source=decision.source,
+            action="WAIT",
+            valid=False,
+            reason="duplicate_terminal_action_suppressed",
+            sdk_motion_requested=False,
+            requires_ack=False,
+            source_command=decision.source_command,
+        )
 
 
 def main(args: list[str] | None = None) -> None:
