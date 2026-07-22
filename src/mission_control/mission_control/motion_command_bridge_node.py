@@ -24,6 +24,8 @@ class MotionCommandBridgeNode(Node):
 
     def __init__(self) -> None:
         """Initialize bridge state, publishers, and subscriptions."""
+        super().__init__('motion_command_bridge')
+
         self.last_sent_command_id: int | None = None
         self.motion_in_progress = False
 
@@ -323,26 +325,7 @@ class MotionCommandBridgeNode(Node):
             )
             return
 
-            if msg.command != self.active_dynamics_command:
-                self.get_logger().warning(
-                    "Motion end ignored: command mismatch "
-                    f"(active={self.active_dynamics_command}, "
-                    f"received={msg.command})"
-                )
-
-                self.publish_motion_status(
-                    status="IGNORED",
-                    command_id=self.active_command_id,
-                    event_id=self.active_event_id,
-                    action=self.active_action,
-                    dynamics_command=self.active_dynamics_command,
-                    reason=(
-                        "motion_end_command_mismatch:"
-                        f"received={msg.command},"
-                        f"expected={self.active_dynamics_command}"
-                    ),
-                )
-                return
+            
 
         completed_command_id = self.active_command_id
         completed_event_id = self.active_event_id
