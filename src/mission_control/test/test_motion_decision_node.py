@@ -58,14 +58,17 @@ class FakeDecisionNode:
         mission_phase='AUTO',
         required_pickups=2,
         required_shots=2,
+        required_ball_sections=2,
     ):
         """Initialize the minimal state used by node callback tests."""
         self.mission_phase = mission_phase
         self.required_pickups = required_pickups
         self.required_shots = required_shots
+        self.required_ball_sections = required_ball_sections
         self.pickups_completed = 0
         self.shots_completed = 0
-        self.finish_enabled = False
+        self.ball_sections_processed = 0
+        self.finish_enabled = required_ball_sections == 0
         self.mission_complete = False
         self.finish_min_confidence = 0.70
         self.terminal_latch = ('test', 'terminal')
@@ -87,11 +90,12 @@ class FakeDecisionNode:
         """Return the fake logger."""
         return self.logger
 
-    def _update_successful_action_progress(self, completed_action):
+    def _update_action_progress(self, completed_action, status):
         """Delegate progress updates to the real node implementation."""
-        MotionDecisionNode._update_successful_action_progress(
+        MotionDecisionNode._update_action_progress(
             self,
             completed_action,
+            status,
         )
 
     def _finish_crossing_ready(self, finish_info):
@@ -393,80 +397,135 @@ def test_terminal_targets_rearm_independently_on_observation_timeout():
     }
 
 
-def test_pickup_success_increments_once_and_duplicate_is_ignored():
-    """Count one pickup and ignore its retransmitted terminal status."""
+def test_pickup_success_increments_score_but_not_section():
+    """A successful pickup still needs its following shot section."""
     node = FakeDecisionNode()
     complete_motion(node, 'PICKUP_NOW', event_id=501)
 
     assert node.pickups_completed == 1
     assert node.shots_completed == 0
-
-    send_status(
-        node,
-        status='SUCCEEDED',
-        action='PICKUP_NOW',
-        command_id=501,
-        event_id=501,
-        dynamics_command=0,
-    )
-
-    assert node.pickups_completed == 1
+    assert node.ball_sections_processed == 0
+    assert node.finish_enabled is False
+    assert node.mission_phase == 'GOAL_APPROACH'
 
 
-def test_failed_shot_does_not_increment_progress():
-    """Do not count a shot whose terminal status is FAILED."""
+@pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT'])
+def test_pickup_failure_processes_section_without_score(status):
+    """Abandon a failed pickup and continue course progress."""
+    node = FakeDecisionNode()
+    complete_motion(node, 'PICKUP_NOW', event_id=502, status=status)
+
+    assert node.pickups_completed == 0
+    assert node.ball_sections_processed == 1
+    assert node.finish_enabled is False
+    assert node.mission_phase == 'AUTO'
+
+
+def test_shot_success_increments_score_and_section():
+    """Count both success score and section for a successful shot."""
     node = FakeDecisionNode('GOAL_APPROACH')
-    complete_motion(node, 'SHOT', event_id=502, status='FAILED')
+    complete_motion(node, 'SHOT', event_id=503)
+
+    assert node.shots_completed == 1
+    assert node.ball_sections_processed == 1
+    assert node.finish_enabled is False
+    assert node.mission_phase == 'AUTO'
+
+
+@pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT'])
+def test_shot_failure_processes_section_without_score(status):
+    """Complete course progress even when the shot does not score."""
+    node = FakeDecisionNode('GOAL_APPROACH')
+    complete_motion(node, 'SHOT', event_id=504, status=status)
 
     assert node.shots_completed == 0
+    assert node.ball_sections_processed == 1
     assert node.finish_enabled is False
     assert node.mission_phase == 'AUTO'
 
 
-def test_one_shot_after_two_pickups_keeps_finish_disabled():
-    """Stay in AUTO until the required second shot succeeds."""
-    node = FakeDecisionNode()
-    complete_motion(node, 'PICKUP_NOW', event_id=503)
-    complete_motion(node, 'PICKUP_NOW', event_id=504)
-    complete_motion(node, 'SHOT', event_id=505)
-
-    assert node.pickups_completed == 2
-    assert node.shots_completed == 1
-    assert node.finish_enabled is False
-    assert node.mission_phase == 'AUTO'
-
-
-def test_two_shots_after_two_pickups_enable_walk_to_finish():
-    """Enable finish walking when both completion requirements are met."""
-    node = FakeDecisionNode()
-    complete_motion(node, 'PICKUP_NOW', event_id=506)
-    complete_motion(node, 'PICKUP_NOW', event_id=507)
-    complete_motion(node, 'SHOT', event_id=508)
-    complete_motion(node, 'SHOT', event_id=509)
-
-    assert node.pickups_completed == 2
-    assert node.shots_completed == 2
-    assert node.finish_enabled is True
-    assert node.mission_phase == 'WALK_TO_FINISH'
-
-    complete_motion(node, 'PICKUP_NOW', event_id=511)
-    complete_motion(node, 'SHOT', event_id=512)
-
-    assert node.pickups_completed == 2
-    assert node.shots_completed == 2
-    assert node.finish_enabled is True
-    assert node.mission_phase == 'WALK_TO_FINISH'
-
-
-def test_go_success_does_not_change_pickup_or_shot_progress():
-    """Keep pickup and shot counters unchanged after a successful GO."""
+@pytest.mark.parametrize('status', ['SUCCEEDED', 'FAILED'])
+def test_go_terminal_status_does_not_change_section(status):
+    """A hurdle action is independent from ball-section progress."""
     node = FakeDecisionNode('HURDLE_APPROACH')
-    complete_motion(node, 'GO', event_id=510)
+    complete_motion(node, 'GO', event_id=505, status=status)
 
     assert node.pickups_completed == 0
     assert node.shots_completed == 0
+    assert node.ball_sections_processed == 0
     assert node.finish_enabled is False
     assert node.mission_phase == 'AUTO'
+
+
+def test_second_pickup_failure_enables_walk_to_finish():
+    """Walk to finish when a failed pickup processes the last section."""
+    node = FakeDecisionNode()
+    complete_motion(node, 'SHOT', event_id=506)
+    complete_motion(node, 'PICKUP_NOW', event_id=507, status='FAILED')
+
+    assert node.ball_sections_processed == 2
+    assert node.finish_enabled is True
+    assert node.mission_phase == 'WALK_TO_FINISH'
+
+
+def test_second_shot_failure_enables_walk_to_finish():
+    """Walk to finish when a failed shot processes the last section."""
+    node = FakeDecisionNode()
+    complete_motion(node, 'SHOT', event_id=508)
+    complete_motion(node, 'SHOT', event_id=509, status='FAILED')
+
+    assert node.shots_completed == 1
+    assert node.ball_sections_processed == 2
+    assert node.finish_enabled is True
+    assert node.mission_phase == 'WALK_TO_FINISH'
+
+
+def test_duplicate_terminal_status_does_not_increment_section_twice():
+    """Ignore a retransmitted terminal result after its lock is released."""
+    node = FakeDecisionNode('GOAL_APPROACH')
+    complete_motion(node, 'SHOT', event_id=510, status='FAILED')
+
+    send_status(
+        node,
+        status='FAILED',
+        action='SHOT',
+        command_id=510,
+        event_id=510,
+        dynamics_command=0,
+    )
+
+    assert node.ball_sections_processed == 1
+
+
+def test_section_progress_is_capped_at_requirement():
+    """Never report more processed sections than configured."""
+    node = FakeDecisionNode(required_ball_sections=2)
+    complete_motion(node, 'SHOT', event_id=511)
+    complete_motion(node, 'SHOT', event_id=512)
+    complete_motion(node, 'SHOT', event_id=513)
+
+    assert node.ball_sections_processed == 2
+    assert node.finish_enabled is True
+
+
+def test_mission_progress_contains_exact_fields_and_values():
+    """Expose success scores and course progress in command JSON shape."""
+    node = FakeDecisionNode()
+    complete_motion(node, 'PICKUP_NOW', event_id=514)
+    complete_motion(node, 'SHOT', event_id=515)
+
+    progress = MotionDecisionNode._mission_progress(node)
+
+    assert progress == {
+        'pickups_completed': 1,
+        'required_pickups': 2,
+        'shots_completed': 1,
+        'required_shots': 2,
+        'ball_sections_processed': 1,
+        'required_ball_sections': 2,
+        'finish_enabled': False,
+        'mission_complete': False,
+    }
 
 
 def finish_info(**overrides):

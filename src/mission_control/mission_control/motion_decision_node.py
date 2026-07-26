@@ -67,6 +67,7 @@ class MotionDecisionNode(Node):
         self.declare_parameter("publish_rate_hz", 10.0)
         self.declare_parameter("required_pickups", 2)
         self.declare_parameter("required_shots", 2)
+        self.declare_parameter("required_ball_sections", 2)
         self.declare_parameter("finish_min_confidence", 0.70)
 
         self.declare_parameter("line_timeout_sec", 0.50)
@@ -176,9 +177,21 @@ class MotionDecisionNode(Node):
             0,
             int(self.get_parameter("required_shots").value),
         )
+        self.required_ball_sections = max(
+            0,
+            int(
+                self.get_parameter(
+                    "required_ball_sections"
+                ).value
+            ),
+        )
         self.pickups_completed = 0
         self.shots_completed = 0
-        self.finish_enabled = False
+        self.ball_sections_processed = 0
+        self.finish_enabled = (
+            self.ball_sections_processed
+            >= self.required_ball_sections
+        )
         self.mission_complete = False
         self.finish_min_confidence = max(
             0.0,
@@ -485,8 +498,9 @@ class MotionDecisionNode(Node):
             f"event_id={completed_event_id}"
         )
 
+        self._update_action_progress(completed_action, status)
+
         if status == "SUCCEEDED":
-            self._update_successful_action_progress(completed_action)
             next_phase = self.SPECIAL_COMPLETION_PHASES.get(
                 completed_action,
                 "AUTO",
@@ -500,6 +514,11 @@ class MotionDecisionNode(Node):
             if completed_action == "CROSS_FINISH":
                 self.mission_complete = False
                 self.terminal_action_armed["finish"] = True
+                next_phase = "WALK_TO_FINISH"
+            elif (
+                completed_action in {"PICKUP_NOW", "SHOT"}
+                and self.finish_enabled
+            ):
                 next_phase = "WALK_TO_FINISH"
             else:
                 next_phase = "AUTO"
@@ -516,44 +535,77 @@ class MotionDecisionNode(Node):
             f"next_phase={self.mission_phase}"
         )
 
-    def _update_successful_action_progress(
+    def _update_action_progress(
         self,
         completed_action: str | None,
+        status: str,
     ) -> None:
-        """Record one validated successful pickup or shot completion."""
+        """Record success scores and processed ball-course sections."""
         previous_pickups = self.pickups_completed
         previous_shots = self.shots_completed
+        previous_sections = self.ball_sections_processed
+        previous_finish_enabled = self.finish_enabled
 
-        if completed_action == "PICKUP_NOW":
+        if completed_action == "PICKUP_NOW" and status == "SUCCEEDED":
             self.pickups_completed = min(
                 self.pickups_completed + 1,
                 self.required_pickups,
             )
-        elif completed_action == "SHOT":
-            self.shots_completed = min(
-                self.shots_completed + 1,
-                self.required_shots,
+        elif completed_action == "PICKUP_NOW":
+            self.ball_sections_processed = min(
+                self.ball_sections_processed + 1,
+                self.required_ball_sections,
             )
-            if (
-                self.shots_completed >= self.required_shots
-                and self.pickups_completed >= self.required_pickups
-            ):
-                self.finish_enabled = True
+        elif completed_action == "SHOT":
+            if status == "SUCCEEDED":
+                self.shots_completed = min(
+                    self.shots_completed + 1,
+                    self.required_shots,
+                )
+            self.ball_sections_processed = min(
+                self.ball_sections_processed + 1,
+                self.required_ball_sections,
+            )
+
+        if completed_action in {"PICKUP_NOW", "SHOT"}:
+            self.finish_enabled = (
+                self.ball_sections_processed
+                >= self.required_ball_sections
+            )
 
         counters_changed = (
             self.pickups_completed != previous_pickups
             or self.shots_completed != previous_shots
+            or self.ball_sections_processed != previous_sections
+            or self.finish_enabled != previous_finish_enabled
         )
         if counters_changed:
             self.get_logger().info(
                 "Mission progress updated: "
                 f"completed_action={completed_action}, "
+                f"status={status}, "
                 f"pickups={self.pickups_completed}/"
                 f"{self.required_pickups}, "
                 f"shots={self.shots_completed}/"
                 f"{self.required_shots}, "
+                f"ball_sections="
+                f"{self.ball_sections_processed}/"
+                f"{self.required_ball_sections}, "
                 f"finish_enabled={self.finish_enabled}"
             )
+
+    def _mission_progress(self) -> dict[str, int | bool]:
+        """Return success scores and independent course progress."""
+        return {
+            "pickups_completed": self.pickups_completed,
+            "required_pickups": self.required_pickups,
+            "shots_completed": self.shots_completed,
+            "required_shots": self.required_shots,
+            "ball_sections_processed": self.ball_sections_processed,
+            "required_ball_sections": self.required_ball_sections,
+            "finish_enabled": self.finish_enabled,
+            "mission_complete": self.mission_complete,
+        }
 
     def _fresh_observations(
         self,
@@ -678,6 +730,7 @@ class MotionDecisionNode(Node):
                 "active_special_command_id": (
                     self.active_special_command_id
                 ),
+                "mission_progress": self._mission_progress(),
                 "source_node": (
                     "motion_decision_node"
                 ),
