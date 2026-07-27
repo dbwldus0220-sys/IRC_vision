@@ -206,6 +206,7 @@ player.result() == MotionError.COMMUNICATION_ERROR
 
 player.lastError() == "motor communication failed"
 → message에 포함
+```
 
 ### StartResult 매핑
 
@@ -253,6 +254,53 @@ terminal 결과는 정확히 한 번만 생성한다. 한 번 생성된
 7. 안전정지 요청은 일반 명령보다 우선한다.
 8. 상태와 결과에는 최초 요청의 `motion_id`를 유지한다.
 9. SDK 내부 모션 이름이나 중간 단계를 알고리즘 계층에 노출하지 않는다.
+
+## 현재 mock 기반 MotionExecutorNode
+
+현재 `motion_executor_node`는 실제 RobotMotionPlayer나 Dynamixel을 연결하지
+않는다. 프로세스 내부에서 `MockRobotMotionPlayer`를 생성하여
+MotionExecutorCore에 주입하는 검증용 ROS2 노드 뼈대이다.
+
+기본 timer 주기는 10ms이며 ROS parameter `tick_period_ms`로 변경할 수 있다.
+0 이하의 값이 설정되면 안전한 기본값 10ms를 사용한다.
+
+### 요청 topic
+
+- topic: `/motion/executor/request`
+- type: `std_msgs/msg/String`
+
+```json
+{
+  "request_id": 1,
+  "motion_id": "forward",
+  "timeout_ms": 5000
+}
+```
+
+잘못된 JSON, 필수 필드 누락과 유효하지 않은 필드 타입은
+`REJECTED` / `"INVALID_REQUEST"`로 응답한다. 지원하지 않는 `motion_id`는
+`REJECTED` / `"INVALID_MOTION"`으로 응답한다. 실행 중 새 요청은
+`REJECTED` / `"REJECTED_BUSY"`로 응답한다.
+
+### 상태 topic
+
+- topic: `/motion/executor/status`
+- type: `std_msgs/msg/String`
+
+```json
+{
+  "request_id": 1,
+  "motion_id": "forward",
+  "status": "RUNNING",
+  "error_code": "",
+  "message": ""
+}
+```
+
+수락 직후 `RUNNING`을 한 번 발행한다. 이후 terminal 결과
+`SUCCEEDED`, `FAILED`, `CANCELLED`, `TIMEOUT` 중 하나를 정확히 한 번
+발행하고 core를 `reset()`한다. terminal 결과까지 최초 `request_id`와
+`motion_id`를 유지한다.
 
 ## 아직 미확정인 항목
 

@@ -37,6 +37,8 @@ setup(
             "mission_control.motion_command_bridge_node:main",
             "sdk_motion_stub_node="
             "mission_control.sdk_motion_stub_node:main",
+            "motion_executor_node="
+            "mission_control.motion_executor_node:main",
         ],
     },
 )
