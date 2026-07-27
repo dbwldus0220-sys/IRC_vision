@@ -43,6 +43,8 @@ setup(
             "mission_control.legacy_motion_executor_adapter:main",
             "legacy_motion_status_adapter="
             "mission_control.legacy_motion_status_adapter:main",
+            "mock_mission_input_node="
+            "mission_control.mock_mission_input_node:main",
         ],
     },
 )

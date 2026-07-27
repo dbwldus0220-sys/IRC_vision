@@ -477,6 +477,41 @@ Executor의 `request_id`, `motion_id`, `error_code`, `message`도 추가 필드�
 이 adapter는 mock 검증을 위한 임시 호환 계층이다. 향후 mission node가
 `/motion/executor/status`를 직접 사용하면 제거할 수 있다.
 
+### Vision 입력부터 mission까지의 mock 통합
+
+다음 명령은 실제 카메라나 검출 모델 없이 결정적인 Vision JSON을 기존
+mission 판단 및 새 Motion Executor mock 경로에 연결한다.
+
+```bash
+ros2 launch mission_control mission_motion_mock.launch.py
+```
+
+검증 흐름은 다음과 같다.
+
+```text
+mock_mission_input_node
+→ /vision/line_info
+→ motion_decision_node
+→ /navigation/motion_command
+→ legacy_motion_executor_adapter
+→ /motion/executor/request
+→ motion_executor_node (player_backend=mock)
+→ /motion/executor/status
+→ legacy_motion_status_adapter
+→ /motion/status
+→ motion_decision_node
+```
+
+기본 `straight` scenario는 중앙에 정렬된 고품질 line 정보를 한 번 발행하여
+기존 `motion_decision_node`가 기존 JSON 형식의 `STRAIGHT` 명령을 생성하게
+한다. 이 launch에는 `motion_command_bridge_node`를 포함하지 않으므로
+`/navigation/motion_command`의 실행 adapter는
+`legacy_motion_executor_adapter` 하나뿐이다.
+
+이 환경은 mock 통합 검증 전용이다. 실제 카메라, RealSense, YOLO 모델,
+실제 RobotMotionPlayer SDK, Dynamixel 및 serial 장치를 실행하거나
+접근하지 않는다.
+
 ## Motion Player backend 선택
 
 MotionExecutorNode는 `player_backend` parameter를 factory에 전달하여 player를
