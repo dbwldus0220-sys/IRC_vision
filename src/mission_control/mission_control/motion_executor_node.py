@@ -1,15 +1,15 @@
-"""Mock-backed ROS 2 Motion Executor node and ROS-free helper functions."""
+"""Backend-selectable ROS 2 Motion Executor and ROS-free helpers."""
 
 import json
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
 try:
-    from .mock_motion_player import MockRobotMotionPlayer, MotionError
     from .motion_executor_core import MotionExecutionResult, MotionExecutorCore
+    from .motion_player_factory import create_motion_player
 except ImportError:  # Allows direct, ROS-free unit-test imports.
-    from mock_motion_player import MockRobotMotionPlayer, MotionError
     from motion_executor_core import MotionExecutionResult, MotionExecutorCore
+    from motion_player_factory import create_motion_player
 
 try:
     import rclpy
@@ -22,6 +22,7 @@ except ImportError:  # Pure helpers remain importable without a ROS installation
 
 
 DEFAULT_TICK_PERIOD_MS = 10
+DEFAULT_PLAYER_BACKEND = "mock"
 
 
 @dataclass(frozen=True)
@@ -255,6 +256,7 @@ class MotionExecutorNode(Node):
 
         super().__init__("motion_executor_node")
         self.declare_parameter("tick_period_ms", DEFAULT_TICK_PERIOD_MS)
+        self.declare_parameter("player_backend", DEFAULT_PLAYER_BACKEND)
         self.declare_parameter("mock_fail_after_updates", -1)
         self.declare_parameter(
             "mock_failure_code", "COMMUNICATION_ERROR"
@@ -273,25 +275,20 @@ class MotionExecutorNode(Node):
         failure_code = self.get_parameter(
             "mock_failure_code"
         ).get_parameter_value().string_value
+        player_backend = self.get_parameter(
+            "player_backend"
+        ).get_parameter_value().string_value
         try:
-            failure_error = MotionError[failure_code]
-        except KeyError:
-            self.get_logger().warning(
-                "invalid mock_failure_code=%s; using INTERNAL_ERROR"
-                % failure_code
+            player = create_motion_player(
+                player_backend,
+                mock_fail_after_updates=fail_after_updates,
+                mock_failure_code=failure_code,
             )
-            failure_error = MotionError.INTERNAL_ERROR
+        except ValueError as exc:
+            self.get_logger().error(str(exc))
+            raise
 
-        self._core = MotionExecutorCore(
-            MockRobotMotionPlayer(
-                fail_after_updates=fail_after_updates,
-                failure_error=failure_error,
-                failure_message=(
-                    "test-only injected mock failure: "
-                    f"{failure_error.name}"
-                ),
-            )
-        )
+        self._core = MotionExecutorCore(player)
         self._publication_state = ExecutionPublicationState()
         self._status_publisher = self.create_publisher(
             String, "/motion/executor/status", 10

@@ -13,6 +13,7 @@ from motion_executor_core import (
 )
 from motion_executor_node import (
     CancelRequest,
+    DEFAULT_PLAYER_BACKEND,
     ExecutionPublicationState,
     MotionRequest,
     RequestValidationError,
@@ -21,6 +22,7 @@ from motion_executor_node import (
     parse_cancel_request,
     parse_motion_request,
 )
+from motion_player_factory import create_motion_player
 
 
 def result(status, error_code="NONE", message="done"):
@@ -38,6 +40,14 @@ def test_parse_valid_request_json():
         '{"request_id": 1, "motion_id": "forward", "timeout_ms": 5000}'
     )
     assert request == MotionRequest(1, "forward", 5000)
+
+
+def test_default_player_backend_is_mock():
+    assert DEFAULT_PLAYER_BACKEND == "mock"
+    assert isinstance(
+        create_motion_player(DEFAULT_PLAYER_BACKEND),
+        MockRobotMotionPlayer,
+    )
 
 
 def test_missing_required_field():

@@ -45,6 +45,19 @@ def test_mock_launch_description(monkeypatch, tmp_path):
     assert "tick_period_ms" in arguments
     assert "mock_fail_after_updates" in arguments
     assert "mock_failure_code" in arguments
+    assert "player_backend" in arguments
+
+    player_backend_argument = next(
+        action
+        for action in description.entities
+        if isinstance(action, DeclareLaunchArgument)
+        and action.name == "player_backend"
+    )
+    default_backend = "".join(
+        substitution.text
+        for substitution in player_backend_argument.default_value
+    )
+    assert default_backend == "mock"
 
     forbidden_executables = {
         "robot_motion_player",

@@ -17,9 +17,17 @@ def generate_launch_description():
         "mock_fail_after_updates"
     )
     mock_failure_code = LaunchConfiguration("mock_failure_code")
+    player_backend = LaunchConfiguration("player_backend")
 
     return LaunchDescription(
         [
+            DeclareLaunchArgument(
+                "player_backend",
+                default_value="mock",
+                description=(
+                    "Safe player backend: mock or disconnected sdk placeholder"
+                ),
+            ),
             DeclareLaunchArgument(
                 "tick_period_ms",
                 default_value="100",
@@ -46,6 +54,9 @@ def generate_launch_description():
                     {
                         "tick_period_ms": ParameterValue(
                             tick_period_ms, value_type=int
+                        ),
+                        "player_backend": ParameterValue(
+                            player_backend, value_type=str
                         ),
                         "mock_fail_after_updates": ParameterValue(
                             mock_fail_after_updates, value_type=int

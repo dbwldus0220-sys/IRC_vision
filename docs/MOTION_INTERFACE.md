@@ -444,9 +444,28 @@ ros2 launch mission_control motion_executor_mock.launch.py \
 
 launch argument 기본값:
 
+- `player_backend`: `mock`
 - `tick_period_ms`: `100`
 - `mock_fail_after_updates`: `-1`
 - `mock_failure_code`: `COMMUNICATION_ERROR`
+
+## Motion Player backend 선택
+
+MotionExecutorNode는 `player_backend` parameter를 factory에 전달하여 player를
+생성한다. 현재 지원하는 backend는 다음 두 가지이다.
+
+- `mock`: 기본값. `MockRobotMotionPlayer`를 사용하며 기존 정상 흐름과 실패 주입
+  검증을 지원한다.
+- `sdk`: 실제 SDK가 아닌 `SdkMotionPlayerPlaceholder`를 사용한다.
+
+`sdk` placeholder는 향후 연결 지점을 준비하기 위한 안전 객체이며 실제 모션을
+실행하지 않는다. SDK, serial 또는 Dynamixel 모듈을 import하지 않고
+`hardwareReady()`가 항상 `False`이다. 따라서 `player_backend:=sdk`로 실행해도
+모션 시작 요청은 `HARDWARE_NOT_READY`로 거부되며 실물 로봇은 움직이지 않는다.
+
+실제 SDK 연동 단계에서는 MotionExecutorCore나 ROS topic을 변경하지 않고
+factory의 `sdk` 생성 구현만 실제 RobotMotionPlayer adapter로 교체할 예정이다.
+그 전까지 기본 backend는 반드시 `mock`으로 유지한다.
 
 ## 아직 미확정인 항목
 
