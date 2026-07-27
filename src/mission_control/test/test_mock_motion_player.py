@@ -56,3 +56,26 @@ def test_hardware_not_ready():
     assert player.hardwareReady() is False
     assert player.start("forward") is StartResult.HARDWARE_NOT_READY
     assert player.result() is MotionError.HARDWARE_NOT_READY
+
+
+def test_injected_failure_does_not_change_to_succeeded():
+    player = MockRobotMotionPlayer(
+        fail_after_updates=2,
+        failure_error=MotionError.COMMUNICATION_ERROR,
+        failure_message="test communication failure",
+    )
+    assert player.start("forward") is StartResult.ACCEPTED
+
+    player.update()
+    assert player.status() is MotionStatus.RUNNING
+    player.update()
+    assert player.status() is MotionStatus.FAILED
+    assert player.update_count == 2
+    assert player.result() is MotionError.COMMUNICATION_ERROR
+    assert player.lastError() == "test communication failure"
+
+    for _ in range(10):
+        player.update()
+    assert player.status() is MotionStatus.FAILED
+    assert player.succeeded() is False
+    assert player.update_count == 2

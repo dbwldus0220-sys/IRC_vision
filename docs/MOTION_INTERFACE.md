@@ -302,6 +302,43 @@ MotionExecutorCore에 주입하는 검증용 ROS2 노드 뼈대이다.
 발행하고 core를 `reset()`한다. terminal 결과까지 최초 `request_id`와
 `motion_id`를 유지한다.
 
+### cancel topic
+
+- topic: `/motion/executor/cancel`
+- type: `std_msgs/msg/String`
+
+```json
+{
+  "request_id": 10
+}
+```
+
+cancel의 `request_id`가 현재 실행 중인 최초 요청과 일치할 때만
+`MotionExecutorCore.cancel()`을 호출한다. 불일치하면
+`REJECTED` / `"REQUEST_ID_MISMATCH"`, 실행 중인 모션이 없으면
+`REJECTED` / `"NOT_RUNNING"`을 발행한다. 성공하면 최초 `request_id`와
+`motion_id`를 유지한 `CANCELLED`를 정확히 한 번 발행한다.
+
+이 cancel topic은 mock 기반 노드의 개발/검증용 인터페이스이다. 실제 SDK
+연동 시에는 ROS Action cancel 처리와 SDK 안전정지 계약에 맞게 교체될 수 있다.
+
+### mock 실패 주입 parameter
+
+- `mock_fail_after_updates` (기본값 `-1`)
+  - `-1`: 실패를 주입하지 않는다.
+  - `0` 이상: 설정한 update 횟수에 도달하면 mock을 `FAILED`로 전환한다.
+- `mock_failure_code` (기본값 `"COMMUNICATION_ERROR"`)
+  - `MotionError`의 enum 이름 문자열을 사용한다.
+
+실패가 주입되면 `player.result()`는 지정된 `MotionError` enum을 반환하고,
+`player.lastError()`는 사람이 읽을 수 있는 상세 문자열을 반환한다. Executor는
+이를 `FAILED`, enum 이름 문자열 `error_code`, 상세 오류가 포함된 `message`로
+변환한다. 한 번 `FAILED`가 된 mock은 이후 `SUCCEEDED`로 바뀌지 않는다.
+
+이 parameter들은 실제 고장을 재현하지 않는 개발/검증 전용 기능이다. 실제
+RobotMotionPlayer 연동 시 제거되거나 실제 SDK의 오류 주입 방식으로 교체될 수
+있으며 Dynamixel 또는 실제 하드웨어에는 접근하지 않는다.
+
 ## 아직 미확정인 항목
 
 - 실제 전체 모션 JSON 데이터

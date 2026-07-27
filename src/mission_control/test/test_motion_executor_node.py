@@ -5,12 +5,20 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "mission_control"))
 
-from motion_executor_core import ExecutorState, MotionExecutionResult
+from mock_motion_player import MockRobotMotionPlayer, MotionError
+from motion_executor_core import (
+    ExecutorState,
+    MotionExecutionResult,
+    MotionExecutorCore,
+)
 from motion_executor_node import (
+    CancelRequest,
     ExecutionPublicationState,
     MotionRequest,
     RequestValidationError,
     build_status_payload,
+    handle_cancel_request,
+    parse_cancel_request,
     parse_motion_request,
 )
 
@@ -111,4 +119,74 @@ def test_terminal_payload_is_not_duplicated():
     state.begin(MotionRequest(1, "forward", 5000))
     terminal = result(ExecutorState.SUCCEEDED)
     assert state.terminal_payload(terminal) is not None
+    assert state.terminal_payload(terminal) is None
+
+
+def active_execution(request_id=10, motion_id="forward", player=None):
+    player = player or MockRobotMotionPlayer()
+    core = MotionExecutorCore(player)
+    state = ExecutionPublicationState()
+    request = MotionRequest(request_id, motion_id, 5000)
+    assert core.start_motion(motion_id, 5000) is None
+    state.begin(request)
+    return core, state, player
+
+
+def test_parse_cancel_request():
+    assert parse_cancel_request('{"request_id": 10}') == CancelRequest(10)
+
+
+def test_cancel_with_matching_request_id():
+    core, state, _ = active_execution(request_id=10, motion_id="shoot")
+    handled = handle_cancel_request('{"request_id": 10}', core, state)
+    assert handled.terminal is True
+    assert handled.payload["request_id"] == 10
+    assert handled.payload["motion_id"] == "shoot"
+    assert handled.payload["status"] == "CANCELLED"
+
+
+def test_cancel_with_mismatched_request_id_is_rejected():
+    core, state, _ = active_execution(request_id=10)
+    handled = handle_cancel_request('{"request_id": 11}', core, state)
+    assert handled.terminal is False
+    assert handled.payload["status"] == "REJECTED"
+    assert handled.payload["error_code"] == "REQUEST_ID_MISMATCH"
+    assert core.busy() is True
+
+
+def test_cancel_when_not_running_is_rejected():
+    core = MotionExecutorCore(MockRobotMotionPlayer())
+    state = ExecutionPublicationState()
+    handled = handle_cancel_request('{"request_id": 10}', core, state)
+    assert handled.terminal is False
+    assert handled.payload["status"] == "REJECTED"
+    assert handled.payload["error_code"] == "NOT_RUNNING"
+
+
+def test_cancelled_terminal_is_generated_only_once():
+    core, state, _ = active_execution()
+    first = handle_cancel_request('{"request_id": 10}', core, state)
+    second = state.terminal_payload(core.terminal_result())
+    assert first.payload["status"] == "CANCELLED"
+    assert second is None
+
+
+def test_mock_failure_payload_preserves_original_request():
+    player = MockRobotMotionPlayer(
+        fail_after_updates=1,
+        failure_error=MotionError.COMMUNICATION_ERROR,
+        failure_message="injected communication failure",
+    )
+    core, state, _ = active_execution(
+        request_id=77, motion_id="turn_right", player=player
+    )
+
+    terminal = core.tick(10)
+    payload = state.terminal_payload(terminal)
+    assert payload["request_id"] == 77
+    assert payload["motion_id"] == "turn_right"
+    assert payload["status"] == "FAILED"
+    assert payload["error_code"] == "COMMUNICATION_ERROR"
+    assert isinstance(payload["error_code"], str)
+    assert "injected communication failure" in payload["message"]
     assert state.terminal_payload(terminal) is None

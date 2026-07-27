@@ -1,4 +1,4 @@
-"""Deterministic, ROS-free mock implementation of RobotMotionPlayer."""
+"""Test-only, deterministic mock implementation of RobotMotionPlayer."""
 
 from enum import Enum, auto
 from typing import Optional
@@ -66,10 +66,16 @@ class MockRobotMotionPlayer:
         hardware_ready: bool = True,
         running_updates: int = 3,
         settling_updates: int = 2,
+        fail_after_updates: int = -1,
+        failure_error: MotionError = MotionError.COMMUNICATION_ERROR,
+        failure_message: str = "injected mock motion failure",
     ) -> None:
         self._hardware_ready = hardware_ready
         self._running_updates = max(0, running_updates)
         self._settling_updates = max(0, settling_updates)
+        self._fail_after_updates = fail_after_updates
+        self._failure_error = failure_error
+        self._failure_message = failure_message
         self._update_count = 0
         self._status = MotionStatus.IDLE
         self._result = MotionError.NONE
@@ -103,6 +109,15 @@ class MockRobotMotionPlayer:
             return
 
         self._update_count += 1
+        if (
+            self._fail_after_updates >= 0
+            and self._update_count >= self._fail_after_updates
+        ):
+            self._status = MotionStatus.FAILED
+            self._result = self._failure_error
+            self._last_error = self._failure_message
+            return
+
         running_end = self._running_updates
         settling_end = running_end + self._settling_updates
 
@@ -144,3 +159,7 @@ class MockRobotMotionPlayer:
 
     def currentMotion(self) -> Optional[str]:
         return self._current_motion
+
+    @property
+    def update_count(self) -> int:
+        return self._update_count

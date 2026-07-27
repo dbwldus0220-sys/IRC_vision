@@ -5,10 +5,10 @@ from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
 try:
-    from .mock_motion_player import MockRobotMotionPlayer
+    from .mock_motion_player import MockRobotMotionPlayer, MotionError
     from .motion_executor_core import MotionExecutionResult, MotionExecutorCore
 except ImportError:  # Allows direct, ROS-free unit-test imports.
-    from mock_motion_player import MockRobotMotionPlayer
+    from mock_motion_player import MockRobotMotionPlayer, MotionError
     from motion_executor_core import MotionExecutionResult, MotionExecutorCore
 
 try:
@@ -29,6 +29,17 @@ class MotionRequest:
     request_id: int
     motion_id: str
     timeout_ms: int
+
+
+@dataclass(frozen=True)
+class CancelRequest:
+    request_id: int
+
+
+@dataclass(frozen=True)
+class CancelHandlingResult:
+    payload: Dict[str, Any]
+    terminal: bool
 
 
 class RequestValidationError(ValueError):
@@ -86,6 +97,31 @@ def parse_motion_request(payload: str) -> MotionRequest:
     return MotionRequest(request_id, motion_id, timeout_ms)
 
 
+def parse_cancel_request(payload: str) -> CancelRequest:
+    try:
+        data = json.loads(payload)
+    except (json.JSONDecodeError, TypeError) as exc:
+        raise RequestValidationError(
+            "INVALID_REQUEST", f"invalid cancel JSON: {exc}"
+        ) from exc
+
+    if not isinstance(data, dict):
+        raise RequestValidationError(
+            "INVALID_REQUEST", "cancel request must be a JSON object"
+        )
+    if "request_id" not in data:
+        raise RequestValidationError(
+            "INVALID_REQUEST", "missing required field: request_id"
+        )
+
+    request_id = data["request_id"]
+    if isinstance(request_id, bool) or not isinstance(request_id, int):
+        raise RequestValidationError(
+            "INVALID_REQUEST", "request_id must be an integer"
+        )
+    return CancelRequest(request_id)
+
+
 def build_status_payload(
     request_id: int,
     motion_id: str,
@@ -140,6 +176,77 @@ class ExecutionPublicationState:
     def clear(self) -> None:
         self._request = None
 
+    def active_request(self) -> Optional[MotionRequest]:
+        return self._request
+
+
+def handle_cancel_request(
+    payload: str,
+    core: MotionExecutorCore,
+    publication_state: ExecutionPublicationState,
+) -> CancelHandlingResult:
+    """Process the test-only cancel interface without requiring a ROS graph."""
+    try:
+        cancel_request = parse_cancel_request(payload)
+    except RequestValidationError as exc:
+        return CancelHandlingResult(
+            build_status_payload(
+                0, "", "REJECTED", exc.error_code, exc.message
+            ),
+            False,
+        )
+
+    active_request = publication_state.active_request()
+    if not core.busy() or active_request is None:
+        return CancelHandlingResult(
+            build_status_payload(
+                cancel_request.request_id,
+                "",
+                "REJECTED",
+                "NOT_RUNNING",
+                "no motion is currently running",
+            ),
+            False,
+        )
+    if cancel_request.request_id != active_request.request_id:
+        return CancelHandlingResult(
+            build_status_payload(
+                cancel_request.request_id,
+                active_request.motion_id,
+                "REJECTED",
+                "REQUEST_ID_MISMATCH",
+                "cancel request_id does not match the active request",
+            ),
+            False,
+        )
+
+    result = core.cancel()
+    if result is None:
+        return CancelHandlingResult(
+            build_status_payload(
+                cancel_request.request_id,
+                active_request.motion_id,
+                "REJECTED",
+                "NOT_RUNNING",
+                "player reported that no motion is running",
+            ),
+            False,
+        )
+
+    terminal_payload = publication_state.terminal_payload(result)
+    if terminal_payload is None:
+        return CancelHandlingResult(
+            build_status_payload(
+                cancel_request.request_id,
+                active_request.motion_id,
+                "REJECTED",
+                "NOT_RUNNING",
+                "terminal result was already published",
+            ),
+            False,
+        )
+    return CancelHandlingResult(terminal_payload, True)
+
 
 class MotionExecutorNode(Node):
     def __init__(self) -> None:
@@ -148,6 +255,10 @@ class MotionExecutorNode(Node):
 
         super().__init__("motion_executor_node")
         self.declare_parameter("tick_period_ms", DEFAULT_TICK_PERIOD_MS)
+        self.declare_parameter("mock_fail_after_updates", -1)
+        self.declare_parameter(
+            "mock_failure_code", "COMMUNICATION_ERROR"
+        )
         configured_period = self.get_parameter(
             "tick_period_ms"
         ).get_parameter_value().integer_value
@@ -156,8 +267,31 @@ class MotionExecutorNode(Node):
             if configured_period > 0
             else DEFAULT_TICK_PERIOD_MS
         )
+        fail_after_updates = self.get_parameter(
+            "mock_fail_after_updates"
+        ).get_parameter_value().integer_value
+        failure_code = self.get_parameter(
+            "mock_failure_code"
+        ).get_parameter_value().string_value
+        try:
+            failure_error = MotionError[failure_code]
+        except KeyError:
+            self.get_logger().warning(
+                "invalid mock_failure_code=%s; using INTERNAL_ERROR"
+                % failure_code
+            )
+            failure_error = MotionError.INTERNAL_ERROR
 
-        self._core = MotionExecutorCore(MockRobotMotionPlayer())
+        self._core = MotionExecutorCore(
+            MockRobotMotionPlayer(
+                fail_after_updates=fail_after_updates,
+                failure_error=failure_error,
+                failure_message=(
+                    "test-only injected mock failure: "
+                    f"{failure_error.name}"
+                ),
+            )
+        )
         self._publication_state = ExecutionPublicationState()
         self._status_publisher = self.create_publisher(
             String, "/motion/executor/status", 10
@@ -166,6 +300,12 @@ class MotionExecutorNode(Node):
             String,
             "/motion/executor/request",
             self._on_request,
+            10,
+        )
+        self._cancel_subscription = self.create_subscription(
+            String,
+            "/motion/executor/cancel",
+            self._on_cancel,
             10,
         )
         self._timer = self.create_timer(
@@ -233,6 +373,15 @@ class MotionExecutorNode(Node):
 
         self._publication_state.begin(request)
         self._publish_payload(self._publication_state.running_payload())
+
+    def _on_cancel(self, message: Any) -> None:
+        handled = handle_cancel_request(
+            message.data, self._core, self._publication_state
+        )
+        self._publish_payload(handled.payload)
+        if handled.terminal:
+            self._core.reset()
+            self._publication_state.clear()
 
     def _on_tick(self) -> None:
         result = self._core.tick(self._tick_period_ms)
