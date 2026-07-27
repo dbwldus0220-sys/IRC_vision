@@ -449,6 +449,34 @@ launch argument 기본값:
 - `mock_fail_after_updates`: `-1`
 - `mock_failure_code`: `COMMUNICATION_ERROR`
 
+### 기존 mission status 호환 흐름
+
+mock 통합 검증에서는 다음 흐름으로 새 Executor를 기존 mission node에
+연결한다.
+
+```text
+motion_decision_node
+→ /navigation/motion_command
+→ legacy_motion_executor_adapter
+→ /motion/executor/request
+→ motion_executor_node
+→ /motion/executor/status
+→ legacy_motion_status_adapter
+→ /motion/status
+→ motion_decision_node
+```
+
+`legacy_motion_status_adapter`는 Executor의 `RUNNING`, `SUCCEEDED`,
+`FAILED`, `CANCELLED`, `TIMEOUT`, `REJECTED` 값을 그대로 보존하면서 기존
+subscriber가 사용하는 `status`, `action`, `command_id`, `event_id`,
+`dynamics_command`, `motion_in_progress`, `reason` 필드를 만든다.
+Executor의 `request_id`, `motion_id`, `error_code`, `message`도 추가 필드로
+보존한다. 잘못된 JSON, 누락되거나 알 수 없는 status는 경고 후 발행하지
+않는다.
+
+이 adapter는 mock 검증을 위한 임시 호환 계층이다. 향후 mission node가
+`/motion/executor/status`를 직접 사용하면 제거할 수 있다.
+
 ## Motion Player backend 선택
 
 MotionExecutorNode는 `player_backend` parameter를 factory에 전달하여 player를

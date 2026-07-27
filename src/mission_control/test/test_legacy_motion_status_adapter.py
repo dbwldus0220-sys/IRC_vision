@@ -1,0 +1,86 @@
+import json
+import sys
+from pathlib import Path
+
+import pytest
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "mission_control"))
+
+from legacy_motion_status_adapter import (
+    ExecutorStatusValidationError,
+    convert_executor_status,
+    convert_executor_status_json,
+)
+
+
+def executor_status(status, **overrides):
+    payload = {
+        "request_id": 7,
+        "motion_id": "pick_ball",
+        "status": status,
+        "error_code": "",
+        "message": "",
+    }
+    payload.update(overrides)
+    return payload
+
+
+@pytest.mark.parametrize(
+    ("executor_value", "legacy_value"),
+    [
+        ("RUNNING", "RUNNING"),
+        ("SUCCEEDED", "SUCCEEDED"),
+        ("CANCELLED", "CANCELLED"),
+        ("TIMEOUT", "TIMEOUT"),
+        ("REJECTED", "REJECTED"),
+    ],
+)
+def test_status_conversion(executor_value, legacy_value):
+    converted = convert_executor_status(
+        executor_status(executor_value)
+    )
+    assert converted["status"] == legacy_value
+    assert converted["motion_in_progress"] is (
+        executor_value == "RUNNING"
+    )
+    assert converted["action"] == "PICKUP_NOW"
+    assert converted["command_id"] == 7
+    assert converted["event_id"] is None
+
+
+def test_failed_preserves_executor_details():
+    converted = convert_executor_status(
+        executor_status(
+            "FAILED",
+            error_code="COMMUNICATION_ERROR",
+            message="mock failure",
+        )
+    )
+    assert converted["status"] == "FAILED"
+    assert converted["request_id"] == 7
+    assert converted["motion_id"] == "pick_ball"
+    assert converted["error_code"] == "COMMUNICATION_ERROR"
+    assert converted["message"] == "mock failure"
+
+
+def test_invalid_json_is_rejected():
+    with pytest.raises(ExecutorStatusValidationError):
+        convert_executor_status("{invalid")
+
+
+def test_missing_status_is_rejected():
+    with pytest.raises(ExecutorStatusValidationError):
+        convert_executor_status({"request_id": 1})
+
+
+def test_unknown_status_is_rejected():
+    with pytest.raises(ExecutorStatusValidationError):
+        convert_executor_status(executor_status("PAUSED"))
+
+
+def test_one_input_produces_one_output_object():
+    output = convert_executor_status_json(
+        json.dumps(executor_status("SUCCEEDED"))
+    )
+    assert isinstance(json.loads(output), dict)
+    assert output.count('"status"') == 1

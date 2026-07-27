@@ -39,9 +39,14 @@ def test_mock_launch_description(monkeypatch, tmp_path):
     ]
     executables = {node.node_executable for node in nodes}
 
-    assert len(nodes) == 2
+    mission_control_nodes = [
+        node for node in nodes if node.node_package == "mission_control"
+    ]
+
+    assert len(mission_control_nodes) == 3
     assert "motion_executor_node" in executables
     assert "legacy_motion_executor_adapter" in executables
+    assert "legacy_motion_status_adapter" in executables
     assert "tick_period_ms" in arguments
     assert "mock_fail_after_updates" in arguments
     assert "mock_failure_code" in arguments

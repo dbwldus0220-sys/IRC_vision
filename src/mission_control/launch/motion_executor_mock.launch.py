@@ -73,5 +73,11 @@ def generate_launch_description():
                 name="legacy_motion_executor_adapter",
                 output="screen",
             ),
+            Node(
+                package="mission_control",
+                executable="legacy_motion_status_adapter",
+                name="legacy_motion_status_adapter",
+                output="screen",
+            ),
         ]
     )

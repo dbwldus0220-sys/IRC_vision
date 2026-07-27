@@ -41,6 +41,8 @@ setup(
             "mission_control.motion_executor_node:main",
             "legacy_motion_executor_adapter="
             "mission_control.legacy_motion_executor_adapter:main",
+            "legacy_motion_status_adapter="
+            "mission_control.legacy_motion_status_adapter:main",
         ],
     },
 )
