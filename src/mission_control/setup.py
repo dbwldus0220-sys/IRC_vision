@@ -39,6 +39,8 @@ setup(
             "mission_control.sdk_motion_stub_node:main",
             "motion_executor_node="
             "mission_control.motion_executor_node:main",
+            "legacy_motion_executor_adapter="
+            "mission_control.legacy_motion_executor_adapter:main",
         ],
     },
 )

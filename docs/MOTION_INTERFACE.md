@@ -339,6 +339,75 @@ cancel의 `request_id`가 현재 실행 중인 최초 요청과 일치할 때만
 RobotMotionPlayer 연동 시 제거되거나 실제 SDK의 오류 주입 방식으로 교체될 수
 있으며 Dynamixel 또는 실제 하드웨어에는 접근하지 않는다.
 
+## Legacy Motion Executor Adapter
+
+`legacy_motion_executor_adapter`는 현재 `/navigation/motion_command` JSON을
+구독하여 mock 기반 `/motion/executor/request` 형식으로 변환하는 병렬 검증
+경로이다.
+
+```text
+/navigation/motion_command
+        ├─ motion_command_bridge_node → 기존 경로
+        └─ legacy_motion_executor_adapter → mock Motion Executor 검증 경로
+```
+
+기존 `motion_command_bridge_node`는 삭제하거나 대체하지 않는다. 새 adapter는
+mock Executor 통합이 검증되는 동안에만 병렬로 사용하며 실제 SDK 또는
+Dynamixel에 접근하지 않는다.
+
+### topic
+
+- 구독: `/navigation/motion_command` (`std_msgs/msg/String`)
+- 발행: `/motion/executor/request` (`std_msgs/msg/String`)
+
+입력 예:
+
+```json
+{
+  "action": "STRAIGHT",
+  "angle_deg": 0.0
+}
+```
+
+출력 예:
+
+```json
+{
+  "request_id": 1,
+  "motion_id": "forward",
+  "timeout_ms": 5000
+}
+```
+
+`request_id`는 adapter 내부에서 1부터 증가한다. `angle_deg`는 호환성을 위해
+파싱하지만 현재 Executor 요청에는 포함하지 않는다. 잘못된 JSON, 유효하지 않은
+`action`, 지원하지 않는 `action`은 경고만 남기고 발행하지 않는다.
+
+### action 매핑
+
+| legacy action | motion_id |
+| --- | --- |
+| `STRAIGHT`, `APPROACH`, `GO` | `forward` |
+| `SLOW_APPROACH`, `FINE_FORWARD_STEP` | `forward_short` |
+| `APPROACH_GOAL`, `APPROACH_HURDLE` | `forward_short` |
+| `ALIGN_LEFT` | `adjust_left` |
+| `ALIGN_RIGHT` | `adjust_right` |
+| `RECOVER_LEFT`, `RECOVER_RIGHT` | `recover` |
+| `RETREAT_GOAL` | `backward` |
+| `PICKUP_NOW` | `pick_ball` |
+| `SHOT` | `shoot` |
+| `TURN_LEFT` | `turn_left` |
+| `TURN_RIGHT` | `turn_right` |
+| `CROSS_FINISH` | `hurdle` |
+
+### timeout
+
+- 일반 이동: 5000ms
+- `pick_ball`: 10000ms
+- `shoot`: 10000ms
+- `hurdle`: 12000ms
+- `recover`: 8000ms
+
 ## 아직 미확정인 항목
 
 - 실제 전체 모션 JSON 데이터
