@@ -1,0 +1,55 @@
+import importlib.util
+from pathlib import Path
+
+from launch.actions import DeclareLaunchArgument
+from launch_ros.actions import Node
+
+
+def load_launch_module():
+    launch_path = (
+        Path(__file__).resolve().parents[1]
+        / "launch"
+        / "motion_executor_mock.launch.py"
+    )
+    spec = importlib.util.spec_from_file_location(
+        "motion_executor_mock_launch", launch_path
+    )
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_mock_launch_description(monkeypatch, tmp_path):
+    # Launch actions initialize logging, but no ROS graph or process is run.
+    monkeypatch.setenv("ROS_LOG_DIR", str(tmp_path / "ros_logs"))
+    module = load_launch_module()
+    description = module.generate_launch_description()
+
+    arguments = {
+        action.name
+        for action in description.entities
+        if isinstance(action, DeclareLaunchArgument)
+    }
+    nodes = [
+        action
+        for action in description.entities
+        if isinstance(action, Node)
+    ]
+    executables = {node.node_executable for node in nodes}
+
+    assert len(nodes) == 2
+    assert "motion_executor_node" in executables
+    assert "legacy_motion_executor_adapter" in executables
+    assert "tick_period_ms" in arguments
+    assert "mock_fail_after_updates" in arguments
+    assert "mock_failure_code" in arguments
+
+    forbidden_executables = {
+        "robot_motion_player",
+        "sdk_motion_stub_node",
+        "dynamixel",
+        "dynamixel_node",
+    }
+    assert executables.isdisjoint(forbidden_executables)

@@ -408,6 +408,46 @@ Dynamixel에 접근하지 않는다.
 - `hurdle`: 12000ms
 - `recover`: 8000ms
 
+## mock 통합 검증 launch
+
+`motion_executor_mock.launch.py`는 mock 기반 Motion Executor 통합 흐름만
+검증하기 위한 launch 파일이다. 다음 두 노드만 실행 대상으로 포함한다.
+
+- `mission_control / motion_executor_node`
+- `mission_control / legacy_motion_executor_adapter`
+
+이 launch는 `MockRobotMotionPlayer`만 사용한다. 실제 RobotMotionPlayer를
+실행하지 않고 Dynamixel에 접근하지 않으며 실물 로봇을 움직이지 않는다.
+실제 로봇 운용용 launch로 사용하면 안 된다.
+
+기본 실행:
+
+```bash
+ros2 launch mission_control motion_executor_mock.launch.py
+```
+
+정상 검증용 예:
+
+```bash
+ros2 launch mission_control motion_executor_mock.launch.py \
+  tick_period_ms:=500
+```
+
+실패 주입용 예:
+
+```bash
+ros2 launch mission_control motion_executor_mock.launch.py \
+  tick_period_ms:=500 \
+  mock_fail_after_updates:=2 \
+  mock_failure_code:=COMMUNICATION_ERROR
+```
+
+launch argument 기본값:
+
+- `tick_period_ms`: `100`
+- `mock_fail_after_updates`: `-1`
+- `mock_failure_code`: `COMMUNICATION_ERROR`
+
 ## 아직 미확정인 항목
 
 - 실제 전체 모션 JSON 데이터
