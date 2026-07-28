@@ -1,6 +1,8 @@
 """Tests for special-motion state handling in the motion decision node."""
 
 import json
+from pathlib import Path
+import sys
 
 from mission_control.motion_decision_node import MotionDecisionNode
 from mission_control.motion_decision_planner import MotionDecision
@@ -8,6 +10,10 @@ from mission_control.motion_decision_planner import MotionDecision
 import pytest
 
 from std_msgs.msg import String
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "mission_control"))
+
+from mock_mission_input_node import build_mock_vision_input
 
 
 class FakeLogger:
@@ -190,6 +196,67 @@ def select_decision(node, finish=None, **observations):
         inputs,
         0.1,
     )
+
+
+class FreshMockInputNode(FakeDecisionNode):
+    """Provide the real freshness and planner state for mock input tests."""
+
+    SOURCES = MotionDecisionNode.SOURCES
+
+    def __init__(self):
+        super().__init__()
+        from mission_control.motion_decision_planner import (
+            MotionDecisionPlanner,
+        )
+
+        self.planner = MotionDecisionPlanner()
+        self.latest_info = {
+            source: None for source in self.SOURCES
+        }
+        self.latest_time = {
+            source: None for source in self.SOURCES
+        }
+        self.timeouts = {
+            source: 0.5 for source in self.SOURCES
+        }
+
+
+@pytest.mark.parametrize(
+    ("scenario", "expected_action"),
+    [
+        ("straight", "STRAIGHT"),
+        ("turn_left", "LEFT"),
+        ("turn_right", "RIGHT"),
+    ],
+)
+def test_mock_line_input_is_fresh_and_produces_action(
+    scenario, expected_action
+):
+    node = FreshMockInputNode()
+    topic, payload = build_mock_vision_input(scenario)
+    assert topic == "/vision/line_info"
+
+    message = String()
+    message.data = json.dumps(payload)
+    MotionDecisionNode._info_callback(node, "line")(message)
+
+    received_at = node.latest_time["line"]
+    assert received_at is not None
+    observations, ages = MotionDecisionNode._fresh_observations(
+        node,
+        now=received_at + 0.1,
+    )
+    assert observations["line"] == payload
+    assert ages["line"] == pytest.approx(0.1)
+
+    decision = MotionDecisionNode._select_mission_decision(
+        node,
+        observations,
+        0.1,
+    )
+    assert decision.reason != "no_fresh_detected_target"
+    assert decision.action == expected_action
+    assert decision.valid is True
 
 
 @pytest.mark.parametrize(

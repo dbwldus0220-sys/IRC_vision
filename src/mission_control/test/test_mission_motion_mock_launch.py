@@ -65,3 +65,37 @@ def test_mission_motion_mock_launch(monkeypatch, tmp_path):
         for substitution in arguments["player_backend"].default_value
     )
     assert default_backend == "mock"
+
+    assert "scenario" in arguments
+    default_scenario = "".join(
+        substitution.text
+        for substitution in arguments["scenario"].default_value
+    )
+    assert default_scenario == "straight"
+
+    mock_input_node = next(
+        node
+        for node in mission_nodes
+        if node.node_executable == "mock_mission_input_node"
+    )
+    mock_parameters = mock_input_node._Node__parameters[0]
+    parameter_names = {
+        "".join(substitution.text for substitution in name)
+        for name in mock_parameters
+    }
+    assert {
+        "scenario",
+        "publish_delay_sec",
+        "publish_once",
+    }.issubset(parameter_names)
+
+    scenario_value = next(
+        value
+        for name, value in mock_parameters.items()
+        if "".join(substitution.text for substitution in name) == "scenario"
+    )
+    assert len(scenario_value) == 1
+    assert "".join(
+        substitution.text
+        for substitution in scenario_value[0].variable_name
+    ) == "scenario"

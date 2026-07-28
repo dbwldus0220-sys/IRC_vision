@@ -396,8 +396,8 @@ Dynamixel에 접근하지 않는다.
 | `RETREAT_GOAL` | `backward` |
 | `PICKUP_NOW` | `pick_ball` |
 | `SHOT` | `shoot` |
-| `TURN_LEFT` | `turn_left` |
-| `TURN_RIGHT` | `turn_right` |
+| `TURN_LEFT`, `LEFT` | `turn_left` |
+| `TURN_RIGHT`, `RIGHT` | `turn_right` |
 | `CROSS_FINISH` | `hurdle` |
 
 ### timeout
@@ -511,6 +511,59 @@ mock_mission_input_node
 이 환경은 mock 통합 검증 전용이다. 실제 카메라, RealSense, YOLO 모델,
 실제 RobotMotionPlayer SDK, Dynamixel 및 serial 장치를 실행하거나
 접근하지 않는다.
+
+scenario별 실행 예:
+
+직진:
+
+```bash
+ros2 launch mission_control mission_motion_mock.launch.py \
+  scenario:=straight \
+  publish_delay_sec:=10.0
+```
+
+왼쪽 회전:
+
+```bash
+ros2 launch mission_control mission_motion_mock.launch.py \
+  scenario:=turn_left \
+  publish_delay_sec:=10.0 \
+  publish_once:=false
+```
+
+오른쪽 회전:
+
+```bash
+ros2 launch mission_control mission_motion_mock.launch.py \
+  scenario:=turn_right \
+  publish_delay_sec:=10.0 \
+  publish_once:=false
+```
+
+현재 코드에서 확인한 scenario별 결과는 다음과 같다.
+
+| scenario | line heading | mission action | Executor 변환 |
+|---|---:|---|---|
+| `straight` | `0.0°` | `STRAIGHT` | `forward` |
+| `turn_left` | `-10.0°` | `LEFT` | `turn_left` |
+| `turn_right` | `+10.0°` | `RIGHT` | `turn_right` |
+
+`straight`는 `STRAIGHT`가 `forward` 요청으로 변환되어 Executor의
+`RUNNING → SUCCEEDED`가 `/motion/status`로 돌아온다.
+
+회전 scenario의 실제 기존 mission action은 각각 `LEFT`, `RIGHT`이다.
+`legacy_motion_executor_adapter`는 이를 각각 Executor의 `turn_left`,
+`turn_right`로 변환한다. `WAIT`, 알 수 없는 action 및 명시적으로
+`valid=false`인 명령은 Executor 요청을 만들지 않는다.
+
+`/vision/line_info`는 `std_msgs/msg/String` JSON이므로 ROS `Header`나
+`header.stamp` 필드가 없다. `motion_decision_node`는 메시지를 받은 순간의
+`time.monotonic()`을 freshness 시각으로 저장하며 기본 0.5초가 지나면
+`no_fresh_detected_target`으로 전환한다. 따라서 지속 관찰용 실행에서는
+`publish_once:=false`를 사용한다. mock node는 `publish_delay_sec` 후 첫
+메시지를 발행한 다음 0.1초마다 같은 결정적 입력을 갱신하여 freshness
+조건을 통과시킨다. `publish_once:=true`는 의도대로 한 번만 발행하므로
+0.5초 후 WAIT로 돌아간다.
 
 ## Motion Player backend 선택
 

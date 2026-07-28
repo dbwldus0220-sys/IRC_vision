@@ -43,7 +43,9 @@ def generate_launch_description():
             DeclareLaunchArgument(
                 "scenario",
                 default_value="straight",
-                description="Deterministic mock mission input scenario",
+                description=(
+                    "Mock input scenario: straight, turn_left, or turn_right"
+                ),
             ),
             DeclareLaunchArgument(
                 "publish_delay_sec",

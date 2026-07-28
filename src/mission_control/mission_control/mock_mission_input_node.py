@@ -15,7 +15,13 @@ except ImportError:  # Pure helpers remain testable without ROS.
     String = None
 
 
-SUPPORTED_SCENARIOS = {"straight"}
+SCENARIO_HEADING_ERROR_DEG = {
+    "straight": 0.0,
+    "turn_left": -10.0,
+    "turn_right": 10.0,
+}
+SUPPORTED_SCENARIOS = frozenset(SCENARIO_HEADING_ERROR_DEG)
+REFRESH_PERIOD_SEC = 0.1
 
 
 class MockScenarioError(ValueError):
@@ -32,7 +38,9 @@ def build_mock_vision_input(scenario: str) -> tuple[str, dict[str, Any]]:
         "/vision/line_info",
         {
             "detected": True,
-            "filtered_heading_error_deg": 0.0,
+            "filtered_heading_error_deg": (
+                SCENARIO_HEADING_ERROR_DEG[normalized]
+            ),
             "filtered_lateral_offset_norm": 0.0,
             "heading_quality": 1.0,
             "geometry_quality": 1.0,
@@ -72,11 +80,14 @@ class MockMissionInputNode(Node):
             String, self._topic, 10
         )
 
-        delay = max(
+        self._publish_delay_sec = max(
             0.01,
             float(self.get_parameter("publish_delay_sec").value),
         )
-        self._timer = self.create_timer(delay, self._publish_mock_input)
+        self._timer = self.create_timer(
+            self._publish_delay_sec,
+            self._publish_mock_input,
+        )
 
     def _publish_mock_input(self) -> None:
         if not should_publish(self._publish_once, self._has_published):
@@ -96,6 +107,14 @@ class MockMissionInputNode(Node):
 
         if self._publish_once:
             self.destroy_timer(self._timer)
+        elif self._publish_delay_sec != REFRESH_PERIOD_SEC:
+            # publish_delay_sec is an initial delay, not a refresh period.
+            # Refresh faster than motion_decision_node's 0.5 s timeout.
+            self.destroy_timer(self._timer)
+            self._timer = self.create_timer(
+                REFRESH_PERIOD_SEC,
+                self._publish_mock_input,
+            )
 
 
 def main(args: Optional[list] = None) -> None:

@@ -34,6 +34,8 @@ ACTION_TO_MOTION_ID = {
     "GO": "forward",
     "TURN_LEFT": "turn_left",
     "TURN_RIGHT": "turn_right",
+    "LEFT": "turn_left",
+    "RIGHT": "turn_right",
     "CROSS_FINISH": "hurdle",
 }
 
@@ -50,6 +52,7 @@ MOTION_TIMEOUT_MS = {
 class LegacyMotionCommand:
     action: str
     angle_deg: Any = None
+    valid: Any = None
 
 
 class LegacyCommandValidationError(ValueError):
@@ -85,7 +88,11 @@ def parse_legacy_motion_command(
         )
 
     # angle_deg is parsed for compatibility but is not sent to the Executor.
-    return LegacyMotionCommand(action=action, angle_deg=data.get("angle_deg"))
+    return LegacyMotionCommand(
+        action=action,
+        angle_deg=data.get("angle_deg"),
+        valid=data.get("valid"),
+    )
 
 
 def map_action_to_motion_id(action: str) -> Optional[str]:
@@ -130,6 +137,12 @@ class LegacyMotionExecutorAdapter(Node):
             command = parse_legacy_motion_command(message.data)
         except LegacyCommandValidationError as exc:
             self.get_logger().warning(str(exc))
+            return
+
+        if command.valid is False:
+            self.get_logger().warning(
+                f"invalid legacy command ignored: {command.action}"
+            )
             return
 
         motion_id = map_action_to_motion_id(command.action)

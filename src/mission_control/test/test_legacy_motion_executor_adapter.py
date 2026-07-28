@@ -1,12 +1,15 @@
 import copy
+import json
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "mission_control"))
 
 from legacy_motion_executor_adapter import (
+    LegacyMotionExecutorAdapter,
     LegacyCommandValidationError,
     build_executor_request,
     map_action_to_motion_id,
@@ -20,6 +23,8 @@ from legacy_motion_executor_adapter import (
     [
         ("STRAIGHT", "forward"),
         ("TURN_LEFT", "turn_left"),
+        ("LEFT", "turn_left"),
+        ("RIGHT", "turn_right"),
         ("PICKUP_NOW", "pick_ball"),
         ("SHOT", "shoot"),
         ("CROSS_FINISH", "hurdle"),
@@ -57,6 +62,7 @@ def test_missing_action():
 
 def test_unsupported_action():
     assert map_action_to_motion_id("FLY") is None
+    assert map_action_to_motion_id("WAIT") is None
 
 
 def test_parse_does_not_modify_input_object():
@@ -66,3 +72,69 @@ def test_parse_does_not_modify_input_object():
     assert source == original
     assert command.action == "STRAIGHT"
     assert command.angle_deg == 12.5
+
+
+class CapturePublisher:
+    def __init__(self):
+        self.messages = []
+
+    def publish(self, message):
+        self.messages.append(message)
+
+
+class FakeLogger:
+    def warning(self, _message):
+        pass
+
+
+class FakeAdapter:
+    def __init__(self):
+        self._next_request_id = 1
+        self._request_publisher = CapturePublisher()
+        self._logger = FakeLogger()
+
+    def get_logger(self):
+        return self._logger
+
+
+def send_legacy_command(adapter, **payload):
+    message = SimpleNamespace(data=json.dumps(payload))
+    LegacyMotionExecutorAdapter._on_legacy_command(adapter, message)
+
+
+def test_left_and_right_create_executor_requests():
+    adapter = FakeAdapter()
+    send_legacy_command(adapter, action="LEFT", valid=True)
+    send_legacy_command(adapter, action="RIGHT", valid=True)
+
+    requests = [
+        json.loads(message.data)
+        for message in adapter._request_publisher.messages
+    ]
+    assert requests == [
+        {
+            "request_id": 1,
+            "motion_id": "turn_left",
+            "timeout_ms": 5000,
+        },
+        {
+            "request_id": 2,
+            "motion_id": "turn_right",
+            "timeout_ms": 5000,
+        },
+    ]
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"action": "WAIT", "valid": False},
+        {"action": "STRAIGHT", "valid": False},
+        {"action": "FLY", "valid": True},
+    ],
+)
+def test_non_executable_command_does_not_create_request(payload):
+    adapter = FakeAdapter()
+    send_legacy_command(adapter, **payload)
+    assert adapter._request_publisher.messages == []
+    assert adapter._next_request_id == 1
