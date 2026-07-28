@@ -12,6 +12,8 @@ from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 from std_msgs.msg import String
 
+from .motion_command_gate import GeneralMotionCommandGate
+from .motion_command_gate import normalize_general_action
 from .motion_decision_planner import MotionDecision
 from .motion_decision_planner import MotionDecisionConfig
 from .motion_decision_planner import MotionDecisionPlanner
@@ -237,6 +239,7 @@ class MotionDecisionNode(Node):
         self.active_special_command_id: int | None = None
         self.active_special_event_id: int | None = None
         self.active_special_dynamics_command: int | None = None
+        self.general_motion_gate = GeneralMotionCommandGate()
 
         for source in self.SOURCES:
             topic = str(
@@ -333,6 +336,7 @@ class MotionDecisionNode(Node):
 
                 self.latest_info[source] = payload
                 self.latest_time[source] = time.monotonic()
+                self.general_motion_gate.on_new_vision_input()
 
             except (
                 json.JSONDecodeError,
@@ -405,6 +409,18 @@ class MotionDecisionNode(Node):
         dynamics_command = payload.get(
             "dynamics_command"
         )
+
+        if normalize_general_action(action) is not None:
+            transition = self.general_motion_gate.on_motion_status(
+                action,
+                status,
+            )
+            if transition.released:
+                self.get_logger().info(
+                    "General motion lock released: "
+                    f"status={status}, action={action}"
+                )
+            return
 
         if action not in self.SPECIAL_ACTIONS:
             return
@@ -671,6 +687,18 @@ class MotionDecisionNode(Node):
             decision
         )
 
+        is_general_motion = (
+            decision.valid
+            and normalize_general_action(decision.action) is not None
+        )
+        if (
+            is_general_motion
+            and not self.general_motion_gate.can_publish(decision.action)
+        ):
+            # Keep receiving Vision and running the planner, but do not publish
+            # another executable command while the current motion is locked.
+            return
+
         terminal_key = (
             decision.source,
             decision.action,
@@ -746,6 +774,11 @@ class MotionDecisionNode(Node):
         )
 
         self.publisher.publish(output)
+
+        if is_general_motion:
+            self.general_motion_gate.on_command_published(
+                decision.action
+            )
 
     def _select_mission_decision(
         self,

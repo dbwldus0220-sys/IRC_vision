@@ -6,6 +6,7 @@ import sys
 
 from mission_control.motion_decision_node import MotionDecisionNode
 from mission_control.motion_decision_planner import MotionDecision
+from mission_control.motion_command_gate import GeneralMotionCommandGate
 
 import pytest
 
@@ -88,6 +89,7 @@ class FakeDecisionNode:
         self.active_special_command_id = None
         self.active_special_event_id = None
         self.active_special_dynamics_command = None
+        self.general_motion_gate = GeneralMotionCommandGate()
         self.planner = FakePlanner()
 
         self.logger = FakeLogger()

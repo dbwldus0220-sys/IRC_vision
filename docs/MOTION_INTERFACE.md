@@ -556,6 +556,36 @@ ros2 launch mission_control mission_motion_mock.launch.py \
 `turn_right`로 변환한다. `WAIT`, 알 수 없는 action 및 명시적으로
 `valid=false`인 명령은 Executor 요청을 만들지 않는다.
 
+### 일반 모션 명령 잠금
+
+`STRAIGHT`, `LEFT`, `RIGHT`는 다음 상태 흐름을 따른다.
+
+```text
+IDLE
+→ 일반 모션 명령 한 번 발행 및 즉시 잠금
+→ RUNNING 동안 잠금 유지
+→ SUCCEEDED / FAILED / TIMEOUT / CANCELLED / REJECTED
+→ 잠금 해제
+→ 새 Vision 입력 이후 다음 판단 허용
+```
+
+잠금 중에도 Vision 입력과 planner 계산은 계속되지만 추가
+`/navigation/motion_command`는 발행하지 않는다. 따라서 같은 action뿐 아니라
+실행 중 판단된 다른 일반 action도 새 Executor 요청으로 전달되지 않는다.
+Executor의 `REJECTED_BUSY` 검사는 이 알고리즘 잠금 이후의 마지막 안전망이다.
+
+정상 완료, 실패, timeout, cancel 이후에는 terminal 상태보다 나중에 도착한
+Vision 메시지가 최소 한 번 있어야 다음 일반 모션을 허용한다. `REJECTED`는
+반복 frame마다 같은 요청을 재전송하지 않도록 동일 action을 억제하며, 판단이
+다른 일반 action으로 바뀌면 다시 허용한다.
+
+현재 `/motion/status`의 `command_id`는 mission command ID가 아니라 Executor
+`request_id`이므로 ID 상관관계는 완전하지 않다. 일반 모션 잠금은 활성 action,
+`LEFT`/`TURN_LEFT` 및 `RIGHT`/`TURN_RIGHT` alias, 명령 발행 이후 matching
+`RUNNING` 수신 여부를 사용한다. matching `RUNNING`보다 먼저 도착한 terminal
+상태는 오래된 상태로 보고 새 잠금을 해제하지 않는다. `REJECTED`는 정상적으로
+`RUNNING` 없이 반환될 수 있어 matching action만 확인한다.
+
 `/vision/line_info`는 `std_msgs/msg/String` JSON이므로 ROS `Header`나
 `header.stamp` 필드가 없다. `motion_decision_node`는 메시지를 받은 순간의
 `time.monotonic()`을 freshness 시각으로 저장하며 기본 0.5초가 지나면
