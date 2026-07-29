@@ -12,6 +12,7 @@ from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 from std_msgs.msg import String
 
+from .mission_phase_manager import MissionPhaseManager
 from .motion_command_gate import GeneralMotionCommandGate
 from .motion_command_gate import normalize_general_action
 from .motion_decision_planner import MotionDecision
@@ -29,13 +30,6 @@ class MotionDecisionNode(Node):
         "SHOT",
         "GO",
         "CROSS_FINISH",
-    }
-
-    SPECIAL_COMPLETION_PHASES = {
-        "PICKUP_NOW": "GOAL_APPROACH",
-        "SHOT": "AUTO",
-        "GO": "AUTO",
-        "CROSS_FINISH": "FINISHED",
     }
 
     SPECIAL_ACTION_SOURCES = {
@@ -168,33 +162,27 @@ class MotionDecisionNode(Node):
             )
         )
 
-        self.mission_phase = str(
-            self.get_parameter("initial_mission_phase").value
-        ).strip().upper()
-        self.required_pickups = max(
-            0,
-            int(self.get_parameter("required_pickups").value),
-        )
-        self.required_shots = max(
-            0,
-            int(self.get_parameter("required_shots").value),
-        )
-        self.required_ball_sections = max(
-            0,
-            int(
-                self.get_parameter(
-                    "required_ball_sections"
-                ).value
+        self.phase_manager = MissionPhaseManager(
+            initial_phase=str(
+                self.get_parameter("initial_mission_phase").value
+            ),
+            required_pickups=max(
+                0,
+                int(self.get_parameter("required_pickups").value),
+            ),
+            required_shots=max(
+                0,
+                int(self.get_parameter("required_shots").value),
+            ),
+            required_ball_sections=max(
+                0,
+                int(
+                    self.get_parameter(
+                        "required_ball_sections"
+                    ).value
+                ),
             ),
         )
-        self.pickups_completed = 0
-        self.shots_completed = 0
-        self.ball_sections_processed = 0
-        self.finish_enabled = (
-            self.ball_sections_processed
-            >= self.required_ball_sections
-        )
-        self.mission_complete = False
         self.finish_min_confidence = max(
             0.0,
             min(
@@ -234,9 +222,6 @@ class MotionDecisionNode(Node):
         }
 
         # Special SDK/Dynamics motion lock state.
-        self.special_motion_running = False
-        self.active_special_action: str | None = None
-        self.active_special_command_id: int | None = None
         self.active_special_event_id: int | None = None
         self.active_special_dynamics_command: int | None = None
         self.general_motion_gate = GeneralMotionCommandGate()
@@ -324,6 +309,55 @@ class MotionDecisionNode(Node):
     def _float_parameter(self, name: str) -> float:
         return float(self.get_parameter(name).value)
 
+    @property
+    def mission_phase(self) -> str:
+        """Expose the Manager-owned phase for legacy readers."""
+        return self.phase_manager.current_phase
+
+    @property
+    def required_pickups(self) -> int:
+        return self.phase_manager.required_pickups
+
+    @property
+    def required_shots(self) -> int:
+        return self.phase_manager.required_shots
+
+    @property
+    def required_ball_sections(self) -> int:
+        return self.phase_manager.required_ball_sections
+
+    @property
+    def pickups_completed(self) -> int:
+        return self.phase_manager.pickups_completed
+
+    @property
+    def shots_completed(self) -> int:
+        return self.phase_manager.shots_completed
+
+    @property
+    def ball_sections_processed(self) -> int:
+        return self.phase_manager.ball_sections_processed
+
+    @property
+    def finish_enabled(self) -> bool:
+        return self.phase_manager.finish_enabled
+
+    @property
+    def mission_complete(self) -> bool:
+        return self.phase_manager.mission_complete
+
+    @property
+    def active_special_action(self) -> str | None:
+        return self.phase_manager.active_special_action
+
+    @property
+    def active_special_command_id(self) -> int | None:
+        return self.phase_manager.active_special_command_id
+
+    @property
+    def special_motion_running(self) -> bool:
+        return self.phase_manager.active_special_running
+
     def _info_callback(self, source: str):
         def callback(message: String) -> None:
             try:
@@ -367,13 +401,31 @@ class MotionDecisionNode(Node):
         except json.JSONDecodeError:
             pass
 
-        if phase:
-            self.mission_phase = phase.upper()
-
-            self.get_logger().info(
-                f"Mission phase changed: "
-                f"{self.mission_phase}"
+        if not phase:
+            self.get_logger().warning(
+                "Mission phase override rejected: empty phase"
             )
+            return
+
+        if self.active_special_command_id is not None:
+            self.get_logger().warning(
+                "Mission phase override rejected: "
+                "special motion is active "
+                f"(action={self.active_special_action}, "
+                f"command_id={self.active_special_command_id})"
+            )
+            return
+
+        if not self.phase_manager.set_phase(phase):
+            self.get_logger().warning(
+                "Mission phase override rejected: "
+                f"unsupported phase={phase!r}"
+            )
+            return
+
+        self.get_logger().info(
+            f"Mission phase changed: {self.mission_phase}"
+        )
 
     def _motion_status_callback(
         self,
@@ -427,29 +479,6 @@ class MotionDecisionNode(Node):
             return
 
         if (
-            isinstance(command_id, bool)
-            or not isinstance(command_id, int)
-            or self.active_special_command_id is None
-            or command_id != self.active_special_command_id
-        ):
-            self.get_logger().warning(
-                "Special motion status ignored: "
-                "command_id mismatch or missing "
-                f"(active={self.active_special_command_id}, "
-                f"received={command_id})"
-            )
-            return
-
-        if action != self.active_special_action:
-            self.get_logger().warning(
-                "Special motion status ignored: "
-                "action mismatch "
-                f"(active={self.active_special_action}, "
-                f"received={action})"
-            )
-            return
-
-        if (
             self.active_special_event_id is not None
             and event_id is not None
             and event_id != self.active_special_event_id
@@ -462,8 +491,23 @@ class MotionDecisionNode(Node):
             )
             return
 
-        if status == "RUNNING":
-            self.special_motion_running = True
+        completed_action = self.active_special_action
+        completed_command_id = self.active_special_command_id
+        result = self.phase_manager.handle_motion_status(
+            action,
+            command_id,
+            status,
+        )
+
+        if not result.handled:
+            self.get_logger().warning(
+                "Special motion status ignored: "
+                f"reason={result.reason}, status={status}, "
+                f"action={action}, command_id={command_id}"
+            )
+            return
+
+        if not result.terminal:
             self.active_special_event_id = (
                 event_id
                 if isinstance(event_id, int)
@@ -487,29 +531,8 @@ class MotionDecisionNode(Node):
             )
             return
 
-        if status not in {
-            "SUCCEEDED",
-            "FAILED",
-            "TIMEOUT",
-        }:
-            return
-
-        if not self.special_motion_running:
-            self.get_logger().info(
-                "Terminal motion status ignored: "
-                "no special motion is currently locked"
-            )
-            return
-
-        completed_action = self.active_special_action
         completed_event_id = self.active_special_event_id
-        completed_command_id = (
-            self.active_special_command_id
-        )
 
-        self.special_motion_running = False
-        self.active_special_action = None
-        self.active_special_command_id = None
         self.active_special_event_id = None
         self.active_special_dynamics_command = None
 
@@ -521,113 +544,33 @@ class MotionDecisionNode(Node):
             f"event_id={completed_event_id}"
         )
 
-        self._update_action_progress(completed_action, status)
-
-        if status == "SUCCEEDED":
-            next_phase = self.SPECIAL_COMPLETION_PHASES.get(
-                completed_action,
-                "AUTO",
-            )
-            if completed_action == "SHOT" and self.finish_enabled:
-                next_phase = "WALK_TO_FINISH"
-            elif completed_action == "CROSS_FINISH":
-                self.mission_complete = True
-                next_phase = "FINISHED"
-        else:
-            if completed_action == "CROSS_FINISH":
-                self.mission_complete = False
-                self.terminal_action_armed["finish"] = True
-                next_phase = "WALK_TO_FINISH"
-            elif (
-                completed_action in {"PICKUP_NOW", "SHOT"}
-                and self.finish_enabled
-            ):
-                next_phase = "WALK_TO_FINISH"
-            else:
-                next_phase = "AUTO"
-
-        previous_phase = self.mission_phase
-        self.mission_phase = next_phase
+        if completed_action == "CROSS_FINISH" and status != "SUCCEEDED":
+            self.terminal_action_armed["finish"] = True
         self.terminal_latch = None
 
         self.get_logger().info(
             "Mission phase advanced after special motion: "
             f"status={status}, "
             f"action={completed_action}, "
-            f"previous_phase={previous_phase}, "
+            f"previous_phase={result.previous_phase}, "
             f"next_phase={self.mission_phase}"
         )
 
-    def _update_action_progress(
-        self,
-        completed_action: str | None,
-        status: str,
-    ) -> None:
-        """Record success scores and processed ball-course sections."""
-        previous_pickups = self.pickups_completed
-        previous_shots = self.shots_completed
-        previous_sections = self.ball_sections_processed
-        previous_finish_enabled = self.finish_enabled
-
-        if completed_action == "PICKUP_NOW" and status == "SUCCEEDED":
-            self.pickups_completed = min(
-                self.pickups_completed + 1,
-                self.required_pickups,
-            )
-        elif completed_action == "PICKUP_NOW":
-            self.ball_sections_processed = min(
-                self.ball_sections_processed + 1,
-                self.required_ball_sections,
-            )
-        elif completed_action == "SHOT":
-            if status == "SUCCEEDED":
-                self.shots_completed = min(
-                    self.shots_completed + 1,
-                    self.required_shots,
-                )
-            self.ball_sections_processed = min(
-                self.ball_sections_processed + 1,
-                self.required_ball_sections,
-            )
-
-        if completed_action in {"PICKUP_NOW", "SHOT"}:
-            self.finish_enabled = (
-                self.ball_sections_processed
-                >= self.required_ball_sections
-            )
-
-        counters_changed = (
-            self.pickups_completed != previous_pickups
-            or self.shots_completed != previous_shots
-            or self.ball_sections_processed != previous_sections
-            or self.finish_enabled != previous_finish_enabled
-        )
-        if counters_changed:
-            self.get_logger().info(
-                "Mission progress updated: "
-                f"completed_action={completed_action}, "
-                f"status={status}, "
-                f"pickups={self.pickups_completed}/"
-                f"{self.required_pickups}, "
-                f"shots={self.shots_completed}/"
-                f"{self.required_shots}, "
-                f"ball_sections="
-                f"{self.ball_sections_processed}/"
-                f"{self.required_ball_sections}, "
-                f"finish_enabled={self.finish_enabled}"
-            )
-
     def _mission_progress(self) -> dict[str, int | bool]:
         """Return success scores and independent course progress."""
+        snapshot = self.phase_manager.snapshot()
         return {
-            "pickups_completed": self.pickups_completed,
-            "required_pickups": self.required_pickups,
-            "shots_completed": self.shots_completed,
-            "required_shots": self.required_shots,
-            "ball_sections_processed": self.ball_sections_processed,
-            "required_ball_sections": self.required_ball_sections,
-            "finish_enabled": self.finish_enabled,
-            "mission_complete": self.mission_complete,
+            key: snapshot[key]
+            for key in (
+                "pickups_completed",
+                "required_pickups",
+                "shots_completed",
+                "required_shots",
+                "ball_sections_processed",
+                "required_ball_sections",
+                "finish_enabled",
+                "mission_complete",
+            )
         }
 
     def _fresh_observations(
@@ -713,31 +656,36 @@ class MotionDecisionNode(Node):
 
         trigger = False
 
+        next_command_id = self.command_id + 1
         if decision.requires_ack:
             if self.terminal_latch != terminal_key:
-                self.event_id += 1
                 trigger = True
-
-                source = self.SPECIAL_ACTION_SOURCES.get(
-                    decision.action
-                )
+                if not self.phase_manager.start_special_action(
+                    decision.action,
+                    next_command_id,
+                ):
+                    self.get_logger().warning(
+                        "Special motion command suppressed: "
+                        "another special command is active "
+                        f"(action={decision.action}, "
+                        f"command_id={next_command_id})"
+                    )
+                    return
+                self.event_id += 1
+                source = self.SPECIAL_ACTION_SOURCES.get(decision.action)
                 if source is not None:
                     self.terminal_action_armed[source] = False
+                self.active_special_event_id = self.event_id
+                self.active_special_dynamics_command = None
 
             self.terminal_latch = terminal_key
 
-        elif not self.special_motion_running:
+        elif self.active_special_command_id is None:
             self.terminal_latch = None
 
-        self.command_id += 1
+        self.command_id = next_command_id
 
         payload = decision.to_dict()
-
-        if decision.requires_ack and trigger:
-            self.active_special_action = decision.action
-            self.active_special_command_id = self.command_id
-            self.active_special_event_id = self.event_id
-            self.active_special_dynamics_command = None
 
         payload.update(
             {
@@ -812,13 +760,9 @@ class MotionDecisionNode(Node):
                 source_command={},
             )
 
-        planning_phase = self.mission_phase
-        if self.special_motion_running:
-            locked_phase = (
-                planning_phase
-                if planning_phase.endswith("_LOCK")
-                else f"{planning_phase}_LOCK"
-            )
+        planning_phase = self.phase_manager.current_phase
+        if self.active_special_command_id is not None:
+            locked_phase = f"{planning_phase}_LOCK"
             return self.planner.plan(
                 locked_phase,
                 observations,

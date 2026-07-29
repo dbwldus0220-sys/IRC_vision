@@ -32,7 +32,7 @@ ROS 2 launch 및 실제 장치 관련 프로그램을 실행하지 않았다.
 | `/vision/mission_state` publisher | 존재 | `MissionStateEstimator.publisher`, `_publish_state()` |
 | `/vision/mission_state` algorithm subscriber | **없음** | mission_control 전체에서 subscriber 없음 |
 | `/vision/mission_state` subscriber | 시각화용 subscriber만 존재 | `MissionMapVisualizer` |
-| 내부 최종 phase | `MotionDecisionNode.mission_phase` | `MotionDecisionNode.__init__` |
+| 내부 최종 phase | `MissionPhaseManager.current_phase`; node의 `mission_phase`는 읽기 호환 프로퍼티 | `mission_phase_manager.py`, `motion_decision_node.py` |
 | phase를 읽는 planner | `MotionDecisionPlanner.plan()`과 `source_for_phase()` | `motion_decision_planner.py` |
 | motion status subscriber | `/motion/status` | `MotionDecisionNode._motion_status_callback()` |
 
@@ -40,32 +40,35 @@ ROS 2 launch 및 실제 장치 관련 프로그램을 실행하지 않았다.
 `motion_decision_node`에 넘기지만 `/mission/phase` publisher나
 `mission_state_estimator`는 실행하지 않는다.
 
-### 1.2 phase를 직접 변경하는 현재 코드
+### 1.2 현재 통합 상태
 
-`motion_decision_node` 안에 두 변경 경로가 동시에 존재한다.
+순수 Python `MissionPhaseManager` core가 `motion_decision_node` 내부에
+통합되어 phase와 진행도의 source of truth가 되었다.
 
 1. `MotionDecisionNode._phase_callback()`
    - 외부 `/mission/phase` 문자열 또는 JSON의 `phase`를 읽는다.
-   - 비어 있지 않으면 `self.mission_phase = phase.upper()`로 즉시 덮어쓴다.
-   - 허용 phase 목록 검증은 없다.
+   - `MissionPhaseManager.set_phase()`로 허용 phase만 반영한다.
+   - 빈 값, 미지원 phase, active 특수 명령 중 override는 거부한다.
+   - 별도 publisher node가 아직 없으므로 현재 입력은 수동 override 성격이다.
 
 2. `MotionDecisionNode._motion_status_callback()`
-   - 특수 action의 `RUNNING`을 받으면 특수 모션 잠금을 설정한다.
-   - 같은 특수 모션의 `SUCCEEDED`, `FAILED`, `TIMEOUT`을 받으면
-     `_update_action_progress()`를 호출하고 다음 phase를 계산한다.
-   - 계산 후 `self.mission_phase = next_phase`로 직접 변경한다.
+   - 특수 status를 `MissionPhaseManager.handle_motion_status()`에 전달한다.
+   - Manager가 action/command ID/RUNNING 상관관계, 중복 방지, 진행도 및
+     다음 phase를 처리한다.
+   - node에는 ROS 로그, event/dynamics metadata와 finish target re-arm만 남는다.
 
 planner는 전달받은 phase에 따라 source와 action을 선택할 뿐,
 `mission_phase`를 변경하거나 다음 phase를 반환하지 않는다.
 
 ### 1.3 진행도 변경 위치
 
-모든 진행도는 현재 `motion_decision_node`가 소유한다.
+모든 진행도는 현재 `MissionPhaseManager`가 소유하며 node의 동일 이름
+프로퍼티는 읽기 호환용이다.
 
 | 상태 | 초기화 | 변경 위치와 조건 |
 | --- | --- | --- |
-| `pickups_completed` | 0 | `_update_action_progress()`: `PICKUP_NOW + SUCCEEDED` |
-| `shots_completed` | 0 | `_update_action_progress()`: `SHOT + SUCCEEDED` |
+| `pickups_completed` | 0 | Manager terminal 정책: `PICKUP_NOW + SUCCEEDED` |
+| `shots_completed` | 0 | Manager terminal 정책: `SHOT + SUCCEEDED` |
 | `ball_sections_processed` | 0 | 실패/timeout `PICKUP_NOW`, 또는 성공·실패·timeout 모든 `SHOT` |
 | `finish_enabled` | `ball_sections_processed >= required_ball_sections` | `PICKUP_NOW` 또는 `SHOT` 처리 후 같은 식으로 재계산 |
 | `mission_complete` | `False` | `CROSS_FINISH + SUCCEEDED`에서 `True`; 실패/timeout에서 `False` |
@@ -485,6 +488,10 @@ motion_decision_node:
 planner는 phase를 읽어 action만 반환하고 phase 상태를 변경하지 않는 현재
 방식을 유지하는 것이 적절하다.
 
+현재는 별도 ROS 2 `mission_phase_manager_node`가 없다. core는
+`motion_decision_node` 프로세스 안에서 사용되며, 향후 권위 있는
+`/mission/phase` publisher node로 분리할 예정이다.
+
 ### 7.2 인터페이스 권장사항
 
 현재 `/mission/phase`는 plain string과 임의 JSON을 모두 받아 검증이 어렵다.
@@ -532,7 +539,7 @@ planner는 phase를 읽어 action만 반환하고 phase 상태를 변경하지 �
 
 이번 작업에서는 아래 구현을 수행하지 않는다.
 
-### 1단계: 순수 `MissionPhaseManager` 상태 객체
+### 1단계: 순수 `MissionPhaseManager` 상태 객체 — 완료
 
 예상 파일:
 
@@ -542,7 +549,7 @@ planner는 phase를 읽어 action만 반환하고 phase 상태를 변경하지 �
 ROS 의존성 없이 phase, progress, active special event와 transition 결과를
 관리한다. 허용 phase와 status를 명시적으로 검증한다.
 
-### 2단계: 단위 테스트
+### 2단계: 단위 테스트 — 완료
 
 예상 파일:
 
@@ -552,16 +559,16 @@ pickup/shot/go/cross-finish 성공·실패·timeout, 중복/오래된 status,
 최대 카운터, finish 활성화와 역행 방지를 검증한다. `CANCELLED`,
 `REJECTED` 정책을 먼저 확정한다.
 
-### 3단계: `motion_decision_node` 내부 phase 변경 이전
+### 3단계: `motion_decision_node` 내부 phase 변경 이전 — 완료
 
 예상 파일:
 
 - `src/mission_control/mission_control/motion_decision_node.py`
 - `src/mission_control/test/test_motion_decision_node.py`
 
-`_motion_status_callback()`의 phase/progress 변경과
-`_update_action_progress()`를 Manager로 옮긴다. decision node에는 일반 gate와
-action latch에 필요한 status 처리만 남긴다.
+`_motion_status_callback()`의 phase/progress 변경은 Manager로 이전했고
+중복 `_update_action_progress()`는 제거했다. decision node에는 일반 gate,
+action latch, ROS 로그와 event/dynamics metadata 처리를 남겼다.
 
 ### 4단계: `/mission/phase` publisher 노드 연결
 
@@ -634,13 +641,14 @@ phase 오판은 잘못된 pickup/shot/hurdle motion과 낙상으로 이어질 �
 
 ## 11. 결론
 
-현재 저장소에는 `/mission/phase`의 권위 있는 publisher가 없고,
-`motion_decision_node`가 외부 phase 입력을 받으면서 동시에 motion status로
-phase와 진행도를 직접 변경한다. `/vision/mission_state`는 coarse landmark
+현재 저장소에는 `/mission/phase`의 권위 있는 publisher가 없다.
+`motion_decision_node` 내부의 순수 Python `MissionPhaseManager`가 phase,
+진행도와 특수 motion terminal 전환을 단독 소유하며 외부 `/mission/phase`는
+검증된 수동 override로만 사용된다. `/vision/mission_state`는 coarse landmark
 추정 및 시각화 신호이며 motion 완료 이력이 없어 최종 phase로 사용할 수 없다.
 
-권장 구조는 phase와 진행도 및 특수 terminal 전환을
-`MissionPhaseManager`가 단독 소유하고, `motion_decision_node`는 발행된
-phase와 Vision을 이용해 하나의 action만 선택하는 것이다. 개별 navigation
-controller는 최종 운용 명령 경로에서 비활성화하여 명령 발행자를 하나로
-유지해야 한다.
+향후에는 이 core를 별도 `mission_phase_manager_node`로 옮겨 권위 있는 phase
+publisher로 연결해야 한다. `motion_decision_node`는 Manager phase와 Vision을
+이용해 하나의 action만 선택하며 planner는 phase를 변경하지 않는다. 개별
+navigation controller는 최종 운용 명령 경로에서 비활성화하여 명령 발행자를
+하나로 유지해야 한다.

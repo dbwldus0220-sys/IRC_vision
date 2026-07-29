@@ -7,6 +7,7 @@ import sys
 from mission_control.motion_decision_node import MotionDecisionNode
 from mission_control.motion_decision_planner import MotionDecision
 from mission_control.motion_command_gate import GeneralMotionCommandGate
+from mission_control.mission_phase_manager import MissionPhaseManager
 
 import pytest
 
@@ -55,9 +56,6 @@ class FakeDecisionNode:
     """Provide only the state required by the motion-status callback."""
 
     SPECIAL_ACTIONS = MotionDecisionNode.SPECIAL_ACTIONS
-    SPECIAL_COMPLETION_PHASES = (
-        MotionDecisionNode.SPECIAL_COMPLETION_PHASES
-    )
     SPECIAL_ACTION_SOURCES = MotionDecisionNode.SPECIAL_ACTION_SOURCES
 
     def __init__(
@@ -68,15 +66,12 @@ class FakeDecisionNode:
         required_ball_sections=2,
     ):
         """Initialize the minimal state used by node callback tests."""
-        self.mission_phase = mission_phase
-        self.required_pickups = required_pickups
-        self.required_shots = required_shots
-        self.required_ball_sections = required_ball_sections
-        self.pickups_completed = 0
-        self.shots_completed = 0
-        self.ball_sections_processed = 0
-        self.finish_enabled = required_ball_sections == 0
-        self.mission_complete = False
+        self.phase_manager = MissionPhaseManager(
+            initial_phase=mission_phase,
+            required_pickups=required_pickups,
+            required_shots=required_shots,
+            required_ball_sections=required_ball_sections,
+        )
         self.finish_min_confidence = 0.70
         self.terminal_latch = ('test', 'terminal')
         self.terminal_action_armed = {
@@ -84,9 +79,6 @@ class FakeDecisionNode:
             for source in self.SPECIAL_ACTION_SOURCES.values()
         }
 
-        self.special_motion_running = False
-        self.active_special_action = None
-        self.active_special_command_id = None
         self.active_special_event_id = None
         self.active_special_dynamics_command = None
         self.general_motion_gate = GeneralMotionCommandGate()
@@ -98,13 +90,39 @@ class FakeDecisionNode:
         """Return the fake logger."""
         return self.logger
 
-    def _update_action_progress(self, completed_action, status):
-        """Delegate progress updates to the real node implementation."""
-        MotionDecisionNode._update_action_progress(
-            self,
-            completed_action,
-            status,
-        )
+    mission_phase = MotionDecisionNode.mission_phase
+    required_pickups = MotionDecisionNode.required_pickups
+    required_shots = MotionDecisionNode.required_shots
+    required_ball_sections = MotionDecisionNode.required_ball_sections
+    pickups_completed = MotionDecisionNode.pickups_completed
+    shots_completed = MotionDecisionNode.shots_completed
+    ball_sections_processed = MotionDecisionNode.ball_sections_processed
+    active_special_action = MotionDecisionNode.active_special_action
+    active_special_command_id = MotionDecisionNode.active_special_command_id
+
+    @property
+    def finish_enabled(self):
+        return self.phase_manager.finish_enabled
+
+    @finish_enabled.setter
+    def finish_enabled(self, value):
+        self.phase_manager.finish_enabled = value
+
+    @property
+    def mission_complete(self):
+        return self.phase_manager.mission_complete
+
+    @mission_complete.setter
+    def mission_complete(self, value):
+        self.phase_manager.mission_complete = value
+
+    @property
+    def special_motion_running(self):
+        return self.phase_manager.active_special_running
+
+    @special_motion_running.setter
+    def special_motion_running(self, value):
+        self.phase_manager.active_special_running = value
 
     def _finish_crossing_ready(self, finish_info):
         """Delegate finish validation to the real node implementation."""
@@ -144,12 +162,79 @@ def send_status(node, **kwargs):
     )
 
 
+def send_phase(node, phase):
+    message = String()
+    message.data = phase
+    MotionDecisionNode._phase_callback(node, message)
+
+
+def test_valid_external_phase_updates_manager():
+    node = FakeDecisionNode()
+    send_phase(node, '{"phase": " goal_approach "}')
+    assert node.phase_manager.current_phase == 'GOAL_APPROACH'
+
+
+@pytest.mark.parametrize('phase', ['', '   ', '{"phase": ""}', 'UNKNOWN'])
+def test_invalid_external_phase_keeps_manager_phase(phase):
+    node = FakeDecisionNode('BALL_SEARCH')
+    send_phase(node, phase)
+    assert node.phase_manager.current_phase == 'BALL_SEARCH'
+
+
+def test_external_phase_override_is_rejected_while_special_is_active():
+    node = FakeDecisionNode('BALL_APPROACH')
+    arm_special_command(node, 'PICKUP_NOW', 10, 1)
+    send_phase(node, 'GOAL_APPROACH')
+    assert node.phase_manager.current_phase == 'BALL_APPROACH'
+
+
 def arm_special_command(node, action, command_id, event_id):
     """Model the active metadata stored when a special command is published."""
-    node.active_special_action = action
-    node.active_special_command_id = command_id
+    assert node.phase_manager.start_special_action(action, command_id)
     node.active_special_event_id = event_id
-    node.active_special_dynamics_command = None
+
+
+def test_planner_uses_manager_current_phase():
+    node = FakeDecisionNode('AUTO')
+    assert node.phase_manager.set_phase('GOAL_APPROACH')
+    decision = MotionDecisionNode._select_mission_decision(
+        node,
+        {'finish': None},
+        0.1,
+    )
+    assert decision.phase == 'GOAL_APPROACH'
+
+
+def test_planning_lock_does_not_change_manager_phase():
+    node = FakeDecisionNode('HURDLE_APPROACH')
+    arm_special_command(node, 'GO', 10, 1)
+    decision = MotionDecisionNode._select_mission_decision(
+        node,
+        {'finish': None},
+        0.1,
+    )
+    assert decision.phase == 'HURDLE_APPROACH_LOCK'
+    assert node.phase_manager.current_phase == 'HURDLE_APPROACH'
+
+
+def test_legacy_state_properties_read_manager_state():
+    node = FakeDecisionNode(
+        required_pickups=3,
+        required_shots=4,
+        required_ball_sections=1,
+    )
+    complete_motion(node, 'SHOT', event_id=10)
+    assert node.mission_phase == node.phase_manager.current_phase
+    assert node.pickups_completed == node.phase_manager.pickups_completed
+    assert node.shots_completed == node.phase_manager.shots_completed
+    assert (
+        node.ball_sections_processed
+        == node.phase_manager.ball_sections_processed
+    )
+    assert node.finish_enabled == node.phase_manager.finish_enabled
+    assert node.mission_complete == node.phase_manager.mission_complete
+    assert node.active_special_action is None
+    assert node.active_special_command_id is None
 
 
 def complete_motion(
