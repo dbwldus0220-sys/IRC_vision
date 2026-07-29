@@ -274,6 +274,7 @@ MotionExecutorCore에 주입하는 검증용 ROS2 노드 뼈대이다.
 {
   "request_id": 1,
   "command_id": 123,
+  "action": "STRAIGHT",
   "motion_id": "forward",
   "timeout_ms": 5000
 }
@@ -283,7 +284,8 @@ MotionExecutorCore에 주입하는 검증용 ROS2 노드 뼈대이다.
 `REJECTED` / `"INVALID_REQUEST"`로 응답한다. 지원하지 않는 `motion_id`는
 `REJECTED` / `"INVALID_MOTION"`으로 응답한다. 실행 중 새 요청은
 `REJECTED` / `"REJECTED_BUSY"`로 응답한다. `command_id`는 선택 필드이며
-정수 또는 `null`이어야 한다.
+정수 또는 `null`이어야 한다. `action`도 선택 metadata이며, 있으면 비어 있지
+않은 문자열이어야 한다.
 
 ### 상태 topic
 
@@ -294,6 +296,7 @@ MotionExecutorCore에 주입하는 검증용 ROS2 노드 뼈대이다.
 {
   "request_id": 1,
   "command_id": 123,
+  "action": "STRAIGHT",
   "motion_id": "forward",
   "status": "RUNNING",
   "error_code": "",
@@ -304,7 +307,7 @@ MotionExecutorCore에 주입하는 검증용 ROS2 노드 뼈대이다.
 수락 직후 `RUNNING`을 한 번 발행한다. 이후 terminal 결과
 `SUCCEEDED`, `FAILED`, `CANCELLED`, `TIMEOUT` 중 하나를 정확히 한 번
 발행하고 core를 `reset()`한다. terminal 결과까지 최초 `request_id`와
-`command_id`, `motion_id`를 유지한다.
+`command_id`, `action`, `motion_id`를 유지한다.
 
 ### cancel topic
 
@@ -368,6 +371,7 @@ Dynamixel에 접근하지 않는다.
 
 ```json
 {
+  "command_id": 123,
   "action": "STRAIGHT",
   "angle_deg": 0.0
 }
@@ -379,6 +383,7 @@ Dynamixel에 접근하지 않는다.
 {
   "request_id": 1,
   "command_id": 123,
+  "action": "STRAIGHT",
   "motion_id": "forward",
   "timeout_ms": 5000
 }
@@ -388,6 +393,7 @@ Dynamixel에 접근하지 않는다.
 생성한 원래 명령 ID이다. `request_id`는 adapter가 Executor 실행 요청을
 추적하기 위해 1부터 별도로 증가시키는 ID이다. 따라서 두 값은 서로 달라도
 정상이며, adapter는 어느 한쪽으로 다른 쪽을 덮어쓰지 않는다.
+원래 `action`도 Executor request metadata로 함께 전달한다.
 
 `command_id`가 없는 구형 legacy 입력은 `null`로 Executor에 전달한다.
 `angle_deg`는 호환성을 위해 파싱하지만 현재 Executor 요청에는 포함하지 않는다.
@@ -469,11 +475,11 @@ mock 통합 검증에서는 다음 흐름으로 새 Executor를 기존 mission n
 motion_decision_node
 → /navigation/motion_command (mission command_id)
 → legacy_motion_executor_adapter
-→ /motion/executor/request (command_id + request_id)
+→ /motion/executor/request (command_id + request_id + 원 action)
 → motion_executor_node
-→ /motion/executor/status (command_id + request_id)
+→ /motion/executor/status (command_id + request_id + 원 action)
 → legacy_motion_status_adapter
-→ /motion/status (command_id + request_id)
+→ /motion/status (command_id + request_id + 원 action)
 → motion_decision_node
 ```
 
@@ -488,8 +494,9 @@ motion_decision_node
 
 Executor node는 수락한 `MotionRequest` 전체를 publication state에 보존한다.
 따라서 `RUNNING`과 `SUCCEEDED`, `FAILED`, `TIMEOUT`, `CANCELLED` terminal
-상태에 같은 두 ID가 포함된다. 실행 중 새 요청의 `REJECTED_BUSY`를 포함한
-요청 단위 거부 상태에도 거부된 요청의 `command_id`와 `request_id`를 넣는다.
+상태에 같은 두 ID와 원 `action`이 포함된다. 실행 중 새 요청의
+`REJECTED_BUSY`를 포함한 요청 단위 거부 상태에도 거부된 요청의
+`command_id`, `request_id`, `action`을 넣는다.
 하드웨어 실행만 담당하는 `MotionExecutorCore`에는 mission metadata를
 추가하지 않는다.
 
@@ -500,6 +507,35 @@ subscriber가 사용하는 `status`, `action`, `command_id`, `event_id`,
 Executor의 `request_id`, `motion_id`, `error_code`, `message`도 추가 필드로
 보존한다. 잘못된 JSON, 누락되거나 알 수 없는 status는 경고 후 발행하지
 않는다.
+
+### 특수 action 왕복 및 status 상관관계
+
+`PICKUP_NOW`, `SHOT`, `GO`, `CROSS_FINISH`는 `motion_id` 역매핑만으로
+복원하지 않고 Executor request/status에 보존된 원 `action`을 우선 사용한다.
+이 규칙이 필요한 이유는 `GO`와 일반 `STRAIGHT`가 모두
+`motion_id="forward"`를 사용하기 때문이다.
+
+- 원 action이 `GO`이면 status도 `GO`이다.
+- 원 action이 `STRAIGHT`이면 status도 `STRAIGHT`이다.
+- 원 action metadata가 없는 구형 Executor status만 기존
+  `motion_id → canonical action` 매핑으로 fallback한다.
+- `request_id`는 Executor 실행 식별자이고 `command_id`는 mission 원 명령
+  식별자이며 서로 대체하지 않는다.
+
+`motion_decision_node`는 특수 명령을 최초 발행할 때 active `action`,
+`command_id`, `event_id`를 저장한다. 특수 `RUNNING`, `SUCCEEDED`, `FAILED`,
+`TIMEOUT`은 다음 조건을 모두 만족할 때만 처리한다.
+
+- status `command_id`가 정수로 존재한다.
+- status `command_id`가 active special `command_id`와 같다.
+- status `action`이 active special `action`과 같다.
+- terminal status 전에 matching `RUNNING`으로 특수 모션 lock이 설정됐다.
+
+다른 ID의 stale status, ID가 없는 status, 같은 ID이지만 action이 다른
+status는 phase와 진행도를 변경하지 않는다. 올바른 terminal을 처리하면
+active special metadata와 running lock을 해제하므로 같은 terminal이 다시
+도착해도 중복 처리되지 않는다. Executor adapter 경로의 `event_id=null`은
+허용하되 `command_id`와 action 일치를 필수로 사용한다.
 
 이 adapter는 mock 검증을 위한 임시 호환 계층이다. 향후 mission node가
 `/motion/executor/status`를 직접 사용하면 제거할 수 있다.

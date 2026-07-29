@@ -117,10 +117,12 @@ def build_executor_request(
     request_id: int,
     motion_id: str,
     command_id: Optional[int] = None,
+    action: Optional[str] = None,
 ) -> Dict[str, Any]:
     return {
         "request_id": request_id,
         "command_id": command_id,
+        "action": action,
         "motion_id": motion_id,
         "timeout_ms": timeout_for_motion(motion_id),
     }
@@ -169,6 +171,7 @@ class LegacyMotionExecutorAdapter(Node):
             self._next_request_id,
             motion_id,
             command.command_id,
+            command.action,
         )
         output = String()
         output.data = json.dumps(request)

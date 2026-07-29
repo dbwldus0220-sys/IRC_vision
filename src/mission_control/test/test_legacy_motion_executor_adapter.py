@@ -27,6 +27,7 @@ from legacy_motion_executor_adapter import (
         ("RIGHT", "turn_right"),
         ("PICKUP_NOW", "pick_ball"),
         ("SHOT", "shoot"),
+        ("GO", "forward"),
         ("CROSS_FINISH", "hurdle"),
     ],
 )
@@ -43,9 +44,10 @@ def test_timeout_mapping():
 
 
 def test_build_request_preserves_request_id():
-    assert build_executor_request(37, "shoot", 123) == {
+    assert build_executor_request(37, "shoot", 123, "SHOT") == {
         "request_id": 37,
         "command_id": 123,
+        "action": "SHOT",
         "motion_id": "shoot",
         "timeout_ms": 10000,
     }
@@ -84,6 +86,7 @@ def test_legacy_command_without_command_id_remains_supported():
     command = parse_legacy_motion_command({"action": "STRAIGHT"})
     assert command.command_id is None
     assert build_executor_request(1, "forward")["command_id"] is None
+    assert build_executor_request(1, "forward")["action"] is None
 
 
 class CapturePublisher:
@@ -131,12 +134,14 @@ def test_left_and_right_create_executor_requests():
         {
             "request_id": 1,
             "command_id": 101,
+            "action": "LEFT",
             "motion_id": "turn_left",
             "timeout_ms": 5000,
         },
         {
             "request_id": 2,
             "command_id": 202,
+            "action": "RIGHT",
             "motion_id": "turn_right",
             "timeout_ms": 5000,
         },
@@ -156,3 +161,29 @@ def test_non_executable_command_does_not_create_request(payload):
     send_legacy_command(adapter, **payload)
     assert adapter._request_publisher.messages == []
     assert adapter._next_request_id == 1
+
+
+@pytest.mark.parametrize(
+    ("action", "command_id", "motion_id"),
+    [
+        ("STRAIGHT", 101, "forward"),
+        ("PICKUP_NOW", 102, "pick_ball"),
+        ("SHOT", 103, "shoot"),
+        ("GO", 104, "forward"),
+        ("CROSS_FINISH", 105, "hurdle"),
+    ],
+)
+def test_original_action_and_command_id_are_added_to_request(
+    action, command_id, motion_id
+):
+    adapter = FakeAdapter()
+    send_legacy_command(
+        adapter,
+        action=action,
+        valid=True,
+        command_id=command_id,
+    )
+    request = json.loads(adapter._request_publisher.messages[0].data)
+    assert request["action"] == action
+    assert request["command_id"] == command_id
+    assert request["motion_id"] == motion_id

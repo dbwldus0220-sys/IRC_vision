@@ -41,9 +41,9 @@ def result(status, error_code="NONE", message="done"):
 def test_parse_valid_request_json():
     request = parse_motion_request(
         '{"request_id": 1, "command_id": 123, '
-        '"motion_id": "forward", "timeout_ms": 5000}'
+        '"action": "GO", "motion_id": "forward", "timeout_ms": 5000}'
     )
-    assert request == MotionRequest(1, "forward", 5000, 123)
+    assert request == MotionRequest(1, "forward", 5000, 123, "GO")
 
 
 def test_default_player_backend_is_mock():
@@ -78,10 +78,11 @@ def test_non_positive_timeout():
 
 def test_running_status_payload():
     state = ExecutionPublicationState()
-    state.begin(MotionRequest(7, "turn_left", 1000, 123))
+    state.begin(MotionRequest(7, "turn_left", 1000, 123, "LEFT"))
     assert state.running_payload() == {
         "request_id": 7,
         "command_id": 123,
+        "action": "LEFT",
         "motion_id": "turn_left",
         "status": "RUNNING",
         "error_code": "",
@@ -91,10 +92,11 @@ def test_running_status_payload():
 
 def test_succeeded_terminal_payload():
     state = ExecutionPublicationState()
-    state.begin(MotionRequest(1, "forward", 5000, 123))
+    state.begin(MotionRequest(1, "forward", 5000, 123, "GO"))
     payload = state.terminal_payload(result(ExecutorState.SUCCEEDED))
     assert payload["status"] == "SUCCEEDED"
     assert payload["command_id"] == 123
+    assert payload["action"] == "GO"
     assert payload["error_code"] == "NONE"
 
 
@@ -109,11 +111,12 @@ def test_succeeded_terminal_payload():
 )
 def test_all_terminal_payloads_preserve_command_id(status):
     state = ExecutionPublicationState()
-    state.begin(MotionRequest(7, "forward", 5000, 321))
+    state.begin(MotionRequest(7, "forward", 5000, 321, "GO"))
     payload = state.terminal_payload(result(status))
     assert payload["status"] == status.name
     assert payload["command_id"] == 321
     assert payload["request_id"] == 7
+    assert payload["action"] == "GO"
 
 
 def test_failed_payload():
@@ -158,6 +161,7 @@ def test_rejected_busy_preserves_both_request_ids():
             {
                 "request_id": 7,
                 "command_id": 321,
+                "action": "GO",
                 "motion_id": "forward",
                 "timeout_ms": 5000,
             }
@@ -169,6 +173,7 @@ def test_rejected_busy_preserves_both_request_ids():
         {
             "request_id": 7,
             "command_id": 321,
+            "action": "GO",
             "motion_id": "forward",
             "status": "REJECTED",
             "error_code": "REJECTED_BUSY",

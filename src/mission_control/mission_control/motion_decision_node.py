@@ -426,18 +426,48 @@ class MotionDecisionNode(Node):
         if action not in self.SPECIAL_ACTIONS:
             return
 
+        if (
+            isinstance(command_id, bool)
+            or not isinstance(command_id, int)
+            or self.active_special_command_id is None
+            or command_id != self.active_special_command_id
+        ):
+            self.get_logger().warning(
+                "Special motion status ignored: "
+                "command_id mismatch or missing "
+                f"(active={self.active_special_command_id}, "
+                f"received={command_id})"
+            )
+            return
+
+        if action != self.active_special_action:
+            self.get_logger().warning(
+                "Special motion status ignored: "
+                "action mismatch "
+                f"(active={self.active_special_action}, "
+                f"received={action})"
+            )
+            return
+
+        if (
+            self.active_special_event_id is not None
+            and event_id is not None
+            and event_id != self.active_special_event_id
+        ):
+            self.get_logger().warning(
+                "Special motion status ignored: "
+                "event_id mismatch "
+                f"(active={self.active_special_event_id}, "
+                f"received={event_id})"
+            )
+            return
+
         if status == "RUNNING":
             self.special_motion_running = True
-            self.active_special_action = action
-            self.active_special_command_id = (
-                command_id
-                if isinstance(command_id, int)
-                else None
-            )
             self.active_special_event_id = (
                 event_id
                 if isinstance(event_id, int)
-                else None
+                else self.active_special_event_id
             )
             self.active_special_dynamics_command = (
                 dynamics_command
@@ -468,30 +498,6 @@ class MotionDecisionNode(Node):
             self.get_logger().info(
                 "Terminal motion status ignored: "
                 "no special motion is currently locked"
-            )
-            return
-
-        if (
-            self.active_special_event_id is not None
-            and event_id != self.active_special_event_id
-        ):
-            self.get_logger().warning(
-                "Terminal motion status ignored: "
-                "event_id mismatch "
-                f"(active={self.active_special_event_id}, "
-                f"received={event_id})"
-            )
-            return
-
-        if (
-            self.active_special_action is not None
-            and action != self.active_special_action
-        ):
-            self.get_logger().warning(
-                "Terminal motion status ignored: "
-                "action mismatch "
-                f"(active={self.active_special_action}, "
-                f"received={action})"
             )
             return
 
@@ -726,6 +732,12 @@ class MotionDecisionNode(Node):
         self.command_id += 1
 
         payload = decision.to_dict()
+
+        if decision.requires_ack and trigger:
+            self.active_special_action = decision.action
+            self.active_special_command_id = self.command_id
+            self.active_special_event_id = self.event_id
+            self.active_special_dynamics_command = None
 
         payload.update(
             {

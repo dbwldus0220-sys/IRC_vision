@@ -144,6 +144,14 @@ def send_status(node, **kwargs):
     )
 
 
+def arm_special_command(node, action, command_id, event_id):
+    """Model the active metadata stored when a special command is published."""
+    node.active_special_action = action
+    node.active_special_command_id = command_id
+    node.active_special_event_id = event_id
+    node.active_special_dynamics_command = None
+
+
 def complete_motion(
     node,
     action,
@@ -151,6 +159,7 @@ def complete_motion(
     status='SUCCEEDED',
 ):
     """Send matching RUNNING and terminal statuses for one event."""
+    arm_special_command(node, action, event_id, event_id)
     send_status(
         node,
         status='RUNNING',
@@ -225,6 +234,64 @@ def terminal_decision(source, action, phase):
         requires_ack=True,
         source_command={},
     )
+
+
+def test_special_command_metadata_is_stored_when_first_published():
+    decision = terminal_decision('hurdle', 'GO', 'HURDLE_APPROACH')
+
+    class CapturePublisher:
+        def __init__(self):
+            self.messages = []
+
+        def publish(self, message):
+            self.messages.append(message)
+
+    class PublishNode(FakeDecisionNode):
+        def __init__(self):
+            super().__init__('HURDLE_APPROACH')
+            self.planner = type(
+                'PlannerTelemetry',
+                (),
+                {
+                    'ball_tracking_status': staticmethod(lambda: {}),
+                    'goal_tracking_status': staticmethod(lambda: {}),
+                },
+            )()
+            self.previous_publish_time = 0.0
+            self.command_id = 99
+            self.event_id = 4
+            self.publisher = CapturePublisher()
+
+        @staticmethod
+        def _fresh_observations(_now):
+            return {}, {}
+
+        @staticmethod
+        def _rearm_absent_terminal_targets(_observations):
+            pass
+
+        @staticmethod
+        def _select_mission_decision(_observations, _dt_sec):
+            return decision
+
+        @staticmethod
+        def _suppress_duplicate_terminal_action(selected):
+            return selected
+
+        @staticmethod
+        def _mission_progress():
+            return {}
+
+    node = PublishNode()
+    MotionDecisionNode._publish_decision(node)
+    payload = json.loads(node.publisher.messages[0].data)
+
+    assert payload['command_id'] == 100
+    assert payload['event_id'] == 5
+    assert node.active_special_action == 'GO'
+    assert node.active_special_command_id == 100
+    assert node.active_special_event_id == 5
+    assert node.special_motion_running is False
 
 
 def select_decision(node, finish=None, **observations):
@@ -326,6 +393,7 @@ def test_special_motion_success_advances_phase(
 ):
     """Advance to the configured phase after a matching success."""
     node = FakeDecisionNode(initial_phase)
+    arm_special_command(node, action, 100, 10)
 
     send_status(
         node,
@@ -362,6 +430,7 @@ def test_special_motion_success_advances_phase(
 def test_ignored_status_keeps_special_motion_locked():
     """Keep the active phase and lock after an ignored status."""
     node = FakeDecisionNode('AUTO')
+    arm_special_command(node, 'PICKUP_NOW', 200, 20)
 
     send_status(
         node,
@@ -387,10 +456,92 @@ def test_ignored_status_keeps_special_motion_locked():
     assert node.terminal_latch == ('test', 'terminal')
 
 
+def test_stale_special_terminal_with_other_command_id_is_ignored():
+    node = FakeDecisionNode('AUTO')
+    arm_special_command(node, 'PICKUP_NOW', 200, 20)
+    node.special_motion_running = True
+
+    send_status(
+        node,
+        status='SUCCEEDED',
+        action='PICKUP_NOW',
+        command_id=199,
+        event_id=None,
+        dynamics_command=9,
+    )
+
+    assert node.mission_phase == 'AUTO'
+    assert node.pickups_completed == 0
+    assert node.special_motion_running is True
+    assert node.active_special_action == 'PICKUP_NOW'
+    assert node.active_special_command_id == 200
+
+
+def test_special_status_without_command_id_is_ignored():
+    node = FakeDecisionNode('AUTO')
+    arm_special_command(node, 'PICKUP_NOW', 200, 20)
+
+    send_status(
+        node,
+        status='RUNNING',
+        action='PICKUP_NOW',
+        command_id=None,
+        event_id=None,
+        dynamics_command=9,
+    )
+
+    assert node.special_motion_running is False
+    assert node.active_special_command_id == 200
+
+
+def test_special_status_with_matching_id_but_wrong_action_is_ignored():
+    node = FakeDecisionNode('AUTO')
+    arm_special_command(node, 'PICKUP_NOW', 200, 20)
+    node.special_motion_running = True
+
+    send_status(
+        node,
+        status='SUCCEEDED',
+        action='SHOT',
+        command_id=200,
+        event_id=None,
+        dynamics_command=17,
+    )
+
+    assert node.mission_phase == 'AUTO'
+    assert node.pickups_completed == 0
+    assert node.shots_completed == 0
+    assert node.special_motion_running is True
+    assert node.active_special_action == 'PICKUP_NOW'
+    assert node.active_special_command_id == 200
+
+
+def test_matching_pickup_status_completes_once_and_clears_active_command():
+    node = FakeDecisionNode('BALL_APPROACH')
+    arm_special_command(node, 'PICKUP_NOW', 200, 20)
+
+    for status in ('RUNNING', 'SUCCEEDED', 'SUCCEEDED'):
+        send_status(
+            node,
+            status=status,
+            action='PICKUP_NOW',
+            command_id=200,
+            event_id=None,
+            dynamics_command=9,
+        )
+
+    assert node.pickups_completed == 1
+    assert node.mission_phase == 'GOAL_APPROACH'
+    assert node.special_motion_running is False
+    assert node.active_special_action is None
+    assert node.active_special_command_id is None
+
+
 @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT'])
 def test_failed_or_timed_out_special_motion_returns_to_auto(status):
     """Release the lock and return to AUTO after failure or timeout."""
     node = FakeDecisionNode('GOAL_APPROACH')
+    arm_special_command(node, 'SHOT', 300, 30)
 
     send_status(
         node,
@@ -443,6 +594,7 @@ def test_terminal_action_rearms_only_after_target_disappears(
 
     # This is the state change made when the first SDK request is published.
     node.terminal_action_armed[source] = False
+    arm_special_command(node, action, 400, 40)
     send_status(
         node,
         status='RUNNING',
@@ -749,6 +901,7 @@ def test_cross_finish_running_blocks_other_commands():
     """Use the existing special lock while finish crossing is running."""
     node = FakeDecisionNode('WALK_TO_FINISH')
     node.finish_enabled = True
+    arm_special_command(node, 'CROSS_FINISH', 601, 601)
     send_status(
         node,
         status='RUNNING',

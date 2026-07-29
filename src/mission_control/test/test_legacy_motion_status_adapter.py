@@ -17,6 +17,7 @@ def executor_status(status, **overrides):
     payload = {
         "request_id": 7,
         "command_id": 123,
+        "action": "PICKUP_NOW",
         "motion_id": "pick_ball",
         "status": status,
         "error_code": "",
@@ -94,3 +95,36 @@ def test_legacy_executor_status_without_command_id_uses_null():
     converted = convert_executor_status(payload)
     assert converted["command_id"] is None
     assert converted["request_id"] == 7
+
+
+@pytest.mark.parametrize(
+    ("action", "motion_id"),
+    [
+        ("STRAIGHT", "forward"),
+        ("PICKUP_NOW", "pick_ball"),
+        ("SHOT", "shoot"),
+        ("GO", "forward"),
+        ("CROSS_FINISH", "hurdle"),
+    ],
+)
+@pytest.mark.parametrize("status", ["RUNNING", "SUCCEEDED"])
+def test_original_action_wins_over_lossy_motion_id_mapping(
+    action, motion_id, status
+):
+    converted = convert_executor_status(
+        executor_status(
+            status,
+            command_id=100,
+            action=action,
+            motion_id=motion_id,
+        )
+    )
+    assert converted["action"] == action
+    assert converted["command_id"] == 100
+    assert converted["request_id"] == 7
+
+
+def test_old_status_without_original_action_uses_motion_id_fallback():
+    payload = executor_status("RUNNING", motion_id="forward")
+    del payload["action"]
+    assert convert_executor_status(payload)["action"] == "STRAIGHT"

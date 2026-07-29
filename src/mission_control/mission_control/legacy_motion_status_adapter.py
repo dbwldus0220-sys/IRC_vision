@@ -94,7 +94,12 @@ def convert_executor_status(
     request_id = data.get("request_id")
     command_id = data.get("command_id")
     motion_id = data.get("motion_id")
-    action = MOTION_ID_TO_LEGACY_ACTION.get(motion_id)
+    original_action = data.get("action")
+    action = (
+        original_action
+        if isinstance(original_action, str) and original_action
+        else MOTION_ID_TO_LEGACY_ACTION.get(motion_id)
+    )
 
     return {
         # Fields consumed by the existing /motion/status subscriber.
