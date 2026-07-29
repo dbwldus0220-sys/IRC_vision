@@ -74,6 +74,37 @@ def test_mismatched_terminal_cannot_release_lock():
     assert gate.locked
 
 
+def test_different_command_id_cannot_mark_running_or_release_lock():
+    gate = gate_with_vision()
+    gate.on_command_published("LEFT", command_id=20)
+    assert not gate.on_motion_status(
+        "TURN_LEFT", "RUNNING", command_id=19
+    ).matched
+    assert not gate.on_motion_status(
+        "TURN_LEFT", "SUCCEEDED", command_id=19
+    ).matched
+    assert gate.locked
+    assert not gate.running_seen
+
+
+def test_same_command_id_releases_only_after_running():
+    gate = gate_with_vision()
+    gate.on_command_published("LEFT", command_id=20)
+    assert gate.on_motion_status(
+        "TURN_LEFT", "RUNNING", command_id=20
+    ).matched
+    assert gate.on_motion_status(
+        "TURN_LEFT", "SUCCEEDED", command_id=20
+    ).released
+
+
+def test_missing_status_command_id_uses_legacy_action_fallback():
+    gate = gate_with_vision()
+    gate.on_command_published("LEFT", command_id=20)
+    assert gate.on_motion_status("TURN_LEFT", "RUNNING").matched
+    assert gate.on_motion_status("TURN_LEFT", "SUCCEEDED").released
+
+
 @pytest.mark.parametrize(
     ("command_action", "status_action"),
     [

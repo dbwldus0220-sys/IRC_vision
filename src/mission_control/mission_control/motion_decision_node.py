@@ -414,6 +414,7 @@ class MotionDecisionNode(Node):
             transition = self.general_motion_gate.on_motion_status(
                 action,
                 status,
+                command_id,
             )
             if transition.released:
                 self.get_logger().info(
@@ -777,7 +778,8 @@ class MotionDecisionNode(Node):
 
         if is_general_motion:
             self.general_motion_gate.on_command_published(
-                decision.action
+                decision.action,
+                self.command_id,
             )
 
     def _select_mission_decision(

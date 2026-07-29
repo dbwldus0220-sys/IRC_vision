@@ -1,5 +1,7 @@
+import json
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -16,6 +18,7 @@ from motion_executor_node import (
     DEFAULT_PLAYER_BACKEND,
     ExecutionPublicationState,
     MotionRequest,
+    MotionExecutorNode,
     RequestValidationError,
     build_status_payload,
     handle_cancel_request,
@@ -37,9 +40,10 @@ def result(status, error_code="NONE", message="done"):
 
 def test_parse_valid_request_json():
     request = parse_motion_request(
-        '{"request_id": 1, "motion_id": "forward", "timeout_ms": 5000}'
+        '{"request_id": 1, "command_id": 123, '
+        '"motion_id": "forward", "timeout_ms": 5000}'
     )
-    assert request == MotionRequest(1, "forward", 5000)
+    assert request == MotionRequest(1, "forward", 5000, 123)
 
 
 def test_default_player_backend_is_mock():
@@ -74,9 +78,10 @@ def test_non_positive_timeout():
 
 def test_running_status_payload():
     state = ExecutionPublicationState()
-    state.begin(MotionRequest(7, "turn_left", 1000))
+    state.begin(MotionRequest(7, "turn_left", 1000, 123))
     assert state.running_payload() == {
         "request_id": 7,
+        "command_id": 123,
         "motion_id": "turn_left",
         "status": "RUNNING",
         "error_code": "",
@@ -86,17 +91,42 @@ def test_running_status_payload():
 
 def test_succeeded_terminal_payload():
     state = ExecutionPublicationState()
-    state.begin(MotionRequest(1, "forward", 5000))
+    state.begin(MotionRequest(1, "forward", 5000, 123))
     payload = state.terminal_payload(result(ExecutorState.SUCCEEDED))
     assert payload["status"] == "SUCCEEDED"
+    assert payload["command_id"] == 123
     assert payload["error_code"] == "NONE"
+
+
+@pytest.mark.parametrize(
+    "status",
+    [
+        ExecutorState.SUCCEEDED,
+        ExecutorState.FAILED,
+        ExecutorState.TIMEOUT,
+        ExecutorState.CANCELLED,
+    ],
+)
+def test_all_terminal_payloads_preserve_command_id(status):
+    state = ExecutionPublicationState()
+    state.begin(MotionRequest(7, "forward", 5000, 321))
+    payload = state.terminal_payload(result(status))
+    assert payload["status"] == status.name
+    assert payload["command_id"] == 321
+    assert payload["request_id"] == 7
 
 
 def test_failed_payload():
     payload = build_status_payload(
-        1, "forward", "FAILED", "COMMUNICATION_ERROR", "send failed"
+        1,
+        "forward",
+        "FAILED",
+        "COMMUNICATION_ERROR",
+        "send failed",
+        123,
     )
     assert payload["status"] == "FAILED"
+    assert payload["command_id"] == 123
     assert payload["error_code"] == "COMMUNICATION_ERROR"
 
 
@@ -108,9 +138,48 @@ def test_rejected_payload():
     assert payload["error_code"] == "INVALID_MOTION"
 
 
+def test_rejected_busy_preserves_both_request_ids():
+    class BusyCore:
+        @staticmethod
+        def busy():
+            return True
+
+    class FakeNode:
+        def __init__(self):
+            self._core = BusyCore()
+            self.payloads = []
+
+        def _publish_payload(self, payload):
+            self.payloads.append(payload)
+
+    node = FakeNode()
+    message = SimpleNamespace(
+        data=json.dumps(
+            {
+                "request_id": 7,
+                "command_id": 321,
+                "motion_id": "forward",
+                "timeout_ms": 5000,
+            }
+        )
+    )
+    MotionExecutorNode._on_request(node, message)
+
+    assert node.payloads == [
+        {
+            "request_id": 7,
+            "command_id": 321,
+            "motion_id": "forward",
+            "status": "REJECTED",
+            "error_code": "REJECTED_BUSY",
+            "message": "another motion is already running",
+        }
+    ]
+
+
 def test_original_request_id_and_motion_id_are_preserved():
     state = ExecutionPublicationState()
-    state.begin(MotionRequest(42, "shoot", 8000))
+    state.begin(MotionRequest(42, "shoot", 8000, 9001))
     payload = state.terminal_payload(
         MotionExecutionResult(
             motion_id="internal_motion",
@@ -122,6 +191,17 @@ def test_original_request_id_and_motion_id_are_preserved():
     )
     assert payload["request_id"] == 42
     assert payload["motion_id"] == "shoot"
+    assert payload["command_id"] == 9001
+
+
+def test_request_without_command_id_remains_supported():
+    request = parse_motion_request(
+        '{"request_id": 1, "motion_id": "forward", "timeout_ms": 5000}'
+    )
+    assert request.command_id is None
+    state = ExecutionPublicationState()
+    state.begin(request)
+    assert state.running_payload()["command_id"] is None
 
 
 def test_terminal_payload_is_not_duplicated():

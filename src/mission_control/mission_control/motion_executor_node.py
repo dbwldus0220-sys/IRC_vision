@@ -30,6 +30,7 @@ class MotionRequest:
     request_id: int
     motion_id: str
     timeout_ms: int
+    command_id: Optional[int] = None
 
 
 @dataclass(frozen=True)
@@ -77,6 +78,7 @@ def parse_motion_request(payload: str) -> MotionRequest:
     request_id = data["request_id"]
     motion_id = data["motion_id"]
     timeout_ms = data["timeout_ms"]
+    command_id = data.get("command_id")
 
     if isinstance(request_id, bool) or not isinstance(request_id, int):
         raise RequestValidationError(
@@ -94,8 +96,14 @@ def parse_motion_request(payload: str) -> MotionRequest:
         raise RequestValidationError(
             "INVALID_REQUEST", "timeout_ms must be greater than zero"
         )
+    if command_id is not None and (
+        isinstance(command_id, bool) or not isinstance(command_id, int)
+    ):
+        raise RequestValidationError(
+            "INVALID_REQUEST", "command_id must be an integer or null"
+        )
 
-    return MotionRequest(request_id, motion_id, timeout_ms)
+    return MotionRequest(request_id, motion_id, timeout_ms, command_id)
 
 
 def parse_cancel_request(payload: str) -> CancelRequest:
@@ -129,9 +137,11 @@ def build_status_payload(
     status: str,
     error_code: str = "",
     message: str = "",
+    command_id: Optional[int] = None,
 ) -> Dict[str, Any]:
     return {
         "request_id": request_id,
+        "command_id": command_id,
         "motion_id": motion_id,
         "status": status,
         "error_code": error_code,
@@ -157,6 +167,7 @@ class ExecutionPublicationState:
             self._request.request_id,
             self._request.motion_id,
             "RUNNING",
+            command_id=self._request.command_id,
         )
 
     def terminal_payload(
@@ -172,6 +183,7 @@ class ExecutionPublicationState:
             result.final_status.name,
             result.error_code,
             result.message,
+            self._request.command_id,
         )
 
     def clear(self) -> None:
@@ -337,6 +349,7 @@ class MotionExecutorNode(Node):
                     "REJECTED",
                     "REJECTED_BUSY",
                     "another motion is already running",
+                    request.command_id,
                 )
             )
             return
@@ -349,6 +362,7 @@ class MotionExecutorNode(Node):
                     "REJECTED",
                     "INVALID_MOTION",
                     "unsupported motion_id",
+                    request.command_id,
                 )
             )
             return
@@ -364,6 +378,7 @@ class MotionExecutorNode(Node):
                     "REJECTED",
                     rejection.error_code,
                     rejection.message,
+                    request.command_id,
                 )
             )
             return

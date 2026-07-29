@@ -43,8 +43,9 @@ def test_timeout_mapping():
 
 
 def test_build_request_preserves_request_id():
-    assert build_executor_request(37, "shoot") == {
+    assert build_executor_request(37, "shoot", 123) == {
         "request_id": 37,
+        "command_id": 123,
         "motion_id": "shoot",
         "timeout_ms": 10000,
     }
@@ -66,12 +67,23 @@ def test_unsupported_action():
 
 
 def test_parse_does_not_modify_input_object():
-    source = {"action": "STRAIGHT", "angle_deg": 12.5}
+    source = {
+        "action": "STRAIGHT",
+        "angle_deg": 12.5,
+        "command_id": 99,
+    }
     original = copy.deepcopy(source)
     command = parse_legacy_motion_command(source)
     assert source == original
     assert command.action == "STRAIGHT"
     assert command.angle_deg == 12.5
+    assert command.command_id == 99
+
+
+def test_legacy_command_without_command_id_remains_supported():
+    command = parse_legacy_motion_command({"action": "STRAIGHT"})
+    assert command.command_id is None
+    assert build_executor_request(1, "forward")["command_id"] is None
 
 
 class CapturePublisher:
@@ -104,8 +116,12 @@ def send_legacy_command(adapter, **payload):
 
 def test_left_and_right_create_executor_requests():
     adapter = FakeAdapter()
-    send_legacy_command(adapter, action="LEFT", valid=True)
-    send_legacy_command(adapter, action="RIGHT", valid=True)
+    send_legacy_command(
+        adapter, action="LEFT", valid=True, command_id=101
+    )
+    send_legacy_command(
+        adapter, action="RIGHT", valid=True, command_id=202
+    )
 
     requests = [
         json.loads(message.data)
@@ -114,11 +130,13 @@ def test_left_and_right_create_executor_requests():
     assert requests == [
         {
             "request_id": 1,
+            "command_id": 101,
             "motion_id": "turn_left",
             "timeout_ms": 5000,
         },
         {
             "request_id": 2,
+            "command_id": 202,
             "motion_id": "turn_right",
             "timeout_ms": 5000,
         },

@@ -92,13 +92,14 @@ def convert_executor_status(
         )
 
     request_id = data.get("request_id")
+    command_id = data.get("command_id")
     motion_id = data.get("motion_id")
     action = MOTION_ID_TO_LEGACY_ACTION.get(motion_id)
 
     return {
         # Fields consumed by the existing /motion/status subscriber.
         "status": status,
-        "command_id": request_id,
+        "command_id": command_id,
         # Executor requests do not carry the legacy event_id.  None avoids
         # inventing an ID and disables event matching in the current consumer.
         "event_id": None,

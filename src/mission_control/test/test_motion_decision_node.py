@@ -169,6 +169,50 @@ def complete_motion(
     )
 
 
+def test_general_status_callback_ignores_other_command_id():
+    node = FakeDecisionNode()
+    node.general_motion_gate.on_new_vision_input()
+    node.general_motion_gate.on_command_published("LEFT", command_id=700)
+
+    send_status(
+        node,
+        status="RUNNING",
+        action="TURN_LEFT",
+        command_id=699,
+        event_id=None,
+        dynamics_command=None,
+    )
+    send_status(
+        node,
+        status="SUCCEEDED",
+        action="TURN_LEFT",
+        command_id=699,
+        event_id=None,
+        dynamics_command=None,
+    )
+
+    assert node.general_motion_gate.locked
+    assert not node.general_motion_gate.running_seen
+
+
+def test_general_status_callback_releases_same_command_id():
+    node = FakeDecisionNode()
+    node.general_motion_gate.on_new_vision_input()
+    node.general_motion_gate.on_command_published("LEFT", command_id=700)
+
+    for status in ("RUNNING", "SUCCEEDED"):
+        send_status(
+            node,
+            status=status,
+            action="TURN_LEFT",
+            command_id=700,
+            event_id=None,
+            dynamics_command=None,
+        )
+
+    assert not node.general_motion_gate.locked
+
+
 def terminal_decision(source, action, phase):
     """Create one terminal planner decision for guard tests."""
     return MotionDecision(

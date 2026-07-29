@@ -65,6 +65,7 @@ bridge를 즉시 제거하지 않는다.
 
 ```json
 {
+  "command_id": 123,
   "action": "STRAIGHT",
   "angle_deg": 0.0
 }
@@ -272,6 +273,7 @@ MotionExecutorCore에 주입하는 검증용 ROS2 노드 뼈대이다.
 ```json
 {
   "request_id": 1,
+  "command_id": 123,
   "motion_id": "forward",
   "timeout_ms": 5000
 }
@@ -280,7 +282,8 @@ MotionExecutorCore에 주입하는 검증용 ROS2 노드 뼈대이다.
 잘못된 JSON, 필수 필드 누락과 유효하지 않은 필드 타입은
 `REJECTED` / `"INVALID_REQUEST"`로 응답한다. 지원하지 않는 `motion_id`는
 `REJECTED` / `"INVALID_MOTION"`으로 응답한다. 실행 중 새 요청은
-`REJECTED` / `"REJECTED_BUSY"`로 응답한다.
+`REJECTED` / `"REJECTED_BUSY"`로 응답한다. `command_id`는 선택 필드이며
+정수 또는 `null`이어야 한다.
 
 ### 상태 topic
 
@@ -290,6 +293,7 @@ MotionExecutorCore에 주입하는 검증용 ROS2 노드 뼈대이다.
 ```json
 {
   "request_id": 1,
+  "command_id": 123,
   "motion_id": "forward",
   "status": "RUNNING",
   "error_code": "",
@@ -300,7 +304,7 @@ MotionExecutorCore에 주입하는 검증용 ROS2 노드 뼈대이다.
 수락 직후 `RUNNING`을 한 번 발행한다. 이후 terminal 결과
 `SUCCEEDED`, `FAILED`, `CANCELLED`, `TIMEOUT` 중 하나를 정확히 한 번
 발행하고 core를 `reset()`한다. terminal 결과까지 최초 `request_id`와
-`motion_id`를 유지한다.
+`command_id`, `motion_id`를 유지한다.
 
 ### cancel topic
 
@@ -374,14 +378,21 @@ Dynamixel에 접근하지 않는다.
 ```json
 {
   "request_id": 1,
+  "command_id": 123,
   "motion_id": "forward",
   "timeout_ms": 5000
 }
 ```
 
-`request_id`는 adapter 내부에서 1부터 증가한다. `angle_deg`는 호환성을 위해
-파싱하지만 현재 Executor 요청에는 포함하지 않는다. 잘못된 JSON, 유효하지 않은
-`action`, 지원하지 않는 `action`은 경고만 남기고 발행하지 않는다.
+`command_id`는 mission 알고리즘이 `/navigation/motion_command`를 발행할 때
+생성한 원래 명령 ID이다. `request_id`는 adapter가 Executor 실행 요청을
+추적하기 위해 1부터 별도로 증가시키는 ID이다. 따라서 두 값은 서로 달라도
+정상이며, adapter는 어느 한쪽으로 다른 쪽을 덮어쓰지 않는다.
+
+`command_id`가 없는 구형 legacy 입력은 `null`로 Executor에 전달한다.
+`angle_deg`는 호환성을 위해 파싱하지만 현재 Executor 요청에는 포함하지 않는다.
+잘못된 JSON, 유효하지 않은 `action`, 지원하지 않는 `action`은 경고만 남기고
+발행하지 않는다.
 
 ### action 매핑
 
@@ -456,15 +467,31 @@ mock 통합 검증에서는 다음 흐름으로 새 Executor를 기존 mission n
 
 ```text
 motion_decision_node
-→ /navigation/motion_command
+→ /navigation/motion_command (mission command_id)
 → legacy_motion_executor_adapter
-→ /motion/executor/request
+→ /motion/executor/request (command_id + request_id)
 → motion_executor_node
-→ /motion/executor/status
+→ /motion/executor/status (command_id + request_id)
 → legacy_motion_status_adapter
-→ /motion/status
+→ /motion/status (command_id + request_id)
 → motion_decision_node
 ```
+
+두 ID의 토픽별 의미는 다음과 같다.
+
+| 토픽 | `command_id` | `request_id` |
+| --- | --- | --- |
+| `/navigation/motion_command` | mission이 만든 원 명령 ID | 없음 |
+| `/motion/executor/request` | 원 명령 ID 보존, 구형 입력은 `null` | adapter가 만든 실행 요청 ID |
+| `/motion/executor/status` | 해당 요청의 원 명령 ID | 해당 실행 요청 ID |
+| `/motion/status` | Executor status의 원 명령 ID | Executor status의 실행 요청 ID |
+
+Executor node는 수락한 `MotionRequest` 전체를 publication state에 보존한다.
+따라서 `RUNNING`과 `SUCCEEDED`, `FAILED`, `TIMEOUT`, `CANCELLED` terminal
+상태에 같은 두 ID가 포함된다. 실행 중 새 요청의 `REJECTED_BUSY`를 포함한
+요청 단위 거부 상태에도 거부된 요청의 `command_id`와 `request_id`를 넣는다.
+하드웨어 실행만 담당하는 `MotionExecutorCore`에는 mission metadata를
+추가하지 않는다.
 
 `legacy_motion_status_adapter`는 Executor의 `RUNNING`, `SUCCEEDED`,
 `FAILED`, `CANCELLED`, `TIMEOUT`, `REJECTED` 값을 그대로 보존하면서 기존
@@ -579,12 +606,22 @@ Vision 메시지가 최소 한 번 있어야 다음 일반 모션을 허용한�
 반복 frame마다 같은 요청을 재전송하지 않도록 동일 action을 억제하며, 판단이
 다른 일반 action으로 바뀌면 다시 허용한다.
 
-현재 `/motion/status`의 `command_id`는 mission command ID가 아니라 Executor
-`request_id`이므로 ID 상관관계는 완전하지 않다. 일반 모션 잠금은 활성 action,
-`LEFT`/`TURN_LEFT` 및 `RIGHT`/`TURN_RIGHT` alias, 명령 발행 이후 matching
-`RUNNING` 수신 여부를 사용한다. matching `RUNNING`보다 먼저 도착한 terminal
-상태는 오래된 상태로 보고 새 잠금을 해제하지 않는다. `REJECTED`는 정상적으로
-`RUNNING` 없이 반환될 수 있어 matching action만 확인한다.
+일반 모션 잠금은 발행한 mission `command_id`를 함께 저장한다. 활성
+`command_id`와 status `command_id`가 모두 있으면 두 값이 같은 상태만
+처리하므로, 이전 요청의 늦은 `RUNNING`이나 `SUCCEEDED`가 현재 잠금을
+변경하거나 해제하지 못한다. ID가 같더라도 `REJECTED` 외 terminal 상태는
+해당 요청의 `RUNNING`을 먼저 보아야 한다.
+
+구형 메시지 호환을 위해 status에 `command_id`가 없으면 기존 정책인 action
+alias와 선행 `RUNNING`으로 상관관계를 판단한다. 이 fallback은 ID 기반만큼
+강하지 않지만, 오래된 같은-action terminal이 단독으로 새 잠금을 해제하는
+것은 막는다. `REJECTED`는 정상적으로 `RUNNING` 없이 반환될 수 있어 구형
+fallback에서는 matching action으로 해제한다.
+
+현재 이 Executor adapter 경로에서는 `event_id`를 전달하지 않으며
+`/motion/status.event_id`는 `null`이다. `event_id`는 기존 특수 모션 경로의
+이벤트 상관관계용 필드로 남아 있고, 일반 모션 Executor 상관관계에는 사용하지
+않는다.
 
 `/vision/line_info`는 `std_msgs/msg/String` JSON이므로 ROS `Header`나
 `header.stamp` 필드가 없다. `motion_decision_node`는 메시지를 받은 순간의

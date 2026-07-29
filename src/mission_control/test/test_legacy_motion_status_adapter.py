@@ -16,6 +16,7 @@ from legacy_motion_status_adapter import (
 def executor_status(status, **overrides):
     payload = {
         "request_id": 7,
+        "command_id": 123,
         "motion_id": "pick_ball",
         "status": status,
         "error_code": "",
@@ -44,7 +45,7 @@ def test_status_conversion(executor_value, legacy_value):
         executor_value == "RUNNING"
     )
     assert converted["action"] == "PICKUP_NOW"
-    assert converted["command_id"] == 7
+    assert converted["command_id"] == 123
     assert converted["event_id"] is None
 
 
@@ -58,6 +59,7 @@ def test_failed_preserves_executor_details():
     )
     assert converted["status"] == "FAILED"
     assert converted["request_id"] == 7
+    assert converted["command_id"] == 123
     assert converted["motion_id"] == "pick_ball"
     assert converted["error_code"] == "COMMUNICATION_ERROR"
     assert converted["message"] == "mock failure"
@@ -84,3 +86,11 @@ def test_one_input_produces_one_output_object():
     )
     assert isinstance(json.loads(output), dict)
     assert output.count('"status"') == 1
+
+
+def test_legacy_executor_status_without_command_id_uses_null():
+    payload = executor_status("RUNNING")
+    del payload["command_id"]
+    converted = convert_executor_status(payload)
+    assert converted["command_id"] is None
+    assert converted["request_id"] == 7
