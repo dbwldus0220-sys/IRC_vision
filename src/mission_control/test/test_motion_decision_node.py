@@ -21,13 +21,18 @@ from mock_mission_input_node import build_mock_vision_input  # noqa: E402
 class FakeLogger:
     """Provide no-op logger methods used by the callback."""
 
+    def __init__(self):
+        """Collect log messages for state-change logging tests."""
+        self.infos = []
+        self.warnings = []
+
     def info(self, _message):
-        """Ignore an informational log message."""
-        pass
+        """Record an informational log message."""
+        self.infos.append(_message)
 
     def warning(self, _message):
-        """Ignore a warning log message."""
-        pass
+        """Record a warning log message."""
+        self.warnings.append(_message)
 
 
 class FakePlanner:
@@ -352,55 +357,74 @@ def terminal_decision(source, action, phase):
     )
 
 
+class ReadinessPublisher:
+    """Capture commands while exposing the rclpy publisher readiness API."""
+
+    def __init__(self, subscription_count=1):
+        """Initialize one controllable subscription count."""
+        self.messages = []
+        self.subscription_count = subscription_count
+
+    def publish(self, message):
+        """Record one published command."""
+        self.messages.append(message)
+
+    def get_subscription_count(self):
+        """Return the simulated matched subscription count."""
+        return self.subscription_count
+
+
+class ReadinessPublishNode(FakeDecisionNode):
+    """Run the real publication path with one deterministic decision."""
+
+    def __init__(self, decision, subscription_count=1):
+        """Initialize publication state without creating a ROS graph."""
+        super().__init__(decision.phase)
+        self.decision = decision
+        self.planner = type(
+            'PlannerTelemetry',
+            (),
+            {
+                'ball_tracking_status': staticmethod(lambda: {}),
+                'goal_tracking_status': staticmethod(lambda: {}),
+            },
+        )()
+        self.previous_publish_time = 0.0
+        self.command_id = 0
+        self.event_id = 0
+        self.terminal_latch = None
+        self.publisher = ReadinessPublisher(subscription_count)
+        self._command_publisher_ready = None
+
+    @staticmethod
+    def _fresh_observations(_now):
+        return {}, {}
+
+    @staticmethod
+    def _rearm_absent_terminal_targets(_observations):
+        pass
+
+    def _select_mission_decision(self, _observations, _dt_sec):
+        return self.decision
+
+    @staticmethod
+    def _suppress_duplicate_terminal_action(selected):
+        return selected
+
+    @staticmethod
+    def _mission_progress():
+        return {}
+
+    def _command_publisher_has_subscriber(self):
+        return MotionDecisionNode._command_publisher_has_subscriber(self)
+
+
 def test_special_command_metadata_is_stored_when_first_published():
     decision = terminal_decision('hurdle', 'GO', 'HURDLE_APPROACH')
+    node = ReadinessPublishNode(decision)
+    node.command_id = 99
+    node.event_id = 4
 
-    class CapturePublisher:
-
-        def __init__(self):
-            self.messages = []
-
-        def publish(self, message):
-            self.messages.append(message)
-
-    class PublishNode(FakeDecisionNode):
-
-        def __init__(self):
-            super().__init__('HURDLE_APPROACH')
-            self.planner = type(
-                'PlannerTelemetry',
-                (),
-                {
-                    'ball_tracking_status': staticmethod(lambda: {}),
-                    'goal_tracking_status': staticmethod(lambda: {}),
-                },
-            )()
-            self.previous_publish_time = 0.0
-            self.command_id = 99
-            self.event_id = 4
-            self.publisher = CapturePublisher()
-
-        @staticmethod
-        def _fresh_observations(_now):
-            return {}, {}
-
-        @staticmethod
-        def _rearm_absent_terminal_targets(_observations):
-            pass
-
-        @staticmethod
-        def _select_mission_decision(_observations, _dt_sec):
-            return decision
-
-        @staticmethod
-        def _suppress_duplicate_terminal_action(selected):
-            return selected
-
-        @staticmethod
-        def _mission_progress():
-            return {}
-
-    node = PublishNode()
     MotionDecisionNode._publish_decision(node)
     payload = json.loads(node.publisher.messages[0].data)
 
@@ -410,6 +434,106 @@ def test_special_command_metadata_is_stored_when_first_published():
     assert node.active_special_command_id == 100
     assert node.active_special_event_id == 5
     assert node.special_motion_running is False
+
+
+def test_general_command_waits_for_subscriber_without_consuming_state():
+    decision = MotionDecision(
+        phase='AUTO',
+        source='line',
+        action='STRAIGHT',
+        valid=True,
+        reason='line_ready',
+        sdk_motion_requested=False,
+        requires_ack=False,
+        source_command={},
+    )
+    node = ReadinessPublishNode(decision, subscription_count=0)
+
+    MotionDecisionNode._publish_decision(node)
+    MotionDecisionNode._publish_decision(node)
+
+    assert node.publisher.messages == []
+    assert node.command_id == 0
+    assert not node.general_motion_gate.locked
+    assert len(node.logger.warnings) == 1
+
+    node.publisher.subscription_count = 1
+    MotionDecisionNode._publish_decision(node)
+
+    assert len(node.publisher.messages) == 1
+    assert json.loads(node.publisher.messages[0].data)['command_id'] == 1
+    assert node.command_id == 1
+    assert node.general_motion_gate.locked
+    assert len(node.logger.infos) == 1
+
+
+@pytest.mark.parametrize(
+    ('source', 'action', 'phase'),
+    [
+        ('ball', 'PICKUP_NOW', 'BALL_APPROACH'),
+        ('goal', 'SHOT', 'GOAL_APPROACH'),
+        ('hurdle', 'GO', 'HURDLE_APPROACH'),
+    ],
+)
+def test_special_command_waits_for_subscriber_before_registering_lock(
+    source,
+    action,
+    phase,
+):
+    node = ReadinessPublishNode(
+        terminal_decision(source, action, phase),
+        subscription_count=0,
+    )
+
+    MotionDecisionNode._publish_decision(node)
+
+    assert node.publisher.messages == []
+    assert node.command_id == 0
+    assert node.event_id == 0
+    assert node.active_special_action is None
+    assert node.active_special_command_id is None
+    assert node.active_special_event_id is None
+    assert node.special_motion_running is False
+    assert node.terminal_latch is None
+    assert node.mission_phase == phase
+
+    node.publisher.subscription_count = 1
+    MotionDecisionNode._publish_decision(node)
+
+    assert len(node.publisher.messages) == 1
+    payload = json.loads(node.publisher.messages[0].data)
+    assert payload['command_id'] == 1
+    assert payload['event_id'] == 1
+    assert node.command_id == 1
+    assert node.event_id == 1
+    assert node.active_special_action == action
+    assert node.active_special_command_id == 1
+    assert node.active_special_event_id == 1
+    assert node.terminal_latch == (source, action)
+
+
+def test_reconnected_special_command_keeps_running_status_correlation():
+    node = ReadinessPublishNode(
+        terminal_decision('hurdle', 'GO', 'HURDLE_APPROACH'),
+        subscription_count=0,
+    )
+    MotionDecisionNode._publish_decision(node)
+    node.publisher.subscription_count = 1
+    MotionDecisionNode._publish_decision(node)
+
+    send_status(
+        node,
+        status='RUNNING',
+        action='GO',
+        command_id=1,
+        event_id=1,
+        dynamics_command=None,
+    )
+
+    assert node.special_motion_running is True
+    assert node.active_special_action == 'GO'
+    assert node.active_special_command_id == 1
+    assert node.active_special_event_id == 1
 
 
 def select_decision(node, finish=None, **observations):

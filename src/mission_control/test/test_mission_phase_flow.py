@@ -31,9 +31,13 @@ class CapturePublisher:
 
     def __init__(self):
         self.messages = []
+        self.subscription_count = 1
 
     def publish(self, message):
         self.messages.append(json.loads(message.data))
+
+    def get_subscription_count(self):
+        return self.subscription_count
 
 
 class FakeLogger:
@@ -83,6 +87,7 @@ class MissionFlowHarness:
         self.planner = MotionDecisionPlanner()
         self.general_motion_gate = GeneralMotionCommandGate()
         self.publisher = CapturePublisher()
+        self._command_publisher_ready = None
         self.logger = FakeLogger()
         self.observations = {
             source: None for source in self.SOURCES
@@ -125,6 +130,9 @@ class MissionFlowHarness:
 
     def _mission_progress(self):
         return MotionDecisionNode._mission_progress(self)
+
+    def _command_publisher_has_subscriber(self):
+        return MotionDecisionNode._command_publisher_has_subscriber(self)
 
     def publish_vision(self, **observations):
         self.observations.update(observations)

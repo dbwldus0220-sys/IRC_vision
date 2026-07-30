@@ -779,6 +779,14 @@ IDLE
 실행 중 판단된 다른 일반 action도 새 Executor 요청으로 전달되지 않는다.
 Executor의 `REJECTED_BUSY` 검사는 이 알고리즘 잠금 이후의 마지막 안전망이다.
 
+노드 시작 직후에는 `/navigation/motion_command` publisher의
+`get_subscription_count()`가 1 이상일 때만 command를 발행한다. subscriber가
+없으면 planner 판단은 다음 timer 주기에 다시 수행하지만 `command_id`,
+`event_id`, general motion gate, special motion metadata와 terminal latch는
+변경하지 않는다. 연결 대기 warning과 연결 회복 info는 상태가 바뀔 때만
+기록한다. 이 검사는 decision node의 최초 outbound command 유실만 방지하며
+downstream topic에 별도 handshake나 durable QoS를 추가하지 않는다.
+
 정상 완료, 실패, timeout, cancel 이후에는 terminal 상태보다 나중에 도착한
 Vision 메시지가 최소 한 번 있어야 다음 일반 모션을 허용한다. `REJECTED`의
 `error_code`가 `REJECTED_BUSY` 또는 `HARDWARE_NOT_READY`이면 일시적 거부로

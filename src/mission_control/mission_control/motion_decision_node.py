@@ -291,6 +291,7 @@ class MotionDecisionNode(Node):
             command_topic,
             10,
         )
+        self._command_publisher_ready: bool | None = None
 
         publish_rate = max(
             1.0,
@@ -662,6 +663,9 @@ class MotionDecisionNode(Node):
             decision
         )
 
+        if not self._command_publisher_has_subscriber():
+            return
+
         is_general_motion = (
             decision.valid
             and normalize_general_action(decision.action) is not None
@@ -766,6 +770,25 @@ class MotionDecisionNode(Node):
                 decision.action,
                 self.command_id,
             )
+
+    def _command_publisher_has_subscriber(self) -> bool:
+        """Report readiness changes without publishing into a disconnected topic."""
+        ready = self.publisher.get_subscription_count() >= 1
+        previous = self._command_publisher_ready
+
+        if not ready and previous is not False:
+            self.get_logger().warning(
+                "Motion command publication deferred: "
+                "no /navigation/motion_command subscriber"
+            )
+        elif ready and previous is False:
+            self.get_logger().info(
+                "Motion command publication resumed: "
+                "/navigation/motion_command subscriber connected"
+            )
+
+        self._command_publisher_ready = ready
+        return ready
 
     def _select_mission_decision(
         self,
