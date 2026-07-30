@@ -804,6 +804,125 @@ MotionExecutorNode는 `player_backend` parameter를 factory에 전달하여 play
 factory의 `sdk` 생성 구현만 실제 RobotMotionPlayer adapter로 교체할 예정이다.
 그 전까지 기본 backend는 반드시 `mock`으로 유지한다.
 
+## 실제 SDK backend 구현 계약
+
+현재 실제 STEP SDK backend는 없다. `StepSdkMotionPlayer`는 향후 adapter가
+구현해야 할 표면을 고정하기 위한 비연결 skeleton이며 factory에 등록하지
+않는다. 하드웨어나 vendor SDK를 import하지 않고 모든 알려진 모션 시작을
+`HARDWARE_NOT_READY`로 거부한다. `player_backend=sdk`는 계속
+`SdkMotionPlayerPlaceholder`를 선택한다.
+
+Python 메서드 이름은 현재 공개 Protocol과의 호환을 위해 snake_case
+`hardware_ready()`가 아니라 `hardwareReady()`를 유지한다.
+
+### 초기화와 hardware readiness
+
+`hardwareReady() -> bool`은 다음을 모두 만족할 때만 `True`여야 한다.
+
+- vendor SDK 초기화 완료
+- 필요한 motion 데이터 또는 리소스 로드 완료
+- SDK가 요구하는 통신 계층 준비 완료
+- 새 모션 요청을 안전하게 받을 수 있는 상태
+
+초기화 전 또는 초기화 실패 상태에서는 `False`를 반환한다.
+`MotionExecutorCore`는 `False`이면 `start()`를 호출하지 않고
+`HARDWARE_NOT_READY`로 요청을 거부한다. 실제 adapter의 `start()`도 직접
+호출될 가능성에 대비해 같은 상태를 다시 확인해야 한다.
+
+### 비동기 start 계약
+
+`start(motion_id) -> StartResult`는 모션 완료까지 block하면 안 된다. SDK에
+시작을 요청한 뒤 즉시 다음 중 하나를 반환해야 한다.
+
+| `StartResult` | 의미 |
+| --- | --- |
+| `ACCEPTED` | 시작 요청을 수락했고 이후 `status()`로 진행 상태 확인 가능 |
+| `REJECTED_BUSY` | 이미 다른 모션 실행 중 |
+| `MOTION_NOT_FOUND` | SDK 또는 모션 데이터에서 식별자를 찾지 못함 |
+| `HARDWARE_NOT_READY` | SDK 초기화나 통신 계층이 준비되지 않음 |
+| `INVALID_MOTION` | adapter 계약에서 지원하지 않는 `motion_id` |
+
+알 수 없는 `motion_id`를 다른 동작으로 대체하거나 성공으로 처리하면 안 된다.
+실제 SDK 식별자 매핑은 외부 SDK 근거가 들어오기 전까지 미정이다.
+
+### status와 result 계약
+
+`status()`가 반환하는 현재 상태 의미는 다음과 같다.
+
+| `MotionStatus` | 의미 |
+| --- | --- |
+| `IDLE` | 실행 중인 모션 없음 |
+| `RUNNING` | SDK가 모션 프레임 또는 궤적을 실행 중 |
+| `SETTLING` | 주 동작은 끝났지만 최종 자세 안정화 또는 완료 확인 중 |
+| `SUCCEEDED` | 최종 자세와 SDK 완료 조건을 정상 충족 |
+| `FAILED` | 모션 실행 또는 통신이 실패했고 `result()` 확인 필요 |
+| `CANCELLED` | `cancel()` 요청으로 실행 종료 |
+
+현재 `MotionError` 값은 `NONE`, `JSON_ERROR`, `HARDWARE_NOT_READY`,
+`COMMUNICATION_ERROR`, `FRAME_SEND_FAILED`,
+`PRESENT_POSITION_READ_FAILED`, `POSITION_TIMEOUT`, `CANCEL_FAILED`,
+`INTERNAL_ERROR`이다. `INVALID_MOTION`은 현재 `MotionError`가 아니라
+시작 거부용 `StartResult` 값이다. 이 구분을 임의로 바꾸지 않는다.
+
+`result()`는 terminal 실패 원인을 enum으로 반환하고, `lastError()`는 사람이
+읽을 수 있는 SDK 진단 문자열을 반환한다. 정상 완료에서는
+`result()=NONE`이어야 한다.
+
+### polling, cancel, timeout
+
+`update()`는 짧고 non-blocking이어야 하며 SDK callback, future 또는 상태
+레지스터의 최신 결과를 내부 상태로 반영한다. Executor는 `update()` 뒤
+`status()`를 polling한다.
+
+Protocol에는 `stop()`이 없고 `cancel()`만 존재한다. `cancel()`은 현재
+모션 실행 취소 또는 안전 hold를 요청하는 backend API이며 mission action
+`STOP`과 별개다. 실제 SDK가 취소를 지원하지 않으면 이를 성공으로 위장하지
+말고 명시적인 미지원/실패 결과를 반환해야 한다. 이번 단계에서는 새
+`stop()` 메서드를 추가하지 않는다.
+
+요청 timeout의 단일 소유자는 `MotionExecutorCore`이다. Core가
+`timeout_ms`를 누적하고 초과 시 `cancel()`을 한 번 호출한 뒤 `TIMEOUT`을
+생성한다. SDK 자체 timeout은 통신 또는 자세 도달 실패를 감지하는 내부
+보호로 사용할 수 있지만, 별도의 상위 timeout terminal을 중복 발행하면
+안 된다.
+
+### 모션 그룹과 correlation
+
+현재 추상 `motion_id` 그룹은 다음과 같으며 실제 SDK 번호는 모두 미정이다.
+
+- 일반: `forward`, `forward_short`, `turn_left`, `turn_right`,
+  `adjust_left`, `adjust_right`, `backward`
+- 특수: `pick_ball`, `shoot`, 현재 허들 호환용 `forward` 또는 `hurdle`
+
+같은 `forward`가 서로 다른 action 의미에 사용될 수 있으므로 SDK adapter가
+`motion_id`만으로 mission action을 역추론하면 안 된다. action별 실제 SDK
+매핑은 SDK 담당자와 별도로 확정해야 한다.
+
+`command_id`, `event_id`, `request_id`, 원 action은
+`MotionExecutorNode.ExecutionPublicationState`가 보존한다. MotionPlayer
+backend에는 `motion_id`만 전달하므로 SDK adapter가 mission correlation ID를
+알 필요가 없다. RUNNING과 terminal status에는 Executor가 원 요청의 ID를
+다시 결합한다.
+
+### SDK 담당자에게 필요한 외부 인터페이스
+
+실제 adapter 구현 전 다음 SDK 근거가 필요하다.
+
+- 초기화·종료 함수와 성공/실패 반환 규칙
+- 지원 모션 조회 또는 motion identifier 목록
+- non-blocking 모션 시작 함수
+- busy 또는 현재 실행 모션 조회
+- 완료·실패 상태 polling 또는 callback
+- 구조화된 실패 코드와 상세 오류 문자열
+- 실행 취소 또는 안전 hold 지원 여부와 결과
+- motion 데이터 로드 위치와 누락 판정 방식
+- SDK thread-safety와 callback thread 규칙
+- 통신 단절 및 자세 도달 실패 판정 방식
+
+blocking 실행 함수만 제공되는 경우 ROS timer thread에서 직접 호출하지 않고
+별도 worker와 thread-safe 상태 전달이 필요하다. 실제 SDK의 문서와 코드가
+확인되기 전에는 함수명, 번호 또는 성공 조건을 추정하지 않는다.
+
 ## 아직 미확정인 항목
 
 - 실제 전체 모션 JSON 데이터
