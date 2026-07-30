@@ -25,6 +25,18 @@ ACTION_ALIASES = {
     "RIGHT": "RIGHT",
     "TURN_RIGHT": "RIGHT",
 }
+TRANSIENT_REJECTION_CODES = frozenset(
+    {"REJECTED_BUSY", "HARDWARE_NOT_READY"}
+)
+PERMANENT_REJECTION_CODES = frozenset(
+    {
+        "INVALID_REQUEST",
+        "INVALID_MOTION",
+        "MOTION_NOT_FOUND",
+        "INTERNAL_ERROR",
+    }
+)
+DEFAULT_MAX_TRANSIENT_RETRIES = 2
 
 
 def normalize_general_action(action: Any) -> str | None:
@@ -48,7 +60,10 @@ class GateTransition:
 class GeneralMotionCommandGate:
     """Allow one general command until its matching execution terminates."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        max_transient_retries: int = DEFAULT_MAX_TRANSIENT_RETRIES,
+    ) -> None:
         self.locked = False
         self.active_action: str | None = None
         self.active_command_id: int | None = None
@@ -56,6 +71,9 @@ class GeneralMotionCommandGate:
         self.vision_generation = 0
         self.required_vision_generation = 0
         self.rejected_action: str | None = None
+        self.transient_rejection_action: str | None = None
+        self.transient_rejection_count = 0
+        self.max_transient_retries = max(0, max_transient_retries)
 
     def on_new_vision_input(self) -> None:
         """Record one valid Vision JSON message."""
@@ -75,6 +93,12 @@ class GeneralMotionCommandGate:
             and self.rejected_action != normalized
         ):
             self.rejected_action = None
+            self._reset_transient_rejections()
+        elif (
+            self.transient_rejection_action is not None
+            and self.transient_rejection_action != normalized
+        ):
+            self._reset_transient_rejections()
         return True
 
     def on_command_published(
@@ -96,6 +120,7 @@ class GeneralMotionCommandGate:
         action: Any,
         status: Any,
         command_id: Any = None,
+        error_code: Any = None,
     ) -> GateTransition:
         """Apply a matching status while protecting against stale terminals."""
         normalized_action = normalize_general_action(action)
@@ -120,6 +145,7 @@ class GeneralMotionCommandGate:
 
         if normalized_status == "RUNNING":
             self.running_seen = True
+            self._reset_transient_rejections()
             return GateTransition(True, False)
 
         if normalized_status not in TERMINAL_STATUSES:
@@ -138,8 +164,39 @@ class GeneralMotionCommandGate:
         self.running_seen = False
         self.required_vision_generation = self.vision_generation + 1
 
-        # A busy rejection must not be retried by every repeated frame.
         if normalized_status == "REJECTED":
-            self.rejected_action = completed_action
+            self._handle_rejection(completed_action, error_code)
+        else:
+            self._reset_transient_rejections()
 
         return GateTransition(True, True)
+
+    def _handle_rejection(
+        self,
+        action: str | None,
+        error_code: Any,
+    ) -> None:
+        """Classify one rejection and update bounded retry state."""
+        normalized_code = (
+            error_code.strip().upper()
+            if isinstance(error_code, str)
+            else ""
+        )
+        if normalized_code not in TRANSIENT_REJECTION_CODES:
+            self.rejected_action = action
+            self._reset_transient_rejections()
+            return
+
+        if self.transient_rejection_action != action:
+            self.transient_rejection_action = action
+            self.transient_rejection_count = 0
+        self.transient_rejection_count += 1
+
+        if self.transient_rejection_count > self.max_transient_retries:
+            self.rejected_action = action
+            self._reset_transient_rejections()
+
+    def _reset_transient_rejections(self) -> None:
+        """Clear the retry budget associated with the previous action."""
+        self.transient_rejection_action = None
+        self.transient_rejection_count = 0

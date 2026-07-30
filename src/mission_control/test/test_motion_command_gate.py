@@ -47,7 +47,7 @@ def test_terminal_requires_new_vision_before_republishing(status):
     assert gate.can_publish("LEFT")
 
 
-def test_rejected_does_not_retry_same_action_forever():
+def test_unknown_rejection_does_not_retry_same_action_forever():
     gate = gate_with_vision()
     gate.on_command_published("LEFT")
     assert gate.on_motion_status("TURN_LEFT", "REJECTED").released
@@ -55,6 +55,67 @@ def test_rejected_does_not_retry_same_action_forever():
         gate.on_new_vision_input()
         assert not gate.can_publish("LEFT")
     assert gate.can_publish("RIGHT")
+
+
+def test_transient_rejection_retries_only_after_new_vision():
+    gate = gate_with_vision()
+    gate.on_command_published("STRAIGHT")
+    assert gate.on_motion_status(
+        "STRAIGHT",
+        "REJECTED",
+        error_code="REJECTED_BUSY",
+    ).released
+    assert not gate.can_publish("STRAIGHT")
+    gate.on_new_vision_input()
+    assert gate.can_publish("STRAIGHT")
+
+
+def test_permanent_rejection_rearms_only_after_action_change():
+    gate = gate_with_vision()
+    gate.on_command_published("STRAIGHT")
+    gate.on_motion_status(
+        "STRAIGHT",
+        "REJECTED",
+        error_code="INVALID_MOTION",
+    )
+    for _ in range(3):
+        gate.on_new_vision_input()
+        assert not gate.can_publish("STRAIGHT")
+
+    assert gate.can_publish("LEFT")
+    assert gate.can_publish("STRAIGHT")
+
+
+def test_transient_retries_are_bounded_and_rearm_on_action_change():
+    gate = GeneralMotionCommandGate(max_transient_retries=2)
+    gate.on_new_vision_input()
+
+    for _ in range(3):
+        assert gate.can_publish("STRAIGHT")
+        gate.on_command_published("STRAIGHT")
+        assert gate.on_motion_status(
+            "STRAIGHT",
+            "REJECTED",
+            error_code="HARDWARE_NOT_READY",
+        ).released
+        gate.on_new_vision_input()
+
+    assert not gate.can_publish("STRAIGHT")
+    assert gate.can_publish("RIGHT")
+    assert gate.can_publish("STRAIGHT")
+
+
+@pytest.mark.parametrize("error_code", [None, "", "UNRECOGNIZED"])
+def test_unknown_rejection_code_fails_closed(error_code):
+    gate = gate_with_vision()
+    gate.on_command_published("STRAIGHT")
+    gate.on_motion_status(
+        "STRAIGHT",
+        "REJECTED",
+        error_code=error_code,
+    )
+    gate.on_new_vision_input()
+    assert not gate.can_publish("STRAIGHT")
 
 
 def test_old_success_cannot_release_new_lock_without_running():

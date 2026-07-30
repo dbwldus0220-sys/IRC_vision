@@ -757,9 +757,16 @@ IDLE
 Executor의 `REJECTED_BUSY` 검사는 이 알고리즘 잠금 이후의 마지막 안전망이다.
 
 정상 완료, 실패, timeout, cancel 이후에는 terminal 상태보다 나중에 도착한
-Vision 메시지가 최소 한 번 있어야 다음 일반 모션을 허용한다. `REJECTED`는
-반복 frame마다 같은 요청을 재전송하지 않도록 동일 action을 억제하며, 판단이
-다른 일반 action으로 바뀌면 다시 허용한다.
+Vision 메시지가 최소 한 번 있어야 다음 일반 모션을 허용한다. `REJECTED`의
+`error_code`가 `REJECTED_BUSY` 또는 `HARDWARE_NOT_READY`이면 일시적 거부로
+분류하고, 새 Vision 입력 이후 같은 action을 최대 2회 재시도한다. 한도를
+넘으면 action이 바뀔 때까지 억제한다. 이 한도는
+`general_motion_transient_retry_limit` parameter로 설정할 수 있다.
+
+`INVALID_REQUEST`, `INVALID_MOTION`, `MOTION_NOT_FOUND`, `INTERNAL_ERROR`와
+알 수 없거나 누락된 error code는 fail-closed로 영구 거부 처리한다. 같은
+action은 Vision generation이 증가해도 재전송하지 않으며, 다른 일반 action이
+선택된 뒤에만 해당 action의 거부 및 retry 상태를 rearm한다.
 
 일반 모션 잠금은 발행한 mission `command_id`를 함께 저장한다. 활성
 `command_id`와 status `command_id`가 모두 있으면 두 값이 같은 상태만

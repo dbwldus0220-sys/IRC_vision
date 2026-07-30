@@ -65,6 +65,7 @@ class MotionDecisionNode(Node):
         self.declare_parameter("required_shots", 2)
         self.declare_parameter("required_ball_sections", 2)
         self.declare_parameter("finish_min_confidence", 0.70)
+        self.declare_parameter("general_motion_transient_retry_limit", 2)
 
         self.declare_parameter("line_timeout_sec", 0.50)
         self.declare_parameter("ball_timeout_sec", 0.50)
@@ -224,7 +225,16 @@ class MotionDecisionNode(Node):
         # Special SDK/Dynamics motion lock state.
         self.active_special_event_id: int | None = None
         self.active_special_dynamics_command: int | None = None
-        self.general_motion_gate = GeneralMotionCommandGate()
+        self.general_motion_gate = GeneralMotionCommandGate(
+            max_transient_retries=max(
+                0,
+                int(
+                    self.get_parameter(
+                        "general_motion_transient_retry_limit"
+                    ).value
+                ),
+            )
+        )
 
         for source in self.SOURCES:
             topic = str(
@@ -458,6 +468,7 @@ class MotionDecisionNode(Node):
         action = payload.get("action")
         command_id = payload.get("command_id")
         event_id = payload.get("event_id")
+        error_code = payload.get("error_code")
         dynamics_command = payload.get(
             "dynamics_command"
         )
@@ -467,6 +478,7 @@ class MotionDecisionNode(Node):
                 action,
                 status,
                 command_id,
+                error_code,
             )
             if transition.released:
                 self.get_logger().info(

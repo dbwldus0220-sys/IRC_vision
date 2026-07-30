@@ -143,6 +143,7 @@ def status_message(
     command_id,
     event_id,
     dynamics_command,
+    error_code=None,
 ):
     """Create one /motion/status JSON message."""
     payload = {
@@ -151,6 +152,7 @@ def status_message(
         'command_id': command_id,
         'event_id': event_id,
         'dynamics_command': dynamics_command,
+        'error_code': error_code,
     }
 
     message = String()
@@ -309,6 +311,29 @@ def test_general_status_callback_releases_same_command_id():
         )
 
     assert not node.general_motion_gate.locked
+
+
+def test_general_status_callback_preserves_transient_error_code():
+    node = FakeDecisionNode()
+    node.general_motion_gate.on_new_vision_input()
+    node.general_motion_gate.on_command_published(
+        "STRAIGHT",
+        command_id=701,
+    )
+
+    send_status(
+        node,
+        status="REJECTED",
+        action="STRAIGHT",
+        command_id=701,
+        event_id=None,
+        dynamics_command=None,
+        error_code="REJECTED_BUSY",
+    )
+
+    assert not node.general_motion_gate.can_publish("STRAIGHT")
+    node.general_motion_gate.on_new_vision_input()
+    assert node.general_motion_gate.can_publish("STRAIGHT")
 
 
 def terminal_decision(source, action, phase):
