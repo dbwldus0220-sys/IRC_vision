@@ -144,6 +144,7 @@ def status_message(
     event_id,
     dynamics_command,
     error_code=None,
+    message=None,
 ):
     """Create one /motion/status JSON message."""
     payload = {
@@ -153,6 +154,7 @@ def status_message(
         'event_id': event_id,
         'dynamics_command': dynamics_command,
         'error_code': error_code,
+        'message': message,
     }
 
     message = String()
@@ -682,6 +684,99 @@ def test_failed_or_timed_out_special_motion_returns_to_auto(status):
     assert node.terminal_latch is None
     assert node.pickups_completed == 0
     assert node.shots_completed == 0
+
+
+@pytest.mark.parametrize(
+    ('initial_phase', 'action', 'expected_phase'),
+    [
+        ('BALL_APPROACH', 'PICKUP_NOW', 'AUTO'),
+        ('GOAL_APPROACH', 'SHOT', 'AUTO'),
+        ('HURDLE_APPROACH', 'GO', 'AUTO'),
+        ('GOAL_APPROACH', 'GO', 'GOAL_APPROACH'),
+    ],
+)
+def test_matching_rejected_without_running_releases_special_lock(
+    initial_phase,
+    action,
+    expected_phase,
+):
+    node = FakeDecisionNode(initial_phase)
+    arm_special_command(node, action, 400, 40)
+
+    send_status(
+        node,
+        status='REJECTED',
+        action=action,
+        command_id=400,
+        event_id=40,
+        dynamics_command=None,
+        error_code='HARDWARE_NOT_READY',
+        message='SDK backend is not ready',
+    )
+
+    assert node.special_motion_running is False
+    assert node.active_special_action is None
+    assert node.active_special_command_id is None
+    assert node.active_special_event_id is None
+    assert node.mission_phase == expected_phase
+    assert node.pickups_completed == 0
+    assert node.shots_completed == 0
+    assert node.terminal_latch is None
+
+
+@pytest.mark.parametrize(
+    ('action', 'command_id', 'event_id'),
+    [
+        ('SHOT', 400, 40),
+        ('PICKUP_NOW', 399, 40),
+        ('PICKUP_NOW', 400, 39),
+        ('PICKUP_NOW', 400, None),
+    ],
+)
+def test_wrong_or_stale_rejected_keeps_special_lock(
+    action,
+    command_id,
+    event_id,
+):
+    node = FakeDecisionNode('BALL_APPROACH')
+    arm_special_command(node, 'PICKUP_NOW', 400, 40)
+
+    send_status(
+        node,
+        status='REJECTED',
+        action=action,
+        command_id=command_id,
+        event_id=event_id,
+        dynamics_command=None,
+        error_code='HARDWARE_NOT_READY',
+    )
+
+    assert node.active_special_action == 'PICKUP_NOW'
+    assert node.active_special_command_id == 400
+    assert node.active_special_event_id == 40
+    assert node.mission_phase == 'BALL_APPROACH'
+    assert node.terminal_latch == ('test', 'terminal')
+
+
+def test_duplicate_rejected_does_not_change_recovered_phase():
+    node = FakeDecisionNode('BALL_APPROACH', required_ball_sections=2)
+    arm_special_command(node, 'PICKUP_NOW', 400, 40)
+    status = {
+        'status': 'REJECTED',
+        'action': 'PICKUP_NOW',
+        'command_id': 400,
+        'event_id': 40,
+        'dynamics_command': None,
+        'error_code': 'HARDWARE_NOT_READY',
+    }
+
+    send_status(node, **status)
+    send_status(node, **status)
+
+    assert node.mission_phase == 'AUTO'
+    assert node.ball_sections_processed == 1
+    assert node.active_special_action is None
+    assert node.active_special_event_id is None
 
 
 @pytest.mark.parametrize(

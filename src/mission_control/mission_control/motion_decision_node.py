@@ -469,6 +469,7 @@ class MotionDecisionNode(Node):
         command_id = payload.get("command_id")
         event_id = payload.get("event_id")
         error_code = payload.get("error_code")
+        status_message = payload.get("message")
         dynamics_command = payload.get(
             "dynamics_command"
         )
@@ -490,11 +491,16 @@ class MotionDecisionNode(Node):
         if action not in self.SPECIAL_ACTIONS:
             return
 
-        if (
-            self.active_special_event_id is not None
-            and event_id is not None
-            and event_id != self.active_special_event_id
-        ):
+        event_id_mismatch = (
+            event_id != self.active_special_event_id
+            if status == "REJECTED"
+            else (
+                self.active_special_event_id is not None
+                and event_id is not None
+                and event_id != self.active_special_event_id
+            )
+        )
+        if event_id_mismatch:
             self.get_logger().warning(
                 "Special motion status ignored: "
                 "event_id mismatch "
@@ -558,7 +564,9 @@ class MotionDecisionNode(Node):
             f"status={status}, "
             f"action={completed_action}, "
             f"command_id={completed_command_id}, "
-            f"event_id={completed_event_id}"
+            f"event_id={completed_event_id}, "
+            f"error_code={error_code}, "
+            f"message={status_message}"
         )
 
         if completed_action == "CROSS_FINISH" and status != "SUCCEEDED":

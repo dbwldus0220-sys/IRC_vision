@@ -240,6 +240,52 @@ def test_terminal_before_running_is_ignored_and_active_remains():
 
 
 @pytest.mark.parametrize(
+    ("initial_phase", "action", "expected_phase"),
+    [
+        ("BALL_APPROACH", "PICKUP_NOW", "AUTO"),
+        ("GOAL_APPROACH", "SHOT", "AUTO"),
+        ("HURDLE_APPROACH", "GO", "AUTO"),
+        ("GOAL_APPROACH", "GO", "GOAL_APPROACH"),
+    ],
+)
+def test_matching_rejected_without_running_uses_failure_phase(
+    initial_phase,
+    action,
+    expected_phase,
+):
+    manager = MissionPhaseManager(initial_phase=initial_phase)
+    assert manager.start_special_action(action, 1)
+
+    result = manager.handle_motion_status(action, 1, "REJECTED")
+
+    assert result.handled and result.terminal
+    assert manager.current_phase == expected_phase
+    assert manager.active_special_action is None
+    assert manager.active_special_command_id is None
+    assert manager.active_special_running is False
+    assert manager.pickups_completed == 0
+    assert manager.shots_completed == 0
+
+
+def test_duplicate_rejected_does_not_apply_failure_twice():
+    manager = MissionPhaseManager(
+        required_ball_sections=2,
+        initial_phase="BALL_APPROACH",
+    )
+    assert manager.start_special_action("PICKUP_NOW", 1)
+    first = manager.handle_motion_status("PICKUP_NOW", 1, "REJECTED")
+    duplicate = manager.handle_motion_status(
+        "PICKUP_NOW", 1, "REJECTED"
+    )
+
+    assert first.handled
+    assert not duplicate.handled
+    assert duplicate.duplicate
+    assert manager.ball_sections_processed == 1
+    assert manager.current_phase == "AUTO"
+
+
+@pytest.mark.parametrize(
     "action",
     [
         "STRAIGHT",

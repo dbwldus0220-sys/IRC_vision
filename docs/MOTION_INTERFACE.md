@@ -656,6 +656,15 @@ active special metadata와 running lock을 해제하므로 같은 terminal이 �
 `event_id=null`은 허용하되 `command_id`와 action 일치를 필수로 사용한다.
 새 요청은 mission의 `event_id`를 terminal status까지 그대로 보존한다.
 
+Executor는 요청을 시작하기 전에 `REJECTED`를 반환할 수 있으므로 이 status는
+matching `RUNNING` 없이도 특수 motion의 실패 terminal로 처리한다. 단,
+`REJECTED`는 active `action`, `command_id`, `event_id`가 모두 정확히 일치해야
+한다. matching 거부는 성공 진행도를 올리지 않고 해당 action의 기존
+`FAILED`/`TIMEOUT` 복귀 phase를 적용한 뒤 lock을 해제한다. `error_code`와
+`message`는 status adapter에서 보존되고 node 진단 log에도 포함된다. wrong,
+stale 또는 duplicate `REJECTED`는 active state를 변경하지 않으며 즉시 자동
+재시도하지 않는다.
+
 이 adapter는 mock 검증을 위한 임시 호환 계층이다. 향후 mission node가
 `/motion/executor/status`를 직접 사용하면 제거할 수 있다.
 

@@ -39,9 +39,11 @@ class MissionPhaseManager:
         {"PICKUP_NOW", "SHOT", "GO", "CROSS_FINISH"}
     )
     SUPPORTED_STATUSES = frozenset(
-        {"RUNNING", "SUCCEEDED", "FAILED", "TIMEOUT"}
+        {"RUNNING", "SUCCEEDED", "FAILED", "TIMEOUT", "REJECTED"}
     )
-    TERMINAL_STATUSES = frozenset({"SUCCEEDED", "FAILED", "TIMEOUT"})
+    TERMINAL_STATUSES = frozenset(
+        {"SUCCEEDED", "FAILED", "TIMEOUT", "REJECTED"}
+    )
 
     def __init__(
         self,
@@ -174,7 +176,10 @@ class MissionPhaseManager:
                 True, False, False, "running", previous_phase
             )
 
-        if not self.active_special_running:
+        if (
+            normalized_status != "REJECTED"
+            and not self.active_special_running
+        ):
             return self._result(
                 False,
                 True,
