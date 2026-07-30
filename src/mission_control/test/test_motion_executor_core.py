@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "mission_control"))
 
-from motion_executor_core import ExecutorState, MotionExecutorCore
+from motion_executor_core import ExecutorState, MotionExecutorCore  # noqa: E402
 
 
 class StartResult(Enum):
@@ -40,6 +40,7 @@ class MotionError(Enum):
 
 
 class MockPlayer:
+
     def __init__(self):
         self.start_result = StartResult.ACCEPTED
         self.cancel_result = CancelResult.CANCELLED

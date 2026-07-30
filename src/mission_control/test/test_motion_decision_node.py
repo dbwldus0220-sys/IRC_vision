@@ -15,7 +15,7 @@ from std_msgs.msg import String
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "mission_control"))
 
-from mock_mission_input_node import build_mock_vision_input
+from mock_mission_input_node import build_mock_vision_input  # noqa: E402
 
 
 class FakeLogger:
@@ -329,6 +329,7 @@ def test_special_command_metadata_is_stored_when_first_published():
     decision = terminal_decision('hurdle', 'GO', 'HURDLE_APPROACH')
 
     class CapturePublisher:
+
         def __init__(self):
             self.messages = []
 
@@ -336,6 +337,7 @@ def test_special_command_metadata_is_stored_when_first_published():
             self.messages.append(message)
 
     class PublishNode(FakeDecisionNode):
+
         def __init__(self):
             super().__init__('HURDLE_APPROACH')
             self.planner = type(

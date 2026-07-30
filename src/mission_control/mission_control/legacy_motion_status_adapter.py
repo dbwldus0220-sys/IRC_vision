@@ -1,4 +1,5 @@
-"""Adapt Motion Executor status JSON to the legacy mission status shape.
+"""
+Adapt Motion Executor status JSON to the legacy mission status shape.
 
 The pure conversion helpers intentionally have no dependency on the robot SDK
 or Dynamixel.  ROS imports are optional so the conversion can be unit tested

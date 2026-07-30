@@ -5,13 +5,15 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "mission_control"))
 
-from mock_mission_input_node import (
+from mock_mission_input_node import (  # noqa: E402
     MockScenarioError,
     REFRESH_PERIOD_SEC,
     build_mock_vision_input,
     should_publish,
 )
-from mission_control.motion_decision_planner import MotionDecisionPlanner
+from mission_control.motion_decision_planner import (  # noqa: E402
+    MotionDecisionPlanner,
+)
 
 
 def test_straight_scenario_builds_centered_line_input():

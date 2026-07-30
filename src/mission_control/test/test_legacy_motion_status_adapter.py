@@ -6,7 +6,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "mission_control"))
 
-from legacy_motion_status_adapter import (
+from legacy_motion_status_adapter import (  # noqa: E402
     ExecutorStatusValidationError,
     convert_executor_status,
     convert_executor_status_json,

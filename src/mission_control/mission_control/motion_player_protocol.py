@@ -5,6 +5,7 @@ from typing import Any, Optional, Protocol, runtime_checkable
 
 @runtime_checkable
 class MotionPlayerProtocol(Protocol):
+
     def hardwareReady(self) -> bool:
         ...
 

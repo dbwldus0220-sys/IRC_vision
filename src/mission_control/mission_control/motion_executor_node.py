@@ -46,6 +46,7 @@ class CancelHandlingResult:
 
 
 class RequestValidationError(ValueError):
+
     def __init__(self, error_code: str, message: str) -> None:
         super().__init__(message)
         self.error_code = error_code
@@ -280,6 +281,7 @@ def handle_cancel_request(
 
 
 class MotionExecutorNode(Node):
+
     def __init__(self) -> None:
         if rclpy is None or String is None:
             raise RuntimeError("rclpy and std_msgs are required to run the node")

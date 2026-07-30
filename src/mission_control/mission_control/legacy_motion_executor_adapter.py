@@ -1,4 +1,5 @@
-"""Parallel adapter for mock Motion Executor integration validation.
+"""
+Parallel adapter for mock Motion Executor integration validation.
 
 This module does not replace the existing motion_command_bridge_node.
 """

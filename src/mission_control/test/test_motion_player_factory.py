@@ -6,10 +6,16 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "mission_control"))
 
-from mock_motion_player import MockRobotMotionPlayer, MotionError, StartResult
-from motion_player_factory import create_motion_player
-from motion_player_protocol import MotionPlayerProtocol
-from sdk_motion_player_placeholder import SdkMotionPlayerPlaceholder
+from mock_motion_player import (  # noqa: E402
+    MockRobotMotionPlayer,
+    MotionError,
+    StartResult,
+)
+from motion_player_factory import create_motion_player  # noqa: E402
+from motion_player_protocol import MotionPlayerProtocol  # noqa: E402
+from sdk_motion_player_placeholder import (  # noqa: E402
+    SdkMotionPlayerPlaceholder,
+)
 
 
 def test_mock_backend_returns_mock_player():

@@ -1,4 +1,5 @@
-"""Launch the mock-only Motion Executor integration path.
+"""
+Launch the mock-only Motion Executor integration path.
 
 This launch file uses MockRobotMotionPlayer only. It does not start the real
 RobotMotionPlayer, access Dynamixel, or move a physical robot.

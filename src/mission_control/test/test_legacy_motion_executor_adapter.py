@@ -8,7 +8,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "mission_control"))
 
-from legacy_motion_executor_adapter import (
+from legacy_motion_executor_adapter import (  # noqa: E402
     LegacyMotionExecutorAdapter,
     LegacyCommandValidationError,
     build_executor_request,
@@ -92,6 +92,7 @@ def test_legacy_command_without_command_id_remains_supported():
 
 
 class CapturePublisher:
+
     def __init__(self):
         self.messages = []
 
@@ -100,11 +101,13 @@ class CapturePublisher:
 
 
 class FakeLogger:
+
     def warning(self, _message):
         pass
 
 
 class FakeAdapter:
+
     def __init__(self):
         self._next_request_id = 1
         self._request_publisher = CapturePublisher()

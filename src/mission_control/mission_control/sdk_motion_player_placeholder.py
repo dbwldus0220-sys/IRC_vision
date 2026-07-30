@@ -1,4 +1,5 @@
-"""Safe placeholder for an SDK backend that is not connected yet.
+"""
+Safe placeholder for an SDK backend that is not connected yet.
 
 No SDK, serial, Dynamixel, file, or hardware API is imported or accessed.
 """

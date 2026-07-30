@@ -7,13 +7,13 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "mission_control"))
 
-from mock_motion_player import MockRobotMotionPlayer, MotionError
-from motion_executor_core import (
+from mock_motion_player import MockRobotMotionPlayer, MotionError  # noqa: E402
+from motion_executor_core import (  # noqa: E402
     ExecutorState,
     MotionExecutionResult,
     MotionExecutorCore,
 )
-from motion_executor_node import (
+from motion_executor_node import (  # noqa: E402
     CancelRequest,
     DEFAULT_PLAYER_BACKEND,
     ExecutionPublicationState,
@@ -25,7 +25,7 @@ from motion_executor_node import (
     parse_cancel_request,
     parse_motion_request,
 )
-from motion_player_factory import create_motion_player
+from motion_player_factory import create_motion_player  # noqa: E402
 
 
 def result(status, error_code="NONE", message="done"):
@@ -143,11 +143,13 @@ def test_rejected_payload():
 
 def test_rejected_busy_preserves_both_request_ids():
     class BusyCore:
+
         @staticmethod
         def busy():
             return True
 
     class FakeNode:
+
         def __init__(self):
             self._core = BusyCore()
             self.payloads = []

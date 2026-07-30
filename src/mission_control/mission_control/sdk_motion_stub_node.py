@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Temporary SDK motion executor.
+"""
+Temporary SDK motion executor.
 
 This node does not control motors. It receives abstract navigation commands,
 prints the SDK action that would be executed, and simulates completion for
