@@ -41,9 +41,10 @@ def result(status, error_code="NONE", message="done"):
 def test_parse_valid_request_json():
     request = parse_motion_request(
         '{"request_id": 1, "command_id": 123, '
-        '"action": "GO", "motion_id": "forward", "timeout_ms": 5000}'
+        '"event_id": 456, "action": "GO", '
+        '"motion_id": "forward", "timeout_ms": 5000}'
     )
-    assert request == MotionRequest(1, "forward", 5000, 123, "GO")
+    assert request == MotionRequest(1, "forward", 5000, 123, "GO", 456)
 
 
 def test_default_player_backend_is_mock():
@@ -82,6 +83,7 @@ def test_running_status_payload():
     assert state.running_payload() == {
         "request_id": 7,
         "command_id": 123,
+        "event_id": None,
         "action": "LEFT",
         "motion_id": "turn_left",
         "status": "RUNNING",
@@ -90,12 +92,13 @@ def test_running_status_payload():
     }
 
 
-def test_succeeded_terminal_payload():
+def test_succeeded_terminal_payload_preserves_correlation_ids():
     state = ExecutionPublicationState()
-    state.begin(MotionRequest(1, "forward", 5000, 123, "GO"))
+    state.begin(MotionRequest(1, "forward", 5000, 123, "GO", 456))
     payload = state.terminal_payload(result(ExecutorState.SUCCEEDED))
     assert payload["status"] == "SUCCEEDED"
     assert payload["command_id"] == 123
+    assert payload["event_id"] == 456
     assert payload["action"] == "GO"
     assert payload["error_code"] == "NONE"
 
@@ -163,6 +166,7 @@ def test_rejected_busy_preserves_both_request_ids():
             {
                 "request_id": 7,
                 "command_id": 321,
+                "event_id": 654,
                 "action": "GO",
                 "motion_id": "forward",
                 "timeout_ms": 5000,
@@ -175,6 +179,7 @@ def test_rejected_busy_preserves_both_request_ids():
         {
             "request_id": 7,
             "command_id": 321,
+            "event_id": 654,
             "action": "GO",
             "motion_id": "forward",
             "status": "REJECTED",

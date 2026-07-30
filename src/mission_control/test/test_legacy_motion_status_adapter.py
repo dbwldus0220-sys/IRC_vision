@@ -124,6 +124,21 @@ def test_original_action_wins_over_lossy_motion_id_mapping(
     assert converted["request_id"] == 7
 
 
+def test_executor_event_id_is_preserved_for_mission_correlation():
+    converted = convert_executor_status(
+        executor_status(
+            "SUCCEEDED",
+            action="GO",
+            motion_id="forward",
+            command_id=123,
+            event_id=456,
+        )
+    )
+
+    assert converted["command_id"] == 123
+    assert converted["event_id"] == 456
+
+
 def test_old_status_without_original_action_uses_motion_id_fallback():
     payload = executor_status("RUNNING", motion_id="forward")
     del payload["action"]

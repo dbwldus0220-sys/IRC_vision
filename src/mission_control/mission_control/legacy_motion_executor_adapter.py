@@ -54,6 +54,7 @@ class LegacyMotionCommand:
     angle_deg: Any = None
     valid: Any = None
     command_id: Optional[int] = None
+    event_id: Optional[int] = None
 
 
 class LegacyCommandValidationError(ValueError):
@@ -96,12 +97,21 @@ def parse_legacy_motion_command(
             "command_id must be an integer or null"
         )
 
+    event_id = data.get("event_id")
+    if event_id is not None and (
+        isinstance(event_id, bool) or not isinstance(event_id, int)
+    ):
+        raise LegacyCommandValidationError(
+            "event_id must be an integer or null"
+        )
+
     # angle_deg is parsed for compatibility but is not sent to the Executor.
     return LegacyMotionCommand(
         action=action,
         angle_deg=data.get("angle_deg"),
         valid=data.get("valid"),
         command_id=command_id,
+        event_id=event_id,
     )
 
 
@@ -118,10 +128,12 @@ def build_executor_request(
     motion_id: str,
     command_id: Optional[int] = None,
     action: Optional[str] = None,
+    event_id: Optional[int] = None,
 ) -> Dict[str, Any]:
     return {
         "request_id": request_id,
         "command_id": command_id,
+        "event_id": event_id,
         "action": action,
         "motion_id": motion_id,
         "timeout_ms": timeout_for_motion(motion_id),
@@ -179,6 +191,7 @@ class LegacyMotionExecutorAdapter(Node):
             motion_id,
             command.command_id,
             command.action,
+            command.event_id,
         )
         output = String()
         output.data = json.dumps(request)

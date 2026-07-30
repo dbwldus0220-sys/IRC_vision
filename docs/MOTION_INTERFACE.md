@@ -439,6 +439,10 @@ offset은 analyzer의 `predicted_line_x - image_center_x` 정의를 따른다.
 `SdkMotionPlayerPlaceholder`이며 `hardwareReady=False`이므로 이 표를 실제
 STEP SDK 번호나 함수 매핑으로 해석하면 안 된다.
 
+현재 프로젝트 단계의 대상은 이 SDK Executor 요청 계약이다. Dynamics 직접
+제어 bridge는 아래 별도 절의 참고 계약이며 SDK backend 구현 근거로 사용하지
+않는다.
+
 | legacy action | motion_id |
 | --- | --- |
 | `STRAIGHT`, `APPROACH`, `GO` | `forward` |
@@ -455,6 +459,10 @@ STEP SDK 번호나 함수 매핑으로 해석하면 안 된다.
 
 `FINE_LEFT`와 `FINE_RIGHT`는 위 매핑 표에 포함되지 않는다. 현재 명시적
 미지원 action이며 mock/실제 Executor request를 생성하지 않는다.
+`WAIT`, `STOP`, `HEAD_SCAN_LEFT`, `HEAD_SCAN_RIGHT`도 현재 legacy adapter
+매핑이 없어 Executor request를 만들지 않는다. `MotionExecutorCore`가
+`head_left`와 `head_right` 문자열을 지원 목록에 가진 것만으로 이 action의
+SDK 매핑이 확정된 것은 아니다.
 `LEFT`/`RIGHT`는 기존 일반 회전 경로를 유지한다. legacy bridge에서도 새
 Dynamics 번호를 추가하지 않고 기존 `TURN_LEFT`/`TURN_RIGHT` 처리의
 action 별칭으로만 해석한다.
@@ -474,6 +482,9 @@ action 별칭으로만 해석한다.
 - `recover`: 8000ms
 
 ### 실제 STEP Dynamics command 대조
+
+이 절은 SDK Executor 계약과 별개인 Dynamics 직접 제어 경로의 참고 기록이다.
+현재 SDK backend 판단과 action 지원 여부에는 사용하지 않는다.
 
 실제 `/motion_command` 경로는 `MotionCommandBridgeNode`가
 `robot_msgs/MotionCommand.command` 정수로 변환한다. 아래 번호는
@@ -597,8 +608,9 @@ Executor node는 수락한 `MotionRequest` 전체를 publication state에 보존
 subscriber가 사용하는 `status`, `action`, `command_id`, `event_id`,
 `dynamics_command`, `motion_in_progress`, `reason` 필드를 만든다.
 Executor의 `request_id`, `motion_id`, `error_code`, `message`도 추가 필드로
-보존한다. 잘못된 JSON, 누락되거나 알 수 없는 status는 경고 후 발행하지
-않는다.
+보존한다. optional `event_id`도 요청에서 status까지 보존하며, 구형 요청처럼
+필드가 없을 때만 `null`이다. 잘못된 JSON, 누락되거나 알 수 없는 status는
+경고 후 발행하지 않는다.
 
 ### 특수 action 왕복 및 status 상관관계
 
@@ -626,8 +638,9 @@ Executor의 `request_id`, `motion_id`, `error_code`, `message`도 추가 필드�
 다른 ID의 stale status, ID가 없는 status, 같은 ID이지만 action이 다른
 status는 phase와 진행도를 변경하지 않는다. 올바른 terminal을 처리하면
 active special metadata와 running lock을 해제하므로 같은 terminal이 다시
-도착해도 중복 처리되지 않는다. Executor adapter 경로의 `event_id=null`은
-허용하되 `command_id`와 action 일치를 필수로 사용한다.
+도착해도 중복 처리되지 않는다. 구형 Executor adapter 요청의
+`event_id=null`은 허용하되 `command_id`와 action 일치를 필수로 사용한다.
+새 요청은 mission의 `event_id`를 terminal status까지 그대로 보존한다.
 
 이 adapter는 mock 검증을 위한 임시 호환 계층이다. 향후 mission node가
 `/motion/executor/status`를 직접 사용하면 제거할 수 있다.
@@ -760,10 +773,9 @@ alias와 선행 `RUNNING`으로 상관관계를 판단한다. 이 fallback은 ID
 것은 막는다. `REJECTED`는 정상적으로 `RUNNING` 없이 반환될 수 있어 구형
 fallback에서는 matching action으로 해제한다.
 
-현재 이 Executor adapter 경로에서는 `event_id`를 전달하지 않으며
-`/motion/status.event_id`는 `null`이다. `event_id`는 기존 특수 모션 경로의
-이벤트 상관관계용 필드로 남아 있고, 일반 모션 Executor 상관관계에는 사용하지
-않는다.
+현재 Executor adapter 경로는 `command_id`, `event_id`, 원 action을 요청과
+status에 함께 전달한다. 구형 입력에서 필드가 없으면 각각 `null`을 유지하며
+새 식별자를 임의로 만들지 않는다.
 
 `/vision/line_info`는 `std_msgs/msg/String` JSON이므로 ROS `Header`나
 `header.stamp` 필드가 없다. `motion_decision_node`는 메시지를 받은 순간의

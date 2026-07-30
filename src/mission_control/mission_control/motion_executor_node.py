@@ -32,6 +32,7 @@ class MotionRequest:
     timeout_ms: int
     command_id: Optional[int] = None
     action: Optional[str] = None
+    event_id: Optional[int] = None
 
 
 @dataclass(frozen=True)
@@ -82,6 +83,7 @@ def parse_motion_request(payload: str) -> MotionRequest:
     timeout_ms = data["timeout_ms"]
     command_id = data.get("command_id")
     action = data.get("action")
+    event_id = data.get("event_id")
 
     if isinstance(request_id, bool) or not isinstance(request_id, int):
         raise RequestValidationError(
@@ -111,6 +113,12 @@ def parse_motion_request(payload: str) -> MotionRequest:
         raise RequestValidationError(
             "INVALID_REQUEST", "action must be a non-empty string or null"
         )
+    if event_id is not None and (
+        isinstance(event_id, bool) or not isinstance(event_id, int)
+    ):
+        raise RequestValidationError(
+            "INVALID_REQUEST", "event_id must be an integer or null"
+        )
 
     return MotionRequest(
         request_id,
@@ -118,6 +126,7 @@ def parse_motion_request(payload: str) -> MotionRequest:
         timeout_ms,
         command_id,
         action,
+        event_id,
     )
 
 
@@ -154,10 +163,12 @@ def build_status_payload(
     message: str = "",
     command_id: Optional[int] = None,
     action: Optional[str] = None,
+    event_id: Optional[int] = None,
 ) -> Dict[str, Any]:
     return {
         "request_id": request_id,
         "command_id": command_id,
+        "event_id": event_id,
         "action": action,
         "motion_id": motion_id,
         "status": status,
@@ -186,6 +197,7 @@ class ExecutionPublicationState:
             "RUNNING",
             command_id=self._request.command_id,
             action=self._request.action,
+            event_id=self._request.event_id,
         )
 
     def terminal_payload(
@@ -203,6 +215,7 @@ class ExecutionPublicationState:
             result.message,
             self._request.command_id,
             self._request.action,
+            self._request.event_id,
         )
 
     def clear(self) -> None:
@@ -371,6 +384,7 @@ class MotionExecutorNode(Node):
                     "another motion is already running",
                     request.command_id,
                     request.action,
+                    request.event_id,
                 )
             )
             return
@@ -385,6 +399,7 @@ class MotionExecutorNode(Node):
                     "unsupported motion_id",
                     request.command_id,
                     request.action,
+                    request.event_id,
                 )
             )
             return
@@ -402,6 +417,7 @@ class MotionExecutorNode(Node):
                     rejection.message,
                     request.command_id,
                     request.action,
+                    request.event_id,
                 )
             )
             return

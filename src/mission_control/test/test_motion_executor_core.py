@@ -2,6 +2,8 @@ import sys
 from enum import Enum, auto
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "mission_control"))
 
 from motion_executor_core import ExecutorState, MotionExecutorCore  # noqa: E402
@@ -94,6 +96,29 @@ def accepted_executor():
     core = MotionExecutorCore(player)
     assert core.start_motion("forward", 1000) is None
     return core, player
+
+
+@pytest.mark.parametrize(
+    "motion_id",
+    [
+        "forward",
+        "forward_short",
+        "turn_left",
+        "turn_right",
+        "adjust_left",
+        "adjust_right",
+        "backward",
+        "pick_ball",
+        "shoot",
+        "hurdle",
+    ],
+)
+def test_supported_adapter_motion_id_is_passed_to_player_once(motion_id):
+    player = MockPlayer()
+    core = MotionExecutorCore(player)
+
+    assert core.start_motion(motion_id, 1000) is None
+    assert player.start_calls == [motion_id]
 
 
 def test_running_settling_succeeded():

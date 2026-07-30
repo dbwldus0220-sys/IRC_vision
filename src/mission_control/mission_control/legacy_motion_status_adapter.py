@@ -105,9 +105,7 @@ def convert_executor_status(
         # Fields consumed by the existing /motion/status subscriber.
         "status": status,
         "command_id": command_id,
-        # Executor requests do not carry the legacy event_id.  None avoids
-        # inventing an ID and disables event matching in the current consumer.
-        "event_id": None,
+        "event_id": data.get("event_id"),
         "action": action,
         "dynamics_command": None,
         "motion_in_progress": status == "RUNNING",

@@ -22,6 +22,14 @@ from legacy_motion_executor_adapter import (  # noqa: E402
     ("action", "motion_id"),
     [
         ("STRAIGHT", "forward"),
+        ("APPROACH", "forward"),
+        ("SLOW_APPROACH", "forward_short"),
+        ("FINE_FORWARD_STEP", "forward_short"),
+        ("APPROACH_GOAL", "forward_short"),
+        ("APPROACH_HURDLE", "forward_short"),
+        ("ALIGN_LEFT", "adjust_left"),
+        ("ALIGN_RIGHT", "adjust_right"),
+        ("RETREAT_GOAL", "backward"),
         ("TURN_LEFT", "turn_left"),
         ("LEFT", "turn_left"),
         ("RIGHT", "turn_right"),
@@ -43,10 +51,11 @@ def test_timeout_mapping():
     assert timeout_for_motion("recover") == 8000
 
 
-def test_build_request_preserves_request_id():
-    assert build_executor_request(37, "shoot", 123, "SHOT") == {
+def test_build_request_preserves_correlation_ids():
+    assert build_executor_request(37, "shoot", 123, "SHOT", 456) == {
         "request_id": 37,
         "command_id": 123,
+        "event_id": 456,
         "action": "SHOT",
         "motion_id": "shoot",
         "timeout_ms": 10000,
@@ -66,8 +75,11 @@ def test_missing_action():
 def test_unsupported_action():
     assert map_action_to_motion_id("FLY") is None
     assert map_action_to_motion_id("WAIT") is None
+    assert map_action_to_motion_id("STOP") is None
     assert map_action_to_motion_id("FINE_LEFT") is None
     assert map_action_to_motion_id("FINE_RIGHT") is None
+    assert map_action_to_motion_id("HEAD_SCAN_LEFT") is None
+    assert map_action_to_motion_id("HEAD_SCAN_RIGHT") is None
 
 
 def test_parse_does_not_modify_input_object():
@@ -75,6 +87,7 @@ def test_parse_does_not_modify_input_object():
         "action": "STRAIGHT",
         "angle_deg": 12.5,
         "command_id": 99,
+        "event_id": 199,
     }
     original = copy.deepcopy(source)
     command = parse_legacy_motion_command(source)
@@ -82,12 +95,14 @@ def test_parse_does_not_modify_input_object():
     assert command.action == "STRAIGHT"
     assert command.angle_deg == 12.5
     assert command.command_id == 99
+    assert command.event_id == 199
 
 
 def test_legacy_command_without_command_id_remains_supported():
     command = parse_legacy_motion_command({"action": "STRAIGHT"})
     assert command.command_id is None
     assert build_executor_request(1, "forward")["command_id"] is None
+    assert build_executor_request(1, "forward")["event_id"] is None
     assert build_executor_request(1, "forward")["action"] is None
 
 
@@ -139,6 +154,7 @@ def test_left_and_right_create_executor_requests():
         {
             "request_id": 1,
             "command_id": 101,
+            "event_id": None,
             "action": "LEFT",
             "motion_id": "turn_left",
             "timeout_ms": 5000,
@@ -146,6 +162,7 @@ def test_left_and_right_create_executor_requests():
         {
             "request_id": 2,
             "command_id": 202,
+            "event_id": None,
             "action": "RIGHT",
             "motion_id": "turn_right",
             "timeout_ms": 5000,
@@ -194,3 +211,18 @@ def test_original_action_and_command_id_are_added_to_request(
     assert request["action"] == action
     assert request["command_id"] == command_id
     assert request["motion_id"] == motion_id
+
+
+def test_event_id_is_added_to_executor_request():
+    adapter = FakeAdapter()
+    send_legacy_command(
+        adapter,
+        action="PICKUP_NOW",
+        valid=True,
+        command_id=501,
+        event_id=601,
+    )
+
+    request = json.loads(adapter._request_publisher.messages[0].data)
+    assert request["command_id"] == 501
+    assert request["event_id"] == 601
