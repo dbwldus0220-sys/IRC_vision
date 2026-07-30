@@ -1,36 +1,37 @@
 # Motion Catalog
 
-알고리즘과 SDK 사이에서 사용할 표준 행동 이름이다.
-SDK의 실제 JSON 모션 이름은 Motion Executor 한 곳에서만 변환한다.
+알고리즘과 motion backend 사이에서 사용할 표준 행동 이름이다.
+`motion_id`는 mock Executor용 문자열이고 실제 STEP Dynamics command는
+`MotionCommandBridgeNode`가 별도로 변환한다.
 
-| 표준 행동 | 의미 | 현재 알고리즘 명령 | SDK JSON 이름 |
+| 표준 행동 | 현재 알고리즘 명령 | mock motion_id | STEP Dynamics command |
 |---|---|---|---|
-| WALK_FORWARD | 일반 전진 | STRAIGHT | 미정 |
-| WALK_APPROACH | 공 접근 전진 | APPROACH | 미정 |
-| WALK_SLOW | 느린 접근 | SLOW_APPROACH | 미정 |
-| WALK_FINE | 아주 짧은 전진 | FINE_FORWARD_STEP | 미정 |
-| TURN_LEFT | 좌회전 | TURN_LEFT | 미정 |
-| TURN_RIGHT | 우회전 | TURN_RIGHT | 미정 |
-| LINE_LEFT | 라인 일반 좌회전 | LEFT | 미정 |
-| LINE_RIGHT | 라인 일반 우회전 | RIGHT | 미정 |
-| ADJUST_LEFT | 좌측 미세 보정 | ALIGN_LEFT | 미정 |
-| ADJUST_RIGHT | 우측 미세 보정 | ALIGN_RIGHT | 미정 |
-| WALK_BACKWARD | 후진 | RETREAT_GOAL | 미정 |
-| PICKUP | 공 줍기 | PICKUP_NOW | 미정 |
-| SHOT | 슛 동작 | SHOT | 미정 |
-| HURDLE_APPROACH | 허들 접근 | APPROACH_HURDLE | 미정 |
-| HURDLE_CROSS | 허들 통과 | GO | 미정 |
-| HEAD_LEFT | 목 왼쪽 | HEAD_SCAN_LEFT | 미정 |
-| HEAD_RIGHT | 목 오른쪽 | HEAD_SCAN_RIGHT | 미정 |
-| HEAD_CENTER | 목 중앙 | HEAD_CENTER | 미정 |
-| FINE_LEFT | 미세 좌회전 | FINE_LEFT | Executor 매핑 미정 |
-| FINE_RIGHT | 미세 우회전 | FINE_RIGHT | Executor 매핑 미정 |
-| STOP | 안전 정지 | STOP | 정책 미정 |
-| CROSS_FINISH | 결승선 통과 | CROSS_FINISH | 미정 |
+| WALK_FORWARD | STRAIGHT | `forward` | 1 |
+| WALK_APPROACH | APPROACH | `forward` | 12 |
+| WALK_SLOW | SLOW_APPROACH | `forward_short` | 6 |
+| WALK_FINE | FINE_FORWARD_STEP | `forward_short` | 27 |
+| TURN_LEFT | TURN_LEFT | `turn_left` | 2 + angle |
+| TURN_RIGHT | TURN_RIGHT | `turn_right` | 3 + angle |
+| LINE_LEFT | LEFT | `turn_left` | 2 + angle |
+| LINE_RIGHT | RIGHT | `turn_right` | 3 + angle |
+| ADJUST_LEFT | ALIGN_LEFT | `adjust_left` | 15 |
+| ADJUST_RIGHT | ALIGN_RIGHT | `adjust_right` | 16 |
+| WALK_BACKWARD | RETREAT_GOAL | `backward` | 5 |
+| PICKUP | PICKUP_NOW | `pick_ball` | 9 |
+| SHOT | SHOT | `shoot` | 17 sequence entry |
+| HURDLE_APPROACH | APPROACH_HURDLE | `forward_short` | 13 |
+| HURDLE_CROSS | GO | `forward` | 14 sequence entry |
+| HEAD_LEFT | HEAD_SCAN_LEFT | `head_left` | bridge 미매핑 |
+| HEAD_RIGHT | HEAD_SCAN_RIGHT | `head_right` | bridge 미매핑 |
+| HEAD_CENTER | HEAD_CENTER | `head_center` | bridge 미매핑 |
+| FINE_LEFT | FINE_LEFT | 미매핑 | 미매핑 |
+| FINE_RIGHT | FINE_RIGHT | 미매핑 | 미매핑 |
+| STOP | STOP | 미매핑 | bridge 미매핑; Dynamics 98 정의만 확인 |
+| CROSS_FINISH | CROSS_FINISH | `hurdle` | bridge 미매핑 |
 
 ## 원칙
 
-- 알고리즘은 SDK의 한글 JSON 이름을 직접 사용하지 않는다.
-- JSON 이름 변환은 Motion Executor 한 곳에서만 한다.
+- mock motion ID와 실제 Dynamics command를 같은 계약으로 간주하지 않는다.
+- 현재 SDK player backend는 placeholder이며 실제 SDK 호출을 하지 않는다.
 - STOP은 일반 모션 이름이 아니라 별도 안전 정지 API가 될 수 있다.
 - 하나의 행동 요청에는 완료 또는 실패 상태가 정확히 한 번 반환되어야 한다.

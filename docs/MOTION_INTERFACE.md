@@ -434,6 +434,11 @@ offset은 analyzer의 `predicted_line_x - image_center_x` 정의를 따른다.
 
 ### action 매핑
 
+아래 `motion_id`는 `LegacyMotionExecutorAdapter`가 mock Motion Executor에
+보내는 추상 문자열이다. 현재 `sdk` player backend는
+`SdkMotionPlayerPlaceholder`이며 `hardwareReady=False`이므로 이 표를 실제
+STEP SDK 번호나 함수 매핑으로 해석하면 안 된다.
+
 | legacy action | motion_id |
 | --- | --- |
 | `STRAIGHT`, `APPROACH`, `GO` | `forward` |
@@ -467,6 +472,50 @@ action 별칭으로만 해석한다.
 - `shoot`: 10000ms
 - `hurdle`: 12000ms
 - `recover`: 8000ms
+
+### 실제 STEP Dynamics command 대조
+
+실제 `/motion_command` 경로는 `MotionCommandBridgeNode`가
+`robot_msgs/MotionCommand.command` 정수로 변환한다. 아래 번호는
+`Dynamics/original_control/main.cpp`와 `Dynamics/safety_control/main.cpp`의
+switch 및 callback 구현에서 확인한 값이다.
+
+| planner action | bridge 결과 `(command, angle)` | Dynamics 근거 의미 | 구분 | 상태 |
+| --- | --- | --- | --- | --- |
+| `STOP` | 미매핑 | command 98이 stop/recovery mode로 정의되어 있으나 bridge busy·status 정책 미정 | 안전 정지 | 미확인 |
+| `STRAIGHT` | `(1, 0)` | `forward_six` | 일반 | 확인 |
+| `LEFT` | `(2, abs(target_heading_change_deg))` | 좌회전 | 일반 | 확인 |
+| `RIGHT` | `(3, abs(target_heading_change_deg))` | 우회전 | 일반 | 확인 |
+| `FINE_LEFT`, `FINE_RIGHT` | 미매핑 | 별도 확정 번호 없음 | 일반 | 의도적 미매핑, planner `valid=false` |
+| `APPROACH` | `(12, 0)` | `1 step` | ball 일반 접근 | 확인 |
+| `SLOW_APPROACH` | `(6, 0)` | `FORWARD_HALF` | ball 일반 접근 | 확인 |
+| `FINE_FORWARD_STEP` | `(27, 0)` | `forward_2` | ball 일반 접근 | 확인 |
+| `APPROACH_BALL` | 미매핑 | planner가 생성하지 않으며 실제 이름은 `APPROACH` 계열 | 호환 이름 없음 | 미매핑 |
+| `APPROACH_HURDLE` | `(13, 0)` | `forward_half_six`, hurdle mode 진입 | 일반 접근 | 확인 |
+| `APPROACH_GOAL` | `(6, 0)` | `FORWARD_HALF` | 일반 접근 | 확인 |
+| `WAIT` | 미매핑 | 판단 보류이며 Dynamics 명령을 보내지 않음 | 비실행 | 확인 |
+| `PICKUP_NOW` | `(9, 0)` | `Picking_Motion`, `Pick::Picking` | 특수 terminal | 확인 |
+| `SHOT` | `(17, 0)` | shoot-ready에서 18→19 내부 sequence | 특수 terminal | 확인 |
+| `GO` | `(14, 0)` | hurdle mode에서 14 반복 후 20 hurdle motion | 특수 terminal | 확인 |
+| `CROSS_FINISH` | 실제 bridge 미매핑 | legacy mock에는 `hurdle` 문자열만 남음 | 수동 호환 | 실제 Dynamics 미확인 |
+
+`STOP`과 `WAIT`는 다르다. `WAIT`는 `valid=false` 판단 보류이므로 bridge와
+SDK를 실행하지 않는다. `STOP`은 planner의 안전 결과 또는 FINISHED 호환
+결과지만 현재 bridge에는 command 98 매핑이 없다. command 98은 Dynamics에
+존재하더라도 bridge가 실행 중 명령을 먼저 차단하므로, 긴급 정지로 연결하려면
+busy 해제와 status correlation 정책을 함께 확정해야 한다.
+
+`GO`는 legacy mock adapter에서 `motion_id=forward`로 표현되지만 실제
+Dynamics 경로는 `STRAIGHT=1`과 다른 command 14이다. 원 action을
+request/status에 보존하는 이유도 두 동작을 문자열 motion ID만으로
+역매핑하지 않기 위해서다.
+
+Dynamics `safety_control`은 최초 요청 command를 보존해 내부 17→18→19 또는
+14→20 sequence가 끝나도 `/motion_end.command`에 17 또는 14를 발행한다.
+bridge는 이 값이 active Dynamics command와 일치할 때만 `SUCCEEDED`를
+발행한다. `STEP_REAL_ROBOT_COMMAND_GATE=ON` 빌드는 현재 1과 98 및 선택적
+startup command만 허용하므로, 실제 빌드 옵션 확인 전에는 2·3·9·14·17
+실행 가능성을 보장할 수 없다.
 
 ## mock 통합 검증 launch
 

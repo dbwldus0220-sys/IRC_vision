@@ -3,6 +3,8 @@
 import json
 from types import MethodType
 
+import pytest
+
 from mission_control.motion_command_bridge_node import MotionCommandBridgeNode
 from robot_msgs.msg import MotionEnd
 from std_msgs.msg import String
@@ -107,6 +109,52 @@ def test_fine_actions_have_no_dynamics_mapping():
 
     for action in ("FINE_LEFT", "FINE_RIGHT"):
         assert bridge.map_action_to_dynamics({"action": action}) is None
+
+
+@pytest.mark.parametrize(
+    ("action", "expected"),
+    [
+        ("STRAIGHT", (1, 0)),
+        ("APPROACH", (12, 0)),
+        ("APPROACH_GOAL", (6, 0)),
+        ("APPROACH_HURDLE", (13, 0)),
+        ("PICKUP_NOW", (9, 0)),
+        ("SHOT", (17, 0)),
+        ("GO", (14, 0)),
+    ],
+)
+def test_bridge_mapping_matches_dynamics_command_switch(action, expected):
+    bridge = FakeBridge()
+
+    assert bridge.map_action_to_dynamics({"action": action}) == expected
+
+
+@pytest.mark.parametrize(
+    "action",
+    [
+        "STOP",
+        "WAIT",
+        "FINE_LEFT",
+        "FINE_RIGHT",
+        "APPROACH_BALL",
+        "CROSS_FINISH",
+    ],
+)
+def test_actions_without_bridge_contract_remain_unmapped(action):
+    bridge = FakeBridge()
+
+    assert bridge.map_action_to_dynamics({"action": action}) is None
+
+
+def test_go_uses_hurdle_sequence_entry_not_straight_command():
+    bridge = FakeBridge()
+
+    straight = bridge.map_action_to_dynamics({"action": "STRAIGHT"})
+    go = bridge.map_action_to_dynamics({"action": "GO"})
+
+    assert straight == (1, 0)
+    assert go == (14, 0)
+    assert go != straight
 
 
 def test_running_ignored_then_succeeded():
