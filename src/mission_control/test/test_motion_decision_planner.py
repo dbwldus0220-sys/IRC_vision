@@ -559,13 +559,17 @@ def test_lost_tracked_ball_runs_timed_head_scan_with_body_stopped():
 
     assert stopped.source == "ball"
     assert stopped.action == "BALL_LOST_STOP"
+    assert stopped.valid is False
     assert stopped.source_command["linear_speed_mps"] == 0.0
     assert stopped.reason == "ball_lost_stop_before_head_scan"
     assert scan_left.action == "HEAD_SCAN_LEFT"
+    assert scan_left.valid is False
     assert scan_left.reason == "scan_head_left_for_ball"
     assert scan_right.action == "HEAD_SCAN_RIGHT"
+    assert scan_right.valid is False
     assert scan_right.reason == "scan_head_right_for_ball"
     assert centered.action == "HEAD_CENTER"
+    assert centered.valid is False
     assert centered.reason == "return_head_to_center"
     for decision in (stopped, scan_left, scan_right, centered):
         assert decision.requires_ack is False
@@ -762,6 +766,7 @@ def test_far_ball_does_not_reacquire_and_timeout_returns_to_line():
 
     assert scanning.source == "ball"
     assert scanning.action == "BALL_LOST_STOP"
+    assert scanning.valid is False
     assert planner.ball_reacquire_count == 0
     assert abandoned.source == "line"
     assert abandoned.action == "STRAIGHT"
@@ -850,9 +855,23 @@ def test_lost_goal_stops_then_turns_toward_last_seen_side():
 
     assert stopped.source == "goal"
     assert stopped.action == "GOAL_LOST_STOP"
+    assert stopped.valid is False
     assert stopped.source_command["linear_speed_mps"] == 0.0
-    assert turning.action == "RECOVER_GOAL_TURN_LEFT"
+    assert turning.action == "LEFT"
+    assert turning.valid is True
     assert turning.source_command["angular_speed_rad_s"] < 0.0
+    assert turning.source_command["target_heading_change_deg"] < 0.0
+    assert planner.goal_tracking_active is True
+    assert planner.goal_lost_elapsed_sec > 0.0
+
+    timed_out = planner.plan(
+        "AUTO",
+        observations(line=line_info(), goal={"detected": False}),
+        planner.config.goal_recovery_timeout_sec,
+    )
+    assert timed_out.source == "line"
+    assert timed_out.action == "STRAIGHT"
+    assert planner.goal_tracking_active is False
 
 
 def test_reacquired_goal_is_centered_before_line_or_goal_control():
@@ -901,9 +920,33 @@ def test_reacquired_goal_is_centered_before_line_or_goal_control():
     )
 
     assert centering.source == "goal"
-    assert centering.action == "RECOVER_GOAL_TURN_RIGHT"
+    assert centering.action == "RIGHT"
+    assert centering.source_command["angular_speed_rad_s"] > 0.0
+    assert centering.source_command["target_heading_change_deg"] > 0.0
     assert resumed.source == "line"
     assert planner.goal_recovery_centering is False
+
+
+def test_confirmation_waits_are_non_executable():
+    planner = MotionDecisionPlanner()
+
+    score_wait = planner.plan(
+        "GOAL_APPROACH",
+        observations(goal=goal_info(score_now=False)),
+        0.1,
+    )
+    go_wait = planner.plan(
+        "HURDLE_APPROACH",
+        observations(hurdle=hurdle_info(go_now=False)),
+        0.1,
+    )
+
+    for decision in (score_wait, go_wait):
+        assert decision.valid is False
+        assert decision.sdk_motion_requested is False
+        assert decision.requires_ack is False
+    assert score_wait.action == "WAIT_SCORE_CONFIRMATION"
+    assert go_wait.action == "WAIT_GO_CONFIRMATION"
 
 
 def test_hurdle_go_is_normalized_as_acknowledged_sdk_event():

@@ -25,10 +25,17 @@ Motion Executor가 사용하는 추상 문자열이다.
 | HURDLE_CROSS | GO | `forward` | mock |
 | HEAD_LEFT | HEAD_SCAN_LEFT | 미매핑 | 미지원 |
 | HEAD_RIGHT | HEAD_SCAN_RIGHT | 미매핑 | 미지원 |
+| HEAD_CENTER | HEAD_CENTER | 미매핑 | 미지원 |
 | FINE_LEFT | FINE_LEFT | 미매핑 | 미지원 |
 | FINE_RIGHT | FINE_RIGHT | 미매핑 | 미지원 |
 | STOP | STOP | 미매핑 | 미지원 |
 | CROSS_FINISH | CROSS_FINISH | `hurdle` | mock 호환 |
+
+`BALL_LOST_STOP`, `GOAL_LOST_STOP`, `WAIT_SCORE_CONFIRMATION`,
+`WAIT_GO_CONFIRMATION`과 세 `HEAD_*` action은 recovery FSM 상태를 표현하지만
+production mission planner에서는 `valid=false`이므로 Executor 요청을 만들지
+않는다. goal recovery의 몸 회전은 `LEFT`/`RIGHT`로 정규화되어 기존
+`turn_left`/`turn_right` mapping을 사용한다.
 
 `player_backend=sdk`도 실제 SDK adapter가 아니라
 `SdkMotionPlayerPlaceholder`를 선택한다. 이 placeholder는

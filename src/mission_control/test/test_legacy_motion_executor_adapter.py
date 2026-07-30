@@ -80,6 +80,9 @@ def test_unsupported_action():
     assert map_action_to_motion_id("FINE_RIGHT") is None
     assert map_action_to_motion_id("HEAD_SCAN_LEFT") is None
     assert map_action_to_motion_id("HEAD_SCAN_RIGHT") is None
+    assert map_action_to_motion_id("HEAD_CENTER") is None
+    assert map_action_to_motion_id("RECOVER_GOAL_TURN_LEFT") is None
+    assert map_action_to_motion_id("RECOVER_GOAL_TURN_RIGHT") is None
 
 
 def test_parse_does_not_modify_input_object():
@@ -178,6 +181,13 @@ def test_left_and_right_create_executor_requests():
         {"action": "FLY", "valid": True},
         {"action": "FINE_LEFT", "valid": True},
         {"action": "FINE_RIGHT", "valid": True},
+        {"action": "BALL_LOST_STOP", "valid": False},
+        {"action": "GOAL_LOST_STOP", "valid": False},
+        {"action": "HEAD_SCAN_LEFT", "valid": False},
+        {"action": "HEAD_SCAN_RIGHT", "valid": False},
+        {"action": "HEAD_CENTER", "valid": False},
+        {"action": "WAIT_SCORE_CONFIRMATION", "valid": False},
+        {"action": "WAIT_GO_CONFIRMATION", "valid": False},
     ],
 )
 def test_non_executable_command_does_not_create_request(payload):

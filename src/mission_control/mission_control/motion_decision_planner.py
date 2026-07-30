@@ -70,6 +70,21 @@ class MotionDecisionPlanner:
     """Run one existing planner according to the active mission phase."""
 
     AUTO_PRIORITY = ("line",)
+    NON_EXECUTABLE_RECOVERY_ACTIONS = frozenset(
+        {
+            "BALL_LOST_STOP",
+            "GOAL_LOST_STOP",
+            "HEAD_SCAN_LEFT",
+            "HEAD_SCAN_RIGHT",
+            "HEAD_CENTER",
+            "WAIT_SCORE_CONFIRMATION",
+            "WAIT_GO_CONFIRMATION",
+        }
+    )
+    GOAL_RECOVERY_ACTIONS = {
+        "RECOVER_GOAL_TURN_LEFT": "LEFT",
+        "RECOVER_GOAL_TURN_RIGHT": "RIGHT",
+    }
     TERMINAL_ACTIONS = {
         ("ball", "PICKUP_NOW"),
         ("goal", "SHOT"),
@@ -191,6 +206,16 @@ class MotionDecisionPlanner:
         command = self._plan_source(source, info, dt_sec)
         action_key = "motion" if source in {"line", "ball"} else "action"
         action = str(command.get(action_key, "WAIT"))
+        valid = bool(command.get("valid", False))
+        if action in self.GOAL_RECOVERY_ACTIONS:
+            action = self.GOAL_RECOVERY_ACTIONS[action]
+            command = dict(command)
+            command[action_key] = action
+        elif action in self.NON_EXECUTABLE_RECOVERY_ACTIONS:
+            valid = False
+            command = dict(command)
+            command["valid"] = False
+            command["sdk_motion_requested"] = False
         terminal = (source, action) in self.TERMINAL_ACTIONS
         requested = terminal and bool(
             command.get("sdk_motion_requested", terminal)
@@ -199,7 +224,7 @@ class MotionDecisionPlanner:
             phase=normalized_phase,
             source=source,
             action=action,
-            valid=bool(command.get("valid", False)),
+            valid=valid,
             reason=str(command.get("reason", "unknown")),
             sdk_motion_requested=requested,
             requires_ack=terminal,

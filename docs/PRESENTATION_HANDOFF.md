@@ -130,7 +130,7 @@ SEARCH → NO_DEPTH/FAR/TRACK/APPROACH → PICKUP_READY → PICKUP_NOW
 - 화면 목표: 가로 중앙 ±0.08, 화면 높이 0.82 ±0.12
 - 조건 충족 시 `PICKUP_NOW`
 
-현재 테스트 단계에서는 `enable_ball_lost_recovery=false`가 기본값입니다. 공이 화면에서 사라지면 `BALL_LOST_STOP`이나 `RECOVER_TURN_LEFT/RIGHT`를 실행하지 않고 즉시 line 판단으로 돌아갑니다. 기존 분실 복구 구현은 삭제하지 않았으며 추후 전략이 확정되면 파라미터로 다시 활성화할 수 있습니다. 아직 실제 공 줍기 SDK를 호출하지 않습니다.
+현재 production 기본값은 `enable_ball_lost_recovery=true`입니다. 공 분실 복구 FSM은 유지되지만 `BALL_LOST_STOP`, `HEAD_SCAN_LEFT/RIGHT`, `HEAD_CENTER`는 현재 SDK 실행 계약이 없어 `valid=false`인 비실행 판단 단계입니다. 필요하면 parameter를 `false`로 지정해 분실 복구 판단을 비활성화할 수 있습니다. 아직 실제 공 줍기 SDK를 호출하지 않습니다.
 
 ## 8. Goal 로직
 

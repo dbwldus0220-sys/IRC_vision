@@ -459,13 +459,27 @@ STEP SDK 번호나 함수 매핑으로 해석하면 안 된다.
 
 `FINE_LEFT`와 `FINE_RIGHT`는 위 매핑 표에 포함되지 않는다. 현재 명시적
 미지원 action이며 mock/실제 Executor request를 생성하지 않는다.
-`WAIT`, `STOP`, `HEAD_SCAN_LEFT`, `HEAD_SCAN_RIGHT`도 현재 legacy adapter
-매핑이 없어 Executor request를 만들지 않는다. `MotionExecutorCore`가
-`head_left`와 `head_right` 문자열을 지원 목록에 가진 것만으로 이 action의
-SDK 매핑이 확정된 것은 아니다.
+`WAIT`, `STOP`, `BALL_LOST_STOP`, `GOAL_LOST_STOP`,
+`WAIT_SCORE_CONFIRMATION`, `WAIT_GO_CONFIRMATION`은 판단 보류 또는 몸을
+움직이지 않는 recovery 단계다. mission planner는 이 action을 `valid=false`로
+정규화하므로 legacy adapter가 Executor request를 만들지 않는다.
+
+`HEAD_SCAN_LEFT`, `HEAD_SCAN_RIGHT`, `HEAD_CENTER`는 ball recovery FSM의
+시간·재검출 판단을 유지하기 위한 알고리즘 단계 이름이지만, 현재 head SDK
+계약이 없어 역시 `valid=false`다. legacy adapter mapping과 새 motion ID를
+추가하지 않는다.
+
+goal recovery 내부 단계인 `RECOVER_GOAL_TURN_LEFT`와
+`RECOVER_GOAL_TURN_RIGHT`는 mission planner 경계에서 각각 기존 `LEFT`와
+`RIGHT`로 정규화한다. `target_heading_change_deg`와
+`angular_speed_rad_s`는 `source_command`에 보존하며, adapter에는 새
+motion ID를 추가하지 않고 기존 `turn_left`/`turn_right`를 사용한다.
 `LEFT`/`RIGHT`는 기존 일반 회전 경로를 유지한다. legacy bridge에서도 새
 Dynamics 번호를 추가하지 않고 기존 `TURN_LEFT`/`TURN_RIGHT` 처리의
 action 별칭으로만 해석한다.
+
+`enable_ball_lost_recovery`의 production 기본값은 `true`이며, 비활성화할
+때만 parameter로 `false`를 지정한다.
 
 `CROSS_FINISH` 매핑과 status correlation은 수동 호환 및 향후 확장을 위해
 유지한다. 현재 자동 mission flow는 이 action을 발행하지 않으며,
