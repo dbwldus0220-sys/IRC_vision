@@ -78,7 +78,7 @@ def test_pickup_succeeded():
     assert manager.current_phase == "GOAL_APPROACH"
 
 
-@pytest.mark.parametrize("status", ["FAILED", "TIMEOUT"])
+@pytest.mark.parametrize("status", ["FAILED", "TIMEOUT", "CANCELLED"])
 def test_pickup_failure_or_timeout_uses_actual_section_policy(status):
     manager = MissionPhaseManager(
         required_ball_sections=2,
@@ -100,7 +100,12 @@ def test_failed_pickup_can_enable_finish_without_ending_auto_flow():
 
 @pytest.mark.parametrize(
     ("status", "expected_shots"),
-    [("SUCCEEDED", 1), ("FAILED", 0), ("TIMEOUT", 0)],
+    [
+        ("SUCCEEDED", 1),
+        ("FAILED", 0),
+        ("TIMEOUT", 0),
+        ("CANCELLED", 0),
+    ],
 )
 def test_shot_terminal_updates_section_and_phase(status, expected_shots):
     manager = MissionPhaseManager(
@@ -114,7 +119,10 @@ def test_shot_terminal_updates_section_and_phase(status, expected_shots):
     assert manager.current_phase == "AUTO"
 
 
-@pytest.mark.parametrize("status", ["SUCCEEDED", "FAILED", "TIMEOUT"])
+@pytest.mark.parametrize(
+    "status",
+    ["SUCCEEDED", "FAILED", "TIMEOUT", "CANCELLED"],
+)
 def test_shot_result_enables_finish_flag_but_returns_to_auto(status):
     manager = MissionPhaseManager(
         required_ball_sections=1,
@@ -125,7 +133,10 @@ def test_shot_result_enables_finish_flag_but_returns_to_auto(status):
     assert manager.current_phase == "AUTO"
 
 
-@pytest.mark.parametrize("status", ["SUCCEEDED", "FAILED", "TIMEOUT"])
+@pytest.mark.parametrize(
+    "status",
+    ["SUCCEEDED", "FAILED", "TIMEOUT", "CANCELLED"],
+)
 def test_go_always_returns_to_auto_without_progress(status):
     manager = MissionPhaseManager(initial_phase="HURDLE_APPROACH")
     before = manager.snapshot()
@@ -135,7 +146,10 @@ def test_go_always_returns_to_auto_without_progress(status):
     assert manager.shots_completed == before["shots_completed"]
 
 
-@pytest.mark.parametrize("status", ["SUCCEEDED", "FAILED", "TIMEOUT"])
+@pytest.mark.parametrize(
+    "status",
+    ["SUCCEEDED", "FAILED", "TIMEOUT", "CANCELLED"],
+)
 def test_goal_approach_go_terminal_restores_goal_mission(status):
     manager = MissionPhaseManager(initial_phase="GOAL_APPROACH")
     before = manager.snapshot()
@@ -237,6 +251,22 @@ def test_terminal_before_running_is_ignored_and_active_remains():
     assert result.reason == "terminal_before_running"
     assert manager.active_special_command_id == 1
     assert manager.pickups_completed == 0
+
+
+def test_cancelled_before_running_is_ignored_and_active_remains():
+    manager = MissionPhaseManager(initial_phase="BALL_APPROACH")
+    assert manager.start_special_action("PICKUP_NOW", 1)
+
+    result = manager.handle_motion_status(
+        "PICKUP_NOW", 1, "CANCELLED"
+    )
+
+    assert not result.handled
+    assert result.reason == "terminal_before_running"
+    assert manager.active_special_action == "PICKUP_NOW"
+    assert manager.active_special_command_id == 1
+    assert manager.active_special_running is False
+    assert manager.current_phase == "BALL_APPROACH"
 
 
 @pytest.mark.parametrize(

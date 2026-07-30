@@ -695,6 +695,143 @@ def test_failed_or_timed_out_special_motion_returns_to_auto(status):
         ('GOAL_APPROACH', 'GO', 'GOAL_APPROACH'),
     ],
 )
+def test_matching_cancelled_after_running_releases_special_lock(
+    initial_phase,
+    action,
+    expected_phase,
+):
+    node = FakeDecisionNode(initial_phase)
+    arm_special_command(node, action, 350, 35)
+
+    for status in ('RUNNING', 'CANCELLED'):
+        send_status(
+            node,
+            status=status,
+            action=action,
+            command_id=350,
+            event_id=35,
+            dynamics_command=None,
+        )
+
+    assert node.special_motion_running is False
+    assert node.active_special_action is None
+    assert node.active_special_command_id is None
+    assert node.active_special_event_id is None
+    assert node.mission_phase == expected_phase
+    assert node.pickups_completed == 0
+    assert node.shots_completed == 0
+    assert node.terminal_latch is None
+
+
+def test_cancelled_before_running_keeps_special_lock():
+    node = FakeDecisionNode('BALL_APPROACH')
+    arm_special_command(node, 'PICKUP_NOW', 350, 35)
+
+    send_status(
+        node,
+        status='CANCELLED',
+        action='PICKUP_NOW',
+        command_id=350,
+        event_id=35,
+        dynamics_command=None,
+    )
+
+    assert node.active_special_action == 'PICKUP_NOW'
+    assert node.active_special_command_id == 350
+    assert node.active_special_event_id == 35
+    assert node.special_motion_running is False
+    assert node.mission_phase == 'BALL_APPROACH'
+
+
+@pytest.mark.parametrize(
+    ('action', 'command_id', 'event_id'),
+    [
+        ('SHOT', 350, 35),
+        ('PICKUP_NOW', 349, 35),
+        ('PICKUP_NOW', 350, 34),
+    ],
+)
+def test_wrong_or_stale_cancelled_keeps_special_lock(
+    action,
+    command_id,
+    event_id,
+):
+    node = FakeDecisionNode('BALL_APPROACH')
+    arm_special_command(node, 'PICKUP_NOW', 350, 35)
+    send_status(
+        node,
+        status='RUNNING',
+        action='PICKUP_NOW',
+        command_id=350,
+        event_id=35,
+        dynamics_command=None,
+    )
+
+    send_status(
+        node,
+        status='CANCELLED',
+        action=action,
+        command_id=command_id,
+        event_id=event_id,
+        dynamics_command=None,
+    )
+
+    assert node.active_special_action == 'PICKUP_NOW'
+    assert node.active_special_command_id == 350
+    assert node.active_special_event_id == 35
+    assert node.special_motion_running is True
+    assert node.mission_phase == 'BALL_APPROACH'
+
+
+def test_duplicate_and_stale_cancelled_do_not_end_new_special_command():
+    node = FakeDecisionNode('BALL_APPROACH', required_ball_sections=2)
+    arm_special_command(node, 'PICKUP_NOW', 350, 35)
+    for status in ('RUNNING', 'CANCELLED', 'CANCELLED'):
+        send_status(
+            node,
+            status=status,
+            action='PICKUP_NOW',
+            command_id=350,
+            event_id=35,
+            dynamics_command=None,
+        )
+
+    assert node.ball_sections_processed == 1
+    assert node.mission_phase == 'AUTO'
+
+    arm_special_command(node, 'GO', 351, 36)
+    send_status(
+        node,
+        status='RUNNING',
+        action='GO',
+        command_id=351,
+        event_id=36,
+        dynamics_command=None,
+    )
+    send_status(
+        node,
+        status='CANCELLED',
+        action='PICKUP_NOW',
+        command_id=350,
+        event_id=35,
+        dynamics_command=None,
+    )
+
+    assert node.active_special_action == 'GO'
+    assert node.active_special_command_id == 351
+    assert node.active_special_event_id == 36
+    assert node.special_motion_running is True
+
+
+@pytest.mark.parametrize(
+    ('initial_phase', 'action', 'expected_phase'),
+    [
+        ('BALL_APPROACH', 'PICKUP_NOW', 'AUTO'),
+        ('GOAL_APPROACH', 'SHOT', 'AUTO'),
+        ('HURDLE_APPROACH', 'GO', 'AUTO'),
+        ('GOAL_APPROACH', 'GO', 'GOAL_APPROACH'),
+    ],
+)
 def test_matching_rejected_without_running_releases_special_lock(
     initial_phase,
     action,

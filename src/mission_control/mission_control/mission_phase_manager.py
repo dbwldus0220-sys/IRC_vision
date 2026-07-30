@@ -39,10 +39,17 @@ class MissionPhaseManager:
         {"PICKUP_NOW", "SHOT", "GO", "CROSS_FINISH"}
     )
     SUPPORTED_STATUSES = frozenset(
-        {"RUNNING", "SUCCEEDED", "FAILED", "TIMEOUT", "REJECTED"}
+        {
+            "RUNNING",
+            "SUCCEEDED",
+            "FAILED",
+            "TIMEOUT",
+            "CANCELLED",
+            "REJECTED",
+        }
     )
     TERMINAL_STATUSES = frozenset(
-        {"SUCCEEDED", "FAILED", "TIMEOUT", "REJECTED"}
+        {"SUCCEEDED", "FAILED", "TIMEOUT", "CANCELLED", "REJECTED"}
     )
 
     def __init__(
