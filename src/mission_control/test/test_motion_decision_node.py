@@ -807,19 +807,19 @@ def test_go_terminal_status_does_not_change_section(status):
     assert node.mission_phase == 'AUTO'
 
 
-def test_second_pickup_failure_enables_walk_to_finish():
-    """Walk to finish when a failed pickup processes the last section."""
+def test_second_pickup_failure_keeps_automatic_flow_active():
+    """Keep AUTO when a failed pickup processes the last section."""
     node = FakeDecisionNode()
     complete_motion(node, 'SHOT', event_id=506)
     complete_motion(node, 'PICKUP_NOW', event_id=507, status='FAILED')
 
     assert node.ball_sections_processed == 2
     assert node.finish_enabled is True
-    assert node.mission_phase == 'WALK_TO_FINISH'
+    assert node.mission_phase == 'AUTO'
 
 
-def test_second_shot_failure_enables_walk_to_finish():
-    """Walk to finish when a failed shot processes the last section."""
+def test_second_shot_failure_keeps_automatic_flow_active():
+    """Keep AUTO when a failed shot processes the last section."""
     node = FakeDecisionNode()
     complete_motion(node, 'SHOT', event_id=508)
     complete_motion(node, 'SHOT', event_id=509, status='FAILED')
@@ -827,7 +827,7 @@ def test_second_shot_failure_enables_walk_to_finish():
     assert node.shots_completed == 1
     assert node.ball_sections_processed == 2
     assert node.finish_enabled is True
-    assert node.mission_phase == 'WALK_TO_FINISH'
+    assert node.mission_phase == 'AUTO'
 
 
 def test_duplicate_terminal_status_does_not_increment_section_twice():
@@ -890,46 +890,17 @@ def finish_info(**overrides):
     return info
 
 
-def test_finish_detection_is_ignored_until_finish_is_enabled():
-    """Keep normal phase planning when mission progress is incomplete."""
+@pytest.mark.parametrize("finish_enabled", [False, True])
+def test_finish_detection_never_requests_cross_finish(finish_enabled):
+    """Treat WALK_TO_FINISH as line-only compatibility phase."""
     node = FakeDecisionNode('WALK_TO_FINISH')
+    node.finish_enabled = finish_enabled
     decision = select_decision(node, finish=finish_info())
 
     assert decision.phase == 'WALK_TO_FINISH'
     assert decision.action == 'STRAIGHT'
     assert decision.source == 'line'
     assert decision.requires_ack is False
-
-
-def test_confirmed_finish_requests_cross_finish():
-    """Request acknowledged crossing for an enabled confirmed finish."""
-    node = FakeDecisionNode('WALK_TO_FINISH')
-    node.finish_enabled = True
-    decision = select_decision(node, finish=finish_info())
-
-    assert decision.phase == 'WALK_TO_FINISH'
-    assert decision.source == 'finish'
-    assert decision.action == 'CROSS_FINISH'
-    assert decision.sdk_motion_requested is True
-    assert decision.requires_ack is True
-
-
-def test_continuous_finish_detection_does_not_retrigger_crossing():
-    """Suppress CROSS_FINISH while the same finish target is disarmed."""
-    node = FakeDecisionNode('WALK_TO_FINISH')
-    node.finish_enabled = True
-    decision = select_decision(node, finish=finish_info())
-    node.terminal_action_armed['finish'] = False
-
-    suppressed = MotionDecisionNode._suppress_duplicate_terminal_action(
-        node,
-        decision,
-    )
-
-    assert suppressed.action == 'WAIT'
-    assert suppressed.reason == 'duplicate_terminal_action_suppressed'
-    assert suppressed.sdk_motion_requested is False
-    assert suppressed.requires_ack is False
 
 
 @pytest.mark.parametrize(
@@ -1052,8 +1023,8 @@ def test_finished_always_stops_even_with_special_targets():
 
 
 @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT'])
-def test_cross_finish_failure_returns_to_walk_and_allows_retry(status):
-    """Return to finish walking and re-arm crossing after failure."""
+def test_manual_cross_finish_failure_returns_to_line_compatibility(status):
+    """Keep manual status compatibility without automatically retrying."""
     node = FakeDecisionNode('WALK_TO_FINISH')
     node.finish_enabled = True
     node.terminal_action_armed['finish'] = False
@@ -1068,6 +1039,6 @@ def test_cross_finish_failure_returns_to_walk_and_allows_retry(status):
     assert node.mission_phase == 'WALK_TO_FINISH'
     assert node.terminal_action_armed['finish'] is True
 
-    retry = select_decision(node, finish=finish_info())
-    assert retry.action == 'CROSS_FINISH'
-    assert retry.requires_ack is True
+    next_decision = select_decision(node, finish=finish_info())
+    assert next_decision.action == 'STRAIGHT'
+    assert next_decision.requires_ack is False

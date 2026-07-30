@@ -417,6 +417,12 @@ Dynamixel에 접근하지 않는다.
 | `TURN_RIGHT`, `RIGHT` | `turn_right` |
 | `CROSS_FINISH` | `hurdle` |
 
+`CROSS_FINISH` 매핑과 status correlation은 수동 호환 및 향후 확장을 위해
+유지한다. 현재 자동 mission flow는 이 action을 발행하지 않으며,
+`finish_enabled=True` 또는 수동 `WALK_TO_FINISH` phase만으로도 자동
+발행되지 않는다. 마지막 미션 뒤에는 `AUTO`로 복귀해 라인 주행을 계속하고,
+최종 정지는 사람이 직접 수행한다.
+
 ### timeout
 
 - 일반 이동: 5000ms

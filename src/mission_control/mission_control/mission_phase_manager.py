@@ -207,9 +207,7 @@ class MissionPhaseManager:
                 self.required_ball_sections,
             )
             self._update_finish_enabled()
-            self.current_phase = (
-                "WALK_TO_FINISH" if self.finish_enabled else "AUTO"
-            )
+            self.current_phase = "AUTO"
             return
 
         if action == "SHOT":
@@ -223,9 +221,7 @@ class MissionPhaseManager:
                 self.required_ball_sections,
             )
             self._update_finish_enabled()
-            self.current_phase = (
-                "WALK_TO_FINISH" if self.finish_enabled else "AUTO"
-            )
+            self.current_phase = "AUTO"
             return
 
         if action == "GO":

@@ -747,7 +747,7 @@ class MotionDecisionNode(Node):
         observations: dict[str, dict[str, Any] | None],
         dt_sec: float,
     ) -> MotionDecision:
-        """Apply finish priorities before falling back to normal planning."""
+        """Keep compatibility phases while disabling automatic finish actions."""
         if self.mission_complete or self.mission_phase == "FINISHED":
             return MotionDecision(
                 phase="FINISHED",
@@ -767,19 +767,6 @@ class MotionDecisionNode(Node):
                 locked_phase,
                 observations,
                 dt_sec,
-            )
-
-        finish_info = observations.get("finish")
-        if self._finish_crossing_ready(finish_info):
-            return MotionDecision(
-                phase="WALK_TO_FINISH",
-                source="finish",
-                action="CROSS_FINISH",
-                valid=True,
-                reason="confirmed_finish_ready",
-                sdk_motion_requested=True,
-                requires_ack=True,
-                source_command=dict(finish_info or {}),
             )
 
         if planning_phase == "WALK_TO_FINISH":
@@ -803,27 +790,6 @@ class MotionDecisionNode(Node):
             planning_phase,
             observations,
             dt_sec,
-        )
-
-    def _finish_crossing_ready(
-        self,
-        finish_info: dict[str, Any] | None,
-    ) -> bool:
-        """Return whether a fresh finish observation can trigger crossing."""
-        if (
-            self.mission_phase != "WALK_TO_FINISH"
-            or not self.finish_enabled
-            or finish_info is None
-            or not bool(finish_info.get("detected", False))
-            or not bool(finish_info.get("confirmed", False))
-        ):
-            return False
-
-        confidence = finish_info.get("confidence")
-        return (
-            isinstance(confidence, (int, float))
-            and not isinstance(confidence, bool)
-            and float(confidence) >= self.finish_min_confidence
         )
 
     def _rearm_absent_terminal_targets(

@@ -91,11 +91,11 @@ def test_pickup_failure_or_timeout_uses_actual_section_policy(status):
     assert manager.current_phase == "AUTO"
 
 
-def test_failed_pickup_can_enable_finish():
+def test_failed_pickup_can_enable_finish_without_ending_auto_flow():
     manager = MissionPhaseManager(required_ball_sections=1)
     complete(manager, "PICKUP_NOW", 1, "FAILED")
     assert manager.finish_enabled is True
-    assert manager.current_phase == "WALK_TO_FINISH"
+    assert manager.current_phase == "AUTO"
 
 
 @pytest.mark.parametrize(
@@ -114,11 +114,15 @@ def test_shot_terminal_updates_section_and_phase(status, expected_shots):
     assert manager.current_phase == "AUTO"
 
 
-def test_shot_result_enables_finish_at_required_section_count():
-    manager = MissionPhaseManager(required_ball_sections=1)
-    complete(manager, "SHOT", 1, "TIMEOUT")
+@pytest.mark.parametrize("status", ["SUCCEEDED", "FAILED", "TIMEOUT"])
+def test_shot_result_enables_finish_flag_but_returns_to_auto(status):
+    manager = MissionPhaseManager(
+        required_ball_sections=1,
+        initial_phase="GOAL_APPROACH",
+    )
+    complete(manager, "SHOT", 1, status)
     assert manager.finish_enabled is True
-    assert manager.current_phase == "WALK_TO_FINISH"
+    assert manager.current_phase == "AUTO"
 
 
 @pytest.mark.parametrize("status", ["SUCCEEDED", "FAILED", "TIMEOUT"])

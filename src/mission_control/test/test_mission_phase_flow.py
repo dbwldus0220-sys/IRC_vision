@@ -122,9 +122,6 @@ class MissionFlowHarness:
             self, decision
         )
 
-    def _finish_crossing_ready(self, finish_info):
-        return MotionDecisionNode._finish_crossing_ready(self, finish_info)
-
     def _mission_progress(self):
         return MotionDecisionNode._mission_progress(self)
 
@@ -303,7 +300,7 @@ def test_shot_success_updates_one_section_and_returns_to_auto():
     assert harness.mission_phase == "AUTO"
 
 
-def test_last_shot_enables_finish_and_walk_to_finish_phase():
+def test_last_shot_enables_finish_flag_and_continues_line_driving():
     harness = MissionFlowHarness(
         phase="GOAL_APPROACH",
         required_ball_sections=2,
@@ -319,7 +316,22 @@ def test_last_shot_enables_finish_and_walk_to_finish_phase():
 
     assert harness.ball_sections_processed == 2
     assert harness.finish_enabled is True
-    assert harness.mission_phase == "WALK_TO_FINISH"
+    assert harness.mission_phase == "AUTO"
+
+    # Model the goal becoming stale after the existing recovery window.
+    harness.planner._clear_goal_tracking()
+    line_commands = harness.publish_vision(
+        line=line_info(),
+        goal=None,
+    )
+    assert any(
+        command["action"] == "STRAIGHT" for command in line_commands
+    )
+    assert all(command["phase"] == "AUTO" for command in line_commands)
+    assert all(
+        command["action"] != "CROSS_FINISH"
+        for command in line_commands
+    )
 
 
 def test_go_round_trip_preserves_action_and_returns_to_auto():
@@ -380,18 +392,13 @@ def test_go_round_trip_preserves_action_and_returns_to_auto():
     )
 
 
-def test_cross_finish_success_stops_new_general_motion():
+def test_manual_cross_finish_status_compatibility_still_enters_finished():
     harness = MissionFlowHarness(
         phase="WALK_TO_FINISH",
         required_ball_sections=0,
     )
-    command = publish_special(
-        harness,
-        "finish",
-        confirmed_finish(),
-        "CROSS_FINISH",
-    )
-    complete_active(harness, "CROSS_FINISH", command["command_id"])
+    assert harness.phase_manager.start_special_action("CROSS_FINISH", 10)
+    complete_active(harness, "CROSS_FINISH", 10)
 
     assert harness.mission_complete is True
     assert harness.mission_phase == "FINISHED"

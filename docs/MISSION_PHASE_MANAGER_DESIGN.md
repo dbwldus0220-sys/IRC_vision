@@ -112,18 +112,25 @@ planner는 전달받은 phase에 따라 source와 action을 선택할 뿐,
 
 ### 2.2 phase별 현재 동작
 
+> **현재 종료 정책:** 자동 결승선 종료는 비활성화되어 있다.
+> `PICKUP_NOW` 실패/timeout과 모든 `SHOT` terminal 결과는 section 진행도와
+> `finish_enabled` 호환 필드를 갱신한 뒤 `AUTO`로 복귀한다. 마지막 section
+> 이후에도 line 판단과 일반 주행을 계속하며 최종 정지는 사람이 수행한다.
+> `WALK_TO_FINISH`, `CROSS_FINISH`, `FINISHED`는 향후 확장 및 수동 status
+> 호환을 위해 남아 있지만 자동 mission flow에는 포함되지 않는다.
+
 | phase | 사용하는 Vision 입력 | 발행 가능한 action | 진입 조건 | 성공 종료 조건 | 실패/timeout | 다음 phase |
 | --- | --- | --- | --- | --- | --- | --- |
-| `AUTO` | hurdle, ball, goal, line | 선택 source의 모든 action | 초기 기본값, 외부 입력, 특수 모션 실패/timeout, `SHOT`/`GO` 성공 | `PICKUP_NOW` 성공, `SHOT` 또는 `GO` 성공 | `PICKUP_NOW`/`SHOT` 실패 후 finish가 아직 비활성일 때 `AUTO` 유지 | pickup 성공 → `GOAL_APPROACH`; shot/go 성공 → `AUTO`; pickup/shot 실패이면서 finish 활성 → `WALK_TO_FINISH` |
-| `BALL_SEARCH` | ball과 fallback line; confirmed hurdle은 항상 우선 | ball action, line action, hurdle action, `WAIT` | 외부 `/mission/phase`만 확인됨 | `PICKUP_NOW + SUCCEEDED` | 실패/timeout 후 finish 비활성 → `AUTO`; 활성 → `WALK_TO_FINISH` | 성공 → `GOAL_APPROACH` |
+| `AUTO` | hurdle, ball, goal, line | 선택 source의 모든 action | 초기 기본값, 외부 입력, 특수 모션 실패/timeout, `SHOT`/`GO` 성공 | `PICKUP_NOW` 성공, `SHOT` 또는 `GO` 성공 | `PICKUP_NOW`/`SHOT` 실패 후 `AUTO` 유지 | pickup 성공 → `GOAL_APPROACH`; shot/go 및 pickup/shot 실패 → `AUTO` |
+| `BALL_SEARCH` | ball과 fallback line; confirmed hurdle은 항상 우선 | ball action, line action, hurdle action, `WAIT` | 외부 `/mission/phase`만 확인됨 | `PICKUP_NOW + SUCCEEDED` | 실패/timeout 후 `AUTO` | 성공 → `GOAL_APPROACH` |
 | `BALL_APPROACH` | ball; confirmed hurdle은 항상 우선 | ball action 또는 hurdle action | 외부 입력 또는 테스트 fixture에서 사용. 자동 진입 조건은 현재 미구현 | `PICKUP_NOW + SUCCEEDED` | 위와 동일 | 성공 → `GOAL_APPROACH` |
-| `GOAL_SEARCH` | goal과 fallback line; confirmed hurdle은 항상 우선 | goal action, line action, hurdle action, `WAIT` | 외부 `/mission/phase`만 확인됨 | `SHOT + SUCCEEDED` | 실패/timeout 후 finish 활성 → `WALK_TO_FINISH`, 아니면 `AUTO` | 성공 후 finish 활성 → `WALK_TO_FINISH`, 아니면 `AUTO` |
-| `GOAL_APPROACH` | goal; confirmed hurdle은 항상 우선 | goal action 또는 hurdle action | `PICKUP_NOW + SUCCEEDED` 또는 외부 입력 | `SHOT + SUCCEEDED` | 위와 동일 | finish 활성 여부에 따라 `WALK_TO_FINISH` 또는 `AUTO` |
+| `GOAL_SEARCH` | goal과 fallback line; confirmed hurdle은 항상 우선 | goal action, line action, hurdle action, `WAIT` | 외부 `/mission/phase`만 확인됨 | `SHOT + SUCCEEDED` | 실패/timeout 후 `AUTO` | 모든 `SHOT` terminal 후 `AUTO` |
+| `GOAL_APPROACH` | goal; confirmed hurdle은 항상 우선 | goal action 또는 hurdle action | `PICKUP_NOW + SUCCEEDED` 또는 외부 입력 | `SHOT + SUCCEEDED` | 위와 동일 | 모든 `SHOT` terminal 후 `AUTO` |
 | `HURDLE_APPROACH` | hurdle | hurdle action | 외부 `/mission/phase`만 확인됨 | `GO + SUCCEEDED` | `GO + FAILED/TIMEOUT` → `AUTO` | `AUTO` |
 | `LINE_TRACK` | line; confirmed hurdle은 항상 우선 | line action 또는 hurdle action | 외부 `/mission/phase`; `WALK_TO_FINISH` 내부에서 line planner 호출 시 임시 planning phase로도 사용 | phase 자체의 성공 종료 조건은 현재 미구현 | 현재 미구현 | TBD |
 | `FINISH` | line; confirmed hurdle은 항상 우선 | line action 또는 hurdle action | 외부 `/mission/phase`만 확인됨 | 현재 미구현 | 현재 미구현 | TBD. `FINISHED`와 다른 문자열 |
-| `WALK_TO_FINISH` | finish와 line; confirmed finish가 최우선 | `CROSS_FINISH`, 아니면 line action | pickup/shot 처리 뒤 `finish_enabled=True`, 또는 외부 입력 | `CROSS_FINISH + SUCCEEDED` | `CROSS_FINISH + FAILED/TIMEOUT`이면 finish target을 재-arm하고 같은 phase 유지 | 성공 → `FINISHED`; 실패/timeout → `WALK_TO_FINISH` |
-| `FINISHED` | 없음 | `STOP` | `CROSS_FINISH + SUCCEEDED`, `mission_complete=True`, 또는 외부 입력 | 계속 정지 | 별도 실패 처리 없음 | `FINISHED` 유지 |
+| `WALK_TO_FINISH` | line (수동 호환 phase) | line action | 외부 입력만 가능; 자동 진입 없음 | 자동 종료 조건 없음 | 수동 `CROSS_FINISH` status 실패/timeout 호환 처리만 유지 | 자동 `CROSS_FINISH` 발행 없음 |
+| `FINISHED` | 없음 | `STOP` | 수동으로 등록된 `CROSS_FINISH + SUCCEEDED`, `mission_complete=True`, 또는 외부 입력 | 계속 정지 | 별도 실패 처리 없음 | 자동 mission flow에서는 진입하지 않음 |
 | `*_LOCK` | planner는 Vision source를 선택하지 않음 | `WAIT` (`valid=False`) | `special_motion_running=True`일 때 현재 phase 뒤에 동적으로 추가 | matching 특수 terminal status | matching `FAILED/TIMEOUT`도 lock 종료 | 원래 phase가 아니라 status callback이 계산한 phase |
 
 주의할 점:
@@ -148,7 +155,7 @@ planner는 전달받은 phase에 따라 source와 action을 선택할 뿐,
 | `PICKUP_NOW` | `BallNavigationPlanner` | ball source가 선택된 phase | 특수 terminal, `requires_ack=True` |
 | `SHOT` | `GoalNavigationPlanner` | goal source가 선택된 phase | 특수 terminal, `requires_ack=True` |
 | `GO` | `HurdleNavigationPlanner` | confirmed hurdle이 있거나 hurdle phase | 특수 terminal, `requires_ack=True` |
-| `CROSS_FINISH` | `MotionDecisionNode._select_mission_decision()` | `WALK_TO_FINISH`이고 finish 조건 충족 | 특수 terminal, `requires_ack=True` |
+| `CROSS_FINISH` | 자동 생성 위치 없음 | 향후 확장/수동 status 호환 전용 | 자동 mission flow에서 발행하지 않음 |
 
 ### 3.2 코드에서 추가로 확인된 action
 
@@ -163,8 +170,8 @@ planner는 전달받은 phase에 따라 source와 action을 선택할 뿐,
 | finished node branch | `STOP` |
 
 `MotionDecisionPlanner.TERMINAL_ACTIONS`에는 `PICKUP_NOW`, `SHOT`, `GO`만
-있다. `CROSS_FINISH`는 planner가 아니라 node의 finish 우선 분기에서 직접
-생성한다.
+있다. `CROSS_FINISH`의 기존 status correlation API는 남아 있지만 planner와
+node 모두 현재 자동으로 이 action을 생성하지 않는다.
 
 ## 4. 영상처리 출력 사용 현황
 
@@ -294,8 +301,9 @@ confirmation gate로 사용한다.
 - `confirmed`
 - `confidence`
 
-`WALK_TO_FINISH`, `finish_enabled=True`, confidence가
-`finish_min_confidence` 이상일 때만 `CROSS_FINISH`를 선택한다.
+현재 자동 종료 정책에서는 이 입력으로 `CROSS_FINISH`를 선택하지 않는다.
+`finish_enabled` 값이나 수동 `WALK_TO_FINISH` override 여부와 관계없이
+`WALK_TO_FINISH`는 line planner만 사용한다.
 
 ## 5. `/vision/mission_state` 분석
 
@@ -359,9 +367,10 @@ zone 고유값은 **6개**다:
 motion status 없이는 확정할 수 없는 전환은 최소 다음과 같다.
 
 - ball phase → goal phase (`PICKUP_NOW` 성공 필요)
-- goal phase → 다음 course/finish phase (`SHOT` 결과 필요)
+- goal phase → `AUTO` 복귀 (`SHOT` 결과 필요)
 - hurdle 실행 후 일반 주행 복귀 (`GO` 결과 필요)
-- finish 접근 → `FINISHED` (`CROSS_FINISH` 성공 필요)
+- 수동 호환 finish 처리 → `FINISHED` (`CROSS_FINISH` 성공 필요,
+  자동 flow에서는 사용하지 않음)
 - 실패/timeout 뒤 재시도 또는 다음 section 진행 여부
 
 ## 6. 책임 중복과 충돌 위험
@@ -521,11 +530,10 @@ planner는 phase를 읽어 action만 반환하고 phase 상태를 변경하지 �
 
 | 현재 phase | Vision 조건 | 실행 action | 필요한 motion status | 성공 시 다음 phase | 실패/timeout 시 phase | 비고 |
 | --- | --- | --- | --- | --- | --- | --- |
-| `AUTO` 또는 ball 계열 | ball detected, confidence/depth/alignment 유효, `pickup_now` confirmation | `PICKUP_NOW` | `RUNNING` 후 `SUCCEEDED`/`FAILED`/`TIMEOUT` | `GOAL_APPROACH` | finish 비활성 `AUTO`; 활성 `WALK_TO_FINISH` | 성공 시 pickup count 증가 |
-| `GOAL_SEARCH`/`GOAL_APPROACH` 또는 AUTO goal 선택 | goal detected, control range, centered, scoring depth, `score_now` confirmation | `SHOT` | 위와 동일 | finish 비활성 `AUTO`; 활성 `WALK_TO_FINISH` | finish 비활성 `AUTO`; 활성 `WALK_TO_FINISH` | 성공 시 shot count 증가; 결과와 무관하게 section 처리 |
+| `AUTO` 또는 ball 계열 | ball detected, confidence/depth/alignment 유효, `pickup_now` confirmation | `PICKUP_NOW` | `RUNNING` 후 `SUCCEEDED`/`FAILED`/`TIMEOUT` | `GOAL_APPROACH` | `AUTO` | 성공 시 pickup count 증가; 실패/timeout은 section 처리 후 계속 주행 |
+| `GOAL_SEARCH`/`GOAL_APPROACH` 또는 AUTO goal 선택 | goal detected, control range, centered, scoring depth, `score_now` confirmation | `SHOT` | 위와 동일 | `AUTO` | `AUTO` | 성공 시 shot count 증가; 결과와 무관하게 section 처리 후 계속 주행 |
 | `HURDLE_APPROACH` 또는 confirmed hurdle 우선 | hurdle detected/confirmed, valid depth, parallel, gap 조건, `go_now` confirmation | `GO` | 위와 동일 | `AUTO` | `AUTO` | phase와 무관하게 confirmed hurdle이 우선될 수 있음 |
-| `WALK_TO_FINISH` | fresh finish: detected, confirmed, confidence 기준 충족 | `CROSS_FINISH` | 위와 동일 | `FINISHED` | `WALK_TO_FINISH` | 실패 시 finish action 재-arm |
-| `WALK_TO_FINISH` | finish 조건 미충족 | line planner action | 일반 action의 matching status | phase 변화 없음 | phase 변화 없음 | line planning은 내부적으로 `LINE_TRACK` 사용 |
+| `WALK_TO_FINISH` | finish 관측과 무관 | line planner action | 일반 action의 matching status | phase 변화 없음 | phase 변화 없음 | 수동 호환 phase이며 내부적으로 `LINE_TRACK` 사용; `CROSS_FINISH` 자동 발행 없음 |
 | `FINISHED` | 조건 없음 | `STOP` | 없음 | `FINISHED` | 해당 없음 | `mission_complete_stop` |
 | 임의 phase + 특수 motion 실행 중 | Vision과 무관 | `WAIT` | active 특수 terminal | status에 따른 위 전환 | status에 따른 위 전환 | 동적 `*_LOCK` |
 | `BALL_SEARCH` | ball이 control range 밖/미검출, recovery도 비활성; line detected | line action | 일반 action status | phase 변화 없음 | phase 변화 없음 | 자동 ball phase 진입/종료는 TBD |
@@ -555,9 +563,9 @@ ROS 의존성 없이 phase, progress, active special event와 transition 결과�
 
 - `src/mission_control/test/test_mission_phase_manager.py`
 
-pickup/shot/go/cross-finish 성공·실패·timeout, 중복/오래된 status,
-최대 카운터, finish 활성화와 역행 방지를 검증한다. `CANCELLED`,
-`REJECTED` 정책을 먼저 확정한다.
+pickup/shot/go와 수동 cross-finish status의 성공·실패·timeout,
+중복/오래된 status, 최대 카운터, `finish_enabled` 호환 값 갱신과 자동
+종료 비활성화를 검증한다. `CANCELLED`, `REJECTED` 정책을 먼저 확정한다.
 
 ### 3단계: `motion_decision_node` 내부 phase 변경 이전 — 완료
 
