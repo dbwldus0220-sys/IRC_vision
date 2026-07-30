@@ -69,7 +69,7 @@ class MotionDecisionConfig:
 class MotionDecisionPlanner:
     """Run one existing planner according to the active mission phase."""
 
-    AUTO_PRIORITY = ("hurdle", "line")
+    AUTO_PRIORITY = ("line",)
     TERMINAL_ACTIONS = {
         ("ball", "PICKUP_NOW"),
         ("goal", "SHOT"),
@@ -140,6 +140,22 @@ class MotionDecisionPlanner:
                 source_command={},
             )
 
+        hurdle_wait_reason = self._hurdle_safety_wait_reason(
+            observations.get("hurdle")
+        )
+        if hurdle_wait_reason is not None:
+            self._reset_previous_source()
+            return MotionDecision(
+                phase=normalized_phase,
+                source="hurdle",
+                action="WAIT",
+                valid=False,
+                reason=hurdle_wait_reason,
+                sdk_motion_requested=False,
+                requires_ack=False,
+                source_command={},
+            )
+
         source = self._select_source(normalized_phase, observations)
         if source == "none":
             self._reset_previous_source()
@@ -181,9 +197,11 @@ class MotionDecisionPlanner:
         phase: str,
         observations: dict[str, dict[str, Any] | None],
     ) -> str:
+        requested = self.source_for_phase(phase)
         if self._confirmed_hurdle(observations.get("hurdle")):
             return "hurdle"
-        requested = self.source_for_phase(phase)
+        if phase == "GOAL_APPROACH":
+            return "goal"
         if requested is None:
             return self._select_auto_source(observations)
         if requested == "none":
@@ -211,6 +229,10 @@ class MotionDecisionPlanner:
                 ):
                     return "ball"
             elif requested == "goal":
+                if self._ball_is_inside_control_range(
+                    observations.get("ball")
+                ):
+                    return "ball"
                 if self._goal_is_inside_control_range(target):
                     return "goal"
                 if self.goal_recovery_centering:
@@ -226,6 +248,8 @@ class MotionDecisionPlanner:
             if line is not None and bool(line.get("detected", False)):
                 return "line"
             return "none"
+        if self._ball_is_inside_control_range(observations.get("ball")):
+            return "ball"
         return requested
 
     def _select_auto_source(
@@ -270,15 +294,25 @@ class MotionDecisionPlanner:
     @staticmethod
     def _confirmed_hurdle(info: dict[str, Any] | None) -> bool:
         """Return true for any confirmed hurdle, regardless of image center."""
-        if info is None or not bool(info.get("detected", False)):
-            return False
-        if (
-            "confirmation_confirmed" in info
-            and not bool(info.get("confirmation_confirmed", False))
-        ):
-            return False
+        return bool(
+            info is not None
+            and info.get("detected", False)
+            and info.get("confirmation_confirmed", False)
+            and info.get("depth_valid", False)
+        )
 
-        return True
+    @staticmethod
+    def _hurdle_safety_wait_reason(
+        info: dict[str, Any] | None,
+    ) -> str | None:
+        """Hold motion while a detected hurdle is not safe to classify."""
+        if info is None or not bool(info.get("detected", False)):
+            return None
+        if not bool(info.get("confirmation_confirmed", False)):
+            return "hurdle_confirmation_pending"
+        if not bool(info.get("depth_valid", False)):
+            return "hurdle_depth_invalid_wait"
+        return None
 
     def _plan_source(
         self,
@@ -493,6 +527,10 @@ class MotionDecisionPlanner:
         self.ball_lost_elapsed_sec = 0.0
         self.last_ball_bearing_deg = None
         self.last_ball_offset_x_norm = None
+
+    def clear_collected_ball_tracking(self) -> None:
+        """Discard recovery state for a ball that was picked up successfully."""
+        self._clear_ball_tracking()
 
     def ball_tracking_status(self) -> dict[str, Any]:
         """Expose remembered-ball state for debugging and behavior logs."""

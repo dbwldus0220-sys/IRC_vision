@@ -72,6 +72,7 @@ class MissionPhaseManager:
         self.active_special_action: str | None = None
         self.active_special_command_id: int | None = None
         self.active_special_running = False
+        self._active_special_origin_phase: str | None = None
         self._completed_command_ids: set[int] = set()
 
     @staticmethod
@@ -127,6 +128,7 @@ class MissionPhaseManager:
         self.active_special_action = normalized_action
         self.active_special_command_id = command_id
         self.active_special_running = False
+        self._active_special_origin_phase = self.current_phase
         return True
 
     def handle_motion_status(
@@ -186,6 +188,7 @@ class MissionPhaseManager:
         self.active_special_action = None
         self.active_special_command_id = None
         self.active_special_running = False
+        self._active_special_origin_phase = None
         return self._result(
             True, True, False, "terminal_applied", previous_phase
         )
@@ -225,7 +228,11 @@ class MissionPhaseManager:
             return
 
         if action == "GO":
-            self.current_phase = "AUTO"
+            self.current_phase = (
+                "GOAL_APPROACH"
+                if self._active_special_origin_phase == "GOAL_APPROACH"
+                else "AUTO"
+            )
             return
 
         if succeeded:

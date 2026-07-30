@@ -33,6 +33,10 @@ class FakeLogger:
 class FakePlanner:
     """Return deterministic line or lock decisions for node-level tests."""
 
+    def clear_collected_ball_tracking(self):
+        """Match the planner lifecycle hook used after a successful pickup."""
+        pass
+
     def plan(self, phase, _observations, _dt_sec):
         """Return WAIT for locks and STRAIGHT for normal line planning."""
         locked = phase.endswith('_LOCK')

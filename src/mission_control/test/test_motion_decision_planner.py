@@ -56,6 +56,7 @@ def goal_info(**overrides):
 def hurdle_info(**overrides):
     sample = {
         "detected": True,
+        "confirmation_confirmed": True,
         "confidence": 0.9,
         "depth_valid": True,
         "depth_m": 0.8,
@@ -90,12 +91,15 @@ def recovery_planner():
     )
 
 
-def test_explicit_goal_phase_ignores_visible_ball():
+def test_goal_approach_keeps_goal_ahead_of_fresh_ball():
     planner = MotionDecisionPlanner()
 
     decision = planner.plan(
         "GOAL_APPROACH",
-        observations(ball=ball_info(), goal=goal_info()),
+        observations(
+            ball=ball_info(depth_m=0.80, distance_m=0.80),
+            goal=goal_info(),
+        ),
         0.1,
     )
 
@@ -104,7 +108,7 @@ def test_explicit_goal_phase_ignores_visible_ball():
     assert decision.requires_ack is True
 
 
-def test_blocking_hurdle_has_priority_over_close_ball():
+def test_go_ready_confirmed_hurdle_has_priority_over_close_ball():
     planner = MotionDecisionPlanner()
 
     decision = planner.plan(
@@ -122,7 +126,7 @@ def test_blocking_hurdle_has_priority_over_close_ball():
     assert decision.action == "GO"
 
 
-def test_confirmed_side_hurdle_still_has_priority_over_close_ball():
+def test_confirmed_hurdle_priority_does_not_depend_on_lateral_offset():
     planner = MotionDecisionPlanner()
 
     decision = planner.plan(
@@ -140,6 +144,135 @@ def test_confirmed_side_hurdle_still_has_priority_over_close_ball():
 
     assert decision.source == "hurdle"
     assert decision.action == "GO"
+
+
+@pytest.mark.parametrize("phase", ["BALL_APPROACH", "LINE_TRACK"])
+def test_confirmed_hurdle_preempts_ball_in_non_goal_phase(phase):
+    planner = MotionDecisionPlanner()
+
+    decision = planner.plan(
+        phase,
+        observations(
+            line=line_info(),
+            ball=ball_info(),
+            hurdle=hurdle_info(
+                go_now=False,
+                ground_gap_m=0.35,
+                camera_bottom_gap_m=0.20,
+            ),
+        ),
+        0.1,
+    )
+
+    assert decision.source == "hurdle"
+    assert decision.action == "APPROACH_HURDLE"
+
+
+@pytest.mark.parametrize("include_ball", [False, True])
+def test_goal_approach_confirmed_hurdle_preempts_goal(include_ball):
+    planner = MotionDecisionPlanner()
+
+    decision = planner.plan(
+        "GOAL_APPROACH",
+        observations(
+            ball=ball_info() if include_ball else None,
+            goal=goal_info(),
+            hurdle=hurdle_info(
+                go_now=False,
+                ground_gap_m=0.35,
+                camera_bottom_gap_m=0.20,
+            ),
+        ),
+        0.1,
+    )
+
+    assert decision.source == "hurdle"
+    assert decision.action == "APPROACH_HURDLE"
+
+
+def test_unconfirmed_hurdle_cannot_reenter_through_auto_fallback():
+    planner = MotionDecisionPlanner()
+
+    decision = planner.plan(
+        "AUTO",
+        observations(
+            line=line_info(),
+            hurdle=hurdle_info(
+                confirmation_confirmed=False,
+                go_now=True,
+            ),
+        ),
+        0.1,
+    )
+
+    assert decision.source == "hurdle"
+    assert decision.action == "WAIT"
+    assert decision.valid is False
+    assert decision.reason == "hurdle_confirmation_pending"
+
+
+@pytest.mark.parametrize(
+    ("phase", "target"),
+    [
+        ("AUTO", {"line": line_info(), "ball": ball_info()}),
+        ("LINE_TRACK", {"line": line_info()}),
+        ("BALL_APPROACH", {"line": line_info(), "ball": ball_info()}),
+        ("GOAL_APPROACH", {"goal": goal_info()}),
+    ],
+)
+def test_detected_unconfirmed_hurdle_holds_each_phase(phase, target):
+    planner = MotionDecisionPlanner()
+
+    decision = planner.plan(
+        phase,
+        observations(
+            **target,
+            hurdle=hurdle_info(confirmation_confirmed=False),
+        ),
+        0.1,
+    )
+
+    assert decision.source == "hurdle"
+    assert decision.action == "WAIT"
+    assert decision.valid is False
+    assert decision.reason == "hurdle_confirmation_pending"
+    assert decision.requires_ack is False
+    assert decision.sdk_motion_requested is False
+
+
+def test_confirmed_hurdle_with_invalid_depth_holds_motion():
+    planner = MotionDecisionPlanner()
+
+    decision = planner.plan(
+        "AUTO",
+        observations(
+            ball=ball_info(),
+            hurdle=hurdle_info(depth_valid=False),
+        ),
+        0.1,
+    )
+
+    assert decision.source == "hurdle"
+    assert decision.action == "WAIT"
+    assert decision.valid is False
+    assert decision.reason == "hurdle_depth_invalid_wait"
+
+
+@pytest.mark.parametrize("hurdle", [None, {"detected": False}])
+def test_absent_or_not_detected_hurdle_does_not_hold_ball(hurdle):
+    planner = MotionDecisionPlanner()
+
+    decision = planner.plan(
+        "AUTO",
+        observations(
+            ball=ball_info(depth_m=0.8, distance_m=0.8),
+            hurdle=hurdle,
+        ),
+        0.1,
+    )
+
+    assert decision.source == "ball"
+    assert decision.action != "WAIT"
 
 
 def test_ball_between_90cm_and_3m_keeps_line_with_tracking_memory():
@@ -279,7 +412,7 @@ def test_lost_tracked_ball_runs_timed_head_scan_with_body_stopped():
         assert decision.source_command["command_duration_sec"] > 0.0
 
 
-def test_blocking_hurdle_interrupts_ball_head_scan():
+def test_confirmed_hurdle_interrupts_active_ball_head_scan():
     planner = recovery_planner()
     planner.plan(
         "AUTO",

@@ -662,6 +662,20 @@ ros2 launch mission_control mission_motion_mock.launch.py \
 않는다. `WAIT`, 알 수 없는 action 및 명시적으로 `valid=false`인 명령도
 Executor 요청을 만들지 않는다.
 
+`test_mission_phase_flow.py`에는 ROS graph를 시작하지 않는 전체 코스 mock
+시나리오도 있다. 실제 planner와 node callback을 직접 연결해 line의
+`STRAIGHT`/미지원 `FINE_*`/큰 편차 `LEFT`·`RIGHT`, 공 접근과
+`PICKUP_NOW`, 골대 접근·정렬과 `SHOT`, 허들 접근과 `GO`, 마지막
+`AUTO` line 주행까지 연속 검증한다. 같은 시나리오에서 command ID가 다른
+status, wrong action, duplicate terminal, 특수 motion lock, 일반 motion
+gate 및 자동 `CROSS_FINISH`/`FINISHED` 비활성화도 확인한다.
+
+별도 parameterized mock은 `PICKUP_NOW`, `SHOT`, `GO`의 `FAILED`와
+`TIMEOUT` 뒤 `AUTO` line 판단 재개를 검증하며, line 상실 mock은 마지막
+geometry 기반 회전, 재검출, 복구 횟수 제한을 확인한다. 이 테스트는 정책의
+소프트웨어 연속성만 검증하며 카메라·지연·마찰·관절 응답을 포함한 실제 장치
+검증은 아직 남아 있다.
+
 ### 일반 모션 명령 잠금
 
 `STRAIGHT`, `LEFT`, `RIGHT`는 다음 상태 흐름을 따른다.

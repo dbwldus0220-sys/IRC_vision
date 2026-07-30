@@ -135,11 +135,21 @@ planner는 전달받은 phase에 따라 source와 action을 선택할 뿐,
 
 주의할 점:
 
-- `MotionDecisionPlanner._select_source()`는 phase보다 confirmed hurdle을 먼저
-  검사한다. 따라서 `BALL_*`, `GOAL_*`, `LINE_TRACK`에서도 hurdle이 확인되면
-  hurdle planner가 action을 선택할 수 있다.
-- `*_SEARCH`만 대상 미검출 시 line fallback과 기억 기반 recovery를 사용한다.
-  `*_APPROACH`는 요청 source를 그대로 선택한다.
+- active special motion lock이 가장 먼저 적용되고, 그다음에는 모든 일반
+  mission phase에서 fresh confirmed hurdle을 안전 최우선으로 선택한다.
+  confirmed hurdle은 `detected`, `confirmation_confirmed`, `depth_valid`가
+  모두 true인 fresh observation이다.
+- fresh hurdle이 detected 상태지만 confirmation 전이거나 depth가
+  invalid이면 `WAIT(valid=false)`로 공·골대·라인 motion을 잠시 보류한다.
+  reason은 각각 `hurdle_confirmation_pending`,
+  `hurdle_depth_invalid_wait`이다. hurdle observation이 없거나 stale 또는
+  `detected=false`이면 이 안전 대기를 적용하지 않는다.
+- `GOAL_APPROACH`에서는 confirmed hurdle이 없을 때 goal source를 유지하고
+  새 공을 다시 추적하지 않는다. 이 phase에서 실행한 `GO`는 성공·실패·
+  timeout 모두 `GOAL_APPROACH`로 복귀한다.
+- `*_SEARCH`는 대상 미검출 시 line fallback과 기억 기반 recovery를
+  사용한다. confirmed hurdle이 없을 때만 각 phase의 기존 mission 대상과
+  fallback을 판단한다.
 - 외부 `/mission/phase` 입력에는 유효성 검사와 현재 특수 모션 lock 보호가 없다.
 
 ## 3. 실제 action 목록
@@ -564,7 +574,7 @@ planner는 phase를 읽어 action만 반환하고 phase 상태를 변경하지 �
 | --- | --- | --- | --- | --- | --- | --- |
 | `AUTO` 또는 ball 계열 | ball detected, confidence/depth/alignment 유효, `pickup_now` confirmation | `PICKUP_NOW` | `RUNNING` 후 `SUCCEEDED`/`FAILED`/`TIMEOUT` | `GOAL_APPROACH` | `AUTO` | 성공 시 pickup count 증가; 실패/timeout은 section 처리 후 계속 주행 |
 | `GOAL_SEARCH`/`GOAL_APPROACH` 또는 AUTO goal 선택 | goal detected, control range, centered, scoring depth, `score_now` confirmation | `SHOT` | 위와 동일 | `AUTO` | `AUTO` | 성공 시 shot count 증가; 결과와 무관하게 section 처리 후 계속 주행 |
-| `HURDLE_APPROACH` 또는 confirmed hurdle 우선 | hurdle detected/confirmed, valid depth, parallel, gap 조건, `go_now` confirmation | `GO` | 위와 동일 | `AUTO` | `AUTO` | phase와 무관하게 confirmed hurdle이 우선될 수 있음 |
+| `HURDLE_APPROACH` 또는 confirmed hurdle 우선 | hurdle detected/confirmed, valid depth, parallel, gap 조건, `go_now` confirmation | `GO` | 위와 동일 | 시작 phase가 `GOAL_APPROACH`면 `GOAL_APPROACH`, 그 외 `AUTO` | 시작 phase가 `GOAL_APPROACH`면 `GOAL_APPROACH`, 그 외 `AUTO` | goal mission 중 안전 회피 후 원래 goal mission을 재개 |
 | `WALK_TO_FINISH` | finish 관측과 무관 | line planner action | 일반 action의 matching status | phase 변화 없음 | phase 변화 없음 | 수동 호환 phase이며 내부적으로 `LINE_TRACK` 사용; `CROSS_FINISH` 자동 발행 없음 |
 | `FINISHED` | 조건 없음 | `STOP` | 없음 | `FINISHED` | 해당 없음 | `mission_complete_stop` |
 | 임의 phase + 특수 motion 실행 중 | Vision과 무관 | `WAIT` | active 특수 terminal | status에 따른 위 전환 | status에 따른 위 전환 | 동적 `*_LOCK` |
@@ -668,9 +678,11 @@ phase 오판은 잘못된 pickup/shot/hurdle motion과 낙상으로 이어질 �
 - `PICKUP_NOW` 성공 뒤 section을 언제 완료로 셀 것인지 현재 정책
   (`SHOT` 결과 시 처리)이 경기 규칙과 맞는가?
 - pickup/shot 실패를 section 처리로 셀 조건과 재시도 횟수는 무엇인가?
-- `GO` 성공 뒤 정확한 다음 phase가 항상 `AUTO`인지 확인이 필요하다.
+- `GOAL_APPROACH`에서 시작한 `GO`는 terminal 결과와 무관하게 goal mission을
+  복원하고, 그 외 phase의 `GO`는 `AUTO`로 복귀한다.
 - `LINE_TRACK`의 완료 조건과 다음 phase는 무엇인가?
-- confirmed hurdle의 전역 최우선 처리가 모든 phase에서 맞는가?
+- confirmed hurdle은 active special motion lock 다음의 전역 안전 최우선
+  대상으로 확정되었다.
 - 특수 motion `CANCELLED`, `REJECTED` 시 phase와 재시도 정책은 무엇인가?
 - 외부 운영자 phase override를 허용한다면 Manager 상태와 진행도를 어떻게
   동기화할 것인가?

@@ -133,6 +133,18 @@ def test_go_always_returns_to_auto_without_progress(status):
     assert manager.current_phase == "AUTO"
     assert manager.pickups_completed == before["pickups_completed"]
     assert manager.shots_completed == before["shots_completed"]
+
+
+@pytest.mark.parametrize("status", ["SUCCEEDED", "FAILED", "TIMEOUT"])
+def test_goal_approach_go_terminal_restores_goal_mission(status):
+    manager = MissionPhaseManager(initial_phase="GOAL_APPROACH")
+    before = manager.snapshot()
+
+    complete(manager, "GO", 1, status)
+
+    assert manager.current_phase == "GOAL_APPROACH"
+    assert manager.pickups_completed == before["pickups_completed"]
+    assert manager.shots_completed == before["shots_completed"]
     assert manager.ball_sections_processed == before[
         "ball_sections_processed"
     ]

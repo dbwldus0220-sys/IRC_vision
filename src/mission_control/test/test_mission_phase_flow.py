@@ -7,6 +7,7 @@ from std_msgs.msg import String
 
 from mission_control.legacy_motion_executor_adapter import (
     build_executor_request,
+    map_action_to_motion_id,
 )
 from mission_control.legacy_motion_status_adapter import (
     convert_executor_status,
@@ -151,11 +152,11 @@ class MissionFlowHarness:
         MotionDecisionNode._phase_callback(self, message)
 
 
-def line_info(heading=0.0):
+def line_info(heading=0.0, offset=0.0):
     return {
         "detected": True,
         "filtered_heading_error_deg": heading,
-        "filtered_lateral_offset_norm": 0.0,
+        "filtered_lateral_offset_norm": offset,
         "heading_quality": 0.95,
         "geometry_quality": 0.95,
         "detection_quality": 0.95,
@@ -214,6 +215,53 @@ def confirmed_finish():
     }
 
 
+def approaching_ball():
+    info = pickup_ready_ball()
+    info.update(
+        {
+            "pickup_ready": False,
+            "pickup_now": False,
+        }
+    )
+    return info
+
+
+def approaching_goal():
+    info = score_ready_goal()
+    info.update(
+        {
+            "depth_m": 0.49,
+            "distance_m": 0.49,
+            "score_now": False,
+        }
+    )
+    return info
+
+
+def aligning_goal():
+    info = score_ready_goal()
+    info.update(
+        {
+            "bearing_deg": 8.0,
+            "offset_x_norm": 0.30,
+            "score_now": False,
+        }
+    )
+    return info
+
+
+def approaching_hurdle():
+    info = go_ready_hurdle()
+    info.update(
+        {
+            "ground_gap_m": 0.35,
+            "camera_bottom_gap_m": 0.20,
+            "go_now": False,
+        }
+    )
+    return info
+
+
 def publish_special(harness, source, observation, action):
     published = harness.publish_vision(**{source: observation})
     matching = [
@@ -229,6 +277,555 @@ def publish_special(harness, source, observation, action):
 def complete_active(harness, action, command_id, terminal="SUCCEEDED"):
     harness.send_status(action, command_id, "RUNNING")
     harness.send_status(action, command_id, terminal)
+
+
+def release_general(harness, payload):
+    harness.send_status(
+        payload["action"],
+        payload["command_id"],
+        "RUNNING",
+    )
+    harness.send_status(
+        payload["action"],
+        payload["command_id"],
+        "SUCCEEDED",
+    )
+
+
+def test_full_course_mock_flow_without_ros_graph():
+    harness = MissionFlowHarness(required_ball_sections=1)
+
+    straight = harness.publish_vision(line=line_info())
+    assert [item["action"] for item in straight] == ["STRAIGHT"]
+    repeated = harness.publish_vision(line=line_info())
+    assert repeated == []
+    release_general(harness, straight[0])
+
+    fine = harness.publish_vision(line=line_info(offset=-0.18))
+    assert [item["action"] for item in fine] == ["FINE_LEFT"]
+    assert fine[0]["valid"] is False
+    assert fine[0]["reason"] == "fine_turn_motion_unmapped"
+    assert map_action_to_motion_id(fine[0]["action"]) is None
+    assert harness.general_motion_gate.locked is False
+
+    large = harness.publish_vision(line=line_info(offset=0.35))
+    assert [item["action"] for item in large] == ["RIGHT"]
+    assert large[0]["valid"] is True
+    assert map_action_to_motion_id(large[0]["action"]) == "turn_right"
+    release_general(harness, large[0])
+
+    approach_ball = harness.publish_vision(
+        line=line_info(),
+        ball=approaching_ball(),
+    )
+    assert approach_ball[-1]["source"] == "ball"
+    assert approach_ball[-1]["action"] in {
+        "APPROACH",
+        "SLOW_APPROACH",
+        "FINE_FORWARD_STEP",
+    }
+
+    pickup = publish_special(
+        harness,
+        "ball",
+        pickup_ready_ball(),
+        "PICKUP_NOW",
+    )
+    pickup_id = pickup["command_id"]
+
+    harness.send_status("PICKUP_NOW", pickup_id + 10, "RUNNING")
+    harness.send_status("SHOT", pickup_id, "RUNNING")
+    assert harness.active_special_command_id == pickup_id
+    assert harness.pickups_completed == 0
+
+    harness.send_status("PICKUP_NOW", pickup_id, "RUNNING")
+    assert harness.special_motion_running is True
+    locked = harness.publish_vision(
+        line=line_info(offset=0.35),
+        ball=pickup_ready_ball(),
+        hurdle=go_ready_hurdle(),
+    )
+    assert locked[-1]["action"] == "WAIT"
+    assert locked[-1]["requires_ack"] is False
+    assert harness.active_special_command_id == pickup_id
+
+    harness.send_status("PICKUP_NOW", pickup_id, "SUCCEEDED")
+    harness.send_status("PICKUP_NOW", pickup_id, "SUCCEEDED")
+    assert harness.pickups_completed == 1
+    assert harness.mission_phase == "GOAL_APPROACH"
+    assert harness.active_special_command_id is None
+
+    goal_approach = harness.publish_vision(
+        ball=None,
+        hurdle=None,
+        goal=approaching_goal(),
+    )
+    assert goal_approach[-1]["action"] == "APPROACH_GOAL"
+    goal_align = harness.publish_vision(goal=aligning_goal())
+    assert goal_align[-1]["action"] == "ALIGN_RIGHT"
+
+    shot = publish_special(
+        harness,
+        "goal",
+        score_ready_goal(),
+        "SHOT",
+    )
+    shot_id = shot["command_id"]
+    harness.send_status("SHOT", shot_id, "RUNNING")
+    shot_locked = harness.publish_vision(
+        line=line_info(),
+        goal=score_ready_goal(),
+        hurdle=go_ready_hurdle(),
+    )
+    assert shot_locked[-1]["action"] == "WAIT"
+    harness.send_status("SHOT", shot_id, "SUCCEEDED")
+
+    assert harness.shots_completed == 1
+    assert harness.ball_sections_processed == 1
+    assert harness.finish_enabled is True
+    assert harness.mission_phase == "AUTO"
+    assert harness.mission_complete is False
+
+    hurdle_approach = harness.publish_vision(
+        ball=None,
+        goal=None,
+        hurdle=approaching_hurdle(),
+    )
+    assert hurdle_approach[-1]["source"] == "hurdle"
+    assert hurdle_approach[-1]["action"] == "APPROACH_HURDLE"
+
+    go = publish_special(
+        harness,
+        "hurdle",
+        go_ready_hurdle(),
+        "GO",
+    )
+    go_id = go["command_id"]
+    assert go["action"] == "GO"
+    assert map_action_to_motion_id("GO") == "forward"
+    assert go["action"] != "STRAIGHT"
+
+    harness.send_status("GO", go_id, "RUNNING")
+    go_locked = harness.publish_vision(
+        line=line_info(),
+        hurdle=go_ready_hurdle(),
+    )
+    assert go_locked[-1]["action"] == "WAIT"
+    harness.send_status("GO", go_id, "SUCCEEDED")
+    assert harness.mission_phase == "AUTO"
+
+    harness.planner._clear_ball_tracking()
+    harness.planner._clear_goal_tracking()
+    final_line = harness.publish_vision(
+        line=line_info(),
+        ball=None,
+        goal=None,
+        hurdle=None,
+        finish=confirmed_finish(),
+    )
+    assert final_line[-1]["action"] == "STRAIGHT"
+    assert final_line[-1]["phase"] == "AUTO"
+    assert harness.mission_phase == "AUTO"
+    assert harness.mission_complete is False
+    assert all(
+        item["action"] != "CROSS_FINISH"
+        for item in harness.publisher.messages
+    )
+    assert all(
+        item["phase"] != "FINISHED"
+        for item in harness.publisher.messages
+    )
+
+
+@pytest.mark.parametrize(
+    ("action", "phase", "source", "observation"),
+    [
+        ("PICKUP_NOW", "BALL_APPROACH", "ball", pickup_ready_ball()),
+        ("SHOT", "GOAL_APPROACH", "goal", score_ready_goal()),
+        ("GO", "HURDLE_APPROACH", "hurdle", go_ready_hurdle()),
+    ],
+)
+@pytest.mark.parametrize("terminal", ["FAILED", "TIMEOUT"])
+def test_special_failure_or_timeout_resumes_line_decision(
+    action,
+    phase,
+    source,
+    observation,
+    terminal,
+):
+    harness = MissionFlowHarness(phase=phase)
+    command = publish_special(
+        harness,
+        source,
+        observation,
+        action,
+    )
+    complete_active(
+        harness,
+        action,
+        command["command_id"],
+        terminal,
+    )
+
+    assert harness.mission_phase == "AUTO"
+    assert harness.active_special_command_id is None
+    harness.planner._clear_ball_tracking()
+    harness.planner._clear_goal_tracking()
+    resumed = harness.publish_vision(
+        line=line_info(),
+        ball=None,
+        goal=None,
+        hurdle=None,
+    )
+    assert resumed[-1]["action"] == "STRAIGHT"
+    assert resumed[-1]["phase"] == "AUTO"
+
+
+def test_full_flow_line_loss_recovery_and_reacquisition():
+    planner = MotionDecisionPlanner()
+    observations = {
+        source: None for source in MotionDecisionNode.SOURCES
+    }
+
+    observations["line"] = line_info(offset=-0.35)
+    large = planner.plan("LINE_TRACK", observations, 0.1)
+    assert large.action == "LEFT"
+
+    observations["line"] = None
+    first_missing = planner.plan("LINE_TRACK", observations, 0.1)
+    recovered = planner.plan("LINE_TRACK", observations, 0.1)
+    assert first_missing.action == "STOP"
+    assert recovered.action == "LEFT"
+    assert planner.line_planner.recovering_line is True
+
+    observations["line"] = line_info()
+    reacquired = planner.plan("LINE_TRACK", observations, 0.1)
+    assert reacquired.action == "STRAIGHT"
+    assert planner.line_planner.recovering_line is False
+    assert planner.line_planner.line_recovery_attempts == 0
+
+    observations["line"] = line_info(offset=0.35)
+    planner.plan("LINE_TRACK", observations, 0.1)
+    observations["line"] = None
+    planner.plan("LINE_TRACK", observations, 0.1)
+    for _ in range(planner.line_planner.config.line_max_recovery_attempts):
+        limited = planner.plan("LINE_TRACK", observations, 0.1)
+        assert limited.action == "RIGHT"
+    exhausted = planner.plan("LINE_TRACK", observations, 0.1)
+    assert exhausted.action == "STOP"
+    assert exhausted.reason == "line_recovery_attempts_exhausted"
+
+
+@pytest.mark.parametrize(
+    "phase",
+    ["AUTO", "BALL_APPROACH", "LINE_TRACK"],
+)
+def test_hurdle_selection_does_not_depend_on_course_phase(phase):
+    harness = MissionFlowHarness(phase=phase)
+
+    published = harness.publish_vision(
+        line=line_info(),
+        hurdle=go_ready_hurdle(),
+    )
+    commands = [item for item in published if item["action"] == "GO"]
+    assert len(commands) == 1
+    command = commands[0]
+
+    assert command["phase"] == phase
+    assert command["source"] == "hurdle"
+
+
+def test_go_ready_confirmed_hurdle_beats_pickup_ready_ball():
+    harness = MissionFlowHarness()
+
+    published = harness.publish_vision(
+        line=line_info(),
+        ball=pickup_ready_ball(),
+        hurdle=go_ready_hurdle(),
+    )
+
+    assert published[-1]["source"] == "hurdle"
+    assert published[-1]["action"] == "GO"
+    assert harness.active_special_action == "GO"
+
+
+def test_confirmed_approaching_hurdle_beats_approaching_ball():
+    harness = MissionFlowHarness()
+
+    published = harness.publish_vision(
+        line=line_info(),
+        ball=approaching_ball(),
+        hurdle=approaching_hurdle(),
+    )
+
+    assert published[-1]["source"] == "hurdle"
+    assert published[-1]["action"] == "APPROACH_HURDLE"
+
+
+def test_goal_approach_resumes_after_hurdle_go_and_ignores_new_ball():
+    harness = MissionFlowHarness(phase="GOAL_APPROACH")
+    command = publish_special(
+        harness,
+        "hurdle",
+        go_ready_hurdle(),
+        "GO",
+    )
+
+    harness.send_status("GO", command["command_id"], "RUNNING")
+    locked = harness.publish_vision(
+        line=line_info(),
+        ball=pickup_ready_ball(),
+        goal=score_ready_goal(),
+        hurdle=go_ready_hurdle(),
+    )
+    assert locked[-1]["action"] == "WAIT"
+
+    harness.send_status("GO", command["command_id"], "SUCCEEDED")
+    assert harness.mission_phase == "GOAL_APPROACH"
+
+    resumed = harness.publish_vision(
+        ball=pickup_ready_ball(),
+        goal=score_ready_goal(),
+        hurdle=None,
+    )
+    assert resumed[-1]["source"] == "goal"
+    assert resumed[-1]["action"] == "SHOT"
+
+
+def test_hurdle_can_appear_after_shot_without_fixed_order():
+    harness = MissionFlowHarness(
+        phase="GOAL_APPROACH",
+        required_ball_sections=1,
+    )
+    shot = publish_special(
+        harness,
+        "goal",
+        score_ready_goal(),
+        "SHOT",
+    )
+    complete_active(harness, "SHOT", shot["command_id"])
+    assert harness.mission_phase == "AUTO"
+
+    hurdle = publish_special(
+        harness,
+        "hurdle",
+        go_ready_hurdle(),
+        "GO",
+    )
+
+    assert hurdle["source"] == "hurdle"
+    assert hurdle["command_id"] > shot["command_id"]
+
+
+def test_missing_or_stale_hurdle_keeps_current_line_driving():
+    harness = MissionFlowHarness()
+    no_hurdle = harness.publish_vision(
+        line=line_info(),
+        hurdle=None,
+    )
+    assert no_hurdle[-1]["action"] == "STRAIGHT"
+    release_general(harness, no_hurdle[-1])
+
+    seen = harness.publish_vision(
+        line=line_info(),
+        hurdle=approaching_hurdle(),
+    )
+    assert seen[-1]["source"] == "hurdle"
+    assert seen[-1]["action"] == "APPROACH_HURDLE"
+
+    missing = harness.publish_vision(hurdle=None)
+    assert missing[-1]["source"] == "line"
+    assert missing[-1]["action"] == "STRAIGHT"
+
+    harness.latest_info = {
+        source: None for source in MotionDecisionNode.SOURCES
+    }
+    harness.latest_time = {
+        source: None for source in MotionDecisionNode.SOURCES
+    }
+    harness.timeouts = {
+        source: 0.5 for source in MotionDecisionNode.SOURCES
+    }
+    harness.latest_info["line"] = line_info()
+    harness.latest_time["line"] = 1.5
+    harness.latest_info["hurdle"] = go_ready_hurdle()
+    harness.latest_time["hurdle"] = 1.0
+    harness.terminal_action_armed["hurdle"] = False
+
+    observations, ages = MotionDecisionNode._fresh_observations(
+        harness,
+        now=1.6,
+    )
+    MotionDecisionNode._rearm_absent_terminal_targets(
+        harness,
+        observations,
+    )
+    decision = harness.planner.plan("AUTO", observations, 0.1)
+
+    assert observations["hurdle"] is None
+    assert ages["hurdle"] == pytest.approx(0.6)
+    assert decision.source == "line"
+    assert decision.action == "STRAIGHT"
+    assert harness.terminal_action_armed["hurdle"] is True
+
+
+@pytest.mark.parametrize(
+    ("overrides", "reason"),
+    [
+        (
+            {"confirmation_confirmed": False},
+            "hurdle_confirmation_pending",
+        ),
+        (
+            {"depth_valid": False},
+            "hurdle_depth_invalid_wait",
+        ),
+    ],
+)
+def test_unconfirmed_or_invalid_depth_hurdle_holds_ball_motion(
+    overrides,
+    reason,
+):
+    harness = MissionFlowHarness()
+    hurdle = go_ready_hurdle()
+    hurdle.update(overrides)
+
+    published = harness.publish_vision(
+        line=line_info(),
+        ball=pickup_ready_ball(),
+        hurdle=hurdle,
+    )
+    decision = published[-1]
+
+    assert decision["source"] == "hurdle"
+    assert decision["action"] == "WAIT"
+    assert decision["valid"] is False
+    assert decision["reason"] == reason
+    assert harness.active_special_action is None
+
+
+def test_unconfirmed_hurdle_disappearance_resumes_ball_mission():
+    harness = MissionFlowHarness()
+    hurdle = go_ready_hurdle()
+    hurdle["confirmation_confirmed"] = False
+
+    held = harness.publish_vision(
+        ball=pickup_ready_ball(),
+        hurdle=hurdle,
+    )
+    assert held[-1]["action"] == "WAIT"
+
+    resumed = harness.publish_vision(hurdle=None)
+    assert resumed[-1]["source"] == "ball"
+    assert resumed[-1]["action"] == "PICKUP_NOW"
+
+
+def test_unconfirmed_hurdle_can_become_confirmed_and_take_priority():
+    harness = MissionFlowHarness()
+    hurdle = approaching_hurdle()
+    hurdle["confirmation_confirmed"] = False
+
+    held = harness.publish_vision(
+        line=line_info(),
+        ball=approaching_ball(),
+        hurdle=hurdle,
+    )
+    assert held[-1]["action"] == "WAIT"
+
+    hurdle["confirmation_confirmed"] = True
+    selected = harness.publish_vision(hurdle=hurdle)
+    assert selected[-1]["source"] == "hurdle"
+    assert selected[-1]["action"] == "APPROACH_HURDLE"
+
+
+def test_absent_hurdle_keeps_ball_priority_over_line():
+    harness = MissionFlowHarness()
+
+    published = harness.publish_vision(
+        line=line_info(),
+        ball=approaching_ball(),
+        hurdle=None,
+    )
+
+    assert published[-1]["source"] == "ball"
+    assert published[-1]["action"] in {
+        "APPROACH",
+        "SLOW_APPROACH",
+        "FINE_FORWARD_STEP",
+    }
+
+
+def test_go_running_and_terminal_suppress_same_hurdle_observation():
+    harness = MissionFlowHarness()
+    command = publish_special(
+        harness,
+        "hurdle",
+        go_ready_hurdle(),
+        "GO",
+    )
+    command_id = command["command_id"]
+
+    harness.send_status("GO", command_id, "RUNNING")
+    running = harness.publish_vision(hurdle=go_ready_hurdle())
+    assert running[-1]["action"] == "WAIT"
+    assert running[-1]["reason"] == (
+        "mission_locked_waiting_for_motion_status"
+    )
+
+    harness.send_status("GO", command_id, "SUCCEEDED")
+    retained = harness.publish_vision(hurdle=go_ready_hurdle())
+    assert retained[-1]["action"] == "WAIT"
+    assert retained[-1]["reason"] == (
+        "duplicate_terminal_action_suppressed"
+    )
+    assert harness.active_special_command_id is None
+    assert harness.terminal_action_armed["hurdle"] is False
+    assert not any(
+        item["action"] == "GO"
+        and item["command_id"] > command_id
+        for item in harness.publisher.messages
+    )
+
+
+def test_ball_mission_resumes_after_completed_hurdle_disappears():
+    harness = MissionFlowHarness()
+    hurdle = go_ready_hurdle()
+    first = publish_special(harness, "hurdle", hurdle, "GO")
+    complete_active(harness, "GO", first["command_id"])
+
+    retained = harness.publish_vision(hurdle=hurdle)
+    assert retained[-1]["action"] == "WAIT"
+
+    resumed = harness.publish_vision(
+        ball=pickup_ready_ball(),
+        hurdle=None,
+    )
+    assert resumed[-1]["source"] == "ball"
+    assert resumed[-1]["action"] == "PICKUP_NOW"
+    assert harness.active_special_action == "PICKUP_NOW"
+
+
+def test_hurdle_can_reappear_at_a_different_position_after_absence():
+    harness = MissionFlowHarness()
+    first_hurdle = go_ready_hurdle()
+    first_hurdle.update({"offset_x_norm": -0.70, "depth_m": 0.60})
+    first = publish_special(harness, "hurdle", first_hurdle, "GO")
+    complete_active(harness, "GO", first["command_id"])
+
+    retained = harness.publish_vision(hurdle=first_hurdle)
+    assert retained[-1]["action"] == "WAIT"
+
+    absent = harness.publish_vision(hurdle=None)
+    assert absent[-1]["action"] == "WAIT"
+    assert harness.terminal_action_armed["hurdle"] is True
+
+    second_hurdle = go_ready_hurdle()
+    second_hurdle.update({"offset_x_norm": 0.75, "depth_m": 1.20})
+    second = publish_special(harness, "hurdle", second_hurdle, "GO")
+
+    assert second["command_id"] > first["command_id"]
+    assert harness.observations["hurdle"]["offset_x_norm"] == 0.75
+    assert second["source_command"]["depth_m"] == 1.20
 
 
 def test_pickup_success_publishes_once_and_advances_to_goal():

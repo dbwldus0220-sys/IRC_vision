@@ -536,6 +536,11 @@ class MotionDecisionNode(Node):
         self.active_special_event_id = None
         self.active_special_dynamics_command = None
 
+        if completed_action == "PICKUP_NOW" and status == "SUCCEEDED":
+            # The tracked ball has been collected. Do not resurrect its stale
+            # recovery state after GOAL_APPROACH and the following SHOT.
+            self.planner.clear_collected_ball_tracking()
+
         self.get_logger().info(
             "Special motion lock released: "
             f"status={status}, "
