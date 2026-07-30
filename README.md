@@ -114,6 +114,22 @@ ros2 launch mission_control full_system.launch.py
 ros2 launch mission_control full_system.launch.py enable_camera:=false
 ```
 
+`full_system.launch.py`의 motion 실행 topology는 `execution_mode`로 선택합니다.
+기본값은 `executor`이며 command adapter, Motion Executor, status adapter를
+함께 실행합니다. 이때 `player_backend` 기본값은 실제 장치를 사용하지 않는
+`mock`입니다.
+
+```bash
+ros2 launch mission_control full_system.launch.py \
+  execution_mode:=executor \
+  player_backend:=mock
+```
+
+`player_backend:=sdk`도 선택할 수 있지만 현재는 실제 SDK backend가 아니라
+`hardwareReady=false`인 안전 placeholder를 사용합니다. 기존 direct stub
+검증이 필요할 때만 `execution_mode:=stub`을 지정합니다. `stub`과 Executor
+체인은 상호 배타적으로 실행됩니다.
+
 ### 경기용 통합 실행
 
 기존 line, ball, goal, hurdle 파일은 유지하면서 네 analyzer를 한 프로세스에서 실행하고, 네 navigation controller 대신 하나의 motion decision node가 기존 planner를 직접 호출합니다.
