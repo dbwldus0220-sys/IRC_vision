@@ -120,6 +120,9 @@ def test_action_aliases_correlate(command_action, status_action):
     assert gate.on_motion_status(status_action, "RUNNING").matched
 
 
-@pytest.mark.parametrize("action", ["WAIT", "STOP", "PICKUP_NOW"])
+@pytest.mark.parametrize(
+    "action",
+    ["WAIT", "STOP", "PICKUP_NOW", "FINE_LEFT", "FINE_RIGHT"],
+)
 def test_non_general_action_is_not_managed_as_execution(action):
     assert not gate_with_vision().can_publish(action)

@@ -61,15 +61,17 @@ def test_offset_and_preview_are_used_for_steering():
         0.1,
     )
 
-    assert command.motion == "RIGHT"
+    assert command.motion == "FINE_RIGHT"
+    assert command.valid is False
+    assert command.reason == "fine_turn_motion_unmapped"
     assert command.steering_error_deg > 7.0
 
 
 @pytest.mark.parametrize(
     ("offset", "expected", "lateral_sign"),
     [
-        (0.35, "RECOVER_RIGHT", 1),
-        (-0.35, "RECOVER_LEFT", -1),
+        (0.35, "RIGHT", 1),
+        (-0.35, "LEFT", -1),
     ],
 )
 def test_large_offset_creates_separate_recovery_command(
@@ -85,10 +87,11 @@ def test_large_offset_creates_separate_recovery_command(
     )
 
     assert command.motion == expected
-    assert command.reason == "line_center_recovery"
+    assert command.reason == "line_large_deviation_turn"
     assert command.linear_speed_mps == 0.0
-    assert command.lateral_speed_mps * lateral_sign > 0.0
-    assert command.lateral_travel_distance_m * lateral_sign > 0.0
+    assert command.lateral_speed_mps == 0.0
+    assert command.angular_speed_rad_s * lateral_sign > 0.0
+    assert command.target_heading_change_deg * lateral_sign > 0.0
 
 
 def test_recovery_uses_exit_threshold_before_returning_to_tracking():
@@ -107,8 +110,8 @@ def test_recovery_uses_exit_threshold_before_returning_to_tracking():
         0.1,
     )
 
-    assert first.motion == "RECOVER_RIGHT"
-    assert held.motion == "RECOVER_RIGHT"
+    assert first.motion == "RIGHT"
+    assert held.motion == "RIGHT"
     assert released.motion == "STRAIGHT"
 
 

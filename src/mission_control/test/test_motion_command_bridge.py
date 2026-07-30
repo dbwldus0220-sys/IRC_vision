@@ -88,6 +88,27 @@ def motion_end_message(command):
     return message
 
 
+def test_general_left_and_right_reuse_existing_turn_paths():
+    bridge = FakeBridge()
+
+    assert bridge.map_action_to_dynamics(
+        {"action": "LEFT", "source_command": {"target_heading_change_deg": 8}}
+    ) == (2, 8)
+    assert bridge.map_action_to_dynamics(
+        {
+            "action": "RIGHT",
+            "source_command": {"target_heading_change_deg": -9},
+        }
+    ) == (3, 9)
+
+
+def test_fine_actions_have_no_dynamics_mapping():
+    bridge = FakeBridge()
+
+    for action in ("FINE_LEFT", "FINE_RIGHT"):
+        assert bridge.map_action_to_dynamics({"action": action}) is None
+
+
 def test_running_ignored_then_succeeded():
     """Keep an active motion until its matching completion arrives."""
     bridge = FakeBridge()

@@ -26,8 +26,6 @@ ACTION_TO_MOTION_ID = {
     "APPROACH_HURDLE": "forward_short",
     "ALIGN_LEFT": "adjust_left",
     "ALIGN_RIGHT": "adjust_right",
-    "RECOVER_LEFT": "recover",
-    "RECOVER_RIGHT": "recover",
     "RETREAT_GOAL": "backward",
     "PICKUP_NOW": "pick_ball",
     "SHOT": "shoot",
@@ -38,6 +36,7 @@ ACTION_TO_MOTION_ID = {
     "RIGHT": "turn_right",
     "CROSS_FINISH": "hurdle",
 }
+UNSUPPORTED_ACTIONS = frozenset({"FINE_LEFT", "FINE_RIGHT"})
 
 DEFAULT_TIMEOUT_MS = 5000
 MOTION_TIMEOUT_MS = {
@@ -157,6 +156,13 @@ class LegacyMotionExecutorAdapter(Node):
         if command.valid is False:
             self.get_logger().warning(
                 f"invalid legacy command ignored: {command.action}"
+            )
+            return
+
+        if command.action in UNSUPPORTED_ACTIONS:
+            self.get_logger().warning(
+                "unsupported legacy action (motion mapping not configured): "
+                f"{command.action}"
             )
             return
 

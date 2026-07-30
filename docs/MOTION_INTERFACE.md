@@ -362,6 +362,38 @@ RobotMotionPlayer 연동 시 제거되거나 실제 SDK의 오류 주입 방식�
 mock Executor 통합이 검증되는 동안에만 병렬로 사용하며 실제 SDK 또는
 Dynamixel에 접근하지 않는다.
 
+### line action 정책
+
+line planner의 action 의미는 다음과 같다.
+
+- `STRAIGHT`: 직진
+- `FINE_LEFT`, `FINE_RIGHT`: 미세 좌·우회전
+- `LEFT`, `RIGHT`: 일반 좌·우회전
+- `STOP`: 안전 정지
+
+라인을 완전히 중앙에 붙이는 포물선 복귀나 재검출 뒤 반대 방향 추가 정렬
+action은 현재 사용하지 않는다.
+
+- 중앙 허용 범위(offset `±0.12`, heading `±4°`)에서는 진행 방향을
+  유지하며 일반 주행으로 복귀한다.
+- 중간 편차는 `FINE_LEFT`/`FINE_RIGHT`, 큰 offset
+  (`|offset| > 0.28`)과 line 상실 복구는 `LEFT`/`RIGHT`를 사용한다.
+- `FINE_LEFT`/`FINE_RIGHT`는 executor/SDK mapping이 아직 없다.
+  planner는 action 이름과 판단 결과를 보존하되 `valid=False`,
+  `reason=fine_turn_motion_unmapped`로 표시한다. gate와 adapter는 이를
+  실행하지 않으며 기존 `turn_left`/`turn_right` mapping을 재사용하지 않는다.
+- line quality 최솟값은 `0.35`, 완전 상실 기준은 2프레임이다.
+- 완전 상실 시 마지막 유효 offset과 heading을 기억해 복구 방향을 정하고,
+  최대 3회 후에는 반복 복구 대신 `STOP`한다.
+- 허용 범위 안에서 재검출되면 복구 상태를 즉시 해제하고 추가 반대 정렬
+  없이 `STRAIGHT`/일반 line planning을 재개한다.
+
+offset은 analyzer의 `predicted_line_x - image_center_x` 정의를 따른다.
+따라서 양수는 라인이 오른쪽에 있어 편차 크기에 따라
+`FINE_RIGHT` 또는 `RIGHT`, 음수는 왼쪽에 있어 `FINE_LEFT` 또는 `LEFT`를
+선택한다. heading도 가까운 점에서 먼 점으로 갈 때의 x 증가가 양수이므로
+같은 방향 규칙을 사용한다.
+
 ### topic
 
 - 구독: `/navigation/motion_command` (`std_msgs/msg/String`)
@@ -409,13 +441,18 @@ Dynamixel에 접근하지 않는다.
 | `APPROACH_GOAL`, `APPROACH_HURDLE` | `forward_short` |
 | `ALIGN_LEFT` | `adjust_left` |
 | `ALIGN_RIGHT` | `adjust_right` |
-| `RECOVER_LEFT`, `RECOVER_RIGHT` | `recover` |
 | `RETREAT_GOAL` | `backward` |
 | `PICKUP_NOW` | `pick_ball` |
 | `SHOT` | `shoot` |
 | `TURN_LEFT`, `LEFT` | `turn_left` |
 | `TURN_RIGHT`, `RIGHT` | `turn_right` |
 | `CROSS_FINISH` | `hurdle` |
+
+`FINE_LEFT`와 `FINE_RIGHT`는 위 매핑 표에 포함되지 않는다. 현재 명시적
+미지원 action이며 mock/실제 Executor request를 생성하지 않는다.
+`LEFT`/`RIGHT`는 기존 일반 회전 경로를 유지한다. legacy bridge에서도 새
+Dynamics 번호를 추가하지 않고 기존 `TURN_LEFT`/`TURN_RIGHT` 처리의
+action 별칭으로만 해석한다.
 
 `CROSS_FINISH` 매핑과 status correlation은 수동 호환 및 향후 확장을 위해
 유지한다. 현재 자동 mission flow는 이 action을 발행하지 않으며,
@@ -614,16 +651,16 @@ ros2 launch mission_control mission_motion_mock.launch.py \
 | scenario | line heading | mission action | Executor 변환 |
 |---|---:|---|---|
 | `straight` | `0.0°` | `STRAIGHT` | `forward` |
-| `turn_left` | `-10.0°` | `LEFT` | `turn_left` |
-| `turn_right` | `+10.0°` | `RIGHT` | `turn_right` |
+| `turn_left` | `-10.0°` | `FINE_LEFT` (`valid=false`) | 미지원 |
+| `turn_right` | `+10.0°` | `FINE_RIGHT` (`valid=false`) | 미지원 |
 
 `straight`는 `STRAIGHT`가 `forward` 요청으로 변환되어 Executor의
 `RUNNING → SUCCEEDED`가 `/motion/status`로 돌아온다.
 
-회전 scenario의 실제 기존 mission action은 각각 `LEFT`, `RIGHT`이다.
-`legacy_motion_executor_adapter`는 이를 각각 Executor의 `turn_left`,
-`turn_right`로 변환한다. `WAIT`, 알 수 없는 action 및 명시적으로
-`valid=false`인 명령은 Executor 요청을 만들지 않는다.
+회전 scenario는 중간 heading 편차이므로 각각 `FINE_LEFT`,
+`FINE_RIGHT`를 선택하지만 현재 mapping이 없어 Executor 요청을 만들지
+않는다. `WAIT`, 알 수 없는 action 및 명시적으로 `valid=false`인 명령도
+Executor 요청을 만들지 않는다.
 
 ### 일반 모션 명령 잠금
 

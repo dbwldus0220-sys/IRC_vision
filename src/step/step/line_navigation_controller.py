@@ -25,9 +25,14 @@ class LineNavigationController(Node):
         self.declare_parameter("publish_rate_hz", 10.0)
         self.declare_parameter("line_timeout_sec", 0.50)
         self.declare_parameter("min_line_quality", 0.35)
+        self.declare_parameter("line_center_offset_tolerance", 0.12)
+        self.declare_parameter("line_large_offset_threshold", 0.28)
+        self.declare_parameter("line_heading_tolerance_deg", 4.0)
+        self.declare_parameter("line_large_heading_threshold_deg", 14.0)
+        self.declare_parameter("line_lost_frame_threshold", 2)
+        self.declare_parameter("line_max_recovery_attempts", 3)
         self.declare_parameter("max_linear_speed_mps", 0.05)
         self.declare_parameter("min_linear_speed_mps", 0.015)
-        self.declare_parameter("recovery_lateral_speed_mps", 0.025)
         self.declare_parameter("max_angular_speed_rad_s", 0.60)
         self.declare_parameter("max_angular_accel_rad_s2", 1.20)
         self.declare_parameter("heading_gain", 1.0)
@@ -38,20 +43,33 @@ class LineNavigationController(Node):
         self.declare_parameter("steering_response_sec", 0.70)
         self.declare_parameter("turn_enter_deg", 7.0)
         self.declare_parameter("turn_exit_deg", 4.0)
-        self.declare_parameter("recovery_enter_offset_norm", 0.28)
-        self.declare_parameter("recovery_exit_offset_norm", 0.16)
         self.declare_parameter("command_duration_sec", 0.40)
 
         config = NavigationConfig(
             min_line_quality=self._float_parameter("min_line_quality"),
+            line_center_offset_tolerance=self._float_parameter(
+                "line_center_offset_tolerance"
+            ),
+            line_large_offset_threshold=self._float_parameter(
+                "line_large_offset_threshold"
+            ),
+            line_heading_tolerance_deg=self._float_parameter(
+                "line_heading_tolerance_deg"
+            ),
+            line_large_heading_threshold_deg=self._float_parameter(
+                "line_large_heading_threshold_deg"
+            ),
+            line_lost_frame_threshold=int(
+                self.get_parameter("line_lost_frame_threshold").value
+            ),
+            line_max_recovery_attempts=int(
+                self.get_parameter("line_max_recovery_attempts").value
+            ),
             max_linear_speed_mps=self._float_parameter(
                 "max_linear_speed_mps"
             ),
             min_linear_speed_mps=self._float_parameter(
                 "min_linear_speed_mps"
-            ),
-            recovery_lateral_speed_mps=self._float_parameter(
-                "recovery_lateral_speed_mps"
             ),
             max_angular_speed_rad_s=self._float_parameter(
                 "max_angular_speed_rad_s"
@@ -73,12 +91,6 @@ class LineNavigationController(Node):
             ),
             turn_enter_deg=self._float_parameter("turn_enter_deg"),
             turn_exit_deg=self._float_parameter("turn_exit_deg"),
-            recovery_enter_offset_norm=self._float_parameter(
-                "recovery_enter_offset_norm"
-            ),
-            recovery_exit_offset_norm=self._float_parameter(
-                "recovery_exit_offset_norm"
-            ),
             command_duration_sec=self._float_parameter(
                 "command_duration_sec"
             ),
@@ -133,12 +145,12 @@ class LineNavigationController(Node):
         self.previous_publish_time = now
 
         if self.latest_line_time is None or self.latest_line_info is None:
-            command = self.planner.stop("waiting_for_line_info")
+            command = self.planner.plan(None, dt_sec)
             line_age_sec = None
         else:
             line_age_sec = now - self.latest_line_time
             if line_age_sec > self.line_timeout_sec:
-                command = self.planner.stop("stale_line_info")
+                command = self.planner.plan(None, dt_sec)
             else:
                 command = self.planner.plan(self.latest_line_info, dt_sec)
 

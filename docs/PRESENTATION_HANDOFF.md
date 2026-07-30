@@ -93,7 +93,10 @@ steering_error
 + preview_gain × far_turn
 ```
 
-명령은 `STRAIGHT`, `LEFT`, `RIGHT`, `RECOVER_LEFT`, `RECOVER_RIGHT`, `STOP`입니다. quality가 낮거나 입력이 오래되면 STOP입니다. offset이 큰 경우 일반 회전보다 옆걸음 복귀를 우선하고 hysteresis로 경계 흔들림을 줄입니다.
+라인 명령은 `STRAIGHT`, `FINE_LEFT`, `FINE_RIGHT`, `LEFT`, `RIGHT`,
+`STOP`입니다. 중간 편차는 `FINE_LEFT/RIGHT`, 큰 편차와 라인 상실은
+`LEFT/RIGHT`를 사용합니다. `FINE_LEFT/RIGHT`는 Executor 매핑이 확정되지
+않아 현재 명시적 미지원이며, quality가 낮거나 복구 한도를 넘으면 STOP합니다.
 
 ### 화면
 

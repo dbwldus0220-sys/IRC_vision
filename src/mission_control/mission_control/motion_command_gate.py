@@ -7,6 +7,7 @@ from typing import Any
 
 
 GENERAL_ACTIONS = frozenset({"STRAIGHT", "LEFT", "RIGHT"})
+UNSUPPORTED_GENERAL_ACTIONS = frozenset({"FINE_LEFT", "FINE_RIGHT"})
 TERMINAL_STATUSES = frozenset(
     {
         "SUCCEEDED",
@@ -30,7 +31,10 @@ def normalize_general_action(action: Any) -> str | None:
     """Normalize only action names used by the general-motion path."""
     if not isinstance(action, str):
         return None
-    return ACTION_ALIASES.get(action.strip().upper())
+    normalized = action.strip().upper()
+    if normalized in UNSUPPORTED_GENERAL_ACTIONS:
+        return None
+    return ACTION_ALIASES.get(normalized)
 
 
 @dataclass(frozen=True)

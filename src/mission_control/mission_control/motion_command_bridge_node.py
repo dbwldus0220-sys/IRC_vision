@@ -87,8 +87,6 @@ class MotionCommandBridgeNode(Node):
             "APPROACH_HURDLE": (13, 0),
             "ALIGN_LEFT": (15, 0),
             "ALIGN_RIGHT": (16, 0),
-            "RECOVER_LEFT": (7, 0),
-            "RECOVER_RIGHT": (8, 0),
             "RETREAT_GOAL": (5, 0),
 
             # Special terminal motions
@@ -100,7 +98,7 @@ class MotionCommandBridgeNode(Node):
         if action in fixed_map:
             return fixed_map[action]
 
-        if action in {"TURN_LEFT", "TURN_RIGHT"}:
+        if action in {"TURN_LEFT", "TURN_RIGHT", "LEFT", "RIGHT"}:
             raw_angle = source_command.get(
                 "target_heading_change_deg",
                 0.0,
@@ -113,7 +111,7 @@ class MotionCommandBridgeNode(Node):
 
             angle = max(1, min(angle, 55))
 
-            if action == "TURN_LEFT":
+            if action in {"TURN_LEFT", "LEFT"}:
                 return 2, angle
 
             return 3, angle

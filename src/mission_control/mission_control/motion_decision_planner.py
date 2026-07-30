@@ -287,11 +287,7 @@ class MotionDecisionPlanner:
         dt_sec: float,
     ) -> dict[str, Any]:
         if source == "line":
-            command = (
-                self.line_planner.stop("waiting_for_line_info")
-                if info is None
-                else self.line_planner.plan(info, dt_sec)
-            )
+            command = self.line_planner.plan(info, dt_sec)
         elif source == "ball":
             if self.config.enable_ball_lost_recovery and self.ball_scan_active:
                 return self._lost_ball_recovery_command()

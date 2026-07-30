@@ -423,8 +423,8 @@ class FreshMockInputNode(FakeDecisionNode):
     ("scenario", "expected_action"),
     [
         ("straight", "STRAIGHT"),
-        ("turn_left", "LEFT"),
-        ("turn_right", "RIGHT"),
+        ("turn_left", "FINE_LEFT"),
+        ("turn_right", "FINE_RIGHT"),
     ],
 )
 def test_mock_line_input_is_fresh_and_produces_action(
@@ -454,7 +454,7 @@ def test_mock_line_input_is_fresh_and_produces_action(
     )
     assert decision.reason != "no_fresh_detected_target"
     assert decision.action == expected_action
-    assert decision.valid is True
+    assert decision.valid is (expected_action == "STRAIGHT")
 
 
 @pytest.mark.parametrize(

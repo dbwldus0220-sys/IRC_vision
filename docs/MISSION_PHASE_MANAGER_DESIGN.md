@@ -161,7 +161,7 @@ planner는 전달받은 phase에 따라 source와 action을 선택할 뿐,
 
 | source | 추가 action |
 | --- | --- |
-| line | `STOP`, `RECOVER_LEFT`, `RECOVER_RIGHT` |
+| line | `STOP`, `STRAIGHT`, `FINE_LEFT`, `FINE_RIGHT`, `LEFT`, `RIGHT` |
 | ball | `STOP`, `TURN_LEFT`, `TURN_RIGHT`, `APPROACH`, `SLOW_APPROACH`, `FINE_FORWARD_STEP` |
 | ball lost recovery | `BALL_LOST_STOP`, `HEAD_SCAN_LEFT`, `HEAD_SCAN_RIGHT`, `HEAD_CENTER` |
 | goal | `ALIGN_LEFT`, `ALIGN_RIGHT`, `APPROACH_GOAL`, `RETREAT_GOAL`, `WAIT_SCORE_CONFIRMATION` |
@@ -192,6 +192,38 @@ node 모두 현재 자동으로 이 action을 생성하지 않는다.
 - `turn_consistency`
 
 `mission_state_estimator`는 추가로 `missed_line_frames`를 읽는다.
+
+#### line 주행 및 상실 복구 정책
+
+라인은 항상 화면 중앙으로 완전히 맞춰야 하는 목표가 아니라, 진행 방향을
+유지하면서 과도한 이탈을 막는 기준으로 사용한다.
+
+- offset 절댓값 `0.12` 이하이고 heading error 절댓값 `4°` 이하이면
+  `STRAIGHT`로 복귀한다. 신뢰할 수 있는 먼 곡선 preview가 있으면 기존
+  preview 회전 판단은 유지한다.
+- 허용 범위를 벗어나지만 offset 절댓값이 `0.28` 이하인 중간 편차는
+  `FINE_LEFT`/`FINE_RIGHT`로 판단한다. 현재 executor motion mapping이
+  없어 `valid=False`, `fine_turn_motion_unmapped`로 명시한다.
+- offset 절댓값이 `0.28`을 넘으면 `LEFT`/`RIGHT` 일반 회전으로
+  라인 쪽에 적극 보정하며 `STRAIGHT`를 선택하지 않는다.
+- quality는 `heading_quality`, `geometry_quality`,
+  `detection_quality`의 유효값 중 최솟값을 사용하고 `0.35` 미만은
+  line loss와 같이 취급한다.
+- 한 프레임 누락에는 즉시 강한 복구를 발행하지 않는다. 2프레임 연속
+  누락부터 마지막 정상 `filtered_lateral_offset_norm`을 우선하고,
+  offset이 허용 범위 안이면 마지막 `filtered_heading_error_deg`를 사용해
+  `LEFT`/`RIGHT` 복구 방향을 정한다.
+- 기억된 geometry가 없거나 같은 방향 복구가 3회에 도달하면 `STOP`한다.
+- 복구 중 line이 재검출되어 offset/heading 허용 범위 안에 들면 복구
+  상태와 횟수를 초기화하고 바로 일반 line planning으로 돌아간다.
+  재진입 후 반대 방향 추가 정렬은 현재 구현하지 않는다. 짧은 추가
+  좌·우 정렬 필요성은 실물 실험 후 결정한다.
+
+이 상태는 ROS node가 아니라 `LineNavigationPlanner`의 순수 Python 상태
+(`last_valid_line_offset`, `last_valid_line_heading`, `line_lost_frames`,
+`line_recovery_attempts`, `recovering_line`)가 소유한다. 따라서 `AUTO`와
+`LINE_TRACK`에서 line source가 선택되면 같은 정책을 사용한다. 특수 motion
+lock과 AUTO의 공/허들 우선순위는 변경하지 않는다.
 
 현재 통합 알고리즘에서 미사용:
 

@@ -30,7 +30,7 @@ OpenCV window showing:
 - Connected path polyline
 - Immediate heading arrow
 - Lateral offset
-- Final tracking or RECOVER_LEFT / RECOVER_RIGHT decision
+- Final STRAIGHT / FINE_LEFT / FINE_RIGHT / LEFT / RIGHT decision
 - Target linear/angular speed, travel distance, and rotation
 - Compact steering calculation inputs
 
@@ -992,10 +992,10 @@ class LinePathVisualizer(Node):
         """Return a stable BGR color for each final motion."""
         return {
             "STRAIGHT": (0, 220, 0),
+            "FINE_LEFT": (255, 200, 80),
+            "FINE_RIGHT": (80, 200, 255),
             "LEFT": (255, 160, 0),
             "RIGHT": (0, 165, 255),
-            "RECOVER_LEFT": (255, 255, 0),
-            "RECOVER_RIGHT": (255, 255, 0),
             "STOP": (0, 0, 255),
         }.get(motion, (180, 180, 180))
 
@@ -1027,40 +1027,6 @@ class LinePathVisualizer(Node):
                 (start[0] - 20, start[1] + 20),
                 color,
                 5,
-                cv2.LINE_AA,
-            )
-            return
-
-        if motion in {"RECOVER_LEFT", "RECOVER_RIGHT"}:
-            direction = -1 if motion == "RECOVER_LEFT" else 1
-            arrow_length = int(width * 0.18)
-            end = (start[0] + direction * arrow_length, start[1])
-            cv2.arrowedLine(
-                frame,
-                start,
-                end,
-                (0, 0, 0),
-                12,
-                cv2.LINE_AA,
-                tipLength=0.20,
-            )
-            cv2.arrowedLine(
-                frame,
-                start,
-                end,
-                color,
-                7,
-                cv2.LINE_AA,
-                tipLength=0.20,
-            )
-            cv2.putText(
-                frame,
-                motion.replace("RECOVER_", "RETURN "),
-                (min(start[0], end[0]), end[1] - 20),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.8,
-                color,
-                3,
                 cv2.LINE_AA,
             )
             return
@@ -1161,28 +1127,17 @@ class LinePathVisualizer(Node):
         )
         quality = self._format_number(command.get("line_quality"), 2)
 
-        if motion in {"RECOVER_LEFT", "RECOVER_RIGHT"}:
-            lines = [
-                f"NAVIGATION : {motion}",
-                f"SIDE SPEED {lateral_speed} m/s  |  FORWARD STOP",
-                f"SIDE MOVE {lateral_distance} m  |  {duration} s",
-                "MODE : RETURN TO LINE CENTER",
-                "CURVE PREVIEW DISABLED DURING RECOVERY",
-                "QUALITY "
-                f"{quality}  |  LINE POINTS {data.get('line_count', 0)}",
-            ]
-        else:
-            lines = [
-                f"NAVIGATION : {motion}",
-                f"SPEED {speed} m/s  |  TURN {turn_rate} rad/s",
-                f"NEXT {distance} m  |  ROTATE {rotation} deg  |  "
-                f"{duration} s",
-                f"STEERING : {steering} deg",
-                f"= HEADING {heading_part} + OFFSET {offset_part} "
-                f"+ CURVE {preview_part}",
-                "QUALITY "
-                f"{quality}  |  LINE POINTS {data.get('line_count', 0)}",
-            ]
+        lines = [
+            f"NAVIGATION : {motion}",
+            f"SPEED {speed} m/s  |  TURN {turn_rate} rad/s",
+            f"NEXT {distance} m  |  ROTATE {rotation} deg  |  "
+            f"{duration} s",
+            f"STEERING : {steering} deg",
+            f"= HEADING {heading_part} + OFFSET {offset_part} "
+            f"+ CURVE {preview_part}",
+            "QUALITY "
+            f"{quality}  |  LINE POINTS {data.get('line_count', 0)}",
+        ]
 
         if self.show_all_metrics:
             lines.extend(

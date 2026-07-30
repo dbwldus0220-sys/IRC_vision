@@ -37,7 +37,6 @@ MOTION_ID_TO_LEGACY_ACTION = {
     "forward_short": "SLOW_APPROACH",
     "adjust_left": "ALIGN_LEFT",
     "adjust_right": "ALIGN_RIGHT",
-    "recover": "RECOVER_LEFT",
     "backward": "RETREAT_GOAL",
     "pick_ball": "PICKUP_NOW",
     "shoot": "SHOT",

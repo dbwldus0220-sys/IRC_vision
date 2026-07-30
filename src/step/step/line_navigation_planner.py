@@ -13,9 +13,15 @@ class NavigationConfig:
     """Tunable limits and gains for line-following command generation."""
 
     min_line_quality: float = 0.35
+    line_center_offset_tolerance: float = 0.12
+    line_large_offset_threshold: float = 0.28
+    line_heading_tolerance_deg: float = 4.0
+    line_large_heading_threshold_deg: float = 14.0
+    line_lost_frame_threshold: int = 2
+    line_max_recovery_attempts: int = 3
+    fine_turn_supported: bool = False
     max_linear_speed_mps: float = 0.05
     min_linear_speed_mps: float = 0.015
-    recovery_lateral_speed_mps: float = 0.025
     max_angular_speed_rad_s: float = 0.60
     max_angular_accel_rad_s2: float = 1.20
     heading_gain: float = 1.0
@@ -26,8 +32,6 @@ class NavigationConfig:
     steering_response_sec: float = 0.70
     turn_enter_deg: float = 7.0
     turn_exit_deg: float = 4.0
-    recovery_enter_offset_norm: float = 0.28
-    recovery_exit_offset_norm: float = 0.16
     command_duration_sec: float = 0.40
 
 
@@ -115,6 +119,11 @@ class LineNavigationPlanner:
         self.config = config or NavigationConfig()
         self.previous_motion = "STOP"
         self.previous_angular_speed_rad_s = 0.0
+        self.last_valid_line_offset: float | None = None
+        self.last_valid_line_heading: float | None = None
+        self.line_lost_frames = 0
+        self.line_recovery_attempts = 0
+        self.recovering_line = False
 
     def stop(self, reason: str) -> NavigationCommand:
         """Create an immediate stop and reset steering state."""
@@ -144,12 +153,12 @@ class LineNavigationPlanner:
 
     def plan(
         self,
-        line_info: dict[str, Any],
+        line_info: dict[str, Any] | None,
         dt_sec: float,
     ) -> NavigationCommand:
         """Generate one bounded command from a fresh line analysis sample."""
-        if not bool(line_info.get("detected", False)):
-            return self.stop("line_not_detected")
+        if line_info is None or not bool(line_info.get("detected", False)):
+            return self._handle_missing_line()
 
         heading = _number(line_info, "filtered_heading_error_deg")
         if heading is None:
@@ -160,7 +169,7 @@ class LineNavigationPlanner:
             offset = _number(line_info, "lateral_offset_norm")
 
         if heading is None or offset is None:
-            return self.stop("invalid_line_geometry")
+            return self._handle_missing_line("invalid_line_geometry")
 
         qualities = [
             _number(line_info, "heading_quality"),
@@ -173,7 +182,17 @@ class LineNavigationPlanner:
         quality = min(valid_qualities)
         quality = _clamp(quality, 0.0, 1.0)
         if quality < self.config.min_line_quality:
-            return self.stop("low_line_quality")
+            return self._handle_missing_line("low_line_quality")
+
+        self.last_valid_line_offset = offset
+        self.last_valid_line_heading = heading
+        self.line_lost_frames = 0
+        if (
+            abs(offset) <= self.config.line_center_offset_tolerance
+            and abs(heading) <= self.config.line_heading_tolerance_deg
+        ):
+            self.recovering_line = False
+            self.line_recovery_attempts = 0
 
         recovery_motion = self._classify_recovery(offset)
         if recovery_motion is not None:
@@ -232,17 +251,25 @@ class LineNavigationPlanner:
         angular_speed = self.previous_angular_speed_rad_s + angular_delta
         angular_accel = angular_delta / dt_sec
 
-        motion = self._classify_motion(steering_error)
+        motion = self._classify_motion(steering_error, heading, offset)
         speed = self._calculate_linear_speed(steering_error, quality)
         duration = self.config.command_duration_sec
 
+        fine_turn_unmapped = (
+            motion in {"FINE_LEFT", "FINE_RIGHT"}
+            and not self.config.fine_turn_supported
+        )
         self.previous_motion = motion
         self.previous_angular_speed_rad_s = angular_speed
 
         return NavigationCommand(
-            valid=True,
+            valid=not fine_turn_unmapped,
             motion=motion,
-            reason="line_tracking",
+            reason=(
+                "fine_turn_motion_unmapped"
+                if fine_turn_unmapped
+                else "line_tracking"
+            ),
             linear_speed_mps=speed,
             lateral_speed_mps=0.0,
             angular_speed_rad_s=angular_speed,
@@ -262,20 +289,20 @@ class LineNavigationPlanner:
         )
 
     def _classify_recovery(self, lateral_offset_norm: float) -> str | None:
-        """Return a lateral recovery command using offset hysteresis."""
+        """Return a general turn only for excessive lateral offset."""
         is_recovering = self.previous_motion in {
-            "RECOVER_LEFT",
-            "RECOVER_RIGHT",
+            "LEFT",
+            "RIGHT",
         }
         threshold = (
-            self.config.recovery_exit_offset_norm
+            self.config.line_center_offset_tolerance
             if is_recovering
-            else self.config.recovery_enter_offset_norm
+            else self.config.line_large_offset_threshold
         )
         if lateral_offset_norm > threshold:
-            return "RECOVER_RIGHT"
+            return "RIGHT"
         if lateral_offset_norm < -threshold:
-            return "RECOVER_LEFT"
+            return "LEFT"
         return None
 
     def _recovery_command(
@@ -284,25 +311,28 @@ class LineNavigationPlanner:
         heading: float,
         offset: float,
         quality: float,
+        reason: str = "line_large_deviation_turn",
     ) -> NavigationCommand:
-        """Create a slow sideways command to return to the line center."""
-        direction = 1.0 if motion == "RECOVER_RIGHT" else -1.0
-        lateral_speed = direction * self.config.recovery_lateral_speed_mps
+        """Create a bounded general turn toward the remembered line."""
+        direction = 1.0 if motion == "RIGHT" else -1.0
+        angular_speed = direction * self.config.max_angular_speed_rad_s
         duration = self.config.command_duration_sec
         self.previous_motion = motion
-        self.previous_angular_speed_rad_s = 0.0
+        self.previous_angular_speed_rad_s = angular_speed
         return NavigationCommand(
             valid=True,
             motion=motion,
-            reason="line_center_recovery",
+            reason=reason,
             linear_speed_mps=0.0,
-            lateral_speed_mps=lateral_speed,
-            angular_speed_rad_s=0.0,
+            lateral_speed_mps=0.0,
+            angular_speed_rad_s=angular_speed,
             angular_accel_rad_s2=0.0,
             command_duration_sec=duration,
             travel_distance_m=0.0,
-            lateral_travel_distance_m=lateral_speed * duration,
-            target_heading_change_deg=0.0,
+            lateral_travel_distance_m=0.0,
+            target_heading_change_deg=math.degrees(
+                angular_speed * duration
+            ),
             steering_error_deg=0.0,
             heading_component_deg=heading,
             offset_component_deg=self.config.offset_gain_deg * offset,
@@ -313,18 +343,101 @@ class LineNavigationPlanner:
             line_quality=quality,
         )
 
-    def _classify_motion(self, steering_error_deg: float) -> str:
-        """Classify with hysteresis so the command does not chatter."""
+    def _classify_motion(
+        self,
+        steering_error_deg: float,
+        heading_error_deg: float,
+        lateral_offset_norm: float,
+    ) -> str:
+        """Keep straight inside tolerance and correct moderate deviations."""
+        if (
+            abs(lateral_offset_norm)
+            <= self.config.line_center_offset_tolerance
+            and abs(heading_error_deg)
+            <= self.config.line_heading_tolerance_deg
+            and abs(steering_error_deg) <= self.config.turn_enter_deg
+        ):
+            return "STRAIGHT"
+
         threshold = (
             self.config.turn_exit_deg
-            if self.previous_motion in {"LEFT", "RIGHT"}
+            if self.previous_motion in {"FINE_LEFT", "FINE_RIGHT"}
             else self.config.turn_enter_deg
         )
+        if abs(lateral_offset_norm) > self.config.line_center_offset_tolerance:
+            if steering_error_deg > 0.0:
+                return "FINE_RIGHT"
+            if steering_error_deg < 0.0:
+                return "FINE_LEFT"
+            return (
+                "FINE_RIGHT"
+                if lateral_offset_norm > 0.0
+                else "FINE_LEFT"
+            )
+        if (
+            abs(heading_error_deg)
+            >= self.config.line_large_heading_threshold_deg
+        ):
+            return "RIGHT" if heading_error_deg > 0.0 else "LEFT"
+        if abs(heading_error_deg) > self.config.line_heading_tolerance_deg:
+            return (
+                "FINE_RIGHT"
+                if heading_error_deg > 0.0
+                else "FINE_LEFT"
+            )
         if steering_error_deg > threshold:
-            return "RIGHT"
+            return "FINE_RIGHT"
         if steering_error_deg < -threshold:
-            return "LEFT"
+            return "FINE_LEFT"
         return "STRAIGHT"
+
+    def _handle_missing_line(
+        self,
+        initial_reason: str = "line_not_detected",
+    ) -> NavigationCommand:
+        """Wait through a short dropout, then recover from remembered geometry."""
+        self.line_lost_frames += 1
+        threshold = max(1, self.config.line_lost_frame_threshold)
+        if self.line_lost_frames < threshold:
+            return self.stop(initial_reason)
+
+        recovery_motion = self._remembered_recovery_motion()
+        if recovery_motion is None:
+            self.recovering_line = False
+            return self.stop("line_lost_without_history")
+
+        self.recovering_line = True
+        if (
+            self.line_recovery_attempts
+            >= max(0, self.config.line_max_recovery_attempts)
+        ):
+            return self.stop("line_recovery_attempts_exhausted")
+
+        self.line_recovery_attempts += 1
+        return self._recovery_command(
+            recovery_motion,
+            self.last_valid_line_heading or 0.0,
+            self.last_valid_line_offset or 0.0,
+            0.0,
+            reason="line_lost_recovery",
+        )
+
+    def _remembered_recovery_motion(self) -> str | None:
+        """Choose recovery direction from offset first, then heading."""
+        offset = self.last_valid_line_offset
+        if (
+            offset is not None
+            and abs(offset) > self.config.line_center_offset_tolerance
+        ):
+            return "RIGHT" if offset > 0.0 else "LEFT"
+
+        heading = self.last_valid_line_heading
+        if (
+            heading is not None
+            and abs(heading) > self.config.line_heading_tolerance_deg
+        ):
+            return "RIGHT" if heading > 0.0 else "LEFT"
+        return None
 
     def _calculate_linear_speed(
         self,

@@ -1,11 +1,15 @@
 """Unit tests for unified mission command selection."""
 
+import pytest
+
 from mission_control.motion_decision_planner import MotionDecisionConfig
 from mission_control.motion_decision_planner import MotionDecisionPlanner
+from step.line_navigation_planner import LineNavigationPlanner
+from step.line_navigation_planner import NavigationConfig
 
 
-def line_info():
-    return {
+def line_info(**overrides):
+    sample = {
         "detected": True,
         "filtered_heading_error_deg": 0.0,
         "filtered_lateral_offset_norm": 0.0,
@@ -15,6 +19,8 @@ def line_info():
         "turn_angle_deg": 0.0,
         "turn_consistency": 1.0,
     }
+    sample.update(overrides)
+    return sample
 
 
 def ball_info(**overrides):
@@ -672,3 +678,229 @@ def test_lock_phase_waits_for_cpp_motion_status():
     assert decision.source == "none"
     assert decision.action == "WAIT"
     assert decision.reason == "mission_locked_waiting_for_motion_status"
+
+
+def test_line_offset_policy_uses_tolerance_and_strong_correction():
+    planner = MotionDecisionPlanner()
+
+    centered = planner.plan(
+        "LINE_TRACK",
+        observations(line=line_info(filtered_lateral_offset_norm=0.05)),
+        0.1,
+    )
+    left = planner.plan(
+        "LINE_TRACK",
+        observations(line=line_info(filtered_lateral_offset_norm=-0.18)),
+        0.1,
+    )
+    right = planner.plan(
+        "LINE_TRACK",
+        observations(line=line_info(filtered_lateral_offset_norm=0.18)),
+        0.1,
+    )
+    far_left = planner.plan(
+        "LINE_TRACK",
+        observations(line=line_info(filtered_lateral_offset_norm=-0.35)),
+        0.1,
+    )
+    far_right = planner.plan(
+        "LINE_TRACK",
+        observations(line=line_info(filtered_lateral_offset_norm=0.35)),
+        0.1,
+    )
+
+    assert centered.action == "STRAIGHT"
+    assert left.action == "FINE_LEFT"
+    assert right.action == "FINE_RIGHT"
+    assert left.valid is False
+    assert right.valid is False
+    assert left.reason == "fine_turn_motion_unmapped"
+    assert right.reason == "fine_turn_motion_unmapped"
+    assert far_left.action == "LEFT"
+    assert far_right.action == "RIGHT"
+    assert far_left.action != "STRAIGHT"
+    assert far_right.action != "STRAIGHT"
+
+
+def test_large_heading_error_selects_matching_correction():
+    planner = MotionDecisionPlanner()
+
+    left = planner.plan(
+        "LINE_TRACK",
+        observations(line=line_info(filtered_heading_error_deg=-20.0)),
+        0.1,
+    )
+    right = planner.plan(
+        "LINE_TRACK",
+        observations(line=line_info(filtered_heading_error_deg=20.0)),
+        0.1,
+    )
+
+    assert left.action == "LEFT"
+    assert right.action == "RIGHT"
+
+
+def test_one_missing_line_frame_does_not_start_strong_recovery():
+    planner = MotionDecisionPlanner()
+    planner.plan(
+        "LINE_TRACK",
+        observations(line=line_info(filtered_lateral_offset_norm=-0.18)),
+        0.1,
+    )
+
+    missing = planner.plan(
+        "LINE_TRACK",
+        observations(line=None),
+        0.1,
+    )
+
+    assert missing.action == "STOP"
+    assert missing.reason == "line_not_detected"
+    assert planner.line_planner.line_lost_frames == 1
+    assert planner.line_planner.line_recovery_attempts == 0
+
+
+@pytest.mark.parametrize(
+    ("offset", "expected"),
+    [(-0.18, "LEFT"), (0.18, "RIGHT")],
+)
+def test_complete_line_loss_recovers_from_last_valid_offset(
+    offset,
+    expected,
+):
+    planner = MotionDecisionPlanner()
+    planner.plan(
+        "LINE_TRACK",
+        observations(line=line_info(filtered_lateral_offset_norm=offset)),
+        0.1,
+    )
+    planner.plan("LINE_TRACK", observations(line=None), 0.1)
+
+    recovery = planner.plan(
+        "LINE_TRACK",
+        observations(line=None),
+        0.1,
+    )
+
+    assert recovery.action == expected
+    assert recovery.reason == "line_lost_recovery"
+    assert planner.line_planner.recovering_line is True
+    assert planner.line_planner.line_recovery_attempts == 1
+
+
+def test_line_loss_uses_heading_when_remembered_offset_is_ambiguous():
+    planner = MotionDecisionPlanner()
+    planner.plan(
+        "LINE_TRACK",
+        observations(
+            line=line_info(
+                filtered_lateral_offset_norm=0.02,
+                filtered_heading_error_deg=-10.0,
+            )
+        ),
+        0.1,
+    )
+    planner.plan("LINE_TRACK", observations(line=None), 0.1)
+
+    recovery = planner.plan(
+        "LINE_TRACK",
+        observations(line=None),
+        0.1,
+    )
+
+    assert recovery.action == "LEFT"
+
+
+def test_line_loss_without_history_stops_safely():
+    planner = MotionDecisionPlanner()
+
+    planner.plan("LINE_TRACK", observations(line=None), 0.1)
+    lost = planner.plan("LINE_TRACK", observations(line=None), 0.1)
+
+    assert lost.action == "STOP"
+    assert lost.reason == "line_lost_without_history"
+    assert planner.line_planner.recovering_line is False
+
+
+def test_reacquired_line_returns_directly_to_straight():
+    planner = MotionDecisionPlanner()
+    planner.plan(
+        "LINE_TRACK",
+        observations(line=line_info(filtered_lateral_offset_norm=-0.18)),
+        0.1,
+    )
+    planner.plan("LINE_TRACK", observations(line=None), 0.1)
+    planner.plan("LINE_TRACK", observations(line=None), 0.1)
+
+    reacquired = planner.plan(
+        "LINE_TRACK",
+        observations(line=line_info()),
+        0.1,
+    )
+
+    assert reacquired.action == "STRAIGHT"
+    assert planner.line_planner.recovering_line is False
+    assert planner.line_planner.line_lost_frames == 0
+    assert planner.line_planner.line_recovery_attempts == 0
+
+
+def test_line_recovery_attempt_limit_stops_repeated_commands():
+    planner = MotionDecisionPlanner()
+    planner.line_planner = LineNavigationPlanner(
+        NavigationConfig(
+            line_lost_frame_threshold=1,
+            line_max_recovery_attempts=2,
+        )
+    )
+    planner.plan(
+        "LINE_TRACK",
+        observations(line=line_info(filtered_lateral_offset_norm=0.18)),
+        0.1,
+    )
+
+    first = planner.plan("LINE_TRACK", observations(line=None), 0.1)
+    second = planner.plan("LINE_TRACK", observations(line=None), 0.1)
+    exhausted = planner.plan("LINE_TRACK", observations(line=None), 0.1)
+
+    assert first.action == "RIGHT"
+    assert second.action == "RIGHT"
+    assert exhausted.action == "STOP"
+    assert exhausted.reason == "line_recovery_attempts_exhausted"
+    assert planner.line_planner.line_recovery_attempts == 2
+
+
+@pytest.mark.parametrize("phase", ["AUTO", "LINE_TRACK"])
+def test_auto_and_line_track_share_line_correction_policy(phase):
+    planner = MotionDecisionPlanner()
+
+    decision = planner.plan(
+        phase,
+        observations(line=line_info(filtered_lateral_offset_norm=0.18)),
+        0.1,
+    )
+
+    assert decision.source == "line"
+    assert decision.action == "FINE_RIGHT"
+    assert decision.valid is False
+    assert decision.reason == "fine_turn_motion_unmapped"
+
+
+def test_special_motion_lock_does_not_advance_line_recovery():
+    planner = MotionDecisionPlanner()
+    planner.plan(
+        "LINE_TRACK",
+        observations(line=line_info(filtered_lateral_offset_norm=0.18)),
+        0.1,
+    )
+    before = planner.line_planner.line_recovery_attempts
+
+    locked = planner.plan(
+        "GOAL_APPROACH_LOCK",
+        observations(line=None),
+        0.1,
+    )
+
+    assert locked.action == "WAIT"
+    assert locked.reason == "mission_locked_waiting_for_motion_status"
+    assert planner.line_planner.line_lost_frames == 0
+    assert planner.line_planner.line_recovery_attempts == before

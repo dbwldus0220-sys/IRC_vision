@@ -11,6 +11,8 @@ SDK의 실제 JSON 모션 이름은 Motion Executor 한 곳에서만 변환한�
 | WALK_FINE | 아주 짧은 전진 | FINE_FORWARD_STEP | 미정 |
 | TURN_LEFT | 좌회전 | TURN_LEFT | 미정 |
 | TURN_RIGHT | 우회전 | TURN_RIGHT | 미정 |
+| LINE_LEFT | 라인 일반 좌회전 | LEFT | 미정 |
+| LINE_RIGHT | 라인 일반 우회전 | RIGHT | 미정 |
 | ADJUST_LEFT | 좌측 미세 보정 | ALIGN_LEFT | 미정 |
 | ADJUST_RIGHT | 우측 미세 보정 | ALIGN_RIGHT | 미정 |
 | WALK_BACKWARD | 후진 | RETREAT_GOAL | 미정 |
@@ -21,8 +23,8 @@ SDK의 실제 JSON 모션 이름은 Motion Executor 한 곳에서만 변환한�
 | HEAD_LEFT | 목 왼쪽 | HEAD_SCAN_LEFT | 미정 |
 | HEAD_RIGHT | 목 오른쪽 | HEAD_SCAN_RIGHT | 미정 |
 | HEAD_CENTER | 목 중앙 | HEAD_CENTER | 미정 |
-| RECOVERY_LEFT | 좌측 복구 | RECOVER_LEFT | 미정 |
-| RECOVERY_RIGHT | 우측 복구 | RECOVER_RIGHT | 미정 |
+| FINE_LEFT | 미세 좌회전 | FINE_LEFT | Executor 매핑 미정 |
+| FINE_RIGHT | 미세 우회전 | FINE_RIGHT | Executor 매핑 미정 |
 | STOP | 안전 정지 | STOP | 정책 미정 |
 | CROSS_FINISH | 결승선 통과 | CROSS_FINISH | 미정 |
 

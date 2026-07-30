@@ -227,7 +227,17 @@ def test_terminal_before_running_is_ignored_and_active_remains():
     assert manager.pickups_completed == 0
 
 
-@pytest.mark.parametrize("action", ["STRAIGHT", "LEFT", "RIGHT", "WAIT"])
+@pytest.mark.parametrize(
+    "action",
+    [
+        "STRAIGHT",
+        "FINE_LEFT",
+        "FINE_RIGHT",
+        "LEFT",
+        "RIGHT",
+        "WAIT",
+    ],
+)
 def test_general_actions_cannot_be_registered(action):
     manager = MissionPhaseManager()
     assert not manager.start_special_action(action, 1)
