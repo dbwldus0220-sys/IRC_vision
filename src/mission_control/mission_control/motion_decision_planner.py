@@ -140,6 +140,20 @@ class MotionDecisionPlanner:
                 source_command={},
             )
 
+        invalid_source = self._invalid_boolean_source(observations)
+        if invalid_source is not None:
+            self._reset_previous_source()
+            return MotionDecision(
+                phase=normalized_phase,
+                source=invalid_source,
+                action="WAIT",
+                valid=False,
+                reason="invalid_vision_boolean_type",
+                sdk_motion_requested=False,
+                requires_ack=False,
+                source_command={},
+            )
+
         hurdle_wait_reason = self._hurdle_safety_wait_reason(
             observations.get("hurdle")
         )
@@ -296,21 +310,58 @@ class MotionDecisionPlanner:
         """Return true for any confirmed hurdle, regardless of image center."""
         return bool(
             info is not None
-            and info.get("detected", False)
-            and info.get("confirmation_confirmed", False)
-            and info.get("depth_valid", False)
+            and info.get("detected") is True
+            and info.get("confirmation_confirmed") is True
+            and info.get("depth_valid") is True
         )
+
+    @staticmethod
+    def _invalid_boolean_source(
+        observations: dict[str, dict[str, Any] | None],
+    ) -> str | None:
+        """Return the first source containing a non-boolean contract field."""
+        boolean_fields = {
+            "line": ("detected",),
+            "ball": (
+                "detected",
+                "depth_valid",
+                "pickup_ready",
+                "pickup_now",
+            ),
+            "goal": ("detected", "depth_valid", "score_now"),
+            "hurdle": (
+                "detected",
+                "raw_detected",
+                "confirmation_confirmed",
+                "depth_valid",
+                "go_now",
+            ),
+        }
+        for source in ("hurdle", "ball", "goal", "line"):
+            info = observations.get(source)
+            if info is None:
+                continue
+            for field in boolean_fields[source]:
+                if field in info and not isinstance(info[field], bool):
+                    return source
+        return None
 
     @staticmethod
     def _hurdle_safety_wait_reason(
         info: dict[str, Any] | None,
     ) -> str | None:
         """Hold motion while a detected hurdle is not safe to classify."""
-        if info is None or not bool(info.get("detected", False)):
+        if info is None:
             return None
-        if not bool(info.get("confirmation_confirmed", False)):
+        hurdle_seen = (
+            info.get("detected") is True
+            or info.get("raw_detected") is True
+        )
+        if not hurdle_seen:
+            return None
+        if info.get("confirmation_confirmed") is not True:
             return "hurdle_confirmation_pending"
-        if not bool(info.get("depth_valid", False)):
+        if info.get("depth_valid") is not True:
             return "hurdle_depth_invalid_wait"
         return None
 

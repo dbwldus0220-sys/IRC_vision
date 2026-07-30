@@ -188,6 +188,25 @@ node 모두 현재 자동으로 이 action을 생성하지 않는다.
 아래 “사용 필드”는 analyzer가 발행하는 전체 schema가 아니라
 `motion_decision_node`와 그 내부 planner가 실제로 읽는 필드이다.
 
+### 4.0 Vision → mission_control observation contract
+
+`unified_vision_node.py`는 `YoloLineAnalyzer`, `BallAnalyzer`,
+`GoalAnalyzer`, `HurdleAnalyzer`를 구성하며, analyzer가
+`std_msgs/String` JSON object를 직접 발행한다. 각 navigation controller는
+같은 info topic의 별도 consumer이며 mission_control 입력 producer가 아니다.
+
+| source | 실제 publisher | publisher/subscriber topic | mission_control 필수 필드 | optional·누락 처리 | 단위·자료형 | freshness | 불일치 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| line | `yolo_line_analyzer.py` | `/vision/line_info` | `detected: bool`; detected일 때 heading, lateral offset, quality 숫자 | filtered heading/offset이 없으면 raw 이름 사용; quality가 모두 없거나 geometry가 invalid면 STOP | heading `deg`, lateral offset normalized, quality `0..1` | 기본 0.50 s | 없음 |
+| ball | `ball_analyzer.py` | `/vision/ball_info` | `detected`, `depth_valid`, `pickup_ready`, `pickup_now`: bool; `confidence`, alignment, `depth_m`: number/None | `distance_m`은 optional; depth 누락/invalid는 STOP, alignment 누락은 STOP | depth/distance `m`, bearing `deg`, offset normalized | 기본 0.50 s | 없음 |
+| hurdle | `hurdle_analyzer.py` | `/vision/hurdle_info` | `detected`, `raw_detected`, `confirmation_confirmed`, `depth_valid`, `go_now`: bool; confirmed target의 geometry 숫자 | confirmation pending은 WAIT; depth invalid는 WAIT; confirmed target의 bottom gap/angle 누락은 hurdle planner WAIT | 거리/gap `m`, angle `deg`, offset normalized | 기본 0.50 s | consumer가 `raw_detected`를 보지 않던 문제를 호환 처리함 |
+| goal | `goal_analyzer.py` | `/vision/goal_info` | `detected`, `depth_valid`, `score_now`: bool; `confidence`, alignment, `depth_m`: number/None | `distance_m`, `bearing_deg`는 optional; depth/alignment invalid는 WAIT | depth/distance `m`, bearing `deg`, offset normalized | 기본 0.50 s | 없음 |
+| finish | 실제 STEP publisher 없음 | consumer만 `/vision/finish_info` | 수동 호환 시 `detected`, `confirmed`, `confidence` | 누락·stale이면 미사용; 자동 finish action 없음 | bool, confidence `0..1` | 기본 0.50 s | producer가 없으며 자동 flow 밖 |
+
+JSON boolean 계약 필드가 문자열이나 숫자로 오면 truthy 변환하지 않고
+`WAIT(valid=false)`, reason `invalid_vision_boolean_type`으로 보류한다.
+stale observation은 이 검증 전에 `None`으로 제거된다.
+
 ### 4.1 `/vision/line_info`
 
 실제 사용:
@@ -297,7 +316,8 @@ planner는 중심과 scoring depth를 자체 설정값으로 다시 계산하고
 실제 사용:
 
 - `detected`
-- `confirmation_confirmed` (필드가 존재할 때 source 선택 gate)
+- `raw_detected`
+- `confirmation_confirmed`
 - `confidence`
 - `depth_m`
 - `distance_m`
@@ -318,7 +338,9 @@ planner는 중심과 scoring depth를 자체 설정값으로 다시 계산하고
 - depth sample, candidate, image/camera/depth age/note 필드
 
 planner는 parallel, ground gap, bottom gap 조건을 다시 계산하고 `go_now`를
-confirmation gate로 사용한다.
+confirmation gate로 사용한다. 실제 analyzer는 confirmation pending frame을
+`raw_detected=true`, `detected=false`, `confirmation_confirmed=false`로
+발행하므로 mission_control은 이를 허들 없음이 아니라 안전 WAIT로 해석한다.
 
 ### 4.5 `/vision/mission_state`
 

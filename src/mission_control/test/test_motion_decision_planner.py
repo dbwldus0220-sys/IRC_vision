@@ -56,6 +56,7 @@ def goal_info(**overrides):
 def hurdle_info(**overrides):
     sample = {
         "detected": True,
+        "raw_detected": True,
         "confirmation_confirmed": True,
         "confidence": 0.9,
         "depth_valid": True,
@@ -66,9 +67,60 @@ def hurdle_info(**overrides):
         "bearing_deg": 0.0,
         "offset_x_norm": 0.0,
         "hurdle_angle_deg": 0.0,
+        "go_now": True,
         "bbox": [300, 300, 980, 500],
         "image_width": 1280,
     }
+    sample.update(overrides)
+    return sample
+
+
+def vision_line_payload(**overrides):
+    """Match the fields emitted by YoloLineAnalyzer."""
+    sample = line_info(
+        center_points_px=[[640, 700], [640, 500]],
+        lateral_offset_norm=0.0,
+        heading_error_deg=0.0,
+        mean_confidence=0.95,
+        filter_ready=True,
+    )
+    sample.update(overrides)
+    return sample
+
+
+def vision_ball_payload(**overrides):
+    """Match the mission fields emitted by BallAnalyzer."""
+    sample = ball_info(
+        raw_detected=True,
+        confirmation_confirmed=True,
+        state="PICKUP_READY",
+        depth_m=0.8,
+        distance_m=0.8,
+        pickup_ready=True,
+        pickup_now=True,
+    )
+    sample.update(overrides)
+    return sample
+
+
+def vision_goal_payload(**overrides):
+    """Match the mission fields emitted by GoalAnalyzer."""
+    sample = goal_info(
+        raw_detected=True,
+        confirmation_confirmed=True,
+        state="SCORE_READY",
+        score_now=True,
+    )
+    sample.update(overrides)
+    return sample
+
+
+def vision_hurdle_payload(**overrides):
+    """Match the mission fields emitted by HurdleAnalyzer."""
+    sample = hurdle_info(
+        state="GO_READY",
+        go_now=True,
+    )
     sample.update(overrides)
     return sample
 
@@ -89,6 +141,117 @@ def recovery_planner():
     return MotionDecisionPlanner(
         MotionDecisionConfig(enable_ball_lost_recovery=True)
     )
+
+
+def test_actual_line_publisher_payload_contract():
+    decision = MotionDecisionPlanner().plan(
+        "AUTO",
+        observations(line=vision_line_payload()),
+        0.1,
+    )
+
+    assert decision.source == "line"
+    assert decision.action == "STRAIGHT"
+
+
+def test_actual_ball_publisher_payload_contract():
+    decision = MotionDecisionPlanner().plan(
+        "AUTO",
+        observations(ball=vision_ball_payload()),
+        0.1,
+    )
+
+    assert decision.source == "ball"
+    assert decision.action == "PICKUP_NOW"
+
+
+def test_actual_hurdle_publisher_payload_contract():
+    decision = MotionDecisionPlanner().plan(
+        "AUTO",
+        observations(
+            ball=vision_ball_payload(),
+            hurdle=vision_hurdle_payload(),
+        ),
+        0.1,
+    )
+
+    assert decision.source == "hurdle"
+    assert decision.action == "GO"
+
+
+def test_actual_goal_publisher_payload_contract():
+    decision = MotionDecisionPlanner().plan(
+        "GOAL_APPROACH",
+        observations(
+            ball=vision_ball_payload(),
+            goal=vision_goal_payload(),
+        ),
+        0.1,
+    )
+
+    assert decision.source == "goal"
+    assert decision.action == "SHOT"
+
+
+def test_actual_unconfirmed_hurdle_payload_holds_motion():
+    decision = MotionDecisionPlanner().plan(
+        "AUTO",
+        observations(
+            ball=vision_ball_payload(),
+            hurdle=vision_hurdle_payload(
+                detected=False,
+                raw_detected=True,
+                confirmation_confirmed=False,
+                depth_valid=False,
+                depth_m=None,
+                go_now=False,
+            ),
+        ),
+        0.1,
+    )
+
+    assert decision.source == "hurdle"
+    assert decision.action == "WAIT"
+    assert decision.reason == "hurdle_confirmation_pending"
+
+
+@pytest.mark.parametrize(
+    ("source", "payload"),
+    [
+        ("ball", vision_ball_payload(pickup_now="false")),
+        ("goal", vision_goal_payload(score_now=1)),
+        ("hurdle", vision_hurdle_payload(depth_valid="false")),
+        ("line", vision_line_payload(detected="true")),
+    ],
+)
+def test_invalid_publisher_boolean_type_holds_motion(source, payload):
+    decision = MotionDecisionPlanner().plan(
+        "AUTO",
+        observations(**{source: payload}),
+        0.1,
+    )
+
+    assert decision.source == source
+    assert decision.action == "WAIT"
+    assert decision.valid is False
+    assert decision.reason == "invalid_vision_boolean_type"
+
+
+def test_optional_ball_alignment_field_missing_stops_safely():
+    payload = vision_ball_payload()
+    payload.pop("bearing_deg")
+    payload.pop("offset_x_norm")
+
+    decision = MotionDecisionPlanner().plan(
+        "AUTO",
+        observations(ball=payload),
+        0.1,
+    )
+
+    assert decision.source == "ball"
+    assert decision.action == "STOP"
+    assert decision.valid is False
+    assert decision.reason == "invalid_ball_alignment"
 
 
 def test_goal_approach_keeps_goal_ahead_of_fresh_ball():
