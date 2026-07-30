@@ -864,14 +864,63 @@ def test_lost_goal_stops_then_turns_toward_last_seen_side():
     assert planner.goal_tracking_active is True
     assert planner.goal_lost_elapsed_sec > 0.0
 
+
+def test_goal_recovery_timeout_is_strict_and_clears_tracking_state():
+    planner = MotionDecisionPlanner()
+    planner.plan(
+        "AUTO",
+        observations(
+            line=line_info(),
+            goal=goal_info(
+                depth_m=1.5,
+                distance_m=1.5,
+                bearing_deg=-12.0,
+                offset_x_norm=-0.25,
+            ),
+        ),
+        0.1,
+    )
+
+    before_timeout = planner.plan(
+        "AUTO",
+        observations(line=line_info(), goal={"detected": False}),
+        planner.config.goal_lost_stop_sec + 0.01,
+    )
+    remaining = (
+        planner.config.goal_recovery_timeout_sec
+        - planner.goal_lost_elapsed_sec
+    )
+    at_timeout = planner.plan(
+        "AUTO",
+        observations(line=line_info(), goal={"detected": False}),
+        remaining,
+    )
+
+    assert before_timeout.action == "LEFT"
+    assert at_timeout.action == "LEFT"
+    assert planner.goal_tracking_active is True
+    assert planner.goal_recovery_centering is True
+    assert planner.goal_lost_elapsed_sec == pytest.approx(
+        planner.config.goal_recovery_timeout_sec
+    )
+    assert planner.last_goal_bearing_deg == -12.0
+    assert planner.last_goal_offset_x_norm == -0.25
+    assert planner.last_goal_turn_direction == "LEFT"
+
     timed_out = planner.plan(
         "AUTO",
         observations(line=line_info(), goal={"detected": False}),
-        planner.config.goal_recovery_timeout_sec,
+        0.001,
     )
+
     assert timed_out.source == "line"
     assert timed_out.action == "STRAIGHT"
     assert planner.goal_tracking_active is False
+    assert planner.goal_recovery_centering is False
+    assert planner.goal_lost_elapsed_sec == 0.0
+    assert planner.last_goal_bearing_deg is None
+    assert planner.last_goal_offset_x_norm is None
+    assert planner.last_goal_turn_direction == "LEFT"
 
 
 def test_reacquired_goal_is_centered_before_line_or_goal_control():

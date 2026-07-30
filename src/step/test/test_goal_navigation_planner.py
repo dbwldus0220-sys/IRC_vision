@@ -64,3 +64,57 @@ def test_misaligned_goal_at_25cm_aligns_before_scoring():
 
     assert command.action == "ALIGN_LEFT"
     assert command.sdk_motion_requested is False
+
+
+def test_centered_goal_below_scoring_range_retreats_with_geometry():
+    planner = GoalNavigationPlanner()
+    depth = (
+        planner.config.score_target_depth_m
+        - planner.config.score_depth_tolerance_m
+        - 0.001
+    )
+
+    command = planner.plan(
+        goal_info(
+            depth_m=depth,
+            distance_m=0.18,
+            offset_x_norm=0.0,
+            score_now=False,
+        )
+    )
+
+    assert command.valid is True
+    assert command.action == "RETREAT_GOAL"
+    assert command.action not in {
+        "APPROACH_GOAL",
+        "ALIGN_LEFT",
+        "ALIGN_RIGHT",
+        "SHOT",
+    }
+    assert command.depth_m == depth
+    assert command.distance_m == 0.18
+    assert command.depth_error_m == (
+        depth - planner.config.score_target_depth_m
+    )
+    assert command.is_centered is True
+    assert command.depth_in_score_range is False
+
+
+def test_scoring_lower_boundary_is_inclusive_before_retreat():
+    planner = GoalNavigationPlanner()
+    boundary = (
+        planner.config.score_target_depth_m
+        - planner.config.score_depth_tolerance_m
+    )
+
+    at_boundary = planner.plan(
+        goal_info(depth_m=boundary, score_now=False)
+    )
+    below_boundary = planner.plan(
+        goal_info(depth_m=boundary - 0.001, score_now=False)
+    )
+
+    assert at_boundary.action == "WAIT_SCORE_CONFIRMATION"
+    assert at_boundary.depth_in_score_range is True
+    assert below_boundary.action == "RETREAT_GOAL"
+    assert below_boundary.depth_in_score_range is False
