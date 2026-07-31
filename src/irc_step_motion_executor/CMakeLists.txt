@@ -61,7 +61,8 @@ if(BUILD_TESTING)
   if(TARGET test_catalog_only_core)
     target_link_libraries(test_catalog_only_core catalog_only_core)
     target_compile_definitions(test_catalog_only_core PRIVATE
-      TEST_ALIAS_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/config/motion_aliases.yaml")
+      TEST_ALIAS_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/config/motion_aliases.yaml"
+      TEST_CONTRACT_VECTORS="${CMAKE_CURRENT_SOURCE_DIR}/test/legacy_catalog_contract_vectors.json")
   endif()
 endif()
 

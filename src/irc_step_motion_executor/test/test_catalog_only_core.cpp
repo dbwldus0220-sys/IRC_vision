@@ -12,6 +12,10 @@
 #define TEST_ALIAS_CONFIG ""
 #endif
 
+#ifndef TEST_CONTRACT_VECTORS
+#define TEST_CONTRACT_VECTORS ""
+#endif
+
 namespace
 {
 
@@ -21,6 +25,16 @@ irc_step_motion_executor::CatalogOnlyCore make_core()
   std::string error;
   EXPECT_TRUE(catalog.load(TEST_ALIAS_CONFIG, error)) << error;
   return irc_step_motion_executor::CatalogOnlyCore(std::move(catalog));
+}
+
+json_object * load_contract_vectors()
+{
+  json_object * vectors = json_object_from_file(TEST_CONTRACT_VECTORS);
+  EXPECT_NE(vectors, nullptr);
+  if (vectors != nullptr) {
+    EXPECT_EQ(json_object_get_type(vectors), json_type_array);
+  }
+  return vectors;
 }
 
 TEST(MotionAliasCatalog, LoadsOnlyCandidateAliases)
@@ -58,6 +72,41 @@ TEST(CatalogOnlyCore, RejectsInvalidJsonSafely)
   const auto status = make_core().handle_request("{not-json");
   EXPECT_EQ(status.status, "REJECTED");
   EXPECT_EQ(status.error_code, "INVALID_REQUEST");
+  EXPECT_FALSE(status.action.has_value());
+  EXPECT_FALSE(status.command_id.has_value());
+  EXPECT_FALSE(status.event_id.has_value());
+  EXPECT_EQ(status.request_id, 0);
+  EXPECT_TRUE(status.motion_id.empty());
+}
+
+TEST(CatalogOnlyCore, DistinguishesRequiredNullEventIdFromMissingEventId)
+{
+  const auto core = make_core();
+  const auto null_status = core.handle_request(
+    R"({"action":"STRAIGHT","command_id":17,"event_id":null,)"
+    R"("request_id":41,"motion_id":"forward"})");
+  EXPECT_EQ(null_status.error_code, "HARDWARE_NOT_READY");
+  EXPECT_FALSE(null_status.event_id.has_value());
+
+  const auto missing_status = core.handle_request(
+    R"({"action":"STRAIGHT","command_id":17,)"
+    R"("request_id":41,"motion_id":"forward"})");
+  EXPECT_EQ(missing_status.status, "REJECTED");
+  EXPECT_EQ(missing_status.error_code, "INVALID_REQUEST");
+}
+
+TEST(CatalogOnlyCore, RequiresEveryRequestContractField)
+{
+  const auto core = make_core();
+  for (const std::string payload : {
+      R"({"command_id":1,"event_id":2,"request_id":3,"motion_id":"forward"})",
+      R"({"action":"STRAIGHT","event_id":2,"request_id":3,"motion_id":"forward"})",
+      R"({"action":"STRAIGHT","command_id":1,"request_id":3,"motion_id":"forward"})",
+      R"({"action":"STRAIGHT","command_id":1,"event_id":2,"motion_id":"forward"})",
+      R"({"action":"STRAIGHT","command_id":1,"event_id":2,"request_id":3})"})
+  {
+    EXPECT_EQ(core.handle_request(payload).error_code, "INVALID_REQUEST");
+  }
 }
 
 TEST(CatalogOnlyCore, RejectsUnknownAliasWithoutFallback)
@@ -87,7 +136,89 @@ TEST(CatalogOnlyCore, SerializedStatusContainsContractFields)
     json_object * value = nullptr;
     EXPECT_TRUE(json_object_object_get_ex(object, field, &value)) << field;
   }
+  json_object * value = nullptr;
+  ASSERT_TRUE(json_object_object_get_ex(object, "status", &value));
+  EXPECT_EQ(json_object_get_type(value), json_type_string);
+  ASSERT_TRUE(json_object_object_get_ex(object, "action", &value));
+  EXPECT_EQ(json_object_get_type(value), json_type_string);
+  ASSERT_TRUE(json_object_object_get_ex(object, "command_id", &value));
+  EXPECT_EQ(json_object_get_type(value), json_type_int);
+  ASSERT_TRUE(json_object_object_get_ex(object, "event_id", &value));
+  EXPECT_EQ(json_object_get_type(value), json_type_int);
+  ASSERT_TRUE(json_object_object_get_ex(object, "request_id", &value));
+  EXPECT_EQ(json_object_get_type(value), json_type_int);
+  ASSERT_TRUE(json_object_object_get_ex(object, "motion_id", &value));
+  EXPECT_EQ(json_object_get_type(value), json_type_string);
+  ASSERT_TRUE(json_object_object_get_ex(object, "error_code", &value));
+  EXPECT_EQ(json_object_get_type(value), json_type_string);
+  ASSERT_TRUE(json_object_object_get_ex(object, "message", &value));
+  EXPECT_EQ(json_object_get_type(value), json_type_string);
   json_object_put(object);
+}
+
+TEST(CatalogOnlyCore, SerializedStatusPreservesNullCorrelationTypes)
+{
+  const auto status = make_core().handle_request(
+    R"({"action":"SLOW_APPROACH","command_id":null,"event_id":null,)"
+    R"("request_id":7,"motion_id":"forward_short"})");
+  const std::string payload =
+    irc_step_motion_executor::CatalogOnlyCore::to_json(status);
+  json_object * object = json_tokener_parse(payload.c_str());
+  ASSERT_NE(object, nullptr);
+  json_object * value = nullptr;
+  ASSERT_TRUE(json_object_object_get_ex(object, "command_id", &value));
+  EXPECT_EQ(json_object_get_type(value), json_type_null);
+  ASSERT_TRUE(json_object_object_get_ex(object, "event_id", &value));
+  EXPECT_EQ(json_object_get_type(value), json_type_null);
+  json_object_put(object);
+}
+
+TEST(CatalogOnlyContract, SharedVectorsPreserveFieldsWithoutFallback)
+{
+  json_object * vectors = load_contract_vectors();
+  ASSERT_NE(vectors, nullptr);
+  const auto core = make_core();
+
+  const std::size_t count = json_object_array_length(vectors);
+  for (std::size_t index = 0; index < count; ++index) {
+    json_object * vector = json_object_array_get_idx(vectors, index);
+    json_object * request = nullptr;
+    json_object * expected_error = nullptr;
+    ASSERT_TRUE(json_object_object_get_ex(vector, "request", &request));
+    ASSERT_TRUE(
+      json_object_object_get_ex(
+        vector, "expected_error_code", &expected_error));
+
+    const auto status = core.handle_request(
+      json_object_to_json_string_ext(request, JSON_C_TO_STRING_PLAIN));
+    EXPECT_EQ(status.status, "REJECTED");
+    EXPECT_EQ(status.error_code, json_object_get_string(expected_error));
+
+    json_object * value = nullptr;
+    ASSERT_TRUE(json_object_object_get_ex(request, "action", &value));
+    ASSERT_TRUE(status.action.has_value());
+    EXPECT_EQ(*status.action, json_object_get_string(value));
+    ASSERT_TRUE(json_object_object_get_ex(request, "request_id", &value));
+    EXPECT_EQ(status.request_id, json_object_get_int64(value));
+    ASSERT_TRUE(json_object_object_get_ex(request, "motion_id", &value));
+    EXPECT_EQ(status.motion_id, json_object_get_string(value));
+
+    ASSERT_TRUE(json_object_object_get_ex(request, "command_id", &value));
+    if (json_object_get_type(value) == json_type_null) {
+      EXPECT_FALSE(status.command_id.has_value());
+    } else {
+      ASSERT_TRUE(status.command_id.has_value());
+      EXPECT_EQ(*status.command_id, json_object_get_int64(value));
+    }
+    ASSERT_TRUE(json_object_object_get_ex(request, "event_id", &value));
+    if (json_object_get_type(value) == json_type_null) {
+      EXPECT_FALSE(status.event_id.has_value());
+    } else {
+      ASSERT_TRUE(status.event_id.has_value());
+      EXPECT_EQ(*status.event_id, json_object_get_int64(value));
+    }
+  }
+  json_object_put(vectors);
 }
 
 TEST(CatalogOnlyCore, CancelNeverTouchesHardware)

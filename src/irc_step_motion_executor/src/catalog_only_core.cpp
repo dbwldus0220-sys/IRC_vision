@@ -52,14 +52,15 @@ bool get_required_string(
   return !output.empty();
 }
 
-bool get_optional_int(
+bool get_required_nullable_int(
   json_object * object, const char * key,
   std::optional<std::int64_t> & output)
 {
   json_object * value = nullptr;
-  if (!json_object_object_get_ex(object, key, &value) ||
-    json_object_get_type(value) == json_type_null)
-  {
+  if (!json_object_object_get_ex(object, key, &value)) {
+    return false;
+  }
+  if (json_object_get_type(value) == json_type_null) {
     output.reset();
     return true;
   }
@@ -70,18 +71,14 @@ bool get_optional_int(
   return true;
 }
 
-bool get_optional_string(
+bool get_required_string(
   json_object * object, const char * key,
   std::optional<std::string> & output)
 {
   json_object * value = nullptr;
   if (!json_object_object_get_ex(object, key, &value) ||
-    json_object_get_type(value) == json_type_null)
+    json_object_get_type(value) != json_type_string)
   {
-    output.reset();
-    return true;
-  }
-  if (json_object_get_type(value) != json_type_string) {
     return false;
   }
   const std::string parsed = json_object_get_string(value);
@@ -179,9 +176,9 @@ MotionStatus CatalogOnlyCore::handle_request(const std::string & payload) const
   const bool valid =
     get_required_int(object, "request_id", request.request_id) &&
     get_required_string(object, "motion_id", request.motion_id) &&
-    get_optional_int(object, "command_id", request.command_id) &&
-    get_optional_int(object, "event_id", request.event_id) &&
-    get_optional_string(object, "action", request.action);
+    get_required_nullable_int(object, "command_id", request.command_id) &&
+    get_required_nullable_int(object, "event_id", request.event_id) &&
+    get_required_string(object, "action", request.action);
   json_object_put(object);
   if (!valid) {
     return invalid_request(

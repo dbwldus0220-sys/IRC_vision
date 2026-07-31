@@ -19,6 +19,18 @@
 alias일 뿐 production 확정값이 아니다. `turn_left`, `shoot`, `hurdle` 등
 확인되지 않은 motion은 의도적으로 매핑하지 않았다.
 
+## JSON 계약
+
+request는 `action`(string), `command_id`(integer 또는 null),
+`event_id`(integer 또는 null), `request_id`(integer),
+`motion_id`(string)를 필수 key로 사용한다. 특히 `event_id: null`은 유효하지만
+`event_id` key 누락은 `REJECTED` / `INVALID_REQUEST`이다.
+
+status는 `status`, `action`, `command_id`, `event_id`, `request_id`,
+`motion_id`, `error_code`, `message`를 항상 포함한다. catalog-only core는
+정상 계약 요청의 원래 action과 correlation 값을 terminal `REJECTED`
+status까지 보존한다.
+
 ## 빌드 모드
 
 기본 빌드는 SDK 경로 없이 catalog-only 모드로 동작한다.
