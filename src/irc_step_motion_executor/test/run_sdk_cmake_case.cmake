@@ -1,0 +1,41 @@
+if(NOT DEFINED PACKAGE_SOURCE_DIR OR NOT DEFINED TEST_BINARY_DIR)
+  message(FATAL_ERROR "PACKAGE_SOURCE_DIR and TEST_BINARY_DIR are required")
+endif()
+
+execute_process(
+  COMMAND "${CMAKE_COMMAND}"
+    -S "${PACKAGE_SOURCE_DIR}"
+    -B "${TEST_BINARY_DIR}"
+    -DBUILD_TESTING=OFF
+    -DIRC_STEP_ENABLE_ROBOT_MOTION_SDK=ON
+    "-DROBOT_MOTION_SDK_DIR=${SDK_DIR}"
+  RESULT_VARIABLE configure_result
+  OUTPUT_VARIABLE configure_stdout
+  ERROR_VARIABLE configure_stderr)
+
+set(configure_output "${configure_stdout}\n${configure_stderr}")
+
+if(EXPECT_SUCCESS)
+  if(NOT configure_result EQUAL 0)
+    message(FATAL_ERROR
+      "Expected SDK configure success, got ${configure_result}:\n${configure_output}")
+  endif()
+  execute_process(
+    COMMAND "${CMAKE_COMMAND}" --build "${TEST_BINARY_DIR}"
+      --target irc_step_motion_sdk_compile_probe
+    RESULT_VARIABLE build_result
+    OUTPUT_VARIABLE build_stdout
+    ERROR_VARIABLE build_stderr)
+  if(NOT build_result EQUAL 0)
+    message(FATAL_ERROR
+      "SDK compile probe build failed:\n${build_stdout}\n${build_stderr}")
+  endif()
+else()
+  if(configure_result EQUAL 0)
+    message(FATAL_ERROR "Expected SDK configure failure, but it succeeded")
+  endif()
+  if(EXPECTED_ERROR AND NOT configure_output MATCHES "${EXPECTED_ERROR}")
+    message(FATAL_ERROR
+      "Configure failed without expected text '${EXPECTED_ERROR}':\n${configure_output}")
+  endif()
+endif()

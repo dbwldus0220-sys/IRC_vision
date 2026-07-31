@@ -23,14 +23,34 @@ if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK)
     message(FATAL_ERROR
       "IRC_STEP_ENABLE_ROBOT_MOTION_SDK=ON requires ROBOT_MOTION_SDK_DIR")
   endif()
-  if(NOT EXISTS "${ROBOT_MOTION_SDK_DIR}/CMakeLists.txt")
+  if(NOT IS_DIRECTORY "${ROBOT_MOTION_SDK_DIR}")
     message(FATAL_ERROR
-      "ROBOT_MOTION_SDK_DIR must contain the SDK CMakeLists.txt: ${ROBOT_MOTION_SDK_DIR}")
+      "ROBOT_MOTION_SDK_DIR is not an existing directory: ${ROBOT_MOTION_SDK_DIR}")
   endif()
+  foreach(required_sdk_file
+      CMakeLists.txt
+      robot_motion_player.hpp
+      robot_motion_player.cpp)
+    if(NOT EXISTS "${ROBOT_MOTION_SDK_DIR}/${required_sdk_file}")
+      message(FATAL_ERROR
+        "ROBOT_MOTION_SDK_DIR is missing required file: ${required_sdk_file}")
+    endif()
+  endforeach()
   message(STATUS
     "SDK inclusion enabled; no SDK backend is instantiated by this package")
   add_subdirectory("${ROBOT_MOTION_SDK_DIR}"
     "${CMAKE_CURRENT_BINARY_DIR}/robot_motion_sdk" EXCLUDE_FROM_ALL)
+  if(NOT TARGET robot_control)
+    message(FATAL_ERROR
+      "External SDK must create a CMake target named robot_control")
+  endif()
+
+  add_library(irc_step_motion_sdk_compile_probe SHARED
+    src/sdk_compile_probe.cpp)
+  target_compile_features(irc_step_motion_sdk_compile_probe PUBLIC cxx_std_17)
+  target_include_directories(irc_step_motion_sdk_compile_probe PRIVATE
+    "${ROBOT_MOTION_SDK_DIR}")
+  target_link_libraries(irc_step_motion_sdk_compile_probe PRIVATE robot_control)
 else()
   message(STATUS
     "Building catalog-only mode (RobotMotionPlayer SDK is not included or linked)")
@@ -64,6 +84,44 @@ if(BUILD_TESTING)
       TEST_ALIAS_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/config/motion_aliases.yaml"
       TEST_CONTRACT_VECTORS="${CMAKE_CURRENT_SOURCE_DIR}/test/legacy_catalog_contract_vectors.json")
   endif()
+
+  function(add_sdk_cmake_guard_test test_name sdk_dir expect_success expected_error)
+    add_test(
+      NAME ${test_name}
+      COMMAND ${CMAKE_COMMAND}
+        "-DPACKAGE_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
+        "-DTEST_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/sdk_cmake_tests/${test_name}"
+        "-DSDK_DIR=${sdk_dir}"
+        "-DEXPECT_SUCCESS=${expect_success}"
+        "-DEXPECTED_ERROR=${expected_error}"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/test/run_sdk_cmake_case.cmake")
+  endfunction()
+
+  add_sdk_cmake_guard_test(
+    sdk_cmake_empty_path "" FALSE
+    "requires ROBOT_MOTION_SDK_DIR")
+  add_sdk_cmake_guard_test(
+    sdk_cmake_nonexistent_path
+    "${CMAKE_CURRENT_BINARY_DIR}/sdk_path_that_does_not_exist"
+    FALSE "is not an existing directory")
+  add_sdk_cmake_guard_test(
+    sdk_cmake_missing_required_files
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/fixtures/missing_files_sdk"
+    FALSE "missing required file: robot_motion_player.hpp")
+  add_sdk_cmake_guard_test(
+    sdk_cmake_missing_robot_control_target
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/fixtures/missing_target_sdk"
+    FALSE "must create a CMake target named robot_control")
+  add_sdk_cmake_guard_test(
+    sdk_cmake_fake_sdk_build
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/fixtures/fake_robot_motion_sdk"
+    TRUE "")
+  add_test(
+    NAME sdk_cmake_disabled_build_has_no_hardware_symbols
+    COMMAND ${CMAKE_COMMAND}
+      "-DPACKAGE_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
+      "-DTEST_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/sdk_cmake_tests/sdk_disabled"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/test/run_sdk_disabled_case.cmake")
 endif()
 
 ament_export_include_directories(include)

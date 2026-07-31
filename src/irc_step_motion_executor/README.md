@@ -39,10 +39,10 @@ status까지 보존한다.
 colcon build --packages-select irc_step_motion_executor
 ```
 
-외부 SDK 포함을 위한 build guard만 준비되어 있다. SDK 소스의 라이선스 및
-재배포 승인이 끝난 뒤에만 SDK를 `vendor/robot_motion_sdk` 같은 승인된 위치에
-배치해야 한다. 이 저장소는 SDK 소스를 포함하지 않으며 tar.gz를 자동으로
-해제하지 않는다.
+SDK-enabled 빌드는 명시적으로 option을 켜는 경우에만 구성된다. SDK 소스의
+라이선스, 복사 및 사용에 대한 조직 승인이 끝난 뒤에만 승인된 **외부 경로**를
+지정해야 한다. 이 저장소에는 SDK를 복사하지 않으며 `vendor/robot_motion_sdk`
+디렉터리나 tar.gz 해제 결과를 만들지 않는다.
 
 ```bash
 colcon build --packages-select irc_step_motion_executor \
@@ -53,9 +53,25 @@ colcon build --packages-select irc_step_motion_executor \
 
 `IRC_STEP_ENABLE_ROBOT_MOTION_SDK`의 기본값은 `OFF`,
 `ROBOT_MOTION_SDK_DIR`의 기본값은 빈 문자열이다. option이 `OFF`이면 SDK를
-`add_subdirectory()` 하지 않고 어떤 SDK library에도 링크하지 않는다.
-option이 `ON`이면 유효한 SDK `CMakeLists.txt`가 반드시 필요하다. 이 모드에도
-실제 SDK 호출 node/backend 연결은 아직 구현되어 있지 않다.
+탐색하거나 `add_subdirectory()` 하지 않고 어떤 SDK library에도 링크하지
+않는다.
+
+option이 `ON`이면 지정한 외부 디렉터리에 다음 항목이 모두 있어야 한다.
+
+- `CMakeLists.txt`
+- `robot_motion_player.hpp`
+- `robot_motion_player.cpp`
+- `add_subdirectory()` 이후 생성되는 `robot_control` CMake target
+
+경로 또는 항목이 없으면 configure 단계에서 명확히 실패하며 다른 경로로
+fallback하지 않는다. SDK source는 현재 package build tree 아래의 별도 binary
+directory에서 `add_subdirectory()`되고 원본 source는 수정하지 않는다.
+
+현재 sdk-enabled 결과물은 `robot_motion_player.hpp` include와
+`robot_control` link 적합성만 확인하는 compile probe이다. 실제
+`sdk_motion_executor_node`, `RobotMotionPlayer`, Dynamixel 객체 또는 hardware
+호출은 포함하지 않는다. 따라서 sdk-enabled build 성공은 실제 로봇에서의
+동작 가능성이나 안전성을 의미하지 않는다.
 
 ## Launch
 
@@ -66,7 +82,9 @@ ros2 launch irc_step_motion_executor catalog_only.launch.py
 launch의 `hardware_enable` 기본값은 `false`, runtime SDK 경로 기본값은 빈
 문자열이다. catalog-only node는 두 안전 조건을 강제하며 실제 장치, serial,
 torque 또는 motor에 접근하지 않는다. 실물 motion 정보와 안전 조건이 확정되기
-전에는 sdk-enabled 빌드 및 실물 실행을 사용하지 않는다.
+전에는 sdk-enabled build 결과를 hardware node로 확장하거나 실물에서 실행하지
+않는다. 관절 방향·영점·limit·속도·전류/토크·비상정지 등 calibration 및 안전
+정보가 확인되기 전에는 hardware node 사용을 금지한다.
 
 기존 Python `motion_executor_node`, legacy adapter, SDK placeholder,
 `full_system.launch.py`는 이 패키지와 별개이며 변경하거나 대체하지 않는다.

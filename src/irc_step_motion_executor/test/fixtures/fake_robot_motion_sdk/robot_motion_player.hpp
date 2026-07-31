@@ -1,0 +1,6 @@
+#ifndef FAKE_ROBOT_MOTION_PLAYER_HPP_
+#define FAKE_ROBOT_MOTION_PLAYER_HPP_
+
+class RobotMotionPlayer;
+
+#endif  // FAKE_ROBOT_MOTION_PLAYER_HPP_
