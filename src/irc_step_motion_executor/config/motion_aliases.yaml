@@ -1,0 +1,4 @@
+# Development candidates only. Confirm these names on the physical robot before SDK use.
+motion_aliases:
+  forward: "전진"
+  forward_short: "첫발"
