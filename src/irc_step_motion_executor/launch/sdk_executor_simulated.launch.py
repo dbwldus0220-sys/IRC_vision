@@ -35,6 +35,8 @@ def generate_launch_description():
             name="sdk_motion_executor",
             output="screen",
             parameters=[{
+                "backend_type": "simulated",
+                "enable_robot_hardware": False,
                 "motion_aliases_file": motion_aliases_file,
                 "poll_period_ms": poll_period_ms,
                 "running_polls": running_polls,

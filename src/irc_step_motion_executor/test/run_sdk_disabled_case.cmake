@@ -21,6 +21,8 @@ execute_process(
       catalog_only_core
       sdk_executor_core
       simulated_motion_backend
+      robot_motion_runtime_config
+      motion_backend_factory
       sdk_executor_driver
       catalog_only_node
       sdk_motion_executor
@@ -37,6 +39,8 @@ foreach(binary
     "${TEST_BINARY_DIR}/libcatalog_only_core.a"
     "${TEST_BINARY_DIR}/libsdk_executor_core.a"
     "${TEST_BINARY_DIR}/libsimulated_motion_backend.a"
+    "${TEST_BINARY_DIR}/librobot_motion_runtime_config.a"
+    "${TEST_BINARY_DIR}/libmotion_backend_factory.a"
     "${TEST_BINARY_DIR}/libsdk_executor_driver.a"
     "${TEST_BINARY_DIR}/catalog_only_node"
     "${TEST_BINARY_DIR}/sdk_motion_executor")

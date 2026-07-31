@@ -92,6 +92,32 @@ target_include_directories(simulated_motion_backend PUBLIC
   "$<INSTALL_INTERFACE:include>")
 target_link_libraries(simulated_motion_backend PUBLIC sdk_executor_core)
 
+add_library(
+  robot_motion_runtime_config
+  src/robot_motion_runtime_config.cpp)
+target_compile_features(robot_motion_runtime_config PUBLIC cxx_std_17)
+target_include_directories(robot_motion_runtime_config PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>")
+
+add_library(motion_backend_factory src/motion_backend_factory.cpp)
+target_compile_features(motion_backend_factory PUBLIC cxx_std_17)
+target_include_directories(motion_backend_factory PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>")
+target_link_libraries(
+  motion_backend_factory
+  PUBLIC simulated_motion_backend robot_motion_runtime_config)
+if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK)
+  target_compile_definitions(
+    motion_backend_factory
+    PRIVATE IRC_STEP_ROBOT_MOTION_PLAYER_BACKEND_BUILT=1)
+else()
+  target_compile_definitions(
+    motion_backend_factory
+    PRIVATE IRC_STEP_ROBOT_MOTION_PLAYER_BACKEND_BUILT=0)
+endif()
+
 add_library(sdk_executor_driver src/sdk_executor_driver.cpp)
 target_compile_features(sdk_executor_driver PUBLIC cxx_std_17)
 target_include_directories(sdk_executor_driver PUBLIC
@@ -107,7 +133,7 @@ ament_target_dependencies(catalog_only_node ament_index_cpp rclcpp std_msgs)
 add_executable(sdk_motion_executor src/sdk_executor_node.cpp)
 target_compile_features(sdk_motion_executor PUBLIC cxx_std_17)
 target_link_libraries(
-  sdk_motion_executor sdk_executor_driver simulated_motion_backend)
+  sdk_motion_executor sdk_executor_driver motion_backend_factory)
 ament_target_dependencies(
   sdk_motion_executor ament_index_cpp rclcpp std_msgs)
 
@@ -115,6 +141,8 @@ install(TARGETS
     catalog_only_core
     sdk_executor_core
     simulated_motion_backend
+    robot_motion_runtime_config
+    motion_backend_factory
     sdk_executor_driver
     catalog_only_node
     sdk_motion_executor
@@ -157,6 +185,31 @@ if(BUILD_TESTING)
       test_simulated_motion_backend simulated_motion_backend)
   endif()
   ament_add_gtest(
+    test_robot_motion_runtime_config
+    test/test_robot_motion_runtime_config.cpp)
+  if(TARGET test_robot_motion_runtime_config)
+    target_link_libraries(
+      test_robot_motion_runtime_config robot_motion_runtime_config)
+  endif()
+  ament_add_gtest(
+    test_motion_backend_factory
+    test/test_motion_backend_factory.cpp)
+  if(TARGET test_motion_backend_factory)
+    target_link_libraries(
+      test_motion_backend_factory motion_backend_factory)
+    target_compile_definitions(test_motion_backend_factory PRIVATE
+      TEST_EXISTING_RUNTIME_FILE="${CMAKE_CURRENT_SOURCE_DIR}/config/motion_aliases.yaml")
+    if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK)
+      target_compile_definitions(
+        test_motion_backend_factory
+        PRIVATE EXPECT_ROBOT_MOTION_PLAYER_BACKEND_BUILT=1)
+    else()
+      target_compile_definitions(
+        test_motion_backend_factory
+        PRIVATE EXPECT_ROBOT_MOTION_PLAYER_BACKEND_BUILT=0)
+    endif()
+  endif()
+  ament_add_gtest(
     test_sdk_executor_driver test/test_sdk_executor_driver.cpp)
   if(TARGET test_sdk_executor_driver)
     target_include_directories(test_sdk_executor_driver PRIVATE test)
@@ -171,6 +224,19 @@ if(BUILD_TESTING)
     test/test_sdk_executor_node_launch.py
     TIMEOUT 30
     ENV "ROS_LOG_DIR=${CMAKE_CURRENT_BINARY_DIR}/ros_test_logs"
+    APPEND_ENV "AMENT_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}"
+    APPEND_LIBRARY_DIRS "${CMAKE_INSTALL_PREFIX}/lib")
+  if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK)
+    set(expect_robot_motion_player_backend_built 1)
+  else()
+    set(expect_robot_motion_player_backend_built 0)
+  endif()
+  add_launch_test(
+    test/test_backend_selection_rejected_launch.py
+    TIMEOUT 30
+    ENV
+      "ROS_LOG_DIR=${CMAKE_CURRENT_BINARY_DIR}/ros_test_logs"
+      "EXPECT_ROBOT_MOTION_PLAYER_BACKEND_BUILT=${expect_robot_motion_player_backend_built}"
     APPEND_ENV "AMENT_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}"
     APPEND_LIBRARY_DIRS "${CMAKE_INSTALL_PREFIX}/lib")
 
@@ -218,6 +284,8 @@ ament_export_libraries(
   catalog_only_core
   sdk_executor_core
   simulated_motion_backend
+  robot_motion_runtime_config
+  motion_backend_factory
   sdk_executor_driver)
 if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK)
   ament_export_libraries(robot_motion_player_backend)

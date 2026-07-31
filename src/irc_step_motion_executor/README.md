@@ -52,7 +52,10 @@ ROS 2 node이다. 실제 SDK backend는 아직 연결되어 있지 않다.
 - subscribe: `/motion/executor/request`
 - subscribe: `/motion/executor/cancel`
 - publish: `/motion/executor/status`
-- parameters: `motion_aliases_file`, `poll_period_ms`(기본 20),
+- parameters: `backend_type`(기본 `simulated`),
+  `enable_robot_hardware`(기본 `false`), `motion_json_path`(기본 빈 값),
+  `motion_aliases_file`,
+  `poll_period_ms`(기본 20),
   `running_polls`(기본 2),
   `settling_polls`(기본 1), `force_start_failure`, `force_backend_failure`
 
@@ -67,6 +70,39 @@ message에 settling을 표시한 `RUNNING`으로 발행된다. cancel은 다음 
 
 이 launch에는 실물 로봇이나 serial 장치를 연결하지 않는다. simulated
 topic test 통과 역시 실물 안전성 검증을 의미하지 않는다.
+
+`MotionBackend` 생성은 node가 아니라 factory가 담당한다. parameter를
+생략하거나 `backend_type=simulated`를 지정하면 simulated backend만 생성되며
+실제 motion을 실행하지 않는다. `robot_motion_player`를 요청하면 simulated로
+fallback하지 않고 guard 순서에 따라 node 시작을 중단한다.
+
+- `enable_robot_hardware=false`: `ROBOT_HARDWARE_NOT_ENABLED`
+- hardware enabled + SDK OFF: `ROBOT_MOTION_PLAYER_BACKEND_NOT_BUILT`
+- hardware enabled + SDK ON + production factory 없음:
+  `ROBOT_MOTION_PLAYER_RUNTIME_NOT_CONFIGURED`
+
+SDK adapter target은 존재하지만 실제 player/hardware 생성 factory와 runtime
+wiring은 아직 비활성 상태다. 지원하지 않는 backend 이름도 허용값을 포함한
+`UNSUPPORTED_BACKEND_TYPE` 오류로 거부한다.
+
+Real runtime은 아직 비활성이다. `backend_type=robot_motion_player`만
+지정하면 `ROBOT_HARDWARE_NOT_ENABLED`로 안전하게 시작을 거부한다.
+향후 real runtime에는 `enable_robot_hardware=true`와 명시적인
+`motion_json_path`가 모두 필요하지만, 현재 production runtime factory가
+연결되지 않았으므로 실제 SDK 객체를 생성하지 않는다. real 요청은
+simulated로 fallback하지 않는다.
+
+현재 SDK API에서 runtime 생성자에 전달할 수 있는 설정은 motion JSON
+경로뿐이다. device `/dev/ttyUSB0`, baud rate `4000000`, protocol `2.0`은
+외부 SDK 저수준 소스에 하드코딩되어 있어 이 package의 설정으로 노출하지
+않았다. 이 값과 calibration, joint limit 및 실물 안전 정보가 검증되기
+전에는 hardware를 활성화하면 안 된다. build/test 성공은 실물 안전성
+검증을 의미하지 않는다.
+
+`RobotMotionRuntime`은 SDK runtime 소유자를 backend보다 오래 유지한다.
+멤버 소멸 순서상 backend가 먼저 파괴되고 runtime 소유자가 나중에
+파괴되므로, 참조 기반 `RobotMotionPlayerBackend`의 dangling reference를
+방지할 수 있다. 현재는 이 계약을 fake runtime factory로만 검증한다.
 
 ## RobotMotionPlayer backend adapter
 

@@ -1,6 +1,6 @@
+#include "irc_step_motion_executor/motion_backend_factory.hpp"
 #include "irc_step_motion_executor/sdk_executor_core.hpp"
 #include "irc_step_motion_executor/sdk_executor_driver.hpp"
-#include "irc_step_motion_executor/simulated_motion_backend.hpp"
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -43,6 +43,12 @@ public:
       "irc_step_motion_executor") + "/config/motion_aliases.yaml";
     const std::string alias_path = declare_parameter<std::string>(
       "motion_aliases_file", default_alias_path);
+    const std::string backend_type = declare_parameter<std::string>(
+      "backend_type", "simulated");
+    const bool enable_robot_hardware = declare_parameter<bool>(
+      "enable_robot_hardware", false);
+    const std::string motion_json_path = declare_parameter<std::string>(
+      "motion_json_path", "");
     const std::int64_t poll_period_ms = positive_parameter_or_default(
       "poll_period_ms", kDefaultPollPeriodMs);
     const std::int64_t running_polls = nonnegative_parameter_or_default(
@@ -57,17 +63,26 @@ public:
               "failed to load motion alias catalog: " + error_message);
     }
 
-    SimulatedMotionBackendConfig backend_config;
-    backend_config.running_polls =
+    MotionBackendFactoryOptions backend_options;
+    backend_options.backend_type = backend_type;
+    backend_options.enable_robot_hardware = enable_robot_hardware;
+    backend_options.robot_motion_player.motion_json_path = motion_json_path;
+    backend_options.simulated.running_polls =
       static_cast<std::size_t>(running_polls);
-    backend_config.settling_polls =
+    backend_options.simulated.settling_polls =
       static_cast<std::size_t>(settling_polls);
-    backend_config.force_start_failure = declare_parameter<bool>(
+    backend_options.simulated.force_start_failure = declare_parameter<bool>(
       "force_start_failure", false);
-    backend_config.force_backend_failure = declare_parameter<bool>(
+    backend_options.simulated.force_backend_failure = declare_parameter<bool>(
       "force_backend_failure", false);
 
-    backend_ = std::make_unique<SimulatedMotionBackend>(backend_config);
+    auto backend_result = create_motion_backend(backend_options);
+    if (!backend_result) {
+      throw std::runtime_error(
+              backend_result.error_code + ": " + backend_result.message);
+    }
+    runtime_owner_ = std::move(backend_result.runtime_owner);
+    backend_ = std::move(backend_result.backend);
     core_ = std::make_unique<SdkExecutorCore>(
       std::move(catalog), *backend_);
     status_publisher_ = create_publisher<std_msgs::msg::String>(
@@ -128,7 +143,9 @@ private:
     return default_value;
   }
 
-  std::unique_ptr<SimulatedMotionBackend> backend_;
+  // Declared first so it outlives a backend that may borrow SDK runtime state.
+  std::shared_ptr<void> runtime_owner_;
+  std::unique_ptr<MotionBackend> backend_;
   std::unique_ptr<SdkExecutorCore> core_;
   std::unique_ptr<SdkExecutorDriver> driver_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr status_publisher_;

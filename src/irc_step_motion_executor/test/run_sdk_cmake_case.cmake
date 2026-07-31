@@ -6,7 +6,7 @@ execute_process(
   COMMAND "${CMAKE_COMMAND}"
     -S "${PACKAGE_SOURCE_DIR}"
     -B "${TEST_BINARY_DIR}"
-    -DBUILD_TESTING=OFF
+    -DBUILD_TESTING=ON
     -DIRC_STEP_ENABLE_ROBOT_MOTION_SDK=ON
     "-DROBOT_MOTION_SDK_DIR=${SDK_DIR}"
   RESULT_VARIABLE configure_result
@@ -22,13 +22,26 @@ if(EXPECT_SUCCESS)
   endif()
   execute_process(
     COMMAND "${CMAKE_COMMAND}" --build "${TEST_BINARY_DIR}"
-      --target irc_step_motion_sdk_compile_probe
+      --target
+        irc_step_motion_sdk_compile_probe
+        robot_motion_player_backend
+        test_motion_backend_factory
     RESULT_VARIABLE build_result
     OUTPUT_VARIABLE build_stdout
     ERROR_VARIABLE build_stderr)
   if(NOT build_result EQUAL 0)
     message(FATAL_ERROR
       "SDK compile probe build failed:\n${build_stdout}\n${build_stderr}")
+  endif()
+  execute_process(
+    COMMAND "${TEST_BINARY_DIR}/test_motion_backend_factory"
+    RESULT_VARIABLE factory_test_result
+    OUTPUT_VARIABLE factory_test_stdout
+    ERROR_VARIABLE factory_test_stderr)
+  if(NOT factory_test_result EQUAL 0)
+    message(FATAL_ERROR
+      "SDK-enabled factory test failed:\n"
+      "${factory_test_stdout}\n${factory_test_stderr}")
   endif()
 else()
   if(configure_result EQUAL 0)
