@@ -70,12 +70,39 @@ target_include_directories(sdk_executor_core PUBLIC
   "$<INSTALL_INTERFACE:include>")
 target_link_libraries(sdk_executor_core PUBLIC catalog_only_core)
 
+add_library(simulated_motion_backend src/simulated_motion_backend.cpp)
+target_compile_features(simulated_motion_backend PUBLIC cxx_std_17)
+target_include_directories(simulated_motion_backend PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>")
+target_link_libraries(simulated_motion_backend PUBLIC sdk_executor_core)
+
+add_library(sdk_executor_driver src/sdk_executor_driver.cpp)
+target_compile_features(sdk_executor_driver PUBLIC cxx_std_17)
+target_include_directories(sdk_executor_driver PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>")
+target_link_libraries(sdk_executor_driver PUBLIC sdk_executor_core)
+
 add_executable(catalog_only_node src/catalog_only_node.cpp)
 target_compile_features(catalog_only_node PUBLIC cxx_std_17)
 target_link_libraries(catalog_only_node catalog_only_core)
 ament_target_dependencies(catalog_only_node ament_index_cpp rclcpp std_msgs)
 
-install(TARGETS catalog_only_core sdk_executor_core catalog_only_node
+add_executable(sdk_motion_executor src/sdk_executor_node.cpp)
+target_compile_features(sdk_motion_executor PUBLIC cxx_std_17)
+target_link_libraries(
+  sdk_motion_executor sdk_executor_driver simulated_motion_backend)
+ament_target_dependencies(
+  sdk_motion_executor ament_index_cpp rclcpp std_msgs)
+
+install(TARGETS
+    catalog_only_core
+    sdk_executor_core
+    simulated_motion_backend
+    sdk_executor_driver
+    catalog_only_node
+    sdk_motion_executor
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME})
@@ -98,6 +125,30 @@ if(BUILD_TESTING)
     target_compile_definitions(test_sdk_executor_core PRIVATE
       TEST_ALIAS_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/config/motion_aliases.yaml")
   endif()
+  ament_add_gtest(
+    test_simulated_motion_backend
+    test/test_simulated_motion_backend.cpp)
+  if(TARGET test_simulated_motion_backend)
+    target_link_libraries(
+      test_simulated_motion_backend simulated_motion_backend)
+  endif()
+  ament_add_gtest(
+    test_sdk_executor_driver test/test_sdk_executor_driver.cpp)
+  if(TARGET test_sdk_executor_driver)
+    target_include_directories(test_sdk_executor_driver PRIVATE test)
+    target_link_libraries(test_sdk_executor_driver sdk_executor_driver)
+    target_compile_definitions(test_sdk_executor_driver PRIVATE
+      TEST_ALIAS_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/config/motion_aliases.yaml")
+  endif()
+
+  find_package(launch_testing_ament_cmake REQUIRED)
+  file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/ros_test_logs")
+  add_launch_test(
+    test/test_sdk_executor_node_launch.py
+    TIMEOUT 30
+    ENV "ROS_LOG_DIR=${CMAKE_CURRENT_BINARY_DIR}/ros_test_logs"
+    APPEND_ENV "AMENT_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}"
+    APPEND_LIBRARY_DIRS "${CMAKE_INSTALL_PREFIX}/lib")
 
   function(add_sdk_cmake_guard_test test_name sdk_dir expect_success expected_error)
     add_test(
@@ -139,5 +190,9 @@ if(BUILD_TESTING)
 endif()
 
 ament_export_include_directories(include)
-ament_export_libraries(catalog_only_core sdk_executor_core)
+ament_export_libraries(
+  catalog_only_core
+  sdk_executor_core
+  simulated_motion_backend
+  sdk_executor_driver)
 ament_package()

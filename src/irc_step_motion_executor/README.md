@@ -39,10 +39,34 @@ status까지 보존한다.
 request를 검증하고 alias를 resolve한 뒤 이 인터페이스를 통해서만 motion
 상태를 처리한다.
 
-현재 검증은 test 전용 `FakeMotionBackend`만 사용한다. 실제
-`RobotMotionPlayer` adapter와 ROS 2 executor node는 아직 구현하지 않았으며,
+core 단위 검증은 test 전용 `FakeMotionBackend`만 사용한다. 실제
+`RobotMotionPlayer` adapter와 hardware executor node는 아직 구현하지 않았으며,
 core library는 `robot_control` target에 링크하지 않는다. 이 core의 빌드와
 단위 테스트 통과는 실물 동작 또는 안전성 검증을 의미하지 않는다.
+
+## Simulated executor node
+
+`sdk_motion_executor`는 현재 `SimulatedMotionBackend`만 사용하는 하드웨어 없는
+ROS 2 node이다. 실제 SDK backend는 아직 연결되어 있지 않다.
+
+- subscribe: `/motion/executor/request`
+- subscribe: `/motion/executor/cancel`
+- publish: `/motion/executor/status`
+- parameters: `motion_aliases_file`, `poll_period_ms`(기본 20),
+  `running_polls`(기본 2),
+  `settling_polls`(기본 1), `force_start_failure`, `force_backend_failure`
+
+```bash
+ros2 launch irc_step_motion_executor sdk_executor_simulated.launch.py
+```
+
+request는 즉시 status를 만들고 timer poll은 simulated 상태를
+`RUNNING → SETTLING → SUCCEEDED`로 진행한다. 외부 status에서 `SETTLING`은
+message에 settling을 표시한 `RUNNING`으로 발행된다. cancel은 다음 poll에서
+`CANCELLED`가 된다. 전이는 sleep이나 장치 시간이 아닌 poll 횟수만 사용한다.
+
+이 launch에는 실물 로봇이나 serial 장치를 연결하지 않는다. simulated
+topic test 통과 역시 실물 안전성 검증을 의미하지 않는다.
 
 ## 빌드 모드
 
