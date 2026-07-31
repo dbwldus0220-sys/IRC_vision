@@ -70,6 +70,21 @@ target_include_directories(sdk_executor_core PUBLIC
   "$<INSTALL_INTERFACE:include>")
 target_link_libraries(sdk_executor_core PUBLIC catalog_only_core)
 
+if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK)
+  add_library(
+    robot_motion_player_backend
+    src/robot_motion_player_backend.cpp)
+  target_compile_features(robot_motion_player_backend PUBLIC cxx_std_20)
+  target_include_directories(robot_motion_player_backend PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:include>")
+  target_link_libraries(
+    robot_motion_player_backend PUBLIC sdk_executor_core robot_control)
+  install(TARGETS robot_motion_player_backend
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib)
+endif()
+
 add_library(simulated_motion_backend src/simulated_motion_backend.cpp)
 target_compile_features(simulated_motion_backend PUBLIC cxx_std_17)
 target_include_directories(simulated_motion_backend PUBLIC
@@ -124,6 +139,15 @@ if(BUILD_TESTING)
     target_link_libraries(test_sdk_executor_core sdk_executor_core)
     target_compile_definitions(test_sdk_executor_core PRIVATE
       TEST_ALIAS_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/config/motion_aliases.yaml")
+  endif()
+  if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK)
+    ament_add_gtest(
+      test_robot_motion_player_backend
+      test/test_robot_motion_player_backend.cpp)
+    if(TARGET test_robot_motion_player_backend)
+      target_link_libraries(
+        test_robot_motion_player_backend robot_motion_player_backend)
+    endif()
   endif()
   ament_add_gtest(
     test_simulated_motion_backend
@@ -195,4 +219,7 @@ ament_export_libraries(
   sdk_executor_core
   simulated_motion_backend
   sdk_executor_driver)
+if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK)
+  ament_export_libraries(robot_motion_player_backend)
+endif()
 ament_package()

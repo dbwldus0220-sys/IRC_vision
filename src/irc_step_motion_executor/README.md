@@ -68,6 +68,19 @@ message에 settling을 표시한 `RUNNING`으로 발행된다. cancel은 다음 
 이 launch에는 실물 로봇이나 serial 장치를 연결하지 않는다. simulated
 topic test 통과 역시 실물 안전성 검증을 의미하지 않는다.
 
+## RobotMotionPlayer backend adapter
+
+`RobotMotionPlayerBackend`는
+`IRC_STEP_ENABLE_ROBOT_MOTION_SDK=ON`일 때만 빌드되는 SDK opt-in target이다.
+실제 `irc_step::RobotMotionPlayer`를 생성하거나 소유하지 않고, 외부에서
+주입된 non-owning API wrapper를 `MotionBackend` 상태로 변환한다.
+
+기본 `sdk_motion_executor` node는 계속 `SimulatedMotionBackend`만 사용한다.
+real backend 선택, production factory 및 hardware launch는 아직 없으며
+`RobotMotionPlayerBackend`가 node에서 활성화되는 경로도 없다. 관절 방향,
+영점, limit, 모션 거리 및 torque 안전 조건이 확인되기 전에는 실제 player를
+생성·초기화하거나 이 adapter로 motion을 실행하지 않는다.
+
 ## 빌드 모드
 
 기본 빌드는 SDK 경로 없이 catalog-only 모드로 동작한다.
