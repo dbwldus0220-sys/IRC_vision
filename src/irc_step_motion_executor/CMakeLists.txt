@@ -63,12 +63,19 @@ target_include_directories(catalog_only_core PUBLIC
   "$<INSTALL_INTERFACE:include>")
 target_link_libraries(catalog_only_core PkgConfig::JSON_C yaml-cpp)
 
+add_library(sdk_executor_core src/sdk_executor_core.cpp)
+target_compile_features(sdk_executor_core PUBLIC cxx_std_17)
+target_include_directories(sdk_executor_core PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>")
+target_link_libraries(sdk_executor_core PUBLIC catalog_only_core)
+
 add_executable(catalog_only_node src/catalog_only_node.cpp)
 target_compile_features(catalog_only_node PUBLIC cxx_std_17)
 target_link_libraries(catalog_only_node catalog_only_core)
 ament_target_dependencies(catalog_only_node ament_index_cpp rclcpp std_msgs)
 
-install(TARGETS catalog_only_core catalog_only_node
+install(TARGETS catalog_only_core sdk_executor_core catalog_only_node
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME})
@@ -83,6 +90,13 @@ if(BUILD_TESTING)
     target_compile_definitions(test_catalog_only_core PRIVATE
       TEST_ALIAS_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/config/motion_aliases.yaml"
       TEST_CONTRACT_VECTORS="${CMAKE_CURRENT_SOURCE_DIR}/test/legacy_catalog_contract_vectors.json")
+  endif()
+  ament_add_gtest(test_sdk_executor_core test/test_sdk_executor_core.cpp)
+  if(TARGET test_sdk_executor_core)
+    target_include_directories(test_sdk_executor_core PRIVATE test)
+    target_link_libraries(test_sdk_executor_core sdk_executor_core)
+    target_compile_definitions(test_sdk_executor_core PRIVATE
+      TEST_ALIAS_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/config/motion_aliases.yaml")
   endif()
 
   function(add_sdk_cmake_guard_test test_name sdk_dir expect_success expected_error)
@@ -125,5 +139,5 @@ if(BUILD_TESTING)
 endif()
 
 ament_export_include_directories(include)
-ament_export_libraries(catalog_only_core)
+ament_export_libraries(catalog_only_core sdk_executor_core)
 ament_package()

@@ -31,6 +31,19 @@ status는 `status`, `action`, `command_id`, `event_id`, `request_id`,
 정상 계약 요청의 원래 action과 correlation 값을 terminal `REJECTED`
 status까지 보존한다.
 
+## Hardware-independent executor core
+
+`MotionBackend`는 실제 SDK 연결 전 단계의 하드웨어 독립 계약이다.
+`start_motion()`, `cancel_motion()`, `poll_status()`만 정의하며 실제 SDK
+함수명이나 생성자 정보를 포함하지 않는다. `SdkExecutorCore`는 기존 JSON
+request를 검증하고 alias를 resolve한 뒤 이 인터페이스를 통해서만 motion
+상태를 처리한다.
+
+현재 검증은 test 전용 `FakeMotionBackend`만 사용한다. 실제
+`RobotMotionPlayer` adapter와 ROS 2 executor node는 아직 구현하지 않았으며,
+core library는 `robot_control` target에 링크하지 않는다. 이 core의 빌드와
+단위 테스트 통과는 실물 동작 또는 안전성 검증을 의미하지 않는다.
+
 ## 빌드 모드
 
 기본 빌드는 SDK 경로 없이 catalog-only 모드로 동작한다.

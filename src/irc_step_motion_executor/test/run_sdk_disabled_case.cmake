@@ -17,7 +17,7 @@ endif()
 
 execute_process(
   COMMAND "${CMAKE_COMMAND}" --build "${TEST_BINARY_DIR}"
-    --target catalog_only_core catalog_only_node
+    --target catalog_only_core sdk_executor_core catalog_only_node
   RESULT_VARIABLE build_result
   OUTPUT_VARIABLE build_stdout
   ERROR_VARIABLE build_stderr)
@@ -29,6 +29,7 @@ endif()
 find_program(NM_EXECUTABLE nm REQUIRED)
 foreach(binary
     "${TEST_BINARY_DIR}/libcatalog_only_core.a"
+    "${TEST_BINARY_DIR}/libsdk_executor_core.a"
     "${TEST_BINARY_DIR}/catalog_only_node")
   execute_process(
     COMMAND "${NM_EXECUTABLE}" -C "${binary}"
