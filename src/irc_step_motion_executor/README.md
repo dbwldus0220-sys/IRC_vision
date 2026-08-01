@@ -124,8 +124,11 @@ integer array 타입으로 선언되어 잘못된 타입은 node 구성 단계�
 
 현재 외부 SDK는 device `/dev/ttyUSB0`, baud rate `4000000`, motor ID `0..22`를
 고정 상수로 사용한다. runtime config의 `device_path`, `baud_rate`, `motor_ids`는
-사전 검증용 요구사항이며 아직 SDK로 전달되지 않는다. 두 설정이 실제로
-연결되기 전에는 validation 값만 바꿔 SDK hardware 설정을 변경할 수 없다.
+임의 hardware 설정 기능이 아니라, 이 SDK 고정 profile과 정확히 일치하는지
+확인하는 safety assertion이다. motor ID 순서는 무시하지만 `0..22` 전체 집합이
+필요하다. 이 값들은 아직 SDK로 전달되지 않으며, SDK가 runtime 설정을 받도록
+변경되기 전에는 다른 device, baud rate 또는 motor ID 구성을 사용할 수 없다.
+validation 성공만으로 port가 열리거나 모터가 초기화되지는 않는다.
 
 현재 SDK API에서 runtime 생성자에 전달할 수 있는 설정은 motion JSON
 경로뿐이다. device `/dev/ttyUSB0`, baud rate `4000000`, protocol `2.0`은

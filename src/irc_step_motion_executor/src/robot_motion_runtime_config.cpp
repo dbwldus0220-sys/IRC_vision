@@ -1,7 +1,10 @@
 #include "irc_step_motion_executor/robot_motion_runtime_config.hpp"
 
+#include <algorithm>
+#include <array>
 #include <filesystem>
 #include <set>
+#include <string_view>
 #include <utility>
 
 namespace irc_step_motion_executor
@@ -11,6 +14,19 @@ namespace
 
 constexpr std::int64_t kMinimumSdkMotorId = 0;
 constexpr std::int64_t kMaximumSdkMotorId = 22;
+
+struct FixedSdkHardwareProfile
+{
+  std::string_view device_path;
+  std::int64_t baud_rate;
+  std::array<std::int64_t, 23> motor_ids;
+};
+
+constexpr FixedSdkHardwareProfile kFixedSdkHardwareProfile{
+  "/dev/ttyUSB0",
+  4000000,
+  {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+    12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22}};
 
 RobotMotionRuntimeConfigResult error(
   std::string error_code, std::string message)
@@ -135,6 +151,26 @@ RobotMotionRuntimeConfigResult validate_robot_hardware_initialization_policy(
     return error(
       "ROBOT_TORQUE_APPROVAL_REQUIRED",
       "hardware initialization requires explicit torque approval");
+  }
+
+  if (config.device_path != kFixedSdkHardwareProfile.device_path) {
+    return error(
+      "ROBOT_DEVICE_PATH_MISMATCH",
+      "device_path does not match the current fixed SDK hardware profile");
+  }
+  if (config.baud_rate != kFixedSdkHardwareProfile.baud_rate) {
+    return error(
+      "ROBOT_BAUD_RATE_MISMATCH",
+      "baud_rate does not match the current fixed SDK hardware profile");
+  }
+  if (!std::equal(
+      unique_motor_ids.begin(), unique_motor_ids.end(),
+      kFixedSdkHardwareProfile.motor_ids.begin(),
+      kFixedSdkHardwareProfile.motor_ids.end()))
+  {
+    return error(
+      "ROBOT_MOTOR_IDS_MISMATCH",
+      "motor IDs must exactly match the current fixed SDK set 0..22");
   }
 
   return {config, "", ""};

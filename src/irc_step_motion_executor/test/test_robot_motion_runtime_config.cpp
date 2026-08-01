@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 
 #include <cstdint>
+#include <algorithm>
 #include <map>
 #include <string>
 #include <vector>
@@ -17,7 +18,9 @@ irc_step_motion_executor::RobotMotionRuntimeConfig valid_hardware_policy()
   config.enable_robot_hardware = true;
   config.device_path = "/dev/ttyUSB0";
   config.baud_rate = 4000000;
-  config.motor_ids = {0, 1, 22};
+  for (std::int64_t motor_id = 0; motor_id <= 22; ++motor_id) {
+    config.motor_ids.push_back(motor_id);
+  }
   config.explicit_torque_approval = true;
   return config;
 }
@@ -169,6 +172,53 @@ TEST(RobotHardwareInitializationPolicy, RequiresTorqueApproval)
 
   EXPECT_FALSE(result);
   EXPECT_EQ(result.error_code, "ROBOT_TORQUE_APPROVAL_REQUIRED");
+}
+
+TEST(RobotHardwareInitializationPolicy, RejectsDevicePathMismatch)
+{
+  auto config = valid_hardware_policy();
+  config.device_path = "/dev/ttyUSB1";
+
+  const auto result =
+    irc_step_motion_executor::validate_robot_hardware_initialization_policy(config);
+
+  EXPECT_FALSE(result);
+  EXPECT_EQ(result.error_code, "ROBOT_DEVICE_PATH_MISMATCH");
+}
+
+TEST(RobotHardwareInitializationPolicy, RejectsBaudRateMismatch)
+{
+  auto config = valid_hardware_policy();
+  config.baud_rate = 1000000;
+
+  const auto result =
+    irc_step_motion_executor::validate_robot_hardware_initialization_policy(config);
+
+  EXPECT_FALSE(result);
+  EXPECT_EQ(result.error_code, "ROBOT_BAUD_RATE_MISMATCH");
+}
+
+TEST(RobotHardwareInitializationPolicy, RejectsIncompleteMotorIdSet)
+{
+  auto config = valid_hardware_policy();
+  config.motor_ids.pop_back();
+
+  const auto result =
+    irc_step_motion_executor::validate_robot_hardware_initialization_policy(config);
+
+  EXPECT_FALSE(result);
+  EXPECT_EQ(result.error_code, "ROBOT_MOTOR_IDS_MISMATCH");
+}
+
+TEST(RobotHardwareInitializationPolicy, AcceptsReversedCompleteMotorIdSet)
+{
+  auto config = valid_hardware_policy();
+  std::reverse(config.motor_ids.begin(), config.motor_ids.end());
+
+  const auto result =
+    irc_step_motion_executor::validate_robot_hardware_initialization_policy(config);
+
+  EXPECT_TRUE(result);
 }
 
 TEST(RobotHardwareInitializationPolicy, AcceptsAllPrerequisites)

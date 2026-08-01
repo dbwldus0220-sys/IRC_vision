@@ -86,7 +86,9 @@ TEST(ProductionRobotMotionRuntimeFactory, PolicyValidationCreatesNoSdkObjects)
   config.enable_robot_hardware = true;
   config.device_path = "/dev/ttyUSB0";
   config.baud_rate = 4000000;
-  config.motor_ids = {0, 1, 22};
+  for (std::int64_t motor_id = 0; motor_id <= 22; ++motor_id) {
+    config.motor_ids.push_back(motor_id);
+  }
   config.explicit_torque_approval = true;
 
   const auto result =
