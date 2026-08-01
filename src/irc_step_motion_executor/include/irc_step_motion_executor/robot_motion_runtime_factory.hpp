@@ -38,8 +38,7 @@ public:
     const RobotMotionRuntimeConfig & config) = 0;
 };
 
-// This factory deliberately contains no SDK types.  It remains blocked until
-// the SDK constructors are made free of hardware side effects.
+// The SDK-backed implementation is available only in SDK-enabled builds.
 class ProductionRobotMotionRuntimeFactory final
   : public RobotMotionRuntimeFactory
 {

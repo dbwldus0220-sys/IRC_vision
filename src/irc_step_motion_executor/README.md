@@ -78,31 +78,27 @@ fallback하지 않고 guard 순서에 따라 node 시작을 중단한다.
 
 - `enable_robot_hardware=false`: `ROBOT_HARDWARE_NOT_ENABLED`
 - hardware enabled + SDK OFF: `ROBOT_MOTION_PLAYER_BACKEND_NOT_BUILT`
-- hardware enabled + SDK ON + production factory 없음:
+- hardware enabled + SDK ON + runtime factory를 주입하지 않음:
   `ROBOT_MOTION_PLAYER_RUNTIME_NOT_CONFIGURED`
 
-SDK adapter target은 존재하지만 실제 player/hardware 생성 factory와 runtime
+SDK adapter와 production runtime factory target은 존재하지만 node runtime
 wiring은 아직 비활성 상태다. 지원하지 않는 backend 이름도 허용값을 포함한
 `UNSUPPORTED_BACKEND_TYPE` 오류로 거부한다.
 
 Real runtime은 아직 비활성이다. `backend_type=robot_motion_player`만
 지정하면 `ROBOT_HARDWARE_NOT_ENABLED`로 안전하게 시작을 거부한다.
 향후 real runtime에는 `enable_robot_hardware=true`와 명시적인
-`motion_json_path`가 모두 필요하지만, 현재 production runtime factory가
-연결되지 않았으므로 실제 SDK 객체를 생성하지 않는다. real 요청은
+`motion_json_path`가 모두 필요하지만, 기본 node에는 production runtime factory가
+연결되지 않았다. real 요청은
 simulated로 fallback하지 않는다.
 
-SDK 소스를 확인한 결과 `Dxl` constructor는 `/dev/ttyUSB0` port open과 baud
-rate 설정을 수행하고, Dynamixel torque를 disable하며 operating mode를 읽고
-쓴다. 따라서 production runtime은 의도적으로
-`ROBOT_MOTION_RUNTIME_NOT_SAFE_TO_INSTANTIATE` 오류로 차단되어 있다. 유효한
-`motion_json_path`를 주어도 `RobotMotionPlayer`, `DynamixelMotionHardware`,
-`Dxl`을 생성하지 않는다.
-
-실제 runtime wiring을 활성화하려면 먼저 SDK를 refactor해 constructor에서
-side effect를 제거해야 한다. 명시적인 hardware 승인 후 `initialize` 단계에서만
-port와 torque/operating mode에 접근하도록 바꾸기 전에는 production runtime을
-활성화하면 안 된다.
+승인된 SDK 작업 복사본에서는 `Dxl` constructor의 port, baud rate, torque 및
+operating-mode 접근을 제거하고 명시적인 `Dxl::Initialize()` 단계로 옮겼다.
+SDK ON production factory는 `DynamixelMotionHardware`, 주입형 2인자
+`RobotMotionPlayer`, borrowed API와 backend 객체를 생성하고 소유권만 구성한다.
+factory는 `initialize()`를 호출하지 않으므로 이 상태에서 motion 시작은
+`SDK_HARDWARE_NOT_READY`로 거부된다. 명시적인 hardware 승인과 별도 initialize
+wiring 전에는 실제 motion을 실행하면 안 된다.
 
 현재 SDK API에서 runtime 생성자에 전달할 수 있는 설정은 motion JSON
 경로뿐이다. device `/dev/ttyUSB0`, baud rate `4000000`, protocol `2.0`은
@@ -114,7 +110,8 @@ port와 torque/operating mode에 접근하도록 바꾸기 전에는 production 
 `RobotMotionRuntime`은 SDK runtime 소유자를 backend보다 오래 유지한다.
 멤버 소멸 순서상 backend가 먼저 파괴되고 runtime 소유자가 나중에
 파괴되므로, 참조 기반 `RobotMotionPlayerBackend`의 dangling reference를
-방지할 수 있다. 현재는 이 계약을 fake runtime factory로만 검증한다.
+방지할 수 있다. 이 계약은 initialize 횟수를 기록하는 fake SDK ownership
+test로 검증한다.
 
 ## RobotMotionPlayer backend adapter
 
@@ -123,8 +120,8 @@ port와 torque/operating mode에 접근하도록 바꾸기 전에는 production 
 실제 `irc_step::RobotMotionPlayer`를 생성하거나 소유하지 않고, 외부에서
 주입된 non-owning API wrapper를 `MotionBackend` 상태로 변환한다.
 
-기본 `sdk_motion_executor` node는 계속 `SimulatedMotionBackend`만 사용한다.
-production factory는 안전 오류만 반환하며 real backend wiring 및 hardware
+기본 `sdk_motion_executor` node는 계속 `SimulatedMotionBackend`를 사용한다.
+production factory는 SDK ON library로만 제공되며 real backend wiring 및 hardware
 launch는 아직 없다. `RobotMotionPlayerBackend`가 node에서 활성화되는 경로도
 없다. 관절 방향,
 영점, limit, 모션 거리 및 torque 안전 조건이 확인되기 전에는 실제 player를
@@ -166,11 +163,10 @@ option이 `ON`이면 지정한 외부 디렉터리에 다음 항목이 모두 �
 fallback하지 않는다. SDK source는 현재 package build tree 아래의 별도 binary
 directory에서 `add_subdirectory()`되고 원본 source는 수정하지 않는다.
 
-현재 sdk-enabled 결과물은 `robot_motion_player.hpp` include와
-`robot_control` link 적합성만 확인하는 compile probe이다. 실제
-`sdk_motion_executor_node`, `RobotMotionPlayer`, Dynamixel 객체 또는 hardware
-호출은 포함하지 않는다. 따라서 sdk-enabled build 성공은 실제 로봇에서의
-동작 가능성이나 안전성을 의미하지 않는다.
+SDK-enabled build는 compile probe와 production runtime ownership library를
+빌드한다. production factory가 만드는 객체는 메모리상 ownership만 구성하며
+hardware initialize나 port/torque 접근을 수행하지 않는다. 따라서 SDK-enabled
+build 성공은 실제 로봇에서의 동작 가능성이나 안전성을 의미하지 않는다.
 
 ## Launch
 

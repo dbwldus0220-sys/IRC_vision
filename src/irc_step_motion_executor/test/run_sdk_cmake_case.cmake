@@ -25,6 +25,8 @@ if(EXPECT_SUCCESS)
       --target
         irc_step_motion_sdk_compile_probe
         robot_motion_player_backend
+        production_robot_motion_runtime_factory
+        test_production_robot_motion_runtime_factory
         test_motion_backend_factory
     RESULT_VARIABLE build_result
     OUTPUT_VARIABLE build_stdout
@@ -32,6 +34,16 @@ if(EXPECT_SUCCESS)
   if(NOT build_result EQUAL 0)
     message(FATAL_ERROR
       "SDK compile probe build failed:\n${build_stdout}\n${build_stderr}")
+  endif()
+  execute_process(
+    COMMAND "${TEST_BINARY_DIR}/test_production_robot_motion_runtime_factory"
+    RESULT_VARIABLE runtime_factory_test_result
+    OUTPUT_VARIABLE runtime_factory_test_stdout
+    ERROR_VARIABLE runtime_factory_test_stderr)
+  if(NOT runtime_factory_test_result EQUAL 0)
+    message(FATAL_ERROR
+      "SDK-enabled production runtime factory test failed:\n"
+      "${runtime_factory_test_stdout}\n${runtime_factory_test_stderr}")
   endif()
   execute_process(
     COMMAND "${TEST_BINARY_DIR}/test_motion_backend_factory"

@@ -1,7 +1,10 @@
 #ifndef FAKE_ROBOT_MOTION_PLAYER_HPP_
 #define FAKE_ROBOT_MOTION_PLAYER_HPP_
 
+#include "motion_hardware.hpp"
+
 #include <cstdint>
+#include <string>
 #include <string_view>
 
 namespace irc_step
@@ -50,11 +53,21 @@ enum class MotionError : std::uint8_t
 class RobotMotionPlayer
 {
 public:
+  RobotMotionPlayer() = default;
+  RobotMotionPlayer(const std::string & json_path, IMotionHardware & hardware);
+  ~RobotMotionPlayer();
+
+  bool initialize() noexcept;
   StartResult start(std::string_view motion_name) noexcept;
   CancelResult cancel() noexcept;
   MotionStatus update() noexcept;
   MotionError result() const noexcept;
   std::string_view lastError() const noexcept;
+
+private:
+  IMotionHardware * hardware_{nullptr};
+  bool initialized_{false};
+  std::string last_error_;
 };
 
 }  // namespace irc_step

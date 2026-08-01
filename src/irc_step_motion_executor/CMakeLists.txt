@@ -94,12 +94,27 @@ target_link_libraries(simulated_motion_backend PUBLIC sdk_executor_core)
 
 add_library(
   robot_motion_runtime_config
-  src/robot_motion_runtime_config.cpp
-  src/production_robot_motion_runtime_factory.cpp)
+  src/robot_motion_runtime_config.cpp)
 target_compile_features(robot_motion_runtime_config PUBLIC cxx_std_17)
 target_include_directories(robot_motion_runtime_config PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>")
+
+if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK)
+  add_library(
+    production_robot_motion_runtime_factory
+    src/production_robot_motion_runtime_factory.cpp)
+  target_compile_features(
+    production_robot_motion_runtime_factory PUBLIC cxx_std_20)
+  target_include_directories(production_robot_motion_runtime_factory PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:include>")
+  target_link_libraries(production_robot_motion_runtime_factory PUBLIC
+    robot_motion_runtime_config robot_motion_player_backend robot_control)
+  install(TARGETS production_robot_motion_runtime_factory
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib)
+endif()
 
 add_library(motion_backend_factory src/motion_backend_factory.cpp)
 target_compile_features(motion_backend_factory PUBLIC cxx_std_17)
@@ -192,15 +207,18 @@ if(BUILD_TESTING)
     target_link_libraries(
       test_robot_motion_runtime_config robot_motion_runtime_config)
   endif()
-  ament_add_gtest(
-    test_production_robot_motion_runtime_factory
-    test/test_production_robot_motion_runtime_factory.cpp)
-  if(TARGET test_production_robot_motion_runtime_factory)
-    target_link_libraries(
-      test_production_robot_motion_runtime_factory robot_motion_runtime_config)
-    target_compile_definitions(
-      test_production_robot_motion_runtime_factory PRIVATE
-      TEST_EXISTING_RUNTIME_FILE="${CMAKE_CURRENT_SOURCE_DIR}/config/motion_aliases.yaml")
+  if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK AND
+    EXISTS "${ROBOT_MOTION_SDK_DIR}/fake_robot_motion_sdk_test_support.hpp")
+    ament_add_gtest(
+      test_production_robot_motion_runtime_factory
+      test/test_production_robot_motion_runtime_factory.cpp)
+    if(TARGET test_production_robot_motion_runtime_factory)
+      target_link_libraries(test_production_robot_motion_runtime_factory
+        production_robot_motion_runtime_factory)
+      target_compile_definitions(
+        test_production_robot_motion_runtime_factory PRIVATE
+        TEST_EXISTING_RUNTIME_FILE="${CMAKE_CURRENT_SOURCE_DIR}/config/motion_aliases.yaml")
+    endif()
   endif()
   ament_add_gtest(
     test_motion_backend_factory
@@ -299,6 +317,7 @@ ament_export_libraries(
   motion_backend_factory
   sdk_executor_driver)
 if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK)
-  ament_export_libraries(robot_motion_player_backend)
+  ament_export_libraries(
+    robot_motion_player_backend production_robot_motion_runtime_factory)
 endif()
 ament_package()
