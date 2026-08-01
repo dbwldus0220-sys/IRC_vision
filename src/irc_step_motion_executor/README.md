@@ -96,6 +96,8 @@ simulated로 fallback하지 않는다.
 operating-mode 접근을 제거하고 명시적인 `Dxl::Initialize()` 단계로 옮겼다.
 SDK ON production factory는 `DynamixelMotionHardware`, 주입형 2인자
 `RobotMotionPlayer`, borrowed API와 backend 객체를 생성하고 소유권만 구성한다.
+검증된 ROS 2 runtime config의 device path, baud rate와 motor IDs는 SDK의
+`DynamixelMotionHardwareConfig`로 변환되어 hardware 생성자까지 전달된다.
 factory는 `initialize()`를 호출하지 않으므로 이 상태에서 motion 시작은
 `SDK_HARDWARE_NOT_READY`로 거부된다. 명시적인 hardware 승인과 별도 initialize
 wiring 전에는 실제 motion을 실행하면 안 된다.
@@ -123,17 +125,16 @@ policy나 initialize를 실행하지 않는다. ROS parameter는 bool, string, i
 integer array 타입으로 선언되어 잘못된 타입은 node 구성 단계에서 거부된다.
 
 현재 외부 SDK는 device `/dev/ttyUSB0`, baud rate `4000000`, motor ID `0..22`를
-고정 상수로 사용한다. runtime config의 `device_path`, `baud_rate`, `motor_ids`는
-임의 hardware 설정 기능이 아니라, 이 SDK 고정 profile과 정확히 일치하는지
+legacy 기본 profile로 사용한다. runtime config의 `device_path`, `baud_rate`,
+`motor_ids`는 이 SDK profile과 정확히 일치하는지
 확인하는 safety assertion이다. motor ID 순서는 무시하지만 `0..22` 전체 집합이
-필요하다. 이 값들은 아직 SDK로 전달되지 않으며, SDK가 runtime 설정을 받도록
-변경되기 전에는 다른 device, baud rate 또는 motor ID 구성을 사용할 수 없다.
-validation 성공만으로 port가 열리거나 모터가 초기화되지는 않는다.
+필요하다. 값은 SDK config 생성자에 전달되지만 validation 및 전달 성공만으로
+port가 열리거나 모터가 초기화되지는 않는다. 실제 접근은 후속 explicit
+initialize 단계에서만 가능하다.
 
 현재 SDK API에서 runtime 생성자에 전달할 수 있는 설정은 motion JSON
-경로뿐이다. device `/dev/ttyUSB0`, baud rate `4000000`, protocol `2.0`은
-외부 SDK 저수준 소스에 하드코딩되어 있어 ROS parameter로는 노출되지만 아직
-SDK 설정으로 전달되지 않는다. 이 값과 calibration, joint limit 및 실물 안전 정보가 검증되기
+경로와 hardware config다. protocol `2.0`은 외부 SDK 저수준 소스에 고정되어
+있다. calibration, joint limit 및 실물 안전 정보가 검증되기
 전에는 hardware를 활성화하면 안 된다. build/test 성공은 실물 안전성
 검증을 의미하지 않는다.
 

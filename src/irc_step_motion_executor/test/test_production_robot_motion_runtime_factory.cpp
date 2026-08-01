@@ -4,18 +4,31 @@
 
 #include <gtest/gtest.h>
 
+#include <cstdint>
+#include <limits>
 #include <string>
 #include <vector>
 
 namespace
 {
 
+irc_step_motion_executor::RobotMotionRuntimeConfig complete_runtime_config()
+{
+  irc_step_motion_executor::RobotMotionRuntimeConfig config;
+  config.motion_json_path = TEST_EXISTING_RUNTIME_FILE;
+  config.device_path = "/dev/ttyUSB0";
+  config.baud_rate = 4000000;
+  for (std::int64_t motor_id = 0; motor_id <= 22; ++motor_id) {
+    config.motor_ids.push_back(motor_id);
+  }
+  return config;
+}
+
 TEST(ProductionRobotMotionRuntimeFactory, CreatesUninitializedOwnedRuntime)
 {
   irc_step::fake_sdk::reset_tracking();
   irc_step_motion_executor::ProductionRobotMotionRuntimeFactory factory;
-  irc_step_motion_executor::RobotMotionRuntimeConfig config;
-  config.motion_json_path = TEST_EXISTING_RUNTIME_FILE;
+  const auto config = complete_runtime_config();
 
   auto result = factory.create(config);
 
@@ -24,6 +37,13 @@ TEST(ProductionRobotMotionRuntimeFactory, CreatesUninitializedOwnedRuntime)
   ASSERT_NE(result.runtime.runtime_owner, nullptr);
   EXPECT_EQ(irc_step::fake_sdk::hardware_construction_count(), 1);
   EXPECT_EQ(irc_step::fake_sdk::player_construction_count(), 1);
+  EXPECT_EQ(irc_step::fake_sdk::hardware_device_path(), "/dev/ttyUSB0");
+  EXPECT_EQ(irc_step::fake_sdk::hardware_baud_rate(), 4000000);
+  std::vector<int> expected_motor_ids;
+  for (int motor_id = 0; motor_id <= 22; ++motor_id) {
+    expected_motor_ids.push_back(motor_id);
+  }
+  EXPECT_EQ(irc_step::fake_sdk::hardware_motor_ids(), expected_motor_ids);
   EXPECT_EQ(irc_step::fake_sdk::hardware_initialize_count(), 0);
   EXPECT_EQ(irc_step::fake_sdk::player_initialize_count(), 0);
 
@@ -76,6 +96,25 @@ TEST(ProductionRobotMotionRuntimeFactory, ConvertsConstructionException)
   EXPECT_EQ(
     irc_step::fake_sdk::destruction_order(),
     (std::vector<std::string>{"hardware"}));
+}
+
+TEST(ProductionRobotMotionRuntimeFactory, RejectsUnrepresentableMotorIdBeforeSdkCreation)
+{
+  irc_step::fake_sdk::reset_tracking();
+  irc_step_motion_executor::ProductionRobotMotionRuntimeFactory factory;
+  auto config = complete_runtime_config();
+  config.motor_ids.front() =
+    static_cast<std::int64_t>(std::numeric_limits<int>::max()) + 1;
+
+  const auto result = factory.create(config);
+
+  EXPECT_FALSE(result);
+  EXPECT_EQ(result.error_code, "ROBOT_MOTION_RUNTIME_CREATION_FAILED");
+  EXPECT_NE(result.message.find("cannot be represented as int"), std::string::npos);
+  EXPECT_EQ(irc_step::fake_sdk::hardware_construction_count(), 0);
+  EXPECT_EQ(irc_step::fake_sdk::player_construction_count(), 0);
+  EXPECT_EQ(irc_step::fake_sdk::hardware_initialize_count(), 0);
+  EXPECT_EQ(irc_step::fake_sdk::player_initialize_count(), 0);
 }
 
 TEST(ProductionRobotMotionRuntimeFactory, PolicyValidationCreatesNoSdkObjects)

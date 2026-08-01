@@ -5,7 +5,9 @@
 #include "dynamixel_motion_hardware.hpp"
 
 #include <exception>
+#include <limits>
 #include <memory>
+#include <stdexcept>
 #include <utility>
 
 namespace irc_step_motion_executor
@@ -13,12 +15,32 @@ namespace irc_step_motion_executor
 namespace
 {
 
+irc_step::DynamixelMotionHardwareConfig to_sdk_hardware_config(
+  const RobotMotionRuntimeConfig & config)
+{
+  irc_step::DynamixelMotionHardwareConfig sdk_config;
+  sdk_config.device_path = config.device_path;
+  sdk_config.baud_rate = config.baud_rate;
+  sdk_config.motor_ids.reserve(config.motor_ids.size());
+  for (const std::int64_t motor_id : config.motor_ids) {
+    if (motor_id < std::numeric_limits<int>::min() ||
+      motor_id > std::numeric_limits<int>::max())
+    {
+      throw std::out_of_range(
+              "RobotMotionRuntimeConfig motor ID cannot be represented as int");
+    }
+    sdk_config.motor_ids.push_back(static_cast<int>(motor_id));
+  }
+  return sdk_config;
+}
+
 class ProductionRobotMotionRuntimeOwner
 {
 public:
-  explicit ProductionRobotMotionRuntimeOwner(const std::string & motion_json_path)
-  : hardware_(),
-    player_(motion_json_path, hardware_),
+  explicit ProductionRobotMotionRuntimeOwner(
+    const RobotMotionRuntimeConfig & config)
+  : hardware_(to_sdk_hardware_config(config)),
+    player_(config.motion_json_path, hardware_),
     player_api_(player_)
   {
   }
@@ -53,7 +75,7 @@ RobotMotionRuntimeFactoryResult ProductionRobotMotionRuntimeFactory::create(
 
   try {
     auto owner = std::make_shared<ProductionRobotMotionRuntimeOwner>(
-      config_result.config.motion_json_path);
+      config_result.config);
     RobotMotionRuntime runtime;
     runtime.runtime_owner = owner;
     runtime.backend =
