@@ -50,6 +50,16 @@ public:
     return player_api_;
   }
 
+  bool initialize()
+  {
+    return player_.initialize();
+  }
+
+  std::string last_error() const
+  {
+    return std::string(player_.lastError());
+  }
+
 private:
   // Members are destroyed in reverse declaration order: API, player, hardware.
   irc_step::DynamixelMotionHardware hardware_;
@@ -63,12 +73,19 @@ RobotMotionRuntimeFactoryResult creation_error(std::string message)
     {}, "ROBOT_MOTION_RUNTIME_CREATION_FAILED", std::move(message)};
 }
 
+RobotMotionRuntimeFactoryResult initialization_error(std::string message)
+{
+  return {
+    {}, "ROBOT_MOTION_RUNTIME_INITIALIZATION_FAILED", std::move(message)};
+}
+
 }  // namespace
 
 RobotMotionRuntimeFactoryResult ProductionRobotMotionRuntimeFactory::create(
   const RobotMotionRuntimeConfig & config)
 {
-  const auto config_result = validate_robot_motion_runtime_config(config);
+  const auto config_result =
+    validate_robot_hardware_initialization_policy(config);
   if (!config_result) {
     return {{}, config_result.error_code, config_result.message};
   }
@@ -76,6 +93,12 @@ RobotMotionRuntimeFactoryResult ProductionRobotMotionRuntimeFactory::create(
   try {
     auto owner = std::make_shared<ProductionRobotMotionRuntimeOwner>(
       config_result.config);
+    if (!owner->initialize()) {
+      const auto sdk_message = owner->last_error();
+      return initialization_error(
+        sdk_message.empty() ?
+        "RobotMotionPlayer hardware initialization failed" : sdk_message);
+    }
     RobotMotionRuntime runtime;
     runtime.runtime_owner = owner;
     runtime.backend =

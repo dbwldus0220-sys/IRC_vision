@@ -98,9 +98,10 @@ SDK ON production factory는 `DynamixelMotionHardware`, 주입형 2인자
 `RobotMotionPlayer`, borrowed API와 backend 객체를 생성하고 소유권만 구성한다.
 검증된 ROS 2 runtime config의 device path, baud rate와 motor IDs는 SDK의
 `DynamixelMotionHardwareConfig`로 변환되어 hardware 생성자까지 전달된다.
-factory는 `initialize()`를 호출하지 않으므로 이 상태에서 motion 시작은
-`SDK_HARDWARE_NOT_READY`로 거부된다. 명시적인 hardware 승인과 별도 initialize
-wiring 전에는 실제 motion을 실행하면 안 된다.
+Production factory는 hardware policy가 모두 통과한 경우에만 owner를 만들고
+`RobotMotionPlayer::initialize()`를 정확히 한 번 호출한다. 성공한 경우에만
+backend를 반환하며 자동 simulated fallback은 없다. Production backend 선택은
+실제 serial port, operating mode 및 torque 접근을 일으킬 수 있다.
 
 Production runtime 객체 생성과 hardware initialization 승인은 서로 다른
 단계다. 초기화 policy의 기본값은 `enable_robot_hardware=false`이며, JSON 경로,
@@ -128,9 +129,8 @@ integer array 타입으로 선언되어 잘못된 타입은 node 구성 단계�
 legacy 기본 profile로 사용한다. runtime config의 `device_path`, `baud_rate`,
 `motor_ids`는 이 SDK profile과 정확히 일치하는지
 확인하는 safety assertion이다. motor ID 순서는 무시하지만 `0..22` 전체 집합이
-필요하다. 값은 SDK config 생성자에 전달되지만 validation 및 전달 성공만으로
-port가 열리거나 모터가 초기화되지는 않는다. 실제 접근은 후속 explicit
-initialize 단계에서만 가능하다.
+필요하다. 값은 SDK config 생성자에 전달되고 production factory의 명시적
+initialize 단계에서 실제 hardware 접근에 사용된다.
 
 현재 SDK API에서 runtime 생성자에 전달할 수 있는 설정은 motion JSON
 경로와 hardware config다. protocol `2.0`은 외부 SDK 저수준 소스에 고정되어

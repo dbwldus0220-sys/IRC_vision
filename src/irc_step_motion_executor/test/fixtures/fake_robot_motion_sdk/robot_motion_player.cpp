@@ -18,6 +18,9 @@ int hardware_initializations = 0;
 int player_constructions = 0;
 int player_initializations = 0;
 bool player_constructor_throws = false;
+bool player_initialize_success = true;
+std::string player_initialize_error;
+bool hardware_initialized = false;
 DynamixelMotionHardwareConfig received_hardware_config;
 std::vector<std::string> destructions;
 
@@ -43,12 +46,13 @@ DynamixelMotionHardware::~DynamixelMotionHardware()
 bool DynamixelMotionHardware::initialize() noexcept
 {
   ++hardware_initializations;
+  hardware_initialized = true;
   return true;
 }
 
 bool DynamixelMotionHardware::ready() const noexcept
 {
-  return false;
+  return hardware_initialized;
 }
 
 RobotMotionPlayer::RobotMotionPlayer(
@@ -69,7 +73,15 @@ RobotMotionPlayer::~RobotMotionPlayer()
 bool RobotMotionPlayer::initialize() noexcept
 {
   ++player_initializations;
-  initialized_ = hardware_ != nullptr && hardware_->initialize();
+  const bool hardware_success =
+    hardware_ != nullptr && hardware_->initialize();
+  initialized_ = hardware_success && player_initialize_success;
+  if (!initialized_) {
+    last_error_ = player_initialize_error.empty() ?
+      "fake player initialization failed" : player_initialize_error;
+  } else {
+    last_error_.clear();
+  }
   return initialized_;
 }
 
@@ -112,6 +124,9 @@ void reset_tracking()
   player_constructions = 0;
   player_initializations = 0;
   player_constructor_throws = false;
+  player_initialize_success = true;
+  player_initialize_error.clear();
+  hardware_initialized = false;
   received_hardware_config = {};
   destructions.clear();
 }
@@ -119,6 +134,12 @@ void reset_tracking()
 void set_player_constructor_throws(bool value)
 {
   player_constructor_throws = value;
+}
+
+void set_player_initialize_result(bool success, std::string error_message)
+{
+  player_initialize_success = success;
+  player_initialize_error = std::move(error_message);
 }
 
 int hardware_construction_count() {return hardware_constructions;}
