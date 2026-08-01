@@ -209,6 +209,12 @@ if(BUILD_TESTING)
     target_compile_definitions(test_robot_motion_runtime_config PRIVATE
       TEST_EXISTING_RUNTIME_FILE="${CMAKE_CURRENT_SOURCE_DIR}/config/motion_aliases.yaml")
   endif()
+  ament_add_gtest(
+    test_robot_motion_parameter_types
+    test/test_robot_motion_parameter_types.cpp)
+  if(TARGET test_robot_motion_parameter_types)
+    ament_target_dependencies(test_robot_motion_parameter_types rclcpp)
+  endif()
   if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK AND
     EXISTS "${ROBOT_MOTION_SDK_DIR}/fake_robot_motion_sdk_test_support.hpp")
     ament_add_gtest(

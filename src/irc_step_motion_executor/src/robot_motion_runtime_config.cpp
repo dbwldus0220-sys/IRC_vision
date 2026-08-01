@@ -9,8 +9,8 @@ namespace irc_step_motion_executor
 namespace
 {
 
-constexpr int kMinimumSdkMotorId = 0;
-constexpr int kMaximumSdkMotorId = 22;
+constexpr std::int64_t kMinimumSdkMotorId = 0;
+constexpr std::int64_t kMaximumSdkMotorId = 22;
 
 RobotMotionRuntimeConfigResult error(
   std::string error_code, std::string message)
@@ -19,6 +19,24 @@ RobotMotionRuntimeConfigResult error(
 }
 
 }  // namespace
+
+RobotMotionRuntimeConfig make_robot_motion_runtime_config(
+  std::string motion_json_path,
+  bool enable_robot_hardware,
+  std::string device_path,
+  std::int64_t baud_rate,
+  std::vector<std::int64_t> motor_ids,
+  bool explicit_torque_approval)
+{
+  RobotMotionRuntimeConfig config;
+  config.motion_json_path = std::move(motion_json_path);
+  config.enable_robot_hardware = enable_robot_hardware;
+  config.device_path = std::move(device_path);
+  config.baud_rate = baud_rate;
+  config.motor_ids = std::move(motor_ids);
+  config.explicit_torque_approval = explicit_torque_approval;
+  return config;
+}
 
 RobotMotionRuntimeConfigResult parse_robot_motion_runtime_config(
   const std::map<std::string, std::string> & settings)
@@ -88,7 +106,7 @@ RobotMotionRuntimeConfigResult validate_robot_hardware_initialization_policy(
       "ROBOT_DEVICE_PATH_REQUIRED",
       "hardware initialization requires a non-empty device_path");
   }
-  if (config.baud_rate == 0) {
+  if (config.baud_rate <= 0) {
     return error(
       "ROBOT_BAUD_RATE_INVALID",
       "hardware initialization requires baud_rate greater than zero");
@@ -99,8 +117,8 @@ RobotMotionRuntimeConfigResult validate_robot_hardware_initialization_policy(
       "hardware initialization requires at least one motor ID");
   }
 
-  std::set<int> unique_motor_ids;
-  for (const int motor_id : config.motor_ids) {
+  std::set<std::int64_t> unique_motor_ids;
+  for (const std::int64_t motor_id : config.motor_ids) {
     if (motor_id < kMinimumSdkMotorId || motor_id > kMaximumSdkMotorId) {
       return error(
         "ROBOT_MOTOR_ID_OUT_OF_RANGE",

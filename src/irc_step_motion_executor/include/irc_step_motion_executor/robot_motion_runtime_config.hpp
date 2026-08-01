@@ -16,8 +16,8 @@ struct RobotMotionRuntimeConfig
   // fixed device, baud-rate, and motor-ID constants and does not receive them.
   bool enable_robot_hardware{false};
   std::string device_path;
-  std::uint32_t baud_rate{0};
-  std::vector<int> motor_ids;
+  std::int64_t baud_rate{0};
+  std::vector<std::int64_t> motor_ids;
   bool explicit_torque_approval{false};
 };
 
@@ -32,6 +32,14 @@ struct RobotMotionRuntimeConfigResult
     return error_code.empty();
   }
 };
+
+RobotMotionRuntimeConfig make_robot_motion_runtime_config(
+  std::string motion_json_path,
+  bool enable_robot_hardware,
+  std::string device_path,
+  std::int64_t baud_rate,
+  std::vector<std::int64_t> motor_ids,
+  bool explicit_torque_approval);
 
 RobotMotionRuntimeConfigResult parse_robot_motion_runtime_config(
   const std::map<std::string, std::string> & settings);

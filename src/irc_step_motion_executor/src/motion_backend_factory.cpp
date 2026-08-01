@@ -29,7 +29,8 @@ MotionBackendFactoryResult create_motion_backend(
     }
 #if IRC_STEP_ROBOT_MOTION_PLAYER_BACKEND_BUILT
     const auto config_result =
-      validate_robot_motion_runtime_config(options.robot_motion_player);
+      validate_robot_hardware_initialization_policy(
+      options.robot_motion_player);
     if (!config_result) {
       return {
         nullptr, nullptr,

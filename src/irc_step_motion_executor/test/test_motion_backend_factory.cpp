@@ -3,8 +3,10 @@
 
 #include <gtest/gtest.h>
 
+#include <cstdint>
 #include <memory>
 #include <string>
+#include <vector>
 
 #ifndef EXPECT_ROBOT_MOTION_PLAYER_BACKEND_BUILT
 #define EXPECT_ROBOT_MOTION_PLAYER_BACKEND_BUILT 0
@@ -74,6 +76,18 @@ public:
   bool backend_destroyed_safely{false};
   irc_step_motion_executor::RobotMotionRuntimeConfig received_config;
 };
+
+void configure_valid_hardware_policy(
+  irc_step_motion_executor::MotionBackendFactoryOptions & options)
+{
+  options.enable_robot_hardware = true;
+  options.robot_motion_player.enable_robot_hardware = true;
+  options.robot_motion_player.motion_json_path = TEST_EXISTING_RUNTIME_FILE;
+  options.robot_motion_player.device_path = "/dev/ttyUSB0";
+  options.robot_motion_player.baud_rate = 4000000;
+  options.robot_motion_player.motor_ids = {0, 1, 22};
+  options.robot_motion_player.explicit_torque_approval = true;
+}
 
 TEST(MotionBackendFactory, DefaultAndExplicitSimulatedCreateBackend)
 {
@@ -152,9 +166,7 @@ TEST(MotionBackendFactory, EnabledRealBackendRequiresBuiltRuntime)
 {
   irc_step_motion_executor::MotionBackendFactoryOptions options;
   options.backend_type = "robot_motion_player";
-  options.enable_robot_hardware = true;
-  options.robot_motion_player.motion_json_path =
-    TEST_EXISTING_RUNTIME_FILE;
+  configure_valid_hardware_policy(options);
 
   auto result = irc_step_motion_executor::create_motion_backend(options);
 
@@ -171,14 +183,34 @@ TEST(MotionBackendFactory, EnabledRealBackendRequiresBuiltRuntime)
 #endif
 }
 
+TEST(MotionBackendFactory, ProductionPolicyFailureNeverFallsBack)
+{
+  FakeRuntimeFactory runtime_factory;
+  irc_step_motion_executor::MotionBackendFactoryOptions options;
+  options.backend_type = "robot_motion_player";
+  configure_valid_hardware_policy(options);
+  options.robot_motion_player.device_path.clear();
+  options.robot_motion_runtime_factory = &runtime_factory;
+
+  const auto result =
+    irc_step_motion_executor::create_motion_backend(options);
+
+  EXPECT_FALSE(result);
+  EXPECT_EQ(result.backend, nullptr);
+#if EXPECT_ROBOT_MOTION_PLAYER_BACKEND_BUILT
+  EXPECT_EQ(result.error_code, "ROBOT_DEVICE_PATH_REQUIRED");
+  EXPECT_FALSE(runtime_factory.called);
+#else
+  EXPECT_EQ(result.error_code, "ROBOT_MOTION_PLAYER_BACKEND_NOT_BUILT");
+#endif
+}
+
 TEST(MotionBackendFactory, PassesConfigAndPreservesRuntimeOwnership)
 {
   FakeRuntimeFactory runtime_factory;
   irc_step_motion_executor::MotionBackendFactoryOptions options;
   options.backend_type = "robot_motion_player";
-  options.enable_robot_hardware = true;
-  options.robot_motion_player.motion_json_path =
-    TEST_EXISTING_RUNTIME_FILE;
+  configure_valid_hardware_policy(options);
   options.robot_motion_runtime_factory = &runtime_factory;
 
   {
@@ -189,6 +221,15 @@ TEST(MotionBackendFactory, PassesConfigAndPreservesRuntimeOwnership)
     EXPECT_EQ(
       runtime_factory.received_config.motion_json_path,
       TEST_EXISTING_RUNTIME_FILE);
+    EXPECT_TRUE(runtime_factory.received_config.enable_robot_hardware);
+    EXPECT_EQ(
+      runtime_factory.received_config.device_path, "/dev/ttyUSB0");
+    EXPECT_EQ(runtime_factory.received_config.baud_rate, 4000000);
+    EXPECT_EQ(
+      runtime_factory.received_config.motor_ids,
+      (std::vector<std::int64_t>{0, 1, 22}));
+    EXPECT_TRUE(
+      runtime_factory.received_config.explicit_torque_approval);
 #else
     EXPECT_FALSE(result);
     EXPECT_FALSE(runtime_factory.called);
@@ -207,9 +248,7 @@ TEST(MotionBackendFactory, RuntimeFactoryFailureNeverFallsBack)
   runtime_factory.fail = true;
   irc_step_motion_executor::MotionBackendFactoryOptions options;
   options.backend_type = "robot_motion_player";
-  options.enable_robot_hardware = true;
-  options.robot_motion_player.motion_json_path =
-    TEST_EXISTING_RUNTIME_FILE;
+  configure_valid_hardware_policy(options);
   options.robot_motion_runtime_factory = &runtime_factory;
 
   auto result = irc_step_motion_executor::create_motion_backend(options);

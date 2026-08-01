@@ -49,6 +49,15 @@ public:
       "enable_robot_hardware", false);
     const std::string motion_json_path = declare_parameter<std::string>(
       "motion_json_path", "");
+    const std::string robot_device_path = declare_parameter<std::string>(
+      "robot_device_path", "");
+    const std::int64_t robot_baud_rate = declare_parameter<std::int64_t>(
+      "robot_baud_rate", 0);
+    const auto robot_motor_ids =
+      declare_parameter<std::vector<std::int64_t>>(
+      "robot_motor_ids", std::vector<std::int64_t>{});
+    const bool explicit_torque_approval = declare_parameter<bool>(
+      "explicit_torque_approval", false);
     const std::int64_t poll_period_ms = positive_parameter_or_default(
       "poll_period_ms", kDefaultPollPeriodMs);
     const std::int64_t running_polls = nonnegative_parameter_or_default(
@@ -66,7 +75,9 @@ public:
     MotionBackendFactoryOptions backend_options;
     backend_options.backend_type = backend_type;
     backend_options.enable_robot_hardware = enable_robot_hardware;
-    backend_options.robot_motion_player.motion_json_path = motion_json_path;
+    backend_options.robot_motion_player = make_robot_motion_runtime_config(
+      motion_json_path, enable_robot_hardware, robot_device_path,
+      robot_baud_rate, robot_motor_ids, explicit_torque_approval);
     backend_options.simulated.running_polls =
       static_cast<std::size_t>(running_polls);
     backend_options.simulated.settling_polls =

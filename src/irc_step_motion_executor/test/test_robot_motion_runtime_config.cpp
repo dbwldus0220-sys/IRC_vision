@@ -2,8 +2,10 @@
 
 #include <gtest/gtest.h>
 
+#include <cstdint>
 #include <map>
 #include <string>
+#include <vector>
 
 namespace
 {
@@ -53,10 +55,33 @@ TEST(RobotMotionRuntimeConfig, RejectsUnknownSetting)
     result.error_code, "UNKNOWN_ROBOT_MOTION_RUNTIME_SETTING");
 }
 
+TEST(RobotMotionRuntimeConfig, CopiesTypedRosParameterValues)
+{
+  const auto config =
+    irc_step_motion_executor::make_robot_motion_runtime_config(
+    "/tmp/motions.json", true, "/dev/ttyUSB9", 123456,
+    {2, 4, 6}, true);
+
+  EXPECT_EQ(config.motion_json_path, "/tmp/motions.json");
+  EXPECT_TRUE(config.enable_robot_hardware);
+  EXPECT_EQ(config.device_path, "/dev/ttyUSB9");
+  EXPECT_EQ(config.baud_rate, 123456);
+  EXPECT_EQ(config.motor_ids, (std::vector<std::int64_t>{2, 4, 6}));
+  EXPECT_TRUE(config.explicit_torque_approval);
+}
+
 TEST(RobotHardwareInitializationPolicy, DefaultConfigDisablesHardware)
 {
+  const irc_step_motion_executor::RobotMotionRuntimeConfig config;
+  EXPECT_FALSE(config.enable_robot_hardware);
+  EXPECT_TRUE(config.device_path.empty());
+  EXPECT_EQ(config.baud_rate, 0);
+  EXPECT_TRUE(config.motor_ids.empty());
+  EXPECT_FALSE(config.explicit_torque_approval);
+
   const auto result =
-    irc_step_motion_executor::validate_robot_hardware_initialization_policy({});
+    irc_step_motion_executor::validate_robot_hardware_initialization_policy(
+    config);
 
   EXPECT_FALSE(result);
   EXPECT_EQ(result.error_code, "ROBOT_HARDWARE_NOT_ENABLED");
@@ -78,6 +103,18 @@ TEST(RobotHardwareInitializationPolicy, RejectsZeroBaudRate)
 {
   auto config = valid_hardware_policy();
   config.baud_rate = 0;
+
+  const auto result =
+    irc_step_motion_executor::validate_robot_hardware_initialization_policy(config);
+
+  EXPECT_FALSE(result);
+  EXPECT_EQ(result.error_code, "ROBOT_BAUD_RATE_INVALID");
+}
+
+TEST(RobotHardwareInitializationPolicy, RejectsNegativeBaudRate)
+{
+  auto config = valid_hardware_policy();
+  config.baud_rate = -1;
 
   const auto result =
     irc_step_motion_executor::validate_robot_hardware_initialization_policy(config);

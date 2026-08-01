@@ -107,6 +107,21 @@ device path, baud rate, motor ID 목록·중복·범위와 explicit torque appro
 모터 초기화나 torque enable을 의미하지 않는다. 실제 initialize 호출 구현은
 후속 단계에서 별도의 hardware 승인과 함께 추가해야 한다.
 
+`sdk_motion_executor`는 같은 ROS parameter 경로에서 다음 값을 읽어 runtime
+config에 복사한다.
+
+- `enable_robot_hardware`: `false`
+- `robot_device_path`: 빈 문자열
+- `robot_baud_rate`: `0`
+- `robot_motor_ids`: 빈 정수 배열
+- `explicit_torque_approval`: `false`
+- `motion_json_path`: 빈 문자열
+
+각 기본값은 hardware initialization을 허용하지 않는다. 기본 backend도 계속
+`simulated`이며, simulated 선택에서는 이 parameter를 지정해도 hardware
+policy나 initialize를 실행하지 않는다. ROS parameter는 bool, string, integer,
+integer array 타입으로 선언되어 잘못된 타입은 node 구성 단계에서 거부된다.
+
 현재 외부 SDK는 device `/dev/ttyUSB0`, baud rate `4000000`, motor ID `0..22`를
 고정 상수로 사용한다. runtime config의 `device_path`, `baud_rate`, `motor_ids`는
 사전 검증용 요구사항이며 아직 SDK로 전달되지 않는다. 두 설정이 실제로
@@ -114,8 +129,8 @@ device path, baud rate, motor ID 목록·중복·범위와 explicit torque appro
 
 현재 SDK API에서 runtime 생성자에 전달할 수 있는 설정은 motion JSON
 경로뿐이다. device `/dev/ttyUSB0`, baud rate `4000000`, protocol `2.0`은
-외부 SDK 저수준 소스에 하드코딩되어 있어 이 package의 설정으로 노출하지
-않았다. 이 값과 calibration, joint limit 및 실물 안전 정보가 검증되기
+외부 SDK 저수준 소스에 하드코딩되어 있어 ROS parameter로는 노출되지만 아직
+SDK 설정으로 전달되지 않는다. 이 값과 calibration, joint limit 및 실물 안전 정보가 검증되기
 전에는 hardware를 활성화하면 안 된다. build/test 성공은 실물 안전성
 검증을 의미하지 않는다.
 
