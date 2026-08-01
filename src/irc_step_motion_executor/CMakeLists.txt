@@ -206,6 +206,8 @@ if(BUILD_TESTING)
   if(TARGET test_robot_motion_runtime_config)
     target_link_libraries(
       test_robot_motion_runtime_config robot_motion_runtime_config)
+    target_compile_definitions(test_robot_motion_runtime_config PRIVATE
+      TEST_EXISTING_RUNTIME_FILE="${CMAKE_CURRENT_SOURCE_DIR}/config/motion_aliases.yaml")
   endif()
   if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK AND
     EXISTS "${ROBOT_MOTION_SDK_DIR}/fake_robot_motion_sdk_test_support.hpp")

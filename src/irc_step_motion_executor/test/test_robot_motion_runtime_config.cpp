@@ -8,6 +8,18 @@
 namespace
 {
 
+irc_step_motion_executor::RobotMotionRuntimeConfig valid_hardware_policy()
+{
+  irc_step_motion_executor::RobotMotionRuntimeConfig config;
+  config.motion_json_path = TEST_EXISTING_RUNTIME_FILE;
+  config.enable_robot_hardware = true;
+  config.device_path = "/dev/ttyUSB0";
+  config.baud_rate = 4000000;
+  config.motor_ids = {0, 1, 22};
+  config.explicit_torque_approval = true;
+  return config;
+}
+
 TEST(RobotMotionRuntimeConfig, RejectsMissingPath)
 {
   const auto result =
@@ -39,6 +51,97 @@ TEST(RobotMotionRuntimeConfig, RejectsUnknownSetting)
   EXPECT_FALSE(result);
   EXPECT_EQ(
     result.error_code, "UNKNOWN_ROBOT_MOTION_RUNTIME_SETTING");
+}
+
+TEST(RobotHardwareInitializationPolicy, DefaultConfigDisablesHardware)
+{
+  const auto result =
+    irc_step_motion_executor::validate_robot_hardware_initialization_policy({});
+
+  EXPECT_FALSE(result);
+  EXPECT_EQ(result.error_code, "ROBOT_HARDWARE_NOT_ENABLED");
+}
+
+TEST(RobotHardwareInitializationPolicy, RequiresDevicePath)
+{
+  auto config = valid_hardware_policy();
+  config.device_path.clear();
+
+  const auto result =
+    irc_step_motion_executor::validate_robot_hardware_initialization_policy(config);
+
+  EXPECT_FALSE(result);
+  EXPECT_EQ(result.error_code, "ROBOT_DEVICE_PATH_REQUIRED");
+}
+
+TEST(RobotHardwareInitializationPolicy, RejectsZeroBaudRate)
+{
+  auto config = valid_hardware_policy();
+  config.baud_rate = 0;
+
+  const auto result =
+    irc_step_motion_executor::validate_robot_hardware_initialization_policy(config);
+
+  EXPECT_FALSE(result);
+  EXPECT_EQ(result.error_code, "ROBOT_BAUD_RATE_INVALID");
+}
+
+TEST(RobotHardwareInitializationPolicy, RequiresMotorIds)
+{
+  auto config = valid_hardware_policy();
+  config.motor_ids.clear();
+
+  const auto result =
+    irc_step_motion_executor::validate_robot_hardware_initialization_policy(config);
+
+  EXPECT_FALSE(result);
+  EXPECT_EQ(result.error_code, "ROBOT_MOTOR_IDS_REQUIRED");
+}
+
+TEST(RobotHardwareInitializationPolicy, RejectsDuplicateMotorIds)
+{
+  auto config = valid_hardware_policy();
+  config.motor_ids = {0, 1, 1};
+
+  const auto result =
+    irc_step_motion_executor::validate_robot_hardware_initialization_policy(config);
+
+  EXPECT_FALSE(result);
+  EXPECT_EQ(result.error_code, "ROBOT_MOTOR_ID_DUPLICATED");
+}
+
+TEST(RobotHardwareInitializationPolicy, RejectsIdsOutsideCurrentSdkRange)
+{
+  auto config = valid_hardware_policy();
+  config.motor_ids = {0, 23};
+
+  const auto result =
+    irc_step_motion_executor::validate_robot_hardware_initialization_policy(config);
+
+  EXPECT_FALSE(result);
+  EXPECT_EQ(result.error_code, "ROBOT_MOTOR_ID_OUT_OF_RANGE");
+}
+
+TEST(RobotHardwareInitializationPolicy, RequiresTorqueApproval)
+{
+  auto config = valid_hardware_policy();
+  config.explicit_torque_approval = false;
+
+  const auto result =
+    irc_step_motion_executor::validate_robot_hardware_initialization_policy(config);
+
+  EXPECT_FALSE(result);
+  EXPECT_EQ(result.error_code, "ROBOT_TORQUE_APPROVAL_REQUIRED");
+}
+
+TEST(RobotHardwareInitializationPolicy, AcceptsAllPrerequisites)
+{
+  const auto result =
+    irc_step_motion_executor::validate_robot_hardware_initialization_policy(
+    valid_hardware_policy());
+
+  EXPECT_TRUE(result);
+  EXPECT_TRUE(result.config.enable_robot_hardware);
 }
 
 }  // namespace

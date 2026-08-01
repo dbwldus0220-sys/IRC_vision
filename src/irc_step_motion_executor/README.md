@@ -100,6 +100,18 @@ factory는 `initialize()`를 호출하지 않으므로 이 상태에서 motion �
 `SDK_HARDWARE_NOT_READY`로 거부된다. 명시적인 hardware 승인과 별도 initialize
 wiring 전에는 실제 motion을 실행하면 안 된다.
 
+Production runtime 객체 생성과 hardware initialization 승인은 서로 다른
+단계다. 초기화 policy의 기본값은 `enable_robot_hardware=false`이며, JSON 경로,
+device path, baud rate, motor ID 목록·중복·범위와 explicit torque approval를
+모두 검증한다. validation 성공은 설정 사전조건이 충족됐다는 뜻일 뿐 실제
+모터 초기화나 torque enable을 의미하지 않는다. 실제 initialize 호출 구현은
+후속 단계에서 별도의 hardware 승인과 함께 추가해야 한다.
+
+현재 외부 SDK는 device `/dev/ttyUSB0`, baud rate `4000000`, motor ID `0..22`를
+고정 상수로 사용한다. runtime config의 `device_path`, `baud_rate`, `motor_ids`는
+사전 검증용 요구사항이며 아직 SDK로 전달되지 않는다. 두 설정이 실제로
+연결되기 전에는 validation 값만 바꿔 SDK hardware 설정을 변경할 수 없다.
+
 현재 SDK API에서 runtime 생성자에 전달할 수 있는 설정은 motion JSON
 경로뿐이다. device `/dev/ttyUSB0`, baud rate `4000000`, protocol `2.0`은
 외부 SDK 저수준 소스에 하드코딩되어 있어 이 package의 설정으로 노출하지

@@ -78,4 +78,25 @@ TEST(ProductionRobotMotionRuntimeFactory, ConvertsConstructionException)
     (std::vector<std::string>{"hardware"}));
 }
 
+TEST(ProductionRobotMotionRuntimeFactory, PolicyValidationCreatesNoSdkObjects)
+{
+  irc_step::fake_sdk::reset_tracking();
+  irc_step_motion_executor::RobotMotionRuntimeConfig config;
+  config.motion_json_path = TEST_EXISTING_RUNTIME_FILE;
+  config.enable_robot_hardware = true;
+  config.device_path = "/dev/ttyUSB0";
+  config.baud_rate = 4000000;
+  config.motor_ids = {0, 1, 22};
+  config.explicit_torque_approval = true;
+
+  const auto result =
+    irc_step_motion_executor::validate_robot_hardware_initialization_policy(config);
+
+  EXPECT_TRUE(result);
+  EXPECT_EQ(irc_step::fake_sdk::hardware_construction_count(), 0);
+  EXPECT_EQ(irc_step::fake_sdk::player_construction_count(), 0);
+  EXPECT_EQ(irc_step::fake_sdk::hardware_initialize_count(), 0);
+  EXPECT_EQ(irc_step::fake_sdk::player_initialize_count(), 0);
+}
+
 }  // namespace
