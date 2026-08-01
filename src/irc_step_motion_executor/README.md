@@ -92,6 +92,18 @@ Real runtime은 아직 비활성이다. `backend_type=robot_motion_player`만
 연결되지 않았으므로 실제 SDK 객체를 생성하지 않는다. real 요청은
 simulated로 fallback하지 않는다.
 
+SDK 소스를 확인한 결과 `Dxl` constructor는 `/dev/ttyUSB0` port open과 baud
+rate 설정을 수행하고, Dynamixel torque를 disable하며 operating mode를 읽고
+쓴다. 따라서 production runtime은 의도적으로
+`ROBOT_MOTION_RUNTIME_NOT_SAFE_TO_INSTANTIATE` 오류로 차단되어 있다. 유효한
+`motion_json_path`를 주어도 `RobotMotionPlayer`, `DynamixelMotionHardware`,
+`Dxl`을 생성하지 않는다.
+
+실제 runtime wiring을 활성화하려면 먼저 SDK를 refactor해 constructor에서
+side effect를 제거해야 한다. 명시적인 hardware 승인 후 `initialize` 단계에서만
+port와 torque/operating mode에 접근하도록 바꾸기 전에는 production runtime을
+활성화하면 안 된다.
+
 현재 SDK API에서 runtime 생성자에 전달할 수 있는 설정은 motion JSON
 경로뿐이다. device `/dev/ttyUSB0`, baud rate `4000000`, protocol `2.0`은
 외부 SDK 저수준 소스에 하드코딩되어 있어 이 package의 설정으로 노출하지
@@ -112,8 +124,9 @@ simulated로 fallback하지 않는다.
 주입된 non-owning API wrapper를 `MotionBackend` 상태로 변환한다.
 
 기본 `sdk_motion_executor` node는 계속 `SimulatedMotionBackend`만 사용한다.
-real backend 선택, production factory 및 hardware launch는 아직 없으며
-`RobotMotionPlayerBackend`가 node에서 활성화되는 경로도 없다. 관절 방향,
+production factory는 안전 오류만 반환하며 real backend wiring 및 hardware
+launch는 아직 없다. `RobotMotionPlayerBackend`가 node에서 활성화되는 경로도
+없다. 관절 방향,
 영점, limit, 모션 거리 및 torque 안전 조건이 확인되기 전에는 실제 player를
 생성·초기화하거나 이 adapter로 motion을 실행하지 않는다.
 

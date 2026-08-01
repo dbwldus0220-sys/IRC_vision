@@ -38,6 +38,16 @@ public:
     const RobotMotionRuntimeConfig & config) = 0;
 };
 
+// This factory deliberately contains no SDK types.  It remains blocked until
+// the SDK constructors are made free of hardware side effects.
+class ProductionRobotMotionRuntimeFactory final
+  : public RobotMotionRuntimeFactory
+{
+public:
+  RobotMotionRuntimeFactoryResult create(
+    const RobotMotionRuntimeConfig & config) override;
+};
+
 }  // namespace irc_step_motion_executor
 
 #endif  // IRC_STEP_MOTION_EXECUTOR__ROBOT_MOTION_RUNTIME_FACTORY_HPP_

@@ -94,7 +94,8 @@ target_link_libraries(simulated_motion_backend PUBLIC sdk_executor_core)
 
 add_library(
   robot_motion_runtime_config
-  src/robot_motion_runtime_config.cpp)
+  src/robot_motion_runtime_config.cpp
+  src/production_robot_motion_runtime_factory.cpp)
 target_compile_features(robot_motion_runtime_config PUBLIC cxx_std_17)
 target_include_directories(robot_motion_runtime_config PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
@@ -190,6 +191,16 @@ if(BUILD_TESTING)
   if(TARGET test_robot_motion_runtime_config)
     target_link_libraries(
       test_robot_motion_runtime_config robot_motion_runtime_config)
+  endif()
+  ament_add_gtest(
+    test_production_robot_motion_runtime_factory
+    test/test_production_robot_motion_runtime_factory.cpp)
+  if(TARGET test_production_robot_motion_runtime_factory)
+    target_link_libraries(
+      test_production_robot_motion_runtime_factory robot_motion_runtime_config)
+    target_compile_definitions(
+      test_production_robot_motion_runtime_factory PRIVATE
+      TEST_EXISTING_RUNTIME_FILE="${CMAKE_CURRENT_SOURCE_DIR}/config/motion_aliases.yaml")
   endif()
   ament_add_gtest(
     test_motion_backend_factory
