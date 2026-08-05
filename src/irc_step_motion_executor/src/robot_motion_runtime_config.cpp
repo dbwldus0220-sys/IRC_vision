@@ -35,7 +35,8 @@ RobotMotionRuntimeConfigResult error(
 }
 
 RobotMotionRuntimeConfigResult validate_robot_hardware_policy(
-  const RobotMotionRuntimeConfig & config, bool require_torque_approval)
+  const RobotMotionRuntimeConfig & config, bool require_motion_runtime,
+  bool require_torque_approval)
 {
   if (!config.enable_robot_hardware) {
     return error(
@@ -43,10 +44,12 @@ RobotMotionRuntimeConfigResult validate_robot_hardware_policy(
       "hardware initialization requires enable_robot_hardware=true");
   }
 
-  const auto runtime_config_result =
-    validate_robot_motion_runtime_config(config);
-  if (!runtime_config_result) {
-    return runtime_config_result;
+  if (require_motion_runtime) {
+    const auto runtime_config_result =
+      validate_robot_motion_runtime_config(config);
+    if (!runtime_config_result) {
+      return runtime_config_result;
+    }
   }
 
   if (config.device_path.empty()) {
@@ -179,13 +182,14 @@ RobotMotionRuntimeConfigResult validate_robot_motion_runtime_config(
 RobotMotionRuntimeConfigResult validate_robot_hardware_initialization_policy(
   const RobotMotionRuntimeConfig & config)
 {
-  return validate_robot_hardware_policy(config, true);
+  return validate_robot_hardware_policy(config, true, true);
 }
 
 RobotMotionRuntimeConfigResult validate_robot_hardware_preflight_policy(
   const RobotMotionRuntimeConfig & config)
 {
-  return validate_robot_hardware_policy(config, false);
+  // Preflight diagnoses hardware only; it does not construct a motion runtime.
+  return validate_robot_hardware_policy(config, false, false);
 }
 
 }  // namespace irc_step_motion_executor

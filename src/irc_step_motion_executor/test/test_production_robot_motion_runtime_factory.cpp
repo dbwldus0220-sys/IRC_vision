@@ -69,6 +69,7 @@ TEST(ProductionRobotMotionRuntimeFactory, PreflightCreatesOwnedDiagnosticsRuntim
   irc_step::fake_sdk::reset_tracking();
   irc_step_motion_executor::ProductionRobotMotionRuntimeFactory factory;
   auto config = complete_runtime_config();
+  config.motion_json_path.clear();
   config.explicit_torque_approval = false;
 
   auto result = factory.preflight(config);
@@ -77,7 +78,7 @@ TEST(ProductionRobotMotionRuntimeFactory, PreflightCreatesOwnedDiagnosticsRuntim
   ASSERT_NE(result.runtime_owner, nullptr);
   EXPECT_TRUE(result.error_code.empty());
   EXPECT_EQ(irc_step::fake_sdk::hardware_construction_count(), 1);
-  EXPECT_EQ(irc_step::fake_sdk::player_construction_count(), 1);
+  EXPECT_EQ(irc_step::fake_sdk::player_construction_count(), 0);
   EXPECT_EQ(irc_step::fake_sdk::hardware_preflight_count(), 1);
   EXPECT_EQ(irc_step::fake_sdk::hardware_initialize_count(), 0);
   EXPECT_EQ(irc_step::fake_sdk::player_initialize_count(), 0);
@@ -86,7 +87,7 @@ TEST(ProductionRobotMotionRuntimeFactory, PreflightCreatesOwnedDiagnosticsRuntim
   result.runtime_owner.reset();
   EXPECT_EQ(
     irc_step::fake_sdk::destruction_order(),
-    (std::vector<std::string>{"player", "hardware"}));
+    (std::vector<std::string>{"hardware"}));
 }
 
 TEST(ProductionRobotMotionRuntimeFactory, PreflightPolicyFailureCreatesNoSdkObjects)
@@ -94,6 +95,7 @@ TEST(ProductionRobotMotionRuntimeFactory, PreflightPolicyFailureCreatesNoSdkObje
   irc_step::fake_sdk::reset_tracking();
   irc_step_motion_executor::ProductionRobotMotionRuntimeFactory factory;
   auto config = complete_runtime_config();
+  config.motion_json_path.clear();
   config.explicit_torque_approval = false;
   config.device_path = "/dev/ttyUSB1";
 
@@ -116,6 +118,7 @@ TEST(ProductionRobotMotionRuntimeFactory, PreflightFailureReturnsHardwareError)
     false, "fake preflight communication detail");
   irc_step_motion_executor::ProductionRobotMotionRuntimeFactory factory;
   auto config = complete_runtime_config();
+  config.motion_json_path.clear();
   config.explicit_torque_approval = false;
 
   const auto result = factory.preflight(config);
@@ -126,31 +129,38 @@ TEST(ProductionRobotMotionRuntimeFactory, PreflightFailureReturnsHardwareError)
     result.message.find("fake preflight communication detail"),
     std::string::npos);
   EXPECT_EQ(result.runtime_owner, nullptr);
+  EXPECT_EQ(irc_step::fake_sdk::hardware_construction_count(), 1);
+  EXPECT_EQ(irc_step::fake_sdk::player_construction_count(), 0);
   EXPECT_EQ(irc_step::fake_sdk::hardware_preflight_count(), 1);
   EXPECT_EQ(irc_step::fake_sdk::hardware_initialize_count(), 0);
   EXPECT_EQ(irc_step::fake_sdk::player_initialize_count(), 0);
   EXPECT_EQ(
     irc_step::fake_sdk::destruction_order(),
-    (std::vector<std::string>{"player", "hardware"}));
+    (std::vector<std::string>{"hardware"}));
 }
 
-TEST(ProductionRobotMotionRuntimeFactory, ConvertsPreflightConstructionException)
+TEST(ProductionRobotMotionRuntimeFactory, PreflightDoesNotConstructPlayer)
 {
   irc_step::fake_sdk::reset_tracking();
   irc_step::fake_sdk::set_player_constructor_throws(true);
   irc_step_motion_executor::ProductionRobotMotionRuntimeFactory factory;
   auto config = complete_runtime_config();
+  config.motion_json_path.clear();
   config.explicit_torque_approval = false;
 
-  const auto result = factory.preflight(config);
+  auto result = factory.preflight(config);
 
-  EXPECT_FALSE(result);
-  EXPECT_EQ(result.error_code, "ROBOT_MOTION_RUNTIME_CREATION_FAILED");
-  EXPECT_NE(result.message.find("fake player construction failed"), std::string::npos);
-  EXPECT_EQ(result.runtime_owner, nullptr);
-  EXPECT_EQ(irc_step::fake_sdk::hardware_preflight_count(), 0);
+  EXPECT_TRUE(result);
+  EXPECT_NE(result.runtime_owner, nullptr);
+  EXPECT_TRUE(result.error_code.empty());
+  EXPECT_EQ(irc_step::fake_sdk::hardware_construction_count(), 1);
+  EXPECT_EQ(irc_step::fake_sdk::player_construction_count(), 0);
+  EXPECT_EQ(irc_step::fake_sdk::hardware_preflight_count(), 1);
   EXPECT_EQ(irc_step::fake_sdk::hardware_initialize_count(), 0);
   EXPECT_EQ(irc_step::fake_sdk::player_initialize_count(), 0);
+  EXPECT_TRUE(irc_step::fake_sdk::destruction_order().empty());
+
+  result.runtime_owner.reset();
   EXPECT_EQ(
     irc_step::fake_sdk::destruction_order(),
     (std::vector<std::string>{"hardware"}));

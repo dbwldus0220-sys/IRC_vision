@@ -231,25 +231,36 @@ TEST(RobotHardwareInitializationPolicy, AcceptsAllPrerequisites)
   EXPECT_TRUE(result.config.enable_robot_hardware);
 }
 
-TEST(RobotHardwarePreflightPolicy, DoesNotRequireTorqueApproval)
+TEST(RobotHardwarePreflightPolicy, DoesNotRequireMotionJsonOrTorqueApproval)
 {
   auto config = valid_hardware_policy();
+  config.motion_json_path.clear();
   config.explicit_torque_approval = false;
 
-  const auto preflight_result =
+  const auto result =
     irc_step_motion_executor::validate_robot_hardware_preflight_policy(config);
-  const auto initialization_result =
+
+  EXPECT_TRUE(result);
+  EXPECT_TRUE(result.config.motion_json_path.empty());
+  EXPECT_FALSE(result.config.explicit_torque_approval);
+}
+
+TEST(RobotHardwareInitializationPolicy, RequiresMotionJsonPath)
+{
+  auto config = valid_hardware_policy();
+  config.motion_json_path.clear();
+
+  const auto result =
     irc_step_motion_executor::validate_robot_hardware_initialization_policy(config);
 
-  EXPECT_TRUE(preflight_result);
-  EXPECT_FALSE(initialization_result);
-  EXPECT_EQ(
-    initialization_result.error_code, "ROBOT_TORQUE_APPROVAL_REQUIRED");
+  EXPECT_FALSE(result);
+  EXPECT_EQ(result.error_code, "MOTION_JSON_PATH_REQUIRED");
 }
 
 TEST(RobotHardwarePreflightPolicy, EnforcesFixedHardwareProfile)
 {
   auto config = valid_hardware_policy();
+  config.motion_json_path.clear();
   config.explicit_torque_approval = false;
   config.baud_rate = 1000000;
 

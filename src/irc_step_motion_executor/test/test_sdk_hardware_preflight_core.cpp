@@ -35,7 +35,6 @@ public:
 std::vector<std::string> valid_arguments()
 {
   return {
-    "--motion-json", "/tmp/motions.json",
     "--device", "/dev/ttyUSB0",
     "--baud", "4000000",
     "--motor-ids", "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22",
@@ -96,7 +95,7 @@ TEST(SdkHardwarePreflightParser, ParsesCompleteArguments)
     irc_step_motion_executor::parse_hardware_preflight_arguments(valid_arguments());
 
   ASSERT_TRUE(result);
-  EXPECT_EQ(result.config.motion_json_path, "/tmp/motions.json");
+  EXPECT_TRUE(result.config.motion_json_path.empty());
   EXPECT_TRUE(result.config.enable_robot_hardware);
   EXPECT_EQ(result.config.device_path, "/dev/ttyUSB0");
   EXPECT_EQ(result.config.baud_rate, 4000000);
@@ -115,7 +114,7 @@ TEST(SdkHardwarePreflightParser, RejectsMissingRequiredOption)
     irc_step_motion_executor::parse_hardware_preflight_arguments(arguments);
 
   EXPECT_FALSE(result);
-  EXPECT_NE(result.error.find("--motion-json"), std::string::npos);
+  EXPECT_NE(result.error.find("--device"), std::string::npos);
 }
 
 TEST(SdkHardwarePreflightParser, RejectsMissingHardwareAccessConfirmation)
@@ -178,17 +177,22 @@ TEST(SdkHardwarePreflightParser, RejectsUnknownAndTorqueApprovalOptions)
   const auto torque =
     irc_step_motion_executor::parse_hardware_preflight_arguments(
     {"--approve-torque"});
+  const auto motion_json =
+    irc_step_motion_executor::parse_hardware_preflight_arguments(
+    {"--motion-json", "/tmp/motions.json"});
 
   EXPECT_FALSE(unknown);
   EXPECT_NE(unknown.error.find("unknown option"), std::string::npos);
   EXPECT_FALSE(torque);
   EXPECT_NE(torque.error.find("unknown option"), std::string::npos);
+  EXPECT_FALSE(motion_json);
+  EXPECT_NE(motion_json.error.find("unknown option"), std::string::npos);
 }
 
 TEST(SdkHardwarePreflightParser, RejectsMalformedBaud)
 {
   auto arguments = valid_arguments();
-  arguments[5] = "4000000baud";
+  arguments[3] = "4000000baud";
 
   const auto result =
     irc_step_motion_executor::parse_hardware_preflight_arguments(arguments);
@@ -203,7 +207,7 @@ TEST(SdkHardwarePreflightParser, RejectsMalformedMotorIdLists)
     {"0,,2", "0,two,2", "0,1,", "0,1,1"})
   {
     auto arguments = valid_arguments();
-    arguments[7] = motor_ids;
+    arguments[5] = motor_ids;
 
     const auto result =
       irc_step_motion_executor::parse_hardware_preflight_arguments(arguments);

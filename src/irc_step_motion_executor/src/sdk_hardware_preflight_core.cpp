@@ -65,8 +65,8 @@ bool parse_motor_ids(
 std::string hardware_preflight_usage()
 {
   return
-    "Usage: sdk_hardware_preflight --motion-json <path> --device <path> "
-    "--baud <integer> --motor-ids <comma-separated IDs> "
+    "Usage: sdk_hardware_preflight --device <path> --baud <integer> "
+    "--motor-ids <comma-separated IDs> "
     "--confirm-hardware-access PREFLIGHT_ONLY_TORQUE_OFF\n"
     "The confirmation approves hardware port access only. It does not approve "
     "torque ON.\n"
@@ -81,7 +81,6 @@ HardwarePreflightArgumentsResult parse_hardware_preflight_arguments(
     RobotMotionRuntimeConfig config;
     config.enable_robot_hardware = true;
     config.explicit_torque_approval = false;
-    bool has_motion_json = false;
     bool has_device = false;
     bool has_baud = false;
     bool has_motor_ids = false;
@@ -89,8 +88,8 @@ HardwarePreflightArgumentsResult parse_hardware_preflight_arguments(
 
     for (std::size_t index = 0; index < arguments.size(); ++index) {
       const std::string & option = arguments[index];
-      if (option != "--motion-json" && option != "--device" &&
-        option != "--baud" && option != "--motor-ids" &&
+      if (option != "--device" && option != "--baud" &&
+        option != "--motor-ids" &&
         option != "--confirm-hardware-access")
       {
         return {{}, "unknown option: " + option};
@@ -102,13 +101,7 @@ HardwarePreflightArgumentsResult parse_hardware_preflight_arguments(
       }
       const std::string & value = arguments[++index];
 
-      if (option == "--motion-json") {
-        if (has_motion_json) {
-          return {{}, "duplicate option: --motion-json"};
-        }
-        has_motion_json = true;
-        config.motion_json_path = value;
-      } else if (option == "--device") {
+      if (option == "--device") {
         if (has_device) {
           return {{}, "duplicate option: --device"};
         }
@@ -145,9 +138,6 @@ HardwarePreflightArgumentsResult parse_hardware_preflight_arguments(
       }
     }
 
-    if (!has_motion_json) {
-      return {{}, "required option is missing: --motion-json"};
-    }
     if (!has_device) {
       return {{}, "required option is missing: --device"};
     }

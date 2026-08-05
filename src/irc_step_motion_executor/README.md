@@ -103,17 +103,17 @@ Production factory는 hardware policy가 모두 통과한 경우에만 owner를 
 backend를 반환하며 자동 simulated fallback은 없다. Production backend 선택은
 실제 serial port, operating mode 및 torque 접근을 일으킬 수 있다.
 
-Production factory의 `preflight()`는 진단 전용 경로다. fixed hardware profile과
-JSON 경로를 검증한 뒤 SDK hardware의 torque-OFF 통신 및 모터 응답 확인만
-수행하며, explicit torque approval를 요구하지 않고 backend도 반환하지 않는다.
+Production factory의 `preflight()`는 진단 전용 경로다. fixed SDK hardware
+profile을 검증한 뒤 torque-OFF 통신 및 모터 응답 확인만 수행한다.
+motion JSON을 읽거나 `RobotMotionPlayer`를 생성하지 않으며, explicit torque
+approval를 요구하지 않고 backend도 반환하지 않는다.
 반면 `create()`와 그 내부 initialize 경로는 explicit torque approval가 반드시
 필요하고, torque ON까지 성공한 경우에만 motion backend를 반환한다. 따라서
 preflight 성공은 motion-ready 또는 모션 실행 가능 상태를 뜻하지 않는다.
 
 SDK-enabled 빌드의 `sdk_hardware_preflight`는 일반
 `sdk_motion_executor`와 분리된 일회성 diagnostics CLI다. ROS 2 node, topic 또는
-지속 실행 loop를 만들지 않으며 `--motion-json`, `--device`, `--baud`,
-`--motor-ids`와
+지속 실행 loop를 만들지 않으며 `--device`, `--baud`, `--motor-ids`와
 `--confirm-hardware-access PREFLIGHT_ONLY_TORQUE_OFF`를 모두 명시해야 한다.
 이 확인 문자열은 하드웨어 포트 접근만 승인하며 torque ON 승인이 아니다.
 CLI는 `explicit_torque_approval=false`를 유지하고 `initialize()`나 모션 실행을

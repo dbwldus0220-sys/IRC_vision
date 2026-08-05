@@ -55,19 +55,9 @@ public:
     return player_.initialize();
   }
 
-  bool preflight()
-  {
-    return hardware_.preflight();
-  }
-
   std::string last_error() const
   {
     return std::string(player_.lastError());
-  }
-
-  std::string preflight_error() const
-  {
-    return std::string(hardware_.lastError());
   }
 
 private:
@@ -75,6 +65,29 @@ private:
   irc_step::DynamixelMotionHardware hardware_;
   irc_step::RobotMotionPlayer player_;
   BorrowedRobotMotionPlayerApi player_api_;
+};
+
+class ProductionRobotMotionPreflightOwner
+{
+public:
+  explicit ProductionRobotMotionPreflightOwner(
+    const RobotMotionRuntimeConfig & config)
+  : hardware_(to_sdk_hardware_config(config))
+  {
+  }
+
+  bool preflight()
+  {
+    return hardware_.preflight();
+  }
+
+  std::string last_error() const
+  {
+    return std::string(hardware_.lastError());
+  }
+
+private:
+  irc_step::DynamixelMotionHardware hardware_;
 };
 
 RobotMotionRuntimeFactoryResult creation_error(std::string message)
@@ -106,24 +119,24 @@ RobotMotionPreflightResult ProductionRobotMotionRuntimeFactory::preflight(
   }
 
   try {
-    auto owner = std::make_shared<ProductionRobotMotionRuntimeOwner>(
+    auto owner = std::make_shared<ProductionRobotMotionPreflightOwner>(
       config_result.config);
     if (!owner->preflight()) {
-      const auto sdk_message = owner->preflight_error();
+      const auto sdk_message = owner->last_error();
       return preflight_error(
         sdk_message.empty() ?
-        "RobotMotionPlayer hardware preflight failed" : sdk_message);
+        "robot hardware preflight failed" : sdk_message);
     }
     return {std::move(owner), "", ""};
   } catch (const std::exception & exception) {
     return {
       {}, "ROBOT_MOTION_RUNTIME_CREATION_FAILED",
-      "failed to create RobotMotionPlayer preflight objects: " +
+      "failed to create robot hardware preflight object: " +
       std::string(exception.what())};
   } catch (...) {
     return {
       {}, "ROBOT_MOTION_RUNTIME_CREATION_FAILED",
-      "failed to create RobotMotionPlayer preflight objects: unknown exception"};
+      "failed to create robot hardware preflight object: unknown exception"};
   }
 }
 
