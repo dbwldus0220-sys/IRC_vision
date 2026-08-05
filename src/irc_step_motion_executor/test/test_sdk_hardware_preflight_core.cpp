@@ -38,7 +38,8 @@ std::vector<std::string> valid_arguments()
     "--motion-json", "/tmp/motions.json",
     "--device", "/dev/ttyUSB0",
     "--baud", "4000000",
-    "--motor-ids", "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22"};
+    "--motor-ids", "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22",
+    "--confirm-hardware-access", "PREFLIGHT_ONLY_TORQUE_OFF"};
 }
 
 TEST(SdkHardwarePreflightCore, CallsPreflightOnceAndReportsSafeSuccess)
@@ -115,6 +116,50 @@ TEST(SdkHardwarePreflightParser, RejectsMissingRequiredOption)
 
   EXPECT_FALSE(result);
   EXPECT_NE(result.error.find("--motion-json"), std::string::npos);
+}
+
+TEST(SdkHardwarePreflightParser, RejectsMissingHardwareAccessConfirmation)
+{
+  auto arguments = valid_arguments();
+  arguments.erase(arguments.end() - 2, arguments.end());
+
+  const auto result =
+    irc_step_motion_executor::parse_hardware_preflight_arguments(arguments);
+
+  EXPECT_FALSE(result);
+  EXPECT_NE(
+    result.error.find("--confirm-hardware-access"), std::string::npos);
+}
+
+TEST(SdkHardwarePreflightParser, RejectsIncorrectHardwareAccessConfirmation)
+{
+  auto arguments = valid_arguments();
+  arguments.back() = "PREFLIGHT_ONLY";
+
+  const auto result =
+    irc_step_motion_executor::parse_hardware_preflight_arguments(arguments);
+
+  EXPECT_FALSE(result);
+  EXPECT_NE(
+    result.error.find("must exactly equal PREFLIGHT_ONLY_TORQUE_OFF"),
+    std::string::npos);
+}
+
+TEST(SdkHardwarePreflightParser, ParserFailureDoesNotCallFakeFactory)
+{
+  FakePreflightFactory factory;
+  auto arguments = valid_arguments();
+  arguments.back() = "TORQUE_ON";
+
+  const auto parsed =
+    irc_step_motion_executor::parse_hardware_preflight_arguments(arguments);
+  if (parsed) {
+    (void)irc_step_motion_executor::run_hardware_preflight(
+      factory, parsed.config);
+  }
+
+  EXPECT_FALSE(parsed);
+  EXPECT_EQ(factory.preflight_calls, 0);
 }
 
 TEST(SdkHardwarePreflightParser, RejectsMissingOptionValue)

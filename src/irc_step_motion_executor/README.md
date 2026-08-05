@@ -113,10 +113,13 @@ preflight 성공은 motion-ready 또는 모션 실행 가능 상태를 뜻하지
 SDK-enabled 빌드의 `sdk_hardware_preflight`는 일반
 `sdk_motion_executor`와 분리된 일회성 diagnostics CLI다. ROS 2 node, topic 또는
 지속 실행 loop를 만들지 않으며 `--motion-json`, `--device`, `--baud`,
-`--motor-ids`를 모두 명시해야 한다. 성공 메시지가 출력되어도 torque는 OFF로
-유지되고 motion-ready 상태가 아니다. 이 도구의 실제 실행은 로봇 지지·비상정지
-등 하드웨어 점검 절차를 준비하고 사용자가 연결 상태를 판단한 뒤에만 수행해야
-한다.
+`--motor-ids`와
+`--confirm-hardware-access PREFLIGHT_ONLY_TORQUE_OFF`를 모두 명시해야 한다.
+이 확인 문자열은 하드웨어 포트 접근만 승인하며 torque ON 승인이 아니다.
+CLI는 `explicit_torque_approval=false`를 유지하고 `initialize()`나 모션 실행을
+호출하지 않는다. 성공 메시지가 출력되어도 torque는 OFF로 유지되며
+motion-ready 상태가 아니다. 이 도구의 실제 실행은 로봇 지지·비상정지 등
+하드웨어 점검 절차를 준비하고 사용자가 연결 상태를 판단한 뒤에만 수행해야 한다.
 
 Production runtime 객체 생성과 hardware initialization 승인은 서로 다른
 단계다. 초기화 policy의 기본값은 `enable_robot_hardware=false`이며, JSON 경로,
