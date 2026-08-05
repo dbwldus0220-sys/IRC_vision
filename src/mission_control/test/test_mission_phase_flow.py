@@ -403,7 +403,7 @@ def test_full_course_mock_flow_without_ros_graph():
     assert harness.shots_completed == 1
     assert harness.ball_sections_processed == 1
     assert harness.finish_enabled is True
-    assert harness.mission_phase == "AUTO"
+    assert harness.mission_phase == "LINE_TRACK"
     assert harness.mission_complete is False
 
     hurdle_approach = harness.publish_vision(
@@ -433,7 +433,7 @@ def test_full_course_mock_flow_without_ros_graph():
     )
     assert go_locked[-1]["action"] == "WAIT"
     harness.send_status("GO", go_id, "SUCCEEDED")
-    assert harness.mission_phase == "AUTO"
+    assert harness.mission_phase == "LINE_TRACK"
 
     harness.planner._clear_ball_tracking()
     harness.planner._clear_goal_tracking()
@@ -445,8 +445,8 @@ def test_full_course_mock_flow_without_ros_graph():
         finish=confirmed_finish(),
     )
     assert final_line[-1]["action"] == "STRAIGHT"
-    assert final_line[-1]["phase"] == "AUTO"
-    assert harness.mission_phase == "AUTO"
+    assert final_line[-1]["phase"] == "LINE_TRACK"
+    assert harness.mission_phase == "LINE_TRACK"
     assert harness.mission_complete is False
     assert all(
         item["action"] != "CROSS_FINISH"
@@ -621,7 +621,7 @@ def test_hurdle_can_appear_after_shot_without_fixed_order():
         "SHOT",
     )
     complete_active(harness, "SHOT", shot["command_id"])
-    assert harness.mission_phase == "AUTO"
+    assert harness.mission_phase == "LINE_TRACK"
 
     hurdle = publish_special(
         harness,
@@ -931,7 +931,7 @@ def test_last_shot_enables_finish_flag_and_continues_line_driving():
 
     assert harness.ball_sections_processed == 2
     assert harness.finish_enabled is True
-    assert harness.mission_phase == "AUTO"
+    assert harness.mission_phase == "LINE_TRACK"
 
     # Model the goal becoming stale after the existing recovery window.
     harness.planner._clear_goal_tracking()
@@ -942,7 +942,7 @@ def test_last_shot_enables_finish_flag_and_continues_line_driving():
     assert any(
         command["action"] == "STRAIGHT" for command in line_commands
     )
-    assert all(command["phase"] == "AUTO" for command in line_commands)
+    assert all(command["phase"] == "LINE_TRACK" for command in line_commands)
     assert all(
         command["action"] != "CROSS_FINISH"
         for command in line_commands

@@ -239,7 +239,16 @@ class MissionPhaseManager:
                     self.required_ball_sections,
                 )
                 self._update_finish_enabled()
-                self.current_phase = "AUTO"
+                all_ball_sections_processed = (
+                    self.required_ball_sections > 0
+                    and self.ball_sections_processed
+                    >= self.required_ball_sections
+                )
+                self.current_phase = (
+                    "LINE_TRACK"
+                    if all_ball_sections_processed
+                    else "AUTO"
+                )
                 return
 
             self.current_phase = "GOAL_APPROACH"

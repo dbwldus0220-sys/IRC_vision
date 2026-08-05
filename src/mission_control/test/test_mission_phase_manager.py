@@ -130,18 +130,54 @@ def test_shot_terminal_updates_section_and_phase(status, expected_shots):
     )
 
 
-@pytest.mark.parametrize(
-    "status",
-    ["SUCCEEDED"],
-)
-def test_successful_shot_enables_finish_flag_and_returns_to_auto(status):
+def test_only_required_shot_enters_line_track_without_finishing():
     manager = MissionPhaseManager(
         required_ball_sections=1,
         initial_phase="GOAL_APPROACH",
     )
-    complete(manager, "SHOT", 1, status)
+    complete(manager, "SHOT", 1, "SUCCEEDED")
+    assert manager.shots_completed == 1
+    assert manager.ball_sections_processed == 1
     assert manager.finish_enabled is True
+    assert manager.current_phase == "LINE_TRACK"
+    assert manager.current_phase not in {
+        "FINISH",
+        "WALK_TO_FINISH",
+        "FINISHED",
+    }
+    assert manager.mission_complete is False
+
+
+def test_second_required_shot_enters_line_track():
+    manager = MissionPhaseManager(
+        required_ball_sections=2,
+        initial_phase="GOAL_APPROACH",
+    )
+    complete(manager, "SHOT", 1, "SUCCEEDED")
+    assert manager.ball_sections_processed == 1
     assert manager.current_phase == "AUTO"
+
+    assert manager.set_phase("GOAL_APPROACH")
+    complete(manager, "SHOT", 2, "SUCCEEDED")
+
+    assert manager.shots_completed == 2
+    assert manager.ball_sections_processed == 2
+    assert manager.finish_enabled is True
+    assert manager.current_phase == "LINE_TRACK"
+    assert manager.mission_complete is False
+
+
+def test_zero_required_sections_preserves_success_phase_policy():
+    manager = MissionPhaseManager(
+        required_ball_sections=0,
+        initial_phase="GOAL_APPROACH",
+    )
+
+    complete(manager, "SHOT", 1, "SUCCEEDED")
+
+    assert manager.ball_sections_processed == 0
+    assert manager.current_phase == "AUTO"
+    assert manager.finish_enabled is True
 
 
 @pytest.mark.parametrize(
@@ -264,6 +300,34 @@ def test_duplicate_terminal_is_ignored():
     assert duplicate.duplicate
     assert manager.pickups_completed == 1
     assert manager.current_phase == "GOAL_APPROACH"
+
+
+def test_duplicate_successful_shot_does_not_increment_twice():
+    manager = MissionPhaseManager(
+        required_shots=2,
+        required_ball_sections=2,
+        initial_phase="GOAL_APPROACH",
+    )
+    complete(manager, "SHOT", 10, "SUCCEEDED")
+
+    duplicate = manager.handle_motion_status("SHOT", 10, "SUCCEEDED")
+
+    assert not duplicate.handled
+    assert duplicate.duplicate
+    assert manager.shots_completed == 1
+    assert manager.ball_sections_processed == 1
+    assert manager.current_phase == "AUTO"
+
+
+def test_mismatched_shot_command_does_not_change_progress_or_phase():
+    manager = MissionPhaseManager(initial_phase="GOAL_APPROACH")
+    assert manager.start_special_action("SHOT", 20)
+    before = manager.snapshot()
+
+    result = manager.handle_motion_status("SHOT", 21, "RUNNING")
+
+    assert not result.handled
+    assert manager.snapshot() == before
 
 
 def test_new_special_action_is_rejected_while_one_is_active():
