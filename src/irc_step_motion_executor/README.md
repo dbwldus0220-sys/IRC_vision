@@ -103,6 +103,13 @@ Production factory는 hardware policy가 모두 통과한 경우에만 owner를 
 backend를 반환하며 자동 simulated fallback은 없다. Production backend 선택은
 실제 serial port, operating mode 및 torque 접근을 일으킬 수 있다.
 
+Production factory의 `preflight()`는 진단 전용 경로다. fixed hardware profile과
+JSON 경로를 검증한 뒤 SDK hardware의 torque-OFF 통신 및 모터 응답 확인만
+수행하며, explicit torque approval를 요구하지 않고 backend도 반환하지 않는다.
+반면 `create()`와 그 내부 initialize 경로는 explicit torque approval가 반드시
+필요하고, torque ON까지 성공한 경우에만 motion backend를 반환한다. 따라서
+preflight 성공은 motion-ready 또는 모션 실행 가능 상태를 뜻하지 않는다.
+
 Production runtime 객체 생성과 hardware initialization 승인은 서로 다른
 단계다. 초기화 policy의 기본값은 `enable_robot_hardware=false`이며, JSON 경로,
 device path, baud rate, motor ID 목록·중복·범위와 explicit torque approval를

@@ -34,6 +34,80 @@ RobotMotionRuntimeConfigResult error(
   return {{}, std::move(error_code), std::move(message)};
 }
 
+RobotMotionRuntimeConfigResult validate_robot_hardware_policy(
+  const RobotMotionRuntimeConfig & config, bool require_torque_approval)
+{
+  if (!config.enable_robot_hardware) {
+    return error(
+      "ROBOT_HARDWARE_NOT_ENABLED",
+      "hardware initialization requires enable_robot_hardware=true");
+  }
+
+  const auto runtime_config_result =
+    validate_robot_motion_runtime_config(config);
+  if (!runtime_config_result) {
+    return runtime_config_result;
+  }
+
+  if (config.device_path.empty()) {
+    return error(
+      "ROBOT_DEVICE_PATH_REQUIRED",
+      "hardware initialization requires a non-empty device_path");
+  }
+  if (config.baud_rate <= 0) {
+    return error(
+      "ROBOT_BAUD_RATE_INVALID",
+      "hardware initialization requires baud_rate greater than zero");
+  }
+  if (config.motor_ids.empty()) {
+    return error(
+      "ROBOT_MOTOR_IDS_REQUIRED",
+      "hardware initialization requires at least one motor ID");
+  }
+
+  std::set<std::int64_t> unique_motor_ids;
+  for (const std::int64_t motor_id : config.motor_ids) {
+    if (motor_id < kMinimumSdkMotorId || motor_id > kMaximumSdkMotorId) {
+      return error(
+        "ROBOT_MOTOR_ID_OUT_OF_RANGE",
+        "motor IDs must match the current SDK range 0..22");
+    }
+    if (!unique_motor_ids.insert(motor_id).second) {
+      return error(
+        "ROBOT_MOTOR_ID_DUPLICATED",
+        "hardware initialization motor IDs must not contain duplicates");
+    }
+  }
+
+  if (require_torque_approval && !config.explicit_torque_approval) {
+    return error(
+      "ROBOT_TORQUE_APPROVAL_REQUIRED",
+      "hardware initialization requires explicit torque approval");
+  }
+
+  if (config.device_path != kFixedSdkHardwareProfile.device_path) {
+    return error(
+      "ROBOT_DEVICE_PATH_MISMATCH",
+      "device_path does not match the current fixed SDK hardware profile");
+  }
+  if (config.baud_rate != kFixedSdkHardwareProfile.baud_rate) {
+    return error(
+      "ROBOT_BAUD_RATE_MISMATCH",
+      "baud_rate does not match the current fixed SDK hardware profile");
+  }
+  if (!std::equal(
+      unique_motor_ids.begin(), unique_motor_ids.end(),
+      kFixedSdkHardwareProfile.motor_ids.begin(),
+      kFixedSdkHardwareProfile.motor_ids.end()))
+  {
+    return error(
+      "ROBOT_MOTOR_IDS_MISMATCH",
+      "motor IDs must exactly match the current fixed SDK set 0..22");
+  }
+
+  return {config, "", ""};
+}
+
 }  // namespace
 
 RobotMotionRuntimeConfig make_robot_motion_runtime_config(
@@ -105,75 +179,13 @@ RobotMotionRuntimeConfigResult validate_robot_motion_runtime_config(
 RobotMotionRuntimeConfigResult validate_robot_hardware_initialization_policy(
   const RobotMotionRuntimeConfig & config)
 {
-  if (!config.enable_robot_hardware) {
-    return error(
-      "ROBOT_HARDWARE_NOT_ENABLED",
-      "hardware initialization requires enable_robot_hardware=true");
-  }
+  return validate_robot_hardware_policy(config, true);
+}
 
-  const auto runtime_config_result =
-    validate_robot_motion_runtime_config(config);
-  if (!runtime_config_result) {
-    return runtime_config_result;
-  }
-
-  if (config.device_path.empty()) {
-    return error(
-      "ROBOT_DEVICE_PATH_REQUIRED",
-      "hardware initialization requires a non-empty device_path");
-  }
-  if (config.baud_rate <= 0) {
-    return error(
-      "ROBOT_BAUD_RATE_INVALID",
-      "hardware initialization requires baud_rate greater than zero");
-  }
-  if (config.motor_ids.empty()) {
-    return error(
-      "ROBOT_MOTOR_IDS_REQUIRED",
-      "hardware initialization requires at least one motor ID");
-  }
-
-  std::set<std::int64_t> unique_motor_ids;
-  for (const std::int64_t motor_id : config.motor_ids) {
-    if (motor_id < kMinimumSdkMotorId || motor_id > kMaximumSdkMotorId) {
-      return error(
-        "ROBOT_MOTOR_ID_OUT_OF_RANGE",
-        "motor IDs must match the current SDK range 0..22");
-    }
-    if (!unique_motor_ids.insert(motor_id).second) {
-      return error(
-        "ROBOT_MOTOR_ID_DUPLICATED",
-        "hardware initialization motor IDs must not contain duplicates");
-    }
-  }
-
-  if (!config.explicit_torque_approval) {
-    return error(
-      "ROBOT_TORQUE_APPROVAL_REQUIRED",
-      "hardware initialization requires explicit torque approval");
-  }
-
-  if (config.device_path != kFixedSdkHardwareProfile.device_path) {
-    return error(
-      "ROBOT_DEVICE_PATH_MISMATCH",
-      "device_path does not match the current fixed SDK hardware profile");
-  }
-  if (config.baud_rate != kFixedSdkHardwareProfile.baud_rate) {
-    return error(
-      "ROBOT_BAUD_RATE_MISMATCH",
-      "baud_rate does not match the current fixed SDK hardware profile");
-  }
-  if (!std::equal(
-      unique_motor_ids.begin(), unique_motor_ids.end(),
-      kFixedSdkHardwareProfile.motor_ids.begin(),
-      kFixedSdkHardwareProfile.motor_ids.end()))
-  {
-    return error(
-      "ROBOT_MOTOR_IDS_MISMATCH",
-      "motor IDs must exactly match the current fixed SDK set 0..22");
-  }
-
-  return {config, "", ""};
+RobotMotionRuntimeConfigResult validate_robot_hardware_preflight_policy(
+  const RobotMotionRuntimeConfig & config)
+{
+  return validate_robot_hardware_policy(config, false);
 }
 
 }  // namespace irc_step_motion_executor

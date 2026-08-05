@@ -12,8 +12,8 @@ namespace irc_step_motion_executor
 struct RobotMotionRuntimeConfig
 {
   std::string motion_json_path;
-  // Initialization-policy prerequisites only. The current SDK still uses
-  // fixed device, baud-rate, and motor-ID constants and does not receive them.
+  // The production factory passes these values to the SDK after validating
+  // that they exactly match the supported hardware profile.
   bool enable_robot_hardware{false};
   std::string device_path;
   std::int64_t baud_rate{0};
@@ -48,6 +48,9 @@ RobotMotionRuntimeConfigResult validate_robot_motion_runtime_config(
   const RobotMotionRuntimeConfig & config);
 
 RobotMotionRuntimeConfigResult validate_robot_hardware_initialization_policy(
+  const RobotMotionRuntimeConfig & config);
+
+RobotMotionRuntimeConfigResult validate_robot_hardware_preflight_policy(
   const RobotMotionRuntimeConfig & config);
 
 }  // namespace irc_step_motion_executor

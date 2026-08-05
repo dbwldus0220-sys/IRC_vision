@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace irc_step
@@ -24,8 +25,14 @@ public:
   explicit DynamixelMotionHardware(DynamixelMotionHardwareConfig config);
   ~DynamixelMotionHardware() override;
 
+  bool preflight() noexcept;
+  bool preflightReady() const noexcept;
   bool initialize() noexcept override;
   bool ready() const noexcept override;
+  std::string_view lastError() const noexcept;
+
+private:
+  std::string last_error_;
 };
 
 }  // namespace irc_step

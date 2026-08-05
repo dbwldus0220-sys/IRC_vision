@@ -231,4 +231,33 @@ TEST(RobotHardwareInitializationPolicy, AcceptsAllPrerequisites)
   EXPECT_TRUE(result.config.enable_robot_hardware);
 }
 
+TEST(RobotHardwarePreflightPolicy, DoesNotRequireTorqueApproval)
+{
+  auto config = valid_hardware_policy();
+  config.explicit_torque_approval = false;
+
+  const auto preflight_result =
+    irc_step_motion_executor::validate_robot_hardware_preflight_policy(config);
+  const auto initialization_result =
+    irc_step_motion_executor::validate_robot_hardware_initialization_policy(config);
+
+  EXPECT_TRUE(preflight_result);
+  EXPECT_FALSE(initialization_result);
+  EXPECT_EQ(
+    initialization_result.error_code, "ROBOT_TORQUE_APPROVAL_REQUIRED");
+}
+
+TEST(RobotHardwarePreflightPolicy, EnforcesFixedHardwareProfile)
+{
+  auto config = valid_hardware_policy();
+  config.explicit_torque_approval = false;
+  config.baud_rate = 1000000;
+
+  const auto result =
+    irc_step_motion_executor::validate_robot_hardware_preflight_policy(config);
+
+  EXPECT_FALSE(result);
+  EXPECT_EQ(result.error_code, "ROBOT_BAUD_RATE_MISMATCH");
+}
+
 }  // namespace

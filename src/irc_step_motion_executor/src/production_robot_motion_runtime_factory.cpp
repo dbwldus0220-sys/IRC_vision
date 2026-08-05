@@ -55,9 +55,19 @@ public:
     return player_.initialize();
   }
 
+  bool preflight()
+  {
+    return hardware_.preflight();
+  }
+
   std::string last_error() const
   {
     return std::string(player_.lastError());
+  }
+
+  std::string preflight_error() const
+  {
+    return std::string(hardware_.lastError());
   }
 
 private:
@@ -79,7 +89,43 @@ RobotMotionRuntimeFactoryResult initialization_error(std::string message)
     {}, "ROBOT_MOTION_RUNTIME_INITIALIZATION_FAILED", std::move(message)};
 }
 
+RobotMotionPreflightResult preflight_error(std::string message)
+{
+  return {
+    {}, "ROBOT_MOTION_RUNTIME_PREFLIGHT_FAILED", std::move(message)};
+}
+
 }  // namespace
+
+RobotMotionPreflightResult ProductionRobotMotionRuntimeFactory::preflight(
+  const RobotMotionRuntimeConfig & config)
+{
+  const auto config_result = validate_robot_hardware_preflight_policy(config);
+  if (!config_result) {
+    return {{}, config_result.error_code, config_result.message};
+  }
+
+  try {
+    auto owner = std::make_shared<ProductionRobotMotionRuntimeOwner>(
+      config_result.config);
+    if (!owner->preflight()) {
+      const auto sdk_message = owner->preflight_error();
+      return preflight_error(
+        sdk_message.empty() ?
+        "RobotMotionPlayer hardware preflight failed" : sdk_message);
+    }
+    return {std::move(owner), "", ""};
+  } catch (const std::exception & exception) {
+    return {
+      {}, "ROBOT_MOTION_RUNTIME_CREATION_FAILED",
+      "failed to create RobotMotionPlayer preflight objects: " +
+      std::string(exception.what())};
+  } catch (...) {
+    return {
+      {}, "ROBOT_MOTION_RUNTIME_CREATION_FAILED",
+      "failed to create RobotMotionPlayer preflight objects: unknown exception"};
+  }
+}
 
 RobotMotionRuntimeFactoryResult ProductionRobotMotionRuntimeFactory::create(
   const RobotMotionRuntimeConfig & config)

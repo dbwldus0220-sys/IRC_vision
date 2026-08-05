@@ -48,6 +48,7 @@ TEST(ProductionRobotMotionRuntimeFactory, CreatesInitializedOwnedRuntime)
   }
   EXPECT_EQ(irc_step::fake_sdk::hardware_motor_ids(), expected_motor_ids);
   EXPECT_EQ(irc_step::fake_sdk::hardware_initialize_count(), 1);
+  EXPECT_EQ(irc_step::fake_sdk::hardware_preflight_count(), 0);
   EXPECT_EQ(irc_step::fake_sdk::player_initialize_count(), 1);
 
   const auto start_result = result.runtime.backend->start_motion("test_motion");
@@ -61,6 +62,98 @@ TEST(ProductionRobotMotionRuntimeFactory, CreatesInitializedOwnedRuntime)
   EXPECT_EQ(
     irc_step::fake_sdk::destruction_order(),
     (std::vector<std::string>{"player", "hardware"}));
+}
+
+TEST(ProductionRobotMotionRuntimeFactory, PreflightCreatesOwnedDiagnosticsRuntime)
+{
+  irc_step::fake_sdk::reset_tracking();
+  irc_step_motion_executor::ProductionRobotMotionRuntimeFactory factory;
+  auto config = complete_runtime_config();
+  config.explicit_torque_approval = false;
+
+  auto result = factory.preflight(config);
+
+  ASSERT_TRUE(result);
+  ASSERT_NE(result.runtime_owner, nullptr);
+  EXPECT_TRUE(result.error_code.empty());
+  EXPECT_EQ(irc_step::fake_sdk::hardware_construction_count(), 1);
+  EXPECT_EQ(irc_step::fake_sdk::player_construction_count(), 1);
+  EXPECT_EQ(irc_step::fake_sdk::hardware_preflight_count(), 1);
+  EXPECT_EQ(irc_step::fake_sdk::hardware_initialize_count(), 0);
+  EXPECT_EQ(irc_step::fake_sdk::player_initialize_count(), 0);
+  EXPECT_TRUE(irc_step::fake_sdk::destruction_order().empty());
+
+  result.runtime_owner.reset();
+  EXPECT_EQ(
+    irc_step::fake_sdk::destruction_order(),
+    (std::vector<std::string>{"player", "hardware"}));
+}
+
+TEST(ProductionRobotMotionRuntimeFactory, PreflightPolicyFailureCreatesNoSdkObjects)
+{
+  irc_step::fake_sdk::reset_tracking();
+  irc_step_motion_executor::ProductionRobotMotionRuntimeFactory factory;
+  auto config = complete_runtime_config();
+  config.explicit_torque_approval = false;
+  config.device_path = "/dev/ttyUSB1";
+
+  const auto result = factory.preflight(config);
+
+  EXPECT_FALSE(result);
+  EXPECT_EQ(result.error_code, "ROBOT_DEVICE_PATH_MISMATCH");
+  EXPECT_EQ(result.runtime_owner, nullptr);
+  EXPECT_EQ(irc_step::fake_sdk::hardware_construction_count(), 0);
+  EXPECT_EQ(irc_step::fake_sdk::player_construction_count(), 0);
+  EXPECT_EQ(irc_step::fake_sdk::hardware_preflight_count(), 0);
+  EXPECT_EQ(irc_step::fake_sdk::hardware_initialize_count(), 0);
+  EXPECT_EQ(irc_step::fake_sdk::player_initialize_count(), 0);
+}
+
+TEST(ProductionRobotMotionRuntimeFactory, PreflightFailureReturnsHardwareError)
+{
+  irc_step::fake_sdk::reset_tracking();
+  irc_step::fake_sdk::set_hardware_preflight_result(
+    false, "fake preflight communication detail");
+  irc_step_motion_executor::ProductionRobotMotionRuntimeFactory factory;
+  auto config = complete_runtime_config();
+  config.explicit_torque_approval = false;
+
+  const auto result = factory.preflight(config);
+
+  EXPECT_FALSE(result);
+  EXPECT_EQ(result.error_code, "ROBOT_MOTION_RUNTIME_PREFLIGHT_FAILED");
+  EXPECT_NE(
+    result.message.find("fake preflight communication detail"),
+    std::string::npos);
+  EXPECT_EQ(result.runtime_owner, nullptr);
+  EXPECT_EQ(irc_step::fake_sdk::hardware_preflight_count(), 1);
+  EXPECT_EQ(irc_step::fake_sdk::hardware_initialize_count(), 0);
+  EXPECT_EQ(irc_step::fake_sdk::player_initialize_count(), 0);
+  EXPECT_EQ(
+    irc_step::fake_sdk::destruction_order(),
+    (std::vector<std::string>{"player", "hardware"}));
+}
+
+TEST(ProductionRobotMotionRuntimeFactory, ConvertsPreflightConstructionException)
+{
+  irc_step::fake_sdk::reset_tracking();
+  irc_step::fake_sdk::set_player_constructor_throws(true);
+  irc_step_motion_executor::ProductionRobotMotionRuntimeFactory factory;
+  auto config = complete_runtime_config();
+  config.explicit_torque_approval = false;
+
+  const auto result = factory.preflight(config);
+
+  EXPECT_FALSE(result);
+  EXPECT_EQ(result.error_code, "ROBOT_MOTION_RUNTIME_CREATION_FAILED");
+  EXPECT_NE(result.message.find("fake player construction failed"), std::string::npos);
+  EXPECT_EQ(result.runtime_owner, nullptr);
+  EXPECT_EQ(irc_step::fake_sdk::hardware_preflight_count(), 0);
+  EXPECT_EQ(irc_step::fake_sdk::hardware_initialize_count(), 0);
+  EXPECT_EQ(irc_step::fake_sdk::player_initialize_count(), 0);
+  EXPECT_EQ(
+    irc_step::fake_sdk::destruction_order(),
+    (std::vector<std::string>{"hardware"}));
 }
 
 TEST(ProductionRobotMotionRuntimeFactory, InvalidConfigErrorTakesPrecedence)

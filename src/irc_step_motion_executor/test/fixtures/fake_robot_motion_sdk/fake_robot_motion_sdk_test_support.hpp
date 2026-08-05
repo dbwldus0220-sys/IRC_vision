@@ -11,7 +11,9 @@ namespace irc_step::fake_sdk
 void reset_tracking();
 void set_player_constructor_throws(bool value);
 void set_player_initialize_result(bool success, std::string error_message);
+void set_hardware_preflight_result(bool success, std::string error_message);
 int hardware_construction_count();
+int hardware_preflight_count();
 int hardware_initialize_count();
 int player_construction_count();
 int player_initialize_count();

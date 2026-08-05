@@ -29,6 +29,18 @@ struct RobotMotionRuntimeFactoryResult
   }
 };
 
+struct RobotMotionPreflightResult
+{
+  std::shared_ptr<void> runtime_owner;
+  std::string error_code;
+  std::string message;
+
+  explicit operator bool() const noexcept
+  {
+    return runtime_owner != nullptr && error_code.empty();
+  }
+};
+
 class RobotMotionRuntimeFactory
 {
 public:
@@ -43,6 +55,9 @@ class ProductionRobotMotionRuntimeFactory final
   : public RobotMotionRuntimeFactory
 {
 public:
+  RobotMotionPreflightResult preflight(
+    const RobotMotionRuntimeConfig & config);
+
   RobotMotionRuntimeFactoryResult create(
     const RobotMotionRuntimeConfig & config) override;
 };

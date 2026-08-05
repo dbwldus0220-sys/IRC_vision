@@ -15,12 +15,16 @@ namespace
 
 int hardware_constructions = 0;
 int hardware_initializations = 0;
+int hardware_preflights = 0;
 int player_constructions = 0;
 int player_initializations = 0;
 bool player_constructor_throws = false;
 bool player_initialize_success = true;
+bool hardware_preflight_success = true;
 std::string player_initialize_error;
+std::string hardware_preflight_error;
 bool hardware_initialized = false;
+bool hardware_preflight_ready = false;
 DynamixelMotionHardwareConfig received_hardware_config;
 std::vector<std::string> destructions;
 
@@ -50,9 +54,32 @@ bool DynamixelMotionHardware::initialize() noexcept
   return true;
 }
 
+bool DynamixelMotionHardware::preflight() noexcept
+{
+  ++hardware_preflights;
+  hardware_preflight_ready = hardware_preflight_success;
+  if (!hardware_preflight_success) {
+    last_error_ = hardware_preflight_error.empty() ?
+      "fake hardware preflight failed" : hardware_preflight_error;
+  } else {
+    last_error_.clear();
+  }
+  return hardware_preflight_ready;
+}
+
+bool DynamixelMotionHardware::preflightReady() const noexcept
+{
+  return hardware_preflight_ready;
+}
+
 bool DynamixelMotionHardware::ready() const noexcept
 {
   return hardware_initialized;
+}
+
+std::string_view DynamixelMotionHardware::lastError() const noexcept
+{
+  return last_error_;
 }
 
 RobotMotionPlayer::RobotMotionPlayer(
@@ -121,12 +148,16 @@ void reset_tracking()
 {
   hardware_constructions = 0;
   hardware_initializations = 0;
+  hardware_preflights = 0;
   player_constructions = 0;
   player_initializations = 0;
   player_constructor_throws = false;
   player_initialize_success = true;
+  hardware_preflight_success = true;
   player_initialize_error.clear();
+  hardware_preflight_error.clear();
   hardware_initialized = false;
+  hardware_preflight_ready = false;
   received_hardware_config = {};
   destructions.clear();
 }
@@ -142,7 +173,14 @@ void set_player_initialize_result(bool success, std::string error_message)
   player_initialize_error = std::move(error_message);
 }
 
+void set_hardware_preflight_result(bool success, std::string error_message)
+{
+  hardware_preflight_success = success;
+  hardware_preflight_error = std::move(error_message);
+}
+
 int hardware_construction_count() {return hardware_constructions;}
+int hardware_preflight_count() {return hardware_preflights;}
 int hardware_initialize_count() {return hardware_initializations;}
 int player_construction_count() {return player_constructions;}
 int player_initialize_count() {return player_initializations;}
