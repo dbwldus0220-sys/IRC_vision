@@ -1,17 +1,17 @@
-"""Tests for the navigation-to-Dynamics motion command bridge."""
+"""Tests for the navigation-to-C++-executor motion bridge."""
 
+import inspect
 import json
 from types import MethodType
 
 import pytest
 
 from mission_control.motion_command_bridge_node import MotionCommandBridgeNode
-from robot_msgs.msg import MotionEnd
 from std_msgs.msg import String
 
 
 class FakeLogger:
-    """Provide no-op logger methods required by the bridge callbacks."""
+    """Provide logger methods required by callbacks."""
 
     def info(self, _message):
         pass
@@ -21,7 +21,7 @@ class FakeLogger:
 
 
 class CapturePublisher:
-    """Store every ROS message published during a test."""
+    """Capture published ROS messages."""
 
     def __init__(self):
         self.messages = []
@@ -31,43 +31,61 @@ class CapturePublisher:
 
 
 class FakeBridge:
-    """Provide the state and methods used by bridge callbacks without ROS."""
+    """Provide bridge state without constructing a ROS node."""
 
-    SPECIAL_ACTIONS = MotionCommandBridgeNode.SPECIAL_ACTIONS
+    ACTION_TO_MOTION_ID = MotionCommandBridgeNode.ACTION_TO_MOTION_ID
+    TERMINAL_STATUSES = MotionCommandBridgeNode.TERMINAL_STATUSES
+    DEFAULT_TIMEOUT_MS = MotionCommandBridgeNode.DEFAULT_TIMEOUT_MS
 
     def __init__(self):
         self.last_sent_command_id = None
         self.motion_in_progress = False
-
         self.active_command_id = None
         self.active_event_id = None
         self.active_action = None
-        self.active_dynamics_command = None
-
-        self.motion_command_publisher = CapturePublisher()
+        self.active_request_id = None
+        self.active_motion_id = None
+        self.executor_request_publisher = CapturePublisher()
         self.motion_status_publisher = CapturePublisher()
         self.logger = FakeLogger()
 
-        self.map_action_to_dynamics = MethodType(
-            MotionCommandBridgeNode.map_action_to_dynamics,
-            self,
-        )
-        self.publish_motion_status = MethodType(
-            MotionCommandBridgeNode.publish_motion_status,
-            self,
-        )
+        for name in (
+            "publish_motion_status",
+            "_publish_local_rejection",
+            "navigation_command_callback",
+            "_valid_executor_status",
+            "_clear_active_request",
+            "executor_status_callback",
+        ):
+            setattr(
+                self,
+                name,
+                MethodType(getattr(MotionCommandBridgeNode, name), self),
+            )
+
+    @staticmethod
+    def _is_integer(value):
+        return MotionCommandBridgeNode._is_integer(value)
+
+    def motion_id_for_action(self, action):
+        return self.ACTION_TO_MOTION_ID.get(action)
+
+    def timeout_ms_from_payload(self, payload):
+        return MotionCommandBridgeNode.timeout_ms_from_payload(payload)
 
     def get_logger(self):
         return self.logger
 
 
-def status_payload(bridge):
-    """Decode the most recently published /motion/status message."""
-    return json.loads(bridge.motion_status_publisher.messages[-1].data)
+def string_message(payload):
+    """Create a String message containing JSON or raw text."""
+    message = String()
+    message.data = payload if isinstance(payload, str) else json.dumps(payload)
+    return message
 
 
 def navigation_message(**overrides):
-    """Create one valid navigation command message."""
+    """Create one valid navigation command."""
     payload = {
         "command_id": 8000,
         "event_id": 8,
@@ -75,143 +93,245 @@ def navigation_message(**overrides):
         "valid": True,
     }
     payload.update(overrides)
-
-    message = String()
-    message.data = json.dumps(payload)
-    return message
+    return string_message(payload)
 
 
-def motion_end_message(command):
-    """Create one completed Dynamics motion message."""
-    message = MotionEnd()
-    message.finished = True
-    message.command = command
-    message.motion_end_detect = True
-    return message
+def executor_status(**overrides):
+    """Create one valid executor status."""
+    payload = {
+        "status": "RUNNING",
+        "command_id": 8000,
+        "event_id": 8,
+        "request_id": 8000,
+        "motion_id": "forward",
+        "error_code": "",
+        "message": "",
+    }
+    payload.update(overrides)
+    return string_message(payload)
 
 
-def test_general_left_and_right_reuse_existing_turn_paths():
-    bridge = FakeBridge()
-
-    assert bridge.map_action_to_dynamics(
-        {"action": "LEFT", "source_command": {"target_heading_change_deg": 8}}
-    ) == (2, 8)
-    assert bridge.map_action_to_dynamics(
-        {
-            "action": "RIGHT",
-            "source_command": {"target_heading_change_deg": -9},
-        }
-    ) == (3, 9)
-
-
-def test_fine_actions_have_no_dynamics_mapping():
-    bridge = FakeBridge()
-
-    for action in ("FINE_LEFT", "FINE_RIGHT"):
-        assert bridge.map_action_to_dynamics({"action": action}) is None
+def decoded_messages(publisher):
+    """Decode all captured String messages."""
+    return [json.loads(message.data) for message in publisher.messages]
 
 
 @pytest.mark.parametrize(
-    ("action", "expected"),
+    ("action", "motion_id"),
     [
-        ("STRAIGHT", (1, 0)),
-        ("APPROACH", (12, 0)),
-        ("APPROACH_GOAL", (6, 0)),
-        ("APPROACH_HURDLE", (13, 0)),
-        ("PICKUP_NOW", (9, 0)),
-        ("SHOT", (17, 0)),
-        ("GO", (14, 0)),
+        ("STRAIGHT", "forward"),
+        ("APPROACH", "forward"),
+        ("GO", "forward"),
+        ("SLOW_APPROACH", "forward_short"),
+        ("FINE_FORWARD_STEP", "forward_short"),
+        ("APPROACH_GOAL", "forward_short"),
+        ("APPROACH_HURDLE", "forward_short"),
     ],
 )
-def test_bridge_mapping_matches_dynamics_command_switch(action, expected):
+def test_supported_action_builds_executor_request(action, motion_id):
     bridge = FakeBridge()
 
-    assert bridge.map_action_to_dynamics({"action": action}) == expected
+    bridge.navigation_command_callback(navigation_message(action=action))
+
+    requests = decoded_messages(bridge.executor_request_publisher)
+    assert requests == [
+        {
+            "action": action,
+            "command_id": 8000,
+            "event_id": 8,
+            "request_id": 8000,
+            "motion_id": motion_id,
+            "timeout_ms": 10000,
+        }
+    ]
+    assert bridge.motion_in_progress is True
+    assert bridge.active_command_id == 8000
+    assert bridge.active_event_id == 8
+    assert bridge.active_action == action
+    assert bridge.active_request_id == 8000
+    assert bridge.active_motion_id == motion_id
+
+
+@pytest.mark.parametrize("timeout", [0, -1, "100", True, None])
+def test_invalid_timeout_uses_default(timeout):
+    bridge = FakeBridge()
+
+    bridge.navigation_command_callback(
+        navigation_message(timeout_ms=timeout)
+    )
+
+    request = decoded_messages(bridge.executor_request_publisher)[0]
+    assert request["timeout_ms"] == 10000
+
+
+def test_positive_source_timeout_is_preserved():
+    bridge = FakeBridge()
+
+    bridge.navigation_command_callback(
+        navigation_message(source_command={"timeout_ms": 2500})
+    )
+
+    request = decoded_messages(bridge.executor_request_publisher)[0]
+    assert request["timeout_ms"] == 2500
 
 
 @pytest.mark.parametrize(
     "action",
     [
-        "STOP",
-        "WAIT",
-        "FINE_LEFT",
-        "FINE_RIGHT",
-        "APPROACH_BALL",
+        "TURN_LEFT",
+        "TURN_RIGHT",
+        "LEFT",
+        "RIGHT",
+        "ALIGN_LEFT",
+        "ALIGN_RIGHT",
+        "RETREAT_GOAL",
+        "PICKUP_NOW",
+        "SHOT",
         "CROSS_FINISH",
+        "UNKNOWN",
     ],
 )
-def test_actions_without_bridge_contract_remain_unmapped(action):
+def test_unsupported_action_does_not_publish_executor_request(action):
     bridge = FakeBridge()
 
-    assert bridge.map_action_to_dynamics({"action": action}) is None
+    bridge.navigation_command_callback(
+        navigation_message(action=action, sdk_motion_requested=True)
+    )
+
+    assert bridge.executor_request_publisher.messages == []
+    status = decoded_messages(bridge.motion_status_publisher)[0]
+    assert status["status"] == "UNSUPPORTED"
+    assert status["error_code"] == "UNSUPPORTED_ACTION"
+    assert status["action"] == action
 
 
-def test_go_uses_hurdle_sequence_entry_not_straight_command():
+def test_duplicate_command_id_is_rejected():
     bridge = FakeBridge()
+    bridge.navigation_command_callback(navigation_message())
+    bridge.motion_in_progress = False
 
-    straight = bridge.map_action_to_dynamics({"action": "STRAIGHT"})
-    go = bridge.map_action_to_dynamics({"action": "GO"})
+    bridge.navigation_command_callback(navigation_message())
 
-    assert straight == (1, 0)
-    assert go == (14, 0)
-    assert go != straight
+    assert len(bridge.executor_request_publisher.messages) == 1
+    status = decoded_messages(bridge.motion_status_publisher)[0]
+    assert status["status"] == "REJECTED"
+    assert status["error_code"] == "DUPLICATE_COMMAND_ID"
 
 
-def test_running_ignored_then_succeeded():
-    """Keep an active motion until its matching completion arrives."""
+def test_new_command_while_running_is_rejected():
     bridge = FakeBridge()
+    bridge.navigation_command_callback(navigation_message())
 
-    MotionCommandBridgeNode.navigation_command_callback(
-        bridge,
-        navigation_message(),
+    bridge.navigation_command_callback(
+        navigation_message(command_id=8001, event_id=9)
     )
 
-    assert len(bridge.motion_command_publisher.messages) == 1
+    assert len(bridge.executor_request_publisher.messages) == 1
+    status = decoded_messages(bridge.motion_status_publisher)[0]
+    assert status["status"] == "REJECTED"
+    assert status["error_code"] == "BUSY"
+    assert status["motion_in_progress"] is True
 
-    dynamics_message = bridge.motion_command_publisher.messages[0]
-    assert dynamics_message.command == 1
-    assert dynamics_message.angle == 0
 
-    running = status_payload(bridge)
-    assert running["status"] == "RUNNING"
-    assert running["command_id"] == 8000
-    assert running["event_id"] == 8
-    assert running["action"] == "STRAIGHT"
-    assert running["dynamics_command"] == 1
-    assert running["motion_in_progress"] is True
+def test_running_status_keeps_lock_and_preserves_fields():
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(navigation_message())
 
-    MotionCommandBridgeNode.motion_end_callback(
-        bridge,
-        motion_end_message(command=17),
-    )
+    bridge.executor_status_callback(executor_status(message="executing"))
 
-    ignored = status_payload(bridge)
-    assert ignored["status"] == "IGNORED"
-    assert ignored["command_id"] == 8000
-    assert ignored["dynamics_command"] == 1
-    assert ignored["motion_in_progress"] is True
-    assert ignored["reason"] == (
-        "motion_end_command_mismatch:received=17,expected=1"
-    )
-
+    status = decoded_messages(bridge.motion_status_publisher)[0]
+    assert status == {
+        "status": "RUNNING",
+        "command_id": 8000,
+        "event_id": 8,
+        "request_id": 8000,
+        "motion_id": "forward",
+        "error_code": "",
+        "message": "executing",
+        "action": "STRAIGHT",
+        "source_node": "motion_command_bridge_node",
+        "motion_in_progress": True,
+    }
     assert bridge.motion_in_progress is True
-    assert bridge.active_dynamics_command == 1
+    assert bridge.active_request_id == 8000
 
-    MotionCommandBridgeNode.motion_end_callback(
-        bridge,
-        motion_end_message(command=1),
+
+@pytest.mark.parametrize(
+    ("terminal_status", "error_code"),
+    [
+        ("SUCCEEDED", ""),
+        ("FAILED", "COMMUNICATION_ERROR"),
+        ("REJECTED", "INVALID_MOTION"),
+        ("CANCELLED", ""),
+    ],
+)
+def test_terminal_status_releases_lock(terminal_status, error_code):
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(navigation_message())
+
+    bridge.executor_status_callback(
+        executor_status(
+            status=terminal_status,
+            error_code=error_code,
+            message="executor detail",
+        )
     )
 
-    succeeded = status_payload(bridge)
-    assert succeeded["status"] == "SUCCEEDED"
-    assert succeeded["command_id"] == 8000
-    assert succeeded["event_id"] == 8
-    assert succeeded["action"] == "STRAIGHT"
-    assert succeeded["dynamics_command"] == 1
-    assert succeeded["motion_in_progress"] is False
-
+    status = decoded_messages(bridge.motion_status_publisher)[0]
+    assert status["status"] == terminal_status
+    assert status["error_code"] == error_code
+    assert status["message"] == "executor detail"
+    assert status["action"] == "STRAIGHT"
+    assert status["motion_in_progress"] is False
     assert bridge.motion_in_progress is False
     assert bridge.active_command_id is None
     assert bridge.active_event_id is None
     assert bridge.active_action is None
-    assert bridge.active_dynamics_command is None
+    assert bridge.active_request_id is None
+    assert bridge.active_motion_id is None
+
+
+def test_mismatched_request_id_is_ignored():
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(navigation_message())
+
+    bridge.executor_status_callback(executor_status(request_id=9000))
+
+    assert bridge.motion_status_publisher.messages == []
+    assert bridge.motion_in_progress is True
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        "not-json",
+        [],
+        {"status": "RUNNING"},
+        {
+            "status": "UNKNOWN",
+            "command_id": 8000,
+            "event_id": 8,
+            "request_id": 8000,
+            "motion_id": "forward",
+            "error_code": "",
+            "message": "",
+        },
+    ],
+)
+def test_malformed_executor_status_is_ignored(payload):
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(navigation_message())
+
+    bridge.executor_status_callback(string_message(payload))
+
+    assert bridge.motion_status_publisher.messages == []
+    assert bridge.motion_in_progress is True
+
+
+def test_bridge_source_has_no_robot_msgs_or_dynamics_interface():
+    source = inspect.getsource(MotionCommandBridgeNode)
+
+    assert "robot_msgs" not in source
+    assert '"/motion_command"' not in source
+    assert "/motion_end" not in source
+    assert "active_dynamics_command" not in source

@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""Launch the complete STEP vision and motion-decision pipeline."""
+"""Launch the STEP vision pipeline with the simulated C++ motion executor."""
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import IncludeLaunchDescription
 from launch.conditions import IfCondition
-from launch.conditions import LaunchConfigurationEquals
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch.substitutions import PathJoinSubstitution
@@ -15,18 +14,13 @@ from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description() -> LaunchDescription:
-    """Build the complete camera-to-navigation ROS graph."""
+    """Build the camera-to-simulated-motion ROS graph."""
     enable_camera = LaunchConfiguration("enable_camera")
     device = LaunchConfiguration("device")
     display = LaunchConfiguration("display")
     metrics_mode = LaunchConfiguration("metrics_mode")
     max_fps = LaunchConfiguration("max_fps")
     initial_mission_phase = LaunchConfiguration("initial_mission_phase")
-    player_backend = LaunchConfiguration("player_backend")
-    mock_fail_after_updates = LaunchConfiguration(
-        "mock_fail_after_updates"
-    )
-    mock_failure_code = LaunchConfiguration("mock_failure_code")
 
     camera = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -74,56 +68,34 @@ def generate_launch_description() -> LaunchDescription:
         parameters=[{"initial_mission_phase": initial_mission_phase}],
     )
 
-    sdk_motion_stub = Node(
+    motion_command_bridge = Node(
         package="mission_control",
-        executable="sdk_motion_stub_node",
-        name="sdk_motion_stub_node",
+        executable="motion_command_bridge_node",
+        name="motion_command_bridge_node",
         output="screen",
         emulate_tty=True,
-        condition=LaunchConfigurationEquals("execution_mode", "stub"),
     )
 
-    command_adapter = Node(
-        package="mission_control",
-        executable="legacy_motion_executor_adapter",
-        name="legacy_motion_executor_adapter",
-        output="screen",
-        emulate_tty=True,
-        condition=LaunchConfigurationEquals("execution_mode", "executor"),
-    )
-
-    motion_executor = Node(
-        package="mission_control",
-        executable="motion_executor_node",
-        name="motion_executor_node",
+    sdk_motion_executor = Node(
+        package="irc_step_motion_executor",
+        executable="sdk_motion_executor",
+        name="sdk_motion_executor",
         output="screen",
         emulate_tty=True,
         parameters=[
             {
-                "player_backend": ParameterValue(
-                    player_backend,
-                    value_type=str,
-                ),
-                "mock_fail_after_updates": ParameterValue(
-                    mock_fail_after_updates,
-                    value_type=int,
-                ),
-                "mock_failure_code": ParameterValue(
-                    mock_failure_code,
-                    value_type=str,
-                ),
+                "backend_type": "simulated",
+                "enable_robot_hardware": False,
+                "poll_period_ms": 20,
+                "running_polls": 2,
+                "settling_polls": 1,
+                "explicit_torque_approval": False,
+                "motion_json_path": "",
+                "robot_device_path": "",
+                "robot_baud_rate": 0,
+                "robot_motor_ids": [],
             }
         ],
-        condition=LaunchConfigurationEquals("execution_mode", "executor"),
-    )
-
-    status_adapter = Node(
-        package="mission_control",
-        executable="legacy_motion_status_adapter",
-        name="legacy_motion_status_adapter",
-        output="screen",
-        emulate_tty=True,
-        condition=LaunchConfigurationEquals("execution_mode", "executor"),
     )
 
     return LaunchDescription(
@@ -156,40 +128,15 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument(
                 "initial_mission_phase",
                 default_value="AUTO",
-                description="Initial planner phase before /mission/phase is received.",
-            ),
-            DeclareLaunchArgument(
-                "execution_mode",
-                default_value="executor",
-                choices=["executor", "stub"],
-                description="Select the mutually exclusive motion topology.",
-            ),
-            DeclareLaunchArgument(
-                "player_backend",
-                default_value="mock",
-                choices=["mock", "sdk"],
                 description=(
-                    "Motion Executor backend; sdk is currently a safe "
-                    "disconnected placeholder."
+                    "Initial planner phase before /mission/phase is received."
                 ),
-            ),
-            DeclareLaunchArgument(
-                "mock_fail_after_updates",
-                default_value="-1",
-                description="Mock failure update count; -1 disables failure.",
-            ),
-            DeclareLaunchArgument(
-                "mock_failure_code",
-                default_value="COMMUNICATION_ERROR",
-                description="MotionError enum name used for mock failure.",
             ),
             camera,
             detector,
             analyzers,
             motion_decision,
-            sdk_motion_stub,
-            command_adapter,
-            motion_executor,
-            status_adapter,
+            motion_command_bridge,
+            sdk_motion_executor,
         ]
     )

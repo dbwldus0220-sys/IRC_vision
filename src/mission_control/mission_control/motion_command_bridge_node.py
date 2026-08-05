@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bridge navigation JSON commands to STEP Dynamics messages."""
+"""Bridge navigation JSON commands to the C++ motion executor."""
 
 from __future__ import annotations
 
@@ -8,31 +8,35 @@ from typing import Any
 
 import rclpy
 from rclpy.node import Node
-from robot_msgs.msg import MotionCommand
-from robot_msgs.msg import MotionEnd
 from std_msgs.msg import String
 
 
 class MotionCommandBridgeNode(Node):
-    """Convert abstract navigation actions into Dynamics commands."""
+    """Translate supported navigation actions into SDK executor requests."""
 
-    SPECIAL_ACTIONS = {
-        "PICKUP_NOW",
-        "SHOT",
-        "GO",
+    ACTION_TO_MOTION_ID = {
+        "STRAIGHT": "forward",
+        "APPROACH": "forward",
+        "GO": "forward",
+        "SLOW_APPROACH": "forward_short",
+        "FINE_FORWARD_STEP": "forward_short",
+        "APPROACH_GOAL": "forward_short",
+        "APPROACH_HURDLE": "forward_short",
     }
+    TERMINAL_STATUSES = {"SUCCEEDED", "FAILED", "CANCELLED", "REJECTED"}
+    DEFAULT_TIMEOUT_MS = 10000
 
     def __init__(self) -> None:
         """Initialize bridge state, publishers, and subscriptions."""
-        super().__init__('motion_command_bridge')
+        super().__init__("motion_command_bridge")
 
         self.last_sent_command_id: int | None = None
         self.motion_in_progress = False
-
         self.active_command_id: int | None = None
         self.active_event_id: int | None = None
         self.active_action: str | None = None
-        self.active_dynamics_command: int | None = None
+        self.active_request_id: int | None = None
+        self.active_motion_id: str | None = None
 
         self.navigation_subscription = self.create_subscription(
             String,
@@ -40,20 +44,17 @@ class MotionCommandBridgeNode(Node):
             self.navigation_command_callback,
             10,
         )
-
-        self.motion_end_subscription = self.create_subscription(
-            MotionEnd,
-            "/motion_end",
-            self.motion_end_callback,
+        self.executor_status_subscription = self.create_subscription(
+            String,
+            "/motion/executor/status",
+            self.executor_status_callback,
             10,
         )
-
-        self.motion_command_publisher = self.create_publisher(
-            MotionCommand,
-            "/motion_command",
+        self.executor_request_publisher = self.create_publisher(
+            String,
+            "/motion/executor/request",
             10,
         )
-
         self.motion_status_publisher = self.create_publisher(
             String,
             "/motion/status",
@@ -61,62 +62,34 @@ class MotionCommandBridgeNode(Node):
         )
 
         self.get_logger().info(
-            "Motion command bridge ready: "
-            "/navigation/motion_command -> /motion_command, "
-            "/motion_end subscribed, "
-            "/motion/status publisher ready"
+            "Motion command bridge ready: /navigation/motion_command -> "
+            "/motion/executor/request, /motion/executor/status -> "
+            "/motion/status"
         )
 
-    def map_action_to_dynamics(
-        self,
-        payload: dict[str, Any],
-    ) -> tuple[int, int] | None:
-        """Convert one abstract action into a Dynamics command and angle."""
-        action = payload.get("action")
+    @staticmethod
+    def _is_integer(value: Any) -> bool:
+        """Return true only for JSON integers, excluding booleans."""
+        return isinstance(value, int) and not isinstance(value, bool)
+
+    @classmethod
+    def motion_id_for_action(cls, action: str) -> str | None:
+        """Return a catalog-backed motion ID for one navigation action."""
+        return cls.ACTION_TO_MOTION_ID.get(action)
+
+    @classmethod
+    def timeout_ms_from_payload(cls, payload: dict[str, Any]) -> int:
+        """Read a positive timeout or use the safe default."""
         source_command = payload.get("source_command")
+        candidates = []
+        if isinstance(source_command, dict):
+            candidates.append(source_command.get("timeout_ms"))
+        candidates.append(payload.get("timeout_ms"))
 
-        if not isinstance(source_command, dict):
-            source_command = {}
-
-        fixed_map: dict[str, tuple[int, int]] = {
-            "STRAIGHT": (1, 0),
-            "APPROACH": (12, 0),
-            "SLOW_APPROACH": (6, 0),
-            "FINE_FORWARD_STEP": (27, 0),
-            "APPROACH_GOAL": (6, 0),
-            "APPROACH_HURDLE": (13, 0),
-            "ALIGN_LEFT": (15, 0),
-            "ALIGN_RIGHT": (16, 0),
-            "RETREAT_GOAL": (5, 0),
-
-            # Special terminal motions
-            "PICKUP_NOW": (9, 0),
-            "SHOT": (17, 0),
-            "GO": (14, 0),
-        }
-
-        if action in fixed_map:
-            return fixed_map[action]
-
-        if action in {"TURN_LEFT", "TURN_RIGHT", "LEFT", "RIGHT"}:
-            raw_angle = source_command.get(
-                "target_heading_change_deg",
-                0.0,
-            )
-
-            try:
-                angle = round(abs(float(raw_angle)))
-            except (TypeError, ValueError):
-                angle = 0
-
-            angle = max(1, min(angle, 55))
-
-            if action in {"TURN_LEFT", "LEFT"}:
-                return 2, angle
-
-            return 3, angle
-
-        return None
+        for candidate in candidates:
+            if cls._is_integer(candidate) and candidate > 0:
+                return candidate
+        return cls.DEFAULT_TIMEOUT_MS
 
     def publish_motion_status(
         self,
@@ -124,45 +97,60 @@ class MotionCommandBridgeNode(Node):
         status: str,
         command_id: int | None,
         event_id: int | None,
+        request_id: int | None,
+        motion_id: str | None,
         action: str | None,
-        dynamics_command: int | None,
-        reason: str,
+        error_code: str = "",
+        message: str = "",
     ) -> None:
-        """Publish the current bridge and Dynamics execution state."""
+        """Publish normalized bridge status while preserving executor fields."""
         payload = {
             "status": status,
             "command_id": command_id,
             "event_id": event_id,
+            "request_id": request_id,
+            "motion_id": motion_id,
+            "error_code": error_code,
+            "message": message,
             "action": action,
-            "dynamics_command": dynamics_command,
-            "reason": reason,
-            "motion_in_progress": self.motion_in_progress,
             "source_node": "motion_command_bridge_node",
+            "motion_in_progress": self.motion_in_progress,
         }
-
-        message = String()
-        message.data = json.dumps(
+        output = String()
+        output.data = json.dumps(
             payload,
             ensure_ascii=True,
             separators=(",", ":"),
         )
+        self.motion_status_publisher.publish(output)
 
-        self.motion_status_publisher.publish(message)
-
-        self.get_logger().info(
-            "Motion status published: "
-            f"status={status}, "
-            f"command_id={command_id}, "
-            f"event_id={event_id}, "
-            f"action={action}, "
-            f"dynamics_command={dynamics_command}"
+    def _publish_local_rejection(
+        self,
+        *,
+        status: str,
+        command_id: int,
+        event_id: int | None,
+        action: str,
+        error_code: str,
+        message: str,
+    ) -> None:
+        """Report a command that is not forwarded to the executor."""
+        self.publish_motion_status(
+            status=status,
+            command_id=command_id,
+            event_id=event_id,
+            request_id=command_id,
+            motion_id=self.motion_id_for_action(action),
+            action=action,
+            error_code=error_code,
+            message=message,
         )
 
     def navigation_command_callback(self, msg: String) -> None:
-        """Parse one navigation command and publish a Dynamics command."""
+        """Validate and translate one navigation command."""
         try:
-            payload: dict[str, Any] = json.loads(msg.data)
-        except json.JSONDecodeError as exc:
+            payload = json.loads(msg.data)
+        except (json.JSONDecodeError, TypeError) as exc:
             self.get_logger().warning(
                 f"Invalid /navigation/motion_command JSON: {exc}"
             )
@@ -170,43 +158,26 @@ class MotionCommandBridgeNode(Node):
 
         if not isinstance(payload, dict):
             self.get_logger().warning(
-                "Invalid /navigation/motion_command: "
-                "JSON root must be an object"
+                "Invalid /navigation/motion_command: JSON root must be an object"
             )
             return
 
         action = payload.get("action")
         command_id = payload.get("command_id")
         event_id = payload.get("event_id")
-        valid = payload.get("valid")
-
-        self.get_logger().info(
-            "Navigation command received: "
-            f"command_id={command_id}, "
-            f"event_id={event_id}, "
-            f"action={action}, "
-            f"valid={valid}"
-        )
-
-        if valid is not True:
-            self.get_logger().info(
-                "Command ignored: valid is not true"
-            )
+        if payload.get("valid") is not True:
+            self.get_logger().info("Command ignored: valid is not true")
             return
-
-        if not isinstance(command_id, int):
+        if not self._is_integer(command_id):
             self.get_logger().warning(
-                "Command ignored: command_id is missing "
-                "or not an integer"
+                "Command ignored: command_id is missing or not an integer"
             )
             return
-
-        if event_id is not None and not isinstance(event_id, int):
+        if event_id is not None and not self._is_integer(event_id):
             self.get_logger().warning(
                 "Command ignored: event_id is not an integer or null"
             )
             return
-
         if not isinstance(action, str) or not action:
             self.get_logger().warning(
                 "Command ignored: action is missing or invalid"
@@ -214,140 +185,129 @@ class MotionCommandBridgeNode(Node):
             return
 
         if command_id == self.last_sent_command_id:
-            self.get_logger().info(
-                f"Duplicate command_id ignored: {command_id}"
+            self._publish_local_rejection(
+                status="REJECTED",
+                command_id=command_id,
+                event_id=event_id,
+                action=action,
+                error_code="DUPLICATE_COMMAND_ID",
+                message="command_id was already sent to the executor",
             )
             return
-
         if self.motion_in_progress:
-            self.get_logger().info(
-                "Command ignored for now: "
-                "Dynamics motion is in progress"
+            self._publish_local_rejection(
+                status="REJECTED",
+                command_id=command_id,
+                event_id=event_id,
+                action=action,
+                error_code="BUSY",
+                message="another motion request is already active",
             )
             return
 
-        if action in self.SPECIAL_ACTIONS:
-            sdk_motion_requested = payload.get(
-                "sdk_motion_requested",
-                False,
-            )
-
-            if sdk_motion_requested is not True:
-                self.get_logger().info(
-                    "Special motion ignored: "
-                    f"action={action}, "
-                    "sdk_motion_requested is not true"
-                )
-                return
-
-        mapped = self.map_action_to_dynamics(payload)
-
-        if mapped is None:
-            self.get_logger().warning(
-                f"Unsupported action: {action}"
+        motion_id = self.motion_id_for_action(action)
+        if motion_id is None:
+            self._publish_local_rejection(
+                status="UNSUPPORTED",
+                command_id=command_id,
+                event_id=event_id,
+                action=action,
+                error_code="UNSUPPORTED_ACTION",
+                message="action has no configured motion alias",
             )
             return
 
-        dynamics_command, dynamics_angle = mapped
-
-        dynamics_msg = MotionCommand()
-        dynamics_msg.command = dynamics_command
-        dynamics_msg.angle = dynamics_angle
-
-        self.motion_command_publisher.publish(dynamics_msg)
+        request_id = command_id
+        request_payload = {
+            "action": action,
+            "command_id": command_id,
+            "event_id": event_id,
+            "request_id": request_id,
+            "motion_id": motion_id,
+            "timeout_ms": self.timeout_ms_from_payload(payload),
+        }
+        request_message = String()
+        request_message.data = json.dumps(
+            request_payload,
+            ensure_ascii=True,
+            separators=(",", ":"),
+        )
+        self.executor_request_publisher.publish(request_message)
 
         self.last_sent_command_id = command_id
         self.motion_in_progress = True
         self.active_command_id = command_id
         self.active_event_id = event_id
         self.active_action = action
-        self.active_dynamics_command = dynamics_command
+        self.active_request_id = request_id
+        self.active_motion_id = motion_id
 
-        self.get_logger().info(
-            "Dynamics command published: "
-            f"command_id={command_id}, "
-            f"event_id={event_id}, "
-            f"action={action}, "
-            f"command={dynamics_command}, "
-            f"angle={dynamics_angle}"
+    def _valid_executor_status(self, payload: dict[str, Any]) -> bool:
+        """Validate fields emitted by the C++ executor."""
+        status = payload.get("status")
+        command_id = payload.get("command_id")
+        event_id = payload.get("event_id")
+        request_id = payload.get("request_id")
+        motion_id = payload.get("motion_id")
+        error_code = payload.get("error_code")
+        message = payload.get("message")
+        return (
+            status in {"RUNNING", *self.TERMINAL_STATUSES}
+            and (command_id is None or self._is_integer(command_id))
+            and (event_id is None or self._is_integer(event_id))
+            and self._is_integer(request_id)
+            and isinstance(motion_id, str)
+            and isinstance(error_code, str)
+            and isinstance(message, str)
         )
 
-        self.publish_motion_status(
-            status="RUNNING",
-            command_id=self.active_command_id,
-            event_id=self.active_event_id,
-            action=self.active_action,
-            dynamics_command=self.active_dynamics_command,
-            reason="dynamics_command_published",
-        )
-
-    def motion_end_callback(self, msg: MotionEnd) -> None:
-        """Release the bridge only for the matching completed command."""
-        self.get_logger().info(
-            "Motion end received: "
-            f"finished={msg.finished}, "
-            f"command={msg.command}, "
-            f"motion_end_detect={msg.motion_end_detect}"
-        )
-
-        if not self.motion_in_progress:
-            self.get_logger().info(
-                "Motion end ignored: bridge has no active command"
-            )
-            return
-
-        if not msg.motion_end_detect or not msg.finished:
-            self.get_logger().warning(
-                "Motion end ignored: completion flags are not true"
-            )
-            return
-
-        if msg.command != self.active_dynamics_command:
-            self.get_logger().warning(
-                "Motion end ignored: command mismatch "
-                f"(active={self.active_dynamics_command}, "
-                f"received={msg.command})"
-            )
-
-            self.publish_motion_status(
-                status="IGNORED",
-                command_id=self.active_command_id,
-                event_id=self.active_event_id,
-                action=self.active_action,
-                dynamics_command=self.active_dynamics_command,
-                reason=(
-                    "motion_end_command_mismatch:"
-                    f"received={msg.command},"
-                    f"expected={self.active_dynamics_command}"
-                ),
-            )
-            return
-
-            
-
-        completed_command_id = self.active_command_id
-        completed_event_id = self.active_event_id
-        completed_action = self.active_action
-        completed_dynamics_command = self.active_dynamics_command
-
+    def _clear_active_request(self) -> None:
+        """Release the bridge after a terminal executor status."""
         self.motion_in_progress = False
         self.active_command_id = None
         self.active_event_id = None
         self.active_action = None
-        self.active_dynamics_command = None
+        self.active_request_id = None
+        self.active_motion_id = None
+
+    def executor_status_callback(self, msg: String) -> None:
+        """Forward matching executor status and release terminal requests."""
+        try:
+            payload = json.loads(msg.data)
+        except (json.JSONDecodeError, TypeError) as exc:
+            self.get_logger().warning(
+                f"Invalid /motion/executor/status JSON: {exc}"
+            )
+            return
+        if not isinstance(payload, dict) or not self._valid_executor_status(payload):
+            self.get_logger().warning(
+                "Invalid /motion/executor/status fields"
+            )
+            return
+        if not self.motion_in_progress:
+            self.get_logger().info(
+                "Executor status ignored: bridge has no active request"
+            )
+            return
+        if payload["request_id"] != self.active_request_id:
+            self.get_logger().warning(
+                "Executor status ignored: request_id mismatch"
+            )
+            return
+
+        action = self.active_action
+        if payload["status"] in self.TERMINAL_STATUSES:
+            self._clear_active_request()
 
         self.publish_motion_status(
-            status="SUCCEEDED",
-            command_id=completed_command_id,
-            event_id=completed_event_id,
-            action=completed_action,
-            dynamics_command=completed_dynamics_command,
-            reason="matching_motion_end_received",
-        )
-
-        self.get_logger().info(
-            "Bridge state changed to IDLE: "
-            f"completed_command={completed_dynamics_command}"
+            status=payload["status"],
+            command_id=payload["command_id"],
+            event_id=payload["event_id"],
+            request_id=payload["request_id"],
+            motion_id=payload["motion_id"],
+            action=action,
+            error_code=payload["error_code"],
+            message=payload["message"],
         )
 
 
@@ -355,14 +315,12 @@ def main(args: list[str] | None = None) -> None:
     """Run the bridge node."""
     rclpy.init(args=args)
     node = MotionCommandBridgeNode()
-
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
         pass
     finally:
         node.destroy_node()
-
         if rclpy.ok():
             rclpy.shutdown()
 

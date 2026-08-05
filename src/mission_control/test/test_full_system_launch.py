@@ -1,21 +1,23 @@
+"""Tests for the simulated C++ full-system launch topology."""
+
 import importlib.util
 from pathlib import Path
 
-import pytest
-
-from launch import LaunchContext
 from launch.actions import DeclareLaunchArgument
 from launch_ros.actions import Node
+import yaml
 
 
-EXECUTOR_NODES = {
+LEGACY_EXECUTABLES = {
     "legacy_motion_executor_adapter",
     "motion_executor_node",
     "legacy_motion_status_adapter",
+    "sdk_motion_stub_node",
 }
 
 
 def load_launch_module():
+    """Load full_system.launch.py as a Python module."""
     launch_path = (
         Path(__file__).resolve().parents[1]
         / "launch"
@@ -33,111 +35,85 @@ def load_launch_module():
 
 
 def launch_description(monkeypatch, tmp_path):
+    """Create the launch description without starting any node."""
     monkeypatch.setenv("ROS_LOG_DIR", str(tmp_path / "ros_logs"))
     return load_launch_module().generate_launch_description()
 
 
-def launch_arguments(description):
+def node_parameters(node):
+    """Return normalized parameters using their textual names."""
+    parameters = node._Node__parameters[0]
     return {
-        action.name: action
-        for action in description.entities
-        if isinstance(action, DeclareLaunchArgument)
-    }
-
-
-def default_value(argument):
-    return "".join(
-        substitution.text for substitution in argument.default_value
-    )
-
-
-def enabled_executables(description, execution_mode):
-    context = LaunchContext()
-    context.launch_configurations["execution_mode"] = execution_mode
-    return {
-        node.node_executable
-        for node in description.entities
-        if isinstance(node, Node)
-        and (
-            node.condition is None
-            or node.condition.evaluate(context)
-        )
-    }
-
-
-def executor_backend_value(description, backend):
-    executor = next(
-        node
-        for node in description.entities
-        if isinstance(node, Node)
-        and node.node_executable == "motion_executor_node"
-    )
-    parameters = executor._Node__parameters[0]
-    backend_parameter = next(
-        value
+        "".join(part.text for part in name): parameter_value(value)
         for name, value in parameters.items()
-        if "".join(part.text for part in name) == "player_backend"
-    )
-    context = LaunchContext()
-    context.launch_configurations["player_backend"] = backend
-    return backend_parameter.evaluate(context)
+    }
 
 
-def test_default_mode_uses_executor_chain(monkeypatch, tmp_path):
+def parameter_value(value):
+    """Resolve static values normalized by launch_ros."""
+    if isinstance(value, tuple):
+        if not value:
+            return []
+        return yaml.safe_load("".join(part.text for part in value))
+    return value
+
+
+def test_full_system_uses_bridge_and_cpp_simulated_executor(
+    monkeypatch,
+    tmp_path,
+):
     description = launch_description(monkeypatch, tmp_path)
-    arguments = launch_arguments(description)
+    nodes = [
+        entity for entity in description.entities if isinstance(entity, Node)
+    ]
+    executables = {node.node_executable for node in nodes}
 
-    assert default_value(arguments["execution_mode"]) == "executor"
-    assert default_value(arguments["player_backend"]) == "mock"
-
-    executables = enabled_executables(description, "executor")
     assert {
         "yolo26_detector",
         "unified_vision_node",
         "motion_decision_node",
+        "motion_command_bridge_node",
+        "sdk_motion_executor",
     }.issubset(executables)
-    assert EXECUTOR_NODES.issubset(executables)
-    assert "sdk_motion_stub_node" not in executables
-    assert executor_backend_value(description, "mock") == "mock"
+    assert executables.isdisjoint(LEGACY_EXECUTABLES)
 
 
-def test_stub_mode_excludes_executor_chain(monkeypatch, tmp_path):
-    description = launch_description(monkeypatch, tmp_path)
-    executables = enabled_executables(description, "stub")
-
-    assert "motion_decision_node" in executables
-    assert "sdk_motion_stub_node" in executables
-    assert executables.isdisjoint(EXECUTOR_NODES)
-
-
-def test_sdk_placeholder_backend_is_forwarded(monkeypatch, tmp_path):
-    description = launch_description(monkeypatch, tmp_path)
-
-    assert EXECUTOR_NODES.issubset(
-        enabled_executables(description, "executor")
-    )
-    assert executor_backend_value(description, "sdk") == "sdk"
-
-
-@pytest.mark.parametrize("execution_mode", ["executor", "stub"])
-def test_execution_modes_are_mutually_exclusive(
+def test_cpp_executor_is_forced_to_safe_simulated_parameters(
     monkeypatch,
     tmp_path,
-    execution_mode,
 ):
     description = launch_description(monkeypatch, tmp_path)
-    executables = enabled_executables(description, execution_mode)
+    executor = next(
+        node
+        for node in description.entities
+        if isinstance(node, Node)
+        and node.node_executable == "sdk_motion_executor"
+    )
+    parameters = node_parameters(executor)
 
-    stub_enabled = "sdk_motion_stub_node" in executables
-    executor_enabled = EXECUTOR_NODES.issubset(executables)
-    assert stub_enabled != executor_enabled
+    assert parameters == {
+        "backend_type": "simulated",
+        "enable_robot_hardware": False,
+        "poll_period_ms": 20,
+        "running_polls": 2,
+        "settling_polls": 1,
+        "explicit_torque_approval": False,
+        "motion_json_path": "",
+        "robot_device_path": "",
+        "robot_baud_rate": 0,
+        "robot_motor_ids": [],
+    }
 
 
-def test_invalid_execution_mode_is_rejected(monkeypatch, tmp_path):
+def test_obsolete_motion_launch_arguments_are_removed(monkeypatch, tmp_path):
     description = launch_description(monkeypatch, tmp_path)
-    execution_mode = launch_arguments(description)["execution_mode"]
-    context = LaunchContext()
-    context.launch_configurations["execution_mode"] = "invalid"
+    arguments = {
+        entity.name
+        for entity in description.entities
+        if isinstance(entity, DeclareLaunchArgument)
+    }
 
-    with pytest.raises(RuntimeError, match="not valid"):
-        execution_mode.execute(context)
+    assert "execution_mode" not in arguments
+    assert "player_backend" not in arguments
+    assert "mock_fail_after_updates" not in arguments
+    assert "mock_failure_code" not in arguments

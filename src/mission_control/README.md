@@ -22,14 +22,27 @@ mission_control (decision)
   /navigation/motion_command
           |
           v
-SDK/C++ motion executor (future)
+  motion_command_bridge_node
+          |
+          v
+  /motion/executor/request
+          |
+          v
+  irc_step_motion_executor/sdk_motion_executor
+          |
+          v
+  /motion/executor/status -> /motion/status
 ```
 
 - `step`: 보이는 것을 측정하고 객체별 행동 후보를 계산합니다.
 - `mission_control`: 후보 간 우선순위, 미션 단계, 단발 모션 요청을
   관리합니다.
-- SDK/C++ 노드: 선택된 명령을 실제 보행·줍기·슛·허들 모션으로
-  실행하고 완료 여부를 회신합니다.
+- `motion_command_bridge_node`: 현재 catalog에 있는 `forward`와
+  `forward_short`만 C++ executor 요청으로 변환합니다. 나머지 action은
+  `/motion/status`에 `UNSUPPORTED`를 발행하며 executor로 보내지 않습니다.
+- C++ executor: `full_system.launch.py`에서는 `backend_type=simulated`,
+  `enable_robot_hardware=false`로만 실행됩니다. SDK, 포트, Dynamixel 및 torque를
+  사용하지 않습니다.
 
 `mission_control`은 `step`의 line/ball/goal/hurdle planner 클래스를
 재사용하므로 두 패키지를 함께 빌드해야 합니다.
