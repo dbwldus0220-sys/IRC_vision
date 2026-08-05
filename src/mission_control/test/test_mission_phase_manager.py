@@ -78,24 +78,32 @@ def test_pickup_succeeded():
     assert manager.current_phase == "GOAL_APPROACH"
 
 
-@pytest.mark.parametrize("status", ["FAILED", "TIMEOUT", "CANCELLED"])
-def test_pickup_failure_or_timeout_uses_actual_section_policy(status):
+@pytest.mark.parametrize(
+    "status",
+    ["FAILED", "TIMEOUT", "CANCELLED", "REJECTED", "UNSUPPORTED"],
+)
+def test_pickup_failure_does_not_complete_section(status):
     manager = MissionPhaseManager(
         required_ball_sections=2,
         initial_phase="BALL_APPROACH",
     )
-    complete(manager, "PICKUP_NOW", 1, status)
+    if status in {"REJECTED", "UNSUPPORTED"}:
+        assert manager.start_special_action("PICKUP_NOW", 1)
+        manager.handle_motion_status("PICKUP_NOW", 1, status)
+    else:
+        complete(manager, "PICKUP_NOW", 1, status)
     assert manager.pickups_completed == 0
-    assert manager.ball_sections_processed == 1
+    assert manager.ball_sections_processed == 0
     assert manager.finish_enabled is False
-    assert manager.current_phase == "AUTO"
+    assert manager.current_phase == "BALL_APPROACH"
 
 
-def test_failed_pickup_can_enable_finish_without_ending_auto_flow():
+def test_failed_pickup_cannot_enable_finish():
     manager = MissionPhaseManager(required_ball_sections=1)
     complete(manager, "PICKUP_NOW", 1, "FAILED")
-    assert manager.finish_enabled is True
-    assert manager.current_phase == "AUTO"
+    assert manager.finish_enabled is False
+    assert manager.ball_sections_processed == 0
+    assert manager.current_phase == "BALL_APPROACH"
 
 
 @pytest.mark.parametrize(
@@ -114,16 +122,19 @@ def test_shot_terminal_updates_section_and_phase(status, expected_shots):
     )
     complete(manager, "SHOT", 1, status)
     assert manager.shots_completed == expected_shots
-    assert manager.ball_sections_processed == 1
+    expected_sections = 1 if status == "SUCCEEDED" else 0
+    assert manager.ball_sections_processed == expected_sections
     assert manager.finish_enabled is False
-    assert manager.current_phase == "AUTO"
+    assert manager.current_phase == (
+        "AUTO" if status == "SUCCEEDED" else "GOAL_APPROACH"
+    )
 
 
 @pytest.mark.parametrize(
     "status",
-    ["SUCCEEDED", "FAILED", "TIMEOUT", "CANCELLED"],
+    ["SUCCEEDED"],
 )
-def test_shot_result_enables_finish_flag_but_returns_to_auto(status):
+def test_successful_shot_enables_finish_flag_and_returns_to_auto(status):
     manager = MissionPhaseManager(
         required_ball_sections=1,
         initial_phase="GOAL_APPROACH",
@@ -134,34 +145,81 @@ def test_shot_result_enables_finish_flag_but_returns_to_auto(status):
 
 
 @pytest.mark.parametrize(
-    "status",
-    ["SUCCEEDED", "FAILED", "TIMEOUT", "CANCELLED"],
+    "origin_phase",
+    [
+        "AUTO",
+        "BALL_SEARCH",
+        "BALL_APPROACH",
+        "GOAL_SEARCH",
+        "GOAL_APPROACH",
+        "HURDLE_APPROACH",
+        "LINE_TRACK",
+    ],
 )
-def test_go_always_returns_to_auto_without_progress(status):
-    manager = MissionPhaseManager(initial_phase="HURDLE_APPROACH")
-    before = manager.snapshot()
-    complete(manager, "GO", 1, status)
-    assert manager.current_phase == "AUTO"
-    assert manager.pickups_completed == before["pickups_completed"]
-    assert manager.shots_completed == before["shots_completed"]
-
-
-@pytest.mark.parametrize(
-    "status",
-    ["SUCCEEDED", "FAILED", "TIMEOUT", "CANCELLED"],
-)
-def test_goal_approach_go_terminal_restores_goal_mission(status):
-    manager = MissionPhaseManager(initial_phase="GOAL_APPROACH")
+def test_successful_go_restores_exact_origin_without_progress(origin_phase):
+    manager = MissionPhaseManager(initial_phase=origin_phase)
     before = manager.snapshot()
 
-    complete(manager, "GO", 1, status)
+    complete(manager, "GO", 1, "SUCCEEDED")
 
-    assert manager.current_phase == "GOAL_APPROACH"
+    assert manager.current_phase == origin_phase
     assert manager.pickups_completed == before["pickups_completed"]
     assert manager.shots_completed == before["shots_completed"]
     assert manager.ball_sections_processed == before[
         "ball_sections_processed"
     ]
+    assert manager.finish_enabled == before["finish_enabled"]
+    assert manager.mission_complete == before["mission_complete"]
+
+
+@pytest.mark.parametrize("invalid_origin", [None, "UNKNOWN"])
+def test_successful_go_without_valid_origin_falls_back_to_auto(
+    invalid_origin,
+):
+    manager = MissionPhaseManager(initial_phase="LINE_TRACK")
+    assert manager.start_special_action("GO", 1)
+    manager._active_special_origin_phase = invalid_origin
+    assert manager.handle_motion_status("GO", 1, "RUNNING").handled
+
+    result = manager.handle_motion_status("GO", 1, "SUCCEEDED")
+
+    assert result.handled and result.terminal
+    assert manager.current_phase == "AUTO"
+
+
+@pytest.mark.parametrize(
+    "status",
+    ["FAILED", "TIMEOUT", "CANCELLED", "REJECTED", "UNSUPPORTED"],
+)
+def test_failed_go_returns_to_hurdle_approach(status):
+    manager = MissionPhaseManager(initial_phase="GOAL_APPROACH")
+    before = manager.snapshot()
+    if status in {"REJECTED", "UNSUPPORTED"}:
+        assert manager.start_special_action("GO", 1)
+        manager.handle_motion_status("GO", 1, status)
+    else:
+        complete(manager, "GO", 1, status)
+    assert manager.current_phase == "HURDLE_APPROACH"
+    assert manager.pickups_completed == before["pickups_completed"]
+    assert manager.shots_completed == before["shots_completed"]
+    assert manager.ball_sections_processed == before[
+        "ball_sections_processed"
+    ]
+    assert manager.finish_enabled == before["finish_enabled"]
+    assert manager.mission_complete == before["mission_complete"]
+
+
+def test_duplicate_successful_go_terminal_is_not_applied_again():
+    manager = MissionPhaseManager(initial_phase="BALL_SEARCH")
+    complete(manager, "GO", 1, "SUCCEEDED")
+    assert manager.current_phase == "BALL_SEARCH"
+
+    assert manager.set_phase("LINE_TRACK")
+    duplicate = manager.handle_motion_status("GO", 1, "SUCCEEDED")
+
+    assert not duplicate.handled
+    assert duplicate.duplicate
+    assert manager.current_phase == "LINE_TRACK"
 
 
 def test_cross_finish_succeeded():
@@ -272,10 +330,10 @@ def test_cancelled_before_running_is_ignored_and_active_remains():
 @pytest.mark.parametrize(
     ("initial_phase", "action", "expected_phase"),
     [
-        ("BALL_APPROACH", "PICKUP_NOW", "AUTO"),
-        ("GOAL_APPROACH", "SHOT", "AUTO"),
-        ("HURDLE_APPROACH", "GO", "AUTO"),
-        ("GOAL_APPROACH", "GO", "GOAL_APPROACH"),
+        ("BALL_APPROACH", "PICKUP_NOW", "BALL_APPROACH"),
+        ("GOAL_APPROACH", "SHOT", "GOAL_APPROACH"),
+        ("HURDLE_APPROACH", "GO", "HURDLE_APPROACH"),
+        ("GOAL_APPROACH", "GO", "HURDLE_APPROACH"),
     ],
 )
 def test_matching_rejected_without_running_uses_failure_phase(
@@ -311,8 +369,8 @@ def test_duplicate_rejected_does_not_apply_failure_twice():
     assert first.handled
     assert not duplicate.handled
     assert duplicate.duplicate
-    assert manager.ball_sections_processed == 1
-    assert manager.current_phase == "AUTO"
+    assert manager.ball_sections_processed == 0
+    assert manager.current_phase == "BALL_APPROACH"
 
 
 @pytest.mark.parametrize(

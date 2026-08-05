@@ -758,7 +758,7 @@ def test_mock_line_input_is_fresh_and_produces_action(
     [
         ('AUTO', 'PICKUP_NOW', 9, 'GOAL_APPROACH'),
         ('GOAL_APPROACH', 'SHOT', 17, 'AUTO'),
-        ('HURDLE_APPROACH', 'GO', 14, 'AUTO'),
+        ('HURDLE_APPROACH', 'GO', 14, 'HURDLE_APPROACH'),
     ],
 )
 def test_special_motion_success_advances_phase(
@@ -1177,7 +1177,7 @@ def test_duplicate_rejected_does_not_change_recovered_phase():
 @pytest.mark.parametrize(
     ('source', 'action', 'initial_phase', 'expected_phase'),
     [
-        ('hurdle', 'GO', 'HURDLE_APPROACH', 'AUTO'),
+        ('hurdle', 'GO', 'HURDLE_APPROACH', 'HURDLE_APPROACH'),
         ('ball', 'PICKUP_NOW', 'BALL_APPROACH', 'GOAL_APPROACH'),
         ('goal', 'SHOT', 'GOAL_APPROACH', 'AUTO'),
     ],
@@ -1325,9 +1325,7 @@ def test_go_terminal_status_does_not_change_section(status):
     assert node.shots_completed == 0
     assert node.ball_sections_processed == 0
     assert node.finish_enabled is False
-    assert node.mission_phase == (
-        'AUTO' if status == 'SUCCEEDED' else 'HURDLE_APPROACH'
-    )
+    assert node.mission_phase == 'HURDLE_APPROACH'
 
 
 def test_pickup_failure_does_not_complete_last_section():

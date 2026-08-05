@@ -471,6 +471,23 @@ def test_ball_search_keeps_line_until_ball_is_inside_90cm():
     assert decision.action == "STRAIGHT"
 
 
+def test_ball_search_approach_phase_requires_controllable_observation():
+    planner = MotionDecisionPlanner()
+
+    assert planner.approach_phase_for_search(
+        "BALL_SEARCH",
+        observations(ball=ball_info(depth_m=0.9)),
+    ) == "BALL_APPROACH"
+    assert planner.approach_phase_for_search(
+        "BALL_SEARCH",
+        observations(ball=ball_info(depth_m=0.91)),
+    ) is None
+    assert planner.approach_phase_for_search(
+        "BALL_SEARCH",
+        observations(ball=None),
+    ) is None
+
+
 def test_ball_beyond_3m_does_not_start_tracking_memory():
     planner = MotionDecisionPlanner()
 
@@ -819,6 +836,23 @@ def test_goal_search_keeps_line_until_goal_is_inside_50cm():
     )
 
     assert decision.source == "line"
+
+
+def test_goal_search_approach_phase_requires_controllable_observation():
+    planner = MotionDecisionPlanner()
+
+    assert planner.approach_phase_for_search(
+        "GOAL_SEARCH",
+        observations(goal=goal_info(depth_m=0.5)),
+    ) == "GOAL_APPROACH"
+    assert planner.approach_phase_for_search(
+        "GOAL_SEARCH",
+        observations(goal=goal_info(depth_m=0.51)),
+    ) is None
+    assert planner.approach_phase_for_search(
+        "GOAL_SEARCH",
+        observations(goal=None),
+    ) is None
 
 
 def test_lost_goal_stops_then_turns_toward_last_seen_side():

@@ -132,6 +132,25 @@ class MotionDecisionPlanner:
             return "line"
         return "none"
 
+    def approach_phase_for_search(
+        self,
+        phase: str,
+        observations: dict[str, dict[str, Any] | None],
+    ) -> str | None:
+        """Return an approach phase only for a fresh controllable target."""
+        normalized = phase.strip().upper()
+        if (
+            normalized == "BALL_SEARCH"
+            and self._ball_is_inside_control_range(observations.get("ball"))
+        ):
+            return "BALL_APPROACH"
+        if (
+            normalized == "GOAL_SEARCH"
+            and self._goal_is_inside_control_range(observations.get("goal"))
+        ):
+            return "GOAL_APPROACH"
+        return None
+
     def plan(
         self,
         phase: str,

@@ -949,7 +949,7 @@ def test_last_shot_enables_finish_flag_and_continues_line_driving():
     )
 
 
-def test_go_round_trip_preserves_action_and_returns_to_auto():
+def test_go_round_trip_preserves_action_and_origin_phase():
     harness = MissionFlowHarness(phase="HURDLE_APPROACH")
     before = harness.phase_manager.snapshot()
     command = publish_special(
@@ -997,7 +997,7 @@ def test_go_round_trip_preserves_action_and_returns_to_auto():
         succeeded["status"],
     )
 
-    assert harness.mission_phase == "AUTO"
+    assert harness.mission_phase == "HURDLE_APPROACH"
     assert harness.active_special_action is None
     assert harness.pickups_completed == before["pickups_completed"]
     assert harness.shots_completed == before["shots_completed"]
@@ -1109,7 +1109,7 @@ def test_active_special_uses_temporary_lock_without_changing_manager_phase():
     assert locked[-1]["action"] == "WAIT"
 
     complete_active(harness, "GO", command["command_id"])
-    assert harness.phase_manager.current_phase == "AUTO"
+    assert harness.phase_manager.current_phase == "HURDLE_APPROACH"
 
 
 def test_external_phase_override_accepts_only_valid_idle_phase():

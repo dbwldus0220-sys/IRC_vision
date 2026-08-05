@@ -249,9 +249,10 @@ class MissionPhaseManager:
             if not succeeded:
                 self.current_phase = "HURDLE_APPROACH"
                 return
+            origin_phase = self._active_special_origin_phase
             self.current_phase = (
-                "GOAL_APPROACH"
-                if self._active_special_origin_phase == "GOAL_APPROACH"
+                origin_phase
+                if origin_phase in self.ALLOWED_PHASES
                 else "AUTO"
             )
             return
