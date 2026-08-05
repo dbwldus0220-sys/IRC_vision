@@ -467,6 +467,94 @@ def test_general_command_waits_for_subscriber_without_consuming_state():
     assert len(node.logger.infos) == 1
 
 
+def test_same_vision_frame_is_not_republished_after_success():
+    decision = MotionDecision(
+        phase='AUTO',
+        source='line',
+        action='STRAIGHT',
+        valid=True,
+        reason='line_ready',
+        sdk_motion_requested=False,
+        requires_ack=False,
+        source_command={},
+    )
+    node = ReadinessPublishNode(decision)
+    node.latest_time = {'line': 1.0}
+    node.last_published_vision_stamp = {}
+
+    MotionDecisionNode._publish_decision(node)
+    for status in ('RUNNING', 'SUCCEEDED'):
+        send_status(
+            node,
+            status=status,
+            action='STRAIGHT',
+            command_id=1,
+            event_id=None,
+            dynamics_command=None,
+        )
+
+    node.general_motion_gate.on_new_vision_input()
+    MotionDecisionNode._publish_decision(node)
+    assert len(node.publisher.messages) == 1
+
+    node.latest_time['line'] = 2.0
+    node.general_motion_gate.on_new_vision_input()
+    MotionDecisionNode._publish_decision(node)
+    assert len(node.publisher.messages) == 2
+
+
+def test_running_general_motion_suppresses_new_special_command():
+    general = MotionDecision(
+        phase='AUTO',
+        source='line',
+        action='STRAIGHT',
+        valid=True,
+        reason='line_ready',
+        sdk_motion_requested=False,
+        requires_ack=False,
+        source_command={},
+    )
+    node = ReadinessPublishNode(general)
+    MotionDecisionNode._publish_decision(node)
+    send_status(
+        node,
+        status='RUNNING',
+        action='STRAIGHT',
+        command_id=1,
+        event_id=None,
+        dynamics_command=None,
+    )
+
+    node.decision = terminal_decision(
+        'ball',
+        'PICKUP_NOW',
+        'BALL_APPROACH',
+    )
+    MotionDecisionNode._publish_decision(node)
+
+    assert len(node.publisher.messages) == 1
+    assert node.active_special_command_id is None
+
+
+def test_special_unsupported_status_releases_lock_without_substitution():
+    node = FakeDecisionNode('BALL_APPROACH')
+    arm_special_command(node, 'PICKUP_NOW', 41, 4)
+
+    send_status(
+        node,
+        status='UNSUPPORTED',
+        action='PICKUP_NOW',
+        command_id=41,
+        event_id=4,
+        dynamics_command=None,
+        error_code='UNSUPPORTED_ACTION',
+    )
+
+    assert node.active_special_command_id is None
+    assert node.active_special_event_id is None
+    assert node.mission_phase == 'AUTO'
+
+
 @pytest.mark.parametrize(
     ('source', 'action', 'phase'),
     [
@@ -768,7 +856,7 @@ def test_matching_pickup_status_completes_once_and_clears_active_command():
             status=status,
             action='PICKUP_NOW',
             command_id=200,
-            event_id=None,
+            event_id=20,
             dynamics_command=9,
         )
 

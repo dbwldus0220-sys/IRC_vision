@@ -216,6 +216,7 @@ class MotionDecisionNode(Node):
 
         self.command_id = 0
         self.event_id = 0
+        self.last_published_vision_stamp: dict[str, float] = {}
         self.terminal_latch: tuple[str, str] | None = None
         self.terminal_action_armed = {
             source: True
@@ -493,13 +494,8 @@ class MotionDecisionNode(Node):
             return
 
         event_id_mismatch = (
-            event_id != self.active_special_event_id
-            if status == "REJECTED"
-            else (
-                self.active_special_event_id is not None
-                and event_id is not None
-                and event_id != self.active_special_event_id
-            )
+            self.active_special_event_id is not None
+            and event_id != self.active_special_event_id
         )
         if event_id_mismatch:
             self.get_logger().warning(
@@ -666,6 +662,11 @@ class MotionDecisionNode(Node):
         if not self._command_publisher_has_subscriber():
             return
 
+        if decision.valid and self.general_motion_gate.locked:
+            # A RUNNING general request owns the executor regardless of what
+            # a newer Vision frame would otherwise select.
+            return
+
         is_general_motion = (
             decision.valid
             and normalize_general_action(decision.action) is not None
@@ -676,6 +677,15 @@ class MotionDecisionNode(Node):
         ):
             # Keep receiving Vision and running the planner, but do not publish
             # another executable command while the current motion is locked.
+            return
+
+        if (
+            is_general_motion
+            and MotionDecisionNode._same_vision_frame_was_published(
+                self,
+                decision,
+            )
+        ):
             return
 
         terminal_key = (
@@ -770,6 +780,30 @@ class MotionDecisionNode(Node):
                 decision.action,
                 self.command_id,
             )
+            MotionDecisionNode._remember_published_vision_frame(
+                self,
+                decision,
+            )
+
+    def _same_vision_frame_was_published(
+        self,
+        decision: MotionDecision,
+    ) -> bool:
+        """Prevent one source frame from creating the same command twice."""
+        stamp = getattr(self, "latest_time", {}).get(decision.source)
+        return bool(
+            stamp is not None
+            and self.last_published_vision_stamp.get(decision.source) == stamp
+        )
+
+    def _remember_published_vision_frame(
+        self,
+        decision: MotionDecision,
+    ) -> None:
+        """Record the source frame consumed by an executable command."""
+        stamp = getattr(self, "latest_time", {}).get(decision.source)
+        if stamp is not None:
+            self.last_published_vision_stamp[decision.source] = stamp
 
     def _command_publisher_has_subscriber(self) -> bool:
         """Report readiness changes without publishing into a disconnected topic."""

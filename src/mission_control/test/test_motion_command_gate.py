@@ -33,15 +33,11 @@ def test_running_keeps_lock_with_left_alias():
     assert gate.locked
 
 
-@pytest.mark.parametrize(
-    "status",
-    ["SUCCEEDED", "FAILED", "TIMEOUT", "CANCELED", "CANCELLED"],
-)
-def test_terminal_requires_new_vision_before_republishing(status):
+def test_success_requires_new_vision_before_republishing():
     gate = gate_with_vision()
     gate.on_command_published("LEFT")
     gate.on_motion_status("TURN_LEFT", "RUNNING")
-    assert gate.on_motion_status("TURN_LEFT", status).released
+    assert gate.on_motion_status("TURN_LEFT", "SUCCEEDED").released
     assert not gate.can_publish("LEFT")
     gate.on_new_vision_input()
     assert gate.can_publish("LEFT")
@@ -159,11 +155,12 @@ def test_same_command_id_releases_only_after_running():
     ).released
 
 
-def test_missing_status_command_id_uses_legacy_action_fallback():
+def test_missing_status_command_id_does_not_release_current_request():
     gate = gate_with_vision()
     gate.on_command_published("LEFT", command_id=20)
-    assert gate.on_motion_status("TURN_LEFT", "RUNNING").matched
-    assert gate.on_motion_status("TURN_LEFT", "SUCCEEDED").released
+    assert not gate.on_motion_status("TURN_LEFT", "RUNNING").matched
+    assert not gate.on_motion_status("TURN_LEFT", "SUCCEEDED").released
+    assert gate.locked
 
 
 @pytest.mark.parametrize(
@@ -183,7 +180,64 @@ def test_action_aliases_correlate(command_action, status_action):
 
 @pytest.mark.parametrize(
     "action",
-    ["WAIT", "STOP", "PICKUP_NOW", "FINE_LEFT", "FINE_RIGHT"],
+    ["WAIT", "PICKUP_NOW", "FINE_LEFT", "FINE_RIGHT"],
 )
 def test_non_general_action_is_not_managed_as_execution(action):
     assert not gate_with_vision().can_publish(action)
+
+
+@pytest.mark.parametrize(
+    "action",
+    [
+        "STRAIGHT",
+        "APPROACH",
+        "SLOW_APPROACH",
+        "FINE_FORWARD_STEP",
+        "APPROACH_GOAL",
+        "APPROACH_HURDLE",
+        "TURN_LEFT",
+        "TURN_RIGHT",
+        "ALIGN_LEFT",
+        "ALIGN_RIGHT",
+        "RETREAT_GOAL",
+    ],
+)
+def test_all_executable_or_bridge_rejected_actions_use_the_gate(action):
+    gate = gate_with_vision()
+
+    assert gate.can_publish(action)
+    gate.on_command_published(action, command_id=30)
+    assert not gate.can_publish(action)
+
+
+def test_unsupported_status_releases_without_running_and_blocks_retry():
+    gate = gate_with_vision()
+    gate.on_command_published("ALIGN_LEFT", command_id=31)
+
+    transition = gate.on_motion_status(
+        "ALIGN_LEFT",
+        "UNSUPPORTED",
+        command_id=31,
+    )
+
+    assert transition.released
+    gate.on_new_vision_input()
+    assert not gate.can_publish("ALIGN_LEFT")
+
+
+@pytest.mark.parametrize("status", ["FAILED", "TIMEOUT", "CANCELLED"])
+def test_failed_or_cancelled_action_is_not_retried_forever(status):
+    gate = gate_with_vision()
+    gate.on_command_published("APPROACH", command_id=32)
+    assert gate.on_motion_status(
+        "APPROACH", "RUNNING", command_id=32
+    ).matched
+    assert gate.on_motion_status(
+        "APPROACH", status, command_id=32
+    ).released
+
+    for _ in range(3):
+        gate.on_new_vision_input()
+        assert not gate.can_publish("APPROACH")
+
+    assert gate.can_publish("STRAIGHT")

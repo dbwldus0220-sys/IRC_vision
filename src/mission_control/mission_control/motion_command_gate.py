@@ -6,7 +6,22 @@ from dataclasses import dataclass
 from typing import Any
 
 
-GENERAL_ACTIONS = frozenset({"STRAIGHT", "LEFT", "RIGHT"})
+GENERAL_ACTIONS = frozenset(
+    {
+        "STRAIGHT",
+        "APPROACH",
+        "SLOW_APPROACH",
+        "FINE_FORWARD_STEP",
+        "APPROACH_GOAL",
+        "APPROACH_HURDLE",
+        "LEFT",
+        "RIGHT",
+        "ALIGN_LEFT",
+        "ALIGN_RIGHT",
+        "RETREAT_GOAL",
+        "STOP",
+    }
+)
 UNSUPPORTED_GENERAL_ACTIONS = frozenset({"FINE_LEFT", "FINE_RIGHT"})
 TERMINAL_STATUSES = frozenset(
     {
@@ -16,14 +31,13 @@ TERMINAL_STATUSES = frozenset(
         "REJECTED",
         "CANCELED",
         "CANCELLED",
+        "UNSUPPORTED",
     }
 )
 ACTION_ALIASES = {
-    "STRAIGHT": "STRAIGHT",
-    "LEFT": "LEFT",
     "TURN_LEFT": "LEFT",
-    "RIGHT": "RIGHT",
     "TURN_RIGHT": "RIGHT",
+    **{action: action for action in GENERAL_ACTIONS},
 }
 TRANSIENT_REJECTION_CODES = frozenset(
     {"REJECTED_BUSY", "HARDWARE_NOT_READY"}
@@ -134,11 +148,10 @@ class GeneralMotionCommandGate:
         ):
             return GateTransition(False, False)
 
-        # New messages correlate by mission command ID. If either side lacks
-        # one, retain the legacy action/RUNNING compatibility path below.
+        # Correlate new messages by mission command ID. A status without the
+        # active ID must not release a newer same-action command.
         if (
             self.active_command_id is not None
-            and command_id is not None
             and command_id != self.active_command_id
         ):
             return GateTransition(False, False)
@@ -154,7 +167,10 @@ class GeneralMotionCommandGate:
         # Accepted Executor requests publish RUNNING before their terminal
         # result. Requiring it prevents an old same-action terminal message
         # from releasing a newly-created lock. REJECTED has no RUNNING.
-        if normalized_status != "REJECTED" and not self.running_seen:
+        if (
+            normalized_status not in {"REJECTED", "UNSUPPORTED"}
+            and not self.running_seen
+        ):
             return GateTransition(False, False)
 
         completed_action = self.active_action
@@ -164,8 +180,16 @@ class GeneralMotionCommandGate:
         self.running_seen = False
         self.required_vision_generation = self.vision_generation + 1
 
-        if normalized_status == "REJECTED":
+        if normalized_status in {"REJECTED", "UNSUPPORTED"}:
             self._handle_rejection(completed_action, error_code)
+        elif normalized_status in {
+            "FAILED",
+            "TIMEOUT",
+            "CANCELED",
+            "CANCELLED",
+        }:
+            self.rejected_action = completed_action
+            self._reset_transient_rejections()
         else:
             self._reset_transient_rejections()
 

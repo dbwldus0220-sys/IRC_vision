@@ -143,11 +143,16 @@ class MissionFlowHarness:
 
     def send_status(self, action, command_id, status):
         message = String()
+        event_id = (
+            self.active_special_event_id
+            if command_id == self.active_special_command_id
+            else None
+        )
         message.data = json.dumps(
             {
                 "action": action,
                 "command_id": command_id,
-                "event_id": None,
+                "event_id": event_id,
                 "dynamics_command": None,
                 "status": status,
             }
@@ -332,6 +337,7 @@ def test_full_course_mock_flow_without_ros_graph():
         "SLOW_APPROACH",
         "FINE_FORWARD_STEP",
     }
+    release_general(harness, approach_ball[-1])
 
     pickup = publish_special(
         harness,
@@ -369,8 +375,14 @@ def test_full_course_mock_flow_without_ros_graph():
         goal=approaching_goal(),
     )
     assert goal_approach[-1]["action"] == "APPROACH_GOAL"
+    release_general(harness, goal_approach[-1])
     goal_align = harness.publish_vision(goal=aligning_goal())
     assert goal_align[-1]["action"] == "ALIGN_RIGHT"
+    harness.send_status(
+        "ALIGN_RIGHT",
+        goal_align[-1]["command_id"],
+        "UNSUPPORTED",
+    )
 
     shot = publish_special(
         harness,
@@ -401,6 +413,7 @@ def test_full_course_mock_flow_without_ros_graph():
     )
     assert hurdle_approach[-1]["source"] == "hurdle"
     assert hurdle_approach[-1]["action"] == "APPROACH_HURDLE"
+    release_general(harness, hurdle_approach[-1])
 
     go = publish_special(
         harness,
@@ -640,6 +653,7 @@ def test_missing_or_stale_hurdle_keeps_current_line_driving():
     )
     assert seen[-1]["source"] == "hurdle"
     assert seen[-1]["action"] == "APPROACH_HURDLE"
+    release_general(harness, seen[-1])
 
     missing = harness.publish_vision(hurdle=None)
     assert missing[-1]["source"] == "line"

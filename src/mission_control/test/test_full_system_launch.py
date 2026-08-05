@@ -76,6 +76,9 @@ def test_full_system_uses_bridge_and_cpp_simulated_executor(
         "sdk_motion_executor",
     }.issubset(executables)
     assert executables.isdisjoint(LEGACY_EXECUTABLES)
+    assert sum(
+        node.node_executable == "sdk_motion_executor" for node in nodes
+    ) == 1
 
 
 def test_cpp_executor_is_forced_to_safe_simulated_parameters(

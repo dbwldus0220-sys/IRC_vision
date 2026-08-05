@@ -46,10 +46,18 @@ class MissionPhaseManager:
             "TIMEOUT",
             "CANCELLED",
             "REJECTED",
+            "UNSUPPORTED",
         }
     )
     TERMINAL_STATUSES = frozenset(
-        {"SUCCEEDED", "FAILED", "TIMEOUT", "CANCELLED", "REJECTED"}
+        {
+            "SUCCEEDED",
+            "FAILED",
+            "TIMEOUT",
+            "CANCELLED",
+            "REJECTED",
+            "UNSUPPORTED",
+        }
     )
 
     def __init__(
@@ -184,7 +192,7 @@ class MissionPhaseManager:
             )
 
         if (
-            normalized_status != "REJECTED"
+            normalized_status not in {"REJECTED", "UNSUPPORTED"}
             and not self.active_special_running
         ):
             return self._result(
