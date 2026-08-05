@@ -199,6 +199,13 @@ if(BUILD_TESTING)
       TEST_ALIAS_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/config/motion_aliases.yaml"
       TEST_CONTRACT_VECTORS="${CMAKE_CURRENT_SOURCE_DIR}/test/legacy_catalog_contract_vectors.json")
   endif()
+  ament_add_gtest(
+    test_motion_json_catalog test/test_motion_json_catalog.cpp)
+  if(TARGET test_motion_json_catalog)
+    target_link_libraries(test_motion_json_catalog PkgConfig::JSON_C)
+    target_compile_definitions(test_motion_json_catalog PRIVATE
+      TEST_MOTION_CANDIDATE_CATALOG="${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/robot_motions_candidates.json")
+  endif()
   ament_add_gtest(test_sdk_executor_core test/test_sdk_executor_core.cpp)
   if(TARGET test_sdk_executor_core)
     target_include_directories(test_sdk_executor_core PRIVATE test)
