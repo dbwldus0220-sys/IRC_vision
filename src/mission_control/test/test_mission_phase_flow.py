@@ -467,7 +467,7 @@ def test_full_course_mock_flow_without_ros_graph():
     ],
 )
 @pytest.mark.parametrize("terminal", ["FAILED", "TIMEOUT"])
-def test_special_failure_or_timeout_resumes_line_decision(
+def test_special_failure_or_timeout_returns_to_safe_approach_phase(
     action,
     phase,
     source,
@@ -488,18 +488,14 @@ def test_special_failure_or_timeout_resumes_line_decision(
         terminal,
     )
 
-    assert harness.mission_phase == "AUTO"
+    expected_phase = {
+        "PICKUP_NOW": "BALL_APPROACH",
+        "SHOT": "GOAL_APPROACH",
+        "GO": "HURDLE_APPROACH",
+    }[action]
+    assert harness.mission_phase == expected_phase
+    assert harness.ball_sections_processed == 0
     assert harness.active_special_command_id is None
-    harness.planner._clear_ball_tracking()
-    harness.planner._clear_goal_tracking()
-    resumed = harness.publish_vision(
-        line=line_info(),
-        ball=None,
-        goal=None,
-        hurdle=None,
-    )
-    assert resumed[-1]["action"] == "STRAIGHT"
-    assert resumed[-1]["phase"] == "AUTO"
 
 
 def test_full_flow_line_loss_recovery_and_reacquisition():
@@ -1045,9 +1041,9 @@ def test_manual_cross_finish_status_compatibility_still_enters_finished():
         "expected_sections",
     ),
     [
-        ("PICKUP_NOW", "BALL_APPROACH", "AUTO", 1),
-        ("SHOT", "GOAL_APPROACH", "AUTO", 1),
-        ("GO", "HURDLE_APPROACH", "AUTO", 0),
+        ("PICKUP_NOW", "BALL_APPROACH", "BALL_APPROACH", 0),
+        ("SHOT", "GOAL_APPROACH", "GOAL_APPROACH", 0),
+        ("GO", "HURDLE_APPROACH", "HURDLE_APPROACH", 0),
         (
             "CROSS_FINISH",
             "WALK_TO_FINISH",

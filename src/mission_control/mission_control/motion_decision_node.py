@@ -851,6 +851,14 @@ class MotionDecisionNode(Node):
                 dt_sec,
             )
 
+        approach_phase = self.planner.approach_phase_for_search(
+            planning_phase,
+            observations,
+        )
+        if approach_phase is not None:
+            self.phase_manager.set_phase(approach_phase)
+            planning_phase = approach_phase
+
         if planning_phase == "WALK_TO_FINISH":
             line_decision = self.planner.plan(
                 "LINE_TRACK",

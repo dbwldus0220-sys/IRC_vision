@@ -42,6 +42,10 @@ class FakePlanner:
         """Match the planner lifecycle hook used after a successful pickup."""
         pass
 
+    def approach_phase_for_search(self, _phase, _observations):
+        """Keep search phases unchanged in tests unrelated to acquisition."""
+        return None
+
     def plan(self, phase, _observations, _dt_sec):
         """Return WAIT for locks and STRAIGHT for normal line planning."""
         locked = phase.endswith('_LOCK')
@@ -552,7 +556,7 @@ def test_special_unsupported_status_releases_lock_without_substitution():
 
     assert node.active_special_command_id is None
     assert node.active_special_event_id is None
-    assert node.mission_phase == 'AUTO'
+    assert node.mission_phase == 'BALL_APPROACH'
 
 
 @pytest.mark.parametrize(
@@ -662,6 +666,48 @@ class FreshMockInputNode(FakeDecisionNode):
         self.timeouts = {
             source: 0.5 for source in self.SOURCES
         }
+
+
+@pytest.mark.parametrize(
+    ('search_phase', 'source', 'payload', 'approach_phase'),
+    [
+        (
+            'BALL_SEARCH',
+            'ball',
+            {'detected': True, 'depth_valid': True, 'depth_m': 0.9},
+            'BALL_APPROACH',
+        ),
+        (
+            'GOAL_SEARCH',
+            'goal',
+            {'detected': True, 'depth_valid': True, 'depth_m': 0.5},
+            'GOAL_APPROACH',
+        ),
+    ],
+)
+def test_search_phase_advances_on_fresh_controllable_target(
+    search_phase,
+    source,
+    payload,
+    approach_phase,
+):
+    node = FreshMockInputNode()
+    assert node.phase_manager.set_phase(search_phase)
+
+    decision = select_decision(node, **{source: payload})
+
+    assert node.mission_phase == approach_phase
+    assert decision.phase == approach_phase
+
+
+@pytest.mark.parametrize('search_phase', ['BALL_SEARCH', 'GOAL_SEARCH'])
+def test_search_phase_does_not_advance_without_fresh_target(search_phase):
+    node = FreshMockInputNode()
+    assert node.phase_manager.set_phase(search_phase)
+
+    select_decision(node)
+
+    assert node.mission_phase == search_phase
 
 
 @pytest.mark.parametrize(
@@ -868,8 +914,8 @@ def test_matching_pickup_status_completes_once_and_clears_active_command():
 
 
 @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT'])
-def test_failed_or_timed_out_special_motion_returns_to_auto(status):
-    """Release the lock and return to AUTO after failure or timeout."""
+def test_failed_or_timed_out_shot_returns_to_goal_approach(status):
+    """Release the lock without completing the failed goal section."""
     node = FakeDecisionNode('GOAL_APPROACH')
     arm_special_command(node, 'SHOT', 300, 30)
 
@@ -892,7 +938,7 @@ def test_failed_or_timed_out_special_motion_returns_to_auto(status):
     )
 
     assert node.special_motion_running is False
-    assert node.mission_phase == 'AUTO'
+    assert node.mission_phase == 'GOAL_APPROACH'
     assert node.terminal_latch is None
     assert node.pickups_completed == 0
     assert node.shots_completed == 0
@@ -901,10 +947,10 @@ def test_failed_or_timed_out_special_motion_returns_to_auto(status):
 @pytest.mark.parametrize(
     ('initial_phase', 'action', 'expected_phase'),
     [
-        ('BALL_APPROACH', 'PICKUP_NOW', 'AUTO'),
-        ('GOAL_APPROACH', 'SHOT', 'AUTO'),
-        ('HURDLE_APPROACH', 'GO', 'AUTO'),
-        ('GOAL_APPROACH', 'GO', 'GOAL_APPROACH'),
+        ('BALL_APPROACH', 'PICKUP_NOW', 'BALL_APPROACH'),
+        ('GOAL_APPROACH', 'SHOT', 'GOAL_APPROACH'),
+        ('HURDLE_APPROACH', 'GO', 'HURDLE_APPROACH'),
+        ('GOAL_APPROACH', 'GO', 'HURDLE_APPROACH'),
     ],
 )
 def test_matching_cancelled_after_running_releases_special_lock(
@@ -1008,8 +1054,8 @@ def test_duplicate_and_stale_cancelled_do_not_end_new_special_command():
             dynamics_command=None,
         )
 
-    assert node.ball_sections_processed == 1
-    assert node.mission_phase == 'AUTO'
+    assert node.ball_sections_processed == 0
+    assert node.mission_phase == 'BALL_APPROACH'
 
     arm_special_command(node, 'GO', 351, 36)
     send_status(
@@ -1038,10 +1084,10 @@ def test_duplicate_and_stale_cancelled_do_not_end_new_special_command():
 @pytest.mark.parametrize(
     ('initial_phase', 'action', 'expected_phase'),
     [
-        ('BALL_APPROACH', 'PICKUP_NOW', 'AUTO'),
-        ('GOAL_APPROACH', 'SHOT', 'AUTO'),
-        ('HURDLE_APPROACH', 'GO', 'AUTO'),
-        ('GOAL_APPROACH', 'GO', 'GOAL_APPROACH'),
+        ('BALL_APPROACH', 'PICKUP_NOW', 'BALL_APPROACH'),
+        ('GOAL_APPROACH', 'SHOT', 'GOAL_APPROACH'),
+        ('HURDLE_APPROACH', 'GO', 'HURDLE_APPROACH'),
+        ('GOAL_APPROACH', 'GO', 'HURDLE_APPROACH'),
     ],
 )
 def test_matching_rejected_without_running_releases_special_lock(
@@ -1122,8 +1168,8 @@ def test_duplicate_rejected_does_not_change_recovered_phase():
     send_status(node, **status)
     send_status(node, **status)
 
-    assert node.mission_phase == 'AUTO'
-    assert node.ball_sections_processed == 1
+    assert node.mission_phase == 'BALL_APPROACH'
+    assert node.ball_sections_processed == 0
     assert node.active_special_action is None
     assert node.active_special_event_id is None
 
@@ -1235,15 +1281,15 @@ def test_pickup_success_increments_score_but_not_section():
 
 
 @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT'])
-def test_pickup_failure_processes_section_without_score(status):
-    """Abandon a failed pickup and continue course progress."""
+def test_pickup_failure_preserves_section_progress(status):
+    """Return to ball approach without completing the failed section."""
     node = FakeDecisionNode()
     complete_motion(node, 'PICKUP_NOW', event_id=502, status=status)
 
     assert node.pickups_completed == 0
-    assert node.ball_sections_processed == 1
+    assert node.ball_sections_processed == 0
     assert node.finish_enabled is False
-    assert node.mission_phase == 'AUTO'
+    assert node.mission_phase == 'BALL_APPROACH'
 
 
 def test_shot_success_increments_score_and_section():
@@ -1258,15 +1304,15 @@ def test_shot_success_increments_score_and_section():
 
 
 @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT'])
-def test_shot_failure_processes_section_without_score(status):
-    """Complete course progress even when the shot does not score."""
+def test_shot_failure_preserves_section_progress(status):
+    """Return to goal approach without completing the failed section."""
     node = FakeDecisionNode('GOAL_APPROACH')
     complete_motion(node, 'SHOT', event_id=504, status=status)
 
     assert node.shots_completed == 0
-    assert node.ball_sections_processed == 1
+    assert node.ball_sections_processed == 0
     assert node.finish_enabled is False
-    assert node.mission_phase == 'AUTO'
+    assert node.mission_phase == 'GOAL_APPROACH'
 
 
 @pytest.mark.parametrize('status', ['SUCCEEDED', 'FAILED'])
@@ -1279,30 +1325,32 @@ def test_go_terminal_status_does_not_change_section(status):
     assert node.shots_completed == 0
     assert node.ball_sections_processed == 0
     assert node.finish_enabled is False
-    assert node.mission_phase == 'AUTO'
+    assert node.mission_phase == (
+        'AUTO' if status == 'SUCCEEDED' else 'HURDLE_APPROACH'
+    )
 
 
-def test_second_pickup_failure_keeps_automatic_flow_active():
-    """Keep AUTO when a failed pickup processes the last section."""
+def test_pickup_failure_does_not_complete_last_section():
+    """Keep the last section incomplete after a failed pickup."""
     node = FakeDecisionNode()
     complete_motion(node, 'SHOT', event_id=506)
     complete_motion(node, 'PICKUP_NOW', event_id=507, status='FAILED')
 
-    assert node.ball_sections_processed == 2
-    assert node.finish_enabled is True
-    assert node.mission_phase == 'AUTO'
+    assert node.ball_sections_processed == 1
+    assert node.finish_enabled is False
+    assert node.mission_phase == 'BALL_APPROACH'
 
 
-def test_second_shot_failure_keeps_automatic_flow_active():
-    """Keep AUTO when a failed shot processes the last section."""
+def test_shot_failure_does_not_complete_last_section():
+    """Keep the last section incomplete after a failed shot."""
     node = FakeDecisionNode()
     complete_motion(node, 'SHOT', event_id=508)
     complete_motion(node, 'SHOT', event_id=509, status='FAILED')
 
     assert node.shots_completed == 1
-    assert node.ball_sections_processed == 2
-    assert node.finish_enabled is True
-    assert node.mission_phase == 'AUTO'
+    assert node.ball_sections_processed == 1
+    assert node.finish_enabled is False
+    assert node.mission_phase == 'GOAL_APPROACH'
 
 
 def test_duplicate_terminal_status_does_not_increment_section_twice():
@@ -1319,7 +1367,7 @@ def test_duplicate_terminal_status_does_not_increment_section_twice():
         dynamics_command=0,
     )
 
-    assert node.ball_sections_processed == 1
+    assert node.ball_sections_processed == 0
 
 
 def test_section_progress_is_capped_at_requirement():

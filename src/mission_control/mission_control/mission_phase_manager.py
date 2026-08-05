@@ -225,12 +225,7 @@ class MissionPhaseManager:
                 self.current_phase = "GOAL_APPROACH"
                 return
 
-            self.ball_sections_processed = min(
-                self.ball_sections_processed + 1,
-                self.required_ball_sections,
-            )
-            self._update_finish_enabled()
-            self.current_phase = "AUTO"
+            self.current_phase = "BALL_APPROACH"
             return
 
         if action == "SHOT":
@@ -239,15 +234,21 @@ class MissionPhaseManager:
                     self.shots_completed + 1,
                     self.required_shots,
                 )
-            self.ball_sections_processed = min(
-                self.ball_sections_processed + 1,
-                self.required_ball_sections,
-            )
-            self._update_finish_enabled()
-            self.current_phase = "AUTO"
+                self.ball_sections_processed = min(
+                    self.ball_sections_processed + 1,
+                    self.required_ball_sections,
+                )
+                self._update_finish_enabled()
+                self.current_phase = "AUTO"
+                return
+
+            self.current_phase = "GOAL_APPROACH"
             return
 
         if action == "GO":
+            if not succeeded:
+                self.current_phase = "HURDLE_APPROACH"
+                return
             self.current_phase = (
                 "GOAL_APPROACH"
                 if self._active_special_origin_phase == "GOAL_APPROACH"
