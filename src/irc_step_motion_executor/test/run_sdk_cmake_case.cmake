@@ -26,7 +26,10 @@ if(EXPECT_SUCCESS)
         irc_step_motion_sdk_compile_probe
         robot_motion_player_backend
         production_robot_motion_runtime_factory
+        sdk_hardware_preflight_core
+        sdk_hardware_preflight
         test_production_robot_motion_runtime_factory
+        test_sdk_hardware_preflight_core
         test_motion_backend_factory
     RESULT_VARIABLE build_result
     OUTPUT_VARIABLE build_stdout
@@ -54,6 +57,16 @@ if(EXPECT_SUCCESS)
     message(FATAL_ERROR
       "SDK-enabled factory test failed:\n"
       "${factory_test_stdout}\n${factory_test_stderr}")
+  endif()
+  execute_process(
+    COMMAND "${TEST_BINARY_DIR}/test_sdk_hardware_preflight_core"
+    RESULT_VARIABLE preflight_core_test_result
+    OUTPUT_VARIABLE preflight_core_test_stdout
+    ERROR_VARIABLE preflight_core_test_stderr)
+  if(NOT preflight_core_test_result EQUAL 0)
+    message(FATAL_ERROR
+      "SDK hardware preflight core test failed:\n"
+      "${preflight_core_test_stdout}\n${preflight_core_test_stderr}")
   endif()
 else()
   if(configure_result EQUAL 0)

@@ -34,6 +34,21 @@ if(NOT build_result EQUAL 0)
     "Default SDK-disabled build failed:\n${build_stdout}\n${build_stderr}")
 endif()
 
+execute_process(
+  COMMAND "${CMAKE_COMMAND}" --build "${TEST_BINARY_DIR}"
+    --target help
+  RESULT_VARIABLE target_help_result
+  OUTPUT_VARIABLE available_targets
+  ERROR_VARIABLE target_help_stderr)
+if(NOT target_help_result EQUAL 0)
+  message(FATAL_ERROR
+    "Could not inspect SDK-disabled targets: ${target_help_stderr}")
+endif()
+if(available_targets MATCHES "sdk_hardware_preflight")
+  message(FATAL_ERROR
+    "sdk_hardware_preflight target must not exist when the SDK is disabled")
+endif()
+
 find_program(NM_EXECUTABLE nm REQUIRED)
 foreach(binary
     "${TEST_BINARY_DIR}/libcatalog_only_core.a"

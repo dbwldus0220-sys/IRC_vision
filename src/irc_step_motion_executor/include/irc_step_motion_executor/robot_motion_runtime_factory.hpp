@@ -41,6 +41,15 @@ struct RobotMotionPreflightResult
   }
 };
 
+class RobotMotionPreflightFactory
+{
+public:
+  virtual ~RobotMotionPreflightFactory() = default;
+
+  virtual RobotMotionPreflightResult preflight(
+    const RobotMotionRuntimeConfig & config) = 0;
+};
+
 class RobotMotionRuntimeFactory
 {
 public:
@@ -52,11 +61,12 @@ public:
 
 // The SDK-backed implementation is available only in SDK-enabled builds.
 class ProductionRobotMotionRuntimeFactory final
-  : public RobotMotionRuntimeFactory
+  : public RobotMotionRuntimeFactory,
+  public RobotMotionPreflightFactory
 {
 public:
   RobotMotionPreflightResult preflight(
-    const RobotMotionRuntimeConfig & config);
+    const RobotMotionRuntimeConfig & config) override;
 
   RobotMotionRuntimeFactoryResult create(
     const RobotMotionRuntimeConfig & config) override;

@@ -114,6 +114,28 @@ if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK)
   install(TARGETS production_robot_motion_runtime_factory
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib)
+
+  add_library(
+    sdk_hardware_preflight_core
+    src/sdk_hardware_preflight_core.cpp)
+  target_compile_features(sdk_hardware_preflight_core PUBLIC cxx_std_17)
+  target_include_directories(sdk_hardware_preflight_core PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:include>")
+  target_link_libraries(sdk_hardware_preflight_core PUBLIC
+    production_robot_motion_runtime_factory)
+
+  add_executable(
+    sdk_hardware_preflight
+    src/sdk_hardware_preflight.cpp)
+  target_compile_features(sdk_hardware_preflight PUBLIC cxx_std_17)
+  target_link_libraries(
+    sdk_hardware_preflight PRIVATE sdk_hardware_preflight_core)
+
+  install(TARGETS sdk_hardware_preflight_core sdk_hardware_preflight
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION lib/${PROJECT_NAME})
 endif()
 
 add_library(motion_backend_factory src/motion_backend_factory.cpp)
@@ -227,6 +249,13 @@ if(BUILD_TESTING)
         test_production_robot_motion_runtime_factory PRIVATE
         TEST_EXISTING_RUNTIME_FILE="${CMAKE_CURRENT_SOURCE_DIR}/config/motion_aliases.yaml")
     endif()
+    ament_add_gtest(
+      test_sdk_hardware_preflight_core
+      test/test_sdk_hardware_preflight_core.cpp)
+    if(TARGET test_sdk_hardware_preflight_core)
+      target_link_libraries(
+        test_sdk_hardware_preflight_core sdk_hardware_preflight_core)
+    endif()
   endif()
   ament_add_gtest(
     test_motion_backend_factory
@@ -326,6 +355,7 @@ ament_export_libraries(
   sdk_executor_driver)
 if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK)
   ament_export_libraries(
-    robot_motion_player_backend production_robot_motion_runtime_factory)
+    robot_motion_player_backend production_robot_motion_runtime_factory
+    sdk_hardware_preflight_core)
 endif()
 ament_package()
