@@ -93,7 +93,6 @@ def generate_launch_description() -> LaunchDescription:
                 "motion_json_path": "",
                 "robot_device_path": "",
                 "robot_baud_rate": 0,
-                "robot_motor_ids": [],
             }
         ],
     )

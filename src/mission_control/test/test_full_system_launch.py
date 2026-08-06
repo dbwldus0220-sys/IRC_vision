@@ -104,8 +104,9 @@ def test_cpp_executor_is_forced_to_safe_simulated_parameters(
         "motion_json_path": "",
         "robot_device_path": "",
         "robot_baud_rate": 0,
-        "robot_motor_ids": [],
     }
+    assert "robot_motor_ids" not in parameters
+    assert parameters.get("robot_motor_ids") not in ([], ())
 
 
 def test_obsolete_motion_launch_arguments_are_removed(monkeypatch, tmp_path):
