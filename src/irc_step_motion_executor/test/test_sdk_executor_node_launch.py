@@ -25,6 +25,7 @@ def generate_test_description():
             "settling_polls": 1,
             "force_start_failure": False,
             "force_backend_failure": False,
+            "heartbeat_period_ms": 100,
         }],
     )
     return (
@@ -58,10 +59,17 @@ class TestSdkExecutorTopics(unittest.TestCase):
             String, "/motion/executor/cancel", 10
         )
         cls.statuses = []
+        cls.heartbeats = []
         cls.subscription = cls.node.create_subscription(
             String,
             "/motion/executor/status",
             lambda message: cls.statuses.append(json.loads(message.data)),
+            10,
+        )
+        cls.heartbeat_subscription = cls.node.create_subscription(
+            String,
+            "/motion/executor/heartbeat",
+            lambda message: cls.heartbeats.append(json.loads(message.data)),
             10,
         )
         cls._wait_for_graph()
@@ -227,6 +235,24 @@ class TestSdkExecutorTopics(unittest.TestCase):
         self.assertEqual(timed_out["status"], "FAILED")
         self.assertEqual(timed_out["command_id"], 1008)
         self.assertEqual(timed_out["event_id"], 2008)
+
+    def test_simulated_executor_publishes_repeated_liveness_heartbeats(self):
+        first = self._wait_for_heartbeat_count(2)
+        self.assertEqual(first["backend_type"], "simulated")
+        self.assertIsInstance(first["active"], bool)
+        sequences = [heartbeat["sequence"] for heartbeat in self.heartbeats]
+        self.assertEqual(sequences, sorted(sequences))
+        self.assertEqual(len(sequences), len(set(sequences)))
+
+    def _wait_for_heartbeat_count(self, count, timeout=5.0):
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            rclpy.spin_once(self.node, timeout_sec=0.05)
+            if len(self.heartbeats) >= count:
+                return self.heartbeats[-1]
+        raise AssertionError(
+            f"heartbeat timeout; received={self.heartbeats!r}"
+        )
 
 
 @launch_testing.post_shutdown_test()

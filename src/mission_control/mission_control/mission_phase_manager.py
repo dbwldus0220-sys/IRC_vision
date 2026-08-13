@@ -66,6 +66,9 @@ class MissionPhaseManager:
         required_pickups: int = 2,
         required_shots: int = 2,
         required_ball_sections: int = 2,
+        max_pickup_failures: int = 3,
+        max_shot_failures: int = 3,
+        max_go_failures: int = 3,
         initial_phase: str = "AUTO",
     ) -> None:
         """Initialize bounded progress counters and one validated phase."""
@@ -73,6 +76,16 @@ class MissionPhaseManager:
         self.required_shots = self._nonnegative_count(required_shots)
         self.required_ball_sections = self._nonnegative_count(
             required_ball_sections
+        )
+
+        self.max_pickup_failures = self._nonnegative_count(
+        max_pickup_failures
+        )
+        self.max_shot_failures = self._nonnegative_count(
+            max_shot_failures
+        )
+        self.max_go_failures = self._nonnegative_count(
+            max_go_failures
         )
 
         normalized_phase = self._normalize_phase(initial_phase)
@@ -85,6 +98,10 @@ class MissionPhaseManager:
         self.ball_sections_processed = 0
         self.finish_enabled = self.required_ball_sections == 0
         self.mission_complete = False
+
+        self.pickup_failure_count = 0
+        self.shot_failure_count = 0
+        self.go_failure_count = 0
 
         self.active_special_action: str | None = None
         self.active_special_command_id: int | None = None
@@ -128,6 +145,25 @@ class MissionPhaseManager:
             return False
         self.current_phase = normalized
         return True
+
+    def special_action_exhausted(self, action: str) -> bool:
+        """Return whether one mission-level special action exhausted failures."""
+        normalized = self._normalize_action(action)
+
+        if normalized == "PICKUP_NOW":
+            return (
+                self.pickup_failure_count
+                >= self.max_pickup_failures
+            )
+
+        if normalized == "SHOT":
+            return self.shot_failure_count >= self.max_shot_failures
+
+        if normalized == "GO":
+            return self.go_failure_count >= self.max_go_failures
+
+        return False
+
 
     def start_special_action(self, action: str, command_id: int) -> bool:
         """Register one special command before its RUNNING status arrives."""
@@ -218,6 +254,7 @@ class MissionPhaseManager:
 
         if action == "PICKUP_NOW":
             if succeeded:
+                self.pickup_failure_count = 0
                 self.pickups_completed = min(
                     self.pickups_completed + 1,
                     self.required_pickups,
@@ -225,11 +262,15 @@ class MissionPhaseManager:
                 self.current_phase = "GOAL_APPROACH"
                 return
 
+            if status in {"FAILED", "TIMEOUT"}:
+                self.pickup_failure_count += 1
+
             self.current_phase = "BALL_APPROACH"
             return
 
         if action == "SHOT":
             if succeeded:
+                self.shot_failure_count = 0
                 self.shots_completed = min(
                     self.shots_completed + 1,
                     self.required_shots,
@@ -251,13 +292,20 @@ class MissionPhaseManager:
                 )
                 return
 
+            if status in {"FAILED", "TIMEOUT"}:
+                self.shot_failure_count += 1
+
             self.current_phase = "GOAL_APPROACH"
             return
 
         if action == "GO":
             if not succeeded:
+                if status in {"FAILED", "TIMEOUT"}:
+                    self.go_failure_count += 1
                 self.current_phase = "HURDLE_APPROACH"
                 return
+
+            self.go_failure_count = 0
             origin_phase = self._active_special_origin_phase
             self.current_phase = (
                 origin_phase

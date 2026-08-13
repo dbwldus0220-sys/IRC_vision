@@ -8,6 +8,10 @@ from mission_control.motion_decision_node import MotionDecisionNode
 from mission_control.motion_decision_planner import MotionDecision
 from mission_control.motion_command_gate import GeneralMotionCommandGate
 from mission_control.mission_phase_manager import MissionPhaseManager
+from mission_control.executor_heartbeat_watchdog import (
+    ExecutorHeartbeatWatchdog,
+)
+from mission_control.safety_interlock import SafetyInterlock
 
 import pytest
 
@@ -95,6 +99,12 @@ class FakeDecisionNode:
         self.active_special_event_id = None
         self.active_special_dynamics_command = None
         self.general_motion_gate = GeneralMotionCommandGate()
+        self.safety_interlock = SafetyInterlock()
+        self.executor_heartbeat_watchdog = ExecutorHeartbeatWatchdog(
+            started_at=0.0,
+            startup_grace_sec=5.0,
+            timeout_sec=2.0,
+        )
         self.planner = FakePlanner()
 
         self.logger = FakeLogger()
@@ -143,6 +153,14 @@ class FakeDecisionNode:
             self,
             finish_info,
         )
+
+    def _latch_critical_executor_fault(self, **kwargs):
+        """Match the production node's safety-latch callback interface."""
+        return MotionDecisionNode._latch_critical_executor_fault(self, **kwargs)
+
+    def _check_executor_heartbeat(self, now=None):
+        """Match the production node's executor watchdog interface."""
+        return MotionDecisionNode._check_executor_heartbeat(self, now)
 
 
 def status_message(
@@ -381,6 +399,10 @@ class ReadinessPublisher:
 class ReadinessPublishNode(FakeDecisionNode):
     """Run the real publication path with one deterministic decision."""
 
+    SPECIAL_FAILURE_REASONS = (
+        MotionDecisionNode.SPECIAL_FAILURE_REASONS
+    )
+
     def __init__(self, decision, subscription_count=1):
         """Initialize publication state without creating a ROS graph."""
         super().__init__(decision.phase)
@@ -415,12 +437,257 @@ class ReadinessPublishNode(FakeDecisionNode):
     def _suppress_duplicate_terminal_action(selected):
         return selected
 
+    def _suppress_exhausted_special_action(self, decision):
+        return MotionDecisionNode._suppress_exhausted_special_action(
+            self,
+            decision,
+        )
+
+    def _latch_critical_executor_fault(self, **kwargs):
+        return MotionDecisionNode._latch_critical_executor_fault(self, **kwargs)
+
     @staticmethod
     def _mission_progress():
         return {}
 
     def _command_publisher_has_subscriber(self):
         return MotionDecisionNode._command_publisher_has_subscriber(self)
+
+
+def general_decision(action='STRAIGHT'):
+    """Create one executable general decision for publication tests."""
+    return MotionDecision(
+        phase='AUTO',
+        source='line',
+        action=action,
+        valid=True,
+        reason='line_ready',
+        sdk_motion_requested=False,
+        requires_ack=False,
+        source_command={},
+    )
+
+
+def test_correlated_critical_general_failure_latches_and_blocks_other_action():
+    node = ReadinessPublishNode(general_decision('STRAIGHT'))
+    MotionDecisionNode._publish_decision(node)
+    send_status(
+        node,
+        status='RUNNING',
+        action='STRAIGHT',
+        command_id=1,
+        event_id=None,
+        dynamics_command=None,
+    )
+    send_status(
+        node,
+        status='FAILED',
+        action='STRAIGHT',
+        command_id=1,
+        event_id=None,
+        dynamics_command=None,
+        error_code='SDK_COMMUNICATION_ERROR',
+        message='communication lost',
+    )
+
+    assert node.safety_interlock.latched
+    assert not node.general_motion_gate.locked
+    node.decision = general_decision('LEFT')
+    for _ in range(3):
+        node.general_motion_gate.on_new_vision_input()
+        MotionDecisionNode._publish_decision(node)
+    assert len(node.publisher.messages) == 1
+
+
+def test_mismatched_critical_general_status_does_not_latch():
+    node = FakeDecisionNode()
+    node.general_motion_gate.on_new_vision_input()
+    node.general_motion_gate.on_command_published('STRAIGHT', command_id=10)
+    send_status(
+        node,
+        status='FAILED',
+        action='STRAIGHT',
+        command_id=9,
+        event_id=None,
+        dynamics_command=None,
+        error_code='SDK_COMMUNICATION_ERROR',
+    )
+    assert not node.safety_interlock.latched
+    assert node.general_motion_gate.locked
+
+
+def test_command_local_rejection_does_not_latch_safety():
+    node = FakeDecisionNode()
+    node.general_motion_gate.on_new_vision_input()
+    node.general_motion_gate.on_command_published('STRAIGHT', command_id=10)
+    send_status(
+        node,
+        status='REJECTED',
+        action='STRAIGHT',
+        command_id=10,
+        event_id=None,
+        dynamics_command=None,
+        error_code='SDK_MOTION_NOT_FOUND',
+    )
+    assert not node.safety_interlock.latched
+
+
+def test_sdk_hardware_not_ready_latches_instead_of_retrying():
+    node = FakeDecisionNode()
+    node.general_motion_gate.on_new_vision_input()
+    node.general_motion_gate.on_command_published('STRAIGHT', command_id=10)
+    send_status(
+        node,
+        status='REJECTED',
+        action='STRAIGHT',
+        command_id=10,
+        event_id=None,
+        dynamics_command=None,
+        error_code='SDK_HARDWARE_NOT_READY',
+    )
+    assert node.safety_interlock.latched
+    assert node.general_motion_gate.rejected_action == 'STRAIGHT'
+    assert node.general_motion_gate.transient_rejection_count == 0
+
+
+def test_critical_special_failure_keeps_terminal_policy_and_blocks_motion():
+    node = ReadinessPublishNode(
+        terminal_decision('ball', 'PICKUP_NOW', 'BALL_APPROACH')
+    )
+    MotionDecisionNode._publish_decision(node)
+    send_status(
+        node,
+        status='RUNNING',
+        action='PICKUP_NOW',
+        command_id=1,
+        event_id=1,
+        dynamics_command=9,
+    )
+    send_status(
+        node,
+        status='FAILED',
+        action='PICKUP_NOW',
+        command_id=1,
+        event_id=1,
+        dynamics_command=9,
+        error_code='SDK_FRAME_SEND_FAILED',
+    )
+
+    assert node.safety_interlock.latched
+    assert node.mission_phase == 'BALL_APPROACH'
+    assert node.phase_manager.pickup_failure_count == 1
+    assert node.active_special_command_id is None
+
+    node.decision = general_decision('APPROACH')
+    node.general_motion_gate.on_new_vision_input()
+    MotionDecisionNode._publish_decision(node)
+    assert len(node.publisher.messages) == 1
+
+
+def test_success_and_fresh_vision_do_not_clear_critical_latch():
+    node = ReadinessPublishNode(general_decision())
+    node.safety_interlock.observe_executor_status(
+        error_code='BACKEND_EXCEPTION',
+        message='exception',
+        action='STRAIGHT',
+        command_id=1,
+        event_id=None,
+    )
+    for _ in range(3):
+        node.general_motion_gate.on_new_vision_input()
+        send_status(
+            node,
+            status='SUCCEEDED',
+            action='STRAIGHT',
+            command_id=1,
+            event_id=None,
+            dynamics_command=None,
+        )
+        MotionDecisionNode._publish_decision(node)
+    assert node.safety_interlock.latched
+    assert node.publisher.messages == []
+
+
+def test_never_seen_executor_timeout_latches_after_grace_only():
+    node = FakeDecisionNode()
+    node._check_executor_heartbeat(now=5.0)
+    assert not node.safety_interlock.latched
+
+    node._check_executor_heartbeat(now=5.001)
+    snapshot = node.safety_interlock.snapshot
+    assert snapshot.latched
+    assert snapshot.error_code == 'EXECUTOR_HEARTBEAT_TIMEOUT'
+    assert snapshot.source == 'executor_watchdog'
+
+
+def test_heartbeat_loss_preserves_active_general_correlation_and_blocks():
+    node = ReadinessPublishNode(general_decision('STRAIGHT'))
+    MotionDecisionNode._publish_decision(node)
+    node.executor_heartbeat_watchdog.observe(
+        sequence=1,
+        observed_at=1.0,
+    )
+    node._check_executor_heartbeat(now=3.001)
+
+    snapshot = node.safety_interlock.snapshot
+    assert snapshot.error_code == 'EXECUTOR_HEARTBEAT_TIMEOUT'
+    assert snapshot.action == 'STRAIGHT'
+    assert snapshot.command_id == 1
+    assert snapshot.event_id is None
+
+    node.decision = general_decision('LEFT')
+    node.general_motion_gate.on_new_vision_input()
+    MotionDecisionNode._publish_decision(node)
+    assert len(node.publisher.messages) == 1
+
+
+def test_heartbeat_loss_preserves_active_special_correlation_and_blocks():
+    node = ReadinessPublishNode(
+        terminal_decision('ball', 'PICKUP_NOW', 'BALL_APPROACH')
+    )
+    MotionDecisionNode._publish_decision(node)
+    node.executor_heartbeat_watchdog.observe(
+        sequence=1,
+        observed_at=1.0,
+    )
+    node._check_executor_heartbeat(now=3.001)
+
+    snapshot = node.safety_interlock.snapshot
+    assert snapshot.action == 'PICKUP_NOW'
+    assert snapshot.command_id == 1
+    assert snapshot.event_id == 1
+    assert node.active_special_command_id == 1
+
+    node.decision = general_decision('APPROACH')
+    MotionDecisionNode._publish_decision(node)
+    assert len(node.publisher.messages) == 1
+
+
+def test_returning_heartbeat_does_not_clear_timeout_latch():
+    node = FakeDecisionNode()
+    node._check_executor_heartbeat(now=6.0)
+    original = node.safety_interlock.snapshot
+    node.executor_heartbeat_watchdog.observe(
+        sequence=0,
+        observed_at=7.0,
+    )
+    node._check_executor_heartbeat(now=7.1)
+    assert node.safety_interlock.snapshot == original
+
+
+def test_heartbeat_timeout_does_not_overwrite_first_critical_fault():
+    node = FakeDecisionNode()
+    node.safety_interlock.observe_executor_status(
+        error_code='SDK_COMMUNICATION_ERROR',
+        message='first fault',
+        action='STRAIGHT',
+        command_id=4,
+        event_id=None,
+    )
+    node._check_executor_heartbeat(now=6.0)
+    snapshot = node.safety_interlock.snapshot
+    assert snapshot.error_code == 'SDK_COMMUNICATION_ERROR'
+    assert snapshot.message == 'first fault'
 
 
 def test_special_command_metadata_is_stored_when_first_published():
@@ -538,6 +805,53 @@ def test_running_general_motion_suppresses_new_special_command():
 
     assert len(node.publisher.messages) == 1
     assert node.active_special_command_id is None
+
+
+def test_completed_general_motion_requires_fresh_vision_before_special():
+    general = MotionDecision(
+        phase='AUTO',
+        source='line',
+        action='STRAIGHT',
+        valid=True,
+        reason='line_ready',
+        sdk_motion_requested=False,
+        requires_ack=False,
+        source_command={},
+    )
+    node = ReadinessPublishNode(general)
+
+    MotionDecisionNode._publish_decision(node)
+
+    for status in ('RUNNING', 'SUCCEEDED'):
+        send_status(
+            node,
+            status=status,
+            action='STRAIGHT',
+            command_id=1,
+            event_id=None,
+            dynamics_command=None,
+        )
+
+    node.decision = terminal_decision(
+        'ball',
+        'PICKUP_NOW',
+        'BALL_APPROACH',
+    )
+
+    # No new Vision after STRAIGHT completed.
+    MotionDecisionNode._publish_decision(node)
+
+    assert len(node.publisher.messages) == 1
+    assert node.active_special_command_id is None
+
+    # New Vision arrives. Re-evaluation may now publish the special action.
+    node.general_motion_gate.on_new_vision_input()
+    MotionDecisionNode._publish_decision(node)
+
+    assert len(node.publisher.messages) == 2
+    assert node.active_special_action == 'PICKUP_NOW'
+    assert node.active_special_command_id == 2
+
 
 
 def test_special_unsupported_status_releases_lock_without_substitution():

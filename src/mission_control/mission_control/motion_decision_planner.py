@@ -64,6 +64,7 @@ class MotionDecisionConfig:
     goal_recovery_command_sec: float = 0.40
     goal_reacquire_center_deg: float = 5.0
     goal_reacquire_center_norm: float = 0.10
+    hurdle_verification_timeout_sec: float = 2.0
 
 
 class MotionDecisionPlanner:
@@ -115,6 +116,8 @@ class MotionDecisionPlanner:
         self.last_goal_bearing_deg: float | None = None
         self.last_goal_offset_x_norm: float | None = None
         self.last_goal_turn_direction = "RIGHT"
+        self.hurdle_verification_elapsed_sec = 0.0
+        self.hurdle_verification_active = False
 
     @staticmethod
     def source_for_phase(phase: str) -> str | None:
@@ -189,7 +192,8 @@ class MotionDecisionPlanner:
             )
 
         hurdle_wait_reason = self._hurdle_safety_wait_reason(
-            observations.get("hurdle")
+            observations.get("hurdle"),
+            dt_sec,
         )
         if hurdle_wait_reason is not None:
             self._reset_previous_source()
@@ -390,24 +394,54 @@ class MotionDecisionPlanner:
                     return source
         return None
 
-    @staticmethod
     def _hurdle_safety_wait_reason(
-        info: dict[str, Any] | None,
+    self,
+    info: dict[str, Any] | None,
+    dt_sec: float,
     ) -> str | None:
         """Hold motion while a detected hurdle is not safe to classify."""
         if info is None:
+            self._reset_hurdle_verification()
             return None
+
         hurdle_seen = (
             info.get("detected") is True
             or info.get("raw_detected") is True
         )
         if not hurdle_seen:
+            self._reset_hurdle_verification()
             return None
+
         if info.get("confirmation_confirmed") is not True:
-            return "hurdle_confirmation_pending"
-        if info.get("depth_valid") is not True:
-            return "hurdle_depth_invalid_wait"
-        return None
+            pending_reason = "hurdle_confirmation_pending"
+        elif info.get("depth_valid") is not True:
+            pending_reason = "hurdle_depth_invalid_wait"
+        else:
+            self._reset_hurdle_verification()
+            return None
+
+        if not self.hurdle_verification_active:
+            # The first unsafe observation starts verification. The incoming dt_sec
+            # belongs to the interval before this hurdle was first observed, so it
+            # must not count toward the hurdle verification timeout.
+            self.hurdle_verification_active = True
+            self.hurdle_verification_elapsed_sec = 0.0
+            return pending_reason
+
+        self.hurdle_verification_elapsed_sec += max(0.0, dt_sec)
+
+        if (
+            self.hurdle_verification_elapsed_sec
+            >= self.config.hurdle_verification_timeout_sec
+        ):
+            return "hurdle_verification_timeout"
+
+        return pending_reason
+
+    def _reset_hurdle_verification(self) -> None:
+        """Clear pending hurdle-verification timing state."""
+        self.hurdle_verification_elapsed_sec = 0.0
+        self.hurdle_verification_active = False
 
     def _plan_source(
         self,

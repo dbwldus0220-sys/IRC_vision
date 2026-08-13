@@ -172,6 +172,17 @@ add_executable(sdk_motion_executor src/sdk_executor_node.cpp)
 target_compile_features(sdk_motion_executor PUBLIC cxx_std_17)
 target_link_libraries(
   sdk_motion_executor sdk_executor_driver motion_backend_factory)
+if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK)
+  target_compile_definitions(
+    sdk_motion_executor
+    PRIVATE IRC_STEP_ROBOT_MOTION_PLAYER_BACKEND_BUILT=1)
+  target_link_libraries(
+    sdk_motion_executor production_robot_motion_runtime_factory)
+else()
+  target_compile_definitions(
+    sdk_motion_executor
+    PRIVATE IRC_STEP_ROBOT_MOTION_PLAYER_BACKEND_BUILT=0)
+endif()
 ament_target_dependencies(
   sdk_motion_executor ament_index_cpp rclcpp std_msgs)
 

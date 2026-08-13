@@ -43,6 +43,29 @@ def test_success_requires_new_vision_before_republishing():
     assert gate.can_publish("LEFT")
 
 
+def test_terminal_general_motion_requires_fresh_vision_globally():
+    gate = gate_with_vision()
+    gate.on_command_published("STRAIGHT", command_id=40)
+
+    assert gate.on_motion_status(
+        "STRAIGHT",
+        "RUNNING",
+        command_id=40,
+    ).matched
+
+    assert gate.on_motion_status(
+        "STRAIGHT",
+        "SUCCEEDED",
+        command_id=40,
+    ).released
+
+    assert not gate.has_required_fresh_vision()
+
+    gate.on_new_vision_input()
+
+    assert gate.has_required_fresh_vision()
+
+
 def test_unknown_rejection_does_not_retry_same_action_forever():
     gate = gate_with_vision()
     gate.on_command_published("LEFT")
@@ -53,13 +76,14 @@ def test_unknown_rejection_does_not_retry_same_action_forever():
     assert gate.can_publish("RIGHT")
 
 
-def test_transient_rejection_retries_only_after_new_vision():
+@pytest.mark.parametrize("error_code", ["REJECTED_BUSY", "BUSY", "SDK_BUSY"])
+def test_transient_rejection_retries_only_after_new_vision(error_code):
     gate = gate_with_vision()
     gate.on_command_published("STRAIGHT")
     assert gate.on_motion_status(
         "STRAIGHT",
         "REJECTED",
-        error_code="REJECTED_BUSY",
+        error_code=error_code,
     ).released
     assert not gate.can_publish("STRAIGHT")
     gate.on_new_vision_input()
@@ -82,7 +106,8 @@ def test_permanent_rejection_rearms_only_after_action_change():
     assert gate.can_publish("STRAIGHT")
 
 
-def test_transient_retries_are_bounded_and_rearm_on_action_change():
+@pytest.mark.parametrize("error_code", ["BUSY", "SDK_BUSY"])
+def test_transient_retries_are_bounded_and_rearm_on_action_change(error_code):
     gate = GeneralMotionCommandGate(max_transient_retries=2)
     gate.on_new_vision_input()
 
@@ -92,7 +117,7 @@ def test_transient_retries_are_bounded_and_rearm_on_action_change():
         assert gate.on_motion_status(
             "STRAIGHT",
             "REJECTED",
-            error_code="HARDWARE_NOT_READY",
+            error_code=error_code,
         ).released
         gate.on_new_vision_input()
 

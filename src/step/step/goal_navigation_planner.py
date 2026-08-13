@@ -113,9 +113,6 @@ class GoalNavigationPlanner:
         depth = _number(goal_info, "depth_m")
         if not bool(goal_info.get("depth_valid", False)) or depth is None:
             return self.wait("missing_valid_goal_depth")
-        if depth > self.config.control_start_depth_m:
-            return self.wait("goal_outside_control_range")
-
         distance = _number(goal_info, "distance_m")
         bearing = _number(goal_info, "bearing_deg")
         offset = _number(goal_info, "offset_x_norm")
@@ -137,12 +134,15 @@ class GoalNavigationPlanner:
             )
         )
 
-        if score_now:
-            action = "SHOT"
-            reason = "goal_centered_at_scoring_depth"
-        elif not centered:
+        if not centered:
             action = "ALIGN_RIGHT" if offset > 0.0 else "ALIGN_LEFT"
             reason = "align_goal_horizontally"
+        elif depth > self.config.control_start_depth_m:
+            action = "APPROACH_GOAL"
+            reason = "goal_aligned_coarse_approach"
+        elif score_now:
+            action = "SHOT"
+            reason = "goal_centered_at_scoring_depth"
         elif ready_geometry:
             action = "WAIT_SCORE_CONFIRMATION"
             reason = "waiting_for_stable_score_condition"

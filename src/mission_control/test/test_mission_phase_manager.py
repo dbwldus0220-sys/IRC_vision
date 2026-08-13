@@ -106,6 +106,56 @@ def test_failed_pickup_cannot_enable_finish():
     assert manager.current_phase == "BALL_APPROACH"
 
 
+def test_pickup_failed_or_timeout_counts_toward_failure_limit():
+    manager = MissionPhaseManager(
+        initial_phase="BALL_APPROACH",
+        max_pickup_failures=2,
+    )
+
+    complete(manager, "PICKUP_NOW", 1, "FAILED")
+
+    assert manager.pickup_failure_count == 1
+    assert not manager.special_action_exhausted("PICKUP_NOW")
+
+    complete(manager, "PICKUP_NOW", 2, "TIMEOUT")
+
+    assert manager.pickup_failure_count == 2
+    assert manager.special_action_exhausted("PICKUP_NOW")
+
+
+def test_success_resets_special_failure_count():
+    manager = MissionPhaseManager(
+        initial_phase="BALL_APPROACH",
+        max_pickup_failures=2,
+    )
+
+    complete(manager, "PICKUP_NOW", 1, "FAILED")
+    assert manager.pickup_failure_count == 1
+
+    complete(manager, "PICKUP_NOW", 2, "SUCCEEDED")
+
+    assert manager.pickup_failure_count == 0
+    assert not manager.special_action_exhausted("PICKUP_NOW")
+
+
+@pytest.mark.parametrize(
+    "status",
+    ["REJECTED", "UNSUPPORTED", "CANCELLED"],
+)
+def test_non_execution_special_terminal_does_not_count_as_mission_failure(
+    status,
+):
+    manager = MissionPhaseManager(
+        initial_phase="BALL_APPROACH",
+        max_pickup_failures=1,
+    )
+
+    complete(manager, "PICKUP_NOW", 1, status)
+
+    assert manager.pickup_failure_count == 0
+    assert not manager.special_action_exhausted("PICKUP_NOW")
+
+
 @pytest.mark.parametrize(
     ("status", "expected_shots"),
     [

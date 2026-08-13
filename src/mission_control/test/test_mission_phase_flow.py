@@ -24,6 +24,7 @@ from mission_control.motion_executor_node import (
     ExecutionPublicationState,
     parse_motion_request,
 )
+from mission_control.safety_interlock import SafetyInterlock
 
 
 class CapturePublisher:
@@ -59,6 +60,9 @@ class MissionFlowHarness:
     SOURCES = MotionDecisionNode.SOURCES
     SPECIAL_ACTIONS = MotionDecisionNode.SPECIAL_ACTIONS
     SPECIAL_ACTION_SOURCES = MotionDecisionNode.SPECIAL_ACTION_SOURCES
+    SPECIAL_FAILURE_REASONS = (
+        MotionDecisionNode.SPECIAL_FAILURE_REASONS
+    )
 
     mission_phase = MotionDecisionNode.mission_phase
     required_pickups = MotionDecisionNode.required_pickups
@@ -77,15 +81,22 @@ class MissionFlowHarness:
         self,
         phase="AUTO",
         required_ball_sections=2,
+        max_pickup_failures=3,
+        max_shot_failures=3,
+        max_go_failures=3,
     ):
         self.phase_manager = MissionPhaseManager(
             initial_phase=phase,
             required_pickups=2,
             required_shots=2,
             required_ball_sections=required_ball_sections,
+            max_pickup_failures=max_pickup_failures,
+            max_shot_failures=max_shot_failures,
+            max_go_failures=max_go_failures,
         )
         self.planner = MotionDecisionPlanner()
         self.general_motion_gate = GeneralMotionCommandGate()
+        self.safety_interlock = SafetyInterlock()
         self.publisher = CapturePublisher()
         self._command_publisher_ready = None
         self.logger = FakeLogger()
@@ -128,8 +139,16 @@ class MissionFlowHarness:
             self, decision
         )
 
+    def _suppress_exhausted_special_action(self, decision):
+        return MotionDecisionNode._suppress_exhausted_special_action(
+            self, decision
+        )
+
     def _mission_progress(self):
         return MotionDecisionNode._mission_progress(self)
+
+    def _latch_critical_executor_fault(self, **kwargs):
+        return MotionDecisionNode._latch_critical_executor_fault(self, **kwargs)
 
     def _command_publisher_has_subscriber(self):
         return MotionDecisionNode._command_publisher_has_subscriber(self)
@@ -496,6 +515,98 @@ def test_special_failure_or_timeout_returns_to_safe_approach_phase(
     assert harness.mission_phase == expected_phase
     assert harness.ball_sections_processed == 0
     assert harness.active_special_command_id is None
+
+
+@pytest.mark.parametrize(
+    (
+        "action",
+        "phase",
+        "source",
+        "observation",
+        "reason",
+    ),
+    [
+        (
+            "PICKUP_NOW",
+            "BALL_APPROACH",
+            "ball",
+            pickup_ready_ball(),
+            "pickup_failures_exhausted",
+        ),
+        (
+            "SHOT",
+            "GOAL_APPROACH",
+            "goal",
+            score_ready_goal(),
+            "shot_failures_exhausted",
+        ),
+        (
+            "GO",
+            "HURDLE_APPROACH",
+            "hurdle",
+            go_ready_hurdle(),
+            "go_failures_exhausted",
+        ),
+    ],
+)
+def test_special_failure_limit_blocks_reexecution_after_target_reappears(
+    action,
+    phase,
+    source,
+    observation,
+    reason,
+):
+    harness = MissionFlowHarness(
+        phase=phase,
+        max_pickup_failures=1,
+        max_shot_failures=1,
+        max_go_failures=1,
+    )
+
+    first = publish_special(
+        harness,
+        source,
+        observation,
+        action,
+    )
+
+    complete_active(
+        harness,
+        action,
+        first["command_id"],
+        "FAILED",
+    )
+
+    assert harness.phase_manager.special_action_exhausted(action)
+
+    if source == "ball":
+        harness.planner._clear_ball_tracking()
+    elif source == "goal":
+        harness.planner._clear_goal_tracking()
+
+    harness.publish_vision(
+        **{source: None}
+    )
+
+    assert harness.terminal_action_armed[source] is True
+
+    reappeared = harness.publish_vision(
+        **{source: observation}
+    )
+
+    decision = reappeared[-1]
+
+    assert decision["action"] == "WAIT"
+    assert decision["valid"] is False
+    assert decision["reason"] == reason
+    assert harness.active_special_command_id is None
+
+    special_commands = [
+        item
+        for item in harness.publisher.messages
+        if item["action"] == action
+    ]
+    assert len(special_commands) == 1
 
 
 def test_full_flow_line_loss_recovery_and_reacquisition():
@@ -947,6 +1058,79 @@ def test_last_shot_enables_finish_flag_and_continues_line_driving():
         command["action"] != "CROSS_FINISH"
         for command in line_commands
     )
+
+
+def test_final_line_track_ignores_new_ball_after_all_sections_complete():
+    harness = MissionFlowHarness()
+
+    harness.phase_manager.ball_sections_processed = (
+        harness.phase_manager.required_ball_sections
+    )
+    harness.phase_manager.finish_enabled = True
+    harness.phase_manager.set_phase("LINE_TRACK")
+
+    published = harness.publish_vision(
+        line=line_info(),
+        ball=pickup_ready_ball(),
+        goal=None,
+        hurdle=None,
+    )
+
+    decision = published[-1]
+
+    assert decision["phase"] == "LINE_TRACK"
+    assert decision["source"] == "line"
+    assert decision["action"] == "STRAIGHT"
+
+
+def test_final_line_track_still_prioritizes_confirmed_hurdle():
+    harness = MissionFlowHarness()
+
+    harness.phase_manager.ball_sections_processed = (
+        harness.phase_manager.required_ball_sections
+    )
+    harness.phase_manager.finish_enabled = True
+    harness.phase_manager.set_phase("LINE_TRACK")
+
+    published = harness.publish_vision(
+        line=line_info(),
+        ball=pickup_ready_ball(),
+        goal=None,
+        hurdle=approaching_hurdle(),
+    )
+
+    decision = published[-1]
+
+    assert decision["phase"] == "LINE_TRACK"
+    assert decision["source"] == "hurdle"
+    assert decision["action"] == "APPROACH_HURDLE"
+
+
+
+def test_final_line_track_still_holds_for_unconfirmed_hurdle():
+    harness = MissionFlowHarness()
+
+    harness.phase_manager.ball_sections_processed = (
+        harness.phase_manager.required_ball_sections
+    )
+    harness.phase_manager.finish_enabled = True
+    harness.phase_manager.set_phase("LINE_TRACK")
+
+    hurdle = approaching_hurdle()
+    hurdle["confirmation_confirmed"] = False
+
+    published = harness.publish_vision(
+        line=line_info(),
+        ball=pickup_ready_ball(),
+        goal=None,
+        hurdle=hurdle,
+    )
+
+    decision = published[-1]
+
+    assert decision["source"] == "hurdle"
+    assert decision["action"] == "WAIT"
+
 
 
 def test_go_round_trip_preserves_action_and_origin_phase():

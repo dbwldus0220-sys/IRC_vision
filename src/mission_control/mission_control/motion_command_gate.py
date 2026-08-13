@@ -40,7 +40,7 @@ ACTION_ALIASES = {
     **{action: action for action in GENERAL_ACTIONS},
 }
 TRANSIENT_REJECTION_CODES = frozenset(
-    {"REJECTED_BUSY", "HARDWARE_NOT_READY"}
+    {"REJECTED_BUSY", "BUSY", "SDK_BUSY"}
 )
 PERMANENT_REJECTION_CODES = frozenset(
     {
@@ -93,12 +93,17 @@ class GeneralMotionCommandGate:
         """Record one valid Vision JSON message."""
         self.vision_generation += 1
 
+    def has_required_fresh_vision(self) -> bool:
+        """Return whether the required post-terminal Vision input has arrived."""
+        return self.vision_generation >= self.required_vision_generation
+
+
     def can_publish(self, action: Any) -> bool:
         """Return whether a general action may be published now."""
         normalized = normalize_general_action(action)
         if normalized is None or self.locked:
             return False
-        if self.vision_generation < self.required_vision_generation:
+        if not self.has_required_fresh_vision():
             return False
         if self.rejected_action == normalized:
             return False

@@ -28,6 +28,7 @@ if(EXPECT_SUCCESS)
         production_robot_motion_runtime_factory
         sdk_hardware_preflight_core
         sdk_hardware_preflight
+        sdk_motion_executor
         test_production_robot_motion_runtime_factory
         test_sdk_hardware_preflight_core
         test_motion_backend_factory

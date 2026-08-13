@@ -12,12 +12,14 @@ from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 from std_msgs.msg import String
 
+from .executor_heartbeat_watchdog import ExecutorHeartbeatWatchdog
 from .mission_phase_manager import MissionPhaseManager
 from .motion_command_gate import GeneralMotionCommandGate
 from .motion_command_gate import normalize_general_action
 from .motion_decision_planner import MotionDecision
 from .motion_decision_planner import MotionDecisionConfig
 from .motion_decision_planner import MotionDecisionPlanner
+from .safety_interlock import SafetyInterlock
 
 
 class MotionDecisionNode(Node):
@@ -39,6 +41,16 @@ class MotionDecisionNode(Node):
         "CROSS_FINISH": "finish",
     }
 
+    SPECIAL_FAILURE_REASONS = {
+        "PICKUP_NOW": "pickup_failures_exhausted",
+        "SHOT": "shot_failures_exhausted",
+        "GO": "go_failures_exhausted",
+    }
+
+    DEFAULT_EXECUTOR_HEARTBEAT_TIMEOUT_SEC = 2.0
+    DEFAULT_EXECUTOR_HEARTBEAT_STARTUP_GRACE_SEC = 5.0
+    EXECUTOR_WATCHDOG_PERIOD_SEC = 0.1
+
     def __init__(self) -> None:
         """Initialize mission decision state, topics, and timers."""
         super().__init__("motion_decision_node")
@@ -57,6 +69,18 @@ class MotionDecisionNode(Node):
         self.declare_parameter(
             "motion_status_topic",
             "/motion/status",
+        )
+        self.declare_parameter(
+            "executor_heartbeat_topic",
+            "/motion/executor/heartbeat",
+        )
+        self.declare_parameter(
+            "executor_heartbeat_timeout_sec",
+            self.DEFAULT_EXECUTOR_HEARTBEAT_TIMEOUT_SEC,
+        )
+        self.declare_parameter(
+            "executor_heartbeat_startup_grace_sec",
+            self.DEFAULT_EXECUTOR_HEARTBEAT_STARTUP_GRACE_SEC,
         )
 
         self.declare_parameter("initial_mission_phase", "AUTO")
@@ -236,6 +260,21 @@ class MotionDecisionNode(Node):
                 ),
             )
         )
+        self.safety_interlock = SafetyInterlock()
+        heartbeat_started_at = time.monotonic()
+        self.executor_heartbeat_watchdog = ExecutorHeartbeatWatchdog(
+            started_at=heartbeat_started_at,
+            startup_grace_sec=max(
+                0.0,
+                self._float_parameter(
+                    "executor_heartbeat_startup_grace_sec"
+                ),
+            ),
+            timeout_sec=max(
+                0.0,
+                self._float_parameter("executor_heartbeat_timeout_sec"),
+            ),
+        )
 
         for source in self.SOURCES:
             topic = str(
@@ -281,6 +320,16 @@ class MotionDecisionNode(Node):
             10,
         )
 
+        executor_heartbeat_topic = str(
+            self.get_parameter("executor_heartbeat_topic").value
+        )
+        self.create_subscription(
+            String,
+            executor_heartbeat_topic,
+            self._executor_heartbeat_callback,
+            10,
+        )
+
         command_topic = str(
             self.get_parameter(
                 "command_topic"
@@ -307,6 +356,10 @@ class MotionDecisionNode(Node):
             1.0 / publish_rate,
             self._publish_decision,
         )
+        self.executor_watchdog_timer = self.create_timer(
+            self.EXECUTOR_WATCHDOG_PERIOD_SEC,
+            self._check_executor_heartbeat,
+        )
 
         self.get_logger().info(
             f"Mission phase: {self.mission_phase}"
@@ -317,9 +370,71 @@ class MotionDecisionNode(Node):
         self.get_logger().info(
             f"Motion status: {motion_status_topic}"
         )
+        self.get_logger().info(
+            f"Executor heartbeat: {executor_heartbeat_topic}"
+        )
 
     def _float_parameter(self, name: str) -> float:
         return float(self.get_parameter(name).value)
+
+    def _executor_heartbeat_callback(self, message: String) -> None:
+        """Record one valid executor process-liveness heartbeat."""
+        try:
+            payload = json.loads(message.data)
+            sequence = payload.get("sequence") if isinstance(payload, dict) else None
+            if (
+                not isinstance(sequence, int)
+                or isinstance(sequence, bool)
+                or sequence < 0
+            ):
+                raise ValueError("heartbeat sequence must be a nonnegative integer")
+        except (json.JSONDecodeError, TypeError, ValueError) as exc:
+            self.get_logger().warning(
+                "Invalid /motion/executor/heartbeat: "
+                f"{type(exc).__name__}: {exc}"
+            )
+            return
+
+        self.executor_heartbeat_watchdog.observe(
+            sequence=sequence,
+            observed_at=time.monotonic(),
+        )
+
+    def _check_executor_heartbeat(self, now: float | None = None) -> None:
+        """Latch process loss while preserving any active command identity."""
+        timeout = self.executor_heartbeat_watchdog.check(
+            time.monotonic() if now is None else now
+        )
+        if timeout is None:
+            return
+
+        if self.active_special_command_id is not None:
+            action = self.active_special_action
+            command_id = self.active_special_command_id
+            event_id = self.active_special_event_id
+        elif self.general_motion_gate.locked:
+            action = self.general_motion_gate.active_action
+            command_id = self.general_motion_gate.active_command_id
+            event_id = None
+        else:
+            action = None
+            command_id = None
+            event_id = None
+
+        if self.safety_interlock.observe_critical_fault(
+            error_code=timeout.error_code,
+            message=timeout.message,
+            source="executor_watchdog",
+            action=action,
+            command_id=command_id,
+            event_id=event_id,
+        ):
+            self.get_logger().warning(
+                "Executor heartbeat timeout latched; all motion publication "
+                f"is blocked until node restart: executor_seen="
+                f"{timeout.executor_seen}, action={action}, "
+                f"command_id={command_id}"
+            )
 
     @property
     def mission_phase(self) -> str:
@@ -483,6 +598,14 @@ class MotionDecisionNode(Node):
                 command_id,
                 error_code,
             )
+            if transition.matched:
+                self._latch_critical_executor_fault(
+                    error_code=error_code,
+                    message=status_message,
+                    action=action,
+                    command_id=command_id,
+                    event_id=event_id,
+                )
             if transition.released:
                 self.get_logger().info(
                     "General motion lock released: "
@@ -521,6 +644,14 @@ class MotionDecisionNode(Node):
                 f"action={action}, command_id={command_id}"
             )
             return
+
+        self._latch_critical_executor_fault(
+            error_code=error_code,
+            message=status_message,
+            action=action,
+            command_id=command_id,
+            event_id=event_id,
+        )
 
         if not result.terminal:
             self.active_special_event_id = (
@@ -577,6 +708,31 @@ class MotionDecisionNode(Node):
             f"previous_phase={result.previous_phase}, "
             f"next_phase={self.mission_phase}"
         )
+
+    def _latch_critical_executor_fault(
+        self,
+        *,
+        error_code: Any,
+        message: Any,
+        action: Any,
+        command_id: Any,
+        event_id: Any,
+    ) -> None:
+        """Latch one correlated critical executor/runtime fault."""
+        if self.safety_interlock.observe_executor_status(
+            error_code=error_code,
+            message=message,
+            action=action,
+            command_id=command_id,
+            event_id=event_id,
+        ):
+            snapshot = self.safety_interlock.snapshot
+            self.get_logger().warning(
+                "Critical executor fault latched; all motion publication "
+                f"is blocked until node restart: error_code="
+                f"{snapshot.error_code}, action={snapshot.action}, "
+                f"command_id={snapshot.command_id}"
+            )
 
     def _mission_progress(self) -> dict[str, int | bool]:
         """Return success scores and independent course progress."""
@@ -635,6 +791,9 @@ class MotionDecisionNode(Node):
         return observations, ages
 
     def _publish_decision(self) -> None:
+        if self.safety_interlock.latched:
+            return
+
         now = time.monotonic()
 
         dt_sec = max(
@@ -659,12 +818,25 @@ class MotionDecisionNode(Node):
             decision
         )
 
+        decision = self._suppress_exhausted_special_action(
+            decision
+        )
+
+
         if not self._command_publisher_has_subscriber():
             return
 
         if decision.valid and self.general_motion_gate.locked:
             # A RUNNING general request owns the executor regardless of what
             # a newer Vision frame would otherwise select.
+            return
+
+        if (
+            decision.valid
+            and not self.general_motion_gate.has_required_fresh_vision()
+        ):
+            # After a general motion terminates, require new Vision before
+            # publishing any executable decision, including special actions.
             return
 
         is_general_motion = (
@@ -851,6 +1023,17 @@ class MotionDecisionNode(Node):
                 dt_sec,
             )
 
+        if planning_phase == "LINE_TRACK" and self.finish_enabled:
+            final_line_observations = dict(observations)
+            final_line_observations["ball"] = None
+            final_line_observations["goal"] = None
+
+            return self.planner.plan(
+                "LINE_TRACK",
+                final_line_observations,
+                dt_sec,
+            )
+
         approach_phase = self.planner.approach_phase_for_search(
             planning_phase,
             observations,
@@ -912,6 +1095,36 @@ class MotionDecisionNode(Node):
             action="WAIT",
             valid=False,
             reason="duplicate_terminal_action_suppressed",
+            sdk_motion_requested=False,
+            requires_ack=False,
+            source_command=decision.source_command,
+        )
+
+
+    def _suppress_exhausted_special_action(
+        self,
+        decision: MotionDecision,
+    ) -> MotionDecision:
+        """Block special actions whose mission failure limit is exhausted."""
+        if (
+            not decision.requires_ack
+            or not self.phase_manager.special_action_exhausted(
+                decision.action
+            )
+        ):
+            return decision
+
+        reason = self.SPECIAL_FAILURE_REASONS.get(
+            decision.action,
+            "special_action_failures_exhausted",
+        )
+
+        return MotionDecision(
+            phase=decision.phase,
+            source=decision.source,
+            action="WAIT",
+            valid=False,
+            reason=reason,
             sdk_motion_requested=False,
             requires_ack=False,
             source_command=decision.source_command,

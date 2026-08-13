@@ -3,6 +3,7 @@
 #include "irc_step_motion_executor/sdk_executor_driver.hpp"
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
+#include <json-c/json.h>
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
 
@@ -22,6 +23,7 @@ namespace
 constexpr std::int64_t kDefaultPollPeriodMs = 20;
 constexpr std::int64_t kDefaultRunningPolls = 2;
 constexpr std::int64_t kDefaultSettlingPolls = 1;
+constexpr std::int64_t kDefaultHeartbeatPeriodMs = 500;
 
 std::uint64_t steady_now_ms()
 {
@@ -64,6 +66,8 @@ public:
       "running_polls", kDefaultRunningPolls);
     const std::int64_t settling_polls = nonnegative_parameter_or_default(
       "settling_polls", kDefaultSettlingPolls);
+    const std::int64_t heartbeat_period_ms = positive_parameter_or_default(
+      "heartbeat_period_ms", kDefaultHeartbeatPeriodMs);
 
     MotionAliasCatalog catalog;
     std::string error_message;
@@ -78,6 +82,14 @@ public:
     backend_options.robot_motion_player = make_robot_motion_runtime_config(
       motion_json_path, enable_robot_hardware, robot_device_path,
       robot_baud_rate, robot_motor_ids, explicit_torque_approval);
+#if IRC_STEP_ROBOT_MOTION_PLAYER_BACKEND_BUILT
+    if (backend_type == "robot_motion_player") {
+      robot_motion_runtime_factory_ =
+        std::make_unique<ProductionRobotMotionRuntimeFactory>();
+      backend_options.robot_motion_runtime_factory =
+        robot_motion_runtime_factory_.get();
+    }
+#endif
     backend_options.simulated.running_polls =
       static_cast<std::size_t>(running_polls);
     backend_options.simulated.settling_polls =
@@ -98,6 +110,8 @@ public:
       std::move(catalog), *backend_);
     status_publisher_ = create_publisher<std_msgs::msg::String>(
       "/motion/executor/status", 10);
+    heartbeat_publisher_ = create_publisher<std_msgs::msg::String>(
+      "/motion/executor/heartbeat", 10);
     driver_ = std::make_unique<SdkExecutorDriver>(
       *core_, steady_now_ms,
       [this](const std::string & payload) {
@@ -119,6 +133,9 @@ public:
     poll_timer_ = create_wall_timer(
       std::chrono::milliseconds(poll_period_ms),
       [this]() {driver_->poll();});
+    heartbeat_timer_ = create_wall_timer(
+      std::chrono::milliseconds(heartbeat_period_ms),
+      [this, backend_type]() {publish_heartbeat(backend_type);});
 
     RCLCPP_WARN(
       get_logger(),
@@ -126,6 +143,24 @@ public:
   }
 
 private:
+  void publish_heartbeat(const std::string & backend_type)
+  {
+    json_object * object = json_object_new_object();
+    json_object_object_add(
+      object, "sequence",
+      json_object_new_uint64(heartbeat_sequence_++));
+    json_object_object_add(
+      object, "backend_type", json_object_new_string(backend_type.c_str()));
+    json_object_object_add(
+      object, "active", json_object_new_boolean(core_->has_active_request()));
+
+    std_msgs::msg::String message;
+    message.data = json_object_to_json_string_ext(
+      object, JSON_C_TO_STRING_PLAIN);
+    json_object_put(object);
+    heartbeat_publisher_->publish(message);
+  }
+
   std::int64_t positive_parameter_or_default(
     const std::string & name, std::int64_t default_value)
   {
@@ -154,15 +189,22 @@ private:
     return default_value;
   }
 
-  // Declared first so it outlives a backend that may borrow SDK runtime state.
+#if IRC_STEP_ROBOT_MOTION_PLAYER_BACKEND_BUILT
+  // Declared first so the injected factory outlives backend construction/use.
+  std::unique_ptr<RobotMotionRuntimeFactory> robot_motion_runtime_factory_;
+#endif
+  // Declared before the backend so borrowed SDK runtime state outlives it.
   std::shared_ptr<void> runtime_owner_;
   std::unique_ptr<MotionBackend> backend_;
   std::unique_ptr<SdkExecutorCore> core_;
   std::unique_ptr<SdkExecutorDriver> driver_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr status_publisher_;
+  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr heartbeat_publisher_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr request_subscription_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr cancel_subscription_;
   rclcpp::TimerBase::SharedPtr poll_timer_;
+  rclcpp::TimerBase::SharedPtr heartbeat_timer_;
+  std::uint64_t heartbeat_sequence_{0};
 };
 
 }  // namespace irc_step_motion_executor

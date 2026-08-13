@@ -215,6 +215,107 @@ def test_actual_unconfirmed_hurdle_payload_holds_motion():
     assert decision.reason == "hurdle_confirmation_pending"
 
 
+def test_persistent_unconfirmed_hurdle_enters_verification_timeout():
+    planner = MotionDecisionPlanner(
+        MotionDecisionConfig(
+            hurdle_verification_timeout_sec=0.25,
+        )
+    )
+
+    pending = observations(
+        line=line_info(),
+        hurdle=hurdle_info(
+            confirmation_confirmed=False,
+        ),
+    )
+
+    first = planner.plan("AUTO", pending, 0.1)
+    second = planner.plan("AUTO", pending, 0.1)
+    third = planner.plan("AUTO", pending, 0.1)
+    timed_out = planner.plan("AUTO", pending, 0.1)
+    assert third.reason == "hurdle_confirmation_pending"
+
+    assert first.source == "hurdle"
+    assert first.action == "WAIT"
+    assert first.reason == "hurdle_confirmation_pending"
+
+    assert second.source == "hurdle"
+    assert second.action == "WAIT"
+    assert second.reason == "hurdle_confirmation_pending"
+
+    assert timed_out.source == "hurdle"
+    assert timed_out.action == "WAIT"
+    assert timed_out.reason == "hurdle_verification_timeout"
+
+
+def test_hurdle_verification_timer_resets_after_disappearance():
+    planner = MotionDecisionPlanner(
+        MotionDecisionConfig(
+            hurdle_verification_timeout_sec=0.25,
+        )
+    )
+
+    pending = observations(
+        line=line_info(),
+        hurdle=hurdle_info(
+            confirmation_confirmed=False,
+        ),
+    )
+
+    planner.plan("AUTO", pending, 0.2)
+
+    disappeared = planner.plan(
+        "AUTO",
+        observations(
+            line=line_info(),
+            hurdle=None,
+        ),
+        0.1,
+    )
+
+    assert disappeared.source == "line"
+    assert disappeared.action == "STRAIGHT"
+    assert planner.hurdle_verification_elapsed_sec == 0.0
+
+    pending_again = planner.plan("AUTO", pending, 0.2)
+
+    assert pending_again.source == "hurdle"
+    assert pending_again.action == "WAIT"
+    assert pending_again.reason == "hurdle_confirmation_pending"
+
+
+def test_hurdle_verification_timer_resets_when_hurdle_becomes_safe():
+    planner = MotionDecisionPlanner(
+        MotionDecisionConfig(
+            hurdle_verification_timeout_sec=0.5,
+        )
+    )
+
+    pending = observations(
+        line=line_info(),
+        hurdle=hurdle_info(
+            confirmation_confirmed=False,
+        ),
+    )
+
+    planner.plan("AUTO", pending, 0.2)
+
+    confirmed = planner.plan(
+        "AUTO",
+        observations(
+            line=line_info(),
+            hurdle=hurdle_info(
+                confirmation_confirmed=True,
+                depth_valid=True,
+            ),
+        ),
+        0.1,
+    )
+
+    assert confirmed.source == "hurdle"
+    assert planner.hurdle_verification_elapsed_sec == 0.0
+
+
 @pytest.mark.parametrize(
     ("source", "payload"),
     [
@@ -486,6 +587,18 @@ def test_ball_search_approach_phase_requires_controllable_observation():
         "BALL_SEARCH",
         observations(ball=None),
     ) is None
+
+
+def test_ball_approach_phase_coarsely_approaches_far_aligned_ball():
+    decision = MotionDecisionPlanner().plan(
+        "BALL_APPROACH",
+        observations(ball=ball_info(depth_m=2.0, distance_m=2.0)),
+        0.1,
+    )
+
+    assert decision.source == "ball"
+    assert decision.valid is True
+    assert decision.action == "APPROACH"
 
 
 def test_ball_beyond_3m_does_not_start_tracking_memory():
@@ -853,6 +966,18 @@ def test_goal_search_approach_phase_requires_controllable_observation():
         "GOAL_SEARCH",
         observations(goal=None),
     ) is None
+
+
+def test_goal_approach_phase_coarsely_approaches_far_aligned_goal():
+    decision = MotionDecisionPlanner().plan(
+        "GOAL_APPROACH",
+        observations(goal=goal_info(depth_m=1.0, distance_m=1.0)),
+        0.1,
+    )
+
+    assert decision.source == "goal"
+    assert decision.valid is True
+    assert decision.action == "APPROACH_GOAL"
 
 
 def test_lost_goal_stops_then_turns_toward_last_seen_side():

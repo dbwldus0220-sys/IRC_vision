@@ -18,14 +18,38 @@ def goal_info(**overrides):
     return sample
 
 
-def test_goal_outside_50cm_control_range_waits():
+def test_aligned_goal_outside_control_range_approaches():
     planner = GoalNavigationPlanner()
 
     command = planner.plan(goal_info(depth_m=0.51))
 
+    assert command.valid is True
+    assert command.action == "APPROACH_GOAL"
+    assert command.reason == "goal_aligned_coarse_approach"
+
+
+def test_misaligned_goal_outside_control_range_aligns_before_approach():
+    planner = GoalNavigationPlanner()
+
+    command = planner.plan(
+        goal_info(depth_m=1.0, offset_x_norm=-0.2)
+    )
+
+    assert command.valid is True
+    assert command.action == "ALIGN_LEFT"
+    assert command.action != "APPROACH_GOAL"
+
+
+def test_goal_without_valid_depth_still_waits():
+    planner = GoalNavigationPlanner()
+
+    command = planner.plan(
+        goal_info(depth_valid=False, depth_m=None)
+    )
+
     assert command.valid is False
     assert command.action == "WAIT"
-    assert command.reason == "goal_outside_control_range"
+    assert command.reason == "missing_valid_goal_depth"
 
 
 def test_centered_goal_at_50cm_approaches():

@@ -183,9 +183,6 @@ class BallNavigationPlanner:
         if not depth_valid or depth is None:
             return self.stop("missing_valid_ball_depth")
 
-        if depth > self.config.control_start_depth_m:
-            return self.stop("ball_outside_control_range")
-
         turn_motion = self._classify_turn(steering_error)
         if turn_motion is not None:
             return self._moving_command(
@@ -202,6 +199,26 @@ class BallNavigationPlanner:
                 depth_valid=depth_valid,
                 pickup_ready=pickup_ready,
                 pickup_now=pickup_now,
+            )
+
+        if depth > self.config.control_start_depth_m:
+            return self._moving_command(
+                motion="APPROACH",
+                reason="ball_aligned_coarse_approach",
+                linear_speed_mps=self._approach_speed(
+                    depth,
+                    pickup_ready,
+                ),
+                steering_error_deg=steering_error,
+                dt_sec=dt_sec,
+                bearing=bearing,
+                offset=offset,
+                depth=depth,
+                distance=distance,
+                confidence=confidence,
+                depth_valid=True,
+                pickup_ready=pickup_ready,
+                pickup_now=False,
             )
 
         if pickup_now:

@@ -88,7 +88,7 @@ def test_offset_is_used_when_camera_bearing_is_missing():
     assert command.motion == "TURN_RIGHT"
 
 
-def test_ball_outside_90cm_control_range_does_not_move_robot():
+def test_aligned_ball_outside_control_range_uses_coarse_approach():
     planner = BallNavigationPlanner()
 
     command = planner.plan(
@@ -96,9 +96,22 @@ def test_ball_outside_90cm_control_range_does_not_move_robot():
         0.1,
     )
 
-    assert command.valid is False
-    assert command.motion == "STOP"
-    assert command.reason == "ball_outside_control_range"
+    assert command.valid is True
+    assert command.motion == "APPROACH"
+    assert command.reason == "ball_aligned_coarse_approach"
+
+
+def test_misaligned_ball_outside_control_range_aligns_before_approach():
+    planner = BallNavigationPlanner()
+
+    command = planner.plan(
+        ball_info(depth_m=1.5, distance_m=1.6, bearing_deg=12.0),
+        0.1,
+    )
+
+    assert command.valid is True
+    assert command.motion == "TURN_RIGHT"
+    assert command.motion != "APPROACH"
 
 
 def test_turn_hysteresis_holds_until_exit_threshold():
