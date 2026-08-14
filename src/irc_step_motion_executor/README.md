@@ -15,7 +15,7 @@
   motion으로 fallback하지 않는다.
 - `RobotMotionPlayer`, Dynamixel backend 및 hardware 객체를 생성하지 않는다.
 
-`forward: "전진"`과 `forward_short: "첫발"`은 실물 검증 전의 **개발 후보**
+`forward: "전진110"`과 `forward_short: "첫발"`은 실물 검증 전의 **개발 후보**
 alias일 뿐 production 확정값이 아니다. `turn_left`, `shoot`, `hurdle` 등
 확인되지 않은 motion은 의도적으로 매핑하지 않았다.
 
