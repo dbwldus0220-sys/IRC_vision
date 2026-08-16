@@ -43,7 +43,7 @@ TEST(MotionAliasCatalog, LoadsOnlyCandidateAliases)
   std::string error;
   ASSERT_TRUE(catalog.load(TEST_ALIAS_CONFIG, error)) << error;
   EXPECT_EQ(catalog.size(), 2U);
-  EXPECT_EQ(catalog.resolve("forward"), std::optional<std::string>("전진110"));
+  EXPECT_EQ(catalog.resolve("forward"), std::optional<std::string>("전진113"));
   EXPECT_EQ(
     catalog.resolve("forward_short"), std::optional<std::string>("첫발"));
   EXPECT_FALSE(catalog.resolve("turn_left").has_value());

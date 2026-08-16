@@ -18,7 +18,7 @@ def test_production_alias_catalog_contains_only_approved_aliases():
     payload = yaml.safe_load(ALIAS_PATH.read_text(encoding="utf-8"))
     assert payload == {
         "motion_aliases": {
-            "forward": "전진110",
+            "forward": "전진113",
             "forward_short": "첫발",
         }
     }

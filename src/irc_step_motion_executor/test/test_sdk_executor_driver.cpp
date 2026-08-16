@@ -107,7 +107,7 @@ TEST(SdkExecutorDriver, RequestPublishesImmediateRunningStatus)
   EXPECT_EQ(string_field(fixture.published[0], "status"), "RUNNING");
   EXPECT_EQ(int_field(fixture.published[0], "request_id"), 1);
   ASSERT_EQ(fixture.backend.started_motion_names.size(), 1U);
-  EXPECT_EQ(fixture.backend.started_motion_names[0], "전진110");
+  EXPECT_EQ(fixture.backend.started_motion_names[0], "전진113");
 }
 
 TEST(SdkExecutorDriver, InvalidAndUnsupportedRequestsPublishRejections)
