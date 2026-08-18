@@ -1,5 +1,19 @@
 # IRC STEP Motion Executor C++ Wrapper
 
+## Production startup pose contract
+
+`full_system_robot.launch.py`는 fail-closed startup gate를 기본 활성화한다.
+`RobotMotionPlayer::initialize()`가 끝난 뒤 executor는 `motion_json_path`에서
+`startup_pose_name`과 정확히 일치하는 유일한 frame을 찾아 motor ID 0..22의
+유한한 각도 23개를 읽는다. 이어 production SDK 확장 API
+`startPoseTransition(const std::vector<double>&, int64_t)`를 호출하고
+`updateStartupPose()`가 `Succeeded`를 반환할 때까지 poll한다.
+
+SDK 구현은 `DynamixelMotionHardware::initialize()`에서 저장한 Present Position을
+시작 벡터로 사용하고, 기존 time-based/shortest-angle 처리와 hardware write를
+재사용해야 한다. JSON/pose 오류, API 미지원, write 실패, settling timeout은
+모두 AUTO gate를 영구 잠금 상태로 유지하며 STRAIGHT로 fallback하지 않는다.
+
 이 패키지는 전달받은 C++ `RobotMotionPlayer` SDK를 향후 ROS 2에 연결하기 위한
 독립 `ament_cmake` wrapper의 최소 골격이다. 현재 단계는
 **catalog-only/mock-safe**이며 production motion executor가 아니다.
@@ -15,9 +29,66 @@
   motion으로 fallback하지 않는다.
 - `RobotMotionPlayer`, Dynamixel backend 및 hardware 객체를 생성하지 않는다.
 
-`forward: "전진113"`과 `forward_short: "첫발"`은 실물 검증 전의 **개발 후보**
-alias일 뿐 production 확정값이 아니다. `turn_left`, `shoot`, `hurdle` 등
-확인되지 않은 motion은 의도적으로 매핑하지 않았다.
+최신 SDK의 top-level motion 10개는 `sdk_*` alias로 각각 수동 시험할 수 있다.
+production canonical alias는 현재 확인된 `forward`, `pickup`, `hurdle`만 둔다.
+짧은 전진, shoot, 좌·우 회전 canonical alias는 실물 검증 전이므로 만들지
+않았으며, 알 수 없는 motion으로 fallback하지 않는다.
+
+## 단일 motion smoke test
+
+executor만 안전한 simulated backend로 시작한다. 이 명령 자체로 motion request가
+발행되지는 않는다.
+
+```bash
+ros2 launch irc_step_motion_executor sdk_motion_test.launch.py
+```
+
+다른 터미널에서 alias 하나를 반드시 지정해 정확히 한 번 요청한다. 기본 timeout은
+15초이며 긴 반복 motion은 사용자가 명시적으로 늘린다.
+
+```bash
+ros2 run irc_step_motion_executor manual_motion_request.py --ros-args \
+  -p motion_id:=sdk_pickup -p timeout_ms:=15000
+```
+
+helper는 자신의 `request_id`에 해당하는 `RUNNING`, `SUCCEEDED`, `FAILED`,
+`CANCELLED`, `REJECTED`와 `error_code`/`message`를 출력한다. 전체 catalog를
+순차 실행하거나 프로그램 시작만으로 자동 재생하지 않는다.
+
+실물에서는 로봇 지지, 비상정지 수단, 관절 영점·방향·limit를 먼저 확인하고
+SDK-enabled 빌드에서만 다음 값을 모두 명시한다. 아래 명령은 torque ON과 실제
+동작을 허용하므로 반드시 개별 motion을 simulated로 먼저 검증해야 한다.
+
+```bash
+ros2 launch irc_step_motion_executor sdk_motion_test.launch.py \
+  backend_type:=robot_motion_player \
+  enable_robot_hardware:=true explicit_torque_approval:=true \
+  motion_json_path:=/approved/sdk/robot_motions.json \
+  robot_device_path:=/dev/ttyUSB0 robot_baud_rate:=4000000 \
+  robot_motor_ids:="[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22]"
+```
+
+실행 중 취소는 기존 executor API만 사용한다. helper가 출력한 `request_id`와
+동일한 값이어야 하며, 이것은 별도의 emergency stop을 의미하지 않는다.
+
+```bash
+ros2 topic pub --once /motion/executor/cancel std_msgs/msg/String \
+  "{data: '{\"request_id\": 123456789}'}"
+```
+
+## SDK JSON/catalog 사전 검증
+
+다음 검사는 serial, SDK, torque 또는 모터에 접근하지 않는다.
+
+```bash
+ros2 run irc_step_motion_executor validate_motion_catalog.py \
+  /approved/sdk/robot_motions.json \
+  --aliases install/irc_step_motion_executor/share/irc_step_motion_executor/config/motion_aliases.yaml
+```
+
+JSON의 top-level `motions`, 중복 motion 이름, 각 alias target, 모든 frame의
+angles/torques motor ID `0..22`, 그리고 motion별 `completion`, `start_pose`,
+`end_pose` 존재 여부를 검사한다.
 
 ## JSON 계약
 
@@ -55,7 +126,7 @@ ROS 2 node이다. 실제 SDK backend는 아직 연결되어 있지 않다.
 - parameters: `backend_type`(기본 `simulated`),
   `enable_robot_hardware`(기본 `false`), `motion_json_path`(기본 빈 값),
   `motion_aliases_file`,
-  `poll_period_ms`(기본 20),
+  `poll_period_ms`(기본 5; production trajectory control 200Hz),
   `running_polls`(기본 2),
   `settling_polls`(기본 1), `force_start_failure`, `force_backend_failure`
 

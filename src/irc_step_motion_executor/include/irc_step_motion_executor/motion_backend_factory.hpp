@@ -27,6 +27,7 @@ struct MotionBackendFactoryResult
   std::unique_ptr<MotionBackend> backend;
   std::string error_code;
   std::string message;
+  StartupPoseController * startup_pose_controller{nullptr};
 
   explicit operator bool() const noexcept
   {

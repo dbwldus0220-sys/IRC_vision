@@ -1,11 +1,12 @@
-"""Tests for the simulated C++ full-system launch topology."""
+"""Tests for the selectable C++ full-system launch topology."""
 
 import importlib.util
 from pathlib import Path
 
+from launch import LaunchContext
 from launch.actions import DeclareLaunchArgument
+from launch.utilities import perform_substitutions
 from launch_ros.actions import Node
-import yaml
 
 
 LEGACY_EXECUTABLES = {
@@ -40,22 +41,33 @@ def launch_description(monkeypatch, tmp_path):
     return load_launch_module().generate_launch_description()
 
 
-def node_parameters(node):
-    """Return normalized parameters using their textual names."""
+def launch_context(description, overrides=None):
+    """Populate a context with launch defaults and optional overrides."""
+    context = LaunchContext()
+    for entity in description.entities:
+        if isinstance(entity, DeclareLaunchArgument):
+            entity.execute(context)
+    context.launch_configurations.update(overrides or {})
+    return context
+
+
+def node_parameters(node, context):
+    """Evaluate executor parameters in a launch context."""
     parameters = node._Node__parameters[0]
+
+    def evaluate(value):
+        if hasattr(value, "evaluate"):
+            return value.evaluate(context)
+        if isinstance(value, tuple):
+            if all(hasattr(part, "perform") for part in value):
+                return perform_substitutions(context, list(value))
+            return list(value)
+        return value
+
     return {
-        "".join(part.text for part in name): parameter_value(value)
+        "".join(part.text for part in name): evaluate(value)
         for name, value in parameters.items()
     }
-
-
-def parameter_value(value):
-    """Resolve static values normalized by launch_ros."""
-    if isinstance(value, tuple):
-        if not value:
-            return []
-        return yaml.safe_load("".join(part.text for part in value))
-    return value
 
 
 def test_full_system_uses_bridge_and_cpp_simulated_executor(
@@ -81,7 +93,7 @@ def test_full_system_uses_bridge_and_cpp_simulated_executor(
     ) == 1
 
 
-def test_cpp_executor_is_forced_to_safe_simulated_parameters(
+def test_cpp_executor_defaults_are_safe_and_simulated(
     monkeypatch,
     tmp_path,
 ):
@@ -92,21 +104,48 @@ def test_cpp_executor_is_forced_to_safe_simulated_parameters(
         if isinstance(node, Node)
         and node.node_executable == "sdk_motion_executor"
     )
-    parameters = node_parameters(executor)
+    parameters = node_parameters(executor, launch_context(description))
 
     assert parameters == {
         "backend_type": "simulated",
         "enable_robot_hardware": False,
-        "poll_period_ms": 20,
+        "poll_period_ms": 5,
         "running_polls": 2,
         "settling_polls": 1,
         "explicit_torque_approval": False,
         "motion_json_path": "",
-        "robot_device_path": "",
-        "robot_baud_rate": 0,
+        "robot_device_path": "/dev/ttyUSB0",
+        "robot_baud_rate": 4000000,
+        "robot_motor_ids": list(range(23)),
     }
-    assert "robot_motor_ids" not in parameters
-    assert parameters.get("robot_motor_ids") not in ([], ())
+
+
+def test_production_arguments_reach_cpp_executor(monkeypatch, tmp_path):
+    description = launch_description(monkeypatch, tmp_path)
+    executor = next(
+        node
+        for node in description.entities
+        if isinstance(node, Node)
+        and node.node_executable == "sdk_motion_executor"
+    )
+    context = launch_context(
+        description,
+        {
+            "backend_type": "robot_motion_player",
+            "enable_robot_hardware": "true",
+            "explicit_torque_approval": "true",
+            "motion_json_path": "/tmp/robot_motions.json",
+        },
+    )
+    parameters = node_parameters(executor, context)
+
+    assert parameters["backend_type"] == "robot_motion_player"
+    assert parameters["enable_robot_hardware"] is True
+    assert parameters["explicit_torque_approval"] is True
+    assert parameters["motion_json_path"] == "/tmp/robot_motions.json"
+    assert parameters["robot_device_path"] == "/dev/ttyUSB0"
+    assert parameters["robot_baud_rate"] == 4000000
+    assert parameters["robot_motor_ids"] == list(range(23))
 
 
 def test_obsolete_motion_launch_arguments_are_removed(monkeypatch, tmp_path):

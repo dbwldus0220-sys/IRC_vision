@@ -1,6 +1,8 @@
 #include "irc_step_motion_executor/motion_backend_factory.hpp"
 #include "irc_step_motion_executor/sdk_executor_core.hpp"
 #include "irc_step_motion_executor/sdk_executor_driver.hpp"
+#include "irc_step_motion_executor/startup_pose_gate.hpp"
+#include "irc_step_motion_executor/startup_pose_catalog.hpp"
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <json-c/json.h>
@@ -20,7 +22,7 @@ namespace irc_step_motion_executor
 namespace
 {
 
-constexpr std::int64_t kDefaultPollPeriodMs = 20;
+constexpr std::int64_t kDefaultPollPeriodMs = 5;
 constexpr std::int64_t kDefaultRunningPolls = 2;
 constexpr std::int64_t kDefaultSettlingPolls = 1;
 constexpr std::int64_t kDefaultHeartbeatPeriodMs = 500;
@@ -68,6 +70,12 @@ public:
       "settling_polls", kDefaultSettlingPolls);
     const std::int64_t heartbeat_period_ms = positive_parameter_or_default(
       "heartbeat_period_ms", kDefaultHeartbeatPeriodMs);
+    const bool startup_pose_enabled = declare_parameter<bool>(
+      "startup_pose_enabled", false);
+    const std::string startup_pose_name = declare_parameter<std::string>(
+      "startup_pose_name", "오뒤307");
+    const std::int64_t startup_pose_duration_ms = positive_parameter_or_default(
+      "startup_pose_duration_ms", 1800);
 
     MotionAliasCatalog catalog;
     std::string error_message;
@@ -106,6 +114,24 @@ public:
     }
     runtime_owner_ = std::move(backend_result.runtime_owner);
     backend_ = std::move(backend_result.backend);
+    std::vector<double> startup_pose_angles;
+    if (startup_pose_enabled && !load_startup_pose_angles(
+        motion_json_path, startup_pose_name, startup_pose_angles, error_message))
+    {
+      RCLCPP_ERROR(
+        get_logger(), "[STARTUP POSE] ERROR: %s", error_message.c_str());
+    }
+    startup_pose_gate_ = std::make_unique<StartupPoseGate>(
+      startup_pose_enabled, startup_pose_name, std::move(startup_pose_angles),
+      startup_pose_duration_ms,
+      backend_result.startup_pose_controller,
+      [this](const std::string & message) {
+        if (message.find("ERROR:") != std::string::npos) {
+          RCLCPP_ERROR(get_logger(), "%s", message.c_str());
+        } else {
+          RCLCPP_INFO(get_logger(), "%s", message.c_str());
+        }
+      });
     core_ = std::make_unique<SdkExecutorCore>(
       std::move(catalog), *backend_);
     status_publisher_ = create_publisher<std_msgs::msg::String>(
@@ -118,7 +144,7 @@ public:
         std_msgs::msg::String message;
         message.data = payload;
         status_publisher_->publish(message);
-      });
+      }, startup_pose_gate_.get());
 
     request_subscription_ = create_subscription<std_msgs::msg::String>(
       "/motion/executor/request", 10,
@@ -137,9 +163,11 @@ public:
       std::chrono::milliseconds(heartbeat_period_ms),
       [this, backend_type]() {publish_heartbeat(backend_type);});
 
-    RCLCPP_WARN(
-      get_logger(),
-      "Simulated backend only: no SDK or hardware access is available");
+    if (backend_type == "simulated") {
+      RCLCPP_WARN(
+        get_logger(),
+        "Simulated backend only: no SDK or hardware access is available");
+    }
   }
 
 private:
@@ -197,6 +225,7 @@ private:
   std::shared_ptr<void> runtime_owner_;
   std::unique_ptr<MotionBackend> backend_;
   std::unique_ptr<SdkExecutorCore> core_;
+  std::unique_ptr<StartupPoseGate> startup_pose_gate_;
   std::unique_ptr<SdkExecutorDriver> driver_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr status_publisher_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr heartbeat_publisher_;

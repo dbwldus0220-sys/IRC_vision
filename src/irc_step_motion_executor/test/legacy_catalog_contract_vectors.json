@@ -33,7 +33,7 @@
       "motion_id": "forward_short",
       "timeout_ms": 5000
     },
-    "expected_error_code": "HARDWARE_NOT_READY"
+    "expected_error_code": "INVALID_MOTION"
   },
   {
     "name": "unsupported_turn_left",
@@ -72,7 +72,7 @@
     "expected_error_code": "INVALID_MOTION"
   },
   {
-    "name": "unsupported_hurdle",
+    "name": "legacy_hurdle_alias_is_catalogued",
     "legacy": {
       "action": "CROSS_FINISH",
       "valid": true,
@@ -87,6 +87,6 @@
       "motion_id": "hurdle",
       "timeout_ms": 12000
     },
-    "expected_error_code": "INVALID_MOTION"
+    "expected_error_code": "HARDWARE_NOT_READY"
   }
 ]

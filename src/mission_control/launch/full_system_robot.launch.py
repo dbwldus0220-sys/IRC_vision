@@ -30,6 +30,9 @@ def generate_launch_description() -> LaunchDescription:
     robot_device_path = LaunchConfiguration("robot_device_path")
     robot_baud_rate = LaunchConfiguration("robot_baud_rate")
     robot_motor_ids = LaunchConfiguration("robot_motor_ids")
+    startup_pose_enabled = LaunchConfiguration("startup_pose_enabled")
+    startup_pose_name = LaunchConfiguration("startup_pose_name")
+    startup_pose_duration_ms = LaunchConfiguration("startup_pose_duration_ms")
 
     camera = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -59,6 +62,9 @@ def generate_launch_description() -> LaunchDescription:
                 "max_fps": ParameterValue(max_fps, value_type=float),
             }
         ],
+        remappings=[
+            ("/camera/color/image_raw", "/camera/camera/color/image_raw"),
+        ],
     )
 
     unified_vision = Node(
@@ -66,6 +72,13 @@ def generate_launch_description() -> LaunchDescription:
         executable="unified_vision_node",
         output="screen",
         emulate_tty=True,
+        remappings=[
+            ("/camera/color/image_raw", "/camera/camera/color/image_raw"),
+            (
+                "/camera/aligned_depth_to_color/image_raw",
+                "/camera/camera/aligned_depth_to_color/image_raw",
+            ),
+        ],
     )
     motion_decision = Node(
         package="mission_control",
@@ -95,7 +108,7 @@ def generate_launch_description() -> LaunchDescription:
                     enable_robot_hardware,
                     value_type=bool,
                 ),
-                "poll_period_ms": 20,
+                "poll_period_ms": 5,
                 "running_polls": 2,
                 "settling_polls": 1,
                 "explicit_torque_approval": ParameterValue(
@@ -115,6 +128,15 @@ def generate_launch_description() -> LaunchDescription:
                     value_type=int,
                 ),
                 "robot_motor_ids": ParameterValue(robot_motor_ids),
+                "startup_pose_enabled": ParameterValue(
+                    startup_pose_enabled, value_type=bool
+                ),
+                "startup_pose_name": ParameterValue(
+                    startup_pose_name, value_type=str
+                ),
+                "startup_pose_duration_ms": ParameterValue(
+                    startup_pose_duration_ms, value_type=int
+                ),
             }
         ],
     )
@@ -123,11 +145,11 @@ def generate_launch_description() -> LaunchDescription:
         [
             DeclareLaunchArgument(
                 "enable_camera",
-                default_value="false",
+                default_value="true",
                 description="Camera is opt-in for robot startup safety.",
             ),
             DeclareLaunchArgument("device", default_value="cpu"),
-            DeclareLaunchArgument("display", default_value="false"),
+            DeclareLaunchArgument("display", default_value="true"),
             DeclareLaunchArgument("metrics_mode", default_value="auto"),
             DeclareLaunchArgument("max_fps", default_value="30.0"),
             DeclareLaunchArgument("initial_mission_phase", default_value="AUTO"),
@@ -139,22 +161,37 @@ def generate_launch_description() -> LaunchDescription:
             ),
             DeclareLaunchArgument(
                 "enable_robot_hardware",
-                default_value="false",
+                default_value="true",
                 description="Must remain false until the hardware procedure is approved.",
             ),
             DeclareLaunchArgument(
                 "explicit_torque_approval",
-                default_value="false",
+                default_value="true",
                 description="Independent explicit approval for torque enable.",
             ),
-            DeclareLaunchArgument("motion_json_path", default_value=""),
-            DeclareLaunchArgument("robot_device_path", default_value=""),
-            DeclareLaunchArgument("robot_baud_rate", default_value="0"),
+            DeclareLaunchArgument(
+                "motion_json_path",
+                default_value=(
+                    "/home/jet/IRC/external_sdk/"
+                    "robot_motion_player_sdk_work_20260801/"
+                    "final step/robot_motions.json"
+                ),
+            ),
+            DeclareLaunchArgument(
+                "robot_device_path", default_value="/dev/ttyUSB1"
+            ),
+            DeclareLaunchArgument("robot_baud_rate", default_value="4000000"),
             DeclareLaunchArgument(
                 "robot_motor_ids",
-                default_value="[]",
+                default_value=(
+                    "[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,"
+                    "18,19,20,21,22]"
+                ),
                 description="Integer array; empty by default and therefore unsafe to run.",
             ),
+            DeclareLaunchArgument("startup_pose_enabled", default_value="true"),
+            DeclareLaunchArgument("startup_pose_name", default_value="오뒤307"),
+            DeclareLaunchArgument("startup_pose_duration_ms", default_value="1800"),
             camera,
             detector,
             unified_vision,

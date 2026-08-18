@@ -17,11 +17,12 @@ class MotionCommandBridgeNode(Node):
     ACTION_TO_MOTION_ID = {
         "STRAIGHT": "forward",
         "APPROACH": "forward",
-        "GO": "forward",
-        "SLOW_APPROACH": "forward_short",
-        "FINE_FORWARD_STEP": "forward_short",
-        "APPROACH_GOAL": "forward_short",
-        "APPROACH_HURDLE": "forward_short",
+        "LEFT": "sdk_turn_in_place_left_6",
+        "RIGHT": "sdk_turn_in_place_right_6",
+        "FINE_LEFT": "sdk_turn_in_place_left_1",
+        "FINE_RIGHT": "sdk_turn_in_place_right_1",
+        "PICKUP_NOW": "pickup",
+        "GO": "hurdle",
     }
     TERMINAL_STATUSES = {"SUCCEEDED", "FAILED", "CANCELLED", "REJECTED"}
     DEFAULT_TIMEOUT_MS = 10000

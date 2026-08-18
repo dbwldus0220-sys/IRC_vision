@@ -16,13 +16,14 @@ GENERAL_ACTIONS = frozenset(
         "APPROACH_HURDLE",
         "LEFT",
         "RIGHT",
+        "FINE_LEFT",
+        "FINE_RIGHT",
         "ALIGN_LEFT",
         "ALIGN_RIGHT",
         "RETREAT_GOAL",
         "STOP",
     }
 )
-UNSUPPORTED_GENERAL_ACTIONS = frozenset({"FINE_LEFT", "FINE_RIGHT"})
 TERMINAL_STATUSES = frozenset(
     {
         "SUCCEEDED",
@@ -58,8 +59,6 @@ def normalize_general_action(action: Any) -> str | None:
     if not isinstance(action, str):
         return None
     normalized = action.strip().upper()
-    if normalized in UNSUPPORTED_GENERAL_ACTIONS:
-        return None
     return ACTION_ALIASES.get(normalized)
 
 

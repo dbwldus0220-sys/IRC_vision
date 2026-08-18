@@ -1145,8 +1145,8 @@ class Yolo26Detector(Node):
         normalized_action = action.strip().upper()
         line_labels = {
             "STRAIGHT": "STRAIGHT",
-            "FINE_LEFT": "FINE LEFT (UNMAPPED)",
-            "FINE_RIGHT": "FINE RIGHT (UNMAPPED)",
+            "FINE_LEFT": "FINE LEFT",
+            "FINE_RIGHT": "FINE RIGHT",
             "LEFT": "LEFT",
             "RIGHT": "RIGHT",
             "STOP": "STOP",

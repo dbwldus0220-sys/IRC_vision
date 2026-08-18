@@ -205,10 +205,38 @@ def test_action_aliases_correlate(command_action, status_action):
 
 @pytest.mark.parametrize(
     "action",
-    ["WAIT", "PICKUP_NOW", "FINE_LEFT", "FINE_RIGHT"],
+    ["WAIT", "PICKUP_NOW"],
 )
 def test_non_general_action_is_not_managed_as_execution(action):
     assert not gate_with_vision().can_publish(action)
+
+
+@pytest.mark.parametrize("fine_action", ["FINE_LEFT", "FINE_RIGHT"])
+def test_fine_turn_uses_general_motion_lock_and_fresh_vision(fine_action):
+    gate = gate_with_vision()
+    assert gate.can_publish(fine_action)
+
+    gate.on_command_published(fine_action, command_id=50)
+    for blocked in (
+        fine_action,
+        "FINE_LEFT",
+        "FINE_RIGHT",
+        "STRAIGHT",
+        "LEFT",
+        "RIGHT",
+    ):
+        assert not gate.can_publish(blocked)
+
+    assert gate.on_motion_status(
+        fine_action, "RUNNING", command_id=50
+    ).matched
+    assert gate.on_motion_status(
+        fine_action, "SUCCEEDED", command_id=50
+    ).released
+    assert not gate.can_publish("STRAIGHT")
+
+    gate.on_new_vision_input()
+    assert gate.can_publish("STRAIGHT")
 
 
 @pytest.mark.parametrize(

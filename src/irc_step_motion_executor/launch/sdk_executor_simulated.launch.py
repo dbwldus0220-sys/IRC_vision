@@ -24,7 +24,7 @@ def generate_launch_description():
                 "motion_aliases.yaml",
             ]),
         ),
-        DeclareLaunchArgument("poll_period_ms", default_value="20"),
+        DeclareLaunchArgument("poll_period_ms", default_value="5"),
         DeclareLaunchArgument("running_polls", default_value="2"),
         DeclareLaunchArgument("settling_polls", default_value="1"),
         DeclareLaunchArgument("force_start_failure", default_value="false"),

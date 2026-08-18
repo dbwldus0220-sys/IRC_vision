@@ -153,7 +153,7 @@ class TestSdkExecutorTopics(unittest.TestCase):
         ))
 
         self._request(
-            102, "forward_short", "SLOW_APPROACH", None, None
+            102, "pickup", "PICKUP_NOW", None, None
         )
         null_terminal = self._wait_for(
             lambda value:
@@ -162,7 +162,7 @@ class TestSdkExecutorTopics(unittest.TestCase):
         )
         self.assertIsNone(null_terminal["command_id"])
         self.assertIsNone(null_terminal["event_id"])
-        self.assertEqual(null_terminal["motion_id"], "forward_short")
+        self.assertEqual(null_terminal["motion_id"], "pickup")
 
         self._request(103, "turn_left", "TURN_LEFT")
         unsupported = self._wait_for(
@@ -173,7 +173,7 @@ class TestSdkExecutorTopics(unittest.TestCase):
         self.assertEqual(unsupported["status"], "REJECTED")
 
         self._request(104, "forward", "STRAIGHT")
-        self._request(105, "forward_short", "SLOW_APPROACH")
+        self._request(105, "hurdle", "GO")
         busy = self._wait_for(
             lambda value:
             value["request_id"] == 105

@@ -333,12 +333,13 @@ def test_full_course_mock_flow_without_ros_graph():
     assert repeated == []
     release_general(harness, straight[0])
 
-    fine = harness.publish_vision(line=line_info(offset=-0.18))
+    fine = harness.publish_vision(line=line_info(offset=-0.24))
     assert [item["action"] for item in fine] == ["FINE_LEFT"]
-    assert fine[0]["valid"] is False
-    assert fine[0]["reason"] == "fine_turn_motion_unmapped"
+    assert fine[0]["valid"] is True
+    assert fine[0]["reason"] == "line_tracking"
     assert map_action_to_motion_id(fine[0]["action"]) is None
-    assert harness.general_motion_gate.locked is False
+    assert harness.general_motion_gate.locked is True
+    release_general(harness, fine[0])
 
     large = harness.publish_vision(line=line_info(offset=0.35))
     assert [item["action"] for item in large] == ["RIGHT"]

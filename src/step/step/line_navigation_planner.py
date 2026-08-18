@@ -13,13 +13,13 @@ class NavigationConfig:
     """Tunable limits and gains for line-following command generation."""
 
     min_line_quality: float = 0.35
-    line_center_offset_tolerance: float = 0.12
+    line_center_offset_tolerance: float = 0.20
     line_large_offset_threshold: float = 0.28
-    line_heading_tolerance_deg: float = 4.0
+    line_heading_tolerance_deg: float = 7.0
     line_large_heading_threshold_deg: float = 14.0
     line_lost_frame_threshold: int = 2
     line_max_recovery_attempts: int = 3
-    fine_turn_supported: bool = False
+    fine_turn_supported: bool = True
     max_linear_speed_mps: float = 0.05
     min_linear_speed_mps: float = 0.015
     max_angular_speed_rad_s: float = 0.60

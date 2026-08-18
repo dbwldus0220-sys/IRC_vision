@@ -48,22 +48,22 @@ TEST(SdkExecutorCore, ResolvesForwardAliasBeforeStartingBackend)
     request_json(1, "forward"), 100);
 
   ASSERT_EQ(backend.started_motion_names.size(), 1U);
-  EXPECT_EQ(backend.started_motion_names[0], "전진113");
+  EXPECT_EQ(backend.started_motion_names[0], "전진 실전(3회)");
   EXPECT_EQ(status.status, "RUNNING");
   EXPECT_TRUE(core.has_active_request());
 }
 
-TEST(SdkExecutorCore, ResolvesForwardShortAliasWithoutFallback)
+TEST(SdkExecutorCore, ResolvesPickupAliasWithoutFallback)
 {
   FakeMotionBackend backend;
   irc_step_motion_executor::SdkExecutorCore core(load_catalog(), backend);
 
   const auto status = core.handle_request(
-    request_json(2, "forward_short", "SLOW_APPROACH"), 100);
+    request_json(2, "pickup", "PICKUP_NOW"), 100);
 
   ASSERT_EQ(backend.started_motion_names.size(), 1U);
-  EXPECT_EQ(backend.started_motion_names[0], "첫발");
-  EXPECT_EQ(status.motion_id, "forward_short");
+  EXPECT_EQ(backend.started_motion_names[0], "공잡기리그랩까지 실전");
+  EXPECT_EQ(status.motion_id, "pickup");
 }
 
 TEST(SdkExecutorCore, UnsupportedMotionNeverCallsBackend)
@@ -198,13 +198,13 @@ TEST(SdkExecutorCore, RejectsSecondStartWhileActive)
   core.handle_request(request_json(10, "forward"), 100);
 
   const auto status = core.handle_request(
-    request_json(11, "forward_short", "SLOW_APPROACH"), 101);
+    request_json(11, "pickup", "PICKUP_NOW"), 101);
 
   EXPECT_EQ(status.status, "REJECTED");
   EXPECT_EQ(status.error_code, "BUSY");
   EXPECT_EQ(status.request_id, 11);
   ASSERT_EQ(backend.started_motion_names.size(), 1U);
-  EXPECT_EQ(backend.started_motion_names[0], "전진113");
+  EXPECT_EQ(backend.started_motion_names[0], "전진 실전(3회)");
 }
 
 TEST(SdkExecutorCore, TimeoutCancelsAndReturnsFailedWithCorrelation)
@@ -237,11 +237,11 @@ TEST(SdkExecutorCore, AllowsNewRequestAfterTerminalStatus)
   ASSERT_TRUE(core.poll(101).has_value());
 
   const auto status = core.handle_request(
-    request_json(14, "forward_short", "SLOW_APPROACH"), 102);
+    request_json(14, "hurdle", "GO"), 102);
 
   EXPECT_EQ(status.status, "RUNNING");
   ASSERT_EQ(backend.started_motion_names.size(), 2U);
-  EXPECT_EQ(backend.started_motion_names[1], "첫발");
+  EXPECT_EQ(backend.started_motion_names[1], "허들넘기 실전");
 }
 
 TEST(SdkExecutorCore, BackendStartExceptionBecomesFailed)

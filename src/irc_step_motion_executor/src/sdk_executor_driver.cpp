@@ -9,15 +9,28 @@ namespace irc_step_motion_executor
 
 SdkExecutorDriver::SdkExecutorDriver(
   SdkExecutorCore & core, NowProvider now_provider,
-  StatusPublisher status_publisher)
+  StatusPublisher status_publisher, StartupPoseGate * startup_pose_gate)
 : core_(core),
   now_provider_(std::move(now_provider)),
-  status_publisher_(std::move(status_publisher))
+  status_publisher_(std::move(status_publisher)),
+  startup_pose_gate_(startup_pose_gate)
 {
 }
 
 void SdkExecutorDriver::handle_request(const std::string & payload)
 {
+  if (startup_pose_gate_ != nullptr &&
+    !startup_pose_gate_->navigation_allowed())
+  {
+    MotionStatus status;
+    status.status = "REJECTED";
+    status.error_code = "STARTUP_POSE_GATE_LOCKED";
+    status.message = startup_pose_gate_->error_message().empty() ?
+      "startup pose transition has not completed" :
+      startup_pose_gate_->error_message();
+    publish(status);
+    return;
+  }
   publish(core_.handle_request(payload, now_provider_()));
 }
 
@@ -28,15 +41,27 @@ void SdkExecutorDriver::handle_cancel(const std::string & payload)
 
 void SdkExecutorDriver::poll()
 {
+  if (startup_pose_gate_ != nullptr &&
+    !startup_pose_gate_->navigation_allowed())
+  {
+    startup_pose_gate_->poll();
+    return;
+  }
   const auto status = core_.poll(now_provider_());
   if (status) {
-    publish(*status);
+    publish(*status, status->status == "RUNNING");
   }
 }
 
-void SdkExecutorDriver::publish(const MotionStatus & status)
+void SdkExecutorDriver::publish(
+  const MotionStatus & status, bool suppress_duplicate)
 {
-  status_publisher_(CatalogOnlyCore::to_json(status));
+  const std::string payload = CatalogOnlyCore::to_json(status);
+  if (suppress_duplicate && payload == last_published_payload_) {
+    return;
+  }
+  last_published_payload_ = payload;
+  status_publisher_(payload);
 }
 
 }  // namespace irc_step_motion_executor

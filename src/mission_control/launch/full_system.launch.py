@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Launch the STEP vision pipeline with the simulated C++ motion executor."""
+"""Launch the STEP vision pipeline with a selectable C++ motion backend."""
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
@@ -14,13 +14,21 @@ from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description() -> LaunchDescription:
-    """Build the camera-to-simulated-motion ROS graph."""
+    """Build the camera-to-motion ROS graph."""
     enable_camera = LaunchConfiguration("enable_camera")
     device = LaunchConfiguration("device")
     display = LaunchConfiguration("display")
     metrics_mode = LaunchConfiguration("metrics_mode")
     max_fps = LaunchConfiguration("max_fps")
     initial_mission_phase = LaunchConfiguration("initial_mission_phase")
+    backend_type = LaunchConfiguration("backend_type")
+    enable_robot_hardware = LaunchConfiguration("enable_robot_hardware")
+    motion_json_path = LaunchConfiguration("motion_json_path")
+    explicit_torque_approval = LaunchConfiguration(
+        "explicit_torque_approval"
+    )
+    robot_device_path = LaunchConfiguration("robot_device_path")
+    robot_baud_rate = LaunchConfiguration("robot_baud_rate")
 
     camera = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -84,15 +92,25 @@ def generate_launch_description() -> LaunchDescription:
         emulate_tty=True,
         parameters=[
             {
-                "backend_type": "simulated",
-                "enable_robot_hardware": False,
-                "poll_period_ms": 20,
+                "backend_type": backend_type,
+                "enable_robot_hardware": ParameterValue(
+                    enable_robot_hardware,
+                    value_type=bool,
+                ),
+                "poll_period_ms": 5,
                 "running_polls": 2,
                 "settling_polls": 1,
-                "explicit_torque_approval": False,
-                "motion_json_path": "",
-                "robot_device_path": "",
-                "robot_baud_rate": 0,
+                "explicit_torque_approval": ParameterValue(
+                    explicit_torque_approval,
+                    value_type=bool,
+                ),
+                "motion_json_path": motion_json_path,
+                "robot_device_path": robot_device_path,
+                "robot_baud_rate": ParameterValue(
+                    robot_baud_rate,
+                    value_type=int,
+                ),
+                "robot_motor_ids": list(range(23)),
             }
         ],
     )
@@ -130,6 +148,45 @@ def generate_launch_description() -> LaunchDescription:
                 description=(
                     "Initial planner phase before /mission/phase is received."
                 ),
+            ),
+            DeclareLaunchArgument(
+                "backend_type",
+                default_value="simulated",
+                choices=["simulated", "robot_motion_player"],
+                description=(
+                    "Select the simulated or robot_motion_player backend."
+                ),
+            ),
+            DeclareLaunchArgument(
+                "enable_robot_hardware",
+                default_value="false",
+                description="Allow access to physical robot hardware.",
+            ),
+            DeclareLaunchArgument(
+                "motion_json_path",
+                default_value="",
+                description=(
+                    "RobotMotionPlayer motion JSON path; empty is allowed "
+                    "for the simulated backend."
+                ),
+            ),
+            DeclareLaunchArgument(
+                "explicit_torque_approval",
+                default_value="false",
+                description=(
+                    "Explicitly approve torque enable during hardware "
+                    "initialization."
+                ),
+            ),
+            DeclareLaunchArgument(
+                "robot_device_path",
+                default_value="/dev/ttyUSB0",
+                description="Dynamixel serial device for the fixed SDK profile.",
+            ),
+            DeclareLaunchArgument(
+                "robot_baud_rate",
+                default_value="4000000",
+                description="Dynamixel baud rate for the fixed SDK profile.",
             ),
             camera,
             detector,

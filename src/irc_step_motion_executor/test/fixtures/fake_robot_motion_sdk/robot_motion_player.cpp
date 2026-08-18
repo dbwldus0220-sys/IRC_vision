@@ -121,6 +121,23 @@ StartResult RobotMotionPlayer::start(std::string_view) noexcept
   return StartResult::Accepted;
 }
 
+bool RobotMotionPlayer::startPoseTransition(
+  const std::vector<double> & target_angles_deg, std::int64_t duration_ms) noexcept
+{
+  if (!initialized_ || hardware_ == nullptr || !hardware_->ready() ||
+    target_angles_deg.size() != 23U || duration_ms <= 0)
+  {
+    last_error_ = "startup pose hardware/configuration is not ready";
+    return false;
+  }
+  return true;
+}
+
+MotionStatus RobotMotionPlayer::updateStartupPose() noexcept
+{
+  return initialized_ ? MotionStatus::Succeeded : MotionStatus::Failed;
+}
+
 CancelResult RobotMotionPlayer::cancel() noexcept
 {
   return CancelResult::Cancelled;

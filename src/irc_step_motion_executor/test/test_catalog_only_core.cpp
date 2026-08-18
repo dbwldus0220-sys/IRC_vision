@@ -37,15 +37,22 @@ json_object * load_contract_vectors()
   return vectors;
 }
 
-TEST(MotionAliasCatalog, LoadsOnlyCandidateAliases)
+TEST(MotionAliasCatalog, LoadsLatestSdkAndCanonicalAliases)
 {
   irc_step_motion_executor::MotionAliasCatalog catalog;
   std::string error;
   ASSERT_TRUE(catalog.load(TEST_ALIAS_CONFIG, error)) << error;
-  EXPECT_EQ(catalog.size(), 2U);
-  EXPECT_EQ(catalog.resolve("forward"), std::optional<std::string>("전진113"));
+  EXPECT_EQ(catalog.size(), 15U);
   EXPECT_EQ(
-    catalog.resolve("forward_short"), std::optional<std::string>("첫발"));
+    catalog.resolve("forward"),
+    std::optional<std::string>("전진 실전(3회)"));
+  EXPECT_EQ(
+    catalog.resolve("pickup"),
+    std::optional<std::string>("공잡기리그랩까지 실전"));
+  EXPECT_EQ(
+    catalog.resolve("sdk_turn_right_3"),
+    std::optional<std::string>("우회전실전(3회)"));
+  EXPECT_FALSE(catalog.resolve("forward_short").has_value());
   EXPECT_FALSE(catalog.resolve("turn_left").has_value());
   EXPECT_FALSE(catalog.resolve("shoot").has_value());
 }
@@ -124,7 +131,7 @@ TEST(CatalogOnlyCore, SerializedStatusContainsContractFields)
 {
   const auto status = make_core().handle_request(
     R"({"action":"STEP","command_id":4,"event_id":5,)"
-    R"("request_id":6,"motion_id":"forward_short"})");
+    R"("request_id":6,"motion_id":"pickup"})");
   const std::string payload =
     irc_step_motion_executor::CatalogOnlyCore::to_json(status);
   json_object * object = json_tokener_parse(payload.c_str());
@@ -159,8 +166,8 @@ TEST(CatalogOnlyCore, SerializedStatusContainsContractFields)
 TEST(CatalogOnlyCore, SerializedStatusPreservesNullCorrelationTypes)
 {
   const auto status = make_core().handle_request(
-    R"({"action":"SLOW_APPROACH","command_id":null,"event_id":null,)"
-    R"("request_id":7,"motion_id":"forward_short"})");
+    R"({"action":"PICKUP_NOW","command_id":null,"event_id":null,)"
+    R"("request_id":7,"motion_id":"pickup"})");
   const std::string payload =
     irc_step_motion_executor::CatalogOnlyCore::to_json(status);
   json_object * object = json_tokener_parse(payload.c_str());

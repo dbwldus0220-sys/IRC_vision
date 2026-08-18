@@ -52,6 +52,8 @@ MotionBackendFactoryResult create_motion_backend(
         runtime_result.error_code, runtime_result.message};
     }
     MotionBackendFactoryResult result;
+    result.startup_pose_controller =
+      runtime_result.runtime.startup_pose_controller;
     result.runtime_owner = std::move(runtime_result.runtime.runtime_owner);
     result.backend = std::move(runtime_result.runtime.backend);
     return result;

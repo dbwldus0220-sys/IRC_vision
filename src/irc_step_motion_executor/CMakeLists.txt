@@ -161,7 +161,10 @@ target_compile_features(sdk_executor_driver PUBLIC cxx_std_17)
 target_include_directories(sdk_executor_driver PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include>")
-target_link_libraries(sdk_executor_driver PUBLIC sdk_executor_core)
+target_sources(sdk_executor_driver PRIVATE
+  src/startup_pose_gate.cpp src/startup_pose_catalog.cpp)
+target_link_libraries(sdk_executor_driver PUBLIC
+  sdk_executor_core robot_motion_runtime_config PkgConfig::JSON_C)
 
 add_executable(catalog_only_node src/catalog_only_node.cpp)
 target_compile_features(catalog_only_node PUBLIC cxx_std_17)
@@ -200,8 +203,13 @@ install(TARGETS
   RUNTIME DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY include/ DESTINATION include)
 install(DIRECTORY config launch DESTINATION share/${PROJECT_NAME})
+install(PROGRAMS
+  scripts/manual_motion_request.py
+  scripts/validate_motion_catalog.py
+  DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
+  find_package(Python3 REQUIRED COMPONENTS Interpreter)
   find_package(ament_cmake_gtest REQUIRED)
   ament_add_gtest(test_catalog_only_core test/test_catalog_only_core.cpp)
   if(TARGET test_catalog_only_core)
@@ -301,6 +309,18 @@ if(BUILD_TESTING)
     target_compile_definitions(test_sdk_executor_driver PRIVATE
       TEST_ALIAS_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/config/motion_aliases.yaml")
   endif()
+  ament_add_gtest(test_startup_pose_gate test/test_startup_pose_gate.cpp)
+  if(TARGET test_startup_pose_gate)
+    target_include_directories(test_startup_pose_gate PRIVATE test)
+    target_link_libraries(test_startup_pose_gate sdk_executor_driver)
+    target_compile_definitions(test_startup_pose_gate PRIVATE
+      TEST_ALIAS_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/config/motion_aliases.yaml")
+  endif()
+  ament_add_gtest(
+    test_startup_pose_catalog test/test_startup_pose_catalog.cpp)
+  if(TARGET test_startup_pose_catalog)
+    target_link_libraries(test_startup_pose_catalog sdk_executor_driver)
+  endif()
 
   find_package(launch_testing_ament_cmake REQUIRED)
   file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/ros_test_logs")
@@ -361,6 +381,10 @@ if(BUILD_TESTING)
       "-DPACKAGE_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
       "-DTEST_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/sdk_cmake_tests/sdk_disabled"
       -P "${CMAKE_CURRENT_SOURCE_DIR}/test/run_sdk_disabled_case.cmake")
+  add_test(
+    NAME test_validate_motion_catalog
+    COMMAND ${Python3_EXECUTABLE}
+      "${CMAKE_CURRENT_SOURCE_DIR}/test/test_validate_motion_catalog.py")
 endif()
 
 ament_export_include_directories(include)

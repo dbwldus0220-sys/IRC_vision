@@ -120,11 +120,12 @@ def test_production_action_mapping_contains_only_approved_contract():
     assert MotionCommandBridgeNode.ACTION_TO_MOTION_ID == {
         "STRAIGHT": "forward",
         "APPROACH": "forward",
-        "GO": "forward",
-        "SLOW_APPROACH": "forward_short",
-        "FINE_FORWARD_STEP": "forward_short",
-        "APPROACH_GOAL": "forward_short",
-        "APPROACH_HURDLE": "forward_short",
+        "LEFT": "sdk_turn_in_place_left_6",
+        "RIGHT": "sdk_turn_in_place_right_6",
+        "FINE_LEFT": "sdk_turn_in_place_left_1",
+        "FINE_RIGHT": "sdk_turn_in_place_right_1",
+        "PICKUP_NOW": "pickup",
+        "GO": "hurdle",
     }
 
 
@@ -133,11 +134,12 @@ def test_production_action_mapping_contains_only_approved_contract():
     [
         ("STRAIGHT", "forward"),
         ("APPROACH", "forward"),
-        ("GO", "forward"),
-        ("SLOW_APPROACH", "forward_short"),
-        ("FINE_FORWARD_STEP", "forward_short"),
-        ("APPROACH_GOAL", "forward_short"),
-        ("APPROACH_HURDLE", "forward_short"),
+        ("LEFT", "sdk_turn_in_place_left_6"),
+        ("RIGHT", "sdk_turn_in_place_right_6"),
+        ("FINE_LEFT", "sdk_turn_in_place_left_1"),
+        ("FINE_RIGHT", "sdk_turn_in_place_right_1"),
+        ("PICKUP_NOW", "pickup"),
+        ("GO", "hurdle"),
     ],
 )
 def test_supported_action_builds_executor_request(action, motion_id):
@@ -192,14 +194,13 @@ def test_positive_source_timeout_is_preserved():
     [
         "TURN_LEFT",
         "TURN_RIGHT",
-        "LEFT",
-        "RIGHT",
         "ALIGN_LEFT",
         "ALIGN_RIGHT",
-        "FINE_LEFT",
-        "FINE_RIGHT",
         "RETREAT_GOAL",
-        "PICKUP_NOW",
+        "SLOW_APPROACH",
+        "FINE_FORWARD_STEP",
+        "APPROACH_GOAL",
+        "APPROACH_HURDLE",
         "SHOT",
         "CROSS_FINISH",
         "STOP",

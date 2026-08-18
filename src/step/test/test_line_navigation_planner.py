@@ -62,9 +62,25 @@ def test_offset_and_preview_are_used_for_steering():
     )
 
     assert command.motion == "FINE_RIGHT"
-    assert command.valid is False
-    assert command.reason == "fine_turn_motion_unmapped"
+    assert command.valid is True
+    assert command.reason == "line_tracking"
     assert command.steering_error_deg > 7.0
+
+
+@pytest.mark.parametrize(
+    ("heading", "expected"),
+    [(8.0, "FINE_RIGHT"), (-8.0, "FINE_LEFT")],
+)
+def test_moderate_heading_creates_valid_fine_turn(heading, expected):
+    planner = LineNavigationPlanner()
+
+    command = planner.plan(
+        line_info(filtered_heading_error_deg=heading),
+        0.1,
+    )
+
+    assert command.motion == expected
+    assert command.valid is True
 
 
 @pytest.mark.parametrize(
@@ -102,7 +118,7 @@ def test_recovery_uses_exit_threshold_before_returning_to_tracking():
         0.1,
     )
     held = planner.plan(
-        line_info(filtered_lateral_offset_norm=0.20),
+        line_info(filtered_lateral_offset_norm=0.21),
         0.1,
     )
     released = planner.plan(

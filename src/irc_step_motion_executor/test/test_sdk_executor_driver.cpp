@@ -107,7 +107,7 @@ TEST(SdkExecutorDriver, RequestPublishesImmediateRunningStatus)
   EXPECT_EQ(string_field(fixture.published[0], "status"), "RUNNING");
   EXPECT_EQ(int_field(fixture.published[0], "request_id"), 1);
   ASSERT_EQ(fixture.backend.started_motion_names.size(), 1U);
-  EXPECT_EQ(fixture.backend.started_motion_names[0], "전진113");
+  EXPECT_EQ(fixture.backend.started_motion_names[0], "전진 실전(3회)");
 }
 
 TEST(SdkExecutorDriver, InvalidAndUnsupportedRequestsPublishRejections)
@@ -130,13 +130,13 @@ TEST(SdkExecutorDriver, NullableCorrelationFieldsRemainNull)
 {
   DriverFixture fixture;
   fixture.driver.handle_request(
-    request_json(3, "forward_short", "SLOW_APPROACH", "null", "null"));
+    request_json(3, "pickup", "PICKUP_NOW", "null", "null"));
 
   ASSERT_EQ(fixture.published.size(), 1U);
   EXPECT_TRUE(field_is_null(fixture.published[0], "command_id"));
   EXPECT_TRUE(field_is_null(fixture.published[0], "event_id"));
   EXPECT_EQ(
-    string_field(fixture.published[0], "action"), "SLOW_APPROACH");
+    string_field(fixture.published[0], "action"), "PICKUP_NOW");
 }
 
 TEST(SdkExecutorDriver, CancelCallbackPublishesAndTerminalPollPublishes)
@@ -185,6 +185,21 @@ TEST(SdkExecutorDriver, TerminalPollPublishesSucceededStatus)
   ASSERT_EQ(fixture.published.size(), 2U);
   EXPECT_EQ(string_field(fixture.published[1], "status"), "SUCCEEDED");
   EXPECT_FALSE(fixture.core.has_active_request());
+}
+
+TEST(SdkExecutorDriver, SuppressesIdenticalRunningStatusAtControlRate)
+{
+  DriverFixture fixture;
+  fixture.backend.statuses = {
+    {irc_step_motion_executor::BackendState::RUNNING, "", "moving"},
+    {irc_step_motion_executor::BackendState::RUNNING, "", "moving"}};
+  fixture.driver.handle_request(request_json(8, "forward"));
+  fixture.driver.poll();
+  fixture.driver.poll();
+
+  ASSERT_EQ(fixture.published.size(), 2U);
+  EXPECT_EQ(string_field(fixture.published[1], "status"), "RUNNING");
+  EXPECT_EQ(string_field(fixture.published[1], "message"), "moving");
 }
 
 TEST(SdkExecutorDriver, BackendExceptionPublishesFailedWithoutEscaping)

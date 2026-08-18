@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace irc_step
 {
@@ -59,6 +60,10 @@ public:
 
   bool initialize() noexcept;
   StartResult start(std::string_view motion_name) noexcept;
+  bool startPoseTransition(
+    const std::vector<double> & target_angles_deg,
+    std::int64_t duration_ms) noexcept;
+  MotionStatus updateStartupPose() noexcept;
   CancelResult cancel() noexcept;
   MotionStatus update() noexcept;
   MotionError result() const noexcept;

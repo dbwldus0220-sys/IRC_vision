@@ -15,6 +15,45 @@ namespace irc_step_motion_executor
 namespace
 {
 
+template<typename PlayerT>
+bool start_startup_pose(
+  PlayerT & player, const std::vector<double> & angles, std::int64_t duration_ms,
+  std::string & error)
+{
+  if constexpr (requires {
+      player.startPoseTransition(angles, duration_ms);
+    })
+  {
+    if (player.startPoseTransition(angles, duration_ms)) {
+      return true;
+    }
+    error = std::string(player.lastError());
+    return false;
+  } else {
+    error =
+      "external RobotMotionPlayer SDK lacks "
+      "startPoseTransition(angles, duration_ms)";
+    return false;
+  }
+}
+
+template<typename PlayerT>
+StartupPoseUpdate update_startup_pose(PlayerT & player)
+{
+  if constexpr (requires {player.updateStartupPose();}) {
+    const auto status = player.updateStartupPose();
+    using Status = decltype(status);
+    if (status == Status::Running) {return {StartupPoseState::MOVING, "", ""};}
+    if (status == Status::Settling) {return {StartupPoseState::SETTLING, "", ""};}
+    if (status == Status::Succeeded) {return {StartupPoseState::SUCCEEDED, "", ""};}
+    return {StartupPoseState::FAILED, "SDK_STARTUP_POSE_FAILED",
+      std::string(player.lastError())};
+  } else {
+    return {StartupPoseState::FAILED, "SDK_STARTUP_POSE_UNSUPPORTED",
+      "external RobotMotionPlayer SDK lacks updateStartupPose()"};
+  }
+}
+
 irc_step::DynamixelMotionHardwareConfig to_sdk_hardware_config(
   const RobotMotionRuntimeConfig & config)
 {
@@ -34,7 +73,7 @@ irc_step::DynamixelMotionHardwareConfig to_sdk_hardware_config(
   return sdk_config;
 }
 
-class ProductionRobotMotionRuntimeOwner
+class ProductionRobotMotionRuntimeOwner : public StartupPoseController
 {
 public:
   explicit ProductionRobotMotionRuntimeOwner(
@@ -58,6 +97,19 @@ public:
   std::string last_error() const
   {
     return std::string(player_.lastError());
+  }
+
+  bool start(
+    const std::vector<double> & target_angles_deg, std::int64_t duration_ms,
+    std::string & error_message) override
+  {
+    return start_startup_pose(
+      player_, target_angles_deg, duration_ms, error_message);
+  }
+
+  StartupPoseUpdate update() override
+  {
+    return update_startup_pose(player_);
   }
 
 private:
@@ -162,6 +214,7 @@ RobotMotionRuntimeFactoryResult ProductionRobotMotionRuntimeFactory::create(
     runtime.runtime_owner = owner;
     runtime.backend =
       std::make_unique<RobotMotionPlayerBackend>(owner->player_api());
+    runtime.startup_pose_controller = owner.get();
     return {std::move(runtime), "", ""};
   } catch (const std::exception & exception) {
     return creation_error(

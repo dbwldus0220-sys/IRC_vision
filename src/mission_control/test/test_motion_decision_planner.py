@@ -1237,12 +1237,12 @@ def test_line_offset_policy_uses_tolerance_and_strong_correction():
     )
     left = planner.plan(
         "LINE_TRACK",
-        observations(line=line_info(filtered_lateral_offset_norm=-0.18)),
+        observations(line=line_info(filtered_lateral_offset_norm=-0.24)),
         0.1,
     )
     right = planner.plan(
         "LINE_TRACK",
-        observations(line=line_info(filtered_lateral_offset_norm=0.18)),
+        observations(line=line_info(filtered_lateral_offset_norm=0.24)),
         0.1,
     )
     far_left = planner.plan(
@@ -1259,10 +1259,10 @@ def test_line_offset_policy_uses_tolerance_and_strong_correction():
     assert centered.action == "STRAIGHT"
     assert left.action == "FINE_LEFT"
     assert right.action == "FINE_RIGHT"
-    assert left.valid is False
-    assert right.valid is False
-    assert left.reason == "fine_turn_motion_unmapped"
-    assert right.reason == "fine_turn_motion_unmapped"
+    assert left.valid is True
+    assert right.valid is True
+    assert left.reason == "line_tracking"
+    assert right.reason == "line_tracking"
     assert far_left.action == "LEFT"
     assert far_right.action == "RIGHT"
     assert far_left.action != "STRAIGHT"
@@ -1291,7 +1291,7 @@ def test_one_missing_line_frame_does_not_start_strong_recovery():
     planner = MotionDecisionPlanner()
     planner.plan(
         "LINE_TRACK",
-        observations(line=line_info(filtered_lateral_offset_norm=-0.18)),
+        observations(line=line_info(filtered_lateral_offset_norm=-0.24)),
         0.1,
     )
 
@@ -1309,7 +1309,7 @@ def test_one_missing_line_frame_does_not_start_strong_recovery():
 
 @pytest.mark.parametrize(
     ("offset", "expected"),
-    [(-0.18, "LEFT"), (0.18, "RIGHT")],
+    [(-0.24, "LEFT"), (0.24, "RIGHT")],
 )
 def test_complete_line_loss_recovers_from_last_valid_offset(
     offset,
@@ -1373,7 +1373,7 @@ def test_reacquired_line_returns_directly_to_straight():
     planner = MotionDecisionPlanner()
     planner.plan(
         "LINE_TRACK",
-        observations(line=line_info(filtered_lateral_offset_norm=-0.18)),
+        observations(line=line_info(filtered_lateral_offset_norm=-0.24)),
         0.1,
     )
     planner.plan("LINE_TRACK", observations(line=None), 0.1)
@@ -1401,7 +1401,7 @@ def test_line_recovery_attempt_limit_stops_repeated_commands():
     )
     planner.plan(
         "LINE_TRACK",
-        observations(line=line_info(filtered_lateral_offset_norm=0.18)),
+        observations(line=line_info(filtered_lateral_offset_norm=0.24)),
         0.1,
     )
 
@@ -1422,21 +1422,21 @@ def test_auto_and_line_track_share_line_correction_policy(phase):
 
     decision = planner.plan(
         phase,
-        observations(line=line_info(filtered_lateral_offset_norm=0.18)),
+        observations(line=line_info(filtered_lateral_offset_norm=0.24)),
         0.1,
     )
 
     assert decision.source == "line"
     assert decision.action == "FINE_RIGHT"
-    assert decision.valid is False
-    assert decision.reason == "fine_turn_motion_unmapped"
+    assert decision.valid is True
+    assert decision.reason == "line_tracking"
 
 
 def test_special_motion_lock_does_not_advance_line_recovery():
     planner = MotionDecisionPlanner()
     planner.plan(
         "LINE_TRACK",
-        observations(line=line_info(filtered_lateral_offset_norm=0.18)),
+        observations(line=line_info(filtered_lateral_offset_norm=0.24)),
         0.1,
     )
     before = planner.line_planner.line_recovery_attempts
