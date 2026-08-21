@@ -12,6 +12,9 @@ from mission_control.legacy_motion_executor_adapter import (
 from mission_control.legacy_motion_status_adapter import (
     convert_executor_status,
 )
+from mission_control.executor_heartbeat_watchdog import (
+    ExecutorHeartbeatWatchdog,
+)
 from mission_control.mission_phase_manager import MissionPhaseManager
 from mission_control.motion_command_gate import GeneralMotionCommandGate
 from mission_control.motion_decision_node import MotionDecisionNode
@@ -98,6 +101,15 @@ class MissionFlowHarness:
         self.planner = MotionDecisionPlanner()
         self.general_motion_gate = GeneralMotionCommandGate()
         self.safety_interlock = SafetyInterlock()
+        self.executor_heartbeat_watchdog = ExecutorHeartbeatWatchdog(
+            started_at=0.0,
+            startup_grace_sec=5.0,
+            timeout_sec=2.0,
+        )
+        self.executor_heartbeat_watchdog.observe(
+            sequence=0,
+            observed_at=0.0,
+        )
         self.publisher = CapturePublisher()
         self._command_publisher_ready = None
         self.logger = FakeLogger()

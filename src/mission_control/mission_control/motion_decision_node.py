@@ -13,6 +13,7 @@ from rclpy.node import Node
 from std_msgs.msg import String
 
 from .executor_heartbeat_watchdog import ExecutorHeartbeatWatchdog
+from .executor_heartbeat_watchdog import HeartbeatStartupDelay
 from .mission_phase_manager import MissionPhaseManager
 from .motion_command_gate import GeneralMotionCommandGate
 from .motion_command_gate import normalize_general_action
@@ -425,6 +426,10 @@ class MotionDecisionNode(Node):
         if timeout is None:
             return
 
+        if isinstance(timeout, HeartbeatStartupDelay):
+            self.get_logger().warning(timeout.message)
+            return
+
         if self.active_special_command_id is not None:
             action = self.active_special_action
             command_id = self.active_special_command_id
@@ -809,6 +814,11 @@ class MotionDecisionNode(Node):
 
     def _publish_decision(self) -> None:
         if self.safety_interlock.latched:
+            return
+
+        if not self.executor_heartbeat_watchdog.executor_seen:
+            # Do not race executor preflight/startup pose with navigation.
+            self._reset_pre_motion_settle()
             return
 
         now = time.monotonic()

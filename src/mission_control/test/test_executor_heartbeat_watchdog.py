@@ -6,6 +6,7 @@ from mission_control.executor_heartbeat_watchdog import (
 from mission_control.executor_heartbeat_watchdog import (
     ExecutorHeartbeatWatchdog,
 )
+from mission_control.executor_heartbeat_watchdog import HeartbeatStartupDelay
 
 
 def watchdog():
@@ -22,12 +23,10 @@ def test_startup_grace_does_not_report_missing_executor_early():
     assert monitor.check(15.0) is None
 
 
-def test_never_seen_executor_times_out_after_startup_grace():
+def test_never_seen_executor_reports_noncritical_startup_delay_once():
     monitor = watchdog()
     timeout = monitor.check(15.001)
-    assert timeout is not None
-    assert timeout.error_code == EXECUTOR_HEARTBEAT_TIMEOUT
-    assert timeout.executor_seen is False
+    assert isinstance(timeout, HeartbeatStartupDelay)
     assert monitor.check(20.0) is None
 
 
@@ -50,8 +49,11 @@ def test_seen_executor_times_out_after_heartbeat_loss():
     assert timeout.executor_seen is True
 
 
-def test_late_heartbeat_does_not_reemit_or_clear_reported_timeout():
+def test_late_first_heartbeat_enables_runtime_timeout_detection():
     monitor = watchdog()
-    assert monitor.check(16.0) is not None
+    assert isinstance(monitor.check(16.0), HeartbeatStartupDelay)
     monitor.observe(sequence=0, observed_at=17.0)
-    assert monitor.check(30.0) is None
+    timeout = monitor.check(19.001)
+    assert timeout is not None
+    assert timeout.error_code == EXECUTOR_HEARTBEAT_TIMEOUT
+    assert timeout.executor_seen is True

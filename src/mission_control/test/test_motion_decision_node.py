@@ -427,6 +427,10 @@ class ReadinessPublishNode(FakeDecisionNode):
         self.terminal_latch = None
         self.publisher = ReadinessPublisher(subscription_count)
         self._command_publisher_ready = None
+        self.executor_heartbeat_watchdog.observe(
+            sequence=0,
+            observed_at=0.0,
+        )
 
     @staticmethod
     def _fresh_observations(_now):
@@ -884,12 +888,59 @@ def test_success_and_fresh_vision_do_not_clear_critical_latch():
     assert node.publisher.messages == []
 
 
-def test_never_seen_executor_timeout_latches_after_grace_only():
+def test_never_seen_executor_after_grace_does_not_latch():
     node = FakeDecisionNode()
     node._check_executor_heartbeat(now=5.0)
     assert not node.safety_interlock.latched
 
     node._check_executor_heartbeat(now=5.001)
+    assert not node.safety_interlock.latched
+    assert any(
+        'waiting for executor readiness' in warning
+        for warning in node.logger.warnings
+    )
+
+
+def test_motion_is_blocked_until_first_executor_heartbeat():
+    node = ReadinessPublishNode(general_decision('STRAIGHT'))
+    node.executor_heartbeat_watchdog = ExecutorHeartbeatWatchdog(
+        started_at=0.0,
+        startup_grace_sec=5.0,
+        timeout_sec=2.0,
+    )
+
+    node._check_executor_heartbeat(now=6.0)
+    MotionDecisionNode._publish_decision(node)
+
+    assert not node.safety_interlock.latched
+    assert node.publisher.messages == []
+    assert node.command_id == 0
+
+
+def test_late_first_heartbeat_releases_motion_publication():
+    node = ReadinessPublishNode(general_decision('STRAIGHT'))
+    node.executor_heartbeat_watchdog = ExecutorHeartbeatWatchdog(
+        started_at=0.0,
+        startup_grace_sec=5.0,
+        timeout_sec=2.0,
+    )
+    node._check_executor_heartbeat(now=6.0)
+
+    node.executor_heartbeat_watchdog.observe(sequence=1, observed_at=7.0)
+    MotionDecisionNode._publish_decision(node)
+
+    assert not node.safety_interlock.latched
+    assert len(node.publisher.messages) == 1
+
+
+def test_runtime_loss_is_detected_after_startup_delay_and_late_heartbeat():
+    node = FakeDecisionNode()
+    node._check_executor_heartbeat(now=6.0)
+    assert not node.safety_interlock.latched
+
+    node.executor_heartbeat_watchdog.observe(sequence=1, observed_at=7.0)
+    node._check_executor_heartbeat(now=9.001)
+
     snapshot = node.safety_interlock.snapshot
     assert snapshot.latched
     assert snapshot.error_code == 'EXECUTOR_HEARTBEAT_TIMEOUT'
@@ -941,7 +992,11 @@ def test_heartbeat_loss_preserves_active_special_correlation_and_blocks():
 
 def test_returning_heartbeat_does_not_clear_timeout_latch():
     node = FakeDecisionNode()
-    node._check_executor_heartbeat(now=6.0)
+    node.executor_heartbeat_watchdog.observe(
+        sequence=0,
+        observed_at=1.0,
+    )
+    node._check_executor_heartbeat(now=3.001)
     original = node.safety_interlock.snapshot
     node.executor_heartbeat_watchdog.observe(
         sequence=0,
