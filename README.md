@@ -99,7 +99,7 @@ preview는 `|turn_angle_deg| >= 8°`, consistency `>= 0.55`일 때만 반영한�
 
 - `STRAIGHT`: `|offset| <= 0.20`, `|heading| <= 7°`, `|steering| <= 7°`.
 - `FINE_LEFT/FINE_RIGHT`: 중간 offset/heading/steering 보정 후보. 이전 FINE 상태에서는 진입 `7°`, 이탈 `4°` hysteresis를 쓴다.
-- `LEFT/RIGHT`: offset 진입 임계 `0.28` 초과 또는 heading `14°` 이상인 큰 보정. offset recovery는 `0.20` tolerance까지 돌아와야 풀린다.
+- `LEFT/RIGHT`: offset 진입 임계 `0.28` 초과 또는 heading `18°` 이상인 큰 보정. offset recovery는 `0.20` tolerance까지 돌아와야 풀린다.
 
 현재 `fine_turn_supported=false`다. FINE 후보가 나와도 실제 planner 출력은 `STRAIGHT`, 각속도 0, reason `fine_turn_unavailable_straight_fallback`이며 bridge mapping도 없다. 2/4/6/8/10회 세분화는 구현되지 않았다.
 
