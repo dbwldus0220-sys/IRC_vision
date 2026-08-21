@@ -16,7 +16,7 @@ class NavigationConfig:
     line_center_offset_tolerance: float = 0.20
     line_large_offset_threshold: float = 0.28
     line_heading_tolerance_deg: float = 7.0
-    line_large_heading_threshold_deg: float = 14.0
+    line_large_heading_threshold_deg: float = 18.0
     line_lost_frame_threshold: int = 2
     line_max_recovery_attempts: int = 3
     fine_turn_supported: bool = False
@@ -30,8 +30,10 @@ class NavigationConfig:
     preview_min_turn_deg: float = 8.0
     preview_min_consistency: float = 0.55
     steering_response_sec: float = 0.70
-    turn_enter_deg: float = 7.0
-    turn_exit_deg: float = 4.0
+    turn_enter_deg: float = 12.0
+    turn_exit_deg: float = 7.0
+    direction_confirmation_frames: int = 5
+    ambiguity_min_angle_deg: float = 25.0
     command_duration_sec: float = 0.40
 
 
@@ -101,6 +103,57 @@ def _clamp(value: float, low: float, high: float) -> float:
     return max(low, min(high, value))
 
 
+def _normalized_severity(
+    value: float,
+    tolerance: float,
+    threshold: float,
+) -> float:
+    span = threshold - tolerance
+    if span <= 0.0:
+        return 1.0 if abs(value) > tolerance else 0.0
+    return _clamp((abs(value) - tolerance) / span, 0.0, 1.0)
+
+
+def _fine_turn_severity(
+    config: NavigationConfig,
+    lateral_offset_norm: float,
+    heading_error_deg: float,
+    steering_error_deg: float,
+) -> float:
+    """Return the strongest normalized fine-turn correction demand."""
+    return max(
+        _normalized_severity(
+            lateral_offset_norm,
+            config.line_center_offset_tolerance,
+            config.line_large_offset_threshold,
+        ),
+        _normalized_severity(
+            heading_error_deg,
+            config.line_heading_tolerance_deg,
+            config.line_large_heading_threshold_deg,
+        ),
+        _normalized_severity(
+            steering_error_deg,
+            config.turn_exit_deg,
+            config.line_large_heading_threshold_deg,
+        ),
+    )
+
+
+def _fine_turn_repeat_count(severity: float) -> int:
+    """Map normalized fine-turn severity to an SDK sequence level."""
+    severity = round(_clamp(severity, 0.0, 1.0), 12)
+    if severity < 0.2:
+        return 2
+    if severity < 0.4:
+        return 4
+    if severity < 0.6:
+        return 6
+    if severity < 0.8:
+        return 8
+    return 10
+
+
 def _number(data: dict[str, Any], key: str) -> float | None:
     value = data.get(key)
     if value is None or isinstance(value, bool):
@@ -119,6 +172,9 @@ class LineNavigationPlanner:
         self.config = config or NavigationConfig()
         self.previous_motion = "STOP"
         self.previous_angular_speed_rad_s = 0.0
+        self.turn_candidate: str | None = None
+        self.turn_candidate_hits = 0
+        self.active_correction_direction: str | None = None
         self.last_valid_line_offset: float | None = None
         self.last_valid_line_heading: float | None = None
         self.line_lost_frames = 0
@@ -129,6 +185,7 @@ class LineNavigationPlanner:
         """Create an immediate stop and reset steering state."""
         self.previous_motion = "STOP"
         self.previous_angular_speed_rad_s = 0.0
+        self._reset_turn_state()
         return NavigationCommand(
             valid=False,
             motion="STOP",
@@ -194,15 +251,6 @@ class LineNavigationPlanner:
             self.recovering_line = False
             self.line_recovery_attempts = 0
 
-        recovery_motion = self._classify_recovery(offset)
-        if recovery_motion is not None:
-            return self._recovery_command(
-                recovery_motion,
-                heading,
-                offset,
-                quality,
-            )
-
         preview_turn = _number(line_info, "turn_angle_deg")
         turn_consistency = _number(line_info, "turn_consistency")
         preview_is_reliable = (
@@ -212,6 +260,12 @@ class LineNavigationPlanner:
             and turn_consistency >= self.config.preview_min_consistency
         )
         preview_component = preview_turn if preview_is_reliable else 0.0
+        direction_is_ambiguous = bool(
+            preview_is_reliable
+            and abs(heading) >= self.config.ambiguity_min_angle_deg
+            and abs(preview_turn) >= self.config.ambiguity_min_angle_deg
+            and heading * preview_turn < 0.0
+        )
         heading_component = self.config.heading_gain * heading
         offset_component = self.config.offset_gain_deg * offset
         preview_component = self.config.preview_gain * preview_component
@@ -220,6 +274,8 @@ class LineNavigationPlanner:
             + offset_component
             + preview_component
         )
+        if direction_is_ambiguous:
+            steering_error = 0.0
 
         max_steering_deg = math.degrees(
             self.config.max_angular_speed_rad_s
@@ -231,7 +287,39 @@ class LineNavigationPlanner:
             max_steering_deg,
         )
 
-        desired_angular_speed = math.radians(steering_error) / max(
+        recovery_motion = self._classify_recovery(offset)
+        requested_motion = recovery_motion or self._classify_motion(
+            steering_error,
+            heading,
+            offset,
+        )
+        if direction_is_ambiguous:
+            self._reset_turn_state()
+            requested_motion = "STRAIGHT"
+        base_motion = self._confirm_motion(requested_motion)
+        turn_confirmation_pending = bool(
+            base_motion == "STRAIGHT"
+            and requested_motion
+            in {"FINE_LEFT", "FINE_RIGHT", "LEFT", "RIGHT"}
+        )
+        if (
+            recovery_motion is not None
+            and not direction_is_ambiguous
+            and not turn_confirmation_pending
+        ):
+            return self._recovery_command(
+                base_motion,
+                heading,
+                offset,
+                quality,
+            )
+        control_steering_error = (
+            0.0
+            if direction_is_ambiguous or turn_confirmation_pending
+            else steering_error
+        )
+
+        desired_angular_speed = math.radians(control_steering_error) / max(
             self.config.steering_response_sec,
             1e-3,
         )
@@ -251,23 +339,46 @@ class LineNavigationPlanner:
         angular_speed = self.previous_angular_speed_rad_s + angular_delta
         angular_accel = angular_delta / dt_sec
 
-        motion = self._classify_motion(steering_error, heading, offset)
+        motion = base_motion
         speed = self._calculate_linear_speed(steering_error, quality)
         duration = self.config.command_duration_sec
 
         fine_turn_fallback = (
-            motion in {"FINE_LEFT", "FINE_RIGHT"}
+            base_motion in {"FINE_LEFT", "FINE_RIGHT"}
             and not self.config.fine_turn_supported
         )
-        if fine_turn_fallback:
+        if direction_is_ambiguous:
+            motion = "STRAIGHT"
+            angular_speed = 0.0
+            angular_accel = 0.0
+            speed = self.config.min_linear_speed_mps
+            reason = "conflicting_heading_and_preview"
+        elif turn_confirmation_pending:
+            angular_speed = 0.0
+            angular_accel = 0.0
+            speed = self.config.min_linear_speed_mps
+            reason = "turn_confirmation_pending"
+        elif fine_turn_fallback:
             motion = "STRAIGHT"
             angular_speed = 0.0
             angular_accel = 0.0
             reason = "fine_turn_unavailable_straight_fallback"
         else:
+            if base_motion in {"FINE_LEFT", "FINE_RIGHT"}:
+                severity = _fine_turn_severity(
+                    self.config,
+                    offset,
+                    heading,
+                    steering_error,
+                )
+                repeat_count = _fine_turn_repeat_count(severity)
+                motion = f"{base_motion}_{repeat_count}"
             reason = "line_tracking"
 
-        self.previous_motion = motion
+        if not turn_confirmation_pending:
+            self.previous_motion = (
+                base_motion if not fine_turn_fallback else motion
+            )
         self.previous_angular_speed_rad_s = angular_speed
 
         return NavigationCommand(
@@ -354,46 +465,61 @@ class LineNavigationPlanner:
         lateral_offset_norm: float,
     ) -> str:
         """Keep straight inside tolerance and correct moderate deviations."""
-        if (
-            abs(lateral_offset_norm)
-            <= self.config.line_center_offset_tolerance
-            and abs(heading_error_deg)
-            <= self.config.line_heading_tolerance_deg
-            and abs(steering_error_deg) <= self.config.turn_enter_deg
-        ):
-            return "STRAIGHT"
-
         threshold = (
             self.config.turn_exit_deg
-            if self.previous_motion in {"FINE_LEFT", "FINE_RIGHT"}
+            if self.previous_motion
+            in {"FINE_LEFT", "FINE_RIGHT", "LEFT", "RIGHT"}
             else self.config.turn_enter_deg
         )
-        if abs(lateral_offset_norm) > self.config.line_center_offset_tolerance:
-            if steering_error_deg > 0.0:
-                return "FINE_RIGHT"
-            if steering_error_deg < 0.0:
-                return "FINE_LEFT"
-            return (
-                "FINE_RIGHT"
-                if lateral_offset_norm > 0.0
-                else "FINE_LEFT"
-            )
         if (
             abs(heading_error_deg)
             >= self.config.line_large_heading_threshold_deg
         ):
             return "RIGHT" if heading_error_deg > 0.0 else "LEFT"
-        if abs(heading_error_deg) > self.config.line_heading_tolerance_deg:
-            return (
-                "FINE_RIGHT"
-                if heading_error_deg > 0.0
-                else "FINE_LEFT"
-            )
-        if steering_error_deg > threshold:
+        if steering_error_deg >= threshold:
             return "FINE_RIGHT"
-        if steering_error_deg < -threshold:
+        if steering_error_deg <= -threshold:
             return "FINE_LEFT"
         return "STRAIGHT"
+
+    @staticmethod
+    def _motion_direction(motion: str) -> str | None:
+        if motion in {"FINE_LEFT", "LEFT"}:
+            return "LEFT"
+        if motion in {"FINE_RIGHT", "RIGHT"}:
+            return "RIGHT"
+        return None
+
+    def _confirm_motion(self, requested_motion: str) -> str:
+        """Confirm only a new or reversed correction direction."""
+        direction = self._motion_direction(requested_motion)
+        if direction is None:
+            self._reset_turn_state()
+            return requested_motion
+        if direction == self.active_correction_direction:
+            self.turn_candidate = None
+            self.turn_candidate_hits = 0
+            return requested_motion
+
+        if direction == self.turn_candidate:
+            self.turn_candidate_hits += 1
+        else:
+            self.turn_candidate = direction
+            self.turn_candidate_hits = 1
+
+        if self.turn_candidate_hits >= max(
+            1, self.config.direction_confirmation_frames
+        ):
+            self.active_correction_direction = direction
+            self.turn_candidate = None
+            self.turn_candidate_hits = 0
+            return requested_motion
+        return "STRAIGHT"
+
+    def _reset_turn_state(self) -> None:
+        self.turn_candidate = None
+        self.turn_candidate_hits = 0
+        self.active_correction_direction = None
 
     def _handle_missing_line(
         self,
