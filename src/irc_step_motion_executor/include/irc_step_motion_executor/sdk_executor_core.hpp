@@ -18,6 +18,9 @@ public:
 
   MotionStatus handle_request(
     const std::string & payload, std::uint64_t now_ms);
+  MotionStatus reject_request(
+    const std::string & payload, const std::string & error_code,
+    const std::string & message) const;
   MotionStatus handle_cancel(const std::string & payload);
   std::optional<MotionStatus> poll(std::uint64_t now_ms);
   bool has_active_request() const;

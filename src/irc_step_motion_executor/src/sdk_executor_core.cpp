@@ -236,6 +236,19 @@ MotionStatus SdkExecutorCore::handle_request(
   return status_for_active("RUNNING", "", "motion start accepted");
 }
 
+MotionStatus SdkExecutorCore::reject_request(
+  const std::string & payload, const std::string & error_code,
+  const std::string & message) const
+{
+  std::string error_message;
+  const auto parsed = parse_request(payload, error_message);
+  if (!parsed) {
+    return rejected_status("INVALID_REQUEST", error_message);
+  }
+  return status_for_request(
+    parsed->request, "REJECTED", error_code, message);
+}
+
 MotionStatus SdkExecutorCore::handle_cancel(const std::string & payload)
 {
   std::string error_message;

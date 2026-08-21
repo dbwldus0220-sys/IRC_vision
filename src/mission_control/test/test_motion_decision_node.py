@@ -3,6 +3,7 @@
 import json
 from pathlib import Path
 import sys
+import time
 
 from mission_control.motion_decision_node import MotionDecisionNode
 from mission_control.motion_decision_planner import MotionDecision
@@ -72,6 +73,7 @@ class FakePlanner:
 class FakeDecisionNode:
     """Provide only the state required by the motion-status callback."""
 
+    PRE_MOTION_SETTLE_ACTIONS = MotionDecisionNode.PRE_MOTION_SETTLE_ACTIONS
     SPECIAL_ACTIONS = MotionDecisionNode.SPECIAL_ACTIONS
     SPECIAL_ACTION_SOURCES = MotionDecisionNode.SPECIAL_ACTION_SOURCES
 
@@ -98,6 +100,10 @@ class FakeDecisionNode:
 
         self.active_special_event_id = None
         self.active_special_dynamics_command = None
+        self.pre_motion_settle_sec = 0.0
+        self.pre_motion_settle_source = None
+        self.pre_motion_settle_action = None
+        self.pre_motion_settle_started_at = None
         self.general_motion_gate = GeneralMotionCommandGate()
         self.safety_interlock = SafetyInterlock()
         self.executor_heartbeat_watchdog = ExecutorHeartbeatWatchdog(
@@ -333,7 +339,7 @@ def test_general_status_callback_releases_same_command_id():
         send_status(
             node,
             status=status,
-            action="TURN_LEFT",
+            action="LEFT",
             command_id=700,
             event_id=None,
             dynamics_command=None,
@@ -453,6 +459,16 @@ class ReadinessPublishNode(FakeDecisionNode):
     def _command_publisher_has_subscriber(self):
         return MotionDecisionNode._command_publisher_has_subscriber(self)
 
+    def _reset_pre_motion_settle(self):
+        return MotionDecisionNode._reset_pre_motion_settle(self)
+
+    def _pre_motion_settle_ready(self, decision, now):
+        return MotionDecisionNode._pre_motion_settle_ready(
+            self,
+            decision,
+            now,
+        )
+
 
 def general_decision(action='STRAIGHT'):
     """Create one executable general decision for publication tests."""
@@ -466,6 +482,266 @@ def general_decision(action='STRAIGHT'):
         requires_ack=False,
         source_command={},
     )
+
+
+def enable_test_settle(node, monkeypatch, start=0.0):
+    """Enable deterministic pre-motion settle timing for one fake node."""
+    clock = [start]
+    node.pre_motion_settle_sec = 0.5
+    monkeypatch.setattr(time, 'monotonic', lambda: clock[0])
+    return clock
+
+
+@pytest.mark.parametrize('action', ['LEFT', 'RIGHT'])
+def test_turn_waits_for_stable_half_second(action, monkeypatch):
+    node = ReadinessPublishNode(general_decision(action))
+    clock = enable_test_settle(node, monkeypatch)
+
+    MotionDecisionNode._publish_decision(node)
+    assert node.publisher.messages == []
+    assert node.command_id == 0
+
+    clock[0] = 0.49
+    MotionDecisionNode._publish_decision(node)
+    assert node.publisher.messages == []
+
+    clock[0] = 0.5
+    MotionDecisionNode._publish_decision(node)
+    assert len(node.publisher.messages) == 1
+    assert node.command_id == 1
+    assert node.general_motion_gate.locked
+    assert node.pre_motion_settle_started_at is None
+
+
+def test_changed_turn_candidate_restarts_settle(monkeypatch):
+    node = ReadinessPublishNode(general_decision('LEFT'))
+    clock = enable_test_settle(node, monkeypatch)
+
+    MotionDecisionNode._publish_decision(node)
+    clock[0] = 0.3
+    node.decision = general_decision('RIGHT')
+    MotionDecisionNode._publish_decision(node)
+
+    clock[0] = 0.55
+    MotionDecisionNode._publish_decision(node)
+    assert node.publisher.messages == []
+
+    clock[0] = 0.8
+    MotionDecisionNode._publish_decision(node)
+    payload = json.loads(node.publisher.messages[0].data)
+    assert payload['action'] == 'RIGHT'
+
+
+def test_new_frame_keeps_same_candidate_start_time(monkeypatch):
+    node = ReadinessPublishNode(general_decision('LEFT'))
+    node.latest_time = {'line': 1.0}
+    node.last_published_vision_stamp = {}
+    clock = enable_test_settle(node, monkeypatch)
+
+    MotionDecisionNode._publish_decision(node)
+    clock[0] = 0.3
+    node.latest_time['line'] = 2.0
+    node.general_motion_gate.on_new_vision_input()
+    MotionDecisionNode._publish_decision(node)
+    assert node.pre_motion_settle_started_at == 0.0
+
+    clock[0] = 0.5
+    MotionDecisionNode._publish_decision(node)
+    assert len(node.publisher.messages) == 1
+
+
+def test_straight_publishes_without_settle(monkeypatch):
+    node = ReadinessPublishNode(general_decision('STRAIGHT'))
+    enable_test_settle(node, monkeypatch)
+
+    MotionDecisionNode._publish_decision(node)
+
+    assert len(node.publisher.messages) == 1
+    assert node.command_id == 1
+
+
+def test_only_current_production_motions_require_settle():
+    assert MotionDecisionNode.PRE_MOTION_SETTLE_ACTIONS == frozenset(
+        {'LEFT', 'RIGHT', 'PICKUP_NOW', 'GO'}
+    )
+
+
+@pytest.mark.parametrize(
+    'action',
+    [
+        'FINE_LEFT',
+        'FINE_RIGHT',
+        'TURN_LEFT',
+        'TURN_RIGHT',
+        'ALIGN_LEFT',
+        'ALIGN_RIGHT',
+        'SHOT',
+    ],
+)
+def test_unsupported_action_does_not_start_settle(action):
+    node = ReadinessPublishNode(general_decision(action))
+    node.pre_motion_settle_sec = 0.5
+
+    assert node._pre_motion_settle_ready(node.decision, now=10.0)
+    assert node.pre_motion_settle_started_at is None
+
+
+def test_stop_cancels_pending_turn_and_is_not_delayed(monkeypatch):
+    node = ReadinessPublishNode(general_decision('LEFT'))
+    clock = enable_test_settle(node, monkeypatch)
+    MotionDecisionNode._publish_decision(node)
+
+    clock[0] = 0.2
+    node.decision = general_decision('STOP')
+    MotionDecisionNode._publish_decision(node)
+
+    payload = json.loads(node.publisher.messages[0].data)
+    assert payload['action'] == 'STOP'
+    assert node.pre_motion_settle_started_at is None
+
+
+def test_invalid_decision_cancels_pending_settle(monkeypatch):
+    node = ReadinessPublishNode(general_decision('LEFT'))
+    clock = enable_test_settle(node, monkeypatch)
+    MotionDecisionNode._publish_decision(node)
+
+    clock[0] = 0.2
+    node.decision = MotionDecision(
+        phase='AUTO',
+        source='line',
+        action='LEFT',
+        valid=False,
+        reason='invalid_candidate',
+        sdk_motion_requested=False,
+        requires_ack=False,
+        source_command={},
+    )
+    MotionDecisionNode._publish_decision(node)
+
+    assert node.pre_motion_settle_started_at is None
+
+
+def test_cross_finish_is_not_delayed(monkeypatch):
+    node = ReadinessPublishNode(
+        terminal_decision('finish', 'CROSS_FINISH', 'WALK_TO_FINISH')
+    )
+    enable_test_settle(node, monkeypatch)
+
+    MotionDecisionNode._publish_decision(node)
+
+    assert len(node.publisher.messages) == 1
+    assert node.active_special_action == 'CROSS_FINISH'
+
+
+@pytest.mark.parametrize(
+    ('source', 'action', 'phase'),
+    [
+        ('ball', 'PICKUP_NOW', 'BALL_APPROACH'),
+        ('hurdle', 'GO', 'HURDLE_APPROACH'),
+    ],
+)
+def test_special_lock_and_ids_are_deferred_until_settle(
+    source,
+    action,
+    phase,
+    monkeypatch,
+):
+    node = ReadinessPublishNode(terminal_decision(source, action, phase))
+    clock = enable_test_settle(node, monkeypatch)
+
+    MotionDecisionNode._publish_decision(node)
+    clock[0] = 0.49
+    MotionDecisionNode._publish_decision(node)
+    assert node.publisher.messages == []
+    assert node.command_id == 0
+    assert node.event_id == 0
+    assert node.active_special_command_id is None
+    assert node.terminal_latch is None
+
+    clock[0] = 0.5
+    MotionDecisionNode._publish_decision(node)
+    assert len(node.publisher.messages) == 1
+    assert node.command_id == 1
+    assert node.event_id == 1
+    assert node.active_special_command_id == 1
+
+
+def test_general_lock_does_not_precount_next_turn(monkeypatch):
+    node = ReadinessPublishNode(general_decision('STRAIGHT'))
+    clock = enable_test_settle(node, monkeypatch, start=10.0)
+    MotionDecisionNode._publish_decision(node)
+    node.decision = general_decision('LEFT')
+
+    clock[0] = 20.0
+    MotionDecisionNode._publish_decision(node)
+    assert node.pre_motion_settle_started_at is None
+
+    for status in ('RUNNING', 'SUCCEEDED'):
+        send_status(
+            node,
+            status=status,
+            action='STRAIGHT',
+            command_id=1,
+            event_id=None,
+            dynamics_command=None,
+        )
+    node.general_motion_gate.on_new_vision_input()
+    MotionDecisionNode._publish_decision(node)
+    assert node.pre_motion_settle_started_at == 20.0
+
+    clock[0] = 20.49
+    MotionDecisionNode._publish_decision(node)
+    assert len(node.publisher.messages) == 1
+    clock[0] = 20.5
+    MotionDecisionNode._publish_decision(node)
+    assert len(node.publisher.messages) == 2
+
+
+def test_active_special_lock_does_not_precount_next_settle(monkeypatch):
+    node = ReadinessPublishNode(general_decision('LEFT'))
+    clock = enable_test_settle(node, monkeypatch, start=10.0)
+    assert node.phase_manager.start_special_action('PICKUP_NOW', 7)
+
+    MotionDecisionNode._publish_decision(node)
+    assert node.pre_motion_settle_started_at is None
+    assert node.publisher.messages == []
+
+    node.phase_manager.handle_motion_status('PICKUP_NOW', 7, 'UNSUPPORTED')
+    clock[0] = 20.0
+    MotionDecisionNode._publish_decision(node)
+    assert node.pre_motion_settle_started_at == 20.0
+
+
+def test_published_turn_requires_a_new_settle_after_completion(monkeypatch):
+    node = ReadinessPublishNode(general_decision('LEFT'))
+    clock = enable_test_settle(node, monkeypatch)
+    MotionDecisionNode._publish_decision(node)
+    clock[0] = 0.5
+    MotionDecisionNode._publish_decision(node)
+
+    for status in ('RUNNING', 'SUCCEEDED'):
+        send_status(
+            node,
+            status=status,
+            action='LEFT',
+            command_id=1,
+            event_id=None,
+            dynamics_command=None,
+        )
+    node.general_motion_gate.on_new_vision_input()
+    node.latest_time = {'line': 2.0}
+    node.last_published_vision_stamp = {'line': 1.0}
+
+    clock[0] = 1.0
+    MotionDecisionNode._publish_decision(node)
+    assert len(node.publisher.messages) == 1
+    assert node.pre_motion_settle_started_at == 1.0
+    clock[0] = 1.49
+    MotionDecisionNode._publish_decision(node)
+    assert len(node.publisher.messages) == 1
+    clock[0] = 1.5
+    MotionDecisionNode._publish_decision(node)
+    assert len(node.publisher.messages) == 2
 
 
 def test_correlated_critical_general_failure_latches_and_blocks_other_action():
@@ -1028,8 +1304,8 @@ def test_search_phase_does_not_advance_without_fresh_target(search_phase):
     ("scenario", "expected_action"),
     [
         ("straight", "STRAIGHT"),
-        ("turn_left", "FINE_LEFT"),
-        ("turn_right", "FINE_RIGHT"),
+        ("turn_left", "STRAIGHT"),
+        ("turn_right", "STRAIGHT"),
     ],
 )
 def test_mock_line_input_is_fresh_and_produces_action(
@@ -1059,7 +1335,7 @@ def test_mock_line_input_is_fresh_and_produces_action(
     )
     assert decision.reason != "no_fresh_detected_target"
     assert decision.action == expected_action
-    assert decision.valid is (expected_action == "STRAIGHT")
+    assert decision.valid is True
 
 
 @pytest.mark.parametrize(

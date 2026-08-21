@@ -97,7 +97,7 @@ def test_robot_launch_defaults_are_production_ready(
     parameters = executor_parameters(executor, context)
 
     assert context.launch_configurations["enable_camera"] == "true"
-    assert context.launch_configurations["device"] == "cpu"
+    assert context.launch_configurations["device"] == "tensorrt"
     assert context.launch_configurations["display"] == "true"
     assert context.launch_configurations["initial_mission_phase"] == "AUTO"
     assert parameters == {
@@ -147,5 +147,9 @@ def test_robot_launch_keeps_realsense_topic_remappings(
         (
             "/camera/aligned_depth_to_color/image_raw",
             "/camera/camera/aligned_depth_to_color/image_raw",
+        ),
+        (
+            "/camera/color/camera_info",
+            "/camera/camera/color/camera_info",
         ),
     }

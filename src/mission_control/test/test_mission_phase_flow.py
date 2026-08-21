@@ -58,6 +58,7 @@ class MissionFlowHarness:
     """Run real node decision methods against deterministic in-memory inputs."""
 
     SOURCES = MotionDecisionNode.SOURCES
+    PRE_MOTION_SETTLE_ACTIONS = MotionDecisionNode.PRE_MOTION_SETTLE_ACTIONS
     SPECIAL_ACTIONS = MotionDecisionNode.SPECIAL_ACTIONS
     SPECIAL_ACTION_SOURCES = MotionDecisionNode.SPECIAL_ACTION_SOURCES
     SPECIAL_FAILURE_REASONS = (
@@ -105,6 +106,10 @@ class MissionFlowHarness:
         }
         self.command_id = 0
         self.event_id = 0
+        self.pre_motion_settle_sec = 0.0
+        self.pre_motion_settle_source = None
+        self.pre_motion_settle_action = None
+        self.pre_motion_settle_started_at = None
         self.terminal_latch = None
         self.terminal_action_armed = {
             source: True
@@ -152,6 +157,16 @@ class MissionFlowHarness:
 
     def _command_publisher_has_subscriber(self):
         return MotionDecisionNode._command_publisher_has_subscriber(self)
+
+    def _reset_pre_motion_settle(self):
+        return MotionDecisionNode._reset_pre_motion_settle(self)
+
+    def _pre_motion_settle_ready(self, decision, now):
+        return MotionDecisionNode._pre_motion_settle_ready(
+            self,
+            decision,
+            now,
+        )
 
     def publish_vision(self, **observations):
         self.observations.update(observations)
@@ -334,10 +349,10 @@ def test_full_course_mock_flow_without_ros_graph():
     release_general(harness, straight[0])
 
     fine = harness.publish_vision(line=line_info(offset=-0.24))
-    assert [item["action"] for item in fine] == ["FINE_LEFT"]
+    assert [item["action"] for item in fine] == ["STRAIGHT"]
     assert fine[0]["valid"] is True
-    assert fine[0]["reason"] == "line_tracking"
-    assert map_action_to_motion_id(fine[0]["action"]) is None
+    assert fine[0]["reason"] == "fine_turn_unavailable_straight_fallback"
+    assert map_action_to_motion_id(fine[0]["action"]) == "forward"
     assert harness.general_motion_gate.locked is True
     release_general(harness, fine[0])
 

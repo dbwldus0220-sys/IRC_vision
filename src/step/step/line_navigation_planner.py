@@ -19,7 +19,7 @@ class NavigationConfig:
     line_large_heading_threshold_deg: float = 14.0
     line_lost_frame_threshold: int = 2
     line_max_recovery_attempts: int = 3
-    fine_turn_supported: bool = True
+    fine_turn_supported: bool = False
     max_linear_speed_mps: float = 0.05
     min_linear_speed_mps: float = 0.015
     max_angular_speed_rad_s: float = 0.60
@@ -255,21 +255,25 @@ class LineNavigationPlanner:
         speed = self._calculate_linear_speed(steering_error, quality)
         duration = self.config.command_duration_sec
 
-        fine_turn_unmapped = (
+        fine_turn_fallback = (
             motion in {"FINE_LEFT", "FINE_RIGHT"}
             and not self.config.fine_turn_supported
         )
+        if fine_turn_fallback:
+            motion = "STRAIGHT"
+            angular_speed = 0.0
+            angular_accel = 0.0
+            reason = "fine_turn_unavailable_straight_fallback"
+        else:
+            reason = "line_tracking"
+
         self.previous_motion = motion
         self.previous_angular_speed_rad_s = angular_speed
 
         return NavigationCommand(
-            valid=not fine_turn_unmapped,
+            valid=True,
             motion=motion,
-            reason=(
-                "fine_turn_motion_unmapped"
-                if fine_turn_unmapped
-                else "line_tracking"
-            ),
+            reason=reason,
             linear_speed_mps=speed,
             lateral_speed_mps=0.0,
             angular_speed_rad_s=angular_speed,

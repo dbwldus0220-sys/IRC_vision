@@ -3,6 +3,7 @@
 #include "irc_step_motion_executor/startup_pose_gate.hpp"
 
 #include <gtest/gtest.h>
+#include <json-c/json.h>
 
 #include <deque>
 #include <string>
@@ -57,6 +58,36 @@ std::string request()
   return R"({"action":"STRAIGHT","command_id":1,"event_id":2,"request_id":3,"motion_id":"forward","timeout_ms":5000})";
 }
 
+std::string string_field(const std::string & payload, const char * key)
+{
+  json_object * object = json_tokener_parse(payload.c_str());
+  EXPECT_NE(object, nullptr);
+  if (object == nullptr) {
+    return "";
+  }
+  json_object * value = nullptr;
+  EXPECT_TRUE(json_object_object_get_ex(object, key, &value));
+  const std::string result =
+    value == nullptr ? "" : json_object_get_string(value);
+  json_object_put(object);
+  return result;
+}
+
+std::int64_t int_field(const std::string & payload, const char * key)
+{
+  json_object * object = json_tokener_parse(payload.c_str());
+  EXPECT_NE(object, nullptr);
+  if (object == nullptr) {
+    return 0;
+  }
+  json_object * value = nullptr;
+  EXPECT_TRUE(json_object_object_get_ex(object, key, &value));
+  const std::int64_t result =
+    value == nullptr ? 0 : json_object_get_int64(value);
+  json_object_put(object);
+  return result;
+}
+
 struct Fixture
 {
   FakeMotionBackend backend;
@@ -86,6 +117,17 @@ TEST(StartupPoseGate, BlocksNavigationUntilSuccessThenAllowsIt)
   Fixture fixture;
   fixture.driver.handle_request(request());
   EXPECT_TRUE(fixture.backend.started_motion_names.empty());
+  EXPECT_FALSE(fixture.core.has_active_request());
+  ASSERT_EQ(fixture.statuses.size(), 1U);
+  EXPECT_EQ(string_field(fixture.statuses[0], "status"), "REJECTED");
+  EXPECT_EQ(
+    string_field(fixture.statuses[0], "error_code"),
+    "STARTUP_POSE_GATE_LOCKED");
+  EXPECT_EQ(string_field(fixture.statuses[0], "action"), "STRAIGHT");
+  EXPECT_EQ(int_field(fixture.statuses[0], "command_id"), 1);
+  EXPECT_EQ(int_field(fixture.statuses[0], "event_id"), 2);
+  EXPECT_EQ(int_field(fixture.statuses[0], "request_id"), 3);
+  EXPECT_EQ(string_field(fixture.statuses[0], "motion_id"), "forward");
   fixture.startup.updates.push_back(
     {irc_step_motion_executor::StartupPoseState::SETTLING, "", ""});
   fixture.startup.updates.push_back(
@@ -95,6 +137,9 @@ TEST(StartupPoseGate, BlocksNavigationUntilSuccessThenAllowsIt)
   fixture.driver.poll();
   fixture.driver.handle_request(request());
   ASSERT_EQ(fixture.backend.started_motion_names.size(), 1U);
+  EXPECT_TRUE(fixture.core.has_active_request());
+  ASSERT_EQ(fixture.statuses.size(), 2U);
+  EXPECT_EQ(string_field(fixture.statuses[1], "status"), "RUNNING");
 }
 
 TEST(StartupPoseGate, FailurePermanentlyKeepsNavigationBlocked)

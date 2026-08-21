@@ -22,13 +22,11 @@ void SdkExecutorDriver::handle_request(const std::string & payload)
   if (startup_pose_gate_ != nullptr &&
     !startup_pose_gate_->navigation_allowed())
   {
-    MotionStatus status;
-    status.status = "REJECTED";
-    status.error_code = "STARTUP_POSE_GATE_LOCKED";
-    status.message = startup_pose_gate_->error_message().empty() ?
+    const std::string message = startup_pose_gate_->error_message().empty() ?
       "startup pose transition has not completed" :
       startup_pose_gate_->error_message();
-    publish(status);
+    publish(core_.reject_request(
+      payload, "STARTUP_POSE_GATE_LOCKED", message));
     return;
   }
   publish(core_.handle_request(payload, now_provider_()));

@@ -48,7 +48,7 @@ TEST(SdkExecutorCore, ResolvesForwardAliasBeforeStartingBackend)
     request_json(1, "forward"), 100);
 
   ASSERT_EQ(backend.started_motion_names.size(), 1U);
-  EXPECT_EQ(backend.started_motion_names[0], "전진 실전(3회)");
+  EXPECT_EQ(backend.started_motion_names[0], "전진 가장 일직선");
   EXPECT_EQ(status.status, "RUNNING");
   EXPECT_TRUE(core.has_active_request());
 }
@@ -77,6 +77,44 @@ TEST(SdkExecutorCore, UnsupportedMotionNeverCallsBackend)
   EXPECT_TRUE(backend.started_motion_names.empty());
   EXPECT_EQ(status.status, "REJECTED");
   EXPECT_EQ(status.error_code, "INVALID_MOTION");
+  EXPECT_FALSE(core.has_active_request());
+}
+
+TEST(SdkExecutorCore, CorrelatedRejectionNeverStartsOrActivatesBackend)
+{
+  FakeMotionBackend backend;
+  irc_step_motion_executor::SdkExecutorCore core(load_catalog(), backend);
+
+  const auto status = core.reject_request(
+    request_json(30, "forward", "STRAIGHT", "10", "null"),
+    "STARTUP_POSE_GATE_LOCKED",
+    "startup pose transition has not completed");
+
+  EXPECT_TRUE(backend.started_motion_names.empty());
+  EXPECT_FALSE(core.has_active_request());
+  EXPECT_EQ(status.status, "REJECTED");
+  EXPECT_EQ(status.error_code, "STARTUP_POSE_GATE_LOCKED");
+  EXPECT_EQ(status.message, "startup pose transition has not completed");
+  ASSERT_TRUE(status.action.has_value());
+  EXPECT_EQ(*status.action, "STRAIGHT");
+  ASSERT_TRUE(status.command_id.has_value());
+  EXPECT_EQ(*status.command_id, 10);
+  EXPECT_FALSE(status.event_id.has_value());
+  EXPECT_EQ(status.request_id, 30);
+  EXPECT_EQ(status.motion_id, "forward");
+}
+
+TEST(SdkExecutorCore, CorrelatedRejectionPreservesInvalidRequestHandling)
+{
+  FakeMotionBackend backend;
+  irc_step_motion_executor::SdkExecutorCore core(load_catalog(), backend);
+
+  const auto status = core.reject_request(
+    "{invalid", "STARTUP_POSE_GATE_LOCKED", "not used");
+
+  EXPECT_EQ(status.status, "REJECTED");
+  EXPECT_EQ(status.error_code, "INVALID_REQUEST");
+  EXPECT_TRUE(backend.started_motion_names.empty());
   EXPECT_FALSE(core.has_active_request());
 }
 
@@ -204,7 +242,7 @@ TEST(SdkExecutorCore, RejectsSecondStartWhileActive)
   EXPECT_EQ(status.error_code, "BUSY");
   EXPECT_EQ(status.request_id, 11);
   ASSERT_EQ(backend.started_motion_names.size(), 1U);
-  EXPECT_EQ(backend.started_motion_names[0], "전진 실전(3회)");
+  EXPECT_EQ(backend.started_motion_names[0], "전진 가장 일직선");
 }
 
 TEST(SdkExecutorCore, TimeoutCancelsAndReturnsFailedWithCorrelation)

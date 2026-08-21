@@ -27,6 +27,15 @@ class MotionDecisionNode(Node):
 
     SOURCES = ("line", "ball", "goal", "hurdle", "finish")
 
+    PRE_MOTION_SETTLE_ACTIONS = frozenset(
+        {
+            "LEFT",
+            "RIGHT",
+            "PICKUP_NOW",
+            "GO",
+        }
+    )
+
     SPECIAL_ACTIONS = {
         "PICKUP_NOW",
         "SHOT",
@@ -85,6 +94,7 @@ class MotionDecisionNode(Node):
 
         self.declare_parameter("initial_mission_phase", "AUTO")
         self.declare_parameter("publish_rate_hz", 10.0)
+        self.declare_parameter("pre_motion_settle_sec", 0.5)
         self.declare_parameter("required_pickups", 2)
         self.declare_parameter("required_shots", 2)
         self.declare_parameter("required_ball_sections", 2)
@@ -240,6 +250,13 @@ class MotionDecisionNode(Node):
 
         self.command_id = 0
         self.event_id = 0
+        self.pre_motion_settle_sec = max(
+            0.0,
+            self._float_parameter("pre_motion_settle_sec"),
+        )
+        self.pre_motion_settle_source: str | None = None
+        self.pre_motion_settle_action: str | None = None
+        self.pre_motion_settle_started_at: float | None = None
         self.last_published_vision_stamp: dict[str, float] = {}
         self.terminal_latch: tuple[str, str] | None = None
         self.terminal_action_armed = {
@@ -829,6 +846,7 @@ class MotionDecisionNode(Node):
         if decision.valid and self.general_motion_gate.locked:
             # A RUNNING general request owns the executor regardless of what
             # a newer Vision frame would otherwise select.
+            self._reset_pre_motion_settle()
             return
 
         if (
@@ -837,6 +855,7 @@ class MotionDecisionNode(Node):
         ):
             # After a general motion terminates, require new Vision before
             # publishing any executable decision, including special actions.
+            self._reset_pre_motion_settle()
             return
 
         is_general_motion = (
@@ -849,6 +868,7 @@ class MotionDecisionNode(Node):
         ):
             # Keep receiving Vision and running the planner, but do not publish
             # another executable command while the current motion is locked.
+            self._reset_pre_motion_settle()
             return
 
         if (
@@ -858,6 +878,10 @@ class MotionDecisionNode(Node):
                 decision,
             )
         ):
+            self._reset_pre_motion_settle()
+            return
+
+        if not self._pre_motion_settle_ready(decision, now):
             return
 
         terminal_key = (
@@ -947,6 +971,8 @@ class MotionDecisionNode(Node):
 
         self.publisher.publish(output)
 
+        self._reset_pre_motion_settle()
+
         if is_general_motion:
             self.general_motion_gate.on_command_published(
                 decision.action,
@@ -956,6 +982,63 @@ class MotionDecisionNode(Node):
                 self,
                 decision,
             )
+
+    def _reset_pre_motion_settle(self) -> None:
+        """Discard a pending pre-motion settle candidate."""
+        self.pre_motion_settle_source = None
+        self.pre_motion_settle_action = None
+        self.pre_motion_settle_started_at = None
+
+    def _pre_motion_settle_ready(
+        self,
+        decision: MotionDecision,
+        now: float,
+    ) -> bool:
+        """Return true when a stable motion candidate has settled long enough."""
+        if (
+            not decision.valid
+            or decision.action not in self.PRE_MOTION_SETTLE_ACTIONS
+        ):
+            self._reset_pre_motion_settle()
+            return True
+
+        if (
+            self.general_motion_gate.locked
+            or self.active_special_command_id is not None
+        ):
+            self._reset_pre_motion_settle()
+            return False
+
+        candidate = (decision.source, decision.action)
+        pending = (
+            self.pre_motion_settle_source,
+            self.pre_motion_settle_action,
+        )
+        if pending != candidate or self.pre_motion_settle_started_at is None:
+            if self.pre_motion_settle_action is not None:
+                self.get_logger().info(
+                    "Pre-motion settle reset: "
+                    f"previous={self.pre_motion_settle_action}, "
+                    f"next={decision.action}"
+                )
+            self.pre_motion_settle_source = decision.source
+            self.pre_motion_settle_action = decision.action
+            self.pre_motion_settle_started_at = now
+            self.get_logger().info(
+                "Pre-motion settle started: "
+                f"action={decision.action}, source={decision.source}, "
+                f"duration={self.pre_motion_settle_sec:.3f}"
+            )
+            return self.pre_motion_settle_sec <= 0.0
+
+        if now - self.pre_motion_settle_started_at < self.pre_motion_settle_sec:
+            return False
+
+        self.get_logger().info(
+            f"Pre-motion settle complete: action={decision.action}"
+        )
+        self._reset_pre_motion_settle()
+        return True
 
     def _same_vision_frame_was_published(
         self,

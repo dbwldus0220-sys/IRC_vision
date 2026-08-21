@@ -17,10 +17,8 @@ class MotionCommandBridgeNode(Node):
     ACTION_TO_MOTION_ID = {
         "STRAIGHT": "forward",
         "APPROACH": "forward",
-        "LEFT": "sdk_turn_in_place_left_6",
-        "RIGHT": "sdk_turn_in_place_right_6",
-        "FINE_LEFT": "sdk_turn_in_place_left_1",
-        "FINE_RIGHT": "sdk_turn_in_place_right_1",
+        "LEFT": "line_turn_left_large",
+        "RIGHT": "line_turn_right_large",
         "PICKUP_NOW": "pickup",
         "GO": "hurdle",
     }

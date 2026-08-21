@@ -1257,12 +1257,12 @@ def test_line_offset_policy_uses_tolerance_and_strong_correction():
     )
 
     assert centered.action == "STRAIGHT"
-    assert left.action == "FINE_LEFT"
-    assert right.action == "FINE_RIGHT"
+    assert left.action == "STRAIGHT"
+    assert right.action == "STRAIGHT"
     assert left.valid is True
     assert right.valid is True
-    assert left.reason == "line_tracking"
-    assert right.reason == "line_tracking"
+    assert left.reason == "fine_turn_unavailable_straight_fallback"
+    assert right.reason == "fine_turn_unavailable_straight_fallback"
     assert far_left.action == "LEFT"
     assert far_right.action == "RIGHT"
     assert far_left.action != "STRAIGHT"
@@ -1427,9 +1427,9 @@ def test_auto_and_line_track_share_line_correction_policy(phase):
     )
 
     assert decision.source == "line"
-    assert decision.action == "FINE_RIGHT"
+    assert decision.action == "STRAIGHT"
     assert decision.valid is True
-    assert decision.reason == "line_tracking"
+    assert decision.reason == "fine_turn_unavailable_straight_fallback"
 
 
 def test_special_motion_lock_does_not_advance_line_recovery():

@@ -16,6 +16,8 @@ GENERAL_ACTIONS = frozenset(
         "APPROACH_HURDLE",
         "LEFT",
         "RIGHT",
+        "TURN_LEFT",
+        "TURN_RIGHT",
         "FINE_LEFT",
         "FINE_RIGHT",
         "ALIGN_LEFT",
@@ -35,13 +37,14 @@ TERMINAL_STATUSES = frozenset(
         "UNSUPPORTED",
     }
 )
-ACTION_ALIASES = {
-    "TURN_LEFT": "LEFT",
-    "TURN_RIGHT": "RIGHT",
-    **{action: action for action in GENERAL_ACTIONS},
-}
+ACTION_ALIASES = {action: action for action in GENERAL_ACTIONS}
 TRANSIENT_REJECTION_CODES = frozenset(
-    {"REJECTED_BUSY", "BUSY", "SDK_BUSY"}
+    {
+        "REJECTED_BUSY",
+        "BUSY",
+        "SDK_BUSY",
+        "STARTUP_POSE_GATE_LOCKED",
+    }
 )
 PERMANENT_REJECTION_CODES = frozenset(
     {

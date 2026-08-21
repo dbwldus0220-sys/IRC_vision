@@ -4,6 +4,7 @@ import pytest
 
 from step.line_navigation_planner import LineNavigationPlanner
 from step.line_navigation_planner import NavigationConfig
+from step.line_navigation_planner import NavigationConfig
 
 
 def line_info(**overrides):
@@ -51,7 +52,9 @@ def test_heading_sign_selects_turn_direction(heading, expected):
 
 
 def test_offset_and_preview_are_used_for_steering():
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(
+        NavigationConfig(fine_turn_supported=True)
+    )
 
     command = planner.plan(
         line_info(
@@ -72,7 +75,9 @@ def test_offset_and_preview_are_used_for_steering():
     [(8.0, "FINE_RIGHT"), (-8.0, "FINE_LEFT")],
 )
 def test_moderate_heading_creates_valid_fine_turn(heading, expected):
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(
+        NavigationConfig(fine_turn_supported=True)
+    )
 
     command = planner.plan(
         line_info(filtered_heading_error_deg=heading),
@@ -81,6 +86,23 @@ def test_moderate_heading_creates_valid_fine_turn(heading, expected):
 
     assert command.motion == expected
     assert command.valid is True
+
+
+@pytest.mark.parametrize("heading", [8.0, -8.0])
+def test_unavailable_fine_turn_falls_back_to_straight(heading):
+    planner = LineNavigationPlanner()
+
+    command = planner.plan(
+        line_info(filtered_heading_error_deg=heading),
+        0.1,
+    )
+
+    assert command.valid is True
+    assert command.motion == "STRAIGHT"
+    assert command.reason == "fine_turn_unavailable_straight_fallback"
+    assert command.angular_speed_rad_s == 0.0
+    assert command.angular_accel_rad_s2 == 0.0
+    assert command.target_heading_change_deg == 0.0
 
 
 @pytest.mark.parametrize(

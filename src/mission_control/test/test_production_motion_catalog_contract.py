@@ -20,8 +20,10 @@ def test_production_alias_catalog_contains_only_approved_aliases():
         "motion_aliases": {
             "sdk_pickup": "공잡기리그랩까지 실전",
             "sdk_hurdle": "허들넘기 실전",
-            "sdk_forward_3": "전진 실전(3회)",
-            "sdk_turn_right_18": "우회전 실전(18회)",
+            "sdk_forward_4": "전진 가장 일직선",
+            "line_turn_left_large": "좌회전실전(9회)",
+            "line_turn_right_large": "우회전 실전(15회)",
+            "sdk_turn_right_15": "우회전 실전(15회)",
             "sdk_return_default": "오뒤에서 기본자세로",
             "sdk_turn_in_place_right_6": "제자리우회전(6회)",
             "sdk_turn_in_place_left_6": "제자리좌회전(6회)",
@@ -32,7 +34,7 @@ def test_production_alias_catalog_contains_only_approved_aliases():
             "sdk_turn_right_3": "우회전실전(3회)",
             "pickup": "공잡기리그랩까지 실전",
             "hurdle": "허들넘기 실전",
-            "forward": "전진 실전(3회)",
+            "forward": "전진 가장 일직선",
         }
     }
 

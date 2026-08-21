@@ -16,6 +16,7 @@ from launch_ros.substitutions import FindPackageShare
 def generate_launch_description() -> LaunchDescription:
     """Build the hardware-capable graph with hardware disabled by default."""
     enable_camera = LaunchConfiguration("enable_camera")
+    model_path = LaunchConfiguration("model_path")
     device = LaunchConfiguration("device")
     display = LaunchConfiguration("display")
     metrics_mode = LaunchConfiguration("metrics_mode")
@@ -56,6 +57,7 @@ def generate_launch_description() -> LaunchDescription:
         emulate_tty=True,
         parameters=[
             {
+                "model_path": model_path,
                 "device": device,
                 "display": ParameterValue(display, value_type=bool),
                 "metrics_mode": metrics_mode,
@@ -77,6 +79,10 @@ def generate_launch_description() -> LaunchDescription:
             (
                 "/camera/aligned_depth_to_color/image_raw",
                 "/camera/camera/aligned_depth_to_color/image_raw",
+            ),
+            (
+                "/camera/color/camera_info",
+                "/camera/camera/color/camera_info",
             ),
         ],
     )
@@ -148,7 +154,13 @@ def generate_launch_description() -> LaunchDescription:
                 default_value="true",
                 description="Camera is opt-in for robot startup safety.",
             ),
-            DeclareLaunchArgument("device", default_value="cpu"),
+            DeclareLaunchArgument(
+                "model_path",
+                default_value=PathJoinSubstitution(
+                    [FindPackageShare("step"), "models", "best.engine"]
+                ),
+            ),
+            DeclareLaunchArgument("device", default_value="tensorrt"),
             DeclareLaunchArgument("display", default_value="true"),
             DeclareLaunchArgument("metrics_mode", default_value="auto"),
             DeclareLaunchArgument("max_fps", default_value="30.0"),

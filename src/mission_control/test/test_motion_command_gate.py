@@ -20,14 +20,14 @@ def test_first_left_publishes_once_and_repeated_left_is_blocked():
 def test_right_is_blocked_while_left_is_running():
     gate = gate_with_vision()
     gate.on_command_published("LEFT")
-    gate.on_motion_status("TURN_LEFT", "RUNNING")
+    gate.on_motion_status("LEFT", "RUNNING")
     assert not gate.can_publish("RIGHT")
 
 
-def test_running_keeps_lock_with_left_alias():
+def test_running_keeps_lock_with_same_action():
     gate = gate_with_vision()
     gate.on_command_published("LEFT")
-    transition = gate.on_motion_status("TURN_LEFT", "RUNNING")
+    transition = gate.on_motion_status("LEFT", "RUNNING")
     assert transition.matched
     assert not transition.released
     assert gate.locked
@@ -36,8 +36,8 @@ def test_running_keeps_lock_with_left_alias():
 def test_success_requires_new_vision_before_republishing():
     gate = gate_with_vision()
     gate.on_command_published("LEFT")
-    gate.on_motion_status("TURN_LEFT", "RUNNING")
-    assert gate.on_motion_status("TURN_LEFT", "SUCCEEDED").released
+    gate.on_motion_status("LEFT", "RUNNING")
+    assert gate.on_motion_status("LEFT", "SUCCEEDED").released
     assert not gate.can_publish("LEFT")
     gate.on_new_vision_input()
     assert gate.can_publish("LEFT")
@@ -69,14 +69,22 @@ def test_terminal_general_motion_requires_fresh_vision_globally():
 def test_unknown_rejection_does_not_retry_same_action_forever():
     gate = gate_with_vision()
     gate.on_command_published("LEFT")
-    assert gate.on_motion_status("TURN_LEFT", "REJECTED").released
+    assert gate.on_motion_status("LEFT", "REJECTED").released
     for _ in range(3):
         gate.on_new_vision_input()
         assert not gate.can_publish("LEFT")
     assert gate.can_publish("RIGHT")
 
 
-@pytest.mark.parametrize("error_code", ["REJECTED_BUSY", "BUSY", "SDK_BUSY"])
+@pytest.mark.parametrize(
+    "error_code",
+    [
+        "REJECTED_BUSY",
+        "BUSY",
+        "SDK_BUSY",
+        "STARTUP_POSE_GATE_LOCKED",
+    ],
+)
 def test_transient_rejection_retries_only_after_new_vision(error_code):
     gate = gate_with_vision()
     gate.on_command_published("STRAIGHT")
@@ -106,7 +114,10 @@ def test_permanent_rejection_rearms_only_after_action_change():
     assert gate.can_publish("STRAIGHT")
 
 
-@pytest.mark.parametrize("error_code", ["BUSY", "SDK_BUSY"])
+@pytest.mark.parametrize(
+    "error_code",
+    ["BUSY", "SDK_BUSY", "STARTUP_POSE_GATE_LOCKED"],
+)
 def test_transient_retries_are_bounded_and_rearm_on_action_change(error_code):
     gate = GeneralMotionCommandGate(max_transient_retries=2)
     gate.on_new_vision_input()
@@ -142,7 +153,7 @@ def test_unknown_rejection_code_fails_closed(error_code):
 def test_old_success_cannot_release_new_lock_without_running():
     gate = gate_with_vision()
     gate.on_command_published("LEFT")
-    transition = gate.on_motion_status("TURN_LEFT", "SUCCEEDED")
+    transition = gate.on_motion_status("LEFT", "SUCCEEDED")
     assert not transition.matched
     assert not transition.released
     assert gate.locked
@@ -151,8 +162,8 @@ def test_old_success_cannot_release_new_lock_without_running():
 def test_mismatched_terminal_cannot_release_lock():
     gate = gate_with_vision()
     gate.on_command_published("RIGHT")
-    gate.on_motion_status("TURN_RIGHT", "RUNNING")
-    assert not gate.on_motion_status("TURN_LEFT", "SUCCEEDED").matched
+    gate.on_motion_status("RIGHT", "RUNNING")
+    assert not gate.on_motion_status("LEFT", "SUCCEEDED").matched
     assert gate.locked
 
 
@@ -160,10 +171,10 @@ def test_different_command_id_cannot_mark_running_or_release_lock():
     gate = gate_with_vision()
     gate.on_command_published("LEFT", command_id=20)
     assert not gate.on_motion_status(
-        "TURN_LEFT", "RUNNING", command_id=19
+        "LEFT", "RUNNING", command_id=19
     ).matched
     assert not gate.on_motion_status(
-        "TURN_LEFT", "SUCCEEDED", command_id=19
+        "LEFT", "SUCCEEDED", command_id=19
     ).matched
     assert gate.locked
     assert not gate.running_seen
@@ -173,30 +184,30 @@ def test_same_command_id_releases_only_after_running():
     gate = gate_with_vision()
     gate.on_command_published("LEFT", command_id=20)
     assert gate.on_motion_status(
-        "TURN_LEFT", "RUNNING", command_id=20
+        "LEFT", "RUNNING", command_id=20
     ).matched
     assert gate.on_motion_status(
-        "TURN_LEFT", "SUCCEEDED", command_id=20
+        "LEFT", "SUCCEEDED", command_id=20
     ).released
 
 
 def test_missing_status_command_id_does_not_release_current_request():
     gate = gate_with_vision()
     gate.on_command_published("LEFT", command_id=20)
-    assert not gate.on_motion_status("TURN_LEFT", "RUNNING").matched
-    assert not gate.on_motion_status("TURN_LEFT", "SUCCEEDED").released
+    assert not gate.on_motion_status("LEFT", "RUNNING").matched
+    assert not gate.on_motion_status("LEFT", "SUCCEEDED").released
     assert gate.locked
 
 
 @pytest.mark.parametrize(
     ("command_action", "status_action"),
     [
-        ("LEFT", "TURN_LEFT"),
-        ("RIGHT", "TURN_RIGHT"),
+        ("LEFT", "LEFT"),
+        ("RIGHT", "RIGHT"),
         ("STRAIGHT", "STRAIGHT"),
     ],
 )
-def test_action_aliases_correlate(command_action, status_action):
+def test_identical_actions_correlate(command_action, status_action):
     gate = gate_with_vision()
     assert gate.can_publish(command_action)
     gate.on_command_published(command_action)

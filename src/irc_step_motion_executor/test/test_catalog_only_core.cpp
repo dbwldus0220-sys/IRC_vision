@@ -42,10 +42,16 @@ TEST(MotionAliasCatalog, LoadsLatestSdkAndCanonicalAliases)
   irc_step_motion_executor::MotionAliasCatalog catalog;
   std::string error;
   ASSERT_TRUE(catalog.load(TEST_ALIAS_CONFIG, error)) << error;
-  EXPECT_EQ(catalog.size(), 15U);
+  EXPECT_EQ(catalog.size(), 17U);
   EXPECT_EQ(
     catalog.resolve("forward"),
-    std::optional<std::string>("전진 실전(3회)"));
+    std::optional<std::string>("전진 가장 일직선"));
+  EXPECT_EQ(
+    catalog.resolve("line_turn_left_large"),
+    std::optional<std::string>("좌회전실전(9회)"));
+  EXPECT_EQ(
+    catalog.resolve("line_turn_right_large"),
+    std::optional<std::string>("우회전 실전(15회)"));
   EXPECT_EQ(
     catalog.resolve("pickup"),
     std::optional<std::string>("공잡기리그랩까지 실전"));
@@ -54,6 +60,8 @@ TEST(MotionAliasCatalog, LoadsLatestSdkAndCanonicalAliases)
     std::optional<std::string>("우회전실전(3회)"));
   EXPECT_FALSE(catalog.resolve("forward_short").has_value());
   EXPECT_FALSE(catalog.resolve("turn_left").has_value());
+  EXPECT_FALSE(catalog.resolve("fine_left").has_value());
+  EXPECT_FALSE(catalog.resolve("align_left").has_value());
   EXPECT_FALSE(catalog.resolve("shoot").has_value());
 }
 

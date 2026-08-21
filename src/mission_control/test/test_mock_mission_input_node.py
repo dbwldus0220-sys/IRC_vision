@@ -59,8 +59,8 @@ def test_scenario_payloads_are_distinct():
     ("scenario", "expected_action"),
     [
         ("straight", "STRAIGHT"),
-        ("turn_left", "FINE_LEFT"),
-        ("turn_right", "FINE_RIGHT"),
+        ("turn_left", "STRAIGHT"),
+        ("turn_right", "STRAIGHT"),
     ],
 )
 def test_mock_input_produces_existing_mission_action(
@@ -78,7 +78,7 @@ def test_mock_input_produces_existing_mission_action(
         "AUTO", observations, dt_sec=0.1
     )
     assert decision.action == expected_action
-    assert decision.valid is (expected_action == "STRAIGHT")
+    assert decision.valid is True
 
 
 def test_unsupported_scenario_is_rejected():
