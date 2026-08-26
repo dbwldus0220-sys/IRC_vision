@@ -37,37 +37,35 @@ def test_bearing_sign_selects_turn_direction(bearing, expected):
     assert command.linear_speed_mps == 0.0
 
 
-def test_centered_ball_inside_90cm_uses_fine_step():
+def test_centered_ball_between_78_and_90cm_uses_generic_straight():
     planner = BallNavigationPlanner()
 
     command = planner.plan(ball_info(), 0.1)
 
-    assert command.motion == "FINE_FORWARD_STEP"
+    assert command.motion == "STRAIGHT"
     assert command.linear_speed_mps > 0.0
     assert command.travel_distance_m == pytest.approx(
         command.linear_speed_mps * command.command_duration_sec
     )
 
 
-def test_close_ball_uses_fine_forward_step():
+def test_close_ball_uses_measured_straight_level():
     planner = BallNavigationPlanner()
 
     command = planner.plan(
-        ball_info(depth_m=0.82, distance_m=0.83, pickup_ready=True),
+        ball_info(depth_m=0.68, distance_m=0.69, pickup_ready=False),
         0.1,
     )
 
-    assert command.motion == "FINE_FORWARD_STEP"
-    assert command.linear_speed_mps == pytest.approx(
-        planner.config.min_linear_speed_mps
-    )
+    assert command.motion == "STRAIGHT_4"
+    assert command.to_dict()["approach_level"] == 4
 
 
 def test_aligned_pickup_distance_stops_forward_motion():
     planner = BallNavigationPlanner()
 
     command = planner.plan(
-        ball_info(depth_m=0.80, distance_m=0.81, pickup_now=True),
+        ball_info(depth_m=0.07, distance_m=0.07, pickup_now=True),
         0.1,
     )
 
@@ -75,6 +73,18 @@ def test_aligned_pickup_distance_stops_forward_motion():
     assert command.motion == "PICKUP_NOW"
     assert command.linear_speed_mps == 0.0
     assert command.pickup_now is True
+
+
+def test_stale_80cm_pickup_flag_cannot_trigger_pickup():
+    planner = BallNavigationPlanner()
+
+    command = planner.plan(
+        ball_info(depth_m=0.80, distance_m=0.81, pickup_now=True),
+        0.1,
+    )
+
+    assert command.motion == "STRAIGHT"
+    assert command.pickup_now is False
 
 
 def test_offset_is_used_when_camera_bearing_is_missing():
@@ -88,7 +98,7 @@ def test_offset_is_used_when_camera_bearing_is_missing():
     assert command.motion == "TURN_RIGHT"
 
 
-def test_aligned_ball_outside_control_range_uses_coarse_approach():
+def test_ball_outside_90cm_control_range_does_not_move_robot():
     planner = BallNavigationPlanner()
 
     command = planner.plan(
@@ -96,22 +106,9 @@ def test_aligned_ball_outside_control_range_uses_coarse_approach():
         0.1,
     )
 
-    assert command.valid is True
-    assert command.motion == "APPROACH"
-    assert command.reason == "ball_aligned_coarse_approach"
-
-
-def test_misaligned_ball_outside_control_range_aligns_before_approach():
-    planner = BallNavigationPlanner()
-
-    command = planner.plan(
-        ball_info(depth_m=1.5, distance_m=1.6, bearing_deg=12.0),
-        0.1,
-    )
-
-    assert command.valid is True
-    assert command.motion == "TURN_RIGHT"
-    assert command.motion != "APPROACH"
+    assert command.valid is False
+    assert command.motion == "STOP"
+    assert command.reason == "ball_outside_control_range"
 
 
 def test_turn_hysteresis_holds_until_exit_threshold():
@@ -123,7 +120,7 @@ def test_turn_hysteresis_holds_until_exit_threshold():
 
     assert first.motion == "TURN_RIGHT"
     assert held.motion == "TURN_RIGHT"
-    assert released.motion == "FINE_FORWARD_STEP"
+    assert released.motion == "STRAIGHT"
 
 
 def test_angular_acceleration_is_limited():

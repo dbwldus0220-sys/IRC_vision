@@ -216,22 +216,36 @@ def test_identical_actions_correlate(command_action, status_action):
 
 @pytest.mark.parametrize(
     "action",
-    ["WAIT", "PICKUP_NOW"],
+    ["WAIT", "PICKUP_NOW", "STRAIGHT_0"],
 )
 def test_non_general_action_is_not_managed_as_execution(action):
     assert not gate_with_vision().can_publish(action)
 
 
-@pytest.mark.parametrize("fine_action", ["FINE_LEFT", "FINE_RIGHT"])
-def test_fine_turn_uses_general_motion_lock_and_fresh_vision(fine_action):
+@pytest.mark.parametrize(
+    "recovery_action",
+    [
+        *[
+            f"RECOVER_{line_side}_TURN_LEFT_{suffix}"
+            for line_side in ("LEFT", "RIGHT")
+            for suffix in (2, 4, 6, 8, 10, 13)
+        ],
+        *[
+            f"RECOVER_{line_side}_TURN_RIGHT_{suffix}"
+            for line_side in ("LEFT", "RIGHT")
+            for suffix in (4, 6, 8, 10, 12, 15)
+        ],
+    ],
+)
+def test_recovery_turn_uses_general_motion_lock_and_fresh_vision(
+    recovery_action,
+):
     gate = gate_with_vision()
-    assert gate.can_publish(fine_action)
+    assert gate.can_publish(recovery_action)
 
-    gate.on_command_published(fine_action, command_id=50)
+    gate.on_command_published(recovery_action, command_id=50)
     for blocked in (
-        fine_action,
-        "FINE_LEFT",
-        "FINE_RIGHT",
+        recovery_action,
         "STRAIGHT",
         "LEFT",
         "RIGHT",
@@ -239,10 +253,11 @@ def test_fine_turn_uses_general_motion_lock_and_fresh_vision(fine_action):
         assert not gate.can_publish(blocked)
 
     assert gate.on_motion_status(
-        fine_action, "RUNNING", command_id=50
+        recovery_action, "RUNNING", command_id=50
     ).matched
+    assert gate.active_action == recovery_action
     assert gate.on_motion_status(
-        fine_action, "SUCCEEDED", command_id=50
+        recovery_action, "SUCCEEDED", command_id=50
     ).released
     assert not gate.can_publish("STRAIGHT")
 
@@ -254,6 +269,11 @@ def test_fine_turn_uses_general_motion_lock_and_fresh_vision(fine_action):
     "action",
     [
         "STRAIGHT",
+        "STRAIGHT_1",
+        "STRAIGHT_2",
+        "STRAIGHT_3",
+        "STRAIGHT_4",
+        "STRAIGHT_5",
         "APPROACH",
         "SLOW_APPROACH",
         "FINE_FORWARD_STEP",

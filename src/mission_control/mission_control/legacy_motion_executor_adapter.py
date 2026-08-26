@@ -37,7 +37,7 @@ ACTION_TO_MOTION_ID = {
     "RIGHT": "turn_right",
     "CROSS_FINISH": "hurdle",
 }
-UNSUPPORTED_ACTIONS = frozenset({"FINE_LEFT", "FINE_RIGHT"})
+UNSUPPORTED_ACTIONS: frozenset[str] = frozenset()
 
 DEFAULT_TIMEOUT_MS = 5000
 MOTION_TIMEOUT_MS = {

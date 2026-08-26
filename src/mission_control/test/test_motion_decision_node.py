@@ -111,6 +111,16 @@ class FakeDecisionNode:
             startup_grace_sec=5.0,
             timeout_sec=2.0,
         )
+        self.executor_auto_ready = True
+        self.executor_ready_requires_fresh_vision = False
+        self.active_general_source = None
+        self.active_line_motion_action = None
+        self.active_line_motion_started_at = None
+        self.active_line_motion_duration_sec = 0.0
+        self.active_line_motion_target_frames = 0
+        self.active_line_motion_frames = []
+        self.line_timeout_recovery_active = False
+        self.line_timeout_recovery_frames = []
         self.planner = FakePlanner()
 
         self.logger = FakeLogger()
@@ -564,6 +574,85 @@ def test_straight_publishes_without_settle(monkeypatch):
     assert node.command_id == 1
 
 
+def test_decision_debug_reports_existing_state(monkeypatch):
+    node = ReadinessPublishNode(general_decision('STRAIGHT'))
+    monkeypatch.setattr(time, 'monotonic', lambda: 10.0)
+    MotionDecisionNode._publish_decision(node)
+    node.latest_info = {
+        source: None for source in MotionDecisionNode.SOURCES
+    }
+    node.latest_info['line'] = {
+        'detected': True,
+        'filtered_heading_error_deg': 19.5,
+        'filtered_lateral_offset_norm': 0.12,
+    }
+    node.latest_time = {
+        source: None for source in MotionDecisionNode.SOURCES
+    }
+    node.last_published_vision_stamp = {}
+    node.latest_time['line'] = 9.9
+    node.timeouts = {
+        source: 0.5 for source in MotionDecisionNode.SOURCES
+    }
+    line_planner = type(
+        'LinePlannerDebugState',
+        (),
+        {
+            'turn_candidate': 'RIGHT',
+            'turn_candidate_hits': 3,
+            'config': type(
+                'LinePlannerDebugConfig',
+                (),
+                {
+                    'direction_confirmation_frames': 3,
+                    'turn_enter_deg': 12.0,
+                    'turn_exit_deg': 7.0,
+                    'line_large_heading_threshold_deg': 18.0,
+                },
+            )(),
+        },
+    )()
+    node.planner.line_planner = line_planner
+    node.executor_active = False
+    node.decision_debug_publisher = ReadinessPublisher()
+
+    MotionDecisionNode._publish_decision_debug(node)
+
+    assert node.logger.warnings == []
+    payload = json.loads(node.decision_debug_publisher.messages[0].data)
+    assert payload['phase'] == 'AUTO'
+    assert payload['source'] == 'LINE'
+    assert payload['fresh_vision']['line'] is True
+    assert payload['line'] == {
+        'line_detected': True,
+        'heading_deg': 19.5,
+        'center_offset': 0.12,
+        'pending_direction': 'RIGHT',
+        'direction_confirmation_current': 3,
+            'direction_confirmation_required': 3,
+        'turn_enter_deg': 12.0,
+        'turn_exit_deg': 7.0,
+        'line_large_heading_threshold_deg': 18.0,
+    }
+    assert payload['decision']['candidate_action'] == 'STRAIGHT'
+    assert payload['decision']['selected_action'] == 'STRAIGHT'
+    assert payload['execution']['executor_state'] == 'IDLE'
+
+
+def test_decision_debug_failure_does_not_escape():
+    node = ReadinessPublishNode(general_decision())
+    node.latest_info = {}
+    node.decision_debug_publisher = type(
+        'FailingPublisher',
+        (),
+        {'publish': staticmethod(lambda _message: (_ for _ in ()).throw(RuntimeError('debug failed')))},
+    )()
+
+    MotionDecisionNode._publish_decision_debug(node)
+
+    assert any('Decision debug publication failed' in item for item in node.logger.warnings)
+
+
 def test_only_current_production_motions_require_settle():
     assert MotionDecisionNode.PRE_MOTION_SETTLE_ACTIONS == frozenset(
         {'LEFT', 'RIGHT', 'PICKUP_NOW', 'GO'}
@@ -573,8 +662,6 @@ def test_only_current_production_motions_require_settle():
 @pytest.mark.parametrize(
     'action',
     [
-        'FINE_LEFT',
-        'FINE_RIGHT',
         'TURN_LEFT',
         'TURN_RIGHT',
         'ALIGN_LEFT',
@@ -689,7 +776,6 @@ def test_general_lock_does_not_precount_next_turn(monkeypatch):
             event_id=None,
             dynamics_command=None,
         )
-    node.general_motion_gate.on_new_vision_input()
     MotionDecisionNode._publish_decision(node)
     assert node.pre_motion_settle_started_at == 20.0
 
@@ -732,7 +818,6 @@ def test_published_turn_requires_a_new_settle_after_completion(monkeypatch):
             event_id=None,
             dynamics_command=None,
         )
-    node.general_motion_gate.on_new_vision_input()
     node.latest_time = {'line': 2.0}
     node.last_published_vision_stamp = {'line': 1.0}
 
@@ -931,6 +1016,55 @@ def test_late_first_heartbeat_releases_motion_publication():
 
     assert not node.safety_interlock.latched
     assert len(node.publisher.messages) == 1
+
+
+def test_startup_hold_discards_commands_until_ready_and_fresh_vision(monkeypatch):
+    node = ReadinessPublishNode(general_decision('STRAIGHT'))
+    node.last_published_vision_stamp = {}
+    node.latest_info = {
+        source: None for source in MotionDecisionNode.SOURCES
+    }
+    node.latest_time = {
+        source: None for source in MotionDecisionNode.SOURCES
+    }
+    node.timeouts = {
+        source: 0.5 for source in MotionDecisionNode.SOURCES
+    }
+    clock = [1.0]
+    monkeypatch.setattr(time, 'monotonic', lambda: clock[0])
+
+    hold_heartbeat = String()
+    hold_heartbeat.data = json.dumps(
+        {'sequence': 1, 'active': False, 'auto_ready': False}
+    )
+    MotionDecisionNode._executor_heartbeat_callback(node, hold_heartbeat)
+
+    line_message = String()
+    line_message.data = json.dumps({'detected': True})
+    MotionDecisionNode._info_callback(node, 'line')(line_message)
+    MotionDecisionNode._publish_decision(node)
+
+    assert node.publisher.messages == []
+    assert node.command_id == 0
+    assert node.latest_info['line'] is None
+    assert not node.safety_interlock.latched
+
+    ready_heartbeat = String()
+    ready_heartbeat.data = json.dumps(
+        {'sequence': 2, 'active': False, 'auto_ready': True}
+    )
+    MotionDecisionNode._executor_heartbeat_callback(node, ready_heartbeat)
+    MotionDecisionNode._publish_decision(node)
+
+    assert node.publisher.messages == []
+    assert node.command_id == 0
+
+    clock[0] = 1.01
+    MotionDecisionNode._info_callback(node, 'line')(line_message)
+    MotionDecisionNode._publish_decision(node)
+
+    assert len(node.publisher.messages) == 1
+    assert node.command_id == 1
 
 
 def test_runtime_loss_is_detected_after_startup_delay_and_late_heartbeat():
@@ -1138,7 +1272,7 @@ def test_running_general_motion_suppresses_new_special_command():
     assert node.active_special_command_id is None
 
 
-def test_completed_general_motion_requires_fresh_vision_before_special():
+def test_completed_line_motion_can_publish_next_decision_without_fresh_vision():
     general = MotionDecision(
         phase='AUTO',
         source='line',
@@ -1169,19 +1303,192 @@ def test_completed_general_motion_requires_fresh_vision_before_special():
         'BALL_APPROACH',
     )
 
-    # No new Vision after STRAIGHT completed.
-    MotionDecisionNode._publish_decision(node)
-
-    assert len(node.publisher.messages) == 1
-    assert node.active_special_command_id is None
-
-    # New Vision arrives. Re-evaluation may now publish the special action.
-    node.general_motion_gate.on_new_vision_input()
+    # The late-motion capture replaces post-terminal fresh-Vision gating.
     MotionDecisionNode._publish_decision(node)
 
     assert len(node.publisher.messages) == 2
     assert node.active_special_action == 'PICKUP_NOW'
     assert node.active_special_command_id == 2
+
+
+def test_line_motion_captures_configured_frames_after_eighty_percent(
+    monkeypatch,
+):
+    node = ReadinessPublishNode(general_decision("STRAIGHT"))
+    clock = [10.0]
+    monkeypatch.setattr(time, "monotonic", lambda: clock[0])
+
+    class RecordingLinePlanner:
+        """Record replayed line frames for one capture-window test."""
+
+        def __init__(self):
+            self.frames = []
+
+        def _reset_turn_state(self):
+            pass
+
+        def plan(self, frame, _dt_sec):
+            self.frames.append(frame)
+
+    recording_planner = RecordingLinePlanner()
+    node.planner.line_planner = recording_planner
+
+    MotionDecisionNode._publish_decision(node)
+    send_status(
+        node,
+        status="RUNNING",
+        action="STRAIGHT",
+        command_id=1,
+        event_id=None,
+        dynamics_command=None,
+    )
+
+    assert node.active_line_motion_duration_sec == pytest.approx(4.0)
+    assert node.active_line_motion_target_frames == 20
+
+    clock[0] = 13.19
+    MotionDecisionNode._collect_active_line_motion_frame(
+        node,
+        {"frame": "too_early"},
+        clock[0],
+    )
+    assert node.active_line_motion_frames == []
+
+    clock[0] = 13.20
+    for frame_id in range(25):
+        MotionDecisionNode._collect_active_line_motion_frame(
+            node,
+            {"frame": frame_id},
+            clock[0],
+        )
+    assert len(node.active_line_motion_frames) == 20
+
+    send_status(
+        node,
+        status="SUCCEEDED",
+        action="STRAIGHT",
+        command_id=1,
+        event_id=None,
+        dynamics_command=None,
+    )
+
+    assert len(recording_planner.frames) == 20
+    assert node.active_line_motion_frames == []
+    MotionDecisionNode._publish_decision(node)
+    assert len(node.publisher.messages) == 2
+
+
+def test_line_motion_capture_table_matches_deployed_timelines():
+    expected = {
+        "STRAIGHT": (4.000, 20),
+        "STRAIGHT_1": (0.800, 5),
+        "STRAIGHT_2": (1.600, 10),
+        "STRAIGHT_3": (2.400, 10),
+        "STRAIGHT_4": (3.200, 15),
+        "STRAIGHT_5": (4.000, 20),
+        "LEFT": (7.365, 30),
+        "RIGHT": (5.184, 30),
+    }
+    left_timelines = {
+        2: (2.272, 10),
+        4: (3.198, 15),
+        6: (4.124, 20),
+        8: (5.050, 25),
+        10: (5.976, 30),
+        13: (7.365, 30),
+    }
+    right_timelines = {
+        4: (0.864, 5),
+        6: (1.728, 10),
+        8: (2.592, 15),
+        10: (3.456, 20),
+        12: (4.320, 25),
+        15: (5.184, 30),
+    }
+    for recovery_side in ("LEFT", "RIGHT"):
+        for suffix, timeline in left_timelines.items():
+            expected[
+                f"RECOVER_{recovery_side}_TURN_LEFT_{suffix}"
+            ] = timeline
+        for suffix, timeline in right_timelines.items():
+            expected[
+                f"RECOVER_{recovery_side}_TURN_RIGHT_{suffix}"
+            ] = timeline
+
+    assert MotionDecisionNode.LINE_MOTION_CAPTURE_CONFIG == expected
+
+
+def test_line_timeout_discards_capture_and_requires_ten_new_valid_frames():
+    node = ReadinessPublishNode(general_decision("STRAIGHT"))
+
+    class RecordingLinePlanner:
+        """Record only the frames used for timeout recovery."""
+
+        def __init__(self):
+            self.frames = []
+
+        def _reset_turn_state(self):
+            self.frames = []
+
+        def plan(self, frame, _dt_sec):
+            self.frames.append(frame)
+
+    recording_planner = RecordingLinePlanner()
+    node.planner.line_planner = recording_planner
+
+    MotionDecisionNode._publish_decision(node)
+    send_status(
+        node,
+        status="RUNNING",
+        action="STRAIGHT",
+        command_id=1,
+        event_id=None,
+        dynamics_command=None,
+    )
+    node.active_line_motion_frames = [{"frame": "old"}]
+
+    send_status(
+        node,
+        status="FAILED",
+        action="STRAIGHT",
+        command_id=1,
+        event_id=None,
+        dynamics_command=None,
+        error_code=" timeout ",
+    )
+
+    assert node.active_line_motion_frames == []
+    assert node.line_timeout_recovery_active is True
+    MotionDecisionNode._publish_decision(node)
+    assert len(node.publisher.messages) == 1
+
+    MotionDecisionNode._collect_timeout_recovery_frame(
+        node,
+        {"detected": False, "frame": "invalid"},
+    )
+    assert node.line_timeout_recovery_frames == []
+
+    for frame_id in range(9):
+        node.general_motion_gate.on_new_vision_input()
+        MotionDecisionNode._collect_timeout_recovery_frame(
+            node,
+            {"detected": True, "frame": frame_id},
+        )
+    assert node.line_timeout_recovery_active is True
+    assert recording_planner.frames == []
+
+    node.general_motion_gate.on_new_vision_input()
+    MotionDecisionNode._collect_timeout_recovery_frame(
+        node,
+        {"detected": True, "frame": 9},
+    )
+
+    assert node.line_timeout_recovery_active is False
+    assert [frame["frame"] for frame in recording_planner.frames] == list(
+        range(10)
+    )
+    MotionDecisionNode._publish_decision(node)
+    assert len(node.publisher.messages) == 2
 
 
 
@@ -1359,8 +1666,8 @@ def test_search_phase_does_not_advance_without_fresh_target(search_phase):
     ("scenario", "expected_action"),
     [
         ("straight", "STRAIGHT"),
-        ("turn_left", "STRAIGHT"),
-        ("turn_right", "STRAIGHT"),
+        ("turn_left", "RECOVER_LEFT_TURN_LEFT_2"),
+        ("turn_right", "RECOVER_RIGHT_TURN_RIGHT_4"),
     ],
 )
 def test_mock_line_input_is_fresh_and_produces_action(

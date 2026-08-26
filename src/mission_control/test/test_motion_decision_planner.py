@@ -4,8 +4,6 @@ import pytest
 
 from mission_control.motion_decision_planner import MotionDecisionConfig
 from mission_control.motion_decision_planner import MotionDecisionPlanner
-from step.line_navigation_planner import LineNavigationPlanner
-from step.line_navigation_planner import NavigationConfig
 
 
 def line_info(**overrides):
@@ -157,7 +155,9 @@ def test_actual_line_publisher_payload_contract():
 def test_actual_ball_publisher_payload_contract():
     decision = MotionDecisionPlanner().plan(
         "AUTO",
-        observations(ball=vision_ball_payload()),
+        observations(
+            ball=vision_ball_payload(depth_m=0.07, distance_m=0.07)
+        ),
         0.1,
     )
 
@@ -193,7 +193,7 @@ def test_actual_goal_publisher_payload_contract():
     assert decision.action == "SHOT"
 
 
-def test_actual_unconfirmed_hurdle_payload_holds_motion():
+def test_actual_unconfirmed_hurdle_does_not_preempt_ball():
     decision = MotionDecisionPlanner().plan(
         "AUTO",
         observations(
@@ -210,17 +210,12 @@ def test_actual_unconfirmed_hurdle_payload_holds_motion():
         0.1,
     )
 
-    assert decision.source == "hurdle"
-    assert decision.action == "WAIT"
-    assert decision.reason == "hurdle_confirmation_pending"
+    assert decision.source == "ball"
+    assert decision.action == "STRAIGHT"
 
 
-def test_persistent_unconfirmed_hurdle_enters_verification_timeout():
-    planner = MotionDecisionPlanner(
-        MotionDecisionConfig(
-            hurdle_verification_timeout_sec=0.25,
-        )
-    )
+def test_persistent_unconfirmed_hurdle_does_not_take_mission_lock():
+    planner = MotionDecisionPlanner()
 
     pending = observations(
         line=line_info(),
@@ -229,31 +224,14 @@ def test_persistent_unconfirmed_hurdle_enters_verification_timeout():
         ),
     )
 
-    first = planner.plan("AUTO", pending, 0.1)
-    second = planner.plan("AUTO", pending, 0.1)
-    third = planner.plan("AUTO", pending, 0.1)
-    timed_out = planner.plan("AUTO", pending, 0.1)
-    assert third.reason == "hurdle_confirmation_pending"
-
-    assert first.source == "hurdle"
-    assert first.action == "WAIT"
-    assert first.reason == "hurdle_confirmation_pending"
-
-    assert second.source == "hurdle"
-    assert second.action == "WAIT"
-    assert second.reason == "hurdle_confirmation_pending"
-
-    assert timed_out.source == "hurdle"
-    assert timed_out.action == "WAIT"
-    assert timed_out.reason == "hurdle_verification_timeout"
+    decisions = [planner.plan("AUTO", pending, 0.1) for _ in range(4)]
+    assert all(decision.source == "line" for decision in decisions)
+    assert all(decision.action == "STRAIGHT" for decision in decisions)
+    assert planner.hurdle_lock_active is False
 
 
-def test_hurdle_verification_timer_resets_after_disappearance():
-    planner = MotionDecisionPlanner(
-        MotionDecisionConfig(
-            hurdle_verification_timeout_sec=0.25,
-        )
-    )
+def test_unconfirmed_hurdle_disappearance_keeps_line_available():
+    planner = MotionDecisionPlanner()
 
     pending = observations(
         line=line_info(),
@@ -275,21 +253,11 @@ def test_hurdle_verification_timer_resets_after_disappearance():
 
     assert disappeared.source == "line"
     assert disappeared.action == "STRAIGHT"
-    assert planner.hurdle_verification_elapsed_sec == 0.0
-
-    pending_again = planner.plan("AUTO", pending, 0.2)
-
-    assert pending_again.source == "hurdle"
-    assert pending_again.action == "WAIT"
-    assert pending_again.reason == "hurdle_confirmation_pending"
+    assert planner.hurdle_lock_active is False
 
 
-def test_hurdle_verification_timer_resets_when_hurdle_becomes_safe():
-    planner = MotionDecisionPlanner(
-        MotionDecisionConfig(
-            hurdle_verification_timeout_sec=0.5,
-        )
-    )
+def test_confirmed_hurdle_acquires_mission_lock():
+    planner = MotionDecisionPlanner()
 
     pending = observations(
         line=line_info(),
@@ -313,19 +281,29 @@ def test_hurdle_verification_timer_resets_when_hurdle_becomes_safe():
     )
 
     assert confirmed.source == "hurdle"
-    assert planner.hurdle_verification_elapsed_sec == 0.0
+    assert planner.hurdle_lock_active is True
 
 
 @pytest.mark.parametrize(
-    ("source", "payload"),
+    ("source", "field", "payload_factory"),
     [
-        ("ball", vision_ball_payload(pickup_now="false")),
-        ("goal", vision_goal_payload(score_now=1)),
-        ("hurdle", vision_hurdle_payload(depth_valid="false")),
-        ("line", vision_line_payload(detected="true")),
+        ("ball", "pickup_now", vision_ball_payload),
+        ("goal", "score_now", vision_goal_payload),
+        ("hurdle", "depth_valid", vision_hurdle_payload),
+        ("line", "detected", vision_line_payload),
     ],
 )
-def test_invalid_publisher_boolean_type_holds_motion(source, payload):
+@pytest.mark.parametrize(
+    "invalid_value",
+    [1, 0, "true", "false", None, [], {}],
+)
+def test_invalid_publisher_boolean_type_holds_motion(
+    source,
+    field,
+    payload_factory,
+    invalid_value,
+):
+    payload = payload_factory(**{field: invalid_value})
     decision = MotionDecisionPlanner().plan(
         "AUTO",
         observations(**{source: payload}),
@@ -336,6 +314,43 @@ def test_invalid_publisher_boolean_type_holds_motion(source, payload):
     assert decision.action == "WAIT"
     assert decision.valid is False
     assert decision.reason == "invalid_vision_boolean_type"
+
+
+@pytest.mark.parametrize(
+    ("source", "field", "payload_factory", "value", "expected_action"),
+    [
+        ("ball", "pickup_now", vision_ball_payload, True, "STRAIGHT"),
+        ("ball", "pickup_now", vision_ball_payload, False, "STRAIGHT"),
+        ("goal", "score_now", vision_goal_payload, True, "SHOT"),
+        (
+            "goal",
+            "score_now",
+            vision_goal_payload,
+            False,
+            "WAIT_SCORE_CONFIRMATION",
+        ),
+        ("hurdle", "depth_valid", vision_hurdle_payload, True, "GO"),
+        ("hurdle", "depth_valid", vision_hurdle_payload, False, "WAIT"),
+        ("line", "detected", vision_line_payload, True, "STRAIGHT"),
+        ("line", "detected", vision_line_payload, False, "WAIT"),
+    ],
+)
+def test_valid_publisher_boolean_type_preserves_existing_action(
+    source,
+    field,
+    payload_factory,
+    value,
+    expected_action,
+):
+    payload = payload_factory(**{field: value})
+    decision = MotionDecisionPlanner().plan(
+        "AUTO",
+        observations(**{source: payload}),
+        0.1,
+    )
+
+    assert decision.action == expected_action
+    assert decision.reason != "invalid_vision_boolean_type"
 
 
 def test_optional_ball_alignment_field_missing_stops_safely():
@@ -429,7 +444,7 @@ def test_confirmed_hurdle_preempts_ball_in_non_goal_phase(phase):
     )
 
     assert decision.source == "hurdle"
-    assert decision.action == "APPROACH_HURDLE"
+    assert decision.action == "STRAIGHT_2"
 
 
 @pytest.mark.parametrize("include_ball", [False, True])
@@ -451,10 +466,10 @@ def test_goal_approach_confirmed_hurdle_preempts_goal(include_ball):
     )
 
     assert decision.source == "hurdle"
-    assert decision.action == "APPROACH_HURDLE"
+    assert decision.action == "STRAIGHT_2"
 
 
-def test_unconfirmed_hurdle_cannot_reenter_through_auto_fallback():
+def test_unconfirmed_hurdle_does_not_enter_auto_priority():
     planner = MotionDecisionPlanner()
 
     decision = planner.plan(
@@ -469,10 +484,9 @@ def test_unconfirmed_hurdle_cannot_reenter_through_auto_fallback():
         0.1,
     )
 
-    assert decision.source == "hurdle"
-    assert decision.action == "WAIT"
-    assert decision.valid is False
-    assert decision.reason == "hurdle_confirmation_pending"
+    assert decision.source == "line"
+    assert decision.action == "STRAIGHT"
+    assert planner.hurdle_lock_active is False
 
 
 @pytest.mark.parametrize(
@@ -484,7 +498,7 @@ def test_unconfirmed_hurdle_cannot_reenter_through_auto_fallback():
         ("GOAL_APPROACH", {"goal": goal_info()}),
     ],
 )
-def test_detected_unconfirmed_hurdle_holds_each_phase(phase, target):
+def test_detected_unconfirmed_hurdle_does_not_own_each_phase(phase, target):
     planner = MotionDecisionPlanner()
 
     decision = planner.plan(
@@ -496,15 +510,11 @@ def test_detected_unconfirmed_hurdle_holds_each_phase(phase, target):
         0.1,
     )
 
-    assert decision.source == "hurdle"
-    assert decision.action == "WAIT"
-    assert decision.valid is False
-    assert decision.reason == "hurdle_confirmation_pending"
-    assert decision.requires_ack is False
-    assert decision.sdk_motion_requested is False
+    assert decision.source != "hurdle"
+    assert planner.hurdle_lock_active is False
 
 
-def test_confirmed_hurdle_with_invalid_depth_holds_motion():
+def test_confirmed_hurdle_with_invalid_depth_does_not_take_lock():
     planner = MotionDecisionPlanner()
 
     decision = planner.plan(
@@ -516,10 +526,10 @@ def test_confirmed_hurdle_with_invalid_depth_holds_motion():
         0.1,
     )
 
-    assert decision.source == "hurdle"
+    assert decision.source == "none"
     assert decision.action == "WAIT"
     assert decision.valid is False
-    assert decision.reason == "hurdle_depth_invalid_wait"
+    assert planner.hurdle_lock_active is False
 
 
 @pytest.mark.parametrize("hurdle", [None, {"detected": False}])
@@ -539,21 +549,21 @@ def test_absent_or_not_detected_hurdle_does_not_hold_ball(hurdle):
     assert decision.action != "WAIT"
 
 
-def test_ball_between_90cm_and_3m_keeps_line_with_tracking_memory():
+def test_ball_between_control_and_tracking_range_keeps_line():
     planner = MotionDecisionPlanner()
 
     decision = planner.plan(
         "AUTO",
         observations(
             line=line_info(),
-            ball=ball_info(depth_m=2.5, distance_m=2.5),
+            ball=ball_info(depth_m=1.2, distance_m=1.2),
         ),
         0.1,
     )
 
     assert decision.source == "line"
     assert decision.action == "STRAIGHT"
-    assert planner.ball_tracking_active is True
+    assert planner.ball_tracking_active is False
 
 
 def test_ball_search_keeps_line_until_ball_is_inside_90cm():
@@ -563,7 +573,7 @@ def test_ball_search_keeps_line_until_ball_is_inside_90cm():
         "BALL_SEARCH",
         observations(
             line=line_info(),
-            ball=ball_info(depth_m=2.0, distance_m=2.0),
+            ball=ball_info(depth_m=1.2, distance_m=1.2),
         ),
         0.1,
     )
@@ -589,26 +599,27 @@ def test_ball_search_approach_phase_requires_controllable_observation():
     ) is None
 
 
-def test_ball_approach_phase_coarsely_approaches_far_aligned_ball():
+def test_ball_approach_phase_rejects_ball_outside_control_range():
     decision = MotionDecisionPlanner().plan(
         "BALL_APPROACH",
-        observations(ball=ball_info(depth_m=2.0, distance_m=2.0)),
+        observations(ball=ball_info(depth_m=1.2, distance_m=1.2)),
         0.1,
     )
 
     assert decision.source == "ball"
-    assert decision.valid is True
-    assert decision.action == "APPROACH"
+    assert decision.valid is False
+    assert decision.action == "STOP"
+    assert decision.reason == "ball_outside_control_range"
 
 
-def test_ball_beyond_3m_does_not_start_tracking_memory():
+def test_ball_beyond_1_5m_does_not_start_tracking_memory():
     planner = MotionDecisionPlanner()
 
     decision = planner.plan(
         "AUTO",
         observations(
             line=line_info(),
-            ball=ball_info(depth_m=3.01, distance_m=3.01),
+            ball=ball_info(depth_m=1.501, distance_m=1.501),
         ),
         0.1,
     )
@@ -617,7 +628,7 @@ def test_ball_beyond_3m_does_not_start_tracking_memory():
     assert planner.ball_tracking_active is False
 
 
-def test_untracked_missing_ball_keeps_line_without_head_scan():
+def test_untracked_missing_ball_keeps_line_without_recovery():
     planner = MotionDecisionPlanner()
 
     decision = planner.plan(
@@ -629,7 +640,7 @@ def test_untracked_missing_ball_keeps_line_without_head_scan():
     assert decision.source == "line"
     assert decision.action == "STRAIGHT"
     assert planner.ball_tracking_active is False
-    assert planner.ball_scan_active is False
+    assert planner.ball_recovery_centering is False
 
 
 def test_90cm_takeover_uses_depth_not_hypotenuse_distance():
@@ -649,14 +660,14 @@ def test_90cm_takeover_uses_depth_not_hypotenuse_distance():
     )
 
     assert decision.source == "ball"
-    assert decision.action == "FINE_FORWARD_STEP"
+    assert decision.action == "STRAIGHT"
 
 
-def test_lost_tracked_ball_runs_timed_head_scan_with_body_stopped():
+def test_lost_tracked_ball_stops_then_turns_toward_last_seen_side():
     planner = recovery_planner()
     visible_right = ball_info(
-        depth_m=2.5,
-        distance_m=2.5,
+        depth_m=0.85,
+        distance_m=0.85,
         bearing_deg=12.0,
         offset_x_norm=0.25,
     )
@@ -671,42 +682,29 @@ def test_lost_tracked_ball_runs_timed_head_scan_with_body_stopped():
         observations(line=line_info(), ball={"detected": False}),
         0.1,
     )
-    scan_left = planner.plan(
+    planner.plan(
         "AUTO",
         observations(line=line_info(), ball={"detected": False}),
-        0.5,
+        0.1,
     )
-    scan_right = planner.plan(
+    planner.plan(
         "AUTO",
         observations(line=line_info(), ball={"detected": False}),
-        0.6,
+        0.1,
     )
-    centered = planner.plan(
+    turning = planner.plan(
         "AUTO",
         observations(line=line_info(), ball={"detected": False}),
-        0.9,
+        0.1,
     )
 
     assert stopped.source == "ball"
     assert stopped.action == "BALL_LOST_STOP"
-    assert stopped.valid is False
     assert stopped.source_command["linear_speed_mps"] == 0.0
-    assert stopped.reason == "ball_lost_stop_before_head_scan"
-    assert scan_left.action == "HEAD_SCAN_LEFT"
-    assert scan_left.valid is False
-    assert scan_left.reason == "scan_head_left_for_ball"
-    assert scan_right.action == "HEAD_SCAN_RIGHT"
-    assert scan_right.valid is False
-    assert scan_right.reason == "scan_head_right_for_ball"
-    assert centered.action == "HEAD_CENTER"
-    assert centered.valid is False
-    assert centered.reason == "return_head_to_center"
-    for decision in (stopped, scan_left, scan_right, centered):
-        assert decision.requires_ack is False
-        assert decision.sdk_motion_requested is False
-        assert decision.source_command["linear_speed_mps"] == 0.0
-        assert decision.source_command["angular_speed_rad_s"] == 0.0
-        assert decision.source_command["command_duration_sec"] > 0.0
+    assert stopped.reason == "ball_lost_stop_before_search"
+    assert turning.action == "RECOVER_TURN_RIGHT"
+    assert turning.source_command["linear_speed_mps"] == 0.0
+    assert turning.source_command["angular_speed_rad_s"] > 0.0
 
 
 def test_confirmed_hurdle_interrupts_active_ball_head_scan():
@@ -743,13 +741,13 @@ def test_confirmed_hurdle_interrupts_active_ball_head_scan():
     assert decision.action == "GO"
 
 
-def test_reacquired_ball_requires_three_frames_before_control_resumes():
+def test_reacquired_ball_inside_90cm_resumes_ball_control():
     planner = recovery_planner()
     planner.plan(
         "AUTO",
         observations(
             line=line_info(),
-            ball=ball_info(depth_m=2.5, distance_m=2.5),
+            ball=ball_info(depth_m=1.2, distance_m=1.2),
         ),
         0.1,
     )
@@ -759,7 +757,7 @@ def test_reacquired_ball_requires_three_frames_before_control_resumes():
         0.4,
     )
 
-    first = planner.plan(
+    decision = planner.plan(
         "AUTO",
         observations(
             line=line_info(),
@@ -767,34 +765,12 @@ def test_reacquired_ball_requires_three_frames_before_control_resumes():
         ),
         0.1,
     )
-    second = planner.plan(
-        "AUTO",
-        observations(
-            line=line_info(),
-            ball=ball_info(depth_m=0.88, distance_m=0.89),
-        ),
-        0.1,
-    )
-    resumed = planner.plan(
-        "AUTO",
-        observations(
-            line=line_info(),
-            ball=ball_info(depth_m=0.88, distance_m=0.89),
-        ),
-        0.1,
-    )
-
-    assert first.action == "BALL_LOST_STOP"
-    assert first.source_command["angular_speed_rad_s"] == 0.0
-    assert second.action == "HEAD_SCAN_LEFT"
-    assert resumed.source == "ball"
-    assert resumed.action == "FINE_FORWARD_STEP"
+    assert decision.source == "ball"
+    assert decision.action == "STRAIGHT"
     assert planner.ball_lost_elapsed_sec == 0.0
-    assert planner.ball_scan_active is False
 
 
-def test_reacquire_count_resets_when_detection_breaks():
-    """Reset consecutive recovery confirmation after a missing frame."""
+def test_ball_tracking_status_exposes_current_recovery_state():
     planner = recovery_planner()
     planner.plan(
         "AUTO",
@@ -809,55 +785,24 @@ def test_reacquire_count_resets_when_detection_breaks():
         observations(line=line_info(), ball={"detected": False}),
         0.6,
     )
-    planner.plan(
-        "AUTO",
-        observations(line=line_info(), ball=ball_info(depth_m=0.8)),
-        0.1,
-    )
-    assert planner.ball_reacquire_count == 1
-
-    planner.plan(
-        "AUTO",
-        observations(line=line_info(), ball={"detected": False}),
-        0.1,
-    )
-
-    assert planner.ball_reacquire_count == 0
-    assert planner.ball_scan_active is True
-
-
-def test_ball_tracking_status_exposes_head_scan_progress():
-    """Expose scan stage, confirmation count, and configured limits."""
-    planner = recovery_planner()
-    planner.plan(
-        "AUTO",
-        observations(ball=ball_info(depth_m=0.8)),
-        0.1,
-    )
-    planner.plan(
-        "AUTO",
-        observations(ball={"detected": False}),
-        0.6,
-    )
-
     status = planner.ball_tracking_status()
 
-    assert status["scan_active"] is True
-    assert status["reacquire_count"] == 0
-    assert status["recovery_timeout_sec"] == 2.5
-    assert status["recovery_max_distance_m"] == 1.0
-    assert status["recovery_stage"] == "HEAD_SCAN_LEFT"
+    assert status["active"] is True
+    assert status["recovery_centering"] is True
+    assert status["tracking_range_m"] == 1.5
+    assert status["control_range_m"] == 0.9
+    assert status["lost_elapsed_sec"] == 0.6
 
 
-def test_far_ball_does_not_reacquire_and_timeout_returns_to_line():
+def test_reacquired_far_ball_cannot_fall_back_to_line_after_mission_entry():
     planner = recovery_planner()
     planner.plan(
         "AUTO",
         observations(
             line=line_info(),
             ball=ball_info(
-                depth_m=2.5,
-                distance_m=2.5,
+                depth_m=0.85,
+                distance_m=0.85,
                 bearing_deg=-15.0,
             ),
         ),
@@ -869,49 +814,48 @@ def test_far_ball_does_not_reacquire_and_timeout_returns_to_line():
         0.4,
     )
 
-    scanning = planner.plan(
+    centering = planner.plan(
         "AUTO",
         observations(
             line=line_info(),
             ball=ball_info(
-                depth_m=2.4,
-                distance_m=2.4,
+                depth_m=1.2,
+                distance_m=1.2,
                 bearing_deg=-10.0,
             ),
         ),
         0.1,
     )
-    abandoned = planner.plan(
+    resumed = planner.plan(
         "AUTO",
         observations(
             line=line_info(),
             ball=ball_info(
-                depth_m=2.4,
-                distance_m=2.4,
+                depth_m=1.2,
+                distance_m=1.2,
                 bearing_deg=2.0,
             ),
         ),
-        2.1,
+        0.1,
     )
 
-    assert scanning.source == "ball"
-    assert scanning.action == "BALL_LOST_STOP"
-    assert scanning.valid is False
-    assert planner.ball_reacquire_count == 0
-    assert abandoned.source == "line"
-    assert abandoned.action == "STRAIGHT"
-    assert planner.ball_tracking_active is False
-    assert planner.ball_scan_active is False
+    assert centering.source == "ball"
+    assert centering.action == "RECOVER_TURN_LEFT"
+    assert centering.source_command["linear_speed_mps"] == 0.0
+    assert resumed.source == "ball"
+    assert resumed.action == "STOP"
+    assert resumed.reason == "ball_outside_control_range"
+    assert planner.ball_recovery_centering is False
 
 
-def test_goal_between_50cm_and_3m_is_remembered_while_line_continues():
+def test_goal_between_control_and_tracking_range_is_remembered():
     planner = MotionDecisionPlanner()
 
     decision = planner.plan(
         "AUTO",
         observations(
             line=line_info(),
-            goal=goal_info(depth_m=1.5, distance_m=1.5),
+            goal=goal_info(depth_m=0.8, distance_m=0.8),
         ),
         0.1,
     )
@@ -933,7 +877,7 @@ def test_goal_inside_50cm_takes_priority_and_approaches():
     )
 
     assert decision.source == "goal"
-    assert decision.action == "APPROACH_GOAL"
+    assert decision.action == "STRAIGHT_3"
 
 
 def test_goal_search_keeps_line_until_goal_is_inside_50cm():
@@ -968,7 +912,7 @@ def test_goal_search_approach_phase_requires_controllable_observation():
     ) is None
 
 
-def test_goal_approach_phase_coarsely_approaches_far_aligned_goal():
+def test_goal_approach_phase_rejects_goal_outside_control_range():
     decision = MotionDecisionPlanner().plan(
         "GOAL_APPROACH",
         observations(goal=goal_info(depth_m=1.0, distance_m=1.0)),
@@ -976,8 +920,9 @@ def test_goal_approach_phase_coarsely_approaches_far_aligned_goal():
     )
 
     assert decision.source == "goal"
-    assert decision.valid is True
-    assert decision.action == "APPROACH_GOAL"
+    assert decision.valid is False
+    assert decision.action == "WAIT"
+    assert decision.reason == "goal_outside_control_range"
 
 
 def test_lost_goal_stops_then_turns_toward_last_seen_side():
@@ -987,8 +932,8 @@ def test_lost_goal_stops_then_turns_toward_last_seen_side():
         observations(
             line=line_info(),
             goal=goal_info(
-                depth_m=1.5,
-                distance_m=1.5,
+                depth_m=0.49,
+                distance_m=0.49,
                 bearing_deg=-12.0,
                 offset_x_norm=-0.25,
             ),
@@ -1016,7 +961,7 @@ def test_lost_goal_stops_then_turns_toward_last_seen_side():
     assert stopped.action == "GOAL_LOST_STOP"
     assert stopped.valid is False
     assert stopped.source_command["linear_speed_mps"] == 0.0
-    assert turning.action == "LEFT"
+    assert turning.action == "RECOVER_GOAL_TURN_LEFT"
     assert turning.valid is True
     assert turning.source_command["angular_speed_rad_s"] < 0.0
     assert turning.source_command["target_heading_change_deg"] < 0.0
@@ -1024,73 +969,69 @@ def test_lost_goal_stops_then_turns_toward_last_seen_side():
     assert planner.goal_lost_elapsed_sec > 0.0
 
 
-def test_goal_recovery_timeout_is_strict_and_clears_tracking_state():
+def test_reacquired_far_goal_cannot_fall_back_to_line_after_mission_entry():
     planner = MotionDecisionPlanner()
     planner.plan(
         "AUTO",
         observations(
             line=line_info(),
             goal=goal_info(
-                depth_m=1.5,
-                distance_m=1.5,
-                bearing_deg=-12.0,
-                offset_x_norm=-0.25,
+                depth_m=0.49,
+                distance_m=0.49,
+                bearing_deg=15.0,
             ),
         ),
         0.1,
     )
 
-    before_timeout = planner.plan(
+    planner.plan(
         "AUTO",
         observations(line=line_info(), goal={"detected": False}),
-        planner.config.goal_lost_stop_sec + 0.01,
+        0.4,
     )
-    remaining = (
-        planner.config.goal_recovery_timeout_sec
-        - planner.goal_lost_elapsed_sec
-    )
-    at_timeout = planner.plan(
+
+    centering = planner.plan(
         "AUTO",
-        observations(line=line_info(), goal={"detected": False}),
-        remaining,
+        observations(
+            line=line_info(),
+            goal=goal_info(
+                depth_m=1.0,
+                distance_m=1.0,
+                bearing_deg=10.0,
+            ),
+        ),
+        0.1,
     )
-
-    assert before_timeout.action == "LEFT"
-    assert at_timeout.action == "LEFT"
-    assert planner.goal_tracking_active is True
-    assert planner.goal_recovery_centering is True
-    assert planner.goal_lost_elapsed_sec == pytest.approx(
-        planner.config.goal_recovery_timeout_sec
-    )
-    assert planner.last_goal_bearing_deg == -12.0
-    assert planner.last_goal_offset_x_norm == -0.25
-    assert planner.last_goal_turn_direction == "LEFT"
-
-    timed_out = planner.plan(
+    resumed = planner.plan(
         "AUTO",
-        observations(line=line_info(), goal={"detected": False}),
-        0.001,
+        observations(
+            line=line_info(),
+            goal=goal_info(
+                depth_m=1.0,
+                distance_m=1.0,
+                bearing_deg=2.0,
+            ),
+        ),
+        0.1,
     )
 
-    assert timed_out.source == "line"
-    assert timed_out.action == "STRAIGHT"
-    assert planner.goal_tracking_active is False
+    assert centering.source == "goal"
+    assert centering.action == "RECOVER_GOAL_TURN_RIGHT"
+    assert resumed.source == "goal"
+    assert resumed.action == "WAIT"
+    assert resumed.reason == "goal_outside_control_range"
     assert planner.goal_recovery_centering is False
-    assert planner.goal_lost_elapsed_sec == 0.0
-    assert planner.last_goal_bearing_deg is None
-    assert planner.last_goal_offset_x_norm is None
-    assert planner.last_goal_turn_direction == "LEFT"
 
 
-def test_reacquired_goal_is_centered_before_line_or_goal_control():
+def test_reacquired_goal_inside_tracking_range_is_centered_first():
     planner = MotionDecisionPlanner()
     planner.plan(
         "AUTO",
         observations(
             line=line_info(),
             goal=goal_info(
-                depth_m=1.5,
-                distance_m=1.5,
+                depth_m=0.49,
+                distance_m=0.49,
                 bearing_deg=15.0,
             ),
         ),
@@ -1128,10 +1069,12 @@ def test_reacquired_goal_is_centered_before_line_or_goal_control():
     )
 
     assert centering.source == "goal"
-    assert centering.action == "RIGHT"
+    assert centering.action == "RECOVER_GOAL_TURN_RIGHT"
     assert centering.source_command["angular_speed_rad_s"] > 0.0
     assert centering.source_command["target_heading_change_deg"] > 0.0
-    assert resumed.source == "line"
+    assert resumed.source == "goal"
+    assert resumed.action == "WAIT"
+    assert resumed.reason == "goal_outside_control_range"
     assert planner.goal_recovery_centering is False
 
 
@@ -1227,7 +1170,7 @@ def test_lock_phase_waits_for_cpp_motion_status():
     assert decision.reason == "mission_locked_waiting_for_motion_status"
 
 
-def test_line_offset_policy_uses_tolerance_and_strong_correction():
+def test_line_offset_policy_keeps_straight_without_heading_error():
     planner = MotionDecisionPlanner()
 
     centered = planner.plan(
@@ -1245,49 +1188,56 @@ def test_line_offset_policy_uses_tolerance_and_strong_correction():
         observations(line=line_info(filtered_lateral_offset_norm=0.24)),
         0.1,
     )
-    far_left = planner.plan(
-        "LINE_TRACK",
-        observations(line=line_info(filtered_lateral_offset_norm=-0.35)),
-        0.1,
-    )
-    far_right = planner.plan(
-        "LINE_TRACK",
-        observations(line=line_info(filtered_lateral_offset_norm=0.35)),
-        0.1,
-    )
-
     assert centered.action == "STRAIGHT"
     assert left.action == "STRAIGHT"
     assert right.action == "STRAIGHT"
     assert left.valid is True
     assert right.valid is True
-    assert left.reason == "fine_turn_unavailable_straight_fallback"
-    assert right.reason == "fine_turn_unavailable_straight_fallback"
-    assert far_left.action == "LEFT"
-    assert far_right.action == "RIGHT"
-    assert far_left.action != "STRAIGHT"
-    assert far_right.action != "STRAIGHT"
+    assert left.reason == "line_tracking"
+    assert right.reason == "line_tracking"
 
 
 def test_large_heading_error_selects_matching_correction():
+    left_planner = MotionDecisionPlanner()
+    right_planner = MotionDecisionPlanner()
+
+    for _ in range(5):
+        left = left_planner.plan(
+            "LINE_TRACK",
+            observations(line=line_info(filtered_heading_error_deg=-20.0)),
+            0.1,
+        )
+        right = right_planner.plan(
+            "LINE_TRACK",
+            observations(line=line_info(filtered_heading_error_deg=20.0)),
+            0.1,
+        )
+
+    assert left.action == "RECOVER_LEFT_TURN_LEFT_2"
+    assert right.action == "RECOVER_RIGHT_TURN_RIGHT_4"
+
+
+def test_composite_line_recovery_exposes_turn_metadata():
     planner = MotionDecisionPlanner()
 
-    left = planner.plan(
+    decision = planner.plan(
         "LINE_TRACK",
-        observations(line=line_info(filtered_heading_error_deg=-20.0)),
+        observations(
+            line=line_info(
+                filtered_heading_error_deg=-45.0,
+                filtered_lateral_offset_norm=0.25,
+            )
+        ),
         0.1,
     )
-    right = planner.plan(
-        "LINE_TRACK",
-        observations(line=line_info(filtered_heading_error_deg=20.0)),
-        0.1,
-    )
 
-    assert left.action == "LEFT"
-    assert right.action == "RIGHT"
+    assert decision.action == "RECOVER_RIGHT_TURN_LEFT_6"
+    assert decision.source_command["recovery_side"] == "RIGHT"
+    assert decision.source_command["turn_motion"] == "TURN_LEFT_6"
+    assert decision.source_command["turn_angle_deg"] == -45.0
 
 
-def test_one_missing_line_frame_does_not_start_strong_recovery():
+def test_one_missing_line_frame_stops_safely():
     planner = MotionDecisionPlanner()
     planner.plan(
         "LINE_TRACK",
@@ -1302,19 +1252,12 @@ def test_one_missing_line_frame_does_not_start_strong_recovery():
     )
 
     assert missing.action == "STOP"
-    assert missing.reason == "line_not_detected"
-    assert planner.line_planner.line_lost_frames == 1
-    assert planner.line_planner.line_recovery_attempts == 0
+    assert missing.reason == "waiting_for_line_info"
+    assert missing.valid is False
 
 
-@pytest.mark.parametrize(
-    ("offset", "expected"),
-    [(-0.24, "LEFT"), (0.24, "RIGHT")],
-)
-def test_complete_line_loss_recovers_from_last_valid_offset(
-    offset,
-    expected,
-):
+@pytest.mark.parametrize("offset", [-0.24, 0.24])
+def test_complete_line_loss_remains_stopped(offset):
     planner = MotionDecisionPlanner()
     planner.plan(
         "LINE_TRACK",
@@ -1329,13 +1272,12 @@ def test_complete_line_loss_recovers_from_last_valid_offset(
         0.1,
     )
 
-    assert recovery.action == expected
-    assert recovery.reason == "line_lost_recovery"
-    assert planner.line_planner.recovering_line is True
-    assert planner.line_planner.line_recovery_attempts == 1
+    assert recovery.action == "STOP"
+    assert recovery.reason == "waiting_for_line_info"
+    assert recovery.valid is False
 
 
-def test_line_loss_uses_heading_when_remembered_offset_is_ambiguous():
+def test_line_loss_does_not_replay_remembered_heading():
     planner = MotionDecisionPlanner()
     planner.plan(
         "LINE_TRACK",
@@ -1355,7 +1297,8 @@ def test_line_loss_uses_heading_when_remembered_offset_is_ambiguous():
         0.1,
     )
 
-    assert recovery.action == "LEFT"
+    assert recovery.action == "STOP"
+    assert recovery.reason == "waiting_for_line_info"
 
 
 def test_line_loss_without_history_stops_safely():
@@ -1365,8 +1308,7 @@ def test_line_loss_without_history_stops_safely():
     lost = planner.plan("LINE_TRACK", observations(line=None), 0.1)
 
     assert lost.action == "STOP"
-    assert lost.reason == "line_lost_without_history"
-    assert planner.line_planner.recovering_line is False
+    assert lost.reason == "waiting_for_line_info"
 
 
 def test_reacquired_line_returns_directly_to_straight():
@@ -1386,34 +1328,24 @@ def test_reacquired_line_returns_directly_to_straight():
     )
 
     assert reacquired.action == "STRAIGHT"
-    assert planner.line_planner.recovering_line is False
-    assert planner.line_planner.line_lost_frames == 0
-    assert planner.line_planner.line_recovery_attempts == 0
+    assert reacquired.valid is True
 
 
-def test_line_recovery_attempt_limit_stops_repeated_commands():
+def test_repeated_line_loss_never_emits_stale_motion():
     planner = MotionDecisionPlanner()
-    planner.line_planner = LineNavigationPlanner(
-        NavigationConfig(
-            line_lost_frame_threshold=1,
-            line_max_recovery_attempts=2,
-        )
-    )
     planner.plan(
         "LINE_TRACK",
         observations(line=line_info(filtered_lateral_offset_norm=0.24)),
         0.1,
     )
 
-    first = planner.plan("LINE_TRACK", observations(line=None), 0.1)
-    second = planner.plan("LINE_TRACK", observations(line=None), 0.1)
-    exhausted = planner.plan("LINE_TRACK", observations(line=None), 0.1)
+    decisions = [
+        planner.plan("LINE_TRACK", observations(line=None), 0.1)
+        for _ in range(3)
+    ]
 
-    assert first.action == "RIGHT"
-    assert second.action == "RIGHT"
-    assert exhausted.action == "STOP"
-    assert exhausted.reason == "line_recovery_attempts_exhausted"
-    assert planner.line_planner.line_recovery_attempts == 2
+    assert all(decision.action == "STOP" for decision in decisions)
+    assert all(not decision.valid for decision in decisions)
 
 
 @pytest.mark.parametrize("phase", ["AUTO", "LINE_TRACK"])
@@ -1429,25 +1361,19 @@ def test_auto_and_line_track_share_line_correction_policy(phase):
     assert decision.source == "line"
     assert decision.action == "STRAIGHT"
     assert decision.valid is True
-    assert decision.reason == "fine_turn_unavailable_straight_fallback"
+    assert decision.reason == "line_tracking"
 
 
-def test_special_motion_lock_does_not_advance_line_recovery():
+def test_line_lock_keeps_publishing_continuous_line_guidance():
     planner = MotionDecisionPlanner()
-    planner.plan(
-        "LINE_TRACK",
-        observations(line=line_info(filtered_lateral_offset_norm=0.24)),
-        0.1,
-    )
-    before = planner.line_planner.line_recovery_attempts
 
-    locked = planner.plan(
-        "GOAL_APPROACH_LOCK",
-        observations(line=None),
+    decision = planner.plan(
+        "LINE_LOCK",
+        observations(line=line_info()),
         0.1,
     )
 
-    assert locked.action == "WAIT"
-    assert locked.reason == "mission_locked_waiting_for_motion_status"
-    assert planner.line_planner.line_lost_frames == 0
-    assert planner.line_planner.line_recovery_attempts == before
+    assert decision.source == "line"
+    assert decision.action == "STRAIGHT"
+    assert decision.valid is True
+    assert decision.requires_ack is False

@@ -7,12 +7,15 @@ from dataclasses import dataclass
 import math
 from typing import Any
 
+from .approach_distance import approach_level_from_motion
+from .approach_distance import approach_motion_for_distance
+
 
 @dataclass(frozen=True)
 class BallNavigationConfig:
     """Tunable limits for ball alignment and approach commands."""
 
-    min_confidence: float = 0.35
+    min_confidence: float = 0.55
     max_linear_speed_mps: float = 0.04
     min_linear_speed_mps: float = 0.012
     max_angular_speed_rad_s: float = 0.50
@@ -25,8 +28,8 @@ class BallNavigationConfig:
     control_start_depth_m: float = 0.90
     slowdown_depth_m: float = 1.0
     fine_step_depth_m: float = 0.95
-    pickup_depth_m: float = 0.80
-    pickup_depth_tolerance_m: float = 0.05
+    pickup_depth_m: float = 0.07
+    pickup_depth_tolerance_m: float = 0.02
     command_duration_sec: float = 0.40
 
 
@@ -57,6 +60,7 @@ class BallNavigationCommand:
 
     def to_dict(self) -> dict[str, Any]:
         """Return a rounded JSON-compatible representation."""
+        approach_level = approach_level_from_motion(self.motion)
         return {
             "valid": self.valid,
             "motion": self.motion,
@@ -93,6 +97,16 @@ class BallNavigationCommand:
             "depth_valid": self.depth_valid,
             "pickup_ready": self.pickup_ready,
             "pickup_now": self.pickup_now,
+            "approach_motion": (
+                self.motion
+                if self.motion == "STRAIGHT" or approach_level is not None
+                else None
+            ),
+            "approach_level": approach_level,
+            "approach_target_distance_m": _round_optional(
+                self.depth_m,
+                3,
+            ),
         }
 
 
@@ -178,11 +192,19 @@ class BallNavigationPlanner:
         distance = _number(ball_info, "distance_m")
         depth_valid = bool(ball_info.get("depth_valid", False))
         pickup_ready = bool(ball_info.get("pickup_ready", False))
-        pickup_now = bool(ball_info.get("pickup_now", False))
+        analyzer_pickup_now = bool(ball_info.get("pickup_now", False))
 
         if not depth_valid or depth is None:
             return self.stop("missing_valid_ball_depth")
 
+        if depth > self.config.control_start_depth_m:
+            return self.stop("ball_outside_control_range")
+
+        pickup_now = bool(
+            analyzer_pickup_now
+            and abs(depth - self.config.pickup_depth_m)
+            <= self.config.pickup_depth_tolerance_m + 1e-9
+        )
         turn_motion = self._classify_turn(steering_error)
         if turn_motion is not None:
             return self._moving_command(
@@ -199,26 +221,6 @@ class BallNavigationPlanner:
                 depth_valid=depth_valid,
                 pickup_ready=pickup_ready,
                 pickup_now=pickup_now,
-            )
-
-        if depth > self.config.control_start_depth_m:
-            return self._moving_command(
-                motion="APPROACH",
-                reason="ball_aligned_coarse_approach",
-                linear_speed_mps=self._approach_speed(
-                    depth,
-                    pickup_ready,
-                ),
-                steering_error_deg=steering_error,
-                dt_sec=dt_sec,
-                bearing=bearing,
-                offset=offset,
-                depth=depth,
-                distance=distance,
-                confidence=confidence,
-                depth_valid=True,
-                pickup_ready=pickup_ready,
-                pickup_now=False,
             )
 
         if pickup_now:
@@ -238,17 +240,8 @@ class BallNavigationPlanner:
             return self.stop("ball_too_close_for_safe_pickup")
 
         speed = self._approach_speed(depth, pickup_ready)
-        fine_step = depth <= self.config.fine_step_depth_m
-        slow_approach = depth <= self.config.slowdown_depth_m
-        if fine_step:
-            motion = "FINE_FORWARD_STEP"
-            reason = "fine_step_into_pickup_window"
-        elif slow_approach:
-            motion = "SLOW_APPROACH"
-            reason = "close_ball_slow_approach"
-        else:
-            motion = "APPROACH"
-            reason = "ball_aligned_approach"
+        motion = approach_motion_for_distance(depth)
+        reason = "ball_aligned_discrete_approach"
         return self._moving_command(
             motion=motion,
             reason=reason,

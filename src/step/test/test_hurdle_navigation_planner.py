@@ -76,7 +76,7 @@ def test_horizontal_offset_does_not_affect_hurdle_action():
 @pytest.mark.parametrize(
     ("depth", "ground_gap", "expected"),
     [
-        (0.74, 0.45, "APPROACH_HURDLE"),
+        (0.74, 0.45, "STRAIGHT_3"),
         (0.47, 0.05, "GO"),
     ],
 )
@@ -138,7 +138,7 @@ def test_impossible_pythagorean_geometry_never_becomes_false_zero_go():
         )
     )
 
-    assert far.action == "APPROACH_HURDLE"
+    assert far.action == "STRAIGHT_3"
     assert far.go_now is False
     assert close.action == "GO"
     assert close.go_now is True

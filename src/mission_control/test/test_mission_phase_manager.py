@@ -491,8 +491,6 @@ def test_duplicate_rejected_does_not_apply_failure_twice():
     "action",
     [
         "STRAIGHT",
-        "FINE_LEFT",
-        "FINE_RIGHT",
         "LEFT",
         "RIGHT",
         "WAIT",

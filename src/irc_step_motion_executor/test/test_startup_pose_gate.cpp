@@ -90,11 +90,13 @@ std::int64_t int_field(const std::string & payload, const char * key)
 
 struct Fixture
 {
+  std::uint64_t now_ms{0};
   FakeMotionBackend backend;
   irc_step_motion_executor::SdkExecutorCore core{catalog(), backend};
   FakeStartupPoseController startup;
   irc_step_motion_executor::StartupPoseGate gate{
-    true, "오뒤307", std::vector<double>(23, 0.0), 1800, &startup};
+    true, "오뒤307", std::vector<double>(23, 0.0), 1800, &startup, {},
+    [this]() {return now_ms;}};
   std::vector<std::string> statuses;
   irc_step_motion_executor::SdkExecutorDriver driver{
     core, []() {return 100U;},
@@ -112,7 +114,7 @@ TEST(StartupPoseGate, DoesNotStartBeforeFirstReadyPollAndStartsExactlyOnce)
   EXPECT_EQ(fixture.startup.received_duration_ms, 1800);
 }
 
-TEST(StartupPoseGate, BlocksNavigationUntilSuccessThenAllowsIt)
+TEST(StartupPoseGate, HoldsForTwoSecondsAfterSuccessThenAllowsNavigation)
 {
   Fixture fixture;
   fixture.driver.handle_request(request());
@@ -135,6 +137,16 @@ TEST(StartupPoseGate, BlocksNavigationUntilSuccessThenAllowsIt)
   fixture.driver.poll();
   fixture.driver.poll();
   fixture.driver.poll();
+  EXPECT_EQ(fixture.gate.state(), irc_step_motion_executor::StartupPoseGate::State::HOLDING);
+  EXPECT_FALSE(fixture.gate.navigation_allowed());
+
+  fixture.now_ms = 1999;
+  fixture.driver.poll();
+  EXPECT_FALSE(fixture.gate.navigation_allowed());
+
+  fixture.now_ms = 2000;
+  fixture.driver.poll();
+  EXPECT_TRUE(fixture.gate.navigation_allowed());
   fixture.driver.handle_request(request());
   ASSERT_EQ(fixture.backend.started_motion_names.size(), 1U);
   EXPECT_TRUE(fixture.core.has_active_request());

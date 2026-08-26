@@ -60,6 +60,42 @@ class MotionDecisionNode(Node):
     DEFAULT_EXECUTOR_HEARTBEAT_TIMEOUT_SEC = 2.0
     DEFAULT_EXECUTOR_HEARTBEAT_STARTUP_GRACE_SEC = 5.0
     EXECUTOR_WATCHDOG_PERIOD_SEC = 0.1
+    LINE_MOTION_CAPTURE_CONFIG = {
+        "STRAIGHT": (4.000, 20),
+        "STRAIGHT_1": (0.800, 5),
+        "STRAIGHT_2": (1.600, 10),
+        "STRAIGHT_3": (2.400, 10),
+        "STRAIGHT_4": (3.200, 15),
+        "STRAIGHT_5": (4.000, 20),
+        "LEFT": (7.365, 30),
+        "RIGHT": (5.184, 30),
+        **{
+            f"RECOVER_{line_side}_TURN_LEFT_{suffix}": timing
+            for line_side in ("LEFT", "RIGHT")
+            for suffix, timing in {
+                2: (2.272, 10),
+                4: (3.198, 15),
+                6: (4.124, 20),
+                8: (5.050, 25),
+                10: (5.976, 30),
+                13: (7.365, 30),
+            }.items()
+        },
+        **{
+            f"RECOVER_{line_side}_TURN_RIGHT_{suffix}": timing
+            for line_side in ("LEFT", "RIGHT")
+            for suffix, timing in {
+                4: (0.864, 5),
+                6: (1.728, 10),
+                8: (2.592, 15),
+                10: (3.456, 20),
+                12: (4.320, 25),
+                15: (5.184, 30),
+            }.items()
+        },
+    }
+    LINE_MOTION_CAPTURE_START_RATIO = 0.80
+    LINE_TIMEOUT_RECOVERY_FRAMES = 10
 
     def __init__(self) -> None:
         """Initialize mission decision state, topics, and timers."""
@@ -75,6 +111,10 @@ class MotionDecisionNode(Node):
         self.declare_parameter(
             "command_topic",
             "/navigation/motion_command",
+        )
+        self.declare_parameter(
+            "decision_debug_topic",
+            "/navigation/decision_debug",
         )
         self.declare_parameter(
             "motion_status_topic",
@@ -108,20 +148,23 @@ class MotionDecisionNode(Node):
         self.declare_parameter("hurdle_timeout_sec", 0.50)
         self.declare_parameter("finish_timeout_sec", 0.50)
 
-        self.declare_parameter("enable_ball_lost_recovery", True)
-        self.declare_parameter("ball_tracking_range_m", 3.0)
+        self.declare_parameter("enable_ball_lost_recovery", False)
+        self.declare_parameter("recovery_heading_turn_deg", 10.0)
+        self.declare_parameter("recovery_away_heading_turn_deg", 3.0)
+        self.declare_parameter("curve_follow_max_offset_norm", 0.55)
+        self.declare_parameter("ball_tracking_range_m", 1.5)
         self.declare_parameter("ball_control_range_m", 0.9)
-        self.declare_parameter("ball_lost_stop_sec", 0.5)
-        self.declare_parameter("ball_recovery_timeout_sec", 2.5)
-        self.declare_parameter("ball_recovery_max_distance_m", 1.0)
-        self.declare_parameter("ball_reacquire_confirm_frames", 3)
+        self.declare_parameter("ball_lost_stop_sec", 0.35)
+        self.declare_parameter("ball_recovery_timeout_sec", 8.0)
         self.declare_parameter("ball_recovery_turn_rad_s", 0.22)
         self.declare_parameter("ball_recovery_command_sec", 0.40)
         self.declare_parameter("ball_reacquire_center_deg", 5.0)
         self.declare_parameter("ball_reacquire_center_norm", 0.08)
 
-        self.declare_parameter("goal_tracking_range_m", 3.0)
+        self.declare_parameter("goal_tracking_range_m", 1.0)
         self.declare_parameter("goal_control_range_m", 0.5)
+        self.declare_parameter("hurdle_control_range_m", 1.0)
+        self.declare_parameter("hurdle_path_reference_hold_sec", 0.50)
         self.declare_parameter("goal_lost_stop_sec", 0.35)
         self.declare_parameter("goal_recovery_timeout_sec", 8.0)
         self.declare_parameter("goal_recovery_turn_rad_s", 0.22)
@@ -136,6 +179,15 @@ class MotionDecisionNode(Node):
                         "enable_ball_lost_recovery"
                     ).value
                 ),
+                recovery_heading_turn_deg=self._float_parameter(
+                    "recovery_heading_turn_deg"
+                ),
+                recovery_away_heading_turn_deg=self._float_parameter(
+                    "recovery_away_heading_turn_deg"
+                ),
+                curve_follow_max_offset_norm=self._float_parameter(
+                    "curve_follow_max_offset_norm"
+                ),
                 ball_tracking_range_m=self._float_parameter(
                     "ball_tracking_range_m"
                 ),
@@ -147,17 +199,6 @@ class MotionDecisionNode(Node):
                 ),
                 ball_recovery_timeout_sec=self._float_parameter(
                     "ball_recovery_timeout_sec"
-                ),
-                ball_recovery_max_distance_m=self._float_parameter(
-                    "ball_recovery_max_distance_m"
-                ),
-                ball_reacquire_confirm_frames=max(
-                    1,
-                    int(
-                        self.get_parameter(
-                            "ball_reacquire_confirm_frames"
-                        ).value
-                    ),
                 ),
                 ball_recovery_turn_rad_s=self._float_parameter(
                     "ball_recovery_turn_rad_s"
@@ -176,6 +217,12 @@ class MotionDecisionNode(Node):
                 ),
                 goal_control_range_m=self._float_parameter(
                     "goal_control_range_m"
+                ),
+                hurdle_control_range_m=self._float_parameter(
+                    "hurdle_control_range_m"
+                ),
+                hurdle_path_reference_hold_sec=self._float_parameter(
+                    "hurdle_path_reference_hold_sec"
                 ),
                 goal_lost_stop_sec=self._float_parameter(
                     "goal_lost_stop_sec"
@@ -251,6 +298,11 @@ class MotionDecisionNode(Node):
 
         self.command_id = 0
         self.event_id = 0
+        self.last_candidate_decision: MotionDecision | None = None
+        self.last_selected_decision: MotionDecision | None = None
+        self.executor_active: bool | None = None
+        self.executor_auto_ready = False
+        self.executor_ready_requires_fresh_vision = True
         self.pre_motion_settle_sec = max(
             0.0,
             self._float_parameter("pre_motion_settle_sec"),
@@ -259,6 +311,14 @@ class MotionDecisionNode(Node):
         self.pre_motion_settle_action: str | None = None
         self.pre_motion_settle_started_at: float | None = None
         self.last_published_vision_stamp: dict[str, float] = {}
+        self.active_general_source: str | None = None
+        self.active_line_motion_action: str | None = None
+        self.active_line_motion_started_at: float | None = None
+        self.active_line_motion_duration_sec = 0.0
+        self.active_line_motion_target_frames = 0
+        self.active_line_motion_frames: list[dict[str, Any]] = []
+        self.line_timeout_recovery_active = False
+        self.line_timeout_recovery_frames: list[dict[str, Any]] = []
         self.terminal_latch: tuple[str, str] | None = None
         self.terminal_action_armed = {
             source: True
@@ -359,6 +419,14 @@ class MotionDecisionNode(Node):
             command_topic,
             10,
         )
+        decision_debug_topic = str(
+            self.get_parameter("decision_debug_topic").value
+        )
+        self.decision_debug_publisher = self.create_publisher(
+            String,
+            decision_debug_topic,
+            10,
+        )
         self._command_publisher_ready: bool | None = None
 
         publish_rate = max(
@@ -373,6 +441,10 @@ class MotionDecisionNode(Node):
         self.timer = self.create_timer(
             1.0 / publish_rate,
             self._publish_decision,
+        )
+        self.decision_debug_timer = self.create_timer(
+            1.0 / publish_rate,
+            self._publish_decision_debug,
         )
         self.executor_watchdog_timer = self.create_timer(
             self.EXECUTOR_WATCHDOG_PERIOD_SEC,
@@ -390,6 +462,9 @@ class MotionDecisionNode(Node):
         )
         self.get_logger().info(
             f"Executor heartbeat: {executor_heartbeat_topic}"
+        )
+        self.get_logger().info(
+            f"Decision debug: {decision_debug_topic}"
         )
 
     def _float_parameter(self, name: str) -> float:
@@ -417,6 +492,15 @@ class MotionDecisionNode(Node):
             sequence=sequence,
             observed_at=time.monotonic(),
         )
+        active = payload.get("active")
+        if isinstance(active, bool):
+            self.executor_active = active
+        auto_ready = payload.get("auto_ready")
+        if isinstance(auto_ready, bool):
+            if not auto_ready:
+                self._reset_pre_motion_settle()
+                self.executor_ready_requires_fresh_vision = True
+            self.executor_auto_ready = auto_ready
 
     def _check_executor_heartbeat(self, now: float | None = None) -> None:
         """Latch process loss while preserving any active command identity."""
@@ -517,8 +601,25 @@ class MotionDecisionNode(Node):
                         "JSON must be an object"
                     )
 
+                if not self.executor_auto_ready:
+                    return
+
                 self.latest_info[source] = payload
-                self.latest_time[source] = time.monotonic()
+                received_at = time.monotonic()
+                self.latest_time[source] = received_at
+                if source == "line":
+                    if self.line_timeout_recovery_active:
+                        MotionDecisionNode._collect_timeout_recovery_frame(
+                            self,
+                            payload,
+                        )
+                    else:
+                        MotionDecisionNode._collect_active_line_motion_frame(
+                            self,
+                            payload,
+                            received_at,
+                        )
+                self.executor_ready_requires_fresh_vision = False
                 self.general_motion_gate.on_new_vision_input()
 
             except (
@@ -628,7 +729,42 @@ class MotionDecisionNode(Node):
                     command_id=command_id,
                     event_id=event_id,
                 )
+                if (
+                    status == "RUNNING"
+                    and self.active_general_source == "line"
+                    and self.active_line_motion_started_at is None
+                ):
+                    MotionDecisionNode._start_line_motion_capture(
+                        self,
+                        str(action),
+                    )
             if transition.released:
+                completed_source = self.active_general_source
+                self.active_general_source = None
+                if completed_source == "line":
+                    normalized_error_code = (
+                        error_code.strip().upper()
+                        if isinstance(error_code, str)
+                        else ""
+                    )
+                    timed_out = bool(
+                        status == "TIMEOUT"
+                        or (
+                            status == "FAILED"
+                            and normalized_error_code == "TIMEOUT"
+                        )
+                    )
+                    if status == "SUCCEEDED":
+                        MotionDecisionNode._finish_line_motion_capture(self)
+                        self.general_motion_gate.required_vision_generation = (
+                            self.general_motion_gate.vision_generation
+                        )
+                    elif timed_out:
+                        MotionDecisionNode._discard_line_motion_capture(self)
+                        self.line_timeout_recovery_active = True
+                        self.line_timeout_recovery_frames = []
+                    else:
+                        MotionDecisionNode._discard_line_motion_capture(self)
                 self.get_logger().info(
                     "General motion lock released: "
                     f"status={status}, action={action}"
@@ -812,12 +948,108 @@ class MotionDecisionNode(Node):
 
         return observations, ages
 
+    def _start_line_motion_capture(self, action: str) -> None:
+        """Start the configured late-motion Vision capture window."""
+        config = MotionDecisionNode.LINE_MOTION_CAPTURE_CONFIG.get(action)
+        self.active_line_motion_frames = []
+        if config is None:
+            self.active_line_motion_action = None
+            self.active_line_motion_started_at = None
+            self.active_line_motion_duration_sec = 0.0
+            self.active_line_motion_target_frames = 0
+            return
+        duration_sec, target_frames = config
+        self.active_line_motion_action = action
+        self.active_line_motion_started_at = time.monotonic()
+        self.active_line_motion_duration_sec = duration_sec
+        self.active_line_motion_target_frames = target_frames
+
+    def _collect_active_line_motion_frame(
+        self,
+        payload: dict[str, Any],
+        received_at: float,
+    ) -> None:
+        """Keep distinct line frames received after 80 percent execution."""
+        started_at = self.active_line_motion_started_at
+        if started_at is None:
+            return
+        capture_start = (
+            started_at
+            + self.active_line_motion_duration_sec
+            * MotionDecisionNode.LINE_MOTION_CAPTURE_START_RATIO
+        )
+        if received_at < capture_start:
+            return
+        if (
+            len(self.active_line_motion_frames)
+            >= self.active_line_motion_target_frames
+        ):
+            return
+        self.active_line_motion_frames.append(dict(payload))
+
+    def _finish_line_motion_capture(self) -> None:
+        """Replay captured frames into the existing line planner."""
+        frames = self.active_line_motion_frames
+        if frames:
+            line_planner = self.planner.line_planner
+            line_planner._reset_turn_state()
+            for frame in frames:
+                line_planner.plan(frame, 1.0 / 30.0)
+        MotionDecisionNode._discard_line_motion_capture(self)
+
+    def _discard_line_motion_capture(self) -> None:
+        """Clear late-motion frames without applying them to the planner."""
+        self.active_line_motion_action = None
+        self.active_line_motion_started_at = None
+        self.active_line_motion_duration_sec = 0.0
+        self.active_line_motion_target_frames = 0
+        self.active_line_motion_frames = []
+
+    def _collect_timeout_recovery_frame(
+        self,
+        payload: dict[str, Any],
+    ) -> None:
+        """Re-evaluate a timed-out line motion from ten new valid frames."""
+        if payload.get("detected") is not True:
+            return
+        self.line_timeout_recovery_frames.append(dict(payload))
+        if (
+            len(self.line_timeout_recovery_frames)
+            < MotionDecisionNode.LINE_TIMEOUT_RECOVERY_FRAMES
+        ):
+            return
+
+        line_planner = self.planner.line_planner
+        line_planner._reset_turn_state()
+        for frame in self.line_timeout_recovery_frames:
+            line_planner.plan(frame, 1.0 / 30.0)
+        self.line_timeout_recovery_frames = []
+        self.line_timeout_recovery_active = False
+        self.general_motion_gate.rejected_action = None
+
     def _publish_decision(self) -> None:
         if self.safety_interlock.latched:
             return
 
         if not self.executor_heartbeat_watchdog.executor_seen:
             # Do not race executor preflight/startup pose with navigation.
+            self._reset_pre_motion_settle()
+            return
+
+        if not self.executor_auto_ready:
+            # Startup HOLD observations are intentionally not queued.
+            self._reset_pre_motion_settle()
+            return
+
+        if self.executor_ready_requires_fresh_vision:
+            self._reset_pre_motion_settle()
+            return
+
+        if self.general_motion_gate.locked:
+            self._reset_pre_motion_settle()
+            return
+
+        if self.line_timeout_recovery_active:
             self._reset_pre_motion_settle()
             return
 
@@ -840,6 +1072,7 @@ class MotionDecisionNode(Node):
             observations,
             dt_sec,
         )
+        self.last_candidate_decision = decision
 
         decision = self._suppress_duplicate_terminal_action(
             decision
@@ -848,7 +1081,7 @@ class MotionDecisionNode(Node):
         decision = self._suppress_exhausted_special_action(
             decision
         )
-
+        self.last_selected_decision = decision
 
         if not self._command_publisher_has_subscriber():
             return
@@ -984,6 +1217,7 @@ class MotionDecisionNode(Node):
         self._reset_pre_motion_settle()
 
         if is_general_motion:
+            self.active_general_source = decision.source
             self.general_motion_gate.on_command_published(
                 decision.action,
                 self.command_id,
@@ -991,6 +1225,97 @@ class MotionDecisionNode(Node):
             MotionDecisionNode._remember_published_vision_frame(
                 self,
                 decision,
+            )
+
+    def _publish_decision_debug(self) -> None:
+        """Publish existing decision state without affecting motion control."""
+        try:
+            now = time.monotonic()
+            fresh_vision = {
+                source: bool(
+                    self.latest_time[source] is not None
+                    and now - self.latest_time[source] <= self.timeouts[source]
+                )
+                for source in MotionDecisionNode.SOURCES
+            }
+            line_info = self.latest_info.get("line") or {}
+            line_planner = self.planner.line_planner
+            line_config = line_planner.config
+            candidate = self.last_candidate_decision
+            selected = self.last_selected_decision
+
+            heading_deg = line_info.get("filtered_heading_error_deg")
+            if heading_deg is None:
+                heading_deg = line_info.get("heading_error_deg")
+            center_offset = line_info.get("filtered_lateral_offset_norm")
+            if center_offset is None:
+                center_offset = line_info.get("lateral_offset_norm")
+
+            payload = {
+                "phase": self.mission_phase,
+                "source": (
+                    selected.source.upper() if selected is not None else "NONE"
+                ),
+                "fresh_vision": fresh_vision,
+                "source_fresh": bool(
+                    selected is not None
+                    and fresh_vision.get(selected.source, False)
+                ),
+                "line": {
+                    "line_detected": bool(line_info.get("detected", False)),
+                    "heading_deg": heading_deg,
+                    "center_offset": center_offset,
+                    "pending_direction": line_planner.turn_candidate,
+                    "direction_confirmation_current": (
+                        line_planner.turn_candidate_hits
+                    ),
+                    "direction_confirmation_required": (
+                        line_config.direction_confirmation_frames
+                    ),
+                    "turn_enter_deg": line_config.turn_enter_deg,
+                    "turn_exit_deg": line_config.turn_exit_deg,
+                    "line_large_heading_threshold_deg": (
+                        line_config.line_large_heading_threshold_deg
+                    ),
+                },
+                "decision": {
+                    "candidate_action": (
+                        candidate.action if candidate is not None else None
+                    ),
+                    "selected_action": (
+                        selected.action if selected is not None else None
+                    ),
+                    "reason": selected.reason if selected is not None else None,
+                },
+                "execution": {
+                    "motion_locked": self.general_motion_gate.locked,
+                    "mission_locked": self.active_special_command_id is not None,
+                    "executor_seen": (
+                        self.executor_heartbeat_watchdog.executor_seen
+                    ),
+                    "executor_state": (
+                        "RUNNING"
+                        if self.executor_active is True
+                        else "IDLE"
+                        if self.executor_active is False
+                        else "UNKNOWN"
+                    ),
+                    "active_special_dynamics_command": (
+                        self.active_special_dynamics_command
+                    ),
+                },
+            }
+            output = String()
+            output.data = json.dumps(
+                payload,
+                ensure_ascii=True,
+                separators=(",", ":"),
+            )
+            self.decision_debug_publisher.publish(output)
+        except Exception as exc:  # noqa: B902 - debug must not affect motion
+            self.get_logger().warning(
+                "Decision debug publication failed: "
+                f"{type(exc).__name__}: {exc}"
             )
 
     def _reset_pre_motion_settle(self) -> None:

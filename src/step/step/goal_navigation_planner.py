@@ -7,12 +7,15 @@ from dataclasses import dataclass
 import math
 from typing import Any
 
+from .approach_distance import approach_level_from_motion
+from .approach_distance import approach_motion_for_distance
+
 
 @dataclass(frozen=True)
 class GoalNavigationConfig:
     """Provisional goal alignment and scoring thresholds."""
 
-    min_confidence: float = 0.35
+    min_confidence: float = 0.55
     control_start_depth_m: float = 0.50
     score_target_depth_m: float = 0.25
     score_depth_tolerance_m: float = 0.05
@@ -39,6 +42,7 @@ class GoalActionCommand:
 
     def to_dict(self) -> dict[str, Any]:
         """Return a rounded JSON-compatible representation."""
+        approach_level = approach_level_from_motion(self.action)
         return {
             "valid": self.valid,
             "action": self.action,
@@ -56,6 +60,16 @@ class GoalActionCommand:
             "is_centered": self.is_centered,
             "depth_in_score_range": self.depth_in_score_range,
             "score_now": self.score_now,
+            "approach_motion": (
+                self.action
+                if self.action == "STRAIGHT" or approach_level is not None
+                else None
+            ),
+            "approach_level": approach_level,
+            "approach_target_distance_m": _round_optional(
+                self.depth_m,
+                3,
+            ),
         }
 
 
@@ -113,6 +127,9 @@ class GoalNavigationPlanner:
         depth = _number(goal_info, "depth_m")
         if not bool(goal_info.get("depth_valid", False)) or depth is None:
             return self.wait("missing_valid_goal_depth")
+        if depth > self.config.control_start_depth_m:
+            return self.wait("goal_outside_control_range")
+
         distance = _number(goal_info, "distance_m")
         bearing = _number(goal_info, "bearing_deg")
         offset = _number(goal_info, "offset_x_norm")
@@ -134,21 +151,18 @@ class GoalNavigationPlanner:
             )
         )
 
-        if not centered:
-            action = "ALIGN_RIGHT" if offset > 0.0 else "ALIGN_LEFT"
-            reason = "align_goal_horizontally"
-        elif depth > self.config.control_start_depth_m:
-            action = "APPROACH_GOAL"
-            reason = "goal_aligned_coarse_approach"
-        elif score_now:
+        if score_now:
             action = "SHOT"
             reason = "goal_centered_at_scoring_depth"
+        elif not centered:
+            action = "TURN_RIGHT" if offset > 0.0 else "TURN_LEFT"
+            reason = "align_backboard_center"
         elif ready_geometry:
             action = "WAIT_SCORE_CONFIRMATION"
             reason = "waiting_for_stable_score_condition"
         elif depth_error > self.config.score_depth_tolerance_m:
-            action = "APPROACH_GOAL"
-            reason = "goal_too_far"
+            action = approach_motion_for_distance(depth)
+            reason = "goal_aligned_discrete_approach"
         else:
             action = "RETREAT_GOAL"
             reason = "goal_too_close"

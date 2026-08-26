@@ -38,8 +38,8 @@ class BallNavigationController(Node):
         self.declare_parameter("control_start_depth_m", 0.90)
         self.declare_parameter("slowdown_depth_m", 1.0)
         self.declare_parameter("fine_step_depth_m", 0.95)
-        self.declare_parameter("pickup_depth_m", 0.80)
-        self.declare_parameter("pickup_depth_tolerance_m", 0.05)
+        self.declare_parameter("pickup_depth_m", 0.07)
+        self.declare_parameter("pickup_depth_tolerance_m", 0.02)
         self.declare_parameter("command_duration_sec", 0.40)
 
         config = BallNavigationConfig(

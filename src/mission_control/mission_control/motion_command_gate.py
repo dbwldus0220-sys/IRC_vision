@@ -9,6 +9,11 @@ from typing import Any
 GENERAL_ACTIONS = frozenset(
     {
         "STRAIGHT",
+        "STRAIGHT_1",
+        "STRAIGHT_2",
+        "STRAIGHT_3",
+        "STRAIGHT_4",
+        "STRAIGHT_5",
         "APPROACH",
         "SLOW_APPROACH",
         "FINE_FORWARD_STEP",
@@ -18,12 +23,20 @@ GENERAL_ACTIONS = frozenset(
         "RIGHT",
         "TURN_LEFT",
         "TURN_RIGHT",
-        "FINE_LEFT",
-        "FINE_RIGHT",
         "ALIGN_LEFT",
         "ALIGN_RIGHT",
         "RETREAT_GOAL",
         "STOP",
+        *{
+            f"RECOVER_{line_side}_TURN_LEFT_{suffix}"
+            for line_side in ("LEFT", "RIGHT")
+            for suffix in (2, 4, 6, 8, 10, 13)
+        },
+        *{
+            f"RECOVER_{line_side}_TURN_RIGHT_{suffix}"
+            for line_side in ("LEFT", "RIGHT")
+            for suffix in (4, 6, 8, 10, 12, 15)
+        },
     }
 )
 TERMINAL_STATUSES = frozenset(

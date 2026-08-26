@@ -30,7 +30,7 @@ OpenCV window showing:
 - Connected path polyline
 - Immediate heading arrow
 - Lateral offset
-- Final STRAIGHT / FINE_LEFT / FINE_RIGHT / LEFT / RIGHT decision
+- Final STRAIGHT / numbered RECOVER_LEFT_n / RECOVER_RIGHT_n decision
 - Target linear/angular speed, travel distance, and rotation
 - Compact steering calculation inputs
 
@@ -990,10 +990,12 @@ class LinePathVisualizer(Node):
     @staticmethod
     def _motion_color(motion: str) -> tuple[int, int, int]:
         """Return a stable BGR color for each final motion."""
+        if motion.startswith("RECOVER_LEFT_"):
+            return (255, 200, 80)
+        if motion.startswith("RECOVER_RIGHT_"):
+            return (80, 200, 255)
         return {
             "STRAIGHT": (0, 220, 0),
-            "FINE_LEFT": (255, 200, 80),
-            "FINE_RIGHT": (80, 200, 255),
             "LEFT": (255, 160, 0),
             "RIGHT": (0, 165, 255),
             "STOP": (0, 0, 255),

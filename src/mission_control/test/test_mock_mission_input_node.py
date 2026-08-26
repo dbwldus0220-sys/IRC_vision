@@ -59,8 +59,8 @@ def test_scenario_payloads_are_distinct():
     ("scenario", "expected_action"),
     [
         ("straight", "STRAIGHT"),
-        ("turn_left", "STRAIGHT"),
-        ("turn_right", "STRAIGHT"),
+        ("turn_left", "RECOVER_LEFT_TURN_LEFT_2"),
+        ("turn_right", "RECOVER_RIGHT_TURN_RIGHT_4"),
     ],
 )
 def test_mock_input_produces_existing_mission_action(

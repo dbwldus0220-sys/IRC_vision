@@ -116,27 +116,53 @@ def decoded_messages(publisher):
     return [json.loads(message.data) for message in publisher.messages]
 
 
+EXPECTED_PRODUCTION_ACTIONS = {
+    "STRAIGHT": "forward",
+    "STRAIGHT_1": "line_forward_2",
+    "STRAIGHT_2": "line_forward_4",
+    "STRAIGHT_3": "line_forward_6",
+    "STRAIGHT_4": "line_forward_8",
+    "STRAIGHT_5": "line_forward_10",
+    "APPROACH": "forward",
+    "LEFT": "line_turn_left_15",
+    "RIGHT": "line_turn_right_large",
+    "PICKUP_NOW": "pickup",
+    "GO": "hurdle",
+}
+for recovery_side in ("LEFT", "RIGHT"):
+    for suffix, motion_id in {
+        2: "line_turn_left_4",
+        4: "line_turn_left_6",
+        6: "line_turn_left_8",
+        8: "line_turn_left_10",
+        10: "line_turn_left_12",
+        13: "line_turn_left_15",
+    }.items():
+        EXPECTED_PRODUCTION_ACTIONS[
+            f"RECOVER_{recovery_side}_TURN_LEFT_{suffix}"
+        ] = motion_id
+    for suffix, motion_id in {
+        4: "line_turn_right_2",
+        6: "line_turn_right_4",
+        8: "line_turn_right_6",
+        10: "line_turn_right_8",
+        12: "line_turn_right_10",
+        15: "line_turn_right_large",
+    }.items():
+        EXPECTED_PRODUCTION_ACTIONS[
+            f"RECOVER_{recovery_side}_TURN_RIGHT_{suffix}"
+        ] = motion_id
+
+
 def test_production_action_mapping_contains_only_approved_contract():
-    assert MotionCommandBridgeNode.ACTION_TO_MOTION_ID == {
-        "STRAIGHT": "forward",
-        "APPROACH": "forward",
-        "LEFT": "line_turn_left_large",
-        "RIGHT": "line_turn_right_large",
-        "PICKUP_NOW": "pickup",
-        "GO": "hurdle",
-    }
+    assert MotionCommandBridgeNode.ACTION_TO_MOTION_ID == (
+        EXPECTED_PRODUCTION_ACTIONS
+    )
 
 
 @pytest.mark.parametrize(
     ("action", "motion_id"),
-    [
-        ("STRAIGHT", "forward"),
-        ("APPROACH", "forward"),
-        ("LEFT", "line_turn_left_large"),
-        ("RIGHT", "line_turn_right_large"),
-        ("PICKUP_NOW", "pickup"),
-        ("GO", "hurdle"),
-    ],
+    sorted(EXPECTED_PRODUCTION_ACTIONS.items()),
 )
 def test_supported_action_builds_executor_request(action, motion_id):
     bridge = FakeBridge()
@@ -151,7 +177,7 @@ def test_supported_action_builds_executor_request(action, motion_id):
             "event_id": 8,
             "request_id": 8000,
             "motion_id": motion_id,
-            "timeout_ms": 10000,
+            "timeout_ms": 12000,
         }
     ]
     assert bridge.motion_in_progress is True
@@ -171,7 +197,7 @@ def test_invalid_timeout_uses_default(timeout):
     )
 
     request = decoded_messages(bridge.executor_request_publisher)[0]
-    assert request["timeout_ms"] == 10000
+    assert request["timeout_ms"] == 12000
 
 
 def test_positive_source_timeout_is_preserved():
@@ -192,8 +218,6 @@ def test_positive_source_timeout_is_preserved():
         "TURN_RIGHT",
         "ALIGN_LEFT",
         "ALIGN_RIGHT",
-        "FINE_LEFT",
-        "FINE_RIGHT",
         "RETREAT_GOAL",
         "SLOW_APPROACH",
         "FINE_FORWARD_STEP",

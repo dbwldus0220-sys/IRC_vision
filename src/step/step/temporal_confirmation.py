@@ -8,6 +8,28 @@ from dataclasses import dataclass
 import math
 
 
+def depth_is_within_range(
+    depth_valid: bool,
+    depth_m: float | None,
+    maximum_depth_m: float,
+) -> bool:
+    """Return whether a fresh object depth is inside an inclusive gate."""
+    if not depth_valid or depth_m is None or isinstance(depth_m, bool):
+        return False
+    try:
+        depth = float(depth_m)
+        maximum = float(maximum_depth_m)
+    except (TypeError, ValueError):
+        return False
+    return bool(
+        math.isfinite(depth)
+        and math.isfinite(maximum)
+        and depth > 0.0
+        and maximum > 0.0
+        and depth <= maximum
+    )
+
+
 @dataclass(frozen=True)
 class ConfirmationResult:
     """State returned after processing one video frame."""

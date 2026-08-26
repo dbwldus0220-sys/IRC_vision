@@ -240,6 +240,7 @@ class TestSdkExecutorTopics(unittest.TestCase):
         first = self._wait_for_heartbeat_count(2)
         self.assertEqual(first["backend_type"], "simulated")
         self.assertIsInstance(first["active"], bool)
+        self.assertIs(first["auto_ready"], True)
         sequences = [heartbeat["sequence"] for heartbeat in self.heartbeats]
         self.assertEqual(sequences, sorted(sequences))
         self.assertEqual(len(sequences), len(set(sequences)))

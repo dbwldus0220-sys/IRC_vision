@@ -21,6 +21,10 @@ from rcl_interfaces.srv import SetParameters
 from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 from rclpy.parameter import Parameter
+from rclpy.qos import DurabilityPolicy
+from rclpy.qos import HistoryPolicy
+from rclpy.qos import QoSProfile
+from rclpy.qos import ReliabilityPolicy
 from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import Image
 from std_msgs.msg import String
@@ -116,14 +120,18 @@ class Yolo26Detector(Node):
         self.declare_parameter("ball_info_topic", "/vision/ball_info")
         self.declare_parameter("ball_info_timeout_sec", 0.8)
         self.declare_parameter("show_ball_metrics", True)
+        self.declare_parameter("ball_tracking_range_m", 1.5)
         self.declare_parameter("ball_control_range_m", 0.9)
         self.declare_parameter("goal_info_topic", "/vision/goal_info")
         self.declare_parameter("goal_info_timeout_sec", 0.8)
         self.declare_parameter("show_goal_metrics", True)
+        self.declare_parameter("goal_tracking_range_m", 1.0)
         self.declare_parameter("goal_control_range_m", 0.5)
         self.declare_parameter("hurdle_info_topic", "/vision/hurdle_info")
         self.declare_parameter("hurdle_info_timeout_sec", 0.8)
         self.declare_parameter("show_hurdle_metrics", True)
+        self.declare_parameter("hurdle_tracking_range_m", 1.0)
+        self.declare_parameter("hurdle_control_range_m", 1.0)
         self.declare_parameter(
             "motion_command_topic",
             "/navigation/motion_command",
@@ -182,6 +190,9 @@ class Yolo26Detector(Node):
         self.show_ball_metrics = bool(
             self.get_parameter("show_ball_metrics").value
         )
+        self.ball_tracking_range_m = float(
+            self.get_parameter("ball_tracking_range_m").value
+        )
         self.ball_control_range_m = float(
             self.get_parameter("ball_control_range_m").value
         )
@@ -192,6 +203,9 @@ class Yolo26Detector(Node):
         self.show_goal_metrics = bool(
             self.get_parameter("show_goal_metrics").value
         )
+        self.goal_tracking_range_m = float(
+            self.get_parameter("goal_tracking_range_m").value
+        )
         self.goal_control_range_m = float(
             self.get_parameter("goal_control_range_m").value
         )
@@ -201,6 +215,12 @@ class Yolo26Detector(Node):
         )
         self.show_hurdle_metrics = bool(
             self.get_parameter("show_hurdle_metrics").value
+        )
+        self.hurdle_tracking_range_m = float(
+            self.get_parameter("hurdle_tracking_range_m").value
+        )
+        self.hurdle_control_range_m = float(
+            self.get_parameter("hurdle_control_range_m").value
         )
         self.motion_command_timeout_sec = max(
             0.1,
@@ -291,11 +311,17 @@ class Yolo26Detector(Node):
         self.annotated_publisher = self.create_publisher(
             Image, annotated_topic, qos_profile_sensor_data
         )
+        latest_image_qos = QoSProfile(
+            history=HistoryPolicy.KEEP_LAST,
+            depth=1,
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            durability=DurabilityPolicy.VOLATILE,
+        )
         self.subscription = self.create_subscription(
             Image,
             image_topic,
             self._image_callback,
-            qos_profile_sensor_data,
+            latest_image_qos,
         )
         self.create_subscription(
             String,
@@ -367,7 +393,15 @@ class Yolo26Detector(Node):
             self._apply_pending_camera_controls,
         )
         if self.display and self.show_camera_controls:
-            self._create_camera_control_panel()
+            try:
+                self._create_camera_control_panel()
+            except cv2.error as exc:
+                self.get_logger().warning(
+                    "OpenCV display unavailable; continuing with detector "
+                    f"display disabled: {exc}"
+                )
+                self.display = False
+                self.show_camera_controls = False
 
         self.get_logger().info(f"Model: {self.model_path}")
         self.get_logger().info(f"Backend: {self.backend_name}")
@@ -1163,6 +1197,51 @@ class Yolo26Detector(Node):
         required = int(info.get("confirmation_required_hits", 1))
         return f"CANDIDATE {hits}/{required}"
 
+    def _object_range_status(
+        self,
+        class_name: str,
+        ball_info: dict[str, Any] | None,
+        goal_info: dict[str, Any] | None,
+        hurdle_info: dict[str, Any] | None,
+    ) -> tuple[bool, bool, float | None]:
+        """Return display visibility, control readiness, and target depth."""
+        settings = {
+            "ball": (
+                ball_info,
+                self.ball_tracking_range_m,
+                self.ball_control_range_m,
+            ),
+            "goal": (
+                goal_info,
+                self.goal_tracking_range_m,
+                self.goal_control_range_m,
+            ),
+            "backboard": (
+                goal_info,
+                self.goal_tracking_range_m,
+                self.goal_control_range_m,
+            ),
+            "hurdle": (
+                hurdle_info,
+                self.hurdle_tracking_range_m,
+                self.hurdle_control_range_m,
+            ),
+        }
+        setting = settings.get(class_name)
+        if setting is None:
+            return True, True, None
+        info, tracking_range, control_range = setting
+        if (
+            info is None
+            or not bool(info.get("detected", False))
+            or not bool(info.get("depth_valid", False))
+        ):
+            return False, False, None
+        depth = self._number(info, "depth_m")
+        if depth is None or depth > tracking_range:
+            return False, False, depth
+        return True, depth <= control_range, depth
+
     @staticmethod
     def _metric_text(
         value: float | None,
@@ -1186,10 +1265,12 @@ class Yolo26Detector(Node):
         normalized_action = action.strip().upper()
         line_labels = {
             "STRAIGHT": "STRAIGHT",
-            "FINE_LEFT": "FINE LEFT",
-            "FINE_RIGHT": "FINE RIGHT",
             "LEFT": "LEFT",
             "RIGHT": "RIGHT",
+            "RECOVER_LEFT_TURN_LEFT": "RECOVER LEFT / TURN LEFT",
+            "RECOVER_LEFT_TURN_RIGHT": "RECOVER LEFT / TURN RIGHT",
+            "RECOVER_RIGHT_TURN_LEFT": "RECOVER RIGHT / TURN LEFT",
+            "RECOVER_RIGHT_TURN_RIGHT": "RECOVER RIGHT / TURN RIGHT",
             "STOP": "STOP",
         }
         ball_labels = {
@@ -1204,11 +1285,55 @@ class Yolo26Detector(Node):
             "RECOVER_TURN_RIGHT": "FIND BALL RIGHT",
             "STOP": "BALL STOP",
         }
+        goal_labels = {
+            "TURN_LEFT": "GOAL TURN LEFT",
+            "TURN_RIGHT": "GOAL TURN RIGHT",
+            "RETREAT_GOAL": "GOAL RETREAT",
+            "SHOT": "SHOOT",
+            "WAIT": "GOAL WAIT",
+            "WAIT_SCORE_CONFIRMATION": "GOAL HOLD",
+        }
+        hurdle_labels = {
+            "TURN_LEFT": "HURDLE TURN LEFT",
+            "TURN_RIGHT": "HURDLE TURN RIGHT",
+            "ALIGN_LEFT": "HURDLE PARALLEL LEFT",
+            "ALIGN_RIGHT": "HURDLE PARALLEL RIGHT",
+            "GO": "HURDLE GO",
+            "WAIT": "HURDLE WAIT",
+            "WAIT_GO_CONFIRMATION": "HURDLE HOLD",
+        }
+
+        def straight_label(prefix: str) -> str | None:
+            if normalized_action == "STRAIGHT":
+                return f"{prefix}STRAIGHT"
+            if not normalized_action.startswith("STRAIGHT_"):
+                return None
+            level_text = normalized_action.rsplit("_", 1)[1]
+            if not level_text.isdigit() or not 0 <= int(level_text) <= 5:
+                return None
+            return f"{prefix}STRAIGHT {int(level_text)}"
+
         if normalized_source == "line":
-            label = line_labels.get(normalized_action)
+            label = straight_label("") or line_labels.get(normalized_action)
+            if label is None:
+                base_action, separator, suffix_text = (
+                    normalized_action.rpartition("_")
+                )
+                base_label = line_labels.get(base_action)
+                suffix_angles = (
+                    {2: 15, 4: 30, 6: 45, 8: 60, 10: 75, 13: 90}
+                    if base_action.endswith("TURN_LEFT")
+                    else {4: 15, 6: 30, 8: 45, 10: 60, 12: 75, 15: 90}
+                )
+                if separator and base_label is not None and suffix_text.isdigit():
+                    angle = suffix_angles.get(int(suffix_text))
+                    if angle is not None:
+                        label = f"{base_label} ({angle} DEG)"
             return (label, (130, 105, 0)) if label is not None else None
         if normalized_source == "ball":
-            label = ball_labels.get(normalized_action)
+            label = straight_label("BALL / ") or ball_labels.get(
+                normalized_action
+            )
             if label is None:
                 return None
             color = (
@@ -1217,6 +1342,16 @@ class Yolo26Detector(Node):
                 else (0, 105, 190)
             )
             return label, color
+        if normalized_source == "goal":
+            label = straight_label("GOAL / ") or goal_labels.get(
+                normalized_action
+            )
+            return (label, (120, 90, 155)) if label is not None else None
+        if normalized_source == "hurdle":
+            label = straight_label("HURDLE / ") or hurdle_labels.get(
+                normalized_action
+            )
+            return (label, (0, 125, 190)) if label is not None else None
         return None
 
     @staticmethod
@@ -1457,7 +1592,7 @@ class Yolo26Detector(Node):
         info = self._fresh_line_info()
         self._draw_line_path_geometry(image, info)
         panel_width = min(410, max(270, width - 24))
-        panel_height = 238
+        panel_height = 310
         panel_x = max(12, width - panel_width - 12)
         panel_y = 44
         panel_bottom = min(height - 8, panel_y + panel_height)
@@ -1506,6 +1641,8 @@ class Yolo26Detector(Node):
             if offset is None:
                 offset = self._number(info, "lateral_offset_norm")
             turn = self._number(info, "turn_angle_deg")
+            if turn is None:
+                turn = self._number(info, "path_turn_delta_deg")
             qualities = [
                 self._number(info, "heading_quality"),
                 self._number(info, "geometry_quality"),
@@ -1527,6 +1664,25 @@ class Yolo26Detector(Node):
                 + self._metric_text(turn, "deg", 1, signed=True),
                 "Quality     : " + self._metric_text(quality, "", 3),
             ]
+            if bool(info.get("corner_preview_confirmed", False)):
+                corner_direction = str(
+                    info.get("corner_direction", "UNKNOWN")
+                ).upper()
+                corner_distance = self._number(
+                    info,
+                    "corner_start_distance_m",
+                )
+                corner_motion = str(
+                    info.get("corner_approach_motion", "STRAIGHT")
+                ).upper()
+                rows.extend(
+                    [
+                        f"Corner      : {corner_direction}",
+                        "Corner dist : "
+                        + self._metric_text(corner_distance, "m", 2),
+                        f"Approach    : {corner_motion}",
+                    ]
+                )
 
         for index, row in enumerate(rows):
             title = index == 0
@@ -1542,6 +1698,26 @@ class Yolo26Detector(Node):
             )
 
         banner = self._action_banner(planner_source, planner_action)
+        source_command = (
+            decision.get("source_command", {})
+            if decision is not None
+            else {}
+        )
+        if (
+            planner_source == "LINE"
+            and isinstance(source_command, dict)
+            and bool(source_command.get("corner_prepare", False))
+        ):
+            corner_direction = str(
+                source_command.get("corner_direction", "TURN")
+            ).upper()
+            approach_motion = str(
+                source_command.get("approach_motion", "STRAIGHT")
+            ).upper()
+            banner = (
+                f"{corner_direction} AHEAD / {approach_motion}",
+                (0, 165, 255),
+            )
         if banner is not None:
             self._draw_action_banner(image, banner[0], banner[1])
 
@@ -1555,7 +1731,16 @@ class Yolo26Detector(Node):
             return
 
         height, width = image.shape[:2]
-        center_x = width // 2
+        calibrated_center_x = self._number(info, "robot_center_x_px")
+        center_x = int(
+            np.clip(
+                round(calibrated_center_x)
+                if calibrated_center_x is not None
+                else width // 2,
+                0,
+                width - 1,
+            )
+        )
         cv2.line(
             image,
             (center_x, 0),
@@ -1566,7 +1751,7 @@ class Yolo26Detector(Node):
         )
         cv2.putText(
             image,
-            "CAMERA CENTER",
+            "ROBOT CENTER",
             (center_x + 10, 52),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.55,
@@ -1612,6 +1797,39 @@ class Yolo26Detector(Node):
                 2,
                 cv2.LINE_AA,
             )
+
+        raw_corner_point = info.get("corner_start_point_px")
+        if (
+            bool(info.get("corner_preview_confirmed", False))
+            and isinstance(raw_corner_point, list)
+            and len(raw_corner_point) == 2
+        ):
+            try:
+                corner_point = (
+                    int(round(float(raw_corner_point[0]))),
+                    int(round(float(raw_corner_point[1]))),
+                )
+            except (TypeError, ValueError):
+                corner_point = None
+            if corner_point is not None:
+                cv2.circle(
+                    image,
+                    corner_point,
+                    15,
+                    (0, 165, 255),
+                    4,
+                    cv2.LINE_AA,
+                )
+                cv2.putText(
+                    image,
+                    "TURN START",
+                    (corner_point[0] + 18, corner_point[1] - 14),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.62,
+                    (0, 165, 255),
+                    2,
+                    cv2.LINE_AA,
+                )
 
         if points:
             near = points[0]
@@ -1864,6 +2082,16 @@ class Yolo26Detector(Node):
                 cv2.LINE_AA,
             )
 
+        if decision is not None:
+            banner = self._action_banner(
+                str(decision.get("source", "")),
+                str(decision.get("action", "")),
+            )
+            if banner is not None and str(
+                decision.get("action", "")
+            ).upper() != "SHOT":
+                self._draw_action_banner(image, banner[0], banner[1])
+
         if detected and info is not None and bool(info.get("score_now")):
             score_text = "SHOT"
             font = cv2.FONT_HERSHEY_SIMPLEX
@@ -1902,10 +2130,19 @@ class Yolo26Detector(Node):
 
         height, width = image.shape[:2]
         info = self._fresh_hurdle_info()
+        decision = self._fresh_motion_command()
         detected = bool(info and info.get("detected", False))
 
+        self._draw_line_path_geometry(image, self._fresh_line_info())
+        source_command: dict[str, Any] = {}
+        if decision is not None:
+            raw_source_command = decision.get("source_command", {})
+            if isinstance(raw_source_command, dict):
+                source_command = raw_source_command
+        self._draw_hurdle_path_reference(image, source_command)
+
         panel_width = min(410, max(260, width - 24))
-        panel_height = 310
+        panel_height = 334
         panel_x = max(12, width - panel_width - 12)
         panel_y = 44
         panel_bottom = min(height - 8, panel_y + panel_height)
@@ -1936,9 +2173,20 @@ class Yolo26Detector(Node):
             rows = ["HURDLE METRICS", f"State       : {state}"]
         else:
             state = str(info.get("state", "UNKNOWN"))
+            path_source = str(
+                source_command.get("path_reference_source", "none")
+            ).upper()
             rows = [
                 "HURDLE METRICS",
                 f"State       : {state}",
+                f"Path ref    : {path_source}",
+                "Path offset : "
+                + self._metric_text(
+                    self._number(source_command, "path_offset_x_norm"),
+                    "",
+                    3,
+                    signed=True,
+                ),
                 "Depth Z     : "
                 + self._metric_text(self._number(info, "depth_m"), "m"),
                 "Ground gap  : "
@@ -1992,6 +2240,16 @@ class Yolo26Detector(Node):
                 cv2.LINE_AA,
             )
 
+        if decision is not None:
+            banner = self._action_banner(
+                str(decision.get("source", "")),
+                str(decision.get("action", "")),
+            )
+            if banner is not None and str(
+                decision.get("action", "")
+            ).upper() != "GO":
+                self._draw_action_banner(image, banner[0], banner[1])
+
         if detected and info is not None and bool(info.get("go_now")):
             go_text = "GO!"
             font = cv2.FONT_HERSHEY_SIMPLEX
@@ -2022,6 +2280,86 @@ class Yolo26Detector(Node):
                 thickness,
                 cv2.LINE_AA,
             )
+
+    @staticmethod
+    def _draw_hurdle_path_reference(
+        image: np.ndarray,
+        source_command: dict[str, Any],
+    ) -> None:
+        """Draw the inferred line bridge and hurdle approach reference."""
+        if not bool(source_command.get("path_reference_valid", False)):
+            return
+        raw_support = source_command.get("path_support_points_px", [])
+        raw_segment = source_command.get("path_bridge_segment_px")
+        raw_point = source_command.get("path_reference_point_px")
+        if not isinstance(raw_segment, list) or len(raw_segment) != 2:
+            return
+        if not isinstance(raw_point, list) or len(raw_point) != 2:
+            return
+        try:
+            segment = [
+                (int(round(float(point[0]))), int(round(float(point[1]))))
+                for point in raw_segment
+                if isinstance(point, list) and len(point) == 2
+            ]
+            reference = (
+                int(round(float(raw_point[0]))),
+                int(round(float(raw_point[1]))),
+            )
+        except (TypeError, ValueError):
+            return
+        if len(segment) != 2:
+            return
+        support: list[tuple[int, int]] = []
+        if isinstance(raw_support, list):
+            try:
+                support = [
+                    (
+                        int(round(float(point[0]))),
+                        int(round(float(point[1]))),
+                    )
+                    for point in raw_support
+                    if isinstance(point, list) and len(point) == 2
+                ]
+            except (TypeError, ValueError):
+                support = []
+        if len(support) >= 2:
+            polyline = np.asarray(support, dtype=np.int32).reshape((-1, 1, 2))
+            cv2.polylines(
+                image,
+                [polyline],
+                False,
+                (255, 255, 0),
+                3,
+                cv2.LINE_AA,
+            )
+        cv2.line(
+            image,
+            segment[0],
+            segment[1],
+            (255, 255, 0),
+            5,
+            cv2.LINE_AA,
+        )
+        cv2.drawMarker(
+            image,
+            reference,
+            (0, 165, 255),
+            cv2.MARKER_CROSS,
+            30,
+            5,
+            cv2.LINE_AA,
+        )
+        cv2.putText(
+            image,
+            "HURDLE PATH TARGET",
+            (reference[0] + 16, max(24, reference[1] - 14)),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.58,
+            (0, 165, 255),
+            2,
+            cv2.LINE_AA,
+        )
 
     def _draw_detections(
         self, image: np.ndarray, detections: list[Detection]
@@ -2073,32 +2411,22 @@ class Yolo26Detector(Node):
                 metrics_mode == "line" or show_recovery_line
             ) and detection.class_name == "line":
                 continue
+            visible, control_ready, object_depth = self._object_range_status(
+                detection.class_name,
+                ball_info,
+                goal_info,
+                hurdle_info,
+            )
+            if not visible:
+                continue
             left, top, right, bottom = detection.bbox
             color = self._color_for_class(detection.class_id)
             label = f"{detection.class_name} {detection.confidence:.2f}"
-            if metrics_mode == "line" and detection.class_name == "ball":
-                ball_info = self._fresh_ball_info()
-                ball_depth = (
-                    self._number(ball_info, "depth_m")
-                    if ball_info is not None
-                    else None
+            if object_depth is not None and not control_ready:
+                label = (
+                    f"{detection.class_name} TRACK ONLY "
+                    f"{object_depth:.2f}m"
                 )
-                if (
-                    ball_depth is not None
-                    and ball_depth > self.ball_control_range_m
-                ):
-                    label = f"ball TRACK ONLY {ball_depth:.2f}m"
-            if metrics_mode == "line" and detection.class_name == "goal":
-                goal_depth = (
-                    self._number(goal_info, "depth_m")
-                    if goal_info is not None
-                    else None
-                )
-                if (
-                    goal_depth is not None
-                    and goal_depth > self.goal_control_range_m
-                ):
-                    label = f"goal TRACK ONLY {goal_depth:.2f}m"
             confirmation_info = {
                 "line": line_info,
                 "ball": ball_info,

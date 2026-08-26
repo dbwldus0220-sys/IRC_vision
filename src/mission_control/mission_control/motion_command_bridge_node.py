@@ -11,19 +11,52 @@ from rclpy.node import Node
 from std_msgs.msg import String
 
 
+LEFT_RECOVERY_MOTION_IDS = {
+    2: "line_turn_left_4",
+    4: "line_turn_left_6",
+    6: "line_turn_left_8",
+    8: "line_turn_left_10",
+    10: "line_turn_left_12",
+    13: "line_turn_left_15",
+}
+RIGHT_RECOVERY_MOTION_IDS = {
+    4: "line_turn_right_2",
+    6: "line_turn_right_4",
+    8: "line_turn_right_6",
+    10: "line_turn_right_8",
+    12: "line_turn_right_10",
+    15: "line_turn_right_large",
+}
+
+
 class MotionCommandBridgeNode(Node):
     """Translate supported navigation actions into SDK executor requests."""
 
     ACTION_TO_MOTION_ID = {
         "STRAIGHT": "forward",
+        "STRAIGHT_1": "line_forward_2",
+        "STRAIGHT_2": "line_forward_4",
+        "STRAIGHT_3": "line_forward_6",
+        "STRAIGHT_4": "line_forward_8",
+        "STRAIGHT_5": "line_forward_10",
         "APPROACH": "forward",
-        "LEFT": "line_turn_left_large",
+        "LEFT": "line_turn_left_15",
         "RIGHT": "line_turn_right_large",
         "PICKUP_NOW": "pickup",
         "GO": "hurdle",
+        **{
+            f"RECOVER_{line_side}_TURN_LEFT_{suffix}": motion_id
+            for line_side in ("LEFT", "RIGHT")
+            for suffix, motion_id in LEFT_RECOVERY_MOTION_IDS.items()
+        },
+        **{
+            f"RECOVER_{line_side}_TURN_RIGHT_{suffix}": motion_id
+            for line_side in ("LEFT", "RIGHT")
+            for suffix, motion_id in RIGHT_RECOVERY_MOTION_IDS.items()
+        },
     }
     TERMINAL_STATUSES = {"SUCCEEDED", "FAILED", "CANCELLED", "REJECTED"}
-    DEFAULT_TIMEOUT_MS = 10000
+    DEFAULT_TIMEOUT_MS = 12000
 
     def __init__(self) -> None:
         """Initialize bridge state, publishers, and subscriptions."""

@@ -76,8 +76,6 @@ def test_unsupported_action():
     assert map_action_to_motion_id("FLY") is None
     assert map_action_to_motion_id("WAIT") is None
     assert map_action_to_motion_id("STOP") is None
-    assert map_action_to_motion_id("FINE_LEFT") is None
-    assert map_action_to_motion_id("FINE_RIGHT") is None
     assert map_action_to_motion_id("HEAD_SCAN_LEFT") is None
     assert map_action_to_motion_id("HEAD_SCAN_RIGHT") is None
     assert map_action_to_motion_id("HEAD_CENTER") is None
@@ -179,8 +177,6 @@ def test_left_and_right_create_executor_requests():
         {"action": "WAIT", "valid": False},
         {"action": "STRAIGHT", "valid": False},
         {"action": "FLY", "valid": True},
-        {"action": "FINE_LEFT", "valid": True},
-        {"action": "FINE_RIGHT", "valid": True},
         {"action": "BALL_LOST_STOP", "valid": False},
         {"action": "GOAL_LOST_STOP", "valid": False},
         {"action": "HEAD_SCAN_LEFT", "valid": False},

@@ -18,6 +18,9 @@ from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import CameraInfo, Image
 from std_msgs.msg import String
 
+from .approach_distance import approach_level_from_motion
+from .approach_distance import approach_motion_for_distance
+from .temporal_confirmation import depth_is_within_range
 from .temporal_confirmation import TemporalConfirmationFilter
 
 
@@ -79,6 +82,9 @@ class GoalInfo:
     depth_in_score_range: bool
     score_depth_error_m: float | None
     score_now: bool
+    approach_motion: str
+    approach_level: int | None
+    approach_target_distance_m: float | None
     target_priority_score: float
     candidate_count: int
     candidates: list[GoalCandidate]
@@ -108,17 +114,18 @@ class GoalAnalyzer(Node):
         self.declare_parameter("goal_class_name", "goal")
         self.declare_parameter("backboard_class_name", "backboard")
         self.declare_parameter("prefer_backboard_center", True)
-        self.declare_parameter("min_confidence", 0.35)
+        self.declare_parameter("min_confidence", 0.55)
         self.declare_parameter("depth_timeout_sec", 0.7)
         self.declare_parameter("depth_window_px", 11)
         self.declare_parameter("max_valid_depth_m", 6.0)
+        self.declare_parameter("detect_depth_m", 1.0)
         self.declare_parameter("approach_depth_m", 0.5)
         self.declare_parameter("score_target_depth_m", 0.25)
         self.declare_parameter("score_depth_tolerance_m", 0.05)
         self.declare_parameter("score_center_tolerance_norm", 0.10)
         self.declare_parameter("direction_deadband_norm", 0.04)
-        self.declare_parameter("confirmation_window_size", 5)
-        self.declare_parameter("confirmation_required_hits", 3)
+        self.declare_parameter("confirmation_window_size", 40)
+        self.declare_parameter("confirmation_required_hits", 30)
         self.declare_parameter("confirmation_max_missed_frames", 2)
         self.declare_parameter("confirmation_max_center_shift_norm", 0.18)
         self.declare_parameter("confirmation_min_area_ratio", 0.40)
@@ -152,6 +159,7 @@ class GoalAnalyzer(Node):
         self.max_valid_depth_m = self._float_parameter(
             "max_valid_depth_m"
         )
+        self.detect_depth_m = self._float_parameter("detect_depth_m")
         self.approach_depth_m = self._float_parameter("approach_depth_m")
         self.score_target_depth_m = self._float_parameter(
             "score_target_depth_m"
@@ -599,6 +607,9 @@ class GoalAnalyzer(Node):
             depth_in_score_range=False,
             score_depth_error_m=None,
             score_now=False,
+            approach_motion="STRAIGHT",
+            approach_level=None,
+            approach_target_distance_m=None,
             target_priority_score=0.0,
             candidate_count=0,
             candidates=[],
@@ -664,6 +675,7 @@ class GoalAnalyzer(Node):
             == self.backboard_class_name
         ]
         candidates: list[GoalCandidate] = []
+        outside_tracking_range = False
         for detection in detections:
             if not isinstance(detection, dict):
                 continue
@@ -680,8 +692,16 @@ class GoalAnalyzer(Node):
                 image_height,
                 aim_detection,
             )
-            if candidate is not None:
+            if candidate is None:
+                continue
+            if depth_is_within_range(
+                candidate.depth_valid,
+                candidate.depth_m,
+                self.detect_depth_m,
+            ):
                 candidates.append(candidate)
+            elif candidate.depth_valid and candidate.depth_m is not None:
+                outside_tracking_range = True
         candidates.sort(key=lambda item: item.score, reverse=True)
         if not candidates:
             confirmation = self.confirmation_filter.update(False)
@@ -691,7 +711,12 @@ class GoalAnalyzer(Node):
                 "score_confirmation"
             )
             if self.publish_empty_when_missing:
-                self._publish(self._empty_info())
+                note = (
+                    "goal_outside_tracking_range"
+                    if outside_tracking_range
+                    else "no_goal_detection"
+                )
+                self._publish(self._empty_info(note))
             return
 
         target = candidates[0]
@@ -763,6 +788,13 @@ class GoalAnalyzer(Node):
                     else None
                 ),
                 score_now=score_now,
+                approach_motion=approach_motion_for_distance(
+                    target.depth_m
+                ),
+                approach_level=approach_level_from_motion(
+                    approach_motion_for_distance(target.depth_m)
+                ),
+                approach_target_distance_m=target.depth_m,
                 target_priority_score=target.score,
                 candidate_count=len(candidates),
                 candidates=candidates[:5],

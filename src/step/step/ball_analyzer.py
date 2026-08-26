@@ -18,6 +18,9 @@ from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import CameraInfo, Image
 from std_msgs.msg import String
 
+from .approach_distance import approach_level_from_motion
+from .approach_distance import approach_motion_for_distance
+from .temporal_confirmation import depth_is_within_range
 from .temporal_confirmation import TemporalConfirmationFilter
 
 
@@ -72,6 +75,9 @@ class BallInfo:
     vertical_offset_m: float | None
     horizontal_distance_m: float | None
     distance_m: float | None
+    approach_motion: str
+    approach_level: int | None
+    approach_target_distance_m: float | None
     depth_valid: bool
     is_centered: bool
     is_close: bool
@@ -118,22 +124,24 @@ class BallAnalyzer(Node):
         )
         self.declare_parameter("output_topic", "/vision/ball_info")
         self.declare_parameter("ball_class_name", "ball")
-        self.declare_parameter("min_confidence", 0.35)
+        self.declare_parameter("min_confidence", 0.55)
         self.declare_parameter("depth_timeout_sec", 0.7)
         self.declare_parameter("depth_window_px", 9)
         self.declare_parameter("max_valid_depth_m", 4.0)
-        self.declare_parameter("detect_depth_m", 3.0)
+        self.declare_parameter("detect_depth_m", 1.5)
         self.declare_parameter("approach_depth_m", 0.9)
-        self.declare_parameter("pickup_ready_depth_m", 0.9)
-        self.declare_parameter("pickup_now_depth_m", 0.8)
-        self.declare_parameter("pickup_depth_tolerance_m", 0.05)
+        self.declare_parameter("pickup_ready_depth_m", 0.15)
+        self.declare_parameter("pickup_now_depth_m", 0.07)
+        self.declare_parameter("pickup_depth_tolerance_m", 0.02)
         self.declare_parameter("pickup_center_tolerance_norm", 0.08)
         self.declare_parameter("pickup_target_y_ratio", 0.82)
         self.declare_parameter("pickup_y_tolerance_ratio", 0.12)
         self.declare_parameter("horizontal_deadband_px", 20)
         self.declare_parameter("center_tolerance_px", 140)
-        self.declare_parameter("confirmation_window_size", 5)
-        self.declare_parameter("confirmation_required_hits", 3)
+        # At the 30 FPS competition setting this requires about one second of
+        # spatially consistent detection before ball_info becomes detected.
+        self.declare_parameter("confirmation_window_size", 40)
+        self.declare_parameter("confirmation_required_hits", 30)
         self.declare_parameter("confirmation_max_missed_frames", 2)
         self.declare_parameter("confirmation_max_center_shift_norm", 0.18)
         self.declare_parameter("confirmation_min_area_ratio", 0.40)
@@ -699,6 +707,9 @@ class BallAnalyzer(Node):
             vertical_offset_m=None,
             horizontal_distance_m=None,
             distance_m=None,
+            approach_motion="STRAIGHT",
+            approach_level=None,
+            approach_target_distance_m=None,
             depth_valid=False,
             is_centered=False,
             is_close=False,
@@ -748,6 +759,7 @@ class BallAnalyzer(Node):
             detections,
         )
         candidates: list[BallCandidate] = []
+        outside_tracking_range = False
         for detection in detections:
             if not isinstance(detection, dict):
                 continue
@@ -758,8 +770,16 @@ class BallAnalyzer(Node):
                 image_width,
                 image_height,
             )
-            if candidate is not None:
+            if candidate is None:
+                continue
+            if depth_is_within_range(
+                candidate.depth_valid,
+                candidate.depth_m,
+                self.detect_depth_m,
+            ):
                 candidates.append(candidate)
+            elif candidate.depth_valid and candidate.depth_m is not None:
+                outside_tracking_range = True
 
         candidates.sort(key=lambda item: item.score, reverse=True)
         if not candidates:
@@ -772,7 +792,12 @@ class BallAnalyzer(Node):
                 "pickup_confirmation"
             )
             if self.publish_empty_when_missing:
-                self._publish(self._empty_info())
+                note = (
+                    "ball_outside_tracking_range"
+                    if outside_tracking_range
+                    else "no_ball_detection"
+                )
+                self._publish(self._empty_info(note))
             return
 
         target = candidates[0]
@@ -839,6 +864,13 @@ class BallAnalyzer(Node):
                 vertical_offset_m=target.vertical_offset_m,
                 horizontal_distance_m=target.horizontal_distance_m,
                 distance_m=target.distance_m,
+                approach_motion=approach_motion_for_distance(
+                    target.depth_m
+                ),
+                approach_level=approach_level_from_motion(
+                    approach_motion_for_distance(target.depth_m)
+                ),
+                approach_target_distance_m=target.depth_m,
                 depth_valid=target.depth_valid,
                 is_centered=centered,
                 is_close=close,

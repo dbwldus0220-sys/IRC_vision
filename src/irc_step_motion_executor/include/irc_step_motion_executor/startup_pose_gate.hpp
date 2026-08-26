@@ -14,13 +14,15 @@ namespace irc_step_motion_executor
 class StartupPoseGate
 {
 public:
-  enum class State {DISABLED, LOCKED, MOVING, SETTLING, RELEASED, ERROR};
+  enum class State {DISABLED, LOCKED, MOVING, SETTLING, HOLDING, RELEASED, ERROR};
   using LogCallback = std::function<void(const std::string &)>;
+  using NowMsCallback = std::function<std::uint64_t()>;
 
   StartupPoseGate(
     bool enabled, std::string pose_name, std::vector<double> target_angles_deg,
     std::int64_t duration_ms,
-    StartupPoseController * controller, LogCallback log_callback = {});
+    StartupPoseController * controller, LogCallback log_callback = {},
+    NowMsCallback now_ms_callback = {});
 
   void poll();
   bool navigation_allowed() const noexcept;
@@ -37,6 +39,8 @@ private:
   std::int64_t duration_ms_;
   StartupPoseController * controller_;
   LogCallback log_callback_;
+  NowMsCallback now_ms_callback_;
+  std::uint64_t hold_started_at_ms_{0};
   std::string error_message_;
 };
 

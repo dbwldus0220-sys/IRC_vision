@@ -181,6 +181,9 @@ private:
       object, "backend_type", json_object_new_string(backend_type.c_str()));
     json_object_object_add(
       object, "active", json_object_new_boolean(core_->has_active_request()));
+    json_object_object_add(
+      object, "auto_ready",
+      json_object_new_boolean(startup_pose_gate_->navigation_allowed()));
 
     std_msgs::msg::String message;
     message.data = json_object_to_json_string_ext(

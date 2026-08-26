@@ -18,6 +18,9 @@ from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import CameraInfo, Image
 from std_msgs.msg import String
 
+from .approach_distance import approach_level_from_motion
+from .approach_distance import approach_motion_for_distance
+from .temporal_confirmation import depth_is_within_range
 from .temporal_confirmation import TemporalConfirmationFilter
 
 
@@ -91,6 +94,9 @@ class HurdleInfo:
     ground_gap_in_go_range: bool
     go_ground_gap_error_m: float | None
     go_now: bool
+    approach_motion: str
+    approach_level: int | None
+    approach_target_distance_m: float | None
     target_priority_score: float
     candidate_count: int
     candidates: list[HurdleCandidate]
@@ -118,10 +124,11 @@ class HurdleAnalyzer(Node):
         )
         self.declare_parameter("output_topic", "/vision/hurdle_info")
         self.declare_parameter("hurdle_class_name", "hurdle")
-        self.declare_parameter("min_confidence", 0.35)
+        self.declare_parameter("min_confidence", 0.60)
         self.declare_parameter("depth_timeout_sec", 0.7)
         self.declare_parameter("depth_window_px", 9)
         self.declare_parameter("max_valid_depth_m", 4.0)
+        self.declare_parameter("detect_depth_m", 1.0)
         self.declare_parameter("camera_height_m", 0.70)
         self.declare_parameter("hurdle_reference_height_m", 0.10)
         self.declare_parameter("go_target_ground_gap_m", 0.10)
@@ -129,8 +136,8 @@ class HurdleAnalyzer(Node):
         self.declare_parameter("go_max_camera_bottom_gap_m", 0.05)
         self.declare_parameter("go_angle_tolerance_deg", 8.0)
         self.declare_parameter("direction_deadband_norm", 0.04)
-        self.declare_parameter("confirmation_window_size", 7)
-        self.declare_parameter("confirmation_required_hits", 5)
+        self.declare_parameter("confirmation_window_size", 40)
+        self.declare_parameter("confirmation_required_hits", 30)
         self.declare_parameter("confirmation_max_missed_frames", 2)
         self.declare_parameter("confirmation_max_center_shift_norm", 0.20)
         self.declare_parameter("confirmation_min_area_ratio", 0.40)
@@ -160,6 +167,7 @@ class HurdleAnalyzer(Node):
         self.max_valid_depth_m = self._float_parameter(
             "max_valid_depth_m"
         )
+        self.detect_depth_m = self._float_parameter("detect_depth_m")
         self.camera_height_m = max(
             0.0,
             self._float_parameter("camera_height_m"),
@@ -326,6 +334,8 @@ class HurdleAnalyzer(Node):
     def _sample_depths(
         self,
         bbox: list[int],
+        source_width: int | None,
+        source_height: int | None,
     ) -> tuple[float | None, float | None, float | None, int]:
         depth_age = self._depth_age_sec()
         if (
@@ -336,7 +346,21 @@ class HurdleAnalyzer(Node):
             or self.latest_depth_image.ndim != 2
         ):
             return None, None, None, 0
-        left, top, right, bottom = bbox
+        depth_height, depth_width = self.latest_depth_image.shape[:2]
+        source_width = int(source_width or depth_width)
+        source_height = int(source_height or depth_height)
+        scale_x = depth_width / max(source_width, 1)
+        scale_y = depth_height / max(source_height, 1)
+        left, top, right, bottom = (
+            int(round(bbox[0] * scale_x)),
+            int(round(bbox[1] * scale_y)),
+            int(round(bbox[2] * scale_x)),
+            int(round(bbox[3] * scale_y)),
+        )
+        left = max(0, min(depth_width - 1, left))
+        right = max(left + 1, min(depth_width, right))
+        top = max(0, min(depth_height - 1, top))
+        bottom = max(top + 1, min(depth_height, bottom))
         width = right - left
         sample_y = int(round(top + (bottom - top) * 0.55))
         ratios = [0.15, 0.325, 0.50, 0.675, 0.85]
@@ -412,7 +436,7 @@ class HurdleAnalyzer(Node):
             offset_y_norm = offset_y_px / max(image_height / 2, 1.0)
 
         depth, left_depth, right_depth, sample_count = (
-            self._sample_depths(bbox)
+            self._sample_depths(bbox, image_width, image_height)
         )
         depth_valid = depth is not None
         bearing: float | None = None
@@ -661,6 +685,9 @@ class HurdleAnalyzer(Node):
             ground_gap_in_go_range=False,
             go_ground_gap_error_m=None,
             go_now=False,
+            approach_motion="STRAIGHT",
+            approach_level=None,
+            approach_target_distance_m=None,
             target_priority_score=0.0,
             candidate_count=0,
             candidates=[],
@@ -697,6 +724,7 @@ class HurdleAnalyzer(Node):
 
         image_width, image_height = self._image_size(payload)
         candidates: list[HurdleCandidate] = []
+        outside_tracking_range = False
         for detection in detections:
             if not isinstance(detection, dict):
                 continue
@@ -707,8 +735,16 @@ class HurdleAnalyzer(Node):
                 image_width,
                 image_height,
             )
-            if candidate is not None:
+            if candidate is None:
+                continue
+            if depth_is_within_range(
+                candidate.depth_valid,
+                candidate.depth_m,
+                self.detect_depth_m,
+            ):
                 candidates.append(candidate)
+            elif candidate.depth_valid and candidate.depth_m is not None:
+                outside_tracking_range = True
         candidates.sort(key=lambda item: item.score, reverse=True)
         if not candidates:
             confirmation = self.confirmation_filter.update(False)
@@ -718,7 +754,12 @@ class HurdleAnalyzer(Node):
                 "go_confirmation"
             )
             if self.publish_empty_when_missing:
-                self._publish(self._empty_info())
+                note = (
+                    "hurdle_outside_tracking_range"
+                    if outside_tracking_range
+                    else "no_hurdle_detection"
+                )
+                self._publish(self._empty_info(note))
             return
 
         target = candidates[0]
@@ -787,6 +828,13 @@ class HurdleAnalyzer(Node):
                     round(error, 3) if error is not None else None
                 ),
                 go_now=go_now,
+                approach_motion=approach_motion_for_distance(
+                    target.ground_gap_m
+                ),
+                approach_level=approach_level_from_motion(
+                    approach_motion_for_distance(target.ground_gap_m)
+                ),
+                approach_target_distance_m=target.ground_gap_m,
                 target_priority_score=target.score,
                 candidate_count=len(candidates),
                 candidates=candidates[:5],
