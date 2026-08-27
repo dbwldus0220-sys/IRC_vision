@@ -1343,10 +1343,10 @@ def test_line_motion_captures_configured_frames_after_eighty_percent(
         dynamics_command=None,
     )
 
-    assert node.active_line_motion_duration_sec == pytest.approx(4.0)
+    assert node.active_line_motion_duration_sec == pytest.approx(4.111)
     assert node.active_line_motion_target_frames == 20
 
-    clock[0] = 13.19
+    clock[0] = 13.28
     MotionDecisionNode._collect_active_line_motion_frame(
         node,
         {"frame": "too_early"},
@@ -1354,7 +1354,7 @@ def test_line_motion_captures_configured_frames_after_eighty_percent(
     )
     assert node.active_line_motion_frames == []
 
-    clock[0] = 13.20
+    clock[0] = 13.29
     for frame_id in range(25):
         MotionDecisionNode._collect_active_line_motion_frame(
             node,
@@ -1380,14 +1380,14 @@ def test_line_motion_captures_configured_frames_after_eighty_percent(
 
 def test_line_motion_capture_table_matches_deployed_timelines():
     expected = {
-        "STRAIGHT": (4.000, 20),
-        "STRAIGHT_1": (0.800, 5),
-        "STRAIGHT_2": (1.600, 10),
-        "STRAIGHT_3": (2.400, 10),
-        "STRAIGHT_4": (3.200, 15),
-        "STRAIGHT_5": (4.000, 20),
+        "STRAIGHT": (4.111, 20),
+        "STRAIGHT_1": (0.822, 5),
+        "STRAIGHT_2": (1.644, 10),
+        "STRAIGHT_3": (2.467, 10),
+        "STRAIGHT_4": (3.289, 15),
+        "STRAIGHT_5": (4.111, 20),
         "LEFT": (7.365, 30),
-        "RIGHT": (5.184, 30),
+        "RIGHT": (7.105, 30),
     }
     left_timelines = {
         2: (2.272, 10),
@@ -1398,12 +1398,12 @@ def test_line_motion_capture_table_matches_deployed_timelines():
         13: (7.365, 30),
     }
     right_timelines = {
-        4: (0.864, 5),
-        6: (1.728, 10),
-        8: (2.592, 15),
-        10: (3.456, 20),
-        12: (4.320, 25),
-        15: (5.184, 30),
+        4: (1.895, 5),
+        6: (2.842, 10),
+        8: (3.789, 15),
+        10: (4.737, 20),
+        12: (5.684, 25),
+        15: (7.105, 30),
     }
     for recovery_side in ("LEFT", "RIGHT"):
         for suffix, timeline in left_timelines.items():

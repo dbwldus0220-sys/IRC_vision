@@ -61,14 +61,14 @@ class MotionDecisionNode(Node):
     DEFAULT_EXECUTOR_HEARTBEAT_STARTUP_GRACE_SEC = 5.0
     EXECUTOR_WATCHDOG_PERIOD_SEC = 0.1
     LINE_MOTION_CAPTURE_CONFIG = {
-        "STRAIGHT": (4.000, 20),
-        "STRAIGHT_1": (0.800, 5),
-        "STRAIGHT_2": (1.600, 10),
-        "STRAIGHT_3": (2.400, 10),
-        "STRAIGHT_4": (3.200, 15),
-        "STRAIGHT_5": (4.000, 20),
+        "STRAIGHT": (4.111, 20),
+        "STRAIGHT_1": (0.822, 5),
+        "STRAIGHT_2": (1.644, 10),
+        "STRAIGHT_3": (2.467, 10),
+        "STRAIGHT_4": (3.289, 15),
+        "STRAIGHT_5": (4.111, 20),
         "LEFT": (7.365, 30),
-        "RIGHT": (5.184, 30),
+        "RIGHT": (7.105, 30),
         **{
             f"RECOVER_{line_side}_TURN_LEFT_{suffix}": timing
             for line_side in ("LEFT", "RIGHT")
@@ -85,12 +85,12 @@ class MotionDecisionNode(Node):
             f"RECOVER_{line_side}_TURN_RIGHT_{suffix}": timing
             for line_side in ("LEFT", "RIGHT")
             for suffix, timing in {
-                4: (0.864, 5),
-                6: (1.728, 10),
-                8: (2.592, 15),
-                10: (3.456, 20),
-                12: (4.320, 25),
-                15: (5.184, 30),
+                4: (1.895, 5),
+                6: (2.842, 10),
+                8: (3.789, 15),
+                10: (4.737, 20),
+                12: (5.684, 25),
+                15: (7.105, 30),
             }.items()
         },
     }
