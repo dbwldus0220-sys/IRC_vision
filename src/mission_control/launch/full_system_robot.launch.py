@@ -6,8 +6,10 @@ from launch.actions import DeclareLaunchArgument
 from launch.actions import IncludeLaunchDescription
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import EnvironmentVariable
 from launch.substitutions import LaunchConfiguration
 from launch.substitutions import PathJoinSubstitution
+from launch.substitutions import PythonExpression
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
@@ -21,6 +23,19 @@ def generate_launch_description() -> LaunchDescription:
     display = LaunchConfiguration("display")
     metrics_mode = LaunchConfiguration("metrics_mode")
     max_fps = LaunchConfiguration("max_fps")
+
+    camera_topic_prefix = LaunchConfiguration("camera_topic_prefix")
+
+    color_image_topic = PythonExpression(
+        ["'", camera_topic_prefix, "/color/image_raw'"]
+    )
+    aligned_depth_topic = PythonExpression(
+        ["'", camera_topic_prefix, "/aligned_depth_to_color/image_raw'"]
+    )
+    color_camera_info_topic = PythonExpression(
+        ["'", camera_topic_prefix, "/color/camera_info'"]
+    )
+
     initial_mission_phase = LaunchConfiguration("initial_mission_phase")
     recovery_heading_turn_deg = LaunchConfiguration("recovery_heading_turn_deg")
     recovery_away_heading_turn_deg = LaunchConfiguration(
@@ -89,6 +104,10 @@ def generate_launch_description() -> LaunchDescription:
                 "display": ParameterValue(display, value_type=bool),
                 "metrics_mode": metrics_mode,
                 "max_fps": ParameterValue(max_fps, value_type=float),
+                "image_topic": ParameterValue(
+                    color_image_topic,
+                    value_type=str,
+                ),
                 "ball_tracking_range_m": ParameterValue(
                     ball_tracking_range_m, value_type=float
                 ),
@@ -109,9 +128,7 @@ def generate_launch_description() -> LaunchDescription:
                 ),
             }
         ],
-        remappings=[
-            ("/camera/color/image_raw", "/camera/camera/color/image_raw"),
-        ],
+
     )
 
     unified_vision = Node(
@@ -121,6 +138,19 @@ def generate_launch_description() -> LaunchDescription:
         emulate_tty=True,
         parameters=[
             {
+                "image_topic": ParameterValue(
+                    color_image_topic,
+                    value_type=str,
+                ),
+                "depth_topic": ParameterValue(
+                    aligned_depth_topic,
+                    value_type=str,
+                ),
+                "camera_info_topic": ParameterValue(
+                    color_camera_info_topic,
+                    value_type=str,
+                ),
+
                 "robot_center_offset_px": ParameterValue(
                     robot_center_offset_px, value_type=float
                 ),
@@ -150,17 +180,7 @@ def generate_launch_description() -> LaunchDescription:
                 ),
             }
         ],
-        remappings=[
-            ("/camera/color/image_raw", "/camera/camera/color/image_raw"),
-            (
-                "/camera/aligned_depth_to_color/image_raw",
-                "/camera/camera/aligned_depth_to_color/image_raw",
-            ),
-            (
-                "/camera/color/camera_info",
-                "/camera/camera/color/camera_info",
-            ),
-        ],
+
     )
     motion_decision = Node(
         package="mission_control",
@@ -268,6 +288,17 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("display", default_value="true"),
             DeclareLaunchArgument("metrics_mode", default_value="auto"),
             DeclareLaunchArgument("max_fps", default_value="30.0"),
+            DeclareLaunchArgument(
+            "camera_topic_prefix",
+            default_value=EnvironmentVariable(
+                "IRC_CAMERA_TOPIC_PREFIX",
+                default_value="/camera/camera",
+            ),
+            description=(
+                "RealSense topic prefix. "
+                "PC=/camera, Jetson=/camera/camera."
+            ),
+),
             DeclareLaunchArgument("initial_mission_phase", default_value="AUTO"),
             DeclareLaunchArgument("recovery_heading_turn_deg", default_value="10.0"),
             DeclareLaunchArgument(
