@@ -1,6 +1,14 @@
+from pathlib import Path
+
 from setuptools import find_packages, setup
 
 package_name = 'step'
+
+package_dir = Path(__file__).resolve().parent
+model_files = ['models/best.onnx']
+
+if (package_dir / 'models' / 'best.engine').is_file():
+    model_files.append('models/best.engine')
 
 setup(
     name=package_name,
@@ -12,7 +20,7 @@ setup(
         ('share/' + package_name, ['package.xml']),
         (
             'share/' + package_name + '/models',
-            ['models/best.onnx', 'models/best.engine'],
+            model_files,
         ),
     ],
     install_requires=['setuptools'],
