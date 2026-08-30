@@ -28,6 +28,8 @@ constexpr FixedSdkHardwareProfile kFixedSdkHardwareProfile{
   {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
     12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22}};
 
+constexpr std::string_view kAlternateSdkDevicePath = "/dev/ttyUSB1";
+
 RobotMotionRuntimeConfigResult error(
   std::string error_code, std::string message)
 {
@@ -88,10 +90,12 @@ RobotMotionRuntimeConfigResult validate_robot_hardware_policy(
       "hardware initialization requires explicit torque approval");
   }
 
-  if (config.device_path != kFixedSdkHardwareProfile.device_path) {
+  if (config.device_path != kFixedSdkHardwareProfile.device_path &&
+    config.device_path != kAlternateSdkDevicePath)
+  {
     return error(
       "ROBOT_DEVICE_PATH_MISMATCH",
-      "device_path does not match the current fixed SDK hardware profile");
+      "device_path does not match an approved SDK hardware device path");
   }
   if (config.baud_rate != kFixedSdkHardwareProfile.baud_rate) {
     return error(

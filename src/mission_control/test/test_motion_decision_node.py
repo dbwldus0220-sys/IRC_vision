@@ -607,7 +607,7 @@ def test_decision_debug_reports_existing_state(monkeypatch):
                     'direction_confirmation_frames': 3,
                     'turn_enter_deg': 12.0,
                     'turn_exit_deg': 7.0,
-                    'line_large_heading_threshold_deg': 18.0,
+                    'recovery_heading_turn_deg': 10.0,
                 },
             )(),
         },
@@ -632,7 +632,7 @@ def test_decision_debug_reports_existing_state(monkeypatch):
             'direction_confirmation_required': 3,
         'turn_enter_deg': 12.0,
         'turn_exit_deg': 7.0,
-        'line_large_heading_threshold_deg': 18.0,
+        'line_large_heading_threshold_deg': 10.0,
     }
     assert payload['decision']['candidate_action'] == 'STRAIGHT'
     assert payload['decision']['selected_action'] == 'STRAIGHT'

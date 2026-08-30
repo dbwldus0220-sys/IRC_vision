@@ -352,7 +352,7 @@ def generate_launch_description() -> LaunchDescription:
                 ),
             ),
             DeclareLaunchArgument(
-                "robot_device_path", default_value="/dev/ttyUSB1"
+                "robot_device_path", default_value="/dev/ttyUSB0"
             ),
             DeclareLaunchArgument("robot_baud_rate", default_value="4000000"),
             DeclareLaunchArgument(

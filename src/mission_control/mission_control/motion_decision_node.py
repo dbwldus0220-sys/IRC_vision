@@ -1275,7 +1275,7 @@ class MotionDecisionNode(Node):
                     "turn_enter_deg": line_config.turn_enter_deg,
                     "turn_exit_deg": line_config.turn_exit_deg,
                     "line_large_heading_threshold_deg": (
-                        line_config.line_large_heading_threshold_deg
+                        line_config.recovery_heading_turn_deg
                     ),
                 },
                 "decision": {

@@ -97,7 +97,7 @@ TEST(ProductionRobotMotionRuntimeFactory, PreflightPolicyFailureCreatesNoSdkObje
   auto config = complete_runtime_config();
   config.motion_json_path.clear();
   config.explicit_torque_approval = false;
-  config.device_path = "/dev/ttyUSB1";
+  config.device_path = "/dev/ttyUSB2";
 
   const auto result = factory.preflight(config);
 
@@ -261,7 +261,7 @@ TEST(ProductionRobotMotionRuntimeFactory, PolicyFailuresCreateNoSdkObjects)
         }()},
       {"ROBOT_DEVICE_PATH_MISMATCH", [] {
           auto config = complete_runtime_config();
-          config.device_path = "/dev/ttyUSB1";
+          config.device_path = "/dev/ttyUSB2";
           return config;
         }()}})
   {

@@ -1224,17 +1224,17 @@ def test_composite_line_recovery_exposes_turn_metadata():
         "LINE_TRACK",
         observations(
             line=line_info(
-                filtered_heading_error_deg=-45.0,
+                filtered_heading_error_deg=45.0,
                 filtered_lateral_offset_norm=0.25,
             )
         ),
         0.1,
     )
 
-    assert decision.action == "RECOVER_RIGHT_TURN_LEFT_6"
+    assert decision.action == "RECOVER_RIGHT_TURN_RIGHT_8"
     assert decision.source_command["recovery_side"] == "RIGHT"
-    assert decision.source_command["turn_motion"] == "TURN_LEFT_6"
-    assert decision.source_command["turn_angle_deg"] == -45.0
+    assert decision.source_command["turn_motion"] == "TURN_RIGHT_8"
+    assert decision.source_command["turn_angle_deg"] == 45.0
 
 
 def test_one_missing_line_frame_stops_safely():

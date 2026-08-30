@@ -177,13 +177,25 @@ TEST(RobotHardwareInitializationPolicy, RequiresTorqueApproval)
 TEST(RobotHardwareInitializationPolicy, RejectsDevicePathMismatch)
 {
   auto config = valid_hardware_policy();
-  config.device_path = "/dev/ttyUSB1";
+  config.device_path = "/dev/ttyUSB2";
 
   const auto result =
     irc_step_motion_executor::validate_robot_hardware_initialization_policy(config);
 
   EXPECT_FALSE(result);
   EXPECT_EQ(result.error_code, "ROBOT_DEVICE_PATH_MISMATCH");
+}
+
+TEST(RobotHardwareInitializationPolicy, AcceptsAlternateUsbEnumeration)
+{
+  auto config = valid_hardware_policy();
+  config.device_path = "/dev/ttyUSB1";
+
+  const auto result =
+    irc_step_motion_executor::validate_robot_hardware_initialization_policy(config);
+
+  EXPECT_TRUE(result);
+  EXPECT_EQ(result.config.device_path, "/dev/ttyUSB1");
 }
 
 TEST(RobotHardwareInitializationPolicy, RejectsBaudRateMismatch)

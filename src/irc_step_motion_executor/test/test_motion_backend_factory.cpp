@@ -213,7 +213,7 @@ TEST(MotionBackendFactory, FixedProfileMismatchDoesNotCallRuntimeFactory)
   irc_step_motion_executor::MotionBackendFactoryOptions options;
   options.backend_type = "robot_motion_player";
   configure_valid_hardware_policy(options);
-  options.robot_motion_player.device_path = "/dev/ttyUSB1";
+  options.robot_motion_player.device_path = "/dev/ttyUSB2";
   options.robot_motion_runtime_factory = &runtime_factory;
 
   const auto result =

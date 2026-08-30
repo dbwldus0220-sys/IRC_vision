@@ -415,6 +415,7 @@ class LineNavigationPlanner:
         )
         straight_line_turn_suppressed = bool(
             requested_motion in {"LEFT", "RIGHT"}
+            and curve_is_reliable
             and not curve_matches_requested_motion
         )
         if straight_line_turn_suppressed:
@@ -469,7 +470,16 @@ class LineNavigationPlanner:
         elif turn_confirmation_pending:
             speed = self.config.min_linear_speed_mps
             reason = "turn_confirmation_pending"
-        if corner_prepare and motion == "STRAIGHT":
+        corner_approach_required = bool(
+            corner_prepare
+            and corner_remaining_forward is not None
+            and corner_remaining_forward > 0.0
+            and motion in {"STRAIGHT", "LEFT", "RIGHT"}
+        )
+        if corner_approach_required:
+            reason = "corner_approach"
+            motion = approach_motion_for_distance(corner_remaining_forward)
+        elif corner_prepare and motion == "STRAIGHT":
             reason = "corner_approach"
             motion = approach_motion_for_distance(corner_start_distance)
         duration = self.config.command_duration_sec
@@ -542,6 +552,17 @@ class LineNavigationPlanner:
             offset_requires_recovery
             and lateral_offset_norm * heading_error_deg > 0.0
         )
+        heading_points_toward_center = bool(
+            offset_requires_recovery
+            and lateral_offset_norm * heading_error_deg < 0.0
+        )
+        if (
+            heading_points_toward_center
+            and abs(heading_error_deg) >= self.config.turn_enter_deg
+            and abs(lateral_offset_norm)
+            < self.config.curve_follow_max_offset_norm
+        ):
+            return None
         active_heading_threshold = (
             self.config.recovery_away_heading_turn_deg
             if heading_points_away

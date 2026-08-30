@@ -108,7 +108,7 @@ def test_confirmed_corner_outputs_straight_motion_count_before_turn():
     )
 
     payload = command.to_dict()
-    assert command.motion == "STRAIGHT"
+    assert command.motion == "STRAIGHT_4"
     assert command.reason == "corner_approach"
     assert payload["corner_prepare"] is True
     assert payload["corner_direction"] == "RIGHT"
@@ -132,9 +132,57 @@ def test_confirmed_corner_uses_shared_discrete_distance_band():
     )
 
     payload = command.to_dict()
-    assert command.motion == "STRAIGHT_4"
-    assert payload["approach_level"] == 4
+    assert command.motion == "STRAIGHT_3"
+    assert payload["approach_level"] == 3
     assert payload["approach_target_distance_m"] == pytest.approx(0.68)
+
+
+def test_confirmed_corner_remaining_distance_blocks_early_left_turn():
+    planner = LineNavigationPlanner(
+        NavigationConfig(direction_confirmation_frames=1)
+    )
+
+    command = planner.plan(
+        line_info(
+            filtered_heading_error_deg=-20.0,
+            filtered_lateral_offset_norm=0.0,
+            turn_angle_deg=-80.0,
+            turn_consistency=0.95,
+            corner_preview_confirmed=True,
+            corner_direction="LEFT",
+            corner_start_distance_m=0.82,
+            corner_remaining_forward_m=0.67,
+            corner_straight_motion_count=13,
+        ),
+        0.1,
+    )
+
+    assert command.motion == "STRAIGHT_4"
+    assert command.reason == "corner_approach"
+
+
+def test_confirmed_corner_allows_left_turn_at_turning_distance():
+    planner = LineNavigationPlanner(
+        NavigationConfig(direction_confirmation_frames=1)
+    )
+
+    command = planner.plan(
+        line_info(
+            filtered_heading_error_deg=-20.0,
+            filtered_lateral_offset_norm=0.0,
+            turn_angle_deg=-80.0,
+            turn_consistency=0.95,
+            corner_preview_confirmed=True,
+            corner_direction="LEFT",
+            corner_start_distance_m=0.14,
+            corner_remaining_forward_m=0.0,
+            corner_straight_motion_count=0,
+        ),
+        0.1,
+    )
+
+    assert command.motion == "LEFT"
+    assert command.reason == "line_tracking"
 
 
 def test_far_curve_turn_starts_after_near_heading_reaches_corner():
@@ -219,7 +267,7 @@ def test_large_offset_without_turn_heading_stays_straight(offset, heading):
         (0.593, -32.0, "RECOVER_RIGHT_TURN_LEFT_4", -1),
         (0.366, 15.0, "RECOVER_RIGHT_TURN_RIGHT_4", 1),
         (-0.40, -15.0, "RECOVER_LEFT_TURN_LEFT_2", -1),
-        (-0.40, 15.0, "RECOVER_LEFT_TURN_RIGHT_4", 1),
+        (-0.40, 15.0, "STRAIGHT", 1),
     ],
 )
 def test_recovery_separates_line_side_from_turn_direction(
@@ -228,7 +276,9 @@ def test_recovery_separates_line_side_from_turn_direction(
     expected,
     angular_sign,
 ):
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(
+        NavigationConfig(direction_confirmation_frames=1)
+    )
 
     command = planner.plan(
         line_info(
@@ -433,6 +483,44 @@ def test_real_right_curve_emits_plain_right_without_far_fit():
     assert commands[-1].preview_turn_deg == 18.0
 
 
+def test_large_heading_toward_center_uses_confirmed_plain_right():
+    planner = LineNavigationPlanner()
+    line = line_info(
+        filtered_heading_error_deg=30.0,
+        filtered_lateral_offset_norm=-0.416,
+        turn_angle_deg=2.8,
+        turn_consistency=0.9,
+    )
+
+    commands = [planner.plan(line, 0.1) for _ in range(3)]
+
+    assert [command.motion for command in commands] == [
+        "STRAIGHT",
+        "STRAIGHT",
+        "RIGHT",
+    ]
+    assert commands[-1].reason == "line_tracking"
+
+
+def test_reliable_opposite_preview_still_suppresses_plain_right():
+    planner = LineNavigationPlanner(
+        NavigationConfig(direction_confirmation_frames=1)
+    )
+
+    command = planner.plan(
+        line_info(
+            filtered_heading_error_deg=30.0,
+            filtered_lateral_offset_norm=-0.416,
+            turn_angle_deg=-30.0,
+            turn_consistency=0.9,
+        ),
+        0.1,
+    )
+
+    assert command.motion == "STRAIGHT"
+    assert command.reason == "conflicting_heading_and_preview"
+
+
 @pytest.mark.parametrize(
     ("offset", "heading", "curve_turn", "expected"),
     [
@@ -485,8 +573,10 @@ def test_matching_curve_does_not_hide_emergency_offset_recovery():
     assert command.motion == "RECOVER_RIGHT_TURN_RIGHT_4"
 
 
-@pytest.mark.parametrize("recovery_side", ["LEFT", "RIGHT"])
-@pytest.mark.parametrize("turn_direction", ["LEFT", "RIGHT"])
+@pytest.mark.parametrize(
+    ("recovery_side", "turn_direction"),
+    [("LEFT", "LEFT"), ("RIGHT", "RIGHT")],
+)
 def test_recovery_side_does_not_change_numbered_turn_motion(
     recovery_side,
     turn_direction,
