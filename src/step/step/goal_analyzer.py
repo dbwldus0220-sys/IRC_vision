@@ -22,6 +22,7 @@ from .approach_distance import approach_level_from_motion
 from .approach_distance import approach_motion_for_distance
 from .temporal_confirmation import depth_is_within_range
 from .temporal_confirmation import TemporalConfirmationFilter
+from .yolo_line_analyzer import ground_forward_distance_from_depth
 
 
 @dataclass(frozen=True)
@@ -45,6 +46,7 @@ class GoalCandidate:
     elevation_deg: float | None
     depth_m: float | None
     distance_m: float | None
+    ground_distance_m: float | None
     lateral_offset_m: float | None
     depth_valid: bool
     depth_sample_count: int
@@ -75,6 +77,7 @@ class GoalInfo:
     elevation_deg: float | None
     depth_m: float | None
     distance_m: float | None
+    ground_distance_m: float | None
     lateral_offset_m: float | None
     depth_valid: bool
     depth_sample_count: int
@@ -124,6 +127,8 @@ class GoalAnalyzer(Node):
         self.declare_parameter("score_depth_tolerance_m", 0.05)
         self.declare_parameter("score_center_tolerance_norm", 0.10)
         self.declare_parameter("direction_deadband_norm", 0.04)
+        self.declare_parameter("camera_pitch_down_deg", 45.0)
+        self.declare_parameter("camera_forward_offset_m", 0.0)
         self.declare_parameter("confirmation_window_size", 40)
         self.declare_parameter("confirmation_required_hits", 30)
         self.declare_parameter("confirmation_max_missed_frames", 2)
@@ -175,6 +180,12 @@ class GoalAnalyzer(Node):
         self.direction_deadband_norm = max(
             0.0,
             self._float_parameter("direction_deadband_norm"),
+        )
+        self.camera_pitch_down_deg = self._float_parameter(
+            "camera_pitch_down_deg"
+        )
+        self.camera_forward_offset_m = self._float_parameter(
+            "camera_forward_offset_m"
         )
         self.publish_empty_when_missing = bool(
             self.get_parameter("publish_empty_when_missing").value
@@ -373,6 +384,7 @@ class GoalAnalyzer(Node):
         float | None,
         float | None,
         float | None,
+        float | None,
     ]:
         if (
             self.fx is None
@@ -380,19 +392,33 @@ class GoalAnalyzer(Node):
             or self.cx is None
             or self.cy is None
         ):
-            return None, None, None, None
+            return None, None, None, None, None
         x_ratio = (center_x - self.cx) / self.fx
         y_ratio = (center_y - self.cy) / self.fy
         bearing = math.degrees(math.atan(x_ratio))
         elevation = math.degrees(math.atan(y_ratio))
         if depth_m is None:
-            return bearing, elevation, None, None
+            return bearing, elevation, None, None, None
         lateral = x_ratio * depth_m
         vertical = y_ratio * depth_m
         distance = math.sqrt(
             lateral * lateral + vertical * vertical + depth_m * depth_m
         )
-        return bearing, elevation, lateral, distance
+        ground_lateral, ground_forward = (
+            ground_forward_distance_from_depth(
+                x_px=center_x,
+                y_px=center_y,
+                depth_m=depth_m,
+                fx=self.fx,
+                fy=self.fy,
+                cx=self.cx,
+                cy=self.cy,
+                camera_pitch_down_deg=self.camera_pitch_down_deg,
+                camera_forward_offset_m=self.camera_forward_offset_m,
+            )
+        )
+        ground_distance = math.hypot(ground_lateral, ground_forward)
+        return bearing, elevation, lateral, distance, ground_distance
 
     def _build_candidate(
         self,
@@ -456,7 +482,7 @@ class GoalAnalyzer(Node):
         depth_m, depth_valid, sample_count = self._sample_goal_depth_m(
             aim_bbox
         )
-        bearing, elevation, lateral, distance = self._project(
+        bearing, elevation, lateral, distance, ground_distance = self._project(
             center_x,
             center_y,
             depth_m,
@@ -503,6 +529,11 @@ class GoalAnalyzer(Node):
             depth_m=round(depth_m, 3) if depth_m is not None else None,
             distance_m=(
                 round(distance, 3) if distance is not None else None
+            ),
+            ground_distance_m=(
+                round(ground_distance, 3)
+                if ground_distance is not None
+                else None
             ),
             lateral_offset_m=(
                 round(lateral, 3) if lateral is not None else None
@@ -600,6 +631,7 @@ class GoalAnalyzer(Node):
             elevation_deg=None,
             depth_m=None,
             distance_m=None,
+            ground_distance_m=None,
             lateral_offset_m=None,
             depth_valid=False,
             depth_sample_count=0,
@@ -777,6 +809,7 @@ class GoalAnalyzer(Node):
                 elevation_deg=target.elevation_deg,
                 depth_m=target.depth_m,
                 distance_m=target.distance_m,
+                ground_distance_m=target.ground_distance_m,
                 lateral_offset_m=target.lateral_offset_m,
                 depth_valid=target.depth_valid,
                 depth_sample_count=target.depth_sample_count,

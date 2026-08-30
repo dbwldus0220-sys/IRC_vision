@@ -153,7 +153,7 @@ class MotionDecisionNode(Node):
         self.declare_parameter("recovery_away_heading_turn_deg", 3.0)
         self.declare_parameter("curve_follow_max_offset_norm", 0.55)
         self.declare_parameter("ball_tracking_range_m", 1.5)
-        self.declare_parameter("ball_control_range_m", 0.9)
+        self.declare_parameter("ball_control_range_m", 1.5)
         self.declare_parameter("ball_lost_stop_sec", 0.35)
         self.declare_parameter("ball_recovery_timeout_sec", 8.0)
         self.declare_parameter("ball_recovery_turn_rad_s", 0.22)

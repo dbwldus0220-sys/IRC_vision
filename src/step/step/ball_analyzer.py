@@ -6,22 +6,50 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 import json
 import math
+import threading
 import time
 from typing import Any
 
 from cv_bridge import CvBridge
 import numpy as np
 import rclpy
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from rclpy.executors import ExternalShutdownException
+from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
-from rclpy.qos import qos_profile_sensor_data
+from rclpy.qos import DurabilityPolicy
+from rclpy.qos import HistoryPolicy
+from rclpy.qos import QoSProfile
+from rclpy.qos import ReliabilityPolicy
 from sensor_msgs.msg import CameraInfo, Image
 from std_msgs.msg import String
 
 from .approach_distance import approach_level_from_motion
 from .approach_distance import approach_motion_for_distance
-from .temporal_confirmation import depth_is_within_range
 from .temporal_confirmation import TemporalConfirmationFilter
+from .yolo_line_analyzer import calibrated_robot_center_x
+from .yolo_line_analyzer import ground_forward_distance_from_depth
+
+
+def ball_path_heading_deg(
+    *,
+    target_x: float,
+    target_y: float,
+    image_width: int,
+    image_height: int,
+    robot_center_offset_px: float,
+) -> float | None:
+    """Measure the ball vector from the calibrated bottom-center axis."""
+    if image_width <= 0 or image_height <= 0:
+        return None
+    origin_x = calibrated_robot_center_x(
+        image_width,
+        robot_center_offset_px,
+    )
+    origin_y = float(image_height - 1)
+    dx = float(target_x) - origin_x
+    forward_dy = origin_y - float(target_y)
+    return math.degrees(math.atan2(dx, forward_dy))
 
 
 @dataclass(frozen=True)
@@ -39,12 +67,14 @@ class BallCandidate:
     offset_x_norm: float
     offset_y_norm: float
     horizontal_direction: str
+    steering_angle_deg: float | None
     bearing_deg: float | None
     elevation_deg: float | None
     depth_m: float | None
     lateral_offset_m: float | None
     vertical_offset_m: float | None
     horizontal_distance_m: float | None
+    ground_distance_m: float | None
     distance_m: float | None
     depth_valid: bool
     score: float
@@ -68,12 +98,14 @@ class BallInfo:
     offset_x_norm: float | None
     offset_y_norm: float | None
     horizontal_direction: str
+    steering_angle_deg: float | None
     bearing_deg: float | None
     elevation_deg: float | None
     depth_m: float | None
     lateral_offset_m: float | None
     vertical_offset_m: float | None
     horizontal_distance_m: float | None
+    ground_distance_m: float | None
     distance_m: float | None
     approach_motion: str
     approach_level: int | None
@@ -96,6 +128,8 @@ class BallInfo:
     image_height: int | None
     image_center_x: float | None
     image_center_y: float | None
+    robot_center_x_px: float | None
+    robot_center_offset_px: float
     camera_info_ready: bool
     depth_age_sec: float | None
     note: str
@@ -124,9 +158,12 @@ class BallAnalyzer(Node):
         )
         self.declare_parameter("output_topic", "/vision/ball_info")
         self.declare_parameter("ball_class_name", "ball")
-        self.declare_parameter("min_confidence", 0.55)
+        self.declare_parameter("min_confidence", 0.45)
         self.declare_parameter("depth_timeout_sec", 0.7)
         self.declare_parameter("depth_window_px", 9)
+        self.declare_parameter("depth_bbox_inner_ratio", 0.70)
+        self.declare_parameter("depth_min_valid_pixels", 5)
+        self.declare_parameter("depth_hold_sec", 0.40)
         self.declare_parameter("max_valid_depth_m", 4.0)
         self.declare_parameter("detect_depth_m", 1.5)
         self.declare_parameter("approach_depth_m", 0.9)
@@ -138,11 +175,14 @@ class BallAnalyzer(Node):
         self.declare_parameter("pickup_y_tolerance_ratio", 0.12)
         self.declare_parameter("horizontal_deadband_px", 20)
         self.declare_parameter("center_tolerance_px", 140)
-        # At the 30 FPS competition setting this requires about one second of
+        self.declare_parameter("robot_center_offset_px", 70.0)
+        self.declare_parameter("camera_pitch_down_deg", 45.0)
+        self.declare_parameter("camera_forward_offset_m", 0.0)
+        # At the 30 FPS competition setting this requires about 0.8 seconds of
         # spatially consistent detection before ball_info becomes detected.
         self.declare_parameter("confirmation_window_size", 40)
-        self.declare_parameter("confirmation_required_hits", 30)
-        self.declare_parameter("confirmation_max_missed_frames", 2)
+        self.declare_parameter("confirmation_required_hits", 24)
+        self.declare_parameter("confirmation_max_missed_frames", 6)
         self.declare_parameter("confirmation_max_center_shift_norm", 0.18)
         self.declare_parameter("confirmation_min_area_ratio", 0.40)
         self.declare_parameter("pickup_confirmation_window_size", 5)
@@ -172,6 +212,23 @@ class BallAnalyzer(Node):
         )
         if self.depth_window_px % 2 == 0:
             self.depth_window_px += 1
+        self.depth_bbox_inner_ratio = min(
+            1.0,
+            max(
+                0.1,
+                float(
+                    self.get_parameter("depth_bbox_inner_ratio").value
+                ),
+            ),
+        )
+        self.depth_min_valid_pixels = max(
+            1,
+            int(self.get_parameter("depth_min_valid_pixels").value),
+        )
+        self.depth_hold_sec = max(
+            0.0,
+            float(self.get_parameter("depth_hold_sec").value),
+        )
         self.max_valid_depth_m = float(
             self.get_parameter("max_valid_depth_m").value
         )
@@ -208,6 +265,15 @@ class BallAnalyzer(Node):
         )
         self.center_tolerance_px = int(
             self.get_parameter("center_tolerance_px").value
+        )
+        self.robot_center_offset_px = float(
+            self.get_parameter("robot_center_offset_px").value
+        )
+        self.camera_pitch_down_deg = float(
+            self.get_parameter("camera_pitch_down_deg").value
+        )
+        self.camera_forward_offset_m = float(
+            self.get_parameter("camera_forward_offset_m").value
         )
         self.publish_empty_when_missing = bool(
             self.get_parameter("publish_empty_when_missing").value
@@ -250,33 +316,60 @@ class BallAnalyzer(Node):
         self.pickup_confirmation_fields: dict[str, object] = {}
 
         self.bridge = CvBridge()
+        self._depth_lock = threading.RLock()
         self.latest_depth_image: np.ndarray | None = None
         self.latest_depth_time: float | None = None
         self.latest_image_width: int | None = None
         self.latest_image_height: int | None = None
+        self.last_valid_ball_depth_m: float | None = None
+        self.last_valid_ball_depth_time: float | None = None
+        self.last_valid_ball_depth_center: tuple[int, int] | None = None
         self.fx: float | None = None
         self.fy: float | None = None
         self.cx: float | None = None
         self.cy: float | None = None
+
+        # In the unified process, high-rate detection callbacks previously
+        # starved this node's depth callback for roughly 0.7 seconds. Give the
+        # three input streams independent groups and keep only their newest
+        # queued samples so aligned depth cannot sit behind detection work.
+        self._detection_callback_group = MutuallyExclusiveCallbackGroup()
+        self._depth_callback_group = MutuallyExclusiveCallbackGroup()
+        self._camera_info_callback_group = MutuallyExclusiveCallbackGroup()
+        latest_detection_qos = QoSProfile(
+            history=HistoryPolicy.KEEP_LAST,
+            depth=1,
+            reliability=ReliabilityPolicy.RELIABLE,
+            durability=DurabilityPolicy.VOLATILE,
+        )
+        latest_depth_qos = QoSProfile(
+            history=HistoryPolicy.KEEP_LAST,
+            depth=1,
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            durability=DurabilityPolicy.VOLATILE,
+        )
 
         self.publisher = self.create_publisher(String, self.output_topic, 10)
         self.create_subscription(
             String,
             self.detections_topic,
             self._detections_callback,
-            10,
+            latest_detection_qos,
+            callback_group=self._detection_callback_group,
         )
         self.create_subscription(
             Image,
             self.depth_topic,
             self._depth_callback,
-            qos_profile_sensor_data,
+            latest_depth_qos,
+            callback_group=self._depth_callback_group,
         )
         self.create_subscription(
             CameraInfo,
             self.camera_info_topic,
             self._camera_info_callback,
             10,
+            callback_group=self._camera_info_callback_group,
         )
 
         self.get_logger().info(
@@ -309,17 +402,19 @@ class BallAnalyzer(Node):
                 message,
                 desired_encoding="passthrough",
             )
-            self.latest_depth_image = np.asarray(depth_image)
-            self.latest_depth_time = time.monotonic()
-            self.latest_image_width = int(message.width)
-            self.latest_image_height = int(message.height)
+            with self._depth_lock:
+                self.latest_depth_image = np.asarray(depth_image)
+                self.latest_depth_time = time.monotonic()
+                self.latest_image_width = int(message.width)
+                self.latest_image_height = int(message.height)
         except Exception as exc:
             self.get_logger().warning(f"Could not read depth image: {exc}")
 
     def _depth_age_sec(self) -> float | None:
-        if self.latest_depth_time is None:
-            return None
-        return time.monotonic() - self.latest_depth_time
+        with self._depth_lock:
+            if self.latest_depth_time is None:
+                return None
+            return time.monotonic() - self.latest_depth_time
 
     def _depth_is_fresh(self) -> bool:
         age = self._depth_age_sec()
@@ -329,25 +424,55 @@ class BallAnalyzer(Node):
         self,
         center_x: int,
         center_y: int,
+        bbox: list[int] | None = None,
     ) -> tuple[float | None, bool]:
-        if self.latest_depth_image is None or not self._depth_is_fresh():
-            return None, False
-
-        depth_image = self.latest_depth_image
+        now = time.monotonic()
+        with self._depth_lock:
+            if self.latest_depth_image is None:
+                return self._held_ball_depth(center_x, center_y, bbox, now)
+            age = (
+                now - self.latest_depth_time
+                if self.latest_depth_time is not None
+                else None
+            )
+            if age is None or age > self.depth_timeout_sec:
+                return self._held_ball_depth(center_x, center_y, bbox, now)
+            depth_image = self.latest_depth_image
         if depth_image.ndim != 2:
-            return None, False
+            return self._held_ball_depth(center_x, center_y, bbox, now)
 
         height, width = depth_image.shape[:2]
         if not (0 <= center_x < width and 0 <= center_y < height):
-            return None, False
+            return self._held_ball_depth(center_x, center_y, bbox, now)
 
         radius = self.depth_window_px // 2
-        x1 = max(0, center_x - radius)
-        x2 = min(width, center_x + radius + 1)
-        y1 = max(0, center_y - radius)
-        y2 = min(height, center_y + radius + 1)
+        regions = [
+            (
+                max(0, center_x - radius),
+                max(0, center_y - radius),
+                min(width, center_x + radius + 1),
+                min(height, center_y + radius + 1),
+            )
+        ]
+        inner_bbox = self._inner_depth_bbox(bbox, width, height)
+        if inner_bbox is not None:
+            regions.append(inner_bbox)
 
-        crop = depth_image[y1:y2, x1:x2]
+        for x1, y1, x2, y2 in regions:
+            depth = self._median_valid_depth(depth_image[y1:y2, x1:x2])
+            if depth is not None:
+                with self._depth_lock:
+                    self.last_valid_ball_depth_m = depth
+                    self.last_valid_ball_depth_time = now
+                    self.last_valid_ball_depth_center = (center_x, center_y)
+                return depth, True
+
+        return self._held_ball_depth(center_x, center_y, bbox, now)
+
+    def _median_valid_depth(self, crop: np.ndarray) -> float | None:
+        """Return robust depth from one ROI when enough pixels are valid."""
+        if crop.size == 0:
+            return None
         if crop.dtype == np.uint16:
             crop_m = crop.astype(np.float32) * 0.001
         else:
@@ -358,10 +483,58 @@ class BallAnalyzer(Node):
             & (crop_m <= self.max_valid_depth_m)
         )
         valid = crop_m[valid_mask]
-        if valid.size == 0:
-            return None, False
+        if valid.size < self.depth_min_valid_pixels:
+            return None
+        return float(np.median(valid))
 
-        return float(np.median(valid)), True
+    def _inner_depth_bbox(
+        self,
+        bbox: list[int] | None,
+        image_width: int,
+        image_height: int,
+    ) -> tuple[int, int, int, int] | None:
+        """Return a central ball-box ROI that avoids most background pixels."""
+        if bbox is None or len(bbox) != 4:
+            return None
+        left, top, right, bottom = bbox
+        if right <= left or bottom <= top:
+            return None
+        half_width = (right - left) * self.depth_bbox_inner_ratio / 2.0
+        half_height = (bottom - top) * self.depth_bbox_inner_ratio / 2.0
+        center_x = (left + right) / 2.0
+        center_y = (top + bottom) / 2.0
+        x1 = max(0, int(round(center_x - half_width)))
+        x2 = min(image_width, int(round(center_x + half_width)) + 1)
+        y1 = max(0, int(round(center_y - half_height)))
+        y2 = min(image_height, int(round(center_y + half_height)) + 1)
+        return (x1, y1, x2, y2) if x2 > x1 and y2 > y1 else None
+
+    def _held_ball_depth(
+        self,
+        center_x: int,
+        center_y: int,
+        bbox: list[int] | None,
+        now: float,
+    ) -> tuple[float | None, bool]:
+        """Briefly reuse a nearby valid sample across stereo depth holes."""
+        with self._depth_lock:
+            depth = self.last_valid_ball_depth_m
+            stamp = self.last_valid_ball_depth_time
+            old_center = self.last_valid_ball_depth_center
+        if depth is None or stamp is None or old_center is None:
+            return None, False
+        if now - stamp > self.depth_hold_sec:
+            return None, False
+        if bbox is not None and len(bbox) == 4:
+            bbox_span = max(bbox[2] - bbox[0], bbox[3] - bbox[1])
+            gate_px = max(20.0, 0.75 * bbox_span)
+        else:
+            gate_px = 20.0
+        center_shift = math.hypot(
+            center_x - old_center[0],
+            center_y - old_center[1],
+        )
+        return (depth, True) if center_shift <= gate_px else (None, False)
 
     def _image_size_from_payload(
         self,
@@ -414,6 +587,7 @@ class BallAnalyzer(Node):
         float | None,
         float | None,
         float | None,
+        float | None,
     ]:
         """Convert one image point to camera-relative angles and position.
 
@@ -426,18 +600,43 @@ class BallAnalyzer(Node):
             or self.cx is None
             or self.cy is None
         ):
-            return None, None, None, None, None, None
+            return None, None, None, None, None, None, None
 
         x_ratio = (center_x - self.cx) / self.fx
         y_ratio = (center_y - self.cy) / self.fy
         bearing_deg = math.degrees(math.atan(x_ratio))
         elevation_deg = math.degrees(math.atan(y_ratio))
         if not depth_valid or depth_m is None:
-            return bearing_deg, elevation_deg, None, None, None, None
+            return (
+                bearing_deg,
+                elevation_deg,
+                None,
+                None,
+                None,
+                None,
+                None,
+            )
 
         lateral_offset_m = x_ratio * depth_m
         vertical_offset_m = y_ratio * depth_m
         horizontal_distance_m = math.hypot(lateral_offset_m, depth_m)
+        ground_lateral_m, ground_forward_m = (
+            ground_forward_distance_from_depth(
+                x_px=center_x,
+                y_px=center_y,
+                depth_m=depth_m,
+                fx=self.fx,
+                fy=self.fy,
+                cx=self.cx,
+                cy=self.cy,
+                camera_pitch_down_deg=self.camera_pitch_down_deg,
+                camera_forward_offset_m=self.camera_forward_offset_m,
+            )
+        )
+        ground_distance_m = math.hypot(
+            ground_lateral_m,
+            ground_forward_m,
+        )
         distance_m = math.sqrt(
             lateral_offset_m * lateral_offset_m
             + vertical_offset_m * vertical_offset_m
@@ -449,6 +648,7 @@ class BallAnalyzer(Node):
             lateral_offset_m,
             vertical_offset_m,
             horizontal_distance_m,
+            ground_distance_m,
             distance_m,
         )
 
@@ -483,19 +683,36 @@ class BallAnalyzer(Node):
         offset_y_px = 0
         offset_x_norm = 0.0
         offset_y_norm = 0.0
+        steering_angle_deg = None
         if image_width and image_height:
-            offset_x_px = int(center_x - image_width / 2)
+            robot_center_x = calibrated_robot_center_x(
+                image_width,
+                self.robot_center_offset_px,
+            )
+            offset_x_px = int(round(center_x - robot_center_x))
             offset_y_px = int(center_y - image_height / 2)
             offset_x_norm = offset_x_px / max(image_width / 2, 1.0)
             offset_y_norm = offset_y_px / max(image_height / 2, 1.0)
+            steering_angle_deg = ball_path_heading_deg(
+                target_x=center_x,
+                target_y=center_y,
+                image_width=image_width,
+                image_height=image_height,
+                robot_center_offset_px=self.robot_center_offset_px,
+            )
 
-        depth_m, depth_valid = self._sample_depth_m(center_x, center_y)
+        depth_m, depth_valid = self._sample_depth_m(
+            center_x,
+            center_y,
+            bbox,
+        )
         (
             bearing_deg,
             elevation_deg,
             lateral_offset_m,
             vertical_offset_m,
             horizontal_distance_m,
+            ground_distance_m,
             distance_m,
         ) = self._project_ball_position(
             center_x,
@@ -532,6 +749,11 @@ class BallAnalyzer(Node):
             offset_x_norm=round(offset_x_norm, 4),
             offset_y_norm=round(offset_y_norm, 4),
             horizontal_direction=horizontal_direction,
+            steering_angle_deg=(
+                round(steering_angle_deg, 3)
+                if steering_angle_deg is not None
+                else None
+            ),
             bearing_deg=(
                 round(bearing_deg, 3) if bearing_deg is not None else None
             ),
@@ -554,6 +776,11 @@ class BallAnalyzer(Node):
             horizontal_distance_m=(
                 round(horizontal_distance_m, 3)
                 if horizontal_distance_m is not None
+                else None
+            ),
+            ground_distance_m=(
+                round(ground_distance_m, 3)
+                if ground_distance_m is not None
                 else None
             ),
             distance_m=(
@@ -700,12 +927,14 @@ class BallAnalyzer(Node):
             offset_x_norm=None,
             offset_y_norm=None,
             horizontal_direction="UNKNOWN",
+            steering_angle_deg=None,
             bearing_deg=None,
             elevation_deg=None,
             depth_m=None,
             lateral_offset_m=None,
             vertical_offset_m=None,
             horizontal_distance_m=None,
+            ground_distance_m=None,
             distance_m=None,
             approach_motion="STRAIGHT",
             approach_level=None,
@@ -717,7 +946,15 @@ class BallAnalyzer(Node):
             pickup_ready=False,
             pickup_now=False,
             is_in_pickup_window=False,
-            pickup_target_x_ratio=0.5,
+            pickup_target_x_ratio=(
+                calibrated_robot_center_x(
+                    self.latest_image_width,
+                    self.robot_center_offset_px,
+                )
+                / max(self.latest_image_width, 1)
+                if self.latest_image_width is not None
+                else 0.5
+            ),
             pickup_target_y_ratio=self.pickup_target_y_ratio,
             pickup_x_tolerance_norm=self.pickup_center_tolerance_norm,
             pickup_y_tolerance_ratio=self.pickup_y_tolerance_ratio,
@@ -736,6 +973,15 @@ class BallAnalyzer(Node):
                 if self.latest_image_height is not None
                 else None
             ),
+            robot_center_x_px=(
+                calibrated_robot_center_x(
+                    self.latest_image_width,
+                    self.robot_center_offset_px,
+                )
+                if self.latest_image_width is not None
+                else None
+            ),
+            robot_center_offset_px=self.robot_center_offset_px,
             camera_info_ready=self.fx is not None,
             depth_age_sec=round(age, 3) if age is not None else None,
             note=note,
@@ -759,7 +1005,6 @@ class BallAnalyzer(Node):
             detections,
         )
         candidates: list[BallCandidate] = []
-        outside_tracking_range = False
         for detection in detections:
             if not isinstance(detection, dict):
                 continue
@@ -772,14 +1017,11 @@ class BallAnalyzer(Node):
             )
             if candidate is None:
                 continue
-            if depth_is_within_range(
-                candidate.depth_valid,
-                candidate.depth_m,
-                self.detect_depth_m,
-            ):
-                candidates.append(candidate)
-            elif candidate.depth_valid and candidate.depth_m is not None:
-                outside_tracking_range = True
+            # RGB detection owns object visibility and temporal confirmation.
+            # Depth is optional metadata used later for FAR/NO_DEPTH states and
+            # the motion planner's control-range gate.  A missing or distant
+            # depth sample must not turn a visible YOLO ball into "not seen".
+            candidates.append(candidate)
 
         candidates.sort(key=lambda item: item.score, reverse=True)
         if not candidates:
@@ -792,12 +1034,7 @@ class BallAnalyzer(Node):
                 "pickup_confirmation"
             )
             if self.publish_empty_when_missing:
-                note = (
-                    "ball_outside_tracking_range"
-                    if outside_tracking_range
-                    else "no_ball_detection"
-                )
-                self._publish(self._empty_info(note))
+                self._publish(self._empty_info("no_ball_detection"))
             return
 
         target = candidates[0]
@@ -857,12 +1094,14 @@ class BallAnalyzer(Node):
                 offset_x_norm=target.offset_x_norm,
                 offset_y_norm=target.offset_y_norm,
                 horizontal_direction=target.horizontal_direction,
+                steering_angle_deg=target.steering_angle_deg,
                 bearing_deg=target.bearing_deg,
                 elevation_deg=target.elevation_deg,
                 depth_m=target.depth_m,
                 lateral_offset_m=target.lateral_offset_m,
                 vertical_offset_m=target.vertical_offset_m,
                 horizontal_distance_m=target.horizontal_distance_m,
+                ground_distance_m=target.ground_distance_m,
                 distance_m=target.distance_m,
                 approach_motion=approach_motion_for_distance(
                     target.depth_m
@@ -878,7 +1117,15 @@ class BallAnalyzer(Node):
                 pickup_ready=pickup_ready,
                 pickup_now=pickup_now,
                 is_in_pickup_window=in_pickup_window,
-                pickup_target_x_ratio=0.5,
+                pickup_target_x_ratio=(
+                    calibrated_robot_center_x(
+                        image_width,
+                        self.robot_center_offset_px,
+                    )
+                    / max(image_width, 1)
+                    if image_width is not None
+                    else 0.5
+                ),
                 pickup_target_y_ratio=self.pickup_target_y_ratio,
                 pickup_x_tolerance_norm=(
                     self.pickup_center_tolerance_norm
@@ -895,6 +1142,15 @@ class BallAnalyzer(Node):
                 image_center_y=(
                     image_height / 2.0 if image_height is not None else None
                 ),
+                robot_center_x_px=(
+                    calibrated_robot_center_x(
+                        image_width,
+                        self.robot_center_offset_px,
+                    )
+                    if image_width is not None
+                    else None
+                ),
+                robot_center_offset_px=self.robot_center_offset_px,
                 camera_info_ready=self.fx is not None,
                 depth_age_sec=round(age, 3) if age is not None else None,
                 note=note,
@@ -905,12 +1161,17 @@ class BallAnalyzer(Node):
 def main(args: list[str] | None = None) -> None:
     rclpy.init(args=args)
     node: BallAnalyzer | None = None
+    executor: MultiThreadedExecutor | None = None
     try:
         node = BallAnalyzer()
-        rclpy.spin(node)
+        executor = MultiThreadedExecutor(num_threads=3)
+        executor.add_node(node)
+        executor.spin()
     except (KeyboardInterrupt, ExternalShutdownException):
         pass
     finally:
+        if executor is not None:
+            executor.shutdown()
         if node is not None:
             node.destroy_node()
         if rclpy.ok():

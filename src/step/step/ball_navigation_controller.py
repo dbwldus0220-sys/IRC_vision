@@ -35,7 +35,7 @@ class BallNavigationController(Node):
         self.declare_parameter("turn_enter_deg", 5.0)
         self.declare_parameter("turn_exit_deg", 2.5)
         self.declare_parameter("fallback_half_fov_deg", 35.0)
-        self.declare_parameter("control_start_depth_m", 0.90)
+        self.declare_parameter("control_start_depth_m", 1.50)
         self.declare_parameter("slowdown_depth_m", 1.0)
         self.declare_parameter("fine_step_depth_m", 0.95)
         self.declare_parameter("pickup_depth_m", 0.07)

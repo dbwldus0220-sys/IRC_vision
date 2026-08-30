@@ -25,7 +25,7 @@ def ball_info(**overrides):
 
 @pytest.mark.parametrize(
     ("bearing", "expected"),
-    [(12.0, "TURN_RIGHT"), (-12.0, "TURN_LEFT")],
+    [(12.0, "TURN_RIGHT_4"), (-12.0, "TURN_LEFT_2")],
 )
 def test_bearing_sign_selects_turn_direction(bearing, expected):
     planner = BallNavigationPlanner()
@@ -95,10 +95,22 @@ def test_offset_is_used_when_camera_bearing_is_missing():
         0.1,
     )
 
-    assert command.motion == "TURN_RIGHT"
+    assert command.motion == "TURN_RIGHT_4"
 
 
-def test_ball_outside_90cm_control_range_does_not_move_robot():
+def test_bottom_center_path_angle_has_priority_over_camera_bearing():
+    planner = BallNavigationPlanner()
+
+    command = planner.plan(
+        ball_info(steering_angle_deg=-30.0, bearing_deg=12.0),
+        0.1,
+    )
+
+    assert command.motion == "TURN_LEFT_4"
+    assert command.target_heading_change_deg == -30.0
+
+
+def test_ball_inside_1_5m_control_range_moves_robot():
     planner = BallNavigationPlanner()
 
     command = planner.plan(
@@ -106,9 +118,41 @@ def test_ball_outside_90cm_control_range_does_not_move_robot():
         0.1,
     )
 
+    assert command.valid is True
+    assert command.motion == "STRAIGHT"
+    assert command.reason == "ball_aligned_discrete_approach"
+
+
+def test_ball_beyond_1_5m_control_range_does_not_move_robot():
+    planner = BallNavigationPlanner()
+
+    command = planner.plan(
+        ball_info(depth_m=1.501, distance_m=1.51),
+        0.1,
+    )
+
     assert command.valid is False
     assert command.motion == "STOP"
     assert command.reason == "ball_outside_control_range"
+
+
+def test_missing_depth_still_allows_visual_centering_turn():
+    planner = BallNavigationPlanner()
+
+    command = planner.plan(
+        ball_info(
+            bearing_deg=12.0,
+            depth_m=None,
+            distance_m=None,
+            depth_valid=False,
+        ),
+        0.1,
+    )
+
+    assert command.valid is True
+    assert command.motion == "TURN_RIGHT_4"
+    assert command.reason == "align_ball_center"
+    assert command.depth_valid is False
 
 
 def test_turn_hysteresis_holds_until_exit_threshold():
@@ -118,9 +162,33 @@ def test_turn_hysteresis_holds_until_exit_threshold():
     held = planner.plan(ball_info(bearing_deg=3.0), 0.1)
     released = planner.plan(ball_info(bearing_deg=2.0), 0.1)
 
-    assert first.motion == "TURN_RIGHT"
-    assert held.motion == "TURN_RIGHT"
+    assert first.motion == "TURN_RIGHT_4"
+    assert held.motion == "TURN_RIGHT_4"
     assert released.motion == "STRAIGHT"
+
+
+@pytest.mark.parametrize(
+    ("bearing", "expected_motion", "expected_angle"),
+    [
+        (12.0, "TURN_RIGHT_4", 15.0),
+        (30.0, "TURN_RIGHT_6", 30.0),
+        (-45.0, "TURN_LEFT_6", -45.0),
+    ],
+)
+def test_ball_turn_reuses_line_recovery_numbered_angles(
+    bearing,
+    expected_motion,
+    expected_angle,
+):
+    planner = BallNavigationPlanner()
+
+    command = planner.plan(ball_info(bearing_deg=bearing), 0.1)
+    payload = command.to_dict()
+
+    assert command.motion == expected_motion
+    assert command.target_heading_change_deg == expected_angle
+    assert payload["turn_motion"] == expected_motion
+    assert payload["turn_angle_deg"] == expected_angle
 
 
 def test_angular_acceleration_is_limited():

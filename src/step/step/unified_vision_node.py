@@ -28,7 +28,10 @@ def main(args: list[str] | None = None) -> None:
     """Compose all vision analyzers into one executable process."""
     rclpy.init(args=args)
     nodes: list[Node] = []
-    executor = MultiThreadedExecutor(num_threads=4)
+    # Ball/goal/hurdle nodes have independent sensor and detection callback
+    # groups. Extra workers prevent high-rate RGB analysis from starving the
+    # latest aligned-depth cache used for distance control.
+    executor = MultiThreadedExecutor(num_threads=8)
     try:
         nodes = _create_analyzers()
         for node in nodes:

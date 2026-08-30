@@ -242,6 +242,10 @@ Temporal confirmation
 Distance-based forward action
 좌우 정렬 판단
 Pickup condition 판단
+RGB detection과 depth validity 독립 처리
+1.5m 이내에서 ball control 전환
+steering_angle_deg 우선 조향 및 ground_distance_m 진단
+Depth가 없을 때 제자리 정렬만 허용하고 전진 금지
 Goal
 거리 기반 tracking / control
 Temporal confirmation
@@ -249,10 +253,23 @@ Goal alignment
 Score condition 판단
 Hurdle
 Depth 기반 거리 판단
+RGB candidate와 depth control-ready 독립 처리
+ground_distance_m 진단
+Production detection 기준 0.40 / 1.5m / 20중 12회 / miss 4 유지
+GO geometry 및 5/7 confirmation 안전조건 유지
 Line + hurdle fusion
 Hurdle path reference 계산
 Distance-based approach
 좌우 alignment 판단
+
+공 detector만 독립적으로 확인할 때는 full system을 종료한 뒤 다음 ONNX
+진단 launch를 사용한다. 이 경로는 analyzer/planner/motion executor를 실행하지
+않으며 production full system의 TensorRT `best.engine` 경로를 대체하지 않는다.
+
+```bash
+ros2 launch step ball_only_debug.launch.py
+```
+
 10. Jetson / Real Robot Configuration
 
 Production 환경에서는 Jetson에서 실행한다.

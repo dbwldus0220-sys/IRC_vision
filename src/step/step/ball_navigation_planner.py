@@ -9,6 +9,8 @@ from typing import Any
 
 from .approach_distance import approach_level_from_motion
 from .approach_distance import approach_motion_for_distance
+from .line_navigation_planner import numbered_turn_motion
+from .line_navigation_planner import numbered_turn_motion_metadata
 
 
 @dataclass(frozen=True)
@@ -25,7 +27,7 @@ class BallNavigationConfig:
     turn_enter_deg: float = 5.0
     turn_exit_deg: float = 2.5
     fallback_half_fov_deg: float = 35.0
-    control_start_depth_m: float = 0.90
+    control_start_depth_m: float = 1.50
     slowdown_depth_m: float = 1.0
     fine_step_depth_m: float = 0.95
     pickup_depth_m: float = 0.07
@@ -61,6 +63,9 @@ class BallNavigationCommand:
     def to_dict(self) -> dict[str, Any]:
         """Return a rounded JSON-compatible representation."""
         approach_level = approach_level_from_motion(self.motion)
+        turn_motion, turn_level, turn_angle_deg = (
+            numbered_turn_motion_metadata(self.motion)
+        )
         return {
             "valid": self.valid,
             "motion": self.motion,
@@ -107,6 +112,9 @@ class BallNavigationCommand:
                 self.depth_m,
                 3,
             ),
+            "turn_motion": turn_motion,
+            "turn_level": turn_level,
+            "turn_angle_deg": turn_angle_deg,
         }
 
 
@@ -182,9 +190,14 @@ class BallNavigationPlanner:
         if confidence is None or confidence < self.config.min_confidence:
             return self.stop("low_ball_confidence")
 
+        steering_angle = _number(ball_info, "steering_angle_deg")
         bearing = _number(ball_info, "bearing_deg")
         offset = _number(ball_info, "offset_x_norm")
-        steering_error = self._steering_error(bearing, offset)
+        steering_error = self._steering_error(
+            steering_angle,
+            bearing,
+            offset,
+        )
         if steering_error is None:
             return self.stop("invalid_ball_alignment")
 
@@ -194,17 +207,12 @@ class BallNavigationPlanner:
         pickup_ready = bool(ball_info.get("pickup_ready", False))
         analyzer_pickup_now = bool(ball_info.get("pickup_now", False))
 
-        if not depth_valid or depth is None:
-            return self.stop("missing_valid_ball_depth")
-
-        if depth > self.config.control_start_depth_m:
+        if (
+            depth_valid
+            and depth is not None
+            and depth > self.config.control_start_depth_m
+        ):
             return self.stop("ball_outside_control_range")
-
-        pickup_now = bool(
-            analyzer_pickup_now
-            and abs(depth - self.config.pickup_depth_m)
-            <= self.config.pickup_depth_tolerance_m + 1e-9
-        )
         turn_motion = self._classify_turn(steering_error)
         if turn_motion is not None:
             return self._moving_command(
@@ -220,8 +228,19 @@ class BallNavigationPlanner:
                 confidence=confidence,
                 depth_valid=depth_valid,
                 pickup_ready=pickup_ready,
-                pickup_now=pickup_now,
+                pickup_now=False,
             )
+
+        # Visual geometry is enough for in-place alignment. Fresh depth is
+        # mandatory before an aligned robot can move toward the ball.
+        if not depth_valid or depth is None:
+            return self.stop("missing_valid_ball_depth")
+
+        pickup_now = bool(
+            analyzer_pickup_now
+            and abs(depth - self.config.pickup_depth_m)
+            <= self.config.pickup_depth_tolerance_m + 1e-9
+        )
 
         if pickup_now:
             return self._pickup_command(
@@ -260,10 +279,13 @@ class BallNavigationPlanner:
 
     def _steering_error(
         self,
+        steering_angle_deg: float | None,
         bearing_deg: float | None,
         offset_x_norm: float | None,
     ) -> float | None:
-        """Use camera bearing, with normalized image offset as fallback."""
+        """Prefer the bottom-center path angle, then camera-ray fallbacks."""
+        if steering_angle_deg is not None:
+            return self.config.bearing_gain * steering_angle_deg
         if bearing_deg is not None:
             return self.config.bearing_gain * bearing_deg
         if offset_x_norm is None:
@@ -275,17 +297,19 @@ class BallNavigationPlanner:
         )
 
     def _classify_turn(self, steering_error_deg: float) -> str | None:
-        """Select an in-place turn using enter/exit hysteresis."""
-        is_turning = self.previous_motion in {"TURN_LEFT", "TURN_RIGHT"}
+        """Select the line-recovery numbered turn with hysteresis."""
+        is_turning = self.previous_motion.startswith(
+            ("TURN_LEFT_", "TURN_RIGHT_")
+        )
         threshold = (
             self.config.turn_exit_deg
             if is_turning
             else self.config.turn_enter_deg
         )
         if steering_error_deg > threshold:
-            return "TURN_RIGHT"
+            return numbered_turn_motion(steering_error_deg, "RIGHT")
         if steering_error_deg < -threshold:
-            return "TURN_LEFT"
+            return numbered_turn_motion(steering_error_deg, "LEFT")
         return None
 
     def _approach_speed(
@@ -370,6 +394,9 @@ class BallNavigationPlanner:
             if depth is not None
             else None
         )
+        _, _, numbered_turn_angle_deg = numbered_turn_motion_metadata(
+            motion
+        )
         return BallNavigationCommand(
             valid=True,
             motion=motion,
@@ -381,8 +408,10 @@ class BallNavigationPlanner:
             command_duration_sec=duration,
             travel_distance_m=linear_speed_mps * duration,
             lateral_travel_distance_m=0.0,
-            target_heading_change_deg=math.degrees(
-                angular_speed * duration
+            target_heading_change_deg=(
+                numbered_turn_angle_deg
+                if numbered_turn_angle_deg is not None
+                else math.degrees(angular_speed * duration)
             ),
             bearing_error_deg=bearing,
             offset_x_norm=offset,

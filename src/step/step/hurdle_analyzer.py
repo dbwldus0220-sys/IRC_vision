@@ -45,6 +45,7 @@ class HurdleCandidate:
     horizontal_distance_m: float | None
     distance_m: float | None
     ground_gap_m: float | None
+    ground_distance_m: float | None
     camera_bottom_gap_px: int | None
     camera_bottom_gap_m: float | None
     lateral_offset_m: float | None
@@ -81,6 +82,7 @@ class HurdleInfo:
     horizontal_distance_m: float | None
     distance_m: float | None
     ground_gap_m: float | None
+    ground_distance_m: float | None
     camera_bottom_gap_px: int | None
     camera_bottom_gap_m: float | None
     lateral_offset_m: float | None
@@ -543,6 +545,9 @@ class HurdleAnalyzer(Node):
             ground_gap_m=(
                 round(ground_gap, 3) if ground_gap is not None else None
             ),
+            ground_distance_m=(
+                round(ground_gap, 3) if ground_gap is not None else None
+            ),
             camera_bottom_gap_px=camera_bottom_gap_px,
             camera_bottom_gap_m=(
                 round(camera_bottom_gap, 3)
@@ -672,6 +677,7 @@ class HurdleAnalyzer(Node):
             horizontal_distance_m=None,
             distance_m=None,
             ground_gap_m=None,
+            ground_distance_m=None,
             camera_bottom_gap_px=None,
             camera_bottom_gap_m=None,
             lateral_offset_m=None,
@@ -737,7 +743,7 @@ class HurdleAnalyzer(Node):
             )
             if candidate is None:
                 continue
-            if depth_is_within_range(
+            if not candidate.depth_valid or depth_is_within_range(
                 candidate.depth_valid,
                 candidate.depth_m,
                 self.detect_depth_m,
@@ -813,6 +819,7 @@ class HurdleAnalyzer(Node):
                 horizontal_distance_m=target.horizontal_distance_m,
                 distance_m=target.distance_m,
                 ground_gap_m=target.ground_gap_m,
+                ground_distance_m=target.ground_distance_m,
                 camera_bottom_gap_px=target.camera_bottom_gap_px,
                 camera_bottom_gap_m=target.camera_bottom_gap_m,
                 lateral_offset_m=target.lateral_offset_m,

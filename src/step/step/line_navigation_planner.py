@@ -179,8 +179,45 @@ def _recovery_turn_action_suffix(
     turn_direction: str,
 ) -> int:
     """Map the nearest 15-degree level to the deployed action suffix."""
+    turn_direction = turn_direction.strip().upper()
+    if turn_direction not in RECOVERY_TURN_ACTION_SUFFIXES:
+        raise ValueError(f"unsupported turn direction: {turn_direction}")
     level = _recovery_turn_level(heading_error_deg)
     return RECOVERY_TURN_ACTION_SUFFIXES[turn_direction][level - 1]
+
+
+def numbered_turn_motion(
+    heading_error_deg: float,
+    turn_direction: str,
+) -> str:
+    """Return the deployed numbered turn for one signed heading error."""
+    normalized_direction = turn_direction.strip().upper()
+    suffix = _recovery_turn_action_suffix(
+        heading_error_deg,
+        normalized_direction,
+    )
+    return f"TURN_{normalized_direction}_{suffix}"
+
+
+def numbered_turn_motion_metadata(
+    motion: str,
+) -> tuple[str | None, int | None, float | None]:
+    """Decode a deployed numbered turn into its suffix and target angle."""
+    normalized = motion.strip().upper()
+    for turn_direction, sign in (("RIGHT", 1.0), ("LEFT", -1.0)):
+        prefix = f"TURN_{turn_direction}_"
+        if not normalized.startswith(prefix):
+            continue
+        try:
+            suffix = int(normalized.removeprefix(prefix))
+        except ValueError:
+            return None, None, None
+        supported_suffixes = RECOVERY_TURN_ACTION_SUFFIXES[turn_direction]
+        if suffix not in supported_suffixes:
+            return None, None, None
+        angle_level = supported_suffixes.index(suffix) + 1
+        return normalized, suffix, sign * angle_level * RECOVERY_TURN_STEP_DEG
+    return None, None, None
 
 
 def _recovery_motion_metadata(
@@ -195,26 +232,12 @@ def _recovery_motion_metadata(
     else:
         return None, None, None, None
 
-    for turn_direction, sign in (("RIGHT", 1.0), ("LEFT", -1.0)):
-        marker = f"_TURN_{turn_direction}_"
-        if marker not in normalized:
-            continue
-        suffix_text = normalized.rsplit(marker, 1)[1]
-        try:
-            suffix = int(suffix_text)
-        except ValueError:
-            return recovery_side, None, None, None
-        supported_suffixes = RECOVERY_TURN_ACTION_SUFFIXES[turn_direction]
-        if suffix not in supported_suffixes:
-            return recovery_side, None, None, None
-        angle_level = supported_suffixes.index(suffix) + 1
-        angle_deg = sign * angle_level * RECOVERY_TURN_STEP_DEG
-        return (
-            recovery_side,
-            f"TURN_{turn_direction}_{suffix}",
-            suffix,
-            float(angle_deg),
-        )
+    turn_prefix = f"RECOVER_{recovery_side}_"
+    turn_motion, suffix, angle_deg = numbered_turn_motion_metadata(
+        normalized.removeprefix(turn_prefix)
+    )
+    if turn_motion is not None:
+        return recovery_side, turn_motion, suffix, angle_deg
     return recovery_side, None, None, None
 
 
@@ -592,17 +615,17 @@ class LineNavigationPlanner:
             line_side = "RIGHT" if heading_error_deg > 0.0 else "LEFT"
 
         if heading_error_deg >= active_heading_threshold:
-            suffix = _recovery_turn_action_suffix(
+            turn_motion = numbered_turn_motion(
                 heading_error_deg,
                 "RIGHT",
             )
-            return f"RECOVER_{line_side}_TURN_RIGHT_{suffix}"
+            return f"RECOVER_{line_side}_{turn_motion}"
         if heading_error_deg <= -active_heading_threshold:
-            suffix = _recovery_turn_action_suffix(
+            turn_motion = numbered_turn_motion(
                 heading_error_deg,
                 "LEFT",
             )
-            return f"RECOVER_{line_side}_TURN_LEFT_{suffix}"
+            return f"RECOVER_{line_side}_{turn_motion}"
         # A lateral offset by itself must not emit a standalone recovery
         # motion.  Numbered recovery turns are reserved for a heading error
         # of at least the active side-aware heading threshold.

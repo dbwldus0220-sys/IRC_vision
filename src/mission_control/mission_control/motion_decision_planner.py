@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import math
 from typing import Any
 
+from step.ball_navigation_planner import BallNavigationConfig
 from step.ball_navigation_planner import BallNavigationPlanner
 from step.goal_navigation_planner import GoalNavigationPlanner
 from step.hurdle_navigation_planner import HurdleNavigationPlanner
@@ -52,7 +53,7 @@ class MotionDecisionConfig:
     recovery_away_heading_turn_deg: float = 3.0
     curve_follow_max_offset_norm: float = 0.55
     ball_tracking_range_m: float = 1.5
-    ball_control_range_m: float = 0.9
+    ball_control_range_m: float = 1.5
     ball_lost_stop_sec: float = 0.35
     ball_recovery_timeout_sec: float = 8.0
     ball_recovery_turn_rad_s: float = 0.22
@@ -118,7 +119,11 @@ class MotionDecisionPlanner:
                 ),
             )
         )
-        self.ball_planner = BallNavigationPlanner()
+        self.ball_planner = BallNavigationPlanner(
+            BallNavigationConfig(
+                control_start_depth_m=self.config.ball_control_range_m,
+            )
+        )
         self.goal_planner = GoalNavigationPlanner()
         self.hurdle_planner = HurdleNavigationPlanner()
         self.previous_source = "none"
@@ -520,12 +525,6 @@ class MotionDecisionPlanner:
                 and self.ball_tracking_active
             ):
                 return self._lost_ball_recovery_command()
-            if (
-                self.config.enable_ball_lost_recovery
-                and self.ball_recovery_centering
-                and self._is_detected_ball(info)
-            ):
-                return self._reacquired_ball_centering_command(info)
             command = (
                 self.ball_planner.stop("waiting_for_ball_info")
                 if info is None
@@ -565,6 +564,16 @@ class MotionDecisionPlanner:
     def _ball_range_m(self, info: dict[str, Any] | None) -> float | None:
         return self._number(info, "depth_m")
 
+    def _ball_direction_error_deg(
+        self,
+        info: dict[str, Any] | None,
+    ) -> float | None:
+        """Prefer the calibrated bottom-center ball path angle."""
+        steering = self._number(info, "steering_angle_deg")
+        if steering is not None:
+            return steering
+        return self._number(info, "bearing_deg")
+
     @staticmethod
     def _is_detected_ball(info: dict[str, Any] | None) -> bool:
         return bool(info is not None and info.get("detected", False))
@@ -573,10 +582,11 @@ class MotionDecisionPlanner:
         self,
         info: dict[str, Any] | None,
     ) -> bool:
+        """Allow confirmed RGB alignment while keeping travel depth-gated."""
         if not self._is_detected_ball(info):
             return False
         if not bool(info.get("depth_valid", False)):
-            return False
+            return True
         ball_range = self._ball_range_m(info)
         return bool(
             ball_range is not None
@@ -603,7 +613,7 @@ class MotionDecisionPlanner:
         reliable = detected and confidence is not None and confidence >= 0.35
 
         if reliable:
-            bearing = self._number(info, "bearing_deg")
+            bearing = self._ball_direction_error_deg(info)
             offset = self._number(info, "offset_x_norm")
             if bearing is not None:
                 self.last_ball_bearing_deg = bearing
@@ -621,18 +631,16 @@ class MotionDecisionPlanner:
                     self.last_ball_turn_direction = "LEFT"
 
             ball_range = self._ball_range_m(info)
-            if (
-                bool(info.get("depth_valid", False))
-                and ball_range is not None
-                and ball_range <= self.config.ball_tracking_range_m
+            depth_valid = bool(info.get("depth_valid", False))
+            visual_alignment_only = not depth_valid
+            if visual_alignment_only or (
+                ball_range is not None
+                and ball_range <= self.config.ball_control_range_m
             ):
                 self.ball_tracking_active = True
             if self.ball_tracking_active:
                 self.ball_lost_elapsed_sec = 0.0
-                if self.ball_recovery_centering and self._ball_is_centered(
-                    info
-                ):
-                    self.ball_recovery_centering = False
+                self.ball_recovery_centering = False
             return
 
         if not self.ball_tracking_active:

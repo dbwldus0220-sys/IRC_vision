@@ -323,7 +323,7 @@ def generate_launch_description() -> LaunchDescription:
             ),
             DeclareLaunchArgument("corner_turn_margin_m", default_value="0.15"),
             DeclareLaunchArgument("ball_tracking_range_m", default_value="1.5"),
-            DeclareLaunchArgument("ball_control_range_m", default_value="0.9"),
+            DeclareLaunchArgument("ball_control_range_m", default_value="1.5"),
             DeclareLaunchArgument("goal_tracking_range_m", default_value="1.0"),
             DeclareLaunchArgument("goal_control_range_m", default_value="0.5"),
             DeclareLaunchArgument("hurdle_control_range_m", default_value="1.0"),
