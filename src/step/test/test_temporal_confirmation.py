@@ -73,6 +73,52 @@ def test_short_miss_keeps_history_for_fast_reacquisition():
     assert reacquired.confirmed is True
 
 
+def test_hurdle_fifteen_of_twenty_hits_confirm_target():
+    """Confirm a hurdle on the fifteenth consistent hit in 20 frames."""
+    filter_ = TemporalConfirmationFilter(
+        window_size=20,
+        required_hits=15,
+        max_missed_frames=4,
+    )
+    bbox = [500, 250, 600, 350]
+
+    for _ in range(14):
+        assert update(filter_, True, bbox).confirmed is False
+
+    result = update(filter_, True, bbox)
+
+    assert result.confirmed is True
+    assert result.hit_count == 15
+    assert result.required_hits == 15
+    assert result.window_size == 20
+
+
+def test_hurdle_history_tolerates_four_misses_but_resets_on_fifth():
+    """Keep history for four consecutive misses and reset on the fifth."""
+    filter_ = TemporalConfirmationFilter(
+        window_size=20,
+        required_hits=15,
+        max_missed_frames=4,
+    )
+    bbox = [500, 250, 600, 350]
+
+    for _ in range(15):
+        update(filter_, True, bbox)
+    for missed_frames in range(1, 5):
+        missed = update(filter_, False)
+        assert missed.confirmed is False
+        assert missed.missed_frames == missed_frames
+
+    assert update(filter_, True, bbox).confirmed is True
+
+    for _ in range(5):
+        update(filter_, False)
+    reacquired = update(filter_, True, bbox)
+
+    assert reacquired.confirmed is False
+    assert reacquired.hit_count == 1
+
+
 def test_boolean_condition_uses_same_filter_without_bbox():
     filter_ = TemporalConfirmationFilter(
         window_size=3,
