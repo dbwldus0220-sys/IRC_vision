@@ -48,7 +48,7 @@ TEST(SdkExecutorCore, ResolvesForwardAliasBeforeStartingBackend)
     request_json(1, "forward"), 100);
 
   ASSERT_EQ(backend.started_motion_names.size(), 1U);
-  EXPECT_EQ(backend.started_motion_names[0], "전진 가장 일직선");
+  EXPECT_EQ(backend.started_motion_names[0], "전진실실전(10회)");
   EXPECT_EQ(status.status, "RUNNING");
   EXPECT_TRUE(core.has_active_request());
 }
@@ -242,7 +242,7 @@ TEST(SdkExecutorCore, RejectsSecondStartWhileActive)
   EXPECT_EQ(status.error_code, "BUSY");
   EXPECT_EQ(status.request_id, 11);
   ASSERT_EQ(backend.started_motion_names.size(), 1U);
-  EXPECT_EQ(backend.started_motion_names[0], "전진 가장 일직선");
+  EXPECT_EQ(backend.started_motion_names[0], "전진실실전(10회)");
 }
 
 TEST(SdkExecutorCore, TimeoutCancelsAndReturnsFailedWithCorrelation)
