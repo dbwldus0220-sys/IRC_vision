@@ -15,7 +15,7 @@ from .approach_distance import approach_motion_for_distance
 class HurdleNavigationConfig:
     """Provisional hurdle alignment and jump thresholds."""
 
-    min_confidence: float = 0.60
+    min_confidence: float = 0.40
     control_start_depth_m: float = 1.0
     go_target_ground_gap_m: float = 0.10
     go_ground_gap_tolerance_m: float = 0.10
