@@ -9,29 +9,33 @@ from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 
 from .ball_analyzer import BallAnalyzer
+from .depth_frame_cache import DepthFrameCache
+from .depth_frame_cache import SharedDepthSubscriber
 from .goal_analyzer import GoalAnalyzer
 from .hurdle_analyzer import HurdleAnalyzer
 from .yolo_line_analyzer import YoloLineAnalyzer
 
 
 def _create_analyzers() -> list[Node]:
-    """Construct the existing analyzers without duplicating their code."""
-    return [
-        YoloLineAnalyzer(),
-        BallAnalyzer(),
-        GoalAnalyzer(),
-        HurdleAnalyzer(),
+    """Construct analyzers sharing one converted aligned-depth frame."""
+    depth_cache = DepthFrameCache()
+    analyzers = [
+        YoloLineAnalyzer(depth_cache=depth_cache),
+        BallAnalyzer(depth_cache=depth_cache),
+        GoalAnalyzer(depth_cache=depth_cache),
+        HurdleAnalyzer(depth_cache=depth_cache),
     ]
+    depth_topic = str(analyzers[0].get_parameter("depth_topic").value)
+    return [SharedDepthSubscriber(depth_topic, depth_cache), *analyzers]
 
 
 def main(args: list[str] | None = None) -> None:
     """Compose all vision analyzers into one executable process."""
     rclpy.init(args=args)
     nodes: list[Node] = []
-    # Ball/goal/hurdle nodes have independent sensor and detection callback
-    # groups. Extra workers prevent high-rate RGB analysis from starving the
-    # latest aligned-depth cache used for distance control.
-    executor = MultiThreadedExecutor(num_threads=8)
+    # One worker receives depth while the remaining workers consume the newest
+    # detections. Four workers avoid oversubscribing the six-core Jetson CPU.
+    executor = MultiThreadedExecutor(num_threads=4)
     try:
         nodes = _create_analyzers()
         for node in nodes:

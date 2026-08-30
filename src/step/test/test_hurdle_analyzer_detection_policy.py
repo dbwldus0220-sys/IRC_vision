@@ -27,7 +27,7 @@ class FakeNode:
         """Return a publisher substitute."""
         return SimpleNamespace(publish=lambda _message: None)
 
-    def create_subscription(self, *_args):
+    def create_subscription(self, *_args, **_kwargs):
         """Return a subscription substitute."""
         return object()
 
@@ -43,6 +43,12 @@ def load_hurdle_analyzer():
     cv_bridge.CvBridge = type('CvBridge', (), {})
 
     rclpy = ModuleType('rclpy')
+    rclpy.callback_groups = ModuleType('rclpy.callback_groups')
+    rclpy.callback_groups.MutuallyExclusiveCallbackGroup = type(
+        'MutuallyExclusiveCallbackGroup',
+        (),
+        {},
+    )
     rclpy.executors = ModuleType('rclpy.executors')
     rclpy.executors.ExternalShutdownException = type(
         'ExternalShutdownException',
@@ -52,7 +58,13 @@ def load_hurdle_analyzer():
     rclpy.node = ModuleType('rclpy.node')
     rclpy.node.Node = FakeNode
     rclpy.qos = ModuleType('rclpy.qos')
-    rclpy.qos.qos_profile_sensor_data = object()
+    rclpy.qos.DurabilityPolicy = SimpleNamespace(VOLATILE='volatile')
+    rclpy.qos.HistoryPolicy = SimpleNamespace(KEEP_LAST='keep_last')
+    rclpy.qos.QoSProfile = lambda **kwargs: SimpleNamespace(**kwargs)
+    rclpy.qos.ReliabilityPolicy = SimpleNamespace(
+        BEST_EFFORT='best_effort',
+        RELIABLE='reliable',
+    )
 
     sensor_msgs = ModuleType('sensor_msgs')
     sensor_msgs.msg = ModuleType('sensor_msgs.msg')
@@ -76,6 +88,7 @@ def load_hurdle_analyzer():
     substitutes = {
         'cv_bridge': cv_bridge,
         'rclpy': rclpy,
+        'rclpy.callback_groups': rclpy.callback_groups,
         'rclpy.executors': rclpy.executors,
         'rclpy.node': rclpy.node,
         'rclpy.qos': rclpy.qos,

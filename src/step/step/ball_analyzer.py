@@ -6,7 +6,6 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 import json
 import math
-import threading
 import time
 from typing import Any
 
@@ -26,6 +25,8 @@ from std_msgs.msg import String
 
 from .approach_distance import approach_level_from_motion
 from .approach_distance import approach_motion_for_distance
+from .depth_frame_cache import DepthFrameCache
+from .depth_frame_cache import DepthFrameConsumer
 from .temporal_confirmation import TemporalConfirmationFilter
 from .yolo_line_analyzer import calibrated_robot_center_x
 from .yolo_line_analyzer import ground_forward_distance_from_depth
@@ -135,7 +136,7 @@ class BallInfo:
     note: str
 
 
-class BallAnalyzer(Node):
+class BallAnalyzer(DepthFrameConsumer, Node):
     """Convert raw YOLO ball detections into stable ball target information.
 
     This node does not decide robot motion. The mission/behavior layer should
@@ -144,7 +145,7 @@ class BallAnalyzer(Node):
     is scoring at Goal A.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, depth_cache: DepthFrameCache | None = None) -> None:
         super().__init__("ball_analyzer")
 
         self.declare_parameter("detections_topic", "/vision/detections")
@@ -315,12 +316,10 @@ class BallAnalyzer(Node):
         self.confirmation_fields: dict[str, object] = {}
         self.pickup_confirmation_fields: dict[str, object] = {}
 
-        self.bridge = CvBridge()
-        self._depth_lock = threading.RLock()
-        self.latest_depth_image: np.ndarray | None = None
-        self.latest_depth_time: float | None = None
-        self.latest_image_width: int | None = None
-        self.latest_image_height: int | None = None
+        self.depth_cache = depth_cache or DepthFrameCache()
+        self._owns_depth_subscription = depth_cache is None
+        self._depth_lock = self.depth_cache.lock
+        self.bridge = CvBridge() if self._owns_depth_subscription else None
         self.last_valid_ball_depth_m: float | None = None
         self.last_valid_ball_depth_time: float | None = None
         self.last_valid_ball_depth_center: tuple[int, int] | None = None
@@ -357,13 +356,14 @@ class BallAnalyzer(Node):
             latest_detection_qos,
             callback_group=self._detection_callback_group,
         )
-        self.create_subscription(
-            Image,
-            self.depth_topic,
-            self._depth_callback,
-            latest_depth_qos,
-            callback_group=self._depth_callback_group,
-        )
+        if self._owns_depth_subscription:
+            self.create_subscription(
+                Image,
+                self.depth_topic,
+                self._depth_callback,
+                latest_depth_qos,
+                callback_group=self._depth_callback_group,
+            )
         self.create_subscription(
             CameraInfo,
             self.camera_info_topic,
@@ -375,9 +375,10 @@ class BallAnalyzer(Node):
         self.get_logger().info(
             f"Subscribing detections: {self.detections_topic}"
         )
-        self.get_logger().info(
-            f"Subscribing aligned depth: {self.depth_topic}"
-        )
+        if self._owns_depth_subscription:
+            self.get_logger().info(
+                f"Subscribing aligned depth: {self.depth_topic}"
+            )
         self.get_logger().info(
             f"Subscribing camera info: {self.camera_info_topic}"
         )
@@ -398,15 +399,8 @@ class BallAnalyzer(Node):
 
     def _depth_callback(self, message: Image) -> None:
         try:
-            depth_image = self.bridge.imgmsg_to_cv2(
-                message,
-                desired_encoding="passthrough",
-            )
-            with self._depth_lock:
-                self.latest_depth_image = np.asarray(depth_image)
-                self.latest_depth_time = time.monotonic()
-                self.latest_image_width = int(message.width)
-                self.latest_image_height = int(message.height)
+            if self.bridge is not None:
+                self._store_depth_message(message, self.bridge)
         except Exception as exc:
             self.get_logger().warning(f"Could not read depth image: {exc}")
 

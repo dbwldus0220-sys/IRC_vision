@@ -53,13 +53,19 @@ from typing import Any
 import numpy as np
 import rclpy
 from cv_bridge import CvBridge
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from rclpy.node import Node
-from rclpy.qos import qos_profile_sensor_data
+from rclpy.qos import DurabilityPolicy
+from rclpy.qos import HistoryPolicy
+from rclpy.qos import QoSProfile
+from rclpy.qos import ReliabilityPolicy
 from sensor_msgs.msg import CameraInfo, Image
 from std_msgs.msg import String
 
 from .approach_distance import approach_level_from_motion
 from .approach_distance import approach_motion_for_distance
+from .depth_frame_cache import DepthFrameCache
+from .depth_frame_cache import DepthFrameConsumer
 from .temporal_confirmation import TemporalConfirmationFilter
 
 
@@ -163,7 +169,7 @@ def ground_forward_distance_from_depth(
 # ============================================================
 
 
-class YoloLineAnalyzer(Node):
+class YoloLineAnalyzer(DepthFrameConsumer, Node):
     """
     Analyze YOLO26 line detections and publish navigation geometry.
 
@@ -194,7 +200,7 @@ class YoloLineAnalyzer(Node):
     /vision/line_info
     """
 
-    def __init__(self) -> None:
+    def __init__(self, depth_cache: DepthFrameCache | None = None) -> None:
         super().__init__("yolo_line_analyzer")
 
         # ====================================================
@@ -842,9 +848,10 @@ class YoloLineAnalyzer(Node):
             self.get_parameter("robot_center_offset_px").value
         )
 
-        self.bridge = CvBridge()
-        self.latest_depth_image: np.ndarray | None = None
-        self.latest_depth_time: float | None = None
+        self.depth_cache = depth_cache or DepthFrameCache()
+        self._owns_depth_subscription = depth_cache is None
+        self._depth_lock = self.depth_cache.lock
+        self.bridge = CvBridge() if self._owns_depth_subscription else None
         self.fx: float | None = None
         self.fy: float | None = None
         self.cx: float | None = None
@@ -897,12 +904,6 @@ class YoloLineAnalyzer(Node):
             ).value
         )
 
-        image_topic = str(
-            self.get_parameter(
-                "image_topic"
-            ).value
-        )
-
         depth_topic = str(self.get_parameter("depth_topic").value)
         camera_info_topic = str(
             self.get_parameter("camera_info_topic").value
@@ -924,30 +925,35 @@ class YoloLineAnalyzer(Node):
             10,
         )
 
-        self.detection_subscription = (
-            self.create_subscription(
-                String,
-                detections_topic,
-                self._detections_callback,
-                10,
-            )
+        self._detection_callback_group = MutuallyExclusiveCallbackGroup()
+        self._depth_callback_group = MutuallyExclusiveCallbackGroup()
+        latest_detection_qos = QoSProfile(
+            history=HistoryPolicy.KEEP_LAST,
+            depth=1,
+            reliability=ReliabilityPolicy.RELIABLE,
+            durability=DurabilityPolicy.VOLATILE,
         )
-
-        self.image_subscription = (
-            self.create_subscription(
+        latest_depth_qos = QoSProfile(
+            history=HistoryPolicy.KEEP_LAST,
+            depth=1,
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            durability=DurabilityPolicy.VOLATILE,
+        )
+        self.detection_subscription = self.create_subscription(
+            String,
+            detections_topic,
+            self._detections_callback,
+            latest_detection_qos,
+            callback_group=self._detection_callback_group,
+        )
+        if self._owns_depth_subscription:
+            self.depth_subscription = self.create_subscription(
                 Image,
-                image_topic,
-                self._image_callback,
-                10,
+                depth_topic,
+                self._depth_callback,
+                latest_depth_qos,
+                callback_group=self._depth_callback_group,
             )
-        )
-
-        self.depth_subscription = self.create_subscription(
-            Image,
-            depth_topic,
-            self._depth_callback,
-            qos_profile_sensor_data,
-        )
 
         self.camera_info_subscription = self.create_subscription(
             CameraInfo,
@@ -964,11 +970,10 @@ class YoloLineAnalyzer(Node):
             f"Subscribing detections: {detections_topic}"
         )
 
-        self.get_logger().info(
-            f"Subscribing image info: {image_topic}"
-        )
-
-        self.get_logger().info(f"Subscribing aligned depth: {depth_topic}")
+        if self._owns_depth_subscription:
+            self.get_logger().info(
+                f"Subscribing aligned depth: {depth_topic}"
+            )
 
         self.get_logger().info(
             f"Subscribing camera info: {camera_info_topic}"
@@ -995,21 +1000,6 @@ class YoloLineAnalyzer(Node):
     # ROS callbacks
     # ========================================================
 
-    def _image_callback(
-        self,
-        message: Image,
-    ) -> None:
-        """Update actual RealSense image resolution."""
-
-        if message.width > 0 and message.height > 0:
-            self.image_width = int(
-                message.width
-            )
-
-            self.image_height = int(
-                message.height
-            )
-
     def _camera_info_callback(self, message: CameraInfo) -> None:
         """Store color-camera intrinsics for floor-forward projection."""
         if len(message.k) < 6:
@@ -1026,12 +1016,8 @@ class YoloLineAnalyzer(Node):
     def _depth_callback(self, message: Image) -> None:
         """Store the latest depth image aligned to the color frame."""
         try:
-            depth = self.bridge.imgmsg_to_cv2(
-                message,
-                desired_encoding="passthrough",
-            )
-            self.latest_depth_image = np.asarray(depth)
-            self.latest_depth_time = time.monotonic()
+            if self.bridge is not None:
+                self._store_depth_message(message, self.bridge)
         except Exception as exc:
             self.get_logger().warning(f"Could not read depth image: {exc}")
 
@@ -1324,6 +1310,16 @@ class YoloLineAnalyzer(Node):
             payload = json.loads(
                 message.data
             )
+
+            try:
+                image_width = int(payload.get("image_width", 0))
+                image_height = int(payload.get("image_height", 0))
+            except (TypeError, ValueError):
+                image_width = 0
+                image_height = 0
+            if image_width > 0 and image_height > 0:
+                self.image_width = image_width
+                self.image_height = image_height
 
             detections = payload.get(
                 "detections",

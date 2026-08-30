@@ -12,14 +12,20 @@ from typing import Any
 from cv_bridge import CvBridge
 import numpy as np
 import rclpy
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
-from rclpy.qos import qos_profile_sensor_data
+from rclpy.qos import DurabilityPolicy
+from rclpy.qos import HistoryPolicy
+from rclpy.qos import QoSProfile
+from rclpy.qos import ReliabilityPolicy
 from sensor_msgs.msg import CameraInfo, Image
 from std_msgs.msg import String
 
 from .approach_distance import approach_level_from_motion
 from .approach_distance import approach_motion_for_distance
+from .depth_frame_cache import DepthFrameCache
+from .depth_frame_cache import DepthFrameConsumer
 from .temporal_confirmation import depth_is_within_range
 from .temporal_confirmation import TemporalConfirmationFilter
 
@@ -109,10 +115,10 @@ class HurdleInfo:
     note: str
 
 
-class HurdleAnalyzer(Node):
+class HurdleAnalyzer(DepthFrameConsumer, Node):
     """Convert raw hurdle detections into an SDK jump-ready signal."""
 
-    def __init__(self) -> None:
+    def __init__(self, depth_cache: DepthFrameCache | None = None) -> None:
         super().__init__("hurdle_analyzer")
 
         self.declare_parameter("detections_topic", "/vision/detections")
@@ -234,42 +240,61 @@ class HurdleAnalyzer(Node):
         self.confirmation_fields: dict[str, object] = {}
         self.go_confirmation_fields: dict[str, object] = {}
 
-        self.bridge = CvBridge()
-        self.latest_depth_image: np.ndarray | None = None
-        self.latest_depth_time: float | None = None
-        self.latest_image_width: int | None = None
-        self.latest_image_height: int | None = None
+        self.depth_cache = depth_cache or DepthFrameCache()
+        self._owns_depth_subscription = depth_cache is None
+        self.bridge = CvBridge() if self._owns_depth_subscription else None
         self.fx: float | None = None
         self.fy: float | None = None
         self.cx: float | None = None
         self.cy: float | None = None
+
+        self._detection_callback_group = MutuallyExclusiveCallbackGroup()
+        self._depth_callback_group = MutuallyExclusiveCallbackGroup()
+        self._camera_info_callback_group = MutuallyExclusiveCallbackGroup()
+        latest_detection_qos = QoSProfile(
+            history=HistoryPolicy.KEEP_LAST,
+            depth=1,
+            reliability=ReliabilityPolicy.RELIABLE,
+            durability=DurabilityPolicy.VOLATILE,
+        )
+        latest_depth_qos = QoSProfile(
+            history=HistoryPolicy.KEEP_LAST,
+            depth=1,
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            durability=DurabilityPolicy.VOLATILE,
+        )
 
         self.publisher = self.create_publisher(String, self.output_topic, 10)
         self.create_subscription(
             String,
             self.detections_topic,
             self._detections_callback,
-            10,
+            latest_detection_qos,
+            callback_group=self._detection_callback_group,
         )
-        self.create_subscription(
-            Image,
-            self.depth_topic,
-            self._depth_callback,
-            qos_profile_sensor_data,
-        )
+        if self._owns_depth_subscription:
+            self.create_subscription(
+                Image,
+                self.depth_topic,
+                self._depth_callback,
+                latest_depth_qos,
+                callback_group=self._depth_callback_group,
+            )
         self.create_subscription(
             CameraInfo,
             self.camera_info_topic,
             self._camera_info_callback,
             10,
+            callback_group=self._camera_info_callback_group,
         )
 
         self.get_logger().info(
             f"Subscribing detections: {self.detections_topic}"
         )
-        self.get_logger().info(
-            f"Subscribing aligned depth: {self.depth_topic}"
-        )
+        if self._owns_depth_subscription:
+            self.get_logger().info(
+                f"Subscribing aligned depth: {self.depth_topic}"
+            )
         self.get_logger().info(
             f"Publishing hurdle info: {self.output_topic}"
         )
@@ -294,14 +319,8 @@ class HurdleAnalyzer(Node):
 
     def _depth_callback(self, message: Image) -> None:
         try:
-            depth = self.bridge.imgmsg_to_cv2(
-                message,
-                desired_encoding="passthrough",
-            )
-            self.latest_depth_image = np.asarray(depth)
-            self.latest_depth_time = time.monotonic()
-            self.latest_image_width = int(message.width)
-            self.latest_image_height = int(message.height)
+            if self.bridge is not None:
+                self._store_depth_message(message, self.bridge)
         except Exception as exc:
             self.get_logger().warning(f"Could not read depth image: {exc}")
 
