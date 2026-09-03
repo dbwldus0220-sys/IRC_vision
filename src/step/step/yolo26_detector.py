@@ -2614,6 +2614,10 @@ class Yolo26Detector(Node):
         if self.processing or waiting_for_interval:
             return
 
+        # Limit callback start times, rather than adding the FPS interval after
+        # every completed inference. Otherwise processing time and the interval
+        # are both charged to each frame, making the real display FPS too low.
+        self.last_inference_time = now
         self.processing = True
         started = time.perf_counter()
         try:
@@ -2656,7 +2660,6 @@ class Yolo26Detector(Node):
         except Exception as exc:
             self.get_logger().error(f"YOLO26 inference failed: {exc}")
         finally:
-            self.last_inference_time = time.monotonic()
             self.processing = False
 
     def destroy_node(self) -> bool:

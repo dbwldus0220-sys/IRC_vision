@@ -121,6 +121,16 @@ StartResult RobotMotionPlayer::start(std::string_view) noexcept
   return StartResult::Accepted;
 }
 
+QueueResult RobotMotionPlayer::queueNext(std::string_view) noexcept
+{
+  return initialized_ ? QueueResult::Queued : QueueResult::HardwareNotReady;
+}
+
+std::uint64_t RobotMotionPlayer::completionSequence() const noexcept
+{
+  return completion_sequence_;
+}
+
 bool RobotMotionPlayer::startPoseTransition(
   const std::vector<double> & target_angles_deg, std::int64_t duration_ms) noexcept
 {

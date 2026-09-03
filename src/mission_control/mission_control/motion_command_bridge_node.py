@@ -13,16 +13,20 @@ from std_msgs.msg import String
 
 LEFT_RECOVERY_MOTION_IDS = {
     2: "line_turn_left_4",
-    4: "line_turn_left_6",
-    6: "line_turn_left_8",
-    8: "line_turn_left_10",
+    4: "line_recovery_left_4",
+    5: "line_recovery_left_5",
+    6: "line_recovery_left_6",
+    7: "line_recovery_left_7",
+    8: "line_recovery_left_8",
     10: "line_turn_left_12",
     13: "line_turn_left_15",
 }
 RIGHT_RECOVERY_MOTION_IDS = {
-    4: "line_turn_right_2",
-    6: "line_turn_right_4",
-    8: "line_turn_right_6",
+    4: "line_recovery_right_4",
+    5: "line_recovery_right_5",
+    6: "line_recovery_right_6",
+    7: "line_recovery_right_7",
+    8: "line_recovery_right_8",
     10: "line_turn_right_8",
     12: "line_turn_right_10",
     15: "line_turn_right_large",
@@ -54,6 +58,10 @@ class MotionCommandBridgeNode(Node):
             for line_side in ("LEFT", "RIGHT")
             for suffix, motion_id in RIGHT_RECOVERY_MOTION_IDS.items()
         },
+        "TURN_LEFT": "stationary_turn_left",
+        "TURN_RIGHT": "stationary_turn_right",
+        "ALIGN_LEFT": "stationary_turn_left",
+        "ALIGN_RIGHT": "stationary_turn_right",
     }
     TERMINAL_STATUSES = {"SUCCEEDED", "FAILED", "CANCELLED", "REJECTED"}
     DEFAULT_TIMEOUT_MS = 12000
@@ -69,6 +77,11 @@ class MotionCommandBridgeNode(Node):
         self.active_action: str | None = None
         self.active_request_id: int | None = None
         self.active_motion_id: str | None = None
+        self.queued_command_id: int | None = None
+        self.queued_event_id: int | None = None
+        self.queued_action: str | None = None
+        self.queued_request_id: int | None = None
+        self.queued_motion_id: str | None = None
 
         self.navigation_subscription = self.create_subscription(
             String,
@@ -226,14 +239,14 @@ class MotionCommandBridgeNode(Node):
                 message="command_id was already sent to the executor",
             )
             return
-        if self.motion_in_progress:
+        if self.motion_in_progress and self.queued_request_id is not None:
             self._publish_local_rejection(
                 status="REJECTED",
                 command_id=command_id,
                 event_id=event_id,
                 action=action,
-                error_code="BUSY",
-                message="another motion request is already active",
+                error_code="QUEUE_FULL",
+                message="one next motion is already queued",
             )
             return
 
@@ -267,12 +280,19 @@ class MotionCommandBridgeNode(Node):
         self.executor_request_publisher.publish(request_message)
 
         self.last_sent_command_id = command_id
-        self.motion_in_progress = True
-        self.active_command_id = command_id
-        self.active_event_id = event_id
-        self.active_action = action
-        self.active_request_id = request_id
-        self.active_motion_id = motion_id
+        if self.motion_in_progress:
+            self.queued_command_id = command_id
+            self.queued_event_id = event_id
+            self.queued_action = action
+            self.queued_request_id = request_id
+            self.queued_motion_id = motion_id
+        else:
+            self.motion_in_progress = True
+            self.active_command_id = command_id
+            self.active_event_id = event_id
+            self.active_action = action
+            self.active_request_id = request_id
+            self.active_motion_id = motion_id
 
     def _valid_executor_status(self, payload: dict[str, Any]) -> bool:
         """Validate fields emitted by the C++ executor."""
@@ -302,6 +322,19 @@ class MotionCommandBridgeNode(Node):
         self.active_request_id = None
         self.active_motion_id = None
 
+    def _promote_queued_request(self) -> None:
+        self.active_command_id = self.queued_command_id
+        self.active_event_id = self.queued_event_id
+        self.active_action = self.queued_action
+        self.active_request_id = self.queued_request_id
+        self.active_motion_id = self.queued_motion_id
+        self.queued_command_id = None
+        self.queued_event_id = None
+        self.queued_action = None
+        self.queued_request_id = None
+        self.queued_motion_id = None
+        self.motion_in_progress = self.active_request_id is not None
+
     def executor_status_callback(self, msg: String) -> None:
         """Forward matching executor status and release terminal requests."""
         try:
@@ -321,15 +354,31 @@ class MotionCommandBridgeNode(Node):
                 "Executor status ignored: bridge has no active request"
             )
             return
-        if payload["request_id"] != self.active_request_id:
+        is_active = payload["request_id"] == self.active_request_id
+        is_queued = payload["request_id"] == self.queued_request_id
+        if not is_active and not is_queued:
             self.get_logger().warning(
                 "Executor status ignored: request_id mismatch"
             )
             return
 
-        action = self.active_action
-        if payload["status"] in self.TERMINAL_STATUSES:
+        action = self.active_action if is_active else self.queued_action
+        if is_queued and payload["status"] in self.TERMINAL_STATUSES:
+            self.queued_command_id = None
+            self.queued_event_id = None
+            self.queued_action = None
+            self.queued_request_id = None
+            self.queued_motion_id = None
+        elif is_active and payload["status"] in self.TERMINAL_STATUSES:
             self._clear_active_request()
+            if payload["status"] == "SUCCEEDED":
+                self._promote_queued_request()
+            else:
+                self.queued_command_id = None
+                self.queued_event_id = None
+                self.queued_action = None
+                self.queued_request_id = None
+                self.queued_motion_id = None
 
         self.publish_motion_status(
             status=payload["status"],

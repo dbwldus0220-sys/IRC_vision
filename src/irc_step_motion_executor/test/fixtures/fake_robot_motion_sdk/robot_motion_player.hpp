@@ -30,6 +30,17 @@ enum class StartResult : std::uint8_t
   InvalidMotion,
 };
 
+enum class QueueResult : std::uint8_t
+{
+  Queued,
+  RejectedNotRunning,
+  RejectedQueueFull,
+  MotionNotFound,
+  HardwareNotReady,
+  IncompatibleTransition,
+  InvalidMotion,
+};
+
 enum class CancelResult : std::uint8_t
 {
   Cancelled,
@@ -60,6 +71,8 @@ public:
 
   bool initialize() noexcept;
   StartResult start(std::string_view motion_name) noexcept;
+  QueueResult queueNext(std::string_view motion_name) noexcept;
+  std::uint64_t completionSequence() const noexcept;
   bool startPoseTransition(
     const std::vector<double> & target_angles_deg,
     std::int64_t duration_ms) noexcept;
@@ -73,6 +86,7 @@ private:
   IMotionHardware * hardware_{nullptr};
   bool initialized_{false};
   std::string last_error_;
+  std::uint64_t completion_sequence_{0};
 };
 
 }  // namespace irc_step

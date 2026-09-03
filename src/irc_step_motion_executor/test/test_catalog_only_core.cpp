@@ -42,7 +42,7 @@ TEST(MotionAliasCatalog, LoadsLatestSdkAndCanonicalAliases)
   irc_step_motion_executor::MotionAliasCatalog catalog;
   std::string error;
   ASSERT_TRUE(catalog.load(TEST_ALIAS_CONFIG, error)) << error;
-  EXPECT_EQ(catalog.size(), 26U);
+  EXPECT_EQ(catalog.size(), 38U);
   EXPECT_EQ(
     catalog.resolve("forward"),
     std::optional<std::string>("전진실실전(10회)"));
@@ -52,6 +52,24 @@ TEST(MotionAliasCatalog, LoadsLatestSdkAndCanonicalAliases)
   EXPECT_EQ(
     catalog.resolve("line_turn_right_large"),
     std::optional<std::string>("우회전실실전(15회)"));
+  EXPECT_EQ(
+    catalog.resolve("line_recovery_left_4"),
+    std::optional<std::string>("라인복귀좌회전(4회)"));
+  EXPECT_EQ(
+    catalog.resolve("line_recovery_left_8"),
+    std::optional<std::string>("라인보귀좌회전(8번)"));
+  EXPECT_EQ(
+    catalog.resolve("line_recovery_right_4"),
+    std::optional<std::string>("라인복귀우회전(4회)"));
+  EXPECT_EQ(
+    catalog.resolve("line_recovery_right_8"),
+    std::optional<std::string>("라인보귀우회전(8번)"));
+  EXPECT_EQ(
+    catalog.resolve("stationary_turn_left"),
+    std::optional<std::string>("제자리좌회전실실전(6번)"));
+  EXPECT_EQ(
+    catalog.resolve("stationary_turn_right"),
+    std::optional<std::string>("제자리우회전실실전(6번)"));
   EXPECT_EQ(
     catalog.resolve("pickup"),
     std::optional<std::string>("공잡기리그랩까지 실전"));

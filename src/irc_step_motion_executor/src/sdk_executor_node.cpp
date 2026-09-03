@@ -73,7 +73,7 @@ public:
     const bool startup_pose_enabled = declare_parameter<bool>(
       "startup_pose_enabled", false);
     const std::string startup_pose_name = declare_parameter<std::string>(
-      "startup_pose_name", "오뒤307");
+      "startup_pose_name", "오뒤401");
     const std::int64_t startup_pose_duration_ms = positive_parameter_or_default(
       "startup_pose_duration_ms", 1800);
 

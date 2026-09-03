@@ -188,6 +188,7 @@ SdkExecutorCore::SdkExecutorCore(
   MotionAliasCatalog catalog, MotionBackend & backend)
 : catalog_(std::move(catalog)), backend_(backend)
 {
+  completion_sequence_ = backend_.completion_sequence();
 }
 
 MotionStatus SdkExecutorCore::handle_request(
@@ -200,9 +201,30 @@ MotionStatus SdkExecutorCore::handle_request(
   }
 
   if (active_) {
+    if (queued_) {
+      return status_for_request(
+        parsed->request, "REJECTED", "QUEUE_FULL",
+        "one next motion is already queued");
+    }
+    const auto resolved_motion = catalog_.resolve(parsed->request.motion_id);
+    if (!resolved_motion) {
+      return status_for_request(
+        parsed->request, "REJECTED", "INVALID_MOTION",
+        "unsupported queued motion_id; backend was not called");
+    }
+    const BackendQueueResult queue_result =
+      backend_.queue_motion(*resolved_motion);
+    if (!queue_result.accepted) {
+      const std::string error_code =
+        queue_result.error_code == "QUEUE_UNSUPPORTED" ?
+        "BUSY" : queue_result.error_code;
+      return status_for_request(
+        parsed->request, "REJECTED", error_code,
+        queue_result.message);
+    }
+    queued_ = ActiveRequest{parsed->request, now_ms, parsed->timeout_ms};
     return status_for_request(
-      parsed->request, "REJECTED", "BUSY",
-      "another motion request is already active");
+      parsed->request, "QUEUED", "", "next motion queued");
   }
 
   const auto resolved_motion = catalog_.resolve(parsed->request.motion_id);
@@ -281,12 +303,14 @@ MotionStatus SdkExecutorCore::handle_cancel(const std::string & payload)
       "FAILED", "BACKEND_EXCEPTION",
       exception_message("cancel_motion", exception));
     clear_active();
+    queued_.reset();
     return status;
   } catch (...) {
     MotionStatus status = status_for_active(
       "FAILED", "BACKEND_EXCEPTION",
       "cancel_motion threw an unknown exception");
     clear_active();
+    queued_.reset();
     return status;
   }
 
@@ -297,6 +321,11 @@ std::optional<MotionStatus> SdkExecutorCore::poll(std::uint64_t now_ms)
 {
   if (!active_) {
     return std::nullopt;
+  }
+
+  if (queued_running_status_pending_) {
+    queued_running_status_pending_ = false;
+    return status_for_active("RUNNING", "", "queued motion activated");
   }
 
   const bool timeout_reached =
@@ -317,6 +346,7 @@ std::optional<MotionStatus> SdkExecutorCore::poll(std::uint64_t now_ms)
     MotionStatus status = status_for_active(
       "FAILED", "TIMEOUT", message);
     clear_active();
+    queued_.reset();
     return status;
   }
 
@@ -328,13 +358,27 @@ std::optional<MotionStatus> SdkExecutorCore::poll(std::uint64_t now_ms)
       "FAILED", "BACKEND_EXCEPTION",
       exception_message("poll_status", exception));
     clear_active();
+    queued_.reset();
     return status;
   } catch (...) {
     MotionStatus status = status_for_active(
       "FAILED", "BACKEND_EXCEPTION",
       "poll_status threw an unknown exception");
     clear_active();
+    queued_.reset();
     return status;
+  }
+
+  const std::uint64_t current_sequence = backend_.completion_sequence();
+  const bool completion_boundary = current_sequence != completion_sequence_;
+  completion_sequence_ = current_sequence;
+  if (completion_boundary && queued_) {
+    MotionStatus completed = status_for_active(
+      "SUCCEEDED", "", "motion completed at seamless queue boundary");
+    active_ = ActiveRequest{queued_->request, now_ms, queued_->timeout_ms};
+    queued_.reset();
+    queued_running_status_pending_ = true;
+    return completed;
   }
 
   switch (backend_status.state) {
@@ -351,6 +395,7 @@ std::optional<MotionStatus> SdkExecutorCore::poll(std::uint64_t now_ms)
       MotionStatus status = status_for_active(
         "SUCCEEDED", backend_status.error_code, backend_status.message);
       clear_active();
+      queued_.reset();
       return status;
     }
     case BackendState::CANCELLED:
@@ -358,6 +403,7 @@ std::optional<MotionStatus> SdkExecutorCore::poll(std::uint64_t now_ms)
       MotionStatus status = status_for_active(
         "CANCELLED", backend_status.error_code, backend_status.message);
       clear_active();
+      queued_.reset();
       return status;
     }
     case BackendState::FAILED:
@@ -368,6 +414,7 @@ std::optional<MotionStatus> SdkExecutorCore::poll(std::uint64_t now_ms)
         "BACKEND_FAILED" : backend_status.error_code,
         backend_status.message);
       clear_active();
+      queued_.reset();
       return status;
     }
     case BackendState::IDLE:
@@ -377,6 +424,7 @@ std::optional<MotionStatus> SdkExecutorCore::poll(std::uint64_t now_ms)
         "FAILED", "BACKEND_UNEXPECTED_IDLE",
         "backend became idle while a request was active");
       clear_active();
+      queued_.reset();
       return status;
     }
   }

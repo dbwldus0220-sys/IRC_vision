@@ -69,6 +69,28 @@ BackendCancelResult map_cancel_result(
   }
 }
 
+BackendQueueResult map_queue_result(
+  irc_step::QueueResult result, const std::string & message)
+{
+  switch (result) {
+    case irc_step::QueueResult::Queued:
+      return {true, "", message};
+    case irc_step::QueueResult::RejectedNotRunning:
+      return {false, "QUEUE_NOT_RUNNING", message};
+    case irc_step::QueueResult::RejectedQueueFull:
+      return {false, "QUEUE_FULL", message};
+    case irc_step::QueueResult::MotionNotFound:
+      return {false, "SDK_MOTION_NOT_FOUND", message};
+    case irc_step::QueueResult::HardwareNotReady:
+      return {false, "SDK_HARDWARE_NOT_READY", message};
+    case irc_step::QueueResult::IncompatibleTransition:
+      return {false, "INCOMPATIBLE_TRANSITION", message};
+    case irc_step::QueueResult::InvalidMotion:
+    default:
+      return {false, "SDK_INVALID_MOTION", message};
+  }
+}
+
 std::string map_motion_error(irc_step::MotionError error)
 {
   switch (error) {
@@ -141,6 +163,12 @@ irc_step::StartResult BorrowedRobotMotionPlayerApi::start(
   return player_.start(motion_name);
 }
 
+irc_step::QueueResult BorrowedRobotMotionPlayerApi::queue_next(
+  std::string_view motion_name)
+{
+  return player_.queueNext(motion_name);
+}
+
 irc_step::CancelResult BorrowedRobotMotionPlayerApi::cancel()
 {
   return player_.cancel();
@@ -159,6 +187,11 @@ irc_step::MotionError BorrowedRobotMotionPlayerApi::result() const
 std::string BorrowedRobotMotionPlayerApi::last_error() const
 {
   return std::string(player_.lastError());
+}
+
+std::uint64_t BorrowedRobotMotionPlayerApi::completion_sequence() const
+{
+  return player_.completionSequence();
 }
 
 RobotMotionPlayerBackend::RobotMotionPlayerBackend(
@@ -215,6 +248,24 @@ BackendStatus RobotMotionPlayerBackend::poll_status()
       BackendState::FAILED, "SDK_EXCEPTION",
       "RobotMotionPlayer::update threw an unknown exception"};
   }
+}
+
+BackendQueueResult RobotMotionPlayerBackend::queue_motion(
+  const std::string & resolved_motion_name)
+{
+  try {
+    return map_queue_result(
+      player_api_.queue_next(resolved_motion_name), player_api_.last_error());
+  } catch (const std::exception & exception) {
+    return {false, "SDK_EXCEPTION", exception_message("queue_next", exception)};
+  } catch (...) {
+    return {false, "SDK_EXCEPTION", "queue_next threw an unknown exception"};
+  }
+}
+
+std::uint64_t RobotMotionPlayerBackend::completion_sequence() const
+{
+  return player_api_.completion_sequence();
 }
 
 }  // namespace irc_step_motion_executor

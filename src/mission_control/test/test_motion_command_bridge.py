@@ -45,6 +45,11 @@ class FakeBridge:
         self.active_action = None
         self.active_request_id = None
         self.active_motion_id = None
+        self.queued_command_id = None
+        self.queued_event_id = None
+        self.queued_action = None
+        self.queued_request_id = None
+        self.queued_motion_id = None
         self.executor_request_publisher = CapturePublisher()
         self.motion_status_publisher = CapturePublisher()
         self.logger = FakeLogger()
@@ -55,6 +60,7 @@ class FakeBridge:
             "navigation_command_callback",
             "_valid_executor_status",
             "_clear_active_request",
+            "_promote_queued_request",
             "executor_status_callback",
         ):
             setattr(
@@ -128,13 +134,19 @@ EXPECTED_PRODUCTION_ACTIONS = {
     "RIGHT": "line_turn_right_large",
     "PICKUP_NOW": "pickup",
     "GO": "hurdle",
+    "TURN_LEFT": "stationary_turn_left",
+    "TURN_RIGHT": "stationary_turn_right",
+    "ALIGN_LEFT": "stationary_turn_left",
+    "ALIGN_RIGHT": "stationary_turn_right",
 }
 for recovery_side in ("LEFT", "RIGHT"):
     for suffix, motion_id in {
         2: "line_turn_left_4",
-        4: "line_turn_left_6",
-        6: "line_turn_left_8",
-        8: "line_turn_left_10",
+        4: "line_recovery_left_4",
+        5: "line_recovery_left_5",
+        6: "line_recovery_left_6",
+        7: "line_recovery_left_7",
+        8: "line_recovery_left_8",
         10: "line_turn_left_12",
         13: "line_turn_left_15",
     }.items():
@@ -142,9 +154,11 @@ for recovery_side in ("LEFT", "RIGHT"):
             f"RECOVER_{recovery_side}_TURN_LEFT_{suffix}"
         ] = motion_id
     for suffix, motion_id in {
-        4: "line_turn_right_2",
-        6: "line_turn_right_4",
-        8: "line_turn_right_6",
+        4: "line_recovery_right_4",
+        5: "line_recovery_right_5",
+        6: "line_recovery_right_6",
+        7: "line_recovery_right_7",
+        8: "line_recovery_right_8",
         10: "line_turn_right_8",
         12: "line_turn_right_10",
         15: "line_turn_right_large",
@@ -214,10 +228,6 @@ def test_positive_source_timeout_is_preserved():
 @pytest.mark.parametrize(
     "action",
     [
-        "TURN_LEFT",
-        "TURN_RIGHT",
-        "ALIGN_LEFT",
-        "ALIGN_RIGHT",
         "RETREAT_GOAL",
         "SLOW_APPROACH",
         "FINE_FORWARD_STEP",
@@ -266,7 +276,7 @@ def test_duplicate_command_id_is_rejected():
     assert status["error_code"] == "DUPLICATE_COMMAND_ID"
 
 
-def test_new_command_while_running_is_rejected():
+def test_new_command_while_running_is_queued():
     bridge = FakeBridge()
     bridge.navigation_command_callback(navigation_message())
 
@@ -274,11 +284,9 @@ def test_new_command_while_running_is_rejected():
         navigation_message(command_id=8001, event_id=9)
     )
 
-    assert len(bridge.executor_request_publisher.messages) == 1
-    status = decoded_messages(bridge.motion_status_publisher)[0]
-    assert status["status"] == "REJECTED"
-    assert status["error_code"] == "BUSY"
-    assert status["motion_in_progress"] is True
+    assert len(bridge.executor_request_publisher.messages) == 2
+    assert bridge.queued_request_id == 8001
+    assert bridge.queued_action == "STRAIGHT"
 
 
 def test_running_status_keeps_lock_and_preserves_fields():

@@ -14,6 +14,7 @@ class FakeRobotMotionPlayerApi final
 {
 public:
   irc_step::StartResult start_result{irc_step::StartResult::Accepted};
+  irc_step::QueueResult queue_result{irc_step::QueueResult::Queued};
   irc_step::CancelResult cancel_result{irc_step::CancelResult::Cancelled};
   irc_step::MotionStatus motion_status{irc_step::MotionStatus::Idle};
   irc_step::MotionError motion_error{irc_step::MotionError::None};
@@ -22,6 +23,7 @@ public:
   bool throw_on_start{false};
   bool throw_on_cancel{false};
   bool throw_on_update{false};
+  std::uint64_t sequence{0};
 
   irc_step::StartResult start(std::string_view motion_name) override
   {
@@ -30,6 +32,12 @@ public:
     }
     received_motion_name = std::string(motion_name);
     return start_result;
+  }
+
+  irc_step::QueueResult queue_next(std::string_view motion_name) override
+  {
+    received_motion_name = std::string(motion_name);
+    return queue_result;
   }
 
   irc_step::CancelResult cancel() override
@@ -56,6 +64,12 @@ public:
   std::string last_error() const override
   {
     return error_message;
+  }
+
+
+  std::uint64_t completion_sequence() const override
+  {
+    return sequence;
   }
 };
 

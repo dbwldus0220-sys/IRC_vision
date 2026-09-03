@@ -2580,7 +2580,7 @@
             "start_pose": "오들555",
             "end_pose": "오뒤777",
             "completion": {
-                "position_tolerance_deg": 2.0,
+                "position_tolerance_deg": 3.0,
                 "settle_duration_ms": 80,
                 "settle_timeout_ms": 3000
             },

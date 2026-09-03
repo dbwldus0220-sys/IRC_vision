@@ -2,6 +2,7 @@
 #define IRC_STEP_MOTION_EXECUTOR__MOTION_BACKEND_HPP_
 
 #include <string>
+#include <cstdint>
 
 namespace irc_step_motion_executor
 {
@@ -30,6 +31,13 @@ struct BackendCancelResult
   std::string message;
 };
 
+struct BackendQueueResult
+{
+  bool accepted{false};
+  std::string error_code;
+  std::string message;
+};
+
 struct BackendStatus
 {
   BackendState state{BackendState::IDLE};
@@ -46,6 +54,11 @@ public:
     const std::string & resolved_motion_name) = 0;
   virtual BackendCancelResult cancel_motion() = 0;
   virtual BackendStatus poll_status() = 0;
+  virtual BackendQueueResult queue_motion(const std::string &)
+  {
+    return {false, "QUEUE_UNSUPPORTED", "backend does not support queuing"};
+  }
+  virtual std::uint64_t completion_sequence() const {return 0;}
 };
 
 }  // namespace irc_step_motion_executor

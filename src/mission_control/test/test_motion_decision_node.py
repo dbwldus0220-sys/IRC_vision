@@ -1311,7 +1311,7 @@ def test_completed_line_motion_can_publish_next_decision_without_fresh_vision():
     assert node.active_special_command_id == 2
 
 
-def test_line_motion_captures_configured_frames_after_eighty_percent(
+def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
     monkeypatch,
 ):
     node = ReadinessPublishNode(general_decision("STRAIGHT"))
@@ -1323,6 +1323,11 @@ def test_line_motion_captures_configured_frames_after_eighty_percent(
 
         def __init__(self):
             self.frames = []
+            self.config = type(
+                "Config",
+                (),
+                {"min_line_quality": 0.35},
+            )()
 
         def _reset_turn_state(self):
             pass
@@ -1346,22 +1351,38 @@ def test_line_motion_captures_configured_frames_after_eighty_percent(
     assert node.active_line_motion_duration_sec == pytest.approx(4.111)
     assert node.active_line_motion_target_frames == 20
 
-    clock[0] = 13.28
-    MotionDecisionNode._collect_active_line_motion_frame(
-        node,
-        {"frame": "too_early"},
-        clock[0],
-    )
-    assert node.active_line_motion_frames == []
+    def valid_frame(frame_id):
+        return {
+            "frame": frame_id,
+            "detected": True,
+            "filtered_heading_error_deg": 0.0,
+            "filtered_lateral_offset_norm": 0.0,
+            "heading_quality": 0.9,
+            "geometry_quality": 0.9,
+            "detection_quality": 0.9,
+        }
 
-    clock[0] = 13.29
-    for frame_id in range(25):
-        MotionDecisionNode._collect_active_line_motion_frame(
+    clock[0] = 11.0
+    for frame_id in range(20):
+        assert not MotionDecisionNode._collect_active_line_motion_frame(
             node,
-            {"frame": frame_id},
+            valid_frame(frame_id),
             clock[0],
         )
     assert len(node.active_line_motion_frames) == 20
+
+    clock[0] = 12.88
+    capture_ready = MotionDecisionNode._collect_active_line_motion_frame(
+        node,
+        {"detected": False},
+        clock[0],
+    )
+    assert capture_ready
+    MotionDecisionNode._prepare_pending_line_decision(
+        node,
+        clock[0],
+    )
+    assert node.pending_line_decision is not None
 
     send_status(
         node,
@@ -1374,6 +1395,7 @@ def test_line_motion_captures_configured_frames_after_eighty_percent(
 
     assert len(recording_planner.frames) == 20
     assert node.active_line_motion_frames == []
+    assert len(node.publisher.messages) == 2
     MotionDecisionNode._publish_decision(node)
     assert len(node.publisher.messages) == 2
 

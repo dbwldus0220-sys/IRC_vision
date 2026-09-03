@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import math
 import time
 from typing import Any
 
@@ -94,7 +95,7 @@ class MotionDecisionNode(Node):
             }.items()
         },
     }
-    LINE_MOTION_CAPTURE_START_RATIO = 0.80
+    LINE_MOTION_CAPTURE_START_RATIO = 0.70
     LINE_TIMEOUT_RECOVERY_FRAMES = 10
 
     def __init__(self) -> None:
@@ -135,7 +136,7 @@ class MotionDecisionNode(Node):
 
         self.declare_parameter("initial_mission_phase", "AUTO")
         self.declare_parameter("publish_rate_hz", 10.0)
-        self.declare_parameter("pre_motion_settle_sec", 0.5)
+        self.declare_parameter("pre_motion_settle_sec", 0.0)
         self.declare_parameter("required_pickups", 2)
         self.declare_parameter("required_shots", 2)
         self.declare_parameter("required_ball_sections", 2)
@@ -317,6 +318,10 @@ class MotionDecisionNode(Node):
         self.active_line_motion_duration_sec = 0.0
         self.active_line_motion_target_frames = 0
         self.active_line_motion_frames: list[dict[str, Any]] = []
+        self.pending_line_decision: MotionDecision | None = None
+        self.queued_general_action: str | None = None
+        self.queued_general_command_id: int | None = None
+        self.queued_general_source: str | None = None
         self.line_timeout_recovery_active = False
         self.line_timeout_recovery_frames: list[dict[str, Any]] = []
         self.terminal_latch: tuple[str, str] | None = None
@@ -614,11 +619,23 @@ class MotionDecisionNode(Node):
                             payload,
                         )
                     else:
-                        MotionDecisionNode._collect_active_line_motion_frame(
-                            self,
-                            payload,
-                            received_at,
+                        capture_ready = (
+                            MotionDecisionNode._collect_active_line_motion_frame(
+                                self,
+                                payload,
+                                received_at,
+                            )
                         )
+                        if (
+                            capture_ready
+                            and str(self.active_line_motion_action).startswith(
+                                "STRAIGHT"
+                            )
+                        ):
+                            MotionDecisionNode._prepare_pending_line_decision(
+                                self,
+                                received_at,
+                            )
                 self.executor_ready_requires_fresh_vision = False
                 self.general_motion_gate.on_new_vision_input()
 
@@ -715,6 +732,36 @@ class MotionDecisionNode(Node):
         )
 
         if normalize_general_action(action) is not None:
+            if status == "QUEUED":
+                return
+            if (
+                status == "REJECTED"
+                and action == getattr(self, "queued_general_action", None)
+                and command_id == getattr(
+                    self,
+                    "queued_general_command_id",
+                    None,
+                )
+            ):
+                self.queued_general_action = None
+                self.queued_general_command_id = None
+                self.queued_general_source = None
+                self.pending_line_decision = None
+                return
+            if (
+                status == "RUNNING"
+                and not self.general_motion_gate.locked
+                and action == self.queued_general_action
+                and command_id == self.queued_general_command_id
+            ):
+                self.general_motion_gate.on_command_published(
+                    action,
+                    command_id,
+                )
+                self.active_general_source = self.queued_general_source
+                self.queued_general_action = None
+                self.queued_general_command_id = None
+                self.queued_general_source = None
             transition = self.general_motion_gate.on_motion_status(
                 action,
                 status,
@@ -765,6 +812,7 @@ class MotionDecisionNode(Node):
                         self.line_timeout_recovery_frames = []
                     else:
                         MotionDecisionNode._discard_line_motion_capture(self)
+                    self.pending_line_decision = None
                 self.get_logger().info(
                     "General motion lock released: "
                     f"status={status}, action={action}"
@@ -951,6 +999,7 @@ class MotionDecisionNode(Node):
     def _start_line_motion_capture(self, action: str) -> None:
         """Start the configured late-motion Vision capture window."""
         config = MotionDecisionNode.LINE_MOTION_CAPTURE_CONFIG.get(action)
+        self.pending_line_decision = None
         self.active_line_motion_frames = []
         if config is None:
             self.active_line_motion_action = None
@@ -968,24 +1017,101 @@ class MotionDecisionNode(Node):
         self,
         payload: dict[str, Any],
         received_at: float,
-    ) -> None:
-        """Keep distinct line frames received after 80 percent execution."""
+    ) -> bool:
+        """Keep recent usable line frames and finalize after 70 percent."""
         started_at = self.active_line_motion_started_at
-        if started_at is None:
-            return
+        if (
+            started_at is None
+            or getattr(self, "pending_line_decision", None) is not None
+        ):
+            return False
+        if MotionDecisionNode._line_frame_is_usable(self, payload):
+            self.active_line_motion_frames.append(dict(payload))
+            del self.active_line_motion_frames[
+                : -self.active_line_motion_target_frames
+            ]
         capture_start = (
             started_at
             + self.active_line_motion_duration_sec
             * MotionDecisionNode.LINE_MOTION_CAPTURE_START_RATIO
         )
         if received_at < capture_start:
-            return
-        if (
+            return False
+        return (
             len(self.active_line_motion_frames)
             >= self.active_line_motion_target_frames
-        ):
+        )
+
+    def _line_frame_is_usable(self, payload: dict[str, Any]) -> bool:
+        """Match the line planner's minimum executable input checks."""
+        if payload.get("detected") is not True:
+            return False
+
+        def finite_number(*keys: str) -> float | None:
+            for key in keys:
+                value = payload.get(key)
+                if value is None or isinstance(value, bool):
+                    continue
+                try:
+                    number = float(value)
+                except (TypeError, ValueError):
+                    continue
+                if math.isfinite(number):
+                    return number
+            return None
+
+        if finite_number(
+            "filtered_heading_error_deg",
+            "heading_error_deg",
+        ) is None:
+            return False
+        if finite_number(
+            "filtered_lateral_offset_norm",
+            "lateral_offset_norm",
+        ) is None:
+            return False
+
+        qualities = [
+            finite_number(key)
+            for key in (
+                "heading_quality",
+                "geometry_quality",
+                "detection_quality",
+            )
+        ]
+        valid_qualities = [value for value in qualities if value is not None]
+        if not valid_qualities:
+            return False
+        minimum_quality = self.planner.line_planner.config.min_line_quality
+        return min(valid_qualities) >= minimum_quality
+
+    def _prepare_pending_line_decision(self, now: float) -> None:
+        """Precompute the next decision from late-motion line frames."""
+        frames = self.active_line_motion_frames
+        if not frames:
             return
-        self.active_line_motion_frames.append(dict(payload))
+        line_planner = self.planner.line_planner
+        line_planner._reset_turn_state()
+        for frame in frames:
+            line_planner.plan(frame, 1.0 / 30.0)
+        self.active_line_motion_frames = []
+
+        observations, _ = self._fresh_observations(now)
+        observations = dict(observations)
+        observations["line"] = frames[-1]
+        decision = self._select_mission_decision(
+            observations,
+            1.0 / 30.0,
+        )
+        decision = self._suppress_duplicate_terminal_action(decision)
+        decision = self._suppress_exhausted_special_action(decision)
+        if decision.valid:
+            self.pending_line_decision = decision
+            MotionDecisionNode._publish_decision(
+                self,
+                decision,
+                queue_while_locked=True,
+            )
 
     def _finish_line_motion_capture(self) -> None:
         """Replay captured frames into the existing line planner."""
@@ -1027,7 +1153,11 @@ class MotionDecisionNode(Node):
         self.line_timeout_recovery_active = False
         self.general_motion_gate.rejected_action = None
 
-    def _publish_decision(self) -> None:
+    def _publish_decision(
+        self,
+        precomputed_decision: MotionDecision | None = None,
+        queue_while_locked: bool = False,
+    ) -> None:
         if self.safety_interlock.latched:
             return
 
@@ -1045,7 +1175,14 @@ class MotionDecisionNode(Node):
             self._reset_pre_motion_settle()
             return
 
-        if self.general_motion_gate.locked:
+        if self.general_motion_gate.locked and not queue_while_locked:
+            self._reset_pre_motion_settle()
+            return
+
+        if (
+            getattr(self, "queued_general_command_id", None) is not None
+            and not queue_while_locked
+        ):
             self._reset_pre_motion_settle()
             return
 
@@ -1068,10 +1205,12 @@ class MotionDecisionNode(Node):
 
         self._rearm_absent_terminal_targets(observations)
 
-        decision = self._select_mission_decision(
-            observations,
-            dt_sec,
-        )
+        decision = precomputed_decision
+        if decision is None:
+            decision = self._select_mission_decision(
+                observations,
+                dt_sec,
+            )
         self.last_candidate_decision = decision
 
         decision = self._suppress_duplicate_terminal_action(
@@ -1086,7 +1225,11 @@ class MotionDecisionNode(Node):
         if not self._command_publisher_has_subscriber():
             return
 
-        if decision.valid and self.general_motion_gate.locked:
+        if (
+            decision.valid
+            and self.general_motion_gate.locked
+            and not queue_while_locked
+        ):
             # A RUNNING general request owns the executor regardless of what
             # a newer Vision frame would otherwise select.
             self._reset_pre_motion_settle()
@@ -1107,6 +1250,7 @@ class MotionDecisionNode(Node):
         )
         if (
             is_general_motion
+            and not queue_while_locked
             and not self.general_motion_gate.can_publish(decision.action)
         ):
             # Keep receiving Vision and running the planner, but do not publish
@@ -1124,7 +1268,10 @@ class MotionDecisionNode(Node):
             self._reset_pre_motion_settle()
             return
 
-        if not self._pre_motion_settle_ready(decision, now):
+        if (
+            not queue_while_locked
+            and not self._pre_motion_settle_ready(decision, now)
+        ):
             return
 
         terminal_key = (
@@ -1217,11 +1364,16 @@ class MotionDecisionNode(Node):
         self._reset_pre_motion_settle()
 
         if is_general_motion:
-            self.active_general_source = decision.source
-            self.general_motion_gate.on_command_published(
-                decision.action,
-                self.command_id,
-            )
+            if queue_while_locked:
+                self.queued_general_action = decision.action
+                self.queued_general_command_id = self.command_id
+                self.queued_general_source = decision.source
+            else:
+                self.active_general_source = decision.source
+                self.general_motion_gate.on_command_published(
+                    decision.action,
+                    self.command_id,
+                )
             MotionDecisionNode._remember_published_vision_frame(
                 self,
                 decision,

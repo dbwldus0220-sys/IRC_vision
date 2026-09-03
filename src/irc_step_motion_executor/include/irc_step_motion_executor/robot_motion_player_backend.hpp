@@ -17,10 +17,12 @@ public:
   virtual ~RobotMotionPlayerApi() = default;
 
   virtual irc_step::StartResult start(std::string_view motion_name) = 0;
+  virtual irc_step::QueueResult queue_next(std::string_view motion_name) = 0;
   virtual irc_step::CancelResult cancel() = 0;
   virtual irc_step::MotionStatus update() = 0;
   virtual irc_step::MotionError result() const = 0;
   virtual std::string last_error() const = 0;
+  virtual std::uint64_t completion_sequence() const = 0;
 };
 
 class BorrowedRobotMotionPlayerApi final : public RobotMotionPlayerApi
@@ -29,10 +31,12 @@ public:
   explicit BorrowedRobotMotionPlayerApi(irc_step::RobotMotionPlayer & player);
 
   irc_step::StartResult start(std::string_view motion_name) override;
+  irc_step::QueueResult queue_next(std::string_view motion_name) override;
   irc_step::CancelResult cancel() override;
   irc_step::MotionStatus update() override;
   irc_step::MotionError result() const override;
   std::string last_error() const override;
+  std::uint64_t completion_sequence() const override;
 
 private:
   irc_step::RobotMotionPlayer & player_;
@@ -47,6 +51,9 @@ public:
     const std::string & resolved_motion_name) override;
   BackendCancelResult cancel_motion() override;
   BackendStatus poll_status() override;
+  BackendQueueResult queue_motion(
+    const std::string & resolved_motion_name) override;
+  std::uint64_t completion_sequence() const override;
 
 private:
   RobotMotionPlayerApi & player_api_;

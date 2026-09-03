@@ -17,8 +17,12 @@ public:
     true, "", "fake start accepted"};
   irc_step_motion_executor::BackendCancelResult cancel_result{
     true, "", "fake cancel accepted"};
+  irc_step_motion_executor::BackendQueueResult queue_result{
+    false, "QUEUE_UNSUPPORTED", "fake queue unsupported"};
   std::deque<irc_step_motion_executor::BackendStatus> statuses;
   std::vector<std::string> started_motion_names;
+  std::vector<std::string> queued_motion_names;
+  std::uint64_t sequence{0};
   int cancel_calls{0};
   int poll_calls{0};
   bool throw_on_start{false};
@@ -57,6 +61,18 @@ public:
     auto status = std::move(statuses.front());
     statuses.pop_front();
     return status;
+  }
+
+  irc_step_motion_executor::BackendQueueResult queue_motion(
+    const std::string & resolved_motion_name) override
+  {
+    queued_motion_names.push_back(resolved_motion_name);
+    return queue_result;
+  }
+
+  std::uint64_t completion_sequence() const override
+  {
+    return sequence;
   }
 };
 

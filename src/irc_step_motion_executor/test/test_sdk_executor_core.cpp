@@ -361,4 +361,31 @@ TEST(SdkExecutorCore, RejectsInvalidRequestWithoutCallingBackend)
   EXPECT_TRUE(backend.started_motion_names.empty());
 }
 
+TEST(SdkExecutorCore, PromotesOneQueuedRequestAtSeamlessBoundary)
+{
+  FakeMotionBackend backend;
+  backend.queue_result = {true, "", "queued"};
+  irc_step_motion_executor::SdkExecutorCore core(load_catalog(), backend);
+
+  EXPECT_EQ(
+    core.handle_request(request_json(30, "forward"), 100).status,
+    "RUNNING");
+  const auto queued = core.handle_request(
+    request_json(31, "forward", "STRAIGHT"), 101);
+  EXPECT_EQ(queued.status, "QUEUED");
+  ASSERT_EQ(backend.queued_motion_names.size(), 1U);
+  EXPECT_EQ(backend.queued_motion_names[0], "전진실실전(10회)");
+
+  backend.sequence = 1;
+  const auto completed = core.poll(200);
+  ASSERT_TRUE(completed.has_value());
+  EXPECT_EQ(completed->request_id, 30);
+  EXPECT_EQ(completed->status, "SUCCEEDED");
+
+  const auto promoted = core.poll(201);
+  ASSERT_TRUE(promoted.has_value());
+  EXPECT_EQ(promoted->request_id, 31);
+  EXPECT_EQ(promoted->status, "RUNNING");
+}
+
 }  // namespace

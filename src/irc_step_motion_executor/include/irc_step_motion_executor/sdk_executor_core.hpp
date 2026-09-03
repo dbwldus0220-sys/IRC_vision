@@ -41,6 +41,9 @@ private:
   MotionAliasCatalog catalog_;
   MotionBackend & backend_;
   std::optional<ActiveRequest> active_;
+  std::optional<ActiveRequest> queued_;
+  std::uint64_t completion_sequence_{0};
+  bool queued_running_status_pending_{false};
 };
 
 }  // namespace irc_step_motion_executor
