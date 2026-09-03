@@ -35,7 +35,7 @@ ROS graph에서 Python executor나 다른 motor executor를 동시에 실행하�
   - hardware enable과 torque approval 정책을 검증한다.
   - 실행 상태와 오류를 `/motion/executor/status`로 반환한다.
 
-현재 bridge는 `STRAIGHT`/`APPROACH`를 `forward`, `PICKUP_NOW`를 `pickup`,
+현재 bridge는 `STRAIGHT`를 `line_forward_6`, `APPROACH`를 `forward`, `PICKUP_NOW`를 `pickup`,
 `GO`를 `hurdle`로만 연결한다. 짧은 전진·회전·SHOT처럼 실물 검증된 SDK motion이
 없는 action은 executor로 전송하지 않고 `/motion/status`에 `UNSUPPORTED`를
 발행한다.

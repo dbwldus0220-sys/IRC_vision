@@ -37,7 +37,7 @@ class MotionCommandBridgeNode(Node):
     """Translate supported navigation actions into SDK executor requests."""
 
     ACTION_TO_MOTION_ID = {
-        "STRAIGHT": "forward",
+        "STRAIGHT": "line_forward_6",
         "STRAIGHT_1": "line_forward_2",
         "STRAIGHT_2": "line_forward_4",
         "STRAIGHT_3": "line_forward_6",

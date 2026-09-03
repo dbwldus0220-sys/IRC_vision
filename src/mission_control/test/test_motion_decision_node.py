@@ -1348,8 +1348,8 @@ def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
         dynamics_command=None,
     )
 
-    assert node.active_line_motion_duration_sec == pytest.approx(4.111)
-    assert node.active_line_motion_target_frames == 20
+    assert node.active_line_motion_duration_sec == pytest.approx(2.467)
+    assert node.active_line_motion_target_frames == 10
 
     def valid_frame(frame_id):
         return {
@@ -1363,15 +1363,15 @@ def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
         }
 
     clock[0] = 11.0
-    for frame_id in range(20):
+    for frame_id in range(10):
         assert not MotionDecisionNode._collect_active_line_motion_frame(
             node,
             valid_frame(frame_id),
             clock[0],
         )
-    assert len(node.active_line_motion_frames) == 20
+    assert len(node.active_line_motion_frames) == 10
 
-    clock[0] = 12.88
+    clock[0] = 11.73
     capture_ready = MotionDecisionNode._collect_active_line_motion_frame(
         node,
         {"detected": False},
@@ -1393,7 +1393,7 @@ def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
         dynamics_command=None,
     )
 
-    assert len(recording_planner.frames) == 20
+    assert len(recording_planner.frames) == 10
     assert node.active_line_motion_frames == []
     assert len(node.publisher.messages) == 2
     MotionDecisionNode._publish_decision(node)
@@ -1402,7 +1402,7 @@ def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
 
 def test_line_motion_capture_table_matches_deployed_timelines():
     expected = {
-        "STRAIGHT": (4.111, 20),
+        "STRAIGHT": (2.467, 10),
         "STRAIGHT_1": (0.822, 5),
         "STRAIGHT_2": (1.644, 10),
         "STRAIGHT_3": (2.467, 10),

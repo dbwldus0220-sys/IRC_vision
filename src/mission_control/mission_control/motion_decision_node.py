@@ -62,7 +62,7 @@ class MotionDecisionNode(Node):
     DEFAULT_EXECUTOR_HEARTBEAT_STARTUP_GRACE_SEC = 5.0
     EXECUTOR_WATCHDOG_PERIOD_SEC = 0.1
     LINE_MOTION_CAPTURE_CONFIG = {
-        "STRAIGHT": (4.111, 20),
+        "STRAIGHT": (2.467, 10),
         "STRAIGHT_1": (0.822, 5),
         "STRAIGHT_2": (1.644, 10),
         "STRAIGHT_3": (2.467, 10),

@@ -123,7 +123,7 @@ def decoded_messages(publisher):
 
 
 EXPECTED_PRODUCTION_ACTIONS = {
-    "STRAIGHT": "forward",
+    "STRAIGHT": "line_forward_6",
     "STRAIGHT_1": "line_forward_2",
     "STRAIGHT_2": "line_forward_4",
     "STRAIGHT_3": "line_forward_6",

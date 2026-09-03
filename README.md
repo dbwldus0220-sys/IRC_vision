@@ -123,12 +123,14 @@ line_forward_6	전진실실전(6회)
 line_forward_8	전진실실전(8회)
 line_forward_10	전진실실전(10회)
 
-기본 forward는 현재:
+기본 STRAIGHT는 현재:
 
-forward
-→ 전진실실전(10회)
+STRAIGHT
+→ line_forward_6
+→ 전진실실전(6회)
 
-로 연결한다.
+`forward` 별칭은 `APPROACH` 등 다른 동작과의 호환성을 위해
+전진실실전(10회) 연결을 유지한다.
 
 5. Right Turn Motion
 
