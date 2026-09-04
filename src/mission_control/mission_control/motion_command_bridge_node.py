@@ -36,6 +36,11 @@ RIGHT_RECOVERY_MOTION_IDS = {
 class MotionCommandBridgeNode(Node):
     """Translate supported navigation actions into SDK executor requests."""
 
+    PICKUP_MOTION_SEQUENCE = (
+        "pickup_pre_backward",
+        "sdk_return_default",
+        "pickup",
+    )
     ACTION_TO_MOTION_ID = {
         "STRAIGHT": "line_forward_6",
         "STRAIGHT_1": "line_forward_2",
@@ -46,7 +51,7 @@ class MotionCommandBridgeNode(Node):
         "APPROACH": "forward",
         "LEFT": "line_turn_left_15",
         "RIGHT": "line_turn_right_large",
-        "PICKUP_NOW": "pickup",
+        "PICKUP_NOW": PICKUP_MOTION_SEQUENCE[0],
         "GO": "hurdle",
         **{
             f"RECOVER_{line_side}_TURN_LEFT_{suffix}": motion_id
@@ -77,11 +82,14 @@ class MotionCommandBridgeNode(Node):
         self.active_action: str | None = None
         self.active_request_id: int | None = None
         self.active_motion_id: str | None = None
+        self.active_timeout_ms: int | None = None
         self.queued_command_id: int | None = None
         self.queued_event_id: int | None = None
         self.queued_action: str | None = None
         self.queued_request_id: int | None = None
         self.queued_motion_id: str | None = None
+        self.queued_timeout_ms: int | None = None
+        self.queued_request_deferred = False
 
         self.navigation_subscription = self.create_subscription(
             String,
@@ -148,7 +156,7 @@ class MotionCommandBridgeNode(Node):
         error_code: str = "",
         message: str = "",
     ) -> None:
-        """Publish normalized bridge status while preserving executor fields."""
+        """Publish normalized status while preserving executor fields."""
         payload = {
             "status": status,
             "command_id": command_id,
@@ -191,6 +199,33 @@ class MotionCommandBridgeNode(Node):
             message=message,
         )
 
+    def _publish_executor_request(
+        self,
+        *,
+        action: str,
+        command_id: int,
+        event_id: int | None,
+        request_id: int,
+        motion_id: str,
+        timeout_ms: int,
+    ) -> None:
+        """Publish one validated request to the C++ executor."""
+        request_payload = {
+            "action": action,
+            "command_id": command_id,
+            "event_id": event_id,
+            "request_id": request_id,
+            "motion_id": motion_id,
+            "timeout_ms": timeout_ms,
+        }
+        request_message = String()
+        request_message.data = json.dumps(
+            request_payload,
+            ensure_ascii=True,
+            separators=(",", ":"),
+        )
+        self.executor_request_publisher.publish(request_message)
+
     def navigation_command_callback(self, msg: String) -> None:
         """Validate and translate one navigation command."""
         try:
@@ -203,7 +238,8 @@ class MotionCommandBridgeNode(Node):
 
         if not isinstance(payload, dict):
             self.get_logger().warning(
-                "Invalid /navigation/motion_command: JSON root must be an object"
+                "Invalid /navigation/motion_command: "
+                "JSON root must be an object"
             )
             return
 
@@ -263,21 +299,19 @@ class MotionCommandBridgeNode(Node):
             return
 
         request_id = command_id
-        request_payload = {
-            "action": action,
-            "command_id": command_id,
-            "event_id": event_id,
-            "request_id": request_id,
-            "motion_id": motion_id,
-            "timeout_ms": self.timeout_ms_from_payload(payload),
-        }
-        request_message = String()
-        request_message.data = json.dumps(
-            request_payload,
-            ensure_ascii=True,
-            separators=(",", ":"),
+        timeout_ms = self.timeout_ms_from_payload(payload)
+        defer_until_active_finishes = (
+            self.motion_in_progress and action == "PICKUP_NOW"
         )
-        self.executor_request_publisher.publish(request_message)
+        if not defer_until_active_finishes:
+            self._publish_executor_request(
+                action=action,
+                command_id=command_id,
+                event_id=event_id,
+                request_id=request_id,
+                motion_id=motion_id,
+                timeout_ms=timeout_ms,
+            )
 
         self.last_sent_command_id = command_id
         if self.motion_in_progress:
@@ -286,6 +320,8 @@ class MotionCommandBridgeNode(Node):
             self.queued_action = action
             self.queued_request_id = request_id
             self.queued_motion_id = motion_id
+            self.queued_timeout_ms = timeout_ms
+            self.queued_request_deferred = defer_until_active_finishes
         else:
             self.motion_in_progress = True
             self.active_command_id = command_id
@@ -293,6 +329,36 @@ class MotionCommandBridgeNode(Node):
             self.active_action = action
             self.active_request_id = request_id
             self.active_motion_id = motion_id
+            self.active_timeout_ms = timeout_ms
+
+    def _start_next_pickup_motion(self) -> bool:
+        """Start the next pickup stage after the active stage succeeds."""
+        if self.active_action != "PICKUP_NOW":
+            return False
+        try:
+            current_index = self.PICKUP_MOTION_SEQUENCE.index(
+                self.active_motion_id
+            )
+        except ValueError:
+            return False
+        next_index = current_index + 1
+        if next_index >= len(self.PICKUP_MOTION_SEQUENCE):
+            return False
+
+        next_motion_id = self.PICKUP_MOTION_SEQUENCE[next_index]
+        self.active_motion_id = next_motion_id
+        self._publish_executor_request(
+            action=self.active_action,
+            command_id=self.active_command_id,
+            event_id=self.active_event_id,
+            request_id=self.active_request_id,
+            motion_id=next_motion_id,
+            timeout_ms=self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS,
+        )
+        self.get_logger().info(
+            f"Pickup sequence advanced to {next_motion_id}"
+        )
+        return True
 
     def _valid_executor_status(self, payload: dict[str, Any]) -> bool:
         """Validate fields emitted by the C++ executor."""
@@ -321,6 +387,7 @@ class MotionCommandBridgeNode(Node):
         self.active_action = None
         self.active_request_id = None
         self.active_motion_id = None
+        self.active_timeout_ms = None
 
     def _promote_queued_request(self) -> None:
         self.active_command_id = self.queued_command_id
@@ -328,12 +395,25 @@ class MotionCommandBridgeNode(Node):
         self.active_action = self.queued_action
         self.active_request_id = self.queued_request_id
         self.active_motion_id = self.queued_motion_id
+        self.active_timeout_ms = self.queued_timeout_ms
+        queued_request_deferred = self.queued_request_deferred
         self.queued_command_id = None
         self.queued_event_id = None
         self.queued_action = None
         self.queued_request_id = None
         self.queued_motion_id = None
+        self.queued_timeout_ms = None
+        self.queued_request_deferred = False
         self.motion_in_progress = self.active_request_id is not None
+        if queued_request_deferred and self.motion_in_progress:
+            self._publish_executor_request(
+                action=self.active_action,
+                command_id=self.active_command_id,
+                event_id=self.active_event_id,
+                request_id=self.active_request_id,
+                motion_id=self.active_motion_id,
+                timeout_ms=self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS,
+            )
 
     def executor_status_callback(self, msg: String) -> None:
         """Forward matching executor status and release terminal requests."""
@@ -344,7 +424,10 @@ class MotionCommandBridgeNode(Node):
                 f"Invalid /motion/executor/status JSON: {exc}"
             )
             return
-        if not isinstance(payload, dict) or not self._valid_executor_status(payload):
+        if (
+            not isinstance(payload, dict)
+            or not self._valid_executor_status(payload)
+        ):
             self.get_logger().warning(
                 "Invalid /motion/executor/status fields"
             )
@@ -363,12 +446,29 @@ class MotionCommandBridgeNode(Node):
             return
 
         action = self.active_action if is_active else self.queued_action
+        if (
+            is_active
+            and action == "PICKUP_NOW"
+            and payload["motion_id"] != self.active_motion_id
+        ):
+            self.get_logger().warning(
+                "Executor status ignored: pickup motion_id mismatch"
+            )
+            return
+        if (
+            is_active
+            and payload["status"] == "SUCCEEDED"
+            and self._start_next_pickup_motion()
+        ):
+            return
         if is_queued and payload["status"] in self.TERMINAL_STATUSES:
             self.queued_command_id = None
             self.queued_event_id = None
             self.queued_action = None
             self.queued_request_id = None
             self.queued_motion_id = None
+            self.queued_timeout_ms = None
+            self.queued_request_deferred = False
         elif is_active and payload["status"] in self.TERMINAL_STATUSES:
             self._clear_active_request()
             if payload["status"] == "SUCCEEDED":
@@ -379,6 +479,8 @@ class MotionCommandBridgeNode(Node):
                 self.queued_action = None
                 self.queued_request_id = None
                 self.queued_motion_id = None
+                self.queued_timeout_ms = None
+                self.queued_request_deferred = False
 
         self.publish_motion_status(
             status=payload["status"],

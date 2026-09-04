@@ -36,6 +36,7 @@ class FakeBridge:
     ACTION_TO_MOTION_ID = MotionCommandBridgeNode.ACTION_TO_MOTION_ID
     TERMINAL_STATUSES = MotionCommandBridgeNode.TERMINAL_STATUSES
     DEFAULT_TIMEOUT_MS = MotionCommandBridgeNode.DEFAULT_TIMEOUT_MS
+    PICKUP_MOTION_SEQUENCE = MotionCommandBridgeNode.PICKUP_MOTION_SEQUENCE
 
     def __init__(self):
         self.last_sent_command_id = None
@@ -45,11 +46,14 @@ class FakeBridge:
         self.active_action = None
         self.active_request_id = None
         self.active_motion_id = None
+        self.active_timeout_ms = None
         self.queued_command_id = None
         self.queued_event_id = None
         self.queued_action = None
         self.queued_request_id = None
         self.queued_motion_id = None
+        self.queued_timeout_ms = None
+        self.queued_request_deferred = False
         self.executor_request_publisher = CapturePublisher()
         self.motion_status_publisher = CapturePublisher()
         self.logger = FakeLogger()
@@ -57,7 +61,9 @@ class FakeBridge:
         for name in (
             "publish_motion_status",
             "_publish_local_rejection",
+            "_publish_executor_request",
             "navigation_command_callback",
+            "_start_next_pickup_motion",
             "_valid_executor_status",
             "_clear_active_request",
             "_promote_queued_request",
@@ -132,7 +138,7 @@ EXPECTED_PRODUCTION_ACTIONS = {
     "APPROACH": "forward",
     "LEFT": "line_turn_left_15",
     "RIGHT": "line_turn_right_large",
-    "PICKUP_NOW": "pickup",
+    "PICKUP_NOW": "pickup_pre_backward",
     "GO": "hurdle",
     "TURN_LEFT": "stationary_turn_left",
     "TURN_RIGHT": "stationary_turn_right",
@@ -287,6 +293,123 @@ def test_new_command_while_running_is_queued():
     assert len(bridge.executor_request_publisher.messages) == 2
     assert bridge.queued_request_id == 8001
     assert bridge.queued_action == "STRAIGHT"
+
+
+def test_pickup_waits_locally_for_incompatible_active_motion_to_finish():
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(navigation_message())
+    bridge.navigation_command_callback(
+        navigation_message(
+            command_id=8001,
+            event_id=9,
+            action="PICKUP_NOW",
+        )
+    )
+
+    requests = decoded_messages(bridge.executor_request_publisher)
+    assert [request["motion_id"] for request in requests] == [
+        "line_forward_6"
+    ]
+    assert bridge.queued_request_deferred is True
+
+    bridge.executor_status_callback(
+        executor_status(status="SUCCEEDED", motion_id="line_forward_6")
+    )
+
+    requests = decoded_messages(bridge.executor_request_publisher)
+    assert [request["motion_id"] for request in requests] == [
+        "line_forward_6",
+        "pickup_pre_backward",
+    ]
+    assert bridge.active_request_id == 8001
+    assert bridge.active_action == "PICKUP_NOW"
+    assert bridge.queued_request_deferred is False
+
+
+def test_pickup_runs_all_three_motions_in_order():
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(
+        navigation_message(action="PICKUP_NOW")
+    )
+
+    for completed_motion in (
+        "pickup_pre_backward",
+        "sdk_return_default",
+    ):
+        bridge.executor_status_callback(
+            executor_status(
+                status="SUCCEEDED",
+                motion_id=completed_motion,
+            )
+        )
+
+    assert [
+        request["motion_id"]
+        for request in decoded_messages(bridge.executor_request_publisher)
+    ] == [
+        "pickup_pre_backward",
+        "sdk_return_default",
+        "pickup",
+    ]
+    assert bridge.motion_status_publisher.messages == []
+    assert bridge.motion_in_progress is True
+
+    bridge.executor_status_callback(
+        executor_status(status="SUCCEEDED", motion_id="pickup")
+    )
+
+    statuses = decoded_messages(bridge.motion_status_publisher)
+    assert len(statuses) == 1
+    assert statuses[0]["status"] == "SUCCEEDED"
+    assert statuses[0]["action"] == "PICKUP_NOW"
+    assert bridge.motion_in_progress is False
+
+
+def test_pickup_sequence_stops_when_an_intermediate_motion_fails():
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(
+        navigation_message(action="PICKUP_NOW")
+    )
+
+    bridge.executor_status_callback(
+        executor_status(
+            status="FAILED",
+            motion_id="pickup_pre_backward",
+            error_code="MOTION_FAILED",
+        )
+    )
+
+    requests = decoded_messages(bridge.executor_request_publisher)
+    assert [request["motion_id"] for request in requests] == [
+        "pickup_pre_backward"
+    ]
+    assert bridge.motion_in_progress is False
+
+
+def test_pickup_sequence_ignores_a_stale_stage_status():
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(
+        navigation_message(action="PICKUP_NOW")
+    )
+    bridge.executor_status_callback(
+        executor_status(
+            status="SUCCEEDED",
+            motion_id="pickup_pre_backward",
+        )
+    )
+
+    bridge.executor_status_callback(
+        executor_status(
+            status="SUCCEEDED",
+            motion_id="pickup_pre_backward",
+        )
+    )
+
+    assert [
+        request["motion_id"]
+        for request in decoded_messages(bridge.executor_request_publisher)
+    ] == ["pickup_pre_backward", "sdk_return_default"]
+    assert bridge.active_motion_id == "sdk_return_default"
 
 
 def test_running_status_keeps_lock_and_preserves_fields():
