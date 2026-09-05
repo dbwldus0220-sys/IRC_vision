@@ -246,7 +246,13 @@ Distance-based forward action
 Pickup condition 판단
 RGB detection과 depth validity 독립 처리
 1.5m 이내에서 ball control 전환
-steering_angle_deg 우선 조향 및 ground_distance_m 진단
+공 중심 높이 0.035m와 카메라 높이 0.515m를 사용하고,
+표면 Depth에 공 반지름 0.030m를 더한 뒤 피타고라스 정리를 적용한
+ground_distance_m 기준 control / STRAIGHT 판단
+raw Depth Z 0.50m 이하에서 pickup 트리거
+steering_angle_deg 우선 조향 및 raw Depth Z 진단
+raw Depth 0.60m 이내 공은 offset norm ±0.05를 중앙 데드밴드로 처리
+공 전용 로봇 중심선은 화면 중앙 기준 +96px로 보정
 Depth가 없을 때 제자리 정렬만 허용하고 전진 금지
 Goal
 거리 기반 tracking / control

@@ -198,7 +198,7 @@ node 모두 현재 자동으로 이 action을 생성하지 않는다.
 | source | 실제 publisher | publisher/subscriber topic | mission_control 필수 필드 | optional·누락 처리 | 단위·자료형 | freshness | 불일치 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | line | `yolo_line_analyzer.py` | `/vision/line_info` | `detected: bool`; detected일 때 heading, lateral offset, quality 숫자 | filtered heading/offset이 없으면 raw 이름 사용; quality가 모두 없거나 geometry가 invalid면 STOP | heading `deg`, lateral offset normalized, quality `0..1` | 기본 0.50 s | 없음 |
-| ball | `ball_analyzer.py` | `/vision/ball_info` | `detected`, `depth_valid`, `pickup_ready`, `pickup_now`: bool; `confidence`, alignment, `depth_m`: number/None | `distance_m`은 optional; depth 누락/invalid는 STOP, alignment 누락은 STOP | depth/distance `m`, bearing `deg`, offset normalized | 기본 0.50 s | 없음 |
+| ball | `ball_analyzer.py` | `/vision/ball_info` | `detected`, `depth_valid`, `pickup_ready`, `pickup_now`: bool; `confidence`, alignment, `depth_m`, `ground_distance_m`: number/None | raw depth 또는 계산된 바닥거리 누락/invalid는 전진 STOP, alignment 누락은 STOP | depth/distance `m`, bearing `deg`, offset normalized | 기본 0.50 s | 없음 |
 | hurdle | `hurdle_analyzer.py` | `/vision/hurdle_info` | `detected`, `raw_detected`, `confirmation_confirmed`, `depth_valid`, `go_now`: bool; confirmed target의 geometry 숫자 | confirmation pending은 WAIT; depth invalid는 WAIT; confirmed target의 bottom gap/angle 누락은 hurdle planner WAIT | 거리/gap `m`, angle `deg`, offset normalized | 기본 0.50 s | consumer가 `raw_detected`를 보지 않던 문제를 호환 처리함 |
 | goal | `goal_analyzer.py` | `/vision/goal_info` | `detected`, `depth_valid`, `score_now`: bool; `confidence`, alignment, `depth_m`: number/None | `distance_m`, `bearing_deg`는 optional; depth/alignment invalid는 WAIT | depth/distance `m`, bearing `deg`, offset normalized | 기본 0.50 s | 없음 |
 | finish | 실제 STEP publisher 없음 | consumer만 `/vision/finish_info` | 수동 호환 시 `detected`, `confirmed`, `confidence` | 누락·stale이면 미사용; 자동 finish action 없음 | bool, confidence `0..1` | 기본 0.50 s | producer가 없으며 자동 flow 밖 |
@@ -272,7 +272,7 @@ lock과 AUTO의 공/허들 우선순위는 변경하지 않는다.
 - `bearing_deg`
 - `offset_x_norm`
 - `depth_m`
-- `distance_m`
+- `ground_distance_m`
 - `depth_valid`
 - `pickup_ready`
 - `pickup_now`
@@ -281,7 +281,7 @@ lock과 AUTO의 공/허들 우선순위는 변경하지 않는다.
 
 - `state`, center/bbox/크기/면적
 - `offset_y_px`, `offset_y_norm`, `horizontal_direction`, `elevation_deg`
-- 3D lateral/vertical/horizontal distance 상세값
+- `distance_m`과 3D lateral/vertical/horizontal distance 상세값
 - `is_centered`, `is_close`, `approach_ready`, `is_in_pickup_window`
 - pickup target/tolerance 값
 - candidate와 priority/debug/camera/depth age/note 필드

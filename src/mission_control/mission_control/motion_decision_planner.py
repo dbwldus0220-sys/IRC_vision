@@ -562,7 +562,7 @@ class MotionDecisionPlanner:
         return number if math.isfinite(number) else None
 
     def _ball_range_m(self, info: dict[str, Any] | None) -> float | None:
-        return self._number(info, "depth_m")
+        return self._number(info, "ground_distance_m")
 
     def _ball_direction_error_deg(
         self,
@@ -588,9 +588,10 @@ class MotionDecisionPlanner:
         if not bool(info.get("depth_valid", False)):
             return True
         ball_range = self._ball_range_m(info)
+        if ball_range is None:
+            return True
         return bool(
-            ball_range is not None
-            and ball_range <= self.config.ball_control_range_m
+            ball_range <= self.config.ball_control_range_m
         )
 
     def _update_ball_tracking(
@@ -632,7 +633,7 @@ class MotionDecisionPlanner:
 
             ball_range = self._ball_range_m(info)
             depth_valid = bool(info.get("depth_valid", False))
-            visual_alignment_only = not depth_valid
+            visual_alignment_only = not depth_valid or ball_range is None
             if visual_alignment_only or (
                 ball_range is not None
                 and ball_range <= self.config.ball_control_range_m

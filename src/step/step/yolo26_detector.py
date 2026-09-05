@@ -1602,11 +1602,10 @@ class Yolo26Detector(Node):
                 "BALL METRICS",
                 f"Planner     : {planner_action}",
                 f"State       : {state} / {direction}",
-                "Distance    : "
-                + self._metric_text(distance, "m"),
-                "Depth Z     : " + self._metric_text(depth, "m"),
-                "Ground dist : "
+                "Object dist : "
                 + self._metric_text(ground_distance, "m"),
+                "Depth Z     : " + self._metric_text(depth, "m"),
+                "Camera ray  : " + self._metric_text(distance, "m"),
                 "Offset X    : "
                 + self._metric_text(offset_px, "px", 0, signed=True),
                 "Offset norm : "

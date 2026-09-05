@@ -13,21 +13,25 @@ from step.ball_analyzer import ball_path_heading_deg
 def _analyzer_with_depth(depth_m, depth_valid):
     analyzer = object.__new__(BallAnalyzer)
     analyzer.min_confidence = 0.45
-    analyzer.horizontal_deadband_px = 20
+    analyzer.horizontal_deadband_px = 30
     analyzer.center_tolerance_px = 140
     analyzer.robot_center_offset_px = 70.0
     analyzer.detect_depth_m = 1.5
     analyzer.approach_depth_m = 0.9
     analyzer.pickup_ready_depth_m = 0.15
-    analyzer.pickup_now_depth_m = 0.07
+    analyzer.pickup_now_depth_m = 0.48
     analyzer.pickup_depth_tolerance_m = 0.02
     analyzer.pickup_center_tolerance_norm = 0.08
     analyzer.pickup_target_y_ratio = 0.82
     analyzer.pickup_y_tolerance_ratio = 0.12
-    analyzer.fx = None
-    analyzer.fy = None
-    analyzer.cx = None
-    analyzer.cy = None
+    analyzer.camera_height_m = 0.515
+    analyzer.ball_diameter_m = 0.060
+    analyzer.ball_top_height_m = 0.065
+    analyzer.camera_forward_offset_m = 0.0
+    analyzer.fx = 600.0
+    analyzer.fy = 600.0
+    analyzer.cx = 640.0
+    analyzer.cy = 360.0
     analyzer._sample_depth_m = (
         lambda _x, _y, _bbox=None: (depth_m, depth_valid)
     )
@@ -77,6 +81,19 @@ def test_ball_path_angle_uses_shifted_bottom_center_axis():
     assert image_midpoint == pytest.approx(-17.726, abs=0.001)
 
 
+def test_ball_mode_can_use_axis_separate_from_line_calibration():
+    """The photographed aligned position calibrates to +96 px."""
+    heading = ball_path_heading_deg(
+        target_x=736,
+        target_y=500,
+        image_width=1280,
+        image_height=720,
+        robot_center_offset_px=96.0,
+    )
+
+    assert heading == 0.0
+
+
 def test_rgb_ball_remains_candidate_beyond_tracking_distance():
     """A distant RGB detection remains visible and is classified as FAR."""
     analyzer = _analyzer_with_depth(1.8, True)
@@ -89,20 +106,50 @@ def test_rgb_ball_remains_candidate_beyond_tracking_distance():
     assert state[0] == "FAR"
 
 
-def test_ball_projection_reports_ground_plane_distance():
-    """Expose pitch-corrected robot-floor range separately from optical Z."""
+def test_pickup_trigger_uses_raw_depth_threshold():
+    analyzer = _analyzer_with_depth(0.48, True)
+
+    candidate = analyzer._build_candidate(_raw_detection(), 1280, 720)
+
+    assert candidate is not None
+    assert candidate.ground_distance_m > analyzer.pickup_ready_depth_m
+    state = analyzer._state_for_candidate(candidate, 720)
+    assert state[0] == "PICKUP_NOW"
+
+
+def test_ball_projection_reports_height_corrected_ground_distance():
+    """Use camera height and Pythagoras for robot-floor range."""
     analyzer = object.__new__(BallAnalyzer)
     analyzer.fx = 600.0
     analyzer.fy = 600.0
     analyzer.cx = 640.0
     analyzer.cy = 360.0
-    analyzer.camera_pitch_down_deg = 45.0
+    analyzer.camera_height_m = 0.515
+    analyzer.ball_diameter_m = 0.060
+    analyzer.ball_top_height_m = 0.065
     analyzer.camera_forward_offset_m = 0.0
 
     projection = analyzer._project_ball_position(640, 360, 1.0, True)
 
-    assert projection[4] == pytest.approx(1.0)
-    assert projection[5] == pytest.approx(2 ** -0.5)
+    assert projection[4] == pytest.approx(1.03)
+    assert projection[5] == pytest.approx((1.03**2 - 0.480**2) ** 0.5)
+
+
+def test_ball_projection_clamps_shorter_than_vertical_leg_to_zero():
+    """A near surface sample cannot produce an imaginary floor distance."""
+    analyzer = object.__new__(BallAnalyzer)
+    analyzer.fx = 600.0
+    analyzer.fy = 600.0
+    analyzer.cx = 640.0
+    analyzer.cy = 360.0
+    analyzer.camera_height_m = 0.515
+    analyzer.ball_diameter_m = 0.060
+    analyzer.ball_top_height_m = 0.065
+    analyzer.camera_forward_offset_m = 0.0
+
+    projection = analyzer._project_ball_position(640, 360, 0.45, True)
+
+    assert projection[5] == 0.0
 
 
 def _depth_sampler(image):

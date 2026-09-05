@@ -1648,7 +1648,12 @@ class FreshMockInputNode(FakeDecisionNode):
         (
             'BALL_SEARCH',
             'ball',
-            {'detected': True, 'depth_valid': True, 'depth_m': 0.9},
+            {
+                'detected': True,
+                'depth_valid': True,
+                'depth_m': 0.9,
+                'ground_distance_m': 0.9,
+            },
             'BALL_APPROACH',
         ),
         (

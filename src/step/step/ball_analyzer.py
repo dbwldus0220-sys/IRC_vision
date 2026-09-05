@@ -29,7 +29,6 @@ from .depth_frame_cache import DepthFrameCache
 from .depth_frame_cache import DepthFrameConsumer
 from .temporal_confirmation import TemporalConfirmationFilter
 from .yolo_line_analyzer import calibrated_robot_center_x
-from .yolo_line_analyzer import ground_forward_distance_from_depth
 
 
 def ball_path_heading_deg(
@@ -169,15 +168,19 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         self.declare_parameter("detect_depth_m", 1.5)
         self.declare_parameter("approach_depth_m", 0.9)
         self.declare_parameter("pickup_ready_depth_m", 0.15)
-        self.declare_parameter("pickup_now_depth_m", 0.07)
+        self.declare_parameter("pickup_now_depth_m", 0.48)
         self.declare_parameter("pickup_depth_tolerance_m", 0.02)
         self.declare_parameter("pickup_center_tolerance_norm", 0.08)
         self.declare_parameter("pickup_target_y_ratio", 0.82)
         self.declare_parameter("pickup_y_tolerance_ratio", 0.12)
-        self.declare_parameter("horizontal_deadband_px", 20)
+        self.declare_parameter("horizontal_deadband_px", 30)
         self.declare_parameter("center_tolerance_px", 140)
-        self.declare_parameter("robot_center_offset_px", 70.0)
-        self.declare_parameter("camera_pitch_down_deg", 45.0)
+        # Ball pickup uses its own calibrated robot axis. Keep this separate
+        # from the line analyzer's robot_center_offset_px parameter.
+        self.declare_parameter("ball_robot_center_offset_px", 96.0)
+        self.declare_parameter("camera_height_m", 0.515)
+        self.declare_parameter("ball_diameter_m", 0.060)
+        self.declare_parameter("ball_top_height_m", 0.065)
         self.declare_parameter("camera_forward_offset_m", 0.0)
         # At the 30 FPS competition setting this requires about 0.8 seconds of
         # spatially consistent detection before ball_info becomes detected.
@@ -268,10 +271,19 @@ class BallAnalyzer(DepthFrameConsumer, Node):
             self.get_parameter("center_tolerance_px").value
         )
         self.robot_center_offset_px = float(
-            self.get_parameter("robot_center_offset_px").value
+            self.get_parameter("ball_robot_center_offset_px").value
         )
-        self.camera_pitch_down_deg = float(
-            self.get_parameter("camera_pitch_down_deg").value
+        self.camera_height_m = max(
+            0.0,
+            float(self.get_parameter("camera_height_m").value),
+        )
+        self.ball_diameter_m = max(
+            0.0,
+            float(self.get_parameter("ball_diameter_m").value),
+        )
+        self.ball_top_height_m = max(
+            0.0,
+            float(self.get_parameter("ball_top_height_m").value),
         )
         self.camera_forward_offset_m = float(
             self.get_parameter("camera_forward_offset_m").value
@@ -611,31 +623,60 @@ class BallAnalyzer(DepthFrameConsumer, Node):
                 None,
             )
 
-        lateral_offset_m = x_ratio * depth_m
-        vertical_offset_m = y_ratio * depth_m
-        horizontal_distance_m = math.hypot(lateral_offset_m, depth_m)
-        ground_lateral_m, ground_forward_m = (
-            ground_forward_distance_from_depth(
-                x_px=center_x,
-                y_px=center_y,
-                depth_m=depth_m,
-                fx=self.fx,
-                fy=self.fy,
-                cx=self.cx,
-                cy=self.cy,
-                camera_pitch_down_deg=self.camera_pitch_down_deg,
-                camera_forward_offset_m=self.camera_forward_offset_m,
-            )
-        )
-        ground_distance_m = math.hypot(
-            ground_lateral_m,
-            ground_forward_m,
+        # Aligned RealSense depth lands on the camera-facing ball surface.
+        # Move that sample one radius farther along optical Z so all projected
+        # geometry below describes the ball center. Keep depth_m itself raw for
+        # diagnostics and apply this correction only inside BallAnalyzer.
+        ball_radius_m = self.ball_diameter_m / 2.0
+        center_depth_m = depth_m + ball_radius_m
+        lateral_offset_m = x_ratio * center_depth_m
+        vertical_offset_m = y_ratio * center_depth_m
+        horizontal_distance_m = math.hypot(
+            lateral_offset_m,
+            center_depth_m,
         )
         distance_m = math.sqrt(
             lateral_offset_m * lateral_offset_m
             + vertical_offset_m * vertical_offset_m
-            + depth_m * depth_m
+            + center_depth_m * center_depth_m
         )
+        # This correction is intentionally ball-only. The sampled depth point
+        # is near the ball center, not on the floor, so subtract its height
+        # before applying Pythagoras to the camera-to-ball ray.
+        ball_center_height_m = max(
+            self.ball_top_height_m - self.ball_diameter_m / 2.0,
+            0.0,
+        )
+        camera_to_ball_center_height_m = max(
+            self.camera_height_m - ball_center_height_m,
+            0.0,
+        )
+        camera_ground_distance_m = math.sqrt(
+            max(
+                distance_m * distance_m
+                - camera_to_ball_center_height_m
+                * camera_to_ball_center_height_m,
+                0.0,
+            )
+        )
+        if horizontal_distance_m > 1e-9:
+            ground_lateral_m = (
+                camera_ground_distance_m
+                * lateral_offset_m
+                / horizontal_distance_m
+            )
+            ground_forward_m = (
+                camera_ground_distance_m
+                * center_depth_m
+                / horizontal_distance_m
+                + self.camera_forward_offset_m
+            )
+            ground_distance_m = math.hypot(
+                ground_lateral_m,
+                ground_forward_m,
+            )
+        else:
+            ground_distance_m = max(0.0, self.camera_forward_offset_m)
         return (
             bearing_deg,
             elevation_deg,
@@ -722,7 +763,10 @@ class BallAnalyzer(DepthFrameConsumer, Node):
             horizontal_direction = "CENTER"
         area_px = width_px * height_px
         center_score = max(0.0, 1.0 - abs(offset_x_norm))
-        depth_score = self._closeness_score(depth_m, depth_valid)
+        depth_score = self._closeness_score(
+            ground_distance_m,
+            depth_valid and ground_distance_m is not None,
+        )
         area_score = min(1.0, math.sqrt(area_px) / 180.0)
         score = (
             confidence * 0.45
@@ -790,15 +834,16 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         image_height: int | None,
     ) -> tuple[str, bool, bool, bool, bool, bool, bool, str]:
         centered = abs(candidate.offset_x_px) <= self.center_tolerance_px
+        ground_distance = candidate.ground_distance_m
         close = (
             candidate.depth_valid
-            and candidate.depth_m is not None
-            and candidate.depth_m <= self.detect_depth_m
+            and ground_distance is not None
+            and ground_distance <= self.detect_depth_m
         )
         approach_ready = (
             candidate.depth_valid
-            and candidate.depth_m is not None
-            and candidate.depth_m <= self.approach_depth_m
+            and ground_distance is not None
+            and ground_distance <= self.approach_depth_m
         )
 
         in_pickup_window = False
@@ -813,16 +858,16 @@ class BallAnalyzer(DepthFrameConsumer, Node):
 
         pickup_ready = (
             candidate.depth_valid
-            and candidate.depth_m is not None
-            and candidate.depth_m <= self.pickup_ready_depth_m
+            and ground_distance is not None
+            and ground_distance <= self.pickup_ready_depth_m
             and centered
             and in_pickup_window
         )
         pickup_now = (
             candidate.depth_valid
             and candidate.depth_m is not None
-            and abs(candidate.depth_m - self.pickup_now_depth_m)
-            <= self.pickup_depth_tolerance_m
+            and candidate.depth_m
+            <= self.pickup_now_depth_m + self.pickup_depth_tolerance_m
             and in_pickup_window
         )
 
@@ -1098,12 +1143,12 @@ class BallAnalyzer(DepthFrameConsumer, Node):
                 ground_distance_m=target.ground_distance_m,
                 distance_m=target.distance_m,
                 approach_motion=approach_motion_for_distance(
-                    target.depth_m
+                    target.ground_distance_m
                 ),
                 approach_level=approach_level_from_motion(
-                    approach_motion_for_distance(target.depth_m)
+                    approach_motion_for_distance(target.ground_distance_m)
                 ),
-                approach_target_distance_m=target.depth_m,
+                approach_target_distance_m=target.ground_distance_m,
                 depth_valid=target.depth_valid,
                 is_centered=centered,
                 is_close=close,

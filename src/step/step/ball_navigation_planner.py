@@ -26,11 +26,14 @@ class BallNavigationConfig:
     steering_response_sec: float = 0.70
     turn_enter_deg: float = 5.0
     turn_exit_deg: float = 2.5
+    path_center_deadband_norm: float = 0.05
+    path_center_deadband_max_depth_m: float = 0.60
     fallback_half_fov_deg: float = 35.0
     control_start_depth_m: float = 1.50
     slowdown_depth_m: float = 1.0
     fine_step_depth_m: float = 0.95
     pickup_depth_m: float = 0.07
+    pickup_trigger_depth_m: float = 0.48
     pickup_depth_tolerance_m: float = 0.02
     command_duration_sec: float = 0.40
 
@@ -109,7 +112,7 @@ class BallNavigationCommand:
             ),
             "approach_level": approach_level,
             "approach_target_distance_m": _round_optional(
-                self.depth_m,
+                self.distance_m,
                 3,
             ),
             "turn_motion": turn_motion,
@@ -193,24 +196,25 @@ class BallNavigationPlanner:
         steering_angle = _number(ball_info, "steering_angle_deg")
         bearing = _number(ball_info, "bearing_deg")
         offset = _number(ball_info, "offset_x_norm")
+        depth = _number(ball_info, "depth_m")
         steering_error = self._steering_error(
             steering_angle,
             bearing,
             offset,
+            depth,
         )
         if steering_error is None:
             return self.stop("invalid_ball_alignment")
 
-        depth = _number(ball_info, "depth_m")
-        distance = _number(ball_info, "distance_m")
+        ground_distance = _number(ball_info, "ground_distance_m")
         depth_valid = bool(ball_info.get("depth_valid", False))
         pickup_ready = bool(ball_info.get("pickup_ready", False))
         analyzer_pickup_now = bool(ball_info.get("pickup_now", False))
 
         if (
             depth_valid
-            and depth is not None
-            and depth > self.config.control_start_depth_m
+            and ground_distance is not None
+            and ground_distance > self.config.control_start_depth_m
         ):
             return self.stop("ball_outside_control_range")
         turn_motion = self._classify_turn(steering_error)
@@ -224,7 +228,7 @@ class BallNavigationPlanner:
                 bearing=bearing,
                 offset=offset,
                 depth=depth,
-                distance=distance,
+                distance=ground_distance,
                 confidence=confidence,
                 depth_valid=depth_valid,
                 pickup_ready=pickup_ready,
@@ -233,13 +237,15 @@ class BallNavigationPlanner:
 
         # Visual geometry is enough for in-place alignment. Fresh depth is
         # mandatory before an aligned robot can move toward the ball.
-        if not depth_valid or depth is None:
-            return self.stop("missing_valid_ball_depth")
+        if not depth_valid or depth is None or ground_distance is None:
+            return self.stop("missing_valid_ball_ground_distance")
 
         pickup_now = bool(
             analyzer_pickup_now
-            and abs(depth - self.config.pickup_depth_m)
-            <= self.config.pickup_depth_tolerance_m + 1e-9
+            and depth
+            <= self.config.pickup_trigger_depth_m
+            + self.config.pickup_depth_tolerance_m
+            + 1e-9
         )
 
         if pickup_now:
@@ -247,19 +253,19 @@ class BallNavigationPlanner:
                 bearing,
                 offset,
                 depth,
-                distance,
+                ground_distance,
                 confidence,
                 pickup_ready,
             )
 
-        if depth < (
+        if ground_distance < (
             self.config.pickup_depth_m
             - self.config.pickup_depth_tolerance_m
         ):
             return self.stop("ball_too_close_for_safe_pickup")
 
-        speed = self._approach_speed(depth, pickup_ready)
-        motion = approach_motion_for_distance(depth)
+        speed = self._approach_speed(ground_distance, pickup_ready)
+        motion = approach_motion_for_distance(ground_distance)
         reason = "ball_aligned_discrete_approach"
         return self._moving_command(
             motion=motion,
@@ -270,7 +276,7 @@ class BallNavigationPlanner:
             bearing=bearing,
             offset=offset,
             depth=depth,
-            distance=distance,
+            distance=ground_distance,
             confidence=confidence,
             depth_valid=True,
             pickup_ready=pickup_ready,
@@ -282,9 +288,19 @@ class BallNavigationPlanner:
         steering_angle_deg: float | None,
         bearing_deg: float | None,
         offset_x_norm: float | None,
+        depth_m: float | None,
     ) -> float | None:
         """Prefer the bottom-center path angle, then camera-ray fallbacks."""
         if steering_angle_deg is not None:
+            if (
+                offset_x_norm is not None
+                and depth_m is not None
+                and abs(offset_x_norm)
+                <= self.config.path_center_deadband_norm
+                and depth_m
+                <= self.config.path_center_deadband_max_depth_m
+            ):
+                return 0.0
             return self.config.bearing_gain * steering_angle_deg
         if bearing_deg is not None:
             return self.config.bearing_gain * bearing_deg
@@ -314,7 +330,7 @@ class BallNavigationPlanner:
 
     def _approach_speed(
         self,
-        depth_m: float,
+        ground_distance_m: float,
         pickup_ready: bool,
     ) -> float:
         """Reduce forward speed smoothly near pickup distance."""
@@ -323,7 +339,7 @@ class BallNavigationPlanner:
             1e-3,
         )
         scale = _clamp(
-            (depth_m - self.config.pickup_depth_m) / span,
+            (ground_distance_m - self.config.pickup_depth_m) / span,
             0.0,
             1.0,
         )
@@ -390,8 +406,8 @@ class BallNavigationPlanner:
         self.previous_motion = motion
         self.previous_angular_speed_rad_s = angular_speed
         distance_error = (
-            depth - self.config.pickup_depth_m
-            if depth is not None
+            distance - self.config.pickup_depth_m
+            if distance is not None
             else None
         )
         _, _, numbered_turn_angle_deg = numbered_turn_motion_metadata(
@@ -452,7 +468,7 @@ class BallNavigationPlanner:
             offset_x_norm=offset,
             depth_m=depth,
             distance_m=distance,
-            distance_error_m=depth - self.config.pickup_depth_m,
+            distance_error_m=distance - self.config.pickup_depth_m,
             confidence=confidence,
             depth_valid=True,
             pickup_ready=pickup_ready,

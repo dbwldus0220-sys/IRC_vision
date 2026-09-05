@@ -34,11 +34,14 @@ class BallNavigationController(Node):
         self.declare_parameter("steering_response_sec", 0.70)
         self.declare_parameter("turn_enter_deg", 5.0)
         self.declare_parameter("turn_exit_deg", 2.5)
+        self.declare_parameter("path_center_deadband_norm", 0.05)
+        self.declare_parameter("path_center_deadband_max_depth_m", 0.60)
         self.declare_parameter("fallback_half_fov_deg", 35.0)
         self.declare_parameter("control_start_depth_m", 1.50)
         self.declare_parameter("slowdown_depth_m", 1.0)
         self.declare_parameter("fine_step_depth_m", 0.95)
         self.declare_parameter("pickup_depth_m", 0.07)
+        self.declare_parameter("pickup_trigger_depth_m", 0.48)
         self.declare_parameter("pickup_depth_tolerance_m", 0.02)
         self.declare_parameter("command_duration_sec", 0.40)
 
@@ -62,6 +65,12 @@ class BallNavigationController(Node):
             ),
             turn_enter_deg=self._float_parameter("turn_enter_deg"),
             turn_exit_deg=self._float_parameter("turn_exit_deg"),
+            path_center_deadband_norm=self._float_parameter(
+                "path_center_deadband_norm"
+            ),
+            path_center_deadband_max_depth_m=self._float_parameter(
+                "path_center_deadband_max_depth_m"
+            ),
             fallback_half_fov_deg=self._float_parameter(
                 "fallback_half_fov_deg"
             ),
@@ -71,6 +80,9 @@ class BallNavigationController(Node):
             slowdown_depth_m=self._float_parameter("slowdown_depth_m"),
             fine_step_depth_m=self._float_parameter("fine_step_depth_m"),
             pickup_depth_m=self._float_parameter("pickup_depth_m"),
+            pickup_trigger_depth_m=self._float_parameter(
+                "pickup_trigger_depth_m"
+            ),
             pickup_depth_tolerance_m=self._float_parameter(
                 "pickup_depth_tolerance_m"
             ),

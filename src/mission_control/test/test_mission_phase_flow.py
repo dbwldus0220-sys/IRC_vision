@@ -245,6 +245,7 @@ def pickup_ready_ball():
         "bearing_deg": 0.0,
         "offset_x_norm": 0.0,
         "depth_m": 0.07,
+        "ground_distance_m": 0.07,
         "distance_m": 0.07,
         "depth_valid": True,
         "pickup_ready": True,
@@ -293,6 +294,7 @@ def approaching_ball():
     info.update(
         {
             "depth_m": 0.80,
+            "ground_distance_m": 0.80,
             "distance_m": 0.80,
             "pickup_ready": False,
             "pickup_now": False,

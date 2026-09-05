@@ -27,6 +27,7 @@ def ball_info(**overrides):
         "confidence": 0.9,
         "depth_valid": True,
         "depth_m": 1.2,
+        "ground_distance_m": 1.2,
         "distance_m": 1.2,
         "bearing_deg": 0.0,
         "offset_x_norm": 0.0,
@@ -34,6 +35,8 @@ def ball_info(**overrides):
         "pickup_now": False,
     }
     sample.update(overrides)
+    if "ground_distance_m" not in overrides and "depth_m" in overrides:
+        sample["ground_distance_m"] = overrides["depth_m"]
     return sample
 
 
@@ -98,6 +101,8 @@ def vision_ball_payload(**overrides):
         pickup_now=True,
     )
     sample.update(overrides)
+    if "ground_distance_m" not in overrides and "depth_m" in overrides:
+        sample["ground_distance_m"] = overrides["depth_m"]
     return sample
 
 
@@ -609,7 +614,7 @@ def test_centered_ball_without_depth_preempts_line_but_cannot_advance():
 
     assert decision.source == "ball"
     assert decision.action == "STOP"
-    assert decision.reason == "missing_valid_ball_depth"
+    assert decision.reason == "missing_valid_ball_ground_distance"
     assert decision.source_command["linear_speed_mps"] == 0.0
 
 
@@ -690,7 +695,7 @@ def test_untracked_missing_ball_keeps_line_without_recovery():
     assert planner.ball_recovery_centering is False
 
 
-def test_90cm_takeover_uses_depth_not_hypotenuse_distance():
+def test_takeover_uses_ground_distance_not_depth_or_camera_distance():
     planner = MotionDecisionPlanner()
 
     decision = planner.plan(
@@ -699,6 +704,7 @@ def test_90cm_takeover_uses_depth_not_hypotenuse_distance():
             line=line_info(),
             ball=ball_info(
                 depth_m=0.89,
+                ground_distance_m=1.60,
                 distance_m=1.70,
                 horizontal_distance_m=1.60,
             ),
@@ -706,7 +712,7 @@ def test_90cm_takeover_uses_depth_not_hypotenuse_distance():
         0.1,
     )
 
-    assert decision.source == "ball"
+    assert decision.source == "line"
     assert decision.action == "STRAIGHT"
 
 

@@ -14,12 +14,15 @@ def ball_info(**overrides):
         "bearing_deg": 0.0,
         "offset_x_norm": 0.0,
         "depth_m": 0.88,
+        "ground_distance_m": 0.88,
         "distance_m": 0.89,
         "depth_valid": True,
         "pickup_ready": False,
         "pickup_now": False,
     }
     sample.update(overrides)
+    if "ground_distance_m" not in overrides and "depth_m" in overrides:
+        sample["ground_distance_m"] = overrides["depth_m"]
     return sample
 
 
@@ -61,17 +64,51 @@ def test_close_ball_uses_measured_straight_level():
     assert command.to_dict()["approach_level"] == 4
 
 
+def test_straight_level_uses_ground_distance_instead_of_depth():
+    planner = BallNavigationPlanner()
+
+    command = planner.plan(
+        ball_info(depth_m=0.68, ground_distance_m=0.10),
+        0.1,
+    )
+
+    assert command.motion == "STRAIGHT_0"
+    assert command.to_dict()["approach_target_distance_m"] == 0.10
+
+
 def test_aligned_pickup_distance_stops_forward_motion():
     planner = BallNavigationPlanner()
 
     command = planner.plan(
-        ball_info(depth_m=0.07, distance_m=0.07, pickup_now=True),
+        ball_info(
+            depth_m=0.48,
+            ground_distance_m=0.07,
+            distance_m=0.07,
+            pickup_now=True,
+        ),
         0.1,
     )
 
     assert command.valid is True
     assert command.motion == "PICKUP_NOW"
     assert command.linear_speed_mps == 0.0
+    assert command.pickup_now is True
+
+
+def test_nearer_than_pickup_target_still_triggers_pickup():
+    planner = BallNavigationPlanner()
+
+    command = planner.plan(
+        ball_info(
+            depth_m=0.43,
+            ground_distance_m=0.0,
+            pickup_ready=True,
+            pickup_now=True,
+        ),
+        0.1,
+    )
+
+    assert command.motion == "PICKUP_NOW"
     assert command.pickup_now is True
 
 
@@ -102,12 +139,33 @@ def test_bottom_center_path_angle_has_priority_over_camera_bearing():
     planner = BallNavigationPlanner()
 
     command = planner.plan(
-        ball_info(steering_angle_deg=-30.0, bearing_deg=12.0),
+        ball_info(
+            steering_angle_deg=-30.0,
+            bearing_deg=12.0,
+            offset_x_norm=-0.20,
+        ),
         0.1,
     )
 
     assert command.motion == "TURN_LEFT_4"
     assert command.target_heading_change_deg == -30.0
+
+
+def test_small_horizontal_offset_is_centered_despite_close_path_angle():
+    planner = BallNavigationPlanner()
+
+    command = planner.plan(
+        ball_info(
+            steering_angle_deg=14.8,
+            bearing_deg=5.3,
+            offset_x_norm=0.034,
+            depth_m=0.50,
+        ),
+        0.1,
+    )
+
+    assert command.motion == "STRAIGHT_3"
+    assert command.angular_speed_rad_s == 0.0
 
 
 def test_ball_inside_1_5m_control_range_moves_robot():
@@ -208,7 +266,7 @@ def test_angular_acceleration_is_limited():
         (ball_info(confidence=0.1), "low_ball_confidence"),
         (
             ball_info(depth_m=None, depth_valid=False),
-            "missing_valid_ball_depth",
+            "missing_valid_ball_ground_distance",
         ),
     ],
 )

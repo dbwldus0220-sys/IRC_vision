@@ -121,12 +121,19 @@ SEARCH → NO_DEPTH/FAR/TRACK/APPROACH → PICKUP_READY → PICKUP_NOW
 
 현재 기본값과 우선순위:
 
-- Depth Z 3.0m 안에서 처음 인식하면 마지막 bearing/화면 좌우 위치를 기억
-- Depth Z 0.90~3.0m에서는 공이 보여도 line 주행을 유지
-- Depth Z 0.90m 안에서 ball planner로 전환
+- 공 모드에서만 카메라 높이 0.515m, 공 지름 0.060m, 공 상단 높이
+  0.065m를 사용한다. 공 중심 높이 0.035m를 뺀 세로거리 0.480m와
+  표면 Depth Z에 반지름 0.030m를 더해 구한 카메라-공 중심 3D
+  직선거리에 피타고라스 정리를 적용해
+  `ground_distance_m`을 계산
+- 바닥거리 1.50m 안에서 ball planner로 전환하고 추적 위치를 기억
 - 좌우 오차가 크면 제자리 `TURN_LEFT/RIGHT`
-- 정렬되면 `APPROACH`, 1.0m 안에서 감속, 0.95m 안에서 `FINE_FORWARD_STEP`
-- 집기 목표: depth 0.80m ±0.05m
+- raw Depth 0.60m 이내 공의 가로 offset norm이 ±0.05 이내면 근거리
+  path angle과 관계없이 중앙 처리
+- 공 전용 로봇 중심선은 화면 중앙에서 오른쪽 +96px이며 라인 중심선
+  보정값과 분리
+- 정렬되면 바닥거리별 `STRAIGHT_0..5` 또는 `STRAIGHT` 선택
+- 집기 트리거: raw Depth Z 0.50m 이하(기준 0.48m + 허용오차 0.02m)
 - 화면 목표: 가로 중앙 ±0.08, 화면 높이 0.82 ±0.12
 - 조건 충족 시 `PICKUP_NOW`
 
