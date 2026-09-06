@@ -12,6 +12,11 @@ ALIAS_PATH = (
     / "config"
     / "motion_aliases.yaml"
 )
+RUNTIME_CATALOG_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "artifacts"
+    / "robot_motions_runtime.json"
+)
 
 
 def test_production_alias_catalog_contains_only_approved_aliases():
@@ -158,3 +163,19 @@ def test_every_production_bridge_motion_id_has_an_approved_alias():
     pickup_motion_ids.discard(None)
     pickup_motion_ids.discard(MotionCommandBridgeNode.FINE_ALIGN_MARKER)
     assert pickup_motion_ids <= set(aliases)
+
+
+def test_aliased_production_motions_use_three_degree_final_tolerance():
+    aliases = yaml.safe_load(
+        ALIAS_PATH.read_text(encoding="utf-8")
+    )["motion_aliases"]
+    catalog = yaml.safe_load(
+        RUNTIME_CATALOG_PATH.read_text(encoding="utf-8")
+    )["motions"]
+    motions_by_name = {motion["name"]: motion for motion in catalog}
+
+    assert set(aliases.values()) <= set(motions_by_name)
+    for exact_name in set(aliases.values()):
+        assert motions_by_name[exact_name]["completion"][
+            "position_tolerance_deg"
+        ] == 3.0

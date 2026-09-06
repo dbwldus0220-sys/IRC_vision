@@ -10,7 +10,7 @@
       "start_pose": "허들001",
       "end_pose": "기본자세2-2",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -675,7 +675,7 @@
       "start_pose": "왼들307",
       "end_pose": "오뒤401",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -3479,7 +3479,7 @@
       "start_pose": "우회전오들200",
       "end_pose": "우회전오뒤200",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -3731,7 +3731,7 @@
       "start_pose": "우회전오들200",
       "end_pose": "우회전오뒤200",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -3983,7 +3983,7 @@
       "start_pose": "우회전오들200",
       "end_pose": "우회전오뒤200",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -4235,7 +4235,7 @@
       "start_pose": "우회전오들200",
       "end_pose": "우회전오뒤200",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -4487,7 +4487,7 @@
       "start_pose": "우회전오들200",
       "end_pose": "우회전오뒤200",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -4739,7 +4739,7 @@
       "start_pose": "우회전오들200",
       "end_pose": "우회전오뒤200",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -4991,7 +4991,7 @@
       "start_pose": "후진왼들6",
       "end_pose": "오뒤401",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -8783,7 +8783,7 @@
       "start_pose": "후진왼들6",
       "end_pose": "오뒤401",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -12591,7 +12591,7 @@
       "start_pose": "후진왼들6",
       "end_pose": "오뒤401",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -13787,7 +13787,7 @@
       "start_pose": "후진왼들6",
       "end_pose": "오뒤401",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -15455,7 +15455,7 @@
       "start_pose": "후진왼들6",
       "end_pose": "오뒤401",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -17595,7 +17595,7 @@
       "start_pose": "후진왼들6",
       "end_pose": "오뒤401",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -21098,7 +21098,7 @@
       "start_pose": "제우오들4",
       "end_pose": "왼뒤407",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -21232,7 +21232,7 @@
       "start_pose": "오들401",
       "end_pose": "오뒤410",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -21485,7 +21485,7 @@
       "start_pose": "오들401",
       "end_pose": "오뒤410",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -22493,7 +22493,7 @@
       "start_pose": "오들401",
       "end_pose": "오뒤408",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -22745,7 +22745,7 @@
       "start_pose": "오들401",
       "end_pose": "오뒤408",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -22997,7 +22997,7 @@
       "start_pose": "오들401",
       "end_pose": "오뒤410",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -23249,7 +23249,7 @@
       "start_pose": "오들401",
       "end_pose": "오뒤408",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -24007,7 +24007,7 @@
       "start_pose": "오들401",
       "end_pose": "오뒤408",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -24260,7 +24260,7 @@
       "start_pose": "오들401",
       "end_pose": "오뒤408",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -24513,7 +24513,7 @@
       "start_pose": "오들401",
       "end_pose": "오뒤410",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -24765,7 +24765,7 @@
       "start_pose": "오들401",
       "end_pose": "오뒤408",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -25774,7 +25774,7 @@
       "start_pose": "음",
       "end_pose": "기본자세4",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -26439,7 +26439,7 @@
       "start_pose": "골1",
       "end_pose": "골3-1",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -26632,7 +26632,7 @@
       "start_pose": "후진오들카메라내린거",
       "end_pose": "후진왼뒤카메라내린거",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -26884,7 +26884,7 @@
       "start_pose": "미세오들(0도)",
       "end_pose": "미세오뒤(0도)",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -27136,7 +27136,7 @@
       "start_pose": "미세오들400",
       "end_pose": "미세오뒤400",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -27388,7 +27388,7 @@
       "start_pose": "오뒤카메라90도",
       "end_pose": "오뒤카메라90도",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -27463,7 +27463,7 @@
       "start_pose": "오옆꽃게1(0도)",
       "end_pose": "기본자세카메라내린거",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -27715,7 +27715,7 @@
       "start_pose": "오옆꽃게1(90도)",
       "end_pose": "기본자세카메라90도",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -27967,7 +27967,7 @@
       "start_pose": "왼들401",
       "end_pose": "오뒤408",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -28101,7 +28101,7 @@
       "start_pose": "왼들 카메라90도(골대)",
       "end_pose": "기본자세카메라90도",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -28235,7 +28235,7 @@
       "start_pose": "왼게걸음1(0도)",
       "end_pose": "기본자세카메라내린거",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -28487,7 +28487,7 @@
       "start_pose": "왼게걸음1(90도)",
       "end_pose": "기본자세카메라90도",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -28739,7 +28739,7 @@
       "start_pose": "오들401",
       "end_pose": "오뒤410",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -28991,7 +28991,7 @@
       "start_pose": "오들401",
       "end_pose": "오뒤410",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -29243,7 +29243,7 @@
       "start_pose": "오들401",
       "end_pose": "오뒤410",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -29495,7 +29495,7 @@
       "start_pose": "오들401",
       "end_pose": "오뒤410",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -29747,7 +29747,7 @@
       "start_pose": "오들 카메라90도(골대)",
       "end_pose": "오뒤카메라90도",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -29999,7 +29999,7 @@
       "start_pose": "오들 카메라90도(골대)",
       "end_pose": "오뒤카메라90도",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -30251,7 +30251,7 @@
       "start_pose": "오들 카메라90도(골대)",
       "end_pose": "오뒤카메라90도",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -30503,7 +30503,7 @@
       "start_pose": "오들 카메라90도(골대)",
       "end_pose": "오뒤카메라90도",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -30755,7 +30755,7 @@
       "start_pose": "오들카메라 내린거",
       "end_pose": "오뒤카메라내림",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -31007,7 +31007,7 @@
       "start_pose": "오들카메라 내린거",
       "end_pose": "오뒤카메라내림",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -31259,7 +31259,7 @@
       "start_pose": "오들카메라 내린거",
       "end_pose": "오뒤카메라내림",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -31511,7 +31511,7 @@
       "start_pose": "오들카메라 내린거",
       "end_pose": "오뒤카메라내림",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -31763,7 +31763,7 @@
       "start_pose": "제우오들8",
       "end_pose": "왼뒤407",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -31897,7 +31897,7 @@
       "start_pose": "제우오들8",
       "end_pose": "왼뒤407",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -32031,7 +32031,7 @@
       "start_pose": "제우오들8",
       "end_pose": "왼뒤407",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -32165,7 +32165,7 @@
       "start_pose": "제우오들8",
       "end_pose": "왼뒤407",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -32299,7 +32299,7 @@
       "start_pose": "제우오들8",
       "end_pose": "왼뒤407",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -32433,7 +32433,7 @@
       "start_pose": "제우오들8",
       "end_pose": "왼뒤407",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -32567,7 +32567,7 @@
       "start_pose": "제우오들8",
       "end_pose": "왼뒤407",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -32701,7 +32701,7 @@
       "start_pose": "제우오들8",
       "end_pose": "왼뒤407",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -32835,7 +32835,7 @@
       "start_pose": "제우오들8",
       "end_pose": "왼뒤407",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -32969,7 +32969,7 @@
       "start_pose": "제우오들90도",
       "end_pose": "왼뒤 카메라90도(골대)",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -33103,7 +33103,7 @@
       "start_pose": "제우오들90도",
       "end_pose": "왼뒤 카메라90도(골대)",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -33237,7 +33237,7 @@
       "start_pose": "제우오들90도",
       "end_pose": "왼뒤 카메라90도(골대)",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -33371,7 +33371,7 @@
       "start_pose": "제우오들90도",
       "end_pose": "왼뒤 카메라90도(골대)",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -33505,7 +33505,7 @@
       "start_pose": "제우오들90도",
       "end_pose": "왼뒤 카메라90도(골대)",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -33639,7 +33639,7 @@
       "start_pose": "제우오들90도",
       "end_pose": "왼뒤 카메라90도(골대)",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -33773,7 +33773,7 @@
       "start_pose": "제우오들90도",
       "end_pose": "왼뒤 카메라90도(골대)",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -33907,7 +33907,7 @@
       "start_pose": "제우오들90도",
       "end_pose": "왼뒤 카메라90도(골대)",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -34041,7 +34041,7 @@
       "start_pose": "제우오들90도",
       "end_pose": "왼뒤 카메라90도(골대)",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -34175,7 +34175,7 @@
       "start_pose": "제좌왼들3",
       "end_pose": "오뒤408",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -34309,7 +34309,7 @@
       "start_pose": "제좌왼들3",
       "end_pose": "오뒤408",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -34443,7 +34443,7 @@
       "start_pose": "제좌왼들3",
       "end_pose": "오뒤408",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -34577,7 +34577,7 @@
       "start_pose": "제좌왼들3",
       "end_pose": "오뒤408",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -34711,7 +34711,7 @@
       "start_pose": "제좌왼들90도",
       "end_pose": "제좌오뒤90도",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -34845,7 +34845,7 @@
       "start_pose": "제좌왼들90도",
       "end_pose": "제좌오뒤90도",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -34979,7 +34979,7 @@
       "start_pose": "제좌왼들90도",
       "end_pose": "제좌오뒤90도",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -35113,7 +35113,7 @@
       "start_pose": "제좌왼들90도",
       "end_pose": "제좌오뒤90도",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -35247,7 +35247,7 @@
       "start_pose": "제좌왼들90도",
       "end_pose": "제좌오뒤90도",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -35381,7 +35381,7 @@
       "start_pose": "제좌왼들90도",
       "end_pose": "제좌오뒤90도",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
@@ -35515,7 +35515,7 @@
       "start_pose": "후진오들102",
       "end_pose": "후진왼뒤105",
       "completion": {
-        "position_tolerance_deg": 2.0,
+        "position_tolerance_deg": 3.0,
         "settle_duration_ms": 80,
         "settle_timeout_ms": 3000
       },
