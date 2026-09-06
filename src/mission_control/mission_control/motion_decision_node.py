@@ -40,6 +40,7 @@ class MotionDecisionNode(Node):
 
     SPECIAL_ACTIONS = {
         "PICKUP_NOW",
+        "POST_BALL_GOAL_TRANSITION",
         "SHOT",
         "GO",
         "CROSS_FINISH",
@@ -97,6 +98,14 @@ class MotionDecisionNode(Node):
     }
     LINE_MOTION_CAPTURE_START_RATIO = 0.70
     LINE_TIMEOUT_RECOVERY_FRAMES = 10
+    PICKUP_FINE_ALIGN_MARKER = "__BALL_PICKUP_FINE_ALIGN_CHECK__"
+    PICKUP_FINE_ALIGN_ACTIONS = frozenset(
+        {
+            "BALL_PICKUP_FINE_ALIGN_CONTINUE",
+            "BALL_PICKUP_CRAB_RIGHT",
+            "BALL_PICKUP_CRAB_LEFT",
+        }
+    )
 
     def __init__(self) -> None:
         """Initialize mission decision state, topics, and timers."""
@@ -333,6 +342,7 @@ class MotionDecisionNode(Node):
         # Special SDK/Dynamics motion lock state.
         self.active_special_event_id: int | None = None
         self.active_special_dynamics_command: int | None = None
+        self.pickup_fine_align_waiting = False
         self.general_motion_gate = GeneralMotionCommandGate(
             max_transient_retries=max(
                 0,
@@ -789,6 +799,9 @@ class MotionDecisionNode(Node):
                 completed_source = self.active_general_source
                 self.active_general_source = None
                 if completed_source == "line":
+                    post_ball_line_correction = str(action).startswith(
+                        "POST_BALL_LINE_TURN_"
+                    )
                     normalized_error_code = (
                         error_code.strip().upper()
                         if isinstance(error_code, str)
@@ -803,10 +816,14 @@ class MotionDecisionNode(Node):
                     )
                     if status == "SUCCEEDED":
                         MotionDecisionNode._finish_line_motion_capture(self)
-                        self.general_motion_gate.required_vision_generation = (
-                            self.general_motion_gate.vision_generation
-                        )
-                    elif timed_out:
+                        if not str(action).startswith(
+                            "POST_BALL_LINE_TURN_"
+                        ):
+                            gate = self.general_motion_gate
+                            gate.required_vision_generation = (
+                                gate.vision_generation
+                            )
+                    elif timed_out and not post_ball_line_correction:
                         MotionDecisionNode._discard_line_motion_capture(self)
                         self.line_timeout_recovery_active = True
                         self.line_timeout_recovery_frames = []
@@ -870,6 +887,16 @@ class MotionDecisionNode(Node):
                 if isinstance(dynamics_command, int)
                 else None
             )
+            if (
+                action == "PICKUP_NOW"
+                and status == "RUNNING"
+                and payload.get("motion_id")
+                == MotionDecisionNode.PICKUP_FINE_ALIGN_MARKER
+            ):
+                self.pickup_fine_align_waiting = True
+                MotionDecisionNode._invalidate_pickup_fine_align_ball_input(
+                    self
+                )
 
             self.get_logger().info(
                 "Special motion lock enabled: "
@@ -887,11 +914,16 @@ class MotionDecisionNode(Node):
 
         self.active_special_event_id = None
         self.active_special_dynamics_command = None
+        self.pickup_fine_align_waiting = False
 
         if completed_action == "PICKUP_NOW" and status == "SUCCEEDED":
             # The tracked ball has been collected. Do not resurrect its stale
             # recovery state after GOAL_APPROACH and the following SHOT.
             self.planner.clear_collected_ball_tracking()
+            if self.pickups_completed >= self.required_pickups:
+                self.planner.disable_completed_ball_missions()
+            if self.mission_phase == "POST_BALL_LINE_ALIGN":
+                MotionDecisionNode._invalidate_post_ball_line_input(self)
 
         self.get_logger().info(
             "Special motion lock released: "
@@ -956,6 +988,36 @@ class MotionDecisionNode(Node):
                 "mission_complete",
             )
         }
+
+    def _invalidate_post_ball_line_input(self) -> None:
+        """Require a Line frame captured after the first pickup finishes."""
+        latest_info = getattr(self, "latest_info", None)
+        latest_time = getattr(self, "latest_time", None)
+        if isinstance(latest_info, dict):
+            latest_info["line"] = None
+        if isinstance(latest_time, dict):
+            latest_time["line"] = None
+        observations = getattr(self, "observations", None)
+        if isinstance(observations, dict):
+            observations["line"] = None
+        published_stamps = getattr(self, "last_published_vision_stamp", None)
+        if isinstance(published_stamps, dict):
+            published_stamps.pop("line", None)
+
+    def _invalidate_pickup_fine_align_ball_input(self) -> None:
+        """Require a Ball frame captured after fine forward motion succeeds."""
+        latest_info = getattr(self, "latest_info", None)
+        latest_time = getattr(self, "latest_time", None)
+        if isinstance(latest_info, dict):
+            latest_info["ball"] = None
+        if isinstance(latest_time, dict):
+            latest_time["ball"] = None
+        observations = getattr(self, "observations", None)
+        if isinstance(observations, dict):
+            observations["ball"] = None
+        published_stamps = getattr(self, "last_published_vision_stamp", None)
+        if isinstance(published_stamps, dict):
+            published_stamps.pop("ball", None)
 
     def _fresh_observations(
         self,
@@ -1225,6 +1287,23 @@ class MotionDecisionNode(Node):
         if not self._command_publisher_has_subscriber():
             return
 
+        if decision.action == "POST_BALL_LINE_ALIGNED":
+            if (
+                not self.general_motion_gate.has_required_fresh_vision()
+                or MotionDecisionNode._same_vision_frame_was_published(
+                    self,
+                    decision,
+                )
+            ):
+                self._reset_pre_motion_settle()
+                return
+            if not self.phase_manager.complete_post_ball_line_align():
+                self._reset_pre_motion_settle()
+                return
+            decision = self._select_mission_decision(observations, dt_sec)
+            self.last_candidate_decision = decision
+            self.last_selected_decision = decision
+
         if (
             decision.valid
             and self.general_motion_gate.locked
@@ -1248,6 +1327,10 @@ class MotionDecisionNode(Node):
             decision.valid
             and normalize_general_action(decision.action) is not None
         )
+        is_pickup_fine_align_action = (
+            decision.valid
+            and decision.action in self.PICKUP_FINE_ALIGN_ACTIONS
+        )
         if (
             is_general_motion
             and not queue_while_locked
@@ -1255,6 +1338,16 @@ class MotionDecisionNode(Node):
         ):
             # Keep receiving Vision and running the planner, but do not publish
             # another executable command while the current motion is locked.
+            self._reset_pre_motion_settle()
+            return
+
+        if (
+            is_pickup_fine_align_action
+            and MotionDecisionNode._same_vision_frame_was_published(
+                self,
+                decision,
+            )
+        ):
             self._reset_pre_motion_settle()
             return
 
@@ -1320,7 +1413,13 @@ class MotionDecisionNode(Node):
                     if decision.requires_ack
                     else None
                 ),
-                "sdk_motion_requested": trigger,
+                "sdk_motion_requested": bool(
+                    trigger
+                    or (
+                        is_pickup_fine_align_action
+                        and decision.sdk_motion_requested
+                    )
+                ),
                 "request_latched": (
                     decision.requires_ack
                 ),
@@ -1378,6 +1477,12 @@ class MotionDecisionNode(Node):
                 self,
                 decision,
             )
+        elif is_pickup_fine_align_action:
+            MotionDecisionNode._remember_published_vision_frame(
+                self,
+                decision,
+            )
+            self.pickup_fine_align_waiting = False
 
     def _publish_decision_debug(self) -> None:
         """Publish existing decision state without affecting motion control."""
@@ -1585,6 +1690,51 @@ class MotionDecisionNode(Node):
             )
 
         planning_phase = self.phase_manager.current_phase
+        if planning_phase == "POST_BALL_GOAL_TRANSITION":
+            failed = self.phase_manager.post_ball_goal_transition_failed
+            return MotionDecision(
+                phase=planning_phase,
+                source="none",
+                action=(
+                    "WAIT"
+                    if failed
+                    else "POST_BALL_GOAL_TRANSITION"
+                ),
+                valid=not failed,
+                reason=(
+                    "post_ball_goal_transition_aborted"
+                    if failed
+                    else "start_post_ball_goal_transition"
+                ),
+                sdk_motion_requested=not failed,
+                requires_ack=not failed,
+                source_command={},
+            )
+        ball_missions_complete = (
+            self.pickups_completed >= self.required_pickups
+        )
+        if ball_missions_complete:
+            self.planner.disable_completed_ball_missions()
+            observations = dict(observations)
+            observations["ball"] = None
+            if self.planner.source_for_phase(planning_phase) == "ball":
+                return MotionDecision(
+                    phase=planning_phase,
+                    source="none",
+                    action="WAIT",
+                    valid=False,
+                    reason="ball_missions_complete",
+                    sdk_motion_requested=False,
+                    requires_ack=False,
+                    source_command={},
+                )
+        if (
+            self.pickup_fine_align_waiting
+            and self.active_special_action == "PICKUP_NOW"
+        ):
+            return self.planner.plan_ball_pickup_fine_alignment(
+                observations.get("ball")
+            )
         if self.active_special_command_id is not None:
             locked_phase = f"{planning_phase}_LOCK"
             return self.planner.plan(
@@ -1627,6 +1777,14 @@ class MotionDecisionNode(Node):
                 sdk_motion_requested=line_decision.sdk_motion_requested,
                 requires_ack=line_decision.requires_ack,
                 source_command=line_decision.source_command,
+            )
+
+        ball_info = observations.get("ball")
+        if ball_info is not None:
+            observations = dict(observations)
+            observations["ball"] = dict(ball_info)
+            observations["ball"]["ball_occurrence"] = (
+                1 if self.pickups_completed == 0 else 2
             )
 
         return self.planner.plan(

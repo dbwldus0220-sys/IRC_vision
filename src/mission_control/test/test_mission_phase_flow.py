@@ -64,6 +64,8 @@ class MissionFlowHarness:
     PRE_MOTION_SETTLE_ACTIONS = MotionDecisionNode.PRE_MOTION_SETTLE_ACTIONS
     SPECIAL_ACTIONS = MotionDecisionNode.SPECIAL_ACTIONS
     SPECIAL_ACTION_SOURCES = MotionDecisionNode.SPECIAL_ACTION_SOURCES
+    PICKUP_FINE_ALIGN_MARKER = MotionDecisionNode.PICKUP_FINE_ALIGN_MARKER
+    PICKUP_FINE_ALIGN_ACTIONS = MotionDecisionNode.PICKUP_FINE_ALIGN_ACTIONS
     SPECIAL_FAILURE_REASONS = (
         MotionDecisionNode.SPECIAL_FAILURE_REASONS
     )
@@ -141,6 +143,7 @@ class MissionFlowHarness:
         }
         self.active_special_event_id = None
         self.active_special_dynamics_command = None
+        self.pickup_fine_align_waiting = False
         self.finish_min_confidence = 0.70
         self.previous_publish_time = 0.0
         self.last_candidate_decision = None
@@ -201,7 +204,7 @@ class MissionFlowHarness:
         MotionDecisionNode._publish_decision(self)
         return self.publisher.messages[before:]
 
-    def send_status(self, action, command_id, status):
+    def send_status(self, action, command_id, status, motion_id=None):
         message = String()
         event_id = (
             self.active_special_event_id
@@ -215,6 +218,7 @@ class MissionFlowHarness:
                 "event_id": event_id,
                 "dynamics_command": None,
                 "status": status,
+                "motion_id": motion_id,
             }
         )
         MotionDecisionNode._motion_status_callback(self, message)
@@ -244,9 +248,12 @@ def pickup_ready_ball():
         "confidence": 0.95,
         "bearing_deg": 0.0,
         "offset_x_norm": 0.0,
-        "depth_m": 0.07,
-        "distance_m": 0.07,
+        "pickup_x_tolerance_norm": 0.08,
+        "depth_m": 0.40,
+        "ground_distance_m": 0.15,
+        "distance_m": 0.40,
         "depth_valid": True,
+        "depth_age_sec": 0.05,
         "pickup_ready": True,
         "pickup_now": True,
     }
@@ -293,6 +300,7 @@ def approaching_ball():
     info.update(
         {
             "depth_m": 0.80,
+            "ground_distance_m": 0.80,
             "distance_m": 0.80,
             "pickup_ready": False,
             "pickup_now": False,
@@ -367,6 +375,54 @@ def release_general(harness, payload):
     )
 
 
+def test_pickup_fine_alignment_rechecks_fresh_ball_under_atomic_lock():
+    harness = MissionFlowHarness(phase="BALL_APPROACH")
+    pickup = publish_special(
+        harness,
+        "ball",
+        pickup_ready_ball(),
+        "PICKUP_NOW",
+    )
+
+    harness.send_status(
+        "PICKUP_NOW",
+        pickup["command_id"],
+        "RUNNING",
+        motion_id=MotionDecisionNode.PICKUP_FINE_ALIGN_MARKER,
+    )
+    assert harness.observations["ball"] is None
+    assert harness.pickup_fine_align_waiting is True
+    assert harness.active_special_command_id == pickup["command_id"]
+
+    waiting = harness.publish_vision(
+        line=line_info(),
+        goal=score_ready_goal(),
+        hurdle=go_ready_hurdle(),
+    )[-1]
+    assert waiting["action"] == "WAIT"
+    assert waiting["source"] == "ball"
+
+    right_ball = pickup_ready_ball()
+    right_ball["offset_x_norm"] = 0.2
+    right = harness.publish_vision(ball=right_ball)[-1]
+    assert right["action"] == "BALL_PICKUP_CRAB_RIGHT"
+    assert right["active_special_command_id"] == pickup["command_id"]
+    assert harness.pickup_fine_align_waiting is False
+
+    harness.send_status(
+        "PICKUP_NOW",
+        pickup["command_id"],
+        "RUNNING",
+        motion_id=MotionDecisionNode.PICKUP_FINE_ALIGN_MARKER,
+    )
+    assert harness.observations["ball"] is None
+
+    centered = harness.publish_vision(ball=pickup_ready_ball())[-1]
+    assert centered["action"] == "BALL_PICKUP_FINE_ALIGN_CONTINUE"
+    assert centered["active_special_command_id"] == pickup["command_id"]
+    assert harness.active_special_action == "PICKUP_NOW"
+
+
 def test_full_course_mock_flow_without_ros_graph():
     harness = MissionFlowHarness(required_ball_sections=1)
 
@@ -395,7 +451,7 @@ def test_full_course_mock_flow_without_ros_graph():
         ball=approaching_ball(),
     )
     assert approach_ball[-1]["source"] == "ball"
-    assert approach_ball[-1]["action"] == "STRAIGHT"
+    assert approach_ball[-1]["action"] == "STRAIGHT_3"
     release_general(harness, approach_ball[-1])
 
     pickup = publish_special(
@@ -415,7 +471,7 @@ def test_full_course_mock_flow_without_ros_graph():
     assert harness.special_motion_running is True
     locked = harness.publish_vision(
         line=line_info(offset=0.35),
-        ball=pickup_ready_ball(),
+        ball=None,
         hurdle=None,
     )
     assert locked[-1]["action"] == "WAIT"
@@ -425,20 +481,32 @@ def test_full_course_mock_flow_without_ros_graph():
     harness.send_status("PICKUP_NOW", pickup_id, "SUCCEEDED")
     harness.send_status("PICKUP_NOW", pickup_id, "SUCCEEDED")
     assert harness.pickups_completed == 1
-    assert harness.mission_phase == "GOAL_APPROACH"
+    assert harness.mission_phase == "POST_BALL_LINE_ALIGN"
     assert harness.active_special_command_id is None
+
+    line_aligned = harness.publish_vision(line=line_info())
+    assert line_aligned[-1]["action"] == "POST_BALL_GOAL_TRANSITION"
+    assert harness.mission_phase == "POST_BALL_GOAL_TRANSITION"
+
+    transition = line_aligned[-1]
+    complete_active(
+        harness,
+        "POST_BALL_GOAL_TRANSITION",
+        transition["command_id"],
+    )
+    assert harness.mission_phase == "GOAL_APPROACH"
 
     goal_approach = harness.publish_vision(
         ball=None,
         hurdle=None,
         goal=approaching_goal(),
     )
-    assert goal_approach[-1]["action"] == "STRAIGHT_3"
+    assert goal_approach[-1]["action"] == "GOAL_CAMERA_90_FORWARD"
     release_general(harness, goal_approach[-1])
     goal_align = harness.publish_vision(goal=aligning_goal())
-    assert goal_align[-1]["action"] == "TURN_RIGHT"
+    assert goal_align[-1]["action"] == "GOAL_CAMERA90_TURN_RIGHT_1"
     harness.send_status(
-        "TURN_RIGHT",
+        "GOAL_CAMERA90_TURN_RIGHT_1",
         goal_align[-1]["command_id"],
         "UNSUPPORTED",
     )
@@ -883,12 +951,12 @@ def test_unconfirmed_hurdle_disappearance_resumes_ball_mission():
         hurdle=hurdle,
     )
     assert held[-1]["source"] == "ball"
-    assert held[-1]["action"] == "STRAIGHT"
+    assert held[-1]["action"] == "STRAIGHT_3"
     release_general(harness, held[-1])
 
     resumed = harness.publish_vision(hurdle=None)
     assert resumed[-1]["source"] == "ball"
-    assert resumed[-1]["action"] == "STRAIGHT"
+    assert resumed[-1]["action"] == "STRAIGHT_3"
 
 
 def test_unconfirmed_hurdle_can_become_confirmed_and_take_priority():
@@ -902,7 +970,7 @@ def test_unconfirmed_hurdle_can_become_confirmed_and_take_priority():
         hurdle=hurdle,
     )
     assert held[-1]["source"] == "ball"
-    assert held[-1]["action"] == "STRAIGHT"
+    assert held[-1]["action"] == "STRAIGHT_3"
     release_general(harness, held[-1])
 
     hurdle["confirmation_confirmed"] = True
@@ -921,7 +989,7 @@ def test_absent_hurdle_keeps_ball_priority_over_line():
     )
 
     assert published[-1]["source"] == "ball"
-    assert published[-1]["action"] == "STRAIGHT"
+    assert published[-1]["action"] == "STRAIGHT_3"
 
 
 def test_go_running_and_terminal_suppress_same_hurdle_observation():
@@ -1023,7 +1091,143 @@ def test_pickup_success_publishes_once_and_advances_to_goal():
     assert harness.active_special_action is None
     assert harness.active_special_command_id is None
     assert harness.pickups_completed == 1
-    assert harness.mission_phase == "GOAL_APPROACH"
+    assert harness.mission_phase == "POST_BALL_LINE_ALIGN"
+
+
+def test_first_ball_line_alignment_is_closed_loop_before_forward_transition():
+    harness = MissionFlowHarness()
+    pickup = publish_special(
+        harness,
+        "ball",
+        pickup_ready_ball(),
+        "PICKUP_NOW",
+    )
+    complete_active(harness, "PICKUP_NOW", pickup["command_id"])
+    assert harness.mission_phase == "POST_BALL_LINE_ALIGN"
+
+    missing = harness.publish_vision(line=None)
+    assert missing[-1]["action"] == "WAIT"
+    assert harness.mission_phase == "POST_BALL_LINE_ALIGN"
+
+    correction = harness.publish_vision(line=line_info(heading=34.0))[-1]
+    assert correction["action"] == "POST_BALL_LINE_TURN_RIGHT_3"
+    assert correction["source_command"]["turn_count"] == 3
+    release_general(harness, correction)
+
+    published_count = len(harness.publisher.messages)
+    MotionDecisionNode._publish_decision(harness)
+    assert len(harness.publisher.messages) == published_count
+    assert harness.mission_phase == "POST_BALL_LINE_ALIGN"
+
+    aligned = harness.publish_vision(line=line_info(heading=0.0))[-1]
+    assert aligned["action"] == "POST_BALL_GOAL_TRANSITION"
+    assert harness.mission_phase == "POST_BALL_GOAL_TRANSITION"
+
+
+def test_post_ball_line_turn_timeout_does_not_enter_line_lost_recovery():
+    harness = MissionFlowHarness(phase="POST_BALL_LINE_ALIGN")
+    correction = harness.publish_vision(line=line_info(heading=34.0))[-1]
+
+    harness.send_status(
+        correction["action"],
+        correction["command_id"],
+        "RUNNING",
+    )
+    harness.send_status(
+        correction["action"],
+        correction["command_id"],
+        "TIMEOUT",
+    )
+
+    assert harness.mission_phase == "POST_BALL_LINE_ALIGN"
+    assert harness.line_timeout_recovery_active is False
+
+
+def test_goal_camera90_turn_rechecks_fresh_goal_before_forward():
+    harness = MissionFlowHarness(phase="GOAL_APPROACH")
+
+    correction = harness.publish_vision(
+        goal={
+            **approaching_goal(),
+            "depth_m": 0.5,
+            "distance_m": 0.5,
+            "bearing_deg": 34.0,
+            "offset_x_norm": 0.3,
+        }
+    )[-1]
+    assert correction["action"] == "GOAL_CAMERA90_TURN_RIGHT_3"
+    release_general(harness, correction)
+
+    published_count = len(harness.publisher.messages)
+    MotionDecisionNode._publish_decision(harness)
+    assert len(harness.publisher.messages) == published_count
+
+    forward = harness.publish_vision(
+        goal={
+            **approaching_goal(),
+            "depth_m": 0.5,
+            "distance_m": 0.5,
+            "bearing_deg": 0.0,
+            "offset_x_norm": 0.0,
+        }
+    )[-1]
+    assert forward["action"] == "GOAL_CAMERA_90_FORWARD"
+
+
+def test_goal_camera90_crab_rechecks_full_priority_with_fresh_goal():
+    harness = MissionFlowHarness(phase="GOAL_APPROACH")
+
+    crab = harness.publish_vision(
+        goal={
+            **approaching_goal(),
+            "depth_m": 0.49,
+            "distance_m": 0.49,
+            "bearing_deg": 0.0,
+            "offset_x_norm": 0.2,
+        }
+    )[-1]
+    assert crab["action"] == "GOAL_CAMERA90_CRAB_RIGHT"
+    release_general(harness, crab)
+
+    published_count = len(harness.publisher.messages)
+    MotionDecisionNode._publish_decision(harness)
+    assert len(harness.publisher.messages) == published_count
+
+    yaw = harness.publish_vision(
+        goal={
+            **approaching_goal(),
+            "depth_m": 0.49,
+            "distance_m": 0.49,
+            "bearing_deg": -24.0,
+            "offset_x_norm": 0.2,
+        }
+    )[-1]
+    assert yaw["action"] == "GOAL_CAMERA90_TURN_LEFT_2"
+
+
+def test_goal_camera90_forward_rechecks_depth_bucket_from_fresh_goal():
+    harness = MissionFlowHarness(phase="GOAL_APPROACH")
+    far = {
+        **approaching_goal(),
+        "depth_m": 0.65,
+        "distance_m": 0.65,
+        "bearing_deg": 0.0,
+        "offset_x_norm": 0.0,
+    }
+
+    first = harness.publish_vision(goal=far)[-1]
+    assert first["action"] == "GOAL_CAMERA_90_FORWARD_4"
+    release_general(harness, first)
+
+    published_count = len(harness.publisher.messages)
+    MotionDecisionNode._publish_decision(harness)
+    assert len(harness.publisher.messages) == published_count
+
+    closer = dict(far)
+    closer["depth_m"] = 0.50
+    closer["distance_m"] = 0.50
+    second = harness.publish_vision(goal=closer)[-1]
+    assert second["action"] == "GOAL_CAMERA_90_FORWARD"
 
 
 def test_stale_wrong_and_duplicate_pickup_statuses_are_ignored():
@@ -1044,7 +1248,7 @@ def test_stale_wrong_and_duplicate_pickup_statuses_are_ignored():
     complete_active(harness, "PICKUP_NOW", command_id)
     harness.send_status("PICKUP_NOW", command_id, "SUCCEEDED")
     assert harness.pickups_completed == 1
-    assert harness.mission_phase == "GOAL_APPROACH"
+    assert harness.mission_phase == "POST_BALL_LINE_ALIGN"
 
 
 def test_shot_success_updates_one_section_and_returns_to_auto():
@@ -1316,6 +1520,94 @@ def test_general_gate_blocks_overlap_and_releases_after_terminal():
         payload.get("error_code") != "REJECTED_BUSY"
         for payload in harness.publisher.messages
     )
+
+
+def test_ball_recovery_turn_requires_fresh_ball_before_next_approach():
+    harness = MissionFlowHarness(phase="BALL_APPROACH")
+    off_center = approaching_ball()
+    off_center.update(
+        {
+            "depth_m": 0.70,
+            "ground_distance_m": 0.70,
+            "distance_m": 0.70,
+            "bearing_deg": 20.0,
+        }
+    )
+
+    recovery = harness.publish_vision(ball=off_center)
+    assert len(recovery) == 1
+    assert recovery[0]["action"] == "RECOVER_LEFT_TURN_LEFT_8"
+    command_id = recovery[0]["command_id"]
+
+    harness.send_status(
+        recovery[0]["action"],
+        command_id,
+        "RUNNING",
+    )
+    harness.send_status(
+        recovery[0]["action"],
+        command_id,
+        "SUCCEEDED",
+    )
+
+    before = len(harness.publisher.messages)
+    MotionDecisionNode._publish_decision(harness)
+    assert len(harness.publisher.messages) == before
+
+    centered = dict(off_center)
+    centered["depth_m"] = 0.60
+    centered["ground_distance_m"] = 0.60
+    centered["distance_m"] = 0.60
+    centered["bearing_deg"] = 0.0
+    next_command = harness.publish_vision(ball=centered)
+    assert len(next_command) == 1
+    assert next_command[0]["action"] == "RECOVER_LEFT_TURN_LEFT_6"
+
+
+def test_second_ball_uses_right_curve_from_completed_pickup_state():
+    harness = MissionFlowHarness(phase="BALL_APPROACH")
+    harness.phase_manager.pickups_completed = 1
+    ball = approaching_ball()
+    ball.update(
+        {
+            "depth_m": 0.70,
+            "ground_distance_m": 0.70,
+            "distance_m": 0.70,
+            "bearing_deg": -20.0,
+        }
+    )
+
+    command = harness.publish_vision(ball=ball)
+
+    assert len(command) == 1
+    assert command[0]["action"] == "RECOVER_RIGHT_TURN_RIGHT_8"
+
+
+def test_failed_first_pickup_keeps_first_ball_left_curve():
+    harness = MissionFlowHarness(phase="BALL_APPROACH")
+    pickup = publish_special(
+        harness,
+        "ball",
+        pickup_ready_ball(),
+        "PICKUP_NOW",
+    )
+    harness.send_status("PICKUP_NOW", pickup["command_id"], "RUNNING")
+    harness.send_status("PICKUP_NOW", pickup["command_id"], "FAILED")
+    assert harness.pickups_completed == 0
+
+    ball = approaching_ball()
+    ball.update(
+        {
+            "depth_m": 0.70,
+            "ground_distance_m": 0.70,
+            "distance_m": 0.70,
+            "bearing_deg": 20.0,
+        }
+    )
+    command = harness.publish_vision(ball=ball)
+
+    assert len(command) == 1
+    assert command[0]["action"] == "RECOVER_LEFT_TURN_LEFT_8"
 
 
 def test_active_special_uses_temporary_lock_without_changing_manager_phase():

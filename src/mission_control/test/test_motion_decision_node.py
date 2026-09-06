@@ -47,6 +47,16 @@ class FakePlanner:
         """Match the planner lifecycle hook used after a successful pickup."""
         pass
 
+    def disable_completed_ball_missions(self):
+        """Record no state in tests that use this minimal planner."""
+        pass
+
+    @staticmethod
+    def source_for_phase(phase):
+        """Match the production BALL phase classification."""
+        normalized = phase.strip().upper()
+        return "ball" if normalized.startswith(("BALL", "PICK")) else "line"
+
     def approach_phase_for_search(self, _phase, _observations):
         """Keep search phases unchanged in tests unrelated to acquisition."""
         return None
@@ -69,6 +79,19 @@ class FakePlanner:
             source_command={},
         )
 
+    def plan_ball_pickup_fine_alignment(self, _info):
+        """Return a safe wait in tests unrelated to pickup fine alignment."""
+        return MotionDecision(
+            phase='BALL_PICKUP_FINE_ALIGN',
+            source='ball',
+            action='WAIT',
+            valid=False,
+            reason='ball_pickup_fine_alignment_waiting_for_ball',
+            sdk_motion_requested=False,
+            requires_ack=False,
+            source_command={},
+        )
+
 
 class FakeDecisionNode:
     """Provide only the state required by the motion-status callback."""
@@ -76,6 +99,8 @@ class FakeDecisionNode:
     PRE_MOTION_SETTLE_ACTIONS = MotionDecisionNode.PRE_MOTION_SETTLE_ACTIONS
     SPECIAL_ACTIONS = MotionDecisionNode.SPECIAL_ACTIONS
     SPECIAL_ACTION_SOURCES = MotionDecisionNode.SPECIAL_ACTION_SOURCES
+    PICKUP_FINE_ALIGN_MARKER = MotionDecisionNode.PICKUP_FINE_ALIGN_MARKER
+    PICKUP_FINE_ALIGN_ACTIONS = MotionDecisionNode.PICKUP_FINE_ALIGN_ACTIONS
 
     def __init__(
         self,
@@ -100,6 +125,14 @@ class FakeDecisionNode:
 
         self.active_special_event_id = None
         self.active_special_dynamics_command = None
+        self.pickup_fine_align_waiting = False
+        self.latest_info = {
+            source: None for source in MotionDecisionNode.SOURCES
+        }
+        self.latest_time = {
+            source: None for source in MotionDecisionNode.SOURCES
+        }
+        self.last_published_vision_stamp = {}
         self.pre_motion_settle_sec = 0.0
         self.pre_motion_settle_source = None
         self.pre_motion_settle_action = None
@@ -188,6 +221,7 @@ def status_message(
     dynamics_command,
     error_code=None,
     message=None,
+    motion_id=None,
 ):
     """Create one /motion/status JSON message."""
     payload = {
@@ -198,6 +232,7 @@ def status_message(
         'dynamics_command': dynamics_command,
         'error_code': error_code,
         'message': message,
+        'motion_id': motion_id,
     }
 
     message = String()
@@ -266,6 +301,95 @@ def test_planning_lock_does_not_change_manager_phase():
     )
     assert decision.phase == 'HURDLE_APPROACH_LOCK'
     assert node.phase_manager.current_phase == 'HURDLE_APPROACH'
+
+
+def test_pickup_fine_checkpoint_discards_pre_motion_ball_frame():
+    node = FreshMockInputNode()
+    assert node.phase_manager.set_phase('BALL_APPROACH')
+    node.latest_info['ball'] = {
+        'detected': True,
+        'confidence': 0.9,
+        'offset_x_norm': 0.0,
+        'pickup_x_tolerance_norm': 0.08,
+    }
+    node.latest_time['ball'] = 10.0
+    node.last_published_vision_stamp['ball'] = 10.0
+    arm_special_command(node, 'PICKUP_NOW', 10, 1)
+
+    send_status(
+        node,
+        status='RUNNING',
+        action='PICKUP_NOW',
+        command_id=10,
+        event_id=1,
+        dynamics_command=None,
+        motion_id=MotionDecisionNode.PICKUP_FINE_ALIGN_MARKER,
+    )
+
+    assert node.pickup_fine_align_waiting is True
+    assert node.latest_info['ball'] is None
+    assert node.latest_time['ball'] is None
+    assert 'ball' not in node.last_published_vision_stamp
+    assert node.active_special_command_id == 10
+
+
+def test_pickup_fine_wait_uses_only_ball_and_blocks_other_sources():
+    node = FreshMockInputNode()
+    assert node.phase_manager.set_phase('BALL_APPROACH')
+    arm_special_command(node, 'PICKUP_NOW', 10, 1)
+    node.pickup_fine_align_waiting = True
+
+    missing = select_decision(
+        node,
+        line={'detected': True},
+        goal={'detected': True},
+        hurdle={'detected': True},
+    )
+    right = select_decision(
+        node,
+        ball={
+            'detected': True,
+            'confidence': 0.9,
+            'offset_x_norm': 0.2,
+            'pickup_x_tolerance_norm': 0.08,
+        },
+        line={'detected': True},
+        goal={'detected': True},
+        hurdle={'detected': True},
+    )
+
+    assert missing.action == 'WAIT'
+    assert missing.source == 'ball'
+    assert right.action == 'BALL_PICKUP_CRAB_RIGHT'
+    assert right.source == 'ball'
+    assert node.active_special_command_id == 10
+
+
+def test_pickup_fine_terminal_status_clears_checkpoint_flag():
+    node = FakeDecisionNode('BALL_APPROACH')
+    arm_special_command(node, 'PICKUP_NOW', 10, 1)
+    send_status(
+        node,
+        status='RUNNING',
+        action='PICKUP_NOW',
+        command_id=10,
+        event_id=1,
+        dynamics_command=None,
+        motion_id=MotionDecisionNode.PICKUP_FINE_ALIGN_MARKER,
+    )
+
+    send_status(
+        node,
+        status='FAILED',
+        action='PICKUP_NOW',
+        command_id=10,
+        event_id=1,
+        dynamics_command=None,
+        motion_id='pickup_crab_right_0',
+    )
+
+    assert node.pickup_fine_align_waiting is False
+    assert node.active_special_command_id is None
 
 
 def test_legacy_state_properties_read_manager_state():
@@ -498,6 +622,65 @@ def general_decision(action='STRAIGHT'):
     )
 
 
+def pickup_fine_decision(action):
+    """Create one executable pickup-checkpoint control decision."""
+    return MotionDecision(
+        phase='BALL_PICKUP_FINE_ALIGN',
+        source='ball',
+        action=action,
+        valid=True,
+        reason='pickup_fine_test',
+        sdk_motion_requested=action in {
+            'BALL_PICKUP_CRAB_RIGHT',
+            'BALL_PICKUP_CRAB_LEFT',
+        },
+        requires_ack=False,
+        source_command={
+            'offset_x_norm': 0.2,
+            'pickup_x_tolerance_norm': 0.08,
+        },
+    )
+
+
+def test_pickup_fine_command_keeps_parent_identity_and_consumes_frame():
+    node = ReadinessPublishNode(general_decision())
+    node.decision = pickup_fine_decision('BALL_PICKUP_CRAB_RIGHT')
+    arm_special_command(node, 'PICKUP_NOW', 40, 4)
+    node.pickup_fine_align_waiting = True
+    node.latest_time = {'ball': 12.0}
+    node.last_published_vision_stamp = {}
+
+    MotionDecisionNode._publish_decision(node)
+
+    assert len(node.publisher.messages) == 1
+    payload = json.loads(node.publisher.messages[0].data)
+    assert payload['action'] == 'BALL_PICKUP_CRAB_RIGHT'
+    assert payload['event_id'] is None
+    assert payload['active_special_action'] == 'PICKUP_NOW'
+    assert payload['active_special_command_id'] == 40
+    assert payload['active_special_event_id'] == 4
+    assert payload['sdk_motion_requested'] is True
+    assert node.last_published_vision_stamp['ball'] == 12.0
+    assert node.pickup_fine_align_waiting is False
+
+
+def test_pickup_left_crab_is_executable_and_consumes_its_frame():
+    node = ReadinessPublishNode(general_decision())
+    node.decision = pickup_fine_decision('BALL_PICKUP_CRAB_LEFT')
+    arm_special_command(node, 'PICKUP_NOW', 40, 4)
+    node.pickup_fine_align_waiting = True
+    node.latest_time = {'ball': 12.0}
+    node.last_published_vision_stamp = {}
+
+    MotionDecisionNode._publish_decision(node)
+    MotionDecisionNode._publish_decision(node)
+
+    assert len(node.publisher.messages) == 1
+    payload = json.loads(node.publisher.messages[0].data)
+    assert payload['sdk_motion_requested'] is True
+    assert node.pickup_fine_align_waiting is False
+
+
 def enable_test_settle(node, monkeypatch, start=0.0):
     """Enable deterministic pre-motion settle timing for one fake node."""
     clock = [start]
@@ -629,7 +812,7 @@ def test_decision_debug_reports_existing_state(monkeypatch):
         'center_offset': 0.12,
         'pending_direction': 'RIGHT',
         'direction_confirmation_current': 3,
-            'direction_confirmation_required': 3,
+        'direction_confirmation_required': 3,
         'turn_enter_deg': 12.0,
         'turn_exit_deg': 7.0,
         'line_large_heading_threshold_deg': 10.0,
@@ -1730,7 +1913,7 @@ def test_mock_line_input_is_fresh_and_produces_action(
         'expected_phase',
     ),
     [
-        ('AUTO', 'PICKUP_NOW', 9, 'GOAL_APPROACH'),
+        ('AUTO', 'PICKUP_NOW', 9, 'POST_BALL_LINE_ALIGN'),
         ('GOAL_APPROACH', 'SHOT', 17, 'AUTO'),
         ('HURDLE_APPROACH', 'GO', 14, 'HURDLE_APPROACH'),
     ],
@@ -1881,7 +2064,7 @@ def test_matching_pickup_status_completes_once_and_clears_active_command():
         )
 
     assert node.pickups_completed == 1
-    assert node.mission_phase == 'GOAL_APPROACH'
+    assert node.mission_phase == 'POST_BALL_LINE_ALIGN'
     assert node.special_motion_running is False
     assert node.active_special_action is None
     assert node.active_special_command_id is None
@@ -2152,7 +2335,12 @@ def test_duplicate_rejected_does_not_change_recovered_phase():
     ('source', 'action', 'initial_phase', 'expected_phase'),
     [
         ('hurdle', 'GO', 'HURDLE_APPROACH', 'HURDLE_APPROACH'),
-        ('ball', 'PICKUP_NOW', 'BALL_APPROACH', 'GOAL_APPROACH'),
+        (
+            'ball',
+            'PICKUP_NOW',
+            'BALL_APPROACH',
+            'POST_BALL_LINE_ALIGN',
+        ),
         ('goal', 'SHOT', 'GOAL_APPROACH', 'AUTO'),
     ],
 )
@@ -2251,7 +2439,22 @@ def test_pickup_success_increments_score_but_not_section():
     assert node.shots_completed == 0
     assert node.ball_sections_processed == 0
     assert node.finish_enabled is False
-    assert node.mission_phase == 'GOAL_APPROACH'
+    assert node.mission_phase == 'POST_BALL_LINE_ALIGN'
+
+
+def test_completed_two_pickups_block_ball_phase_reentry():
+    node = FakeDecisionNode(mission_phase='BALL_APPROACH')
+    node.phase_manager.pickups_completed = node.required_pickups
+
+    decision = MotionDecisionNode._select_mission_decision(
+        node,
+        {'ball': {'detected': True}, 'line': {'detected': True}},
+        0.1,
+    )
+
+    assert decision.source == 'none'
+    assert decision.action == 'WAIT'
+    assert decision.reason == 'ball_missions_complete'
 
 
 @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT'])
