@@ -65,7 +65,6 @@ class MotionCommandBridgeNode(Node):
         "pickup_fine_forward_0",
         FINE_ALIGN_MARKER,
         "pickup_pre_backward_camera_down",
-        "pickup_left_back_to_default_90",
         "pickup",
         "pickup_retreat_3",
     )

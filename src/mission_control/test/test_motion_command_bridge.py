@@ -415,7 +415,6 @@ def test_first_pickup_runs_motion_dwell_and_camera_transition_in_order():
     continue_pickup_after_fine_alignment(bridge)
     for completed_motion in (
         "pickup_pre_backward_camera_down",
-        "pickup_left_back_to_default_90",
         "pickup",
         "pickup_retreat_3",
         "pickup_first_turn_right_9",
@@ -434,7 +433,6 @@ def test_first_pickup_runs_motion_dwell_and_camera_transition_in_order():
         "ball_camera_down_forward_4",
         "pickup_fine_forward_0",
         "pickup_pre_backward_camera_down",
-        "pickup_left_back_to_default_90",
         "pickup",
         "pickup_retreat_3",
         "pickup_first_turn_right_9",
@@ -484,7 +482,6 @@ def test_pickup_dwell_is_non_blocking_and_does_not_start_early():
     continue_pickup_after_fine_alignment(bridge)
     for completed_motion in (
         "pickup_pre_backward_camera_down",
-        "pickup_left_back_to_default_90",
         "pickup",
         "pickup_retreat_3",
         "pickup_first_turn_right_9",
@@ -588,7 +585,6 @@ def test_second_pickup_finishes_with_left_turn():
     continue_pickup_after_fine_alignment(bridge)
     for completed_motion in (
         "pickup_pre_backward_camera_down",
-        "pickup_left_back_to_default_90",
         "pickup",
         "pickup_retreat_3",
         "stationary_turn_left",

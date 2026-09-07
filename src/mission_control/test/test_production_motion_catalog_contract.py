@@ -69,7 +69,6 @@ def test_production_alias_catalog_contains_only_approved_aliases():
             "pickup_pre_backward_camera_down": (
                 "공잡기전후진카메라내린거"
             ),
-            "pickup_left_back_to_default_90": "왼뒤에서기본자세(90도)",
             "pickup_retreat_3": "후진실전(3회)",
             "pickup_first_turn_right_9": "제자리우회전(9회)",
             "pickup_first_to_right_back_camera_45": (
@@ -127,14 +126,13 @@ def test_deprecated_left_turn_is_not_a_production_alias_target():
     assert forbidden.isdisjoint(aliases.values())
 
 
-def test_pickup_uses_90_degree_default_pose_not_old_zero_degree_pose():
+def test_pickup_does_not_use_intermediate_default_pose():
     aliases = yaml.safe_load(
         ALIAS_PATH.read_text(encoding="utf-8")
     )["motion_aliases"]
 
-    assert aliases["pickup_left_back_to_default_90"] == (
-        "왼뒤에서기본자세(90도)"
-    )
+    assert "pickup_left_back_to_default_90" not in aliases
+    assert "왼뒤에서기본자세(90도)" not in aliases.values()
     assert "왼뒤에서기본(0도)" not in aliases.values()
     assert aliases["goal_camera_90_turn_left_1"] == (
         "제자리좌회전90도(1회)"

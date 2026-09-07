@@ -42,7 +42,6 @@ motion_aliases:
   pickup_crab_right_0: "오옆꽃게(0도)"
   pickup_crab_left_0: "왼쪽게걸음(0도)"
   pickup_pre_backward_camera_down: "공잡기전후진카메라내린거"
-  pickup_left_back_to_default_90: "왼뒤에서기본자세(90도)"
   pickup_retreat_3: "후진실전(3회)"
   pickup_first_turn_right_9: "제자리우회전(9회)"
   pickup_first_to_right_back_camera_45: "왼뒤에서 오뒤로(카메라45도)"
