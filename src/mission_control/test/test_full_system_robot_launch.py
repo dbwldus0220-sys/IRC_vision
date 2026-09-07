@@ -5,7 +5,6 @@ from pathlib import Path
 
 from launch import LaunchContext
 from launch.actions import DeclareLaunchArgument
-from launch.utilities import perform_substitutions
 from launch_ros.actions import Node
 
 
@@ -53,17 +52,6 @@ def executor_parameters(executor, context):
         key = "".join(part.text for part in name)
         output[key] = value.evaluate(context) if hasattr(value, "evaluate") else value
     return output
-
-
-def node_remappings(node, context):
-    """Evaluate a Node action's configured remapping rules."""
-    return {
-        (
-            perform_substitutions(context, source),
-            perform_substitutions(context, destination),
-        )
-        for source, destination in node._Node__remappings
-    }
 
 
 def test_robot_launch_has_one_cpp_executor_and_no_legacy_nodes(
@@ -116,7 +104,7 @@ def test_robot_launch_defaults_are_production_ready(
             / "config"
             / "robot_motions_runtime.json"
         ),
-        "robot_device_path": "/dev/ttyUSB1",
+        "robot_device_path": "/dev/ttyUSB0",
         "robot_baud_rate": 4000000,
         "robot_motor_ids": list(range(23)),
         "startup_pose_enabled": True,
@@ -125,7 +113,7 @@ def test_robot_launch_defaults_are_production_ready(
     }
 
 
-def test_robot_launch_keeps_realsense_topic_remappings(
+def test_robot_launch_passes_realsense_topic_parameters(
     monkeypatch,
     tmp_path,
 ):
@@ -137,23 +125,24 @@ def test_robot_launch_keeps_realsense_topic_remappings(
         if isinstance(entity, Node)
     }
 
-    assert node_remappings(nodes["yolo26_detector"], context) == {
-        (
-            "/camera/color/image_raw",
-            "/camera/camera/color/image_raw",
-        ),
-    }
-    assert node_remappings(nodes["unified_vision_node"], context) == {
-        (
-            "/camera/color/image_raw",
-            "/camera/camera/color/image_raw",
-        ),
-        (
-            "/camera/aligned_depth_to_color/image_raw",
-            "/camera/camera/aligned_depth_to_color/image_raw",
-        ),
-        (
-            "/camera/color/camera_info",
-            "/camera/camera/color/camera_info",
-        ),
-    }
+    detector_parameters = executor_parameters(
+        nodes["yolo26_detector"],
+        context,
+    )
+    assert detector_parameters["image_topic"] == (
+        "/camera/camera/color/image_raw"
+    )
+
+    vision_parameters = executor_parameters(
+        nodes["unified_vision_node"],
+        context,
+    )
+    assert vision_parameters["image_topic"] == (
+        "/camera/camera/color/image_raw"
+    )
+    assert vision_parameters["depth_topic"] == (
+        "/camera/camera/aligned_depth_to_color/image_raw"
+    )
+    assert vision_parameters["camera_info_topic"] == (
+        "/camera/camera/color/camera_info"
+    )

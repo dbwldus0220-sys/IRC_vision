@@ -42,10 +42,10 @@ TEST(MotionAliasCatalog, LoadsLatestSdkAndCanonicalAliases)
   irc_step_motion_executor::MotionAliasCatalog catalog;
   std::string error;
   ASSERT_TRUE(catalog.load(TEST_ALIAS_CONFIG, error)) << error;
-  EXPECT_EQ(catalog.size(), 39U);
+  EXPECT_EQ(catalog.size(), 87U);
   EXPECT_EQ(
     catalog.resolve("forward"),
-    std::optional<std::string>("전진실실전(10회)"));
+    std::optional<std::string>("전진진짜실전(8회)"));
   EXPECT_EQ(
     catalog.resolve("line_turn_left_15"),
     std::optional<std::string>("좌회전실실전(15회)"));
@@ -66,7 +66,7 @@ TEST(MotionAliasCatalog, LoadsLatestSdkAndCanonicalAliases)
     std::optional<std::string>("라인보귀우회전(8번)"));
   EXPECT_EQ(
     catalog.resolve("stationary_turn_left"),
-    std::optional<std::string>("제자리좌회전실실전(6번)"));
+    std::optional<std::string>("제자리좌회전(6번)"));
   EXPECT_EQ(
     catalog.resolve("stationary_turn_right"),
     std::optional<std::string>("제자리우회전(9회)"));
