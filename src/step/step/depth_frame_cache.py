@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections import deque
+from dataclasses import dataclass
 import threading
 import time
 
@@ -16,12 +18,35 @@ from rclpy.qos import ReliabilityPolicy
 from sensor_msgs.msg import Image
 
 
-class DepthFrameCache:
-    """Thread-safe holder for one immutable, most-recent depth frame."""
+def image_stamp_ns(message: Image) -> int:
+    """Convert one ROS image header timestamp to integer nanoseconds."""
+    return (
+        int(message.header.stamp.sec) * 1_000_000_000
+        + int(message.header.stamp.nanosec)
+    )
 
-    def __init__(self) -> None:
+
+@dataclass(frozen=True)
+class DepthFrame:
+    """One immutable depth image and the metadata needed for synchronization."""
+
+    image: np.ndarray
+    stamp_ns: int | None
+    received_at: float
+    width: int
+    height: int
+
+
+class DepthFrameCache:
+    """Thread-safe timestamp ring plus latest-frame compatibility fields."""
+
+    def __init__(self, max_frames: int = 30) -> None:
         self.lock = threading.RLock()
+        self.frames: deque[DepthFrame] = deque(
+            maxlen=max(2, int(max_frames))
+        )
         self.image: np.ndarray | None = None
+        self.stamp_ns: int | None = None
         self.received_at: float | None = None
         self.width: int | None = None
         self.height: int | None = None
@@ -32,16 +57,60 @@ class DepthFrameCache:
         *,
         width: int,
         height: int,
+        stamp_ns: int | None = None,
         received_at: float | None = None,
     ) -> None:
-        """Atomically replace the cached frame and its metadata."""
+        """Atomically append a frame and update compatibility fields."""
+        received_at = (
+            time.monotonic() if received_at is None else received_at
+        )
+        frame = DepthFrame(
+            image=image,
+            stamp_ns=stamp_ns,
+            received_at=received_at,
+            width=width,
+            height=height,
+        )
         with self.lock:
+            self.frames.append(frame)
             self.image = image
-            self.received_at = (
-                time.monotonic() if received_at is None else received_at
-            )
+            self.stamp_ns = stamp_ns
+            self.received_at = received_at
             self.width = width
             self.height = height
+
+    def nearest(
+        self,
+        stamp_ns: int,
+    ) -> tuple[DepthFrame | None, float | None]:
+        """Return the frame closest to ``stamp_ns`` and its delta in seconds."""
+        with self.lock:
+            candidates = [
+                frame for frame in self.frames if frame.stamp_ns is not None
+            ]
+            if not candidates:
+                return None, None
+            frame = min(
+                candidates,
+                key=lambda item: abs(int(item.stamp_ns) - stamp_ns),
+            )
+        delta_sec = abs(int(frame.stamp_ns) - stamp_ns) / 1_000_000_000.0
+        return frame, delta_sec
+
+    def latest(self) -> DepthFrame | None:
+        """Return the newest complete frame snapshot."""
+        with self.lock:
+            if self.frames:
+                return self.frames[-1]
+            if self.image is None or self.received_at is None:
+                return None
+            return DepthFrame(
+                image=self.image,
+                stamp_ns=self.stamp_ns,
+                received_at=self.received_at,
+                width=int(self.width or self.image.shape[1]),
+                height=int(self.height or self.image.shape[0]),
+            )
 
 
 class DepthFrameConsumer:
@@ -118,6 +187,7 @@ class DepthFrameConsumer:
             np.asarray(depth),
             width=int(message.width),
             height=int(message.height),
+            stamp_ns=image_stamp_ns(message),
         )
 
 
@@ -154,6 +224,7 @@ class SharedDepthSubscriber(Node):
                 np.asarray(depth),
                 width=int(message.width),
                 height=int(message.height),
+                stamp_ns=image_stamp_ns(message),
             )
         except Exception as exc:
             self.get_logger().warning(f"Could not read depth image: {exc}")

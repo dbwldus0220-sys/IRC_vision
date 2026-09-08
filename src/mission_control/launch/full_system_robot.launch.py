@@ -23,6 +23,9 @@ def generate_launch_description() -> LaunchDescription:
     display = LaunchConfiguration("display")
     metrics_mode = LaunchConfiguration("metrics_mode")
     max_fps = LaunchConfiguration("max_fps")
+    max_rgb_depth_delta_sec = LaunchConfiguration(
+        "max_rgb_depth_delta_sec"
+    )
 
     camera_topic_prefix = LaunchConfiguration("camera_topic_prefix")
 
@@ -105,6 +108,10 @@ def generate_launch_description() -> LaunchDescription:
                 "display": ParameterValue(display, value_type=bool),
                 "metrics_mode": metrics_mode,
                 "max_fps": ParameterValue(max_fps, value_type=float),
+                "overlay_max_stamp_delta_sec": ParameterValue(
+                    max_rgb_depth_delta_sec,
+                    value_type=float,
+                ),
                 "image_topic": ParameterValue(
                     color_image_topic,
                     value_type=str,
@@ -163,6 +170,10 @@ def generate_launch_description() -> LaunchDescription:
                 ),
                 "camera_forward_offset_m": ParameterValue(
                     camera_forward_offset_m, value_type=float
+                ),
+                "max_rgb_depth_delta_sec": ParameterValue(
+                    max_rgb_depth_delta_sec,
+                    value_type=float,
                 ),
                 "roi_x_min_ratio": ParameterValue(
                     line_roi_x_min_ratio, value_type=float
@@ -292,6 +303,14 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("display", default_value="true"),
             DeclareLaunchArgument("metrics_mode", default_value="auto"),
             DeclareLaunchArgument("max_fps", default_value="30.0"),
+            DeclareLaunchArgument(
+                "max_rgb_depth_delta_sec",
+                default_value="0.05",
+                description=(
+                    "Maximum RGB/depth timestamp difference accepted for "
+                    "ball control and metrics."
+                ),
+            ),
             DeclareLaunchArgument(
                 "camera_topic_prefix",
                 default_value=EnvironmentVariable(

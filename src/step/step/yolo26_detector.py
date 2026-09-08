@@ -32,6 +32,7 @@ from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import Image
 from std_msgs.msg import String
 
+from step.depth_frame_cache import image_stamp_ns
 from step.line_navigation_planner import numbered_turn_motion_metadata
 from step.tensorrt_backend import TensorRTBackend
 
@@ -141,10 +142,14 @@ class Yolo26Detector(Node):
             "/navigation/motion_command",
         )
         self.declare_parameter("motion_command_timeout_sec", 0.8)
+        self.declare_parameter("overlay_max_stamp_delta_sec", 0.05)
         self.declare_parameter("metrics_mode", "auto")
         self.declare_parameter("confidence_threshold", 0.25)
         self.declare_parameter("ball_confidence_threshold", 0.20)
-        self.declare_parameter("hurdle_confidence_threshold", 0.20)
+        # Hurdle false positives can preempt every mission phase.  Keep the
+        # raw detector threshold aligned with the analyzer/controller safety
+        # threshold instead of publishing weak hurdle boxes.
+        self.declare_parameter("hurdle_confidence_threshold", 0.60)
         self.declare_parameter("max_detections", 300)
         self.declare_parameter("max_fps", 15.0)
         self.declare_parameter("device", "auto")
@@ -237,6 +242,12 @@ class Yolo26Detector(Node):
         self.motion_command_timeout_sec = max(
             0.1,
             float(self.get_parameter("motion_command_timeout_sec").value),
+        )
+        self.overlay_max_stamp_delta_sec = max(
+            0.0,
+            float(
+                self.get_parameter("overlay_max_stamp_delta_sec").value
+            ),
         )
         self.metrics_mode = str(
             self.get_parameter("metrics_mode").value
@@ -387,6 +398,8 @@ class Yolo26Detector(Node):
         self.latest_hurdle_info_time: float | None = None
         self.latest_motion_command: dict[str, Any] | None = None
         self.latest_motion_command_time: float | None = None
+        self._overlay_rgb_stamp_ns: int | None = None
+        self._ball_info_stamp_delta_ms: float | None = None
 
         self.camera_control_specs = self._camera_control_specs()
         self.camera_control_values = {
@@ -942,7 +955,8 @@ class Yolo26Detector(Node):
         self.latest_ball_info_time = time.monotonic()
 
     def _fresh_ball_info(self) -> dict[str, Any] | None:
-        """Return fresh ball information, or None after its timeout."""
+        """Return ball information fresh in both receipt and RGB time."""
+        self._ball_info_stamp_delta_ms = None
         if (
             self.latest_ball_info is None
             or self.latest_ball_info_time is None
@@ -951,6 +965,21 @@ class Yolo26Detector(Node):
         age = time.monotonic() - self.latest_ball_info_time
         if age > self.ball_info_timeout_sec:
             return None
+        expected_stamp_ns = getattr(self, "_overlay_rgb_stamp_ns", None)
+        if expected_stamp_ns is not None:
+            try:
+                info_stamp_ns = int(self.latest_ball_info["rgb_stamp_ns"])
+            except (KeyError, TypeError, ValueError):
+                self._ball_info_stamp_delta_ms = None
+                return None
+            delta_ms = abs(info_stamp_ns - expected_stamp_ns) / 1_000_000.0
+            self._ball_info_stamp_delta_ms = delta_ms
+            max_delta_ms = (
+                getattr(self, "overlay_max_stamp_delta_sec", 0.05)
+                * 1000.0
+            )
+            if delta_ms > max_delta_ms:
+                return None
         return self.latest_ball_info
 
     def _goal_info_callback(self, message: String) -> None:
@@ -1243,41 +1272,35 @@ class Yolo26Detector(Node):
         if class_name == "ball":
             if ball_info is None:
                 return True, False, None
-            ground_distance = self._number(
-                ball_info,
-                "ground_distance_m",
-            )
+            depth = self._number(ball_info, "depth_m")
             depth_valid = bool(ball_info.get("depth_valid", False))
             control_ready = bool(
                 ball_info.get("detected", False)
                 and depth_valid
-                and ground_distance is not None
-                and ground_distance <= self.ball_control_range_m
+                and depth is not None
+                and depth <= self.ball_control_range_m
             )
             return (
                 True,
                 control_ready,
-                ground_distance if depth_valid else None,
+                depth if depth_valid else None,
             )
 
         if class_name == "hurdle":
             if hurdle_info is None:
                 return True, False, None
-            ground_distance = self._number(
-                hurdle_info,
-                "ground_distance_m",
-            )
+            depth = self._number(hurdle_info, "depth_m")
             depth_valid = bool(hurdle_info.get("depth_valid", False))
             control_ready = bool(
                 hurdle_info.get("detected", False)
                 and depth_valid
-                and ground_distance is not None
-                and ground_distance <= self.hurdle_control_range_m
+                and depth is not None
+                and depth <= self.hurdle_control_range_m
             )
             return (
                 True,
                 control_ready,
-                ground_distance if depth_valid else None,
+                depth if depth_valid else None,
             )
 
         settings = {
@@ -1565,7 +1588,7 @@ class Yolo26Detector(Node):
                 )
 
         panel_width = min(390, max(250, width - 24))
-        panel_height = 312
+        panel_height = 430
         panel_x = max(12, width - panel_width - 12)
         panel_y = 44
         panel_bottom = min(height - 8, panel_y + panel_height)
@@ -1588,10 +1611,15 @@ class Yolo26Detector(Node):
         )
 
         if info is None:
+            stamp_delta = getattr(self, "_ball_info_stamp_delta_ms", None)
             rows = [
                 "BALL METRICS",
                 f"Planner     : {planner_action}",
-                "NO BALL INFO",
+                (
+                    f"Frame sync  : STALE ({stamp_delta:.1f} ms)"
+                    if stamp_delta is not None
+                    else "NO MATCHED BALL INFO"
+                ),
             ]
         elif not detected:
             state = str(info.get("state", "SEARCH"))
@@ -1601,9 +1629,7 @@ class Yolo26Detector(Node):
                 f"State       : {state}",
             ]
         else:
-            distance = self._number(info, "distance_m")
             depth = self._number(info, "depth_m")
-            ground_distance = self._number(info, "ground_distance_m")
             offset_px = self._number(info, "offset_x_px")
             offset_norm = self._number(info, "offset_x_norm")
             bearing = self._number(info, "bearing_deg")
@@ -1612,14 +1638,34 @@ class Yolo26Detector(Node):
             direction = str(info.get("horizontal_direction", "UNKNOWN"))
             state = str(info.get("state", "UNKNOWN"))
             camera_ready = bool(info.get("camera_info_ready", False))
+            depth_source = str(info.get("depth_source", "invalid")).upper()
+            sync_delta = self._number(info, "depth_sync_delta_ms")
+            depth_width = self._number(info, "depth_width")
+            depth_height = self._number(info, "depth_height")
+            rgb_width = self._number(info, "image_width")
+            rgb_height = self._number(info, "image_height")
+            sample_count = self._number(info, "depth_sample_count")
             rows = [
                 "BALL METRICS",
                 f"Planner     : {planner_action}",
                 f"State       : {state} / {direction}",
-                "Object dist : "
-                + self._metric_text(ground_distance, "m"),
                 "Depth Z     : " + self._metric_text(depth, "m"),
-                "Camera ray  : " + self._metric_text(distance, "m"),
+                f"Depth source: {depth_source}",
+                "RGB-Depth dT: " + self._metric_text(sync_delta, "ms", 1),
+                "Depth res   : "
+                + (
+                    f"{int(depth_width)}x{int(depth_height)}"
+                    if depth_width is not None and depth_height is not None
+                    else "N/A"
+                ),
+                "RGB res     : "
+                + (
+                    f"{int(rgb_width)}x{int(rgb_height)}"
+                    if rgb_width is not None and rgb_height is not None
+                    else "N/A"
+                ),
+                "Valid pixels: "
+                + self._metric_text(sample_count, "", 0),
                 "Offset X    : "
                 + self._metric_text(offset_px, "px", 0, signed=True),
                 "Offset norm : "
@@ -1644,7 +1690,7 @@ class Yolo26Detector(Node):
             cv2.putText(
                 image,
                 row,
-                (panel_x + 12, panel_y + 25 + index * 24),
+                (panel_x + 12, panel_y + 25 + index * 23),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.56 if is_title else 0.5,
                 color,
@@ -2156,9 +2202,7 @@ class Yolo26Detector(Node):
                 f"State       : {state}",
             ]
         else:
-            distance = self._number(info, "distance_m")
             depth = self._number(info, "depth_m")
-            ground_distance = self._number(info, "ground_distance_m")
             offset_px = self._number(info, "offset_x_px")
             offset_norm = self._number(info, "offset_x_norm")
             bearing = self._number(info, "bearing_deg")
@@ -2172,10 +2216,7 @@ class Yolo26Detector(Node):
                 f"Planner     : {planner_action}",
                 f"State       : {state} / {direction}",
                 f"Aim source  : {aim_source}",
-                "Distance    : " + self._metric_text(distance, "m"),
                 "Depth Z     : " + self._metric_text(depth, "m"),
-                "Ground dist : "
-                + self._metric_text(ground_distance, "m"),
                 "Offset X    : "
                 + self._metric_text(offset_px, "px", 0, signed=True),
                 "Offset norm : "
@@ -2310,16 +2351,6 @@ class Yolo26Detector(Node):
                 ),
                 "Depth Z     : "
                 + self._metric_text(self._number(info, "depth_m"), "m"),
-                "Ground dist : "
-                + self._metric_text(
-                    self._number(info, "ground_distance_m"),
-                    "m",
-                ),
-                "Bottom gap  : "
-                + self._metric_text(
-                    self._number(info, "camera_bottom_gap_m"),
-                    "m",
-                ),
                 "Left depth  : "
                 + self._metric_text(
                     self._number(info, "left_depth_m"),
@@ -2555,12 +2586,13 @@ class Yolo26Detector(Node):
                 "backboard": goal_info,
                 "hurdle": hurdle_info,
             }.get(detection.class_name)
-            ground_distance = self._number(
-                confirmation_info,
-                "ground_distance_m",
-            ) if confirmation_info is not None else None
-            if ground_distance is not None:
-                label = f"{label} | GND {ground_distance:.2f}m"
+            depth = (
+                self._number(confirmation_info, "depth_m")
+                if confirmation_info is not None
+                else None
+            )
+            if depth is not None:
+                label = f"{label} | DEPTH {depth:.2f}m"
             badge = self._confirmation_badge(confirmation_info)
             label = f"{label} | {badge}"
             cv2.rectangle(annotated, (left, top), (right, bottom), color, 2)
@@ -2648,7 +2680,11 @@ class Yolo26Detector(Node):
 
             self._publish_detections(message, detections)
             if self.publish_annotated_image or self.display:
-                annotated = self._draw_detections(image, detections)
+                self._overlay_rgb_stamp_ns = image_stamp_ns(message)
+                try:
+                    annotated = self._draw_detections(image, detections)
+                finally:
+                    self._overlay_rgb_stamp_ns = None
 
                 if self.publish_annotated_image:
                     annotated_message = self.bridge.cv2_to_imgmsg(

@@ -132,16 +132,13 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
         )
         self.declare_parameter("output_topic", "/vision/hurdle_info")
         self.declare_parameter("hurdle_class_name", "hurdle")
-        self.declare_parameter("min_confidence", 0.40)
+        self.declare_parameter("min_confidence", 0.60)
         self.declare_parameter("depth_timeout_sec", 0.7)
         self.declare_parameter("depth_window_px", 9)
         self.declare_parameter("max_valid_depth_m", 4.0)
         self.declare_parameter("detect_depth_m", 1.5)
-        self.declare_parameter("camera_height_m", 0.70)
-        self.declare_parameter("hurdle_reference_height_m", 0.10)
-        self.declare_parameter("go_target_ground_gap_m", 0.10)
-        self.declare_parameter("go_ground_gap_tolerance_m", 0.10)
-        self.declare_parameter("go_max_camera_bottom_gap_m", 0.05)
+        self.declare_parameter("go_target_depth_m", 0.10)
+        self.declare_parameter("go_depth_tolerance_m", 0.10)
         self.declare_parameter("go_angle_tolerance_deg", 8.0)
         self.declare_parameter("direction_deadband_norm", 0.04)
         self.declare_parameter("confirmation_window_size", 20)
@@ -176,25 +173,13 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
             "max_valid_depth_m"
         )
         self.detect_depth_m = self._float_parameter("detect_depth_m")
-        self.camera_height_m = max(
+        self.go_target_depth_m = max(
             0.0,
-            self._float_parameter("camera_height_m"),
+            self._float_parameter("go_target_depth_m"),
         )
-        self.hurdle_reference_height_m = max(
+        self.go_depth_tolerance_m = max(
             0.0,
-            self._float_parameter("hurdle_reference_height_m"),
-        )
-        self.go_target_ground_gap_m = max(
-            0.0,
-            self._float_parameter("go_target_ground_gap_m"),
-        )
-        self.go_ground_gap_tolerance_m = max(
-            0.0,
-            self._float_parameter("go_ground_gap_tolerance_m"),
-        )
-        self.go_max_camera_bottom_gap_m = max(
-            0.0,
-            self._float_parameter("go_max_camera_bottom_gap_m"),
+            self._float_parameter("go_depth_tolerance_m"),
         )
         self.go_angle_tolerance_deg = max(
             0.0,
@@ -464,8 +449,8 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
         elevation: float | None = None
         lateral: float | None = None
         horizontal_distance: float | None = None
-        distance: float | None = None
-        ground_gap: float | None = None
+        distance: float | None = depth
+        ground_gap: float | None = depth
         camera_bottom_gap_px: int | None = None
         camera_bottom_gap: float | None = None
         estimated_width: float | None = None
@@ -478,21 +463,9 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
             elevation = math.degrees(math.atan(y_ratio))
             if depth is not None:
                 lateral = x_ratio * depth
-                vertical = y_ratio * depth
-                horizontal_distance = math.hypot(lateral, depth)
-                distance = math.sqrt(
-                    lateral * lateral + vertical * vertical + depth * depth
-                )
-                vertical_separation = max(
-                    self.camera_height_m - self.hurdle_reference_height_m,
-                    0.0,
-                )
-                ground_square = (
-                    distance * distance
-                    - vertical_separation * vertical_separation
-                )
-                if ground_square >= 0.0:
-                    ground_gap = math.sqrt(ground_square)
+                # HURDLE distance control uses raw aligned Depth Z only.  The
+                # old horizontal/slant/ground calculations are deliberately
+                # not evaluated; legacy JSON distance fields alias depth.
                 if image_height is not None:
                     camera_bottom_gap_px = max(0, image_height - bottom)
                     camera_bottom_gap = (
@@ -609,15 +582,14 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
         if (
             not target.depth_valid
             or target.depth_m is None
-            or target.camera_bottom_gap_m is None
         ):
             return (
-                "NO_GROUND_DISTANCE",
+                "NO_DEPTH",
                 parallel,
                 False,
                 None,
                 False,
-                "hurdle_detected_without_valid_bottom_gap",
+                "hurdle_detected_without_valid_depth",
             )
         if target.hurdle_angle_deg is None:
             return (
@@ -629,19 +601,12 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
                 "hurdle_parallel_angle_unavailable",
             )
         error = (
-            target.ground_gap_m - self.go_target_ground_gap_m
-            if target.ground_gap_m is not None
-            else None
+            target.depth_m - self.go_target_depth_m
         )
-        ground_gap_in_range = (
-            error is None
-            or abs(error) <= self.go_ground_gap_tolerance_m + 1e-9
+        depth_in_range = (
+            abs(error) <= self.go_depth_tolerance_m + 1e-9
         )
-        bottom_gap_in_range = (
-            target.camera_bottom_gap_m
-            <= self.go_max_camera_bottom_gap_m + 1e-9
-        )
-        go_now = parallel and ground_gap_in_range and bottom_gap_in_range
+        go_now = parallel and depth_in_range
         if go_now:
             return (
                 "GO_READY",
@@ -649,25 +614,21 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
                 True,
                 error,
                 True,
-                "hurdle_parallel_at_close_ground_gap",
+                "hurdle_parallel_at_close_depth",
             )
         if not parallel:
             return (
                 "ALIGN_ANGLE",
                 False,
-                ground_gap_in_range,
+                depth_in_range,
                 error,
                 False,
                 "align_robot_parallel_to_hurdle",
             )
         if (
-            not bottom_gap_in_range
-            or (
-                error is not None
-                and error > self.go_ground_gap_tolerance_m
-            )
+            error > self.go_depth_tolerance_m
         ):
-            return "APPROACH", True, False, error, False, "hurdle_too_far"
+            return "APPROACH", True, False, error, False, "hurdle_depth_too_far"
         return "GO_READY", True, True, error, True, "hurdle_close_enough"
 
     def _empty_info(
@@ -764,11 +725,11 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
                 continue
             if not candidate.depth_valid or depth_is_within_range(
                 candidate.depth_valid,
-                candidate.ground_gap_m,
+                candidate.depth_m,
                 self.detect_depth_m,
             ):
                 candidates.append(candidate)
-            elif candidate.depth_valid and candidate.ground_gap_m is not None:
+            elif candidate.depth_valid and candidate.depth_m is not None:
                 outside_tracking_range = True
         candidates.sort(key=lambda item: item.score, reverse=True)
         if not candidates:
@@ -855,12 +816,12 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
                 ),
                 go_now=go_now,
                 approach_motion=approach_motion_for_distance(
-                    target.ground_gap_m
+                    target.depth_m
                 ),
                 approach_level=approach_level_from_motion(
-                    approach_motion_for_distance(target.ground_gap_m)
+                    approach_motion_for_distance(target.depth_m)
                 ),
-                approach_target_distance_m=target.ground_gap_m,
+                approach_target_distance_m=target.depth_m,
                 target_priority_score=target.score,
                 candidate_count=len(candidates),
                 candidates=candidates[:5],

@@ -15,11 +15,10 @@ from .approach_distance import approach_motion_for_distance
 class HurdleNavigationConfig:
     """Provisional hurdle alignment and jump thresholds."""
 
-    min_confidence: float = 0.40
+    min_confidence: float = 0.60
     control_start_depth_m: float = 1.0
-    go_target_ground_gap_m: float = 0.10
-    go_ground_gap_tolerance_m: float = 0.10
-    go_max_camera_bottom_gap_m: float = 0.05
+    go_target_depth_m: float = 0.10
+    go_depth_tolerance_m: float = 0.10
     go_angle_tolerance_deg: float = 8.0
     path_center_tolerance_norm: float = 0.10
 
@@ -53,8 +52,9 @@ class HurdleActionCommand:
             "sdk_motion_requested": self.sdk_motion_requested,
             "confidence": round(self.confidence, 4),
             "depth_m": _round_optional(self.depth_m, 3),
-            "distance_m": _round_optional(self.distance_m, 3),
-            "ground_gap_m": _round_optional(self.ground_gap_m, 3),
+            # Legacy distance keys carry raw Depth Z for compatibility.
+            "distance_m": _round_optional(self.depth_m, 3),
+            "ground_gap_m": _round_optional(self.depth_m, 3),
             "camera_bottom_gap_m": _round_optional(
                 self.camera_bottom_gap_m,
                 3,
@@ -77,7 +77,7 @@ class HurdleActionCommand:
             ),
             "approach_level": approach_level,
             "approach_target_distance_m": _round_optional(
-                self.ground_gap_m,
+                self.depth_m,
                 3,
             ),
         }
@@ -138,18 +138,16 @@ class HurdleNavigationPlanner:
         depth = _number(hurdle_info, "depth_m")
         if not bool(hurdle_info.get("depth_valid", False)) or depth is None:
             return self.wait("missing_valid_hurdle_depth")
-        distance = _number(hurdle_info, "distance_m")
-        ground_gap = _number(hurdle_info, "ground_gap_m")
-        if ground_gap is None or ground_gap < 0.0:
-            return self.wait("missing_valid_hurdle_ground_gap")
-        if ground_gap > self.config.control_start_depth_m:
+        distance = depth
+        ground_gap = depth
+        if depth <= 0.0:
+            return self.wait("missing_valid_hurdle_depth")
+        if depth > self.config.control_start_depth_m:
             return self.wait("hurdle_outside_control_range")
         camera_bottom_gap = _number(
             hurdle_info,
             "camera_bottom_gap_m",
         )
-        if camera_bottom_gap is None:
-            return self.wait("missing_hurdle_bottom_gap")
         hurdle_angle = _number(hurdle_info, "hurdle_angle_deg")
         if hurdle_angle is None:
             return self.wait("missing_hurdle_parallel_angle")
@@ -166,24 +164,16 @@ class HurdleNavigationPlanner:
             or abs(path_offset) <= self.config.path_center_tolerance_norm
         )
         ground_gap_error = (
-            ground_gap - self.config.go_target_ground_gap_m
-            if ground_gap is not None
-            else None
+            depth - self.config.go_target_depth_m
         )
         ground_gap_in_range = (
-            ground_gap_error is None
-            or abs(ground_gap_error)
-            <= self.config.go_ground_gap_tolerance_m + 1e-9
-        )
-        bottom_gap_in_range = (
-            camera_bottom_gap
-            <= self.config.go_max_camera_bottom_gap_m + 1e-9
+            abs(ground_gap_error)
+            <= self.config.go_depth_tolerance_m + 1e-9
         )
         ready_geometry = (
             parallel
             and path_centered
             and ground_gap_in_range
-            and bottom_gap_in_range
         )
         analyzer_go_now = hurdle_info.get("go_now")
         go_now = bool(
@@ -197,7 +187,7 @@ class HurdleNavigationPlanner:
 
         if go_now:
             action = "GO"
-            reason = "hurdle_parallel_at_close_ground_gap"
+            reason = "hurdle_parallel_at_close_depth"
         elif (
             path_reference_valid
             and path_offset is not None
@@ -211,13 +201,8 @@ class HurdleNavigationPlanner:
         elif ready_geometry:
             action = "WAIT_GO_CONFIRMATION"
             reason = "waiting_for_stable_hurdle_condition"
-        elif not bottom_gap_in_range or (
-            ground_gap_error is not None
-            and ground_gap_error > self.config.go_ground_gap_tolerance_m
-        ):
-            action = approach_motion_for_distance(
-                ground_gap if ground_gap is not None else depth
-            )
+        elif ground_gap_error > self.config.go_depth_tolerance_m:
+            action = approach_motion_for_distance(depth)
             reason = "hurdle_aligned_discrete_approach"
         else:
             action = "WAIT_GO_CONFIRMATION"

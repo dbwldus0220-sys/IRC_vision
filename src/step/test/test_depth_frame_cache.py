@@ -67,3 +67,46 @@ def test_cache_update_is_serialized_by_the_shared_lock():
     assert cache.received_at == 8.0
     assert cache.width == 2
     assert cache.height == 2
+
+
+def test_nearest_selects_depth_by_ros_timestamp():
+    """Match delayed detections to the closest buffered depth frame."""
+    cache = DepthFrameCache(max_frames=6)
+    first = np.full((2, 2), 400, dtype=np.uint16)
+    second = np.full((2, 2), 900, dtype=np.uint16)
+    cache.update(
+        first,
+        width=2,
+        height=2,
+        stamp_ns=1_000_000_000,
+        received_at=10.0,
+    )
+    cache.update(
+        second,
+        width=2,
+        height=2,
+        stamp_ns=1_040_000_000,
+        received_at=10.04,
+    )
+
+    frame, delta_sec = cache.nearest(1_035_000_000)
+
+    assert frame is not None
+    assert frame.image is second
+    assert frame.stamp_ns == 1_040_000_000
+    assert delta_sec == 0.005
+
+
+def test_ring_discards_oldest_depth_frame():
+    """Keep memory bounded while retaining recent timestamp history."""
+    cache = DepthFrameCache(max_frames=2)
+    for index in range(3):
+        cache.update(
+            np.full((1, 1), index, dtype=np.uint16),
+            width=1,
+            height=1,
+            stamp_ns=index,
+            received_at=float(index),
+        )
+
+    assert [frame.stamp_ns for frame in cache.frames] == [1, 2]

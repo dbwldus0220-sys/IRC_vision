@@ -106,8 +106,8 @@ def test_rgb_ball_remains_candidate_beyond_tracking_distance():
     assert state[0] == "FAR"
 
 
-def test_ball_projection_reports_height_corrected_ground_distance():
-    """Separate raw Z, camera ray, and height-corrected floor range."""
+def test_ball_projection_does_not_compute_horizontal_distance():
+    """Keep only raw depth aliases and camera-coordinate diagnostics."""
     analyzer = object.__new__(BallAnalyzer)
     analyzer.fx = 600.0
     analyzer.fy = 600.0
@@ -120,13 +120,13 @@ def test_ball_projection_reports_height_corrected_ground_distance():
 
     projection = analyzer._project_ball_position(640, 360, 1.0, True)
 
-    assert projection[4] == pytest.approx(1.03)
-    assert projection[5] == pytest.approx((1.03**2 - 0.480**2) ** 0.5)
-    assert projection[6] == pytest.approx(1.03)
+    assert projection[4] is None
+    assert projection[5] == pytest.approx(1.0)
+    assert projection[6] == pytest.approx(1.0)
 
 
-def test_ball_projection_clamps_shorter_than_vertical_leg_to_zero():
-    """A near surface sample cannot produce an imaginary floor distance."""
+def test_ball_projection_preserves_close_raw_depth():
+    """Do not distort a close sample with a camera-height correction."""
     analyzer = object.__new__(BallAnalyzer)
     analyzer.fx = 600.0
     analyzer.fy = 600.0
@@ -139,16 +139,16 @@ def test_ball_projection_clamps_shorter_than_vertical_leg_to_zero():
 
     projection = analyzer._project_ball_position(640, 360, 0.45, True)
 
-    assert projection[5] == 0.0
+    assert projection[5] == pytest.approx(0.45)
 
 
-def test_pickup_ready_uses_ground_range_center_and_image_window():
-    analyzer = _analyzer_with_depth(0.43, True)
+def test_pickup_ready_uses_raw_depth_center_and_image_window():
+    analyzer = _analyzer_with_depth(0.15, True)
 
     candidate = analyzer._build_candidate(_raw_detection(), 1280, 720)
     state = analyzer._state_for_candidate(candidate, 720)
 
-    assert candidate.ground_distance_m <= analyzer.pickup_ready_depth_m
+    assert candidate.depth_m <= analyzer.pickup_ready_depth_m
     assert state[4] is True
     assert state[6] is True
 
@@ -168,6 +168,26 @@ def test_pickup_ready_rejects_ball_outside_ball_specific_center_window():
 
 def _depth_sampler(image):
     analyzer = object.__new__(BallAnalyzer)
+    analyzer.min_confidence = 0.45
+    analyzer.horizontal_deadband_px = 30
+    analyzer.center_tolerance_px = 140
+    analyzer.robot_center_offset_px = 70.0
+    analyzer.detect_depth_m = 1.5
+    analyzer.approach_depth_m = 0.9
+    analyzer.pickup_ready_depth_m = 0.15
+    analyzer.pickup_now_depth_m = 0.48
+    analyzer.pickup_depth_tolerance_m = 0.02
+    analyzer.pickup_center_tolerance_norm = 0.08
+    analyzer.pickup_target_y_ratio = 0.82
+    analyzer.pickup_y_tolerance_ratio = 0.12
+    analyzer.camera_height_m = 0.515
+    analyzer.ball_diameter_m = 0.060
+    analyzer.ball_top_height_m = 0.065
+    analyzer.camera_forward_offset_m = 0.0
+    analyzer.fx = 600.0
+    analyzer.fy = 600.0
+    analyzer.cx = 640.0
+    analyzer.cy = 360.0
     analyzer._depth_lock = threading.RLock()
     analyzer.latest_depth_image = image
     analyzer.latest_depth_time = time.monotonic()
@@ -221,3 +241,53 @@ def test_depth_briefly_holds_last_value_across_full_depth_hole():
     assert first_depth == np.float32(0.91)
     assert held_valid is True
     assert held_depth == first_depth
+
+
+def test_held_depth_is_available_for_display_but_invalid_for_control():
+    """Never let a remembered measurement authorize robot motion."""
+    image = np.full((720, 1280), 910, dtype=np.uint16)
+    analyzer = _depth_sampler(image)
+    analyzer._sample_depth_m(708, 529, [680, 500, 736, 558])
+    analyzer.latest_depth_image = np.zeros_like(image)
+
+    candidate = analyzer._build_candidate(_raw_detection(), 1280, 720)
+
+    assert candidate is not None
+    assert candidate.depth_m == pytest.approx(0.91)
+    assert candidate.ground_distance_m is not None
+    assert candidate.depth_source == "held"
+    assert candidate.depth_valid is False
+
+
+def test_ball_depth_coordinates_scale_to_actual_depth_resolution():
+    """Sample the corresponding pixel when RGB and depth sizes differ."""
+    image = np.zeros((480, 848), dtype=np.uint16)
+    image[348:358, 464:474] = 720
+    analyzer = _depth_sampler(image)
+    analyzer._active_rgb_width = 1280
+    analyzer._active_rgb_height = 720
+
+    candidate = analyzer._build_candidate(_raw_detection(), 1280, 720)
+
+    assert candidate is not None
+    assert candidate.depth_m == pytest.approx(0.72)
+    assert candidate.depth_width == 848
+    assert candidate.depth_height == 480
+    assert candidate.depth_source == "center"
+
+
+def test_depth_over_50ms_from_rgb_is_control_invalid():
+    """Reject a fresh but temporally unrelated depth frame."""
+    image = np.full((720, 1280), 500, dtype=np.uint16)
+    analyzer = _depth_sampler(image)
+    analyzer.max_rgb_depth_delta_sec = 0.05
+    analyzer._active_depth_frame = analyzer._get_depth_cache().latest()
+    analyzer._active_depth_sync_delta_sec = 0.051
+    analyzer._depth_sync_required = True
+
+    candidate = analyzer._build_candidate(_raw_detection(), 1280, 720)
+
+    assert candidate is not None
+    assert candidate.depth_valid is False
+    assert candidate.depth_source == "invalid"
+    assert candidate.depth_sync_delta_ms == pytest.approx(51.0)

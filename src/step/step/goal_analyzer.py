@@ -410,11 +410,9 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         if depth_m is None:
             return bearing, elevation, None, None, None
         lateral = x_ratio * depth_m
-        vertical = y_ratio * depth_m
-        distance = math.sqrt(
-            lateral * lateral + vertical * vertical + depth_m * depth_m
-        )
-        return bearing, elevation, lateral, distance, None
+        # GOAL already controls from raw Depth Z.  Keep legacy distance output
+        # as a depth alias and do not calculate slant or floor distance.
+        return bearing, elevation, lateral, depth_m, None
 
     def _build_candidate(
         self,

@@ -279,8 +279,8 @@ def go_ready_hurdle():
         "detected": True,
         "confirmation_confirmed": True,
         "confidence": 0.95,
-        "depth_m": 0.70,
-        "distance_m": 0.70,
+        "depth_m": 0.10,
+        "distance_m": 0.10,
         "depth_valid": True,
         "ground_gap_m": 0.10,
         "camera_bottom_gap_m": 0.05,
@@ -340,6 +340,8 @@ def approaching_hurdle():
     info = go_ready_hurdle()
     info.update(
         {
+            "depth_m": 0.35,
+            "distance_m": 0.35,
             "ground_gap_m": 0.35,
             "camera_bottom_gap_m": 0.20,
             "go_now": False,
@@ -1054,7 +1056,7 @@ def test_completed_hurdle_mission_lock_waits_when_hurdle_disappears():
 def test_hurdle_can_reappear_at_a_different_position_after_absence():
     harness = MissionFlowHarness()
     first_hurdle = go_ready_hurdle()
-    first_hurdle.update({"offset_x_norm": -0.70, "depth_m": 0.60})
+    first_hurdle.update({"offset_x_norm": -0.70, "depth_m": 0.10})
     first = publish_special(harness, "hurdle", first_hurdle, "GO")
     complete_active(harness, "GO", first["command_id"])
 
@@ -1066,12 +1068,12 @@ def test_hurdle_can_reappear_at_a_different_position_after_absence():
     assert harness.terminal_action_armed["hurdle"] is True
 
     second_hurdle = go_ready_hurdle()
-    second_hurdle.update({"offset_x_norm": 0.75, "depth_m": 0.80})
+    second_hurdle.update({"offset_x_norm": 0.75, "depth_m": 0.12})
     second = publish_special(harness, "hurdle", second_hurdle, "GO")
 
     assert second["command_id"] > first["command_id"]
     assert harness.observations["hurdle"]["offset_x_norm"] == 0.75
-    assert second["source_command"]["depth_m"] == 0.80
+    assert second["source_command"]["depth_m"] == 0.12
 
 
 def test_pickup_success_publishes_once_and_advances_to_goal():

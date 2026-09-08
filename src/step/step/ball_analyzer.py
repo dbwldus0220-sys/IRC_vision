@@ -25,6 +25,7 @@ from std_msgs.msg import String
 
 from .approach_distance import approach_level_from_motion
 from .approach_distance import approach_motion_for_distance
+from .depth_frame_cache import DepthFrame
 from .depth_frame_cache import DepthFrameCache
 from .depth_frame_cache import DepthFrameConsumer
 from .temporal_confirmation import TemporalConfirmationFilter
@@ -77,6 +78,13 @@ class BallCandidate:
     ground_distance_m: float | None
     distance_m: float | None
     depth_valid: bool
+    depth_source: str
+    depth_sync_delta_ms: float | None
+    depth_sample_count: int
+    depth_width: int | None
+    depth_height: int | None
+    depth_stamp_ns: int | None
+    depth_age_sec: float | None
     score: float
 
 
@@ -111,6 +119,13 @@ class BallInfo:
     approach_level: int | None
     approach_target_distance_m: float | None
     depth_valid: bool
+    depth_source: str
+    depth_sync_delta_ms: float | None
+    depth_sample_count: int
+    depth_width: int | None
+    depth_height: int | None
+    rgb_stamp_ns: int | None
+    depth_stamp_ns: int | None
     is_centered: bool
     is_close: bool
     approach_ready: bool
@@ -164,6 +179,7 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         self.declare_parameter("depth_bbox_inner_ratio", 0.70)
         self.declare_parameter("depth_min_valid_pixels", 5)
         self.declare_parameter("depth_hold_sec", 0.40)
+        self.declare_parameter("max_rgb_depth_delta_sec", 0.05)
         self.declare_parameter("max_valid_depth_m", 4.0)
         self.declare_parameter("detect_depth_m", 1.5)
         self.declare_parameter("approach_depth_m", 0.9)
@@ -178,10 +194,6 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         # Ball pickup uses its own calibrated robot axis. Keep this separate
         # from the line analyzer's robot_center_offset_px parameter.
         self.declare_parameter("ball_robot_center_offset_px", 96.0)
-        self.declare_parameter("camera_height_m", 0.515)
-        self.declare_parameter("ball_diameter_m", 0.060)
-        self.declare_parameter("ball_top_height_m", 0.065)
-        self.declare_parameter("camera_forward_offset_m", 0.0)
         # At the 30 FPS competition setting this requires about 0.8 seconds of
         # spatially consistent detection before ball_info becomes detected.
         self.declare_parameter("confirmation_window_size", 40)
@@ -233,6 +245,12 @@ class BallAnalyzer(DepthFrameConsumer, Node):
             0.0,
             float(self.get_parameter("depth_hold_sec").value),
         )
+        self.max_rgb_depth_delta_sec = max(
+            0.0,
+            float(
+                self.get_parameter("max_rgb_depth_delta_sec").value
+            ),
+        )
         self.max_valid_depth_m = float(
             self.get_parameter("max_valid_depth_m").value
         )
@@ -272,21 +290,6 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         )
         self.robot_center_offset_px = float(
             self.get_parameter("ball_robot_center_offset_px").value
-        )
-        self.camera_height_m = max(
-            0.0,
-            float(self.get_parameter("camera_height_m").value),
-        )
-        self.ball_diameter_m = max(
-            0.0,
-            float(self.get_parameter("ball_diameter_m").value),
-        )
-        self.ball_top_height_m = max(
-            0.0,
-            float(self.get_parameter("ball_top_height_m").value),
-        )
-        self.camera_forward_offset_m = float(
-            self.get_parameter("camera_forward_offset_m").value
         )
         self.publish_empty_when_missing = bool(
             self.get_parameter("publish_empty_when_missing").value
@@ -335,6 +338,22 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         self.last_valid_ball_depth_m: float | None = None
         self.last_valid_ball_depth_time: float | None = None
         self.last_valid_ball_depth_center: tuple[int, int] | None = None
+        self.last_valid_ball_depth_sample_count = 0
+        self.last_valid_ball_depth_frame: DepthFrame | None = None
+        self._active_depth_frame: DepthFrame | None = None
+        self._active_depth_sync_delta_sec: float | None = None
+        self._active_rgb_width: int | None = None
+        self._active_rgb_height: int | None = None
+        self._active_rgb_stamp_ns: int | None = None
+        self._depth_sync_required = False
+        self._last_depth_source = "invalid"
+        self._last_depth_control_valid = False
+        self._last_depth_sample_count = 0
+        self._last_depth_width: int | None = None
+        self._last_depth_height: int | None = None
+        self._last_depth_stamp_ns: int | None = None
+        self._last_depth_age_sec: float | None = None
+        self._last_depth_sync_delta_sec: float | None = None
         self.fx: float | None = None
         self.fy: float | None = None
         self.cx: float | None = None
@@ -432,53 +451,176 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         center_y: int,
         bbox: list[int] | None = None,
     ) -> tuple[float | None, bool]:
+        """Sample the RGB-matched depth frame and retain source metadata."""
         now = time.monotonic()
-        with self._depth_lock:
-            if self.latest_depth_image is None:
-                return self._held_ball_depth(center_x, center_y, bbox, now)
-            age = (
-                now - self.latest_depth_time
-                if self.latest_depth_time is not None
-                else None
+        frame = getattr(self, "_active_depth_frame", None)
+        sync_delta = getattr(self, "_active_depth_sync_delta_sec", None)
+        sync_required = bool(getattr(self, "_depth_sync_required", False))
+        if frame is None and not sync_required:
+            frame = self._get_depth_cache().latest()
+        if (
+            frame is None
+            or now - frame.received_at > self.depth_timeout_sec
+            or (
+                sync_required
+                and (
+                    sync_delta is None
+                    or sync_delta
+                    > getattr(self, "max_rgb_depth_delta_sec", 0.05)
+                )
             )
-            if age is None or age > self.depth_timeout_sec:
-                return self._held_ball_depth(center_x, center_y, bbox, now)
-            depth_image = self.latest_depth_image
-        if depth_image.ndim != 2:
-            return self._held_ball_depth(center_x, center_y, bbox, now)
+        ):
+            return self._held_depth_sample(center_x, center_y, bbox, now)
 
-        height, width = depth_image.shape[:2]
-        if not (0 <= center_x < width and 0 <= center_y < height):
-            return self._held_ball_depth(center_x, center_y, bbox, now)
+        depth_image = frame.image
+        if depth_image.ndim != 2:
+            return self._held_depth_sample(center_x, center_y, bbox, now)
+
+        depth_height, depth_width = depth_image.shape[:2]
+        rgb_width = int(
+            getattr(self, "_active_rgb_width", None) or depth_width
+        )
+        rgb_height = int(
+            getattr(self, "_active_rgb_height", None) or depth_height
+        )
+        scale_x = depth_width / max(rgb_width, 1)
+        scale_y = depth_height / max(rgb_height, 1)
+        sample_x = int(round(center_x * scale_x))
+        sample_y = int(round(center_y * scale_y))
+        sample_x = max(0, min(depth_width - 1, sample_x))
+        sample_y = max(0, min(depth_height - 1, sample_y))
+        depth_bbox = (
+            [
+                int(round(bbox[0] * scale_x)),
+                int(round(bbox[1] * scale_y)),
+                int(round(bbox[2] * scale_x)),
+                int(round(bbox[3] * scale_y)),
+            ]
+            if bbox is not None and len(bbox) == 4
+            else None
+        )
 
         radius = self.depth_window_px // 2
         regions = [
             (
-                max(0, center_x - radius),
-                max(0, center_y - radius),
-                min(width, center_x + radius + 1),
-                min(height, center_y + radius + 1),
+                "center",
+                max(0, sample_x - radius),
+                max(0, sample_y - radius),
+                min(depth_width, sample_x + radius + 1),
+                min(depth_height, sample_y + radius + 1),
             )
         ]
-        inner_bbox = self._inner_depth_bbox(bbox, width, height)
+        inner_bbox = self._inner_depth_bbox(
+            depth_bbox,
+            depth_width,
+            depth_height,
+        )
         if inner_bbox is not None:
-            regions.append(inner_bbox)
+            regions.append(("inner_roi", *inner_bbox))
 
-        for x1, y1, x2, y2 in regions:
-            depth = self._median_valid_depth(depth_image[y1:y2, x1:x2])
+        for source, x1, y1, x2, y2 in regions:
+            depth, sample_count = self._median_valid_depth_sample(
+                depth_image[y1:y2, x1:x2]
+            )
             if depth is not None:
                 with self._depth_lock:
                     self.last_valid_ball_depth_m = depth
                     self.last_valid_ball_depth_time = now
                     self.last_valid_ball_depth_center = (center_x, center_y)
+                    self.last_valid_ball_depth_sample_count = sample_count
+                    self.last_valid_ball_depth_frame = frame
+                self._set_depth_metadata(
+                    source=source,
+                    control_valid=True,
+                    sample_count=sample_count,
+                    frame=frame,
+                    sync_delta_sec=sync_delta,
+                    age_sec=now - frame.received_at,
+                )
                 return depth, True
 
-        return self._held_ball_depth(center_x, center_y, bbox, now)
+        return self._held_depth_sample(center_x, center_y, bbox, now)
+
+    def _set_depth_metadata(
+        self,
+        *,
+        source: str,
+        control_valid: bool,
+        sample_count: int,
+        frame: DepthFrame | None,
+        sync_delta_sec: float | None,
+        age_sec: float | None,
+    ) -> None:
+        """Record metadata for the most recent candidate depth sample."""
+        self._last_depth_source = source
+        self._last_depth_control_valid = control_valid
+        self._last_depth_sample_count = sample_count
+        self._last_depth_width = frame.width if frame is not None else None
+        self._last_depth_height = frame.height if frame is not None else None
+        self._last_depth_stamp_ns = (
+            frame.stamp_ns if frame is not None else None
+        )
+        self._last_depth_age_sec = age_sec
+        self._last_depth_sync_delta_sec = sync_delta_sec
+
+    def _held_depth_sample(
+        self,
+        center_x: int,
+        center_y: int,
+        bbox: list[int] | None,
+        now: float,
+    ) -> tuple[float | None, bool]:
+        """Return held depth for display while making it control-invalid."""
+        depth, available = self._held_ball_depth(
+            center_x,
+            center_y,
+            bbox,
+            now,
+        )
+        frame = getattr(self, "last_valid_ball_depth_frame", None)
+        stamp = getattr(self, "last_valid_ball_depth_time", None)
+        rgb_stamp_ns = getattr(self, "_active_rgb_stamp_ns", None)
+        if (
+            available
+            and frame is not None
+            and frame.stamp_ns is not None
+            and rgb_stamp_ns is not None
+        ):
+            held_sync_delta_sec = (
+                abs(frame.stamp_ns - rgb_stamp_ns) / 1_000_000_000.0
+            )
+        else:
+            held_sync_delta_sec = getattr(
+                self,
+                "_active_depth_sync_delta_sec",
+                None,
+            )
+        self._set_depth_metadata(
+            source="held" if available else "invalid",
+            control_valid=False,
+            sample_count=(
+                int(getattr(self, "last_valid_ball_depth_sample_count", 0))
+                if available
+                else 0
+            ),
+            frame=frame,
+            sync_delta_sec=held_sync_delta_sec,
+            age_sec=(now - stamp if available and stamp is not None else None),
+        )
+        return depth, available
 
     def _median_valid_depth(self, crop: np.ndarray) -> float | None:
         """Return robust depth from one ROI when enough pixels are valid."""
+        depth, _ = self._median_valid_depth_sample(crop)
+        return depth
+
+    def _median_valid_depth_sample(
+        self,
+        crop: np.ndarray,
+    ) -> tuple[float | None, int]:
+        """Return median metric depth and the contributing pixel count."""
         if crop.size == 0:
-            return None
+            return None, 0
         if crop.dtype == np.uint16:
             crop_m = crop.astype(np.float32) * 0.001
         else:
@@ -490,8 +632,8 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         )
         valid = crop_m[valid_mask]
         if valid.size < self.depth_min_valid_pixels:
-            return None
-        return float(np.median(valid))
+            return None, int(valid.size)
+        return float(np.median(valid)), int(valid.size)
 
     def _inner_depth_bbox(
         self,
@@ -623,68 +765,21 @@ class BallAnalyzer(DepthFrameConsumer, Node):
                 None,
             )
 
-        # Aligned RealSense depth lands on the camera-facing ball surface.
-        # Move that sample one radius farther along optical Z so all projected
-        # geometry below describes the ball center. Keep depth_m itself raw for
-        # diagnostics and apply this correction only inside BallAnalyzer.
-        ball_radius_m = self.ball_diameter_m / 2.0
-        center_depth_m = depth_m + ball_radius_m
-        lateral_offset_m = x_ratio * center_depth_m
-        vertical_offset_m = y_ratio * center_depth_m
-        horizontal_distance_m = math.hypot(
-            lateral_offset_m,
-            center_depth_m,
-        )
-        distance_m = math.sqrt(
-            lateral_offset_m * lateral_offset_m
-            + vertical_offset_m * vertical_offset_m
-            + center_depth_m * center_depth_m
-        )
-        # This correction is intentionally ball-only. The sampled depth point
-        # is near the ball center, not on the floor, so subtract its height
-        # before applying Pythagoras to the camera-to-ball ray.
-        ball_center_height_m = max(
-            self.ball_top_height_m - ball_radius_m,
-            0.0,
-        )
-        camera_to_ball_center_height_m = max(
-            self.camera_height_m - ball_center_height_m,
-            0.0,
-        )
-        camera_ground_distance_m = math.sqrt(
-            max(
-                distance_m * distance_m
-                - camera_to_ball_center_height_m
-                * camera_to_ball_center_height_m,
-                0.0,
-            )
-        )
-        if horizontal_distance_m > 1e-9:
-            ground_lateral_m = (
-                camera_ground_distance_m
-                * lateral_offset_m
-                / horizontal_distance_m
-            )
-            ground_forward_m = (
-                camera_ground_distance_m
-                * center_depth_m
-                / horizontal_distance_m
-                + self.camera_forward_offset_m
-            )
-            ground_distance_m = math.hypot(
-                ground_lateral_m,
-                ground_forward_m,
-            )
-        else:
-            ground_distance_m = max(0.0, self.camera_forward_offset_m)
+        # Distance control intentionally uses raw aligned Depth Z only.  Keep
+        # camera-coordinate X/Y as diagnostics, but do not derive a slant or
+        # floor distance with Pythagoras.  The two legacy distance fields are
+        # raw-depth aliases so older JSON consumers cannot accidentally keep
+        # controlling from the removed horizontal-distance calculation.
+        lateral_offset_m = x_ratio * depth_m
+        vertical_offset_m = y_ratio * depth_m
         return (
             bearing_deg,
             elevation_deg,
             lateral_offset_m,
             vertical_offset_m,
-            horizontal_distance_m,
-            ground_distance_m,
-            distance_m,
+            None,
+            depth_m,
+            depth_m,
         )
 
     def _build_candidate(
@@ -736,10 +831,22 @@ class BallAnalyzer(DepthFrameConsumer, Node):
                 robot_center_offset_px=self.robot_center_offset_px,
             )
 
-        depth_m, depth_valid = self._sample_depth_m(
+        depth_m, depth_available = self._sample_depth_m(
             center_x,
             center_y,
             bbox,
+        )
+        depth_source = getattr(
+            self,
+            "_last_depth_source",
+            "center" if depth_available else "invalid",
+        )
+        depth_valid = bool(
+            getattr(
+                self,
+                "_last_depth_control_valid",
+                depth_available,
+            )
         )
         (
             bearing_deg,
@@ -753,7 +860,7 @@ class BallAnalyzer(DepthFrameConsumer, Node):
             center_x,
             center_y,
             depth_m,
-            depth_valid,
+            depth_available,
         )
         if offset_x_px < -self.horizontal_deadband_px:
             horizontal_direction = "LEFT"
@@ -763,10 +870,7 @@ class BallAnalyzer(DepthFrameConsumer, Node):
             horizontal_direction = "CENTER"
         area_px = width_px * height_px
         center_score = max(0.0, 1.0 - abs(offset_x_norm))
-        depth_score = self._closeness_score(
-            ground_distance_m,
-            depth_valid and ground_distance_m is not None,
-        )
+        depth_score = self._closeness_score(depth_m, depth_valid)
         area_score = min(1.0, math.sqrt(area_px) / 180.0)
         score = (
             confidence * 0.45
@@ -825,6 +929,24 @@ class BallAnalyzer(DepthFrameConsumer, Node):
                 round(distance_m, 3) if distance_m is not None else None
             ),
             depth_valid=depth_valid,
+            depth_source=depth_source,
+            depth_sync_delta_ms=(
+                round(self._last_depth_sync_delta_sec * 1000.0, 3)
+                if getattr(self, "_last_depth_sync_delta_sec", None)
+                is not None
+                else None
+            ),
+            depth_sample_count=int(
+                getattr(self, "_last_depth_sample_count", 0)
+            ),
+            depth_width=getattr(self, "_last_depth_width", None),
+            depth_height=getattr(self, "_last_depth_height", None),
+            depth_stamp_ns=getattr(self, "_last_depth_stamp_ns", None),
+            depth_age_sec=(
+                round(self._last_depth_age_sec, 3)
+                if getattr(self, "_last_depth_age_sec", None) is not None
+                else None
+            ),
             score=round(score, 4),
         )
 
@@ -834,16 +956,15 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         image_height: int | None,
     ) -> tuple[str, bool, bool, bool, bool, bool, bool, str]:
         centered = abs(candidate.offset_x_px) <= self.center_tolerance_px
-        ground_distance = candidate.ground_distance_m
         close = (
             candidate.depth_valid
-            and ground_distance is not None
-            and ground_distance <= self.detect_depth_m
+            and candidate.depth_m is not None
+            and candidate.depth_m <= self.detect_depth_m
         )
         approach_ready = (
             candidate.depth_valid
-            and ground_distance is not None
-            and ground_distance <= self.approach_depth_m
+            and candidate.depth_m is not None
+            and candidate.depth_m <= self.approach_depth_m
         )
 
         in_pickup_window = False
@@ -858,8 +979,8 @@ class BallAnalyzer(DepthFrameConsumer, Node):
 
         pickup_ready = (
             candidate.depth_valid
-            and ground_distance is not None
-            and ground_distance <= self.pickup_ready_depth_m
+            and candidate.depth_m is not None
+            and candidate.depth_m <= self.pickup_ready_depth_m
             and centered
             and in_pickup_window
         )
@@ -949,6 +1070,21 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         )
         self.publisher.publish(message)
 
+    @staticmethod
+    def _payload_stamp_ns(payload: dict[str, Any]) -> int | None:
+        """Read the detector's original RGB timestamp."""
+        stamp = payload.get("stamp")
+        if not isinstance(stamp, dict):
+            return None
+        try:
+            sec = int(stamp.get("sec"))
+            nanosec = int(stamp.get("nanosec"))
+        except (TypeError, ValueError):
+            return None
+        if sec < 0 or not 0 <= nanosec < 1_000_000_000:
+            return None
+        return sec * 1_000_000_000 + nanosec
+
     def _empty_info(self, note: str = "no_ball_detection") -> BallInfo:
         age = self._depth_age_sec()
         return BallInfo(
@@ -979,6 +1115,13 @@ class BallAnalyzer(DepthFrameConsumer, Node):
             approach_level=None,
             approach_target_distance_m=None,
             depth_valid=False,
+            depth_source="invalid",
+            depth_sync_delta_ms=None,
+            depth_sample_count=0,
+            depth_width=self.latest_image_width,
+            depth_height=self.latest_image_height,
+            rgb_stamp_ns=getattr(self, "_active_rgb_stamp_ns", None),
+            depth_stamp_ns=None,
             is_centered=False,
             is_close=False,
             approach_ready=False,
@@ -1043,6 +1186,20 @@ class BallAnalyzer(DepthFrameConsumer, Node):
             payload,
             detections,
         )
+        rgb_stamp_ns = self._payload_stamp_ns(payload)
+        if rgb_stamp_ns is None:
+            depth_frame = self._get_depth_cache().latest()
+            sync_delta_sec = None
+        else:
+            depth_frame, sync_delta_sec = self._get_depth_cache().nearest(
+                rgb_stamp_ns
+            )
+        self._active_depth_frame = depth_frame
+        self._active_depth_sync_delta_sec = sync_delta_sec
+        self._active_rgb_width = image_width
+        self._active_rgb_height = image_height
+        self._active_rgb_stamp_ns = rgb_stamp_ns
+        self._depth_sync_required = rgb_stamp_ns is not None
         candidates: list[BallCandidate] = []
         for detection in detections:
             if not isinstance(detection, dict):
@@ -1115,8 +1272,6 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         pickup_now = raw_pickup_now and pickup_confirmation.confirmed
         if raw_pickup_now and not pickup_now:
             note = "pickup_confirmation_pending"
-        age = self._depth_age_sec()
-
         self._publish(
             BallInfo(
                 detected=True,
@@ -1143,13 +1298,20 @@ class BallAnalyzer(DepthFrameConsumer, Node):
                 ground_distance_m=target.ground_distance_m,
                 distance_m=target.distance_m,
                 approach_motion=approach_motion_for_distance(
-                    target.ground_distance_m
+                    target.depth_m
                 ),
                 approach_level=approach_level_from_motion(
-                    approach_motion_for_distance(target.ground_distance_m)
+                    approach_motion_for_distance(target.depth_m)
                 ),
-                approach_target_distance_m=target.ground_distance_m,
+                approach_target_distance_m=target.depth_m,
                 depth_valid=target.depth_valid,
+                depth_source=target.depth_source,
+                depth_sync_delta_ms=target.depth_sync_delta_ms,
+                depth_sample_count=target.depth_sample_count,
+                depth_width=target.depth_width,
+                depth_height=target.depth_height,
+                rgb_stamp_ns=rgb_stamp_ns,
+                depth_stamp_ns=target.depth_stamp_ns,
                 is_centered=centered,
                 is_close=close,
                 approach_ready=approach_ready,
@@ -1191,7 +1353,7 @@ class BallAnalyzer(DepthFrameConsumer, Node):
                 ),
                 robot_center_offset_px=self.robot_center_offset_px,
                 camera_info_ready=self.fx is not None,
-                depth_age_sec=round(age, 3) if age is not None else None,
+                depth_age_sec=target.depth_age_sec,
                 note=note,
             )
         )

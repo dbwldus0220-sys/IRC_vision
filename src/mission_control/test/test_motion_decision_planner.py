@@ -65,8 +65,8 @@ def hurdle_info(**overrides):
         "confirmation_confirmed": True,
         "confidence": 0.9,
         "depth_valid": True,
-        "depth_m": 0.8,
-        "distance_m": 0.8,
+        "depth_m": 0.1,
+        "distance_m": 0.1,
         "ground_gap_m": 0.1,
         "camera_bottom_gap_m": 0.02,
         "bearing_deg": 0.0,
@@ -452,6 +452,7 @@ def test_confirmed_hurdle_preempts_ball_in_non_goal_phase(phase):
             line=line_info(),
             ball=ball_info(),
             hurdle=hurdle_info(
+                depth_m=0.35,
                 go_now=False,
                 ground_gap_m=0.35,
                 camera_bottom_gap_m=0.20,
@@ -474,6 +475,7 @@ def test_goal_approach_confirmed_hurdle_preempts_goal(include_ball):
             ball=ball_info() if include_ball else None,
             goal=goal_info(),
             hurdle=hurdle_info(
+                depth_m=0.35,
                 go_now=False,
                 ground_gap_m=0.35,
                 camera_bottom_gap_m=0.20,
@@ -601,7 +603,7 @@ def test_confirmed_ball_without_depth_stops_without_raw_turn():
 
     assert decision.source == "ball"
     assert decision.action == "STOP"
-    assert decision.reason == "missing_valid_ball_ground_distance"
+    assert decision.reason == "missing_valid_ball_depth"
     assert decision.source_command["linear_speed_mps"] == 0.0
     assert decision.source_command["depth_valid"] is False
     assert planner.ball_lock_active is True
@@ -626,7 +628,7 @@ def test_centered_ball_without_depth_preempts_line_but_cannot_advance():
 
     assert decision.source == "ball"
     assert decision.action == "STOP"
-    assert decision.reason == "missing_valid_ball_ground_distance"
+    assert decision.reason == "missing_valid_ball_depth"
     assert decision.source_command["linear_speed_mps"] == 0.0
 
 
@@ -676,7 +678,7 @@ def test_explicit_ball_approach_accepts_valid_distance_above_1_5m():
     assert decision.reason == "ball_aligned_discrete_approach"
 
 
-def test_ball_straight_0_becomes_context_specific_fine_forward():
+def test_ball_ignores_legacy_close_ground_distance():
     decision = MotionDecisionPlanner().plan(
         "BALL_APPROACH",
         observations(
@@ -690,9 +692,9 @@ def test_ball_straight_0_becomes_context_specific_fine_forward():
     )
 
     assert decision.source == "ball"
-    assert decision.action == "BALL_FINE_FORWARD_8"
+    assert decision.action == "STRAIGHT_3"
     assert decision.valid is True
-    assert decision.source_command["semantic_motion"] == "STRAIGHT_0"
+    assert decision.source_command["approach_motion"] == "STRAIGHT_3"
 
 
 def test_ball_beyond_1_5m_does_not_start_tracking_memory():
@@ -726,7 +728,7 @@ def test_untracked_missing_ball_keeps_line_without_recovery():
     assert planner.ball_recovery_centering is False
 
 
-def test_takeover_uses_ground_distance_not_depth_or_camera_distance():
+def test_takeover_uses_raw_depth_not_legacy_distance_fields():
     planner = MotionDecisionPlanner()
 
     decision = planner.plan(
@@ -743,8 +745,8 @@ def test_takeover_uses_ground_distance_not_depth_or_camera_distance():
         0.1,
     )
 
-    assert decision.source == "line"
-    assert decision.action == "STRAIGHT"
+    assert decision.source == "ball"
+    assert decision.action == "STRAIGHT_3"
 
 
 def test_lost_tracked_ball_stops_then_turns_toward_last_seen_side():

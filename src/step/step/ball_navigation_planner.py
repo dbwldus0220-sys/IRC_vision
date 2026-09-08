@@ -105,9 +105,11 @@ class BallNavigationCommand:
             ),
             "offset_x_norm": _round_optional(self.offset_x_norm, 6),
             "depth_m": _round_optional(self.depth_m, 3),
-            "distance_m": _round_optional(self.distance_m, 3),
+            # Legacy aliases intentionally carry raw Depth Z.  No slant or
+            # floor distance is calculated for BALL control anymore.
+            "distance_m": _round_optional(self.depth_m, 3),
             "ground_distance_m": _round_optional(
-                self.ground_distance_m,
+                self.depth_m,
                 3,
             ),
             "distance_error_m": _round_optional(
@@ -126,7 +128,7 @@ class BallNavigationCommand:
             ),
             "approach_level": approach_level,
             "approach_target_distance_m": _round_optional(
-                self.ground_distance_m,
+                self.depth_m,
                 3,
             ),
             "turn_motion": turn_motion,
@@ -226,20 +228,18 @@ class BallNavigationPlanner:
         if steering_error is None:
             return self.stop("invalid_ball_alignment")
 
-        distance = _number(ball_info, "distance_m")
-        ground_distance = _number(ball_info, "ground_distance_m")
+        distance = depth
+        ground_distance = depth
         depth_valid = bool(ball_info.get("depth_valid", False))
         pickup_ready = bool(ball_info.get("pickup_ready", False))
 
-        # A normal general BALL approach is selected jointly from fresh ground
-        # distance and ball occurrence, without raw numbered turn actions.
+        # Every BALL distance threshold is evaluated against raw Depth Z.
         if (
             not depth_valid
             or depth is None
-            or ground_distance is None
-            or ground_distance <= 0.0
+            or depth <= 0.0
         ):
-            return self.stop("missing_valid_ball_ground_distance")
+            return self.stop("missing_valid_ball_depth")
 
         # Raw depth owns only the transition from general approach into the
         # atomic pickup sequence. pickup_ready gates the fixed grasp block at
@@ -253,8 +253,6 @@ class BallNavigationPlanner:
             ):
                 return self.stop("stale_ball_depth_for_pickup_sequence")
 
-            # Keep the locally validated raw-Z bucket for the camera-down
-            # pickup approach. General BALL approach uses ground distance.
             pickup_approach_motion = approach_motion_for_distance(depth)
             pickup_approach_level = approach_level_from_motion(
                 pickup_approach_motion
@@ -274,9 +272,9 @@ class BallNavigationPlanner:
                 pickup_approach_motion,
             )
 
-        speed = self._approach_speed(ground_distance, pickup_ready)
+        speed = self._approach_speed(depth, pickup_ready)
         motion = self._general_approach_motion(
-            ground_distance,
+            depth,
             ball_occurrence=_number(ball_info, "ball_occurrence"),
         )
         directional_recovery = motion.startswith("RECOVER_")
@@ -295,7 +293,7 @@ class BallNavigationPlanner:
             offset=offset,
             depth=depth,
             distance=distance,
-            ground_distance=ground_distance,
+            ground_distance=depth,
             confidence=confidence,
             depth_valid=True,
             pickup_ready=pickup_ready,
@@ -354,11 +352,11 @@ class BallNavigationPlanner:
 
     def _general_approach_motion(
         self,
-        ground_distance_m: float,
+        depth_m: float,
         ball_occurrence: float | None,
     ) -> str:
-        """Select the BALL-only distance and occurrence-curved approach."""
-        if ground_distance_m > self.FAR_APPROACH_MIN_DISTANCE_M:
+        """Select the BALL-only raw-depth and occurrence-curved approach."""
+        if depth_m > self.FAR_APPROACH_MIN_DISTANCE_M:
             return "STRAIGHT_3"
 
         # The first and second balls intentionally use opposite curved paths.
@@ -369,16 +367,16 @@ class BallNavigationPlanner:
             if ball_occurrence is not None and ball_occurrence >= 2.0
             else "LEFT"
         )
-        if ground_distance_m > self.RECOVERY_8_MIN_DISTANCE_M:
+        if depth_m > self.RECOVERY_8_MIN_DISTANCE_M:
             return f"RECOVER_{direction}_TURN_{direction}_8"
-        if ground_distance_m > self.RECOVERY_6_MIN_DISTANCE_M:
+        if depth_m > self.RECOVERY_6_MIN_DISTANCE_M:
             return f"RECOVER_{direction}_TURN_{direction}_6"
 
-        return approach_motion_for_distance(ground_distance_m)
+        return approach_motion_for_distance(depth_m)
 
     def _approach_speed(
         self,
-        ground_distance_m: float,
+        depth_m: float,
         pickup_ready: bool,
     ) -> float:
         """Reduce forward speed smoothly near pickup distance."""
@@ -387,7 +385,7 @@ class BallNavigationPlanner:
             1e-3,
         )
         scale = _clamp(
-            (ground_distance_m - self.config.pickup_depth_m) / span,
+            (depth_m - self.config.pickup_depth_m) / span,
             0.0,
             1.0,
         )

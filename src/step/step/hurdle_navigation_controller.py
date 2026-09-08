@@ -28,22 +28,18 @@ class HurdleNavigationController(Node):
         )
         self.declare_parameter("publish_rate_hz", 10.0)
         self.declare_parameter("hurdle_timeout_sec", 0.50)
-        self.declare_parameter("min_confidence", 0.35)
-        self.declare_parameter("go_target_ground_gap_m", 0.10)
-        self.declare_parameter("go_ground_gap_tolerance_m", 0.10)
-        self.declare_parameter("go_max_camera_bottom_gap_m", 0.05)
+        self.declare_parameter("min_confidence", 0.60)
+        self.declare_parameter("go_target_depth_m", 0.10)
+        self.declare_parameter("go_depth_tolerance_m", 0.10)
         self.declare_parameter("go_angle_tolerance_deg", 8.0)
 
         config = HurdleNavigationConfig(
             min_confidence=self._float_parameter("min_confidence"),
-            go_target_ground_gap_m=self._float_parameter(
-                "go_target_ground_gap_m"
+            go_target_depth_m=self._float_parameter(
+                "go_target_depth_m"
             ),
-            go_ground_gap_tolerance_m=self._float_parameter(
-                "go_ground_gap_tolerance_m"
-            ),
-            go_max_camera_bottom_gap_m=self._float_parameter(
-                "go_max_camera_bottom_gap_m"
+            go_depth_tolerance_m=self._float_parameter(
+                "go_depth_tolerance_m"
             ),
             go_angle_tolerance_deg=self._float_parameter(
                 "go_angle_tolerance_deg"

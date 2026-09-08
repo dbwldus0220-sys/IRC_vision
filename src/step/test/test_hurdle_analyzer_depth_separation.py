@@ -8,11 +8,8 @@ def _rgb_only_analyzer() -> HurdleAnalyzer:
     analyzer.min_confidence = 0.40
     analyzer.direction_deadband_norm = 0.04
     analyzer.max_valid_depth_m = 4.0
-    analyzer.camera_height_m = 0.70
-    analyzer.hurdle_reference_height_m = 0.10
-    analyzer.go_target_ground_gap_m = 0.10
-    analyzer.go_ground_gap_tolerance_m = 0.10
-    analyzer.go_max_camera_bottom_gap_m = 0.05
+    analyzer.go_target_depth_m = 0.10
+    analyzer.go_depth_tolerance_m = 0.10
     analyzer.go_angle_tolerance_deg = 8.0
     analyzer.fx = None
     analyzer.fy = None
@@ -38,5 +35,5 @@ def test_rgb_hurdle_remains_candidate_without_depth():
     assert candidate.depth_m is None
     assert candidate.ground_distance_m is None
     state = analyzer._state(candidate)
-    assert state[0] == "NO_GROUND_DISTANCE"
+    assert state[0] == "NO_DEPTH"
     assert state[4] is False

@@ -79,9 +79,6 @@ def test_first_ball_at_68cm_uses_left_6_curve():
         (0.70, "RECOVER_LEFT_TURN_LEFT_8"),
         (0.60, "RECOVER_LEFT_TURN_LEFT_6"),
         (0.50, "STRAIGHT_3"),
-        (0.30, "STRAIGHT_2"),
-        (0.20, "STRAIGHT_1"),
-        (0.13, "STRAIGHT_0"),
     ],
 )
 def test_aligned_general_ball_approach_distance_policy(
@@ -92,7 +89,7 @@ def test_aligned_general_ball_approach_distance_policy(
 
     command = planner.plan(
         ball_info(
-            depth_m=max(ground_distance, 0.50),
+            depth_m=ground_distance,
             ground_distance_m=ground_distance,
             bearing_deg=0.0,
             offset_x_norm=0.0,
@@ -143,7 +140,7 @@ def test_raw_depth_starts_pickup_sequence_at_400mm_without_vision_gate():
     assert command.linear_speed_mps == 0.0
     assert command.pickup_now is True
     assert command.pickup_approach_motion == "STRAIGHT_2"
-    assert command.ground_distance_m == 0.15
+    assert command.ground_distance_m == 0.40
 
 
 @pytest.mark.parametrize("depth_age_sec", [None, 0.701])
@@ -281,17 +278,17 @@ def test_near_center_deadband_suppresses_path_angle_turn():
 
 
 @pytest.mark.parametrize(
-    "ground_distance",
+    "depth",
     [1.0, 1.5, 1.51, 2.0, 10.0],
 )
-def test_valid_far_ground_distance_uses_straight_3(ground_distance):
+def test_valid_far_depth_uses_straight_3(depth):
     planner = BallNavigationPlanner()
 
     command = planner.plan(
         ball_info(
-            depth_m=ground_distance,
-            ground_distance_m=ground_distance,
-            distance_m=ground_distance,
+            depth_m=depth,
+            ground_distance_m=depth,
+            distance_m=depth,
         ),
         0.1,
     )
@@ -302,7 +299,7 @@ def test_valid_far_ground_distance_uses_straight_3(ground_distance):
 
 
 @pytest.mark.parametrize(
-    "ground_distance",
+    "depth",
     [
         None,
         "invalid",
@@ -313,13 +310,13 @@ def test_valid_far_ground_distance_uses_straight_3(ground_distance):
         -0.1,
     ],
 )
-def test_invalid_ground_distance_stops(ground_distance):
+def test_invalid_depth_stops(depth):
     planner = BallNavigationPlanner()
 
     command = planner.plan(
         ball_info(
-            depth_m=1.0,
-            ground_distance_m=ground_distance,
+            depth_m=depth,
+            ground_distance_m=1.0,
             distance_m=1.0,
         ),
         0.1,
@@ -327,7 +324,7 @@ def test_invalid_ground_distance_stops(ground_distance):
 
     assert command.valid is False
     assert command.motion == "STOP"
-    assert command.reason == "missing_valid_ball_ground_distance"
+    assert command.reason == "missing_valid_ball_depth"
 
 
 def test_missing_depth_does_not_emit_unsupported_raw_turn():
@@ -346,7 +343,7 @@ def test_missing_depth_does_not_emit_unsupported_raw_turn():
 
     assert command.valid is False
     assert command.motion == "STOP"
-    assert command.reason == "missing_valid_ball_ground_distance"
+    assert command.reason == "missing_valid_ball_depth"
     assert command.depth_valid is False
 
 
@@ -407,7 +404,7 @@ def test_angular_acceleration_is_limited():
         (ball_info(confidence=0.1), "low_ball_confidence"),
         (
             ball_info(depth_m=None, depth_valid=False),
-            "missing_valid_ball_ground_distance",
+            "missing_valid_ball_depth",
         ),
     ],
 )

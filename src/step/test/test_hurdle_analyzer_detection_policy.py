@@ -107,34 +107,33 @@ def test_hurdle_detection_defaults_keep_go_policy_unchanged():
     """Detection defaults change while every GO threshold stays fixed."""
     analyzer = load_hurdle_analyzer()()
 
-    assert analyzer.min_confidence == 0.40
+    assert analyzer.min_confidence == 0.60
     assert analyzer.detect_depth_m == 1.5
     assert analyzer.confirmation_filter.window_size == 20
     assert analyzer.confirmation_filter.required_hits == 12
     assert analyzer.confirmation_filter.max_missed_frames == 4
 
-    assert analyzer.go_target_ground_gap_m == 0.10
-    assert analyzer.go_ground_gap_tolerance_m == 0.10
-    assert analyzer.go_max_camera_bottom_gap_m == 0.05
+    assert analyzer.go_target_depth_m == 0.10
+    assert analyzer.go_depth_tolerance_m == 0.10
     assert analyzer.go_angle_tolerance_deg == 8.0
     assert analyzer.go_confirmation_filter.window_size == 7
     assert analyzer.go_confirmation_filter.required_hits == 5
 
 
 def test_hurdle_candidate_confidence_threshold_is_inclusive():
-    """Accept confidence at 0.40 and reject a value just below it."""
+    """Accept confidence at 0.60 and reject a value just below it."""
     analyzer = load_hurdle_analyzer()()
     analyzer._sample_depths = lambda *_args: (None, None, None, 0)
     detection = {
-        'confidence': 0.40,
+        'confidence': 0.60,
         'bbox': [500, 250, 600, 350],
         'center': [550, 300],
     }
 
     accepted = analyzer._build_candidate(detection, 1280, 720)
-    detection['confidence'] = 0.3999
+    detection['confidence'] = 0.5999
     rejected = analyzer._build_candidate(detection, 1280, 720)
 
     assert accepted is not None
-    assert accepted.confidence == 0.40
+    assert accepted.confidence == 0.60
     assert rejected is None

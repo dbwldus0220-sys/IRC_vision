@@ -509,11 +509,11 @@ class MotionDecisionPlanner:
             and not bool(info.get("confirmation_confirmed", False))
         ):
             return False
-        ground_gap = self._number(info, "ground_gap_m")
+        depth = self._number(info, "depth_m")
         return bool(
             info.get("depth_valid", False)
-            and ground_gap is not None
-            and ground_gap <= self.config.hurdle_control_range_m
+            and depth is not None
+            and depth <= self.config.hurdle_control_range_m
         )
 
     def _plan_source(
@@ -710,7 +710,7 @@ class MotionDecisionPlanner:
         confidence = self._number(info, "confidence")
         offset = self._number(info, "offset_x_norm")
         tolerance = self._number(info, "pickup_x_tolerance_norm")
-        ground_distance = self._number(info, "ground_distance_m")
+        depth = self._number(info, "depth_m")
         depth_valid = info.get("depth_valid")
         depth_age = self._number(info, "depth_age_sec")
         pickup_ready = info.get("pickup_ready")
@@ -740,7 +740,7 @@ class MotionDecisionPlanner:
             "offset_x_norm": offset,
             "pickup_x_tolerance_norm": tolerance,
             "confidence": confidence,
-            "ground_distance_m": ground_distance,
+            "depth_m": depth,
             "depth_valid": depth_valid,
             "depth_age_sec": depth_age,
             "pickup_ready": pickup_ready,
@@ -755,8 +755,8 @@ class MotionDecisionPlanner:
         if pickup_ready:
             if (
                 not depth_is_fresh
-                or ground_distance is None
-                or ground_distance <= 0.0
+                or depth is None
+                or depth <= 0.0
             ):
                 return MotionDecision(
                     phase=phase,
@@ -799,8 +799,8 @@ class MotionDecisionPlanner:
                 )
             if (
                 in_pickup_window
-                and ground_distance is not None
-                and ground_distance > 0.0
+                and depth is not None
+                and depth > 0.0
             ):
                 return MotionDecision(
                     phase=phase,
@@ -973,7 +973,8 @@ class MotionDecisionPlanner:
         return number if math.isfinite(number) else None
 
     def _ball_range_m(self, info: dict[str, Any] | None) -> float | None:
-        return self._number(info, "ground_distance_m")
+        """Return the raw aligned Depth Z used by every BALL threshold."""
+        return self._number(info, "depth_m")
 
     def _ball_direction_error_deg(
         self,
