@@ -509,11 +509,11 @@ class MotionDecisionPlanner:
             and not bool(info.get("confirmation_confirmed", False))
         ):
             return False
-        depth = self._number(info, "depth_m")
+        ground_gap = self._number(info, "ground_gap_m")
         return bool(
             info.get("depth_valid", False)
-            and depth is not None
-            and depth <= self.config.hurdle_control_range_m
+            and ground_gap is not None
+            and ground_gap <= self.config.hurdle_control_range_m
         )
 
     def _plan_source(
@@ -710,12 +710,20 @@ class MotionDecisionPlanner:
         confidence = self._number(info, "confidence")
         offset = self._number(info, "offset_x_norm")
         tolerance = self._number(info, "pickup_x_tolerance_norm")
+        ground_distance = self._number(info, "ground_distance_m")
+        depth_valid = info.get("depth_valid")
+        depth_age = self._number(info, "depth_age_sec")
+        pickup_ready = info.get("pickup_ready")
+        in_pickup_window = info.get("is_in_pickup_window")
         if (
             confidence is None
             or confidence < self.ball_planner.config.min_confidence
             or offset is None
             or tolerance is None
             or tolerance <= 0.0
+            or not isinstance(depth_valid, bool)
+            or not isinstance(pickup_ready, bool)
+            or not isinstance(in_pickup_window, bool)
         ):
             return MotionDecision(
                 phase=phase,
@@ -732,14 +740,40 @@ class MotionDecisionPlanner:
             "offset_x_norm": offset,
             "pickup_x_tolerance_norm": tolerance,
             "confidence": confidence,
+            "ground_distance_m": ground_distance,
+            "depth_valid": depth_valid,
+            "depth_age_sec": depth_age,
+            "pickup_ready": pickup_ready,
+            "is_in_pickup_window": in_pickup_window,
         }
-        if abs(offset) <= tolerance:
+        depth_is_fresh = bool(
+            depth_valid
+            and depth_age is not None
+            and 0.0 <= depth_age
+            <= self.ball_planner.config.max_pickup_depth_age_sec
+        )
+        if pickup_ready:
+            if (
+                not depth_is_fresh
+                or ground_distance is None
+                or ground_distance <= 0.0
+            ):
+                return MotionDecision(
+                    phase=phase,
+                    source="ball",
+                    action="WAIT",
+                    valid=False,
+                    reason="ball_pickup_ready_waiting_for_fresh_depth",
+                    sdk_motion_requested=False,
+                    requires_ack=False,
+                    source_command=common,
+                )
             return MotionDecision(
                 phase=phase,
                 source="ball",
                 action="BALL_PICKUP_FINE_ALIGN_CONTINUE",
                 valid=True,
-                reason="ball_pickup_fine_alignment_complete",
+                reason="ball_pickup_ready_for_fixed_grasp_block",
                 sdk_motion_requested=False,
                 requires_ack=False,
                 source_command={
@@ -751,6 +785,48 @@ class MotionDecisionPlanner:
 
         # BallAnalyzer computes detected center minus calibrated robot center;
         # positive therefore means the ball is to the robot's screen-right.
+        if abs(offset) <= tolerance:
+            if not depth_is_fresh:
+                return MotionDecision(
+                    phase=phase,
+                    source="ball",
+                    action="WAIT",
+                    valid=False,
+                    reason="ball_pickup_fine_forward_waiting_for_fresh_depth",
+                    sdk_motion_requested=False,
+                    requires_ack=False,
+                    source_command=common,
+                )
+            if (
+                in_pickup_window
+                and ground_distance is not None
+                and ground_distance > 0.0
+            ):
+                return MotionDecision(
+                    phase=phase,
+                    source="ball",
+                    action="BALL_PICKUP_FINE_FORWARD",
+                    valid=True,
+                    reason="ball_pickup_not_ready_continue_fine_approach",
+                    sdk_motion_requested=True,
+                    requires_ack=False,
+                    source_command={
+                        **common,
+                        "lateral_direction": "CENTERED",
+                        "catalog_motion_available": True,
+                    },
+                )
+            return MotionDecision(
+                phase=phase,
+                source="ball",
+                action="WAIT",
+                valid=False,
+                reason="ball_pickup_not_ready_waiting_for_valid_window",
+                sdk_motion_requested=False,
+                requires_ack=False,
+                source_command=common,
+            )
+
         direction = "RIGHT" if offset > 0.0 else "LEFT"
         return MotionDecision(
             phase=phase,

@@ -107,16 +107,20 @@ def test_robot_launch_defaults_are_production_ready(
         "running_polls": 2,
         "settling_polls": 1,
         "explicit_torque_approval": True,
-        "motion_json_path": (
-            "/home/jet/IRC/external_sdk/"
-            "robot_motion_player_sdk_work_20260801/"
-            "final step/robot_motions.json"
+        "motion_json_path": str(
+            Path(__file__).resolve().parents[3]
+            / "install"
+            / "irc_step_motion_executor"
+            / "share"
+            / "irc_step_motion_executor"
+            / "config"
+            / "robot_motions_runtime.json"
         ),
         "robot_device_path": "/dev/ttyUSB1",
         "robot_baud_rate": 4000000,
         "robot_motor_ids": list(range(23)),
         "startup_pose_enabled": True,
-        "startup_pose_name": "오뒤401",
+        "startup_pose_name": "오뒤410",
         "startup_pose_duration_ms": 4000,
     }
 

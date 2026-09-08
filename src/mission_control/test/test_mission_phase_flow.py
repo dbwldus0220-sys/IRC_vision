@@ -256,6 +256,7 @@ def pickup_ready_ball():
         "depth_age_sec": 0.05,
         "pickup_ready": True,
         "pickup_now": True,
+        "is_in_pickup_window": True,
     }
 
 
@@ -266,6 +267,7 @@ def score_ready_goal():
         "bearing_deg": 0.0,
         "offset_x_norm": 0.0,
         "depth_m": 0.25,
+        "ground_distance_m": 0.25,
         "distance_m": 0.25,
         "depth_valid": True,
         "score_now": True,
@@ -314,6 +316,7 @@ def approaching_goal():
     info.update(
         {
             "depth_m": 0.49,
+            "ground_distance_m": 0.49,
             "distance_m": 0.49,
             "score_now": False,
         }
@@ -403,7 +406,13 @@ def test_pickup_fine_alignment_rechecks_fresh_ball_under_atomic_lock():
     assert waiting["source"] == "ball"
 
     right_ball = pickup_ready_ball()
-    right_ball["offset_x_norm"] = 0.2
+    right_ball.update(
+        {
+            "offset_x_norm": 0.2,
+            "pickup_ready": False,
+            "is_in_pickup_window": False,
+        }
+    )
     right = harness.publish_vision(ball=right_ball)[-1]
     assert right["action"] == "BALL_PICKUP_CRAB_RIGHT"
     assert right["active_special_command_id"] == pickup["command_id"]
@@ -1150,6 +1159,7 @@ def test_goal_camera90_turn_rechecks_fresh_goal_before_forward():
         goal={
             **approaching_goal(),
             "depth_m": 0.5,
+            "ground_distance_m": 0.5,
             "distance_m": 0.5,
             "bearing_deg": 34.0,
             "offset_x_norm": 0.3,
@@ -1166,6 +1176,7 @@ def test_goal_camera90_turn_rechecks_fresh_goal_before_forward():
         goal={
             **approaching_goal(),
             "depth_m": 0.5,
+            "ground_distance_m": 0.5,
             "distance_m": 0.5,
             "bearing_deg": 0.0,
             "offset_x_norm": 0.0,
@@ -1181,6 +1192,7 @@ def test_goal_camera90_crab_rechecks_full_priority_with_fresh_goal():
         goal={
             **approaching_goal(),
             "depth_m": 0.49,
+            "ground_distance_m": 0.49,
             "distance_m": 0.49,
             "bearing_deg": 0.0,
             "offset_x_norm": 0.2,
@@ -1197,6 +1209,7 @@ def test_goal_camera90_crab_rechecks_full_priority_with_fresh_goal():
         goal={
             **approaching_goal(),
             "depth_m": 0.49,
+            "ground_distance_m": 0.49,
             "distance_m": 0.49,
             "bearing_deg": -24.0,
             "offset_x_norm": 0.2,
@@ -1210,6 +1223,7 @@ def test_goal_camera90_forward_rechecks_depth_bucket_from_fresh_goal():
     far = {
         **approaching_goal(),
         "depth_m": 0.65,
+        "ground_distance_m": 0.65,
         "distance_m": 0.65,
         "bearing_deg": 0.0,
         "offset_x_norm": 0.0,
@@ -1225,6 +1239,7 @@ def test_goal_camera90_forward_rechecks_depth_bucket_from_fresh_goal():
 
     closer = dict(far)
     closer["depth_m"] = 0.50
+    closer["ground_distance_m"] = 0.50
     closer["distance_m"] = 0.50
     second = harness.publish_vision(goal=closer)[-1]
     assert second["action"] == "GOAL_CAMERA_90_FORWARD"

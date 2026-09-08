@@ -31,7 +31,7 @@ motion_aliases:
   line_recovery_right_7: "라인복귀우회전(7회)"
   line_recovery_right_8: "라인보귀우회전(8번)"
   stationary_turn_left: "제자리좌회전(6번)"
-  stationary_turn_right: "제자리우회전실실전(6번)"
+  stationary_turn_right: "제자리우회전(9회)"
   sdk_turn_right_15: "우회전실실전(15회)"
   ball_camera_down_forward_2: "전진카메라내린거(2회)"
   ball_camera_down_forward_4: "전진카메라내린거(4회)"

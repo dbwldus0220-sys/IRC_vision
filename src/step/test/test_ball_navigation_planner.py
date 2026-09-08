@@ -92,7 +92,7 @@ def test_aligned_general_ball_approach_distance_policy(
 
     command = planner.plan(
         ball_info(
-            depth_m=ground_distance,
+            depth_m=max(ground_distance, 0.50),
             ground_distance_m=ground_distance,
             bearing_deg=0.0,
             offset_x_norm=0.0,
@@ -123,24 +123,26 @@ def test_valid_general_approach_does_not_emit_raw_numbered_turn(
     assert not command.motion.startswith(("TURN_LEFT_", "TURN_RIGHT_"))
 
 
-def test_pickup_ready_starts_pickup_sequence_without_400mm_gate():
+def test_raw_depth_starts_pickup_sequence_at_400mm_without_vision_gate():
     planner = BallNavigationPlanner()
 
     command = planner.plan(
         ball_info(
-            depth_m=0.48,
+            depth_m=0.40,
             ground_distance_m=0.15,
             distance_m=0.62,
-            pickup_ready=True,
+            pickup_ready=False,
+            pickup_now=False,
         ),
         0.1,
     )
 
     assert command.valid is True
     assert command.motion == "PICKUP_NOW"
+    assert command.reason == "ball_raw_depth_entered_pickup_sequence"
     assert command.linear_speed_mps == 0.0
     assert command.pickup_now is True
-    assert command.pickup_approach_motion == "STRAIGHT_3"
+    assert command.pickup_approach_motion == "STRAIGHT_2"
     assert command.ground_distance_m == 0.15
 
 
@@ -152,9 +154,10 @@ def test_invalid_or_stale_depth_does_not_start_pickup_sequence(
 
     command = planner.plan(
         ball_info(
-            depth_m=0.48,
+            depth_m=0.40,
             ground_distance_m=0.15,
             pickup_ready=True,
+            pickup_now=True,
             depth_age_sec=depth_age_sec,
         ),
         0.1,
@@ -165,7 +168,7 @@ def test_invalid_or_stale_depth_does_not_start_pickup_sequence(
     assert command.reason == "stale_ball_depth_for_pickup_sequence"
 
 
-def test_pickup_ready_false_never_starts_sequence_at_close_depth():
+def test_pickup_now_false_still_starts_sequence_at_close_raw_depth():
     planner = BallNavigationPlanner()
 
     command = planner.plan(
@@ -173,21 +176,45 @@ def test_pickup_ready_false_never_starts_sequence_at_close_depth():
         0.1,
     )
 
-    assert command.motion == "STRAIGHT_0"
-    assert command.pickup_now is False
+    assert command.motion == "PICKUP_NOW"
+    assert command.pickup_now is True
+    assert command.pickup_ready is False
+    assert command.pickup_approach_motion == "STRAIGHT_2"
 
 
-def test_pickup_ready_true_is_not_blocked_above_400mm():
+def test_pickup_sequence_does_not_start_above_400mm():
     planner = BallNavigationPlanner()
 
     command = planner.plan(
-        ball_info(depth_m=0.48, ground_distance_m=0.15, pickup_ready=True),
+        ball_info(
+            depth_m=0.401,
+            ground_distance_m=0.15,
+            pickup_ready=True,
+            pickup_now=True,
+        ),
         0.1,
     )
 
     assert command.valid is True
+    assert command.motion != "PICKUP_NOW"
+    assert command.pickup_now is False
+
+
+def test_pickup_sequence_uses_fine_motion_at_130mm():
+    planner = BallNavigationPlanner()
+
+    command = planner.plan(
+        ball_info(
+            depth_m=0.13,
+            ground_distance_m=0.05,
+            pickup_ready=True,
+            pickup_now=True,
+        ),
+        0.1,
+    )
+
     assert command.motion == "PICKUP_NOW"
-    assert command.pickup_now is True
+    assert command.pickup_approach_motion == "STRAIGHT_0"
 
 
 def test_stale_80cm_pickup_flag_cannot_trigger_pickup():

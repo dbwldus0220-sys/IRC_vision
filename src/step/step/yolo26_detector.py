@@ -1243,28 +1243,42 @@ class Yolo26Detector(Node):
         if class_name == "ball":
             if ball_info is None:
                 return True, False, None
-            depth = self._number(ball_info, "depth_m")
+            ground_distance = self._number(
+                ball_info,
+                "ground_distance_m",
+            )
             depth_valid = bool(ball_info.get("depth_valid", False))
             control_ready = bool(
                 ball_info.get("detected", False)
                 and depth_valid
-                and depth is not None
-                and depth <= self.ball_control_range_m
+                and ground_distance is not None
+                and ground_distance <= self.ball_control_range_m
             )
-            return True, control_ready, depth if depth_valid else None
+            return (
+                True,
+                control_ready,
+                ground_distance if depth_valid else None,
+            )
 
         if class_name == "hurdle":
             if hurdle_info is None:
                 return True, False, None
-            depth = self._number(hurdle_info, "depth_m")
+            ground_distance = self._number(
+                hurdle_info,
+                "ground_distance_m",
+            )
             depth_valid = bool(hurdle_info.get("depth_valid", False))
             control_ready = bool(
                 hurdle_info.get("detected", False)
                 and depth_valid
-                and depth is not None
-                and depth <= self.hurdle_control_range_m
+                and ground_distance is not None
+                and ground_distance <= self.hurdle_control_range_m
             )
-            return True, control_ready, depth if depth_valid else None
+            return (
+                True,
+                control_ready,
+                ground_distance if depth_valid else None,
+            )
 
         settings = {
             "goal": (

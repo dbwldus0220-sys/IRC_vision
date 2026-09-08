@@ -105,20 +105,30 @@ def test_raw_ball_stays_visible_without_depth_or_confirmation():
     ) == (True, False, None)
 
 
-def test_ball_depth_only_controls_motion_readiness():
-    """Keep near and far balls visible while gating only control readiness."""
+def test_ball_ground_distance_controls_motion_readiness():
+    """Keep near and far balls visible while gating by floor distance."""
     detector = object.__new__(Yolo26Detector)
     detector.ball_control_range_m = 1.5
 
     near = detector._object_range_status(
         "ball",
-        {"detected": True, "depth_valid": True, "depth_m": 1.2},
+        {
+            "detected": True,
+            "depth_valid": True,
+            "depth_m": 1.6,
+            "ground_distance_m": 1.2,
+        },
         None,
         None,
     )
     far = detector._object_range_status(
         "ball",
-        {"detected": True, "depth_valid": True, "depth_m": 1.8},
+        {
+            "detected": True,
+            "depth_valid": True,
+            "depth_m": 1.2,
+            "ground_distance_m": 1.8,
+        },
         None,
         None,
     )

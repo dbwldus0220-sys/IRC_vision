@@ -102,6 +102,7 @@ class MotionDecisionNode(Node):
     PICKUP_FINE_ALIGN_ACTIONS = frozenset(
         {
             "BALL_PICKUP_FINE_ALIGN_CONTINUE",
+            "BALL_PICKUP_FINE_FORWARD",
             "BALL_PICKUP_CRAB_RIGHT",
             "BALL_PICKUP_CRAB_LEFT",
         }

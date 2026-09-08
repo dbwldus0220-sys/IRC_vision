@@ -764,11 +764,11 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
                 continue
             if not candidate.depth_valid or depth_is_within_range(
                 candidate.depth_valid,
-                candidate.depth_m,
+                candidate.ground_gap_m,
                 self.detect_depth_m,
             ):
                 candidates.append(candidate)
-            elif candidate.depth_valid and candidate.depth_m is not None:
+            elif candidate.depth_valid and candidate.ground_gap_m is not None:
                 outside_tracking_range = True
         candidates.sort(key=lambda item: item.score, reverse=True)
         if not candidates:

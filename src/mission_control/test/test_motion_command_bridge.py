@@ -605,6 +605,7 @@ def test_second_pickup_finishes_with_left_turn():
 @pytest.mark.parametrize(
     ("approach_motion", "motion_id"),
     [
+        ("STRAIGHT_0", "pickup_fine_forward_0"),
         ("STRAIGHT_1", "ball_camera_down_forward_2"),
         ("STRAIGHT_2", "ball_camera_down_forward_4"),
         ("STRAIGHT_3", "ball_camera_down_forward_6"),
@@ -631,7 +632,7 @@ def test_pickup_reuses_existing_straight_bucket_for_camera_down_forward(
 @pytest.mark.parametrize(
     "overrides",
     [
-        {"source_command": {"pickup_approach_motion": "STRAIGHT_0"}},
+        {"source_command": {"pickup_approach_motion": "STRAIGHT_5"}},
         {
             "mission_progress": {
                 "pickups_completed": 2,
@@ -737,6 +738,28 @@ def test_centered_fine_alignment_resumes_at_pre_grab_stage_only():
         "pickup_fine_forward_0",
         "pickup_pre_backward_camera_down",
     ]
+
+
+def test_fine_forward_success_requires_another_checkpoint_before_grab():
+    bridge = FakeBridge()
+    enter_pickup_fine_alignment(bridge)
+
+    bridge.navigation_command_callback(
+        fine_alignment_message("BALL_PICKUP_FINE_FORWARD")
+    )
+    request = decoded_messages(bridge.executor_request_publisher)[-1]
+    assert request["motion_id"] == "pickup_fine_forward_0"
+    assert request["action"] == "PICKUP_NOW"
+    assert request["command_id"] == 8000
+
+    bridge.executor_status_callback(
+        executor_status(status="SUCCEEDED", motion_id="pickup_fine_forward_0")
+    )
+
+    assert bridge.pickup_fine_align_waiting is True
+    assert decoded_messages(bridge.motion_status_publisher)[-1][
+        "motion_id"
+    ] == bridge.FINE_ALIGN_MARKER
 
 
 def test_right_crab_success_requires_another_checkpoint_before_grab():

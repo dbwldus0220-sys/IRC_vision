@@ -10,11 +10,14 @@ def goal_info(**overrides):
         "confidence": 0.9,
         "depth_valid": True,
         "depth_m": 0.5,
+        "ground_distance_m": 0.5,
         "distance_m": 0.5,
         "bearing_deg": 0.0,
         "offset_x_norm": 0.0,
     }
     sample.update(overrides)
+    if "ground_distance_m" not in overrides and "depth_m" in overrides:
+        sample["ground_distance_m"] = overrides["depth_m"]
     return sample
 
 
@@ -53,6 +56,17 @@ def test_centered_goal_at_25cm_requests_score_motion():
 
     assert command.action == "SHOT"
     assert command.sdk_motion_requested is True
+
+
+def test_goal_decision_uses_raw_depth_not_ground_distance():
+    planner = GoalNavigationPlanner()
+
+    command = planner.plan(
+        goal_info(depth_m=0.25, ground_distance_m=0.80)
+    )
+
+    assert command.action == "SHOT"
+    assert command.depth_m == 0.25
 
 
 def test_goal_waits_until_analyzer_confirms_score_condition():

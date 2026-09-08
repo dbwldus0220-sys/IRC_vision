@@ -31,6 +31,7 @@ class BallNavigationConfig:
     fallback_half_fov_deg: float = 35.0
     control_start_depth_m: float = 1.50
     max_pickup_depth_age_sec: float = 0.70
+    pickup_sequence_start_depth_m: float = 0.40
     slowdown_depth_m: float = 1.0
     fine_step_depth_m: float = 0.95
     pickup_depth_m: float = 0.07
@@ -239,7 +240,10 @@ class BallNavigationPlanner:
         ):
             return self.stop("missing_valid_ball_ground_distance")
 
-        if pickup_ready:
+        # Raw depth owns only the transition from general approach into the
+        # atomic pickup sequence. pickup_ready gates the fixed grasp block at
+        # the later fine-alignment checkpoint.
+        if depth <= self.config.pickup_sequence_start_depth_m:
             depth_age = _number(ball_info, "depth_age_sec")
             if (
                 depth_age is None
@@ -254,7 +258,7 @@ class BallNavigationPlanner:
             pickup_approach_level = approach_level_from_motion(
                 pickup_approach_motion
             )
-            if pickup_approach_level not in {1, 2, 3, 4}:
+            if pickup_approach_level not in {0, 1, 2, 3, 4}:
                 return self.stop(
                     "pickup_camera_down_motion_unavailable_for_distance"
                 )
@@ -497,13 +501,13 @@ class BallNavigationPlanner:
         pickup_ready: bool,
         pickup_approach_motion: str,
     ) -> BallNavigationCommand:
-        """Hold position and expose a pickup action candidate."""
+        """Hold general approach and request the atomic pickup sequence."""
         self.previous_motion = "PICKUP_NOW"
         self.previous_angular_speed_rad_s = 0.0
         return BallNavigationCommand(
             valid=True,
             motion="PICKUP_NOW",
-            reason="ball_analyzer_pickup_ready_with_fresh_depth",
+            reason="ball_raw_depth_entered_pickup_sequence",
             linear_speed_mps=0.0,
             lateral_speed_mps=0.0,
             angular_speed_rad_s=0.0,

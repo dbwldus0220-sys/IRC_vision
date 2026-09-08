@@ -43,19 +43,22 @@ class MotionCommandBridgeNode(Node):
     PICKUP_FINE_ALIGN_ACTIONS = frozenset(
         {
             "BALL_PICKUP_FINE_ALIGN_CONTINUE",
+            "BALL_PICKUP_FINE_FORWARD",
             "BALL_PICKUP_CRAB_RIGHT",
             "BALL_PICKUP_CRAB_LEFT",
         }
     )
     PICKUP_FINE_ALIGN_MOTION_IDS = {
-        "RIGHT": "pickup_crab_right_0",
-        "LEFT": "pickup_crab_left_0",
+        "BALL_PICKUP_FINE_FORWARD": "pickup_fine_forward_0",
+        "BALL_PICKUP_CRAB_RIGHT": "pickup_crab_right_0",
+        "BALL_PICKUP_CRAB_LEFT": "pickup_crab_left_0",
     }
     ATOMIC_SEQUENCE_ACTIONS = frozenset(
         {"PICKUP_NOW", "POST_BALL_GOAL_TRANSITION"}
     )
 
     PICKUP_CAMERA_DOWN_MOTION_IDS = {
+        "STRAIGHT_0": "pickup_fine_forward_0",
         "STRAIGHT_1": "ball_camera_down_forward_2",
         "STRAIGHT_2": "ball_camera_down_forward_4",
         "STRAIGHT_3": "ball_camera_down_forward_6",
@@ -376,10 +379,7 @@ class MotionCommandBridgeNode(Node):
                 )
             return
 
-        direction = (
-            "RIGHT" if action == "BALL_PICKUP_CRAB_RIGHT" else "LEFT"
-        )
-        motion_id = self.PICKUP_FINE_ALIGN_MOTION_IDS[direction]
+        motion_id = self.PICKUP_FINE_ALIGN_MOTION_IDS[action]
         self.pickup_fine_align_correction_active = True
         self.active_motion_id = motion_id
         self._publish_executor_request(

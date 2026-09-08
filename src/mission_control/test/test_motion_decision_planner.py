@@ -47,6 +47,7 @@ def goal_info(**overrides):
         "confidence": 0.9,
         "depth_valid": True,
         "depth_m": 0.25,
+        "ground_distance_m": 0.25,
         "distance_m": 0.25,
         "bearing_deg": 0.0,
         "offset_x_norm": 0.0,
@@ -163,10 +164,11 @@ def test_actual_ball_publisher_payload_contract():
         "AUTO",
         observations(
             ball=vision_ball_payload(
-                depth_m=0.48,
+                depth_m=0.40,
                 ground_distance_m=0.15,
                 distance_m=0.62,
                 pickup_ready=True,
+                pickup_now=True,
             )
         ),
         0.1,
@@ -174,7 +176,7 @@ def test_actual_ball_publisher_payload_contract():
 
     assert decision.source == "ball"
     assert decision.action == "PICKUP_NOW"
-    assert decision.source_command["pickup_approach_motion"] == "STRAIGHT_3"
+    assert decision.source_command["pickup_approach_motion"] == "STRAIGHT_2"
 
 
 def test_actual_hurdle_publisher_payload_contract():
@@ -677,9 +679,9 @@ def test_ball_straight_0_becomes_context_specific_fine_forward():
         "BALL_APPROACH",
         observations(
             ball=ball_info(
-                depth_m=0.12,
+                depth_m=0.50,
                 ground_distance_m=0.12,
-                distance_m=0.12,
+                distance_m=0.50,
             )
         ),
         0.1,
@@ -1698,16 +1700,17 @@ def test_line_lock_keeps_publishing_continuous_line_guidance():
 
 
 @pytest.mark.parametrize(
-    ("offset", "expected_action", "available"),
+    ("offset", "pickup_ready", "expected_action", "available"),
     [
-        (0.0, "BALL_PICKUP_FINE_ALIGN_CONTINUE", True),
-        (0.08, "BALL_PICKUP_FINE_ALIGN_CONTINUE", True),
-        (0.081, "BALL_PICKUP_CRAB_RIGHT", True),
-        (-0.081, "BALL_PICKUP_CRAB_LEFT", True),
+        (0.0, True, "BALL_PICKUP_FINE_ALIGN_CONTINUE", True),
+        (0.08, True, "BALL_PICKUP_FINE_ALIGN_CONTINUE", True),
+        (0.081, False, "BALL_PICKUP_CRAB_RIGHT", True),
+        (-0.081, False, "BALL_PICKUP_CRAB_LEFT", True),
     ],
 )
-def test_pickup_fine_alignment_uses_ball_offset_and_emitted_tolerance(
+def test_pickup_fine_alignment_uses_ready_gate_and_lateral_offset(
     offset,
+    pickup_ready,
     expected_action,
     available,
 ):
@@ -1717,6 +1720,8 @@ def test_pickup_fine_alignment_uses_ball_offset_and_emitted_tolerance(
         ball_info(
             offset_x_norm=offset,
             pickup_x_tolerance_norm=0.08,
+            pickup_ready=pickup_ready,
+            is_in_pickup_window=True,
         )
     )
 
@@ -1726,6 +1731,99 @@ def test_pickup_fine_alignment_uses_ball_offset_and_emitted_tolerance(
     assert decision.source_command["offset_x_norm"] == offset
     assert decision.source_command["pickup_x_tolerance_norm"] == 0.08
     assert decision.source_command["catalog_motion_available"] is available
+
+
+def test_centered_ball_not_ready_runs_fine_forward_then_rechecks():
+    decision = MotionDecisionPlanner().plan_ball_pickup_fine_alignment(
+        ball_info(
+            offset_x_norm=0.0,
+            pickup_x_tolerance_norm=0.08,
+            ground_distance_m=0.20,
+            pickup_ready=False,
+            is_in_pickup_window=True,
+        )
+    )
+
+    assert decision.action == "BALL_PICKUP_FINE_FORWARD"
+    assert decision.valid is True
+    assert decision.sdk_motion_requested is True
+
+
+def test_centered_ball_outside_pickup_window_waits():
+    decision = MotionDecisionPlanner().plan_ball_pickup_fine_alignment(
+        ball_info(
+            offset_x_norm=0.0,
+            pickup_x_tolerance_norm=0.08,
+            pickup_ready=False,
+            is_in_pickup_window=False,
+        )
+    )
+
+    assert decision.action == "WAIT"
+    assert decision.valid is False
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"depth_valid": False, "depth_age_sec": 0.05},
+        {"depth_valid": True, "depth_age_sec": None},
+        {"depth_valid": True, "depth_age_sec": 0.701},
+    ],
+)
+def test_centered_ball_never_moves_forward_with_invalid_or_stale_depth(
+    overrides,
+):
+    decision = MotionDecisionPlanner().plan_ball_pickup_fine_alignment(
+        ball_info(
+            offset_x_norm=0.0,
+            pickup_x_tolerance_norm=0.08,
+            ground_distance_m=0.20,
+            pickup_ready=False,
+            is_in_pickup_window=True,
+            **overrides,
+        )
+    )
+
+    assert decision.action == "WAIT"
+    assert decision.valid is False
+    assert decision.sdk_motion_requested is False
+    assert decision.reason == (
+        "ball_pickup_fine_forward_waiting_for_fresh_depth"
+    )
+
+
+def test_lateral_correction_remains_available_during_depth_dropout():
+    decision = MotionDecisionPlanner().plan_ball_pickup_fine_alignment(
+        ball_info(
+            offset_x_norm=0.20,
+            pickup_x_tolerance_norm=0.08,
+            depth_valid=False,
+            depth_age_sec=None,
+            pickup_ready=False,
+            is_in_pickup_window=False,
+        )
+    )
+
+    assert decision.action == "BALL_PICKUP_CRAB_RIGHT"
+    assert decision.valid is True
+
+
+def test_inconsistent_pickup_ready_cannot_start_grasp_without_fresh_depth():
+    decision = MotionDecisionPlanner().plan_ball_pickup_fine_alignment(
+        ball_info(
+            offset_x_norm=0.0,
+            pickup_x_tolerance_norm=0.08,
+            depth_valid=False,
+            depth_age_sec=0.05,
+            pickup_ready=True,
+            is_in_pickup_window=True,
+        )
+    )
+
+    assert decision.action == "WAIT"
+    assert decision.valid is False
+    assert decision.reason == "ball_pickup_ready_waiting_for_fresh_depth"
 
 
 @pytest.mark.parametrize(
