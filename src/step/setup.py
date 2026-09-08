@@ -43,6 +43,10 @@ setup(
     entry_points={
         'console_scripts': [
             'yolo26_detector=step.yolo26_detector:main',
+            (
+                'dual_realsense_selector_test='
+                'step.dual_realsense_selector_test:main'
+            ),
             'ball_only_debug=step.ball_only_debug:main',
             'yolo_line_analyzer=step.yolo_line_analyzer:main',
             'ball_analyzer=step.ball_analyzer:main',
