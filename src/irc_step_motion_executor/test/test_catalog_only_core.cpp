@@ -69,7 +69,7 @@ TEST(MotionAliasCatalog, LoadsLatestSdkAndCanonicalAliases)
     std::optional<std::string>("제자리좌회전실실전(6번)"));
   EXPECT_EQ(
     catalog.resolve("stationary_turn_right"),
-    std::optional<std::string>("제자리우회전실실전(6번)"));
+    std::optional<std::string>("제자리우회전(9회)"));
   EXPECT_EQ(
     catalog.resolve("pickup"),
     std::optional<std::string>("공잡기리그랩까지 실전"));

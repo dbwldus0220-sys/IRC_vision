@@ -117,20 +117,20 @@ STRAIGHT_5
 현재 실제 SDK motion mapping:
 
 Internal Motion	RobotMotionPlayer Motion
-line_forward_2	전진실실전(2회)
-line_forward_4	전진실실전(4회)
-line_forward_6	전진실실전(6회)
-line_forward_8	전진실실전(8회)
-line_forward_10	전진실실전(10회)
+line_forward_2	전진진짜실전(2회)
+line_forward_4	전진진짜실전(4회)
+line_forward_6	전진진짜실전(6회)
+line_forward_8	전진진짜실전(8회)
+line_forward_10	전진진짜실전(8회)
 
 기본 STRAIGHT는 현재:
 
 STRAIGHT
 → line_forward_6
-→ 전진실실전(6회)
+→ 전진진짜실전(6회)
 
 `forward` 별칭은 `APPROACH` 등 다른 동작과의 호환성을 위해
-전진실실전(10회) 연결을 유지한다.
+전진진짜실전(8회)에 연결한다.
 
 5. Right Turn Motion
 

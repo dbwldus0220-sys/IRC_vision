@@ -45,6 +45,7 @@ def generate_launch_description() -> LaunchDescription:
         "curve_follow_max_offset_norm"
     )
     robot_center_offset_px = LaunchConfiguration("robot_center_offset_px")
+    camera_height_m = LaunchConfiguration("camera_height_m")
     camera_pitch_down_deg = LaunchConfiguration("camera_pitch_down_deg")
     camera_forward_offset_m = LaunchConfiguration("camera_forward_offset_m")
     line_roi_x_min_ratio = LaunchConfiguration("line_roi_x_min_ratio")
@@ -153,6 +154,9 @@ def generate_launch_description() -> LaunchDescription:
 
                 "robot_center_offset_px": ParameterValue(
                     robot_center_offset_px, value_type=float
+                ),
+                "camera_height_m": ParameterValue(
+                    camera_height_m, value_type=float
                 ),
                 "camera_pitch_down_deg": ParameterValue(
                     camera_pitch_down_deg, value_type=float
@@ -289,16 +293,16 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("metrics_mode", default_value="auto"),
             DeclareLaunchArgument("max_fps", default_value="30.0"),
             DeclareLaunchArgument(
-            "camera_topic_prefix",
-            default_value=EnvironmentVariable(
-                "IRC_CAMERA_TOPIC_PREFIX",
-                default_value="/camera/camera",
+                "camera_topic_prefix",
+                default_value=EnvironmentVariable(
+                    "IRC_CAMERA_TOPIC_PREFIX",
+                    default_value="/camera/camera",
+                ),
+                description=(
+                    "RealSense topic prefix. "
+                    "PC=/camera, Jetson=/camera/camera."
+                ),
             ),
-            description=(
-                "RealSense topic prefix. "
-                "PC=/camera, Jetson=/camera/camera."
-            ),
-),
             DeclareLaunchArgument("initial_mission_phase", default_value="AUTO"),
             DeclareLaunchArgument("recovery_heading_turn_deg", default_value="10.0"),
             DeclareLaunchArgument(
@@ -308,6 +312,7 @@ def generate_launch_description() -> LaunchDescription:
                 "curve_follow_max_offset_norm", default_value="0.55"
             ),
             DeclareLaunchArgument("robot_center_offset_px", default_value="70.0"),
+            DeclareLaunchArgument("camera_height_m", default_value="0.515"),
             DeclareLaunchArgument("camera_pitch_down_deg", default_value="45.0"),
             DeclareLaunchArgument("camera_forward_offset_m", default_value="0.0"),
             DeclareLaunchArgument("line_roi_x_min_ratio", default_value="0.15"),
@@ -345,10 +350,12 @@ def generate_launch_description() -> LaunchDescription:
             ),
             DeclareLaunchArgument(
                 "motion_json_path",
-                default_value=(
-                    "/home/jet/IRC/external_sdk/"
-                    "robot_motion_player_sdk_work_20260801/"
-                    "final step/robot_motions.json"
+                default_value=PathJoinSubstitution(
+                    [
+                        FindPackageShare("irc_step_motion_executor"),
+                        "config",
+                        "robot_motions_runtime.json",
+                    ]
                 ),
             ),
             DeclareLaunchArgument(
@@ -364,7 +371,7 @@ def generate_launch_description() -> LaunchDescription:
                 description="Integer array; empty by default and therefore unsafe to run.",
             ),
             DeclareLaunchArgument("startup_pose_enabled", default_value="true"),
-            DeclareLaunchArgument("startup_pose_name", default_value="오뒤401"),
+            DeclareLaunchArgument("startup_pose_name", default_value="오뒤410"),
             DeclareLaunchArgument("startup_pose_duration_ms", default_value="4000"),
             camera,
             detector,

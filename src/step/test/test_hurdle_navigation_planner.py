@@ -138,7 +138,7 @@ def test_impossible_pythagorean_geometry_never_becomes_false_zero_go():
         )
     )
 
-    assert far.action == "STRAIGHT_3"
+    assert far.action == "WAIT"
     assert far.go_now is False
-    assert close.action == "GO"
-    assert close.go_now is True
+    assert close.action == "WAIT"
+    assert close.go_now is False

@@ -43,6 +43,54 @@ def test_success_requires_new_vision_before_republishing():
     assert gate.can_publish("LEFT")
 
 
+@pytest.mark.parametrize(
+    "action",
+    [
+        "GOAL_CAMERA_90_FORWARD",
+        "GOAL_CAMERA_90_FORWARD_1",
+        "GOAL_CAMERA_90_FORWARD_2",
+        "GOAL_CAMERA_90_FORWARD_4",
+        "BALL_FINE_FORWARD_8",
+    ],
+)
+def test_context_forward_requires_fresh_vision_after_success(action):
+    gate = gate_with_vision()
+    gate.on_command_published(action, command_id=41)
+    gate.on_motion_status(
+        action,
+        "RUNNING",
+        command_id=41,
+    )
+    assert gate.on_motion_status(
+        action,
+        "SUCCEEDED",
+        command_id=41,
+    ).released
+
+    assert not gate.can_publish(action)
+    gate.on_new_vision_input()
+    assert gate.can_publish(action)
+
+
+@pytest.mark.parametrize(
+    "action",
+    ["POST_BALL_LINE_TURN_RIGHT_3", "GOAL_CAMERA90_TURN_RIGHT_3"],
+)
+def test_closed_loop_alignment_actions_require_new_vision(action):
+    gate = gate_with_vision()
+    gate.on_command_published(action, command_id=42)
+    gate.on_motion_status(action, "RUNNING", command_id=42)
+    assert gate.on_motion_status(
+        action,
+        "SUCCEEDED",
+        command_id=42,
+    ).released
+
+    assert not gate.can_publish(action)
+    gate.on_new_vision_input()
+    assert gate.can_publish(action)
+
+
 def test_terminal_general_motion_requires_fresh_vision_globally():
     gate = gate_with_vision()
     gate.on_command_published("STRAIGHT", command_id=40)

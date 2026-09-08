@@ -28,7 +28,6 @@ from .depth_frame_cache import DepthFrameCache
 from .depth_frame_cache import DepthFrameConsumer
 from .temporal_confirmation import depth_is_within_range
 from .temporal_confirmation import TemporalConfirmationFilter
-from .yolo_line_analyzer import ground_forward_distance_from_depth
 
 
 @dataclass(frozen=True)
@@ -133,8 +132,6 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         self.declare_parameter("score_depth_tolerance_m", 0.05)
         self.declare_parameter("score_center_tolerance_norm", 0.10)
         self.declare_parameter("direction_deadband_norm", 0.04)
-        self.declare_parameter("camera_pitch_down_deg", 45.0)
-        self.declare_parameter("camera_forward_offset_m", 0.0)
         self.declare_parameter("confirmation_window_size", 40)
         self.declare_parameter("confirmation_required_hits", 30)
         self.declare_parameter("confirmation_max_missed_frames", 2)
@@ -186,12 +183,6 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         self.direction_deadband_norm = max(
             0.0,
             self._float_parameter("direction_deadband_norm"),
-        )
-        self.camera_pitch_down_deg = self._float_parameter(
-            "camera_pitch_down_deg"
-        )
-        self.camera_forward_offset_m = self._float_parameter(
-            "camera_forward_offset_m"
         )
         self.publish_empty_when_missing = bool(
             self.get_parameter("publish_empty_when_missing").value
@@ -423,21 +414,7 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         distance = math.sqrt(
             lateral * lateral + vertical * vertical + depth_m * depth_m
         )
-        ground_lateral, ground_forward = (
-            ground_forward_distance_from_depth(
-                x_px=center_x,
-                y_px=center_y,
-                depth_m=depth_m,
-                fx=self.fx,
-                fy=self.fy,
-                cx=self.cx,
-                cy=self.cy,
-                camera_pitch_down_deg=self.camera_pitch_down_deg,
-                camera_forward_offset_m=self.camera_forward_offset_m,
-            )
-        )
-        ground_distance = math.hypot(ground_lateral, ground_forward)
-        return bearing, elevation, lateral, distance, ground_distance
+        return bearing, elevation, lateral, distance, None
 
     def _build_candidate(
         self,

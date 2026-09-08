@@ -21,6 +21,7 @@ def test_default_initial_state():
         "ball_sections_processed": 0,
         "finish_enabled": False,
         "mission_complete": False,
+        "post_ball_goal_transition_failed": False,
         "required_pickups": 2,
         "required_shots": 2,
         "required_ball_sections": 2,
@@ -75,7 +76,68 @@ def test_pickup_succeeded():
     assert result.handled and result.terminal
     assert manager.pickups_completed == 1
     assert manager.ball_sections_processed == 0
+    assert manager.current_phase == "POST_BALL_LINE_ALIGN"
+
+
+def test_first_ball_line_alignment_completes_before_goal_transition():
+    manager = MissionPhaseManager(initial_phase="BALL_APPROACH")
+    complete(manager, "PICKUP_NOW", 1, "SUCCEEDED")
+
+    assert manager.complete_post_ball_line_align()
+    assert manager.current_phase == "POST_BALL_GOAL_TRANSITION"
+    assert not manager.complete_post_ball_line_align()
+
+
+def test_second_pickup_skips_first_ball_line_alignment():
+    manager = MissionPhaseManager(initial_phase="BALL_APPROACH")
+    manager.pickups_completed = 1
+
+    complete(manager, "PICKUP_NOW", 1, "SUCCEEDED")
+
+    assert manager.pickups_completed == 2
+    assert manager.current_phase == "POST_BALL_GOAL_TRANSITION"
+
+
+def test_post_ball_goal_transition_success_enters_goal_approach():
+    manager = MissionPhaseManager(
+        initial_phase="POST_BALL_GOAL_TRANSITION"
+    )
+
+    result = complete(
+        manager,
+        "POST_BALL_GOAL_TRANSITION",
+        2,
+        "SUCCEEDED",
+    )
+
+    assert result.handled and result.terminal
     assert manager.current_phase == "GOAL_APPROACH"
+    assert manager.post_ball_goal_transition_failed is False
+
+
+@pytest.mark.parametrize("status", ["FAILED", "TIMEOUT", "REJECTED"])
+def test_post_ball_goal_transition_failure_latches_abort(status):
+    manager = MissionPhaseManager(
+        initial_phase="POST_BALL_GOAL_TRANSITION"
+    )
+    if status == "REJECTED":
+        assert manager.start_special_action("POST_BALL_GOAL_TRANSITION", 2)
+        result = manager.handle_motion_status(
+            "POST_BALL_GOAL_TRANSITION",
+            2,
+            status,
+        )
+    else:
+        result = complete(
+            manager,
+            "POST_BALL_GOAL_TRANSITION",
+            2,
+            status,
+        )
+
+    assert result.handled and result.terminal
+    assert manager.current_phase == "POST_BALL_GOAL_TRANSITION"
+    assert manager.post_ball_goal_transition_failed is True
 
 
 @pytest.mark.parametrize(
@@ -349,7 +411,7 @@ def test_duplicate_terminal_is_ignored():
     assert not duplicate.handled
     assert duplicate.duplicate
     assert manager.pickups_completed == 1
-    assert manager.current_phase == "GOAL_APPROACH"
+    assert manager.current_phase == "POST_BALL_LINE_ALIGN"
 
 
 def test_duplicate_successful_shot_does_not_increment_twice():

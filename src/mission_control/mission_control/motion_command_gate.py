@@ -18,6 +18,29 @@ GENERAL_ACTIONS = frozenset(
         "SLOW_APPROACH",
         "FINE_FORWARD_STEP",
         "APPROACH_GOAL",
+        "BALL_FINE_FORWARD_8",
+        "GOAL_CAMERA_90_FORWARD",
+        "GOAL_CAMERA_90_FORWARD_1",
+        "GOAL_CAMERA_90_FORWARD_2",
+        "GOAL_CAMERA_90_FORWARD_4",
+        "GOAL_CAMERA90_CRAB_RIGHT",
+        "GOAL_CAMERA90_CRAB_LEFT",
+        *{
+            f"POST_BALL_LINE_TURN_RIGHT_{count}"
+            for count in range(1, 10)
+        },
+        *{
+            f"POST_BALL_LINE_TURN_LEFT_{count}"
+            for count in (2, 3, 4, 6)
+        },
+        *{
+            f"GOAL_CAMERA90_TURN_RIGHT_{count}"
+            for count in range(1, 10)
+        },
+        *{
+            f"GOAL_CAMERA90_TURN_LEFT_{count}"
+            for count in range(1, 7)
+        },
         "APPROACH_HURDLE",
         "LEFT",
         "RIGHT",

@@ -69,6 +69,8 @@ def test_floor_forward_projection_removes_camera_pitch_slant():
         cx=640.0,
         cy=360.0,
         camera_pitch_down_deg=45.0,
+        camera_height_m=0.70,
+        reference_height_m=0.0,
         camera_forward_offset_m=0.0,
     )
     assert lateral_m == pytest.approx(0.0)

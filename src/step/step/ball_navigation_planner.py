@@ -30,6 +30,8 @@ class BallNavigationConfig:
     path_center_deadband_max_depth_m: float = 0.60
     fallback_half_fov_deg: float = 35.0
     control_start_depth_m: float = 1.50
+    max_pickup_depth_age_sec: float = 0.70
+    pickup_sequence_start_depth_m: float = 0.40
     slowdown_depth_m: float = 1.0
     fine_step_depth_m: float = 0.95
     pickup_depth_m: float = 0.07
@@ -57,15 +59,22 @@ class BallNavigationCommand:
     offset_x_norm: float | None
     depth_m: float | None
     distance_m: float | None
+    ground_distance_m: float | None
     distance_error_m: float | None
     confidence: float
     depth_valid: bool
     pickup_ready: bool
     pickup_now: bool
+    pickup_approach_motion: str | None
 
     def to_dict(self) -> dict[str, Any]:
         """Return a rounded JSON-compatible representation."""
-        approach_level = approach_level_from_motion(self.motion)
+        approach_motion = (
+            self.pickup_approach_motion
+            if self.motion == "PICKUP_NOW"
+            else self.motion
+        )
+        approach_level = approach_level_from_motion(approach_motion)
         turn_motion, turn_level, turn_angle_deg = (
             numbered_turn_motion_metadata(self.motion)
         )
@@ -97,6 +106,10 @@ class BallNavigationCommand:
             "offset_x_norm": _round_optional(self.offset_x_norm, 6),
             "depth_m": _round_optional(self.depth_m, 3),
             "distance_m": _round_optional(self.distance_m, 3),
+            "ground_distance_m": _round_optional(
+                self.ground_distance_m,
+                3,
+            ),
             "distance_error_m": _round_optional(
                 self.distance_error_m,
                 3,
@@ -105,14 +118,15 @@ class BallNavigationCommand:
             "depth_valid": self.depth_valid,
             "pickup_ready": self.pickup_ready,
             "pickup_now": self.pickup_now,
+            "pickup_approach_motion": self.pickup_approach_motion,
             "approach_motion": (
-                self.motion
-                if self.motion == "STRAIGHT" or approach_level is not None
+                approach_motion
+                if approach_motion == "STRAIGHT" or approach_level is not None
                 else None
             ),
             "approach_level": approach_level,
             "approach_target_distance_m": _round_optional(
-                self.distance_m,
+                self.ground_distance_m,
                 3,
             ),
             "turn_motion": turn_motion,
@@ -145,6 +159,10 @@ def _number(data: dict[str, Any], key: str) -> float | None:
 class BallNavigationPlanner:
     """Create ball alignment and approach targets from ``ball_info``."""
 
+    FAR_APPROACH_MIN_DISTANCE_M = 0.780
+    RECOVERY_8_MIN_DISTANCE_M = 0.680
+    RECOVERY_6_MIN_DISTANCE_M = 0.564
+
     def __init__(
         self,
         config: BallNavigationConfig | None = None,
@@ -173,11 +191,13 @@ class BallNavigationPlanner:
             offset_x_norm=None,
             depth_m=None,
             distance_m=None,
+            ground_distance_m=None,
             distance_error_m=None,
             confidence=0.0,
             depth_valid=False,
             pickup_ready=False,
             pickup_now=False,
+            pickup_approach_motion=None,
         )
 
     def plan(
@@ -206,77 +226,76 @@ class BallNavigationPlanner:
         if steering_error is None:
             return self.stop("invalid_ball_alignment")
 
+        distance = _number(ball_info, "distance_m")
         ground_distance = _number(ball_info, "ground_distance_m")
         depth_valid = bool(ball_info.get("depth_valid", False))
         pickup_ready = bool(ball_info.get("pickup_ready", False))
-        analyzer_pickup_now = bool(ball_info.get("pickup_now", False))
 
+        # A normal general BALL approach is selected jointly from fresh ground
+        # distance and ball occurrence, without raw numbered turn actions.
         if (
-            depth_valid
-            and ground_distance is not None
-            and ground_distance > self.config.control_start_depth_m
+            not depth_valid
+            or depth is None
+            or ground_distance is None
+            or ground_distance <= 0.0
         ):
-            return self.stop("ball_outside_control_range")
-        turn_motion = self._classify_turn(steering_error)
-        if turn_motion is not None:
-            return self._moving_command(
-                motion=turn_motion,
-                reason="align_ball_center",
-                linear_speed_mps=0.0,
-                steering_error_deg=steering_error,
-                dt_sec=dt_sec,
-                bearing=bearing,
-                offset=offset,
-                depth=depth,
-                distance=ground_distance,
-                confidence=confidence,
-                depth_valid=depth_valid,
-                pickup_ready=pickup_ready,
-                pickup_now=False,
-            )
-
-        # Visual geometry is enough for in-place alignment. Fresh depth is
-        # mandatory before an aligned robot can move toward the ball.
-        if not depth_valid or depth is None or ground_distance is None:
             return self.stop("missing_valid_ball_ground_distance")
 
-        pickup_now = bool(
-            analyzer_pickup_now
-            and depth
-            <= self.config.pickup_trigger_depth_m
-            + self.config.pickup_depth_tolerance_m
-            + 1e-9
-        )
+        # Raw depth owns only the transition from general approach into the
+        # atomic pickup sequence. pickup_ready gates the fixed grasp block at
+        # the later fine-alignment checkpoint.
+        if depth <= self.config.pickup_sequence_start_depth_m:
+            depth_age = _number(ball_info, "depth_age_sec")
+            if (
+                depth_age is None
+                or depth_age < 0.0
+                or depth_age > self.config.max_pickup_depth_age_sec
+            ):
+                return self.stop("stale_ball_depth_for_pickup_sequence")
 
-        if pickup_now:
+            # Keep the locally validated raw-Z bucket for the camera-down
+            # pickup approach. General BALL approach uses ground distance.
+            pickup_approach_motion = approach_motion_for_distance(depth)
+            pickup_approach_level = approach_level_from_motion(
+                pickup_approach_motion
+            )
+            if pickup_approach_level not in {0, 1, 2, 3, 4}:
+                return self.stop(
+                    "pickup_camera_down_motion_unavailable_for_distance"
+                )
             return self._pickup_command(
                 bearing,
                 offset,
                 depth,
+                distance,
                 ground_distance,
                 confidence,
                 pickup_ready,
+                pickup_approach_motion,
             )
 
-        if ground_distance < (
-            self.config.pickup_depth_m
-            - self.config.pickup_depth_tolerance_m
-        ):
-            return self.stop("ball_too_close_for_safe_pickup")
-
         speed = self._approach_speed(ground_distance, pickup_ready)
-        motion = approach_motion_for_distance(ground_distance)
-        reason = "ball_aligned_discrete_approach"
+        motion = self._general_approach_motion(
+            ground_distance,
+            ball_occurrence=_number(ball_info, "ball_occurrence"),
+        )
+        directional_recovery = motion.startswith("RECOVER_")
+        reason = (
+            "ball_directional_recovery_approach"
+            if directional_recovery
+            else "ball_aligned_discrete_approach"
+        )
         return self._moving_command(
             motion=motion,
             reason=reason,
-            linear_speed_mps=speed,
+            linear_speed_mps=0.0 if directional_recovery else speed,
             steering_error_deg=steering_error,
             dt_sec=dt_sec,
             bearing=bearing,
             offset=offset,
             depth=depth,
-            distance=ground_distance,
+            distance=distance,
+            ground_distance=ground_distance,
             confidence=confidence,
             depth_valid=True,
             pickup_ready=pickup_ready,
@@ -315,7 +334,12 @@ class BallNavigationPlanner:
     def _classify_turn(self, steering_error_deg: float) -> str | None:
         """Select the line-recovery numbered turn with hysteresis."""
         is_turning = self.previous_motion.startswith(
-            ("TURN_LEFT_", "TURN_RIGHT_")
+            (
+                "TURN_LEFT_",
+                "TURN_RIGHT_",
+                "RECOVER_LEFT_TURN_LEFT_",
+                "RECOVER_RIGHT_TURN_RIGHT_",
+            )
         )
         threshold = (
             self.config.turn_exit_deg
@@ -327,6 +351,30 @@ class BallNavigationPlanner:
         if steering_error_deg < -threshold:
             return numbered_turn_motion(steering_error_deg, "LEFT")
         return None
+
+    def _general_approach_motion(
+        self,
+        ground_distance_m: float,
+        ball_occurrence: float | None,
+    ) -> str:
+        """Select the BALL-only distance and occurrence-curved approach."""
+        if ground_distance_m > self.FAR_APPROACH_MIN_DISTANCE_M:
+            return "STRAIGHT_3"
+
+        # The first and second balls intentionally use opposite curved paths.
+        # Steering remains available as command metadata, but does not choose
+        # the recovery direction inside this distance window.
+        direction = (
+            "RIGHT"
+            if ball_occurrence is not None and ball_occurrence >= 2.0
+            else "LEFT"
+        )
+        if ground_distance_m > self.RECOVERY_8_MIN_DISTANCE_M:
+            return f"RECOVER_{direction}_TURN_{direction}_8"
+        if ground_distance_m > self.RECOVERY_6_MIN_DISTANCE_M:
+            return f"RECOVER_{direction}_TURN_{direction}_6"
+
+        return approach_motion_for_distance(ground_distance_m)
 
     def _approach_speed(
         self,
@@ -392,6 +440,7 @@ class BallNavigationPlanner:
         offset: float | None,
         depth: float | None,
         distance: float | None,
+        ground_distance: float | None,
         confidence: float,
         depth_valid: bool,
         pickup_ready: bool,
@@ -406,8 +455,8 @@ class BallNavigationPlanner:
         self.previous_motion = motion
         self.previous_angular_speed_rad_s = angular_speed
         distance_error = (
-            distance - self.config.pickup_depth_m
-            if distance is not None
+            ground_distance - self.config.pickup_depth_m
+            if ground_distance is not None
             else None
         )
         _, _, numbered_turn_angle_deg = numbered_turn_motion_metadata(
@@ -433,11 +482,13 @@ class BallNavigationPlanner:
             offset_x_norm=offset,
             depth_m=depth,
             distance_m=distance,
+            ground_distance_m=ground_distance,
             distance_error_m=distance_error,
             confidence=confidence,
             depth_valid=depth_valid,
             pickup_ready=pickup_ready,
             pickup_now=pickup_now,
+            pickup_approach_motion=None,
         )
 
     def _pickup_command(
@@ -446,16 +497,18 @@ class BallNavigationPlanner:
         offset: float | None,
         depth: float,
         distance: float | None,
+        ground_distance: float,
         confidence: float,
         pickup_ready: bool,
+        pickup_approach_motion: str,
     ) -> BallNavigationCommand:
-        """Hold position and expose a pickup action candidate."""
+        """Hold general approach and request the atomic pickup sequence."""
         self.previous_motion = "PICKUP_NOW"
         self.previous_angular_speed_rad_s = 0.0
         return BallNavigationCommand(
             valid=True,
             motion="PICKUP_NOW",
-            reason="ball_aligned_at_pickup_distance",
+            reason="ball_raw_depth_entered_pickup_sequence",
             linear_speed_mps=0.0,
             lateral_speed_mps=0.0,
             angular_speed_rad_s=0.0,
@@ -468,9 +521,13 @@ class BallNavigationPlanner:
             offset_x_norm=offset,
             depth_m=depth,
             distance_m=distance,
-            distance_error_m=distance - self.config.pickup_depth_m,
+            ground_distance_m=ground_distance,
+            distance_error_m=(
+                ground_distance - self.config.pickup_depth_m
+            ),
             confidence=confidence,
             depth_valid=True,
             pickup_ready=pickup_ready,
             pickup_now=True,
+            pickup_approach_motion=pickup_approach_motion,
         )

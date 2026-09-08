@@ -28,6 +28,8 @@ class MissionPhaseManager:
             "BALL_APPROACH",
             "GOAL_SEARCH",
             "GOAL_APPROACH",
+            "POST_BALL_LINE_ALIGN",
+            "POST_BALL_GOAL_TRANSITION",
             "HURDLE_APPROACH",
             "LINE_TRACK",
             "FINISH",
@@ -36,7 +38,13 @@ class MissionPhaseManager:
         }
     )
     SPECIAL_ACTIONS = frozenset(
-        {"PICKUP_NOW", "SHOT", "GO", "CROSS_FINISH"}
+        {
+            "PICKUP_NOW",
+            "POST_BALL_GOAL_TRANSITION",
+            "SHOT",
+            "GO",
+            "CROSS_FINISH",
+        }
     )
     SUPPORTED_STATUSES = frozenset(
         {
@@ -98,6 +106,7 @@ class MissionPhaseManager:
         self.ball_sections_processed = 0
         self.finish_enabled = self.required_ball_sections == 0
         self.mission_complete = False
+        self.post_ball_goal_transition_failed = False
 
         self.pickup_failure_count = 0
         self.shot_failure_count = 0
@@ -144,6 +153,8 @@ class MissionPhaseManager:
         if normalized is None:
             return False
         self.current_phase = normalized
+        if normalized == "POST_BALL_GOAL_TRANSITION":
+            self.post_ball_goal_transition_failed = False
         return True
 
     def special_action_exhausted(self, action: str) -> bool:
@@ -163,6 +174,17 @@ class MissionPhaseManager:
             return self.go_failure_count >= self.max_go_failures
 
         return False
+
+    def complete_post_ball_line_align(self) -> bool:
+        """Advance only a completed first-Ball line alignment."""
+        if (
+            self.current_phase != "POST_BALL_LINE_ALIGN"
+            or self.active_special_command_id is not None
+        ):
+            return False
+        self.current_phase = "POST_BALL_GOAL_TRANSITION"
+        self.post_ball_goal_transition_failed = False
+        return True
 
 
     def start_special_action(self, action: str, command_id: int) -> bool:
@@ -259,13 +281,27 @@ class MissionPhaseManager:
                     self.pickups_completed + 1,
                     self.required_pickups,
                 )
-                self.current_phase = "GOAL_APPROACH"
+                self.post_ball_goal_transition_failed = False
+                self.current_phase = (
+                    "POST_BALL_LINE_ALIGN"
+                    if self.pickups_completed == 1
+                    else "POST_BALL_GOAL_TRANSITION"
+                )
                 return
 
             if status in {"FAILED", "TIMEOUT"}:
                 self.pickup_failure_count += 1
 
             self.current_phase = "BALL_APPROACH"
+            return
+
+        if action == "POST_BALL_GOAL_TRANSITION":
+            if succeeded:
+                self.post_ball_goal_transition_failed = False
+                self.current_phase = "GOAL_APPROACH"
+            else:
+                self.post_ball_goal_transition_failed = True
+                self.current_phase = "POST_BALL_GOAL_TRANSITION"
             return
 
         if action == "SHOT":
@@ -352,6 +388,9 @@ class MissionPhaseManager:
             "ball_sections_processed": self.ball_sections_processed,
             "finish_enabled": self.finish_enabled,
             "mission_complete": self.mission_complete,
+            "post_ball_goal_transition_failed": (
+                self.post_ball_goal_transition_failed
+            ),
             "required_pickups": self.required_pickups,
             "required_shots": self.required_shots,
             "required_ball_sections": self.required_ball_sections,

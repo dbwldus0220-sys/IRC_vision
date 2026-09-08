@@ -46,6 +46,7 @@ def generate_launch_description() -> LaunchDescription:
         "curve_follow_max_offset_norm"
     )
     robot_center_offset_px = LaunchConfiguration("robot_center_offset_px")
+    camera_height_m = LaunchConfiguration("camera_height_m")
     camera_pitch_down_deg = LaunchConfiguration("camera_pitch_down_deg")
     camera_forward_offset_m = LaunchConfiguration("camera_forward_offset_m")
     line_roi_x_min_ratio = LaunchConfiguration("line_roi_x_min_ratio")
@@ -149,6 +150,9 @@ def generate_launch_description() -> LaunchDescription:
                 ),
                 "robot_center_offset_px": ParameterValue(
                     robot_center_offset_px, value_type=float
+                ),
+                "camera_height_m": ParameterValue(
+                    camera_height_m, value_type=float
                 ),
                 "camera_pitch_down_deg": ParameterValue(
                     camera_pitch_down_deg, value_type=float
@@ -307,6 +311,7 @@ def generate_launch_description() -> LaunchDescription:
                 "curve_follow_max_offset_norm", default_value="0.55"
             ),
             DeclareLaunchArgument("robot_center_offset_px", default_value="70.0"),
+            DeclareLaunchArgument("camera_height_m", default_value="0.515"),
             DeclareLaunchArgument("camera_pitch_down_deg", default_value="45.0"),
             DeclareLaunchArgument("camera_forward_offset_m", default_value="0.0"),
             DeclareLaunchArgument("line_roi_x_min_ratio", default_value="0.15"),

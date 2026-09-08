@@ -138,10 +138,12 @@ class HurdleNavigationPlanner:
         depth = _number(hurdle_info, "depth_m")
         if not bool(hurdle_info.get("depth_valid", False)) or depth is None:
             return self.wait("missing_valid_hurdle_depth")
-        if depth > self.config.control_start_depth_m:
-            return self.wait("hurdle_outside_control_range")
         distance = _number(hurdle_info, "distance_m")
         ground_gap = _number(hurdle_info, "ground_gap_m")
+        if ground_gap is None or ground_gap < 0.0:
+            return self.wait("missing_valid_hurdle_ground_gap")
+        if ground_gap > self.config.control_start_depth_m:
+            return self.wait("hurdle_outside_control_range")
         camera_bottom_gap = _number(
             hurdle_info,
             "camera_bottom_gap_m",

@@ -146,17 +146,47 @@ def ground_forward_distance_from_depth(
     cx: float,
     cy: float,
     camera_pitch_down_deg: float,
+    camera_height_m: float,
+    reference_height_m: float = 0.0,
     camera_forward_offset_m: float = 0.0,
 ) -> tuple[float, float]:
-    """Project aligned depth into robot lateral and floor-forward metres."""
+    """Project aligned depth into height-corrected floor coordinates."""
     lateral_m = (float(x_px) - float(cx)) * float(depth_m) / float(fx)
     camera_down_m = (
         (float(y_px) - float(cy)) * float(depth_m) / float(fy)
     )
+    slant_distance_m = math.sqrt(
+        lateral_m * lateral_m
+        + camera_down_m * camera_down_m
+        + float(depth_m) * float(depth_m)
+    )
+    vertical_separation_m = abs(
+        float(camera_height_m) - float(reference_height_m)
+    )
+    ground_radius_m = math.sqrt(
+        max(
+            slant_distance_m * slant_distance_m
+            - vertical_separation_m * vertical_separation_m,
+            0.0,
+        )
+    )
+
+    # Pitch only determines the front/back sign. The distance magnitude is
+    # corrected with the measured camera height and Pythagoras.
     pitch_rad = math.radians(float(camera_pitch_down_deg))
-    forward_from_camera_m = (
+    rotated_forward_m = (
         float(depth_m) * math.cos(pitch_rad)
         - camera_down_m * math.sin(pitch_rad)
+    )
+    forward_from_camera_m = math.copysign(
+        math.sqrt(
+            max(
+                ground_radius_m * ground_radius_m
+                - lateral_m * lateral_m,
+                0.0,
+            )
+        ),
+        rotated_forward_m,
     )
     forward_from_robot_m = (
         forward_from_camera_m + float(camera_forward_offset_m)
@@ -236,6 +266,7 @@ class YoloLineAnalyzer(DepthFrameConsumer, Node):
         self.declare_parameter("depth_window_px", 9)
         self.declare_parameter("max_valid_depth_m", 4.0)
         self.declare_parameter("robot_center_offset_px", 70.0)
+        self.declare_parameter("camera_height_m", 0.515)
         self.declare_parameter("camera_pitch_down_deg", 45.0)
         self.declare_parameter("camera_forward_offset_m", 0.0)
 
@@ -870,6 +901,10 @@ class YoloLineAnalyzer(DepthFrameConsumer, Node):
             0.05,
             float(self.get_parameter("max_valid_depth_m").value),
         )
+        self.camera_height_m = max(
+            0.0,
+            float(self.get_parameter("camera_height_m").value),
+        )
         self.camera_pitch_down_deg = float(
             self.get_parameter("camera_pitch_down_deg").value
         )
@@ -1085,6 +1120,8 @@ class YoloLineAnalyzer(DepthFrameConsumer, Node):
             cx=self.cx,
             cy=self.cy,
             camera_pitch_down_deg=self.camera_pitch_down_deg,
+            camera_height_m=self.camera_height_m,
+            reference_height_m=0.0,
             camera_forward_offset_m=self.camera_forward_offset_m,
         )
         return {

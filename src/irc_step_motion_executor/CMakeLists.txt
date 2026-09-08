@@ -203,6 +203,9 @@ install(TARGETS
   RUNTIME DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY include/ DESTINATION include)
 install(DIRECTORY config launch DESTINATION share/${PROJECT_NAME})
+install(FILES
+  "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/robot_motions_runtime.json"
+  DESTINATION share/${PROJECT_NAME}/config)
 install(PROGRAMS
   scripts/manual_motion_request.py
   scripts/validate_motion_catalog.py

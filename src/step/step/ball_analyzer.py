@@ -644,7 +644,7 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         # is near the ball center, not on the floor, so subtract its height
         # before applying Pythagoras to the camera-to-ball ray.
         ball_center_height_m = max(
-            self.ball_top_height_m - self.ball_diameter_m / 2.0,
+            self.ball_top_height_m - ball_radius_m,
             0.0,
         )
         camera_to_ball_center_height_m = max(

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import time
 from typing import Any
 
 import rclpy
@@ -36,10 +37,44 @@ RIGHT_RECOVERY_MOTION_IDS = {
 class MotionCommandBridgeNode(Node):
     """Translate supported navigation actions into SDK executor requests."""
 
-    PICKUP_MOTION_SEQUENCE = (
-        "pickup_pre_backward",
-        "sdk_return_default",
+    DWELL_MARKER = "__NON_BLOCKING_DWELL__"
+    FINE_ALIGN_MARKER = "__BALL_PICKUP_FINE_ALIGN_CHECK__"
+    PICKUP_DWELL_SEC = 3.0
+    PICKUP_FINE_ALIGN_ACTIONS = frozenset(
+        {
+            "BALL_PICKUP_FINE_ALIGN_CONTINUE",
+            "BALL_PICKUP_FINE_FORWARD",
+            "BALL_PICKUP_CRAB_RIGHT",
+            "BALL_PICKUP_CRAB_LEFT",
+        }
+    )
+    PICKUP_FINE_ALIGN_MOTION_IDS = {
+        "BALL_PICKUP_FINE_FORWARD": "pickup_fine_forward_0",
+        "BALL_PICKUP_CRAB_RIGHT": "pickup_crab_right_0",
+        "BALL_PICKUP_CRAB_LEFT": "pickup_crab_left_0",
+    }
+    ATOMIC_SEQUENCE_ACTIONS = frozenset(
+        {"PICKUP_NOW", "POST_BALL_GOAL_TRANSITION"}
+    )
+
+    PICKUP_CAMERA_DOWN_MOTION_IDS = {
+        "STRAIGHT_0": "pickup_fine_forward_0",
+        "STRAIGHT_1": "ball_camera_down_forward_2",
+        "STRAIGHT_2": "ball_camera_down_forward_4",
+        "STRAIGHT_3": "ball_camera_down_forward_6",
+        "STRAIGHT_4": "ball_camera_down_forward_8",
+    }
+    PICKUP_MOTION_TAIL = (
+        "pickup_fine_forward_0",
+        FINE_ALIGN_MARKER,
+        "pickup_pre_backward_camera_down",
         "pickup",
+        "pickup_retreat_3",
+    )
+    POST_BALL_GOAL_TRANSITION_SEQUENCE = (
+        "post_ball_forward_4",
+        "post_ball_forward_8",
+        "post_ball_camera_90",
     )
     ACTION_TO_MOTION_ID = {
         "STRAIGHT": "line_forward_6",
@@ -51,7 +86,40 @@ class MotionCommandBridgeNode(Node):
         "APPROACH": "forward",
         "LEFT": "line_turn_left_15",
         "RIGHT": "line_turn_right_large",
-        "PICKUP_NOW": PICKUP_MOTION_SEQUENCE[0],
+        "PICKUP_NOW": "ball_camera_down_forward_4",
+        "POST_BALL_GOAL_TRANSITION": "post_ball_forward_4",
+        "BALL_FINE_FORWARD_8": "ball_general_fine_forward_8",
+        "GOAL_CAMERA_90_FORWARD": "goal_camera_90_forward_6",
+        "GOAL_CAMERA_90_FORWARD_1": "goal_camera_90_forward_2",
+        "GOAL_CAMERA_90_FORWARD_2": "goal_camera_90_forward_4",
+        "GOAL_CAMERA_90_FORWARD_4": "goal_camera_90_forward_8",
+        "GOAL_CAMERA90_CRAB_RIGHT": "goal_camera_90_crab_right",
+        "GOAL_CAMERA90_CRAB_LEFT": "goal_camera_90_crab_left",
+        **{
+            f"POST_BALL_LINE_TURN_RIGHT_{count}": (
+                f"post_ball_line_turn_right_{count}"
+            )
+            for count in range(1, 10)
+        },
+        **{
+            f"POST_BALL_LINE_TURN_LEFT_{count}": (
+                f"post_ball_line_turn_left_{count}"
+            )
+            for count in (2, 3, 4, 6)
+        },
+        **{
+            f"GOAL_CAMERA90_TURN_RIGHT_{count}": (
+                f"goal_camera_90_turn_right_{count}"
+            )
+            for count in range(1, 10)
+        },
+        **{
+            f"GOAL_CAMERA90_TURN_LEFT_{count}": (
+                f"goal_camera_90_turn_left_{count}"
+            )
+            for count in range(1, 7)
+        },
+        "SHOT": "goal_shot",
         "GO": "hurdle",
         **{
             f"RECOVER_{line_side}_TURN_LEFT_{suffix}": motion_id
@@ -68,7 +136,13 @@ class MotionCommandBridgeNode(Node):
         "ALIGN_LEFT": "stationary_turn_left",
         "ALIGN_RIGHT": "stationary_turn_right",
     }
-    TERMINAL_STATUSES = {"SUCCEEDED", "FAILED", "CANCELLED", "REJECTED"}
+    TERMINAL_STATUSES = {
+        "SUCCEEDED",
+        "FAILED",
+        "TIMEOUT",
+        "CANCELLED",
+        "REJECTED",
+    }
     DEFAULT_TIMEOUT_MS = 12000
 
     def __init__(self) -> None:
@@ -83,6 +157,11 @@ class MotionCommandBridgeNode(Node):
         self.active_request_id: int | None = None
         self.active_motion_id: str | None = None
         self.active_timeout_ms: int | None = None
+        self.active_pickup_sequence: tuple[str, ...] = ()
+        self.active_sequence_index = 0
+        self.active_dwell_until: float | None = None
+        self.pickup_fine_align_waiting = False
+        self.pickup_fine_align_correction_active = False
         self.queued_command_id: int | None = None
         self.queued_event_id: int | None = None
         self.queued_action: str | None = None
@@ -90,6 +169,7 @@ class MotionCommandBridgeNode(Node):
         self.queued_motion_id: str | None = None
         self.queued_timeout_ms: int | None = None
         self.queued_request_deferred = False
+        self.queued_pickup_sequence: tuple[str, ...] = ()
 
         self.navigation_subscription = self.create_subscription(
             String,
@@ -112,6 +192,10 @@ class MotionCommandBridgeNode(Node):
             String,
             "/motion/status",
             10,
+        )
+        self.dwell_timer = self.create_timer(
+            0.05,
+            self._check_atomic_dwell,
         )
 
         self.get_logger().info(
@@ -143,6 +227,43 @@ class MotionCommandBridgeNode(Node):
             if cls._is_integer(candidate) and candidate > 0:
                 return candidate
         return cls.DEFAULT_TIMEOUT_MS
+
+    @classmethod
+    def _pickup_motion_sequence(
+        cls,
+        payload: dict[str, Any],
+    ) -> tuple[str, ...] | None:
+        """Build one catalog-backed sequence from planner and mission state."""
+        source_command = payload.get("source_command")
+        mission_progress = payload.get("mission_progress")
+        if not isinstance(source_command, dict) or not isinstance(
+            mission_progress, dict
+        ):
+            return None
+
+        approach_motion = source_command.get("pickup_approach_motion")
+        first_motion = cls.PICKUP_CAMERA_DOWN_MOTION_IDS.get(approach_motion)
+        completed = mission_progress.get("pickups_completed")
+        if (
+            first_motion is None
+            or isinstance(completed, bool)
+            or not isinstance(completed, int)
+            or completed not in {0, 1}
+        ):
+            return None
+
+        if completed == 0:
+            final_stages = (
+                "pickup_first_turn_right_9",
+                cls.DWELL_MARKER,
+                "pickup_first_to_right_back_camera_45",
+            )
+        else:
+            final_stages = (
+                "stationary_turn_left",
+                cls.DWELL_MARKER,
+            )
+        return (first_motion, *cls.PICKUP_MOTION_TAIL, *final_stages)
 
     def publish_motion_status(
         self,
@@ -197,6 +318,77 @@ class MotionCommandBridgeNode(Node):
             action=action,
             error_code=error_code,
             message=message,
+        )
+
+    def _enter_pickup_fine_align_checkpoint(self) -> None:
+        """Pause the atomic pickup while retaining its command ownership."""
+        self.active_motion_id = self.FINE_ALIGN_MARKER
+        self.pickup_fine_align_waiting = True
+        self.pickup_fine_align_correction_active = False
+        self.publish_motion_status(
+            status="RUNNING",
+            command_id=self.active_command_id,
+            event_id=self.active_event_id,
+            request_id=self.active_request_id,
+            motion_id=self.FINE_ALIGN_MARKER,
+            action=self.active_action,
+            message="waiting for fresh BALL pickup fine alignment",
+        )
+
+    def _handle_pickup_fine_align_command(
+        self,
+        *,
+        action: str,
+        command_id: int,
+        event_id: int | None,
+        payload: dict[str, Any],
+    ) -> None:
+        """Apply one Vision decision inside the active pickup checkpoint."""
+        parent_command_id = payload.get("active_special_command_id")
+        parent_event_id = payload.get("active_special_event_id")
+        checkpoint_matches = bool(
+            self.motion_in_progress
+            and self.active_action == "PICKUP_NOW"
+            and self.pickup_fine_align_waiting
+            and parent_command_id == self.active_command_id
+            and parent_event_id == self.active_event_id
+        )
+        if not checkpoint_matches:
+            self._publish_local_rejection(
+                status="REJECTED",
+                command_id=command_id,
+                event_id=event_id,
+                action=action,
+                error_code="PICKUP_FINE_ALIGNMENT_NOT_ACTIVE",
+                message="pickup fine-alignment checkpoint is not active",
+            )
+            return
+
+        self.last_sent_command_id = command_id
+        self.pickup_fine_align_waiting = False
+        if action == "BALL_PICKUP_FINE_ALIGN_CONTINUE":
+            if not self._start_next_pickup_motion():
+                self.pickup_fine_align_waiting = True
+                self._publish_local_rejection(
+                    status="REJECTED",
+                    command_id=command_id,
+                    event_id=event_id,
+                    action=action,
+                    error_code="PICKUP_FINE_ALIGNMENT_RESUME_FAILED",
+                    message="pickup sequence could not resume after alignment",
+                )
+            return
+
+        motion_id = self.PICKUP_FINE_ALIGN_MOTION_IDS[action]
+        self.pickup_fine_align_correction_active = True
+        self.active_motion_id = motion_id
+        self._publish_executor_request(
+            action=self.active_action,
+            command_id=self.active_command_id,
+            event_id=self.active_event_id,
+            request_id=self.active_request_id,
+            motion_id=motion_id,
+            timeout_ms=self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS,
         )
 
     def _publish_executor_request(
@@ -265,6 +457,15 @@ class MotionCommandBridgeNode(Node):
             )
             return
 
+        if action in self.PICKUP_FINE_ALIGN_ACTIONS:
+            self._handle_pickup_fine_align_command(
+                action=action,
+                command_id=command_id,
+                event_id=event_id,
+                payload=payload,
+            )
+            return
+
         if command_id == self.last_sent_command_id:
             self._publish_local_rejection(
                 status="REJECTED",
@@ -273,6 +474,19 @@ class MotionCommandBridgeNode(Node):
                 action=action,
                 error_code="DUPLICATE_COMMAND_ID",
                 message="command_id was already sent to the executor",
+            )
+            return
+        if (
+            self.motion_in_progress
+            and self.active_action in self.ATOMIC_SEQUENCE_ACTIONS
+        ):
+            self._publish_local_rejection(
+                status="REJECTED",
+                command_id=command_id,
+                event_id=event_id,
+                action=action,
+                error_code="ATOMIC_SEQUENCE_LOCKED",
+                message="an atomic BALL sequence owns the motion executor",
             )
             return
         if self.motion_in_progress and self.queued_request_id is not None:
@@ -286,15 +500,48 @@ class MotionCommandBridgeNode(Node):
             )
             return
 
-        motion_id = self.motion_id_for_action(action)
+        pickup_sequence: tuple[str, ...] = ()
+        if action == "PICKUP_NOW":
+            built_sequence = self._pickup_motion_sequence(payload)
+            if built_sequence is None:
+                self._publish_local_rejection(
+                    status="UNSUPPORTED",
+                    command_id=command_id,
+                    event_id=event_id,
+                    action=action,
+                    error_code="UNSUPPORTED_PICKUP_SEQUENCE",
+                    message=(
+                        "pickup sequence requires a supported camera-down "
+                        "approach bucket and ball mission index 0 or 1"
+                    ),
+                )
+                return
+            pickup_sequence = built_sequence
+            motion_id = pickup_sequence[0]
+        elif action == "POST_BALL_GOAL_TRANSITION":
+            pickup_sequence = self.POST_BALL_GOAL_TRANSITION_SEQUENCE
+            motion_id = pickup_sequence[0]
+        else:
+            motion_id = self.motion_id_for_action(action)
         if motion_id is None:
+            goal_left_unavailable = action.startswith(
+                "GOAL_CAMERA90_TURN_LEFT_"
+            )
             self._publish_local_rejection(
                 status="UNSUPPORTED",
                 command_id=command_id,
                 event_id=event_id,
                 action=action,
-                error_code="UNSUPPORTED_ACTION",
-                message="action has no configured motion alias",
+                error_code=(
+                    "GOAL_CAMERA90_LEFT_TURN_NOT_AVAILABLE"
+                    if goal_left_unavailable
+                    else "UNSUPPORTED_ACTION"
+                ),
+                message=(
+                    "camera-90 goal left-turn motion is not in the catalog"
+                    if goal_left_unavailable
+                    else "action has no configured motion alias"
+                ),
             )
             return
 
@@ -322,6 +569,7 @@ class MotionCommandBridgeNode(Node):
             self.queued_motion_id = motion_id
             self.queued_timeout_ms = timeout_ms
             self.queued_request_deferred = defer_until_active_finishes
+            self.queued_pickup_sequence = pickup_sequence
         else:
             self.motion_in_progress = True
             self.active_command_id = command_id
@@ -330,22 +578,31 @@ class MotionCommandBridgeNode(Node):
             self.active_request_id = request_id
             self.active_motion_id = motion_id
             self.active_timeout_ms = timeout_ms
+            self.active_pickup_sequence = pickup_sequence
+            self.active_sequence_index = 0
+            self.active_dwell_until = None
 
     def _start_next_pickup_motion(self) -> bool:
-        """Start the next pickup stage after the active stage succeeds."""
-        if self.active_action != "PICKUP_NOW":
+        """Advance one atomic BALL sequence after a successful stage."""
+        if self.active_action not in self.ATOMIC_SEQUENCE_ACTIONS:
             return False
-        try:
-            current_index = self.PICKUP_MOTION_SEQUENCE.index(
-                self.active_motion_id
-            )
-        except ValueError:
-            return False
-        next_index = current_index + 1
-        if next_index >= len(self.PICKUP_MOTION_SEQUENCE):
+        if self.active_dwell_until is not None:
+            return True
+        next_index = self.active_sequence_index + 1
+        if next_index >= len(self.active_pickup_sequence):
             return False
 
-        next_motion_id = self.PICKUP_MOTION_SEQUENCE[next_index]
+        next_motion_id = self.active_pickup_sequence[next_index]
+        self.active_sequence_index = next_index
+        if next_motion_id == self.FINE_ALIGN_MARKER:
+            self._enter_pickup_fine_align_checkpoint()
+            return True
+        if next_motion_id == self.DWELL_MARKER:
+            self.active_dwell_until = time.monotonic() + self.PICKUP_DWELL_SEC
+            self.get_logger().info(
+                f"Atomic sequence dwell started: {self.PICKUP_DWELL_SEC:.1f}s"
+            )
+            return True
         self.active_motion_id = next_motion_id
         self._publish_executor_request(
             action=self.active_action,
@@ -359,6 +616,52 @@ class MotionCommandBridgeNode(Node):
             f"Pickup sequence advanced to {next_motion_id}"
         )
         return True
+
+    def _check_atomic_dwell(self, now: float | None = None) -> None:
+        """Advance a dwell stage without blocking ROS callbacks."""
+        if self.active_dwell_until is None:
+            return
+        current_time = time.monotonic() if now is None else now
+        if current_time < self.active_dwell_until:
+            return
+
+        self.active_dwell_until = None
+        self.pickup_fine_align_waiting = False
+        self.pickup_fine_align_correction_active = False
+        next_index = self.active_sequence_index + 1
+        if next_index < len(self.active_pickup_sequence):
+            self.active_sequence_index = next_index
+            next_motion_id = self.active_pickup_sequence[next_index]
+            self.active_motion_id = next_motion_id
+            self._publish_executor_request(
+                action=self.active_action,
+                command_id=self.active_command_id,
+                event_id=self.active_event_id,
+                request_id=self.active_request_id,
+                motion_id=next_motion_id,
+                timeout_ms=self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS,
+            )
+            self.get_logger().info(
+                f"Atomic sequence advanced to {next_motion_id}"
+            )
+            return
+
+        command_id = self.active_command_id
+        event_id = self.active_event_id
+        request_id = self.active_request_id
+        motion_id = self.active_motion_id
+        action = self.active_action
+        self._clear_active_request()
+        self._promote_queued_request()
+        self.publish_motion_status(
+            status="SUCCEEDED",
+            command_id=command_id,
+            event_id=event_id,
+            request_id=request_id,
+            motion_id=motion_id,
+            action=action,
+            message="atomic sequence completed after non-blocking dwell",
+        )
 
     def _valid_executor_status(self, payload: dict[str, Any]) -> bool:
         """Validate fields emitted by the C++ executor."""
@@ -388,6 +691,22 @@ class MotionCommandBridgeNode(Node):
         self.active_request_id = None
         self.active_motion_id = None
         self.active_timeout_ms = None
+        self.active_pickup_sequence = ()
+        self.active_sequence_index = 0
+        self.active_dwell_until = None
+        self.pickup_fine_align_waiting = False
+        self.pickup_fine_align_correction_active = False
+
+    def _clear_queued_request(self) -> None:
+        """Discard one queued request and any associated pickup sequence."""
+        self.queued_command_id = None
+        self.queued_event_id = None
+        self.queued_action = None
+        self.queued_request_id = None
+        self.queued_motion_id = None
+        self.queued_timeout_ms = None
+        self.queued_request_deferred = False
+        self.queued_pickup_sequence = ()
 
     def _promote_queued_request(self) -> None:
         self.active_command_id = self.queued_command_id
@@ -396,14 +715,11 @@ class MotionCommandBridgeNode(Node):
         self.active_request_id = self.queued_request_id
         self.active_motion_id = self.queued_motion_id
         self.active_timeout_ms = self.queued_timeout_ms
+        self.active_pickup_sequence = self.queued_pickup_sequence
+        self.active_sequence_index = 0
+        self.active_dwell_until = None
         queued_request_deferred = self.queued_request_deferred
-        self.queued_command_id = None
-        self.queued_event_id = None
-        self.queued_action = None
-        self.queued_request_id = None
-        self.queued_motion_id = None
-        self.queued_timeout_ms = None
-        self.queued_request_deferred = False
+        self._clear_queued_request()
         self.motion_in_progress = self.active_request_id is not None
         if queued_request_deferred and self.motion_in_progress:
             self._publish_executor_request(
@@ -448,7 +764,7 @@ class MotionCommandBridgeNode(Node):
         action = self.active_action if is_active else self.queued_action
         if (
             is_active
-            and action == "PICKUP_NOW"
+            and action in self.ATOMIC_SEQUENCE_ACTIONS
             and payload["motion_id"] != self.active_motion_id
         ):
             self.get_logger().warning(
@@ -457,30 +773,26 @@ class MotionCommandBridgeNode(Node):
             return
         if (
             is_active
+            and action == "PICKUP_NOW"
+            and self.pickup_fine_align_correction_active
+            and payload["status"] == "SUCCEEDED"
+        ):
+            self._enter_pickup_fine_align_checkpoint()
+            return
+        if (
+            is_active
             and payload["status"] == "SUCCEEDED"
             and self._start_next_pickup_motion()
         ):
             return
         if is_queued and payload["status"] in self.TERMINAL_STATUSES:
-            self.queued_command_id = None
-            self.queued_event_id = None
-            self.queued_action = None
-            self.queued_request_id = None
-            self.queued_motion_id = None
-            self.queued_timeout_ms = None
-            self.queued_request_deferred = False
+            self._clear_queued_request()
         elif is_active and payload["status"] in self.TERMINAL_STATUSES:
             self._clear_active_request()
             if payload["status"] == "SUCCEEDED":
                 self._promote_queued_request()
             else:
-                self.queued_command_id = None
-                self.queued_event_id = None
-                self.queued_action = None
-                self.queued_request_id = None
-                self.queued_motion_id = None
-                self.queued_timeout_ms = None
-                self.queued_request_deferred = False
+                self._clear_queued_request()
 
         self.publish_motion_status(
             status=payload["status"],

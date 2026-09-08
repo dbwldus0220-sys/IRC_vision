@@ -106,19 +106,8 @@ def test_rgb_ball_remains_candidate_beyond_tracking_distance():
     assert state[0] == "FAR"
 
 
-def test_pickup_trigger_uses_raw_depth_threshold():
-    analyzer = _analyzer_with_depth(0.48, True)
-
-    candidate = analyzer._build_candidate(_raw_detection(), 1280, 720)
-
-    assert candidate is not None
-    assert candidate.ground_distance_m > analyzer.pickup_ready_depth_m
-    state = analyzer._state_for_candidate(candidate, 720)
-    assert state[0] == "PICKUP_NOW"
-
-
 def test_ball_projection_reports_height_corrected_ground_distance():
-    """Use camera height and Pythagoras for robot-floor range."""
+    """Separate raw Z, camera ray, and height-corrected floor range."""
     analyzer = object.__new__(BallAnalyzer)
     analyzer.fx = 600.0
     analyzer.fy = 600.0
@@ -133,6 +122,7 @@ def test_ball_projection_reports_height_corrected_ground_distance():
 
     assert projection[4] == pytest.approx(1.03)
     assert projection[5] == pytest.approx((1.03**2 - 0.480**2) ** 0.5)
+    assert projection[6] == pytest.approx(1.03)
 
 
 def test_ball_projection_clamps_shorter_than_vertical_leg_to_zero():
@@ -150,6 +140,30 @@ def test_ball_projection_clamps_shorter_than_vertical_leg_to_zero():
     projection = analyzer._project_ball_position(640, 360, 0.45, True)
 
     assert projection[5] == 0.0
+
+
+def test_pickup_ready_uses_ground_range_center_and_image_window():
+    analyzer = _analyzer_with_depth(0.43, True)
+
+    candidate = analyzer._build_candidate(_raw_detection(), 1280, 720)
+    state = analyzer._state_for_candidate(candidate, 720)
+
+    assert candidate.ground_distance_m <= analyzer.pickup_ready_depth_m
+    assert state[4] is True
+    assert state[6] is True
+
+
+def test_pickup_ready_rejects_ball_outside_ball_specific_center_window():
+    analyzer = _analyzer_with_depth(0.43, True)
+    detection = _raw_detection()
+    detection["center"] = [850, 529]
+    detection["bbox"] = [822, 500, 878, 558]
+
+    candidate = analyzer._build_candidate(detection, 1280, 720)
+    state = analyzer._state_for_candidate(candidate, 720)
+
+    assert state[4] is False
+    assert state[6] is False
 
 
 def _depth_sampler(image):
