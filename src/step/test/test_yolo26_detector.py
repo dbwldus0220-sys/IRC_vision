@@ -4,8 +4,48 @@ import time
 
 import numpy as np
 
+from step.yolo26_detector import DEFAULT_CLASS_NAMES
 from step.yolo26_detector import LetterboxInfo
 from step.yolo26_detector import Yolo26Detector
+
+
+def test_default_class_names_match_production_model():
+    """Keep TensorRT class IDs aligned with the exported ONNX model."""
+    assert DEFAULT_CLASS_NAMES == [
+        "line",
+        "ball",
+        "goal",
+        "backboard",
+        "hurdle",
+        "grab",
+    ]
+
+
+def test_grab_class_uses_default_threshold_and_is_published():
+    """Accept the grab class emitted as class ID 5 by TensorRT."""
+    detector = object.__new__(Yolo26Detector)
+    detector.max_detections = 300
+    detector.class_names = DEFAULT_CLASS_NAMES.copy()
+    detector.confidence_threshold = 0.25
+    detector.ball_confidence_threshold = 0.20
+    detector.hurdle_confidence_threshold = 0.60
+    predictions = np.asarray(
+        [
+            [10, 10, 20, 20, 0.26, 5],
+            [30, 30, 40, 40, 0.24, 5],
+        ],
+        dtype=np.float32,
+    )[None, ...]
+
+    detections = detector._postprocess(
+        predictions,
+        LetterboxInfo(scale=1.0, pad_x=0.0, pad_y=0.0),
+        (100, 100, 3),
+    )
+
+    assert len(detections) == 1
+    assert detections[0].class_id == 5
+    assert detections[0].class_name == "grab"
 
 
 def test_ball_uses_lower_raw_threshold_without_lowering_other_classes():

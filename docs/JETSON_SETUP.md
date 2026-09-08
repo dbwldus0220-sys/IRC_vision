@@ -568,7 +568,7 @@ RGB + Depth
         ↓
 YOLO26 객체 탐지
         ↓
-line / ball / goal / backboard / hurdle
+line / ball / goal / backboard / hurdle / grab
         ↓
 객체별 거리 및 상대 위치 계산
         ↓

@@ -48,7 +48,14 @@ def _default_model_path() -> str:
 
 
 DEFAULT_MODEL_PATH = _default_model_path()
-DEFAULT_CLASS_NAMES = ["line", "ball", "goal", "backboard", "hurdle"]
+DEFAULT_CLASS_NAMES = [
+    "line",
+    "ball",
+    "goal",
+    "backboard",
+    "hurdle",
+    "grab",
+]
 DISPLAY_WINDOW_NAME = "YOLO26 RealSense Detection"
 
 
