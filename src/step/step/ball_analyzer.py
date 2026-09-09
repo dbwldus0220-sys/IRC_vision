@@ -717,10 +717,10 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         return None, None
 
     @staticmethod
-    def _closeness_score(depth_m: float | None, valid: bool) -> float:
-        if not valid or depth_m is None:
+    def _closeness_score(distance_m: float | None, valid: bool) -> float:
+        if not valid or distance_m is None:
             return 0.0
-        return max(0.0, min(1.0, 1.0 - depth_m / 2.0))
+        return max(0.0, min(1.0, 1.0 - distance_m / 2.0))
 
     def _project_ball_position(
         self,
@@ -870,7 +870,7 @@ class BallAnalyzer(DepthFrameConsumer, Node):
             horizontal_direction = "CENTER"
         area_px = width_px * height_px
         center_score = max(0.0, 1.0 - abs(offset_x_norm))
-        depth_score = self._closeness_score(depth_m, depth_valid)
+        depth_score = self._closeness_score(distance_m, depth_valid)
         area_score = min(1.0, math.sqrt(area_px) / 180.0)
         score = (
             confidence * 0.45
@@ -958,13 +958,13 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         centered = abs(candidate.offset_x_px) <= self.center_tolerance_px
         close = (
             candidate.depth_valid
-            and candidate.depth_m is not None
-            and candidate.depth_m <= self.detect_depth_m
+            and candidate.distance_m is not None
+            and candidate.distance_m <= self.detect_depth_m
         )
         approach_ready = (
             candidate.depth_valid
-            and candidate.depth_m is not None
-            and candidate.depth_m <= self.approach_depth_m
+            and candidate.distance_m is not None
+            and candidate.distance_m <= self.approach_depth_m
         )
 
         in_pickup_window = False
@@ -979,15 +979,15 @@ class BallAnalyzer(DepthFrameConsumer, Node):
 
         pickup_ready = (
             candidate.depth_valid
-            and candidate.depth_m is not None
-            and candidate.depth_m <= self.pickup_ready_depth_m
+            and candidate.distance_m is not None
+            and candidate.distance_m <= self.pickup_ready_depth_m
             and centered
             and in_pickup_window
         )
         pickup_now = (
             candidate.depth_valid
-            and candidate.depth_m is not None
-            and candidate.depth_m
+            and candidate.distance_m is not None
+            and candidate.distance_m
             <= self.pickup_now_depth_m + self.pickup_depth_tolerance_m
             and in_pickup_window
         )
@@ -1298,12 +1298,12 @@ class BallAnalyzer(DepthFrameConsumer, Node):
                 ground_distance_m=target.ground_distance_m,
                 distance_m=target.distance_m,
                 approach_motion=approach_motion_for_distance(
-                    target.depth_m
+                    target.distance_m
                 ),
                 approach_level=approach_level_from_motion(
-                    approach_motion_for_distance(target.depth_m)
+                    approach_motion_for_distance(target.distance_m)
                 ),
-                approach_target_distance_m=target.depth_m,
+                approach_target_distance_m=target.distance_m,
                 depth_valid=target.depth_valid,
                 depth_source=target.depth_source,
                 depth_sync_delta_ms=target.depth_sync_delta_ms,

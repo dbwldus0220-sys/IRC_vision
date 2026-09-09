@@ -99,6 +99,12 @@ class FakeDecisionNode:
     PRE_MOTION_SETTLE_ACTIONS = MotionDecisionNode.PRE_MOTION_SETTLE_ACTIONS
     SPECIAL_ACTIONS = MotionDecisionNode.SPECIAL_ACTIONS
     SPECIAL_ACTION_SOURCES = MotionDecisionNode.SPECIAL_ACTION_SOURCES
+    PICKUP_INITIAL_ALIGN_MARKER = (
+        MotionDecisionNode.PICKUP_INITIAL_ALIGN_MARKER
+    )
+    PICKUP_INITIAL_ALIGN_ACTIONS = (
+        MotionDecisionNode.PICKUP_INITIAL_ALIGN_ACTIONS
+    )
     PICKUP_FINE_ALIGN_MARKER = MotionDecisionNode.PICKUP_FINE_ALIGN_MARKER
     PICKUP_FINE_ALIGN_ACTIONS = MotionDecisionNode.PICKUP_FINE_ALIGN_ACTIONS
 
@@ -125,6 +131,7 @@ class FakeDecisionNode:
 
         self.active_special_event_id = None
         self.active_special_dynamics_command = None
+        self.pickup_initial_align_waiting = False
         self.pickup_fine_align_waiting = False
         self.latest_info = {
             source: None for source in MotionDecisionNode.SOURCES

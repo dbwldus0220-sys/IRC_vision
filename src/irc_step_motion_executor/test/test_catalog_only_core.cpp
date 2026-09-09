@@ -42,7 +42,7 @@ TEST(MotionAliasCatalog, LoadsLatestSdkAndCanonicalAliases)
   irc_step_motion_executor::MotionAliasCatalog catalog;
   std::string error;
   ASSERT_TRUE(catalog.load(TEST_ALIAS_CONFIG, error)) << error;
-  EXPECT_EQ(catalog.size(), 87U);
+  EXPECT_EQ(catalog.size(), 105U);
   EXPECT_EQ(
     catalog.resolve("forward"),
     std::optional<std::string>("전진진짜실전(8회)"));
@@ -70,6 +70,12 @@ TEST(MotionAliasCatalog, LoadsLatestSdkAndCanonicalAliases)
   EXPECT_EQ(
     catalog.resolve("stationary_turn_right"),
     std::optional<std::string>("제자리우회전(9회)"));
+  EXPECT_EQ(
+    catalog.resolve("pickup_camera_down_turn_left_6"),
+    std::optional<std::string>("제좌카메라내린거(6회)"));
+  EXPECT_EQ(
+    catalog.resolve("pickup_camera_down_turn_right_9"),
+    std::optional<std::string>("제우카메라내린거(9회)"));
   EXPECT_EQ(
     catalog.resolve("pickup"),
     std::optional<std::string>("공잡기리그랩까지 실전"));

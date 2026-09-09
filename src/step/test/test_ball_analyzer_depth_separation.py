@@ -1,5 +1,6 @@
 """Tests separating RGB ball detection from optional depth metadata."""
 
+from dataclasses import replace
 import threading
 import time
 
@@ -142,13 +143,20 @@ def test_ball_projection_preserves_close_raw_depth():
     assert projection[5] == pytest.approx(0.45)
 
 
-def test_pickup_ready_uses_raw_depth_center_and_image_window():
+def test_pickup_ready_uses_distance_center_and_image_window():
     analyzer = _analyzer_with_depth(0.15, True)
 
     candidate = analyzer._build_candidate(_raw_detection(), 1280, 720)
+    candidate = replace(
+        candidate,
+        depth_m=0.50,
+        ground_distance_m=0.30,
+        distance_m=0.15,
+    )
     state = analyzer._state_for_candidate(candidate, 720)
 
-    assert candidate.depth_m <= analyzer.pickup_ready_depth_m
+    assert candidate.depth_m > analyzer.pickup_ready_depth_m
+    assert candidate.distance_m <= analyzer.pickup_ready_depth_m
     assert state[4] is True
     assert state[6] is True
 

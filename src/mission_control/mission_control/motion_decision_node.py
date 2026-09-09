@@ -98,7 +98,18 @@ class MotionDecisionNode(Node):
     }
     LINE_MOTION_CAPTURE_START_RATIO = 0.70
     LINE_TIMEOUT_RECOVERY_FRAMES = 10
+    PICKUP_INITIAL_ALIGN_MARKER = "__BALL_PICKUP_INITIAL_ALIGN_CHECK__"
     PICKUP_FINE_ALIGN_MARKER = "__BALL_PICKUP_FINE_ALIGN_CHECK__"
+    PICKUP_INITIAL_ALIGN_ACTIONS = frozenset(
+        {
+            "BALL_PICKUP_INITIAL_ALIGN_CONTINUE",
+            *{
+                f"BALL_PICKUP_CAMERA_DOWN_TURN_{direction}_{count}"
+                for direction in ("LEFT", "RIGHT")
+                for count in range(1, 10)
+            },
+        }
+    )
     PICKUP_FINE_ALIGN_ACTIONS = frozenset(
         {
             "BALL_PICKUP_FINE_ALIGN_CONTINUE",
@@ -343,6 +354,7 @@ class MotionDecisionNode(Node):
         # Special SDK/Dynamics motion lock state.
         self.active_special_event_id: int | None = None
         self.active_special_dynamics_command: int | None = None
+        self.pickup_initial_align_waiting = False
         self.pickup_fine_align_waiting = False
         self.general_motion_gate = GeneralMotionCommandGate(
             max_transient_retries=max(
@@ -892,12 +904,20 @@ class MotionDecisionNode(Node):
                 action == "PICKUP_NOW"
                 and status == "RUNNING"
                 and payload.get("motion_id")
+                == MotionDecisionNode.PICKUP_INITIAL_ALIGN_MARKER
+            ):
+                self.pickup_initial_align_waiting = True
+                self.pickup_fine_align_waiting = False
+                MotionDecisionNode._invalidate_pickup_ball_input(self)
+            elif (
+                action == "PICKUP_NOW"
+                and status == "RUNNING"
+                and payload.get("motion_id")
                 == MotionDecisionNode.PICKUP_FINE_ALIGN_MARKER
             ):
+                self.pickup_initial_align_waiting = False
                 self.pickup_fine_align_waiting = True
-                MotionDecisionNode._invalidate_pickup_fine_align_ball_input(
-                    self
-                )
+                MotionDecisionNode._invalidate_pickup_ball_input(self)
 
             self.get_logger().info(
                 "Special motion lock enabled: "
@@ -915,6 +935,7 @@ class MotionDecisionNode(Node):
 
         self.active_special_event_id = None
         self.active_special_dynamics_command = None
+        self.pickup_initial_align_waiting = False
         self.pickup_fine_align_waiting = False
 
         if completed_action == "PICKUP_NOW" and status == "SUCCEEDED":
@@ -1005,8 +1026,8 @@ class MotionDecisionNode(Node):
         if isinstance(published_stamps, dict):
             published_stamps.pop("line", None)
 
-    def _invalidate_pickup_fine_align_ball_input(self) -> None:
-        """Require a Ball frame captured after fine forward motion succeeds."""
+    def _invalidate_pickup_ball_input(self) -> None:
+        """Require a Ball frame captured after the pickup checkpoint."""
         latest_info = getattr(self, "latest_info", None)
         latest_time = getattr(self, "latest_time", None)
         if isinstance(latest_info, dict):
@@ -1328,9 +1349,17 @@ class MotionDecisionNode(Node):
             decision.valid
             and normalize_general_action(decision.action) is not None
         )
+        is_pickup_initial_align_action = (
+            decision.valid
+            and decision.action in self.PICKUP_INITIAL_ALIGN_ACTIONS
+        )
         is_pickup_fine_align_action = (
             decision.valid
             and decision.action in self.PICKUP_FINE_ALIGN_ACTIONS
+        )
+        is_pickup_checkpoint_action = bool(
+            is_pickup_initial_align_action
+            or is_pickup_fine_align_action
         )
         if (
             is_general_motion
@@ -1343,7 +1372,7 @@ class MotionDecisionNode(Node):
             return
 
         if (
-            is_pickup_fine_align_action
+            is_pickup_checkpoint_action
             and MotionDecisionNode._same_vision_frame_was_published(
                 self,
                 decision,
@@ -1417,7 +1446,7 @@ class MotionDecisionNode(Node):
                 "sdk_motion_requested": bool(
                     trigger
                     or (
-                        is_pickup_fine_align_action
+                        is_pickup_checkpoint_action
                         and decision.sdk_motion_requested
                     )
                 ),
@@ -1478,12 +1507,15 @@ class MotionDecisionNode(Node):
                 self,
                 decision,
             )
-        elif is_pickup_fine_align_action:
+        elif is_pickup_checkpoint_action:
             MotionDecisionNode._remember_published_vision_frame(
                 self,
                 decision,
             )
-            self.pickup_fine_align_waiting = False
+            if is_pickup_initial_align_action:
+                self.pickup_initial_align_waiting = False
+            else:
+                self.pickup_fine_align_waiting = False
 
     def _publish_decision_debug(self) -> None:
         """Publish existing decision state without affecting motion control."""
@@ -1729,6 +1761,13 @@ class MotionDecisionNode(Node):
                     requires_ack=False,
                     source_command={},
                 )
+        if (
+            self.pickup_initial_align_waiting
+            and self.active_special_action == "PICKUP_NOW"
+        ):
+            return self.planner.plan_ball_pickup_initial_alignment(
+                observations.get("ball")
+            )
         if (
             self.pickup_fine_align_waiting
             and self.active_special_action == "PICKUP_NOW"

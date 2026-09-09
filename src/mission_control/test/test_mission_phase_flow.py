@@ -64,6 +64,12 @@ class MissionFlowHarness:
     PRE_MOTION_SETTLE_ACTIONS = MotionDecisionNode.PRE_MOTION_SETTLE_ACTIONS
     SPECIAL_ACTIONS = MotionDecisionNode.SPECIAL_ACTIONS
     SPECIAL_ACTION_SOURCES = MotionDecisionNode.SPECIAL_ACTION_SOURCES
+    PICKUP_INITIAL_ALIGN_MARKER = (
+        MotionDecisionNode.PICKUP_INITIAL_ALIGN_MARKER
+    )
+    PICKUP_INITIAL_ALIGN_ACTIONS = (
+        MotionDecisionNode.PICKUP_INITIAL_ALIGN_ACTIONS
+    )
     PICKUP_FINE_ALIGN_MARKER = MotionDecisionNode.PICKUP_FINE_ALIGN_MARKER
     PICKUP_FINE_ALIGN_ACTIONS = MotionDecisionNode.PICKUP_FINE_ALIGN_ACTIONS
     SPECIAL_FAILURE_REASONS = (
@@ -143,6 +149,7 @@ class MissionFlowHarness:
         }
         self.active_special_event_id = None
         self.active_special_dynamics_command = None
+        self.pickup_initial_align_waiting = False
         self.pickup_fine_align_waiting = False
         self.finish_min_confidence = 0.70
         self.previous_publish_time = 0.0
@@ -432,6 +439,59 @@ def test_pickup_fine_alignment_rechecks_fresh_ball_under_atomic_lock():
     assert centered["action"] == "BALL_PICKUP_FINE_ALIGN_CONTINUE"
     assert centered["active_special_command_id"] == pickup["command_id"]
     assert harness.active_special_action == "PICKUP_NOW"
+
+
+def test_pickup_initial_alignment_requires_fresh_ball_and_depth():
+    harness = MissionFlowHarness(phase="BALL_APPROACH")
+    pickup = publish_special(
+        harness,
+        "ball",
+        pickup_ready_ball(),
+        "PICKUP_NOW",
+    )
+
+    harness.send_status(
+        "PICKUP_NOW",
+        pickup["command_id"],
+        "RUNNING",
+        motion_id=MotionDecisionNode.PICKUP_INITIAL_ALIGN_MARKER,
+    )
+    assert harness.observations["ball"] is None
+    assert harness.pickup_initial_align_waiting is True
+    assert harness.active_special_command_id == pickup["command_id"]
+
+    waiting = harness.publish_vision(line=line_info())[-1]
+    assert waiting["action"] == "WAIT"
+    assert waiting["source"] == "ball"
+
+    right_ball = pickup_ready_ball()
+    right_ball.update(
+        {
+            "steering_angle_deg": 24.0,
+            "bearing_deg": -20.0,
+            "offset_x_norm": 0.2,
+            "pickup_ready": False,
+        }
+    )
+    right = harness.publish_vision(ball=right_ball)[-1]
+    assert right["action"] == "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_2"
+    assert right["active_special_command_id"] == pickup["command_id"]
+    assert harness.pickup_initial_align_waiting is False
+
+    harness.send_status(
+        "PICKUP_NOW",
+        pickup["command_id"],
+        "RUNNING",
+        motion_id=MotionDecisionNode.PICKUP_INITIAL_ALIGN_MARKER,
+    )
+    centered = pickup_ready_ball()
+    centered.update(
+        {"depth_m": 0.55, "distance_m": 0.44, "pickup_ready": False}
+    )
+    approach = harness.publish_vision(ball=centered)[-1]
+    assert approach["action"] == "BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+    assert approach["source_command"]["pickup_approach_motion"] == "STRAIGHT_1"
+    assert approach["source_command"]["distance_m"] == 0.44
 
 
 def test_full_course_mock_flow_without_ros_graph():

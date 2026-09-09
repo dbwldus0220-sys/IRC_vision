@@ -22,6 +22,8 @@ def ball_info(**overrides):
         "pickup_now": False,
     }
     sample.update(overrides)
+    if "distance_m" not in overrides and "depth_m" in overrides:
+        sample["distance_m"] = overrides["depth_m"]
     if "ground_distance_m" not in overrides and "depth_m" in overrides:
         sample["ground_distance_m"] = overrides["depth_m"]
     return sample
@@ -64,7 +66,7 @@ def test_first_ball_at_68cm_uses_left_6_curve():
     planner = BallNavigationPlanner()
 
     command = planner.plan(
-        ball_info(depth_m=0.68, distance_m=0.69, pickup_ready=False),
+        ball_info(depth_m=0.68, distance_m=0.68, pickup_ready=False),
         0.1,
     )
 
@@ -78,7 +80,7 @@ def test_first_ball_at_68cm_uses_left_6_curve():
         (1.50, "STRAIGHT_3"),
         (0.70, "RECOVER_LEFT_TURN_LEFT_8"),
         (0.60, "RECOVER_LEFT_TURN_LEFT_6"),
-        (0.50, "STRAIGHT_3"),
+        (0.50, "PICKUP_NOW"),
     ],
 )
 def test_aligned_general_ball_approach_distance_policy(
@@ -120,14 +122,14 @@ def test_valid_general_approach_does_not_emit_raw_numbered_turn(
     assert not command.motion.startswith(("TURN_LEFT_", "TURN_RIGHT_"))
 
 
-def test_raw_depth_starts_pickup_sequence_at_400mm_without_vision_gate():
+def test_fresh_distance_starts_pickup_sequence_at_570mm_without_vision_gate():
     planner = BallNavigationPlanner()
 
     command = planner.plan(
         ball_info(
-            depth_m=0.40,
-            ground_distance_m=0.15,
-            distance_m=0.62,
+            depth_m=0.62,
+            ground_distance_m=0.30,
+            distance_m=0.570,
             pickup_ready=False,
             pickup_now=False,
         ),
@@ -136,11 +138,12 @@ def test_raw_depth_starts_pickup_sequence_at_400mm_without_vision_gate():
 
     assert command.valid is True
     assert command.motion == "PICKUP_NOW"
-    assert command.reason == "ball_raw_depth_entered_pickup_sequence"
+    assert command.reason == "ball_distance_entered_pickup_sequence"
     assert command.linear_speed_mps == 0.0
     assert command.pickup_now is True
-    assert command.pickup_approach_motion == "STRAIGHT_2"
-    assert command.ground_distance_m == 0.40
+    assert command.pickup_approach_motion is None
+    assert command.distance_m == 0.570
+    assert command.ground_distance_m == 0.30
 
 
 @pytest.mark.parametrize("depth_age_sec", [None, 0.701])
@@ -162,10 +165,10 @@ def test_invalid_or_stale_depth_does_not_start_pickup_sequence(
 
     assert command.valid is False
     assert command.motion == "STOP"
-    assert command.reason == "stale_ball_depth_for_pickup_sequence"
+    assert command.reason == "stale_ball_distance_for_pickup_sequence"
 
 
-def test_pickup_now_false_still_starts_sequence_at_close_raw_depth():
+def test_pickup_now_false_still_starts_sequence_at_close_distance():
     planner = BallNavigationPlanner()
 
     command = planner.plan(
@@ -176,15 +179,16 @@ def test_pickup_now_false_still_starts_sequence_at_close_raw_depth():
     assert command.motion == "PICKUP_NOW"
     assert command.pickup_now is True
     assert command.pickup_ready is False
-    assert command.pickup_approach_motion == "STRAIGHT_2"
+    assert command.pickup_approach_motion is None
 
 
-def test_pickup_sequence_does_not_start_above_400mm():
+def test_pickup_sequence_does_not_start_above_570mm():
     planner = BallNavigationPlanner()
 
     command = planner.plan(
         ball_info(
-            depth_m=0.401,
+            depth_m=0.40,
+            distance_m=0.571,
             ground_distance_m=0.15,
             pickup_ready=True,
             pickup_now=True,
@@ -195,6 +199,37 @@ def test_pickup_sequence_does_not_start_above_400mm():
     assert command.valid is True
     assert command.motion != "PICKUP_NOW"
     assert command.pickup_now is False
+
+
+def test_580mm_keeps_general_ball_approach():
+    command = BallNavigationPlanner().plan(
+        ball_info(
+            depth_m=0.40,
+            distance_m=0.580,
+            ground_distance_m=0.30,
+            pickup_ready=True,
+            pickup_now=True,
+        ),
+        0.1,
+    )
+
+    assert command.motion == "RECOVER_LEFT_TURN_LEFT_6"
+    assert command.pickup_now is False
+
+
+def test_invalid_distance_never_falls_back_to_ground_distance():
+    command = BallNavigationPlanner().plan(
+        ball_info(
+            depth_m=0.40,
+            distance_m=None,
+            ground_distance_m=0.30,
+        ),
+        0.1,
+    )
+
+    assert command.valid is False
+    assert command.motion == "STOP"
+    assert command.reason == "missing_valid_ball_distance"
 
 
 def test_pickup_sequence_uses_fine_motion_at_130mm():
@@ -211,7 +246,7 @@ def test_pickup_sequence_uses_fine_motion_at_130mm():
     )
 
     assert command.motion == "PICKUP_NOW"
-    assert command.pickup_approach_motion == "STRAIGHT_0"
+    assert command.pickup_approach_motion is None
 
 
 def test_stale_80cm_pickup_flag_cannot_trigger_pickup():
@@ -310,24 +345,24 @@ def test_valid_far_depth_uses_straight_3(depth):
         -0.1,
     ],
 )
-def test_invalid_depth_stops(depth):
+def test_invalid_distance_stops(depth):
     planner = BallNavigationPlanner()
 
     command = planner.plan(
         ball_info(
             depth_m=depth,
             ground_distance_m=1.0,
-            distance_m=1.0,
+            distance_m=depth,
         ),
         0.1,
     )
 
     assert command.valid is False
     assert command.motion == "STOP"
-    assert command.reason == "missing_valid_ball_depth"
+    assert command.reason == "missing_valid_ball_distance"
 
 
-def test_missing_depth_does_not_emit_unsupported_raw_turn():
+def test_missing_distance_does_not_emit_unsupported_raw_turn():
     planner = BallNavigationPlanner()
 
     command = planner.plan(
@@ -343,7 +378,7 @@ def test_missing_depth_does_not_emit_unsupported_raw_turn():
 
     assert command.valid is False
     assert command.motion == "STOP"
-    assert command.reason == "missing_valid_ball_depth"
+    assert command.reason == "missing_valid_ball_distance"
     assert command.depth_valid is False
 
 
@@ -404,7 +439,7 @@ def test_angular_acceleration_is_limited():
         (ball_info(confidence=0.1), "low_ball_confidence"),
         (
             ball_info(depth_m=None, depth_valid=False),
-            "missing_valid_ball_depth",
+            "missing_valid_ball_distance",
         ),
     ],
 )
