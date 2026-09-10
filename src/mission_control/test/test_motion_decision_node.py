@@ -99,8 +99,18 @@ class FakeDecisionNode:
     PRE_MOTION_SETTLE_ACTIONS = MotionDecisionNode.PRE_MOTION_SETTLE_ACTIONS
     SPECIAL_ACTIONS = MotionDecisionNode.SPECIAL_ACTIONS
     SPECIAL_ACTION_SOURCES = MotionDecisionNode.SPECIAL_ACTION_SOURCES
+    PICKUP_INITIAL_ALIGN_MARKER = (
+        MotionDecisionNode.PICKUP_INITIAL_ALIGN_MARKER
+    )
+    PICKUP_INITIAL_ALIGN_ACTIONS = (
+        MotionDecisionNode.PICKUP_INITIAL_ALIGN_ACTIONS
+    )
     PICKUP_FINE_ALIGN_MARKER = MotionDecisionNode.PICKUP_FINE_ALIGN_MARKER
     PICKUP_FINE_ALIGN_ACTIONS = MotionDecisionNode.PICKUP_FINE_ALIGN_ACTIONS
+    BALL_POST_MOTION_DWELL_SEC = 0.0
+    BALL_RAW_CONFIRMATION_RELEASE_SEC = (
+        MotionDecisionNode.BALL_RAW_CONFIRMATION_RELEASE_SEC
+    )
 
     def __init__(
         self,
@@ -125,6 +135,7 @@ class FakeDecisionNode:
 
         self.active_special_event_id = None
         self.active_special_dynamics_command = None
+        self.pickup_initial_align_waiting = False
         self.pickup_fine_align_waiting = False
         self.latest_info = {
             source: None for source in MotionDecisionNode.SOURCES
@@ -147,6 +158,12 @@ class FakeDecisionNode:
         self.executor_auto_ready = True
         self.executor_ready_requires_fresh_vision = False
         self.active_general_source = None
+        self.ball_approach_entry_pending = False
+        self.ball_approach_alignment_pending = False
+        self.ball_pickup_entry_pending = False
+        self.ball_post_motion_dwell_until = None
+        self.ball_confirmation_pending_latched = False
+        self.ball_confirmation_last_raw_at = None
         self.active_line_motion_action = None
         self.active_line_motion_started_at = None
         self.active_line_motion_duration_sec = 0.0
@@ -1502,6 +1519,7 @@ def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
     monkeypatch,
 ):
     node = ReadinessPublishNode(general_decision("STRAIGHT"))
+    node.phase_manager.pickups_completed = node.required_pickups
     clock = [10.0]
     monkeypatch.setattr(time, "monotonic", lambda: clock[0])
 
@@ -1806,6 +1824,26 @@ def select_decision(node, finish=None, **observations):
     )
 
 
+def ball_info_for_node(**overrides):
+    """Build one confirmed, fresh BALL sample for node flow tests."""
+    sample = {
+        "detected": True,
+        "confidence": 0.95,
+        "depth_valid": True,
+        "depth_age_sec": 0.05,
+        "depth_m": 0.9,
+        "distance_m": 0.9,
+        "ground_distance_m": 0.9,
+        "steering_angle_deg": 0.0,
+        "bearing_deg": 0.0,
+        "offset_x_norm": 0.0,
+        "pickup_ready": False,
+        "pickup_now": False,
+    }
+    sample.update(overrides)
+    return sample
+
+
 class FreshMockInputNode(FakeDecisionNode):
     """Provide the real freshness and planner state for mock input tests."""
 
@@ -1829,6 +1867,218 @@ class FreshMockInputNode(FakeDecisionNode):
         }
 
 
+def test_raw_ball_latches_confirmation_hold_until_confirmed():
+    node = FreshMockInputNode()
+
+    MotionDecisionNode._update_ball_confirmation_pending(
+        node,
+        {
+            "detected": False,
+            "raw_detected": True,
+            "confirmation_hits": 5,
+            "confirmation_required_hits": 12,
+        },
+        10.0,
+    )
+
+    assert node.ball_confirmation_pending_latched is True
+    decision = select_decision(
+        node,
+        ball={
+            "detected": False,
+            "raw_detected": True,
+            "confirmation_hits": 5,
+            "confirmation_required_hits": 12,
+        },
+        line={"detected": True},
+    )
+    assert decision.action == "WAIT"
+    assert decision.reason == "ball_confirmation_pending_hold"
+
+    MotionDecisionNode._update_ball_confirmation_pending(
+        node,
+        {"detected": True, "confirmation_confirmed": True},
+        10.1,
+    )
+    assert node.ball_confirmation_pending_latched is False
+
+
+def test_raw_ball_confirmation_hold_releases_after_detection_is_lost():
+    node = FreshMockInputNode()
+
+    MotionDecisionNode._update_ball_confirmation_pending(
+        node,
+        {"detected": False, "raw_detected": True},
+        10.0,
+    )
+    MotionDecisionNode._update_ball_confirmation_pending(
+        node,
+        {"detected": False, "raw_detected": False},
+        10.49,
+    )
+    assert node.ball_confirmation_pending_latched is True
+
+    MotionDecisionNode._update_ball_confirmation_pending(
+        node,
+        {"detected": False, "raw_detected": False},
+        10.5,
+    )
+    assert node.ball_confirmation_pending_latched is False
+
+
+def test_ball_callback_latches_valid_pickup_entry_during_ball_motion():
+    node = FreshMockInputNode()
+    node.general_motion_gate.on_new_vision_input()
+    node.general_motion_gate.on_command_published(
+        "STRAIGHT_3",
+        command_id=1,
+    )
+    node.active_general_source = "ball"
+    message = String()
+    message.data = json.dumps(
+        {
+            "detected": True,
+            "confidence": 0.95,
+            "depth_valid": True,
+            "depth_m": 0.57,
+            "distance_m": 0.57,
+            "depth_age_sec": 0.05,
+        }
+    )
+
+    MotionDecisionNode._info_callback(node, "ball")(message)
+
+    assert node.ball_pickup_entry_pending is True
+
+
+def test_ball_approach_entry_during_line_motion_waits_for_success_and_fresh_ball():
+    node = FreshMockInputNode()
+    node.general_motion_gate.on_new_vision_input()
+    node.general_motion_gate.on_command_published("STRAIGHT_3", command_id=1)
+    node.active_general_source = "line"
+    message = String()
+    message.data = json.dumps(ball_info_for_node(distance_m=1.4))
+
+    MotionDecisionNode._info_callback(node, "ball")(message)
+
+    assert node.general_motion_gate.locked is True
+    assert node.ball_approach_entry_pending is True
+    assert node.planner.ball_lock_active is True
+
+    send_status(
+        node,
+        status="RUNNING",
+        action="STRAIGHT_3",
+        command_id=1,
+        event_id=None,
+        dynamics_command=None,
+    )
+    send_status(
+        node,
+        status="SUCCEEDED",
+        action="STRAIGHT_3",
+        command_id=1,
+        event_id=None,
+        dynamics_command=None,
+    )
+
+    assert node.general_motion_gate.locked is False
+    assert node.latest_info["ball"] is None
+    waiting = select_decision(node)
+    assert waiting.action == "STOP"
+
+    MotionDecisionNode._info_callback(node, "ball")(message)
+    decision = select_decision(node, ball=json.loads(message.data))
+    assert decision.source == "ball"
+    assert decision.action == "STRAIGHT_3"
+
+
+def test_ball_straight_success_starts_three_second_alignment_settle(monkeypatch):
+    node = FreshMockInputNode()
+    node.BALL_POST_MOTION_DWELL_SEC = 3.0
+    node.general_motion_gate.on_new_vision_input()
+    node.general_motion_gate.on_command_published("STRAIGHT_4", command_id=2)
+    node.active_general_source = "ball"
+    monkeypatch.setattr(time, "monotonic", lambda: 10.0)
+
+    send_status(
+        node,
+        status="RUNNING",
+        action="STRAIGHT_4",
+        command_id=2,
+        event_id=None,
+        dynamics_command=None,
+    )
+    send_status(
+        node,
+        status="SUCCEEDED",
+        action="STRAIGHT_4",
+        command_id=2,
+        event_id=None,
+        dynamics_command=None,
+    )
+
+    assert node.ball_approach_alignment_pending is True
+    assert node.ball_post_motion_dwell_until == pytest.approx(13.0)
+
+
+def test_ball_settle_expiry_discards_frames_received_during_settle(monkeypatch):
+    node = ReadinessPublishNode(general_decision())
+    node.ball_post_motion_dwell_until = 13.0
+    node.latest_info["ball"] = ball_info_for_node()
+    node.latest_time["ball"] = 12.5
+    node.general_motion_gate.vision_generation = 5
+    monkeypatch.setattr(time, "monotonic", lambda: 13.0)
+
+    MotionDecisionNode._publish_decision(node)
+
+    assert node.publisher.messages == []
+    assert node.latest_info["ball"] is None
+    assert node.latest_time["ball"] is None
+    assert node.general_motion_gate.required_vision_generation == 6
+
+
+def test_570mm_entry_during_general_settle_skips_remaining_general_cycle():
+    node = FreshMockInputNode()
+    node.ball_post_motion_dwell_until = 20.0
+    node.ball_approach_alignment_pending = True
+
+    MotionDecisionNode._latch_ball_pickup_entry(
+        node,
+        ball_info_for_node(distance_m=0.565),
+    )
+
+    assert node.ball_pickup_entry_pending is True
+    assert node.ball_post_motion_dwell_until is None
+    assert node.ball_approach_alignment_pending is False
+
+
+def test_general_ball_alignment_pending_uses_fresh_angle_then_distance():
+    node = FreshMockInputNode()
+    assert node.phase_manager.set_phase("BALL_APPROACH")
+    node.ball_approach_alignment_pending = True
+
+    turn = select_decision(
+        node,
+        ball=ball_info_for_node(
+            distance_m=0.9,
+            steering_angle_deg=26.0,
+        ),
+    )
+    assert turn.action == "BALL_APPROACH_TURN_RIGHT_3"
+
+    node.ball_approach_alignment_pending = True
+    straight = select_decision(
+        node,
+        ball=ball_info_for_node(
+            distance_m=0.9,
+            steering_angle_deg=2.0,
+        ),
+    )
+    assert straight.action == "STRAIGHT_3"
+    assert node.ball_approach_alignment_pending is False
+
+
 @pytest.mark.parametrize(
     ('search_phase', 'source', 'payload', 'approach_phase'),
     [
@@ -1840,6 +2090,7 @@ class FreshMockInputNode(FakeDecisionNode):
                 'depth_valid': True,
                 'depth_m': 0.9,
                 'ground_distance_m': 0.9,
+                'distance_m': 0.9,
             },
             'BALL_APPROACH',
         ),

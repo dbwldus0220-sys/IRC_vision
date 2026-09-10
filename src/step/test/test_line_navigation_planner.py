@@ -87,7 +87,7 @@ def test_far_curve_slows_down_without_starting_turn_early():
     assert command.linear_speed_mps < planner.config.max_linear_speed_mps
 
 
-def test_confirmed_corner_outputs_straight_motion_count_before_turn():
+def test_confirmed_corner_does_not_override_normal_line_tracking():
     planner = LineNavigationPlanner(
         NavigationConfig(direction_confirmation_frames=1)
     )
@@ -108,15 +108,15 @@ def test_confirmed_corner_outputs_straight_motion_count_before_turn():
     )
 
     payload = command.to_dict()
-    assert command.motion == "STRAIGHT_4"
-    assert command.reason == "corner_approach"
-    assert payload["corner_prepare"] is True
-    assert payload["corner_direction"] == "RIGHT"
-    assert payload["corner_start_distance_m"] == pytest.approx(0.82)
-    assert payload["corner_straight_motion_count"] == 13
+    assert command.motion == "STRAIGHT"
+    assert command.reason == "line_tracking"
+    assert payload["corner_prepare"] is False
+    assert payload["corner_direction"] is None
+    assert payload["corner_start_distance_m"] is None
+    assert payload["corner_straight_motion_count"] is None
 
 
-def test_confirmed_corner_uses_shared_discrete_distance_band():
+def test_confirmed_corner_does_not_create_discrete_approach_motion():
     planner = LineNavigationPlanner(
         NavigationConfig(direction_confirmation_frames=1)
     )
@@ -132,12 +132,13 @@ def test_confirmed_corner_uses_shared_discrete_distance_band():
     )
 
     payload = command.to_dict()
-    assert command.motion == "STRAIGHT_3"
-    assert payload["approach_level"] == 3
-    assert payload["approach_target_distance_m"] == pytest.approx(0.68)
+    assert command.motion == "STRAIGHT"
+    assert command.reason == "line_tracking"
+    assert payload["approach_level"] is None
+    assert payload["approach_target_distance_m"] is None
 
 
-def test_confirmed_corner_remaining_distance_blocks_early_left_turn():
+def test_confirmed_corner_remaining_distance_does_not_block_line_turn():
     planner = LineNavigationPlanner(
         NavigationConfig(direction_confirmation_frames=1)
     )
@@ -157,8 +158,8 @@ def test_confirmed_corner_remaining_distance_blocks_early_left_turn():
         0.1,
     )
 
-    assert command.motion == "STRAIGHT_4"
-    assert command.reason == "corner_approach"
+    assert command.motion == "LEFT"
+    assert command.reason == "line_tracking"
 
 
 def test_confirmed_corner_allows_left_turn_at_turning_distance():

@@ -38,8 +38,36 @@ class MotionCommandBridgeNode(Node):
     """Translate supported navigation actions into SDK executor requests."""
 
     DWELL_MARKER = "__NON_BLOCKING_DWELL__"
+    PICKUP_INITIAL_ALIGN_DWELL_MARKER = (
+        "__BALL_PICKUP_INITIAL_ALIGN_DWELL__"
+    )
+    PICKUP_INITIAL_ALIGN_MARKER = "__BALL_PICKUP_INITIAL_ALIGN_CHECK__"
     FINE_ALIGN_MARKER = "__BALL_PICKUP_FINE_ALIGN_CHECK__"
     PICKUP_DWELL_SEC = 3.0
+    PICKUP_INITIAL_ALIGN_ACTIONS = frozenset(
+        {
+            "BALL_PICKUP_INITIAL_ALIGN_CONTINUE",
+            *{
+                f"BALL_PICKUP_CAMERA_DOWN_TURN_{direction}_{count}"
+                for direction in ("LEFT", "RIGHT")
+                for count in range(1, 10)
+            },
+        }
+    )
+    PICKUP_CAMERA_DOWN_TURN_MOTION_IDS = {
+        **{
+            f"BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_{count}": (
+                f"pickup_camera_down_turn_left_{count}"
+            )
+            for count in range(1, 10)
+        },
+        **{
+            f"BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_{count}": (
+                f"pickup_camera_down_turn_right_{count}"
+            )
+            for count in range(1, 10)
+        },
+    }
     PICKUP_FINE_ALIGN_ACTIONS = frozenset(
         {
             "BALL_PICKUP_FINE_ALIGN_CONTINUE",
@@ -86,7 +114,6 @@ class MotionCommandBridgeNode(Node):
         "APPROACH": "forward",
         "LEFT": "line_turn_left_15",
         "RIGHT": "line_turn_right_large",
-        "PICKUP_NOW": "ball_camera_down_forward_4",
         "POST_BALL_GOAL_TRANSITION": "post_ball_forward_4",
         "BALL_FINE_FORWARD_8": "ball_general_fine_forward_8",
         "GOAL_CAMERA_90_FORWARD": "goal_camera_90_forward_6",
@@ -106,6 +133,18 @@ class MotionCommandBridgeNode(Node):
                 f"post_ball_line_turn_left_{count}"
             )
             for count in (2, 3, 4, 6)
+        },
+        **{
+            f"BALL_APPROACH_TURN_RIGHT_{count}": (
+                f"post_ball_line_turn_right_{count}"
+            )
+            for count in range(1, 10)
+        },
+        **{
+            f"BALL_APPROACH_TURN_LEFT_{count}": (
+                f"post_ball_line_turn_left_{count}"
+            )
+            for count in (2, 3, 4, 5, 6)
         },
         **{
             f"GOAL_CAMERA90_TURN_RIGHT_{count}": (
@@ -160,6 +199,9 @@ class MotionCommandBridgeNode(Node):
         self.active_pickup_sequence: tuple[str, ...] = ()
         self.active_sequence_index = 0
         self.active_dwell_until: float | None = None
+        self.pickup_initial_align_dwell_until: float | None = None
+        self.pickup_initial_align_waiting = False
+        self.pickup_initial_align_correction_active = False
         self.pickup_fine_align_waiting = False
         self.pickup_fine_align_correction_active = False
         self.queued_command_id: int | None = None
@@ -241,12 +283,9 @@ class MotionCommandBridgeNode(Node):
         ):
             return None
 
-        approach_motion = source_command.get("pickup_approach_motion")
-        first_motion = cls.PICKUP_CAMERA_DOWN_MOTION_IDS.get(approach_motion)
         completed = mission_progress.get("pickups_completed")
         if (
-            first_motion is None
-            or isinstance(completed, bool)
+            isinstance(completed, bool)
             or not isinstance(completed, int)
             or completed not in {0, 1}
         ):
@@ -263,7 +302,7 @@ class MotionCommandBridgeNode(Node):
                 "stationary_turn_left",
                 cls.DWELL_MARKER,
             )
-        return (first_motion, *cls.PICKUP_MOTION_TAIL, *final_stages)
+        return (*cls.PICKUP_MOTION_TAIL, *final_stages)
 
     def publish_motion_status(
         self,
@@ -333,6 +372,121 @@ class MotionCommandBridgeNode(Node):
             motion_id=self.FINE_ALIGN_MARKER,
             action=self.active_action,
             message="waiting for fresh BALL pickup fine alignment",
+        )
+
+    def _enter_pickup_initial_align_checkpoint(self) -> None:
+        """Request a fresh Ball frame while retaining pickup ownership."""
+        self.active_motion_id = self.PICKUP_INITIAL_ALIGN_MARKER
+        self.pickup_initial_align_waiting = True
+        self.pickup_initial_align_correction_active = False
+        self.publish_motion_status(
+            status="RUNNING",
+            command_id=self.active_command_id,
+            event_id=self.active_event_id,
+            request_id=self.active_request_id,
+            motion_id=self.PICKUP_INITIAL_ALIGN_MARKER,
+            action=self.active_action,
+            message="waiting for fresh BALL pickup heading alignment",
+        )
+
+    def _start_pickup_initial_align_dwell(self) -> None:
+        """Hold still for three seconds before checking pickup heading."""
+        self.active_motion_id = self.PICKUP_INITIAL_ALIGN_DWELL_MARKER
+        self.pickup_initial_align_dwell_until = (
+            time.monotonic() + self.PICKUP_DWELL_SEC
+        )
+        self.pickup_initial_align_waiting = False
+        self.pickup_initial_align_correction_active = False
+        self.publish_motion_status(
+            status="RUNNING",
+            command_id=self.active_command_id,
+            event_id=self.active_event_id,
+            request_id=self.active_request_id,
+            motion_id=self.PICKUP_INITIAL_ALIGN_DWELL_MARKER,
+            action=self.active_action,
+            message="holding still before BALL pickup heading alignment",
+        )
+
+    def _handle_pickup_initial_align_command(
+        self,
+        *,
+        action: str,
+        command_id: int,
+        event_id: int | None,
+        payload: dict[str, Any],
+    ) -> None:
+        """Apply one fresh heading decision inside the pickup checkpoint."""
+        parent_command_id = payload.get("active_special_command_id")
+        parent_event_id = payload.get("active_special_event_id")
+        checkpoint_matches = bool(
+            self.motion_in_progress
+            and self.active_action == "PICKUP_NOW"
+            and self.pickup_initial_align_waiting
+            and parent_command_id == self.active_command_id
+            and parent_event_id == self.active_event_id
+        )
+        if not checkpoint_matches:
+            self._publish_local_rejection(
+                status="REJECTED",
+                command_id=command_id,
+                event_id=event_id,
+                action=action,
+                error_code="PICKUP_INITIAL_ALIGNMENT_NOT_ACTIVE",
+                message="pickup initial-alignment checkpoint is not active",
+            )
+            return
+
+        self.last_sent_command_id = command_id
+        self.pickup_initial_align_waiting = False
+        if action == "BALL_PICKUP_INITIAL_ALIGN_CONTINUE":
+            source_command = payload.get("source_command")
+            approach_motion = (
+                source_command.get("pickup_approach_motion")
+                if isinstance(source_command, dict)
+                else None
+            )
+            first_motion = self.PICKUP_CAMERA_DOWN_MOTION_IDS.get(
+                approach_motion
+            )
+            if first_motion is None:
+                self.pickup_initial_align_waiting = True
+                self._publish_local_rejection(
+                    status="REJECTED",
+                    command_id=command_id,
+                    event_id=event_id,
+                    action=action,
+                    error_code="UNSUPPORTED_PICKUP_DISTANCE_APPROACH",
+                    message=(
+                        "fresh pickup depth did not select a supported motion"
+                    ),
+                )
+                return
+            self.active_pickup_sequence = (
+                first_motion,
+                *self.active_pickup_sequence,
+            )
+            self.active_sequence_index = 0
+            self.active_motion_id = first_motion
+            self._publish_executor_request(
+                action=self.active_action,
+                command_id=self.active_command_id,
+                event_id=self.active_event_id,
+                request_id=self.active_request_id,
+                motion_id=first_motion,
+                timeout_ms=self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS,
+            )
+            return
+
+        motion_id = self.PICKUP_CAMERA_DOWN_TURN_MOTION_IDS[action]
+        self.pickup_initial_align_correction_active = True
+        self.active_motion_id = motion_id
+        self._publish_executor_request(
+            action=self.active_action,
+            command_id=self.active_command_id,
+            event_id=self.active_event_id,
+            request_id=self.active_request_id,
+            motion_id=motion_id,
+            timeout_ms=self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS,
         )
 
     def _handle_pickup_fine_align_command(
@@ -465,6 +619,14 @@ class MotionCommandBridgeNode(Node):
                 payload=payload,
             )
             return
+        if action in self.PICKUP_INITIAL_ALIGN_ACTIONS:
+            self._handle_pickup_initial_align_command(
+                action=action,
+                command_id=command_id,
+                event_id=event_id,
+                payload=payload,
+            )
+            return
 
         if command_id == self.last_sent_command_id:
             self._publish_local_rejection(
@@ -511,13 +673,12 @@ class MotionCommandBridgeNode(Node):
                     action=action,
                     error_code="UNSUPPORTED_PICKUP_SEQUENCE",
                     message=(
-                        "pickup sequence requires a supported camera-down "
-                        "approach bucket and ball mission index 0 or 1"
+                        "pickup sequence requires ball mission index 0 or 1"
                     ),
                 )
                 return
             pickup_sequence = built_sequence
-            motion_id = pickup_sequence[0]
+            motion_id = self.PICKUP_INITIAL_ALIGN_MARKER
         elif action == "POST_BALL_GOAL_TRANSITION":
             pickup_sequence = self.POST_BALL_GOAL_TRANSITION_SEQUENCE
             motion_id = pickup_sequence[0]
@@ -547,10 +708,14 @@ class MotionCommandBridgeNode(Node):
 
         request_id = command_id
         timeout_ms = self.timeout_ms_from_payload(payload)
-        defer_until_active_finishes = (
+        defer_until_active_finishes = bool(
             self.motion_in_progress and action == "PICKUP_NOW"
         )
-        if not defer_until_active_finishes:
+        starts_with_initial_align_checkpoint = action == "PICKUP_NOW"
+        if (
+            not defer_until_active_finishes
+            and not starts_with_initial_align_checkpoint
+        ):
             self._publish_executor_request(
                 action=action,
                 command_id=command_id,
@@ -581,6 +746,8 @@ class MotionCommandBridgeNode(Node):
             self.active_pickup_sequence = pickup_sequence
             self.active_sequence_index = 0
             self.active_dwell_until = None
+            if starts_with_initial_align_checkpoint:
+                self._start_pickup_initial_align_dwell()
 
     def _start_next_pickup_motion(self) -> bool:
         """Advance one atomic BALL sequence after a successful stage."""
@@ -619,9 +786,20 @@ class MotionCommandBridgeNode(Node):
 
     def _check_atomic_dwell(self, now: float | None = None) -> None:
         """Advance a dwell stage without blocking ROS callbacks."""
-        if self.active_dwell_until is None:
+        if (
+            self.active_dwell_until is None
+            and self.pickup_initial_align_dwell_until is None
+        ):
             return
         current_time = time.monotonic() if now is None else now
+        if self.pickup_initial_align_dwell_until is not None:
+            if current_time < self.pickup_initial_align_dwell_until:
+                return
+            self.pickup_initial_align_dwell_until = None
+            self._enter_pickup_initial_align_checkpoint()
+            return
+
+        assert self.active_dwell_until is not None
         if current_time < self.active_dwell_until:
             return
 
@@ -694,6 +872,9 @@ class MotionCommandBridgeNode(Node):
         self.active_pickup_sequence = ()
         self.active_sequence_index = 0
         self.active_dwell_until = None
+        self.pickup_initial_align_dwell_until = None
+        self.pickup_initial_align_waiting = False
+        self.pickup_initial_align_correction_active = False
         self.pickup_fine_align_waiting = False
         self.pickup_fine_align_correction_active = False
 
@@ -718,18 +899,24 @@ class MotionCommandBridgeNode(Node):
         self.active_pickup_sequence = self.queued_pickup_sequence
         self.active_sequence_index = 0
         self.active_dwell_until = None
+        self.pickup_initial_align_dwell_until = None
         queued_request_deferred = self.queued_request_deferred
         self._clear_queued_request()
         self.motion_in_progress = self.active_request_id is not None
         if queued_request_deferred and self.motion_in_progress:
-            self._publish_executor_request(
-                action=self.active_action,
-                command_id=self.active_command_id,
-                event_id=self.active_event_id,
-                request_id=self.active_request_id,
-                motion_id=self.active_motion_id,
-                timeout_ms=self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS,
-            )
+            if self.active_action == "PICKUP_NOW":
+                self._start_pickup_initial_align_dwell()
+            else:
+                self._publish_executor_request(
+                    action=self.active_action,
+                    command_id=self.active_command_id,
+                    event_id=self.active_event_id,
+                    request_id=self.active_request_id,
+                    motion_id=self.active_motion_id,
+                    timeout_ms=(
+                        self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS
+                    ),
+                )
 
     def executor_status_callback(self, msg: String) -> None:
         """Forward matching executor status and release terminal requests."""
@@ -770,6 +957,14 @@ class MotionCommandBridgeNode(Node):
             self.get_logger().warning(
                 "Executor status ignored: pickup motion_id mismatch"
             )
+            return
+        if (
+            is_active
+            and action == "PICKUP_NOW"
+            and self.pickup_initial_align_correction_active
+            and payload["status"] == "SUCCEEDED"
+        ):
+            self._enter_pickup_initial_align_checkpoint()
             return
         if (
             is_active

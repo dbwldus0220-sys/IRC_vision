@@ -74,6 +74,18 @@ def test_production_alias_catalog_contains_only_approved_aliases():
             "pickup_first_to_right_back_camera_45": (
                 "왼뒤에서 오뒤로(카메라45도)"
             ),
+            **{
+                f"pickup_camera_down_turn_left_{count}": (
+                    f"제좌카메라내린거({count}회)"
+                )
+                for count in range(1, 10)
+            },
+            **{
+                f"pickup_camera_down_turn_right_{count}": (
+                    f"제우카메라내린거({count}회)"
+                )
+                for count in range(1, 10)
+            },
             "post_ball_forward_4": "전진진짜실전(4회)",
             "post_ball_forward_8": "전진진짜실전(8회)",
             "post_ball_camera_90": "오뒤카메라90도",
@@ -92,6 +104,7 @@ def test_production_alias_catalog_contains_only_approved_aliases():
             "post_ball_line_turn_left_2": "제자리좌회전(2번)",
             "post_ball_line_turn_left_3": "제자리좌회전(3회)",
             "post_ball_line_turn_left_4": "제자리좌회전(4회)",
+            "post_ball_line_turn_left_5": "제자리좌회전(5번)",
             "post_ball_line_turn_left_6": "제자리좌회전(6번)",
             **{
                 f"goal_camera_90_turn_right_{count}": (
@@ -163,7 +176,70 @@ def test_every_production_bridge_motion_id_has_an_approved_alias():
     assert pickup_motion_ids <= set(aliases)
 
 
-def test_aliased_production_motions_use_three_degree_final_tolerance():
+def test_counted_turn_aliases_match_family_direction_and_repeat_count():
+    aliases = yaml.safe_load(
+        ALIAS_PATH.read_text(encoding="utf-8")
+    )["motion_aliases"]
+    catalog = yaml.safe_load(
+        RUNTIME_CATALOG_PATH.read_text(encoding="utf-8")
+    )["motions"]
+    motions_by_name = {motion["name"]: motion for motion in catalog}
+
+    expected = {
+        "stationary_turn_left": ("제자리좌회전(6번)", 6),
+        "stationary_turn_right": ("제자리우회전(9회)", 9),
+        "pickup_first_turn_right_9": ("제자리우회전(9회)", 9),
+        **{
+            f"post_ball_line_turn_right_{count}": (
+                f"제자리우회전({count}회)",
+                count,
+            )
+            for count in range(1, 10)
+        },
+        "post_ball_line_turn_left_2": ("제자리좌회전(2번)", 2),
+        "post_ball_line_turn_left_3": ("제자리좌회전(3회)", 3),
+        "post_ball_line_turn_left_4": ("제자리좌회전(4회)", 4),
+        "post_ball_line_turn_left_6": ("제자리좌회전(6번)", 6),
+        **{
+            f"goal_camera_90_turn_right_{count}": (
+                f"제자리우회전90도({count}회)",
+                count,
+            )
+            for count in range(1, 10)
+        },
+        **{
+            f"goal_camera_90_turn_left_{count}": (
+                f"제자리좌회전90도({count}회)",
+                count,
+            )
+            for count in range(1, 7)
+        },
+        **{
+            f"pickup_camera_down_turn_left_{count}": (
+                f"제좌카메라내린거({count}회)",
+                count,
+            )
+            for count in range(1, 10)
+        },
+        **{
+            f"pickup_camera_down_turn_right_{count}": (
+                f"제우카메라내린거({count}회)",
+                count,
+            )
+            for count in range(1, 10)
+        },
+    }
+
+    for motion_id, (exact_name, repeat_count) in expected.items():
+        assert aliases[motion_id] == exact_name
+        assert motions_by_name[exact_name]["repeat_count"] == repeat_count
+
+    assert motions_by_name["제자리좌회전90도(6회)"][
+        "playback_speed"
+    ] == 0.95
+
+
+def test_production_motions_use_four_degree_final_tolerance():
     aliases = yaml.safe_load(
         ALIAS_PATH.read_text(encoding="utf-8")
     )["motion_aliases"]
@@ -173,7 +249,13 @@ def test_aliased_production_motions_use_three_degree_final_tolerance():
     motions_by_name = {motion["name"]: motion for motion in catalog}
 
     assert set(aliases.values()) <= set(motions_by_name)
-    for exact_name in set(aliases.values()):
-        assert motions_by_name[exact_name]["completion"][
+    for motion in catalog:
+        assert motion["completion"][
             "position_tolerance_deg"
-        ] == 3.0
+        ] == 4.0
+
+    production_tolerance = motions_by_name[
+        "공잡기리그랩까지 실전"
+    ]["completion"]["position_tolerance_deg"]
+    assert 3.779274 <= production_tolerance
+    assert 4.2 > production_tolerance
