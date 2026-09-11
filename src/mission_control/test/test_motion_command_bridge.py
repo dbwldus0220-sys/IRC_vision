@@ -575,6 +575,43 @@ def test_pickup_dwell_is_non_blocking_and_does_not_start_early():
     assert bridge.motion_in_progress is True
 
 
+def test_consecutive_pickup_motions_have_one_exact_three_second_dwell(
+    monkeypatch,
+):
+    now = [100.0]
+    monkeypatch.setattr(
+        "mission_control.motion_command_bridge_node.time.monotonic",
+        lambda: now[0],
+    )
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(
+        navigation_message(action="PICKUP_NOW")
+    )
+    now[0] = 103.0
+    bridge._check_atomic_dwell(now[0])
+    continue_pickup_after_initial_alignment(bridge)
+
+    now[0] = 110.0
+    bridge.executor_status_callback(
+        executor_status(
+            status="SUCCEEDED",
+            motion_id="ball_camera_down_forward_2",
+        )
+    )
+    assert bridge.active_dwell_until == pytest.approx(113.0)
+    request_count = len(bridge.executor_request_publisher.messages)
+
+    bridge._check_atomic_dwell(112.999)
+    assert len(bridge.executor_request_publisher.messages) == request_count
+    assert bridge.active_dwell_until == pytest.approx(113.0)
+
+    bridge._check_atomic_dwell(113.0)
+    assert bridge.active_dwell_until is None
+    requests = decoded_messages(bridge.executor_request_publisher)
+    assert len(requests) == request_count + 1
+    assert requests[-1]["motion_id"] == "pickup_fine_forward_0"
+
+
 def test_pickup_entry_holds_still_three_seconds_before_initial_alignment():
     bridge = FakeBridge()
     assert bridge.PICKUP_DWELL_SEC == 3.0

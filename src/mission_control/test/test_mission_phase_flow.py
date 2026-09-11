@@ -406,9 +406,14 @@ def release_general(harness, payload):
     )
 
 
-def test_ball_pickup_entry_crossing_is_latched_until_general_motion_finishes():
+def test_ball_pickup_entry_waits_for_general_motion_dwell(monkeypatch):
     harness = MissionFlowHarness(phase="BALL_APPROACH")
     harness.BALL_POST_MOTION_DWELL_SEC = 3.0
+    now = [10.0]
+    monkeypatch.setattr(
+        "mission_control.motion_decision_node.time.monotonic",
+        lambda: now[0],
+    )
     approach = harness.publish_vision(ball=approaching_ball())[-1]
     assert approach["action"] == "STRAIGHT_3"
 
@@ -426,8 +431,13 @@ def test_ball_pickup_entry_crossing_is_latched_until_general_motion_finishes():
     assert harness.ball_pickup_entry_pending is True
     release_general(harness, approach)
 
-    assert harness.ball_post_motion_dwell_until is None
-    published = harness.publish_vision(ball={"detected": False})
+    assert harness.ball_post_motion_dwell_until == pytest.approx(13.0)
+    now[0] = 12.999
+    assert harness.publish_vision(ball={"detected": False}) == []
+    now[0] = 13.0
+    assert harness.publish_vision(ball={"detected": False}) == []
+    now[0] = 13.1
+    published = harness.publish_vision(ball=close_ball)
     assert published[-1]["action"] == "PICKUP_NOW"
     assert published[-1]["reason"] == (
         "ball_pickup_entry_latched_during_motion"
@@ -455,6 +465,47 @@ def test_ball_pickup_entry_crossing_is_latched_until_general_motion_finishes():
     assert alignment["action"] == (
         "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_3"
     )
+
+
+def test_ball_loss_recovery_turn_has_dwell_before_and_after(monkeypatch):
+    harness = MissionFlowHarness(phase="BALL_APPROACH")
+    harness.BALL_POST_MOTION_DWELL_SEC = 3.0
+    now = [10.0]
+    monkeypatch.setattr(
+        "mission_control.motion_decision_node.time.monotonic",
+        lambda: now[0],
+    )
+    visible_ball = approaching_ball()
+    visible_ball["steering_angle_deg"] = -31.0
+    approach = harness.publish_vision(ball=visible_ball)[-1]
+
+    MotionDecisionNode._track_ball_loss_during_motion(
+        harness,
+        visible_ball,
+    )
+    lost_ball = {"detected": False, "raw_detected": False}
+    MotionDecisionNode._track_ball_loss_during_motion(harness, lost_ball)
+    release_general(harness, approach)
+
+    assert harness.ball_post_motion_dwell_until == pytest.approx(13.0)
+    now[0] = 12.999
+    assert harness.publish_vision(ball=lost_ball) == []
+    now[0] = 13.0
+    assert harness.publish_vision(ball=lost_ball) == []
+    now[0] = 13.1
+    recovery = harness.publish_vision(ball=lost_ball)[-1]
+    assert recovery["action"] == "BALL_APPROACH_TURN_LEFT_2"
+
+    now[0] = 14.0
+    release_general(harness, recovery)
+    assert harness.ball_post_motion_dwell_until == pytest.approx(17.0)
+    now[0] = 16.999
+    assert harness.publish_vision(ball=approaching_ball()) == []
+    now[0] = 17.0
+    assert harness.publish_vision(ball=approaching_ball()) == []
+    now[0] = 17.1
+    fresh_decision = harness.publish_vision(ball=approaching_ball())[-1]
+    assert fresh_decision["action"] == "STRAIGHT_3"
 
 
 def test_ball_motion_without_pickup_entry_keeps_three_second_dwell():

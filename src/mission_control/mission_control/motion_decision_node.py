@@ -841,7 +841,6 @@ class MotionDecisionNode(Node):
         self.ball_lost_during_motion_pending = False
         self.ball_last_visible_approach_info = None
         if not self.general_motion_gate.locked:
-            self.ball_post_motion_dwell_until = None
             self.ball_approach_alignment_pending = False
         self.get_logger().info(
             "BALL pickup entry latched: "
@@ -1044,20 +1043,12 @@ class MotionDecisionNode(Node):
                         self.ball_approach_alignment_pending = bool(
                             not approach_turn_completed
                         )
-                    straight_completed = bool(
-                        status == "SUCCEEDED"
-                        and not pickup_entry_ready
-                        and not approach_turn_completed
-                    )
                     dwell_sec = (
                         max(
                             0.0,
                             float(self.BALL_POST_MOTION_DWELL_SEC),
                         )
-                        if (
-                            straight_completed
-                            and not self.ball_lost_during_motion_pending
-                        )
+                        if status == "SUCCEEDED"
                         else 0.0
                     )
                     self.ball_post_motion_dwell_until = (
@@ -1069,8 +1060,8 @@ class MotionDecisionNode(Node):
                         self.ball_approach_alignment_pending = False
                         MotionDecisionNode._invalidate_pickup_ball_input(self)
                         self.get_logger().info(
-                            "BALL pickup entry pending; skipping general "
-                            "post-motion dwell and starting pickup settle"
+                            "BALL pickup entry pending; preserving general "
+                            "post-motion dwell before pickup"
                         )
                     if self.ball_post_motion_dwell_until is not None:
                         self.get_logger().info(

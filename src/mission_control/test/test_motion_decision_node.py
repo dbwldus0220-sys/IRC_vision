@@ -2044,11 +2044,15 @@ def test_ball_straight_success_starts_three_second_alignment_settle(monkeypatch)
     assert node.ball_post_motion_dwell_until == pytest.approx(13.0)
 
 
-def test_ball_loss_during_57_to_150cm_motion_turns_from_last_direction():
+def test_ball_loss_during_57_to_150cm_motion_dwells_before_recovery_turn(
+    monkeypatch,
+):
     node = FreshMockInputNode()
+    node.BALL_POST_MOTION_DWELL_SEC = 3.0
     node.general_motion_gate.on_new_vision_input()
     node.general_motion_gate.on_command_published("STRAIGHT_3", command_id=2)
     node.active_general_source = "ball"
+    monkeypatch.setattr(time, "monotonic", lambda: 10.0)
 
     MotionDecisionNode._track_ball_loss_during_motion(
         node,
@@ -2080,7 +2084,7 @@ def test_ball_loss_during_57_to_150cm_motion_turns_from_last_direction():
         dynamics_command=None,
     )
 
-    assert node.ball_post_motion_dwell_until is None
+    assert node.ball_post_motion_dwell_until == pytest.approx(13.0)
     decision = select_decision(node)
     assert decision.action == "BALL_APPROACH_TURN_LEFT_2"
     assert decision.source_command[
@@ -2122,7 +2126,7 @@ def test_ball_settle_expiry_discards_frames_received_during_settle(monkeypatch):
     assert node.general_motion_gate.required_vision_generation == 6
 
 
-def test_570mm_entry_during_general_settle_skips_remaining_general_cycle():
+def test_570mm_entry_during_general_settle_preserves_motion_dwell():
     node = FreshMockInputNode()
     node.ball_post_motion_dwell_until = 20.0
     node.ball_approach_alignment_pending = True
@@ -2133,7 +2137,7 @@ def test_570mm_entry_during_general_settle_skips_remaining_general_cycle():
     )
 
     assert node.ball_pickup_entry_pending is True
-    assert node.ball_post_motion_dwell_until is None
+    assert node.ball_post_motion_dwell_until == 20.0
     assert node.ball_approach_alignment_pending is False
 
 
