@@ -72,6 +72,10 @@ class MissionFlowHarness:
     )
     PICKUP_FINE_ALIGN_MARKER = MotionDecisionNode.PICKUP_FINE_ALIGN_MARKER
     PICKUP_FINE_ALIGN_ACTIONS = MotionDecisionNode.PICKUP_FINE_ALIGN_ACTIONS
+    BALL_POST_MOTION_DWELL_SEC = 0.0
+    BALL_RAW_CONFIRMATION_RELEASE_SEC = (
+        MotionDecisionNode.BALL_RAW_CONFIRMATION_RELEASE_SEC
+    )
     SPECIAL_FAILURE_REASONS = (
         MotionDecisionNode.SPECIAL_FAILURE_REASONS
     )
@@ -123,6 +127,12 @@ class MissionFlowHarness:
         self.executor_active = False
         self.last_published_vision_stamp = {}
         self.active_general_source = None
+        self.ball_approach_entry_pending = False
+        self.ball_approach_alignment_pending = False
+        self.ball_pickup_entry_pending = False
+        self.ball_post_motion_dwell_until = None
+        self.ball_confirmation_pending_latched = False
+        self.ball_confirmation_last_raw_at = None
         self.active_line_motion_action = None
         self.active_line_motion_started_at = None
         self.active_line_motion_duration_sec = 0.0
@@ -385,6 +395,113 @@ def release_general(harness, payload):
         payload["command_id"],
         "SUCCEEDED",
     )
+
+
+def test_ball_pickup_entry_crossing_is_latched_until_general_motion_finishes():
+    harness = MissionFlowHarness(phase="BALL_APPROACH")
+    harness.BALL_POST_MOTION_DWELL_SEC = 3.0
+    approach = harness.publish_vision(ball=approaching_ball())[-1]
+    assert approach["action"] == "STRAIGHT_3"
+
+    close_ball = pickup_ready_ball()
+    close_ball.update(
+        {
+            "depth_m": 0.56,
+            "distance_m": 0.56,
+            "pickup_ready": False,
+            "pickup_now": False,
+        }
+    )
+    MotionDecisionNode._latch_ball_pickup_entry(harness, close_ball)
+
+    assert harness.ball_pickup_entry_pending is True
+    release_general(harness, approach)
+
+    assert harness.ball_post_motion_dwell_until is None
+    waiting = harness.publish_vision(ball={"detected": False})
+    assert waiting[-1]["action"] == "WAIT"
+    published = harness.publish_vision(ball=close_ball)
+    assert published[-1]["action"] == "PICKUP_NOW"
+    assert published[-1]["reason"] == (
+        "ball_pickup_entry_latched_during_motion"
+    )
+    assert harness.active_special_action == "PICKUP_NOW"
+    assert harness.ball_pickup_entry_pending is False
+
+    harness.send_status(
+        "PICKUP_NOW",
+        published[-1]["command_id"],
+        "RUNNING",
+        motion_id=MotionDecisionNode.PICKUP_INITIAL_ALIGN_MARKER,
+    )
+    assert harness.pickup_initial_align_waiting is True
+    assert harness.observations["ball"] is None
+
+    waiting = harness.publish_vision(line=line_info())[-1]
+    assert waiting["action"] == "WAIT"
+    assert waiting["source"] == "ball"
+
+    right_ball = pickup_ready_ball()
+    right_ball["steering_angle_deg"] = 26.0
+    right_ball["offset_x_norm"] = 0.2
+    alignment = harness.publish_vision(ball=right_ball)[-1]
+    assert alignment["action"] == (
+        "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_3"
+    )
+
+
+def test_ball_motion_without_pickup_entry_keeps_three_second_dwell():
+    harness = MissionFlowHarness(phase="BALL_APPROACH")
+    harness.BALL_POST_MOTION_DWELL_SEC = 3.0
+    approach = harness.publish_vision(ball=approaching_ball())[-1]
+
+    release_general(harness, approach)
+
+    assert harness.ball_pickup_entry_pending is False
+    assert harness.ball_post_motion_dwell_until is not None
+    assert harness.publish_vision(ball=approaching_ball()) == []
+
+
+def test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell():
+    harness = MissionFlowHarness(phase="BALL_APPROACH")
+    close_ball = pickup_ready_ball()
+    close_ball.update(
+        {
+            "depth_m": 0.56,
+            "distance_m": 0.56,
+            "pickup_ready": False,
+            "pickup_now": False,
+        }
+    )
+
+    MotionDecisionNode._latch_ball_pickup_entry(harness, close_ball)
+
+    assert harness.ball_pickup_entry_pending is True
+    assert harness.ball_post_motion_dwell_until is None
+    published = harness.publish_vision(ball=close_ball)[-1]
+    assert published["action"] == "PICKUP_NOW"
+
+
+def test_failed_ball_motion_discards_latched_pickup_entry():
+    harness = MissionFlowHarness(phase="BALL_APPROACH")
+    approach = harness.publish_vision(ball=approaching_ball())[-1]
+    close_ball = pickup_ready_ball()
+    close_ball["depth_m"] = 0.56
+    close_ball["distance_m"] = 0.56
+    MotionDecisionNode._latch_ball_pickup_entry(harness, close_ball)
+
+    harness.send_status(
+        approach["action"],
+        approach["command_id"],
+        "RUNNING",
+    )
+    harness.send_status(
+        approach["action"],
+        approach["command_id"],
+        "FAILED",
+    )
+
+    assert harness.ball_pickup_entry_pending is False
 
 
 def test_pickup_fine_alignment_rechecks_fresh_ball_under_atomic_lock():
@@ -1599,8 +1716,9 @@ def test_general_gate_blocks_overlap_and_releases_after_terminal():
     )
 
 
-def test_ball_recovery_turn_requires_fresh_ball_before_next_approach():
+def test_ball_stationary_turn_requires_fresh_ball_before_next_approach():
     harness = MissionFlowHarness(phase="BALL_APPROACH")
+    harness.BALL_POST_MOTION_DWELL_SEC = 0.0
     off_center = approaching_ball()
     off_center.update(
         {
@@ -1611,21 +1729,30 @@ def test_ball_recovery_turn_requires_fresh_ball_before_next_approach():
         }
     )
 
-    recovery = harness.publish_vision(ball=off_center)
-    assert len(recovery) == 1
-    assert recovery[0]["action"] == "RECOVER_LEFT_TURN_LEFT_8"
-    command_id = recovery[0]["command_id"]
+    approach = harness.publish_vision(ball=off_center)
+    assert len(approach) == 1
+    assert approach[0]["action"] == "STRAIGHT_3"
+    command_id = approach[0]["command_id"]
 
     harness.send_status(
-        recovery[0]["action"],
+        approach[0]["action"],
         command_id,
         "RUNNING",
     )
     harness.send_status(
-        recovery[0]["action"],
+        approach[0]["action"],
         command_id,
         "SUCCEEDED",
     )
+
+    before = len(harness.publisher.messages)
+    MotionDecisionNode._publish_decision(harness)
+    assert len(harness.publisher.messages) == before
+
+    turn = harness.publish_vision(ball=off_center)
+    assert len(turn) == 1
+    assert turn[0]["action"] == "BALL_APPROACH_TURN_RIGHT_2"
+    release_general(harness, turn[0])
 
     before = len(harness.publisher.messages)
     MotionDecisionNode._publish_decision(harness)
@@ -1638,10 +1765,10 @@ def test_ball_recovery_turn_requires_fresh_ball_before_next_approach():
     centered["bearing_deg"] = 0.0
     next_command = harness.publish_vision(ball=centered)
     assert len(next_command) == 1
-    assert next_command[0]["action"] == "RECOVER_LEFT_TURN_LEFT_6"
+    assert next_command[0]["action"] == "STRAIGHT_4"
 
 
-def test_second_ball_uses_right_curve_from_completed_pickup_state():
+def test_second_ball_uses_same_straight_distance_policy():
     harness = MissionFlowHarness(phase="BALL_APPROACH")
     harness.phase_manager.pickups_completed = 1
     ball = approaching_ball()
@@ -1657,10 +1784,10 @@ def test_second_ball_uses_right_curve_from_completed_pickup_state():
     command = harness.publish_vision(ball=ball)
 
     assert len(command) == 1
-    assert command[0]["action"] == "RECOVER_RIGHT_TURN_RIGHT_8"
+    assert command[0]["action"] == "STRAIGHT_3"
 
 
-def test_failed_first_pickup_keeps_first_ball_left_curve():
+def test_failed_first_pickup_keeps_straight_distance_policy():
     harness = MissionFlowHarness(phase="BALL_APPROACH")
     pickup = publish_special(
         harness,
@@ -1684,7 +1811,7 @@ def test_failed_first_pickup_keeps_first_ball_left_curve():
     command = harness.publish_vision(ball=ball)
 
     assert len(command) == 1
-    assert command[0]["action"] == "RECOVER_LEFT_TURN_LEFT_8"
+    assert command[0]["action"] == "STRAIGHT_3"
 
 
 def test_active_special_uses_temporary_lock_without_changing_manager_phase():

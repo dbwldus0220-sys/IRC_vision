@@ -41,6 +41,14 @@ GENERAL_ACTIONS = frozenset(
             f"GOAL_CAMERA90_TURN_LEFT_{count}"
             for count in range(1, 7)
         },
+        *{
+            f"BALL_APPROACH_TURN_RIGHT_{count}"
+            for count in range(1, 10)
+        },
+        *{
+            f"BALL_APPROACH_TURN_LEFT_{count}"
+            for count in (2, 3, 4, 5, 6)
+        },
         "APPROACH_HURDLE",
         "LEFT",
         "RIGHT",

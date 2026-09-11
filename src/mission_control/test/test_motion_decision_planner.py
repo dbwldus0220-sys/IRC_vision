@@ -590,7 +590,7 @@ def test_ball_inside_1_5m_preempts_line():
     assert planner.ball_lock_active is True
 
 
-def test_confirmed_ball_without_depth_stops_without_raw_turn():
+def test_confirmed_ball_without_valid_distance_keeps_existing_line_flow():
     planner = MotionDecisionPlanner()
 
     decision = planner.plan(
@@ -607,15 +607,13 @@ def test_confirmed_ball_without_depth_stops_without_raw_turn():
         0.1,
     )
 
-    assert decision.source == "ball"
-    assert decision.action == "STOP"
-    assert decision.reason == "missing_valid_ball_distance"
-    assert decision.source_command["linear_speed_mps"] == 0.0
-    assert decision.source_command["depth_valid"] is False
-    assert planner.ball_lock_active is True
+    assert decision.source == "line"
+    assert decision.action == "STRAIGHT"
+    assert decision.valid is True
+    assert planner.ball_lock_active is False
 
 
-def test_centered_ball_without_depth_preempts_line_but_cannot_advance():
+def test_centered_ball_without_valid_distance_does_not_preempt_line():
     planner = MotionDecisionPlanner()
 
     decision = planner.plan(
@@ -632,10 +630,9 @@ def test_centered_ball_without_depth_preempts_line_but_cannot_advance():
         0.1,
     )
 
-    assert decision.source == "ball"
-    assert decision.action == "STOP"
-    assert decision.reason == "missing_valid_ball_distance"
-    assert decision.source_command["linear_speed_mps"] == 0.0
+    assert decision.source == "line"
+    assert decision.action == "STRAIGHT"
+    assert decision.valid is True
 
 
 def test_ball_search_switches_to_ball_inside_1_5m():
@@ -1724,6 +1721,46 @@ def test_pickup_initial_alignment_prefers_steering_and_selects_camera_turn():
     assert decision.valid is True
     assert decision.sdk_motion_requested is True
     assert decision.source_command["steering_error_deg"] == 26.0
+
+
+@pytest.mark.parametrize(
+    (
+        "steering_error",
+        "expected_action",
+        "expected_count",
+        "expected_turn_angle",
+    ),
+    [
+        (26.0, "BALL_APPROACH_TURN_RIGHT_3", 3, 30.0),
+        (88.0, "BALL_APPROACH_TURN_RIGHT_9", 9, 90.0),
+        (-26.0, "BALL_APPROACH_TURN_LEFT_2", 2, 30.0),
+        (-50.0, "BALL_APPROACH_TURN_LEFT_3", 3, 45.0),
+        (-88.0, "BALL_APPROACH_TURN_LEFT_6", 6, 90.0),
+    ],
+)
+def test_general_ball_alignment_uses_ordinary_stationary_turns(
+    steering_error,
+    expected_action,
+    expected_count,
+    expected_turn_angle,
+):
+    decision = MotionDecisionPlanner().plan_ball_approach_alignment(
+        ball_info(steering_angle_deg=steering_error, distance_m=0.9)
+    )
+
+    assert decision.action == expected_action
+    assert decision.source_command["turn_count"] == expected_count
+    assert decision.source_command["turn_angle_deg"] == expected_turn_angle
+    assert "CAMERA_DOWN" not in decision.action
+
+
+def test_general_ball_alignment_skips_turn_inside_existing_tolerance():
+    decision = MotionDecisionPlanner().plan_ball_approach_alignment(
+        ball_info(steering_angle_deg=4.9, distance_m=0.9)
+    )
+
+    assert decision.action == "BALL_APPROACH_ALIGNED"
+    assert decision.sdk_motion_requested is False
 
 
 def test_pickup_initial_alignment_uses_bearing_then_offset_fallback():

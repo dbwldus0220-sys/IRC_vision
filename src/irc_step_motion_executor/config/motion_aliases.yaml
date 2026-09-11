@@ -84,6 +84,7 @@ motion_aliases:
   post_ball_line_turn_left_2: "제자리좌회전(2번)"
   post_ball_line_turn_left_3: "제자리좌회전(3회)"
   post_ball_line_turn_left_4: "제자리좌회전(4회)"
+  post_ball_line_turn_left_5: "제자리좌회전(5번)"
   post_ball_line_turn_left_6: "제자리좌회전(6번)"
   goal_camera_90_turn_right_1: "제자리우회전90도(1회)"
   goal_camera_90_turn_right_2: "제자리우회전90도(2회)"

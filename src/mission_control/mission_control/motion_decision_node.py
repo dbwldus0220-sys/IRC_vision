@@ -98,6 +98,8 @@ class MotionDecisionNode(Node):
     }
     LINE_MOTION_CAPTURE_START_RATIO = 0.70
     LINE_TIMEOUT_RECOVERY_FRAMES = 10
+    BALL_POST_MOTION_DWELL_SEC = 3.0
+    BALL_RAW_CONFIRMATION_RELEASE_SEC = 0.5
     PICKUP_INITIAL_ALIGN_MARKER = "__BALL_PICKUP_INITIAL_ALIGN_CHECK__"
     PICKUP_FINE_ALIGN_MARKER = "__BALL_PICKUP_FINE_ALIGN_CHECK__"
     PICKUP_INITIAL_ALIGN_ACTIONS = frozenset(
@@ -334,6 +336,12 @@ class MotionDecisionNode(Node):
         self.pre_motion_settle_started_at: float | None = None
         self.last_published_vision_stamp: dict[str, float] = {}
         self.active_general_source: str | None = None
+        self.ball_approach_entry_pending = False
+        self.ball_approach_alignment_pending = False
+        self.ball_pickup_entry_pending = False
+        self.ball_post_motion_dwell_until: float | None = None
+        self.ball_confirmation_pending_latched = False
+        self.ball_confirmation_last_raw_at: float | None = None
         self.active_line_motion_action: str | None = None
         self.active_line_motion_started_at: float | None = None
         self.active_line_motion_duration_sec = 0.0
@@ -635,6 +643,20 @@ class MotionDecisionNode(Node):
                 self.latest_info[source] = payload
                 received_at = time.monotonic()
                 self.latest_time[source] = received_at
+                if source == "ball":
+                    MotionDecisionNode._update_ball_confirmation_pending(
+                        self,
+                        payload,
+                        received_at,
+                    )
+                    MotionDecisionNode._latch_ball_approach_entry(
+                        self,
+                        payload,
+                    )
+                    MotionDecisionNode._latch_ball_pickup_entry(
+                        self,
+                        payload,
+                    )
                 if source == "line":
                     if self.line_timeout_recovery_active:
                         MotionDecisionNode._collect_timeout_recovery_frame(
@@ -673,6 +695,134 @@ class MotionDecisionNode(Node):
                 )
 
         return callback
+
+    def _latch_ball_approach_entry(self, payload: dict[str, Any]) -> None:
+        """Remember a confirmed 1.5 m crossing during a general motion."""
+        if (
+            self.ball_approach_entry_pending
+            or not self.general_motion_gate.locked
+            or self.active_general_source == "ball"
+            or self.active_special_command_id is not None
+            or payload.get("detected") is not True
+            or payload.get("depth_valid") is not True
+        ):
+            return
+
+        requested_source = self.planner.source_for_phase(
+            self.phase_manager.current_phase
+        )
+        if (
+            requested_source not in {None, "line", "ball"}
+            or bool(getattr(self.planner, "goal_lock_active", False))
+            or bool(getattr(self.planner, "hurdle_lock_active", False))
+        ):
+            return
+
+        config = self.planner.ball_planner.config
+        confidence = self.planner._number(payload, "confidence")
+        distance = self.planner._number(payload, "distance_m")
+        if (
+            confidence is None
+            or confidence < config.min_confidence
+            or distance is None
+            or distance <= 0.0
+            or distance > config.control_start_depth_m
+        ):
+            return
+
+        self.ball_approach_entry_pending = True
+        self.planner.ball_lock_active = True
+        self.get_logger().info(
+            "BALL approach entry latched during motion: "
+            f"distance_m={distance:.3f}"
+        )
+
+    def _update_ball_confirmation_pending(
+        self,
+        payload: dict[str, Any],
+        received_at: float,
+    ) -> None:
+        """Hold at a motion boundary while a raw ball is confirming."""
+        if payload.get("detected") is True:
+            if self.ball_confirmation_pending_latched:
+                self.get_logger().info(
+                    "BALL confirmation completed; releasing pending hold"
+                )
+            self.ball_confirmation_pending_latched = False
+            self.ball_confirmation_last_raw_at = None
+            return
+
+        if payload.get("raw_detected") is True:
+            if not self.ball_confirmation_pending_latched:
+                self.get_logger().info(
+                    "BALL raw detection latched; waiting for confirmation "
+                    "after the current motion"
+                )
+            self.ball_confirmation_pending_latched = True
+            self.ball_confirmation_last_raw_at = received_at
+            return
+
+        last_raw_at = self.ball_confirmation_last_raw_at
+        if (
+            self.ball_confirmation_pending_latched
+            and last_raw_at is not None
+            and received_at - last_raw_at
+            >= self.BALL_RAW_CONFIRMATION_RELEASE_SEC
+        ):
+            self.ball_confirmation_pending_latched = False
+            self.ball_confirmation_last_raw_at = None
+            self.get_logger().info(
+                "BALL raw detection lost; releasing pending hold"
+            )
+
+    def _latch_ball_pickup_entry(self, payload: dict[str, Any]) -> None:
+        """Remember the first valid 57 cm crossing owned by BALL control."""
+        if (
+            self.ball_pickup_entry_pending
+            or payload.get("detected") is not True
+            or payload.get("depth_valid") is not True
+        ):
+            return
+
+        if self.general_motion_gate.locked:
+            if self.active_general_source != "ball":
+                return
+        else:
+            requested_source = self.planner.source_for_phase(
+                self.phase_manager.current_phase
+            )
+            if (
+                self.active_special_command_id is not None
+                or requested_source not in {None, "ball"}
+                or bool(getattr(self.planner, "goal_lock_active", False))
+                or bool(getattr(self.planner, "hurdle_lock_active", False))
+            ):
+                return
+
+        config = self.planner.ball_planner.config
+        confidence = self.planner._number(payload, "confidence")
+        distance = self.planner._number(payload, "distance_m")
+        depth_age = self.planner._number(payload, "depth_age_sec")
+        if (
+            confidence is None
+            or confidence < config.min_confidence
+            or distance is None
+            or distance <= 0.0
+            or distance > config.pickup_sequence_start_distance_m
+            or depth_age is None
+            or depth_age < 0.0
+            or depth_age > config.max_pickup_depth_age_sec
+        ):
+            return
+
+        self.ball_pickup_entry_pending = True
+        if not self.general_motion_gate.locked:
+            self.ball_post_motion_dwell_until = None
+            self.ball_approach_alignment_pending = False
+        self.get_logger().info(
+            "BALL pickup entry latched: "
+            f"distance_m={distance:.3f}"
+        )
 
     def _phase_callback(self, message: String) -> None:
         phase = message.data.strip()
@@ -811,6 +961,51 @@ class MotionDecisionNode(Node):
             if transition.released:
                 completed_source = self.active_general_source
                 self.active_general_source = None
+                if completed_source == "ball":
+                    if status != "SUCCEEDED":
+                        self.ball_pickup_entry_pending = False
+                        self.ball_approach_alignment_pending = False
+                    pickup_entry_ready = bool(
+                        status == "SUCCEEDED"
+                        and self.ball_pickup_entry_pending
+                    )
+                    approach_turn_completed = str(action).startswith(
+                        "BALL_APPROACH_TURN_"
+                    )
+                    if status == "SUCCEEDED" and not pickup_entry_ready:
+                        self.ball_approach_alignment_pending = bool(
+                            not approach_turn_completed
+                        )
+                    straight_completed = bool(
+                        status == "SUCCEEDED"
+                        and not pickup_entry_ready
+                        and not approach_turn_completed
+                    )
+                    dwell_sec = (
+                        max(
+                            0.0,
+                            float(self.BALL_POST_MOTION_DWELL_SEC),
+                        )
+                        if straight_completed
+                        else 0.0
+                    )
+                    self.ball_post_motion_dwell_until = (
+                        time.monotonic() + dwell_sec
+                        if dwell_sec > 0.0
+                        else None
+                    )
+                    if pickup_entry_ready:
+                        self.ball_approach_alignment_pending = False
+                        MotionDecisionNode._invalidate_pickup_ball_input(self)
+                        self.get_logger().info(
+                            "BALL pickup entry pending; skipping general "
+                            "post-motion dwell and starting pickup settle"
+                        )
+                    if self.ball_post_motion_dwell_until is not None:
+                        self.get_logger().info(
+                            "BALL post-motion dwell started: "
+                            f"{dwell_sec:.1f}s after action={action}"
+                        )
                 if completed_source == "line":
                     post_ball_line_correction = str(action).startswith(
                         "POST_BALL_LINE_TURN_"
@@ -829,7 +1024,11 @@ class MotionDecisionNode(Node):
                     )
                     if status == "SUCCEEDED":
                         MotionDecisionNode._finish_line_motion_capture(self)
-                        if not str(action).startswith(
+                        if self.ball_approach_entry_pending:
+                            MotionDecisionNode._invalidate_pickup_ball_input(
+                                self
+                            )
+                        elif not str(action).startswith(
                             "POST_BALL_LINE_TURN_"
                         ):
                             gate = self.general_motion_gate
@@ -1171,6 +1370,10 @@ class MotionDecisionNode(Node):
 
     def _prepare_pending_line_decision(self, now: float) -> None:
         """Precompute the next decision from late-motion line frames."""
+        # Keep the next motion boundary available for a late raw-ball latch.
+        # Once all pickups are complete, normal line pre-queueing resumes.
+        if self.pickups_completed < self.required_pickups:
+            return
         frames = self.active_line_motion_frames
         if not frames:
             return
@@ -1275,6 +1478,18 @@ class MotionDecisionNode(Node):
             return
 
         now = time.monotonic()
+
+        dwell_until = self.ball_post_motion_dwell_until
+        if dwell_until is not None:
+            if now < dwell_until:
+                self._reset_pre_motion_settle()
+                return
+            self.ball_post_motion_dwell_until = None
+            MotionDecisionNode._invalidate_pickup_ball_input(self)
+            gate = self.general_motion_gate
+            gate.required_vision_generation = gate.vision_generation + 1
+            self._reset_pre_motion_settle()
+            return
 
         dt_sec = max(
             1e-3,
@@ -1490,6 +1705,9 @@ class MotionDecisionNode(Node):
 
         self.publisher.publish(output)
 
+        if decision.action == "PICKUP_NOW":
+            self.ball_pickup_entry_pending = False
+
         self._reset_pre_motion_settle()
 
         if is_general_motion:
@@ -1507,6 +1725,8 @@ class MotionDecisionNode(Node):
                 self,
                 decision,
             )
+            if decision.source == "ball":
+                self.ball_approach_entry_pending = False
         elif is_pickup_checkpoint_action:
             MotionDecisionNode._remember_published_vision_frame(
                 self,
@@ -1580,6 +1800,9 @@ class MotionDecisionNode(Node):
                 "execution": {
                     "motion_locked": self.general_motion_gate.locked,
                     "mission_locked": self.active_special_command_id is not None,
+                    "ball_confirmation_pending": (
+                        self.ball_confirmation_pending_latched
+                    ),
                     "executor_seen": (
                         self.executor_heartbeat_watchdog.executor_seen
                     ),
@@ -1783,6 +2006,71 @@ class MotionDecisionNode(Node):
                 dt_sec,
             )
 
+        ball_info = observations.get("ball")
+        if self.ball_pickup_entry_pending:
+            if ball_info is None or ball_info.get("detected") is not True:
+                return MotionDecision(
+                    phase=planning_phase,
+                    source="ball",
+                    action="WAIT",
+                    valid=False,
+                    reason="ball_pickup_entry_waiting_for_fresh_ball",
+                    sdk_motion_requested=False,
+                    requires_ack=False,
+                    source_command={"pickup_entry_latched": True},
+                )
+            return MotionDecision(
+                phase=planning_phase,
+                source="ball",
+                action="PICKUP_NOW",
+                valid=True,
+                reason="ball_pickup_entry_latched_during_motion",
+                sdk_motion_requested=True,
+                requires_ack=True,
+                source_command={"pickup_entry_latched": True},
+            )
+
+        if self.ball_approach_alignment_pending:
+            alignment = self.planner.plan_ball_approach_alignment(ball_info)
+            if alignment.action != "BALL_APPROACH_ALIGNED":
+                return alignment
+            self.ball_approach_alignment_pending = False
+
+        ball_confirmed = bool(
+            ball_info is not None
+            and ball_info.get("detected") is True
+        )
+        if (
+            not ball_missions_complete
+            and self.ball_confirmation_pending_latched
+            and not ball_confirmed
+        ):
+            return MotionDecision(
+                phase=planning_phase,
+                source="ball",
+                action="WAIT",
+                valid=False,
+                reason="ball_confirmation_pending_hold",
+                sdk_motion_requested=False,
+                requires_ack=False,
+                source_command={
+                    "raw_detected": bool(
+                        ball_info is not None
+                        and ball_info.get("raw_detected") is True
+                    ),
+                    "confirmation_hits": (
+                        ball_info.get("confirmation_hits")
+                        if ball_info is not None
+                        else None
+                    ),
+                    "confirmation_required_hits": (
+                        ball_info.get("confirmation_required_hits")
+                        if ball_info is not None
+                        else None
+                    ),
+                },
+            )
+
         if planning_phase == "LINE_TRACK" and self.finish_enabled:
             final_line_observations = dict(observations)
             final_line_observations["ball"] = None
@@ -1819,7 +2107,6 @@ class MotionDecisionNode(Node):
                 source_command=line_decision.source_command,
             )
 
-        ball_info = observations.get("ball")
         if ball_info is not None:
             observations = dict(observations)
             observations["ball"] = dict(ball_info)

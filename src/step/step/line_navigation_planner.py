@@ -8,7 +8,6 @@ import math
 from typing import Any
 
 from .approach_distance import approach_level_from_motion
-from .approach_distance import approach_motion_for_distance
 
 
 RECOVERY_TURN_STEP_DEG = 15
@@ -322,40 +321,6 @@ class LineNavigationPlanner:
         if quality < self.config.min_line_quality:
             return self.stop("low_line_quality")
 
-        corner_prepare = bool(
-            line_info.get("corner_preview_confirmed", False)
-        )
-        corner_direction_value = str(
-            line_info.get("corner_direction", "")
-        ).strip().upper()
-        corner_direction = (
-            corner_direction_value
-            if corner_direction_value in {"LEFT", "RIGHT"}
-            else None
-        )
-        corner_start_distance = _number(
-            line_info,
-            "corner_start_distance_m",
-        )
-        corner_remaining_forward = _number(
-            line_info,
-            "corner_remaining_forward_m",
-        )
-        corner_motion_count_value = _number(
-            line_info,
-            "corner_straight_motion_count",
-        )
-        corner_motion_count = (
-            max(0, int(corner_motion_count_value))
-            if corner_motion_count_value is not None
-            else None
-        )
-        corner_prepare = bool(
-            corner_prepare
-            and corner_direction is not None
-            and corner_start_distance is not None
-        )
-
         preview_turn = _number(line_info, "turn_angle_deg")
         path_turn_delta = _number(line_info, "path_turn_delta_deg")
         turn_consistency = _number(line_info, "turn_consistency")
@@ -493,18 +458,6 @@ class LineNavigationPlanner:
         elif turn_confirmation_pending:
             speed = self.config.min_linear_speed_mps
             reason = "turn_confirmation_pending"
-        corner_approach_required = bool(
-            corner_prepare
-            and corner_remaining_forward is not None
-            and corner_remaining_forward > 0.0
-            and motion in {"STRAIGHT", "LEFT", "RIGHT"}
-        )
-        if corner_approach_required:
-            reason = "corner_approach"
-            motion = approach_motion_for_distance(corner_remaining_forward)
-        elif corner_prepare and motion == "STRAIGHT":
-            reason = "corner_approach"
-            motion = approach_motion_for_distance(corner_start_distance)
         duration = self.config.command_duration_sec
 
         self.previous_motion = motion
@@ -530,17 +483,11 @@ class LineNavigationPlanner:
             lateral_offset_norm=offset,
             preview_turn_deg=curve_turn,
             line_quality=quality,
-            corner_prepare=corner_prepare,
-            corner_direction=corner_direction if corner_prepare else None,
-            corner_start_distance_m=(
-                corner_start_distance if corner_prepare else None
-            ),
-            corner_remaining_forward_m=(
-                corner_remaining_forward if corner_prepare else None
-            ),
-            corner_straight_motion_count=(
-                corner_motion_count if corner_prepare else None
-            ),
+            corner_prepare=False,
+            corner_direction=None,
+            corner_start_distance_m=None,
+            corner_remaining_forward_m=None,
+            corner_straight_motion_count=None,
         )
 
     def _classify_recovery(

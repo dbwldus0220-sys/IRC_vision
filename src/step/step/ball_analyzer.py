@@ -194,11 +194,11 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         # Ball pickup uses its own calibrated robot axis. Keep this separate
         # from the line analyzer's robot_center_offset_px parameter.
         self.declare_parameter("ball_robot_center_offset_px", 96.0)
-        # At the 30 FPS competition setting this requires about 0.8 seconds of
+        # At the 30 FPS competition setting this requires about 0.4 seconds of
         # spatially consistent detection before ball_info becomes detected.
-        self.declare_parameter("confirmation_window_size", 40)
-        self.declare_parameter("confirmation_required_hits", 24)
-        self.declare_parameter("confirmation_max_missed_frames", 6)
+        self.declare_parameter("confirmation_window_size", 20)
+        self.declare_parameter("confirmation_required_hits", 12)
+        self.declare_parameter("confirmation_max_missed_frames", 10)
         self.declare_parameter("confirmation_max_center_shift_norm", 0.18)
         self.declare_parameter("confirmation_min_area_ratio", 0.40)
         self.declare_parameter("pickup_confirmation_window_size", 5)

@@ -37,6 +37,9 @@ class FakeBridge:
     TERMINAL_STATUSES = MotionCommandBridgeNode.TERMINAL_STATUSES
     DEFAULT_TIMEOUT_MS = MotionCommandBridgeNode.DEFAULT_TIMEOUT_MS
     DWELL_MARKER = MotionCommandBridgeNode.DWELL_MARKER
+    PICKUP_INITIAL_ALIGN_DWELL_MARKER = (
+        MotionCommandBridgeNode.PICKUP_INITIAL_ALIGN_DWELL_MARKER
+    )
     PICKUP_INITIAL_ALIGN_MARKER = (
         MotionCommandBridgeNode.PICKUP_INITIAL_ALIGN_MARKER
     )
@@ -75,6 +78,7 @@ class FakeBridge:
         self.active_pickup_sequence = ()
         self.active_sequence_index = 0
         self.active_dwell_until = None
+        self.pickup_initial_align_dwell_until = None
         self.pickup_initial_align_waiting = False
         self.pickup_initial_align_correction_active = False
         self.pickup_fine_align_waiting = False
@@ -94,6 +98,7 @@ class FakeBridge:
         for name in (
             "publish_motion_status",
             "_publish_local_rejection",
+            "_start_pickup_initial_align_dwell",
             "_enter_pickup_initial_align_checkpoint",
             "_handle_pickup_initial_align_command",
             "_enter_pickup_fine_align_checkpoint",
@@ -189,7 +194,10 @@ def continue_pickup_after_fine_alignment(bridge, command_id=8001):
 
 
 def assert_pickup_initial_alignment_started(bridge):
-    """Confirm pickup ownership immediately opens heading alignment."""
+    """Advance the initial stationary dwell and confirm heading alignment."""
+    assert bridge.pickup_initial_align_dwell_until is not None
+    assert bridge.pickup_initial_align_waiting is False
+    bridge._check_atomic_dwell(bridge.pickup_initial_align_dwell_until)
     assert bridge.pickup_initial_align_waiting is True
 
 
@@ -243,6 +251,9 @@ for count in range(1, 10):
     EXPECTED_PRODUCTION_ACTIONS[
         f"GOAL_CAMERA90_TURN_RIGHT_{count}"
     ] = f"goal_camera_90_turn_right_{count}"
+    EXPECTED_PRODUCTION_ACTIONS[
+        f"BALL_APPROACH_TURN_RIGHT_{count}"
+    ] = f"post_ball_line_turn_right_{count}"
 for count in range(1, 7):
     EXPECTED_PRODUCTION_ACTIONS[
         f"GOAL_CAMERA90_TURN_LEFT_{count}"
@@ -250,6 +261,10 @@ for count in range(1, 7):
 for count in (2, 3, 4, 6):
     EXPECTED_PRODUCTION_ACTIONS[
         f"POST_BALL_LINE_TURN_LEFT_{count}"
+    ] = f"post_ball_line_turn_left_{count}"
+for count in (2, 3, 4, 5, 6):
+    EXPECTED_PRODUCTION_ACTIONS[
+        f"BALL_APPROACH_TURN_LEFT_{count}"
     ] = f"post_ball_line_turn_left_{count}"
 for recovery_side in ("LEFT", "RIGHT"):
     for suffix, motion_id in {
@@ -428,8 +443,11 @@ def test_pickup_waits_locally_for_incompatible_active_motion_to_finish():
     assert bridge.active_request_id == 8001
     assert bridge.active_action == "PICKUP_NOW"
     assert bridge.queued_request_deferred is False
-    assert bridge.active_motion_id == bridge.PICKUP_INITIAL_ALIGN_MARKER
-    assert bridge.pickup_initial_align_waiting is True
+    assert bridge.active_motion_id == (
+        bridge.PICKUP_INITIAL_ALIGN_DWELL_MARKER
+    )
+    assert bridge.pickup_initial_align_dwell_until is not None
+    assert bridge.pickup_initial_align_waiting is False
 
 
 def test_first_pickup_runs_motion_dwell_and_camera_transition_in_order():
@@ -538,20 +556,32 @@ def test_pickup_dwell_is_non_blocking_and_does_not_start_early():
     assert bridge.motion_in_progress is True
 
 
-def test_pickup_entry_immediately_opens_initial_alignment_checkpoint():
+def test_pickup_entry_holds_still_three_seconds_before_initial_alignment():
     bridge = FakeBridge()
+    assert bridge.PICKUP_DWELL_SEC == 3.0
     bridge.navigation_command_callback(
         navigation_message(action="PICKUP_NOW")
     )
 
-    assert_pickup_initial_alignment_started(bridge)
-
     assert bridge.motion_in_progress is True
     assert bridge.active_dwell_until is None
+    assert bridge.pickup_initial_align_dwell_until is not None
+    assert bridge.pickup_initial_align_waiting is False
     assert bridge.executor_request_publisher.messages == []
     status = decoded_messages(bridge.motion_status_publisher)[-1]
     assert status["status"] == "RUNNING"
-    assert status["motion_id"] == bridge.PICKUP_INITIAL_ALIGN_MARKER
+    assert status["motion_id"] == bridge.PICKUP_INITIAL_ALIGN_DWELL_MARKER
+
+    dwell_until = bridge.pickup_initial_align_dwell_until
+    bridge._check_atomic_dwell(dwell_until - 0.001)
+    assert bridge.pickup_initial_align_waiting is False
+
+    bridge._check_atomic_dwell(dwell_until)
+    assert bridge.pickup_initial_align_dwell_until is None
+    assert bridge.pickup_initial_align_waiting is True
+    assert decoded_messages(bridge.motion_status_publisher)[-1][
+        "motion_id"
+    ] == bridge.PICKUP_INITIAL_ALIGN_MARKER
 
 
 def test_camera_down_turn_success_requires_fresh_heading_recheck():

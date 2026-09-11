@@ -38,6 +38,9 @@ class MotionCommandBridgeNode(Node):
     """Translate supported navigation actions into SDK executor requests."""
 
     DWELL_MARKER = "__NON_BLOCKING_DWELL__"
+    PICKUP_INITIAL_ALIGN_DWELL_MARKER = (
+        "__BALL_PICKUP_INITIAL_ALIGN_DWELL__"
+    )
     PICKUP_INITIAL_ALIGN_MARKER = "__BALL_PICKUP_INITIAL_ALIGN_CHECK__"
     FINE_ALIGN_MARKER = "__BALL_PICKUP_FINE_ALIGN_CHECK__"
     PICKUP_DWELL_SEC = 3.0
@@ -132,6 +135,18 @@ class MotionCommandBridgeNode(Node):
             for count in (2, 3, 4, 6)
         },
         **{
+            f"BALL_APPROACH_TURN_RIGHT_{count}": (
+                f"post_ball_line_turn_right_{count}"
+            )
+            for count in range(1, 10)
+        },
+        **{
+            f"BALL_APPROACH_TURN_LEFT_{count}": (
+                f"post_ball_line_turn_left_{count}"
+            )
+            for count in (2, 3, 4, 5, 6)
+        },
+        **{
             f"GOAL_CAMERA90_TURN_RIGHT_{count}": (
                 f"goal_camera_90_turn_right_{count}"
             )
@@ -184,6 +199,7 @@ class MotionCommandBridgeNode(Node):
         self.active_pickup_sequence: tuple[str, ...] = ()
         self.active_sequence_index = 0
         self.active_dwell_until: float | None = None
+        self.pickup_initial_align_dwell_until: float | None = None
         self.pickup_initial_align_waiting = False
         self.pickup_initial_align_correction_active = False
         self.pickup_fine_align_waiting = False
@@ -371,6 +387,24 @@ class MotionCommandBridgeNode(Node):
             motion_id=self.PICKUP_INITIAL_ALIGN_MARKER,
             action=self.active_action,
             message="waiting for fresh BALL pickup heading alignment",
+        )
+
+    def _start_pickup_initial_align_dwell(self) -> None:
+        """Hold still for three seconds before checking pickup heading."""
+        self.active_motion_id = self.PICKUP_INITIAL_ALIGN_DWELL_MARKER
+        self.pickup_initial_align_dwell_until = (
+            time.monotonic() + self.PICKUP_DWELL_SEC
+        )
+        self.pickup_initial_align_waiting = False
+        self.pickup_initial_align_correction_active = False
+        self.publish_motion_status(
+            status="RUNNING",
+            command_id=self.active_command_id,
+            event_id=self.active_event_id,
+            request_id=self.active_request_id,
+            motion_id=self.PICKUP_INITIAL_ALIGN_DWELL_MARKER,
+            action=self.active_action,
+            message="holding still before BALL pickup heading alignment",
         )
 
     def _handle_pickup_initial_align_command(
@@ -713,7 +747,7 @@ class MotionCommandBridgeNode(Node):
             self.active_sequence_index = 0
             self.active_dwell_until = None
             if starts_with_initial_align_checkpoint:
-                self._enter_pickup_initial_align_checkpoint()
+                self._start_pickup_initial_align_dwell()
 
     def _start_next_pickup_motion(self) -> bool:
         """Advance one atomic BALL sequence after a successful stage."""
@@ -752,9 +786,20 @@ class MotionCommandBridgeNode(Node):
 
     def _check_atomic_dwell(self, now: float | None = None) -> None:
         """Advance a dwell stage without blocking ROS callbacks."""
-        if self.active_dwell_until is None:
+        if (
+            self.active_dwell_until is None
+            and self.pickup_initial_align_dwell_until is None
+        ):
             return
         current_time = time.monotonic() if now is None else now
+        if self.pickup_initial_align_dwell_until is not None:
+            if current_time < self.pickup_initial_align_dwell_until:
+                return
+            self.pickup_initial_align_dwell_until = None
+            self._enter_pickup_initial_align_checkpoint()
+            return
+
+        assert self.active_dwell_until is not None
         if current_time < self.active_dwell_until:
             return
 
@@ -827,6 +872,7 @@ class MotionCommandBridgeNode(Node):
         self.active_pickup_sequence = ()
         self.active_sequence_index = 0
         self.active_dwell_until = None
+        self.pickup_initial_align_dwell_until = None
         self.pickup_initial_align_waiting = False
         self.pickup_initial_align_correction_active = False
         self.pickup_fine_align_waiting = False
@@ -853,12 +899,13 @@ class MotionCommandBridgeNode(Node):
         self.active_pickup_sequence = self.queued_pickup_sequence
         self.active_sequence_index = 0
         self.active_dwell_until = None
+        self.pickup_initial_align_dwell_until = None
         queued_request_deferred = self.queued_request_deferred
         self._clear_queued_request()
         self.motion_in_progress = self.active_request_id is not None
         if queued_request_deferred and self.motion_in_progress:
             if self.active_action == "PICKUP_NOW":
-                self._enter_pickup_initial_align_checkpoint()
+                self._start_pickup_initial_align_dwell()
             else:
                 self._publish_executor_request(
                     action=self.active_action,

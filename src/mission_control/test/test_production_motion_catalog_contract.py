@@ -104,6 +104,7 @@ def test_production_alias_catalog_contains_only_approved_aliases():
             "post_ball_line_turn_left_2": "제자리좌회전(2번)",
             "post_ball_line_turn_left_3": "제자리좌회전(3회)",
             "post_ball_line_turn_left_4": "제자리좌회전(4회)",
+            "post_ball_line_turn_left_5": "제자리좌회전(5번)",
             "post_ball_line_turn_left_6": "제자리좌회전(6번)",
             **{
                 f"goal_camera_90_turn_right_{count}": (
@@ -238,7 +239,7 @@ def test_counted_turn_aliases_match_family_direction_and_repeat_count():
     ] == 0.95
 
 
-def test_aliased_production_motions_use_three_degree_final_tolerance():
+def test_production_motions_use_four_degree_final_tolerance():
     aliases = yaml.safe_load(
         ALIAS_PATH.read_text(encoding="utf-8")
     )["motion_aliases"]
@@ -248,14 +249,13 @@ def test_aliased_production_motions_use_three_degree_final_tolerance():
     motions_by_name = {motion["name"]: motion for motion in catalog}
 
     assert set(aliases.values()) <= set(motions_by_name)
-    for exact_name in set(aliases.values()):
-        expected_tolerance = (
-            2.0
-            if exact_name.startswith(
-                ("제좌카메라내린거(", "제우카메라내린거(")
-            )
-            else 3.0
-        )
-        assert motions_by_name[exact_name]["completion"][
+    for motion in catalog:
+        assert motion["completion"][
             "position_tolerance_deg"
-        ] == expected_tolerance
+        ] == 4.0
+
+    production_tolerance = motions_by_name[
+        "공잡기리그랩까지 실전"
+    ]["completion"]["position_tolerance_deg"]
+    assert 3.779274 <= production_tolerance
+    assert 4.2 > production_tolerance

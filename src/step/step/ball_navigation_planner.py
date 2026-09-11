@@ -9,7 +9,6 @@ from typing import Any
 
 from .approach_distance import approach_level_from_motion
 from .approach_distance import approach_motion_for_distance
-from .line_navigation_planner import numbered_turn_motion
 from .line_navigation_planner import numbered_turn_motion_metadata
 
 
@@ -163,10 +162,6 @@ def _number(data: dict[str, Any], key: str) -> float | None:
 class BallNavigationPlanner:
     """Create ball alignment and approach targets from ``ball_info``."""
 
-    FAR_APPROACH_MIN_DISTANCE_M = 0.780
-    RECOVERY_8_MIN_DISTANCE_M = 0.680
-    RECOVERY_6_MIN_DISTANCE_M = 0.564
-
     def __init__(
         self,
         config: BallNavigationConfig | None = None,
@@ -268,18 +263,11 @@ class BallNavigationPlanner:
         speed = self._approach_speed(distance, pickup_ready)
         motion = self._general_approach_motion(
             distance,
-            ball_occurrence=_number(ball_info, "ball_occurrence"),
-        )
-        directional_recovery = motion.startswith("RECOVER_")
-        reason = (
-            "ball_directional_recovery_approach"
-            if directional_recovery
-            else "ball_aligned_discrete_approach"
         )
         return self._moving_command(
             motion=motion,
-            reason=reason,
-            linear_speed_mps=0.0 if directional_recovery else speed,
+            reason="ball_aligned_discrete_approach",
+            linear_speed_mps=speed,
             steering_error_deg=steering_error,
             dt_sec=dt_sec,
             bearing=bearing,
@@ -322,49 +310,15 @@ class BallNavigationPlanner:
             * self.config.fallback_half_fov_deg
         )
 
-    def _classify_turn(self, steering_error_deg: float) -> str | None:
-        """Select the line-recovery numbered turn with hysteresis."""
-        is_turning = self.previous_motion.startswith(
-            (
-                "TURN_LEFT_",
-                "TURN_RIGHT_",
-                "RECOVER_LEFT_TURN_LEFT_",
-                "RECOVER_RIGHT_TURN_RIGHT_",
-            )
-        )
-        threshold = (
-            self.config.turn_exit_deg
-            if is_turning
-            else self.config.turn_enter_deg
-        )
-        if steering_error_deg > threshold:
-            return numbered_turn_motion(steering_error_deg, "RIGHT")
-        if steering_error_deg < -threshold:
-            return numbered_turn_motion(steering_error_deg, "LEFT")
-        return None
-
     def _general_approach_motion(
         self,
         distance_m: float,
-        ball_occurrence: float | None,
     ) -> str:
-        """Select the BALL-only distance and occurrence-curved approach."""
-        if distance_m > self.FAR_APPROACH_MIN_DISTANCE_M:
+        """Select the BALL-only straight motion for the current distance."""
+        if distance_m > 0.680:
             return "STRAIGHT_3"
-
-        # The first and second balls intentionally use opposite curved paths.
-        # Steering remains available as command metadata, but does not choose
-        # the recovery direction inside this distance window.
-        direction = (
-            "RIGHT"
-            if ball_occurrence is not None and ball_occurrence >= 2.0
-            else "LEFT"
-        )
-        if distance_m > self.RECOVERY_8_MIN_DISTANCE_M:
-            return f"RECOVER_{direction}_TURN_{direction}_8"
-        if distance_m > self.RECOVERY_6_MIN_DISTANCE_M:
-            return f"RECOVER_{direction}_TURN_{direction}_6"
-
+        if distance_m > 0.564:
+            return "STRAIGHT_4"
         return approach_motion_for_distance(distance_m)
 
     def _approach_speed(

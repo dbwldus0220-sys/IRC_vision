@@ -33,7 +33,7 @@ def ball_info(**overrides):
     "bearing",
     [-12.0, 0.0, 12.0],
 )
-def test_first_ball_curve_direction_does_not_follow_bearing(bearing):
+def test_ball_distance_motion_does_not_follow_bearing(bearing):
     planner = BallNavigationPlanner()
 
     command = planner.plan(
@@ -46,8 +46,8 @@ def test_first_ball_curve_direction_does_not_follow_bearing(bearing):
     )
 
     assert command.valid is True
-    assert command.motion == "RECOVER_LEFT_TURN_LEFT_8"
-    assert command.linear_speed_mps == 0.0
+    assert command.motion == "STRAIGHT_3"
+    assert command.linear_speed_mps > 0.0
 
 
 def test_centered_ball_above_78cm_uses_straight_3():
@@ -62,7 +62,7 @@ def test_centered_ball_above_78cm_uses_straight_3():
     )
 
 
-def test_first_ball_at_68cm_uses_left_6_curve():
+def test_ball_at_68cm_uses_straight_4():
     planner = BallNavigationPlanner()
 
     command = planner.plan(
@@ -70,7 +70,7 @@ def test_first_ball_at_68cm_uses_left_6_curve():
         0.1,
     )
 
-    assert command.motion == "RECOVER_LEFT_TURN_LEFT_6"
+    assert command.motion == "STRAIGHT_4"
 
 
 @pytest.mark.parametrize(
@@ -78,8 +78,8 @@ def test_first_ball_at_68cm_uses_left_6_curve():
     [
         (0.80, "STRAIGHT_3"),
         (1.50, "STRAIGHT_3"),
-        (0.70, "RECOVER_LEFT_TURN_LEFT_8"),
-        (0.60, "RECOVER_LEFT_TURN_LEFT_6"),
+        (0.70, "STRAIGHT_3"),
+        (0.60, "STRAIGHT_4"),
         (0.50, "PICKUP_NOW"),
     ],
 )
@@ -213,7 +213,7 @@ def test_580mm_keeps_general_ball_approach():
         0.1,
     )
 
-    assert command.motion == "RECOVER_LEFT_TURN_LEFT_6"
+    assert command.motion == "STRAIGHT_4"
     assert command.pickup_now is False
 
 
@@ -274,7 +274,7 @@ def test_offset_is_used_when_camera_bearing_is_missing():
         0.1,
     )
 
-    assert command.motion == "RECOVER_LEFT_TURN_LEFT_8"
+    assert command.motion == "STRAIGHT_3"
 
 
 def test_bottom_center_path_angle_has_priority_over_camera_bearing():
@@ -291,8 +291,8 @@ def test_bottom_center_path_angle_has_priority_over_camera_bearing():
         0.1,
     )
 
-    assert command.motion == "RECOVER_LEFT_TURN_LEFT_6"
-    assert command.linear_speed_mps == 0.0
+    assert command.motion == "STRAIGHT_4"
+    assert command.linear_speed_mps > 0.0
 
 
 def test_near_center_deadband_suppresses_path_angle_turn():
@@ -385,21 +385,13 @@ def test_missing_distance_does_not_emit_unsupported_raw_turn():
 @pytest.mark.parametrize(
     ("ball_occurrence", "ground_distance", "bearing", "expected_motion"),
     [
-        (1, 0.70, -30.0, "RECOVER_LEFT_TURN_LEFT_8"),
-        (1, 0.70, 30.0, "RECOVER_LEFT_TURN_LEFT_8"),
-        (1, 0.70, 0.0, "RECOVER_LEFT_TURN_LEFT_8"),
-        (1, 0.60, -30.0, "RECOVER_LEFT_TURN_LEFT_6"),
-        (1, 0.60, 30.0, "RECOVER_LEFT_TURN_LEFT_6"),
-        (1, 0.60, 0.0, "RECOVER_LEFT_TURN_LEFT_6"),
-        (2, 0.70, -30.0, "RECOVER_RIGHT_TURN_RIGHT_8"),
-        (2, 0.70, 30.0, "RECOVER_RIGHT_TURN_RIGHT_8"),
-        (2, 0.70, 0.0, "RECOVER_RIGHT_TURN_RIGHT_8"),
-        (2, 0.60, -30.0, "RECOVER_RIGHT_TURN_RIGHT_6"),
-        (2, 0.60, 30.0, "RECOVER_RIGHT_TURN_RIGHT_6"),
-        (2, 0.60, 0.0, "RECOVER_RIGHT_TURN_RIGHT_6"),
+        (1, 0.70, -30.0, "STRAIGHT_3"),
+        (1, 0.60, 30.0, "STRAIGHT_4"),
+        (2, 0.70, 30.0, "STRAIGHT_3"),
+        (2, 0.60, -30.0, "STRAIGHT_4"),
     ],
 )
-def test_ball_occurrence_selects_fixed_curve_independent_of_steering(
+def test_ball_occurrence_does_not_change_straight_distance_bucket(
     ball_occurrence,
     ground_distance,
     bearing,
@@ -418,8 +410,33 @@ def test_ball_occurrence_selects_fixed_curve_independent_of_steering(
     )
 
     assert command.motion == expected_motion
-    assert command.linear_speed_mps == 0.0
-    assert command.reason == "ball_directional_recovery_approach"
+    assert command.linear_speed_mps > 0.0
+    assert command.reason == "ball_aligned_discrete_approach"
+
+
+@pytest.mark.parametrize(
+    ("distance_m", "expected_motion"),
+    [
+        (0.900, "STRAIGHT_3"),
+        (0.681, "STRAIGHT_3"),
+        (0.680, "STRAIGHT_4"),
+        (0.565, "STRAIGHT_4"),
+        (0.564, "STRAIGHT_3"),
+        (0.427, "STRAIGHT_2"),
+        (0.263, "STRAIGHT_1"),
+        (0.130, "STRAIGHT_0"),
+    ],
+)
+def test_general_ball_distance_bucket_uses_only_straight_motion(
+    distance_m,
+    expected_motion,
+):
+    planner = BallNavigationPlanner()
+
+    motion = planner._general_approach_motion(distance_m)
+
+    assert motion == expected_motion
+    assert not motion.startswith("RECOVER_")
 
 
 def test_angular_acceleration_is_limited():
