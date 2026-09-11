@@ -21,6 +21,13 @@ class MotionStatusResult:
 class MissionPhaseManager:
     """Own mission progress and special-motion phase transitions."""
 
+    GRASP_UNKNOWN = "UNKNOWN"
+    GRASPED = "GRABBED"
+    GRASP_NOT_GRABBED = "NOT_GRABBED"
+    GRASP_RESULTS = frozenset(
+        {GRASP_UNKNOWN, GRASPED, GRASP_NOT_GRABBED}
+    )
+
     ALLOWED_PHASES = frozenset(
         {
             "AUTO",
@@ -102,6 +109,11 @@ class MissionPhaseManager:
 
         self.current_phase = normalized_phase
         self.pickups_completed = 0
+        self.ball_grasp_results = {
+            index: self.GRASP_UNKNOWN
+            for index in range(1, self.required_pickups + 1)
+        }
+        self.active_pickup_attempt: int | None = None
         self.shots_completed = 0
         self.ball_sections_processed = 0
         self.finish_enabled = self.required_ball_sections == 0
@@ -204,7 +216,37 @@ class MissionPhaseManager:
         self.active_special_command_id = command_id
         self.active_special_running = False
         self._active_special_origin_phase = self.current_phase
+        if normalized_action == "PICKUP_NOW":
+            attempt = self.pickups_completed + 1
+            self.active_pickup_attempt = (
+                attempt if attempt in self.ball_grasp_results else None
+            )
+            if self.active_pickup_attempt is not None:
+                self.ball_grasp_results[
+                    self.active_pickup_attempt
+                ] = self.GRASP_UNKNOWN
         return True
+
+    def record_active_pickup_grasp_result(self, result: str) -> bool:
+        """Latch one verified result for the currently active BALL pickup."""
+        normalized = result.strip().upper() if isinstance(result, str) else ""
+        attempt = self.active_pickup_attempt
+        if (
+            normalized not in self.GRASP_RESULTS
+            or self.active_special_action != "PICKUP_NOW"
+            or attempt is None
+        ):
+            return False
+        self.ball_grasp_results[attempt] = normalized
+        return True
+
+    def grasp_result_for_ball(self, ball_index: int) -> str:
+        """Return a BALL-specific grasp result without sharing stale state."""
+        return self.ball_grasp_results.get(ball_index, self.GRASP_UNKNOWN)
+
+    def grasp_result_for_next_shot(self) -> str:
+        """Return the result belonging to the next unprocessed BALL section."""
+        return self.grasp_result_for_ball(self.ball_sections_processed + 1)
 
     def handle_motion_status(
         self,
@@ -267,6 +309,7 @@ class MissionPhaseManager:
         self.active_special_command_id = None
         self.active_special_running = False
         self._active_special_origin_phase = None
+        self.active_pickup_attempt = None
         return self._result(
             True, True, False, "terminal_applied", previous_phase
         )

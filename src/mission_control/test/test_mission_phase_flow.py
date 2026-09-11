@@ -78,6 +78,12 @@ class MissionFlowHarness:
     PICKUP_POST_BACKWARD_ALIGN_ACTIONS = (
         MotionDecisionNode.PICKUP_POST_BACKWARD_ALIGN_ACTIONS
     )
+    PICKUP_POSITIONING_LOSS_LATCH_ACTION = (
+        MotionDecisionNode.PICKUP_POSITIONING_LOSS_LATCH_ACTION
+    )
+    PICKUP_FIXED_SEQUENCE_FIRST_MOTION = (
+        MotionDecisionNode.PICKUP_FIXED_SEQUENCE_FIRST_MOTION
+    )
     BALL_POST_MOTION_DWELL_SEC = 0.0
     BALL_RAW_CONFIRMATION_RELEASE_SEC = (
         MotionDecisionNode.BALL_RAW_CONFIRMATION_RELEASE_SEC
@@ -170,6 +176,12 @@ class MissionFlowHarness:
         self.pickup_initial_align_waiting = False
         self.pickup_fine_align_waiting = False
         self.pickup_post_backward_align_waiting = False
+        self.pickup_positioning_motion_running = False
+        self.pickup_positioning_motion_id = None
+        self.pickup_positioning_ball_seen_during_motion = False
+        self.pickup_positioning_ball_lost_pending = False
+        self.pickup_positioning_loss_latch_sent = False
+        self.pickup_fixed_sequence_started = False
         self.finish_min_confidence = 0.70
         self.previous_publish_time = 0.0
         self.last_candidate_decision = None
@@ -386,6 +398,12 @@ def publish_special(harness, source, observation, action):
     assert payload["command_id"] == harness.active_special_command_id
     assert payload["sdk_motion_requested"] is True
     return payload
+
+
+def mark_next_ball_grabbed(harness):
+    """Seed the verified precondition for existing SHOT flow tests."""
+    ball_index = harness.phase_manager.ball_sections_processed + 1
+    harness.phase_manager.ball_grasp_results[ball_index] = "GRABBED"
 
 
 def complete_active(harness, action, command_id, terminal="SUCCEEDED"):
@@ -616,6 +634,47 @@ def test_pickup_fine_alignment_rechecks_fresh_ball_under_atomic_lock():
     assert harness.active_special_action == "PICKUP_NOW"
 
 
+def test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment():
+    harness = MissionFlowHarness(phase="BALL_APPROACH")
+    pickup = publish_special(
+        harness,
+        "ball",
+        pickup_ready_ball(),
+        "PICKUP_NOW",
+    )
+    harness.pickup_positioning_motion_running = True
+    harness.pickup_positioning_motion_id = "ball_camera_down_forward_2"
+    harness.pickup_positioning_ball_seen_during_motion = True
+    lost_ball = {"detected": False, "raw_detected": False}
+    MotionDecisionNode._track_pickup_positioning_ball_loss(
+        harness,
+        lost_ball,
+    )
+
+    latch = harness.publish_vision(ball=lost_ball)[-1]
+    assert latch["action"] == harness.PICKUP_POSITIONING_LOSS_LATCH_ACTION
+    assert latch["sdk_motion_requested"] is False
+    assert latch["active_special_command_id"] == pickup["command_id"]
+
+    harness.send_status(
+        "PICKUP_NOW",
+        pickup["command_id"],
+        "RUNNING",
+        motion_id=MotionDecisionNode.PICKUP_INITIAL_ALIGN_MARKER,
+    )
+    assert harness.pickup_initial_align_waiting is True
+    waiting = harness.publish_vision(ball=lost_ball)[-1]
+    assert waiting["action"] == "WAIT"
+    assert waiting["sdk_motion_requested"] is False
+
+    left_ball = pickup_ready_ball()
+    left_ball["steering_angle_deg"] = -26.0
+    left_ball["offset_x_norm"] = -0.2
+    turn = harness.publish_vision(ball=left_ball)[-1]
+    assert turn["action"] == "BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_3"
+    assert harness.pickup_positioning_ball_lost_pending is False
+
+
 def test_pickup_initial_alignment_requires_fresh_ball_and_depth():
     harness = MissionFlowHarness(phase="BALL_APPROACH")
     pickup = publish_special(
@@ -757,6 +816,7 @@ def test_full_course_mock_flow_without_ros_graph():
         "UNSUPPORTED",
     )
 
+    mark_next_ball_grabbed(harness)
     shot = publish_special(
         harness,
         "goal",
@@ -848,6 +908,8 @@ def test_special_failure_or_timeout_returns_to_safe_approach_phase(
     terminal,
 ):
     harness = MissionFlowHarness(phase=phase)
+    if action == "SHOT":
+        mark_next_ball_grabbed(harness)
     command = publish_special(
         harness,
         source,
@@ -916,6 +978,8 @@ def test_special_failure_limit_blocks_reexecution_after_target_reappears(
         max_shot_failures=1,
         max_go_failures=1,
     )
+    if action == "SHOT":
+        mark_next_ball_grabbed(harness)
 
     first = publish_special(
         harness,
@@ -1064,6 +1128,7 @@ def test_goal_approach_resumes_after_hurdle_go_and_ignores_new_ball():
     harness.send_status("GO", command["command_id"], "SUCCEEDED")
     assert harness.mission_phase == "GOAL_APPROACH"
 
+    mark_next_ball_grabbed(harness)
     resumed = harness.publish_vision(
         ball=pickup_ready_ball(),
         goal=score_ready_goal(),
@@ -1078,6 +1143,7 @@ def test_hurdle_can_appear_after_shot_without_fixed_order():
         phase="GOAL_APPROACH",
         required_ball_sections=1,
     )
+    mark_next_ball_grabbed(harness)
     shot = publish_special(
         harness,
         "goal",
@@ -1508,6 +1574,7 @@ def test_shot_success_updates_one_section_and_returns_to_auto():
         phase="GOAL_APPROACH",
         required_ball_sections=2,
     )
+    mark_next_ball_grabbed(harness)
     command = publish_special(
         harness,
         "goal",
@@ -1528,6 +1595,7 @@ def test_last_shot_enables_finish_flag_and_continues_line_driving():
         required_ball_sections=2,
     )
     harness.phase_manager.ball_sections_processed = 1
+    mark_next_ball_grabbed(harness)
     command = publish_special(
         harness,
         "goal",

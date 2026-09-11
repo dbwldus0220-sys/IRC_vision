@@ -25,12 +25,12 @@ def test_production_alias_catalog_contains_only_approved_aliases():
         "motion_aliases": {
             "sdk_pickup": "공잡기리그랩까지 실전",
             "sdk_hurdle": "허들넘기 실전",
-            "sdk_forward_4": "전진진짜실전(4회)",
-            "line_forward_2": "전진진짜실전(2회)",
-            "line_forward_4": "전진진짜실전(4회)",
-            "line_forward_6": "전진진짜실전(6회)",
-            "line_forward_8": "전진진짜실전(8회)",
-            "line_forward_10": "전진진짜실전(8회)",
+            "sdk_forward_4": "전진45도(4회)",
+            "line_forward_2": "전진45도(2회)",
+            "line_forward_4": "전진45도(4회)",
+            "line_forward_6": "전진45도(6회)",
+            "line_forward_8": "전진45도(8회)",
+            "line_forward_10": "전진45도(10회)",
             "line_turn_left_4": "좌회전실실전(4회)",
             "line_turn_left_6": "좌회전실실전(6회)",
             "line_turn_left_8": "좌회전실실전(8회)",
@@ -69,6 +69,7 @@ def test_production_alias_catalog_contains_only_approved_aliases():
             "pickup_pre_backward_camera_down": (
                 "공잡기전후진카메라내린거"
             ),
+            "pickup_grasp_check_pose": "공확인자세",
             "pickup_retreat_3": "후진실전(3회)",
             "pickup_first_turn_right_9": "제자리우회전(9회)",
             "pickup_first_to_right_back_camera_45": (
@@ -86,8 +87,8 @@ def test_production_alias_catalog_contains_only_approved_aliases():
                 )
                 for count in range(1, 10)
             },
-            "post_ball_forward_4": "전진진짜실전(4회)",
-            "post_ball_forward_8": "전진진짜실전(8회)",
+            "post_ball_forward_4": "전진45도(4회)",
+            "post_ball_forward_8": "전진45도(8회)",
             "post_ball_camera_90": "오뒤카메라90도",
             "goal_camera_90_forward_2": "전진카메라90도(2회)",
             "goal_camera_90_forward_4": "전진카메라90도(4회)",
@@ -122,7 +123,7 @@ def test_production_alias_catalog_contains_only_approved_aliases():
             "sdk_default_to_right_back": "기본자세에서 오뒤로",
             "pickup": "공잡기리그랩까지 실전",
             "hurdle": "허들넘기 실전",
-            "forward": "전진진짜실전(8회)",
+            "forward": "전진45도(8회)",
         }
     }
 
@@ -259,3 +260,46 @@ def test_production_motions_use_four_degree_final_tolerance():
     ]["completion"]["position_tolerance_deg"]
     assert 3.779274 <= production_tolerance
     assert 4.2 > production_tolerance
+
+
+def test_latest_pickup_and_grasp_check_motion_definitions_are_mapped():
+    aliases = yaml.safe_load(
+        ALIAS_PATH.read_text(encoding="utf-8")
+    )["motion_aliases"]
+    motions = yaml.safe_load(
+        RUNTIME_CATALOG_PATH.read_text(encoding="utf-8")
+    )["motions"]
+    by_name = {motion["name"]: motion for motion in motions}
+
+    expected = {
+        "미세실전(8회)": (7045, 5, 0.95, "미세오들400", "미세오뒤400"),
+        "미세실전(0도)": (
+            7045,
+            5,
+            0.95,
+            "미세오들(0도)",
+            "미세오뒤(0도)",
+        ),
+        "공잡기리그랩까지 실전": (
+            8000,
+            1,
+            1.05,
+            "음",
+            "기본자세4",
+        ),
+        "공확인자세": (7045, 1, 1.0, "공확인자세", "공확인자세"),
+    }
+    for name, metadata in expected.items():
+        motion = by_name[name]
+        assert (
+            motion["max_seq_ms"],
+            motion["repeat_count"],
+            motion["playback_speed"],
+            motion["start_pose"],
+            motion["end_pose"],
+        ) == metadata
+
+    check_pose = by_name[aliases["pickup_grasp_check_pose"]]
+    assert len(check_pose["frames"]) == 1
+    assert check_pose["frames"][0]["name"] == "공확인자세"
+    assert check_pose["frames"][0]["time_ms"] == 400

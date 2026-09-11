@@ -79,6 +79,32 @@ def test_pickup_succeeded():
     assert manager.current_phase == "POST_BALL_LINE_ALIGN"
 
 
+def test_grasp_results_are_attempt_scoped_and_reset_on_retry():
+    manager = MissionPhaseManager(initial_phase="BALL_APPROACH")
+    assert manager.start_special_action("PICKUP_NOW", 1)
+    assert manager.active_pickup_attempt == 1
+    assert manager.record_active_pickup_grasp_result("GRABBED")
+    assert manager.grasp_result_for_ball(1) == "GRABBED"
+    manager.handle_motion_status("PICKUP_NOW", 1, "RUNNING")
+    manager.handle_motion_status("PICKUP_NOW", 1, "FAILED")
+
+    assert manager.start_special_action("PICKUP_NOW", 2)
+    assert manager.grasp_result_for_ball(1) == "UNKNOWN"
+
+
+def test_first_and_second_ball_grasp_results_do_not_mix():
+    manager = MissionPhaseManager(initial_phase="BALL_APPROACH")
+    assert manager.start_special_action("PICKUP_NOW", 1)
+    assert manager.record_active_pickup_grasp_result("NOT_GRABBED")
+    manager.handle_motion_status("PICKUP_NOW", 1, "RUNNING")
+    manager.handle_motion_status("PICKUP_NOW", 1, "SUCCEEDED")
+
+    assert manager.start_special_action("PICKUP_NOW", 2)
+    assert manager.record_active_pickup_grasp_result("GRABBED")
+    assert manager.grasp_result_for_ball(1) == "NOT_GRABBED"
+    assert manager.grasp_result_for_ball(2) == "GRABBED"
+
+
 def test_first_ball_line_alignment_completes_before_goal_transition():
     manager = MissionPhaseManager(initial_phase="BALL_APPROACH")
     complete(manager, "PICKUP_NOW", 1, "SUCCEEDED")

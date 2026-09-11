@@ -126,6 +126,19 @@ class FakeDecisionNode:
     PICKUP_POST_BACKWARD_ALIGN_ACTIONS = (
         MotionDecisionNode.PICKUP_POST_BACKWARD_ALIGN_ACTIONS
     )
+    PICKUP_POSITIONING_LOSS_LATCH_ACTION = (
+        MotionDecisionNode.PICKUP_POSITIONING_LOSS_LATCH_ACTION
+    )
+    PICKUP_FIXED_SEQUENCE_FIRST_MOTION = (
+        MotionDecisionNode.PICKUP_FIXED_SEQUENCE_FIRST_MOTION
+    )
+    PICKUP_DWELL_MARKER = MotionDecisionNode.PICKUP_DWELL_MARKER
+    PICKUP_GRASP_CHECK_MOTION_ID = (
+        MotionDecisionNode.PICKUP_GRASP_CHECK_MOTION_ID
+    )
+    GRASP_CONFIDENCE_THRESHOLD = (
+        MotionDecisionNode.GRASP_CONFIDENCE_THRESHOLD
+    )
     BALL_POST_MOTION_DWELL_SEC = 0.0
     BALL_RAW_CONFIRMATION_RELEASE_SEC = (
         MotionDecisionNode.BALL_RAW_CONFIRMATION_RELEASE_SEC
@@ -157,6 +170,18 @@ class FakeDecisionNode:
         self.pickup_initial_align_waiting = False
         self.pickup_fine_align_waiting = False
         self.pickup_post_backward_align_waiting = False
+        self.pickup_positioning_motion_running = False
+        self.pickup_positioning_motion_id = None
+        self.pickup_positioning_ball_seen_during_motion = False
+        self.pickup_positioning_ball_lost_pending = False
+        self.pickup_positioning_loss_latch_sent = False
+        self.pickup_fixed_sequence_started = False
+        self.grasp_latest_detection_stamp_ns = None
+        self.grasp_verification_active = False
+        self.grasp_verification_attempt = None
+        self.grasp_verification_min_stamp_ns = None
+        self.grasp_verification_result = MissionPhaseManager.GRASP_UNKNOWN
+        self.grasp_verification_confidence = None
         self.latest_info = {
             source: None for source in MotionDecisionNode.SOURCES
         }
@@ -250,6 +275,10 @@ class FakeDecisionNode:
         """Match the production node's executor watchdog interface."""
         return MotionDecisionNode._check_executor_heartbeat(self, now)
 
+    def _suppress_unverified_shot(self, decision):
+        """Apply the production BALL-grasp shot gate."""
+        return MotionDecisionNode._suppress_unverified_shot(self, decision)
+
 
 def status_message(
     *,
@@ -261,6 +290,8 @@ def status_message(
     error_code=None,
     message=None,
     motion_id=None,
+    completed_motion_id=None,
+    verification_window_complete=None,
 ):
     """Create one /motion/status JSON message."""
     payload = {
@@ -272,6 +303,8 @@ def status_message(
         'error_code': error_code,
         'message': message,
         'motion_id': motion_id,
+        'completed_motion_id': completed_motion_id,
+        'verification_window_complete': verification_window_complete,
     }
 
     message = String()
@@ -291,6 +324,338 @@ def send_phase(node, phase):
     message = String()
     message.data = phase
     MotionDecisionNode._phase_callback(node, message)
+
+
+def grasp_detections_message(stamp_ns, detections):
+    """Build the detector's stamped String JSON contract."""
+    message = String()
+    message.data = json.dumps(
+        {
+            "stamp": {
+                "sec": stamp_ns // 1_000_000_000,
+                "nanosec": stamp_ns % 1_000_000_000,
+            },
+            "detections": detections,
+        }
+    )
+    return message
+
+
+def send_grasp_detections(node, stamp_ns, detections):
+    MotionDecisionNode._grasp_detections_callback(
+        node,
+        grasp_detections_message(stamp_ns, detections),
+    )
+
+
+def grasp_log_records(node, marker):
+    """Return decoded structured records for one grasp log marker."""
+    prefix = f"[{marker}] "
+    return [
+        json.loads(item[len(prefix):])
+        for item in node.logger.infos
+        if item.startswith(prefix)
+    ]
+
+
+def set_grasp_result_for_first_ball(node, result):
+    assert node.phase_manager.start_special_action("PICKUP_NOW", 10)
+    if result != MissionPhaseManager.GRASP_UNKNOWN:
+        assert node.phase_manager.record_active_pickup_grasp_result(result)
+    node.phase_manager.handle_motion_status("PICKUP_NOW", 10, "RUNNING")
+    node.phase_manager.handle_motion_status("PICKUP_NOW", 10, "SUCCEEDED")
+
+
+def test_grasp_window_ignores_pre_pose_detection_and_latches_fresh_grab():
+    node = FakeDecisionNode("BALL_APPROACH")
+    send_grasp_detections(
+        node,
+        10,
+        [{"class_name": "grab", "confidence": 0.9}],
+    )
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+    send_status(
+        node,
+        status="RUNNING",
+        action="PICKUP_NOW",
+        command_id=10,
+        event_id=1,
+        dynamics_command=None,
+        motion_id=node.PICKUP_DWELL_MARKER,
+        completed_motion_id=node.PICKUP_GRASP_CHECK_MOTION_ID,
+        verification_window_complete=False,
+    )
+
+    send_grasp_detections(
+        node,
+        10,
+        [{"class_name": "grab", "confidence": 0.9}],
+    )
+    assert node.grasp_verification_result == "UNKNOWN"
+    send_grasp_detections(
+        node,
+        11,
+        [{"class_name": "grab", "confidence": 0.26}],
+    )
+    send_status(
+        node,
+        status="RUNNING",
+        action="PICKUP_NOW",
+        command_id=10,
+        event_id=1,
+        dynamics_command=None,
+        motion_id=node.PICKUP_DWELL_MARKER,
+        completed_motion_id=node.PICKUP_GRASP_CHECK_MOTION_ID,
+        verification_window_complete=True,
+    )
+
+    assert node.phase_manager.grasp_result_for_ball(1) == "GRABBED"
+    assert node.grasp_verification_active is False
+
+
+def test_grasp_window_latches_not_grabbed_from_last_fresh_frame():
+    node = FakeDecisionNode("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+    MotionDecisionNode._start_grasp_verification_window(node)
+    send_grasp_detections(node, 20, [])
+    MotionDecisionNode._finish_grasp_verification_window(node)
+
+    assert node.phase_manager.grasp_result_for_ball(1) == "NOT_GRABBED"
+
+
+def test_grasp_window_without_fresh_frame_remains_unknown():
+    node = FakeDecisionNode("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+    MotionDecisionNode._start_grasp_verification_window(node)
+    MotionDecisionNode._finish_grasp_verification_window(node)
+
+    assert node.phase_manager.grasp_result_for_ball(1) == "UNKNOWN"
+
+
+def test_grasp_verification_start_log_is_emitted_once():
+    node = FakeDecisionNode("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+
+    MotionDecisionNode._start_grasp_verification_window(node)
+
+    records = grasp_log_records(node, "GRASP_VERIFY_START")
+    assert len(records) == 1
+    assert records[0]["attempt_id"] == 1
+    assert records[0]["ball_index"] == 1
+    assert records[0]["completed_motion"] == "pickup_grasp_check_pose"
+    assert records[0]["confidence_threshold"] == 0.25
+    assert records[0]["expected_window_sec"] == 3.0
+    assert records[0]["initial_result"] == "UNKNOWN"
+
+
+def test_grasp_verification_frame_logs_grab_and_miss_observations():
+    node = FakeDecisionNode("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+    MotionDecisionNode._start_grasp_verification_window(node)
+
+    send_grasp_detections(
+        node,
+        20,
+        [
+            {
+                "class_name": "grab",
+                "confidence": 0.63,
+                "bbox": [1, 2, 3, 4],
+            },
+            {"class_name": "ball", "confidence": 0.8},
+        ],
+    )
+    send_grasp_detections(node, 30, [])
+
+    records = grasp_log_records(node, "GRASP_VERIFY_FRAME")
+    assert len(records) == 2
+    assert records[0]["frame_idx"] == 1
+    assert records[0]["grab_count"] == 1
+    assert records[0]["grab_max_confidence"] == 0.63
+    assert records[0]["grab_pass"] is True
+    assert records[0]["frame_result"] == "GRABBED"
+    assert records[0]["pending_result"] == "GRABBED"
+    assert records[0]["bbox"] == [1, 2, 3, 4]
+    assert records[0]["ball_detected"] is True
+    assert records[1]["frame_idx"] == 2
+    assert records[1]["grab_count"] == 0
+    assert records[1]["grab_max_confidence"] is None
+    assert records[1]["grab_pass"] is False
+    assert records[1]["frame_result"] == "NOT_GRABBED"
+    assert records[1]["pending_result"] == "NOT_GRABBED"
+
+
+def test_grasp_verification_reject_logs_preserve_pending_result():
+    node = FakeDecisionNode("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+    MotionDecisionNode._start_grasp_verification_window(node)
+    send_grasp_detections(
+        node,
+        20,
+        [{"class_name": "grab", "confidence": 0.7}],
+    )
+
+    send_grasp_detections(node, 20, [])
+    send_grasp_detections(node, 19, [])
+
+    records = grasp_log_records(node, "GRASP_VERIFY_REJECT")
+    assert [record["reason"] for record in records] == [
+        "same_timestamp",
+        "timestamp_regression",
+    ]
+    assert node.grasp_verify_rejected_frames == 2
+    assert node.grasp_verification_result == "GRABBED"
+
+
+def test_grasp_verification_end_summarizes_last_frame_semantics():
+    node = FakeDecisionNode("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+    MotionDecisionNode._start_grasp_verification_window(node)
+    send_grasp_detections(
+        node,
+        10,
+        [{"class_name": "grab", "confidence": 0.4}],
+    )
+    send_grasp_detections(
+        node,
+        20,
+        [{"class_name": "grab", "confidence": 0.8}],
+    )
+    send_grasp_detections(node, 30, [])
+
+    MotionDecisionNode._finish_grasp_verification_window(node)
+    MotionDecisionNode._finish_grasp_verification_window(node)
+
+    records = grasp_log_records(node, "GRASP_VERIFY_END")
+    assert len(records) == 1
+    assert records[0]["accepted_frames"] == 3
+    assert records[0]["grabbed_frames"] == 2
+    assert records[0]["not_grabbed_frames"] == 1
+    assert records[0]["grab_confidence_min"] == 0.4
+    assert records[0]["grab_confidence_max"] == 0.8
+    assert records[0]["grab_confidence_mean"] == pytest.approx(0.6)
+    assert records[0]["grab_confidence_median"] == pytest.approx(0.6)
+    assert records[0]["last_fresh_frame_result"] == "NOT_GRABBED"
+    assert records[0]["latched_result"] == "NOT_GRABBED"
+    assert node.phase_manager.grasp_result_for_ball(1) == "NOT_GRABBED"
+
+
+def test_grasp_verification_end_reports_zero_fresh_frames():
+    node = FakeDecisionNode("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+    MotionDecisionNode._start_grasp_verification_window(node)
+
+    MotionDecisionNode._finish_grasp_verification_window(node)
+
+    record = grasp_log_records(node, "GRASP_VERIFY_END")[0]
+    assert record["accepted_frames"] == 0
+    assert record["fresh_frame_zero"] is True
+    assert record["latched_result"] == "UNKNOWN"
+
+
+def test_grasp_summary_keeps_below_threshold_confidence_for_analysis():
+    node = FakeDecisionNode("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+    MotionDecisionNode._start_grasp_verification_window(node)
+    send_grasp_detections(
+        node,
+        10,
+        [{"class_name": "grab", "confidence": 0.24}],
+    )
+
+    MotionDecisionNode._finish_grasp_verification_window(node)
+
+    frame = grasp_log_records(node, "GRASP_VERIFY_FRAME")[0]
+    summary = grasp_log_records(node, "GRASP_VERIFY_END")[0]
+    assert frame["grab_max_confidence"] == 0.24
+    assert frame["grab_pass"] is False
+    assert frame["frame_result"] == "NOT_GRABBED"
+    assert summary["grab_confidence_min"] == 0.24
+    assert summary["grab_confidence_max"] == 0.24
+    assert summary["latched_result"] == "NOT_GRABBED"
+
+
+def test_grasp_frame_detail_log_is_silent_outside_verification_window():
+    node = FakeDecisionNode("LINE_TRACK")
+
+    send_grasp_detections(
+        node,
+        10,
+        [{"class_name": "grab", "confidence": 0.9}],
+    )
+
+    assert grasp_log_records(node, "GRASP_VERIFY_FRAME") == []
+    assert grasp_log_records(node, "GRASP_VERIFY_REJECT") == []
+
+
+@pytest.mark.parametrize("result", ["NOT_GRABBED", "UNKNOWN"])
+def test_shot_is_blocked_without_verified_grab(result):
+    node = FakeDecisionNode("GOAL_APPROACH")
+    set_grasp_result_for_first_ball(node, result)
+    shot = MotionDecision(
+        phase="GOAL_APPROACH",
+        source="goal",
+        action="SHOT",
+        valid=True,
+        reason="goal_centered_at_scoring_depth",
+        sdk_motion_requested=True,
+        requires_ack=True,
+        source_command={},
+    )
+
+    selected = MotionDecisionNode._suppress_unverified_shot(node, shot)
+
+    assert selected.action == "WAIT"
+    assert selected.sdk_motion_requested is False
+    assert selected.source_command["grasp_result"] == result
+
+
+def test_shot_remains_enabled_for_matching_grabbed_ball():
+    node = FakeDecisionNode("GOAL_APPROACH")
+    set_grasp_result_for_first_ball(node, "GRABBED")
+    shot = MotionDecision(
+        phase="GOAL_APPROACH",
+        source="goal",
+        action="SHOT",
+        valid=True,
+        reason="goal_centered_at_scoring_depth",
+        sdk_motion_requested=True,
+        requires_ack=True,
+        source_command={},
+    )
+
+    assert MotionDecisionNode._suppress_unverified_shot(node, shot) == shot
+
+
+def test_second_shot_does_not_reuse_first_ball_grab_result():
+    node = FakeDecisionNode("GOAL_APPROACH")
+    set_grasp_result_for_first_ball(node, "GRABBED")
+
+    assert node.phase_manager.start_special_action("SHOT", 11)
+    node.phase_manager.handle_motion_status("SHOT", 11, "RUNNING")
+    node.phase_manager.handle_motion_status("SHOT", 11, "SUCCEEDED")
+
+    assert node.phase_manager.start_special_action("PICKUP_NOW", 12)
+    assert node.phase_manager.record_active_pickup_grasp_result("NOT_GRABBED")
+    node.phase_manager.handle_motion_status("PICKUP_NOW", 12, "RUNNING")
+    node.phase_manager.handle_motion_status("PICKUP_NOW", 12, "SUCCEEDED")
+
+    shot = MotionDecision(
+        phase="GOAL_APPROACH",
+        source="goal",
+        action="SHOT",
+        valid=True,
+        reason="goal_centered_at_scoring_depth",
+        sdk_motion_requested=True,
+        requires_ack=True,
+        source_command={},
+    )
+    selected = MotionDecisionNode._suppress_unverified_shot(node, shot)
+
+    assert node.phase_manager.grasp_result_for_ball(1) == "GRABBED"
+    assert node.phase_manager.grasp_result_for_ball(2) == "NOT_GRABBED"
+    assert selected.action == "WAIT"
+    assert selected.source_command["grasp_result"] == "NOT_GRABBED"
 
 
 def test_valid_external_phase_updates_manager():
@@ -1777,6 +2142,9 @@ def test_special_command_waits_for_subscriber_before_registering_lock(
         terminal_decision(source, action, phase),
         subscription_count=0,
     )
+    if action == 'SHOT':
+        set_grasp_result_for_first_ball(node, 'GRABBED')
+        assert node.phase_manager.set_phase(phase)
 
     MotionDecisionNode._publish_decision(node)
 
@@ -2107,6 +2475,114 @@ def test_raw_ball_confirmation_does_not_count_as_motion_time_loss():
         {"detected": False, "raw_detected": True},
     )
 
+    assert node.ball_lost_during_motion_pending is False
+
+
+def test_pickup_positioning_loss_latches_without_general_recovery():
+    node = FreshMockInputNode()
+    assert node.phase_manager.set_phase("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+    node.pickup_positioning_motion_running = True
+    node.pickup_positioning_motion_id = "ball_camera_down_forward_2"
+
+    MotionDecisionNode._track_pickup_positioning_ball_loss(
+        node,
+        ball_info_for_node(distance_m=0.4),
+    )
+    MotionDecisionNode._track_pickup_positioning_ball_loss(
+        node,
+        {"detected": False, "raw_detected": False},
+    )
+
+    assert node.pickup_positioning_ball_lost_pending is True
+    decision = select_decision(node, ball={"detected": False})
+    assert decision.action == node.PICKUP_POSITIONING_LOSS_LATCH_ACTION
+    assert decision.sdk_motion_requested is False
+    assert decision.source_command["pickup_positioning_motion_id"] == (
+        "ball_camera_down_forward_2"
+    )
+    assert not decision.action.startswith("BALL_APPROACH_TURN_")
+
+
+@pytest.mark.parametrize(
+    ("steering_angle_deg", "expected_action"),
+    [
+        (-26.0, "BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_3"),
+        (26.0, "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_3"),
+    ],
+)
+def test_pickup_loss_reacquisition_reuses_camera_down_heading_planner(
+    steering_angle_deg,
+    expected_action,
+):
+    node = FreshMockInputNode()
+    assert node.phase_manager.set_phase("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+    node.pickup_initial_align_waiting = True
+    node.pickup_positioning_ball_lost_pending = True
+    node.pickup_positioning_loss_latch_sent = True
+
+    missing = select_decision(node, ball={"detected": False})
+    assert missing.action == "WAIT"
+    assert missing.reason == (
+        "pickup_positioning_loss_waiting_for_fresh_ball"
+    )
+
+    reacquired = select_decision(
+        node,
+        ball=ball_info_for_node(
+            distance_m=0.4,
+            steering_angle_deg=steering_angle_deg,
+            offset_x_norm=0.2,
+        ),
+    )
+    assert reacquired.action == expected_action
+    assert reacquired.sdk_motion_requested is True
+
+
+@pytest.mark.parametrize(
+    ("distance_m", "expected_motion"),
+    [
+        (0.56, "STRAIGHT_3"),
+        (0.40, "STRAIGHT_1"),
+        (0.13, "STRAIGHT_0"),
+    ],
+)
+def test_pickup_loss_reacquisition_uses_existing_distance_buckets(
+    distance_m,
+    expected_motion,
+):
+    node = FreshMockInputNode()
+    assert node.phase_manager.set_phase("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+    node.pickup_initial_align_waiting = True
+    node.pickup_positioning_ball_lost_pending = True
+    node.pickup_positioning_loss_latch_sent = True
+
+    decision = select_decision(
+        node,
+        ball=ball_info_for_node(
+            distance_m=distance_m,
+            steering_angle_deg=0.0,
+        ),
+    )
+
+    assert decision.action == "BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+    assert decision.source_command["pickup_approach_motion"] == expected_motion
+
+
+def test_pickup_positioning_loss_does_not_latch_in_fixed_or_line_motion():
+    node = FreshMockInputNode()
+    node.pickup_positioning_motion_running = True
+    node.pickup_positioning_ball_seen_during_motion = True
+    node.pickup_fixed_sequence_started = True
+
+    MotionDecisionNode._track_pickup_positioning_ball_loss(
+        node,
+        {"detected": False, "raw_detected": False},
+    )
+
+    assert node.pickup_positioning_ball_lost_pending is False
     assert node.ball_lost_during_motion_pending is False
 
 
@@ -2926,6 +3402,8 @@ def test_mission_progress_contains_exact_fields_and_values():
         'required_ball_sections': 2,
         'finish_enabled': False,
         'mission_complete': False,
+        'ball_1_grasp_result': 'UNKNOWN',
+        'ball_2_grasp_result': 'UNKNOWN',
     }
 
 

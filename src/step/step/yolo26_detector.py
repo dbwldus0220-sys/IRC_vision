@@ -5,7 +5,9 @@ from __future__ import annotations
 
 import ast
 from dataclasses import asdict, dataclass
+import hashlib
 import json
+import math
 from pathlib import Path
 import time
 from typing import Any
@@ -48,7 +50,14 @@ def _default_model_path() -> str:
 
 
 DEFAULT_MODEL_PATH = _default_model_path()
-DEFAULT_CLASS_NAMES = ["line", "ball", "goal", "backboard", "hurdle"]
+DEFAULT_CLASS_NAMES = [
+    "line",
+    "ball",
+    "goal",
+    "backboard",
+    "hurdle",
+    "grab",
+]
 DISPLAY_WINDOW_NAME = "YOLO26 RealSense Detection"
 
 
@@ -282,6 +291,8 @@ class Yolo26Detector(Node):
         self.session: ort.InferenceSession | None = None
         self.tensorrt_backend: TensorRTBackend | None = None
         requested_device = str(self.get_parameter("device").value)
+        self.requested_device = requested_device
+        self.onnx_class_names_metadata: str | None = None
         model_suffix = self.model_path.suffix.lower()
         if model_suffix == ".onnx":
             self.backend_name = "ONNX Runtime"
@@ -290,6 +301,9 @@ class Yolo26Detector(Node):
             )
             self.input_name = self.session.get_inputs()[0].name
             input_shape = self.session.get_inputs()[0].shape
+            self.onnx_class_names_metadata = (
+                self.session.get_modelmeta().custom_metadata_map.get("names")
+            )
             self.class_names = self._read_class_names()
         elif model_suffix == ".engine":
             device = requested_device.strip().lower()
@@ -388,6 +402,9 @@ class Yolo26Detector(Node):
         self.last_inference_time = 0.0
         self.smoothed_fps = 0.0
         self.processing = False
+        self.inference_timing_samples_ms: list[float] = []
+        self.inference_timing_window_started = time.monotonic()
+        self.inference_timing_last_log = self.inference_timing_window_started
         self.latest_line_info: dict[str, Any] | None = None
         self.latest_line_info_time: float | None = None
         self.latest_ball_info: dict[str, Any] | None = None
@@ -436,9 +453,30 @@ class Yolo26Detector(Node):
                 self.display = False
                 self.show_camera_controls = False
 
-        self.get_logger().info(f"Model: {self.model_path}")
+        available_providers = (
+            ort.get_available_providers() if ort is not None else []
+        )
+        session_providers = (
+            self.session.get_providers() if self.session is not None else []
+        )
+        requested_device_normalized = requested_device.strip().lower()
+        cpu_fallback = bool(
+            model_suffix == ".onnx"
+            and requested_device_normalized != "cpu"
+            and self.active_provider == "CPUExecutionProvider"
+        )
+        self.get_logger().info(
+            "[YOLO_RUNTIME] "
+            f"model={self.model_path.resolve()} "
+            f"sha256={self._file_sha256(self.model_path)} "
+            f"requested_device={requested_device_normalized} "
+            f"available_providers={available_providers} "
+            f"session_providers={session_providers} "
+            f"active_provider={self.active_provider} "
+            f"cpu_fallback={str(cpu_fallback).lower()} "
+            f"onnx_names_metadata={self.onnx_class_names_metadata!r}"
+        )
         self.get_logger().info(f"Backend: {self.backend_name}")
-        self.get_logger().info(f"Provider: {self.active_provider}")
         self.get_logger().info(
             f"Input: {self.input_width}x{self.input_height}"
         )
@@ -1033,6 +1071,47 @@ class Yolo26Detector(Node):
     @staticmethod
     def _fixed_dimension(value: Any, fallback: int) -> int:
         return int(value) if isinstance(value, int) and value > 0 else fallback
+
+    @staticmethod
+    def _file_sha256(path: Path) -> str:
+        """Hash one model once at startup without loading it in one copy."""
+        digest = hashlib.sha256()
+        with path.open("rb") as stream:
+            for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                digest.update(chunk)
+        return digest.hexdigest()
+
+    def _record_inference_timing(
+        self,
+        latency_ms: float,
+        now_monotonic: float,
+    ) -> None:
+        """Emit one lightweight two-second inference timing summary."""
+        self.inference_timing_samples_ms.append(latency_ms)
+        elapsed = now_monotonic - self.inference_timing_last_log
+        if elapsed < 2.0:
+            return
+        samples = sorted(self.inference_timing_samples_ms)
+        sample_count = len(samples)
+        p50 = samples[max(0, (sample_count + 1) // 2 - 1)]
+        p95 = samples[max(0, math.ceil(sample_count * 0.95) - 1)]
+        window_duration = max(
+            now_monotonic - self.inference_timing_window_started,
+            1e-6,
+        )
+        self.get_logger().info(
+            "[YOLO_INFERENCE_TIMING] "
+            f"samples={sample_count} "
+            f"avg_ms={sum(samples) / sample_count:.3f} "
+            f"p50_ms={p50:.3f} "
+            f"p95_ms={p95:.3f} "
+            f"max_ms={samples[-1]:.3f} "
+            f"effective_fps={sample_count / window_duration:.3f} "
+            f"window_sec={window_duration:.3f}"
+        )
+        self.inference_timing_samples_ms.clear()
+        self.inference_timing_window_started = now_monotonic
+        self.inference_timing_last_log = now_monotonic
 
     def _create_session(
         self, requested_device: str
@@ -2668,7 +2747,15 @@ class Yolo26Detector(Node):
         try:
             image = self.bridge.imgmsg_to_cv2(message, desired_encoding="bgr8")
             blob, info = self._preprocess(image)
+            inference_started = time.perf_counter()
             output = self._run_inference(blob)
+            inference_latency_ms = (
+                time.perf_counter() - inference_started
+            ) * 1000.0
+            self._record_inference_timing(
+                inference_latency_ms,
+                time.monotonic(),
+            )
             detections = self._postprocess(output, info, image.shape)
             elapsed = max(time.perf_counter() - started, 1e-6)
             current_fps = 1.0 / elapsed

@@ -86,6 +86,9 @@ def test_robot_launch_defaults_are_production_ready(
 
     assert context.launch_configurations["enable_camera"] == "true"
     assert context.launch_configurations["device"] == "tensorrt"
+    assert context.launch_configurations["model_path"].endswith(
+        "/step/models/best.onnx"
+    )
     assert context.launch_configurations["display"] == "true"
     assert context.launch_configurations["initial_mission_phase"] == "AUTO"
     assert parameters == {

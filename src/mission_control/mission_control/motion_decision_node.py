@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import math
+import statistics
 import time
 from typing import Any
 
@@ -100,11 +101,18 @@ class MotionDecisionNode(Node):
     LINE_TIMEOUT_RECOVERY_FRAMES = 10
     BALL_POST_MOTION_DWELL_SEC = 3.0
     BALL_RAW_CONFIRMATION_RELEASE_SEC = 0.5
+    PICKUP_DWELL_MARKER = "__NON_BLOCKING_DWELL__"
+    PICKUP_GRASP_CHECK_MOTION_ID = "pickup_grasp_check_pose"
+    GRASP_CONFIDENCE_THRESHOLD = 0.25
     PICKUP_INITIAL_ALIGN_MARKER = "__BALL_PICKUP_INITIAL_ALIGN_CHECK__"
     PICKUP_FINE_ALIGN_MARKER = "__BALL_PICKUP_FINE_ALIGN_CHECK__"
     PICKUP_POST_BACKWARD_ALIGN_MARKER = (
         "__BALL_PICKUP_POST_BACKWARD_ALIGN_CHECK__"
     )
+    PICKUP_POSITIONING_LOSS_LATCH_ACTION = (
+        "BALL_PICKUP_POSITIONING_LOSS_LATCH"
+    )
+    PICKUP_FIXED_SEQUENCE_FIRST_MOTION = "pickup_pre_backward_camera_down"
     PICKUP_INITIAL_ALIGN_ACTIONS = frozenset(
         {
             "BALL_PICKUP_INITIAL_ALIGN_CONTINUE",
@@ -145,6 +153,9 @@ class MotionDecisionNode(Node):
         self.declare_parameter("goal_info_topic", "/vision/goal_info")
         self.declare_parameter("hurdle_info_topic", "/vision/hurdle_info")
         self.declare_parameter("finish_info_topic", "/vision/finish_info")
+        self.declare_parameter(
+            "grasp_detections_topic", "/vision/detections"
+        )
 
         self.declare_parameter("mission_phase_topic", "/mission/phase")
         self.declare_parameter(
@@ -382,6 +393,30 @@ class MotionDecisionNode(Node):
         self.pickup_initial_align_waiting = False
         self.pickup_fine_align_waiting = False
         self.pickup_post_backward_align_waiting = False
+        self.pickup_positioning_motion_running = False
+        self.pickup_positioning_motion_id: str | None = None
+        self.pickup_positioning_ball_seen_during_motion = False
+        self.pickup_positioning_ball_lost_pending = False
+        self.pickup_positioning_loss_latch_sent = False
+        self.pickup_fixed_sequence_started = False
+        self.grasp_latest_detection_stamp_ns: int | None = None
+        self.grasp_verification_active = False
+        self.grasp_verification_attempt: int | None = None
+        self.grasp_verification_min_stamp_ns: int | None = None
+        self.grasp_verification_result = MissionPhaseManager.GRASP_UNKNOWN
+        self.grasp_verification_confidence: float | None = None
+        self.grasp_verify_attempt_serial = 0
+        self.grasp_verify_attempt_id: int | None = None
+        self.grasp_verify_window_start_monotonic: float | None = None
+        self.grasp_verify_window_start_ros_ns: int | None = None
+        self.grasp_verify_motion_status_monotonic: float | None = None
+        self.grasp_verify_accepted_frames = 0
+        self.grasp_verify_rejected_frames = 0
+        self.grasp_verify_grab_frames = 0
+        self.grasp_verify_miss_frames = 0
+        self.grasp_verify_confidences: list[float] = []
+        self.grasp_verify_first_stamp_ns: int | None = None
+        self.grasp_verify_last_stamp_ns: int | None = None
         self.general_motion_gate = GeneralMotionCommandGate(
             max_transient_retries=max(
                 0,
@@ -452,6 +487,16 @@ class MotionDecisionNode(Node):
             10,
         )
 
+        grasp_detections_topic = str(
+            self.get_parameter("grasp_detections_topic").value
+        )
+        self.create_subscription(
+            String,
+            grasp_detections_topic,
+            self._grasp_detections_callback,
+            10,
+        )
+
         executor_heartbeat_topic = str(
             self.get_parameter("executor_heartbeat_topic").value
         )
@@ -513,6 +558,9 @@ class MotionDecisionNode(Node):
         )
         self.get_logger().info(
             f"Motion status: {motion_status_topic}"
+        )
+        self.get_logger().info(
+            f"Grasp detections: {grasp_detections_topic}"
         )
         self.get_logger().info(
             f"Executor heartbeat: {executor_heartbeat_topic}"
@@ -679,6 +727,10 @@ class MotionDecisionNode(Node):
                         self,
                         payload,
                     )
+                    MotionDecisionNode._track_pickup_positioning_ball_loss(
+                        self,
+                        payload,
+                    )
                 if source == "line":
                     if self.line_timeout_recovery_active:
                         MotionDecisionNode._collect_timeout_recovery_frame(
@@ -717,6 +769,401 @@ class MotionDecisionNode(Node):
                 )
 
         return callback
+
+    @staticmethod
+    def _detection_stamp_ns(payload: dict[str, Any]) -> int | None:
+        """Read one valid ROS image stamp from detector JSON."""
+        stamp = payload.get("stamp")
+        if not isinstance(stamp, dict):
+            return None
+        sec = stamp.get("sec")
+        nanosec = stamp.get("nanosec")
+        if (
+            isinstance(sec, bool)
+            or not isinstance(sec, int)
+            or sec < 0
+            or isinstance(nanosec, bool)
+            or not isinstance(nanosec, int)
+            or not 0 <= nanosec < 1_000_000_000
+        ):
+            return None
+        return sec * 1_000_000_000 + nanosec
+
+    @staticmethod
+    def _current_ros_time_ns(node: Any) -> int | None:
+        """Return the node clock in nanoseconds when it is available."""
+        try:
+            return int(node.get_clock().now().nanoseconds)
+        except (AttributeError, RuntimeError, TypeError, ValueError):
+            return None
+
+    @staticmethod
+    def _grasp_verify_log(node: Any, marker: str, **fields: Any) -> None:
+        """Write one compact structured grasp-verification INFO record."""
+        node.get_logger().info(
+            f"[{marker}] "
+            + json.dumps(
+                fields,
+                ensure_ascii=True,
+                separators=(",", ":"),
+                sort_keys=True,
+            )
+        )
+
+    @staticmethod
+    def _reject_grasp_verification_frame(
+        node: Any,
+        *,
+        reason: str,
+        stamp_ns: int | None,
+        receive_monotonic: float,
+        scope: str = "frame",
+    ) -> None:
+        """Log one rejected frame or malformed detection observation."""
+        if not getattr(node, "grasp_verification_active", False):
+            return
+        if scope == "frame":
+            node.grasp_verify_rejected_frames = (
+                getattr(node, "grasp_verify_rejected_frames", 0) + 1
+            )
+        MotionDecisionNode._grasp_verify_log(
+            node,
+            "GRASP_VERIFY_REJECT",
+            attempt_id=getattr(node, "grasp_verify_attempt_id", None),
+            ball_index=getattr(node, "grasp_verification_attempt", None),
+            minimum_stamp_ns=getattr(
+                node, "grasp_verification_min_stamp_ns", None
+            ),
+            reason=reason,
+            receive_monotonic=receive_monotonic,
+            scope=scope,
+            stamp_ns=stamp_ns,
+        )
+
+    def _grasp_detections_callback(self, message: String) -> None:
+        """Collect fresh one-frame `grab` observations in the pose dwell."""
+        receive_monotonic = time.monotonic()
+        receive_ros_ns = MotionDecisionNode._current_ros_time_ns(self)
+        payload: Any = None
+        try:
+            payload = json.loads(message.data)
+            if not isinstance(payload, dict):
+                raise ValueError("JSON must be an object")
+            stamp_ns = MotionDecisionNode._detection_stamp_ns(payload)
+            detections = payload.get("detections")
+            if stamp_ns is None or not isinstance(detections, list):
+                raise ValueError("stamp and detections are required")
+        except (json.JSONDecodeError, TypeError, ValueError) as exc:
+            MotionDecisionNode._reject_grasp_verification_frame(
+                self,
+                reason=(
+                    "missing_or_invalid_stamp_or_detections"
+                    if isinstance(payload, dict)
+                    else "malformed_json"
+                ),
+                stamp_ns=(
+                    MotionDecisionNode._detection_stamp_ns(payload)
+                    if isinstance(payload, dict)
+                    else None
+                ),
+                receive_monotonic=receive_monotonic,
+            )
+            self.get_logger().warning(
+                "Invalid grasp detections: "
+                f"{type(exc).__name__}: {exc}"
+            )
+            return
+
+        previous_stamp = getattr(
+            self, "grasp_latest_detection_stamp_ns", None
+        )
+        if previous_stamp is not None and stamp_ns <= previous_stamp:
+            MotionDecisionNode._reject_grasp_verification_frame(
+                self,
+                reason=(
+                    "same_timestamp"
+                    if stamp_ns == previous_stamp
+                    else "timestamp_regression"
+                ),
+                stamp_ns=stamp_ns,
+                receive_monotonic=receive_monotonic,
+            )
+            return
+        self.grasp_latest_detection_stamp_ns = stamp_ns
+
+        if not getattr(self, "grasp_verification_active", False):
+            return
+        minimum_stamp = getattr(
+            self, "grasp_verification_min_stamp_ns", None
+        )
+        if minimum_stamp is not None and stamp_ns <= minimum_stamp:
+            MotionDecisionNode._reject_grasp_verification_frame(
+                self,
+                reason="pre_window_stamp",
+                stamp_ns=stamp_ns,
+                receive_monotonic=receive_monotonic,
+            )
+            return
+
+        best_confidence: float | None = None
+        observed_grab_count = 0
+        observed_grab_max_confidence: float | None = None
+        observed_grab_bbox: Any = None
+        ball_detected = False
+        for detection_index, detection in enumerate(detections):
+            if isinstance(detection, dict):
+                ball_detected = bool(
+                    ball_detected or detection.get("class_name") == "ball"
+                )
+            if (
+                not isinstance(detection, dict)
+                or detection.get("class_name") != "grab"
+            ):
+                continue
+            observed_grab_count += 1
+            confidence = detection.get("confidence")
+            if isinstance(confidence, bool):
+                MotionDecisionNode._reject_grasp_verification_frame(
+                    self,
+                    reason=f"invalid_confidence[{detection_index}]",
+                    stamp_ns=stamp_ns,
+                    receive_monotonic=receive_monotonic,
+                    scope="detection",
+                )
+                continue
+            try:
+                confidence_value = float(confidence)
+            except (TypeError, ValueError):
+                MotionDecisionNode._reject_grasp_verification_frame(
+                    self,
+                    reason=f"invalid_confidence[{detection_index}]",
+                    stamp_ns=stamp_ns,
+                    receive_monotonic=receive_monotonic,
+                    scope="detection",
+                )
+                continue
+            if not math.isfinite(confidence_value):
+                MotionDecisionNode._reject_grasp_verification_frame(
+                    self,
+                    reason=f"invalid_confidence[{detection_index}]",
+                    stamp_ns=stamp_ns,
+                    receive_monotonic=receive_monotonic,
+                    scope="detection",
+                )
+                continue
+            if (
+                observed_grab_max_confidence is None
+                or confidence_value > observed_grab_max_confidence
+            ):
+                observed_grab_max_confidence = confidence_value
+                observed_grab_bbox = detection.get("bbox")
+            if confidence_value < self.GRASP_CONFIDENCE_THRESHOLD:
+                continue
+            best_confidence = (
+                confidence_value
+                if best_confidence is None
+                else max(best_confidence, confidence_value)
+            )
+
+        self.grasp_verification_result = (
+            MissionPhaseManager.GRASPED
+            if best_confidence is not None
+            else MissionPhaseManager.GRASP_NOT_GRABBED
+        )
+        self.grasp_verification_confidence = best_confidence
+
+        accepted_frames = getattr(
+            self, "grasp_verify_accepted_frames", 0
+        ) + 1
+        self.grasp_verify_accepted_frames = accepted_frames
+        frame_result = self.grasp_verification_result
+        if frame_result == MissionPhaseManager.GRASPED:
+            self.grasp_verify_grab_frames = (
+                getattr(self, "grasp_verify_grab_frames", 0) + 1
+            )
+        else:
+            self.grasp_verify_miss_frames = (
+                getattr(self, "grasp_verify_miss_frames", 0) + 1
+            )
+        if observed_grab_max_confidence is not None:
+            self.grasp_verify_confidences.append(
+                observed_grab_max_confidence
+            )
+        prior_accepted_stamp = getattr(
+            self, "grasp_verify_last_stamp_ns", None
+        )
+        if getattr(self, "grasp_verify_first_stamp_ns", None) is None:
+            self.grasp_verify_first_stamp_ns = stamp_ns
+        self.grasp_verify_last_stamp_ns = stamp_ns
+        window_start_ros_ns = getattr(
+            self, "grasp_verify_window_start_ros_ns", None
+        )
+        motion_status_monotonic = getattr(
+            self, "grasp_verify_motion_status_monotonic", None
+        )
+        MotionDecisionNode._grasp_verify_log(
+            self,
+            "GRASP_VERIFY_FRAME",
+            accepted_reason="fresh_stamp_after_window_boundary",
+            attempt_id=getattr(self, "grasp_verify_attempt_id", None),
+            ball_detected=ball_detected,
+            ball_index=getattr(self, "grasp_verification_attempt", None),
+            bbox=observed_grab_bbox,
+            callback_receive_ros_ns=receive_ros_ns,
+            callback_receive_monotonic=receive_monotonic,
+            frame_age_at_receive_sec=(
+                (receive_ros_ns - stamp_ns) / 1_000_000_000.0
+                if receive_ros_ns is not None
+                else None
+            ),
+            frame_idx=accepted_frames,
+            frame_result=frame_result,
+            frame_stamp_vs_window_sec=(
+                (stamp_ns - window_start_ros_ns) / 1_000_000_000.0
+                if window_start_ros_ns is not None
+                else None
+            ),
+            grab_count=observed_grab_count,
+            grab_max_confidence=observed_grab_max_confidence,
+            grab_pass=best_confidence is not None,
+            motion_status_to_receive_sec=(
+                receive_monotonic - motion_status_monotonic
+                if motion_status_monotonic is not None
+                else None
+            ),
+            pending_result=self.grasp_verification_result,
+            stamp_delta_sec=(
+                (stamp_ns - prior_accepted_stamp) / 1_000_000_000.0
+                if prior_accepted_stamp is not None
+                else None
+            ),
+            stamp_ns=stamp_ns,
+            window_start_monotonic=getattr(
+                self, "grasp_verify_window_start_monotonic", None
+            ),
+        )
+
+    def _start_grasp_verification_window(
+        self,
+        *,
+        completed_motion: str = PICKUP_GRASP_CHECK_MOTION_ID,
+        motion_status_receive_monotonic: float | None = None,
+    ) -> None:
+        """Open the pickup attempt's window after check-pose success."""
+        attempt = self.phase_manager.active_pickup_attempt
+        if attempt is None:
+            return
+        window_start_monotonic = time.monotonic()
+        window_start_ros_ns = MotionDecisionNode._current_ros_time_ns(self)
+        self.grasp_verification_active = True
+        self.grasp_verification_attempt = attempt
+        self.grasp_verification_min_stamp_ns = getattr(
+            self, "grasp_latest_detection_stamp_ns", None
+        )
+        self.grasp_verification_result = MissionPhaseManager.GRASP_UNKNOWN
+        self.grasp_verification_confidence = None
+        self.grasp_verify_attempt_serial = (
+            getattr(self, "grasp_verify_attempt_serial", 0) + 1
+        )
+        self.grasp_verify_attempt_id = self.grasp_verify_attempt_serial
+        self.grasp_verify_window_start_monotonic = window_start_monotonic
+        self.grasp_verify_window_start_ros_ns = window_start_ros_ns
+        self.grasp_verify_motion_status_monotonic = (
+            motion_status_receive_monotonic
+            if motion_status_receive_monotonic is not None
+            else window_start_monotonic
+        )
+        self.grasp_verify_accepted_frames = 0
+        self.grasp_verify_rejected_frames = 0
+        self.grasp_verify_grab_frames = 0
+        self.grasp_verify_miss_frames = 0
+        self.grasp_verify_confidences = []
+        self.grasp_verify_first_stamp_ns = None
+        self.grasp_verify_last_stamp_ns = None
+        MotionDecisionNode._grasp_verify_log(
+            self,
+            "GRASP_VERIFY_START",
+            attempt_id=self.grasp_verify_attempt_id,
+            ball_index=attempt,
+            completed_motion=completed_motion,
+            confidence_threshold=self.GRASP_CONFIDENCE_THRESHOLD,
+            expected_window_sec=3.0,
+            initial_result=self.grasp_verification_result,
+            minimum_accepted_stamp_ns=self.grasp_verification_min_stamp_ns,
+            motion_status_receive_monotonic=(
+                self.grasp_verify_motion_status_monotonic
+            ),
+            window_start_monotonic=window_start_monotonic,
+            window_start_ros_ns=window_start_ros_ns,
+        )
+
+    def _finish_grasp_verification_window(self) -> None:
+        """Latch the last fresh frame result, or UNKNOWN when none arrived."""
+        if not getattr(self, "grasp_verification_active", False):
+            return
+        result = getattr(
+            self,
+            "grasp_verification_result",
+            MissionPhaseManager.GRASP_UNKNOWN,
+        )
+        attempt = getattr(self, "grasp_verification_attempt", None)
+        self.phase_manager.record_active_pickup_grasp_result(result)
+        latched_result = (
+            self.phase_manager.grasp_result_for_ball(attempt)
+            if attempt is not None
+            else result
+        )
+        end_monotonic = time.monotonic()
+        confidences = getattr(self, "grasp_verify_confidences", [])
+        MotionDecisionNode._grasp_verify_log(
+            self,
+            "GRASP_VERIFY_END",
+            accepted_frames=getattr(
+                self, "grasp_verify_accepted_frames", 0
+            ),
+            attempt_id=getattr(self, "grasp_verify_attempt_id", None),
+            ball_index=attempt,
+            duration_sec=(
+                end_monotonic - self.grasp_verify_window_start_monotonic
+                if getattr(
+                    self, "grasp_verify_window_start_monotonic", None
+                ) is not None
+                else None
+            ),
+            final_confidence=getattr(
+                self, "grasp_verification_confidence", None
+            ),
+            first_accepted_stamp_ns=getattr(
+                self, "grasp_verify_first_stamp_ns", None
+            ),
+            fresh_frame_zero=(
+                getattr(self, "grasp_verify_accepted_frames", 0) == 0
+            ),
+            grab_confidence_max=max(confidences) if confidences else None,
+            grab_confidence_mean=(
+                statistics.fmean(confidences) if confidences else None
+            ),
+            grab_confidence_median=(
+                statistics.median(confidences) if confidences else None
+            ),
+            grab_confidence_min=min(confidences) if confidences else None,
+            grabbed_frames=getattr(self, "grasp_verify_grab_frames", 0),
+            last_accepted_stamp_ns=getattr(
+                self, "grasp_verify_last_stamp_ns", None
+            ),
+            last_fresh_frame_result=result,
+            latched_result=latched_result,
+            not_grabbed_frames=getattr(
+                self, "grasp_verify_miss_frames", 0
+            ),
+            rejected_frames=getattr(
+                self, "grasp_verify_rejected_frames", 0
+            ),
+            window_end_monotonic=end_monotonic,
+        )
+        self.grasp_verification_active = False
+        self.grasp_verification_attempt = None
+        self.grasp_verification_min_stamp_ns = None
 
     def _latch_ball_approach_entry(self, payload: dict[str, Any]) -> None:
         """Remember a confirmed 1.5 m crossing during a general motion."""
@@ -889,6 +1336,38 @@ class MotionDecisionNode(Node):
                 "remembering the last direction for the motion boundary"
             )
 
+    def _track_pickup_positioning_ball_loss(
+        self,
+        payload: dict[str, Any],
+    ) -> None:
+        """Latch Ball loss during a running pre-grasp pickup motion."""
+        if (
+            self.active_special_action != "PICKUP_NOW"
+            or not self.pickup_positioning_motion_running
+            or self.pickup_fixed_sequence_started
+        ):
+            return
+
+        if payload.get("detected") is True:
+            self.pickup_positioning_ball_seen_during_motion = True
+            return
+
+        actually_lost = bool(
+            payload.get("detected") is not True
+            and payload.get("raw_detected") is not True
+        )
+        if (
+            actually_lost
+            and self.pickup_positioning_ball_seen_during_motion
+            and not self.pickup_positioning_ball_lost_pending
+        ):
+            self.pickup_positioning_ball_lost_pending = True
+            self.pickup_positioning_loss_latch_sent = False
+            self.get_logger().info(
+                "BALL lost during pickup positioning; preserving the active "
+                "motion before camera-down reacquisition"
+            )
+
     def _phase_callback(self, message: String) -> None:
         phase = message.data.strip()
 
@@ -937,6 +1416,7 @@ class MotionDecisionNode(Node):
         message: String,
     ) -> None:
         """Track execution state reported by the command bridge."""
+        status_receive_monotonic = time.monotonic()
         try:
             payload = json.loads(message.data)
 
@@ -1126,6 +1606,26 @@ class MotionDecisionNode(Node):
             )
             return
 
+        grasp_dwell_status = bool(
+            action == "PICKUP_NOW"
+            and status == "RUNNING"
+            and payload.get("motion_id")
+            == MotionDecisionNode.PICKUP_DWELL_MARKER
+            and payload.get("completed_motion_id")
+            == MotionDecisionNode.PICKUP_GRASP_CHECK_MOTION_ID
+        )
+        if grasp_dwell_status:
+            if payload.get("verification_window_complete") is True:
+                MotionDecisionNode._finish_grasp_verification_window(self)
+            elif payload.get("verification_window_complete") is False:
+                MotionDecisionNode._start_grasp_verification_window(
+                    self,
+                    completed_motion=str(payload.get("completed_motion_id")),
+                    motion_status_receive_monotonic=(
+                        status_receive_monotonic
+                    ),
+                )
+
         completed_action = self.active_special_action
         completed_command_id = self.active_special_command_id
         result = self.phase_manager.handle_motion_status(
@@ -1170,6 +1670,9 @@ class MotionDecisionNode(Node):
                 self.pickup_initial_align_waiting = True
                 self.pickup_fine_align_waiting = False
                 self.pickup_post_backward_align_waiting = False
+                self.pickup_positioning_motion_running = False
+                self.pickup_positioning_motion_id = None
+                self.pickup_positioning_ball_seen_during_motion = False
                 MotionDecisionNode._invalidate_pickup_ball_input(self)
             elif (
                 action == "PICKUP_NOW"
@@ -1180,6 +1683,9 @@ class MotionDecisionNode(Node):
                 self.pickup_initial_align_waiting = False
                 self.pickup_fine_align_waiting = True
                 self.pickup_post_backward_align_waiting = False
+                self.pickup_positioning_motion_running = False
+                self.pickup_positioning_motion_id = None
+                self.pickup_positioning_ball_seen_during_motion = False
                 MotionDecisionNode._invalidate_pickup_ball_input(self)
             elif (
                 action == "PICKUP_NOW"
@@ -1190,7 +1696,33 @@ class MotionDecisionNode(Node):
                 self.pickup_initial_align_waiting = False
                 self.pickup_fine_align_waiting = False
                 self.pickup_post_backward_align_waiting = True
+                self.pickup_positioning_motion_running = False
+                self.pickup_positioning_motion_id = None
+                self.pickup_positioning_ball_seen_during_motion = False
+                self.pickup_fixed_sequence_started = True
                 MotionDecisionNode._invalidate_pickup_ball_input(self)
+            elif action == "PICKUP_NOW" and status == "RUNNING":
+                motion_id = payload.get("motion_id")
+                if motion_id == self.PICKUP_FIXED_SEQUENCE_FIRST_MOTION:
+                    self.pickup_fixed_sequence_started = True
+                positioning_motion = bool(
+                    not self.pickup_fixed_sequence_started
+                    and isinstance(motion_id, str)
+                    and not motion_id.startswith("__")
+                )
+                if positioning_motion:
+                    if motion_id != self.pickup_positioning_motion_id:
+                        latest_ball = self.latest_info.get("ball")
+                        self.pickup_positioning_ball_seen_during_motion = bool(
+                            isinstance(latest_ball, dict)
+                            and latest_ball.get("detected") is True
+                        )
+                    self.pickup_positioning_motion_running = True
+                    self.pickup_positioning_motion_id = motion_id
+                elif isinstance(motion_id, str) and motion_id.startswith("__"):
+                    self.pickup_positioning_motion_running = False
+                    self.pickup_positioning_motion_id = None
+                    self.pickup_positioning_ball_seen_during_motion = False
 
             self.get_logger().info(
                 "Special motion lock enabled: "
@@ -1206,11 +1738,20 @@ class MotionDecisionNode(Node):
 
         completed_event_id = self.active_special_event_id
 
+        if completed_action == "PICKUP_NOW":
+            MotionDecisionNode._finish_grasp_verification_window(self)
+
         self.active_special_event_id = None
         self.active_special_dynamics_command = None
         self.pickup_initial_align_waiting = False
         self.pickup_fine_align_waiting = False
         self.pickup_post_backward_align_waiting = False
+        self.pickup_positioning_motion_running = False
+        self.pickup_positioning_motion_id = None
+        self.pickup_positioning_ball_seen_during_motion = False
+        self.pickup_positioning_ball_lost_pending = False
+        self.pickup_positioning_loss_latch_sent = False
+        self.pickup_fixed_sequence_started = False
 
         if completed_action == "PICKUP_NOW" and status == "SUCCEEDED":
             # The tracked ball has been collected. Do not resurrect its stale
@@ -1268,10 +1809,10 @@ class MotionDecisionNode(Node):
                 f"command_id={snapshot.command_id}"
             )
 
-    def _mission_progress(self) -> dict[str, int | bool]:
+    def _mission_progress(self) -> dict[str, int | bool | str]:
         """Return success scores and independent course progress."""
         snapshot = self.phase_manager.snapshot()
-        return {
+        progress = {
             key: snapshot[key]
             for key in (
                 "pickups_completed",
@@ -1284,6 +1825,11 @@ class MotionDecisionNode(Node):
                 "mission_complete",
             )
         }
+        for ball_index in range(1, self.required_pickups + 1):
+            progress[f"ball_{ball_index}_grasp_result"] = (
+                self.phase_manager.grasp_result_for_ball(ball_index)
+            )
+        return progress
 
     def _invalidate_post_ball_line_input(self) -> None:
         """Require a Line frame captured after the first pickup finishes."""
@@ -1594,6 +2140,10 @@ class MotionDecisionNode(Node):
         decision = self._suppress_exhausted_special_action(
             decision
         )
+        decision = MotionDecisionNode._suppress_unverified_shot(
+            self,
+            decision,
+        )
         self.last_selected_decision = decision
 
         if not self._command_publisher_has_subscriber():
@@ -1651,10 +2201,16 @@ class MotionDecisionNode(Node):
             decision.valid
             and decision.action in self.PICKUP_POST_BACKWARD_ALIGN_ACTIONS
         )
+        is_pickup_positioning_loss_latch = bool(
+            decision.valid
+            and decision.action
+            == self.PICKUP_POSITIONING_LOSS_LATCH_ACTION
+        )
         is_pickup_checkpoint_action = bool(
             is_pickup_initial_align_action
             or is_pickup_fine_align_action
             or is_pickup_post_backward_align_action
+            or is_pickup_positioning_loss_latch
         )
         if (
             is_general_motion
@@ -1787,6 +2343,12 @@ class MotionDecisionNode(Node):
 
         if decision.action == "PICKUP_NOW":
             self.ball_pickup_entry_pending = False
+            self.pickup_positioning_motion_running = False
+            self.pickup_positioning_motion_id = None
+            self.pickup_positioning_ball_seen_during_motion = False
+            self.pickup_positioning_ball_lost_pending = False
+            self.pickup_positioning_loss_latch_sent = False
+            self.pickup_fixed_sequence_started = False
 
         self._reset_pre_motion_settle()
 
@@ -1817,10 +2379,17 @@ class MotionDecisionNode(Node):
                 self,
                 decision,
             )
-            if is_pickup_initial_align_action:
+            if is_pickup_positioning_loss_latch:
+                self.pickup_positioning_loss_latch_sent = True
+            elif is_pickup_initial_align_action:
                 self.pickup_initial_align_waiting = False
+                if self.pickup_positioning_ball_lost_pending:
+                    self.pickup_positioning_ball_lost_pending = False
+                    self.pickup_positioning_loss_latch_sent = False
             elif is_pickup_fine_align_action:
                 self.pickup_fine_align_waiting = False
+                if decision.action == "BALL_PICKUP_FINE_ALIGN_CONTINUE":
+                    self.pickup_fixed_sequence_started = True
             else:
                 self.pickup_post_backward_align_waiting = False
 
@@ -2075,8 +2644,48 @@ class MotionDecisionNode(Node):
             self.pickup_initial_align_waiting
             and self.active_special_action == "PICKUP_NOW"
         ):
+            ball_info = observations.get("ball")
+            if (
+                self.pickup_positioning_ball_lost_pending
+                and (
+                    ball_info is None
+                    or ball_info.get("detected") is not True
+                )
+            ):
+                return MotionDecision(
+                    phase="BALL_PICKUP_INITIAL_ALIGN",
+                    source="ball",
+                    action="WAIT",
+                    valid=False,
+                    reason=(
+                        "pickup_positioning_loss_waiting_for_fresh_ball"
+                    ),
+                    sdk_motion_requested=False,
+                    requires_ack=False,
+                    source_command={},
+                )
             return self.planner.plan_ball_pickup_initial_alignment(
-                observations.get("ball")
+                ball_info
+            )
+        if (
+            self.pickup_positioning_ball_lost_pending
+            and not self.pickup_positioning_loss_latch_sent
+            and self.active_special_action == "PICKUP_NOW"
+        ):
+            return MotionDecision(
+                phase="BALL_PICKUP_POSITIONING",
+                source="ball",
+                action=self.PICKUP_POSITIONING_LOSS_LATCH_ACTION,
+                valid=True,
+                reason="pickup_positioning_ball_loss_latched",
+                sdk_motion_requested=False,
+                requires_ack=False,
+                source_command={
+                    "pickup_positioning_ball_lost": True,
+                    "pickup_positioning_motion_id": (
+                        self.pickup_positioning_motion_id
+                    ),
+                },
             )
         if (
             self.pickup_fine_align_waiting
@@ -2270,6 +2879,30 @@ class MotionDecisionNode(Node):
             sdk_motion_requested=False,
             requires_ack=False,
             source_command=decision.source_command,
+        )
+
+    def _suppress_unverified_shot(
+        self,
+        decision: MotionDecision,
+    ) -> MotionDecision:
+        """Fail closed when the corresponding BALL was not verified in hand."""
+        if decision.action != "SHOT" or not decision.requires_ack:
+            return decision
+        grasp_result = self.phase_manager.grasp_result_for_next_shot()
+        if grasp_result == MissionPhaseManager.GRASPED:
+            return decision
+        return MotionDecision(
+            phase=decision.phase,
+            source=decision.source,
+            action="WAIT",
+            valid=False,
+            reason=f"shot_blocked_grasp_{grasp_result.lower()}",
+            sdk_motion_requested=False,
+            requires_ack=False,
+            source_command={
+                **decision.source_command,
+                "grasp_result": grasp_result,
+            },
         )
 
 

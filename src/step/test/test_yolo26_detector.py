@@ -4,8 +4,48 @@ import time
 
 import numpy as np
 
+from step.yolo26_detector import DEFAULT_CLASS_NAMES
 from step.yolo26_detector import LetterboxInfo
 from step.yolo26_detector import Yolo26Detector
+
+
+def test_default_class_names_include_grab_model_output():
+    """Keep TensorRT/ONNX class ID 5 aligned with the six-class model."""
+    assert DEFAULT_CLASS_NAMES == [
+        "line",
+        "ball",
+        "goal",
+        "backboard",
+        "hurdle",
+        "grab",
+    ]
+
+
+def test_grab_class_uses_reference_branch_threshold():
+    """Publish class ID 5 at the detector's unchanged default threshold."""
+    detector = object.__new__(Yolo26Detector)
+    detector.max_detections = 300
+    detector.class_names = DEFAULT_CLASS_NAMES.copy()
+    detector.confidence_threshold = 0.25
+    detector.ball_confidence_threshold = 0.20
+    detector.hurdle_confidence_threshold = 0.60
+    predictions = np.asarray(
+        [
+            [10, 10, 20, 20, 0.26, 5],
+            [30, 30, 40, 40, 0.24, 5],
+        ],
+        dtype=np.float32,
+    )[None, ...]
+
+    detections = detector._postprocess(
+        predictions,
+        LetterboxInfo(scale=1.0, pad_x=0.0, pad_y=0.0),
+        (100, 100, 3),
+    )
+
+    assert len(detections) == 1
+    assert detections[0].class_id == 5
+    assert detections[0].class_name == "grab"
 
 
 def test_ball_uses_lower_raw_threshold_without_lowering_other_classes():
@@ -172,3 +212,42 @@ def test_ball_overlay_rejects_info_outside_rgb_stamp_tolerance():
 
     assert detector._fresh_ball_info() is None
     assert detector._ball_info_stamp_delta_ms == 51.0
+
+
+def test_model_sha256_is_computed_without_changing_model_data(tmp_path):
+    """Report a stable startup model identifier."""
+    model_path = tmp_path / "model.onnx"
+    model_path.write_bytes(b"STEP grasp model")
+
+    assert Yolo26Detector._file_sha256(model_path) == (
+        "40cd83a2cec1ead78101bb8d0510e8955d66cc5a7b74ee"
+        "22d8ab713e80b6a058"
+    )
+
+
+def test_inference_timing_emits_one_bounded_summary():
+    """Aggregate inference timing instead of logging every image."""
+
+    class Logger:
+        def __init__(self):
+            self.infos = []
+
+        def info(self, message):
+            self.infos.append(message)
+
+    detector = object.__new__(Yolo26Detector)
+    detector.inference_timing_samples_ms = []
+    detector.inference_timing_window_started = 0.0
+    detector.inference_timing_last_log = 0.0
+    logger = Logger()
+    detector.get_logger = lambda: logger
+
+    detector._record_inference_timing(10.0, 1.0)
+    assert logger.infos == []
+    detector._record_inference_timing(20.0, 2.0)
+
+    assert len(logger.infos) == 1
+    assert logger.infos[0].startswith("[YOLO_INFERENCE_TIMING]")
+    assert "samples=2" in logger.infos[0]
+    assert "avg_ms=15.000" in logger.infos[0]
+    assert detector.inference_timing_samples_ms == []

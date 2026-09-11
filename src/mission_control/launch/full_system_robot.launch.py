@@ -296,7 +296,7 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument(
                 "model_path",
                 default_value=PathJoinSubstitution(
-                    [FindPackageShare("step"), "models", "best.engine"]
+                    [FindPackageShare("step"), "models", "best.onnx"]
                 ),
             ),
             DeclareLaunchArgument("device", default_value="tensorrt"),
