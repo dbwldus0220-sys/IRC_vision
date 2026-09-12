@@ -272,7 +272,9 @@ Distance-based approach
 
 공 detector만 독립적으로 확인할 때는 full system을 종료한 뒤 다음 ONNX
 진단 launch를 사용한다. 이 경로는 analyzer/planner/motion executor를 실행하지
-않는다. Production full system도 `grab` class가 포함된 `best.onnx`를 사용한다.
+않는다. Production full system은 `grab` class가 포함된 최신 `best.onnx`에서
+생성한 `best.engine`을 사용한다. ONNX 파일은 모델 원본 및 CPU 진단용으로
+유지하며, Jetson 실로봇 실행에서는 시작 시 엔진을 다시 빌드하지 않는다.
 
 ```bash
 ros2 launch step ball_only_debug.launch.py
