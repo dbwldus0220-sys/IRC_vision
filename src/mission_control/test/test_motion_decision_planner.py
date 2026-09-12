@@ -1796,6 +1796,99 @@ def test_pickup_initial_alignment_selects_straight_from_fresh_distance():
     assert decision.source_command["pickup_approach_motion"] == "STRAIGHT_1"
 
 
+def test_pickup_initial_alignment_uses_fine_forward_when_ball_not_visible():
+    decision = MotionDecisionPlanner().plan_ball_pickup_initial_alignment(
+        {"detected": False}
+    )
+
+    assert decision.action == "BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+    assert decision.valid is True
+    assert decision.reason == "ball_pickup_not_visible_fine_forward"
+    assert decision.source_command["pickup_approach_motion"] == "STRAIGHT_0"
+    assert decision.source_command["use_no_ball_pickup_path"] is True
+
+
+def test_post_backward_alignment_waits_until_ball_is_visible():
+    decision = (
+        MotionDecisionPlanner().plan_ball_pickup_post_backward_alignment(
+            ball_info(detected=False, pickup_x_tolerance_norm=0.08)
+        )
+    )
+
+    assert decision.action == "WAIT"
+    assert decision.valid is False
+
+
+def test_post_backward_alignment_corrects_heading_before_lateral_offset():
+    decision = (
+        MotionDecisionPlanner().plan_ball_pickup_post_backward_alignment(
+            ball_info(
+                steering_angle_deg=31.0,
+                offset_x_norm=-0.20,
+                pickup_x_tolerance_norm=0.08,
+            )
+        )
+    )
+
+    assert decision.action == "BALL_PICKUP_POST_BACKWARD_TURN_RIGHT_3"
+    assert decision.valid is True
+
+
+def test_post_backward_alignment_corrects_lateral_offset_after_heading():
+    decision = (
+        MotionDecisionPlanner().plan_ball_pickup_post_backward_alignment(
+            ball_info(
+                steering_angle_deg=0.0,
+                offset_x_norm=-0.20,
+                pickup_x_tolerance_norm=0.08,
+            )
+        )
+    )
+
+    assert decision.action == "BALL_PICKUP_POST_BACKWARD_CRAB_LEFT"
+    assert decision.valid is True
+
+
+def test_post_backward_alignment_continues_when_ball_is_centered():
+    decision = (
+        MotionDecisionPlanner().plan_ball_pickup_post_backward_alignment(
+            ball_info(
+                steering_angle_deg=0.0,
+                offset_x_norm=0.02,
+                pickup_x_tolerance_norm=0.08,
+            )
+        )
+    )
+
+    assert decision.action == "BALL_PICKUP_POST_BACKWARD_ALIGN_CONTINUE"
+    assert decision.valid is True
+
+
+@pytest.mark.parametrize(
+    ("steering_angle_deg", "expected_action"),
+    [
+        (26.0, "BALL_APPROACH_TURN_RIGHT_3"),
+        (-31.0, "BALL_APPROACH_TURN_LEFT_2"),
+    ],
+)
+def test_lost_ball_alignment_uses_last_direction_and_catalog_count(
+    steering_angle_deg,
+    expected_action,
+):
+    decision = MotionDecisionPlanner().plan_lost_ball_approach_alignment(
+        ball_info(
+            distance_m=0.9,
+            steering_angle_deg=steering_angle_deg,
+        )
+    )
+
+    assert decision.action == expected_action
+    assert decision.valid is True
+    assert decision.source_command[
+        "lost_ball_alignment_from_memory"
+    ] is True
+
+
 @pytest.mark.parametrize(
     ("distance_m", "expected_motion"),
     [
@@ -1865,7 +1958,7 @@ def test_pickup_initial_alignment_waits_for_fresh_distance_when_aligned(
         (-0.081, False, "BALL_PICKUP_CRAB_LEFT", True),
     ],
 )
-def test_pickup_fine_alignment_uses_ready_gate_and_lateral_offset(
+def test_pickup_fine_alignment_uses_lateral_offset(
     offset,
     pickup_ready,
     expected_action,
@@ -1890,7 +1983,7 @@ def test_pickup_fine_alignment_uses_ready_gate_and_lateral_offset(
     assert decision.source_command["catalog_motion_available"] is available
 
 
-def test_centered_ball_not_ready_runs_fine_forward_then_rechecks():
+def test_centered_ball_not_ready_continues_without_repeating_fine_motion():
     decision = MotionDecisionPlanner().plan_ball_pickup_fine_alignment(
         ball_info(
             offset_x_norm=0.0,
@@ -1901,12 +1994,12 @@ def test_centered_ball_not_ready_runs_fine_forward_then_rechecks():
         )
     )
 
-    assert decision.action == "BALL_PICKUP_FINE_FORWARD"
+    assert decision.action == "BALL_PICKUP_FINE_ALIGN_CONTINUE"
     assert decision.valid is True
-    assert decision.sdk_motion_requested is True
+    assert decision.sdk_motion_requested is False
 
 
-def test_centered_ball_outside_pickup_window_waits():
+def test_centered_ball_outside_pickup_window_continues_after_fixed_fine_motion():
     decision = MotionDecisionPlanner().plan_ball_pickup_fine_alignment(
         ball_info(
             offset_x_norm=0.0,
@@ -1916,8 +2009,8 @@ def test_centered_ball_outside_pickup_window_waits():
         )
     )
 
-    assert decision.action == "WAIT"
-    assert decision.valid is False
+    assert decision.action == "BALL_PICKUP_FINE_ALIGN_CONTINUE"
+    assert decision.valid is True
 
 
 @pytest.mark.parametrize(
@@ -1928,7 +2021,7 @@ def test_centered_ball_outside_pickup_window_waits():
         {"depth_valid": True, "depth_age_sec": 0.701},
     ],
 )
-def test_centered_ball_never_moves_forward_with_invalid_or_stale_depth(
+def test_centered_ball_does_not_repeat_fine_motion_with_stale_depth(
     overrides,
 ):
     decision = MotionDecisionPlanner().plan_ball_pickup_fine_alignment(
@@ -1942,12 +2035,10 @@ def test_centered_ball_never_moves_forward_with_invalid_or_stale_depth(
         )
     )
 
-    assert decision.action == "WAIT"
-    assert decision.valid is False
+    assert decision.action == "BALL_PICKUP_FINE_ALIGN_CONTINUE"
+    assert decision.valid is True
     assert decision.sdk_motion_requested is False
-    assert decision.reason == (
-        "ball_pickup_fine_forward_waiting_for_fresh_distance"
-    )
+    assert decision.reason == "ball_pickup_fine_motion_complete_and_centered"
 
 
 def test_lateral_correction_remains_available_during_depth_dropout():
@@ -1966,7 +2057,7 @@ def test_lateral_correction_remains_available_during_depth_dropout():
     assert decision.valid is True
 
 
-def test_inconsistent_pickup_ready_cannot_start_grasp_without_fresh_depth():
+def test_fixed_fine_motion_is_not_repeated_when_depth_drops_out():
     decision = MotionDecisionPlanner().plan_ball_pickup_fine_alignment(
         ball_info(
             offset_x_norm=0.0,
@@ -1978,9 +2069,9 @@ def test_inconsistent_pickup_ready_cannot_start_grasp_without_fresh_depth():
         )
     )
 
-    assert decision.action == "WAIT"
-    assert decision.valid is False
-    assert decision.reason == "ball_pickup_ready_waiting_for_fresh_distance"
+    assert decision.action == "BALL_PICKUP_FINE_ALIGN_CONTINUE"
+    assert decision.valid is True
+    assert decision.sdk_motion_requested is False
 
 
 @pytest.mark.parametrize(

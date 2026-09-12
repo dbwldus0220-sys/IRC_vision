@@ -694,6 +694,82 @@ class MotionDecisionPlanner:
             },
         )
 
+    def plan_lost_ball_approach_alignment(
+        self,
+        info: dict[str, Any] | None,
+    ) -> MotionDecision:
+        """Turn once from the last in-range Ball sample after image loss."""
+        phase = "BALL_APPROACH_LOST_ALIGN"
+        if info is None:
+            return MotionDecision(
+                phase=phase,
+                source="ball",
+                action="WAIT",
+                valid=False,
+                reason="lost_ball_alignment_has_no_remembered_sample",
+                sdk_motion_requested=False,
+                requires_ack=False,
+                source_command={},
+            )
+
+        distance = self._number(info, "distance_m")
+        steering_error = self.ball_planner._steering_error(
+            self._number(info, "steering_angle_deg"),
+            self._number(info, "bearing_deg"),
+            self._number(info, "offset_x_norm"),
+            distance,
+        )
+        if steering_error is None:
+            return MotionDecision(
+                phase=phase,
+                source="ball",
+                action="WAIT",
+                valid=False,
+                reason="lost_ball_alignment_has_no_remembered_direction",
+                sdk_motion_requested=False,
+                requires_ack=False,
+                source_command={},
+            )
+
+        direction = "RIGHT" if steering_error >= 0.0 else "LEFT"
+        turn_repeat_deg = self.TURN_REPEAT_DEG
+        count = self._turn_repeat_count(steering_error)
+        if direction == "LEFT":
+            turn_repeat_deg = self.BALL_APPROACH_LEFT_TURN_REPEAT_DEG
+            requested_count = int(
+                math.floor(abs(steering_error) / turn_repeat_deg + 0.5)
+            )
+            requested_count = max(
+                1,
+                min(
+                    self.BALL_APPROACH_LEFT_MAX_TURN_REPEAT_COUNT,
+                    requested_count,
+                ),
+            )
+            count = min(
+                self.BALL_APPROACH_LEFT_COUNTS,
+                key=lambda supported: abs(supported - requested_count),
+            )
+        return MotionDecision(
+            phase=phase,
+            source="ball",
+            action=f"BALL_APPROACH_TURN_{direction}_{count}",
+            valid=True,
+            reason="ball_lost_during_motion_turn_from_last_direction",
+            sdk_motion_requested=False,
+            requires_ack=False,
+            source_command={
+                "distance_m": distance,
+                "steering_error_deg": steering_error,
+                "turn_direction": direction,
+                "turn_count": count,
+                "turn_repeat_deg": turn_repeat_deg,
+                "turn_angle_deg": count * turn_repeat_deg,
+                "lost_ball_alignment_from_memory": True,
+                "catalog_motion_available": True,
+            },
+        )
+
     def _plan_post_ball_line_align(
         self,
         info: dict[str, Any] | None,
@@ -828,9 +904,6 @@ class MotionDecisionPlanner:
             or offset is None
             or tolerance is None
             or tolerance <= 0.0
-            or not isinstance(depth_valid, bool)
-            or not isinstance(pickup_ready, bool)
-            or not isinstance(in_pickup_window, bool)
         ):
             return MotionDecision(
                 phase=phase,
@@ -854,36 +927,15 @@ class MotionDecisionPlanner:
             "pickup_ready": pickup_ready,
             "is_in_pickup_window": in_pickup_window,
         }
-        distance_is_fresh = bool(
-            depth_valid
-            and distance is not None
-            and distance > 0.0
-            and depth_age is not None
-            and 0.0 <= depth_age
-            <= self.ball_planner.config.max_pickup_depth_age_sec
-        )
-        if pickup_ready:
-            if (
-                not distance_is_fresh
-                or distance is None
-                or distance <= 0.0
-            ):
-                return MotionDecision(
-                    phase=phase,
-                    source="ball",
-                    action="WAIT",
-                    valid=False,
-                    reason="ball_pickup_ready_waiting_for_fresh_distance",
-                    sdk_motion_requested=False,
-                    requires_ack=False,
-                    source_command=common,
-                )
+        # BallAnalyzer computes detected center minus calibrated robot center;
+        # positive therefore means the ball is to the robot's screen-right.
+        if abs(offset) <= tolerance:
             return MotionDecision(
                 phase=phase,
                 source="ball",
                 action="BALL_PICKUP_FINE_ALIGN_CONTINUE",
                 valid=True,
-                reason="ball_pickup_ready_for_fixed_grasp_block",
+                reason="ball_pickup_fine_motion_complete_and_centered",
                 sdk_motion_requested=False,
                 requires_ack=False,
                 source_command={
@@ -891,50 +943,6 @@ class MotionDecisionPlanner:
                     "lateral_direction": "CENTERED",
                     "catalog_motion_available": True,
                 },
-            )
-
-        # BallAnalyzer computes detected center minus calibrated robot center;
-        # positive therefore means the ball is to the robot's screen-right.
-        if abs(offset) <= tolerance:
-            if not distance_is_fresh:
-                return MotionDecision(
-                    phase=phase,
-                    source="ball",
-                    action="WAIT",
-                    valid=False,
-                    reason="ball_pickup_fine_forward_waiting_for_fresh_distance",
-                    sdk_motion_requested=False,
-                    requires_ack=False,
-                    source_command=common,
-                )
-            if (
-                in_pickup_window
-                and distance is not None
-                and distance > 0.0
-            ):
-                return MotionDecision(
-                    phase=phase,
-                    source="ball",
-                    action="BALL_PICKUP_FINE_FORWARD",
-                    valid=True,
-                    reason="ball_pickup_not_ready_continue_fine_approach",
-                    sdk_motion_requested=True,
-                    requires_ack=False,
-                    source_command={
-                        **common,
-                        "lateral_direction": "CENTERED",
-                        "catalog_motion_available": True,
-                    },
-                )
-            return MotionDecision(
-                phase=phase,
-                source="ball",
-                action="WAIT",
-                valid=False,
-                reason="ball_pickup_not_ready_waiting_for_valid_window",
-                sdk_motion_requested=False,
-                requires_ack=False,
-                source_command=common,
             )
 
         direction = "RIGHT" if offset > 0.0 else "LEFT"
@@ -963,16 +971,32 @@ class MotionDecisionPlanner:
     ) -> MotionDecision:
         """Align pickup heading, then choose distance from this frame."""
         phase = "BALL_PICKUP_INITIAL_ALIGN"
-        if info is None or info.get("detected") is not True:
+        if info is None:
             return MotionDecision(
                 phase=phase,
                 source="ball",
                 action="WAIT",
                 valid=False,
-                reason="ball_pickup_initial_alignment_waiting_for_ball",
+                reason="ball_pickup_initial_alignment_waiting_for_frame",
                 sdk_motion_requested=False,
                 requires_ack=False,
                 source_command={},
+            )
+        if info.get("detected") is not True:
+            return MotionDecision(
+                phase=phase,
+                source="ball",
+                action="BALL_PICKUP_INITIAL_ALIGN_CONTINUE",
+                valid=True,
+                reason="ball_pickup_not_visible_fine_forward",
+                sdk_motion_requested=True,
+                requires_ack=False,
+                source_command={
+                    "pickup_approach_motion": "STRAIGHT_0",
+                    "approach_level": 0,
+                    "use_no_ball_pickup_path": True,
+                    "catalog_motion_available": True,
+                },
             )
 
         confidence = self._number(info, "confidence")
@@ -1087,6 +1111,121 @@ class MotionDecisionPlanner:
                 **common,
                 "pickup_approach_motion": approach_motion,
                 "approach_level": approach_level,
+                "catalog_motion_available": True,
+            },
+        )
+
+    def plan_ball_pickup_post_backward_alignment(
+        self,
+        info: dict[str, Any] | None,
+    ) -> MotionDecision:
+        """Align heading and lateral position after the no-Ball fallback."""
+        phase = "BALL_PICKUP_POST_BACKWARD_ALIGN"
+        if info is None or info.get("detected") is not True:
+            return MotionDecision(
+                phase=phase,
+                source="ball",
+                action="WAIT",
+                valid=False,
+                reason="ball_pickup_post_backward_alignment_waiting_for_ball",
+                sdk_motion_requested=False,
+                requires_ack=False,
+                source_command={},
+            )
+
+        confidence = self._number(info, "confidence")
+        steering_angle = self._number(info, "steering_angle_deg")
+        bearing = self._number(info, "bearing_deg")
+        offset = self._number(info, "offset_x_norm")
+        distance = self._number(info, "distance_m")
+        tolerance = self._number(info, "pickup_x_tolerance_norm")
+        steering_error = self.ball_planner._steering_error(
+            steering_angle,
+            bearing,
+            offset,
+            distance,
+        )
+        if (
+            confidence is None
+            or confidence < self.ball_planner.config.min_confidence
+            or steering_error is None
+            or offset is None
+            or tolerance is None
+            or tolerance <= 0.0
+        ):
+            return MotionDecision(
+                phase=phase,
+                source="ball",
+                action="WAIT",
+                valid=False,
+                reason="invalid_ball_pickup_post_backward_alignment_input",
+                sdk_motion_requested=False,
+                requires_ack=False,
+                source_command={},
+            )
+
+        heading_tolerance = self.ball_planner.config.turn_enter_deg
+        common = {
+            "steering_angle_deg": steering_angle,
+            "bearing_deg": bearing,
+            "offset_x_norm": offset,
+            "steering_error_deg": steering_error,
+            "heading_tolerance_deg": heading_tolerance,
+            "pickup_x_tolerance_norm": tolerance,
+            "confidence": confidence,
+            "distance_m": distance,
+        }
+        if abs(steering_error) > heading_tolerance:
+            direction = "RIGHT" if steering_error > 0.0 else "LEFT"
+            count = self._turn_repeat_count(steering_error)
+            return MotionDecision(
+                phase=phase,
+                source="ball",
+                action=(
+                    "BALL_PICKUP_POST_BACKWARD_TURN_"
+                    f"{direction}_{count}"
+                ),
+                valid=True,
+                reason="ball_pickup_post_backward_heading_correction",
+                sdk_motion_requested=True,
+                requires_ack=False,
+                source_command={
+                    **common,
+                    "turn_direction": direction,
+                    "turn_count": count,
+                    "turn_angle_deg": count * self.TURN_REPEAT_DEG,
+                    "catalog_motion_available": True,
+                },
+            )
+
+        if abs(offset) > tolerance:
+            direction = "RIGHT" if offset > 0.0 else "LEFT"
+            return MotionDecision(
+                phase=phase,
+                source="ball",
+                action=f"BALL_PICKUP_POST_BACKWARD_CRAB_{direction}",
+                valid=True,
+                reason="ball_pickup_post_backward_lateral_correction",
+                sdk_motion_requested=True,
+                requires_ack=False,
+                source_command={
+                    **common,
+                    "lateral_direction": direction,
+                    "catalog_motion_available": True,
+                },
+            )
+
+        return MotionDecision(
+            phase=phase,
+            source="ball",
+            action="BALL_PICKUP_POST_BACKWARD_ALIGN_CONTINUE",
+            valid=True,
+            reason="ball_pickup_post_backward_alignment_complete",
+            sdk_motion_requested=False,
+            requires_ack=False,
+            source_command={
+                **common,
+                "lateral_direction": "CENTERED",
                 "catalog_motion_available": True,
             },
         )

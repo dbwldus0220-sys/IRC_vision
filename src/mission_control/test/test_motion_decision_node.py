@@ -92,6 +92,19 @@ class FakePlanner:
             source_command={},
         )
 
+    def plan_ball_pickup_post_backward_alignment(self, _info):
+        """Return a safe wait in tests unrelated to post-backward alignment."""
+        return MotionDecision(
+            phase='BALL_PICKUP_POST_BACKWARD_ALIGN',
+            source='ball',
+            action='WAIT',
+            valid=False,
+            reason='ball_pickup_post_backward_alignment_waiting_for_ball',
+            sdk_motion_requested=False,
+            requires_ack=False,
+            source_command={},
+        )
+
 
 class FakeDecisionNode:
     """Provide only the state required by the motion-status callback."""
@@ -107,6 +120,12 @@ class FakeDecisionNode:
     )
     PICKUP_FINE_ALIGN_MARKER = MotionDecisionNode.PICKUP_FINE_ALIGN_MARKER
     PICKUP_FINE_ALIGN_ACTIONS = MotionDecisionNode.PICKUP_FINE_ALIGN_ACTIONS
+    PICKUP_POST_BACKWARD_ALIGN_MARKER = (
+        MotionDecisionNode.PICKUP_POST_BACKWARD_ALIGN_MARKER
+    )
+    PICKUP_POST_BACKWARD_ALIGN_ACTIONS = (
+        MotionDecisionNode.PICKUP_POST_BACKWARD_ALIGN_ACTIONS
+    )
     BALL_POST_MOTION_DWELL_SEC = 0.0
     BALL_RAW_CONFIRMATION_RELEASE_SEC = (
         MotionDecisionNode.BALL_RAW_CONFIRMATION_RELEASE_SEC
@@ -137,6 +156,7 @@ class FakeDecisionNode:
         self.active_special_dynamics_command = None
         self.pickup_initial_align_waiting = False
         self.pickup_fine_align_waiting = False
+        self.pickup_post_backward_align_waiting = False
         self.latest_info = {
             source: None for source in MotionDecisionNode.SOURCES
         }
@@ -160,6 +180,8 @@ class FakeDecisionNode:
         self.active_general_source = None
         self.ball_approach_entry_pending = False
         self.ball_approach_alignment_pending = False
+        self.ball_lost_during_motion_pending = False
+        self.ball_last_visible_approach_info = None
         self.ball_pickup_entry_pending = False
         self.ball_post_motion_dwell_until = None
         self.ball_confirmation_pending_latched = False
@@ -2020,6 +2042,68 @@ def test_ball_straight_success_starts_three_second_alignment_settle(monkeypatch)
 
     assert node.ball_approach_alignment_pending is True
     assert node.ball_post_motion_dwell_until == pytest.approx(13.0)
+
+
+def test_ball_loss_during_57_to_150cm_motion_turns_from_last_direction():
+    node = FreshMockInputNode()
+    node.general_motion_gate.on_new_vision_input()
+    node.general_motion_gate.on_command_published("STRAIGHT_3", command_id=2)
+    node.active_general_source = "ball"
+
+    MotionDecisionNode._track_ball_loss_during_motion(
+        node,
+        ball_info_for_node(
+            distance_m=0.9,
+            steering_angle_deg=-31.0,
+        ),
+    )
+    MotionDecisionNode._track_ball_loss_during_motion(
+        node,
+        {"detected": False, "raw_detected": False},
+    )
+
+    assert node.ball_lost_during_motion_pending is True
+    send_status(
+        node,
+        status="RUNNING",
+        action="STRAIGHT_3",
+        command_id=2,
+        event_id=None,
+        dynamics_command=None,
+    )
+    send_status(
+        node,
+        status="SUCCEEDED",
+        action="STRAIGHT_3",
+        command_id=2,
+        event_id=None,
+        dynamics_command=None,
+    )
+
+    assert node.ball_post_motion_dwell_until is None
+    decision = select_decision(node)
+    assert decision.action == "BALL_APPROACH_TURN_LEFT_2"
+    assert decision.source_command[
+        "lost_ball_alignment_from_memory"
+    ] is True
+
+
+def test_raw_ball_confirmation_does_not_count_as_motion_time_loss():
+    node = FreshMockInputNode()
+    node.general_motion_gate.on_new_vision_input()
+    node.general_motion_gate.on_command_published("STRAIGHT_3", command_id=2)
+    node.active_general_source = "ball"
+    MotionDecisionNode._track_ball_loss_during_motion(
+        node,
+        ball_info_for_node(distance_m=0.9),
+    )
+
+    MotionDecisionNode._track_ball_loss_during_motion(
+        node,
+        {"detected": False, "raw_detected": True},
+    )
+
+    assert node.ball_lost_during_motion_pending is False
 
 
 def test_ball_settle_expiry_discards_frames_received_during_settle(monkeypatch):

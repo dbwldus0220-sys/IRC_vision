@@ -102,6 +102,9 @@ class MotionDecisionNode(Node):
     BALL_RAW_CONFIRMATION_RELEASE_SEC = 0.5
     PICKUP_INITIAL_ALIGN_MARKER = "__BALL_PICKUP_INITIAL_ALIGN_CHECK__"
     PICKUP_FINE_ALIGN_MARKER = "__BALL_PICKUP_FINE_ALIGN_CHECK__"
+    PICKUP_POST_BACKWARD_ALIGN_MARKER = (
+        "__BALL_PICKUP_POST_BACKWARD_ALIGN_CHECK__"
+    )
     PICKUP_INITIAL_ALIGN_ACTIONS = frozenset(
         {
             "BALL_PICKUP_INITIAL_ALIGN_CONTINUE",
@@ -118,6 +121,18 @@ class MotionDecisionNode(Node):
             "BALL_PICKUP_FINE_FORWARD",
             "BALL_PICKUP_CRAB_RIGHT",
             "BALL_PICKUP_CRAB_LEFT",
+        }
+    )
+    PICKUP_POST_BACKWARD_ALIGN_ACTIONS = frozenset(
+        {
+            "BALL_PICKUP_POST_BACKWARD_ALIGN_CONTINUE",
+            "BALL_PICKUP_POST_BACKWARD_CRAB_RIGHT",
+            "BALL_PICKUP_POST_BACKWARD_CRAB_LEFT",
+            *{
+                f"BALL_PICKUP_POST_BACKWARD_TURN_{direction}_{count}"
+                for direction in ("LEFT", "RIGHT")
+                for count in range(1, 10)
+            },
         }
     )
 
@@ -338,6 +353,8 @@ class MotionDecisionNode(Node):
         self.active_general_source: str | None = None
         self.ball_approach_entry_pending = False
         self.ball_approach_alignment_pending = False
+        self.ball_lost_during_motion_pending = False
+        self.ball_last_visible_approach_info: dict[str, Any] | None = None
         self.ball_pickup_entry_pending = False
         self.ball_post_motion_dwell_until: float | None = None
         self.ball_confirmation_pending_latched = False
@@ -364,6 +381,7 @@ class MotionDecisionNode(Node):
         self.active_special_dynamics_command: int | None = None
         self.pickup_initial_align_waiting = False
         self.pickup_fine_align_waiting = False
+        self.pickup_post_backward_align_waiting = False
         self.general_motion_gate = GeneralMotionCommandGate(
             max_transient_retries=max(
                 0,
@@ -657,6 +675,10 @@ class MotionDecisionNode(Node):
                         self,
                         payload,
                     )
+                    MotionDecisionNode._track_ball_loss_during_motion(
+                        self,
+                        payload,
+                    )
                 if source == "line":
                     if self.line_timeout_recovery_active:
                         MotionDecisionNode._collect_timeout_recovery_frame(
@@ -816,6 +838,8 @@ class MotionDecisionNode(Node):
             return
 
         self.ball_pickup_entry_pending = True
+        self.ball_lost_during_motion_pending = False
+        self.ball_last_visible_approach_info = None
         if not self.general_motion_gate.locked:
             self.ball_post_motion_dwell_until = None
             self.ball_approach_alignment_pending = False
@@ -823,6 +847,48 @@ class MotionDecisionNode(Node):
             "BALL pickup entry latched: "
             f"distance_m={distance:.3f}"
         )
+
+    def _track_ball_loss_during_motion(
+        self,
+        payload: dict[str, Any],
+    ) -> None:
+        """Latch a 57-150 cm Ball loss until the active motion ends."""
+        if (
+            not self.general_motion_gate.locked
+            or self.active_general_source != "ball"
+            or self.ball_pickup_entry_pending
+        ):
+            return
+
+        config = self.planner.ball_planner.config
+        distance = self.planner._number(payload, "distance_m")
+        in_recovery_range = bool(
+            distance is not None
+            and config.pickup_sequence_start_distance_m < distance
+            <= config.control_start_depth_m
+        )
+        if (
+            payload.get("detected") is True
+            and payload.get("depth_valid") is True
+            and in_recovery_range
+        ):
+            self.ball_last_visible_approach_info = dict(payload)
+            return
+
+        actually_lost = bool(
+            payload.get("detected") is not True
+            and payload.get("raw_detected") is not True
+        )
+        if (
+            actually_lost
+            and self.ball_last_visible_approach_info is not None
+            and not self.ball_lost_during_motion_pending
+        ):
+            self.ball_lost_during_motion_pending = True
+            self.get_logger().info(
+                "BALL lost during 57-150 cm approach motion; "
+                "remembering the last direction for the motion boundary"
+            )
 
     def _phase_callback(self, message: String) -> None:
         phase = message.data.strip()
@@ -965,6 +1031,8 @@ class MotionDecisionNode(Node):
                     if status != "SUCCEEDED":
                         self.ball_pickup_entry_pending = False
                         self.ball_approach_alignment_pending = False
+                        self.ball_lost_during_motion_pending = False
+                        self.ball_last_visible_approach_info = None
                     pickup_entry_ready = bool(
                         status == "SUCCEEDED"
                         and self.ball_pickup_entry_pending
@@ -986,7 +1054,10 @@ class MotionDecisionNode(Node):
                             0.0,
                             float(self.BALL_POST_MOTION_DWELL_SEC),
                         )
-                        if straight_completed
+                        if (
+                            straight_completed
+                            and not self.ball_lost_during_motion_pending
+                        )
                         else 0.0
                     )
                     self.ball_post_motion_dwell_until = (
@@ -1107,6 +1178,7 @@ class MotionDecisionNode(Node):
             ):
                 self.pickup_initial_align_waiting = True
                 self.pickup_fine_align_waiting = False
+                self.pickup_post_backward_align_waiting = False
                 MotionDecisionNode._invalidate_pickup_ball_input(self)
             elif (
                 action == "PICKUP_NOW"
@@ -1116,6 +1188,17 @@ class MotionDecisionNode(Node):
             ):
                 self.pickup_initial_align_waiting = False
                 self.pickup_fine_align_waiting = True
+                self.pickup_post_backward_align_waiting = False
+                MotionDecisionNode._invalidate_pickup_ball_input(self)
+            elif (
+                action == "PICKUP_NOW"
+                and status == "RUNNING"
+                and payload.get("motion_id")
+                == MotionDecisionNode.PICKUP_POST_BACKWARD_ALIGN_MARKER
+            ):
+                self.pickup_initial_align_waiting = False
+                self.pickup_fine_align_waiting = False
+                self.pickup_post_backward_align_waiting = True
                 MotionDecisionNode._invalidate_pickup_ball_input(self)
 
             self.get_logger().info(
@@ -1136,6 +1219,7 @@ class MotionDecisionNode(Node):
         self.active_special_dynamics_command = None
         self.pickup_initial_align_waiting = False
         self.pickup_fine_align_waiting = False
+        self.pickup_post_backward_align_waiting = False
 
         if completed_action == "PICKUP_NOW" and status == "SUCCEEDED":
             # The tracked ball has been collected. Do not resurrect its stale
@@ -1572,9 +1656,14 @@ class MotionDecisionNode(Node):
             decision.valid
             and decision.action in self.PICKUP_FINE_ALIGN_ACTIONS
         )
+        is_pickup_post_backward_align_action = (
+            decision.valid
+            and decision.action in self.PICKUP_POST_BACKWARD_ALIGN_ACTIONS
+        )
         is_pickup_checkpoint_action = bool(
             is_pickup_initial_align_action
             or is_pickup_fine_align_action
+            or is_pickup_post_backward_align_action
         )
         if (
             is_general_motion
@@ -1727,6 +1816,11 @@ class MotionDecisionNode(Node):
             )
             if decision.source == "ball":
                 self.ball_approach_entry_pending = False
+                if decision.source_command.get(
+                    "lost_ball_alignment_from_memory"
+                ) is True:
+                    self.ball_lost_during_motion_pending = False
+                    self.ball_last_visible_approach_info = None
         elif is_pickup_checkpoint_action:
             MotionDecisionNode._remember_published_vision_frame(
                 self,
@@ -1734,8 +1828,10 @@ class MotionDecisionNode(Node):
             )
             if is_pickup_initial_align_action:
                 self.pickup_initial_align_waiting = False
-            else:
+            elif is_pickup_fine_align_action:
                 self.pickup_fine_align_waiting = False
+            else:
+                self.pickup_post_backward_align_waiting = False
 
     def _publish_decision_debug(self) -> None:
         """Publish existing decision state without affecting motion control."""
@@ -1998,6 +2094,13 @@ class MotionDecisionNode(Node):
             return self.planner.plan_ball_pickup_fine_alignment(
                 observations.get("ball")
             )
+        if (
+            self.pickup_post_backward_align_waiting
+            and self.active_special_action == "PICKUP_NOW"
+        ):
+            return self.planner.plan_ball_pickup_post_backward_alignment(
+                observations.get("ball")
+            )
         if self.active_special_command_id is not None:
             locked_phase = f"{planning_phase}_LOCK"
             return self.planner.plan(
@@ -2008,17 +2111,6 @@ class MotionDecisionNode(Node):
 
         ball_info = observations.get("ball")
         if self.ball_pickup_entry_pending:
-            if ball_info is None or ball_info.get("detected") is not True:
-                return MotionDecision(
-                    phase=planning_phase,
-                    source="ball",
-                    action="WAIT",
-                    valid=False,
-                    reason="ball_pickup_entry_waiting_for_fresh_ball",
-                    sdk_motion_requested=False,
-                    requires_ack=False,
-                    source_command={"pickup_entry_latched": True},
-                )
             return MotionDecision(
                 phase=planning_phase,
                 source="ball",
@@ -2031,6 +2123,10 @@ class MotionDecisionNode(Node):
             )
 
         if self.ball_approach_alignment_pending:
+            if self.ball_lost_during_motion_pending:
+                return self.planner.plan_lost_ball_approach_alignment(
+                    self.ball_last_visible_approach_info
+                )
             alignment = self.planner.plan_ball_approach_alignment(ball_info)
             if alignment.action != "BALL_APPROACH_ALIGNED":
                 return alignment

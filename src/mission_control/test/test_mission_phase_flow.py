@@ -72,6 +72,12 @@ class MissionFlowHarness:
     )
     PICKUP_FINE_ALIGN_MARKER = MotionDecisionNode.PICKUP_FINE_ALIGN_MARKER
     PICKUP_FINE_ALIGN_ACTIONS = MotionDecisionNode.PICKUP_FINE_ALIGN_ACTIONS
+    PICKUP_POST_BACKWARD_ALIGN_MARKER = (
+        MotionDecisionNode.PICKUP_POST_BACKWARD_ALIGN_MARKER
+    )
+    PICKUP_POST_BACKWARD_ALIGN_ACTIONS = (
+        MotionDecisionNode.PICKUP_POST_BACKWARD_ALIGN_ACTIONS
+    )
     BALL_POST_MOTION_DWELL_SEC = 0.0
     BALL_RAW_CONFIRMATION_RELEASE_SEC = (
         MotionDecisionNode.BALL_RAW_CONFIRMATION_RELEASE_SEC
@@ -129,6 +135,8 @@ class MissionFlowHarness:
         self.active_general_source = None
         self.ball_approach_entry_pending = False
         self.ball_approach_alignment_pending = False
+        self.ball_lost_during_motion_pending = False
+        self.ball_last_visible_approach_info = None
         self.ball_pickup_entry_pending = False
         self.ball_post_motion_dwell_until = None
         self.ball_confirmation_pending_latched = False
@@ -161,6 +169,7 @@ class MissionFlowHarness:
         self.active_special_dynamics_command = None
         self.pickup_initial_align_waiting = False
         self.pickup_fine_align_waiting = False
+        self.pickup_post_backward_align_waiting = False
         self.finish_min_confidence = 0.70
         self.previous_publish_time = 0.0
         self.last_candidate_decision = None
@@ -418,9 +427,7 @@ def test_ball_pickup_entry_crossing_is_latched_until_general_motion_finishes():
     release_general(harness, approach)
 
     assert harness.ball_post_motion_dwell_until is None
-    waiting = harness.publish_vision(ball={"detected": False})
-    assert waiting[-1]["action"] == "WAIT"
-    published = harness.publish_vision(ball=close_ball)
+    published = harness.publish_vision(ball={"detected": False})
     assert published[-1]["action"] == "PICKUP_NOW"
     assert published[-1]["reason"] == (
         "ball_pickup_entry_latched_during_motion"
