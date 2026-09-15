@@ -24,6 +24,7 @@ public:
   MotionStatus handle_cancel(const std::string & payload);
   std::optional<MotionStatus> poll(std::uint64_t now_ms);
   bool has_active_request() const;
+  std::optional<std::string> active_motion_id() const;
 
 private:
   struct ActiveRequest

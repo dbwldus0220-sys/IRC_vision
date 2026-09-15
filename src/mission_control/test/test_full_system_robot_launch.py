@@ -98,6 +98,7 @@ def test_robot_launch_defaults_are_production_ready(
         "running_polls": 2,
         "settling_polls": 1,
         "explicit_torque_approval": True,
+        "position_tolerance_enabled": True,
         "motion_json_path": str(
             Path(__file__).resolve().parents[3]
             / "install"
@@ -113,6 +114,7 @@ def test_robot_launch_defaults_are_production_ready(
         "startup_pose_enabled": True,
         "startup_pose_name": "오뒤410",
         "startup_pose_duration_ms": 4000,
+        "ball_head_override_deg": -60.0,
     }
 
 
@@ -135,6 +137,14 @@ def test_robot_launch_passes_realsense_topic_parameters(
     assert detector_parameters["image_topic"] == (
         "/camera/camera/color/image_raw"
     )
+    assert (
+        context.launch_configurations["max_rgb_depth_delta_sec"] == "0.05"
+    )
+    assert (
+        context.launch_configurations["overlay_max_stamp_delta_sec"]
+        == "0.12"
+    )
+    assert detector_parameters["overlay_max_stamp_delta_sec"] == 0.12
 
     vision_parameters = executor_parameters(
         nodes["unified_vision_node"],
@@ -149,3 +159,11 @@ def test_robot_launch_passes_realsense_topic_parameters(
     assert vision_parameters["camera_info_topic"] == (
         "/camera/camera/color/camera_info"
     )
+    assert vision_parameters["max_rgb_depth_delta_sec"] == 0.05
+    assert vision_parameters["head_down_trigger_bottom_distance_px"] == 120
+
+    decision_parameters = executor_parameters(
+        nodes["motion_decision_node"],
+        context,
+    )
+    assert decision_parameters["pickup_fine_step_bottom_distance_px"] == 500

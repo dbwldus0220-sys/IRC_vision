@@ -11,6 +11,8 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 
+from .safety_interlock import RECOVERABLE_MOTOR_ERROR_CODES
+
 
 LEFT_RECOVERY_MOTION_IDS = {
     2: "line_turn_left_4",
@@ -55,6 +57,8 @@ class MotionCommandBridgeNode(Node):
     PICKUP_INITIAL_ALIGN_ACTIONS = frozenset(
         {
             "BALL_PICKUP_INITIAL_ALIGN_CONTINUE",
+            "BALL_PICKUP_INITIAL_CRAB_LEFT",
+            "BALL_PICKUP_INITIAL_CRAB_RIGHT",
             *{
                 f"BALL_PICKUP_CAMERA_DOWN_TURN_{direction}_{count}"
                 for direction in ("LEFT", "RIGHT")
@@ -107,14 +111,9 @@ class MotionCommandBridgeNode(Node):
 
     PICKUP_CAMERA_DOWN_MOTION_IDS = {
         "STRAIGHT_0": "pickup_fine_forward_0",
-        "STRAIGHT_1": "ball_camera_down_forward_2",
         "STRAIGHT_2": "ball_camera_down_forward_4",
-        "STRAIGHT_3": "ball_camera_down_forward_6",
-        "STRAIGHT_4": "ball_camera_down_forward_8",
     }
     PICKUP_MOTION_TAIL = (
-        "pickup_fine_forward_0",
-        FINE_ALIGN_MARKER,
         "pickup_pre_backward_camera_down",
         "pickup",
         PICKUP_GRASP_CHECK_MOTION_ID,
@@ -238,6 +237,7 @@ class MotionCommandBridgeNode(Node):
         self.pickup_checkpoint_after_dwell: str | None = None
         self.pickup_positioning_loss_pending = False
         self.pickup_fixed_sequence_started = False
+        self.pickup_fine_positioning_complete = False
         self.pickup_positioning_dwell_motion_id: str | None = None
         self.queued_command_id: int | None = None
         self.queued_event_id: int | None = None
@@ -470,6 +470,9 @@ class MotionCommandBridgeNode(Node):
 
     def _start_pickup_checkpoint_dwell(self, checkpoint: str) -> None:
         """Wait three seconds after a correction before checking Vision."""
+        self.pickup_initial_align_correction_active = False
+        self.pickup_fine_align_correction_active = False
+        self.pickup_post_backward_align_correction_active = False
         self.pickup_positioning_dwell_motion_id = self.active_motion_id
         self.active_motion_id = self.DWELL_MARKER
         self.active_dwell_until = time.monotonic() + self.PICKUP_DWELL_SEC
@@ -535,10 +538,11 @@ class MotionCommandBridgeNode(Node):
             )
             return
 
+        source_command = payload.get("source_command")
+
         self.last_sent_command_id = command_id
         self.pickup_initial_align_waiting = False
         if action == "BALL_PICKUP_INITIAL_ALIGN_CONTINUE":
-            source_command = payload.get("source_command")
             use_no_ball_pickup_path = bool(
                 isinstance(source_command, dict)
                 and source_command.get("use_no_ball_pickup_path") is True
@@ -590,15 +594,34 @@ class MotionCommandBridgeNode(Node):
                     *self.PICKUP_NO_BALL_MOTION_TAIL,
                     *final_stages,
                 )
-            else:
-                next_sequence = (
-                    first_motion,
-                    *self.active_pickup_sequence,
+                self.active_pickup_sequence = self._with_pickup_motion_dwells(
+                    next_sequence
                 )
-            self.active_pickup_sequence = self._with_pickup_motion_dwells(
-                next_sequence
+                self.active_sequence_index = 0
+                self.active_motion_id = first_motion
+                self._publish_executor_request(
+                    action=self.active_action,
+                    command_id=self.active_command_id,
+                    event_id=self.active_event_id,
+                    request_id=self.active_request_id,
+                    motion_id=first_motion,
+                    timeout_ms=(
+                        self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS
+                    ),
+                )
+                return
+
+            if (
+                approach_motion == "STRAIGHT_0"
+                and self.pickup_fine_positioning_complete
+            ):
+                self._enter_pickup_fine_align_checkpoint()
+                return
+
+            self.pickup_fine_positioning_complete = bool(
+                approach_motion == "STRAIGHT_0"
             )
-            self.active_sequence_index = 0
+            self.pickup_initial_align_correction_active = True
             self.active_motion_id = first_motion
             self._publish_executor_request(
                 action=self.active_action,
@@ -610,7 +633,11 @@ class MotionCommandBridgeNode(Node):
             )
             return
 
-        motion_id = self.PICKUP_CAMERA_DOWN_TURN_MOTION_IDS[action]
+        if action.startswith("BALL_PICKUP_INITIAL_CRAB_"):
+            fine_action = action.replace("INITIAL_", "", 1)
+            motion_id = self.PICKUP_FINE_ALIGN_MOTION_IDS[fine_action]
+        else:
+            motion_id = self.PICKUP_CAMERA_DOWN_TURN_MOTION_IDS[action]
         self.pickup_initial_align_correction_active = True
         self.active_motion_id = motion_id
         self._publish_executor_request(
@@ -655,6 +682,10 @@ class MotionCommandBridgeNode(Node):
         self.pickup_fine_align_waiting = False
         if action == "BALL_PICKUP_FINE_ALIGN_CONTINUE":
             self.pickup_fixed_sequence_started = True
+            self.active_pickup_sequence = self._with_pickup_motion_dwells(
+                self.active_pickup_sequence
+            )
+            self.active_sequence_index = -1
             if not self._start_next_pickup_motion():
                 self.pickup_fixed_sequence_started = False
                 self.pickup_fine_align_waiting = True
@@ -669,6 +700,8 @@ class MotionCommandBridgeNode(Node):
             return
 
         motion_id = self.PICKUP_FINE_ALIGN_MOTION_IDS[action]
+        # Intentionally keep no crab retry counter. Each completed correction
+        # returns to the fresh pixel checkpoint until Vision reports centered.
         self.pickup_fine_align_correction_active = True
         self.active_motion_id = motion_id
         self._publish_executor_request(
@@ -687,9 +720,10 @@ class MotionCommandBridgeNode(Node):
         """Resume pickup positioning at the existing camera-down checkpoint."""
         if checkpoint == self.FINE_ALIGN_MARKER:
             remaining_index = self.active_sequence_index
-            self.active_pickup_sequence = self.active_pickup_sequence[
-                remaining_index:
-            ]
+            if remaining_index >= 0:
+                self.active_pickup_sequence = self.active_pickup_sequence[
+                    remaining_index:
+                ]
         elif checkpoint != self.PICKUP_INITIAL_ALIGN_MARKER:
             remaining_index = self.active_sequence_index + 1
             self.active_pickup_sequence = self.active_pickup_sequence[
@@ -698,7 +732,13 @@ class MotionCommandBridgeNode(Node):
         self.active_sequence_index = 0
         self.pickup_positioning_loss_pending = False
         self.pickup_fixed_sequence_started = False
-        self._enter_pickup_initial_align_checkpoint()
+        if (
+            checkpoint == self.FINE_ALIGN_MARKER
+            or self.pickup_fine_positioning_complete
+        ):
+            self._enter_pickup_fine_align_checkpoint()
+        else:
+            self._enter_pickup_initial_align_checkpoint()
 
     def _handle_pickup_positioning_loss_latch(
         self,
@@ -1047,8 +1087,10 @@ class MotionCommandBridgeNode(Node):
             self.active_dwell_until = None
             self.pickup_positioning_loss_pending = False
             self.pickup_fixed_sequence_started = False
+            self.pickup_fine_positioning_complete = False
             self.pickup_positioning_dwell_motion_id = None
             if starts_with_initial_align_checkpoint:
+                self.active_sequence_index = -1
                 self._start_pickup_initial_align_dwell()
 
     def _start_next_pickup_motion(self) -> bool:
@@ -1228,6 +1270,7 @@ class MotionCommandBridgeNode(Node):
         self.pickup_checkpoint_after_dwell = None
         self.pickup_positioning_loss_pending = False
         self.pickup_fixed_sequence_started = False
+        self.pickup_fine_positioning_complete = False
         self.pickup_positioning_dwell_motion_id = None
 
     def _clear_queued_request(self) -> None:
@@ -1254,6 +1297,7 @@ class MotionCommandBridgeNode(Node):
         self.pickup_initial_align_dwell_until = None
         self.pickup_positioning_loss_pending = False
         self.pickup_fixed_sequence_started = False
+        self.pickup_fine_positioning_complete = False
         self.pickup_positioning_dwell_motion_id = None
         queued_request_deferred = self.queued_request_deferred
         self._clear_queued_request()
@@ -1307,6 +1351,19 @@ class MotionCommandBridgeNode(Node):
         if (
             is_active
             and action in self.ATOMIC_SEQUENCE_ACTIONS
+            and payload["status"] == "FAILED"
+            and payload["error_code"] in RECOVERABLE_MOTOR_ERROR_CODES
+        ):
+            self.get_logger().warning(
+                "Recoverable motor fault during atomic sequence; "
+                "continuing with the next stage: "
+                f"motion_id={payload['motion_id']}, "
+                f"error_code={payload['error_code']}"
+            )
+            payload["status"] = "SUCCEEDED"
+        if (
+            is_active
+            and action in self.ATOMIC_SEQUENCE_ACTIONS
             and payload["motion_id"] != self.active_motion_id
         ):
             self.get_logger().warning(
@@ -1320,7 +1377,9 @@ class MotionCommandBridgeNode(Node):
             and payload["status"] == "SUCCEEDED"
         ):
             self._start_pickup_checkpoint_dwell(
-                self.PICKUP_INITIAL_ALIGN_MARKER
+                self.FINE_ALIGN_MARKER
+                if self.pickup_fine_positioning_complete
+                else self.PICKUP_INITIAL_ALIGN_MARKER
             )
             return
         if (
@@ -1329,7 +1388,9 @@ class MotionCommandBridgeNode(Node):
             and self.pickup_fine_align_correction_active
             and payload["status"] == "SUCCEEDED"
         ):
-            self._start_pickup_checkpoint_dwell(self.FINE_ALIGN_MARKER)
+            self._start_pickup_checkpoint_dwell(
+                self.FINE_ALIGN_MARKER
+            )
             return
         if (
             is_active

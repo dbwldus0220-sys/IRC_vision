@@ -151,6 +151,11 @@ class Yolo26Detector(Node):
             "/navigation/motion_command",
         )
         self.declare_parameter("motion_command_timeout_sec", 0.8)
+        self.declare_parameter(
+            "decision_debug_topic",
+            "/navigation/decision_debug",
+        )
+        self.declare_parameter("decision_debug_timeout_sec", 0.5)
         self.declare_parameter("overlay_max_stamp_delta_sec", 0.05)
         self.declare_parameter("metrics_mode", "auto")
         self.declare_parameter("confidence_threshold", 0.25)
@@ -252,6 +257,10 @@ class Yolo26Detector(Node):
             0.1,
             float(self.get_parameter("motion_command_timeout_sec").value),
         )
+        self.decision_debug_timeout_sec = max(
+            0.1,
+            float(self.get_parameter("decision_debug_timeout_sec").value),
+        )
         self.overlay_max_stamp_delta_sec = max(
             0.0,
             float(
@@ -349,6 +358,9 @@ class Yolo26Detector(Node):
         motion_command_topic = str(
             self.get_parameter("motion_command_topic").value
         )
+        decision_debug_topic = str(
+            self.get_parameter("decision_debug_topic").value
+        )
 
         self.detections_publisher = self.create_publisher(
             String, detections_topic, 10
@@ -398,6 +410,12 @@ class Yolo26Detector(Node):
             self._motion_command_callback,
             10,
         )
+        self.create_subscription(
+            String,
+            decision_debug_topic,
+            self._decision_debug_callback,
+            10,
+        )
 
         self.last_inference_time = 0.0
         self.smoothed_fps = 0.0
@@ -415,6 +433,8 @@ class Yolo26Detector(Node):
         self.latest_hurdle_info_time: float | None = None
         self.latest_motion_command: dict[str, Any] | None = None
         self.latest_motion_command_time: float | None = None
+        self.latest_decision_debug: dict[str, Any] | None = None
+        self.latest_decision_debug_time: float | None = None
         self._overlay_rgb_stamp_ns: int | None = None
         self._ball_info_stamp_delta_ms: float | None = None
 
@@ -487,6 +507,7 @@ class Yolo26Detector(Node):
         self.get_logger().info(f"Goal metrics: {goal_info_topic}")
         self.get_logger().info(f"Hurdle metrics: {hurdle_info_topic}")
         self.get_logger().info(f"Motion decision: {motion_command_topic}")
+        self.get_logger().info(f"Decision debug: {decision_debug_topic}")
         if self.display and self.show_camera_controls:
             self.get_logger().info(
                 f"Camera sliders: {self.camera_node_name}"
@@ -966,6 +987,26 @@ class Yolo26Detector(Node):
             return None
         return self.latest_motion_command
 
+    def _decision_debug_callback(self, message: String) -> None:
+        """Store decision state used only for the local debug overlay."""
+        payload = self._read_json_object(message, "decision debug")
+        if payload is None:
+            return
+        self.latest_decision_debug = payload
+        self.latest_decision_debug_time = time.monotonic()
+
+    def _fresh_decision_debug(self) -> dict[str, Any] | None:
+        """Return recent decision state, avoiding a stale grasp banner."""
+        if (
+            self.latest_decision_debug is None
+            or self.latest_decision_debug_time is None
+        ):
+            return None
+        age = time.monotonic() - self.latest_decision_debug_time
+        if age > self.decision_debug_timeout_sec:
+            return None
+        return self.latest_decision_debug
+
     def _read_json_object(
         self,
         message: String,
@@ -992,9 +1033,8 @@ class Yolo26Detector(Node):
         self.latest_ball_info = payload
         self.latest_ball_info_time = time.monotonic()
 
-    def _fresh_ball_info(self) -> dict[str, Any] | None:
-        """Return ball information fresh in both receipt and RGB time."""
-        self._ball_info_stamp_delta_ms = None
+    def _recent_ball_info(self) -> dict[str, Any] | None:
+        """Return receipt-fresh ball status without matching RGB geometry."""
         if (
             self.latest_ball_info is None
             or self.latest_ball_info_time is None
@@ -1003,10 +1043,18 @@ class Yolo26Detector(Node):
         age = time.monotonic() - self.latest_ball_info_time
         if age > self.ball_info_timeout_sec:
             return None
+        return self.latest_ball_info
+
+    def _fresh_ball_info(self) -> dict[str, Any] | None:
+        """Return ball information fresh in both receipt and RGB time."""
+        self._ball_info_stamp_delta_ms = None
+        recent_info = self._recent_ball_info()
+        if recent_info is None:
+            return None
         expected_stamp_ns = getattr(self, "_overlay_rgb_stamp_ns", None)
         if expected_stamp_ns is not None:
             try:
-                info_stamp_ns = int(self.latest_ball_info["rgb_stamp_ns"])
+                info_stamp_ns = int(recent_info["rgb_stamp_ns"])
             except (KeyError, TypeError, ValueError):
                 self._ball_info_stamp_delta_ms = None
                 return None
@@ -1018,7 +1066,7 @@ class Yolo26Detector(Node):
             )
             if delta_ms > max_delta_ms:
                 return None
-        return self.latest_ball_info
+        return recent_info
 
     def _goal_info_callback(self, message: String) -> None:
         """Store the latest analyzed goal geometry for the display."""
@@ -1582,6 +1630,7 @@ class Yolo26Detector(Node):
 
         height, width = image.shape[:2]
         info = self._fresh_ball_info()
+        recent_info = self._recent_ball_info()
         calibrated_center_x = (
             self._number(info, "robot_center_x_px")
             if info is not None
@@ -1597,6 +1646,17 @@ class Yolo26Detector(Node):
             )
         )
         center_color = (0, 255, 255)
+        camera_center_x = width // 2
+        camera_center_y = height // 2
+        cv2.drawMarker(
+            image,
+            (camera_center_x, camera_center_y),
+            (180, 180, 180),
+            cv2.MARKER_CROSS,
+            18,
+            1,
+            cv2.LINE_AA,
+        )
         cv2.line(
             image,
             (center_x, max(45, int(height * 0.42))),
@@ -1630,34 +1690,46 @@ class Yolo26Detector(Node):
             if target_x is not None and target_y is not None:
                 point_x = int(np.clip(round(target_x), 0, width - 1))
                 point_y = int(np.clip(round(target_y), 0, height - 1))
-                cv2.arrowedLine(
+                cv2.line(
                     image,
-                    (center_x, height - 1),
+                    (camera_center_x, point_y),
                     (point_x, point_y),
                     (0, 140, 255),
                     2,
                     cv2.LINE_AA,
-                    tipLength=0.12,
                 )
-                offset_x = self._number(info, "offset_x_px")
+                cv2.line(
+                    image,
+                    (point_x, height - 1),
+                    (point_x, point_y),
+                    (255, 160, 0),
+                    2,
+                    cv2.LINE_AA,
+                )
+                offset_x = self._number(
+                    info,
+                    "camera_center_offset_x_px",
+                )
                 offset_text = self._metric_text(
                     offset_x,
                     "px",
                     digits=0,
                     signed=True,
                 )
-                steering_angle = self._number(info, "steering_angle_deg")
-                angle_text = self._metric_text(
-                    steering_angle,
-                    "deg",
-                    digits=1,
-                    signed=True,
+                bottom_distance = self._number(
+                    info,
+                    "bottom_distance_px",
                 )
-                text_x = min(center_x, point_x) + 8
-                text_y = max(22, (height - 1 + point_y) // 2 - 10)
+                bottom_text = self._metric_text(
+                    bottom_distance,
+                    "px",
+                    digits=0,
+                )
+                text_x = min(camera_center_x, point_x) + 8
+                text_y = max(22, point_y - 10)
                 cv2.putText(
                     image,
-                    f"dx {offset_text} / path {angle_text}",
+                    f"center dx {offset_text}",
                     (text_x, text_y),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.55,
@@ -1665,9 +1737,20 @@ class Yolo26Detector(Node):
                     2,
                     cv2.LINE_AA,
                 )
+                vertical_text_y = max(22, (height - 1 + point_y) // 2)
+                cv2.putText(
+                    image,
+                    f"bottom dy {bottom_text}",
+                    (min(point_x + 8, max(12, width - 190)), vertical_text_y),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.55,
+                    (255, 160, 0),
+                    2,
+                    cv2.LINE_AA,
+                )
 
         panel_width = min(390, max(250, width - 24))
-        panel_height = 430
+        panel_height = 505
         panel_x = max(12, width - panel_width - 12)
         panel_y = 44
         panel_bottom = min(height - 8, panel_y + panel_height)
@@ -1691,6 +1774,7 @@ class Yolo26Detector(Node):
 
         if info is None:
             stamp_delta = getattr(self, "_ball_info_stamp_delta_ms", None)
+            analyzer_badge = self._confirmation_badge(recent_info)
             rows = [
                 "BALL METRICS",
                 f"Planner     : {planner_action}",
@@ -1699,7 +1783,12 @@ class Yolo26Detector(Node):
                     if stamp_delta is not None
                     else "NO MATCHED BALL INFO"
                 ),
+                f"Analyzer    : {analyzer_badge}",
             ]
+            if recent_info is not None:
+                rows.append(
+                    f"Analyzer state: {recent_info.get('state', 'UNKNOWN')}"
+                )
         elif not detected:
             state = str(info.get("state", "SEARCH"))
             rows = [
@@ -1711,6 +1800,14 @@ class Yolo26Detector(Node):
             depth = self._number(info, "depth_m")
             offset_px = self._number(info, "offset_x_px")
             offset_norm = self._number(info, "offset_x_norm")
+            camera_center_offset_px = self._number(
+                info,
+                "camera_center_offset_x_px",
+            )
+            bottom_distance_px = self._number(info, "bottom_distance_px")
+            head_down_requested = bool(
+                info.get("head_down_requested", False)
+            )
             bearing = self._number(info, "bearing_deg")
             steering_angle = self._number(info, "steering_angle_deg")
             lateral = self._number(info, "lateral_offset_m")
@@ -1745,8 +1842,18 @@ class Yolo26Detector(Node):
                 ),
                 "Valid pixels: "
                 + self._metric_text(sample_count, "", 0),
-                "Offset X    : "
+                "Robot dx    : "
                 + self._metric_text(offset_px, "px", 0, signed=True),
+                "Camera dx   : "
+                + self._metric_text(
+                    camera_center_offset_px,
+                    "px",
+                    0,
+                    signed=True,
+                ),
+                "Bottom dy   : "
+                + self._metric_text(bottom_distance_px, "px", 0),
+                f"Head down   : {'ON' if head_down_requested else 'OFF'}",
                 "Offset norm : "
                 + self._metric_text(offset_norm, "", 3, signed=True),
                 "Bearing     : "
@@ -2599,6 +2706,7 @@ class Yolo26Detector(Node):
         metrics_mode = self._active_metrics_mode()
         decision = self._fresh_motion_command()
         ball_info = self._fresh_ball_info()
+        recent_ball_info = self._recent_ball_info()
         goal_info = self._fresh_goal_info()
         hurdle_info = self._fresh_hurdle_info()
         line_info = self._fresh_line_info()
@@ -2672,7 +2780,14 @@ class Yolo26Detector(Node):
             )
             if depth is not None:
                 label = f"{label} | DEPTH {depth:.2f}m"
-            badge = self._confirmation_badge(confirmation_info)
+            if detection.class_name == "ball" and confirmation_info is None:
+                badge = (
+                    "INFO STALE"
+                    if recent_ball_info is not None
+                    else "RAW YOLO"
+                )
+            else:
+                badge = self._confirmation_badge(confirmation_info)
             label = f"{label} | {badge}"
             cv2.rectangle(annotated, (left, top), (right, bottom), color, 2)
             cv2.circle(annotated, tuple(detection.center), 4, color, -1)
@@ -2708,7 +2823,71 @@ class Yolo26Detector(Node):
             2,
             cv2.LINE_AA,
         )
+        self._draw_grasp_verification_status(annotated)
         return annotated
+
+    @staticmethod
+    def _grasp_verification_banner(
+        decision_debug: dict[str, Any] | None,
+    ) -> tuple[str, tuple[int, int, int]] | None:
+        """Translate the mission node's active grasp result into a banner."""
+        if not isinstance(decision_debug, dict):
+            return None
+        verification = decision_debug.get("grasp_verification")
+        if not isinstance(verification, dict) or not bool(
+            verification.get("active", False)
+        ):
+            return None
+
+        result = str(verification.get("result", "UNKNOWN")).upper()
+        if result == "GRABBED":
+            return "GRASP CHECK: GRABBED", (0, 255, 0)
+        if result == "NOT_GRABBED":
+            return "GRASP CHECK: NOT GRABBED", (0, 0, 255)
+        return "GRASP CHECK: WAITING", (0, 165, 255)
+
+    def _draw_grasp_verification_status(self, image: np.ndarray) -> None:
+        """Show what motion_decision_node recognizes during grasp checking."""
+        banner = self._grasp_verification_banner(
+            self._fresh_decision_debug()
+        )
+        if banner is None:
+            return
+
+        text, color = banner
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale = 0.8
+        thickness = 2
+        (text_width, text_height), baseline = cv2.getTextSize(
+            text, font, font_scale, thickness
+        )
+        center_x = image.shape[1] // 2
+        text_x = max(8, center_x - text_width // 2)
+        text_y = 64
+        cv2.rectangle(
+            image,
+            (text_x - 8, text_y - text_height - 8),
+            (text_x + text_width + 8, text_y + baseline + 8),
+            (0, 0, 0),
+            -1,
+        )
+        cv2.rectangle(
+            image,
+            (text_x - 8, text_y - text_height - 8),
+            (text_x + text_width + 8, text_y + baseline + 8),
+            color,
+            2,
+        )
+        cv2.putText(
+            image,
+            text,
+            (text_x, text_y),
+            font,
+            font_scale,
+            color,
+            thickness,
+            cv2.LINE_AA,
+        )
 
     def _publish_detections(
         self, message: Image, detections: list[Detection]
@@ -2728,6 +2907,13 @@ class Yolo26Detector(Node):
             payload, ensure_ascii=True, separators=(",", ":")
         )
         self.detections_publisher.publish(output)
+
+    def _annotated_image_has_subscriber(self) -> bool:
+        """Avoid copying a full RGB frame when only the local window uses it."""
+        return bool(
+            self.publish_annotated_image
+            and self.annotated_publisher.get_subscription_count() > 0
+        )
 
     def _image_callback(self, message: Image) -> None:
         now = time.monotonic()
@@ -2766,14 +2952,15 @@ class Yolo26Detector(Node):
             )
 
             self._publish_detections(message, detections)
-            if self.publish_annotated_image or self.display:
+            publish_annotated = self._annotated_image_has_subscriber()
+            if publish_annotated or self.display:
                 self._overlay_rgb_stamp_ns = image_stamp_ns(message)
                 try:
                     annotated = self._draw_detections(image, detections)
                 finally:
                     self._overlay_rgb_stamp_ns = None
 
-                if self.publish_annotated_image:
+                if publish_annotated:
                     annotated_message = self.bridge.cv2_to_imgmsg(
                         annotated, encoding="bgr8"
                     )

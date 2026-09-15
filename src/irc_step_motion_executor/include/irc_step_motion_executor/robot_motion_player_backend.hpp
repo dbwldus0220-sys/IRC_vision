@@ -23,6 +23,12 @@ public:
   virtual irc_step::MotionError result() const = 0;
   virtual std::string last_error() const = 0;
   virtual std::uint64_t completion_sequence() const = 0;
+  virtual void set_joint_override(int motor_id, double target_deg) = 0;
+  virtual void clear_joint_override(int motor_id) noexcept = 0;
+  virtual bool set_position_tolerance_enabled(bool enabled)
+  {
+    return enabled;
+  }
 };
 
 class BorrowedRobotMotionPlayerApi final : public RobotMotionPlayerApi
@@ -37,6 +43,9 @@ public:
   irc_step::MotionError result() const override;
   std::string last_error() const override;
   std::uint64_t completion_sequence() const override;
+  void set_joint_override(int motor_id, double target_deg) override;
+  void clear_joint_override(int motor_id) noexcept override;
+  bool set_position_tolerance_enabled(bool enabled) override;
 
 private:
   irc_step::RobotMotionPlayer & player_;
@@ -53,6 +62,9 @@ public:
   BackendStatus poll_status() override;
   BackendQueueResult queue_motion(
     const std::string & resolved_motion_name) override;
+  bool set_joint_override(int motor_id, double target_deg) override;
+  void clear_joint_override(int motor_id) noexcept override;
+  bool set_position_tolerance_enabled(bool enabled) override;
   std::uint64_t completion_sequence() const override;
 
 private:

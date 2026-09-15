@@ -81,6 +81,8 @@ public:
   MotionStatus update() noexcept;
   MotionError result() const noexcept;
   std::string_view lastError() const noexcept;
+  void setJointOverride(int motor_id, double target_deg);
+  void clearJointOverride(int motor_id) noexcept;
 
 private:
   IMotionHardware * hardware_{nullptr};

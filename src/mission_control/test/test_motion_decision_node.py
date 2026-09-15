@@ -207,6 +207,7 @@ class FakeDecisionNode:
         self.ball_approach_alignment_pending = False
         self.ball_lost_during_motion_pending = False
         self.ball_last_visible_approach_info = None
+        self.ball_last_visible_line_info = None
         self.ball_pickup_entry_pending = False
         self.ball_post_motion_dwell_until = None
         self.ball_confirmation_pending_latched = False
@@ -216,6 +217,9 @@ class FakeDecisionNode:
         self.active_line_motion_duration_sec = 0.0
         self.active_line_motion_target_frames = 0
         self.active_line_motion_frames = []
+        self.pending_line_decision = None
+        self.pending_line_recover_decision = None
+        self.line_recover_dwell_until = None
         self.line_timeout_recovery_active = False
         self.line_timeout_recovery_frames = []
         self.planner = FakePlanner()
@@ -754,6 +758,7 @@ def test_pickup_fine_wait_uses_only_ball_and_blocks_other_sources():
         ball={
             'detected': True,
             'confidence': 0.9,
+            'offset_x_px': 51,
             'offset_x_norm': 0.2,
             'pickup_x_tolerance_norm': 0.08,
             'ground_distance_m': 0.20,
@@ -1228,6 +1233,12 @@ def test_decision_debug_reports_existing_state(monkeypatch):
     assert payload['decision']['candidate_action'] == 'STRAIGHT'
     assert payload['decision']['selected_action'] == 'STRAIGHT'
     assert payload['execution']['executor_state'] == 'IDLE'
+    assert payload['grasp_verification'] == {
+        'active': False,
+        'result': 'UNKNOWN',
+        'confidence': None,
+        'accepted_frames': 0,
+    }
 
 
 def test_decision_debug_failure_does_not_escape():
@@ -1266,6 +1277,36 @@ def test_unsupported_action_does_not_start_settle(action):
 
     assert node._pre_motion_settle_ready(node.decision, now=10.0)
     assert node.pre_motion_settle_started_at is None
+
+
+def test_line_recover_is_latched_for_two_seconds_and_published_once(
+    monkeypatch,
+):
+    recover = general_decision("RECOVER_LEFT_TURN_LEFT_2")
+    node = ReadinessPublishNode(recover)
+    clock = [10.0]
+    monkeypatch.setattr(time, "monotonic", lambda: clock[0])
+
+    MotionDecisionNode._publish_decision(node)
+    assert node.publisher.messages == []
+    assert node.pending_line_recover_decision == recover
+    assert node.line_recover_dwell_until == pytest.approx(12.0)
+
+    node.decision = general_decision("STRAIGHT")
+    clock[0] = 11.999
+    MotionDecisionNode._publish_decision(node)
+    assert node.publisher.messages == []
+    assert node.line_recover_dwell_until == pytest.approx(12.0)
+
+    clock[0] = 12.0
+    MotionDecisionNode._publish_decision(node)
+    assert len(node.publisher.messages) == 1
+    payload = json.loads(node.publisher.messages[0].data)
+    assert payload["action"] == "RECOVER_LEFT_TURN_LEFT_2"
+    assert node.pending_line_recover_decision is None
+
+    MotionDecisionNode._publish_decision(node)
+    assert len(node.publisher.messages) == 1
 
 
 def test_stop_cancels_pending_turn_and_is_not_delayed(monkeypatch):
@@ -1424,7 +1465,7 @@ def test_published_turn_requires_a_new_settle_after_completion(monkeypatch):
     assert len(node.publisher.messages) == 2
 
 
-def test_correlated_critical_general_failure_latches_and_blocks_other_action():
+def test_correlated_motor_failure_releases_and_allows_other_action():
     node = ReadinessPublishNode(general_decision('STRAIGHT'))
     MotionDecisionNode._publish_decision(node)
     send_status(
@@ -1446,13 +1487,13 @@ def test_correlated_critical_general_failure_latches_and_blocks_other_action():
         message='communication lost',
     )
 
-    assert node.safety_interlock.latched
+    assert not node.safety_interlock.latched
     assert not node.general_motion_gate.locked
     node.decision = general_decision('LEFT')
     for _ in range(3):
         node.general_motion_gate.on_new_vision_input()
         MotionDecisionNode._publish_decision(node)
-    assert len(node.publisher.messages) == 1
+    assert len(node.publisher.messages) == 2
 
 
 def test_mismatched_critical_general_status_does_not_latch():
@@ -1506,7 +1547,7 @@ def test_sdk_hardware_not_ready_latches_instead_of_retrying():
     assert node.general_motion_gate.transient_rejection_count == 0
 
 
-def test_critical_special_failure_keeps_terminal_policy_and_blocks_motion():
+def test_non_motor_critical_special_failure_keeps_terminal_policy_and_blocks_motion():
     node = ReadinessPublishNode(
         terminal_decision('ball', 'PICKUP_NOW', 'BALL_APPROACH')
     )
@@ -1526,7 +1567,7 @@ def test_critical_special_failure_keeps_terminal_policy_and_blocks_motion():
         command_id=1,
         event_id=1,
         dynamics_command=9,
-        error_code='SDK_FRAME_SEND_FAILED',
+        error_code='BACKEND_EXCEPTION',
     )
 
     assert node.safety_interlock.latched
@@ -1734,7 +1775,7 @@ def test_returning_heartbeat_does_not_clear_timeout_latch():
 def test_heartbeat_timeout_does_not_overwrite_first_critical_fault():
     node = FakeDecisionNode()
     node.safety_interlock.observe_executor_status(
-        error_code='SDK_COMMUNICATION_ERROR',
+        error_code='BACKEND_EXCEPTION',
         message='first fault',
         action='STRAIGHT',
         command_id=4,
@@ -1742,7 +1783,7 @@ def test_heartbeat_timeout_does_not_overwrite_first_critical_fault():
     )
     node._check_executor_heartbeat(now=6.0)
     snapshot = node.safety_interlock.snapshot
-    assert snapshot.error_code == 'SDK_COMMUNICATION_ERROR'
+    assert snapshot.error_code == 'BACKEND_EXCEPTION'
     assert snapshot.message == 'first fault'
 
 
@@ -1906,7 +1947,6 @@ def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
     monkeypatch,
 ):
     node = ReadinessPublishNode(general_decision("STRAIGHT"))
-    node.phase_manager.pickups_completed = node.required_pickups
     clock = [10.0]
     monkeypatch.setattr(time, "monotonic", lambda: clock[0])
 
@@ -2030,6 +2070,29 @@ def test_line_motion_capture_table_matches_deployed_timelines():
             ] = timeline
 
     assert MotionDecisionNode.LINE_MOTION_CAPTURE_CONFIG == expected
+
+
+@pytest.mark.parametrize("source", ["goal", "hurdle", "finish"])
+def test_line_seamless_prequeue_stops_when_other_mission_is_detected(source):
+    node = ReadinessPublishNode(general_decision("STRAIGHT"))
+    observations = {name: None for name in MotionDecisionNode.SOURCES}
+    observations[source] = {"raw_detected": True, "detected": False}
+
+    assert not MotionDecisionNode._line_only_prequeue_allowed(
+        node,
+        observations,
+    )
+
+
+def test_line_seamless_prequeue_stops_at_ball_approach_entry():
+    node = ReadinessPublishNode(general_decision("STRAIGHT"))
+    observations = {name: None for name in MotionDecisionNode.SOURCES}
+    node.ball_approach_entry_pending = True
+
+    assert not MotionDecisionNode._line_only_prequeue_allowed(
+        node,
+        observations,
+    )
 
 
 def test_line_timeout_discards_capture_and_requires_ten_new_valid_frames():
@@ -2226,7 +2289,10 @@ def ball_info_for_node(**overrides):
         "ground_distance_m": 0.9,
         "steering_angle_deg": 0.0,
         "bearing_deg": 0.0,
+        "offset_x_px": 0,
         "offset_x_norm": 0.0,
+        "camera_center_offset_x_px": 0,
+        "bottom_distance_px": 600,
         "pickup_ready": False,
         "pickup_now": False,
     }
@@ -2341,8 +2407,12 @@ def test_ball_callback_latches_valid_pickup_entry_during_ball_motion():
     assert node.ball_pickup_entry_pending is True
 
 
-def test_ball_approach_entry_during_line_motion_waits_for_success_and_fresh_ball():
+def test_ball_approach_entry_during_line_motion_dwells_before_initial_alignment(
+    monkeypatch,
+):
     node = FreshMockInputNode()
+    node.BALL_POST_MOTION_DWELL_SEC = 3.0
+    monkeypatch.setattr(time, "monotonic", lambda: 10.0)
     node.general_motion_gate.on_new_vision_input()
     node.general_motion_gate.on_command_published("STRAIGHT_3", command_id=1)
     node.active_general_source = "line"
@@ -2374,13 +2444,39 @@ def test_ball_approach_entry_during_line_motion_waits_for_success_and_fresh_ball
 
     assert node.general_motion_gate.locked is False
     assert node.latest_info["ball"] is None
+    assert node.ball_approach_alignment_pending is True
+    assert node.ball_post_motion_dwell_until == pytest.approx(13.0)
     waiting = select_decision(node)
-    assert waiting.action == "STOP"
+    assert waiting.action == "WAIT"
 
     MotionDecisionNode._info_callback(node, "ball")(message)
-    decision = select_decision(node, ball=json.loads(message.data))
+    decision = select_decision(
+        node,
+        ball=ball_info_for_node(
+            distance_m=1.4,
+            steering_angle_deg=-26.0,
+        ),
+    )
     assert decision.source == "ball"
-    assert decision.action == "STRAIGHT_3"
+    assert decision.action == "BALL_APPROACH_TURN_LEFT_2"
+
+
+def test_ball_approach_entry_after_line_release_starts_initial_dwell(
+    monkeypatch,
+):
+    node = FreshMockInputNode()
+    node.BALL_POST_MOTION_DWELL_SEC = 3.0
+    monkeypatch.setattr(time, "monotonic", lambda: 20.0)
+    message = String()
+    message.data = json.dumps(ball_info_for_node(distance_m=0.76))
+
+    MotionDecisionNode._info_callback(node, "ball")(message)
+
+    assert node.general_motion_gate.locked is False
+    assert node.ball_approach_entry_pending is True
+    assert node.ball_approach_alignment_pending is True
+    assert node.ball_post_motion_dwell_until == pytest.approx(23.0)
+    assert node.planner.ball_lock_active is True
 
 
 def test_ball_straight_success_starts_three_second_alignment_settle(monkeypatch):
@@ -2412,6 +2508,49 @@ def test_ball_straight_success_starts_three_second_alignment_settle(monkeypatch)
     assert node.ball_post_motion_dwell_until == pytest.approx(13.0)
 
 
+def test_ball_alignment_turn_success_proceeds_to_forward_without_rechecking(
+    monkeypatch,
+):
+    node = FreshMockInputNode()
+    assert node.phase_manager.set_phase("BALL_APPROACH")
+    node.BALL_POST_MOTION_DWELL_SEC = 3.0
+    node.general_motion_gate.on_new_vision_input()
+    node.general_motion_gate.on_command_published(
+        "BALL_APPROACH_TURN_LEFT_2",
+        command_id=3,
+    )
+    node.active_general_source = "ball"
+    monkeypatch.setattr(time, "monotonic", lambda: 10.0)
+
+    send_status(
+        node,
+        status="RUNNING",
+        action="BALL_APPROACH_TURN_LEFT_2",
+        command_id=3,
+        event_id=None,
+        dynamics_command=None,
+    )
+    send_status(
+        node,
+        status="SUCCEEDED",
+        action="BALL_APPROACH_TURN_LEFT_2",
+        command_id=3,
+        event_id=None,
+        dynamics_command=None,
+    )
+
+    assert node.ball_approach_alignment_pending is False
+    assert node.ball_post_motion_dwell_until is None
+    decision = select_decision(
+        node,
+        ball=ball_info_for_node(
+            distance_m=0.9,
+            steering_angle_deg=-26.0,
+        ),
+    )
+    assert decision.action == "STRAIGHT_3"
+
+
 def test_ball_loss_during_57_to_150cm_motion_dwells_before_recovery_turn(
     monkeypatch,
 ):
@@ -2420,6 +2559,10 @@ def test_ball_loss_during_57_to_150cm_motion_dwells_before_recovery_turn(
     node.general_motion_gate.on_new_vision_input()
     node.general_motion_gate.on_command_published("STRAIGHT_3", command_id=2)
     node.active_general_source = "ball"
+    node.latest_info["line"] = {
+        "detected": True,
+        "filtered_lateral_offset_norm": -0.24,
+    }
     monkeypatch.setattr(time, "monotonic", lambda: 10.0)
 
     MotionDecisionNode._track_ball_loss_during_motion(
@@ -2454,7 +2597,8 @@ def test_ball_loss_during_57_to_150cm_motion_dwells_before_recovery_turn(
 
     assert node.ball_post_motion_dwell_until == pytest.approx(13.0)
     decision = select_decision(node)
-    assert decision.action == "BALL_APPROACH_TURN_LEFT_2"
+    assert decision.action == "BALL_APPROACH_TURN_LEFT_6"
+    assert decision.source_command["line_side"] == "LEFT"
     assert decision.source_command[
         "lost_ball_alignment_from_memory"
     ] is True
@@ -2541,15 +2685,16 @@ def test_pickup_loss_reacquisition_reuses_camera_down_heading_planner(
 
 
 @pytest.mark.parametrize(
-    ("distance_m", "expected_motion"),
+    ("bottom_distance_px", "expected_motion"),
     [
-        (0.56, "STRAIGHT_3"),
-        (0.40, "STRAIGHT_1"),
-        (0.13, "STRAIGHT_0"),
+        (700, "STRAIGHT_2"),
+        (501, "STRAIGHT_2"),
+        (500, "STRAIGHT_0"),
+        (0, "STRAIGHT_0"),
     ],
 )
-def test_pickup_loss_reacquisition_uses_existing_distance_buckets(
-    distance_m,
+def test_pickup_loss_reacquisition_uses_bottom_pixel_threshold(
+    bottom_distance_px,
     expected_motion,
 ):
     node = FreshMockInputNode()
@@ -2562,13 +2707,32 @@ def test_pickup_loss_reacquisition_uses_existing_distance_buckets(
     decision = select_decision(
         node,
         ball=ball_info_for_node(
-            distance_m=distance_m,
+            bottom_distance_px=bottom_distance_px,
             steering_angle_deg=0.0,
         ),
     )
 
     assert decision.action == "BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
     assert decision.source_command["pickup_approach_motion"] == expected_motion
+
+
+def test_pickup_initial_close_offset_selects_initial_crab_action():
+    node = FreshMockInputNode()
+    assert node.phase_manager.set_phase("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+    node.pickup_initial_align_waiting = True
+
+    decision = select_decision(
+        node,
+        ball=ball_info_for_node(
+            offset_x_px=71,
+            bottom_distance_px=119,
+            steering_angle_deg=35.0,
+        ),
+    )
+
+    assert decision.action == "BALL_PICKUP_INITIAL_CRAB_RIGHT"
+    assert decision.action in node.PICKUP_INITIAL_ALIGN_ACTIONS
 
 
 def test_pickup_positioning_loss_does_not_latch_in_fixed_or_line_motion():

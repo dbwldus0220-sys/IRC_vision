@@ -53,6 +53,32 @@ def ball_path_heading_deg(
     return math.degrees(math.atan2(dx, forward_dy))
 
 
+def ball_display_offsets_px(
+    *,
+    target_x: float,
+    target_y: float,
+    image_width: int,
+    image_height: int,
+) -> tuple[int, int] | None:
+    """Return camera-center dx and image-bottom dy in RGB pixels."""
+    if image_width <= 0 or image_height <= 0:
+        return None
+    camera_center_dx = int(round(float(target_x) - image_width / 2.0))
+    bottom_dy = max(0, image_height - 1 - int(round(float(target_y))))
+    return camera_center_dx, bottom_dy
+
+
+def should_request_head_down(
+    bottom_distance_px: int | None,
+    trigger_distance_px: int,
+) -> bool:
+    """Return whether a confirmed ball has entered the bottom trigger."""
+    return (
+        bottom_distance_px is not None
+        and bottom_distance_px <= max(0, trigger_distance_px)
+    )
+
+
 @dataclass(frozen=True)
 class BallCandidate:
     """One ball candidate with image geometry and optional depth."""
@@ -105,6 +131,9 @@ class BallInfo:
     offset_y_px: int | None
     offset_x_norm: float | None
     offset_y_norm: float | None
+    camera_center_offset_x_px: int | None
+    bottom_distance_px: int | None
+    head_down_requested: bool
     horizontal_direction: str
     steering_angle_deg: float | None
     bearing_deg: float | None
@@ -191,6 +220,7 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         self.declare_parameter("pickup_y_tolerance_ratio", 0.12)
         self.declare_parameter("horizontal_deadband_px", 30)
         self.declare_parameter("center_tolerance_px", 140)
+        self.declare_parameter("head_down_trigger_bottom_distance_px", 120)
         # Ball pickup uses its own calibrated robot axis. Keep this separate
         # from the line analyzer's robot_center_offset_px parameter.
         self.declare_parameter("ball_robot_center_offset_px", 96.0)
@@ -287,6 +317,14 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         )
         self.center_tolerance_px = int(
             self.get_parameter("center_tolerance_px").value
+        )
+        self.head_down_trigger_bottom_distance_px = max(
+            0,
+            int(
+                self.get_parameter(
+                    "head_down_trigger_bottom_distance_px"
+                ).value
+            ),
         )
         self.robot_center_offset_px = float(
             self.get_parameter("ball_robot_center_offset_px").value
@@ -1101,6 +1139,9 @@ class BallAnalyzer(DepthFrameConsumer, Node):
             offset_y_px=None,
             offset_x_norm=None,
             offset_y_norm=None,
+            camera_center_offset_x_px=None,
+            bottom_distance_px=None,
+            head_down_requested=False,
             horizontal_direction="UNKNOWN",
             steering_angle_deg=None,
             bearing_deg=None,
@@ -1272,6 +1313,16 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         pickup_now = raw_pickup_now and pickup_confirmation.confirmed
         if raw_pickup_now and not pickup_now:
             note = "pickup_confirmation_pending"
+        display_offsets = (
+            ball_display_offsets_px(
+                target_x=target.center[0],
+                target_y=target.center[1],
+                image_width=image_width,
+                image_height=image_height,
+            )
+            if image_width is not None and image_height is not None
+            else None
+        )
         self._publish(
             BallInfo(
                 detected=True,
@@ -1287,6 +1338,16 @@ class BallAnalyzer(DepthFrameConsumer, Node):
                 offset_y_px=target.offset_y_px,
                 offset_x_norm=target.offset_x_norm,
                 offset_y_norm=target.offset_y_norm,
+                camera_center_offset_x_px=(
+                    display_offsets[0] if display_offsets is not None else None
+                ),
+                bottom_distance_px=(
+                    display_offsets[1] if display_offsets is not None else None
+                ),
+                head_down_requested=should_request_head_down(
+                    display_offsets[1] if display_offsets is not None else None,
+                    self.head_down_trigger_bottom_distance_px,
+                ),
                 horizontal_direction=target.horizontal_direction,
                 steering_angle_deg=target.steering_angle_deg,
                 bearing_deg=target.bearing_deg,

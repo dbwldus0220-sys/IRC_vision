@@ -36,6 +36,18 @@ def test_straight_command_contains_speed_and_distance():
     )
 
 
+@pytest.mark.parametrize("reported_depth", [0.10, 0.50, 1.00, 3.00])
+def test_line_straight_action_does_not_use_distance_buckets(reported_depth):
+    planner = LineNavigationPlanner()
+
+    command = planner.plan(
+        line_info(depth_m=reported_depth, distance_m=reported_depth),
+        0.1,
+    )
+
+    assert command.motion == "STRAIGHT"
+
+
 @pytest.mark.parametrize(
     ("heading", "expected"),
     [(14.0, "RIGHT"), (-14.0, "LEFT")],

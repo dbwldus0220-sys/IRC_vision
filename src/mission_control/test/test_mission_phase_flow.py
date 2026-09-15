@@ -143,6 +143,7 @@ class MissionFlowHarness:
         self.ball_approach_alignment_pending = False
         self.ball_lost_during_motion_pending = False
         self.ball_last_visible_approach_info = None
+        self.ball_last_visible_line_info = None
         self.ball_pickup_entry_pending = False
         self.ball_post_motion_dwell_until = None
         self.ball_confirmation_pending_latched = False
@@ -285,7 +286,10 @@ def pickup_ready_ball():
         "detected": True,
         "confidence": 0.95,
         "bearing_deg": 0.0,
+        "offset_x_px": 0,
         "offset_x_norm": 0.0,
+        "camera_center_offset_x_px": 0,
+        "bottom_distance_px": 500,
         "pickup_x_tolerance_norm": 0.08,
         "depth_m": 0.40,
         "ground_distance_m": 0.15,
@@ -433,7 +437,7 @@ def test_ball_pickup_entry_waits_for_general_motion_dwell(monkeypatch):
         lambda: now[0],
     )
     approach = harness.publish_vision(ball=approaching_ball())[-1]
-    assert approach["action"] == "STRAIGHT_3"
+    assert approach["action"] == "STRAIGHT_2"
 
     close_ball = pickup_ready_ball()
     close_ball.update(
@@ -485,7 +489,9 @@ def test_ball_pickup_entry_waits_for_general_motion_dwell(monkeypatch):
     )
 
 
-def test_ball_loss_recovery_turn_has_dwell_before_and_after(monkeypatch):
+def test_ball_loss_recovery_turn_is_followed_by_approach_not_another_turn(
+    monkeypatch,
+):
     harness = MissionFlowHarness(phase="BALL_APPROACH")
     harness.BALL_POST_MOTION_DWELL_SEC = 3.0
     now = [10.0]
@@ -495,7 +501,12 @@ def test_ball_loss_recovery_turn_has_dwell_before_and_after(monkeypatch):
     )
     visible_ball = approaching_ball()
     visible_ball["steering_angle_deg"] = -31.0
-    approach = harness.publish_vision(ball=visible_ball)[-1]
+    remembered_line = line_info(offset=-0.24)
+    approach = harness.publish_vision(
+        ball=visible_ball,
+        line=remembered_line,
+    )[-1]
+    harness.ball_last_visible_line_info = remembered_line
 
     MotionDecisionNode._track_ball_loss_during_motion(
         harness,
@@ -512,18 +523,16 @@ def test_ball_loss_recovery_turn_has_dwell_before_and_after(monkeypatch):
     assert harness.publish_vision(ball=lost_ball) == []
     now[0] = 13.1
     recovery = harness.publish_vision(ball=lost_ball)[-1]
-    assert recovery["action"] == "BALL_APPROACH_TURN_LEFT_2"
+    assert recovery["action"] == "BALL_APPROACH_TURN_LEFT_6"
 
     now[0] = 14.0
     release_general(harness, recovery)
-    assert harness.ball_post_motion_dwell_until == pytest.approx(17.0)
-    now[0] = 16.999
-    assert harness.publish_vision(ball=approaching_ball()) == []
-    now[0] = 17.0
-    assert harness.publish_vision(ball=approaching_ball()) == []
-    now[0] = 17.1
-    fresh_decision = harness.publish_vision(ball=approaching_ball())[-1]
-    assert fresh_decision["action"] == "STRAIGHT_3"
+    assert harness.ball_post_motion_dwell_until is None
+    assert harness.ball_approach_alignment_pending is False
+    misaligned_ball = approaching_ball()
+    misaligned_ball["steering_angle_deg"] = 26.0
+    fresh_decision = harness.publish_vision(ball=misaligned_ball)[-1]
+    assert fresh_decision["action"] == "STRAIGHT_2"
 
 
 def test_ball_motion_without_pickup_entry_keeps_three_second_dwell():
@@ -611,6 +620,7 @@ def test_pickup_fine_alignment_rechecks_fresh_ball_under_atomic_lock():
     right_ball.update(
         {
             "offset_x_norm": 0.2,
+            "offset_x_px": 51,
             "pickup_ready": False,
             "is_in_pickup_window": False,
         }
@@ -724,7 +734,7 @@ def test_pickup_initial_alignment_requires_fresh_ball_and_depth():
     )
     approach = harness.publish_vision(ball=centered)[-1]
     assert approach["action"] == "BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
-    assert approach["source_command"]["pickup_approach_motion"] == "STRAIGHT_1"
+    assert approach["source_command"]["pickup_approach_motion"] == "STRAIGHT_0"
     assert approach["source_command"]["distance_m"] == 0.44
 
 
@@ -756,7 +766,7 @@ def test_full_course_mock_flow_without_ros_graph():
         ball=approaching_ball(),
     )
     assert approach_ball[-1]["source"] == "ball"
-    assert approach_ball[-1]["action"] == "STRAIGHT_3"
+    assert approach_ball[-1]["action"] == "STRAIGHT_2"
     release_general(harness, approach_ball[-1])
 
     pickup = publish_special(
@@ -1263,12 +1273,12 @@ def test_unconfirmed_hurdle_disappearance_resumes_ball_mission():
         hurdle=hurdle,
     )
     assert held[-1]["source"] == "ball"
-    assert held[-1]["action"] == "STRAIGHT_3"
+    assert held[-1]["action"] == "STRAIGHT_2"
     release_general(harness, held[-1])
 
     resumed = harness.publish_vision(hurdle=None)
     assert resumed[-1]["source"] == "ball"
-    assert resumed[-1]["action"] == "STRAIGHT_3"
+    assert resumed[-1]["action"] == "STRAIGHT_2"
 
 
 def test_unconfirmed_hurdle_can_become_confirmed_and_take_priority():
@@ -1282,7 +1292,7 @@ def test_unconfirmed_hurdle_can_become_confirmed_and_take_priority():
         hurdle=hurdle,
     )
     assert held[-1]["source"] == "ball"
-    assert held[-1]["action"] == "STRAIGHT_3"
+    assert held[-1]["action"] == "STRAIGHT_2"
     release_general(harness, held[-1])
 
     hurdle["confirmation_confirmed"] = True
@@ -1301,7 +1311,7 @@ def test_absent_hurdle_keeps_ball_priority_over_line():
     )
 
     assert published[-1]["source"] == "ball"
-    assert published[-1]["action"] == "STRAIGHT_3"
+    assert published[-1]["action"] == "STRAIGHT_2"
 
 
 def test_go_running_and_terminal_suppress_same_hurdle_observation():
@@ -1857,7 +1867,7 @@ def test_ball_stationary_turn_requires_fresh_ball_before_next_approach():
 
     approach = harness.publish_vision(ball=off_center)
     assert len(approach) == 1
-    assert approach[0]["action"] == "STRAIGHT_3"
+    assert approach[0]["action"] == "STRAIGHT_2"
     command_id = approach[0]["command_id"]
 
     harness.send_status(
@@ -1891,7 +1901,7 @@ def test_ball_stationary_turn_requires_fresh_ball_before_next_approach():
     centered["bearing_deg"] = 0.0
     next_command = harness.publish_vision(ball=centered)
     assert len(next_command) == 1
-    assert next_command[0]["action"] == "STRAIGHT_4"
+    assert next_command[0]["action"] == "STRAIGHT_2"
 
 
 def test_second_ball_uses_same_straight_distance_policy():
@@ -1910,7 +1920,7 @@ def test_second_ball_uses_same_straight_distance_policy():
     command = harness.publish_vision(ball=ball)
 
     assert len(command) == 1
-    assert command[0]["action"] == "STRAIGHT_3"
+    assert command[0]["action"] == "STRAIGHT_2"
 
 
 def test_failed_first_pickup_keeps_straight_distance_policy():
@@ -1937,7 +1947,7 @@ def test_failed_first_pickup_keeps_straight_distance_policy():
     command = harness.publish_vision(ball=ball)
 
     assert len(command) == 1
-    assert command[0]["action"] == "STRAIGHT_3"
+    assert command[0]["action"] == "STRAIGHT_2"
 
 
 def test_active_special_uses_temporary_lock_without_changing_manager_phase():

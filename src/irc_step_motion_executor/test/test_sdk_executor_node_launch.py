@@ -21,11 +21,11 @@ def generate_test_description():
         output="screen",
         parameters=[{
             "poll_period_ms": 20,
-            "running_polls": 2,
+            "running_polls": 5,
             "settling_polls": 1,
             "force_start_failure": False,
             "force_backend_failure": False,
-            "heartbeat_period_ms": 100,
+            "heartbeat_period_ms": 20,
         }],
     )
     return (
@@ -58,6 +58,9 @@ class TestSdkExecutorTopics(unittest.TestCase):
         cls.cancel_publisher = cls.node.create_publisher(
             String, "/motion/executor/cancel", 10
         )
+        cls.ball_info_publisher = cls.node.create_publisher(
+            String, "/vision/ball_info", 10
+        )
         cls.statuses = []
         cls.heartbeats = []
         cls.subscription = cls.node.create_subscription(
@@ -87,6 +90,7 @@ class TestSdkExecutorTopics(unittest.TestCase):
             if (
                 cls.request_publisher.get_subscription_count() > 0
                 and cls.cancel_publisher.get_subscription_count() > 0
+                and cls.ball_info_publisher.get_subscription_count() > 0
             ):
                 return
         raise AssertionError("executor topic discovery timed out")
@@ -236,11 +240,73 @@ class TestSdkExecutorTopics(unittest.TestCase):
         self.assertEqual(timed_out["command_id"], 1008)
         self.assertEqual(timed_out["event_id"], 2008)
 
+    def test_ball_bottom_trigger_latches_override_until_pickup_starts(self):
+        self._request(201, "forward", "STRAIGHT", 1201, 2201)
+        self._wait_for(
+            lambda value:
+            value["request_id"] == 201
+            and value["status"] == "RUNNING"
+        )
+        self._publish(self.ball_info_publisher, {
+            "detected": True,
+            "head_down_requested": True,
+        })
+        active = self._wait_for_heartbeat(
+            lambda value: value.get("ball_head_override_active") is True
+        )
+        self.assertEqual(active["ball_head_override_deg"], -60.0)
+
+        self._wait_for(
+            lambda value:
+            value["request_id"] == 201
+            and value["status"] == "SUCCEEDED"
+        )
+        held_after_forward = self._wait_for_heartbeat(
+            lambda value:
+            value["sequence"] > active["sequence"]
+            and value.get("ball_head_override_active") is True
+        )
+
+        self._request(202, "hurdle", "GO", 1202, 2202)
+        self._wait_for(
+            lambda value:
+            value["request_id"] == 202
+            and value["status"] == "RUNNING"
+        )
+        self._wait_for_heartbeat(
+            lambda value:
+            value["sequence"] > held_after_forward["sequence"]
+            and value.get("ball_head_override_active") is True
+        )
+        self._wait_for(
+            lambda value:
+            value["request_id"] == 202
+            and value["status"] == "SUCCEEDED"
+        )
+
+        self._request(203, "pickup", "PICKUP_NOW", 1203, 2203)
+        self._wait_for(
+            lambda value:
+            value["request_id"] == 203
+            and value["status"] == "RUNNING"
+        )
+        self._wait_for_heartbeat(
+            lambda value:
+            value["sequence"] > held_after_forward["sequence"]
+            and value.get("ball_head_override_active") is False
+        )
+        self._wait_for(
+            lambda value:
+            value["request_id"] == 203
+            and value["status"] == "SUCCEEDED"
+        )
+
     def test_simulated_executor_publishes_repeated_liveness_heartbeats(self):
         first = self._wait_for_heartbeat_count(2)
         self.assertEqual(first["backend_type"], "simulated")
         self.assertIsInstance(first["active"], bool)
         self.assertIs(first["auto_ready"], True)
+        self.assertIsInstance(first["ball_head_override_active"], bool)
         sequences = [heartbeat["sequence"] for heartbeat in self.heartbeats]
         self.assertEqual(sequences, sorted(sequences))
         self.assertEqual(len(sequences), len(set(sequences)))
@@ -253,6 +319,17 @@ class TestSdkExecutorTopics(unittest.TestCase):
                 return self.heartbeats[-1]
         raise AssertionError(
             f"heartbeat timeout; received={self.heartbeats!r}"
+        )
+
+    def _wait_for_heartbeat(self, predicate, timeout=5.0):
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            rclpy.spin_once(self.node, timeout_sec=0.05)
+            matching = [value for value in self.heartbeats if predicate(value)]
+            if matching:
+                return matching[-1]
+        raise AssertionError(
+            f"heartbeat predicate timeout; received={self.heartbeats!r}"
         )
 
 

@@ -113,10 +113,12 @@ def test_cpp_executor_defaults_are_safe_and_simulated(
         "running_polls": 2,
         "settling_polls": 1,
         "explicit_torque_approval": False,
+        "position_tolerance_enabled": True,
         "motion_json_path": "",
         "robot_device_path": "/dev/ttyUSB0",
         "robot_baud_rate": 4000000,
         "robot_motor_ids": list(range(23)),
+        "ball_head_override_deg": -60.0,
     }
 
 
@@ -134,6 +136,7 @@ def test_production_arguments_reach_cpp_executor(monkeypatch, tmp_path):
             "backend_type": "robot_motion_player",
             "enable_robot_hardware": "true",
             "explicit_torque_approval": "true",
+            "position_tolerance_enabled": "false",
             "motion_json_path": "/tmp/robot_motions.json",
         },
     )
@@ -142,10 +145,74 @@ def test_production_arguments_reach_cpp_executor(monkeypatch, tmp_path):
     assert parameters["backend_type"] == "robot_motion_player"
     assert parameters["enable_robot_hardware"] is True
     assert parameters["explicit_torque_approval"] is True
+    assert parameters["position_tolerance_enabled"] is False
     assert parameters["motion_json_path"] == "/tmp/robot_motions.json"
     assert parameters["robot_device_path"] == "/dev/ttyUSB0"
     assert parameters["robot_baud_rate"] == 4000000
     assert parameters["robot_motor_ids"] == list(range(23))
+    assert parameters["ball_head_override_deg"] == -60.0
+
+
+def test_overlay_tolerance_is_separate_from_depth_sync(
+    monkeypatch,
+    tmp_path,
+):
+    description = launch_description(monkeypatch, tmp_path)
+    context = launch_context(description)
+    detector = next(
+        node
+        for node in description.entities
+        if isinstance(node, Node)
+        and node.node_executable == "yolo26_detector"
+    )
+    parameters = node_parameters(detector, context)
+
+    assert (
+        context.launch_configurations["max_rgb_depth_delta_sec"] == "0.05"
+    )
+    assert (
+        context.launch_configurations["overlay_max_stamp_delta_sec"]
+        == "0.12"
+    )
+    assert parameters["overlay_max_stamp_delta_sec"] == 0.12
+
+    unified_vision = next(
+        node
+        for node in description.entities
+        if isinstance(node, Node)
+        and node.node_executable == "unified_vision_node"
+    )
+    vision_parameters = node_parameters(unified_vision, context)
+    assert vision_parameters["max_rgb_depth_delta_sec"] == 0.05
+    assert vision_parameters["head_down_trigger_bottom_distance_px"] == 120
+
+    motion_decision = next(
+        node
+        for node in description.entities
+        if isinstance(node, Node)
+        and node.node_executable == "motion_decision_node"
+    )
+    decision_parameters = node_parameters(motion_decision, context)
+    assert decision_parameters["pickup_fine_step_bottom_distance_px"] == 500
+
+
+def test_detector_defaults_to_prebuilt_tensorrt_engine(monkeypatch, tmp_path):
+    description = launch_description(monkeypatch, tmp_path)
+    context = launch_context(description)
+    detector = next(
+        node
+        for node in description.entities
+        if isinstance(node, Node)
+        and node.node_executable == "yolo26_detector"
+    )
+    parameters = node_parameters(detector, context)
+
+    assert context.launch_configurations["device"] == "tensorrt"
+    assert context.launch_configurations["model_path"].endswith(
+        "/models/best.engine"
+    )
+    assert parameters["device"] == "tensorrt"
+    assert parameters["model_path"].endswith("/models/best.engine")
 
 
 def test_obsolete_motion_launch_arguments_are_removed(monkeypatch, tmp_path):

@@ -15,6 +15,19 @@ std::string message_or_default(
   return message.empty() ? default_message : message;
 }
 
+template<typename PlayerT>
+bool set_position_tolerance_enabled(PlayerT & player, bool enabled)
+{
+  if constexpr (requires {
+      player.setPositionToleranceEnabled(enabled);
+    })
+  {
+    player.setPositionToleranceEnabled(enabled);
+    return true;
+  }
+  return enabled;
+}
+
 BackendStartResult map_start_result(
   irc_step::StartResult result, const std::string & message)
 {
@@ -194,6 +207,23 @@ std::uint64_t BorrowedRobotMotionPlayerApi::completion_sequence() const
   return player_.completionSequence();
 }
 
+void BorrowedRobotMotionPlayerApi::set_joint_override(
+  int motor_id, double target_deg)
+{
+  player_.setJointOverride(motor_id, target_deg);
+}
+
+void BorrowedRobotMotionPlayerApi::clear_joint_override(int motor_id) noexcept
+{
+  player_.clearJointOverride(motor_id);
+}
+
+bool BorrowedRobotMotionPlayerApi::set_position_tolerance_enabled(bool enabled)
+{
+  return irc_step_motion_executor::set_position_tolerance_enabled(
+    player_, enabled);
+}
+
 RobotMotionPlayerBackend::RobotMotionPlayerBackend(
   RobotMotionPlayerApi & player_api)
 : player_api_(player_api)
@@ -261,6 +291,27 @@ BackendQueueResult RobotMotionPlayerBackend::queue_motion(
   } catch (...) {
     return {false, "SDK_EXCEPTION", "queue_next threw an unknown exception"};
   }
+}
+
+bool RobotMotionPlayerBackend::set_joint_override(
+  int motor_id, double target_deg)
+{
+  try {
+    player_api_.set_joint_override(motor_id, target_deg);
+    return true;
+  } catch (...) {
+    return false;
+  }
+}
+
+void RobotMotionPlayerBackend::clear_joint_override(int motor_id) noexcept
+{
+  player_api_.clear_joint_override(motor_id);
+}
+
+bool RobotMotionPlayerBackend::set_position_tolerance_enabled(bool enabled)
+{
+  return player_api_.set_position_tolerance_enabled(enabled);
 }
 
 std::uint64_t RobotMotionPlayerBackend::completion_sequence() const

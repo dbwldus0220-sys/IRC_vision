@@ -168,6 +168,14 @@ std::string_view RobotMotionPlayer::lastError() const noexcept
   return last_error_;
 }
 
+void RobotMotionPlayer::setJointOverride(int, double)
+{
+}
+
+void RobotMotionPlayer::clearJointOverride(int) noexcept
+{
+}
+
 namespace fake_sdk
 {
 

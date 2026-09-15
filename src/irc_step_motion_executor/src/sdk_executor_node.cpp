@@ -9,7 +9,9 @@
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
 
+#include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -62,6 +64,8 @@ public:
       "robot_motor_ids", std::vector<std::int64_t>{});
     const bool explicit_torque_approval = declare_parameter<bool>(
       "explicit_torque_approval", false);
+    const bool position_tolerance_enabled = declare_parameter<bool>(
+      "position_tolerance_enabled", true);
     const std::int64_t poll_period_ms = positive_parameter_or_default(
       "poll_period_ms", kDefaultPollPeriodMs);
     const std::int64_t running_polls = nonnegative_parameter_or_default(
@@ -76,6 +80,28 @@ public:
       "startup_pose_name", "오뒤410");
     const std::int64_t startup_pose_duration_ms = positive_parameter_or_default(
       "startup_pose_duration_ms", 1800);
+    ball_head_override_enabled_ = declare_parameter<bool>(
+      "ball_head_override_enabled", true);
+    ball_head_override_deg_ = declare_parameter<double>(
+      "ball_head_override_deg", -60.0);
+    ball_head_camera_up_deg_ = declare_parameter<double>(
+      "ball_head_camera_up_deg", -33.0);
+    ball_head_transition_ms_ = positive_parameter_or_default(
+      "ball_head_transition_ms", 400);
+    ball_head_override_motion_ids_ =
+      declare_parameter<std::vector<std::string>>(
+      "ball_head_override_motion_ids",
+      std::vector<std::string>{
+        "line_forward_2", "line_forward_4", "line_forward_6",
+        "line_forward_8", "line_forward_10", "sdk_forward_4", "forward"});
+    if (!std::isfinite(ball_head_override_deg_) ||
+      !std::isfinite(ball_head_camera_up_deg_) ||
+      ball_head_override_deg_ < -90.0 || ball_head_override_deg_ > 30.0)
+    {
+      throw std::runtime_error(
+              "ball head angles must be finite and the override must be "
+              "in [-90, 30]");
+    }
 
     MotionAliasCatalog catalog;
     std::string error_message;
@@ -114,6 +140,16 @@ public:
     }
     runtime_owner_ = std::move(backend_result.runtime_owner);
     backend_ = std::move(backend_result.backend);
+    if (backend_type == "robot_motion_player" &&
+      !backend_->set_position_tolerance_enabled(position_tolerance_enabled))
+    {
+      throw std::runtime_error(
+              "external RobotMotionPlayer SDK does not support disabling "
+              "position tolerance checks");
+    }
+    RCLCPP_INFO(
+      get_logger(), "Motion position tolerance check: %s",
+      position_tolerance_enabled ? "ENABLED" : "DISABLED");
     std::vector<double> startup_pose_angles;
     if (startup_pose_enabled && !load_startup_pose_angles(
         motion_json_path, startup_pose_name, startup_pose_angles, error_message))
@@ -149,16 +185,27 @@ public:
     request_subscription_ = create_subscription<std_msgs::msg::String>(
       "/motion/executor/request", 10,
       [this](const std_msgs::msg::String::SharedPtr message) {
+        clear_ball_head_override_before_pickup(message->data);
         driver_->handle_request(message->data);
       });
     cancel_subscription_ = create_subscription<std_msgs::msg::String>(
       "/motion/executor/cancel", 10,
       [this](const std_msgs::msg::String::SharedPtr message) {
+        clear_ball_head_override();
         driver_->handle_cancel(message->data);
+      });
+    ball_info_subscription_ = create_subscription<std_msgs::msg::String>(
+      "/vision/ball_info", 10,
+      [this](const std_msgs::msg::String::SharedPtr message) {
+        handle_ball_info(message->data);
       });
     poll_timer_ = create_wall_timer(
       std::chrono::milliseconds(poll_period_ms),
-      [this]() {driver_->poll();});
+      [this]() {
+        const auto now_ms = steady_now_ms();
+        update_ball_head_override(now_ms);
+        driver_->poll();
+      });
     heartbeat_timer_ = create_wall_timer(
       std::chrono::milliseconds(heartbeat_period_ms),
       [this, backend_type]() {publish_heartbeat(backend_type);});
@@ -171,6 +218,105 @@ public:
   }
 
 private:
+  bool ball_head_motion_active() const
+  {
+    const auto motion_id = core_->active_motion_id();
+    return motion_id && std::find(
+      ball_head_override_motion_ids_.begin(),
+      ball_head_override_motion_ids_.end(),
+      *motion_id) != ball_head_override_motion_ids_.end();
+  }
+
+  void handle_ball_info(const std::string & payload)
+  {
+    if (!ball_head_override_enabled_ || ball_head_override_latched_) {
+      return;
+    }
+    json_object * object = json_tokener_parse(payload.c_str());
+    if (object == nullptr || json_object_get_type(object) != json_type_object) {
+      if (object != nullptr) {
+        json_object_put(object);
+      }
+      return;
+    }
+    json_object * detected = nullptr;
+    json_object * requested = nullptr;
+    const bool should_override =
+      json_object_object_get_ex(object, "detected", &detected) &&
+      json_object_get_type(detected) == json_type_boolean &&
+      json_object_get_boolean(detected) &&
+      json_object_object_get_ex(
+        object, "head_down_requested", &requested) &&
+      json_object_get_type(requested) == json_type_boolean &&
+      json_object_get_boolean(requested);
+    json_object_put(object);
+    if (!should_override || !ball_head_motion_active()) {
+      return;
+    }
+    ball_head_override_latched_ = true;
+    ball_head_override_started_ms_ = steady_now_ms();
+    RCLCPP_INFO(
+      get_logger(),
+      "Ball entered bottom trigger: motor 0 override %.1f deg latched",
+      ball_head_override_deg_);
+  }
+
+  void update_ball_head_override(std::uint64_t now_ms)
+  {
+    if (!ball_head_override_latched_) {
+      return;
+    }
+    const auto elapsed_ms = now_ms >= ball_head_override_started_ms_ ?
+      now_ms - ball_head_override_started_ms_ : 0;
+    const double progress = std::min(
+      1.0,
+      static_cast<double>(elapsed_ms) /
+      static_cast<double>(ball_head_transition_ms_));
+    const double target_deg = ball_head_camera_up_deg_ +
+      (ball_head_override_deg_ - ball_head_camera_up_deg_) * progress;
+    if (!backend_->set_joint_override(0, target_deg)) {
+      RCLCPP_ERROR(
+        get_logger(), "Motion backend rejected motor 0 override");
+      clear_ball_head_override();
+    }
+  }
+
+  void clear_ball_head_override_before_pickup(const std::string & payload)
+  {
+    if (!ball_head_override_latched_) {
+      return;
+    }
+    json_object * object = json_tokener_parse(payload.c_str());
+    if (object == nullptr || json_object_get_type(object) != json_type_object) {
+      if (object != nullptr) {
+        json_object_put(object);
+      }
+      return;
+    }
+    json_object * motion_id_value = nullptr;
+    const bool starts_pickup =
+      json_object_object_get_ex(object, "motion_id", &motion_id_value) &&
+      json_object_get_type(motion_id_value) == json_type_string &&
+      (std::string(json_object_get_string(motion_id_value)) == "pickup" ||
+      std::string(json_object_get_string(motion_id_value)) == "sdk_pickup");
+    json_object_put(object);
+    if (starts_pickup) {
+      clear_ball_head_override();
+      RCLCPP_INFO(
+        get_logger(),
+        "Motor 0 override cleared before pickup motion");
+    }
+  }
+
+  void clear_ball_head_override() noexcept
+  {
+    if (!ball_head_override_latched_) {
+      return;
+    }
+    backend_->clear_joint_override(0);
+    ball_head_override_latched_ = false;
+  }
+
   void publish_heartbeat(const std::string & backend_type)
   {
     json_object * object = json_object_new_object();
@@ -184,6 +330,12 @@ private:
     json_object_object_add(
       object, "auto_ready",
       json_object_new_boolean(startup_pose_gate_->navigation_allowed()));
+    json_object_object_add(
+      object, "ball_head_override_active",
+      json_object_new_boolean(ball_head_override_latched_));
+    json_object_object_add(
+      object, "ball_head_override_deg",
+      json_object_new_double(ball_head_override_deg_));
 
     std_msgs::msg::String message;
     message.data = json_object_to_json_string_ext(
@@ -234,9 +386,18 @@ private:
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr heartbeat_publisher_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr request_subscription_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr cancel_subscription_;
+  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr
+    ball_info_subscription_;
   rclcpp::TimerBase::SharedPtr poll_timer_;
   rclcpp::TimerBase::SharedPtr heartbeat_timer_;
   std::uint64_t heartbeat_sequence_{0};
+  bool ball_head_override_enabled_{true};
+  bool ball_head_override_latched_{false};
+  double ball_head_override_deg_{-60.0};
+  double ball_head_camera_up_deg_{-33.0};
+  std::int64_t ball_head_transition_ms_{400};
+  std::uint64_t ball_head_override_started_ms_{0};
+  std::vector<std::string> ball_head_override_motion_ids_;
 };
 
 }  // namespace irc_step_motion_executor

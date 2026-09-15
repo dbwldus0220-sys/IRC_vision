@@ -58,6 +58,20 @@ public:
   {
     return {false, "QUEUE_UNSUPPORTED", "backend does not support queuing"};
   }
+  virtual bool set_joint_override(int motor_id, double target_deg)
+  {
+    static_cast<void>(motor_id);
+    static_cast<void>(target_deg);
+    return false;
+  }
+  virtual void clear_joint_override(int motor_id) noexcept
+  {
+    static_cast<void>(motor_id);
+  }
+  virtual bool set_position_tolerance_enabled(bool enabled)
+  {
+    return enabled;
+  }
   virtual std::uint64_t completion_sequence() const {return 0;}
 };
 

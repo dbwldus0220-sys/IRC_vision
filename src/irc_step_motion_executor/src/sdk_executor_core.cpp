@@ -435,6 +435,14 @@ bool SdkExecutorCore::has_active_request() const
   return active_.has_value();
 }
 
+std::optional<std::string> SdkExecutorCore::active_motion_id() const
+{
+  if (!active_) {
+    return std::nullopt;
+  }
+  return active_->request.motion_id;
+}
+
 MotionStatus SdkExecutorCore::status_for_active(
   const std::string & status, const std::string & error_code,
   const std::string & message) const

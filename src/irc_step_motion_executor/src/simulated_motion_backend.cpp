@@ -74,6 +74,22 @@ BackendStatus SimulatedMotionBackend::poll_status()
   return {BackendState::SUCCEEDED, "", "simulated motion succeeded"};
 }
 
+bool SimulatedMotionBackend::set_joint_override(int motor_id, double target_deg)
+{
+  if (motor_id != 0) {
+    return false;
+  }
+  joint_zero_override_deg_ = target_deg;
+  return true;
+}
+
+void SimulatedMotionBackend::clear_joint_override(int motor_id) noexcept
+{
+  if (motor_id == 0) {
+    joint_zero_override_deg_.reset();
+  }
+}
+
 const std::optional<std::string> &
 SimulatedMotionBackend::active_motion_name() const
 {

@@ -5,6 +5,7 @@ import pytest
 from mission_control.safety_interlock import CRITICAL_EXECUTOR_ERROR_CODES
 from mission_control.safety_interlock import CRITICAL_LATCHED
 from mission_control.safety_interlock import NORMAL
+from mission_control.safety_interlock import RECOVERABLE_MOTOR_ERROR_CODES
 from mission_control.safety_interlock import SafetyInterlock
 
 
@@ -23,13 +24,13 @@ def test_critical_fault_latches_first_fault_until_restart():
     assert interlock.snapshot.state == NORMAL
     assert not interlock.latched
 
-    assert observe(interlock, "SDK_COMMUNICATION_ERROR")
+    assert observe(interlock, "BACKEND_EXCEPTION")
     assert interlock.latched
     assert interlock.snapshot.state == CRITICAL_LATCHED
-    assert interlock.snapshot.error_code == "SDK_COMMUNICATION_ERROR"
+    assert interlock.snapshot.error_code == "BACKEND_EXCEPTION"
 
     assert not observe(interlock, "BUSY", action="LEFT", command_id=11)
-    assert interlock.snapshot.error_code == "SDK_COMMUNICATION_ERROR"
+    assert interlock.snapshot.error_code == "BACKEND_EXCEPTION"
     assert interlock.snapshot.action == "STRAIGHT"
 
 
@@ -38,6 +39,13 @@ def test_known_runtime_faults_are_critical(error_code):
     interlock = SafetyInterlock()
     assert observe(interlock, error_code)
     assert interlock.latched
+
+
+@pytest.mark.parametrize("error_code", sorted(RECOVERABLE_MOTOR_ERROR_CODES))
+def test_motor_faults_do_not_latch_mission_control(error_code):
+    interlock = SafetyInterlock()
+    assert not observe(interlock, error_code)
+    assert not interlock.latched
 
 
 @pytest.mark.parametrize(

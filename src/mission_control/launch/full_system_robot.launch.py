@@ -21,10 +21,14 @@ def generate_launch_description() -> LaunchDescription:
     model_path = LaunchConfiguration("model_path")
     device = LaunchConfiguration("device")
     display = LaunchConfiguration("display")
+    show_camera_controls = LaunchConfiguration("show_camera_controls")
     metrics_mode = LaunchConfiguration("metrics_mode")
     max_fps = LaunchConfiguration("max_fps")
     max_rgb_depth_delta_sec = LaunchConfiguration(
         "max_rgb_depth_delta_sec"
+    )
+    overlay_max_stamp_delta_sec = LaunchConfiguration(
+        "overlay_max_stamp_delta_sec"
     )
 
     camera_topic_prefix = LaunchConfiguration("camera_topic_prefix")
@@ -63,6 +67,13 @@ def generate_launch_description() -> LaunchDescription:
     corner_turn_margin_m = LaunchConfiguration("corner_turn_margin_m")
     ball_tracking_range_m = LaunchConfiguration("ball_tracking_range_m")
     ball_control_range_m = LaunchConfiguration("ball_control_range_m")
+    pickup_fine_step_bottom_distance_px = LaunchConfiguration(
+        "pickup_fine_step_bottom_distance_px"
+    )
+    head_down_trigger_bottom_distance_px = LaunchConfiguration(
+        "head_down_trigger_bottom_distance_px"
+    )
+    ball_head_override_deg = LaunchConfiguration("ball_head_override_deg")
     goal_tracking_range_m = LaunchConfiguration("goal_tracking_range_m")
     goal_control_range_m = LaunchConfiguration("goal_control_range_m")
     hurdle_control_range_m = LaunchConfiguration("hurdle_control_range_m")
@@ -70,6 +81,9 @@ def generate_launch_description() -> LaunchDescription:
     enable_robot_hardware = LaunchConfiguration("enable_robot_hardware")
     explicit_torque_approval = LaunchConfiguration(
         "explicit_torque_approval"
+    )
+    position_tolerance_enabled = LaunchConfiguration(
+        "position_tolerance_enabled"
     )
     motion_json_path = LaunchConfiguration("motion_json_path")
     robot_device_path = LaunchConfiguration("robot_device_path")
@@ -106,10 +120,14 @@ def generate_launch_description() -> LaunchDescription:
                 "model_path": model_path,
                 "device": device,
                 "display": ParameterValue(display, value_type=bool),
+                "show_camera_controls": ParameterValue(
+                    show_camera_controls,
+                    value_type=bool,
+                ),
                 "metrics_mode": metrics_mode,
                 "max_fps": ParameterValue(max_fps, value_type=float),
                 "overlay_max_stamp_delta_sec": ParameterValue(
-                    max_rgb_depth_delta_sec,
+                    overlay_max_stamp_delta_sec,
                     value_type=float,
                 ),
                 "image_topic": ParameterValue(
@@ -193,6 +211,10 @@ def generate_launch_description() -> LaunchDescription:
                 "corner_turn_margin_m": ParameterValue(
                     corner_turn_margin_m, value_type=float
                 ),
+                "head_down_trigger_bottom_distance_px": ParameterValue(
+                    head_down_trigger_bottom_distance_px,
+                    value_type=int,
+                ),
             }
         ],
 
@@ -220,6 +242,10 @@ def generate_launch_description() -> LaunchDescription:
                 ),
                 "ball_control_range_m": ParameterValue(
                     ball_control_range_m, value_type=float
+                ),
+                "pickup_fine_step_bottom_distance_px": ParameterValue(
+                    pickup_fine_step_bottom_distance_px,
+                    value_type=int,
                 ),
                 "goal_tracking_range_m": ParameterValue(
                     goal_tracking_range_m, value_type=float
@@ -260,6 +286,10 @@ def generate_launch_description() -> LaunchDescription:
                     explicit_torque_approval,
                     value_type=bool,
                 ),
+                "position_tolerance_enabled": ParameterValue(
+                    position_tolerance_enabled,
+                    value_type=bool,
+                ),
                 "motion_json_path": ParameterValue(
                     motion_json_path,
                     value_type=str,
@@ -282,6 +312,10 @@ def generate_launch_description() -> LaunchDescription:
                 "startup_pose_duration_ms": ParameterValue(
                     startup_pose_duration_ms, value_type=int
                 ),
+                "ball_head_override_deg": ParameterValue(
+                    ball_head_override_deg,
+                    value_type=float,
+                ),
             }
         ],
     )
@@ -301,6 +335,10 @@ def generate_launch_description() -> LaunchDescription:
             ),
             DeclareLaunchArgument("device", default_value="tensorrt"),
             DeclareLaunchArgument("display", default_value="true"),
+            DeclareLaunchArgument(
+                "show_camera_controls",
+                default_value="false",
+            ),
             DeclareLaunchArgument("metrics_mode", default_value="auto"),
             DeclareLaunchArgument("max_fps", default_value="30.0"),
             DeclareLaunchArgument(
@@ -309,6 +347,15 @@ def generate_launch_description() -> LaunchDescription:
                 description=(
                     "Maximum RGB/depth timestamp difference accepted for "
                     "ball control and metrics."
+                ),
+            ),
+            DeclareLaunchArgument(
+                "overlay_max_stamp_delta_sec",
+                default_value="0.12",
+                description=(
+                    "Maximum RGB timestamp difference used only for the "
+                    "detector debug overlay. This does not relax RGB-depth "
+                    "control synchronization."
                 ),
             ),
             DeclareLaunchArgument(
@@ -348,6 +395,22 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("corner_turn_margin_m", default_value="0.15"),
             DeclareLaunchArgument("ball_tracking_range_m", default_value="1.5"),
             DeclareLaunchArgument("ball_control_range_m", default_value="1.5"),
+            DeclareLaunchArgument(
+                "pickup_fine_step_bottom_distance_px",
+                default_value="500",
+                description=(
+                    "Switch to the fixed pickup fine step when the Ball "
+                    "center is this many pixels or less from the image bottom."
+                ),
+            ),
+            DeclareLaunchArgument(
+                "head_down_trigger_bottom_distance_px",
+                default_value="120",
+            ),
+            DeclareLaunchArgument(
+                "ball_head_override_deg",
+                default_value="-60.0",
+            ),
             DeclareLaunchArgument("goal_tracking_range_m", default_value="1.0"),
             DeclareLaunchArgument("goal_control_range_m", default_value="0.5"),
             DeclareLaunchArgument("hurdle_control_range_m", default_value="1.0"),
@@ -366,6 +429,13 @@ def generate_launch_description() -> LaunchDescription:
                 "explicit_torque_approval",
                 default_value="true",
                 description="Independent explicit approval for torque enable.",
+            ),
+            DeclareLaunchArgument(
+                "position_tolerance_enabled",
+                default_value="true",
+                description=(
+                    "Check final joint positions before completing each motion."
+                ),
             ),
             DeclareLaunchArgument(
                 "motion_json_path",

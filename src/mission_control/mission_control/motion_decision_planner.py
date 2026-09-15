@@ -55,6 +55,7 @@ class MotionDecisionConfig:
     curve_follow_max_offset_norm: float = 0.55
     ball_tracking_range_m: float = 1.5
     ball_control_range_m: float = 1.5
+    pickup_fine_step_bottom_distance_px: int = 500
     ball_lost_stop_sec: float = 0.35
     ball_recovery_timeout_sec: float = 8.0
     ball_recovery_turn_rad_s: float = 0.22
@@ -103,12 +104,17 @@ class MotionDecisionPlanner:
     }
     TURN_REPEAT_DEG = 10.0
     MAX_TURN_REPEAT_COUNT = 9
+    PICKUP_INITIAL_HEADING_TOLERANCE_DEG = 7.0
+    PICKUP_INITIAL_CENTER_BOUND_PX = 70.0
+    PICKUP_CLOSE_CRAB_BOTTOM_DISTANCE_PX = 120.0
     BALL_APPROACH_LEFT_TURN_REPEAT_DEG = 15.0
     BALL_APPROACH_LEFT_MAX_TURN_REPEAT_COUNT = 6
-    PICKUP_LONG_APPROACH_MIN_DISTANCE_M = 0.450
-    PICKUP_FINE_APPROACH_MIN_DISTANCE_M = 0.130
+    PICKUP_FINE_LEFT_BOUND_PX = -30.0
+    PICKUP_FINE_RIGHT_BOUND_PX = 50.0
     POST_BALL_LINE_LEFT_COUNTS = frozenset({2, 3, 4, 6})
     BALL_APPROACH_LEFT_COUNTS = (2, 3, 4, 5, 6)
+    BALL_LOST_LINE_LEFT_TURN_COUNT = 6
+    BALL_LOST_LINE_RIGHT_TURN_COUNT = 9
 
     def __init__(
         self,
@@ -142,6 +148,8 @@ class MotionDecisionPlanner:
         self.last_ball_bearing_deg: float | None = None
         self.last_ball_offset_x_norm: float | None = None
         self.last_ball_turn_direction = "RIGHT"
+        self.last_ball_line_offset_norm: float | None = None
+        self.last_ball_line_side: str | None = None
         self.ball_lock_active = False
         self.ball_terminal_requested = False
         self.ball_ignore_until_clear = False
@@ -229,6 +237,7 @@ class MotionDecisionPlanner:
             )
         if normalized_phase == "POST_BALL_LINE_ALIGN":
             return self._plan_post_ball_line_align(observations.get("line"))
+        self._update_ball_recovery_line_tracking(observations.get("line"))
         self._update_ball_tracking(observations.get("ball"), dt_sec)
         self._update_goal_tracking(observations.get("goal"), dt_sec)
         self._update_hurdle_lock(
@@ -698,74 +707,59 @@ class MotionDecisionPlanner:
         self,
         info: dict[str, Any] | None,
     ) -> MotionDecision:
-        """Turn once from the last in-range Ball sample after image loss."""
+        """Turn about 90 degrees toward the remembered Line side."""
         phase = "BALL_APPROACH_LOST_ALIGN"
-        if info is None:
+        if info is None or info.get("detected") is not True:
             return MotionDecision(
                 phase=phase,
                 source="ball",
                 action="WAIT",
                 valid=False,
-                reason="lost_ball_alignment_has_no_remembered_sample",
+                reason="lost_ball_alignment_has_no_remembered_line",
                 sdk_motion_requested=False,
                 requires_ack=False,
                 source_command={},
             )
 
-        distance = self._number(info, "distance_m")
-        steering_error = self.ball_planner._steering_error(
-            self._number(info, "steering_angle_deg"),
-            self._number(info, "bearing_deg"),
-            self._number(info, "offset_x_norm"),
-            distance,
-        )
-        if steering_error is None:
+        line_offset = self._number(info, "filtered_lateral_offset_norm")
+        if line_offset is None:
+            line_offset = self._number(info, "lateral_offset_norm")
+        if line_offset is None or line_offset == 0.0:
             return MotionDecision(
                 phase=phase,
                 source="ball",
                 action="WAIT",
                 valid=False,
-                reason="lost_ball_alignment_has_no_remembered_direction",
+                reason="lost_ball_alignment_has_no_line_side",
                 sdk_motion_requested=False,
                 requires_ack=False,
                 source_command={},
             )
 
-        direction = "RIGHT" if steering_error >= 0.0 else "LEFT"
-        turn_repeat_deg = self.TURN_REPEAT_DEG
-        count = self._turn_repeat_count(steering_error)
-        if direction == "LEFT":
+        direction = "RIGHT" if line_offset > 0.0 else "LEFT"
+        if direction == "RIGHT":
+            count = self.BALL_LOST_LINE_RIGHT_TURN_COUNT
+            turn_repeat_deg = self.TURN_REPEAT_DEG
+        else:
+            count = self.BALL_LOST_LINE_LEFT_TURN_COUNT
             turn_repeat_deg = self.BALL_APPROACH_LEFT_TURN_REPEAT_DEG
-            requested_count = int(
-                math.floor(abs(steering_error) / turn_repeat_deg + 0.5)
-            )
-            requested_count = max(
-                1,
-                min(
-                    self.BALL_APPROACH_LEFT_MAX_TURN_REPEAT_COUNT,
-                    requested_count,
-                ),
-            )
-            count = min(
-                self.BALL_APPROACH_LEFT_COUNTS,
-                key=lambda supported: abs(supported - requested_count),
-            )
         return MotionDecision(
             phase=phase,
             source="ball",
             action=f"BALL_APPROACH_TURN_{direction}_{count}",
             valid=True,
-            reason="ball_lost_during_motion_turn_from_last_direction",
+            reason="ball_lost_turn_toward_last_line_side",
             sdk_motion_requested=False,
             requires_ack=False,
             source_command={
-                "distance_m": distance,
-                "steering_error_deg": steering_error,
+                "line_lateral_offset_norm": line_offset,
+                "line_side": direction,
                 "turn_direction": direction,
                 "turn_count": count,
                 "turn_repeat_deg": turn_repeat_deg,
                 "turn_angle_deg": count * turn_repeat_deg,
                 "lost_ball_alignment_from_memory": True,
+                "alignment_reference": "line_side",
                 "catalog_motion_available": True,
             },
         )
@@ -891,7 +885,10 @@ class MotionDecisionPlanner:
 
         confidence = self._number(info, "confidence")
         offset = self._number(info, "offset_x_norm")
-        tolerance = self._number(info, "pickup_x_tolerance_norm")
+        robot_center_offset_px = self._number(
+            info,
+            "offset_x_px",
+        )
         depth = self._number(info, "depth_m")
         distance = self._number(info, "distance_m")
         depth_valid = info.get("depth_valid")
@@ -901,9 +898,7 @@ class MotionDecisionPlanner:
         if (
             confidence is None
             or confidence < self.ball_planner.config.min_confidence
-            or offset is None
-            or tolerance is None
-            or tolerance <= 0.0
+            or robot_center_offset_px is None
         ):
             return MotionDecision(
                 phase=phase,
@@ -918,7 +913,9 @@ class MotionDecisionPlanner:
 
         common = {
             "offset_x_norm": offset,
-            "pickup_x_tolerance_norm": tolerance,
+            "offset_x_px": robot_center_offset_px,
+            "pickup_left_bound_px": self.PICKUP_FINE_LEFT_BOUND_PX,
+            "pickup_right_bound_px": self.PICKUP_FINE_RIGHT_BOUND_PX,
             "confidence": confidence,
             "depth_m": depth,
             "distance_m": distance,
@@ -927,9 +924,13 @@ class MotionDecisionPlanner:
             "pickup_ready": pickup_ready,
             "is_in_pickup_window": in_pickup_window,
         }
-        # BallAnalyzer computes detected center minus calibrated robot center;
-        # positive therefore means the ball is to the robot's screen-right.
-        if abs(offset) <= tolerance:
+        # BallAnalyzer computes this offset from the calibrated robot center;
+        # positive therefore means the ball is to the screen-right.
+        if (
+            self.PICKUP_FINE_LEFT_BOUND_PX
+            <= robot_center_offset_px
+            <= self.PICKUP_FINE_RIGHT_BOUND_PX
+        ):
             return MotionDecision(
                 phase=phase,
                 source="ball",
@@ -945,7 +946,7 @@ class MotionDecisionPlanner:
                 },
             )
 
-        direction = "RIGHT" if offset > 0.0 else "LEFT"
+        direction = "RIGHT" if robot_center_offset_px > 0.0 else "LEFT"
         return MotionDecision(
             phase=phase,
             source="ball",
@@ -969,7 +970,7 @@ class MotionDecisionPlanner:
         self,
         info: dict[str, Any] | None,
     ) -> MotionDecision:
-        """Align pickup heading, then choose distance from this frame."""
+        """Align pickup heading, then choose a step from Ball image height."""
         phase = "BALL_PICKUP_INITIAL_ALIGN"
         if info is None:
             return MotionDecision(
@@ -986,25 +987,22 @@ class MotionDecisionPlanner:
             return MotionDecision(
                 phase=phase,
                 source="ball",
-                action="BALL_PICKUP_INITIAL_ALIGN_CONTINUE",
-                valid=True,
-                reason="ball_pickup_not_visible_fine_forward",
-                sdk_motion_requested=True,
+                action="WAIT",
+                valid=False,
+                reason="ball_pickup_initial_alignment_waiting_for_ball",
+                sdk_motion_requested=False,
                 requires_ack=False,
-                source_command={
-                    "pickup_approach_motion": "STRAIGHT_0",
-                    "approach_level": 0,
-                    "use_no_ball_pickup_path": True,
-                    "catalog_motion_available": True,
-                },
+                source_command={},
             )
 
         confidence = self._number(info, "confidence")
         steering_angle = self._number(info, "steering_angle_deg")
         bearing = self._number(info, "bearing_deg")
         offset = self._number(info, "offset_x_norm")
+        robot_center_offset_px = self._number(info, "offset_x_px")
         depth = self._number(info, "depth_m")
         distance = self._number(info, "distance_m")
+        bottom_distance_px = self._number(info, "bottom_distance_px")
         steering_error = self.ball_planner._steering_error(
             steering_angle,
             bearing,
@@ -1015,6 +1013,7 @@ class MotionDecisionPlanner:
             confidence is None
             or confidence < self.ball_planner.config.min_confidence
             or steering_error is None
+            or robot_center_offset_px is None
         ):
             return MotionDecision(
                 phase=phase,
@@ -1027,21 +1026,86 @@ class MotionDecisionPlanner:
                 source_command={},
             )
 
-        tolerance = self.ball_planner.config.turn_enter_deg
+        tolerance = self.PICKUP_INITIAL_HEADING_TOLERANCE_DEG
         common = {
             "steering_angle_deg": steering_angle,
             "bearing_deg": bearing,
             "offset_x_norm": offset,
+            "offset_x_px": robot_center_offset_px,
+            "pickup_center_left_bound_px": (
+                -self.PICKUP_INITIAL_CENTER_BOUND_PX
+            ),
+            "pickup_center_right_bound_px": (
+                self.PICKUP_INITIAL_CENTER_BOUND_PX
+            ),
             "steering_error_deg": steering_error,
             "heading_tolerance_deg": tolerance,
             "confidence": confidence,
             "depth_m": depth,
             "distance_m": distance,
+            "bottom_distance_px": bottom_distance_px,
+            "pickup_fine_step_bottom_distance_px": (
+                self.config.pickup_fine_step_bottom_distance_px
+            ),
             "depth_valid": info.get("depth_valid"),
             "depth_age_sec": self._number(info, "depth_age_sec"),
         }
-        if abs(steering_error) > tolerance:
-            direction = "RIGHT" if steering_error > 0.0 else "LEFT"
+        if bottom_distance_px is None or bottom_distance_px < 0.0:
+            return MotionDecision(
+                phase=phase,
+                source="ball",
+                action="WAIT",
+                valid=False,
+                reason="ball_pickup_waiting_for_bottom_distance_px",
+                sdk_motion_requested=False,
+                requires_ack=False,
+                source_command=common,
+            )
+
+        outside_center_window = bool(
+            abs(robot_center_offset_px)
+            > self.PICKUP_INITIAL_CENTER_BOUND_PX
+        )
+        if (
+            outside_center_window
+            and bottom_distance_px
+            < self.PICKUP_CLOSE_CRAB_BOTTOM_DISTANCE_PX
+        ):
+            direction = (
+                "RIGHT" if robot_center_offset_px > 0.0 else "LEFT"
+            )
+            return MotionDecision(
+                phase=phase,
+                source="ball",
+                action=f"BALL_PICKUP_INITIAL_CRAB_{direction}",
+                valid=True,
+                reason="ball_pickup_close_lateral_correction",
+                sdk_motion_requested=True,
+                requires_ack=False,
+                source_command={
+                    **common,
+                    "lateral_direction": direction,
+                    "close_crab_bottom_distance_px": (
+                        self.PICKUP_CLOSE_CRAB_BOTTOM_DISTANCE_PX
+                    ),
+                    "catalog_motion_available": True,
+                },
+            )
+
+        if (
+            bottom_distance_px
+            >= self.PICKUP_CLOSE_CRAB_BOTTOM_DISTANCE_PX
+            and (
+                outside_center_window
+                or abs(steering_error) > tolerance
+            )
+        ):
+            if outside_center_window:
+                direction = (
+                    "RIGHT" if robot_center_offset_px > 0.0 else "LEFT"
+                )
+            else:
+                direction = "RIGHT" if steering_error > 0.0 else "LEFT"
             count = self._turn_repeat_count(steering_error)
             return MotionDecision(
                 phase=phase,
@@ -1060,41 +1124,22 @@ class MotionDecisionPlanner:
                 },
             )
 
-        depth_age = self._number(info, "depth_age_sec")
-        distance_is_fresh = bool(
-            info.get("depth_valid") is True
-            and distance is not None
-            and distance > 0.0
-            and depth_age is not None
-            and 0.0 <= depth_age
-            <= self.ball_planner.config.max_pickup_depth_age_sec
+        fine_step_threshold_px = max(
+            0,
+            self.config.pickup_fine_step_bottom_distance_px,
         )
-        if not distance_is_fresh:
-            return MotionDecision(
-                phase=phase,
-                source="ball",
-                action="WAIT",
-                valid=False,
-                reason="ball_pickup_waiting_for_fresh_distance",
-                sdk_motion_requested=False,
-                requires_ack=False,
-                source_command=common,
-            )
-
-        if distance > self.PICKUP_LONG_APPROACH_MIN_DISTANCE_M:
-            approach_motion = "STRAIGHT_3"
-        elif distance > self.PICKUP_FINE_APPROACH_MIN_DISTANCE_M:
-            approach_motion = "STRAIGHT_1"
+        if bottom_distance_px > fine_step_threshold_px:
+            approach_motion = "STRAIGHT_2"
         else:
             approach_motion = "STRAIGHT_0"
         approach_level = approach_level_from_motion(approach_motion)
-        if approach_level not in {0, 1, 3}:
+        if approach_level not in {0, 2}:
             return MotionDecision(
                 phase=phase,
                 source="ball",
                 action="WAIT",
                 valid=False,
-                reason="pickup_camera_down_motion_unavailable_for_distance",
+                reason="pickup_camera_down_motion_unavailable_for_pixel_range",
                 sdk_motion_requested=False,
                 requires_ack=False,
                 source_command=common,
@@ -1104,7 +1149,7 @@ class MotionDecisionPlanner:
             source="ball",
             action="BALL_PICKUP_INITIAL_ALIGN_CONTINUE",
             valid=True,
-            reason="ball_pickup_heading_aligned_for_distance_approach",
+            reason="ball_pickup_heading_aligned_for_pixel_approach",
             sdk_motion_requested=True,
             requires_ack=False,
             source_command={
@@ -1444,27 +1489,48 @@ class MotionDecisionPlanner:
             return
         self.ball_recovery_centering = True
         self.ball_lost_elapsed_sec += max(0.0, dt_sec)
-        if (
-            self.ball_lost_elapsed_sec
-            > self.config.ball_recovery_timeout_sec
-        ):
-            self._clear_ball_tracking()
+        # Recovery retries are intentionally observation-driven with no
+        # elapsed-time or attempt-count limit.
+
+    def _update_ball_recovery_line_tracking(
+        self,
+        info: dict[str, Any] | None,
+    ) -> None:
+        """Remember which side of the robot the latest detected Line is on."""
+        if info is None or info.get("detected") is not True:
+            return
+        offset = self._number(info, "filtered_lateral_offset_norm")
+        if offset is None:
+            offset = self._number(info, "lateral_offset_norm")
+        if offset is None or offset == 0.0:
+            return
+        self.last_ball_line_offset_norm = offset
+        self.last_ball_line_side = "RIGHT" if offset > 0.0 else "LEFT"
 
     def _lost_ball_recovery_command(self) -> dict[str, Any]:
-        """Stop first, then rotate toward the last observed ball side."""
-        direction = self.last_ball_turn_direction
+        """Stop first, then turn about 90 degrees toward the last Line side."""
+        direction = self.last_ball_line_side
         stopping = (
             self.ball_lost_elapsed_sec <= self.config.ball_lost_stop_sec
         )
-        if stopping:
+        if stopping or direction is None:
             motion = "BALL_LOST_STOP"
-            angular_speed = 0.0
-            reason = "ball_lost_stop_before_search"
+            reason = (
+                "ball_lost_stop_before_line_turn"
+                if stopping
+                else "ball_lost_stop_without_line_side"
+            )
+            count = 0
+            turn_repeat_deg = 0.0
         else:
-            motion = f"RECOVER_TURN_{direction}"
-            sign = 1.0 if direction == "RIGHT" else -1.0
-            angular_speed = sign * self.config.ball_recovery_turn_rad_s
-            reason = "turn_toward_last_seen_ball_side"
+            if direction == "RIGHT":
+                count = self.BALL_LOST_LINE_RIGHT_TURN_COUNT
+                turn_repeat_deg = self.TURN_REPEAT_DEG
+            else:
+                count = self.BALL_LOST_LINE_LEFT_TURN_COUNT
+                turn_repeat_deg = self.BALL_APPROACH_LEFT_TURN_REPEAT_DEG
+            motion = f"BALL_APPROACH_TURN_{direction}_{count}"
+            reason = "turn_toward_last_seen_line_side"
 
         duration = self.config.ball_recovery_command_sec
         return {
@@ -1473,15 +1539,12 @@ class MotionDecisionPlanner:
             "reason": reason,
             "linear_speed_mps": 0.0,
             "lateral_speed_mps": 0.0,
-            "angular_speed_rad_s": round(angular_speed, 4),
+            "angular_speed_rad_s": 0.0,
             "angular_accel_rad_s2": 0.0,
             "command_duration_sec": round(duration, 3),
             "travel_distance_m": 0.0,
             "lateral_travel_distance_m": 0.0,
-            "target_heading_change_deg": round(
-                math.degrees(angular_speed * duration),
-                3,
-            ),
+            "target_heading_change_deg": count * turn_repeat_deg,
             "bearing_error_deg": self.last_ball_bearing_deg,
             "offset_x_norm": self.last_ball_offset_x_norm,
             "depth_m": None,
@@ -1493,64 +1556,14 @@ class MotionDecisionPlanner:
             "pickup_now": False,
             "tracking_active": True,
             "lost_elapsed_sec": round(self.ball_lost_elapsed_sec, 3),
-            "last_seen_direction": direction,
-        }
-
-    def _ball_is_centered(self, info: dict[str, Any] | None) -> bool:
-        bearing = self._number(info, "bearing_deg")
-        if bearing is not None:
-            return abs(bearing) <= self.config.ball_reacquire_center_deg
-        offset = self._number(info, "offset_x_norm")
-        return bool(
-            offset is not None
-            and abs(offset) <= self.config.ball_reacquire_center_norm
-        )
-
-    def _reacquired_ball_centering_command(
-        self,
-        info: dict[str, Any],
-    ) -> dict[str, Any]:
-        """Keep rotating after reacquisition until the ball is centered."""
-        bearing = self._number(info, "bearing_deg")
-        offset = self._number(info, "offset_x_norm")
-        direction_value = bearing
-        if direction_value is None and offset is not None:
-            direction_value = offset * 35.0
-        if direction_value is not None and direction_value < 0.0:
-            direction = "LEFT"
-            sign = -1.0
-        else:
-            direction = "RIGHT"
-            sign = 1.0
-        angular_speed = sign * self.config.ball_recovery_turn_rad_s
-        duration = self.config.ball_recovery_command_sec
-        return {
-            "valid": True,
-            "motion": f"RECOVER_TURN_{direction}",
-            "reason": "reacquired_ball_centering_in_place",
-            "linear_speed_mps": 0.0,
-            "lateral_speed_mps": 0.0,
-            "angular_speed_rad_s": round(angular_speed, 4),
-            "angular_accel_rad_s2": 0.0,
-            "command_duration_sec": round(duration, 3),
-            "travel_distance_m": 0.0,
-            "lateral_travel_distance_m": 0.0,
-            "target_heading_change_deg": round(
-                math.degrees(angular_speed * duration),
-                3,
-            ),
-            "bearing_error_deg": bearing,
-            "offset_x_norm": offset,
-            "depth_m": self._number(info, "depth_m"),
-            "distance_m": self._number(info, "distance_m"),
-            "distance_error_m": None,
-            "confidence": self._number(info, "confidence") or 0.0,
-            "depth_valid": bool(info.get("depth_valid", False)),
-            "pickup_ready": False,
-            "pickup_now": False,
-            "tracking_active": True,
-            "lost_elapsed_sec": 0.0,
-            "last_seen_direction": direction,
+            "last_seen_line_side": direction,
+            "line_lateral_offset_norm": self.last_ball_line_offset_norm,
+            "turn_direction": direction,
+            "turn_count": count,
+            "turn_repeat_deg": turn_repeat_deg,
+            "lost_ball_alignment_from_memory": not stopping,
+            "alignment_reference": "line_side",
+            "catalog_motion_available": direction is not None,
         }
 
     def _clear_ball_tracking(self) -> None:
@@ -1559,6 +1572,8 @@ class MotionDecisionPlanner:
         self.ball_lost_elapsed_sec = 0.0
         self.last_ball_bearing_deg = None
         self.last_ball_offset_x_norm = None
+        self.last_ball_line_offset_norm = None
+        self.last_ball_line_side = None
 
     def clear_collected_ball_tracking(self) -> None:
         """Discard recovery state for a ball that was picked up successfully."""
@@ -1584,6 +1599,8 @@ class MotionDecisionPlanner:
             "last_bearing_deg": self.last_ball_bearing_deg,
             "last_offset_x_norm": self.last_ball_offset_x_norm,
             "last_direction": self.last_ball_turn_direction,
+            "last_line_offset_norm": self.last_ball_line_offset_norm,
+            "last_line_side": self.last_ball_line_side,
         }
 
     @staticmethod

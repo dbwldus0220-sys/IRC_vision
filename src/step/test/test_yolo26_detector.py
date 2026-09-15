@@ -9,6 +9,29 @@ from step.yolo26_detector import LetterboxInfo
 from step.yolo26_detector import Yolo26Detector
 
 
+class _SubscriptionCountPublisher:
+    """Minimal publisher double exposing only its subscriber count."""
+
+    def __init__(self, count):
+        """Store the simulated ROS subscription count."""
+        self.count = count
+
+    def get_subscription_count(self):
+        """Return the simulated ROS subscription count."""
+        return self.count
+
+
+def test_annotated_image_copy_requires_an_actual_subscriber():
+    """Keep the local window without an unused full-frame ROS copy."""
+    detector = object.__new__(Yolo26Detector)
+    detector.publish_annotated_image = True
+    detector.annotated_publisher = _SubscriptionCountPublisher(0)
+    assert detector._annotated_image_has_subscriber() is False
+
+    detector.annotated_publisher = _SubscriptionCountPublisher(1)
+    assert detector._annotated_image_has_subscriber() is True
+
+
 def test_default_class_names_include_grab_model_output():
     """Keep TensorRT/ONNX class ID 5 aligned with the six-class model."""
     assert DEFAULT_CLASS_NAMES == [
@@ -212,6 +235,78 @@ def test_ball_overlay_rejects_info_outside_rgb_stamp_tolerance():
 
     assert detector._fresh_ball_info() is None
     assert detector._ball_info_stamp_delta_ms == 51.0
+
+
+def test_recent_ball_info_remains_available_when_rgb_stamp_is_stale():
+    """Expose analyzer status without reusing stale geometry."""
+    detector = _detector_with_ball_info_stamp(
+        info_stamp_ns=1_000_000_000,
+        overlay_stamp_ns=1_080_000_000,
+    )
+    detector.latest_ball_info.update(
+        {
+            "confirmation_confirmed": True,
+            "detected": True,
+        }
+    )
+
+    assert detector._fresh_ball_info() is None
+    assert detector._recent_ball_info() == detector.latest_ball_info
+    assert detector._ball_info_stamp_delta_ms == 80.0
+
+
+def test_recent_ball_info_rejects_expired_receipt():
+    """Do not display analyzer status after its receipt timeout."""
+    detector = _detector_with_ball_info_stamp(
+        info_stamp_ns=1_000_000_000,
+        overlay_stamp_ns=1_040_000_000,
+    )
+    detector.latest_ball_info_time = (
+        time.monotonic() - detector.ball_info_timeout_sec - 0.01
+    )
+
+    assert detector._recent_ball_info() is None
+    assert detector._fresh_ball_info() is None
+
+
+def test_grasp_banner_only_appears_during_verification():
+    """Hide grasp recognition outside the explicit checking window."""
+    assert Yolo26Detector._grasp_verification_banner(None) is None
+    assert Yolo26Detector._grasp_verification_banner(
+        {"grasp_verification": {"active": False, "result": "GRABBED"}}
+    ) is None
+
+
+def test_grasp_banner_reports_the_mission_nodes_current_result():
+    """Display waiting, success, and failure using distinct colors."""
+    assert Yolo26Detector._grasp_verification_banner(
+        {"grasp_verification": {"active": True, "result": "UNKNOWN"}}
+    ) == ("GRASP CHECK: WAITING", (0, 165, 255))
+    assert Yolo26Detector._grasp_verification_banner(
+        {"grasp_verification": {"active": True, "result": "GRABBED"}}
+    ) == ("GRASP CHECK: GRABBED", (0, 255, 0))
+    assert Yolo26Detector._grasp_verification_banner(
+        {
+            "grasp_verification": {
+                "active": True,
+                "result": "NOT_GRABBED",
+            }
+        }
+    ) == ("GRASP CHECK: NOT GRABBED", (0, 0, 255))
+
+
+def test_grasp_debug_status_expires_instead_of_leaving_stale_banner():
+    """Drop the overlay if motion_decision_node status stops arriving."""
+    detector = object.__new__(Yolo26Detector)
+    detector.latest_decision_debug = {
+        "grasp_verification": {"active": True, "result": "GRABBED"}
+    }
+    detector.latest_decision_debug_time = time.monotonic()
+    detector.decision_debug_timeout_sec = 0.5
+
+    assert detector._fresh_decision_debug() == detector.latest_decision_debug
+    detector.latest_decision_debug_time -= 0.51
+    assert detector._fresh_decision_debug() is None
 
 
 def test_model_sha256_is_computed_without_changing_model_data(tmp_path):

@@ -8,7 +8,9 @@ import numpy as np
 import pytest
 
 from step.ball_analyzer import BallAnalyzer
+from step.ball_analyzer import ball_display_offsets_px
 from step.ball_analyzer import ball_path_heading_deg
+from step.ball_analyzer import should_request_head_down
 
 
 def _analyzer_with_depth(depth_m, depth_valid):
@@ -93,6 +95,36 @@ def test_ball_mode_can_use_axis_separate_from_line_calibration():
     )
 
     assert heading == 0.0
+
+
+def test_ball_display_offsets_use_camera_center_and_image_bottom():
+    """Keep display pixels independent from the calibrated robot axis."""
+    offsets = ball_display_offsets_px(
+        target_x=708,
+        target_y=529,
+        image_width=1280,
+        image_height=720,
+    )
+
+    assert offsets == (68, 190)
+
+
+def test_ball_display_bottom_distance_is_zero_at_last_image_row():
+    offsets = ball_display_offsets_px(
+        target_x=640,
+        target_y=719,
+        image_width=1280,
+        image_height=720,
+    )
+
+    assert offsets == (0, 0)
+
+
+def test_head_down_pixel_trigger_includes_exact_120_pixel_boundary():
+    assert should_request_head_down(121, 120) is False
+    assert should_request_head_down(120, 120) is True
+    assert should_request_head_down(0, 120) is True
+    assert should_request_head_down(None, 120) is False
 
 
 def test_rgb_ball_remains_candidate_beyond_tracking_distance():

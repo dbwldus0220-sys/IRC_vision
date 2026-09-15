@@ -24,6 +24,8 @@ public:
   bool throw_on_cancel{false};
   bool throw_on_update{false};
   std::uint64_t sequence{0};
+  int override_motor_id{-1};
+  double override_target_deg{0.0};
 
   irc_step::StartResult start(std::string_view motion_name) override
   {
@@ -71,6 +73,19 @@ public:
   {
     return sequence;
   }
+
+  void set_joint_override(int motor_id, double target_deg) override
+  {
+    override_motor_id = motor_id;
+    override_target_deg = target_deg;
+  }
+
+  void clear_joint_override(int motor_id) noexcept override
+  {
+    if (override_motor_id == motor_id) {
+      override_motor_id = -1;
+    }
+  }
 };
 
 TEST(RobotMotionPlayerBackend, PassesResolvedMotionNameWithoutModification)
@@ -82,6 +97,19 @@ TEST(RobotMotionPlayerBackend, PassesResolvedMotionNameWithoutModification)
 
   EXPECT_TRUE(result.accepted);
   EXPECT_EQ(api.received_motion_name, "첫발");
+}
+
+TEST(RobotMotionPlayerBackend, ForwardsAbsoluteJointOverride)
+{
+  FakeRobotMotionPlayerApi api;
+  irc_step_motion_executor::RobotMotionPlayerBackend backend(api);
+
+  EXPECT_TRUE(backend.set_joint_override(0, -60.0));
+  EXPECT_EQ(api.override_motor_id, 0);
+  EXPECT_DOUBLE_EQ(api.override_target_deg, -60.0);
+
+  backend.clear_joint_override(0);
+  EXPECT_EQ(api.override_motor_id, -1);
 }
 
 TEST(RobotMotionPlayerBackend, MapsEveryKnownStartResult)

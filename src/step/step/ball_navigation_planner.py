@@ -8,7 +8,6 @@ import math
 from typing import Any
 
 from .approach_distance import approach_level_from_motion
-from .approach_distance import approach_motion_for_distance
 from .line_navigation_planner import numbered_turn_motion_metadata
 
 
@@ -312,14 +311,10 @@ class BallNavigationPlanner:
 
     def _general_approach_motion(
         self,
-        distance_m: float,
+        _distance_m: float,
     ) -> str:
-        """Select the BALL-only straight motion for the current distance."""
-        if distance_m > 0.680:
-            return "STRAIGHT_3"
-        if distance_m > 0.564:
-            return "STRAIGHT_4"
-        return approach_motion_for_distance(distance_m)
+        """Use the fixed four-repeat forward motion during BALL approach."""
+        return "STRAIGHT_2"
 
     def _approach_speed(
         self,
