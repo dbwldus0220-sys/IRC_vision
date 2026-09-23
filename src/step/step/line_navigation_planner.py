@@ -292,6 +292,8 @@ class LineNavigationPlanner:
         self,
         line_info: dict[str, Any],
         dt_sec: float,
+        *,
+        allow_corner_turns: bool = True,
     ) -> NavigationCommand:
         """Generate one bounded command from a fresh line analysis sample."""
         if not bool(line_info.get("detected", False)):
@@ -325,13 +327,15 @@ class LineNavigationPlanner:
         path_turn_delta = _number(line_info, "path_turn_delta_deg")
         turn_consistency = _number(line_info, "turn_consistency")
         preview_is_reliable = (
-            preview_turn is not None
+            allow_corner_turns
+            and preview_turn is not None
             and abs(preview_turn) >= self.config.preview_min_turn_deg
             and turn_consistency is not None
             and turn_consistency >= self.config.preview_min_consistency
         )
         path_turn_is_reliable = (
-            path_turn_delta is not None
+            allow_corner_turns
+            and path_turn_delta is not None
             and abs(path_turn_delta) >= self.config.preview_min_turn_deg
             and turn_consistency is not None
             and turn_consistency >= self.config.preview_min_consistency
@@ -394,6 +398,13 @@ class LineNavigationPlanner:
         )
 
         requested_motion = self._classify_motion(steering_error)
+        # Local line recovery above remains available. Generic LEFT/RIGHT
+        # actions select fixed corner motions in the hardware bridge.
+        corner_turn_suppressed = bool(
+            not allow_corner_turns and requested_motion in {"LEFT", "RIGHT"}
+        )
+        if corner_turn_suppressed:
+            requested_motion = "STRAIGHT"
         curve_matches_requested_motion = bool(
             curve_is_reliable
             and (
@@ -422,7 +433,11 @@ class LineNavigationPlanner:
         )
         control_steering_error = (
             0.0
-            if turn_confirmation_pending or straight_line_turn_suppressed
+            if (
+                turn_confirmation_pending
+                or straight_line_turn_suppressed
+                or corner_turn_suppressed
+            )
             else steering_error
         )
 
@@ -451,6 +466,8 @@ class LineNavigationPlanner:
         if direction_is_ambiguous:
             speed = self.config.min_linear_speed_mps
             reason = "conflicting_heading_and_preview"
+        elif corner_turn_suppressed:
+            reason = "corner_turn_suppressed"
         elif straight_line_turn_suppressed:
             reason = "straight_line_turn_suppressed"
         elif turn_approach_pending:

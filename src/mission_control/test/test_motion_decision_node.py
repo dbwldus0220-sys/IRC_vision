@@ -43,6 +43,10 @@ class FakeLogger:
 class FakePlanner:
     """Return deterministic line or lock decisions for node-level tests."""
 
+    def _remember_pickup_close_ball(self, _info):
+        """Leave proximity handling to tests using the real planner."""
+        pass
+
     def clear_collected_ball_tracking(self):
         """Match the planner lifecycle hook used after a successful pickup."""
         pass
@@ -108,6 +112,9 @@ class FakePlanner:
 
 class FakeDecisionNode:
     """Provide only the state required by the motion-status callback."""
+
+    # Timing tests explicitly enable the production shot delay.
+    SHOT_PRE_MOTION_SETTLE_SEC = 0.0
 
     PRE_MOTION_SETTLE_ACTIONS = MotionDecisionNode.PRE_MOTION_SETTLE_ACTIONS
     SPECIAL_ACTIONS = MotionDecisionNode.SPECIAL_ACTIONS
@@ -396,11 +403,12 @@ def test_grasp_window_ignores_pre_pose_detection_and_latches_fresh_grab():
         [{"class_name": "grab", "confidence": 0.9}],
     )
     assert node.grasp_verification_result == "UNKNOWN"
-    send_grasp_detections(
-        node,
-        11,
-        [{"class_name": "grab", "confidence": 0.26}],
-    )
+    for stamp in range(11, 26):
+        send_grasp_detections(
+            node,
+            stamp,
+            [{"class_name": "grab", "confidence": 0.25}],
+        )
     send_status(
         node,
         status="RUNNING",
@@ -417,7 +425,7 @@ def test_grasp_window_ignores_pre_pose_detection_and_latches_fresh_grab():
     assert node.grasp_verification_active is False
 
 
-def test_grasp_window_latches_not_grabbed_from_last_fresh_frame():
+def test_grasp_window_latches_not_grabbed_without_successful_frames():
     node = FakeDecisionNode("BALL_APPROACH")
     arm_special_command(node, "PICKUP_NOW", 10, 1)
     MotionDecisionNode._start_grasp_verification_window(node)
@@ -425,6 +433,144 @@ def test_grasp_window_latches_not_grabbed_from_last_fresh_frame():
     MotionDecisionNode._finish_grasp_verification_window(node)
 
     assert node.phase_manager.grasp_result_for_ball(1) == "NOT_GRABBED"
+
+
+@pytest.mark.parametrize(
+    ("success_count", "frame_count", "last_success", "expected"),
+    [
+        (15, 40, False, "GRABBED"),
+        (14, 40, True, "NOT_GRABBED"),
+        (15, 15, True, "GRABBED"),
+        (14, 14, True, "NOT_GRABBED"),
+    ],
+)
+def test_grasp_window_requires_fifteen_successful_frames(
+    success_count, frame_count, last_success, expected
+):
+    node = FakeDecisionNode("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+    MotionDecisionNode._start_grasp_verification_window(node)
+    successes_before_last = success_count - int(last_success)
+    for index in range(frame_count):
+        successful = (
+            last_success if index == frame_count - 1
+            else index < successes_before_last
+        )
+        send_grasp_detections(
+            node,
+            index + 1,
+            [{"class_name": "grab", "confidence": 0.25}]
+            if successful else [],
+        )
+
+    MotionDecisionNode._finish_grasp_verification_window(node)
+
+    assert node.phase_manager.grasp_result_for_ball(1) == expected
+    # Later observations cannot change a completed verification result.
+    send_grasp_detections(node, frame_count + 1, [])
+    assert node.grasp_verification_result == expected
+    assert node.phase_manager.grasp_result_for_ball(1) == expected
+
+
+def test_grasp_window_counts_nonconsecutive_successes_for_shot_permission():
+    node = FakeDecisionNode("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+    MotionDecisionNode._start_grasp_verification_window(node)
+    for index in range(40):
+        send_grasp_detections(
+            node,
+            index + 1,
+            [{"class_name": "grab", "confidence": 0.8}]
+            if index < 30 and index % 2 == 0 else [],
+        )
+    MotionDecisionNode._finish_grasp_verification_window(node)
+    node.phase_manager.handle_motion_status("PICKUP_NOW", 10, "RUNNING")
+    node.phase_manager.handle_motion_status("PICKUP_NOW", 10, "SUCCEEDED")
+    shot = MotionDecision(
+        phase="GOAL_APPROACH",
+        source="goal",
+        action="SHOT",
+        valid=True,
+        reason="goal_centered_at_scoring_depth",
+        sdk_motion_requested=True,
+        requires_ack=True,
+        source_command={},
+    )
+
+    assert node.phase_manager.grasp_result_for_ball(1) == "GRABBED"
+    assert MotionDecisionNode._suppress_unverified_shot(node, shot) == shot
+
+
+def test_grasp_window_uses_latest_forty_frames():
+    node = FakeDecisionNode("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+    MotionDecisionNode._start_grasp_verification_window(node)
+    for stamp in range(1, 41):
+        send_grasp_detections(
+            node,
+            stamp,
+            [{"class_name": "grab", "confidence": 0.8}]
+            if stamp <= 15 else [],
+        )
+    assert node.grasp_verification_result == "GRABBED"
+
+    send_grasp_detections(node, 41, [])
+    MotionDecisionNode._finish_grasp_verification_window(node)
+
+    assert node.phase_manager.grasp_result_for_ball(1) == "NOT_GRABBED"
+    summary = grasp_log_records(node, "GRASP_VERIFY_END")[0]
+    assert summary["accepted_frames"] == 41
+    assert summary["grabbed_frames"] == 15
+    assert summary["decision_window_frames"] == 40
+    assert summary["decision_window_grabbed_frames"] == 14
+
+
+def test_grasp_window_counts_one_vote_per_frame_and_keeps_confidence_threshold():
+    node = FakeDecisionNode("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+    MotionDecisionNode._start_grasp_verification_window(node)
+    send_grasp_detections(
+        node, 1, [{"class_name": "grab", "confidence": 0.9}] * 15
+    )
+    for stamp in range(2, 41):
+        send_grasp_detections(node, stamp, [
+            {"class_name": "grab", "confidence": 0.24},
+            {"class_name": "ball", "confidence": 0.99},
+        ])
+    MotionDecisionNode._finish_grasp_verification_window(node)
+
+    assert node.phase_manager.grasp_result_for_ball(1) == "NOT_GRABBED"
+    summary = grasp_log_records(node, "GRASP_VERIFY_END")[0]
+    assert summary["decision_window_frames"] == 40
+    assert summary["decision_window_grabbed_frames"] == 1
+
+
+def test_grasp_window_clears_votes_for_the_next_ball():
+    node = FakeDecisionNode("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+    MotionDecisionNode._start_grasp_verification_window(node)
+    for stamp in range(1, 16):
+        send_grasp_detections(
+            node, stamp, [{"class_name": "grab", "confidence": 0.8}]
+        )
+    MotionDecisionNode._finish_grasp_verification_window(node)
+    node.phase_manager.handle_motion_status("PICKUP_NOW", 10, "RUNNING")
+    node.phase_manager.handle_motion_status("PICKUP_NOW", 10, "SUCCEEDED")
+    assert node.phase_manager.start_special_action("SHOT", 11)
+    node.phase_manager.handle_motion_status("SHOT", 11, "RUNNING")
+    node.phase_manager.handle_motion_status("SHOT", 11, "SUCCEEDED")
+    assert node.phase_manager.start_special_action("PICKUP_NOW", 12)
+    MotionDecisionNode._start_grasp_verification_window(node)
+    assert node.grasp_verification_result == "UNKNOWN"
+    send_grasp_detections(node, 16, [])
+    MotionDecisionNode._finish_grasp_verification_window(node)
+
+    assert node.phase_manager.grasp_result_for_ball(1) == "GRABBED"
+    assert node.phase_manager.grasp_result_for_ball(2) == "NOT_GRABBED"
+    summary = grasp_log_records(node, "GRASP_VERIFY_END")[-1]
+    assert summary["ball_index"] == 2
+    assert summary["decision_window_frames"] == 1
+    assert summary["decision_window_grabbed_frames"] == 0
 
 
 def test_grasp_window_without_fresh_frame_remains_unknown():
@@ -448,6 +594,8 @@ def test_grasp_verification_start_log_is_emitted_once():
     assert records[0]["ball_index"] == 1
     assert records[0]["completed_motion"] == "pickup_grasp_check_pose"
     assert records[0]["confidence_threshold"] == 0.25
+    assert records[0]["frame_window_limit"] == 40
+    assert records[0]["required_grab_frames"] == 15
     assert records[0]["expected_window_sec"] == 3.0
     assert records[0]["initial_result"] == "UNKNOWN"
 
@@ -478,7 +626,9 @@ def test_grasp_verification_frame_logs_grab_and_miss_observations():
     assert records[0]["grab_max_confidence"] == 0.63
     assert records[0]["grab_pass"] is True
     assert records[0]["frame_result"] == "GRABBED"
-    assert records[0]["pending_result"] == "GRABBED"
+    assert records[0]["pending_result"] == "NOT_GRABBED"
+    assert records[0]["decision_window_frames"] == 1
+    assert records[0]["decision_window_grabbed_frames"] == 1
     assert records[0]["bbox"] == [1, 2, 3, 4]
     assert records[0]["ball_detected"] is True
     assert records[1]["frame_idx"] == 2
@@ -487,20 +637,23 @@ def test_grasp_verification_frame_logs_grab_and_miss_observations():
     assert records[1]["grab_pass"] is False
     assert records[1]["frame_result"] == "NOT_GRABBED"
     assert records[1]["pending_result"] == "NOT_GRABBED"
+    assert records[1]["decision_window_frames"] == 2
+    assert records[1]["decision_window_grabbed_frames"] == 1
 
 
 def test_grasp_verification_reject_logs_preserve_pending_result():
     node = FakeDecisionNode("BALL_APPROACH")
     arm_special_command(node, "PICKUP_NOW", 10, 1)
     MotionDecisionNode._start_grasp_verification_window(node)
-    send_grasp_detections(
-        node,
-        20,
-        [{"class_name": "grab", "confidence": 0.7}],
-    )
+    for stamp in range(20, 35):
+        send_grasp_detections(
+            node,
+            stamp,
+            [{"class_name": "grab", "confidence": 0.7}],
+        )
 
-    send_grasp_detections(node, 20, [])
-    send_grasp_detections(node, 19, [])
+    send_grasp_detections(node, 34, [])
+    send_grasp_detections(node, 33, [])
 
     records = grasp_log_records(node, "GRASP_VERIFY_REJECT")
     assert [record["reason"] for record in records] == [
@@ -509,39 +662,42 @@ def test_grasp_verification_reject_logs_preserve_pending_result():
     ]
     assert node.grasp_verify_rejected_frames == 2
     assert node.grasp_verification_result == "GRABBED"
+    assert node.grasp_verify_accepted_frames == 15
+    assert len(node.grasp_verify_frame_votes) == 15
 
 
-def test_grasp_verification_end_summarizes_last_frame_semantics():
+def test_grasp_verification_end_distinguishes_last_frame_from_vote_result():
     node = FakeDecisionNode("BALL_APPROACH")
     arm_special_command(node, "PICKUP_NOW", 10, 1)
     MotionDecisionNode._start_grasp_verification_window(node)
-    send_grasp_detections(
-        node,
-        10,
-        [{"class_name": "grab", "confidence": 0.4}],
-    )
-    send_grasp_detections(
-        node,
-        20,
-        [{"class_name": "grab", "confidence": 0.8}],
-    )
-    send_grasp_detections(node, 30, [])
+    for stamp, confidence in enumerate([0.4, 0.8] * 7 + [0.6], start=1):
+        send_grasp_detections(
+            node,
+            stamp,
+            [{"class_name": "grab", "confidence": confidence}],
+        )
+    for stamp in range(16, 41):
+        send_grasp_detections(node, stamp, [])
 
     MotionDecisionNode._finish_grasp_verification_window(node)
     MotionDecisionNode._finish_grasp_verification_window(node)
 
     records = grasp_log_records(node, "GRASP_VERIFY_END")
     assert len(records) == 1
-    assert records[0]["accepted_frames"] == 3
-    assert records[0]["grabbed_frames"] == 2
-    assert records[0]["not_grabbed_frames"] == 1
+    assert records[0]["accepted_frames"] == 40
+    assert records[0]["grabbed_frames"] == 15
+    assert records[0]["not_grabbed_frames"] == 25
+    assert records[0]["decision_window_frames"] == 40
+    assert records[0]["decision_window_grabbed_frames"] == 15
+    assert records[0]["frame_window_limit"] == 40
+    assert records[0]["required_grab_frames"] == 15
     assert records[0]["grab_confidence_min"] == 0.4
     assert records[0]["grab_confidence_max"] == 0.8
     assert records[0]["grab_confidence_mean"] == pytest.approx(0.6)
     assert records[0]["grab_confidence_median"] == pytest.approx(0.6)
     assert records[0]["last_fresh_frame_result"] == "NOT_GRABBED"
-    assert records[0]["latched_result"] == "NOT_GRABBED"
-    assert node.phase_manager.grasp_result_for_ball(1) == "NOT_GRABBED"
+    assert records[0]["latched_result"] == "GRABBED"
+    assert node.phase_manager.grasp_result_for_ball(1) == "GRABBED"
 
 
 def test_grasp_verification_end_reports_zero_fresh_frames():
@@ -555,6 +711,9 @@ def test_grasp_verification_end_reports_zero_fresh_frames():
     assert record["accepted_frames"] == 0
     assert record["fresh_frame_zero"] is True
     assert record["latched_result"] == "UNKNOWN"
+    assert record["last_fresh_frame_result"] == "UNKNOWN"
+    assert record["decision_window_frames"] == 0
+    assert record["decision_window_grabbed_frames"] == 0
 
 
 def test_grasp_summary_keeps_below_threshold_confidence_for_analysis():
@@ -758,7 +917,8 @@ def test_pickup_fine_wait_uses_only_ball_and_blocks_other_sources():
         ball={
             'detected': True,
             'confidence': 0.9,
-            'offset_x_px': 51,
+            'offset_x_px': 56,
+            'bottom_distance_px': 200,
             'offset_x_norm': 0.2,
             'pickup_x_tolerance_norm': 0.08,
             'ground_distance_m': 0.20,
@@ -966,6 +1126,8 @@ class ReadinessPublishNode(FakeDecisionNode):
             {
                 'ball_tracking_status': staticmethod(lambda: {}),
                 'goal_tracking_status': staticmethod(lambda: {}),
+                '_remember_pickup_close_ball': staticmethod(lambda _info: None),
+                'clear_collected_ball_tracking': staticmethod(lambda: None),
             },
         )()
         self.previous_publish_time = 0.0
@@ -1238,7 +1400,22 @@ def test_decision_debug_reports_existing_state(monkeypatch):
         'result': 'UNKNOWN',
         'confidence': None,
         'accepted_frames': 0,
+        'decision_window_frames': 0,
+        'decision_window_grabbed_frames': 0,
+        'frame_window_limit': 40,
+        'required_grab_frames': 15,
     }
+    assert payload['safety']['latched'] is False
+    node.safety_interlock.observe_executor_status(
+        error_code='SDK_HARDWARE_NOT_READY',
+        message='direct profile restore: Profile Velocity address=112 result=-1001',
+        action='PICKUP_NOW', command_id=10, event_id=1,
+    )
+    MotionDecisionNode._publish_decision_debug(node)
+    stopped = json.loads(node.decision_debug_publisher.messages[-1].data)
+    assert stopped['safety']['latched'] is True
+    assert stopped['safety']['error_code'] == 'SDK_HARDWARE_NOT_READY'
+    assert 'address=112' in stopped['safety']['message']
 
 
 def test_decision_debug_failure_does_not_escape():
@@ -1257,7 +1434,7 @@ def test_decision_debug_failure_does_not_escape():
 
 def test_only_current_production_motions_require_settle():
     assert MotionDecisionNode.PRE_MOTION_SETTLE_ACTIONS == frozenset(
-        {'LEFT', 'RIGHT', 'PICKUP_NOW', 'GO'}
+        {'LEFT', 'RIGHT', 'PICKUP_NOW', 'GO', 'SHOT'}
     )
 
 
@@ -1268,7 +1445,6 @@ def test_only_current_production_motions_require_settle():
         'TURN_RIGHT',
         'ALIGN_LEFT',
         'ALIGN_RIGHT',
-        'SHOT',
     ],
 )
 def test_unsupported_action_does_not_start_settle(action):
@@ -1943,8 +2119,9 @@ def test_completed_line_motion_can_publish_next_decision_without_fresh_vision():
     assert node.active_special_command_id == 2
 
 
+@pytest.mark.parametrize("latest_detected", [True, False])
 def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
-    monkeypatch,
+    monkeypatch, latest_detected,
 ):
     node = ReadinessPublishNode(general_decision("STRAIGHT"))
     clock = [10.0]
@@ -1964,11 +2141,13 @@ def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
         def _reset_turn_state(self):
             pass
 
-        def plan(self, frame, _dt_sec):
+        def plan(self, frame, _dt_sec, *, allow_corner_turns=True):
+            assert allow_corner_turns is True
             self.frames.append(frame)
 
     recording_planner = RecordingLinePlanner()
     node.planner.line_planner = recording_planner
+    node.planner.observe_line_for_search = lambda _info: None
 
     MotionDecisionNode._publish_decision(node)
     send_status(
@@ -2010,11 +2189,15 @@ def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
         clock[0],
     )
     assert capture_ready
+    node._fresh_observations = lambda _now: ({"line": {"detected": latest_detected}}, {})
     MotionDecisionNode._prepare_pending_line_decision(
         node,
         clock[0],
     )
-    assert node.pending_line_decision is not None
+    assert (node.pending_line_decision is not None) is latest_detected
+    assert len(node.publisher.messages) == (2 if latest_detected else 1)
+    if not latest_detected:
+        node.decision = general_decision("LINE_LOST_TURN_LEFT")
 
     send_status(
         node,
@@ -2027,9 +2210,11 @@ def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
 
     assert len(recording_planner.frames) == 10
     assert node.active_line_motion_frames == []
-    assert len(node.publisher.messages) == 2
+    assert len(node.publisher.messages) == (2 if latest_detected else 1)
     MotionDecisionNode._publish_decision(node)
     assert len(node.publisher.messages) == 2
+    expected = "STRAIGHT" if latest_detected else "LINE_LOST_TURN_LEFT"
+    assert json.loads(node.publisher.messages[-1].data)["action"] == expected
 
 
 def test_line_motion_capture_table_matches_deployed_timelines():
@@ -2107,7 +2292,8 @@ def test_line_timeout_discards_capture_and_requires_ten_new_valid_frames():
         def _reset_turn_state(self):
             self.frames = []
 
-        def plan(self, frame, _dt_sec):
+        def plan(self, frame, _dt_sec, *, allow_corner_turns=True):
+            assert allow_corner_turns is True
             self.frames.append(frame)
 
     recording_planner = RecordingLinePlanner()
@@ -2297,6 +2483,8 @@ def ball_info_for_node(**overrides):
         "pickup_now": False,
     }
     sample.update(overrides)
+    if "camera_center_offset_x_px" not in overrides and "offset_x_px" in overrides:
+        sample["camera_center_offset_x_px"] = overrides["offset_x_px"]
     return sample
 
 
@@ -2454,11 +2642,11 @@ def test_ball_approach_entry_during_line_motion_dwells_before_initial_alignment(
         node,
         ball=ball_info_for_node(
             distance_m=1.4,
-            steering_angle_deg=-26.0,
+            steering_angle_deg=-30.0,
         ),
     )
     assert decision.source == "ball"
-    assert decision.action == "BALL_APPROACH_TURN_LEFT_2"
+    assert decision.action == "BALL_APPROACH_TURN_LEFT_1"
 
 
 def test_ball_approach_entry_after_line_release_starts_initial_dwell(
@@ -2508,7 +2696,7 @@ def test_ball_straight_success_starts_three_second_alignment_settle(monkeypatch)
     assert node.ball_post_motion_dwell_until == pytest.approx(13.0)
 
 
-def test_ball_alignment_turn_success_proceeds_to_forward_without_rechecking(
+def test_ball_alignment_turn_success_dwells_before_forward_without_rechecking(
     monkeypatch,
 ):
     node = FreshMockInputNode()
@@ -2516,7 +2704,7 @@ def test_ball_alignment_turn_success_proceeds_to_forward_without_rechecking(
     node.BALL_POST_MOTION_DWELL_SEC = 3.0
     node.general_motion_gate.on_new_vision_input()
     node.general_motion_gate.on_command_published(
-        "BALL_APPROACH_TURN_LEFT_2",
+        "BALL_APPROACH_TURN_LEFT_1",
         command_id=3,
     )
     node.active_general_source = "ball"
@@ -2525,7 +2713,7 @@ def test_ball_alignment_turn_success_proceeds_to_forward_without_rechecking(
     send_status(
         node,
         status="RUNNING",
-        action="BALL_APPROACH_TURN_LEFT_2",
+        action="BALL_APPROACH_TURN_LEFT_1",
         command_id=3,
         event_id=None,
         dynamics_command=None,
@@ -2533,14 +2721,14 @@ def test_ball_alignment_turn_success_proceeds_to_forward_without_rechecking(
     send_status(
         node,
         status="SUCCEEDED",
-        action="BALL_APPROACH_TURN_LEFT_2",
+        action="BALL_APPROACH_TURN_LEFT_1",
         command_id=3,
         event_id=None,
         dynamics_command=None,
     )
 
     assert node.ball_approach_alignment_pending is False
-    assert node.ball_post_motion_dwell_until is None
+    assert node.ball_post_motion_dwell_until == pytest.approx(13.0)
     decision = select_decision(
         node,
         ball=ball_info_for_node(
@@ -2548,7 +2736,88 @@ def test_ball_alignment_turn_success_proceeds_to_forward_without_rechecking(
             steering_angle_deg=-26.0,
         ),
     )
-    assert decision.action == "STRAIGHT_3"
+    assert decision.action == "STRAIGHT_2"
+
+
+@pytest.mark.parametrize(
+    ("angle", "turn_action"),
+    [
+        (-30.0, "BALL_APPROACH_TURN_LEFT_1"),
+        (26.0, "BALL_APPROACH_TURN_RIGHT_2"),
+    ],
+)
+def test_ball_approach_repeats_dwell_turn_dwell_forward_cycle(
+    monkeypatch, angle, turn_action,
+):
+    from mission_control.motion_decision_planner import MotionDecisionPlanner
+
+    class BallApproachPublishNode(ReadinessPublishNode):
+        SOURCES = MotionDecisionNode.SOURCES
+        BALL_POST_MOTION_DWELL_SEC = MotionDecisionNode.BALL_POST_MOTION_DWELL_SEC
+        _fresh_observations = MotionDecisionNode._fresh_observations
+        _select_mission_decision = MotionDecisionNode._select_mission_decision
+
+    node = BallApproachPublishNode(general_decision())
+    node.planner = MotionDecisionPlanner()
+    node.timeouts = {source: 0.5 for source in node.SOURCES}
+    assert node.phase_manager.set_phase("BALL_APPROACH")
+    clock = [10.0]
+    monkeypatch.setattr(time, "monotonic", lambda: clock[0])
+    ball_callback = MotionDecisionNode._info_callback(node, "ball")
+
+    def receive_ball():
+        message = String()
+        message.data = json.dumps(
+            ball_info_for_node(distance_m=0.9, steering_angle_deg=angle)
+        )
+        ball_callback(message)
+
+    def wait_then_publish(expected_action):
+        deadline = node.ball_post_motion_dwell_until
+        assert deadline == pytest.approx(clock[0] + 3.0)
+        published_count = len(node.publisher.messages)
+        clock[0] = deadline - 0.001
+        receive_ball()
+        MotionDecisionNode._publish_decision(node)
+        assert len(node.publisher.messages) == published_count
+        assert node.latest_info["ball"]["detected"] is True
+
+        clock[0] = deadline
+        MotionDecisionNode._publish_decision(node)
+        assert len(node.publisher.messages) == published_count
+        assert node.latest_info["ball"] is None
+
+        clock[0] = deadline + 0.01
+        receive_ball()
+        MotionDecisionNode._publish_decision(node)
+        assert len(node.publisher.messages) == published_count + 1
+        assert json.loads(node.publisher.messages[-1].data)["action"] == (
+            expected_action
+        )
+
+    def complete_last_motion():
+        payload = json.loads(node.publisher.messages[-1].data)
+        for status in ("RUNNING", "SUCCEEDED"):
+            send_status(
+                node,
+                status=status,
+                action=payload["action"],
+                command_id=payload["command_id"],
+                event_id=None,
+                dynamics_command=None,
+            )
+
+    receive_ball()
+    assert node.ball_approach_alignment_pending is True
+    for _ in range(2):
+        wait_then_publish(turn_action)
+        node.ball_lost_during_motion_pending = True
+        complete_last_motion()
+        assert node.ball_approach_alignment_pending is False
+        assert node.ball_lost_during_motion_pending is False
+        wait_then_publish("STRAIGHT_2")
+        complete_last_motion()
+        assert node.ball_approach_alignment_pending is True
 
 
 def test_ball_loss_during_57_to_150cm_motion_dwells_before_recovery_turn(
@@ -2565,17 +2834,11 @@ def test_ball_loss_during_57_to_150cm_motion_dwells_before_recovery_turn(
     }
     monkeypatch.setattr(time, "monotonic", lambda: 10.0)
 
-    MotionDecisionNode._track_ball_loss_during_motion(
-        node,
-        ball_info_for_node(
-            distance_m=0.9,
-            steering_angle_deg=-31.0,
-        ),
-    )
-    MotionDecisionNode._track_ball_loss_during_motion(
-        node,
-        {"detected": False, "raw_detected": False},
-    )
+    receive = MotionDecisionNode._info_callback(node, "ball")
+    receive(String(data=json.dumps(ball_info_for_node(
+        distance_m=0.9, steering_angle_deg=31.0, offset_x_px=100,
+    ))))
+    receive(String(data=json.dumps({"detected": False, "raw_detected": False})))
 
     assert node.ball_lost_during_motion_pending is True
     send_status(
@@ -2596,9 +2859,9 @@ def test_ball_loss_during_57_to_150cm_motion_dwells_before_recovery_turn(
     )
 
     assert node.ball_post_motion_dwell_until == pytest.approx(13.0)
-    decision = select_decision(node)
-    assert decision.action == "BALL_APPROACH_TURN_LEFT_6"
-    assert decision.source_command["line_side"] == "LEFT"
+    decision = select_decision(node, ball={"detected": False})
+    assert decision.action == "BALL_APPROACH_TURN_RIGHT_5"
+    assert decision.source_command["turn_direction"] == "RIGHT"
     assert decision.source_command[
         "lost_ball_alignment_from_memory"
     ] is True
@@ -2651,8 +2914,8 @@ def test_pickup_positioning_loss_latches_without_general_recovery():
 @pytest.mark.parametrize(
     ("steering_angle_deg", "expected_action"),
     [
-        (-26.0, "BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_3"),
-        (26.0, "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_3"),
+        (-30.0, "BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_1"),
+        (26.0, "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_2"),
     ],
 )
 def test_pickup_loss_reacquisition_reuses_camera_down_heading_planner(
@@ -2669,7 +2932,7 @@ def test_pickup_loss_reacquisition_reuses_camera_down_heading_planner(
     missing = select_decision(node, ball={"detected": False})
     assert missing.action == "WAIT"
     assert missing.reason == (
-        "pickup_positioning_loss_waiting_for_fresh_ball"
+        "ball_pickup_initial_alignment_waiting_for_ball"
     )
 
     reacquired = select_decision(
@@ -2685,16 +2948,17 @@ def test_pickup_loss_reacquisition_reuses_camera_down_heading_planner(
 
 
 @pytest.mark.parametrize(
-    ("bottom_distance_px", "expected_motion"),
+    ("distance_m", "expected_motion"),
     [
-        (700, "STRAIGHT_2"),
-        (501, "STRAIGHT_2"),
-        (500, "STRAIGHT_0"),
-        (0, "STRAIGHT_0"),
+        (0.670, "STRAIGHT_2"),
+        (0.571, "STRAIGHT_2"),
+        (0.570, "STRAIGHT_0"),
+        (0.569, "STRAIGHT_0"),
+        (0.470, "STRAIGHT_0"),
     ],
 )
-def test_pickup_loss_reacquisition_uses_bottom_pixel_threshold(
-    bottom_distance_px,
+def test_pickup_loss_reacquisition_uses_metric_distance_threshold(
+    distance_m,
     expected_motion,
 ):
     node = FreshMockInputNode()
@@ -2707,7 +2971,7 @@ def test_pickup_loss_reacquisition_uses_bottom_pixel_threshold(
     decision = select_decision(
         node,
         ball=ball_info_for_node(
-            bottom_distance_px=bottom_distance_px,
+            distance_m=distance_m,
             steering_angle_deg=0.0,
         ),
     )
@@ -2716,7 +2980,13 @@ def test_pickup_loss_reacquisition_uses_bottom_pixel_threshold(
     assert decision.source_command["pickup_approach_motion"] == expected_motion
 
 
-def test_pickup_initial_close_offset_selects_initial_crab_action():
+@pytest.mark.parametrize("bottom_distance,expected_action", [
+    (100, "BALL_PICKUP_INITIAL_CRAB_RIGHT"),
+    (101, "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_3"),
+])
+def test_pickup_initial_offset_selects_action_by_close_distance(
+    bottom_distance, expected_action,
+):
     node = FreshMockInputNode()
     assert node.phase_manager.set_phase("BALL_APPROACH")
     arm_special_command(node, "PICKUP_NOW", 10, 1)
@@ -2726,12 +2996,12 @@ def test_pickup_initial_close_offset_selects_initial_crab_action():
         node,
         ball=ball_info_for_node(
             offset_x_px=71,
-            bottom_distance_px=119,
+            bottom_distance_px=bottom_distance,
             steering_angle_deg=35.0,
         ),
     )
 
-    assert decision.action == "BALL_PICKUP_INITIAL_CRAB_RIGHT"
+    assert decision.action == expected_action
     assert decision.action in node.PICKUP_INITIAL_ALIGN_ACTIONS
 
 
@@ -2766,6 +3036,65 @@ def test_ball_settle_expiry_discards_frames_received_during_settle(monkeypatch):
     assert node.general_motion_gate.required_vision_generation == 6
 
 
+@pytest.mark.parametrize('action', [
+    'GOAL_CAMERA_90_FORWARD',
+    *(f'GOAL_CAMERA90_FINE_FORWARD_{count}' for count in range(1, 5)),
+    'GOAL_CAMERA90_TURN_RIGHT_2', 'GOAL_CAMERA90_CRAB_LEFT',
+    'GOAL_CAMERA90_BACKWARD_1',
+])
+def test_goal_motion_success_starts_three_second_dwell(monkeypatch, action):
+    node = FreshMockInputNode()
+    node.general_motion_gate.on_new_vision_input()
+    node.general_motion_gate.on_command_published(action, command_id=31)
+    node.active_general_source = 'goal'
+    monkeypatch.setattr(time, 'monotonic', lambda: 10.0)
+    send_status(node, status='RUNNING', action=action, command_id=31,
+                event_id=None, dynamics_command=None)
+    send_status(node, status='SUCCEEDED', action=action, command_id=31,
+                event_id=None, dynamics_command=None)
+    assert node.goal_post_motion_dwell_until == 13.0
+    monkeypatch.setattr(time, 'monotonic', lambda: 11.0)
+    send_status(node, status='SUCCEEDED', action=action, command_id=31,
+                event_id=None, dynamics_command=None)
+    assert node.goal_post_motion_dwell_until == 13.0
+
+
+def test_goal_dwell_blocks_commands_then_discards_old_goal(monkeypatch):
+    node = ReadinessPublishNode(general_decision())
+    node.goal_post_motion_dwell_until = 13.0
+    node.latest_info['goal'] = {'detected': True}
+    node.latest_time['goal'] = 12.9
+    node.general_motion_gate.vision_generation = 5
+    monkeypatch.setattr(time, 'monotonic', lambda: 12.99)
+    MotionDecisionNode._publish_decision(node)
+    assert node.publisher.messages == []
+    assert node.goal_post_motion_dwell_until == 13.0
+    monkeypatch.setattr(time, 'monotonic', lambda: 13.0)
+    MotionDecisionNode._publish_decision(node)
+    assert node.publisher.messages == []
+    assert node.latest_info['goal'] is None
+    assert node.latest_time['goal'] is None
+    assert node.general_motion_gate.required_vision_generation == 6
+
+
+def test_post_ball_transition_requires_fresh_goal_without_an_extra_dwell(monkeypatch):
+    node = FakeDecisionNode(mission_phase='POST_BALL_GOAL_TRANSITION')
+    node.latest_info['goal'] = {'detected': True}
+    node.latest_time['goal'] = 9.9
+    node.general_motion_gate.vision_generation = 5
+    node.phase_manager.start_special_action('POST_BALL_GOAL_TRANSITION', 32)
+    monkeypatch.setattr(time, 'monotonic', lambda: 10.0)
+    send_status(node, status='RUNNING', action='POST_BALL_GOAL_TRANSITION',
+                command_id=32, event_id=None, dynamics_command=None)
+    send_status(node, status='SUCCEEDED', action='POST_BALL_GOAL_TRANSITION',
+                command_id=32, event_id=None, dynamics_command=None)
+    assert node.mission_phase == 'GOAL_APPROACH'
+    assert node.goal_post_motion_dwell_until is None
+    assert node.latest_info['goal'] is None
+    assert node.latest_time['goal'] is None
+    assert node.general_motion_gate.required_vision_generation == 6
+
+
 def test_570mm_entry_during_general_settle_preserves_motion_dwell():
     node = FreshMockInputNode()
     node.ball_post_motion_dwell_until = 20.0
@@ -2793,7 +3122,7 @@ def test_general_ball_alignment_pending_uses_fresh_angle_then_distance():
             steering_angle_deg=26.0,
         ),
     )
-    assert turn.action == "BALL_APPROACH_TURN_RIGHT_3"
+    assert turn.action == "BALL_APPROACH_TURN_RIGHT_2"
 
     node.ball_approach_alignment_pending = True
     straight = select_decision(
@@ -2803,7 +3132,7 @@ def test_general_ball_alignment_pending_uses_fresh_angle_then_distance():
             steering_angle_deg=2.0,
         ),
     )
-    assert straight.action == "STRAIGHT_3"
+    assert straight.action == "STRAIGHT_2"
     assert node.ball_approach_alignment_pending is False
 
 
@@ -2907,7 +3236,7 @@ def test_mock_line_input_is_fresh_and_produces_action(
     ),
     [
         ('AUTO', 'PICKUP_NOW', 9, 'POST_BALL_LINE_ALIGN'),
-        ('GOAL_APPROACH', 'SHOT', 17, 'AUTO'),
+        ('GOAL_APPROACH', 'SHOT', 17, 'POST_SHOT_TURN'),
         ('HURDLE_APPROACH', 'GO', 14, 'HURDLE_APPROACH'),
     ],
 )
@@ -3334,7 +3663,7 @@ def test_duplicate_rejected_does_not_change_recovered_phase():
             'BALL_APPROACH',
             'POST_BALL_LINE_ALIGN',
         ),
-        ('goal', 'SHOT', 'GOAL_APPROACH', 'AUTO'),
+        ('goal', 'SHOT', 'GOAL_APPROACH', 'POST_SHOT_TURN'),
     ],
 )
 def test_terminal_action_rearms_only_after_target_disappears(
@@ -3470,7 +3799,7 @@ def test_shot_success_increments_score_and_section():
     assert node.shots_completed == 1
     assert node.ball_sections_processed == 1
     assert node.finish_enabled is False
-    assert node.mission_phase == 'AUTO'
+    assert node.mission_phase == 'POST_SHOT_TURN'
 
 
 @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT'])
@@ -3558,6 +3887,7 @@ def test_mission_progress_contains_exact_fields_and_values():
     progress = MotionDecisionNode._mission_progress(node)
 
     assert progress == {
+        'ball_mode_active': False,
         'pickups_completed': 1,
         'required_pickups': 2,
         'shots_completed': 1,
@@ -3735,3 +4065,189 @@ def test_manual_cross_finish_failure_returns_to_line_compatibility(status):
     next_decision = select_decision(node, finish=finish_info())
     assert next_decision.action == 'STRAIGHT'
     assert next_decision.requires_ack is False
+
+
+@pytest.mark.parametrize("fine", [False, True])
+@pytest.mark.parametrize("offset,direction", [(-100, "LEFT"), (100, "RIGHT")])
+def test_ball_loss_memory_updates_while_pickup_motion_is_locked(fine, offset, direction):
+    node = FreshMockInputNode()
+    assert node.phase_manager.set_phase("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+    node.pickup_positioning_motion_running = True
+    node.pickup_positioning_motion_id = "pickup_crab_right_0"
+    receive = MotionDecisionNode._info_callback(node, "ball")
+    receive(String(data=json.dumps(ball_info_for_node(distance_m=0.4, offset_x_px=offset))))
+    missing = {"detected": False, "raw_detected": False}
+    receive(String(data=json.dumps(missing)))
+    assert node.planner.last_ball_turn_direction == direction
+    assert select_decision(node, ball=missing).action == node.PICKUP_POSITIONING_LOSS_LATCH_ACTION
+    node.pickup_positioning_loss_latch_sent = True
+    assert select_decision(node, ball=missing).action == "WAIT"
+    node.pickup_positioning_motion_running = False
+    node.pickup_initial_align_waiting = not fine
+    node.pickup_fine_align_waiting = fine
+    expected = (f"BALL_PICKUP_FINE_SEARCH_{direction}" if fine
+                else f"BALL_PICKUP_CAMERA_DOWN_TURN_{direction}_{5 if direction == 'RIGHT' else 2}")
+    decision = select_decision(node, ball=missing)
+    assert decision.action == expected
+    assert decision.sdk_motion_requested is True
+
+
+@pytest.mark.parametrize("fine", [False, True])
+@pytest.mark.parametrize("raw_only", [False, True])
+def test_close_ball_seen_during_pickup_motion_allows_later_loss_search(fine, raw_only):
+    node = FreshMockInputNode()
+    assert node.phase_manager.set_phase("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+    node.pickup_positioning_motion_running = True
+    node.pickup_positioning_motion_id = "pickup_fine_forward_0"
+    receive = MotionDecisionNode._info_callback(node, "ball")
+    receive(String(data=json.dumps(ball_info_for_node(distance_m=0.4, offset_x_px=100))))
+    receive(String(data=json.dumps(ball_info_for_node(
+        distance_m=0.4, offset_x_px=100, bottom_distance_px=100,
+        detected=not raw_only, raw_detected=True,
+    ))))
+    missing = {"detected": False, "raw_detected": False}
+    receive(String(data=json.dumps(missing)))
+    assert node.planner.pickup_close_alignment_active
+    node.pickup_positioning_motion_running = False
+    node.pickup_positioning_loss_latch_sent = True
+    node.pickup_initial_align_waiting = not fine
+    node.pickup_fine_align_waiting = fine
+    decision = select_decision(node, ball=missing)
+    expected = (
+        "BALL_PICKUP_FINE_SEARCH_RIGHT" if fine
+        else "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_5"
+    )
+    assert decision.action == expected
+    assert decision.reason == "ball_lost_turn_toward_last_ball_side"
+    assert decision.sdk_motion_requested
+
+
+@pytest.mark.parametrize("status", ["SUCCEEDED", "FAILED", "TIMEOUT", "CANCELLED"])
+def test_pickup_terminal_status_clears_close_ball_latch(status):
+    node = FreshMockInputNode()
+    assert node.phase_manager.set_phase("BALL_APPROACH")
+    node.planner.pickup_close_alignment_active = True
+    complete_motion(node, "PICKUP_NOW", event_id=10, status=status)
+    assert not node.planner.pickup_close_alignment_active
+
+
+@pytest.mark.parametrize("was_close,bottom_distance,expected", [
+    (True, None, False),
+    (True, 101, False),
+    (False, 100, True),
+])
+def test_new_pickup_resets_close_latch_and_uses_current_observation(
+    was_close, bottom_distance, expected,
+):
+    node = ReadinessPublishNode(
+        terminal_decision("ball", "PICKUP_NOW", "BALL_APPROACH")
+    )
+    node.planner = FreshMockInputNode().planner
+    node.planner.pickup_close_alignment_active = was_close
+    ball = (
+        ball_info_for_node(bottom_distance_px=bottom_distance)
+        if bottom_distance is not None else None
+    )
+    node._fresh_observations = lambda _now: ({"ball": ball}, {})
+
+    MotionDecisionNode._publish_decision(node)
+
+    assert node.active_special_action == "PICKUP_NOW"
+    assert node.planner.pickup_close_alignment_active is expected
+
+
+def test_raw_ball_crossing_image_center_updates_side_during_active_left_turn():
+    node = FreshMockInputNode()
+    assert node.phase_manager.set_phase("BALL_APPROACH")
+    node.general_motion_gate.on_new_vision_input()
+    node.general_motion_gate.on_command_published("BALL_APPROACH_TURN_LEFT_1", command_id=3)
+    node.active_general_source = "ball"
+    receive = MotionDecisionNode._info_callback(node, "ball")
+    receive(String(data=json.dumps(ball_info_for_node(camera_center_offset_x_px=-300))))
+    assert node.planner.last_ball_turn_direction == "LEFT"
+    receive(String(data=json.dumps({
+        "detected": False, "raw_detected": True, "confidence": 0.9,
+        "camera_center_offset_x_px": 500, "depth_valid": False,
+    })))
+    receive(String(data=json.dumps({"detected": False, "raw_detected": False})))
+    assert node.general_motion_gate.locked is True
+    assert node.planner.last_ball_turn_direction == "RIGHT"
+    assert node.planner.plan_lost_ball_approach_alignment().action == "BALL_APPROACH_TURN_RIGHT_5"
+
+
+@pytest.mark.parametrize("fixed,completed,fresh,raw,detected,expected", [
+    (False, 0, True, False, False, True),
+    (True, 0, True, False, False, False),
+    (False, 2, True, False, False, False),
+    (False, 0, False, False, False, False),
+    (False, 0, True, True, False, False),
+    (False, 0, True, True, True, False),
+])
+def test_ball_lost_debug_uses_fresh_loss_and_excludes_fixed_grasp(
+    fixed, completed, fresh, raw, detected, expected,
+):
+    node = FreshMockInputNode()
+    node.planner._update_ball_tracking(ball_info_for_node(offset_x_px=-100), 0.0)
+    node.latest_info["ball"] = {"detected": detected, "raw_detected": raw}
+    node.latest_time["ball"] = time.monotonic() - (0.0 if fresh else 1.0)
+    node.pickup_fixed_sequence_started = fixed
+    node.phase_manager.pickups_completed = completed
+    node.last_candidate_decision = None
+    node.last_selected_decision = None
+    node.executor_active = False
+    node.decision_debug_publisher = ReadinessPublisher()
+    MotionDecisionNode._publish_decision_debug(node)
+    payload = json.loads(node.decision_debug_publisher.messages[-1].data)
+    assert payload["ball_tracking"]["lost"] is expected
+    assert payload["ball_tracking"]["last_direction"] == "LEFT"
+
+
+def test_shot_waits_three_seconds_even_when_general_settle_is_disabled(monkeypatch):
+    node = ReadinessPublishNode(terminal_decision('goal', 'SHOT', 'GOAL_APPROACH'))
+    node.SHOT_PRE_MOTION_SETTLE_SEC = MotionDecisionNode.SHOT_PRE_MOTION_SETTLE_SEC
+    assert node.SHOT_PRE_MOTION_SETTLE_SEC == 3.0
+    node.pre_motion_settle_sec = 0.0
+    set_grasp_result_for_first_ball(node, 'GRABBED')
+    clock = [10.0]
+    monkeypatch.setattr(time, 'monotonic', lambda: clock[0])
+    for stamp in (10.0, 12.999):
+        clock[0] = stamp
+        MotionDecisionNode._publish_decision(node)
+        assert node.publisher.messages == []
+        assert node.active_special_command_id is None
+        assert node.command_id == 0
+    clock[0] = 13.0
+    MotionDecisionNode._publish_decision(node)
+    assert json.loads(node.publisher.messages[-1].data)['action'] == 'SHOT'
+    assert node.active_special_command_id == 1
+
+
+def test_line_search_memory_updates_during_running_motion():
+    node = FreshMockInputNode()
+    node.active_general_source = 'line'
+    node.general_motion_gate.on_new_vision_input()
+    node.general_motion_gate.on_command_published('STRAIGHT', command_id=71)
+    callback = MotionDecisionNode._info_callback(node, 'line')
+    for offset in (-0.8, 0.8):
+        callback(String(data=json.dumps({
+            'detected': True, 'lateral_offset_norm': offset,
+            'detection_quality': 0.9, 'geometry_quality': 0.9,
+        })))
+    callback(String(data=json.dumps({'detected': False})))
+    assert node.planner.last_line_seen_direction == 'RIGHT'
+    assert node.general_motion_gate.locked
+
+
+def test_lost_line_overrides_pending_recovery_from_old_geometry():
+    node = ReadinessPublishNode(general_decision('RECOVER_LEFT_TURN_LEFT_2'))
+    node.pending_line_recover_decision = node.decision
+    node.line_recover_dwell_until = 12.0
+    lost = general_decision('LINE_LOST_TURN_RIGHT')
+    selected = MotionDecisionNode._line_recover_pre_dwell_decision(
+        node, lost, 10.1, queue_while_locked=False,
+    )
+    assert selected == lost
+    assert node.pending_line_recover_decision is None
+    assert node.line_recover_dwell_until is None

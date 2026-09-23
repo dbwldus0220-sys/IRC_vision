@@ -112,7 +112,7 @@ def test_robot_launch_defaults_are_production_ready(
         "robot_baud_rate": 4000000,
         "robot_motor_ids": list(range(23)),
         "startup_pose_enabled": True,
-        "startup_pose_name": "오뒤410",
+        "startup_pose_name": "오뒤412",
         "startup_pose_duration_ms": 4000,
         "ball_head_override_deg": -60.0,
     }
@@ -161,9 +161,13 @@ def test_robot_launch_passes_realsense_topic_parameters(
     )
     assert vision_parameters["max_rgb_depth_delta_sec"] == 0.05
     assert vision_parameters["head_down_trigger_bottom_distance_px"] == 120
+    assert vision_parameters["roi_x_min_ratio"] == 0.0
+    assert vision_parameters["roi_x_max_ratio"] == 1.0
 
     decision_parameters = executor_parameters(
         nodes["motion_decision_node"],
         context,
     )
-    assert decision_parameters["pickup_fine_step_bottom_distance_px"] == 500
+    assert decision_parameters["goal_control_range_m"] == 2.0
+    assert decision_parameters["pickup_fine_step_distance_m"] == 0.570
+    assert decision_parameters["pickup_fine_align_bottom_distance_px"] == 300

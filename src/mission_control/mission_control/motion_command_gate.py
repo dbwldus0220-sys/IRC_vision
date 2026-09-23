@@ -19,23 +19,37 @@ GENERAL_ACTIONS = frozenset(
         "FINE_FORWARD_STEP",
         "APPROACH_GOAL",
         "BALL_FINE_FORWARD_8",
+        "BALL_LOST_FORWARD_2",
+        "LINE_LOST_TURN_LEFT",
+        "LINE_LOST_TURN_RIGHT",
         "GOAL_CAMERA_90_FORWARD",
         "GOAL_CAMERA_90_FORWARD_1",
         "GOAL_CAMERA_90_FORWARD_2",
-        "GOAL_CAMERA_90_FORWARD_4",
+        "GOAL_CAMERA90_BACKWARD_1",
+        *(f"GOAL_CAMERA90_FINE_FORWARD_{count}" for count in range(1, 5)),
         "GOAL_CAMERA90_CRAB_RIGHT",
         "GOAL_CAMERA90_CRAB_LEFT",
+        "POST_SHOT_TURN_RIGHT_9",
+        "POST_SHOT_TURN_LEFT_4",
+        "POST_SHOT_FORWARD",
+        *{
+            f"POST_SHOT_LINE_TURN_{direction}_{count}"
+            for direction, counts in (
+                ("RIGHT", (2, 3, 5, 7, 9)), ("LEFT", (1, 2, 3, 4, 5)),
+            )
+            for count in counts
+        },
         *{
             f"POST_BALL_LINE_TURN_RIGHT_{count}"
-            for count in range(1, 10)
+            for count in (2, 3, 5, 7, 9)
         },
         *{
             f"POST_BALL_LINE_TURN_LEFT_{count}"
-            for count in (2, 3, 4, 6)
+            for count in (1, 2, 3, 4, 5, 6)
         },
         *{
             f"GOAL_CAMERA90_TURN_RIGHT_{count}"
-            for count in range(1, 10)
+            for count in (2, 3, 5, 7, 9)
         },
         *{
             f"GOAL_CAMERA90_TURN_LEFT_{count}"
@@ -43,11 +57,11 @@ GENERAL_ACTIONS = frozenset(
         },
         *{
             f"BALL_APPROACH_TURN_RIGHT_{count}"
-            for count in range(1, 10)
+            for count in (2, 3, 5, 7, 9)
         },
         *{
             f"BALL_APPROACH_TURN_LEFT_{count}"
-            for count in (2, 3, 4, 5, 6)
+            for count in (1, 2, 3, 4, 5, 6)
         },
         "APPROACH_HURDLE",
         "LEFT",
@@ -61,12 +75,12 @@ GENERAL_ACTIONS = frozenset(
         *{
             f"RECOVER_{line_side}_TURN_LEFT_{suffix}"
             for line_side in ("LEFT", "RIGHT")
-            for suffix in (2, 4, 6, 8, 10, 13)
+            for suffix in (2, 3, 4, 5, 6, 7, 8, 10, 13)
         },
         *{
             f"RECOVER_{line_side}_TURN_RIGHT_{suffix}"
             for line_side in ("LEFT", "RIGHT")
-            for suffix in (4, 6, 8, 10, 12, 15)
+            for suffix in (2, 3, 4, 5, 6, 7, 8, 10, 12, 15)
         },
     }
 )

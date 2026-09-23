@@ -22,12 +22,11 @@ from rclpy.qos import ReliabilityPolicy
 from sensor_msgs.msg import CameraInfo, Image
 from std_msgs.msg import String
 
-from .approach_distance import approach_level_from_motion
-from .approach_distance import approach_motion_for_distance
 from .depth_frame_cache import DepthFrameCache
 from .depth_frame_cache import DepthFrameConsumer
 from .temporal_confirmation import depth_is_within_range
 from .temporal_confirmation import TemporalConfirmationFilter
+from .yolo_line_analyzer import calibrated_robot_center_x
 
 
 @dataclass(frozen=True)
@@ -121,16 +120,19 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         self.declare_parameter("output_topic", "/vision/goal_info")
         self.declare_parameter("goal_class_name", "goal")
         self.declare_parameter("backboard_class_name", "backboard")
+        # Keep the parameter name; it now prefers goal-associated backboards.
         self.declare_parameter("prefer_backboard_center", True)
+        self.declare_parameter("goal_robot_center_offset_px", 96.0)
         self.declare_parameter("min_confidence", 0.55)
         self.declare_parameter("depth_timeout_sec", 0.7)
         self.declare_parameter("depth_window_px", 11)
         self.declare_parameter("max_valid_depth_m", 6.0)
-        self.declare_parameter("detect_depth_m", 1.0)
-        self.declare_parameter("approach_depth_m", 0.5)
-        self.declare_parameter("score_target_depth_m", 0.25)
-        self.declare_parameter("score_depth_tolerance_m", 0.05)
-        self.declare_parameter("score_center_tolerance_norm", 0.10)
+        self.declare_parameter("detect_depth_m", 2.0)
+        self.declare_parameter("approach_depth_m", 1.0)
+        self.declare_parameter("score_target_depth_m", 0.795)
+        self.declare_parameter("score_depth_tolerance_m", 0.025)
+        self.declare_parameter("score_left_bound_px", -40.0)
+        self.declare_parameter("score_right_bound_px", 100.0)
         self.declare_parameter("direction_deadband_norm", 0.04)
         self.declare_parameter("confirmation_window_size", 40)
         self.declare_parameter("confirmation_required_hits", 30)
@@ -154,6 +156,11 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         self.prefer_backboard_center = bool(
             self.get_parameter("prefer_backboard_center").value
         )
+        self.robot_center_offset_px = self._float_parameter(
+            "goal_robot_center_offset_px"
+        )
+        if not math.isfinite(self.robot_center_offset_px):
+            raise ValueError("goal_robot_center_offset_px must be finite")
         self.min_confidence = self._float_parameter("min_confidence")
         self.depth_timeout_sec = self._float_parameter(
             "depth_timeout_sec"
@@ -176,10 +183,14 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
             0.0,
             self._float_parameter("score_depth_tolerance_m"),
         )
-        self.score_center_tolerance_norm = max(
-            0.0,
-            self._float_parameter("score_center_tolerance_norm"),
-        )
+        self.score_left_bound_px = self._float_parameter("score_left_bound_px")
+        self.score_right_bound_px = self._float_parameter("score_right_bound_px")
+        if not (
+            math.isfinite(self.score_left_bound_px)
+            and math.isfinite(self.score_right_bound_px)
+            and self.score_left_bound_px <= self.score_right_bound_px
+        ):
+            raise ValueError("goal pixel bounds must be finite and ordered")
         self.direction_deadband_norm = max(
             0.0,
             self._float_parameter("direction_deadband_norm"),
@@ -389,6 +400,7 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         center_x: int,
         center_y: int,
         depth_m: float | None,
+        reference_x: float | None = None,
     ) -> tuple[
         float | None,
         float | None,
@@ -403,7 +415,9 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
             or self.cy is None
         ):
             return None, None, None, None, None
-        x_ratio = (center_x - self.cx) / self.fx
+        # Goal yaw control must use the same calibrated axis as pixel alignment.
+        origin_x = self.cx if reference_x is None else reference_x
+        x_ratio = (center_x - origin_x) / self.fx
         y_ratio = (center_y - self.cy) / self.fy
         bearing = math.degrees(math.atan(x_ratio))
         elevation = math.degrees(math.atan(y_ratio))
@@ -419,20 +433,21 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         detection: dict[str, Any],
         image_width: int | None,
         image_height: int | None,
-        aim_detection: dict[str, Any] | None = None,
     ) -> GoalCandidate | None:
+        """Build geometry and confidence from one backboard detection."""
         try:
             confidence = float(detection.get("confidence", 0.0))
             bbox = [int(value) for value in detection.get("bbox", [])]
-            goal_center = [
+            center = [
                 int(value) for value in detection.get("center", [])
             ]
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             return None
         if (
-            confidence < self.min_confidence
+            not math.isfinite(confidence)
+            or not self.min_confidence <= confidence <= 1.0
             or len(bbox) != 4
-            or len(goal_center) != 2
+            or len(center) != 2
         ):
             return None
         left, top, right, bottom = bbox
@@ -441,34 +456,20 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         if width_px <= 0 or height_px <= 0:
             return None
 
-        aim_source = "goal"
+        aim_source = "backboard"
         aim_bbox = bbox
-        center = goal_center
-        if aim_detection is not None:
-            try:
-                candidate_aim_bbox = [
-                    int(value)
-                    for value in aim_detection.get("bbox", [])
-                ]
-                candidate_aim_center = [
-                    int(value)
-                    for value in aim_detection.get("center", [])
-                ]
-            except (TypeError, ValueError):
-                candidate_aim_bbox = []
-                candidate_aim_center = []
-            if len(candidate_aim_bbox) == 4 and len(candidate_aim_center) == 2:
-                aim_source = "backboard"
-                aim_bbox = candidate_aim_bbox
-                center = candidate_aim_center
 
         center_x, center_y = center
         offset_x_px = 0
         offset_y_px = 0
         offset_x_norm = 0.0
         offset_y_norm = 0.0
+        robot_center_x = None
         if image_width and image_height:
-            offset_x_px = int(center_x - image_width / 2)
+            robot_center_x = calibrated_robot_center_x(
+                image_width, self.robot_center_offset_px
+            )
+            offset_x_px = int(round(center_x - robot_center_x))
             offset_y_px = int(center_y - image_height / 2)
             offset_x_norm = offset_x_px / max(image_width / 2, 1.0)
             offset_y_norm = offset_y_px / max(image_height / 2, 1.0)
@@ -480,6 +481,7 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
             center_x,
             center_y,
             depth_m,
+            reference_x=robot_center_x,
         )
         if offset_x_norm < -self.direction_deadband_norm:
             direction = "LEFT"
@@ -541,9 +543,7 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         self,
         target: GoalCandidate,
     ) -> tuple[str, bool, bool, float | None, bool, str]:
-        centered = (
-            abs(target.offset_x_norm) <= self.score_center_tolerance_norm
-        )
+        centered = self.score_left_bound_px <= target.offset_x_px <= self.score_right_bound_px
         if not target.depth_valid or target.depth_m is None:
             return (
                 "NO_DEPTH",
@@ -554,7 +554,11 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
                 "goal_detected_without_valid_depth",
             )
         error = target.depth_m - self.score_target_depth_m
-        depth_in_range = abs(error) <= self.score_depth_tolerance_m
+        depth_in_range = (
+            self.score_target_depth_m - self.score_depth_tolerance_m
+            <= target.depth_m
+            <= self.score_target_depth_m + self.score_depth_tolerance_m
+        )
         score_now = depth_in_range and centered
         if score_now:
             return (
@@ -593,6 +597,12 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
     def _publish(self, info: GoalInfo) -> None:
         message = String()
         payload = asdict(info)
+        payload["robot_center_offset_px"] = self.robot_center_offset_px
+        payload["robot_center_x_px"] = (
+            calibrated_robot_center_x(info.image_width, self.robot_center_offset_px)
+            if info.image_width is not None and info.image_width > 0
+            else None
+        )
         payload.update(self.confirmation_fields)
         payload.update(self.score_confirmation_fields)
         message.data = json.dumps(
@@ -646,38 +656,32 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
             note=note,
         )
 
-    def _matching_backboard(
+    def _has_matching_goal(
         self,
-        goal_detection: dict[str, Any],
-        backboards: list[dict[str, Any]],
-    ) -> dict[str, Any] | None:
-        """Return the strongest backboard whose center is inside the goal."""
-        try:
-            goal_bbox = [
-                int(value) for value in goal_detection.get("bbox", [])
-            ]
-        except (TypeError, ValueError):
-            return None
-        if len(goal_bbox) != 4:
-            return None
-        left, top, right, bottom = goal_bbox
-        matches: list[tuple[float, dict[str, Any]]] = []
-        for backboard in backboards:
+        candidate: GoalCandidate,
+        goals: list[dict[str, Any]],
+    ) -> bool:
+        """Prefer a backboard whose center is inside a confident goal box."""
+        for goal in goals:
             try:
-                confidence = float(backboard.get("confidence", 0.0))
-                center = [
-                    int(value)
-                    for value in backboard.get("center", [])
-                ]
-            except (TypeError, ValueError):
+                confidence = float(goal.get("confidence", 0.0))
+                bbox = [int(value) for value in goal.get("bbox", [])]
+            except (TypeError, ValueError, OverflowError):
                 continue
-            if confidence < self.min_confidence or len(center) != 2:
+            if (
+                not math.isfinite(confidence)
+                or not self.min_confidence <= confidence <= 1.0
+                or len(bbox) != 4
+            ):
                 continue
-            if left <= center[0] <= right and top <= center[1] <= bottom:
-                matches.append((confidence, backboard))
-        if not matches:
-            return None
-        return max(matches, key=lambda item: item[0])[1]
+            left, top, right, bottom = bbox
+            if (
+                left < right and top < bottom
+                and left <= candidate.center[0] <= right
+                and top <= candidate.center[1] <= bottom
+            ):
+                return True
+        return False
 
     def _detections_callback(self, message: String) -> None:
         """Select and publish the strongest valid goal target."""
@@ -700,23 +704,19 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
             and str(detection.get("class_name", ""))
             == self.backboard_class_name
         ]
-        candidates: list[GoalCandidate] = []
+        goals = [
+            detection
+            for detection in detections
+            if isinstance(detection, dict)
+            and str(detection.get("class_name", "")) == self.goal_class_name
+        ]
+        ranked_candidates: list[tuple[bool, GoalCandidate]] = []
         outside_tracking_range = False
-        for detection in detections:
-            if not isinstance(detection, dict):
-                continue
-            if str(detection.get("class_name", "")) != self.goal_class_name:
-                continue
-            aim_detection = (
-                self._matching_backboard(detection, backboards)
-                if self.prefer_backboard_center
-                else None
-            )
+        for detection in backboards:
             candidate = self._build_candidate(
                 detection,
                 image_width,
                 image_height,
-                aim_detection,
             )
             if candidate is None:
                 continue
@@ -725,10 +725,17 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
                 candidate.depth_m,
                 self.detect_depth_m,
             ):
-                candidates.append(candidate)
+                goal_associated = (
+                    self.prefer_backboard_center
+                    and self._has_matching_goal(candidate, goals)
+                )
+                ranked_candidates.append((goal_associated, candidate))
             elif candidate.depth_valid and candidate.depth_m is not None:
                 outside_tracking_range = True
-        candidates.sort(key=lambda item: item.score, reverse=True)
+        ranked_candidates.sort(
+            key=lambda item: (item[0], item[1].score), reverse=True
+        )
+        candidates = [candidate for _, candidate in ranked_candidates]
         if not candidates:
             confirmation = self.confirmation_filter.update(False)
             score_confirmation = self.score_confirmation_filter.update(False)
@@ -815,12 +822,8 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
                     else None
                 ),
                 score_now=score_now,
-                approach_motion=approach_motion_for_distance(
-                    target.depth_m
-                ),
-                approach_level=approach_level_from_motion(
-                    approach_motion_for_distance(target.depth_m)
-                ),
+                approach_motion="WAIT",
+                approach_level=None,
                 approach_target_distance_m=target.depth_m,
                 target_priority_score=target.score,
                 candidate_count=len(candidates),

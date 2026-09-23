@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter
+import copy
 from datetime import datetime
 import hashlib
 import json
@@ -14,6 +15,18 @@ import shutil
 import tempfile
 
 import yaml
+
+
+POSITION_TOLERANCE_DEG = 5.0
+
+
+def _with_runtime_tolerance(motion: dict) -> dict:
+    """Preserve source motion data while applying STEP's completion policy."""
+    result = copy.deepcopy(motion)
+    result.setdefault("completion", {})["position_tolerance_deg"] = (
+        POSITION_TOLERANCE_DEG
+    )
+    return result
 
 
 def _sha256(path: Path) -> str:
@@ -84,7 +97,7 @@ def main() -> int:
     replaced = []
     identical = []
     for name in sorted(required_names):
-        source_motion = source_by_name[name]
+        source_motion = _with_runtime_tolerance(source_by_name[name])
         position = runtime_positions.get(name)
         if position is None:
             runtime_positions[name] = len(motions)
@@ -106,7 +119,7 @@ def main() -> int:
         raise RuntimeError("backup SHA256 does not match runtime")
 
     merged_payload = dict(runtime_payload)
-    merged_payload["motions"] = motions
+    merged_payload["motions"] = [_with_runtime_tolerance(motion) for motion in motions]
     descriptor, temporary_name = tempfile.mkstemp(
         prefix="robot_motions.upsert.",
         suffix=".json",

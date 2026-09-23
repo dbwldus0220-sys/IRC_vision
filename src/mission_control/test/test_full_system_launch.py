@@ -185,6 +185,8 @@ def test_overlay_tolerance_is_separate_from_depth_sync(
     vision_parameters = node_parameters(unified_vision, context)
     assert vision_parameters["max_rgb_depth_delta_sec"] == 0.05
     assert vision_parameters["head_down_trigger_bottom_distance_px"] == 120
+    assert vision_parameters["roi_x_min_ratio"] == 0.0
+    assert vision_parameters["roi_x_max_ratio"] == 1.0
 
     motion_decision = next(
         node
@@ -193,7 +195,9 @@ def test_overlay_tolerance_is_separate_from_depth_sync(
         and node.node_executable == "motion_decision_node"
     )
     decision_parameters = node_parameters(motion_decision, context)
-    assert decision_parameters["pickup_fine_step_bottom_distance_px"] == 500
+    assert decision_parameters["goal_control_range_m"] == 2.0
+    assert decision_parameters["pickup_fine_step_distance_m"] == 0.570
+    assert decision_parameters["pickup_fine_align_bottom_distance_px"] == 300
 
 
 def test_detector_defaults_to_prebuilt_tensorrt_engine(monkeypatch, tmp_path):

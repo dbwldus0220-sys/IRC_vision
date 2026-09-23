@@ -1,16 +1,21 @@
 """Tests separating RGB ball detection from optional depth metadata."""
 
-from dataclasses import replace
+from dataclasses import fields, replace
+import json
 import threading
 import time
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
 
 from step.ball_analyzer import BallAnalyzer
+from step.ball_analyzer import BallInfo
 from step.ball_analyzer import ball_display_offsets_px
 from step.ball_analyzer import ball_path_heading_deg
 from step.ball_analyzer import should_request_head_down
+from step.temporal_confirmation import TemporalConfirmationFilter
+from std_msgs.msg import String
 
 
 def _analyzer_with_depth(depth_m, depth_valid):
@@ -61,6 +66,41 @@ def test_rgb_ball_remains_candidate_without_depth():
     assert candidate.steering_angle_deg == pytest.approx(-0.603, abs=0.001)
     state = analyzer._state_for_candidate(candidate, 720)
     assert state[0] == "NO_DEPTH"
+
+
+def test_pending_confirmation_publishes_current_image_side_without_control_readiness():
+    analyzer = _analyzer_with_depth(None, False)
+    analyzer.ball_class_name = "ball"
+    analyzer.publish_empty_when_missing = True
+    analyzer.confirmation_filter = TemporalConfirmationFilter(window_size=20, required_hits=12)
+    analyzer.pickup_confirmation_filter = TemporalConfirmationFilter(window_size=5, required_hits=3)
+    analyzer._image_size_from_payload = lambda *_: (1280, 720)
+    analyzer._get_depth_cache = lambda: SimpleNamespace(latest=lambda: None)
+    empty = BallInfo(**{field.name: None for field in fields(BallInfo)})
+    analyzer._empty_info = lambda note: replace(
+        empty, detected=False, confidence=0.0, depth_valid=False,
+        pickup_ready=False, pickup_now=False, note=note,
+    )
+    published = []
+    analyzer.publisher = SimpleNamespace(publish=published.append)
+    detection = {**_raw_detection(), "class_name": "ball"}
+    analyzer._detections_callback(String(data=json.dumps({"detections": [detection]})))
+    pending = json.loads(published[-1].data)
+    assert pending["raw_detected"] is True
+    assert pending["detected"] is False
+    assert pending["depth_valid"] is False
+    assert pending["pickup_now"] is False
+    assert pending["confidence"] == 0.83
+    assert pending["camera_center_offset_x_px"] == 68
+    assert pending["center_x"] == 708
+    assert pending["image_width"] == 1280
+    assert pending["image_height"] == 720
+    assert pending["center_y"] == 529
+    assert pending["bbox"] == [680, 500, 736, 558]
+    analyzer._detections_callback(String(data=json.dumps({"detections": []})))
+    lost = json.loads(published[-1].data)
+    assert lost["raw_detected"] is False
+    assert lost["camera_center_offset_x_px"] is None
 
 
 def test_ball_path_angle_uses_shifted_bottom_center_axis():

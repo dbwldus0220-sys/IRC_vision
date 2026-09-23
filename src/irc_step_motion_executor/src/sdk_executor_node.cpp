@@ -77,7 +77,7 @@ public:
     const bool startup_pose_enabled = declare_parameter<bool>(
       "startup_pose_enabled", false);
     const std::string startup_pose_name = declare_parameter<std::string>(
-      "startup_pose_name", "오뒤410");
+      "startup_pose_name", "오뒤412");
     const std::int64_t startup_pose_duration_ms = positive_parameter_or_default(
       "startup_pose_duration_ms", 1800);
     ball_head_override_enabled_ = declare_parameter<bool>(
@@ -94,6 +94,15 @@ public:
       std::vector<std::string>{
         "line_forward_2", "line_forward_4", "line_forward_6",
         "line_forward_8", "line_forward_10", "sdk_forward_4", "forward"});
+    goal_head_override_enabled_ = declare_parameter<bool>(
+      "goal_head_override_enabled", true);
+    goal_head_override_deg_ = declare_parameter<double>(
+      "goal_head_override_deg", 1.0);
+    if (!std::isfinite(goal_head_override_deg_) ||
+      goal_head_override_deg_ < -90.0 || goal_head_override_deg_ > 30.0)
+    {
+      throw std::runtime_error("goal head override must be finite and in [-90, 30]");
+    }
     if (!std::isfinite(ball_head_override_deg_) ||
       !std::isfinite(ball_head_camera_up_deg_) ||
       ball_head_override_deg_ < -90.0 || ball_head_override_deg_ > 30.0)
@@ -177,6 +186,7 @@ public:
     driver_ = std::make_unique<SdkExecutorDriver>(
       *core_, steady_now_ms,
       [this](const std::string & payload) {
+        handle_goal_head_override_status(payload);
         std_msgs::msg::String message;
         message.data = payload;
         status_publisher_->publish(message);
@@ -229,7 +239,9 @@ private:
 
   void handle_ball_info(const std::string & payload)
   {
-    if (!ball_head_override_enabled_ || ball_head_override_latched_) {
+    if (!ball_head_override_enabled_ || ball_head_override_latched_ ||
+      goal_head_override_latched_)
+    {
       return;
     }
     json_object * object = json_tokener_parse(payload.c_str());
@@ -317,6 +329,48 @@ private:
     ball_head_override_latched_ = false;
   }
 
+  void handle_goal_head_override_status(const std::string & payload)
+  {
+    // Rejected requests must not activate or release the camera hold.
+    json_object * object = json_tokener_parse(payload.c_str());
+    if (object == nullptr) {
+      return;
+    }
+    json_object * status_value = nullptr;
+    json_object * motion_value = nullptr;
+    const bool valid =
+      json_object_object_get_ex(object, "status", &status_value) &&
+      json_object_get_type(status_value) == json_type_string &&
+      json_object_object_get_ex(object, "motion_id", &motion_value) &&
+      json_object_get_type(motion_value) == json_type_string;
+    const std::string status = valid ? json_object_get_string(status_value) : "";
+    const std::string motion_id = valid ? json_object_get_string(motion_value) : "";
+    json_object_put(object);
+
+    if (goal_head_override_enabled_ && status == "SUCCEEDED" &&
+      motion_id == "post_ball_camera_90")
+    {
+      clear_ball_head_override();
+      if (backend_->set_joint_override(0, goal_head_override_deg_)) {
+        goal_head_override_latched_ = true;
+        RCLCPP_INFO(
+          get_logger(), "Camera 90-degree hold enabled: motor 0 %.1f deg",
+          goal_head_override_deg_);
+      } else {
+        RCLCPP_ERROR(get_logger(), "Motion backend rejected goal camera override");
+      }
+    }
+    if (goal_head_override_latched_ &&
+      ((status == "SUCCEEDED" && motion_id == "goal_shot") ||
+      status == "CANCELLED" ||
+      (status == "RUNNING" && (motion_id == "pickup" || motion_id == "sdk_pickup"))))
+    {
+      backend_->clear_joint_override(0);
+      goal_head_override_latched_ = false;
+      RCLCPP_INFO(get_logger(), "Camera 90-degree hold cleared: %s", motion_id.c_str());
+    }
+  }
+
   void publish_heartbeat(const std::string & backend_type)
   {
     json_object * object = json_object_new_object();
@@ -336,6 +390,12 @@ private:
     json_object_object_add(
       object, "ball_head_override_deg",
       json_object_new_double(ball_head_override_deg_));
+    json_object_object_add(
+      object, "goal_head_override_active",
+      json_object_new_boolean(goal_head_override_latched_));
+    json_object_object_add(
+      object, "goal_head_override_deg",
+      json_object_new_double(goal_head_override_deg_));
 
     std_msgs::msg::String message;
     message.data = json_object_to_json_string_ext(
@@ -398,6 +458,9 @@ private:
   std::int64_t ball_head_transition_ms_{400};
   std::uint64_t ball_head_override_started_ms_{0};
   std::vector<std::string> ball_head_override_motion_ids_;
+  bool goal_head_override_enabled_{true};
+  bool goal_head_override_latched_{false};
+  double goal_head_override_deg_{1.0};
 };
 
 }  // namespace irc_step_motion_executor

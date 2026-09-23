@@ -8,7 +8,6 @@ import math
 from typing import Any
 
 from .approach_distance import approach_level_from_motion
-from .approach_distance import approach_motion_for_distance
 
 
 @dataclass(frozen=True)
@@ -16,10 +15,11 @@ class GoalNavigationConfig:
     """Provisional goal alignment and scoring thresholds."""
 
     min_confidence: float = 0.55
-    control_start_depth_m: float = 0.50
-    score_target_depth_m: float = 0.25
-    score_depth_tolerance_m: float = 0.05
-    score_center_tolerance_norm: float = 0.10
+    control_start_depth_m: float = 2.0
+    score_target_depth_m: float = 0.795
+    score_depth_tolerance_m: float = 0.025
+    score_left_bound_px: float = -40.0
+    score_right_bound_px: float = 100.0
 
 
 @dataclass(frozen=True)
@@ -125,7 +125,7 @@ class GoalNavigationPlanner:
         if confidence is None or confidence < self.config.min_confidence:
             return self.wait("low_goal_confidence")
         depth = _number(goal_info, "depth_m")
-        if not bool(goal_info.get("depth_valid", False)) or depth is None:
+        if not bool(goal_info.get("depth_valid", False)) or depth is None or depth <= 0.0:
             return self.wait("missing_valid_goal_depth")
         if depth > self.config.control_start_depth_m:
             return self.wait("goal_outside_control_range")
@@ -133,39 +133,55 @@ class GoalNavigationPlanner:
         distance = _number(goal_info, "distance_m")
         bearing = _number(goal_info, "bearing_deg")
         offset = _number(goal_info, "offset_x_norm")
-        if offset is None:
+        offset_px = _number(goal_info, "offset_x_px")
+        if offset_px is None:
             return self.wait("invalid_goal_alignment")
-        centered = abs(offset) <= self.config.score_center_tolerance_norm
+        centered = self.config.score_left_bound_px <= offset_px <= self.config.score_right_bound_px
         depth_error = depth - self.config.score_target_depth_m
         depth_in_range = (
-            abs(depth_error) <= self.config.score_depth_tolerance_m
+            self.config.score_target_depth_m - self.config.score_depth_tolerance_m
+            <= depth
+            <= self.config.score_target_depth_m + self.config.score_depth_tolerance_m
         )
         ready_geometry = centered and depth_in_range
         analyzer_score_now = goal_info.get("score_now")
         score_now = bool(
             ready_geometry
-            and (
-                ready_geometry
-                if analyzer_score_now is None
-                else analyzer_score_now
-            )
+            and analyzer_score_now is True
         )
 
         if score_now:
             action = "SHOT"
             reason = "goal_centered_at_scoring_depth"
-        elif not centered:
-            action = "TURN_RIGHT" if offset > 0.0 else "TURN_LEFT"
-            reason = "align_backboard_center"
+        elif depth < self.config.score_target_depth_m - self.config.score_depth_tolerance_m:
+            action = "GOAL_CAMERA90_BACKWARD_1"
+            reason = "retreat_goal_to_scoring_depth"
+        elif depth_in_range and not centered:
+            # During approach, the mission planner corrects yaw before advancing.
+            # Reserve lateral steps for final alignment at scoring depth.
+            direction = "RIGHT" if offset_px > self.config.score_right_bound_px else "LEFT"
+            action = f"GOAL_CAMERA90_CRAB_{direction}"
+            reason = "align_goal_lateral_camera90"
         elif ready_geometry:
             action = "WAIT_SCORE_CONFIRMATION"
             reason = "waiting_for_stable_score_condition"
         elif depth_error > self.config.score_depth_tolerance_m:
-            action = approach_motion_for_distance(depth)
-            reason = "goal_aligned_discrete_approach"
+            # Use camera Depth Z directly; ground distance is a different metric.
+            if depth > 1.280:
+                action = "GOAL_CAMERA_90_FORWARD"
+            elif depth > 1.025:
+                action = "GOAL_CAMERA_90_FORWARD_2"
+            elif depth > 0.985:
+                action = "GOAL_CAMERA90_FINE_FORWARD_4"
+            elif depth > 0.950:
+                action = "GOAL_CAMERA90_FINE_FORWARD_3"
+            elif depth > 0.875:
+                action = "GOAL_CAMERA90_FINE_FORWARD_2"
+            else:
+                action = "GOAL_CAMERA90_FINE_FORWARD_1"
+            reason = "approach_goal_by_depth"
         else:
-            action = "RETREAT_GOAL"
-            reason = "goal_too_close"
+            return self.wait("goal_too_close_hold")
 
         return GoalActionCommand(
             valid=True,

@@ -1,0 +1,58 @@
+[
+  {
+    "assumed_turn_consistency": 1.0,
+    "corner_distance_m": 0.2,
+    "preview_deg": 63.0,
+    "steering_error_deg": 12.206,
+    "motions": [
+      "STRAIGHT",
+      "STRAIGHT",
+      "RIGHT"
+    ],
+    "motion_id": "line_turn_right_large",
+    "catalog_motion": "제자리우회전45도(9회)",
+    "reason": "line_tracking"
+  },
+  {
+    "assumed_turn_consistency": 1.0,
+    "corner_distance_m": 0.74,
+    "preview_deg": 63.0,
+    "steering_error_deg": 12.206,
+    "motions": [
+      "STRAIGHT",
+      "STRAIGHT",
+      "RIGHT"
+    ],
+    "motion_id": "line_turn_right_large",
+    "catalog_motion": "제자리우회전45도(9회)",
+    "reason": "line_tracking"
+  },
+  {
+    "assumed_turn_consistency": 1.0,
+    "corner_distance_m": 2.0,
+    "preview_deg": 63.0,
+    "steering_error_deg": 12.206,
+    "motions": [
+      "STRAIGHT",
+      "STRAIGHT",
+      "RIGHT"
+    ],
+    "motion_id": "line_turn_right_large",
+    "catalog_motion": "제자리우회전45도(9회)",
+    "reason": "line_tracking"
+  },
+  {
+    "assumed_turn_consistency": 1.0,
+    "corner_distance_m": 0.74,
+    "preview_deg": 0.0,
+    "steering_error_deg": 2.756,
+    "motions": [
+      "STRAIGHT",
+      "STRAIGHT",
+      "STRAIGHT"
+    ],
+    "motion_id": "line_forward_6",
+    "catalog_motion": "전진실험45도(6회)",
+    "reason": "line_tracking"
+  }
+]

@@ -49,8 +49,10 @@ def test_success_requires_new_vision_before_republishing():
         "GOAL_CAMERA_90_FORWARD",
         "GOAL_CAMERA_90_FORWARD_1",
         "GOAL_CAMERA_90_FORWARD_2",
-        "GOAL_CAMERA_90_FORWARD_4",
+        *(f"GOAL_CAMERA90_FINE_FORWARD_{count}" for count in range(1, 5)),
         "BALL_FINE_FORWARD_8",
+        "LINE_LOST_TURN_LEFT",
+        "LINE_LOST_TURN_RIGHT",
     ],
 )
 def test_context_forward_requires_fresh_vision_after_success(action):
@@ -74,7 +76,11 @@ def test_context_forward_requires_fresh_vision_after_success(action):
 
 @pytest.mark.parametrize(
     "action",
-    ["POST_BALL_LINE_TURN_RIGHT_3", "GOAL_CAMERA90_TURN_RIGHT_3"],
+    [
+        "POST_BALL_LINE_TURN_RIGHT_3",
+        "GOAL_CAMERA90_TURN_RIGHT_3",
+        "BALL_APPROACH_TURN_LEFT_1",
+    ],
 )
 def test_closed_loop_alignment_actions_require_new_vision(action):
     gate = gate_with_vision()
@@ -276,12 +282,12 @@ def test_non_general_action_is_not_managed_as_execution(action):
         *[
             f"RECOVER_{line_side}_TURN_LEFT_{suffix}"
             for line_side in ("LEFT", "RIGHT")
-            for suffix in (2, 4, 6, 8, 10, 13)
+            for suffix in (2, 3, 4, 5, 6, 7, 8, 10, 13)
         ],
         *[
             f"RECOVER_{line_side}_TURN_RIGHT_{suffix}"
             for line_side in ("LEFT", "RIGHT")
-            for suffix in (4, 6, 8, 10, 12, 15)
+            for suffix in (2, 3, 4, 5, 6, 7, 8, 10, 12, 15)
         ],
     ],
 )

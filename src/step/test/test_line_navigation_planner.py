@@ -36,6 +36,73 @@ def test_straight_command_contains_speed_and_distance():
     )
 
 
+@pytest.mark.parametrize("direction", [-1, 1])
+@pytest.mark.parametrize("preview_field", ["turn_angle_deg", "path_turn_delta_deg"])
+def test_local_line_tracking_ignores_corner_preview(direction, preview_field):
+    planner = LineNavigationPlanner()
+    sample = line_info(
+        filtered_heading_error_deg=direction * 8.9,
+        filtered_lateral_offset_norm=direction * -0.256,
+        corner_preview_confirmed=True,
+        corner_start_distance_m=0.74,
+        corner_approach_motion="STRAIGHT_5",
+        **{preview_field: direction * 63.0},
+    )
+    original = dict(sample)
+
+    for _ in range(5):
+        command = planner.plan(sample, 0.1, allow_corner_turns=False)
+        assert command.motion == "STRAIGHT"
+        assert command.preview_component_deg == 0.0
+        assert command.steering_error_deg == pytest.approx(direction * 2.756)
+    assert sample == original
+
+    # The restriction must end with the mission phase, not latch globally.
+    for _ in range(3):
+        command = planner.plan(sample, 0.1)
+    assert command.motion == ("RIGHT" if direction > 0 else "LEFT")
+
+
+@pytest.mark.parametrize(
+    ("direction", "expected"),
+    [(1, "RECOVER_RIGHT_TURN_RIGHT_4"), (-1, "RECOVER_LEFT_TURN_LEFT_2")],
+)
+def test_local_line_tracking_keeps_heading_recovery(direction, expected):
+    planner = LineNavigationPlanner()
+
+    command = planner.plan(
+        line_info(
+            filtered_heading_error_deg=direction * 20.0,
+            filtered_lateral_offset_norm=direction * 0.25,
+            turn_angle_deg=direction * 70.0,
+        ),
+        0.1,
+        allow_corner_turns=False,
+    )
+
+    assert command.motion == expected
+    assert command.reason == "line_center_recovery"
+    assert command.preview_component_deg == 0.0
+
+
+@pytest.mark.parametrize("direction", [-1, 1])
+def test_local_line_tracking_blocks_generic_turn_even_without_preview(direction):
+    planner = LineNavigationPlanner()
+    sample = line_info(
+        filtered_heading_error_deg=direction * 40.0,
+        filtered_lateral_offset_norm=direction * -0.5,
+    )
+    for _ in range(3):
+        command = planner.plan(sample, 0.1)
+    assert command.motion == ("RIGHT" if direction > 0 else "LEFT")
+
+    for _ in range(5):
+        command = planner.plan(sample, 0.1, allow_corner_turns=False)
+        assert command.motion == "STRAIGHT"
+        assert command.reason == "corner_turn_suppressed"
+    assert planner.turn_candidate is None
+
+
 @pytest.mark.parametrize("reported_depth", [0.10, 0.50, 1.00, 3.00])
 def test_line_straight_action_does_not_use_distance_buckets(reported_depth):
     planner = LineNavigationPlanner()

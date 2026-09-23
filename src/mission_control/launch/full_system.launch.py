@@ -71,8 +71,11 @@ def generate_launch_description() -> LaunchDescription:
     corner_turn_margin_m = LaunchConfiguration("corner_turn_margin_m")
     ball_tracking_range_m = LaunchConfiguration("ball_tracking_range_m")
     ball_control_range_m = LaunchConfiguration("ball_control_range_m")
-    pickup_fine_step_bottom_distance_px = LaunchConfiguration(
-        "pickup_fine_step_bottom_distance_px"
+    pickup_fine_step_distance_m = LaunchConfiguration(
+        "pickup_fine_step_distance_m"
+    )
+    pickup_fine_align_bottom_distance_px = LaunchConfiguration(
+        "pickup_fine_align_bottom_distance_px"
     )
     head_down_trigger_bottom_distance_px = LaunchConfiguration(
         "head_down_trigger_bottom_distance_px"
@@ -241,8 +244,12 @@ def generate_launch_description() -> LaunchDescription:
                 "ball_control_range_m": ParameterValue(
                     ball_control_range_m, value_type=float
                 ),
-                "pickup_fine_step_bottom_distance_px": ParameterValue(
-                    pickup_fine_step_bottom_distance_px,
+                "pickup_fine_step_distance_m": ParameterValue(
+                    pickup_fine_step_distance_m,
+                    value_type=float,
+                ),
+                "pickup_fine_align_bottom_distance_px": ParameterValue(
+                    pickup_fine_align_bottom_distance_px,
                     value_type=int,
                 ),
                 "goal_tracking_range_m": ParameterValue(
@@ -392,8 +399,8 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("camera_height_m", default_value="0.515"),
             DeclareLaunchArgument("camera_pitch_down_deg", default_value="45.0"),
             DeclareLaunchArgument("camera_forward_offset_m", default_value="0.0"),
-            DeclareLaunchArgument("line_roi_x_min_ratio", default_value="0.15"),
-            DeclareLaunchArgument("line_roi_x_max_ratio", default_value="0.85"),
+            DeclareLaunchArgument("line_roi_x_min_ratio", default_value="0.0"),
+            DeclareLaunchArgument("line_roi_x_max_ratio", default_value="1.0"),
             DeclareLaunchArgument(
                 "corner_min_turn_delta_deg", default_value="30.0"
             ),
@@ -407,11 +414,19 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("ball_tracking_range_m", default_value="1.5"),
             DeclareLaunchArgument("ball_control_range_m", default_value="1.5"),
             DeclareLaunchArgument(
-                "pickup_fine_step_bottom_distance_px",
-                default_value="500",
+                "pickup_fine_step_distance_m",
+                default_value="0.570",
                 description=(
-                    "Switch to the fixed pickup fine step when the Ball "
-                    "center is this many pixels or less from the image bottom."
+                    "Use pickup fine steps at or below this Ball distance "
+                    "in meters; use four-repeat forward steps above it."
+                ),
+            ),
+            DeclareLaunchArgument(
+                "pickup_fine_align_bottom_distance_px",
+                default_value="300",
+                description=(
+                    "Allow lateral alignment and backward pickup stages only "
+                    "when the Ball center is this close to the image bottom."
                 ),
             ),
             DeclareLaunchArgument(
@@ -422,8 +437,8 @@ def generate_launch_description() -> LaunchDescription:
                 "ball_head_override_deg",
                 default_value="-60.0",
             ),
-            DeclareLaunchArgument("goal_tracking_range_m", default_value="1.0"),
-            DeclareLaunchArgument("goal_control_range_m", default_value="0.5"),
+            DeclareLaunchArgument("goal_tracking_range_m", default_value="2.0"),
+            DeclareLaunchArgument("goal_control_range_m", default_value="2.0"),
             DeclareLaunchArgument("hurdle_control_range_m", default_value="1.0"),
             DeclareLaunchArgument(
                 "backend_type",

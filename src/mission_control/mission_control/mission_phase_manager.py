@@ -36,7 +36,11 @@ class MissionPhaseManager:
             "GOAL_SEARCH",
             "GOAL_APPROACH",
             "POST_BALL_LINE_ALIGN",
+            "LINE_TRACK_AFTER_PICKUP",
             "POST_BALL_GOAL_TRANSITION",
+            "POST_SHOT_TURN",
+            "POST_SHOT_LINE_ALIGN",
+            "POST_SHOT_FORWARD",
             "HURDLE_APPROACH",
             "LINE_TRACK",
             "FINISH",
@@ -94,7 +98,7 @@ class MissionPhaseManager:
         )
 
         self.max_pickup_failures = self._nonnegative_count(
-        max_pickup_failures
+            max_pickup_failures
         )
         self.max_shot_failures = self._nonnegative_count(
             max_shot_failures
@@ -119,6 +123,7 @@ class MissionPhaseManager:
         self.finish_enabled = self.required_ball_sections == 0
         self.mission_complete = False
         self.post_ball_goal_transition_failed = False
+        self.post_shot_failed = False
 
         self.pickup_failure_count = 0
         self.shot_failure_count = 0
@@ -188,16 +193,34 @@ class MissionPhaseManager:
         return False
 
     def complete_post_ball_line_align(self) -> bool:
-        """Advance only a completed first-Ball line alignment."""
+        """Advance only after post-pickup line alignment completes."""
         if (
             self.current_phase != "POST_BALL_LINE_ALIGN"
             or self.active_special_command_id is not None
         ):
             return False
-        self.current_phase = "POST_BALL_GOAL_TRANSITION"
+        self.current_phase = "LINE_TRACK_AFTER_PICKUP"
         self.post_ball_goal_transition_failed = False
         return True
 
+    def complete_post_ball_line_run(self) -> bool:
+        """Choose the Goal route only when the completed pickup held a ball."""
+        if (
+            self.current_phase != "LINE_TRACK_AFTER_PICKUP"
+            or self.active_special_command_id is not None
+            or self.pickups_completed <= self.ball_sections_processed
+        ):
+            return False
+        if self.grasp_result_for_ball(self.pickups_completed) == self.GRASPED:
+            self.current_phase = "POST_BALL_GOAL_TRANSITION"
+        else:
+            # Passing an empty pickup consumes its course section, not a shot.
+            self.ball_sections_processed = min(
+                self.ball_sections_processed + 1, self.required_ball_sections
+            )
+            self._update_finish_enabled()
+            self.current_phase = "LINE_TRACK" if self.finish_enabled else "AUTO"
+        return True
 
     def start_special_action(self, action: str, command_id: int) -> bool:
         """Register one special command before its RUNNING status arrives."""
@@ -225,6 +248,47 @@ class MissionPhaseManager:
                 self.ball_grasp_results[
                     self.active_pickup_attempt
                 ] = self.GRASP_UNKNOWN
+        return True
+
+    def post_shot_turn_action(self) -> str:
+        """Choose the fixed exit turn for the completed BALL section."""
+        return (
+            "POST_SHOT_TURN_RIGHT_9"
+            if self.ball_sections_processed <= 1
+            else "POST_SHOT_TURN_LEFT_4"
+        )
+
+    def complete_post_shot_line_align(self) -> bool:
+        """Arm the forward checkpoint only after heading alignment."""
+        if self.current_phase != "POST_SHOT_LINE_ALIGN" or self.post_shot_failed:
+            return False
+        self.current_phase = "POST_SHOT_FORWARD"
+        return True
+
+    def handle_post_shot_motion(self, action: str, status: str) -> bool:
+        """Apply a general terminal status already correlated by the gate."""
+        matched = (
+            (self.current_phase == "POST_SHOT_TURN"
+             and action == self.post_shot_turn_action())
+            or (self.current_phase == "POST_SHOT_LINE_ALIGN"
+                and action.startswith("POST_SHOT_LINE_TURN_"))
+            or (self.current_phase == "POST_SHOT_FORWARD"
+                and action == "POST_SHOT_FORWARD")
+        )
+        if not matched:
+            return False
+        if status != "SUCCEEDED":
+            # A partial turn has unknown yaw; do not replay or walk onward.
+            self.post_shot_failed = True
+        elif self.current_phase == "POST_SHOT_TURN":
+            self.current_phase = "POST_SHOT_LINE_ALIGN"
+        elif self.current_phase == "POST_SHOT_FORWARD":
+            self.current_phase = (
+                "LINE_TRACK"
+                if self.required_ball_sections > 0
+                and self.ball_sections_processed >= self.required_ball_sections
+                else "AUTO"
+            )
         return True
 
     def record_active_pickup_grasp_result(self, result: str) -> bool:
@@ -325,11 +389,7 @@ class MissionPhaseManager:
                     self.required_pickups,
                 )
                 self.post_ball_goal_transition_failed = False
-                self.current_phase = (
-                    "POST_BALL_LINE_ALIGN"
-                    if self.pickups_completed == 1
-                    else "POST_BALL_GOAL_TRANSITION"
-                )
+                self.current_phase = "POST_BALL_LINE_ALIGN"
                 return
 
             if status in {"FAILED", "TIMEOUT"}:
@@ -359,16 +419,8 @@ class MissionPhaseManager:
                     self.required_ball_sections,
                 )
                 self._update_finish_enabled()
-                all_ball_sections_processed = (
-                    self.required_ball_sections > 0
-                    and self.ball_sections_processed
-                    >= self.required_ball_sections
-                )
-                self.current_phase = (
-                    "LINE_TRACK"
-                    if all_ball_sections_processed
-                    else "AUTO"
-                )
+                self.post_shot_failed = False
+                self.current_phase = "POST_SHOT_TURN"
                 return
 
             if status in {"FAILED", "TIMEOUT"}:
@@ -426,6 +478,13 @@ class MissionPhaseManager:
         """Return a new dictionary containing the externally visible state."""
         return {
             "current_phase": self.current_phase,
+            "ball_mode_active": (
+                self.active_special_action == "PICKUP_NOW"
+                or self.current_phase in {
+                    "BALL_SEARCH", "BALL_APPROACH",
+                    "POST_BALL_LINE_ALIGN",
+                }
+            ),
             "pickups_completed": self.pickups_completed,
             "shots_completed": self.shots_completed,
             "ball_sections_processed": self.ball_sections_processed,

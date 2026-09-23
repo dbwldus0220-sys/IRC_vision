@@ -25,11 +25,12 @@ class GoalNavigationController(Node):
         self.declare_parameter("command_topic", "/navigation/goal_command")
         self.declare_parameter("publish_rate_hz", 10.0)
         self.declare_parameter("goal_timeout_sec", 0.50)
-        self.declare_parameter("min_confidence", 0.35)
-        self.declare_parameter("control_start_depth_m", 0.50)
-        self.declare_parameter("score_target_depth_m", 0.25)
-        self.declare_parameter("score_depth_tolerance_m", 0.05)
-        self.declare_parameter("score_center_tolerance_norm", 0.10)
+        self.declare_parameter("min_confidence", 0.55)
+        self.declare_parameter("control_start_depth_m", 2.0)
+        self.declare_parameter("score_target_depth_m", 0.795)
+        self.declare_parameter("score_depth_tolerance_m", 0.025)
+        self.declare_parameter("score_left_bound_px", -40.0)
+        self.declare_parameter("score_right_bound_px", 100.0)
 
         config = GoalNavigationConfig(
             min_confidence=self._float_parameter("min_confidence"),
@@ -42,9 +43,8 @@ class GoalNavigationController(Node):
             score_depth_tolerance_m=self._float_parameter(
                 "score_depth_tolerance_m"
             ),
-            score_center_tolerance_norm=self._float_parameter(
-                "score_center_tolerance_norm"
-            ),
+            score_left_bound_px=self._float_parameter("score_left_bound_px"),
+            score_right_bound_px=self._float_parameter("score_right_bound_px"),
         )
         self.planner = GoalNavigationPlanner(config)
         self.goal_timeout_sec = self._float_parameter("goal_timeout_sec")

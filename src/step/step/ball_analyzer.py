@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 import json
 import math
 import time
@@ -1290,7 +1290,23 @@ class BallAnalyzer(DepthFrameConsumer, Node):
                 "pickup_confirmation"
             )
             if self.publish_empty_when_missing:
-                self._publish(self._empty_info("ball_confirmation_pending"))
+                # Preserve the latest screen side during motion blur without
+                # promoting a raw detection to a confirmed control target.
+                pending = self._empty_info("ball_confirmation_pending")
+                self._publish(replace(
+                    pending,
+                    confidence=target.confidence,
+                    center_x=target.center[0],
+                    center_y=target.center[1],
+                    bbox=target.bbox,
+                    image_width=image_width,
+                    image_height=image_height,
+                    camera_center_offset_x_px=(
+                        int(round(target.center[0] - image_width / 2.0))
+                        if image_width is not None and image_width > 0
+                        else None
+                    ),
+                ))
             return
 
         (

@@ -139,8 +139,8 @@ class Yolo26Detector(Node):
         self.declare_parameter("goal_info_topic", "/vision/goal_info")
         self.declare_parameter("goal_info_timeout_sec", 0.8)
         self.declare_parameter("show_goal_metrics", True)
-        self.declare_parameter("goal_tracking_range_m", 1.0)
-        self.declare_parameter("goal_control_range_m", 0.5)
+        self.declare_parameter("goal_tracking_range_m", 2.0)
+        self.declare_parameter("goal_control_range_m", 2.0)
         self.declare_parameter("hurdle_info_topic", "/vision/hurdle_info")
         self.declare_parameter("hurdle_info_timeout_sec", 0.8)
         self.declare_parameter("show_hurdle_metrics", True)
@@ -151,6 +151,7 @@ class Yolo26Detector(Node):
             "/navigation/motion_command",
         )
         self.declare_parameter("motion_command_timeout_sec", 0.8)
+        self.declare_parameter("motion_status_topic", "/motion/status")
         self.declare_parameter(
             "decision_debug_topic",
             "/navigation/decision_debug",
@@ -416,6 +417,12 @@ class Yolo26Detector(Node):
             self._decision_debug_callback,
             10,
         )
+        self.create_subscription(
+            String,
+            str(self.get_parameter("motion_status_topic").value),
+            self._motion_status_callback,
+            10,
+        )
 
         self.last_inference_time = 0.0
         self.smoothed_fps = 0.0
@@ -433,6 +440,8 @@ class Yolo26Detector(Node):
         self.latest_hurdle_info_time: float | None = None
         self.latest_motion_command: dict[str, Any] | None = None
         self.latest_motion_command_time: float | None = None
+        self.latest_running_motion: dict[str, Any] | None = None
+        self.latest_running_motion_time: float | None = None
         self.latest_decision_debug: dict[str, Any] | None = None
         self.latest_decision_debug_time: float | None = None
         self._overlay_rgb_stamp_ns: int | None = None
@@ -987,6 +996,74 @@ class Yolo26Detector(Node):
             return None
         return self.latest_motion_command
 
+    def _motion_status_callback(self, message: String) -> None:
+        """Track actual submotions, rather than only the parent PICKUP action."""
+        payload = self._read_json_object(message, "motion status")
+        if payload is None:
+            return
+        if payload.get("status") == "RUNNING" and payload.get("motion_id"):
+            self.latest_running_motion = payload
+            self.latest_running_motion_time = time.monotonic()
+        elif payload.get("status") in {
+            "SUCCEEDED", "FAILED", "CANCELLED", "REJECTED",
+        }:
+            active = getattr(self, "latest_running_motion", None)
+            if active is not None and all(
+                payload.get(key) == active.get(key)
+                for key in ("command_id", "request_id")
+            ) and (
+                payload.get("status") != "REJECTED"
+                or payload.get("motion_id") == active.get("motion_id")
+            ):
+                self.latest_running_motion = None
+                self.latest_running_motion_time = None
+
+    def _running_motion_banner(self) -> tuple[str, tuple[int, int, int]] | None:
+        """Keep a running label through long motions, with a stale-data limit."""
+        payload = getattr(self, "latest_running_motion", None)
+        received = getattr(self, "latest_running_motion_time", None)
+        if payload is None or received is None or time.monotonic() - received > 120.0:
+            return None
+        motion_id = str(payload.get("motion_id", ""))
+        labels = {
+            "pickup_fine_prepare": "PICKUP / PREPARE FINE STEP",
+            "pickup_fine_forward_0": "PICKUP / FINE FORWARD",
+            "pickup_crab_prepare": "PICKUP / PREPARE SIDE STEP",
+            "pickup_crab_left_0": "PICKUP / SIDE STEP LEFT",
+            "pickup_crab_right_0": "PICKUP / SIDE STEP RIGHT",
+            "pickup_pre_backward_camera_down": "PICKUP / BACKWARD (2 CYCLES)",
+            "pickup": "PICKUP / GRASP",
+            "pickup_grasp_check_pose": "PICKUP / CHECK BALL",
+            "pickup_retreat_2": "PICKUP / BACKWARD (3 CYCLES)",
+            "pickup_first_backward_turn_right": "PICKUP / BACKWARD + TURN RIGHT",
+            "pickup_second_backward_turn_left": "PICKUP / BACKWARD + TURN LEFT",
+            "goal_camera_90_backward_1": "GOAL / BACKWARD (1 CYCLE)",
+            "goal_shot": "GOAL / SHOT",
+            "goal_fine_to_default": "GOAL / PREPARE SHOT",
+            "post_ball_camera_90": "GOAL / CAMERA 90",
+            "post_shot_default_turn_right": "LINE RETURN / TURN RIGHT",
+            "post_shot_default_turn_left": "LINE RETURN / TURN LEFT",
+        }
+        label = labels.get(motion_id)
+        for prefix, description in (
+            ("line_turn_", "LINE / IN-PLACE TURN"),
+            ("line_search_", "LINE SEARCH / IN-PLACE TURN"),
+            ("post_ball_line_turn_", "LINE ALIGN / IN-PLACE TURN"),
+            ("post_shot_line_turn_", "LINE ALIGN / IN-PLACE TURN"),
+            ("goal_camera_90_turn_", "GOAL / IN-PLACE TURN"),
+            ("pickup_camera_down_turn_", "PICKUP / IN-PLACE TURN"),
+            ("goal_camera_90_fine_forward_", "GOAL / FINE FORWARD"),
+        ):
+            if label is None and motion_id.startswith(prefix):
+                suffix = motion_id[len(prefix):].upper().replace("_", " ")
+                label = f"{description} {suffix}"
+        if label is None:
+            # Aliases use ASCII so OpenCV's built-in font can render every motion.
+            label = motion_id.strip("_").upper().replace("_", " ")
+            if "RECOVERY" in label:
+                label = label.replace("RECOVERY", "RETURN")
+        return (label, (130, 105, 0)) if label else None
+
     def _decision_debug_callback(self, message: String) -> None:
         """Store decision state used only for the local debug overlay."""
         payload = self._read_json_object(message, "decision debug")
@@ -1430,13 +1507,23 @@ class Yolo26Detector(Node):
                 depth if depth_valid else None,
             )
 
+        # Show raw backboards even in detector-only runs without goal_info.
+        # This only affects the overlay, not the analyzer's motion gates.
+        if class_name == "backboard":
+            if goal_info is None:
+                return True, False, None
+            depth = self._number(goal_info, "depth_m")
+            depth_valid = bool(goal_info.get("depth_valid", False))
+            control_ready = bool(
+                goal_info.get("detected", False)
+                and depth_valid
+                and depth is not None
+                and 0.0 < depth <= self.goal_control_range_m
+            )
+            return True, control_ready, depth if depth_valid else None
+
         settings = {
             "goal": (
-                goal_info,
-                self.goal_tracking_range_m,
-                self.goal_control_range_m,
-            ),
-            "backboard": (
                 goal_info,
                 self.goal_tracking_range_m,
                 self.goal_control_range_m,
@@ -1501,6 +1588,7 @@ class Yolo26Detector(Node):
             "STOP": "BALL STOP",
         }
         goal_labels = {
+            "GOAL_CAMERA90_BACKWARD_1": "GOAL BACKWARD (1 CYCLE)",
             "TURN_LEFT": "GOAL TURN LEFT",
             "TURN_RIGHT": "GOAL TURN RIGHT",
             "RETREAT_GOAL": "GOAL RETREAT",
@@ -2298,7 +2386,24 @@ class Yolo26Detector(Node):
     def _draw_goal_metrics(self, image: np.ndarray) -> None:
         """Draw analyzed goal distance and scoring data in-place."""
         height, width = image.shape[:2]
-        center_x = width // 2
+        info = self._fresh_goal_info()
+        calibrated_center_x = (
+            self._number(info, "robot_center_x_px")
+            if info is not None
+            else None
+        )
+        center_x = int(np.clip(
+            round(calibrated_center_x)
+            if calibrated_center_x is not None else width // 2,
+            0, width - 1,
+        ))
+        cv2.drawMarker(
+            image,
+            (width // 2, height // 2),
+            (180, 180, 180),
+            cv2.MARKER_CROSS,
+            18, 1, cv2.LINE_AA,
+        )
         cv2.line(
             image,
             (center_x, max(45, int(height * 0.32))),
@@ -2308,7 +2413,6 @@ class Yolo26Detector(Node):
             cv2.LINE_AA,
         )
 
-        info = self._fresh_goal_info()
         decision = self._fresh_motion_command()
         if decision is None:
             planner_action = "NO COMMAND"
@@ -2823,8 +2927,54 @@ class Yolo26Detector(Node):
             2,
             cv2.LINE_AA,
         )
-        self._draw_grasp_verification_status(annotated)
+        decision_debug = self._fresh_decision_debug()
+        running_banner = self._running_motion_banner()
+        if running_banner is not None:
+            cv2.rectangle(annotated, (0, 32), (annotated.shape[1], 96), (0, 0, 0), -1)
+            self._draw_action_banner(annotated, running_banner[0], running_banner[1])
+        fault_banner = self._executor_fault_banner(decision_debug)
+        lost_banner = self._ball_lost_banner(decision_debug)
+        if fault_banner is not None:
+            # Replace any earlier action banner, including vision-only pickup.
+            cv2.rectangle(annotated, (0, 32), (annotated.shape[1], 96), (0, 0, 0), -1)
+            self._draw_action_banner(annotated, fault_banner, (0, 0, 180))
+        elif lost_banner is not None:
+            if running_banner is not None:
+                lost_banner = f"BALL LOST | {running_banner[0]}"
+            cv2.rectangle(annotated, (0, 32), (annotated.shape[1], 96), (0, 0, 0), -1)
+            self._draw_action_banner(annotated, lost_banner, (0, 100, 220))
+        else:
+            self._draw_grasp_verification_status(annotated)
         return annotated
+
+    @staticmethod
+    def _ball_lost_banner(decision_debug: dict[str, Any] | None) -> str | None:
+        """Show image loss even while the preceding motion is still running."""
+        if not isinstance(decision_debug, dict):
+            return None
+        tracking = decision_debug.get("ball_tracking")
+        if not isinstance(tracking, dict) or tracking.get("lost") is not True:
+            return None
+        if tracking.get("top_forward_pending") is True:
+            return "BALL LOST | SEARCH FORWARD"
+        direction = tracking.get("last_direction")
+        if direction in {"LEFT", "RIGHT"}:
+            return f"BALL LOST | SEARCH {direction}"
+        return "BALL LOST"
+
+    @staticmethod
+    def _executor_fault_banner(decision_debug: dict[str, Any] | None) -> str | None:
+        """Prioritize an executor stop over a vision pickup indication."""
+        if not isinstance(decision_debug, dict):
+            return None
+        safety = decision_debug.get("safety")
+        if not isinstance(safety, dict) or safety.get("latched") is not True:
+            return None
+        if "direct profile restore" in str(safety.get("message", "")) or (
+            "restore direct playback profile" in str(safety.get("message", ""))
+        ):
+            return "STOPPED: MOTOR PROFILE ERROR"
+        return "STOPPED: " + str(safety.get("error_code") or "EXECUTOR ERROR")
 
     @staticmethod
     def _grasp_verification_banner(

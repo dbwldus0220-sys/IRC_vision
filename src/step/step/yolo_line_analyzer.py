@@ -300,12 +300,12 @@ class YoloLineAnalyzer(DepthFrameConsumer, Node):
 
         self.declare_parameter(
             "roi_x_min_ratio",
-            0.15,
+            0.0,
         )
 
         self.declare_parameter(
             "roi_x_max_ratio",
-            0.85,
+            1.0,
         )
 
         self.declare_parameter(

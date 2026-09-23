@@ -16,6 +16,7 @@ def test_default_initial_state():
     manager = MissionPhaseManager()
     assert manager.snapshot() == {
         "current_phase": "AUTO",
+        "ball_mode_active": False,
         "pickups_completed": 0,
         "shots_completed": 0,
         "ball_sections_processed": 0,
@@ -110,21 +111,25 @@ def test_first_ball_line_alignment_completes_before_goal_transition():
     complete(manager, "PICKUP_NOW", 1, "SUCCEEDED")
 
     assert manager.complete_post_ball_line_align()
-    assert manager.current_phase == "POST_BALL_GOAL_TRANSITION"
+    assert manager.current_phase == "LINE_TRACK_AFTER_PICKUP"
+    assert manager.snapshot()["ball_mode_active"] is False
     assert not manager.complete_post_ball_line_align()
 
 
-def test_second_pickup_skips_first_ball_line_alignment():
+def test_second_pickup_requires_line_alignment_before_forward():
     manager = MissionPhaseManager(initial_phase="BALL_APPROACH")
     manager.pickups_completed = 1
 
     complete(manager, "PICKUP_NOW", 1, "SUCCEEDED")
 
     assert manager.pickups_completed == 2
-    assert manager.current_phase == "POST_BALL_GOAL_TRANSITION"
+    assert manager.current_phase == "POST_BALL_LINE_ALIGN"
+    assert manager.complete_post_ball_line_align()
+    assert manager.current_phase == "LINE_TRACK_AFTER_PICKUP"
+    assert manager.snapshot()["ball_mode_active"] is False
 
 
-def test_post_ball_goal_transition_success_enters_goal_approach():
+def test_post_ball_goal_transition_finishes_after_forward_camera_and_pause():
     manager = MissionPhaseManager(
         initial_phase="POST_BALL_GOAL_TRANSITION"
     )
@@ -138,6 +143,7 @@ def test_post_ball_goal_transition_success_enters_goal_approach():
 
     assert result.handled and result.terminal
     assert manager.current_phase == "GOAL_APPROACH"
+    assert manager.snapshot()["ball_mode_active"] is False
     assert manager.post_ball_goal_transition_failed is False
 
 
@@ -164,6 +170,7 @@ def test_post_ball_goal_transition_failure_latches_abort(status):
     assert result.handled and result.terminal
     assert manager.current_phase == "POST_BALL_GOAL_TRANSITION"
     assert manager.post_ball_goal_transition_failed is True
+    assert manager.snapshot()["ball_mode_active"] is False
 
 
 @pytest.mark.parametrize(
@@ -264,7 +271,7 @@ def test_shot_terminal_updates_section_and_phase(status, expected_shots):
     assert manager.ball_sections_processed == expected_sections
     assert manager.finish_enabled is False
     assert manager.current_phase == (
-        "AUTO" if status == "SUCCEEDED" else "GOAL_APPROACH"
+        "POST_SHOT_TURN" if status == "SUCCEEDED" else "GOAL_APPROACH"
     )
 
 
@@ -277,7 +284,7 @@ def test_only_required_shot_enters_line_track_without_finishing():
     assert manager.shots_completed == 1
     assert manager.ball_sections_processed == 1
     assert manager.finish_enabled is True
-    assert manager.current_phase == "LINE_TRACK"
+    assert manager.current_phase == "POST_SHOT_TURN"
     assert manager.current_phase not in {
         "FINISH",
         "WALK_TO_FINISH",
@@ -293,7 +300,7 @@ def test_second_required_shot_enters_line_track():
     )
     complete(manager, "SHOT", 1, "SUCCEEDED")
     assert manager.ball_sections_processed == 1
-    assert manager.current_phase == "AUTO"
+    assert manager.current_phase == "POST_SHOT_TURN"
 
     assert manager.set_phase("GOAL_APPROACH")
     complete(manager, "SHOT", 2, "SUCCEEDED")
@@ -301,7 +308,7 @@ def test_second_required_shot_enters_line_track():
     assert manager.shots_completed == 2
     assert manager.ball_sections_processed == 2
     assert manager.finish_enabled is True
-    assert manager.current_phase == "LINE_TRACK"
+    assert manager.current_phase == "POST_SHOT_TURN"
     assert manager.mission_complete is False
 
 
@@ -314,7 +321,7 @@ def test_zero_required_sections_preserves_success_phase_policy():
     complete(manager, "SHOT", 1, "SUCCEEDED")
 
     assert manager.ball_sections_processed == 0
-    assert manager.current_phase == "AUTO"
+    assert manager.current_phase == "POST_SHOT_TURN"
     assert manager.finish_enabled is True
 
 
@@ -454,7 +461,7 @@ def test_duplicate_successful_shot_does_not_increment_twice():
     assert duplicate.duplicate
     assert manager.shots_completed == 1
     assert manager.ball_sections_processed == 1
-    assert manager.current_phase == "AUTO"
+    assert manager.current_phase == "POST_SHOT_TURN"
 
 
 def test_mismatched_shot_command_does_not_change_progress_or_phase():
@@ -605,3 +612,58 @@ def test_required_counts_are_clamped_to_zero():
 def test_invalid_command_ids_are_rejected(command_id):
     manager = MissionPhaseManager()
     assert not manager.start_special_action("SHOT", command_id)
+
+
+@pytest.mark.parametrize("completed", [1, 2])
+@pytest.mark.parametrize("grasp", ["GRABBED", "NOT_GRABBED", "UNKNOWN"])
+def test_post_pickup_line_run_routes_by_its_ball_grasp(completed, grasp):
+    manager = MissionPhaseManager(initial_phase="LINE_TRACK_AFTER_PICKUP")
+    manager.pickups_completed = completed
+    manager.ball_sections_processed = completed - 1
+    manager.shots_completed = completed - 1
+    manager.ball_grasp_results[completed] = grasp
+    assert manager.snapshot()["ball_mode_active"] is False
+    assert manager.complete_post_ball_line_run()
+    if grasp == "GRABBED":
+        assert manager.current_phase == "POST_BALL_GOAL_TRANSITION"
+        assert manager.ball_sections_processed == completed - 1
+        assert manager.grasp_result_for_next_shot() == "GRABBED"
+    else:
+        assert manager.current_phase == ("LINE_TRACK" if completed == 2 else "AUTO")
+        assert manager.ball_sections_processed == completed
+        assert manager.finish_enabled is (completed == 2)
+    assert manager.shots_completed == completed - 1
+    assert not manager.complete_post_ball_line_run()
+
+
+def test_second_grab_is_used_after_skipping_first_empty_pickup():
+    manager = MissionPhaseManager(initial_phase="LINE_TRACK_AFTER_PICKUP")
+    manager.pickups_completed = 1
+    manager.ball_grasp_results[1] = "NOT_GRABBED"
+    assert manager.complete_post_ball_line_run()
+    assert manager.ball_sections_processed == 1
+    assert manager.start_special_action("PICKUP_NOW", 10)
+    assert manager.record_active_pickup_grasp_result("GRABBED")
+    manager.handle_motion_status("PICKUP_NOW", 10, "RUNNING")
+    manager.handle_motion_status("PICKUP_NOW", 10, "SUCCEEDED")
+    assert manager.complete_post_ball_line_align()
+    assert manager.complete_post_ball_line_run()
+    assert manager.current_phase == "POST_BALL_GOAL_TRANSITION"
+    assert manager.grasp_result_for_next_shot() == "GRABBED"
+    complete(manager, "POST_BALL_GOAL_TRANSITION", 11, "SUCCEEDED")
+    complete(manager, "SHOT", 12, "SUCCEEDED")
+    assert manager.shots_completed == 1
+    assert manager.ball_sections_processed == 2
+    assert manager.finish_enabled is True
+    assert manager.post_shot_turn_action() == "POST_SHOT_TURN_LEFT_4"
+
+
+def test_timed_line_cannot_consume_an_already_processed_empty_pickup():
+    manager = MissionPhaseManager(initial_phase="LINE_TRACK_AFTER_PICKUP")
+    manager.pickups_completed = 1
+    manager.ball_grasp_results[1] = "NOT_GRABBED"
+    assert manager.complete_post_ball_line_run()
+    manager.set_phase("LINE_TRACK_AFTER_PICKUP")
+    assert not manager.complete_post_ball_line_run()
+    assert manager.ball_sections_processed == 1
+    assert manager.shots_completed == 0
