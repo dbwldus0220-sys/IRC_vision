@@ -42,6 +42,7 @@ class MissionPhaseManager:
             "POST_SHOT_LINE_ALIGN",
             "POST_SHOT_FORWARD",
             "HURDLE_APPROACH",
+            "HURDLE_POSITIONING",
             "LINE_TRACK",
             "FINISH",
             "WALK_TO_FINISH",
@@ -57,6 +58,16 @@ class MissionPhaseManager:
             "CROSS_FINISH",
         }
     )
+    EXECUTION_COUNTERS = {
+        "PICKUP_NOW": ("pickups_executed", "required_pickups"),
+        "SHOT": ("shots_executed", "required_shots"),
+        "GO": ("hurdles_executed", "required_hurdles"),
+    }
+    EXECUTION_MOTIONS = {
+        "PICKUP_NOW": frozenset({"pickup", "pick_ball"}),
+        "SHOT": frozenset({"goal_shot", "shoot"}),
+        "GO": frozenset({"hurdle", "forward"}),
+    }
     SUPPORTED_STATUSES = frozenset(
         {
             "RUNNING",
@@ -114,6 +125,11 @@ class MissionPhaseManager:
             raise ValueError("initial_phase must be a supported phase")
 
         self.current_phase = normalized_phase
+        # Execution budgets are independent of success and course progress.
+        self.pickups_executed = 0
+        self.shots_executed = 0
+        self.hurdles_executed = 0
+        self._active_execution_counted = False
         self.pickups_completed = 0
         self.ball_grasp_results = {
             index: self.GRASP_UNKNOWN
@@ -195,6 +211,18 @@ class MissionPhaseManager:
 
         return False
 
+    def execution_limit_reached(self, action: str) -> bool:
+        """Report whether the configured mission execution budget is exhausted."""
+        fields = self.EXECUTION_COUNTERS.get(action)
+        return bool(fields and getattr(self, fields[0]) >= getattr(self, fields[1]))
+
+    def _count_active_execution(self) -> None:
+        """Count once per command, independently of its eventual result."""
+        fields = self.EXECUTION_COUNTERS.get(self.active_special_action)
+        if fields is not None and not self._active_execution_counted:
+            setattr(self, fields[0], getattr(self, fields[0]) + 1)
+            self._active_execution_counted = True
+
     def complete_post_ball_line_align(self) -> bool:
         """Advance only after post-pickup line alignment completes."""
         if (
@@ -204,6 +232,14 @@ class MissionPhaseManager:
             return False
         self.current_phase = "LINE_TRACK_AFTER_PICKUP"
         self.post_ball_goal_transition_failed = False
+        if self.grasp_result_for_ball(self.pickups_completed) != self.GRASPED:
+            # An empty pickup resumes object selection as soon as Line is found.
+            if self.pickups_completed > self.ball_sections_processed:
+                self.ball_sections_processed = min(
+                    self.ball_sections_processed + 1, self.required_ball_sections
+                )
+                self._update_finish_enabled()
+            self.current_phase = "AUTO"
         return True
 
     def complete_post_ball_line_run(self) -> bool:
@@ -238,6 +274,10 @@ class MissionPhaseManager:
                 and self.active_special_command_id == command_id
             )
 
+        if self.execution_limit_reached(normalized_action):
+            return False
+
+        self._active_execution_counted = False
         self.active_special_action = normalized_action
         self.active_special_command_id = command_id
         self.active_special_running = False
@@ -320,6 +360,8 @@ class MissionPhaseManager:
         action: str,
         command_id: int,
         status: str,
+        *,
+        motion_id: str | None = None,
     ) -> MotionStatusResult:
         """Apply one correlated special-motion status."""
         previous_phase = self.current_phase
@@ -354,6 +396,13 @@ class MissionPhaseManager:
 
         if normalized_status == "RUNNING":
             self.active_special_running = True
+            # Legacy action-only status has no motion_id. Production status
+            # must identify the actual mission motion, not alignment or dwell.
+            if motion_id is None or (
+                isinstance(motion_id, str)
+                and motion_id in self.EXECUTION_MOTIONS.get(normalized_action, ())
+            ):
+                self._count_active_execution()
             return self._result(
                 True, False, False, "running", previous_phase
             )
@@ -370,6 +419,9 @@ class MissionPhaseManager:
                 previous_phase,
             )
 
+        if normalized_status == "SUCCEEDED":
+            # Completion also proves execution if an intermediate RUNNING was lost.
+            self._count_active_execution()
         self._apply_terminal(normalized_action, normalized_status)
         self._completed_command_ids.add(command_id)
         self.active_special_action = None
@@ -436,7 +488,11 @@ class MissionPhaseManager:
             if not succeeded:
                 if status in {"FAILED", "TIMEOUT"}:
                     self.go_failure_count += 1
-                self.current_phase = "HURDLE_APPROACH"
+                self.current_phase = (
+                    "HURDLE_POSITIONING"
+                    if self._active_special_origin_phase == "HURDLE_POSITIONING"
+                    else "HURDLE_APPROACH"
+                )
                 return
 
             self.go_failure_count = 0
@@ -486,6 +542,9 @@ class MissionPhaseManager:
                     "POST_BALL_LINE_ALIGN",
                 }
             ),
+            "pickups_executed": self.pickups_executed,
+            "shots_executed": self.shots_executed,
+            "hurdles_executed": self.hurdles_executed,
             "pickups_completed": self.pickups_completed,
             "shots_completed": self.shots_completed,
             "hurdles_completed": self.hurdles_completed,

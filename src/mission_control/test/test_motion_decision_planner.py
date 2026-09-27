@@ -3116,7 +3116,7 @@ def test_completed_hurdle_releases_close_turn_block_for_next_hurdle():
     assert not planner.hurdle_planner.close_rotation_blocked
     planner.plan("AUTO", observations(), 0.1)
     next_hurdle = planner.plan("AUTO", observations(hurdle=hurdle_info(
-        bottom_distance_px=150, depth_m=0.4, hurdle_angle_deg=12.0,
+        bottom_distance_px=150, depth_m=0.4, hurdle_angle_deg=45.0, camera_center_offset_x_px=-150,
     )), 0.1)
     assert next_hurdle.action == "ALIGN_LEFT"
 

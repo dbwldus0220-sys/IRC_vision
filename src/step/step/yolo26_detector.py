@@ -34,6 +34,7 @@ from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import Image
 from std_msgs.msg import String
 
+from step.approach_distance import BALL_HURDLE_FINE_DISTANCE_M
 from step.ball_navigation_planner import valid_ball_ground_steering
 from step.depth_frame_cache import image_stamp_ns
 from step.line_navigation_planner import (
@@ -988,6 +989,14 @@ class Yolo26Detector(Node):
             return
         self.latest_motion_command = payload
         self.latest_motion_command_time = time.monotonic()
+        # Different ROS topics may deliver RUNNING before its command.
+        active = getattr(self, "latest_running_motion", None)
+        if (
+            active is not None
+            and payload.get("command_id") is not None
+            and active.get("command_id") == payload.get("command_id")
+        ):
+            active["source"] = payload.get("source")
 
     def _fresh_motion_command(self) -> dict[str, Any] | None:
         if (
@@ -1006,6 +1015,18 @@ class Yolo26Detector(Node):
         if payload is None:
             return
         if payload.get("status") == "RUNNING" and payload.get("motion_id"):
+            for context in (
+                getattr(self, "latest_motion_command", None),
+                getattr(self, "latest_running_motion", None),
+            ):
+                if (
+                    context is not None
+                    and payload.get("command_id") is not None
+                    and context.get("command_id") == payload.get("command_id")
+                    and context.get("source")
+                ):
+                    payload["source"] = context["source"]
+                    break
             self.latest_running_motion = payload
             self.latest_running_motion_time = time.monotonic()
         elif payload.get("status") in {
@@ -1050,6 +1071,20 @@ class Yolo26Detector(Node):
             "post_shot_default_turn_left": "LINE RETURN / TURN LEFT",
         }
         label = labels.get(motion_id)
+        source = str(payload.get("source", "")).lower()
+        if source == "hurdle" or payload.get("action") == "GO":
+            if motion_id == "line_forward_4":
+                label = "HURDLE / FORWARD 4"
+            elif motion_id == "pickup_fine_forward_0":
+                label = "HURDLE / FINE FORWARD"
+        if motion_id == "ball_general_fine_forward_8":
+            source = str(payload.get("source", "")).lower()
+            if payload.get("action") == "GO":
+                source = "hurdle"
+            label = (
+                f"{source.upper()} / FINE FORWARD"
+                if source in {"ball", "hurdle"} else "FINE FORWARD"
+            )
         for prefix, description in (
             ("line_turn_", "LINE / IN-PLACE TURN"),
             ("line_search_", "LINE SEARCH / IN-PLACE TURN"),
@@ -1068,6 +1103,24 @@ class Yolo26Detector(Node):
             if "RECOVERY" in label:
                 label = label.replace("RECOVERY", "RETURN")
         return (label, (130, 105, 0)) if label else None
+
+    @staticmethod
+    def _hurdle_line_tracking_label(
+        info: dict[str, Any] | None, source: str, motion_label: str,
+    ) -> str | None:
+        """Show a confirmed approaching hurdle while Line still owns control."""
+        if source.lower() != "line" or info is None or any(
+            info.get(key) is not True
+            for key in ("detected", "confirmation_confirmed", "depth_valid")
+        ):
+            return None
+        depth = Yolo26Detector._number(info, "depth_m")
+        if depth is None or not BALL_HURDLE_FINE_DISTANCE_M < depth <= 1.0:
+            return None
+        label = motion_label.replace("LINE FORWARD", "LINE_FORWARD")
+        if label.startswith("STRAIGHT"):
+            label = label.replace("STRAIGHT", "LINE_FORWARD", 1)
+        return f"HURDLE / {label}"
 
     def _decision_debug_callback(self, message: String) -> None:
         """Store decision state used only for the local debug overlay."""
@@ -2020,16 +2073,28 @@ class Yolo26Detector(Node):
             return self.metrics_mode
 
         decision = self._fresh_motion_command()
-        if decision is not None:
-            selected = str(decision.get("source", "")).strip().lower()
-            enabled = {
-                "line": self.show_line_metrics,
-                "ball": self.show_ball_metrics,
-                "goal": self.show_goal_metrics,
-                "hurdle": self.show_hurdle_metrics,
-            }
-            if selected in enabled and enabled[selected]:
-                return selected
+        context = decision
+        if self._running_motion_banner() is not None:
+            context = self.latest_running_motion
+        if context is None:
+            context = self._fresh_decision_debug()
+        selected = str((context or {}).get("source", "")).strip().lower()
+        hurdle = self._fresh_hurdle_info()
+        depth = self._number(hurdle, "depth_m") if hurdle else None
+        if (
+            selected in {"", "none", "line", "hurdle"}
+            and self.show_hurdle_metrics and hurdle
+            and hurdle.get("detected") is True
+            and (hurdle.get("head_down_requested") is True
+                 or (depth is not None and 0.0 < depth <= 1.0))
+        ):
+            return "hurdle"
+        enabled = {
+            "line": self.show_line_metrics, "ball": self.show_ball_metrics,
+            "goal": self.show_goal_metrics, "hurdle": self.show_hurdle_metrics,
+        }
+        if enabled.get(selected, False):
+            return selected
 
         line_info = self._fresh_line_info()
         if (
@@ -2632,18 +2697,37 @@ class Yolo26Detector(Node):
         decision = self._fresh_motion_command()
         detected = bool(info and info.get("detected", False))
 
-        self._draw_line_path_geometry(image, self._fresh_line_info())
         source_command: dict[str, Any] = {}
         if decision is not None:
             raw_source_command = decision.get("source_command", {})
             if isinstance(raw_source_command, dict):
                 source_command = raw_source_command
-        self._draw_hurdle_path_reference(image, source_command)
+        debug = self._fresh_decision_debug() or {}
+        control = str((decision or debug).get("source", "none")).upper()
+        if self._running_motion_banner() is not None:
+            control = str(self.latest_running_motion.get("source", control)).upper()
+        phase = str(debug.get("phase", (decision or {}).get("phase", "UNKNOWN")))
+        if detected and info is not None:
+            target_x = self._number(info, "center_x")
+            target_y = self._number(info, "center_y")
+            if target_x is not None and target_y is not None:
+                x = int(np.clip(round(target_x), 0, width - 1))
+                y = int(np.clip(round(target_y), 0, height - 1))
+                cv2.line(image, (width // 2, y), (x, y), (0, 140, 255), 2)
+                cv2.line(image, (x, height - 1), (x, y), (255, 160, 0), 2)
+                bottom_text = self._metric_text(
+                    self._number(info, "bottom_distance_px"), "px", digits=0,
+                )
+                cv2.putText(
+                    image, f"bottom dy {bottom_text}",
+                    (min(x + 8, max(12, width - 190)), max(110, (height - 1 + y) // 2)),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 160, 0), 2, cv2.LINE_AA,
+                )
 
         panel_width = min(410, max(260, width - 24))
-        panel_height = 358
+        panel_height = 526
         panel_x = max(12, width - panel_width - 12)
-        panel_y = 44
+        panel_y = 104
         panel_bottom = min(height - 8, panel_y + panel_height)
         overlay = image.copy()
         cv2.rectangle(
@@ -2669,22 +2753,25 @@ class Yolo26Detector(Node):
             rows = ["HURDLE METRICS", "NO HURDLE INFO"]
         elif not detected:
             state = str(info.get("state", "SEARCH"))
-            rows = ["HURDLE METRICS", f"State       : {state}"]
+            rows = ["HURDLE METRICS", f"Detection   : {state}"]
         else:
             state = str(info.get("state", "UNKNOWN"))
-            path_source = str(
-                source_command.get("path_reference_source", "none")
-            ).upper()
             rows = [
                 "HURDLE METRICS",
-                f"State       : {state}",
-                f"Path ref    : {path_source}",
-                "Path offset : "
-                + self._metric_text(
-                    self._number(source_command, "path_offset_x_norm"),
-                    "",
-                    3,
-                    signed=True,
+                f"Detection   : {state}",
+                "Confirm     : " + self._confirmation_badge(info),
+                "Center dx   : " + self._metric_text(
+                    self._number(info, "camera_center_offset_x_px"), "px", 0, signed=True,
+                ),
+                "Bottom dy   : " + self._metric_text(
+                    self._number(info, "bottom_distance_px"), "px", 0,
+                ),
+                "Head request: " + ("YES" if info.get("head_down_requested") else "NO")
+                + " (<= " + self._metric_text(
+                    self._number(info, "head_down_trigger_bottom_distance_px"), "px", 0,
+                ) + ")",
+                "Center angle: " + self._metric_text(
+                    self._number(source_command, "center_steering_deg"), "deg", 1, signed=True,
                 ),
                 "Depth Z     : "
                 + self._metric_text(self._number(info, "depth_m"), "m"),
@@ -2716,14 +2803,17 @@ class Yolo26Detector(Node):
                 f"Go now      : {'YES' if info.get('go_now') else 'NO'}",
             ]
 
+        stage = str(source_command.get("hurdle_stage", "TRACKING"))
+        rows[1:1] = [f"Control     : {control}", f"Phase       : {phase}", f"Stage       : {stage}"]
+        row_spacing = min(24.0, (panel_bottom - panel_y - 12) / len(rows))
         for index, row in enumerate(rows):
             title = index == 0
             cv2.putText(
                 image,
                 row,
-                (panel_x + 12, panel_y + 25 + index * 24),
+                (panel_x + 12, int(panel_y + 5 + (index + 1) * row_spacing)),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.56 if title else 0.5,
+                (0.56 if title else 0.5) * min(1.0, row_spacing / 23.0),
                 (0, 255, 255) if title else (245, 245, 245),
                 2 if title else 1,
                 cv2.LINE_AA,
@@ -2976,6 +3066,18 @@ class Yolo26Detector(Node):
         )
         decision_debug = self._fresh_decision_debug()
         running_banner = self._running_motion_banner()
+        display_source = decision_source
+        display_banner = running_banner
+        if running_banner is not None:
+            display_source = str(self.latest_running_motion.get("source", ""))
+        else:
+            display_banner = self._action_banner(decision_source, decision_action)
+        if display_banner is not None:
+            hurdle_label = self._hurdle_line_tracking_label(
+                hurdle_info, display_source, display_banner[0],
+            )
+            if hurdle_label is not None:
+                running_banner = (hurdle_label, (0, 125, 190))
         if running_banner is not None:
             cv2.rectangle(annotated, (0, 32), (annotated.shape[1], 96), (0, 0, 0), -1)
             self._draw_action_banner(annotated, running_banner[0], running_banner[1])

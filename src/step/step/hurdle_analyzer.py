@@ -24,6 +24,7 @@ from std_msgs.msg import String
 
 from .approach_distance import approach_level_from_motion
 from .approach_distance import ball_hurdle_approach_motion
+from .hurdle_navigation_planner import HURDLE_HEAD_DOWN_BOTTOM_DISTANCE_PX
 from .depth_frame_cache import DepthFrameCache
 from .depth_frame_cache import DepthFrameConsumer
 from .temporal_confirmation import depth_is_within_range
@@ -114,6 +115,8 @@ class HurdleInfo:
     depth_age_sec: float | None
     note: str
     bottom_distance_px: int | None = None
+    camera_center_offset_x_px: int | None = None
+    head_down_requested: bool = False
 
 
 class HurdleAnalyzer(DepthFrameConsumer, Node):
@@ -142,8 +145,9 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
         self.declare_parameter("go_depth_tolerance_m", 0.10)
         self.declare_parameter("go_angle_tolerance_deg", 8.0)
         self.declare_parameter("direction_deadband_norm", 0.04)
-        self.declare_parameter("confirmation_window_size", 20)
-        self.declare_parameter("confirmation_required_hits", 12)
+        self.declare_parameter("head_down_trigger_bottom_distance_px", HURDLE_HEAD_DOWN_BOTTOM_DISTANCE_PX)
+        self.declare_parameter("confirmation_window_size", 40)
+        self.declare_parameter("confirmation_required_hits", 15)
         self.declare_parameter("confirmation_max_missed_frames", 4)
         self.declare_parameter("confirmation_max_center_shift_norm", 0.20)
         self.declare_parameter("confirmation_min_area_ratio", 0.40)
@@ -192,6 +196,10 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
         )
         self.publish_empty_when_missing = bool(
             self.get_parameter("publish_empty_when_missing").value
+        )
+
+        self.head_down_trigger_bottom_distance_px = max(
+            0, int(self.get_parameter("head_down_trigger_bottom_distance_px").value),
         )
 
         self.confirmation_filter = TemporalConfirmationFilter(
@@ -688,6 +696,7 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
     def _publish(self, info: HurdleInfo) -> None:
         message = String()
         payload = asdict(info)
+        payload["head_down_trigger_bottom_distance_px"] = self.head_down_trigger_bottom_distance_px
         payload.update(self.confirmation_fields)
         payload.update(self.go_confirmation_fields)
         message.data = json.dumps(
@@ -778,6 +787,10 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
         if raw_go_now and not go_now:
             note = "go_confirmation_pending"
         age = self._depth_age_sec()
+        bottom_distance_px = (
+            max(0, image_height - 1 - target.center[1])
+            if image_height is not None and image_height > 0 else None
+        )
         self._publish(
             HurdleInfo(
                 detected=True,
@@ -785,10 +798,14 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
                 confidence=target.confidence,
                 center_x=target.center[0],
                 center_y=target.center[1],
-                bottom_distance_px=(
-                    max(0, image_height - 1 - target.center[1])
-                    if image_height is not None and image_height > 0
-                    else None
+                bottom_distance_px=bottom_distance_px,
+                camera_center_offset_x_px=(
+                    int(round(target.center[0] - image_width / 2.0))
+                    if image_width is not None and image_width > 0 else None
+                ),
+                head_down_requested=(
+                    bottom_distance_px is not None
+                    and bottom_distance_px <= self.head_down_trigger_bottom_distance_px
                 ),
                 bbox=target.bbox,
                 width_px=target.width_px,

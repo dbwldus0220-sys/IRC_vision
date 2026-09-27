@@ -1749,13 +1749,14 @@ def test_pickup_distance_decisions_repeat_fine_then_crab_then_backward():
     bridge = FakeBridge()
     planner = MotionDecisionPlanner()
     enter_pickup_fine_alignment(bridge)
+    threshold = planner.config.pickup_fine_align_bottom_distance_px
     sample = {
         "detected": True,
         "confidence": 0.9,
         "offset_x_px": 56,
     }
 
-    for command_id, bottom_distance_px in enumerate((450, 400, 301), 8100):
+    for command_id, bottom_distance_px in enumerate((threshold + 150, threshold + 100, threshold + 1), 8100):
         decision = planner.plan_ball_pickup_fine_alignment({
             **sample,
             "bottom_distance_px": bottom_distance_px,
@@ -1776,7 +1777,7 @@ def test_pickup_distance_decisions_repeat_fine_then_crab_then_backward():
 
     decision = planner.plan_ball_pickup_fine_alignment({
         **sample,
-        "bottom_distance_px": 300,
+        "bottom_distance_px": threshold,
     })
     assert decision.action == "BALL_PICKUP_CRAB_RIGHT"
     bridge.navigation_command_callback(
@@ -1790,7 +1791,7 @@ def test_pickup_distance_decisions_repeat_fine_then_crab_then_backward():
 
     decision = planner.plan_ball_pickup_fine_alignment({
         **sample,
-        "bottom_distance_px": 300,
+        "bottom_distance_px": threshold,
         "offset_x_px": 0,
     })
     assert decision.action == "BALL_PICKUP_FINE_ALIGN_CONTINUE"
@@ -2489,6 +2490,7 @@ def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
     """Exercise normal approach and the default close-Ball pickup checkpoint."""
     from pathlib import Path
     import yaml
+    from test_motion_decision_planner import line_info
 
     planner = MotionDecisionPlanner()
     sample = {
@@ -2500,7 +2502,10 @@ def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
         "bottom_distance_px": 200, "hurdle_angle_deg": 0.0,
         "go_now": False, "pickup_ready": False, "pickup_now": False,
     }
-    decision = planner.plan("AUTO", {source: sample}, 0.1)
+    decision = planner.plan("AUTO", {source: sample, "line": line_info()}, 0.1)
+    if source == "hurdle":
+        assert decision.source == "hurdle"
+        motion_name = "찐미세0도-4" if distance <= 0.550 else "찐전진실험45도(4회)"
     bridge = FakeBridge()
     if source == "ball" and distance <= 0.550:
         assert decision.action == "PICKUP_NOW"
@@ -2525,6 +2530,92 @@ def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
     assert motion_name in {motion["name"] for motion in runtime["motions"]}
 
 
+@pytest.mark.parametrize("error,count,turn_angle", [
+    (8.001, 1, 15), (12, 1, 15), (15, 1, 15), (29.999, 1, 15),
+    (30, 2, 30), (45, 3, 45), (60, 4, 60), (75, 5, 75),
+    (90, 6, 90), (120, 6, 90),
+    (-8.001, 2, 15), (-12, 2, 15), (-15, 2, 15), (-29.999, 2, 15),
+    (-30, 3, 30), (-44.999, 3, 30), (-45, 5, 45),
+    (-64.999, 5, 45), (-65, 7, 65), (-94.999, 7, 65),
+    (-95, 9, 95), (-120, 9, 95),
+])
+def test_hurdle_center_error_selects_calibrated_runtime_turn(error, count, turn_angle):
+    from pathlib import Path
+    import yaml
+
+    decision = MotionDecisionPlanner().plan("AUTO", {"hurdle": {
+        "detected": True, "confirmation_confirmed": True,
+        "confidence": 0.9, "depth_valid": True, "depth_m": 0.55,
+        "hurdle_angle_deg": 0, "bearing_deg": -error, "bottom_distance_px": 200,
+    }}, 0.1)
+    direction = "LEFT" if error > 0 else "RIGHT"
+    assert decision.valid and decision.source == "hurdle"
+    if abs(error) < 15.0:
+        assert decision.action == "STRAIGHT_0"
+        assert "turn_count" not in decision.source_command
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(
+            source=decision.source, action=decision.action,
+            source_command=decision.source_command,
+        ))
+        request = decoded_messages(bridge.executor_request_publisher)[-1]
+        assert request["motion_id"] == "pickup_fine_forward_0"
+        return
+    assert decision.action == f"ALIGN_{direction}"
+    assert decision.source_command["turn_count"] == count
+    assert decision.source_command["turn_angle_deg"] == turn_angle
+    assert not decision.requires_ack and not decision.sdk_motion_requested
+
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(navigation_message(
+        source=decision.source, action=decision.action,
+        source_command=decision.source_command,
+    ))
+    request = decoded_messages(bridge.executor_request_publisher)[-1]
+    assert request["motion_id"] == f"post_ball_line_turn_{direction.lower()}_{count}"
+    root = Path(__file__).resolve().parents[3]
+    aliases = yaml.safe_load((root / "src/irc_step_motion_executor/config/motion_aliases.yaml").read_text())["motion_aliases"]
+    runtime = json.loads((root / "artifacts/robot_motions_runtime.json").read_text())
+    assert aliases[request["motion_id"]] in {m["name"] for m in runtime["motions"]}
+    complete_active_motion(bridge)
+    status = decoded_messages(bridge.motion_status_publisher)[-1]
+    assert (status["action"], status["status"]) == (decision.action, "SUCCEEDED")
+
+
+@pytest.mark.parametrize("error,bottom,depth,expected", [
+    (8, 200, 0.55, "STRAIGHT_0"), (-8, 200, 0.55, "STRAIGHT_0"),
+    (0, 200, 0.55, "STRAIGHT_0"), (0, 200, 0.20, "GO"),
+    (40, 100, 0.4, "STRAIGHT_0"), (-40, 100, 0.4, "STRAIGHT_0"),
+])
+def test_hurdle_turn_sizing_preserves_parallel_and_close_behavior(
+    error, bottom, depth, expected,
+):
+    decision = MotionDecisionPlanner().plan("AUTO", {"hurdle": {
+        "detected": True, "confirmation_confirmed": True, "confidence": 0.9,
+        "depth_valid": True, "depth_m": depth,
+        "hurdle_angle_deg": error, "bottom_distance_px": bottom,
+        "camera_center_offset_x_px": 0,
+    }}, 0.1)
+    assert decision.valid and decision.action == expected
+    assert "turn_count" not in decision.source_command
+
+
+@pytest.mark.parametrize("action,count", [
+    ("ALIGN_LEFT", None), ("ALIGN_LEFT", True), ("ALIGN_LEFT", 1.0),
+    ("ALIGN_LEFT", "1"), ("ALIGN_LEFT", 0), ("ALIGN_LEFT", 7),
+    ("ALIGN_RIGHT", None), ("ALIGN_RIGHT", 1), ("ALIGN_RIGHT", 4),
+    ("ALIGN_RIGHT", 10),
+])
+def test_hurdle_alignment_without_supported_count_never_uses_fixed_turn(action, count):
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(navigation_message(
+        source="hurdle", action=action, source_command={"turn_count": count},
+    ))
+    assert not bridge.executor_request_publisher.messages
+    status = decoded_messages(bridge.motion_status_publisher)[-1]
+    assert status["status"] == "UNSUPPORTED"
+
+
 @pytest.mark.parametrize("source", ["line", "goal", None])
 def test_object_approach_mapping_does_not_change_other_sources(source):
     bridge = FakeBridge()
@@ -2537,7 +2628,7 @@ def test_object_approach_mapping_does_not_change_other_sources(source):
 
 def hurdle_depth_fallback_message(command_id=8000):
     planner = MotionDecisionPlanner()
-    decision = planner.plan("AUTO", {"hurdle": {
+    decision = planner.plan("HURDLE_POSITIONING", {"hurdle": {
         "detected": True, "confirmation_confirmed": True,
         "confidence": 0.9, "bottom_distance_px": 100,
         "depth_valid": False, "depth_m": None, "hurdle_angle_deg": None,
@@ -2623,15 +2714,16 @@ def test_hurdle_fallback_waits_until_current_motion_finishes():
 
 
 @pytest.mark.parametrize("depth,motion_id", [
-    (0.550, "ball_general_fine_forward_8"),
+    (0.550, "pickup_fine_forward_0"),
     (0.550001, "line_forward_4"), (0.7, "line_forward_4"),
 ])
 @pytest.mark.parametrize("angle", [None, 20.0])
 def test_close_hurdle_valid_depth_selects_actual_motion_without_turning(depth, motion_id, angle):
-    decision = MotionDecisionPlanner().plan("AUTO", {"hurdle": {
+    decision = MotionDecisionPlanner().plan("HURDLE_POSITIONING", {"hurdle": {
         "detected": True, "confirmation_confirmed": True,
         "confidence": 0.9, "bottom_distance_px": 100,
         "depth_valid": True, "depth_m": depth, "hurdle_angle_deg": angle,
+        "camera_center_offset_x_px": 0,
     }}, 0.1)
     assert decision.valid and not decision.requires_ack
     assert decision.source_command["depth_fallback_requested"] is False

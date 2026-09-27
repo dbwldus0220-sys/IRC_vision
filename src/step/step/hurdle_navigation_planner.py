@@ -11,6 +11,9 @@ from .approach_distance import approach_level_from_motion
 from .approach_distance import ball_hurdle_approach_motion
 
 
+HURDLE_HEAD_DOWN_BOTTOM_DISTANCE_PX = 120
+
+
 @dataclass(frozen=True)
 class HurdleNavigationConfig:
     """Provisional hurdle alignment and jump thresholds."""
@@ -22,6 +25,8 @@ class HurdleNavigationConfig:
     go_angle_tolerance_deg: float = 8.0
     path_center_tolerance_norm: float = 0.10
     close_turn_stop_bottom_distance_px: float = 100.0
+    positioning_turn_min_angle_deg: float = 45.0
+    center_turn_min_angle_deg: float = 15.0
 
 
 @dataclass(frozen=True)
@@ -45,6 +50,7 @@ class HurdleActionCommand:
     bottom_distance_px: float | None = None
     close_rotation_blocked: bool = False
     depth_fallback_requested: bool = False
+    center_steering_deg: float | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Return a rounded JSON-compatible representation."""
@@ -71,6 +77,7 @@ class HurdleActionCommand:
                 self.hurdle_angle_deg,
                 3,
             ),
+            "center_steering_deg": _round_optional(self.center_steering_deg, 3),
             "is_parallel": self.is_parallel,
             "ground_gap_in_go_range": self.ground_gap_in_go_range,
             "go_now": self.go_now,
@@ -141,8 +148,10 @@ class HurdleNavigationPlanner:
             close_rotation_blocked=self.close_rotation_blocked,
         )
 
-    def plan(self, hurdle_info: dict[str, Any]) -> HurdleActionCommand:
-        """Create one alignment, distance-adjustment, or GO action."""
+    def plan(
+        self, hurdle_info: dict[str, Any], *, positioning: bool = False,
+    ) -> HurdleActionCommand:
+        """Plan an action; positioning uses RGB-center steering in both approach stages."""
         if not bool(hurdle_info.get("detected", False)):
             return self.wait("hurdle_not_detected")
         confidence = _number(hurdle_info, "confidence")
@@ -181,20 +190,35 @@ class HurdleNavigationPlanner:
             "camera_bottom_gap_m",
         )
         hurdle_angle = _number(hurdle_info, "hurdle_angle_deg")
-        if hurdle_angle is None and not self.close_rotation_blocked:
+        if hurdle_angle is None and not self.close_rotation_blocked and not positioning:
             return self.wait("missing_hurdle_parallel_angle")
         parallel = (
             hurdle_angle is not None
             and abs(hurdle_angle) <= self.config.go_angle_tolerance_deg
         )
+        center_steering = None
+        if positioning:
+            center_dx = _number(hurdle_info, "camera_center_offset_x_px")
+            if center_dx is None:
+                center_dx = _number(hurdle_info, "offset_x_px")
+            if center_dx is not None and bottom_distance_valid:
+                center_steering = math.degrees(
+                    math.atan2(center_dx, max(1.0, bottom_distance_px))
+                )
+            else:
+                center_steering = _number(hurdle_info, "bearing_deg")
+            if center_steering is None:
+                return self.wait("missing_hurdle_center_geometry")
         path_reference_valid = bool(
-            hurdle_info.get("path_reference_valid", False)
+            not positioning and hurdle_info.get("path_reference_valid", False)
         )
         path_offset = _number(hurdle_info, "path_offset_x_norm")
-        path_centered = bool(
-            not path_reference_valid
-            or path_offset is None
-            or abs(path_offset) <= self.config.path_center_tolerance_norm
+        path_centered = (
+            abs(center_steering) < self.config.center_turn_min_angle_deg
+            if positioning else bool(
+                not path_reference_valid or path_offset is None
+                or abs(path_offset) <= self.config.path_center_tolerance_norm
+            )
         )
         ground_gap_error = (
             depth - self.config.go_target_depth_m
@@ -219,8 +243,10 @@ class HurdleNavigationPlanner:
         )
 
         alignment_needed = not path_centered or not parallel
+        positioning_turn_needed = positioning and not path_centered
+        rotation_needed = positioning_turn_needed if positioning else alignment_needed
         if (
-            alignment_needed
+            rotation_needed
             and not bottom_distance_valid
             and not self.close_rotation_blocked
         ):
@@ -232,6 +258,12 @@ class HurdleNavigationPlanner:
         elif self.close_rotation_blocked and not ready_geometry:
             action = ball_hurdle_approach_motion(depth)
             reason = "hurdle_close_distance_approach_without_rotation"
+        elif positioning and positioning_turn_needed:
+            action = "ALIGN_LEFT" if center_steering < 0.0 else "ALIGN_RIGHT"
+            reason = "align_to_hurdle_center"
+        elif positioning and not ready_geometry:
+            action = ball_hurdle_approach_motion(depth)
+            reason = "hurdle_center_distance_approach"
         elif (
             path_reference_valid
             and path_offset is not None
@@ -264,6 +296,7 @@ class HurdleNavigationPlanner:
             camera_bottom_gap_m=camera_bottom_gap,
             ground_gap_error_m=ground_gap_error,
             hurdle_angle_deg=hurdle_angle,
+            center_steering_deg=center_steering,
             is_parallel=parallel,
             ground_gap_in_go_range=ground_gap_in_range,
             go_now=go_now,

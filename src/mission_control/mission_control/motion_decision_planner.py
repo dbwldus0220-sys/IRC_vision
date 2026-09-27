@@ -302,18 +302,14 @@ class MotionDecisionPlanner:
             self._reset_source(source)
         self.previous_source = source
         info = observations.get(source)
-        hurdle_reference: dict[str, Any] | None = None
-        if source == "hurdle":
-            info, hurdle_reference = self._hurdle_observation_with_path(
-                info,
-                observations.get("line"),
-                dt_sec,
-            )
-        command = self._plan_source(
-            source, info, dt_sec,
+        hurdle_positioning = source == "hurdle" and (
+            self.hurdle_lock_active or normalized_phase == "HURDLE_POSITIONING"
         )
-        if hurdle_reference is not None:
-            command.update(hurdle_reference)
+        command = self._plan_source(source, info, dt_sec)
+        if source == "hurdle":
+            command["hurdle_stage"] = "FINE_APPROACH" if hurdle_positioning else "RECOGNITION_APPROACH"
+        if hurdle_positioning:
+            command["hurdle_positioning_active"] = True
         action_key = "motion" if source in {"line", "ball"} else "action"
         action = str(command.get(action_key, "WAIT"))
         valid = bool(command.get("valid", False))
@@ -426,7 +422,7 @@ class MotionDecisionPlanner:
             if not self._confirmed_hurdle(hurdle_info):
                 self.hurdle_ignore_until_clear = False
             return
-        if self._confirmed_hurdle(hurdle_info):
+        if self._hurdle_positioning_ready(hurdle_info):
             self.hurdle_lock_active = True
 
     def _update_object_locks(
@@ -506,6 +502,8 @@ class MotionDecisionPlanner:
             return self._select_auto_source(observations)
         if requested == "none":
             return "none"
+        if requested in {"line", "hurdle"} and phase in {"LINE_TRACK", "HURDLE_APPROACH", "HURDLE_SEARCH"}:
+            return "hurdle" if self._hurdle_approach_ready(observations.get("hurdle")) else "line"
         if phase.endswith("_SEARCH"):
             target = observations.get(requested)
             if requested == "ball":
@@ -540,6 +538,8 @@ class MotionDecisionPlanner:
         goal = observations.get("goal")
         if self._goal_is_inside_control_range(goal):
             return "goal"
+        if self._hurdle_approach_ready(observations.get("hurdle")):
+            return "hurdle"
         for source in self.AUTO_PRIORITY:
             info = observations.get(source)
             if info is not None and bool(info.get("detected", False)):
@@ -583,6 +583,35 @@ class MotionDecisionPlanner:
             info is not None
             and info.get("detected") is False
             and self.last_line_seen_direction is not None
+        )
+
+    def _hurdle_approach_ready(self, info: dict[str, Any] | None) -> bool:
+        """Select center-based recognition approach without entering the fine sequence."""
+        if self.hurdle_mission_disabled or self.hurdle_ignore_until_clear or info is None:
+            return False
+        depth = self._number(info, "depth_m")
+        confidence = self._number(info, "confidence")
+        return bool(
+            all(info.get(key) is True for key in ("detected", "confirmation_confirmed", "depth_valid"))
+            and confidence is not None and confidence >= self.hurdle_planner.config.min_confidence
+            and depth is not None
+            and 0.0 < depth <= min(self.config.hurdle_control_range_m, self.hurdle_planner.config.control_start_depth_m)
+        )
+
+    def _hurdle_positioning_ready(self, info: dict[str, Any] | None) -> bool:
+        if info is None or any(
+            info.get(key) is not True
+            for key in ("detected", "confirmation_confirmed")
+        ):
+            return False
+        confidence = self._number(info, "confidence")
+        if confidence is None or confidence < self.hurdle_planner.config.min_confidence:
+            return False
+        depth = self._number(info, "depth_m")
+        return bool(
+            info.get("depth_valid") is True
+            and depth is not None
+            and 0.0 < depth <= BALL_HURDLE_FINE_DISTANCE_M
         )
 
     def _confirmed_hurdle(self, info: dict[str, Any] | None) -> bool:
@@ -664,9 +693,23 @@ class MotionDecisionPlanner:
             command = (
                 self.hurdle_planner.wait("waiting_for_hurdle_info")
                 if info is None
-                else self.hurdle_planner.plan(info)
+                else self.hurdle_planner.plan(info, positioning=True)
             )
-        return command.to_dict()
+        result = command.to_dict()
+        if source == "hurdle" and command.action in {"ALIGN_LEFT", "ALIGN_RIGHT"}:
+            direction = "LEFT" if command.action == "ALIGN_LEFT" else "RIGHT"
+            # Use calibrated turns toward the object center, independent of Line.
+            angle = max(
+                abs(command.center_steering_deg),
+                self.STATIONARY_TURN_MIN_DEG[direction],
+            )
+            count = self._turn_repeat_count(angle, direction)
+            result.update({
+                "turn_direction": direction,
+                "turn_count": count,
+                "turn_angle_deg": self._turn_angle_deg(count, direction),
+            })
+        return result
 
     @classmethod
     def _turn_repeat_deg(cls, direction: str) -> float | None:

@@ -108,9 +108,10 @@ def test_hurdle_detection_defaults_keep_go_policy_unchanged():
     analyzer = load_hurdle_analyzer()()
 
     assert analyzer.min_confidence == 0.60
+    assert analyzer.head_down_trigger_bottom_distance_px == 120
     assert analyzer.detect_depth_m == 1.5
-    assert analyzer.confirmation_filter.window_size == 20
-    assert analyzer.confirmation_filter.required_hits == 12
+    assert analyzer.confirmation_filter.window_size == 40
+    assert analyzer.confirmation_filter.required_hits == 15
     assert analyzer.confirmation_filter.max_missed_frames == 4
 
     assert analyzer.go_target_depth_m == 0.10
@@ -153,7 +154,7 @@ def test_published_bottom_distance_uses_center_and_needs_no_depth():
             "bbox": [100, 350, 300, 408], "center": [200, 379],
         }],
     }))
-    for _ in range(12):
+    for _ in range(15):
         analyzer._detections_callback(message)
     info = published[-1]
     assert info.detected and not info.depth_valid
@@ -161,3 +162,77 @@ def test_published_bottom_distance_uses_center_and_needs_no_depth():
     assert info.camera_bottom_gap_px is None
     analyzer._detections_callback(SimpleNamespace(data=json.dumps({"detections": []})))
     assert published[-1].bottom_distance_px is None
+
+
+def test_far_confirmation_survives_approach_to_550mm():
+    import json
+
+    analyzer = load_hurdle_analyzer()()
+    depth = [0.9]
+    analyzer._sample_depths = lambda *_args: (depth[0], depth[0], depth[0], 5)
+    published = []
+    analyzer._publish = lambda info: published.append((info, dict(analyzer.confirmation_fields)))
+    message = SimpleNamespace(data=json.dumps({
+        "image_width": 640, "image_height": 480,
+        "detections": [{
+            "class_name": "hurdle", "confidence": 0.9,
+            "bbox": [100, 300, 300, 360], "center": [200, 330],
+        }],
+    }))
+    for _ in range(14):
+        analyzer._detections_callback(message)
+        assert not published[-1][0].detected
+    analyzer._detections_callback(message)
+    assert published[-1][0].detected
+    assert published[-1][1]["confirmation_hits"] == 15
+    for distance in (0.7, 0.551, 0.55):
+        depth[0] = distance
+        analyzer._detections_callback(message)
+        info, confirmation = published[-1]
+        assert info.detected and info.depth_m == distance
+        assert confirmation["confirmation_confirmed"]
+        assert confirmation["confirmation_hits"] > 15
+
+    missing = SimpleNamespace(data=json.dumps({"detections": []}))
+    for _ in range(4):
+        analyzer._detections_callback(missing)
+        assert not published[-1][0].detected
+    analyzer._detections_callback(message)
+    assert published[-1][1]["confirmation_confirmed"]
+    for _ in range(5):
+        analyzer._detections_callback(missing)
+    analyzer._detections_callback(message)
+    assert not published[-1][1]["confirmation_confirmed"]
+    assert published[-1][1]["confirmation_hits"] == 1
+
+
+def test_hurdle_bottom_trigger_uses_confirmed_rgb_center_without_depth():
+    import json
+
+    analyzer = load_hurdle_analyzer()()
+    analyzer._sample_depths = lambda *_args: (None, None, None, 0)
+    published = []
+    analyzer._publish = published.append
+    def observe(center_y):
+        analyzer._detections_callback(SimpleNamespace(data=json.dumps({
+            "image_width": 640, "image_height": 480,
+            "detections": [{
+                "class_name": "hurdle", "confidence": 0.9,
+                "bbox": [100, center_y - 20, 300, center_y + 20],
+                "center": [200, center_y],
+            }],
+        })))
+        return published[-1]
+
+    for _ in range(14):
+        assert not observe(359).head_down_requested
+    confirmed = observe(359)
+    assert confirmed.detected and not confirmed.depth_valid
+    assert confirmed.camera_center_offset_x_px == -120
+    assert confirmed.bottom_distance_px == 120
+    assert confirmed.head_down_requested
+    assert not observe(358).head_down_requested
+    assert observe(360).head_down_requested
+    analyzer._detections_callback(SimpleNamespace(data=json.dumps({"detections": []})))
+    assert not published[-1].head_down_requested
+    assert published[-1].camera_center_offset_x_px is None

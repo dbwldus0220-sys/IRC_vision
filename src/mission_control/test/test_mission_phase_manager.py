@@ -17,6 +17,9 @@ def test_default_initial_state():
     assert manager.snapshot() == {
         "current_phase": "AUTO",
         "ball_mode_active": False,
+        "pickups_executed": 0,
+        "shots_executed": 0,
+        "hurdles_executed": 0,
         "pickups_completed": 0,
         "shots_completed": 0,
         "hurdles_completed": 0,
@@ -111,6 +114,7 @@ def test_first_and_second_ball_grasp_results_do_not_mix():
 def test_first_ball_alignment_completes_before_normal_line_run():
     manager = MissionPhaseManager(initial_phase="BALL_APPROACH")
     complete(manager, "PICKUP_NOW", 1, "SUCCEEDED")
+    manager.ball_grasp_results[1] = "GRABBED"
 
     assert manager.current_phase == "POST_BALL_LINE_ALIGN"
     assert manager.snapshot()["ball_mode_active"] is True
@@ -127,6 +131,7 @@ def test_second_pickup_alignment_completes_before_normal_line_run():
     complete(manager, "PICKUP_NOW", 1, "SUCCEEDED")
 
     assert manager.pickups_completed == 2
+    manager.ball_grasp_results[2] = "GRABBED"
     assert manager.current_phase == "POST_BALL_LINE_ALIGN"
     assert manager.complete_post_ball_line_align()
     assert manager.current_phase == "LINE_TRACK_AFTER_PICKUP"
@@ -495,9 +500,9 @@ def test_counters_are_capped_at_required_values():
         required_ball_sections=1,
     )
     complete(manager, "PICKUP_NOW", 1, "SUCCEEDED")
-    complete(manager, "PICKUP_NOW", 2, "SUCCEEDED")
+    assert not manager.start_special_action("PICKUP_NOW", 2)
     complete(manager, "SHOT", 3, "SUCCEEDED")
-    complete(manager, "SHOT", 4, "SUCCEEDED")
+    assert not manager.start_special_action("SHOT", 4)
     assert manager.pickups_completed == 1
     assert manager.shots_completed == 1
     assert manager.ball_sections_processed == 1
@@ -619,6 +624,24 @@ def test_invalid_command_ids_are_rejected(command_id):
 
 
 @pytest.mark.parametrize("completed", [1, 2])
+@pytest.mark.parametrize("grasp", ["NOT_GRABBED", "UNKNOWN"])
+def test_empty_pickup_alignment_resumes_auto_without_timed_line(completed, grasp):
+    manager = MissionPhaseManager(initial_phase="POST_BALL_LINE_ALIGN")
+    manager.pickups_completed = completed
+    manager.ball_sections_processed = completed - 1
+    manager.ball_grasp_results[completed] = grasp
+
+    assert manager.complete_post_ball_line_align()
+    assert manager.current_phase == "AUTO"
+    assert manager.ball_sections_processed == completed
+    assert manager.shots_completed == 0
+    assert manager.finish_enabled is (completed == 2)
+    assert not manager.complete_post_ball_line_align()
+    assert not manager.complete_post_ball_line_run()
+    assert manager.ball_sections_processed == completed
+
+
+@pytest.mark.parametrize("completed", [1, 2])
 @pytest.mark.parametrize("grasp", ["GRABBED", "NOT_GRABBED", "UNKNOWN"])
 def test_post_pickup_line_run_routes_by_its_ball_grasp(completed, grasp):
     manager = MissionPhaseManager(initial_phase="LINE_TRACK_AFTER_PICKUP")
@@ -676,7 +699,8 @@ def test_timed_line_cannot_consume_an_already_processed_empty_pickup():
 def test_rejected_pickup_retries_are_bounded_by_failure_limit():
     manager = MissionPhaseManager(initial_phase="BALL_APPROACH", max_pickup_failures=3)
     for attempt in range(1, 4):
-        complete(manager, "PICKUP_NOW", attempt, "REJECTED")
+        assert manager.start_special_action("PICKUP_NOW", attempt)
+        manager.handle_motion_status("PICKUP_NOW", attempt, "REJECTED")
         assert manager.pickup_failure_count == attempt
         assert manager.special_action_exhausted("PICKUP_NOW") is (attempt == 3)
     assert manager.pickups_completed == 0
@@ -694,8 +718,9 @@ def test_hurdle_counter_counts_only_unique_successes(status):
     assert manager.hurdles_completed == 1
     manager.handle_motion_status("GO", 2, "SUCCEEDED")
     assert manager.hurdles_completed == 1
-    complete(manager, "GO", 3, "SUCCEEDED")
-    assert manager.hurdles_completed == manager.required_hurdles == 2
+    assert not manager.start_special_action("GO", 3)
+    assert manager.hurdles_executed == manager.required_hurdles == 2
+    assert manager.hurdles_completed == 1
     assert manager.current_phase == "LINE_TRACK"
     assert manager.pickups_completed == manager.shots_completed == 0
     assert manager.ball_sections_processed == 0

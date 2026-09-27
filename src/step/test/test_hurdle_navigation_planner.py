@@ -24,6 +24,27 @@ def hurdle_info(**overrides):
     return sample
 
 
+@pytest.mark.parametrize("angle,action", [
+    (-15.0, "ALIGN_LEFT"), (-14.999, "STRAIGHT_0"),
+    (0.0, "STRAIGHT_0"), (14.999, "STRAIGHT_0"), (15.0, "ALIGN_RIGHT"),
+])
+@pytest.mark.parametrize("offset", [-0.5, 0.5])
+def test_center_approach_ignores_parallel_angle_and_path_offset(angle, action, offset):
+    decision = HurdleNavigationPlanner().plan(hurdle_info(
+        depth_m=0.5, hurdle_angle_deg=60, bearing_deg=angle,
+        path_reference_valid=True, path_offset_x_norm=offset,
+    ), positioning=True)
+    assert decision.valid and decision.action == action
+
+
+def test_positioning_small_error_does_not_relax_jump_geometry():
+    decision = HurdleNavigationPlanner().plan(hurdle_info(
+        depth_m=0.15, hurdle_angle_deg=30.0, go_now=True,
+    ), positioning=True)
+    assert decision.action == "STRAIGHT_0"
+    assert not decision.go_now and not decision.sdk_motion_requested
+
+
 def test_parallel_hurdle_at_target_depth_requests_sdk_motion():
     planner = HurdleNavigationPlanner()
 

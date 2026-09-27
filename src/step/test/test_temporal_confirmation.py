@@ -73,36 +73,39 @@ def test_short_miss_keeps_history_for_fast_reacquisition():
     assert reacquired.confirmed is True
 
 
-def test_hurdle_twelve_of_twenty_hits_confirm_target():
-    """Confirm a hurdle on the twelfth consistent hit in 20 frames."""
+def test_hurdle_fifteen_of_forty_intermittent_hits_confirm_target():
+    """Accumulate intermittent hits beyond the old 20-frame window."""
     filter_ = TemporalConfirmationFilter(
-        window_size=20,
-        required_hits=12,
+        window_size=40,
+        required_hits=15,
         max_missed_frames=4,
     )
     bbox = [500, 250, 600, 350]
 
-    for _ in range(11):
+    for _ in range(14):
         assert update(filter_, True, bbox).confirmed is False
+        assert update(filter_, False).confirmed is False
+    for _ in range(3):
+        assert update(filter_, False).confirmed is False
 
     result = update(filter_, True, bbox)
 
     assert result.confirmed is True
-    assert result.hit_count == 12
-    assert result.required_hits == 12
-    assert result.window_size == 20
+    assert result.hit_count == 15
+    assert result.required_hits == 15
+    assert result.window_size == 40
 
 
 def test_hurdle_history_tolerates_four_misses_but_resets_on_fifth():
     """Keep history for four consecutive misses and reset on the fifth."""
     filter_ = TemporalConfirmationFilter(
-        window_size=20,
-        required_hits=12,
+        window_size=40,
+        required_hits=15,
         max_missed_frames=4,
     )
     bbox = [500, 250, 600, 350]
 
-    for _ in range(12):
+    for _ in range(15):
         update(filter_, True, bbox)
     for missed_frames in range(1, 5):
         missed = update(filter_, False)

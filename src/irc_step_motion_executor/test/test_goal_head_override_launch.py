@@ -19,6 +19,7 @@ TOPIC_ROOT = "/goal_head_override_test"
 TOPICS = (
     "/motion/executor/request", "/motion/executor/cancel",
     "/motion/executor/status", "/motion/executor/heartbeat", "/vision/ball_info",
+    "/navigation/motion_command", "/vision/hurdle_info",
 )
 
 

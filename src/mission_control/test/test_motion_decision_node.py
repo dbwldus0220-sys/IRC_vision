@@ -3797,9 +3797,8 @@ def test_completed_two_pickups_block_ball_phase_reentry():
         0.1,
     )
 
-    assert decision.source == 'none'
-    assert decision.action == 'WAIT'
-    assert decision.reason == 'ball_missions_complete'
+    assert decision.source == 'line'
+    assert node.mission_phase == 'AUTO'
 
 
 @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT'])
@@ -3895,7 +3894,7 @@ def test_section_progress_is_capped_at_requirement():
     node = FakeDecisionNode(required_ball_sections=2)
     complete_motion(node, 'SHOT', event_id=511)
     complete_motion(node, 'SHOT', event_id=512)
-    complete_motion(node, 'SHOT', event_id=513)
+    assert not node.phase_manager.start_special_action('SHOT', 513)
 
     assert node.ball_sections_processed == 2
     assert node.finish_enabled is True
@@ -3911,6 +3910,9 @@ def test_mission_progress_contains_exact_fields_and_values():
 
     assert progress == {
         'ball_mode_active': False,
+        'pickups_executed': 1,
+        'shots_executed': 1,
+        'hurdles_executed': 0,
         'pickups_completed': 1,
         'required_pickups': 2,
         'shots_completed': 1,
@@ -4659,6 +4661,7 @@ def hurdle_info_for_node():
         "detected": True, "confirmation_confirmed": True, "confidence": 0.9,
         "depth_valid": True, "depth_m": 0.1, "distance_m": 0.1,
         "hurdle_angle_deg": 0.0, "bottom_distance_px": 200, "go_now": True,
+        "camera_center_offset_x_px": 0,
     }
 
 
@@ -4727,6 +4730,7 @@ def test_completed_hurdle_phase_cannot_reenter(required_hurdles):
 @pytest.mark.parametrize("completed", [0, 1, 2])
 def test_line_prequeue_ignores_only_completed_hurdles(completed):
     node = ReadinessPublishNode(general_decision("STRAIGHT"))
+    node.planner = MotionDecisionPlanner()
     node.phase_manager.hurdles_completed = completed
     observations = {"hurdle": hurdle_info_for_node()}
     assert MotionDecisionNode._line_only_prequeue_allowed(

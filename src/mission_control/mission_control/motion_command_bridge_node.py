@@ -1173,12 +1173,27 @@ class MotionCommandBridgeNode(Node):
                 "goal_shot",
             )
             motion_id = pickup_sequence[0]
+        elif payload.get("source") == "hurdle" and action in {
+            "ALIGN_LEFT", "ALIGN_RIGHT",
+        }:
+            source_command = payload.get("source_command")
+            count = (
+                source_command.get("turn_count")
+                if isinstance(source_command, dict) else None
+            )
+            direction = "LEFT" if action == "ALIGN_LEFT" else "RIGHT"
+            # Reuse calibrated camera-45 turns, keeping the hurdle action ID.
+            motion_id = (
+                self.motion_id_for_action(f"POST_BALL_LINE_TURN_{direction}_{count}")
+                if self._is_integer(count) else None
+            )
         elif payload.get("source") in ("ball", "hurdle") and action in {
             "STRAIGHT", "STRAIGHT_0",
         }:
-            # Object approach uses camera-45 motions; Line keeps its own mapping.
+            # Hurdle fine approach uses camera-0; Ball keeps its camera-45 gait.
             motion_id = (
                 "line_forward_4" if action == "STRAIGHT"
+                else "pickup_fine_forward_0" if payload.get("source") == "hurdle"
                 else "ball_general_fine_forward_8"
             )
         else:

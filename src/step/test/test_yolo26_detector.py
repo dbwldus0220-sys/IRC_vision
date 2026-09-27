@@ -512,6 +512,64 @@ def test_atomic_sequence_completion_clears_dwell_banner():
     assert detector._running_motion_banner() is None
 
 
+@pytest.mark.parametrize('status_first', [False, True])
+@pytest.mark.parametrize('source,motion_id,expected', [
+    ('ball', 'ball_general_fine_forward_8', 'BALL / FINE FORWARD'),
+    ('hurdle', 'ball_general_fine_forward_8', 'HURDLE / FINE FORWARD'),
+    ('hurdle', 'pickup_fine_forward_0', 'HURDLE / FINE FORWARD'),
+    ('hurdle', 'line_forward_4', 'HURDLE / FORWARD 4'),
+])
+def test_shared_fine_motion_label_keeps_command_owner(monkeypatch, status_first, source, motion_id, expected):
+    import json
+    from std_msgs.msg import String
+
+    detector = object.__new__(Yolo26Detector)
+    monkeypatch.setattr(time, 'monotonic', lambda: 10.0)
+    command = String(data=json.dumps({
+        'command_id': 8, 'source': source, 'action': 'STRAIGHT_0',
+    }))
+    status = String(data=json.dumps({
+        'status': 'RUNNING', 'motion_id': motion_id,
+        'command_id': 8, 'request_id': 8, 'action': 'STRAIGHT_0',
+    }))
+    callbacks = [
+        (detector._motion_command_callback, command),
+        (detector._motion_status_callback, status),
+    ]
+    if status_first:
+        callbacks.reverse()
+    for callback, message in callbacks:
+        callback(message)
+    # An unrelated command and an expired command display must not rename it.
+    detector._motion_command_callback(String(data=json.dumps({
+        'command_id': 9, 'source': 'line', 'action': 'WAIT',
+    })))
+    monkeypatch.setattr(time, 'monotonic', lambda: 15.0)
+    detector._motion_status_callback(status)
+    assert detector._running_motion_banner()[0] == expected
+
+
+@pytest.mark.parametrize('depth,shown', [
+    (0.55, False), (0.551, True), (0.67, True), (1.0, True),
+    (1.001, False), (None, False), (float('nan'), False),
+])
+def test_hurdle_recognition_label_preserves_line_driving(depth, shown):
+    info = {
+        'detected': True, 'confirmation_confirmed': True,
+        'depth_valid': True, 'depth_m': depth,
+    }
+    label = Yolo26Detector._hurdle_line_tracking_label(info, 'line', 'LINE FORWARD 6')
+    assert bool(label) is shown
+    if shown:
+        assert label == 'HURDLE / LINE_FORWARD 6'
+    assert Yolo26Detector._hurdle_line_tracking_label(info, 'hurdle', 'FINE FORWARD') is None
+    for key in ('detected', 'confirmation_confirmed', 'depth_valid'):
+        assert Yolo26Detector._hurdle_line_tracking_label(
+            {**info, key: False}, 'line', 'LINE FORWARD 6',
+        ) is None
+    assert Yolo26Detector._hurdle_line_tracking_label(None, 'line', 'LINE FORWARD 6') is None
+
+
 def test_missing_terminal_status_does_not_leave_banner_forever(monkeypatch):
     detector = object.__new__(Yolo26Detector)
     detector.latest_running_motion = {'motion_id': 'pickup_fine_forward_0'}
@@ -553,3 +611,46 @@ def test_line_recover_banner_uses_fixed_four_repeat_angle(side, turn, angle):
     banner = Yolo26Detector._action_banner("line", f"RECOVER_{side}_TURN_{turn}_4")
     assert banner is not None
     assert banner[0] == f"RECOVER {side} / TURN {turn} ({angle} DEG)"
+
+
+@pytest.mark.parametrize("source,expected", [("line", "hurdle"), ("hurdle", "hurdle"), ("ball", "ball")])
+def test_hurdle_metrics_show_during_line_approach_without_changing_owner(source, expected):
+    detector = object.__new__(Yolo26Detector)
+    detector.metrics_mode = "auto"
+    detector.show_line_metrics = detector.show_ball_metrics = True
+    detector.show_goal_metrics = detector.show_hurdle_metrics = True
+    detector._fresh_motion_command = lambda: None
+    detector.latest_running_motion = {"motion_id": "line_forward_6", "source": source}
+    detector.latest_running_motion_time = time.monotonic()
+    detector._fresh_hurdle_info = lambda: {"detected": True, "depth_m": 0.66}
+    assert detector._active_metrics_mode() == expected
+    assert detector.latest_running_motion["source"] == source
+
+
+def test_hurdle_metrics_expose_actual_phase_and_rgb_head_trigger(monkeypatch):
+    import cv2
+    detector = object.__new__(Yolo26Detector)
+    detector.show_hurdle_metrics = True
+    detector._fresh_hurdle_info = lambda: {
+        "detected": True, "center_x": 450, "center_y": 599,
+        "camera_center_offset_x_px": -190, "bottom_distance_px": 120,
+        "head_down_requested": True, "head_down_trigger_bottom_distance_px": 120,
+        "confirmation_confirmed": True, "depth_valid": False,
+    }
+    detector._fresh_motion_command = lambda: None
+    detector._fresh_line_info = lambda: None
+    detector._fresh_decision_debug = lambda: {"source": "LINE", "phase": "AUTO"}
+    detector._draw_line_path_geometry = lambda *args: None
+    detector._draw_hurdle_path_reference = lambda *args: None
+    rows = []
+    original = cv2.putText
+    def capture(image, text, origin, *args, **kwargs):
+        rows.append((text, origin[1]))
+        return original(image, text, origin, *args, **kwargs)
+    monkeypatch.setattr(cv2, "putText", capture)
+    detector._draw_hurdle_metrics(np.zeros((720, 1280, 3), dtype=np.uint8))
+    assert any("Control" in text and "LINE" in text for text, _ in rows)
+    assert any("Phase" in text and "AUTO" in text for text, _ in rows)
+    assert any("Bottom dy" in text and "120px" in text for text, _ in rows)
+    assert any("Head request" in text and "YES" in text for text, _ in rows)
+    assert all(y > 96 for text, y in rows)

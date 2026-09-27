@@ -1,0 +1,6 @@
+# Simulated-backend fixture only; these names do not command robot hardware.
+motion_aliases:
+  line_forward_4: simulated_forward
+  hurdle: simulated_hurdle
+  post_ball_camera_90: simulated_goal_camera
+  goal_shot: simulated_shot
