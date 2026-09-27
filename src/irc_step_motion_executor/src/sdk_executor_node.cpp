@@ -186,7 +186,7 @@ public:
     driver_ = std::make_unique<SdkExecutorDriver>(
       *core_, steady_now_ms,
       [this](const std::string & payload) {
-        handle_goal_head_override_status(payload);
+        handle_head_override_status(payload);
         std_msgs::msg::String message;
         message.data = payload;
         status_publisher_->publish(message);
@@ -329,7 +329,7 @@ private:
     ball_head_override_latched_ = false;
   }
 
-  void handle_goal_head_override_status(const std::string & payload)
+  void handle_head_override_status(const std::string & payload)
   {
     // Rejected requests must not activate or release the camera hold.
     json_object * object = json_tokener_parse(payload.c_str());
@@ -346,6 +346,15 @@ private:
     const std::string status = valid ? json_object_get_string(status_value) : "";
     const std::string motion_id = valid ? json_object_get_string(motion_value) : "";
     json_object_put(object);
+
+    // Pickup forward uses the original camera-45 frames. Release a previous
+    // ball look-down only after this request is accepted, never on rejection.
+    if (status == "RUNNING" &&
+      (motion_id == "ball_camera_down_forward_2" ||
+      motion_id == "ball_camera_down_forward_4"))
+    {
+      clear_ball_head_override();
+    }
 
     if (goal_head_override_enabled_ && status == "SUCCEEDED" &&
       motion_id == "post_ball_camera_90")

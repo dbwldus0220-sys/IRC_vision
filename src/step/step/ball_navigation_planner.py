@@ -7,7 +7,9 @@ from dataclasses import dataclass
 import math
 from typing import Any
 
+from .approach_distance import BALL_HURDLE_FINE_DISTANCE_M
 from .approach_distance import approach_level_from_motion
+from .approach_distance import ball_hurdle_approach_motion
 from .line_navigation_planner import numbered_turn_motion_metadata
 
 
@@ -29,7 +31,7 @@ class BallNavigationConfig:
     fallback_half_fov_deg: float = 35.0
     control_start_depth_m: float = 1.50
     max_pickup_depth_age_sec: float = 0.70
-    pickup_sequence_start_distance_m: float = 0.570
+    pickup_sequence_start_distance_m: float = BALL_HURDLE_FINE_DISTANCE_M
     slowdown_depth_m: float = 1.0
     fine_step_depth_m: float = 0.95
     pickup_depth_m: float = 0.07
@@ -64,6 +66,8 @@ class BallNavigationCommand:
     pickup_ready: bool
     pickup_now: bool
     pickup_approach_motion: str | None
+    steering_error_deg: float | None = None
+    steering_source: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Return a rounded JSON-compatible representation."""
@@ -101,6 +105,8 @@ class BallNavigationCommand:
                 self.target_heading_change_deg,
                 3,
             ),
+            "steering_error_deg": _round_optional(self.steering_error_deg, 3),
+            "steering_source": self.steering_source,
             "bearing_error_deg": _round_optional(
                 self.bearing_error_deg,
                 3,
@@ -156,6 +162,19 @@ def _number(data: dict[str, Any], key: str) -> float | None:
     except (TypeError, ValueError):
         return None
     return number if math.isfinite(number) else None
+
+
+def valid_ball_ground_steering(info: dict[str, Any]) -> float | None:
+    """Read calibrated steering ONLY for normal-head-pose ball approach."""
+    if (
+        info.get("ground_projection_enabled") is not True
+        or info.get("ground_projection_valid") is not True
+        or info.get("ground_projection_scope") != "ball_approach_only"
+        or info.get("ground_coordinate_frame") != "robot_x_right_z_forward"
+    ):
+        return None
+    angle = _number(info, "ground_steering_angle_deg")
+    return angle if angle is not None and abs(angle) < 90.0 else None
 
 
 class BallNavigationPlanner:
@@ -217,12 +236,14 @@ class BallNavigationPlanner:
         depth = _number(ball_info, "depth_m")
         distance = _number(ball_info, "distance_m")
         ground_distance = _number(ball_info, "ground_distance_m")
-        steering_error = self._steering_error(
-            steering_angle,
-            bearing,
-            offset,
-            distance,
-        )
+        if (distance is not None
+                and distance <= self.config.pickup_sequence_start_distance_m):
+            # Preserve pickup entry and all head-down geometry thresholds.
+            steering_error = self._steering_error(
+                steering_angle, bearing, offset, distance,
+            )
+        else:
+            steering_error = self.approach_steering_error(ball_info)
         if steering_error is None:
             return self.stop("invalid_ball_alignment")
 
@@ -268,6 +289,11 @@ class BallNavigationPlanner:
             reason="ball_aligned_discrete_approach",
             linear_speed_mps=speed,
             steering_error_deg=steering_error,
+            steering_source=(
+                "ground_steering_angle_deg"
+                if "ground_projection_enabled" in ball_info
+                else "legacy_image_angle"
+            ),
             dt_sec=dt_sec,
             bearing=bearing,
             offset=offset,
@@ -278,6 +304,23 @@ class BallNavigationPlanner:
             depth_valid=True,
             pickup_ready=pickup_ready,
             pickup_now=False,
+        )
+
+    def approach_steering_error(self, info: dict[str, Any]) -> float | None:
+        """Use ground steering for approach, without the pixel-axis deadband.
+
+        Old publishers without ground metadata retain their legacy behavior.
+        An explicit disabled/invalid ground projection never falls back to a
+        pixel angle. Head-down pickup callers must use _steering_error instead.
+        """
+        if "ground_projection_enabled" in info:
+            angle = valid_ball_ground_steering(info)
+            return self.config.bearing_gain * angle if angle is not None else None
+        return self._steering_error(
+            _number(info, "steering_angle_deg"),
+            _number(info, "bearing_deg"),
+            _number(info, "offset_x_norm"),
+            _number(info, "distance_m"),
         )
 
     def _steering_error(
@@ -311,10 +354,10 @@ class BallNavigationPlanner:
 
     def _general_approach_motion(
         self,
-        _distance_m: float,
+        distance_m: float,
     ) -> str:
-        """Use the fixed four-repeat forward motion during BALL approach."""
-        return "STRAIGHT_2"
+        """Use the same camera-45 distance policy as HURDLE approach."""
+        return ball_hurdle_approach_motion(distance_m)
 
     def _approach_speed(
         self,
@@ -375,6 +418,7 @@ class BallNavigationPlanner:
         reason: str,
         linear_speed_mps: float,
         steering_error_deg: float,
+        steering_source: str,
         dt_sec: float,
         bearing: float | None,
         offset: float | None,
@@ -418,6 +462,8 @@ class BallNavigationPlanner:
                 if numbered_turn_angle_deg is not None
                 else math.degrees(angular_speed * duration)
             ),
+            steering_error_deg=steering_error_deg,
+            steering_source=steering_source,
             bearing_error_deg=bearing,
             offset_x_norm=offset,
             depth_m=depth,

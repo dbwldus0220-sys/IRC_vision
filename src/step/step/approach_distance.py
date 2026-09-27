@@ -34,6 +34,26 @@ def approach_motion_for_distance(distance_m: float | None) -> str:
     return "STRAIGHT"
 
 
+BALL_HURDLE_FINE_DISTANCE_M = 0.550
+
+
+def ball_hurdle_approach_motion(
+    distance_m: float | None,
+    *,
+    fine_distance_m: float = BALL_HURDLE_FINE_DISTANCE_M,
+) -> str:
+    """Select camera-45 approach; callers must validate distance before moving."""
+    if distance_m is None or isinstance(distance_m, bool):
+        return "STRAIGHT"
+    try:
+        distance = float(distance_m)
+    except (TypeError, ValueError):
+        return "STRAIGHT"
+    if not math.isfinite(distance) or distance < 0.0:
+        return "STRAIGHT"
+    return "STRAIGHT_0" if distance <= fine_distance_m else "STRAIGHT"
+
+
 def approach_level_from_motion(motion: str) -> int | None:
     """Extract a valid 0..5 approach level from a motion name."""
     normalized = motion.strip().upper()

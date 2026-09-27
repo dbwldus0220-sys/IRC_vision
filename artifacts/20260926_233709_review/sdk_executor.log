@@ -1,0 +1,4 @@
+[INFO] [1790433437.592150555] [sdk_motion_executor]: Motion position tolerance check: DISABLED
+[ERROR] [1790433437.675823592] [sdk_motion_executor]: [STARTUP POSE] ERROR: startup pose name is ambiguous: 오뒤412
+[ERROR] [1790433437.687690906] [sdk_motion_executor]: [STARTUP POSE] ERROR: startup pose is enabled but its production controller/configuration is unavailable
+[INFO] [1790433449.867874989] [rclcpp]: signal_handler(SIGINT/SIGTERM)

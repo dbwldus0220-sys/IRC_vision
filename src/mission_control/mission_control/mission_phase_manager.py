@@ -84,6 +84,7 @@ class MissionPhaseManager:
         *,
         required_pickups: int = 2,
         required_shots: int = 2,
+        required_hurdles: int = 2,
         required_ball_sections: int = 2,
         max_pickup_failures: int = 3,
         max_shot_failures: int = 3,
@@ -93,6 +94,7 @@ class MissionPhaseManager:
         """Initialize bounded progress counters and one validated phase."""
         self.required_pickups = self._nonnegative_count(required_pickups)
         self.required_shots = self._nonnegative_count(required_shots)
+        self.required_hurdles = self._nonnegative_count(required_hurdles)
         self.required_ball_sections = self._nonnegative_count(
             required_ball_sections
         )
@@ -119,6 +121,7 @@ class MissionPhaseManager:
         }
         self.active_pickup_attempt: int | None = None
         self.shots_completed = 0
+        self.hurdles_completed = 0
         self.ball_sections_processed = 0
         self.finish_enabled = self.required_ball_sections == 0
         self.mission_complete = False
@@ -281,7 +284,7 @@ class MissionPhaseManager:
             # A partial turn has unknown yaw; do not replay or walk onward.
             self.post_shot_failed = True
         elif self.current_phase == "POST_SHOT_TURN":
-            self.current_phase = "POST_SHOT_LINE_ALIGN"
+            self.current_phase = "LINE_TRACK"
         elif self.current_phase == "POST_SHOT_FORWARD":
             self.current_phase = (
                 "LINE_TRACK"
@@ -392,7 +395,7 @@ class MissionPhaseManager:
                 self.current_phase = "POST_BALL_LINE_ALIGN"
                 return
 
-            if status in {"FAILED", "TIMEOUT"}:
+            if status in {"REJECTED", "FAILED", "TIMEOUT"}:
                 self.pickup_failure_count += 1
 
             self.current_phase = "BALL_APPROACH"
@@ -437,12 +440,10 @@ class MissionPhaseManager:
                 return
 
             self.go_failure_count = 0
-            origin_phase = self._active_special_origin_phase
-            self.current_phase = (
-                origin_phase
-                if origin_phase in self.ALLOWED_PHASES
-                else "AUTO"
+            self.hurdles_completed = min(
+                self.hurdles_completed + 1, self.required_hurdles,
             )
+            self.current_phase = "LINE_TRACK"
             return
 
         if succeeded:
@@ -487,6 +488,7 @@ class MissionPhaseManager:
             ),
             "pickups_completed": self.pickups_completed,
             "shots_completed": self.shots_completed,
+            "hurdles_completed": self.hurdles_completed,
             "ball_sections_processed": self.ball_sections_processed,
             "finish_enabled": self.finish_enabled,
             "mission_complete": self.mission_complete,
@@ -495,6 +497,7 @@ class MissionPhaseManager:
             ),
             "required_pickups": self.required_pickups,
             "required_shots": self.required_shots,
+            "required_hurdles": self.required_hurdles,
             "required_ball_sections": self.required_ball_sections,
             "active_special_action": self.active_special_action,
             "active_special_command_id": self.active_special_command_id,

@@ -1,0 +1,65 @@
+"""Verify the supplied catalog import, retained motions, and runtime routing."""
+
+import hashlib
+import json
+from pathlib import Path
+
+import pytest
+import yaml
+
+from mission_control.motion_command_bridge_node import MotionCommandBridgeNode
+
+
+ROOT = Path(__file__).resolve().parents[3]
+MANIFEST = json.loads((ROOT / "artifacts/catalog25_migration_manifest.json").read_text())
+
+
+@pytest.fixture(scope="module")
+def catalog():
+    motions = json.loads((ROOT / "artifacts/robot_motions_runtime.json").read_text())["motions"]
+    by_name = {motion["name"]: motion for motion in motions}
+    assert len(by_name) == len(motions)
+    return by_name
+
+
+@pytest.fixture(scope="module")
+def aliases():
+    return yaml.safe_load((ROOT / "src/irc_step_motion_executor/config/motion_aliases.yaml").read_text())["motion_aliases"]
+
+
+@pytest.mark.parametrize("name,digest", [
+    *MANIFEST["imported_sha256"].items(),
+    *MANIFEST["preserved_sha256"].items(),
+])
+def test_motion_matches_import_or_preserved_snapshot(catalog, name, digest):
+    encoded = json.dumps(catalog[name], sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    assert hashlib.sha256(encoded.encode()).hexdigest() == digest
+
+
+def test_renamed_motions_and_aliases_are_consistent(catalog, aliases):
+    assert not set(MANIFEST["renames"]) & set(catalog)
+    assert set(aliases.values()) <= set(catalog)
+    for alias, change in MANIFEST["changed_aliases"].items():
+        assert aliases[alias] == change["after"]
+    assert set(catalog) == set(MANIFEST["imported_sha256"]) | set(MANIFEST["preserved_sha256"])
+
+
+@pytest.mark.parametrize("action,name", [
+    ("STRAIGHT", "찐전진실험45도(6회)"),
+    ("STRAIGHT_2", "찐전진실험45도(4회)"),
+    ("GOAL_CAMERA_90_FORWARD_2", "찐전진실험90도(4회)"),
+    ("GOAL_CAMERA_90_FORWARD", "찐전진실험90도(6회)"),
+    ("RECOVER_LEFT_TURN_LEFT_4", "찐라인복귀좌회전45도(4회)"),
+    ("RECOVER_RIGHT_TURN_RIGHT_4", "찐라인복귀우회전45도(4회)"),
+    ("RECOVER_LEFT_TURN_LEFT_6", "찐라인복귀좌회전45도(6회)"),
+])
+def test_navigation_reaches_supplied_motion(catalog, aliases, action, name):
+    assert aliases[MotionCommandBridgeNode.motion_id_for_action(action)] == name
+    assert catalog[name]["completion"]["position_tolerance_deg"] == 5.0
+
+
+def test_startup_pose_still_has_one_unambiguous_set_of_angles(catalog):
+    poses = [frame["angles"] for motion in catalog.values() for frame in motion["frames"] if frame["name"] == "오뒤412"]
+    assert poses
+    assert all(set(pose) == {str(motor) for motor in range(23)} for pose in poses)
+    assert all(pose == poses[0] for pose in poses)

@@ -46,7 +46,7 @@ def test_ball_distance_motion_does_not_follow_bearing(bearing):
     )
 
     assert command.valid is True
-    assert command.motion == "STRAIGHT_2"
+    assert command.motion == "STRAIGHT"
     assert command.linear_speed_mps > 0.0
 
 
@@ -55,7 +55,7 @@ def test_centered_ball_uses_four_repeat_forward():
 
     command = planner.plan(ball_info(), 0.1)
 
-    assert command.motion == "STRAIGHT_2"
+    assert command.motion == "STRAIGHT"
     assert command.linear_speed_mps > 0.0
     assert command.travel_distance_m == pytest.approx(
         command.linear_speed_mps * command.command_duration_sec
@@ -70,16 +70,16 @@ def test_ball_at_68cm_uses_four_repeat_forward():
         0.1,
     )
 
-    assert command.motion == "STRAIGHT_2"
+    assert command.motion == "STRAIGHT"
 
 
 @pytest.mark.parametrize(
     ("ground_distance", "expected_motion"),
     [
-        (0.80, "STRAIGHT_2"),
-        (1.50, "STRAIGHT_2"),
-        (0.70, "STRAIGHT_2"),
-        (0.60, "STRAIGHT_2"),
+        (0.80, "STRAIGHT"),
+        (1.50, "STRAIGHT"),
+        (0.70, "STRAIGHT"),
+        (0.60, "STRAIGHT"),
         (0.50, "PICKUP_NOW"),
     ],
 )
@@ -122,14 +122,14 @@ def test_valid_general_approach_does_not_emit_raw_numbered_turn(
     assert not command.motion.startswith(("TURN_LEFT_", "TURN_RIGHT_"))
 
 
-def test_fresh_distance_starts_pickup_sequence_at_570mm_without_vision_gate():
+def test_fresh_distance_starts_pickup_sequence_at_550mm_without_vision_gate():
     planner = BallNavigationPlanner()
 
     command = planner.plan(
         ball_info(
             depth_m=0.62,
             ground_distance_m=0.30,
-            distance_m=0.570,
+            distance_m=0.550,
             pickup_ready=False,
             pickup_now=False,
         ),
@@ -142,7 +142,7 @@ def test_fresh_distance_starts_pickup_sequence_at_570mm_without_vision_gate():
     assert command.linear_speed_mps == 0.0
     assert command.pickup_now is True
     assert command.pickup_approach_motion is None
-    assert command.distance_m == 0.570
+    assert command.distance_m == 0.550
     assert command.ground_distance_m == 0.30
 
 
@@ -182,13 +182,13 @@ def test_pickup_now_false_still_starts_sequence_at_close_distance():
     assert command.pickup_approach_motion is None
 
 
-def test_pickup_sequence_does_not_start_above_570mm():
+def test_pickup_sequence_does_not_start_above_550mm():
     planner = BallNavigationPlanner()
 
     command = planner.plan(
         ball_info(
             depth_m=0.40,
-            distance_m=0.571,
+            distance_m=0.551,
             ground_distance_m=0.15,
             pickup_ready=True,
             pickup_now=True,
@@ -213,7 +213,7 @@ def test_580mm_keeps_general_ball_approach():
         0.1,
     )
 
-    assert command.motion == "STRAIGHT_2"
+    assert command.motion == "STRAIGHT"
     assert command.pickup_now is False
 
 
@@ -257,7 +257,7 @@ def test_stale_80cm_pickup_flag_cannot_trigger_pickup():
         0.1,
     )
 
-    assert command.motion == "STRAIGHT_2"
+    assert command.motion == "STRAIGHT"
     assert command.pickup_now is False
 
 
@@ -274,7 +274,7 @@ def test_offset_is_used_when_camera_bearing_is_missing():
         0.1,
     )
 
-    assert command.motion == "STRAIGHT_2"
+    assert command.motion == "STRAIGHT"
 
 
 def test_bottom_center_path_angle_has_priority_over_camera_bearing():
@@ -291,7 +291,7 @@ def test_bottom_center_path_angle_has_priority_over_camera_bearing():
         0.1,
     )
 
-    assert command.motion == "STRAIGHT_2"
+    assert command.motion == "STRAIGHT"
     assert command.linear_speed_mps > 0.0
 
 
@@ -329,7 +329,7 @@ def test_valid_far_depth_uses_four_repeat_forward(depth):
     )
 
     assert command.valid is True
-    assert command.motion == "STRAIGHT_2"
+    assert command.motion == "STRAIGHT"
     assert command.reason == "ball_aligned_discrete_approach"
 
 
@@ -408,7 +408,7 @@ def test_ball_occurrence_does_not_change_straight_distance_bucket(
         0.1,
     )
 
-    assert command.motion == "STRAIGHT_2"
+    assert command.motion == "STRAIGHT"
     assert command.linear_speed_mps > 0.0
     assert command.reason == "ball_aligned_discrete_approach"
 
@@ -419,7 +419,7 @@ def test_general_ball_approach_always_uses_four_repeat_forward(distance_m):
 
     motion = planner._general_approach_motion(distance_m)
 
-    assert motion == "STRAIGHT_2"
+    assert motion == "STRAIGHT"
 
 
 def test_angular_acceleration_is_limited():
@@ -451,3 +451,16 @@ def test_unsafe_input_produces_stop(sample, reason):
     assert command.valid is False
     assert command.motion == "STOP"
     assert command.reason == reason
+
+
+@pytest.mark.parametrize("distance,expected", [
+    (0.549, "STRAIGHT_0"), (0.550, "STRAIGHT_0"),
+    (0.550001, "STRAIGHT"), (0.7, "STRAIGHT"),
+])
+def test_general_ball_550mm_boundary_when_pickup_entry_is_lower(distance, expected):
+    planner = BallNavigationPlanner(BallNavigationConfig(
+        pickup_sequence_start_distance_m=0.2,
+    ))
+    command = planner.plan(ball_info(distance_m=distance), 0.1)
+    assert command.valid
+    assert command.motion == expected

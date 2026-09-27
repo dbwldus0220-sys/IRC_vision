@@ -20,7 +20,7 @@ def test_straight_scenario_builds_centered_line_input():
     topic, payload = build_mock_vision_input("straight")
     assert topic == "/vision/line_info"
     assert payload["detected"] is True
-    assert payload["filtered_heading_error_deg"] == 0.0
+    assert payload["ground_heading_error_deg"] == 0.0
     assert payload["filtered_lateral_offset_norm"] == 0.0
     assert payload["heading_quality"] == 1.0
     assert payload["geometry_quality"] == 1.0
@@ -40,7 +40,7 @@ def test_turn_scenario_builds_deterministic_line_input(
     topic, payload = build_mock_vision_input(scenario)
     assert topic == "/vision/line_info"
     assert payload["detected"] is True
-    assert payload["filtered_heading_error_deg"] == heading_error
+    assert payload["ground_heading_error_deg"] == heading_error
     assert payload["filtered_lateral_offset_norm"] == 0.0
 
 
@@ -50,7 +50,7 @@ def test_scenario_payloads_are_distinct():
         for scenario in ("straight", "turn_left", "turn_right")
     ]
     headings = {
-        payload["filtered_heading_error_deg"] for payload in payloads
+        payload["ground_heading_error_deg"] for payload in payloads
     }
     assert headings == {0.0, -10.0, 10.0}
 

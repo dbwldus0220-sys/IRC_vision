@@ -23,7 +23,7 @@ from sensor_msgs.msg import CameraInfo, Image
 from std_msgs.msg import String
 
 from .approach_distance import approach_level_from_motion
-from .approach_distance import approach_motion_for_distance
+from .approach_distance import ball_hurdle_approach_motion
 from .depth_frame_cache import DepthFrameCache
 from .depth_frame_cache import DepthFrameConsumer
 from .temporal_confirmation import depth_is_within_range
@@ -113,6 +113,7 @@ class HurdleInfo:
     camera_info_ready: bool
     depth_age_sec: float | None
     note: str
+    bottom_distance_px: int | None = None
 
 
 class HurdleAnalyzer(DepthFrameConsumer, Node):
@@ -784,6 +785,11 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
                 confidence=target.confidence,
                 center_x=target.center[0],
                 center_y=target.center[1],
+                bottom_distance_px=(
+                    max(0, image_height - 1 - target.center[1])
+                    if image_height is not None and image_height > 0
+                    else None
+                ),
                 bbox=target.bbox,
                 width_px=target.width_px,
                 height_px=target.height_px,
@@ -815,11 +821,11 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
                     round(error, 3) if error is not None else None
                 ),
                 go_now=go_now,
-                approach_motion=approach_motion_for_distance(
+                approach_motion=ball_hurdle_approach_motion(
                     target.depth_m
                 ),
                 approach_level=approach_level_from_motion(
-                    approach_motion_for_distance(target.depth_m)
+                    ball_hurdle_approach_motion(target.depth_m)
                 ),
                 approach_target_distance_m=target.depth_m,
                 target_priority_score=target.score,

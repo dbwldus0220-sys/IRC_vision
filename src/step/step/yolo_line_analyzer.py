@@ -125,6 +125,175 @@ class FittedLine:
     y_span_px: float
 
 
+GROUND_PROJECTION_DEFAULTS = {
+    "ground_projection_enabled": True,
+    "ground_homography": [
+        0.004321184279685925, 0.00005156799318565749, -3.104011001665696,
+        0.00017474715815540918, -0.0005889102664434363, 2.967508842663798,
+        0.0004104036656612267, 0.00874745340620437, 1.0,
+    ],
+    "ground_calibration_image_width": 1280,
+    "ground_calibration_image_height": 720,
+    "ground_fit_min_forward_m": 0.35,
+    "ground_fit_max_forward_m": 1.05,
+    "ground_fit_min_points": 3,
+    "ground_fit_outlier_residual_m": 0.04,
+    "ground_lookahead_m": 0.50,
+}
+
+
+def project_line_points_to_ground(
+    points: list[LinePoint],
+    image_width: int,
+    image_height: int,
+    parameters: dict[str, Any],
+) -> np.ndarray:
+    """Return finite [X right, Z forward] points within the calibrated range.
+
+    Homography is valid only at the calibrated camera mounting position and
+    head pitch/roll/yaw. Resolution scaling assumes the same field of view;
+    it does not compensate for cropping, lens distortion, or camera motion.
+    """
+    empty = np.empty((0, 2), dtype=np.float64)
+    calibration_width = parameters["ground_calibration_image_width"]
+    calibration_height = parameters["ground_calibration_image_height"]
+    dimensions = [
+        image_width, image_height, calibration_width, calibration_height,
+    ]
+    if not np.all(np.isfinite(dimensions)) or min(dimensions) <= 0:
+        return empty
+    homography = np.asarray(parameters["ground_homography"], dtype=np.float64)
+    if homography.size != 9 or not np.all(np.isfinite(homography)):
+        return empty
+    homography = homography.reshape(3, 3)
+    if np.linalg.matrix_rank(homography) < 3 or not points:
+        return empty
+    pixels = np.asarray([
+        [point.x * calibration_width / image_width,
+         point.y * calibration_height / image_height, 1.0]
+        for point in points
+    ])
+    pixels = pixels[np.all(np.isfinite(pixels), axis=1)]
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+        projected = pixels @ homography.T
+        valid = (
+            np.all(np.isfinite(projected), axis=1)
+            & (np.abs(projected[:, 2]) > 1e-9)
+        )
+        ground = projected[valid, :2] / projected[valid, 2:3]
+    valid = (
+        np.all(np.isfinite(ground), axis=1)
+        & (ground[:, 1] >= parameters["ground_fit_min_forward_m"])
+        & (ground[:, 1] <= parameters["ground_fit_max_forward_m"])
+    )
+    return ground[valid]
+
+
+def analyze_ground_line(
+    points: list[LinePoint],
+    image_width: int,
+    image_height: int,
+    parameters: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Compute calibrated ground geometry, including the navigation heading.
+
+    Numeric fields are null on failure, including count and calibration size.
+    On success, ground_line_points_m contains only the final fit inliers [X, Z].
+    Residuals are along X, matching the X = slope * Z + intercept model.
+    """
+    config = dict(GROUND_PROJECTION_DEFAULTS)
+    if parameters is not None:
+        config.update(parameters)
+    result = {
+        "ground_projection_enabled": bool(config["ground_projection_enabled"]),
+        "ground_projection_valid": False,
+        "ground_coordinate_frame": "robot_x_right_z_forward",
+        "ground_line_points_m": [],
+        "ground_heading_error_deg": None,
+        "ground_lateral_offset_m": None,
+        "ground_lookahead_distance_m": None,
+        "ground_lookahead_lateral_m": None,
+        "ground_steering_angle_deg": None,
+        "ground_fit_rmse_m": None,
+        "ground_fit_point_count": None,
+        "ground_calibration_image_width": None,
+        "ground_calibration_image_height": None,
+    }
+    if not result["ground_projection_enabled"]:
+        return result
+    try:
+        min_points = max(3, int(config["ground_fit_min_points"]))
+        threshold = float(config["ground_fit_outlier_residual_m"])
+        lookahead = float(config["ground_lookahead_m"])
+        limits = [config["ground_fit_min_forward_m"],
+                  config["ground_fit_max_forward_m"], threshold, lookahead]
+        if (not np.all(np.isfinite(limits)) or threshold <= 0 or lookahead <= 0
+                or limits[0] >= limits[1]):
+            return result
+        ground = project_line_points_to_ground(
+            points, image_width, image_height, config,
+        )
+        if len(ground) < min_points:
+            return result
+        x, z = ground.T
+        # Median pair slopes resist isolated bad detections without randomness.
+        first, second = np.triu_indices(len(ground), k=1)
+        dz = z[second] - z[first]
+        distinct = np.abs(dz) > 1e-6
+        if not np.any(distinct):
+            return result
+        slope = float(np.median(
+            (x[second] - x[first])[distinct] / dz[distinct]
+        ))
+        intercept = float(np.median(x - slope * z))
+        inliers = np.abs(x - (slope * z + intercept)) <= threshold
+        # Monotonic rejection terminates in at most N iterations.
+        for _ in range(len(ground)):
+            if np.count_nonzero(inliers) < min_points:
+                return result
+            fit_z, fit_x = z[inliers], x[inliers]
+            centered_z = fit_z - np.mean(fit_z)
+            denominator = float(centered_z @ centered_z)
+            if denominator <= 1e-12:
+                return result
+            slope = float(centered_z @ (fit_x - np.mean(fit_x)) / denominator)
+            intercept = float(np.mean(fit_x) - slope * np.mean(fit_z))
+            residual = x - (slope * z + intercept)
+            refined = inliers & (np.abs(residual) <= threshold)
+            if np.array_equal(refined, inliers):
+                break
+            inliers = refined
+        else:
+            return result
+        heading = math.degrees(math.atan(slope))
+        offset = intercept / math.hypot(1.0, slope)
+        lookahead_lateral = slope * lookahead + intercept
+        steering = math.degrees(math.atan2(lookahead_lateral, lookahead))
+        rmse = float(np.sqrt(np.mean(residual[inliers] ** 2)))
+        if not np.all(np.isfinite([
+            heading, offset, lookahead_lateral, steering, rmse,
+        ])):
+            return result
+    except (TypeError, ValueError, OverflowError, np.linalg.LinAlgError):
+        return result
+    result.update({
+        "ground_projection_valid": True,
+        "ground_line_points_m": ground[inliers].tolist(),
+        "ground_heading_error_deg": heading,
+        "ground_lateral_offset_m": offset,
+        "ground_lookahead_distance_m": lookahead,
+        "ground_lookahead_lateral_m": lookahead_lateral,
+        "ground_steering_angle_deg": steering,
+        "ground_fit_rmse_m": rmse,
+        "ground_fit_point_count": int(np.count_nonzero(inliers)),
+        "ground_calibration_image_width": int(
+            config["ground_calibration_image_width"]),
+        "ground_calibration_image_height": int(
+            config["ground_calibration_image_height"]),
+    })
+    return result
+
+
 def calibrated_robot_center_x(
     image_width: int,
     center_offset_px: float,
@@ -269,6 +438,12 @@ class YoloLineAnalyzer(DepthFrameConsumer, Node):
         self.declare_parameter("camera_height_m", 0.515)
         self.declare_parameter("camera_pitch_down_deg", 45.0)
         self.declare_parameter("camera_forward_offset_m", 0.0)
+
+        # Diagnostic only; recalibrate after any camera/head pose change.
+        self.ground_projection_parameters = {
+            name: self.declare_parameter(name, default).value
+            for name, default in GROUND_PROJECTION_DEFAULTS.items()
+        }
 
         # ====================================================
         # Detection filtering
@@ -1443,6 +1618,14 @@ class YoloLineAnalyzer(DepthFrameConsumer, Node):
                     **continuity_debug,
                 }
             )
+
+            # Keep the image-space filters and planner inputs unchanged.
+            result.update(analyze_ground_line(
+                points if result["detected"] else [],
+                self.image_width,
+                self.image_height,
+                self.ground_projection_parameters,
+            ))
 
             result["processing_ms"] = round(
                 (

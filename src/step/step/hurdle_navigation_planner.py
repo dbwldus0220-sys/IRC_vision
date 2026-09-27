@@ -3,12 +3,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import math
 from typing import Any
 
 from .approach_distance import approach_level_from_motion
-from .approach_distance import approach_motion_for_distance
+from .approach_distance import ball_hurdle_approach_motion
 
 
 @dataclass(frozen=True)
@@ -21,6 +21,7 @@ class HurdleNavigationConfig:
     go_depth_tolerance_m: float = 0.10
     go_angle_tolerance_deg: float = 8.0
     path_center_tolerance_norm: float = 0.10
+    close_turn_stop_bottom_distance_px: float = 100.0
 
 
 @dataclass(frozen=True)
@@ -41,6 +42,9 @@ class HurdleActionCommand:
     is_parallel: bool
     ground_gap_in_go_range: bool
     go_now: bool
+    bottom_distance_px: float | None = None
+    close_rotation_blocked: bool = False
+    depth_fallback_requested: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         """Return a rounded JSON-compatible representation."""
@@ -70,6 +74,9 @@ class HurdleActionCommand:
             "is_parallel": self.is_parallel,
             "ground_gap_in_go_range": self.ground_gap_in_go_range,
             "go_now": self.go_now,
+            "bottom_distance_px": self.bottom_distance_px,
+            "close_rotation_blocked": self.close_rotation_blocked,
+            "depth_fallback_requested": self.depth_fallback_requested,
             "approach_motion": (
                 self.action
                 if self.action == "STRAIGHT" or approach_level is not None
@@ -108,6 +115,11 @@ class HurdleNavigationPlanner:
         config: HurdleNavigationConfig | None = None,
     ) -> None:
         self.config = config or HurdleNavigationConfig()
+        self.close_rotation_blocked = False
+
+    def reset(self) -> None:
+        """Release the near-hurdle turn block only after mission completion."""
+        self.close_rotation_blocked = False
 
     def wait(self, reason: str) -> HurdleActionCommand:
         """Return a non-action command for missing or unsafe input."""
@@ -126,6 +138,7 @@ class HurdleNavigationPlanner:
             is_parallel=False,
             ground_gap_in_go_range=False,
             go_now=False,
+            close_rotation_blocked=self.close_rotation_blocked,
         )
 
     def plan(self, hurdle_info: dict[str, Any]) -> HurdleActionCommand:
@@ -135,13 +148,32 @@ class HurdleNavigationPlanner:
         confidence = _number(hurdle_info, "confidence")
         if confidence is None or confidence < self.config.min_confidence:
             return self.wait("low_hurdle_confidence")
+        bottom_distance_px = _number(hurdle_info, "bottom_distance_px")
+        bottom_distance_valid = (
+            bottom_distance_px is not None and bottom_distance_px >= 0.0
+        )
+        if (
+            bottom_distance_valid
+            and bottom_distance_px <= self.config.close_turn_stop_bottom_distance_px
+        ):
+            self.close_rotation_blocked = True
         depth = _number(hurdle_info, "depth_m")
-        if not bool(hurdle_info.get("depth_valid", False)) or depth is None:
+        if (
+            not bool(hurdle_info.get("depth_valid", False))
+            or depth is None or depth <= 0.0
+        ):
+            if self.close_rotation_blocked:
+                # GO owns an atomic fine-0, three-second dwell, hurdle sequence.
+                return replace(
+                    self.wait("hurdle_close_depth_fallback"),
+                    valid=True, action="GO", sdk_motion_requested=True,
+                    confidence=confidence, go_now=True,
+                    bottom_distance_px=bottom_distance_px,
+                    depth_fallback_requested=True,
+                )
             return self.wait("missing_valid_hurdle_depth")
         distance = depth
         ground_gap = depth
-        if depth <= 0.0:
-            return self.wait("missing_valid_hurdle_depth")
         if depth > self.config.control_start_depth_m:
             return self.wait("hurdle_outside_control_range")
         camera_bottom_gap = _number(
@@ -149,10 +181,11 @@ class HurdleNavigationPlanner:
             "camera_bottom_gap_m",
         )
         hurdle_angle = _number(hurdle_info, "hurdle_angle_deg")
-        if hurdle_angle is None:
+        if hurdle_angle is None and not self.close_rotation_blocked:
             return self.wait("missing_hurdle_parallel_angle")
         parallel = (
-            abs(hurdle_angle) <= self.config.go_angle_tolerance_deg
+            hurdle_angle is not None
+            and abs(hurdle_angle) <= self.config.go_angle_tolerance_deg
         )
         path_reference_valid = bool(
             hurdle_info.get("path_reference_valid", False)
@@ -185,9 +218,20 @@ class HurdleNavigationPlanner:
             )
         )
 
+        alignment_needed = not path_centered or not parallel
+        if (
+            alignment_needed
+            and not bottom_distance_valid
+            and not self.close_rotation_blocked
+        ):
+            return self.wait("missing_valid_hurdle_bottom_distance")
+
         if go_now:
             action = "GO"
             reason = "hurdle_parallel_at_close_depth"
+        elif self.close_rotation_blocked and not ready_geometry:
+            action = ball_hurdle_approach_motion(depth)
+            reason = "hurdle_close_distance_approach_without_rotation"
         elif (
             path_reference_valid
             and path_offset is not None
@@ -202,7 +246,7 @@ class HurdleNavigationPlanner:
             action = "WAIT_GO_CONFIRMATION"
             reason = "waiting_for_stable_hurdle_condition"
         elif ground_gap_error > self.config.go_depth_tolerance_m:
-            action = approach_motion_for_distance(depth)
+            action = ball_hurdle_approach_motion(depth)
             reason = "hurdle_aligned_discrete_approach"
         else:
             action = "WAIT_GO_CONFIRMATION"
@@ -223,4 +267,6 @@ class HurdleNavigationPlanner:
             is_parallel=parallel,
             ground_gap_in_go_range=ground_gap_in_range,
             go_now=go_now,
+            bottom_distance_px=bottom_distance_px,
+            close_rotation_blocked=self.close_rotation_blocked,
         )

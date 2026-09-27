@@ -9,6 +9,7 @@ from typing import Any
 GENERAL_ACTIONS = frozenset(
     {
         "STRAIGHT",
+        "STRAIGHT_0",
         "STRAIGHT_1",
         "STRAIGHT_2",
         "STRAIGHT_3",
@@ -35,7 +36,7 @@ GENERAL_ACTIONS = frozenset(
         *{
             f"POST_SHOT_LINE_TURN_{direction}_{count}"
             for direction, counts in (
-                ("RIGHT", (2, 3, 5, 7, 9)), ("LEFT", (1, 2, 3, 4, 5)),
+                ("RIGHT", (2, 3, 5, 7, 9)), ("LEFT", (1, 2, 3, 4, 5, 6)),
             )
             for count in counts
         },
@@ -158,12 +159,20 @@ class GeneralMotionCommandGate:
         return self.vision_generation >= self.required_vision_generation
 
 
-    def can_publish(self, action: Any) -> bool:
+    def can_publish(
+        self, action: Any, *, allow_missing_line_search: bool = False,
+    ) -> bool:
         """Return whether a general action may be published now."""
         normalized = normalize_general_action(action)
         if normalized is None or self.locked:
             return False
-        if not self.has_required_fresh_vision():
+        missing_line_search = (
+            allow_missing_line_search
+            and normalized in {
+                "POST_BALL_LINE_TURN_RIGHT_5", "POST_BALL_LINE_TURN_LEFT_2",
+            }
+        )
+        if not missing_line_search and not self.has_required_fresh_vision():
             return False
         if self.rejected_action == normalized:
             return False

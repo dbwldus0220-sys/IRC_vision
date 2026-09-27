@@ -415,7 +415,7 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("ball_control_range_m", default_value="1.5"),
             DeclareLaunchArgument(
                 "pickup_fine_step_distance_m",
-                default_value="0.570",
+                default_value="0.550",
                 description=(
                     "Use pickup fine steps at or below this Ball distance "
                     "in meters; use four-repeat forward steps above it."
@@ -423,7 +423,7 @@ def generate_launch_description() -> LaunchDescription:
             ),
             DeclareLaunchArgument(
                 "pickup_fine_align_bottom_distance_px",
-                default_value="300",
+                default_value="60",
                 description=(
                     "Allow lateral alignment and backward pickup stages only "
                     "when the Ball center is this close to the image bottom."

@@ -21,10 +21,10 @@ def make_analyzer(depth_m=0.4, required_hits=1, robot_center_offset_px=0.0):
     analyzer.max_valid_depth_m = 6.0
     analyzer.detect_depth_m = 2.0
     analyzer.approach_depth_m = 0.5
-    analyzer.score_target_depth_m = 0.795
-    analyzer.score_depth_tolerance_m = 0.025
-    analyzer.score_left_bound_px = -40.0
-    analyzer.score_right_bound_px = 100.0
+    analyzer.score_target_depth_m = 0.43
+    analyzer.score_depth_tolerance_m = 0.04
+    analyzer.score_left_bound_px = -70.0
+    analyzer.score_right_bound_px = 70.0
     analyzer.direction_deadband_norm = 0.04
     analyzer.publish_empty_when_missing = True
     analyzer.fx = analyzer.fy = 600.0
@@ -149,7 +149,7 @@ def test_standalone_board_keeps_depth_gate(depth_m):
     assert GoalNavigationPlanner().plan(info).valid is False
 
 
-@pytest.mark.parametrize("depth_m", [0.795, 1.5, 2.0])
+@pytest.mark.parametrize("depth_m", [0.43, 1.5, 2.0])
 def test_backboard_depth_is_published_up_to_two_meters(depth_m):
     analyzer, published = make_analyzer(depth_m=depth_m)
     for _ in range(3):
@@ -157,9 +157,9 @@ def test_backboard_depth_is_published_up_to_two_meters(depth_m):
     assert info["detected"] is True
     assert info["depth_valid"] is True
     assert info["depth_m"] == depth_m
-    assert info["score_now"] is (depth_m == 0.795)
+    assert info["score_now"] is (depth_m == 0.43)
     if depth_m > 1.0:
-        assert GoalNavigationPlanner().plan(info).valid is False
+        assert GoalNavigationPlanner().plan(info).action == "GOAL_CAMERA_90_FORWARD"
 
 
 def test_goal_dropout_preserves_backboard_confirmation():
@@ -185,7 +185,7 @@ def test_goal_cannot_keep_lost_backboard_active():
 
 
 def test_standalone_board_keeps_separate_score_confirmation():
-    analyzer, published = make_analyzer(depth_m=0.795)
+    analyzer, published = make_analyzer(depth_m=0.43)
     for _ in range(2):
         info = send(analyzer, published, [detection()])
         assert info["detected"] is True
@@ -221,7 +221,7 @@ def test_unreliable_goal_does_not_give_board_priority(goal_confidence):
 
 
 def test_calibrated_backboard_center_agrees_with_yaw_and_scoring():
-    analyzer, published = make_analyzer(depth_m=0.795, robot_center_offset_px=96.0)
+    analyzer, published = make_analyzer(depth_m=0.43, robot_center_offset_px=96.0)
     analyzer.cx = 650.0
     for _ in range(3):
         info = send(analyzer, published, [detection(center_x=736)])
@@ -231,7 +231,7 @@ def test_calibrated_backboard_center_agrees_with_yaw_and_scoring():
     assert info["offset_x_norm"] == 0.0
     assert info["bearing_deg"] == 0.0
     assert info["lateral_offset_m"] == 0.0
-    assert info["depth_m"] == 0.795
+    assert info["depth_m"] == 0.43
     assert info["score_now"] is True
     assert GoalNavigationPlanner().plan(info).action == "SHOT"
 
@@ -267,8 +267,8 @@ def test_pending_goal_publishes_calibrated_axis_before_confirmation():
     assert info["robot_center_offset_px"] == 96.0
 
 
-@pytest.mark.parametrize('depth', [0.77, 0.795, 0.82])
-@pytest.mark.parametrize('offset', [-40, 0, 100])
+@pytest.mark.parametrize('depth', [0.39, 0.43, 0.47])
+@pytest.mark.parametrize('offset', [-70, 0, 70])
 def test_analyzer_confirms_new_scoring_rectangle(depth, offset):
     analyzer, published = make_analyzer(depth_m=depth, robot_center_offset_px=96.0)
     for index in range(3):
@@ -280,7 +280,7 @@ def test_analyzer_confirms_new_scoring_rectangle(depth, offset):
 
 
 @pytest.mark.parametrize('depth,offset', [
-    (0.769, 0), (0.821, 0), (0.795, -41), (0.795, 101),
+    (0.389, 0), (0.471, 0), (0.480, 0), (0.500, 0), (0.43, -71), (0.43, 71),
 ])
 def test_analyzer_rejects_outside_new_scoring_rectangle(depth, offset):
     analyzer, published = make_analyzer(depth_m=depth, robot_center_offset_px=96.0)

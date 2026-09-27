@@ -137,3 +137,27 @@ def test_hurdle_candidate_confidence_threshold_is_inclusive():
     assert accepted is not None
     assert accepted.confidence == 0.60
     assert rejected is None
+
+
+def test_published_bottom_distance_uses_center_and_needs_no_depth():
+    import json
+
+    analyzer = load_hurdle_analyzer()()
+    analyzer._sample_depths = lambda *_args: (None, None, None, 0)
+    published = []
+    analyzer._publish = published.append
+    message = SimpleNamespace(data=json.dumps({
+        "image_width": 640, "image_height": 480,
+        "detections": [{
+            "class_name": "hurdle", "confidence": 0.9,
+            "bbox": [100, 350, 300, 408], "center": [200, 379],
+        }],
+    }))
+    for _ in range(12):
+        analyzer._detections_callback(message)
+    info = published[-1]
+    assert info.detected and not info.depth_valid
+    assert info.bottom_distance_px == 100
+    assert info.camera_bottom_gap_px is None
+    analyzer._detections_callback(SimpleNamespace(data=json.dumps({"detections": []})))
+    assert published[-1].bottom_distance_px is None

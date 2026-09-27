@@ -24,12 +24,69 @@ from sensor_msgs.msg import CameraInfo, Image
 from std_msgs.msg import String
 
 from .approach_distance import approach_level_from_motion
-from .approach_distance import approach_motion_for_distance
+from .approach_distance import ball_hurdle_approach_motion
 from .depth_frame_cache import DepthFrame
 from .depth_frame_cache import DepthFrameCache
 from .depth_frame_cache import DepthFrameConsumer
 from .temporal_confirmation import TemporalConfirmationFilter
 from .yolo_line_analyzer import calibrated_robot_center_x
+from .yolo_line_analyzer import GROUND_PROJECTION_DEFAULTS
+from .yolo_line_analyzer import LinePoint
+from .yolo_line_analyzer import project_line_points_to_ground
+
+
+def ball_ground_geometry(
+    bbox: list[int] | None,
+    image_width: int | None,
+    image_height: int | None,
+    parameters: dict[str, Any],
+) -> dict[str, Any]:
+    """Estimate approach steering from the ball box's bottom-center contact.
+
+    This is a floor-contact approximation, not a 3-D ball-center measurement.
+    The calibration applies ONLY to the normal approach head pose. Never use
+    it for head-down pickup alignment, or after changing camera pitch/roll/yaw.
+    Raw Depth Z remains the distance-control input.
+    """
+    result = {
+        "ground_projection_enabled": bool(parameters["ground_projection_enabled"]),
+        "ground_projection_valid": False,
+        "ground_projection_scope": "ball_approach_only",
+        "ground_coordinate_frame": "robot_x_right_z_forward",
+        "ground_contact_point_px": None,
+        "ground_lateral_offset_m": None,
+        "ground_forward_distance_m": None,
+        "ground_steering_angle_deg": None,
+    }
+    if (not result["ground_projection_enabled"] or bbox is None
+            or len(bbox) != 4 or not image_width or not image_height):
+        return result
+    left, top, right, bottom = bbox
+    # A clipped box does not provide an observable floor contact.
+    if not (0 <= left < right < image_width
+            and 0 <= top < bottom < image_height - 1):
+        return result
+    contact_x = (left + right) / 2.0
+    try:
+        ground = project_line_points_to_ground(
+            [LinePoint(contact_x, float(bottom), 1.0)],
+            image_width, image_height, parameters,
+        )
+    except (TypeError, ValueError, OverflowError, np.linalg.LinAlgError):
+        return result
+    if len(ground) != 1 or ground[0, 1] <= 0.0:
+        return result
+    lateral, forward = (float(value) for value in ground[0])
+    result.update({
+        "ground_projection_valid": True,
+        "ground_contact_point_px": [contact_x, float(bottom)],
+        "ground_lateral_offset_m": round(lateral, 6),
+        "ground_forward_distance_m": round(forward, 6),
+        "ground_steering_angle_deg": round(
+            math.degrees(math.atan2(lateral, forward)), 3,
+        ),
+    })
+    return result
 
 
 def ball_path_heading_deg(
@@ -201,6 +258,15 @@ class BallAnalyzer(DepthFrameConsumer, Node):
             "/camera/color/camera_info",
         )
         self.declare_parameter("output_topic", "/vision/ball_info")
+        # Shared floor calibration; only normal-pose BALL approach may use it.
+        self.ground_projection_parameters = {
+            name: self.declare_parameter(name, default).value
+            for name, default in GROUND_PROJECTION_DEFAULTS.items()
+            if name not in {
+                "ground_fit_min_points", "ground_fit_outlier_residual_m",
+                "ground_lookahead_m",
+            }
+        }
         self.declare_parameter("ball_class_name", "ball")
         self.declare_parameter("min_confidence", 0.45)
         self.declare_parameter("depth_timeout_sec", 0.7)
@@ -224,10 +290,10 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         # Ball pickup uses its own calibrated robot axis. Keep this separate
         # from the line analyzer's robot_center_offset_px parameter.
         self.declare_parameter("ball_robot_center_offset_px", 96.0)
-        # At the 30 FPS competition setting this requires about 0.4 seconds of
-        # spatially consistent detection before ball_info becomes detected.
-        self.declare_parameter("confirmation_window_size", 20)
-        self.declare_parameter("confirmation_required_hits", 12)
+        # Confirm 18 spatially consistent hits within the latest 40 frames.
+        # At 30 FPS, uninterrupted detections confirm in about 0.6 seconds.
+        self.declare_parameter("confirmation_window_size", 40)
+        self.declare_parameter("confirmation_required_hits", 18)
         self.declare_parameter("confirmation_max_missed_frames", 10)
         self.declare_parameter("confirmation_max_center_shift_norm", 0.18)
         self.declare_parameter("confirmation_min_area_ratio", 0.40)
@@ -1101,6 +1167,12 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         payload = asdict(info)
         payload.update(self.confirmation_fields)
         payload.update(self.pickup_confirmation_fields)
+        payload.update(ball_ground_geometry(
+            info.bbox if info.detected else None,
+            info.image_width,
+            info.image_height,
+            getattr(self, "ground_projection_parameters", GROUND_PROJECTION_DEFAULTS),
+        ))
         message.data = json.dumps(
             payload,
             ensure_ascii=True,
@@ -1374,11 +1446,11 @@ class BallAnalyzer(DepthFrameConsumer, Node):
                 horizontal_distance_m=target.horizontal_distance_m,
                 ground_distance_m=target.ground_distance_m,
                 distance_m=target.distance_m,
-                approach_motion=approach_motion_for_distance(
+                approach_motion=ball_hurdle_approach_motion(
                     target.distance_m
                 ),
                 approach_level=approach_level_from_motion(
-                    approach_motion_for_distance(target.distance_m)
+                    ball_hurdle_approach_motion(target.distance_m)
                 ),
                 approach_target_distance_m=target.distance_m,
                 depth_valid=target.depth_valid,

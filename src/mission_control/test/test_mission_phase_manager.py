@@ -19,12 +19,14 @@ def test_default_initial_state():
         "ball_mode_active": False,
         "pickups_completed": 0,
         "shots_completed": 0,
+        "hurdles_completed": 0,
         "ball_sections_processed": 0,
         "finish_enabled": False,
         "mission_complete": False,
         "post_ball_goal_transition_failed": False,
         "required_pickups": 2,
         "required_shots": 2,
+        "required_hurdles": 2,
         "required_ball_sections": 2,
         "active_special_action": None,
         "active_special_command_id": None,
@@ -106,17 +108,19 @@ def test_first_and_second_ball_grasp_results_do_not_mix():
     assert manager.grasp_result_for_ball(2) == "GRABBED"
 
 
-def test_first_ball_line_alignment_completes_before_goal_transition():
+def test_first_ball_alignment_completes_before_normal_line_run():
     manager = MissionPhaseManager(initial_phase="BALL_APPROACH")
     complete(manager, "PICKUP_NOW", 1, "SUCCEEDED")
 
+    assert manager.current_phase == "POST_BALL_LINE_ALIGN"
+    assert manager.snapshot()["ball_mode_active"] is True
     assert manager.complete_post_ball_line_align()
     assert manager.current_phase == "LINE_TRACK_AFTER_PICKUP"
     assert manager.snapshot()["ball_mode_active"] is False
     assert not manager.complete_post_ball_line_align()
 
 
-def test_second_pickup_requires_line_alignment_before_forward():
+def test_second_pickup_alignment_completes_before_normal_line_run():
     manager = MissionPhaseManager(initial_phase="BALL_APPROACH")
     manager.pickups_completed = 1
 
@@ -235,7 +239,7 @@ def test_success_resets_special_failure_count():
 
 @pytest.mark.parametrize(
     "status",
-    ["REJECTED", "UNSUPPORTED", "CANCELLED"],
+    ["UNSUPPORTED", "CANCELLED"],
 )
 def test_non_execution_special_terminal_does_not_count_as_mission_failure(
     status,
@@ -337,13 +341,13 @@ def test_zero_required_sections_preserves_success_phase_policy():
         "LINE_TRACK",
     ],
 )
-def test_successful_go_restores_exact_origin_without_progress(origin_phase):
+def test_successful_go_returns_to_line_without_progress(origin_phase):
     manager = MissionPhaseManager(initial_phase=origin_phase)
     before = manager.snapshot()
 
     complete(manager, "GO", 1, "SUCCEEDED")
 
-    assert manager.current_phase == origin_phase
+    assert manager.current_phase == "LINE_TRACK"
     assert manager.pickups_completed == before["pickups_completed"]
     assert manager.shots_completed == before["shots_completed"]
     assert manager.ball_sections_processed == before[
@@ -354,7 +358,7 @@ def test_successful_go_restores_exact_origin_without_progress(origin_phase):
 
 
 @pytest.mark.parametrize("invalid_origin", [None, "UNKNOWN"])
-def test_successful_go_without_valid_origin_falls_back_to_auto(
+def test_successful_go_without_valid_origin_returns_to_line(
     invalid_origin,
 ):
     manager = MissionPhaseManager(initial_phase="LINE_TRACK")
@@ -365,7 +369,7 @@ def test_successful_go_without_valid_origin_falls_back_to_auto(
     result = manager.handle_motion_status("GO", 1, "SUCCEEDED")
 
     assert result.handled and result.terminal
-    assert manager.current_phase == "AUTO"
+    assert manager.current_phase == "LINE_TRACK"
 
 
 @pytest.mark.parametrize(
@@ -393,7 +397,7 @@ def test_failed_go_returns_to_hurdle_approach(status):
 def test_duplicate_successful_go_terminal_is_not_applied_again():
     manager = MissionPhaseManager(initial_phase="BALL_SEARCH")
     complete(manager, "GO", 1, "SUCCEEDED")
-    assert manager.current_phase == "BALL_SEARCH"
+    assert manager.current_phase == "LINE_TRACK"
 
     assert manager.set_phase("LINE_TRACK")
     duplicate = manager.handle_motion_status("GO", 1, "SUCCEEDED")
@@ -667,3 +671,51 @@ def test_timed_line_cannot_consume_an_already_processed_empty_pickup():
     assert not manager.complete_post_ball_line_run()
     assert manager.ball_sections_processed == 1
     assert manager.shots_completed == 0
+
+
+def test_rejected_pickup_retries_are_bounded_by_failure_limit():
+    manager = MissionPhaseManager(initial_phase="BALL_APPROACH", max_pickup_failures=3)
+    for attempt in range(1, 4):
+        complete(manager, "PICKUP_NOW", attempt, "REJECTED")
+        assert manager.pickup_failure_count == attempt
+        assert manager.special_action_exhausted("PICKUP_NOW") is (attempt == 3)
+    assert manager.pickups_completed == 0
+
+
+@pytest.mark.parametrize("status", ["FAILED", "TIMEOUT", "CANCELLED", "REJECTED", "UNSUPPORTED"])
+def test_hurdle_counter_counts_only_unique_successes(status):
+    manager = MissionPhaseManager()
+    complete(manager, "GO", 1, status)
+    assert manager.hurdles_completed == 0
+    assert manager.start_special_action("GO", 2)
+    manager.handle_motion_status("GO", 2, "RUNNING")
+    assert manager.hurdles_completed == 0
+    manager.handle_motion_status("GO", 2, "SUCCEEDED")
+    assert manager.hurdles_completed == 1
+    manager.handle_motion_status("GO", 2, "SUCCEEDED")
+    assert manager.hurdles_completed == 1
+    complete(manager, "GO", 3, "SUCCEEDED")
+    assert manager.hurdles_completed == manager.required_hurdles == 2
+    assert manager.current_phase == "LINE_TRACK"
+    assert manager.pickups_completed == manager.shots_completed == 0
+    assert manager.ball_sections_processed == 0
+    assert not manager.finish_enabled
+    assert not manager.mission_complete
+
+
+def test_ball_goal_progress_and_hurdle_progress_are_independent():
+    manager = MissionPhaseManager()
+    complete(manager, "GO", 1, "SUCCEEDED")
+    for index in range(2):
+        complete(manager, "PICKUP_NOW", 2 + index * 2, "SUCCEEDED")
+        complete(manager, "SHOT", 3 + index * 2, "SUCCEEDED")
+    assert manager.pickups_completed == manager.shots_completed == 2
+    assert manager.ball_sections_processed == 2
+    assert manager.hurdles_completed == 1
+    assert manager.finish_enabled
+    assert not manager.mission_complete
+    complete(manager, "GO", 6, "SUCCEEDED")
+    assert manager.hurdles_completed == 2
+    assert manager.pickups_completed == manager.shots_completed == 2
+    assert manager.ball_sections_processed == 2
+    assert not manager.mission_complete

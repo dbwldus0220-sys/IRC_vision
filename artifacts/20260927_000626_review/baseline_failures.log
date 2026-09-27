@@ -1,0 +1,106 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+__ test_failed_pickup_rearms_visible_ball_but_requires_fresh_vision[REJECTED] __
+
+status = 'REJECTED'
+
+    @pytest.mark.parametrize("status", ["REJECTED", "FAILED", "TIMEOUT"])
+    def test_failed_pickup_rearms_visible_ball_but_requires_fresh_vision(status):
+        node = FakeDecisionNode("BALL_APPROACH")
+        node.terminal_action_armed["ball"] = False
+        node.latest_info["ball"] = {"detected": True}
+        node.latest_time["ball"] = 10.0
+        arm_special_command(node, "PICKUP_NOW", 400, 40)
+        if status != "REJECTED":
+            send_status(node, status="RUNNING", action="PICKUP_NOW", command_id=400,
+                        event_id=40, dynamics_command=None)
+        send_status(node, status=status, action="PICKUP_NOW", command_id=400,
+                    event_id=40, dynamics_command=None,
+                    error_code="INVALID_MOTION" if status == "REJECTED" else "")
+        assert node.active_special_command_id is None
+>       assert node.terminal_action_armed["ball"] is True
+E       assert False is True
+
+src/mission_control/test/test_motion_decision_node.py:4577: AssertionError
+___ test_failed_pickup_rearms_visible_ball_but_requires_fresh_vision[FAILED] ___
+
+status = 'FAILED'
+
+    @pytest.mark.parametrize("status", ["REJECTED", "FAILED", "TIMEOUT"])
+    def test_failed_pickup_rearms_visible_ball_but_requires_fresh_vision(status):
+        node = FakeDecisionNode("BALL_APPROACH")
+        node.terminal_action_armed["ball"] = False
+        node.latest_info["ball"] = {"detected": True}
+        node.latest_time["ball"] = 10.0
+        arm_special_command(node, "PICKUP_NOW", 400, 40)
+        if status != "REJECTED":
+            send_status(node, status="RUNNING", action="PICKUP_NOW", command_id=400,
+                        event_id=40, dynamics_command=None)
+        send_status(node, status=status, action="PICKUP_NOW", command_id=400,
+                    event_id=40, dynamics_command=None,
+                    error_code="INVALID_MOTION" if status == "REJECTED" else "")
+        assert node.active_special_command_id is None
+>       assert node.terminal_action_armed["ball"] is True
+E       assert False is True
+
+src/mission_control/test/test_motion_decision_node.py:4577: AssertionError
+__ test_failed_pickup_rearms_visible_ball_but_requires_fresh_vision[TIMEOUT] ___
+
+status = 'TIMEOUT'
+
+    @pytest.mark.parametrize("status", ["REJECTED", "FAILED", "TIMEOUT"])
+    def test_failed_pickup_rearms_visible_ball_but_requires_fresh_vision(status):
+        node = FakeDecisionNode("BALL_APPROACH")
+        node.terminal_action_armed["ball"] = False
+        node.latest_info["ball"] = {"detected": True}
+        node.latest_time["ball"] = 10.0
+        arm_special_command(node, "PICKUP_NOW", 400, 40)
+        if status != "REJECTED":
+            send_status(node, status="RUNNING", action="PICKUP_NOW", command_id=400,
+                        event_id=40, dynamics_command=None)
+        send_status(node, status=status, action="PICKUP_NOW", command_id=400,
+                    event_id=40, dynamics_command=None,
+                    error_code="INVALID_MOTION" if status == "REJECTED" else "")
+        assert node.active_special_command_id is None
+>       assert node.terminal_action_armed["ball"] is True
+E       assert False is True
+
+src/mission_control/test/test_motion_decision_node.py:4577: AssertionError
+____ test_shot_pause_survives_geometry_valid_reconfirmation_without_firing _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff82529f30>
+
+    def test_shot_pause_survives_geometry_valid_reconfirmation_without_firing(monkeypatch):
+        planner = MotionDecisionPlanner()
+        def decision(confirmed):
+            return planner.plan("GOAL_APPROACH", {"goal": {
+                "detected": True, "confidence": 0.9, "depth_valid": True,
+                "depth_m": 0.42, "offset_x_px": 18, "bearing_deg": 1.1,
+                "score_now": confirmed,
+            }}, 0.1)
+        node = ReadinessPublishNode(decision(True))
+        node.SHOT_PRE_MOTION_SETTLE_SEC = 3.0
+        set_grasp_result_for_first_ball(node, "GRABBED")
+        clock = [10.0]
+        monkeypatch.setattr(time, "monotonic", lambda: clock[0])
+        MotionDecisionNode._publish_decision(node)
+        for stamp, confirmed in [(10.5, False), (11.0, True), (12.5, False), (13.1, False)]:
+            clock[0] = stamp
+            node.decision = decision(confirmed)
+            MotionDecisionNode._publish_decision(node)
+>           assert node.publisher.messages == []
+E           assert [std_msgs.msg...sion_node"}')] == []
+E             Left contains one more item: std_msgs.msg.String(data='{"phase":"GOAL_APPROACH","source":"goal","action":"WAIT_SCORE_CONFIRMATION","valid":false,"r...e_special_event_id":null,"active_special_command_id":null,"mission_progress":{},"source_node":"motion_decision_node"}')
+E             Full diff:
+E             - []
+E             + [std_msgs.msg.String(data='{"phase":"GOAL_APPROACH","source":"goal","action":"WAIT_SCORE_CONFIRMATION","valid":false,"reason":"waiting_for_stable_score_condition","sdk_motion_requested":false,"requires_ack":false,"source_command":{"valid":false,"action":"WAIT_SCORE_CONFIRMATION","reason":"waiting_for_stable_score_cond...
+E             
+E             ...Full output truncated (1 line hidden), use '-vv' to show
+
+src/mission_control/test/test_motion_decision_node.py:4605: AssertionError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_motion_decision_node.py::test_failed_pickup_rearms_visible_ball_but_requires_fresh_vision[REJECTED]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_failed_pickup_rearms_visible_ball_but_requires_fresh_vision[FAILED]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_failed_pickup_rearms_visible_ball_but_requires_fresh_vision[TIMEOUT]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_shot_pause_survives_geometry_valid_reconfirmation_without_firing
+4 failed, 253 deselected in 1.10s

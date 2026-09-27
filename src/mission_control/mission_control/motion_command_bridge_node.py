@@ -16,11 +16,11 @@ from .safety_interlock import RECOVERABLE_MOTOR_ERROR_CODES
 
 LEFT_RECOVERY_MOTION_IDS = {
     count: f"line_recovery_left_{count}"
-    for count in (2, 3, 4, 5, 6, 7, 8, 10, 13)
+    for count in (4,)
 }
 RIGHT_RECOVERY_MOTION_IDS = {
     count: f"line_recovery_right_{count}"
-    for count in (2, 3, 4, 5, 6, 7, 8, 10, 12, 15)
+    for count in (4,)
 }
 
 
@@ -31,6 +31,12 @@ class MotionCommandBridgeNode(Node):
     SHOT_PREPARE_DWELL_MARKER = "__SHOT_PREPARE_DWELL__"
     SHOT_PREPARE_MOTION_ID = "goal_fine_to_default"
     SHOT_PREPARE_DWELL_SEC = 2.0
+    GOAL_CRAB_ACTIONS = frozenset(
+        {"GOAL_CAMERA90_CRAB_LEFT", "GOAL_CAMERA90_CRAB_RIGHT"}
+    )
+    GOAL_FORWARD_CRAB_PREPARE_MOTION_ID = "goal_forward_to_crab_right_90"
+    GOAL_FINE_CRAB_PREPARE_MOTION_ID = "goal_fine_to_default_90"
+    GOAL_FINE_RIGHT_CRAB_PREPARE_MOTION_ID = "goal_fine_to_crab_right_90"
     POST_BALL_CAMERA_DWELL_MARKER = "__POST_BALL_CAMERA_DWELL__"
     POST_BALL_CAMERA_PAUSE_SEC = 3.0
     PICKUP_INITIAL_ALIGN_DWELL_MARKER = (
@@ -48,11 +54,15 @@ class MotionCommandBridgeNode(Node):
     PICKUP_GRASP_CHECK_MOTION_ID = "pickup_grasp_check_pose"
     PICKUP_FINE_PREPARE_MOTION_ID = "pickup_fine_prepare"
     PICKUP_CRAB_PREPARE_MOTION_ID = "pickup_crab_prepare"
+    PICKUP_FINE_RIGHT_CRAB_PREPARE_MOTION_ID = "pickup_fine_to_crab_right_0"
     PICKUP_DWELL_SEC = 3.0
+    HURDLE_PRE_GO_DWELL_MARKER = "__HURDLE_PRE_GO_DWELL__"
+    HURDLE_PRE_GO_DWELL_SEC = 3.0
     PICKUP_INITIAL_ALIGN_ACTIONS = frozenset(
         {
             "BALL_PICKUP_INITIAL_ALIGN_CONTINUE",
             "BALL_PICKUP_INITIAL_SEARCH_FORWARD",
+            "BALL_PICKUP_INITIAL_SEARCH_BACKWARD",
             "BALL_PICKUP_INITIAL_CRAB_LEFT",
             "BALL_PICKUP_INITIAL_CRAB_RIGHT",
             *{
@@ -86,6 +96,7 @@ class MotionCommandBridgeNode(Node):
             "BALL_PICKUP_FINE_SEARCH_LEFT",
             "BALL_PICKUP_FINE_SEARCH_RIGHT",
             "BALL_PICKUP_FINE_SEARCH_FORWARD",
+            "BALL_PICKUP_FINE_SEARCH_BACKWARD",
             "BALL_PICKUP_CRAB_RIGHT",
             "BALL_PICKUP_CRAB_LEFT",
         }
@@ -95,6 +106,7 @@ class MotionCommandBridgeNode(Node):
         "BALL_PICKUP_FINE_SEARCH_LEFT": "pickup_camera_down_turn_left_2",
         "BALL_PICKUP_FINE_SEARCH_RIGHT": "pickup_camera_down_turn_right_5",
         "BALL_PICKUP_FINE_SEARCH_FORWARD": "ball_camera_down_forward_2",
+        "BALL_PICKUP_FINE_SEARCH_BACKWARD": "pickup_lost_ball_backward_1",
         "BALL_PICKUP_CRAB_RIGHT": "pickup_crab_right_0",
         "BALL_PICKUP_CRAB_LEFT": "pickup_crab_left_0",
     }
@@ -114,11 +126,12 @@ class MotionCommandBridgeNode(Node):
         }
     )
     ATOMIC_SEQUENCE_ACTIONS = frozenset(
-        {"PICKUP_NOW", "POST_BALL_GOAL_TRANSITION", "SHOT"}
+        {"PICKUP_NOW", "POST_BALL_GOAL_TRANSITION", "SHOT", "GO", *GOAL_CRAB_ACTIONS}
     )
 
     PICKUP_CAMERA_DOWN_MOTION_IDS = {
-        "STRAIGHT_0": "pickup_fine_forward_0",
+        "STRAIGHT": "line_forward_4",
+        "STRAIGHT_0": "ball_general_fine_forward_8",
         "STRAIGHT_2": "ball_camera_down_forward_4",
     }
     PICKUP_MOTION_TAIL = (
@@ -160,14 +173,14 @@ class MotionCommandBridgeNode(Node):
                 f"post_ball_line_turn_{direction.lower()}_{count}"
             )
             for direction, counts in (
-                ("RIGHT", (2, 3, 5, 7, 9)), ("LEFT", (1, 2, 3, 4, 5)),
+                ("RIGHT", (2, 3, 5, 7, 9)), ("LEFT", (1, 2, 3, 4, 5, 6)),
             )
             for count in counts
         },
         "BALL_FINE_FORWARD_8": "ball_general_fine_forward_8",
         "BALL_LOST_FORWARD_2": "ball_camera_down_forward_2",
-        "LINE_LOST_TURN_LEFT": "line_search_left_1",
-        "LINE_LOST_TURN_RIGHT": "line_search_right_3",
+        "LINE_LOST_TURN_LEFT": "line_search_left_2",
+        "LINE_LOST_TURN_RIGHT": "line_search_right_5",
         "GOAL_CAMERA_90_FORWARD": "goal_camera_90_forward_6",
         "GOAL_CAMERA_90_FORWARD_1": "goal_camera_90_forward_2",
         "GOAL_CAMERA_90_FORWARD_2": "goal_camera_90_forward_4",
@@ -257,7 +270,9 @@ class MotionCommandBridgeNode(Node):
         self.active_dwell_until: float | None = None
         self.post_ball_camera_pause_until: float | None = None
         self.goal_fine_forward_completed = False
+        self.hurdle_depth_fine_completed = False
         self.goal_crab_completed = False
+        self.last_completed_motion_id: str | None = None
         self.pickup_initial_align_dwell_until: float | None = None
         self.pickup_initial_align_waiting = False
         self.pickup_initial_align_correction_active = False
@@ -436,6 +451,7 @@ class MotionCommandBridgeNode(Node):
 
     def _record_goal_motion_success(self, motion_id: str) -> None:
         """Track completed goal approach motions until scoring or a new pickup."""
+        self.last_completed_motion_id = motion_id
         if motion_id.startswith("goal_camera_90_fine_forward_"):
             self.goal_fine_forward_completed = True
         elif motion_id in {"goal_camera_90_crab_left", "goal_camera_90_crab_right"}:
@@ -636,7 +652,8 @@ class MotionCommandBridgeNode(Node):
                     len(self.PICKUP_MOTION_TAIL):
                 ]
                 next_sequence = (
-                    *self.PICKUP_NO_BALL_MOTION_TAIL,
+                    first_motion,
+                    *self.PICKUP_NO_BALL_MOTION_TAIL[1:],
                     *final_stages,
                 )
                 self.active_pickup_sequence = self._with_pickup_motion_dwells(
@@ -680,7 +697,11 @@ class MotionCommandBridgeNode(Node):
             )
             return
 
-        if action == "BALL_PICKUP_INITIAL_SEARCH_FORWARD":
+        if action == "BALL_PICKUP_INITIAL_SEARCH_BACKWARD":
+            motion_id = self.PICKUP_FINE_ALIGN_MOTION_IDS[
+                "BALL_PICKUP_FINE_SEARCH_BACKWARD"
+            ]
+        elif action == "BALL_PICKUP_INITIAL_SEARCH_FORWARD":
             motion_id = "ball_camera_down_forward_2"
         elif action.startswith("BALL_PICKUP_INITIAL_CRAB_"):
             fine_action = action.replace("INITIAL_", "", 1)
@@ -935,11 +956,13 @@ class MotionCommandBridgeNode(Node):
             )
         if (
             action == "PICKUP_NOW"
-            and motion_id in {"pickup_crab_left_0", "pickup_crab_right_0"}
-            and self.last_pickup_motion_id == "ball_camera_down_forward_4"
+            and motion_id == "pickup_crab_right_0"
+            and self.last_pickup_motion_id in {
+                "pickup_fine_forward_0", "ball_general_fine_forward_8",
+            }
         ):
             self.pending_pickup_crab_motion_id = motion_id
-            motion_id = self.PICKUP_CRAB_PREPARE_MOTION_ID
+            motion_id = self.PICKUP_FINE_RIGHT_CRAB_PREPARE_MOTION_ID
             self.active_motion_id = motion_id
         if (
             prepare_pickup_fine
@@ -1067,7 +1090,9 @@ class MotionCommandBridgeNode(Node):
                 message="an atomic motion sequence owns the motion executor",
             )
             return
-        if self.motion_in_progress and action in {"SHOT", "POST_BALL_GOAL_TRANSITION"}:
+        if self.motion_in_progress and action in {
+            "SHOT", "GO", "POST_BALL_GOAL_TRANSITION", *self.GOAL_CRAB_ACTIONS,
+        }:
             self._publish_local_rejection(
                 status="REJECTED",
                 command_id=command_id,
@@ -1107,9 +1132,36 @@ class MotionCommandBridgeNode(Node):
             motion_id = self.PICKUP_INITIAL_ALIGN_MARKER
             self.goal_fine_forward_completed = False
             self.goal_crab_completed = False
+            self.last_completed_motion_id = None
+        elif action == "GO":
+            source_command = payload.get("source_command")
+            needs_depth_fine_step = (
+                payload.get("source") == "hurdle"
+                and isinstance(source_command, dict)
+                and source_command.get("depth_fallback_requested") is True
+                and not self.hurdle_depth_fine_completed
+            )
+            # Every attempt holds still immediately before the hurdle motion.
+            # Retrying a completed blind step must not execute it again.
+            pickup_sequence = (self.HURDLE_PRE_GO_DWELL_MARKER, "hurdle")
+            if needs_depth_fine_step:
+                pickup_sequence = ("pickup_fine_forward_0", *pickup_sequence)
+            motion_id = pickup_sequence[0]
         elif action == "POST_BALL_GOAL_TRANSITION":
             pickup_sequence = self.POST_BALL_GOAL_TRANSITION_SEQUENCE
             motion_id = pickup_sequence[0]
+        elif action in self.GOAL_CRAB_ACTIONS:
+            motion_id = self.motion_id_for_action(action)
+            previous_motion = self.last_completed_motion_id or ""
+            prepare_motion = None
+            if action == "GOAL_CAMERA90_CRAB_RIGHT":
+                if previous_motion.startswith("goal_camera_90_forward_"):
+                    prepare_motion = self.GOAL_FORWARD_CRAB_PREPARE_MOTION_ID
+                elif previous_motion.startswith("goal_camera_90_fine_forward_"):
+                    prepare_motion = self.GOAL_FINE_RIGHT_CRAB_PREPARE_MOTION_ID
+            if prepare_motion is not None:
+                pickup_sequence = (prepare_motion, motion_id)
+                motion_id = prepare_motion
         elif (
             action == "SHOT"
             and self.goal_fine_forward_completed
@@ -1121,6 +1173,14 @@ class MotionCommandBridgeNode(Node):
                 "goal_shot",
             )
             motion_id = pickup_sequence[0]
+        elif payload.get("source") in ("ball", "hurdle") and action in {
+            "STRAIGHT", "STRAIGHT_0",
+        }:
+            # Object approach uses camera-45 motions; Line keeps its own mapping.
+            motion_id = (
+                "line_forward_4" if action == "STRAIGHT"
+                else "ball_general_fine_forward_8"
+            )
         else:
             motion_id = self.motion_id_for_action(action)
         if motion_id is None:
@@ -1151,9 +1211,13 @@ class MotionCommandBridgeNode(Node):
             self.motion_in_progress and action == "PICKUP_NOW"
         )
         starts_with_initial_align_checkpoint = action == "PICKUP_NOW"
+        starts_with_hurdle_dwell = (
+            action == "GO" and motion_id == self.HURDLE_PRE_GO_DWELL_MARKER
+        )
         if (
             not defer_until_active_finishes
             and not starts_with_initial_align_checkpoint
+            and not starts_with_hurdle_dwell
         ):
             self._publish_executor_request(
                 action=action,
@@ -1194,9 +1258,12 @@ class MotionCommandBridgeNode(Node):
             if starts_with_initial_align_checkpoint:
                 self.active_sequence_index = -1
                 self._start_pickup_initial_align_dwell()
+            elif starts_with_hurdle_dwell:
+                self.active_sequence_index = -1
+                self._start_next_pickup_motion()
 
     def _start_next_pickup_motion(self) -> bool:
-        """Advance an atomic pickup, goal transition, or shot sequence."""
+        """Advance an atomic pickup, goal, transition, shot, or hurdle sequence."""
         if self.active_action not in self.ATOMIC_SEQUENCE_ACTIONS:
             return False
         if self.active_dwell_until is not None:
@@ -1219,6 +1286,19 @@ class MotionCommandBridgeNode(Node):
                 motion_id=next_motion_id,
                 action=self.active_action,
                 message="camera raised; completing the post-walk three-second pause",
+            )
+            return True
+        if next_motion_id == self.HURDLE_PRE_GO_DWELL_MARKER:
+            self.active_motion_id = next_motion_id
+            self.active_dwell_until = time.monotonic() + self.HURDLE_PRE_GO_DWELL_SEC
+            self.publish_motion_status(
+                status="RUNNING",
+                command_id=self.active_command_id,
+                event_id=self.active_event_id,
+                request_id=self.active_request_id,
+                motion_id=next_motion_id,
+                action=self.active_action,
+                message="holding still for three seconds before hurdle",
             )
             return True
         if next_motion_id == self.SHOT_PREPARE_DWELL_MARKER:
@@ -1489,6 +1569,7 @@ class MotionCommandBridgeNode(Node):
             and payload["motion_id"] != "post_ball_camera_90"
             and payload["motion_id"] != self.PICKUP_FINE_PREPARE_MOTION_ID
             and payload["motion_id"] != self.PICKUP_CRAB_PREPARE_MOTION_ID
+            and payload["motion_id"] != self.PICKUP_FINE_RIGHT_CRAB_PREPARE_MOTION_ID
             and not (
                 self.pickup_fixed_sequence_started
                 and payload["motion_id"] == "pickup_fine_forward_0"
@@ -1512,6 +1593,11 @@ class MotionCommandBridgeNode(Node):
                 "Executor status ignored: atomic motion_id mismatch"
             )
             return
+        if is_active and action == "GO" and payload["status"] == "SUCCEEDED":
+            if payload["motion_id"] == "pickup_fine_forward_0":
+                self.hurdle_depth_fine_completed = True
+            elif payload["motion_id"] == "hurdle":
+                self.hurdle_depth_fine_completed = False
         if (
             is_active
             and action == "PICKUP_NOW"
@@ -1519,7 +1605,10 @@ class MotionCommandBridgeNode(Node):
         ):
             self.last_pickup_motion_id = payload["motion_id"]
             if (
-                payload["motion_id"] == self.PICKUP_CRAB_PREPARE_MOTION_ID
+                payload["motion_id"] in {
+                    self.PICKUP_CRAB_PREPARE_MOTION_ID,
+                    self.PICKUP_FINE_RIGHT_CRAB_PREPARE_MOTION_ID,
+                }
                 and self.pending_pickup_crab_motion_id is not None
             ):
                 self.active_motion_id = self.pending_pickup_crab_motion_id

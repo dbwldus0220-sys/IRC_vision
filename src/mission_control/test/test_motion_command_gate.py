@@ -51,6 +51,7 @@ def test_success_requires_new_vision_before_republishing():
         "GOAL_CAMERA_90_FORWARD_2",
         *(f"GOAL_CAMERA90_FINE_FORWARD_{count}" for count in range(1, 5)),
         "BALL_FINE_FORWARD_8",
+        "POST_SHOT_LINE_TURN_LEFT_6",
         "LINE_LOST_TURN_LEFT",
         "LINE_LOST_TURN_RIGHT",
     ],
@@ -270,7 +271,7 @@ def test_identical_actions_correlate(command_action, status_action):
 
 @pytest.mark.parametrize(
     "action",
-    ["WAIT", "PICKUP_NOW", "STRAIGHT_0"],
+    ["WAIT", "PICKUP_NOW"],
 )
 def test_non_general_action_is_not_managed_as_execution(action):
     assert not gate_with_vision().can_publish(action)
@@ -379,3 +380,36 @@ def test_failed_or_cancelled_action_is_not_retried_forever(status):
         assert not gate.can_publish("APPROACH")
 
     assert gate.can_publish("STRAIGHT")
+
+
+@pytest.mark.parametrize("action", ["POST_BALL_LINE_TURN_RIGHT_5", "POST_BALL_LINE_TURN_LEFT_2"])
+def test_missing_line_search_exception_preserves_lock_and_failure_block(action):
+    gate = GeneralMotionCommandGate()
+    gate.required_vision_generation = 1
+    assert not gate.can_publish(action)
+    assert gate.can_publish(action, allow_missing_line_search=True)
+    gate.on_command_published(action, command_id=1)
+    assert not gate.can_publish(action, allow_missing_line_search=True)
+    gate.on_motion_status(action, "RUNNING", command_id=1)
+    gate.on_motion_status(action, "FAILED", command_id=1)
+    assert not gate.can_publish(action, allow_missing_line_search=True)
+
+
+@pytest.mark.parametrize("action", ["STRAIGHT", "RECOVER_RIGHT_TURN_RIGHT_4", "LINE_LOST_TURN_RIGHT", "POST_SHOT_TURN_RIGHT_9"])
+def test_missing_line_search_exception_cannot_release_other_actions(action):
+    gate = GeneralMotionCommandGate()
+    gate.required_vision_generation = 1
+    assert not gate.can_publish(action, allow_missing_line_search=True)
+
+
+def test_fine_approach_waits_for_completion_and_a_new_observation():
+    gate = gate_with_vision()
+    assert gate.can_publish("STRAIGHT_0")
+    gate.on_command_published("STRAIGHT_0", command_id=42)
+    gate.on_new_vision_input()
+    assert not gate.can_publish("STRAIGHT_0")
+    gate.on_motion_status("STRAIGHT_0", "RUNNING", command_id=42)
+    assert gate.on_motion_status("STRAIGHT_0", "SUCCEEDED", command_id=42).released
+    assert not gate.can_publish("STRAIGHT_0")
+    gate.on_new_vision_input()
+    assert gate.can_publish("STRAIGHT_0")

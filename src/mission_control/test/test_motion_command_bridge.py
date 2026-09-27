@@ -42,6 +42,17 @@ class FakeBridge:
     SHOT_PREPARE_DWELL_MARKER = MotionCommandBridgeNode.SHOT_PREPARE_DWELL_MARKER
     SHOT_PREPARE_MOTION_ID = MotionCommandBridgeNode.SHOT_PREPARE_MOTION_ID
     SHOT_PREPARE_DWELL_SEC = MotionCommandBridgeNode.SHOT_PREPARE_DWELL_SEC
+    GOAL_CRAB_ACTIONS = MotionCommandBridgeNode.GOAL_CRAB_ACTIONS
+    GOAL_FINE_RIGHT_CRAB_PREPARE_MOTION_ID = (
+        MotionCommandBridgeNode.GOAL_FINE_RIGHT_CRAB_PREPARE_MOTION_ID
+    )
+    PICKUP_FINE_RIGHT_CRAB_PREPARE_MOTION_ID = (
+        MotionCommandBridgeNode.PICKUP_FINE_RIGHT_CRAB_PREPARE_MOTION_ID
+    )
+    GOAL_FINE_CRAB_PREPARE_MOTION_ID = MotionCommandBridgeNode.GOAL_FINE_CRAB_PREPARE_MOTION_ID
+    GOAL_FORWARD_CRAB_PREPARE_MOTION_ID = (
+        MotionCommandBridgeNode.GOAL_FORWARD_CRAB_PREPARE_MOTION_ID
+    )
     PICKUP_INITIAL_ALIGN_DWELL_MARKER = (
         MotionCommandBridgeNode.PICKUP_INITIAL_ALIGN_DWELL_MARKER
     )
@@ -62,6 +73,8 @@ class FakeBridge:
         MotionCommandBridgeNode.PICKUP_GRASP_CHECK_MOTION_ID
     )
     PICKUP_DWELL_SEC = MotionCommandBridgeNode.PICKUP_DWELL_SEC
+    HURDLE_PRE_GO_DWELL_MARKER = MotionCommandBridgeNode.HURDLE_PRE_GO_DWELL_MARKER
+    HURDLE_PRE_GO_DWELL_SEC = MotionCommandBridgeNode.HURDLE_PRE_GO_DWELL_SEC
     PICKUP_FINE_PREPARE_MOTION_ID = MotionCommandBridgeNode.PICKUP_FINE_PREPARE_MOTION_ID
     PICKUP_CRAB_PREPARE_MOTION_ID = MotionCommandBridgeNode.PICKUP_CRAB_PREPARE_MOTION_ID
     PICKUP_INITIAL_ALIGN_ACTIONS = (
@@ -104,7 +117,9 @@ class FakeBridge:
         self.active_sequence_index = 0
         self.active_dwell_until = None
         self.goal_fine_forward_completed = False
+        self.hurdle_depth_fine_completed = False
         self.goal_crab_completed = False
+        self.last_completed_motion_id = None
         self.pickup_initial_align_dwell_until = None
         self.pickup_initial_align_waiting = False
         self.pickup_initial_align_correction_active = False
@@ -292,6 +307,8 @@ def test_shot_without_fine_only_approach_keeps_direct_scoring(actions):
     for command_id, action in enumerate(actions, 1):
         bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
         complete_active_motion(bridge)
+        if bridge.motion_in_progress:
+            complete_active_motion(bridge)
     bridge.navigation_command_callback(navigation_message(action="SHOT", command_id=10))
     assert bridge.active_motion_id == "goal_shot"
     assert bridge.active_pickup_sequence == ()
@@ -456,14 +473,14 @@ EXPECTED_PRODUCTION_ACTIONS = {
             f"post_ball_line_turn_{direction.lower()}_{count}"
         )
         for direction, counts in (
-            ("RIGHT", (2, 3, 5, 7, 9)), ("LEFT", (1, 2, 3, 4, 5)),
+            ("RIGHT", (2, 3, 5, 7, 9)), ("LEFT", (1, 2, 3, 4, 5, 6)),
         )
         for count in counts
     },
     "BALL_FINE_FORWARD_8": "ball_general_fine_forward_8",
     "BALL_LOST_FORWARD_2": "ball_camera_down_forward_2",
-    "LINE_LOST_TURN_LEFT": "line_search_left_1",
-    "LINE_LOST_TURN_RIGHT": "line_search_right_3",
+    "LINE_LOST_TURN_LEFT": "line_search_left_2",
+    "LINE_LOST_TURN_RIGHT": "line_search_right_5",
     "GOAL_CAMERA_90_FORWARD": "goal_camera_90_forward_6",
     "GOAL_CAMERA_90_FORWARD_1": "goal_camera_90_forward_2",
     "GOAL_CAMERA_90_FORWARD_2": "goal_camera_90_forward_4",
@@ -506,8 +523,8 @@ for count in (1, 2, 3, 4, 5, 6):
     ] = f"post_ball_line_turn_left_{count}"
 for recovery_side in ("LEFT", "RIGHT"):
     for direction, counts in (
-        ("LEFT", (2, 3, 4, 5, 6, 7, 8, 10, 13)),
-        ("RIGHT", (2, 3, 4, 5, 6, 7, 8, 10, 12, 15)),
+        ("LEFT", (4,)),
+        ("RIGHT", (4,)),
     ):
         for count in counts:
             EXPECTED_PRODUCTION_ACTIONS[
@@ -529,6 +546,9 @@ def test_supported_action_builds_executor_request(action, motion_id):
     bridge = FakeBridge()
 
     bridge.navigation_command_callback(navigation_message(action=action))
+    if action == "GO":
+        assert not bridge.executor_request_publisher.messages
+        bridge._check_atomic_dwell(bridge.active_dwell_until)
 
     requests = decoded_messages(bridge.executor_request_publisher)
     assert requests == [
@@ -590,6 +610,10 @@ def test_positive_source_timeout_is_preserved():
         "HEAD_CENTER",
         "RECOVER_GOAL_TURN_LEFT",
         "RECOVER_GOAL_TURN_RIGHT",
+        "RECOVER_LEFT_TURN_LEFT_6",
+        "RECOVER_RIGHT_TURN_LEFT_2",
+        "RECOVER_LEFT_TURN_RIGHT_6",
+        "RECOVER_RIGHT_TURN_RIGHT_8",
         "WAIT_SCORE_CONFIRMATION",
         "WAIT_GO_CONFIRMATION",
         "UNKNOWN",
@@ -688,7 +712,7 @@ def test_first_pickup_finishes_after_backward_turn_and_dwell_without_pose_transi
 
     for completed_motion in (
         "ball_camera_down_forward_4",
-        "pickup_fine_forward_0",
+        "ball_general_fine_forward_8",
     ):
         complete_pickup_motion_and_dwell(bridge, completed_motion)
     continue_pickup_after_fine_alignment(bridge)
@@ -711,7 +735,7 @@ def test_first_pickup_finishes_after_backward_turn_and_dwell_without_pose_transi
         for request in decoded_messages(bridge.executor_request_publisher)
     ] == [
         "ball_camera_down_forward_4",
-        "pickup_fine_forward_0",
+        "ball_general_fine_forward_8",
         "pickup_pre_backward_camera_down",
         "pickup",
         "pickup_grasp_check_pose",
@@ -761,7 +785,7 @@ def test_pickup_dwell_is_non_blocking_and_does_not_start_early():
 
     for completed_motion in (
         "ball_camera_down_forward_4",
-        "pickup_fine_forward_0",
+        "ball_general_fine_forward_8",
     ):
         complete_pickup_motion_and_dwell(bridge, completed_motion)
     continue_pickup_after_fine_alignment(bridge)
@@ -918,6 +942,8 @@ def test_pickup_crab_loss_reacquires_before_returning_to_fine_checkpoint():
     bridge.navigation_command_callback(
         fine_alignment_message("BALL_PICKUP_CRAB_RIGHT")
     )
+    assert bridge.active_motion_id == "pickup_fine_to_crab_right_0"
+    complete_active_motion(bridge)
     bridge.executor_status_callback(
         executor_status(status="RUNNING", motion_id="pickup_crab_right_0")
     )
@@ -1013,13 +1039,13 @@ def test_pickup_missing_ball_aligns_after_camera_down_backward_motion():
 
     requests = decoded_messages(bridge.executor_request_publisher)
     assert [request["motion_id"] for request in requests] == [
-        "pickup_fine_prepare"
+        "ball_general_fine_forward_8"
     ]
     assert bridge.active_pickup_sequence.count(
-        "pickup_fine_forward_0"
+        "ball_general_fine_forward_8"
     ) == 1
     assert bridge.active_pickup_sequence[:11] == (
-        "pickup_fine_forward_0",
+        "ball_general_fine_forward_8",
         bridge.DWELL_MARKER,
         "pickup_pre_backward_camera_down",
         bridge.DWELL_MARKER,
@@ -1032,7 +1058,7 @@ def test_pickup_missing_ball_aligns_after_camera_down_backward_motion():
         bridge.DWELL_MARKER,
     )
 
-    complete_pickup_motion_and_dwell(bridge, "pickup_fine_forward_0")
+    complete_pickup_motion_and_dwell(bridge, "ball_general_fine_forward_8")
     assert decoded_messages(bridge.executor_request_publisher)[-1][
         "motion_id"
     ] == "pickup_pre_backward_camera_down"
@@ -1354,7 +1380,7 @@ def test_pickup_sequence_stops_when_an_intermediate_motion_fails():
     bridge.executor_status_callback(
         executor_status(
             status="FAILED",
-            motion_id="pickup_fine_forward_0",
+            motion_id="ball_general_fine_forward_8",
             error_code="MOTION_FAILED",
         )
     )
@@ -1362,7 +1388,7 @@ def test_pickup_sequence_stops_when_an_intermediate_motion_fails():
     requests = decoded_messages(bridge.executor_request_publisher)
     assert [request["motion_id"] for request in requests] == [
         "ball_camera_down_forward_4",
-        "pickup_fine_forward_0",
+        "ball_general_fine_forward_8",
     ]
     assert bridge.motion_in_progress is False
 
@@ -1391,7 +1417,7 @@ def test_pickup_sequence_continues_after_recoverable_motor_fault(error_code):
     bridge.executor_status_callback(
         executor_status(
             status="FAILED",
-            motion_id="pickup_fine_forward_0",
+            motion_id="ball_general_fine_forward_8",
             error_code=error_code,
         )
     )
@@ -1418,7 +1444,7 @@ def test_second_pickup_finishes_with_backward_left_turn_composite():
 
     for completed_motion in (
         "ball_camera_down_forward_4",
-        "pickup_fine_forward_0",
+        "ball_general_fine_forward_8",
     ):
         complete_pickup_motion_and_dwell(bridge, completed_motion)
     continue_pickup_after_fine_alignment(bridge)
@@ -1448,7 +1474,7 @@ def test_second_pickup_finishes_with_backward_left_turn_composite():
 @pytest.mark.parametrize(
     ("approach_motion", "motion_id"),
     [
-        ("STRAIGHT_0", "pickup_fine_forward_0"),
+        ("STRAIGHT_0", "ball_general_fine_forward_8"),
         ("STRAIGHT_2", "ball_camera_down_forward_4"),
     ],
 )
@@ -1534,7 +1560,7 @@ def enter_pickup_fine_alignment(bridge):
     continue_pickup_after_initial_alignment(bridge)
     for motion_id in (
         "ball_camera_down_forward_4",
-        "pickup_fine_forward_0",
+        "ball_general_fine_forward_8",
     ):
         complete_pickup_motion_and_dwell(bridge, motion_id)
 
@@ -1551,7 +1577,7 @@ def fine_alignment_message(action, command_id=8001):
 
 
 @pytest.mark.parametrize("direction", ["LEFT", "RIGHT"])
-def test_forward4_then_crab_prepares_once_and_preserves_checkpoint(direction):
+def test_forward4_then_crab_starts_directly_and_preserves_checkpoint(direction):
     bridge = FakeBridge()
     bridge.navigation_command_callback(navigation_message(action="PICKUP_NOW"))
     assert_pickup_initial_alignment_started(bridge)
@@ -1563,18 +1589,12 @@ def test_forward4_then_crab_prepares_once_and_preserves_checkpoint(direction):
     action = f"BALL_PICKUP_INITIAL_CRAB_{direction}"
     crab = f"pickup_crab_{direction.lower()}_0"
     bridge.navigation_command_callback(fine_alignment_message(action, 8002))
-    assert bridge.active_motion_id == "pickup_crab_prepare"
-    # A stale forward completion cannot skip preparation.
+    assert bridge.active_motion_id == crab
+    assert bridge.pending_pickup_crab_motion_id is None
     bridge.executor_status_callback(executor_status(
         status="SUCCEEDED", motion_id="ball_camera_down_forward_4",
     ))
-    assert bridge.active_motion_id == "pickup_crab_prepare"
-    complete_active_motion(bridge)
     assert bridge.active_motion_id == crab
-    assert bridge.active_dwell_until is None
-    bridge.executor_status_callback(executor_status(
-        status="SUCCEEDED", motion_id="pickup_crab_prepare",
-    ))
     complete_active_motion(bridge)
     assert bridge.active_dwell_until is not None
     bridge._check_atomic_dwell(bridge.active_dwell_until)
@@ -1583,34 +1603,8 @@ def test_forward4_then_crab_prepares_once_and_preserves_checkpoint(direction):
     assert bridge.active_motion_id == crab
     requests = decoded_messages(bridge.executor_request_publisher)
     assert [r["motion_id"] for r in requests] == [
-        "ball_camera_down_forward_4", "pickup_crab_prepare", crab, crab,
+        "ball_camera_down_forward_4", crab, crab,
     ]
-
-
-@pytest.mark.parametrize("status,error_code", [
-    ("FAILED", "MOTION_FAILED"), ("TIMEOUT", "TIMEOUT"),
-    ("CANCELLED", ""), ("REJECTED", "INVALID_MOTION"),
-    *[("FAILED", code) for code in sorted(RECOVERABLE_MOTOR_ERROR_CODES)],
-])
-def test_crab_preparation_failure_stops_without_crab(status, error_code):
-    bridge = FakeBridge()
-    bridge.navigation_command_callback(navigation_message(action="PICKUP_NOW"))
-    assert_pickup_initial_alignment_started(bridge)
-    continue_pickup_after_initial_alignment(bridge)
-    complete_active_motion(bridge)
-    bridge._check_atomic_dwell(bridge.active_dwell_until)
-    bridge.navigation_command_callback(fine_alignment_message(
-        "BALL_PICKUP_INITIAL_CRAB_LEFT", 8002,
-    ))
-    assert bridge.active_motion_id == "pickup_crab_prepare"
-    complete_active_motion(bridge, status, error_code)
-    assert not bridge.motion_in_progress
-    assert bridge.pending_pickup_crab_motion_id is None
-    assert bridge.last_pickup_motion_id is None
-    assert [r["motion_id"] for r in decoded_messages(
-        bridge.executor_request_publisher
-    )] == ["ball_camera_down_forward_4", "pickup_crab_prepare"]
-    assert decoded_messages(bridge.motion_status_publisher)[-1]["status"] == status
 
 
 @pytest.mark.parametrize("status,error_code", [
@@ -1637,9 +1631,9 @@ def test_pickup_distance_approach_skips_preparation_and_waits_for_fine_alignment
         active_special_command_id=8000, active_special_event_id=8,
     ))
     requests = decoded_messages(bridge.executor_request_publisher)
-    assert [r["motion_id"] for r in requests] == ["pickup_fine_forward_0"]
+    assert [r["motion_id"] for r in requests] == ["ball_general_fine_forward_8"]
     assert bridge.pickup_fine_align_waiting is False
-    complete_pickup_motion_and_dwell(bridge, "pickup_fine_forward_0")
+    complete_pickup_motion_and_dwell(bridge, "ball_general_fine_forward_8")
     assert bridge.pickup_fine_align_waiting is True
     assert len(bridge.executor_request_publisher.messages) == 1
 
@@ -1700,7 +1694,7 @@ def test_fine_forward_success_waits_before_grab_stage():
     requests = decoded_messages(bridge.executor_request_publisher)
     assert [request["motion_id"] for request in requests] == [
         "ball_camera_down_forward_4",
-        "pickup_fine_forward_0",
+        "ball_general_fine_forward_8",
     ]
     assert bridge.pickup_fine_align_waiting is True
     assert bridge.motion_in_progress is True
@@ -1720,7 +1714,7 @@ def test_centered_fine_alignment_starts_backward_without_extra_fine_step():
     requests = decoded_messages(bridge.executor_request_publisher)
     assert [request["motion_id"] for request in requests] == [
         "ball_camera_down_forward_4",
-        "pickup_fine_forward_0",
+        "ball_general_fine_forward_8",
         "pickup_pre_backward_camera_down",
     ]
 
@@ -1788,6 +1782,8 @@ def test_pickup_distance_decisions_repeat_fine_then_crab_then_backward():
     bridge.navigation_command_callback(
         fine_alignment_message(decision.action, command_id=8103)
     )
+    assert bridge.active_motion_id == "pickup_fine_to_crab_right_0"
+    complete_active_motion(bridge)
     complete_pickup_motion_and_dwell(bridge, "pickup_crab_right_0")
     assert bridge.pickup_fine_align_waiting is True
     assert bridge.pickup_fixed_sequence_started is False
@@ -1814,6 +1810,8 @@ def test_right_crab_success_requires_another_checkpoint_before_grab():
     bridge.navigation_command_callback(
         fine_alignment_message("BALL_PICKUP_CRAB_RIGHT")
     )
+    assert bridge.active_motion_id == "pickup_fine_to_crab_right_0"
+    complete_active_motion(bridge)
     crab_request = decoded_messages(bridge.executor_request_publisher)[-1]
     assert crab_request["motion_id"] == "pickup_crab_right_0"
     assert crab_request["action"] == "PICKUP_NOW"
@@ -1883,6 +1881,9 @@ def test_pickup_crab_repeats_without_limit_until_pixel_window_is_met():
                 command_id=command_id,
             )
         )
+        if command_id == 8001:
+            assert bridge.active_motion_id == "pickup_fine_to_crab_right_0"
+            complete_active_motion(bridge)
         bridge.executor_status_callback(
             executor_status(
                 status="SUCCEEDED",
@@ -1928,6 +1929,8 @@ def test_right_crab_failure_aborts_original_pickup(status):
     bridge.navigation_command_callback(
         fine_alignment_message("BALL_PICKUP_CRAB_RIGHT")
     )
+    assert bridge.active_motion_id == "pickup_fine_to_crab_right_0"
+    complete_active_motion(bridge)
 
     bridge.executor_status_callback(
         executor_status(
@@ -2238,3 +2241,455 @@ def test_camera_transition_cannot_start_while_line_motion_is_running():
     assert len(bridge.executor_request_publisher.messages) == 1
     assert decoded_messages(bridge.motion_status_publisher)[-1]["error_code"] == "REJECTED_BUSY"
     assert bridge.queued_request_id is None
+
+
+@pytest.mark.parametrize("stage", ["INITIAL", "FINE"])
+def test_close_ball_backward_runs_once_per_checkpoint_and_preserves_pickup_tail(stage):
+    bridge = FakeBridge()
+    if stage == "FINE":
+        enter_pickup_fine_alignment(bridge)
+    else:
+        bridge.navigation_command_callback(navigation_message(action="PICKUP_NOW"))
+        bridge._check_atomic_dwell(bridge.pickup_initial_align_dwell_until)
+    original_tail = bridge.active_pickup_sequence
+    original_index = bridge.active_sequence_index
+    action = f"BALL_PICKUP_{stage}_SEARCH_BACKWARD"
+    motion = "pickup_lost_ball_backward_1"
+    for command_id in (8200, 8202):
+        before = len(bridge.executor_request_publisher.messages)
+        command = fine_alignment_message(action, command_id)
+        bridge.navigation_command_callback(command)
+        assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == motion
+        # Repeated or newly numbered requests while running cannot queue more retreat.
+        bridge.navigation_command_callback(command)
+        bridge.navigation_command_callback(fine_alignment_message(action, command_id + 1))
+        assert len(bridge.executor_request_publisher.messages) == before + 1
+        bridge.executor_status_callback(executor_status(status="SUCCEEDED", motion_id=motion))
+        deadline = bridge.active_dwell_until
+        assert deadline is not None
+        bridge._check_atomic_dwell(deadline - 0.001)
+        assert not bridge.pickup_initial_align_waiting
+        assert not bridge.pickup_fine_align_waiting
+        bridge._check_atomic_dwell(deadline)
+        assert bridge.pickup_initial_align_waiting is (stage == "INITIAL")
+        assert bridge.pickup_fine_align_waiting is (stage == "FINE")
+        assert len(bridge.executor_request_publisher.messages) == before + 1
+        assert bridge.active_pickup_sequence == original_tail
+        assert bridge.active_sequence_index == original_index
+        assert not bridge.pickup_fixed_sequence_started
+    if stage == "FINE":
+        # Reacquisition and centering still run the separate mandatory pre-grasp backward.
+        continue_pickup_after_fine_alignment(bridge, command_id=8300)
+        assert bridge.active_motion_id == "pickup_pre_backward_camera_down"
+        complete_pickup_motion_and_dwell(bridge, "pickup_pre_backward_camera_down")
+        assert bridge.active_motion_id == "pickup"
+
+
+@pytest.mark.parametrize("stage", ["INITIAL", "FINE"])
+@pytest.mark.parametrize("status", ["FAILED", "TIMEOUT", "CANCELLED"])
+def test_close_ball_backward_failure_does_not_repeat_or_start_grasp(stage, status):
+    bridge = FakeBridge()
+    if stage == "FINE":
+        enter_pickup_fine_alignment(bridge)
+    else:
+        bridge.navigation_command_callback(navigation_message(action="PICKUP_NOW"))
+        bridge._check_atomic_dwell(bridge.pickup_initial_align_dwell_until)
+    bridge.navigation_command_callback(fine_alignment_message(
+        f"BALL_PICKUP_{stage}_SEARCH_BACKWARD", 8200,
+    ))
+    before = len(bridge.executor_request_publisher.messages)
+    complete_active_motion(bridge, status=status)
+    assert not bridge.motion_in_progress
+    assert bridge.active_dwell_until is None
+    bridge.navigation_command_callback(fine_alignment_message(
+        f"BALL_PICKUP_{stage}_SEARCH_BACKWARD", 8201,
+    ))
+    assert len(bridge.executor_request_publisher.messages) == before
+
+
+@pytest.mark.parametrize("direction", ["LEFT", "RIGHT"])
+@pytest.mark.parametrize("approach,prepare", [
+    ("GOAL_CAMERA_90_FORWARD", "goal_forward_to_crab_right_90"),
+    ("GOAL_CAMERA_90_FORWARD_1", "goal_forward_to_crab_right_90"),
+    ("GOAL_CAMERA_90_FORWARD_2", "goal_forward_to_crab_right_90"),
+    *[(f"GOAL_CAMERA90_FINE_FORWARD_{count}", "goal_fine_to_default_90")
+      for count in range(1, 5)],
+])
+def test_goal_crab_prepares_after_completed_approach(approach, prepare, direction):
+    if direction == "RIGHT" and approach.startswith("GOAL_CAMERA90_FINE_FORWARD_"):
+        prepare = "goal_fine_to_crab_right_90"
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(navigation_message(action=approach, command_id=1))
+    complete_active_motion(bridge)
+    action = f"GOAL_CAMERA90_CRAB_{direction}"
+    crab = f"goal_camera_90_crab_{direction.lower()}"
+    bridge.navigation_command_callback(navigation_message(action=action, command_id=2))
+    if direction == "RIGHT":
+        assert bridge.active_motion_id == prepare
+        assert bridge.active_action == action
+        complete_active_motion(bridge)
+        assert bridge.active_motion_id == crab
+        assert bridge.active_dwell_until is None
+        assert not any(m["command_id"] == 2 and m["status"] == "SUCCEEDED"
+                       for m in decoded_messages(bridge.motion_status_publisher))
+
+        # A duplicate preparation completion cannot finish the crab command.
+        bridge.executor_status_callback(executor_status(
+            status="SUCCEEDED", command_id=2, request_id=2, motion_id=prepare,
+        ))
+    assert bridge.motion_in_progress and bridge.active_motion_id == crab
+    complete_active_motion(bridge)
+    terminal = decoded_messages(bridge.motion_status_publisher)[-1]
+    assert (terminal["action"], terminal["status"]) == (action, "SUCCEEDED")
+
+    # Consecutive crab corrections do not repeat the approach preparation.
+    bridge.navigation_command_callback(navigation_message(action=action, command_id=3))
+    assert bridge.active_motion_id == crab
+    expected = [bridge.motion_id_for_action(approach)]
+    if direction == "RIGHT":
+        expected.append(prepare)
+    assert [m["motion_id"] for m in decoded_messages(bridge.executor_request_publisher)] == expected + [crab, crab]
+
+
+@pytest.mark.parametrize("approaches,prepare", [
+    (["GOAL_CAMERA_90_FORWARD", "GOAL_CAMERA90_FINE_FORWARD_2"], "goal_fine_to_crab_right_90"),
+    (["GOAL_CAMERA90_FINE_FORWARD_2", "GOAL_CAMERA_90_FORWARD"], "goal_forward_to_crab_right_90"),
+])
+def test_goal_crab_uses_latest_completed_gait(approaches, prepare):
+    bridge = FakeBridge()
+    for command_id, action in enumerate(approaches, 1):
+        bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+        complete_active_motion(bridge)
+    bridge.navigation_command_callback(navigation_message(action="GOAL_CAMERA90_CRAB_RIGHT", command_id=3))
+    assert bridge.active_motion_id == prepare
+
+
+@pytest.mark.parametrize("approach", ["GOAL_CAMERA_90_FORWARD", "GOAL_CAMERA90_FINE_FORWARD_1"])
+@pytest.mark.parametrize("status,error_code", [
+    ("FAILED", "SDK_POSITION_TIMEOUT"), ("TIMEOUT", "TIMEOUT"),
+    ("CANCELLED", ""), ("REJECTED", "MOTION_NOT_FOUND"),
+    *[("FAILED", code) for code in sorted(RECOVERABLE_MOTOR_ERROR_CODES)],
+])
+def test_goal_crab_preparation_failure_never_starts_crab(approach, status, error_code):
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(navigation_message(action=approach, command_id=1))
+    complete_active_motion(bridge)
+    bridge.navigation_command_callback(navigation_message(action="GOAL_CAMERA90_CRAB_RIGHT", command_id=2))
+    complete_active_motion(bridge, status, error_code)
+    assert not bridge.motion_in_progress
+    assert "goal_camera_90_crab_right" not in [
+        m["motion_id"] for m in decoded_messages(bridge.executor_request_publisher)
+    ]
+    terminal = decoded_messages(bridge.motion_status_publisher)[-1]
+    assert terminal["status"] == status
+    assert terminal["error_code"] == error_code
+
+
+def test_goal_crab_waits_for_completed_approach_and_locks_preparation():
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(navigation_message(action="GOAL_CAMERA_90_FORWARD", command_id=1))
+    bridge.navigation_command_callback(navigation_message(action="GOAL_CAMERA90_CRAB_RIGHT", command_id=2))
+    assert decoded_messages(bridge.motion_status_publisher)[-1]["error_code"] == "REJECTED_BUSY"
+    assert len(bridge.executor_request_publisher.messages) == 1
+    complete_active_motion(bridge)
+    bridge.navigation_command_callback(navigation_message(action="GOAL_CAMERA90_CRAB_RIGHT", command_id=3))
+    bridge.navigation_command_callback(navigation_message(action="STRAIGHT", command_id=4))
+    assert decoded_messages(bridge.motion_status_publisher)[-1]["error_code"] == "ATOMIC_SEQUENCE_LOCKED"
+    assert bridge.active_motion_id == "goal_forward_to_crab_right_90"
+    assert bridge.queued_request_id is None
+
+
+@pytest.mark.parametrize("intervening", ["GOAL_CAMERA90_TURN_LEFT_1", "GOAL_CAMERA90_BACKWARD_1"])
+@pytest.mark.parametrize("direction", ["LEFT", "RIGHT"])
+@pytest.mark.parametrize("approach", ["GOAL_CAMERA_90_FORWARD", "GOAL_CAMERA90_FINE_FORWARD_1"])
+def test_goal_crab_does_not_prepare_from_old_forward_history(intervening, direction, approach):
+    bridge = FakeBridge()
+    for command_id, action in enumerate([approach, intervening], 1):
+        bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+        complete_active_motion(bridge)
+    bridge.navigation_command_callback(navigation_message(action=f"GOAL_CAMERA90_CRAB_{direction}", command_id=3))
+    assert bridge.active_motion_id == f"goal_camera_90_crab_{direction.lower()}"
+
+
+@pytest.mark.parametrize("direction", ["LEFT", "RIGHT"])
+def test_pickup_fine_to_crab_preserves_left_and_prepares_right_once(direction):
+    bridge = FakeBridge()
+    enter_pickup_fine_alignment(bridge)
+    before = len(bridge.executor_request_publisher.messages)
+    action = f"BALL_PICKUP_CRAB_{direction}"
+    crab = f"pickup_crab_{direction.lower()}_0"
+    prepare = "pickup_fine_to_crab_right_0"
+    bridge.navigation_command_callback(fine_alignment_message(action))
+    if direction == "RIGHT":
+        assert bridge.active_motion_id == prepare
+        bridge.executor_status_callback(executor_status(
+            status="SUCCEEDED", motion_id="pickup_fine_forward_0",
+        ))
+        assert bridge.active_motion_id == prepare
+        bridge.navigation_command_callback(navigation_message(action="SHOT", command_id=9000))
+        assert decoded_messages(bridge.motion_status_publisher)[-1]["error_code"] == "ATOMIC_SEQUENCE_LOCKED"
+        complete_active_motion(bridge)
+        assert bridge.active_dwell_until is None
+        bridge.executor_status_callback(executor_status(status="SUCCEEDED", motion_id=prepare))
+    assert bridge.active_motion_id == crab
+    complete_active_motion(bridge)
+    assert bridge.active_dwell_until is not None
+    bridge._check_atomic_dwell(bridge.active_dwell_until)
+    assert bridge.pickup_fine_align_waiting
+    bridge.navigation_command_callback(fine_alignment_message(action, 9001))
+    assert bridge.active_motion_id == crab
+    requests = decoded_messages(bridge.executor_request_publisher)[before:]
+    assert [r["motion_id"] for r in requests] == (
+        [prepare, crab, crab] if direction == "RIGHT" else [crab, crab]
+    )
+    assert all((r["command_id"], r["event_id"]) == (8000, 8) for r in requests)
+
+
+@pytest.mark.parametrize("status,error_code", [
+    ("FAILED", "MOTION_FAILED"), ("TIMEOUT", "TIMEOUT"),
+    ("CANCELLED", ""), ("REJECTED", "INVALID_MOTION"),
+    *[("FAILED", code) for code in sorted(RECOVERABLE_MOTOR_ERROR_CODES)],
+])
+def test_pickup_fine_right_crab_preparation_failure_stops(status, error_code):
+    bridge = FakeBridge()
+    enter_pickup_fine_alignment(bridge)
+    bridge.navigation_command_callback(fine_alignment_message("BALL_PICKUP_CRAB_RIGHT"))
+    assert bridge.active_motion_id == "pickup_fine_to_crab_right_0"
+    complete_active_motion(bridge, status, error_code)
+    assert not bridge.motion_in_progress
+    assert bridge.pending_pickup_crab_motion_id is None
+    assert "pickup_crab_right_0" not in [
+        r["motion_id"] for r in decoded_messages(bridge.executor_request_publisher)
+    ]
+    assert decoded_messages(bridge.motion_status_publisher)[-1]["status"] == status
+
+
+@pytest.mark.parametrize("intervening", ["BALL_PICKUP_FINE_SEARCH_LEFT", "BALL_PICKUP_FINE_SEARCH_BACKWARD"])
+def test_pickup_right_crab_does_not_prepare_from_old_fine_history(intervening):
+    bridge = FakeBridge()
+    enter_pickup_fine_alignment(bridge)
+    bridge.navigation_command_callback(fine_alignment_message(intervening))
+    complete_active_motion(bridge)
+    bridge._check_atomic_dwell(bridge.active_dwell_until)
+    bridge.navigation_command_callback(fine_alignment_message("BALL_PICKUP_CRAB_RIGHT", 8002))
+    assert bridge.active_motion_id == "pickup_crab_right_0"
+
+
+@pytest.mark.parametrize("source", ["ball", "hurdle"])
+@pytest.mark.parametrize("distance,action,motion_name", [
+    (0.549, "STRAIGHT_0", "찐미세45도-4"),
+    (0.550, "STRAIGHT_0", "찐미세45도-4"),
+    (0.550001, "STRAIGHT", "찐전진실험45도(4회)"),
+    (0.570, "STRAIGHT", "찐전진실험45도(4회)"),
+    (0.700, "STRAIGHT", "찐전진실험45도(4회)"),
+])
+def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
+    source, distance, action, motion_name,
+):
+    """Exercise normal approach and the default close-Ball pickup checkpoint."""
+    from pathlib import Path
+    import yaml
+
+    planner = MotionDecisionPlanner()
+    sample = {
+        "detected": True, "confirmation_confirmed": True,
+        "confidence": 0.9, "depth_valid": True, "depth_age_sec": 0.05,
+        "distance_m": distance, "depth_m": distance,
+        "bearing_deg": 0.0, "steering_angle_deg": 0.0,
+        "offset_x_px": 0, "offset_x_norm": 0.0,
+        "bottom_distance_px": 200, "hurdle_angle_deg": 0.0,
+        "go_now": False, "pickup_ready": False, "pickup_now": False,
+    }
+    decision = planner.plan("AUTO", {source: sample}, 0.1)
+    bridge = FakeBridge()
+    if source == "ball" and distance <= 0.550:
+        assert decision.action == "PICKUP_NOW"
+        bridge.navigation_command_callback(navigation_message(action="PICKUP_NOW"))
+        assert_pickup_initial_alignment_started(bridge)
+        decision = planner.plan_ball_pickup_initial_alignment(sample)
+        assert decision.valid
+        assert decision.source_command["pickup_approach_motion"] == action
+        continue_pickup_after_initial_alignment(bridge, approach_motion=action)
+    else:
+        assert decision.valid
+        assert decision.action == action
+        bridge.navigation_command_callback(navigation_message(
+            source=decision.source, action=decision.action,
+            source_command=decision.source_command,
+        ))
+    request = decoded_messages(bridge.executor_request_publisher)[-1]
+    root = Path(__file__).resolve().parents[3]
+    aliases = yaml.safe_load((root / "src/irc_step_motion_executor/config/motion_aliases.yaml").read_text())["motion_aliases"]
+    assert aliases[request["motion_id"]] == motion_name
+    runtime = json.loads((root / "artifacts/robot_motions_runtime.json").read_text())
+    assert motion_name in {motion["name"] for motion in runtime["motions"]}
+
+
+@pytest.mark.parametrize("source", ["line", "goal", None])
+def test_object_approach_mapping_does_not_change_other_sources(source):
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(navigation_message(source=source, action="STRAIGHT"))
+    assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == "line_forward_6"
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(navigation_message(source=source, action="STRAIGHT_0"))
+    assert bridge.executor_request_publisher.messages == []
+
+
+def hurdle_depth_fallback_message(command_id=8000):
+    planner = MotionDecisionPlanner()
+    decision = planner.plan("AUTO", {"hurdle": {
+        "detected": True, "confirmation_confirmed": True,
+        "confidence": 0.9, "bottom_distance_px": 100,
+        "depth_valid": False, "depth_m": None, "hurdle_angle_deg": None,
+    }}, 0.1)
+    assert decision.action == "GO" and decision.requires_ack and decision.valid
+    assert decision.source_command["depth_fallback_requested"] is True
+    return navigation_message(
+        source="hurdle", action=decision.action, command_id=command_id,
+        source_command=decision.source_command,
+    )
+
+
+def test_hurdle_depth_loss_runs_fine_once_then_three_second_dwell_then_hurdle(monkeypatch):
+    clock = [10.0]
+    monkeypatch.setattr("mission_control.motion_command_bridge_node.time.monotonic", lambda: clock[0])
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(hurdle_depth_fallback_message())
+    requests = lambda: decoded_messages(bridge.executor_request_publisher)
+    assert [r["motion_id"] for r in requests()] == ["pickup_fine_forward_0"]
+    assert bridge.active_dwell_until is None
+    assert bridge.active_action == "GO"
+    assert bridge.motion_in_progress
+    clock[0] = 20.0
+    complete_active_motion(bridge)
+    assert bridge.active_dwell_until == 23.0
+    assert bridge.active_motion_id == bridge.HURDLE_PRE_GO_DWELL_MARKER
+    bridge.executor_status_callback(executor_status(
+        status="SUCCEEDED", motion_id="pickup_fine_forward_0",
+    ))
+    assert bridge.active_dwell_until == 23.0
+    bridge.navigation_command_callback(hurdle_depth_fallback_message(command_id=8001))
+    assert len(requests()) == 1
+    assert decoded_messages(bridge.motion_status_publisher)[-1]["error_code"] == "ATOMIC_SEQUENCE_LOCKED"
+    bridge._check_atomic_dwell(22.999)
+    assert len(requests()) == 1
+    bridge._check_atomic_dwell(23.0)
+    bridge._check_atomic_dwell(24.0)
+    assert [r["motion_id"] for r in requests()] == ["pickup_fine_forward_0", "hurdle"]
+    assert not any(m["status"] == "SUCCEEDED" for m in decoded_messages(bridge.motion_status_publisher))
+    complete_active_motion(bridge)
+    assert not bridge.motion_in_progress
+    assert not bridge.hurdle_depth_fine_completed
+    assert decoded_messages(bridge.motion_status_publisher)[-1]["status"] == "SUCCEEDED"
+
+
+@pytest.mark.parametrize("status,error_code", [
+    ("FAILED", "SDK_COMMUNICATION_ERROR"), ("TIMEOUT", "TIMEOUT"),
+    ("CANCELLED", ""), ("REJECTED", "INVALID_MOTION"),
+])
+def test_failed_hurdle_fine_step_never_starts_hurdle(status, error_code):
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(hurdle_depth_fallback_message())
+    complete_active_motion(bridge, status, error_code)
+    bridge._check_atomic_dwell(1e12)
+    assert not bridge.motion_in_progress
+    assert not bridge.hurdle_depth_fine_completed
+    assert [r["motion_id"] for r in decoded_messages(bridge.executor_request_publisher)] == ["pickup_fine_forward_0"]
+
+
+def test_missing_hurdle_motion_is_not_success_and_retry_does_not_repeat_fine():
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(hurdle_depth_fallback_message())
+    complete_active_motion(bridge)
+    bridge._check_atomic_dwell(bridge.active_dwell_until)
+    complete_active_motion(bridge, "REJECTED", "INVALID_MOTION")
+    assert decoded_messages(bridge.motion_status_publisher)[-1]["status"] == "REJECTED"
+    bridge.navigation_command_callback(hurdle_depth_fallback_message(command_id=8001))
+    assert [r["motion_id"] for r in decoded_messages(bridge.executor_request_publisher)] == [
+        "pickup_fine_forward_0", "hurdle",
+    ]
+    bridge._check_atomic_dwell(bridge.active_dwell_until)
+    assert [r["motion_id"] for r in decoded_messages(bridge.executor_request_publisher)] == [
+        "pickup_fine_forward_0", "hurdle", "hurdle",
+    ]
+
+
+def test_hurdle_fallback_waits_until_current_motion_finishes():
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(navigation_message(action="STRAIGHT", command_id=7999))
+    bridge.navigation_command_callback(hurdle_depth_fallback_message())
+    assert [r["motion_id"] for r in decoded_messages(bridge.executor_request_publisher)] == ["line_forward_6"]
+    assert decoded_messages(bridge.motion_status_publisher)[-1]["error_code"] == "REJECTED_BUSY"
+
+
+@pytest.mark.parametrize("depth,motion_id", [
+    (0.550, "ball_general_fine_forward_8"),
+    (0.550001, "line_forward_4"), (0.7, "line_forward_4"),
+])
+@pytest.mark.parametrize("angle", [None, 20.0])
+def test_close_hurdle_valid_depth_selects_actual_motion_without_turning(depth, motion_id, angle):
+    decision = MotionDecisionPlanner().plan("AUTO", {"hurdle": {
+        "detected": True, "confirmation_confirmed": True,
+        "confidence": 0.9, "bottom_distance_px": 100,
+        "depth_valid": True, "depth_m": depth, "hurdle_angle_deg": angle,
+    }}, 0.1)
+    assert decision.valid and not decision.requires_ack
+    assert decision.source_command["depth_fallback_requested"] is False
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(navigation_message(
+        source=decision.source, action=decision.action,
+        source_command=decision.source_command,
+    ))
+    assert [request["motion_id"] for request in decoded_messages(bridge.executor_request_publisher)] == [motion_id]
+
+
+@pytest.mark.parametrize("source", [None, "hurdle"])
+def test_every_normal_go_holds_three_seconds_before_hurdle(monkeypatch, source):
+    clock = [10.0]
+    monkeypatch.setattr("mission_control.motion_command_bridge_node.time.monotonic", lambda: clock[0])
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(navigation_message(action="GO", source=source))
+    assert bridge.active_dwell_until == 13.0
+    assert bridge.active_motion_id == bridge.HURDLE_PRE_GO_DWELL_MARKER
+    assert not bridge.executor_request_publisher.messages
+    status = decoded_messages(bridge.motion_status_publisher)[-1]
+    assert status["status"] == "RUNNING" and status["action"] == "GO"
+    bridge.navigation_command_callback(navigation_message(action="STRAIGHT", command_id=8001))
+    assert decoded_messages(bridge.motion_status_publisher)[-1]["error_code"] == "ATOMIC_SEQUENCE_LOCKED"
+    bridge._check_atomic_dwell(12.999)
+    assert not bridge.executor_request_publisher.messages
+    bridge._check_atomic_dwell(13.0)
+    bridge._check_atomic_dwell(14.0)
+    requests = decoded_messages(bridge.executor_request_publisher)
+    assert [r["motion_id"] for r in requests] == ["hurdle"]
+    assert bridge.motion_in_progress
+    assert not any(s["status"] == "SUCCEEDED" for s in decoded_messages(bridge.motion_status_publisher))
+    complete_active_motion(bridge)
+    assert not bridge.motion_in_progress
+    assert decoded_messages(bridge.motion_status_publisher)[-1]["status"] == "SUCCEEDED"
+
+
+@pytest.mark.parametrize("fallback", [False, True])
+def test_each_go_retry_has_a_new_full_three_second_hold(monkeypatch, fallback):
+    clock = [10.0]
+    monkeypatch.setattr("mission_control.motion_command_bridge_node.time.monotonic", lambda: clock[0])
+    bridge = FakeBridge()
+    def request(command_id):
+        return (hurdle_depth_fallback_message(command_id) if fallback else
+                navigation_message(action="GO", source="hurdle", command_id=command_id))
+    bridge.navigation_command_callback(request(8000))
+    if fallback:
+        clock[0] = 20.0
+        complete_active_motion(bridge)
+    clock[0] = bridge.active_dwell_until
+    bridge._check_atomic_dwell(clock[0])
+    complete_active_motion(bridge, "REJECTED", "INVALID_MOTION")
+    clock[0] = 30.0
+    bridge.navigation_command_callback(request(8001))
+    assert bridge.active_dwell_until == 33.0
+    before = len(bridge.executor_request_publisher.messages)
+    bridge._check_atomic_dwell(32.999)
+    assert len(bridge.executor_request_publisher.messages) == before
+    bridge._check_atomic_dwell(33.0)
+    motions = [r["motion_id"] for r in decoded_messages(bridge.executor_request_publisher)]
+    assert motions == (["pickup_fine_forward_0"] if fallback else []) + ["hurdle", "hurdle"]

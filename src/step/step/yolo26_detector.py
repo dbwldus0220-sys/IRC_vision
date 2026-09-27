@@ -34,8 +34,12 @@ from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import Image
 from std_msgs.msg import String
 
+from step.ball_navigation_planner import valid_ball_ground_steering
 from step.depth_frame_cache import image_stamp_ns
-from step.line_navigation_planner import numbered_turn_motion_metadata
+from step.line_navigation_planner import (
+    LINE_RECOVERY_TURN_ANGLES_DEG,
+    numbered_turn_motion_metadata,
+)
 from step.tensorrt_backend import TensorRTBackend
 
 
@@ -1034,7 +1038,8 @@ class Yolo26Detector(Node):
             "pickup_pre_backward_camera_down": "PICKUP / BACKWARD (2 CYCLES)",
             "pickup": "PICKUP / GRASP",
             "pickup_grasp_check_pose": "PICKUP / CHECK BALL",
-            "pickup_retreat_2": "PICKUP / BACKWARD (3 CYCLES)",
+            "pickup_retreat_2": "PICKUP / BACKWARD (2 CYCLES)",
+            "pickup_lost_ball_backward_1": "BALL REACQUIRE / BACKWARD (1 CYCLE)",
             "pickup_first_backward_turn_right": "PICKUP / BACKWARD + TURN RIGHT",
             "pickup_second_backward_turn_left": "PICKUP / BACKWARD + TURN LEFT",
             "goal_camera_90_backward_1": "GOAL / BACKWARD (1 CYCLE)",
@@ -1630,6 +1635,9 @@ class Yolo26Detector(Node):
                 )
                 if separator and base_label is not None and suffix_text.isdigit():
                     angle = suffix_angles.get(int(suffix_text))
+                    if base_action.startswith("RECOVER_") and int(suffix_text) == 4:
+                        direction = "LEFT" if base_action.endswith("TURN_LEFT") else "RIGHT"
+                        angle = int(abs(LINE_RECOVERY_TURN_ANGLES_DEG[direction]))
                     if angle is not None:
                         label = f"{base_label} ({angle} DEG)"
             return (label, (130, 105, 0)) if label is not None else None
@@ -1838,28 +1846,6 @@ class Yolo26Detector(Node):
                 )
 
         panel_width = min(390, max(250, width - 24))
-        panel_height = 505
-        panel_x = max(12, width - panel_width - 12)
-        panel_y = 44
-        panel_bottom = min(height - 8, panel_y + panel_height)
-        overlay = image.copy()
-        cv2.rectangle(
-            overlay,
-            (panel_x, panel_y),
-            (panel_x + panel_width, panel_bottom),
-            (20, 20, 20),
-            -1,
-        )
-        image[panel_y:panel_bottom, panel_x:panel_x + panel_width] = (
-            cv2.addWeighted(
-                overlay[panel_y:panel_bottom, panel_x:panel_x + panel_width],
-                0.72,
-                image[panel_y:panel_bottom, panel_x:panel_x + panel_width],
-                0.28,
-                0.0,
-            )
-        )
-
         if info is None:
             stamp_delta = getattr(self, "_ball_info_stamp_delta_ms", None)
             analyzer_badge = self._confirmation_badge(recent_info)
@@ -1898,6 +1884,24 @@ class Yolo26Detector(Node):
             )
             bearing = self._number(info, "bearing_deg")
             steering_angle = self._number(info, "steering_angle_deg")
+            command = (
+                decision.get("source_command", {})
+                if decision and decision.get("source") == "ball" else {}
+            )
+            if not isinstance(command, dict):
+                command = {}
+            phase = str(decision.get("phase", "")) if decision else ""
+            action = str(decision.get("action", "")) if decision else ""
+            pickup_pose = (
+                phase.startswith("BALL_PICKUP")
+                or action.startswith(("BALL_PICKUP", "PICKUP"))
+                or command.get("steering_source") == "head_down_image_angle"
+            )
+            ground_steering = (
+                None if pickup_pose else valid_ball_ground_steering(info)
+            )
+            control_steering = self._number(command, "steering_error_deg")
+            angle_source = str(command.get("steering_source", "WAIT CHECK"))
             lateral = self._number(info, "lateral_offset_m")
             direction = str(info.get("horizontal_direction", "UNKNOWN"))
             state = str(info.get("state", "UNKNOWN"))
@@ -1946,17 +1950,42 @@ class Yolo26Detector(Node):
                 + self._metric_text(offset_norm, "", 3, signed=True),
                 "Bearing     : "
                 + self._metric_text(bearing, "deg", 1, signed=True),
-                "Path angle  : "
+                "Image angle : "
                 + self._metric_text(
                     steering_angle,
                     "deg",
                     1,
                     signed=True,
                 ),
+                "Ground steer: " + self._metric_text(
+                    ground_steering, "deg", 2, signed=True),
+                "Steering    : " + self._metric_text(
+                    control_steering, "deg", 2, signed=True),
+                "Angle source: " + {
+                    "ground_steering_angle_deg": "GROUND / APPROACH",
+                    "head_down_image_angle": "IMAGE / HEAD DOWN",
+                    "legacy_image_angle": "LEGACY IMAGE",
+                }.get(angle_source, "WAIT CHECK"),
                 "Lateral X   : "
                 + self._metric_text(lateral, "m", 3, signed=True),
                 f"Camera info : {'OK' if camera_ready else 'MISSING'}",
             ]
+
+        panel_x = max(12, width - panel_width - 12)
+        panel_y = 44
+        row_spacing = min(23.0, max(1.0, (height - panel_y - 22) / len(rows)))
+        panel_bottom = min(height - 8, int(panel_y + 14 + len(rows) * row_spacing))
+        overlay = image.copy()
+        cv2.rectangle(
+            overlay, (panel_x, panel_y),
+            (panel_x + panel_width, panel_bottom), (20, 20, 20), -1,
+        )
+        panel_slice = np.s_[
+            panel_y:panel_bottom, panel_x:panel_x + panel_width,
+        ]
+        image[panel_slice] = cv2.addWeighted(
+            overlay[panel_slice], 0.72, image[panel_slice], 0.28, 0.0,
+        )
 
         for index, row in enumerate(rows):
             is_title = index == 0
@@ -1964,9 +1993,9 @@ class Yolo26Detector(Node):
             cv2.putText(
                 image,
                 row,
-                (panel_x + 12, panel_y + 25 + index * 23),
+                (panel_x + 12, int(panel_y + 5 + (index + 1) * row_spacing)),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.56 if is_title else 0.5,
+                (0.56 if is_title else 0.5) * min(1.0, row_spacing / 23.0),
                 color,
                 2 if is_title else 1,
                 cv2.LINE_AA,
@@ -2030,30 +2059,6 @@ class Yolo26Detector(Node):
         info = self._fresh_line_info()
         self._draw_line_path_geometry(image, info)
         panel_width = min(410, max(270, width - 24))
-        panel_height = 334
-        panel_x = max(12, width - panel_width - 12)
-        panel_y = 44
-        panel_bottom = min(height - 8, panel_y + panel_height)
-        overlay = image.copy()
-        cv2.rectangle(
-            overlay,
-            (panel_x, panel_y),
-            (panel_x + panel_width, panel_bottom),
-            (20, 20, 20),
-            -1,
-        )
-        panel_slice = np.s_[
-            panel_y:panel_bottom,
-            panel_x:panel_x + panel_width,
-        ]
-        image[panel_slice] = cv2.addWeighted(
-            overlay[panel_slice],
-            0.72,
-            image[panel_slice],
-            0.28,
-            0.0,
-        )
-
         planner_source = (
             str(decision.get("source", "none")).upper()
             if decision is not None
@@ -2094,10 +2099,15 @@ class Yolo26Detector(Node):
                 "LINE METRICS",
                 f"Planner     : {planner_source} / {planner_action}",
                 "State       : TRACKING",
-                "Heading     : "
+                "Image head  : "
                 + self._metric_text(heading, "deg", 1, signed=True),
                 "Offset norm : "
                 + self._metric_text(offset, "", 3, signed=True),
+                "Ref depth   : " + self._metric_text(
+                    self._number(info, "nearest_line_depth_m"), "m", 3),
+                "Ref forward : " + self._metric_text(
+                    self._number(info, "nearest_line_ground_forward_distance_m"),
+                    "m", 3),
                 "Turn preview: "
                 + self._metric_text(turn, "deg", 1, signed=True),
                 "Quality     : " + self._metric_text(quality, "", 3),
@@ -2122,14 +2132,51 @@ class Yolo26Detector(Node):
                     ]
                 )
 
+        ground_valid = bool(info and info.get("ground_projection_valid", False))
+        ground_rows = []
+        for label, key, unit, digits in (
+            ("Ground head", "ground_heading_error_deg", "deg", 2),
+            ("Ground off ", "ground_lateral_offset_m", "m", 4),
+            ("Steering   ", "ground_steering_angle_deg", "deg", 2),
+            ("Ground RMSE", "ground_fit_rmse_m", "m", 4),
+        ):
+            value = self._number(info, key) if ground_valid else None
+            ground_rows.append(
+                label + " : " + self._metric_text(
+                    value, unit, digits, signed=key != "ground_fit_rmse_m",
+                )
+            )
+        rows[5:5] = ground_rows
+
+        panel_x = max(12, width - panel_width - 12)
+        panel_y = 44
+        # Grow with the rows; compact spacing also fits 640x360 debug frames.
+        row_spacing = min(24.0, max(1.0, (height - panel_y - 22) / len(rows)))
+        panel_height = int(14 + len(rows) * row_spacing)
+        panel_bottom = min(height - 8, panel_y + panel_height)
+        overlay = image.copy()
+        cv2.rectangle(
+            overlay,
+            (panel_x, panel_y),
+            (panel_x + panel_width, panel_bottom),
+            (20, 20, 20),
+            -1,
+        )
+        panel_slice = np.s_[
+            panel_y:panel_bottom, panel_x:panel_x + panel_width,
+        ]
+        image[panel_slice] = cv2.addWeighted(
+            overlay[panel_slice], 0.72, image[panel_slice], 0.28, 0.0,
+        )
+
         for index, row in enumerate(rows):
             title = index == 0
             cv2.putText(
                 image,
                 row,
-                (panel_x + 12, panel_y + 25 + index * 24),
+                (panel_x + 12, int(panel_y + 5 + (index + 1) * row_spacing)),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.56 if title else 0.5,
+                (0.56 if title else 0.5) * min(1.0, row_spacing / 24.0),
                 (255, 255, 0) if title else (245, 245, 245),
                 2 if title else 1,
                 cv2.LINE_AA,

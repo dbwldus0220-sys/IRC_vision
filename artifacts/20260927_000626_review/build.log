@@ -1,0 +1,26 @@
+[  3%] Building CXX object CMakeFiles/catalog_only_core.dir/src/catalog_only_core.cpp.o
+[  6%] Building CXX object robot_motion_sdk/CMakeFiles/motion_core.dir/motion_pattern.cpp.o
+[ 10%] Linking CXX static library libcatalog_only_core.a
+[ 10%] Built target catalog_only_core
+[ 13%] Building CXX object CMakeFiles/robot_motion_runtime_config.dir/src/robot_motion_runtime_config.cpp.o
+[ 16%] Linking CXX static library librobot_motion_runtime_config.a
+[ 16%] Built target robot_motion_runtime_config
+[ 20%] Building CXX object robot_motion_sdk/CMakeFiles/motion_core.dir/motion_callback.cpp.o
+[ 26%] Built target sdk_executor_core
+[ 33%] Built target simulated_motion_backend
+[ 36%] Building CXX object CMakeFiles/sdk_executor_driver.dir/src/startup_pose_catalog.cpp.o
+[ 40%] Linking CXX static library libsdk_executor_driver.a
+[ 46%] Built target sdk_executor_driver
+[ 53%] Built target motion_backend_factory
+[ 56%] Linking CXX static library libmotion_core.a
+[ 56%] Built target motion_core
+[ 63%] Built target motion_player_core
+[ 66%] Building CXX object robot_motion_sdk/CMakeFiles/robot_control.dir/dynamixel_controller.cpp.o
+[ 70%] Linking CXX static library librobot_control.a
+[ 80%] Built target robot_control
+[ 86%] Built target robot_motion_player_backend
+[ 93%] Built target production_robot_motion_runtime_factory
+Consolidate compiler generated dependencies of target sdk_motion_executor
+[ 96%] Building CXX object CMakeFiles/sdk_motion_executor.dir/src/sdk_executor_node.cpp.o
+[100%] Linking CXX executable sdk_motion_executor
+[100%] Built target sdk_motion_executor

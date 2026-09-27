@@ -468,7 +468,9 @@ def test_ball_top_loss_banner_shows_forward_search_before_side():
 @pytest.mark.parametrize('motion_id,expected', [
     ('pickup_fine_forward_0', 'PICKUP / FINE FORWARD'),
     ('pickup_pre_backward_camera_down', 'PICKUP / BACKWARD (2 CYCLES)'),
+    ('pickup_retreat_2', 'PICKUP / BACKWARD (2 CYCLES)'),
     ('goal_camera_90_backward_1', 'GOAL / BACKWARD (1 CYCLE)'),
+    ('pickup_lost_ball_backward_1', 'BALL REACQUIRE / BACKWARD (1 CYCLE)'),
     ('line_turn_right_2', 'LINE / IN-PLACE TURN RIGHT 2'),
     ('line_recovery_left_3', 'LINE RETURN LEFT 3'),
     ('post_ball_line_turn_left_2', 'LINE ALIGN / IN-PLACE TURN LEFT 2'),
@@ -543,3 +545,11 @@ def test_running_turn_is_drawn_in_every_metrics_mode_even_when_ball_is_lost(metr
     detector._draw_detections(np.zeros((480, 640, 3), dtype=np.uint8), [])
     expected = 'LINE / IN-PLACE TURN RIGHT 2'
     assert labels[-1] == ('BALL LOST | ' + expected if lost else expected)
+
+
+@pytest.mark.parametrize("side", ["LEFT", "RIGHT"])
+@pytest.mark.parametrize("turn,angle", [("LEFT", 30), ("RIGHT", 20)])
+def test_line_recover_banner_uses_fixed_four_repeat_angle(side, turn, angle):
+    banner = Yolo26Detector._action_banner("line", f"RECOVER_{side}_TURN_{turn}_4")
+    assert banner is not None
+    assert banner[0] == f"RECOVER {side} / TURN {turn} ({angle} DEG)"

@@ -1,0 +1,19 @@
+{
+  "source_file": "/home/jet/Downloads/robot_motions(26).json",
+  "source_sha256": "81788c948adf6cf229bf1eb4a65b33f6955ed64b77c4b03c58bb59d260938882",
+  "imported_sha256": {
+    "찐골넣기": "a5cd574c1277e8bfa5d4f2a3a6a24cb239a198295e917c82d899f49b41f04ded",
+    "찐후진실전(1회)": "17081fe0b604bb1ddb60c3ccded49a7840c8d24908ec59e178bcdc48257a3815"
+  },
+  "removed_aliases": [
+    "line_search_left_1",
+    "line_search_right_3"
+  ],
+  "aliases": {
+    "line_search_left_2": "찐제자리좌회전45도-1(2회)",
+    "line_search_right_5": "찐제자리우회전45도-1(5회)",
+    "goal_shot": "찐골넣기",
+    "pickup_retreat_2": "찐후진실전(1회)"
+  },
+  "position_tolerance_deg": 5.0
+}

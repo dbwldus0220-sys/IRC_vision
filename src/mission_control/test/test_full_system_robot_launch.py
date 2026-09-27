@@ -169,5 +169,16 @@ def test_robot_launch_passes_realsense_topic_parameters(
         context,
     )
     assert decision_parameters["goal_control_range_m"] == 2.0
-    assert decision_parameters["pickup_fine_step_distance_m"] == 0.570
-    assert decision_parameters["pickup_fine_align_bottom_distance_px"] == 300
+    assert decision_parameters["pickup_fine_step_distance_m"] == 0.550
+    assert decision_parameters["pickup_fine_align_bottom_distance_px"] == 60
+
+
+def test_robot_launch_waits_for_enter(monkeypatch, tmp_path):
+    description = launch_description(monkeypatch, tmp_path)
+    context = default_context(description)
+    decision = next(
+        entity for entity in description.entities
+        if isinstance(entity, Node)
+        and entity.node_executable == "motion_decision_node"
+    )
+    assert executor_parameters(decision, context)["wait_for_enter"] is True

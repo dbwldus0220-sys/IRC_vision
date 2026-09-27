@@ -1,0 +1,14 @@
+[INFO] [1790433797.255933443] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_RIGHT_4
+[INFO] [1790433799.756474388] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_RIGHT_4
+[INFO] [1790433800.098001698] [motion_decision_node]: BALL raw detection latched; waiting for confirmation after the current motion
+[INFO] [1790433800.806670002] [motion_decision_node]: BALL raw detection lost; releasing pending hold
+[INFO] [1790433800.905894986] [motion_decision_node]: BALL raw detection latched; waiting for confirmation after the current motion
+[INFO] [1790433804.805877615] [motion_decision_node]: BALL confirmation completed; releasing pending hold
+[INFO] [1790433809.582798681] [motion_decision_node]: BALL raw detection latched; waiting for confirmation after the current motion
+[INFO] [1790433810.222078261] [motion_decision_node]: BALL post-motion dwell started: 3.0s after action=BALL_APPROACH_TURN_LEFT_2
+[INFO] [1790433810.227601334] [motion_decision_node]: BALL stationary correction complete; waiting for post-motion dwell before the next approach motion without another same-boundary alignment check
+[INFO] [1790433810.228488171] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_TURN_LEFT_2
+[INFO] [1790433812.080807054] [motion_decision_node]: BALL confirmation completed; releasing pending hold
+[INFO] [1790433814.441019994] [motion_decision_node]: BALL lost during 57-150 cm approach motion; remembering the last Ball side for the motion boundary
+[INFO] [1790433815.561045860] [motion_decision_node]: BALL post-motion dwell started: 3.0s after action=STRAIGHT_2
+[INFO] [1790433815.561936633] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT_2

@@ -16,10 +16,10 @@ class GoalNavigationConfig:
 
     min_confidence: float = 0.55
     control_start_depth_m: float = 2.0
-    score_target_depth_m: float = 0.795
-    score_depth_tolerance_m: float = 0.025
-    score_left_bound_px: float = -40.0
-    score_right_bound_px: float = 100.0
+    score_target_depth_m: float = 0.43
+    score_depth_tolerance_m: float = 0.04
+    score_left_bound_px: float = -70.0
+    score_right_bound_px: float = 70.0
 
 
 @dataclass(frozen=True)
@@ -169,14 +169,10 @@ class GoalNavigationPlanner:
             # Use camera Depth Z directly; ground distance is a different metric.
             if depth > 1.280:
                 action = "GOAL_CAMERA_90_FORWARD"
-            elif depth > 1.025:
+            elif depth > 0.850:
                 action = "GOAL_CAMERA_90_FORWARD_2"
-            elif depth > 0.985:
-                action = "GOAL_CAMERA90_FINE_FORWARD_4"
-            elif depth > 0.950:
+            elif depth > 0.500:
                 action = "GOAL_CAMERA90_FINE_FORWARD_3"
-            elif depth > 0.875:
-                action = "GOAL_CAMERA90_FINE_FORWARD_2"
             else:
                 action = "GOAL_CAMERA90_FINE_FORWARD_1"
             reason = "approach_goal_by_depth"

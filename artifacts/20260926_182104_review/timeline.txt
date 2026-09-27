@@ -1,0 +1,56 @@
+  41.067s [python3_6703_1790414473963.log] Pre-motion settle started: action=PICKUP_NOW, source=ball, duration=0.000
+  44.622s [python3_6705_1790414474077.log] Pickup correction dwell started: 3.0s before __BALL_PICKUP_INITIAL_ALIGN_CHECK__
+  47.768s [python3_6705_1790414474077.log] Pickup fine motion requested: motion_id=pickup_fine_forward_0, command_id=6, request_id=6
+  49.746s [python3_6705_1790414474077.log] Pickup correction dwell started: 3.0s before __BALL_PICKUP_FINE_ALIGN_CHECK__
+  53.356s [python3_6705_1790414474077.log] Pickup correction dwell started: 3.0s before __BALL_PICKUP_FINE_ALIGN_CHECK__
+  56.956s [python3_6705_1790414474077.log] Pickup correction dwell started: 3.0s before __BALL_PICKUP_FINE_ALIGN_CHECK__
+  60.070s [python3_6705_1790414474077.log] Atomic sequence advanced to pickup_pre_backward_camera_down
+  64.113s [python3_6705_1790414474077.log] Atomic sequence advanced to pickup
+  73.058s [python3_6705_1790414474077.log] Atomic sequence advanced to pickup_grasp_check_pose
+  76.558s [python3_6705_1790414474077.log] Atomic sequence advanced to pickup_retreat_2
+  80.108s [python3_6705_1790414474077.log] Atomic sequence advanced to pickup_first_backward_turn_right
+  86.059s [python3_6703_1790414473963.log] Special motion lock released: status=SUCCEEDED, action=PICKUP_NOW, command_id=6, event_id=1, error_code=, message=atomic sequence completed after non-blocking dwell
+  86.059s [python3_6703_1790414473963.log] Mission phase advanced after special motion: status=SUCCEEDED, action=PICKUP_NOW, previous_phase=AUTO, next_phase=POST_BALL_LINE_ALIGN
+  86.167s [python3_6703_1790414473963.log] Pre-motion settle started: action=POST_BALL_LINE_TURN_RIGHT_2, source=line, duration=3.000
+  89.267s [python3_6703_1790414473963.log] Pre-motion settle complete: action=POST_BALL_LINE_TURN_RIGHT_2
+  89.912s [python3_6703_1790414473963.log] General motion lock released: status=SUCCEEDED, action=POST_BALL_LINE_TURN_RIGHT_2
+  93.367s [python3_6703_1790414473963.log] Pre-motion settle started: action=POST_BALL_LINE_TURN_RIGHT_2, source=line, duration=3.000
+  96.470s [python3_6703_1790414473963.log] Pre-motion settle complete: action=POST_BALL_LINE_TURN_RIGHT_2
+  97.122s [python3_6703_1790414473963.log] General motion lock released: status=SUCCEEDED, action=POST_BALL_LINE_TURN_RIGHT_2
+ 100.271s [python3_6703_1790414473963.log] Post-pickup normal Line driving started: 10 seconds
+ 102.696s [python3_6703_1790414473963.log] General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4
+ 106.274s [python3_6703_1790414473963.log] General motion lock released: status=SUCCEEDED, action=STRAIGHT
+ 109.575s [python3_6703_1790414473963.log] General motion lock released: status=SUCCEEDED, action=STRAIGHT
+ 109.667s [python3_6703_1790414473963.log] Pre-motion settle started: action=RIGHT, source=line, duration=3.000
+ 112.190s [python3_6703_1790414473963.log] General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4
+ 112.267s [python3_6703_1790414473963.log] Post-pickup Line driving completed: grasp=GRABBED, next_phase=POST_BALL_GOAL_TRANSITION
+ 112.396s [sdk_motion_executor_6707_1790414472994.log] Camera 90-degree hold enabled: motor 0 1.0 deg
+ 115.309s [python3_6703_1790414473963.log] Special motion lock released: status=SUCCEEDED, action=POST_BALL_GOAL_TRANSITION, command_id=469, event_id=2, error_code=, message=atomic sequence completed after non-blocking dwell
+ 115.311s [python3_6703_1790414473963.log] Mission phase advanced after special motion: status=SUCCEEDED, action=POST_BALL_GOAL_TRANSITION, previous_phase=POST_BALL_GOAL_TRANSITION, next_phase=GOAL_APPROACH
+ 117.560s [python3_6703_1790414473963.log] General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA_90_FORWARD_2
+ 121.314s [python3_6703_1790414473963.log] General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_TURN_RIGHT_2
+ 125.663s [python3_6703_1790414473963.log] General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_FINE_FORWARD_3
+ 129.961s [python3_6703_1790414473963.log] General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_FINE_FORWARD_3
+ 133.067s [python3_6703_1790414473963.log] Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+ 134.268s [python3_6703_1790414473963.log] Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+ 137.068s [python3_6703_1790414473963.log] Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+ 138.467s [python3_6703_1790414473963.log] Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+ 140.368s [python3_6703_1790414473963.log] Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+ 140.868s [python3_6703_1790414473963.log] Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+ 141.472s [python3_6703_1790414473963.log] Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+ 143.367s [python3_6703_1790414473963.log] Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+ 146.369s [python3_6703_1790414473963.log] Pre-motion settle complete: action=SHOT
+ 148.608s [python3_6705_1790414474077.log] Atomic sequence advanced to goal_shot
+ 150.766s [sdk_motion_executor_6707_1790414472994.log] Camera 90-degree hold cleared: goal_shot
+ 150.774s [python3_6703_1790414473963.log] Special motion lock released: status=SUCCEEDED, action=SHOT, command_id=517, event_id=3, error_code=, message=
+ 150.775s [python3_6703_1790414473963.log] Mission phase advanced after special motion: status=SUCCEEDED, action=SHOT, previous_phase=GOAL_APPROACH, next_phase=POST_SHOT_TURN
+ 156.891s [python3_6703_1790414473963.log] Post-shot motion ended: action=POST_SHOT_TURN_RIGHT_9, status=SUCCEEDED, phase=LINE_TRACK
+ 163.272s [python3_6703_1790414473963.log] General motion lock released: status=SUCCEEDED, action=STRAIGHT
+ 166.475s [python3_6703_1790414473963.log] General motion lock released: status=SUCCEEDED, action=STRAIGHT
+ 166.568s [python3_6703_1790414473963.log] Pre-motion settle started: action=LINE_LOST_TURN_RIGHT, source=line, duration=3.000
+ 169.570s [python3_6703_1790414473963.log] Pre-motion settle complete: action=LINE_LOST_TURN_RIGHT
+ 171.180s [python3_6703_1790414473963.log] General motion lock released: status=SUCCEEDED, action=LINE_LOST_TURN_RIGHT
+ 173.676s [python3_6703_1790414473963.log] General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_LEFT_4
+ 176.177s [python3_6703_1790414473963.log] General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_LEFT_4
+ 176.268s [python3_6703_1790414473963.log] Pre-motion settle started: action=LINE_LOST_TURN_RIGHT, source=line, duration=3.000
+ 179.371s [python3_6703_1790414473963.log] Pre-motion settle complete: action=LINE_LOST_TURN_RIGHT

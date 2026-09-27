@@ -10,6 +10,8 @@ from typing import Any
 from .approach_distance import approach_level_from_motion
 
 
+LINE_RECOVERY_TURN_ANGLES_DEG = {"LEFT": -30.0, "RIGHT": 20.0}
+
 RECOVERY_TURN_STEP_DEG = 15
 RECOVERY_TURN_MAX_LEVEL = 6
 RECOVERY_TURN_ACTION_SUFFIXES = {
@@ -163,6 +165,13 @@ def _number(data: dict[str, Any], key: str) -> float | None:
     return number if math.isfinite(number) else None
 
 
+def valid_ground_heading(line_info: dict[str, Any]) -> float | None:
+    """Read the calibrated heading; never fall back to image slope."""
+    if line_info.get("ground_projection_valid") is not True:
+        return None
+    return _number(line_info, "ground_heading_error_deg")
+
+
 def _recovery_turn_level(heading_error_deg: float) -> int:
     """Quantize a recovery heading to the nearest 15-degree motion."""
     magnitude = abs(heading_error_deg)
@@ -236,6 +245,9 @@ def _recovery_motion_metadata(
         normalized.removeprefix(turn_prefix)
     )
     if turn_motion is not None:
+        if suffix == 4:
+            turn_direction = "LEFT" if turn_motion.startswith("TURN_LEFT_") else "RIGHT"
+            angle_deg = LINE_RECOVERY_TURN_ANGLES_DEG[turn_direction]
         return recovery_side, turn_motion, suffix, angle_deg
     return recovery_side, None, None, None
 
@@ -299,9 +311,9 @@ class LineNavigationPlanner:
         if not bool(line_info.get("detected", False)):
             return self.stop("line_not_detected")
 
-        heading = _number(line_info, "filtered_heading_error_deg")
+        heading = valid_ground_heading(line_info)
         if heading is None:
-            heading = _number(line_info, "heading_error_deg")
+            return self.stop("invalid_ground_line_geometry")
 
         offset = _number(line_info, "filtered_lateral_offset_norm")
         if offset is None:
@@ -579,17 +591,9 @@ class LineNavigationPlanner:
             line_side = "RIGHT" if heading_error_deg > 0.0 else "LEFT"
 
         if heading_error_deg >= active_heading_threshold:
-            turn_motion = numbered_turn_motion(
-                heading_error_deg,
-                "RIGHT",
-            )
-            return f"RECOVER_{line_side}_{turn_motion}"
+            return f"RECOVER_{line_side}_TURN_RIGHT_4"
         if heading_error_deg <= -active_heading_threshold:
-            turn_motion = numbered_turn_motion(
-                heading_error_deg,
-                "LEFT",
-            )
-            return f"RECOVER_{line_side}_{turn_motion}"
+            return f"RECOVER_{line_side}_TURN_LEFT_4"
         # A lateral offset by itself must not emit a standalone recovery
         # motion.  Numbered recovery turns are reserved for a heading error
         # of at least the active side-aware heading threshold.

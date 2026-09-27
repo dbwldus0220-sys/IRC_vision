@@ -1,0 +1,56 @@
+[INFO] [1790435286.750331054] [motion_decision_node]: BALL pickup entry latched: distance_m=0.553
+[INFO] [1790435290.037206137] [motion_decision_node]: Special motion lock released: status=REJECTED, action=PICKUP_NOW, command_id=14, event_id=1, error_code=INVALID_MOTION, message=unsupported motion_id; backend was not called
+[INFO] [1790435291.129826391] [motion_decision_node]: BALL pickup entry latched: distance_m=0.553
+[INFO] [1790435292.279928077] [motion_decision_node]: BALL pickup entry pending; preserving general post-motion dwell before pickup
+[INFO] [1790435404.740519680] [motion_decision_node]: Special motion lock released: status=REJECTED, action=PICKUP_NOW, command_id=997, event_id=2, error_code=INVALID_MOTION, message=unsupported motion_id; backend was not called
+[INFO] [1790435405.898385384] [motion_decision_node]: BALL pickup entry latched: distance_m=0.554
+[INFO] [1790435406.973922161] [motion_decision_node]: BALL pickup entry pending; preserving general post-motion dwell before pickup
+[INFO] [1790435452.439613544] [motion_decision_node]: Special motion lock released: status=SUCCEEDED, action=PICKUP_NOW, command_id=1142, event_id=3, error_code=, message=atomic sequence completed after non-blocking dwell
+[INFO] [1790435495.187356594] [motion_decision_node]: Special motion lock released: status=SUCCEEDED, action=POST_BALL_GOAL_TRANSITION, command_id=1575, event_id=4, error_code=, message=atomic sequence completed after non-blocking dwell
+[INFO] [1790435516.137024274] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435516.534574637] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435517.134383074] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435518.034733630] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435520.939860228] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435522.334214272] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435523.036285501] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435523.734434383] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435524.234755458] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435525.234170275] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435526.736875676] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435529.634983702] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435530.634231867] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435531.434256479] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435531.934289658] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435532.856345913] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435533.634149385] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435533.935870973] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435534.534201915] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435534.934584737] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435535.834340485] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435536.334854018] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435536.733885025] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435537.534254137] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435538.234314385] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435540.834168041] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435541.734564711] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435542.434009538] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435543.234637357] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435544.233847541] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435544.634453583] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435545.433786641] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435545.934227031] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435546.834506206] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435548.934229855] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435549.234336947] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435550.233882507] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435550.934462858] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435551.634527673] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435552.034196814] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435552.934178806] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435554.034167768] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435554.837516451] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435555.633830257] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435558.133850590] [motion_decision_node]: Pre-motion settle started: action=SHOT, source=goal, duration=3.000
+[INFO] [1790435561.135058154] [motion_decision_node]: Pre-motion settle complete: action=SHOT
+[INFO] [1790435565.547396672] [motion_decision_node]: Special motion lock released: status=SUCCEEDED, action=SHOT, command_id=1743, event_id=5, error_code=, message=

@@ -1,0 +1,19 @@
+{
+  "source": "/home/jet/Downloads/robot_motions(29).json",
+  "source_sha256": "32816034e918e8a991006bbccc0ba7b010369a740a11d43e72be70d815761686",
+  "selected_names": [
+    "찐미세오옆꽃게0-1(1회)",
+    "찐미세오옆꽃게90-1(1회)",
+    "찐오뒤에서 오옆꽃게90도",
+    "찐미세오뒤에서 오옆꽃게90도",
+    "찐미세오뒤에서오옆꽃게0도"
+  ],
+  "added_names": [
+    "찐오뒤에서 오옆꽃게90도",
+    "찐미세오뒤에서 오옆꽃게90도",
+    "찐미세오뒤에서오옆꽃게0도"
+  ],
+  "runtime_tolerance_deg": 5.0,
+  "before_count": 80,
+  "after_count": 83
+}

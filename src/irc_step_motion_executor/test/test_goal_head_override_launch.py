@@ -109,8 +109,23 @@ class TestGoalHeadOverride(unittest.TestCase):
             self.request, self.cancel, self.ball,
         )))
         self.hold(False)
-        self.send(1, "line_forward_6")
-        self.status(1, "SUCCEEDED")
+        for index, forward in enumerate(("ball_camera_down_forward_2", "ball_camera_down_forward_4")):
+            request_id = 100 + index * 3
+            self.send(request_id, "line_forward_6")
+            self.status(request_id, "RUNNING")
+            self.publish(self.ball, {"detected": True, "head_down_requested": True})
+            self.wait(lambda: self.heartbeats and self.heartbeats[-1]["ball_head_override_active"])
+            self.status(request_id, "SUCCEEDED")
+            # An invalid request must not release the latched camera override.
+            self.send(request_id + 1, "unsupported_camera45_test_motion")
+            self.status(request_id + 1, "REJECTED")
+            self.assertTrue(self.heartbeats[-1]["ball_head_override_active"])
+            self.send(request_id + 2, forward)
+            self.status(request_id + 2, "RUNNING")
+            self.publish(self.ball, {"detected": True, "head_down_requested": True})
+            self.wait(lambda: self.heartbeats and not self.heartbeats[-1]["ball_head_override_active"])
+            self.status(request_id + 2, "SUCCEEDED")
+            self.assertFalse(self.heartbeats[-1]["ball_head_override_active"])
         self.hold(False)
 
         self.send(4, "post_ball_camera_90")
