@@ -443,6 +443,8 @@ class MotionDecisionNode(Node):
         self.post_ball_line_run_failed = False
         self.post_shot_dwell_until: float | None = None
         self.post_shot_turn_settled = False
+        self.post_shot_line_search_action: str | None = None
+        self.post_shot_line_search_failed = False
         self.ball_confirmation_pending_latched = False
         self.ball_confirmation_last_raw_at: float | None = None
         self.active_line_motion_action: str | None = None
@@ -1835,6 +1837,22 @@ class MotionDecisionNode(Node):
                     return
                 if (
                     completed_source == "line"
+                    and self.mission_phase == "LINE_TRACK"
+                    and action == getattr(self, "post_shot_line_search_action", None)
+                ):
+                    # Finish each search turn before checking stationary Vision again.
+                    MotionDecisionNode._discard_line_motion_capture(self)
+                    self.pending_line_decision = None
+                    MotionDecisionNode._invalidate_post_ball_line_input(self)
+                    self.post_shot_line_search_failed = status != "SUCCEEDED"
+                    if status == "SUCCEEDED":
+                        self.post_shot_dwell_until = (
+                            status_receive_monotonic
+                            + MotionDecisionNode.POST_SHOT_DWELL_SEC
+                        )
+                    return
+                if (
+                    completed_source == "line"
                     and self.phase_manager.handle_post_shot_motion(action, status)
                 ):
                     MotionDecisionNode._discard_line_motion_capture(self)
@@ -1852,6 +1870,15 @@ class MotionDecisionNode(Node):
                             self.latest_info["goal"] = None
                             self.latest_time["goal"] = None
                             self.planner.last_line_seen_direction = None
+                            if action in {
+                                "POST_SHOT_TURN_RIGHT_9", "POST_SHOT_TURN_LEFT_4",
+                            }:
+                                self.post_shot_line_search_action = (
+                                    "POST_SHOT_LINE_TURN_RIGHT_2"
+                                    if action == "POST_SHOT_TURN_RIGHT_9"
+                                    else "POST_SHOT_LINE_TURN_LEFT_1"
+                                )
+                                self.post_shot_line_search_failed = False
                         if "_TURN_" in action:
                             self.planner.post_ball_line_search_direction = (
                                 "RIGHT" if "_RIGHT_" in action else "LEFT"
@@ -3451,6 +3478,32 @@ class MotionDecisionNode(Node):
             MotionDecisionNode._clear_ball_navigation_state(self)
             self.get_logger().info("HURDLE positioning started after motion and dwell")
             planning_phase = "HURDLE_POSITIONING"
+        search_action = getattr(self, "post_shot_line_search_action", None)
+        if planning_phase != "LINE_TRACK":
+            self.post_shot_line_search_action = None
+            self.post_shot_line_search_failed = False
+        elif search_action is not None:
+            if getattr(self, "post_shot_line_search_failed", False):
+                return MotionDecision(
+                    phase=planning_phase, source="line", action="WAIT", valid=False,
+                    reason="post_shot_line_search_failed",
+                    sdk_motion_requested=False, requires_ack=False, source_command={},
+                )
+            line_info = observations.get("line")
+            if line_info is not None and line_info.get("detected") is True:
+                # Once reacquired, later losses belong to normal Line navigation.
+                self.post_shot_line_search_action = None
+            else:
+                has_fresh_line = line_info is not None
+                return MotionDecision(
+                    phase=planning_phase, source="line",
+                    action=search_action if has_fresh_line else "STOP",
+                    valid=has_fresh_line,
+                    reason=("post_shot_line_search" if has_fresh_line
+                            else "waiting_for_line_info"),
+                    sdk_motion_requested=False, requires_ack=False, source_command={},
+                )
+
         if (
             planning_phase == "HURDLE_POSITIONING"
             and self.active_special_command_id is None

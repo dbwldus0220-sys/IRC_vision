@@ -689,7 +689,7 @@ def test_calibrated_right_turn_aliases_resolve_to_supplied_catalog(count, angle)
     ("goal_camera_90_crab_left", "찐미세왼옆꽃게90도-1",
      "dba9db69d2bc5342abe6a0812ae672b234acbf5687053b3dd7f40eab2a7bb7d7"),
 ])
-def test_imported_motions_preserve_source_except_tolerance(
+def test_imported_motions_preserve_source_except_tolerance_and_added_turns(
     motion_id, name, digest,
 ):
     aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
@@ -699,10 +699,56 @@ def test_imported_motions_preserve_source_except_tolerance(
     assert aliases[motion_id] == name
     motion = motions[name]
     assert motion["completion"]["position_tolerance_deg"] == 5.0
+    original_turn_counts = {
+        "post_shot_default_turn_right": 7,
+        "post_shot_default_turn_left": 4,
+    }
+    if motion_id in original_turn_counts:
+        # Verify the original prefix independently of the two added turn sets.
+        motion = dict(motion)
+        motion["frames"] = motion["frames"][
+            :2 + 2 * original_turn_counts[motion_id]
+        ]
+        last_frame = motion["frames"][-1]
+        motion["max_seq_ms"] = last_frame["start_ms"] + last_frame["time_ms"]
     encoded = json.dumps(
         motion, sort_keys=True, separators=(",", ":"), ensure_ascii=False,
     )
     assert hashlib.sha256(encoded.encode()).hexdigest() == digest
+
+
+@pytest.mark.parametrize("motion_id,turn_count,turn_pose,end_pose,duration_ms", [
+    ("post_shot_default_turn_right", 9, "제우오들25", "오뒤415", 3531),
+    ("post_shot_default_turn_left", 6, "제좌왼들25", "오뒤412", 2750),
+])
+def test_post_shot_extended_turn_sets_preserve_pose_and_timing(
+    motion_id, turn_count, turn_pose, end_pose, duration_ms,
+):
+    aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+    motions = {
+        m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+    }
+    motion = motions[aliases[motion_id]]
+    frames = motion["frames"]
+    assert motion["repeat_count"] == 1
+    assert motion["playback_speed"] == 1.0
+    assert motion["end_pose"] == end_pose
+    assert [frame["name"] for frame in frames] == (
+        ["왼들401", end_pose] + [turn_pose, end_pose] * turn_count
+    )
+    assert motion["max_seq_ms"] == duration_ms
+    assert frames[-1]["start_ms"] + frames[-1]["time_ms"] == duration_ms
+    for previous, current in zip(frames, frames[1:]):
+        assert current["start_ms"] >= previous["start_ms"] + previous["time_ms"]
+
+    # The appended sets must retain every field except their absolute start time.
+    original = frames[:-4]
+    period = original[-2]["start_ms"] - original[-4]["start_ms"]
+    for cycle in (1, 2):
+        for index, template in enumerate(original[-2:]):
+            expected = dict(template)
+            expected["start_ms"] += cycle * period
+            assert frames[len(original) + (cycle - 1) * 2 + index] == expected
 
 
 @pytest.mark.parametrize("completed,exit_name", [
