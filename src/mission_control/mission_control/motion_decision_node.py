@@ -22,6 +22,7 @@ from step.line_navigation_planner import valid_ground_heading
 from .ball_loss_confirmation import BallLossConfirmation
 from .executor_heartbeat_watchdog import ExecutorHeartbeatWatchdog
 from .executor_heartbeat_watchdog import HeartbeatStartupDelay
+from .lost_search_turn_limiter import LostSearchTurnLimiter
 from .mission_phase_manager import MissionPhaseManager
 from .motion_command_gate import GeneralMotionCommandGate
 from .motion_command_gate import normalize_general_action
@@ -37,6 +38,7 @@ class MotionDecisionNode(Node):
     SOURCES = ("line", "ball", "goal", "hurdle", "finish")
     SHOT_PRE_MOTION_SETTLE_SEC = 3.0
     LINE_TURN_PRE_MOTION_SETTLE_SEC = 1.0
+    FINE_FORWARD_PRE_MOTION_SETTLE_SEC = 1.0
 
     PRE_MOTION_SETTLE_ACTIONS = frozenset(
         {
@@ -241,6 +243,12 @@ class MotionDecisionNode(Node):
         self.declare_parameter("hurdle_timeout_sec", 0.50)
         self.declare_parameter("finish_timeout_sec", 0.50)
 
+        self.declare_parameter("lost_search_max_turns", 3)
+        self.declare_parameter("lost_search_max_angle_deg", 90.0)
+        self.lost_search_turn_limiter = LostSearchTurnLimiter(
+            max_turns=int(self.get_parameter("lost_search_max_turns").value),
+            max_angle_deg=float(self.get_parameter("lost_search_max_angle_deg").value),
+        )
         self.declare_parameter("enable_ball_lost_recovery", True)
         self.declare_parameter("recovery_heading_turn_deg", 10.0)
         self.declare_parameter("recovery_away_heading_turn_deg", 3.0)
@@ -458,6 +466,9 @@ class MotionDecisionNode(Node):
         self.active_line_motion_target_frames = 0
         self.active_line_motion_frames: list[dict[str, Any]] = []
         self.pending_line_decision: MotionDecision | None = None
+        self.pending_line_corner: dict[str, Any] | None = None
+        self.line_corner_rearm_required = False
+        self.remembered_corner_command_id: int | None = None
         self.queued_general_action: str | None = None
         self.queued_general_command_id: int | None = None
         self.queued_general_source: str | None = None
@@ -740,6 +751,8 @@ class MotionDecisionNode(Node):
         auto_ready = payload.get("auto_ready")
         if isinstance(auto_ready, bool):
             if not auto_ready:
+                self.pending_line_corner = None
+                self.line_corner_rearm_required = False
                 self._reset_pre_motion_settle()
                 self.executor_ready_requires_fresh_vision = True
             self.executor_auto_ready = auto_ready
@@ -902,6 +915,7 @@ class MotionDecisionNode(Node):
                         payload,
                     )
                 if source == "line":
+                    MotionDecisionNode._remember_line_corner(self, payload)
                     if (
                         self.active_special_command_id is None
                         and (
@@ -1688,6 +1702,8 @@ class MotionDecisionNode(Node):
             )
             return
 
+        self.pending_line_corner = None
+        self.line_corner_rearm_required = False
         self.hurdle_positioning_entry_pending = False
         self.hurdle_post_motion_dwell_until = None
         self.hurdle_stationary_since = None
@@ -1803,6 +1819,15 @@ class MotionDecisionNode(Node):
                     )
             if transition.released:
                 completed_source = self.active_general_source
+                if completed_source == "line":
+                    if status != "SUCCEEDED":
+                        self.pending_line_corner = None
+                        self.line_corner_rearm_required = True
+                    if command_id == getattr(self, "remembered_corner_command_id", None):
+                        self.remembered_corner_command_id = None
+                        if status == "SUCCEEDED":
+                            # The remembered near point preceded this corner turn.
+                            self.planner.last_line_seen_direction = None
                 existing_pause = (
                     (completed_source == "hurdle" and action in {
                         "ALIGN_LEFT", "ALIGN_RIGHT", "TURN_LEFT", "TURN_RIGHT",
@@ -1888,7 +1913,9 @@ class MotionDecisionNode(Node):
                     self.pending_line_decision = None
                     MotionDecisionNode._invalidate_post_ball_line_input(self)
                     if status == "SUCCEEDED":
-                        if self.mission_phase in {"AUTO", "LINE_TRACK"}:
+                        if self.mission_phase in {"AUTO", "LINE_TRACK"} or action in {
+                            "POST_SHOT_TURN_RIGHT_9", "POST_SHOT_TURN_LEFT_4",
+                        }:
                             MotionDecisionNode._clear_ball_navigation_state(self)
                             MotionDecisionNode._invalidate_pickup_ball_input(self)
                             # Release the scored Goal before normal Line planning.
@@ -1902,16 +1929,12 @@ class MotionDecisionNode(Node):
                             if action in {
                                 "POST_SHOT_TURN_RIGHT_9", "POST_SHOT_TURN_LEFT_4",
                             }:
-                                self.post_shot_line_search_action = (
-                                    "POST_SHOT_LINE_TURN_RIGHT_2"
-                                    if action == "POST_SHOT_TURN_RIGHT_9"
-                                    else "POST_SHOT_LINE_TURN_LEFT_1"
-                                )
+                                self.post_shot_line_search_action = None
                                 self.post_shot_line_search_failed = False
+                                self.planner.post_ball_line_search_direction = (
+                                    "RIGHT" if "_RIGHT_" in action else "LEFT"
+                                )
                         if "_TURN_" in action:
-                            self.planner.post_ball_line_search_direction = (
-                                "RIGHT" if "_RIGHT_" in action else "LEFT"
-                            )
                             self.post_shot_turn_settled = False
                             self.post_shot_dwell_until = (
                                 status_receive_monotonic
@@ -2448,6 +2471,74 @@ class MotionDecisionNode(Node):
 
         return observations, ages
 
+    def _remember_line_corner(self, info: dict[str, Any]) -> None:
+        """Keep a confirmed corner seen during normal Line motion until its turn."""
+        if (
+            self.mission_phase not in {"AUTO", "LINE_TRACK"}
+            or self.active_special_command_id is not None
+            or self.active_general_source not in {None, "line"}
+        ):
+            self.pending_line_corner = None
+            self.line_corner_rearm_required = False
+            return
+        gate = self.general_motion_gate
+        if gate.locked and gate.active_action in {"LEFT", "RIGHT"}:
+            return
+        if info.get("detected") is not True:
+            return
+        qualities = [MotionDecisionPlanner._number(info, key) for key in (
+            "heading_quality", "geometry_quality", "detection_quality",
+        )]
+        qualities = [value for value in qualities if value is not None]
+        if not qualities or min(qualities) < self.planner.line_planner.config.min_line_quality:
+            return
+        if getattr(self, "line_corner_rearm_required", False):
+            # Loss does not prove the previous corner has been passed.
+            if info.get("corner_preview_confirmed") is False:
+                self.line_corner_rearm_required = False
+            return
+        if (
+            not gate.locked or self.active_general_source != "line"
+            or info.get("corner_preview_confirmed") is not True
+            or info.get("corner_direction") not in {"LEFT", "RIGHT"}
+            or getattr(self, "pending_line_corner", None) is not None
+        ):
+            return
+        self.pending_line_corner = {
+            "corner_direction": info["corner_direction"],
+            "corner_start_distance_m": MotionDecisionPlanner._number(
+                info, "corner_start_distance_m",
+            ),
+            "observed_during_action": gate.active_action,
+            "observed_during_command_id": gate.active_command_id,
+        }
+        self.pending_line_decision = None
+        self.get_logger().info(
+            f"Line corner remembered: {self.pending_line_corner}"
+        )
+
+    def _apply_pending_line_corner(self, decision: MotionDecision) -> MotionDecision:
+        """Prefer the remembered corner over Line tracking/search at the boundary."""
+        if (
+            self.mission_phase not in {"AUTO", "LINE_TRACK"}
+            or self.active_special_command_id is not None
+            or decision.source not in {"line", "none"}
+            or self.mission_complete
+        ):
+            self.pending_line_corner = None
+            self.line_corner_rearm_required = False
+            return decision
+        corner = getattr(self, "pending_line_corner", None)
+        if corner is None or decision.reason == "invalid_vision_boolean_type":
+            return decision
+        return MotionDecision(
+            phase=self.mission_phase, source="line",
+            action=corner["corner_direction"], valid=True,
+            reason="line_corner_remembered_during_motion",
+            sdk_motion_requested=False, requires_ack=False,
+            source_command={**corner, "corner_from_memory": True},
+        )
+
     def _start_line_motion_capture(self, action: str) -> None:
         """Start the configured late-motion Vision capture window."""
         # Recovery is checked only after completion, never queued from moving frames.
@@ -2606,6 +2697,8 @@ class MotionDecisionNode(Node):
         observations: dict[str, dict[str, Any] | None],
     ) -> bool:
         """Allow seamless STRAIGHT only before another mission is detected."""
+        if getattr(self, "pending_line_corner", None) is not None:
+            return False
         if MotionDecisionNode._needs_correction_dwell(self.general_motion_gate.active_action):
             return False
         if (
@@ -2708,6 +2801,8 @@ class MotionDecisionNode(Node):
 
         if self.general_motion_gate.locked and not queue_while_locked:
             self._reset_pre_motion_settle()
+            return
+        if queue_while_locked and getattr(self, "pending_line_corner", None) is not None:
             return
 
         if (
@@ -2831,6 +2926,7 @@ class MotionDecisionNode(Node):
                 observations,
                 dt_sec,
             )
+        decision = MotionDecisionNode._apply_pending_line_corner(self, decision)
         self.last_candidate_decision = decision
 
         decision = self._suppress_duplicate_terminal_action(
@@ -2844,6 +2940,10 @@ class MotionDecisionNode(Node):
             self,
             decision,
         )
+        limiter = getattr(self, "lost_search_turn_limiter", None)
+        if limiter is None:
+            limiter = self.lost_search_turn_limiter = LostSearchTurnLimiter()
+        decision = limiter.filter(decision, observations)
         self.last_selected_decision = decision
 
         if not self._command_publisher_has_subscriber():
@@ -2871,6 +2971,7 @@ class MotionDecisionNode(Node):
             self.post_shot_turn_settled = False
             decision = self._select_mission_decision(observations, dt_sec)
             self.last_candidate_decision = decision
+            decision = limiter.filter(decision, observations)
             self.last_selected_decision = decision
 
         if decision.action == "POST_BALL_LINE_ALIGNED":
@@ -2893,6 +2994,7 @@ class MotionDecisionNode(Node):
             self.planner.goal_terminal_requested = False
             decision = self._select_mission_decision(observations, dt_sec)
             self.last_candidate_decision = decision
+            decision = limiter.filter(decision, observations)
             self.last_selected_decision = decision
 
         if (
@@ -3083,6 +3185,18 @@ class MotionDecisionNode(Node):
         )
 
         self.publisher.publish(output)
+        limiter.record_published(decision, observations)
+        if (
+            decision.valid and decision.source == "line"
+            and decision.action in {"LEFT", "RIGHT"}
+        ):
+            self.pending_line_corner = None
+            self.line_corner_rearm_required = True
+            if decision.source_command.get("corner_from_memory") is True:
+                self.remembered_corner_command_id = self.command_id
+        elif decision.source not in {"line", "none"}:
+            self.pending_line_corner = None
+            self.line_corner_rearm_required = False
         if decision.valid and decision.action.startswith("POST_BALL_LINE_TURN_"):
             command = decision.source_command
             self.get_logger().info(
@@ -3231,6 +3345,10 @@ class MotionDecisionNode(Node):
                     ),
                     "reason": selected.reason if selected is not None else None,
                 },
+                "line_corner": {
+                    "pending": getattr(self, "pending_line_corner", None),
+                    "rearm_required": getattr(self, "line_corner_rearm_required", False),
+                },
                 "execution": {
                     "motion_locked": self.general_motion_gate.locked,
                     "mission_locked": self.active_special_command_id is not None,
@@ -3304,7 +3422,29 @@ class MotionDecisionNode(Node):
         decision: MotionDecision,
         now: float,
     ) -> bool:
-        """Pause before stationary turns; RECOVER walks have no dwell."""
+        """Recheck fresh decisions while settling before turns or fine steps."""
+        fine_forward = (
+            decision.action in {
+                "STRAIGHT_0", "BALL_FINE_FORWARD_8", "BALL_PICKUP_FINE_FORWARD",
+                "SLOW_APPROACH", "FINE_FORWARD_STEP",
+            }
+            or decision.action.startswith("GOAL_CAMERA90_FINE_FORWARD_")
+            or (decision.action == "BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+                and decision.source_command.get("pickup_approach_motion") == "STRAIGHT_0")
+            or (decision.action == "GO" and any(
+                decision.source_command.get(key) is True
+                for key in ("fine_sequence_requested", "depth_fallback_requested")
+            ))
+        )
+        pickup_fine_checkpoint = bool(
+            fine_forward and self.active_special_action == "PICKUP_NOW"
+            and (
+                (decision.action == "BALL_PICKUP_FINE_FORWARD"
+                 and self.pickup_fine_align_waiting)
+                or (decision.action == "BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+                    and self.pickup_initial_align_waiting)
+            )
+        )
         hurdle_turn = decision.source == "hurdle" and decision.action in {
             "ALIGN_LEFT", "ALIGN_RIGHT", "TURN_LEFT", "TURN_RIGHT",
         }
@@ -3330,7 +3470,7 @@ class MotionDecisionNode(Node):
         if (
             not decision.valid
             or (
-                not line_turn and not hurdle_turn
+                not line_turn and not hurdle_turn and not fine_forward
                 and decision.action not in self.PRE_MOTION_SETTLE_ACTIONS
             )
         ):
@@ -3339,7 +3479,7 @@ class MotionDecisionNode(Node):
 
         if (
             self.general_motion_gate.locked
-            or self.active_special_command_id is not None
+            or (self.active_special_command_id is not None and not pickup_fine_checkpoint)
         ):
             self._reset_pre_motion_settle()
             return False
@@ -3357,8 +3497,16 @@ class MotionDecisionNode(Node):
                 if decision.action == "SHOT" else self.pre_motion_settle_sec
             )
         )
-        if hurdle_turn:
+        if fine_forward:
+            settle_sec = getattr(
+                self, "FINE_FORWARD_PRE_MOTION_SETTLE_SEC",
+                MotionDecisionNode.FINE_FORWARD_PRE_MOTION_SETTLE_SEC,
+            )
+        elif hurdle_turn:
             settle_sec = MotionDecisionNode.HURDLE_POST_MOTION_DWELL_SEC
+        if settle_sec <= 0.0:
+            self._reset_pre_motion_settle()
+            return True
         candidate = (decision.source, decision.action)
         pending = (
             self.pre_motion_settle_source,

@@ -1,0 +1,3146 @@
+{
+  "source_path": "/home/sy/Downloads/robot_motions.json",
+  "source_sha256": "9921ba9ea63fc3de52a6ffc3b51e5edad077616d5634c346f8578142c23fa2a3",
+  "runtime_before_sha256": "587412e65938656da23151d3d7d79ebc2068e4a9321cdff3bf45a710a9246bf8",
+  "runtime_after_sha256": "fe6dcb68abf6bff1aa99ef2e96bd8a8d7dc0883f10350b256d74f766a8b15487",
+  "runtime_count": 86,
+  "source_count": 84,
+  "replaced_motion_names": [
+    "찐제자리좌회전0도-1(1회)",
+    "찐제자리좌회전0도-1(2회)",
+    "찐제자리좌회전0도-1(3회)",
+    "찐제자리좌회전0도-1(4회)",
+    "찐제자리좌회전0도-1(5회)",
+    "찐제자리우회전0도-1(2회)",
+    "찐제자리우회전0도-1(3회)",
+    "찐제자리우회전0도-1(5회)",
+    "찐제자리우회전0도-1(7회)",
+    "찐제자리우회전0도-1(9회)",
+    "찐제자리좌회전0도-1(6회)",
+    "찐미세0도-4",
+    "찐공잡기전후진-2(2회)",
+    "찐미세왼옆꽃게0도-1",
+    "찐미세오옆꽃게0-1(1회)",
+    "찐미세오뒤에서오옆꽃게0도"
+  ],
+  "replaced_motion_differences": {
+    "찐제자리좌회전0도-1(1회)": [
+      {
+        "path": "/frames/0/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/1/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/1/torques/0",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/1",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/10",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/11",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/12",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/13",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/14",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/15",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/16",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/17",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/18",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/19",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/2",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/20",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/21",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/22",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/3",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/4",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/5",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/6",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/7",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/8",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/9",
+        "before": false,
+        "source": true
+      }
+    ],
+    "찐제자리좌회전0도-1(2회)": [
+      {
+        "path": "/frames/0/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/1/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/1/torques/0",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/1",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/10",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/11",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/12",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/13",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/14",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/15",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/16",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/17",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/18",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/19",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/2",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/20",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/21",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/22",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/3",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/4",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/5",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/6",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/7",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/8",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/9",
+        "before": false,
+        "source": true
+      }
+    ],
+    "찐제자리좌회전0도-1(3회)": [
+      {
+        "path": "/frames/0/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/1/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/1/torques/0",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/1",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/10",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/11",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/12",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/13",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/14",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/15",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/16",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/17",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/18",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/19",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/2",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/20",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/21",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/22",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/3",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/4",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/5",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/6",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/7",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/8",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/9",
+        "before": false,
+        "source": true
+      }
+    ],
+    "찐제자리좌회전0도-1(4회)": [
+      {
+        "path": "/frames/0/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/1/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/1/torques/0",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/1",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/10",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/11",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/12",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/13",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/14",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/15",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/16",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/17",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/18",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/19",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/2",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/20",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/21",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/22",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/3",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/4",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/5",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/6",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/7",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/8",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/9",
+        "before": false,
+        "source": true
+      }
+    ],
+    "찐제자리좌회전0도-1(5회)": [
+      {
+        "path": "/frames/0/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/1/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/1/torques/0",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/1",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/10",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/11",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/12",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/13",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/14",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/15",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/16",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/17",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/18",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/19",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/2",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/20",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/21",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/22",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/3",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/4",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/5",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/6",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/7",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/8",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/9",
+        "before": false,
+        "source": true
+      }
+    ],
+    "찐제자리우회전0도-1(2회)": [
+      {
+        "path": "/frames/0/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/1/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      }
+    ],
+    "찐제자리우회전0도-1(3회)": [
+      {
+        "path": "/frames/0/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/1/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      }
+    ],
+    "찐제자리우회전0도-1(5회)": [
+      {
+        "path": "/frames/0/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/1/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      }
+    ],
+    "찐제자리우회전0도-1(7회)": [
+      {
+        "path": "/frames/0/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/1/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      }
+    ],
+    "찐제자리우회전0도-1(9회)": [
+      {
+        "path": "/frames/0/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/1/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      }
+    ],
+    "찐제자리좌회전0도-1(6회)": [
+      {
+        "path": "/frames/0/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/1/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/1/torques/0",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/1",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/10",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/11",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/12",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/13",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/14",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/15",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/16",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/17",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/18",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/19",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/2",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/20",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/21",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/22",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/3",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/4",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/5",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/6",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/7",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/8",
+        "before": false,
+        "source": true
+      },
+      {
+        "path": "/frames/1/torques/9",
+        "before": false,
+        "source": true
+      }
+    ],
+    "찐미세0도-4": [
+      {
+        "path": "/end_pose",
+        "before": "미세오뒤4111",
+        "source": "미세오뒤4111(0도)"
+      },
+      {
+        "path": "/frames/0/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/0/name",
+        "before": "미세오들4112",
+        "source": "미세오들4112(0도)"
+      },
+      {
+        "path": "/frames/1/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/1/name",
+        "before": "미세왼뒤4111",
+        "source": "미세왼뒤4111(0도)"
+      },
+      {
+        "path": "/frames/2/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/2/name",
+        "before": "미세왼들4112",
+        "source": "미세왼들4112(0도)"
+      },
+      {
+        "path": "/frames/3/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/3/name",
+        "before": "미세오뒤4111",
+        "source": "미세오뒤4111(0도)"
+      },
+      {
+        "path": "/start_pose",
+        "before": "미세오들4112",
+        "source": "미세오들4112(0도)"
+      }
+    ],
+    "찐공잡기전후진-2(2회)": [
+      {
+        "path": "/frames/0/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/1/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/2/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/3/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      }
+    ],
+    "찐미세왼옆꽃게0도-1": [
+      {
+        "path": "/frames/0/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/1/angles/0",
+        "before": -60.1171875,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/2/angles/0",
+        "before": -60.29296875,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/3/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      }
+    ],
+    "찐미세오옆꽃게0-1(1회)": [
+      {
+        "path": "/frames/0/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/1/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/2/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/3/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      }
+    ],
+    "찐미세오뒤에서오옆꽃게0도": [
+      {
+        "path": "/frames/0/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      },
+      {
+        "path": "/frames/1/angles/0",
+        "before": -60.0,
+        "source": -64.0
+      }
+    ]
+  },
+  "other_common_motion_differences_not_imported": {
+    "찐후진하고 제자리우회전(공)": [
+      {
+        "path": "/frames/length",
+        "before": 24,
+        "source": 16
+      },
+      {
+        "path": "/frames/removed_tail",
+        "before": [
+          {
+            "frame_id": "e9b51eede7254f8d8b252397f92b9434",
+            "name": "제우오들25",
+            "time_ms": 67,
+            "angles": {
+              "0": -33.134765625,
+              "1": -0.17578125,
+              "2": -9.404296875,
+              "3": 9.404296875,
+              "4": 9.931640625,
+              "5": -9.228515625,
+              "6": 68.115234375,
+              "7": -69.43359375,
+              "8": -11.337890625,
+              "9": 2.724609375,
+              "10": 2.900390625,
+              "11": 10,
+              "12": -14,
+              "13": -95,
+              "14": 67,
+              "15": -4,
+              "16": 1.0546875,
+              "17": -65.7421875,
+              "18": 18.80859375,
+              "19": 53,
+              "20": -55.458984375,
+              "21": 10.283203125,
+              "22": -19
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "13": true,
+              "14": true,
+              "15": true,
+              "16": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "e9b51eede7254f8d8b252397f92b9434",
+            "start_ms": 3000
+          },
+          {
+            "frame_id": "7ba8f380c0e7458aa55562b82342cc87",
+            "name": "오뒤415",
+            "time_ms": 144,
+            "angles": {
+              "0": -33.486328125,
+              "1": 0.17578125,
+              "2": -9.66796875,
+              "3": 9.755859375,
+              "4": 9.66796875,
+              "5": -8.876953125,
+              "6": 67.1484375,
+              "7": -68.5546875,
+              "8": -11.513671875,
+              "9": 2.900390625,
+              "10": -0.703125,
+              "11": -0.087890625,
+              "12": -1.845703125,
+              "13": -47,
+              "14": 61,
+              "15": 2.548828125,
+              "16": -1.93359375,
+              "17": -27.861328125,
+              "18": 30.322265625,
+              "19": 68.466796875,
+              "20": -59.23828125,
+              "21": 3.779296875,
+              "22": -4.39453125
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "13": true,
+              "14": true,
+              "15": true,
+              "16": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "7ba8f380c0e7458aa55562b82342cc87",
+            "start_ms": 3067,
+            "playback_cycle_end": true
+          },
+          {
+            "frame_id": "e9b51eede7254f8d8b252397f92b9434",
+            "name": "제우오들25",
+            "time_ms": 67,
+            "angles": {
+              "0": -33.134765625,
+              "1": -0.17578125,
+              "2": -9.404296875,
+              "3": 9.404296875,
+              "4": 9.931640625,
+              "5": -9.228515625,
+              "6": 68.115234375,
+              "7": -69.43359375,
+              "8": -11.337890625,
+              "9": 2.724609375,
+              "10": 2.900390625,
+              "11": 10,
+              "12": -14,
+              "13": -95,
+              "14": 67,
+              "15": -4,
+              "16": 1.0546875,
+              "17": -65.7421875,
+              "18": 18.80859375,
+              "19": 53,
+              "20": -55.458984375,
+              "21": 10.283203125,
+              "22": -19
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "13": true,
+              "14": true,
+              "15": true,
+              "16": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "e9b51eede7254f8d8b252397f92b9434",
+            "start_ms": 3311
+          },
+          {
+            "frame_id": "7ba8f380c0e7458aa55562b82342cc87",
+            "name": "오뒤415",
+            "time_ms": 144,
+            "angles": {
+              "0": -33.486328125,
+              "1": 0.17578125,
+              "2": -9.66796875,
+              "3": 9.755859375,
+              "4": 9.66796875,
+              "5": -8.876953125,
+              "6": 67.1484375,
+              "7": -68.5546875,
+              "8": -11.513671875,
+              "9": 2.900390625,
+              "10": -0.703125,
+              "11": -0.087890625,
+              "12": -1.845703125,
+              "13": -47,
+              "14": 61,
+              "15": 2.548828125,
+              "16": -1.93359375,
+              "17": -27.861328125,
+              "18": 30.322265625,
+              "19": 68.466796875,
+              "20": -59.23828125,
+              "21": 3.779296875,
+              "22": -4.39453125
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "13": true,
+              "14": true,
+              "15": true,
+              "16": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "7ba8f380c0e7458aa55562b82342cc87",
+            "start_ms": 3378,
+            "playback_cycle_end": true
+          },
+          {
+            "frame_id": "e9b51eede7254f8d8b252397f92b9434",
+            "name": "제우오들25",
+            "time_ms": 67,
+            "angles": {
+              "0": -33.134765625,
+              "1": -0.17578125,
+              "2": -9.404296875,
+              "3": 9.404296875,
+              "4": 9.931640625,
+              "5": -9.228515625,
+              "6": 68.115234375,
+              "7": -69.43359375,
+              "8": -11.337890625,
+              "9": 2.724609375,
+              "10": 2.900390625,
+              "11": 10,
+              "12": -14,
+              "13": -95,
+              "14": 67,
+              "15": -4,
+              "16": 1.0546875,
+              "17": -65.7421875,
+              "18": 18.80859375,
+              "19": 53,
+              "20": -55.458984375,
+              "21": 10.283203125,
+              "22": -19
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "13": true,
+              "14": true,
+              "15": true,
+              "16": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "e9b51eede7254f8d8b252397f92b9434",
+            "start_ms": 3622
+          },
+          {
+            "frame_id": "7ba8f380c0e7458aa55562b82342cc87",
+            "name": "오뒤415",
+            "time_ms": 144,
+            "angles": {
+              "0": -33.486328125,
+              "1": 0.17578125,
+              "2": -9.66796875,
+              "3": 9.755859375,
+              "4": 9.66796875,
+              "5": -8.876953125,
+              "6": 67.1484375,
+              "7": -68.5546875,
+              "8": -11.513671875,
+              "9": 2.900390625,
+              "10": -0.703125,
+              "11": -0.087890625,
+              "12": -1.845703125,
+              "13": -47,
+              "14": 61,
+              "15": 2.548828125,
+              "16": -1.93359375,
+              "17": -27.861328125,
+              "18": 30.322265625,
+              "19": 68.466796875,
+              "20": -59.23828125,
+              "21": 3.779296875,
+              "22": -4.39453125
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "13": true,
+              "14": true,
+              "15": true,
+              "16": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "7ba8f380c0e7458aa55562b82342cc87",
+            "start_ms": 3689,
+            "playback_cycle_end": true
+          },
+          {
+            "frame_id": "e9b51eede7254f8d8b252397f92b9434",
+            "name": "제우오들25",
+            "time_ms": 67,
+            "angles": {
+              "0": -33.134765625,
+              "1": -0.17578125,
+              "2": -9.404296875,
+              "3": 9.404296875,
+              "4": 9.931640625,
+              "5": -9.228515625,
+              "6": 68.115234375,
+              "7": -69.43359375,
+              "8": -11.337890625,
+              "9": 2.724609375,
+              "10": 2.900390625,
+              "11": 10,
+              "12": -14,
+              "13": -95,
+              "14": 67,
+              "15": -4,
+              "16": 1.0546875,
+              "17": -65.7421875,
+              "18": 18.80859375,
+              "19": 53,
+              "20": -55.458984375,
+              "21": 10.283203125,
+              "22": -19
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "13": true,
+              "14": true,
+              "15": true,
+              "16": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "e9b51eede7254f8d8b252397f92b9434",
+            "start_ms": 3933
+          },
+          {
+            "frame_id": "7ba8f380c0e7458aa55562b82342cc87",
+            "name": "오뒤415",
+            "time_ms": 144,
+            "angles": {
+              "0": -33.486328125,
+              "1": 0.17578125,
+              "2": -9.66796875,
+              "3": 9.755859375,
+              "4": 9.66796875,
+              "5": -8.876953125,
+              "6": 67.1484375,
+              "7": -68.5546875,
+              "8": -11.513671875,
+              "9": 2.900390625,
+              "10": -0.703125,
+              "11": -0.087890625,
+              "12": -1.845703125,
+              "13": -47,
+              "14": 61,
+              "15": 2.548828125,
+              "16": -1.93359375,
+              "17": -27.861328125,
+              "18": 30.322265625,
+              "19": 68.466796875,
+              "20": -59.23828125,
+              "21": 3.779296875,
+              "22": -4.39453125
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "13": true,
+              "14": true,
+              "15": true,
+              "16": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "7ba8f380c0e7458aa55562b82342cc87",
+            "start_ms": 4000,
+            "playback_cycle_end": true
+          }
+        ],
+        "source": []
+      },
+      {
+        "path": "/max_seq_ms",
+        "before": 4144,
+        "source": 2900
+      }
+    ],
+    "찐기본자세에서 제자리 우회전(골대)": [
+      {
+        "path": "/frames/length",
+        "before": 20,
+        "source": 16
+      },
+      {
+        "path": "/frames/removed_tail",
+        "before": [
+          {
+            "frame_id": "e9b51eede7254f8d8b252397f92b9434",
+            "name": "제우오들25",
+            "time_ms": 66,
+            "angles": {
+              "0": -33.134765625,
+              "1": -0.17578125,
+              "2": -9.404296875,
+              "3": 9.404296875,
+              "4": 9.931640625,
+              "5": -9.228515625,
+              "6": 68.115234375,
+              "7": -69.43359375,
+              "8": -11.337890625,
+              "9": 2.724609375,
+              "10": 2.900390625,
+              "11": 10.0,
+              "12": -14.0,
+              "15": -4.0,
+              "16": 1.0546875,
+              "13": -95.0,
+              "14": 67.0,
+              "17": -65.7421875,
+              "18": 18.80859375,
+              "19": 53.0,
+              "20": -55.458984375,
+              "21": 10.283203125,
+              "22": -19.0
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "e9b51eede7254f8d8b252397f92b9434",
+            "start_ms": 3008
+          },
+          {
+            "frame_id": "7ba8f380c0e7458aa55562b82342cc87",
+            "name": "오뒤415",
+            "time_ms": 145,
+            "angles": {
+              "0": -33.486328125,
+              "1": 0.17578125,
+              "2": -9.66796875,
+              "3": 9.755859375,
+              "4": 9.66796875,
+              "5": -8.876953125,
+              "6": 67.1484375,
+              "7": -68.5546875,
+              "8": -11.513671875,
+              "9": 2.900390625,
+              "10": -0.703125,
+              "11": -0.087890625,
+              "12": -1.845703125,
+              "15": 2.548828125,
+              "16": -1.93359375,
+              "13": -47.0,
+              "14": 61.0,
+              "17": -27.861328125,
+              "18": 30.322265625,
+              "19": 68.466796875,
+              "20": -59.23828125,
+              "21": 3.779296875,
+              "22": -4.39453125
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "7ba8f380c0e7458aa55562b82342cc87",
+            "start_ms": 3074,
+            "playback_cycle_end": true
+          },
+          {
+            "frame_id": "e9b51eede7254f8d8b252397f92b9434",
+            "name": "제우오들25",
+            "time_ms": 66,
+            "angles": {
+              "0": -33.134765625,
+              "1": -0.17578125,
+              "2": -9.404296875,
+              "3": 9.404296875,
+              "4": 9.931640625,
+              "5": -9.228515625,
+              "6": 68.115234375,
+              "7": -69.43359375,
+              "8": -11.337890625,
+              "9": 2.724609375,
+              "10": 2.900390625,
+              "11": 10.0,
+              "12": -14.0,
+              "15": -4.0,
+              "16": 1.0546875,
+              "13": -95.0,
+              "14": 67.0,
+              "17": -65.7421875,
+              "18": 18.80859375,
+              "19": 53.0,
+              "20": -55.458984375,
+              "21": 10.283203125,
+              "22": -19.0
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "e9b51eede7254f8d8b252397f92b9434",
+            "start_ms": 3320
+          },
+          {
+            "frame_id": "7ba8f380c0e7458aa55562b82342cc87",
+            "name": "오뒤415",
+            "time_ms": 145,
+            "angles": {
+              "0": -33.486328125,
+              "1": 0.17578125,
+              "2": -9.66796875,
+              "3": 9.755859375,
+              "4": 9.66796875,
+              "5": -8.876953125,
+              "6": 67.1484375,
+              "7": -68.5546875,
+              "8": -11.513671875,
+              "9": 2.900390625,
+              "10": -0.703125,
+              "11": -0.087890625,
+              "12": -1.845703125,
+              "15": 2.548828125,
+              "16": -1.93359375,
+              "13": -47.0,
+              "14": 61.0,
+              "17": -27.861328125,
+              "18": 30.322265625,
+              "19": 68.466796875,
+              "20": -59.23828125,
+              "21": 3.779296875,
+              "22": -4.39453125
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "7ba8f380c0e7458aa55562b82342cc87",
+            "start_ms": 3386,
+            "playback_cycle_end": true
+          }
+        ],
+        "source": []
+      },
+      {
+        "path": "/max_seq_ms",
+        "before": 3531,
+        "source": 2907
+      }
+    ],
+    "찐기본자세에서 제자리좌회전(골대)": [
+      {
+        "path": "/frames/length",
+        "before": 14,
+        "source": 10
+      },
+      {
+        "path": "/frames/removed_tail",
+        "before": [
+          {
+            "frame_id": "71f5a572518046d9a6b21070390b6ec1",
+            "name": "제좌왼들25",
+            "time_ms": 61,
+            "angles": {
+              "0": -32.255859375,
+              "1": -0.263671875,
+              "2": -8.4375,
+              "3": 7.55859375,
+              "4": 11.25,
+              "5": -13.447265625,
+              "6": 75.05859375,
+              "7": -76.904296875,
+              "8": -10.546875,
+              "9": 2.548828125,
+              "10": 9.0,
+              "11": 4.0,
+              "12": 4.0,
+              "15": -8.0,
+              "16": 0.0,
+              "13": -52.91015625,
+              "14": 78.0,
+              "17": -29.970703125,
+              "18": 61.435546875,
+              "19": 66.0,
+              "20": -60.0,
+              "21": 15.0,
+              "22": -3.955078125
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "71f5a572518046d9a6b21070390b6ec1",
+            "start_ms": 2206
+          },
+          {
+            "frame_id": "94f36aea9d384b58921e01457aed0bec",
+            "name": "오뒤412",
+            "time_ms": 144,
+            "angles": {
+              "0": -33.310546875,
+              "1": 0.0,
+              "2": -9.580078125,
+              "3": 9.580078125,
+              "4": 9.66796875,
+              "5": -9.140625,
+              "6": 67.67578125,
+              "7": -69.08203125,
+              "8": -11.42578125,
+              "9": 2.8125,
+              "10": -5.0,
+              "11": 0.0,
+              "12": -2.0,
+              "15": 2.0,
+              "16": -2.0,
+              "13": -43.59375,
+              "14": 57.568359375,
+              "17": -24.0,
+              "18": 28.0,
+              "19": 67.0,
+              "20": -60.0,
+              "21": 4.658203125,
+              "22": -1.318359375
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "94f36aea9d384b58921e01457aed0bec",
+            "start_ms": 2267,
+            "_drag_original_start_ms": 145,
+            "playback_cycle_end": true
+          },
+          {
+            "frame_id": "71f5a572518046d9a6b21070390b6ec1",
+            "name": "제좌왼들25",
+            "time_ms": 61,
+            "angles": {
+              "0": -32.255859375,
+              "1": -0.263671875,
+              "2": -8.4375,
+              "3": 7.55859375,
+              "4": 11.25,
+              "5": -13.447265625,
+              "6": 75.05859375,
+              "7": -76.904296875,
+              "8": -10.546875,
+              "9": 2.548828125,
+              "10": 9.0,
+              "11": 4.0,
+              "12": 4.0,
+              "15": -8.0,
+              "16": 0.0,
+              "13": -52.91015625,
+              "14": 78.0,
+              "17": -29.970703125,
+              "18": 61.435546875,
+              "19": 66.0,
+              "20": -60.0,
+              "21": 15.0,
+              "22": -3.955078125
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "71f5a572518046d9a6b21070390b6ec1",
+            "start_ms": 2545
+          },
+          {
+            "frame_id": "94f36aea9d384b58921e01457aed0bec",
+            "name": "오뒤412",
+            "time_ms": 144,
+            "angles": {
+              "0": -33.310546875,
+              "1": 0.0,
+              "2": -9.580078125,
+              "3": 9.580078125,
+              "4": 9.66796875,
+              "5": -9.140625,
+              "6": 67.67578125,
+              "7": -69.08203125,
+              "8": -11.42578125,
+              "9": 2.8125,
+              "10": -5.0,
+              "11": 0.0,
+              "12": -2.0,
+              "15": 2.0,
+              "16": -2.0,
+              "13": -43.59375,
+              "14": 57.568359375,
+              "17": -24.0,
+              "18": 28.0,
+              "19": 67.0,
+              "20": -60.0,
+              "21": 4.658203125,
+              "22": -1.318359375
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "94f36aea9d384b58921e01457aed0bec",
+            "start_ms": 2606,
+            "_drag_original_start_ms": 145,
+            "playback_cycle_end": true
+          }
+        ],
+        "source": []
+      },
+      {
+        "path": "/max_seq_ms",
+        "before": 2750,
+        "source": 2072
+      }
+    ],
+    "찐후진에서 제자리좌회전(공)": [
+      {
+        "path": "/frames/length",
+        "before": 16,
+        "source": 10
+      },
+      {
+        "path": "/frames/removed_tail",
+        "before": [
+          {
+            "frame_id": "71f5a572518046d9a6b21070390b6ec1",
+            "name": "제좌왼들25",
+            "time_ms": 61,
+            "angles": {
+              "0": -32.255859375,
+              "1": -0.263671875,
+              "2": -8.4375,
+              "3": 7.55859375,
+              "4": 11.25,
+              "5": -13.447265625,
+              "6": 75.05859375,
+              "7": -76.904296875,
+              "8": -10.546875,
+              "9": 2.548828125,
+              "10": 9,
+              "11": 4,
+              "12": 4,
+              "13": -52.91015625,
+              "14": 78,
+              "15": -8,
+              "16": 0,
+              "17": -29.970703125,
+              "18": 61.435546875,
+              "19": 66,
+              "20": -60,
+              "21": 15,
+              "22": -3.955078125
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "13": true,
+              "14": true,
+              "15": true,
+              "16": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "71f5a572518046d9a6b21070390b6ec1",
+            "start_ms": 2206
+          },
+          {
+            "frame_id": "94f36aea9d384b58921e01457aed0bec",
+            "name": "오뒤412",
+            "time_ms": 144,
+            "angles": {
+              "0": -33.310546875,
+              "1": 0,
+              "2": -9.580078125,
+              "3": 9.580078125,
+              "4": 9.66796875,
+              "5": -9.140625,
+              "6": 67.67578125,
+              "7": -69.08203125,
+              "8": -11.42578125,
+              "9": 2.8125,
+              "10": -5,
+              "11": 0,
+              "12": -2,
+              "13": -43.59375,
+              "14": 57.568359375,
+              "15": 2,
+              "16": -2,
+              "17": -24,
+              "18": 28,
+              "19": 67,
+              "20": -60,
+              "21": 4.658203125,
+              "22": -1.318359375
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "13": true,
+              "14": true,
+              "15": true,
+              "16": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "94f36aea9d384b58921e01457aed0bec",
+            "start_ms": 2267,
+            "_drag_original_start_ms": 145,
+            "playback_cycle_end": true
+          },
+          {
+            "frame_id": "71f5a572518046d9a6b21070390b6ec1",
+            "name": "제좌왼들25",
+            "time_ms": 61,
+            "angles": {
+              "0": -32.255859375,
+              "1": -0.263671875,
+              "2": -8.4375,
+              "3": 7.55859375,
+              "4": 11.25,
+              "5": -13.447265625,
+              "6": 75.05859375,
+              "7": -76.904296875,
+              "8": -10.546875,
+              "9": 2.548828125,
+              "10": 9,
+              "11": 4,
+              "12": 4,
+              "13": -52.91015625,
+              "14": 78,
+              "15": -8,
+              "16": 0,
+              "17": -29.970703125,
+              "18": 61.435546875,
+              "19": 66,
+              "20": -60,
+              "21": 15,
+              "22": -3.955078125
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "13": true,
+              "14": true,
+              "15": true,
+              "16": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "71f5a572518046d9a6b21070390b6ec1",
+            "start_ms": 2545
+          },
+          {
+            "frame_id": "94f36aea9d384b58921e01457aed0bec",
+            "name": "오뒤412",
+            "time_ms": 144,
+            "angles": {
+              "0": -33.310546875,
+              "1": 0,
+              "2": -9.580078125,
+              "3": 9.580078125,
+              "4": 9.66796875,
+              "5": -9.140625,
+              "6": 67.67578125,
+              "7": -69.08203125,
+              "8": -11.42578125,
+              "9": 2.8125,
+              "10": -5,
+              "11": 0,
+              "12": -2,
+              "13": -43.59375,
+              "14": 57.568359375,
+              "15": 2,
+              "16": -2,
+              "17": -24,
+              "18": 28,
+              "19": 67,
+              "20": -60,
+              "21": 4.658203125,
+              "22": -1.318359375
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "13": true,
+              "14": true,
+              "15": true,
+              "16": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "94f36aea9d384b58921e01457aed0bec",
+            "start_ms": 2606,
+            "_drag_original_start_ms": 145,
+            "playback_cycle_end": true
+          },
+          {
+            "frame_id": "71f5a572518046d9a6b21070390b6ec1",
+            "name": "제좌왼들25",
+            "time_ms": 61,
+            "angles": {
+              "0": -32.255859375,
+              "1": -0.263671875,
+              "2": -8.4375,
+              "3": 7.55859375,
+              "4": 11.25,
+              "5": -13.447265625,
+              "6": 75.05859375,
+              "7": -76.904296875,
+              "8": -10.546875,
+              "9": 2.548828125,
+              "10": 9,
+              "11": 4,
+              "12": 4,
+              "13": -52.91015625,
+              "14": 78,
+              "15": -8,
+              "16": 0,
+              "17": -29.970703125,
+              "18": 61.435546875,
+              "19": 66,
+              "20": -60,
+              "21": 15,
+              "22": -3.955078125
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "13": true,
+              "14": true,
+              "15": true,
+              "16": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "71f5a572518046d9a6b21070390b6ec1",
+            "start_ms": 2884
+          },
+          {
+            "frame_id": "94f36aea9d384b58921e01457aed0bec",
+            "name": "오뒤412",
+            "time_ms": 144,
+            "angles": {
+              "0": -33.310546875,
+              "1": 0,
+              "2": -9.580078125,
+              "3": 9.580078125,
+              "4": 9.66796875,
+              "5": -9.140625,
+              "6": 67.67578125,
+              "7": -69.08203125,
+              "8": -11.42578125,
+              "9": 2.8125,
+              "10": -5,
+              "11": 0,
+              "12": -2,
+              "13": -43.59375,
+              "14": 57.568359375,
+              "15": 2,
+              "16": -2,
+              "17": -24,
+              "18": 28,
+              "19": 67,
+              "20": -60,
+              "21": 4.658203125,
+              "22": -1.318359375
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "13": true,
+              "14": true,
+              "15": true,
+              "16": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "94f36aea9d384b58921e01457aed0bec",
+            "start_ms": 2945,
+            "_drag_original_start_ms": 145,
+            "playback_cycle_end": true
+          }
+        ],
+        "source": []
+      },
+      {
+        "path": "/max_seq_ms",
+        "before": 3089,
+        "source": 2072
+      }
+    ],
+    "찐골넣기": [
+      {
+        "path": "/frames/1/_drag_original_start_ms",
+        "before": null,
+        "source": 500,
+        "added": true,
+        "removed": false
+      },
+      {
+        "path": "/frames/1/time_ms",
+        "before": 500,
+        "source": 600
+      },
+      {
+        "path": "/frames/2/angles/5",
+        "before": 14.0,
+        "source": 12.0
+      },
+      {
+        "path": "/frames/2/start_ms",
+        "before": 1250,
+        "source": 1350
+      },
+      {
+        "path": "/frames/3/start_ms",
+        "before": 1550,
+        "source": 1650
+      },
+      {
+        "path": "/frames/4/start_ms",
+        "before": 1650,
+        "source": 1750
+      }
+    ]
+  },
+  "whitespace_name_matches_not_imported": [
+    {
+      "runtime_name": "찐라인복귀우회전45도(4회)",
+      "source_name": "찐라인복귀우회전45 도(4회)",
+      "differences": [
+        {
+          "path": "/end_pose",
+          "before": "오뒤412(우복귀45도)",
+          "source": "오뒤412"
+        },
+        {
+          "path": "/frames/0/frame_id",
+          "before": "7fc0b96c0b454d2aa30d886701dfd569",
+          "source": "5697898460c54f3593e48d8bd386a7d9"
+        },
+        {
+          "path": "/frames/0/is_important",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/0/source_frame_id",
+          "before": "7fc0b96c0b454d2aa30d886701dfd569",
+          "source": "5697898460c54f3593e48d8bd386a7d9"
+        },
+        {
+          "path": "/frames/0/start_ms",
+          "before": 130,
+          "source": 140
+        },
+        {
+          "path": "/frames/0/time_ms",
+          "before": 65,
+          "source": 60
+        },
+        {
+          "path": "/frames/0/torques/0",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/0/torques/1",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/0/torques/10",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/0/torques/11",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/0/torques/12",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/0/torques/13",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/0/torques/14",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/0/torques/15",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/0/torques/16",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/0/torques/17",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/0/torques/18",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/0/torques/19",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/0/torques/2",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/0/torques/20",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/0/torques/21",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/0/torques/22",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/0/torques/3",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/0/torques/4",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/0/torques/5",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/0/torques/6",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/0/torques/7",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/0/torques/8",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/0/torques/9",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/frame_id",
+          "before": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
+          "source": "46c8c5bda6924327837ded0d9612d346"
+        },
+        {
+          "path": "/frames/1/is_important",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/source_frame_id",
+          "before": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
+          "source": "46c8c5bda6924327837ded0d9612d346"
+        },
+        {
+          "path": "/frames/1/start_ms",
+          "before": 195,
+          "source": 200
+        },
+        {
+          "path": "/frames/1/torques/0",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/torques/1",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/torques/10",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/torques/11",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/torques/12",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/torques/13",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/torques/14",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/torques/15",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/torques/16",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/torques/17",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/torques/18",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/torques/19",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/torques/2",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/torques/20",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/torques/21",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/torques/22",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/torques/3",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/torques/4",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/torques/5",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/torques/6",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/torques/7",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/torques/8",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/1/torques/9",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/angles/11",
+          "before": -1.0,
+          "source": 0.0
+        },
+        {
+          "path": "/frames/2/angles/12",
+          "before": 3.33984375,
+          "source": -1.66015625
+        },
+        {
+          "path": "/frames/2/frame_id",
+          "before": "29c39bedc9bf44ffb0cfd15a06cbdbd2",
+          "source": "059d2c5929a64676aa8b6c138012f8f4"
+        },
+        {
+          "path": "/frames/2/is_important",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/source_frame_id",
+          "before": "29c39bedc9bf44ffb0cfd15a06cbdbd2",
+          "source": "059d2c5929a64676aa8b6c138012f8f4"
+        },
+        {
+          "path": "/frames/2/start_ms",
+          "before": 401,
+          "source": 395
+        },
+        {
+          "path": "/frames/2/torques/0",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/torques/1",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/torques/10",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/torques/11",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/torques/12",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/torques/13",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/torques/14",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/torques/15",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/torques/16",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/torques/17",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/torques/18",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/torques/19",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/torques/2",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/torques/20",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/torques/21",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/torques/22",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/torques/3",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/torques/4",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/torques/5",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/torques/6",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/torques/7",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/torques/8",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/2/torques/9",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/3/angles/17",
+          "before": -26.0,
+          "source": -24.0
+        },
+        {
+          "path": "/frames/3/angles/19",
+          "before": 68.115234375,
+          "source": 67.0
+        },
+        {
+          "path": "/frames/3/frame_id",
+          "before": "d8cb5b57ed8f4b9cada466d433c0eccf",
+          "source": "94f36aea9d384b58921e01457aed0bec"
+        },
+        {
+          "path": "/frames/3/name",
+          "before": "오뒤412(우복귀45도)",
+          "source": "오뒤412"
+        },
+        {
+          "path": "/frames/3/source_frame_id",
+          "before": "d8cb5b57ed8f4b9cada466d433c0eccf",
+          "source": "94f36aea9d384b58921e01457aed0bec"
+        },
+        {
+          "path": "/frames/3/start_ms",
+          "before": 458,
+          "source": 452
+        },
+        {
+          "path": "/frames/3/time_ms",
+          "before": 140,
+          "source": 130
+        },
+        {
+          "path": "/frames/3/torques/0",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/3/torques/1",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/3/torques/10",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/3/torques/11",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/3/torques/12",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/3/torques/13",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/3/torques/14",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/3/torques/15",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/3/torques/16",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/3/torques/17",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/3/torques/18",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/3/torques/19",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/3/torques/2",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/3/torques/20",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/3/torques/21",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/3/torques/22",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/3/torques/3",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/3/torques/4",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/3/torques/5",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/3/torques/6",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/3/torques/7",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/3/torques/8",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/frames/3/torques/9",
+          "before": false,
+          "source": true
+        },
+        {
+          "path": "/name",
+          "before": "찐라인복귀우회전45도(4회)",
+          "source": "찐라인복귀우회전45 도(4회)"
+        }
+      ]
+    }
+  ],
+  "runtime_only_exact_names_preserved": [
+    "미세오뒤에서 오옆꽃게90도",
+    "미세오옆에서오옆꽃게0도",
+    "찐골넣기실전",
+    "찐라인복귀우회전45도(4회)",
+    "찐미세오뒤에서기본자세(골대 카메라90도)",
+    "찐미세오옆꽃게0도",
+    "찐미세오옆꽃게90도-1",
+    "찐오뒤에서기본자세(골대 카메라90도)",
+    "후진실전-2(1회, 픽업 카메라0도)"
+  ],
+  "source_only_exact_names_not_imported": [
+    "찐라인복귀우회전45 도(4회)",
+    "찐라인복귀우회전45도(6회)",
+    "찐라인복귀우회전45도(8회)",
+    "찐라인복귀우회전90도(4회)",
+    "찐미세오옆꽃게90-1(2회)",
+    "찐미세오옆꽃게90-1(3회)",
+    "찐전진90(2회)"
+  ],
+  "tolerance_policy": "All runtime completion.position_tolerance_deg remain 5.0; original source snapshot unchanged.",
+  "validation": "Exactly 16 motions replaced; other 70 motions unchanged; all alias targets exist; alias file unchanged; source unchanged.",
+  "numeric_representation_only_differences_not_imported": {
+    "찐허들": [
+      {
+        "path": "/frames/0/angles/11",
+        "before": 0,
+        "source": 0.0
+      },
+      {
+        "path": "/frames/1/angles/21",
+        "before": 20,
+        "source": 20.0
+      },
+      {
+        "path": "/frames/4/angles/16",
+        "before": 17,
+        "source": 17.0
+      },
+      {
+        "path": "/frames/11/angles/14",
+        "before": 68,
+        "source": 68.0
+      },
+      {
+        "path": "/frames/11/angles/22",
+        "before": -16,
+        "source": -16.0
+      },
+      {
+        "path": "/frames/12/angles/4",
+        "before": 22,
+        "source": 22.0
+      },
+      {
+        "path": "/frames/12/angles/5",
+        "before": -19,
+        "source": -19.0
+      },
+      {
+        "path": "/frames/13/angles/10",
+        "before": 0,
+        "source": 0.0
+      },
+      {
+        "path": "/frames/13/angles/11",
+        "before": 0,
+        "source": 0.0
+      },
+      {
+        "path": "/frames/13/angles/13",
+        "before": -55,
+        "source": -55.0
+      },
+      {
+        "path": "/frames/13/angles/14",
+        "before": 80,
+        "source": 80.0
+      },
+      {
+        "path": "/frames/13/angles/15",
+        "before": -5,
+        "source": -5.0
+      },
+      {
+        "path": "/frames/13/angles/16",
+        "before": 4,
+        "source": 4.0
+      },
+      {
+        "path": "/frames/13/angles/19",
+        "before": 64,
+        "source": 64.0
+      },
+      {
+        "path": "/frames/13/angles/20",
+        "before": -58,
+        "source": -58.0
+      },
+      {
+        "path": "/frames/13/angles/21",
+        "before": 12,
+        "source": 12.0
+      },
+      {
+        "path": "/frames/14/angles/1",
+        "before": 0,
+        "source": 0.0
+      },
+      {
+        "path": "/frames/14/angles/10",
+        "before": -5,
+        "source": -5.0
+      },
+      {
+        "path": "/frames/14/angles/11",
+        "before": 0,
+        "source": 0.0
+      },
+      {
+        "path": "/frames/14/angles/12",
+        "before": -2,
+        "source": -2.0
+      },
+      {
+        "path": "/frames/14/angles/15",
+        "before": 2,
+        "source": 2.0
+      },
+      {
+        "path": "/frames/14/angles/16",
+        "before": -2,
+        "source": -2.0
+      },
+      {
+        "path": "/frames/14/angles/17",
+        "before": -24,
+        "source": -24.0
+      },
+      {
+        "path": "/frames/14/angles/18",
+        "before": 28,
+        "source": 28.0
+      },
+      {
+        "path": "/frames/14/angles/19",
+        "before": 67,
+        "source": 67.0
+      },
+      {
+        "path": "/frames/14/angles/20",
+        "before": -60,
+        "source": -60.0
+      }
+    ]
+  }
+}

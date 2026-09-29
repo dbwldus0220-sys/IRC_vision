@@ -229,6 +229,12 @@ def generate_launch_description() -> LaunchDescription:
         parameters=[
             {
                 "initial_mission_phase": initial_mission_phase,
+                "lost_search_max_turns": ParameterValue(
+                    LaunchConfiguration("lost_search_max_turns"), value_type=int
+                ),
+                "lost_search_max_angle_deg": ParameterValue(
+                    LaunchConfiguration("lost_search_max_angle_deg"), value_type=float
+                ),
                 "recovery_heading_turn_deg": ParameterValue(
                     recovery_heading_turn_deg, value_type=float
                 ),
@@ -314,6 +320,8 @@ def generate_launch_description() -> LaunchDescription:
 
     return LaunchDescription(
         [
+            DeclareLaunchArgument("lost_search_max_turns", default_value="3"),
+            DeclareLaunchArgument("lost_search_max_angle_deg", default_value="90.0"),
             DeclareLaunchArgument(
                 "enable_camera",
                 default_value="true",
@@ -435,7 +443,7 @@ def generate_launch_description() -> LaunchDescription:
             ),
             DeclareLaunchArgument(
                 "ball_head_override_deg",
-                default_value="-60.0",
+                default_value="-64.0",
             ),
             DeclareLaunchArgument("goal_tracking_range_m", default_value="2.0"),
             DeclareLaunchArgument("goal_control_range_m", default_value="2.0"),

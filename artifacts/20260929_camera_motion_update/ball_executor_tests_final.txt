@@ -1,0 +1,11 @@
+Internal ctest changing into directory: /tmp/step_camera64_build/irc_step_motion_executor
+Test project /tmp/step_camera64_build/irc_step_motion_executor
+    Start 13: test_test_sdk_executor_node_launch.py
+1/1 Test #13: test_test_sdk_executor_node_launch.py ...   Passed    1.60 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Label Time Summary:
+launch_test    =   1.60 sec*proc (1 test)
+
+Total Test time (real) =   1.60 sec

@@ -18367,7 +18367,7 @@
         {
           "frame_id": "5276d21b1e634c2dab861949715e0f6a",
           "name": "골22",
-          "time_ms": 600,
+          "time_ms": 500,
           "angles": {
             "0": 0.791015625,
             "1": 0.0,
@@ -18421,8 +18421,7 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "5276d21b1e634c2dab861949715e0f6a",
-          "start_ms": 500,
-          "_drag_original_start_ms": 500
+          "start_ms": 500
         },
         {
           "frame_id": "efd4ef475cdc4acd8f561035d95b2494",
@@ -18434,7 +18433,7 @@
             "2": -10.01953125,
             "3": -134.0,
             "4": 12.48046875,
-            "5": 12.0,
+            "5": 14.0,
             "6": 67.642578125,
             "7": -4.0,
             "8": -11.25,
@@ -18481,7 +18480,7 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "efd4ef475cdc4acd8f561035d95b2494",
-          "start_ms": 1350
+          "start_ms": 1250
         },
         {
           "frame_id": "8f57019493174c46931d86864ce6a0fe",
@@ -18540,7 +18539,7 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "8f57019493174c46931d86864ce6a0fe",
-          "start_ms": 1650
+          "start_ms": 1550
         },
         {
           "frame_id": "9cd8ec7c52aa4ac598e71c4693a20a41",
@@ -18599,7 +18598,7 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "9cd8ec7c52aa4ac598e71c4693a20a41",
-          "start_ms": 1750
+          "start_ms": 1650
         }
       ]
     },

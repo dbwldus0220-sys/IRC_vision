@@ -3,6 +3,7 @@
 import importlib.util
 from pathlib import Path
 
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchContext
 from launch.actions import DeclareLaunchArgument
 from launch_ros.actions import Node
@@ -100,11 +101,7 @@ def test_robot_launch_defaults_are_production_ready(
         "explicit_torque_approval": True,
         "position_tolerance_enabled": True,
         "motion_json_path": str(
-            Path(__file__).resolve().parents[3]
-            / "install"
-            / "irc_step_motion_executor"
-            / "share"
-            / "irc_step_motion_executor"
+            Path(get_package_share_directory("irc_step_motion_executor"))
             / "config"
             / "robot_motions_runtime.json"
         ),
@@ -114,7 +111,7 @@ def test_robot_launch_defaults_are_production_ready(
         "startup_pose_enabled": True,
         "startup_pose_name": "오뒤412",
         "startup_pose_duration_ms": 4000,
-        "ball_head_override_deg": -60.0,
+        "ball_head_override_deg": -64.0,
     }
 
 

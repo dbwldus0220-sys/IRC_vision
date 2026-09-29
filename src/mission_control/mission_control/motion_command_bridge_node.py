@@ -53,6 +53,8 @@ class MotionCommandBridgeNode(Node):
     PICKUP_FIXED_SEQUENCE_FIRST_MOTION = "pickup_pre_backward_camera_down"
     PICKUP_GRASP_CHECK_MOTION_ID = "pickup_grasp_check_pose"
     PICKUP_FINE_PREPARE_MOTION_ID = "pickup_fine_prepare"
+    PICKUP_FINE_PRE_DWELL_MARKER = "__PICKUP_FINE_PRE_DWELL__"
+    PICKUP_FINE_PRE_DWELL_SEC = 1.0
     PICKUP_CRAB_PREPARE_MOTION_ID = "pickup_crab_prepare"
     PICKUP_FINE_RIGHT_CRAB_PREPARE_MOTION_ID = "pickup_fine_to_crab_right_0"
     PICKUP_DWELL_SEC = 1.0
@@ -171,6 +173,7 @@ class MotionCommandBridgeNode(Node):
         "POST_BALL_GOAL_TRANSITION": "post_ball_camera_90",
         # Keep legacy action IDs; each target now includes its pose transition.
         "POST_SHOT_TURN_RIGHT_9": "post_shot_default_turn_right",
+        # Keep the legacy action ID; the composite now contains six left turns.
         "POST_SHOT_TURN_LEFT_4": "post_shot_default_turn_left",
         "POST_SHOT_FORWARD": "line_forward_6",
         **{
@@ -1454,6 +1457,24 @@ class MotionCommandBridgeNode(Node):
             return
 
         self.active_dwell_until = None
+        if self.active_motion_id == MotionCommandBridgeNode.PICKUP_FINE_PRE_DWELL_MARKER:
+            self.pickup_positioning_dwell_motion_id = None
+            if self.pickup_positioning_loss_pending:
+                checkpoint = (
+                    self.PICKUP_INITIAL_ALIGN_MARKER
+                    if self.pickup_initial_align_correction_active else self.FINE_ALIGN_MARKER
+                )
+                self._enter_pickup_positioning_loss_reacquisition(checkpoint)
+                return
+            self.active_motion_id = "pickup_fine_forward_0"
+            self._publish_executor_request(
+                action=self.active_action, command_id=self.active_command_id,
+                event_id=self.active_event_id, request_id=self.active_request_id,
+                motion_id=self.active_motion_id,
+                timeout_ms=self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS,
+                prepare_pickup_fine=False,
+            )
+            return
         completed_motion_id = self.pickup_positioning_dwell_motion_id
         if (
             self.active_action == "PICKUP_NOW"
@@ -1702,20 +1723,19 @@ class MotionCommandBridgeNode(Node):
             is_active
             and action == "PICKUP_NOW"
             and payload["motion_id"] == self.PICKUP_FINE_PREPARE_MOTION_ID
+            and self.active_motion_id == self.PICKUP_FINE_PREPARE_MOTION_ID
             and payload["status"] == "SUCCEEDED"
         ):
-            self.get_logger().info(
-                "Pickup fine preparation succeeded; starting pickup_fine_forward_0"
+            self.active_motion_id = MotionCommandBridgeNode.PICKUP_FINE_PRE_DWELL_MARKER
+            self.pickup_positioning_dwell_motion_id = self.PICKUP_FINE_PREPARE_MOTION_ID
+            self.active_dwell_until = (
+                time.monotonic() + MotionCommandBridgeNode.PICKUP_FINE_PRE_DWELL_SEC
             )
-            self.active_motion_id = "pickup_fine_forward_0"
-            self._publish_executor_request(
-                action=action,
-                command_id=self.active_command_id,
-                event_id=self.active_event_id,
-                request_id=self.active_request_id,
-                motion_id=self.active_motion_id,
-                timeout_ms=self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS,
-                prepare_pickup_fine=False,
+            self.publish_motion_status(
+                status="RUNNING", action=action,
+                command_id=self.active_command_id, event_id=self.active_event_id,
+                request_id=self.active_request_id, motion_id=self.active_motion_id,
+                message="holding still for one second before pickup fine forward",
             )
             return
         if (

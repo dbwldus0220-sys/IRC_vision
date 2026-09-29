@@ -62,10 +62,28 @@ def test_catalog30_replaces_only_requested_forward_motions_and_aliases():
     motions = json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
     catalog = {m["name"]: m for m in motions}
     aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
-    assert len(catalog) == len(motions) == manifest["after_count"] + 1
+    # The hurdle import and restored close-ball retreat each add one motion.
+    assert len(catalog) == len(motions) == manifest["after_count"] + 2
     assert not set(manifest["renames"]) & set(catalog)
     assert set(aliases.values()) <= set(catalog)
+    # Later camera updates supersede the historical catalog30 digests.
+    camera_update_dir = RUNTIME_CATALOG_PATH.parent / "20260929_camera_motion_update"
+    camera_update = json.loads((camera_update_dir / "comparison.json").read_text())
+    camera_source = {
+        m["name"]: m for m in
+        json.loads((camera_update_dir / "source_robot_motions.json").read_text())["motions"]
+    }
+    camera_names = set(camera_update["replaced_motion_names"])
+    assert len(camera_names) == 16
+    for name in camera_names:
+        expected = copy.deepcopy(camera_source[name])
+        expected["completion"]["position_tolerance_deg"] = 5.0
+        assert catalog[name] == expected
+        assert all(frame["angles"]["0"] == -64.0 for frame in catalog[name]["frames"])
     for name, digest in manifest["unchanged_sha256"].items():
+        # The latest shot source is checked by the dedicated goal-shot test.
+        if name in camera_names or name == "찐골넣기":
+            continue
         motion = catalog[name]
         original_counts = {
             "찐후진하고 제자리우회전(공)": 7,
@@ -83,6 +101,7 @@ def test_catalog30_replaces_only_requested_forward_motions_and_aliases():
     for alias, change in manifest["changed_aliases"].items():
         expected_aliases[alias] = change["after"]
     expected_aliases["hurdle"] = "찐허들"
+    expected_aliases["pickup_lost_ball_backward_1"] = "후진실전-2(1회, 픽업 카메라0도)"
     assert aliases == expected_aliases
 
 
@@ -101,10 +120,10 @@ def test_post_ball_transition_contains_only_camera_without_stationary_pause():
 def test_goal_shot_matches_supplied_motion_with_five_degree_tolerance():
     motions = json.loads(RUNTIME_CATALOG_PATH.read_text(encoding="utf-8"))["motions"]
     target = next(motion for motion in motions if motion["name"] == "찐골넣기")
-    encoded = json.dumps(target, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-    assert hashlib.sha256(encoded.encode()).hexdigest() == (
-        "a5cd574c1277e8bfa5d4f2a3a6a24cb239a198295e917c82d899f49b41f04ded"
-    )
+    source_path = RUNTIME_CATALOG_PATH.parent / "20260929_goal_shot_update/source_shot.json"
+    expected = json.loads(source_path.read_text(encoding="utf-8"))
+    expected["completion"]["position_tolerance_deg"] = 5.0
+    assert target == expected
 
 
 def test_post_shot_fixed_turns_and_forward_resolve_to_runtime_motions():
@@ -537,7 +556,8 @@ def test_goal_fine_repeats_use_walking_cycle_not_pickup_frames(count):
 
 
 @pytest.mark.parametrize('name,digest', [
-    ('찐미세0도-4', '85fc667137b6b50476fa88a4998065b72f33ed60fd06415676685adb0b446dfb'),
+    # Camera-0 source: artifacts/20260929_camera_motion_update/source_robot_motions.json
+    ('찐미세0도-4', '9abdda081d4406738b7e731707ce690d2207ad82287cedc5c0db1fa230d0eb75'),
     ('찐미세45도-4', '7eb93d40e4fea5441dc4b603443bd5cc46f626ee6d4742895912d44dc649e4a0'),
     ('찐미세90도-4(1회)', '05a8bf2428764b71f8bd4cf6b4663227facd5a34cd489de6e977186e86af704f'),
 ])
@@ -574,12 +594,12 @@ def test_pickup_retreat_keeps_command_id_with_one_repeat():
     ("pickup", "찐공잡기리그랩까지 실전",
      "49f40834f6b2f9e40a12998766acd6a0dfa91456d3277ccb806fb473a9ecad4b"),
     ("pickup_pre_backward_camera_down", "찐공잡기전후진-2(2회)",
-     "ff8f8f30d431c9b9d2e90bf4d1bdf4027d15ff37629a75c51ae6806f99b123b6"),
+     "7bc8b060ba29ab42314be112a6077132ac3284e3398e45e57afa48a6f3cf7715"),
 ])
 def test_import15_requested_motions_match_source_with_five_degree_tolerance(
     motion_id, name, digest,
 ):
-    """Preserve robot_motions(15).json data with only the approved tolerance edit."""
+    """Preserve supplied pickup data, including the 2026-09-29 camera update."""
     aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
     motions = {
         motion["name"]: motion
@@ -710,7 +730,7 @@ def test_calibrated_right_turn_aliases_resolve_to_supplied_catalog(count, angle)
     ("pickup_second_backward_turn_left", "찐후진에서 제자리좌회전(공)",
      "9735e143053bbc33496d68f0d3fe521432478df41bd86bcc03472c3577480418"),
     ("pickup_crab_left_0", "찐미세왼옆꽃게0도-1",
-     "30fe6fde48d687d1a50ecc7fdf2161376fcc7f459e6160f19bdb7ea8c275ce97"),
+     "931415b970ab5d0dcf2bbdc4052079801f953a096a9ba28e3a5013856711929e"),
     ("goal_camera_90_crab_left", "찐미세왼옆꽃게90도-1",
      "dba9db69d2bc5342abe6a0812ae672b234acbf5687053b3dd7f40eab2a7bb7d7"),
 ])
@@ -966,11 +986,11 @@ def test_goal_crab_preparation_changes_only_camera_and_pose_labels(alias, source
 
 @pytest.mark.parametrize("alias,name,frame_count,digest", [
     ("pickup_crab_right_0", "찐미세오옆꽃게0-1(1회)", 4,
-     "2b32b6445f8b8e60ac3ab6d65517baa4debd5f26654fcd86c38ddc295638c66b"),
+     "955855ee4ea1ba22b9f2d65746e30a845f97b177505fa4a2f678de9737b004e5"),
     ("goal_camera_90_crab_right", "찐미세오옆꽃게90-1(1회)", 4,
      "ef4fd376232c750ce52d6f9c374f44fd7c665873bc1d2d7bbc65b6732eb90a3b"),
     ("pickup_fine_to_crab_right_0", "찐미세오뒤에서오옆꽃게0도", 2,
-     "45e9b49852b6ccc2b8d22ca4f61b6de8dc7187441b970cd45278336bb563726b"),
+     "5058c68644682c32c76d1d07fba4e566d9089a87cd669954e8aa38ba5055c6f0"),
     ("goal_fine_to_crab_right_90", "찐미세오뒤에서 오옆꽃게90도", 2,
      "ba38d07ef6ba1ea0a4398f5d6667e45ab97463875deacf6cfc7e6a11ffd152b1"),
     ("goal_forward_to_crab_right_90", "찐오뒤에서 오옆꽃게90도", 2,
@@ -1030,12 +1050,12 @@ def test_pickup_forward_preserves_original_camera45_frames(count):
 
 
 @pytest.mark.parametrize("camera,digest", [
-    (0, "4f633cfd52093bc0fc115eba513ed8ea4750c756a95a65361b69b01a450004eb"),
+    (0, "e9bfd6d522b113c852991f998a9f0b06b860e25e256106b658bb95c3ac5d05bc"),
     (45, "b88c956306ed650997fe3355b2374e34fd089e4e03eab08fb28d67282b6a1a72"),
     (90, "431236af4a758dac798edd50204dc1d309ffe4c3e01337d9425661d8c665d24e"),
 ])
 def test_stationary_left_turns_preserve_latest_catalog29_data(camera, digest):
-    """Lock all 18 left motions to the supplied JSON, including frame timing."""
+    """Preserve supplied left turns; camera 0 uses the 2026-09-29 update."""
     aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
     catalog = {
         motion["name"]: motion

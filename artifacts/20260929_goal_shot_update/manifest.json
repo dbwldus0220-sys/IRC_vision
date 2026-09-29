@@ -1,0 +1,12 @@
+{
+  "source_file": "/home/sy/Downloads/robot_motions.json",
+  "source_sha256": "9921ba9ea63fc3de52a6ffc3b51e5edad077616d5634c346f8578142c23fa2a3",
+  "motion_name": "찐골넣기",
+  "position_tolerance_deg": 5.0,
+  "before_sha256": "fe6dcb68abf6bff1aa99ef2e96bd8a8d7dc0883f10350b256d74f766a8b15487",
+  "after_sha256": "6fdb09050c6f85459fe8d856370ddd5606f8db36cf23a3e795cb99019f4cf1aa",
+  "changed_motion_names": [
+    "찐골넣기"
+  ],
+  "unchanged_motion_count": 85
+}

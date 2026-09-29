@@ -128,6 +128,7 @@ class FakeDecisionNode:
     # Timing tests explicitly enable the production shot delay.
     SHOT_PRE_MOTION_SETTLE_SEC = 0.0
     LINE_TURN_PRE_MOTION_SETTLE_SEC = 0.0
+    FINE_FORWARD_PRE_MOTION_SETTLE_SEC = 0.0
 
     PRE_MOTION_SETTLE_ACTIONS = MotionDecisionNode.PRE_MOTION_SETTLE_ACTIONS
     SPECIAL_ACTIONS = MotionDecisionNode.SPECIAL_ACTIONS

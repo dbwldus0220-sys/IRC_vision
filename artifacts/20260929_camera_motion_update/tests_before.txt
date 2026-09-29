@@ -1,0 +1,21 @@
+...........FF...F...FF....FFF....FFFF.FF................................ [ 70%]
+..FF.......F..................                                           [100%]
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_updated_forward_and_stationary_right_turn_catalog
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_production_alias_catalog_contains_only_approved_aliases
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_every_production_bridge_motion_id_has_an_approved_alias
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_latest_pickup_and_grasp_check_motion_definitions_are_mapped
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_top_loss_forward_uses_existing_camera0_two_repeat_motion
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_updated_fine_frames_match_supplied_walking_data[\ucc10\ubbf8\uc1380\ub3c4-4-85fc667137b6b50476fa88a4998065b72f33ed60fd06415676685adb0b446dfb]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_updated_fine_frames_match_supplied_walking_data[\ucc10\ubbf8\uc13845\ub3c4-4-7eb93d40e4fea5441dc4b603443bd5cc46f626ee6d4742895912d44dc649e4a0]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_updated_fine_frames_match_supplied_walking_data[\ucc10\ubbf8\uc13890\ub3c4-4(1\ud68c)-05a8bf2428764b71f8bd4cf6b4663227facd5a34cd489de6e977186e86af704f]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_recovery_turns_resolve_to_same_direction_and_repeat_count[LEFT-\uc88c-counts0-LEFT]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_recovery_turns_resolve_to_same_direction_and_repeat_count[LEFT-\uc88c-counts0-RIGHT]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_recovery_turns_resolve_to_same_direction_and_repeat_count[RIGHT-\uc6b0-counts1-LEFT]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_recovery_turns_resolve_to_same_direction_and_repeat_count[RIGHT-\uc6b0-counts1-RIGHT]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_recovery_cycle_matches_supplied_catalog[\uc88c-839d8a59316168882e987e8610386a31df77005f5de0cb15ecd6c8b6f2713174]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_recovery_cycle_matches_supplied_catalog[\uc6b0-4d5a9601ab7d363b9e92d73e24283060aeba763a7075e692c94fd96e93123384]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_pickup_crab_preparation_preserves_body_motion_with_camera_down
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_goal_single_retreat_preserves_original_frames_and_three_cycle_pickup_motion
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_goal_depth_selection_resolves_to_requested_runtime_motion[0.431-GOAL_CAMERA90_FINE_FORWARD_1-\ucc10\ubbf8\uc13890\ub3c4-4(1\ud68c)-1]
+17 failed, 85 passed in 3.61s

@@ -1,0 +1,43 @@
+Internal ctest changing into directory: /tmp/step_camera64_build/irc_step_motion_executor
+Test project /tmp/step_camera64_build/irc_step_motion_executor
+    Start 11: test_test_hurdle_head_override_launch.py
+1/3 Test #11: test_test_hurdle_head_override_launch.py ...   Passed    5.95 sec
+    Start 12: test_test_goal_head_override_launch.py
+2/3 Test #12: test_test_goal_head_override_launch.py .....   Passed    4.80 sec
+    Start 13: test_test_sdk_executor_node_launch.py
+3/3 Test #13: test_test_sdk_executor_node_launch.py ......***Failed    7.20 sec
+-- run_test.py: extra environment variables:
+ - ROS_LOG_DIR=/tmp/step_camera64_build/irc_step_motion_executor/ros_test_logs
+-- run_test.py: extra environment variables to append:
+ - AMENT_PREFIX_PATH+=/tmp/step_camera64_install/irc_step_motion_executor
+ - LD_LIBRARY_PATH+=/tmp/step_camera64_install/irc_step_motion_executor/lib
+-- run_test.py: invoking following command in '/tmp/step_camera64_build/irc_step_motion_executor':
+ - /usr/bin/python3 -m launch_testing.launch_test /home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_node_launch.py --junit-xml=/tmp/step_camera64_build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_sdk_executor_node_launch.py.xunit.xml --package-name=irc_step_motion_executor
+[INFO] [launch]: All log files can be found below /tmp/step_camera64_build/irc_step_motion_executor/ros_test_logs/2026-09-29-16-42-03-969294-0-0-24804
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [sdk_motion_executor-1]: process started with pid [24807]
+[INFO] [python3-2]: process started with pid [24809]
+[sdk_motion_executor-1] [0m[INFO]: Motion position tolerance check: ENABLED[0m
+[sdk_motion_executor-1] [33m[WARN]: Simulated backend only: no SDK or hardware access is available[0m
+test_ball_bottom_trigger_latches_override_until_pickup_starts (irc_step_motion_executor.TestSdkExecutorTopics) ... [INFO] [python3-2]: sending signal 'SIGINT' to process[python3-2]
+[INFO] [sdk_motion_executor-1]: sending signal 'SIGINT' to process[sdk_motion_executor-1]
+[sdk_motion_executor-1] [0m[INFO]: signal_handler(signum=2)[0m
+[INFO] [python3-2]: process has finished cleanly [pid 24809]
+FAIL
+test_simulated_executor_publishes_repeated_liveness_heartbeats (irc_step_motion_executor.TestSdkExecutorTopics) ... ok
+test_simulated_topic_contract (irc_step_motion_executor.TestSdkExecutorTopics) ... [INFO] [sdk_motion_executor-1]: process has finished cleanly [pid 24807]
+Processes under test stopped before tests completed
+terminate called without an active exception
+-- run_test.py: return code -6
+-- run_test.py: verify result file '/tmp/step_camera64_build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_sdk_executor_node_launch.py.xunit.xml'
+
+
+67% tests passed, 1 tests failed out of 3
+
+Label Time Summary:
+launch_test    =  17.94 sec*proc (3 tests)
+
+Total Test time (real) =  17.95 sec
+
+The following tests FAILED:
+	 13 - test_test_sdk_executor_node_launch.py (Failed)

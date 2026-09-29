@@ -20,6 +20,8 @@ def generate_test_description():
         name="sdk_motion_executor_launch_test",
         output="screen",
         parameters=[{
+            "backend_type": "simulated",
+            "enable_robot_hardware": False,
             "poll_period_ms": 20,
             "running_polls": 5,
             "settling_polls": 1,
@@ -133,7 +135,7 @@ class TestSdkExecutorTopics(unittest.TestCase):
         )
 
     def test_simulated_topic_contract(self):
-        self._request(101, "forward", "STRAIGHT", 1001, 2001)
+        self._request(101, "sdk_forward_4", "STRAIGHT", 1001, 2001)
         succeeded = self._wait_for(
             lambda value:
             value["request_id"] == 101
@@ -176,7 +178,7 @@ class TestSdkExecutorTopics(unittest.TestCase):
         )
         self.assertEqual(unsupported["status"], "REJECTED")
 
-        self._request(104, "forward", "STRAIGHT")
+        self._request(104, "sdk_forward_4", "STRAIGHT")
         self._request(105, "hurdle", "GO")
         busy = self._wait_for(
             lambda value:
@@ -190,7 +192,7 @@ class TestSdkExecutorTopics(unittest.TestCase):
             and value["status"] == "SUCCEEDED"
         )
 
-        self._request(106, "forward", "STRAIGHT")
+        self._request(106, "sdk_forward_4", "STRAIGHT")
         self._wait_for(
             lambda value:
             value["request_id"] == 106
@@ -214,7 +216,7 @@ class TestSdkExecutorTopics(unittest.TestCase):
             for value in self.statuses
         ))
 
-        self._request(107, "forward", "STRAIGHT")
+        self._request(107, "sdk_forward_4", "STRAIGHT")
         self._wait_for(
             lambda value:
             value["request_id"] == 107
@@ -229,7 +231,7 @@ class TestSdkExecutorTopics(unittest.TestCase):
         self.assertEqual(cancelled["action"], "STRAIGHT")
 
         self._request(
-            108, "forward", "STRAIGHT", 1008, 2008, timeout_ms=1
+            108, "sdk_forward_4", "STRAIGHT", 1008, 2008, timeout_ms=1
         )
         timed_out = self._wait_for(
             lambda value:
@@ -241,7 +243,7 @@ class TestSdkExecutorTopics(unittest.TestCase):
         self.assertEqual(timed_out["event_id"], 2008)
 
     def test_ball_bottom_trigger_latches_override_until_pickup_starts(self):
-        self._request(201, "forward", "STRAIGHT", 1201, 2201)
+        self._request(201, "sdk_forward_4", "STRAIGHT", 1201, 2201)
         self._wait_for(
             lambda value:
             value["request_id"] == 201
@@ -254,7 +256,7 @@ class TestSdkExecutorTopics(unittest.TestCase):
         active = self._wait_for_heartbeat(
             lambda value: value.get("ball_head_override_active") is True
         )
-        self.assertEqual(active["ball_head_override_deg"], -60.0)
+        self.assertEqual(active["ball_head_override_deg"], -64.0)
 
         self._wait_for(
             lambda value:

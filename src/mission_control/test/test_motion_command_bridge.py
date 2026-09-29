@@ -416,6 +416,12 @@ def complete_pickup_fine_preparation(bridge):
     bridge.executor_status_callback(executor_status(
         status="SUCCEEDED", motion_id=bridge.PICKUP_FINE_PREPARE_MOTION_ID,
     ))
+    assert bridge.active_motion_id == MotionCommandBridgeNode.PICKUP_FINE_PRE_DWELL_MARKER
+    deadline = bridge.active_dwell_until
+    before = len(bridge.executor_request_publisher.messages)
+    bridge._check_atomic_dwell(deadline - .001)
+    assert len(bridge.executor_request_publisher.messages) == before
+    bridge._check_atomic_dwell(deadline)
     assert bridge.active_motion_id == "pickup_fine_forward_0"
     assert bridge.active_dwell_until is None
 

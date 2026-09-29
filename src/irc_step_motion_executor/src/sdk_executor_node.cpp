@@ -85,7 +85,7 @@ public:
     ball_head_override_enabled_ = declare_parameter<bool>(
       "ball_head_override_enabled", true);
     ball_head_override_deg_ = declare_parameter<double>(
-      "ball_head_override_deg", -60.0);
+      "ball_head_override_deg", -64.0);
     ball_head_camera_up_deg_ = declare_parameter<double>(
       "ball_head_camera_up_deg", -33.0);
     ball_head_transition_ms_ = positive_parameter_or_default(
@@ -631,7 +631,7 @@ private:
   std::uint64_t heartbeat_sequence_{0};
   bool ball_head_override_enabled_{true};
   bool ball_head_override_latched_{false};
-  double ball_head_override_deg_{-60.0};
+  double ball_head_override_deg_{-64.0};
   double ball_head_camera_up_deg_{-33.0};
   std::int64_t ball_head_transition_ms_{400};
   std::uint64_t ball_head_override_started_ms_{0};

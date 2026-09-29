@@ -44,7 +44,7 @@ def ball_ground_geometry(
     """Estimate approach steering from the ball box's bottom-center contact.
 
     This is a floor-contact approximation, not a 3-D ball-center measurement.
-    The calibration applies ONLY to the normal approach head pose. Never use
+    The calibration applies ONLY to the 45-degree approach head pose. Never use
     it for head-down pickup alignment, or after changing camera pitch/roll/yaw.
     Raw Depth Z remains the distance-control input.
     """
@@ -67,10 +67,17 @@ def ball_ground_geometry(
             and 0 <= top < bottom < image_height - 1):
         return result
     contact_x = (left + right) / 2.0
+    # Line fitting keeps its calibrated distance window. Ball approach may
+    # extrapolate at the same 45-degree head pose, using only finite front points.
+    projection_parameters = {
+        **parameters,
+        "ground_fit_min_forward_m": 0.0,
+        "ground_fit_max_forward_m": math.inf,
+    }
     try:
         ground = project_line_points_to_ground(
             [LinePoint(contact_x, float(bottom), 1.0)],
-            image_width, image_height, parameters,
+            image_width, image_height, projection_parameters,
         )
     except (TypeError, ValueError, OverflowError, np.linalg.LinAlgError):
         return result

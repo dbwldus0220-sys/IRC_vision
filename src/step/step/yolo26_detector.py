@@ -1052,6 +1052,7 @@ class Yolo26Detector(Node):
         motion_id = str(payload.get("motion_id", ""))
         labels = {
             "pickup_fine_prepare": "PICKUP / PREPARE FINE STEP",
+            "__PICKUP_FINE_PRE_DWELL__": "PICKUP / WAIT BEFORE FINE STEP",
             "pickup_fine_forward_0": "PICKUP / FINE FORWARD",
             "pickup_crab_prepare": "PICKUP / PREPARE SIDE STEP",
             "pickup_crab_left_0": "PICKUP / SIDE STEP LEFT",
@@ -1071,6 +1072,13 @@ class Yolo26Detector(Node):
             "post_shot_default_turn_left": "LINE RETURN / TURN LEFT",
         }
         label = labels.get(motion_id)
+        action = str(payload.get("action", ""))
+        # Corner actions share aliases with recovery; preserve their intent.
+        if (
+            action in {"LEFT", "RIGHT"}
+            and motion_id == f"line_recovery_{action.lower()}_4"
+        ):
+            label = action
         source = str(payload.get("source", "")).lower()
         if source == "hurdle" or payload.get("action") == "GO":
             if motion_id == "line_forward_4":
@@ -1109,6 +1117,8 @@ class Yolo26Detector(Node):
         info: dict[str, Any] | None, source: str, motion_label: str,
     ) -> str | None:
         """Show a confirmed approaching hurdle while Line still owns control."""
+        if motion_label in {"LEFT", "RIGHT"}:
+            return None
         if source.lower() != "line" or info is None or any(
             info.get(key) is not True
             for key in ("detected", "confirmation_confirmed", "depth_valid")

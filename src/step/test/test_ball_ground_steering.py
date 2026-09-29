@@ -11,6 +11,7 @@ from step.ball_analyzer import BallAnalyzer, BallInfo, ball_ground_geometry
 from step.ball_navigation_planner import BallNavigationPlanner
 from step.yolo26_detector import Yolo26Detector
 from step.yolo_line_analyzer import GROUND_PROJECTION_DEFAULTS
+from step.yolo_line_analyzer import LinePoint, project_line_points_to_ground
 
 
 def ground_info(angle=20.0, **overrides):
@@ -52,9 +53,9 @@ def test_contact_projection_and_resolution_scaling(x):
 @pytest.mark.parametrize("bbox", [
     None, [], [600, 690, 660, 720], [600, 690, 660, 719],
     [-1, 400, 20, 440], [1260, 400, 1280, 440],
-    [600, 50, 650, 100], [600, 450, 650, 400],
+    [600, 450, 650, 400],
 ])
-def test_missing_clipped_or_out_of_range_contact_is_invalid(bbox):
+def test_missing_clipped_or_reversed_contact_is_invalid(bbox):
     result = ball_ground_geometry(bbox, 1280, 720, GROUND_PROJECTION_DEFAULTS)
     assert result["ground_projection_valid"] is False
     assert result["ground_steering_angle_deg"] is None
@@ -157,3 +158,60 @@ def test_display_distinguishes_ground_approach_from_head_down(
         "IMAGE / HEAD DOWN" if head_down else "GROUND / APPROACH"
     )
     assert all(0 <= origin[1] < height for _, origin in texts)
+
+
+@pytest.mark.parametrize("x", [-0.2, 0.0, 0.2])
+@pytest.mark.parametrize("z", [1.2, 1.5, 1.8])
+def test_far_ball_extrapolates_while_line_range_stays_limited(x, z):
+    parameters = dict(GROUND_PROJECTION_DEFAULTS)
+    h = np.asarray(parameters["ground_homography"]).reshape(3, 3)
+    pixel = np.linalg.inv(h) @ [x, z, 1.0]
+    u, v = pixel[:2] / pixel[2]
+    bbox = [u - 10, v - 20, u + 10, v]
+    result = ball_ground_geometry(bbox, 1280, 720, parameters)
+    assert result["ground_projection_valid"] is True
+    assert result["ground_forward_distance_m"] == pytest.approx(z)
+    assert result["ground_steering_angle_deg"] == pytest.approx(
+        np.rad2deg(np.arctan2(x, z)), abs=0.001,
+    )
+    assert parameters == GROUND_PROJECTION_DEFAULTS
+    assert len(project_line_points_to_ground(
+        [LinePoint(u, v, 1.0)], 1280, 720, parameters,
+    )) == 0
+    half = ball_ground_geometry(
+        [value / 2 for value in bbox], 640, 360, parameters,
+    )
+    assert half["ground_steering_angle_deg"] == result["ground_steering_angle_deg"]
+    json.dumps(result, allow_nan=False)
+
+
+def test_video_ball_contact_no_longer_waits_on_line_range_limit():
+    # Approximate contact read from the 02:16:24 recording at 1:55.
+    result = ball_ground_geometry(
+        [624, 122, 664, 155], 1280, 720, GROUND_PROJECTION_DEFAULTS,
+    )
+    assert result["ground_projection_valid"] is True
+    assert result["ground_forward_distance_m"] == pytest.approx(1.141, abs=.001)
+    assert result["ground_steering_angle_deg"] == pytest.approx(-5.98, abs=.01)
+    info = ground_info(depth_m=1.4, distance_m=1.4, **result)
+    command = BallNavigationPlanner().plan(info, .1)
+    assert command.valid is True
+    assert command.steering_source == "ground_steering_angle_deg"
+    assert command.steering_error_deg == result["ground_steering_angle_deg"]
+    assert command.depth_m == command.distance_m == 1.4
+
+
+@pytest.mark.parametrize("homography", [
+    [0.] * 9,
+    [float("nan")] * 9,
+    [1., 0., 0., 0., 0., -1., 0., 1., 0.],  # Behind the robot.
+    [1., 0., 0., 0., 0., 1., 0., 1., -400.],  # Zero divisor.
+])
+def test_extrapolation_still_rejects_invalid_projection(homography):
+    result = ball_ground_geometry(
+        [600, 350, 650, 400], 1280, 720,
+        {**GROUND_PROJECTION_DEFAULTS, "ground_homography": homography},
+    )
+    assert result["ground_projection_valid"] is False
+    assert result["ground_steering_angle_deg"] is None
+    json.dumps(result, allow_nan=False)

@@ -324,7 +324,7 @@ class MissionPhaseManager:
             # A partial turn has unknown yaw; do not replay or walk onward.
             self.post_shot_failed = True
         elif self.current_phase == "POST_SHOT_TURN":
-            self.current_phase = "LINE_TRACK"
+            self.current_phase = "POST_SHOT_LINE_ALIGN"
         elif self.current_phase == "POST_SHOT_FORWARD":
             self.current_phase = (
                 "LINE_TRACK"

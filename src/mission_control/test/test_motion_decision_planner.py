@@ -1221,6 +1221,9 @@ def test_stationary_right_turn_calibration_in_line_and_goal_paths(
     )
     for decision, prefix in decisions:
         assert decision.valid is True
+        if prefix == "POST_SHOT_LINE" and angle <= 20.0:
+            assert decision.action == "POST_SHOT_LINE_ALIGNED"
+            continue
         assert decision.action == f"{prefix}_TURN_RIGHT_{count}"
         assert decision.source_command["turn_count"] == count
         assert decision.source_command["turn_repeat_deg"] is None
@@ -1449,8 +1452,8 @@ def test_goal_left_deadband_keeps_distance_based_forward(bearing):
     assert decision.action == "GOAL_CAMERA_90_FORWARD_2"
 
 
-@pytest.mark.parametrize("angle,count", [(14.999, 0), (15.0, 1), (20.0, 1), (30.0, 2), (45.0, 3)])
-def test_ball_approach_bypasses_stationary_turns_without_changing_line_thresholds(angle, count):
+@pytest.mark.parametrize("angle,count", [(14.999, 0), (15.0, 0), (20.0, 0), (20.001, 1), (30.0, 2), (45.0, 3)])
+def test_ball_approach_bypasses_turns_and_post_shot_uses_twenty_degree_tolerance(angle, count):
     planner = MotionDecisionPlanner()
     ball = planner.plan_ball_approach_alignment(
         ball_info(steering_angle_deg=-angle, bearing_deg=-angle),
@@ -2946,7 +2949,7 @@ def test_alignment_uses_shared_turn_table_in_ball_line_and_goal_stages(
          "GOAL_CAMERA90", "GOAL_CAMERA_90_FORWARD_2"),
     ):
         assert decision.valid
-        if expected_count == 0:
+        if expected_count == 0 or (prefix == "POST_SHOT_LINE" and angle <= 20.0):
             assert decision.action == aligned_action
         else:
             assert decision.action == f"{prefix}_TURN_{direction}_{expected_count}"
@@ -3066,7 +3069,7 @@ def test_line_alignment_uses_ground_heading_over_opposite_image_heading(phase):
     assert decision.valid is True
     assert decision.action == (
         "POST_BALL_LINE_ALIGNED" if phase == "POST_BALL_LINE_ALIGN"
-        else "POST_SHOT_LINE_TURN_RIGHT_2"
+        else "POST_SHOT_LINE_ALIGNED"
     )
     assert decision.source_command["heading_error_deg"] == 20.0
 

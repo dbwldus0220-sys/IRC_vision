@@ -118,7 +118,7 @@ def test_cpp_executor_defaults_are_safe_and_simulated(
         "robot_device_path": "/dev/ttyUSB0",
         "robot_baud_rate": 4000000,
         "robot_motor_ids": list(range(23)),
-        "ball_head_override_deg": -60.0,
+        "ball_head_override_deg": -64.0,
     }
 
 
@@ -150,7 +150,7 @@ def test_production_arguments_reach_cpp_executor(monkeypatch, tmp_path):
     assert parameters["robot_device_path"] == "/dev/ttyUSB0"
     assert parameters["robot_baud_rate"] == 4000000
     assert parameters["robot_motor_ids"] == list(range(23))
-    assert parameters["ball_head_override_deg"] == -60.0
+    assert parameters["ball_head_override_deg"] == -64.0
 
 
 def test_overlay_tolerance_is_separate_from_depth_sync(

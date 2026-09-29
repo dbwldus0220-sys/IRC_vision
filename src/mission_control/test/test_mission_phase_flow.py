@@ -64,6 +64,7 @@ class MissionFlowHarness:
     # Timing tests explicitly enable the production shot delay.
     SHOT_PRE_MOTION_SETTLE_SEC = 0.0
     LINE_TURN_PRE_MOTION_SETTLE_SEC = 0.0
+    FINE_FORWARD_PRE_MOTION_SETTLE_SEC = 0.0
 
     SOURCES = MotionDecisionNode.SOURCES
     PRE_MOTION_SETTLE_ACTIONS = MotionDecisionNode.PRE_MOTION_SETTLE_ACTIONS
@@ -311,7 +312,7 @@ def complete_post_shot_exit(harness, monkeypatch, correction_heading=0.0):
         assert turn["action"] == expected
         assert harness.publish_vision(line=line_info()) == []
         release_general(harness, turn)
-        assert harness.mission_phase == "LINE_TRACK"
+        assert harness.mission_phase == "POST_SHOT_LINE_ALIGN"
         assert harness.observations["line"] is None
         assert harness.post_shot_dwell_until == clock[0] + 1.0
         clock[0] += 0.99
@@ -320,9 +321,15 @@ def complete_post_shot_exit(harness, monkeypatch, correction_heading=0.0):
         assert harness.publish_vision(line=line_info(heading=correction_heading)) == []
         assert harness.observations["line"] is None
 
-
+        if abs(correction_heading) > 20.0:
+            correction = harness.publish_vision(line=line_info(heading=correction_heading))[-1]
+            assert correction["action"].startswith("POST_SHOT_LINE_TURN_")
+            assert correction["source_command"]["heading_error_deg"] == correction_heading
+            release_general(harness, correction)
+            clock[0] = harness.post_shot_dwell_until
+            assert harness.publish_vision(line=line_info()) == []
         forward = harness.publish_vision(line=line_info())[-1]
-        assert forward["action"] == "STRAIGHT", (forward["source"], forward["reason"])
+        assert forward["action"] == "POST_SHOT_FORWARD", (forward["source"], forward["reason"])
         assert harness.post_shot_dwell_until is None
         release_general(harness, forward)
 
@@ -339,11 +346,11 @@ def test_post_shot_exit_turn_returns_to_normal_line(monkeypatch, section, headin
     harness.send_status("SHOT", shot["command_id"], "SUCCEEDED")
     assert harness.post_shot_dwell_until == deadline
     complete_post_shot_exit(harness, monkeypatch, heading)
-    assert harness.mission_phase == "LINE_TRACK"
+    assert harness.mission_phase == ("AUTO" if section == 1 else "LINE_TRACK")
     actions = [m["action"] for m in harness.publisher.messages]
     corrections = [a for a in actions if a.startswith("POST_SHOT_LINE_TURN_")]
-    assert corrections == []
-    assert actions[-1] == "STRAIGHT"
+    assert len(corrections) == (1 if abs(heading) > 20.0 else 0)
+    assert actions[-1] == "POST_SHOT_FORWARD"
 
 
 @pytest.mark.parametrize("status", ["FAILED", "TIMEOUT", "CANCELLED", "UNSUPPORTED"])
@@ -388,7 +395,7 @@ def test_post_shot_forward_rechecks_heading_after_dwell(monkeypatch):
     assert harness.post_shot_dwell_until == 12.0
 
 
-def test_post_shot_exit_uses_normal_recover_after_dwell(monkeypatch):
+def test_post_shot_exit_aligns_heading_before_normal_recover(monkeypatch):
     clock = [10.0]
     monkeypatch.setattr(
         "mission_control.motion_decision_node.time.monotonic", lambda: clock[0],
@@ -397,16 +404,16 @@ def test_post_shot_exit_uses_normal_recover_after_dwell(monkeypatch):
     turn = harness.publish_vision(line=line_info())[-1]
     assert turn["action"] == "POST_SHOT_TURN_RIGHT_9"
     release_general(harness, turn)
-    assert harness.mission_phase == "LINE_TRACK"
+    assert harness.mission_phase == "POST_SHOT_LINE_ALIGN"
     sample = line_info(heading=30.5, offset=-1.29)
     assert harness.publish_vision(line=sample) == []
     clock[0] = 11.0
     assert harness.publish_vision(line=sample) == []
     assert harness.observations["line"] is None
     result = harness.publish_vision(line=sample)[-1]
-    expected = MotionDecisionPlanner().plan("LINE_TRACK", {"line": sample}, 0.1)
-    assert result["action"] == expected.action == "RECOVER_LEFT_TURN_RIGHT_4"
-    assert all(not m["action"].startswith("POST_SHOT_LINE_") for m in harness.publisher.messages)
+    expected = MotionDecisionPlanner().plan("POST_SHOT_LINE_ALIGN", {"line": sample}, 0.1)
+    assert result["action"] == expected.action == "POST_SHOT_LINE_TURN_RIGHT_3"
+    assert not any(m["action"] in {"STRAIGHT", "POST_SHOT_FORWARD"} for m in harness.publisher.messages)
 
 
 @pytest.mark.parametrize("phase", [
@@ -564,7 +571,7 @@ def test_post_shot_return_requires_new_ball_frame_and_resumes_acquisition(monkey
     receive(String(data=json.dumps(approaching_ball())))
     complete_post_shot_exit(harness, monkeypatch)
 
-    assert harness.mission_phase == "LINE_TRACK"
+    assert harness.mission_phase == "AUTO"
     assert harness.latest_info["ball"] is None
     assert harness.latest_time["ball"] is None
     assert harness.ball_approach_alignment_pending is False
@@ -587,9 +594,9 @@ def test_post_shot_exit_ignores_mismatched_and_duplicate_turn_status():
     harness.send_status(action, turn["command_id"] + 1, "SUCCEEDED")
     assert harness.mission_phase == "POST_SHOT_TURN"
     release_general(harness, turn)
-    assert harness.mission_phase == "LINE_TRACK"
+    assert harness.mission_phase == "POST_SHOT_LINE_ALIGN"
     harness.send_status(action, turn["command_id"], "SUCCEEDED")
-    assert harness.mission_phase == "LINE_TRACK"
+    assert harness.mission_phase == "POST_SHOT_LINE_ALIGN"
 
 
 def post_shot_line_search_ready(monkeypatch, section):
@@ -605,7 +612,7 @@ def post_shot_line_search_ready(monkeypatch, section):
         "POST_SHOT_TURN_RIGHT_9" if section == 1 else "POST_SHOT_TURN_LEFT_4"
     )
     release_general(harness, turn)
-    assert harness.mission_phase == "LINE_TRACK"
+    assert harness.mission_phase == "POST_SHOT_LINE_ALIGN"
     assert harness.publish_vision(line={"detected": False}) == []
     clock[0] = harness.post_shot_dwell_until
     assert harness.publish_vision(line={"detected": False}) == []
@@ -647,10 +654,13 @@ def test_post_shot_search_repeats_one_motion_at_a_time_until_line_visible(
         clock[0] = harness.post_shot_dwell_until
         assert harness.publish_vision(line=line_info()) == []
         assert harness.observations["line"] is None
-        assert harness.post_shot_line_search_action == action
+        assert harness.mission_phase == "POST_SHOT_LINE_ALIGN"
 
+    blocked = harness.publish_vision(line={"detected": False})[-1]
+    assert not blocked["valid"]
+    assert blocked["reason"] == "lost_search_turn_limit_reached"
     forward = harness.publish_vision(line=line_info())[-1]
-    assert forward["action"] == "STRAIGHT"
+    assert forward["action"] == "POST_SHOT_FORWARD"
     assert harness.post_shot_line_search_action is None
     release_general(harness, forward)
     # A later loss must use normal Line logic, not the fixed exit search.
@@ -660,14 +670,15 @@ def test_post_shot_search_repeats_one_motion_at_a_time_until_line_visible(
 
 @pytest.mark.parametrize("section", [1, 2])
 @pytest.mark.parametrize("sample", [line_info(), line_info(heading=30.5, offset=-1.29)])
-def test_post_shot_visible_line_skips_search_and_uses_normal_planner(
+def test_post_shot_visible_line_requires_heading_alignment_before_forward(
     monkeypatch, section, sample,
 ):
     harness, _clock = post_shot_line_search_ready(monkeypatch, section)
     result = harness.publish_vision(line=sample)[-1]
-    expected = MotionDecisionPlanner().plan("LINE_TRACK", {"line": sample}, 0.1)
-    assert result["action"] == expected.action
-    assert result["reason"] == expected.reason
+    expected = MotionDecisionPlanner().plan("POST_SHOT_LINE_ALIGN", {"line": sample}, 0.1)
+    assert result["action"] == (
+        "POST_SHOT_FORWARD" if expected.action == "POST_SHOT_LINE_ALIGNED" else expected.action
+    )
     assert harness.post_shot_line_search_action is None
 
 
@@ -677,10 +688,10 @@ def test_post_shot_search_waits_for_fresh_line_messages(monkeypatch, section):
     clock[0] += 10.0
     for _ in range(2):
         result = harness.publish_vision(line=None)[-1]
-        assert result["action"] == "STOP"
+        assert result["action"] == "WAIT"
         assert result["valid"] is False
-        assert result["reason"] == "waiting_for_line_info"
-        assert harness.post_shot_line_search_action is not None
+        assert result["reason"] == "post_shot_line_not_detected"
+        assert harness.mission_phase == "POST_SHOT_LINE_ALIGN"
     assert harness.publish_vision(line={"detected": False})[-1]["valid"] is True
 
 
@@ -690,7 +701,7 @@ def test_post_shot_detected_low_quality_line_does_not_force_search(monkeypatch, 
     sample = line_info()
     sample["heading_quality"] = 0.01
     result = harness.publish_vision(line=sample)[-1]
-    expected = MotionDecisionPlanner().plan("LINE_TRACK", {"line": sample}, 0.1)
+    expected = MotionDecisionPlanner().plan("POST_SHOT_LINE_ALIGN", {"line": sample}, 0.1)
     assert result["action"] == expected.action
     assert result["valid"] is False
     assert harness.post_shot_line_search_action is None
@@ -707,7 +718,7 @@ def test_post_shot_search_failure_holds_without_replay(monkeypatch, section, sta
         result = harness.publish_vision(line=sample)[-1]
         assert result["action"] == "WAIT"
         assert result["valid"] is False
-        assert result["reason"] == "post_shot_line_search_failed"
+        assert result["reason"] == "post_shot_motion_failed"
     assert harness.line_timeout_recovery_active is False
 
 
@@ -739,7 +750,7 @@ def test_post_shot_search_waits_one_second_before_and_after_turn(
     assert harness.observations["line"] is None
     assert not harness.general_motion_gate.has_required_fresh_vision()
     if line_visible_after_turn:
-        assert harness.publish_vision(line=sample)[-1]["action"] == "STRAIGHT"
+        assert harness.publish_vision(line=sample)[-1]["action"] == "POST_SHOT_FORWARD"
         assert harness.post_shot_line_search_action is None
         return
     # The next search turn still has its own three-second pre-motion pause.
@@ -763,7 +774,7 @@ def test_post_shot_line_seen_during_settle_cancels_search(monkeypatch):
     harness.LINE_TURN_PRE_MOTION_SETTLE_SEC = 1.0
     assert harness.publish_vision(line={"detected": False}) == []
     clock[0] += 1.0
-    assert harness.publish_vision(line=line_info())[-1]["action"] == "STRAIGHT"
+    assert harness.publish_vision(line=line_info())[-1]["action"] == "POST_SHOT_FORWARD"
     assert harness.post_shot_line_search_action is None
     assert not any(
         m["action"].startswith("POST_SHOT_LINE_TURN_")
@@ -2234,7 +2245,7 @@ def test_shot_success_updates_one_section_and_returns_to_line(monkeypatch):
     assert harness.shots_completed == 1
     assert harness.ball_sections_processed == 1
     assert harness.finish_enabled is False
-    assert harness.mission_phase == "LINE_TRACK"
+    assert harness.mission_phase == "AUTO"
 
 
 def test_last_shot_enables_finish_flag_and_continues_line_driving(monkeypatch):

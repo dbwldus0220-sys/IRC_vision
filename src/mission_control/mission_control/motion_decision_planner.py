@@ -125,6 +125,7 @@ class MotionDecisionPlanner:
     # Fixed lost-ball search turns: left two repeats, right five repeats.
     BALL_LOST_LEFT_TURN_COUNT = 2
     BALL_LOST_RIGHT_TURN_COUNT = 5
+    POST_SHOT_LINE_HEADING_TOLERANCE_DEG = 20.0
 
     def __init__(
         self,
@@ -1125,7 +1126,7 @@ class MotionDecisionPlanner:
             )
 
         direction = "RIGHT" if heading > 0.0 else "LEFT"
-        heading_tolerance = self.STATIONARY_TURN_MIN_DEG[direction]
+        heading_tolerance = self.POST_SHOT_LINE_HEADING_TOLERANCE_DEG
         offset_tolerance = self.line_planner.config.recovery_exit_offset_norm
         common = {
             "heading_error_deg": heading,
@@ -1136,7 +1137,7 @@ class MotionDecisionPlanner:
             "alignment_reference": "line_heading",
             "steering_error_deg": heading,
         }
-        if abs(heading) < heading_tolerance:
+        if abs(heading) <= heading_tolerance:
             return MotionDecision(
                 phase=phase,
                 source="line",

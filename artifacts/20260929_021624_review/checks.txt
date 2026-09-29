@@ -1,0 +1,10 @@
+{"ball_case": "approximate video box", "unfiltered_ground_z_m": 1.141, "max_ground_z_m": 1.05, "ground_projection_valid": false, "reason": "invalid_ball_alignment"}
+{"synthetic_reliable_right_curve": [["STRAIGHT", "turn_confirmation_pending"], ["STRAIGHT", "turn_confirmation_pending"], ["RIGHT", "line_tracking"]]}
+{"synthetic_near_point_left_and_corner_right": {"valid": true, "motion": "LINE_LOST_TURN_LEFT", "reason": "line_lost_turn_toward_last_seen_side", "sdk_motion_requested": false, "last_seen_direction": "LEFT", "turn_count": 2, "catalog_motion_available": true}}
+{"action": "RIGHT", "alias": "line_recovery_right_4", "banner": "RIGHT"}
+{"action": "LEFT", "alias": "line_recovery_left_4", "banner": "LEFT"}
+{"action": "RECOVER_RIGHT_TURN_RIGHT_4", "alias": "line_recovery_right_4", "banner": "LINE RETURN RIGHT 4"}
+{"action": "BALL_APPROACH_RECOVER_LEFT_4", "alias": "line_recovery_left_4", "banner": "LINE RETURN LEFT 4"}
+{"action": "LINE_LOST_TURN_LEFT", "alias": "line_search_left_2", "banner": "LINE SEARCH / IN-PLACE TURN LEFT 2"}
+{"action": "RIGHT", "alias": "line_search_left_2", "banner": "LINE SEARCH / IN-PLACE TURN LEFT 2"}
+Corner banner checks passed; normal recovery and lost-search labels preserved.
