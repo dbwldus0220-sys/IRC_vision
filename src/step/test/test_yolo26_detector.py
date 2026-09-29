@@ -551,7 +551,8 @@ def test_shared_fine_motion_label_keeps_command_owner(monkeypatch, status_first,
 
 
 @pytest.mark.parametrize('depth,shown', [
-    (0.55, False), (0.551, True), (0.67, True), (1.0, True),
+    (0.55, False), (0.551, False), (0.67, False), (0.7, False),
+    (0.700001, True), (1.0, True),
     (1.001, False), (None, False), (float('nan'), False),
 ])
 def test_hurdle_recognition_label_preserves_line_driving(depth, shown):

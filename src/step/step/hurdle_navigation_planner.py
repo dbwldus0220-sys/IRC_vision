@@ -9,7 +9,7 @@ from typing import Any
 
 from .approach_distance import approach_level_from_motion
 from .approach_distance import ball_hurdle_approach_motion
-from .approach_distance import BALL_HURDLE_FINE_DISTANCE_M
+from .approach_distance import HURDLE_FINE_DISTANCE_M
 
 
 HURDLE_HEAD_DOWN_BOTTOM_DISTANCE_PX = 120
@@ -249,7 +249,7 @@ class HurdleNavigationPlanner:
         positioning_turn_needed = positioning and not path_centered
         fine_sequence_requested = bool(
             positioning
-            and depth <= BALL_HURDLE_FINE_DISTANCE_M
+            and depth <= HURDLE_FINE_DISTANCE_M
             and (not positioning_turn_needed or self.close_rotation_blocked)
         )
         if positioning:
@@ -270,13 +270,17 @@ class HurdleNavigationPlanner:
             action = "GO"
             reason = "hurdle_parallel_at_close_depth"
         elif self.close_rotation_blocked and not ready_geometry:
-            action = ball_hurdle_approach_motion(depth)
+            action = ball_hurdle_approach_motion(
+                depth, fine_distance_m=HURDLE_FINE_DISTANCE_M,
+            )
             reason = "hurdle_close_distance_approach_without_rotation"
         elif positioning and positioning_turn_needed:
             action = "ALIGN_LEFT" if center_steering < 0.0 else "ALIGN_RIGHT"
             reason = "align_to_hurdle_center"
         elif positioning and not ready_geometry:
-            action = ball_hurdle_approach_motion(depth)
+            action = ball_hurdle_approach_motion(
+                depth, fine_distance_m=HURDLE_FINE_DISTANCE_M,
+            )
             reason = "hurdle_center_distance_approach"
         elif (
             path_reference_valid
@@ -292,7 +296,9 @@ class HurdleNavigationPlanner:
             action = "WAIT_GO_CONFIRMATION"
             reason = "waiting_for_stable_hurdle_condition"
         elif ground_gap_error > self.config.go_depth_tolerance_m:
-            action = ball_hurdle_approach_motion(depth)
+            action = ball_hurdle_approach_motion(
+                depth, fine_distance_m=HURDLE_FINE_DISTANCE_M,
+            )
             reason = "hurdle_aligned_discrete_approach"
         else:
             action = "WAIT_GO_CONFIRMATION"

@@ -95,7 +95,10 @@ public:
       "ball_head_override_motion_ids",
       std::vector<std::string>{
         "line_forward_2", "line_forward_4", "line_forward_6",
-        "line_forward_8", "line_forward_10", "sdk_forward_4", "forward"});
+        "line_forward_8", "line_forward_10", "sdk_forward_4", "forward",
+        "line_recovery_left_4", "line_recovery_left_6", "line_recovery_right_4",
+        "ball_general_fine_forward_8", "ball_camera_down_forward_2",
+        "ball_camera_down_forward_4"});
     goal_head_override_enabled_ = declare_parameter<bool>(
       "goal_head_override_enabled", true);
     goal_head_override_deg_ = declare_parameter<double>(
@@ -197,13 +200,11 @@ public:
     request_subscription_ = create_subscription<std_msgs::msg::String>(
       "/motion/executor/request", 10,
       [this](const std_msgs::msg::String::SharedPtr message) {
-        clear_ball_head_override_before_pickup(message->data);
         driver_->handle_request(message->data);
       });
     cancel_subscription_ = create_subscription<std_msgs::msg::String>(
       "/motion/executor/cancel", 10,
       [this](const std_msgs::msg::String::SharedPtr message) {
-        clear_ball_head_override();
         driver_->handle_cancel(message->data);
       });
     ball_info_subscription_ = create_subscription<std_msgs::msg::String>(
@@ -261,6 +262,14 @@ private:
     const std::string phase = phase_present && json_object_get_type(phase_value) == json_type_string ?
       json_object_get_string(phase_value) : "";
     json_object_put(object);
+    if (source == "ball") {
+      if (!ball_control_active_) {
+        ball_grasp_started_ = false;
+      }
+      ball_control_active_ = true;
+    } else if (valid && (source == "line" || source == "hurdle" || source == "goal")) {
+      ball_control_active_ = false;
+    }
     if (source == "hurdle" && (valid || phase == "HURDLE_POSITIONING")) {
       // A positioning WAIT may be waiting for fresh geometry after Line ended.
       hurdle_control_active_ = true;
@@ -390,7 +399,7 @@ private:
   void handle_ball_info(const std::string & payload)
   {
     if (!ball_head_override_enabled_ || ball_head_override_latched_ ||
-      goal_head_override_latched_ || hurdle_head_override_latched_)
+      ball_grasp_started_ || goal_head_override_latched_ || hurdle_head_override_latched_)
     {
       return;
     }
@@ -412,7 +421,8 @@ private:
       json_object_get_type(requested) == json_type_boolean &&
       json_object_get_boolean(requested);
     json_object_put(object);
-    if (!should_override || !ball_head_motion_active()) {
+    // BALL owns camera-down even while stationary or correcting its heading.
+    if (!should_override || (!ball_control_active_ && !ball_head_motion_active())) {
       return;
     }
     ball_head_override_latched_ = true;
@@ -440,33 +450,6 @@ private:
       RCLCPP_ERROR(
         get_logger(), "Motion backend rejected motor 0 override");
       clear_ball_head_override();
-    }
-  }
-
-  void clear_ball_head_override_before_pickup(const std::string & payload)
-  {
-    if (!ball_head_override_latched_) {
-      return;
-    }
-    json_object * object = json_tokener_parse(payload.c_str());
-    if (object == nullptr || json_object_get_type(object) != json_type_object) {
-      if (object != nullptr) {
-        json_object_put(object);
-      }
-      return;
-    }
-    json_object * motion_id_value = nullptr;
-    const bool starts_pickup =
-      json_object_object_get_ex(object, "motion_id", &motion_id_value) &&
-      json_object_get_type(motion_id_value) == json_type_string &&
-      (std::string(json_object_get_string(motion_id_value)) == "pickup" ||
-      std::string(json_object_get_string(motion_id_value)) == "sdk_pickup");
-    json_object_put(object);
-    if (starts_pickup) {
-      clear_ball_head_override();
-      RCLCPP_INFO(
-        get_logger(),
-        "Motor 0 override cleared before pickup motion");
     }
   }
 
@@ -505,12 +488,13 @@ private:
       clear_hurdle_head_override();
     }
 
-    // Pickup forward uses the original camera-45 frames. Release a previous
-    // ball look-down only after this request is accepted, never on rejection.
-    if (status == "RUNNING" &&
-      (motion_id == "ball_camera_down_forward_2" ||
-      motion_id == "ball_camera_down_forward_4"))
-    {
+    // Release only on accepted grasp/cancel, never on a rejected request.
+    if (status == "RUNNING" && (motion_id == "pickup" || motion_id == "sdk_pickup")) {
+      ball_grasp_started_ = true;
+      clear_ball_head_override();
+    }
+    if (status == "CANCELLED") {
+      ball_control_active_ = false;
       clear_ball_head_override();
     }
 
@@ -629,6 +613,8 @@ private:
   rclcpp::TimerBase::SharedPtr poll_timer_;
   rclcpp::TimerBase::SharedPtr heartbeat_timer_;
   std::uint64_t heartbeat_sequence_{0};
+  bool ball_control_active_{false};
+  bool ball_grasp_started_{false};
   bool ball_head_override_enabled_{true};
   bool ball_head_override_latched_{false};
   double ball_head_override_deg_{-64.0};

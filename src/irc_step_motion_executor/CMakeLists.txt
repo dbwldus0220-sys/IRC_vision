@@ -334,6 +334,12 @@ if(BUILD_TESTING)
     APPEND_ENV "AMENT_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}"
     APPEND_LIBRARY_DIRS "${CMAKE_INSTALL_PREFIX}/lib")
   add_launch_test(
+    test/test_ball_head_override_launch.py
+    TIMEOUT 30
+    ENV "ROS_LOG_DIR=${CMAKE_CURRENT_BINARY_DIR}/ros_test_logs"
+    APPEND_ENV "AMENT_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}"
+    APPEND_LIBRARY_DIRS "${CMAKE_INSTALL_PREFIX}/lib")
+  add_launch_test(
     test/test_goal_head_override_launch.py
     TIMEOUT 30
     ENV "ROS_LOG_DIR=${CMAKE_CURRENT_BINARY_DIR}/ros_test_logs"

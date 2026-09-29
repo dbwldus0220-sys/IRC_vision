@@ -34,7 +34,7 @@ from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import Image
 from std_msgs.msg import String
 
-from step.approach_distance import BALL_HURDLE_FINE_DISTANCE_M
+from step.approach_distance import HURDLE_FINE_DISTANCE_M
 from step.ball_navigation_planner import valid_ball_ground_steering
 from step.depth_frame_cache import image_stamp_ns
 from step.line_navigation_planner import (
@@ -1125,7 +1125,7 @@ class Yolo26Detector(Node):
         ):
             return None
         depth = Yolo26Detector._number(info, "depth_m")
-        if depth is None or not BALL_HURDLE_FINE_DISTANCE_M < depth <= 1.0:
+        if depth is None or not HURDLE_FINE_DISTANCE_M < depth <= 1.0:
             return None
         label = motion_label.replace("LINE FORWARD", "LINE_FORWARD")
         if label.startswith("STRAIGHT"):

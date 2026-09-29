@@ -185,7 +185,8 @@ def test_close_pixel_boundary_replaces_both_turn_types_with_fine_approach(
 
 @pytest.mark.parametrize("depth,expected", [
     (0.15, "STRAIGHT_0"), (0.550, "STRAIGHT_0"),
-    (0.550001, "STRAIGHT"), (0.7, "STRAIGHT"),
+    (0.550001, "STRAIGHT_0"), (0.7, "STRAIGHT_0"),
+    (0.700001, "STRAIGHT"), (1.0, "STRAIGHT"),
 ])
 def test_near_misaligned_hurdle_uses_depth_without_requesting_go(depth, expected):
     command = HurdleNavigationPlanner().plan(hurdle_info(

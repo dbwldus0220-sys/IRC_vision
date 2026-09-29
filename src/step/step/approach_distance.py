@@ -35,6 +35,7 @@ def approach_motion_for_distance(distance_m: float | None) -> str:
 
 
 BALL_HURDLE_FINE_DISTANCE_M = 0.550
+HURDLE_FINE_DISTANCE_M = 0.700
 
 
 def ball_hurdle_approach_motion(

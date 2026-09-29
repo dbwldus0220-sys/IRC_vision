@@ -1,0 +1,18 @@
+{
+  "source_file": "/home/jet/Downloads/robot_motions(34).json",
+  "source_sha256": "e490e1460aacf641b62777031f0cbb56bd9ea22fe270a9cc1d1edab6c01623b7",
+  "replaced_names": [
+    "찐후진실전(1회)",
+    "찐후진실전-2(2회)"
+  ],
+  "position_tolerance_deg": 5.0,
+  "motion_count": 89,
+  "before_sha256": {
+    "찐후진실전(1회)": "17081fe0b604bb1ddb60c3ccded49a7840c8d24908ec59e178bcdc48257a3815",
+    "찐후진실전-2(2회)": "c23bf0501008e9ebeb396e3668cbc7e6823263377ffcda38440a0432e701c853"
+  },
+  "after_sha256": {
+    "찐후진실전(1회)": "1a4484895f37b3749c582281fc37a572ca1eef7be6a41a8ec1f7c5b292b89140",
+    "찐후진실전-2(2회)": "ac3a5e6bdca47c7b7341fa1bc3efe4e586d98a3c69601d2ca531051a78946fc4"
+  }
+}

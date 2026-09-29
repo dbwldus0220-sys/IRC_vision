@@ -105,8 +105,3 @@ motion_aliases:
 
   pickup: "찐공잡기리그랩까지 실전"
   hurdle: "찐허들"
-
-  # Fine-forward exit posture before any in-place turn (camera pose in degrees).
-  fine_to_turn_ready_45: "찐미세오뒤에서 오뒤(45도)"
-  fine_to_turn_ready_0: "찐미세오뒤에서 오뒤(0도)"
-  fine_to_turn_ready_90: "찐미세오뒤에서 오뒤(골대 카메라90도)"

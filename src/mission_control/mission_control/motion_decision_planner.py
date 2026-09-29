@@ -9,6 +9,7 @@ from typing import Any
 
 from step.approach_distance import approach_level_from_motion
 from step.approach_distance import BALL_HURDLE_FINE_DISTANCE_M
+from step.approach_distance import HURDLE_FINE_DISTANCE_M
 from step.approach_distance import ball_hurdle_approach_motion
 from step.ball_navigation_planner import BallNavigationConfig
 from step.ball_navigation_planner import BallNavigationPlanner
@@ -617,7 +618,7 @@ class MotionDecisionPlanner:
         return bool(
             info.get("depth_valid") is True
             and depth is not None
-            and 0.0 < depth <= BALL_HURDLE_FINE_DISTANCE_M
+            and 0.0 < depth <= HURDLE_FINE_DISTANCE_M
         )
 
     def _confirmed_hurdle(self, info: dict[str, Any] | None) -> bool:

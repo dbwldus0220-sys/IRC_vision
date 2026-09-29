@@ -124,9 +124,9 @@ class TestGoalHeadOverride(unittest.TestCase):
             self.send(request_id + 2, forward)
             self.status(request_id + 2, "RUNNING")
             self.publish(self.ball, {"detected": True, "head_down_requested": True})
-            self.wait(lambda: self.heartbeats and not self.heartbeats[-1]["ball_head_override_active"])
+            self.wait(lambda: self.heartbeats and self.heartbeats[-1]["ball_head_override_active"])
             self.status(request_id + 2, "SUCCEEDED")
-            self.assertFalse(self.heartbeats[-1]["ball_head_override_active"])
+            self.assertTrue(self.heartbeats[-1]["ball_head_override_active"])
         self.hold(False)
 
         self.send(4, "post_ball_camera_90")

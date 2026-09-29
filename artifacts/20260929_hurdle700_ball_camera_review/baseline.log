@@ -1,0 +1,64 @@
+.F.F                                                                     [100%]
+=================================== FAILURES ===================================
+_____ test_close_pickup_loss_backs_up_one_cycle_and_reacquires[-100-True] ______
+
+fine = True, offset = -100
+
+    @pytest.mark.parametrize("fine", [False, True])
+    @pytest.mark.parametrize("offset", [-100, 100])
+    def test_close_pickup_loss_backs_up_one_cycle_and_reacquires(fine, offset):
+        planner = MotionDecisionPlanner()
+        close = ball_info(distance_m=0.4, offset_x_px=offset, bottom_distance_px=100)
+        planner._update_ball_tracking(close, 0.0)
+        plan = (planner.plan_ball_pickup_fine_alignment if fine
+                else planner.plan_ball_pickup_initial_alignment)
+        plan(close)
+        stage = "FINE" if fine else "INITIAL"
+        expected = f"BALL_PICKUP_{stage}_SEARCH_BACKWARD"
+        for _ in range(3):
+            decision = plan({"detected": False, "raw_detected": False})
+            assert decision.action == expected
+            assert decision.reason == "close_ball_lost_backward_reacquisition"
+            assert decision.source_command["backward_count"] == 1
+            assert decision.sdk_motion_requested
+        centered = ball_info(distance_m=0.4, offset_x_px=0, bottom_distance_px=90)
+        if fine:
+>           assert plan(centered).action == "BALL_PICKUP_FINE_FORWARD"
+E           AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_FINE_FORWARD'
+E             - BALL_PICKUP_FINE_FORWARD
+E             + BALL_PICKUP_FINE_ALIGN_CONTINUE
+
+src/mission_control/test/test_motion_decision_planner.py:2678: AssertionError
+______ test_close_pickup_loss_backs_up_one_cycle_and_reacquires[100-True] ______
+
+fine = True, offset = 100
+
+    @pytest.mark.parametrize("fine", [False, True])
+    @pytest.mark.parametrize("offset", [-100, 100])
+    def test_close_pickup_loss_backs_up_one_cycle_and_reacquires(fine, offset):
+        planner = MotionDecisionPlanner()
+        close = ball_info(distance_m=0.4, offset_x_px=offset, bottom_distance_px=100)
+        planner._update_ball_tracking(close, 0.0)
+        plan = (planner.plan_ball_pickup_fine_alignment if fine
+                else planner.plan_ball_pickup_initial_alignment)
+        plan(close)
+        stage = "FINE" if fine else "INITIAL"
+        expected = f"BALL_PICKUP_{stage}_SEARCH_BACKWARD"
+        for _ in range(3):
+            decision = plan({"detected": False, "raw_detected": False})
+            assert decision.action == expected
+            assert decision.reason == "close_ball_lost_backward_reacquisition"
+            assert decision.source_command["backward_count"] == 1
+            assert decision.sdk_motion_requested
+        centered = ball_info(distance_m=0.4, offset_x_px=0, bottom_distance_px=90)
+        if fine:
+>           assert plan(centered).action == "BALL_PICKUP_FINE_FORWARD"
+E           AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_FINE_FORWARD'
+E             - BALL_PICKUP_FINE_FORWARD
+E             + BALL_PICKUP_FINE_ALIGN_CONTINUE
+
+src/mission_control/test/test_motion_decision_planner.py:2678: AssertionError
+=========================== short test summary info ============================
+FAILED ../../../../../tmp/step_hurdle_ball_review/baseline/mission_control/test/test_motion_decision_planner.py::test_close_pickup_loss_backs_up_one_cycle_and_reacquires[-100-True]
+FAILED ../../../../../tmp/step_hurdle_ball_review/baseline/mission_control/test/test_motion_decision_planner.py::test_close_pickup_loss_backs_up_one_cycle_and_reacquires[100-True]
+2 failed, 2 passed, 575 deselected in 0.37s

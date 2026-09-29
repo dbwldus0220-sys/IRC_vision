@@ -1,0 +1,12 @@
+{
+  "source_sha256": "fa362e24e4bc3b95b5e9d44b383cf29ef2aef352fad966693465751425759b3c",
+  "added_names": [
+    "찐미세오뒤에서 오뒤(45도)",
+    "찐미세오뒤에서 오뒤(0도)",
+    "찐미세오뒤에서 오뒤(골대 카메라90도)"
+  ],
+  "derived_90_from": "찐미세오뒤에서 오뒤(45도)",
+  "derived_90_motor_0_deg": 1.0,
+  "position_tolerance_deg": 5.0,
+  "derived_90_pose_names": "Append (회전준비90도) to both frame names and start/end pose names to avoid startup-pose ambiguity"
+}

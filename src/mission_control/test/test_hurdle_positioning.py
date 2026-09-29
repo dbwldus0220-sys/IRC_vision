@@ -11,7 +11,7 @@ from mission_control.motion_decision_planner import MotionDecisionPlanner
 from test_mission_phase_flow import MissionFlowHarness, line_info, release_general
 
 
-def hurdle(depth=0.55, **updates):
+def hurdle(depth=0.7, **updates):
     info = {
         "detected": True, "confirmation_confirmed": True, "confidence": 0.9,
         "depth_valid": True, "depth_m": depth, "hurdle_angle_deg": 0.0,
@@ -58,7 +58,8 @@ def enter_positioning(node, clock):
 
 
 @pytest.mark.parametrize("depth,accepted", [
-    (0.551, False), (0.55, True), (0.549, True), (0.0, False),
+    (0.700001, False), (0.7, True), (0.699, True),
+    (0.551, True), (0.55, True), (0.0, False),
     (-0.1, False), (None, False), (True, False), (float("nan"), False),
     (float("inf"), False),
 ])
@@ -82,7 +83,7 @@ def test_hurdle_positioning_requires_confirmed_valid_depth(clock, update):
 def test_crossing_during_motion_waits_for_completion_and_fresh_frame(clock):
     node = HurdleHarness()
     node.receive_line()
-    node.receive(hurdle(0.7))
+    node.receive(hurdle(0.8))
     approach = node.publish()[-1]
     assert approach["action"] == "STRAIGHT"
     node.receive(hurdle())
@@ -129,7 +130,7 @@ def test_positioning_go_terminal_lifecycle(clock, status):
 def test_failed_approach_discards_positioning_reservation(clock, status):
     node = HurdleHarness()
     node.receive_line()
-    node.receive(hurdle(0.7))
+    node.receive(hurdle(0.8))
     approach = node.publish()[-1]
     node.receive(hurdle())
     node.send_status(approach["action"], approach["command_id"], "RUNNING")
@@ -189,7 +190,7 @@ def test_manual_phase_override_discards_positioning_reservation(clock):
 def test_far_approach_and_close_sequence_trigger():
     planner = MotionDecisionPlanner()
     far = planner.plan("HURDLE_APPROACH", {
-        "hurdle": hurdle(0.7), "line": line_info(),
+        "hurdle": hurdle(0.8), "line": line_info(),
     }, 0.1)
     assert far.action == "STRAIGHT"
     assert far.source == "hurdle"
@@ -210,13 +211,13 @@ def test_recognition_approach_has_no_fine_sequence_dwell(clock, angle):
     approach = node.publish()[-1]
     assert approach["source"] == "hurdle"
     assert approach["action"] == "STRAIGHT"
-    node.receive(hurdle(0.7, hurdle_angle_deg=angle))
+    node.receive(hurdle(0.8, hurdle_angle_deg=angle))
     assert node.publish() == []
     release_general(node, approach)
     assert getattr(node, "hurdle_post_motion_dwell_until", None) is None
     clock[0] += 0.01
     node.receive_line()
-    node.receive(hurdle(0.7, hurdle_angle_deg=angle))
+    node.receive(hurdle(0.8, hurdle_angle_deg=angle))
     forward = node.publish()[-1]
     assert forward["source"] == "hurdle"
     assert forward["action"] == "STRAIGHT"
@@ -224,7 +225,7 @@ def test_recognition_approach_has_no_fine_sequence_dwell(clock, angle):
 
 def test_recognition_approach_works_without_line(clock):
     node = HurdleHarness()
-    node.receive(hurdle(0.7, hurdle_angle_deg=-34.0))
+    node.receive(hurdle(0.8, hurdle_angle_deg=-34.0))
     waiting = node.publish()[-1]
     assert waiting["valid"] and waiting["action"] == "STRAIGHT"
     assert waiting["source"] == "hurdle"
@@ -247,7 +248,7 @@ def test_recognition_approach_blocks_new_line_prequeue(clock, depth, allowed):
     ) is allowed
 
 
-@pytest.mark.parametrize("depth", [1.0, 0.7, 0.550001])
+@pytest.mark.parametrize("depth", [1.0, 0.8, 0.700001])
 @pytest.mark.parametrize("heading", [-34.0, 0.0, 34.0])
 def test_recognition_approach_ignores_line_heading(depth, heading):
     line = line_info(heading=heading)
@@ -260,14 +261,14 @@ def test_recognition_approach_ignores_line_heading(depth, heading):
     assert not planner.hurdle_lock_active
 
 
-@pytest.mark.parametrize("depth", [0.7, 0.4])
+@pytest.mark.parametrize("depth", [0.8, 0.7, 0.4])
 @pytest.mark.parametrize("bottom,action", [(101, "ALIGN_RIGHT"), (100, "GO")])
-def test_rotation_cutoff_is_image_distance_not_550mm(depth, bottom, action):
+def test_rotation_cutoff_is_image_distance_not_metric_depth(depth, bottom, action):
     planner = MotionDecisionPlanner()
     decision = planner.plan("HURDLE_POSITIONING", {
         "hurdle": hurdle(depth, hurdle_angle_deg=-45.0, camera_center_offset_x_px=600, bottom_distance_px=bottom),
     }, 0.1)
-    expected = "STRAIGHT" if bottom == 100 and depth > 0.55 else action
+    expected = "STRAIGHT" if bottom == 100 and depth > 0.7 else action
     assert decision.action == expected
     if bottom == 100:
         later = planner.plan("HURDLE_POSITIONING", {
@@ -322,7 +323,7 @@ def test_near_turn_pauses_one_second_before_and_after(clock, status):
 
 def test_positioning_forward_rechecks_fresh_hurdle_without_dwell(clock):
     node = HurdleHarness(phase="HURDLE_POSITIONING")
-    node.receive(hurdle(0.7))
+    node.receive(hurdle(0.8))
     forward = node.publish()[-1]
     assert forward["action"] == "STRAIGHT"
     release_general(node, forward)
@@ -338,7 +339,7 @@ def test_positioning_forward_rechecks_fresh_hurdle_without_dwell(clock):
 def test_positioning_turn_pause_starts_when_forward_finishes(clock):
     node = HurdleHarness(phase="HURDLE_POSITIONING")
     node.hurdle_stationary_since = 0.0
-    node.receive(hurdle(0.7))
+    node.receive(hurdle(0.8))
     forward = node.publish()[-1]
     release_general(node, forward)
     node.receive(hurdle(0.5, camera_center_offset_x_px=-600))
@@ -366,7 +367,7 @@ def test_turn_without_recorded_stationary_time_still_waits_one_second(clock):
 
 
 @pytest.mark.parametrize("depth,depth_valid", [
-    (0.551, True), (0.66, True), (None, False), (0.0, True),
+    (0.701, True), (0.8, True), (None, False), (0.0, True),
     (-0.1, True), (float("nan"), True), (0.5, False),
 ])
 def test_bottom_trigger_cannot_reserve_hurdle_without_close_valid_depth(clock, depth, depth_valid):
@@ -379,14 +380,14 @@ def test_bottom_trigger_cannot_reserve_hurdle_without_close_valid_depth(clock, d
     assert not getattr(node, "hurdle_positioning_entry_pending", False)
     assert not node.planner._hurdle_positioning_ready(observation)
     command = node.publish()[-1]
-    assert command["source"] == ("hurdle" if depth_valid and depth in (0.551, 0.66) else "line")
+    assert command["source"] == ("hurdle" if depth_valid and depth in (0.701, 0.8) else "line")
     assert not node.planner.hurdle_lock_active
 
 
 def test_depth_entry_waits_for_line_then_stays_hurdle_on_lost_detection(clock):
     node = HurdleHarness()
     node.receive_line()
-    node.receive(hurdle(0.66))
+    node.receive(hurdle(0.8))
     approach = node.publish()[-1]
     assert approach["source"] == "hurdle"
     node.receive(hurdle(0.55, bottom_distance_px=200, head_down_requested=False))
@@ -398,7 +399,7 @@ def test_depth_entry_waits_for_line_then_stays_hurdle_on_lost_detection(clock):
     assert waiting["phase"] == "HURDLE_POSITIONING"
     assert waiting["source"] == "hurdle" and waiting["action"] == "WAIT"
     clock[0] += 0.1
-    node.receive(hurdle(0.66, bottom_distance_px=120, head_down_requested=True))
+    node.receive(hurdle(0.8, bottom_distance_px=120, head_down_requested=True))
     fine = node.publish()[-1]
     assert fine["source"] == "hurdle" and fine["action"] == "STRAIGHT"
 
@@ -414,7 +415,7 @@ def test_missing_depth_after_depth_entry_waits_in_hurdle_mode(clock):
     assert waiting["reason"] == "missing_valid_hurdle_depth"
 
 
-@pytest.mark.parametrize("depth", [0.550001, 0.7, 1.0])
+@pytest.mark.parametrize("depth", [0.700001, 0.8, 1.0])
 def test_recognition_depth_never_enters_fine_sequence(clock, depth):
     node = HurdleHarness()
     node.receive(hurdle(depth, bottom_distance_px=120, head_down_requested=True))
@@ -434,7 +435,7 @@ def test_unconfirmed_or_out_of_range_hurdle_does_not_take_line_control():
         assert command.source == "line"
 
 
-@pytest.mark.parametrize("depth", [0.7, 0.5])
+@pytest.mark.parametrize("depth", [0.8, 0.7, 0.5])
 @pytest.mark.parametrize("center_dx,action", [(-600, "ALIGN_LEFT"), (600, "ALIGN_RIGHT")])
 def test_both_approach_stages_steer_toward_hurdle_center(depth, center_dx, action):
     decision = MotionDecisionPlanner().plan("AUTO", {
@@ -444,7 +445,7 @@ def test_both_approach_stages_steer_toward_hurdle_center(depth, center_dx, actio
     assert decision.source == "hurdle" and decision.valid
     assert decision.action == action
     assert decision.source_command["hurdle_stage"] == (
-        "RECOGNITION_APPROACH" if depth > 0.55 else "FINE_APPROACH"
+        "RECOGNITION_APPROACH" if depth > 0.7 else "FINE_APPROACH"
     )
 
 

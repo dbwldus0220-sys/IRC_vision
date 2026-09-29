@@ -1,0 +1,50 @@
+-- Found ament_cmake: 1.3.14 (/opt/ros/humble/share/ament_cmake/cmake)
+-- Override CMake install command with custom implementation using symlinks instead of copying resources
+-- Found ament_index_cpp: 1.4.1 (/opt/ros/humble/share/ament_index_cpp/cmake)
+-- Found rclcpp: 16.0.21 (/opt/ros/humble/share/rclcpp/cmake)
+-- Found rosidl_generator_c: 3.1.9 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+-- Found rosidl_adapter: 3.1.9 (/opt/ros/humble/share/rosidl_adapter/cmake)
+-- Found rosidl_generator_cpp: 3.1.9 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+-- Found rmw_implementation_cmake: 6.1.4 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)
+-- Found rmw_fastrtps_cpp: 6.2.10 (/opt/ros/humble/share/rmw_fastrtps_cpp/cmake)
+-- Using RMW implementation 'rmw_fastrtps_cpp' as default
+-- Found yaml_cpp_vendor: 8.0.2 (/opt/ros/humble/share/yaml_cpp_vendor/cmake)
+-- SDK inclusion enabled; no SDK backend is instantiated by this package
+-- Found ament_cmake_gtest: 1.3.14 (/opt/ros/humble/share/ament_cmake_gtest/cmake)
+-- Found gtest sources under '/opt/ros/humble/src/gtest_vendor': C++ tests using 'Google Test' will be built
+-- Found launch_testing_ament_cmake: 1.0.15 (/opt/ros/humble/share/launch_testing_ament_cmake/cmake)
+-- Found python_cmake_module: 0.10.0 (/opt/ros/humble/share/python_cmake_module/cmake)
+-- Using PYTHON_EXECUTABLE: /usr/bin/python3
+-- Using PYTHON_INCLUDE_DIRS: /usr/include/python3.10
+-- Using PYTHON_LIBRARIES: /usr/lib/aarch64-linux-gnu/libpython3.10.so
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+Consolidate compiler generated dependencies of target catalog_only_core
+Consolidate compiler generated dependencies of target motion_core
+[ 13%] Built target motion_core
+[ 16%] Built target catalog_only_core
+Consolidate compiler generated dependencies of target robot_motion_runtime_config
+Consolidate compiler generated dependencies of target motion_player_core
+[ 30%] Built target motion_player_core
+[ 30%] Built target robot_motion_runtime_config
+Consolidate compiler generated dependencies of target sdk_executor_core
+Consolidate compiler generated dependencies of target robot_control
+[ 36%] Built target sdk_executor_core
+[ 53%] Built target robot_control
+Consolidate compiler generated dependencies of target simulated_motion_backend
+[ 60%] Built target simulated_motion_backend
+Consolidate compiler generated dependencies of target sdk_executor_driver
+Consolidate compiler generated dependencies of target robot_motion_player_backend
+[ 73%] Built target sdk_executor_driver
+[ 80%] Built target robot_motion_player_backend
+Consolidate compiler generated dependencies of target motion_backend_factory
+[ 86%] Built target motion_backend_factory
+Consolidate compiler generated dependencies of target production_robot_motion_runtime_factory
+[ 93%] Built target production_robot_motion_runtime_factory
+Consolidate compiler generated dependencies of target sdk_motion_executor
+[ 96%] Building CXX object CMakeFiles/sdk_motion_executor.dir/src/sdk_executor_node.cpp.o
+[100%] Linking CXX executable sdk_motion_executor
+[100%] Built target sdk_motion_executor

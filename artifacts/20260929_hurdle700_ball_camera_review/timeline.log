@@ -1,0 +1,22 @@
+2026-09-29T17:28:00.052+09:00 [python3_8376_1790670411432.log] [INFO] [1790670480.052186209] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+2026-09-29T17:28:00.056+09:00 [python3_8376_1790670411432.log] [INFO] [1790670480.056279656] [motion_decision_node]: BALL confirmation completed; releasing pending hold
+2026-09-29T17:28:00.065+09:00 [python3_8376_1790670411432.log] [INFO] [1790670480.065881603] [motion_decision_node]: BALL approach entry latched while stationary: distance_m=1.341
+2026-09-29T17:28:02.550+09:00 [python3_8376_1790670411432.log] [INFO] [1790670482.550612233] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+2026-09-29T17:28:05.161+09:00 [python3_8376_1790670411432.log] [INFO] [1790670485.161055624] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_RECOVER_LEFT_4
+2026-09-29T17:28:07.730+09:00 [python3_8376_1790670411432.log] [INFO] [1790670487.730980602] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_RECOVER_LEFT_4
+2026-09-29T17:28:08.619+09:00 [python3_8376_1790670411432.log] [INFO] [1790670488.619273895] [motion_decision_node]: BALL raw detection latched; waiting for confirmation after the current motion
+2026-09-29T17:28:09.853+09:00 [python3_8376_1790670411432.log] [INFO] [1790670489.853615038] [motion_decision_node]: BALL raw detection lost; releasing pending hold
+2026-09-29T17:28:09.927+09:00 [python3_8376_1790670411432.log] [INFO] [1790670489.927605976] [motion_decision_node]: BALL lost during 57-150 cm approach motion; remembering the last Ball side for the motion boundary
+2026-09-29T17:28:10.234+09:00 [python3_8376_1790670411432.log] [INFO] [1790670490.234210218] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_RECOVER_LEFT_4
+2026-09-29T17:28:25.504+09:00 [python3_8376_1790670411432.log] [INFO] [1790670505.504099026] [motion_decision_node]: BALL raw detection latched; waiting for confirmation after the current motion
+2026-09-29T17:28:26.699+09:00 [python3_8376_1790670411432.log] [INFO] [1790670506.699805745] [motion_decision_node]: BALL confirmation completed; releasing pending hold
+2026-09-29T17:28:27.687+09:00 [sdk_motion_executor_8380_1790670409966.log] [INFO] [1790670507.687685192] [sdk_motion_executor]: Ball entered bottom trigger: motor 0 override -64.0 deg latched
+2026-09-29T17:28:28.730+09:00 [python3_8376_1790670411432.log] [INFO] [1790670508.730901819] [motion_decision_node]: BALL pickup entry latched: distance_m=0.541
+2026-09-29T17:28:29.056+09:00 [python3_8376_1790670411432.log] [INFO] [1790670509.056333853] [motion_decision_node]: BALL pickup entry pending; waiting for fresh vision
+2026-09-29T17:28:29.057+09:00 [python3_8376_1790670411432.log] [INFO] [1790670509.057136168] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+2026-09-29T17:28:29.124+09:00 [python3_8376_1790670411432.log] [INFO] [1790670509.124600898] [motion_decision_node]: Special motion lock enabled: action=PICKUP_NOW, command_id=407, event_id=2, dynamics_command=None
+2026-09-29T17:28:29.127+09:00 [python3_8376_1790670411432.log] [INFO] [1790670509.127662577] [motion_decision_node]: Special motion lock enabled: action=PICKUP_NOW, command_id=407, event_id=2, dynamics_command=None
+2026-09-29T17:28:29.220+09:00 [python3_8376_1790670411432.log] [INFO] [1790670509.220945819] [motion_decision_node]: Pre-motion settle started: action=BALL_PICKUP_INITIAL_ALIGN_CONTINUE, source=ball, duration=1.000
+2026-09-29T17:28:29.429+09:00 [python3_8376_1790670411432.log] [INFO] [1790670509.429389769] [motion_decision_node]: Special motion lock enabled: action=PICKUP_NOW, command_id=407, event_id=2, dynamics_command=None
+2026-09-29T17:28:29.452+09:00 [python3_8376_1790670411432.log] [INFO] [1790670509.452298631] [motion_decision_node]: Special motion lock enabled: action=PICKUP_NOW, command_id=407, event_id=2, dynamics_command=None
+2026-09-29T17:28:29.782+09:00 [python3_8376_1790670411432.log] [INFO] [1790670509.782332589] [motion_decision_node]: Special motion lock enabled: action=PICKUP_NOW, command_id=407, event_id=2, dynamics_command=None

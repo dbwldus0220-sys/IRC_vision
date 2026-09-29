@@ -262,6 +262,10 @@ class MotionCommandBridgeNode(Node):
         "CANCELLED",
         "REJECTED",
     }
+    FINE_FORWARD_MOTION_IDS = frozenset({
+        "ball_general_fine_forward_8", "pickup_fine_forward_0",
+        *(f"goal_camera_90_fine_forward_{count}" for count in range(1, 5)),
+    })
     DEFAULT_TIMEOUT_MS = 12000
 
     def __init__(self) -> None:
@@ -286,6 +290,11 @@ class MotionCommandBridgeNode(Node):
         self.hurdle_fine_sequence_pending = False
         self.goal_crab_completed = False
         self.last_completed_motion_id: str | None = None
+        self.last_physical_motion_id: str | None = None
+        self.pending_turn_request: dict[str, Any] | None = None
+        self.turn_prepare_motion_id: str | None = None
+        self.head_override_state: dict[str, Any] = {}
+        self.head_override_received_at: float | None = None
         self.pickup_initial_align_dwell_until: float | None = None
         self.pickup_initial_align_waiting = False
         self.pickup_initial_align_correction_active = False
@@ -320,6 +329,9 @@ class MotionCommandBridgeNode(Node):
             "/motion/executor/status",
             self.executor_status_callback,
             10,
+        )
+        self.executor_heartbeat_subscription = self.create_subscription(
+            String, "/motion/executor/heartbeat", self.executor_heartbeat_callback, 10,
         )
         self.executor_request_publisher = self.create_publisher(
             String,
@@ -963,6 +975,42 @@ class MotionCommandBridgeNode(Node):
             timeout_ms=self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS,
         )
 
+    def executor_heartbeat_callback(self, msg: String) -> None:
+        """Read camera ownership for the pre-turn posture choice."""
+        try:
+            payload = json.loads(msg.data)
+        except (json.JSONDecodeError, TypeError):
+            return
+        if isinstance(payload, dict):
+            self.head_override_state = payload
+            self.head_override_received_at = time.monotonic()
+
+    def _is_stationary_turn(self, motion_id: str) -> bool:
+        """Exclude walking corrections and composite retreat/exit motions."""
+        return motion_id.startswith((
+            "stationary_turn_", "line_turn_", "line_search_",
+            "post_ball_line_turn_", "goal_camera_90_turn_",
+            "pickup_camera_down_turn_", "pickup_first_turn_", "pickup_second_turn_",
+        )) or motion_id == "post_shot_turn_right_9"
+
+    def _turn_prepare_motion(self, motion_id: str) -> str | None:
+        if (self.last_physical_motion_id not in self.FINE_FORWARD_MOTION_IDS
+                or not self._is_stationary_turn(motion_id)):
+            return None
+        state = self.head_override_state
+        if (self.head_override_received_at is None
+                or time.monotonic() - self.head_override_received_at > 1.0):
+            state = {}
+        if (state.get("goal_head_override_active") is True
+                or motion_id.startswith("goal_camera_90_turn_")):
+            return "fine_to_turn_ready_90"
+        if (state.get("ball_head_override_active") is True
+                or state.get("hurdle_head_override_active") is True
+                or motion_id.startswith("pickup_camera_down_turn_")
+                or self.last_physical_motion_id == "pickup_fine_forward_0"):
+            return "fine_to_turn_ready_0"
+        return "fine_to_turn_ready_45"
+
     def _publish_executor_request(
         self,
         *,
@@ -1005,6 +1053,14 @@ class MotionCommandBridgeNode(Node):
             "motion_id": motion_id,
             "timeout_ms": timeout_ms,
         }
+        prepare_motion = self._turn_prepare_motion(motion_id)
+        if prepare_motion is not None:
+            self.pending_turn_request = dict(request_payload)
+            self.turn_prepare_motion_id = prepare_motion
+            request_payload["motion_id"] = prepare_motion
+            self.get_logger().info(
+                f"Preparing stationary turn: {prepare_motion} -> {motion_id}"
+            )
         request_message = String()
         request_message.data = json.dumps(
             request_payload,
@@ -1104,7 +1160,8 @@ class MotionCommandBridgeNode(Node):
             return
         if (
             self.motion_in_progress
-            and self.active_action in self.ATOMIC_SEQUENCE_ACTIONS
+            and (self.active_action in self.ATOMIC_SEQUENCE_ACTIONS
+                 or self.pending_turn_request is not None)
         ):
             self._publish_local_rejection(
                 status="REJECTED",
@@ -1259,7 +1316,8 @@ class MotionCommandBridgeNode(Node):
         request_id = command_id
         timeout_ms = self.timeout_ms_from_payload(payload)
         defer_until_active_finishes = bool(
-            self.motion_in_progress and action == "PICKUP_NOW"
+            self.motion_in_progress
+            and (action == "PICKUP_NOW" or self._is_stationary_turn(motion_id))
         )
         starts_with_initial_align_checkpoint = action == "PICKUP_NOW"
         starts_with_hurdle_dwell = (
@@ -1552,6 +1610,8 @@ class MotionCommandBridgeNode(Node):
     def _clear_active_request(self) -> None:
         """Release the bridge after a terminal executor status."""
         self.motion_in_progress = False
+        self.pending_turn_request = None
+        self.turn_prepare_motion_id = None
         self.active_command_id = None
         self.active_event_id = None
         self.active_action = None
@@ -1655,6 +1715,36 @@ class MotionCommandBridgeNode(Node):
             return
 
         action = self.active_action if is_active else self.queued_action
+        if is_active and self.pending_turn_request is not None:
+            if payload["motion_id"] != self.turn_prepare_motion_id:
+                return
+            pending = self.pending_turn_request
+            if payload["status"] == "SUCCEEDED":
+                self.last_physical_motion_id = self.turn_prepare_motion_id
+                self.pending_turn_request = None
+                self.turn_prepare_motion_id = None
+                self._publish_executor_request(**pending, prepare_pickup_fine=False)
+                return
+            payload["motion_id"] = pending["motion_id"]
+            if payload["status"] in self.TERMINAL_STATUSES:
+                self.pending_turn_request = None
+                self.turn_prepare_motion_id = None
+                # Never let pickup's recoverable-motor policy skip preparation.
+                payload["message"] = (
+                    "stationary turn preparation failed: "
+                    + payload["error_code"] + " " + payload["message"]
+                )
+                payload["error_code"] = "TURN_PREPARATION_FAILED"
+        elif is_active and payload["motion_id"] == self.active_motion_id:
+            if payload["status"] == "SUCCEEDED":
+                self.last_physical_motion_id = payload["motion_id"]
+            elif payload["status"] in self.TERMINAL_STATUSES:
+                self.last_physical_motion_id = None
+        elif is_active and payload["motion_id"] in {
+            "fine_to_turn_ready_0", "fine_to_turn_ready_45", "fine_to_turn_ready_90",
+        }:
+            # Duplicate preparation completions must not finish the real turn.
+            return
         if (
             is_active
             and action == "PICKUP_NOW"

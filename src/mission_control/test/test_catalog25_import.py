@@ -42,8 +42,14 @@ def aliases():
     *FORWARD_UPDATE["imported_sha256"].items(),
 ])
 def test_motion_matches_import_snapshot(catalog, name, digest):
-    encoded = json.dumps(catalog[name], sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-    assert hashlib.sha256(encoded.encode()).hexdigest() == digest
+    if name in {"찐후진실전-2(2회)", "찐후진실전(1회)"}:
+        source = json.loads((ROOT / "artifacts/20260929_catalog34_retreat_update/source_requested_motions.json").read_text())
+        expected = next(m for m in source["motions"] if m["name"] == name)
+        expected["completion"]["position_tolerance_deg"] = 5.0
+        assert catalog[name] == expected
+    else:
+        encoded = json.dumps(catalog[name], sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+        assert hashlib.sha256(encoded.encode()).hexdigest() == digest
 
 
 def test_renamed_motions_and_aliases_are_consistent(catalog, aliases):
@@ -107,8 +113,9 @@ def test_new_shot_preserves_catalog26_frames_and_runtime_tolerance(catalog):
     assert catalog["찐골넣기"]["start_pose"] == "골기본11"
 
 
-def test_post_grasp_retreat_preserves_catalog26_motion(catalog, aliases):
-    original = json.loads((ROOT / "artifacts/catalog26_shot_update_backup/source_retreat.json").read_text())
+def test_post_grasp_retreat_preserves_catalog34_motion(catalog, aliases):
+    source = json.loads((ROOT / "artifacts/20260929_catalog34_retreat_update/source_requested_motions.json").read_text())
+    original = next(m for m in source["motions"] if m["name"] == "찐후진실전(1회)")
     original["completion"]["position_tolerance_deg"] = 5.0
     retreat = catalog[aliases["pickup_retreat_2"]]
     assert retreat == original

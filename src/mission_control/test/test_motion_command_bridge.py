@@ -38,6 +38,7 @@ class FakeBridge:
     ACTION_TO_MOTION_ID = MotionCommandBridgeNode.ACTION_TO_MOTION_ID
     TERMINAL_STATUSES = MotionCommandBridgeNode.TERMINAL_STATUSES
     DEFAULT_TIMEOUT_MS = MotionCommandBridgeNode.DEFAULT_TIMEOUT_MS
+    FINE_FORWARD_MOTION_IDS = MotionCommandBridgeNode.FINE_FORWARD_MOTION_IDS
     DWELL_MARKER = MotionCommandBridgeNode.DWELL_MARKER
     SHOT_PREPARE_DWELL_MARKER = MotionCommandBridgeNode.SHOT_PREPARE_DWELL_MARKER
     SHOT_PREPARE_MOTION_ID = MotionCommandBridgeNode.SHOT_PREPARE_MOTION_ID
@@ -122,6 +123,11 @@ class FakeBridge:
         self.hurdle_fine_sequence_pending = False
         self.goal_crab_completed = False
         self.last_completed_motion_id = None
+        self.last_physical_motion_id = None
+        self.pending_turn_request = None
+        self.turn_prepare_motion_id = None
+        self.head_override_state = {}
+        self.head_override_received_at = None
         self.pickup_initial_align_dwell_until = None
         self.pickup_initial_align_waiting = False
         self.pickup_initial_align_correction_active = False
@@ -162,6 +168,9 @@ class FakeBridge:
             "_enter_pickup_post_backward_align_checkpoint",
             "_handle_pickup_post_backward_align_command",
             "_start_pickup_checkpoint_dwell",
+            "executor_heartbeat_callback",
+            "_is_stationary_turn",
+            "_turn_prepare_motion",
             "_publish_executor_request",
             "navigation_command_callback",
             "_start_next_pickup_motion",
@@ -243,7 +252,15 @@ def decoded_messages(publisher):
 
 
 def complete_active_motion(bridge, status="SUCCEEDED", error_code=""):
-    """Return a correlated terminal status for the current executor motion."""
+    """Complete preparation, if present, then the original executor motion."""
+    if bridge.pending_turn_request is not None:
+        bridge.executor_status_callback(executor_status(
+            status=status, error_code=error_code,
+            command_id=bridge.active_command_id, event_id=bridge.active_event_id,
+            request_id=bridge.active_request_id, motion_id=bridge.turn_prepare_motion_id,
+        ))
+        if status != "SUCCEEDED":
+            return
     bridge.executor_status_callback(executor_status(
         status=status,
         error_code=error_code,
@@ -2197,6 +2214,10 @@ def test_pickup_fine_search_uses_camera_down_turn_and_returns_after_dwell(direct
     action = f"BALL_PICKUP_FINE_SEARCH_{direction}"
     bridge.navigation_command_callback(fine_alignment_message(action))
     motion = f"pickup_camera_down_turn_{direction.lower()}_{5 if direction == 'RIGHT' else 2}"
+    assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == "fine_to_turn_ready_0"
+    bridge.executor_status_callback(executor_status(
+        status="SUCCEEDED", motion_id="fine_to_turn_ready_0",
+    ))
     request = decoded_messages(bridge.executor_request_publisher)[-1]
     assert request["motion_id"] == motion
     assert request["action"] == "PICKUP_NOW"
@@ -2514,6 +2535,7 @@ def test_pickup_right_crab_does_not_prepare_from_old_fine_history(intervening):
     (0.550001, "STRAIGHT", "찐전진45(4회)"),
     (0.570, "STRAIGHT", "찐전진45(4회)"),
     (0.700, "STRAIGHT", "찐전진45(4회)"),
+    (0.700001, "STRAIGHT", "찐전진45(4회)"),
 ])
 def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
     source, distance, action, motion_name,
@@ -2536,8 +2558,8 @@ def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
     decision = planner.plan("AUTO", {source: sample, "line": line_info()}, 0.1)
     if source == "hurdle":
         assert decision.source == "hurdle"
-        motion_name = "찐미세0도-4" if distance <= 0.550 else "찐전진45(4회)"
-        action = "GO" if distance <= 0.550 else action
+        motion_name = "찐미세0도-4" if distance <= 0.700 else "찐전진45(4회)"
+        action = "GO" if distance <= 0.700 else action
     bridge = FakeBridge()
     if source == "ball" and distance <= 0.550:
         assert decision.action == "PICKUP_NOW"
@@ -2748,7 +2770,8 @@ def test_hurdle_fallback_waits_until_current_motion_finishes():
 
 @pytest.mark.parametrize("depth,motion_id", [
     (0.550, "pickup_fine_forward_0"),
-    (0.550001, "line_forward_4"), (0.7, "line_forward_4"),
+    (0.550001, "pickup_fine_forward_0"), (0.7, "pickup_fine_forward_0"),
+    (0.700001, "line_forward_4"),
 ])
 @pytest.mark.parametrize("angle", [None, 20.0])
 def test_close_hurdle_valid_depth_selects_actual_motion_without_turning(depth, motion_id, angle):
@@ -2759,7 +2782,7 @@ def test_close_hurdle_valid_depth_selects_actual_motion_without_turning(depth, m
         "camera_center_offset_x_px": 0,
     }}, 0.1)
     assert decision.valid
-    assert decision.requires_ack == (depth <= 0.55)
+    assert decision.requires_ack == (depth <= 0.7)
     assert decision.source_command["depth_fallback_requested"] is False
     bridge = FakeBridge()
     bridge.navigation_command_callback(navigation_message(

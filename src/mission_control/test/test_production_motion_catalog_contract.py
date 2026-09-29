@@ -62,8 +62,8 @@ def test_catalog30_replaces_only_requested_forward_motions_and_aliases():
     motions = json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
     catalog = {m["name"]: m for m in motions}
     aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
-    # The hurdle import and restored close-ball retreat each add one motion.
-    assert len(catalog) == len(motions) == manifest["after_count"] + 2
+    # Hurdle/retreat imports plus three camera-specific turn preparations.
+    assert len(catalog) == len(motions) == manifest["after_count"] + 5
     assert not set(manifest["renames"]) & set(catalog)
     assert set(aliases.values()) <= set(catalog)
     # Later camera updates supersede the historical catalog30 digests.
@@ -102,6 +102,11 @@ def test_catalog30_replaces_only_requested_forward_motions_and_aliases():
         expected_aliases[alias] = change["after"]
     expected_aliases["hurdle"] = "찐허들"
     expected_aliases["pickup_lost_ball_backward_1"] = "후진실전-2(1회, 픽업 카메라0도)"
+    expected_aliases.update({
+        "fine_to_turn_ready_45": "찐미세오뒤에서 오뒤(45도)",
+        "fine_to_turn_ready_0": "찐미세오뒤에서 오뒤(0도)",
+        "fine_to_turn_ready_90": "찐미세오뒤에서 오뒤(골대 카메라90도)",
+    })
     assert aliases == expected_aliases
 
 
@@ -720,7 +725,7 @@ def test_calibrated_right_turn_aliases_resolve_to_supplied_catalog(count, angle)
 
 @pytest.mark.parametrize("motion_id,name,digest", [
     ("pickup_retreat_2", "찐후진실전(1회)",
-     "17081fe0b604bb1ddb60c3ccded49a7840c8d24908ec59e178bcdc48257a3815"),
+     "1a4484895f37b3749c582281fc37a572ca1eef7be6a41a8ec1f7c5b292b89140"),
     ("pickup_first_backward_turn_right", "찐후진하고 제자리우회전(공)",
      "0568d0a09ea18182611e4ed34efe2d96943c0faf52107ce6c3683ab34f1c6005"),
     ("post_shot_default_turn_right", "찐기본자세에서 제자리 우회전(골대)",
@@ -885,7 +890,11 @@ def test_close_ball_backward_is_one_goal_retreat_cycle_with_camera_down():
 
     aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
     motions = {m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]}
-    expected = copy.deepcopy(motions[aliases["goal_camera_90_backward_1"]])
+    # This independent recovery retains the body frames from before catalog 34.
+    previous = json.loads((RUNTIME_CATALOG_PATH.parent /
+                           "20260929_catalog34_retreat_update/runtime_before.json").read_text())
+    previous_motions = {m["name"]: m for m in previous["motions"]}
+    expected = copy.deepcopy(previous_motions[aliases["goal_camera_90_backward_1"]])
     expected["name"] = "후진실전-2(1회, 픽업 카메라0도)"
     for frame in expected["frames"]:
         frame["angles"]["0"] = -60.0
@@ -1090,3 +1099,52 @@ def test_hurdle_preserves_catalog31_source_except_five_degree_tolerance():
     assert source["playback_speed"] == 0.95
     assert source["repeat_count"] == 1
     assert source["completion"]["position_tolerance_deg"] == 2.0
+
+
+def test_fine_turn_import_preserves_source_and_unrelated_runtime_motions():
+    archive = RUNTIME_CATALOG_PATH.parent / "20260929_fine_turn_transition"
+    source = {m["name"]: m for m in json.loads((archive / "source_robot_motions33.json").read_text())["motions"]}
+    before = {m["name"]: m for m in json.loads((archive / "runtime_before.json").read_text())["motions"]}
+    current = {m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]}
+    aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+    assert len(current) == len(before) + 3
+    for name, motion in before.items():
+        # Catalog 34 separately updates these two retreats; verify them below.
+        if name not in {"찐후진실전-2(2회)", "찐후진실전(1회)"}:
+            assert current[name] == motion
+    for angle in (0, 45):
+        name = aliases[f"fine_to_turn_ready_{angle}"]
+        expected = copy.deepcopy(source[name])
+        expected["completion"]["position_tolerance_deg"] = 5.0
+        assert current[name] == expected
+    expected = copy.deepcopy(current[aliases["fine_to_turn_ready_45"]])
+    expected["name"] = aliases["fine_to_turn_ready_90"]
+    for frame in expected["frames"]:
+        frame["angles"]["0"] = 1.0
+        frame["name"] += "(회전준비90도)"
+    expected["start_pose"] = expected["frames"][0]["name"]
+    expected["end_pose"] = expected["frames"][-1]["name"]
+    assert current[expected["name"]] == expected
+    before_aliases = yaml.safe_load((archive / "aliases_before.yaml").read_text())["motion_aliases"]
+    assert aliases == {**before_aliases,
+                       "fine_to_turn_ready_0": "찐미세오뒤에서 오뒤(0도)",
+                       "fine_to_turn_ready_45": "찐미세오뒤에서 오뒤(45도)",
+                       "fine_to_turn_ready_90": "찐미세오뒤에서 오뒤(골대 카메라90도)"}
+
+
+def test_catalog34_replaces_only_requested_retreats_with_five_degree_tolerance():
+    archive = RUNTIME_CATALOG_PATH.parent / "20260929_catalog34_retreat_update"
+    source = {m["name"]: m for m in json.loads((archive / "source_requested_motions.json").read_text())["motions"]}
+    before = json.loads((archive / "runtime_before.json").read_text())
+    current = json.loads(RUNTIME_CATALOG_PATH.read_text())
+    expected = copy.deepcopy(before)
+    assert set(source) == {"찐후진실전-2(2회)", "찐후진실전(1회)"}
+    for index, motion in enumerate(expected["motions"]):
+        if motion["name"] in source:
+            replacement = copy.deepcopy(source[motion["name"]])
+            replacement["completion"]["position_tolerance_deg"] = 5.0
+            expected["motions"][index] = replacement
+    assert current == expected
+    aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+    assert aliases["pickup_retreat_2"] == "찐후진실전(1회)"
+    assert aliases["goal_camera_90_backward_1"] == "찐후진실전(1회)"

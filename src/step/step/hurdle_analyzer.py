@@ -23,6 +23,7 @@ from sensor_msgs.msg import CameraInfo, Image
 from std_msgs.msg import String
 
 from .approach_distance import approach_level_from_motion
+from .approach_distance import HURDLE_FINE_DISTANCE_M
 from .approach_distance import ball_hurdle_approach_motion
 from .hurdle_navigation_planner import HURDLE_HEAD_DOWN_BOTTOM_DISTANCE_PX
 from .depth_frame_cache import DepthFrameCache
@@ -839,10 +840,12 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
                 ),
                 go_now=go_now,
                 approach_motion=ball_hurdle_approach_motion(
-                    target.depth_m
+                    target.depth_m, fine_distance_m=HURDLE_FINE_DISTANCE_M,
                 ),
                 approach_level=approach_level_from_motion(
-                    ball_hurdle_approach_motion(target.depth_m)
+                    ball_hurdle_approach_motion(
+                        target.depth_m, fine_distance_m=HURDLE_FINE_DISTANCE_M,
+                    )
                 ),
                 approach_target_distance_m=target.depth_m,
                 target_priority_score=target.score,
