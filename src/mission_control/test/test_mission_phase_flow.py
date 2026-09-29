@@ -1636,7 +1636,7 @@ def test_confirmed_approaching_hurdle_beats_approaching_ball():
     )
 
     assert published[-1]["source"] == "hurdle"
-    assert published[-1]["action"] == "GO"
+    assert published[-1]["action"] == "STRAIGHT_0"
 
 
 def test_hurdle_go_returns_to_line_from_goal_approach():
@@ -1705,7 +1705,7 @@ def test_missing_or_stale_hurdle_preserves_active_hurdle_lock():
 
     seen = harness.publish_vision(
         line=line_info(),
-        hurdle=approaching_hurdle(),
+        hurdle=go_ready_hurdle(),
     )
     assert seen[-1]["source"] == "hurdle"
     assert seen[-1]["action"] == "GO"
@@ -2327,7 +2327,7 @@ def test_final_line_track_still_prioritizes_confirmed_hurdle():
 
     assert decision["phase"] == "LINE_TRACK"
     assert decision["source"] == "hurdle"
-    assert decision["action"] == "GO"
+    assert decision["action"] == "STRAIGHT_0"
 
 
 
@@ -2864,11 +2864,17 @@ def test_shot_settle_restarts_after_scoring_condition_is_lost(monkeypatch, lost_
     interrupted = harness.publish_vision(goal=lost_confirmation)
     assert all(command['action'] != 'SHOT' for command in interrupted)
     assert harness.pre_motion_settle_started_at is None
-    now[0] = 13.0
+    if lost_confirmation == {'detected': False}:
+        search = interrupted[-1]
+        assert search['action'] == 'GOAL_CAMERA90_TURN_RIGHT_2'
+        release_general(harness, search)
+        now[0] = harness.goal_post_motion_dwell_until
+        assert harness.publish_vision(goal=score_ready_goal()) == []
+    now[0] = 14.0
     assert harness.publish_vision(goal=score_ready_goal()) == []
-    now[0] = 15.999
+    now[0] = 16.999
     assert harness.publish_vision(goal=score_ready_goal()) == []
-    now[0] = 16.0
+    now[0] = 17.0
     shot = harness.publish_vision(goal=score_ready_goal())[-1]
     assert shot['action'] == 'SHOT'
     assert shot['sdk_motion_requested'] is True

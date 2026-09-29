@@ -479,7 +479,7 @@ def test_confirmed_hurdle_preempts_ball_in_non_goal_phase(phase):
     )
 
     assert decision.source == "hurdle"
-    assert decision.action == "GO" and decision.source_command["fine_sequence_requested"]
+    assert decision.action == "STRAIGHT_0" and not decision.source_command["fine_sequence_requested"]
 
 
 @pytest.mark.parametrize("include_ball", [False, True])
@@ -502,7 +502,7 @@ def test_goal_approach_confirmed_hurdle_preempts_goal(include_ball):
     )
 
     assert decision.source == "hurdle"
-    assert decision.action == "GO" and decision.source_command["fine_sequence_requested"]
+    assert decision.action == "STRAIGHT_0" and not decision.source_command["fine_sequence_requested"]
 
 
 def test_unconfirmed_hurdle_does_not_enter_auto_priority():
@@ -1584,7 +1584,7 @@ def test_lost_goal_stops_then_turns_toward_last_seen_side():
     assert stopped.action == "GOAL_LOST_STOP"
     assert stopped.valid is False
     assert stopped.source_command["linear_speed_mps"] == 0.0
-    assert turning.action == "RECOVER_GOAL_TURN_LEFT"
+    assert turning.action == "GOAL_CAMERA90_TURN_LEFT_1"
     assert turning.valid is True
     assert turning.source_command["angular_speed_rad_s"] < 0.0
     assert turning.source_command["target_heading_change_deg"] < 0.0
@@ -2675,7 +2675,7 @@ def test_close_pickup_loss_backs_up_one_cycle_and_reacquires(fine, offset):
         assert decision.sdk_motion_requested
     centered = ball_info(distance_m=0.4, offset_x_px=0, bottom_distance_px=90)
     if fine:
-        assert plan(centered).action == "BALL_PICKUP_FINE_FORWARD"
+        assert plan(centered).action == "BALL_PICKUP_FINE_ALIGN_CONTINUE"
     assert plan({**centered, "bottom_distance_px": 40}).action.endswith("ALIGN_CONTINUE")
     planner.clear_collected_ball_tracking()
     assert not planner.pickup_close_alignment_active
@@ -3113,7 +3113,7 @@ def test_completed_hurdle_releases_close_turn_block_for_next_hurdle():
     approach = planner.plan("AUTO", observations(hurdle=hurdle_info(
         bottom_distance_px=100, depth_m=0.4, hurdle_angle_deg=12.0,
     )), 0.1)
-    assert approach.action == "GO" and approach.valid
+    assert approach.action == "STRAIGHT_0" and approach.valid
     assert approach.source_command["close_rotation_blocked"]
     ready = planner.plan("AUTO", observations(hurdle=hurdle_info(
         bottom_distance_px=100,

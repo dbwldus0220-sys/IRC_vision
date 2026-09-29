@@ -148,7 +148,7 @@ def test_fine_checkpoint_waits_inside_pickup_lock_without_deadlock(clock, action
 
 def test_hurdle_go_waits_for_fresh_fine_sequence_decision(clock):
     node = LiveInputHarness(phase='HURDLE_POSITIONING')
-    info = hurdle_info(depth_m=.55, distance_m=.55, bottom_distance_px=200,
+    info = hurdle_info(depth_m=.20, distance_m=.20, bottom_distance_px=200,
                        camera_center_offset_x_px=0, go_now=False)
     observe(node, clock, 'hurdle', info)
     assert node.last_selected_decision.action == 'GO'

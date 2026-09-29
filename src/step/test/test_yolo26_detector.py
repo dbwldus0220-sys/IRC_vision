@@ -371,22 +371,21 @@ def test_grasp_banner_only_appears_during_verification():
     ) is None
 
 
-def test_grasp_banner_reports_the_mission_nodes_current_result():
-    """Display waiting, success, and failure using distinct colors."""
-    assert Yolo26Detector._grasp_verification_banner(
-        {"grasp_verification": {"active": True, "result": "UNKNOWN"}}
-    ) == ("GRASP CHECK: WAITING", (0, 165, 255))
-    assert Yolo26Detector._grasp_verification_banner(
-        {"grasp_verification": {"active": True, "result": "GRABBED"}}
-    ) == ("GRASP CHECK: GRABBED", (0, 255, 0))
-    assert Yolo26Detector._grasp_verification_banner(
-        {
-            "grasp_verification": {
-                "active": True,
-                "result": "NOT_GRABBED",
-            }
-        }
-    ) == ("GRASP CHECK: NOT GRABBED", (0, 0, 255))
+@pytest.mark.parametrize("result", ["UNKNOWN", "NOT_GRABBED", "GRABBED"])
+def test_grasp_banner_hides_all_provisional_votes(result):
+    assert Yolo26Detector._grasp_verification_banner({
+        "grasp_verification": {"active": True, "finalized": False, "result": result},
+    }) is None
+
+
+@pytest.mark.parametrize("result,label,color", [
+    ("GRABBED", "GRASP CHECK: GRABBED", (0, 255, 0)),
+    ("NOT_GRABBED", "GRASP CHECK: NOT GRABBED", (0, 0, 255)),
+])
+def test_grasp_banner_displays_only_final_result(result, label, color):
+    assert Yolo26Detector._grasp_verification_banner({
+        "grasp_verification": {"active": False, "finalized": True, "result": result},
+    }) == (label, color)
 
 
 def test_grasp_debug_status_expires_instead_of_leaving_stale_banner():
@@ -443,11 +442,11 @@ def test_inference_timing_emits_one_bounded_summary():
 
 
 @pytest.mark.parametrize("direction,expected", [
-    ("LEFT", "BALL LOST | SEARCH LEFT"),
-    ("RIGHT", "BALL LOST | SEARCH RIGHT"),
-    (None, "BALL LOST"),
+    ("LEFT", "BALL LOST | WAIT"),
+    ("RIGHT", "BALL LOST | WAIT"),
+    (None, "BALL LOST | WAIT"),
 ])
-def test_ball_lost_banner_shows_remembered_search_direction(direction, expected):
+def test_ball_lost_banner_does_not_claim_turn_from_memory_alone(direction, expected):
     assert Yolo26Detector._ball_lost_banner({
         "ball_tracking": {"lost": True, "last_direction": direction},
     }) == expected
@@ -462,6 +461,7 @@ def test_ball_top_loss_banner_shows_forward_search_before_side():
     assert Yolo26Detector._ball_lost_banner({
         "ball_tracking": {"lost": True, "last_direction": "LEFT",
                           "top_forward_pending": True},
+        "decision": {"selected_action": "BALL_LOST_FORWARD_2"},
     }) == "BALL LOST | SEARCH FORWARD"
 
 
@@ -656,3 +656,78 @@ def test_hurdle_metrics_expose_actual_phase_and_rgb_head_trigger(monkeypatch):
     assert any("Bottom dy" in text and "120px" in text for text, _ in rows)
     assert any("Head request" in text and "YES" in text for text, _ in rows)
     assert all(y > 96 for text, y in rows)
+
+
+@pytest.mark.parametrize('action,reason,label', [
+    ('LINE_LOST_TURN_LEFT', 'line_lost_turn_toward_last_seen_side', 'LINE LOST | SEARCH LEFT'),
+    ('LINE_LOST_TURN_RIGHT', 'line_lost_turn_toward_last_seen_side', 'LINE LOST | SEARCH RIGHT'),
+    ('WAIT', 'lost_search_turn_limit_reached', 'LINE LOST | SEARCH LIMIT'),
+    ('WAIT', 'no_fresh_detected_target', 'LINE LOST | WAIT'),
+])
+def test_line_loss_banner_reports_selected_search_or_hold(action, reason, label):
+    debug = {'source': 'LINE', 'fresh_vision': {'line': True},
+             'line': {'line_detected': False},
+             'decision': {'selected_action': action, 'reason': reason}}
+    assert Yolo26Detector._line_lost_banner(debug) == label
+    debug['fresh_vision']['line'] = False
+    assert Yolo26Detector._line_lost_banner(debug) is None
+    debug['fresh_vision']['line'] = True
+    debug['line']['line_detected'] = True
+    assert Yolo26Detector._line_lost_banner(debug) is None
+
+
+@pytest.mark.parametrize('direction,count', [('LEFT', 2), ('RIGHT', 5)])
+def test_running_line_search_keeps_line_lost_label(direction, count):
+    detector = object.__new__(Yolo26Detector)
+    detector.latest_running_motion = {
+        'motion_id': f'line_search_{direction.lower()}_{count}',
+        'action': f'LINE_LOST_TURN_{direction}',
+    }
+    detector.latest_running_motion_time = time.monotonic()
+    assert detector._running_motion_banner()[0] == f'LINE LOST | SEARCH {direction}'
+
+
+def test_raw_grab_detection_does_not_appear_as_a_final_result():
+    detector = object.__new__(Yolo26Detector)
+    detector._active_metrics_mode = lambda: 'ball'
+    for method in (
+        '_fresh_motion_command', '_fresh_ball_info', '_recent_ball_info',
+        '_fresh_goal_info', '_fresh_hurdle_info', '_fresh_line_info', '_fresh_decision_debug',
+    ):
+        setattr(detector, method, lambda: None)
+    for method in ('_draw_ball_metrics', '_draw_grasp_verification_status'):
+        setattr(detector, method, lambda image: None)
+    detector.active_provider = 'test'
+    detector.smoothed_fps = 15.
+    frame = np.zeros((480, 640, 3), dtype=np.uint8)
+    detection = Detection(class_id=5, class_name='grab', confidence=.95,
+                          bbox=[100, 150, 300, 350], center=[200, 250])
+    assert np.array_equal(detector._draw_detections(frame, [detection]),
+                          detector._draw_detections(frame, []))
+
+
+@pytest.mark.parametrize('phase,locked,visible', [
+    ('AUTO', False, True), ('LINE_TRACK', False, True),
+    ('HURDLE_POSITIONING_LOCK', True, False), ('GOAL_APPROACH_LOCK', True, False),
+])
+def test_line_loss_overlay_does_not_claim_another_missions_wait(phase, locked, visible):
+    debug = {'source': 'NONE', 'phase': phase, 'execution': {'mission_locked': locked},
+             'fresh_vision': {'line': True}, 'line': {'line_detected': False},
+             'decision': {'selected_action': 'WAIT'}}
+    assert (Yolo26Detector._line_lost_banner(debug) is not None) == visible
+
+
+@pytest.mark.parametrize('action,reason,expected', [
+    ('BALL_APPROACH_TURN_RIGHT_5', '', 'SEARCH RIGHT'),
+    ('BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_2', '', 'SEARCH LEFT'),
+    ('BALL_PICKUP_FINE_SEARCH_RIGHT', '', 'SEARCH RIGHT'),
+    ('BALL_PICKUP_FINE_SEARCH_BACKWARD', '', 'SEARCH BACKWARD'),
+    ('BALL_PICKUP_INITIAL_SEARCH_FORWARD_4', '', 'SEARCH FORWARD'),
+    ('WAIT', 'lost_search_turn_limit_reached', 'SEARCH LIMIT'),
+    ('WAIT', 'ball_post_motion_dwell', 'WAIT'),
+])
+def test_ball_lost_banner_follows_selected_command(action, reason, expected):
+    assert Yolo26Detector._ball_lost_banner({
+        'ball_tracking': {'lost': True, 'last_direction': 'RIGHT'},
+        'decision': {'selected_action': action, 'reason': reason},
+    }) == f'BALL LOST | {expected}'

@@ -11,7 +11,7 @@ from mission_control.motion_decision_planner import MotionDecisionPlanner
 from test_mission_phase_flow import MissionFlowHarness, line_info, release_general
 
 
-def hurdle(depth=0.7, **updates):
+def hurdle(depth=0.20, **updates):
     info = {
         "detected": True, "confirmation_confirmed": True, "confidence": 0.9,
         "depth_valid": True, "depth_m": depth, "hurdle_angle_deg": 0.0,
@@ -196,7 +196,7 @@ def test_far_approach_and_close_sequence_trigger():
     assert far.source == "hurdle"
     assert not far.source_command.get("hurdle_positioning_active", False)
     aligned = planner.plan("HURDLE_POSITIONING", {"hurdle": hurdle(0.4)}, 0.1)
-    assert aligned.action == "GO" and aligned.source_command["fine_sequence_requested"]
+    assert aligned.action == "STRAIGHT_0" and not aligned.source_command["fine_sequence_requested"]
     not_confirmed = planner.plan("HURDLE_POSITIONING", {"hurdle": hurdle(0.15)}, 0.1)
     assert not_confirmed.action == "GO" and not_confirmed.requires_ack
     ready = planner.plan("HURDLE_POSITIONING", {"hurdle": hurdle(0.15, go_now=True)}, 0.1)
@@ -262,7 +262,7 @@ def test_recognition_approach_ignores_line_heading(depth, heading):
 
 
 @pytest.mark.parametrize("depth", [0.8, 0.7, 0.4])
-@pytest.mark.parametrize("bottom,action", [(101, "ALIGN_RIGHT"), (100, "GO")])
+@pytest.mark.parametrize("bottom,action", [(101, "ALIGN_RIGHT"), (100, "STRAIGHT_0")])
 def test_rotation_cutoff_is_image_distance_not_metric_depth(depth, bottom, action):
     planner = MotionDecisionPlanner()
     decision = planner.plan("HURDLE_POSITIONING", {
@@ -285,7 +285,7 @@ def test_turn_uses_center_angle_and_70_degree_minimum(angle, phase):
     }, 0.1)
     expected = (
         "ALIGN_RIGHT" if angle >= 70.0 else
-        "ALIGN_LEFT" if angle <= -70.0 else "GO"
+        "ALIGN_LEFT" if angle <= -70.0 else "STRAIGHT_0"
     )
     assert decision.valid and decision.action == expected
     assert decision.source_command["center_steering_deg"] == pytest.approx(angle, abs=0.001)
@@ -317,7 +317,7 @@ def test_near_turn_pauses_one_second_before_and_after(clock, status):
     assert node.latest_info["hurdle"] is None
     node.receive(hurdle(0.4, hurdle_angle_deg=44.999))
     forward = node.publish()[-1]
-    assert forward["action"] == "GO"
+    assert forward["action"] == "STRAIGHT_0"
 
 
 
@@ -332,8 +332,9 @@ def test_positioning_forward_rechecks_fresh_hurdle_without_dwell(clock):
     assert node.latest_info["hurdle"] is None
     assert not node.general_motion_gate.has_required_fresh_vision()
     assert all(not command["sdk_motion_requested"] for command in node.publish())
+    clock[0] += 0.01
     node.receive(hurdle(0.5))
-    assert node.publish()[-1]["action"] == "GO"
+    assert node.publish()[-1]["action"] == "STRAIGHT_0"
 
 
 def test_positioning_turn_pause_starts_when_forward_finishes(clock):

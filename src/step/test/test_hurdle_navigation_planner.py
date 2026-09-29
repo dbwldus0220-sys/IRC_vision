@@ -25,8 +25,8 @@ def hurdle_info(**overrides):
 
 
 @pytest.mark.parametrize("angle,action", [
-    (-70.0, "ALIGN_LEFT"), (-69.999, "GO"),
-    (0.0, "GO"), (69.999, "GO"), (70.0, "ALIGN_RIGHT"),
+    (-70.0, "ALIGN_LEFT"), (-69.999, "STRAIGHT_0"),
+    (0.0, "STRAIGHT_0"), (69.999, "STRAIGHT_0"), (70.0, "ALIGN_RIGHT"),
 ])
 @pytest.mark.parametrize("offset", [-0.5, 0.5])
 def test_center_approach_ignores_parallel_angle_and_path_offset(angle, action, offset):
@@ -39,7 +39,7 @@ def test_center_approach_ignores_parallel_angle_and_path_offset(angle, action, o
 
 def test_positioning_starts_fixed_sequence_without_old_jump_confirmation():
     decision = HurdleNavigationPlanner().plan(hurdle_info(
-        depth_m=0.55, hurdle_angle_deg=30.0, go_now=False,
+        depth_m=0.20, hurdle_angle_deg=30.0, go_now=False,
     ), positioning=True)
     assert decision.action == "GO"
     assert decision.go_now and decision.sdk_motion_requested
@@ -203,8 +203,8 @@ def test_close_turn_block_survives_missing_depth_detection_and_pixel_increase():
     command = planner.plan(hurdle_info(
         bottom_distance_px=100, depth_valid=False, depth_m=None,
     ))
-    assert command.action == "GO"
-    assert command.depth_fallback_requested
+    assert command.action == "WAIT"
+    assert not command.depth_fallback_requested
     assert planner.close_rotation_blocked
     assert planner.plan({"detected": False}).action == "WAIT"
     command = planner.plan(hurdle_info(
@@ -240,13 +240,13 @@ def test_near_hurdle_at_go_geometry_waits_for_confirmation():
     (False, None), (False, 0.4), (True, None), (True, 0),
     (True, -1), (True, float('nan')), (True, float('inf')),
 ])
-def test_close_invalid_depth_requests_fine0_dwell_hurdle_sequence(depth_valid, depth):
+def test_close_invalid_depth_cannot_start_final_sequence(depth_valid, depth):
     command = HurdleNavigationPlanner().plan(hurdle_info(
         depth_valid=depth_valid, depth_m=depth, bottom_distance_px=100,
         hurdle_angle_deg=None,
     ))
-    assert command.action == "GO" and command.sdk_motion_requested
-    assert command.to_dict()["depth_fallback_requested"] is True
+    assert command.action == "WAIT" and not command.sdk_motion_requested
+    assert command.to_dict()["depth_fallback_requested"] is False
 
 
 def test_close_valid_depth_with_missing_angle_still_requests_fine45():

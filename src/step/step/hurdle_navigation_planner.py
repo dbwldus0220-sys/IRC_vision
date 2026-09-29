@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 import math
 from typing import Any
 
@@ -174,15 +174,6 @@ class HurdleNavigationPlanner:
             not bool(hurdle_info.get("depth_valid", False))
             or depth is None or depth <= 0.0
         ):
-            if self.close_rotation_blocked:
-                # GO owns an atomic fine-0, three-second dwell, hurdle sequence.
-                return replace(
-                    self.wait("hurdle_close_depth_fallback"),
-                    valid=True, action="GO", sdk_motion_requested=True,
-                    confidence=confidence, go_now=True,
-                    bottom_distance_px=bottom_distance_px,
-                    depth_fallback_requested=True,
-                )
             return self.wait("missing_valid_hurdle_depth")
         distance = depth
         ground_gap = depth
@@ -249,11 +240,11 @@ class HurdleNavigationPlanner:
         positioning_turn_needed = positioning and not path_centered
         fine_sequence_requested = bool(
             positioning
-            and depth <= HURDLE_FINE_DISTANCE_M
+            and ground_gap_in_range
             and (not positioning_turn_needed or self.close_rotation_blocked)
         )
         if positioning:
-            # The bridge owns both fine motions and the pre-hurdle pause.
+            # Only the final distance checkpoint may start the atomic sequence.
             go_now = fine_sequence_requested
         rotation_needed = positioning_turn_needed if positioning else alignment_needed
         if (
@@ -265,7 +256,7 @@ class HurdleNavigationPlanner:
 
         if fine_sequence_requested:
             action = "GO"
-            reason = "hurdle_fine_sequence_at_close_depth"
+            reason = "hurdle_final_sequence_at_go_depth"
         elif go_now:
             action = "GO"
             reason = "hurdle_parallel_at_close_depth"

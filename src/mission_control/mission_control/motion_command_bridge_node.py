@@ -1216,29 +1216,14 @@ class MotionCommandBridgeNode(Node):
             self.goal_crab_completed = False
             self.last_completed_motion_id = None
         elif action == "GO":
-            source_command = payload.get("source_command")
-            needs_depth_fine_step = (
-                payload.get("source") == "hurdle"
-                and isinstance(source_command, dict)
-                and source_command.get("depth_fallback_requested") is True
-                and not self.hurdle_depth_fine_completed
+            # Approach steps are separate commands and do not count toward this tail.
+            # On a failed tail, retry only the stages not already completed.
+            self.hurdle_fine_sequence_pending = True
+            remaining = max(0, 2 - self.hurdle_sequence_fine_completed)
+            fine_steps = ("pickup_fine_forward_0", self.DWELL_MARKER) * remaining
+            pickup_sequence = fine_steps[:-1] + (
+                self.HURDLE_PRE_GO_DWELL_MARKER, "hurdle",
             )
-            # Every attempt holds still immediately before the hurdle motion.
-            # Retrying a completed blind step must not execute it again.
-            pickup_sequence = (self.HURDLE_PRE_GO_DWELL_MARKER, "hurdle")
-            if (
-                payload.get("source") == "hurdle"
-                and isinstance(source_command, dict)
-                and source_command.get("fine_sequence_requested") is True
-            ):
-                self.hurdle_fine_sequence_pending = True
-            if self.hurdle_fine_sequence_pending:
-                remaining = max(0, 2 - self.hurdle_sequence_fine_completed)
-                fine_steps = ("pickup_fine_forward_0", self.DWELL_MARKER) * remaining
-                # The existing pre-GO pause also serves as the last fine-step pause.
-                pickup_sequence = fine_steps[:-1] + pickup_sequence
-            elif needs_depth_fine_step:
-                pickup_sequence = ("pickup_fine_forward_0", *pickup_sequence)
             motion_id = pickup_sequence[0]
         elif action == "POST_BALL_GOAL_TRANSITION":
             pickup_sequence = self.POST_BALL_GOAL_TRANSITION_SEQUENCE
@@ -1408,7 +1393,7 @@ class MotionCommandBridgeNode(Node):
                 request_id=self.active_request_id,
                 motion_id=next_motion_id,
                 action=self.active_action,
-                message="holding still for three seconds before hurdle",
+                message="holding still for one second before hurdle",
             )
             return True
         if next_motion_id == self.SHOT_PREPARE_DWELL_MARKER:

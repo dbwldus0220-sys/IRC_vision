@@ -1085,6 +1085,8 @@ class Yolo26Detector(Node):
                 label = "HURDLE / FORWARD 4"
             elif motion_id == "pickup_fine_forward_0":
                 label = "HURDLE / FINE FORWARD"
+        if action in {"LINE_LOST_TURN_LEFT", "LINE_LOST_TURN_RIGHT"}:
+            label = "LINE LOST | SEARCH " + action.rsplit("_", 1)[1]
         if motion_id == "ball_general_fine_forward_8":
             source = str(payload.get("source", "")).lower()
             if payload.get("action") == "GO":
@@ -1642,6 +1644,8 @@ class Yolo26Detector(Node):
             "RECOVER_RIGHT_TURN_LEFT": "RECOVER RIGHT / TURN LEFT",
             "RECOVER_RIGHT_TURN_RIGHT": "RECOVER RIGHT / TURN RIGHT",
             "STOP": "STOP",
+            "LINE_LOST_TURN_LEFT": "LINE LOST | SEARCH LEFT",
+            "LINE_LOST_TURN_RIGHT": "LINE LOST | SEARCH RIGHT",
         }
         ball_labels = {
             "PICKUP_NOW": "PICK UP BALL",
@@ -2997,6 +3001,9 @@ class Yolo26Detector(Node):
             and bool(line_info.get("detected", False))
         )
         for detection in detections:
+            # Raw grab evidence is still published, but only the final vote is shown.
+            if detection.class_name == "grab":
+                continue
             if (
                 metrics_mode == "line" or show_recovery_line
             ) and detection.class_name == "line":
@@ -3103,8 +3110,36 @@ class Yolo26Detector(Node):
             cv2.rectangle(annotated, (0, 32), (annotated.shape[1], 96), (0, 0, 0), -1)
             self._draw_action_banner(annotated, lost_banner, (0, 100, 220))
         else:
+            line_lost = self._line_lost_banner(decision_debug)
+            if line_lost is not None and running_banner is None:
+                cv2.rectangle(annotated, (0, 32), (annotated.shape[1], 96), (0, 0, 0), -1)
+                self._draw_action_banner(annotated, line_lost, (0, 100, 220))
             self._draw_grasp_verification_status(annotated)
         return annotated
+
+    @staticmethod
+    def _line_lost_banner(decision_debug: dict[str, Any] | None) -> str | None:
+        """Distinguish fresh line loss from a missing frame or a blocked search."""
+        if not isinstance(decision_debug, dict):
+            return None
+        source = decision_debug.get("source")
+        if source not in {"LINE", "NONE"}:
+            return None
+        if decision_debug.get("execution", {}).get("mission_locked") is True:
+            return None
+        if source == "NONE" and decision_debug.get("phase") not in {"AUTO", "LINE_TRACK"}:
+            return None
+        if not decision_debug.get("fresh_vision", {}).get("line", False):
+            return None
+        if decision_debug.get("line", {}).get("line_detected") is not False:
+            return None
+        decision = decision_debug.get("decision", {})
+        action = str(decision.get("selected_action", ""))
+        if action in {"LINE_LOST_TURN_LEFT", "LINE_LOST_TURN_RIGHT"}:
+            return "LINE LOST | SEARCH " + action.rsplit("_", 1)[1]
+        if decision.get("reason") == "lost_search_turn_limit_reached":
+            return "LINE LOST | SEARCH LIMIT"
+        return "LINE LOST | WAIT"
 
     @staticmethod
     def _ball_lost_banner(decision_debug: dict[str, Any] | None) -> str | None:
@@ -3114,12 +3149,22 @@ class Yolo26Detector(Node):
         tracking = decision_debug.get("ball_tracking")
         if not isinstance(tracking, dict) or tracking.get("lost") is not True:
             return None
-        if tracking.get("top_forward_pending") is True:
-            return "BALL LOST | SEARCH FORWARD"
-        direction = tracking.get("last_direction")
-        if direction in {"LEFT", "RIGHT"}:
-            return f"BALL LOST | SEARCH {direction}"
-        return "BALL LOST"
+        decision = decision_debug.get("decision", {})
+        if decision.get("reason") == "lost_search_turn_limit_reached":
+            return "BALL LOST | SEARCH LIMIT"
+        action = str(decision.get("selected_action", ""))
+        if action.startswith(("BALL_APPROACH_TURN_", "BALL_PICKUP_CAMERA_DOWN_TURN_",
+                              "BALL_PICKUP_FINE_SEARCH_")):
+            for direction in ("LEFT", "RIGHT"):
+                if f"_{direction}" in action:
+                    return f"BALL LOST | SEARCH {direction}"
+        if action.startswith(("BALL_LOST_FORWARD_", "BALL_PICKUP_INITIAL_SEARCH_",
+                              "BALL_PICKUP_FINE_SEARCH_")):
+            if "BACKWARD" in action:
+                return "BALL LOST | SEARCH BACKWARD"
+            if "FORWARD" in action:
+                return "BALL LOST | SEARCH FORWARD"
+        return "BALL LOST | WAIT"
 
     @staticmethod
     def _executor_fault_banner(decision_debug: dict[str, Any] | None) -> str | None:
@@ -3139,12 +3184,14 @@ class Yolo26Detector(Node):
     def _grasp_verification_banner(
         decision_debug: dict[str, Any] | None,
     ) -> tuple[str, tuple[int, int, int]] | None:
-        """Translate the mission node's active grasp result into a banner."""
+        """Display only the latched result after the observation window closes."""
         if not isinstance(decision_debug, dict):
             return None
         verification = decision_debug.get("grasp_verification")
-        if not isinstance(verification, dict) or not bool(
-            verification.get("active", False)
+        if (
+            not isinstance(verification, dict)
+            or verification.get("active") is True
+            or verification.get("finalized") is not True
         ):
             return None
 
@@ -3153,7 +3200,7 @@ class Yolo26Detector(Node):
             return "GRASP CHECK: GRABBED", (0, 255, 0)
         if result == "NOT_GRABBED":
             return "GRASP CHECK: NOT GRABBED", (0, 0, 255)
-        return "GRASP CHECK: WAITING", (0, 165, 255)
+        return None
 
     def _draw_grasp_verification_status(self, image: np.ndarray) -> None:
         """Show what motion_decision_node recognizes during grasp checking."""

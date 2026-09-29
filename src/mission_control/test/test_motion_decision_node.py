@@ -1463,6 +1463,7 @@ def test_decision_debug_reports_existing_state(monkeypatch):
     assert payload['fresh_vision']['line'] is True
     assert payload['line'] == {
         'line_detected': True,
+        'last_seen_direction': None,
         'heading_deg': 19.5,
         'heading_source': 'ground_heading_error_deg',
         'center_offset': 0.12,
@@ -1477,6 +1478,7 @@ def test_decision_debug_reports_existing_state(monkeypatch):
     assert payload['decision']['selected_action'] == 'STRAIGHT'
     assert payload['execution']['executor_state'] == 'IDLE'
     assert payload['grasp_verification'] == {
+        'finalized': False,
         'active': False,
         'result': 'UNKNOWN',
         'confidence': None,
@@ -2900,7 +2902,7 @@ def test_ball_recover_rechecks_new_angle_without_dwell_or_forced_forward(
     assert json.loads(node.publisher.messages[-1].data)["action"] == "PICKUP_NOW"
 
 
-def test_ball_loss_during_approach_waits_without_blind_turn_or_dwell(
+def test_confirmed_ball_loss_during_approach_selects_last_side_turn(
     monkeypatch,
 ):
     node = FreshMockInputNode()
@@ -2940,8 +2942,8 @@ def test_ball_loss_during_approach_waits_without_blind_turn_or_dwell(
 
     assert node.ball_post_motion_dwell_until is None
     decision = select_decision(node, ball=missing)
-    assert decision.action == "WAIT"
-    assert decision.valid is False
+    assert decision.action == "BALL_APPROACH_TURN_RIGHT_5"
+    assert decision.valid is True
 
 
 def test_raw_ball_confirmation_does_not_count_as_motion_time_loss():
@@ -4176,10 +4178,12 @@ def test_ball_loss_memory_updates_while_pickup_motion_is_locked(fine, offset, di
     node.pickup_positioning_motion_running = False
     node.pickup_initial_align_waiting = not fine
     node.pickup_fine_align_waiting = fine
-    expected = "WAIT"
+    count = 2 if direction == "LEFT" else 5
+    expected = (f"BALL_PICKUP_FINE_SEARCH_{direction}" if fine
+                else f"BALL_PICKUP_CAMERA_DOWN_TURN_{direction}_{count}")
     decision = select_decision(node, ball=missing)
     assert decision.action == expected
-    assert decision.sdk_motion_requested is False
+    assert decision.sdk_motion_requested is True
 
 
 @pytest.mark.parametrize("fine", [False, True])
@@ -4428,7 +4432,7 @@ def test_ball_loss_confirmation_gates_motion_and_banner_together(stage, monkeypa
             assert decision.action == "WAIT"
             assert decision.reason == "ball_loss_confirmation_pending"
         elif stage == "approach":
-            assert decision.action == "WAIT"
+            assert decision.action == "BALL_APPROACH_TURN_RIGHT_5"
         else:
             assert decision.action == f"BALL_PICKUP_{stage.upper()}_SEARCH_BACKWARD"
 

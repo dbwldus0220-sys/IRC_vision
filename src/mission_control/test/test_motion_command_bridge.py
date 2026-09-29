@@ -585,8 +585,12 @@ def test_supported_action_builds_executor_request(action, motion_id):
 
     bridge.navigation_command_callback(navigation_message(action=action))
     if action == "GO":
-        assert not bridge.executor_request_publisher.messages
-        bridge._check_atomic_dwell(bridge.active_dwell_until)
+        assert bridge.active_motion_id == "pickup_fine_forward_0"
+        for _ in range(2):
+            complete_active_motion(bridge)
+            bridge._check_atomic_dwell(bridge.active_dwell_until)
+        assert bridge.active_motion_id == "hurdle"
+        return
 
     requests = decoded_messages(bridge.executor_request_publisher)
     assert requests == [
@@ -2532,10 +2536,10 @@ def test_pickup_right_crab_does_not_prepare_from_old_fine_history(intervening):
 @pytest.mark.parametrize("distance,action,motion_name", [
     (0.549, "STRAIGHT_0", "찐미세45도-4"),
     (0.550, "STRAIGHT_0", "찐미세45도-4"),
-    (0.550001, "STRAIGHT", "찐전진45(4회)"),
-    (0.570, "STRAIGHT", "찐전진45(4회)"),
-    (0.700, "STRAIGHT", "찐전진45(4회)"),
-    (0.700001, "STRAIGHT", "찐전진45(4회)"),
+    (0.550001, "STRAIGHT", "찐찐전진45(4회)"),
+    (0.570, "STRAIGHT", "찐찐전진45(4회)"),
+    (0.700, "STRAIGHT", "찐찐전진45(4회)"),
+    (0.700001, "STRAIGHT", "찐찐전진45(4회)"),
 ])
 def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
     source, distance, action, motion_name,
@@ -2558,8 +2562,8 @@ def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
     decision = planner.plan("AUTO", {source: sample, "line": line_info()}, 0.1)
     if source == "hurdle":
         assert decision.source == "hurdle"
-        motion_name = "찐미세0도-4" if distance <= 0.700 else "찐전진45(4회)"
-        action = "GO" if distance <= 0.700 else action
+        motion_name = "찐미세0도-4" if distance <= 0.700 else "찐찐전진45(4회)"
+        action = "STRAIGHT_0" if distance <= 0.700 else action
     bridge = FakeBridge()
     if source == "ball" and distance <= 0.550:
         assert decision.action == "PICKUP_NOW"
@@ -2605,7 +2609,7 @@ def test_hurdle_center_error_selects_calibrated_runtime_turn(error, count, turn_
     direction = "LEFT" if error > 0 else "RIGHT"
     assert decision.valid and decision.source == "hurdle"
     if abs(error) < 70.0:
-        assert decision.action == "GO"
+        assert decision.action == "STRAIGHT_0"
         assert "turn_count" not in decision.source_command
         bridge = FakeBridge()
         bridge.navigation_command_callback(navigation_message(
@@ -2637,9 +2641,9 @@ def test_hurdle_center_error_selects_calibrated_runtime_turn(error, count, turn_
 
 
 @pytest.mark.parametrize("error,bottom,depth,expected", [
-    (8, 200, 0.55, "GO"), (-8, 200, 0.55, "GO"),
-    (0, 200, 0.55, "GO"), (0, 200, 0.20, "GO"),
-    (40, 100, 0.4, "GO"), (-40, 100, 0.4, "GO"),
+    (8, 200, 0.55, "STRAIGHT_0"), (-8, 200, 0.55, "STRAIGHT_0"),
+    (0, 200, 0.55, "STRAIGHT_0"), (0, 200, 0.20, "GO"),
+    (40, 100, 0.4, "STRAIGHT_0"), (-40, 100, 0.4, "STRAIGHT_0"),
 ])
 def test_hurdle_turn_sizing_preserves_parallel_and_close_behavior(
     error, bottom, depth, expected,
@@ -2687,45 +2691,18 @@ def hurdle_depth_fallback_message(command_id=8000):
         "confidence": 0.9, "bottom_distance_px": 100,
         "depth_valid": False, "depth_m": None, "hurdle_angle_deg": None,
     }}, 0.1)
-    assert decision.action == "GO" and decision.requires_ack and decision.valid
-    assert decision.source_command["depth_fallback_requested"] is True
+    assert decision.action == "WAIT" and not decision.valid
     return navigation_message(
         source="hurdle", action=decision.action, command_id=command_id,
-        source_command=decision.source_command,
+        source_command=decision.source_command, valid=decision.valid,
     )
 
 
-def test_hurdle_depth_loss_runs_fine_once_then_one_second_dwell_then_hurdle(monkeypatch):
-    clock = [10.0]
-    monkeypatch.setattr("mission_control.motion_command_bridge_node.time.monotonic", lambda: clock[0])
+def test_hurdle_depth_loss_does_not_dispatch_any_motion():
     bridge = FakeBridge()
     bridge.navigation_command_callback(hurdle_depth_fallback_message())
-    requests = lambda: decoded_messages(bridge.executor_request_publisher)
-    assert [r["motion_id"] for r in requests()] == ["pickup_fine_forward_0"]
-    assert bridge.active_dwell_until is None
-    assert bridge.active_action == "GO"
-    assert bridge.motion_in_progress
-    clock[0] = 20.0
-    complete_active_motion(bridge)
-    assert bridge.active_dwell_until == 21.0
-    assert bridge.active_motion_id == bridge.HURDLE_PRE_GO_DWELL_MARKER
-    bridge.executor_status_callback(executor_status(
-        status="SUCCEEDED", motion_id="pickup_fine_forward_0",
-    ))
-    assert bridge.active_dwell_until == 21.0
-    bridge.navigation_command_callback(hurdle_depth_fallback_message(command_id=8001))
-    assert len(requests()) == 1
-    assert decoded_messages(bridge.motion_status_publisher)[-1]["error_code"] == "ATOMIC_SEQUENCE_LOCKED"
-    bridge._check_atomic_dwell(20.999)
-    assert len(requests()) == 1
-    bridge._check_atomic_dwell(21.0)
-    bridge._check_atomic_dwell(24.0)
-    assert [r["motion_id"] for r in requests()] == ["pickup_fine_forward_0", "hurdle"]
-    assert not any(m["status"] == "SUCCEEDED" for m in decoded_messages(bridge.motion_status_publisher))
-    complete_active_motion(bridge)
+    assert not bridge.executor_request_publisher.messages
     assert not bridge.motion_in_progress
-    assert not bridge.hurdle_depth_fine_completed
-    assert decoded_messages(bridge.motion_status_publisher)[-1]["status"] == "SUCCEEDED"
 
 
 
@@ -2735,7 +2712,7 @@ def test_hurdle_depth_loss_runs_fine_once_then_one_second_dwell_then_hurdle(monk
 ])
 def test_failed_hurdle_fine_step_never_starts_hurdle(status, error_code):
     bridge = FakeBridge()
-    bridge.navigation_command_callback(hurdle_depth_fallback_message())
+    bridge.navigation_command_callback(hurdle_fine_sequence_message())
     complete_active_motion(bridge, status, error_code)
     bridge._check_atomic_dwell(1e12)
     assert not bridge.motion_in_progress
@@ -2745,25 +2722,26 @@ def test_failed_hurdle_fine_step_never_starts_hurdle(status, error_code):
 
 def test_missing_hurdle_motion_is_not_success_and_retry_does_not_repeat_fine():
     bridge = FakeBridge()
-    bridge.navigation_command_callback(hurdle_depth_fallback_message())
-    complete_active_motion(bridge)
-    bridge._check_atomic_dwell(bridge.active_dwell_until)
+    bridge.navigation_command_callback(hurdle_fine_sequence_message())
+    for _ in range(2):
+        complete_active_motion(bridge)
+        bridge._check_atomic_dwell(bridge.active_dwell_until)
     complete_active_motion(bridge, "REJECTED", "INVALID_MOTION")
     assert decoded_messages(bridge.motion_status_publisher)[-1]["status"] == "REJECTED"
-    bridge.navigation_command_callback(hurdle_depth_fallback_message(command_id=8001))
+    bridge.navigation_command_callback(hurdle_fine_sequence_message(command_id=8001))
     assert [r["motion_id"] for r in decoded_messages(bridge.executor_request_publisher)] == [
-        "pickup_fine_forward_0", "hurdle",
+        "pickup_fine_forward_0", "pickup_fine_forward_0", "hurdle",
     ]
     bridge._check_atomic_dwell(bridge.active_dwell_until)
     assert [r["motion_id"] for r in decoded_messages(bridge.executor_request_publisher)] == [
-        "pickup_fine_forward_0", "hurdle", "hurdle",
+        "pickup_fine_forward_0", "pickup_fine_forward_0", "hurdle", "hurdle",
     ]
 
 
-def test_hurdle_fallback_waits_until_current_motion_finishes():
+def test_hurdle_final_sequence_waits_until_current_motion_finishes():
     bridge = FakeBridge()
     bridge.navigation_command_callback(navigation_message(action="STRAIGHT", command_id=7999))
-    bridge.navigation_command_callback(hurdle_depth_fallback_message())
+    bridge.navigation_command_callback(hurdle_fine_sequence_message())
     assert [r["motion_id"] for r in decoded_messages(bridge.executor_request_publisher)] == ["line_forward_6"]
     assert decoded_messages(bridge.motion_status_publisher)[-1]["error_code"] == "REJECTED_BUSY"
 
@@ -2782,7 +2760,7 @@ def test_close_hurdle_valid_depth_selects_actual_motion_without_turning(depth, m
         "camera_center_offset_x_px": 0,
     }}, 0.1)
     assert decision.valid
-    assert decision.requires_ack == (depth <= 0.7)
+    assert decision.requires_ack is False
     assert decision.source_command["depth_fallback_requested"] is False
     bridge = FakeBridge()
     bridge.navigation_command_callback(navigation_message(
@@ -2798,19 +2776,25 @@ def test_every_normal_go_holds_one_second_before_hurdle(monkeypatch, source):
     monkeypatch.setattr("mission_control.motion_command_bridge_node.time.monotonic", lambda: clock[0])
     bridge = FakeBridge()
     bridge.navigation_command_callback(navigation_message(action="GO", source=source))
-    assert bridge.active_dwell_until == 11.0
+    for _ in range(2):
+        assert bridge.active_motion_id == "pickup_fine_forward_0"
+        complete_active_motion(bridge)
+        if bridge.active_motion_id == bridge.DWELL_MARKER:
+            clock[0] = bridge.active_dwell_until
+            bridge._check_atomic_dwell(clock[0])
+    assert bridge.active_dwell_until == clock[0] + 1.0
     assert bridge.active_motion_id == bridge.HURDLE_PRE_GO_DWELL_MARKER
-    assert not bridge.executor_request_publisher.messages
+    assert len(bridge.executor_request_publisher.messages) == 2
     status = decoded_messages(bridge.motion_status_publisher)[-1]
     assert status["status"] == "RUNNING" and status["action"] == "GO"
     bridge.navigation_command_callback(navigation_message(action="STRAIGHT", command_id=8001))
     assert decoded_messages(bridge.motion_status_publisher)[-1]["error_code"] == "ATOMIC_SEQUENCE_LOCKED"
-    bridge._check_atomic_dwell(10.999)
-    assert not bridge.executor_request_publisher.messages
-    bridge._check_atomic_dwell(11.0)
+    bridge._check_atomic_dwell(bridge.active_dwell_until - 0.001)
+    assert len(bridge.executor_request_publisher.messages) == 2
+    bridge._check_atomic_dwell(bridge.active_dwell_until)
     bridge._check_atomic_dwell(14.0)
     requests = decoded_messages(bridge.executor_request_publisher)
-    assert [r["motion_id"] for r in requests] == ["hurdle"]
+    assert [r["motion_id"] for r in requests] == ["pickup_fine_forward_0", "pickup_fine_forward_0", "hurdle"]
     assert bridge.motion_in_progress
     assert not any(s["status"] == "SUCCEEDED" for s in decoded_messages(bridge.motion_status_publisher))
     complete_active_motion(bridge)
@@ -2825,12 +2809,14 @@ def test_each_go_retry_has_a_new_full_one_second_hold(monkeypatch, fallback):
     monkeypatch.setattr("mission_control.motion_command_bridge_node.time.monotonic", lambda: clock[0])
     bridge = FakeBridge()
     def request(command_id):
-        return (hurdle_depth_fallback_message(command_id) if fallback else
+        return (hurdle_fine_sequence_message(command_id) if fallback else
                 navigation_message(action="GO", source="hurdle", command_id=command_id))
     bridge.navigation_command_callback(request(8000))
-    if fallback:
-        clock[0] = 20.0
+    for _ in range(2):
         complete_active_motion(bridge)
+        if bridge.active_motion_id == bridge.DWELL_MARKER:
+            clock[0] = bridge.active_dwell_until
+            bridge._check_atomic_dwell(clock[0])
     clock[0] = bridge.active_dwell_until
     bridge._check_atomic_dwell(clock[0])
     complete_active_motion(bridge, "REJECTED", "INVALID_MOTION")
@@ -2842,14 +2828,14 @@ def test_each_go_retry_has_a_new_full_one_second_hold(monkeypatch, fallback):
     assert len(bridge.executor_request_publisher.messages) == before
     bridge._check_atomic_dwell(31.0)
     motions = [r["motion_id"] for r in decoded_messages(bridge.executor_request_publisher)]
-    assert motions == (["pickup_fine_forward_0"] if fallback else []) + ["hurdle", "hurdle"]
+    assert motions == ["pickup_fine_forward_0", "pickup_fine_forward_0"] + ["hurdle", "hurdle"]
 
 
 
 def hurdle_fine_sequence_message(command_id=8100):
     decision = MotionDecisionPlanner().plan("HURDLE_POSITIONING", {"hurdle": {
         "detected": True, "confirmation_confirmed": True, "confidence": 0.9,
-        "depth_valid": True, "depth_m": 0.55, "hurdle_angle_deg": None,
+        "depth_valid": True, "depth_m": 0.20, "hurdle_angle_deg": None,
         "bottom_distance_px": 200, "camera_center_offset_x_px": 0, "go_now": False,
     }}, 0.1)
     assert decision.valid and decision.action == "GO" and decision.requires_ack
@@ -2934,13 +2920,17 @@ def test_hurdle_sequence_failure_stops_and_retry_skips_completed_fine(completed_
 
 
 
-def test_hurdle_retry_with_depth_loss_preserves_two_fine_sequence():
+def test_hurdle_retry_waits_for_valid_depth_without_replaying_completed_steps():
     bridge = FakeBridge()
     bridge.navigation_command_callback(hurdle_fine_sequence_message())
     complete_active_motion(bridge)
+    bridge._check_atomic_dwell(bridge.active_dwell_until)
     complete_active_motion(bridge, "FAILED", "SDK_COMMUNICATION_ERROR")
     assert bridge.hurdle_sequence_fine_completed == 1
+    before = len(bridge.executor_request_publisher.messages)
     bridge.navigation_command_callback(hurdle_depth_fallback_message(command_id=8101))
+    assert len(bridge.executor_request_publisher.messages) == before
+    bridge.navigation_command_callback(hurdle_fine_sequence_message(command_id=8102))
     assert bridge.active_motion_id == "pickup_fine_forward_0"
     complete_active_motion(bridge)
     assert bridge.hurdle_sequence_fine_completed == 2

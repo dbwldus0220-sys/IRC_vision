@@ -36,7 +36,7 @@ class LostSearchTurnLimiter:
             "LOST_TURN" in action or "FINE_SEARCH_" in action
             or decision.reason in {
                 "post_ball_line_search", "post_shot_line_search",
-                "turn_toward_last_seen_goal_side",
+                "turn_toward_last_seen_goal_side", "turn_toward_last_seen_ball_side",
             }
         )
         if not stationary or (

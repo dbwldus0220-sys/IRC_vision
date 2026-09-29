@@ -128,6 +128,7 @@ class MotionDecisionNode(Node):
     GRASP_CONFIDENCE_THRESHOLD = 0.25
     GRASP_VERIFICATION_FRAME_WINDOW = 40
     GRASP_VERIFICATION_MIN_SUCCESSES = 15
+    GRASP_RESULT_DISPLAY_SEC = 3.0
     PICKUP_INITIAL_ALIGN_MARKER = "__BALL_PICKUP_INITIAL_ALIGN_CHECK__"
     PICKUP_FINE_ALIGN_MARKER = "__BALL_PICKUP_FINE_ALIGN_CHECK__"
     PICKUP_POST_BACKWARD_ALIGN_MARKER = (
@@ -494,6 +495,7 @@ class MotionDecisionNode(Node):
         self.pickup_fixed_sequence_started = False
         self.grasp_latest_detection_stamp_ns: int | None = None
         self.grasp_verification_active = False
+        self.grasp_result_display_until: float | None = None
         self.grasp_verification_attempt: int | None = None
         self.grasp_verification_min_stamp_ns: int | None = None
         self.grasp_verification_result = MissionPhaseManager.GRASP_UNKNOWN
@@ -876,6 +878,9 @@ class MotionDecisionNode(Node):
                     payload["ball_loss_confirmed"] = loss.confirmed
                 self.latest_info[source] = payload
                 self.latest_time[source] = received_at
+                if source == "goal" and getattr(self.planner, "goal_tracking_active", False):
+                    # Keep the last visible side current while a motion owns the gate.
+                    self.planner._update_goal_tracking(payload, 0.0)
                 if source == "hurdle":
                     MotionDecisionNode._latch_hurdle_positioning_entry(self, payload)
                 if (
@@ -1262,6 +1267,7 @@ class MotionDecisionNode(Node):
         window_start_monotonic = time.monotonic()
         window_start_ros_ns = MotionDecisionNode._current_ros_time_ns(self)
         self.grasp_verification_active = True
+        self.grasp_result_display_until = None
         self.grasp_verification_attempt = attempt
         self.grasp_verification_min_stamp_ns = getattr(
             self, "grasp_latest_detection_stamp_ns", None
@@ -1326,6 +1332,14 @@ class MotionDecisionNode(Node):
             else result
         )
         end_monotonic = time.monotonic()
+        self.grasp_verification_result = latched_result
+        self.grasp_result_display_until = (
+            end_monotonic + MotionDecisionNode.GRASP_RESULT_DISPLAY_SEC
+            if latched_result in {
+                MissionPhaseManager.GRASPED, MissionPhaseManager.GRASP_NOT_GRABBED,
+            }
+            else None
+        )
         confidences = getattr(self, "grasp_verify_confidences", [])
         frame_votes = self.grasp_verify_frame_votes
         last_frame_result = MissionPhaseManager.GRASP_UNKNOWN
@@ -1925,10 +1939,11 @@ class MotionDecisionNode(Node):
                             self.planner.goal_ignore_until_clear = True
                             self.latest_info["goal"] = None
                             self.latest_time["goal"] = None
-                            self.planner.last_line_seen_direction = None
                             if action in {
                                 "POST_SHOT_TURN_RIGHT_9", "POST_SHOT_TURN_LEFT_4",
                             }:
+                                # Only the exit turn invalidates the pre-shot direction.
+                                self.planner.last_line_seen_direction = None
                                 self.post_shot_line_search_action = None
                                 self.post_shot_line_search_failed = False
                                 self.planner.post_ball_line_search_direction = (
@@ -3320,6 +3335,7 @@ class MotionDecisionNode(Node):
                 ),
                 "line": {
                     "line_detected": bool(line_info.get("detected", False)),
+                    "last_seen_direction": getattr(self.planner, "last_line_seen_direction", None),
                     "heading_deg": heading_deg,
                     "heading_source": "ground_heading_error_deg",
                     "center_offset": center_offset,
@@ -3370,6 +3386,11 @@ class MotionDecisionNode(Node):
                     ),
                 },
                 "grasp_verification": {
+                    "finalized": bool(
+                        not getattr(self, "grasp_verification_active", False)
+                        and getattr(self, "grasp_result_display_until", None) is not None
+                        and now < self.grasp_result_display_until
+                    ),
                     "active": bool(
                         getattr(self, "grasp_verification_active", False)
                     ),
