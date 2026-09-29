@@ -9,6 +9,7 @@ from typing import Any
 
 from .approach_distance import approach_level_from_motion
 from .approach_distance import ball_hurdle_approach_motion
+from .approach_distance import BALL_HURDLE_FINE_DISTANCE_M
 
 
 HURDLE_HEAD_DOWN_BOTTOM_DISTANCE_PX = 120
@@ -25,7 +26,7 @@ class HurdleNavigationConfig:
     go_angle_tolerance_deg: float = 8.0
     path_center_tolerance_norm: float = 0.10
     close_turn_stop_bottom_distance_px: float = 100.0
-    positioning_turn_min_angle_deg: float = 45.0
+    positioning_turn_min_angle_deg: float = 70.0
     center_turn_min_angle_deg: float = 15.0
 
 
@@ -51,6 +52,7 @@ class HurdleActionCommand:
     close_rotation_blocked: bool = False
     depth_fallback_requested: bool = False
     center_steering_deg: float | None = None
+    fine_sequence_requested: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         """Return a rounded JSON-compatible representation."""
@@ -84,6 +86,7 @@ class HurdleActionCommand:
             "bottom_distance_px": self.bottom_distance_px,
             "close_rotation_blocked": self.close_rotation_blocked,
             "depth_fallback_requested": self.depth_fallback_requested,
+            "fine_sequence_requested": self.fine_sequence_requested,
             "approach_motion": (
                 self.action
                 if self.action == "STRAIGHT" or approach_level is not None
@@ -214,7 +217,7 @@ class HurdleNavigationPlanner:
         )
         path_offset = _number(hurdle_info, "path_offset_x_norm")
         path_centered = (
-            abs(center_steering) < self.config.center_turn_min_angle_deg
+            abs(center_steering) < self.config.positioning_turn_min_angle_deg
             if positioning else bool(
                 not path_reference_valid or path_offset is None
                 or abs(path_offset) <= self.config.path_center_tolerance_norm
@@ -244,6 +247,14 @@ class HurdleNavigationPlanner:
 
         alignment_needed = not path_centered or not parallel
         positioning_turn_needed = positioning and not path_centered
+        fine_sequence_requested = bool(
+            positioning
+            and depth <= BALL_HURDLE_FINE_DISTANCE_M
+            and (not positioning_turn_needed or self.close_rotation_blocked)
+        )
+        if positioning:
+            # The bridge owns both fine motions and the pre-hurdle pause.
+            go_now = fine_sequence_requested
         rotation_needed = positioning_turn_needed if positioning else alignment_needed
         if (
             rotation_needed
@@ -252,7 +263,10 @@ class HurdleNavigationPlanner:
         ):
             return self.wait("missing_valid_hurdle_bottom_distance")
 
-        if go_now:
+        if fine_sequence_requested:
+            action = "GO"
+            reason = "hurdle_fine_sequence_at_close_depth"
+        elif go_now:
             action = "GO"
             reason = "hurdle_parallel_at_close_depth"
         elif self.close_rotation_blocked and not ready_geometry:
@@ -302,4 +316,5 @@ class HurdleNavigationPlanner:
             go_now=go_now,
             bottom_distance_px=bottom_distance_px,
             close_rotation_blocked=self.close_rotation_blocked,
+            fine_sequence_requested=fine_sequence_requested,
         )

@@ -450,6 +450,66 @@ def test_grasp_window_latches_not_grabbed_without_successful_frames():
     assert node.phase_manager.grasp_result_for_ball(1) == "NOT_GRABBED"
 
 
+def test_grasp_dwell_updates_do_not_restart_verification():
+    node = FakeDecisionNode("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+    pose = dict(
+        status="RUNNING", action="PICKUP_NOW", command_id=10, event_id=1,
+        dynamics_command=None, motion_id=node.PICKUP_DWELL_MARKER,
+        completed_motion_id=node.PICKUP_GRASP_CHECK_MOTION_ID,
+    )
+    send_status(node, **pose, verification_window_complete=False)
+    send_grasp_detections(node, 1, [{"class_name": "grab", "confidence": 0.9}])
+    send_status(node, **pose, verification_window_complete=False)
+    assert node.grasp_verify_accepted_frames == 1
+    assert len(grasp_log_records(node, "GRASP_VERIFY_START")) == 1
+    send_status(node, **pose, verification_window_complete=True)
+    assert not node.grasp_verification_active
+    send_grasp_detections(node, 2, [{"class_name": "grab", "confidence": 0.9}])
+    assert node.grasp_verify_accepted_frames == 1
+
+
+@pytest.mark.parametrize("command_id,event_id", [(11, 1), (10, 2)])
+def test_unmatched_check_pose_status_cannot_start_verification(command_id, event_id):
+    node = FakeDecisionNode("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+    send_status(
+        node, status="RUNNING", action="PICKUP_NOW", command_id=command_id,
+        event_id=event_id, dynamics_command=None,
+        motion_id=node.PICKUP_DWELL_MARKER,
+        completed_motion_id=node.PICKUP_GRASP_CHECK_MOTION_ID,
+        verification_window_complete=False,
+    )
+    assert not getattr(node, "grasp_verification_active", False)
+
+
+def test_grasp_dwell_rejects_delayed_frames_captured_before_pause(monkeypatch):
+    node = FakeDecisionNode("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+    monkeypatch.setattr(MotionDecisionNode, "_current_ros_time_ns", lambda self: 100)
+    MotionDecisionNode._start_grasp_verification_window(node)
+    send_grasp_detections(node, 99, [{"class_name": "grab", "confidence": 0.9}])
+    assert node.grasp_verify_accepted_frames == 0
+    send_grasp_detections(node, 100, [{"class_name": "grab", "confidence": 0.9}])
+    assert node.grasp_verify_accepted_frames == 1
+
+
+@pytest.mark.parametrize("status", ["FAILED", "TIMEOUT", "CANCELLED"])
+def test_pickup_failure_closes_grasp_dwell_verification(status):
+    node = FakeDecisionNode("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 10, 1)
+    pose = dict(
+        action="PICKUP_NOW", command_id=10, event_id=1,
+        dynamics_command=None, motion_id=node.PICKUP_DWELL_MARKER,
+        completed_motion_id=node.PICKUP_GRASP_CHECK_MOTION_ID,
+        verification_window_complete=False,
+    )
+    send_status(node, status="RUNNING", **pose)
+    assert node.grasp_verification_active
+    send_status(node, status=status, **pose)
+    assert not node.grasp_verification_active
+
+
 @pytest.mark.parametrize(
     ("success_count", "frame_count", "last_success", "expected"),
     [
@@ -611,6 +671,7 @@ def test_grasp_verification_start_log_is_emitted_once():
     assert records[0]["confidence_threshold"] == 0.25
     assert records[0]["frame_window_limit"] == 40
     assert records[0]["required_grab_frames"] == 15
+    assert records[0]["window_scope"] == "post_check_pose_dwell"
     assert records[0]["expected_window_sec"] == 3.0
     assert records[0]["initial_result"] == "UNKNOWN"
 
@@ -1627,17 +1688,24 @@ def test_published_turn_requires_a_new_settle_after_completion(monkeypatch):
             event_id=None,
             dynamics_command=None,
         )
+    assert node.correction_post_motion_dwell_until == 1.5
+    clock[0] = 1.499
+    MotionDecisionNode._publish_decision(node)
+    assert len(node.publisher.messages) == 1
+    assert node.pre_motion_settle_started_at is None
+    clock[0] = 1.5
+    MotionDecisionNode._publish_decision(node)
+    assert node.latest_info['line'] is None
     node.latest_time = {'line': 2.0}
     node.last_published_vision_stamp = {'line': 1.0}
-
-    clock[0] = 1.0
+    node.general_motion_gate.on_new_vision_input()
+    clock[0] = 2.0
+    MotionDecisionNode._publish_decision(node)
+    assert node.pre_motion_settle_started_at == 2.0
+    clock[0] = 2.49
     MotionDecisionNode._publish_decision(node)
     assert len(node.publisher.messages) == 1
-    assert node.pre_motion_settle_started_at == 1.0
-    clock[0] = 1.49
-    MotionDecisionNode._publish_decision(node)
-    assert len(node.publisher.messages) == 1
-    clock[0] = 1.5
+    clock[0] = 2.5
     MotionDecisionNode._publish_decision(node)
     assert len(node.publisher.messages) == 2
 
@@ -2619,7 +2687,7 @@ def test_ball_callback_latches_valid_pickup_entry_during_ball_motion():
     assert node.ball_pickup_entry_pending is True
 
 
-def test_ball_approach_entry_during_line_motion_dwells_before_initial_alignment(
+def test_ball_approach_entry_during_line_motion_requires_fresh_frame_without_dwell(
     monkeypatch,
 ):
     node = FreshMockInputNode()
@@ -2657,7 +2725,7 @@ def test_ball_approach_entry_during_line_motion_dwells_before_initial_alignment(
     assert node.general_motion_gate.locked is False
     assert node.latest_info["ball"] is None
     assert node.ball_approach_alignment_pending is True
-    assert node.ball_post_motion_dwell_until == pytest.approx(13.0)
+    assert node.ball_post_motion_dwell_until is None
     waiting = select_decision(node)
     assert waiting.action == "WAIT"
 
@@ -2670,10 +2738,10 @@ def test_ball_approach_entry_during_line_motion_dwells_before_initial_alignment(
         ),
     )
     assert decision.source == "ball"
-    assert decision.action == "BALL_APPROACH_TURN_LEFT_2"
+    assert decision.action == "BALL_APPROACH_RECOVER_LEFT_4"
 
 
-def test_ball_approach_entry_after_line_release_starts_initial_dwell(
+def test_ball_approach_entry_after_line_release_has_no_initial_dwell(
     monkeypatch,
 ):
     node = FreshMockInputNode()
@@ -2687,11 +2755,11 @@ def test_ball_approach_entry_after_line_release_starts_initial_dwell(
     assert node.general_motion_gate.locked is False
     assert node.ball_approach_entry_pending is True
     assert node.ball_approach_alignment_pending is True
-    assert node.ball_post_motion_dwell_until == pytest.approx(23.0)
+    assert node.ball_post_motion_dwell_until is None
     assert node.planner.ball_lock_active is True
 
 
-def test_ball_straight_success_starts_three_second_alignment_settle(monkeypatch):
+def test_ball_straight_success_requires_fresh_frame_without_dwell(monkeypatch):
     node = FreshMockInputNode()
     node.BALL_POST_MOTION_DWELL_SEC = 3.0
     node.general_motion_gate.on_new_vision_input()
@@ -2717,10 +2785,12 @@ def test_ball_straight_success_starts_three_second_alignment_settle(monkeypatch)
     )
 
     assert node.ball_approach_alignment_pending is True
-    assert node.ball_post_motion_dwell_until == pytest.approx(13.0)
+    assert node.ball_post_motion_dwell_until is None
+    assert node.latest_info["ball"] is None
+    assert not node.general_motion_gate.has_required_fresh_vision()
 
 
-def test_ball_alignment_turn_success_dwells_before_forward_without_rechecking(
+def test_legacy_ball_turn_ack_keeps_dwell_but_next_plan_uses_moving_recover(
     monkeypatch,
 ):
     node = FreshMockInputNode()
@@ -2760,18 +2830,15 @@ def test_ball_alignment_turn_success_dwells_before_forward_without_rechecking(
             steering_angle_deg=-26.0,
         ),
     )
-    assert decision.action == "STRAIGHT"
+    assert decision.action == "BALL_APPROACH_RECOVER_LEFT_4"
 
 
-@pytest.mark.parametrize(
-    ("angle", "turn_action"),
-    [
-        (-30.0, "BALL_APPROACH_TURN_LEFT_2"),
-        (26.0, "BALL_APPROACH_TURN_RIGHT_2"),
-    ],
-)
-def test_ball_approach_repeats_dwell_turn_dwell_forward_cycle(
-    monkeypatch, angle, turn_action,
+@pytest.mark.parametrize("angle,recover_action", [
+    (-30.0, "BALL_APPROACH_RECOVER_LEFT_4"),
+    (26.0, "BALL_APPROACH_RECOVER_RIGHT_4"),
+])
+def test_ball_recover_rechecks_new_angle_without_dwell_or_forced_forward(
+    monkeypatch, angle, recover_action,
 ):
     from mission_control.motion_decision_planner import MotionDecisionPlanner
 
@@ -2789,62 +2856,50 @@ def test_ball_approach_repeats_dwell_turn_dwell_forward_cycle(
     monkeypatch.setattr(time, "monotonic", lambda: clock[0])
     ball_callback = MotionDecisionNode._info_callback(node, "ball")
 
-    def receive_ball():
-        message = String()
-        message.data = json.dumps(
-            ball_info_for_node(distance_m=0.9, steering_angle_deg=angle)
-        )
-        ball_callback(message)
-
-    def wait_then_publish(expected_action):
-        deadline = node.ball_post_motion_dwell_until
-        assert deadline == pytest.approx(clock[0] + 3.0)
-        published_count = len(node.publisher.messages)
-        clock[0] = deadline - 0.001
-        receive_ball()
-        MotionDecisionNode._publish_decision(node)
-        assert len(node.publisher.messages) == published_count
-        assert node.latest_info["ball"]["detected"] is True
-
-        clock[0] = deadline
-        MotionDecisionNode._publish_decision(node)
-        assert len(node.publisher.messages) == published_count
-        assert node.latest_info["ball"] is None
-
-        clock[0] = deadline + 0.01
-        receive_ball()
-        MotionDecisionNode._publish_decision(node)
-        assert len(node.publisher.messages) == published_count + 1
-        assert json.loads(node.publisher.messages[-1].data)["action"] == (
-            expected_action
-        )
+    def receive_ball(steering, distance=0.9):
+        ball_callback(String(data=json.dumps(ball_info_for_node(
+            distance_m=distance, depth_m=distance, steering_angle_deg=steering,
+        ))))
 
     def complete_last_motion():
         payload = json.loads(node.publisher.messages[-1].data)
         for status in ("RUNNING", "SUCCEEDED"):
             send_status(
-                node,
-                status=status,
-                action=payload["action"],
-                command_id=payload["command_id"],
-                event_id=None,
+                node, status=status, action=payload["action"],
+                command_id=payload["command_id"], event_id=None,
                 dynamics_command=None,
             )
 
-    receive_ball()
-    assert node.ball_approach_alignment_pending is True
-    for _ in range(2):
-        wait_then_publish(turn_action)
-        node.ball_lost_during_motion_pending = True
-        complete_last_motion()
-        assert node.ball_approach_alignment_pending is False
-        assert node.ball_lost_during_motion_pending is False
-        wait_then_publish("STRAIGHT")
+    # The same large error needs another recover, not a forced straight step.
+    for steering, expected in ((angle, recover_action), (angle, recover_action),
+                               (-8.0, "STRAIGHT")):
+        clock[0] += 0.1
+        receive_ball(steering)
+        MotionDecisionNode._publish_decision(node)
+        assert json.loads(node.publisher.messages[-1].data)["action"] == expected
+        assert node.general_motion_gate.locked
+        count = len(node.publisher.messages)
+        receive_ball(steering)
+        MotionDecisionNode._publish_decision(node)
+        assert len(node.publisher.messages) == count
         complete_last_motion()
         assert node.ball_approach_alignment_pending is True
+        assert node.ball_post_motion_dwell_until is None
+        assert node.latest_info["ball"] is None
+        assert not node.general_motion_gate.has_required_fresh_vision()
+        MotionDecisionNode._publish_decision(node)
+        assert all(
+            json.loads(message.data)["valid"] is False
+            for message in node.publisher.messages[count:]
+        )
+
+    clock[0] += 0.1
+    receive_ball(angle, distance=0.55)
+    MotionDecisionNode._publish_decision(node)
+    assert json.loads(node.publisher.messages[-1].data)["action"] == "PICKUP_NOW"
 
 
-def test_ball_loss_during_55_to_150cm_motion_dwells_before_recovery_turn(
+def test_ball_loss_during_approach_waits_without_blind_turn_or_dwell(
     monkeypatch,
 ):
     node = FreshMockInputNode()
@@ -2882,13 +2937,10 @@ def test_ball_loss_during_55_to_150cm_motion_dwells_before_recovery_turn(
         dynamics_command=None,
     )
 
-    assert node.ball_post_motion_dwell_until == pytest.approx(13.5)
+    assert node.ball_post_motion_dwell_until is None
     decision = select_decision(node, ball=missing)
-    assert decision.action == "BALL_APPROACH_TURN_RIGHT_5"
-    assert decision.source_command["turn_direction"] == "RIGHT"
-    assert decision.source_command[
-        "lost_ball_alignment_from_memory"
-    ] is True
+    assert decision.action == "WAIT"
+    assert decision.valid is False
 
 
 def test_raw_ball_confirmation_does_not_count_as_motion_time_loss():
@@ -2959,7 +3011,7 @@ def test_pickup_loss_reacquisition_reuses_camera_down_heading_planner(
     reacquired = select_decision(
         node,
         ball=ball_info_for_node(
-            distance_m=0.4,
+            distance_m=0.4, depth_m=0.4, bottom_distance_px=300,
             steering_angle_deg=steering_angle_deg,
             offset_x_norm=0.2,
         ),
@@ -3005,7 +3057,8 @@ def test_pickup_loss_reacquisition_uses_metric_distance_threshold(
 
 @pytest.mark.parametrize("bottom_distance,expected_action", [
     (100, "BALL_PICKUP_INITIAL_CRAB_RIGHT"),
-    (101, "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_3"),
+    (120, "BALL_PICKUP_INITIAL_CRAB_RIGHT"),
+    (121, "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_3"),
 ])
 def test_pickup_initial_offset_selects_action_by_close_distance(
     bottom_distance, expected_action,
@@ -3018,7 +3071,7 @@ def test_pickup_initial_offset_selects_action_by_close_distance(
     decision = select_decision(
         node,
         ball=ball_info_for_node(
-            offset_x_px=71,
+            offset_x_px=71, offset_x_norm=0.2, depth_m=0.5, distance_m=0.5,
             bottom_distance_px=bottom_distance,
             steering_angle_deg=35.0,
         ),
@@ -3062,10 +3115,11 @@ def test_ball_settle_expiry_discards_frames_received_during_settle(monkeypatch):
 @pytest.mark.parametrize('action', [
     'GOAL_CAMERA_90_FORWARD',
     *(f'GOAL_CAMERA90_FINE_FORWARD_{count}' for count in range(1, 5)),
-    'GOAL_CAMERA90_TURN_RIGHT_2', 'GOAL_CAMERA90_CRAB_LEFT',
+    'GOAL_CAMERA90_TURN_RIGHT_2', 'GOAL_CAMERA90_TURN_LEFT_1',
+    'GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_CRAB_RIGHT',
     'GOAL_CAMERA90_BACKWARD_1',
 ])
-def test_goal_motion_success_starts_three_second_dwell(monkeypatch, action):
+def test_goal_motion_success_dwells_only_after_turns(monkeypatch, action):
     node = FreshMockInputNode()
     node.general_motion_gate.on_new_vision_input()
     node.general_motion_gate.on_command_published(action, command_id=31)
@@ -3075,11 +3129,20 @@ def test_goal_motion_success_starts_three_second_dwell(monkeypatch, action):
                 event_id=None, dynamics_command=None)
     send_status(node, status='SUCCEEDED', action=action, command_id=31,
                 event_id=None, dynamics_command=None)
-    assert node.goal_post_motion_dwell_until == 13.0
+    assert node.goal_post_motion_dwell_until == (
+        11.0 if action.startswith('GOAL_CAMERA90_TURN_') else None
+    )
+    if not action.startswith('GOAL_CAMERA90_TURN_'):
+        assert node.latest_info['goal'] is None
+        assert node.latest_time['goal'] is None
+        assert not node.general_motion_gate.has_required_fresh_vision()
     monkeypatch.setattr(time, 'monotonic', lambda: 11.0)
     send_status(node, status='SUCCEEDED', action=action, command_id=31,
                 event_id=None, dynamics_command=None)
-    assert node.goal_post_motion_dwell_until == 13.0
+    assert node.goal_post_motion_dwell_until == (
+        11.0 if action.startswith('GOAL_CAMERA90_TURN_') else None
+    )
+
 
 
 def test_goal_dwell_blocks_commands_then_discards_old_goal(monkeypatch):
@@ -3145,7 +3208,7 @@ def test_general_ball_alignment_pending_uses_fresh_angle_then_distance():
             steering_angle_deg=26.0,
         ),
     )
-    assert turn.action == "BALL_APPROACH_TURN_RIGHT_2"
+    assert turn.action == "BALL_APPROACH_RECOVER_RIGHT_4"
 
     node.ball_approach_alignment_pending = True
     straight = select_decision(
@@ -4112,11 +4175,10 @@ def test_ball_loss_memory_updates_while_pickup_motion_is_locked(fine, offset, di
     node.pickup_positioning_motion_running = False
     node.pickup_initial_align_waiting = not fine
     node.pickup_fine_align_waiting = fine
-    expected = (f"BALL_PICKUP_FINE_SEARCH_{direction}" if fine
-                else f"BALL_PICKUP_CAMERA_DOWN_TURN_{direction}_{5 if direction == 'RIGHT' else 2}")
+    expected = "WAIT"
     decision = select_decision(node, ball=missing)
     assert decision.action == expected
-    assert decision.sdk_motion_requested is True
+    assert decision.sdk_motion_requested is False
 
 
 @pytest.mark.parametrize("fine", [False, True])
@@ -4198,7 +4260,7 @@ def test_raw_ball_crossing_image_center_updates_side_during_active_left_turn():
     receive(String(data=json.dumps({"detected": False, "raw_detected": False})))
     assert node.general_motion_gate.locked is True
     assert node.planner.last_ball_turn_direction == "RIGHT"
-    assert node.planner.plan_lost_ball_approach_alignment().action == "BALL_APPROACH_TURN_RIGHT_5"
+    assert node.planner.plan_lost_ball_approach_alignment().action == "WAIT"
 
 
 @pytest.mark.parametrize("fixed,completed,fresh,raw,detected,expected", [
@@ -4249,6 +4311,7 @@ def test_shot_waits_three_seconds_even_when_general_settle_is_disabled(monkeypat
     assert node.active_special_command_id == 1
 
 
+
 def test_line_search_memory_updates_during_running_motion():
     node = FreshMockInputNode()
     node.active_general_source = 'line'
@@ -4270,8 +4333,9 @@ def test_line_lost_turn_waits_even_when_generic_settle_is_disabled():
     node.LINE_TURN_PRE_MOTION_SETTLE_SEC = MotionDecisionNode.LINE_TURN_PRE_MOTION_SETTLE_SEC
     node.pre_motion_settle_sec = 0.0
     assert not node._pre_motion_settle_ready(node.decision, 10.0)
-    assert not node._pre_motion_settle_ready(node.decision, 12.999)
-    assert node._pre_motion_settle_ready(node.decision, 13.0)
+    assert not node._pre_motion_settle_ready(node.decision, 10.999)
+    assert node._pre_motion_settle_ready(node.decision, 11.0)
+
 
 
 @pytest.mark.parametrize("active_source", ["line", None])
@@ -4363,7 +4427,7 @@ def test_ball_loss_confirmation_gates_motion_and_banner_together(stage, monkeypa
             assert decision.action == "WAIT"
             assert decision.reason == "ball_loss_confirmation_pending"
         elif stage == "approach":
-            assert decision.action == "BALL_APPROACH_TURN_RIGHT_5"
+            assert decision.action == "WAIT"
         else:
             assert decision.action == f"BALL_PICKUP_{stage.upper()}_SEARCH_BACKWARD"
 
@@ -4446,7 +4510,7 @@ def test_line_recover_does_not_wait_when_turn_direction_changes():
     "POST_BALL_LINE_TURN_LEFT_2", "POST_BALL_LINE_TURN_RIGHT_3",
     "POST_SHOT_LINE_TURN_LEFT_2", "POST_SHOT_LINE_TURN_RIGHT_3",
 ])
-def test_all_line_stationary_turns_pause_three_seconds_before_publish(action, monkeypatch):
+def test_all_line_stationary_turns_pause_one_second_before_publish(action, monkeypatch):
     clock = [10.0]
     monkeypatch.setattr(time, "monotonic", lambda: clock[0])
     node = ReadinessPublishNode(general_decision(action))
@@ -4454,12 +4518,13 @@ def test_all_line_stationary_turns_pause_three_seconds_before_publish(action, mo
     node.pre_motion_settle_sec = 0.0
     MotionDecisionNode._publish_decision(node)
     assert not node.publisher.messages
-    clock[0] = 12.999
+    clock[0] = 10.999
     MotionDecisionNode._publish_decision(node)
     assert not node.publisher.messages
-    clock[0] = 13.0
+    clock[0] = 11.0
     MotionDecisionNode._publish_decision(node)
     assert json.loads(node.publisher.messages[-1].data)["action"] == action
+
 
 
 @pytest.mark.parametrize("replacement", ["STRAIGHT", "RECOVER_LEFT_TURN_LEFT_4"])
@@ -4485,8 +4550,9 @@ def test_line_turn_pause_starts_after_running_motion_ends():
     assert node.pre_motion_settle_started_at is None
     node.general_motion_gate.locked = False
     assert not node._pre_motion_settle_ready(node.decision, 20.0)
-    assert not node._pre_motion_settle_ready(node.decision, 22.999)
-    assert node._pre_motion_settle_ready(node.decision, 23.0)
+    assert not node._pre_motion_settle_ready(node.decision, 20.999)
+    assert node._pre_motion_settle_ready(node.decision, 21.0)
+
 
 
 @pytest.mark.parametrize('executor_ready_at_enter', [False, True])

@@ -479,7 +479,7 @@ def test_confirmed_hurdle_preempts_ball_in_non_goal_phase(phase):
     )
 
     assert decision.source == "hurdle"
-    assert decision.action == "STRAIGHT_0"
+    assert decision.action == "GO" and decision.source_command["fine_sequence_requested"]
 
 
 @pytest.mark.parametrize("include_ball", [False, True])
@@ -502,7 +502,7 @@ def test_goal_approach_confirmed_hurdle_preempts_goal(include_ball):
     )
 
     assert decision.source == "hurdle"
-    assert decision.action == "STRAIGHT_0"
+    assert decision.action == "GO" and decision.source_command["fine_sequence_requested"]
 
 
 def test_unconfirmed_hurdle_does_not_enter_auto_priority():
@@ -763,7 +763,7 @@ def test_takeover_uses_distance_field():
     assert decision.action == "STRAIGHT"
 
 
-def test_lost_tracked_ball_stops_then_turns_toward_last_seen_side():
+def test_lost_tracked_ball_keeps_waiting_without_visible_turn_geometry():
     planner = recovery_planner()
     visible_right = ball_info(
         depth_m=0.85,
@@ -818,13 +818,14 @@ def test_lost_tracked_ball_stops_then_turns_toward_last_seen_side():
     assert stopped.action == "BALL_LOST_STOP"
     assert stopped.source_command["linear_speed_mps"] == 0.0
     assert stopped.reason == "ball_lost_stop_before_ball_turn"
-    assert turning.action == "BALL_APPROACH_TURN_RIGHT_5"
+    assert turning.action == "BALL_LOST_STOP"
+    assert turning.valid is False
     assert turning.source_command["linear_speed_mps"] == 0.0
     assert turning.source_command["last_seen_ball_side"] == "RIGHT"
-    assert turning.source_command["turn_count"] == 5
+    assert turning.source_command["turn_count"] == 0
 
 
-def test_lost_ball_side_turn_has_no_recovery_timeout():
+def test_lost_ball_keeps_ownership_without_blind_turns():
     planner = MotionDecisionPlanner(
         MotionDecisionConfig(
             enable_ball_lost_recovery=True,
@@ -850,7 +851,8 @@ def test_lost_ball_side_turn_has_no_recovery_timeout():
     )
 
     assert planner.ball_tracking_active is True
-    assert decision.action == "BALL_APPROACH_TURN_LEFT_2"
+    assert decision.action == "BALL_LOST_STOP"
+    assert decision.valid is False
 
 
 def test_confirmed_hurdle_interrupts_active_ball_head_scan():
@@ -987,8 +989,8 @@ def test_reacquired_far_ball_cannot_fall_back_to_line_after_mission_entry():
     )
 
     assert centering.source == "ball"
-    assert centering.action == "STRAIGHT"
-    assert centering.reason == "ball_aligned_discrete_approach"
+    assert centering.action == "BALL_APPROACH_RECOVER_LEFT_4"
+    assert centering.reason == "ball_moving_heading_correction"
     assert resumed.source == "ball"
     assert resumed.action == "STRAIGHT"
     assert resumed.reason == "ball_aligned_discrete_approach"
@@ -1225,13 +1227,13 @@ def test_stationary_right_turn_calibration_in_line_and_goal_paths(
         assert decision.source_command["turn_angle_deg"] == estimated_angle
 
 
-def test_lost_ball_recovery_right_turn_is_incremental():
+def test_lost_ball_recovery_never_turns_from_memory():
     planner = MotionDecisionPlanner()
     planner._update_ball_tracking(ball_info(offset_x_px=100), 0.0)
     planner.ball_lost_elapsed_sec = 1.0
     command = planner._lost_ball_recovery_command()
-    assert command["motion"] == "BALL_APPROACH_TURN_RIGHT_5"
-    assert command["target_heading_change_deg"] == 45.0
+    assert command["motion"] == "BALL_LOST_STOP"
+    assert command["target_heading_change_deg"] == 0.0
 
 
 @pytest.mark.parametrize("angle,count,expected_angle", [
@@ -1254,7 +1256,7 @@ def test_line_left_turn_uses_fifteen_degree_bins(angle, count, expected_angle):
     assert decision.source_command["turn_repeat_deg"] is None
 
 
-def test_last_raw_image_half_reverses_search_without_confirming_new_target():
+def test_last_raw_image_half_updates_memory_without_authorizing_turns():
     planner = MotionDecisionPlanner()
     raw = {"detected": False, "raw_detected": True, "confidence": 0.9,
            "camera_center_offset_x_px": 420, "depth_valid": False}
@@ -1267,13 +1269,13 @@ def test_last_raw_image_half_reverses_search_without_confirming_new_target():
     assert planner.last_ball_turn_direction == "RIGHT"
     assert planner.plan_ball_pickup_initial_alignment(raw).action == "WAIT"
     lost = {"detected": False, "raw_detected": False}
-    assert planner.plan_lost_ball_approach_alignment(lost).action == "BALL_APPROACH_TURN_RIGHT_5"
-    assert planner.plan_ball_pickup_initial_alignment(lost).action == "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_5"
-    assert planner.plan_ball_pickup_fine_alignment(lost).action == "BALL_PICKUP_FINE_SEARCH_RIGHT"
+    assert planner.plan_lost_ball_approach_alignment(lost).action == "WAIT"
+    assert planner.plan_ball_pickup_initial_alignment(lost).action == "WAIT"
+    assert planner.plan_ball_pickup_fine_alignment(lost).action == "WAIT"
     planner._update_ball_tracking({**raw, "camera_center_offset_x_px": -400}, 0.0)
     result = planner.plan_lost_ball_approach_alignment(lost)
-    assert result.action == "BALL_APPROACH_TURN_LEFT_2"
-    assert result.source_command["turn_angle_deg"] == 30.0
+    assert result.action == "WAIT"
+    assert result.valid is False
 
 
 def test_centered_ball_loss_without_side_history_waits():
@@ -1283,7 +1285,7 @@ def test_centered_ball_loss_without_side_history_waits():
     assert planner.last_ball_turn_direction is None
     decision = planner.plan_lost_ball_approach_alignment({"detected": False})
     assert decision.action == "WAIT"
-    assert decision.reason == "lost_ball_alignment_has_no_remembered_ball_side"
+    assert decision.reason == "ball_lost_waiting_for_visible_turn_geometry"
     assert decision.valid is False
 
 
@@ -1448,15 +1450,12 @@ def test_goal_left_deadband_keeps_distance_based_forward(bearing):
 
 
 @pytest.mark.parametrize("angle,count", [(14.999, 0), (15.0, 1), (20.0, 1), (30.0, 2), (45.0, 3)])
-def test_ball_and_line_share_left_thresholds(angle, count):
+def test_ball_approach_bypasses_stationary_turns_without_changing_line_thresholds(angle, count):
     planner = MotionDecisionPlanner()
     ball = planner.plan_ball_approach_alignment(
         ball_info(steering_angle_deg=-angle, bearing_deg=-angle),
     )
-    assert ball.action == (
-        f"BALL_APPROACH_TURN_LEFT_{count}" if count
-        else "BALL_APPROACH_ALIGNED"
-    )
+    assert ball.action == "BALL_APPROACH_ALIGNED"
     line = planner.plan(
         "POST_SHOT_LINE_ALIGN",
         observations(line=line_info(ground_heading_error_deg=-angle)), 0.1,
@@ -1779,12 +1778,13 @@ def test_confirmation_waits_are_non_executable():
         0.1,
     )
 
-    for decision in (score_wait, go_wait):
+    for decision in (score_wait,):
         assert decision.valid is False
         assert decision.sdk_motion_requested is False
         assert decision.requires_ack is False
     assert score_wait.action == "WAIT_SCORE_CONFIRMATION"
-    assert go_wait.action == "WAIT_GO_CONFIRMATION"
+    assert go_wait.action == "GO" and go_wait.requires_ack
+    assert go_wait.source_command["fine_sequence_requested"]
 
 
 def test_hurdle_go_is_normalized_as_acknowledged_sdk_event():
@@ -2111,10 +2111,12 @@ def test_pickup_initial_alignment_uses_fifteen_degree_turn_threshold():
     planner = MotionDecisionPlanner()
 
     aligned = planner.plan_ball_pickup_initial_alignment(
-        ball_info(steering_angle_deg=14.999, bottom_distance_px=500)
+        ball_info(steering_angle_deg=14.999, bottom_distance_px=500,
+                  depth_m=0.5, distance_m=0.5, offset_x_norm=0.06)
     )
     turn = planner.plan_ball_pickup_initial_alignment(
-        ball_info(steering_angle_deg=15.0, bottom_distance_px=500)
+        ball_info(steering_angle_deg=15.0, bottom_distance_px=500,
+                  depth_m=0.5, distance_m=0.5, offset_x_norm=0.06)
     )
 
     assert aligned.action == "BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
@@ -2137,19 +2139,22 @@ def test_pickup_initial_alignment_uses_fifteen_degree_turn_threshold():
         (-88.0, "BALL_APPROACH_TURN_LEFT_5", 5, 75.0),
     ],
 )
-def test_general_ball_alignment_uses_ordinary_stationary_turns(
+def test_general_ball_alignment_uses_moving_recover(
     steering_error,
     expected_action,
     expected_count,
     expected_turn_angle,
 ):
-    decision = MotionDecisionPlanner().plan_ball_approach_alignment(
-        ball_info(steering_angle_deg=steering_error, distance_m=0.9)
+    decision = MotionDecisionPlanner().plan(
+        "BALL_APPROACH",
+        observations(ball=ball_info(steering_angle_deg=steering_error, distance_m=0.9)),
+        0.1,
     )
 
-    assert decision.action == expected_action
-    assert decision.source_command["turn_count"] == expected_count
-    assert decision.source_command["turn_angle_deg"] == expected_turn_angle
+    direction = "LEFT" if steering_error < 0 else "RIGHT"
+    assert decision.action == f"BALL_APPROACH_RECOVER_{direction}_4"
+    assert decision.source_command["turn_count"] == 4
+    assert decision.source_command["turn_angle_deg"] == 30.0
     assert "CAMERA_DOWN" not in decision.action
 
 
@@ -2166,7 +2171,8 @@ def test_pickup_initial_alignment_uses_bearing_then_offset_fallback():
     planner = MotionDecisionPlanner()
 
     bearing_decision = planner.plan_ball_pickup_initial_alignment(
-        ball_info(steering_angle_deg=None, bearing_deg=-30.0)
+        ball_info(steering_angle_deg=None, bearing_deg=-30.0,
+                  depth_m=0.5, distance_m=0.5, bottom_distance_px=300)
     )
     offset_decision = planner.plan_ball_pickup_initial_alignment(
         ball_info(
@@ -2225,7 +2231,7 @@ def test_pickup_pixel_offset_does_not_force_turn_below_fifteen_degrees(
     decision = MotionDecisionPlanner().plan_ball_pickup_initial_alignment(
         ball_info(
             offset_x_px=offset_px,
-            bottom_distance_px=101,
+            bottom_distance_px=121,
             steering_angle_deg=0.0,
         )
     )
@@ -2294,7 +2300,8 @@ def test_post_backward_alignment_corrects_heading_before_lateral_offset():
     decision = (
         MotionDecisionPlanner().plan_ball_pickup_post_backward_alignment(
             ball_info(
-                steering_angle_deg=31.0,
+                steering_angle_deg=31.0, depth_m=0.5, distance_m=0.5,
+                bottom_distance_px=300,
                 offset_x_norm=-0.20,
                 pickup_x_tolerance_norm=0.08,
             )
@@ -2340,18 +2347,16 @@ def test_post_backward_alignment_continues_when_ball_is_centered():
     [(100, "BALL_APPROACH_TURN_RIGHT_5", 5),
      (-100, "BALL_APPROACH_TURN_LEFT_2", 2)],
 )
-def test_lost_ball_alignment_uses_image_half_not_robot_side(
+def test_lost_ball_alignment_does_not_turn_from_image_half_memory(
     robot_offset, expected_action, expected_count,
 ):
     decision = MotionDecisionPlanner().plan_lost_ball_approach_alignment(
         ball_info(camera_center_offset_x_px=robot_offset,
                   offset_x_px=-robot_offset, bearing_deg=-robot_offset / 10)
     )
-    assert decision.action == expected_action
-    assert decision.valid is True
-    assert decision.source_command["turn_count"] == expected_count
-    assert decision.source_command["lost_ball_alignment_from_memory"] is True
-    assert decision.source_command["alignment_reference"] == "ball_side"
+    assert decision.action == "WAIT"
+    assert decision.valid is False
+    assert decision.source_command == {}
 
 
 @pytest.mark.parametrize("bottom_distance_px", [0, 500, 700])
@@ -2639,12 +2644,13 @@ def test_pickup_fine_alignment_missing_or_invalid_ball_waits(info):
 
 
 @pytest.mark.parametrize("distance,expected", [(1.5, True), (1.51, False), (0.4, True)])
-def test_ball_loss_recovery_requires_confirmed_control_range(distance, expected):
+def test_ball_loss_tracking_does_not_authorize_stationary_search(distance, expected):
     planner = MotionDecisionPlanner()
     planner._update_ball_tracking(ball_info(distance_m=distance, offset_x_px=-80), 0.0)
     result = planner.plan_ball_pickup_initial_alignment({"detected": False})
-    assert result.valid is expected
-    assert (result.action == "BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_2") is expected
+    assert planner.ball_tracking_active is expected
+    assert result.valid is False
+    assert result.action == "WAIT"
 
 
 @pytest.mark.parametrize("fine", [False, True])
@@ -2683,7 +2689,7 @@ def test_pickup_close_latch_survives_pixel_jitter_and_suppresses_fallback_turn()
     assert planner.plan_ball_pickup_initial_alignment(jitter).action.endswith("CRAB_RIGHT")
     assert planner.plan_ball_pickup_post_backward_alignment(jitter).action.endswith("CRAB_RIGHT")
     planner.clear_collected_ball_tracking()
-    assert planner.plan_ball_pickup_initial_alignment(jitter).action == "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_3"
+    assert planner.plan_ball_pickup_initial_alignment(jitter).action == "BALL_PICKUP_INITIAL_CRAB_RIGHT"
 
 
 @pytest.mark.parametrize("overrides", [
@@ -2712,13 +2718,12 @@ def test_ball_loss_does_not_turn_on_stale_or_unconfirmed_visible_input(missing):
 
 @pytest.mark.parametrize("fine", [False, True])
 @pytest.mark.parametrize("offset,direction", [(-80, "LEFT"), (80, "RIGHT")])
-def test_pickup_loss_search_repeats_until_ball_returns(fine, offset, direction):
+def test_pickup_loss_waits_without_turning_until_ball_returns(fine, offset, direction):
     planner = MotionDecisionPlanner()
     planner._update_ball_tracking(ball_info(distance_m=0.4, offset_x_px=offset), 0.0)
     plan = (planner.plan_ball_pickup_fine_alignment if fine
             else planner.plan_ball_pickup_initial_alignment)
-    expected = (f"BALL_PICKUP_FINE_SEARCH_{direction}" if fine
-                else f"BALL_PICKUP_CAMERA_DOWN_TURN_{direction}_{5 if direction == 'RIGHT' else 2}")
+    expected = "WAIT"
     for _ in range(3):
         assert plan({"detected": False, "raw_detected": False}).action == expected
     reacquired = ball_info(distance_m=0.4, offset_x_px=0)
@@ -2781,14 +2786,14 @@ def test_top_edge_ball_loss_searches_forward_once_per_observation(method, action
     ([600, -1, 660, 60], 720), ([600, float('nan'), 660, 60], 720),
     ([600, 0, 660, 60], 0), ([600, 10, 660, 5], 720),
 ])
-def test_non_top_or_invalid_last_geometry_keeps_side_search(bbox, height):
+def test_non_top_or_invalid_last_geometry_waits_without_turning(bbox, height):
     planner = MotionDecisionPlanner()
     planner._update_ball_tracking(ball_info(
         bbox=bbox, image_height=height, camera_center_offset_x_px=80,
     ), 0.0)
     assert planner.plan_ball_pickup_initial_alignment(
         {"detected": False}
-    ).action == "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_5"
+    ).action == "WAIT"
 
 
 def test_top_loss_general_recovery_stops_first_and_requires_fresh_loss():
@@ -2818,7 +2823,7 @@ def test_raw_latest_ball_position_updates_and_clears_top_edge_memory():
     planner._update_ball_tracking({**raw, "bbox": None}, 0.0)
     assert planner.last_ball_top_edge_ratio is None
     assert planner.plan_ball_pickup_initial_alignment({"detected": False}).action == (
-        "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_5"
+        "WAIT"
     )
 
 
@@ -2909,7 +2914,7 @@ def test_alignment_uses_shared_turn_table_in_ball_line_and_goal_stages(
     planner = MotionDecisionPlanner()
     info = ball_info(
         steering_angle_deg=sign * angle, bearing_deg=-sign * 80,
-        distance_m=0.9, offset_x_px=0, offset_x_norm=0.0,
+        distance_m=0.5, depth_m=0.5, offset_x_px=0, offset_x_norm=0.06,
         bottom_distance_px=300, pickup_x_tolerance_norm=0.08,
     )
     expected_count = min(count, 6)
@@ -2927,9 +2932,8 @@ def test_alignment_uses_shared_turn_table_in_ball_line_and_goal_stages(
             expected_count, expected_angle = 7, 65.0
         else:
             expected_count, expected_angle = 9, 95.0
+    assert planner.plan_ball_approach_alignment(info).action == "BALL_APPROACH_ALIGNED"
     for decision, prefix, aligned_action in (
-        (planner.plan_ball_approach_alignment(info), "BALL_APPROACH",
-         "BALL_APPROACH_ALIGNED"),
         (planner.plan_ball_pickup_initial_alignment(info), "BALL_PICKUP_CAMERA_DOWN",
          "BALL_PICKUP_INITIAL_ALIGN_CONTINUE"),
         (planner.plan_ball_pickup_post_backward_alignment(info),
@@ -3106,7 +3110,7 @@ def test_completed_hurdle_releases_close_turn_block_for_next_hurdle():
     approach = planner.plan("AUTO", observations(hurdle=hurdle_info(
         bottom_distance_px=100, depth_m=0.4, hurdle_angle_deg=12.0,
     )), 0.1)
-    assert approach.action == "STRAIGHT_0" and approach.valid
+    assert approach.action == "GO" and approach.valid
     assert approach.source_command["close_rotation_blocked"]
     ready = planner.plan("AUTO", observations(hurdle=hurdle_info(
         bottom_distance_px=100,
@@ -3116,7 +3120,7 @@ def test_completed_hurdle_releases_close_turn_block_for_next_hurdle():
     assert not planner.hurdle_planner.close_rotation_blocked
     planner.plan("AUTO", observations(), 0.1)
     next_hurdle = planner.plan("AUTO", observations(hurdle=hurdle_info(
-        bottom_distance_px=150, depth_m=0.4, hurdle_angle_deg=45.0, camera_center_offset_x_px=-150,
+        bottom_distance_px=150, depth_m=0.4, hurdle_angle_deg=45.0, camera_center_offset_x_px=-600,
     )), 0.1)
     assert next_hurdle.action == "ALIGN_LEFT"
 

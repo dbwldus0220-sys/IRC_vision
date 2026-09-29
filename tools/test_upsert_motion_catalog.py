@@ -1,19 +1,22 @@
-"""Verify that catalog imports cannot restore a tighter completion tolerance."""
+"""Verify that catalog imports always apply the five-degree completion policy."""
 
 import json
 from pathlib import Path
 import subprocess
 import sys
 
+import pytest
 
-def test_upsert_normalizes_new_replaced_and_unreferenced_motions(tmp_path):
+
+@pytest.mark.parametrize("source_tolerance", [2.0, 5.0, 8.0])
+def test_upsert_normalizes_new_replaced_and_unreferenced_motions(tmp_path, source_tolerance):
     source = tmp_path / "source.json"
     runtime = tmp_path / "runtime.json"
     aliases = tmp_path / "aliases.yaml"
     backup_dir = tmp_path / "backups"
     new_motion = {
         "name": "new", "frames": [{"angles": {"0": 42.0}}],
-        "completion": {"position_tolerance_deg": 2.0, "settle_timeout_ms": 3000},
+        "completion": {"position_tolerance_deg": source_tolerance, "settle_timeout_ms": 3000},
     }
     source_payload = {"motions": [new_motion, {"name": "replaced"}]}
     original = {"motions": [

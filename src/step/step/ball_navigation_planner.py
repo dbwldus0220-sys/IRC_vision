@@ -17,7 +17,7 @@ from .line_navigation_planner import numbered_turn_motion_metadata
 class BallNavigationConfig:
     """Tunable limits for ball alignment and approach commands."""
 
-    min_confidence: float = 0.55
+    min_confidence: float = 0.35
     max_linear_speed_mps: float = 0.04
     min_linear_speed_mps: float = 0.012
     max_angular_speed_rad_s: float = 0.50

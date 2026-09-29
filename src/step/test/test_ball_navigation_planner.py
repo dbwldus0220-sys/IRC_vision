@@ -464,3 +464,14 @@ def test_general_ball_550mm_boundary_when_pickup_entry_is_lower(distance, expect
     command = planner.plan(ball_info(distance_m=distance), 0.1)
     assert command.valid
     assert command.motion == expected
+
+
+@pytest.mark.parametrize("confidence,accepted", [(0.30, False), (0.349, False), (0.35, True)])
+def test_ball_navigation_confidence_boundary(confidence, accepted):
+    command = BallNavigationPlanner().plan(ball_info(confidence=confidence), 0.1)
+    if accepted:
+        assert command.valid
+        assert command.motion == "STRAIGHT"
+    else:
+        assert command.motion == "STOP"
+        assert command.reason == "low_ball_confidence"

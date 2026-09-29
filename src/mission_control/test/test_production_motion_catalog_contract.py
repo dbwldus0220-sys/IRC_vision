@@ -1,6 +1,7 @@
 """Lock the production bridge-to-C++ alias contract to approved entries."""
 
 from pathlib import Path
+import copy
 import hashlib
 import json
 
@@ -22,53 +23,79 @@ RUNTIME_CATALOG_PATH = (
 )
 
 
-@pytest.mark.parametrize("angle,count,digest", [
-    (45, 4, "38aa0e73ff5d71633ca4ab11de01994314794ea5d473f6faf510e663f3012238"),
-    (45, 6, "d1ed193a0e82ac79322cf4a907f816527d701d7315eb8fd3c528b0f79b4d6b3a"),
-    (45, 8, "c79659d720ab1c01b66531919e444020a6a3a3c9b0e9a86de824b6f83f4e7743"),
-    (90, 4, "c3ed218b3eeec3574661a40e8157ecf4f1cdb264f8964c668c151e5617a6257e"),
-    (90, 6, "a4f5c74e51d7861e2c8c3925a685b77c5663f8df3dcb302e4df5246d294fbaf8"),
+@pytest.mark.parametrize("angle,count", [
+    (45, 2), (45, 4), (45, 6), (45, 8),
+    (90, 4), (90, 6), (90, 8),
 ])
-def test_experimental_forward_preserves_supplied_motion(angle, count, digest):
-    aliases = yaml.safe_load(ALIAS_PATH.read_text(encoding="utf-8"))[
-        "motion_aliases"
-    ]
-    motions = json.loads(RUNTIME_CATALOG_PATH.read_text(encoding="utf-8"))[
-        "motions"
-    ]
+def test_catalog30_forward_preserves_supplied_motion(angle, count):
+    aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+    motions = json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
     by_name = {motion["name"]: motion for motion in motions}
-    expected_name = f"찐전진실험{angle}도({count}회)"
+    expected_name = f"찐전진{angle}({count}회)"
     expected_aliases = {
-        (45, 4): ("sdk_forward_4", "line_forward_4", "post_ball_forward_4"),
+        (45, 2): ("ball_camera_down_forward_2",),
+        (45, 4): ("sdk_forward_4", "line_forward_4", "post_ball_forward_4", "ball_camera_down_forward_4"),
         (45, 6): ("line_forward_6", "post_ball_forward_6"),
         (45, 8): ("post_ball_forward_8",),
         (90, 4): ("goal_camera_90_forward_4",),
         (90, 6): ("goal_camera_90_forward_6",),
+        (90, 8): (),
     }
     for alias in expected_aliases[angle, count]:
         assert aliases[alias] == expected_name
     motion = by_name[expected_name]
-    # robot_motions(21).json repeats an eight-frame, two-cycle gait.
+    # robot_motions(30).json repeats an eight-frame, two-cycle gait.
     assert motion["repeat_count"] == count // 2
     assert len(motion["frames"]) == 8
-    assert motion["playback_speed"] == pytest.approx(1.15)
+    assert motion["playback_speed"] == pytest.approx(1.05)
     assert motion["completion"]["position_tolerance_deg"] == 5.0
     # Preserve the entire supplied motion, except the completion tolerance.
-    encoded = json.dumps(
-        motion, sort_keys=True, separators=(",", ":"), ensure_ascii=False,
-    )
-    assert hashlib.sha256(encoded.encode()).hexdigest() == digest
+    source_path = RUNTIME_CATALOG_PATH.parent / "catalog30_forward_update_backup/source_requested_motions.json"
+    source = {m["name"]: m for m in json.loads(source_path.read_text())["motions"]}
+    expected = source[expected_name]
+    expected["completion"]["position_tolerance_deg"] = 5.0
+    assert motion == expected
 
 
-def test_post_ball_transition_contains_only_camera_and_stationary_pause():
+def test_catalog30_replaces_only_requested_forward_motions_and_aliases():
+    manifest = json.loads((RUNTIME_CATALOG_PATH.parent / "catalog30_forward_update_manifest.json").read_text())
+    motions = json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+    catalog = {m["name"]: m for m in motions}
+    aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+    assert len(catalog) == len(motions) == manifest["after_count"] + 1
+    assert not set(manifest["renames"]) & set(catalog)
+    assert set(aliases.values()) <= set(catalog)
+    for name, digest in manifest["unchanged_sha256"].items():
+        motion = catalog[name]
+        original_counts = {
+            "찐후진하고 제자리우회전(공)": 7,
+            "찐후진에서 제자리좌회전(공)": 4,
+        }
+        if name in original_counts:
+            motion = dict(motion)
+            motion["frames"] = motion["frames"][:2 + 2 * original_counts[name]]
+            last = motion["frames"][-1]
+            motion["max_seq_ms"] = last["start_ms"] + last["time_ms"]
+        encoded = json.dumps(motion, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+        assert hashlib.sha256(encoded.encode()).hexdigest() == digest
+    before_path = RUNTIME_CATALOG_PATH.parent / "catalog30_forward_update_backup/motion_aliases.yaml"
+    expected_aliases = yaml.safe_load(before_path.read_text())["motion_aliases"]
+    for alias, change in manifest["changed_aliases"].items():
+        expected_aliases[alias] = change["after"]
+    expected_aliases["hurdle"] = "찐허들"
+    assert aliases == expected_aliases
+
+
+def test_post_ball_transition_contains_only_camera_without_stationary_pause():
     aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
     motions = {m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]}
     assert MotionCommandBridgeNode.POST_BALL_GOAL_TRANSITION_SEQUENCE == (
         "post_ball_camera_90", MotionCommandBridgeNode.POST_BALL_CAMERA_DWELL_MARKER,
     )
+    assert MotionCommandBridgeNode.POST_BALL_CAMERA_PAUSE_SEC == 0.0
     assert MotionCommandBridgeNode.ACTION_TO_MOTION_ID["POST_BALL_GOAL_TRANSITION"] == "post_ball_camera_90"
     assert motions[aliases["post_ball_camera_90"]]["frames"]
-    assert aliases["line_forward_6"] == "찐전진실험45도(6회)"
+    assert aliases["line_forward_6"] == "찐전진45(6회)"
 
 
 def test_goal_shot_matches_supplied_motion_with_five_degree_tolerance():
@@ -88,7 +115,7 @@ def test_post_shot_fixed_turns_and_forward_resolve_to_runtime_motions():
     expected = {
         "POST_SHOT_TURN_RIGHT_9": ("찐기본자세에서 제자리 우회전(골대)", 1),
         "POST_SHOT_TURN_LEFT_4": ("찐기본자세에서 제자리좌회전(골대)", 1),
-        "POST_SHOT_FORWARD": ("찐전진실험45도(6회)", 3),
+        "POST_SHOT_FORWARD": ("찐전진45(6회)", 3),
     }
     for action, (name, count) in expected.items():
         motion_id = MotionCommandBridgeNode.motion_id_for_action(action)
@@ -143,10 +170,10 @@ def test_production_alias_catalog_contains_only_approved_aliases():
         "motion_aliases": {
             "sdk_pickup": "찐공잡기리그랩까지 실전",
             "sdk_hurdle": "허들실실전",
-            "sdk_forward_4": "찐전진실험45도(4회)",
+            "sdk_forward_4": "찐전진45(4회)",
             "line_forward_2": "전진45도-1(2회)",
-            "line_forward_4": "찐전진실험45도(4회)",
-            "line_forward_6": "찐전진실험45도(6회)",
+            "line_forward_4": "찐전진45(4회)",
+            "line_forward_6": "찐전진45(6회)",
             "line_forward_8": "전진45도-1(8회)",
             "line_forward_10": "전진45도-1(10회)",
             "line_turn_left_4": "좌회전실실전(4회)",
@@ -211,16 +238,16 @@ def test_production_alias_catalog_contains_only_approved_aliases():
                 )
                 for count in range(1, 10)
             },
-            "post_ball_forward_4": "찐전진실험45도(4회)",
-            "post_ball_forward_6": "찐전진실험45도(6회)",
+            "post_ball_forward_4": "찐전진45(4회)",
+            "post_ball_forward_6": "찐전진45(6회)",
             "post_shot_default_turn_right": "찐기본자세에서 제자리 우회전(골대)",
             "post_shot_default_turn_left": "찐기본자세에서 제자리좌회전(골대)",
             "post_shot_turn_right_9": "찐제자리우회전45도(9회)",
-            "post_ball_forward_8": "찐전진실험45도(8회)",
+            "post_ball_forward_8": "찐전진45(8회)",
             "post_ball_camera_90": "찐오뒤카메라90도",
             "goal_camera_90_forward_2": "전진90도-1(2회)",
-            "goal_camera_90_forward_4": "찐전진실험90도(4회)",
-            "goal_camera_90_forward_6": "찐전진실험90도(6회)",
+            "goal_camera_90_forward_4": "찐전진90(4회)",
+            "goal_camera_90_forward_6": "찐전진90(6회)",
             **{
                 f"goal_camera_90_fine_forward_{count}": f"미세90도-4({count}회)"
                 for count in range(1, 5)
@@ -410,16 +437,14 @@ def test_all_production_alias_targets_exist_in_catalog():
     assert set(aliases.values()) <= set(motions_by_name)
 
 
-def test_production_motions_use_five_degree_final_tolerance():
+def test_production_motions_keep_approved_final_tolerances():
     catalog = json.loads(
         RUNTIME_CATALOG_PATH.read_text(encoding="utf-8")
     )["motions"]
     motions_by_name = {motion["name"]: motion for motion in catalog}
 
     for motion in catalog:
-        assert motion["completion"][
-            "position_tolerance_deg"
-        ] == 5.0
+        assert motion["completion"]["position_tolerance_deg"] == 5.0
 
     production_tolerance = motions_by_name[
         "찐공잡기리그랩까지 실전"
@@ -702,9 +727,11 @@ def test_imported_motions_preserve_source_except_tolerance_and_added_turns(
     original_turn_counts = {
         "post_shot_default_turn_right": 7,
         "post_shot_default_turn_left": 4,
+        "pickup_first_backward_turn_right": 7,
+        "pickup_second_backward_turn_left": 4,
     }
     if motion_id in original_turn_counts:
-        # Verify the original prefix independently of the two added turn sets.
+        # Verify the original prefix independently of the added turn sets.
         motion = dict(motion)
         motion["frames"] = motion["frames"][
             :2 + 2 * original_turn_counts[motion_id]
@@ -717,12 +744,14 @@ def test_imported_motions_preserve_source_except_tolerance_and_added_turns(
     assert hashlib.sha256(encoded.encode()).hexdigest() == digest
 
 
-@pytest.mark.parametrize("motion_id,turn_count,turn_pose,end_pose,duration_ms", [
-    ("post_shot_default_turn_right", 9, "제우오들25", "오뒤415", 3531),
-    ("post_shot_default_turn_left", 6, "제좌왼들25", "오뒤412", 2750),
+@pytest.mark.parametrize("motion_id,original_count,turn_count,turn_pose,end_pose,duration_ms", [
+    ("post_shot_default_turn_right", 7, 9, "제우오들25", "오뒤415", 3531),
+    ("post_shot_default_turn_left", 4, 6, "제좌왼들25", "오뒤412", 2750),
+    ("pickup_first_backward_turn_right", 7, 11, "제우오들25", "오뒤415", 4144),
+    ("pickup_second_backward_turn_left", 4, 7, "제좌왼들25", "오뒤412", 3089),
 ])
-def test_post_shot_extended_turn_sets_preserve_pose_and_timing(
-    motion_id, turn_count, turn_pose, end_pose, duration_ms,
+def test_composite_extended_turn_sets_preserve_pose_and_timing(
+    motion_id, original_count, turn_count, turn_pose, end_pose, duration_ms,
 ):
     aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
     motions = {
@@ -742,9 +771,9 @@ def test_post_shot_extended_turn_sets_preserve_pose_and_timing(
         assert current["start_ms"] >= previous["start_ms"] + previous["time_ms"]
 
     # The appended sets must retain every field except their absolute start time.
-    original = frames[:-4]
+    original = frames[:2 + 2 * original_count]
     period = original[-2]["start_ms"] - original[-4]["start_ms"]
-    for cycle in (1, 2):
+    for cycle in range(1, turn_count - original_count + 1):
         for index, template in enumerate(original[-2:]):
             expected = dict(template)
             expected["start_ms"] += cycle * period
@@ -765,13 +794,14 @@ def test_pickup_retreat_exit_and_dwell_order(completed, exit_name):
         "찐후진실전(1회)", exit_name,
     ]
     assert sequence[-1] == MotionCommandBridgeNode.DWELL_MARKER
-    assert MotionCommandBridgeNode.PICKUP_DWELL_SEC == 3.0
+    assert MotionCommandBridgeNode.PICKUP_DWELL_SEC == 1.0
+    assert MotionCommandBridgeNode.PICKUP_TURN_DWELL_SEC == 1.0
 
 
-def test_general_right_keeps_nine_repeats_and_first_pickup_uses_composite():
+def test_general_right_uses_line_return_four_repeats_and_first_pickup_uses_composite():
     aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
     assert aliases[MotionCommandBridgeNode.ACTION_TO_MOTION_ID["RIGHT"]] == (
-        "찐제자리우회전45도(9회)"
+        "찐라인복귀우회전45도(4회)"
     )
     sequence = MotionCommandBridgeNode._pickup_motion_sequence({
         "source_command": {}, "mission_progress": {"pickups_completed": 0},
@@ -851,9 +881,9 @@ def test_close_ball_backward_is_one_goal_retreat_cycle_with_camera_down():
 
 
 @pytest.mark.parametrize('depth,expected_action,name,repeats', [
-    (1.281, 'GOAL_CAMERA_90_FORWARD', '찐전진실험90도(6회)', 3),
-    (1.280, 'GOAL_CAMERA_90_FORWARD_2', '찐전진실험90도(4회)', 2),
-    (0.851, 'GOAL_CAMERA_90_FORWARD_2', '찐전진실험90도(4회)', 2),
+    (1.281, 'GOAL_CAMERA_90_FORWARD', '찐전진90(6회)', 3),
+    (1.280, 'GOAL_CAMERA_90_FORWARD_2', '찐전진90(4회)', 2),
+    (0.851, 'GOAL_CAMERA_90_FORWARD_2', '찐전진90(4회)', 2),
     (0.850, 'GOAL_CAMERA90_FINE_FORWARD_3', '찐미세90도-4(3회)', 3),
     (0.501, 'GOAL_CAMERA90_FINE_FORWARD_3', '찐미세90도-4(3회)', 3),
     (0.500, 'GOAL_CAMERA90_FINE_FORWARD_1', '찐미세90도-4(1회)', 1),
@@ -983,7 +1013,7 @@ def test_pickup_camera_down_forward_request_resolves_to_existing_motion(count):
     motions = {m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]}
     motion_id = (MotionCommandBridgeNode.PICKUP_CAMERA_DOWN_MOTION_IDS["STRAIGHT_2"]
                  if count == 4 else "ball_camera_down_forward_2")
-    assert aliases[motion_id] == f"찐전진실험45도({count}회)"
+    assert aliases[motion_id] == f"찐전진45({count}회)"
     assert motions[aliases[motion_id]]["frames"]
     assert motions[aliases[motion_id]]["repeat_count"] == count // 2
 
@@ -991,8 +1021,8 @@ def test_pickup_camera_down_forward_request_resolves_to_existing_motion(count):
 @pytest.mark.parametrize("count", [2, 4])
 def test_pickup_forward_preserves_original_camera45_frames(count):
     motions = {m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]}
-    base = motions["찐전진실험45도(4회)"]
-    target = motions[f"찐전진실험45도({count}회)"]
+    base = motions["찐전진45(4회)"]
+    target = motions[f"찐전진45({count}회)"]
     assert target["repeat_count"] == count // 2
     for key in base.keys() - {"name", "repeat_count"}:
         assert target[key] == base[key]
@@ -1028,3 +1058,19 @@ def test_stationary_left_turns_preserve_latest_catalog29_data(camera, digest):
         motions, sort_keys=True, separators=(",", ":"), ensure_ascii=False,
     )
     assert hashlib.sha256(encoded.encode()).hexdigest() == digest
+
+
+def test_hurdle_preserves_catalog31_source_except_five_degree_tolerance():
+    source = json.loads((RUNTIME_CATALOG_PATH.parent / "catalog31_hurdle_source.json").read_text())
+    catalog = json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+    aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+    assert aliases["hurdle"] == "찐허들"
+    matches = [m for m in catalog if m["name"] == aliases["hurdle"]]
+    expected = copy.deepcopy(source)
+    expected["completion"]["position_tolerance_deg"] = 5.0
+    assert matches == [expected]
+    assert all(m["name"] != "찐허들실전" for m in catalog)
+    assert len(source["frames"]) == 15
+    assert source["playback_speed"] == 0.95
+    assert source["repeat_count"] == 1
+    assert source["completion"]["position_tolerance_deg"] == 2.0

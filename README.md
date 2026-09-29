@@ -265,14 +265,15 @@ RGB candidate와 depth control-ready 독립 처리
 ground_distance_m 진단
 Production detection 기준 0.60 / 1.5m / 40중 15회 / miss 4 유지
 확정 검출에서 550mm < Depth ≤ 1000mm는 허들 인식·중심 접근 구간이며, 미세 접근 시퀀스 진입이 아님
-이 구간은 Line 대신 허들 중심을 기준으로 조향하고 STRAIGHT → 찐전진실험45도(4회) 사용
-유효한 Depth ≤ 550mm일 때만 미세 접근 진입 예약; Bottom dy는 진입 조건에 사용하지 않음
-진행 중인 접근 동작 완료 및 3초 대기 후 HURDLE_POSITIONING 유지; STRAIGHT_0 → 찐미세0도-4 사용
-진입 후 검출이 끊겨도 Line으로 복귀하지 않고 허들 관측 대기. 유효 Depth가 다시 550mm를 넘으면 접근 보폭은 STRAIGHT 사용
+이 구간은 Line 대신 허들 중심을 기준으로 조향하고 STRAIGHT → 찐전진45(4회) 사용
+유효한 0 < Depth ≤ 550mm일 때 미세 접근 진입 예약; Bottom dy는 진입 조건에 사용하지 않음
+진행 중인 접근 동작 완료 후 HURDLE_POSITIONING에서 중심 조향각 절댓값이 70도 이상이면 먼저 제자리 회전
+정렬 후 GO를 하나의 시퀀스로 실행: 찐미세0도-4 2회 → 3초 정지 → 찐허들
+시퀀스 중 관측 누락으로 Line에 복귀하지 않으며, 각 모션 성공 후 다음 단계 실행. 재시도에서는 성공한 미세 접근을 반복하지 않음
 Bottom dy ≤ 120px의 카메라 0도 덮어쓰기는 미세 접근 진입과 독립적이며, 마지막 Line 동작 중에도 1m 이내 확정 검출이면 적용
 카메라는 기존 속도로 0도 자세(모터 0: -60도)로 내려가고 허들 완료/취소 또는 다른 미션 제어 시 해제
 Bottom dy는 RGB 영상 하단에서 허들 검출 중심까지의 픽셀 거리이며, 화면에 Control/Phase/Stage/Center dx/Bottom dy/Head request 표시
-GO geometry 및 5/7 confirmation 안전조건 유지. 중심 조향은 기존 보정 회전 최소 각도 15도부터 적용하며 Bottom dy ≤ 100px 회전 금지 유지
+통합 제어의 550mm 시퀀스는 기존 200mm GO geometry 및 5/7 confirmation을 기다리지 않음. Bottom dy ≤ 100px 회전 금지와 카메라 제어는 유지
 
 공 detector만 독립적으로 확인할 때는 full system을 종료한 뒤 다음 ONNX
 진단 launch를 사용한다. 이 경로는 analyzer/planner/motion executor를 실행하지

@@ -114,6 +114,9 @@ class MotionDecisionPlanner:
     STATIONARY_TURN_MIN_DEG = {"LEFT": 15.0, "RIGHT": 15.0}
     STATIONARY_MAX_TURN_COUNTS = {"LEFT": 6, "RIGHT": 9}
     PICKUP_INITIAL_CENTER_BOUND_PX = 70.0
+    BALL_APPROACH_RECOVER_MIN_DEG = 20.0
+    BALL_APPROACH_RECOVER_YAW_DEG = 30.0
+    BALL_STATIONARY_TURN_MIN_BOTTOM_PX = 120.0
     PICKUP_CLOSE_CRAB_BOTTOM_DISTANCE_PX = 100.0
     PICKUP_FINE_LEFT_BOUND_PX = -30.0
     PICKUP_FINE_RIGHT_BOUND_PX = 55.0
@@ -160,6 +163,8 @@ class MotionDecisionPlanner:
         self.last_ball_camera_offset_x_px: float | None = None
         self.last_ball_top_edge_ratio: float | None = None
         self.ball_top_loss_forward_sent = False
+        self.last_ball_inside_image = False
+        self.ball_interior_loss_forward_sent = False
         self.pickup_close_alignment_active = False
         self.pickup_last_visible_bottom_distance_px: float | None = None
         self.last_ball_turn_direction: str | None = None
@@ -670,7 +675,7 @@ class MotionDecisionPlanner:
                 and not self._is_detected_ball(info)
                 and self.ball_tracking_active
             ):
-                return self._lost_ball_recovery_command()
+                return self._lost_ball_recovery_command(info)
             command = (
                 self.ball_planner.stop("waiting_for_ball_info")
                 if info is None
@@ -696,6 +701,31 @@ class MotionDecisionPlanner:
                 else self.hurdle_planner.plan(info, positioning=True)
             )
         result = command.to_dict()
+        if source == "ball" and command.valid and command.motion == "STRAIGHT":
+            distance = command.distance_m
+            angle = command.steering_error_deg
+            if (
+                distance is not None
+                and BALL_HURDLE_FINE_DISTANCE_M < distance <= self.config.ball_control_range_m
+                and angle is not None
+                and abs(angle) >= self.BALL_APPROACH_RECOVER_MIN_DEG
+            ):
+                direction = "RIGHT" if angle > 0.0 else "LEFT"
+                motion = f"BALL_APPROACH_RECOVER_{direction}_4"
+                result.update({
+                    "motion": motion,
+                    "approach_motion": motion,
+                    "reason": "ball_moving_heading_correction",
+                    "turn_direction": direction,
+                    "turn_count": 4,
+                    "turn_angle_deg": self.BALL_APPROACH_RECOVER_YAW_DEG,
+                    "target_heading_change_deg": math.copysign(
+                        self.BALL_APPROACH_RECOVER_YAW_DEG, angle,
+                    ),
+                    "recover_threshold_deg": self.BALL_APPROACH_RECOVER_MIN_DEG,
+                    "alignment_reference": "ball",
+                    "catalog_motion_available": True,
+                })
         if source == "hurdle" and command.action in {"ALIGN_LEFT", "ALIGN_RIGHT"}:
             direction = "LEFT" if command.action == "ALIGN_LEFT" else "RIGHT"
             # Use calibrated turns toward the object center, independent of Line.
@@ -757,7 +787,7 @@ class MotionDecisionPlanner:
         self,
         info: dict[str, Any] | None,
     ) -> MotionDecision:
-        """Choose one ordinary stationary turn from a fresh Ball sample."""
+        """Validate Ball steering; the ordinary approach chooses a moving correction."""
         phase = "BALL_APPROACH_ALIGN"
         if info is None or info.get("detected") is not True:
             return MotionDecision(
@@ -792,8 +822,6 @@ class MotionDecisionPlanner:
                 source_command={},
             )
 
-        direction = "RIGHT" if steering_error > 0.0 else "LEFT"
-        tolerance = self.STATIONARY_TURN_MIN_DEG[direction]
         common = {
             "steering_error_deg": steering_error,
             "steering_source": (
@@ -801,50 +829,33 @@ class MotionDecisionPlanner:
                 if "ground_projection_enabled" in info
                 else "legacy_image_angle"
             ),
-            "heading_tolerance_deg": tolerance,
+            "recover_threshold_deg": self.BALL_APPROACH_RECOVER_MIN_DEG,
             "distance_m": distance,
             "confidence": confidence,
         }
-        if abs(steering_error) < tolerance:
-            return MotionDecision(
-                phase=phase,
-                source="ball",
-                action="BALL_APPROACH_ALIGNED",
-                valid=True,
-                reason="ball_approach_heading_aligned",
-                sdk_motion_requested=False,
-                requires_ack=False,
-                source_command=common,
-            )
-
-        requested_count = self._ball_turn_repeat_count(steering_error, direction)
-        count = requested_count
         return MotionDecision(
             phase=phase,
             source="ball",
-            action=f"BALL_APPROACH_TURN_{direction}_{count}",
+            action="BALL_APPROACH_ALIGNED",
             valid=True,
-            reason="ball_approach_stationary_heading_correction",
+            reason="ball_approach_ready_for_moving_alignment",
             sdk_motion_requested=False,
             requires_ack=False,
-            source_command={
-                **common,
-                "turn_direction": direction,
-                "turn_count": count,
-                "requested_turn_count": requested_count,
-                "turn_repeat_deg": None,
-                "turn_angle_deg": self._ball_turn_angle_deg(count, direction),
-                "catalog_motion_available": True,
-            },
+            source_command=common,
         )
 
     def plan_lost_ball_approach_alignment(
         self,
         info: dict[str, Any] | None = None,
     ) -> MotionDecision:
-        """Search toward the most recently observed half of the camera image."""
+        """Search confirmed interior/top-edge loss without turning from remembered geometry."""
         if info is not None:
             self._update_ball_tracking(info, 0.0)
+        recovery = self._ball_interior_loss_forward_decision(
+            info, "BALL_APPROACH_LOST_ALIGN", "BALL_LOST_FORWARD_4",
+        )
+        if recovery is not None:
+            return recovery
         if (
             info is not None
             and info.get("detected") is not True
@@ -854,39 +865,31 @@ class MotionDecisionPlanner:
             return self._ball_top_loss_forward_decision(
                 "BALL_APPROACH_LOST_ALIGN", "BALL_LOST_FORWARD_2"
             )
-        direction = self.last_ball_turn_direction
-        available = self.ball_tracking_active and direction is not None
-        count = (
-            self.BALL_LOST_RIGHT_TURN_COUNT
-            if direction == "RIGHT"
-            else self.BALL_LOST_LEFT_TURN_COUNT
-        )
-        turn_repeat_deg = self._turn_repeat_deg(direction)
         return MotionDecision(
             phase="BALL_APPROACH_LOST_ALIGN",
             source="ball",
-            action=(
-                f"BALL_APPROACH_TURN_{direction}_{count}" if available else "WAIT"
-            ),
-            valid=available,
-            reason=(
-                "ball_lost_turn_toward_last_ball_side"
-                if available
-                else "lost_ball_alignment_has_no_remembered_ball_side"
-            ),
+            action="WAIT",
+            valid=False,
+            reason="ball_lost_waiting_for_visible_turn_geometry",
             sdk_motion_requested=False,
             requires_ack=False,
-            source_command={
-                "turn_direction": direction,
-                "turn_count": count if available else 0,
-                "turn_repeat_deg": turn_repeat_deg if available else 0.0,
-                "turn_angle_deg": (
-                    self._turn_angle_deg(count, direction) if available else 0.0
-                ),
-                "lost_ball_alignment_from_memory": available,
-                "alignment_reference": "ball_side",
-                "catalog_motion_available": available,
-            },
+            source_command={},
+        )
+
+    def _ball_stationary_turn_allowed(self, info: dict[str, Any]) -> bool:
+        """Only a fresh, visible close Ball above the bottom limit may turn."""
+        depth = self._number(info, "depth_m")
+        depth_age = self._number(info, "depth_age_sec")
+        bottom = self._number(info, "bottom_distance_px")
+        return bool(
+            info.get("detected") is True
+            and info.get("depth_valid") is True
+            and depth is not None
+            and 0.0 < depth <= BALL_HURDLE_FINE_DISTANCE_M
+            and depth_age is not None
+            and 0.0 <= depth_age <= self.ball_planner.config.max_pickup_depth_age_sec
+            and bottom is not None
+            and bottom > self.BALL_STATIONARY_TURN_MIN_BOTTOM_PX
         )
 
     def _remember_pickup_close_ball(self, info: dict[str, Any] | None) -> None:
@@ -922,6 +925,12 @@ class MotionDecisionPlanner:
             or not self.ball_tracking_active
         ):
             return None
+        stage = "FINE" if fine else "INITIAL"
+        recovery = self._ball_interior_loss_forward_decision(
+            info, f"BALL_PICKUP_{stage}_ALIGN", f"BALL_PICKUP_{stage}_SEARCH_FORWARD_4",
+        )
+        if recovery is not None:
+            return recovery
         last_bottom = self.pickup_last_visible_bottom_distance_px
         if (
             info.get("detected") is False
@@ -953,34 +962,34 @@ class MotionDecisionPlanner:
                 f"BALL_PICKUP_{stage}_ALIGN",
                 f"BALL_PICKUP_{stage}_SEARCH_FORWARD",
             )
-        if self.last_ball_turn_direction is None:
-            return None
-        direction = self.last_ball_turn_direction
-        count = (
-            self.BALL_LOST_RIGHT_TURN_COUNT if direction == "RIGHT"
-            else self.BALL_LOST_LEFT_TURN_COUNT
-        )
-        action = (
-            f"BALL_PICKUP_FINE_SEARCH_{direction}"
-            if fine
-            else f"BALL_PICKUP_CAMERA_DOWN_TURN_{direction}_{count}"
-        )
         return MotionDecision(
-            phase=(
-                "BALL_PICKUP_FINE_ALIGN" if fine else "BALL_PICKUP_INITIAL_ALIGN"
-            ),
+            phase=("BALL_PICKUP_FINE_ALIGN" if fine else "BALL_PICKUP_INITIAL_ALIGN"),
             source="ball",
-            action=action,
-            valid=True,
-            reason="ball_lost_turn_toward_last_ball_side",
-            sdk_motion_requested=True,
+            action="WAIT",
+            valid=False,
+            reason="ball_lost_waiting_for_visible_turn_geometry",
+            sdk_motion_requested=False,
             requires_ack=False,
-            source_command={
-                "turn_direction": direction,
-                "turn_count": count,
-                "alignment_reference": "ball_side",
-                "turn_angle_deg": self._turn_angle_deg(count, direction),
-                "lost_ball_alignment_from_memory": True,
+            source_command={},
+        )
+
+    def _ball_interior_loss_forward_decision(
+        self, info: dict[str, Any] | None, phase: str, action: str,
+    ) -> MotionDecision | None:
+        """Search once after confirmed loss inside the image, never on a stale frame."""
+        if not (
+            info is not None and info.get("detected") is False
+            and info.get("raw_detected") is not True
+            and info.get("ball_loss_confirmed") is True
+            and self.ball_tracking_active and self.last_ball_inside_image
+            and not self.ball_interior_loss_forward_sent
+        ):
+            return None
+        return MotionDecision(
+            phase=phase, source="ball", action=action, valid=True,
+            reason="ball_lost_inside_image_forward_search", sdk_motion_requested=True,
+            requires_ack=False, source_command={
+                "lost_ball_interior_forward": True, "forward_count": 4,
                 "catalog_motion_available": True,
             },
         )
@@ -1420,7 +1429,10 @@ class MotionDecisionPlanner:
 
         if (
             outside_center_window
-            and self.pickup_close_alignment_active
+            and (
+                self.pickup_close_alignment_active
+                or bottom_distance_px <= self.BALL_STATIONARY_TURN_MIN_BOTTOM_PX
+            )
         ):
             direction = (
                 "RIGHT" if robot_center_offset_px > 0.0 else "LEFT"
@@ -1445,6 +1457,7 @@ class MotionDecisionPlanner:
 
         if (
             not self.pickup_close_alignment_active
+            and self._ball_stationary_turn_allowed(info)
             and abs(steering_error) >= tolerance
         ):
             count = self._ball_turn_repeat_count(steering_error, direction)
@@ -1587,6 +1600,7 @@ class MotionDecisionPlanner:
         }
         if (
             not self.pickup_close_alignment_active
+            and self._ball_stationary_turn_allowed(info)
             and abs(steering_error) >= heading_tolerance
         ):
             count = self._ball_turn_repeat_count(steering_error, direction)
@@ -1817,6 +1831,8 @@ class MotionDecisionPlanner:
             # Never fall back to the shifted robot axis for screen-half search.
             self.last_ball_top_edge_ratio = None
             self.ball_top_loss_forward_sent = False
+            self.last_ball_inside_image = False
+            self.ball_interior_loss_forward_sent = False
             bbox = info.get("bbox")
             image_height = self._number(info, "image_height")
             if isinstance(bbox, (list, tuple)) and len(bbox) == 4:
@@ -1828,6 +1844,15 @@ class MotionDecisionPlanner:
                     and 0.0 <= top < bottom <= image_height
                 ):
                     self.last_ball_top_edge_ratio = top / image_height
+                    width = self._number(info, "image_width")
+                    left = self._number({"x": bbox[0]}, "x")
+                    right = self._number({"x": bbox[2]}, "x")
+                    if width is not None and width > 0 and left is not None and right is not None:
+                        self.last_ball_inside_image = (
+                            0.02 * width < left < right < 0.98 * width
+                            and self.BALL_LOST_TOP_EDGE_RATIO * image_height < top
+                            and bottom < 0.98 * image_height
+                        )
             direction_value = self._number(info, "camera_center_offset_x_px")
             if direction_value is None:
                 center_x = self._number(info, "center_x")
@@ -1872,10 +1897,17 @@ class MotionDecisionPlanner:
         self.last_ball_line_offset_norm = offset
         self.last_ball_line_side = "RIGHT" if offset > 0.0 else "LEFT"
 
-    def _lost_ball_recovery_command(self) -> dict[str, Any]:
-        """Stop first, then search toward the last observed Ball side."""
+    def _lost_ball_recovery_command(
+        self, info: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Keep translational loss recovery, but never turn from remembered geometry."""
         direction = self.last_ball_turn_direction
         stopping = self.ball_lost_elapsed_sec <= self.config.ball_lost_stop_sec
+        recovery = self._ball_interior_loss_forward_decision(
+            info, "BALL_APPROACH_LOST_ALIGN", "BALL_LOST_FORWARD_4",
+        )
+        if not stopping and recovery is not None:
+            return {**recovery.source_command, "valid": True, "motion": recovery.action, "reason": recovery.reason}
         if not stopping and self._ball_top_loss_forward_pending():
             decision = self._ball_top_loss_forward_decision(
                 "BALL_APPROACH_LOST_ALIGN", "BALL_LOST_FORWARD_2"
@@ -1896,14 +1928,10 @@ class MotionDecisionPlanner:
             count = 0
             turn_repeat_deg = 0.0
         else:
-            count = (
-                self.BALL_LOST_RIGHT_TURN_COUNT
-                if direction == "RIGHT"
-                else self.BALL_LOST_LEFT_TURN_COUNT
-            )
-            turn_repeat_deg = self._turn_repeat_deg(direction)
-            motion = f"BALL_APPROACH_TURN_{direction}_{count}"
-            reason = "turn_toward_last_seen_ball_side"
+            count = 0
+            turn_repeat_deg = 0.0
+            motion = "BALL_LOST_STOP"
+            reason = "ball_lost_waiting_for_visible_turn_geometry"
 
         duration = self.config.ball_recovery_command_sec
         return {
@@ -1936,9 +1964,9 @@ class MotionDecisionPlanner:
             "turn_direction": direction,
             "turn_count": count,
             "turn_repeat_deg": turn_repeat_deg,
-            "lost_ball_alignment_from_memory": not stopping and direction is not None,
+            "lost_ball_alignment_from_memory": False,
             "alignment_reference": "ball_side",
-            "catalog_motion_available": direction is not None,
+            "catalog_motion_available": False,
         }
 
     def _clear_ball_tracking(self) -> None:
@@ -1950,6 +1978,8 @@ class MotionDecisionPlanner:
         self.last_ball_camera_offset_x_px = None
         self.last_ball_top_edge_ratio = None
         self.ball_top_loss_forward_sent = False
+        self.last_ball_inside_image = False
+        self.ball_interior_loss_forward_sent = False
         self.pickup_last_visible_bottom_distance_px = None
         self.last_ball_turn_direction = None
         self.last_ball_line_offset_norm = None

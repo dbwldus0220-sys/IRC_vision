@@ -20,7 +20,7 @@ from std_msgs.msg import String
 
 def _analyzer_with_depth(depth_m, depth_valid):
     analyzer = object.__new__(BallAnalyzer)
-    analyzer.min_confidence = 0.45
+    analyzer.min_confidence = 0.30
     analyzer.horizontal_deadband_px = 30
     analyzer.center_tolerance_px = 140
     analyzer.robot_center_offset_px = 70.0
@@ -248,7 +248,7 @@ def test_pickup_ready_rejects_ball_outside_ball_specific_center_window():
 
 def _depth_sampler(image):
     analyzer = object.__new__(BallAnalyzer)
-    analyzer.min_confidence = 0.45
+    analyzer.min_confidence = 0.30
     analyzer.horizontal_deadband_px = 30
     analyzer.center_tolerance_px = 140
     analyzer.robot_center_offset_px = 70.0
@@ -371,3 +371,11 @@ def test_depth_over_50ms_from_rgb_is_control_invalid():
     assert candidate.depth_valid is False
     assert candidate.depth_source == "invalid"
     assert candidate.depth_sync_delta_ms == pytest.approx(51.0)
+
+
+@pytest.mark.parametrize("confidence,accepted", [(0.299, False), (0.30, True), (0.35, True)])
+def test_ball_candidate_confidence_boundary(confidence, accepted):
+    analyzer = _analyzer_with_depth(0.8, True)
+    detection = {**_raw_detection(), "confidence": confidence}
+    candidate = analyzer._build_candidate(detection, 1280, 720)
+    assert (candidate is not None) is accepted

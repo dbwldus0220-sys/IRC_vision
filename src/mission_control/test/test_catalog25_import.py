@@ -13,6 +13,7 @@ from mission_control.motion_command_bridge_node import MotionCommandBridgeNode
 ROOT = Path(__file__).resolve().parents[3]
 UPDATE = json.loads((ROOT / "artifacts/catalog26_shot_update_manifest.json").read_text())
 MANIFEST = json.loads((ROOT / "artifacts/catalog25_migration_manifest.json").read_text())
+FORWARD_UPDATE = json.loads((ROOT / "artifacts/catalog30_forward_update_manifest.json").read_text())
 CRAB_ALIASES = {
     "pickup_crab_right_0": "찐미세오옆꽃게0-1(1회)",
     "goal_camera_90_crab_right": "찐미세오옆꽃게90-1(1회)",
@@ -35,8 +36,10 @@ def aliases():
 
 
 @pytest.mark.parametrize("name,digest", [
-    *MANIFEST["imported_sha256"].items(),
+    *((name, digest) for name, digest in MANIFEST["imported_sha256"].items()
+      if name not in FORWARD_UPDATE["renames"]),
     *UPDATE["imported_sha256"].items(),
+    *FORWARD_UPDATE["imported_sha256"].items(),
 ])
 def test_motion_matches_import_snapshot(catalog, name, digest):
     encoded = json.dumps(catalog[name], sort_keys=True, separators=(",", ":"), ensure_ascii=False)
@@ -49,11 +52,13 @@ def test_renamed_motions_and_aliases_are_consistent(catalog, aliases):
     expected_aliases = {alias: change["after"] for alias, change in MANIFEST["changed_aliases"].items() if alias not in UPDATE["removed_aliases"]}
     expected_aliases.update(UPDATE["aliases"])
     expected_aliases.update(CRAB_ALIASES)
+    expected_aliases.update({alias: change["after"] for alias, change in FORWARD_UPDATE["changed_aliases"].items()})
     for alias, name in expected_aliases.items():
         assert aliases[alias] == name
     assert not set(UPDATE["removed_aliases"]) & set(aliases)
     assert set(catalog) == (
-        set(MANIFEST["imported_sha256"]) | set(UPDATE["imported_sha256"])
+        (set(MANIFEST["imported_sha256"]) - set(FORWARD_UPDATE["renames"]))
+        | set(FORWARD_UPDATE["imported_sha256"]) | set(UPDATE["imported_sha256"])
         | set(CRAB_ALIASES.values())
     )
 
@@ -62,10 +67,10 @@ def test_renamed_motions_and_aliases_are_consistent(catalog, aliases):
     ("SHOT", "찐골넣기"),
     ("LINE_LOST_TURN_LEFT", "찐제자리좌회전45도-1(2회)"),
     ("LINE_LOST_TURN_RIGHT", "찐제자리우회전45도-1(5회)"),
-    ("STRAIGHT", "찐전진실험45도(6회)"),
-    ("STRAIGHT_2", "찐전진실험45도(4회)"),
-    ("GOAL_CAMERA_90_FORWARD_2", "찐전진실험90도(4회)"),
-    ("GOAL_CAMERA_90_FORWARD", "찐전진실험90도(6회)"),
+    ("STRAIGHT", "찐전진45(6회)"),
+    ("STRAIGHT_2", "찐전진45(4회)"),
+    ("GOAL_CAMERA_90_FORWARD_2", "찐전진90(4회)"),
+    ("GOAL_CAMERA_90_FORWARD", "찐전진90(6회)"),
     ("RECOVER_LEFT_TURN_LEFT_4", "찐라인복귀좌회전45도(4회)"),
     ("RECOVER_RIGHT_TURN_RIGHT_4", "찐라인복귀우회전45도(4회)"),
     ("RECOVER_RIGHT_TURN_LEFT_4", "찐라인복귀좌회전45도(4회)"),

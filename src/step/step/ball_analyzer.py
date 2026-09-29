@@ -268,7 +268,7 @@ class BallAnalyzer(DepthFrameConsumer, Node):
             }
         }
         self.declare_parameter("ball_class_name", "ball")
-        self.declare_parameter("min_confidence", 0.45)
+        self.declare_parameter("min_confidence", 0.30)
         self.declare_parameter("depth_timeout_sec", 0.7)
         self.declare_parameter("depth_window_px", 9)
         self.declare_parameter("depth_bbox_inner_ratio", 0.70)
