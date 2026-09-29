@@ -59,7 +59,7 @@ class MotionDecisionConfig:
     ball_tracking_range_m: float = 1.5
     ball_control_range_m: float = 1.5
     pickup_fine_step_distance_m: float = BALL_HURDLE_FINE_DISTANCE_M
-    pickup_fine_align_bottom_distance_px: int = 60
+    pickup_fine_align_bottom_distance_px: int = 120
     ball_lost_stop_sec: float = 0.35
     ball_recovery_timeout_sec: float = 8.0
     ball_recovery_turn_rad_s: float = 0.22

@@ -167,7 +167,7 @@ def test_robot_launch_passes_realsense_topic_parameters(
     )
     assert decision_parameters["goal_control_range_m"] == 2.0
     assert decision_parameters["pickup_fine_step_distance_m"] == 0.550
-    assert decision_parameters["pickup_fine_align_bottom_distance_px"] == 60
+    assert decision_parameters["pickup_fine_align_bottom_distance_px"] == 120
 
 
 def test_robot_launch_waits_for_enter(monkeypatch, tmp_path):

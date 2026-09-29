@@ -72,9 +72,9 @@ def test_renamed_motions_and_aliases_are_consistent(catalog, aliases):
     ("GOAL_CAMERA_90_FORWARD_2", "찐전진90(4회)"),
     ("GOAL_CAMERA_90_FORWARD", "찐전진90(6회)"),
     ("RECOVER_LEFT_TURN_LEFT_4", "찐라인복귀좌회전45도(4회)"),
-    ("RECOVER_RIGHT_TURN_RIGHT_4", "찐라인복귀우회전45도(4회)"),
+    ("RECOVER_RIGHT_TURN_RIGHT_4", "찐라인복귀우회전45 도(4회)"),
     ("RECOVER_RIGHT_TURN_LEFT_4", "찐라인복귀좌회전45도(4회)"),
-    ("RECOVER_LEFT_TURN_RIGHT_4", "찐라인복귀우회전45도(4회)"),
+    ("RECOVER_LEFT_TURN_RIGHT_4", "찐라인복귀우회전45 도(4회)"),
 ])
 def test_navigation_reaches_supplied_motion(catalog, aliases, action, name):
     assert aliases[MotionCommandBridgeNode.motion_id_for_action(action)] == name

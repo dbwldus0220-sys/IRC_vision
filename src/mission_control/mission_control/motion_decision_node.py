@@ -261,7 +261,7 @@ class MotionDecisionNode(Node):
         )
         self.declare_parameter(
             "pickup_fine_align_bottom_distance_px",
-            60,
+            120,
         )
         self.declare_parameter("ball_lost_stop_sec", 0.35)
         self.declare_parameter("ball_recovery_timeout_sec", 8.0)

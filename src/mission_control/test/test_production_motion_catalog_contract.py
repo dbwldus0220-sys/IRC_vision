@@ -821,7 +821,7 @@ def test_pickup_retreat_exit_and_dwell_order(completed, exit_name):
 def test_general_right_uses_line_return_four_repeats_and_first_pickup_uses_composite():
     aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
     assert aliases[MotionCommandBridgeNode.ACTION_TO_MOTION_ID["RIGHT"]] == (
-        "찐라인복귀우회전45도(4회)"
+        "찐라인복귀우회전45 도(4회)"
     )
     sequence = MotionCommandBridgeNode._pickup_motion_sequence({
         "source_command": {}, "mission_progress": {"pickups_completed": 0},
@@ -932,32 +932,28 @@ def test_goal_depth_selection_resolves_to_requested_runtime_motion(
     assert motions[name]['frames']
 
 
-def test_line_return_right_four_keeps_camera_45_and_original_body_frames():
+@pytest.mark.parametrize("action", [
+    "RIGHT",
+    "RECOVER_RIGHT_TURN_RIGHT_4",
+    "RECOVER_LEFT_TURN_RIGHT_4",
+    "BALL_APPROACH_RECOVER_RIGHT_4",
+])
+def test_line_return_right_four_preserves_catalog32_motion(action):
     aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
     motions = {
-        motion['name']: motion
-        for motion in json.loads(RUNTIME_CATALOG_PATH.read_text())['motions']
+        motion["name"]: motion
+        for motion in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
     }
-    motion_id = MotionCommandBridgeNode.motion_id_for_action('RECOVER_RIGHT_TURN_RIGHT_4')
-    assert aliases[motion_id] == '찐라인복귀우회전45도(4회)'
-    motion = motions[aliases[motion_id]]
-    assert motion['repeat_count'] == 4
-    assert motion['start_pose'] == '오들401'
-    assert motion['end_pose'] == '오뒤412(우복귀45도)'
-    assert motion['frames'][-1]['name'] == motion['end_pose']
-    expected_head_angles = [-32.34375, -32.6953125, -32.34375, -33.310546875]
-    assert [frame['angles']['0'] for frame in motion['frames']] == expected_head_angles
-    # Lock every other joint, torque, timing and frame identifier to the reviewed motion.
-    body_frames = [
-        {
-            key: ({i: angle for i, angle in value.items() if i != '0'}
-                  if key == 'angles' else value)
-            for key, value in frame.items() if key != 'name'
-        }
-        for frame in motion['frames']
-    ]
-    encoded = json.dumps(body_frames, sort_keys=True, separators=(',', ':'))
-    assert hashlib.sha256(encoded.encode()).hexdigest() == '79b09f09ed128697c72cf8799050491c56360f14cf5a61fb923c2a6f4975b7cc'
+    source_path = RUNTIME_CATALOG_PATH.parent / "catalog32_right_recovery_source.json"
+    expected = json.loads(source_path.read_text())["motions"][0]
+    assert expected["name"] == "찐라인복귀우회전45 도(4회)"
+    assert expected["repeat_count"] == 4
+    expected["completion"]["position_tolerance_deg"] = 5.0
+    motion_id = MotionCommandBridgeNode.motion_id_for_action(action)
+    assert motion_id == "line_recovery_right_4"
+    assert aliases[motion_id] == expected["name"]
+    # Preserve all source data, including torque flags, timing and end pose.
+    assert motions[aliases[motion_id]] == expected
 
 
 @pytest.mark.parametrize("alias,source_name", [

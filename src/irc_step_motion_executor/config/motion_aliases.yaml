@@ -18,7 +18,7 @@ motion_aliases:
   line_turn_right_large: "찐제자리우회전45도(9회)"
   line_recovery_left_4: "찐라인복귀좌회전45도(4회)"
   line_recovery_left_6: "찐라인복귀좌회전45도(6회)"
-  line_recovery_right_4: "찐라인복귀우회전45도(4회)"
+  line_recovery_right_4: "찐라인복귀우회전45 도(4회)"
   line_search_left_2: "찐제자리좌회전45도-1(2회)"
   line_search_right_5: "찐제자리우회전45도-1(5회)"
   stationary_turn_left: "찐제자리좌회전45도-1(6회)"

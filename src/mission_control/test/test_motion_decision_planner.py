@@ -2478,7 +2478,7 @@ def test_pickup_fine_alignment_uses_asymmetric_pixel_window(
     assert decision.source_command["catalog_motion_available"] is True
 
 
-@pytest.mark.parametrize("bottom_distance_px", [61, 123, 200, 300, 400, 500, 600])
+@pytest.mark.parametrize("bottom_distance_px", [121, 123, 200, 300, 400, 500, 600])
 @pytest.mark.parametrize("offset_px", [-31, 0, 51])
 def test_pickup_repeats_fine_approach_before_crab_or_backward(
     bottom_distance_px,
@@ -2839,16 +2839,16 @@ def test_goal_control_range_override_reaches_goal_subplanner():
 
 
 @pytest.mark.parametrize('bottom_distance_px,expected_action', [
-    (59, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'),
-    (60, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'),
-    (61, 'BALL_PICKUP_FINE_FORWARD'),
+    (119, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'),
+    (120, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'),
+    (121, 'BALL_PICKUP_FINE_FORWARD'),
 ])
-def test_pickup_fine_approach_stops_at_60_pixel_boundary(bottom_distance_px, expected_action):
+def test_pickup_fine_approach_stops_at_120_pixel_boundary(bottom_distance_px, expected_action):
     decision = MotionDecisionPlanner().plan_ball_pickup_fine_alignment(
         ball_info(bottom_distance_px=bottom_distance_px, offset_x_px=0),
     )
     assert decision.action == expected_action
-    assert decision.source_command['pickup_fine_align_bottom_distance_px'] == 60
+    assert decision.source_command['pickup_fine_align_bottom_distance_px'] == 120
 
 
 @pytest.mark.parametrize('phase', ['AUTO', 'LINE_TRACK', 'BALL_SEARCH', 'GOAL_SEARCH'])
@@ -3088,7 +3088,7 @@ def test_detected_line_with_invalid_ground_holds_instead_of_image_turn_or_search
     assert decision.action in {"STOP", "WAIT"}
 
 
-@pytest.mark.parametrize("bottom_distance_px", [59, 60, 61])
+@pytest.mark.parametrize("bottom_distance_px", [119, 120, 121])
 @pytest.mark.parametrize("offset_x_px,lateral_action", [
     (-31, "BALL_PICKUP_CRAB_LEFT"),
     (-30, "BALL_PICKUP_FINE_ALIGN_CONTINUE"),
@@ -3102,7 +3102,7 @@ def test_pickup_alignment_requires_both_bottom_and_lateral_bounds(
         ball_info(bottom_distance_px=bottom_distance_px, offset_x_px=offset_x_px),
     )
     expected = (
-        "BALL_PICKUP_FINE_FORWARD" if bottom_distance_px > 60 else lateral_action
+        "BALL_PICKUP_FINE_FORWARD" if bottom_distance_px > 120 else lateral_action
     )
     assert decision.valid is True
     assert decision.action == expected

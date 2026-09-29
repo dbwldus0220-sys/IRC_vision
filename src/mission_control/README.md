@@ -118,7 +118,7 @@ WAIT가 되지 않는다.
 - 0.39m 미만의 `GOAL_CAMERA90_BACKWARD_1`은 `goal_camera_90_backward_1` alias를
   통해 `찐후진실전(1회)`를 실행한다.
 - 코너 `LEFT`/`RIGHT`는 각각 `찐라인복귀좌회전45도(4회)` /
-  `찐라인복귀우회전45도(4회)`를 실행한다. 완료 후 새 라인 관측으로 일반 주행을 계속한다.
+  `찐라인복귀우회전45 도(4회)`를 실행한다. 완료 후 새 라인 관측으로 일반 주행을 계속한다.
 
 ### 이전 카탈로그 25 적용
 
@@ -452,7 +452,7 @@ BALL은 550 mm 이하에서 pickup 시퀀스에 진입하며, 내부 초기 정�
 일반 BALL 접근의 `550 < distance_m <= 1500 mm`에서는 제자리 정렬을 하지 않는다.
 유효한 공 지면 방향각 `ground_steering_angle_deg`가 -20° 이하이면
 `BALL_APPROACH_RECOVER_LEFT_4` → `찐라인복귀좌회전45도(4회)`,
-+20° 이상이면 `BALL_APPROACH_RECOVER_RIGHT_4` → `찐라인복귀우회전45도(4회)`,
++20° 이상이면 `BALL_APPROACH_RECOVER_RIGHT_4` → `찐라인복귀우회전45 도(4회)`,
 그 사이이면 기존 전진 4회를 선택한다. 라인 관측은 선택에 사용하지 않는다.
 recover는 약 30°의 이동형 보정이며 한 번 완료할 때마다 새 공 관측으로 재선택한다.
 회전각이 작아지면 전진, 기존 거리값이 550 mm 이하이면 픽업으로 전환한다.
@@ -470,7 +470,7 @@ recover는 약 30°의 이동형 보정이며 한 번 완료할 때마다 새 �
   `STRAIGHT` → `찐전진45(4회)`, 이하이면 `STRAIGHT_0` → `찐미세45도-4`다.
   거리값이 없거나 0 이하, `depth_valid=false`, `depth_age_sec`가 없거나
   0~0.70초 범위를 벗어나면 전진을 대기한다.
-- `pickup_fine_align_bottom_distance_px` 기본값 `60`: 미세실전 완료 후
+- `pickup_fine_align_bottom_distance_px` 기본값 `120`: 미세실전 완료 후
   새 영상의 `bottom_distance_px`가 이 기준보다 크면 미세실전을 반복한다.
   이하이면 꽃게걸음으로
   좌우 정렬하고, `offset_x_px`가 `-30~+55` 범위에 들어오면 추가 미세전진 없이
@@ -612,13 +612,18 @@ source install/setup.bash
 | 명령 | 실행 모션 | 예상 회전량 |
 | --- | --- | --- |
 | `RECOVER_LEFT_TURN_LEFT_4`, `RECOVER_RIGHT_TURN_LEFT_4` | `찐라인복귀좌회전45도(4회)` | 약 30° |
-| `RECOVER_RIGHT_TURN_RIGHT_4`, `RECOVER_LEFT_TURN_RIGHT_4` | `찐라인복귀우회전45도(4회)` | 약 20° |
+| `RECOVER_RIGHT_TURN_RIGHT_4`, `RECOVER_LEFT_TURN_RIGHT_4` | `찐라인복귀우회전45 도(4회)` | 약 20° |
 | `LINE_LOST_TURN_LEFT` | `찐제자리좌회전45도-1(2회)` | 실행 전 3초 정지 |
 | `LINE_LOST_TURN_RIGHT` | `찐제자리우회전45도-1(5회)` | 실행 전 3초 정지 |
 
 브리지는 위 네 RECOVER 명령만 실행한다. 6회 등 다른 RECOVER 횟수 요청은 거부한다.
 JSON의 `찐라인복귀좌회전45도(6회)` 데이터와 별칭은 보관하지만 자동 주행에서는 사용하지 않는다.
-관절 궤적과 프레임·토크·반복 데이터는 최신 `robot_motions(25).json`에서 가져온 상태를 유지한다.
+우회전 4회 모션은 `robot_motions(32).json`의 `찐라인복귀우회전45 도(4회)`로 교체했다.
+이름의 공백을 포함해 원본 관절 각도·토크 플래그·프레임 시간·속도·반복 수·종료 자세를
+유지하며, 완료 허용 오차만 런타임 정책인 5°로 적용한다.
+같은 별칭을 쓰는 일반 `RIGHT`와 `BALL_APPROACH_RECOVER_RIGHT_4`에도 적용된다.
+원본 모션은 `artifacts/catalog32_right_recovery_source.json`에 보관한다.
+좌회전과 다른 모션 데이터는 이번 교체에서 변경하지 않았다.
 30°/20°는 사용자가 지정한 예상 회전량이며 실제 회전량은 바닥과 자세에 따라 달라질 수 있다.
 
 RECOVER에는 고정 정지 시간을 넣지 않는다. 유효한 새 판단이 나오면 4회를 실행하며,
