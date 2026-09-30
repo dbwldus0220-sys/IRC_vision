@@ -303,3 +303,86 @@ torque 또는 motor에 접근하지 않는다. 실물 motion 정보와 안전 �
 
 기존 Python `motion_executor_node`, legacy adapter, SDK placeholder,
 `full_system.launch.py`는 이 패키지와 별개이며 변경하거나 대체하지 않는다.
+
+## 2026-09-30 GUI 호환 SDK 작업본
+
+현재 검토 중인 외부 SDK는 담당자 전달본
+`gui_sdk_20260930_135448.tar.gz`에 `tools/sdk_gui_compat.patch`를 적용한 것이다.
+아래 절은 위의 초기 scaffold 설명보다 최신이며, 운영 모션 JSON과 기존 ROS
+실행 기본값을 바꾸지 않은 상태에서 검증했다. 실제 모터에서는 실행하지 않았다.
+
+재현용 작업본은 저장소 밖의 **새 폴더**에 준비한다.
+
+```bash
+python3 tools/prepare_gui_sdk.py /path/to/gui_sdk_20260930_135448.tar.gz \
+  --output /path/to/new-step-sdk
+```
+
+준비 도구는 전달 압축파일과 파일별 해시를 검증하고 C++ 패치만 적용한다.
+패키지 설치, 로봇 실행, runtime JSON 교체는 수행하지 않는다.
+GUI 소스와 저장 상태는 담당자의 원본이며, STEP runtime 보정은
+`tools/upsert_motion_catalog.py`가 별도로 적용한다.
+
+C++ 작업본은 PC half-cosine 보간, 발 들기 80%/유지 20%, 현재각 시작,
+5ms 호출 기준의 중간 Goal 송신, 10ms 조건의 관측 피드백, 조합 내부 반복
+경계를 지원한다. 모터에는 초기화 시 Profile Acceleration/Velocity=0을
+설정하고 이후 Goal Position만 보낸다. 생성자에서는 장치에 접근하지 않으며
+Operating Mode/PID를 덮어쓰지 않는다. GUI와 같이 종료 때 토크를 자동 해제하지
+않으므로 토크 해제는 명시적 emergencyStop 경로로 구분한다.
+
+ROS 호환을 위해 hardware config/preflight, 시작 자세 전환, joint override와
+기존 queue/completionSequence API를 유지·보완했다. 시작 자세는 기존 STEP의
+5도/80ms/3000ms 도착 검사와 AUTO 전 2초 대기를 유지한다. GUI에는 없는
+STEP 통합 기능이므로 이것까지 GUI와 동일하다는 뜻은 아니다.
+
+2026-09-30 사용자 요청에 따라 일반 모션의 프레임별 도착 검사를 복구했다.
+`position_tolerance_enabled=true`(기본값)에서는 각 프레임의 최종 목표를 보낸 뒤
+20ms 간격으로 실제 관절각을 확인한다. 미도착 시 프레임 끝에 타임라인을 고정하고
+다음 프레임·반복·조합 경계·예약 전환을 보류한다. STEP JSON 기준 허용오차는
+5도, 최대 대기는 3000ms다. 읽기 실패도 최대 대기까지 재시도하며, 실패 시 현재
+자세 홀드를 시도하고 예약을 지운다. 관절 override가 있으면 실제 전송한 목표를
+기준으로 검사한다.
+
+마지막 프레임 도착 후 예약 모션이 있으면 기존처럼 추가 80ms 안정화 대기 없이
+전환한다. 예약이 없으면 기존 최종 안정화 검사를 유지한다. 시작 자세의 별도
+도착·안정화 검사도 유지한다. PC 보간과 프로파일 0은 유지했으므로 원본 SDK의
+모터 내부 프로파일 재생 전체를 되돌린 것은 아니다. 각도 계산은 GUI 방식이지만
+프레임 대기로 실제 재생 시간은 GUI보다 길어질 수 있다. 상위 명령의 전체 timeout은
+별도로 적용된다. `false`의 GUI 시간 재생 경로는 가짜 하드웨어 비교용으로만
+검증했으며, 운영 기본값은 바꾸지 않았다.
+
+복구 검사는 `frame_arrival_test`에서 지연된 호출, 프레임 사이 공백, 허용오차,
+예약, 반복, 조합 경계, 배속, 관절 override, 취소, 미도착 및 읽기 실패를 확인한다.
+실물 로봇은 실행하지 않았다.
+
+GUI 전용 가상환경은 ROS Python 경로와 사용자 패키지를 배제해 실행해야 한다.
+관측된 버전은 Python 3.10.12, PyQt5 5.15.6, dynamixel-sdk 4.0.5,
+pyserial 3.5, numpy 1.21.5다. ROS/vision 환경의 numpy를 일괄 변경하지 않는다.
+GUI 창 생성은 모터 탐색/토크 OFF를 수행할 수 있으므로 검증에서는 import와
+제공된 가짜 통신 테스트만 실행했다.
+
+```bash
+python3 -m venv --system-site-packages /path/to/new-step-sdk/.venv
+env -u PYTHONPATH PYTHONNOUSERSITE=1 /path/to/new-step-sdk/.venv/bin/python \
+  -m pip install -r /path/to/new-step-sdk/gui/requirements-observed.txt
+```
+
+외부 ROBOTIS C++ 라이브러리의 담당자 버전은 전달본에도 특정되지 않았다.
+이 PC에서는 `/opt/ros/humble/lib/libdynamixel_sdk.so`로 컴파일·링크했다.
+USB latency, 실제 모터 PID/Operating Mode/영점, 실측 전송 주기는 일치 검증을
+하지 않았다. 따라서 패키지 버전과 소프트웨어 궤적 일치가 실물 동작의 일치를
+보장하지 않는다.
+
+독립 GUI 비교는 원본 Python 재생 메서드를 가짜 I/O에서 실행하고 C++의
+`gui_trace_probe`가 계산한 모터 raw 값과 대조한다. SDK의 CTest는 가상 시계로
+반복 지연, 시작각, 예약, 취소, 오류, override, 시작 자세 게이트를 확인한다.
+
+```bash
+python3 tools/verify_gui_playback.py --sdk-root /path/to/new-step-sdk \
+  --probe /path/to/sdk-build/gui_trace_probe artifacts/robot_motions_runtime.json
+```
+
+현재 runtime에는 STEP 보정과 추가 모션이 있으므로 새 GUI export를 통째로
+덮어쓰지 않는다. ID 4=18도/5=-18도 규칙과 세 예외 및 completion 5도 정책은
+`artifacts/AGENTS.md`를 따른다. 9월 30일 새 `robot_motions(3).json` 비교는
+`artifacts/20260930_sdk_gui_alignment/motion3_comparison.json`에 보관했다.

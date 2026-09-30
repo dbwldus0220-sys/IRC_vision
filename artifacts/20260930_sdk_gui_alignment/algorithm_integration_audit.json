@@ -1,0 +1,32 @@
+{
+  "algorithm_tests": {
+    "files": [
+      "test_motion_command_bridge.py",
+      "test_motion_decision_planner.py",
+      "test_motion_decision_node.py"
+    ],
+    "passed": 1247
+  },
+  "catalog_contract_checks": {
+    "all_alias_targets_exist": "passed",
+    "all_bridge_ids_have_alias": "failed"
+  },
+  "missing_action_aliases": {
+    "STRAIGHT_4": "line_forward_8",
+    "STRAIGHT_5": "line_forward_10",
+    "APPROACH": "forward",
+    "GOAL_CAMERA_90_FORWARD_1": "goal_camera_90_forward_2"
+  },
+  "missing_aliases_preexisting": true,
+  "queue_probe": {
+    "fake_hardware": true,
+    "position_tolerance_enabled": true,
+    "present_deg": 0,
+    "target_deg": 90,
+    "without_queue": "SETTLING; completionSequence=0",
+    "with_queue": "RUNNING next motion; completionSequence=1"
+  },
+  "queue_impact": "Original SDK also skipped final settling at queue boundaries, but gated frames first. GUI-compatible SDK removed frame gates, so queued transitions no longer imply measured arrival even with tolerance enabled.",
+  "runtime_logic_modified_by_this_audit": false,
+  "hardware_executed": false
+}

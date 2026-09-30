@@ -1,0 +1,45 @@
+{
+  "request": "Restore per-frame arrival checks while preserving approved motion data",
+  "sdk_source": "/home/sy/step_sdk_gui_20260930/cpp_sdk",
+  "reproducible_patch": "tools/sdk_gui_compat.patch",
+  "ros_validation_install": "/tmp/step-ros-aligned-install",
+  "behavior": {
+    "frame_arrival_check": true,
+    "check_interval_ms": 20,
+    "runtime_tolerance_deg": 5,
+    "runtime_timeout_ms": 3000,
+    "freeze_timeline_while_waiting": true,
+    "queue_only_after_last_frame_arrival": true,
+    "queued_transition_requires_extra_80ms_settle": false,
+    "unqueued_final_settle_retained": true,
+    "startup_settle_retained": true,
+    "gui_interpolation_retained": true,
+    "motor_profiles_remain_zero": true
+  },
+  "runtime_json_sha256": "3cd27766b9e3cbbbb48bb9df89187643b3b9c57acac53e5d1c0ff378b15832d2",
+  "runtime_json_unchanged": true,
+  "checks": {
+    "standalone_sdk_suites_passed": 4,
+    "selected_ros_suites_passed_across_runs": 16,
+    "ros_test_build_note": "External SDK tests excluded from default build; explicitly built all four SDK test targets and reran successfully",
+    "patch_reproduced_files": 14,
+    "gui_angle_parity_samples": 10780,
+    "gui_angle_parity_joint_commands": 247940,
+    "hardware_executed": false,
+    "git_diff_check": "passed"
+  },
+  "modified_sdk_files": {
+    "robot_motion_player.cpp": "9908ee881bb7ff2df4ca24be3e1de97f4e09ca20f456ecfe0adcf3930496259e",
+    "robot_motion_player.hpp": "896e99bb7151d24b62457ca10aff88f8bca56a9fc965a4513c3346bd8141df20",
+    "test_gui_playback.cpp": "b2ddcaf2115e03b612e628a3849a767401cb11a9749885e0e74afcbc543d4047",
+    "test_frame_arrival.cpp": "5fb853a36b8c83642efbb6a80754ca53356068f79eec616243203c56b19e47ed",
+    "CMakeLists.txt": "859eb794af195b728787761407b2dd9781a4c1bdb96fa53a548d0e09abb774c8"
+  },
+  "limits": [
+    "Frame waits can increase elapsed time; upper-level total request timeouts remain unchanged",
+    "No physical motion validation performed",
+    "Previously identified missing motion aliases remain outside this restoration scope",
+    "ROS build remains a validation overlay, not an automatically sourced production environment"
+  ],
+  "supersedes_queue_bypass_finding": "artifacts/20260930_sdk_gui_alignment/algorithm_integration_audit.json"
+}

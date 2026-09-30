@@ -18,14 +18,23 @@ import yaml
 
 
 POSITION_TOLERANCE_DEG = 5.0
+FIXED_JOINT_ANGLES_DEG = {"4": 18.0, "5": -18.0}
+FIXED_JOINT_EXEMPT_MOTIONS = frozenset({
+    "찐공잡기리그랩까지 실전",
+    "찐골넣기",
+    "찐허들",
+})
 
 
-def _with_runtime_tolerance(motion: dict) -> dict:
-    """Preserve source motion data while applying STEP's completion policy."""
+def _with_runtime_policy(motion: dict) -> dict:
+    """Apply STEP's completion and fixed-joint policies to a runtime copy."""
     result = copy.deepcopy(motion)
     result.setdefault("completion", {})["position_tolerance_deg"] = (
         POSITION_TOLERANCE_DEG
     )
+    if result["name"] not in FIXED_JOINT_EXEMPT_MOTIONS:
+        for frame in result.get("frames", []):
+            frame["angles"].update(FIXED_JOINT_ANGLES_DEG)
     return result
 
 
@@ -97,7 +106,7 @@ def main() -> int:
     replaced = []
     identical = []
     for name in sorted(required_names):
-        source_motion = _with_runtime_tolerance(source_by_name[name])
+        source_motion = _with_runtime_policy(source_by_name[name])
         position = runtime_positions.get(name)
         if position is None:
             runtime_positions[name] = len(motions)
@@ -119,7 +128,7 @@ def main() -> int:
         raise RuntimeError("backup SHA256 does not match runtime")
 
     merged_payload = dict(runtime_payload)
-    merged_payload["motions"] = [_with_runtime_tolerance(motion) for motion in motions]
+    merged_payload["motions"] = [_with_runtime_policy(motion) for motion in motions]
     descriptor, temporary_name = tempfile.mkstemp(
         prefix="robot_motions.upsert.",
         suffix=".json",

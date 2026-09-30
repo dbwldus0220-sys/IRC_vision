@@ -1,0 +1,13 @@
+{
+  "source": "/home/sy/Downloads/robot_motions(3).json",
+  "source_sha256": "ba8ef86fec898c38e839cbe4d12bbff2947bd6a45fd9a2d034818f9f6ade7c4c",
+  "replaced_motions": [
+    "찐공잡기리그랩까지 실전",
+    "찐공잡기전후진-2(2회)"
+  ],
+  "before_sha256": "4f82b7d9c67e6fd5884b8c61f5750e72556fd48020d2b615df51d10cd9d67efa",
+  "after_sha256": "3cd27766b9e3cbbbb48bb9df89187643b3b9c57acac53e5d1c0ff378b15832d2",
+  "unrelated_motions_unchanged": 79,
+  "runtime_policies_preserved": true,
+  "hardware_accessed": false
+}

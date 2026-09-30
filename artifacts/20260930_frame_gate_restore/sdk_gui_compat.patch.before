@@ -1,0 +1,1159 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -2,6 +2,7 @@
+ project(irc_humanoid_motion LANGUAGES CXX)
+ 
+ set(CMAKE_CXX_STANDARD 20)
++set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ set(CMAKE_CXX_EXTENSIONS OFF)
+ 
+@@ -42,7 +43,11 @@
+ enable_testing()
+ add_test(NAME motion_pattern_test COMMAND test_motion_pattern)
+ add_test(NAME motion_callback_test COMMAND test_motion_callback)
+-add_test(NAME robot_motion_player_test COMMAND test_robot_motion_player)
++add_executable(test_gui_playback test_gui_playback.cpp)
++target_link_libraries(test_gui_playback PRIVATE motion_player_core)
++add_test(NAME gui_playback_test COMMAND test_gui_playback)
++add_executable(gui_trace_probe gui_trace_probe.cpp)
++target_link_libraries(gui_trace_probe PRIVATE motion_core)
+ 
+ if(DYNAMIXEL_SDK_INCLUDE_DIR AND DYNAMIXEL_SDK_LIBRARY)
+     add_library(robot_control
+--- a/dynamixel_motion_hardware.cpp
++++ b/dynamixel_motion_hardware.cpp
+@@ -1,50 +1,83 @@
+ #include "dynamixel_motion_hardware.hpp"
+ 
+ #include <cmath>
++#include <algorithm>
++#include <stdexcept>
+ #include <exception>
+ #include <utility>
+ 
+ namespace irc_step {
+ 
+-DynamixelMotionHardware::DynamixelMotionHardware()
+-    : controller_(&dxl_),
+-      desired_rad_(Eigen::VectorXd::Zero(NUMBER_OF_DYNAMIXELS)) {}
++DynamixelMotionHardware::DynamixelMotionHardware(DynamixelMotionHardwareConfig config)
++    : config_(std::move(config)), desired_deg_(NUMBER_OF_DYNAMIXELS, 0.0), controller_(&dxl_),
++      desired_rad_(Eigen::VectorXd::Zero(NUMBER_OF_DYNAMIXELS)) {
++    auto ids = config_.motor_ids;
++    std::sort(ids.begin(), ids.end());
++    if (config_.device_path.empty() || config_.baud_rate <= 0 || ids.size() != 23)
++        throw std::invalid_argument("invalid hardware configuration");
++    for (int id = 0; id < 23; ++id)
++        if (ids[id] != id) throw std::invalid_argument("hardware requires IDs 0..22 exactly once");
++}
+ 
+ void DynamixelMotionHardware::setError(std::string message) noexcept {
+     last_error_ = std::move(message);
+ }
+ 
++bool DynamixelMotionHardware::preflight() noexcept {
++    try {
++        if (!dxl_.Initialize(config_.device_path, config_.baud_rate)) {
++            setError("failed to open DYNAMIXEL port"); return false;
++        }
++        if (!dxl_.SetTorqueEnabled(false)) {
++            setError("failed to disable torque"); return false;
++        }
++        if (!dxl_.ReadPositionDegrees(desired_deg_)) {
++            setError("failed to read all motor positions"); return false;
++        }
++        initialized_ = false;
++        last_error_.clear();
++        return true;
++    } catch (const std::exception& e) { setError(e.what()); return false; }
++      catch (...) { setError("unknown hardware preflight error"); return false; }
++}
++
+ bool DynamixelMotionHardware::initialize() noexcept {
+     try {
+-        if (!dxl_.IsReady()) {
+-            setError("DYNAMIXEL port is not ready");
+-            return false;
++        if (!preflight()) return false;
++        if (!dxl_.ConfigureTimeBasedProfile()) {
++            setError("failed to prepare profile 0"); return false;
+         }
+-        if (!controller_.SetTorqueEnabled(false)) {
+-            setError("failed to disable torque for time-profile setup");
+-            return false;
++        // 토크 ON 직전에 현재 자세를 다시 읽어 동일 Goal을 선등록한다.
++        if (!dxl_.ReadPositionDegrees(desired_deg_) ||
++            !dxl_.WriteGoalDegrees(desired_deg_, config_.motor_ids)) {
++            setError("failed to seed current-position goals before torque ON"); return false;
+         }
+-        if (!controller_.ConfigureTimeBasedProfile()) {
+-            setError("failed to configure time-based profiles");
+-            return false;
+-        }
+-        desired_rad_ = controller_.GetJointTheta();
+-        if (!controller_.SetTorqueEnabled(true)) {
+-            setError("failed to enable motor torque");
+-            return false;
++        if (!dxl_.SetTorqueEnabled(true)) {
++            static_cast<void>(dxl_.SetTorqueEnabled(false));
++            setError("failed to enable torque"); return false;
+         }
+         initialized_ = true;
+         last_error_.clear();
+         return true;
+-    } catch (const std::exception& error) {
+-        setError(error.what());
+-        initialized_ = false;
+-        return false;
+-    } catch (...) {
+-        setError("unknown DYNAMIXEL initialization error");
+-        initialized_ = false;
+-        return false;
++    } catch (const std::exception& e) { setError(e.what()); return false; }
++      catch (...) { setError("unknown hardware initialization error"); return false; }
++}
++
++bool DynamixelMotionHardware::commandImmediatePosition(
++    const JointAngles& goals, const std::vector<int>& ids) noexcept {
++    if (!ready()) { setError("hardware is not ready"); return false; }
++    for (const int id : ids) {
++        const auto value = goals.find(id);
++        if (id < 0 || id >= 23 || value == goals.end() || !std::isfinite(value->second)) {
++            setError("invalid immediate motor goal"); return false;
++        }
++        desired_deg_[id] = value->second;
+     }
++    if (!dxl_.WriteGoalDegrees(desired_deg_, ids)) {
++        setError("Goal Position SyncWrite failed"); return false;
++    }
++    last_error_.clear();
++    return true;
+ }
+ 
+ bool DynamixelMotionHardware::ready() const noexcept {
+@@ -83,10 +116,11 @@
+         return false;
+     }
+     try {
+-        const auto positions_rad = controller_.GetJointTheta();
++        if (!dxl_.ReadPositionDegrees(desired_deg_)) {
++            setError("Present Position SyncRead failed"); return false;
++        }
+         positions_deg.clear();
+-        for (int motor_id = 0; motor_id < NUMBER_OF_DYNAMIXELS; ++motor_id)
+-            positions_deg[motor_id] = positions_rad[motor_id] / DEG2RAD;
++        for (int id = 0; id < 23; ++id) positions_deg[id] = desired_deg_[id];
+         last_error_.clear();
+         return true;
+     } catch (const std::exception& error) {
+@@ -106,7 +140,8 @@
+     motor_ids.reserve(current_deg.size());
+     for (const auto& [motor_id, unused] : current_deg)
+         motor_ids.push_back(motor_id);
+-    return commandPosition(current_deg, motor_ids, stop_duration_ms, 0);
++    static_cast<void>(stop_duration_ms);
++    return commandImmediatePosition(current_deg, motor_ids);
+ }
+ 
+ bool DynamixelMotionHardware::setTorqueEnabled(bool enabled) noexcept {
+--- a/dynamixel_motion_hardware.hpp
++++ b/dynamixel_motion_hardware.hpp
+@@ -7,9 +7,18 @@
+ 
+ namespace irc_step {
+ 
++struct DynamixelMotionHardwareConfig {
++    std::string device_path{"/dev/ttyUSB0"};
++    int baud_rate{4000000};
++    std::vector<int> motor_ids{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22};
++};
++
+ class DynamixelMotionHardware final : public IMotionHardware {
+ public:
+-    DynamixelMotionHardware();
++    explicit DynamixelMotionHardware(DynamixelMotionHardwareConfig config = {});
++    bool preflight() noexcept;
++    bool commandImmediatePosition(const JointAngles& goal_deg,
++        const std::vector<int>& motor_ids) noexcept override;
+ 
+     bool initialize() noexcept override;
+     [[nodiscard]] bool ready() const noexcept override;
+@@ -27,6 +36,8 @@
+ private:
+     void setError(std::string message) noexcept;
+ 
++    DynamixelMotionHardwareConfig config_;
++    std::vector<double> desired_deg_;
+     Dxl dxl_;
+     Dxl_Controller controller_;
+     Eigen::VectorXd desired_rad_;
+--- /dev/null
++++ b/gui_playback.hpp
+@@ -0,0 +1,74 @@
++#pragma once
++#include "motion_pattern.hpp"
++#include <algorithm>
++#include <array>
++#include <cmath>
++#include <stdexcept>
++
++namespace irc_step {
++inline double guiShortestDelta(double start, double end) {
++    double delta = std::fmod(end - start + 180.0, 360.0);
++    if (delta < 0.0) delta += 360.0;
++    return delta - 180.0;
++}
++inline double guiFrameProgress(const MotionFrame& frame, std::int64_t time_ms) {
++    const bool lift = frame.lift_early_arrival &&
++        (frame.name.find("발들") != std::string::npos ||
++         frame.name.find("들기") != std::string::npos ||
++         frame.name.find("오들") != std::string::npos ||
++         frame.name.find("왼들") != std::string::npos);
++    const double duration = std::max(1.0, frame.time_ms * (lift ? 0.8 : 1.0));
++    const double fraction = std::clamp((time_ms - frame.start_ms) / duration, 0.0, 1.0);
++    return 0.5 - 0.5 * std::cos(std::acos(-1.0) * fraction);
++}
++// Python round()와 같은 ties-to-even. 전송 각도는 GUI와 같은 4096 step/rev.
++inline int guiPositionRaw(double degree) {
++    if (!std::isfinite(degree)) throw std::invalid_argument("non-finite motor angle");
++    if (degree > 180.0 || degree < -180.0) {
++        degree = std::fmod(degree, 360.0);
++        if (degree > 180.0) degree -= 360.0;
++        if (degree < -180.0) degree += 360.0;
++    }
++    degree = std::clamp(degree, -180.0, 179.912109375);
++    const double raw = 2048.0 + degree * (4096.0 / 360.0);
++    const double lower = std::floor(raw);
++    const double fraction = raw - lower;
++    return static_cast<int>(lower + (fraction > 0.5 ||
++        (fraction == 0.5 && static_cast<int>(lower) % 2 != 0)));
++}
++struct GuiSample {
++    std::array<double, 23> angles{};
++    std::array<bool, 23> commanded{};
++};
++inline GuiSample sampleGuiMotion(const std::vector<MotionFrame>& frames,
++    const JointAngles& initial, std::int64_t time_ms, bool cycle_end = false) {
++    GuiSample base;
++    auto merge = [](GuiSample& sample, const JointAngles& angles) {
++        for (const auto& [id, value] : angles) {
++            if (id < 0 || id >= 23 || !std::isfinite(value))
++                throw std::invalid_argument("invalid GUI joint target");
++            sample.angles[id] = value;
++            sample.commanded[id] = true;
++        }
++    };
++    merge(base, initial);
++    const auto end = frames.back().start_ms + frames.back().time_ms;
++    for (const auto& frame : frames) {
++        const auto frame_end = frame.start_ms + frame.time_ms;
++        const bool active = (frame.start_ms <= time_ms && time_ms < frame_end) ||
++            (time_ms == frame_end && (cycle_end || time_ms == end));
++        if (active) {
++            GuiSample target;
++            const double progress = guiFrameProgress(frame, time_ms);
++            for (const auto& [id, goal] : frame.angles) {
++                const double start = base.commanded[id] ? base.angles[id] : goal;
++                target.angles[id] = start + guiShortestDelta(start, goal) * progress;
++                target.commanded[id] = true;
++            }
++            return target;
++        }
++        if (frame_end <= time_ms) merge(base, frame.angles);
++    }
++    return base;
++}
++}  // namespace irc_step
+--- /dev/null
++++ b/gui_trace_probe.cpp
+@@ -0,0 +1,23 @@
++#include "gui_playback.hpp"
++#include <iostream>
++#include <set>
++int main(int argc,char**argv) {
++    if(argc!=2)return 2;
++    const auto library=irc_step::MotionLibrary::loadGuiJson(argv[1]);
++    irc_step::JointAngles initial;
++    for(int id=0;id<23;++id) initial[id]=id*0.25-3;
++    for(const auto& name:library.names()) {
++        const auto& p=library.motion(name);
++        std::set<std::int64_t> times{p.durationMs()};
++        for(std::int64_t t=0;t<p.durationMs();t+=5)times.insert(t);
++        for(const auto& f:p.frames()) {times.insert(f.start_ms);times.insert(f.start_ms+f.time_ms);}
++        for(auto t:times) {
++            bool boundary=false;
++            for(const auto& f:p.frames()) if(f.playback_cycle_end && f.start_ms+f.time_ms==t)boundary=true;
++            auto target=irc_step::sampleGuiMotion(p.frames(),initial,t,boundary);
++            std::cout<<name<<'\t'<<t<<'\t'<<boundary;
++            for(int id=0;id<23;++id)std::cout<<'\t'<<(target.commanded[id]?irc_step::guiPositionRaw(target.angles[id]):-1);
++            std::cout<<'\n';
++        }
++    }
++}
+--- a/motion_hardware.hpp
++++ b/motion_hardware.hpp
+@@ -26,6 +26,12 @@
+         std::uint32_t duration_ms,
+         std::uint32_t acceleration_ms) noexcept = 0;
+ 
++    // 프로파일 0 상태의 중간 Goal만 전송한다. 시간 프로파일 전송과 분리한다.
++    virtual bool commandImmediatePosition(const JointAngles& goal_deg,
++        const std::vector<int>& motor_ids) noexcept {
++        return commandPosition(goal_deg, motor_ids, 0, 0);
++    }
++
+     virtual bool readPresentPositions(JointAngles& positions_deg) noexcept = 0;
+     virtual bool holdCurrentPosition(
+         std::uint32_t stop_duration_ms) noexcept = 0;
+--- a/motion_pattern.cpp
++++ b/motion_pattern.cpp
+@@ -181,6 +181,8 @@
+         if (const auto it = object.find("torques"); it != object.end())
+             for (const auto& [id, value] : it->second.object())
+                 frame.torques[std::stoi(id)] = value.boolean();
++        frame.lift_early_arrival = optionalBool(object, "lift_early_arrival", false);
++        frame.playback_cycle_end = optionalBool(object, "playback_cycle_end", false);
+         frames.push_back(std::move(frame));
+     }
+     MotionCompletion completion;
+@@ -251,6 +253,10 @@
+     duration_ms_ = 0;
+     for (std::size_t i = 0; i < frames_.size(); ++i) {
+         const auto& frame = frames_[i];
++        for (const auto& [id, value] : frame.angles) {
++            if (id < 0 || id >= 23 || !std::isfinite(value))
++                throw std::runtime_error("invalid motor target in frame: " + frame.name);
++        }
+         if (frame.start_ms < 0 || frame.time_ms <= 0)
+             throw std::runtime_error("invalid frame time: " + frame.name);
+         if (i > 0 && frames_[i - 1].start_ms + frames_[i - 1].time_ms > frame.start_ms)
+--- a/motion_pattern.hpp
++++ b/motion_pattern.hpp
+@@ -18,6 +18,8 @@
+     std::int64_t time_ms{1};
+     JointAngles angles;
+     TorqueStates torques;
++    bool lift_early_arrival{false};
++    bool playback_cycle_end{false};
+ };
+ 
+ // callback이 SDK로 전송할 현재 시각의 목표값.
+--- a/robot_motion_player.cpp
++++ b/robot_motion_player.cpp
+@@ -1,4 +1,5 @@
+ #include "robot_motion_player.hpp"
++#include "gui_playback.hpp"
+ 
+ #include <algorithm>
+ #include <cmath>
+@@ -11,17 +12,16 @@
+ 
+ namespace irc_step {
+ namespace {
+-constexpr std::string_view kLandingTag{"[착지]"};
+-constexpr double kLandingAccelerationRatio = 0.10;
+-constexpr std::uint32_t kLandingAccelerationMaxMs = 30;
+-constexpr std::uint32_t kCancelHoldDurationMs = 50;
++constexpr std::uint32_t kCancelHoldDurationMs = 0;
+ constexpr auto kPositionCheckInterval = std::chrono::milliseconds(20);
+ }
+ 
+ RobotMotionPlayer::RobotMotionPlayer(
+-    const std::string& json_path, IMotionHardware& hardware)
+-    : library_(MotionLibrary::loadGuiJson(json_path)),
+-      hardware_(&hardware) {}
++    const std::string& json_path, IMotionHardware& hardware, Now now)
++    : now_(std::move(now)), library_(MotionLibrary::loadGuiJson(json_path)),
++      hardware_(&hardware) {
++    if (!now_) throw std::invalid_argument("clock callback is required");
++}
+ 
+ RobotMotionPlayer::~RobotMotionPlayer() { shutdown(); }
+ 
+@@ -88,8 +88,10 @@
+             last_error_ = "motion has no frames: " + name;
+             return StartResult::InvalidMotion;
+         }
++        if (!readStartAngles()) return StartResult::HardwareNotReady;
++        startup_active_ = false;
+         clearQueuedMotion();
+-        resetMotionRuntime(pattern, name, Clock::now());
++        resetMotionRuntime(pattern, name, now_());
+         error_ = MotionError::None;
+         last_error_.clear();
+         return StartResult::Accepted;
+@@ -158,9 +160,15 @@
+ }
+ 
+ void RobotMotionPlayer::resetMotionRuntime(
+-    const MotionPattern& pattern, std::string name, Clock::time_point now) noexcept {
++    const MotionPattern& pattern, std::string name, Clock::time_point now) {
+     pattern_ = &pattern;
+     current_motion_ = std::move(name);
++    playback_frames_ = pattern.frames();
++    for (auto& frame : playback_frames_) frame.angles = correctedFrameAngles(frame);
++    command_ids_.reserve(kMotionMotorCount);
++    for (int id = 0; id < kMotionMotorCount; ++id) command_angles_[id] = 0.0;
++    cycle_start_ms_ = 0;
++    feedback_sampled_ = false;
+     next_frame_ = 0;
+     repeat_ = 1;
+     final_goal_deg_.clear();
+@@ -178,7 +186,7 @@
+     status_ = MotionStatus::Running;
+ }
+ 
+-bool RobotMotionPlayer::activateQueuedMotion(Clock::time_point now) noexcept {
++bool RobotMotionPlayer::activateQueuedMotion(Clock::time_point now) {
+     if (queued_pattern_ == nullptr) return false;
+     const MotionPattern* next = queued_pattern_;
+     std::string next_name = std::move(queued_motion_);
+@@ -186,7 +194,10 @@
+     queued_motion_.clear();
+     last_completed_motion_ = current_motion_;
+     ++completion_sequence_;
+-    resetMotionRuntime(*next, std::move(next_name), now);
++    // 예약 전환도 새 모션이므로 실기 시작각을 다시 읽는다.
++    if (!readStartAngles()) return true;
++    resetMotionRuntime(*next, std::move(next_name), now_());
++    static_cast<void>(now);
+     error_ = MotionError::None;
+     last_error_.clear();
+     return true;
+@@ -194,7 +205,7 @@
+ 
+ MotionStatus RobotMotionPlayer::update() noexcept {
+     try {
+-        const auto now = Clock::now();
++        const auto now = now_();
+         if (status_ == MotionStatus::Running) return updateRunning(now);
+         if (status_ == MotionStatus::Settling) return updateSettling(now);
+         return status_;
+@@ -206,118 +217,112 @@
+     return status_;
+ }
+ 
++bool RobotMotionPlayer::readStartAngles() {
++    JointAngles present;
++    if (!hardware_->readPresentPositions(present)) {
++        fail(MotionError::PresentPositionReadFailed, "cannot capture actual start pose");
++        return false;
++    }
++    if (present.size() != kMotionMotorCount) {
++        fail(MotionError::PresentPositionReadFailed, "incomplete actual start pose");
++        return false;
++    }
++    for (const auto& [id, angle] : present) {
++        if (id < 0 || id >= kMotionMotorCount || !std::isfinite(angle)) {
++            fail(MotionError::PresentPositionReadFailed, "invalid actual start pose");
++            return false;
++        }
++    }
++    start_angles_ = present;
++    feedback_angles_ = std::move(present);
++    return true;
++}
++
++void RobotMotionPlayer::markSucceeded() {
++    status_ = MotionStatus::Succeeded;
++    error_ = MotionError::None;
++    last_error_.clear();
++    if (!startup_active_) {
++        last_completed_motion_ = current_motion_;
++        ++completion_sequence_;
++    }
++}
++
++bool RobotMotionPlayer::sendGuiSample(std::int64_t timeline_ms, bool boundary) {
++    const auto target = sampleGuiMotion(playback_frames_, start_angles_, timeline_ms, boundary);
++    command_ids_.clear();
++    for (int id = 0; id < kMotionMotorCount; ++id) {
++        if (!target.commanded[id] && !joint_overrides_.contains(id)) continue;
++        const auto override = joint_overrides_.find(id);
++        const double angle = override == joint_overrides_.end() ? target.angles[id] : override->second;
++        command_angles_[id] = angle;
++        command_ids_.push_back(id);
++        final_goal_deg_[id] = (guiPositionRaw(angle) - 2048) * (360.0 / 4096.0);
++    }
++    if (!command_ids_.empty() && !hardware_->commandImmediatePosition(command_angles_, command_ids_)) {
++        fail(MotionError::FrameSendFailed, std::string(hardware_->lastError()));
++        return false;
++    }
++    const auto now = now_();
++    if (boundary || !feedback_sampled_ || now - last_feedback_at_ >= std::chrono::milliseconds(10)) {
++        last_feedback_at_ = now;
++        feedback_sampled_ = true;
++        // GUI 재생과 같이 피드백은 관측용이다. 시작 자세/정착 검사는 별도다.
++        JointAngles present;
++        if (hardware_->readPresentPositions(present)) feedback_angles_ = std::move(present);
++    }
++    return true;
++}
++
+ MotionStatus RobotMotionPlayer::updateRunning(Clock::time_point now) {
+     if (pattern_ == nullptr) {
+         fail(MotionError::InternalError, "running motion has no pattern");
+         return status_;
+     }
+-    const double real_ms =
+-        std::chrono::duration<double, std::milli>(now - started_at_).count();
+-    const auto timeline_ms = static_cast<std::int64_t>(
+-        real_ms * pattern_->playbackSpeed());
+-    const auto& frames = pattern_->frames();
+-
+-    if (!gateCurrentFrame(now, timeline_ms)) return status_;
+-
+-    while (next_frame_ < frames.size()
+-           && frames[next_frame_].start_ms <= timeline_ms) {
+-        if (!sendFrame(frames[next_frame_], timeline_ms)) {
+-            fail(
+-                MotionError::FrameSendFailed,
+-                hardware_->lastError().empty()
+-                    ? "DYNAMIXEL frame transmission failed"
+-                    : std::string(hardware_->lastError()));
+-            return status_;
+-        }
+-        ++next_frame_;
+-    }
+-
+-    if (timeline_ms < pattern_->durationMs()) return status_;
++    const double real_ms = std::chrono::duration<double, std::milli>(now - started_at_).count();
++    auto timeline_ms = static_cast<std::int64_t>(real_ms * pattern_->playbackSpeed() + 1e-7);
++    const auto sequence_end = pattern_->durationMs();
++    std::int64_t boundary_ms = sequence_end;
++    for (const auto& frame : playback_frames_) {
++        const auto end = frame.start_ms + frame.time_ms;
++        if (frame.playback_cycle_end && cycle_start_ms_ < end && end < boundary_ms)
++            boundary_ms = end;
++    }
++    const bool boundary = timeline_ms >= boundary_ms;
++    timeline_ms = std::min(timeline_ms, boundary_ms);
++    if (!sendGuiSample(timeline_ms, boundary)) return status_;
++    if (!boundary) return status_;
++    if (boundary_ms < sequence_end) {
++        cycle_start_ms_ = boundary_ms;
++        for (const auto& frame : playback_frames_)
++            if (frame.start_ms + frame.time_ms == boundary_ms)
++                for (const auto& [id, angle] : frame.angles) start_angles_[id] = angle;
++        // 통신 완료 이후 시계를 재시작해 GUI 반복 경계의 지연을 재현한다.
++        started_at_ = now_() - std::chrono::duration_cast<Clock::duration>(
++            std::chrono::duration<double, std::milli>(boundary_ms / pattern_->playbackSpeed()));
++        feedback_sampled_ = false;
++        return status_;
++    }
+     if (repeat_ < pattern_->repeatCount()) {
+         ++repeat_;
+-        next_frame_ = 0;
+-        started_at_ = now;
+-        return status_;
+-    }
+-
+-    // 예약 명령은 최종 정착 상태로 들어가기 전에 같은 타임라인 경계에서
+-    // 시작합니다. start() busy 검사를 제거하지 않으므로 런타임 상태가 섞이지 않습니다.
+-    if (activateQueuedMotion(now)) return status_;
+-
+-    status_ = MotionStatus::Settling;
+-    settling_started_at_ = now;
+-    last_position_check_at_ = Clock::time_point{};
+-    within_tolerance_ = false;
+-    return updateSettling(now);
+-}
+-
+-bool RobotMotionPlayer::gateCurrentFrame(
+-    Clock::time_point now, std::int64_t timeline_ms) {
+-    if (gated_frame_ == nullptr) return true;
+-    const auto frame_end_ms = gated_frame_->start_ms + gated_frame_->time_ms;
+-    if (timeline_ms < frame_end_ms) return true;
+-
+-    started_at_ = now - std::chrono::duration_cast<Clock::duration>(
+-        std::chrono::duration<double, std::milli>(
+-            frame_end_ms / pattern_->playbackSpeed()));
+-    if (frame_gate_wait_started_at_ == Clock::time_point{})
+-        frame_gate_wait_started_at_ = now;
+-    if (frame_gate_last_check_at_ != Clock::time_point{}
+-        && now - frame_gate_last_check_at_ < kPositionCheckInterval) {
+-        return false;
+-    }
+-    frame_gate_last_check_at_ = now;
+-
+-    JointAngles present_deg;
+-    if (!hardware_->readPresentPositions(present_deg)) {
+-        const auto wait_ms =
+-            std::chrono::duration_cast<std::chrono::milliseconds>(
+-                now - frame_gate_wait_started_at_).count();
+-        if (wait_ms <= pattern_->completion().settle_timeout_ms) return false;
+-        static_cast<void>(hardware_->holdCurrentPosition(kCancelHoldDurationMs));
+-        fail(
+-            MotionError::PresentPositionReadFailed,
+-            hardware_->lastError().empty()
+-                ? "failed to read frame Present Position"
+-                : std::string(hardware_->lastError()));
+-        return false;
+-    }
+-
+-    bool reached = !gated_goal_ids_.empty();
+-    double worst_error = 0.0;
+-    int worst_id = -1;
+-    for (const int motor_id : gated_goal_ids_) {
+-        const auto goal = gated_goal_deg_.find(motor_id);
+-        const auto present = present_deg.find(motor_id);
+-        const double error = (
+-            goal == gated_goal_deg_.end() || present == present_deg.end())
+-            ? 1e9 : std::abs(goal->second - present->second);
+-        if (error > worst_error) {
+-            worst_error = error;
+-            worst_id = motor_id;
+-        }
+-        if (error > pattern_->completion().position_tolerance_deg)
+-            reached = false;
+-    }
+-    if (reached) {
+-        gated_frame_ = nullptr;
+-        gated_goal_deg_.clear();
+-        gated_goal_ids_.clear();
+-        frame_gate_wait_started_at_ = Clock::time_point{};
+-        frame_gate_last_check_at_ = Clock::time_point{};
+-        return true;
+-    }
+-
+-    const auto wait_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+-        now - frame_gate_wait_started_at_).count();
+-    if (wait_ms <= pattern_->completion().settle_timeout_ms) return false;
+-    static_cast<void>(hardware_->holdCurrentPosition(kCancelHoldDurationMs));
+-    fail(
+-        MotionError::PositionTimeout,
+-        "frame goal was not reached; motor "
+-            + std::to_string(worst_id) + " error="
+-            + std::to_string(worst_error) + "deg");
+-    return false;
++        for (const auto& [id, angle] : playback_frames_.back().angles) start_angles_[id] = angle;
++        cycle_start_ms_ = 0;
++        started_at_ = now_();
++        feedback_sampled_ = false;
++        return status_;
++    }
++    if (activateQueuedMotion(now_())) return status_;
++    if (position_tolerance_enabled_ || startup_active_) {
++        final_goal_ids_.clear();
++        for (const auto& [id, angle] : final_goal_deg_) final_goal_ids_.push_back(id);
++        status_ = MotionStatus::Settling;
++        settling_started_at_ = now_();
++        last_position_check_at_ = Clock::time_point{};
++        within_tolerance_ = false;
++        return updateSettling(now_());
++    }
++    markSucceeded();
++    return status_;
+ }
+ 
+ MotionStatus RobotMotionPlayer::updateSettling(Clock::time_point now) {
+@@ -378,12 +383,7 @@
+     if (stable_ms < pattern_->completion().settle_duration_ms)
+         return status_;
+ 
+-    status_ = MotionStatus::Succeeded;
+-    error_ = MotionError::None;
+-    last_error_.clear();
+-    last_completed_motion_ = current_motion_;
+-    ++completion_sequence_;
+-    std::cout << "[Info] Motion succeeded: " << current_motion_ << std::endl;
++    markSucceeded();
+     return status_;
+ }
+ 
+@@ -454,7 +454,7 @@
+     if (start(motion_name) != StartResult::Accepted) return false;
+     while (running()) {
+         update();
+-        std::this_thread::sleep_for(std::chrono::milliseconds(2));
++        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+     }
+     return succeeded();
+ }
+@@ -512,16 +512,10 @@
+ }
+ 
+ void RobotMotionPlayer::shutdown() noexcept {
+-    if (hardware_ != nullptr && initialized_) {
+-        if (running()) static_cast<void>(cancel());
+-        static_cast<void>(hardware_->setTorqueEnabled(false));
+-    }
++    // GUI 종료와 동일하게 마지막 목표와 토크 상태를 유지하고 통신 소유권만 해제한다.
+     initialized_ = false;
+     clearQueuedMotion();
+-    if (status_ == MotionStatus::Running
+-        || status_ == MotionStatus::Settling) {
+-        status_ = MotionStatus::Cancelled;
+-    }
++    if (running()) status_ = MotionStatus::Cancelled;
+ }
+ 
+ void RobotMotionPlayer::fail(
+@@ -551,47 +545,55 @@
+     return corrected;
+ }
+ 
+-bool RobotMotionPlayer::sendFrame(
+-    const MotionFrame& frame, std::int64_t timeline_ms) {
+-    const auto corrected = correctedFrameAngles(frame);
+-    std::vector<int> target_ids;
+-    target_ids.reserve(corrected.size());
+-    for (const auto& [motor_id, degree] : corrected) {
+-        if (motor_id < 0 || motor_id >= kMotionMotorCount)
+-            throw std::runtime_error(
+-                "invalid motor ID in JSON: " + std::to_string(motor_id));
+-        target_ids.push_back(motor_id);
+-        final_goal_deg_[motor_id] = degree;
+-    }
+-    if (target_ids.empty()) return true;
+-    final_goal_ids_.clear();
+-    final_goal_ids_.reserve(final_goal_deg_.size());
+-    for (const auto& [motor_id, unused] : final_goal_deg_)
+-        final_goal_ids_.push_back(motor_id);
+-
+-    const auto frame_end_ms = frame.start_ms + frame.time_ms;
+-    const auto remaining_timeline_ms =
+-        std::max<std::int64_t>(1, frame_end_ms - timeline_ms);
+-    const auto real_duration_ms = static_cast<std::uint32_t>(std::clamp(
+-        std::ceil(remaining_timeline_ms / pattern_->playbackSpeed()),
+-        1.0, static_cast<double>(kMaxTimeProfileMs)));
+-    const bool landing = frame.name.find(kLandingTag) != std::string::npos;
+-    const auto acceleration_ms = landing
+-        ? std::min<std::uint32_t>(
+-            static_cast<std::uint32_t>(
+-                real_duration_ms * kLandingAccelerationRatio),
+-            kLandingAccelerationMaxMs)
+-        : 0;
+-    if (!hardware_->commandPosition(
+-            corrected, target_ids, real_duration_ms, acceleration_ms)) {
+-        return false;
+-    }
+-    gated_frame_ = &frame;
+-    gated_goal_deg_ = corrected;
+-    gated_goal_ids_ = target_ids;
+-    frame_gate_wait_started_at_ = Clock::time_point{};
+-    frame_gate_last_check_at_ = Clock::time_point{};
+-    return true;
++void RobotMotionPlayer::setJointOverride(int motor_id, double target_deg) {
++    if (motor_id < 0 || motor_id >= kMotionMotorCount || !std::isfinite(target_deg))
++        throw std::invalid_argument("invalid joint override");
++    joint_overrides_[motor_id] = target_deg;
++    // 대기 중에도 ROS의 카메라 이동 요청은 다음 모션을 기다리지 않는다.
++    if (hardwareReady() && !running()) {
++        JointAngles goal{{motor_id, target_deg}};
++        if (!hardware_->commandImmediatePosition(goal, std::vector<int>{motor_id}))
++            throw std::runtime_error("failed to send idle joint override");
++    }
++}
++void RobotMotionPlayer::clearJointOverride(int motor_id) noexcept {
++    joint_overrides_.erase(motor_id);
++}
++bool RobotMotionPlayer::startPoseTransition(
++    const std::vector<double>& angles, std::int64_t duration_ms) noexcept {
++    if (running() || !hardwareReady()) return false;
++    try {
++        if (angles.size() != kMotionMotorCount || duration_ms <= 0)
++            throw std::invalid_argument("startup pose requires 23 angles and positive duration");
++        MotionFrame frame;
++        frame.name = "STEP startup";
++        frame.time_ms = duration_ms;
++        for (int id = 0; id < kMotionMotorCount; ++id) {
++            if (!std::isfinite(angles[id])) throw std::invalid_argument("non-finite startup angle");
++            frame.angles[id] = angles[id];
++        }
++        if (!readStartAngles() || start_angles_.size() != kMotionMotorCount) return false;
++        MotionCompletion completion;
++        completion.position_tolerance_deg = 5.0;
++        startup_pattern_ = std::make_unique<MotionPattern>(std::vector<MotionFrame>{frame},
++            duration_ms, 1, 1.0, false, "", "", completion);
++        startup_active_ = true;
++        clearQueuedMotion();
++        resetMotionRuntime(*startup_pattern_, "STEP startup", now_());
++        error_ = MotionError::None;
++        last_error_.clear();
++        return true;
++    } catch (const std::exception& e) {
++        fail(MotionError::InternalError, e.what());
++        return false;
++    } catch (...) {
++        fail(MotionError::InternalError, "unknown startup pose error");
++        return false;
++    }
++}
++MotionStatus RobotMotionPlayer::updateStartupPose() noexcept {
++    if (!startup_active_) return MotionStatus::Failed;
++    return update();
+ }
+ 
+ }  // namespace irc_step
+--- a/robot_motion_player.hpp
++++ b/robot_motion_player.hpp
+@@ -4,6 +4,7 @@
+ #include "motion_pattern.hpp"
+ 
+ #include <chrono>
++#include <functional>
+ #include <cstdint>
+ #include <map>
+ #include <memory>
+@@ -75,16 +76,24 @@
+ 
+ class RobotMotionPlayer {
+ public:
++    using Clock = std::chrono::steady_clock;
++    using Now = std::function<Clock::time_point()>;
+     // 실제 Dynamixel을 소유하는 실행용 생성자.
+     explicit RobotMotionPlayer(const std::string& json_path);
+     // ROS/mock 테스트가 가짜 하드웨어를 주입할 때 사용하는 생성자.
+-    RobotMotionPlayer(const std::string& json_path, IMotionHardware& hardware);
++    RobotMotionPlayer(const std::string& json_path, IMotionHardware& hardware,
++                      Now now = Clock::now);
+     ~RobotMotionPlayer();
+ 
+     RobotMotionPlayer(const RobotMotionPlayer&) = delete;
+     RobotMotionPlayer& operator=(const RobotMotionPlayer&) = delete;
+ 
+     bool initialize() noexcept;
++    bool startPoseTransition(const std::vector<double>& angles, std::int64_t duration_ms) noexcept;
++    MotionStatus updateStartupPose() noexcept;
++    void setPositionToleranceEnabled(bool enabled) noexcept { position_tolerance_enabled_ = enabled; }
++    void setJointOverride(int motor_id, double target_deg);
++    void clearJointOverride(int motor_id) noexcept;
+     [[nodiscard]] bool hardwareReady() const noexcept;
+ 
+     [[nodiscard]] std::vector<std::string> motionNames() const;
+@@ -132,24 +141,38 @@
+     void shutdown() noexcept;
+ 
+ private:
+-    using Clock = std::chrono::steady_clock;
+     using FrameCorrectionKey = std::tuple<std::string, std::string, int>;
+ 
+-    bool sendFrame(const MotionFrame& frame, std::int64_t timeline_ms);
++    bool sendGuiSample(std::int64_t timeline_ms, bool boundary);
++    bool readStartAngles();
++    void markSucceeded();
+     MotionStatus updateRunning(Clock::time_point now);
+     MotionStatus updateSettling(Clock::time_point now);
+     bool canSeamlesslyTransition(const MotionPattern& current,
+                                  std::string_view current_name,
+                                  const MotionPattern& next,
+                                  std::string_view next_name) const noexcept;
+-    bool activateQueuedMotion(Clock::time_point now) noexcept;
++    bool activateQueuedMotion(Clock::time_point now);
+     void resetMotionRuntime(const MotionPattern& pattern,
+                             std::string name,
+-                            Clock::time_point now) noexcept;
+-    bool gateCurrentFrame(Clock::time_point now, std::int64_t timeline_ms);
++                            Clock::time_point now);
++
+     void fail(MotionError error, std::string message) noexcept;
+     JointAngles correctedFrameAngles(const MotionFrame& frame) const;
+ 
++    Now now_{Clock::now};
++    JointAngles start_angles_;
++    JointAngles feedback_angles_;
++    JointAngles command_angles_;
++    JointAngles joint_overrides_;
++    std::vector<int> command_ids_;
++    std::vector<MotionFrame> playback_frames_;
++    std::unique_ptr<MotionPattern> startup_pattern_;
++    std::int64_t cycle_start_ms_{0};
++    Clock::time_point last_feedback_at_{};
++    bool feedback_sampled_{false};
++    bool position_tolerance_enabled_{true};
++    bool startup_active_{false};
+     MotionLibrary library_;
+     std::unique_ptr<IMotionHardware> owned_hardware_;
+     IMotionHardware* hardware_{nullptr};
+--- a/step_dynamixel.cpp
++++ b/step_dynamixel.cpp
+@@ -1,4 +1,5 @@
+ #include "step_dynamixel.hpp"
++#include "gui_playback.hpp"
+ #include <algorithm>
+ #include <iostream>  
+ #include <cmath>
+@@ -32,118 +33,58 @@
+ // }
+ 
+ 
+-Dxl::Dxl()
+-{
+-    uint8_t dxl_error = 0;
+-    int dxl_comm_result = COMM_TX_FAIL;
+-
+-
+-    // const char* device_name = getAvailableDeviceName();   // ✅ 자동 선택
+-    // portHandler = dynamixel::PortHandler::getPortHandler(device_name);
+-    // packetHandler = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
+-
+-    portHandler = dynamixel::PortHandler::getPortHandler(DEVICE_NAME);
+-    packetHandler = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
+-    initActuatorValues();
+-
+-    if (!portHandler->openPort())
+-        std::cerr << "[Error] Failed to open the port!" << std::endl;
+-    else {
+-        port_opened_ = true;
+-        std::cout << "[Info] Succeeded to open the port!" << std::endl;
+-    }
+-
+-    if (!port_opened_ || !portHandler->setBaudRate(BAUDRATE)) {
+-        std::cerr << "[Error] Failed to set the baudrate!" << std::endl;
+-        if (port_opened_) {
+-            portHandler->closePort();
+-            port_opened_ = false;
+-        }
+-    } else {
+-        std::cout << "[Info] Succeeded to set the baudrate!" << std::endl;
+-    }
+-
+-    if (!port_opened_) return;
+-    SetTorqueEnabled(false);  // Operating Mode 변경 전 반드시 토크 OFF
+-    int16_t current_mode = SetPresentMode(Mode);
+-
+-    if (current_mode == Current_Control_Mode)
+-    {
+-        for (uint8_t i = 0; i < NUMBER_OF_DYNAMIXELS; i++)
+-        {
+-            dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, dxl_id[i], DxlReg_OperatingMode, Current_Control_Mode, &dxl_error);
+-            if (dxl_comm_result != COMM_SUCCESS)
+-                std::cerr << "[Error] Failed to set current control mode for ID: " << int(dxl_id[i]) << std::endl;
+-            else
+-                std::cout << "[Info] Set current control mode for ID: " << int(dxl_id[i]) << std::endl;
+-        }
+-    }
+-    else if (current_mode == Position_Control_Mode)
+-    {
+-        for (uint8_t i = 0; i < NUMBER_OF_DYNAMIXELS; i++)
+-        {
+-            dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, dxl_id[i], DxlReg_OperatingMode, Position_Control_Mode, &dxl_error);
+-            if (dxl_comm_result != COMM_SUCCESS)
+-                std::cerr << "[Error] Failed to set position control mode for ID: " << int(dxl_id[i]) << std::endl; // 몇번 모터가 작동이 안되는지 아이디가 뜬다
+-            else
+-                std::cout << "[Info] Set position control mode for ID: " << int(dxl_id[i]) << std::endl; // 작동되는 모터 부분은 이렇게 뜸 아이디도 뜸
+-        }
+-    }
+-    else
+-    {
+-        std::cerr << "[Error] Invalid mode set." << std::endl;
+-    }
+-
+-
+-
+-
+-    // 생성자에서는 토크를 켜지 않는다. main에서 현재각 동기화 후 켠다.
+-
+-
+-
+-    // VectorXd theta_zero = VectorXd::Zero(NUMBER_OF_DYNAMIXELS);
+-    // MoveToTargetSmoothCos(theta_zero, 150, 10);
+-
+-    // VectorXd theta_goal = Eigen::Map<VectorXd>(Set_D, NUMBER_OF_DYNAMIXELS);
+-    // MoveToTargetSmoothCos(theta_goal, 150, 10);
+-    // std::cout << "[Info] Start is half!!!!!!" << std::endl;
+-// 대회 시작할 때 주석 풀기  모터가 다 정상 작동하는지 확인하고 풀어주면된다
+-
+-    VectorXd PID_Gain(3);
+-    PID_Gain << 850, 0, 0;
+-    SetPIDGain(PID_Gain);
+-}
+- 
+-//D값을 적절히 주면 동작 끝부분에서 흔들림을 잡아줘서 보행이 훨씬 안정
+-//I값이 들어가면 제어기가 과거의 오차를 계산하느라 반응이 한 박자 늦어질 수 있어, 실시간으로 빠르게 움직여야 하는 대회용 로봇에는 방해  
+-// 로봇 상황을 보면서 p값과 d값 변경
+-
+-Dxl::~Dxl()
+-{
+-    uint8_t dxl_error = 0;
+-    int dxl_comm_result = COMM_TX_FAIL;
+-
+-    if (!port_opened_) return;
+-    SetTorqueEnabled(false);
+-
+-    for (uint8_t i = 0; i < NUMBER_OF_DYNAMIXELS; i++)
+-    {
+-        dxl_comm_result = packetHandler->write1ByteTxRx(
+-            portHandler, dxl_id[i], DxlReg_LED, 0, &dxl_error);
+-        if (dxl_comm_result != COMM_SUCCESS)
+-            std::cerr << "[Error] Failed to disable LED for ID: " << int(dxl_id[i]) << std::endl;
+-        else
+-            std::cout << "[Info] LED disabled for ID: " << int(dxl_id[i]) << std::endl;
+-    }
+-
+-    portHandler->closePort(); // 포트 종료 명령
+-}
+-// 모터값 다 꺼지는 코드
+-
+-
+-
+-
+-
++Dxl::Dxl() : portHandler(nullptr), packetHandler(nullptr) { initActuatorValues(); }
++
++bool Dxl::Initialize(const std::string& device, int baud) {
++    if (port_opened_) return true;
++    if (portHandler == nullptr) {
++        portHandler = dynamixel::PortHandler::getPortHandler(device.c_str());
++        packetHandler = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
++    }
++    if (!portHandler->openPort()) return false;
++    port_opened_ = true;
++    if (!portHandler->setBaudRate(baud)) {
++        portHandler->closePort();
++        port_opened_ = false;
++        return false;
++    }
++    // GUI와 동일하게 Operating Mode와 PID는 변경하지 않는다.
++    return true;
++}
++
++Dxl::~Dxl() {
++    // GUI 종료와 동일하게 torque OFF 명령 없이 포트만 닫는다.
++    if (port_opened_) portHandler->closePort();
++    delete portHandler;
++}
++
++bool Dxl::WriteGoalDegrees(const std::vector<double>& angles, const std::vector<int>& ids) {
++    if (!port_opened_ || angles.size() != NUMBER_OF_DYNAMIXELS || ids.empty()) return false;
++    dynamixel::GroupSyncWrite writer(portHandler, packetHandler, DxlReg_GoalPosition, 4);
++    for (const int id : ids) {
++        if (id < 0 || id >= NUMBER_OF_DYNAMIXELS || !std::isfinite(angles[id])) return false;
++        uint8_t data[4]{};
++        getParam(irc_step::guiPositionRaw(angles[id]), data);
++        if (!writer.addParam(static_cast<uint8_t>(id), data)) return false;
++    }
++    return writer.txPacket() == COMM_SUCCESS;
++}
++
++bool Dxl::ReadPositionDegrees(std::vector<double>& angles) {
++    if (!port_opened_) return false;
++    dynamixel::GroupSyncRead reader(portHandler, packetHandler, DxlReg_PresentPosition, 4);
++    for (int id = 0; id < NUMBER_OF_DYNAMIXELS; ++id)
++        if (!reader.addParam(id)) return false;
++    if (reader.txRxPacket() != COMM_SUCCESS) return false;
++    for (int id = 0; id < NUMBER_OF_DYNAMIXELS; ++id)
++        if (!reader.isAvailable(id, DxlReg_PresentPosition, 4)) return false;
++    angles.resize(NUMBER_OF_DYNAMIXELS);
++    for (int id = 0; id < NUMBER_OF_DYNAMIXELS; ++id) {
++        const auto raw = static_cast<std::int32_t>(reader.getData(id, DxlReg_PresentPosition, 4));
++        angles[id] = std::clamp((raw - 2048.0) * (360.0 / 4096.0), -180.0, 179.912109375);
++    }
++    return true;
++}
+ 
+ // ************************************ GETTERS ***************************************** //
+ 
+--- a/step_dynamixel.hpp
++++ b/step_dynamixel.hpp
+@@ -3,6 +3,7 @@
+ 
+ #include <eigen3/Eigen/Dense>
+ #include <vector>
++#include <string>
+ #include <thread>
+ #include <chrono>
+ #include "dynamixel_sdk/dynamixel_sdk.h"
+@@ -183,7 +184,10 @@
+ 
+     // Member Function
+     public:
+-        Dxl(); //생성자
++        Dxl(); // 생성자는 포트·모터에 접근하지 않는다.
++        bool Initialize(const std::string& device, int baud);
++        bool WriteGoalDegrees(const std::vector<double>& angles, const std::vector<int>& ids);
++        bool ReadPositionDegrees(std::vector<double>& angles);
+         ~Dxl(); //소멸자
+ 
+ // ************************************ GETTERS ***************************************** //
+--- /dev/null
++++ b/test_gui_playback.cpp
+@@ -0,0 +1,86 @@
++#include "robot_motion_player.hpp"
++#include "gui_playback.hpp"
++#include <cassert>
++#include <filesystem>
++#include <fstream>
++#include <functional>
++#include <iostream>
++using namespace irc_step;
++using namespace std::chrono_literals;
++struct Hardware : IMotionHardware {
++    JointAngles present, goal;
++    bool online=false, read_ok=true, write_ok=true, follow=false;
++    int writes=0, reads=0, torque_writes=0;
++    std::function<void()> after_write=[]{};
++    Hardware() { for(int i=0;i<23;++i) present[i]=0; }
++    bool initialize() noexcept override { online=true; return true; }
++    bool ready() const noexcept override { return online; }
++    bool commandPosition(const JointAngles&,const std::vector<int>&,uint32_t,uint32_t) noexcept override {
++        assert(false && "time-profile path must never be used"); return false;
++    }
++    bool commandImmediatePosition(const JointAngles& g,const std::vector<int>& ids) noexcept override {
++        ++writes; if(!write_ok)return false;
++        for(int id:ids) { goal[id]=g.at(id); if(follow)present[id]=g.at(id); }
++        after_write(); return true;
++    }
++    bool readPresentPositions(JointAngles& p) noexcept override { ++reads; if(!read_ok)return false; p=present;return true; }
++    bool holdCurrentPosition(uint32_t duration) noexcept override { assert(duration==0);if(!read_ok)return false;goal=present;return true; }
++    bool setTorqueEnabled(bool) noexcept override { ++torque_writes;return true; }
++    std::string_view lastError() const noexcept override {return "injected hardware failure";}
++};
++int main() {
++    const auto path=std::filesystem::temp_directory_path()/"step_gui_player_test.json";
++    std::ofstream(path)<<R"({"motions":[
++      {"name":"walk","max_seq_ms":999,"repeat_count":2,"playback_speed":2,
++       "start_pose":"ready","end_pose":"ready","frames":[
++        {"name":"오들","start_ms":20,"time_ms":100,"angles":{"1":30},"lift_early_arrival":true,"playback_cycle_end":true},
++        {"name":"normal","start_ms":120,"time_ms":100,"angles":{"1":60}}]},
++      {"name":"next","max_seq_ms":100,"start_pose":"ready","end_pose":"ready","frames":[
++        {"name":"normal","start_ms":0,"time_ms":100,"angles":{"1":90}}]}
++    ]})";
++    RobotMotionPlayer::Clock::time_point now=RobotMotionPlayer::Clock::time_point{}+1s;
++    Hardware hw;
++    RobotMotionPlayer p(path.string(),hw,[&]{return now;});
++    assert(p.initialize());
++    p.setPositionToleranceEnabled(false); // GUI mode tested only on fake hardware.
++    assert(p.start("walk")==StartResult::Accepted);
++    assert(p.start("next")==StartResult::RejectedBusy);
++    p.update();assert(hw.goal.at(1)==0); // initial gap holds actual pose
++    now+=10ms;p.update();assert(hw.goal.at(1)==0);
++    now+=20ms;p.update();assert(std::abs(hw.goal.at(1)-15)<1e-9);
++    now+=20ms;p.update();assert(hw.goal.at(1)==30); // lift at 80 percent
++    now+=10ms;hw.after_write=[&]{now+=7ms;};p.update(); // composed cycle boundary
++    assert(hw.goal.at(1)==30 && p.running());
++    hw.after_write=[]{};now+=25ms;p.update();assert(std::abs(hw.goal.at(1)-45)<1e-9);
++    now+=25ms;p.update();assert(hw.goal.at(1)==60 && p.running()); // repeat starts after I/O
++    now+=5ms;p.update();assert(hw.goal.at(1)==60); // repeated initial gap
++    now+=55ms;p.update();assert(hw.goal.at(1)==30);
++    now+=50ms;assert(p.update()==MotionStatus::Succeeded);assert(p.completionSequence()==1);
++    assert(hw.present.at(1)==0); // actual position never arrived
++    hw.present[1]=-10;assert(p.start("next")==StartResult::Accepted);
++    p.update();assert(hw.goal.at(1)==-10); // start reads actual pose again
++    p.setJointOverride(0,-64);now+=50ms;p.update();assert(hw.goal.at(0)==-64);
++    p.clearJointOverride(0);
++    hw.read_ok=false;now+=50ms;assert(p.update()==MotionStatus::Succeeded); // observation failure
++    assert(p.start("next")==StartResult::HardwareNotReady); // start read is mandatory
++    hw.read_ok=true;assert(p.start("next")==StartResult::Accepted);
++    hw.write_ok=false;assert(p.update()==MotionStatus::Failed);assert(p.result()==MotionError::FrameSendFailed);
++    hw.write_ok=true;assert(p.start("next")==StartResult::Accepted);assert(p.cancel()==CancelResult::Cancelled);
++    assert(p.start("next")==StartResult::Accepted);assert(p.queueNext("next")==QueueResult::Queued);
++    auto before=p.completionSequence();now+=100ms;p.update();assert(p.running());assert(p.completionSequence()==before+1);
++    now+=100ms;p.update();assert(p.succeeded()&&p.completionSequence()==before+2);
++    p.setPositionToleranceEnabled(true);assert(p.start("next")==StartResult::Accepted);
++    now+=100ms;assert(p.update()==MotionStatus::Settling);
++    now+=3001ms;assert(p.update()==MotionStatus::Failed);assert(p.result()==MotionError::PositionTimeout);
++    p.setPositionToleranceEnabled(false);hw.follow=true;
++    assert(p.startPoseTransition(std::vector<double>(23,10),100));
++    assert(p.updateStartupPose()==MotionStatus::Running);
++    now+=100ms;assert(p.updateStartupPose()==MotionStatus::Settling);
++    now+=80ms;assert(p.updateStartupPose()==MotionStatus::Succeeded);
++    assert(!p.startPoseTransition({0},100));
++    int torque=hw.torque_writes;p.shutdown();assert(hw.torque_writes==torque);
++    assert(guiPositionRaw(0.5*360/4096)==2048);assert(guiPositionRaw(1.5*360/4096)==2050);
++    assert(guiPositionRaw(-180)==0);assert(guiPositionRaw(180)==4095);
++    std::filesystem::remove(path);
++    std::cout<<"GUI playback, queue, failures, overrides and startup contracts passed\n";
++}

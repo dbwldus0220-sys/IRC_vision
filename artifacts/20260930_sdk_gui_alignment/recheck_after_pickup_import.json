@@ -1,0 +1,90 @@
+{
+  "scope": "GUI compatibility recheck after selected pickup imports; no motor access",
+  "sdk_working_copy": "/home/sy/step_sdk_gui_20260930",
+  "ros_install": "/tmp/step-ros-aligned-install",
+  "runtime_sha256": "3cd27766b9e3cbbbb48bb9df89187643b3b9c57acac53e5d1c0ff378b15832d2",
+  "installed_runtime_sha256": "3cd27766b9e3cbbbb48bb9df89187643b3b9c57acac53e5d1c0ff378b15832d2",
+  "final_arrival_policy": {
+    "enabled": true,
+    "user_decision": "retain existing arrival check",
+    "position_tolerance_deg": 5.0,
+    "stable_time_ms": 80,
+    "timeout_ms": 3000
+  },
+  "gui_oracle_comparison": {
+    "motions": 81,
+    "sample_times": 10780,
+    "joint_commands": 247940,
+    "all_matched": true,
+    "initial_pose": "synthetic, identical on both sides",
+    "hardware_io": "fake"
+  },
+  "verification": {
+    "gui_unit_tests_passed": 43,
+    "standalone_sdk_suites_passed": 3,
+    "selected_ros_ctest_suites_passed": 15,
+    "selected_ros_ctest_suites_failed": 0,
+    "ros_packages_rebuilt": [
+      "step",
+      "mission_control",
+      "irc_step_motion_executor"
+    ],
+    "full_suite_rerun": false,
+    "prior_full_suite_failures": "See verification.json: four failing suites also failed in the SDK-disabled baseline"
+  },
+  "software_settings": {
+    "integrated_launch_poll_period_ms": 5,
+    "standalone_node_default_poll_period_ms": 20,
+    "sequence_feedback_interval_ms": 10,
+    "baud_rate": 4000000,
+    "motor_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22
+    ],
+    "profile_acceleration": 0,
+    "profile_velocity": 0,
+    "operating_mode_and_pid_overwritten": false,
+    "cpp_dynamixel_library": "/opt/ros/humble/lib/libdynamixel_sdk.so"
+  },
+  "gui_packages": {
+    "Python": "3.10.12",
+    "PyQt5": "5.15.6",
+    "dynamixel-sdk": "4.0.5",
+    "pyserial": "3.5",
+    "numpy": "1.21.5"
+  },
+  "execution_environment": {
+    "default_shell_prefix": "/opt/ros/humble",
+    "verified_overlay_by_explicit_source": "/tmp/step-ros-aligned-install/setup.bash",
+    "persistent_workspace_install_present": false,
+    "hardware_started": false
+  },
+  "remaining_limits": [
+    "No ttyUSB device or USB serial sysfs directory visible during audit",
+    "Actual motor mode, PID, offsets, limits and firmware not read",
+    "USB latency and achieved transmission frequency not measured",
+    "Supplier C++ DYNAMIXEL library version unspecified",
+    "STEP startup gate, head overrides and user-approved catalog differences retained"
+  ]
+}

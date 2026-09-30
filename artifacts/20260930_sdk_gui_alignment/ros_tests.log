@@ -1,0 +1,516 @@
+Internal ctest changing into directory: /tmp/step-ros-aligned-build/irc_step_motion_executor
+Test project /tmp/step-ros-aligned-build/irc_step_motion_executor
+      Start  1: test_catalog_only_core
+ 1/20 Test  #1: test_catalog_only_core ...........................***Failed    0.05 sec
+-- run_test.py: invoking following command in '/tmp/step-ros-aligned-build/irc_step_motion_executor':
+ - /tmp/step-ros-aligned-build/irc_step_motion_executor/test_catalog_only_core --gtest_output=xml:/tmp/step-ros-aligned-build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_catalog_only_core.gtest.xml
+Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+[==========] Running 10 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from MotionAliasCatalog
+[ RUN      ] MotionAliasCatalog.LoadsLatestSdkAndCanonicalAliases
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:45: Failure
+Expected equality of these values:
+  catalog.size()
+    Which is: 93
+  107U
+    Which is: 107
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:46: Failure
+Expected equality of these values:
+  catalog.resolve("forward")
+    Which is: 40-byte object <B0-AA FE-4A 6E-59 00-00 98-AA FE-4A 6E-59 00-00 C0-E7 79-3E 6E-59 00-00 98-AA FE-4A 6E-59 00-00 00-88 BD-2A FD-7F 00-00>
+  std::optional<std::string>("전진45도(8회)")
+    Which is: 40-byte object <F0-8A 00-4B 6E-59 00-00 11-00 00-00 00-00 00-00 11-00 00-00 00-00 00-00 2B-6D 7B-3E 6E-59 00-00 01-AA FE-4A 6E-59 00-00>
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:49: Failure
+Expected equality of these values:
+  catalog.resolve("line_turn_left_15")
+    Which is: 40-byte object <B0-AA FE-4A 6E-59 00-00 98-AA FE-4A 6E-59 00-00 C0-E7 79-3E 6E-59 00-00 98-AA FE-4A 6E-59 00-00 00-88 BD-2A FD-7F 00-00>
+  std::optional<std::string>("좌회전실실전(15회)")
+    Which is: 40-byte object <90-81 00-4B 6E-59 00-00 19-00 00-00 00-00 00-00 19-00 00-00 00-00 00-00 2B-6D 7B-3E 6E-59 00-00 01-AA FE-4A 6E-59 00-00>
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:52: Failure
+Expected equality of these values:
+  catalog.resolve("line_turn_right_large")
+    Which is: 40-byte object <90-81 00-4B 6E-59 00-00 20-00 00-00 00-00 00-00 20-00 00-00 00-00 00-00 98-AA FE-4A 6E-59 00-00 01-88 BD-2A FD-7F 00-00>
+  std::optional<std::string>("우회전실실전(15회)")
+    Which is: 40-byte object <E0-83 00-4B 6E-59 00-00 19-00 00-00 00-00 00-00 19-00 00-00 00-00 00-00 2B-6D 7B-3E 6E-59 00-00 01-AA FE-4A 6E-59 00-00>
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:55: Failure
+Expected equality of these values:
+  catalog.resolve("line_recovery_left_4")
+    Which is: 40-byte object <E0-83 00-4B 6E-59 00-00 26-00 00-00 00-00 00-00 26-00 00-00 00-00 00-00 98-AA FE-4A 6E-59 00-00 01-88 BD-2A FD-7F 00-00>
+  std::optional<std::string>("라인복귀좌회전(4회)")
+    Which is: 40-byte object <90-85 00-4B 6E-59 00-00 1B-00 00-00 00-00 00-00 1B-00 00-00 00-00 00-00 2B-6D 7B-3E 6E-59 00-00 01-AA FE-4A 6E-59 00-00>
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:58: Failure
+Expected equality of these values:
+  catalog.resolve("line_recovery_left_8")
+    Which is: 40-byte object <E0-83 00-4B 6E-59 00-00 26-00 00-00 00-00 00-00 26-00 00-00 00-00 00-00 98-AA FE-4A 6E-59 00-00 00-88 BD-2A FD-7F 00-00>
+  std::optional<std::string>("라인보귀좌회전(8번)")
+    Which is: 40-byte object <20-7C 00-4B 6E-59 00-00 1B-00 00-00 00-00 00-00 1B-00 00-00 00-00 00-00 2B-6D 7B-3E 6E-59 00-00 01-AA FE-4A 6E-59 00-00>
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:61: Failure
+Expected equality of these values:
+  catalog.resolve("line_recovery_right_4")
+    Which is: 40-byte object <20-7C 00-4B 6E-59 00-00 24-00 00-00 00-00 00-00 24-00 00-00 00-00 00-00 98-AA FE-4A 6E-59 00-00 01-88 BD-2A FD-7F 00-00>
+  std::optional<std::string>("라인복귀우회전(4회)")
+    Which is: 40-byte object <E0-83 00-4B 6E-59 00-00 1B-00 00-00 00-00 00-00 1B-00 00-00 00-00 00-00 2B-6D 7B-3E 6E-59 00-00 01-AA FE-4A 6E-59 00-00>
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:64: Failure
+Expected equality of these values:
+  catalog.resolve("line_recovery_right_8")
+    Which is: 40-byte object <20-7C 00-4B 6E-59 00-00 24-00 00-00 00-00 00-00 24-00 00-00 00-00 00-00 98-AA FE-4A 6E-59 00-00 00-88 BD-2A FD-7F 00-00>
+  std::optional<std::string>("라인보귀우회전(8번)")
+    Which is: 40-byte object <90-81 00-4B 6E-59 00-00 1B-00 00-00 00-00 00-00 1B-00 00-00 00-00 00-00 2B-6D 7B-3E 6E-59 00-00 01-AA FE-4A 6E-59 00-00>
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:67: Failure
+Expected equality of these values:
+  catalog.resolve("stationary_turn_left")
+    Which is: 40-byte object <90-81 00-4B 6E-59 00-00 22-00 00-00 00-00 00-00 22-00 00-00 00-00 00-00 98-AA FE-4A 6E-59 00-00 01-88 BD-2A FD-7F 00-00>
+  std::optional<std::string>("제자리좌회전(6번)")
+    Which is: 40-byte object <20-7C 00-4B 6E-59 00-00 18-00 00-00 00-00 00-00 18-00 00-00 00-00 00-00 2B-6D 7B-3E 6E-59 00-00 01-AA FE-4A 6E-59 00-00>
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:70: Failure
+Expected equality of these values:
+  catalog.resolve("stationary_turn_right")
+    Which is: 40-byte object <20-7C 00-4B 6E-59 00-00 20-00 00-00 00-00 00-00 20-00 00-00 00-00 00-00 98-AA FE-4A 6E-59 00-00 01-88 BD-2A FD-7F 00-00>
+  std::optional<std::string>("제자리우회전(9회)")
+    Which is: 40-byte object <90-85 00-4B 6E-59 00-00 18-00 00-00 00-00 00-00 18-00 00-00 00-00 00-00 2B-6D 7B-3E 6E-59 00-00 01-AA FE-4A 6E-59 00-00>
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:73: Failure
+Expected equality of these values:
+  catalog.resolve("pickup_camera_down_turn_left_6")
+    Which is: 40-byte object <20-7C 00-4B 6E-59 00-00 21-00 00-00 00-00 00-00 21-00 00-00 00-00 00-00 98-AA FE-4A 6E-59 00-00 01-88 BD-2A FD-7F 00-00>
+  std::optional<std::string>("제좌카메라내린거(6회)")
+    Which is: 40-byte object <E0-83 00-4B 6E-59 00-00 1E-00 00-00 00-00 00-00 1E-00 00-00 00-00 00-00 2B-6D 7B-3E 6E-59 00-00 01-AA FE-4A 6E-59 00-00>
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:76: Failure
+Expected equality of these values:
+  catalog.resolve("pickup_camera_down_turn_right_9")
+    Which is: 40-byte object <90-85 00-4B 6E-59 00-00 21-00 00-00 00-00 00-00 21-00 00-00 00-00 00-00 98-AA FE-4A 6E-59 00-00 01-88 BD-2A FD-7F 00-00>
+  std::optional<std::string>("제우카메라내린거(9회)")
+    Which is: 40-byte object <E0-87 00-4B 6E-59 00-00 1E-00 00-00 00-00 00-00 1E-00 00-00 00-00 00-00 2B-6D 7B-3E 6E-59 00-00 01-AA FE-4A 6E-59 00-00>
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:79: Failure
+Expected equality of these values:
+  catalog.resolve("pickup")
+    Which is: 40-byte object <E0-87 00-4B 6E-59 00-00 22-00 00-00 00-00 00-00 22-00 00-00 00-00 00-00 98-AA FE-4A 6E-59 00-00 01-88 BD-2A FD-7F 00-00>
+  std::optional<std::string>("공잡기리그랩까지 실전")
+    Which is: 40-byte object <90-81 00-4B 6E-59 00-00 1F-00 00-00 00-00 00-00 1F-00 00-00 00-00 00-00 2B-6D 7B-3E 6E-59 00-00 01-AA FE-4A 6E-59 00-00>
+[  FAILED  ] MotionAliasCatalog.LoadsLatestSdkAndCanonicalAliases (0 ms)
+[----------] 1 test from MotionAliasCatalog (0 ms total)
+
+[----------] 8 tests from CatalogOnlyCore
+[ RUN      ] CatalogOnlyCore.PreservesCorrelationFieldsAndRejectsExecution
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:102: Failure
+Expected equality of these values:
+  status.error_code
+    Which is: "INVALID_MOTION"
+  "HARDWARE_NOT_READY"
+[  FAILED  ] CatalogOnlyCore.PreservesCorrelationFieldsAndRejectsExecution (1 ms)
+[ RUN      ] CatalogOnlyCore.RejectsInvalidJsonSafely
+[       OK ] CatalogOnlyCore.RejectsInvalidJsonSafely (1 ms)
+[ RUN      ] CatalogOnlyCore.DistinguishesRequiredNullEventIdFromMissingEventId
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:124: Failure
+Expected equality of these values:
+  null_status.error_code
+    Which is: "INVALID_MOTION"
+  "HARDWARE_NOT_READY"
+[  FAILED  ] CatalogOnlyCore.DistinguishesRequiredNullEventIdFromMissingEventId (0 ms)
+[ RUN      ] CatalogOnlyCore.RequiresEveryRequestContractField
+[       OK ] CatalogOnlyCore.RequiresEveryRequestContractField (1 ms)
+[ RUN      ] CatalogOnlyCore.RejectsUnknownAliasWithoutFallback
+[       OK ] CatalogOnlyCore.RejectsUnknownAliasWithoutFallback (0 ms)
+[ RUN      ] CatalogOnlyCore.SerializedStatusContainsContractFields
+[       OK ] CatalogOnlyCore.SerializedStatusContainsContractFields (1 ms)
+[ RUN      ] CatalogOnlyCore.SerializedStatusPreservesNullCorrelationTypes
+[       OK ] CatalogOnlyCore.SerializedStatusPreservesNullCorrelationTypes (0 ms)
+[ RUN      ] CatalogOnlyCore.CancelNeverTouchesHardware
+[       OK ] CatalogOnlyCore.CancelNeverTouchesHardware (1 ms)
+[----------] 8 tests from CatalogOnlyCore (5 ms total)
+
+[----------] 1 test from CatalogOnlyContract
+[ RUN      ] CatalogOnlyContract.SharedVectorsPreserveFieldsWithoutFallback
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:231: Failure
+Expected equality of these values:
+  status.error_code
+    Which is: "INVALID_MOTION"
+  json_object_get_string(expected_error)
+    Which is: "HARDWARE_NOT_READY"
+[  FAILED  ] CatalogOnlyContract.SharedVectorsPreserveFieldsWithoutFallback (0 ms)
+[----------] 1 test from CatalogOnlyContract (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 10 tests from 3 test suites ran. (5 ms total)
+[  PASSED  ] 6 tests.
+[  FAILED  ] 4 tests, listed below:
+[  FAILED  ] MotionAliasCatalog.LoadsLatestSdkAndCanonicalAliases
+[  FAILED  ] CatalogOnlyCore.PreservesCorrelationFieldsAndRejectsExecution
+[  FAILED  ] CatalogOnlyCore.DistinguishesRequiredNullEventIdFromMissingEventId
+[  FAILED  ] CatalogOnlyContract.SharedVectorsPreserveFieldsWithoutFallback
+
+ 4 FAILED TESTS
+-- run_test.py: return code 1
+-- run_test.py: inject classname prefix into gtest result file '/tmp/step-ros-aligned-build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_catalog_only_core.gtest.xml'
+-- run_test.py: verify result file '/tmp/step-ros-aligned-build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_catalog_only_core.gtest.xml'
+
+      Start  2: test_motion_json_catalog
+ 2/20 Test  #2: test_motion_json_catalog .........................   Passed    0.05 sec
+      Start  3: test_sdk_executor_core
+ 3/20 Test  #3: test_sdk_executor_core ...........................***Failed    0.05 sec
+-- run_test.py: invoking following command in '/tmp/step-ros-aligned-build/irc_step_motion_executor':
+ - /tmp/step-ros-aligned-build/irc_step_motion_executor/test_sdk_executor_core --gtest_output=xml:/tmp/step-ros-aligned-build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_core.gtest.xml
+Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+[==========] Running 20 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 20 tests from SdkExecutorCore
+[ RUN      ] SdkExecutorCore.ResolvesForwardAliasBeforeStartingBackend
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:50: Failure
+Expected equality of these values:
+  backend.started_motion_names.size()
+    Which is: 0
+  1U
+    Which is: 1
+[  FAILED  ] SdkExecutorCore.ResolvesForwardAliasBeforeStartingBackend (0 ms)
+[ RUN      ] SdkExecutorCore.ResolvesPickupAliasWithoutFallback
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:65: Failure
+Expected equality of these values:
+  backend.started_motion_names[0]
+    Which is: "\xEC\xB0\x90\xEA\xB3\xB5\xEC\x9E\xA1\xEA\xB8\xB0\xEB\xA6\xAC\xEA\xB7\xB8\xEB\x9E\xA9\xEA\xB9\x8C\xEC\xA7\x80 \xEC\x8B\xA4\xEC\xA0\x84"
+    As Text: "찐공잡기리그랩까지 실전"
+  "공잡기리그랩까지 실전"
+    Which is: "\xEA\xB3\xB5\xEC\x9E\xA1\xEA\xB8\xB0\xEB\xA6\xAC\xEA\xB7\xB8\xEB\x9E\xA9\xEA\xB9\x8C\xEC\xA7\x80 \xEC\x8B\xA4\xEC\xA0\x84"
+    As Text: "공잡기리그랩까지 실전"
+[  FAILED  ] SdkExecutorCore.ResolvesPickupAliasWithoutFallback (1 ms)
+[ RUN      ] SdkExecutorCore.UnsupportedMotionNeverCallsBackend
+[       OK ] SdkExecutorCore.UnsupportedMotionNeverCallsBackend (1 ms)
+[ RUN      ] SdkExecutorCore.CorrelatedRejectionNeverStartsOrActivatesBackend
+[       OK ] SdkExecutorCore.CorrelatedRejectionNeverStartsOrActivatesBackend (0 ms)
+[ RUN      ] SdkExecutorCore.CorrelatedRejectionPreservesInvalidRequestHandling
+[       OK ] SdkExecutorCore.CorrelatedRejectionPreservesInvalidRequestHandling (1 ms)
+[ RUN      ] SdkExecutorCore.PreservesCorrelationIncludingNullIds
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:139: Failure
+Value of: terminal.has_value()
+  Actual: false
+Expected: true
+[  FAILED  ] SdkExecutorCore.PreservesCorrelationIncludingNullIds (0 ms)
+[ RUN      ] SdkExecutorCore.MapsRunningSettlingAndSucceeded
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:159: Failure
+Value of: running.has_value()
+  Actual: false
+Expected: true
+[  FAILED  ] SdkExecutorCore.MapsRunningSettlingAndSucceeded (1 ms)
+[ RUN      ] SdkExecutorCore.MapsBackendFailureToFailedTerminal
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:181: Failure
+Value of: status.has_value()
+  Actual: false
+Expected: true
+[  FAILED  ] SdkExecutorCore.MapsBackendFailureToFailedTerminal (0 ms)
+[ RUN      ] SdkExecutorCore.CancelRequestCompletesWhenBackendReportsCancelled
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:196: Failure
+Expected equality of these values:
+  cancelling.status
+    Which is: "REJECTED"
+  "RUNNING"
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:197: Failure
+Expected equality of these values:
+  backend.cancel_calls
+    Which is: 0
+  1
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:199: Failure
+Value of: cancelled.has_value()
+  Actual: false
+Expected: true
+[  FAILED  ] SdkExecutorCore.CancelRequestCompletesWhenBackendReportsCancelled (1 ms)
+[ RUN      ] SdkExecutorCore.RejectsCancelWithoutActiveRequest
+[       OK ] SdkExecutorCore.RejectsCancelWithoutActiveRequest (0 ms)
+[ RUN      ] SdkExecutorCore.RejectsStaleCancelWithoutTouchingActiveRequest
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:226: Failure
+Expected equality of these values:
+  status.error_code
+    Which is: "NOT_RUNNING"
+  "STALE_REQUEST"
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:227: Failure
+Expected equality of these values:
+  status.request_id
+    Which is: 99
+  9
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:229: Failure
+Value of: core.has_active_request()
+  Actual: false
+Expected: true
+[  FAILED  ] SdkExecutorCore.RejectsStaleCancelWithoutTouchingActiveRequest (1 ms)
+[ RUN      ] SdkExecutorCore.RejectsSecondStartWhileActive
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:241: Failure
+Expected equality of these values:
+  status.status
+    Which is: "RUNNING"
+  "REJECTED"
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:242: Failure
+Expected equality of these values:
+  status.error_code
+    Which is: ""
+  "BUSY"
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:245: Failure
+Expected equality of these values:
+  backend.started_motion_names[0]
+    Which is: "\xEC\xB0\x90\xEA\xB3\xB5\xEC\x9E\xA1\xEA\xB8\xB0\xEB\xA6\xAC\xEA\xB7\xB8\xEB\x9E\xA9\xEA\xB9\x8C\xEC\xA7\x80 \xEC\x8B\xA4\xEC\xA0\x84"
+    As Text: "찐공잡기리그랩까지 실전"
+  "전진45도(8회)"
+    Which is: "\xEC\xA0\x84\xEC\xA7\x84" "45\xEB\x8F\x84(8\xED\x9A\x8C)"
+    As Text: "전진45도(8회)"
+[  FAILED  ] SdkExecutorCore.RejectsSecondStartWhileActive (0 ms)
+[ RUN      ] SdkExecutorCore.TimeoutCancelsAndReturnsFailedWithCorrelation
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:257: Failure
+Value of: status.has_value()
+  Actual: false
+Expected: true
+[  FAILED  ] SdkExecutorCore.TimeoutCancelsAndReturnsFailedWithCorrelation (1 ms)
+[ RUN      ] SdkExecutorCore.AllowsNewRequestAfterTerminalStatus
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:275: Failure
+Value of: core.poll(101).has_value()
+  Actual: false
+Expected: true
+[  FAILED  ] SdkExecutorCore.AllowsNewRequestAfterTerminalStatus (0 ms)
+[ RUN      ] SdkExecutorCore.BackendStartExceptionBecomesFailed
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:294: Failure
+Expected equality of these values:
+  status.status
+    Which is: "REJECTED"
+  "FAILED"
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:295: Failure
+Expected equality of these values:
+  status.error_code
+    Which is: "INVALID_MOTION"
+  "BACKEND_EXCEPTION"
+[  FAILED  ] SdkExecutorCore.BackendStartExceptionBecomesFailed (1 ms)
+[ RUN      ] SdkExecutorCore.ExplicitBackendStartRejectionStaysRejected
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:310: Failure
+Expected equality of these values:
+  status.error_code
+    Which is: "INVALID_MOTION"
+  "BACKEND_NOT_READY"
+[  FAILED  ] SdkExecutorCore.ExplicitBackendStartRejectionStaysRejected (0 ms)
+[ RUN      ] SdkExecutorCore.BackendPollExceptionBecomesFailedAndReleasesRequest
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:322: Failure
+Value of: failed.has_value()
+  Actual: false
+Expected: true
+[  FAILED  ] SdkExecutorCore.BackendPollExceptionBecomesFailedAndReleasesRequest (1 ms)
+[ RUN      ] SdkExecutorCore.BackendCancelExceptionBecomesFailedTerminal
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:342: Failure
+Expected equality of these values:
+  status.status
+    Which is: "REJECTED"
+  "FAILED"
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:343: Failure
+Expected equality of these values:
+  status.error_code
+    Which is: "NOT_RUNNING"
+  "BACKEND_EXCEPTION"
+[  FAILED  ] SdkExecutorCore.BackendCancelExceptionBecomesFailedTerminal (1 ms)
+[ RUN      ] SdkExecutorCore.RejectsInvalidRequestWithoutCallingBackend
+[       OK ] SdkExecutorCore.RejectsInvalidRequestWithoutCallingBackend (0 ms)
+[ RUN      ] SdkExecutorCore.PromotesOneQueuedRequestAtSeamlessBoundary
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:370: Failure
+Expected equality of these values:
+  core.handle_request(request_json(30, "forward"), 100).status
+    Which is: "REJECTED"
+  "RUNNING"
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:375: Failure
+Expected equality of these values:
+  queued.status
+    Which is: "REJECTED"
+  "QUEUED"
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:376: Failure
+Expected equality of these values:
+  backend.queued_motion_names.size()
+    Which is: 0
+  1U
+    Which is: 1
+[  FAILED  ] SdkExecutorCore.PromotesOneQueuedRequestAtSeamlessBoundary (1 ms)
+[----------] 20 tests from SdkExecutorCore (11 ms total)
+
+[----------] Global test environment tear-down
+[==========] 20 tests from 1 test suite ran. (11 ms total)
+[  PASSED  ] 5 tests.
+[  FAILED  ] 15 tests, listed below:
+[  FAILED  ] SdkExecutorCore.ResolvesForwardAliasBeforeStartingBackend
+[  FAILED  ] SdkExecutorCore.ResolvesPickupAliasWithoutFallback
+[  FAILED  ] SdkExecutorCore.PreservesCorrelationIncludingNullIds
+[  FAILED  ] SdkExecutorCore.MapsRunningSettlingAndSucceeded
+[  FAILED  ] SdkExecutorCore.MapsBackendFailureToFailedTerminal
+[  FAILED  ] SdkExecutorCore.CancelRequestCompletesWhenBackendReportsCancelled
+[  FAILED  ] SdkExecutorCore.RejectsStaleCancelWithoutTouchingActiveRequest
+[  FAILED  ] SdkExecutorCore.RejectsSecondStartWhileActive
+[  FAILED  ] SdkExecutorCore.TimeoutCancelsAndReturnsFailedWithCorrelation
+[  FAILED  ] SdkExecutorCore.AllowsNewRequestAfterTerminalStatus
+[  FAILED  ] SdkExecutorCore.BackendStartExceptionBecomesFailed
+[  FAILED  ] SdkExecutorCore.ExplicitBackendStartRejectionStaysRejected
+[  FAILED  ] SdkExecutorCore.BackendPollExceptionBecomesFailedAndReleasesRequest
+[  FAILED  ] SdkExecutorCore.BackendCancelExceptionBecomesFailedTerminal
+[  FAILED  ] SdkExecutorCore.PromotesOneQueuedRequestAtSeamlessBoundary
+
+15 FAILED TESTS
+-- run_test.py: return code 1
+-- run_test.py: inject classname prefix into gtest result file '/tmp/step-ros-aligned-build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_core.gtest.xml'
+-- run_test.py: verify result file '/tmp/step-ros-aligned-build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_core.gtest.xml'
+
+      Start  4: test_robot_motion_player_backend
+ 4/20 Test  #4: test_robot_motion_player_backend .................   Passed    0.04 sec
+      Start  5: test_simulated_motion_backend
+ 5/20 Test  #5: test_simulated_motion_backend ....................   Passed    0.04 sec
+      Start  6: test_robot_motion_runtime_config
+ 6/20 Test  #6: test_robot_motion_runtime_config .................   Passed    0.04 sec
+      Start  7: test_robot_motion_parameter_types
+ 7/20 Test  #7: test_robot_motion_parameter_types ................   Passed    0.05 sec
+      Start  8: test_motion_backend_factory
+ 8/20 Test  #8: test_motion_backend_factory ......................   Passed    0.04 sec
+      Start  9: test_sdk_executor_driver
+ 9/20 Test  #9: test_sdk_executor_driver .........................***Failed    0.05 sec
+-- run_test.py: invoking following command in '/tmp/step-ros-aligned-build/irc_step_motion_executor':
+ - /tmp/step-ros-aligned-build/irc_step_motion_executor/test_sdk_executor_driver --gtest_output=xml:/tmp/step-ros-aligned-build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_driver.gtest.xml
+Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+[==========] Running 9 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 9 tests from SdkExecutorDriver
+[ RUN      ] SdkExecutorDriver.RequestPublishesImmediateRunningStatus
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_driver.cpp:107: Failure
+Expected equality of these values:
+  string_field(fixture.published[0], "status")
+    Which is: "REJECTED"
+  "RUNNING"
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_driver.cpp:109: Failure
+Expected equality of these values:
+  fixture.backend.started_motion_names.size()
+    Which is: 0
+  1U
+    Which is: 1
+[  FAILED  ] SdkExecutorDriver.RequestPublishesImmediateRunningStatus (0 ms)
+[ RUN      ] SdkExecutorDriver.InvalidAndUnsupportedRequestsPublishRejections
+[       OK ] SdkExecutorDriver.InvalidAndUnsupportedRequestsPublishRejections (1 ms)
+[ RUN      ] SdkExecutorDriver.NullableCorrelationFieldsRemainNull
+[       OK ] SdkExecutorDriver.NullableCorrelationFieldsRemainNull (1 ms)
+[ RUN      ] SdkExecutorDriver.CancelCallbackPublishesAndTerminalPollPublishes
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_driver.cpp:151: Failure
+Expected equality of these values:
+  fixture.published.size()
+    Which is: 2
+  3U
+    Which is: 3
+[  FAILED  ] SdkExecutorDriver.CancelCallbackPublishesAndTerminalPollPublishes (0 ms)
+[ RUN      ] SdkExecutorDriver.StaleCancelDoesNotCancelActiveMotion
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_driver.cpp:163: Failure
+Expected equality of these values:
+  string_field(fixture.published[1], "error_code")
+    Which is: "NOT_RUNNING"
+  "STALE_REQUEST"
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_driver.cpp:166: Failure
+Value of: fixture.core.has_active_request()
+  Actual: false
+Expected: true
+[  FAILED  ] SdkExecutorDriver.StaleCancelDoesNotCancelActiveMotion (1 ms)
+[ RUN      ] SdkExecutorDriver.PollWithoutActiveRequestPublishesNothing
+[       OK ] SdkExecutorDriver.PollWithoutActiveRequestPublishesNothing (0 ms)
+[ RUN      ] SdkExecutorDriver.TerminalPollPublishesSucceededStatus
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_driver.cpp:185: Failure
+Expected equality of these values:
+  fixture.published.size()
+    Which is: 1
+  2U
+    Which is: 2
+[  FAILED  ] SdkExecutorDriver.TerminalPollPublishesSucceededStatus (1 ms)
+[ RUN      ] SdkExecutorDriver.SuppressesIdenticalRunningStatusAtControlRate
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_driver.cpp:200: Failure
+Expected equality of these values:
+  fixture.published.size()
+    Which is: 1
+  2U
+    Which is: 2
+[  FAILED  ] SdkExecutorDriver.SuppressesIdenticalRunningStatusAtControlRate (0 ms)
+[ RUN      ] SdkExecutorDriver.BackendExceptionPublishesFailedWithoutEscaping
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_sdk_executor_driver.cpp:212: Failure
+Expected equality of these values:
+  fixture.published.size()
+    Which is: 1
+  2U
+    Which is: 2
+[  FAILED  ] SdkExecutorDriver.BackendExceptionPublishesFailedWithoutEscaping (1 ms)
+[----------] 9 tests from SdkExecutorDriver (5 ms total)
+
+[----------] Global test environment tear-down
+[==========] 9 tests from 1 test suite ran. (5 ms total)
+[  PASSED  ] 3 tests.
+[  FAILED  ] 6 tests, listed below:
+[  FAILED  ] SdkExecutorDriver.RequestPublishesImmediateRunningStatus
+[  FAILED  ] SdkExecutorDriver.CancelCallbackPublishesAndTerminalPollPublishes
+[  FAILED  ] SdkExecutorDriver.StaleCancelDoesNotCancelActiveMotion
+[  FAILED  ] SdkExecutorDriver.TerminalPollPublishesSucceededStatus
+[  FAILED  ] SdkExecutorDriver.SuppressesIdenticalRunningStatusAtControlRate
+[  FAILED  ] SdkExecutorDriver.BackendExceptionPublishesFailedWithoutEscaping
+
+ 6 FAILED TESTS
+-- run_test.py: return code 1
+-- run_test.py: inject classname prefix into gtest result file '/tmp/step-ros-aligned-build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_driver.gtest.xml'
+-- run_test.py: verify result file '/tmp/step-ros-aligned-build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_driver.gtest.xml'
+
+      Start 10: test_startup_pose_gate
+10/20 Test #10: test_startup_pose_gate ...........................***Failed    0.04 sec
+-- run_test.py: invoking following command in '/tmp/step-ros-aligned-build/irc_step_motion_executor':
+ - /tmp/step-ros-aligned-build/irc_step_motion_executor/test_startup_pose_gate --gtest_output=xml:/tmp/step-ros-aligned-build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_startup_pose_gate.gtest.xml
+Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+[==========] Running 4 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 4 tests from StartupPoseGate
+[ RUN      ] StartupPoseGate.DoesNotStartBeforeFirstReadyPollAndStartsExactlyOnce
+[       OK ] StartupPoseGate.DoesNotStartBeforeFirstReadyPollAndStartsExactlyOnce (1 ms)
+[ RUN      ] StartupPoseGate.HoldsForTwoSecondsAfterSuccessThenAllowsNavigation
+/home/sy/IRC_vision/src/irc_step_motion_executor/test/test_startup_pose_gate.cpp:151: Failure
+Expected equality of these values:
+  fixture.backend.started_motion_names.size()
+    Which is: 0
+  1U
+    Which is: 1
+[  FAILED  ] StartupPoseGate.HoldsForTwoSecondsAfterSuccessThenAllowsNavigation (0 ms)
+[ RUN      ] StartupPoseGate.FailurePermanentlyKeepsNavigationBlocked
+[       OK ] StartupPoseGate.FailurePermanentlyKeepsNavigationBlocked (1 ms)
+[ RUN      ] StartupPoseGate.DisabledGateNeverRunsAndAllowsSimulatedNavigation
+[       OK ] StartupPoseGate.DisabledGateNeverRunsAndAllowsSimulatedNavigation (0 ms)
+[----------] 4 tests from StartupPoseGate (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 4 tests from 1 test suite ran. (2 ms total)
+[  PASSED  ] 3 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] StartupPoseGate.HoldsForTwoSecondsAfterSuccessThenAllowsNavigation
+
+ 1 FAILED TEST
+-- run_test.py: return code 1
+-- run_test.py: inject classname prefix into gtest result file '/tmp/step-ros-aligned-build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_startup_pose_gate.gtest.xml'
+-- run_test.py: verify result file '/tmp/step-ros-aligned-build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_startup_pose_gate.gtest.xml'
+
+      Start 11: test_startup_pose_catalog
+11/20 Test #11: test_startup_pose_catalog ........................   Passed    0.04 sec
+      Start 12: test_test_hurdle_head_override_launch.py
+12/20 Test #12: test_test_hurdle_head_override_launch.py .........   Passed    5.98 sec
+      Start 13: test_test_ball_head_override_launch.py
+13/20 Test #13: test_test_ball_head_override_launch.py ...........   Passed    4.60 sec
+      Start 14: test_test_goal_head_override_launch.py
+14/20 Test #14: test_test_goal_head_override_launch.py ...........   Passed    4.77 sec
+      Start 15: test_test_sdk_executor_node_launch.py
+15/20 Test #15: test_test_sdk_executor_node_launch.py ............   Passed    1.53 sec
+      Start 16: test_test_backend_selection_rejected_launch.py
+16/20 Test #16: test_test_backend_selection_rejected_launch.py ...   Passed    0.50 sec
+      Start 17: test_validate_motion_catalog
+17/20 Test #17: test_validate_motion_catalog .....................   Passed    0.04 sec
+      Start 18: motion_pattern_test
+18/20 Test #18: motion_pattern_test ..............................   Passed    0.00 sec
+      Start 19: motion_callback_test
+19/20 Test #19: motion_callback_test .............................   Passed    0.08 sec
+      Start 20: gui_playback_test
+20/20 Test #20: gui_playback_test ................................   Passed    0.01 sec
+
+80% tests passed, 4 tests failed out of 20
+
+Label Time Summary:
+gtest          =   0.51 sec*proc (11 tests)
+launch_test    =  17.38 sec*proc (5 tests)
+
+Total Test time (real) =  18.03 sec
+
+The following tests FAILED:
+	  1 - test_catalog_only_core (Failed)
+	  3 - test_sdk_executor_core (Failed)
+	  9 - test_sdk_executor_driver (Failed)
+	 10 - test_startup_pose_gate (Failed)
+Errors while running CTest

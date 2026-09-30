@@ -1,0 +1,86 @@
+#include "robot_motion_player.hpp"
+#include "gui_playback.hpp"
+#include <cassert>
+#include <filesystem>
+#include <fstream>
+#include <functional>
+#include <iostream>
+using namespace irc_step;
+using namespace std::chrono_literals;
+struct Hardware : IMotionHardware {
+    JointAngles present, goal;
+    bool online=false, read_ok=true, write_ok=true, follow=false;
+    int writes=0, reads=0, torque_writes=0;
+    std::function<void()> after_write=[]{};
+    Hardware() { for(int i=0;i<23;++i) present[i]=0; }
+    bool initialize() noexcept override { online=true; return true; }
+    bool ready() const noexcept override { return online; }
+    bool commandPosition(const JointAngles&,const std::vector<int>&,uint32_t,uint32_t) noexcept override {
+        assert(false && "time-profile path must never be used"); return false;
+    }
+    bool commandImmediatePosition(const JointAngles& g,const std::vector<int>& ids) noexcept override {
+        ++writes; if(!write_ok)return false;
+        for(int id:ids) { goal[id]=g.at(id); if(follow)present[id]=g.at(id); }
+        after_write(); return true;
+    }
+    bool readPresentPositions(JointAngles& p) noexcept override { ++reads; if(!read_ok)return false; p=present;return true; }
+    bool holdCurrentPosition(uint32_t duration) noexcept override { assert(duration==0);if(!read_ok)return false;goal=present;return true; }
+    bool setTorqueEnabled(bool) noexcept override { ++torque_writes;return true; }
+    std::string_view lastError() const noexcept override {return "injected hardware failure";}
+};
+int main() {
+    const auto path=std::filesystem::temp_directory_path()/"step_gui_player_test.json";
+    std::ofstream(path)<<R"({"motions":[
+      {"name":"walk","max_seq_ms":999,"repeat_count":2,"playback_speed":2,
+       "start_pose":"ready","end_pose":"ready","frames":[
+        {"name":"오들","start_ms":20,"time_ms":100,"angles":{"1":30},"lift_early_arrival":true,"playback_cycle_end":true},
+        {"name":"normal","start_ms":120,"time_ms":100,"angles":{"1":60}}]},
+      {"name":"next","max_seq_ms":100,"start_pose":"ready","end_pose":"ready","frames":[
+        {"name":"normal","start_ms":0,"time_ms":100,"angles":{"1":90}}]}
+    ]})";
+    RobotMotionPlayer::Clock::time_point now=RobotMotionPlayer::Clock::time_point{}+1s;
+    Hardware hw;
+    RobotMotionPlayer p(path.string(),hw,[&]{return now;});
+    assert(p.initialize());
+    p.setPositionToleranceEnabled(false); // GUI mode tested only on fake hardware.
+    assert(p.start("walk")==StartResult::Accepted);
+    assert(p.start("next")==StartResult::RejectedBusy);
+    p.update();assert(hw.goal.at(1)==0); // initial gap holds actual pose
+    now+=10ms;p.update();assert(hw.goal.at(1)==0);
+    now+=20ms;p.update();assert(std::abs(hw.goal.at(1)-15)<1e-9);
+    now+=20ms;p.update();assert(hw.goal.at(1)==30); // lift at 80 percent
+    now+=10ms;hw.after_write=[&]{now+=7ms;};p.update(); // composed cycle boundary
+    assert(hw.goal.at(1)==30 && p.running());
+    hw.after_write=[]{};now+=25ms;p.update();assert(std::abs(hw.goal.at(1)-45)<1e-9);
+    now+=25ms;p.update();assert(hw.goal.at(1)==60 && p.running()); // repeat starts after I/O
+    now+=5ms;p.update();assert(hw.goal.at(1)==60); // repeated initial gap
+    now+=55ms;p.update();assert(hw.goal.at(1)==30);
+    now+=50ms;assert(p.update()==MotionStatus::Succeeded);assert(p.completionSequence()==1);
+    assert(hw.present.at(1)==0); // actual position never arrived
+    hw.present[1]=-10;assert(p.start("next")==StartResult::Accepted);
+    p.update();assert(hw.goal.at(1)==-10); // start reads actual pose again
+    p.setJointOverride(0,-64);now+=50ms;p.update();assert(hw.goal.at(0)==-64);
+    p.clearJointOverride(0);
+    hw.read_ok=false;now+=50ms;assert(p.update()==MotionStatus::Succeeded); // observation failure
+    assert(p.start("next")==StartResult::HardwareNotReady); // start read is mandatory
+    hw.read_ok=true;assert(p.start("next")==StartResult::Accepted);
+    hw.write_ok=false;assert(p.update()==MotionStatus::Failed);assert(p.result()==MotionError::FrameSendFailed);
+    hw.write_ok=true;assert(p.start("next")==StartResult::Accepted);assert(p.cancel()==CancelResult::Cancelled);
+    assert(p.start("next")==StartResult::Accepted);assert(p.queueNext("next")==QueueResult::Queued);
+    auto before=p.completionSequence();now+=100ms;p.update();assert(p.running());assert(p.completionSequence()==before+1);
+    now+=100ms;p.update();assert(p.succeeded()&&p.completionSequence()==before+2);
+    p.setPositionToleranceEnabled(true);assert(p.start("next")==StartResult::Accepted);
+    now+=100ms;assert(p.update()==MotionStatus::Settling);
+    now+=3001ms;assert(p.update()==MotionStatus::Failed);assert(p.result()==MotionError::PositionTimeout);
+    p.setPositionToleranceEnabled(false);hw.follow=true;
+    assert(p.startPoseTransition(std::vector<double>(23,10),100));
+    assert(p.updateStartupPose()==MotionStatus::Running);
+    now+=100ms;assert(p.updateStartupPose()==MotionStatus::Settling);
+    now+=80ms;assert(p.updateStartupPose()==MotionStatus::Succeeded);
+    assert(!p.startPoseTransition({0},100));
+    int torque=hw.torque_writes;p.shutdown();assert(hw.torque_writes==torque);
+    assert(guiPositionRaw(0.5*360/4096)==2048);assert(guiPositionRaw(1.5*360/4096)==2050);
+    assert(guiPositionRaw(-180)==0);assert(guiPositionRaw(180)==4095);
+    std::filesystem::remove(path);
+    std::cout<<"GUI playback, queue, failures, overrides and startup contracts passed\n";
+}

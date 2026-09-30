@@ -1,0 +1,413 @@
+........................................................................ [ 13%]
+........................................................................ [ 27%]
+........................................................................ [ 40%]
+........................................................................ [ 54%]
+........................................................................ [ 67%]
+...............................FFF...................................... [ 81%]
+........................................................................ [ 95%]
+..........................                                               [100%]
+=================================== FAILURES ===================================
+_______________ test_robot_launch_defaults_are_production_ready ________________
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+>           content, package_prefix = get_resource('packages', package_name)
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+resource_type = 'packages', resource_name = 'step'
+
+    def get_resource(resource_type, resource_name):
+        """
+        Get the content of a specific resource and its prefix path.
+    
+        :param resource_type: the type of the resource
+        :type resource_type: str
+        :param resource_names: the name of the resource
+        :type resource_name: str
+        :returns: a tuple of the content (bytes) of the resource and its prefix path
+        :raises: :exc:`EnvironmentError`
+        :raises: :exc:`OSError`
+        :raises: :exc:`LookupError`
+        :raises: :exc:`InvalidResourceTypeNameError`
+        :raises: :exc:`InvalidResourceNameError`
+        """
+        assert resource_type, 'The resource type must not be empty'
+        assert resource_name, 'The resource name must not be empty'
+        if _name_is_invalid(resource_type):
+            raise InvalidResourceTypeNameError(
+                "Resource type '%s' is invalid" % resource_type)
+        if _name_is_invalid(resource_name):
+            raise InvalidResourceNameError(
+                "Resource name '%s' is invalid" % resource_name)
+        for path in get_search_paths():
+            resource_path = os.path.join(path, RESOURCE_INDEX_SUBFOLDER, resource_type, resource_name)
+            if os.path.isfile(resource_path):
+                try:
+                    with open(resource_path, 'r') as h:
+                        content = h.read()
+                except OSError as e:
+                    raise OSError(
+                        "Could not open the resource '%s' of type '%s':\n%s"
+                        % (resource_name, resource_type, e))
+                return content, path
+>       raise LookupError(
+            "Could not find the resource '%s' of type '%s'" % (resource_name, resource_type))
+E       LookupError: Could not find the resource 'step' of type 'packages'
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/resources.py:86: LookupError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7b8dbc875720>
+tmp_path = PosixPath('/tmp/pytest-of-sy/pytest-1/test_robot_launch_defaults_are0')
+
+    def test_robot_launch_defaults_are_production_ready(
+        monkeypatch,
+        tmp_path,
+    ):
+        description = launch_description(monkeypatch, tmp_path)
+>       context = default_context(description)
+
+src/mission_control/test/test_full_system_robot_launch.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/test/test_full_system_robot_launch.py:44: in default_context
+    entity.execute(context)
+/opt/ros/humble/lib/python3.10/site-packages/launch/actions/declare_launch_argument.py:215: in execute
+    perform_substitutions(context, self.default_value)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:45: in perform
+    performed_substitutions = [sub.perform(context) for sub in self.__substitutions]
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:45: in <listcomp>
+    performed_substitutions = [sub.perform(context) for sub in self.__substitutions]
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:79: in perform
+    result = self.find(package)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:112: in find
+    return get_package_share_directory(package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:80: in get_package_share_directory
+    path = os.path.join(get_package_prefix(package_name), 'share', package_name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+            content, package_prefix = get_resource('packages', package_name)
+        except LookupError:
+>           raise PackageNotFoundError(
+                "package '{}' not found, searching: {}".format(package_name, get_search_paths()))
+E           ament_index_python.packages.PackageNotFoundError: "package 'step' not found, searching: ['/opt/ros/humble']"
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:60: PackageNotFoundError
+_____________ test_robot_launch_passes_realsense_topic_parameters ______________
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+>           content, package_prefix = get_resource('packages', package_name)
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+resource_type = 'packages', resource_name = 'step'
+
+    def get_resource(resource_type, resource_name):
+        """
+        Get the content of a specific resource and its prefix path.
+    
+        :param resource_type: the type of the resource
+        :type resource_type: str
+        :param resource_names: the name of the resource
+        :type resource_name: str
+        :returns: a tuple of the content (bytes) of the resource and its prefix path
+        :raises: :exc:`EnvironmentError`
+        :raises: :exc:`OSError`
+        :raises: :exc:`LookupError`
+        :raises: :exc:`InvalidResourceTypeNameError`
+        :raises: :exc:`InvalidResourceNameError`
+        """
+        assert resource_type, 'The resource type must not be empty'
+        assert resource_name, 'The resource name must not be empty'
+        if _name_is_invalid(resource_type):
+            raise InvalidResourceTypeNameError(
+                "Resource type '%s' is invalid" % resource_type)
+        if _name_is_invalid(resource_name):
+            raise InvalidResourceNameError(
+                "Resource name '%s' is invalid" % resource_name)
+        for path in get_search_paths():
+            resource_path = os.path.join(path, RESOURCE_INDEX_SUBFOLDER, resource_type, resource_name)
+            if os.path.isfile(resource_path):
+                try:
+                    with open(resource_path, 'r') as h:
+                        content = h.read()
+                except OSError as e:
+                    raise OSError(
+                        "Could not open the resource '%s' of type '%s':\n%s"
+                        % (resource_name, resource_type, e))
+                return content, path
+>       raise LookupError(
+            "Could not find the resource '%s' of type '%s'" % (resource_name, resource_type))
+E       LookupError: Could not find the resource 'step' of type 'packages'
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/resources.py:86: LookupError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7b8dbc9bc160>
+tmp_path = PosixPath('/tmp/pytest-of-sy/pytest-1/test_robot_launch_passes_reals0')
+
+    def test_robot_launch_passes_realsense_topic_parameters(
+        monkeypatch,
+        tmp_path,
+    ):
+        description = launch_description(monkeypatch, tmp_path)
+>       context = default_context(description)
+
+src/mission_control/test/test_full_system_robot_launch.py:123: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/test/test_full_system_robot_launch.py:44: in default_context
+    entity.execute(context)
+/opt/ros/humble/lib/python3.10/site-packages/launch/actions/declare_launch_argument.py:215: in execute
+    perform_substitutions(context, self.default_value)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:45: in perform
+    performed_substitutions = [sub.perform(context) for sub in self.__substitutions]
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:45: in <listcomp>
+    performed_substitutions = [sub.perform(context) for sub in self.__substitutions]
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:79: in perform
+    result = self.find(package)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:112: in find
+    return get_package_share_directory(package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:80: in get_package_share_directory
+    path = os.path.join(get_package_prefix(package_name), 'share', package_name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+            content, package_prefix = get_resource('packages', package_name)
+        except LookupError:
+>           raise PackageNotFoundError(
+                "package '{}' not found, searching: {}".format(package_name, get_search_paths()))
+E           ament_index_python.packages.PackageNotFoundError: "package 'step' not found, searching: ['/opt/ros/humble']"
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:60: PackageNotFoundError
+______________________ test_robot_launch_waits_for_enter _______________________
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+>           content, package_prefix = get_resource('packages', package_name)
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+resource_type = 'packages', resource_name = 'step'
+
+    def get_resource(resource_type, resource_name):
+        """
+        Get the content of a specific resource and its prefix path.
+    
+        :param resource_type: the type of the resource
+        :type resource_type: str
+        :param resource_names: the name of the resource
+        :type resource_name: str
+        :returns: a tuple of the content (bytes) of the resource and its prefix path
+        :raises: :exc:`EnvironmentError`
+        :raises: :exc:`OSError`
+        :raises: :exc:`LookupError`
+        :raises: :exc:`InvalidResourceTypeNameError`
+        :raises: :exc:`InvalidResourceNameError`
+        """
+        assert resource_type, 'The resource type must not be empty'
+        assert resource_name, 'The resource name must not be empty'
+        if _name_is_invalid(resource_type):
+            raise InvalidResourceTypeNameError(
+                "Resource type '%s' is invalid" % resource_type)
+        if _name_is_invalid(resource_name):
+            raise InvalidResourceNameError(
+                "Resource name '%s' is invalid" % resource_name)
+        for path in get_search_paths():
+            resource_path = os.path.join(path, RESOURCE_INDEX_SUBFOLDER, resource_type, resource_name)
+            if os.path.isfile(resource_path):
+                try:
+                    with open(resource_path, 'r') as h:
+                        content = h.read()
+                except OSError as e:
+                    raise OSError(
+                        "Could not open the resource '%s' of type '%s':\n%s"
+                        % (resource_name, resource_type, e))
+                return content, path
+>       raise LookupError(
+            "Could not find the resource '%s' of type '%s'" % (resource_name, resource_type))
+E       LookupError: Could not find the resource 'step' of type 'packages'
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/resources.py:86: LookupError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7b8dbbcf3dc0>
+tmp_path = PosixPath('/tmp/pytest-of-sy/pytest-1/test_robot_launch_waits_for_en0')
+
+    def test_robot_launch_waits_for_enter(monkeypatch, tmp_path):
+        description = launch_description(monkeypatch, tmp_path)
+>       context = default_context(description)
+
+src/mission_control/test/test_full_system_robot_launch.py:175: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/test/test_full_system_robot_launch.py:44: in default_context
+    entity.execute(context)
+/opt/ros/humble/lib/python3.10/site-packages/launch/actions/declare_launch_argument.py:215: in execute
+    perform_substitutions(context, self.default_value)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:45: in perform
+    performed_substitutions = [sub.perform(context) for sub in self.__substitutions]
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:45: in <listcomp>
+    performed_substitutions = [sub.perform(context) for sub in self.__substitutions]
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:79: in perform
+    result = self.find(package)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:112: in find
+    return get_package_share_directory(package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:80: in get_package_share_directory
+    path = os.path.join(get_package_prefix(package_name), 'share', package_name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+            content, package_prefix = get_resource('packages', package_name)
+        except LookupError:
+>           raise PackageNotFoundError(
+                "package '{}' not found, searching: {}".format(package_name, get_search_paths()))
+E           ament_index_python.packages.PackageNotFoundError: "package 'step' not found, searching: ['/opt/ros/humble']"
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:60: PackageNotFoundError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_full_system_robot_launch.py::test_robot_launch_defaults_are_production_ready
+FAILED src/mission_control/test/test_full_system_robot_launch.py::test_robot_launch_passes_realsense_topic_parameters
+FAILED src/mission_control/test/test_full_system_robot_launch.py::test_robot_launch_waits_for_enter
+3 failed, 527 passed in 0.92s

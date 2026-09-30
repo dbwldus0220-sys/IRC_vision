@@ -1,0 +1,1192 @@
+{
+  "runtime_to_new": {
+    "left_only": [
+      "찐미세오뒤에서 오뒤(골대 카메라90도)",
+      "찐찐라인복귀좌회전45도(6회)"
+    ],
+    "right_only": [
+      "찐라인복귀우회전45도(6회)",
+      "찐라인복귀우회전45도(8회)",
+      "찐라인복귀우회전90도(4회)",
+      "찐미세오옆꽃게90-1(2회)",
+      "찐미세오옆꽃게90-1(3회)",
+      "찐찐전진90(2회)"
+    ],
+    "common": 79,
+    "changes": [
+      {
+        "name": "찐공잡기리그랩까지 실전",
+        "frames": [
+          {
+            "frame": 3,
+            "angles": {
+              "5": [
+                -29.267578125,
+                -24.267578125
+              ]
+            }
+          },
+          {
+            "frame": 4,
+            "angles": {
+              "5": [
+                -36.9140625,
+                -33.134765625
+              ]
+            }
+          },
+          {
+            "frame": 5,
+            "angles": {
+              "5": [
+                -34.453125,
+                -31.453125
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "찐공잡기전후진-2(2회)",
+        "frames": [
+          {
+            "frame": 1,
+            "time_ms": [
+              55,
+              60
+            ]
+          },
+          {
+            "frame": 2,
+            "angles": {
+              "13": [
+                -51.416015625,
+                -53.416015625
+              ]
+            },
+            "start_ms": [
+              115,
+              120
+            ],
+            "torques": {
+              "1": [
+                true,
+                false
+              ],
+              "3": [
+                true,
+                false
+              ],
+              "10": [
+                true,
+                false
+              ],
+              "19": [
+                true,
+                false
+              ],
+              "14": [
+                true,
+                false
+              ],
+              "13": [
+                true,
+                false
+              ],
+              "17": [
+                true,
+                false
+              ],
+              "15": [
+                true,
+                false
+              ],
+              "6": [
+                true,
+                false
+              ],
+              "18": [
+                true,
+                false
+              ],
+              "20": [
+                true,
+                false
+              ],
+              "2": [
+                true,
+                false
+              ],
+              "4": [
+                true,
+                false
+              ],
+              "8": [
+                true,
+                false
+              ],
+              "9": [
+                true,
+                false
+              ],
+              "22": [
+                true,
+                false
+              ],
+              "0": [
+                true,
+                false
+              ],
+              "21": [
+                true,
+                false
+              ],
+              "7": [
+                true,
+                false
+              ],
+              "12": [
+                true,
+                false
+              ],
+              "16": [
+                true,
+                false
+              ],
+              "11": [
+                true,
+                false
+              ],
+              "5": [
+                true,
+                false
+              ]
+            },
+            "name": [
+              "미세후진왼뒤(0도)",
+              "찐미세후진왼뒤0도"
+            ]
+          },
+          {
+            "frame": 3,
+            "time_ms": [
+              55,
+              80
+            ],
+            "angles": {
+              "19": [
+                91.58203125,
+                78.0
+              ]
+            },
+            "start_ms": [
+              292,
+              300
+            ],
+            "torques": {
+              "1": [
+                true,
+                false
+              ],
+              "3": [
+                true,
+                false
+              ],
+              "10": [
+                true,
+                false
+              ],
+              "19": [
+                true,
+                false
+              ],
+              "14": [
+                true,
+                false
+              ],
+              "13": [
+                true,
+                false
+              ],
+              "17": [
+                true,
+                false
+              ],
+              "15": [
+                true,
+                false
+              ],
+              "6": [
+                true,
+                false
+              ],
+              "18": [
+                true,
+                false
+              ],
+              "20": [
+                true,
+                false
+              ],
+              "2": [
+                true,
+                false
+              ],
+              "4": [
+                true,
+                false
+              ],
+              "8": [
+                true,
+                false
+              ],
+              "9": [
+                true,
+                false
+              ],
+              "22": [
+                true,
+                false
+              ],
+              "0": [
+                true,
+                false
+              ],
+              "21": [
+                true,
+                false
+              ],
+              "7": [
+                true,
+                false
+              ],
+              "12": [
+                true,
+                false
+              ],
+              "16": [
+                true,
+                false
+              ],
+              "11": [
+                true,
+                false
+              ],
+              "5": [
+                true,
+                false
+              ]
+            },
+            "name": [
+              "미세후진오들(0도)",
+              "찐미세후진오들0도"
+            ]
+          },
+          {
+            "frame": 4,
+            "start_ms": [
+              347,
+              380
+            ]
+          }
+        ]
+      },
+      {
+        "name": "찐기본자세에서 제자리좌회전(골대)",
+        "max_seq_ms": [
+          2750,
+          2072
+        ],
+        "frame_count": [
+          14,
+          10
+        ]
+      },
+      {
+        "name": "찐라인복귀우회전45 도(4회)",
+        "playback_speed": [
+          1.0,
+          1.1
+        ]
+      },
+      {
+        "name": "찐미세오뒤에서 오뒤(0도)",
+        "playback_speed": [
+          1.05,
+          1.0
+        ]
+      },
+      {
+        "name": "찐오뒤카메라90도",
+        "frames": [
+          {
+            "frame": 1,
+            "angles": {
+              "14": [
+                57.568359375,
+                55.568359375
+              ],
+              "13": [
+                -43.59375,
+                -41.59375
+              ]
+            },
+            "torques": {
+              "1": [
+                false,
+                true
+              ],
+              "3": [
+                false,
+                true
+              ],
+              "10": [
+                false,
+                true
+              ],
+              "19": [
+                false,
+                true
+              ],
+              "14": [
+                false,
+                true
+              ],
+              "13": [
+                false,
+                true
+              ],
+              "17": [
+                false,
+                true
+              ],
+              "15": [
+                false,
+                true
+              ],
+              "6": [
+                false,
+                true
+              ],
+              "18": [
+                false,
+                true
+              ],
+              "20": [
+                false,
+                true
+              ],
+              "2": [
+                false,
+                true
+              ],
+              "4": [
+                false,
+                true
+              ],
+              "8": [
+                false,
+                true
+              ],
+              "9": [
+                false,
+                true
+              ],
+              "22": [
+                false,
+                true
+              ],
+              "0": [
+                false,
+                true
+              ],
+              "21": [
+                false,
+                true
+              ],
+              "7": [
+                false,
+                true
+              ],
+              "12": [
+                false,
+                true
+              ],
+              "16": [
+                false,
+                true
+              ],
+              "11": [
+                false,
+                true
+              ],
+              "5": [
+                false,
+                true
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "찐제자리좌회전90도-1(1회)",
+        "frames": [
+          {
+            "frame": 2,
+            "angles": {
+              "14": [
+                57.568359375,
+                55.568359375
+              ],
+              "13": [
+                -43.59375,
+                -41.59375
+              ]
+            },
+            "torques": {
+              "1": [
+                false,
+                true
+              ],
+              "3": [
+                false,
+                true
+              ],
+              "10": [
+                false,
+                true
+              ],
+              "19": [
+                false,
+                true
+              ],
+              "14": [
+                false,
+                true
+              ],
+              "13": [
+                false,
+                true
+              ],
+              "17": [
+                false,
+                true
+              ],
+              "15": [
+                false,
+                true
+              ],
+              "6": [
+                false,
+                true
+              ],
+              "18": [
+                false,
+                true
+              ],
+              "20": [
+                false,
+                true
+              ],
+              "2": [
+                false,
+                true
+              ],
+              "4": [
+                false,
+                true
+              ],
+              "8": [
+                false,
+                true
+              ],
+              "9": [
+                false,
+                true
+              ],
+              "22": [
+                false,
+                true
+              ],
+              "0": [
+                false,
+                true
+              ],
+              "21": [
+                false,
+                true
+              ],
+              "7": [
+                false,
+                true
+              ],
+              "12": [
+                false,
+                true
+              ],
+              "16": [
+                false,
+                true
+              ],
+              "11": [
+                false,
+                true
+              ],
+              "5": [
+                false,
+                true
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "찐제자리좌회전90도-1(2회)",
+        "frames": [
+          {
+            "frame": 2,
+            "angles": {
+              "14": [
+                57.568359375,
+                55.568359375
+              ],
+              "13": [
+                -43.59375,
+                -41.59375
+              ]
+            },
+            "torques": {
+              "1": [
+                false,
+                true
+              ],
+              "3": [
+                false,
+                true
+              ],
+              "10": [
+                false,
+                true
+              ],
+              "19": [
+                false,
+                true
+              ],
+              "14": [
+                false,
+                true
+              ],
+              "13": [
+                false,
+                true
+              ],
+              "17": [
+                false,
+                true
+              ],
+              "15": [
+                false,
+                true
+              ],
+              "6": [
+                false,
+                true
+              ],
+              "18": [
+                false,
+                true
+              ],
+              "20": [
+                false,
+                true
+              ],
+              "2": [
+                false,
+                true
+              ],
+              "4": [
+                false,
+                true
+              ],
+              "8": [
+                false,
+                true
+              ],
+              "9": [
+                false,
+                true
+              ],
+              "22": [
+                false,
+                true
+              ],
+              "0": [
+                false,
+                true
+              ],
+              "21": [
+                false,
+                true
+              ],
+              "7": [
+                false,
+                true
+              ],
+              "12": [
+                false,
+                true
+              ],
+              "16": [
+                false,
+                true
+              ],
+              "11": [
+                false,
+                true
+              ],
+              "5": [
+                false,
+                true
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "찐제자리좌회전90도-1(3회)",
+        "frames": [
+          {
+            "frame": 2,
+            "angles": {
+              "14": [
+                57.568359375,
+                55.568359375
+              ],
+              "13": [
+                -43.59375,
+                -41.59375
+              ]
+            },
+            "torques": {
+              "1": [
+                false,
+                true
+              ],
+              "3": [
+                false,
+                true
+              ],
+              "10": [
+                false,
+                true
+              ],
+              "19": [
+                false,
+                true
+              ],
+              "14": [
+                false,
+                true
+              ],
+              "13": [
+                false,
+                true
+              ],
+              "17": [
+                false,
+                true
+              ],
+              "15": [
+                false,
+                true
+              ],
+              "6": [
+                false,
+                true
+              ],
+              "18": [
+                false,
+                true
+              ],
+              "20": [
+                false,
+                true
+              ],
+              "2": [
+                false,
+                true
+              ],
+              "4": [
+                false,
+                true
+              ],
+              "8": [
+                false,
+                true
+              ],
+              "9": [
+                false,
+                true
+              ],
+              "22": [
+                false,
+                true
+              ],
+              "0": [
+                false,
+                true
+              ],
+              "21": [
+                false,
+                true
+              ],
+              "7": [
+                false,
+                true
+              ],
+              "12": [
+                false,
+                true
+              ],
+              "16": [
+                false,
+                true
+              ],
+              "11": [
+                false,
+                true
+              ],
+              "5": [
+                false,
+                true
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "찐제자리좌회전90도-1(4회)",
+        "frames": [
+          {
+            "frame": 2,
+            "angles": {
+              "14": [
+                57.568359375,
+                55.568359375
+              ],
+              "13": [
+                -43.59375,
+                -41.59375
+              ]
+            },
+            "torques": {
+              "1": [
+                false,
+                true
+              ],
+              "3": [
+                false,
+                true
+              ],
+              "10": [
+                false,
+                true
+              ],
+              "19": [
+                false,
+                true
+              ],
+              "14": [
+                false,
+                true
+              ],
+              "13": [
+                false,
+                true
+              ],
+              "17": [
+                false,
+                true
+              ],
+              "15": [
+                false,
+                true
+              ],
+              "6": [
+                false,
+                true
+              ],
+              "18": [
+                false,
+                true
+              ],
+              "20": [
+                false,
+                true
+              ],
+              "2": [
+                false,
+                true
+              ],
+              "4": [
+                false,
+                true
+              ],
+              "8": [
+                false,
+                true
+              ],
+              "9": [
+                false,
+                true
+              ],
+              "22": [
+                false,
+                true
+              ],
+              "0": [
+                false,
+                true
+              ],
+              "21": [
+                false,
+                true
+              ],
+              "7": [
+                false,
+                true
+              ],
+              "12": [
+                false,
+                true
+              ],
+              "16": [
+                false,
+                true
+              ],
+              "11": [
+                false,
+                true
+              ],
+              "5": [
+                false,
+                true
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "찐제자리좌회전90도-1(5회)",
+        "frames": [
+          {
+            "frame": 2,
+            "angles": {
+              "14": [
+                57.568359375,
+                55.568359375
+              ],
+              "13": [
+                -43.59375,
+                -41.59375
+              ]
+            },
+            "torques": {
+              "1": [
+                false,
+                true
+              ],
+              "3": [
+                false,
+                true
+              ],
+              "10": [
+                false,
+                true
+              ],
+              "19": [
+                false,
+                true
+              ],
+              "14": [
+                false,
+                true
+              ],
+              "13": [
+                false,
+                true
+              ],
+              "17": [
+                false,
+                true
+              ],
+              "15": [
+                false,
+                true
+              ],
+              "6": [
+                false,
+                true
+              ],
+              "18": [
+                false,
+                true
+              ],
+              "20": [
+                false,
+                true
+              ],
+              "2": [
+                false,
+                true
+              ],
+              "4": [
+                false,
+                true
+              ],
+              "8": [
+                false,
+                true
+              ],
+              "9": [
+                false,
+                true
+              ],
+              "22": [
+                false,
+                true
+              ],
+              "0": [
+                false,
+                true
+              ],
+              "21": [
+                false,
+                true
+              ],
+              "7": [
+                false,
+                true
+              ],
+              "12": [
+                false,
+                true
+              ],
+              "16": [
+                false,
+                true
+              ],
+              "11": [
+                false,
+                true
+              ],
+              "5": [
+                false,
+                true
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "찐제자리좌회전90도-1(6회)",
+        "frames": [
+          {
+            "frame": 2,
+            "angles": {
+              "14": [
+                57.568359375,
+                55.568359375
+              ],
+              "13": [
+                -43.59375,
+                -41.59375
+              ]
+            },
+            "torques": {
+              "1": [
+                false,
+                true
+              ],
+              "3": [
+                false,
+                true
+              ],
+              "10": [
+                false,
+                true
+              ],
+              "19": [
+                false,
+                true
+              ],
+              "14": [
+                false,
+                true
+              ],
+              "13": [
+                false,
+                true
+              ],
+              "17": [
+                false,
+                true
+              ],
+              "15": [
+                false,
+                true
+              ],
+              "6": [
+                false,
+                true
+              ],
+              "18": [
+                false,
+                true
+              ],
+              "20": [
+                false,
+                true
+              ],
+              "2": [
+                false,
+                true
+              ],
+              "4": [
+                false,
+                true
+              ],
+              "8": [
+                false,
+                true
+              ],
+              "9": [
+                false,
+                true
+              ],
+              "22": [
+                false,
+                true
+              ],
+              "0": [
+                false,
+                true
+              ],
+              "21": [
+                false,
+                true
+              ],
+              "7": [
+                false,
+                true
+              ],
+              "12": [
+                false,
+                true
+              ],
+              "16": [
+                false,
+                true
+              ],
+              "11": [
+                false,
+                true
+              ],
+              "5": [
+                false,
+                true
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "찐허들",
+        "end_pose": [
+          "오뒤412(허들)",
+          "오뒤412"
+        ],
+        "frames": [
+          {
+            "frame": 16,
+            "name": [
+              "오뒤412(허들)",
+              "오뒤412"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "찐후진에서 제자리좌회전(공)",
+        "max_seq_ms": [
+          3089,
+          2072
+        ],
+        "frame_count": [
+          16,
+          10
+        ]
+      }
+    ]
+  },
+  "gui_to_new": {
+    "left_only": [],
+    "right_only": [],
+    "common": 85,
+    "changes": [
+      {
+        "name": "찐찐라인복귀좌회전45도(4회)",
+        "playback_speed": [
+          1.0,
+          1.1
+        ],
+        "frames": [
+          {
+            "frame": 1,
+            "time_ms": [
+              65,
+              60
+            ],
+            "start_ms": [
+              80,
+              110
+            ]
+          },
+          {
+            "frame": 2,
+            "start_ms": [
+              145,
+              170
+            ]
+          },
+          {
+            "frame": 3,
+            "_drag_original_start_ms": [
+              null,
+              460
+            ],
+            "time_ms": [
+              55,
+              45
+            ],
+            "start_ms": [
+              445,
+              469
+            ]
+          },
+          {
+            "frame": 4,
+            "time_ms": [
+              100,
+              80
+            ],
+            "start_ms": [
+              500,
+              514
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
