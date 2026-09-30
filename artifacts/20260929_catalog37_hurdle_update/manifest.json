@@ -1,0 +1,12 @@
+{
+  "source_path": "/home/jet/Downloads/robot_motions(37).json",
+  "source_sha256": "438e05d8868fd73dd781e027b53341b2836e927a52487c60715245765f71c5f7",
+  "replaced_motion": "찐허들",
+  "motion_count": 81,
+  "runtime_tolerance_deg": 5.0,
+  "pose_label": {
+    "source": "오뒤412",
+    "runtime": "오뒤412(허들)"
+  },
+  "other_motions_unchanged": 80
+}

@@ -313,7 +313,15 @@ class MotionDecisionPlanner:
         hurdle_positioning = source == "hurdle" and (
             self.hurdle_lock_active or normalized_phase == "HURDLE_POSITIONING"
         )
+        if source == "hurdle" and info is not None:
+            # Steering uses current intersection geometry, never a held target
+            # left over from before a recovery turn.
+            reference = build_hurdle_path_reference(info, observations.get("line"))
+            info = {**info, **reference, "hurdle_positioning_active": hurdle_positioning}
         command = self._plan_source(source, info, dt_sec)
+        if source == "hurdle" and info is not None:
+            command.update(reference)
+            command["alignment_reference"] = "line_hurdle_intersection"
         if source == "hurdle":
             command["hurdle_stage"] = "FINE_APPROACH" if hurdle_positioning else "RECOGNITION_APPROACH"
         if hurdle_positioning:
@@ -592,7 +600,7 @@ class MotionDecisionPlanner:
         )
 
     def _hurdle_approach_ready(self, info: dict[str, Any] | None) -> bool:
-        """Select center-based recognition approach without entering the fine sequence."""
+        """Select intersection-guided approach before entering the fine sequence."""
         if self.hurdle_mission_disabled or self.hurdle_ignore_until_clear or info is None:
             return False
         depth = self._number(info, "depth_m")
@@ -807,9 +815,7 @@ class MotionDecisionPlanner:
 
         confidence = self._number(info, "confidence")
         distance = self._number(info, "distance_m")
-        # This checkpoint uses the calibrated normal head pose. The separate
-        # pickup checkpoints below retain their head-down pixel geometry.
-        steering_error = self.ball_planner.approach_steering_error(info)
+        steering_error, steering_source = self.ball_planner.select_steering(info)
         if (
             confidence is None
             or confidence < self.ball_planner.config.min_confidence
@@ -828,11 +834,8 @@ class MotionDecisionPlanner:
 
         common = {
             "steering_error_deg": steering_error,
-            "steering_source": (
-                "ground_steering_angle_deg"
-                if "ground_projection_enabled" in info
-                else "legacy_image_angle"
-            ),
+            "steering_source": steering_source,
+            "ground_forward_distance_m": self._number(info, "ground_forward_distance_m"),
             "recover_threshold_deg": self.BALL_APPROACH_RECOVER_MIN_DEG,
             "distance_m": distance,
             "confidence": confidence,
@@ -1407,12 +1410,7 @@ class MotionDecisionPlanner:
         depth = self._number(info, "depth_m")
         distance = self._number(info, "distance_m")
         bottom_distance_px = self._number(info, "bottom_distance_px")
-        steering_error = self.ball_planner._steering_error(
-            steering_angle,
-            bearing,
-            offset,
-            distance,
-        )
+        steering_error, steering_source = self.ball_planner.select_steering(info)
         if (
             confidence is None
             or confidence < self.ball_planner.config.min_confidence
@@ -1434,14 +1432,16 @@ class MotionDecisionPlanner:
             abs(robot_center_offset_px)
             > self.PICKUP_INITIAL_CENTER_BOUND_PX
         )
-        if outside_center_window:
+        # Ground heading owns turn direction; pixel position still owns crab steps.
+        if outside_center_window and steering_source != "ground_steering_angle_deg":
             direction = "RIGHT" if robot_center_offset_px > 0.0 else "LEFT"
         else:
             direction = "RIGHT" if steering_error > 0.0 else "LEFT"
         tolerance = self.STATIONARY_TURN_MIN_DEG[direction]
         common = {
             "steering_angle_deg": steering_angle,
-            "steering_source": "head_down_image_angle",
+            "steering_source": steering_source,
+            "ground_forward_distance_m": self._number(info, "ground_forward_distance_m"),
             "bearing_deg": bearing,
             "offset_x_norm": offset,
             "offset_x_px": robot_center_offset_px,
@@ -1608,12 +1608,7 @@ class MotionDecisionPlanner:
         offset = self._number(info, "offset_x_norm")
         distance = self._number(info, "distance_m")
         tolerance = self._number(info, "pickup_x_tolerance_norm")
-        steering_error = self.ball_planner._steering_error(
-            steering_angle,
-            bearing,
-            offset,
-            distance,
-        )
+        steering_error, steering_source = self.ball_planner.select_steering(info)
         if (
             confidence is None
             or confidence < self.ball_planner.config.min_confidence
@@ -1637,7 +1632,8 @@ class MotionDecisionPlanner:
         heading_tolerance = self.STATIONARY_TURN_MIN_DEG[direction]
         common = {
             "steering_angle_deg": steering_angle,
-            "steering_source": "head_down_image_angle",
+            "steering_source": steering_source,
+            "ground_forward_distance_m": self._number(info, "ground_forward_distance_m"),
             "bearing_deg": bearing,
             "offset_x_norm": offset,
             "steering_error_deg": steering_error,

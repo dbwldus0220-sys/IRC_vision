@@ -42,7 +42,11 @@ def aliases():
     *FORWARD_UPDATE["imported_sha256"].items(),
 ])
 def test_motion_matches_import_snapshot(catalog, name, digest):
-    if name in {"찐후진실전-2(2회)", "찐후진실전(1회)"}:
+    if name == "찐공잡기리그랩까지 실전":
+        expected = json.loads((ROOT / "artifacts/20260929_catalog36_pickup_update/source_pickup.json").read_text())
+        expected["completion"]["position_tolerance_deg"] = 5.0
+        assert catalog[name] == expected
+    elif name in {"찐후진실전-2(2회)", "찐후진실전(1회)"}:
         source = json.loads((ROOT / "artifacts/20260929_catalog34_retreat_update/source_requested_motions.json").read_text())
         expected = next(m for m in source["motions"] if m["name"] == name)
         expected["completion"]["position_tolerance_deg"] = 5.0

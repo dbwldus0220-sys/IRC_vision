@@ -1,0 +1,172 @@
+.............................................F..F....................... [ 14%]
+.....F.F.FF.F..............F.....FFF...............FFF..F.......F....... [ 28%]
+.....FFF..............................F.....F........................... [ 42%]
+........................................................................ [ 56%]
+........................................................................ [ 70%]
+........................................................................ [ 84%]
+........................................................................ [ 98%]
+..........                                                               [100%]
+=================================== FAILURES ===================================
+_ test_collected_ball_route_clears_stale_reservations_before_dwell[GOAL_APPROACH-GOAL_CAMERA90_FINE_FORWARD_2] _
+src/mission_control/test/test_mission_phase_flow.py:502: in test_collected_ball_route_clears_stale_reservations_before_dwell
+    assert command["action"] == expected_action
+E   AssertionError: assert 'GOAL_CAMERA_90_FORWARD_2' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E     - GOAL_CAMERA90_FINE_FORWARD_2
+E     ?              -----
+E     + GOAL_CAMERA_90_FORWARD_2
+E     ?            +
+______ test_post_ball_detection_loss_cannot_interrupt_timed_line_or_goal _______
+src/mission_control/test/test_mission_phase_flow.py:561: in test_post_ball_detection_loss_cannot_interrupt_timed_line_or_goal
+    assert harness.publish_vision(goal=approaching_goal())[-1]["action"] == "GOAL_CAMERA90_FINE_FORWARD_2"
+E   AssertionError: assert 'GOAL_CAMERA_90_FORWARD_2' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E     - GOAL_CAMERA90_FINE_FORWARD_2
+E     ?              -----
+E     + GOAL_CAMERA_90_FORWARD_2
+E     ?            +
+_______ test_ball_loss_waits_then_reacquired_ball_selects_moving_recover _______
+src/mission_control/test/test_mission_phase_flow.py:1029: in test_ball_loss_waits_then_reacquired_ball_selects_moving_recover
+    assert harness.publish_vision(ball=lost_ball)[-1]["action"] == "WAIT"
+E   AssertionError: assert 'BALL_APPROACH_TURN_LEFT_2' == 'WAIT'
+E     - WAIT
+E     + BALL_APPROACH_TURN_LEFT_2
+____ test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell _____
+src/mission_control/test/test_mission_phase_flow.py:1072: in test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell
+    assert harness.ball_pickup_entry_pending is True
+E   assert False is True
+E    +  where False = <test_mission_phase_flow.MissionFlowHarness object at 0xffff72524490>.ball_pickup_entry_pending
+_______ test_pickup_fine_alignment_rechecks_fresh_ball_under_atomic_lock _______
+src/mission_control/test/test_mission_phase_flow.py:1138: in test_pickup_fine_alignment_rechecks_fresh_ball_under_atomic_lock
+    assert right["action"] == "BALL_PICKUP_CRAB_RIGHT"
+E   AssertionError: assert 'BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_CRAB_RIGHT'
+E     - BALL_PICKUP_CRAB_RIGHT
+E     + BALL_PICKUP_FINE_FORWARD
+_____ test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment ______
+src/mission_control/test/test_mission_phase_flow.py:1194: in test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment
+    assert turn["action"] == "BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_1"
+E   AssertionError: assert 'BALL_PICKUP_...N_TURN_LEFT_2' == 'BALL_PICKUP_...N_TURN_LEFT_1'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_1
+E     ?                                   ^
+E     + BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_2
+E     ?                                   ^
+_________________ test_full_course_mock_flow_without_ros_graph _________________
+src/mission_control/test/test_mission_phase_flow.py:1279: in test_full_course_mock_flow_without_ros_graph
+    assert approach_ball[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+___________ test_confirmed_approaching_hurdle_beats_approaching_ball ___________
+src/mission_control/test/test_mission_phase_flow.py:1639: in test_confirmed_approaching_hurdle_beats_approaching_ball
+    assert published[-1]["action"] == "STRAIGHT_0"
+E   AssertionError: assert 'GO' == 'STRAIGHT_0'
+E     - STRAIGHT_0
+E     + GO
+__________ test_unconfirmed_hurdle_disappearance_resumes_ball_mission __________
+src/mission_control/test/test_mission_phase_flow.py:1797: in test_unconfirmed_hurdle_disappearance_resumes_ball_mission
+    assert held[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+________ test_unconfirmed_hurdle_can_become_confirmed_and_take_priority ________
+src/mission_control/test/test_mission_phase_flow.py:1816: in test_unconfirmed_hurdle_can_become_confirmed_and_take_priority
+    assert held[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+_______________ test_absent_hurdle_keeps_ball_priority_over_line _______________
+src/mission_control/test/test_mission_phase_flow.py:1835: in test_absent_hurdle_keeps_ball_priority_over_line
+    assert published[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+_ test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[34.0-GOAL_CAMERA90_TURN_RIGHT_3-0.0-GOAL_CAMERA90_FINE_FORWARD_2] _
+src/mission_control/test/test_mission_phase_flow.py:2123: in test_goal_camera90_turn_dwells_then_rechecks_fresh_goal
+    assert forward["action"] == next_action
+E   AssertionError: assert 'GOAL_CAMERA_90_FORWARD_2' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E     - GOAL_CAMERA90_FINE_FORWARD_2
+E     ?              -----
+E     + GOAL_CAMERA_90_FORWARD_2
+E     ?            +
+_ test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-35.0-GOAL_CAMERA90_TURN_LEFT_1--20.0-GOAL_CAMERA90_TURN_LEFT_1] _
+src/mission_control/test/test_mission_phase_flow.py:2103: in test_goal_camera90_turn_dwells_then_rechecks_fresh_goal
+    assert correction["action"] == initial_action
+E   AssertionError: assert 'GOAL_CAMERA90_TURN_LEFT_2' == 'GOAL_CAMERA90_TURN_LEFT_1'
+E     - GOAL_CAMERA90_TURN_LEFT_1
+E     ?                         ^
+E     + GOAL_CAMERA90_TURN_LEFT_2
+E     ?                         ^
+_ test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-20.0-GOAL_CAMERA90_TURN_LEFT_1--15.0-GOAL_CAMERA90_FINE_FORWARD_2] _
+src/mission_control/test/test_mission_phase_flow.py:2123: in test_goal_camera90_turn_dwells_then_rechecks_fresh_goal
+    assert forward["action"] == next_action
+E   AssertionError: assert 'GOAL_CAMERA90_TURN_LEFT_1' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E     - GOAL_CAMERA90_FINE_FORWARD_2
+E     + GOAL_CAMERA90_TURN_LEFT_1
+_ test_goal_depth_actions_follow_new_scoring_range[0.65-GOAL_CAMERA90_FINE_FORWARD_1] _
+src/mission_control/test/test_mission_phase_flow.py:2205: in test_goal_depth_actions_follow_new_scoring_range
+    assert decision["action"] == action
+E   AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_3' == 'GOAL_CAMERA90_FINE_FORWARD_1'
+E     - GOAL_CAMERA90_FINE_FORWARD_1
+E     ?                            ^
+E     + GOAL_CAMERA90_FINE_FORWARD_3
+E     ?                            ^
+___________ test_final_line_track_still_prioritizes_confirmed_hurdle ___________
+src/mission_control/test/test_mission_phase_flow.py:2330: in test_final_line_track_still_prioritizes_confirmed_hurdle
+    assert decision["action"] == "STRAIGHT_0"
+E   AssertionError: assert 'GO' == 'STRAIGHT_0'
+E     - STRAIGHT_0
+E     + GO
+______ test_ball_stationary_turn_requires_fresh_ball_before_next_approach ______
+src/mission_control/test/test_mission_phase_flow.py:2520: in test_ball_stationary_turn_requires_fresh_ball_before_next_approach
+    assert approach[0]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'BALL_APPROAC...COVER_RIGHT_4' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     + BALL_APPROACH_RECOVER_RIGHT_4
+_____________ test_second_ball_uses_same_straight_distance_policy ______________
+src/mission_control/test/test_mission_phase_flow.py:2573: in test_second_ball_uses_same_straight_distance_policy
+    assert command[0]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'BALL_APPROACH_RECOVER_LEFT_4' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     + BALL_APPROACH_RECOVER_LEFT_4
+___________ test_failed_first_pickup_keeps_straight_distance_policy ____________
+src/mission_control/test/test_mission_phase_flow.py:2600: in test_failed_first_pickup_keeps_straight_distance_policy
+    assert command[0]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'BALL_APPROAC...COVER_RIGHT_4' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     + BALL_APPROACH_RECOVER_RIGHT_4
+________ test_top_loss_forward_rechecks_new_vision_without_motion_dwell ________
+src/mission_control/test/test_mission_phase_flow.py:2800: in test_top_loss_forward_rechecks_new_vision_without_motion_dwell
+    assert search["action"] == "WAIT"
+E   AssertionError: assert 'BALL_APPROACH_TURN_RIGHT_5' == 'WAIT'
+E     - WAIT
+E     + BALL_APPROACH_TURN_RIGHT_5
+_ test_shot_settle_restarts_after_scoring_condition_is_lost[lost_confirmation2] _
+src/mission_control/test/test_mission_phase_flow.py:2866: in test_shot_settle_restarts_after_scoring_condition_is_lost
+    assert harness.pre_motion_settle_started_at is None
+E   assert 10.0 is None
+E    +  where 10.0 = <test_mission_phase_flow.MissionFlowHarness object at 0xffff71e9f7f0>.pre_motion_settle_started_at
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_collected_ball_route_clears_stale_reservations_before_dwell[GOAL_APPROACH-GOAL_CAMERA90_FINE_FORWARD_2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_ball_detection_loss_cannot_interrupt_timed_line_or_goal
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_ball_loss_waits_then_reacquired_ball_selects_moving_recover
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_pickup_fine_alignment_rechecks_fresh_ball_under_atomic_lock
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_full_course_mock_flow_without_ros_graph
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_confirmed_approaching_hurdle_beats_approaching_ball
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_unconfirmed_hurdle_disappearance_resumes_ball_mission
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_unconfirmed_hurdle_can_become_confirmed_and_take_priority
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_absent_hurdle_keeps_ball_priority_over_line
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[34.0-GOAL_CAMERA90_TURN_RIGHT_3-0.0-GOAL_CAMERA90_FINE_FORWARD_2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-35.0-GOAL_CAMERA90_TURN_LEFT_1--20.0-GOAL_CAMERA90_TURN_LEFT_1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-20.0-GOAL_CAMERA90_TURN_LEFT_1--15.0-GOAL_CAMERA90_FINE_FORWARD_2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_depth_actions_follow_new_scoring_range[0.65-GOAL_CAMERA90_FINE_FORWARD_1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_final_line_track_still_prioritizes_confirmed_hurdle
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_ball_stationary_turn_requires_fresh_ball_before_next_approach
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_second_ball_uses_same_straight_distance_policy
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_failed_first_pickup_keeps_straight_distance_policy
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_top_loss_forward_rechecks_new_vision_without_motion_dwell
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_shot_settle_restarts_after_scoring_condition_is_lost[lost_confirmation2]
+21 failed, 493 passed in 4.87s

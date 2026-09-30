@@ -237,11 +237,14 @@ def test_published_diagnostics_preserve_legacy_fields_and_clear_after_loss(monke
             ]
             message = String(data=json.dumps({
                 "image_width": 1280, "image_height": 720, "detections": detections,
+                "stamp": {"sec": 123, "nanosec": 456},
             }))
             for _ in range(3):
                 node._detections_callback(message)
             outputs.append(published[-1])
+            assert published[-1]["stamp"] == {"sec": 123, "nanosec": 456}
             node._detections_callback(String(data=json.dumps({"detections": []})))
+            assert published[-1]["stamp"] is None
             assert published[-1]["ground_projection_valid"] is False
             assert published[-1]["ground_heading_error_deg"] is None
         assert outputs[1]["detected"] is True

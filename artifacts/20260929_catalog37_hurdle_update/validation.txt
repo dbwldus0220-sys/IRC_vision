@@ -1,0 +1,4 @@
+Catalog schema / alias validation passed: 81 motions, frame motor IDs 0..22.
+Targeted hurdle source/scope, full tolerance, startup-pose and catalog36 regression tests: 10 passed.
+Source file hash and archived source equality verified.
+No robot hardware execution.

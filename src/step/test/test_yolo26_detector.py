@@ -519,6 +519,8 @@ def test_atomic_sequence_completion_clears_dwell_banner():
     ('hurdle', 'ball_general_fine_forward_8', 'HURDLE / FINE FORWARD'),
     ('hurdle', 'pickup_fine_forward_0', 'HURDLE / FINE FORWARD'),
     ('hurdle', 'line_forward_4', 'HURDLE / FORWARD 4'),
+    ('hurdle', 'line_recovery_left_4', 'HURDLE / LINE RETURN LEFT 4'),
+    ('hurdle', 'line_recovery_right_4', 'HURDLE / LINE RETURN RIGHT 4'),
 ])
 def test_shared_fine_motion_label_keeps_command_owner(monkeypatch, status_first, source, motion_id, expected):
     import json

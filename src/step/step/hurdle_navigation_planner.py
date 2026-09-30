@@ -23,6 +23,7 @@ class HurdleNavigationConfig:
     control_start_depth_m: float = 1.0
     go_target_depth_m: float = 0.10
     go_depth_tolerance_m: float = 0.10
+    final_sequence_start_depth_m: float = 0.540
     go_angle_tolerance_deg: float = 8.0
     path_center_tolerance_norm: float = 0.10
     close_turn_stop_bottom_distance_px: float = 100.0
@@ -126,10 +127,12 @@ class HurdleNavigationPlanner:
     ) -> None:
         self.config = config or HurdleNavigationConfig()
         self.close_rotation_blocked = False
+        self.fine_approach_active = False
 
     def reset(self) -> None:
         """Release the near-hurdle turn block only after mission completion."""
         self.close_rotation_blocked = False
+        self.fine_approach_active = False
 
     def wait(self, reason: str) -> HurdleActionCommand:
         """Return a non-action command for missing or unsafe input."""
@@ -154,7 +157,7 @@ class HurdleNavigationPlanner:
     def plan(
         self, hurdle_info: dict[str, Any], *, positioning: bool = False,
     ) -> HurdleActionCommand:
-        """Plan an action; positioning uses RGB-center steering in both approach stages."""
+        """Use the line intersection before fine approach; never turn in fine mode."""
         if not bool(hurdle_info.get("detected", False)):
             return self.wait("hurdle_not_detected")
         confidence = _number(hurdle_info, "confidence")
@@ -179,6 +182,12 @@ class HurdleNavigationPlanner:
         ground_gap = depth
         if depth > self.config.control_start_depth_m:
             return self.wait("hurdle_outside_control_range")
+        if positioning and (
+            depth <= HURDLE_FINE_DISTANCE_M
+            or hurdle_info.get("hurdle_positioning_active") is True
+        ):
+            self.fine_approach_active = True
+            self.close_rotation_blocked = True
         camera_bottom_gap = _number(
             hurdle_info,
             "camera_bottom_gap_m",
@@ -201,25 +210,28 @@ class HurdleNavigationPlanner:
                 )
             else:
                 center_steering = _number(hurdle_info, "bearing_deg")
-            if center_steering is None:
-                return self.wait("missing_hurdle_center_geometry")
-        path_reference_valid = bool(
-            not positioning and hurdle_info.get("path_reference_valid", False)
-        )
+        path_reference_valid = hurdle_info.get("path_reference_valid") is True
         path_offset = _number(hurdle_info, "path_offset_x_norm")
-        path_centered = (
-            abs(center_steering) < self.config.positioning_turn_min_angle_deg
-            if positioning else bool(
-                not path_reference_valid or path_offset is None
-                or abs(path_offset) <= self.config.path_center_tolerance_norm
-            )
+        if positioning and not self.fine_approach_active and (
+            not path_reference_valid or path_offset is None
+            or hurdle_info.get("path_reference_source") == "held"
+        ):
+            return self.wait("waiting_for_fresh_hurdle_line_intersection")
+        path_centered = bool(
+            (positioning and self.fine_approach_active)
+            or not path_reference_valid or path_offset is None
+            or abs(path_offset) <= self.config.path_center_tolerance_norm
         )
         ground_gap_error = (
             depth - self.config.go_target_depth_m
         )
+        # Positioning includes two fixed fine advances before the hurdle motion.
         ground_gap_in_range = (
-            abs(ground_gap_error)
-            <= self.config.go_depth_tolerance_m + 1e-9
+            depth <= self.config.final_sequence_start_depth_m + 1e-9
+            if positioning else (
+                abs(ground_gap_error)
+                <= self.config.go_depth_tolerance_m + 1e-9
+            )
         )
         ready_geometry = (
             parallel
@@ -241,7 +253,7 @@ class HurdleNavigationPlanner:
         fine_sequence_requested = bool(
             positioning
             and ground_gap_in_range
-            and (not positioning_turn_needed or self.close_rotation_blocked)
+            and self.fine_approach_active
         )
         if positioning:
             # Only the final distance checkpoint may start the atomic sequence.
@@ -260,19 +272,23 @@ class HurdleNavigationPlanner:
         elif go_now:
             action = "GO"
             reason = "hurdle_parallel_at_close_depth"
+        elif positioning and self.fine_approach_active:
+            action = "STRAIGHT_0"
+            reason = "hurdle_fine_approach_without_rotation"
+        elif positioning and positioning_turn_needed:
+            if self.close_rotation_blocked:
+                return self.wait("hurdle_intersection_turn_blocked_near_bottom")
+            direction = "LEFT" if path_offset < 0.0 else "RIGHT"
+            action = f"RECOVER_{direction}_TURN_{direction}_4"
+            reason = "recover_to_hurdle_line_intersection"
+        elif positioning:
+            action = "STRAIGHT"
+            reason = "hurdle_intersection_aligned_approach"
         elif self.close_rotation_blocked and not ready_geometry:
             action = ball_hurdle_approach_motion(
                 depth, fine_distance_m=HURDLE_FINE_DISTANCE_M,
             )
             reason = "hurdle_close_distance_approach_without_rotation"
-        elif positioning and positioning_turn_needed:
-            action = "ALIGN_LEFT" if center_steering < 0.0 else "ALIGN_RIGHT"
-            reason = "align_to_hurdle_center"
-        elif positioning and not ready_geometry:
-            action = ball_hurdle_approach_motion(
-                depth, fine_distance_m=HURDLE_FINE_DISTANCE_M,
-            )
-            reason = "hurdle_center_distance_approach"
         elif (
             path_reference_valid
             and path_offset is not None

@@ -14,6 +14,7 @@ def ball_sample(angle, **changes):
         "ground_projection_scope": "ball_approach_only",
         "ground_coordinate_frame": "robot_x_right_z_forward",
         "ground_steering_angle_deg": angle,
+        "ground_forward_distance_m": 0.9,
         "steering_angle_deg": -45.0, "bearing_deg": -30.0,
         "offset_x_norm": 0.06, "offset_x_px": 0,
         "depth_valid": True, "depth_age_sec": 0.01,
@@ -90,15 +91,48 @@ def test_invalid_ground_projection_waits_without_pixel_fallback():
     ("plan_ball_pickup_initial_alignment", "BALL_PICKUP_CAMERA_DOWN"),
     ("plan_ball_pickup_post_backward_alignment", "BALL_PICKUP_POST_BACKWARD"),
 ])
-@pytest.mark.parametrize("ground_valid", [False, True])
-def test_head_down_checkpoints_keep_image_geometry(method, prefix, ground_valid):
+@pytest.mark.parametrize("forward,angle,source,turn", [
+    (0.349999, -45.0, "near_image_angle", "LEFT_3"),
+    (0.35, -45.0, "near_image_angle", "LEFT_3"),
+    (0.350001, 30.0, "ground_steering_angle_deg", "RIGHT_3"),
+    (1.5, 30.0, "ground_steering_angle_deg", "RIGHT_3"),
+])
+def test_pickup_checkpoints_share_distance_based_steering(method, prefix, forward, angle, source, turn):
     sample = ball_sample(
-        30.0, ground_projection_valid=ground_valid, depth_m=0.5, distance_m=0.5,
+        30.0, ground_forward_distance_m=forward, depth_m=0.5, distance_m=0.5,
+        offset_x_px=-200,
     )
     decision = getattr(MotionDecisionPlanner(), method)(sample)
-    assert decision.action == f"{prefix}_TURN_LEFT_3"
-    assert decision.source_command["steering_error_deg"] == -45.0
-    assert decision.source_command["steering_source"] == "head_down_image_angle"
+    assert decision.action == f"{prefix}_TURN_{turn}"
+    assert decision.source_command["steering_error_deg"] == angle
+    assert decision.source_command["steering_source"] == source
+    checkpoint = MotionDecisionPlanner().plan_ball_approach_alignment(sample)
+    assert checkpoint.source_command["steering_error_deg"] == angle
+    assert checkpoint.source_command["steering_source"] == source
+
+
+@pytest.mark.parametrize("method", [
+    "plan_ball_pickup_initial_alignment", "plan_ball_pickup_post_backward_alignment",
+])
+@pytest.mark.parametrize("changes", [
+    {"ground_projection_valid": False}, {"ground_forward_distance_m": None},
+    {"ground_forward_distance_m": float("nan")}, {"ground_steering_angle_deg": None},
+])
+def test_pickup_waits_when_selected_geometry_is_invalid(method, changes):
+    sample = ball_sample(30.0, depth_m=0.5, distance_m=0.5, **changes)
+    decision = getattr(MotionDecisionPlanner(), method)(sample)
+    assert decision.action == "WAIT"
+    assert not decision.valid
+
+
+def test_close_crab_still_uses_pixel_side_when_ground_heading_points_opposite():
+    sample = ball_sample(
+        30.0, ground_forward_distance_m=0.4, depth_m=0.5, distance_m=0.5,
+        offset_x_px=-200, bottom_distance_px=100,
+    )
+    decision = MotionDecisionPlanner().plan_ball_pickup_initial_alignment(sample)
+    assert decision.action == "BALL_PICKUP_INITIAL_CRAB_LEFT"
+    assert decision.source_command["steering_error_deg"] == 30.0
 
 
 @pytest.mark.parametrize("method", [

@@ -469,9 +469,9 @@ def test_confirmed_hurdle_preempts_ball_in_non_goal_phase(phase):
             line=line_info(),
             ball=ball_info(),
             hurdle=hurdle_info(
-                depth_m=0.35,
+                depth_m=0.60,
                 go_now=False,
-                ground_gap_m=0.35,
+                ground_gap_m=0.60,
                 camera_bottom_gap_m=0.20,
             ),
         ),
@@ -492,9 +492,9 @@ def test_goal_approach_confirmed_hurdle_preempts_goal(include_ball):
             ball=ball_info() if include_ball else None,
             goal=goal_info(),
             hurdle=hurdle_info(
-                depth_m=0.35,
+                depth_m=0.60,
                 go_now=False,
-                ground_gap_m=0.35,
+                ground_gap_m=0.60,
                 camera_bottom_gap_m=0.20,
             ),
         ),
@@ -3111,7 +3111,7 @@ def test_pickup_alignment_requires_both_bottom_and_lateral_bounds(
 def test_completed_hurdle_releases_close_turn_block_for_next_hurdle():
     planner = MotionDecisionPlanner()
     approach = planner.plan("AUTO", observations(hurdle=hurdle_info(
-        bottom_distance_px=100, depth_m=0.4, hurdle_angle_deg=12.0,
+        bottom_distance_px=100, depth_m=0.6, hurdle_angle_deg=12.0,
     )), 0.1)
     assert approach.action == "STRAIGHT_0" and approach.valid
     assert approach.source_command["close_rotation_blocked"]
@@ -3122,10 +3122,16 @@ def test_completed_hurdle_releases_close_turn_block_for_next_hurdle():
     planner.plan("HURDLE_DONE", observations(), 0.1)
     assert not planner.hurdle_planner.close_rotation_blocked
     planner.plan("AUTO", observations(), 0.1)
-    next_hurdle = planner.plan("AUTO", observations(hurdle=hurdle_info(
-        bottom_distance_px=150, depth_m=0.4, hurdle_angle_deg=45.0, camera_center_offset_x_px=-600,
-    )), 0.1)
-    assert next_hurdle.action == "ALIGN_LEFT"
+    assert not planner.hurdle_planner.fine_approach_active
+    next_hurdle = planner.plan("AUTO", observations(
+        hurdle=hurdle_info(
+            bottom_distance_px=150, depth_m=0.8, hurdle_angle_deg=45.0,
+            bbox=[400, 300, 1000, 500], image_width=1280, image_height=720,
+        ),
+        line=line_info(robot_center_x_px=710,
+                       center_points_px=[[500, 650], [500, 580], [500, 250]]),
+    ), 0.1)
+    assert next_hurdle.action == "RECOVER_LEFT_TURN_LEFT_4"
 
 
 @pytest.mark.parametrize("phase", ["AUTO", "LINE_TRACK", "HURDLE_APPROACH", "HURDLE_SEARCH"])

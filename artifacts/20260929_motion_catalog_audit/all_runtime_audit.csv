@@ -1,0 +1,90 @@
+﻿name,in_latest_json,in_runtime_only,auto_command_connected,no_alias,aliases,connected_aliases,startup_pose_frame_count,frame_count,max_seq_ms
+찐공잡기리그랩까지 실전,True,False,True,False,pickup; sdk_pickup,pickup,0,11,8000
+찐찐라인복귀좌회전45도(4회),True,False,True,False,line_recovery_left_4,line_recovery_left_4,1,4,7045
+찐찐라인복귀좌회전45도(6회),False,True,False,False,line_recovery_left_6,,1,4,7045
+찐라인복귀우회전45 도(4회),True,False,True,False,line_recovery_right_4,line_recovery_right_4,1,4,7045
+찐오뒤에서 기본자세(카메라45도),True,False,False,True,,,0,2,7045
+찐오뒤카메라90도,True,False,True,False,post_ball_camera_90,post_ball_camera_90,0,1,7045
+찐오뒤에서기본자세(0도),True,False,False,True,,,0,2,7045
+찐왼뒤에서기본(0도),True,False,False,True,,,0,2,7045
+찐왼뒤에서기본자세(90도),True,False,False,True,,,0,2,7045
+찐왼쪽게걸음(45도),True,False,False,True,,,0,4,10340
+찐오뒤412,True,False,False,True,,,1,1,7045
+찐골넣기실전,False,True,False,True,,,0,5,7045
+찐공확인자세,True,False,True,False,pickup_grasp_check_pose,pickup_grasp_check_pose,0,1,7045
+찐미세오옆꽃게0도,False,True,False,True,,,0,4,7045
+찐제자리좌회전45도-1(5회),True,False,True,False,post_ball_line_turn_left_5,post_ball_line_turn_left_5,1,2,12330
+찐제자리좌회전45도-1(4회),True,False,True,False,post_ball_line_turn_left_4,post_ball_line_turn_left_4,1,2,12330
+찐제자리좌회전45도-1(3회),True,False,True,False,pickup_second_turn_left_3; post_ball_line_turn_left_3,post_ball_line_turn_left_3,1,2,12330
+찐제자리좌회전45도-1(2회),True,False,True,False,line_search_left_2; post_ball_line_turn_left_2,line_search_left_2; post_ball_line_turn_left_2,1,2,12330
+찐제자리좌회전45도-1(1회),True,False,True,False,post_ball_line_turn_left_1,post_ball_line_turn_left_1,1,2,12330
+찐제자리좌회전0도-1(1회),True,False,True,False,pickup_camera_down_turn_left_1,pickup_camera_down_turn_left_1,0,2,12330
+찐제자리좌회전0도-1(2회),True,False,True,False,pickup_camera_down_turn_left_2,pickup_camera_down_turn_left_2,0,2,12330
+찐제자리좌회전0도-1(3회),True,False,True,False,pickup_camera_down_turn_left_3,pickup_camera_down_turn_left_3,0,2,12330
+찐제자리좌회전0도-1(4회),True,False,True,False,pickup_camera_down_turn_left_4,pickup_camera_down_turn_left_4,0,2,12330
+찐제자리좌회전0도-1(5회),True,False,True,False,pickup_camera_down_turn_left_5,pickup_camera_down_turn_left_5,0,2,12330
+찐제자리좌회전90도-1(1회),True,False,True,False,goal_camera_90_turn_left_1,goal_camera_90_turn_left_1,0,2,12330
+찐제자리좌회전90도-1(2회),True,False,True,False,goal_camera_90_turn_left_2,goal_camera_90_turn_left_2,0,2,12330
+찐제자리좌회전90도-1(3회),True,False,True,False,goal_camera_90_turn_left_3,goal_camera_90_turn_left_3,0,2,12330
+찐제자리좌회전90도-1(4회),True,False,True,False,goal_camera_90_turn_left_4,goal_camera_90_turn_left_4,0,2,12330
+찐제자리좌회전90도-1(5회),True,False,True,False,goal_camera_90_turn_left_5,goal_camera_90_turn_left_5,0,2,12330
+찐제자리우회전45도-1(2회),True,False,True,False,line_turn_right_2; post_ball_line_turn_right_2,post_ball_line_turn_right_2,0,2,12330
+찐제자리우회전45도-1(3회),True,False,True,False,line_turn_right_3; post_ball_line_turn_right_3,post_ball_line_turn_right_3,0,2,12330
+찐제자리우회전45도-1(5회),True,False,True,False,line_search_right_5; line_turn_right_5; post_ball_line_turn_right_5,line_search_right_5; post_ball_line_turn_right_5,0,2,12330
+찐제자리우회전45도-1(7회),True,False,True,False,line_turn_right_7; pickup_first_turn_right_7; post_ball_line_turn_right_7,post_ball_line_turn_right_7,0,2,12330
+찐제자리우회전0도-1(2회),True,False,True,False,pickup_camera_down_turn_right_2,pickup_camera_down_turn_right_2,0,2,12330
+찐제자리우회전0도-1(3회),True,False,True,False,pickup_camera_down_turn_right_3,pickup_camera_down_turn_right_3,0,2,12330
+찐제자리우회전0도-1(5회),True,False,True,False,pickup_camera_down_turn_right_5,pickup_camera_down_turn_right_5,0,2,12330
+찐제자리우회전0도-1(7회),True,False,True,False,pickup_camera_down_turn_right_7,pickup_camera_down_turn_right_7,0,2,12330
+찐제자리우회전90도-1(2회),True,False,True,False,goal_camera_90_turn_right_2,goal_camera_90_turn_right_2,0,2,12330
+찐제자리우회전90도-1(3회),True,False,True,False,goal_camera_90_turn_right_3,goal_camera_90_turn_right_3,0,2,12330
+찐제자리우회전90도-1(5회),True,False,True,False,goal_camera_90_turn_right_5,goal_camera_90_turn_right_5,0,2,12330
+찐제자리우회전90도-1(7회),True,False,True,False,goal_camera_90_turn_right_7,goal_camera_90_turn_right_7,0,2,12330
+찐제자리우회전45도(9회),True,False,True,False,line_turn_right_9; line_turn_right_large; pickup_first_turn_right_9; post_ball_line_turn_right_9; post_shot_turn_right_9; stationary_turn_right,post_ball_line_turn_right_9; post_shot_turn_right_9; stationary_turn_right,0,2,12330
+찐제자리우회전0도-1(9회),True,False,True,False,pickup_camera_down_turn_right_9,pickup_camera_down_turn_right_9,0,2,12330
+찐제자리우회전90도-1(9회),True,False,True,False,goal_camera_90_turn_right_9,goal_camera_90_turn_right_9,0,2,12330
+찐제자리좌회전45도-1(6회),True,False,True,False,post_ball_line_turn_left_6; stationary_turn_left,post_ball_line_turn_left_6; stationary_turn_left,1,2,12330
+찐제자리좌회전0도-1(6회),True,False,True,False,pickup_camera_down_turn_left_6,pickup_camera_down_turn_left_6,0,2,12330
+찐제자리좌회전90도-1(6회),True,False,True,False,goal_camera_90_turn_left_6,goal_camera_90_turn_left_6,0,2,12330
+찐오뒤에서미세오뒤,True,False,True,False,pickup_fine_prepare,pickup_fine_prepare,0,2,3505
+찐오뒤에서미세오뒤(왼들),True,False,False,True,,,0,2,3505
+찐미세0도-4,True,False,True,False,pickup_fine_forward_0,pickup_fine_forward_0,0,4,3505
+찐미세45도-4,True,False,True,False,ball_general_fine_forward_8,ball_general_fine_forward_8,0,4,3505
+찐미세90도-4,True,False,False,True,,,0,4,3505
+찐미세90도-4(1회),True,False,True,False,goal_camera_90_fine_forward_1,goal_camera_90_fine_forward_1,0,4,3505
+찐미세오뒤에서기본자세,True,False,True,False,goal_fine_to_default,goal_fine_to_default,0,2,3505
+찐미세90도-4(2회),True,False,True,False,goal_camera_90_fine_forward_2,goal_camera_90_fine_forward_2,0,4,3505
+찐미세90도-4(3회),True,False,True,False,goal_camera_90_fine_forward_3,goal_camera_90_fine_forward_3,0,4,3505
+찐미세90도-4(4회),True,False,True,False,goal_camera_90_fine_forward_4,goal_camera_90_fine_forward_4,0,4,3505
+찐공잡기전후진-2(2회),True,False,True,False,pickup_pre_backward_camera_down,pickup_pre_backward_camera_down,0,4,7045
+찐미세오옆꽃게90도-1,False,True,False,True,,,0,4,7045
+찐미세왼옆꽃게0도-1,True,False,True,False,pickup_crab_left_0,pickup_crab_left_0,0,4,7045
+찐미세왼옆꽃게90도-1,True,False,True,False,goal_camera_90_crab_left,goal_camera_90_crab_left,0,4,7045
+찐후진하고 제자리우회전(공),True,False,True,False,pickup_first_backward_turn_right,pickup_first_backward_turn_right,0,16,2900
+찐기본자세에서 제자리 우회전(골대),True,False,True,False,post_shot_default_turn_right,post_shot_default_turn_right,0,16,10539
+찐기본자세에서 제자리좌회전(골대),True,False,True,False,post_shot_default_turn_left,post_shot_default_turn_left,7,14,2750
+찐후진에서 제자리좌회전(공),True,False,True,False,pickup_second_backward_turn_left,pickup_second_backward_turn_left,8,16,3089
+찐찐전진45(4회),True,False,True,False,ball_camera_down_forward_4; line_forward_4; post_ball_forward_4; sdk_forward_4,ball_camera_down_forward_4; line_forward_4,1,4,1225
+찐찐전진(6회),True,False,True,False,line_forward_6; post_ball_forward_6,line_forward_6,1,4,1225
+찐찐전진45(8회),True,False,False,False,post_ball_forward_8,,1,4,1225
+찐찐전진90(4회),True,False,True,False,goal_camera_90_forward_4,goal_camera_90_forward_4,0,4,1212
+찐찐전진90(6회),True,False,True,False,goal_camera_90_forward_6,goal_camera_90_forward_6,0,4,1212
+찐후진실전-2(2회),True,False,False,True,,,0,4,7045
+찐찐전진90(8회),True,False,False,True,,,0,4,1212
+찐골넣기,True,False,True,False,goal_shot,goal_shot,0,5,7045
+찐후진실전(1회),True,False,True,False,goal_camera_90_backward_1; pickup_lost_ball_backward_1; pickup_retreat_2,goal_camera_90_backward_1; pickup_lost_ball_backward_1; pickup_retreat_2,0,4,7045
+찐오뒤에서기본자세(골대 카메라90도),False,True,False,False,goal_forward_to_default_90,,0,2,7045
+찐미세오뒤에서기본자세(골대 카메라90도),False,True,False,False,goal_fine_to_default_90,,0,2,3505
+찐미세오옆꽃게0-1(1회),True,False,True,False,pickup_crab_right_0,pickup_crab_right_0,0,4,7045
+찐미세오옆꽃게90-1(1회),True,False,True,False,goal_camera_90_crab_right,goal_camera_90_crab_right,0,4,7045
+미세오옆에서오옆꽃게0도,False,True,False,True,,,0,2,7045
+미세오뒤에서 오옆꽃게90도,False,True,False,True,,,0,2,7045
+찐오뒤에서 오옆꽃게90도,True,False,True,False,goal_forward_to_crab_right_90,goal_forward_to_crab_right_90,0,2,7045
+찐미세오뒤에서 오옆꽃게90도,True,False,True,False,goal_fine_to_crab_right_90,goal_fine_to_crab_right_90,0,2,7045
+찐미세오뒤에서오옆꽃게0도,True,False,True,False,pickup_fine_to_crab_right_0,pickup_fine_to_crab_right_0,0,2,7045
+찐찐전진45(2회),True,False,True,False,ball_camera_down_forward_2,ball_camera_down_forward_2,1,4,1225
+찐허들,True,False,True,False,hurdle,hurdle,0,15,7045
+"후진실전-2(1회, 픽업 카메라0도)",False,True,False,True,,,0,4,7045
+찐미세오뒤에서 오뒤(45도),True,False,True,False,fine_to_turn_ready_45,fine_to_turn_ready_45,1,2,1212
+찐미세오뒤에서 오뒤(0도),True,False,True,False,fine_to_turn_ready_0,fine_to_turn_ready_0,0,2,1212
+찐미세오뒤에서 오뒤(골대 카메라90도),False,True,True,False,fine_to_turn_ready_90,fine_to_turn_ready_90,0,2,1212

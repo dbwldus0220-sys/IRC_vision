@@ -1,0 +1,1427 @@
+{
+  "reference": "/home/jet/Downloads/robot_motions(35).json",
+  "runtime": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/robot_motions_runtime.json",
+  "sha256": {
+    "/home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/robot_motions_runtime.json": "cc7305112f987fbec68efa5b737d80d2cea04f4203252f9ebbe03828d0a97568",
+    "/home/jet/Downloads/robot_motions(35).json": "2d855f67d03e8cc156240812e39602621315f4602a10089500b7ef0fc69c2957",
+    "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/config/motion_aliases.yaml": "0cd56fdb24bbc59b40f72bb5d010e4c15e9f69b5dedf9528d2df9f48529ee1cf",
+    "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/mission_control/motion_command_bridge_node.py": "307b6330ad38085462ef4fdb4da2823062dfe3b5910d1fee4187c7371861d483"
+  },
+  "comparison": "Exact motion names, preserving spaces and punctuation",
+  "usage_scope": "Current motion_command_bridge_node action mappings, sequences and preparation branches; no robot execution",
+  "runtime_count": 89,
+  "reference_count": 85,
+  "runtime_only_count": 10,
+  "unused_auto_count": 20,
+  "union_count": 21,
+  "unused_aliases": [
+    "goal_fine_to_default_90",
+    "goal_forward_to_default_90",
+    "line_recovery_left_6",
+    "line_turn_right_2",
+    "line_turn_right_3",
+    "line_turn_right_5",
+    "line_turn_right_7",
+    "line_turn_right_9",
+    "line_turn_right_large",
+    "pickup_first_turn_right_7",
+    "pickup_first_turn_right_9",
+    "pickup_second_turn_left_3",
+    "post_ball_forward_4",
+    "post_ball_forward_6",
+    "post_ball_forward_8",
+    "sdk_forward_4",
+    "sdk_pickup"
+  ],
+  "source_only_names": [
+    "찐라인복귀우회전45도(6회)",
+    "찐라인복귀우회전45도(8회)",
+    "찐라인복귀우회전90도(4회)",
+    "찐미세오옆꽃게90-1(2회)",
+    "찐미세오옆꽃게90-1(3회)",
+    "찐찐전진90(2회)"
+  ],
+  "motions": [
+    {
+      "name": "찐공잡기리그랩까지 실전",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "pickup",
+        "sdk_pickup"
+      ],
+      "connected_aliases": [
+        "pickup"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 11,
+      "max_seq_ms": 8000
+    },
+    {
+      "name": "찐찐라인복귀좌회전45도(4회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "line_recovery_left_4"
+      ],
+      "connected_aliases": [
+        "line_recovery_left_4"
+      ],
+      "startup_pose_frame_count": 1,
+      "frame_count": 4,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐찐라인복귀좌회전45도(6회)",
+      "in_latest_json": false,
+      "in_runtime_only": true,
+      "auto_command_connected": false,
+      "no_alias": false,
+      "aliases": [
+        "line_recovery_left_6"
+      ],
+      "connected_aliases": [],
+      "startup_pose_frame_count": 1,
+      "frame_count": 4,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐라인복귀우회전45 도(4회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "line_recovery_right_4"
+      ],
+      "connected_aliases": [
+        "line_recovery_right_4"
+      ],
+      "startup_pose_frame_count": 1,
+      "frame_count": 4,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐오뒤에서 기본자세(카메라45도)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": false,
+      "no_alias": true,
+      "aliases": [],
+      "connected_aliases": [],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐오뒤카메라90도",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "post_ball_camera_90"
+      ],
+      "connected_aliases": [
+        "post_ball_camera_90"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 1,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐오뒤에서기본자세(0도)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": false,
+      "no_alias": true,
+      "aliases": [],
+      "connected_aliases": [],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐왼뒤에서기본(0도)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": false,
+      "no_alias": true,
+      "aliases": [],
+      "connected_aliases": [],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐왼뒤에서기본자세(90도)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": false,
+      "no_alias": true,
+      "aliases": [],
+      "connected_aliases": [],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐왼쪽게걸음(45도)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": false,
+      "no_alias": true,
+      "aliases": [],
+      "connected_aliases": [],
+      "startup_pose_frame_count": 0,
+      "frame_count": 4,
+      "max_seq_ms": 10340
+    },
+    {
+      "name": "찐오뒤412",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": false,
+      "no_alias": true,
+      "aliases": [],
+      "connected_aliases": [],
+      "startup_pose_frame_count": 1,
+      "frame_count": 1,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐골넣기실전",
+      "in_latest_json": false,
+      "in_runtime_only": true,
+      "auto_command_connected": false,
+      "no_alias": true,
+      "aliases": [],
+      "connected_aliases": [],
+      "startup_pose_frame_count": 0,
+      "frame_count": 5,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐공확인자세",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "pickup_grasp_check_pose"
+      ],
+      "connected_aliases": [
+        "pickup_grasp_check_pose"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 1,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐미세오옆꽃게0도",
+      "in_latest_json": false,
+      "in_runtime_only": true,
+      "auto_command_connected": false,
+      "no_alias": true,
+      "aliases": [],
+      "connected_aliases": [],
+      "startup_pose_frame_count": 0,
+      "frame_count": 4,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐제자리좌회전45도-1(5회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "post_ball_line_turn_left_5"
+      ],
+      "connected_aliases": [
+        "post_ball_line_turn_left_5"
+      ],
+      "startup_pose_frame_count": 1,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리좌회전45도-1(4회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "post_ball_line_turn_left_4"
+      ],
+      "connected_aliases": [
+        "post_ball_line_turn_left_4"
+      ],
+      "startup_pose_frame_count": 1,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리좌회전45도-1(3회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "pickup_second_turn_left_3",
+        "post_ball_line_turn_left_3"
+      ],
+      "connected_aliases": [
+        "post_ball_line_turn_left_3"
+      ],
+      "startup_pose_frame_count": 1,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리좌회전45도-1(2회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "line_search_left_2",
+        "post_ball_line_turn_left_2"
+      ],
+      "connected_aliases": [
+        "line_search_left_2",
+        "post_ball_line_turn_left_2"
+      ],
+      "startup_pose_frame_count": 1,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리좌회전45도-1(1회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "post_ball_line_turn_left_1"
+      ],
+      "connected_aliases": [
+        "post_ball_line_turn_left_1"
+      ],
+      "startup_pose_frame_count": 1,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리좌회전0도-1(1회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "pickup_camera_down_turn_left_1"
+      ],
+      "connected_aliases": [
+        "pickup_camera_down_turn_left_1"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리좌회전0도-1(2회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "pickup_camera_down_turn_left_2"
+      ],
+      "connected_aliases": [
+        "pickup_camera_down_turn_left_2"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리좌회전0도-1(3회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "pickup_camera_down_turn_left_3"
+      ],
+      "connected_aliases": [
+        "pickup_camera_down_turn_left_3"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리좌회전0도-1(4회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "pickup_camera_down_turn_left_4"
+      ],
+      "connected_aliases": [
+        "pickup_camera_down_turn_left_4"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리좌회전0도-1(5회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "pickup_camera_down_turn_left_5"
+      ],
+      "connected_aliases": [
+        "pickup_camera_down_turn_left_5"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리좌회전90도-1(1회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_camera_90_turn_left_1"
+      ],
+      "connected_aliases": [
+        "goal_camera_90_turn_left_1"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리좌회전90도-1(2회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_camera_90_turn_left_2"
+      ],
+      "connected_aliases": [
+        "goal_camera_90_turn_left_2"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리좌회전90도-1(3회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_camera_90_turn_left_3"
+      ],
+      "connected_aliases": [
+        "goal_camera_90_turn_left_3"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리좌회전90도-1(4회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_camera_90_turn_left_4"
+      ],
+      "connected_aliases": [
+        "goal_camera_90_turn_left_4"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리좌회전90도-1(5회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_camera_90_turn_left_5"
+      ],
+      "connected_aliases": [
+        "goal_camera_90_turn_left_5"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리우회전45도-1(2회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "line_turn_right_2",
+        "post_ball_line_turn_right_2"
+      ],
+      "connected_aliases": [
+        "post_ball_line_turn_right_2"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리우회전45도-1(3회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "line_turn_right_3",
+        "post_ball_line_turn_right_3"
+      ],
+      "connected_aliases": [
+        "post_ball_line_turn_right_3"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리우회전45도-1(5회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "line_search_right_5",
+        "line_turn_right_5",
+        "post_ball_line_turn_right_5"
+      ],
+      "connected_aliases": [
+        "line_search_right_5",
+        "post_ball_line_turn_right_5"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리우회전45도-1(7회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "line_turn_right_7",
+        "pickup_first_turn_right_7",
+        "post_ball_line_turn_right_7"
+      ],
+      "connected_aliases": [
+        "post_ball_line_turn_right_7"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리우회전0도-1(2회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "pickup_camera_down_turn_right_2"
+      ],
+      "connected_aliases": [
+        "pickup_camera_down_turn_right_2"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리우회전0도-1(3회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "pickup_camera_down_turn_right_3"
+      ],
+      "connected_aliases": [
+        "pickup_camera_down_turn_right_3"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리우회전0도-1(5회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "pickup_camera_down_turn_right_5"
+      ],
+      "connected_aliases": [
+        "pickup_camera_down_turn_right_5"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리우회전0도-1(7회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "pickup_camera_down_turn_right_7"
+      ],
+      "connected_aliases": [
+        "pickup_camera_down_turn_right_7"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리우회전90도-1(2회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_camera_90_turn_right_2"
+      ],
+      "connected_aliases": [
+        "goal_camera_90_turn_right_2"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리우회전90도-1(3회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_camera_90_turn_right_3"
+      ],
+      "connected_aliases": [
+        "goal_camera_90_turn_right_3"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리우회전90도-1(5회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_camera_90_turn_right_5"
+      ],
+      "connected_aliases": [
+        "goal_camera_90_turn_right_5"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리우회전90도-1(7회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_camera_90_turn_right_7"
+      ],
+      "connected_aliases": [
+        "goal_camera_90_turn_right_7"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리우회전45도(9회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "line_turn_right_9",
+        "line_turn_right_large",
+        "pickup_first_turn_right_9",
+        "post_ball_line_turn_right_9",
+        "post_shot_turn_right_9",
+        "stationary_turn_right"
+      ],
+      "connected_aliases": [
+        "post_ball_line_turn_right_9",
+        "post_shot_turn_right_9",
+        "stationary_turn_right"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리우회전0도-1(9회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "pickup_camera_down_turn_right_9"
+      ],
+      "connected_aliases": [
+        "pickup_camera_down_turn_right_9"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리우회전90도-1(9회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_camera_90_turn_right_9"
+      ],
+      "connected_aliases": [
+        "goal_camera_90_turn_right_9"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리좌회전45도-1(6회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "post_ball_line_turn_left_6",
+        "stationary_turn_left"
+      ],
+      "connected_aliases": [
+        "post_ball_line_turn_left_6",
+        "stationary_turn_left"
+      ],
+      "startup_pose_frame_count": 1,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리좌회전0도-1(6회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "pickup_camera_down_turn_left_6"
+      ],
+      "connected_aliases": [
+        "pickup_camera_down_turn_left_6"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐제자리좌회전90도-1(6회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_camera_90_turn_left_6"
+      ],
+      "connected_aliases": [
+        "goal_camera_90_turn_left_6"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 12330
+    },
+    {
+      "name": "찐오뒤에서미세오뒤",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "pickup_fine_prepare"
+      ],
+      "connected_aliases": [
+        "pickup_fine_prepare"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 3505
+    },
+    {
+      "name": "찐오뒤에서미세오뒤(왼들)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": false,
+      "no_alias": true,
+      "aliases": [],
+      "connected_aliases": [],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 3505
+    },
+    {
+      "name": "찐미세0도-4",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "pickup_fine_forward_0"
+      ],
+      "connected_aliases": [
+        "pickup_fine_forward_0"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 4,
+      "max_seq_ms": 3505
+    },
+    {
+      "name": "찐미세45도-4",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "ball_general_fine_forward_8"
+      ],
+      "connected_aliases": [
+        "ball_general_fine_forward_8"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 4,
+      "max_seq_ms": 3505
+    },
+    {
+      "name": "찐미세90도-4",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": false,
+      "no_alias": true,
+      "aliases": [],
+      "connected_aliases": [],
+      "startup_pose_frame_count": 0,
+      "frame_count": 4,
+      "max_seq_ms": 3505
+    },
+    {
+      "name": "찐미세90도-4(1회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_camera_90_fine_forward_1"
+      ],
+      "connected_aliases": [
+        "goal_camera_90_fine_forward_1"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 4,
+      "max_seq_ms": 3505
+    },
+    {
+      "name": "찐미세오뒤에서기본자세",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_fine_to_default"
+      ],
+      "connected_aliases": [
+        "goal_fine_to_default"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 3505
+    },
+    {
+      "name": "찐미세90도-4(2회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_camera_90_fine_forward_2"
+      ],
+      "connected_aliases": [
+        "goal_camera_90_fine_forward_2"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 4,
+      "max_seq_ms": 3505
+    },
+    {
+      "name": "찐미세90도-4(3회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_camera_90_fine_forward_3"
+      ],
+      "connected_aliases": [
+        "goal_camera_90_fine_forward_3"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 4,
+      "max_seq_ms": 3505
+    },
+    {
+      "name": "찐미세90도-4(4회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_camera_90_fine_forward_4"
+      ],
+      "connected_aliases": [
+        "goal_camera_90_fine_forward_4"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 4,
+      "max_seq_ms": 3505
+    },
+    {
+      "name": "찐공잡기전후진-2(2회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "pickup_pre_backward_camera_down"
+      ],
+      "connected_aliases": [
+        "pickup_pre_backward_camera_down"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 4,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐미세오옆꽃게90도-1",
+      "in_latest_json": false,
+      "in_runtime_only": true,
+      "auto_command_connected": false,
+      "no_alias": true,
+      "aliases": [],
+      "connected_aliases": [],
+      "startup_pose_frame_count": 0,
+      "frame_count": 4,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐미세왼옆꽃게0도-1",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "pickup_crab_left_0"
+      ],
+      "connected_aliases": [
+        "pickup_crab_left_0"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 4,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐미세왼옆꽃게90도-1",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_camera_90_crab_left"
+      ],
+      "connected_aliases": [
+        "goal_camera_90_crab_left"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 4,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐후진하고 제자리우회전(공)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "pickup_first_backward_turn_right"
+      ],
+      "connected_aliases": [
+        "pickup_first_backward_turn_right"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 16,
+      "max_seq_ms": 2900
+    },
+    {
+      "name": "찐기본자세에서 제자리 우회전(골대)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "post_shot_default_turn_right"
+      ],
+      "connected_aliases": [
+        "post_shot_default_turn_right"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 16,
+      "max_seq_ms": 10539
+    },
+    {
+      "name": "찐기본자세에서 제자리좌회전(골대)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "post_shot_default_turn_left"
+      ],
+      "connected_aliases": [
+        "post_shot_default_turn_left"
+      ],
+      "startup_pose_frame_count": 7,
+      "frame_count": 14,
+      "max_seq_ms": 2750
+    },
+    {
+      "name": "찐후진에서 제자리좌회전(공)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "pickup_second_backward_turn_left"
+      ],
+      "connected_aliases": [
+        "pickup_second_backward_turn_left"
+      ],
+      "startup_pose_frame_count": 8,
+      "frame_count": 16,
+      "max_seq_ms": 3089
+    },
+    {
+      "name": "찐찐전진45(4회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "ball_camera_down_forward_4",
+        "line_forward_4",
+        "post_ball_forward_4",
+        "sdk_forward_4"
+      ],
+      "connected_aliases": [
+        "ball_camera_down_forward_4",
+        "line_forward_4"
+      ],
+      "startup_pose_frame_count": 1,
+      "frame_count": 4,
+      "max_seq_ms": 1225
+    },
+    {
+      "name": "찐찐전진(6회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "line_forward_6",
+        "post_ball_forward_6"
+      ],
+      "connected_aliases": [
+        "line_forward_6"
+      ],
+      "startup_pose_frame_count": 1,
+      "frame_count": 4,
+      "max_seq_ms": 1225
+    },
+    {
+      "name": "찐찐전진45(8회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": false,
+      "no_alias": false,
+      "aliases": [
+        "post_ball_forward_8"
+      ],
+      "connected_aliases": [],
+      "startup_pose_frame_count": 1,
+      "frame_count": 4,
+      "max_seq_ms": 1225
+    },
+    {
+      "name": "찐찐전진90(4회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_camera_90_forward_4"
+      ],
+      "connected_aliases": [
+        "goal_camera_90_forward_4"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 4,
+      "max_seq_ms": 1212
+    },
+    {
+      "name": "찐찐전진90(6회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_camera_90_forward_6"
+      ],
+      "connected_aliases": [
+        "goal_camera_90_forward_6"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 4,
+      "max_seq_ms": 1212
+    },
+    {
+      "name": "찐후진실전-2(2회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": false,
+      "no_alias": true,
+      "aliases": [],
+      "connected_aliases": [],
+      "startup_pose_frame_count": 0,
+      "frame_count": 4,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐찐전진90(8회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": false,
+      "no_alias": true,
+      "aliases": [],
+      "connected_aliases": [],
+      "startup_pose_frame_count": 0,
+      "frame_count": 4,
+      "max_seq_ms": 1212
+    },
+    {
+      "name": "찐골넣기",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_shot"
+      ],
+      "connected_aliases": [
+        "goal_shot"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 5,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐후진실전(1회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_camera_90_backward_1",
+        "pickup_lost_ball_backward_1",
+        "pickup_retreat_2"
+      ],
+      "connected_aliases": [
+        "goal_camera_90_backward_1",
+        "pickup_lost_ball_backward_1",
+        "pickup_retreat_2"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 4,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐오뒤에서기본자세(골대 카메라90도)",
+      "in_latest_json": false,
+      "in_runtime_only": true,
+      "auto_command_connected": false,
+      "no_alias": false,
+      "aliases": [
+        "goal_forward_to_default_90"
+      ],
+      "connected_aliases": [],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐미세오뒤에서기본자세(골대 카메라90도)",
+      "in_latest_json": false,
+      "in_runtime_only": true,
+      "auto_command_connected": false,
+      "no_alias": false,
+      "aliases": [
+        "goal_fine_to_default_90"
+      ],
+      "connected_aliases": [],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 3505
+    },
+    {
+      "name": "찐미세오옆꽃게0-1(1회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "pickup_crab_right_0"
+      ],
+      "connected_aliases": [
+        "pickup_crab_right_0"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 4,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐미세오옆꽃게90-1(1회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_camera_90_crab_right"
+      ],
+      "connected_aliases": [
+        "goal_camera_90_crab_right"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 4,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "미세오옆에서오옆꽃게0도",
+      "in_latest_json": false,
+      "in_runtime_only": true,
+      "auto_command_connected": false,
+      "no_alias": true,
+      "aliases": [],
+      "connected_aliases": [],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "미세오뒤에서 오옆꽃게90도",
+      "in_latest_json": false,
+      "in_runtime_only": true,
+      "auto_command_connected": false,
+      "no_alias": true,
+      "aliases": [],
+      "connected_aliases": [],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐오뒤에서 오옆꽃게90도",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_forward_to_crab_right_90"
+      ],
+      "connected_aliases": [
+        "goal_forward_to_crab_right_90"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐미세오뒤에서 오옆꽃게90도",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "goal_fine_to_crab_right_90"
+      ],
+      "connected_aliases": [
+        "goal_fine_to_crab_right_90"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐미세오뒤에서오옆꽃게0도",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "pickup_fine_to_crab_right_0"
+      ],
+      "connected_aliases": [
+        "pickup_fine_to_crab_right_0"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐찐전진45(2회)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "ball_camera_down_forward_2"
+      ],
+      "connected_aliases": [
+        "ball_camera_down_forward_2"
+      ],
+      "startup_pose_frame_count": 1,
+      "frame_count": 4,
+      "max_seq_ms": 1225
+    },
+    {
+      "name": "찐허들",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "hurdle"
+      ],
+      "connected_aliases": [
+        "hurdle"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 15,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "후진실전-2(1회, 픽업 카메라0도)",
+      "in_latest_json": false,
+      "in_runtime_only": true,
+      "auto_command_connected": false,
+      "no_alias": true,
+      "aliases": [],
+      "connected_aliases": [],
+      "startup_pose_frame_count": 0,
+      "frame_count": 4,
+      "max_seq_ms": 7045
+    },
+    {
+      "name": "찐미세오뒤에서 오뒤(45도)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "fine_to_turn_ready_45"
+      ],
+      "connected_aliases": [
+        "fine_to_turn_ready_45"
+      ],
+      "startup_pose_frame_count": 1,
+      "frame_count": 2,
+      "max_seq_ms": 1212
+    },
+    {
+      "name": "찐미세오뒤에서 오뒤(0도)",
+      "in_latest_json": true,
+      "in_runtime_only": false,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "fine_to_turn_ready_0"
+      ],
+      "connected_aliases": [
+        "fine_to_turn_ready_0"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 1212
+    },
+    {
+      "name": "찐미세오뒤에서 오뒤(골대 카메라90도)",
+      "in_latest_json": false,
+      "in_runtime_only": true,
+      "auto_command_connected": true,
+      "no_alias": false,
+      "aliases": [
+        "fine_to_turn_ready_90"
+      ],
+      "connected_aliases": [
+        "fine_to_turn_ready_90"
+      ],
+      "startup_pose_frame_count": 0,
+      "frame_count": 2,
+      "max_seq_ms": 1212
+    }
+  ]
+}

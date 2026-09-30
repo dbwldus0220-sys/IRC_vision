@@ -68,8 +68,10 @@ def test_rgb_ball_remains_candidate_without_depth():
     assert state[0] == "NO_DEPTH"
 
 
-def test_pending_confirmation_publishes_current_image_side_without_control_readiness():
-    analyzer = _analyzer_with_depth(None, False)
+@pytest.mark.parametrize("depth,valid", [(None, False), (1.3, True)])
+def test_pending_confirmation_publishes_current_image_side_without_control_readiness(depth, valid):
+    analyzer = _analyzer_with_depth(depth, valid)
+    analyzer._last_depth_age_sec = 0.05
     analyzer.ball_class_name = "ball"
     analyzer.publish_empty_when_missing = True
     analyzer.confirmation_filter = TemporalConfirmationFilter(window_size=20, required_hits=12)
@@ -97,10 +99,21 @@ def test_pending_confirmation_publishes_current_image_side_without_control_readi
     assert pending["image_height"] == 720
     assert pending["center_y"] == 529
     assert pending["bbox"] == [680, 500, 736, 558]
+    candidate = pending["approach_candidate"]
+    assert candidate["depth_valid"] is valid
+    assert candidate["depth_age_sec"] == 0.05
+    assert candidate["bottom_distance_px"] == 190
+    assert candidate["head_down_requested"] is False
+    assert "ground_projection_enabled" in candidate
+    if valid:
+        assert candidate["distance_m"] > 1.0
+    else:
+        assert candidate["distance_m"] is None
     analyzer._detections_callback(String(data=json.dumps({"detections": []})))
     lost = json.loads(published[-1].data)
     assert lost["raw_detected"] is False
     assert lost["camera_center_offset_x_px"] is None
+    assert "approach_candidate" not in lost
 
 
 def test_ball_path_angle_uses_shifted_bottom_center_axis():

@@ -1,0 +1,12 @@
+[INFO] [1790698391.965372462] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+[INFO] [1790698392.901504278] [motion_decision_node]: HURDLE positioning entry latched: depth_m=0.691, bottom_distance_px=127.0, head_down_requested=False
+[INFO] [1790698394.263958606] [motion_decision_node]: HURDLE positioning started after current motion
+[INFO] [1790698394.413115436] [motion_decision_node]: HURDLE final sequence latched: depth_m=0.536, center_steering_deg=-42.52177483180997, observed_during_action=None
+[INFO] [1790698410.666486519] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+[INFO] [1790698413.138469998] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_RIGHT_4
+[INFO] [1790698415.760866975] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+[INFO] [1790698418.239969906] [motion_decision_node]: BALL approach entry latched during motion: distance_m=1.142
+[INFO] [1790698422.433373289] [motion_decision_node]: BALL confirmation completed; releasing pending hold
+[INFO] [1790698426.221891949] [motion_decision_node]: BALL pickup entry latched: distance_m=0.540
+[INFO] [1790698426.901067620] [motion_decision_node]: BALL pickup entry pending; waiting for fresh vision
+[INFO] [1790698465.767745334] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4

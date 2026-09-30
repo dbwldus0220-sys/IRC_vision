@@ -1,4 +1,4 @@
-"""Ground contact steering, legacy head-pose separation, and display tests."""
+"""Ground contact projection, distance-based steering, and display tests."""
 
 from dataclasses import fields
 import json
@@ -21,6 +21,7 @@ def ground_info(angle=20.0, **overrides):
         "ground_projection_scope": "ball_approach_only",
         "ground_coordinate_frame": "robot_x_right_z_forward",
         "ground_steering_angle_deg": angle,
+        "ground_forward_distance_m": 0.9,
         "steering_angle_deg": -45.0, "bearing_deg": -30.0,
         "offset_x_norm": 0.0, "offset_x_px": 0,
         "depth_valid": True, "depth_age_sec": 0.01,
@@ -116,28 +117,30 @@ def test_invalid_ground_metadata_never_falls_back_to_pixel_angle(overrides):
     assert planner.plan(info, 0.1).valid is False
 
 
-def test_invalid_ground_contact_does_not_change_close_pickup_entry():
+def test_invalid_ground_contact_cannot_choose_steering_at_pickup_entry():
     command = BallNavigationPlanner().plan(
         ground_info(distance_m=0.5, ground_projection_valid=False), 0.1,
     )
-    assert command.motion == "PICKUP_NOW"
+    assert command.valid is False
+    assert command.reason == "invalid_ball_alignment"
 
 
-@pytest.mark.parametrize("head_down", [False, True])
+@pytest.mark.parametrize("pickup", [False, True])
+@pytest.mark.parametrize("near", [False, True])
 @pytest.mark.parametrize("width,height", [(1280, 720), (640, 360)])
-def test_display_distinguishes_ground_approach_from_head_down(
-    monkeypatch, head_down, width, height,
+def test_display_reports_distance_based_source_in_all_phases(
+    monkeypatch, pickup, near, width, height,
 ):
     detector = object.__new__(Yolo26Detector)
     detector.show_ball_metrics = True
-    info = ground_info()
+    info = ground_info(ground_forward_distance_m=0.35 if near else 0.9)
     command = {
         "source": "ball", "action": "WAIT",
-        "phase": "BALL_PICKUP_INITIAL_ALIGN" if head_down else "BALL_APPROACH_ALIGN",
+        "phase": "BALL_PICKUP_INITIAL_ALIGN" if pickup else "BALL_APPROACH_ALIGN",
         "source_command": {
-            "steering_error_deg": -45.0 if head_down else 20.0,
+            "steering_error_deg": -45.0 if near else 20.0,
             "steering_source": (
-                "head_down_image_angle" if head_down else "ground_steering_angle_deg"
+                "near_image_angle" if near else "ground_steering_angle_deg"
             ),
         },
     }
@@ -152,10 +155,10 @@ def test_display_distinguishes_ground_approach_from_head_down(
     detector._draw_ball_metrics(np.zeros((height, width, 3), dtype=np.uint8))
     rows = dict(text.split(":", 1) for text, _ in texts if ":" in text)
     assert rows["Image angle "].strip() == "-45.0deg"
-    assert rows["Ground steer"].strip() == ("N/A" if head_down else "+20.00deg")
-    assert rows["Steering    "].strip() == ("-45.00deg" if head_down else "+20.00deg")
+    assert rows["Ground steer"].strip() == "+20.00deg"
+    assert rows["Steering    "].strip() == ("-45.00deg" if near else "+20.00deg")
     assert rows["Angle source"].strip() == (
-        "IMAGE / HEAD DOWN" if head_down else "GROUND / APPROACH"
+        "IMAGE / <=35cm" if near else "GROUND / >35cm"
     )
     assert all(0 <= origin[1] < height for _, origin in texts)
 
@@ -215,3 +218,56 @@ def test_extrapolation_still_rejects_invalid_projection(homography):
     assert result["ground_projection_valid"] is False
     assert result["ground_steering_angle_deg"] is None
     json.dumps(result, allow_nan=False)
+
+
+@pytest.mark.parametrize("forward,expected,source", [
+    (0.20, -45.0, "near_image_angle"),
+    (0.349999, -45.0, "near_image_angle"),
+    (0.35, -45.0, "near_image_angle"),
+    (0.350001, 20.0, "ground_steering_angle_deg"),
+    (1.05, 20.0, "ground_steering_angle_deg"),
+    (1.8, 20.0, "ground_steering_angle_deg"),
+])
+@pytest.mark.parametrize("depth", [0.30, 0.9])
+def test_switch_uses_ground_forward_not_depth(forward, expected, source, depth):
+    info = ground_info(
+        ground_forward_distance_m=forward, depth_m=depth, distance_m=depth,
+        offset_x_norm=-0.3,
+    )
+    planner = BallNavigationPlanner()
+    assert planner.select_steering(info) == (expected, source)
+    assert planner.approach_steering_error(info) == expected
+    command = planner.plan(info, 0.1)
+    assert command.valid
+    if depth > planner.config.pickup_sequence_start_distance_m:
+        assert command.steering_error_deg == expected
+        assert command.steering_source == source
+    else:
+        assert command.motion == "PICKUP_NOW"
+
+
+@pytest.mark.parametrize("forward", [None, True, 0.0, -0.1, float("nan"), float("inf")])
+def test_invalid_ground_forward_never_selects_a_distance_branch(forward):
+    planner = BallNavigationPlanner()
+    info = ground_info(ground_forward_distance_m=forward)
+    assert planner.approach_steering_error(info) is None
+    assert not planner.plan(info, 0.1).valid
+
+
+def test_near_image_keeps_original_pixel_deadband_without_requiring_ground_angle():
+    planner = BallNavigationPlanner()
+    info = ground_info(
+        ground_forward_distance_m=0.35, distance_m=0.5,
+        ground_steering_angle_deg=None,
+    )
+    assert planner.select_steering(info) == (0.0, "near_image_angle")
+    info["offset_x_norm"] = -0.3
+    assert planner.select_steering(info) == (-45.0, "near_image_angle")
+
+
+def test_crossing_boundary_reselects_angle_each_frame():
+    planner = BallNavigationPlanner()
+    info = ground_info(offset_x_norm=-0.3)
+    for forward, expected in [(0.36, 20.0), (0.35, -45.0), (0.34, -45.0), (0.36, 20.0)]:
+        info["ground_forward_distance_m"] = forward
+        assert planner.approach_steering_error(info) == expected

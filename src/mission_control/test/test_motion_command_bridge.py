@@ -50,7 +50,6 @@ class FakeBridge:
     PICKUP_FINE_RIGHT_CRAB_PREPARE_MOTION_ID = (
         MotionCommandBridgeNode.PICKUP_FINE_RIGHT_CRAB_PREPARE_MOTION_ID
     )
-    GOAL_FINE_CRAB_PREPARE_MOTION_ID = MotionCommandBridgeNode.GOAL_FINE_CRAB_PREPARE_MOTION_ID
     GOAL_FORWARD_CRAB_PREPARE_MOTION_ID = (
         MotionCommandBridgeNode.GOAL_FORWARD_CRAB_PREPARE_MOTION_ID
     )
@@ -2369,12 +2368,10 @@ def test_close_ball_backward_failure_does_not_repeat_or_start_grasp(stage, statu
     ("GOAL_CAMERA_90_FORWARD", "goal_forward_to_crab_right_90"),
     ("GOAL_CAMERA_90_FORWARD_1", "goal_forward_to_crab_right_90"),
     ("GOAL_CAMERA_90_FORWARD_2", "goal_forward_to_crab_right_90"),
-    *[(f"GOAL_CAMERA90_FINE_FORWARD_{count}", "goal_fine_to_default_90")
+    *[(f"GOAL_CAMERA90_FINE_FORWARD_{count}", "goal_fine_to_crab_right_90")
       for count in range(1, 5)],
 ])
 def test_goal_crab_prepares_after_completed_approach(approach, prepare, direction):
-    if direction == "RIGHT" and approach.startswith("GOAL_CAMERA90_FINE_FORWARD_"):
-        prepare = "goal_fine_to_crab_right_90"
     bridge = FakeBridge()
     bridge.navigation_command_callback(navigation_message(action=approach, command_id=1))
     complete_active_motion(bridge)
@@ -2559,7 +2556,10 @@ def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
         "bottom_distance_px": 200, "hurdle_angle_deg": 0.0,
         "go_now": False, "pickup_ready": False, "pickup_now": False,
     }
-    decision = planner.plan("AUTO", {source: sample, "line": line_info()}, 0.1)
+    sample.update(bbox=[400, 300, 1000, 500], image_width=1280, image_height=720)
+    route = {**line_info(), "robot_center_x_px": 710,
+             "center_points_px": [[710, 650], [710, 580], [710, 250]]}
+    decision = planner.plan("AUTO", {source: sample, "line": route}, 0.1)
     if source == "hurdle":
         assert decision.source == "hurdle"
         motion_name = "찐미세0도-4" if distance <= 0.700 else "찐찐전진45(4회)"
@@ -2597,7 +2597,7 @@ def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
     (-64.999, 5, 45), (-65, 7, 65), (-94.999, 7, 65),
     (-95, 9, 95), (-120, 9, 95),
 ])
-def test_hurdle_center_error_selects_calibrated_runtime_turn(error, count, turn_angle):
+def test_hurdle_fine_center_error_never_dispatches_turn(error, count, turn_angle):
     from pathlib import Path
     import yaml
 
@@ -2606,44 +2606,21 @@ def test_hurdle_center_error_selects_calibrated_runtime_turn(error, count, turn_
         "confidence": 0.9, "depth_valid": True, "depth_m": 0.55,
         "hurdle_angle_deg": 0, "bearing_deg": -error, "bottom_distance_px": 200,
     }}, 0.1)
-    direction = "LEFT" if error > 0 else "RIGHT"
     assert decision.valid and decision.source == "hurdle"
-    if abs(error) < 70.0:
-        assert decision.action == "STRAIGHT_0"
-        assert "turn_count" not in decision.source_command
-        bridge = FakeBridge()
-        bridge.navigation_command_callback(navigation_message(
-            source=decision.source, action=decision.action,
-            source_command=decision.source_command,
-        ))
-        request = decoded_messages(bridge.executor_request_publisher)[-1]
-        assert request["motion_id"] == "pickup_fine_forward_0"
-        return
-    assert decision.action == f"ALIGN_{direction}"
-    assert decision.source_command["turn_count"] == count
-    assert decision.source_command["turn_angle_deg"] == turn_angle
-    assert not decision.requires_ack and not decision.sdk_motion_requested
-
+    assert decision.action == "STRAIGHT_0"
+    assert "turn_count" not in decision.source_command
     bridge = FakeBridge()
     bridge.navigation_command_callback(navigation_message(
         source=decision.source, action=decision.action,
         source_command=decision.source_command,
     ))
-    request = decoded_messages(bridge.executor_request_publisher)[-1]
-    assert request["motion_id"] == f"post_ball_line_turn_{direction.lower()}_{count}"
-    root = Path(__file__).resolve().parents[3]
-    aliases = yaml.safe_load((root / "src/irc_step_motion_executor/config/motion_aliases.yaml").read_text())["motion_aliases"]
-    runtime = json.loads((root / "artifacts/robot_motions_runtime.json").read_text())
-    assert aliases[request["motion_id"]] in {m["name"] for m in runtime["motions"]}
-    complete_active_motion(bridge)
-    status = decoded_messages(bridge.motion_status_publisher)[-1]
-    assert (status["action"], status["status"]) == (decision.action, "SUCCEEDED")
+    assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == "pickup_fine_forward_0"
 
 
 @pytest.mark.parametrize("error,bottom,depth,expected", [
     (8, 200, 0.55, "STRAIGHT_0"), (-8, 200, 0.55, "STRAIGHT_0"),
     (0, 200, 0.55, "STRAIGHT_0"), (0, 200, 0.20, "GO"),
-    (40, 100, 0.4, "STRAIGHT_0"), (-40, 100, 0.4, "STRAIGHT_0"),
+    (40, 100, 0.4, "GO"), (-40, 100, 0.4, "GO"),
 ])
 def test_hurdle_turn_sizing_preserves_parallel_and_close_behavior(
     error, bottom, depth, expected,
@@ -2749,7 +2726,7 @@ def test_hurdle_final_sequence_waits_until_current_motion_finishes():
 @pytest.mark.parametrize("depth,motion_id", [
     (0.550, "pickup_fine_forward_0"),
     (0.550001, "pickup_fine_forward_0"), (0.7, "pickup_fine_forward_0"),
-    (0.700001, "line_forward_4"),
+    (0.700001, "pickup_fine_forward_0"),
 ])
 @pytest.mark.parametrize("angle", [None, 20.0])
 def test_close_hurdle_valid_depth_selects_actual_motion_without_turning(depth, motion_id, angle):
@@ -2832,10 +2809,10 @@ def test_each_go_retry_has_a_new_full_one_second_hold(monkeypatch, fallback):
 
 
 
-def hurdle_fine_sequence_message(command_id=8100):
+def hurdle_fine_sequence_message(command_id=8100, depth=0.20):
     decision = MotionDecisionPlanner().plan("HURDLE_POSITIONING", {"hurdle": {
         "detected": True, "confirmation_confirmed": True, "confidence": 0.9,
-        "depth_valid": True, "depth_m": 0.20, "hurdle_angle_deg": None,
+        "depth_valid": True, "depth_m": depth, "hurdle_angle_deg": None,
         "bottom_distance_px": 200, "camera_center_offset_x_px": 0, "go_now": False,
     }}, 0.1)
     assert decision.valid and decision.action == "GO" and decision.requires_ack
@@ -2845,11 +2822,12 @@ def hurdle_fine_sequence_message(command_id=8100):
     )
 
 
-def test_hurdle_sequence_runs_two_fine_motions_then_one_second_then_hurdle(monkeypatch):
+@pytest.mark.parametrize("depth", [0.20, 0.43, 0.54])
+def test_hurdle_sequence_runs_two_fine_motions_then_one_second_then_hurdle(monkeypatch, depth):
     clock = [10.0]
     monkeypatch.setattr("mission_control.motion_command_bridge_node.time.monotonic", lambda: clock[0])
     bridge = FakeBridge()
-    bridge.navigation_command_callback(hurdle_fine_sequence_message())
+    bridge.navigation_command_callback(hurdle_fine_sequence_message(depth=depth))
     first_request = decoded_messages(bridge.executor_request_publisher)[-1]
     assert bridge.active_motion_id == "pickup_fine_forward_0"
     assert bridge.active_dwell_until is None

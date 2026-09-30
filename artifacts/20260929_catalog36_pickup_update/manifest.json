@@ -1,0 +1,22 @@
+{
+  "source_path": "/home/jet/Downloads/robot_motions(36).json",
+  "source_sha256": "999ebca24e1779d371a59e8f1d6572b80a8847ae2c4c2d6bd196d2d6fd0c7cfe",
+  "before_count": 89,
+  "after_count": 81,
+  "removed_motion_names": [
+    "찐골넣기실전",
+    "찐미세오옆꽃게0도",
+    "찐미세오옆꽃게90도-1",
+    "찐오뒤에서기본자세(골대 카메라90도)",
+    "찐미세오뒤에서기본자세(골대 카메라90도)",
+    "미세오옆에서오옆꽃게0도",
+    "미세오뒤에서 오옆꽃게90도",
+    "후진실전-2(1회, 픽업 카메라0도)"
+  ],
+  "removed_aliases": {
+    "goal_forward_to_default_90": "찐오뒤에서기본자세(골대 카메라90도)",
+    "goal_fine_to_default_90": "찐미세오뒤에서기본자세(골대 카메라90도)"
+  },
+  "replaced_motion_name": "찐공잡기리그랩까지 실전",
+  "runtime_position_tolerance_deg": 5.0
+}

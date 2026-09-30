@@ -101,7 +101,7 @@ def test_catalog30_replaces_only_requested_forward_motions_and_aliases():
     for alias, change in manifest["changed_aliases"].items():
         expected_aliases[alias] = change["after"]
     expected_aliases["hurdle"] = "찐허들"
-    expected_aliases["pickup_lost_ball_backward_1"] = "후진실전-2(1회, 픽업 카메라0도)"
+    expected_aliases["pickup_lost_ball_backward_1"] = "찐후진실전(1회)"
     expected_aliases.update({
         "fine_to_turn_ready_45": "찐미세오뒤에서 오뒤(45도)",
         "fine_to_turn_ready_0": "찐미세오뒤에서 오뒤(0도)",
@@ -236,7 +236,7 @@ def test_production_alias_catalog_contains_only_approved_aliases():
             "pickup_crab_right_0": "찐미세오옆꽃게0-1(1회)",
             "pickup_fine_to_crab_right_0": "찐미세오뒤에서오옆꽃게0도",
             "pickup_crab_left_0": "찐미세왼옆꽃게0도-1",
-            "pickup_lost_ball_backward_1": "후진실전-2(1회, 픽업 카메라0도)",
+            "pickup_lost_ball_backward_1": "찐후진실전(1회)",
             "pickup_pre_backward_camera_down": (
                 "찐공잡기전후진-2(2회)"
             ),
@@ -597,14 +597,14 @@ def test_pickup_retreat_keeps_command_id_with_one_repeat():
 
 @pytest.mark.parametrize("motion_id,name,digest", [
     ("pickup", "찐공잡기리그랩까지 실전",
-     "49f40834f6b2f9e40a12998766acd6a0dfa91456d3277ccb806fb473a9ecad4b"),
+     "b466c0860852e7a2e4d6dc55baf04d22822d8d3a96e522a10ca4510268a96909"),
     ("pickup_pre_backward_camera_down", "찐공잡기전후진-2(2회)",
      "7bc8b060ba29ab42314be112a6077132ac3284e3398e45e57afa48a6f3cf7715"),
 ])
 def test_import15_requested_motions_match_source_with_five_degree_tolerance(
     motion_id, name, digest,
 ):
-    """Preserve supplied pickup data, including the 2026-09-29 camera update."""
+    """Preserve supplied data, including the catalog36 pickup update."""
     aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
     motions = {
         motion["name"]: motion
@@ -885,21 +885,15 @@ def test_goal_single_retreat_preserves_original_frames_and_three_cycle_pickup_mo
     assert retreat['completion']['position_tolerance_deg'] == 5.0
 
 
-def test_close_ball_backward_is_one_goal_retreat_cycle_with_camera_down():
-    import copy
-
+def test_close_ball_backward_uses_supplied_one_cycle_retreat():
     aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
     motions = {m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]}
-    # This independent recovery retains the body frames from before catalog 34.
-    previous = json.loads((RUNTIME_CATALOG_PATH.parent /
-                           "20260929_catalog34_retreat_update/runtime_before.json").read_text())
-    previous_motions = {m["name"]: m for m in previous["motions"]}
-    expected = copy.deepcopy(previous_motions[aliases["goal_camera_90_backward_1"]])
-    expected["name"] = "후진실전-2(1회, 픽업 카메라0도)"
-    for frame in expected["frames"]:
-        frame["angles"]["0"] = -60.0
+    assert aliases["pickup_lost_ball_backward_1"] == "찐후진실전(1회)"
     recovery = motions[aliases["pickup_lost_ball_backward_1"]]
-    assert recovery == expected
+    assert recovery == motions[aliases["pickup_retreat_2"]]
+    for frame in recovery["frames"]:
+        assert frame["angles"]["4"] == 18
+        assert frame["angles"]["5"] == -18
     assert recovery["repeat_count"] == 1
     pre_grasp = motions[aliases["pickup_pre_backward_camera_down"]]
     assert pre_grasp["name"] == "찐공잡기전후진-2(2회)"
@@ -965,28 +959,17 @@ def test_line_return_right_four_preserves_catalog32_motion(action):
     assert motions[aliases[motion_id]] == expected
 
 
-@pytest.mark.parametrize("alias,source_name", [
-    ("goal_forward_to_default_90", "찐오뒤에서기본자세(0도)"),
-    ("goal_fine_to_default_90", "찐미세오뒤에서기본자세"),
+@pytest.mark.parametrize("alias,name", [
+    ("goal_forward_to_default_90", "찐오뒤에서기본자세(골대 카메라90도)"),
+    ("goal_fine_to_default_90", "찐미세오뒤에서기본자세(골대 카메라90도)"),
 ])
-def test_goal_crab_preparation_changes_only_camera_and_pose_labels(alias, source_name):
-    import copy
-
+def test_removed_goal_default_preparations_have_no_dangling_alias(alias, name):
     aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
-    motions = {m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]}
-    source = copy.deepcopy(motions[source_name])
-    prepared = copy.deepcopy(motions[aliases[alias]])
-    camera_90 = motions[aliases["post_ball_camera_90"]]["frames"][-1]["angles"]["0"]
-    assert camera_90 == 1.0
-    assert len(source["frames"]) == len(prepared["frames"])
-    for original_frame, prepared_frame in zip(source["frames"], prepared["frames"]):
-        assert prepared_frame["angles"]["0"] == camera_90
-        prepared_frame["angles"]["0"] = original_frame["angles"]["0"]
-        prepared_frame["name"] = original_frame["name"]
-    for key in ("name", "start_pose", "end_pose"):
-        prepared[key] = source[key]
-    assert prepared == source
+    names = {m["name"] for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]}
+    assert alias not in aliases
+    assert name not in names
     assert aliases["goal_fine_to_default"] == "찐미세오뒤에서기본자세"
+
 
 
 @pytest.mark.parametrize("alias,name,frame_count,digest", [
@@ -1085,18 +1068,28 @@ def test_stationary_left_turns_preserve_latest_catalog29_data(camera, digest):
     assert hashlib.sha256(encoded.encode()).hexdigest() == digest
 
 
-def test_hurdle_preserves_catalog31_source_except_five_degree_tolerance():
-    source = json.loads((RUNTIME_CATALOG_PATH.parent / "catalog31_hurdle_source.json").read_text())
-    catalog = json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+def test_hurdle_preserves_catalog37_source_except_tolerance_and_pose_label():
+    archive = RUNTIME_CATALOG_PATH.parent / "20260929_catalog37_hurdle_update"
+    source = json.loads((archive / "source_hurdle.json").read_text())
+    before = json.loads((archive / "runtime_before.json").read_text())
+    current = json.loads(RUNTIME_CATALOG_PATH.read_text())
     aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
     assert aliases["hurdle"] == "찐허들"
-    matches = [m for m in catalog if m["name"] == aliases["hurdle"]]
     expected = copy.deepcopy(source)
     expected["completion"]["position_tolerance_deg"] = 5.0
-    assert matches == [expected]
-    assert all(m["name"] != "찐허들실전" for m in catalog)
-    assert len(source["frames"]) == 15
-    assert source["playback_speed"] == 0.95
+    expected["end_pose"] = "오뒤412(허들)"
+    for frame in expected["frames"]:
+        if frame["name"] == "오뒤412":
+            frame["name"] = "오뒤412(허들)"
+    for index, motion in enumerate(before["motions"]):
+        if motion["name"] == "찐허들":
+            before["motions"][index] = expected
+    # Only the requested hurdle changes; preserve every other motion and order.
+    assert current == before
+    assert len(current["motions"]) == 81
+    assert all(m["name"] != "찐허들실전" for m in current["motions"])
+    assert len(source["frames"]) == 16
+    assert source["playback_speed"] == 1.0
     assert source["repeat_count"] == 1
     assert source["completion"]["position_tolerance_deg"] == 2.0
 

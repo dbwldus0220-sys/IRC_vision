@@ -25,13 +25,13 @@ def hurdle_info(**overrides):
 
 
 @pytest.mark.parametrize("angle,action", [
-    (-70.0, "ALIGN_LEFT"), (-69.999, "STRAIGHT_0"),
-    (0.0, "STRAIGHT_0"), (69.999, "STRAIGHT_0"), (70.0, "ALIGN_RIGHT"),
+    (-70.0, "STRAIGHT_0"), (-69.999, "STRAIGHT_0"),
+    (0.0, "STRAIGHT_0"), (69.999, "STRAIGHT_0"), (70.0, "STRAIGHT_0"),
 ])
 @pytest.mark.parametrize("offset", [-0.5, 0.5])
-def test_center_approach_ignores_parallel_angle_and_path_offset(angle, action, offset):
+def test_fine_approach_ignores_center_parallel_angle_and_path_offset(angle, action, offset):
     decision = HurdleNavigationPlanner().plan(hurdle_info(
-        depth_m=0.5, hurdle_angle_deg=60, bearing_deg=angle,
+        depth_m=0.6, hurdle_angle_deg=60, bearing_deg=angle,
         path_reference_valid=True, path_offset_x_norm=offset,
     ), positioning=True)
     assert decision.valid and decision.action == action
@@ -262,3 +262,40 @@ def test_no_depth_outside_close_pixels_still_waits():
         bottom_distance_px=101, depth_valid=False, depth_m=None,
     ))
     assert command.action == "WAIT" and not command.valid
+
+
+@pytest.mark.parametrize("depth,action", [
+    (0.001, "GO"), (0.2, "GO"), (0.43, "GO"),
+    (0.539999, "GO"), (0.540, "GO"),
+    (0.540001, "STRAIGHT_0"), (0.55, "STRAIGHT_0"),
+])
+def test_positioning_final_sequence_starts_at_540mm(depth, action):
+    command = HurdleNavigationPlanner().plan(hurdle_info(
+        depth_m=depth, go_now=False,
+    ), positioning=True)
+    assert command.valid and command.action == action
+    assert command.fine_sequence_requested == (action == "GO")
+    assert command.sdk_motion_requested == (action == "GO")
+    assert command.ground_gap_in_go_range == (action == "GO")
+
+
+@pytest.mark.parametrize("updates", [
+    {"detected": False}, {"confidence": 0.59},
+    {"depth_valid": False}, {"depth_m": None}, {"depth_m": 0},
+    {"depth_m": -0.1}, {"depth_m": float("nan")},
+    {"depth_m": float("inf")},
+])
+def test_positioning_540mm_requires_valid_current_observation(updates):
+    command = HurdleNavigationPlanner().plan(hurdle_info(
+        **{"depth_m": 0.54, **updates},
+    ), positioning=True)
+    assert command.action == "WAIT"
+    assert not command.valid and not command.sdk_motion_requested
+
+
+def test_positioning_540mm_cannot_request_center_turn():
+    command = HurdleNavigationPlanner().plan(hurdle_info(
+        depth_m=0.54, bearing_deg=70.0, bottom_distance_px=200,
+    ), positioning=True)
+    assert command.action == "GO" and command.fine_sequence_requested
+    assert command.close_rotation_blocked

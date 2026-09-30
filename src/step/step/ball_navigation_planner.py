@@ -28,6 +28,7 @@ class BallNavigationConfig:
     turn_exit_deg: float = 2.5
     path_center_deadband_norm: float = 0.05
     path_center_deadband_max_depth_m: float = 0.60
+    image_steering_max_forward_m: float = 0.35
     fallback_half_fov_deg: float = 35.0
     control_start_depth_m: float = 1.50
     max_pickup_depth_age_sec: float = 0.70
@@ -165,7 +166,7 @@ def _number(data: dict[str, Any], key: str) -> float | None:
 
 
 def valid_ball_ground_steering(info: dict[str, Any]) -> float | None:
-    """Read calibrated steering ONLY for normal-head-pose ball approach."""
+    """Read calibrated ball steering in the robot ground coordinate frame."""
     if (
         info.get("ground_projection_enabled") is not True
         or info.get("ground_projection_valid") is not True
@@ -230,20 +231,12 @@ class BallNavigationPlanner:
         if confidence is None or confidence < self.config.min_confidence:
             return self.stop("low_ball_confidence")
 
-        steering_angle = _number(ball_info, "steering_angle_deg")
         bearing = _number(ball_info, "bearing_deg")
         offset = _number(ball_info, "offset_x_norm")
         depth = _number(ball_info, "depth_m")
         distance = _number(ball_info, "distance_m")
         ground_distance = _number(ball_info, "ground_distance_m")
-        if (distance is not None
-                and distance <= self.config.pickup_sequence_start_distance_m):
-            # Preserve pickup entry and all head-down geometry thresholds.
-            steering_error = self._steering_error(
-                steering_angle, bearing, offset, distance,
-            )
-        else:
-            steering_error = self.approach_steering_error(ball_info)
+        steering_error, steering_source = self.select_steering(ball_info)
         if steering_error is None:
             return self.stop("invalid_ball_alignment")
 
@@ -289,11 +282,7 @@ class BallNavigationPlanner:
             reason="ball_aligned_discrete_approach",
             linear_speed_mps=speed,
             steering_error_deg=steering_error,
-            steering_source=(
-                "ground_steering_angle_deg"
-                if "ground_projection_enabled" in ball_info
-                else "legacy_image_angle"
-            ),
+            steering_source=steering_source,
             dt_sec=dt_sec,
             bearing=bearing,
             offset=offset,
@@ -306,22 +295,41 @@ class BallNavigationPlanner:
             pickup_now=False,
         )
 
-    def approach_steering_error(self, info: dict[str, Any]) -> float | None:
-        """Use ground steering for approach, without the pixel-axis deadband.
+    def select_steering(self, info: dict[str, Any]) -> tuple[float | None, str]:
+        """Use image geometry at ground-forward <=35 cm, ground geometry beyond.
 
-        Old publishers without ground metadata retain their legacy behavior.
-        An explicit disabled/invalid ground projection never falls back to a
-        pixel angle. Head-down pickup callers must use _steering_error instead.
+        Old publishers without projection metadata keep their image behavior.
+        Invalid projection data cannot establish which distance branch applies.
         """
+        source = "legacy_image_angle"
         if "ground_projection_enabled" in info:
-            angle = valid_ball_ground_steering(info)
-            return self.config.bearing_gain * angle if angle is not None else None
+            forward = _number(info, "ground_forward_distance_m")
+            if (
+                info.get("ground_projection_enabled") is not True
+                or info.get("ground_projection_valid") is not True
+                or info.get("ground_projection_scope") != "ball_approach_only"
+                or info.get("ground_coordinate_frame") != "robot_x_right_z_forward"
+                or forward is None
+                or forward <= 0.0
+            ):
+                return None, "invalid_ground_projection"
+            if forward > self.config.image_steering_max_forward_m:
+                angle = valid_ball_ground_steering(info)
+                return (
+                    self.config.bearing_gain * angle if angle is not None else None,
+                    "ground_steering_angle_deg",
+                )
+            source = "near_image_angle"
         return self._steering_error(
             _number(info, "steering_angle_deg"),
             _number(info, "bearing_deg"),
             _number(info, "offset_x_norm"),
             _number(info, "distance_m"),
-        )
+        ), source
+
+    def approach_steering_error(self, info: dict[str, Any]) -> float | None:
+        """Use the same distance-based steering policy as pickup alignment."""
+        return self.select_steering(info)[0]
 
     def _steering_error(
         self,

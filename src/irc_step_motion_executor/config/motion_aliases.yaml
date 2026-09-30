@@ -8,6 +8,7 @@
 motion_aliases:
   sdk_pickup: "찐공잡기리그랩까지 실전"
   sdk_forward_4: "찐찐전진45(4회)"
+  line_forward_2: "찐찐전진45(2회)"
   line_forward_4: "찐찐전진45(4회)"
   line_forward_6: "찐찐전진(6회)"
   line_turn_right_2: "찐제자리우회전45도-1(2회)"
@@ -34,8 +35,8 @@ motion_aliases:
   pickup_fine_to_crab_right_0: "찐미세오뒤에서오옆꽃게0도"
   pickup_crab_left_0: "찐미세왼옆꽃게0도-1"
   pickup_pre_backward_camera_down: "찐공잡기전후진-2(2회)"
-  # Independent close-ball recovery: one retreat cycle, keeping camera down.
-  pickup_lost_ball_backward_1: "후진실전-2(1회, 픽업 카메라0도)"
+  # Close-ball recovery uses the supplied one-cycle retreat.
+  pickup_lost_ball_backward_1: "찐후진실전(1회)"
   pickup_grasp_check_pose: "찐공확인자세"
   # Keep the legacy ID; post-grasp retreat now uses one cycle from catalog 26.
   pickup_retreat_2: "찐후진실전(1회)"
@@ -76,8 +77,6 @@ motion_aliases:
   goal_fine_to_crab_right_90: "찐미세오뒤에서 오옆꽃게90도"
   goal_camera_90_crab_left: "찐미세왼옆꽃게90도-1"
   goal_forward_to_crab_right_90: "찐오뒤에서 오옆꽃게90도"
-  goal_forward_to_default_90: "찐오뒤에서기본자세(골대 카메라90도)"
-  goal_fine_to_default_90: "찐미세오뒤에서기본자세(골대 카메라90도)"
   post_ball_line_turn_right_2: "찐제자리우회전45도-1(2회)"
   post_ball_line_turn_right_3: "찐제자리우회전45도-1(3회)"
   post_ball_line_turn_right_5: "찐제자리우회전45도-1(5회)"

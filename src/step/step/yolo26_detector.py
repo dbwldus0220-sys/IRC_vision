@@ -1081,7 +1081,10 @@ class Yolo26Detector(Node):
             label = action
         source = str(payload.get("source", "")).lower()
         if source == "hurdle" or payload.get("action") == "GO":
-            if motion_id == "line_forward_4":
+            if motion_id in {"line_recovery_left_4", "line_recovery_right_4"}:
+                direction = "LEFT" if motion_id == "line_recovery_left_4" else "RIGHT"
+                label = f"HURDLE / LINE RETURN {direction} 4"
+            elif motion_id == "line_forward_4":
                 label = "HURDLE / FORWARD 4"
             elif motion_id == "pickup_fine_forward_0":
                 label = "HURDLE / FINE FORWARD"
@@ -1957,16 +1960,7 @@ class Yolo26Detector(Node):
             )
             if not isinstance(command, dict):
                 command = {}
-            phase = str(decision.get("phase", "")) if decision else ""
-            action = str(decision.get("action", "")) if decision else ""
-            pickup_pose = (
-                phase.startswith("BALL_PICKUP")
-                or action.startswith(("BALL_PICKUP", "PICKUP"))
-                or command.get("steering_source") == "head_down_image_angle"
-            )
-            ground_steering = (
-                None if pickup_pose else valid_ball_ground_steering(info)
-            )
+            ground_steering = valid_ball_ground_steering(info)
             control_steering = self._number(command, "steering_error_deg")
             angle_source = str(command.get("steering_source", "WAIT CHECK"))
             lateral = self._number(info, "lateral_offset_m")
@@ -2024,12 +2018,15 @@ class Yolo26Detector(Node):
                     1,
                     signed=True,
                 ),
+                "Ground Z    : " + self._metric_text(
+                    self._number(info, "ground_forward_distance_m"), "m", 3),
                 "Ground steer: " + self._metric_text(
                     ground_steering, "deg", 2, signed=True),
                 "Steering    : " + self._metric_text(
                     control_steering, "deg", 2, signed=True),
                 "Angle source: " + {
-                    "ground_steering_angle_deg": "GROUND / APPROACH",
+                    "ground_steering_angle_deg": "GROUND / >35cm",
+                    "near_image_angle": "IMAGE / <=35cm",
                     "head_down_image_angle": "IMAGE / HEAD DOWN",
                     "legacy_image_angle": "LEGACY IMAGE",
                 }.get(angle_source, "WAIT CHECK"),

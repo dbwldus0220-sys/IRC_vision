@@ -162,7 +162,10 @@ def build_hurdle_path_reference(
     )
     support_points = sorted(set(support_points), key=lambda point: -point[1])
 
-    target_x = min(max(slope * target_y + intercept, 0.0), image_width - 1.0)
+    target_x = slope * target_y + intercept
+    if not left <= target_x <= right:
+        return empty_hurdle_path_reference("line_does_not_intersect_hurdle")
+    target_x = min(max(target_x, 0.0), image_width - 1.0)
     bridge_top_y = min(max(top, 0.0), image_height - 1.0)
     bridge_bottom_y = target_y
     bridge_top_x = min(

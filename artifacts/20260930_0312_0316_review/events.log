@@ -1,0 +1,44 @@
+python3_13889_1790705552164.log [INFO] [1790705610.744178715] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT_2
+python3_13889_1790705552164.log [INFO] [1790705611.915199916] [motion_decision_node]: BALL approach entry latched during motion: distance_m=1.452
+python3_13889_1790705552164.log [INFO] [1790705613.235709685] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+python3_13889_1790705552164.log [INFO] [1790705615.589942052] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+python3_13889_1790705552164.log [INFO] [1790705615.860888149] [motion_decision_node]: BALL motion boundary: wait_sec=0.271, next_action=STRAIGHT, reobserved=False
+python3_13889_1790705552164.log [INFO] [1790705617.969928089] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+python3_13889_1790705552164.log [INFO] [1790705618.335150650] [motion_decision_node]: BALL confirmation completed; releasing pending hold
+python3_13889_1790705552164.log [INFO] [1790705618.336595012] [motion_decision_node]: BALL motion boundary: wait_sec=0.367, next_action=BALL_APPROACH_RECOVER_LEFT_4, reobserved=False
+python3_13889_1790705552164.log [INFO] [1790705619.574642865] [motion_decision_node]: BALL confirmation completed; releasing pending hold
+python3_13889_1790705552164.log [INFO] [1790705619.966825952] [motion_decision_node]: BALL pickup entry latched: distance_m=0.545
+python3_13889_1790705552164.log [INFO] [1790705620.539043038] [motion_decision_node]: BALL pickup entry pending; waiting for fresh vision
+python3_13889_1790705552164.log [INFO] [1790705620.542127928] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_RECOVER_LEFT_4
+python3_13889_1790705552164.log [INFO] [1790705646.916348605] [motion_decision_node]: [GRASP_VERIFY_END] {"accepted_frames":41,"attempt_id":1,"ball_index":1,"decision_window_frames":40,"decision_window_grabbed_frames":40,"duration_sec":3.039054900999872,"final_confidence":0.87353515625,"first_accepted_stamp_ns":1790705643898813232,"frame_window_limit":40,"fresh_frame_zero":false,"grab_confidence_max":0.8828125,"grab_confidence_mean":0.8562547637195121,"grab_confidence_median":0.8642578125,"grab_confidence_min":0.62255859375,"grabbed_frames":41,"last_accepted_stamp_ns":1790705646767525146,"last_fresh_frame_result":"GRABBED","latched_result":"GRABBED","not_grabbed_frames":0,"rejected_frames":2,"required_grab_frames":15,"window_end_monotonic":5150.766102404}
+python3_13889_1790705552164.log [INFO] [1790705655.296488350] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=POST_BALL_LINE_TURN_RIGHT_5
+python3_13889_1790705552164.log [INFO] [1790705659.594190887] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+python3_13889_1790705552164.log [INFO] [1790705661.999741819] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4
+python3_13889_1790705552164.log [INFO] [1790705665.191720775] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+python3_13889_1790705552164.log [INFO] [1790705668.396098260] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+python3_14413_1790705767844.log [INFO] [1790705812.112346268] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT_2
+python3_14413_1790705767844.log [INFO] [1790705814.888264373] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+python3_14413_1790705767844.log [INFO] [1790705817.507471892] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT_2
+python3_14413_1790705767844.log [INFO] [1790705817.946462982] [motion_decision_node]: BALL approach entry latched while stationary: distance_m=1.162
+python3_14413_1790705767844.log [INFO] [1790705820.152842348] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_RECOVER_LEFT_4
+python3_14413_1790705767844.log [INFO] [1790705820.391908819] [motion_decision_node]: BALL motion boundary: wait_sec=0.239, next_action=BALL_APPROACH_RECOVER_LEFT_4, reobserved=False
+python3_14413_1790705767844.log [INFO] [1790705822.598263901] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_RECOVER_LEFT_4
+python3_14413_1790705767844.log [INFO] [1790705823.428272528] [motion_decision_node]: BALL confirmation completed; releasing pending hold
+python3_14413_1790705767844.log [INFO] [1790705823.430681107] [motion_decision_node]: BALL motion boundary: wait_sec=0.831, next_action=BALL_APPROACH_RECOVER_LEFT_4, reobserved=False
+python3_14413_1790705767844.log [INFO] [1790705825.628858649] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_RECOVER_LEFT_4
+python3_14413_1790705767844.log [INFO] [1790705825.786902570] [motion_decision_node]: BALL motion boundary: wait_sec=0.158, next_action=BALL_APPROACH_RECOVER_LEFT_4, reobserved=False
+python3_14413_1790705767844.log [INFO] [1790705827.219814113] [motion_decision_node]: BALL pickup entry latched: distance_m=0.550
+python3_14413_1790705767844.log [INFO] [1790705828.000176444] [motion_decision_node]: BALL pickup entry pending; waiting for fresh vision
+python3_14413_1790705767844.log [INFO] [1790705828.002851750] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_RECOVER_LEFT_4
+python3_14413_1790705767844.log [INFO] [1790705842.048937343] [motion_decision_node]: BALL raw detection lost; releasing pending hold
+python3_14413_1790705767844.log [INFO] [1790705843.650943580] [motion_decision_node]: BALL confirmation completed; releasing pending hold
+python3_14413_1790705767844.log [INFO] [1790705845.197963191] [motion_decision_node]: BALL raw detection lost; releasing pending hold
+python3_14413_1790705767844.log [INFO] [1790705847.288699891] [motion_decision_node]: BALL confirmation completed; releasing pending hold
+python3_14413_1790705767844.log [INFO] [1790705850.690314969] [motion_decision_node]: BALL confirmation completed; releasing pending hold
+python3_14413_1790705767844.log [INFO] [1790705871.214254967] [motion_decision_node]: [GRASP_VERIFY_END] {"accepted_frames":52,"attempt_id":1,"ball_index":1,"decision_window_frames":40,"decision_window_grabbed_frames":40,"duration_sec":3.0382297360001758,"final_confidence":0.94189453125,"first_accepted_stamp_ns":1790705868260929199,"frame_window_limit":40,"fresh_frame_zero":false,"grab_confidence_max":0.9482421875,"grab_confidence_mean":0.9390399639423077,"grab_confidence_median":0.9404296875,"grab_confidence_min":0.92431640625,"grabbed_frames":52,"last_accepted_stamp_ns":1790705871029573730,"last_fresh_frame_result":"GRABBED","latched_result":"GRABBED","not_grabbed_frames":0,"rejected_frames":2,"required_grab_frames":15,"window_end_monotonic":5375.063944317}
+python3_14413_1790705767844.log [INFO] [1790705876.614083252] [motion_decision_node]: BALL raw detection lost; releasing pending hold
+python3_14413_1790705767844.log [INFO] [1790705879.564393008] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=POST_BALL_LINE_TURN_RIGHT_5
+python3_14413_1790705767844.log [INFO] [1790705883.465202958] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=POST_BALL_LINE_TURN_RIGHT_5
+python3_14413_1790705767844.log [INFO] [1790705887.761256600] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+python3_14413_1790705767844.log [INFO] [1790705890.000766439] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+python3_14413_1790705767844.log [INFO] [1790705893.267360061] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT

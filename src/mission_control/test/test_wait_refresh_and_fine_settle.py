@@ -43,7 +43,7 @@ def ground_ball(valid=True, angle=25.):
         ground_projection_enabled=True, ground_projection_valid=valid,
         ground_projection_scope='ball_approach_only',
         ground_coordinate_frame='robot_x_right_z_forward',
-        ground_steering_angle_deg=angle,
+        ground_steering_angle_deg=angle, ground_forward_distance_m=0.9,
     )
 
 

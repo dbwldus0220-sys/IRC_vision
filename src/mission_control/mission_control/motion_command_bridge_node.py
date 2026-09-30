@@ -35,7 +35,6 @@ class MotionCommandBridgeNode(Node):
         {"GOAL_CAMERA90_CRAB_LEFT", "GOAL_CAMERA90_CRAB_RIGHT"}
     )
     GOAL_FORWARD_CRAB_PREPARE_MOTION_ID = "goal_forward_to_crab_right_90"
-    GOAL_FINE_CRAB_PREPARE_MOTION_ID = "goal_fine_to_default_90"
     GOAL_FINE_RIGHT_CRAB_PREPARE_MOTION_ID = "goal_fine_to_crab_right_90"
     POST_BALL_CAMERA_DWELL_MARKER = "__POST_BALL_CAMERA_DWELL__"
     POST_BALL_CAMERA_PAUSE_SEC = 0.0

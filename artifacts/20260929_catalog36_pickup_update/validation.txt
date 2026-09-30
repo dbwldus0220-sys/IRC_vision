@@ -1,0 +1,5 @@
+Catalog validator: 81 motions, aliases resolve, motor IDs 0..22.
+Targeted catalog36/startup/tolerance/removal tests: 11 passed.
+Related suite before: 444 passed, 144 failed.
+Related suite after, including pickup snapshot retest: 446 passed, same 144 pre-existing failures.
+No robot hardware execution.

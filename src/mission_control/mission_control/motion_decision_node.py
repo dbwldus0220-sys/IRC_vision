@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from collections import deque
+from dataclasses import replace
 import json
 import math
 import os
@@ -16,9 +17,13 @@ from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 from std_msgs.msg import String
 
+from step.approach_distance import APPROACH_DISTANCE_LIMITS_M
 from step.approach_distance import BALL_HURDLE_FINE_DISTANCE_M
+from step.approach_distance import approach_motion_for_distance
 from step.line_navigation_planner import valid_ground_heading
+from step.hurdle_navigation_planner import HurdleNavigationPlanner
 
+from .ball_approach_observation import BallApproachObservation
 from .ball_loss_confirmation import BallLossConfirmation
 from .executor_heartbeat_watchdog import ExecutorHeartbeatWatchdog
 from .executor_heartbeat_watchdog import HeartbeatStartupDelay
@@ -38,6 +43,8 @@ class MotionDecisionNode(Node):
     SOURCES = ("line", "ball", "goal", "hurdle", "finish")
     SHOT_PRE_MOTION_SETTLE_SEC = 3.0
     LINE_TURN_PRE_MOTION_SETTLE_SEC = 1.0
+    # Match the line analyzer's default corner_turn_margin_m.
+    LINE_CORNER_TURN_DISTANCE_M = 0.15
     FINE_FORWARD_PRE_MOTION_SETTLE_SEC = 1.0
 
     PRE_MOTION_SETTLE_ACTIONS = frozenset(
@@ -231,6 +238,9 @@ class MotionDecisionNode(Node):
         self.declare_parameter("initial_mission_phase", "AUTO")
         self.declare_parameter("publish_rate_hz", 10.0)
         self.declare_parameter("pre_motion_settle_sec", 0.0)
+        self.declare_parameter(
+            "line_corner_turn_distance_m", self.LINE_CORNER_TURN_DISTANCE_M,
+        )
         self.declare_parameter("required_pickups", 2)
         self.declare_parameter("required_shots", 2)
         self.declare_parameter("required_hurdles", 2)
@@ -433,6 +443,11 @@ class MotionDecisionNode(Node):
             0.0,
             self._float_parameter("pre_motion_settle_sec"),
         )
+        # Below the shortest approach band, STRAIGHT_0 would have no line gait.
+        self.line_corner_turn_distance_m = max(
+            APPROACH_DISTANCE_LIMITS_M[0],
+            self._float_parameter("line_corner_turn_distance_m"),
+        )
         self.correction_post_motion_dwell_until: float | None = None
         self.correction_post_motion_source: str | None = None
         self.pre_motion_settle_source: str | None = None
@@ -449,6 +464,7 @@ class MotionDecisionNode(Node):
         self.ball_pickup_entry_pending = False
         self.ball_post_motion_dwell_until: float | None = None
         self.hurdle_positioning_entry_pending = False
+        self.pending_hurdle_final_sequence: dict[str, Any] | None = None
         self.hurdle_post_motion_dwell_until: float | None = None
         self.hurdle_stationary_since: float | None = None
         self.goal_post_motion_dwell_until: float | None = None
@@ -461,6 +477,12 @@ class MotionDecisionNode(Node):
         self.post_shot_line_search_failed = False
         self.ball_confirmation_pending_latched = False
         self.ball_confirmation_last_raw_at: float | None = None
+        self.ball_approach_observation = BallApproachObservation()
+        self.ball_prepared_info = None
+        self.ball_prepared_observation = None
+        self.ball_prepared_alignment = None
+        self.ball_min_rgb_stamp_ns = None
+        self.ball_motion_completed_at = None
         self.active_line_motion_action: str | None = None
         self.active_line_motion_started_at: float | None = None
         self.active_line_motion_duration_sec = 0.0
@@ -551,7 +573,7 @@ class MotionDecisionNode(Node):
             self.create_subscription(
                 String,
                 topic,
-                self._info_callback(source),
+                self._info_callback(source, dispatch_on_ball=(source == "ball")),
                 10,
             )
 
@@ -755,6 +777,7 @@ class MotionDecisionNode(Node):
             if not auto_ready:
                 self.pending_line_corner = None
                 self.line_corner_rearm_required = False
+                self.pending_hurdle_final_sequence = None
                 self._reset_pre_motion_settle()
                 self.executor_ready_requires_fresh_vision = True
             self.executor_auto_ready = auto_ready
@@ -848,7 +871,7 @@ class MotionDecisionNode(Node):
     def special_motion_running(self) -> bool:
         return self.phase_manager.active_special_running
 
-    def _info_callback(self, source: str):
+    def _info_callback(self, source: str, *, dispatch_on_ball: bool = False):
         def callback(message: String) -> None:
             if not self.decision_started:
                 return
@@ -864,6 +887,19 @@ class MotionDecisionNode(Node):
                     return
 
                 received_at = time.monotonic()
+                if source == "ball":
+                    stamp = payload.get("rgb_stamp_ns")
+                    boundary = getattr(self, "ball_min_rgb_stamp_ns", None)
+                    ros_now = MotionDecisionNode._current_ros_time_ns(self)
+                    valid_stamp = (
+                        isinstance(stamp, int) and not isinstance(stamp, bool) and stamp > 0
+                    )
+                    if boundary is not None and (not valid_stamp or stamp <= boundary):
+                        return
+                    if valid_stamp and ros_now is not None and not (
+                        0 <= ros_now - stamp <= int(self.timeouts["ball"] * 1e9)
+                    ):
+                        return
                 if (
                     source == "ball"
                     and not MotionDecisionNode._ball_navigation_blocked(self)
@@ -883,6 +919,7 @@ class MotionDecisionNode(Node):
                     self.planner._update_goal_tracking(payload, 0.0)
                 if source == "hurdle":
                     MotionDecisionNode._latch_hurdle_positioning_entry(self, payload)
+                    MotionDecisionNode._latch_hurdle_final_sequence(self, payload)
                 if (
                     source == "ball"
                     and not MotionDecisionNode._ball_navigation_blocked(self)
@@ -919,6 +956,9 @@ class MotionDecisionNode(Node):
                         self,
                         payload,
                     )
+                    MotionDecisionNode._prepare_ball_approach_observation(
+                        self, payload, received_at,
+                    )
                 if source == "line":
                     MotionDecisionNode._remember_line_corner(self, payload)
                     if (
@@ -954,6 +994,14 @@ class MotionDecisionNode(Node):
                             )
                 self.executor_ready_requires_fresh_vision = False
                 self.general_motion_gate.on_new_vision_input()
+                if (
+                    dispatch_on_ball and source == "ball"
+                    and getattr(self, "ball_prepared_info", None) is payload
+                    and not self.general_motion_gate.locked
+                ):
+                    # Reuse all normal motion/dwell/safety gates, without
+                    # waiting for the next 10 Hz decision timer tick.
+                    MotionDecisionNode._publish_decision(self)
 
             except (
                 json.JSONDecodeError,
@@ -1424,6 +1472,14 @@ class MotionDecisionNode(Node):
         self.ball_confirmation_pending_latched = False
         self.ball_confirmation_last_raw_at = None
         self.ball_post_motion_dwell_until = None
+        observer = getattr(self, "ball_approach_observation", None)
+        if observer is not None:
+            observer.reset()
+        self.ball_prepared_info = None
+        self.ball_prepared_observation = None
+        self.ball_prepared_alignment = None
+        self.ball_min_rgb_stamp_ns = None
+        self.ball_motion_completed_at = None
         loss = getattr(self, "ball_loss_confirmation", None)
         if loss is not None:
             loss.reset_missing()
@@ -1485,7 +1541,7 @@ class MotionDecisionNode(Node):
         payload: dict[str, Any],
         received_at: float,
     ) -> None:
-        """Hold at a motion boundary while a raw ball is confirming."""
+        """Confirm while walking; reserve a hold for near/unknown candidates."""
         if payload.get("detected") is True:
             if self.ball_confirmation_pending_latched:
                 self.get_logger().info(
@@ -1496,9 +1552,28 @@ class MotionDecisionNode(Node):
             return
 
         if payload.get("raw_detected") is True:
+            candidate = payload.get("approach_candidate")
+            config = self.planner.ball_planner.config
+            distance = (
+                MotionDecisionPlanner._number(candidate, "distance_m")
+                if isinstance(candidate, dict) else None
+            )
+            depth_age = (
+                MotionDecisionPlanner._number(candidate, "depth_age_sec")
+                if isinstance(candidate, dict) else None
+            )
+            if (
+                isinstance(candidate, dict) and candidate.get("depth_valid") is True
+                and distance is not None and distance > config.slowdown_depth_m
+                and depth_age is not None
+                and 0 <= depth_age <= BallApproachObservation.MAX_DEPTH_AGE_SEC
+            ):
+                self.ball_confirmation_pending_latched = False
+                self.ball_confirmation_last_raw_at = None
+                return
             if not self.ball_confirmation_pending_latched:
                 self.get_logger().info(
-                    "BALL raw detection latched; waiting for confirmation "
+                    "BALL near/unknown candidate; waiting for confirmation "
                     "after the current motion"
                 )
             self.ball_confirmation_pending_latched = True
@@ -1517,6 +1592,31 @@ class MotionDecisionNode(Node):
             self.get_logger().info(
                 "BALL raw detection lost; releasing pending hold"
             )
+
+    def _prepare_ball_approach_observation(
+        self, payload: dict[str, Any], received_at: float,
+    ) -> None:
+        """Prepare alignment while moving, without advancing a stateful planner."""
+        observer = getattr(self, "ball_approach_observation", None)
+        if observer is None:
+            observer = self.ball_approach_observation = BallApproachObservation()
+        self.ball_prepared_info = None
+        self.ball_prepared_observation = None
+        self.ball_prepared_alignment = None
+        if (
+            self.active_special_command_id is not None
+            or not getattr(self.planner, "ball_lock_active", False)
+            or str(self.general_motion_gate.active_action).startswith("BALL_APPROACH_TURN_")
+            or self.ball_post_motion_dwell_until is not None
+        ):
+            observer.reset()
+            return
+        observer.observe(payload, received_at, self.planner.ball_planner.config)
+        observation = payload if payload.get("detected") is True else observer.observation
+        if observation is not None:
+            self.ball_prepared_info = payload
+            self.ball_prepared_observation = observation
+            self.ball_prepared_alignment = self.planner.plan_ball_approach_alignment(observation)
 
     def _latch_hurdle_positioning_entry(self, payload: dict[str, Any]) -> None:
         """Remember the near crossing without interrupting an active motion."""
@@ -1548,6 +1648,54 @@ class MotionDecisionNode(Node):
         self.get_logger().info(
             f"HURDLE positioning entry latched: depth_m={depth}, "
             f"bottom_distance_px={bottom}, head_down_requested={payload.get('head_down_requested', False)}"
+        )
+
+    def _latch_hurdle_final_sequence(self, payload: dict[str, Any]) -> None:
+        """Keep a confirmed final checkpoint across motion completion and occlusion."""
+        if (
+            getattr(self, "pending_hurdle_final_sequence", None) is not None
+            or self.active_special_command_id is not None
+            or not self.executor_auto_ready
+            or self.phase_manager.hurdles_completed >= self.phase_manager.required_hurdles
+            or self.phase_manager.execution_limit_reached("GO")
+            or getattr(self.planner, "hurdle_ignore_until_clear", False)
+            or not self.planner._hurdle_positioning_ready(payload)
+            or not (
+                self.mission_phase == "HURDLE_POSITIONING"
+                or getattr(self, "hurdle_positioning_entry_pending", False)
+            )
+        ):
+            return
+        if (
+            self.general_motion_gate.locked
+            and self.active_general_source not in {"line", "hurdle"}
+        ):
+            return
+        depth = MotionDecisionPlanner._number(payload, "depth_m")
+        config = self.planner.hurdle_planner.config
+        if depth > config.final_sequence_start_depth_m + 1e-9:
+            return
+        # Inspect without changing the active planner while another motion runs.
+        checkpoint_planner = HurdleNavigationPlanner(config)
+        checkpoint_planner.close_rotation_blocked = (
+            self.planner.hurdle_planner.close_rotation_blocked
+        )
+        checkpoint = checkpoint_planner.plan(payload, positioning=True)
+        if not checkpoint.valid or not checkpoint.fine_sequence_requested:
+            return
+        self.pending_hurdle_final_sequence = {
+            **checkpoint.to_dict(),
+            "hurdle_stage": "FINE_APPROACH",
+            "hurdle_positioning_active": True,
+            "hurdle_final_sequence_latched": True,
+            "observed_during_action": self.general_motion_gate.active_action,
+            "observed_during_command_id": self.general_motion_gate.active_command_id,
+        }
+        self.pending_line_decision = None
+        self.get_logger().info(
+            f"HURDLE final sequence latched: depth_m={depth}, "
+            f"center_steering_deg={checkpoint.center_steering_deg}, "
+            f"observed_during_action={self.general_motion_gate.active_action}"
         )
 
     def _latch_ball_pickup_entry(self, payload: dict[str, Any]) -> None:
@@ -1719,6 +1867,7 @@ class MotionDecisionNode(Node):
         self.pending_line_corner = None
         self.line_corner_rearm_required = False
         self.hurdle_positioning_entry_pending = False
+        self.pending_hurdle_final_sequence = None
         self.hurdle_post_motion_dwell_until = None
         self.hurdle_stationary_since = None
         if MotionDecisionNode._ball_navigation_blocked(self):
@@ -1782,6 +1931,7 @@ class MotionDecisionNode(Node):
                 self.queued_general_command_id = None
                 self.queued_general_source = None
                 self.pending_line_decision = None
+                self.pending_hurdle_final_sequence = None
                 return
             if (
                 status == "RUNNING"
@@ -1834,6 +1984,14 @@ class MotionDecisionNode(Node):
             if transition.released:
                 completed_source = self.active_general_source
                 if completed_source == "line":
+                    self.line_motion_completed_at = status_receive_monotonic
+                    self.line_motion_min_rgb_stamp_ns = (
+                        MotionDecisionNode._current_ros_time_ns(self)
+                    )
+                    corner = getattr(self, "pending_line_corner", None)
+                    if corner is not None:
+                        corner["motion_completed_at"] = status_receive_monotonic
+                        corner["minimum_rgb_stamp_ns"] = self.line_motion_min_rgb_stamp_ns
                     if status != "SUCCEEDED":
                         self.pending_line_corner = None
                         self.line_corner_rearm_required = True
@@ -1872,6 +2030,7 @@ class MotionDecisionNode(Node):
                     and getattr(self, "hurdle_positioning_entry_pending", False)
                 ):
                     if status != "SUCCEEDED":
+                        self.pending_hurdle_final_sequence = None
                         self.hurdle_positioning_entry_pending = False
                         self.hurdle_post_motion_dwell_until = None
                         self.hurdle_stationary_since = None
@@ -1973,6 +2132,7 @@ class MotionDecisionNode(Node):
                         gate = self.general_motion_gate
                         gate.required_vision_generation = gate.vision_generation + 1
                 if completed_source == "ball":
+                    self.ball_motion_completed_at = status_receive_monotonic
                     completed_approach_turn = str(action).startswith(
                         "BALL_APPROACH_TURN_"
                     )
@@ -2434,6 +2594,10 @@ class MotionDecisionNode(Node):
 
     def _invalidate_pickup_ball_input(self) -> None:
         """Require a Ball frame captured after the pickup checkpoint."""
+        self.ball_min_rgb_stamp_ns = MotionDecisionNode._current_ros_time_ns(self)
+        self.ball_prepared_info = None
+        self.ball_prepared_observation = None
+        self.ball_prepared_alignment = None
         latest_info = getattr(self, "latest_info", None)
         latest_time = getattr(self, "latest_time", None)
         if isinstance(latest_info, dict):
@@ -2487,7 +2651,7 @@ class MotionDecisionNode(Node):
         return observations, ages
 
     def _remember_line_corner(self, info: dict[str, Any]) -> None:
-        """Keep a confirmed corner seen during normal Line motion until its turn."""
+        """Remember the first confirmed direction and refresh its observed distance."""
         if (
             self.mission_phase not in {"AUTO", "LINE_TRACK"}
             or self.active_special_command_id is not None
@@ -2513,11 +2677,16 @@ class MotionDecisionNode(Node):
                 self.line_corner_rearm_required = False
             return
         if (
-            not gate.locked or self.active_general_source != "line"
-            or info.get("corner_preview_confirmed") is not True
+            info.get("corner_preview_confirmed") is not True
             or info.get("corner_direction") not in {"LEFT", "RIGHT"}
-            or getattr(self, "pending_line_corner", None) is not None
         ):
+            return
+        corner = getattr(self, "pending_line_corner", None)
+        if corner is not None:
+            if info["corner_direction"] == corner["corner_direction"]:
+                corner["corner_start_distance_m"] = MotionDecisionPlanner._number(
+                    info, "corner_start_distance_m",
+                )
             return
         self.pending_line_corner = {
             "corner_direction": info["corner_direction"],
@@ -2526,14 +2695,18 @@ class MotionDecisionNode(Node):
             ),
             "observed_during_action": gate.active_action,
             "observed_during_command_id": gate.active_command_id,
+            "motion_completed_at": getattr(self, "line_motion_completed_at", None),
+            "minimum_rgb_stamp_ns": getattr(self, "line_motion_min_rgb_stamp_ns", None),
         }
         self.pending_line_decision = None
         self.get_logger().info(
             f"Line corner remembered: {self.pending_line_corner}"
         )
 
-    def _apply_pending_line_corner(self, decision: MotionDecision) -> MotionDecision:
-        """Prefer the remembered corner over Line tracking/search at the boundary."""
+    def _apply_pending_line_corner(
+        self, decision: MotionDecision, info: dict[str, Any] | None = None,
+    ) -> MotionDecision:
+        """Approach a remembered corner using fresh distance before allowing its turn."""
         if (
             self.mission_phase not in {"AUTO", "LINE_TRACK"}
             or self.active_special_command_id is not None
@@ -2543,15 +2716,87 @@ class MotionDecisionNode(Node):
             self.pending_line_corner = None
             self.line_corner_rearm_required = False
             return decision
-        corner = getattr(self, "pending_line_corner", None)
-        if corner is None or decision.reason == "invalid_vision_boolean_type":
+        if decision.reason == "invalid_vision_boolean_type":
             return decision
+        # Also guard corners first confirmed while stationary, before the planner's
+        # ordinary LEFT/RIGHT can bypass the distance check.
+        if info is not None:
+            MotionDecisionNode._remember_line_corner(self, info)
+        corner = getattr(self, "pending_line_corner", None)
+        if corner is None:
+            return decision
+        distance = MotionDecisionPlanner._number(
+            info or {}, "corner_start_distance_m",
+        )
+        received_at = self.latest_time.get("line")
+        completed_at = corner.get("motion_completed_at")
+        minimum_stamp = corner.get("minimum_rgb_stamp_ns")
+        stamp = MotionDecisionNode._detection_stamp_ns(info or {})
+        if stamp is None:
+            stamp = (info or {}).get("rgb_stamp_ns")
+        ros_now = MotionDecisionNode._current_ros_time_ns(self)
+        valid_stamp = (
+            isinstance(stamp, int) and not isinstance(stamp, bool) and stamp > 0
+        )
+        fresh_distance = bool(
+            info is not None
+            and received_at is not None
+            and 0.0 <= time.monotonic() - received_at <= self.timeouts["line"]
+            and (completed_at is None or received_at > completed_at)
+            and (ros_now is None or (
+                valid_stamp
+                and 0 <= ros_now - stamp <= int(self.timeouts["line"] * 1e9)
+            ))
+            and (minimum_stamp is None or (valid_stamp and stamp > minimum_stamp))
+            and MotionDecisionNode._line_frame_is_usable(self, info)
+            and info.get("corner_preview_confirmed") is True
+            and info.get("corner_preview_held") is not True
+            and info.get("corner_start_depth_valid") is True
+            and info.get("corner_direction") == corner["corner_direction"]
+            and distance is not None and distance > 0.0
+        )
+        metadata = {**corner, "corner_from_memory": True}
+        if not fresh_distance:
+            return MotionDecision(
+                phase=self.mission_phase, source="line", action="WAIT", valid=False,
+                reason="line_corner_waiting_for_fresh_distance",
+                sdk_motion_requested=False, requires_ack=False, source_command=metadata,
+            )
+        turn_distance = getattr(
+            self, "line_corner_turn_distance_m",
+            MotionDecisionNode.LINE_CORNER_TURN_DISTANCE_M,
+        )
+        metadata.update(
+            corner_start_distance_m=distance, corner_turn_distance_m=turn_distance,
+        )
+        if distance > turn_distance:
+            # Keep local alignment available; remembering a distant bend must not
+            # force straight walking while the robot is off the line.
+            if decision.valid and decision.action.startswith("RECOVER_"):
+                return decision
+            remaining = distance - turn_distance
+            approach = approach_motion_for_distance(remaining)
+            # Reobserve after at most four steps; longer legacy aliases are absent
+            # from the deployed catalog. STRAIGHT_0 has no line execution mapping.
+            action = (
+                "STRAIGHT_1" if approach in {"STRAIGHT_0", "STRAIGHT_1"}
+                else "STRAIGHT_2"
+            )
+            metadata.update(
+                corner_prepare=True, approach_motion=action,
+                corner_remaining_forward_m=remaining,
+            )
+            return MotionDecision(
+                phase=self.mission_phase, source="line", action=action, valid=True,
+                reason="line_corner_approach", sdk_motion_requested=False,
+                requires_ack=False, source_command=metadata,
+            )
         return MotionDecision(
             phase=self.mission_phase, source="line",
             action=corner["corner_direction"], valid=True,
             reason="line_corner_remembered_during_motion",
             sdk_motion_requested=False, requires_ack=False,
-            source_command={**corner, "corner_from_memory": True},
+            source_command=metadata,
         )
 
     def _start_line_motion_capture(self, action: str) -> None:
@@ -2724,7 +2969,9 @@ class MotionDecisionNode(Node):
             or getattr(self, "active_special_command_id", None) is not None
         ):
             return False
-        for source in ("goal", "hurdle", "finish"):
+        for source in ("ball", "goal", "hurdle", "finish"):
+            if source == "ball" and MotionDecisionNode._ball_navigation_blocked(self):
+                continue
             if (
                 source == "hurdle"
                 and self.phase_manager.hurdles_completed
@@ -2941,7 +3188,9 @@ class MotionDecisionNode(Node):
                 observations,
                 dt_sec,
             )
-        decision = MotionDecisionNode._apply_pending_line_corner(self, decision)
+        decision = MotionDecisionNode._apply_pending_line_corner(
+            self, decision, observations.get("line"),
+        )
         self.last_candidate_decision = decision
 
         decision = self._suppress_duplicate_terminal_action(
@@ -3032,13 +3281,20 @@ class MotionDecisionNode(Node):
             }
         )
 
+        reserved_hurdle_sequence = bool(
+            self.mission_phase == "HURDLE_POSITIONING"
+            and decision.source == "hurdle" and decision.action == "GO"
+            and decision.source_command.get("hurdle_final_sequence_latched") is True
+            and getattr(self, "pending_hurdle_final_sequence", None) is not None
+        )
         if (
             decision.valid
             and not missing_line_search
+            and not reserved_hurdle_sequence
             and not self.general_motion_gate.has_required_fresh_vision()
         ):
-            # After a general motion terminates, require new Vision before
-            # publishing any executable decision, including special actions.
+            # An already confirmed hurdle checkpoint may finish its fixed sequence
+            # without another frame. Other executable decisions need new Vision.
             self._reset_pre_motion_settle()
             return
 
@@ -3200,6 +3456,8 @@ class MotionDecisionNode(Node):
         )
 
         self.publisher.publish(output)
+        if decision.valid and decision.source == "hurdle" and decision.action == "GO":
+            self.pending_hurdle_final_sequence = None
         limiter.record_published(decision, observations)
         if (
             decision.valid and decision.source == "line"
@@ -3262,6 +3520,18 @@ class MotionDecisionNode(Node):
                 decision,
             )
             if decision.source == "ball":
+                completed_at = getattr(self, "ball_motion_completed_at", None)
+                if completed_at is not None:
+                    self.get_logger().info(
+                        f"BALL motion boundary: wait_sec={now - completed_at:.3f}, "
+                        f"next_action={decision.action}, "
+                        f"reobserved={decision.source_command.get('approach_reobserved', False)}"
+                    )
+                    self.ball_motion_completed_at = None
+                if decision.action.startswith("BALL_APPROACH_TURN_"):
+                    observer = getattr(self, "ball_approach_observation", None)
+                    if observer is not None:
+                        observer.reset()
                 self.ball_approach_entry_pending = False
                 if decision.source_command.get(
                     "lost_ball_alignment_from_memory"
@@ -3332,6 +3602,9 @@ class MotionDecisionNode(Node):
                 "source_fresh": bool(
                     selected is not None
                     and fresh_vision.get(selected.source, False)
+                ),
+                "hurdle_final_sequence_pending": getattr(
+                    self, "pending_hurdle_final_sequence", None,
                 ),
                 "line": {
                     "line_detected": bool(line_info.get("detected", False)),
@@ -3672,6 +3945,7 @@ class MotionDecisionNode(Node):
         ):
             self.planner.disable_completed_hurdle_missions()
             self.hurdle_positioning_entry_pending = False
+            self.pending_hurdle_final_sequence = None
             self.hurdle_post_motion_dwell_until = None
             observations = dict(observations)
             observations["hurdle"] = None
@@ -3736,6 +4010,15 @@ class MotionDecisionNode(Node):
             planning_phase == "HURDLE_POSITIONING"
             and self.active_special_command_id is None
         ):
+            checkpoint = getattr(self, "pending_hurdle_final_sequence", None)
+            if checkpoint is not None:
+                self.planner.hurdle_go_requested = True
+                return MotionDecision(
+                    phase=planning_phase, source="hurdle", action="GO", valid=True,
+                    reason="hurdle_final_sequence_latched",
+                    sdk_motion_requested=True, requires_ack=True,
+                    source_command=dict(checkpoint),
+                )
             return self.planner.plan(planning_phase, observations, dt_sec)
 
         if planning_phase == "LINE_TRACK_AFTER_PICKUP":
@@ -3909,6 +4192,20 @@ class MotionDecisionNode(Node):
             )
 
         ball_info = observations.get("ball")
+        prepared_alignment = None
+        if (
+            ball_info is not None
+            and ball_info is getattr(self, "ball_prepared_info", None)
+            and getattr(self.planner, "ball_lock_active", False)
+            and self.active_special_command_id is None
+            and (
+                ball_info.get("detected") is True
+                or self.ball_approach_observation.is_current(time.monotonic())
+            )
+        ):
+            ball_info = self.ball_prepared_observation
+            observations = {**observations, "ball": ball_info}
+            prepared_alignment = self.ball_prepared_alignment
         if self.ball_pickup_entry_pending:
             return MotionDecision(
                 phase=planning_phase,
@@ -3939,7 +4236,7 @@ class MotionDecisionNode(Node):
                         source_command={},
                     )
                 return self.planner.plan_lost_ball_approach_alignment(ball_info)
-            alignment = self.planner.plan_ball_approach_alignment(ball_info)
+            alignment = prepared_alignment or self.planner.plan_ball_approach_alignment(ball_info)
             if alignment.action != "BALL_APPROACH_ALIGNED":
                 return alignment
             self.ball_approach_alignment_pending = False
@@ -4023,11 +4320,16 @@ class MotionDecisionNode(Node):
                 1 if self.pickups_completed == 0 else 2
             )
 
-        return self.planner.plan(
+        decision = self.planner.plan(
             planning_phase,
             observations,
             dt_sec,
         )
+        if ball_info is not None and ball_info.get("approach_reobserved") is True:
+            decision = replace(decision, source_command={
+                **decision.source_command, "approach_reobserved": True,
+            })
+        return decision
 
     def _rearm_absent_terminal_targets(
         self,

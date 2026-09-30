@@ -1636,6 +1636,9 @@ class YoloLineAnalyzer(DepthFrameConsumer, Node):
                 3,
             )
 
+            # Preserve capture time for post-motion corner distance checks.
+            result["stamp"] = payload.get("stamp")
+
             output = String()
 
             output.data = json.dumps(

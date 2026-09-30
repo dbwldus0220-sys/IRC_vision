@@ -1,0 +1,9 @@
+synthetic hurdle: 0.9 STRAIGHT hurdle_center_distance_approach parallel= False center= -42.52
+synthetic hurdle: 0.6 STRAIGHT_0 hurdle_center_distance_approach parallel= False center= -42.52
+synthetic hurdle: 0.536 GO hurdle_final_sequence_at_go_depth parallel= False center= -42.52
+synthetic line: 9.9 None
+synthetic line: 10.0 RECOVER_LEFT_TURN_RIGHT_4
+synthetic line: 11.9 RECOVER_LEFT_TURN_RIGHT_4
+synthetic line: 12.0 None
+synthetic line: 14.36 None
+confirmation: 18 hits confirm; missing frame is false; matching reacquisition restores

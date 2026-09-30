@@ -44,8 +44,9 @@ def ball_ground_geometry(
     """Estimate approach steering from the ball box's bottom-center contact.
 
     This is a floor-contact approximation, not a 3-D ball-center measurement.
-    The calibration applies ONLY to the 45-degree approach head pose. Never use
-    it for head-down pickup alignment, or after changing camera pitch/roll/yaw.
+    The calibration assumes the 45-degree approach head pose; changing camera
+    pitch/roll/yaw invalidates that assumption. The planner selects image/ground
+    steering by ground-forward distance, not by measured head pose.
     Raw Depth Z remains the distance-control input.
     """
     result = {
@@ -297,10 +298,10 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         # Ball pickup uses its own calibrated robot axis. Keep this separate
         # from the line analyzer's robot_center_offset_px parameter.
         self.declare_parameter("ball_robot_center_offset_px", 96.0)
-        # Confirm 18 spatially consistent hits within the latest 40 frames.
-        # At 30 FPS, uninterrupted detections confirm in about 0.6 seconds.
-        self.declare_parameter("confirmation_window_size", 40)
-        self.declare_parameter("confirmation_required_hits", 18)
+        # Confirm 12 spatially consistent hits within the latest 30 frames.
+        # At 15 processed FPS, uninterrupted detections take about 0.8 seconds.
+        self.declare_parameter("confirmation_window_size", 30)
+        self.declare_parameter("confirmation_required_hits", 12)
         self.declare_parameter("confirmation_max_missed_frames", 10)
         self.declare_parameter("confirmation_max_center_shift_norm", 0.18)
         self.declare_parameter("confirmation_min_area_ratio", 0.40)
@@ -1169,7 +1170,7 @@ class BallAnalyzer(DepthFrameConsumer, Node):
             "ball_detected_without_valid_depth",
         )
 
-    def _publish(self, info: BallInfo) -> None:
+    def _publish(self, info: BallInfo, approach_candidate: dict | None = None) -> None:
         message = String()
         payload = asdict(info)
         payload.update(self.confirmation_fields)
@@ -1180,6 +1181,14 @@ class BallAnalyzer(DepthFrameConsumer, Node):
             info.image_height,
             getattr(self, "ground_projection_parameters", GROUND_PROJECTION_DEFAULTS),
         ))
+        if approach_candidate is not None:
+            # Candidate geometry is advisory until the decision node verifies
+            # continuity with an already acquired ball. Never promote detected.
+            approach_candidate.update(ball_ground_geometry(
+                info.bbox, info.image_width, info.image_height,
+                getattr(self, "ground_projection_parameters", GROUND_PROJECTION_DEFAULTS),
+            ))
+            payload["approach_candidate"] = approach_candidate
         message.data = json.dumps(
             payload,
             ensure_ascii=True,
@@ -1372,6 +1381,10 @@ class BallAnalyzer(DepthFrameConsumer, Node):
                 # Preserve the latest screen side during motion blur without
                 # promoting a raw detection to a confirmed control target.
                 pending = self._empty_info("ball_confirmation_pending")
+                bottom_distance = (
+                    max(0, image_height - 1 - int(round(target.center[1])))
+                    if image_height else None
+                )
                 self._publish(replace(
                     pending,
                     confidence=target.confidence,
@@ -1385,7 +1398,23 @@ class BallAnalyzer(DepthFrameConsumer, Node):
                         if image_width is not None and image_width > 0
                         else None
                     ),
-                ))
+                ), approach_candidate={
+                    "distance_m": target.distance_m,
+                    "depth_m": target.depth_m,
+                    "ground_distance_m": target.ground_distance_m,
+                    "depth_valid": target.depth_valid,
+                    "depth_age_sec": target.depth_age_sec,
+                    "depth_stamp_ns": target.depth_stamp_ns,
+                    "depth_source": target.depth_source,
+                    "offset_x_norm": target.offset_x_norm,
+                    "steering_angle_deg": target.steering_angle_deg,
+                    "bearing_deg": target.bearing_deg,
+                    "bottom_distance_px": bottom_distance,
+                    "head_down_requested": should_request_head_down(
+                        bottom_distance,
+                        getattr(self, "head_down_trigger_bottom_distance_px", 120),
+                    ),
+                })
             return
 
         (
