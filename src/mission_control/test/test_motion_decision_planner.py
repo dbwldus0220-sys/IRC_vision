@@ -19,7 +19,21 @@ def line_info(**overrides):
         "turn_consistency": 1.0,
     }
     sample.update(overrides)
+    sample.setdefault("filtered_heading_error_deg", sample["ground_heading_error_deg"])
     return sample
+
+
+@pytest.mark.parametrize('side', [-1, 1])
+def test_default_line_recovery_follows_ground_in_recorded_opposing_heading_scene(side):
+    decision = MotionDecisionPlanner().plan('LINE_TRACK', {'line': line_info(
+        ground_heading_error_deg=side * 18.21,
+        filtered_heading_error_deg=-side * 19.5,
+        filtered_lateral_offset_norm=side * 1.099,
+    )}, .1)
+    direction = 'RIGHT' if side > 0 else 'LEFT'
+    assert decision.valid
+    assert decision.action == f'RECOVER_{direction}_TURN_{direction}_4'
+    assert decision.source_command['heading_source'] == 'ground'
 
 
 def ball_info(**overrides):
@@ -1167,7 +1181,7 @@ def test_post_ball_visible_line_hands_remaining_error_to_normal_tracking(heading
     {"heading_quality": None, "geometry_quality": None, "detection_quality": None},
 ])
 def test_post_ball_unusable_line_waits_before_normal_tracking(overrides):
-    result = MotionDecisionPlanner().plan(
+    result = MotionDecisionPlanner(MotionDecisionConfig(line_heading_source="ground")).plan(
         "POST_BALL_LINE_ALIGN", observations(line=line_info(**overrides)), 0.1,
     )
     assert result.action == "WAIT"
@@ -1548,7 +1562,9 @@ def test_goal_scoring_range_uses_crab_even_with_large_bearing():
     assert decision.action == "GOAL_CAMERA90_CRAB_RIGHT"
 
 
-def test_lost_goal_stops_then_turns_toward_last_seen_side():
+def test_lost_goal_stops_then_turns_toward_last_seen_side(monkeypatch):
+    now = [10.]
+    monkeypatch.setattr('mission_control.motion_decision_planner.time.monotonic', lambda: now[0])
     planner = MotionDecisionPlanner()
     planner.plan(
         "AUTO",
@@ -1566,17 +1582,19 @@ def test_lost_goal_stops_then_turns_toward_last_seen_side():
 
     stopped = planner.plan(
         "AUTO",
-        observations(line=line_info(), goal={"detected": False}),
+        observations(line=line_info(), goal={"detected": False, "rgb_stamp_ns": round(now[0] * 1e9)}),
         0.1,
     )
+    now[0] += .3
     planner.plan(
         "AUTO",
-        observations(line=line_info(), goal={"detected": False}),
+        observations(line=line_info(), goal={"detected": False, "rgb_stamp_ns": round(now[0] * 1e9)}),
         0.3,
     )
+    now[0] += .1
     turning = planner.plan(
         "AUTO",
-        observations(line=line_info(), goal={"detected": False}),
+        observations(line=line_info(), goal={"detected": False, "rgb_stamp_ns": round(now[0] * 1e9)}),
         0.1,
     )
 
@@ -3057,7 +3075,7 @@ def test_special_motion_lock_cannot_acquire_another_mission(phase):
 
 @pytest.mark.parametrize("phase", ["POST_BALL_LINE_ALIGN", "POST_SHOT_LINE_ALIGN"])
 def test_line_alignment_uses_ground_heading_over_opposite_image_heading(phase):
-    decision = MotionDecisionPlanner().plan(
+    decision = MotionDecisionPlanner(MotionDecisionConfig(line_heading_source="ground")).plan(
         phase,
         observations(line=line_info(
             ground_heading_error_deg=20.0,
@@ -3076,7 +3094,7 @@ def test_line_alignment_uses_ground_heading_over_opposite_image_heading(phase):
 
 @pytest.mark.parametrize("phase", ["LINE_TRACK", "POST_BALL_LINE_ALIGN", "POST_SHOT_LINE_ALIGN"])
 def test_detected_line_with_invalid_ground_holds_instead_of_image_turn_or_search(phase):
-    planner = MotionDecisionPlanner()
+    planner = MotionDecisionPlanner(MotionDecisionConfig(line_heading_source="ground"))
     sample = line_info(
         ground_projection_valid=False,
         ground_heading_error_deg=20.0,
@@ -3098,7 +3116,7 @@ def test_detected_line_with_invalid_ground_holds_instead_of_image_turn_or_search
 def test_pickup_alignment_requires_both_bottom_and_lateral_bounds(
     bottom_distance_px, offset_x_px, lateral_action,
 ):
-    decision = MotionDecisionPlanner().plan_ball_pickup_fine_alignment(
+    decision = MotionDecisionPlanner(MotionDecisionConfig(line_heading_source="ground")).plan_ball_pickup_fine_alignment(
         ball_info(bottom_distance_px=bottom_distance_px, offset_x_px=offset_x_px),
     )
     expected = (

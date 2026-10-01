@@ -194,17 +194,29 @@ def analyze_ground_line(
     image_width: int,
     image_height: int,
     parameters: dict[str, Any] | None = None,
+    *, corner_start_index: int | None = None,
 ) -> dict[str, Any]:
     """Compute calibrated ground geometry, including the navigation heading.
 
-    Numeric fields are null on failure, including count and calibration size.
+    Computed fit fields are null on failure; input count and segment remain diagnostic.
     On success, ground_line_points_m contains only the final fit inliers [X, Z].
     Residuals are along X, matching the X = slope * Z + intercept model.
     """
     config = dict(GROUND_PROJECTION_DEFAULTS)
     if parameters is not None:
         config.update(parameters)
+    segment = "FULL_PATH"
+    if corner_start_index is not None:
+        segment = "PRE_CORNER"
+        # Indices belong to this frame's near-to-far path, never held geometry.
+        if (isinstance(corner_start_index, bool) or not isinstance(corner_start_index, int)
+                or not 0 <= corner_start_index < len(points)):
+            points = []
+        else:
+            points = points[:corner_start_index + 1]
     result = {
+        "ground_fit_segment": segment,
+        "ground_fit_input_point_count": len(points),
         "ground_projection_enabled": bool(config["ground_projection_enabled"]),
         "ground_projection_valid": False,
         "ground_coordinate_frame": "robot_x_right_z_forward",
@@ -303,6 +315,30 @@ def calibrated_robot_center_x(
         return 0.0
     center_x = image_width / 2.0 + center_offset_px
     return float(np.clip(center_x, 0.0, image_width - 1.0))
+
+
+def offset_reference_geometry(
+    line_x: float, eval_y: float, robot_center_x: float,
+    image_width: int, image_height: int,
+) -> dict:
+    """Measure image steering to the exact point used for lateral offset."""
+    valid = bool(
+        image_width > 0 and image_height > 1
+        and all(math.isfinite(v) for v in (line_x, eval_y, robot_center_x))
+        and 0.0 <= line_x < image_width
+        and 0.0 <= robot_center_x < image_width
+        and 0.0 <= eval_y < image_height - 1
+    )
+    return {
+        "offset_reference_valid": valid,
+        "offset_reference_x_px": round(line_x, 3) if math.isfinite(line_x) else None,
+        "offset_reference_y_px": round(eval_y, 3) if math.isfinite(eval_y) else None,
+        "offset_reference_steering_deg": (
+            round(math.degrees(math.atan2(
+                line_x - robot_center_x, image_height - 1.0 - eval_y,
+            )), 3) if valid else None
+        ),
+    }
 
 
 def ground_forward_distance_from_depth(
@@ -1625,6 +1661,11 @@ class YoloLineAnalyzer(DepthFrameConsumer, Node):
                 self.image_width,
                 self.image_height,
                 self.ground_projection_parameters,
+                corner_start_index=(
+                    result.get("corner_start_index")
+                    if result.get("corner_preview_raw_detected") is True
+                    and result.get("corner_preview_held") is not True else None
+                ),
             ))
 
             result["processing_ms"] = round(
@@ -3460,6 +3501,11 @@ class YoloLineAnalyzer(DepthFrameConsumer, Node):
             "lateral_offset_px":
                 None,
 
+            "offset_reference_valid": False,
+            "offset_reference_x_px": None,
+            "offset_reference_y_px": None,
+            "offset_reference_steering_deg": None,
+
             "lateral_offset_norm":
                 None,
 
@@ -3737,6 +3783,10 @@ class YoloLineAnalyzer(DepthFrameConsumer, Node):
 
         robot_center_x = self._robot_center_x_px()
         image_half_width = self.image_width / 2.0
+        offset_reference = offset_reference_geometry(
+            predicted_line_x, eval_y, robot_center_x,
+            self.image_width, self.image_height,
+        )
 
         lateral_offset_px = (
             predicted_line_x
@@ -3871,6 +3921,8 @@ class YoloLineAnalyzer(DepthFrameConsumer, Node):
                     lateral_offset_px,
                     3,
                 ),
+
+            **offset_reference,
 
             "lateral_offset_norm":
                 round(

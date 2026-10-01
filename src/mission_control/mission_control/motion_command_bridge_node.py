@@ -99,6 +99,11 @@ class MotionCommandBridgeNode(Node):
             "BALL_PICKUP_FINE_FORWARD",
             "BALL_PICKUP_FINE_SEARCH_LEFT",
             "BALL_PICKUP_FINE_SEARCH_RIGHT",
+            *{
+                f"BALL_PICKUP_FINE_SEARCH_{direction}_{count}"
+                for direction, counts in (("LEFT", (1, 3)), ("RIGHT", (2, 5)))
+                for count in counts
+            },
             "BALL_PICKUP_FINE_SEARCH_FORWARD",
             "BALL_PICKUP_FINE_SEARCH_FORWARD_4",
             "BALL_PICKUP_FINE_SEARCH_BACKWARD",
@@ -110,6 +115,11 @@ class MotionCommandBridgeNode(Node):
         "BALL_PICKUP_FINE_FORWARD": "pickup_fine_forward_0",
         "BALL_PICKUP_FINE_SEARCH_LEFT": "pickup_camera_down_turn_left_2",
         "BALL_PICKUP_FINE_SEARCH_RIGHT": "pickup_camera_down_turn_right_5",
+        **{
+            f"BALL_PICKUP_FINE_SEARCH_{direction}_{count}": f"pickup_camera_down_turn_{direction.lower()}_{count}"
+            for direction, counts in (("LEFT", (1, 3)), ("RIGHT", (2, 5)))
+            for count in counts
+        },
         "BALL_PICKUP_FINE_SEARCH_FORWARD": "ball_camera_down_forward_2",
         "BALL_PICKUP_FINE_SEARCH_FORWARD_4": "ball_camera_down_forward_4",
         "BALL_PICKUP_FINE_SEARCH_BACKWARD": "pickup_lost_ball_backward_1",
@@ -191,6 +201,20 @@ class MotionCommandBridgeNode(Node):
         "BALL_APPROACH_RECOVER_RIGHT_4": "line_recovery_right_4",
         "LINE_LOST_TURN_LEFT": "line_search_left_2",
         "LINE_LOST_TURN_RIGHT": "line_search_right_5",
+        **{
+            f"LINE_OFFSET_TURN_{direction}_{count}": (
+                f"post_ball_line_turn_{direction.lower()}_{count}"
+            )
+            for direction, counts in (
+                ("LEFT", (1, 2, 3, 4, 5, 6)), ("RIGHT", (2, 3, 5, 7, 9)),
+            )
+            for count in counts
+        },
+        **{
+            f"LINE_LOST_TURN_{direction}_{count}": f"post_ball_line_turn_{direction.lower()}_{count}"
+            for direction, counts in (("LEFT", (1, 3)), ("RIGHT", (2, 5)))
+            for count in counts
+        },
         "GOAL_CAMERA_90_FORWARD": "goal_camera_90_forward_6",
         "GOAL_CAMERA_90_FORWARD_1": "goal_camera_90_forward_2",
         "GOAL_CAMERA_90_FORWARD_2": "goal_camera_90_forward_4",

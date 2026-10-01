@@ -12,6 +12,7 @@ from step.yolo_line_analyzer import GROUND_PROJECTION_DEFAULTS
 from step.yolo_line_analyzer import project_line_points_to_ground
 
 from step.yolo_line_analyzer import calibrated_robot_center_x
+from step.yolo_line_analyzer import offset_reference_geometry
 from step.yolo_line_analyzer import ground_forward_distance_from_depth
 from step.yolo_line_analyzer import LinePoint
 from step.yolo_line_analyzer import YoloLineAnalyzer
@@ -24,6 +25,22 @@ def test_1280_image_center_is_shifted_70_pixels_right():
 def test_center_calibration_is_clipped_inside_image():
     assert calibrated_robot_center_x(1280, -1000.0) == 0.0
     assert calibrated_robot_center_x(1280, 1000.0) == 1279.0
+
+
+@pytest.mark.parametrize("dx,expected", [(-128.6, -45.0), (0.0, 0.0), (128.6, 45.0)])
+def test_offset_reference_angle_uses_calibrated_bottom_center(dx, expected):
+    result = offset_reference_geometry(710.0 + dx, 590.4, 710.0, 1280, 720)
+    assert result["offset_reference_valid"]
+    assert result["offset_reference_steering_deg"] == pytest.approx(expected)
+
+
+@pytest.mark.parametrize("x,y", [(1280., 590.), (-1., 590.), (710., 719.),
+                                   (float("nan"), 590.), (710., float("inf"))])
+def test_offset_reference_rejects_invisible_or_invalid_points(x, y):
+    result = offset_reference_geometry(x, y, 710., 1280, 720)
+    assert not result["offset_reference_valid"]
+    assert result["offset_reference_steering_deg"] is None
+    json.dumps(result, allow_nan=False)
 
 
 def _corner_geometry(points):
@@ -201,6 +218,7 @@ def test_invalid_ground_fit_keeps_all_keys_with_null_numbers(
     metadata = {
         "ground_projection_enabled", "ground_projection_valid",
         "ground_coordinate_frame", "ground_line_points_m",
+        "ground_fit_segment", "ground_fit_input_point_count",
     }
     assert all(value is None for key, value in result.items() if key not in metadata)
     json.dumps(result, allow_nan=False)
@@ -242,11 +260,20 @@ def test_published_diagnostics_preserve_legacy_fields_and_clear_after_loss(monke
             for _ in range(3):
                 node._detections_callback(message)
             outputs.append(published[-1])
+            geometry = published[-1]
+            assert geometry["offset_reference_valid"]
+            assert geometry["offset_reference_y_px"] == pytest.approx(720 * 0.82)
+            assert geometry["offset_reference_x_px"] - geometry["robot_center_x_px"] == pytest.approx(
+                geometry["lateral_offset_px"], abs=0.002)
+            assert geometry["offset_reference_steering_deg"] is not None
             assert published[-1]["stamp"] == {"sec": 123, "nanosec": 456}
             node._detections_callback(String(data=json.dumps({"detections": []})))
             assert published[-1]["stamp"] is None
             assert published[-1]["ground_projection_valid"] is False
             assert published[-1]["ground_heading_error_deg"] is None
+            assert published[-1]["offset_reference_valid"] is False
+            assert published[-1]["offset_reference_steering_deg"] is None
+            assert published[-1]["offset_reference_x_px"] is None
         assert outputs[1]["detected"] is True
         assert outputs[0]["ground_projection_valid"] is False
         assert outputs[1]["ground_projection_valid"] is True

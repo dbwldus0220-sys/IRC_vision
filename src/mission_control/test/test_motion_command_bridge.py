@@ -518,6 +518,10 @@ EXPECTED_PRODUCTION_ACTIONS = {
     "BALL_LOST_FORWARD_4": "ball_camera_down_forward_4",
     "LINE_LOST_TURN_LEFT": "line_search_left_2",
     "LINE_LOST_TURN_RIGHT": "line_search_right_5",
+    "LINE_LOST_TURN_LEFT_1": "post_ball_line_turn_left_1",
+    "LINE_LOST_TURN_LEFT_3": "post_ball_line_turn_left_3",
+    "LINE_LOST_TURN_RIGHT_2": "post_ball_line_turn_right_2",
+    "LINE_LOST_TURN_RIGHT_5": "post_ball_line_turn_right_5",
     "GOAL_CAMERA_90_FORWARD": "goal_camera_90_forward_6",
     "GOAL_CAMERA_90_FORWARD_1": "goal_camera_90_forward_2",
     "GOAL_CAMERA_90_FORWARD_2": "goal_camera_90_forward_4",
@@ -540,6 +544,9 @@ for count in (2, 3, 5, 7, 9):
         f"POST_BALL_LINE_TURN_RIGHT_{count}"
     ] = f"post_ball_line_turn_right_{count}"
     EXPECTED_PRODUCTION_ACTIONS[
+        f"LINE_OFFSET_TURN_RIGHT_{count}"
+    ] = f"post_ball_line_turn_right_{count}"
+    EXPECTED_PRODUCTION_ACTIONS[
         f"GOAL_CAMERA90_TURN_RIGHT_{count}"
     ] = f"goal_camera_90_turn_right_{count}"
 for count in (2, 3, 5, 7, 9):
@@ -553,6 +560,9 @@ for count in range(1, 7):
 for count in (1, 2, 3, 4, 5, 6):
     EXPECTED_PRODUCTION_ACTIONS[
         f"POST_BALL_LINE_TURN_LEFT_{count}"
+    ] = f"post_ball_line_turn_left_{count}"
+    EXPECTED_PRODUCTION_ACTIONS[
+        f"LINE_OFFSET_TURN_LEFT_{count}"
     ] = f"post_ball_line_turn_left_{count}"
 for count in (1, 2, 3, 4, 5, 6):
     EXPECTED_PRODUCTION_ACTIONS[

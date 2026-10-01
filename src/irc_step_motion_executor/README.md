@@ -304,9 +304,40 @@ torque 또는 motor에 접근하지 않는다. 실물 motion 정보와 안전 �
 기존 Python `motion_executor_node`, legacy adapter, SDK placeholder,
 `full_system.launch.py`는 이 패키지와 별개이며 변경하거나 대체하지 않는다.
 
-## 2026-09-30 GUI 호환 SDK 작업본
+## 2026-10-01 현재 Jetson SDK의 전진 재생 정렬
 
-현재 검토 중인 외부 SDK는 담당자 전달본
+현재 설치 빌드는
+`/home/jet/IRC/external_sdk/robot_motion_player_sdk_work_20260801/final step`을
+참조한다. 아래 9월 30일 절의 별도 검증 작업본과 구분해야 한다.
+이 경로에 적용하는 변경은 `tools/sdk_active_gui_alignment.patch`에 보관한다.
+
+프레임 종료 호출에서 경계 자세와 반복 종료를 함께 처리해 반복마다 한 tick씩
+추가되던 지연을 제거했다. GUI와 동일하게 배속 적용 후 정수 ms로 시각을 계산하고,
+시작 자세 읽기가 끝난 시점부터 시간을 센다. 직접 실행하는 노드의 기본 주기도
+통합 launch 및 GUI와 같은 5ms다. 실제 USB 송신 주기를 보장하는 값은 아니다.
+
+초기화는 기존 PID와 Operating Mode를 덮어쓰지 않는다. 요청한 위치 제어 모드와
+실제 모드가 다르거나 읽지 못하면 시작을 거부한다. 이미 모터에 저장된 PID를
+과거 값으로 복원하지는 않는다. 모터 4·5번 보정, 모션 JSON의 5도 허용 오차와
+기존 최종 완료 판정, 시작 자세 및 카메라 보정 정책은 유지한다.
+
+가짜 하드웨어 검증은 아래 명령으로 재현한다. 같은 실행용 JSON, 시작 자세,
+배속, 호출 간격을 양쪽에 주입해 23개 목표각과 종료 시각을 비교한다. 제어 주기
+5/10/20ms 및 지터, 서로 다른 시작 자세와 최초 읽기 지연을 포함한다.
+
+```bash
+python3 tools/verify_sdk_forward_gui.py \
+  --sdk "/home/jet/IRC/external_sdk/robot_motion_player_sdk_work_20260801/final step" \
+  --gui-archive /home/jet/Downloads/gui_sdk_20260930_135448.tar.gz \
+  --catalog artifacts/robot_motions_runtime.json
+```
+
+모터 통신이나 실물 보행을 실행하는 검사가 아니다. 실물 비교 전 같은 PID와
+시작 자세인지 확인하고, 시뮬레이션 및 지지 장치가 있는 조건에서 먼저 검증한다.
+
+## 2026-09-30 별도 GUI 호환 SDK 검증 작업본
+
+당시 검토한 외부 SDK는 담당자 전달본
 `gui_sdk_20260930_135448.tar.gz`에 `tools/sdk_gui_compat.patch`를 적용한 것이다.
 아래 절은 위의 초기 scaffold 설명보다 최신이며, 운영 모션 JSON과 기존 ROS
 실행 기본값을 바꾸지 않은 상태에서 검증했다. 실제 모터에서는 실행하지 않았다.

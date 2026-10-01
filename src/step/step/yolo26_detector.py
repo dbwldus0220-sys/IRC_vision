@@ -1088,8 +1088,8 @@ class Yolo26Detector(Node):
                 label = "HURDLE / FORWARD 4"
             elif motion_id == "pickup_fine_forward_0":
                 label = "HURDLE / FINE FORWARD"
-        if action in {"LINE_LOST_TURN_LEFT", "LINE_LOST_TURN_RIGHT"}:
-            label = "LINE LOST | SEARCH " + action.rsplit("_", 1)[1]
+        if action.startswith("LINE_LOST_TURN_"):
+            label = "LINE LOST | SEARCH " + ("LEFT" if "_LEFT" in action else "RIGHT")
         if motion_id == "ball_general_fine_forward_8":
             source = str(payload.get("source", "")).lower()
             if payload.get("action") == "GO":
@@ -2179,6 +2179,8 @@ class Yolo26Detector(Node):
                 + self._metric_text(heading, "deg", 1, signed=True),
                 "Offset norm : "
                 + self._metric_text(offset, "", 3, signed=True),
+                "Offset steer: " + self._metric_text(
+                    self._number(info, "offset_reference_steering_deg"), "deg", 1, signed=True),
                 "Ref depth   : " + self._metric_text(
                     self._number(info, "nearest_line_depth_m"), "m", 3),
                 "Ref forward : " + self._metric_text(
@@ -2223,6 +2225,9 @@ class Yolo26Detector(Node):
                 )
             )
         rows[5:5] = ground_rows
+        control = (decision or {}).get("source_command", {})
+        if planner_source == "LINE" and control.get("heading_source") in {"image", "ground"}:
+            rows.append("Control head: " + control["heading_source"].upper())
 
         panel_x = max(12, width - panel_width - 12)
         panel_y = 44
@@ -2419,7 +2424,8 @@ class Yolo26Detector(Node):
 
         offset_px = self._number(info, "lateral_offset_px")
         if offset_px is not None:
-            eval_y = int(height * 0.82)
+            reference_y = self._number(info, "offset_reference_y_px")
+            eval_y = int(np.clip(reference_y if reference_y is not None else height * 0.82, 0, height - 1))
             line_x = int(np.clip(center_x + offset_px, 0, width - 1))
             cv2.line(
                 image,
@@ -3132,8 +3138,8 @@ class Yolo26Detector(Node):
             return None
         decision = decision_debug.get("decision", {})
         action = str(decision.get("selected_action", ""))
-        if action in {"LINE_LOST_TURN_LEFT", "LINE_LOST_TURN_RIGHT"}:
-            return "LINE LOST | SEARCH " + action.rsplit("_", 1)[1]
+        if action.startswith("LINE_LOST_TURN_"):
+            return "LINE LOST | SEARCH " + ("LEFT" if "_LEFT" in action else "RIGHT")
         if decision.get("reason") == "lost_search_turn_limit_reached":
             return "LINE LOST | SEARCH LIMIT"
         return "LINE LOST | WAIT"

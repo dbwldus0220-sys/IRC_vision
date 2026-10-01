@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
+import time
 from typing import Any
 
 from step.approach_distance import approach_level_from_motion
@@ -17,8 +18,9 @@ from step.goal_navigation_planner import GoalNavigationConfig, GoalNavigationPla
 from step.hurdle_navigation_planner import HurdleNavigationPlanner
 from step.line_navigation_planner import LineNavigationPlanner
 from step.line_navigation_planner import NavigationConfig
-from step.line_navigation_planner import valid_ground_heading
+from step.line_navigation_planner import valid_ground_heading, line_heading
 
+from .goal_loss_timer import GoalLossTimer
 from .hurdle_line_fusion import build_hurdle_path_reference
 
 
@@ -78,6 +80,8 @@ class MotionDecisionConfig:
     goal_recovery_command_sec: float = 0.40
     goal_reacquire_center_deg: float = 5.0
     goal_reacquire_center_norm: float = 0.10
+    line_heading_source: str = "ground"
+    line_offset_align_enter_px: float = -1.0
 
 
 class MotionDecisionPlanner:
@@ -115,7 +119,7 @@ class MotionDecisionPlanner:
     STATIONARY_TURN_MIN_DEG = {"LEFT": 15.0, "RIGHT": 15.0}
     STATIONARY_MAX_TURN_COUNTS = {"LEFT": 6, "RIGHT": 9}
     PICKUP_INITIAL_CENTER_BOUND_PX = 70.0
-    BALL_APPROACH_RECOVER_MIN_DEG = 20.0
+    BALL_APPROACH_RECOVER_MIN_DEG = 15.0
     BALL_APPROACH_RECOVER_YAW_DEG = 30.0
     BALL_STATIONARY_TURN_MIN_BOTTOM_PX = 120.0
     PICKUP_CLOSE_CRAB_BOTTOM_DISTANCE_PX = 100.0
@@ -133,8 +137,11 @@ class MotionDecisionPlanner:
         config: MotionDecisionConfig | None = None,
     ) -> None:
         self.config = config or MotionDecisionConfig()
+        if not math.isfinite(self.config.line_offset_align_enter_px):
+            raise ValueError("line offset alignment threshold must be finite")
         self.line_planner = LineNavigationPlanner(
             NavigationConfig(
+                heading_source=self.config.line_heading_source,
                 recovery_heading_turn_deg=(
                     self.config.recovery_heading_turn_deg
                 ),
@@ -179,6 +186,7 @@ class MotionDecisionPlanner:
         self.goal_tracking_active = False
         self.goal_recovery_centering = False
         self.goal_lost_elapsed_sec = 0.0
+        self.goal_loss_timer = GoalLossTimer()
         self.last_goal_bearing_deg: float | None = None
         self.last_goal_offset_x_norm: float | None = None
         self.last_goal_turn_direction = "RIGHT"
@@ -713,6 +721,9 @@ class MotionDecisionPlanner:
                 else self.hurdle_planner.plan(info, positioning=True)
             )
         result = command.to_dict()
+        if source == "line":
+            result["heading_source"] = self.line_planner.config.heading_source
+            result = self._line_offset_alignment(info or {}, result)
         if source == "ball" and command.valid and command.motion == "STRAIGHT":
             distance = command.distance_m
             angle = command.steering_error_deg
@@ -752,6 +763,52 @@ class MotionDecisionPlanner:
                 "turn_angle_deg": self._turn_angle_deg(count, direction),
             })
         return result
+
+    def _line_offset_alignment(self, info: dict, result: dict) -> dict:
+        """Prefer stationary steering to the offset point outside the pixel limit."""
+        angle = self._number(info, "offset_reference_steering_deg")
+        reference_valid = (
+            info.get("offset_reference_valid") is True
+            and angle is not None and abs(angle) < 90.0
+        )
+        direction = ("RIGHT" if angle >= 0.0 else "LEFT") if reference_valid else None
+        count = self._turn_repeat_count(angle, direction) if reference_valid else 0
+        offset = self._number(info, "lateral_offset_px")
+        threshold = self.config.line_offset_align_enter_px
+        result.update({
+            "lateral_offset_px": offset,
+            "offset_reference_valid": reference_valid,
+            "offset_reference_x_px": self._number(info, "offset_reference_x_px"),
+            "offset_reference_y_px": self._number(info, "offset_reference_y_px"),
+            "offset_reference_steering_deg": angle if reference_valid else None,
+            "offset_reference_turn_direction": direction,
+            "offset_reference_turn_count": count,
+            "offset_align_enter_px": threshold,
+        })
+        if threshold < 0.0 or not result["valid"]:
+            return result
+        if offset is not None and abs(offset) <= threshold:
+            return result
+        if offset is None or not reference_valid:
+            stopped = self.line_planner.stop("line_offset_alignment_invalid_reference").to_dict()
+            return {**result, **stopped}
+        # Below the smallest calibrated turn, re-evaluate recovery/forward normally.
+        if count == 0:
+            return result
+        yaw = self._turn_angle_deg(count, direction)
+        stopped = self.line_planner.stop("line_offset_alignment").to_dict()
+        return {
+            **result, **stopped,
+            "valid": True,
+            "motion": f"LINE_OFFSET_TURN_{direction}_{count}",
+            "reason": "line_offset_alignment",
+            "steering_error_deg": angle,
+            "target_heading_change_deg": math.copysign(yaw, angle),
+            "turn_direction": direction, "turn_count": count,
+            "turn_angle_deg": yaw,
+            "alignment_reference": "offset_reference_image_point",
+            "catalog_motion_available": True,
+        }
 
     @classmethod
     def _turn_repeat_deg(cls, direction: str) -> float | None:
@@ -1128,7 +1185,10 @@ class MotionDecisionPlanner:
                 source_command={},
             )
 
-        heading = valid_ground_heading(info)
+        heading = (
+            line_heading(info, self.line_planner.config.heading_source)
+            if phase == "POST_BALL_LINE_ALIGN" else valid_ground_heading(info)
+        )
         offset = self._number(info, "filtered_lateral_offset_norm")
         if offset is None:
             offset = self._number(info, "lateral_offset_norm")
@@ -2159,7 +2219,7 @@ class MotionDecisionPlanner:
             ):
                 self.goal_tracking_active = True
             if self.goal_tracking_active:
-                self.goal_lost_elapsed_sec = 0.0
+                self.reset_goal_loss_timer()
                 if self.goal_recovery_centering and self._goal_is_centered(
                     info
                 ):
@@ -2169,7 +2229,8 @@ class MotionDecisionPlanner:
         if not self.goal_tracking_active:
             return
         self.goal_recovery_centering = True
-        self.goal_lost_elapsed_sec += max(0.0, dt_sec)
+        self.goal_loss_timer.observe(info, time.monotonic())
+        self.goal_lost_elapsed_sec = self.goal_loss_timer.elapsed_sec
         if (
             self.goal_lost_elapsed_sec
             > self.config.goal_recovery_timeout_sec
@@ -2278,10 +2339,15 @@ class MotionDecisionPlanner:
             "last_seen_direction": direction,
         }
 
+    def reset_goal_loss_timer(self) -> None:
+        """Start a new loss check after motion or reacquisition."""
+        self.goal_loss_timer.reset()
+        self.goal_lost_elapsed_sec = 0.0
+
     def _clear_goal_tracking(self) -> None:
         self.goal_tracking_active = False
         self.goal_recovery_centering = False
-        self.goal_lost_elapsed_sec = 0.0
+        self.reset_goal_loss_timer()
         self.last_goal_bearing_deg = None
         self.last_goal_offset_x_norm = None
 

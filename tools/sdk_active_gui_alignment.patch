@@ -1,0 +1,185 @@
+--- a/robot_motion_player.cpp
++++ b/robot_motion_player.cpp
+@@ -402,7 +402,7 @@
+                     << std::endl;
+                 trajectory_initialized_ = true;
+                 last_position_check_at_ = Clock::time_point{};
+-                started_at_ = now;
++                started_at_ = Clock::now();
+                 return status_;
+             }
+             std::cerr
+@@ -414,12 +414,14 @@
+         last_position_check_at_ = Clock::time_point{};
+         // A delayed successful read is the real beginning of the trajectory.
+         // Do not skip early samples while communication is recovering.
++        now = Clock::now();
+         started_at_ = now;
+     }
+ 
+     const double real_ms =
+         std::chrono::duration<double, std::milli>(now - started_at_).count();
+-    const double timeline_ms = real_ms * pattern_->playbackSpeed();
++    // GUI evaluates an integer timeline after applying playback speed.
++    double timeline_ms = std::floor(real_ms * pattern_->playbackSpeed() + 1e-7);
+ 
+     if (!gateCurrentFrame(timeline_ms)) return status_;
+ 
+@@ -442,7 +444,8 @@
+         ++repeat_;
+         trajectory_start_deg_ = final_goal_deg_;
+         next_frame_ = 0;
+-        started_at_ = now;
++        // Start the next cycle after the final Goal transmission completes.
++        started_at_ = Clock::now();
+         gated_frame_ = nullptr;
+         return status_;
+     }
+@@ -456,14 +459,14 @@
+     return updateSettling(now);
+ }
+ 
+-bool RobotMotionPlayer::gateCurrentFrame(double timeline_ms) {
++bool RobotMotionPlayer::gateCurrentFrame(double& timeline_ms) {
+     if (gated_frame_ == nullptr) return true;
+     const auto frame_end_ms = gated_frame_->start_ms + gated_frame_->time_ms;
+     if (timeline_ms < frame_end_ms) return true;
+ 
+     // A sampled direct trajectory may not land on the exact frame boundary.
+-    // Match the GUI by confirming the final corrected Goal once, then release
+-    // without Present Position waiting or timeline adjustment.
++    // Match the GUI: process the exact boundary in this update. The next
++    // update uses elapsed wall time; no extra tick is added at cycle end.
+     if (!sendDirectGoal(correctedFrameAngles(*gated_frame_))) {
+         std::cerr
+             << "[Warning] DYNAMIXEL frame boundary transmission failed; "
+@@ -471,7 +474,8 @@
+             << std::endl;
+     }
+     gated_frame_ = nullptr;
+-    return false;
++    timeline_ms = static_cast<double>(frame_end_ms);
++    return true;
+ }
+ 
+ MotionStatus RobotMotionPlayer::updateSettling(Clock::time_point now) {
+--- a/robot_motion_player.hpp
++++ b/robot_motion_player.hpp
+@@ -155,7 +155,7 @@
+     void resetMotionRuntime(
+         const MotionPattern& pattern, std::string name,
+         Clock::time_point now) noexcept;
+-    bool gateCurrentFrame(double timeline_ms);
++    bool gateCurrentFrame(double& timeline_ms);
+     void fail(MotionError error, std::string message) noexcept;
+     JointAngles correctedFrameAngles(const MotionFrame& frame) const;
+     JointAngles accumulatedPoseBefore(const MotionFrame& frame) const;
+--- a/step_dynamixel.cpp
++++ b/step_dynamixel.cpp
+@@ -335,52 +335,15 @@
+                 "failed to read DYNAMIXEL operating mode for ID "
+                 + std::to_string(id));
+         }
+-        if (verified_mode == static_cast<uint8_t>(current_mode)) {
+-            std::cout << "[Info] Operating mode already configured for ID: "
+-                      << int(id) << std::endl;
+-            continue;
+-        }
+-
+-        dxl_error = 0;
+-        const int dxl_comm_result = packetHandler->write1ByteTxRx(
+-            portHandler, id, DxlReg_OperatingMode,
+-            static_cast<uint8_t>(current_mode), &dxl_error);
+-        if (dxl_comm_result != COMM_SUCCESS || dxl_error != 0) {
+-            std::cerr << "[DYNAMIXEL OPERATING MODE WRITE] motor_id="
+-                      << int(id)
+-                      << " requested_mode=" << current_mode
+-                      << " write_comm_result=" << dxl_comm_result
+-                      << " dxl_error=" << int(dxl_error) << std::endl;
++        // Preserve the existing mode and gains, as the GUI does. A mismatched
++        // mode cannot safely execute position goals; require explicit setup.
++        if (verified_mode != static_cast<uint8_t>(current_mode)) {
+             return fail_configuration(
+-                "failed to transmit DYNAMIXEL operating mode for ID "
++                "DYNAMIXEL operating mode mismatch; configuration preserved for ID "
+                 + std::to_string(id));
+         }
+-        verified_mode = 0;
+-        dxl_error = 0;
+-        read_succeeded = Read1ByteWithRetry(
+-            id, DxlReg_OperatingMode, &verified_mode, &dxl_error);
+-        if (!read_succeeded || dxl_error != 0
+-            || verified_mode != static_cast<uint8_t>(current_mode)) {
+-            std::cerr << "[DYNAMIXEL OPERATING MODE VERIFICATION] motor_id="
+-                      << int(id)
+-                      << " requested_mode=" << current_mode
+-                      << " verified_mode=" << int(verified_mode)
+-                      << " read_succeeded=" << std::boolalpha
+-                      << read_succeeded << std::noboolalpha
+-                      << " dxl_error=" << int(dxl_error) << std::endl;
+-            return fail_configuration(
+-                "failed to verify DYNAMIXEL operating mode for ID "
+-                + std::to_string(id));
+-        }
+-        std::cout << "[Info] Set operating mode for ID: "
+-                  << int(id) << std::endl;
+-    }
+-
+-    VectorXd PID_Gain(3);
+-    PID_Gain << 850, 0, 0;
+-    if (!SetPIDGain(PID_Gain)) {
+-        return fail_configuration("failed to configure DYNAMIXEL PID gains");
+-    }
++    }
++
+     motion_configured_ = true;
+     last_error_.clear();
+     return true;
+--- a/test_constructor_side_effects.cmake
++++ b/test_constructor_side_effects.cmake
+@@ -75,32 +75,21 @@
+     message(FATAL_ERROR "Dxl::Preflight must reject transmit, read, and nonzero readback failures")
+ endif()
+ 
+-foreach(required_call Preflight DxlReg_OperatingMode SetPIDGain)
++foreach(required_call Preflight DxlReg_OperatingMode Read1ByteWithRetry
++                      "verified_mode !=" "motion_configured_ = true")
+     string(FIND "${initialize_source}" "${required_call}" required_position)
+     if(required_position EQUAL -1)
+-        message(FATAL_ERROR
+-            "Dxl::Initialize does not contain required operation: ${required_call}")
+-    endif()
+-endforeach()
+-string(FIND "${initialize_source}" "write1ByteTxOnly(" mode_tx_only)
+-string(FIND "${initialize_source}" "write1ByteTxRx(" mode_tx_rx)
+-string(FIND "${initialize_source}" "Read1ByteWithRetry(" mode_initial_read)
+-string(LENGTH "${initialize_source}" initialize_length)
+-math(EXPR mode_after_write_length "${initialize_length} - ${mode_tx_rx}")
+-string(SUBSTRING "${initialize_source}" ${mode_tx_rx}
+-       ${mode_after_write_length} initialize_after_mode_write)
+-string(FIND "${initialize_after_mode_write}" "Read1ByteWithRetry(" mode_readback)
+-string(FIND "${initialize_source}" "verified_mode !=" mode_value_check)
+-string(FIND "${initialize_source}" "if (!SetPIDGain(PID_Gain))" pid_result_check)
+-string(FIND "${initialize_source}" "motion_configured_ = true" configured_assignment)
+-if(mode_tx_rx EQUAL -1 OR mode_initial_read EQUAL -1 OR mode_readback EQUAL -1
+-   OR mode_value_check EQUAL -1 OR pid_result_check EQUAL -1
+-   OR configured_assignment EQUAL -1 OR NOT mode_tx_only EQUAL -1
+-   OR NOT mode_initial_read LESS mode_tx_rx
+-   OR NOT pid_result_check LESS configured_assignment)
+-    message(FATAL_ERROR
+-        "Dxl::Initialize must read before conditional TxRx mode write and verify mode/PID configuration")
+-endif()
++        message(FATAL_ERROR "Dxl::Initialize lacks mode validation: ${required_call}")
++    endif()
++endforeach()
++foreach(forbidden_call SetPIDGain write1ByteTxRx write1ByteTxOnly
++                       write2ByteTxRx write2ByteTxOnly)
++    string(FIND "${initialize_source}" "${forbidden_call}" write_position)
++    if(NOT write_position EQUAL -1)
++        message(FATAL_ERROR
++            "Dxl::Initialize must preserve existing mode/PID: ${forbidden_call}")
++    endif()
++endforeach()
+ 
+ string(FIND "${dxl_source}" "bool Dxl::SetPIDGain" pid_start)
+ string(FIND "${dxl_source}" "int16_t Dxl::SetPresentMode" pid_end)

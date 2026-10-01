@@ -1,0 +1,869 @@
+#include "robot_motion_player.hpp"
+
+#include <algorithm>
+#include <cmath>
+#include <exception>
+#include <iostream>
+#include <numbers>
+#include <stdexcept>
+#include <string_view>
+#include <thread>
+#include <utility>
+
+namespace irc_step {
+namespace {
+constexpr std::uint32_t kCancelHoldDurationMs = 50;
+constexpr auto kPositionCheckInterval = std::chrono::milliseconds(20);
+constexpr std::int64_t kFinalPositionCheckBudgetMs = 100;
+constexpr MotionCompletion kStartupCompletion{
+    .position_tolerance_deg = 4.0,
+    .settle_duration_ms = 80,
+    .settle_timeout_ms = 3000,
+};
+constexpr std::int64_t kMinimumTimelineFrameMs = 10;
+constexpr double kLiftTargetArrivalRatio = 0.80;
+
+bool isLiftFrame(std::string_view name) {
+    constexpr std::string_view keywords[]{"발들", "들기", "오들", "왼들"};
+    return std::any_of(
+        std::begin(keywords), std::end(keywords),
+        [name](std::string_view keyword) {
+            return name.find(keyword) != std::string_view::npos;
+        });
+}
+
+void mergeAngles(JointAngles& destination, const JointAngles& source) {
+    for (const auto& [motor_id, degree] : source)
+        destination[motor_id] = degree;
+}
+}
+
+RobotMotionPlayer::RobotMotionPlayer(
+    const std::string& json_path, IMotionHardware& hardware)
+    : library_(MotionLibrary::loadGuiJson(json_path)),
+      hardware_(&hardware) {}
+
+RobotMotionPlayer::~RobotMotionPlayer() { shutdown(); }
+
+bool RobotMotionPlayer::initialize() noexcept {
+    if (hardware_ == nullptr) {
+        fail(MotionError::InternalError, "motion hardware is not configured");
+        return false;
+    }
+    if (!hardware_->initialize()) {
+        fail(MotionError::HardwareNotReady, std::string(hardware_->lastError()));
+        return false;
+    }
+    initialized_ = true;
+    status_ = MotionStatus::Idle;
+    error_ = MotionError::None;
+    last_error_.clear();
+    return true;
+}
+
+bool RobotMotionPlayer::hardwareReady() const noexcept {
+    return initialized_ && hardware_ != nullptr && hardware_->ready();
+}
+
+std::vector<std::string> RobotMotionPlayer::motionNames() const {
+    return library_.names();
+}
+
+bool RobotMotionPlayer::contains(std::string_view name) const {
+    return library_.contains(std::string(name));
+}
+
+MotionInfo RobotMotionPlayer::motionInfo(std::string_view name) const {
+    const std::string owned_name(name);
+    const auto& pattern = library_.motion(owned_name);
+    const auto nominal_once_ms = static_cast<std::int64_t>(std::ceil(
+        pattern.durationMs() / pattern.playbackSpeed()));
+    return MotionInfo{
+        owned_name,
+        pattern.durationMs(),
+        nominal_once_ms * pattern.repeatCount(),
+        pattern.startPose(),
+        pattern.endPose(),
+        pattern.repeatable(),
+        pattern.repeatCount(),
+        pattern.playbackSpeed(),
+    };
+}
+
+StartResult RobotMotionPlayer::start(std::string_view motion_name) noexcept {
+    if (running() || startup_status_ == MotionStatus::Running
+        || startup_status_ == MotionStatus::Settling)
+        return StartResult::RejectedBusy;
+    if (!hardwareReady()) {
+        fail(MotionError::HardwareNotReady, "motion hardware is not ready");
+        return StartResult::HardwareNotReady;
+    }
+    const std::string name(motion_name);
+    if (!library_.contains(name)) {
+        error_ = MotionError::None;
+        last_error_ = "motion not found: " + name;
+        return StartResult::MotionNotFound;
+    }
+    try {
+        const auto& pattern = library_.motion(name);
+        if (pattern.frames().empty()) {
+            last_error_ = "motion has no frames: " + name;
+            return StartResult::InvalidMotion;
+        }
+        // cancel/startup transitions can leave a nonzero motor time profile.
+        if (!hardware_->restoreDirectPlaybackProfile()) {
+            fail(MotionError::CommunicationError,
+                 "failed to restore direct playback profiles: "
+                     + std::string(hardware_->lastError()));
+            return StartResult::HardwareNotReady;
+        }
+        clearQueuedMotion();
+        resetMotionRuntime(pattern, name, Clock::now());
+        error_ = MotionError::None;
+        last_error_.clear();
+        return StartResult::Accepted;
+    } catch (const std::exception& error) {
+        fail(MotionError::InternalError, error.what());
+        return StartResult::InvalidMotion;
+    } catch (...) {
+        fail(MotionError::InternalError, "unknown motion start error");
+        return StartResult::InvalidMotion;
+    }
+}
+
+QueueResult RobotMotionPlayer::queueNext(std::string_view motion_name) noexcept {
+    if (!hardwareReady()) return QueueResult::HardwareNotReady;
+    if (!running() || pattern_ == nullptr) return QueueResult::RejectedNotRunning;
+    if (queued_pattern_ != nullptr) return QueueResult::RejectedQueueFull;
+
+    const std::string name(motion_name);
+    if (!library_.contains(name)) return QueueResult::MotionNotFound;
+    try {
+        const auto& next = library_.motion(name);
+        if (next.frames().empty()) return QueueResult::InvalidMotion;
+        if (!canSeamlesslyTransition(*pattern_, current_motion_, next, name))
+            return QueueResult::IncompatibleTransition;
+        queued_motion_ = name;
+        queued_pattern_ = &next;
+        return QueueResult::Queued;
+    } catch (const std::exception& error) {
+        last_error_ = error.what();
+    } catch (...) {
+        last_error_ = "unknown queued motion error";
+    }
+    return QueueResult::InvalidMotion;
+}
+
+bool RobotMotionPlayer::hasQueuedMotion() const noexcept {
+    return queued_pattern_ != nullptr;
+}
+
+std::string_view RobotMotionPlayer::queuedMotion() const noexcept {
+    return queued_motion_;
+}
+
+void RobotMotionPlayer::clearQueuedMotion() noexcept {
+    queued_pattern_ = nullptr;
+    queued_motion_.clear();
+}
+
+std::uint64_t RobotMotionPlayer::completionSequence() const noexcept {
+    return completion_sequence_;
+}
+
+std::string_view RobotMotionPlayer::lastCompletedMotion() const noexcept {
+    return last_completed_motion_;
+}
+
+bool RobotMotionPlayer::canSeamlesslyTransition(
+    const MotionPattern& current, std::string_view current_name,
+    const MotionPattern& next, std::string_view next_name) const noexcept {
+    if (current_name == next_name && current.repeatable()) return true;
+    return !current.endPose().empty() && !next.startPose().empty()
+        && current.endPose() == next.startPose();
+}
+
+void RobotMotionPlayer::resetMotionRuntime(
+    const MotionPattern& pattern, std::string name,
+    Clock::time_point now) noexcept {
+    JointAngles fallback_start_deg = final_goal_deg_.empty()
+        ? startup_target_deg_
+        : final_goal_deg_;
+    pattern_ = &pattern;
+    current_motion_ = std::move(name);
+    next_frame_ = 0;
+    repeat_ = 1;
+    final_goal_deg_.clear();
+    last_present_deg_.clear();
+    final_goal_ids_.clear();
+    trajectory_start_deg_ = std::move(fallback_start_deg);
+    trajectory_initialized_ = false;
+    gated_frame_ = nullptr;
+    settling_started_at_ = Clock::time_point{};
+    within_tolerance_since_ = Clock::time_point{};
+    last_position_check_at_ = Clock::time_point{};
+    within_tolerance_ = false;
+    started_at_ = now;
+    status_ = MotionStatus::Running;
+}
+
+bool RobotMotionPlayer::activateQueuedMotion(Clock::time_point now) noexcept {
+    if (queued_pattern_ == nullptr) return false;
+    const MotionPattern* next = queued_pattern_;
+    std::string next_name = std::move(queued_motion_);
+    queued_pattern_ = nullptr;
+    queued_motion_.clear();
+    last_completed_motion_ = current_motion_;
+    ++completion_sequence_;
+    resetMotionRuntime(*next, std::move(next_name), now);
+    error_ = MotionError::None;
+    last_error_.clear();
+    return true;
+}
+
+bool RobotMotionPlayer::startPoseTransition(
+    const std::vector<double>& target_angles_deg,
+    std::int64_t duration_ms) noexcept {
+    if (!hardwareReady()) {
+        error_ = MotionError::HardwareNotReady;
+        last_error_ = "motion hardware is not ready for startup pose";
+        startup_status_ = MotionStatus::Failed;
+        return false;
+    }
+    if (running() || startup_status_ == MotionStatus::Running
+        || startup_status_ == MotionStatus::Settling) {
+        last_error_ = "motion player is busy";
+        return false;
+    }
+    if (target_angles_deg.size() != kMotionMotorCount || duration_ms <= 0
+        || duration_ms > static_cast<std::int64_t>(kMaxTimeProfileMs)) {
+        last_error_ = "invalid startup pose motor count or duration";
+        startup_status_ = MotionStatus::Failed;
+        return false;
+    }
+
+    JointAngles target;
+    std::vector<int> motor_ids;
+    target.reserve(kMotionMotorCount);
+    motor_ids.reserve(kMotionMotorCount);
+    for (int motor_id = 0; motor_id < kMotionMotorCount; ++motor_id) {
+        const double angle_deg = target_angles_deg[motor_id];
+        if (!std::isfinite(angle_deg)) {
+            last_error_ = "startup pose contains a non-finite angle";
+            startup_status_ = MotionStatus::Failed;
+            return false;
+        }
+        target[motor_id] = angle_deg;
+        motor_ids.push_back(motor_id);
+    }
+    if (!hardware_->commandPosition(
+            target, motor_ids, static_cast<std::uint32_t>(duration_ms), 0)) {
+        error_ = MotionError::FrameSendFailed;
+        last_error_ = hardware_->lastError().empty()
+            ? "failed to write startup pose Goal Position"
+            : std::string(hardware_->lastError());
+        startup_status_ = MotionStatus::Failed;
+        return false;
+    }
+
+    startup_target_deg_ = std::move(target);
+    startup_motor_ids_ = std::move(motor_ids);
+    startup_duration_ms_ = duration_ms;
+    startup_started_at_ = Clock::now();
+    startup_settling_started_at_ = Clock::time_point{};
+    startup_within_tolerance_since_ = Clock::time_point{};
+    startup_last_position_check_at_ = Clock::time_point{};
+    startup_within_tolerance_ = false;
+    startup_status_ = MotionStatus::Running;
+    error_ = MotionError::None;
+    last_error_.clear();
+    return true;
+}
+
+MotionStatus RobotMotionPlayer::updateStartupPose() noexcept {
+    if (startup_status_ != MotionStatus::Running
+        && startup_status_ != MotionStatus::Settling)
+        return startup_status_;
+    try {
+        const auto now = Clock::now();
+        const auto moving_ms =
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+                now - startup_started_at_).count();
+        if (moving_ms < startup_duration_ms_) return MotionStatus::Running;
+
+        if (startup_status_ == MotionStatus::Running) {
+            startup_status_ = MotionStatus::Settling;
+            startup_settling_started_at_ = now;
+        }
+        const auto settling_ms =
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+                now - startup_settling_started_at_).count();
+        if (settling_ms > kStartupCompletion.settle_timeout_ms) {
+            error_ = MotionError::PositionTimeout;
+            last_error_ =
+                "startup pose Present Position did not reach the goal before timeout";
+            startup_status_ = MotionStatus::Failed;
+            return startup_status_;
+        }
+        if (startup_last_position_check_at_ != Clock::time_point{}
+            && now - startup_last_position_check_at_ < kPositionCheckInterval)
+            return startup_status_;
+        startup_last_position_check_at_ = now;
+
+        JointAngles present_deg;
+        if (!hardware_->readPresentPositions(present_deg)) {
+            error_ = MotionError::PresentPositionReadFailed;
+            last_error_ = hardware_->lastError().empty()
+                ? "failed to read startup pose Present Position"
+                : std::string(hardware_->lastError());
+            startup_status_ = MotionStatus::Failed;
+            return startup_status_;
+        }
+        bool all_reached = true;
+        for (const int motor_id : startup_motor_ids_) {
+            const auto goal = startup_target_deg_.find(motor_id);
+            const auto present = present_deg.find(motor_id);
+            if (goal == startup_target_deg_.end() || present == present_deg.end()
+                || std::abs(goal->second - present->second)
+                    > kStartupCompletion.position_tolerance_deg) {
+                all_reached = false;
+                break;
+            }
+        }
+        if (!all_reached) {
+            startup_within_tolerance_ = false;
+            return startup_status_;
+        }
+        if (!startup_within_tolerance_) {
+            startup_within_tolerance_ = true;
+            startup_within_tolerance_since_ = now;
+            return startup_status_;
+        }
+        const auto stable_ms =
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+                now - startup_within_tolerance_since_).count();
+        if (stable_ms < kStartupCompletion.settle_duration_ms)
+            return startup_status_;
+
+        if (!hardware_->restoreDirectPlaybackProfile()) {
+            error_ = MotionError::CommunicationError;
+            last_error_ = hardware_->lastError().empty()
+                ? "failed to restore direct playback profile"
+                : std::string(hardware_->lastError());
+            startup_status_ = MotionStatus::Failed;
+            return startup_status_;
+        }
+
+        startup_status_ = MotionStatus::Succeeded;
+        error_ = MotionError::None;
+        last_error_.clear();
+        return startup_status_;
+    } catch (const std::exception& error) {
+        error_ = MotionError::InternalError;
+        last_error_ = error.what();
+    } catch (...) {
+        error_ = MotionError::InternalError;
+        last_error_ = "unknown startup pose update error";
+    }
+    startup_status_ = MotionStatus::Failed;
+    return startup_status_;
+}
+
+MotionStatus RobotMotionPlayer::update() noexcept {
+    try {
+        const auto now = Clock::now();
+        if (status_ == MotionStatus::Running) return updateRunning(now);
+        if (status_ == MotionStatus::Settling) return updateSettling(now);
+        return status_;
+    } catch (const std::exception& error) {
+        fail(MotionError::InternalError, error.what());
+    } catch (...) {
+        fail(MotionError::InternalError, "unknown RobotMotionPlayer update error");
+    }
+    return status_;
+}
+
+MotionStatus RobotMotionPlayer::updateRunning(Clock::time_point now) {
+    if (pattern_ == nullptr) {
+        fail(MotionError::InternalError, "running motion has no pattern");
+        return status_;
+    }
+    if (!trajectory_initialized_) {
+        if (last_position_check_at_ != Clock::time_point{}
+            && now - last_position_check_at_ < kPositionCheckInterval) {
+            return status_;
+        }
+        last_position_check_at_ = now;
+        if (!hardware_->readPresentPositions(trajectory_start_deg_)) {
+            if (!trajectory_start_deg_.empty()) {
+                std::cerr
+                    << "[Warning] Failed to read trajectory start Present "
+                    << "Position; continuing from the last commanded pose"
+                    << std::endl;
+                trajectory_initialized_ = true;
+                last_position_check_at_ = Clock::time_point{};
+                started_at_ = now;
+                return status_;
+            }
+            std::cerr
+                << "[Warning] Failed to read trajectory start Present Position; "
+                << "waiting to retry without starting the motion" << std::endl;
+            return status_;
+        }
+        trajectory_initialized_ = true;
+        last_position_check_at_ = Clock::time_point{};
+        // A delayed successful read is the real beginning of the trajectory.
+        // Do not skip early samples while communication is recovering.
+        started_at_ = now;
+    }
+
+    const double real_ms =
+        std::chrono::duration<double, std::milli>(now - started_at_).count();
+    const double timeline_ms = real_ms * pattern_->playbackSpeed();
+
+    if (!gateCurrentFrame(timeline_ms)) return status_;
+
+    if (!sendTrajectorySample(
+            std::min(timeline_ms, static_cast<double>(pattern_->durationMs())))) {
+        if (error_ != MotionError::FrameSendFailed) {
+            std::cerr
+                << "[Warning] DYNAMIXEL trajectory sample transmission "
+                << "failed; continuing motion timeline: "
+                << hardware_->lastError() << std::endl;
+        }
+        error_ = MotionError::FrameSendFailed;
+        last_error_ = hardware_->lastError().empty()
+            ? "DYNAMIXEL trajectory sample transmission failed"
+            : std::string(hardware_->lastError());
+    }
+
+    if (timeline_ms < pattern_->durationMs()) return status_;
+    if (repeat_ < pattern_->repeatCount()) {
+        ++repeat_;
+        trajectory_start_deg_ = final_goal_deg_;
+        next_frame_ = 0;
+        started_at_ = now;
+        gated_frame_ = nullptr;
+        return status_;
+    }
+
+    if (activateQueuedMotion(now)) return status_;
+
+    status_ = MotionStatus::Settling;
+    settling_started_at_ = now;
+    last_position_check_at_ = Clock::time_point{};
+    within_tolerance_ = false;
+    return updateSettling(now);
+}
+
+bool RobotMotionPlayer::gateCurrentFrame(double timeline_ms) {
+    if (gated_frame_ == nullptr) return true;
+    const auto frame_end_ms = gated_frame_->start_ms + gated_frame_->time_ms;
+    if (timeline_ms < frame_end_ms) return true;
+
+    // A sampled direct trajectory may not land on the exact frame boundary.
+    // Match the GUI by confirming the final corrected Goal once, then release
+    // without Present Position waiting or timeline adjustment.
+    if (!sendDirectGoal(correctedFrameAngles(*gated_frame_))) {
+        std::cerr
+            << "[Warning] DYNAMIXEL frame boundary transmission failed; "
+            << "continuing motion timeline: " << hardware_->lastError()
+            << std::endl;
+    }
+    gated_frame_ = nullptr;
+    return false;
+}
+
+MotionStatus RobotMotionPlayer::updateSettling(Clock::time_point now) {
+    if (pattern_ == nullptr) {
+        fail(MotionError::InternalError, "settling motion has no pattern");
+        return status_;
+    }
+    if (activateQueuedMotion(now)) return status_;
+    const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+        now - settling_started_at_).count();
+    const auto complete_motion = [this](
+        MotionError warning, std::string message) {
+        status_ = MotionStatus::Succeeded;
+        error_ = warning;
+        last_error_ = std::move(message);
+        last_completed_motion_ = current_motion_;
+        ++completion_sequence_;
+        std::cout << "[Info] Motion succeeded"
+                  << (warning == MotionError::None ? "" : " best-effort")
+                  << ": " << current_motion_ << std::endl;
+        return status_;
+    };
+    if (!position_tolerance_enabled_) {
+        return complete_motion(MotionError::None, "");
+    }
+    if (elapsed_ms >= kFinalPositionCheckBudgetMs) {
+        const double tolerance_deg =
+            pattern_->completion().position_tolerance_deg;
+        double worst_error_deg = 0.0;
+        int worst_motor_id = -1;
+        std::cout << "[Error] Motion completion timeout diagnostics: motion="
+                  << current_motion_ << ", tolerance_deg=" << tolerance_deg
+                  << ", elapsed_ms=" << elapsed_ms << std::endl;
+        for (const int motor_id : final_goal_ids_) {
+            const auto goal = final_goal_deg_.find(motor_id);
+            const auto present = last_present_deg_.find(motor_id);
+            if (goal == final_goal_deg_.end() || present == last_present_deg_.end()) {
+                std::cout << "[Error] Motion completion motor: ID=" << motor_id
+                          << ", goal_deg="
+                          << (goal == final_goal_deg_.end() ? 0.0 : goal->second)
+                          << ", present_available=false, tolerance_deg="
+                          << tolerance_deg << std::endl;
+                continue;
+            }
+            const double error_deg = std::abs(goal->second - present->second);
+            if (error_deg > worst_error_deg) {
+                worst_error_deg = error_deg;
+                worst_motor_id = motor_id;
+            }
+            if (error_deg > tolerance_deg) {
+                std::cout << "[Error] Motion completion motor: ID=" << motor_id
+                          << ", goal_deg=" << goal->second
+                          << ", present_deg=" << present->second
+                          << ", error_deg=" << error_deg
+                          << ", tolerance_deg=" << tolerance_deg << std::endl;
+            }
+        }
+        std::cout << "[Error] Motion completion worst error: ID="
+                  << worst_motor_id << ", error_deg=" << worst_error_deg
+                  << ", tolerance_deg=" << tolerance_deg << std::endl;
+        return complete_motion(
+            MotionError::PositionTimeout,
+            "final Present Position did not reach the goal before timeout; "
+            "worst_motor_id=" + std::to_string(worst_motor_id)
+                + ", worst_error_deg=" + std::to_string(worst_error_deg)
+                + ", tolerance_deg=" + std::to_string(tolerance_deg));
+    }
+    if (last_position_check_at_ != Clock::time_point{}
+        && now - last_position_check_at_ < kPositionCheckInterval) {
+        return status_;
+    }
+    last_position_check_at_ = now;
+
+    JointAngles present_deg;
+    if (!hardware_->readPresentPositions(present_deg)) {
+        return complete_motion(
+            MotionError::PresentPositionReadFailed,
+            hardware_->lastError().empty()
+                ? "failed to read final Present Position"
+                : std::string(hardware_->lastError()));
+    }
+    last_present_deg_ = present_deg;
+
+    bool all_reached = !final_goal_ids_.empty();
+    for (const int motor_id : final_goal_ids_) {
+        const auto goal = final_goal_deg_.find(motor_id);
+        const auto present = present_deg.find(motor_id);
+        if (goal == final_goal_deg_.end() || present == present_deg.end()
+            || std::abs(goal->second - present->second)
+                > pattern_->completion().position_tolerance_deg) {
+            all_reached = false;
+            break;
+        }
+    }
+
+    if (!all_reached) return status_;
+
+    return complete_motion(MotionError::None, "");
+}
+
+bool RobotMotionPlayer::running() const noexcept {
+    return status_ == MotionStatus::Running
+        || status_ == MotionStatus::Settling;
+}
+
+MotionStatus RobotMotionPlayer::status() const noexcept { return status_; }
+
+bool RobotMotionPlayer::succeeded() const noexcept {
+    return status_ == MotionStatus::Succeeded;
+}
+
+MotionError RobotMotionPlayer::result() const noexcept { return error_; }
+
+std::string_view RobotMotionPlayer::lastError() const noexcept {
+    return last_error_;
+}
+
+std::string_view RobotMotionPlayer::currentMotion() const noexcept {
+    return current_motion_;
+}
+
+void RobotMotionPlayer::setPositionToleranceEnabled(bool enabled) noexcept {
+    position_tolerance_enabled_ = enabled;
+}
+
+CancelResult RobotMotionPlayer::cancel() noexcept {
+    if (!running()) return CancelResult::NotRunning;
+    if (!hardwareReady()) {
+        fail(MotionError::HardwareNotReady, "hardware is not ready for cancel");
+        return CancelResult::HardwareNotReady;
+    }
+    if (!hardware_->holdCurrentPosition(kCancelHoldDurationMs)) {
+        fail(
+            MotionError::CancelFailed,
+            hardware_->lastError().empty()
+                ? "failed to hold current motor positions"
+                : std::string(hardware_->lastError()));
+        return CancelResult::HoldFailed;
+    }
+    status_ = MotionStatus::Cancelled;
+    error_ = MotionError::None;
+    last_error_.clear();
+    pattern_ = nullptr;
+    next_frame_ = 0;
+    clearQueuedMotion();
+    return CancelResult::Cancelled;
+}
+
+bool RobotMotionPlayer::emergencyStop() noexcept {
+    if (hardware_ == nullptr) return false;
+    const bool success = hardware_->setTorqueEnabled(false);
+    initialized_ = false;
+    status_ = success ? MotionStatus::Cancelled : MotionStatus::Failed;
+    if (!success) {
+        error_ = MotionError::CommunicationError;
+        last_error_ = std::string(hardware_->lastError());
+    }
+    pattern_ = nullptr;
+    next_frame_ = 0;
+    clearQueuedMotion();
+    return success;
+}
+
+void RobotMotionPlayer::stop() noexcept {
+    if (running()) static_cast<void>(cancel());
+}
+
+bool RobotMotionPlayer::playBlocking(std::string_view motion_name) {
+    if (start(motion_name) != StartResult::Accepted) return false;
+    constexpr auto interval = std::chrono::milliseconds(5);
+    auto next_tick = Clock::now();
+    while (running()) {
+        update();
+        next_tick += interval;
+        const auto now = Clock::now();
+        if (next_tick < now) next_tick = now + interval;
+        std::this_thread::sleep_until(next_tick);
+    }
+    return succeeded();
+}
+
+void RobotMotionPlayer::setJointCorrection(
+    int motor_id, double correction_deg) {
+    if (motor_id < 0 || motor_id >= kMotionMotorCount)
+        throw std::out_of_range("invalid correction motor ID");
+    corrections_deg_[motor_id] = correction_deg;
+}
+
+void RobotMotionPlayer::setCorrections(const JointAngles& corrections_deg) {
+    for (const auto& [motor_id, correction] : corrections_deg)
+        setJointCorrection(motor_id, correction);
+}
+
+void RobotMotionPlayer::clearJointCorrections() noexcept {
+    corrections_deg_.clear();
+}
+
+void RobotMotionPlayer::setJointOverride(int motor_id, double target_deg) {
+    if (motor_id < 0 || motor_id >= kMotionMotorCount)
+        throw std::out_of_range("invalid override motor ID");
+    if (!std::isfinite(target_deg))
+        throw std::invalid_argument("joint override must be finite");
+    overrides_deg_[motor_id] = target_deg;
+}
+
+void RobotMotionPlayer::clearJointOverride(int motor_id) noexcept {
+    overrides_deg_.erase(motor_id);
+}
+
+void RobotMotionPlayer::clearJointOverrides() noexcept {
+    overrides_deg_.clear();
+}
+
+void RobotMotionPlayer::setFrameCorrection(
+    const std::string& motion_name, const std::string& frame_name,
+    int motor_id, double correction_deg) {
+    if (motion_name.empty() || frame_name.empty())
+        throw std::invalid_argument("motion and frame names are required");
+    if (!library_.contains(motion_name))
+        throw std::out_of_range("unknown correction motion: " + motion_name);
+    if (motor_id < 0 || motor_id >= kMotionMotorCount)
+        throw std::out_of_range("invalid frame correction motor ID");
+    const auto& frames = library_.motion(motion_name).frames();
+    const bool matching_target = std::any_of(
+        frames.begin(), frames.end(),
+        [&](const MotionFrame& frame) {
+            return frame.name == frame_name && frame.angles.contains(motor_id);
+        });
+    if (!matching_target)
+        throw std::out_of_range(
+            "motion/frame does not command motor " + std::to_string(motor_id));
+    frame_corrections_deg_[{motion_name, frame_name, motor_id}] = correction_deg;
+}
+
+void RobotMotionPlayer::clearFrameCorrection(
+    const std::string& motion_name, const std::string& frame_name,
+    int motor_id) noexcept {
+    frame_corrections_deg_.erase({motion_name, frame_name, motor_id});
+}
+
+void RobotMotionPlayer::clearFrameCorrections() noexcept {
+    frame_corrections_deg_.clear();
+}
+
+void RobotMotionPlayer::clearCorrections() noexcept {
+    clearJointCorrections();
+    clearFrameCorrections();
+    clearJointOverrides();
+}
+
+void RobotMotionPlayer::shutdown() noexcept {
+    if (hardware_ != nullptr && initialized_) {
+        if (running()) static_cast<void>(cancel());
+        static_cast<void>(hardware_->setTorqueEnabled(false));
+    }
+    initialized_ = false;
+    clearQueuedMotion();
+    if (status_ == MotionStatus::Running
+        || status_ == MotionStatus::Settling) {
+        status_ = MotionStatus::Cancelled;
+    }
+}
+
+void RobotMotionPlayer::fail(
+    MotionError error, std::string message) noexcept {
+    error_ = error;
+    last_error_ = std::move(message);
+    status_ = MotionStatus::Failed;
+    pattern_ = nullptr;
+    next_frame_ = 0;
+    clearQueuedMotion();
+}
+
+JointAngles RobotMotionPlayer::correctedFrameAngles(
+    const MotionFrame& frame) const {
+    JointAngles corrected = frame.angles;
+    for (auto& [motor_id, degree] : corrected) {
+        if (const auto correction = corrections_deg_.find(motor_id);
+            correction != corrections_deg_.end()) {
+            degree += correction->second;
+        }
+        if (const auto correction = frame_corrections_deg_.find(
+                {current_motion_, frame.name, motor_id});
+            correction != frame_corrections_deg_.end()) {
+            degree += correction->second;
+        }
+        if (const auto override = overrides_deg_.find(motor_id);
+            override != overrides_deg_.end()) {
+            degree = override->second;
+        }
+    }
+    return corrected;
+}
+
+double RobotMotionPlayer::interpolateShortest(
+    double from_deg, double to_deg, double progress) {
+    double delta = std::fmod(to_deg - from_deg + 180.0, 360.0);
+    if (delta < 0.0) delta += 360.0;
+    return from_deg + (delta - 180.0) * progress;
+}
+
+JointAngles RobotMotionPlayer::accumulatedPoseBefore(
+    const MotionFrame& active_frame) const {
+    JointAngles pose = trajectory_start_deg_;
+    const auto& frames = pattern_->frames();
+    for (const auto& frame : frames) {
+        if (frame.start_ms + frame.time_ms > active_frame.start_ms) break;
+        const auto corrected = correctedFrameAngles(frame);
+        mergeAngles(pose, corrected);
+    }
+    return pose;
+}
+
+double RobotMotionPlayer::frameMotionProgress(
+    const MotionFrame& frame, double timeline_ms) {
+    const auto duration_ms = std::max(kMinimumTimelineFrameMs, frame.time_ms);
+    const double arrival_ratio = isLiftFrame(frame.name) ? kLiftTargetArrivalRatio : 1.0;
+    const double elapsed_ms = std::clamp(
+        timeline_ms - frame.start_ms, 0.0, static_cast<double>(duration_ms));
+    const double u = std::min(1.0, elapsed_ms / (duration_ms * arrival_ratio));
+    return 0.5 - 0.5 * std::cos(std::numbers::pi * u);
+}
+
+JointAngles RobotMotionPlayer::sampledPose(double timeline_ms) const {
+    const auto& frames = pattern_->frames();
+    const MotionFrame* active = nullptr;
+    for (const auto& frame : frames) {
+        const auto frame_end_ms = frame.start_ms + frame.time_ms;
+        if ((frame.start_ms <= timeline_ms && timeline_ms < frame_end_ms)
+            || (timeline_ms == pattern_->durationMs()
+                && frame_end_ms == pattern_->durationMs())) {
+            active = &frame;
+            break;
+        }
+    }
+
+    if (active != nullptr) {
+        const auto previous = accumulatedPoseBefore(*active);
+        const auto corrected = correctedFrameAngles(*active);
+        const double progress = frameMotionProgress(*active, timeline_ms);
+        JointAngles target;
+        for (const auto& [motor_id, final_deg] : corrected) {
+            const auto start = previous.find(motor_id);
+            const double start_deg =
+                start == previous.end() ? final_deg : start->second;
+            target[motor_id] = interpolateShortest(
+                start_deg, final_deg, progress);
+        }
+        return target;
+    }
+
+    JointAngles hold = trajectory_start_deg_;
+    for (const auto& frame : frames) {
+        if (frame.start_ms + frame.time_ms <= timeline_ms) {
+            const auto corrected = correctedFrameAngles(frame);
+            mergeAngles(hold, corrected);
+        }
+    }
+    return hold;
+}
+
+bool RobotMotionPlayer::sendTrajectorySample(double timeline_ms) {
+    const auto& frames = pattern_->frames();
+    gated_frame_ = nullptr;
+    for (const auto& frame : frames) {
+        const auto frame_end_ms = frame.start_ms + frame.time_ms;
+        if ((frame.start_ms <= timeline_ms && timeline_ms < frame_end_ms)
+            || (timeline_ms == pattern_->durationMs()
+                && frame_end_ms == pattern_->durationMs())) {
+            gated_frame_ = &frame;
+            break;
+        }
+    }
+    return sendDirectGoal(sampledPose(timeline_ms));
+}
+
+bool RobotMotionPlayer::sendDirectGoal(const JointAngles& goal_deg) {
+    std::vector<int> target_ids;
+    target_ids.reserve(goal_deg.size());
+    for (const auto& [motor_id, degree] : goal_deg) {
+        if (motor_id < 0 || motor_id >= kMotionMotorCount)
+            throw std::runtime_error(
+                "invalid motor ID in JSON: " + std::to_string(motor_id));
+        target_ids.push_back(motor_id);
+        final_goal_deg_[motor_id] = degree;
+    }
+    if (target_ids.empty()) return true;
+    final_goal_ids_.clear();
+    final_goal_ids_.reserve(final_goal_deg_.size());
+    for (const auto& [motor_id, unused] : final_goal_deg_)
+        final_goal_ids_.push_back(motor_id);
+    return hardware_->commandDirectPosition(goal_deg, target_ids);
+}
+
+}  // namespace irc_step

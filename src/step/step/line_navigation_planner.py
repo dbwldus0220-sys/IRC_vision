@@ -50,6 +50,7 @@ class NavigationConfig:
     recovery_enter_offset_norm: float = 0.20
     recovery_exit_offset_norm: float = 0.12
     command_duration_sec: float = 0.40
+    heading_source: str = "ground"
 
 
 @dataclass(frozen=True)
@@ -172,6 +173,16 @@ def valid_ground_heading(line_info: dict[str, Any]) -> float | None:
     return _number(line_info, "ground_heading_error_deg")
 
 
+def line_heading(line_info: dict[str, Any], source: str) -> float | None:
+    """Use one configured coordinate system; do not switch on a bad frame."""
+    if source == "ground":
+        return valid_ground_heading(line_info)
+    if source != "image":
+        raise ValueError("line heading source must be image or ground")
+    heading = _number(line_info, "filtered_heading_error_deg")
+    return heading if heading is not None else _number(line_info, "heading_error_deg")
+
+
 def _recovery_turn_level(heading_error_deg: float) -> int:
     """Quantize a recovery heading to the nearest 15-degree motion."""
     magnitude = abs(heading_error_deg)
@@ -257,6 +268,8 @@ class LineNavigationPlanner:
 
     def __init__(self, config: NavigationConfig | None = None) -> None:
         self.config = config or NavigationConfig()
+        if self.config.heading_source not in {"image", "ground"}:
+            raise ValueError("line heading source must be image or ground")
         self.previous_motion = "STOP"
         self.previous_angular_speed_rad_s = 0.0
         self.turn_candidate: str | None = None
@@ -311,9 +324,9 @@ class LineNavigationPlanner:
         if not bool(line_info.get("detected", False)):
             return self.stop("line_not_detected")
 
-        heading = valid_ground_heading(line_info)
+        heading = line_heading(line_info, self.config.heading_source)
         if heading is None:
-            return self.stop("invalid_ground_line_geometry")
+            return self.stop(f"invalid_{self.config.heading_source}_line_geometry")
 
         offset = _number(line_info, "filtered_lateral_offset_norm")
         if offset is None:

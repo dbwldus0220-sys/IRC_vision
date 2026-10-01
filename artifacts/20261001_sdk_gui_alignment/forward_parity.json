@@ -1,0 +1,1506 @@
+[
+  {
+    "motion": "찐찐전진45(4회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 2120,
+    "samples": 425,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(4회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 2150,
+    "samples": 425,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(4회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 2120,
+    "samples": 425,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(4회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 2150,
+    "samples": 425,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(4회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 2120,
+    "samples": 213,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(4회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 2150,
+    "samples": 213,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(4회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 2120,
+    "samples": 213,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(4회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 2150,
+    "samples": 213,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(4회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 2160,
+    "samples": 109,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(4회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 2190,
+    "samples": 109,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(4회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 2160,
+    "samples": 109,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(4회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 2190,
+    "samples": 109,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(4회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 2132,
+    "samples": 329,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(4회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 2162,
+    "samples": 329,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(4회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 2132,
+    "samples": 329,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(4회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 2162,
+    "samples": 329,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진(6회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 3180,
+    "samples": 637,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진(6회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 3210,
+    "samples": 637,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진(6회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 3180,
+    "samples": 637,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진(6회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 3210,
+    "samples": 637,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진(6회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 3180,
+    "samples": 319,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진(6회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 3210,
+    "samples": 319,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진(6회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 3180,
+    "samples": 319,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진(6회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 3210,
+    "samples": 319,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진(6회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 3240,
+    "samples": 163,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진(6회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 3270,
+    "samples": 163,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진(6회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 3240,
+    "samples": 163,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진(6회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 3270,
+    "samples": 163,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진(6회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 3198,
+    "samples": 493,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진(6회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 3228,
+    "samples": 493,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진(6회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 3198,
+    "samples": 493,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진(6회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 3228,
+    "samples": 493,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(8회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 4240,
+    "samples": 849,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(8회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 4270,
+    "samples": 849,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(8회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 4240,
+    "samples": 849,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(8회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 4270,
+    "samples": 849,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(8회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 4240,
+    "samples": 425,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(8회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 4270,
+    "samples": 425,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(8회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 4240,
+    "samples": 425,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(8회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 4270,
+    "samples": 425,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(8회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 4320,
+    "samples": 217,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(8회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 4350,
+    "samples": 217,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(8회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 4320,
+    "samples": 217,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(8회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 4350,
+    "samples": 217,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(8회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 4264,
+    "samples": 657,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(8회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 4294,
+    "samples": 657,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(8회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 4264,
+    "samples": 657,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(8회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 4294,
+    "samples": 657,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(4회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 2120,
+    "samples": 425,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(4회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 2150,
+    "samples": 425,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(4회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 2120,
+    "samples": 425,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(4회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 2150,
+    "samples": 425,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(4회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 2120,
+    "samples": 213,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(4회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 2150,
+    "samples": 213,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(4회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 2120,
+    "samples": 213,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(4회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 2150,
+    "samples": 213,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(4회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 2160,
+    "samples": 109,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(4회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 2190,
+    "samples": 109,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(4회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 2160,
+    "samples": 109,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(4회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 2190,
+    "samples": 109,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(4회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 2132,
+    "samples": 329,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(4회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 2162,
+    "samples": 329,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(4회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 2132,
+    "samples": 329,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(4회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 2162,
+    "samples": 329,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(6회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 3180,
+    "samples": 637,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(6회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 3210,
+    "samples": 637,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(6회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 3180,
+    "samples": 637,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(6회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 3210,
+    "samples": 637,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(6회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 3180,
+    "samples": 319,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(6회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 3210,
+    "samples": 319,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(6회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 3180,
+    "samples": 319,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(6회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 3210,
+    "samples": 319,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(6회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 3240,
+    "samples": 163,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(6회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 3270,
+    "samples": 163,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(6회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 3240,
+    "samples": 163,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(6회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 3270,
+    "samples": 163,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(6회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 3198,
+    "samples": 493,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(6회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 3228,
+    "samples": 493,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(6회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 3198,
+    "samples": 493,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(6회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 3228,
+    "samples": 493,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(8회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 4240,
+    "samples": 849,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(8회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 4270,
+    "samples": 849,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(8회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 4240,
+    "samples": 849,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(8회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 4270,
+    "samples": 849,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(8회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 4240,
+    "samples": 425,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(8회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 4270,
+    "samples": 425,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(8회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 4240,
+    "samples": 425,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(8회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 4270,
+    "samples": 425,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(8회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 4320,
+    "samples": 217,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(8회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 4350,
+    "samples": 217,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(8회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 4320,
+    "samples": 217,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(8회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 4350,
+    "samples": 217,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(8회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 4264,
+    "samples": 657,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(8회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 4294,
+    "samples": 657,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(8회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 4264,
+    "samples": 657,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(8회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 4294,
+    "samples": 657,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(2회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 1060,
+    "samples": 213,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(2회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 1090,
+    "samples": 213,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(2회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 1060,
+    "samples": 213,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(2회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 1090,
+    "samples": 213,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(2회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 1060,
+    "samples": 107,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(2회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 1090,
+    "samples": 107,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(2회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 1060,
+    "samples": 107,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(2회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 1090,
+    "samples": 107,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(2회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 1080,
+    "samples": 55,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(2회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 1110,
+    "samples": 55,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(2회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 1080,
+    "samples": 55,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(2회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 1110,
+    "samples": 55,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(2회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 1066,
+    "samples": 165,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(2회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 1096,
+    "samples": 165,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(2회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 1066,
+    "samples": 165,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진45(2회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 1096,
+    "samples": 165,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(2회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 1060,
+    "samples": 213,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(2회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 1090,
+    "samples": 213,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(2회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 1060,
+    "samples": 213,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(2회)",
+    "periods_ms": [
+      5
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 1090,
+    "samples": 213,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(2회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 1060,
+    "samples": 107,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(2회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 1090,
+    "samples": 107,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(2회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 1060,
+    "samples": 107,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(2회)",
+    "periods_ms": [
+      10
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 1090,
+    "samples": 107,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(2회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 1080,
+    "samples": 55,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(2회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 1110,
+    "samples": 55,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(2회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 1080,
+    "samples": 55,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(2회)",
+    "periods_ms": [
+      20
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 1110,
+    "samples": 55,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(2회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 1066,
+    "samples": 165,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(2회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "last",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 1096,
+    "samples": 165,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(2회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 0,
+    "finish_ms": 1066,
+    "samples": 165,
+    "max_goal_difference_deg": 0.0
+  },
+  {
+    "motion": "찐찐전진90(2회)",
+    "periods_ms": [
+      5,
+      7,
+      3,
+      11
+    ],
+    "initial_pose": "synthetic",
+    "initial_read_delay_ms": 30,
+    "finish_ms": 1096,
+    "samples": 165,
+    "max_goal_difference_deg": 0.0
+  }
+]

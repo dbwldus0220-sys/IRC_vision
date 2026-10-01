@@ -283,6 +283,7 @@ def line_info(heading=0.0, offset=0.0):
         "detected": True,
         "ground_projection_valid": True,
         "ground_heading_error_deg": heading,
+        "filtered_heading_error_deg": heading,
         "filtered_lateral_offset_norm": offset,
         "heading_quality": 0.95,
         "geometry_quality": 0.95,
@@ -631,7 +632,13 @@ def test_post_shot_search_repeats_one_motion_at_a_time_until_line_visible(
 
     harness, clock = post_shot_line_search_ready(monkeypatch, section)
     assert MotionCommandBridgeNode.motion_id_for_action(action) == motion_id
-    for _ in range(3):
+    direction = "RIGHT" if section == 1 else "LEFT"
+    opposite = "LEFT" if direction == "RIGHT" else "RIGHT"
+    turns = [(direction, 5 if direction == "RIGHT" else 3)]
+    turns += [(direction, 2 if direction == "RIGHT" else 1)] * 3
+    turns += [(opposite, 1 if opposite == "LEFT" else 2)] * 6
+    for side, count in turns:
+        action = f"POST_SHOT_LINE_TURN_{side}_{count}"
         command = harness.publish_vision(line={"detected": False})[-1]
         assert command["action"] == action
         assert command["reason"] == "post_shot_line_search"
@@ -735,8 +742,8 @@ def test_post_shot_search_waits_one_second_before_and_after_turn(
     clock[0] += 0.02
     command = harness.publish_vision(line={"detected": False})[-1]
     assert command["action"] == (
-        "POST_SHOT_LINE_TURN_RIGHT_2" if section == 1
-        else "POST_SHOT_LINE_TURN_LEFT_1"
+        "POST_SHOT_LINE_TURN_RIGHT_5" if section == 1
+        else "POST_SHOT_LINE_TURN_LEFT_3"
     )
     release_general(harness, command)
     deadline = clock[0] + 1.0
@@ -753,12 +760,14 @@ def test_post_shot_search_waits_one_second_before_and_after_turn(
         assert harness.publish_vision(line=sample)[-1]["action"] == "POST_SHOT_FORWARD"
         assert harness.post_shot_line_search_action is None
         return
-    # The next search turn still has its own three-second pre-motion pause.
+    # The next search turn still has its own one-second pre-motion pause.
     assert harness.publish_vision(line=sample) == []
     clock[0] += 0.99
     assert harness.publish_vision(line=sample) == []
     clock[0] += 0.02
-    assert harness.publish_vision(line={"detected": False})[-1]["action"] == command["action"]
+    assert harness.publish_vision(line={"detected": False})[-1]["action"] == (
+        "POST_SHOT_LINE_TURN_RIGHT_2" if section == 1 else "POST_SHOT_LINE_TURN_LEFT_1"
+    )
 
 
 def test_normal_line_loss_does_not_arm_post_shot_search():
@@ -1959,7 +1968,7 @@ def test_pickup_visible_line_starts_normal_run_without_stationary_alignment(
 
 
 @pytest.mark.parametrize(
-    "completed_before,direction,count", [(0, "RIGHT", 5), (1, "LEFT", 2)]
+    "completed_before,direction,count", [(0, "RIGHT", 5), (1, "LEFT", 3)]
 )
 def test_post_pickup_search_completes_before_normal_line_run(
     monkeypatch, completed_before, direction, count
@@ -2004,14 +2013,14 @@ def test_post_pickup_search_repeats_only_after_dwell_and_new_missing_line(
     now[0] = 11.0
     assert harness.publish_vision(line={"detected": False}) == []
     second = harness.publish_vision(line={"detected": False})[-1]
-    assert second["action"] == first["action"]
+    assert second["action"] == "POST_BALL_LINE_TURN_RIGHT_2"
     assert second["command_id"] != first["command_id"]
     assert harness.mission_phase == "POST_BALL_LINE_ALIGN"
 
 
 @pytest.mark.parametrize("direction,count,heading,offset,expected", [
     ("RIGHT", 5, 34.281, 0.456579, "RECOVER_RIGHT_TURN_RIGHT_4"),
-    ("LEFT", 2, -35.0, -0.7, "RECOVER_LEFT_TURN_LEFT_4"),
+    ("LEFT", 3, -35.0, -0.7, "RECOVER_LEFT_TURN_LEFT_4"),
 ])
 def test_post_ball_search_hands_off_to_recover_after_dwell(
     monkeypatch, direction, count, heading, offset, expected,
@@ -2059,7 +2068,7 @@ def test_post_ball_line_turn_timeout_does_not_enter_line_lost_recovery():
     assert harness.line_timeout_recovery_active is False
 
 
-@pytest.mark.parametrize("direction,count", [("RIGHT", 5), ("LEFT", 2)])
+@pytest.mark.parametrize("direction,count", [("RIGHT", 5), ("LEFT", 3)])
 def test_post_pickup_search_keeps_fixed_direction_after_opposite_side_seen(
     monkeypatch, direction, count,
 ):
@@ -2077,7 +2086,7 @@ def test_post_pickup_search_keeps_fixed_direction_after_opposite_side_seen(
     now[0] = 11.0
     assert harness.publish_vision(line={"detected": False}) == []
     repeated = harness.publish_vision(line={"detected": False})[-1]
-    assert repeated["action"] == search["action"]
+    assert repeated["action"] == f"POST_BALL_LINE_TURN_{direction}_{1 if direction == 'LEFT' else 2}"
 
 
 @pytest.mark.parametrize("initial_bearing,initial_action,remaining_bearing,next_action", [
@@ -2643,7 +2652,7 @@ def test_post_pickup_line_run_then_camera_only_with_verified_ball(monkeypatch, c
     correction = harness.publish_vision(line={"detected": False})[-1]
     assert correction["action"] == (
         "POST_BALL_LINE_TURN_RIGHT_5" if completed_before == 0
-        else "POST_BALL_LINE_TURN_LEFT_2"
+        else "POST_BALL_LINE_TURN_LEFT_3"
     )
     assert correction["mission_progress"]["ball_mode_active"] is True
     release_general(harness, correction)
@@ -2706,7 +2715,7 @@ def test_empty_pickup_resumes_object_selection_without_timed_line(
     search = harness.publish_vision(line={"detected": False})[-1]
     assert search["action"] == (
         "POST_BALL_LINE_TURN_RIGHT_5" if completed_before == 0
-        else "POST_BALL_LINE_TURN_LEFT_2"
+        else "POST_BALL_LINE_TURN_LEFT_3"
     )
     release_general(harness, search)
     now[0] = 10.999
@@ -2865,11 +2874,9 @@ def test_shot_settle_restarts_after_scoring_condition_is_lost(monkeypatch, lost_
     assert all(command['action'] != 'SHOT' for command in interrupted)
     assert harness.pre_motion_settle_started_at is None
     if lost_confirmation == {'detected': False}:
-        search = interrupted[-1]
-        assert search['action'] == 'GOAL_CAMERA90_TURN_RIGHT_2'
-        release_general(harness, search)
-        now[0] = harness.goal_post_motion_dwell_until
-        assert harness.publish_vision(goal=score_ready_goal()) == []
+        # The first missing observation must not inherit the 2.9-second shot pause.
+        assert interrupted[-1]['action'] == 'GOAL_LOST_STOP'
+        assert not interrupted[-1]['valid']
     now[0] = 14.0
     assert harness.publish_vision(goal=score_ready_goal()) == []
     now[0] = 16.999
@@ -2882,7 +2889,7 @@ def test_shot_settle_restarts_after_scoring_condition_is_lost(monkeypatch, lost_
 
 
 @pytest.mark.parametrize('offset,action', [
-    (-0.8, 'LINE_LOST_TURN_LEFT'), (0.8, 'LINE_LOST_TURN_RIGHT'),
+    (-0.8, 'LINE_LOST_TURN_LEFT_3'), (0.8, 'LINE_LOST_TURN_RIGHT_5'),
 ])
 def test_line_search_rechecks_new_line_after_turn_success(offset, action):
     harness = MissionFlowHarness(phase='LINE_TRACK')
@@ -2910,7 +2917,7 @@ def test_line_search_repeats_only_after_new_negative_frame():
     release_general(harness, search)
     assert harness.latest_info['line'] is None
     search_again = harness.publish_vision(line={'detected': False})[-1]
-    assert search_again['action'] == 'LINE_LOST_TURN_LEFT'
+    assert search_again['action'] == 'LINE_LOST_TURN_LEFT_1'
     assert search_again['command_id'] != search['command_id']
 
 
@@ -3108,27 +3115,27 @@ def test_completed_line_recover_rechecks_when_line_observation_expires(monkeypat
     assert not decision["valid"]
 
 
-@pytest.mark.parametrize("direction,offset,count", [("LEFT", -0.8, 2), ("RIGHT", 0.8, 5)])
+@pytest.mark.parametrize("direction,offset,count", [("LEFT", -0.8, 3), ("RIGHT", 0.8, 5)])
 def test_repeated_line_lost_turns_each_wait_one_second(monkeypatch, direction, offset, count):
     now = [10.0]
     monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: now[0])
     harness = MissionFlowHarness(phase="LINE_TRACK")
     harness.LINE_TURN_PRE_MOTION_SETTLE_SEC = MotionDecisionNode.LINE_TURN_PRE_MOTION_SETTLE_SEC
     harness.planner.observe_line_for_search(line_info(offset=offset))
-    for _ in range(2):
+    for repeats in (count, 1 if direction == "LEFT" else 2):
         assert harness.publish_vision(line={"detected": False}) == []
         now[0] += 0.999
         assert harness.publish_vision(line={"detected": False}) == []
         now[0] += 0.002
         turn = harness.publish_vision(line={"detected": False})[-1]
-        assert turn["action"] == f"LINE_LOST_TURN_{direction}"
-        assert turn["source_command"]["turn_count"] == count
+        assert turn["action"] == f"LINE_LOST_TURN_{direction}_{repeats}"
+        assert turn["source_command"]["turn_count"] == repeats
         release_general(harness, turn)
         assert harness.latest_info["line"] is None
         assert not harness.general_motion_gate.has_required_fresh_vision()
 
 
-@pytest.mark.parametrize("direction,count", [("RIGHT", 5), ("LEFT", 2)])
+@pytest.mark.parametrize("direction,count", [("RIGHT", 5), ("LEFT", 3)])
 def test_post_pickup_missing_line_repeats_search_without_new_vision(monkeypatch, direction, count):
     now = [10.0]
     monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: now[0])
@@ -3154,7 +3161,7 @@ def test_post_pickup_missing_line_repeats_search_without_new_vision(monkeypatch,
     assert not gate.has_required_fresh_vision()
     MotionDecisionNode._publish_decision(harness)
     second = harness.publisher.messages[-1]
-    assert second["action"] == first["action"]
+    assert second["action"] == f"POST_BALL_LINE_TURN_{direction}_{1 if direction == 'LEFT' else 2}"
     assert second["command_id"] != first["command_id"]
     assert harness.mission_phase == "POST_BALL_LINE_ALIGN"
 
@@ -3168,4 +3175,6 @@ def test_missing_line_search_still_stops_after_execution_failure(status):
     harness.send_status(first["action"], first["command_id"], status)
     before = len(harness.publisher.messages)
     MotionDecisionNode._publish_decision(harness)
-    assert len(harness.publisher.messages) == before
+    assert all(not m["valid"] for m in harness.publisher.messages[before:])
+    assert harness.lost_search_turn_limiter.counts["line"] == 1
+    assert harness.last_selected_decision.reason == "lost_search_motion_failed"

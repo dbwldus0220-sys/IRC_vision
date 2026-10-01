@@ -663,6 +663,8 @@ def test_hurdle_metrics_expose_actual_phase_and_rgb_head_trigger(monkeypatch):
 @pytest.mark.parametrize('action,reason,label', [
     ('LINE_LOST_TURN_LEFT', 'line_lost_turn_toward_last_seen_side', 'LINE LOST | SEARCH LEFT'),
     ('LINE_LOST_TURN_RIGHT', 'line_lost_turn_toward_last_seen_side', 'LINE LOST | SEARCH RIGHT'),
+    ('LINE_LOST_TURN_LEFT_3', 'line_lost_turn_toward_last_seen_side', 'LINE LOST | SEARCH LEFT'),
+    ('LINE_LOST_TURN_RIGHT_2', 'line_lost_turn_toward_last_seen_side', 'LINE LOST | SEARCH RIGHT'),
     ('WAIT', 'lost_search_turn_limit_reached', 'LINE LOST | SEARCH LIMIT'),
     ('WAIT', 'no_fresh_detected_target', 'LINE LOST | WAIT'),
 ])
@@ -678,12 +680,13 @@ def test_line_loss_banner_reports_selected_search_or_hold(action, reason, label)
     assert Yolo26Detector._line_lost_banner(debug) is None
 
 
-@pytest.mark.parametrize('direction,count', [('LEFT', 2), ('RIGHT', 5)])
-def test_running_line_search_keeps_line_lost_label(direction, count):
+@pytest.mark.parametrize('direction,count', [('LEFT', 1), ('LEFT', 3), ('RIGHT', 2), ('RIGHT', 5)])
+@pytest.mark.parametrize('suffix', [False, True])
+def test_running_line_search_keeps_line_lost_label(direction, count, suffix):
     detector = object.__new__(Yolo26Detector)
     detector.latest_running_motion = {
         'motion_id': f'line_search_{direction.lower()}_{count}',
-        'action': f'LINE_LOST_TURN_{direction}',
+        'action': f'LINE_LOST_TURN_{direction}' + (f'_{count}' if suffix else ''),
     }
     detector.latest_running_motion_time = time.monotonic()
     assert detector._running_motion_banner()[0] == f'LINE LOST | SEARCH {direction}'

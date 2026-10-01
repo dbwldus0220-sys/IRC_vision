@@ -642,3 +642,116 @@ def test_final_checkpoint_waits_for_already_queued_motion_or_cancels_on_rejectio
     result = node.publish()[-1]
     assert result['action'] == ('GO' if queued_status == 'SUCCEEDED' else 'WAIT')
     assert node.pending_hurdle_final_sequence is None
+
+
+@pytest.mark.parametrize("interrupted_info", [
+    {"detected": False},
+    {"detected": False, "confirmation_confirmed": False,
+     "note": "hurdle_confirmation_pending"},
+    hurdle(.65, depth_valid=False),
+    None,
+])
+@pytest.mark.parametrize("reacquired_depth,expected_action", [(.60, "STRAIGHT_0"), (.53, "GO")])
+def test_hurdle_settle_survives_invalid_input_but_requires_valid_next_decision(
+    clock, interrupted_info, reacquired_depth, expected_action,
+):
+    node = HurdleHarness()
+    node.FINE_FORWARD_PRE_MOTION_SETTLE_SEC = 1.0
+    node.receive(hurdle(.65))
+    assert node.publish() == []
+    stopped_at = clock[0]
+    clock[0] += .4
+    if interrupted_info is not None:
+        node.receive(interrupted_info)
+    node.publish()
+    clock[0] = stopped_at + 1.1
+    if interrupted_info is not None:
+        node.receive(interrupted_info)
+    node.publish()
+    assert node.hurdle_stationary_since == stopped_at
+    assert not any(command["valid"] for command in node.publisher.messages)
+
+    # The new distance, not the old .65 m observation, selects the action.
+    node.receive(hurdle(reacquired_depth))
+    command = node.publish()[-1]
+    assert command["valid"] and command["action"] == expected_action
+    assert node.hurdle_stationary_since is None
+
+
+def test_hurdle_reacquisition_waits_only_remaining_stationary_time(clock):
+    node = HurdleHarness()
+    node.FINE_FORWARD_PRE_MOTION_SETTLE_SEC = 1.0
+    node.receive(hurdle(.65))
+    assert node.publish() == []
+    clock[0] += .3
+    node.receive({"detected": False})
+    node.publish()
+    clock[0] += .5
+    node.receive(hurdle(.60))
+    assert node.publish() == []
+    clock[0] += .21
+    node.receive(hurdle(.60))
+    assert node.publish()[-1]["action"] == "STRAIGHT_0"
+
+
+@pytest.mark.parametrize("source", ["line", "hurdle"])
+def test_hurdle_entry_during_motion_counts_settle_from_success(clock, source):
+    node = HurdleHarness()
+    node.FINE_FORWARD_PRE_MOTION_SETTLE_SEC = 1.0
+    node.receive_line()
+    if source == "hurdle":
+        node.receive(hurdle(.8))
+    moving = node.publish()[-1]
+    assert moving["source"] == source
+    node.send_status(moving["action"], moving["command_id"], "RUNNING")
+    node.receive(hurdle(.65))
+    clock[0] += 5.0
+    assert node.publish() == []
+    release_general(node, moving)
+    stopped_at = clock[0]
+    assert node.hurdle_stationary_since == stopped_at
+    assert node.latest_info["hurdle"] is None
+    clock[0] += .8
+    node.receive(hurdle(.60))
+    assert node.publish() == []
+    clock[0] += .21
+    node.receive(hurdle(.60))
+    fine = node.publish()[-1]
+    assert fine["action"] == "STRAIGHT_0"
+    assert node.hurdle_stationary_since is None
+
+    # Each fine step starts a new stationary interval at completion.
+    node.send_status(fine["action"], fine["command_id"], "RUNNING")
+    clock[0] += 4.0
+    release_general(node, fine)
+    stopped_at = clock[0]
+    assert node.hurdle_stationary_since == stopped_at
+    node.receive(hurdle(.58))
+    assert node.publish() == []
+    clock[0] += .4
+    node.receive({"detected": False})
+    node.publish()
+    clock[0] += .61
+    node.receive(hurdle(.58))
+    assert node.publish()[-1]["action"] == "STRAIGHT_0"
+
+
+def test_hurdle_settle_does_not_count_executor_startup_hold(clock):
+    node = HurdleHarness()
+    node.FINE_FORWARD_PRE_MOTION_SETTLE_SEC = 1.0
+    node.receive(hurdle(.65))
+    assert node.publish() == []
+    for sequence, ready in [(1, False), (2, True)]:
+        clock[0] += 5.0
+        MotionDecisionNode._executor_heartbeat_callback(node, String(data=json.dumps({
+            "sequence": sequence, "active": not ready, "auto_ready": ready,
+        })))
+        assert node.hurdle_stationary_since is None
+    node.receive(hurdle(.60))
+    assert node.publish() == []
+    clock[0] += .9
+    node.receive(hurdle(.60))
+    assert node.publish() == []
+    clock[0] += .11
+    node.receive(hurdle(.60))
+    assert node.publish()[-1]["action"] == "STRAIGHT_0"

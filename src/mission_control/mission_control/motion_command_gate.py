@@ -26,6 +26,18 @@ GENERAL_ACTIONS = frozenset(
         "BALL_APPROACH_RECOVER_RIGHT_4",
         "LINE_LOST_TURN_LEFT",
         "LINE_LOST_TURN_RIGHT",
+        *{
+            f"LINE_OFFSET_TURN_{direction}_{count}"
+            for direction, counts in (
+                ("LEFT", (1, 2, 3, 4, 5, 6)), ("RIGHT", (2, 3, 5, 7, 9)),
+            )
+            for count in counts
+        },
+        *{
+            f"LINE_LOST_TURN_{direction}_{count}"
+            for direction, counts in (("LEFT", (1, 3)), ("RIGHT", (2, 5)))
+            for count in counts
+        },
         "GOAL_CAMERA_90_FORWARD",
         "GOAL_CAMERA_90_FORWARD_1",
         "GOAL_CAMERA_90_FORWARD_2",
@@ -172,7 +184,9 @@ class GeneralMotionCommandGate:
         missing_line_search = (
             allow_missing_line_search
             and normalized in {
-                "POST_BALL_LINE_TURN_RIGHT_5", "POST_BALL_LINE_TURN_LEFT_2",
+                "POST_BALL_LINE_TURN_RIGHT_5", "POST_BALL_LINE_TURN_RIGHT_2",
+                "POST_BALL_LINE_TURN_LEFT_1", "POST_BALL_LINE_TURN_LEFT_2",
+                "POST_BALL_LINE_TURN_LEFT_3",
             }
         )
         if not missing_line_search and not self.has_required_fresh_vision():

@@ -1,0 +1,347 @@
+if(NOT DEFINED SDK_SOURCE_DIR)
+    message(FATAL_ERROR "SDK_SOURCE_DIR is required")
+endif()
+
+file(READ "${SDK_SOURCE_DIR}/step_dynamixel.cpp" dxl_source)
+file(READ "${SDK_SOURCE_DIR}/dynamixel_motion_hardware.cpp" hardware_source)
+
+string(FIND "${dxl_source}" "Dxl::Dxl()" constructor_start)
+string(FIND "${dxl_source}" "bool Dxl::Preflight() noexcept" preflight_start)
+string(FIND "${dxl_source}" "bool Dxl::Initialize() noexcept" initialize_start)
+if(constructor_start EQUAL -1 OR preflight_start EQUAL -1
+   OR initialize_start EQUAL -1 OR NOT constructor_start LESS preflight_start
+   OR NOT preflight_start LESS initialize_start)
+    message(FATAL_ERROR "Could not locate Dxl constructor/Preflight/Initialize definitions")
+endif()
+math(EXPR constructor_length "${preflight_start} - ${constructor_start}")
+string(SUBSTRING "${dxl_source}" ${constructor_start}
+       ${constructor_length} constructor_source)
+
+foreach(forbidden_call openPort setBaudRate SetTorqueEnabled write1ByteTxRx
+                       write2ByteTxRx read1ByteTxRx read2ByteTxRx read4ByteTxRx)
+    string(FIND "${constructor_source}" "${forbidden_call}(" forbidden_position)
+    if(NOT forbidden_position EQUAL -1)
+        message(FATAL_ERROR
+            "Dxl constructor contains forbidden hardware call: ${forbidden_call}")
+    endif()
+endforeach()
+string(FIND "${constructor_source}" "dxl_id.push_back" constructor_id_filter)
+if(NOT constructor_id_filter EQUAL -1)
+    message(FATAL_ERROR "Dxl constructor must not filter or populate motor IDs")
+endif()
+
+string(FIND "${dxl_source}" "Dxl::~Dxl()" destructor_start)
+if(destructor_start EQUAL -1 OR NOT initialize_start LESS destructor_start)
+    message(FATAL_ERROR "Could not locate Dxl destructor after Initialize")
+endif()
+math(EXPR initialize_length "${destructor_start} - ${initialize_start}")
+string(SUBSTRING "${dxl_source}" ${initialize_start}
+       ${initialize_length} initialize_source)
+math(EXPR preflight_length "${initialize_start} - ${preflight_start}")
+string(SUBSTRING "${dxl_source}" ${preflight_start}
+       ${preflight_length} dxl_preflight_source)
+
+foreach(required_call ValidateDynamixelMotionHardwareConfig dxl_id.push_back
+                      openPort setBaudRate write1ByteTxOnly clearPort
+                      Read1ByteWithRetry DxlReg_TorqueEnable
+                      "std::chrono::milliseconds(20)")
+    string(FIND "${dxl_preflight_source}" "${required_call}" required_position)
+    if(required_position EQUAL -1)
+        message(FATAL_ERROR
+            "Dxl::Preflight does not contain required operation: ${required_call}")
+    endif()
+endforeach()
+foreach(forbidden_register DxlReg_OperatingMode DxlReg_PositionPGain
+                           DxlReg_PositionIGain DxlReg_PositionDGain
+                           DxlReg_DriveMode DxlReg_ProfileAcceleration
+                           DxlReg_ProfileVelocity)
+    string(FIND "${dxl_preflight_source}" "${forbidden_register}" forbidden_position)
+    if(NOT forbidden_position EQUAL -1)
+        message(FATAL_ERROR
+            "Dxl::Preflight writes or references forbidden setting: ${forbidden_register}")
+    endif()
+endforeach()
+string(FIND "${dxl_preflight_source}" "bool torque_off_verified = true" aggregate_start)
+string(FIND "${dxl_preflight_source}" "for (const uint8_t id : dxl_id)" tx_loop)
+string(FIND "${dxl_preflight_source}" "uint8_t torque_enabled = 1" read_loop)
+string(FIND "${dxl_preflight_source}" "if (!torque_off_verified)" aggregate_failure)
+string(FIND "${dxl_preflight_source}" "torque_enabled != 0" torque_readback_check)
+string(FIND "${dxl_preflight_source}" "result != COMM_SUCCESS" tx_failure_check)
+string(FIND "${dxl_preflight_source}" "dxl_error != 0" read_failure_check)
+if(aggregate_start EQUAL -1 OR tx_loop EQUAL -1 OR read_loop EQUAL -1
+   OR aggregate_failure EQUAL -1 OR torque_readback_check EQUAL -1
+   OR tx_failure_check EQUAL -1 OR read_failure_check EQUAL -1
+   OR NOT tx_loop LESS read_loop OR NOT read_loop LESS aggregate_failure)
+    message(FATAL_ERROR "Dxl::Preflight must reject transmit, read, and nonzero readback failures")
+endif()
+
+foreach(required_call Preflight DxlReg_OperatingMode SetPIDGain)
+    string(FIND "${initialize_source}" "${required_call}" required_position)
+    if(required_position EQUAL -1)
+        message(FATAL_ERROR
+            "Dxl::Initialize does not contain required operation: ${required_call}")
+    endif()
+endforeach()
+string(FIND "${initialize_source}" "write1ByteTxOnly(" mode_tx_only)
+string(FIND "${initialize_source}" "write1ByteTxRx(" mode_tx_rx)
+string(FIND "${initialize_source}" "Read1ByteWithRetry(" mode_initial_read)
+string(LENGTH "${initialize_source}" initialize_length)
+math(EXPR mode_after_write_length "${initialize_length} - ${mode_tx_rx}")
+string(SUBSTRING "${initialize_source}" ${mode_tx_rx}
+       ${mode_after_write_length} initialize_after_mode_write)
+string(FIND "${initialize_after_mode_write}" "Read1ByteWithRetry(" mode_readback)
+string(FIND "${initialize_source}" "verified_mode !=" mode_value_check)
+string(FIND "${initialize_source}" "if (!SetPIDGain(PID_Gain))" pid_result_check)
+string(FIND "${initialize_source}" "motion_configured_ = true" configured_assignment)
+if(mode_tx_rx EQUAL -1 OR mode_initial_read EQUAL -1 OR mode_readback EQUAL -1
+   OR mode_value_check EQUAL -1 OR pid_result_check EQUAL -1
+   OR configured_assignment EQUAL -1 OR NOT mode_tx_only EQUAL -1
+   OR NOT mode_initial_read LESS mode_tx_rx
+   OR NOT pid_result_check LESS configured_assignment)
+    message(FATAL_ERROR
+        "Dxl::Initialize must read before conditional TxRx mode write and verify mode/PID configuration")
+endif()
+
+string(FIND "${dxl_source}" "bool Dxl::SetPIDGain" pid_start)
+string(FIND "${dxl_source}" "int16_t Dxl::SetPresentMode" pid_end)
+if(pid_start EQUAL -1 OR pid_end EQUAL -1 OR NOT pid_start LESS pid_end)
+    message(FATAL_ERROR "Could not locate Dxl::SetPIDGain")
+endif()
+math(EXPR pid_length "${pid_end} - ${pid_start}")
+string(SUBSTRING "${dxl_source}" ${pid_start} ${pid_length} pid_source)
+foreach(required_pid_operation write2ByteTxRx Read2ByteWithRetry
+                               DxlReg_PositionPGain DxlReg_PositionIGain
+                               DxlReg_PositionDGain "verified_gain != gain.value"
+                               "verified_gain == gain.value")
+    string(FIND "${pid_source}" "${required_pid_operation}" pid_operation)
+    if(pid_operation EQUAL -1)
+        message(FATAL_ERROR
+            "Dxl::SetPIDGain lacks read-before-write TxRx verification: ${required_pid_operation}")
+    endif()
+endforeach()
+string(FIND "${pid_source}" "write2ByteTxOnly(" pid_tx_only)
+string(FIND "${pid_source}" "Read2ByteWithRetry(" pid_initial_read)
+string(FIND "${pid_source}" "write2ByteTxRx(" pid_write)
+string(LENGTH "${pid_source}" pid_source_length)
+math(EXPR pid_after_write_length "${pid_source_length} - ${pid_write}")
+string(SUBSTRING "${pid_source}" ${pid_write}
+       ${pid_after_write_length} pid_after_write)
+string(FIND "${pid_after_write}" "Read2ByteWithRetry(" pid_readback)
+foreach(required_pid_diagnostic "ID=" "gain=" "requested_value="
+                                "verified_value=" "write_comm_result="
+                                "read_succeeded=" "dxl_error=")
+    string(FIND "${pid_source}" "${required_pid_diagnostic}" diagnostic_position)
+    if(diagnostic_position EQUAL -1)
+        message(FATAL_ERROR
+            "Dxl::SetPIDGain lacks diagnostic: ${required_pid_diagnostic}")
+    endif()
+endforeach()
+if(NOT pid_tx_only EQUAL -1 OR pid_initial_read EQUAL -1 OR pid_write EQUAL -1
+   OR pid_readback EQUAL -1 OR NOT pid_initial_read LESS pid_write)
+    message(FATAL_ERROR "Dxl::SetPIDGain must use write status replies")
+endif()
+
+string(FIND "${dxl_source}" "bool Dxl::ConfigureTimeBasedProfile()" profile_start)
+string(FIND "${dxl_source}" "bool Dxl::syncWriteTimeBasedTheta" profile_end)
+if(profile_start EQUAL -1 OR profile_end EQUAL -1
+   OR NOT profile_start LESS profile_end)
+    message(FATAL_ERROR "Could not locate Dxl::ConfigureTimeBasedProfile")
+endif()
+math(EXPR profile_length "${profile_end} - ${profile_start}")
+string(SUBSTRING "${dxl_source}" ${profile_start}
+       ${profile_length} profile_source)
+foreach(required_profile_operation write1ByteTxRx Read1ByteWithRetry
+                                   "verified_mode & DRIVE_MODE_TIME_BASED_BIT")
+    string(FIND "${profile_source}" "${required_profile_operation}" profile_operation)
+    if(profile_operation EQUAL -1)
+        message(FATAL_ERROR
+            "Time-based Drive Mode lacks TxRx/readback verification: ${required_profile_operation}")
+    endif()
+endforeach()
+string(FIND "${profile_source}" "write1ByteTxOnly(" profile_tx_only)
+if(NOT profile_tx_only EQUAL -1)
+    message(FATAL_ERROR "Drive Mode write must use a write status reply")
+endif()
+
+string(FIND "${dxl_source}" "bool Dxl::SetTorqueEnabled(bool enabled)" torque_start)
+string(FIND "${dxl_source}" "bool Dxl::IsReady() const" torque_end)
+if(torque_start EQUAL -1 OR torque_end EQUAL -1
+   OR NOT torque_start LESS torque_end)
+    message(FATAL_ERROR "Could not locate Dxl torque enable implementation")
+endif()
+math(EXPR torque_length "${torque_end} - ${torque_start}")
+string(SUBSTRING "${dxl_source}" ${torque_start}
+       ${torque_length} torque_source)
+foreach(required_torque_operation write1ByteTxRx Read1ByteWithRetry
+                                  DxlReg_TorqueEnable
+                                  "actual_value == requested_value"
+                                  DisableTorqueBestEffort)
+    string(FIND "${torque_source}" "${required_torque_operation}" torque_operation)
+    if(torque_operation EQUAL -1)
+        message(FATAL_ERROR
+            "Torque control lacks TxRx/readback/rollback operation: ${required_torque_operation}")
+    endif()
+endforeach()
+string(FIND "${torque_source}" "write1ByteTxOnly(" torque_tx_only)
+string(FIND "${torque_source}" "if (!enabled) return DisableTorqueBestEffort()"
+       torque_off_best_effort)
+string(FIND "${torque_source}" "DisableTorqueBestEffort();" torque_rollback)
+string(FIND "${torque_source}" "for (const uint8_t id : dxl_id)"
+       torque_all_ids_loop)
+if(NOT torque_tx_only EQUAL -1 OR torque_off_best_effort EQUAL -1
+   OR torque_rollback EQUAL -1 OR torque_all_ids_loop EQUAL -1)
+    message(FATAL_ERROR
+        "Torque OFF must cover all IDs and Torque ON failure must roll back using TxRx writes")
+endif()
+
+string(FIND "${dxl_source}" "bool Dxl::Read1ByteWithRetry(" retry_start)
+string(FIND "${dxl_source}" "bool Dxl::Initialize() noexcept" retry_end)
+if(retry_start EQUAL -1 OR retry_end EQUAL -1 OR NOT retry_start LESS retry_end)
+    message(FATAL_ERROR "Could not locate bounded 1-byte read retry helper")
+endif()
+math(EXPR retry_length "${retry_end} - ${retry_start}")
+string(SUBSTRING "${dxl_source}" ${retry_start} ${retry_length} retry_source)
+foreach(required_retry_contract "kMaxAttempts = 3" "attempt <= kMaxAttempts"
+                                "std::chrono::milliseconds(5)" "clearPort()"
+                                "read1ByteTxRx(" "result == COMM_SUCCESS"
+                                "[DYNAMIXEL RETRY]")
+    string(FIND "${retry_source}" "${required_retry_contract}" retry_contract)
+    if(retry_contract EQUAL -1)
+        message(FATAL_ERROR
+            "1-byte read retry helper lacks contract: ${required_retry_contract}")
+    endif()
+endforeach()
+string(FIND "${dxl_source}" "bool Dxl::Read2ByteWithRetry(" retry2_start)
+if(retry2_start EQUAL -1 OR NOT retry2_start LESS retry_end)
+    message(FATAL_ERROR "Could not locate bounded 2-byte read retry helper")
+endif()
+math(EXPR retry2_length "${retry_end} - ${retry2_start}")
+string(SUBSTRING "${dxl_source}" ${retry2_start} ${retry2_length} retry2_source)
+foreach(required_retry2_contract "kMaxAttempts = 3" "attempt <= kMaxAttempts"
+                                 "std::chrono::milliseconds(5)" "clearPort()"
+                                 "read2ByteTxRx(" "result == COMM_SUCCESS"
+                                 "[DYNAMIXEL RETRY]")
+    string(FIND "${retry2_source}" "${required_retry2_contract}" retry2_contract)
+    if(retry2_contract EQUAL -1)
+        message(FATAL_ERROR
+            "2-byte read retry helper lacks contract: ${required_retry2_contract}")
+    endif()
+endforeach()
+
+string(FIND "${dxl_source}" "bool Dxl::syncReadTheta()" position_read_start)
+string(FIND "${dxl_source}" "VectorXd Dxl::GetThetaAct()" position_read_end)
+if(position_read_start EQUAL -1 OR position_read_end EQUAL -1
+   OR NOT position_read_start LESS position_read_end)
+    message(FATAL_ERROR "Could not locate Dxl Present Position sync read")
+endif()
+math(EXPR position_read_length
+     "${position_read_end} - ${position_read_start}")
+string(SUBSTRING "${dxl_source}" ${position_read_start}
+       ${position_read_length} position_read_source)
+foreach(required_position_read_contract
+        "kMaxAttempts = 3" "attempt <= kMaxAttempts"
+        "std::chrono::milliseconds(5)" "clearPort()" "txRxPacket()"
+        "getTxRxResult(result)" "unavailable_ids" "isAvailable("
+        "getData(")
+    string(FIND "${position_read_source}"
+           "${required_position_read_contract}" position_read_contract)
+    if(position_read_contract EQUAL -1)
+        message(FATAL_ERROR
+            "Present Position sync read lacks retry/diagnostic contract: ${required_position_read_contract}")
+    endif()
+endforeach()
+foreach(retry_policy "if (motion_configured_ && port_opened_)"
+                     "motion_configured_ = false"
+                     "motion_configured_ = true")
+    string(FIND "${initialize_source}" "${retry_policy}" policy_position)
+    if(policy_position EQUAL -1)
+        message(FATAL_ERROR
+            "Dxl::Initialize retry policy is missing: ${retry_policy}")
+    endif()
+endforeach()
+
+string(LENGTH "${dxl_source}" source_length)
+math(EXPR destructor_length "${source_length} - ${destructor_start}")
+string(SUBSTRING "${dxl_source}" ${destructor_start}
+       ${destructor_length} destructor_source)
+string(FIND "${destructor_source}" "if (!port_opened_) return;"
+       destructor_guard)
+string(FIND "${destructor_source}" "portHandler->closePort()"
+       destructor_close)
+if(destructor_guard EQUAL -1 OR destructor_close EQUAL -1
+   OR NOT destructor_guard LESS destructor_close)
+    message(FATAL_ERROR "Dxl destructor does not guard closePort by open state")
+endif()
+
+string(FIND "${hardware_source}"
+       "bool DynamixelMotionHardware::initialize() noexcept" hardware_initialize_start)
+string(FIND "${hardware_source}"
+       "bool DynamixelMotionHardware::preflight() noexcept" hardware_preflight_start)
+string(FIND "${hardware_source}"
+       "bool DynamixelMotionHardware::preflightReady() const noexcept"
+       hardware_preflight_end)
+if(hardware_preflight_start EQUAL -1 OR hardware_preflight_end EQUAL -1
+   OR NOT hardware_preflight_start LESS hardware_preflight_end)
+    message(FATAL_ERROR "Could not locate DynamixelMotionHardware preflight")
+endif()
+math(EXPR hardware_preflight_length
+     "${hardware_preflight_end} - ${hardware_preflight_start}")
+string(SUBSTRING "${hardware_source}" ${hardware_preflight_start}
+       ${hardware_preflight_length} hardware_preflight_source)
+string(FIND "${hardware_preflight_source}" "active_dxl_->Initialize()"
+       dxl_initialize_call)
+string(FIND "${hardware_preflight_source}" "active_dxl_->Preflight()"
+       dxl_preflight_call)
+string(FIND "${hardware_preflight_source}" "GetJointTheta()"
+       preflight_position_read_call)
+string(FIND "${hardware_preflight_source}" "SetTorqueEnabled(true)"
+       preflight_torque_enable_call)
+if(dxl_preflight_call EQUAL -1 OR preflight_position_read_call EQUAL -1)
+    message(FATAL_ERROR
+        "DynamixelMotionHardware preflight must run safe Dxl preflight and read positions")
+endif()
+if(NOT dxl_initialize_call EQUAL -1 OR NOT preflight_torque_enable_call EQUAL -1)
+    message(FATAL_ERROR
+        "DynamixelMotionHardware preflight must never run motion initialization or enable torque")
+endif()
+
+string(FIND "${hardware_source}" "ConfigureTimeBasedProfile()" profile_call)
+string(FIND "${hardware_source}" "SetTorqueEnabled(true)" torque_enable_call)
+string(FIND "${hardware_source}" "if (initialized_ && active_dxl_->IsReady())"
+       initialized_guard)
+if(hardware_initialize_start EQUAL -1 OR profile_call EQUAL -1
+   OR torque_enable_call EQUAL -1 OR initialized_guard EQUAL -1
+   OR NOT hardware_initialize_start LESS profile_call
+   OR NOT profile_call LESS torque_enable_call)
+    message(FATAL_ERROR
+        "DynamixelMotionHardware initialization order is incorrect")
+endif()
+
+string(FIND "${hardware_source}" "bool DynamixelMotionHardware::ready() const noexcept"
+       hardware_initialize_end)
+math(EXPR hardware_initialize_length
+     "${hardware_initialize_end} - ${hardware_initialize_start}")
+string(SUBSTRING "${hardware_source}" ${hardware_initialize_start}
+       ${hardware_initialize_length} hardware_initialize_source)
+string(FIND "${hardware_initialize_source}" "preflight()" preflight_call)
+string(FIND "${hardware_initialize_source}" "active_dxl_->Initialize()"
+       motion_initialize_call)
+string(FIND "${hardware_initialize_source}" "ConfigureTimeBasedProfile()"
+       initialize_profile_call)
+string(FIND "${hardware_initialize_source}" "GetJointTheta()" position_read_call)
+string(FIND "${hardware_initialize_source}" "initialized_ = true"
+       initialized_assignment)
+string(FIND "${hardware_initialize_source}" "SetTorqueEnabled(true)"
+       initialize_torque_enable_call)
+if(preflight_call EQUAL -1 OR motion_initialize_call EQUAL -1
+   OR position_read_call EQUAL -1
+   OR initialize_profile_call EQUAL -1 OR initialize_torque_enable_call EQUAL -1
+   OR initialized_assignment EQUAL -1
+   OR NOT preflight_call LESS initialize_profile_call
+   OR NOT motion_initialize_call LESS initialize_profile_call
+   OR NOT initialize_profile_call LESS position_read_call
+   OR NOT position_read_call LESS initialize_torque_enable_call
+   OR NOT initialize_torque_enable_call LESS initialized_assignment)
+    message(FATAL_ERROR
+        "Torque must be the final motion-ready operation in initialize")
+endif()

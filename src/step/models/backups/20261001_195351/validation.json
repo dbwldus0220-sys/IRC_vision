@@ -1,0 +1,36 @@
+{
+  "input_shape": [
+    1,
+    3,
+    640,
+    640
+  ],
+  "output_shape": [
+    1,
+    300,
+    6
+  ],
+  "frames": [
+    {
+      "image": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/20260927_000626_review/frame_104.102.jpg",
+      "detections_above_0.25": 0,
+      "max_box_difference_pixels": 0.0,
+      "max_confidence_difference": 0.0,
+      "inference_ms_single_sample": 18.949447999943914
+    },
+    {
+      "image": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/20260927_000626_review/frame_170.013.jpg",
+      "detections_above_0.25": 1,
+      "max_box_difference_pixels": 0.009368896484375,
+      "max_confidence_difference": 3.7729740142822266e-05,
+      "inference_ms_single_sample": 29.141589000005297
+    },
+    {
+      "image": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/20260927_000626_review/frame_155.061.jpg",
+      "detections_above_0.25": 1,
+      "max_box_difference_pixels": 0.00799560546875,
+      "max_confidence_difference": 0.0005308985710144043,
+      "inference_ms_single_sample": 28.44526000001224
+    }
+  ]
+}

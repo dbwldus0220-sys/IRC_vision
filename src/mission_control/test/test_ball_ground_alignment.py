@@ -28,12 +28,14 @@ def ball_sample(angle, **changes):
 @pytest.mark.parametrize("angle,action", [
     (-89.999, "BALL_APPROACH_RECOVER_LEFT_4"),
     (-20.0, "BALL_APPROACH_RECOVER_LEFT_4"),
-    (-19.999, "STRAIGHT"), (0.0, "STRAIGHT"), (19.999, "STRAIGHT"),
+    (-15.0, "BALL_APPROACH_RECOVER_LEFT_4"),
+    (-14.999, "STRAIGHT"), (0.0, "STRAIGHT"), (14.999, "STRAIGHT"),
+    (15.0, "BALL_APPROACH_RECOVER_RIGHT_4"),
     (20.0, "BALL_APPROACH_RECOVER_RIGHT_4"),
     (89.999, "BALL_APPROACH_RECOVER_RIGHT_4"),
 ])
 @pytest.mark.parametrize("distance", [0.551, 0.9, 1.5])
-def test_general_approach_uses_ground_angle_and_twenty_degree_boundary(angle, action, distance):
+def test_general_approach_uses_ground_angle_and_fifteen_degree_boundary(angle, action, distance):
     planner = MotionDecisionPlanner()
     sample = ball_sample(angle, depth_m=distance, distance_m=distance)
     checkpoint = planner.plan_ball_approach_alignment(sample)

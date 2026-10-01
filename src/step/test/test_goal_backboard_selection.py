@@ -287,3 +287,15 @@ def test_analyzer_rejects_outside_new_scoring_rectangle(depth, offset):
     for _ in range(5):
         info = send(analyzer, published, [detection(center_x=736 + offset)])
         assert info['score_now'] is False
+
+
+@pytest.mark.parametrize('detections', [[], [detection()]])
+def test_goal_observation_preserves_capture_stamp_for_visible_and_missing_frames(detections):
+    analyzer, published = make_analyzer()
+    analyzer._detections_callback(String(data=json.dumps({
+        'stamp': {'sec': 12, 'nanosec': 345}, 'image_width': 1280,
+        'image_height': 720, 'detections': detections,
+    })))
+    assert json.loads(published[-1].data)['rgb_stamp_ns'] == 12_000_000_345
+    send(analyzer, published, detections)
+    assert json.loads(published[-1].data)['rgb_stamp_ns'] is None

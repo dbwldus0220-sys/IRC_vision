@@ -170,8 +170,8 @@ def test_real_exit_route_reaches_heading_gate(monkeypatch, section, heading, act
 
 
 @pytest.mark.parametrize('section,heading,search', [
-    (1, -30.0, 'POST_SHOT_LINE_TURN_RIGHT_2'),
-    (2, 30.0, 'POST_SHOT_LINE_TURN_LEFT_1'),
+    (1, -30.0, 'POST_SHOT_LINE_TURN_RIGHT_5'),
+    (2, 30.0, 'POST_SHOT_LINE_TURN_LEFT_3'),
 ])
 def test_post_shot_search_keeps_course_direction_after_opposite_correction(
     monkeypatch, section, heading, search,

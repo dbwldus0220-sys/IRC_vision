@@ -24,7 +24,7 @@ namespace irc_step_motion_executor
 namespace
 {
 
-constexpr std::int64_t kDefaultPollPeriodMs = 20;
+constexpr std::int64_t kDefaultPollPeriodMs = 5;
 constexpr std::int64_t kDefaultRunningPolls = 2;
 constexpr std::int64_t kDefaultSettlingPolls = 1;
 constexpr std::int64_t kDefaultHeartbeatPeriodMs = 500;

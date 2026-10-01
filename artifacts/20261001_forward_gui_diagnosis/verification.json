@@ -1,0 +1,468 @@
+{
+  "scope": "Read-only control-code diagnosis; fake hardware with perfect goal tracking and deterministic clock; no physical robot execution",
+  "gui_reference": "/home/jet/Downloads/gui_sdk_20260930_135448.tar.gz:gui/sdk_gui.py",
+  "gui_reference_limit": "User reports GUI speed 1.05; exact running GUI file not confirmed. Local older GUI rounds to one decimal and is not used for this timing comparison.",
+  "sdk_source": "/home/jet/IRC/external_sdk/robot_motion_player_sdk_work_20260801/final step",
+  "identical_inputs": [
+    "current runtime JSON on both sides",
+    "JSON playback speed and repeat count",
+    "initial pose equal to the motion final frame",
+    "no runtime joint overrides",
+    "same periodic calls"
+  ],
+  "clock_injection": "Only Clock::now() calls redirected in a temporary SDK source copy for deterministic playback",
+  "baseline": [
+    {
+      "motion": "찐찐전진45(4회)",
+      "period_ms": 5,
+      "gui_finish_ms": 2120,
+      "sdk_finish_ms": 2140,
+      "max_leg_command_difference_deg": 16.3698,
+      "at_ms": 1700,
+      "motor_id": 13
+    },
+    {
+      "motion": "찐찐전진45(4회)",
+      "period_ms": 10,
+      "gui_finish_ms": 2120,
+      "sdk_finish_ms": 2160,
+      "max_leg_command_difference_deg": 29.8425,
+      "at_ms": 1710,
+      "motor_id": 13
+    },
+    {
+      "motion": "찐찐전진45(4회)",
+      "period_ms": 20,
+      "gui_finish_ms": 2160,
+      "sdk_finish_ms": 2240,
+      "max_leg_command_difference_deg": 37.8962,
+      "at_ms": 1760,
+      "motor_id": 13
+    },
+    {
+      "motion": "찐찐전진(6회)",
+      "period_ms": 5,
+      "gui_finish_ms": 3180,
+      "sdk_finish_ms": 3210,
+      "max_leg_command_difference_deg": 25.792,
+      "at_ms": 2765,
+      "motor_id": 13
+    },
+    {
+      "motion": "찐찐전진(6회)",
+      "period_ms": 10,
+      "gui_finish_ms": 3180,
+      "sdk_finish_ms": 3240,
+      "max_leg_command_difference_deg": 37.8962,
+      "at_ms": 2780,
+      "motor_id": 13
+    },
+    {
+      "motion": "찐찐전진(6회)",
+      "period_ms": 20,
+      "gui_finish_ms": 3240,
+      "sdk_finish_ms": 3360,
+      "max_leg_command_difference_deg": 38.4062,
+      "at_ms": 2300,
+      "motor_id": 13
+    },
+    {
+      "motion": "찐찐전진45(8회)",
+      "period_ms": 5,
+      "gui_finish_ms": 4240,
+      "sdk_finish_ms": 4280,
+      "max_leg_command_difference_deg": 33.5154,
+      "at_ms": 3830,
+      "motor_id": 13
+    },
+    {
+      "motion": "찐찐전진45(8회)",
+      "period_ms": 10,
+      "gui_finish_ms": 4240,
+      "sdk_finish_ms": 4320,
+      "max_leg_command_difference_deg": 38.4062,
+      "at_ms": 3310,
+      "motor_id": 13
+    },
+    {
+      "motion": "찐찐전진45(8회)",
+      "period_ms": 20,
+      "gui_finish_ms": 4320,
+      "sdk_finish_ms": 4480,
+      "max_leg_command_difference_deg": 38.4062,
+      "at_ms": 2300,
+      "motor_id": 13
+    },
+    {
+      "motion": "찐찐전진90(4회)",
+      "period_ms": 5,
+      "gui_finish_ms": 2120,
+      "sdk_finish_ms": 2140,
+      "max_leg_command_difference_deg": 16.3698,
+      "at_ms": 1700,
+      "motor_id": 13
+    },
+    {
+      "motion": "찐찐전진90(4회)",
+      "period_ms": 10,
+      "gui_finish_ms": 2120,
+      "sdk_finish_ms": 2160,
+      "max_leg_command_difference_deg": 29.8425,
+      "at_ms": 1710,
+      "motor_id": 13
+    },
+    {
+      "motion": "찐찐전진90(4회)",
+      "period_ms": 20,
+      "gui_finish_ms": 2160,
+      "sdk_finish_ms": 2240,
+      "max_leg_command_difference_deg": 37.8962,
+      "at_ms": 1760,
+      "motor_id": 13
+    },
+    {
+      "motion": "찐찐전진90(6회)",
+      "period_ms": 5,
+      "gui_finish_ms": 3180,
+      "sdk_finish_ms": 3210,
+      "max_leg_command_difference_deg": 25.792,
+      "at_ms": 2765,
+      "motor_id": 13
+    },
+    {
+      "motion": "찐찐전진90(6회)",
+      "period_ms": 10,
+      "gui_finish_ms": 3180,
+      "sdk_finish_ms": 3240,
+      "max_leg_command_difference_deg": 37.8962,
+      "at_ms": 2780,
+      "motor_id": 13
+    },
+    {
+      "motion": "찐찐전진90(6회)",
+      "period_ms": 20,
+      "gui_finish_ms": 3240,
+      "sdk_finish_ms": 3360,
+      "max_leg_command_difference_deg": 38.4062,
+      "at_ms": 2300,
+      "motor_id": 13
+    },
+    {
+      "motion": "찐찐전진90(8회)",
+      "period_ms": 5,
+      "gui_finish_ms": 4240,
+      "sdk_finish_ms": 4280,
+      "max_leg_command_difference_deg": 33.5154,
+      "at_ms": 3830,
+      "motor_id": 13
+    },
+    {
+      "motion": "찐찐전진90(8회)",
+      "period_ms": 10,
+      "gui_finish_ms": 4240,
+      "sdk_finish_ms": 4320,
+      "max_leg_command_difference_deg": 38.4062,
+      "at_ms": 3310,
+      "motor_id": 13
+    },
+    {
+      "motion": "찐찐전진90(8회)",
+      "period_ms": 20,
+      "gui_finish_ms": 4320,
+      "sdk_finish_ms": 4480,
+      "max_leg_command_difference_deg": 38.4062,
+      "at_ms": 2300,
+      "motor_id": 13
+    },
+    {
+      "motion": "찐찐전진45(2회)",
+      "period_ms": 5,
+      "gui_finish_ms": 1060,
+      "sdk_finish_ms": 1070,
+      "max_leg_command_difference_deg": 5.5762,
+      "at_ms": 630,
+      "motor_id": 13
+    },
+    {
+      "motion": "찐찐전진45(2회)",
+      "period_ms": 10,
+      "gui_finish_ms": 1060,
+      "sdk_finish_ms": 1080,
+      "max_leg_command_difference_deg": 10.7937,
+      "at_ms": 640,
+      "motor_id": 13
+    },
+    {
+      "motion": "찐찐전진45(2회)",
+      "period_ms": 20,
+      "gui_finish_ms": 1080,
+      "sdk_finish_ms": 1120,
+      "max_leg_command_difference_deg": 19.4208,
+      "at_ms": 660,
+      "motor_id": 13
+    },
+    {
+      "motion": "찐찐전진90(2회)",
+      "period_ms": 5,
+      "gui_finish_ms": 1060,
+      "sdk_finish_ms": 1070,
+      "max_leg_command_difference_deg": 5.5762,
+      "at_ms": 630,
+      "motor_id": 13
+    },
+    {
+      "motion": "찐찐전진90(2회)",
+      "period_ms": 10,
+      "gui_finish_ms": 1060,
+      "sdk_finish_ms": 1080,
+      "max_leg_command_difference_deg": 10.7937,
+      "at_ms": 640,
+      "motor_id": 13
+    },
+    {
+      "motion": "찐찐전진90(2회)",
+      "period_ms": 20,
+      "gui_finish_ms": 1080,
+      "sdk_finish_ms": 1120,
+      "max_leg_command_difference_deg": 19.4208,
+      "at_ms": 660,
+      "motor_id": 13
+    }
+  ],
+  "temporary_boundary_experiment": {
+    "change": "In gateCurrentFrame, after the final Goal write, allow same-tick cycle completion when frame_end_ms >= pattern_->durationMs(); intermediate frame behavior unchanged.",
+    "results": [
+      {
+        "motion": "찐찐전진45(4회)",
+        "period_ms": 5,
+        "gui_finish_ms": 2120,
+        "sdk_finish_ms": 2120,
+        "max_leg_command_difference_deg": 0.7482,
+        "at_ms": 95,
+        "motor_id": 13
+      },
+      {
+        "motion": "찐찐전진45(4회)",
+        "period_ms": 10,
+        "gui_finish_ms": 2120,
+        "sdk_finish_ms": 2120,
+        "max_leg_command_difference_deg": 0.4956,
+        "at_ms": 110,
+        "motor_id": 13
+      },
+      {
+        "motion": "찐찐전진45(4회)",
+        "period_ms": 20,
+        "gui_finish_ms": 2160,
+        "sdk_finish_ms": 2160,
+        "max_leg_command_difference_deg": 0,
+        "at_ms": null,
+        "motor_id": null
+      },
+      {
+        "motion": "찐찐전진(6회)",
+        "period_ms": 5,
+        "gui_finish_ms": 3180,
+        "sdk_finish_ms": 3180,
+        "max_leg_command_difference_deg": 0.7482,
+        "at_ms": 95,
+        "motor_id": 13
+      },
+      {
+        "motion": "찐찐전진(6회)",
+        "period_ms": 10,
+        "gui_finish_ms": 3180,
+        "sdk_finish_ms": 3180,
+        "max_leg_command_difference_deg": 0.4956,
+        "at_ms": 110,
+        "motor_id": 13
+      },
+      {
+        "motion": "찐찐전진(6회)",
+        "period_ms": 20,
+        "gui_finish_ms": 3240,
+        "sdk_finish_ms": 3240,
+        "max_leg_command_difference_deg": 0,
+        "at_ms": null,
+        "motor_id": null
+      },
+      {
+        "motion": "찐찐전진45(8회)",
+        "period_ms": 5,
+        "gui_finish_ms": 4240,
+        "sdk_finish_ms": 4240,
+        "max_leg_command_difference_deg": 0.7482,
+        "at_ms": 95,
+        "motor_id": 13
+      },
+      {
+        "motion": "찐찐전진45(8회)",
+        "period_ms": 10,
+        "gui_finish_ms": 4240,
+        "sdk_finish_ms": 4240,
+        "max_leg_command_difference_deg": 0.4956,
+        "at_ms": 110,
+        "motor_id": 13
+      },
+      {
+        "motion": "찐찐전진45(8회)",
+        "period_ms": 20,
+        "gui_finish_ms": 4320,
+        "sdk_finish_ms": 4320,
+        "max_leg_command_difference_deg": 0,
+        "at_ms": null,
+        "motor_id": null
+      },
+      {
+        "motion": "찐찐전진90(4회)",
+        "period_ms": 5,
+        "gui_finish_ms": 2120,
+        "sdk_finish_ms": 2120,
+        "max_leg_command_difference_deg": 0.7482,
+        "at_ms": 95,
+        "motor_id": 13
+      },
+      {
+        "motion": "찐찐전진90(4회)",
+        "period_ms": 10,
+        "gui_finish_ms": 2120,
+        "sdk_finish_ms": 2120,
+        "max_leg_command_difference_deg": 0.4956,
+        "at_ms": 110,
+        "motor_id": 13
+      },
+      {
+        "motion": "찐찐전진90(4회)",
+        "period_ms": 20,
+        "gui_finish_ms": 2160,
+        "sdk_finish_ms": 2160,
+        "max_leg_command_difference_deg": 0,
+        "at_ms": null,
+        "motor_id": null
+      },
+      {
+        "motion": "찐찐전진90(6회)",
+        "period_ms": 5,
+        "gui_finish_ms": 3180,
+        "sdk_finish_ms": 3180,
+        "max_leg_command_difference_deg": 0.7482,
+        "at_ms": 95,
+        "motor_id": 13
+      },
+      {
+        "motion": "찐찐전진90(6회)",
+        "period_ms": 10,
+        "gui_finish_ms": 3180,
+        "sdk_finish_ms": 3180,
+        "max_leg_command_difference_deg": 0.4956,
+        "at_ms": 110,
+        "motor_id": 13
+      },
+      {
+        "motion": "찐찐전진90(6회)",
+        "period_ms": 20,
+        "gui_finish_ms": 3240,
+        "sdk_finish_ms": 3240,
+        "max_leg_command_difference_deg": 0,
+        "at_ms": null,
+        "motor_id": null
+      },
+      {
+        "motion": "찐찐전진90(8회)",
+        "period_ms": 5,
+        "gui_finish_ms": 4240,
+        "sdk_finish_ms": 4240,
+        "max_leg_command_difference_deg": 0.7482,
+        "at_ms": 95,
+        "motor_id": 13
+      },
+      {
+        "motion": "찐찐전진90(8회)",
+        "period_ms": 10,
+        "gui_finish_ms": 4240,
+        "sdk_finish_ms": 4240,
+        "max_leg_command_difference_deg": 0.4956,
+        "at_ms": 110,
+        "motor_id": 13
+      },
+      {
+        "motion": "찐찐전진90(8회)",
+        "period_ms": 20,
+        "gui_finish_ms": 4320,
+        "sdk_finish_ms": 4320,
+        "max_leg_command_difference_deg": 0,
+        "at_ms": null,
+        "motor_id": null
+      },
+      {
+        "motion": "찐찐전진45(2회)",
+        "period_ms": 5,
+        "gui_finish_ms": 1060,
+        "sdk_finish_ms": 1060,
+        "max_leg_command_difference_deg": 0.7482,
+        "at_ms": 95,
+        "motor_id": 13
+      },
+      {
+        "motion": "찐찐전진45(2회)",
+        "period_ms": 10,
+        "gui_finish_ms": 1060,
+        "sdk_finish_ms": 1060,
+        "max_leg_command_difference_deg": 0.4956,
+        "at_ms": 110,
+        "motor_id": 13
+      },
+      {
+        "motion": "찐찐전진45(2회)",
+        "period_ms": 20,
+        "gui_finish_ms": 1080,
+        "sdk_finish_ms": 1080,
+        "max_leg_command_difference_deg": 0.0,
+        "at_ms": 900,
+        "motor_id": 14
+      },
+      {
+        "motion": "찐찐전진90(2회)",
+        "period_ms": 5,
+        "gui_finish_ms": 1060,
+        "sdk_finish_ms": 1060,
+        "max_leg_command_difference_deg": 0.7482,
+        "at_ms": 95,
+        "motor_id": 13
+      },
+      {
+        "motion": "찐찐전진90(2회)",
+        "period_ms": 10,
+        "gui_finish_ms": 1060,
+        "sdk_finish_ms": 1060,
+        "max_leg_command_difference_deg": 0.4956,
+        "at_ms": 110,
+        "motor_id": 13
+      },
+      {
+        "motion": "찐찐전진90(2회)",
+        "period_ms": 20,
+        "gui_finish_ms": 1080,
+        "sdk_finish_ms": 1080,
+        "max_leg_command_difference_deg": 0,
+        "at_ms": null,
+        "motor_id": null
+      }
+    ],
+    "applied_to_operational_sdk": false
+  },
+  "interpretation": "Elapsed-time differences reproduce a cycle-boundary delay. Same-wall-clock goal angle differences describe phase drift, not altered final frame targets. Physical instability causation is unverified.",
+  "other_candidates": {
+    "pid": "Active SDK initialization enforces P=850,I=0,D=0; GUI preserves existing gains. Actual motor gains not read.",
+    "runtime_joint_policy": "Forward frames override motor 4 to 18 and motor 5 to -18; source differs by up to 8.859375 degrees. Leg targets match supplied forward source.",
+    "camera_override": "Mission-dependent motor 0 override can change the source pose.",
+    "catalog_reload": "SDK loads JSON in constructor; existing running player does not automatically reload an updated file.",
+    "io_timing": "GUI feedback/FK and ROS callbacks have different workloads; actual USB/timer intervals not measured."
+  },
+  "sha256": {
+    "/home/jet/IRC/external_sdk/robot_motion_player_sdk_work_20260801/final step/robot_motion_player.cpp": "09083a69f48dc7f1e02e19a952f1d40f4c0ea0013bef9d6319f7e8b233a009e4",
+    "/home/jet/IRC/external_sdk/robot_motion_player_sdk_work_20260801/final step/step_dynamixel.cpp": "c4fa7f184a91e429f5d77a5dd80ee4adc1550b609f3cb5bac9ea225039af467f",
+    "artifacts/robot_motions_runtime.json": "f160ebc8f256f27c9ab699255398bfa53503f11d2424863e0fcbbe8df76c0ecb",
+    "/tmp/step_forward_gui_audit/handoff_sdk_gui.py": "5f510f76fb1eb7bd2c29f959026994d5365141bdf8f1e1a941cdf90bf5ed3f25"
+  }
+}

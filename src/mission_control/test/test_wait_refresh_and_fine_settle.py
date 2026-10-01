@@ -60,7 +60,7 @@ def test_ball_wait_uses_new_ground_angle_instead_of_invalid_old_sample(clock):
 
 def test_line_wait_uses_new_heading(clock):
     node = LiveInputHarness(phase='LINE_TRACK')
-    observe(node, clock, 'line', {**line_info(), 'ground_projection_valid': False})
+    observe(node, clock, 'line', {**line_info(), 'ground_heading_error_deg': None})
     assert not node.last_selected_decision.valid
     observe(node, clock, 'line', line_info(heading=30., offset=.3))
     command = node.publisher.messages[-1]
@@ -154,7 +154,7 @@ def test_hurdle_go_waits_for_fresh_fine_sequence_decision(clock):
     assert node.last_selected_decision.action == 'GO'
     assert node.last_selected_decision.source_command['fine_sequence_requested']
     assert not node.publisher.messages
-    start = node.pre_motion_settle_started_at
+    start = node.hurdle_stationary_since
     for elapsed in (.4, .8, 1.):
         clock[0] = start + elapsed
         observe(node, clock, 'hurdle', info)

@@ -1,0 +1,46 @@
+{
+  "sdk_path": "/home/jet/IRC/external_sdk/robot_motion_player_sdk_work_20260801/final step",
+  "runtime_sha256": "f160ebc8f256f27c9ab699255398bfa53503f11d2424863e0fcbbe8df76c0ecb",
+  "files": {
+    "robot_motion_player.cpp": {
+      "before_sha256": "09083a69f48dc7f1e02e19a952f1d40f4c0ea0013bef9d6319f7e8b233a009e4",
+      "after_sha256": "994b51b77c981cde5cf928e70608718ff1bfb9003141905c103925838be7e7d5"
+    },
+    "robot_motion_player.hpp": {
+      "before_sha256": "7f07850acc778818b6d91261e7be4567171f984c61c7875cfcf47e7a0bba5888",
+      "after_sha256": "b99eceadbc081d05ebcebd8955ff924867be99297e02a78a64da8e5f1a67cff8"
+    },
+    "step_dynamixel.cpp": {
+      "before_sha256": "c4fa7f184a91e429f5d77a5dd80ee4adc1550b609f3cb5bac9ea225039af467f",
+      "after_sha256": "ab9a54a61bb6875b5f5cf566c65a7a98123a1d4f6c6ebb44d2e8c87d4074fdde"
+    },
+    "test_constructor_side_effects.cmake": {
+      "before_sha256": "1776ed21d93659216e70dafc4251288c0391ce1cda9f0423b7d0cfa7f995106d",
+      "after_sha256": "f5daf99819705163fff30ff605cd678d5267245949915030bbd1c06496243dd0"
+    }
+  },
+  "hardware_executed": false,
+  "staged_sdk_ctest_passed": 6,
+  "forward_parity_cases": 128,
+  "forward_parity_timestamps": 43008,
+  "external_sdk_applied": true,
+  "ros_build_succeeded": true,
+  "installed_executable": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/sdk_motion_executor",
+  "installed_executable_sha256": "b92655ff81764a13386a15ae25636f95ce0bf590b0305ece45c91d79b3404363",
+  "runtime_catalog_byte_identical": true,
+  "policy_pytest_passed": 6,
+  "selected_ros_ctest_suites_passed": 5,
+  "operational_changes": [
+    "Remove extra update tick at frame/cycle boundaries",
+    "Match GUI integer-ms timeline sampling",
+    "Start trajectory clock after initial Present Position read",
+    "Preserve existing PID and validate Operating Mode without overwriting it",
+    "Use 5ms standalone ROS executor default"
+  ],
+  "limits": [
+    "No physical robot run or motor PID readback",
+    "Existing PID values are preserved, not restored to unknown historical GUI values",
+    "Existing final completion policy, startup handling and mission camera overrides are retained",
+    "Exact currently used GUI installation remains unconfirmed; comparison uses supplied 2026-09-30 GUI archive"
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "source": "/home/jet/Downloads/best(1).onnx",
+  "backups": {
+    "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/step/models/best.onnx": {
+      "backup": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/step/models/backups/20261001_195351/source/best.onnx",
+      "sha256": "c0de02e292672f2bcbd2db9011e09eb979a53477c613429e22b5f7333415a11e"
+    },
+    "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/step/models/best.engine": {
+      "backup": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/step/models/backups/20261001_195351/source/best.engine",
+      "sha256": "1c54950ce775648758dc7547461ecab588e1d8a76e34c25308de33a59dacd721"
+    },
+    "/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/step/share/step/models/best.onnx": {
+      "backup": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/step/models/backups/20261001_195351/install/best.onnx",
+      "sha256": "c0de02e292672f2bcbd2db9011e09eb979a53477c613429e22b5f7333415a11e"
+    },
+    "/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/step/share/step/models/best.engine": {
+      "backup": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/step/models/backups/20261001_195351/install/best.engine",
+      "sha256": "1c54950ce775648758dc7547461ecab588e1d8a76e34c25308de33a59dacd721"
+    }
+  },
+  "status": "installed_and_validated",
+  "new_onnx_sha256": "1dbdf2bb4a3dcc78d626ebd9ad1969ad61e0b5cd3b19a3c78406b11611b94d9d",
+  "build_command": [
+    "/usr/src/tensorrt/bin/trtexec",
+    "--onnx=/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/step/models/backups/20261001_195351/new.best.onnx",
+    "--saveEngine=/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/step/models/backups/20261001_195351/new.best.engine",
+    "--skipInference",
+    "--memPoolSize=workspace:2048"
+  ],
+  "build_exit_code": 0,
+  "installed": {
+    "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/step/models/best.onnx": "1dbdf2bb4a3dcc78d626ebd9ad1969ad61e0b5cd3b19a3c78406b11611b94d9d",
+    "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/step/models/best.engine": "ea78b85ae5f0ad79e4a40c80e0154f2f79ff18a8c5f414ce533afb650ff43498",
+    "/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/step/share/step/models/best.onnx": "1dbdf2bb4a3dcc78d626ebd9ad1969ad61e0b5cd3b19a3c78406b11611b94d9d",
+    "/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/step/share/step/models/best.engine": "ea78b85ae5f0ad79e4a40c80e0154f2f79ff18a8c5f414ce533afb650ff43498"
+  },
+  "installed_at": "2026-10-01T19:58:23.235395",
+  "previous_validation_detection_counts": [
+    1,
+    2,
+    2
+  ],
+  "new_validation_detection_counts": [
+    0,
+    1,
+    1
+  ],
+  "removed_old_backup": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/step/models/backups/20260930_231421"
+}

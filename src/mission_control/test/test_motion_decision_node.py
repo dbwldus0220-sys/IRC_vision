@@ -1,6 +1,7 @@
 """Tests for special-motion state handling in the motion decision node."""
 
 import json
+from dataclasses import replace
 import os
 from pathlib import Path
 import sys
@@ -1465,8 +1466,12 @@ def test_decision_debug_reports_existing_state(monkeypatch):
         'line_detected': True,
         'last_seen_direction': None,
         'heading_deg': 19.5,
-        'heading_source': 'ground_heading_error_deg',
+        'heading_source': 'ground',
+        'image_heading_deg': -19.5,
+        'ground_heading_deg': 19.5,
         'center_offset': 0.12,
+        'offset_reference_steering_deg': None,
+        'lateral_offset_px': None,
         'pending_direction': 'RIGHT',
         'direction_confirmation_current': 3,
         'direction_confirmation_required': 3,
@@ -2208,7 +2213,7 @@ def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
             self.config = type(
                 "Config",
                 (),
-                {"min_line_quality": 0.35},
+                {"min_line_quality": 0.35, "heading_source": "ground"},
             )()
 
         def _reset_turn_state(self):
@@ -2294,7 +2299,7 @@ def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
     assert len(node.publisher.messages) == (2 if latest_detected and latest_ground_valid else 1)
     MotionDecisionNode._publish_decision(node)
     assert len(node.publisher.messages) == 2
-    expected = "STRAIGHT" if latest_detected else "LINE_LOST_TURN_LEFT"
+    expected = "STRAIGHT" if latest_detected else "LINE_LOST_TURN_LEFT_3"
     assert json.loads(node.publisher.messages[-1].data)["action"] == expected
 
 
@@ -4519,6 +4524,7 @@ def test_all_line_stationary_turns_pause_one_second_before_publish(action, monke
     clock = [10.0]
     monkeypatch.setattr(time, "monotonic", lambda: clock[0])
     node = ReadinessPublishNode(general_decision(action))
+    node._fresh_observations = lambda _now: ({"line": {"detected": not action.startswith("LINE_LOST_TURN_")}}, {})
     node.LINE_TURN_PRE_MOTION_SETTLE_SEC = MotionDecisionNode.LINE_TURN_PRE_MOTION_SETTLE_SEC
     node.pre_motion_settle_sec = 0.0
     MotionDecisionNode._publish_decision(node)
@@ -4528,7 +4534,9 @@ def test_all_line_stationary_turns_pause_one_second_before_publish(action, monke
     assert not node.publisher.messages
     clock[0] = 11.0
     MotionDecisionNode._publish_decision(node)
-    assert json.loads(node.publisher.messages[-1].data)["action"] == action
+    expected = {"LINE_LOST_TURN_LEFT": "LINE_LOST_TURN_LEFT_3",
+                "LINE_LOST_TURN_RIGHT": "LINE_LOST_TURN_RIGHT_5"}.get(action, action)
+    assert json.loads(node.publisher.messages[-1].data)["action"] == expected
 
 
 
@@ -4537,6 +4545,7 @@ def test_line_turn_pause_cancels_without_delaying_new_walk(replacement, monkeypa
     clock = [10.0]
     monkeypatch.setattr(time, "monotonic", lambda: clock[0])
     node = ReadinessPublishNode(general_decision("LINE_LOST_TURN_LEFT"))
+    node._fresh_observations = lambda _now: ({"line": {"detected": False}}, {})
     node.LINE_TURN_PRE_MOTION_SETTLE_SEC = MotionDecisionNode.LINE_TURN_PRE_MOTION_SETTLE_SEC
     MotionDecisionNode._publish_decision(node)
     assert not node.publisher.messages
@@ -4629,6 +4638,7 @@ def test_enter_gate_does_not_start_on_terminal_eof():
 ])
 def test_line_capture_rejects_invalid_ground_even_with_valid_image(field, value):
     node = FreshMockInputNode()
+    node.planner.line_planner.config = replace(node.planner.line_planner.config, heading_source="ground")
     _, sample = build_mock_vision_input("straight")
     sample[field] = value
     sample["filtered_heading_error_deg"] = 20.0
@@ -4637,6 +4647,7 @@ def test_line_capture_rejects_invalid_ground_even_with_valid_image(field, value)
 
 def test_line_capture_accepts_valid_ground_without_image_heading():
     node = FreshMockInputNode()
+    node.planner.line_planner.config = replace(node.planner.line_planner.config, heading_source="ground")
     _, sample = build_mock_vision_input("straight")
     sample.pop("filtered_heading_error_deg")
     assert MotionDecisionNode._line_frame_is_usable(node, sample)

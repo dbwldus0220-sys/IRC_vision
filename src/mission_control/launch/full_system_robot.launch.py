@@ -238,6 +238,10 @@ def generate_launch_description() -> LaunchDescription:
                 "lost_search_max_angle_deg": ParameterValue(
                     LaunchConfiguration("lost_search_max_angle_deg"), value_type=float
                 ),
+                "line_heading_source": LaunchConfiguration("line_heading_source"),
+                "line_offset_align_enter_px": ParameterValue(
+                    LaunchConfiguration("line_offset_align_enter_px"), value_type=float
+                ),
                 "recovery_heading_turn_deg": ParameterValue(
                     recovery_heading_turn_deg, value_type=float
                 ),
@@ -386,6 +390,10 @@ def generate_launch_description() -> LaunchDescription:
                 ),
             ),
             DeclareLaunchArgument("initial_mission_phase", default_value="AUTO"),
+            DeclareLaunchArgument("line_heading_source", default_value="ground",
+                                  choices=["image", "ground"]),
+            DeclareLaunchArgument("line_offset_align_enter_px", default_value="-1.0",
+                                  description="Pixel offset limit for stationary alignment; negative disables."),
             DeclareLaunchArgument("recovery_heading_turn_deg", default_value="10.0"),
             DeclareLaunchArgument(
                 "recovery_away_heading_turn_deg", default_value="3.0"

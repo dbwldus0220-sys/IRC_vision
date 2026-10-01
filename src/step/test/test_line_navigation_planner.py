@@ -24,7 +24,7 @@ def line_info(**overrides):
 
 
 def test_straight_command_contains_speed_and_distance():
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
 
     command = planner.plan(line_info(), 0.1)
 
@@ -39,7 +39,7 @@ def test_straight_command_contains_speed_and_distance():
 @pytest.mark.parametrize("direction", [-1, 1])
 @pytest.mark.parametrize("preview_field", ["turn_angle_deg", "path_turn_delta_deg"])
 def test_local_line_tracking_ignores_corner_preview(direction, preview_field):
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
     sample = line_info(
         ground_heading_error_deg=direction * 8.9,
         filtered_lateral_offset_norm=direction * -0.256,
@@ -68,7 +68,7 @@ def test_local_line_tracking_ignores_corner_preview(direction, preview_field):
     [(1, "RECOVER_RIGHT_TURN_RIGHT_4"), (-1, "RECOVER_LEFT_TURN_LEFT_4")],
 )
 def test_local_line_tracking_keeps_heading_recovery(direction, expected):
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
 
     command = planner.plan(
         line_info(
@@ -87,7 +87,7 @@ def test_local_line_tracking_keeps_heading_recovery(direction, expected):
 
 @pytest.mark.parametrize("direction", [-1, 1])
 def test_local_line_tracking_blocks_generic_turn_even_without_preview(direction):
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
     sample = line_info(
         ground_heading_error_deg=direction * 40.0,
         filtered_lateral_offset_norm=direction * -0.5,
@@ -105,7 +105,7 @@ def test_local_line_tracking_blocks_generic_turn_even_without_preview(direction)
 
 @pytest.mark.parametrize("reported_depth", [0.10, 0.50, 1.00, 3.00])
 def test_line_straight_action_does_not_use_distance_buckets(reported_depth):
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
 
     command = planner.plan(
         line_info(depth_m=reported_depth, distance_m=reported_depth),
@@ -120,7 +120,7 @@ def test_line_straight_action_does_not_use_distance_buckets(reported_depth):
     [(14.0, "RIGHT"), (-14.0, "LEFT")],
 )
 def test_heading_sign_selects_turn_direction(heading, expected):
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
 
     for _ in range(3):
         command = planner.plan(
@@ -137,7 +137,7 @@ def test_heading_sign_selects_turn_direction(heading, expected):
 
 @pytest.mark.parametrize("heading", [-9.999, 0.0, 9.999])
 def test_wider_straight_deadband(heading):
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
 
     command = planner.plan(
         line_info(ground_heading_error_deg=heading),
@@ -149,7 +149,7 @@ def test_wider_straight_deadband(heading):
 
 def test_far_curve_slows_down_without_starting_turn_early():
     planner = LineNavigationPlanner(
-        NavigationConfig(direction_confirmation_frames=1)
+        NavigationConfig(heading_source="ground", direction_confirmation_frames=1)
     )
 
     command = planner.plan(
@@ -168,7 +168,7 @@ def test_far_curve_slows_down_without_starting_turn_early():
 
 def test_confirmed_corner_does_not_override_normal_line_tracking():
     planner = LineNavigationPlanner(
-        NavigationConfig(direction_confirmation_frames=1)
+        NavigationConfig(heading_source="ground", direction_confirmation_frames=1)
     )
 
     command = planner.plan(
@@ -197,7 +197,7 @@ def test_confirmed_corner_does_not_override_normal_line_tracking():
 
 def test_confirmed_corner_does_not_create_discrete_approach_motion():
     planner = LineNavigationPlanner(
-        NavigationConfig(direction_confirmation_frames=1)
+        NavigationConfig(heading_source="ground", direction_confirmation_frames=1)
     )
 
     command = planner.plan(
@@ -219,7 +219,7 @@ def test_confirmed_corner_does_not_create_discrete_approach_motion():
 
 def test_confirmed_corner_remaining_distance_does_not_block_line_turn():
     planner = LineNavigationPlanner(
-        NavigationConfig(direction_confirmation_frames=1)
+        NavigationConfig(heading_source="ground", direction_confirmation_frames=1)
     )
 
     command = planner.plan(
@@ -243,7 +243,7 @@ def test_confirmed_corner_remaining_distance_does_not_block_line_turn():
 
 def test_confirmed_corner_allows_left_turn_at_turning_distance():
     planner = LineNavigationPlanner(
-        NavigationConfig(direction_confirmation_frames=1)
+        NavigationConfig(heading_source="ground", direction_confirmation_frames=1)
     )
 
     command = planner.plan(
@@ -267,7 +267,7 @@ def test_confirmed_corner_allows_left_turn_at_turning_distance():
 
 def test_far_curve_turn_starts_after_near_heading_reaches_corner():
     planner = LineNavigationPlanner(
-        NavigationConfig(direction_confirmation_frames=1)
+        NavigationConfig(heading_source="ground", direction_confirmation_frames=1)
     )
 
     command = planner.plan(
@@ -283,7 +283,7 @@ def test_far_curve_turn_starts_after_near_heading_reaches_corner():
 
 
 def test_conflicting_heading_and_preview_holds_slow_straight():
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
 
     command = planner.plan(
         line_info(
@@ -301,7 +301,7 @@ def test_conflicting_heading_and_preview_holds_slow_straight():
 
 
 def test_turn_requires_three_consecutive_frames():
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
     sample = line_info(
         ground_heading_error_deg=20.0,
         turn_angle_deg=30.0,
@@ -327,7 +327,7 @@ def test_turn_requires_three_consecutive_frames():
     ],
 )
 def test_large_offset_without_turn_heading_stays_straight(offset, heading):
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
 
     command = planner.plan(
         line_info(
@@ -357,7 +357,7 @@ def test_recovery_separates_line_side_from_turn_direction(
     angular_sign,
 ):
     planner = LineNavigationPlanner(
-        NavigationConfig(direction_confirmation_frames=1)
+        NavigationConfig(heading_source="ground", direction_confirmation_frames=1)
     )
 
     command = planner.plan(
@@ -373,7 +373,7 @@ def test_recovery_separates_line_side_from_turn_direction(
 
 
 def test_straight_line_heading_error_uses_recovery_not_plain_left():
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
 
     command = planner.plan(
         line_info(
@@ -389,7 +389,7 @@ def test_straight_line_heading_error_uses_recovery_not_plain_left():
 
 
 def test_plain_left_is_reserved_for_confirmed_left_curve():
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
     curve = line_info(
         filtered_lateral_offset_norm=-0.10,
         ground_heading_error_deg=-20.0,
@@ -403,7 +403,7 @@ def test_plain_left_is_reserved_for_confirmed_left_curve():
 
 
 def test_moderate_offset_and_parallel_line_can_continue_straight():
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
 
     command = planner.plan(
         line_info(
@@ -418,7 +418,7 @@ def test_moderate_offset_and_parallel_line_can_continue_straight():
 
 
 def test_robot_right_of_line_pointing_farther_right_recovers_at_three_deg():
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
 
     command = planner.plan(
         line_info(
@@ -451,7 +451,7 @@ def test_off_center_robot_uses_asymmetric_heading_deadband(
     heading,
     expected,
 ):
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
 
     command = planner.plan(
         line_info(
@@ -486,7 +486,7 @@ def test_right_recovery_turn_uses_one_four_repeat_step_for_all_heading_levels(
     heading,
     expected_level,
 ):
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
 
     command = planner.plan(
         line_info(
@@ -511,7 +511,7 @@ def test_right_recovery_turn_uses_one_four_repeat_step_for_all_heading_levels(
 
 
 def test_small_heading_and_centered_offset_stays_straight():
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
 
     command = planner.plan(
         line_info(
@@ -528,7 +528,7 @@ def test_small_heading_and_centered_offset_stays_straight():
 
 def test_ten_degree_recovery_threshold_uses_numbered_turn_not_plain_right():
     planner = LineNavigationPlanner(
-        NavigationConfig(direction_confirmation_frames=1)
+        NavigationConfig(heading_source="ground", direction_confirmation_frames=1)
     )
 
     command = planner.plan(
@@ -548,7 +548,7 @@ def test_ten_degree_recovery_threshold_uses_numbered_turn_not_plain_right():
 
 
 def test_real_right_curve_emits_plain_right_without_far_fit():
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
     curve = line_info(
         ground_heading_error_deg=22.2,
         filtered_lateral_offset_norm=-0.079,
@@ -564,7 +564,7 @@ def test_real_right_curve_emits_plain_right_without_far_fit():
 
 
 def test_large_heading_toward_center_uses_confirmed_plain_right():
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
     line = line_info(
         ground_heading_error_deg=30.0,
         filtered_lateral_offset_norm=-0.416,
@@ -584,7 +584,7 @@ def test_large_heading_toward_center_uses_confirmed_plain_right():
 
 def test_reliable_opposite_preview_still_suppresses_plain_right():
     planner = LineNavigationPlanner(
-        NavigationConfig(direction_confirmation_frames=1)
+        NavigationConfig(heading_source="ground", direction_confirmation_frames=1)
     )
 
     command = planner.plan(
@@ -615,7 +615,7 @@ def test_matching_curve_ignores_normal_turn_induced_offset(
     expected,
 ):
     planner = LineNavigationPlanner(
-        NavigationConfig(direction_confirmation_frames=1)
+        NavigationConfig(heading_source="ground", direction_confirmation_frames=1)
     )
 
     command = planner.plan(
@@ -635,7 +635,7 @@ def test_matching_curve_ignores_normal_turn_induced_offset(
 def test_matching_curve_does_not_hide_emergency_offset_recovery():
     planner = LineNavigationPlanner(
         NavigationConfig(
-            direction_confirmation_frames=1,
+            heading_source="ground",            direction_confirmation_frames=1,
             curve_follow_max_offset_norm=0.55,
         )
     )
@@ -661,7 +661,7 @@ def test_recovery_side_does_not_change_numbered_turn_motion(
     recovery_side,
     turn_direction,
 ):
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
     offset = -0.30 if recovery_side == "LEFT" else 0.30
     heading = -46.0 if turn_direction == "LEFT" else 46.0
 
@@ -690,7 +690,7 @@ def test_recovery_side_does_not_change_numbered_turn_motion(
 
 
 def test_numbered_recovery_does_not_fall_back_to_standalone_recovery():
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
 
     first = planner.plan(
         line_info(
@@ -709,13 +709,13 @@ def test_numbered_recovery_does_not_fall_back_to_standalone_recovery():
 
 
 def test_small_or_inconsistent_far_curve_is_not_used_early():
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
 
     small_curve = planner.plan(
         line_info(turn_angle_deg=7.9, turn_consistency=1.0),
         0.1,
     )
-    inconsistent_curve = LineNavigationPlanner().plan(
+    inconsistent_curve = LineNavigationPlanner(NavigationConfig(heading_source="ground")).plan(
         line_info(turn_angle_deg=30.0, turn_consistency=0.2),
         0.1,
     )
@@ -726,7 +726,7 @@ def test_small_or_inconsistent_far_curve_is_not_used_early():
 
 def test_angular_acceleration_is_limited():
     config = NavigationConfig(
-        max_angular_accel_rad_s2=0.5,
+            heading_source="ground",        max_angular_accel_rad_s2=0.5,
         direction_confirmation_frames=1,
     )
     planner = LineNavigationPlanner(config)
@@ -755,7 +755,7 @@ def test_angular_acceleration_is_limited():
     ],
 )
 def test_unsafe_input_produces_stop(sample, reason):
-    planner = LineNavigationPlanner()
+    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
 
     command = planner.plan(sample, 0.1)
 
@@ -767,7 +767,7 @@ def test_unsafe_input_produces_stop(sample, reason):
 
 @pytest.mark.parametrize("sign", [-1, 1])
 def test_recovery_uses_ground_heading_when_image_heading_disagrees(sign):
-    command = LineNavigationPlanner().plan(
+    command = LineNavigationPlanner(NavigationConfig(heading_source="ground")).plan(
         line_info(
             ground_heading_error_deg=sign * 14.11,
             filtered_heading_error_deg=sign * -15.2,
@@ -784,7 +784,7 @@ def test_recovery_uses_ground_heading_when_image_heading_disagrees(sign):
 
 
 def test_zero_ground_heading_does_not_use_large_image_heading():
-    command = LineNavigationPlanner().plan(
+    command = LineNavigationPlanner(NavigationConfig(heading_source="ground")).plan(
         line_info(
             ground_heading_error_deg=0.0,
             filtered_heading_error_deg=-35.0,
@@ -812,7 +812,7 @@ def test_invalid_ground_geometry_never_falls_back_to_image(field, value):
         sample.pop(field)
     else:
         sample[field] = value
-    command = LineNavigationPlanner().plan(sample, 0.1)
+    command = LineNavigationPlanner(NavigationConfig(heading_source="ground")).plan(sample, 0.1)
     assert command.valid is False
     assert command.motion == "STOP"
     assert command.reason == "invalid_ground_line_geometry"

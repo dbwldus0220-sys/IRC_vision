@@ -597,6 +597,7 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
     def _publish(self, info: GoalInfo) -> None:
         message = String()
         payload = asdict(info)
+        payload["rgb_stamp_ns"] = getattr(self, "_active_rgb_stamp_ns", None)
         payload["robot_center_offset_px"] = self.robot_center_offset_px
         payload["robot_center_x_px"] = (
             calibrated_robot_center_x(info.image_width, self.robot_center_offset_px)
@@ -696,6 +697,15 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
             self.get_logger().warning(f"Invalid detections message: {exc}")
             return
 
+        stamp = payload.get("stamp")
+        sec = stamp.get("sec") if isinstance(stamp, dict) else None
+        nanosec = stamp.get("nanosec") if isinstance(stamp, dict) else None
+        self._active_rgb_stamp_ns = (
+            sec * 1_000_000_000 + nanosec
+            if (isinstance(sec, int) and not isinstance(sec, bool) and sec >= 0
+                and isinstance(nanosec, int) and not isinstance(nanosec, bool)
+                and 0 <= nanosec < 1_000_000_000) else None
+        )
         image_width, image_height = self._image_size(payload)
         backboards = [
             detection

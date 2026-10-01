@@ -23,6 +23,7 @@ class LineNavigationController(Node):
         self.declare_parameter("line_info_topic", "/vision/line_info")
         self.declare_parameter("command_topic", "/navigation/line_command")
         self.declare_parameter("publish_rate_hz", 10.0)
+        self.declare_parameter("line_heading_source", "ground")
         self.declare_parameter("line_timeout_sec", 0.50)
         self.declare_parameter("min_line_quality", 0.35)
         self.declare_parameter("max_linear_speed_mps", 0.05)
@@ -52,6 +53,7 @@ class LineNavigationController(Node):
         self.declare_parameter("command_duration_sec", 0.40)
 
         config = NavigationConfig(
+            heading_source=str(self.get_parameter("line_heading_source").value),
             min_line_quality=self._float_parameter("min_line_quality"),
             max_linear_speed_mps=self._float_parameter(
                 "max_linear_speed_mps"
