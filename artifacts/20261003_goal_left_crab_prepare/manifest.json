@@ -1,0 +1,16 @@
+{
+  "source": "/home/sy/Downloads/robot_motions(4).json",
+  "motion": "찐미세오뒤에서기본자세",
+  "alias": "goal_fine_to_default",
+  "source_sha256": "c38ee0abfa5f25747416ea3eda1389650bd10d7e952e7a337d868acd30b1d678",
+  "runtime_before_sha256": "2206ac6a94e32ac89500c5e1e16eda65c9cd6b6476ea986c0323a76833bdbc4f",
+  "runtime_after_sha256": "eec006de5e7802f10fec4391452a6e4e5d3921118a819f1c0a1ad7c195ad379f",
+  "policy": {
+    "position_tolerance_deg": 5.0,
+    "fixed_joint_angles_deg": {
+      "4": 18.0,
+      "5": -18.0
+    }
+  },
+  "other_motions_preserved": true
+}

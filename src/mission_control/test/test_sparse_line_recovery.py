@@ -161,14 +161,14 @@ def test_stationary_confirmation_and_motion_completion_require_new_captures(monk
     frame()
     assert not any(m["valid"] for m in node.publisher.messages)
     frame()
-    assert node.last_selected_decision.action == "LINE_SPARSE_TURN_RIGHT_2"
+    assert node.last_selected_decision.action == "LINE_HEADING_TURN_RIGHT_2"
     assert node.sparse_line_recovery.motions_used == 0
     for _ in range(6):
         clock[0] += .2
         frame()
     command = next(m for m in node.publisher.messages if m["valid"])
-    assert command["action"] == "LINE_SPARSE_TURN_RIGHT_2"
-    assert node.sparse_line_recovery.motions_used == 1
+    assert command["action"] == "LINE_HEADING_TURN_RIGHT_2"
+    assert node.sparse_line_recovery.motions_used == 0
     node.send_status(command["action"], command["command_id"], "RUNNING")
     node.send_status(command["action"], command["command_id"], "SUCCEEDED")
     assert node.latest_info["line"] is None
@@ -177,7 +177,8 @@ def test_stationary_confirmation_and_motion_completion_require_new_captures(monk
     MotionDecisionNode._publish_decision(node)
     assert node.line_offset_min_rgb_stamp_ns == int(clock[0] * 1e9)
     frame()
-    assert len(node.sparse_line_recovery.samples) == 1
+    assert not node.sparse_line_recovery.samples
+    assert node.latest_info["line"]["ground_projection_valid"] is False
 
 
 def test_failed_motion_and_exhausted_budget_never_authorize_another_peek():
@@ -271,7 +272,7 @@ def test_recorded_two_point_corner_replays_to_bounded_motion(monkeypatch):
         assert outputs[-1]["ground_two_point_candidate"] is not None
         motions = [m for m in node.publisher.messages if m["valid"]]
         assert len(motions) == 1
-        assert motions[0]["action"] == "LINE_SPARSE_TURN_RIGHT_2"
+        assert motions[0]["action"] == "LINE_HEADING_TURN_RIGHT_2"
         assert motions[0]["source_command"]["turn_angle_deg"] == 15.
     finally:
         if analyzer is not None:

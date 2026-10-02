@@ -23,8 +23,8 @@ def make_analyzer(depth_m=0.4, required_hits=1, robot_center_offset_px=0.0):
     analyzer.approach_depth_m = 0.5
     analyzer.score_target_depth_m = 0.43
     analyzer.score_depth_tolerance_m = 0.04
-    analyzer.score_left_bound_px = -70.0
-    analyzer.score_right_bound_px = 70.0
+    analyzer.score_left_bound_px = -90.0
+    analyzer.score_right_bound_px = 90.0
     analyzer.direction_deadband_norm = 0.04
     analyzer.publish_empty_when_missing = True
     analyzer.fx = analyzer.fy = 600.0
@@ -69,7 +69,7 @@ def send(analyzer, published, detections):
 
 @pytest.mark.parametrize(
     "center_x,direction,action",
-    [(450, "LEFT", "GOAL_CAMERA90_CRAB_LEFT"), (830, "RIGHT", "GOAL_CAMERA90_CRAB_RIGHT")],
+    [(450, "LEFT", "GOAL_CAMERA90_TURN_LEFT_1"), (830, "RIGHT", "GOAL_CAMERA90_TURN_RIGHT_2")],
 )
 def test_standalone_backboard_center_reaches_navigation(center_x, direction, action):
     analyzer, published = make_analyzer()
@@ -268,7 +268,7 @@ def test_pending_goal_publishes_calibrated_axis_before_confirmation():
 
 
 @pytest.mark.parametrize('depth', [0.39, 0.43, 0.47])
-@pytest.mark.parametrize('offset', [-70, 0, 70])
+@pytest.mark.parametrize('offset', [-90, -70, 0, 70, 90])
 def test_analyzer_confirms_new_scoring_rectangle(depth, offset):
     analyzer, published = make_analyzer(depth_m=depth, robot_center_offset_px=96.0)
     for index in range(3):
@@ -280,7 +280,7 @@ def test_analyzer_confirms_new_scoring_rectangle(depth, offset):
 
 
 @pytest.mark.parametrize('depth,offset', [
-    (0.389, 0), (0.471, 0), (0.480, 0), (0.500, 0), (0.43, -71), (0.43, 71),
+    (0.389, 0), (0.471, 0), (0.480, 0), (0.500, 0), (0.43, -91), (0.43, 91),
 ])
 def test_analyzer_rejects_outside_new_scoring_rectangle(depth, offset):
     analyzer, published = make_analyzer(depth_m=depth, robot_center_offset_px=96.0)

@@ -4307,21 +4307,21 @@ def test_ball_lost_debug_uses_fresh_loss_and_excludes_fixed_grasp(
     assert payload["ball_tracking"]["last_direction"] == "LEFT"
 
 
-def test_shot_waits_three_seconds_even_when_general_settle_is_disabled(monkeypatch):
+def test_shot_waits_one_second_even_when_general_settle_is_disabled(monkeypatch):
     node = ReadinessPublishNode(terminal_decision('goal', 'SHOT', 'GOAL_APPROACH'))
     node.SHOT_PRE_MOTION_SETTLE_SEC = MotionDecisionNode.SHOT_PRE_MOTION_SETTLE_SEC
-    assert node.SHOT_PRE_MOTION_SETTLE_SEC == 3.0
+    assert node.SHOT_PRE_MOTION_SETTLE_SEC == 1.0
     node.pre_motion_settle_sec = 0.0
     set_grasp_result_for_first_ball(node, 'GRABBED')
     clock = [10.0]
     monkeypatch.setattr(time, 'monotonic', lambda: clock[0])
-    for stamp in (10.0, 12.999):
+    for stamp in (10.0, 10.999):
         clock[0] = stamp
         MotionDecisionNode._publish_decision(node)
         assert node.publisher.messages == []
         assert node.active_special_command_id is None
         assert node.command_id == 0
-    clock[0] = 13.0
+    clock[0] = 11.0
     MotionDecisionNode._publish_decision(node)
     assert json.loads(node.publisher.messages[-1].data)['action'] == 'SHOT'
     assert node.active_special_command_id == 1
@@ -4692,38 +4692,39 @@ def test_shot_pause_survives_geometry_valid_reconfirmation_without_firing(monkey
             "score_now": confirmed,
         }}, 0.1)
     node = ReadinessPublishNode(decision(True))
-    node.SHOT_PRE_MOTION_SETTLE_SEC = 3.0
+    node.SHOT_PRE_MOTION_SETTLE_SEC = MotionDecisionNode.SHOT_PRE_MOTION_SETTLE_SEC
     set_grasp_result_for_first_ball(node, "GRABBED")
     clock = [10.0]
     monkeypatch.setattr(time, "monotonic", lambda: clock[0])
     MotionDecisionNode._publish_decision(node)
-    for stamp, confirmed in [(10.5, False), (11.0, True), (12.5, False), (13.1, False)]:
+    for stamp, confirmed in [(10.5, False), (10.9, True), (11.5, False)]:
         clock[0] = stamp
         node.decision = decision(confirmed)
         MotionDecisionNode._publish_decision(node)
-        assert node.publisher.messages == []
-        assert node.pre_motion_settle_started_at == 10.0
-    clock[0] = 13.2
+        assert all(json.loads(m.data)["action"] != "SHOT" for m in node.publisher.messages)
+        assert node.goal_stationary_since == 10.0
+        assert node.active_special_command_id is None
+    clock[0] = 11.6
     node.decision = decision(True)
     MotionDecisionNode._publish_decision(node)
     assert json.loads(node.publisher.messages[-1].data)["action"] == "SHOT"
 
 
 @pytest.mark.parametrize("overrides", [
-    {"depth_m": 0.471}, {"offset_x_px": 71}, {"depth_valid": False},
+    {"depth_m": 0.471}, {"offset_x_px": 91}, {"depth_valid": False},
     {"detected": False},
 ])
-def test_shot_pause_resets_when_goal_geometry_is_no_longer_valid(overrides):
+def test_shot_rest_survives_candidate_changes_without_actual_motion(overrides):
     node = ReadinessPublishNode(terminal_decision("goal", "SHOT", "GOAL_APPROACH"))
-    node.SHOT_PRE_MOTION_SETTLE_SEC = 3.0
+    node.SHOT_PRE_MOTION_SETTLE_SEC = MotionDecisionNode.SHOT_PRE_MOTION_SETTLE_SEC
     assert not node._pre_motion_settle_ready(node.decision, 10.0)
     info = {"detected": True, "confidence": 0.9, "depth_valid": True,
             "depth_m": 0.42, "offset_x_px": 18, "score_now": False, **overrides}
     changed = MotionDecisionPlanner().plan("GOAL_APPROACH", {"goal": info}, 0.1)
-    node._pre_motion_settle_ready(changed, 11.0)
-    assert node.pre_motion_settle_started_at is None
-    assert not node._pre_motion_settle_ready(node.decision, 13.1)
-    assert node.pre_motion_settle_started_at == 13.1
+    node._pre_motion_settle_ready(changed, 10.5)
+    assert node.goal_stationary_since == 10.0
+    assert not node._pre_motion_settle_ready(node.decision, 10.999)
+    assert node._pre_motion_settle_ready(node.decision, 11.0)
 
 
 @pytest.mark.parametrize("distance,pickup_expected", [

@@ -32,7 +32,6 @@ motion_aliases:
   ball_camera_down_forward_2: "찐찐전진45(2회)"
   ball_camera_down_forward_4: "찐찐전진45(4회)"
   pickup_fine_forward_0: "찐미세0도-4"
-  hurdle_fine_forward_10: "찐미세0도-4(허들10회)"
   pickup_fine_prepare: "찐오뒤에서미세오뒤"
   pickup_crab_right_0: "찐미세오옆꽃게0-1(1회)"
   pickup_fine_to_crab_right_0: "찐미세오뒤에서오옆꽃게0도"

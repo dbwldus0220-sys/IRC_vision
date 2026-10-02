@@ -1780,7 +1780,7 @@ class MotionDecisionPlanner:
         self,
         info: dict[str, Any] | None,
     ) -> dict[str, Any] | None:
-        """Correct far-target heading; use crab alignment at scoring depth."""
+        """Correct far-target heading; delegate scoring-depth pixel alignment."""
         if not self._is_detected_goal(info) or info is None:
             return None
         confidence = self._number(info, "confidence")

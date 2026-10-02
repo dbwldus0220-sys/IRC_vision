@@ -133,7 +133,7 @@ def test_duplicate_hurdle_fine_completion_cannot_skip_pause_or_count_twice(monke
     for _ in range(2):
         bridge.executor_status_callback(executor_status(
             status='SUCCEEDED', command_id=8100, request_id=first_id,
-            motion_id='pickup_fine_forward_0'))
+            motion_id='hurdle_fine_forward_10'))
     assert bridge.hurdle_sequence_fine_completed == 1
     assert bridge.active_dwell_until == 11.0
     assert len(bridge.executor_request_publisher.messages) == 1

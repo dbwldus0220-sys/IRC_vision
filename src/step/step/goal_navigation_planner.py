@@ -18,8 +18,9 @@ class GoalNavigationConfig:
     control_start_depth_m: float = 2.0
     score_target_depth_m: float = 0.43
     score_depth_tolerance_m: float = 0.04
-    score_left_bound_px: float = -70.0
-    score_right_bound_px: float = 70.0
+    score_left_bound_px: float = -90.0
+    score_right_bound_px: float = 90.0
+    score_crab_max_offset_px: float = 140.0
 
 
 @dataclass(frozen=True)
@@ -157,11 +158,15 @@ class GoalNavigationPlanner:
             action = "GOAL_CAMERA90_BACKWARD_1"
             reason = "retreat_goal_to_scoring_depth"
         elif depth_in_range and not centered:
-            # During approach, the mission planner corrects yaw before advancing.
-            # Reserve lateral steps for final alignment at scoring depth.
-            direction = "RIGHT" if offset_px > self.config.score_right_bound_px else "LEFT"
-            action = f"GOAL_CAMERA90_CRAB_{direction}"
-            reason = "align_goal_lateral_camera90"
+            direction = "RIGHT" if offset_px > 0.0 else "LEFT"
+            if abs(offset_px) > self.config.score_crab_max_offset_px:
+                # Re-evaluate pixels after each completed turn and stationary pause.
+                count = 2 if direction == "RIGHT" else 1
+                action = f"GOAL_CAMERA90_TURN_{direction}_{count}"
+                reason = "align_goal_large_pixel_offset_camera90"
+            else:
+                action = f"GOAL_CAMERA90_CRAB_{direction}"
+                reason = "align_goal_lateral_camera90"
         elif ready_geometry:
             action = "WAIT_SCORE_CONFIRMATION"
             reason = "waiting_for_stable_score_condition"

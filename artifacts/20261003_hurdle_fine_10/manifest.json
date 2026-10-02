@@ -1,0 +1,11 @@
+{
+  "source_motion": "찐미세0도-4",
+  "added_motion": "찐미세0도-4(허들10회)",
+  "motion_id": "hurdle_fine_forward_10",
+  "repeat_count": 10,
+  "previous_motion_count": 82,
+  "new_motion_count": 83,
+  "runtime_before_sha256": "c324a00c2755b12521b55c36f1fb1406d7c4f4d8d0077306f5d87fb65a1b534d",
+  "runtime_after_sha256": "2206ac6a94e32ac89500c5e1e16eda65c9cd6b6476ea986c0323a76833bdbc4f",
+  "preserved_fields": "All source motion fields except name and repeat_count; all previous runtime motions unchanged."
+}

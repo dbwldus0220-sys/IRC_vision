@@ -2862,30 +2862,28 @@ def test_goal_depth_approach_remeasures_after_each_motion_before_shot(monkeypatc
 @pytest.mark.parametrize('lost_confirmation', [
     None, {'detected': False}, {**score_ready_goal(), 'score_now': False},
 ])
-def test_shot_settle_restarts_after_scoring_condition_is_lost(monkeypatch, lost_confirmation):
+def test_shot_rest_survives_detection_loss_but_requires_current_permission(monkeypatch, lost_confirmation):
     now = [10.0]
     monkeypatch.setattr('mission_control.motion_decision_node.time.monotonic', lambda: now[0])
     harness = MissionFlowHarness(phase='GOAL_APPROACH')
     harness.SHOT_PRE_MOTION_SETTLE_SEC = MotionDecisionNode.SHOT_PRE_MOTION_SETTLE_SEC
     mark_next_ball_grabbed(harness)
     assert harness.publish_vision(goal=score_ready_goal()) == []
-    now[0] = 12.9
+    now[0] = 10.9
     interrupted = harness.publish_vision(goal=lost_confirmation)
     assert all(command['action'] != 'SHOT' for command in interrupted)
-    assert harness.pre_motion_settle_started_at is None
+    assert harness.goal_stationary_since == 10.0
     if lost_confirmation == {'detected': False}:
-        # The first missing observation must not inherit the 2.9-second shot pause.
         assert interrupted[-1]['action'] == 'GOAL_LOST_STOP'
         assert not interrupted[-1]['valid']
-    now[0] = 14.0
+    now[0] = 10.999
     assert harness.publish_vision(goal=score_ready_goal()) == []
-    now[0] = 16.999
-    assert harness.publish_vision(goal=score_ready_goal()) == []
-    now[0] = 17.0
+    now[0] = 11.0
     shot = harness.publish_vision(goal=score_ready_goal())[-1]
     assert shot['action'] == 'SHOT'
     assert shot['sdk_motion_requested'] is True
     assert harness.active_special_command_id == shot['command_id']
+    assert harness.goal_stationary_since is None
 
 
 @pytest.mark.parametrize('offset,action', [

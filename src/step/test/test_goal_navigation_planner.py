@@ -86,7 +86,7 @@ def test_misaligned_goal_crabs_before_scoring():
     planner = GoalNavigationPlanner()
 
     command = planner.plan(
-        goal_info(offset_x_px=-71, offset_x_norm=-0.2)
+        goal_info(offset_x_px=-91, offset_x_norm=-0.2)
     )
 
     assert command.action == "GOAL_CAMERA90_CRAB_LEFT"
@@ -124,14 +124,14 @@ def test_scoring_lower_boundary_is_inclusive_before_retreat():
 
 
 @pytest.mark.parametrize('depth', [0.39, 0.43, 0.47])
-@pytest.mark.parametrize('offset_px', [-70, 0, 70])
+@pytest.mark.parametrize('offset_px', [-90, -70, 0, 70, 90])
 def test_inclusive_shot_rectangle(depth, offset_px):
     command = GoalNavigationPlanner().plan(goal_info(depth_m=depth, offset_x_px=offset_px))
     assert command.action == 'SHOT'
 
 
 @pytest.mark.parametrize('offset_px,action', [
-    (-71, 'GOAL_CAMERA90_CRAB_LEFT'), (71, 'GOAL_CAMERA90_CRAB_RIGHT'),
+    (-91, 'GOAL_CAMERA90_CRAB_LEFT'), (91, 'GOAL_CAMERA90_CRAB_RIGHT'),
 ])
 def test_outside_pixel_bounds_never_shoots(offset_px, action):
     command = GoalNavigationPlanner().plan(goal_info(offset_x_px=offset_px))
@@ -205,7 +205,7 @@ def test_off_center_approach_uses_depth_bucket_without_crab(depth, action, offse
 
 
 @pytest.mark.parametrize('depth', [0.39, 0.43, 0.47])
-@pytest.mark.parametrize('offset_px,direction', [(-71, 'LEFT'), (71, 'RIGHT')])
+@pytest.mark.parametrize('offset_px,direction', [(-91, 'LEFT'), (91, 'RIGHT')])
 def test_crab_is_reserved_for_inclusive_scoring_range(depth, offset_px, direction):
     command = GoalNavigationPlanner().plan(goal_info(
         depth_m=depth, offset_x_px=offset_px, score_now=False,
@@ -219,3 +219,36 @@ def test_fine_approach_overrides_stale_score_confirmation(depth):
     assert command.action == 'GOAL_CAMERA90_FINE_FORWARD_1'
     assert command.score_now is False
     assert command.sdk_motion_requested is False
+
+
+@pytest.mark.parametrize("depth", [0.39, 0.43, 0.47])
+@pytest.mark.parametrize("offset,action", [
+    (-250, "GOAL_CAMERA90_TURN_LEFT_1"),
+    (-140.001, "GOAL_CAMERA90_TURN_LEFT_1"),
+    (-140, "GOAL_CAMERA90_CRAB_LEFT"),
+    (-90.001, "GOAL_CAMERA90_CRAB_LEFT"),
+    (-90, "SHOT"), (0, "SHOT"), (90, "SHOT"),
+    (90.001, "GOAL_CAMERA90_CRAB_RIGHT"),
+    (140, "GOAL_CAMERA90_CRAB_RIGHT"),
+    (140.001, "GOAL_CAMERA90_TURN_RIGHT_2"),
+    (250, "GOAL_CAMERA90_TURN_RIGHT_2"),
+])
+def test_scoring_alignment_pixel_boundaries(depth, offset, action):
+    command = GoalNavigationPlanner().plan(goal_info(
+        depth_m=depth, offset_x_px=offset, score_now=True,
+    ))
+    assert command.action == action
+    assert command.is_centered is (action == "SHOT")
+    assert command.score_now is (action == "SHOT")
+
+
+@pytest.mark.parametrize("overrides", [
+    {"detected": False}, {"confidence": 0.1}, {"depth_valid": False},
+    {"depth_m": None}, {"offset_x_px": None}, {"offset_x_px": float("inf")},
+])
+def test_large_pixel_alignment_does_not_bypass_input_validation(overrides):
+    sample = goal_info(offset_x_px=200)
+    sample.update(overrides)
+    command = GoalNavigationPlanner().plan(sample)
+    assert command.action == "WAIT"
+    assert command.valid is False

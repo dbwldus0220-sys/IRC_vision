@@ -29,8 +29,9 @@ class GoalNavigationController(Node):
         self.declare_parameter("control_start_depth_m", 2.0)
         self.declare_parameter("score_target_depth_m", 0.43)
         self.declare_parameter("score_depth_tolerance_m", 0.04)
-        self.declare_parameter("score_left_bound_px", -70.0)
-        self.declare_parameter("score_right_bound_px", 70.0)
+        self.declare_parameter("score_left_bound_px", -90.0)
+        self.declare_parameter("score_right_bound_px", 90.0)
+        self.declare_parameter("score_crab_max_offset_px", 140.0)
 
         config = GoalNavigationConfig(
             min_confidence=self._float_parameter("min_confidence"),
@@ -45,6 +46,7 @@ class GoalNavigationController(Node):
             ),
             score_left_bound_px=self._float_parameter("score_left_bound_px"),
             score_right_bound_px=self._float_parameter("score_right_bound_px"),
+            score_crab_max_offset_px=self._float_parameter("score_crab_max_offset_px"),
         )
         self.planner = GoalNavigationPlanner(config)
         self.goal_timeout_sec = self._float_parameter("goal_timeout_sec")

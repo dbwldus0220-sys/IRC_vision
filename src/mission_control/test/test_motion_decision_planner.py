@@ -1504,7 +1504,7 @@ def test_goal_right_turn_thresholds_are_unchanged(bearing, count):
     ("offset_x_norm", "expected_action", "direction"),
     [
         (0.20, "GOAL_CAMERA90_CRAB_RIGHT", "RIGHT"),
-        (-0.11, "GOAL_CAMERA90_CRAB_LEFT", "LEFT"),
+        (-0.20, "GOAL_CAMERA90_CRAB_LEFT", "LEFT"),
     ],
 )
 def test_goal_camera90_lateral_uses_offset_after_yaw_is_aligned(
@@ -1545,7 +1545,7 @@ def test_goal_camera90_yaw_has_priority_over_lateral_offset():
     assert decision.action == "GOAL_CAMERA90_TURN_RIGHT_3"
 
 
-def test_goal_scoring_range_uses_crab_even_with_large_bearing():
+def test_goal_scoring_range_uses_fixed_pixel_turn_even_with_large_bearing():
     decision = MotionDecisionPlanner().plan(
         "GOAL_APPROACH",
         observations(
@@ -1559,7 +1559,7 @@ def test_goal_scoring_range_uses_crab_even_with_large_bearing():
         0.1,
     )
 
-    assert decision.action == "GOAL_CAMERA90_CRAB_RIGHT"
+    assert decision.action == "GOAL_CAMERA90_TURN_RIGHT_2"
 
 
 def test_lost_goal_stops_then_turns_toward_last_seen_side(monkeypatch):
@@ -1718,7 +1718,7 @@ def test_reacquired_goal_inside_tracking_range_aligns_then_approaches():
 
 
 @pytest.mark.parametrize('depth', [0.39, 0.43, 0.47])
-@pytest.mark.parametrize('offset_px', [-70, 0, 70])
+@pytest.mark.parametrize('offset_px', [-90, -70, 0, 70, 90])
 def test_goal_shot_rectangle_takes_priority_over_bearing(depth, offset_px):
     decision = MotionDecisionPlanner().plan(
         'GOAL_APPROACH',
@@ -1730,7 +1730,7 @@ def test_goal_shot_rectangle_takes_priority_over_bearing(depth, offset_px):
     assert decision.requires_ack is True
 
 
-@pytest.mark.parametrize('offset_px,direction', [(-71, 'LEFT'), (71, 'RIGHT')])
+@pytest.mark.parametrize('offset_px,direction', [(-91, 'LEFT'), (91, 'RIGHT')])
 @pytest.mark.parametrize('bearing', [-20.0, 20.0])
 def test_goal_at_scoring_depth_uses_crab_not_yaw(offset_px, direction, bearing):
     decision = MotionDecisionPlanner().plan(
@@ -3172,3 +3172,22 @@ def test_disabled_hurdle_leaves_other_sources_available(phase, next_source):
     # Even losing and reacquiring the hurdle cannot re-enable its mission.
     planner.plan(phase, observations(line=line_info()), 0.1)
     assert planner.plan(phase, inputs, 0.1).source == next_source
+
+
+@pytest.mark.parametrize("phase", ["AUTO", "GOAL_APPROACH"])
+@pytest.mark.parametrize("offset,action", [
+    (-200, "GOAL_CAMERA90_TURN_LEFT_1"),
+    (-140, "GOAL_CAMERA90_CRAB_LEFT"),
+    (-90, "SHOT"), (90, "SHOT"),
+    (140, "GOAL_CAMERA90_CRAB_RIGHT"),
+    (200, "GOAL_CAMERA90_TURN_RIGHT_2"),
+])
+@pytest.mark.parametrize("bearing", [-34.0, 0.0, 34.0, None])
+def test_goal_scoring_alignment_uses_pixels_independently_of_bearing(phase, offset, action, bearing):
+    decision = MotionDecisionPlanner().plan(phase, observations(goal=goal_info(
+        depth_m=0.43, offset_x_px=offset, offset_x_norm=offset / 640,
+        bearing_deg=bearing, score_now=True,
+    )), 0.1)
+    assert decision.action == action
+    assert decision.valid is True
+    assert decision.requires_ack is (action == "SHOT")

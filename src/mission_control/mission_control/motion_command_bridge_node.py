@@ -38,6 +38,7 @@ class MotionCommandBridgeNode(Node):
     GOAL_CRAB_PRE_DWELL_SEC = 1.0
     GOAL_FORWARD_CRAB_PREPARE_MOTION_ID = "goal_forward_to_crab_right_90"
     GOAL_FINE_RIGHT_CRAB_PREPARE_MOTION_ID = "goal_fine_to_crab_right_90"
+    GOAL_FINE_LEFT_CRAB_PREPARE_MOTION_ID = "goal_fine_to_default"
     POST_BALL_CAMERA_DWELL_MARKER = "__POST_BALL_CAMERA_DWELL__"
     POST_BALL_CAMERA_PAUSE_SEC = 0.0
     PICKUP_INITIAL_ALIGN_DWELL_MARKER = (
@@ -65,6 +66,7 @@ class MotionCommandBridgeNode(Node):
     PICKUP_MOTOR_FAILURE_LIMIT = 2
     HURDLE_PRE_GO_DWELL_MARKER = "__HURDLE_PRE_GO_DWELL__"
     HURDLE_PRE_GO_DWELL_SEC = 1.0
+    HURDLE_FINAL_FINE_MOTION_ID = "hurdle_fine_forward_10"
     PICKUP_INITIAL_ALIGN_ACTIONS = frozenset(
         {
             "BALL_PICKUP_INITIAL_ALIGN_CONTINUE",
@@ -301,7 +303,7 @@ class MotionCommandBridgeNode(Node):
         "REJECTED",
     }
     FINE_FORWARD_MOTION_IDS = frozenset({
-        "ball_general_fine_forward_8", "pickup_fine_forward_0",
+        "ball_general_fine_forward_8", "pickup_fine_forward_0", HURDLE_FINAL_FINE_MOTION_ID,
         *(f"goal_camera_90_fine_forward_{count}" for count in range(1, 5)),
     })
     DEFAULT_TIMEOUT_MS = 12000
@@ -1058,7 +1060,9 @@ class MotionCommandBridgeNode(Node):
         if (state.get("ball_head_override_active") is True
                 or state.get("hurdle_head_override_active") is True
                 or motion_id.startswith("pickup_camera_down_turn_")
-                or self.last_physical_motion_id == "pickup_fine_forward_0"):
+                or self.last_physical_motion_id in {
+                    "pickup_fine_forward_0", self.HURDLE_FINAL_FINE_MOTION_ID,
+                }):
             return "fine_to_turn_ready_0"
         return "fine_to_turn_ready_45"
 
@@ -1275,9 +1279,11 @@ class MotionCommandBridgeNode(Node):
             # Approach steps are separate commands and do not count toward this tail.
             # On a failed tail, retry only the stages not already completed.
             self.hurdle_fine_sequence_pending = True
-            remaining = max(0, 2 - self.hurdle_sequence_fine_completed)
-            fine_steps = ("pickup_fine_forward_0", self.DWELL_MARKER) * remaining
-            pickup_sequence = fine_steps[:-1] + (
+            fine_steps = (
+                (self.HURDLE_FINAL_FINE_MOTION_ID,)
+                if self.hurdle_sequence_fine_completed == 0 else ()
+            )
+            pickup_sequence = fine_steps + (
                 self.HURDLE_PRE_GO_DWELL_MARKER, "hurdle",
             )
             motion_id = pickup_sequence[0]
@@ -1293,6 +1299,8 @@ class MotionCommandBridgeNode(Node):
                     prepare_motion = self.GOAL_FORWARD_CRAB_PREPARE_MOTION_ID
                 elif previous_motion.startswith("goal_camera_90_fine_forward_"):
                     prepare_motion = self.GOAL_FINE_RIGHT_CRAB_PREPARE_MOTION_ID
+            elif previous_motion.startswith("goal_camera_90_fine_forward_"):
+                prepare_motion = self.GOAL_FINE_LEFT_CRAB_PREPARE_MOTION_ID
             pickup_sequence = (
                 MotionCommandBridgeNode.GOAL_CRAB_PRE_DWELL_MARKER, motion_id,
             )
@@ -1543,14 +1551,6 @@ class MotionCommandBridgeNode(Node):
             and next_motion_id == self.PICKUP_FIXED_SEQUENCE_FIRST_MOTION
         ):
             self.pickup_fixed_sequence_started = True
-        if (
-            self.active_action == "GO"
-            and next_motion_id == "pickup_fine_forward_0"
-            and self.hurdle_sequence_fine_completed > 0
-        ):
-            # Separate identical consecutive motions from delayed completion statuses.
-            # Navigation command IDs are positive; the executor accepts signed IDs.
-            self.active_request_id = -abs(self.active_request_id) - 1
         self.active_motion_id = next_motion_id
         self._publish_executor_request(
             action=self.active_action,
@@ -1887,11 +1887,9 @@ class MotionCommandBridgeNode(Node):
             payload["status"] == "SUCCEEDED" or continue_after_motor_fault
         )
         if is_active and action == "GO" and payload["status"] == "SUCCEEDED":
-            if payload["motion_id"] == "pickup_fine_forward_0":
+            if payload["motion_id"] == self.HURDLE_FINAL_FINE_MOTION_ID:
                 self.hurdle_depth_fine_completed = True
-                self.hurdle_sequence_fine_completed = min(
-                    2, self.hurdle_sequence_fine_completed + 1,
-                )
+                self.hurdle_sequence_fine_completed = 1
             elif payload["motion_id"] == "hurdle":
                 self.hurdle_depth_fine_completed = False
                 self.hurdle_sequence_fine_completed = 0

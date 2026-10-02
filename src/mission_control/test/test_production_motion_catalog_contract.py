@@ -231,6 +231,7 @@ def test_production_alias_catalog_contains_only_approved_aliases():
             ),
             "ball_general_fine_forward_8": "찐미세45도-4",
             "pickup_fine_forward_0": "찐미세0도-4",
+            "hurdle_fine_forward_10": "찐미세0도-4(허들10회)",
             "pickup_fine_prepare": "찐오뒤에서미세오뒤",
             "pickup_crab_prepare": "오뒤에서 기본자세(픽업 카메라0도)",
             "pickup_crab_right_0": "찐미세오옆꽃게0-1(1회)",
@@ -373,6 +374,7 @@ def test_every_production_bridge_motion_id_has_an_approved_alias():
         "pickup_second_backward_turn_left",
         "pickup_first_backward_turn_right",
         *MotionCommandBridgeNode.PICKUP_FINE_ALIGN_MOTION_IDS.values(),
+        MotionCommandBridgeNode.HURDLE_FINAL_FINE_MOTION_ID,
     }
     pickup_motion_ids.discard(None)
     pickup_motion_ids.discard(MotionCommandBridgeNode.FINE_ALIGN_MARKER)
@@ -1141,3 +1143,41 @@ def test_catalog34_replaces_only_requested_retreats_with_five_degree_tolerance()
     aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
     assert aliases["pickup_retreat_2"] == "찐후진실전(1회)"
     assert aliases["goal_camera_90_backward_1"] == "찐후진실전(1회)"
+
+
+def test_hurdle_final_fine_uses_ten_repeats_without_changing_shared_five_repeat_gait():
+    aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+    catalog = json.loads(RUNTIME_CATALOG_PATH.read_text())
+    motions = {m["name"]: m for m in catalog["motions"]}
+    original = motions[aliases["pickup_fine_forward_0"]]
+    final_fine = motions[aliases[MotionCommandBridgeNode.HURDLE_FINAL_FINE_MOTION_ID]]
+    assert original["repeat_count"] == 5
+    assert final_fine["repeat_count"] == 10
+    assert final_fine["name"] != original["name"]
+    assert {k: v for k, v in final_fine.items() if k not in {"name", "repeat_count"}} == {
+        k: v for k, v in original.items() if k not in {"name", "repeat_count"}
+    }
+    before = json.loads((RUNTIME_CATALOG_PATH.parent / "20261003_hurdle_fine_10/runtime_before.json").read_text())
+    before_motions = {m["name"]: m for m in before["motions"]}
+    assert original == before_motions[original["name"]]
+    assert final_fine["name"] not in before_motions
+
+
+def test_goal_left_crab_preparation_matches_attached_source_with_runtime_policy():
+    archive = RUNTIME_CATALOG_PATH.parent / "20261003_goal_left_crab_prepare"
+    source = json.loads((archive / "source.json").read_text())
+    before = json.loads((archive / "runtime_before.json").read_text())
+    catalog = json.loads(RUNTIME_CATALOG_PATH.read_text())
+    aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+    alias = MotionCommandBridgeNode.GOAL_FINE_LEFT_CRAB_PREPARE_MOTION_ID
+    assert alias == MotionCommandBridgeNode.SHOT_PREPARE_MOTION_ID
+    name = aliases[alias]
+    assert name == "찐미세오뒤에서기본자세"
+    expected = next(m for m in source["motions"] if m["name"] == name)
+    assert expected["frames"][-1]["angles"]["13"] == -45.0
+    assert expected["frames"][-1]["angles"]["14"] == 45.251953125
+    expected["completion"]["position_tolerance_deg"] = 5.0
+    for frame in expected["frames"]:
+        frame["angles"].update({"4": 18.0, "5": -18.0})
+    before["motions"] = [expected if m["name"] == name else m for m in before["motions"]]
+    assert catalog == before
