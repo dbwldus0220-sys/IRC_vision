@@ -452,7 +452,7 @@ def generate_launch_description() -> LaunchDescription:
             ),
             DeclareLaunchArgument(
                 "pickup_fine_align_bottom_distance_px",
-                default_value="120",
+                default_value="140",
                 description=(
                     "Allow lateral alignment and backward pickup stages only "
                     "when the Ball center is this close to the image bottom."

@@ -1,0 +1,2583 @@
+{
+  "scope": "Screen recording, matching ROS logs, and synthetic boundary reproduction; no RGB-D replay or hardware execution.",
+  "line_wait": {
+    "action": "WAIT",
+    "reason": "invalid_post_ball_line_alignment_input",
+    "first_log": "2026-10-02T21:58:38.331489+09:00",
+    "last_log": "2026-10-02T21:58:59.231770+09:00"
+  },
+  "missing_line_search_action": "POST_BALL_LINE_TURN_RIGHT_5",
+  "goal_boundaries": [
+    {
+      "depth_m": 0.46,
+      "offset_x_px": 162,
+      "score_confirmed": false,
+      "action": "GOAL_CAMERA90_CRAB_RIGHT"
+    },
+    {
+      "depth_m": 0.46,
+      "offset_x_px": 90,
+      "score_confirmed": false,
+      "action": "GOAL_CAMERA90_CRAB_RIGHT"
+    },
+    {
+      "depth_m": 0.46,
+      "offset_x_px": 70,
+      "score_confirmed": true,
+      "action": "SHOT"
+    },
+    {
+      "depth_m": 0.47,
+      "offset_x_px": -28,
+      "score_confirmed": false,
+      "action": "WAIT_SCORE_CONFIRMATION"
+    },
+    {
+      "depth_m": 0.47,
+      "offset_x_px": -28,
+      "score_confirmed": true,
+      "action": "SHOT"
+    },
+    {
+      "depth_m": 0.471,
+      "offset_x_px": -28,
+      "score_confirmed": false,
+      "action": "GOAL_CAMERA90_FINE_FORWARD_1"
+    }
+  ],
+  "goal_crab_success_counts": {
+    "GOAL_CAMERA90_CRAB_RIGHT": 13,
+    "GOAL_CAMERA90_CRAB_LEFT": 5
+  },
+  "shot_settle_resets": 7,
+  "first_shot_settle_to_request_sec": 10.606,
+  "synthetic_1mm_depth_change_restarts_shot_settle": true,
+  "events": [
+    {
+      "epoch_sec": 1790945857.6259391,
+      "local_time": "2026-10-02T21:57:37.625939+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=STRAIGHT"
+    },
+    {
+      "epoch_sec": 1790945860.98062,
+      "local_time": "2026-10-02T21:57:40.980620+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=STRAIGHT"
+    },
+    {
+      "epoch_sec": 1790945864.3369994,
+      "local_time": "2026-10-02T21:57:44.336999+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=STRAIGHT"
+    },
+    {
+      "epoch_sec": 1790945866.8638775,
+      "local_time": "2026-10-02T21:57:46.863878+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4"
+    },
+    {
+      "epoch_sec": 1790945869.2439346,
+      "local_time": "2026-10-02T21:57:49.243935+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4"
+    },
+    {
+      "epoch_sec": 1790945869.331761,
+      "local_time": "2026-10-02T21:57:49.331761+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LINE_LOST_TURN_RIGHT_5, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945870.3331587,
+      "local_time": "2026-10-02T21:57:50.333159+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle complete: action=LINE_LOST_TURN_RIGHT_5"
+    },
+    {
+      "epoch_sec": 1790945872.0917838,
+      "local_time": "2026-10-02T21:57:52.091784+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=LINE_LOST_TURN_RIGHT_5"
+    },
+    {
+      "epoch_sec": 1790945875.6603804,
+      "local_time": "2026-10-02T21:57:55.660380+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4"
+    },
+    {
+      "epoch_sec": 1790945878.2641647,
+      "local_time": "2026-10-02T21:57:58.264165+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4"
+    },
+    {
+      "epoch_sec": 1790945882.0198414,
+      "local_time": "2026-10-02T21:58:02.019841+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=STRAIGHT"
+    },
+    {
+      "epoch_sec": 1790945884.5183809,
+      "local_time": "2026-10-02T21:58:04.518381+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=STRAIGHT"
+    },
+    {
+      "epoch_sec": 1790945887.4459221,
+      "local_time": "2026-10-02T21:58:07.445922+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=STRAIGHT"
+    },
+    {
+      "epoch_sec": 1790945889.9093502,
+      "local_time": "2026-10-02T21:58:09.909350+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=STRAIGHT"
+    },
+    {
+      "epoch_sec": 1790945890.3307023,
+      "local_time": "2026-10-02T21:58:10.330702+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=BALL_PICKUP_INITIAL_ALIGN_CONTINUE, source=ball, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945892.0304582,
+      "local_time": "2026-10-02T21:58:12.030458+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=BALL_PICKUP_INITIAL_ALIGN_CONTINUE, source=ball, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945893.0307364,
+      "local_time": "2026-10-02T21:58:13.030736+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle complete: action=BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+    },
+    {
+      "epoch_sec": 1790945914.4306293,
+      "local_time": "2026-10-02T21:58:34.430629+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=POST_BALL_LINE_TURN_RIGHT_5, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945915.4308655,
+      "local_time": "2026-10-02T21:58:35.430866+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle complete: action=POST_BALL_LINE_TURN_RIGHT_5"
+    },
+    {
+      "epoch_sec": 1790945915.4323425,
+      "local_time": "2026-10-02T21:58:35.432343+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Post-ball line turn requested: command_id=262, action=POST_BALL_LINE_TURN_RIGHT_5, reason=post_ball_line_search, heading_deg=None, offset_norm=None, reference=None, target_px=None, steering_deg=None, tolerance_deg=None, turn_angle_deg=45.0, input_age_sec=0.057"
+    },
+    {
+      "epoch_sec": 1790945917.1898127,
+      "local_time": "2026-10-02T21:58:37.189813+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=POST_BALL_LINE_TURN_RIGHT_5"
+    },
+    {
+      "epoch_sec": 1790945918.3314893,
+      "local_time": "2026-10-02T21:58:38.331489+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945918.4345086,
+      "local_time": "2026-10-02T21:58:38.434509+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945918.531499,
+      "local_time": "2026-10-02T21:58:38.531499+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945918.6340852,
+      "local_time": "2026-10-02T21:58:38.634085+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945918.73252,
+      "local_time": "2026-10-02T21:58:38.732520+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945918.8317535,
+      "local_time": "2026-10-02T21:58:38.831753+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945918.9310672,
+      "local_time": "2026-10-02T21:58:38.931067+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945919.035036,
+      "local_time": "2026-10-02T21:58:39.035036+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945919.132215,
+      "local_time": "2026-10-02T21:58:39.132215+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945919.2323666,
+      "local_time": "2026-10-02T21:58:39.232367+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945919.3321762,
+      "local_time": "2026-10-02T21:58:39.332176+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945919.4344995,
+      "local_time": "2026-10-02T21:58:39.434500+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945919.5312905,
+      "local_time": "2026-10-02T21:58:39.531291+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945919.6315968,
+      "local_time": "2026-10-02T21:58:39.631597+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945919.7331052,
+      "local_time": "2026-10-02T21:58:39.733105+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945919.833079,
+      "local_time": "2026-10-02T21:58:39.833079+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945919.9316354,
+      "local_time": "2026-10-02T21:58:39.931635+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945920.0394886,
+      "local_time": "2026-10-02T21:58:40.039489+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945920.132932,
+      "local_time": "2026-10-02T21:58:40.132932+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945920.232142,
+      "local_time": "2026-10-02T21:58:40.232142+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945920.3357775,
+      "local_time": "2026-10-02T21:58:40.335778+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945920.4318156,
+      "local_time": "2026-10-02T21:58:40.431816+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945920.5342085,
+      "local_time": "2026-10-02T21:58:40.534209+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945920.6316874,
+      "local_time": "2026-10-02T21:58:40.631687+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945920.7334433,
+      "local_time": "2026-10-02T21:58:40.733443+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945920.8329253,
+      "local_time": "2026-10-02T21:58:40.832925+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945920.933137,
+      "local_time": "2026-10-02T21:58:40.933137+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945921.033979,
+      "local_time": "2026-10-02T21:58:41.033979+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945921.131429,
+      "local_time": "2026-10-02T21:58:41.131429+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945921.2315197,
+      "local_time": "2026-10-02T21:58:41.231520+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945921.3329277,
+      "local_time": "2026-10-02T21:58:41.332928+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945921.4333968,
+      "local_time": "2026-10-02T21:58:41.433397+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945921.533222,
+      "local_time": "2026-10-02T21:58:41.533222+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945921.6318424,
+      "local_time": "2026-10-02T21:58:41.631842+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945921.7318096,
+      "local_time": "2026-10-02T21:58:41.731810+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945921.8323057,
+      "local_time": "2026-10-02T21:58:41.832306+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945921.9336216,
+      "local_time": "2026-10-02T21:58:41.933622+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945922.0325754,
+      "local_time": "2026-10-02T21:58:42.032575+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945922.1311147,
+      "local_time": "2026-10-02T21:58:42.131115+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945922.2321718,
+      "local_time": "2026-10-02T21:58:42.232172+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945922.3329515,
+      "local_time": "2026-10-02T21:58:42.332952+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945922.4370131,
+      "local_time": "2026-10-02T21:58:42.437013+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945922.5365853,
+      "local_time": "2026-10-02T21:58:42.536585+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945922.634683,
+      "local_time": "2026-10-02T21:58:42.634683+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945922.732389,
+      "local_time": "2026-10-02T21:58:42.732389+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945922.831856,
+      "local_time": "2026-10-02T21:58:42.831856+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945922.9337435,
+      "local_time": "2026-10-02T21:58:42.933743+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945923.0316176,
+      "local_time": "2026-10-02T21:58:43.031618+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945923.1325078,
+      "local_time": "2026-10-02T21:58:43.132508+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945923.231416,
+      "local_time": "2026-10-02T21:58:43.231416+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945923.3311567,
+      "local_time": "2026-10-02T21:58:43.331157+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945923.4318655,
+      "local_time": "2026-10-02T21:58:43.431865+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945923.531628,
+      "local_time": "2026-10-02T21:58:43.531628+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945923.6312816,
+      "local_time": "2026-10-02T21:58:43.631282+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945923.73492,
+      "local_time": "2026-10-02T21:58:43.734920+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945923.832215,
+      "local_time": "2026-10-02T21:58:43.832215+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945923.933099,
+      "local_time": "2026-10-02T21:58:43.933099+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945924.031755,
+      "local_time": "2026-10-02T21:58:44.031755+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945924.1320765,
+      "local_time": "2026-10-02T21:58:44.132077+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945924.2330608,
+      "local_time": "2026-10-02T21:58:44.233061+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945924.3316317,
+      "local_time": "2026-10-02T21:58:44.331632+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945924.43545,
+      "local_time": "2026-10-02T21:58:44.435450+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945924.5316978,
+      "local_time": "2026-10-02T21:58:44.531698+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945924.6328416,
+      "local_time": "2026-10-02T21:58:44.632842+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945924.7337723,
+      "local_time": "2026-10-02T21:58:44.733772+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945924.8386054,
+      "local_time": "2026-10-02T21:58:44.838605+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945924.9327464,
+      "local_time": "2026-10-02T21:58:44.932746+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945925.0322728,
+      "local_time": "2026-10-02T21:58:45.032273+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945925.1317754,
+      "local_time": "2026-10-02T21:58:45.131775+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945925.2316062,
+      "local_time": "2026-10-02T21:58:45.231606+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945925.3310468,
+      "local_time": "2026-10-02T21:58:45.331047+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945925.4309628,
+      "local_time": "2026-10-02T21:58:45.430963+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945925.5318792,
+      "local_time": "2026-10-02T21:58:45.531879+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945925.631545,
+      "local_time": "2026-10-02T21:58:45.631545+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945925.732955,
+      "local_time": "2026-10-02T21:58:45.732955+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945925.8315852,
+      "local_time": "2026-10-02T21:58:45.831585+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945925.9329038,
+      "local_time": "2026-10-02T21:58:45.932904+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945926.033196,
+      "local_time": "2026-10-02T21:58:46.033196+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945926.1312964,
+      "local_time": "2026-10-02T21:58:46.131296+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945926.2328627,
+      "local_time": "2026-10-02T21:58:46.232863+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945926.3367043,
+      "local_time": "2026-10-02T21:58:46.336704+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945926.4336677,
+      "local_time": "2026-10-02T21:58:46.433668+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945926.5318162,
+      "local_time": "2026-10-02T21:58:46.531816+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945926.631231,
+      "local_time": "2026-10-02T21:58:46.631231+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945926.7309222,
+      "local_time": "2026-10-02T21:58:46.730922+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945926.8315234,
+      "local_time": "2026-10-02T21:58:46.831523+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945926.931459,
+      "local_time": "2026-10-02T21:58:46.931459+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945927.031253,
+      "local_time": "2026-10-02T21:58:47.031253+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945927.1357696,
+      "local_time": "2026-10-02T21:58:47.135770+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945927.231151,
+      "local_time": "2026-10-02T21:58:47.231151+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945927.334462,
+      "local_time": "2026-10-02T21:58:47.334462+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945927.4315336,
+      "local_time": "2026-10-02T21:58:47.431534+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945927.5329752,
+      "local_time": "2026-10-02T21:58:47.532975+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945927.6318052,
+      "local_time": "2026-10-02T21:58:47.631805+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945927.732162,
+      "local_time": "2026-10-02T21:58:47.732162+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945927.8323977,
+      "local_time": "2026-10-02T21:58:47.832398+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945927.933271,
+      "local_time": "2026-10-02T21:58:47.933271+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945928.0339718,
+      "local_time": "2026-10-02T21:58:48.033972+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945928.1327937,
+      "local_time": "2026-10-02T21:58:48.132794+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945928.2325606,
+      "local_time": "2026-10-02T21:58:48.232561+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945928.3331614,
+      "local_time": "2026-10-02T21:58:48.333161+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945928.433021,
+      "local_time": "2026-10-02T21:58:48.433021+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945928.533558,
+      "local_time": "2026-10-02T21:58:48.533558+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945928.6338606,
+      "local_time": "2026-10-02T21:58:48.633861+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945928.7317338,
+      "local_time": "2026-10-02T21:58:48.731734+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945928.8317034,
+      "local_time": "2026-10-02T21:58:48.831703+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945928.931843,
+      "local_time": "2026-10-02T21:58:48.931843+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945929.0315895,
+      "local_time": "2026-10-02T21:58:49.031590+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945929.133445,
+      "local_time": "2026-10-02T21:58:49.133445+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945929.2323153,
+      "local_time": "2026-10-02T21:58:49.232315+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945929.3311,
+      "local_time": "2026-10-02T21:58:49.331100+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945929.4321973,
+      "local_time": "2026-10-02T21:58:49.432197+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945929.531309,
+      "local_time": "2026-10-02T21:58:49.531309+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945929.6315908,
+      "local_time": "2026-10-02T21:58:49.631591+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945929.731629,
+      "local_time": "2026-10-02T21:58:49.731629+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945929.8313508,
+      "local_time": "2026-10-02T21:58:49.831351+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945929.9315405,
+      "local_time": "2026-10-02T21:58:49.931540+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945930.031622,
+      "local_time": "2026-10-02T21:58:50.031622+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945930.132312,
+      "local_time": "2026-10-02T21:58:50.132312+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945930.2315128,
+      "local_time": "2026-10-02T21:58:50.231513+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945930.3331513,
+      "local_time": "2026-10-02T21:58:50.333151+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945930.432112,
+      "local_time": "2026-10-02T21:58:50.432112+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945930.5327895,
+      "local_time": "2026-10-02T21:58:50.532789+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945930.6321979,
+      "local_time": "2026-10-02T21:58:50.632198+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945930.732626,
+      "local_time": "2026-10-02T21:58:50.732626+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945930.836908,
+      "local_time": "2026-10-02T21:58:50.836908+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945930.9316685,
+      "local_time": "2026-10-02T21:58:50.931669+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945931.0324554,
+      "local_time": "2026-10-02T21:58:51.032455+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945931.1326897,
+      "local_time": "2026-10-02T21:58:51.132690+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945931.2362187,
+      "local_time": "2026-10-02T21:58:51.236219+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945931.3315003,
+      "local_time": "2026-10-02T21:58:51.331500+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945931.4325807,
+      "local_time": "2026-10-02T21:58:51.432581+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945931.531934,
+      "local_time": "2026-10-02T21:58:51.531934+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945931.6327815,
+      "local_time": "2026-10-02T21:58:51.632782+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945931.7312043,
+      "local_time": "2026-10-02T21:58:51.731204+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945931.8318346,
+      "local_time": "2026-10-02T21:58:51.831835+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945931.9308696,
+      "local_time": "2026-10-02T21:58:51.930870+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945932.0338366,
+      "local_time": "2026-10-02T21:58:52.033837+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945932.1317995,
+      "local_time": "2026-10-02T21:58:52.131799+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945932.231914,
+      "local_time": "2026-10-02T21:58:52.231914+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945932.3318253,
+      "local_time": "2026-10-02T21:58:52.331825+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945932.4311936,
+      "local_time": "2026-10-02T21:58:52.431194+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945932.5318577,
+      "local_time": "2026-10-02T21:58:52.531858+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945932.6318827,
+      "local_time": "2026-10-02T21:58:52.631883+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945932.7318394,
+      "local_time": "2026-10-02T21:58:52.731839+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945932.8310795,
+      "local_time": "2026-10-02T21:58:52.831079+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945932.9319344,
+      "local_time": "2026-10-02T21:58:52.931934+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945933.031808,
+      "local_time": "2026-10-02T21:58:53.031808+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945933.135391,
+      "local_time": "2026-10-02T21:58:53.135391+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945933.2318175,
+      "local_time": "2026-10-02T21:58:53.231817+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945933.3322098,
+      "local_time": "2026-10-02T21:58:53.332210+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945933.4317682,
+      "local_time": "2026-10-02T21:58:53.431768+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945933.5316005,
+      "local_time": "2026-10-02T21:58:53.531600+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945933.6323965,
+      "local_time": "2026-10-02T21:58:53.632396+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945933.7318046,
+      "local_time": "2026-10-02T21:58:53.731805+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945933.8317986,
+      "local_time": "2026-10-02T21:58:53.831799+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945933.9332325,
+      "local_time": "2026-10-02T21:58:53.933233+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945934.0327647,
+      "local_time": "2026-10-02T21:58:54.032765+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945934.1338906,
+      "local_time": "2026-10-02T21:58:54.133891+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945934.2329414,
+      "local_time": "2026-10-02T21:58:54.232941+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945934.333591,
+      "local_time": "2026-10-02T21:58:54.333591+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945934.432061,
+      "local_time": "2026-10-02T21:58:54.432061+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945934.5339563,
+      "local_time": "2026-10-02T21:58:54.533956+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945934.6316395,
+      "local_time": "2026-10-02T21:58:54.631639+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945934.7311656,
+      "local_time": "2026-10-02T21:58:54.731166+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945934.831557,
+      "local_time": "2026-10-02T21:58:54.831557+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945934.9335914,
+      "local_time": "2026-10-02T21:58:54.933591+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945935.0310452,
+      "local_time": "2026-10-02T21:58:55.031045+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945935.1332033,
+      "local_time": "2026-10-02T21:58:55.133203+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945935.2332978,
+      "local_time": "2026-10-02T21:58:55.233298+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945935.3313923,
+      "local_time": "2026-10-02T21:58:55.331392+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945935.433708,
+      "local_time": "2026-10-02T21:58:55.433708+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945935.533143,
+      "local_time": "2026-10-02T21:58:55.533143+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945935.6315196,
+      "local_time": "2026-10-02T21:58:55.631520+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945935.732665,
+      "local_time": "2026-10-02T21:58:55.732665+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945935.8331106,
+      "local_time": "2026-10-02T21:58:55.833111+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945935.93143,
+      "local_time": "2026-10-02T21:58:55.931430+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945936.0347664,
+      "local_time": "2026-10-02T21:58:56.034766+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945936.1321938,
+      "local_time": "2026-10-02T21:58:56.132194+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945936.2351608,
+      "local_time": "2026-10-02T21:58:56.235161+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945936.331902,
+      "local_time": "2026-10-02T21:58:56.331902+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945936.4367101,
+      "local_time": "2026-10-02T21:58:56.436710+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945936.531696,
+      "local_time": "2026-10-02T21:58:56.531696+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945936.6315904,
+      "local_time": "2026-10-02T21:58:56.631590+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945936.7312272,
+      "local_time": "2026-10-02T21:58:56.731227+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945936.83142,
+      "local_time": "2026-10-02T21:58:56.831420+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945936.931497,
+      "local_time": "2026-10-02T21:58:56.931497+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945937.0317407,
+      "local_time": "2026-10-02T21:58:57.031741+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945937.131665,
+      "local_time": "2026-10-02T21:58:57.131665+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945937.231584,
+      "local_time": "2026-10-02T21:58:57.231584+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945937.331595,
+      "local_time": "2026-10-02T21:58:57.331595+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945937.4316337,
+      "local_time": "2026-10-02T21:58:57.431634+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945937.5320733,
+      "local_time": "2026-10-02T21:58:57.532073+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945937.6320095,
+      "local_time": "2026-10-02T21:58:57.632010+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945937.7320116,
+      "local_time": "2026-10-02T21:58:57.732012+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945937.832896,
+      "local_time": "2026-10-02T21:58:57.832896+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945937.9336274,
+      "local_time": "2026-10-02T21:58:57.933627+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945938.033264,
+      "local_time": "2026-10-02T21:58:58.033264+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945938.133277,
+      "local_time": "2026-10-02T21:58:58.133277+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945938.2335076,
+      "local_time": "2026-10-02T21:58:58.233508+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945938.331604,
+      "local_time": "2026-10-02T21:58:58.331604+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945938.4313354,
+      "local_time": "2026-10-02T21:58:58.431335+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945938.5319724,
+      "local_time": "2026-10-02T21:58:58.531972+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945938.6318069,
+      "local_time": "2026-10-02T21:58:58.631807+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945938.7312653,
+      "local_time": "2026-10-02T21:58:58.731265+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945938.8326032,
+      "local_time": "2026-10-02T21:58:58.832603+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945938.9317324,
+      "local_time": "2026-10-02T21:58:58.931732+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945939.031845,
+      "local_time": "2026-10-02T21:58:59.031845+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945939.131468,
+      "local_time": "2026-10-02T21:58:59.131468+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945939.23177,
+      "local_time": "2026-10-02T21:58:59.231770+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Command ignored: valid is not true, action=WAIT, reason=invalid_post_ball_line_alignment_input, line_input_checks=None"
+    },
+    {
+      "epoch_sec": 1790945939.330936,
+      "local_time": "2026-10-02T21:58:59.330936+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LINE_HEADING_TURN_RIGHT_5, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945941.8616393,
+      "local_time": "2026-10-02T21:59:01.861639+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4"
+    },
+    {
+      "epoch_sec": 1790945944.3573725,
+      "local_time": "2026-10-02T21:59:04.357373+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4"
+    },
+    {
+      "epoch_sec": 1790945946.7343454,
+      "local_time": "2026-10-02T21:59:06.734345+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4"
+    },
+    {
+      "epoch_sec": 1790945947.03044,
+      "local_time": "2026-10-02T21:59:07.030440+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=RIGHT, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945948.0308595,
+      "local_time": "2026-10-02T21:59:08.030859+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle complete: action=RIGHT"
+    },
+    {
+      "epoch_sec": 1790945950.4737399,
+      "local_time": "2026-10-02T21:59:10.473740+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=RIGHT"
+    },
+    {
+      "epoch_sec": 1790945956.1939342,
+      "local_time": "2026-10-02T21:59:16.193934+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA_90_FORWARD_2"
+    },
+    {
+      "epoch_sec": 1790945957.6312048,
+      "local_time": "2026-10-02T21:59:17.631205+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_3, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945958.6320488,
+      "local_time": "2026-10-02T21:59:18.632049+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle complete: action=GOAL_CAMERA90_FINE_FORWARD_3"
+    },
+    {
+      "epoch_sec": 1790945959.8380556,
+      "local_time": "2026-10-02T21:59:19.838056+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_FINE_FORWARD_3"
+    },
+    {
+      "epoch_sec": 1790945961.0306408,
+      "local_time": "2026-10-02T21:59:21.030641+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_3, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945962.0307605,
+      "local_time": "2026-10-02T21:59:22.030761+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle complete: action=GOAL_CAMERA90_FINE_FORWARD_3"
+    },
+    {
+      "epoch_sec": 1790945963.222262,
+      "local_time": "2026-10-02T21:59:23.222262+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_FINE_FORWARD_3"
+    },
+    {
+      "epoch_sec": 1790945964.3305836,
+      "local_time": "2026-10-02T21:59:24.330584+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_3, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945965.4306173,
+      "local_time": "2026-10-02T21:59:25.430617+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle complete: action=GOAL_CAMERA90_FINE_FORWARD_3"
+    },
+    {
+      "epoch_sec": 1790945966.640255,
+      "local_time": "2026-10-02T21:59:26.640255+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_FINE_FORWARD_3"
+    },
+    {
+      "epoch_sec": 1790945968.0907776,
+      "local_time": "2026-10-02T21:59:28.090778+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Atomic sequence advanced to goal_camera_90_crab_right"
+    },
+    {
+      "epoch_sec": 1790945968.6342974,
+      "local_time": "2026-10-02T21:59:28.634297+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_CRAB_RIGHT"
+    },
+    {
+      "epoch_sec": 1790945970.378194,
+      "local_time": "2026-10-02T21:59:30.378194+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_CRAB_RIGHT"
+    },
+    {
+      "epoch_sec": 1790945972.0734866,
+      "local_time": "2026-10-02T21:59:32.073487+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_CRAB_RIGHT"
+    },
+    {
+      "epoch_sec": 1790945973.773494,
+      "local_time": "2026-10-02T21:59:33.773494+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_CRAB_RIGHT"
+    },
+    {
+      "epoch_sec": 1790945974.930591,
+      "local_time": "2026-10-02T21:59:34.930591+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945975.578361,
+      "local_time": "2026-10-02T21:59:35.578361+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_CRAB_RIGHT"
+    },
+    {
+      "epoch_sec": 1790945976.7313719,
+      "local_time": "2026-10-02T21:59:36.731372+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945977.57963,
+      "local_time": "2026-10-02T21:59:37.579630+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_CRAB_RIGHT"
+    },
+    {
+      "epoch_sec": 1790945978.7306657,
+      "local_time": "2026-10-02T21:59:38.730666+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945979.7305372,
+      "local_time": "2026-10-02T21:59:39.730537+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle complete: action=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790945980.152625,
+      "local_time": "2026-10-02T21:59:40.152625+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790945981.5869448,
+      "local_time": "2026-10-02T21:59:41.586945+09:00",
+      "log": "python3_6475_1790945835740.log",
+      "message": "Atomic sequence advanced to goal_camera_90_crab_right"
+    },
+    {
+      "epoch_sec": 1790945982.1202824,
+      "local_time": "2026-10-02T21:59:42.120282+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_CRAB_RIGHT"
+    },
+    {
+      "epoch_sec": 1790945983.7674267,
+      "local_time": "2026-10-02T21:59:43.767427+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_CRAB_RIGHT"
+    },
+    {
+      "epoch_sec": 1790945985.4834068,
+      "local_time": "2026-10-02T21:59:45.483407+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_CRAB_RIGHT"
+    },
+    {
+      "epoch_sec": 1790945987.2742057,
+      "local_time": "2026-10-02T21:59:47.274206+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_CRAB_RIGHT"
+    },
+    {
+      "epoch_sec": 1790945988.967991,
+      "local_time": "2026-10-02T21:59:48.967991+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_CRAB_RIGHT"
+    },
+    {
+      "epoch_sec": 1790945990.6801107,
+      "local_time": "2026-10-02T21:59:50.680111+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_CRAB_RIGHT"
+    },
+    {
+      "epoch_sec": 1790945992.3806717,
+      "local_time": "2026-10-02T21:59:52.380672+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_CRAB_RIGHT"
+    },
+    {
+      "epoch_sec": 1790945993.5335493,
+      "local_time": "2026-10-02T21:59:53.533549+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_3, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945993.8306785,
+      "local_time": "2026-10-02T21:59:53.830678+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_3, next=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790945993.832765,
+      "local_time": "2026-10-02T21:59:53.832765+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945994.2307818,
+      "local_time": "2026-10-02T21:59:54.230782+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_1, next=GOAL_CAMERA90_FINE_FORWARD_3"
+    },
+    {
+      "epoch_sec": 1790945994.2332265,
+      "local_time": "2026-10-02T21:59:54.233227+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_3, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945994.730306,
+      "local_time": "2026-10-02T21:59:54.730306+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_3, next=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790945994.7311993,
+      "local_time": "2026-10-02T21:59:54.731199+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945994.9307017,
+      "local_time": "2026-10-02T21:59:54.930702+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_1, next=GOAL_CAMERA90_FINE_FORWARD_3"
+    },
+    {
+      "epoch_sec": 1790945994.9361863,
+      "local_time": "2026-10-02T21:59:54.936186+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_3, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945995.5313597,
+      "local_time": "2026-10-02T21:59:55.531360+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945995.630541,
+      "local_time": "2026-10-02T21:59:55.630541+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_1, next=GOAL_CAMERA90_FINE_FORWARD_3"
+    },
+    {
+      "epoch_sec": 1790945995.6313016,
+      "local_time": "2026-10-02T21:59:55.631302+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_3, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945996.0307744,
+      "local_time": "2026-10-02T21:59:56.030774+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_3, next=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790945996.0316796,
+      "local_time": "2026-10-02T21:59:56.031680+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945996.1313765,
+      "local_time": "2026-10-02T21:59:56.131377+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_1, next=GOAL_CAMERA90_FINE_FORWARD_3"
+    },
+    {
+      "epoch_sec": 1790945996.1321332,
+      "local_time": "2026-10-02T21:59:56.132133+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_3, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945996.3307545,
+      "local_time": "2026-10-02T21:59:56.330755+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_3, next=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790945996.3315232,
+      "local_time": "2026-10-02T21:59:56.331523+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945996.4308155,
+      "local_time": "2026-10-02T21:59:56.430815+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_1, next=GOAL_CAMERA90_FINE_FORWARD_3"
+    },
+    {
+      "epoch_sec": 1790945996.431545,
+      "local_time": "2026-10-02T21:59:56.431545+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_3, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945997.0308125,
+      "local_time": "2026-10-02T21:59:57.030813+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_3, next=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790945997.0315793,
+      "local_time": "2026-10-02T21:59:57.031579+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945997.1306348,
+      "local_time": "2026-10-02T21:59:57.130635+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_1, next=GOAL_CAMERA90_FINE_FORWARD_3"
+    },
+    {
+      "epoch_sec": 1790945997.1313646,
+      "local_time": "2026-10-02T21:59:57.131365+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_3, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945997.5320668,
+      "local_time": "2026-10-02T21:59:57.532067+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_3, next=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790945997.5330353,
+      "local_time": "2026-10-02T21:59:57.533035+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945997.6312642,
+      "local_time": "2026-10-02T21:59:57.631264+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_1, next=GOAL_CAMERA90_FINE_FORWARD_3"
+    },
+    {
+      "epoch_sec": 1790945997.6324275,
+      "local_time": "2026-10-02T21:59:57.632427+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_3, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945997.7321517,
+      "local_time": "2026-10-02T21:59:57.732152+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_3, next=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790945997.733685,
+      "local_time": "2026-10-02T21:59:57.733685+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945997.8312466,
+      "local_time": "2026-10-02T21:59:57.831247+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_1, next=GOAL_CAMERA90_FINE_FORWARD_3"
+    },
+    {
+      "epoch_sec": 1790945997.832057,
+      "local_time": "2026-10-02T21:59:57.832057+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_3, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945997.930726,
+      "local_time": "2026-10-02T21:59:57.930726+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_3, next=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790945997.9315221,
+      "local_time": "2026-10-02T21:59:57.931522+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945998.0309181,
+      "local_time": "2026-10-02T21:59:58.030918+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_1, next=GOAL_CAMERA90_FINE_FORWARD_3"
+    },
+    {
+      "epoch_sec": 1790945998.0317166,
+      "local_time": "2026-10-02T21:59:58.031717+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_3, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945998.230598,
+      "local_time": "2026-10-02T21:59:58.230598+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_3, next=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790945998.2331653,
+      "local_time": "2026-10-02T21:59:58.233165+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945998.3306298,
+      "local_time": "2026-10-02T21:59:58.330630+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_1, next=GOAL_CAMERA90_FINE_FORWARD_3"
+    },
+    {
+      "epoch_sec": 1790945998.332843,
+      "local_time": "2026-10-02T21:59:58.332843+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_3, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945998.4307392,
+      "local_time": "2026-10-02T21:59:58.430739+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_3, next=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790945998.4334269,
+      "local_time": "2026-10-02T21:59:58.433427+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945998.530707,
+      "local_time": "2026-10-02T21:59:58.530707+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_1, next=GOAL_CAMERA90_FINE_FORWARD_3"
+    },
+    {
+      "epoch_sec": 1790945998.5329535,
+      "local_time": "2026-10-02T21:59:58.532954+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_3, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945998.6305494,
+      "local_time": "2026-10-02T21:59:58.630549+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_3, next=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790945998.6334827,
+      "local_time": "2026-10-02T21:59:58.633483+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945998.7308154,
+      "local_time": "2026-10-02T21:59:58.730815+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_1, next=GOAL_CAMERA90_FINE_FORWARD_3"
+    },
+    {
+      "epoch_sec": 1790945998.7331119,
+      "local_time": "2026-10-02T21:59:58.733112+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_3, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945999.5307307,
+      "local_time": "2026-10-02T21:59:59.530731+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_3, next=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790945999.5315247,
+      "local_time": "2026-10-02T21:59:59.531525+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790945999.7406168,
+      "local_time": "2026-10-02T21:59:59.740617+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=GOAL_CAMERA90_FINE_FORWARD_1, next=GOAL_CAMERA90_FINE_FORWARD_3"
+    },
+    {
+      "epoch_sec": 1790945999.7440965,
+      "local_time": "2026-10-02T21:59:59.744097+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_3, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946000.8342488,
+      "local_time": "2026-10-02T22:00:00.834249+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle complete: action=GOAL_CAMERA90_FINE_FORWARD_3"
+    },
+    {
+      "epoch_sec": 1790946002.039688,
+      "local_time": "2026-10-02T22:00:02.039688+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_FINE_FORWARD_3"
+    },
+    {
+      "epoch_sec": 1790946003.7508626,
+      "local_time": "2026-10-02T22:00:03.750863+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_BACKWARD_1"
+    },
+    {
+      "epoch_sec": 1790946005.4392872,
+      "local_time": "2026-10-02T22:00:05.439287+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_CRAB_LEFT"
+    },
+    {
+      "epoch_sec": 1790946007.000065,
+      "local_time": "2026-10-02T22:00:07.000065+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_TURN_LEFT_1"
+    },
+    {
+      "epoch_sec": 1790946008.2300856,
+      "local_time": "2026-10-02T22:00:08.230086+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946009.230195,
+      "local_time": "2026-10-02T22:00:09.230195+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle complete: action=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790946009.6398017,
+      "local_time": "2026-10-02T22:00:09.639802+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790946011.3290732,
+      "local_time": "2026-10-02T22:00:11.329073+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_CRAB_LEFT"
+    },
+    {
+      "epoch_sec": 1790946012.430576,
+      "local_time": "2026-10-02T22:00:12.430576+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946013.0388525,
+      "local_time": "2026-10-02T22:00:13.038852+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_CRAB_LEFT"
+    },
+    {
+      "epoch_sec": 1790946014.230912,
+      "local_time": "2026-10-02T22:00:14.230912+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946014.430183,
+      "local_time": "2026-10-02T22:00:14.430183+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946014.9307096,
+      "local_time": "2026-10-02T22:00:14.930710+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946015.3314495,
+      "local_time": "2026-10-02T22:00:15.331450+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946016.4341693,
+      "local_time": "2026-10-02T22:00:16.434169+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle complete: action=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790946016.8591063,
+      "local_time": "2026-10-02T22:00:16.859106+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790946018.5249681,
+      "local_time": "2026-10-02T22:00:18.524968+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_CRAB_LEFT"
+    },
+    {
+      "epoch_sec": 1790946020.124436,
+      "local_time": "2026-10-02T22:00:20.124436+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_CRAB_LEFT"
+    },
+    {
+      "epoch_sec": 1790946021.230827,
+      "local_time": "2026-10-02T22:00:21.230827+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946021.430438,
+      "local_time": "2026-10-02T22:00:21.430438+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=SHOT, source=goal, duration=3.000"
+    },
+    {
+      "epoch_sec": 1790946022.0306838,
+      "local_time": "2026-10-02T22:00:22.030684+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=SHOT, next=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790946022.0328832,
+      "local_time": "2026-10-02T22:00:22.032883+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946022.4305983,
+      "local_time": "2026-10-02T22:00:22.430598+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=SHOT, source=goal, duration=3.000"
+    },
+    {
+      "epoch_sec": 1790946022.830631,
+      "local_time": "2026-10-02T22:00:22.830631+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=SHOT, next=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790946022.833271,
+      "local_time": "2026-10-02T22:00:22.833271+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946023.030693,
+      "local_time": "2026-10-02T22:00:23.030693+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946023.2305267,
+      "local_time": "2026-10-02T22:00:23.230527+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946023.4306645,
+      "local_time": "2026-10-02T22:00:23.430665+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=SHOT, source=goal, duration=3.000"
+    },
+    {
+      "epoch_sec": 1790946024.330677,
+      "local_time": "2026-10-02T22:00:24.330677+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=SHOT, next=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790946024.3314505,
+      "local_time": "2026-10-02T22:00:24.331450+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946024.5312836,
+      "local_time": "2026-10-02T22:00:24.531284+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=SHOT, source=goal, duration=3.000"
+    },
+    {
+      "epoch_sec": 1790946025.7304406,
+      "local_time": "2026-10-02T22:00:25.730441+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=SHOT, next=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790946025.7314813,
+      "local_time": "2026-10-02T22:00:25.731481+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946025.9307055,
+      "local_time": "2026-10-02T22:00:25.930706+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=SHOT, source=goal, duration=3.000"
+    },
+    {
+      "epoch_sec": 1790946027.9316018,
+      "local_time": "2026-10-02T22:00:27.931602+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=SHOT, next=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790946027.9326417,
+      "local_time": "2026-10-02T22:00:27.932642+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946028.1301148,
+      "local_time": "2026-10-02T22:00:28.130115+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=SHOT, source=goal, duration=3.000"
+    },
+    {
+      "epoch_sec": 1790946028.4315054,
+      "local_time": "2026-10-02T22:00:28.431505+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=SHOT, next=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790946028.4322593,
+      "local_time": "2026-10-02T22:00:28.432259+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946028.6307306,
+      "local_time": "2026-10-02T22:00:28.630731+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=SHOT, source=goal, duration=3.000"
+    },
+    {
+      "epoch_sec": 1790946028.830979,
+      "local_time": "2026-10-02T22:00:28.830979+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=SHOT, next=GOAL_CAMERA90_FINE_FORWARD_1"
+    },
+    {
+      "epoch_sec": 1790946028.8325486,
+      "local_time": "2026-10-02T22:00:28.832549+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=GOAL_CAMERA90_FINE_FORWARD_1, source=goal, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946029.030465,
+      "local_time": "2026-10-02T22:00:29.030465+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=SHOT, source=goal, duration=3.000"
+    },
+    {
+      "epoch_sec": 1790946032.030654,
+      "local_time": "2026-10-02T22:00:32.030654+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle complete: action=SHOT"
+    },
+    {
+      "epoch_sec": 1790946032.0361745,
+      "local_time": "2026-10-02T22:00:32.036175+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Special motion lock enabled: action=SHOT, command_id=562, event_id=3, dynamics_command=None"
+    },
+    {
+      "epoch_sec": 1790946032.0657516,
+      "local_time": "2026-10-02T22:00:32.065752+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Special motion lock enabled: action=SHOT, command_id=562, event_id=3, dynamics_command=None"
+    },
+    {
+      "epoch_sec": 1790946034.3203752,
+      "local_time": "2026-10-02T22:00:34.320375+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Special motion lock released: status=SUCCEEDED, action=SHOT, command_id=562, event_id=3, error_code=, motion_id=goal_shot, message="
+    },
+    {
+      "epoch_sec": 1790946039.630591,
+      "local_time": "2026-10-02T22:00:39.630591+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=POST_SHOT_LINE_TURN_RIGHT_5, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946040.6306386,
+      "local_time": "2026-10-02T22:00:40.630639+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle complete: action=POST_SHOT_LINE_TURN_RIGHT_5"
+    },
+    {
+      "epoch_sec": 1790946049.4567974,
+      "local_time": "2026-10-02T22:00:49.456797+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4"
+    },
+    {
+      "epoch_sec": 1790946051.9509737,
+      "local_time": "2026-10-02T22:00:51.950974+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4"
+    },
+    {
+      "epoch_sec": 1790946054.3412325,
+      "local_time": "2026-10-02T22:00:54.341233+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4"
+    },
+    {
+      "epoch_sec": 1790946056.8658764,
+      "local_time": "2026-10-02T22:00:56.865876+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4"
+    },
+    {
+      "epoch_sec": 1790946059.2377956,
+      "local_time": "2026-10-02T22:00:59.237796+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4"
+    },
+    {
+      "epoch_sec": 1790946061.762268,
+      "local_time": "2026-10-02T22:01:01.762268+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4"
+    },
+    {
+      "epoch_sec": 1790946064.2269754,
+      "local_time": "2026-10-02T22:01:04.226975+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4"
+    },
+    {
+      "epoch_sec": 1790946064.3307803,
+      "local_time": "2026-10-02T22:01:04.330780+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LINE_HEADING_TURN_RIGHT_5, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946064.5604122,
+      "local_time": "2026-10-02T22:01:04.560412+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=FAILED, action=RECOVER_LEFT_TURN_RIGHT_4"
+    },
+    {
+      "epoch_sec": 1790946066.1310096,
+      "local_time": "2026-10-02T22:01:06.131010+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LINE_LOST_TURN_LEFT_3, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946067.4308288,
+      "local_time": "2026-10-02T22:01:07.430829+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LINE_LOST_TURN_RIGHT_5, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946068.5306096,
+      "local_time": "2026-10-02T22:01:08.530610+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle complete: action=LINE_LOST_TURN_RIGHT_5"
+    },
+    {
+      "epoch_sec": 1790946068.658581,
+      "local_time": "2026-10-02T22:01:08.658581+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=FAILED, action=LINE_LOST_TURN_RIGHT_5"
+    },
+    {
+      "epoch_sec": 1790946072.130771,
+      "local_time": "2026-10-02T22:01:12.130771+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LINE_HEADING_TURN_LEFT_3, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946072.9632013,
+      "local_time": "2026-10-02T22:01:12.963201+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=FAILED, action=RECOVER_LEFT_TURN_LEFT_4"
+    },
+    {
+      "epoch_sec": 1790946073.4584122,
+      "local_time": "2026-10-02T22:01:13.458412+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=FAILED, action=RECOVER_RIGHT_TURN_LEFT_4"
+    },
+    {
+      "epoch_sec": 1790946074.0305715,
+      "local_time": "2026-10-02T22:01:14.030571+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LINE_LOST_TURN_RIGHT_5, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946074.9307418,
+      "local_time": "2026-10-02T22:01:14.930742+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LINE_LOST_TURN_LEFT_3, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946075.9307854,
+      "local_time": "2026-10-02T22:01:15.930785+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle complete: action=LINE_LOST_TURN_LEFT_3"
+    },
+    {
+      "epoch_sec": 1790946076.0564988,
+      "local_time": "2026-10-02T22:01:16.056499+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=FAILED, action=LINE_LOST_TURN_LEFT_3"
+    },
+    {
+      "epoch_sec": 1790946080.3309033,
+      "local_time": "2026-10-02T22:01:20.330903+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LINE_HEADING_TURN_LEFT_3, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946081.230962,
+      "local_time": "2026-10-02T22:01:21.230962+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LINE_HEADING_TURN_LEFT_3, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946082.0575204,
+      "local_time": "2026-10-02T22:01:22.057520+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=FAILED, action=RECOVER_LEFT_TURN_LEFT_4"
+    },
+    {
+      "epoch_sec": 1790946082.5308003,
+      "local_time": "2026-10-02T22:01:22.530800+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LINE_HEADING_TURN_LEFT_4, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946082.6312363,
+      "local_time": "2026-10-02T22:01:22.631236+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=LINE_HEADING_TURN_LEFT_4, next=LINE_HEADING_TURN_LEFT_3"
+    },
+    {
+      "epoch_sec": 1790946082.6342518,
+      "local_time": "2026-10-02T22:01:22.634252+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LINE_HEADING_TURN_LEFT_3, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946082.955684,
+      "local_time": "2026-10-02T22:01:22.955684+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=FAILED, action=RECOVER_LEFT_TURN_LEFT_4"
+    },
+    {
+      "epoch_sec": 1790946083.9357123,
+      "local_time": "2026-10-02T22:01:23.935712+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LEFT, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946084.4365547,
+      "local_time": "2026-10-02T22:01:24.436555+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LEFT, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946085.4603817,
+      "local_time": "2026-10-02T22:01:25.460382+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=FAILED, action=RECOVER_LEFT_TURN_LEFT_4"
+    },
+    {
+      "epoch_sec": 1790946085.9313235,
+      "local_time": "2026-10-02T22:01:25.931324+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LINE_HEADING_TURN_LEFT_3, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946086.2573884,
+      "local_time": "2026-10-02T22:01:26.257388+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=FAILED, action=RECOVER_LEFT_TURN_LEFT_4"
+    },
+    {
+      "epoch_sec": 1790946087.930761,
+      "local_time": "2026-10-02T22:01:27.930761+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LINE_SPARSE_TURN_LEFT_1, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946088.631435,
+      "local_time": "2026-10-02T22:01:28.631435+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LINE_SPARSE_TURN_LEFT_1, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946089.0307565,
+      "local_time": "2026-10-02T22:01:29.030756+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle reset: previous=LINE_SPARSE_TURN_LEFT_1, next=LEFT"
+    },
+    {
+      "epoch_sec": 1790946089.0315804,
+      "local_time": "2026-10-02T22:01:29.031580+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LEFT, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946089.5629182,
+      "local_time": "2026-10-02T22:01:29.562918+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=FAILED, action=RECOVER_LEFT_TURN_LEFT_4"
+    },
+    {
+      "epoch_sec": 1790946090.2307944,
+      "local_time": "2026-10-02T22:01:30.230794+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LEFT, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946091.2320976,
+      "local_time": "2026-10-02T22:01:31.232098+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle complete: action=LEFT"
+    },
+    {
+      "epoch_sec": 1790946091.357939,
+      "local_time": "2026-10-02T22:01:31.357939+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=FAILED, action=LEFT"
+    },
+    {
+      "epoch_sec": 1790946091.4313478,
+      "local_time": "2026-10-02T22:01:31.431348+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LINE_HEADING_TURN_LEFT_3, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946091.6307635,
+      "local_time": "2026-10-02T22:01:31.630764+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LINE_LOST_TURN_LEFT_3, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946092.7333262,
+      "local_time": "2026-10-02T22:01:32.733326+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle complete: action=LINE_LOST_TURN_LEFT_3"
+    },
+    {
+      "epoch_sec": 1790946092.8600504,
+      "local_time": "2026-10-02T22:01:32.860050+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=FAILED, action=LINE_LOST_TURN_LEFT_3"
+    },
+    {
+      "epoch_sec": 1790946094.5311658,
+      "local_time": "2026-10-02T22:01:34.531166+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LEFT, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946095.1309998,
+      "local_time": "2026-10-02T22:01:35.131000+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LEFT, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946095.756772,
+      "local_time": "2026-10-02T22:01:35.756772+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=FAILED, action=STRAIGHT"
+    },
+    {
+      "epoch_sec": 1790946098.0308092,
+      "local_time": "2026-10-02T22:01:38.030809+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LINE_LOST_TURN_LEFT_3, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946101.6603465,
+      "local_time": "2026-10-02T22:01:41.660347+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "General motion lock released: status=FAILED, action=RECOVER_RIGHT_TURN_RIGHT_4"
+    },
+    {
+      "epoch_sec": 1790946105.3312645,
+      "local_time": "2026-10-02T22:01:45.331264+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LINE_LOST_TURN_RIGHT_5, source=line, duration=1.000"
+    },
+    {
+      "epoch_sec": 1790946113.930618,
+      "local_time": "2026-10-02T22:01:53.930618+09:00",
+      "log": "python3_6473_1790945836541.log",
+      "message": "Pre-motion settle started: action=LINE_LOST_TURN_RIGHT_5, source=line, duration=1.000"
+    }
+  ]
+}

@@ -62,7 +62,7 @@ class MotionDecisionConfig:
     ball_tracking_range_m: float = 1.5
     ball_control_range_m: float = 1.5
     pickup_fine_step_distance_m: float = BALL_HURDLE_FINE_DISTANCE_M
-    pickup_fine_align_bottom_distance_px: int = 120
+    pickup_fine_align_bottom_distance_px: int = 140
     ball_lost_stop_sec: float = 0.35
     ball_recovery_timeout_sec: float = 8.0
     ball_recovery_turn_rad_s: float = 0.22
@@ -723,6 +723,20 @@ class MotionDecisionPlanner:
         result = command.to_dict()
         if source == "line":
             result["heading_source"] = self.line_planner.config.heading_source
+            if command.valid and command.motion.startswith("LINE_HEADING_TURN_"):
+                heading = command.heading_error_deg
+                direction = "RIGHT" if heading > 0.0 else "LEFT"
+                count = self._turn_repeat_count(heading, direction)
+                yaw = self._turn_angle_deg(count, direction)
+                result.update({
+                    "motion": f"LINE_HEADING_TURN_{direction}_{count}",
+                    "turn_direction": direction, "turn_count": count,
+                    "turn_angle_deg": yaw,
+                    "target_heading_change_deg": math.copysign(yaw, heading),
+                    "alignment_reference": "ground_heading",
+                    "catalog_motion_available": True,
+                })
+                return result
             result = self._line_offset_alignment(info or {}, result)
         if source == "ball" and command.valid and command.motion == "STRAIGHT":
             distance = command.distance_m

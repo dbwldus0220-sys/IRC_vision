@@ -217,6 +217,8 @@ def analyze_ground_line(
     result = {
         "ground_fit_segment": segment,
         "ground_fit_input_point_count": len(points),
+        "ground_fit_projected_point_count": 0,
+        "ground_fit_reason": "disabled",
         "ground_projection_enabled": bool(config["ground_projection_enabled"]),
         "ground_projection_valid": False,
         "ground_coordinate_frame": "robot_x_right_z_forward",
@@ -233,6 +235,7 @@ def analyze_ground_line(
     }
     if not result["ground_projection_enabled"]:
         return result
+    result["ground_fit_reason"] = "invalid_parameters"
     try:
         min_points = max(3, int(config["ground_fit_min_points"]))
         threshold = float(config["ground_fit_outlier_residual_m"])
@@ -242,11 +245,17 @@ def analyze_ground_line(
         if (not np.all(np.isfinite(limits)) or threshold <= 0 or lookahead <= 0
                 or limits[0] >= limits[1]):
             return result
+        if len(points) < min_points:
+            result["ground_fit_reason"] = "too_few_segment_points"
+            return result
         ground = project_line_points_to_ground(
             points, image_width, image_height, config,
         )
+        result["ground_fit_projected_point_count"] = len(ground)
         if len(ground) < min_points:
+            result["ground_fit_reason"] = "too_few_projected_points"
             return result
+        result["ground_fit_reason"] = "degenerate_forward_span"
         x, z = ground.T
         # Median pair slopes resist isolated bad detections without randomness.
         first, second = np.triu_indices(len(ground), k=1)
@@ -262,6 +271,7 @@ def analyze_ground_line(
         # Monotonic rejection terminates in at most N iterations.
         for _ in range(len(ground)):
             if np.count_nonzero(inliers) < min_points:
+                result["ground_fit_reason"] = "too_few_inliers"
                 return result
             fit_z, fit_x = z[inliers], x[inliers]
             centered_z = fit_z - np.mean(fit_z)
@@ -276,6 +286,7 @@ def analyze_ground_line(
                 break
             inliers = refined
         else:
+            result["ground_fit_reason"] = "fit_did_not_converge"
             return result
         heading = math.degrees(math.atan(slope))
         offset = intercept / math.hypot(1.0, slope)
@@ -285,10 +296,13 @@ def analyze_ground_line(
         if not np.all(np.isfinite([
             heading, offset, lookahead_lateral, steering, rmse,
         ])):
+            result["ground_fit_reason"] = "nonfinite_fit"
             return result
     except (TypeError, ValueError, OverflowError, np.linalg.LinAlgError):
+        result["ground_fit_reason"] = "invalid_projection_or_fit"
         return result
     result.update({
+        "ground_fit_reason": "ok",
         "ground_projection_valid": True,
         "ground_line_points_m": ground[inliers].tolist(),
         "ground_heading_error_deg": heading,
@@ -304,6 +318,35 @@ def analyze_ground_line(
             config["ground_calibration_image_height"]),
     })
     return result
+
+
+def two_point_ground_candidate(
+    points: list[LinePoint], image_width: int, image_height: int,
+    parameters: dict[str, Any], *, corner_start_index: int | None,
+) -> dict[str, Any] | None:
+    """Publish a provisional direction, never an executable ground fit.
+
+    Motion-side confirmation must check distinct stationary captures. Two points
+    cannot provide an outlier residual, so normal three-point fitting stays intact.
+    """
+    if type(corner_start_index) is not int or corner_start_index != 1 or len(points) < 2:
+        return None
+    config = {**GROUND_PROJECTION_DEFAULTS, **parameters}
+    if config["ground_projection_enabled"] is not True:
+        return None
+    try:
+        ground = project_line_points_to_ground(points[:2], image_width, image_height, config)
+        if len(ground) != 2:
+            return None
+        dx, dz = ground[1] - ground[0]
+        span = float(math.hypot(dx, dz))
+        # Short baselines amplify detection jitter; reversed depth is ambiguous.
+        if span < 0.04 or dz < 0.025:
+            return None
+        heading = math.degrees(math.atan2(dx, dz))
+        return {"heading_deg": heading, "points_m": ground.tolist(), "span_m": span}
+    except (TypeError, ValueError, OverflowError):
+        return None
 
 
 def calibrated_robot_center_x(
@@ -1667,6 +1710,18 @@ class YoloLineAnalyzer(DepthFrameConsumer, Node):
                     and result.get("corner_preview_held") is not True else None
                 ),
             ))
+            result["ground_two_point_candidate"] = (
+                two_point_ground_candidate(
+                    points, self.image_width, self.image_height,
+                    self.ground_projection_parameters,
+                    corner_start_index=result.get("corner_start_index"),
+                )
+                if result.get("ground_fit_reason") == "too_few_segment_points"
+                and result.get("ground_fit_input_point_count") == 2
+                and result.get("corner_preview_raw_detected") is True
+                and result.get("corner_preview_held") is not True
+                else None
+            )
 
             result["processing_ms"] = round(
                 (

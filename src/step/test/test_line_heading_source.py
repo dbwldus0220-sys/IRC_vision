@@ -1,7 +1,7 @@
 """Keep image and ground control separate and fit only the approaching segment."""
 import pytest
 from step.line_navigation_planner import LineNavigationPlanner, NavigationConfig, line_heading
-from step.yolo_line_analyzer import analyze_ground_line, LinePoint
+from step.yolo_line_analyzer import analyze_ground_line, two_point_ground_candidate, LinePoint
 
 
 def sample(**updates):
@@ -84,6 +84,41 @@ def test_recorded_corner_whole_fit_fails_but_approach_segment_succeeds():
 def test_too_short_or_invalid_near_segment_cannot_fall_back_to_whole_corner(index):
     fit=analyze_ground_line(corner_pixels(),1280,720,corner_start_index=index)
     assert not fit['ground_projection_valid']
+    assert fit['ground_fit_reason'] == 'too_few_segment_points'
+
+
+def test_recorded_october2_corner_has_only_two_pre_corner_points():
+    # Approximate markers from the 80 s screen recording, camera viewport at (532, 115).
+    xy = [(1375, 827), (1374, 746), (1398, 671), (1458, 614),
+          (1560, 570), (1638, 552), (1732, 533), (1800, 522)]
+    points = [LinePoint(x - 532, y - 115, 1.) for x, y in xy]
+    fit = analyze_ground_line(points, 1280, 720, corner_start_index=1)
+    assert not fit['ground_projection_valid']
+    assert fit['ground_fit_input_point_count'] == 2
+    assert fit['ground_fit_reason'] == 'too_few_segment_points'
+    assert fit['ground_heading_error_deg'] is None
+    candidate = two_point_ground_candidate(points, 1280, 720, {}, corner_start_index=1)
+    assert candidate is not None
+    assert candidate['span_m'] == pytest.approx(.04417, abs=.0001)
+    assert candidate['heading_deg'] == pytest.approx(8.604, abs=.02)
+
+
+@pytest.mark.parametrize('changes', [
+    {'corner_start_index': 0}, {'corner_start_index': True}, {'corner_start_index': None},
+    {'parameters': {'ground_projection_enabled': False}},
+    {'parameters': {'ground_homography': [0.] * 9}},
+])
+def test_two_point_candidate_rejects_invalid_projection_or_segment(changes):
+    args = dict(points=[LinePoint(843., 712., 1.), LinePoint(842., 631., 1.)],
+                image_width=1280, image_height=720, parameters={}, corner_start_index=1)
+    args.update(changes)
+    assert two_point_ground_candidate(**args) is None
+
+
+def test_two_point_candidate_rejects_short_baseline():
+    assert two_point_ground_candidate(
+        [LinePoint(843., 712., 1.), LinePoint(842., 710., 1.)],
+        1280, 720, {}, corner_start_index=1) is None
 
 
 def test_real_analyzer_selects_current_corner_prefix_and_image_planner_tracks(monkeypatch):

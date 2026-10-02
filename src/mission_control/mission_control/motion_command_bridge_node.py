@@ -34,6 +34,8 @@ class MotionCommandBridgeNode(Node):
     GOAL_CRAB_ACTIONS = frozenset(
         {"GOAL_CAMERA90_CRAB_LEFT", "GOAL_CAMERA90_CRAB_RIGHT"}
     )
+    GOAL_CRAB_PRE_DWELL_MARKER = "__GOAL_CRAB_PRE_DWELL__"
+    GOAL_CRAB_PRE_DWELL_SEC = 1.0
     GOAL_FORWARD_CRAB_PREPARE_MOTION_ID = "goal_forward_to_crab_right_90"
     GOAL_FINE_RIGHT_CRAB_PREPARE_MOTION_ID = "goal_fine_to_crab_right_90"
     POST_BALL_CAMERA_DWELL_MARKER = "__POST_BALL_CAMERA_DWELL__"
@@ -202,8 +204,20 @@ class MotionCommandBridgeNode(Node):
         "BALL_APPROACH_RECOVER_RIGHT_4": "line_recovery_right_4",
         "LINE_LOST_TURN_LEFT": "line_search_left_2",
         "LINE_LOST_TURN_RIGHT": "line_search_right_5",
+        "LINE_SPARSE_FORWARD": "line_forward_2",
+        "LINE_SPARSE_TURN_LEFT_1": "post_ball_line_turn_left_1",
+        "LINE_SPARSE_TURN_RIGHT_2": "post_ball_line_turn_right_2",
         **{
             f"LINE_OFFSET_TURN_{direction}_{count}": (
+                f"post_ball_line_turn_{direction.lower()}_{count}"
+            )
+            for direction, counts in (
+                ("LEFT", (1, 2, 3, 4, 5, 6)), ("RIGHT", (2, 3, 5, 7, 9)),
+            )
+            for count in counts
+        },
+        **{
+            f"LINE_HEADING_TURN_{direction}_{count}": (
                 f"post_ball_line_turn_{direction.lower()}_{count}"
             )
             for direction, counts in (
@@ -1134,7 +1148,12 @@ class MotionCommandBridgeNode(Node):
         command_id = payload.get("command_id")
         event_id = payload.get("event_id")
         if payload.get("valid") is not True:
-            self.get_logger().info("Command ignored: valid is not true")
+            command = payload.get("source_command")
+            checks = command.get("line_input_checks") if isinstance(command, dict) else None
+            self.get_logger().info(
+                f"Command ignored: valid is not true, action={action}, "
+                f"reason={payload.get('reason')}, line_input_checks={checks}"
+            )
             return
         if not self._is_integer(command_id):
             self.get_logger().warning(
@@ -1274,9 +1293,12 @@ class MotionCommandBridgeNode(Node):
                     prepare_motion = self.GOAL_FORWARD_CRAB_PREPARE_MOTION_ID
                 elif previous_motion.startswith("goal_camera_90_fine_forward_"):
                     prepare_motion = self.GOAL_FINE_RIGHT_CRAB_PREPARE_MOTION_ID
+            pickup_sequence = (
+                MotionCommandBridgeNode.GOAL_CRAB_PRE_DWELL_MARKER, motion_id,
+            )
             if prepare_motion is not None:
-                pickup_sequence = (prepare_motion, motion_id)
-                motion_id = prepare_motion
+                pickup_sequence = (prepare_motion,) + pickup_sequence
+            motion_id = pickup_sequence[0]
         elif (
             action == "SHOT"
             and self.goal_fine_forward_completed
@@ -1345,10 +1367,14 @@ class MotionCommandBridgeNode(Node):
         starts_with_hurdle_dwell = (
             action == "GO" and motion_id == self.HURDLE_PRE_GO_DWELL_MARKER
         )
+        starts_with_crab_dwell = (
+            motion_id == MotionCommandBridgeNode.GOAL_CRAB_PRE_DWELL_MARKER
+        )
         if (
             not defer_until_active_finishes
             and not starts_with_initial_align_checkpoint
             and not starts_with_hurdle_dwell
+            and not starts_with_crab_dwell
         ):
             self._publish_executor_request(
                 action=action,
@@ -1392,7 +1418,7 @@ class MotionCommandBridgeNode(Node):
             if starts_with_initial_align_checkpoint:
                 self.active_sequence_index = -1
                 self._start_pickup_initial_align_dwell()
-            elif starts_with_hurdle_dwell:
+            elif starts_with_hurdle_dwell or starts_with_crab_dwell:
                 self.active_sequence_index = -1
                 self._start_next_pickup_motion()
 
@@ -1408,6 +1434,22 @@ class MotionCommandBridgeNode(Node):
 
         next_motion_id = self.active_pickup_sequence[next_index]
         self.active_sequence_index = next_index
+        if next_motion_id == MotionCommandBridgeNode.GOAL_CRAB_PRE_DWELL_MARKER:
+            self.active_motion_id = next_motion_id
+            self.active_dwell_until = (
+                time.monotonic() + MotionCommandBridgeNode.GOAL_CRAB_PRE_DWELL_SEC
+            )
+            self.publish_motion_status(
+                status="RUNNING",
+                command_id=self.active_command_id,
+                event_id=self.active_event_id,
+                request_id=self.active_request_id,
+                motion_id=next_motion_id,
+                action=self.active_action,
+                message="holding still for one second before goal crab step",
+            )
+            self.get_logger().info("Goal crab pre-motion dwell started: 1.0s")
+            return True
         if next_motion_id == MotionCommandBridgeNode.POST_BALL_CAMERA_DWELL_MARKER:
             self.active_motion_id = next_motion_id
             self.active_dwell_until = self.post_ball_camera_pause_until

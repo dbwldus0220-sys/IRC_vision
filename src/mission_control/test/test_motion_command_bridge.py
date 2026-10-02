@@ -254,6 +254,8 @@ def decoded_messages(publisher):
 
 def complete_active_motion(bridge, status="SUCCEEDED", error_code=""):
     """Complete preparation, if present, then the original executor motion."""
+    if bridge.active_motion_id == MotionCommandBridgeNode.GOAL_CRAB_PRE_DWELL_MARKER:
+        bridge._check_atomic_dwell(bridge.active_dwell_until)
     if bridge.pending_turn_request is not None:
         bridge.executor_status_callback(executor_status(
             status=status, error_code=error_code,
@@ -519,6 +521,9 @@ EXPECTED_PRODUCTION_ACTIONS = {
     "BALL_LOST_FORWARD_4": "ball_camera_down_forward_4",
     "LINE_LOST_TURN_LEFT": "line_search_left_2",
     "LINE_LOST_TURN_RIGHT": "line_search_right_5",
+    "LINE_SPARSE_FORWARD": "line_forward_2",
+    "LINE_SPARSE_TURN_LEFT_1": "post_ball_line_turn_left_1",
+    "LINE_SPARSE_TURN_RIGHT_2": "post_ball_line_turn_right_2",
     "LINE_LOST_TURN_LEFT_1": "post_ball_line_turn_left_1",
     "LINE_LOST_TURN_LEFT_3": "post_ball_line_turn_left_3",
     "LINE_LOST_TURN_RIGHT_2": "post_ball_line_turn_right_2",
@@ -548,6 +553,9 @@ for count in (2, 3, 5, 7, 9):
         f"LINE_OFFSET_TURN_RIGHT_{count}"
     ] = f"post_ball_line_turn_right_{count}"
     EXPECTED_PRODUCTION_ACTIONS[
+        f"LINE_HEADING_TURN_RIGHT_{count}"
+    ] = f"post_ball_line_turn_right_{count}"
+    EXPECTED_PRODUCTION_ACTIONS[
         f"GOAL_CAMERA90_TURN_RIGHT_{count}"
     ] = f"goal_camera_90_turn_right_{count}"
 for count in (2, 3, 5, 7, 9):
@@ -564,6 +572,9 @@ for count in (1, 2, 3, 4, 5, 6):
     ] = f"post_ball_line_turn_left_{count}"
     EXPECTED_PRODUCTION_ACTIONS[
         f"LINE_OFFSET_TURN_LEFT_{count}"
+    ] = f"post_ball_line_turn_left_{count}"
+    EXPECTED_PRODUCTION_ACTIONS[
+        f"LINE_HEADING_TURN_LEFT_{count}"
     ] = f"post_ball_line_turn_left_{count}"
 for count in (1, 2, 3, 4, 5, 6):
     EXPECTED_PRODUCTION_ACTIONS[
@@ -594,6 +605,9 @@ def test_supported_action_builds_executor_request(action, motion_id):
     bridge = FakeBridge()
 
     bridge.navigation_command_callback(navigation_message(action=action))
+    if action in MotionCommandBridgeNode.GOAL_CRAB_ACTIONS:
+        assert not bridge.executor_request_publisher.messages
+        bridge._check_atomic_dwell(bridge.active_dwell_until)
     if action == "GO":
         assert bridge.active_motion_id == "pickup_fine_forward_0"
         for _ in range(2):
@@ -2492,8 +2506,8 @@ def test_goal_crab_prepares_after_completed_approach(approach, prepare, directio
         assert bridge.active_motion_id == prepare
         assert bridge.active_action == action
         complete_active_motion(bridge)
-        assert bridge.active_motion_id == crab
-        assert bridge.active_dwell_until is None
+        assert bridge.active_motion_id == MotionCommandBridgeNode.GOAL_CRAB_PRE_DWELL_MARKER
+        deadline = bridge.active_dwell_until
         assert not any(m["command_id"] == 2 and m["status"] == "SUCCEEDED"
                        for m in decoded_messages(bridge.motion_status_publisher))
 
@@ -2501,6 +2515,9 @@ def test_goal_crab_prepares_after_completed_approach(approach, prepare, directio
         bridge.executor_status_callback(executor_status(
             status="SUCCEEDED", command_id=2, request_id=2, motion_id=prepare,
         ))
+        assert bridge.active_dwell_until == deadline
+    assert bridge.active_motion_id == MotionCommandBridgeNode.GOAL_CRAB_PRE_DWELL_MARKER
+    bridge._check_atomic_dwell(bridge.active_dwell_until)
     assert bridge.motion_in_progress and bridge.active_motion_id == crab
     complete_active_motion(bridge)
     terminal = decoded_messages(bridge.motion_status_publisher)[-1]
@@ -2508,11 +2525,52 @@ def test_goal_crab_prepares_after_completed_approach(approach, prepare, directio
 
     # Consecutive crab corrections do not repeat the approach preparation.
     bridge.navigation_command_callback(navigation_message(action=action, command_id=3))
+    assert bridge.active_motion_id == MotionCommandBridgeNode.GOAL_CRAB_PRE_DWELL_MARKER
+    bridge._check_atomic_dwell(bridge.active_dwell_until)
     assert bridge.active_motion_id == crab
     expected = [bridge.motion_id_for_action(approach)]
     if direction == "RIGHT":
         expected.append(prepare)
     assert [m["motion_id"] for m in decoded_messages(bridge.executor_request_publisher)] == expected + [crab, crab]
+
+
+@pytest.mark.parametrize("direction", ["LEFT", "RIGHT"])
+@pytest.mark.parametrize("after_fine", [False, True])
+def test_goal_crab_waits_full_second_after_preparation(monkeypatch, direction, after_fine):
+    now = [10.0]
+    monkeypatch.setattr(
+        "mission_control.motion_command_bridge_node.time.monotonic", lambda: now[0],
+    )
+    bridge = FakeBridge()
+    if after_fine:
+        bridge.navigation_command_callback(navigation_message(
+            action="GOAL_CAMERA90_FINE_FORWARD_1", command_id=1,
+        ))
+        complete_active_motion(bridge)
+    action = f"GOAL_CAMERA90_CRAB_{direction}"
+    bridge.navigation_command_callback(navigation_message(action=action, command_id=2))
+    if after_fine and direction == "RIGHT":
+        assert bridge.active_motion_id == "goal_fine_to_crab_right_90"
+        now[0] = 12.0
+        complete_active_motion(bridge)
+    deadline = now[0] + 1.0
+    assert bridge.active_dwell_until == pytest.approx(deadline)
+    before = len(bridge.executor_request_publisher.messages)
+    bridge._check_atomic_dwell(deadline - .001)
+    assert len(bridge.executor_request_publisher.messages) == before
+    assert bridge.motion_in_progress
+    bridge.navigation_command_callback(navigation_message(action="STRAIGHT", command_id=3))
+    assert decoded_messages(bridge.motion_status_publisher)[-1]["error_code"] == "ATOMIC_SEQUENCE_LOCKED"
+    assert bridge.active_dwell_until == deadline
+    bridge._check_atomic_dwell(deadline)
+    assert len(bridge.executor_request_publisher.messages) == before + 1
+    assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == (
+        f"goal_camera_90_crab_{direction.lower()}"
+    )
+    bridge._check_atomic_dwell(deadline + 1.0)
+    assert len(bridge.executor_request_publisher.messages) == before + 1
+    complete_active_motion(bridge)
+    assert not bridge.motion_in_progress
 
 
 @pytest.mark.parametrize("approaches,prepare", [
@@ -2572,6 +2630,8 @@ def test_goal_crab_does_not_prepare_from_old_forward_history(intervening, direct
         bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
         complete_active_motion(bridge)
     bridge.navigation_command_callback(navigation_message(action=f"GOAL_CAMERA90_CRAB_{direction}", command_id=3))
+    assert bridge.active_motion_id == MotionCommandBridgeNode.GOAL_CRAB_PRE_DWELL_MARKER
+    bridge._check_atomic_dwell(bridge.active_dwell_until)
     assert bridge.active_motion_id == f"goal_camera_90_crab_{direction.lower()}"
 
 

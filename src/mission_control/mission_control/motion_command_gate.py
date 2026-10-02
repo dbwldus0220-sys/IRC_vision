@@ -25,8 +25,18 @@ GENERAL_ACTIONS = frozenset(
         "BALL_APPROACH_RECOVER_RIGHT_4",
         "LINE_LOST_TURN_LEFT",
         "LINE_LOST_TURN_RIGHT",
+        "LINE_SPARSE_FORWARD",
+        "LINE_SPARSE_TURN_LEFT_1",
+        "LINE_SPARSE_TURN_RIGHT_2",
         *{
             f"LINE_OFFSET_TURN_{direction}_{count}"
+            for direction, counts in (
+                ("LEFT", (1, 2, 3, 4, 5, 6)), ("RIGHT", (2, 3, 5, 7, 9)),
+            )
+            for count in counts
+        },
+        *{
+            f"LINE_HEADING_TURN_{direction}_{count}"
             for direction, counts in (
                 ("LEFT", (1, 2, 3, 4, 5, 6)), ("RIGHT", (2, 3, 5, 7, 9)),
             )

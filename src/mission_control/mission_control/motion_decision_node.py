@@ -19,7 +19,8 @@ from std_msgs.msg import String
 
 from step.approach_distance import APPROACH_DISTANCE_LIMITS_M
 from step.approach_distance import BALL_HURDLE_FINE_DISTANCE_M
-from step.line_navigation_planner import line_heading
+from step.line_navigation_planner import line_heading, straight_heading_is_aligned
+from .sparse_line_recovery import SparseLineRecovery
 from step.hurdle_navigation_planner import HurdleNavigationPlanner
 
 from .ball_approach_observation import BallApproachObservation
@@ -278,7 +279,7 @@ class MotionDecisionNode(Node):
         )
         self.declare_parameter(
             "pickup_fine_align_bottom_distance_px",
-            120,
+            140,
         )
         self.declare_parameter("ball_lost_stop_sec", 0.35)
         self.declare_parameter("ball_recovery_timeout_sec", 8.0)
@@ -2032,6 +2033,10 @@ class MotionDecisionNode(Node):
                 if limiter is not None and status != "SUCCEEDED":
                     limiter.record_failure(completed_source, str(action))
                 if completed_source == "line":
+                    sparse = getattr(self, "sparse_line_recovery", None)
+                    if sparse is not None and str(action).startswith("LINE_SPARSE_"):
+                        sparse.failed = status != "SUCCEEDED"
+                        sparse.reset_observations()
                     self.line_motion_completed_at = status_receive_monotonic
                     self.line_motion_min_rgb_stamp_ns = (
                         MotionDecisionNode._current_ros_time_ns(self)
@@ -2069,7 +2074,8 @@ class MotionDecisionNode(Node):
                         + MotionDecisionNode.CORRECTION_POST_MOTION_DWELL_SEC
                     )
                     self.correction_post_motion_source = completed_source
-                    self.line_offset_alignment_refresh_pending = str(action).startswith("LINE_OFFSET_TURN_")
+                    self.line_offset_alignment_refresh_pending = str(action).startswith(
+                        ("LINE_OFFSET_TURN_", "LINE_HEADING_TURN_", "LINE_SPARSE_"))
                 self.active_general_source = None
                 if (
                     completed_source == "hurdle"
@@ -2259,7 +2265,7 @@ class MotionDecisionNode(Node):
                     )
                     if status == "SUCCEEDED":
                         MotionDecisionNode._finish_line_motion_capture(self)
-                        if str(action).startswith(("LINE_LOST_TURN_", "LINE_OFFSET_TURN_", "RECOVER_")):
+                        if str(action).startswith(("LINE_LOST_TURN_", "LINE_OFFSET_TURN_", "LINE_HEADING_TURN_", "LINE_SPARSE_", "RECOVER_")):
                             MotionDecisionNode._invalidate_post_ball_line_input(self)
                         if post_ball_line_correction:
                             self.post_ball_line_dwell_until = (
@@ -2821,6 +2827,28 @@ class MotionDecisionNode(Node):
             })
         metadata = {**decision.source_command, **corner, "corner_from_memory": True}
         if not fresh_frame or not MotionDecisionNode._line_frame_is_usable(self, info):
+            # A visible line can still be rejected by capture-time checks.
+            # Preserve the values needed to distinguish occlusion from clock skew.
+            metadata["line_input_checks"] = {
+                "received_age_sec": (
+                    round(time.monotonic() - received_at, 6)
+                    if received_at is not None else None
+                ),
+                "timeout_sec": self.timeouts["line"],
+                "received_after_motion": (
+                    completed_at is None
+                    or (received_at is not None and received_at > completed_at)
+                ),
+                "capture_stamp_valid": valid_stamp,
+                "capture_age_sec": (
+                    round((ros_now - stamp) / 1e9, 6)
+                    if ros_now is not None and valid_stamp else None
+                ),
+                "captured_after_motion": (
+                    minimum_stamp is None or (valid_stamp and stamp > minimum_stamp)
+                ),
+                "geometry_usable": MotionDecisionNode._line_frame_is_usable(self, info or {}),
+            }
             return MotionDecision(
                 phase=self.mission_phase, source="line", action="WAIT", valid=False,
                 reason="line_corner_waiting_for_usable_line",
@@ -2851,6 +2879,13 @@ class MotionDecisionNode(Node):
             corner_start_distance_m=distance, corner_turn_distance_m=turn_distance,
         )
         if distance > turn_distance:
+            if not straight_heading_is_aligned(info, self.planner.line_planner.config):
+                return replace(
+                    decision, action="WAIT", valid=False,
+                    reason="line_corner_approach_heading_not_aligned",
+                    sdk_motion_requested=False, requires_ack=False,
+                    source_command={**metadata, "valid": False, "motion": "STOP"},
+                )
             # A far bend may postpone a turn, but cannot command a long blind walk.
             return replace(
                 decision, action="STRAIGHT_1", reason="line_corner_turn_too_far",
@@ -3005,6 +3040,8 @@ class MotionDecisionNode(Node):
         """Hold after turns, fine steps, crab steps and retreats in every mission."""
         if action is None or action.startswith("RECOVER_"):
             return False
+        if action.startswith("LINE_SPARSE_"):
+            return True
         return action in {
             "LEFT", "RIGHT", "TURN_LEFT", "TURN_RIGHT", "ALIGN_LEFT", "ALIGN_RIGHT",
             "STRAIGHT_0", "SLOW_APPROACH", "FINE_FORWARD_STEP", "RETREAT_GOAL",
@@ -3242,6 +3279,29 @@ class MotionDecisionNode(Node):
             now
         )
 
+        sparse = getattr(self, "sparse_line_recovery", None)
+        if sparse is None:
+            sparse = self.sparse_line_recovery = SparseLineRecovery()
+        line_info = observations.get("line")
+        stamp = MotionDecisionNode._detection_stamp_ns(line_info or {})
+        if stamp is None:
+            stamp = (line_info or {}).get("rgb_stamp_ns")
+        line_config = getattr(getattr(self.planner, "line_planner", None), "config", None)
+        sparse_allowed = (
+            self.mission_phase in {"AUTO", "LINE_TRACK"}
+            and getattr(line_config, "heading_source", None) == "ground"
+            and not queue_while_locked and not self.general_motion_gate.locked
+            and self.active_special_command_id is None
+            and not getattr(self, "executor_active", False)
+            and not self.mission_complete
+        )
+        observations["line"] = sparse.prepare(
+            line_info, stamp=stamp, ros_now=MotionDecisionNode._current_ros_time_ns(self),
+            now=now, max_age=getattr(self, "timeouts", {}).get("line", 0.),
+            stationary=sparse_allowed,
+            min_quality=getattr(line_config, "min_line_quality", 1.),
+        )
+
         self._rearm_absent_terminal_targets(observations)
 
         decision = precomputed_decision
@@ -3253,6 +3313,7 @@ class MotionDecisionNode(Node):
         decision = MotionDecisionNode._apply_pending_line_corner(
             self, decision, observations.get("line"),
         )
+        decision = sparse.constrain(decision, observations.get("line"), now)
         self.last_candidate_decision = decision
 
         decision = self._suppress_duplicate_terminal_action(
@@ -3536,6 +3597,7 @@ class MotionDecisionNode(Node):
         if decision.valid and decision.source == "hurdle" and decision.action == "GO":
             self.pending_hurdle_final_sequence = None
         limiter.record_published(decision, observations)
+        sparse.published(decision, MotionDecisionNode._current_ros_time_ns(self))
         if (
             decision.valid and decision.source == "line"
             and decision.source_command.get("lost_search_stage") in {"INITIAL", "EXTEND", "REVERSE"}
@@ -3665,6 +3727,10 @@ class MotionDecisionNode(Node):
 
             payload = {
                 "phase": self.mission_phase,
+                "sparse_line": (
+                    self.sparse_line_recovery.diagnostics()
+                    if getattr(self, "sparse_line_recovery", None) is not None else None
+                ),
                 "safety": self.safety_interlock.snapshot.to_dict(),
                 "source": (
                     selected.source.upper() if selected is not None else "NONE"
@@ -3697,6 +3763,9 @@ class MotionDecisionNode(Node):
                     "heading_source": heading_source,
                     "image_heading_deg": line_heading(line_info, "image"),
                     "ground_heading_deg": line_heading(line_info, "ground"),
+                    "ground_fit_reason": line_info.get("ground_fit_reason"),
+                    "straight_heading_aligned": straight_heading_is_aligned(line_info, line_config),
+                    "in_place_ground_heading_deg": line_config.in_place_ground_heading_deg,
                     "center_offset": center_offset,
                     "offset_reference_steering_deg": line_info.get("offset_reference_steering_deg"),
                     "lateral_offset_px": line_info.get("lateral_offset_px"),
@@ -3832,7 +3901,7 @@ class MotionDecisionNode(Node):
         }
         line_turn = decision.source == "line" and (
             decision.action in {"LEFT", "RIGHT"}
-            or decision.action.startswith(("LINE_LOST_TURN_", "LINE_OFFSET_TURN_"))
+            or decision.action.startswith(("LINE_LOST_TURN_", "LINE_OFFSET_TURN_", "LINE_HEADING_TURN_", "LINE_SPARSE_"))
             or decision.action.startswith(("POST_BALL_LINE_TURN_", "POST_SHOT_LINE_TURN_"))
         )
         # Keep elapsed stationary time while valid geometry is reconfirmed.

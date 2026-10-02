@@ -219,6 +219,7 @@ def test_invalid_ground_fit_keeps_all_keys_with_null_numbers(
         "ground_projection_enabled", "ground_projection_valid",
         "ground_coordinate_frame", "ground_line_points_m",
         "ground_fit_segment", "ground_fit_input_point_count",
+        "ground_fit_reason", "ground_fit_projected_point_count",
     }
     assert all(value is None for key, value in result.items() if key not in metadata)
     json.dumps(result, allow_nan=False)

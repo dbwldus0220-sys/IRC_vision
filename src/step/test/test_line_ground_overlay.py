@@ -18,6 +18,9 @@ def test_ground_metrics_preserve_existing_rows_and_fit_panel(
         "filtered_heading_error_deg": 7.0,
         "filtered_lateral_offset_norm": 0.2,
         "ground_projection_valid": ground_valid,
+        "ground_fit_reason": "ok" if ground_valid else "too_few_segment_points",
+        "ground_fit_input_point_count": 2,
+        "ground_fit_projected_point_count": 0,
         "ground_heading_error_deg": -0.326,
         "ground_lateral_offset_m": 0.0015,
         "ground_steering_angle_deg": -0.151,
@@ -50,6 +53,9 @@ def test_ground_metrics_preserve_existing_rows_and_fit_panel(
         assert label in rows
     for label in ("Ground head ", "Ground off  ", "Steering    ", "Ground RMSE "):
         assert (rows[label].strip() != "N/A") == ground_valid
+    if not ground_valid:
+        assert rows["Ground fit"].strip() == "too_few_segment_points"
+        assert rows["Fit points"].strip() == "2 -> 0"
     (_, top), (_, bottom) = rectangles[0]
     assert bottom <= height - 8
     assert all(top < origin[1] < bottom for _, origin in texts)

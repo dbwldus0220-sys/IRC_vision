@@ -67,6 +67,59 @@ def start_line(node):
     return command
 
 
+@pytest.mark.parametrize('capture_age_sec,held,ground_valid,expected', [
+    (.1, False, True, 'RECOVER_LEFT_TURN_LEFT_4'),
+    (.1, True, True, 'RECOVER_LEFT_TURN_LEFT_4'),
+    (-.1, False, True, 'WAIT'),
+    (.6, False, True, 'WAIT'),
+    (.1, True, False, 'WAIT'),
+])
+def test_visible_corner_separates_clock_rejection_from_occlusion(
+    clock, monkeypatch, capture_age_sec, held, ground_valid, expected,
+):
+    node = CornerHarness(phase='LINE_TRACK')
+    ros_now = 100_000_000_000
+    monkeypatch.setattr(MotionDecisionNode, '_current_ros_time_ns',
+                        staticmethod(lambda _: ros_now))
+    stamp = ros_now - round(capture_age_sec * 1e9)
+    info = corner_info(
+        ground_heading_error_deg=-14.26, heading_error_deg=-10.6,
+        filtered_lateral_offset_norm=-.055, turn_angle_deg=51.,
+        corner_start_distance_m=1.15, corner_preview_held=held,
+        ground_projection_valid=ground_valid,
+        stamp={'sec': stamp // 10**9, 'nanosec': stamp % 10**9},
+    )
+    node.latest_time['line'] = clock[0]
+    node.pending_line_corner = {
+        'corner_direction': 'RIGHT', 'motion_completed_at': clock[0] - 2,
+        'minimum_rgb_stamp_ns': ros_now - 2_000_000_000,
+    }
+    decision = node.planner.plan('LINE_TRACK', {'line': info}, .1)
+    result = MotionDecisionNode._apply_pending_line_corner(node, decision, info)
+    assert result.action == expected
+    if expected == 'WAIT':
+        assert result.reason == 'line_corner_waiting_for_usable_line'
+        checks = result.source_command['line_input_checks']
+        assert checks['capture_age_sec'] == pytest.approx(capture_age_sec)
+        assert checks['received_age_sec'] == 0.
+        assert checks['geometry_usable'] is ground_valid
+        assert checks['captured_after_motion'] is True
+
+
+@pytest.mark.parametrize('direction', ['LEFT', 'RIGHT'])
+def test_far_corner_cannot_convert_misaligned_turn_to_forward(clock, direction):
+    node = CornerHarness(phase='LINE_TRACK')
+    heading = 30. if direction == 'RIGHT' else -30.
+    info = corner_info(direction, ground_heading_error_deg=heading,
+                       corner_start_distance_m=.4)
+    receive_line(node, clock, info)
+    decision = node.planner.plan('LINE_TRACK', {'line': info}, .1)
+    assert decision.action == direction
+    gated = MotionDecisionNode._apply_pending_line_corner(node, decision, info)
+    assert not gated.valid and gated.action == 'WAIT'
+    assert gated.reason == 'line_corner_approach_heading_not_aligned'
+
+
 @pytest.mark.parametrize('phase', ['AUTO', 'LINE_TRACK'])
 @pytest.mark.parametrize('direction', ['LEFT', 'RIGHT'])
 @pytest.mark.parametrize('after_motion', [{'detected': False}, None])

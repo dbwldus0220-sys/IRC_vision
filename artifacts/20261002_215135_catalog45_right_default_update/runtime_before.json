@@ -1176,7 +1176,7 @@
       "name": "찐라인복귀우회전45 도(4회)",
       "max_seq_ms": 7045,
       "repeat_count": 4,
-      "playback_speed": 1.0,
+      "playback_speed": 1.05,
       "repeatable": true,
       "start_pose": "오들418",
       "end_pose": "오뒤412",

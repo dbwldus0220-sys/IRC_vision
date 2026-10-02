@@ -1692,6 +1692,12 @@ class Yolo26Detector(Node):
             return f"{prefix}STRAIGHT {int(level_text)}"
 
         if normalized_source == "line":
+            if normalized_action.startswith("LINE_SPARSE_"):
+                suffix = normalized_action.removeprefix("LINE_SPARSE_")
+                return ("LINE / 2-POINT " + suffix.replace("_", " "), (0, 165, 255))
+            if normalized_action.startswith("LINE_HEADING_TURN_"):
+                suffix = normalized_action.removeprefix("LINE_HEADING_TURN_")
+                return ("LINE / IN-PLACE TURN " + suffix.replace("_", " "), (130, 105, 0))
             label = straight_label("") or line_labels.get(normalized_action)
             if label is None:
                 base_action, separator, suffix_text = (
@@ -2225,9 +2231,18 @@ class Yolo26Detector(Node):
                 )
             )
         rows[5:5] = ground_rows
+        if info and not ground_valid and info.get("ground_fit_reason"):
+            rows.append("Ground fit: " + str(info["ground_fit_reason"]))
+            rows.append(
+                "Fit points: " + str(info.get("ground_fit_input_point_count", 0))
+                + " -> " + str(info.get("ground_fit_projected_point_count", 0)))
         control = (decision or {}).get("source_command", {})
         if planner_source == "LINE" and control.get("heading_source") in {"image", "ground"}:
             rows.append("Control head: " + control["heading_source"].upper())
+        if planner_source == "LINE" and control.get("sparse_line_motion") is True:
+            rows.append("2-point head: " + self._metric_text(
+                self._number(control, "two_point_heading_deg"), "deg", 1, signed=True))
+            rows.append("2-point mode: " + str(control.get("ground_fit_mode", "UNKNOWN")))
 
         panel_x = max(12, width - panel_width - 12)
         panel_y = 44

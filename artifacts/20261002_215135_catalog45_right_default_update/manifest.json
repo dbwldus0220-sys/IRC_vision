@@ -1,0 +1,32 @@
+{
+  "source_path": "/home/jet/Downloads/robot_motions(45).json",
+  "source_sha256": "6961f279adf31a58e76fdca2929e11cbd4ba3324cc83921e2741a9444dc51dde",
+  "before_sha256": "b687af615e9ae884139ad3835155e9afb85df3858bdd8e178a78d728c12fa458",
+  "after_sha256": "c324a00c2755b12521b55c36f1fb1406d7c4f4d8d0077306f5d87fb65a1b534d",
+  "requested_names": [
+    "찐라인복귀우회전45 도(4회)",
+    "찐미세오뒤에서기본자세"
+  ],
+  "changed_names": [
+    "찐라인복귀우회전45 도(4회)"
+  ],
+  "right_turn_playback_speed": {
+    "before": 1.05,
+    "after": 1.0
+  },
+  "default_pose_reimport_matches_existing": true,
+  "runtime_policy": {
+    "position_tolerance_deg": 5.0,
+    "fixed_joint_angles_deg": {
+      "4": 18.0,
+      "5": -18.0
+    }
+  },
+  "verification": {
+    "unrelated_motions_unchanged": true,
+    "aliases_unchanged": true,
+    "source_unchanged": true,
+    "installed_catalog_matches": true
+  },
+  "motion_count": 82
+}

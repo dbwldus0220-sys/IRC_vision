@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import math
 from typing import Any
 
@@ -51,6 +51,9 @@ class NavigationConfig:
     recovery_exit_offset_norm: float = 0.12
     command_duration_sec: float = 0.40
     heading_source: str = "ground"
+    in_place_ground_heading_deg: float = 45.0
+    straight_max_heading_deg: float = 10.0
+    straight_max_image_heading_deg: float = 25.0
 
 
 @dataclass(frozen=True)
@@ -181,6 +184,21 @@ def line_heading(line_info: dict[str, Any], source: str) -> float | None:
         raise ValueError("line heading source must be image or ground")
     heading = _number(line_info, "filtered_heading_error_deg")
     return heading if heading is not None else _number(line_info, "heading_error_deg")
+
+
+def straight_heading_is_aligned(line_info: dict[str, Any], config: NavigationConfig) -> bool:
+    """Require aligned local geometry before any discrete forward motion.
+
+    Raw image slope only vetoes forward motion; it never supplies ground yaw.
+    This prevents a lagging image filter from hiding a newly visible cross-line.
+    """
+    heading = line_heading(line_info, config.heading_source)
+    if heading is None or abs(heading) > config.straight_max_heading_deg:
+        return False
+    image_heading = _number(line_info, "heading_error_deg")
+    if image_heading is None:
+        image_heading = _number(line_info, "filtered_heading_error_deg")
+    return image_heading is None or abs(image_heading) <= config.straight_max_image_heading_deg
 
 
 def _recovery_turn_level(heading_error_deg: float) -> int:
@@ -348,6 +366,18 @@ class LineNavigationPlanner:
         if quality < self.config.min_line_quality:
             return self.stop("low_line_quality")
 
+        if (self.config.heading_source == "ground"
+                and abs(heading) > self.config.in_place_ground_heading_deg):
+            direction = "RIGHT" if heading > 0.0 else "LEFT"
+            # The mission planner resolves this request using calibrated catalog yaw.
+            return replace(
+                self.stop("line_large_ground_heading"),
+                valid=True, motion=f"LINE_HEADING_TURN_{direction}",
+                heading_error_deg=heading, heading_component_deg=heading,
+                lateral_offset_norm=offset, line_quality=quality,
+                target_heading_change_deg=heading,
+            )
+
         preview_turn = _number(line_info, "turn_angle_deg")
         path_turn_delta = _number(line_info, "path_turn_delta_deg")
         turn_consistency = _number(line_info, "turn_consistency")
@@ -456,6 +486,16 @@ class LineNavigationPlanner:
         turn_confirmation_pending = bool(
             motion == "STRAIGHT" and requested_motion in {"LEFT", "RIGHT"}
         )
+        if motion == "STRAIGHT" and not straight_heading_is_aligned(line_info, self.config):
+            # Wait without losing the evidence needed to confirm a turn next frame.
+            candidate, hits = self.turn_candidate, self.turn_candidate_hits
+            stopped = self.stop("straight_heading_not_aligned")
+            self.turn_candidate, self.turn_candidate_hits = candidate, hits
+            return replace(
+                stopped, heading_error_deg=heading, heading_component_deg=heading,
+                lateral_offset_norm=offset, preview_turn_deg=preview_turn,
+                line_quality=quality,
+            )
         control_steering_error = (
             0.0
             if (

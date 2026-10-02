@@ -4,6 +4,7 @@ import pytest
 
 from step.line_navigation_planner import LineNavigationPlanner
 from step.line_navigation_planner import NavigationConfig
+from step.line_navigation_planner import straight_heading_is_aligned
 
 
 def line_info(**overrides):
@@ -21,6 +22,16 @@ def line_info(**overrides):
     }
     sample.update(overrides)
     return sample
+
+
+@pytest.mark.parametrize("heading,image_heading,allowed", [
+    (10., 25., True), (-10., -25., True),
+    (10.001, 0., False), (-10.001, 0., False),
+    (0., 25.001, False), (0., -25.001, False),
+])
+def test_straight_heading_boundaries(heading, image_heading, allowed):
+    info = line_info(ground_heading_error_deg=heading, heading_error_deg=image_heading)
+    assert straight_heading_is_aligned(info, NavigationConfig()) is allowed
 
 
 def test_straight_command_contains_speed_and_distance():
@@ -98,8 +109,8 @@ def test_local_line_tracking_blocks_generic_turn_even_without_preview(direction)
 
     for _ in range(5):
         command = planner.plan(sample, 0.1, allow_corner_turns=False)
-        assert command.motion == "STRAIGHT"
-        assert command.reason == "corner_turn_suppressed"
+        assert command.motion == "STOP"
+        assert command.reason == "straight_heading_not_aligned"
     assert planner.turn_candidate is None
 
 
@@ -282,7 +293,7 @@ def test_far_curve_turn_starts_after_near_heading_reaches_corner():
     assert command.motion == "RIGHT"
 
 
-def test_conflicting_heading_and_preview_holds_slow_straight():
+def test_conflicting_heading_and_preview_stops_instead_of_walking():
     planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
 
     command = planner.plan(
@@ -294,10 +305,10 @@ def test_conflicting_heading_and_preview_holds_slow_straight():
         0.1,
     )
 
-    assert command.motion == "STRAIGHT"
-    assert command.reason == "conflicting_heading_and_preview"
+    assert command.motion == "STOP"
+    assert command.reason == "straight_heading_not_aligned"
     assert command.steering_error_deg == 0.0
-    assert command.linear_speed_mps == planner.config.min_linear_speed_mps
+    assert command.linear_speed_mps == 0.0
 
 
 def test_turn_requires_three_consecutive_frames():
@@ -311,8 +322,8 @@ def test_turn_requires_three_consecutive_frames():
     commands = [planner.plan(sample, 0.1) for _ in range(3)]
 
     assert [command.motion for command in commands] == [
-        "STRAIGHT",
-        "STRAIGHT",
+        "STOP",
+        "STOP",
         "RIGHT",
     ]
 
@@ -347,7 +358,7 @@ def test_large_offset_without_turn_heading_stays_straight(offset, heading):
         (0.593, -32.0, "RECOVER_RIGHT_TURN_LEFT_4", -1),
         (0.366, 15.0, "RECOVER_RIGHT_TURN_RIGHT_4", 1),
         (-0.40, -15.0, "RECOVER_LEFT_TURN_LEFT_4", -1),
-        (-0.40, 15.0, "STRAIGHT", 1),
+        (-0.40, 15.0, "STOP", 0),
     ],
 )
 def test_recovery_separates_line_side_from_turn_direction(
@@ -369,7 +380,10 @@ def test_recovery_separates_line_side_from_turn_direction(
     )
 
     assert command.motion == expected
-    assert command.angular_speed_rad_s * angular_sign > 0.0
+    if angular_sign:
+        assert command.angular_speed_rad_s * angular_sign > 0.0
+    else:
+        assert command.angular_speed_rad_s == command.linear_speed_mps == 0.0
 
 
 def test_straight_line_heading_error_uses_recovery_not_plain_left():
@@ -482,7 +496,7 @@ def test_off_center_robot_uses_asymmetric_heading_deadband(
         (90.0, 6),
     ],
 )
-def test_right_recovery_turn_uses_one_four_repeat_step_for_all_heading_levels(
+def test_right_recovery_switches_to_stationary_above_45_degrees(
     heading,
     expected_level,
 ):
@@ -499,6 +513,11 @@ def test_right_recovery_turn_uses_one_four_repeat_step_for_all_heading_levels(
     )
     payload = command.to_dict()
 
+    if heading > 45.0:
+        assert command.motion == "LINE_HEADING_TURN_RIGHT"
+        assert command.linear_speed_mps == command.lateral_speed_mps == 0.0
+        assert payload["recovery_side"] is None
+        return
     expected_suffix = 4
     assert command.motion == (
         f"RECOVER_RIGHT_TURN_RIGHT_{expected_suffix}"
@@ -575,8 +594,8 @@ def test_large_heading_toward_center_uses_confirmed_plain_right():
     commands = [planner.plan(line, 0.1) for _ in range(3)]
 
     assert [command.motion for command in commands] == [
-        "STRAIGHT",
-        "STRAIGHT",
+        "STOP",
+        "STOP",
         "RIGHT",
     ]
     assert commands[-1].reason == "line_tracking"
@@ -597,8 +616,8 @@ def test_reliable_opposite_preview_still_suppresses_plain_right():
         0.1,
     )
 
-    assert command.motion == "STRAIGHT"
-    assert command.reason == "conflicting_heading_and_preview"
+    assert command.motion == "STOP"
+    assert command.reason == "straight_heading_not_aligned"
 
 
 @pytest.mark.parametrize(
@@ -663,7 +682,7 @@ def test_recovery_side_does_not_change_numbered_turn_motion(
 ):
     planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
     offset = -0.30 if recovery_side == "LEFT" else 0.30
-    heading = -46.0 if turn_direction == "LEFT" else 46.0
+    heading = -45.0 if turn_direction == "LEFT" else 45.0
 
     command = planner.plan(
         line_info(
@@ -783,7 +802,7 @@ def test_recovery_uses_ground_heading_when_image_heading_disagrees(sign):
     assert command.heading_error_deg == pytest.approx(sign * 14.11)
 
 
-def test_zero_ground_heading_does_not_use_large_image_heading():
+def test_large_image_heading_vetoes_forward_without_becoming_ground_yaw():
     command = LineNavigationPlanner(NavigationConfig(heading_source="ground")).plan(
         line_info(
             ground_heading_error_deg=0.0,
@@ -792,8 +811,9 @@ def test_zero_ground_heading_does_not_use_large_image_heading():
         ),
         0.1,
     )
-    assert command.valid is True
-    assert command.motion == "STRAIGHT"
+    assert command.valid is False
+    assert command.motion == "STOP"
+    assert command.reason == "straight_heading_not_aligned"
     assert command.heading_component_deg == 0.0
 
 
