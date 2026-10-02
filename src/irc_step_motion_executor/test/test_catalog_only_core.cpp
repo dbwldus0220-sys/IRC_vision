@@ -42,43 +42,23 @@ TEST(MotionAliasCatalog, LoadsLatestSdkAndCanonicalAliases)
   irc_step_motion_executor::MotionAliasCatalog catalog;
   std::string error;
   ASSERT_TRUE(catalog.load(TEST_ALIAS_CONFIG, error)) << error;
-  EXPECT_EQ(catalog.size(), 107U);
-  EXPECT_EQ(
-    catalog.resolve("forward"),
-    std::optional<std::string>("전진45도(8회)"));
-  EXPECT_EQ(
-    catalog.resolve("line_turn_left_15"),
-    std::optional<std::string>("좌회전실실전(15회)"));
-  EXPECT_EQ(
-    catalog.resolve("line_turn_right_large"),
-    std::optional<std::string>("우회전실실전(15회)"));
-  EXPECT_EQ(
-    catalog.resolve("line_recovery_left_4"),
-    std::optional<std::string>("라인복귀좌회전(4회)"));
-  EXPECT_EQ(
-    catalog.resolve("line_recovery_left_8"),
-    std::optional<std::string>("라인보귀좌회전(8번)"));
-  EXPECT_EQ(
-    catalog.resolve("line_recovery_right_4"),
-    std::optional<std::string>("라인복귀우회전(4회)"));
-  EXPECT_EQ(
-    catalog.resolve("line_recovery_right_8"),
-    std::optional<std::string>("라인보귀우회전(8번)"));
-  EXPECT_EQ(
-    catalog.resolve("stationary_turn_left"),
-    std::optional<std::string>("제자리좌회전(6번)"));
-  EXPECT_EQ(
-    catalog.resolve("stationary_turn_right"),
-    std::optional<std::string>("제자리우회전(9회)"));
-  EXPECT_EQ(
-    catalog.resolve("pickup_camera_down_turn_left_6"),
-    std::optional<std::string>("제좌카메라내린거(6회)"));
-  EXPECT_EQ(
-    catalog.resolve("pickup_camera_down_turn_right_9"),
-    std::optional<std::string>("제우카메라내린거(9회)"));
-  EXPECT_EQ(
-    catalog.resolve("pickup"),
-    std::optional<std::string>("공잡기리그랩까지 실전"));
+  EXPECT_EQ(catalog.size(), 96U);
+  for (const auto & [alias, motion] : {
+      std::pair{"forward", "찐찐전진45(8회)"},
+      std::pair{"line_forward_8", "찐찐전진45(8회)"},
+      std::pair{"goal_camera_90_forward_2", "찐찐전진90(2회)"},
+      std::pair{"line_turn_right_large", "찐제자리우회전45도(9회)"},
+      std::pair{"line_recovery_left_4", "찐찐라인복귀좌회전45도(4회)"},
+      std::pair{"line_recovery_right_4", "찐라인복귀우회전45 도(4회)"},
+      std::pair{"stationary_turn_left", "찐제자리좌회전45도-1(6회)"},
+      std::pair{"stationary_turn_right", "찐제자리우회전45도(9회)"},
+      std::pair{"pickup_camera_down_turn_left_6", "찐제자리좌회전0도-1(6회)"},
+      std::pair{"pickup_camera_down_turn_right_9", "찐제자리우회전0도-1(9회)"},
+      std::pair{"pickup", "찐공잡기리그랩까지 실전"}})
+  {
+    EXPECT_EQ(catalog.resolve(alias), std::optional<std::string>(motion));
+  }
+  EXPECT_FALSE(catalog.resolve("line_forward_10").has_value());
   EXPECT_FALSE(catalog.resolve("forward_short").has_value());
   EXPECT_FALSE(catalog.resolve("turn_left").has_value());
   EXPECT_FALSE(catalog.resolve("fine_left").has_value());

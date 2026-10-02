@@ -113,7 +113,13 @@ def test_cpp_executor_defaults_are_safe_and_simulated(
         "running_polls": 2,
         "settling_polls": 1,
         "explicit_torque_approval": False,
-        "position_tolerance_enabled": True,
+        "position_tolerance_enabled": False,
+        "enable_head_override": True,
+        "enable_shoulder_override": True,
+        "queued_transition_hold_ms": 0,
+        "motion_trace_enabled": False,
+        "motion_trace_path": "",
+        "motion_trace_goals": False,
         "motion_json_path": "",
         "robot_device_path": "/dev/ttyUSB0",
         "robot_baud_rate": 4000000,
@@ -136,7 +142,7 @@ def test_production_arguments_reach_cpp_executor(monkeypatch, tmp_path):
             "backend_type": "robot_motion_player",
             "enable_robot_hardware": "true",
             "explicit_torque_approval": "true",
-            "position_tolerance_enabled": "false",
+            "position_tolerance_enabled": "true",
             "motion_json_path": "/tmp/robot_motions.json",
         },
     )
@@ -145,7 +151,7 @@ def test_production_arguments_reach_cpp_executor(monkeypatch, tmp_path):
     assert parameters["backend_type"] == "robot_motion_player"
     assert parameters["enable_robot_hardware"] is True
     assert parameters["explicit_torque_approval"] is True
-    assert parameters["position_tolerance_enabled"] is False
+    assert parameters["position_tolerance_enabled"] is True
     assert parameters["motion_json_path"] == "/tmp/robot_motions.json"
     assert parameters["robot_device_path"] == "/dev/ttyUSB0"
     assert parameters["robot_baud_rate"] == 4000000

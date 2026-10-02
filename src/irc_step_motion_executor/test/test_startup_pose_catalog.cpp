@@ -72,4 +72,29 @@ TEST(StartupPoseCatalog, RejectsRepeatedNameWithMissingMotor)
   std::filesystem::remove(path);
 }
 
+TEST(StartupPoseCatalog, PolicyOffChangesOnlySelectedAxesToVerifiedPcPose)
+{
+  std::vector<double> production, pc, actual;
+  std::string error;
+  ASSERT_TRUE(irc_step_motion_executor::load_startup_pose_angles(
+      TEST_RUNTIME_CATALOG, "오뒤412", production, error)) << error;
+  ASSERT_TRUE(irc_step_motion_executor::load_startup_pose_angles(
+      TEST_PC_CATALOG, "오뒤412", pc, error)) << error;
+  for (bool head : {false, true}) {
+    for (bool shoulder : {false, true}) {
+      ASSERT_TRUE(irc_step_motion_executor::load_startup_pose_with_policy(
+          TEST_RUNTIME_CATALOG, TEST_PC_CATALOG, "오뒤412",
+          head, shoulder, actual, error)) << error;
+      for (int id = 0; id < 23; ++id) {
+        const bool use_pc = (id == 0 && !head) || ((id == 4 || id == 5) && !shoulder);
+        EXPECT_DOUBLE_EQ(actual[id], use_pc ? pc[id] : production[id]);
+      }
+    }
+  }
+  actual.clear();
+  EXPECT_FALSE(irc_step_motion_executor::load_startup_pose_with_policy(
+      TEST_RUNTIME_CATALOG, "/missing/pc.json", "오뒤412", false, true, actual, error));
+  EXPECT_TRUE(actual.empty());
+}
+
 }  // namespace

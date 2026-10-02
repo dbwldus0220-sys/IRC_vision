@@ -297,6 +297,13 @@ def generate_launch_description() -> LaunchDescription:
                     value_type=bool,
                 ),
                 "poll_period_ms": 5,
+                "enable_head_override": ParameterValue(LaunchConfiguration("enable_head_override"), value_type=bool),
+                "enable_shoulder_override": ParameterValue(LaunchConfiguration("enable_shoulder_override"), value_type=bool),
+                "queued_transition_hold_ms": ParameterValue(LaunchConfiguration("queued_transition_hold_ms"), value_type=int),
+                "motion_trace_enabled": ParameterValue(LaunchConfiguration("motion_trace_enabled"), value_type=bool),
+                "motion_trace_goals": ParameterValue(LaunchConfiguration("motion_trace_goals"), value_type=bool),
+                "motion_trace_path": ParameterValue(LaunchConfiguration("motion_trace_path"), value_type=str),
+
                 "running_polls": 2,
                 "settling_polls": 1,
                 "explicit_torque_approval": ParameterValue(
@@ -324,6 +331,12 @@ def generate_launch_description() -> LaunchDescription:
 
     return LaunchDescription(
         [
+            DeclareLaunchArgument("enable_head_override", default_value="true"),
+            DeclareLaunchArgument("enable_shoulder_override", default_value="true"),
+            DeclareLaunchArgument("queued_transition_hold_ms", default_value="0"),
+            DeclareLaunchArgument("motion_trace_enabled", default_value="false"),
+            DeclareLaunchArgument("motion_trace_goals", default_value="false"),
+            DeclareLaunchArgument("motion_trace_path", default_value=""),
             DeclareLaunchArgument("lost_search_max_turns", default_value="3"),
             DeclareLaunchArgument("lost_search_max_angle_deg", default_value="90.0"),
             DeclareLaunchArgument(
@@ -487,9 +500,10 @@ def generate_launch_description() -> LaunchDescription:
             ),
             DeclareLaunchArgument(
                 "position_tolerance_enabled",
-                default_value="true",
+                default_value="false",
                 description=(
-                    "Check final joint positions before completing each motion."
+                    "Optional final position check for ordinary playback; "
+                    "startup pose verification is independent."
                 ),
             ),
             DeclareLaunchArgument(

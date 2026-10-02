@@ -323,10 +323,9 @@ std::optional<MotionStatus> SdkExecutorCore::poll(std::uint64_t now_ms)
     return std::nullopt;
   }
 
-  if (queued_running_status_pending_) {
-    queued_running_status_pending_ = false;
-    return status_for_active("RUNNING", "", "queued motion activated");
-  }
+  // Publishing the activation status must not consume a control update.
+  const bool queue_activation_pending = queued_running_status_pending_;
+  queued_running_status_pending_ = false;
 
   const bool timeout_reached =
     now_ms >= active_->started_at_ms &&
@@ -384,7 +383,8 @@ std::optional<MotionStatus> SdkExecutorCore::poll(std::uint64_t now_ms)
   switch (backend_status.state) {
     case BackendState::RUNNING:
       return status_for_active(
-        "RUNNING", backend_status.error_code, backend_status.message);
+        "RUNNING", backend_status.error_code,
+        queue_activation_pending ? "queued motion activated" : backend_status.message);
     case BackendState::SETTLING:
       return status_for_active(
         "RUNNING", backend_status.error_code,

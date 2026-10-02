@@ -1,0 +1,38 @@
+{
+  "base_sdk_directory": "/home/jet/IRC/external_sdk/robot_motion_player_sdk_work_20260801/final step",
+  "files": {
+    "CMakeLists.txt": {
+      "before": "21439914ce7ef07f2eb42e12c4f94584cdf32a60fd97565b39ebb9f5f8f78c8b",
+      "after": "18ae2547b6e86d23323acac1e0974614184989b3e621d4d44ad9456d60493c7f"
+    },
+    "motion_pattern.hpp": {
+      "before": "09aa7d3d1528c9a0b25de2a630723b99bf6995c786eb62c4a06abfd8f4c138c5",
+      "after": "2027f1c81e4ef6b1a4621b29545f443ad59b4eb27267494c9d794f863255b6e8"
+    },
+    "motion_pattern.cpp": {
+      "before": "de34f984016547cb1b171270b0feb5cad77a6fd2804dd74d1466ba844cc93fbe",
+      "after": "051ffcd0a98c0c319244ce449f05fcfe79130a8378d6726de256e624f7fbcc4d"
+    },
+    "robot_motion_player.hpp": {
+      "before": "b99eceadbc081d05ebcebd8955ff924867be99297e02a78a64da8e5f1a67cff8",
+      "after": "5b0646b320492fc8ee62c1b40bf26bd7decdcbc4a56a354c8f22489845d6233d"
+    },
+    "robot_motion_player.cpp": {
+      "before": "994b51b77c981cde5cf928e70608718ff1bfb9003141905c103925838be7e7d5",
+      "after": "7376285d939f58458cdaec919a781d7bb8238993329897ae3a7749b406aa9eeb"
+    },
+    "playback_diagnostics.hpp": {
+      "before": null,
+      "after": "5f984e0b0b3ac0713f568f9fad23ecbff4e0cde6bd2cd133a9fa16accc204aea"
+    }
+  },
+  "previous_files": {
+    "CMakeLists.txt": "18ae2547b6e86d23323acac1e0974614184989b3e621d4d44ad9456d60493c7f",
+    "motion_pattern.hpp": "2027f1c81e4ef6b1a4621b29545f443ad59b4eb27267494c9d794f863255b6e8",
+    "motion_pattern.cpp": "051ffcd0a98c0c319244ce449f05fcfe79130a8378d6726de256e624f7fbcc4d",
+    "robot_motion_player.hpp": "2e28eedffc4a53ffcbf5b8262e22ad84e7ea155b6e1e0cb9c9999c85d6d7af5b",
+    "robot_motion_player.cpp": "00513c4bf2d97fe8d84e037f64b2607d3165e72127d136142753c9e7efc39c08",
+    "playback_diagnostics.hpp": "5f984e0b0b3ac0713f568f9fad23ecbff4e0cde6bd2cd133a9fa16accc204aea"
+  },
+  "upgrade_patch": "sdk_common_playback_pc_boundary.patch"
+}

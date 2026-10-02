@@ -1,0 +1,864 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -23,7 +23,7 @@
+     robot_motion_player.cpp
+ )
+ target_include_directories(motion_player_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+-target_link_libraries(motion_player_core PUBLIC motion_core)
++target_link_libraries(motion_player_core PUBLIC motion_core Threads::Threads)
+ target_compile_options(motion_player_core PRIVATE -Wall -Wextra -Wpedantic)
+ 
+ if(PROJECT_IS_TOP_LEVEL)
+--- a/motion_pattern.hpp
++++ b/motion_pattern.hpp
+@@ -18,6 +18,9 @@
+     std::int64_t time_ms{1};
+     JointAngles angles;
+     TorqueStates torques;
++    bool lift_early_arrival{false};
++    bool playback_cycle_end{false};
++    std::string frame_id;
+ };
+ 
+ // callback이 SDK로 전송할 현재 시각의 목표값.
+--- a/motion_pattern.cpp
++++ b/motion_pattern.cpp
+@@ -176,6 +176,9 @@
+         frame.name = required(object, "name").string();
+         frame.start_ms = static_cast<std::int64_t>(required(object, "start_ms").number());
+         frame.time_ms = static_cast<std::int64_t>(required(object, "time_ms").number());
++        frame.lift_early_arrival = optionalBool(object, "lift_early_arrival", false);
++        frame.playback_cycle_end = optionalBool(object, "playback_cycle_end", false);
++        frame.frame_id = optionalString(object, "frame_id", "");
+         for (const auto& [id, value] : required(object, "angles").object())
+             frame.angles[std::stoi(id)] = value.number();
+         if (const auto it = object.find("torques"); it != object.end())
+--- a/robot_motion_player.hpp
++++ b/robot_motion_player.hpp
+@@ -2,9 +2,11 @@
+ 
+ #include "motion_hardware.hpp"
+ #include "motion_pattern.hpp"
++#include "playback_diagnostics.hpp"
+ 
+ #include <chrono>
+ #include <cstdint>
++#include <functional>
+ #include <map>
+ #include <memory>
+ #include <string>
+@@ -73,10 +75,14 @@
+ 
+ class RobotMotionPlayer {
+ public:
++    using Clock = std::chrono::steady_clock;
++    using NowProvider = std::function<Clock::time_point()>;
+     // 실제 Dynamixel을 소유하는 실행용 생성자.
+     explicit RobotMotionPlayer(const std::string& json_path);
+     // ROS/mock 테스트가 가짜 하드웨어를 주입할 때 사용하는 생성자.
+     RobotMotionPlayer(const std::string& json_path, IMotionHardware& hardware);
++    RobotMotionPlayer(const std::string& json_path, IMotionHardware& hardware,
++                      NowProvider now);
+     ~RobotMotionPlayer();
+ 
+     RobotMotionPlayer(const RobotMotionPlayer&) = delete;
+@@ -108,6 +114,13 @@
+     [[nodiscard]] std::string_view lastError() const noexcept;
+     [[nodiscard]] std::string_view currentMotion() const noexcept;
+     void setPositionToleranceEnabled(bool enabled) noexcept;
++    void setQueuedTransitionHoldMs(std::int64_t duration_ms);
++    void configureJointPolicy(const std::string& reference_json,
++                              bool enable_head_override,
++                              bool enable_shoulder_override);
++    void configureDiagnostics(double expected_tick_ms, const std::string& trace_path,
++                              bool trace_goals = false, std::size_t capacity = 8192);
++    std::shared_ptr<const PlaybackDiagnostics> lastDiagnostics() const { return last_diagnostics_; }
+ 
+     // Present Position을 읽고 같은 위치를 Goal로 보내 토크를 유지한 채 정지.
+     CancelResult cancel() noexcept;
+@@ -141,7 +154,6 @@
+         const MotionFrame& frame, double timeline_ms);
+ 
+ private:
+-    using Clock = std::chrono::steady_clock;
+     using FrameCorrectionKey = std::tuple<std::string, std::string, int>;
+ 
+     bool sendTrajectorySample(double timeline_ms);
+@@ -155,13 +167,19 @@
+     void resetMotionRuntime(
+         const MotionPattern& pattern, std::string name,
+         Clock::time_point now) noexcept;
+-    bool gateCurrentFrame(double& timeline_ms);
+     void fail(MotionError error, std::string message) noexcept;
+     JointAngles correctedFrameAngles(const MotionFrame& frame) const;
+     JointAngles accumulatedPoseBefore(const MotionFrame& frame) const;
+-    JointAngles sampledPose(double timeline_ms) const;
++    JointAngles sampledPose(double timeline_ms, bool cycle_end = false) const;
++    const MotionFrame& referenceFrame(const MotionFrame& frame) const;
++    void validatePolicyReference(const MotionPattern& pattern,
++                                 const std::string& name) const;
++    void finishDiagnostics(const std::shared_ptr<PlaybackDiagnostics>& diagnostics);
+ 
+     MotionLibrary library_;
++    std::unique_ptr<MotionLibrary> reference_library_;
++    bool enable_head_override_{true};
++    bool enable_shoulder_override_{true};
+     std::unique_ptr<IMotionHardware> owned_hardware_;
+     IMotionHardware* hardware_{nullptr};
+     JointAngles corrections_deg_;
+@@ -171,11 +189,11 @@
+     JointAngles last_present_deg_;
+     std::vector<int> final_goal_ids_;
+     JointAngles trajectory_start_deg_;
+-    const MotionFrame* gated_frame_{nullptr};
+     const MotionPattern* pattern_{nullptr};
+     std::size_t next_frame_{0};
+     int repeat_{1};
+     Clock::time_point started_at_{};
++    std::int64_t timeline_start_ms_{0};
+     Clock::time_point settling_started_at_{};
+     Clock::time_point within_tolerance_since_{};
+     Clock::time_point last_position_check_at_{};
+@@ -190,7 +208,21 @@
+     bool initialized_{false};
+     bool trajectory_initialized_{false};
+     bool within_tolerance_{false};
+-    bool position_tolerance_enabled_{true};
++    bool position_tolerance_enabled_{false};
++    NowProvider now_{Clock::now};
++    bool cycle_final_sent_{false};
++    Clock::time_point final_sent_at_{};
++    std::int64_t queued_transition_hold_ms_{0};
++    std::unique_ptr<PlaybackTraceWriter> trace_writer_;
++    std::shared_ptr<PlaybackDiagnostics> diagnostics_, last_diagnostics_;
++    PlaybackTick tick_;
++    double expected_tick_ms_{5};
++    bool trace_goals_{false};
++    std::size_t trace_capacity_{0};
++    Clock::time_point previous_tick_at_{};
++    Clock::time_point previous_write_at_{};
++    bool have_previous_write_{false};
++    bool have_previous_tick_{false};
+ 
+     JointAngles startup_target_deg_;
+     std::vector<int> startup_motor_ids_;
+--- a/robot_motion_player.cpp
++++ b/robot_motion_player.cpp
+@@ -5,6 +5,7 @@
+ #include <exception>
+ #include <iostream>
+ #include <numbers>
++#include <limits>
+ #include <stdexcept>
+ #include <string_view>
+ #include <thread>
+@@ -20,7 +21,7 @@
+     .settle_duration_ms = 80,
+     .settle_timeout_ms = 3000,
+ };
+-constexpr std::int64_t kMinimumTimelineFrameMs = 10;
++constexpr std::int64_t kMinimumTimelineFrameMs = 1;
+ constexpr double kLiftTargetArrivalRatio = 0.80;
+ 
+ bool isLiftFrame(std::string_view name) {
+@@ -42,6 +43,95 @@
+     const std::string& json_path, IMotionHardware& hardware)
+     : library_(MotionLibrary::loadGuiJson(json_path)),
+       hardware_(&hardware) {}
++
++RobotMotionPlayer::RobotMotionPlayer(
++    const std::string& json_path, IMotionHardware& hardware, NowProvider now)
++    : library_(MotionLibrary::loadGuiJson(json_path)), hardware_(&hardware),
++      now_(std::move(now)) {
++    if (!now_) throw std::invalid_argument("clock provider is required");
++}
++
++void RobotMotionPlayer::setQueuedTransitionHoldMs(std::int64_t duration_ms) {
++    if (duration_ms < 0) throw std::invalid_argument("negative queue hold");
++    queued_transition_hold_ms_ = duration_ms;
++}
++
++void RobotMotionPlayer::configureJointPolicy(
++    const std::string& reference_json, bool head, bool shoulder) {
++    if (running()) throw std::logic_error("cannot change policy during a motion");
++    if (!head || !shoulder) {
++        if (reference_json.empty())
++            throw std::invalid_argument("override OFF requires the PC reference catalog");
++        reference_library_ = std::make_unique<MotionLibrary>(
++            MotionLibrary::loadGuiJson(reference_json));
++    }
++    enable_head_override_ = head;
++    enable_shoulder_override_ = shoulder;
++}
++
++void RobotMotionPlayer::validatePolicyReference(
++    const MotionPattern& pattern, const std::string& name) const {
++    if (enable_head_override_ && enable_shoulder_override_) return;
++    if (!reference_library_ || !reference_library_->contains(name))
++        throw std::invalid_argument("PC reference missing motion for override OFF: " + name);
++    const auto& originals = reference_library_->motion(name).frames();
++    for (const auto& frame : pattern.frames()) {
++        const MotionFrame* match = nullptr;
++        for (const auto& original : originals) {
++            if ((!frame.frame_id.empty() && frame.frame_id == original.frame_id)
++                || (frame.name == original.name && frame.start_ms == original.start_ms)) {
++                if (match && match->angles != original.angles)
++                    throw std::invalid_argument("ambiguous PC reference frame: " + frame.name);
++                match = &original;
++            }
++        }
++        if (!match) throw std::invalid_argument("PC reference missing frame: " + frame.name);
++        for (int id : {0, 4, 5}) {
++            if ((id == 0 ? !enable_head_override_ : !enable_shoulder_override_)
++                && frame.angles.contains(id) && !match->angles.contains(id))
++                throw std::invalid_argument("PC reference missing policy joint");
++        }
++    }
++}
++
++const MotionFrame& RobotMotionPlayer::referenceFrame(const MotionFrame& frame) const {
++    for (const auto& original : reference_library_->motion(current_motion_).frames()) {
++        if ((!frame.frame_id.empty() && frame.frame_id == original.frame_id)
++            || (frame.name == original.name && frame.start_ms == original.start_ms))
++            return original;
++    }
++    throw std::logic_error("validated PC reference frame disappeared");
++}
++
++void RobotMotionPlayer::configureDiagnostics(
++    double expected_tick_ms, const std::string& path, bool goals, std::size_t capacity) {
++    if (running() || expected_tick_ms <= 0 || !std::isfinite(expected_tick_ms)
++        || capacity > 100000) throw std::invalid_argument("invalid diagnostics options");
++    expected_tick_ms_ = expected_tick_ms;
++    trace_goals_ = goals;
++    trace_capacity_ = path.empty() && !goals ? 0 : capacity;
++    trace_writer_.reset();
++    if (!path.empty()) trace_writer_ = std::make_unique<PlaybackTraceWriter>(path);
++}
++
++void RobotMotionPlayer::finishDiagnostics(
++    const std::shared_ptr<PlaybackDiagnostics>& d) {
++    if (!d || d->finished) return;
++    d->finished = true;
++    d->finished_ms = std::chrono::duration<double, std::milli>(now_().time_since_epoch()).count();
++    last_diagnostics_ = d;
++    std::cout << "[Playback summary] motion=" << d->motion << " ticks=" << d->ticks
++              << " mean_interval_ms=" << (d->interval_count ? d->interval_sum_ms / d->interval_count : 0)
++              << " max_interval_ms=" << d->max_interval_ms
++              << " over_7.5/10/20=" << d->over_7_5 << '/' << d->over_10 << '/' << d->over_20
++              << " final_corrections=" << d->final_corrections
++              << " goal_failures=" << d->goal_failures
++              << " queue_delay_ms=" << d->queue_delay_ms
++              << " elapsed_ms=" << d->finished_ms - d->started_ms
++              << " trace_dropped=" << d->dropped_trace << '\n';
++    if (trace_writer_ && !trace_writer_->enqueue(d))
++        std::cerr << "[Playback diagnostics] trace batch dropped: logger busy\n";
++}
+ 
+ RobotMotionPlayer::~RobotMotionPlayer() { shutdown(); }
+ 
+@@ -110,6 +200,7 @@
+             last_error_ = "motion has no frames: " + name;
+             return StartResult::InvalidMotion;
+         }
++        validatePolicyReference(pattern, name);
+         // cancel/startup transitions can leave a nonzero motor time profile.
+         if (!hardware_->restoreDirectPlaybackProfile()) {
+             fail(MotionError::CommunicationError,
+@@ -118,7 +209,7 @@
+             return StartResult::HardwareNotReady;
+         }
+         clearQueuedMotion();
+-        resetMotionRuntime(pattern, name, Clock::now());
++        resetMotionRuntime(pattern, name, now_());
+         error_ = MotionError::None;
+         last_error_.clear();
+         return StartResult::Accepted;
+@@ -141,6 +232,7 @@
+     try {
+         const auto& next = library_.motion(name);
+         if (next.frames().empty()) return QueueResult::InvalidMotion;
++        validatePolicyReference(next, name);
+         if (!canSeamlesslyTransition(*pattern_, current_motion_, next, name))
+             return QueueResult::IncompatibleTransition;
+         queued_motion_ = name;
+@@ -192,19 +284,28 @@
+     pattern_ = &pattern;
+     current_motion_ = std::move(name);
+     next_frame_ = 0;
++    cycle_final_sent_ = false;
+     repeat_ = 1;
+     final_goal_deg_.clear();
+     last_present_deg_.clear();
+     final_goal_ids_.clear();
+     trajectory_start_deg_ = std::move(fallback_start_deg);
+     trajectory_initialized_ = false;
+-    gated_frame_ = nullptr;
+     settling_started_at_ = Clock::time_point{};
+     within_tolerance_since_ = Clock::time_point{};
+     last_position_check_at_ = Clock::time_point{};
+     within_tolerance_ = false;
+     started_at_ = now;
++    timeline_start_ms_ = 0;
+     status_ = MotionStatus::Running;
++    diagnostics_ = std::make_shared<PlaybackDiagnostics>();
++    diagnostics_->motion = current_motion_;
++    diagnostics_->expected_tick_ms = expected_tick_ms_;
++    diagnostics_->include_goals = trace_goals_;
++    diagnostics_->started_ms = std::chrono::duration<double, std::milli>(now.time_since_epoch()).count();
++    for (const auto& frame : pattern.frames()) diagnostics_->frames.push_back(frame.name);
++    diagnostics_->trace.reserve(trace_capacity_);
++    have_previous_tick_ = false;
+ }
+ 
+ bool RobotMotionPlayer::activateQueuedMotion(Clock::time_point now) noexcept {
+@@ -213,9 +314,13 @@
+     std::string next_name = std::move(queued_motion_);
+     queued_pattern_ = nullptr;
+     queued_motion_.clear();
++    tick_.queue_activated = true;
++    tick_.queue_delay_ms = std::chrono::duration<double, std::milli>(now - final_sent_at_).count();
+     last_completed_motion_ = current_motion_;
+     ++completion_sequence_;
+     resetMotionRuntime(*next, std::move(next_name), now);
++    // A queued transition continues from the successfully sent final command.
++    trajectory_initialized_ = true;
+     error_ = MotionError::None;
+     last_error_.clear();
+     return true;
+@@ -269,7 +374,7 @@
+     startup_target_deg_ = std::move(target);
+     startup_motor_ids_ = std::move(motor_ids);
+     startup_duration_ms_ = duration_ms;
+-    startup_started_at_ = Clock::now();
++    startup_started_at_ = now_();
+     startup_settling_started_at_ = Clock::time_point{};
+     startup_within_tolerance_since_ = Clock::time_point{};
+     startup_last_position_check_at_ = Clock::time_point{};
+@@ -285,7 +390,7 @@
+         && startup_status_ != MotionStatus::Settling)
+         return startup_status_;
+     try {
+-        const auto now = Clock::now();
++        const auto now = now_();
+         const auto moving_ms =
+             std::chrono::duration_cast<std::chrono::milliseconds>(
+                 now - startup_started_at_).count();
+@@ -370,16 +475,48 @@
+ }
+ 
+ MotionStatus RobotMotionPlayer::update() noexcept {
++    const auto batch = diagnostics_;
++    if (!running()) return status_;
++    const auto now = now_();
++    tick_ = {};
++    tick_.goals.fill(std::numeric_limits<double>::quiet_NaN());
++    tick_.monotonic_ms = std::chrono::duration<double, std::milli>(now.time_since_epoch()).count();
++    tick_.repeat = repeat_;
++    tick_.queued = hasQueuedMotion();
++    tick_.head_override = enable_head_override_ && overrides_deg_.contains(0);
++    tick_.shoulder_override = enable_shoulder_override_
++        && current_motion_ != "찐공잡기리그랩까지 실전"
++        && current_motion_ != "찐골넣기" && current_motion_ != "찐허들";
++    if (batch) {
++        ++batch->ticks;
++        if (have_previous_tick_) {
++            tick_.interval_ms = std::chrono::duration<double, std::milli>(now - previous_tick_at_).count();
++            ++batch->interval_count;
++            batch->interval_sum_ms += tick_.interval_ms;
++            batch->max_interval_ms = std::max(batch->max_interval_ms, tick_.interval_ms);
++            batch->over_7_5 += tick_.interval_ms > 7.5;
++            batch->over_10 += tick_.interval_ms > 10;
++            batch->over_20 += tick_.interval_ms > 20;
++        }
++    }
++    previous_tick_at_ = now;
++    have_previous_tick_ = true;
+     try {
+-        const auto now = Clock::now();
+-        if (status_ == MotionStatus::Running) return updateRunning(now);
+-        if (status_ == MotionStatus::Settling) return updateSettling(now);
+-        return status_;
++        if (status_ == MotionStatus::Running) updateRunning(now);
++        else if (status_ == MotionStatus::Settling) updateSettling(now);
+     } catch (const std::exception& error) {
+         fail(MotionError::InternalError, error.what());
+     } catch (...) {
+         fail(MotionError::InternalError, "unknown RobotMotionPlayer update error");
+     }
++    if (batch) {
++        batch->final_corrections += tick_.final_goal;
++        batch->goal_failures += tick_.sent && !tick_.success;
++        if (tick_.queue_activated) batch->queue_delay_ms = tick_.queue_delay_ms;
++        if (batch->trace.size() < trace_capacity_) batch->trace.push_back(tick_);
++        else if (trace_capacity_ > 0) ++batch->dropped_trace;
++        if (!running() || batch != diagnostics_) finishDiagnostics(batch);
++    }
+     return status_;
+ }
+ 
+@@ -395,87 +532,105 @@
+         }
+         last_position_check_at_ = now;
+         if (!hardware_->readPresentPositions(trajectory_start_deg_)) {
+-            if (!trajectory_start_deg_.empty()) {
+-                std::cerr
+-                    << "[Warning] Failed to read trajectory start Present "
+-                    << "Position; continuing from the last commanded pose"
+-                    << std::endl;
+-                trajectory_initialized_ = true;
+-                last_position_check_at_ = Clock::time_point{};
+-                started_at_ = Clock::now();
+-                return status_;
+-            }
+-            std::cerr
+-                << "[Warning] Failed to read trajectory start Present Position; "
+-                << "waiting to retry without starting the motion" << std::endl;
++            fail(MotionError::PresentPositionReadFailed,
++                 "cannot start from actual position: " + std::string(hardware_->lastError()));
+             return status_;
+         }
+         trajectory_initialized_ = true;
+         last_position_check_at_ = Clock::time_point{};
+         // A delayed successful read is the real beginning of the trajectory.
+         // Do not skip early samples while communication is recovering.
+-        now = Clock::now();
++        now = now_();
+         started_at_ = now;
+     }
+ 
+     const double real_ms =
+         std::chrono::duration<double, std::milli>(now - started_at_).count();
+     // GUI evaluates an integer timeline after applying playback speed.
+-    double timeline_ms = std::floor(real_ms * pattern_->playbackSpeed() + 1e-7);
+-
+-    if (!gateCurrentFrame(timeline_ms)) return status_;
+-
+-    if (!sendTrajectorySample(
+-            std::min(timeline_ms, static_cast<double>(pattern_->durationMs())))) {
+-        if (error_ != MotionError::FrameSendFailed) {
+-            std::cerr
+-                << "[Warning] DYNAMIXEL trajectory sample transmission "
+-                << "failed; continuing motion timeline: "
+-                << hardware_->lastError() << std::endl;
+-        }
+-        error_ = MotionError::FrameSendFailed;
+-        last_error_ = hardware_->lastError().empty()
+-            ? "DYNAMIXEL trajectory sample transmission failed"
+-            : std::string(hardware_->lastError());
+-    }
+-
+-    if (timeline_ms < pattern_->durationMs()) return status_;
+-    if (repeat_ < pattern_->repeatCount()) {
+-        ++repeat_;
+-        trajectory_start_deg_ = final_goal_deg_;
+-        next_frame_ = 0;
+-        // Start the next cycle after the final Goal transmission completes.
+-        started_at_ = Clock::now();
+-        gated_frame_ = nullptr;
+-        return status_;
+-    }
+-
+-    if (activateQueuedMotion(now)) return status_;
+-
+-    status_ = MotionStatus::Settling;
+-    settling_started_at_ = now;
+-    last_position_check_at_ = Clock::time_point{};
+-    within_tolerance_ = false;
+-    return updateSettling(now);
+-}
+-
+-bool RobotMotionPlayer::gateCurrentFrame(double& timeline_ms) {
+-    if (gated_frame_ == nullptr) return true;
+-    const auto frame_end_ms = gated_frame_->start_ms + gated_frame_->time_ms;
+-    if (timeline_ms < frame_end_ms) return true;
+-
+-    // A sampled direct trajectory may not land on the exact frame boundary.
+-    // Match the GUI: process the exact boundary in this update. The next
+-    // update uses elapsed wall time; no extra tick is added at cycle end.
+-    if (!sendDirectGoal(correctedFrameAngles(*gated_frame_))) {
+-        std::cerr
+-            << "[Warning] DYNAMIXEL frame boundary transmission failed; "
+-            << "continuing motion timeline: " << hardware_->lastError()
+-            << std::endl;
+-    }
+-    gated_frame_ = nullptr;
+-    timeline_ms = static_cast<double>(frame_end_ms);
+-    return true;
++    const double timeline_ms = std::floor(
++        timeline_start_ms_ + real_ms * pattern_->playbackSpeed() + 1e-7);
++
++    tick_.timeline_ms = timeline_ms;
++    // A final command is a separate control callback, even with zero hold.
++    if (cycle_final_sent_) {
++        if (hasQueuedMotion()) {
++            const auto hold_ms = std::chrono::duration<double, std::milli>(
++                now - final_sent_at_).count();
++            if (hold_ms >= queued_transition_hold_ms_)
++                activateQueuedMotion(now);
++            return status_;
++        }
++        status_ = MotionStatus::Settling;
++        settling_started_at_ = now;
++        last_position_check_at_ = Clock::time_point{};
++        return updateSettling(now);
++    }
++
++    tick_.timeline_ms = timeline_ms;
++    tick_.repeat = repeat_;
++    // At most one Goal SyncWrite per update. If a tick spans multiple frames,
++    // drain their exact endpoints one per callback, never burst stale samples.
++    const auto& frames = pattern_->frames();
++    if (next_frame_ < frames.size()) {
++        const auto& frame = frames[next_frame_];
++        if (timeline_ms >= frame.start_ms + frame.time_ms) {
++            tick_.frame = static_cast<int>(next_frame_);
++            tick_.final_goal = true;
++            tick_.progress = 1.0;
++            const auto frame_end_ms = frame.start_ms + frame.time_ms;
++            // Merge the PC's final-frame write and boundary sample into one
++            // packet, including joints appearing only in the adjacent frame.
++            JointAngles boundary = correctedFrameAngles(frame);
++            mergeAngles(boundary, sampledPose(frame_end_ms, frame.playback_cycle_end));
++            if (!sendDirectGoal(boundary)) {
++                fail(MotionError::FrameSendFailed,
++                     "final Goal SyncWrite failed: " + std::string(hardware_->lastError()));
++                return status_;
++            }
++            ++next_frame_;
++            if (next_frame_ == frames.size()) {
++                if (repeat_ < pattern_->repeatCount()) {
++                    ++repeat_;
++                    trajectory_start_deg_ = final_goal_deg_;
++                    next_frame_ = 0;
++                    timeline_start_ms_ = 0;
++                    // Read the clock after the successful final transmission.
++                    // The next callback samples elapsed time from this anchor.
++                    started_at_ = now_();
++                } else {
++                    cycle_final_sent_ = true;
++                    final_sent_at_ = now_();
++                    if (!hasQueuedMotion() && !position_tolerance_enabled_) {
++                        status_ = MotionStatus::Settling;
++                        settling_started_at_ = final_sent_at_;
++                        return updateSettling(final_sent_at_);
++                    }
++                }
++            } else if (frame.playback_cycle_end) {
++                // Internal cycle boundaries discard lateness; ordinary frame
++                // boundaries leave the clock running. Final flags use the
++                // whole-motion path above, never a second clock reset.
++                trajectory_start_deg_ = final_goal_deg_;
++                timeline_start_ms_ = frame_end_ms;
++                started_at_ = now_();
++            }
++            return status_;
++        }
++    }
++    tick_.timeline_ms = timeline_ms;
++    tick_.repeat = repeat_;
++    for (std::size_t i = 0; i < frames.size(); ++i) {
++        if (frames[i].start_ms <= timeline_ms && timeline_ms < frames[i].start_ms + frames[i].time_ms) {
++            tick_.frame = static_cast<int>(i);
++            tick_.progress = frameMotionProgress(frames[i], timeline_ms);
++            break;
++        }
++    }
++    if (!sendTrajectorySample(timeline_ms)) {
++        fail(MotionError::FrameSendFailed,
++             "trajectory Goal SyncWrite failed: " + std::string(hardware_->lastError()));
++    }
++    return status_;
+ }
+ 
+ MotionStatus RobotMotionPlayer::updateSettling(Clock::time_point now) {
+@@ -483,11 +638,23 @@
+         fail(MotionError::InternalError, "settling motion has no pattern");
+         return status_;
+     }
+-    if (activateQueuedMotion(now)) return status_;
++    if (hasQueuedMotion()) {
++        const auto hold_ms = std::chrono::duration<double, std::milli>(
++            now - final_sent_at_).count();
++        if (cycle_final_sent_ && hold_ms >= queued_transition_hold_ms_)
++            activateQueuedMotion(now);
++        return status_;
++    }
+     const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+         now - settling_started_at_).count();
+     const auto complete_motion = [this](
+         MotionError warning, std::string message) {
++        // Preserve the existing bounded best-effort arrival check. A read
++        // failure is a communication failure, not an arrival timeout.
++        if (warning == MotionError::PresentPositionReadFailed) {
++            fail(warning, std::move(message));
++            return status_;
++        }
+         status_ = MotionStatus::Succeeded;
+         error_ = warning;
+         last_error_ = std::move(message);
+@@ -605,6 +772,7 @@
+     if (!running()) return CancelResult::NotRunning;
+     if (!hardwareReady()) {
+         fail(MotionError::HardwareNotReady, "hardware is not ready for cancel");
++        finishDiagnostics(diagnostics_);
+         return CancelResult::HardwareNotReady;
+     }
+     if (!hardware_->holdCurrentPosition(kCancelHoldDurationMs)) {
+@@ -613,9 +781,11 @@
+             hardware_->lastError().empty()
+                 ? "failed to hold current motor positions"
+                 : std::string(hardware_->lastError()));
++        finishDiagnostics(diagnostics_);
+         return CancelResult::HoldFailed;
+     }
+     status_ = MotionStatus::Cancelled;
++    finishDiagnostics(diagnostics_);
+     error_ = MotionError::None;
+     last_error_.clear();
+     pattern_ = nullptr;
+@@ -629,6 +799,7 @@
+     const bool success = hardware_->setTorqueEnabled(false);
+     initialized_ = false;
+     status_ = success ? MotionStatus::Cancelled : MotionStatus::Failed;
++    finishDiagnostics(diagnostics_);
+     if (!success) {
+         error_ = MotionError::CommunicationError;
+         last_error_ = std::string(hardware_->lastError());
+@@ -646,11 +817,11 @@
+ bool RobotMotionPlayer::playBlocking(std::string_view motion_name) {
+     if (start(motion_name) != StartResult::Accepted) return false;
+     constexpr auto interval = std::chrono::milliseconds(5);
+-    auto next_tick = Clock::now();
++    auto next_tick = now_();
+     while (running()) {
+         update();
+         next_tick += interval;
+-        const auto now = Clock::now();
++        const auto now = now_();
+         if (next_tick < now) next_tick = now + interval;
+         std::this_thread::sleep_until(next_tick);
+     }
+@@ -752,7 +923,22 @@
+ JointAngles RobotMotionPlayer::correctedFrameAngles(
+     const MotionFrame& frame) const {
+     JointAngles corrected = frame.angles;
++    if (!enable_head_override_ || !enable_shoulder_override_) {
++        const auto& original = referenceFrame(frame);
++        for (int id : {0, 4, 5}) {
++            if ((id == 0 ? !enable_head_override_ : !enable_shoulder_override_)
++                && corrected.contains(id)) corrected[id] = original.angles.at(id);
++        }
++    }
++    if (enable_shoulder_override_ && current_motion_ != "찐공잡기리그랩까지 실전"
++        && current_motion_ != "찐골넣기" && current_motion_ != "찐허들") {
++        if (corrected.contains(4)) corrected[4] = 18.0;
++        if (corrected.contains(5)) corrected[5] = -18.0;
++    }
+     for (auto& [motor_id, degree] : corrected) {
++        // OFF means the PC reference angle, including suppression of corrections.
++        if ((motor_id == 0 && !enable_head_override_)
++            || ((motor_id == 4 || motor_id == 5) && !enable_shoulder_override_)) continue;
+         if (const auto correction = corrections_deg_.find(motor_id);
+             correction != corrections_deg_.end()) {
+             degree += correction->second;
+@@ -792,19 +978,22 @@
+ double RobotMotionPlayer::frameMotionProgress(
+     const MotionFrame& frame, double timeline_ms) {
+     const auto duration_ms = std::max(kMinimumTimelineFrameMs, frame.time_ms);
+-    const double arrival_ratio = isLiftFrame(frame.name) ? kLiftTargetArrivalRatio : 1.0;
++    const double arrival_ratio = frame.lift_early_arrival && isLiftFrame(frame.name)
++        ? kLiftTargetArrivalRatio : 1.0;
+     const double elapsed_ms = std::clamp(
+         timeline_ms - frame.start_ms, 0.0, static_cast<double>(duration_ms));
+-    const double u = std::min(1.0, elapsed_ms / (duration_ms * arrival_ratio));
++    const double trajectory_ms = std::max(1.0, duration_ms * arrival_ratio);
++    const double u = std::min(1.0, elapsed_ms / trajectory_ms);
+     return 0.5 - 0.5 * std::cos(std::numbers::pi * u);
+ }
+ 
+-JointAngles RobotMotionPlayer::sampledPose(double timeline_ms) const {
++JointAngles RobotMotionPlayer::sampledPose(double timeline_ms, bool cycle_end) const {
+     const auto& frames = pattern_->frames();
+     const MotionFrame* active = nullptr;
+     for (const auto& frame : frames) {
+         const auto frame_end_ms = frame.start_ms + frame.time_ms;
+         if ((frame.start_ms <= timeline_ms && timeline_ms < frame_end_ms)
++            || (cycle_end && timeline_ms == frame_end_ms)
+             || (timeline_ms == pattern_->durationMs()
+                 && frame_end_ms == pattern_->durationMs())) {
+             active = &frame;
+@@ -816,7 +1005,7 @@
+         const auto previous = accumulatedPoseBefore(*active);
+         const auto corrected = correctedFrameAngles(*active);
+         const double progress = frameMotionProgress(*active, timeline_ms);
+-        JointAngles target;
++        JointAngles target = previous;
+         for (const auto& [motor_id, final_deg] : corrected) {
+             const auto start = previous.find(motor_id);
+             const double start_deg =
+@@ -838,36 +1027,37 @@
+ }
+ 
+ bool RobotMotionPlayer::sendTrajectorySample(double timeline_ms) {
+-    const auto& frames = pattern_->frames();
+-    gated_frame_ = nullptr;
+-    for (const auto& frame : frames) {
+-        const auto frame_end_ms = frame.start_ms + frame.time_ms;
+-        if ((frame.start_ms <= timeline_ms && timeline_ms < frame_end_ms)
+-            || (timeline_ms == pattern_->durationMs()
+-                && frame_end_ms == pattern_->durationMs())) {
+-            gated_frame_ = &frame;
+-            break;
+-        }
+-    }
+     return sendDirectGoal(sampledPose(timeline_ms));
+ }
+ 
+ bool RobotMotionPlayer::sendDirectGoal(const JointAngles& goal_deg) {
++    JointAngles merged = final_goal_deg_.empty() ? trajectory_start_deg_ : final_goal_deg_;
++    mergeAngles(merged, goal_deg);
+     std::vector<int> target_ids;
+-    target_ids.reserve(goal_deg.size());
+-    for (const auto& [motor_id, degree] : goal_deg) {
+-        if (motor_id < 0 || motor_id >= kMotionMotorCount)
+-            throw std::runtime_error(
+-                "invalid motor ID in JSON: " + std::to_string(motor_id));
++    target_ids.reserve(merged.size());
++    for (const auto& [motor_id, degree] : merged) {
++        if (motor_id < 0 || motor_id >= kMotionMotorCount || !std::isfinite(degree))
++            throw std::runtime_error("invalid motor goal in JSON");
+         target_ids.push_back(motor_id);
+-        final_goal_deg_[motor_id] = degree;
+     }
+     if (target_ids.empty()) return true;
+-    final_goal_ids_.clear();
+-    final_goal_ids_.reserve(final_goal_deg_.size());
+-    for (const auto& [motor_id, unused] : final_goal_deg_)
+-        final_goal_ids_.push_back(motor_id);
+-    return hardware_->commandDirectPosition(goal_deg, target_ids);
++    tick_.sent = true;
++    tick_.motor_count = target_ids.size();
++    if (trace_goals_) for (const auto& [id, degree] : merged) tick_.goals[id] = degree;
++    const auto write_started = Clock::now();
++    tick_.write_started_ms = std::chrono::duration<double, std::milli>(
++        write_started.time_since_epoch()).count();
++    if (have_previous_write_) tick_.goal_interval_ms =
++        std::chrono::duration<double, std::milli>(write_started - previous_write_at_).count();
++    previous_write_at_ = write_started;
++    have_previous_write_ = true;
++    tick_.success = hardware_->commandDirectPosition(merged, target_ids);
++    tick_.write_ms = std::chrono::duration<double, std::milli>(Clock::now() - write_started).count();
++    if (!tick_.success) return false;
++    // Failed writes must not become the start pose for a repeat or queue.
++    final_goal_deg_ = std::move(merged);
++    final_goal_ids_ = std::move(target_ids);
++    return true;
+ }
+ 
+ }  // namespace irc_step
+--- /dev/null
++++ b/playback_diagnostics.hpp
+@@ -0,0 +1,102 @@
++#pragma once
++
++#include <array>
++#include <condition_variable>
++#include <cstdint>
++#include <deque>
++#include <fstream>
++#include <iomanip>
++#include <iostream>
++#include <memory>
++#include <mutex>
++#include <string>
++#include <stdexcept>
++#include <thread>
++#include <vector>
++
++namespace irc_step {
++
++struct PlaybackTick {
++    double monotonic_ms{0}, interval_ms{0}, timeline_ms{0}, progress{0};
++    double write_ms{0}, write_started_ms{0}, goal_interval_ms{0}, queue_delay_ms{0};
++    int repeat{0}, frame{-1};
++    std::size_t motor_count{0};
++    bool final_goal{false}, sent{false}, success{false}, queued{false};
++    bool queue_activated{false}, head_override{false}, shoulder_override{false};
++    std::array<double, 23> goals{};
++};
++
++struct PlaybackDiagnostics {
++    std::string motion;
++    std::vector<std::string> frames;
++    std::vector<PlaybackTick> trace;
++    std::uint64_t ticks{0}, interval_count{0}, over_7_5{0}, over_10{0}, over_20{0};
++    std::uint64_t final_corrections{0}, goal_failures{0}, dropped_trace{0};
++    double expected_tick_ms{5}, interval_sum_ms{0}, max_interval_ms{0};
++    double started_ms{0}, finished_ms{0}, queue_delay_ms{0};
++    bool finished{false}, include_goals{false};
++};
++
++// File I/O runs on one worker. The control path only hands over a completed,
++// bounded trace with try_lock; an overloaded logger drops a batch, not a tick.
++class PlaybackTraceWriter {
++public:
++    explicit PlaybackTraceWriter(const std::string& path) : output_(path, std::ios::app) {
++        if (!output_) throw std::runtime_error("cannot open playback trace: " + path);
++        worker_ = std::thread([this] { run(); });
++    }
++    ~PlaybackTraceWriter() {
++        { std::lock_guard<std::mutex> lock(mutex_); stopping_ = true; }
++        wake_.notify_one();
++        worker_.join();
++    }
++    bool enqueue(std::shared_ptr<const PlaybackDiagnostics> batch) {
++        std::unique_lock<std::mutex> lock(mutex_, std::try_to_lock);
++        if (!lock || batches_.size() >= 4) return false;
++        batches_.push_back(std::move(batch));
++        wake_.notify_one();
++        return true;
++    }
++private:
++    void run() {
++        for (;;) {
++            std::shared_ptr<const PlaybackDiagnostics> batch;
++            {
++                std::unique_lock<std::mutex> lock(mutex_);
++                wake_.wait(lock, [this] { return stopping_ || !batches_.empty(); });
++                if (batches_.empty()) return;
++                batch = std::move(batches_.front()); batches_.pop_front();
++            }
++            output_ << "summary," << std::quoted(batch->motion) << ','
++                    << batch->ticks << ',' << batch->expected_tick_ms << ','
++                    << (batch->interval_count ? batch->interval_sum_ms / batch->interval_count : 0)
++                    << ',' << batch->max_interval_ms << ',' << batch->over_7_5
++                    << ',' << batch->over_10 << ',' << batch->over_20 << ','
++                    << batch->final_corrections << ',' << batch->goal_failures << ','
++                    << batch->queue_delay_ms << ',' << batch->finished_ms - batch->started_ms
++                    << ',' << batch->dropped_trace << '\n';
++            for (const auto& t : batch->trace) {
++                output_ << "tick," << std::setprecision(15) << std::quoted(batch->motion)
++                        << ',' << t.monotonic_ms << ',' << batch->expected_tick_ms
++                        << ',' << t.interval_ms << ',' << t.repeat << ',' << t.frame << ','
++                        << std::quoted(t.frame >= 0 ? batch->frames.at(t.frame) : "")
++                        << ',' << t.timeline_ms << ',' << t.progress << ',' << t.final_goal
++                        << ',' << t.queued << ',' << t.queue_activated << ',' << t.queue_delay_ms
++                        << ',' << t.sent << ',' << t.success << ',' << t.write_ms
++                        << ',' << t.write_started_ms << ',' << t.goal_interval_ms
++                        << ',' << t.motor_count << ',' << t.head_override << ',' << t.shoulder_override;
++                if (batch->include_goals) for (double goal : t.goals) output_ << ',' << goal;
++                output_ << '\n';
++            }
++            output_.flush();
++        }
++    }
++    std::ofstream output_;
++    std::mutex mutex_;
++    std::condition_variable wake_;
++    std::deque<std::shared_ptr<const PlaybackDiagnostics>> batches_;
++    bool stopping_{false};
++    std::thread worker_;
++};
++
++}  // namespace irc_step

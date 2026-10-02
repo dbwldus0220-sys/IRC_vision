@@ -76,7 +76,6 @@ class FakeBridge:
     HURDLE_PRE_GO_DWELL_MARKER = MotionCommandBridgeNode.HURDLE_PRE_GO_DWELL_MARKER
     HURDLE_PRE_GO_DWELL_SEC = MotionCommandBridgeNode.HURDLE_PRE_GO_DWELL_SEC
     PICKUP_FINE_PREPARE_MOTION_ID = MotionCommandBridgeNode.PICKUP_FINE_PREPARE_MOTION_ID
-    PICKUP_CRAB_PREPARE_MOTION_ID = MotionCommandBridgeNode.PICKUP_CRAB_PREPARE_MOTION_ID
     PICKUP_INITIAL_ALIGN_ACTIONS = (
         MotionCommandBridgeNode.PICKUP_INITIAL_ALIGN_ACTIONS
     )
@@ -139,6 +138,9 @@ class FakeBridge:
         self.pickup_fixed_sequence_started = False
         self.pickup_fine_positioning_complete = False
         self.last_pickup_motion_id = None
+        self.pickup_consecutive_motor_failures = 0
+        self.pickup_motor_failures = []
+        self.pickup_last_stage_succeeded = True
         self.pending_pickup_crab_motion_id = None
         self.pickup_positioning_dwell_motion_id = None
         self.queued_command_id = None
@@ -496,7 +498,6 @@ EXPECTED_PRODUCTION_ACTIONS = {
     "STRAIGHT_2": "line_forward_4",
     "STRAIGHT_3": "line_forward_6",
     "STRAIGHT_4": "line_forward_8",
-    "STRAIGHT_5": "line_forward_10",
     "APPROACH": "forward",
     "LEFT": "line_recovery_left_4",
     "RIGHT": "line_recovery_right_4",
@@ -647,6 +648,7 @@ def test_positive_source_timeout_is_preserved():
     "action",
     [
         "RETREAT_GOAL",
+        "STRAIGHT_5",
         "SLOW_APPROACH",
         "FINE_FORWARD_STEP",
         "APPROACH_GOAL",
@@ -1500,6 +1502,104 @@ def test_pickup_sequence_continues_after_recoverable_motor_fault(error_code):
     assert_correction_dwell_blocks_then_finishes(bridge)
     assert bridge.active_dwell_until is None
     assert bridge.pickup_fine_align_waiting is True
+
+
+@pytest.mark.parametrize("error_code", sorted(RECOVERABLE_MOTOR_ERROR_CODES))
+def test_pickup_stops_after_two_consecutive_motor_failures(error_code):
+    bridge = FakeBridge()
+    enter_pickup_fine_alignment(bridge)
+    continue_pickup_after_fine_alignment(bridge)
+    first = executor_status(
+        status="FAILED", motion_id="pickup_pre_backward_camera_down",
+        error_code=error_code, message="injected first fault",
+    )
+    bridge.executor_status_callback(first)
+    assert bridge.motion_in_progress
+    assert bridge.last_physical_motion_id is None
+    assert bridge.last_pickup_motion_id is None
+    assert bridge.pickup_consecutive_motor_failures == 1
+    # A repeated message during the dwell is not a second execution failure.
+    bridge.executor_status_callback(first)
+    assert bridge.pickup_consecutive_motor_failures == 1
+    bridge._check_atomic_dwell(bridge.active_dwell_until)
+    assert bridge.active_motion_id == "pickup"
+    bridge.executor_status_callback(executor_status(
+        status="RUNNING", motion_id="pickup",
+    ))
+    assert bridge.pickup_consecutive_motor_failures == 1
+    count = len(bridge.executor_request_publisher.messages)
+    bridge.executor_status_callback(executor_status(
+        status="FAILED", motion_id="pickup", error_code=error_code,
+        message="injected second fault",
+    ))
+    terminal = decoded_messages(bridge.motion_status_publisher)[-1]
+    assert terminal["status"] == "FAILED"
+    assert terminal["error_code"] == error_code
+    assert "consecutive motor failures" in terminal["message"]
+    assert [fault["status"] for fault in terminal["motor_failures"]] == ["FAILED", "FAILED"]
+    assert not bridge.motion_in_progress
+    bridge._check_atomic_dwell()
+    assert len(bridge.executor_request_publisher.messages) == count
+
+
+def test_pickup_recovers_normally_and_retains_faults_in_sequence_summary():
+    bridge = FakeBridge()
+    enter_pickup_fine_alignment(bridge)
+    continue_pickup_after_fine_alignment(bridge)
+    complete_pickup_motion_and_dwell(bridge, "pickup_pre_backward_camera_down")
+    bridge.executor_status_callback(executor_status(
+        status="FAILED", motion_id="pickup", error_code="SDK_FRAME_SEND_FAILED",
+        message="injected Goal write failure",
+    ))
+    assert bridge.last_completed_motion_id != "pickup"
+    skipped = decoded_messages(bridge.motion_status_publisher)[-1]
+    assert skipped["status"] == "RUNNING"
+    assert "completed_motion_id" not in skipped
+    assert skipped["motor_failures"][0]["status"] == "FAILED"
+    bridge._check_atomic_dwell(bridge.active_dwell_until)
+    complete_pickup_motion_and_dwell(bridge, "pickup_grasp_check_pose")
+    assert bridge.pickup_consecutive_motor_failures == 0
+    # Successful intervening execution permits another isolated fault.
+    bridge.executor_status_callback(executor_status(
+        status="FAILED", motion_id="pickup_retreat_2", error_code="SDK_FRAME_SEND_FAILED",
+    ))
+    assert bridge.motion_in_progress
+    assert bridge.pickup_consecutive_motor_failures == 1
+    bridge._check_atomic_dwell(bridge.active_dwell_until)
+    complete_pickup_motion_and_dwell(bridge, "pickup_first_backward_turn_right")
+    terminal = decoded_messages(bridge.motion_status_publisher)[-1]
+    assert terminal["status"] == "SUCCEEDED"  # The sequence finished, including skipped stages.
+    assert [fault["motion_id"] for fault in terminal["motor_failures"]] == ["pickup", "pickup_retreat_2"]
+    assert all(fault["status"] == "FAILED" for fault in terminal["motor_failures"])
+    assert not bridge.motion_in_progress
+    assert bridge.pickup_motor_failures == []
+
+
+def test_failed_grasp_check_pose_keeps_grasp_unknown_and_continues_retreat():
+    from test_motion_decision_node import FakeDecisionNode, arm_special_command
+    from mission_control.motion_decision_node import MotionDecisionNode
+
+    bridge = FakeBridge()
+    enter_pickup_fine_alignment(bridge)
+    continue_pickup_after_fine_alignment(bridge)
+    for motion in ("pickup_pre_backward_camera_down", "pickup"):
+        complete_pickup_motion_and_dwell(bridge, motion)
+    node = FakeDecisionNode("BALL_APPROACH")
+    arm_special_command(node, "PICKUP_NOW", 8000, 8)
+    offset = len(bridge.motion_status_publisher.messages)
+    bridge.executor_status_callback(executor_status(
+        status="FAILED", motion_id="pickup_grasp_check_pose",
+        error_code="SDK_PRESENT_POSITION_READ_FAILED",
+    ))
+    bridge._check_atomic_dwell(bridge.active_dwell_until)
+    assert bridge.active_motion_id == "pickup_retreat_2"
+    for message in bridge.motion_status_publisher.messages[offset:]:
+        payload = json.loads(message.data)
+        assert "verification_window_complete" not in payload
+        MotionDecisionNode._motion_status_callback(node, message)
+    assert not getattr(node, "grasp_verification_active", False)
+    assert node.phase_manager.grasp_result_for_ball(1) == "UNKNOWN"
+    assert not node.safety_interlock.latched
 
 
 def test_second_pickup_finishes_with_backward_left_turn_composite():

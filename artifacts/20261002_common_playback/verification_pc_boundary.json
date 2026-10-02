@@ -1,0 +1,113 @@
+{
+  "date": "2026-10-02",
+  "basis": "Latest SDK owner reply supplied by user: PC goal/boundary/repeat semantics with <=1 Goal SyncWrite per callback",
+  "pc_commit": "4bfdddc86ad34278b22b4f2f8e54edc5fd998192",
+  "pc_gui_sha256": "5f510f76fb1eb7bd2c29f959026994d5365141bdf8f1e1a941cdf90bf5ed3f25",
+  "files": {
+    "artifacts/robot_motions_runtime.json": {
+      "real_path": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/robot_motions_runtime.json",
+      "sha256": "b537a60b167503fb7491a87c8106b698aacce9531e837ed28652ebdd167aad2d",
+      "motions": 82,
+      "frames": 293
+    },
+    "install/irc_step_motion_executor/share/irc_step_motion_executor/config/robot_motions_runtime.json": {
+      "real_path": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/robot_motions_runtime.json",
+      "sha256": "b537a60b167503fb7491a87c8106b698aacce9531e837ed28652ebdd167aad2d",
+      "motions": 82,
+      "frames": 293
+    },
+    "artifacts/20261002_common_playback/robot_motions_pc.json": {
+      "real_path": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/20261002_common_playback/robot_motions_pc.json",
+      "sha256": "b4d228b865cef7f582bdb67f1fe5d20be4c82178a2553810a30fba2e48fd811e",
+      "motions": 82,
+      "frames": 286
+    },
+    "build/irc_step_motion_executor/sdk_motion_executor": {
+      "real_path": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/sdk_motion_executor",
+      "sha256": "3935d7c9c9c86b3b134ea85a9379edebf5f0736514a86ee95db57178921061cb"
+    },
+    "install/irc_step_motion_executor/lib/irc_step_motion_executor/sdk_motion_executor": {
+      "real_path": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/sdk_motion_executor",
+      "sha256": "3935d7c9c9c86b3b134ea85a9379edebf5f0736514a86ee95db57178921061cb"
+    }
+  },
+  "sdk_sources_match_reviewed_patch": true,
+  "sdk_incremental_files": [
+    "robot_motion_player.hpp",
+    "robot_motion_player.cpp"
+  ],
+  "sdk_incremental_patch": "tools/sdk_common_playback_pc_boundary.patch",
+  "sdk_current_sha256": {
+    "CMakeLists.txt": "18ae2547b6e86d23323acac1e0974614184989b3e621d4d44ad9456d60493c7f",
+    "motion_pattern.hpp": "2027f1c81e4ef6b1a4621b29545f443ad59b4eb27267494c9d794f863255b6e8",
+    "motion_pattern.cpp": "051ffcd0a98c0c319244ce449f05fcfe79130a8378d6726de256e624f7fbcc4d",
+    "robot_motion_player.hpp": "5b0646b320492fc8ee62c1b40bf26bd7decdcbc4a56a354c8f22489845d6233d",
+    "robot_motion_player.cpp": "7376285d939f58458cdaec919a781d7bb8238993329897ae3a7749b406aa9eeb",
+    "playback_diagnostics.hpp": "5f984e0b0b3ac0713f568f9fad23ecbff4e0cde6bd2cd133a9fa16accc204aea"
+  },
+  "runtime_unchanged_during_this_revision": true,
+  "build": {
+    "packages": [
+      "irc_step_motion_executor",
+      "mission_control",
+      "step"
+    ],
+    "result": "passed",
+    "launch_executed": false
+  },
+  "tests": {
+    "ctest": {
+      "total": 20,
+      "failed": [],
+      "skipped": []
+    },
+    "pytest": {
+      "total": 1241,
+      "failed": [],
+      "skipped": []
+    },
+    "catalog_contract": {
+      "passed": 3
+    },
+    "all_82_runtime_motions_fake_playback": "passed",
+    "patch_application": [
+      "original base",
+      "previous patched revision",
+      "idempotent final revision",
+      "refuse unrelated edits"
+    ],
+    "ctest_launch_suites_excluded": 5
+  },
+  "assertions": {
+    "repeat_205ms_deg": 19.938441702975688,
+    "repeat_205ms_raw_goal": 2275,
+    "repeat_with_8ms_write_delay_restart_ms": 208,
+    "internal_boundary_125_then_130ms_timeline_ms": 105,
+    "ordinary_boundary_125_then_130ms_timeline_ms": 130,
+    "internal_speed_applied_once": true,
+    "final_cycle_flag_no_double_restart": true,
+    "partial_joint_boundary_merged_into_one_write": true,
+    "failed_boundary_does_not_advance_or_restart": true,
+    "default_general_completion_no_position_read": true,
+    "startup_position_verification_and_80ms_settle_preserved": true,
+    "startup_gate_two_second_hold_preserved": true,
+    "queue_activation_after_final_callback_preserved": true,
+    "all_fake_control_callbacks_goal_writes_at_most_one": true
+  },
+  "preserved_policies": [
+    "82 motions / 293 frames",
+    "ID 0/4/5 production policy",
+    "startup transition/dwell",
+    "queue hold/activation",
+    "pickup recoverable error progression and two consecutive failure stop",
+    "line_forward_10 and STRAIGHT_5 remain removed"
+  ],
+  "not_verified": [
+    "real timer jitter",
+    "real Goal bus intervals",
+    "physical motor arrival or shutdown",
+    "physical walking stability"
+  ],
+  "hardware_accessed": false,
+  "prior_evidence": "verification.json and phase_flow_baseline.json are historical and were not overwritten; 21 known phase-flow failures were not rerun for this SDK-only revision"
+}

@@ -1,5 +1,26 @@
 # mission_control
 
+## 2026-10-02 공통 재생 연동 및 pickup 오류 처리
+
+SDK 담당자의 최신 PC GUI 기준 공통 재생 수정은
+[executor 보고서](../irc_step_motion_executor/README.md)에 정리했다.
+기존 runtime 82모션/293프레임과 ID 0·4·5 기본 정책을 유지한다.
+`line_forward_8`, `forward`, `goal_camera_90_forward_2` alias를 복구했고,
+사용하지 않는 `line_forward_10`/`STRAIGHT_5` 요청은 제거했다.
+
+pickup의 단발성 복구 가능 모터 오류 후 다음 단계 진행은 유지한다.
+executor의 FAILED를 성공으로 바꾸는 대신 `motor_failures`에 원래 오류를
+남기며, 다음 모션의 기존 위치 읽기·Goal 송신 검사를 이용한다.
+연속 2개 모션이 실패하면 현재 sequence를 FAILED로 종료한다.
+모션 성공 시 연속 횟수를 초기화하며, 이 정책에 새 AUTO 영구 잠금이나
+추가 통신 대기를 넣지 않는다. 준비 모션 실패 예외와 critical 잠금은 유지한다.
+
+실패한 집기 확인 자세는 영상 검증 창을 열지 않는다. UNKNOWN 또는
+NOT_GRABBED인 공은 정상 후퇴·라인 복귀 후 AUTO를 재개한다.
+묶음 종료 SUCCEEDED는 공 획득 성공과 별개이며, 중간 모터 실패는 종료
+상태의 `motor_failures`에서도 확인할 수 있다.
+
+
 ## 2026-09-29 카탈로그 37 허들 갱신
 
 `찐허들`을 `robot_motions(37).json` 기준으로 교체했다. 16프레임,

@@ -1,0 +1,52 @@
+{
+  "head": "0e6b0b486a00f751401dd762f80251555a7147f4",
+  "method": "Rebuilt unchanged HEAD C++ sources and tests in /tmp using HEAD alias config; no serial implementation linked",
+  "results": {
+    "test_startup_pose_gate": {
+      "failed": [
+        "StartupPoseGate.HoldsForTwoSecondsAfterSuccessThenAllowsNavigation"
+      ],
+      "exit_code": 1
+    },
+    "test_sdk_executor_driver": {
+      "failed": [
+        "SdkExecutorDriver.RequestPublishesImmediateRunningStatus",
+        "SdkExecutorDriver.CancelCallbackPublishesAndTerminalPollPublishes",
+        "SdkExecutorDriver.StaleCancelDoesNotCancelActiveMotion",
+        "SdkExecutorDriver.TerminalPollPublishesSucceededStatus",
+        "SdkExecutorDriver.SuppressesIdenticalRunningStatusAtControlRate",
+        "SdkExecutorDriver.BackendExceptionPublishesFailedWithoutEscaping"
+      ],
+      "exit_code": 1
+    },
+    "test_sdk_executor_core": {
+      "failed": [
+        "SdkExecutorCore.ResolvesForwardAliasBeforeStartingBackend",
+        "SdkExecutorCore.ResolvesPickupAliasWithoutFallback",
+        "SdkExecutorCore.PreservesCorrelationIncludingNullIds",
+        "SdkExecutorCore.MapsRunningSettlingAndSucceeded",
+        "SdkExecutorCore.MapsBackendFailureToFailedTerminal",
+        "SdkExecutorCore.CancelRequestCompletesWhenBackendReportsCancelled",
+        "SdkExecutorCore.RejectsStaleCancelWithoutTouchingActiveRequest",
+        "SdkExecutorCore.RejectsSecondStartWhileActive",
+        "SdkExecutorCore.TimeoutCancelsAndReturnsFailedWithCorrelation",
+        "SdkExecutorCore.AllowsNewRequestAfterTerminalStatus",
+        "SdkExecutorCore.BackendStartExceptionBecomesFailed",
+        "SdkExecutorCore.ExplicitBackendStartRejectionStaysRejected",
+        "SdkExecutorCore.BackendPollExceptionBecomesFailedAndReleasesRequest",
+        "SdkExecutorCore.BackendCancelExceptionBecomesFailedTerminal",
+        "SdkExecutorCore.PromotesOneQueuedRequestAtSeamlessBoundary"
+      ],
+      "exit_code": 1
+    },
+    "test_catalog_only_core": {
+      "failed": [
+        "MotionAliasCatalog.LoadsLatestSdkAndCanonicalAliases",
+        "CatalogOnlyCore.PreservesCorrelationFieldsAndRejectsExecution",
+        "CatalogOnlyCore.DistinguishesRequiredNullEventIdFromMissingEventId",
+        "CatalogOnlyContract.SharedVectorsPreserveFieldsWithoutFallback"
+      ],
+      "exit_code": 1
+    }
+  }
+}

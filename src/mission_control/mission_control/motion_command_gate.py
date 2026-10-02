@@ -14,7 +14,6 @@ GENERAL_ACTIONS = frozenset(
         "STRAIGHT_2",
         "STRAIGHT_3",
         "STRAIGHT_4",
-        "STRAIGHT_5",
         "APPROACH",
         "SLOW_APPROACH",
         "FINE_FORWARD_STEP",

@@ -1,0 +1,39 @@
+{
+  "source_path": "/home/jet/Downloads/robot_motions(45).json",
+  "source_sha256": "6961f279adf31a58e76fdca2929e11cbd4ba3324cc83921e2741a9444dc51dde",
+  "before_sha256": "b537a60b167503fb7491a87c8106b698aacce9531e837ed28652ebdd167aad2d",
+  "after_sha256": "b687af615e9ae884139ad3835155e9afb85df3858bdd8e178a78d728c12fa458",
+  "updated_names": [
+    "찐찐전진45(4회)",
+    "찐찐전진(6회)",
+    "찐찐전진45(8회)",
+    "찐찐전진90(4회)",
+    "찐찐전진90(6회)",
+    "찐찐전진90(8회)",
+    "찐찐전진45(2회)",
+    "찐찐전진90(2회)"
+  ],
+  "changed_fields": [
+    "playback_speed"
+  ],
+  "playback_speed": {
+    "before": 1.05,
+    "after": 1.0
+  },
+  "runtime_policy": {
+    "position_tolerance_deg": 5.0,
+    "fixed_joint_angles_deg": {
+      "4": 18.0,
+      "5": -18.0
+    }
+  },
+  "verification": {
+    "source_matches_except_runtime_policy": true,
+    "unrelated_motions_unchanged": true,
+    "aliases_unchanged": true,
+    "source_unchanged": true,
+    "installed_catalog_matches": true
+  },
+  "motion_count": 82,
+  "frame_count": 293
+}

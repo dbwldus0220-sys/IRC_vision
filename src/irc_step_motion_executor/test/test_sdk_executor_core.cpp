@@ -48,7 +48,7 @@ TEST(SdkExecutorCore, ResolvesForwardAliasBeforeStartingBackend)
     request_json(1, "forward"), 100);
 
   ASSERT_EQ(backend.started_motion_names.size(), 1U);
-  EXPECT_EQ(backend.started_motion_names[0], "전진45도(8회)");
+  EXPECT_EQ(backend.started_motion_names[0], "찐찐전진45(8회)");
   EXPECT_EQ(status.status, "RUNNING");
   EXPECT_TRUE(core.has_active_request());
 }
@@ -62,7 +62,7 @@ TEST(SdkExecutorCore, ResolvesPickupAliasWithoutFallback)
     request_json(2, "pickup", "PICKUP_NOW"), 100);
 
   ASSERT_EQ(backend.started_motion_names.size(), 1U);
-  EXPECT_EQ(backend.started_motion_names[0], "공잡기리그랩까지 실전");
+  EXPECT_EQ(backend.started_motion_names[0], "찐공잡기리그랩까지 실전");
   EXPECT_EQ(status.motion_id, "pickup");
 }
 
@@ -242,7 +242,7 @@ TEST(SdkExecutorCore, RejectsSecondStartWhileActive)
   EXPECT_EQ(status.error_code, "BUSY");
   EXPECT_EQ(status.request_id, 11);
   ASSERT_EQ(backend.started_motion_names.size(), 1U);
-  EXPECT_EQ(backend.started_motion_names[0], "전진45도(8회)");
+  EXPECT_EQ(backend.started_motion_names[0], "찐찐전진45(8회)");
 }
 
 TEST(SdkExecutorCore, TimeoutCancelsAndReturnsFailedWithCorrelation)
@@ -279,7 +279,7 @@ TEST(SdkExecutorCore, AllowsNewRequestAfterTerminalStatus)
 
   EXPECT_EQ(status.status, "RUNNING");
   ASSERT_EQ(backend.started_motion_names.size(), 2U);
-  EXPECT_EQ(backend.started_motion_names[1], "허들넘기 실전");
+  EXPECT_EQ(backend.started_motion_names[1], "찐허들");
 }
 
 TEST(SdkExecutorCore, BackendStartExceptionBecomesFailed)
@@ -374,7 +374,7 @@ TEST(SdkExecutorCore, PromotesOneQueuedRequestAtSeamlessBoundary)
     request_json(31, "forward", "STRAIGHT"), 101);
   EXPECT_EQ(queued.status, "QUEUED");
   ASSERT_EQ(backend.queued_motion_names.size(), 1U);
-  EXPECT_EQ(backend.queued_motion_names[0], "전진45도(8회)");
+  EXPECT_EQ(backend.queued_motion_names[0], "찐찐전진45(8회)");
 
   backend.sequence = 1;
   const auto completed = core.poll(200);

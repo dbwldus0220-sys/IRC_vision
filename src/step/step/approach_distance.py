@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 
 
-# Measured forward-walk averages (metres): 2, 4, 6, 8, and 10 steps.
+# Measured distance bands for the retained STRAIGHT_0..4 actions.
 # STRAIGHT_0 is deliberately left to the behavior layer: it may mean hold,
 # one micro-step, or a small retreat depending on the active mission.
 APPROACH_DISTANCE_LIMITS_M = (
@@ -14,12 +14,11 @@ APPROACH_DISTANCE_LIMITS_M = (
     0.427,
     0.564,
     0.680,
-    0.780,
 )
 
 
 def approach_motion_for_distance(distance_m: float | None) -> str:
-    """Return STRAIGHT_0..5, or generic STRAIGHT outside known range."""
+    """Return STRAIGHT_0..4, or generic STRAIGHT outside known range."""
     if distance_m is None or isinstance(distance_m, bool):
         return "STRAIGHT"
     try:
@@ -56,7 +55,7 @@ def ball_hurdle_approach_motion(
 
 
 def approach_level_from_motion(motion: str) -> int | None:
-    """Extract a valid 0..5 approach level from a motion name."""
+    """Extract a valid approach level from a supported motion name."""
     normalized = motion.strip().upper()
     if not normalized.startswith("STRAIGHT_"):
         return None
@@ -64,4 +63,4 @@ def approach_level_from_motion(motion: str) -> int | None:
         level = int(normalized.rsplit("_", 1)[1])
     except (TypeError, ValueError):
         return None
-    return level if 0 <= level <= 5 else None
+    return level if 0 <= level < len(APPROACH_DISTANCE_LIMITS_M) else None

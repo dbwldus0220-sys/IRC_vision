@@ -1,0 +1,59 @@
+{
+  "head": {
+    "exit_code": 1,
+    "total": 214,
+    "failed": [
+      "test_absent_hurdle_keeps_ball_priority_over_line",
+      "test_ball_loss_waits_then_reacquired_ball_selects_moving_recover",
+      "test_ball_stationary_turn_requires_fresh_ball_before_next_approach",
+      "test_collected_ball_route_clears_stale_reservations_before_dwell[GOAL_APPROACH-GOAL_CAMERA90_FINE_FORWARD_2]",
+      "test_confirmed_approaching_hurdle_beats_approaching_ball",
+      "test_failed_first_pickup_keeps_straight_distance_policy",
+      "test_final_line_track_still_prioritizes_confirmed_hurdle",
+      "test_full_course_mock_flow_without_ros_graph",
+      "test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-20.0-GOAL_CAMERA90_TURN_LEFT_1--15.0-GOAL_CAMERA90_FINE_FORWARD_2]",
+      "test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-35.0-GOAL_CAMERA90_TURN_LEFT_1--20.0-GOAL_CAMERA90_TURN_LEFT_1]",
+      "test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[34.0-GOAL_CAMERA90_TURN_RIGHT_3-0.0-GOAL_CAMERA90_FINE_FORWARD_2]",
+      "test_goal_depth_actions_follow_new_scoring_range[0.65-GOAL_CAMERA90_FINE_FORWARD_1]",
+      "test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell",
+      "test_pickup_fine_alignment_rechecks_fresh_ball_under_atomic_lock",
+      "test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment",
+      "test_post_ball_detection_loss_cannot_interrupt_timed_line_or_goal",
+      "test_second_ball_uses_same_straight_distance_policy",
+      "test_shot_settle_restarts_after_scoring_condition_is_lost[lost_confirmation2]",
+      "test_top_loss_forward_rechecks_new_vision_without_motion_dwell",
+      "test_unconfirmed_hurdle_can_become_confirmed_and_take_priority",
+      "test_unconfirmed_hurdle_disappearance_resumes_ball_mission"
+    ],
+    "passed": 193
+  },
+  "current": {
+    "exit_code": 1,
+    "total": 214,
+    "failed": [
+      "test_absent_hurdle_keeps_ball_priority_over_line",
+      "test_ball_loss_waits_then_reacquired_ball_selects_moving_recover",
+      "test_ball_stationary_turn_requires_fresh_ball_before_next_approach",
+      "test_collected_ball_route_clears_stale_reservations_before_dwell[GOAL_APPROACH-GOAL_CAMERA90_FINE_FORWARD_2]",
+      "test_confirmed_approaching_hurdle_beats_approaching_ball",
+      "test_failed_first_pickup_keeps_straight_distance_policy",
+      "test_final_line_track_still_prioritizes_confirmed_hurdle",
+      "test_full_course_mock_flow_without_ros_graph",
+      "test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-20.0-GOAL_CAMERA90_TURN_LEFT_1--15.0-GOAL_CAMERA90_FINE_FORWARD_2]",
+      "test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-35.0-GOAL_CAMERA90_TURN_LEFT_1--20.0-GOAL_CAMERA90_TURN_LEFT_1]",
+      "test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[34.0-GOAL_CAMERA90_TURN_RIGHT_3-0.0-GOAL_CAMERA90_FINE_FORWARD_2]",
+      "test_goal_depth_actions_follow_new_scoring_range[0.65-GOAL_CAMERA90_FINE_FORWARD_1]",
+      "test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell",
+      "test_pickup_fine_alignment_rechecks_fresh_ball_under_atomic_lock",
+      "test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment",
+      "test_post_ball_detection_loss_cannot_interrupt_timed_line_or_goal",
+      "test_second_ball_uses_same_straight_distance_policy",
+      "test_shot_settle_restarts_after_scoring_condition_is_lost[lost_confirmation2]",
+      "test_top_loss_forward_rechecks_new_vision_without_motion_dwell",
+      "test_unconfirmed_hurdle_can_become_confirmed_and_take_priority",
+      "test_unconfirmed_hurdle_disappearance_resumes_ball_mission"
+    ],
+    "passed": 193
+  },
+  "new_failures": []
+}

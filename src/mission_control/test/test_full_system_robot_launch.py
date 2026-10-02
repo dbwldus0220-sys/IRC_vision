@@ -99,7 +99,13 @@ def test_robot_launch_defaults_are_production_ready(
         "running_polls": 2,
         "settling_polls": 1,
         "explicit_torque_approval": True,
-        "position_tolerance_enabled": True,
+        "position_tolerance_enabled": False,
+        "enable_head_override": True,
+        "enable_shoulder_override": True,
+        "queued_transition_hold_ms": 0,
+        "motion_trace_enabled": False,
+        "motion_trace_path": "",
+        "motion_trace_goals": False,
         "motion_json_path": str(
             Path(get_package_share_directory("irc_step_motion_executor"))
             / "config"

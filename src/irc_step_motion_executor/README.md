@@ -1,5 +1,290 @@
 # IRC STEP Motion Executor C++ Wrapper
 
+## 2026-10-02 공통 재생 경로 수정 및 검증
+
+현재 production은 외부 SDK를 연결해 사용한다. 아래의 과거 catalog-only 단계
+설명과 구분한다. 이번 작업은 모터를 연결하거나 launch를 실행하지 않았다.
+사용자가 선택한 대로 **기존 runtime 82모션/293프레임을 그대로 유지**했다.
+PC 데이터는 비교 및 override OFF 기준 파일로만 별도 설치한다.
+
+### 기준 파일과 전체 차이
+
+- branch: `agent/sdk-gui-frame-gates-20260930`
+- HEAD: `0e6b0b486a00f751401dd762f80251555a7147f4` (commit/push 없음)
+- 작업 시작 시 git 변경 없음. 잘못된 final-Goal/time-profile 변경도 없었다.
+- 최초 host 프로세스 검사에서 실행 중인 full_system/모션 executor 없음.
+- PC commit: `4bfdddc86ad34278b22b4f2f8e54edc5fd998192`
+- PC GUI SHA256: `5f510f76fb1eb7bd2c29f959026994d5365141bdf8f1e1a941cdf90bf5ed3f25`
+- PC JSON SHA256: `b4d228b865cef7f582bdb67f1fe5d20be4c82178a2553810a30fba2e48fd811e`
+- 최초 비교 runtime SHA256: `f160ebc8f256f27c9ab699255398bfa53503f11d2424863e0fcbbe8df76c0ecb`
+- 최신 runtime SHA256: `b537a60b167503fb7491a87c8106b698aacce9531e837ed28652ebdd167aad2d`
+
+runtime source는 `artifacts/robot_motions_runtime.json`, install은
+`install/irc_step_motion_executor/share/irc_step_motion_executor/config/robot_motions_runtime.json`이다.
+install은 source로 연결된 symlink이며 둘 다 82/293 및 최신 runtime SHA가 같다.
+최초 비교 이후 사용자가 바꾼 `찐라인복귀우회전45 도(4회)`의 `왼뒤407`
+ID 10/11/12(-4/2/-2 → -3/0/0)는 보존했다. 이번 경계·시계 수정에서는
+runtime JSON을 편집하지 않았다.
+PC 파일은 commit의 raw URL에서 다운로드하여 전체 SHA를 검증한
+`artifacts/20261002_common_playback/robot_motions_pc.json`이며 install의
+`config/robot_motions_pc.json`도 같은 바이트를 참조한다(82/286).
+최초 binary는 node source보다 새로웠다. 이번에는 외부 SDK와 wrapper를 다시
+빌드했고 최종 binary hash/경로는 아래 verification 파일에 기록했다.
+
+전체 84개 이름의 합집합, 모든 프레임/관절/metadata 차이는
+[`catalog_diff.json`](../../artifacts/20261002_common_playback/catalog_diff.json),
+최초 runtime 기준 행 단위 표 691개는 [`catalog_diff.csv`](../../artifacts/20261002_common_playback/catalog_diff.csv)에 있다.
+변경 전 원본도 `robot_motions_runtime.before.json`에 보존했다.
+
+| 구분 | 확인한 내용 | 처리 |
+|---|---|---|
+| 의도된 ID 0 정책 | 공통 대응 프레임의 JSON ID 0 값은 PC와 같음. ball/goal/hurdle ROS callback은 runtime head override를 설정함 | 기본 ON 유지 |
+| 의도된 ID 4·5 정책 | 대응 프레임 245개에서 각 축 값이 다름. 일반 모션은 18/-18, 명시된 예외 3개는 원래 값 | 기본 ON 유지 |
+| 기존 completion 정책 | 공통 80모션 모두 PC 2도, Jetson 5도. settle 설정은 동일 | artifacts 정책대로 5도 유지 |
+| 이름 집합 | 양쪽 모두 82개지만 서로 다른 이름이 각각 2개 | 기존 이름 보존 |
+| 비정책 관절 | 라인 복귀 ID 10/11/12, 우회전 ID 15/18, 좌회전90·카메라90 ID 17/19, 자세전환 ID 15, 허들 ID 15 등 | 기존 튜닝 보존 |
+| 시간·구조 | 좌회전 복합 모션 추가 프레임, 허들 삭제·시각 변경, 0도 자세전환 speed 1.0→1.05 | 기존 데이터 보존 |
+| torques | 카메라90/좌회전90의 `오뒤412(90도)` 7프레임에서 PC true, Jetson false | 재생 중 Torque Enable에 사용하지 않음 |
+| 기타 | 공통 모션의 repeat_count/repeatable/start_pose, 대응 프레임 lift_early_arrival/playback_cycle_end는 동일. 허들의 end_pose/마지막 frame name은 다름 | 상세 원본 차이 보존 |
+
+비정책 관절의 PC→Jetson 차이는 다음과 같다. 따라서 ID 0·4·5를 제외해도
+데이터 차이가 남는다. 이것이 오류라는 뜻은 아니며, 작업자의 추가 의도 확인 없이 고치지 않았다.
+
+| 모션/프레임 | PC → Jetson |
+|---|---|
+| 좌/우 라인복귀 4회 `왼뒤407` | ID 10: -3→-4, 11: 0→2, 12: 0→-2 |
+| 우회전45 2/3/5/7/9회 및 우회전 복합 모션 `제우오들25` | ID 15: -3.548828125→-4, 18: 19→18.80859375 |
+| 좌회전90 1~6회 및 `찐오뒤카메라90도`의 `오뒤412(90도)` | ID 17: -24→-26, 19: 67.115234375→68.115234375 |
+| `찐오뒤에서 기본자세(카메라45도)` 첫 프레임 | ID 15: -3→-2 |
+| `찐허들`의 `허들찐12` / `왼뒤407` | ID 15: -6→0.703125 / ID 10·11·12는 라인복귀와 같은 차이 |
+
+순증 7프레임은 단순한 7개 삽입이 아니다. 아래 합계는 **+4+6-1+4+2-4-4=+7**이다.
+시각 표기는 `start_ms/time_ms`, 프레임 index는 JSON 차이표에서 0부터 센다.
+
+| 모션 | PC / Jetson 프레임 수 | 정확한 위치·내용 |
+|---|---|---|
+| `찐기본자세에서 제자리좌회전(골대)` | 10 / 14 | Jetson index 10~13: `제좌왼들25` 2206/61, `오뒤412` 2267/144, `제좌왼들25` 2545/61, `오뒤412` 2606/144 |
+| `찐후진에서 제자리좌회전(공)` | 10 / 16 | 위 4개 + index 14~15 `제좌왼들25` 2884/61, `오뒤412` 2945/144 |
+| `찐허들` | 17 / 16 | PC index 13 `허들찐13` 5810/70 삭제. 뒤 `왼뒤407` 5880/300→5810/100, `왼들401` 6818/60→6614/55, 마지막 `오뒤412` 6878/120→`오뒤412(허들)` 6669/120. 마지막 프레임의 비정책 관절은 동일 |
+| `찐찐라인복귀좌회전45도(6회)` | 0 / 4 | Jetson 전용: `오들401` 60/70, `왼뒤407` 130/150, `왼들401` 430/45, `오뒤412` 475/90 |
+| `찐미세오뒤에서 오뒤(골대 카메라90도)` | 0 / 2 | Jetson 전용: `왼들401(회전준비90도)` 50/67, `오뒤412(회전준비90도)` 117/118 |
+| `찐미세오옆꽃게90-1(2회)` | 4 / 0 | PC 전용: `미세오옆꽃게1-1` 80/60, `미세오옆꽃게2` 140/140, `미세오옆꽃게3` 330/60, `오옆4` 390/100 |
+| `찐미세오옆꽃게90-1(3회)` | 4 / 0 | 위와 같은 4개 프레임, repeat_count=3 |
+
+### 이름 계약 및 요청 정리
+
+등록 alias 96개의 target은 모두 현재 runtime에서 해석된다. 누락되었던
+`line_forward_8`과 `forward`는 기존 8회 전진 의미대로 `찐찐전진45(8회)`,
+`goal_camera_90_forward_2`는 `찐찐전진90(2회)`에 연결했다.
+
+사용자 지시에 따라 `line_forward_10`과 이를 요청하는 `STRAIGHT_5`를 제거했다.
+bridge, 일반 명령 gate, 라인 관측 시간표, head override 대상에서 제거했으며
+거리 분류도 더 이상 STRAIGHT_5를 생성하지 않는다. 0.680m를 초과하는 거리는
+기존 범위 밖 처리인 일반 STRAIGHT로 판단한다. 제거된 요청은 다른 모션으로
+대체 실행하지 않고 거절한다. 사용되지 않던 `pickup_crab_prepare` 상수와
+상태 분기도 제거했다. 실제 미세전진→꽃게 준비 모션은 보존했다.
+
+전체 action map과 모션 상수의 alias 누락 검사가 통과한다.
+PC 원본으로 교체하면 여전히 `line_recovery_left_6`와 `fine_to_turn_ready_90`의
+대상이 없으므로, 사용자가 선택한 runtime 82모션/293프레임을 유지한다.
+전체 alias target과 정적 참조 위치는 `catalog_diff.json`에 기록했다.
+
+### 공 집기 오류 후 진행 정책
+
+SDK의 Goal 송신 실패는 FAILED로 남으며 해당 모션과 SDK queue를 종료한다.
+bridge는 그 결과를 SUCCEEDED로 덮어쓰지 않는다. 기존에 허용하던 네 종류의
+모터 오류에 대해서는 실패 내역을 `/motion/status`의 `motor_failures` 배열에
+남기고 sequence의 다음 단계를 별도로 진행한다. 각 항목은 motion_id,
+status=FAILED, error_code, message를 보존한다. 기존 준비 모션 예외와
+critical 오류의 AUTO 잠금 정책은 유지한다.
+
+별도의 복구 ping, 대기 또는 도착 gate는 추가하지 않았다. 다음 단독 모션은
+기존 SDK start의 profile 설정, Present Position 읽기, Goal 송신 검사를 사용한다.
+RUNNING 수신이나 dwell 종료는 통신 회복 성공으로 세지 않는다. 다음 모션도
+실패하여 **연속 2개 모션이 실패하면** 현재 pickup sequence를 FAILED로 끝낸다.
+이는 이번 수정의 미션 정책이며 SDK 담당자 프롬프트 자체의 요구는 아니다.
+성공한 모션이 사이에 있으면 연속 실패 횟수는 초기화한다. 전체 AUTO에 새로운
+영구 잠금을 추가하지 않으며 이후 판단은 기존 BALL_APPROACH 재시도 정책을 따른다.
+
+모션 실행 실패는 자세 완료 이력에 기록하지 않으며, 집기 확인 자세가 실패하면
+영상 검증 창도 열지 않는다. 이때 공 획득 결과는 UNKNOWN으로 남고 후퇴·복귀를
+계속할 수 있다. 정상 검증에서 NOT_GRABBED가 나온 경우도 기존대로 라인 정렬 후
+AUTO를 재개한다. sequence 끝의 SUCCEEDED는 묶음 처리가 끝났다는 뜻이며,
+생략된 모션의 실패 내역은 종료 상태에도 남는다. 공 획득 성공을 뜻하지 않는다.
+
+### 적용 경로와 Goal writer
+
+| 단계 | 코드 위치 |
+|---|---|
+| vision/algorithm decision → navigation publish | `mission_control/motion_decision_node.py:3521` |
+| bridge 및 sequence/ready gate → motion request | `motion_command_bridge_node.py:1051`, `:1107` |
+| request/alias resolve/queue | `src/sdk_executor_driver.cpp:20`, `src/sdk_executor_core.cpp:194` |
+| 5ms timer → core poll → SDK update | `src/sdk_executor_node.cpp:250`, `src/sdk_executor_driver.cpp:40`, `src/robot_motion_player_backend.cpp:266` |
+| JSON lookup, actual-time timeline, endpoint 보장 | 외부 SDK `robot_motion_player.cpp:523` |
+| half-cosine + shortest-angle + lift 80% | 외부 SDK `robot_motion_player.cpp:978`, `:959`, `:990` |
+| ID 0·4·5 + correction/override 합성 | 외부 SDK `robot_motion_player.cpp:923` |
+| direct Goal 합성 → hardware | 외부 SDK `robot_motion_player.cpp:1033`, `dynamixel_motion_hardware.cpp:144` |
+| degree/radian/raw → 한 번의 GroupSyncWrite | 외부 SDK `dynamixel_controller.cpp:72`, `gui_goal_position.hpp:10`, `step_dynamixel.cpp:549` |
+
+외부 SDK 경로는 `/home/jet/IRC/external_sdk/robot_motion_player_sdk_work_20260801/final step`이다.
+23축 degree map을 하드웨어의 desired_rad에 합쳐 `SetPosition`으로 전송하고,
+raw 변환은 `2048 + degree*4096/360`에 GUI의 wrap/clamp/ties-to-even을 적용한다.
+
+full_system의 일반 Goal writer는 이 executor 하나다. vision은 ROS 정보만
+보내며 head callback은 같은 player의 override map을 갱신한다. head용 별도
+SyncWrite는 없다. `tools/upsert_motion_catalog.py:21`은 import 시 JSON의
+4·5 및 completion 정책을 적용하는 도구이지 bus writer가 아니다.
+
+같은 hardware owner의 startup transition(`robot_motion_player.cpp:363`)과
+cancel hold(`dynamixel_motion_hardware.cpp:216`)는 별도 상황에서
+`commandPosition → SetTimeBasedPosition → syncWriteTimeBasedTheta`를 사용한다.
+일반 재생의 profile 0 설정과 혼동하지 않는다. SDK의 legacy
+`MoveToTargetSmoothCos`도 Goal Position write를 호출할 수 있으나 현재
+full_system 호출 경로에는 없다. `Dxl::Loop`의 선택적 write는 Goal Torque이며
+일반 모션 재생 경로에서 호출하지 않는다. 별도 실행되는 임의 프로그램까지 막는
+OS 수준의 port lock을 이번에 추가한 것은 아니다.
+
+### 변경한 공통 동작과 영향
+
+| 항목 | 이전 | 변경 후 |
+|---|---|---|
+| 프레임 경계 | endpoint 후 같은 callback에서 다음 sample 가능 | endpoint 성공을 확인하고 callback 종료. 다음 callback부터 진행 |
+| 여러 경계를 넘긴 tick | 샘플과 경계 명령 중첩 가능 | 밀린 endpoint만 callback당 하나. 놓친 5ms sample 몰아쓰기 없음 |
+| queue | 마지막 sample과 queued activation이 같은 callback일 수 있음 | 마지막 final 성공 이후 callback에서만 activation. 첫 queued Goal은 그 다음 callback |
+| ROS queue 알림 | RUNNING 알림 때문에 SDK update 한 번 생략 | 알림 callback에서도 SDK poll 유지. 오류를 즉시 보고 |
+| 실패 | 전송 실패 후 timeline 진행 / 최종 read 실패도 best effort 성공 가능 | Goal 실패 또는 read 실패는 FAILED, queue 해제 |
+| 위치 도착 | 마지막 모션의 최대 100ms best effort 확인 | 일반 재생 기본값 false. 최종 Goal 성공 시 도착 검사 없이 완료. 시작 자세 검사는 별도 유지 |
+| 반복 시계 | 마지막 Goal 다음 callback에서 재설정 | 최종 송신을 마친 callback에서 새 시각으로 재설정. 다음 callback부터 경과시간 반영 |
+| 내부 반복 | playback_cycle_end를 실행 경계로 사용하지 않음 | 내부 종점 성공 후 시계 재설정, 초과 지연 버림. 마지막 플래그는 전체 종료·반복 경로만 사용 |
+| 시작 자세 | 단독 실행 PP read 실패 시 과거 Goal fallback 가능. queue에서 PP 재읽기 | 단독 시작은 PP read 필수. 반복/queue는 직전 성공한 final Goal 사용 |
+| lift | 이름만 검사, 최소 duration 10ms | flag=true **그리고** 키워드일 때 80%, 최소 1ms. 현재 catalog에서 실효 곡선 차이는 없음 |
+| 누락 관절 | 일부 sample이 partial map | 이전 자세를 유지한 full map 합성 |
+
+`playback_speed`는 elapsed timeline에 한 번만 곱한다. 반복 끝은 마지막
+`start_ms+time_ms`이며 `max_seq_ms`가 아니다. JSON `torques`는 하드웨어
+Torque 전환에 사용하지 않는다. `playback_cycle_end`는 단독 재생에도 적용하는
+시간 경계이며 관절 도착 조건이 아니다.
+
+최신 SDK 담당자 답변에 따라 PC 목표각·경계·반복 시계를 따르되, callback당
+Goal SyncWrite 최대 1회는 Jetson의 명시적 정책으로 유지한다. PC는 경계에서
+종점과 경계 sample을 두 번 보낼 수 있다. Jetson은 인접 부분 관절 프레임까지
+합성해 한 번 보낸다. 일반 경계는 기존 시계를 유지하고, 내부·전체 반복은
+성공한 송신 처리가 끝난 뒤 새 시각으로 시계를 갱신한다. 송신 실패 시 갱신하지 않는다.
+PC의 관측용 100Hz 피드백은 추가하지 않았다. 계산 규칙의 일치가 실제 버스 부하나
+송신 간격의 일치를 뜻하지는 않는다.
+위 순서 보장은 실제 관절 도착 보장이 아니다. `SyncWrite::txPacket` 성공은
+송신 측 성공이며 각 모터의 수신·이동 또는 hardware shutdown 해제를 보장하지 않는다.
+Hardware Error Status/Shutdown 레지스터는 현재 재생 경로에서 polling하지 않는다.
+일반 실패 시 자동 Torque OFF를 추가하지 않았다. 기존 emergencyStop/shutdown의
+Torque OFF 경로는 유지하며, 이번 테스트에서는 fake hardware만 호출했다.
+
+수정은 외부 SDK 6개 파일과 ROS wrapper/launch에 걸친다. SDK 변경 전체는
+[`sdk_common_playback.patch`](../../tools/sdk_common_playback.patch), 전후 hash는
+[`sdk_common_playback_manifest.json`](../../tools/sdk_common_playback_manifest.json)에 있다.
+`tools/apply_common_playback_sdk.py --sdk '.../final step'`는 읽기 검증만 하고,
+`--apply`일 때만 정확한 원본 또는 직전 적용본 hash에 패치를 적용한다.
+이번 답변에 따른 추가 변경만 담은 파일은
+[`sdk_common_playback_pc_boundary.patch`](../../tools/sdk_common_playback_pc_boundary.patch)다.
+다른 변경이 있으면 거절한다.
+실제 설정된 SDK에는 최종 패치를 적용했고 해당 SDK로 빌드했다.
+
+### 옵션 및 나중의 A/B 시험
+
+| 파라미터 | 기본값 | 의미 |
+|---|---|---|
+| enable_head_override | true | false이면 PC 원본 ID 0 사용, head ROS override 차단 |
+| enable_shoulder_override | true | false이면 PC 원본 ID 4·5 사용 |
+| policy_reference_json_path | install/config/robot_motions_pc.json | OFF일 때 참조하는 검증된 PC 원본 |
+| queued_transition_hold_ms | 0 | 성공한 마지막 Goal 이후 activation까지 최소 대기시간 |
+| position_tolerance_enabled | false | 일반 모션 종료 검사만 제어. 시작 자세 위치 검사·안정화·AUTO 전 대기에는 영향 없음 |
+| motion_trace_enabled | false | bounded trace를 종료 후 비동기 파일 기록 |
+| motion_trace_path | 빈 문자열 | trace 활성화 시 필수 출력 경로 |
+| motion_trace_goals | false | 상세 23축 degree Goal 추가 |
+
+일반 모션의 shoulder ON 정책은 18/-18이며 예외는 정확히
+`찐공잡기리그랩까지 실전`, `찐골넣기`, `찐허들` 세 이름이다.
+head ON은 기존 JSON과 ball/goal/hurdle runtime policy를 유지한다.
+OFF일 때는 frame_id 또는 name+start_ms로 PC 프레임을 확인하고 해당 축만
+복원한다. 매칭 불가·모호한 데이터는 추측하지 않고 실행 전 거절한다.
+현재 원본이 없는 위 Jetson 전용 2모션은 OFF 시험을 할 수 없다.
+따라서 전체 경기 실행을 OFF로 바꾸는 대신 PC 대응이 있는 대표 모션을 사용한다.
+startup pose에도 같은 ON/OFF 축 선택을 적용하며, catalog 오류는 hardware
+backend 생성 전에 검출한다(`startup_pose_catalog.cpp:89`, `sdk_executor_node.cpp:172`).
+
+나중에 로봇을 지지한 상태에서 동일 시작 자세·전원·모션으로 기본 ON/ON을
+기록한 뒤, head와 shoulder를 각각 하나씩 OFF로 바꿔 비교한다. 그 다음
+정책을 고정하고 queue hold만 0/20/50/100ms로 바꾼다. 이번에는 실시하지 않았다.
+0ms도 다음 callback에서 activation하며 첫 Goal은 한 callback 더 뒤다.
+5ms 주기가 정확하다면 final→activation→첫 Goal은 약 5ms→5ms이다.
+hold 값은 최솟값이며 timer jitter와 송신 시간만큼 길어질 수 있다.
+
+### Timer 및 telemetry 해석
+
+`sdk_executor_node.cpp:673`의 `rclcpp::spin`은 single-thread executor다.
+head/status/request callback, startup/PP read, blocking SyncWrite가 timer를
+지연시킬 수 있다. vision은 별도 process이고 자체 `MultiThreadedExecutor(4)`를
+사용한다(`step/unified_vision_node.py:38`). vision callback 자체가 같은 executor에
+올라가는 구조는 아니지만 CPU/USB/OS scheduling 부하는 공유한다.
+실제 5ms 주기, 송신 간격, baud 또는 firmware 상태는 실기로 측정하지 않았다.
+
+파일 I/O는 선택한 trace 파일을 초기화할 때와 worker thread에서만 수행한다.
+제어 루프는 기본적으로 카운터만, trace를 켜면 최대 8192 tick을 메모리에
+저장한다. 이후 tick은 dropped_trace로 집계하며 worker queue도 최대 4 batch다.
+기본 trace는 비활성화. 모션 종료 요약은 한 번 출력한다.
+긴 모션의 전체 tick이 필요하면 trace 한도를 고려해야 한다.
+
+trace는 CSV row type으로 구분한다. `summary` 열은 motion, ticks,
+expected_tick_ms, mean/max_interval_ms, over_7.5/10/20 counts,
+final_corrections, goal_failures, queue_delay_ms, elapsed_ms, dropped_trace이다.
+`tick` 열은 motion, monotonic_ms, expected_tick_ms, actual_interval_ms,
+repeat, frame_index, frame_name, timeline_ms, eased_progress, final_goal,
+queued, queue_activated, queue_delay_ms, sent, success, write_ms,
+write_started_ms, goal_interval_ms, motor_count, head_override,
+shoulder_override, [옵션 Goal 0..22] 순서다. 값이 없는 Goal은 NaN이다.
+head_override는 동적 ID 0 override 활성 상태, shoulder_override는
+예외를 제외한 shoulder 정책 활성 상태다. elapsed/queue delay와 progress는
+제어 clock, write_started/goal_interval/write_ms는 실제 steady clock을 사용한다.
+
+### 오프라인 검증 결과와 한계
+
+- `irc_step_motion_executor`, `mission_control`, `step` 빌드 성공. launch/full_system 실행 없음.
+- `test_common_playback`: 전진/후진/좌우회전/꽃게/공/복구/허들을 포함한 **82개 전체** fake 실행 성공.
+  half-cosine, shortest-angle, lift flag, speed 1회, max_seq 무시, 늦은 경계,
+  frame final/queue 실패, hold 0/20/50/100, repeat, gap, 누락 관절, cancel/emergency,
+  4개 ON/OFF 조합, bounded trace 및 비동기 flush를 검증했다.
+- `찐찐전진45(4회)`는 repeat=4, speed=1.05, 실제 주기=555ms,
+  프레임 시각 80/68, 148/132, 360/70, 430/125를 고정 회귀 벡터로 검사했다.
+- `test_queue_control_tick`: 전환 알림 callback에서도 backend poll, 즉시 실패 전달 2개 통과.
+- startup policy, runtime config, backend/factory, parameter type, JSON validator 및
+  SDK CMake guard/mock build 검사 통과.
+- CTest 20종 검사 중 첫 실행 19종 통과. 마지막 옛 허들 이름 기대값을 현재
+  alias로 수정한 뒤 해당 executor core 검사를 재실행해 **20종 모두 통과**했다.
+  launch 5종은 실행하지 않았다. 기존 4종 실패의 원인이던 누락 forward alias와
+  오래된 모션 이름 기대값을 해결했다.
+- Python bridge/gate/decision/safety/phase 및 거리·개별 planner 검사 **1,226개 통과**.
+  단발성 오류 후 계속 진행, 연속 2회 실패 중단, 중간 성공 시 횟수 초기화,
+  실패한 집기 확인 자세의 UNKNOWN 보존, 종료 실패 기록을 검증했다.
+- 현재 alias 계약/target 존재/5도 completion 검사 3개와 import 정책 검사 5개 통과.
+- 미션 전체 흐름 검사 214개 중 193개 통과, **21개는 수정 전 HEAD에서도 같은
+  이름으로 실패**한다. `/tmp`의 독립 HEAD 소스로 재현했고 새 실패는 없다.
+  `phase_flow_baseline.json`에 전후 결과를 남겼으며, 이번 작업에서 별도 골대·허들
+  판단 정책을 바꿔 기존 실패를 맞추지는 않았다.
+- `baseline_test_failures.json`은 최초 C++ 실패 이력,
+  `verification.json`은 최초 공통 재생 수정 당시의 검사 요약이다.
+  SDK 담당자의 경계·반복 시계 정정을 반영한 최신 검증은
+  [`verification_pc_boundary.json`](../../artifacts/20261002_common_playback/verification_pc_boundary.json)에 기록한다.
+  추가 가상 시계 검사는 200ms 종료 후 205ms의 19.9384417도/raw 2275,
+  8ms 송신 지연 후 208ms 재시작, 내부 경계 125→130ms의 timeline 105ms,
+  일반 경계의 timeline 130ms, 배속, 부분 관절 경계, 송신 실패,
+  일반 종료 검사 생략과 시작 자세 검사·80ms 안정화 유지를 포함한다.
+  이번 재검증은 3개 패키지 빌드, CTest 20종, Python 1,241개 및 catalog 계약
+  3개가 통과했다. Python에는 노드를 실행하지 않는 launch 설정 검사 10개도 포함한다.
+
+관절 도착/전류/과열/전압 저하/모터 shutdown, 실제 5ms timer jitter와
+실제 Goal 송신 간격은 아직 미측정이다. 공통 코드의 명령 순서 보장을
+실제 걷기 안정성 검증과 동일시하지 않는다. 오류 후 다음 모션을 시작할 수
+있는 실제 자세인지, shutdown된 모터가 있는지는 이 오프라인 검사로 판정할 수 없다.
+
 ## Production startup pose contract
 
 `full_system_robot.launch.py`는 fail-closed startup gate를 기본 활성화한다.
@@ -363,28 +648,18 @@ Operating Mode/PID를 덮어쓰지 않는다. GUI와 같이 종료 때 토크를
 
 ROS 호환을 위해 hardware config/preflight, 시작 자세 전환, joint override와
 기존 queue/completionSequence API를 유지·보완했다. 시작 자세는 기존 STEP의
-5도/80ms/3000ms 도착 검사와 AUTO 전 2초 대기를 유지한다. GUI에는 없는
+실제 코드의 4도/80ms/3000ms 도착 검사와 AUTO 전 2초 대기를 유지한다. GUI에는 없는
 STEP 통합 기능이므로 이것까지 GUI와 동일하다는 뜻은 아니다.
 
-2026-09-30 사용자 요청에 따라 일반 모션의 프레임별 도착 검사를 복구했다.
-`position_tolerance_enabled=true`(기본값)에서는 각 프레임의 최종 목표를 보낸 뒤
-20ms 간격으로 실제 관절각을 확인한다. 미도착 시 프레임 끝에 타임라인을 고정하고
-다음 프레임·반복·조합 경계·예약 전환을 보류한다. STEP JSON 기준 허용오차는
-5도, 최대 대기는 3000ms다. 읽기 실패도 최대 대기까지 재시도하며, 실패 시 현재
-자세 홀드를 시도하고 예약을 지운다. 관절 override가 있으면 실제 전송한 목표를
-기준으로 검사한다.
-
-마지막 프레임 도착 후 예약 모션이 있으면 기존처럼 추가 80ms 안정화 대기 없이
-전환한다. 예약이 없으면 기존 최종 안정화 검사를 유지한다. 시작 자세의 별도
-도착·안정화 검사도 유지한다. PC 보간과 프로파일 0은 유지했으므로 원본 SDK의
-모터 내부 프로파일 재생 전체를 되돌린 것은 아니다. 각도 계산은 GUI 방식이지만
-프레임 대기로 실제 재생 시간은 GUI보다 길어질 수 있다. 상위 명령의 전체 timeout은
-별도로 적용된다. `false`의 GUI 시간 재생 경로는 가짜 하드웨어 비교용으로만
-검증했으며, 운영 기본값은 바꾸지 않았다.
-
-복구 검사는 `frame_arrival_test`에서 지연된 호출, 프레임 사이 공백, 허용오차,
-예약, 반복, 조합 경계, 배속, 관절 override, 취소, 미도착 및 읽기 실패를 확인한다.
-실물 로봇은 실행하지 않았다.
+2026-09-30의 프레임별 도착 대기 정책은 최신 PC 기준에 따른 2026-10-02
+공통 재생 정책으로 대체했다. SDK와 두 full_system launch 모두
+`position_tolerance_enabled=false`가 기본값이다. 일반 프레임·반복·queue는
+위치 도착을 기다리지 않는다. 예약이 없으면 마지막 Goal 송신 성공 callback에서
+완료한다. `true`를 명시하면 기존 모션 끝의 최대 100ms best-effort 검사만
+활성화하며, 프레임마다 3000ms 기다리는 옛 동작을 복원하지 않는다.
+시작 자세의 별도 위치 검사·80ms 안정화·AUTO 전 2초 대기는 유지한다.
+완료는 계획한 Goal 송신이 끝났다는 뜻이며 실제 관절 도착을 증명하지 않는다.
+검증은 `test_common_playback`과 startup gate의 가짜 하드웨어 검사로 수행한다.
 
 GUI 전용 가상환경은 ROS Python 경로와 사용자 패키지를 배제해 실행해야 한다.
 관측된 버전은 Python 3.10.12, PyQt5 5.15.6, dynamixel-sdk 4.0.5,

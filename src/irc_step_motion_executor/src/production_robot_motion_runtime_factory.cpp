@@ -16,6 +16,29 @@ namespace
 {
 
 template<typename PlayerT>
+void configure_playback(PlayerT & player, const RobotMotionRuntimeConfig & config)
+{
+  if constexpr (requires {
+      player.configureJointPolicy(config.policy_reference_json_path,
+        config.enable_head_override, config.enable_shoulder_override);
+      player.setQueuedTransitionHoldMs(config.queued_transition_hold_ms);
+      player.configureDiagnostics(double(config.expected_tick_ms),
+        config.motion_trace_path, config.motion_trace_goals);
+    })
+  {
+    player.configureJointPolicy(config.policy_reference_json_path,
+      config.enable_head_override, config.enable_shoulder_override);
+    player.setQueuedTransitionHoldMs(config.queued_transition_hold_ms);
+    player.configureDiagnostics(double(config.expected_tick_ms),
+      config.motion_trace_enabled ? config.motion_trace_path : "", config.motion_trace_goals);
+  } else if (!config.enable_head_override || !config.enable_shoulder_override ||
+    config.queued_transition_hold_ms != 0 || config.motion_trace_enabled)
+  {
+    throw std::runtime_error("external SDK lacks common playback options; apply SDK patch first");
+  }
+}
+
+template<typename PlayerT>
 bool start_startup_pose(
   PlayerT & player, const std::vector<double> & angles, std::int64_t duration_ms,
   std::string & error)
@@ -82,6 +105,7 @@ public:
     player_(config.motion_json_path, hardware_),
     player_api_(player_)
   {
+    configure_playback(player_, config);
   }
 
   BorrowedRobotMotionPlayerApi & player_api() noexcept

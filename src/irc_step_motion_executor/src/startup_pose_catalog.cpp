@@ -86,4 +86,30 @@ bool load_startup_pose_angles(
   return true;
 }
 
+bool load_startup_pose_with_policy(
+  const std::string & runtime_path, const std::string & reference_path,
+  const std::string & pose_name, bool enable_head_override,
+  bool enable_shoulder_override, std::vector<double> & angles_deg,
+  std::string & error_message)
+{
+  std::vector<double> selected;
+  if (!load_startup_pose_angles(runtime_path, pose_name, selected, error_message)) {
+    return false;
+  }
+  if (!enable_head_override || !enable_shoulder_override) {
+    std::vector<double> original;
+    if (!load_startup_pose_angles(reference_path, pose_name, original, error_message)) {
+      error_message = "override OFF requires an unambiguous PC startup pose: " + error_message;
+      return false;
+    }
+    if (!enable_head_override) {selected[0] = original[0];}
+    if (!enable_shoulder_override) {
+      selected[4] = original[4];
+      selected[5] = original[5];
+    }
+  }
+  angles_deg = std::move(selected);
+  return true;
+}
+
 }  // namespace irc_step_motion_executor

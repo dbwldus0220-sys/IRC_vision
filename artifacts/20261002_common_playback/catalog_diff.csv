@@ -1,0 +1,692 @@
+motion,pc_index_0_based,jetson_index_0_based,field,category,pc,jetson
+찐골넣기,motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐공잡기리그랩까지 실전,motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐공잡기전후진-2(2회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐공잡기전후진-2(2회),0,0,angles.4,policy_angles,9.66796875,18.0
+찐공잡기전후진-2(2회),0,0,angles.5,policy_angles,-9.66796875,-18.0
+찐공잡기전후진-2(2회),1,1,angles.4,policy_angles,10.546875,18.0
+찐공잡기전후진-2(2회),1,1,angles.5,policy_angles,-10.01953125,-18.0
+찐공잡기전후진-2(2회),2,2,angles.4,policy_angles,10.546875,18.0
+찐공잡기전후진-2(2회),2,2,angles.5,policy_angles,-10.01953125,-18.0
+찐공잡기전후진-2(2회),3,3,angles.4,policy_angles,10.37109375,18.0
+찐공잡기전후진-2(2회),3,3,angles.5,policy_angles,-10.1953125,-18.0
+찐공확인자세,motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐공확인자세,0,0,angles.4,policy_angles,20.302734375,18.0
+찐공확인자세,0,0,angles.5,policy_angles,-27.59765625,-18.0
+찐기본자세에서 제자리 우회전(골대),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐기본자세에서 제자리 우회전(골대),0,0,angles.4,policy_angles,11.25,18.0
+찐기본자세에서 제자리 우회전(골대),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐기본자세에서 제자리 우회전(골대),1,1,angles.4,policy_angles,9.66796875,18.0
+찐기본자세에서 제자리 우회전(골대),1,1,angles.5,policy_angles,-8.876953125,-18.0
+찐기본자세에서 제자리 우회전(골대),2,2,angles.4,policy_angles,9.931640625,18.0
+찐기본자세에서 제자리 우회전(골대),2,2,angles.5,policy_angles,-9.228515625,-18.0
+찐기본자세에서 제자리 우회전(골대),2,2,angles.15,other_angles,-3.548828125,-4.0
+찐기본자세에서 제자리 우회전(골대),2,2,angles.18,other_angles,19.0,18.80859375
+찐기본자세에서 제자리 우회전(골대),3,3,angles.4,policy_angles,9.66796875,18.0
+찐기본자세에서 제자리 우회전(골대),3,3,angles.5,policy_angles,-8.876953125,-18.0
+찐기본자세에서 제자리 우회전(골대),4,4,angles.4,policy_angles,9.931640625,18.0
+찐기본자세에서 제자리 우회전(골대),4,4,angles.5,policy_angles,-9.228515625,-18.0
+찐기본자세에서 제자리 우회전(골대),4,4,angles.15,other_angles,-3.548828125,-4.0
+찐기본자세에서 제자리 우회전(골대),4,4,angles.18,other_angles,19.0,18.80859375
+찐기본자세에서 제자리 우회전(골대),5,5,angles.4,policy_angles,9.66796875,18.0
+찐기본자세에서 제자리 우회전(골대),5,5,angles.5,policy_angles,-8.876953125,-18.0
+찐기본자세에서 제자리 우회전(골대),6,6,angles.4,policy_angles,9.931640625,18.0
+찐기본자세에서 제자리 우회전(골대),6,6,angles.5,policy_angles,-9.228515625,-18.0
+찐기본자세에서 제자리 우회전(골대),6,6,angles.15,other_angles,-3.548828125,-4.0
+찐기본자세에서 제자리 우회전(골대),6,6,angles.18,other_angles,19.0,18.80859375
+찐기본자세에서 제자리 우회전(골대),7,7,angles.4,policy_angles,9.66796875,18.0
+찐기본자세에서 제자리 우회전(골대),7,7,angles.5,policy_angles,-8.876953125,-18.0
+찐기본자세에서 제자리 우회전(골대),8,8,angles.4,policy_angles,9.931640625,18.0
+찐기본자세에서 제자리 우회전(골대),8,8,angles.5,policy_angles,-9.228515625,-18.0
+찐기본자세에서 제자리 우회전(골대),8,8,angles.15,other_angles,-3.548828125,-4.0
+찐기본자세에서 제자리 우회전(골대),8,8,angles.18,other_angles,19.0,18.80859375
+찐기본자세에서 제자리 우회전(골대),9,9,angles.4,policy_angles,9.66796875,18.0
+찐기본자세에서 제자리 우회전(골대),9,9,angles.5,policy_angles,-8.876953125,-18.0
+찐기본자세에서 제자리 우회전(골대),10,10,angles.4,policy_angles,9.931640625,18.0
+찐기본자세에서 제자리 우회전(골대),10,10,angles.5,policy_angles,-9.228515625,-18.0
+찐기본자세에서 제자리 우회전(골대),10,10,angles.15,other_angles,-3.548828125,-4.0
+찐기본자세에서 제자리 우회전(골대),10,10,angles.18,other_angles,19.0,18.80859375
+찐기본자세에서 제자리 우회전(골대),11,11,angles.4,policy_angles,9.66796875,18.0
+찐기본자세에서 제자리 우회전(골대),11,11,angles.5,policy_angles,-8.876953125,-18.0
+찐기본자세에서 제자리 우회전(골대),12,12,angles.4,policy_angles,9.931640625,18.0
+찐기본자세에서 제자리 우회전(골대),12,12,angles.5,policy_angles,-9.228515625,-18.0
+찐기본자세에서 제자리 우회전(골대),12,12,angles.15,other_angles,-3.548828125,-4.0
+찐기본자세에서 제자리 우회전(골대),12,12,angles.18,other_angles,19.0,18.80859375
+찐기본자세에서 제자리 우회전(골대),13,13,angles.4,policy_angles,9.66796875,18.0
+찐기본자세에서 제자리 우회전(골대),13,13,angles.5,policy_angles,-8.876953125,-18.0
+찐기본자세에서 제자리 우회전(골대),14,14,angles.4,policy_angles,9.931640625,18.0
+찐기본자세에서 제자리 우회전(골대),14,14,angles.5,policy_angles,-9.228515625,-18.0
+찐기본자세에서 제자리 우회전(골대),14,14,angles.15,other_angles,-3.548828125,-4.0
+찐기본자세에서 제자리 우회전(골대),14,14,angles.18,other_angles,19.0,18.80859375
+찐기본자세에서 제자리 우회전(골대),15,15,angles.4,policy_angles,9.66796875,18.0
+찐기본자세에서 제자리 우회전(골대),15,15,angles.5,policy_angles,-8.876953125,-18.0
+찐기본자세에서 제자리좌회전(골대),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐기본자세에서 제자리좌회전(골대),motion,,max_seq_ms,metadata,2072,2750
+찐기본자세에서 제자리좌회전(골대),0,0,angles.4,policy_angles,11.25,18.0
+찐기본자세에서 제자리좌회전(골대),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐기본자세에서 제자리좌회전(골대),1,1,angles.4,policy_angles,9.66796875,18.0
+찐기본자세에서 제자리좌회전(골대),1,1,angles.5,policy_angles,-9.140625,-18.0
+찐기본자세에서 제자리좌회전(골대),2,2,angles.4,policy_angles,11.25,18.0
+찐기본자세에서 제자리좌회전(골대),2,2,angles.5,policy_angles,-13.447265625,-18.0
+찐기본자세에서 제자리좌회전(골대),3,3,angles.4,policy_angles,9.66796875,18.0
+찐기본자세에서 제자리좌회전(골대),3,3,angles.5,policy_angles,-9.140625,-18.0
+찐기본자세에서 제자리좌회전(골대),4,4,angles.4,policy_angles,11.25,18.0
+찐기본자세에서 제자리좌회전(골대),4,4,angles.5,policy_angles,-13.447265625,-18.0
+찐기본자세에서 제자리좌회전(골대),5,5,angles.4,policy_angles,9.66796875,18.0
+찐기본자세에서 제자리좌회전(골대),5,5,angles.5,policy_angles,-9.140625,-18.0
+찐기본자세에서 제자리좌회전(골대),6,6,angles.4,policy_angles,11.25,18.0
+찐기본자세에서 제자리좌회전(골대),6,6,angles.5,policy_angles,-13.447265625,-18.0
+찐기본자세에서 제자리좌회전(골대),7,7,angles.4,policy_angles,9.66796875,18.0
+찐기본자세에서 제자리좌회전(골대),7,7,angles.5,policy_angles,-9.140625,-18.0
+찐기본자세에서 제자리좌회전(골대),8,8,angles.4,policy_angles,11.25,18.0
+찐기본자세에서 제자리좌회전(골대),8,8,angles.5,policy_angles,-13.447265625,-18.0
+찐기본자세에서 제자리좌회전(골대),9,9,angles.4,policy_angles,9.66796875,18.0
+찐기본자세에서 제자리좌회전(골대),9,9,angles.5,policy_angles,-9.140625,-18.0
+찐기본자세에서 제자리좌회전(골대),"[10, 10]","[10, 14]",frames,insert,[],"[{""frame_id"": ""71f5a572518046d9a6b21070390b6ec1"", ""name"": ""제좌왼들25"", ""time_ms"": 61, ""angles"": {""0"": -32.255859375, ""1"": -0.263671875, ""2"": -8.4375, ""3"": 7.55859375, ""4"": 18.0, ""5"": -18.0, ""6"": 75.05859375, ""7"": -76.904296875, ""8"": -10.546875, ""9"": 2.548828125, ""10"": 9.0, ""11"": 4.0, ""12"": 4.0, ""15"": -8.0, ""16"": 0.0, ""13"": -52.91015625, ""14"": 78.0, ""17"": -29.970703125, ""18"": 61.435546875, ""19"": 66.0, ""20"": -60.0, ""21"": 15.0, ""22"": -3.955078125}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""71f5a572518046d9a6b21070390b6ec1"", ""start_ms"": 2206}, {""frame_id"": ""94f36aea9d384b58921e01457aed0bec"", ""name"": ""오뒤412"", ""time_ms"": 144, ""angles"": {""0"": -33.310546875, ""1"": 0.0, ""2"": -9.580078125, ""3"": 9.580078125, ""4"": 18.0, ""5"": -18.0, ""6"": 67.67578125, ""7"": -69.08203125, ""8"": -11.42578125, ""9"": 2.8125, ""10"": -5.0, ""11"": 0.0, ""12"": -2.0, ""15"": 2.0, ""16"": -2.0, ""13"": -41.59375, ""14"": 55.568359375, ""17"": -24.0, ""18"": 28.0, ""19"": 67.0, ""20"": -60.0, ""21"": 4.658203125, ""22"": -1.318359375}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""94f36aea9d384b58921e01457aed0bec"", ""start_ms"": 2267, ""_drag_original_start_ms"": 145, ""playback_cycle_end"": true}, {""frame_id"": ""71f5a572518046d9a6b21070390b6ec1"", ""name"": ""제좌왼들25"", ""time_ms"": 61, ""angles"": {""0"": -32.255859375, ""1"": -0.263671875, ""2"": -8.4375, ""3"": 7.55859375, ""4"": 18.0, ""5"": -18.0, ""6"": 75.05859375, ""7"": -76.904296875, ""8"": -10.546875, ""9"": 2.548828125, ""10"": 9.0, ""11"": 4.0, ""12"": 4.0, ""15"": -8.0, ""16"": 0.0, ""13"": -52.91015625, ""14"": 78.0, ""17"": -29.970703125, ""18"": 61.435546875, ""19"": 66.0, ""20"": -60.0, ""21"": 15.0, ""22"": -3.955078125}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""71f5a572518046d9a6b21070390b6ec1"", ""start_ms"": 2545}, {""frame_id"": ""94f36aea9d384b58921e01457aed0bec"", ""name"": ""오뒤412"", ""time_ms"": 144, ""angles"": {""0"": -33.310546875, ""1"": 0.0, ""2"": -9.580078125, ""3"": 9.580078125, ""4"": 18.0, ""5"": -18.0, ""6"": 67.67578125, ""7"": -69.08203125, ""8"": -11.42578125, ""9"": 2.8125, ""10"": -5.0, ""11"": 0.0, ""12"": -2.0, ""15"": 2.0, ""16"": -2.0, ""13"": -41.59375, ""14"": 55.568359375, ""17"": -24.0, ""18"": 28.0, ""19"": 67.0, ""20"": -60.0, ""21"": 4.658203125, ""22"": -1.318359375}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""94f36aea9d384b58921e01457aed0bec"", ""start_ms"": 2606, ""_drag_original_start_ms"": 145, ""playback_cycle_end"": true}]"
+찐라인복귀우회전45 도(4회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐라인복귀우회전45 도(4회),0,0,angles.4,policy_angles,11.25,18.0
+찐라인복귀우회전45 도(4회),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐라인복귀우회전45 도(4회),1,1,angles.4,policy_angles,10.37109375,18.0
+찐라인복귀우회전45 도(4회),1,1,angles.5,policy_angles,-10.1953125,-18.0
+찐라인복귀우회전45 도(4회),1,1,angles.10,other_angles,-3.0,-4.0
+찐라인복귀우회전45 도(4회),1,1,angles.11,other_angles,0.0,2.0
+찐라인복귀우회전45 도(4회),1,1,angles.12,other_angles,0.0,-2.0
+찐라인복귀우회전45 도(4회),2,2,angles.4,policy_angles,11.25,18.0
+찐라인복귀우회전45 도(4회),2,2,angles.5,policy_angles,-13.271484375,-18.0
+찐라인복귀우회전45 도(4회),3,3,angles.4,policy_angles,9.66796875,18.0
+찐라인복귀우회전45 도(4회),3,3,angles.5,policy_angles,-9.140625,-18.0
+찐미세0도-4,motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐미세0도-4,0,0,angles.4,policy_angles,11.25,18.0
+찐미세0도-4,0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐미세0도-4,1,1,angles.4,policy_angles,9.228515625,18.0
+찐미세0도-4,1,1,angles.5,policy_angles,-10.01953125,-18.0
+찐미세0도-4,2,2,angles.4,policy_angles,11.25,18.0
+찐미세0도-4,2,2,angles.5,policy_angles,-13.271484375,-18.0
+찐미세0도-4,3,3,angles.4,policy_angles,9.140625,18.0
+찐미세0도-4,3,3,angles.5,policy_angles,-8.96484375,-18.0
+찐미세45도-4,motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐미세45도-4,0,0,angles.4,policy_angles,11.25,18.0
+찐미세45도-4,0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐미세45도-4,1,1,angles.4,policy_angles,9.228515625,18.0
+찐미세45도-4,1,1,angles.5,policy_angles,-10.01953125,-18.0
+찐미세45도-4,2,2,angles.4,policy_angles,11.25,18.0
+찐미세45도-4,2,2,angles.5,policy_angles,-13.271484375,-18.0
+찐미세45도-4,3,3,angles.4,policy_angles,9.140625,18.0
+찐미세45도-4,3,3,angles.5,policy_angles,-8.96484375,-18.0
+찐미세90도-4,motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐미세90도-4,0,0,angles.4,policy_angles,11.25,18.0
+찐미세90도-4,0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐미세90도-4,1,1,angles.4,policy_angles,9.228515625,18.0
+찐미세90도-4,1,1,angles.5,policy_angles,-10.01953125,-18.0
+찐미세90도-4,2,2,angles.4,policy_angles,11.25,18.0
+찐미세90도-4,2,2,angles.5,policy_angles,-13.271484375,-18.0
+찐미세90도-4,3,3,angles.4,policy_angles,9.140625,18.0
+찐미세90도-4,3,3,angles.5,policy_angles,-8.96484375,-18.0
+찐미세90도-4(1회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐미세90도-4(1회),0,0,angles.4,policy_angles,11.25,18.0
+찐미세90도-4(1회),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐미세90도-4(1회),1,1,angles.4,policy_angles,9.228515625,18.0
+찐미세90도-4(1회),1,1,angles.5,policy_angles,-10.01953125,-18.0
+찐미세90도-4(1회),2,2,angles.4,policy_angles,11.25,18.0
+찐미세90도-4(1회),2,2,angles.5,policy_angles,-13.271484375,-18.0
+찐미세90도-4(1회),3,3,angles.4,policy_angles,9.140625,18.0
+찐미세90도-4(1회),3,3,angles.5,policy_angles,-8.96484375,-18.0
+찐미세90도-4(2회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐미세90도-4(2회),0,0,angles.4,policy_angles,11.25,18.0
+찐미세90도-4(2회),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐미세90도-4(2회),1,1,angles.4,policy_angles,9.228515625,18.0
+찐미세90도-4(2회),1,1,angles.5,policy_angles,-10.01953125,-18.0
+찐미세90도-4(2회),2,2,angles.4,policy_angles,11.25,18.0
+찐미세90도-4(2회),2,2,angles.5,policy_angles,-13.271484375,-18.0
+찐미세90도-4(2회),3,3,angles.4,policy_angles,9.140625,18.0
+찐미세90도-4(2회),3,3,angles.5,policy_angles,-8.96484375,-18.0
+찐미세90도-4(3회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐미세90도-4(3회),0,0,angles.4,policy_angles,11.25,18.0
+찐미세90도-4(3회),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐미세90도-4(3회),1,1,angles.4,policy_angles,9.228515625,18.0
+찐미세90도-4(3회),1,1,angles.5,policy_angles,-10.01953125,-18.0
+찐미세90도-4(3회),2,2,angles.4,policy_angles,11.25,18.0
+찐미세90도-4(3회),2,2,angles.5,policy_angles,-13.271484375,-18.0
+찐미세90도-4(3회),3,3,angles.4,policy_angles,9.140625,18.0
+찐미세90도-4(3회),3,3,angles.5,policy_angles,-8.96484375,-18.0
+찐미세90도-4(4회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐미세90도-4(4회),0,0,angles.4,policy_angles,11.25,18.0
+찐미세90도-4(4회),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐미세90도-4(4회),1,1,angles.4,policy_angles,9.228515625,18.0
+찐미세90도-4(4회),1,1,angles.5,policy_angles,-10.01953125,-18.0
+찐미세90도-4(4회),2,2,angles.4,policy_angles,11.25,18.0
+찐미세90도-4(4회),2,2,angles.5,policy_angles,-13.271484375,-18.0
+찐미세90도-4(4회),3,3,angles.4,policy_angles,9.140625,18.0
+찐미세90도-4(4회),3,3,angles.5,policy_angles,-8.96484375,-18.0
+찐미세오뒤에서 오뒤(0도),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐미세오뒤에서 오뒤(0도),motion,,playback_speed,metadata,1.0,1.05
+찐미세오뒤에서 오뒤(0도),0,0,angles.4,policy_angles,11.25,18.0
+찐미세오뒤에서 오뒤(0도),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐미세오뒤에서 오뒤(0도),1,1,angles.4,policy_angles,9.66796875,18.0
+찐미세오뒤에서 오뒤(0도),1,1,angles.5,policy_angles,-9.140625,-18.0
+찐미세오뒤에서 오뒤(45도),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐미세오뒤에서 오뒤(45도),0,0,angles.4,policy_angles,11.25,18.0
+찐미세오뒤에서 오뒤(45도),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐미세오뒤에서 오뒤(45도),1,1,angles.4,policy_angles,9.66796875,18.0
+찐미세오뒤에서 오뒤(45도),1,1,angles.5,policy_angles,-9.140625,-18.0
+찐미세오뒤에서 오뒤(골대 카메라90도),motion,,completion,metadata,,"{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐미세오뒤에서 오뒤(골대 카메라90도),motion,,end_pose,metadata,,오뒤412(회전준비90도)
+찐미세오뒤에서 오뒤(골대 카메라90도),motion,,max_seq_ms,metadata,,1212
+찐미세오뒤에서 오뒤(골대 카메라90도),motion,,name,metadata,,찐미세오뒤에서 오뒤(골대 카메라90도)
+찐미세오뒤에서 오뒤(골대 카메라90도),motion,,playback_speed,metadata,,1.05
+찐미세오뒤에서 오뒤(골대 카메라90도),motion,,repeat_count,metadata,,1
+찐미세오뒤에서 오뒤(골대 카메라90도),motion,,repeatable,metadata,,True
+찐미세오뒤에서 오뒤(골대 카메라90도),motion,,start_pose,metadata,,왼들401(회전준비90도)
+찐미세오뒤에서 오뒤(골대 카메라90도),"[0, 0]","[0, 2]",frames,insert,[],"[{""frame_id"": ""059d2c5929a64676aa8b6c138012f8f4"", ""name"": ""왼들401(회전준비90도)"", ""time_ms"": 67, ""angles"": {""0"": 1.0, ""1"": -0.3515625, ""2"": -8.4375, ""3"": 7.55859375, ""4"": 18.0, ""5"": -18.0, ""6"": 74.35546875, ""7"": -76.2890625, ""8"": -10.546875, ""9"": 2.4609375, ""10"": 0.0, ""11"": 0.0, ""12"": -1.66015625, ""15"": -5.0, ""16"": 4.0, ""13"": -55.0, ""14"": 80.0, ""17"": -29.70703125, ""18"": 56.337890625, ""19"": 64.0, ""20"": -58.0, ""21"": 12.0, ""22"": -1.7578125}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""059d2c5929a64676aa8b6c138012f8f4"", ""start_ms"": 50}, {""frame_id"": ""94f36aea9d384b58921e01457aed0bec"", ""name"": ""오뒤412(회전준비90도)"", ""time_ms"": 118, ""angles"": {""0"": 1.0, ""1"": 0.0, ""2"": -9.580078125, ""3"": 9.580078125, ""4"": 18.0, ""5"": -18.0, ""6"": 67.67578125, ""7"": -69.08203125, ""8"": -11.42578125, ""9"": 2.8125, ""10"": -5.0, ""11"": 0.0, ""12"": -2.0, ""15"": 2.0, ""16"": -2.0, ""13"": -43.59375, ""14"": 57.568359375, ""17"": -24.0, ""18"": 28.0, ""19"": 67.0, ""20"": -60.0, ""21"": 4.658203125, ""22"": -1.318359375}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""94f36aea9d384b58921e01457aed0bec"", ""start_ms"": 117, ""playback_cycle_end"": true}]"
+찐미세오뒤에서 오옆꽃게90도,motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐미세오뒤에서 오옆꽃게90도,0,0,angles.4,policy_angles,11.25,18.0
+찐미세오뒤에서 오옆꽃게90도,0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐미세오뒤에서 오옆꽃게90도,1,1,angles.4,policy_angles,21.181640625,18.0
+찐미세오뒤에서 오옆꽃게90도,1,1,angles.5,policy_angles,-17.578125,-18.0
+찐미세오뒤에서기본자세,motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐미세오뒤에서기본자세,0,0,angles.4,policy_angles,11.25,18.0
+찐미세오뒤에서기본자세,0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐미세오뒤에서기본자세,1,1,angles.4,policy_angles,20.7421875,18.0
+찐미세오뒤에서기본자세,1,1,angles.5,policy_angles,-18.6328125,-18.0
+찐미세오뒤에서오옆꽃게0도,motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐미세오뒤에서오옆꽃게0도,0,0,angles.4,policy_angles,11.25,18.0
+찐미세오뒤에서오옆꽃게0도,0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐미세오뒤에서오옆꽃게0도,1,1,angles.4,policy_angles,21.181640625,18.0
+찐미세오뒤에서오옆꽃게0도,1,1,angles.5,policy_angles,-17.578125,-18.0
+찐미세오옆꽃게0-1(1회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐미세오옆꽃게0-1(1회),0,0,angles.4,policy_angles,8.349609375,18.0
+찐미세오옆꽃게0-1(1회),0,0,angles.5,policy_angles,-9.931640625,-18.0
+찐미세오옆꽃게0-1(1회),1,1,angles.4,policy_angles,21.0,18.0
+찐미세오옆꽃게0-1(1회),1,1,angles.5,policy_angles,-9.931640625,-18.0
+찐미세오옆꽃게0-1(1회),2,2,angles.4,policy_angles,21.0,18.0
+찐미세오옆꽃게0-1(1회),2,2,angles.5,policy_angles,-9.755859375,-18.0
+찐미세오옆꽃게0-1(1회),3,3,angles.4,policy_angles,21.181640625,18.0
+찐미세오옆꽃게0-1(1회),3,3,angles.5,policy_angles,-17.578125,-18.0
+찐미세오옆꽃게90-1(1회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐미세오옆꽃게90-1(1회),0,0,angles.4,policy_angles,8.349609375,18.0
+찐미세오옆꽃게90-1(1회),0,0,angles.5,policy_angles,-9.931640625,-18.0
+찐미세오옆꽃게90-1(1회),1,1,angles.4,policy_angles,21.0,18.0
+찐미세오옆꽃게90-1(1회),1,1,angles.5,policy_angles,-9.931640625,-18.0
+찐미세오옆꽃게90-1(1회),2,2,angles.4,policy_angles,21.0,18.0
+찐미세오옆꽃게90-1(1회),2,2,angles.5,policy_angles,-9.755859375,-18.0
+찐미세오옆꽃게90-1(1회),3,3,angles.4,policy_angles,21.181640625,18.0
+찐미세오옆꽃게90-1(1회),3,3,angles.5,policy_angles,-17.578125,-18.0
+찐미세오옆꽃게90-1(2회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}",
+찐미세오옆꽃게90-1(2회),motion,,end_pose,metadata,오옆4,
+찐미세오옆꽃게90-1(2회),motion,,max_seq_ms,metadata,7045,
+찐미세오옆꽃게90-1(2회),motion,,name,metadata,찐미세오옆꽃게90-1(2회),
+찐미세오옆꽃게90-1(2회),motion,,playback_speed,metadata,0.95,
+찐미세오옆꽃게90-1(2회),motion,,repeat_count,metadata,2,
+찐미세오옆꽃게90-1(2회),motion,,repeatable,metadata,True,
+찐미세오옆꽃게90-1(2회),motion,,start_pose,metadata,미세오옆꽃게1-1,
+찐미세오옆꽃게90-1(2회),"[0, 4]","[0, 0]",frames,delete,"[{""frame_id"": ""c3b56bb1d3b04925a66516941051ac55"", ""name"": ""미세오옆꽃게1-1"", ""time_ms"": 60, ""angles"": {""0"": 1.0, ""1"": 0.0, ""2"": -8.701171875, ""3"": 9.140625, ""4"": 8.349609375, ""5"": -9.931640625, ""6"": 68.37890625, ""7"": -69.9609375, ""8"": -11.42578125, ""9"": 2.63671875, ""10"": -2.98828125, ""11"": 0.0, ""12"": 2.0, ""15"": -7.537109375, ""16"": 1.0, ""13"": -60.18359375, ""14"": 46.0, ""17"": -73.740234375, ""18"": 24.43359375, ""19"": 97.0, ""20"": -70.224609375, ""21"": -25.3125, ""22"": -10.0}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""c3b56bb1d3b04925a66516941051ac55"", ""start_ms"": 80}, {""frame_id"": ""97b720d78f7c492d8626f683bb5f403f"", ""name"": ""미세오옆꽃게2"", ""time_ms"": 140, ""angles"": {""0"": 1.0, ""1"": 0.0, ""2"": -8.701171875, ""3"": 9.140625, ""4"": 21.0, ""5"": -9.931640625, ""6"": 68.37890625, ""7"": -69.9609375, ""8"": -11.42578125, ""9"": 2.63671875, ""10"": -4.39453125, ""11"": 0.0, ""12"": 0.0, ""15"": -4.04296875, ""16"": 1.0, ""13"": -43.154296875, ""14"": 44.12109375, ""17"": -34.98046875, ""18"": 24.43359375, ""19"": 69.345703125, ""20"": -70.224609375, ""21"": -1.23046875, ""22"": -10.0}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""97b720d78f7c492d8626f683bb5f403f"", ""start_ms"": 140, ""_drag_original_start_ms"": 100}, {""frame_id"": ""a5b29498442f4597a18c35a6e636d745"", ""name"": ""미세오옆꽃게3"", ""time_ms"": 60, ""angles"": {""0"": 0.703125, ""1"": -0.3515625, ""2"": -8.96484375, ""3"": 9.31640625, ""4"": 21.0, ""5"": -9.755859375, ""6"": 67.8515625, ""7"": -69.521484375, ""8"": -11.513671875, ""9"": 2.63671875, ""10"": -2.0, ""11"": 0.263671875, ""12"": 2.0, ""15"": -3.515625, ""16"": -5.0, ""13"": -52.0, ""14"": 62.0, ""17"": -35.947265625, ""18"": 64.423828125, ""19"": 69.609375, ""20"": -88.0, ""21"": 8.173828125, ""22"": -36.03515625}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""a5b29498442f4597a18c35a6e636d745"", ""start_ms"": 330}, {""frame_id"": ""730c37b051d44de4ae71e9001267f26c"", ""name"": ""오옆4"", ""time_ms"": 100, ""angles"": {""0"": 0.087890625, ""1"": -0.3515625, ""2"": -9.931640625, ""3"": 8.876953125, ""4"": 21.181640625, ""5"": -17.578125, ""6"": 67.763671875, ""7"": -69.2578125, ""8"": -11.337890625, ""9"": 2.8125, ""10"": 0.087890625, ""11"": -0.439453125, ""12"": 3.1640625, ""15"": 1.93359375, ""16"": -2.021484375, ""13"": -50.09765625, ""14"": 48.076171875, ""17"": -31.025390625, ""18"": 28.212890625, ""19"": 66.26953125, ""20"": -68.02734375, ""21"": 4.21875, ""22"": -3.779296875}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""730c37b051d44de4ae71e9001267f26c"", ""start_ms"": 390}]",[]
+찐미세오옆꽃게90-1(3회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}",
+찐미세오옆꽃게90-1(3회),motion,,end_pose,metadata,오옆4,
+찐미세오옆꽃게90-1(3회),motion,,max_seq_ms,metadata,7045,
+찐미세오옆꽃게90-1(3회),motion,,name,metadata,찐미세오옆꽃게90-1(3회),
+찐미세오옆꽃게90-1(3회),motion,,playback_speed,metadata,0.95,
+찐미세오옆꽃게90-1(3회),motion,,repeat_count,metadata,3,
+찐미세오옆꽃게90-1(3회),motion,,repeatable,metadata,True,
+찐미세오옆꽃게90-1(3회),motion,,start_pose,metadata,미세오옆꽃게1-1,
+찐미세오옆꽃게90-1(3회),"[0, 4]","[0, 0]",frames,delete,"[{""frame_id"": ""c3b56bb1d3b04925a66516941051ac55"", ""name"": ""미세오옆꽃게1-1"", ""time_ms"": 60, ""angles"": {""0"": 1.0, ""1"": 0.0, ""2"": -8.701171875, ""3"": 9.140625, ""4"": 8.349609375, ""5"": -9.931640625, ""6"": 68.37890625, ""7"": -69.9609375, ""8"": -11.42578125, ""9"": 2.63671875, ""10"": -2.98828125, ""11"": 0.0, ""12"": 2.0, ""15"": -7.537109375, ""16"": 1.0, ""13"": -60.18359375, ""14"": 46.0, ""17"": -73.740234375, ""18"": 24.43359375, ""19"": 97.0, ""20"": -70.224609375, ""21"": -25.3125, ""22"": -10.0}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""c3b56bb1d3b04925a66516941051ac55"", ""start_ms"": 80}, {""frame_id"": ""97b720d78f7c492d8626f683bb5f403f"", ""name"": ""미세오옆꽃게2"", ""time_ms"": 140, ""angles"": {""0"": 1.0, ""1"": 0.0, ""2"": -8.701171875, ""3"": 9.140625, ""4"": 21.0, ""5"": -9.931640625, ""6"": 68.37890625, ""7"": -69.9609375, ""8"": -11.42578125, ""9"": 2.63671875, ""10"": -4.39453125, ""11"": 0.0, ""12"": 0.0, ""15"": -4.04296875, ""16"": 1.0, ""13"": -43.154296875, ""14"": 44.12109375, ""17"": -34.98046875, ""18"": 24.43359375, ""19"": 69.345703125, ""20"": -70.224609375, ""21"": -1.23046875, ""22"": -10.0}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""97b720d78f7c492d8626f683bb5f403f"", ""start_ms"": 140, ""_drag_original_start_ms"": 100}, {""frame_id"": ""a5b29498442f4597a18c35a6e636d745"", ""name"": ""미세오옆꽃게3"", ""time_ms"": 60, ""angles"": {""0"": 0.703125, ""1"": -0.3515625, ""2"": -8.96484375, ""3"": 9.31640625, ""4"": 21.0, ""5"": -9.755859375, ""6"": 67.8515625, ""7"": -69.521484375, ""8"": -11.513671875, ""9"": 2.63671875, ""10"": -2.0, ""11"": 0.263671875, ""12"": 2.0, ""15"": -3.515625, ""16"": -5.0, ""13"": -52.0, ""14"": 62.0, ""17"": -35.947265625, ""18"": 64.423828125, ""19"": 69.609375, ""20"": -88.0, ""21"": 8.173828125, ""22"": -36.03515625}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""a5b29498442f4597a18c35a6e636d745"", ""start_ms"": 330}, {""frame_id"": ""730c37b051d44de4ae71e9001267f26c"", ""name"": ""오옆4"", ""time_ms"": 100, ""angles"": {""0"": 0.087890625, ""1"": -0.3515625, ""2"": -9.931640625, ""3"": 8.876953125, ""4"": 21.181640625, ""5"": -17.578125, ""6"": 67.763671875, ""7"": -69.2578125, ""8"": -11.337890625, ""9"": 2.8125, ""10"": 0.087890625, ""11"": -0.439453125, ""12"": 3.1640625, ""15"": 1.93359375, ""16"": -2.021484375, ""13"": -50.09765625, ""14"": 48.076171875, ""17"": -31.025390625, ""18"": 28.212890625, ""19"": 66.26953125, ""20"": -68.02734375, ""21"": 4.21875, ""22"": -3.779296875}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""730c37b051d44de4ae71e9001267f26c"", ""start_ms"": 390}]",[]
+찐미세왼옆꽃게0도-1,motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐미세왼옆꽃게0도-1,0,0,angles.4,policy_angles,20.7421875,18.0
+찐미세왼옆꽃게0도-1,0,0,angles.5,policy_angles,-18.720703125,-18.0
+찐미세왼옆꽃게0도-1,1,1,angles.4,policy_angles,19.3359375,18.0
+찐미세왼옆꽃게0도-1,1,1,angles.5,policy_angles,-18.45703125,-18.0
+찐미세왼옆꽃게0도-1,2,2,angles.4,policy_angles,17.666015625,18.0
+찐미세왼옆꽃게0도-1,2,2,angles.5,policy_angles,-17.9296875,-18.0
+찐미세왼옆꽃게0도-1,3,3,angles.4,policy_angles,22.0,18.0
+찐미세왼옆꽃게0도-1,3,3,angles.5,policy_angles,-19.0,-18.0
+찐미세왼옆꽃게90도-1,motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐미세왼옆꽃게90도-1,0,0,angles.4,policy_angles,20.7421875,18.0
+찐미세왼옆꽃게90도-1,0,0,angles.5,policy_angles,-18.720703125,-18.0
+찐미세왼옆꽃게90도-1,1,1,angles.4,policy_angles,19.3359375,18.0
+찐미세왼옆꽃게90도-1,1,1,angles.5,policy_angles,-18.45703125,-18.0
+찐미세왼옆꽃게90도-1,2,2,angles.4,policy_angles,17.666015625,18.0
+찐미세왼옆꽃게90도-1,2,2,angles.5,policy_angles,-17.9296875,-18.0
+찐미세왼옆꽃게90도-1,3,3,angles.4,policy_angles,22.0,18.0
+찐미세왼옆꽃게90도-1,3,3,angles.5,policy_angles,-19.0,-18.0
+찐오뒤412,motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐오뒤412,0,0,angles.4,policy_angles,9.66796875,18.0
+찐오뒤412,0,0,angles.5,policy_angles,-9.140625,-18.0
+찐오뒤에서 기본자세(카메라45도),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐오뒤에서 기본자세(카메라45도),0,0,angles.4,policy_angles,11.25,18.0
+찐오뒤에서 기본자세(카메라45도),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐오뒤에서 기본자세(카메라45도),0,0,angles.15,other_angles,-3.0,-2.0
+찐오뒤에서 기본자세(카메라45도),1,1,angles.4,policy_angles,22.0,18.0
+찐오뒤에서 기본자세(카메라45도),1,1,angles.5,policy_angles,-19.0,-18.0
+찐오뒤에서 오옆꽃게90도,motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐오뒤에서 오옆꽃게90도,0,0,angles.4,policy_angles,11.25,18.0
+찐오뒤에서 오옆꽃게90도,0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐오뒤에서 오옆꽃게90도,1,1,angles.4,policy_angles,21.181640625,18.0
+찐오뒤에서 오옆꽃게90도,1,1,angles.5,policy_angles,-17.578125,-18.0
+찐오뒤에서기본자세(0도),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐오뒤에서기본자세(0도),0,0,angles.4,policy_angles,11.25,18.0
+찐오뒤에서기본자세(0도),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐오뒤에서기본자세(0도),1,1,angles.4,policy_angles,22.0,18.0
+찐오뒤에서기본자세(0도),1,1,angles.5,policy_angles,-19.0,-18.0
+찐오뒤에서미세오뒤,motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐오뒤에서미세오뒤,0,0,angles.4,policy_angles,11.25,18.0
+찐오뒤에서미세오뒤,0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐오뒤에서미세오뒤,1,1,angles.4,policy_angles,9.140625,18.0
+찐오뒤에서미세오뒤,1,1,angles.5,policy_angles,-8.96484375,-18.0
+찐오뒤에서미세오뒤(왼들),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐오뒤에서미세오뒤(왼들),0,0,angles.4,policy_angles,11.25,18.0
+찐오뒤에서미세오뒤(왼들),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐오뒤에서미세오뒤(왼들),1,1,angles.4,policy_angles,9.140625,18.0
+찐오뒤에서미세오뒤(왼들),1,1,angles.5,policy_angles,-8.96484375,-18.0
+찐오뒤카메라90도,motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐오뒤카메라90도,0,0,angles.4,policy_angles,9.66796875,18.0
+찐오뒤카메라90도,0,0,angles.5,policy_angles,-9.140625,-18.0
+찐오뒤카메라90도,0,0,angles.17,other_angles,-24.0,-26.0
+찐오뒤카메라90도,0,0,angles.19,other_angles,67.115234375,68.115234375
+찐오뒤카메라90도,0,0,torques,fields,"{""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}","{""0"": false, ""1"": false, ""2"": false, ""3"": false, ""4"": false, ""5"": false, ""6"": false, ""7"": false, ""8"": false, ""9"": false, ""10"": false, ""11"": false, ""12"": false, ""15"": false, ""16"": false, ""13"": false, ""14"": false, ""17"": false, ""18"": false, ""19"": false, ""20"": false, ""21"": false, ""22"": false}"
+찐왼뒤에서기본(0도),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐왼뒤에서기본(0도),0,0,angles.4,policy_angles,11.25,18.0
+찐왼뒤에서기본(0도),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐왼뒤에서기본(0도),1,1,angles.4,policy_angles,22.0,18.0
+찐왼뒤에서기본(0도),1,1,angles.5,policy_angles,-19.0,-18.0
+찐왼뒤에서기본자세(90도),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐왼뒤에서기본자세(90도),0,0,angles.4,policy_angles,11.25,18.0
+찐왼뒤에서기본자세(90도),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐왼뒤에서기본자세(90도),1,1,angles.4,policy_angles,20.830078125,18.0
+찐왼뒤에서기본자세(90도),1,1,angles.5,policy_angles,-18.369140625,-18.0
+찐왼쪽게걸음(45도),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐왼쪽게걸음(45도),0,0,angles.4,policy_angles,22.0,18.0
+찐왼쪽게걸음(45도),0,0,angles.5,policy_angles,-19.0,-18.0
+찐왼쪽게걸음(45도),1,1,angles.4,policy_angles,20.21484375,18.0
+찐왼쪽게걸음(45도),1,1,angles.5,policy_angles,-19.599609375,-18.0
+찐왼쪽게걸음(45도),2,2,angles.4,policy_angles,20.21484375,18.0
+찐왼쪽게걸음(45도),2,2,angles.5,policy_angles,-17.841796875,-18.0
+찐왼쪽게걸음(45도),3,3,angles.4,policy_angles,22.0,18.0
+찐왼쪽게걸음(45도),3,3,angles.5,policy_angles,-19.0,-18.0
+찐제자리우회전0도-1(2회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리우회전0도-1(2회),0,0,angles.4,policy_angles,9.931640625,18.0
+찐제자리우회전0도-1(2회),0,0,angles.5,policy_angles,-9.228515625,-18.0
+찐제자리우회전0도-1(2회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리우회전0도-1(2회),1,1,angles.5,policy_angles,-8.876953125,-18.0
+찐제자리우회전0도-1(3회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리우회전0도-1(3회),0,0,angles.4,policy_angles,9.931640625,18.0
+찐제자리우회전0도-1(3회),0,0,angles.5,policy_angles,-9.228515625,-18.0
+찐제자리우회전0도-1(3회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리우회전0도-1(3회),1,1,angles.5,policy_angles,-8.876953125,-18.0
+찐제자리우회전0도-1(5회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리우회전0도-1(5회),0,0,angles.4,policy_angles,9.931640625,18.0
+찐제자리우회전0도-1(5회),0,0,angles.5,policy_angles,-9.228515625,-18.0
+찐제자리우회전0도-1(5회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리우회전0도-1(5회),1,1,angles.5,policy_angles,-8.876953125,-18.0
+찐제자리우회전0도-1(7회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리우회전0도-1(7회),0,0,angles.4,policy_angles,9.931640625,18.0
+찐제자리우회전0도-1(7회),0,0,angles.5,policy_angles,-9.228515625,-18.0
+찐제자리우회전0도-1(7회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리우회전0도-1(7회),1,1,angles.5,policy_angles,-8.876953125,-18.0
+찐제자리우회전0도-1(9회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리우회전0도-1(9회),0,0,angles.4,policy_angles,9.931640625,18.0
+찐제자리우회전0도-1(9회),0,0,angles.5,policy_angles,-9.228515625,-18.0
+찐제자리우회전0도-1(9회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리우회전0도-1(9회),1,1,angles.5,policy_angles,-8.876953125,-18.0
+찐제자리우회전45도(9회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리우회전45도(9회),0,0,angles.4,policy_angles,9.931640625,18.0
+찐제자리우회전45도(9회),0,0,angles.5,policy_angles,-9.228515625,-18.0
+찐제자리우회전45도(9회),0,0,angles.15,other_angles,-3.548828125,-4.0
+찐제자리우회전45도(9회),0,0,angles.18,other_angles,19.0,18.80859375
+찐제자리우회전45도(9회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리우회전45도(9회),1,1,angles.5,policy_angles,-8.876953125,-18.0
+찐제자리우회전45도-1(2회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리우회전45도-1(2회),0,0,angles.4,policy_angles,9.931640625,18.0
+찐제자리우회전45도-1(2회),0,0,angles.5,policy_angles,-9.228515625,-18.0
+찐제자리우회전45도-1(2회),0,0,angles.15,other_angles,-3.548828125,-4.0
+찐제자리우회전45도-1(2회),0,0,angles.18,other_angles,19.0,18.80859375
+찐제자리우회전45도-1(2회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리우회전45도-1(2회),1,1,angles.5,policy_angles,-8.876953125,-18.0
+찐제자리우회전45도-1(3회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리우회전45도-1(3회),0,0,angles.4,policy_angles,9.931640625,18.0
+찐제자리우회전45도-1(3회),0,0,angles.5,policy_angles,-9.228515625,-18.0
+찐제자리우회전45도-1(3회),0,0,angles.15,other_angles,-3.548828125,-4.0
+찐제자리우회전45도-1(3회),0,0,angles.18,other_angles,19.0,18.80859375
+찐제자리우회전45도-1(3회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리우회전45도-1(3회),1,1,angles.5,policy_angles,-8.876953125,-18.0
+찐제자리우회전45도-1(5회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리우회전45도-1(5회),0,0,angles.4,policy_angles,9.931640625,18.0
+찐제자리우회전45도-1(5회),0,0,angles.5,policy_angles,-9.228515625,-18.0
+찐제자리우회전45도-1(5회),0,0,angles.15,other_angles,-3.548828125,-4.0
+찐제자리우회전45도-1(5회),0,0,angles.18,other_angles,19.0,18.80859375
+찐제자리우회전45도-1(5회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리우회전45도-1(5회),1,1,angles.5,policy_angles,-8.876953125,-18.0
+찐제자리우회전45도-1(7회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리우회전45도-1(7회),0,0,angles.4,policy_angles,9.931640625,18.0
+찐제자리우회전45도-1(7회),0,0,angles.5,policy_angles,-9.228515625,-18.0
+찐제자리우회전45도-1(7회),0,0,angles.15,other_angles,-3.548828125,-4.0
+찐제자리우회전45도-1(7회),0,0,angles.18,other_angles,19.0,18.80859375
+찐제자리우회전45도-1(7회),0,0,_drag_original_start_ms,fields,120,
+찐제자리우회전45도-1(7회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리우회전45도-1(7회),1,1,angles.5,policy_angles,-8.876953125,-18.0
+찐제자리우회전90도-1(2회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리우회전90도-1(2회),0,0,angles.4,policy_angles,9.931640625,18.0
+찐제자리우회전90도-1(2회),0,0,angles.5,policy_angles,-9.228515625,-18.0
+찐제자리우회전90도-1(2회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리우회전90도-1(2회),1,1,angles.5,policy_angles,-8.876953125,-18.0
+찐제자리우회전90도-1(3회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리우회전90도-1(3회),0,0,angles.4,policy_angles,9.931640625,18.0
+찐제자리우회전90도-1(3회),0,0,angles.5,policy_angles,-9.228515625,-18.0
+찐제자리우회전90도-1(3회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리우회전90도-1(3회),1,1,angles.5,policy_angles,-8.876953125,-18.0
+찐제자리우회전90도-1(5회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리우회전90도-1(5회),0,0,angles.4,policy_angles,9.931640625,18.0
+찐제자리우회전90도-1(5회),0,0,angles.5,policy_angles,-9.228515625,-18.0
+찐제자리우회전90도-1(5회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리우회전90도-1(5회),1,1,angles.5,policy_angles,-8.876953125,-18.0
+찐제자리우회전90도-1(7회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리우회전90도-1(7회),0,0,angles.4,policy_angles,9.931640625,18.0
+찐제자리우회전90도-1(7회),0,0,angles.5,policy_angles,-9.228515625,-18.0
+찐제자리우회전90도-1(7회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리우회전90도-1(7회),1,1,angles.5,policy_angles,-8.876953125,-18.0
+찐제자리우회전90도-1(9회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리우회전90도-1(9회),0,0,angles.4,policy_angles,9.931640625,18.0
+찐제자리우회전90도-1(9회),0,0,angles.5,policy_angles,-9.228515625,-18.0
+찐제자리우회전90도-1(9회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리우회전90도-1(9회),1,1,angles.5,policy_angles,-8.876953125,-18.0
+찐제자리좌회전0도-1(1회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리좌회전0도-1(1회),0,0,angles.4,policy_angles,11.25,18.0
+찐제자리좌회전0도-1(1회),0,0,angles.5,policy_angles,-13.447265625,-18.0
+찐제자리좌회전0도-1(1회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리좌회전0도-1(1회),1,1,angles.5,policy_angles,-9.140625,-18.0
+찐제자리좌회전0도-1(2회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리좌회전0도-1(2회),0,0,angles.4,policy_angles,11.25,18.0
+찐제자리좌회전0도-1(2회),0,0,angles.5,policy_angles,-13.447265625,-18.0
+찐제자리좌회전0도-1(2회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리좌회전0도-1(2회),1,1,angles.5,policy_angles,-9.140625,-18.0
+찐제자리좌회전0도-1(3회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리좌회전0도-1(3회),0,0,angles.4,policy_angles,11.25,18.0
+찐제자리좌회전0도-1(3회),0,0,angles.5,policy_angles,-13.447265625,-18.0
+찐제자리좌회전0도-1(3회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리좌회전0도-1(3회),1,1,angles.5,policy_angles,-9.140625,-18.0
+찐제자리좌회전0도-1(4회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리좌회전0도-1(4회),0,0,angles.4,policy_angles,11.25,18.0
+찐제자리좌회전0도-1(4회),0,0,angles.5,policy_angles,-13.447265625,-18.0
+찐제자리좌회전0도-1(4회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리좌회전0도-1(4회),1,1,angles.5,policy_angles,-9.140625,-18.0
+찐제자리좌회전0도-1(5회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리좌회전0도-1(5회),0,0,angles.4,policy_angles,11.25,18.0
+찐제자리좌회전0도-1(5회),0,0,angles.5,policy_angles,-13.447265625,-18.0
+찐제자리좌회전0도-1(5회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리좌회전0도-1(5회),1,1,angles.5,policy_angles,-9.140625,-18.0
+찐제자리좌회전0도-1(6회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리좌회전0도-1(6회),0,0,angles.4,policy_angles,11.25,18.0
+찐제자리좌회전0도-1(6회),0,0,angles.5,policy_angles,-13.447265625,-18.0
+찐제자리좌회전0도-1(6회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리좌회전0도-1(6회),1,1,angles.5,policy_angles,-9.140625,-18.0
+찐제자리좌회전45도-1(1회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리좌회전45도-1(1회),0,0,angles.4,policy_angles,11.25,18.0
+찐제자리좌회전45도-1(1회),0,0,angles.5,policy_angles,-13.447265625,-18.0
+찐제자리좌회전45도-1(1회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리좌회전45도-1(1회),1,1,angles.5,policy_angles,-9.140625,-18.0
+찐제자리좌회전45도-1(2회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리좌회전45도-1(2회),0,0,angles.4,policy_angles,11.25,18.0
+찐제자리좌회전45도-1(2회),0,0,angles.5,policy_angles,-13.447265625,-18.0
+찐제자리좌회전45도-1(2회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리좌회전45도-1(2회),1,1,angles.5,policy_angles,-9.140625,-18.0
+찐제자리좌회전45도-1(3회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리좌회전45도-1(3회),0,0,angles.4,policy_angles,11.25,18.0
+찐제자리좌회전45도-1(3회),0,0,angles.5,policy_angles,-13.447265625,-18.0
+찐제자리좌회전45도-1(3회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리좌회전45도-1(3회),1,1,angles.5,policy_angles,-9.140625,-18.0
+찐제자리좌회전45도-1(4회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리좌회전45도-1(4회),0,0,angles.4,policy_angles,11.25,18.0
+찐제자리좌회전45도-1(4회),0,0,angles.5,policy_angles,-13.447265625,-18.0
+찐제자리좌회전45도-1(4회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리좌회전45도-1(4회),1,1,angles.5,policy_angles,-9.140625,-18.0
+찐제자리좌회전45도-1(5회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리좌회전45도-1(5회),0,0,angles.4,policy_angles,11.25,18.0
+찐제자리좌회전45도-1(5회),0,0,angles.5,policy_angles,-13.447265625,-18.0
+찐제자리좌회전45도-1(5회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리좌회전45도-1(5회),1,1,angles.5,policy_angles,-9.140625,-18.0
+찐제자리좌회전45도-1(6회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리좌회전45도-1(6회),0,0,angles.4,policy_angles,11.25,18.0
+찐제자리좌회전45도-1(6회),0,0,angles.5,policy_angles,-13.447265625,-18.0
+찐제자리좌회전45도-1(6회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리좌회전45도-1(6회),1,1,angles.5,policy_angles,-9.140625,-18.0
+찐제자리좌회전90도-1(1회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리좌회전90도-1(1회),0,0,angles.4,policy_angles,11.25,18.0
+찐제자리좌회전90도-1(1회),0,0,angles.5,policy_angles,-13.447265625,-18.0
+찐제자리좌회전90도-1(1회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리좌회전90도-1(1회),1,1,angles.5,policy_angles,-9.140625,-18.0
+찐제자리좌회전90도-1(1회),1,1,angles.17,other_angles,-24.0,-26.0
+찐제자리좌회전90도-1(1회),1,1,angles.19,other_angles,67.115234375,68.115234375
+찐제자리좌회전90도-1(1회),1,1,torques,fields,"{""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}","{""0"": false, ""1"": false, ""2"": false, ""3"": false, ""4"": false, ""5"": false, ""6"": false, ""7"": false, ""8"": false, ""9"": false, ""10"": false, ""11"": false, ""12"": false, ""15"": false, ""16"": false, ""13"": false, ""14"": false, ""17"": false, ""18"": false, ""19"": false, ""20"": false, ""21"": false, ""22"": false}"
+찐제자리좌회전90도-1(2회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리좌회전90도-1(2회),0,0,angles.4,policy_angles,11.25,18.0
+찐제자리좌회전90도-1(2회),0,0,angles.5,policy_angles,-13.447265625,-18.0
+찐제자리좌회전90도-1(2회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리좌회전90도-1(2회),1,1,angles.5,policy_angles,-9.140625,-18.0
+찐제자리좌회전90도-1(2회),1,1,angles.17,other_angles,-24.0,-26.0
+찐제자리좌회전90도-1(2회),1,1,angles.19,other_angles,67.115234375,68.115234375
+찐제자리좌회전90도-1(2회),1,1,torques,fields,"{""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}","{""0"": false, ""1"": false, ""2"": false, ""3"": false, ""4"": false, ""5"": false, ""6"": false, ""7"": false, ""8"": false, ""9"": false, ""10"": false, ""11"": false, ""12"": false, ""15"": false, ""16"": false, ""13"": false, ""14"": false, ""17"": false, ""18"": false, ""19"": false, ""20"": false, ""21"": false, ""22"": false}"
+찐제자리좌회전90도-1(3회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리좌회전90도-1(3회),0,0,angles.4,policy_angles,11.25,18.0
+찐제자리좌회전90도-1(3회),0,0,angles.5,policy_angles,-13.447265625,-18.0
+찐제자리좌회전90도-1(3회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리좌회전90도-1(3회),1,1,angles.5,policy_angles,-9.140625,-18.0
+찐제자리좌회전90도-1(3회),1,1,angles.17,other_angles,-24.0,-26.0
+찐제자리좌회전90도-1(3회),1,1,angles.19,other_angles,67.115234375,68.115234375
+찐제자리좌회전90도-1(3회),1,1,torques,fields,"{""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}","{""0"": false, ""1"": false, ""2"": false, ""3"": false, ""4"": false, ""5"": false, ""6"": false, ""7"": false, ""8"": false, ""9"": false, ""10"": false, ""11"": false, ""12"": false, ""15"": false, ""16"": false, ""13"": false, ""14"": false, ""17"": false, ""18"": false, ""19"": false, ""20"": false, ""21"": false, ""22"": false}"
+찐제자리좌회전90도-1(4회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리좌회전90도-1(4회),0,0,angles.4,policy_angles,11.25,18.0
+찐제자리좌회전90도-1(4회),0,0,angles.5,policy_angles,-13.447265625,-18.0
+찐제자리좌회전90도-1(4회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리좌회전90도-1(4회),1,1,angles.5,policy_angles,-9.140625,-18.0
+찐제자리좌회전90도-1(4회),1,1,angles.17,other_angles,-24.0,-26.0
+찐제자리좌회전90도-1(4회),1,1,angles.19,other_angles,67.115234375,68.115234375
+찐제자리좌회전90도-1(4회),1,1,torques,fields,"{""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}","{""0"": false, ""1"": false, ""2"": false, ""3"": false, ""4"": false, ""5"": false, ""6"": false, ""7"": false, ""8"": false, ""9"": false, ""10"": false, ""11"": false, ""12"": false, ""15"": false, ""16"": false, ""13"": false, ""14"": false, ""17"": false, ""18"": false, ""19"": false, ""20"": false, ""21"": false, ""22"": false}"
+찐제자리좌회전90도-1(5회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리좌회전90도-1(5회),0,0,angles.4,policy_angles,11.25,18.0
+찐제자리좌회전90도-1(5회),0,0,angles.5,policy_angles,-13.447265625,-18.0
+찐제자리좌회전90도-1(5회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리좌회전90도-1(5회),1,1,angles.5,policy_angles,-9.140625,-18.0
+찐제자리좌회전90도-1(5회),1,1,angles.17,other_angles,-24.0,-26.0
+찐제자리좌회전90도-1(5회),1,1,angles.19,other_angles,67.115234375,68.115234375
+찐제자리좌회전90도-1(5회),1,1,torques,fields,"{""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}","{""0"": false, ""1"": false, ""2"": false, ""3"": false, ""4"": false, ""5"": false, ""6"": false, ""7"": false, ""8"": false, ""9"": false, ""10"": false, ""11"": false, ""12"": false, ""15"": false, ""16"": false, ""13"": false, ""14"": false, ""17"": false, ""18"": false, ""19"": false, ""20"": false, ""21"": false, ""22"": false}"
+찐제자리좌회전90도-1(6회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐제자리좌회전90도-1(6회),0,0,angles.4,policy_angles,11.25,18.0
+찐제자리좌회전90도-1(6회),0,0,angles.5,policy_angles,-13.447265625,-18.0
+찐제자리좌회전90도-1(6회),1,1,angles.4,policy_angles,9.66796875,18.0
+찐제자리좌회전90도-1(6회),1,1,angles.5,policy_angles,-9.140625,-18.0
+찐제자리좌회전90도-1(6회),1,1,angles.17,other_angles,-24.0,-26.0
+찐제자리좌회전90도-1(6회),1,1,angles.19,other_angles,67.115234375,68.115234375
+찐제자리좌회전90도-1(6회),1,1,torques,fields,"{""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}","{""0"": false, ""1"": false, ""2"": false, ""3"": false, ""4"": false, ""5"": false, ""6"": false, ""7"": false, ""8"": false, ""9"": false, ""10"": false, ""11"": false, ""12"": false, ""15"": false, ""16"": false, ""13"": false, ""14"": false, ""17"": false, ""18"": false, ""19"": false, ""20"": false, ""21"": false, ""22"": false}"
+찐찐라인복귀좌회전45도(4회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐찐라인복귀좌회전45도(4회),0,0,angles.4,policy_angles,11.25,18.0
+찐찐라인복귀좌회전45도(4회),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐찐라인복귀좌회전45도(4회),1,1,angles.4,policy_angles,10.37109375,18.0
+찐찐라인복귀좌회전45도(4회),1,1,angles.5,policy_angles,-10.1953125,-18.0
+찐찐라인복귀좌회전45도(4회),1,1,angles.10,other_angles,-3.0,-4.0
+찐찐라인복귀좌회전45도(4회),1,1,angles.11,other_angles,0.0,2.0
+찐찐라인복귀좌회전45도(4회),1,1,angles.12,other_angles,0.0,-2.0
+찐찐라인복귀좌회전45도(4회),2,2,angles.4,policy_angles,11.25,18.0
+찐찐라인복귀좌회전45도(4회),2,2,angles.5,policy_angles,-13.271484375,-18.0
+찐찐라인복귀좌회전45도(4회),3,3,angles.4,policy_angles,9.66796875,18.0
+찐찐라인복귀좌회전45도(4회),3,3,angles.5,policy_angles,-9.140625,-18.0
+찐찐라인복귀좌회전45도(6회),motion,,completion,metadata,,"{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐찐라인복귀좌회전45도(6회),motion,,end_pose,metadata,,오뒤412
+찐찐라인복귀좌회전45도(6회),motion,,max_seq_ms,metadata,,7045
+찐찐라인복귀좌회전45도(6회),motion,,name,metadata,,찐찐라인복귀좌회전45도(6회)
+찐찐라인복귀좌회전45도(6회),motion,,playback_speed,metadata,,1.0
+찐찐라인복귀좌회전45도(6회),motion,,repeat_count,metadata,,6
+찐찐라인복귀좌회전45도(6회),motion,,repeatable,metadata,,True
+찐찐라인복귀좌회전45도(6회),motion,,start_pose,metadata,,오들401
+찐찐라인복귀좌회전45도(6회),"[0, 0]","[0, 4]",frames,insert,[],"[{""frame_id"": ""5697898460c54f3593e48d8bd386a7d9"", ""name"": ""오들401"", ""time_ms"": 70, ""angles"": {""0"": -32.34375, ""1"": -0.3515625, ""2"": -8.4375, ""3"": 7.55859375, ""4"": 18.0, ""5"": -18.0, ""6"": 74.35546875, ""7"": -76.2890625, ""8"": -10.546875, ""9"": 2.4609375, ""10"": -3.33984375, ""11"": -1.0, ""12"": 0.0, ""15"": -3.0, ""16"": 5.0, ""13"": -80.0, ""14"": 56.0, ""17"": -56.337890625, ""18"": 32.0, ""19"": 55.0, ""20"": -68.0, ""21"": 1.7578125, ""22"": -12.0}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""5697898460c54f3593e48d8bd386a7d9"", ""start_ms"": 60, ""_drag_original_start_ms"": 60}, {""frame_id"": ""46c8c5bda6924327837ded0d9612d346"", ""name"": ""왼뒤407"", ""time_ms"": 150, ""angles"": {""0"": -32.6953125, ""1"": -0.439453125, ""2"": -9.228515625, ""3"": 8.61328125, ""4"": 18.0, ""5"": -18.0, ""6"": 69.609375, ""7"": -70.927734375, ""8"": -11.07421875, ""9"": 2.63671875, ""10"": -4.0, ""11"": 2.0, ""12"": -2.0, ""15"": 3.0, ""16"": -2.0, ""13"": -59.0, ""14"": 47.0, ""17"": -34.453125, ""18"": 31.904296875, ""19"": 60.64453125, ""20"": -74.0, ""21"": 3.0, ""22"": -4.5703125}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""46c8c5bda6924327837ded0d9612d346"", ""start_ms"": 130}, {""frame_id"": ""059d2c5929a64676aa8b6c138012f8f4"", ""name"": ""왼들401"", ""time_ms"": 45, ""angles"": {""0"": -32.34375, ""1"": -0.3515625, ""2"": -8.4375, ""3"": 7.55859375, ""4"": 18.0, ""5"": -18.0, ""6"": 74.35546875, ""7"": -76.2890625, ""8"": -10.546875, ""9"": 2.4609375, ""10"": 0.0, ""11"": 0.0, ""12"": -1.66015625, ""15"": -5.0, ""16"": 4.0, ""13"": -55.0, ""14"": 80.0, ""17"": -29.70703125, ""18"": 56.337890625, ""19"": 64.0, ""20"": -58.0, ""21"": 12.0, ""22"": -1.7578125}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""059d2c5929a64676aa8b6c138012f8f4"", ""start_ms"": 430}, {""frame_id"": ""94f36aea9d384b58921e01457aed0bec"", ""name"": ""오뒤412"", ""time_ms"": 90, ""angles"": {""0"": -33.310546875, ""1"": 0.0, ""2"": -9.580078125, ""3"": 9.580078125, ""4"": 18.0, ""5"": -18.0, ""6"": 67.67578125, ""7"": -69.08203125, ""8"": -11.42578125, ""9"": 2.8125, ""10"": -5.0, ""11"": 0.0, ""12"": -2.0, ""15"": 2.0, ""16"": -2.0, ""13"": -41.59375, ""14"": 55.568359375, ""17"": -24.0, ""18"": 28.0, ""19"": 67.0, ""20"": -60.0, ""21"": 4.658203125, ""22"": -1.318359375}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""94f36aea9d384b58921e01457aed0bec"", ""start_ms"": 475}]"
+찐찐전진(6회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐찐전진(6회),0,0,angles.4,policy_angles,11.25,18.0
+찐찐전진(6회),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐찐전진(6회),1,1,angles.4,policy_angles,10.37109375,18.0
+찐찐전진(6회),1,1,angles.5,policy_angles,-10.1953125,-18.0
+찐찐전진(6회),2,2,angles.4,policy_angles,11.25,18.0
+찐찐전진(6회),2,2,angles.5,policy_angles,-13.271484375,-18.0
+찐찐전진(6회),3,3,angles.4,policy_angles,9.66796875,18.0
+찐찐전진(6회),3,3,angles.5,policy_angles,-9.140625,-18.0
+찐찐전진45(2회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐찐전진45(2회),0,0,angles.4,policy_angles,11.25,18.0
+찐찐전진45(2회),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐찐전진45(2회),1,1,angles.4,policy_angles,10.37109375,18.0
+찐찐전진45(2회),1,1,angles.5,policy_angles,-10.1953125,-18.0
+찐찐전진45(2회),2,2,angles.4,policy_angles,11.25,18.0
+찐찐전진45(2회),2,2,angles.5,policy_angles,-13.271484375,-18.0
+찐찐전진45(2회),3,3,angles.4,policy_angles,9.66796875,18.0
+찐찐전진45(2회),3,3,angles.5,policy_angles,-9.140625,-18.0
+찐찐전진45(4회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐찐전진45(4회),0,0,angles.4,policy_angles,11.25,18.0
+찐찐전진45(4회),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐찐전진45(4회),1,1,angles.4,policy_angles,10.37109375,18.0
+찐찐전진45(4회),1,1,angles.5,policy_angles,-10.1953125,-18.0
+찐찐전진45(4회),2,2,angles.4,policy_angles,11.25,18.0
+찐찐전진45(4회),2,2,angles.5,policy_angles,-13.271484375,-18.0
+찐찐전진45(4회),3,3,angles.4,policy_angles,9.66796875,18.0
+찐찐전진45(4회),3,3,angles.5,policy_angles,-9.140625,-18.0
+찐찐전진45(8회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐찐전진45(8회),0,0,angles.4,policy_angles,11.25,18.0
+찐찐전진45(8회),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐찐전진45(8회),1,1,angles.4,policy_angles,10.37109375,18.0
+찐찐전진45(8회),1,1,angles.5,policy_angles,-10.1953125,-18.0
+찐찐전진45(8회),2,2,angles.4,policy_angles,11.25,18.0
+찐찐전진45(8회),2,2,angles.5,policy_angles,-13.271484375,-18.0
+찐찐전진45(8회),3,3,angles.4,policy_angles,9.66796875,18.0
+찐찐전진45(8회),3,3,angles.5,policy_angles,-9.140625,-18.0
+찐찐전진90(2회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐찐전진90(2회),0,0,angles.4,policy_angles,11.25,18.0
+찐찐전진90(2회),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐찐전진90(2회),1,1,angles.4,policy_angles,10.37109375,18.0
+찐찐전진90(2회),1,1,angles.5,policy_angles,-10.1953125,-18.0
+찐찐전진90(2회),2,2,angles.4,policy_angles,11.25,18.0
+찐찐전진90(2회),2,2,angles.5,policy_angles,-13.271484375,-18.0
+찐찐전진90(2회),3,3,angles.4,policy_angles,9.66796875,18.0
+찐찐전진90(2회),3,3,angles.5,policy_angles,-9.140625,-18.0
+찐찐전진90(4회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐찐전진90(4회),0,0,angles.4,policy_angles,11.25,18.0
+찐찐전진90(4회),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐찐전진90(4회),1,1,angles.4,policy_angles,10.37109375,18.0
+찐찐전진90(4회),1,1,angles.5,policy_angles,-10.1953125,-18.0
+찐찐전진90(4회),2,2,angles.4,policy_angles,11.25,18.0
+찐찐전진90(4회),2,2,angles.5,policy_angles,-13.271484375,-18.0
+찐찐전진90(4회),3,3,angles.4,policy_angles,9.66796875,18.0
+찐찐전진90(4회),3,3,angles.5,policy_angles,-9.140625,-18.0
+찐찐전진90(6회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐찐전진90(6회),0,0,angles.4,policy_angles,11.25,18.0
+찐찐전진90(6회),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐찐전진90(6회),1,1,angles.4,policy_angles,10.37109375,18.0
+찐찐전진90(6회),1,1,angles.5,policy_angles,-10.1953125,-18.0
+찐찐전진90(6회),2,2,angles.4,policy_angles,11.25,18.0
+찐찐전진90(6회),2,2,angles.5,policy_angles,-13.271484375,-18.0
+찐찐전진90(6회),3,3,angles.4,policy_angles,9.66796875,18.0
+찐찐전진90(6회),3,3,angles.5,policy_angles,-9.140625,-18.0
+찐찐전진90(8회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐찐전진90(8회),0,0,angles.4,policy_angles,11.25,18.0
+찐찐전진90(8회),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐찐전진90(8회),1,1,angles.4,policy_angles,10.37109375,18.0
+찐찐전진90(8회),1,1,angles.5,policy_angles,-10.1953125,-18.0
+찐찐전진90(8회),2,2,angles.4,policy_angles,11.25,18.0
+찐찐전진90(8회),2,2,angles.5,policy_angles,-13.271484375,-18.0
+찐찐전진90(8회),3,3,angles.4,policy_angles,9.66796875,18.0
+찐찐전진90(8회),3,3,angles.5,policy_angles,-9.140625,-18.0
+찐허들,motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐허들,motion,,end_pose,metadata,오뒤412,오뒤412(허들)
+찐허들,motion,,max_seq_ms,metadata,7358,7045
+찐허들,12,12,angles.15,other_angles,-6.0,0.703125
+찐허들,14,13,angles.10,other_angles,-3.0,-4.0
+찐허들,14,13,angles.11,other_angles,0.0,2.0
+찐허들,14,13,angles.12,other_angles,0.0,-2.0
+찐허들,14,13,start_ms,fields,5880,5810
+찐허들,14,13,time_ms,fields,300,100
+찐허들,15,14,_drag_original_start_ms,fields,6814,
+찐허들,15,14,start_ms,fields,6818,6614
+찐허들,15,14,time_ms,fields,60,55
+찐허들,"[13, 14]","[13, 13]",frames,delete,"[{""frame_id"": ""4bb16e7d829a4037acf0bf54f1a841e7"", ""name"": ""허들찐13"", ""time_ms"": 70, ""angles"": {""0"": -0.966796875, ""1"": -0.263671875, ""2"": -0.703125, ""3"": -7.20703125, ""4"": 30.76171875, ""5"": -14.23828125, ""6"": 79.189453125, ""7"": -68.37890625, ""8"": 0.3515625, ""9"": -0.17578125, ""10"": 0.1640625, ""11"": -0.087890625, ""12"": 3.943359375, ""15"": 1.23046875, ""16"": 2.9453125, ""13"": -67.6640625, ""14"": 66.0, ""17"": -31.81640625, ""18"": 38.14453125, ""19"": 54.2734375, ""20"": -67.412109375, ""21"": -1.318359375, ""22"": -9.4921875}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""4bb16e7d829a4037acf0bf54f1a841e7"", ""start_ms"": 5810}]",[]
+찐허들,"[16, 17]","[15, 16]",frames,replace,"[{""frame_id"": ""94f36aea9d384b58921e01457aed0bec"", ""name"": ""오뒤412"", ""time_ms"": 120, ""angles"": {""0"": -33.310546875, ""1"": 0.0, ""2"": -9.580078125, ""3"": 9.580078125, ""4"": 9.66796875, ""5"": -9.140625, ""6"": 67.67578125, ""7"": -69.08203125, ""8"": -11.42578125, ""9"": 2.8125, ""10"": -5.0, ""11"": 0.0, ""12"": -2.0, ""15"": 2.0, ""16"": -2.0, ""13"": -41.59375, ""14"": 55.568359375, ""17"": -24.0, ""18"": 28.0, ""19"": 67.0, ""20"": -60.0, ""21"": 4.658203125, ""22"": -1.318359375}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": true, ""lift_early_arrival"": true, ""source_frame_id"": ""94f36aea9d384b58921e01457aed0bec"", ""start_ms"": 6878}]","[{""frame_id"": ""94f36aea9d384b58921e01457aed0bec"", ""name"": ""오뒤412(허들)"", ""time_ms"": 120, ""angles"": {""0"": -33.310546875, ""1"": 0.0, ""2"": -9.580078125, ""3"": 9.580078125, ""4"": 9.66796875, ""5"": -9.140625, ""6"": 67.67578125, ""7"": -69.08203125, ""8"": -11.42578125, ""9"": 2.8125, ""10"": -5.0, ""11"": 0.0, ""12"": -2.0, ""15"": 2.0, ""16"": -2.0, ""13"": -41.59375, ""14"": 55.568359375, ""17"": -24.0, ""18"": 28.0, ""19"": 67.0, ""20"": -60.0, ""21"": 4.658203125, ""22"": -1.318359375}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""15"": true, ""16"": true, ""13"": true, ""14"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": true, ""lift_early_arrival"": true, ""source_frame_id"": ""94f36aea9d384b58921e01457aed0bec"", ""start_ms"": 6669}]"
+찐후진실전(1회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐후진실전(1회),0,0,angles.4,policy_angles,9.66796875,18.0
+찐후진실전(1회),0,0,angles.5,policy_angles,-9.66796875,-18.0
+찐후진실전(1회),1,1,angles.4,policy_angles,10.546875,18.0
+찐후진실전(1회),1,1,angles.5,policy_angles,-10.01953125,-18.0
+찐후진실전(1회),2,2,angles.4,policy_angles,10.546875,18.0
+찐후진실전(1회),2,2,angles.5,policy_angles,-10.01953125,-18.0
+찐후진실전(1회),3,3,angles.4,policy_angles,10.37109375,18.0
+찐후진실전(1회),3,3,angles.5,policy_angles,-10.1953125,-18.0
+찐후진실전-2(2회),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐후진실전-2(2회),0,0,angles.4,policy_angles,9.66796875,18.0
+찐후진실전-2(2회),0,0,angles.5,policy_angles,-9.66796875,-18.0
+찐후진실전-2(2회),1,1,angles.4,policy_angles,10.546875,18.0
+찐후진실전-2(2회),1,1,angles.5,policy_angles,-10.01953125,-18.0
+찐후진실전-2(2회),2,2,angles.4,policy_angles,10.546875,18.0
+찐후진실전-2(2회),2,2,angles.5,policy_angles,-10.01953125,-18.0
+찐후진실전-2(2회),3,3,angles.4,policy_angles,10.37109375,18.0
+찐후진실전-2(2회),3,3,angles.5,policy_angles,-10.1953125,-18.0
+찐후진에서 제자리좌회전(공),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐후진에서 제자리좌회전(공),motion,,max_seq_ms,metadata,2072,3089
+찐후진에서 제자리좌회전(공),0,0,angles.4,policy_angles,11.25,18.0
+찐후진에서 제자리좌회전(공),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐후진에서 제자리좌회전(공),1,1,angles.4,policy_angles,9.66796875,18.0
+찐후진에서 제자리좌회전(공),1,1,angles.5,policy_angles,-9.140625,-18.0
+찐후진에서 제자리좌회전(공),2,2,angles.4,policy_angles,11.25,18.0
+찐후진에서 제자리좌회전(공),2,2,angles.5,policy_angles,-13.447265625,-18.0
+찐후진에서 제자리좌회전(공),3,3,angles.4,policy_angles,9.66796875,18.0
+찐후진에서 제자리좌회전(공),3,3,angles.5,policy_angles,-9.140625,-18.0
+찐후진에서 제자리좌회전(공),4,4,angles.4,policy_angles,11.25,18.0
+찐후진에서 제자리좌회전(공),4,4,angles.5,policy_angles,-13.447265625,-18.0
+찐후진에서 제자리좌회전(공),5,5,angles.4,policy_angles,9.66796875,18.0
+찐후진에서 제자리좌회전(공),5,5,angles.5,policy_angles,-9.140625,-18.0
+찐후진에서 제자리좌회전(공),6,6,angles.4,policy_angles,11.25,18.0
+찐후진에서 제자리좌회전(공),6,6,angles.5,policy_angles,-13.447265625,-18.0
+찐후진에서 제자리좌회전(공),7,7,angles.4,policy_angles,9.66796875,18.0
+찐후진에서 제자리좌회전(공),7,7,angles.5,policy_angles,-9.140625,-18.0
+찐후진에서 제자리좌회전(공),8,8,angles.4,policy_angles,11.25,18.0
+찐후진에서 제자리좌회전(공),8,8,angles.5,policy_angles,-13.447265625,-18.0
+찐후진에서 제자리좌회전(공),9,9,angles.4,policy_angles,9.66796875,18.0
+찐후진에서 제자리좌회전(공),9,9,angles.5,policy_angles,-9.140625,-18.0
+찐후진에서 제자리좌회전(공),"[10, 10]","[10, 16]",frames,insert,[],"[{""frame_id"": ""71f5a572518046d9a6b21070390b6ec1"", ""name"": ""제좌왼들25"", ""time_ms"": 61, ""angles"": {""0"": -32.255859375, ""1"": -0.263671875, ""2"": -8.4375, ""3"": 7.55859375, ""4"": 18.0, ""5"": -18.0, ""6"": 75.05859375, ""7"": -76.904296875, ""8"": -10.546875, ""9"": 2.548828125, ""10"": 9, ""11"": 4, ""12"": 4, ""13"": -52.91015625, ""14"": 78, ""15"": -8, ""16"": 0, ""17"": -29.970703125, ""18"": 61.435546875, ""19"": 66, ""20"": -60, ""21"": 15, ""22"": -3.955078125}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""13"": true, ""14"": true, ""15"": true, ""16"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""71f5a572518046d9a6b21070390b6ec1"", ""start_ms"": 2206}, {""frame_id"": ""94f36aea9d384b58921e01457aed0bec"", ""name"": ""오뒤412"", ""time_ms"": 144, ""angles"": {""0"": -33.310546875, ""1"": 0.0, ""2"": -9.580078125, ""3"": 9.580078125, ""4"": 18.0, ""5"": -18.0, ""6"": 67.67578125, ""7"": -69.08203125, ""8"": -11.42578125, ""9"": 2.8125, ""10"": -5.0, ""11"": 0.0, ""12"": -2.0, ""13"": -41.59375, ""14"": 55.568359375, ""15"": 2.0, ""16"": -2.0, ""17"": -24.0, ""18"": 28.0, ""19"": 67.0, ""20"": -60.0, ""21"": 4.658203125, ""22"": -1.318359375}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""13"": true, ""14"": true, ""15"": true, ""16"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""94f36aea9d384b58921e01457aed0bec"", ""start_ms"": 2267, ""_drag_original_start_ms"": 145, ""playback_cycle_end"": true}, {""frame_id"": ""71f5a572518046d9a6b21070390b6ec1"", ""name"": ""제좌왼들25"", ""time_ms"": 61, ""angles"": {""0"": -32.255859375, ""1"": -0.263671875, ""2"": -8.4375, ""3"": 7.55859375, ""4"": 18.0, ""5"": -18.0, ""6"": 75.05859375, ""7"": -76.904296875, ""8"": -10.546875, ""9"": 2.548828125, ""10"": 9, ""11"": 4, ""12"": 4, ""13"": -52.91015625, ""14"": 78, ""15"": -8, ""16"": 0, ""17"": -29.970703125, ""18"": 61.435546875, ""19"": 66, ""20"": -60, ""21"": 15, ""22"": -3.955078125}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""13"": true, ""14"": true, ""15"": true, ""16"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""71f5a572518046d9a6b21070390b6ec1"", ""start_ms"": 2545}, {""frame_id"": ""94f36aea9d384b58921e01457aed0bec"", ""name"": ""오뒤412"", ""time_ms"": 144, ""angles"": {""0"": -33.310546875, ""1"": 0.0, ""2"": -9.580078125, ""3"": 9.580078125, ""4"": 18.0, ""5"": -18.0, ""6"": 67.67578125, ""7"": -69.08203125, ""8"": -11.42578125, ""9"": 2.8125, ""10"": -5.0, ""11"": 0.0, ""12"": -2.0, ""13"": -41.59375, ""14"": 55.568359375, ""15"": 2.0, ""16"": -2.0, ""17"": -24.0, ""18"": 28.0, ""19"": 67.0, ""20"": -60.0, ""21"": 4.658203125, ""22"": -1.318359375}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""13"": true, ""14"": true, ""15"": true, ""16"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""94f36aea9d384b58921e01457aed0bec"", ""start_ms"": 2606, ""_drag_original_start_ms"": 145, ""playback_cycle_end"": true}, {""frame_id"": ""71f5a572518046d9a6b21070390b6ec1"", ""name"": ""제좌왼들25"", ""time_ms"": 61, ""angles"": {""0"": -32.255859375, ""1"": -0.263671875, ""2"": -8.4375, ""3"": 7.55859375, ""4"": 18.0, ""5"": -18.0, ""6"": 75.05859375, ""7"": -76.904296875, ""8"": -10.546875, ""9"": 2.548828125, ""10"": 9, ""11"": 4, ""12"": 4, ""13"": -52.91015625, ""14"": 78, ""15"": -8, ""16"": 0, ""17"": -29.970703125, ""18"": 61.435546875, ""19"": 66, ""20"": -60, ""21"": 15, ""22"": -3.955078125}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""13"": true, ""14"": true, ""15"": true, ""16"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""71f5a572518046d9a6b21070390b6ec1"", ""start_ms"": 2884}, {""frame_id"": ""94f36aea9d384b58921e01457aed0bec"", ""name"": ""오뒤412"", ""time_ms"": 144, ""angles"": {""0"": -33.310546875, ""1"": 0.0, ""2"": -9.580078125, ""3"": 9.580078125, ""4"": 18.0, ""5"": -18.0, ""6"": 67.67578125, ""7"": -69.08203125, ""8"": -11.42578125, ""9"": 2.8125, ""10"": -5.0, ""11"": 0.0, ""12"": -2.0, ""13"": -41.59375, ""14"": 55.568359375, ""15"": 2.0, ""16"": -2.0, ""17"": -24.0, ""18"": 28.0, ""19"": 67.0, ""20"": -60.0, ""21"": 4.658203125, ""22"": -1.318359375}, ""torques"": {""0"": true, ""1"": true, ""2"": true, ""3"": true, ""4"": true, ""5"": true, ""6"": true, ""7"": true, ""8"": true, ""9"": true, ""10"": true, ""11"": true, ""12"": true, ""13"": true, ""14"": true, ""15"": true, ""16"": true, ""17"": true, ""18"": true, ""19"": true, ""20"": true, ""21"": true, ""22"": true}, ""is_important"": false, ""lift_early_arrival"": true, ""source_frame_id"": ""94f36aea9d384b58921e01457aed0bec"", ""start_ms"": 2945, ""_drag_original_start_ms"": 145, ""playback_cycle_end"": true}]"
+찐후진하고 제자리우회전(공),motion,,completion,metadata,"{""position_tolerance_deg"": 2.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}","{""position_tolerance_deg"": 5.0, ""settle_duration_ms"": 80, ""settle_timeout_ms"": 3000}"
+찐후진하고 제자리우회전(공),0,0,angles.4,policy_angles,11.25,18.0
+찐후진하고 제자리우회전(공),0,0,angles.5,policy_angles,-13.271484375,-18.0
+찐후진하고 제자리우회전(공),1,1,angles.4,policy_angles,9.66796875,18.0
+찐후진하고 제자리우회전(공),1,1,angles.5,policy_angles,-8.876953125,-18.0
+찐후진하고 제자리우회전(공),2,2,angles.4,policy_angles,9.931640625,18.0
+찐후진하고 제자리우회전(공),2,2,angles.5,policy_angles,-9.228515625,-18.0
+찐후진하고 제자리우회전(공),2,2,angles.15,other_angles,-3.548828125,-4.0
+찐후진하고 제자리우회전(공),2,2,angles.18,other_angles,19.0,18.80859375
+찐후진하고 제자리우회전(공),3,3,angles.4,policy_angles,9.66796875,18.0
+찐후진하고 제자리우회전(공),3,3,angles.5,policy_angles,-8.876953125,-18.0
+찐후진하고 제자리우회전(공),4,4,angles.4,policy_angles,9.931640625,18.0
+찐후진하고 제자리우회전(공),4,4,angles.5,policy_angles,-9.228515625,-18.0
+찐후진하고 제자리우회전(공),4,4,angles.15,other_angles,-3.548828125,-4.0
+찐후진하고 제자리우회전(공),4,4,angles.18,other_angles,19.0,18.80859375
+찐후진하고 제자리우회전(공),5,5,angles.4,policy_angles,9.66796875,18.0
+찐후진하고 제자리우회전(공),5,5,angles.5,policy_angles,-8.876953125,-18.0
+찐후진하고 제자리우회전(공),6,6,angles.4,policy_angles,9.931640625,18.0
+찐후진하고 제자리우회전(공),6,6,angles.5,policy_angles,-9.228515625,-18.0
+찐후진하고 제자리우회전(공),6,6,angles.15,other_angles,-3.548828125,-4.0
+찐후진하고 제자리우회전(공),6,6,angles.18,other_angles,19.0,18.80859375
+찐후진하고 제자리우회전(공),7,7,angles.4,policy_angles,9.66796875,18.0
+찐후진하고 제자리우회전(공),7,7,angles.5,policy_angles,-8.876953125,-18.0
+찐후진하고 제자리우회전(공),8,8,angles.4,policy_angles,9.931640625,18.0
+찐후진하고 제자리우회전(공),8,8,angles.5,policy_angles,-9.228515625,-18.0
+찐후진하고 제자리우회전(공),8,8,angles.15,other_angles,-3.548828125,-4.0
+찐후진하고 제자리우회전(공),8,8,angles.18,other_angles,19.0,18.80859375
+찐후진하고 제자리우회전(공),9,9,angles.4,policy_angles,9.66796875,18.0
+찐후진하고 제자리우회전(공),9,9,angles.5,policy_angles,-8.876953125,-18.0
+찐후진하고 제자리우회전(공),10,10,angles.4,policy_angles,9.931640625,18.0
+찐후진하고 제자리우회전(공),10,10,angles.5,policy_angles,-9.228515625,-18.0
+찐후진하고 제자리우회전(공),10,10,angles.15,other_angles,-3.548828125,-4.0
+찐후진하고 제자리우회전(공),10,10,angles.18,other_angles,19.0,18.80859375
+찐후진하고 제자리우회전(공),11,11,angles.4,policy_angles,9.66796875,18.0
+찐후진하고 제자리우회전(공),11,11,angles.5,policy_angles,-8.876953125,-18.0
+찐후진하고 제자리우회전(공),12,12,angles.4,policy_angles,9.931640625,18.0
+찐후진하고 제자리우회전(공),12,12,angles.5,policy_angles,-9.228515625,-18.0
+찐후진하고 제자리우회전(공),12,12,angles.15,other_angles,-3.548828125,-4.0
+찐후진하고 제자리우회전(공),12,12,angles.18,other_angles,19.0,18.80859375
+찐후진하고 제자리우회전(공),13,13,angles.4,policy_angles,9.66796875,18.0
+찐후진하고 제자리우회전(공),13,13,angles.5,policy_angles,-8.876953125,-18.0
+찐후진하고 제자리우회전(공),14,14,angles.4,policy_angles,9.931640625,18.0
+찐후진하고 제자리우회전(공),14,14,angles.5,policy_angles,-9.228515625,-18.0
+찐후진하고 제자리우회전(공),14,14,angles.15,other_angles,-3.548828125,-4.0
+찐후진하고 제자리우회전(공),14,14,angles.18,other_angles,19.0,18.80859375
+찐후진하고 제자리우회전(공),15,15,angles.4,policy_angles,9.66796875,18.0
+찐후진하고 제자리우회전(공),15,15,angles.5,policy_angles,-8.876953125,-18.0

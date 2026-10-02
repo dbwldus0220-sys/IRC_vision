@@ -2310,7 +2310,6 @@ def test_line_motion_capture_table_matches_deployed_timelines():
         "STRAIGHT_2": (1.644, 10),
         "STRAIGHT_3": (2.467, 10),
         "STRAIGHT_4": (3.289, 15),
-        "STRAIGHT_5": (4.111, 20),
         "LEFT": (7.365, 30),
         "RIGHT": (7.105, 30),
     }

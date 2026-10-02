@@ -19,6 +19,14 @@ struct RobotMotionRuntimeConfig
   std::int64_t baud_rate{0};
   std::vector<std::int64_t> motor_ids;
   bool explicit_torque_approval{false};
+  bool enable_head_override{true};
+  bool enable_shoulder_override{true};
+  std::string policy_reference_json_path;
+  std::int64_t queued_transition_hold_ms{0};
+  std::int64_t expected_tick_ms{5};
+  bool motion_trace_enabled{false};
+  bool motion_trace_goals{false};
+  std::string motion_trace_path;
 };
 
 struct RobotMotionRuntimeConfigResult

@@ -1,0 +1,150 @@
+--- a/robot_motion_player.hpp
++++ b/robot_motion_player.hpp
+@@ -170,7 +170,7 @@
+     void fail(MotionError error, std::string message) noexcept;
+     JointAngles correctedFrameAngles(const MotionFrame& frame) const;
+     JointAngles accumulatedPoseBefore(const MotionFrame& frame) const;
+-    JointAngles sampledPose(double timeline_ms) const;
++    JointAngles sampledPose(double timeline_ms, bool cycle_end = false) const;
+     const MotionFrame& referenceFrame(const MotionFrame& frame) const;
+     void validatePolicyReference(const MotionPattern& pattern,
+                                  const std::string& name) const;
+@@ -193,6 +193,7 @@
+     std::size_t next_frame_{0};
+     int repeat_{1};
+     Clock::time_point started_at_{};
++    std::int64_t timeline_start_ms_{0};
+     Clock::time_point settling_started_at_{};
+     Clock::time_point within_tolerance_since_{};
+     Clock::time_point last_position_check_at_{};
+@@ -207,7 +208,7 @@
+     bool initialized_{false};
+     bool trajectory_initialized_{false};
+     bool within_tolerance_{false};
+-    bool position_tolerance_enabled_{true};
++    bool position_tolerance_enabled_{false};
+     NowProvider now_{Clock::now};
+     bool cycle_final_sent_{false};
+     Clock::time_point final_sent_at_{};
+--- a/robot_motion_player.cpp
++++ b/robot_motion_player.cpp
+@@ -296,6 +296,7 @@
+     last_position_check_at_ = Clock::time_point{};
+     within_tolerance_ = false;
+     started_at_ = now;
++    timeline_start_ms_ = 0;
+     status_ = MotionStatus::Running;
+     diagnostics_ = std::make_shared<PlaybackDiagnostics>();
+     diagnostics_->motion = current_motion_;
+@@ -546,31 +547,23 @@
+     const double real_ms =
+         std::chrono::duration<double, std::milli>(now - started_at_).count();
+     // GUI evaluates an integer timeline after applying playback speed.
+-    double timeline_ms = std::floor(real_ms * pattern_->playbackSpeed() + 1e-7);
++    const double timeline_ms = std::floor(
++        timeline_start_ms_ + real_ms * pattern_->playbackSpeed() + 1e-7);
+ 
+     tick_.timeline_ms = timeline_ms;
+     // A final command is a separate control callback, even with zero hold.
+     if (cycle_final_sent_) {
+-        if (repeat_ < pattern_->repeatCount()) {
+-            ++repeat_;
+-            trajectory_start_deg_ = final_goal_deg_;
+-            next_frame_ = 0;
+-            cycle_final_sent_ = false;
+-            started_at_ = now;
+-            timeline_ms = 0.0;
+-        } else {
+-            if (hasQueuedMotion()) {
+-                const auto hold_ms = std::chrono::duration<double, std::milli>(
+-                    now - final_sent_at_).count();
+-                if (hold_ms >= queued_transition_hold_ms_)
+-                    activateQueuedMotion(now);
+-                return status_;
+-            }
+-            status_ = MotionStatus::Settling;
+-            settling_started_at_ = now;
+-            last_position_check_at_ = Clock::time_point{};
+-            return updateSettling(now);
+-        }
++        if (hasQueuedMotion()) {
++            const auto hold_ms = std::chrono::duration<double, std::milli>(
++                now - final_sent_at_).count();
++            if (hold_ms >= queued_transition_hold_ms_)
++                activateQueuedMotion(now);
++            return status_;
++        }
++        status_ = MotionStatus::Settling;
++        settling_started_at_ = now;
++        last_position_check_at_ = Clock::time_point{};
++        return updateSettling(now);
+     }
+ 
+     tick_.timeline_ms = timeline_ms;
+@@ -584,15 +577,42 @@
+             tick_.frame = static_cast<int>(next_frame_);
+             tick_.final_goal = true;
+             tick_.progress = 1.0;
+-            if (!sendDirectGoal(correctedFrameAngles(frame))) {
++            const auto frame_end_ms = frame.start_ms + frame.time_ms;
++            // Merge the PC's final-frame write and boundary sample into one
++            // packet, including joints appearing only in the adjacent frame.
++            JointAngles boundary = correctedFrameAngles(frame);
++            mergeAngles(boundary, sampledPose(frame_end_ms, frame.playback_cycle_end));
++            if (!sendDirectGoal(boundary)) {
+                 fail(MotionError::FrameSendFailed,
+                      "final Goal SyncWrite failed: " + std::string(hardware_->lastError()));
+                 return status_;
+             }
+             ++next_frame_;
+             if (next_frame_ == frames.size()) {
+-                cycle_final_sent_ = true;
+-                final_sent_at_ = now_();
++                if (repeat_ < pattern_->repeatCount()) {
++                    ++repeat_;
++                    trajectory_start_deg_ = final_goal_deg_;
++                    next_frame_ = 0;
++                    timeline_start_ms_ = 0;
++                    // Read the clock after the successful final transmission.
++                    // The next callback samples elapsed time from this anchor.
++                    started_at_ = now_();
++                } else {
++                    cycle_final_sent_ = true;
++                    final_sent_at_ = now_();
++                    if (!hasQueuedMotion() && !position_tolerance_enabled_) {
++                        status_ = MotionStatus::Settling;
++                        settling_started_at_ = final_sent_at_;
++                        return updateSettling(final_sent_at_);
++                    }
++                }
++            } else if (frame.playback_cycle_end) {
++                // Internal cycle boundaries discard lateness; ordinary frame
++                // boundaries leave the clock running. Final flags use the
++                // whole-motion path above, never a second clock reset.
++                trajectory_start_deg_ = final_goal_deg_;
++                timeline_start_ms_ = frame_end_ms;
++                started_at_ = now_();
+             }
+             return status_;
+         }
+@@ -962,16 +982,18 @@
+         ? kLiftTargetArrivalRatio : 1.0;
+     const double elapsed_ms = std::clamp(
+         timeline_ms - frame.start_ms, 0.0, static_cast<double>(duration_ms));
+-    const double u = std::min(1.0, elapsed_ms / (duration_ms * arrival_ratio));
++    const double trajectory_ms = std::max(1.0, duration_ms * arrival_ratio);
++    const double u = std::min(1.0, elapsed_ms / trajectory_ms);
+     return 0.5 - 0.5 * std::cos(std::numbers::pi * u);
+ }
+ 
+-JointAngles RobotMotionPlayer::sampledPose(double timeline_ms) const {
++JointAngles RobotMotionPlayer::sampledPose(double timeline_ms, bool cycle_end) const {
+     const auto& frames = pattern_->frames();
+     const MotionFrame* active = nullptr;
+     for (const auto& frame : frames) {
+         const auto frame_end_ms = frame.start_ms + frame.time_ms;
+         if ((frame.start_ms <= timeline_ms && timeline_ms < frame_end_ms)
++            || (cycle_end && timeline_ms == frame_end_ms)
+             || (timeline_ms == pattern_->durationMs()
+                 && frame_end_ms == pattern_->durationMs())) {
+             active = &frame;

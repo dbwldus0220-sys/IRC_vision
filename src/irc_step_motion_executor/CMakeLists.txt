@@ -44,6 +44,11 @@ if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK)
     message(FATAL_ERROR
       "External SDK must create a CMake target named robot_control")
   endif()
+  if(NOT EXISTS "${ROBOT_MOTION_SDK_DIR}/fake_robot_motion_sdk_test_support.hpp"
+      AND NOT EXISTS "${ROBOT_MOTION_SDK_DIR}/playback_diagnostics.hpp")
+    message(FATAL_ERROR
+      "External SDK needs tools/apply_common_playback_sdk.py before this build")
+  endif()
 
   add_library(irc_step_motion_sdk_compile_probe SHARED
     src/sdk_compile_probe.cpp)
@@ -205,6 +210,7 @@ install(DIRECTORY include/ DESTINATION include)
 install(DIRECTORY config launch DESTINATION share/${PROJECT_NAME})
 install(FILES
   "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/robot_motions_runtime.json"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/20261002_common_playback/robot_motions_pc.json"
   DESTINATION share/${PROJECT_NAME}/config)
 install(PROGRAMS
   scripts/manual_motion_request.py
@@ -214,6 +220,20 @@ install(PROGRAMS
 if(BUILD_TESTING)
   find_package(Python3 REQUIRED COMPONENTS Interpreter)
   find_package(ament_cmake_gtest REQUIRED)
+  if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK AND
+      EXISTS "${ROBOT_MOTION_SDK_DIR}/playback_diagnostics.hpp")
+    add_executable(test_common_playback test/test_common_playback.cpp)
+    target_compile_features(test_common_playback PRIVATE cxx_std_20)
+    target_compile_options(test_common_playback PRIVATE -UNDEBUG)
+    # Deliberately excludes robot_control and all serial implementations.
+    target_link_libraries(test_common_playback PRIVATE motion_player_core)
+    add_test(NAME test_common_playback
+      COMMAND ${Python3_EXECUTABLE}
+        "${CMAKE_CURRENT_SOURCE_DIR}/test/run_common_playback.py"
+        $<TARGET_FILE:test_common_playback>
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/robot_motions_runtime.json"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/20261002_common_playback/robot_motions_pc.json")
+  endif()
   ament_add_gtest(test_catalog_only_core test/test_catalog_only_core.cpp)
   if(TARGET test_catalog_only_core)
     target_link_libraries(test_catalog_only_core catalog_only_core)
@@ -233,6 +253,13 @@ if(BUILD_TESTING)
     target_include_directories(test_sdk_executor_core PRIVATE test)
     target_link_libraries(test_sdk_executor_core sdk_executor_core)
     target_compile_definitions(test_sdk_executor_core PRIVATE
+      TEST_ALIAS_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/config/motion_aliases.yaml")
+  endif()
+  ament_add_gtest(test_queue_control_tick test/test_queue_control_tick.cpp)
+  if(TARGET test_queue_control_tick)
+    target_include_directories(test_queue_control_tick PRIVATE test)
+    target_link_libraries(test_queue_control_tick sdk_executor_core)
+    target_compile_definitions(test_queue_control_tick PRIVATE
       TEST_ALIAS_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/config/motion_aliases.yaml")
   endif()
   if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK)
@@ -323,6 +350,9 @@ if(BUILD_TESTING)
     test_startup_pose_catalog test/test_startup_pose_catalog.cpp)
   if(TARGET test_startup_pose_catalog)
     target_link_libraries(test_startup_pose_catalog sdk_executor_driver)
+    target_compile_definitions(test_startup_pose_catalog PRIVATE
+      TEST_RUNTIME_CATALOG="${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/robot_motions_runtime.json"
+      TEST_PC_CATALOG="${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/20261002_common_playback/robot_motions_pc.json")
   endif()
 
   find_package(launch_testing_ament_cmake REQUIRED)

@@ -186,6 +186,11 @@ RobotMotionRuntimeConfigResult validate_robot_motion_runtime_config(
 RobotMotionRuntimeConfigResult validate_robot_hardware_initialization_policy(
   const RobotMotionRuntimeConfig & config)
 {
+  if (config.queued_transition_hold_ms < 0 || config.expected_tick_ms <= 0 ||
+    (config.motion_trace_enabled && config.motion_trace_path.empty()))
+  {
+    return {config, "INVALID_PLAYBACK_OPTIONS", "invalid hold, tick or trace settings"};
+  }
   return validate_robot_hardware_policy(config, true, true);
 }
 

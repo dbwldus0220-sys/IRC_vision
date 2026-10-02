@@ -1,0 +1,146 @@
+{
+  "artifacts/robot_motions_runtime.json": {
+    "real_path": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/robot_motions_runtime.json",
+    "sha256": "f160ebc8f256f27c9ab699255398bfa53503f11d2424863e0fcbbe8df76c0ecb",
+    "motions": 82,
+    "frames": 293
+  },
+  "install/irc_step_motion_executor/share/irc_step_motion_executor/config/robot_motions_runtime.json": {
+    "real_path": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/robot_motions_runtime.json",
+    "sha256": "f160ebc8f256f27c9ab699255398bfa53503f11d2424863e0fcbbe8df76c0ecb",
+    "motions": 82,
+    "frames": 293
+  },
+  "artifacts/20261002_common_playback/robot_motions_pc.json": {
+    "real_path": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/20261002_common_playback/robot_motions_pc.json",
+    "sha256": "b4d228b865cef7f582bdb67f1fe5d20be4c82178a2553810a30fba2e48fd811e",
+    "motions": 82,
+    "frames": 286
+  },
+  "install/irc_step_motion_executor/share/irc_step_motion_executor/config/robot_motions_pc.json": {
+    "real_path": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/20261002_common_playback/robot_motions_pc.json",
+    "sha256": "b4d228b865cef7f582bdb67f1fe5d20be4c82178a2553810a30fba2e48fd811e",
+    "motions": 82,
+    "frames": 286
+  },
+  "build/irc_step_motion_executor/sdk_motion_executor": {
+    "real_path": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/sdk_motion_executor",
+    "sha256": "7b1e44916ff58614b4dcfe159acc49f1f0195f65f8ff585bd320313249b1db4b",
+    "mtime": 1790919955.9005964
+  },
+  "install/irc_step_motion_executor/lib/irc_step_motion_executor/sdk_motion_executor": {
+    "real_path": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/sdk_motion_executor",
+    "sha256": "7b1e44916ff58614b4dcfe159acc49f1f0195f65f8ff585bd320313249b1db4b",
+    "mtime": 1790919955.9005964
+  },
+  "branch": "agent/sdk-gui-frame-gates-20260930",
+  "head": "0e6b0b486a00f751401dd762f80251555a7147f4",
+  "catalog_choice": "Preserve production 82 motions / 293 frames, explicitly selected by user",
+  "sdk_patch_verified": true,
+  "tests": {
+    "ctest_suites_passed": 20,
+    "ctest_suites_failed": [],
+    "ctest_final_results": {
+      "test_common_playback": "passed",
+      "test_catalog_only_core": "passed",
+      "test_motion_json_catalog": "passed",
+      "test_sdk_executor_core": "passed",
+      "test_queue_control_tick": "passed",
+      "test_robot_motion_player_backend": "passed",
+      "test_simulated_motion_backend": "passed",
+      "test_robot_motion_runtime_config": "passed",
+      "test_robot_motion_parameter_types": "passed",
+      "test_motion_backend_factory": "passed",
+      "test_sdk_executor_driver": "passed",
+      "test_startup_pose_gate": "passed",
+      "test_startup_pose_catalog": "passed",
+      "sdk_cmake_empty_path": "passed",
+      "sdk_cmake_nonexistent_path": "passed",
+      "sdk_cmake_missing_required_files": "passed",
+      "sdk_cmake_missing_robot_control_target": "passed",
+      "sdk_cmake_fake_sdk_build": "passed",
+      "sdk_cmake_disabled_build_has_no_hardware_symbols": "passed",
+      "test_validate_motion_catalog": "passed"
+    },
+    "ctest_method": "19/20 passed initially; stale hurdle name expectation updated and failed suite rerun successfully",
+    "launch_tests_excluded": 5,
+    "python_motion_control_and_planner_passed": 1226,
+    "python_catalog_contract_passed": 3,
+    "python_import_policy_passed": 5,
+    "python_bridge_alias_contract": "PASSED; no missing action or motion-constant aliases",
+    "python_phase_flow_passed": 193,
+    "python_phase_flow_failed_preexisting": 21,
+    "python_phase_flow_new_failures": [],
+    "python_phase_flow_baseline": "phase_flow_baseline.json",
+    "common_playback_final_run": "PASSED, including recovery using ordinary standalone PP read",
+    "queue_control_tick_final_run": "PASSED",
+    "hardware_executed": false
+  },
+  "build_packages": [
+    "irc_step_motion_executor",
+    "mission_control",
+    "step"
+  ],
+  "initial_binary_sha256": "b92655ff81764a13386a15ae25636f95ce0bf590b0305ece45c91d79b3404363",
+  "initial_binary_newer_than_node_source": true,
+  "pc_source_url": "https://raw.githubusercontent.com/geonwoo0407/sdk_gui/4bfdddc86ad34278b22b4f2f8e54edc5fd998192/robot_motions.json",
+  "modified_sdk_files": [
+    "CMakeLists.txt",
+    "motion_pattern.hpp",
+    "motion_pattern.cpp",
+    "robot_motion_player.hpp",
+    "robot_motion_player.cpp",
+    "playback_diagnostics.hpp"
+  ],
+  "git_diff_stat_tracked": " src/irc_step_motion_executor/CMakeLists.txt        |  30 +++\n src/irc_step_motion_executor/README.md             | 258 +++++++++++++++++++++\n .../config/motion_aliases.yaml                     |   3 +\n .../robot_motion_runtime_config.hpp                |   8 +\n .../startup_pose_catalog.hpp                       |   6 +\n .../production_robot_motion_runtime_factory.cpp    |  24 ++\n .../src/robot_motion_runtime_config.cpp            |   5 +\n .../src/sdk_executor_core.cpp                      |  10 +-\n .../src/sdk_executor_node.cpp                      |  46 +++-\n .../src/startup_pose_catalog.cpp                   |  26 +++\n .../test/test_catalog_only_core.cpp                |  54 ++---\n .../test/test_sdk_executor_core.cpp                |  10 +-\n .../test/test_sdk_executor_driver.cpp              |   2 +-\n .../test/test_startup_pose_catalog.cpp             |  25 ++\n src/mission_control/README.md                      |  21 ++\n src/mission_control/launch/full_system.launch.py   |  13 ++\n .../launch/full_system_robot.launch.py             |  13 ++\n .../mission_control/motion_command_bridge_node.py  | 113 +++++++--\n .../mission_control/motion_command_gate.py         |   1 -\n .../mission_control/motion_decision_node.py        |   1 -\n .../test/test_motion_command_bridge.py             | 104 ++++++++-\n .../test/test_motion_command_gate.py               |   1 -\n .../test/test_motion_decision_node.py              |   1 -\n src/step/step/approach_distance.py                 |   9 +-\n src/step/test/test_approach_distance.py            |   4 +-\n 25 files changed, 694 insertions(+), 94 deletions(-)\n",
+  "git_status_short": " M src/irc_step_motion_executor/CMakeLists.txt\n M src/irc_step_motion_executor/README.md\n M src/irc_step_motion_executor/config/motion_aliases.yaml\n M src/irc_step_motion_executor/include/irc_step_motion_executor/robot_motion_runtime_config.hpp\n M src/irc_step_motion_executor/include/irc_step_motion_executor/startup_pose_catalog.hpp\n M src/irc_step_motion_executor/src/production_robot_motion_runtime_factory.cpp\n M src/irc_step_motion_executor/src/robot_motion_runtime_config.cpp\n M src/irc_step_motion_executor/src/sdk_executor_core.cpp\n M src/irc_step_motion_executor/src/sdk_executor_node.cpp\n M src/irc_step_motion_executor/src/startup_pose_catalog.cpp\n M src/irc_step_motion_executor/test/test_catalog_only_core.cpp\n M src/irc_step_motion_executor/test/test_sdk_executor_core.cpp\n M src/irc_step_motion_executor/test/test_sdk_executor_driver.cpp\n M src/irc_step_motion_executor/test/test_startup_pose_catalog.cpp\n M src/mission_control/README.md\n M src/mission_control/launch/full_system.launch.py\n M src/mission_control/launch/full_system_robot.launch.py\n M src/mission_control/mission_control/motion_command_bridge_node.py\n M src/mission_control/mission_control/motion_command_gate.py\n M src/mission_control/mission_control/motion_decision_node.py\n M src/mission_control/test/test_motion_command_bridge.py\n M src/mission_control/test/test_motion_command_gate.py\n M src/mission_control/test/test_motion_decision_node.py\n M src/step/step/approach_distance.py\n M src/step/test/test_approach_distance.py\n?? artifacts/20261002_common_playback/\n?? src/irc_step_motion_executor/test/run_common_playback.py\n?? src/irc_step_motion_executor/test/test_common_playback.cpp\n?? src/irc_step_motion_executor/test/test_queue_control_tick.cpp\n?? tools/apply_common_playback_sdk.py\n?? tools/audit_pc_motion_catalog.py\n?? tools/sdk_common_playback.patch\n?? tools/sdk_common_playback_manifest.json\n",
+  "untracked_files": [
+    "artifacts/20261002_common_playback/baseline_test_failures.json",
+    "artifacts/20261002_common_playback/catalog_diff.csv",
+    "artifacts/20261002_common_playback/catalog_diff.json",
+    "artifacts/20261002_common_playback/phase_flow_baseline.json",
+    "artifacts/20261002_common_playback/robot_motions_pc.json",
+    "artifacts/20261002_common_playback/robot_motions_runtime.before.json",
+    "artifacts/20261002_common_playback/verification.json",
+    "src/irc_step_motion_executor/test/run_common_playback.py",
+    "src/irc_step_motion_executor/test/test_common_playback.cpp",
+    "src/irc_step_motion_executor/test/test_queue_control_tick.cpp",
+    "tools/apply_common_playback_sdk.py",
+    "tools/audit_pc_motion_catalog.py",
+    "tools/sdk_common_playback.patch",
+    "tools/sdk_common_playback_manifest.json"
+  ],
+  "src/irc_step_motion_executor/config/motion_aliases.yaml": {
+    "real_path": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/config/motion_aliases.yaml",
+    "sha256": "feefeb94f8eaa3d67cd2d0f5e45feb511eb6c789d37fbb6307b4ab1823491c9f"
+  },
+  "install/irc_step_motion_executor/share/irc_step_motion_executor/config/motion_aliases.yaml": {
+    "real_path": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/config/motion_aliases.yaml",
+    "sha256": "feefeb94f8eaa3d67cd2d0f5e45feb511eb6c789d37fbb6307b4ab1823491c9f"
+  },
+  "build_result": "3 packages finished; no launch or hardware execution",
+  "alias_resolution": {
+    "alias_count": 96,
+    "missing_runtime_targets": {},
+    "missing_bridge_actions": {},
+    "missing_bridge_motion_constants": {},
+    "removed_by_user": [
+      "line_forward_10",
+      "STRAIGHT_5"
+    ],
+    "restored": {
+      "line_forward_8": "찐찐전진45(8회)",
+      "forward": "찐찐전진45(8회)",
+      "goal_camera_90_forward_2": "찐찐전진90(2회)"
+    }
+  },
+  "pickup_fault_policy": {
+    "consecutive_failure_limit": 2,
+    "additional_recovery_wait": false,
+    "sdk_failure_result_preserved": true,
+    "status_diagnostics_field": "motor_failures",
+    "new_auto_latch": false,
+    "failed_grasp_check_opens_verification": false,
+    "policy_source": "current user discussion; common SDK playback follows attached latest-PC prompt"
+  }
+}

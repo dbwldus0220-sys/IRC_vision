@@ -54,11 +54,13 @@ class MotionCommandBridgeNode(Node):
     PICKUP_FINE_PREPARE_MOTION_ID = "pickup_fine_prepare"
     PICKUP_FINE_PRE_DWELL_MARKER = "__PICKUP_FINE_PRE_DWELL__"
     PICKUP_FINE_PRE_DWELL_SEC = 1.0
-    PICKUP_CRAB_PREPARE_MOTION_ID = "pickup_crab_prepare"
     PICKUP_FINE_RIGHT_CRAB_PREPARE_MOTION_ID = "pickup_fine_to_crab_right_0"
     PICKUP_DWELL_SEC = 1.0
     PICKUP_TURN_DWELL_SEC = 1.0
     PICKUP_GRASP_DWELL_SEC = 3.0
+    # One skipped fault may recover at the next normal SDK start; a second
+    # consecutive failed motion must not consume the rest of the sequence.
+    PICKUP_MOTOR_FAILURE_LIMIT = 2
     HURDLE_PRE_GO_DWELL_MARKER = "__HURDLE_PRE_GO_DWELL__"
     HURDLE_PRE_GO_DWELL_SEC = 1.0
     PICKUP_INITIAL_ALIGN_ACTIONS = frozenset(
@@ -175,7 +177,6 @@ class MotionCommandBridgeNode(Node):
         "STRAIGHT_2": "line_forward_4",
         "STRAIGHT_3": "line_forward_6",
         "STRAIGHT_4": "line_forward_8",
-        "STRAIGHT_5": "line_forward_10",
         "APPROACH": "forward",
         "LEFT": "line_recovery_left_4",
         "RIGHT": "line_recovery_right_4",
@@ -330,6 +331,9 @@ class MotionCommandBridgeNode(Node):
         self.pickup_fixed_sequence_started = False
         self.pickup_fine_positioning_complete = False
         self.last_pickup_motion_id = None
+        self.pickup_consecutive_motor_failures = 0
+        self.pickup_motor_failures: list[dict[str, Any]] = []
+        self.pickup_last_stage_succeeded = True
         self.pending_pickup_crab_motion_id = None
         self.pickup_positioning_dwell_motion_id: str | None = None
         self.queued_command_id: int | None = None
@@ -447,6 +451,7 @@ class MotionCommandBridgeNode(Node):
         message: str = "",
         completed_motion_id: str | None = None,
         verification_window_complete: bool | None = None,
+        motor_failures: list[dict[str, Any]] | None = None,
     ) -> None:
         """Publish normalized status while preserving executor fields."""
         payload = {
@@ -467,6 +472,15 @@ class MotionCommandBridgeNode(Node):
             payload["verification_window_complete"] = (
                 verification_window_complete
             )
+        if (
+            motor_failures is None
+            and action == "PICKUP_NOW"
+            and command_id == self.active_command_id
+        ):
+            motor_failures = self.pickup_motor_failures
+        if motor_failures:
+            # Sequence progress and the executor's actual result are separate.
+            payload["motor_failures"] = motor_failures
         output = String()
         output.data = json.dumps(
             payload,
@@ -1370,6 +1384,9 @@ class MotionCommandBridgeNode(Node):
             self.pickup_fixed_sequence_started = False
             self.pickup_fine_positioning_complete = False
             self.last_pickup_motion_id = None
+            self.pickup_consecutive_motor_failures = 0
+            self.pickup_motor_failures = []
+            self.pickup_last_stage_succeeded = True
             self.pending_pickup_crab_motion_id = None
             self.pickup_positioning_dwell_motion_id = None
             if starts_with_initial_align_checkpoint:
@@ -1467,8 +1484,11 @@ class MotionCommandBridgeNode(Node):
                     message="pickup sequence non-blocking dwell active",
                     completed_motion_id=(
                         self.pickup_positioning_dwell_motion_id
+                        if self.pickup_last_stage_succeeded else None
                     ),
-                    verification_window_complete=False if grasp_check else None,
+                    verification_window_complete=(
+                        False if grasp_check and self.pickup_last_stage_succeeded else None
+                    ),
                 )
             self.get_logger().info(
                 f"Atomic sequence dwell started: {dwell_sec:.1f}s"
@@ -1545,6 +1565,7 @@ class MotionCommandBridgeNode(Node):
         if (
             self.active_action == "PICKUP_NOW"
             and completed_motion_id == self.PICKUP_GRASP_CHECK_MOTION_ID
+            and self.pickup_last_stage_succeeded
         ):
             self.publish_motion_status(
                 status="RUNNING",
@@ -1584,6 +1605,7 @@ class MotionCommandBridgeNode(Node):
         request_id = self.active_request_id
         motion_id = self.active_motion_id
         action = self.active_action
+        motor_failures = self.pickup_motor_failures
         self._clear_active_request()
         self._promote_queued_request()
         self.publish_motion_status(
@@ -1594,6 +1616,7 @@ class MotionCommandBridgeNode(Node):
             motion_id=motion_id,
             action=action,
             message="atomic sequence completed after non-blocking dwell",
+            motor_failures=motor_failures,
         )
 
     def _valid_executor_status(self, payload: dict[str, Any]) -> bool:
@@ -1642,6 +1665,9 @@ class MotionCommandBridgeNode(Node):
         self.pickup_fixed_sequence_started = False
         self.pickup_fine_positioning_complete = False
         self.last_pickup_motion_id = None
+        self.pickup_consecutive_motor_failures = 0
+        self.pickup_motor_failures = []
+        self.pickup_last_stage_succeeded = True
         self.pending_pickup_crab_motion_id = None
         self.pickup_positioning_dwell_motion_id = None
 
@@ -1672,6 +1698,9 @@ class MotionCommandBridgeNode(Node):
         self.pickup_fixed_sequence_started = False
         self.pickup_fine_positioning_complete = False
         self.last_pickup_motion_id = None
+        self.pickup_consecutive_motor_failures = 0
+        self.pickup_motor_failures = []
+        self.pickup_last_stage_succeeded = True
         self.pending_pickup_crab_motion_id = None
         self.pickup_positioning_dwell_motion_id = None
         queued_request_deferred = self.queued_request_deferred
@@ -1723,12 +1752,20 @@ class MotionCommandBridgeNode(Node):
             return
 
         action = self.active_action if is_active else self.queued_action
+        if (
+            is_active and action == "PICKUP_NOW"
+            and self.active_dwell_until is not None
+        ):
+            # A duplicate terminal status is not another failed motion.
+            return
         if is_active and self.pending_turn_request is not None:
             if payload["motion_id"] != self.turn_prepare_motion_id:
                 return
             pending = self.pending_turn_request
             if payload["status"] == "SUCCEEDED":
                 self.last_physical_motion_id = self.turn_prepare_motion_id
+                if action == "PICKUP_NOW":
+                    self.pickup_consecutive_motor_failures = 0
                 self.pending_turn_request = None
                 self.turn_prepare_motion_id = None
                 self._publish_executor_request(**pending, prepare_pickup_fine=False)
@@ -1755,10 +1792,33 @@ class MotionCommandBridgeNode(Node):
             return
         if (
             is_active
+            and action in self.ATOMIC_SEQUENCE_ACTIONS
+            and payload["motion_id"] != self.active_motion_id
+        ):
+            self.get_logger().warning(
+                "Executor status ignored: atomic motion_id mismatch"
+            )
+            return
+        if is_active and action == "PICKUP_NOW":
+            if payload["status"] == "SUCCEEDED":
+                self.pickup_consecutive_motor_failures = 0
+                self.pickup_last_stage_succeeded = True
+            elif payload["status"] == "FAILED":
+                self.pickup_last_stage_succeeded = False
+                self.last_pickup_motion_id = None
+                self.pickup_consecutive_motor_failures += 1
+                self.pickup_motor_failures.append({
+                    "motion_id": payload["motion_id"],
+                    "status": "FAILED",
+                    "error_code": payload["error_code"],
+                    "message": payload["message"],
+                })
+        continue_after_motor_fault = False
+        if (
+            is_active
             and action == "PICKUP_NOW"
             and payload["motion_id"] != "post_ball_camera_90"
             and payload["motion_id"] != self.PICKUP_FINE_PREPARE_MOTION_ID
-            and payload["motion_id"] != self.PICKUP_CRAB_PREPARE_MOTION_ID
             and payload["motion_id"] != self.PICKUP_FINE_RIGHT_CRAB_PREPARE_MOTION_ID
             and not (
                 self.pickup_fixed_sequence_started
@@ -1767,22 +1827,23 @@ class MotionCommandBridgeNode(Node):
             and payload["status"] == "FAILED"
             and payload["error_code"] in RECOVERABLE_MOTOR_ERROR_CODES
         ):
-            self.get_logger().warning(
-                "Recoverable motor fault during atomic sequence; "
-                "continuing with the next stage: "
-                f"motion_id={payload['motion_id']}, "
-                f"error_code={payload['error_code']}"
+            continue_after_motor_fault = (
+                self.pickup_consecutive_motor_failures
+                < MotionCommandBridgeNode.PICKUP_MOTOR_FAILURE_LIMIT
             )
-            payload["status"] = "SUCCEEDED"
-        if (
-            is_active
-            and action in self.ATOMIC_SEQUENCE_ACTIONS
-            and payload["motion_id"] != self.active_motion_id
-        ):
+            if not continue_after_motor_fault:
+                payload["message"] = (
+                    "consecutive motor failures; pickup sequence stopped: "
+                    + payload["message"]
+                )
             self.get_logger().warning(
-                "Executor status ignored: atomic motion_id mismatch"
+                f"Pickup motor fault: motion_id={payload['motion_id']}, "
+                f"error_code={payload['error_code']}, "
+                f"continue_sequence={continue_after_motor_fault}"
             )
-            return
+        stage_can_advance = (
+            payload["status"] == "SUCCEEDED" or continue_after_motor_fault
+        )
         if is_active and action == "GO" and payload["status"] == "SUCCEEDED":
             if payload["motion_id"] == "pickup_fine_forward_0":
                 self.hurdle_depth_fine_completed = True
@@ -1800,10 +1861,7 @@ class MotionCommandBridgeNode(Node):
         ):
             self.last_pickup_motion_id = payload["motion_id"]
             if (
-                payload["motion_id"] in {
-                    self.PICKUP_CRAB_PREPARE_MOTION_ID,
-                    self.PICKUP_FINE_RIGHT_CRAB_PREPARE_MOTION_ID,
-                }
+                payload["motion_id"] == self.PICKUP_FINE_RIGHT_CRAB_PREPARE_MOTION_ID
                 and self.pending_pickup_crab_motion_id is not None
             ):
                 self.active_motion_id = self.pending_pickup_crab_motion_id
@@ -1846,7 +1904,7 @@ class MotionCommandBridgeNode(Node):
             is_active
             and action == "PICKUP_NOW"
             and self.pickup_initial_align_correction_active
-            and payload["status"] == "SUCCEEDED"
+            and stage_can_advance
         ):
             self._start_pickup_checkpoint_dwell(
                 self.FINE_ALIGN_MARKER
@@ -1858,7 +1916,7 @@ class MotionCommandBridgeNode(Node):
             is_active
             and action == "PICKUP_NOW"
             and self.pickup_fine_align_correction_active
-            and payload["status"] == "SUCCEEDED"
+            and stage_can_advance
         ):
             self._start_pickup_checkpoint_dwell(
                 self.FINE_ALIGN_MARKER
@@ -1868,7 +1926,7 @@ class MotionCommandBridgeNode(Node):
             is_active
             and action == "PICKUP_NOW"
             and self.pickup_post_backward_align_correction_active
-            and payload["status"] == "SUCCEEDED"
+            and stage_can_advance
         ):
             self._start_pickup_checkpoint_dwell(
                 self.POST_BACKWARD_ALIGN_MARKER
@@ -1876,10 +1934,14 @@ class MotionCommandBridgeNode(Node):
             return
         if (
             is_active
-            and payload["status"] == "SUCCEEDED"
+            and stage_can_advance
             and self._start_next_pickup_motion()
         ):
             return
+        motor_failures = (
+            self.pickup_motor_failures
+            if is_active and action == "PICKUP_NOW" else None
+        )
         if is_queued and payload["status"] in self.TERMINAL_STATUSES:
             self._clear_queued_request()
         elif is_active and payload["status"] in self.TERMINAL_STATUSES:
@@ -1898,6 +1960,7 @@ class MotionCommandBridgeNode(Node):
             action=action,
             error_code=payload["error_code"],
             message=payload["message"],
+            motor_failures=motor_failures,
         )
 
 

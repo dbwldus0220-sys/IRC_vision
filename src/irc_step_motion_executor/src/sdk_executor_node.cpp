@@ -67,7 +67,7 @@ public:
     const bool explicit_torque_approval = declare_parameter<bool>(
       "explicit_torque_approval", false);
     const bool position_tolerance_enabled = declare_parameter<bool>(
-      "position_tolerance_enabled", true);
+      "position_tolerance_enabled", false);
     const std::int64_t poll_period_ms = positive_parameter_or_default(
       "poll_period_ms", kDefaultPollPeriodMs);
     const std::int64_t running_polls = nonnegative_parameter_or_default(
@@ -82,6 +82,19 @@ public:
       "startup_pose_name", "오뒤412");
     const std::int64_t startup_pose_duration_ms = positive_parameter_or_default(
       "startup_pose_duration_ms", 1800);
+    enable_head_override_ = declare_parameter<bool>("enable_head_override", true);
+    const bool enable_shoulder_override = declare_parameter<bool>("enable_shoulder_override", true);
+    const std::string policy_reference_json = declare_parameter<std::string>(
+      "policy_reference_json_path", ament_index_cpp::get_package_share_directory(
+        "irc_step_motion_executor") + "/config/robot_motions_pc.json");
+    const auto queued_transition_hold_ms = declare_parameter<std::int64_t>(
+      "queued_transition_hold_ms", 0);
+    const bool motion_trace_enabled = declare_parameter<bool>("motion_trace_enabled", false);
+    const bool motion_trace_goals = declare_parameter<bool>("motion_trace_goals", false);
+    const auto motion_trace_path = declare_parameter<std::string>("motion_trace_path", "");
+    if (queued_transition_hold_ms < 0 || (motion_trace_enabled && motion_trace_path.empty())) {
+      throw std::invalid_argument("queue hold must be nonnegative; enabled trace needs a file path");
+    }
     ball_head_override_enabled_ = declare_parameter<bool>(
       "ball_head_override_enabled", true);
     ball_head_override_deg_ = declare_parameter<double>(
@@ -95,7 +108,7 @@ public:
       "ball_head_override_motion_ids",
       std::vector<std::string>{
         "line_forward_2", "line_forward_4", "line_forward_6",
-        "line_forward_8", "line_forward_10", "sdk_forward_4", "forward",
+        "line_forward_8", "sdk_forward_4", "forward",
         "line_recovery_left_4", "line_recovery_left_6", "line_recovery_right_4",
         "ball_general_fine_forward_8", "ball_camera_down_forward_2",
         "ball_camera_down_forward_4"});
@@ -130,6 +143,15 @@ public:
     backend_options.robot_motion_player = make_robot_motion_runtime_config(
       motion_json_path, enable_robot_hardware, robot_device_path,
       robot_baud_rate, robot_motor_ids, explicit_torque_approval);
+    auto & playback_config = backend_options.robot_motion_player;
+    playback_config.enable_head_override = enable_head_override_;
+    playback_config.enable_shoulder_override = enable_shoulder_override;
+    playback_config.policy_reference_json_path = policy_reference_json;
+    playback_config.queued_transition_hold_ms = queued_transition_hold_ms;
+    playback_config.expected_tick_ms = poll_period_ms;
+    playback_config.motion_trace_enabled = motion_trace_enabled;
+    playback_config.motion_trace_goals = motion_trace_goals;
+    playback_config.motion_trace_path = motion_trace_path;
 #if IRC_STEP_ROBOT_MOTION_PLAYER_BACKEND_BUILT
     if (backend_type == "robot_motion_player") {
       robot_motion_runtime_factory_ =
@@ -146,6 +168,16 @@ public:
       "force_start_failure", false);
     backend_options.simulated.force_backend_failure = declare_parameter<bool>(
       "force_backend_failure", false);
+
+    // Validate both catalogs before constructing a hardware backend.
+    std::vector<double> startup_pose_angles;
+    if (startup_pose_enabled && !load_startup_pose_with_policy(
+        motion_json_path, policy_reference_json, startup_pose_name,
+        enable_head_override_, enable_shoulder_override,
+        startup_pose_angles, error_message))
+    {
+      throw std::runtime_error("[STARTUP POSE] ERROR: " + error_message);
+    }
 
     auto backend_result = create_motion_backend(backend_options);
     if (!backend_result) {
@@ -164,13 +196,6 @@ public:
     RCLCPP_INFO(
       get_logger(), "Motion position tolerance check: %s",
       position_tolerance_enabled ? "ENABLED" : "DISABLED");
-    std::vector<double> startup_pose_angles;
-    if (startup_pose_enabled && !load_startup_pose_angles(
-        motion_json_path, startup_pose_name, startup_pose_angles, error_message))
-    {
-      RCLCPP_ERROR(
-        get_logger(), "[STARTUP POSE] ERROR: %s", error_message.c_str());
-    }
     startup_pose_gate_ = std::make_unique<StartupPoseGate>(
       startup_pose_enabled, startup_pose_name, std::move(startup_pose_angles),
       startup_pose_duration_ms,
@@ -244,6 +269,7 @@ public:
 private:
   void handle_hurdle_navigation(const std::string & payload)
   {
+    if (!enable_head_override_) {return;}
     json_object * object = json_tokener_parse(payload.c_str());
     if (object == nullptr) {
       return;
@@ -290,6 +316,7 @@ private:
 
   void handle_hurdle_info(const std::string & payload)
   {
+    if (!enable_head_override_) {return;}
     if (!hurdle_control_active_ || hurdle_head_override_latched_ ||
       !startup_pose_gate_->navigation_allowed())
     {
@@ -398,6 +425,7 @@ private:
 
   void handle_ball_info(const std::string & payload)
   {
+    if (!enable_head_override_) {return;}
     if (!ball_head_override_enabled_ || ball_head_override_latched_ ||
       ball_grasp_started_ || goal_head_override_latched_ || hurdle_head_override_latched_)
     {
@@ -464,6 +492,7 @@ private:
 
   void handle_head_override_status(const std::string & payload)
   {
+    if (!enable_head_override_) {return;}
     // Rejected requests must not activate or release the camera hold.
     json_object * object = json_tokener_parse(payload.c_str());
     if (object == nullptr) {
@@ -615,6 +644,7 @@ private:
   std::uint64_t heartbeat_sequence_{0};
   bool ball_control_active_{false};
   bool ball_grasp_started_{false};
+  bool enable_head_override_{true};
   bool ball_head_override_enabled_{true};
   bool ball_head_override_latched_{false};
   double ball_head_override_deg_{-64.0};

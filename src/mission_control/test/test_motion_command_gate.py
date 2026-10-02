@@ -328,7 +328,6 @@ def test_recovery_turn_uses_general_motion_lock_and_fresh_vision(
         "STRAIGHT_2",
         "STRAIGHT_3",
         "STRAIGHT_4",
-        "STRAIGHT_5",
         "APPROACH",
         "SLOW_APPROACH",
         "FINE_FORWARD_STEP",
