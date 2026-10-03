@@ -1,0 +1,123 @@
+{
+  "source_path": "/home/sy/Downloads/robot_motions(5).json",
+  "source_sha256": "cd3a3eb3727dea49dabd041f070b39ed56c86379b6a16eee7d1a26eba5c8d547",
+  "before_sha256": "eec006de5e7802f10fec4391452a6e4e5d3921118a819f1c0a1ad7c195ad379f",
+  "after_sha256": "603ff5b942c2beb56a6eab09534575970b79971fa42d3c2d7d08c9820764b52f",
+  "renames": {
+    "찐찐전진45(2회)": "유전진45도(2회)",
+    "찐찐전진45(4회)": "유전진45도(4회)",
+    "찐찐전진(6회)": "유전진45도(6회)",
+    "찐찐전진45(8회)": "유전진45도(8회)",
+    "찐찐전진90(2회)": "유전진90도(2회)",
+    "찐찐전진90(4회)": "유전진90도(4회)",
+    "찐찐전진90(6회)": "유전진90도(6회)",
+    "찐찐전진90(8회)": "유전진90도(8회)",
+    "찐미세오옆꽃게0-1(1회)": "유미세오옆꽃게0도",
+    "찐미세왼옆꽃게0도-1": "유미세왼옆꽃게0도",
+    "찐미세오옆꽃게90-1(1회)": "유미세오옆꽃게90도",
+    "찐미세왼옆꽃게90도-1": "유미세왼옆꽃게90도",
+    "찐찐라인복귀좌회전45도(4회)": "유라인복귀좌",
+    "찐찐라인복귀좌회전45도(6회)": "유라인복귀좌(6회)",
+    "찐라인복귀우회전45 도(4회)": "유라인복귀우회전(4회)"
+  },
+  "derived_motion": {
+    "name": "유라인복귀좌(6회)",
+    "source_name": "유라인복귀좌",
+    "repeat_count": 6
+  },
+  "changed_aliases": {
+    "sdk_forward_4": {
+      "before": "찐찐전진45(4회)",
+      "after": "유전진45도(4회)"
+    },
+    "line_forward_2": {
+      "before": "찐찐전진45(2회)",
+      "after": "유전진45도(2회)"
+    },
+    "line_forward_4": {
+      "before": "찐찐전진45(4회)",
+      "after": "유전진45도(4회)"
+    },
+    "line_forward_6": {
+      "before": "찐찐전진(6회)",
+      "after": "유전진45도(6회)"
+    },
+    "line_forward_8": {
+      "before": "찐찐전진45(8회)",
+      "after": "유전진45도(8회)"
+    },
+    "forward": {
+      "before": "찐찐전진45(8회)",
+      "after": "유전진45도(8회)"
+    },
+    "line_recovery_left_4": {
+      "before": "찐찐라인복귀좌회전45도(4회)",
+      "after": "유라인복귀좌"
+    },
+    "line_recovery_left_6": {
+      "before": "찐찐라인복귀좌회전45도(6회)",
+      "after": "유라인복귀좌(6회)"
+    },
+    "line_recovery_right_4": {
+      "before": "찐라인복귀우회전45 도(4회)",
+      "after": "유라인복귀우회전(4회)"
+    },
+    "ball_camera_down_forward_2": {
+      "before": "찐찐전진45(2회)",
+      "after": "유전진45도(2회)"
+    },
+    "ball_camera_down_forward_4": {
+      "before": "찐찐전진45(4회)",
+      "after": "유전진45도(4회)"
+    },
+    "pickup_crab_right_0": {
+      "before": "찐미세오옆꽃게0-1(1회)",
+      "after": "유미세오옆꽃게0도"
+    },
+    "pickup_crab_left_0": {
+      "before": "찐미세왼옆꽃게0도-1",
+      "after": "유미세왼옆꽃게0도"
+    },
+    "post_ball_forward_4": {
+      "before": "찐찐전진45(4회)",
+      "after": "유전진45도(4회)"
+    },
+    "post_ball_forward_6": {
+      "before": "찐찐전진(6회)",
+      "after": "유전진45도(6회)"
+    },
+    "post_ball_forward_8": {
+      "before": "찐찐전진45(8회)",
+      "after": "유전진45도(8회)"
+    },
+    "goal_camera_90_forward_2": {
+      "before": "찐찐전진90(2회)",
+      "after": "유전진90도(2회)"
+    },
+    "goal_camera_90_forward_4": {
+      "before": "찐찐전진90(4회)",
+      "after": "유전진90도(4회)"
+    },
+    "goal_camera_90_forward_6": {
+      "before": "찐찐전진90(6회)",
+      "after": "유전진90도(6회)"
+    },
+    "goal_camera_90_crab_right": {
+      "before": "찐미세오옆꽃게90-1(1회)",
+      "after": "유미세오옆꽃게90도"
+    },
+    "goal_camera_90_crab_left": {
+      "before": "찐미세왼옆꽃게90도-1",
+      "after": "유미세왼옆꽃게90도"
+    }
+  },
+  "runtime_policy": {
+    "position_tolerance_deg": 5.0,
+    "fixed_joint_angles_deg": {
+      "4": 18.0,
+      "5": -18.0
+    }
+  },
+  "motion_count": 83,
+  "unchanged_motion_count": 68
+}

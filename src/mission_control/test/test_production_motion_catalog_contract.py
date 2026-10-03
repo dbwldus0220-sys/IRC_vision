@@ -828,7 +828,7 @@ def test_pickup_retreat_exit_and_dwell_order(completed, exit_name):
 def test_general_right_uses_line_return_four_repeats_and_first_pickup_uses_composite():
     aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
     assert aliases[MotionCommandBridgeNode.ACTION_TO_MOTION_ID["RIGHT"]] == (
-        "찐라인복귀우회전45 도(4회)"
+        "유라인복귀우회전(4회)"
     )
     sequence = MotionCommandBridgeNode._pickup_motion_sequence({
         "source_command": {}, "mission_progress": {"pickups_completed": 0},
@@ -1180,4 +1180,7 @@ def test_goal_left_crab_preparation_matches_attached_source_with_runtime_policy(
     for frame in expected["frames"]:
         frame["angles"].update({"4": 18.0, "5": -18.0})
     before["motions"] = [expected if m["name"] == name else m for m in before["motions"]]
-    assert catalog == before
+    # Later gait replacements preserve this preparation and its original import.
+    gait_update = RUNTIME_CATALOG_PATH.parent / "20261003_catalog5_yu_motion_update"
+    assert json.loads((gait_update / "robot_motions_runtime.before.json").read_text()) == before
+    assert next(m for m in catalog["motions"] if m["name"] == name) == expected

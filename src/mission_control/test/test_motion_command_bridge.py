@@ -2719,10 +2719,10 @@ def test_pickup_right_crab_does_not_prepare_from_old_fine_history(intervening):
 @pytest.mark.parametrize("distance,action,motion_name", [
     (0.549, "STRAIGHT_0", "찐미세45도-4"),
     (0.550, "STRAIGHT_0", "찐미세45도-4"),
-    (0.550001, "STRAIGHT", "찐찐전진45(4회)"),
-    (0.570, "STRAIGHT", "찐찐전진45(4회)"),
-    (0.700, "STRAIGHT", "찐찐전진45(4회)"),
-    (0.700001, "STRAIGHT", "찐찐전진45(4회)"),
+    (0.550001, "STRAIGHT", "유전진45도(4회)"),
+    (0.570, "STRAIGHT", "유전진45도(4회)"),
+    (0.700, "STRAIGHT", "유전진45도(4회)"),
+    (0.700001, "STRAIGHT", "유전진45도(4회)"),
 ])
 def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
     source, distance, action, motion_name,
@@ -2748,7 +2748,7 @@ def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
     decision = planner.plan("AUTO", {source: sample, "line": route}, 0.1)
     if source == "hurdle":
         assert decision.source == "hurdle"
-        motion_name = "찐미세0도-4" if distance <= 0.700 else "찐찐전진45(4회)"
+        motion_name = "찐미세0도-4" if distance <= 0.700 else "유전진45도(4회)"
         action = "STRAIGHT_0" if distance <= 0.700 else action
     bridge = FakeBridge()
     if source == "ball" and distance <= 0.550:
