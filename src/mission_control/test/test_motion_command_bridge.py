@@ -258,6 +258,24 @@ def decoded_messages(publisher):
     return [json.loads(message.data) for message in publisher.messages]
 
 
+def test_straight_queue_ack_is_forwarded_without_releasing_active_motion():
+    bridge = FakeBridge()
+    for command_id in (8000, 8001):
+        bridge.navigation_command_callback(navigation_message(command_id=command_id))
+    requests = decoded_messages(bridge.executor_request_publisher)
+    assert [r['motion_id'] for r in requests] == ['line_forward_6', 'line_forward_6']
+    assert not bridge.queued_request_deferred
+    bridge.executor_status_callback(executor_status(
+        status='QUEUED', command_id=8001, request_id=8001, motion_id='line_forward_6',
+    ))
+    assert decoded_messages(bridge.motion_status_publisher)[-1]['status'] == 'QUEUED'
+    assert bridge.active_command_id == 8000
+    assert bridge.queued_command_id == 8001
+    complete_active_motion(bridge)
+    assert bridge.active_command_id == 8001
+    assert len(bridge.executor_request_publisher.messages) == 2
+
+
 def complete_active_motion(bridge, status="SUCCEEDED", error_code=""):
     """Complete preparation, if present, then the original executor motion."""
     if bridge.active_motion_id == MotionCommandBridgeNode.GOAL_CRAB_PRE_DWELL_MARKER:

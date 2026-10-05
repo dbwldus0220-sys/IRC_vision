@@ -2301,7 +2301,7 @@ def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
         dynamics_command=None,
     )
 
-    assert len(recording_planner.frames) == 10
+    assert len(recording_planner.frames) == (10 if latest_detected and latest_ground_valid else 20)
     assert node.active_line_motion_frames == []
     assert len(node.publisher.messages) == (2 if latest_detected and latest_ground_valid else 1)
     MotionDecisionNode._publish_decision(node)
@@ -2347,6 +2347,39 @@ def test_line_motion_capture_table_matches_deployed_timelines():
             ] = timeline
 
     assert MotionDecisionNode.LINE_MOTION_CAPTURE_CONFIG == expected
+
+
+def test_line_prequeue_retries_after_temporary_target_disappears(monkeypatch):
+    node = ReadinessPublishNode(general_decision('STRAIGHT'))
+    node.planner = MotionDecisionPlanner()
+    clock = [10.0]
+    monkeypatch.setattr(time, 'monotonic', lambda: clock[0])
+    line = {
+        'detected': True, 'ground_projection_valid': True,
+        'ground_heading_error_deg': 0., 'filtered_lateral_offset_norm': 0.,
+        'heading_quality': .9, 'geometry_quality': .9, 'detection_quality': .9,
+    }
+    observations = {'line': line, 'goal': {'raw_detected': True}}
+    node._fresh_observations = lambda _now: (dict(observations), {})
+    MotionDecisionNode._publish_decision(node)
+    send_status(node, status='RUNNING', action='STRAIGHT', command_id=1,
+                event_id=None, dynamics_command=None)
+    clock[0] = 11.8
+    for _ in range(10):
+        MotionDecisionNode._collect_active_line_motion_frame(node, line, clock[0])
+    MotionDecisionNode._prepare_pending_line_decision(node, clock[0])
+    assert node.pending_line_decision is not None
+    assert len(node.publisher.messages) == 1
+
+    # Still in the SAME running motion: the next frame may now queue straight.
+    observations['goal'] = None
+    clock[0] = 11.9
+    assert MotionDecisionNode._collect_active_line_motion_frame(node, line, clock[0])
+    MotionDecisionNode._prepare_pending_line_decision(node, clock[0])
+    assert len(node.publisher.messages) == 2
+    assert node.queued_general_command_id == 2
+    assert node.general_motion_gate.active_command_id == 1
+    assert not MotionDecisionNode._collect_active_line_motion_frame(node, line, clock[0])
 
 
 @pytest.mark.parametrize("source", ["goal", "hurdle", "finish"])
@@ -4229,9 +4262,11 @@ def test_pickup_terminal_status_clears_close_ball_latch(status):
     node = FreshMockInputNode()
     assert node.phase_manager.set_phase("BALL_APPROACH")
     node.planner.pickup_close_alignment_active = True
+    node.planner.pickup_fine_approach_complete = True
     node.planner.pickup_last_visible_bottom_distance_px = 34.0
     complete_motion(node, "PICKUP_NOW", event_id=10, status=status)
     assert not node.planner.pickup_close_alignment_active
+    assert not node.planner.pickup_fine_approach_complete
     assert node.planner.pickup_last_visible_bottom_distance_px is None
 
 
@@ -4248,6 +4283,7 @@ def test_new_pickup_resets_close_latch_and_uses_current_observation(
     )
     node.planner = FreshMockInputNode().planner
     node.planner.pickup_close_alignment_active = was_close
+    node.planner.pickup_fine_approach_complete = True
     ball = (
         ball_info_for_node(bottom_distance_px=bottom_distance)
         if bottom_distance is not None else None
@@ -4258,6 +4294,7 @@ def test_new_pickup_resets_close_latch_and_uses_current_observation(
 
     assert node.active_special_action == "PICKUP_NOW"
     assert node.planner.pickup_close_alignment_active is expected
+    assert not node.planner.pickup_fine_approach_complete
 
 
 def test_raw_ball_crossing_image_center_updates_side_during_active_left_turn():

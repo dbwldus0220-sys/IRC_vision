@@ -1155,17 +1155,22 @@ def post_ball_return_line(**overrides):
     })
 
 
-@pytest.mark.parametrize("heading", [-88.0, -35.0, 0.0, 24.591, 34.281, 88.0])
+@pytest.mark.parametrize("heading", [-88.0, -35.0, -10.001, -10.0, 0.0, 10.0, 10.001, 24.591, 34.281, 88.0])
 @pytest.mark.parametrize("offset", [-0.93, -0.451, 0.0, 0.451, 0.93])
-def test_post_ball_visible_line_hands_remaining_error_to_normal_tracking(heading, offset):
+def test_post_ball_keeps_turning_until_heading_is_aligned(heading, offset):
     result = MotionDecisionPlanner().plan(
         "POST_BALL_LINE_ALIGN", observations(line=post_ball_return_line(
             ground_heading_error_deg=heading, filtered_lateral_offset_norm=offset,
         )), 0.1,
     )
-    assert result.action == "POST_BALL_LINE_ALIGNED"
+    if abs(heading) <= 10.0:
+        assert result.action == "POST_BALL_LINE_ALIGNED"
+        assert result.reason == "post_ball_line_heading_aligned"
+    else:
+        direction = "RIGHT" if heading > 0 else "LEFT"
+        assert result.action.startswith(f"POST_BALL_LINE_TURN_{direction}_")
+        assert result.source_command["turn_count"] > 0
     assert result.valid
-    assert result.reason == "post_ball_line_ready_for_normal_tracking"
     assert result.source_command["heading_error_deg"] == heading
     assert result.source_command["lateral_offset_norm"] == offset
 
@@ -1193,7 +1198,7 @@ def test_post_ball_handoff_does_not_change_legacy_post_shot_alignment():
     info = post_ball_return_line()
     assert planner.plan(
         "POST_BALL_LINE_ALIGN", observations(line=info), 0.1,
-    ).action == "POST_BALL_LINE_ALIGNED"
+    ).action == "POST_BALL_LINE_TURN_RIGHT_2"
     assert planner.plan(
         "POST_SHOT_LINE_ALIGN", observations(line=info), 0.1,
     ).action == "POST_SHOT_LINE_TURN_RIGHT_2"
@@ -2871,6 +2876,39 @@ def test_pickup_fine_approach_stops_at_140_pixel_boundary(bottom_distance_px, ex
     assert decision.source_command['pickup_fine_align_bottom_distance_px'] == 140
 
 
+def test_pickup_near_stage_survives_crab_sway_and_missing_observations():
+    planner = MotionDecisionPlanner()
+    for bottom, offset, action in [
+        (141, 60, 'BALL_PICKUP_FINE_FORWARD'),
+        (140, 60, 'BALL_PICKUP_CRAB_RIGHT'),
+        (150, -40, 'BALL_PICKUP_CRAB_LEFT'),
+        (145, 0, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'),
+    ]:
+        result = planner.plan_ball_pickup_fine_alignment(
+            ball_info(bottom_distance_px=bottom, offset_x_px=offset),
+        )
+        assert result.action == action
+    assert not planner.plan_ball_pickup_fine_alignment(None).valid
+    assert not planner.plan_ball_pickup_fine_alignment(ball_info(confidence=0.1)).valid
+    assert planner.plan_ball_pickup_fine_alignment(
+        ball_info(bottom_distance_px=150, offset_x_px=0),
+    ).action == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+    planner.clear_collected_ball_tracking()
+    assert planner.plan_ball_pickup_fine_alignment(
+        ball_info(bottom_distance_px=150, offset_x_px=0),
+    ).action == 'BALL_PICKUP_FINE_FORWARD'
+
+
+def test_invalid_near_ball_does_not_latch_fine_approach_complete():
+    planner = MotionDecisionPlanner()
+    assert not planner.plan_ball_pickup_fine_alignment(
+        ball_info(bottom_distance_px=100, confidence=0.1),
+    ).valid
+    assert planner.plan_ball_pickup_fine_alignment(
+        ball_info(bottom_distance_px=141),
+    ).action == 'BALL_PICKUP_FINE_FORWARD'
+
+
 @pytest.mark.parametrize('phase', ['AUTO', 'LINE_TRACK', 'BALL_SEARCH', 'GOAL_SEARCH'])
 @pytest.mark.parametrize('offset,direction,count', [(-0.8, 'LEFT', 2), (0.8, 'RIGHT', 5)])
 def test_lost_line_searches_last_seen_side(phase, offset, direction, count):
@@ -3088,7 +3126,7 @@ def test_line_alignment_uses_ground_heading_over_opposite_image_heading(phase):
     )
     assert decision.valid is True
     assert decision.action == (
-        "POST_BALL_LINE_ALIGNED" if phase == "POST_BALL_LINE_ALIGN"
+        "POST_BALL_LINE_TURN_RIGHT_2" if phase == "POST_BALL_LINE_ALIGN"
         else "POST_SHOT_LINE_ALIGNED"
     )
     assert decision.source_command["heading_error_deg"] == 20.0

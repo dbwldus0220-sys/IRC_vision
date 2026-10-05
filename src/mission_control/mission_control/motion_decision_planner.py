@@ -175,6 +175,7 @@ class MotionDecisionPlanner:
         self.last_ball_inside_image = False
         self.ball_interior_loss_forward_sent = False
         self.pickup_close_alignment_active = False
+        self.pickup_fine_approach_complete = False
         self.pickup_last_visible_bottom_distance_px: float | None = None
         self.last_ball_turn_direction: str | None = None
         self.post_ball_line_search_direction = "RIGHT"
@@ -1233,25 +1234,12 @@ class MotionDecisionPlanner:
                 source_command={},
             )
 
-        if phase == "POST_BALL_LINE_ALIGN":
-            # The node immediately plans normal Line driving from this sample.
-            # Let its RECOVER/steering rules handle the remaining heading error.
-            return MotionDecision(
-                phase=phase,
-                source="line",
-                action="POST_BALL_LINE_ALIGNED",
-                valid=True,
-                reason="post_ball_line_ready_for_normal_tracking",
-                sdk_motion_requested=False,
-                requires_ack=False,
-                source_command={
-                    "heading_error_deg": heading,
-                    "lateral_offset_norm": offset,
-                },
-            )
-
         direction = "RIGHT" if heading > 0.0 else "LEFT"
-        heading_tolerance = self.POST_SHOT_LINE_HEADING_TOLERANCE_DEG
+        heading_tolerance = (
+            self.line_planner.config.straight_max_heading_deg
+            if phase == "POST_BALL_LINE_ALIGN"
+            else self.POST_SHOT_LINE_HEADING_TOLERANCE_DEG
+        )
         offset_tolerance = self.line_planner.config.recovery_exit_offset_norm
         common = {
             "heading_error_deg": heading,
@@ -1275,6 +1263,14 @@ class MotionDecisionPlanner:
             )
 
         count = self._turn_repeat_count(heading, direction)
+        if phase == "POST_BALL_LINE_ALIGN" and count == 0:
+            # The smallest available turn is 15 degrees; use it for the
+            # remaining 10..15-degree error instead of releasing alignment.
+            angles = (
+                self.RIGHT_TURN_ANGLES_DEG if direction == "RIGHT"
+                else self.LEFT_TURN_ANGLES_DEG
+            )
+            count = min(angles, key=angles.get)
         action = f"{prefix}_TURN_{direction}_{count}"
         available = bool(
             direction == "RIGHT"
@@ -1383,11 +1379,14 @@ class MotionDecisionPlanner:
                 source_command=common,
             )
 
-        # Completing one fine step does not prove that the ball is close.
-        # Recheck after every motion and dwell before crab/backward stages.
-        if bottom_distance_px > max(
-            0, self.config.pickup_fine_align_bottom_distance_px
+        # Latch only a valid checkpoint observation, after the motion/dwell.
+        # Crab/body sway must not restart forward approach for the same pickup.
+        if bottom_distance_px <= max(
+            0, self.config.pickup_fine_align_bottom_distance_px,
         ):
+            self.pickup_fine_approach_complete = True
+        common["pickup_fine_approach_complete"] = self.pickup_fine_approach_complete
+        if not self.pickup_fine_approach_complete:
             return MotionDecision(
                 phase=phase,
                 source="ball",
@@ -2114,6 +2113,7 @@ class MotionDecisionPlanner:
     def clear_collected_ball_tracking(self) -> None:
         """Discard recovery state for a ball that was picked up successfully."""
         self.pickup_close_alignment_active = False
+        self.pickup_fine_approach_complete = False
         self._clear_ball_tracking()
         # A latched pickup can bypass plan(), so release ownership on its ACK.
         self.ball_lock_active = False
@@ -2137,6 +2137,7 @@ class MotionDecisionPlanner:
     def disable_completed_ball_missions(self) -> None:
         """Release BALL ownership after all configured pickups complete."""
         self.pickup_close_alignment_active = False
+        self.pickup_fine_approach_complete = False
         self._clear_ball_tracking()
         self.ball_lock_active = False
         self.ball_terminal_requested = False

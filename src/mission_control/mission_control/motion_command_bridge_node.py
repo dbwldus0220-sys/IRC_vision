@@ -1701,7 +1701,7 @@ class MotionCommandBridgeNode(Node):
         error_code = payload.get("error_code")
         message = payload.get("message")
         return (
-            status in {"RUNNING", *self.TERMINAL_STATUSES}
+            status in {"QUEUED", "RUNNING", *self.TERMINAL_STATUSES}
             and (command_id is None or self._is_integer(command_id))
             and (event_id is None or self._is_integer(event_id))
             and self._is_integer(request_id)

@@ -2478,6 +2478,7 @@ class MotionDecisionNode(Node):
                 limiter.record_failure("ball", "PICKUP_NOW")
             MotionDecisionNode._finish_grasp_verification_window(self)
             self.planner.pickup_close_alignment_active = False
+            self.planner.pickup_fine_approach_complete = False
             self.planner.pickup_last_visible_bottom_distance_px = None
 
         self.active_special_event_id = None
@@ -3052,7 +3053,7 @@ class MotionDecisionNode(Node):
         started_at = self.active_line_motion_started_at
         if (
             started_at is None
-            or getattr(self, "pending_line_decision", None) is not None
+            or getattr(self, "queued_general_command_id", None) is not None
         ):
             return False
         if MotionDecisionNode._line_frame_is_usable(self, payload):
@@ -3124,7 +3125,6 @@ class MotionDecisionNode(Node):
         line_planner._reset_turn_state()
         for frame in frames:
             line_planner.plan(frame, 1.0 / 30.0)
-        self.active_line_motion_frames = []
 
         observations, _ = self._fresh_observations(now)
         observations = dict(observations)
@@ -3162,6 +3162,10 @@ class MotionDecisionNode(Node):
                     decision,
                     queue_while_locked=True,
                 )
+                if getattr(self, "queued_general_command_id", None) is not None:
+                    self.active_line_motion_frames = []
+        # Until a request is actually queued, retain the rolling observations
+        # so a temporary blocker can be reconsidered on the next fresh frame.
 
     @staticmethod
     def _needs_correction_dwell(action: str | None) -> bool:
@@ -3779,6 +3783,7 @@ class MotionDecisionNode(Node):
 
         if decision.action == "PICKUP_NOW":
             self.planner.pickup_close_alignment_active = False
+            self.planner.pickup_fine_approach_complete = False
             self.planner.pickup_last_visible_bottom_distance_px = None
             self.planner._remember_pickup_close_ball(observations.get("ball"))
             self.ball_pickup_entry_pending = False
@@ -3792,6 +3797,18 @@ class MotionDecisionNode(Node):
         self._reset_pre_motion_settle()
 
         if is_general_motion:
+            if decision.source == "line":
+                completed_at = getattr(self, "line_motion_completed_at", None)
+                if queue_while_locked:
+                    self.get_logger().info(
+                        f"Line next motion requested before completion: action={decision.action}, "
+                        f"command_id={self.command_id}"
+                    )
+                elif completed_at is not None:
+                    self.get_logger().info(
+                        f"Line motion boundary: wait_sec={now - completed_at:.3f}, "
+                        f"next_action={decision.action}, reason={decision.reason}"
+                    )
             if queue_while_locked:
                 self.queued_general_action = decision.action
                 self.queued_general_command_id = self.command_id
