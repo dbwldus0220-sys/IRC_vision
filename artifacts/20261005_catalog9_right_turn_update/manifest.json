@@ -1,0 +1,42 @@
+{
+  "source_path": "/home/sy/Downloads/robot_motions(9).json",
+  "source_sha256": "fd90be1f68ea5b42fffbf27c14947907555f718a6e7c9c8329fe9706ae75b488",
+  "before_sha256": "46a50c383e4b7e1ebc631e2327f41a9e073847486db9dfb72ec56117a3d7c878",
+  "after_sha256": "ce7184c2b87185d608e1d6abd7061b2f48f454f9210529e5be75f595303b1289",
+  "renames": {
+    "찐기본자세에서 제자리 우회전(골대)": "건기본자세에서제자리우회전(골대)"
+  },
+  "replaced_same_name": [
+    "찐제자리우회전45도-1(2회)",
+    "찐제자리우회전45도-1(3회)",
+    "찐제자리우회전45도-1(5회)",
+    "찐제자리우회전45도-1(7회)",
+    "찐제자리우회전0도-1(2회)",
+    "찐제자리우회전0도-1(3회)",
+    "찐제자리우회전0도-1(5회)",
+    "찐제자리우회전0도-1(7회)",
+    "찐제자리우회전90도-1(3회)",
+    "찐제자리우회전90도-1(5회)",
+    "찐제자리우회전90도-1(7회)",
+    "찐제자리우회전45도(9회)",
+    "찐제자리우회전0도-1(9회)",
+    "찐제자리우회전90도-1(9회)",
+    "찐제자리우회전90도-1(2회)"
+  ],
+  "changed_aliases": {
+    "post_shot_default_turn_right": {
+      "before": "찐기본자세에서 제자리 우회전(골대)",
+      "after": "건기본자세에서제자리우회전(골대)"
+    }
+  },
+  "before_count": 86,
+  "after_count": 86,
+  "unchanged_motion_count": 70,
+  "runtime_policy": {
+    "position_tolerance_deg": 5.0,
+    "fixed_joint_angles_deg": {
+      "4": 18.0,
+      "5": -18.0
+    }
+  }
+}

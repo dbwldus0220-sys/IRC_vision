@@ -138,7 +138,7 @@ def test_post_shot_fixed_turns_and_forward_resolve_to_runtime_motions():
     }
     expected = {
         "POST_SHOT_TURN_RIGHT_9": ("찐기본자세에서 제자리 우회전(골대)", 1),
-        "POST_SHOT_TURN_LEFT_4": ("찐기본자세에서 제자리좌회전(골대)", 1),
+        "POST_SHOT_TURN_LEFT_4": ("건기본자세에서제자리좌회전(골대)", 1),
         "POST_SHOT_FORWARD": ("찐전진45(6회)", 3),
     }
     for action, (name, count) in expected.items():
@@ -220,9 +220,9 @@ def test_production_alias_catalog_contains_only_approved_aliases():
                 f"line_recovery_right_{count}": f"라인복귀우회전({count}회)"
                 for count in (2, 3, 4, 5, 6, 7, 8, 10, 12, 15)
             },
-            "line_search_left_2": "찐제자리좌회전45도-1(2회)",
+            "line_search_left_2": "건제자리좌회전45도(2회)",
             "line_search_right_5": "찐제자리우회전45도-1(5회)",
-            "stationary_turn_left": "찐제자리좌회전45도-1(6회)",
+            "stationary_turn_left": "건제자리좌회전45도(6회)",
             "stationary_turn_right": "찐제자리우회전45도(9회)",
             "ball_camera_down_forward_2": "전진0도-1(2회)",
             "ball_camera_down_forward_4": "전진0도-1(4회)",
@@ -246,14 +246,14 @@ def test_production_alias_catalog_contains_only_approved_aliases():
             "pickup_second_backward_turn_left": "찐후진에서 제자리좌회전(공)",
             "pickup_first_backward_turn_right": "찐후진하고 제자리우회전(공)",
             "pickup_first_turn_right_7": "찐제자리우회전45도-1(7회)",
-            "pickup_second_turn_left_3": "찐제자리좌회전45도-1(3회)",
+            "pickup_second_turn_left_3": "건제자리좌회전45도(3회)",
             "pickup_first_turn_right_9": "찐제자리우회전45도(9회)",
             "pickup_first_to_right_back_camera_45": (
                 "왼뒤에서 오뒤로(카메라45도)"
             ),
             **{
                 f"pickup_camera_down_turn_left_{count}": (
-                    f"찐제자리좌회전0도-1({count}회)"
+                    f"건제자리좌회전0도({count}회)"
                 )
                 for count in range(1, 7)
             },
@@ -266,7 +266,7 @@ def test_production_alias_catalog_contains_only_approved_aliases():
             "post_ball_forward_4": "찐전진45(4회)",
             "post_ball_forward_6": "찐전진45(6회)",
             "post_shot_default_turn_right": "찐기본자세에서 제자리 우회전(골대)",
-            "post_shot_default_turn_left": "찐기본자세에서 제자리좌회전(골대)",
+            "post_shot_default_turn_left": "건기본자세에서제자리좌회전(골대)",
             "post_shot_turn_right_9": "찐제자리우회전45도(9회)",
             "post_ball_forward_8": "찐전진45(8회)",
             "post_ball_camera_90": "찐오뒤카메라90도",
@@ -290,12 +290,12 @@ def test_production_alias_catalog_contains_only_approved_aliases():
                 )
                 for count in range(1, 10)
             },
-            "post_ball_line_turn_left_1": "찐제자리좌회전45도-1(1회)",
-            "post_ball_line_turn_left_2": "찐제자리좌회전45도-1(2회)",
-            "post_ball_line_turn_left_3": "찐제자리좌회전45도-1(3회)",
-            "post_ball_line_turn_left_4": "찐제자리좌회전45도-1(4회)",
-            "post_ball_line_turn_left_5": "찐제자리좌회전45도-1(5회)",
-            "post_ball_line_turn_left_6": "찐제자리좌회전45도-1(6회)",
+            "post_ball_line_turn_left_1": "건제자리좌회전45도(1회)",
+            "post_ball_line_turn_left_2": "건제자리좌회전45도(2회)",
+            "post_ball_line_turn_left_3": "건제자리좌회전45도(3회)",
+            "post_ball_line_turn_left_4": "건제자리좌회전45도(4회)",
+            "post_ball_line_turn_left_5": "건제자리좌회전45도(5회)",
+            "post_ball_line_turn_left_6": "건제자리좌회전45도(6회)",
             **{
                 f"goal_camera_90_turn_right_{count}": (
                     f"찐제자리우회전90도-1({count}회)"
@@ -304,7 +304,7 @@ def test_production_alias_catalog_contains_only_approved_aliases():
             },
             **{
                 f"goal_camera_90_turn_left_{count}": (
-                    f"찐제자리좌회전90도-1({count}회)"
+                    f"건제자리좌회전90도({count}회)"
                 )
                 for count in range(1, 7)
             },
@@ -339,10 +339,10 @@ def test_pickup_does_not_use_intermediate_default_pose():
     assert "찐왼뒤에서기본자세(90도)" not in aliases.values()
     assert "찐왼뒤에서기본(0도)" not in aliases.values()
     assert aliases["goal_camera_90_turn_left_1"] == (
-        "찐제자리좌회전90도-1(1회)"
+        "건제자리좌회전90도(1회)"
     )
     assert aliases["goal_camera_90_turn_left_6"] == (
-        "찐제자리좌회전90도-1(6회)"
+        "건제자리좌회전90도(6회)"
     )
 
 
@@ -392,10 +392,10 @@ def test_counted_turn_aliases_match_family_direction_and_repeat_count():
     motions_by_name = {motion["name"]: motion for motion in catalog}
 
     expected = {
-        "stationary_turn_left": ("찐제자리좌회전45도-1(6회)", 6),
+        "stationary_turn_left": ("건제자리좌회전45도(6회)", 6),
         "stationary_turn_right": ("찐제자리우회전45도(9회)", 9),
         "pickup_first_turn_right_7": ("찐제자리우회전45도-1(7회)", 7),
-        "pickup_second_turn_left_3": ("찐제자리좌회전45도-1(3회)", 3),
+        "pickup_second_turn_left_3": ("건제자리좌회전45도(3회)", 3),
         "pickup_first_turn_right_9": ("찐제자리우회전45도(9회)", 9),
         **{
             f"post_ball_line_turn_right_{count}": (
@@ -407,11 +407,11 @@ def test_counted_turn_aliases_match_family_direction_and_repeat_count():
             )
             for count in (2, 3, 5, 7, 9)
         },
-        "post_ball_line_turn_left_1": ("찐제자리좌회전45도-1(1회)", 1),
-        "post_ball_line_turn_left_2": ("찐제자리좌회전45도-1(2회)", 2),
-        "post_ball_line_turn_left_3": ("찐제자리좌회전45도-1(3회)", 3),
-        "post_ball_line_turn_left_4": ("찐제자리좌회전45도-1(4회)", 4),
-        "post_ball_line_turn_left_6": ("찐제자리좌회전45도-1(6회)", 6),
+        "post_ball_line_turn_left_1": ("건제자리좌회전45도(1회)", 1),
+        "post_ball_line_turn_left_2": ("건제자리좌회전45도(2회)", 2),
+        "post_ball_line_turn_left_3": ("건제자리좌회전45도(3회)", 3),
+        "post_ball_line_turn_left_4": ("건제자리좌회전45도(4회)", 4),
+        "post_ball_line_turn_left_6": ("건제자리좌회전45도(6회)", 6),
         **{
             f"goal_camera_90_turn_right_{count}": (
                 f"찐제자리우회전90도-1({count}회)",
@@ -421,14 +421,14 @@ def test_counted_turn_aliases_match_family_direction_and_repeat_count():
         },
         **{
             f"goal_camera_90_turn_left_{count}": (
-                f"찐제자리좌회전90도-1({count}회)",
+                f"건제자리좌회전90도({count}회)",
                 count,
             )
             for count in range(1, 7)
         },
         **{
             f"pickup_camera_down_turn_left_{count}": (
-                f"찐제자리좌회전0도-1({count}회)",
+                f"건제자리좌회전0도({count}회)",
                 count,
             )
             for count in range(1, 7)
@@ -446,7 +446,7 @@ def test_counted_turn_aliases_match_family_direction_and_repeat_count():
         assert aliases[motion_id] == exact_name
         assert motions_by_name[exact_name]["repeat_count"] == repeat_count
 
-    assert motions_by_name["찐제자리좌회전90도-1(6회)"][
+    assert motions_by_name["건제자리좌회전90도(6회)"][
         "playback_speed"
     ] == pytest.approx(0.9, rel=0.0, abs=1e-12)
 
@@ -552,13 +552,13 @@ def test_goal_fine_repeats_use_walking_cycle_not_pickup_frames(count):
         f"GOAL_CAMERA90_FINE_FORWARD_{count}"
     ]
     motion = motions[aliases[motion_id]]
-    base = motions['찐미세90도-4(1회)']
+    base = motions['건미세90도(1회)']
     assert motion['repeat_count'] == count
     assert len(motion['frames']) == 4
     assert motion['frames'] == base['frames']
-    assert motion['start_pose'] == '미세오들4112(90도)'
-    assert motion['end_pose'] == '미세오뒤4111(90도)'
-    assert motion['playback_speed'] == 1.0
+    assert motion['start_pose'] == '건미세오들90도'
+    assert motion['end_pose'] == '건미세오뒤90도'
+    assert motion['playback_speed'] == 1.05
     assert motion['max_seq_ms'] == 3505
 
 
@@ -581,10 +581,10 @@ def test_pickup_fine_preparation_resolves_to_requested_single_transition():
         for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
     }
     prepare_id = MotionCommandBridgeNode.PICKUP_FINE_PREPARE_MOTION_ID
-    assert aliases[prepare_id] == "찐오뒤에서미세오뒤"
+    assert aliases[prepare_id] == "건오뒤에서 미세오뒤45도"
     assert motions[aliases[prepare_id]]["repeat_count"] == 1
     assert motions[aliases[prepare_id]]["completion"]["position_tolerance_deg"] == 5.0
-    assert aliases["pickup_fine_forward_0"] == "찐미세0도-4"
+    assert aliases["pickup_fine_forward_0"] == "건미세0도"
 
 
 def test_pickup_retreat_keeps_command_id_with_one_repeat():
@@ -648,7 +648,7 @@ def test_line_search_uses_requested_stationary_motions():
     aliases = yaml.safe_load(ALIAS_PATH.read_text())['motion_aliases']
     motions = {m['name']: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())['motions']}
     for action, name, count in [
-        ('LINE_LOST_TURN_LEFT', '찐제자리좌회전45도-1(2회)', 2),
+        ('LINE_LOST_TURN_LEFT', '건제자리좌회전45도(2회)', 2),
         ('LINE_LOST_TURN_RIGHT', '찐제자리우회전45도-1(5회)', 5),
     ]:
         motion_id = MotionCommandBridgeNode.ACTION_TO_MOTION_ID[action]
@@ -732,7 +732,7 @@ def test_calibrated_right_turn_aliases_resolve_to_supplied_catalog(count, angle)
      "0568d0a09ea18182611e4ed34efe2d96943c0faf52107ce6c3683ab34f1c6005"),
     ("post_shot_default_turn_right", "찐기본자세에서 제자리 우회전(골대)",
      "d1adb58605677ed92b853640e7cb9125cb5c605f3eefab010c1397c78e84a844"),
-    ("post_shot_default_turn_left", "찐기본자세에서 제자리좌회전(골대)",
+    ("post_shot_default_turn_left", "건기본자세에서제자리좌회전(골대)",
      "455de963e21cd376d3da174e3c9da2423ec1964747dbf1beb7e1dab826a55009"),
     ("pickup_second_backward_turn_left", "찐후진에서 제자리좌회전(공)",
      "9735e143053bbc33496d68f0d3fe521432478df41bd86bcc03472c3577480418"),
@@ -773,7 +773,7 @@ def test_imported_motions_preserve_source_except_tolerance_and_added_turns(
 
 @pytest.mark.parametrize("motion_id,original_count,turn_count,turn_pose,end_pose,duration_ms", [
     ("post_shot_default_turn_right", 7, 9, "제우오들25", "오뒤415", 3531),
-    ("post_shot_default_turn_left", 4, 6, "제좌왼들25", "오뒤412", 2750),
+    ("post_shot_default_turn_left", 4, 6, "제좌왼들25", "김오뒤3", 2656),
     ("pickup_first_backward_turn_right", 7, 11, "제우오들25", "오뒤415", 4144),
     ("pickup_second_backward_turn_left", 4, 7, "제좌왼들25", "오뒤412", 3089),
 ])
@@ -789,8 +789,11 @@ def test_composite_extended_turn_sets_preserve_pose_and_timing(
     assert motion["repeat_count"] == 1
     assert motion["playback_speed"] == 1.0
     assert motion["end_pose"] == end_pose
+    start_pose = (
+        "김왼들(앞먼저닿음)" if motion_id == "post_shot_default_turn_left" else "왼들401"
+    )
     assert [frame["name"] for frame in frames] == (
-        ["왼들401", end_pose] + [turn_pose, end_pose] * turn_count
+        [start_pose, end_pose] + [turn_pose, end_pose] * turn_count
     )
     assert motion["max_seq_ms"] == duration_ms
     assert frames[-1]["start_ms"] + frames[-1]["time_ms"] == duration_ms
@@ -817,7 +820,7 @@ def test_pickup_retreat_exit_and_dwell_order(completed, exit_name):
         "source_command": {}, "mission_progress": {"pickups_completed": completed},
     })
     assert [aliases[motion_id] for motion_id in sequence[:-1]] == [
-        "찐공잡기전후진-2(2회)", "찐공잡기리그랩까지 실전", "찐공확인자세",
+        "찐공잡기전후진-2(2회)", "건공잡기", "찐공확인자세",
         "찐후진실전(1회)", exit_name,
     ]
     assert sequence[-1] == MotionCommandBridgeNode.DWELL_MARKER
@@ -828,7 +831,7 @@ def test_pickup_retreat_exit_and_dwell_order(completed, exit_name):
 def test_general_right_uses_line_return_four_repeats_and_first_pickup_uses_composite():
     aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
     assert aliases[MotionCommandBridgeNode.ACTION_TO_MOTION_ID["RIGHT"]] == (
-        "유라인복귀우회전(4회)"
+        "건라인복귀우회전45도(4회)"
     )
     sequence = MotionCommandBridgeNode._pickup_motion_sequence({
         "source_command": {}, "mission_progress": {"pickups_completed": 0},
@@ -970,7 +973,7 @@ def test_removed_goal_default_preparations_have_no_dangling_alias(alias, name):
     names = {m["name"] for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]}
     assert alias not in aliases
     assert name not in names
-    assert aliases["goal_fine_to_default"] == "찐미세오뒤에서기본자세"
+    assert aliases["goal_fine_to_default"] == "건미세오뒤에서 기본자세45도"
 
 
 
@@ -1008,10 +1011,10 @@ def test_runtime_startup_pose_has_unambiguous_canonical_joint_angles():
         (motion["name"], frame["angles"])
         for motion in motions
         for frame in motion["frames"]
-        if frame["name"] == "오뒤412"
+        if frame["name"] == "김오뒤3"
     ]
     assert matches
-    canonical = next(angles for name, angles in matches if name == "찐오뒤412")
+    canonical = next(angles for name, angles in matches if name == "건김오뒤3")
     assert set(canonical) == {str(i) for i in range(23)}
     for motion_name, angles in matches:
         assert angles == canonical, f"ambiguous startup pose in {motion_name}"
@@ -1058,7 +1061,7 @@ def test_stationary_left_turns_preserve_latest_catalog29_data(camera, digest):
     }[camera]
     motions = []
     for count in range(1, 7):
-        name = f"찐제자리좌회전{camera}도-1({count}회)"
+        name = f"건제자리좌회전{camera}도({count}회)"
         assert aliases[f"{prefix}_{count}"] == name
         motion = catalog[name]
         assert motion["repeat_count"] == count
@@ -1157,19 +1160,24 @@ def test_hurdle_final_fine_uses_ten_repeats_without_changing_shared_five_repeat_
     assert {k: v for k, v in final_fine.items() if k not in {"name", "repeat_count"}} == {
         k: v for k, v in original.items() if k not in {"name", "repeat_count"}
     }
-    before = json.loads((RUNTIME_CATALOG_PATH.parent / "20261003_hurdle_fine_10/runtime_before.json").read_text())
-    before_motions = {m["name"]: m for m in before["motions"]}
-    assert original == before_motions[original["name"]]
-    assert final_fine["name"] not in before_motions
+    source_path = RUNTIME_CATALOG_PATH.parent / "20261005_catalog8_geon_motion_update/source_requested_motions.json"
+    supplied = next(m for m in json.loads(source_path.read_text())["motions"] if m["name"] == "건미세0도")
+    expected = copy.deepcopy(supplied)
+    expected["completion"]["position_tolerance_deg"] = 5.0
+    for frame in expected["frames"]:
+        frame["angles"].update({"4": 18.0, "5": -18.0})
+    assert original == expected
 
 
 def test_goal_left_crab_preparation_matches_attached_source_with_runtime_policy():
     archive = RUNTIME_CATALOG_PATH.parent / "20261003_goal_left_crab_prepare"
     source = json.loads((archive / "source.json").read_text())
     before = json.loads((archive / "runtime_before.json").read_text())
-    catalog = json.loads(RUNTIME_CATALOG_PATH.read_text())
-    aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
-    alias = MotionCommandBridgeNode.GOAL_FINE_LEFT_CRAB_PREPARE_MOTION_ID
+    snapshot = RUNTIME_CATALOG_PATH.parent / "20261005_catalog8_geon_motion_update"
+    catalog = json.loads((snapshot / "robot_motions_runtime.before.json").read_text())
+    aliases = yaml.safe_load((snapshot / "motion_aliases.before.yaml").read_text())["motion_aliases"]
+    # Check the historical preparation before the shared gait-transition update.
+    alias = "goal_fine_to_default"
     assert alias == MotionCommandBridgeNode.SHOT_PREPARE_MOTION_ID
     name = aliases[alias]
     assert name == "찐미세오뒤에서기본자세"

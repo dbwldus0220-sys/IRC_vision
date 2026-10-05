@@ -1,0 +1,11 @@
+{
+  "motion_name": "건기본자세에서제자리좌회전(골대)",
+  "alias": "post_shot_default_turn_left",
+  "before_turn_count": 4,
+  "after_turn_count": 6,
+  "cycle_period_ms": 339,
+  "max_seq_ms": 2656,
+  "repeat_count": 1,
+  "before_catalog_sha256": "f3608b631bc784cfd14073b09ae2cb343026710ef240d66a0efb8d613b10b100",
+  "after_catalog_sha256": "17108f04e2a084f94ddebae1a8b38dc009d9d28a4dba458dc99bf07915603d14"
+}

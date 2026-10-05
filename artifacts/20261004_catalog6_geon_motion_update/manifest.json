@@ -1,0 +1,115 @@
+{
+  "source_path": "/home/sy/Downloads/robot_motions(6).json",
+  "source_sha256": "496d275bbc6972dadbac4fd236ef6364713b4680a5cacae3c36f2ed8b2feed17",
+  "before_sha256": "603ff5b942c2beb56a6eab09534575970b79971fa42d3c2d7d08c9820764b52f",
+  "after_sha256": "ac3ef9ffaecc72a529b0d74592ef40af4b7ebc956a9ebd1b11af8bf1eb255894",
+  "renames": {
+    "유전진45도(2회)": "건전진45도(2회)",
+    "유전진45도(4회)": "건전진45도(4회)",
+    "유전진45도(6회)": "건전진45도(6회)",
+    "유전진45도(8회)": "건전진45도(8회)",
+    "유전진90도(2회)": "건전진90도(2회)",
+    "유전진90도(4회)": "건전진90도(4회)",
+    "유전진90도(6회)": "건전진90도(6회)",
+    "유전진90도(8회)": "건전진90도(8회)",
+    "유라인복귀좌": "건라인복귀좌회전45도(4회)",
+    "유라인복귀좌(6회)": "건라인복귀좌회전45도(6회)",
+    "유라인복귀우회전(4회)": "건라인복귀우회전45도(4회)",
+    "찐오뒤에서 기본자세(카메라45도)": "건오뒤에서 기본자세(카메라45도)",
+    "찐오뒤카메라90도": "건오뒤카메라90도",
+    "찐오뒤에서기본자세(0도)": "건오뒤에서 기본자세(0도)",
+    "찐왼뒤에서기본(0도)": "건왼뒤에서 기본자세(0도)",
+    "찐오뒤412": "건김오뒤3"
+  },
+  "added_motions": [
+    "건라인복귀좌회전45도(1회)"
+  ],
+  "derived_motion": {
+    "name": "건라인복귀좌회전45도(6회)",
+    "source_name": "건라인복귀좌회전45도(4회)",
+    "repeat_count": 6
+  },
+  "changed_aliases": {
+    "sdk_forward_4": {
+      "before": "유전진45도(4회)",
+      "after": "건전진45도(4회)"
+    },
+    "line_forward_2": {
+      "before": "유전진45도(2회)",
+      "after": "건전진45도(2회)"
+    },
+    "line_forward_4": {
+      "before": "유전진45도(4회)",
+      "after": "건전진45도(4회)"
+    },
+    "line_forward_6": {
+      "before": "유전진45도(6회)",
+      "after": "건전진45도(6회)"
+    },
+    "line_forward_8": {
+      "before": "유전진45도(8회)",
+      "after": "건전진45도(8회)"
+    },
+    "forward": {
+      "before": "유전진45도(8회)",
+      "after": "건전진45도(8회)"
+    },
+    "line_recovery_left_4": {
+      "before": "유라인복귀좌",
+      "after": "건라인복귀좌회전45도(4회)"
+    },
+    "line_recovery_left_6": {
+      "before": "유라인복귀좌(6회)",
+      "after": "건라인복귀좌회전45도(6회)"
+    },
+    "line_recovery_right_4": {
+      "before": "유라인복귀우회전(4회)",
+      "after": "건라인복귀우회전45도(4회)"
+    },
+    "ball_camera_down_forward_2": {
+      "before": "유전진45도(2회)",
+      "after": "건전진45도(2회)"
+    },
+    "ball_camera_down_forward_4": {
+      "before": "유전진45도(4회)",
+      "after": "건전진45도(4회)"
+    },
+    "post_ball_forward_4": {
+      "before": "유전진45도(4회)",
+      "after": "건전진45도(4회)"
+    },
+    "post_ball_forward_6": {
+      "before": "유전진45도(6회)",
+      "after": "건전진45도(6회)"
+    },
+    "post_ball_forward_8": {
+      "before": "유전진45도(8회)",
+      "after": "건전진45도(8회)"
+    },
+    "post_ball_camera_90": {
+      "before": "찐오뒤카메라90도",
+      "after": "건오뒤카메라90도"
+    },
+    "goal_camera_90_forward_2": {
+      "before": "유전진90도(2회)",
+      "after": "건전진90도(2회)"
+    },
+    "goal_camera_90_forward_4": {
+      "before": "유전진90도(4회)",
+      "after": "건전진90도(4회)"
+    },
+    "goal_camera_90_forward_6": {
+      "before": "유전진90도(6회)",
+      "after": "건전진90도(6회)"
+    }
+  },
+  "runtime_policy": {
+    "position_tolerance_deg": 5.0,
+    "fixed_joint_angles_deg": {
+      "4": 18.0,
+      "5": -18.0
+    }
+  },
+  "motion_count": 84,
+  "unchanged_motion_count": 67
+}

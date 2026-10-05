@@ -120,8 +120,8 @@ def test_queued_turn_waits_for_actual_fine_completion(fine_status):
         assert not bridge.motion_in_progress
 
 
-@pytest.mark.parametrize("action", ["STRAIGHT", "BALL_APPROACH_RECOVER_LEFT_4", "BALL_APPROACH_RECOVER_RIGHT_4"])
-def test_walking_is_not_classified_as_stationary_turn(action):
+@pytest.mark.parametrize("action", ["BALL_APPROACH_RECOVER_LEFT_4", "BALL_APPROACH_RECOVER_RIGHT_4"])
+def test_walking_recovery_does_not_add_a_transition(action):
     bridge = FakeBridge()
     bridge.navigation_command_callback(navigation_message(action="BALL_FINE_FORWARD_8", command_id=1))
     finish_physical(bridge)
@@ -133,5 +133,8 @@ def test_intervening_walk_discards_old_fine_pose():
     bridge = FakeBridge()
     for command_id, action in enumerate(("BALL_FINE_FORWARD_8", "STRAIGHT", "TURN_LEFT"), 1):
         bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
-        finish_physical(bridge)
-    assert not any(r["motion_id"].startswith("fine_to_turn_ready_") for r in requests(bridge))
+        complete_active_motion(bridge)
+    assert [r["motion_id"] for r in requests(bridge)] == [
+        "ball_general_fine_forward_8", "fine_to_turn_ready_45",
+        "line_forward_6", "stationary_turn_left",
+    ]

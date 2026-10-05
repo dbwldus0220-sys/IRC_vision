@@ -115,7 +115,7 @@ def test_robot_launch_defaults_are_production_ready(
         "robot_baud_rate": 4000000,
         "robot_motor_ids": list(range(23)),
         "startup_pose_enabled": True,
-        "startup_pose_name": "오뒤412",
+        "startup_pose_name": "김오뒤3",
         "startup_pose_duration_ms": 4000,
         "ball_head_override_deg": -64.0,
     }

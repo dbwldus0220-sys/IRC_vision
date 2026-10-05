@@ -1,0 +1,129 @@
+{
+  "source_path": "/home/sy/Downloads/robot_motions(7).json",
+  "source_sha256": "41e8deb8b97b10c6049f1ed01be6a9cf53cede70ffd2aefc84e0bb3c1fc16493",
+  "before_sha256": "ac3ef9ffaecc72a529b0d74592ef40af4b7ebc956a9ebd1b11af8bf1eb255894",
+  "after_sha256": "f3608b631bc784cfd14073b09ae2cb343026710ef240d66a0efb8d613b10b100",
+  "renames": {
+    "찐제자리좌회전0도-1(1회)": "건제자리좌회전0도(1회)",
+    "찐제자리좌회전0도-1(2회)": "건제자리좌회전0도(2회)",
+    "찐제자리좌회전0도-1(3회)": "건제자리좌회전0도(3회)",
+    "찐제자리좌회전0도-1(4회)": "건제자리좌회전0도(4회)",
+    "찐제자리좌회전0도-1(5회)": "건제자리좌회전0도(5회)",
+    "찐제자리좌회전0도-1(6회)": "건제자리좌회전0도(6회)",
+    "찐제자리좌회전45도-1(1회)": "건제자리좌회전45도(1회)",
+    "찐제자리좌회전45도-1(2회)": "건제자리좌회전45도(2회)",
+    "찐제자리좌회전45도-1(3회)": "건제자리좌회전45도(3회)",
+    "찐제자리좌회전45도-1(4회)": "건제자리좌회전45도(4회)",
+    "찐제자리좌회전45도-1(5회)": "건제자리좌회전45도(5회)",
+    "찐제자리좌회전45도-1(6회)": "건제자리좌회전45도(6회)",
+    "찐제자리좌회전90도-1(1회)": "건제자리좌회전90도(1회)",
+    "찐제자리좌회전90도-1(2회)": "건제자리좌회전90도(2회)",
+    "찐제자리좌회전90도-1(3회)": "건제자리좌회전90도(3회)",
+    "찐제자리좌회전90도-1(4회)": "건제자리좌회전90도(4회)",
+    "찐제자리좌회전90도-1(5회)": "건제자리좌회전90도(5회)",
+    "찐제자리좌회전90도-1(6회)": "건제자리좌회전90도(6회)",
+    "찐기본자세에서 제자리좌회전(골대)": "건기본자세에서제자리좌회전(골대)"
+  },
+  "replaced_same_name": [
+    "건라인복귀우회전45도(4회)"
+  ],
+  "changed_aliases": {
+    "line_search_left_2": {
+      "before": "찐제자리좌회전45도-1(2회)",
+      "after": "건제자리좌회전45도(2회)"
+    },
+    "stationary_turn_left": {
+      "before": "찐제자리좌회전45도-1(6회)",
+      "after": "건제자리좌회전45도(6회)"
+    },
+    "pickup_second_turn_left_3": {
+      "before": "찐제자리좌회전45도-1(3회)",
+      "after": "건제자리좌회전45도(3회)"
+    },
+    "pickup_camera_down_turn_left_1": {
+      "before": "찐제자리좌회전0도-1(1회)",
+      "after": "건제자리좌회전0도(1회)"
+    },
+    "pickup_camera_down_turn_left_2": {
+      "before": "찐제자리좌회전0도-1(2회)",
+      "after": "건제자리좌회전0도(2회)"
+    },
+    "pickup_camera_down_turn_left_3": {
+      "before": "찐제자리좌회전0도-1(3회)",
+      "after": "건제자리좌회전0도(3회)"
+    },
+    "pickup_camera_down_turn_left_4": {
+      "before": "찐제자리좌회전0도-1(4회)",
+      "after": "건제자리좌회전0도(4회)"
+    },
+    "pickup_camera_down_turn_left_5": {
+      "before": "찐제자리좌회전0도-1(5회)",
+      "after": "건제자리좌회전0도(5회)"
+    },
+    "pickup_camera_down_turn_left_6": {
+      "before": "찐제자리좌회전0도-1(6회)",
+      "after": "건제자리좌회전0도(6회)"
+    },
+    "post_shot_default_turn_left": {
+      "before": "찐기본자세에서 제자리좌회전(골대)",
+      "after": "건기본자세에서제자리좌회전(골대)"
+    },
+    "post_ball_line_turn_left_1": {
+      "before": "찐제자리좌회전45도-1(1회)",
+      "after": "건제자리좌회전45도(1회)"
+    },
+    "post_ball_line_turn_left_2": {
+      "before": "찐제자리좌회전45도-1(2회)",
+      "after": "건제자리좌회전45도(2회)"
+    },
+    "post_ball_line_turn_left_3": {
+      "before": "찐제자리좌회전45도-1(3회)",
+      "after": "건제자리좌회전45도(3회)"
+    },
+    "post_ball_line_turn_left_4": {
+      "before": "찐제자리좌회전45도-1(4회)",
+      "after": "건제자리좌회전45도(4회)"
+    },
+    "post_ball_line_turn_left_5": {
+      "before": "찐제자리좌회전45도-1(5회)",
+      "after": "건제자리좌회전45도(5회)"
+    },
+    "post_ball_line_turn_left_6": {
+      "before": "찐제자리좌회전45도-1(6회)",
+      "after": "건제자리좌회전45도(6회)"
+    },
+    "goal_camera_90_turn_left_1": {
+      "before": "찐제자리좌회전90도-1(1회)",
+      "after": "건제자리좌회전90도(1회)"
+    },
+    "goal_camera_90_turn_left_2": {
+      "before": "찐제자리좌회전90도-1(2회)",
+      "after": "건제자리좌회전90도(2회)"
+    },
+    "goal_camera_90_turn_left_3": {
+      "before": "찐제자리좌회전90도-1(3회)",
+      "after": "건제자리좌회전90도(3회)"
+    },
+    "goal_camera_90_turn_left_4": {
+      "before": "찐제자리좌회전90도-1(4회)",
+      "after": "건제자리좌회전90도(4회)"
+    },
+    "goal_camera_90_turn_left_5": {
+      "before": "찐제자리좌회전90도-1(5회)",
+      "after": "건제자리좌회전90도(5회)"
+    },
+    "goal_camera_90_turn_left_6": {
+      "before": "찐제자리좌회전90도-1(6회)",
+      "after": "건제자리좌회전90도(6회)"
+    }
+  },
+  "motion_count": 84,
+  "unchanged_motion_count": 64,
+  "runtime_policy": {
+    "position_tolerance_deg": 5.0,
+    "fixed_joint_angles_deg": {
+      "4": 18.0,
+      "5": -18.0
+    }
+  }
+}

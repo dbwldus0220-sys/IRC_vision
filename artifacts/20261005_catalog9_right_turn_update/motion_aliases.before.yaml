@@ -1,8 +1,7 @@
 # Stable aliases for the latest SDK catalog.
 # Retained left-turn selection: 1/2/3/4/5/6 repeats = 15/30/45/60/75/90 degrees.
 # Re-measure actual yaw after the catalog7 gait update.
-# Retained stationary right-turn selection: 2/3/5/7/9 repeats = 15/30/45/65/95 degrees.
-# Re-measure actual yaw after the catalog9 right-turn gait update.
+# Calibrated stationary right turns: 2/3/5/7/9 repeats = 15/30/45/65/95 degrees.
 # The 45/0/90 in catalog names identifies the camera pose, not the yaw angle.
 # Visible-target alignment: left 15/30/45/60/75/90+ degrees -> 1/2/3/4/5/6 repeats.
 # Right 15/30/45/65/95+ degrees -> 2/3/5/7/9 repeats; below minimum: no turn.
@@ -70,7 +69,7 @@ motion_aliases:
   post_ball_forward_6: "건전진45도(6회)"
   post_shot_turn_right_9: "찐제자리우회전45도(9회)"
   # Composite exit turns contain seven right / six left yaw cycles; play once.
-  post_shot_default_turn_right: "건기본자세에서제자리우회전(골대)"
+  post_shot_default_turn_right: "찐기본자세에서 제자리 우회전(골대)"
   post_shot_default_turn_left: "건기본자세에서제자리좌회전(골대)"
   post_ball_forward_8: "건전진45도(8회)"
   post_ball_camera_90: "건오뒤카메라90도"

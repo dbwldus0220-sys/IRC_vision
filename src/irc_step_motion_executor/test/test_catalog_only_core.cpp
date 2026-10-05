@@ -42,24 +42,24 @@ TEST(MotionAliasCatalog, LoadsLatestSdkAndCanonicalAliases)
   irc_step_motion_executor::MotionAliasCatalog catalog;
   std::string error;
   ASSERT_TRUE(catalog.load(TEST_ALIAS_CONFIG, error)) << error;
-  EXPECT_EQ(catalog.size(), 97U);
+  EXPECT_EQ(catalog.size(), 98U);
   for (const auto & [alias, motion] : {
-      std::pair{"forward", "유전진45도(8회)"},
-      std::pair{"line_forward_8", "유전진45도(8회)"},
-      std::pair{"goal_camera_90_forward_2", "유전진90도(2회)"},
+      std::pair{"forward", "건전진45도(8회)"},
+      std::pair{"line_forward_8", "건전진45도(8회)"},
+      std::pair{"goal_camera_90_forward_2", "건전진90도(2회)"},
       std::pair{"line_turn_right_large", "찐제자리우회전45도(9회)"},
-      std::pair{"line_recovery_left_4", "유라인복귀좌"},
-      std::pair{"line_recovery_left_6", "유라인복귀좌(6회)"},
-      std::pair{"line_recovery_right_4", "유라인복귀우회전(4회)"},
+      std::pair{"line_recovery_left_4", "건라인복귀좌회전45도(4회)"},
+      std::pair{"line_recovery_left_6", "건라인복귀좌회전45도(6회)"},
+      std::pair{"line_recovery_right_4", "건라인복귀우회전45도(4회)"},
       std::pair{"pickup_crab_right_0", "유미세오옆꽃게0도"},
       std::pair{"pickup_crab_left_0", "유미세왼옆꽃게0도"},
       std::pair{"goal_camera_90_crab_right", "유미세오옆꽃게90도"},
       std::pair{"goal_camera_90_crab_left", "유미세왼옆꽃게90도"},
-      std::pair{"stationary_turn_left", "찐제자리좌회전45도-1(6회)"},
+      std::pair{"stationary_turn_left", "건제자리좌회전45도(6회)"},
       std::pair{"stationary_turn_right", "찐제자리우회전45도(9회)"},
-      std::pair{"pickup_camera_down_turn_left_6", "찐제자리좌회전0도-1(6회)"},
+      std::pair{"pickup_camera_down_turn_left_6", "건제자리좌회전0도(6회)"},
       std::pair{"pickup_camera_down_turn_right_9", "찐제자리우회전0도-1(9회)"},
-      std::pair{"pickup", "찐공잡기리그랩까지 실전"}})
+      std::pair{"pickup", "건공잡기"}})
   {
     EXPECT_EQ(catalog.resolve(alias), std::optional<std::string>(motion));
   }

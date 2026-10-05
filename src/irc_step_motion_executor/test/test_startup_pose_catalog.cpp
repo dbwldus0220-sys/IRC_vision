@@ -72,6 +72,20 @@ TEST(StartupPoseCatalog, RejectsRepeatedNameWithMissingMotor)
   std::filesystem::remove(path);
 }
 
+TEST(StartupPoseCatalog, LoadsGeonStartupPoseWithDefaultPolicy)
+{
+  std::vector<double> angles;
+  std::string error;
+  ASSERT_TRUE(irc_step_motion_executor::load_startup_pose_with_policy(
+      TEST_RUNTIME_CATALOG, TEST_PC_CATALOG, "김오뒤3",
+      true, true, angles, error)) << error;
+  ASSERT_EQ(angles.size(), 23U);
+  EXPECT_DOUBLE_EQ(angles[4], 18.0);
+  EXPECT_DOUBLE_EQ(angles[5], -18.0);
+  EXPECT_DOUBLE_EQ(angles[13], -41.220703125);
+  EXPECT_DOUBLE_EQ(angles[14], 55.3046875);
+}
+
 TEST(StartupPoseCatalog, PolicyOffChangesOnlySelectedAxesToVerifiedPcPose)
 {
   std::vector<double> production, pc, actual;
