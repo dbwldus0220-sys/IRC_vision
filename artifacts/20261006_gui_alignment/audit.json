@@ -1,0 +1,7227 @@
+{
+  "source_hashes": {
+    "sdk_gui_state.json": "afe380588c7b036af343d7040c0680529b1c2e1f3f87b4b3d848d258f2049c68",
+    "sdk_gui_timing_repairs.json": "10761ed37d8ac7882993f9414262948bf09dd861c69eb2bc5f258e467e014b7e",
+    "robot_motions(10).json": "fd90be1f68ea5b42fffbf27c14947907555f718a6e7c9c8329fe9706ae75b488",
+    "sdk_gui.py": "ce6b871a14af1187a5e3f221834265649e1e819cb6b529487d75a090c7e2d527",
+    "ALIGN_ALGORITHM_TO_SDK_GUI_PROMPT_20261005.md": "b1bb0af708c3d62920b8e64bcc6f7145303a7e8c6e4487c46a710011687a3bb2"
+  },
+  "runtime_sha256": "ce7184c2b87185d608e1d6abd7061b2f48f454f9210529e5be75f595303b1289",
+  "sdk_hashes": {
+    "playback_trace.hpp": "e2dff63007a606430f137ae68a0c3972e6f38214d45843402305470d9bec1102",
+    "CMakeLists.txt": "3f460ac00d14439ead1a3389d87a4a205ef98841e19bdfd0356a6f6dec52cbba",
+    "gui_playback.hpp": "7da9c3f98de790c2bae9599de1a573514fbb9297de7ecfcd07833f93166cb8fa",
+    "motion_callback.hpp": "3aa39a6c47bbd395f446db6f652bec9aeb4f2f86e0f859ffba67841b85bc471e",
+    "dynamixel_controller.cpp": "df2c48dbff7800deeaec7ad1e907c98b0e3c47262dd3c3d96f99088f8175e04a",
+    "test_motion_callback.cpp": "98c9ede0e14a74be0dc33649f1215f8036ece1621436bba102cb33803d046791",
+    "motion_hardware.hpp": "a667487cceb02dc3cd1bbaa176363e966c17253895e6e513e89cf9c635a792e4",
+    "mock_motion_hardware.hpp": "cbfa80329c460dbc910291a9c3f08321cb139d176ee64f6ca3d52f2dd1d8881f",
+    "robot_motion_player.hpp": "1eb7277d097d2de802f32b0b731314476eda108c0f9285ed70c3e053353218e7",
+    "motion_callback.cpp": "b119141329f711e08470877824c0dcc42ef7af8c8792bf8644a24559cbfc232a",
+    "dynamixel_motion_hardware.hpp": "4245266fc41392ffe437c629766283ae4f770fba3434b10c2ce98c5a07693ab1",
+    "test_motion_pattern.cpp": "12ace23f98b37493cb61f256b7a8a8cc368afd36485d8fa08d4db0a89425e1ed",
+    "gui_alignment.hpp": "655221df493704dbeaf246a1f9c0dbe9dcc9dac7dff6d0e68eb02ba26fdabf13",
+    "step_dynamixel.cpp": "2736e90e6dae49bf8a2f01597c6e5e83e5cc69d6d9e124f6b61c495bc76fc937",
+    "main.cpp": "c0956f17ce5f92594c24eea10eb3660ef81b22fdad918cc76c6d245d93d38f63",
+    "robot_motion_player.cpp": "a3e1fdc6dbac7d19a779abf8cc14f6ad7c22fef07123a74303b110c0d1f48b04",
+    "motion_pattern.hpp": "7cb17985253ba2f60b4cb13b38a8e10430063eb62207952b5ccfa937759d276d",
+    "gui_trace_probe.cpp": "e390aacbbe2d87cef0f578b473566e7f5e1a66a0f87964f54385545f4f67dec9",
+    "motion_pattern.cpp": "5dd201a7501665702343e3d6f580ec7d33fea867e8677c82283cd9112951294b",
+    "robot_motion_player_dynamixel.cpp": "fce0f460db65a038d9abe7b6cf7a310fcd2acda9c22bc0f092dcf576d2f8e5b6",
+    "dynamixel_controller.hpp": "d7d18d0448eaeac7e45b112143778fb9458c45ed1454c044abae54c1cffac2dc",
+    "gui_execution_probe.cpp": "f1aa712b7b0893ca6b02ee94f5425f0857d52bcad4a8c1cb570ef809c9140e7b",
+    "robot_motions.example.json": "93bee2135be94e70a54e2548e5ff575a643f281fa292f9b2cd1d57448ab7f08c",
+    "dynamixel_motion_hardware.cpp": "d0be4763a72b34108654330e0175e5c6800a3dbf15d52637eed9d2449872d7fb",
+    "test_gui_alignment.cpp": "7cf8f2908a601377e5493ad8aefb813710317ad3f9ce630b12d975f34300f6c7",
+    "step_dynamixel.hpp": "855d6bcac192ba912a0efc694c1fabdecc70f1b5b340404e5417f999da886d0e"
+  },
+  "counts": {
+    "gui": 75,
+    "runtime": 86,
+    "saved_sequences": 495,
+    "checked": 75
+  },
+  "checked_export_differences": [
+    [
+      "건라인복귀좌회전45도(1회)",
+      "frames"
+    ],
+    [
+      "건전진45도(2회)",
+      "frames"
+    ],
+    [
+      "건라인복귀우회전45도(4회)",
+      "frames"
+    ],
+    [
+      "건전진45도(4회)",
+      "frames"
+    ],
+    [
+      "건전진45도(6회)",
+      "frames"
+    ],
+    [
+      "건전진45도(8회)",
+      "frames"
+    ],
+    [
+      "건라인복귀좌회전45도(4회)",
+      "frames"
+    ],
+    [
+      "건오뒤에서 기본자세(카메라45도)",
+      "frames"
+    ],
+    [
+      "건기본자세에서제자리좌회전(골대)",
+      "frames"
+    ],
+    [
+      "건미세오뒤에서 오뒤45도",
+      "frames"
+    ],
+    [
+      "건기본자세에서제자리우회전(골대)",
+      "frames"
+    ]
+  ],
+  "state_frame_differences": [
+    {
+      "path": "건라인복귀좌회전45도(1회)/frames/2/angles/20",
+      "gui": -62.875,
+      "runtime": -61.875
+    },
+    {
+      "path": "건전진45도(2회)/frames/0/angles/19",
+      "gui": 59.0,
+      "runtime": 58.0
+    },
+    {
+      "path": "건전진45도(2회)/frames/2/angles/20",
+      "gui": -62.875,
+      "runtime": -61.875
+    },
+    {
+      "path": "건라인복귀우회전45도(4회)/frames/0/angles/19",
+      "gui": 59.0,
+      "runtime": 58.0
+    },
+    {
+      "path": "건라인복귀우회전45도(4회)/frames/2/angles/20",
+      "gui": -62.875,
+      "runtime": -61.875
+    },
+    {
+      "path": "건전진45도(4회)/frames/0/angles/19",
+      "gui": 59.0,
+      "runtime": 58.0
+    },
+    {
+      "path": "건전진45도(4회)/frames/2/angles/20",
+      "gui": -62.875,
+      "runtime": -61.875
+    },
+    {
+      "path": "건전진45도(6회)/frames/0/angles/19",
+      "gui": 59.0,
+      "runtime": 58.0
+    },
+    {
+      "path": "건전진45도(6회)/frames/2/angles/20",
+      "gui": -62.875,
+      "runtime": -61.875
+    },
+    {
+      "path": "건전진45도(8회)/frames/0/angles/19",
+      "gui": 59.0,
+      "runtime": 58.0
+    },
+    {
+      "path": "건전진45도(8회)/frames/2/angles/20",
+      "gui": -62.875,
+      "runtime": -61.875
+    },
+    {
+      "path": "건라인복귀좌회전45도(4회)/frames/2/angles/20",
+      "gui": -62.875,
+      "runtime": -61.875
+    },
+    {
+      "path": "건오뒤에서 기본자세(카메라45도)/frames/0/angles/19",
+      "gui": 59.0,
+      "runtime": 58.0
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/0/angles/20",
+      "gui": -62.875,
+      "runtime": -61.875
+    },
+    {
+      "path": "건미세오뒤에서 오뒤45도/frames/0/angles/20",
+      "gui": -62.875,
+      "runtime": -61.875
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/0/angles/20",
+      "gui": -62.875,
+      "runtime": -61.875
+    }
+  ],
+  "timing_repairs": [
+    {
+      "name": null,
+      "pending": false
+    }
+  ],
+  "gui_only": [],
+  "runtime_only": [
+    "건라인복귀좌회전45도(6회)",
+    "건미세0도(허들10회)",
+    "건미세90도(1회)",
+    "건미세90도(2회)",
+    "건미세90도(3회)",
+    "건미세90도(4회)",
+    "찐공잡기리그랩까지 실전",
+    "찐미세오뒤에서 오뒤(골대 카메라90도)",
+    "찐오뒤에서미세오뒤(왼들)",
+    "찐왼뒤에서기본자세(90도)",
+    "찐왼쪽게걸음(45도)"
+  ],
+  "aliases_missing_runtime": {},
+  "aliases_missing_gui": {
+    "line_recovery_left_6": "건라인복귀좌회전45도(6회)",
+    "hurdle_fine_forward_10": "건미세0도(허들10회)",
+    "goal_camera_90_fine_forward_1": "건미세90도(1회)",
+    "goal_camera_90_fine_forward_2": "건미세90도(2회)",
+    "goal_camera_90_fine_forward_3": "건미세90도(3회)",
+    "goal_camera_90_fine_forward_4": "건미세90도(4회)",
+    "fine_to_turn_ready_90": "찐미세오뒤에서 오뒤(골대 카메라90도)"
+  },
+  "selected": {
+    "name": "건전진45도(6회)",
+    "aliases": [
+      "line_forward_6",
+      "post_ball_forward_6"
+    ],
+    "frames": [
+      {
+        "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
+        "name": "김오들(앞먼저닿음)",
+        "time_ms": 60,
+        "angles": {
+          "0": -32.34375,
+          "1": -0.3515625,
+          "2": -8.4375,
+          "3": 7.55859375,
+          "4": 18.0,
+          "5": -18.0,
+          "6": 74.35546875,
+          "7": -76.2890625,
+          "8": -10.546875,
+          "9": 2.4609375,
+          "10": 0.693359375,
+          "11": -3.0,
+          "12": 4.0,
+          "15": -1.0,
+          "16": 5.0,
+          "13": -89.82421875,
+          "14": 56.0,
+          "17": -67.236328125,
+          "18": 32.0,
+          "19": 58.0,
+          "20": -68.0,
+          "21": 2.0,
+          "22": -12.0
+        },
+        "torques": {
+          "0": true,
+          "1": true,
+          "2": true,
+          "3": true,
+          "4": true,
+          "5": true,
+          "6": true,
+          "7": true,
+          "8": true,
+          "9": true,
+          "10": true,
+          "11": true,
+          "12": true,
+          "15": true,
+          "16": true,
+          "13": true,
+          "14": true,
+          "17": true,
+          "18": true,
+          "19": true,
+          "20": true,
+          "21": true,
+          "22": true
+        },
+        "is_important": false,
+        "lift_early_arrival": true,
+        "source_frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
+        "start_ms": 90,
+        "_drag_original_start_ms": 90
+      },
+      {
+        "frame_id": "46c8c5bda6924327837ded0d9612d346",
+        "name": "왼뒤407",
+        "time_ms": 105,
+        "angles": {
+          "0": -32.6953125,
+          "1": -0.439453125,
+          "2": -9.228515625,
+          "3": 8.61328125,
+          "4": 18.0,
+          "5": -18.0,
+          "6": 69.609375,
+          "7": -70.927734375,
+          "8": -11.07421875,
+          "9": 2.63671875,
+          "10": 0.0,
+          "11": -3.0,
+          "12": 3.0,
+          "15": 3.0,
+          "16": -2.0,
+          "13": -59.0,
+          "14": 47.0,
+          "17": -34.453125,
+          "18": 31.904296875,
+          "19": 60.64453125,
+          "20": -74.0,
+          "21": 3.0,
+          "22": -4.5703125
+        },
+        "torques": {
+          "0": true,
+          "1": true,
+          "2": true,
+          "3": true,
+          "4": true,
+          "5": true,
+          "6": true,
+          "7": true,
+          "8": true,
+          "9": true,
+          "10": true,
+          "11": true,
+          "12": true,
+          "15": true,
+          "16": true,
+          "13": true,
+          "14": true,
+          "17": true,
+          "18": true,
+          "19": true,
+          "20": true,
+          "21": true,
+          "22": true
+        },
+        "is_important": false,
+        "lift_early_arrival": true,
+        "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
+        "start_ms": 150,
+        "_drag_original_start_ms": 145
+      },
+      {
+        "frame_id": "ec62ecf478094eaca551707a406b2f02",
+        "name": "김왼들(앞먼저닿음)",
+        "time_ms": 62,
+        "angles": {
+          "0": -32.607421875,
+          "1": -0.087890625,
+          "2": -8.349609375,
+          "3": 7.646484375,
+          "4": 16.435546875,
+          "5": -17.314453125,
+          "6": 73.564453125,
+          "7": -75.41015625,
+          "8": -10.634765625,
+          "9": 2.548828125,
+          "10": -0.263671875,
+          "11": -3.427734375,
+          "12": 4.658203125,
+          "15": -1.439453125,
+          "16": 4.955078125,
+          "13": -54.66796875,
+          "14": 79.1015625,
+          "17": -31.552734375,
+          "18": 55.1953125,
+          "19": 65.91796875,
+          "20": -61.875,
+          "21": 10.634765625,
+          "22": -3.515625
+        },
+        "torques": {
+          "0": true,
+          "1": true,
+          "2": true,
+          "3": true,
+          "4": true,
+          "5": true,
+          "6": true,
+          "7": true,
+          "8": true,
+          "9": true,
+          "10": true,
+          "11": true,
+          "12": true,
+          "15": true,
+          "16": true,
+          "13": true,
+          "14": true,
+          "17": true,
+          "18": true,
+          "19": true,
+          "20": true,
+          "21": true,
+          "22": true
+        },
+        "is_important": false,
+        "lift_early_arrival": true,
+        "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
+        "start_ms": 339,
+        "_drag_original_start_ms": 341
+      },
+      {
+        "frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+        "name": "김오뒤3",
+        "time_ms": 110,
+        "angles": {
+          "0": -33.57421875,
+          "1": 0.52734375,
+          "2": -9.84375,
+          "3": 9.931640625,
+          "4": 16.5234375,
+          "5": -17.40234375,
+          "6": 67.060546875,
+          "7": -68.37890625,
+          "8": -10.986328125,
+          "9": 2.63671875,
+          "10": 1.845703125,
+          "11": -2.724609375,
+          "12": 2.548828125,
+          "15": 3.603515625,
+          "16": -1.0546875,
+          "13": -41.220703125,
+          "14": 55.3046875,
+          "17": -26.015625,
+          "18": 26.279296875,
+          "19": 67.587890625,
+          "20": -57.568359375,
+          "21": 4.658203125,
+          "22": -5.009765625
+        },
+        "torques": {
+          "0": true,
+          "1": true,
+          "2": true,
+          "3": true,
+          "4": true,
+          "5": true,
+          "6": true,
+          "7": true,
+          "8": true,
+          "9": true,
+          "10": true,
+          "11": true,
+          "12": true,
+          "15": true,
+          "16": true,
+          "13": true,
+          "14": true,
+          "17": true,
+          "18": true,
+          "19": true,
+          "20": true,
+          "21": true,
+          "22": true
+        },
+        "is_important": false,
+        "lift_early_arrival": true,
+        "source_frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+        "start_ms": 403,
+        "_drag_original_start_ms": 422
+      }
+    ],
+    "playback_speed": 1.0,
+    "repeat_count": 6,
+    "timeline_end_ms": 513,
+    "max_seq_ms": 11522,
+    "differences": [
+      {
+        "path": "건전진45도(6회)/completion/position_tolerance_deg",
+        "gui": 2.0,
+        "runtime": 5.0
+      },
+      {
+        "path": "건전진45도(6회)/frames/2/angles/4",
+        "gui": 16.435546875,
+        "runtime": 18.0
+      },
+      {
+        "path": "건전진45도(6회)/frames/2/angles/5",
+        "gui": -17.314453125,
+        "runtime": -18.0
+      },
+      {
+        "path": "건전진45도(6회)/frames/3/angles/4",
+        "gui": 16.5234375,
+        "runtime": 18.0
+      },
+      {
+        "path": "건전진45도(6회)/frames/3/angles/5",
+        "gui": -17.40234375,
+        "runtime": -18.0
+      }
+    ]
+  },
+  "ui_snapshot": {
+    "loaded_sequence_name": "건전진45도(8회)",
+    "timeline_equals_loaded_frames": true,
+    "runtime_ui_speed_and_repeat": "not recorded; saved values used for software comparison"
+  },
+  "usb_latency": {
+    "devices": [],
+    "measured_value": null
+  },
+  "differences": [
+    {
+      "path": "건공잡기/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건공잡기/frames/0/angles/4",
+      "gui": 17.05078125,
+      "runtime": 18.0
+    },
+    {
+      "path": "건공잡기/frames/0/angles/5",
+      "gui": -17.2265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건공잡기/frames/1/angles/4",
+      "gui": 17.05078125,
+      "runtime": 18.0
+    },
+    {
+      "path": "건공잡기/frames/1/angles/5",
+      "gui": -17.2265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건공잡기/frames/2/angles/4",
+      "gui": 17.05078125,
+      "runtime": 18.0
+    },
+    {
+      "path": "건공잡기/frames/2/angles/5",
+      "gui": -31.552734375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건공잡기/frames/3/angles/4",
+      "gui": 17.05078125,
+      "runtime": 18.0
+    },
+    {
+      "path": "건공잡기/frames/3/angles/5",
+      "gui": -37.03515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건공잡기/frames/4/angles/4",
+      "gui": 17.05078125,
+      "runtime": 18.0
+    },
+    {
+      "path": "건공잡기/frames/4/angles/5",
+      "gui": -37.123046875,
+      "runtime": -18.0
+    },
+    {
+      "path": "건공잡기/frames/5/angles/4",
+      "gui": 17.05078125,
+      "runtime": 18.0
+    },
+    {
+      "path": "건공잡기/frames/5/angles/5",
+      "gui": -17.2265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건공잡기/frames/6/angles/4",
+      "gui": 10.37109375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건공잡기/frames/6/angles/5",
+      "gui": -10.1953125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건공잡기/frames/7/angles/4",
+      "gui": 20.0,
+      "runtime": 18.0
+    },
+    {
+      "path": "건공잡기/frames/7/angles/5",
+      "gui": -21.0,
+      "runtime": -18.0
+    },
+    {
+      "path": "건공잡기/frames/8/angles/4",
+      "gui": 20.0,
+      "runtime": 18.0
+    },
+    {
+      "path": "건공잡기/frames/8/angles/5",
+      "gui": -21.0,
+      "runtime": -18.0
+    },
+    {
+      "path": "건공잡기/frames/9/angles/4",
+      "gui": 20.0,
+      "runtime": 18.0
+    },
+    {
+      "path": "건공잡기/frames/9/angles/5",
+      "gui": -21.0,
+      "runtime": -18.0
+    },
+    {
+      "path": "건공잡기/frames/10/angles/4",
+      "gui": 9.140625,
+      "runtime": 18.0
+    },
+    {
+      "path": "건공잡기/frames/10/angles/5",
+      "gui": -8.96484375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/0/angles/4",
+      "gui": 16.435546875,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/0/angles/5",
+      "gui": -17.314453125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/2/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/2/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/3/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/3/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/4/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/4/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/5/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/5/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/6/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/6/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/7/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/7/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/8/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/8/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/9/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/9/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/10/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/10/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/11/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/11/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/12/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/12/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/13/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/13/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/14/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/14/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/15/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리우회전(골대)/frames/15/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/0/angles/4",
+      "gui": 16.435546875,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/0/angles/5",
+      "gui": -17.314453125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/2/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/2/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/3/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/3/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/4/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/4/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/5/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/5/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/6/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/6/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/7/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/7/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/8/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/8/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/9/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/9/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/10",
+      "gui": null,
+      "runtime": {
+        "frame_id": "71f5a572518046d9a6b21070390b6ec1",
+        "name": "제좌왼들25",
+        "time_ms": 61,
+        "angles": {
+          "0": -32.255859375,
+          "1": -0.263671875,
+          "2": -8.4375,
+          "3": 7.55859375,
+          "4": 18.0,
+          "5": -18.0,
+          "6": 75.05859375,
+          "7": -76.904296875,
+          "8": -10.546875,
+          "9": 2.548828125,
+          "10": 9.0,
+          "11": 4.0,
+          "12": 4.0,
+          "15": -8.0,
+          "16": 0.0,
+          "13": -52.91015625,
+          "14": 78.0,
+          "17": -29.970703125,
+          "18": 61.435546875,
+          "19": 66.0,
+          "20": -60.0,
+          "21": 15.0,
+          "22": -3.955078125
+        },
+        "torques": {
+          "0": true,
+          "1": true,
+          "2": true,
+          "3": true,
+          "4": true,
+          "5": true,
+          "6": true,
+          "7": true,
+          "8": true,
+          "9": true,
+          "10": true,
+          "11": true,
+          "12": true,
+          "15": true,
+          "16": true,
+          "13": true,
+          "14": true,
+          "17": true,
+          "18": true,
+          "19": true,
+          "20": true,
+          "21": true,
+          "22": true
+        },
+        "is_important": false,
+        "lift_early_arrival": true,
+        "source_frame_id": "71f5a572518046d9a6b21070390b6ec1",
+        "start_ms": 2111
+      }
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/11",
+      "gui": null,
+      "runtime": {
+        "frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+        "name": "김오뒤3",
+        "time_ms": 145,
+        "angles": {
+          "0": -33.57421875,
+          "1": 0.52734375,
+          "2": -9.84375,
+          "3": 9.931640625,
+          "4": 18.0,
+          "5": -18.0,
+          "6": 67.060546875,
+          "7": -68.37890625,
+          "8": -10.986328125,
+          "9": 2.63671875,
+          "10": 1.845703125,
+          "11": -2.724609375,
+          "12": 2.548828125,
+          "15": 3.603515625,
+          "16": -1.0546875,
+          "13": -41.220703125,
+          "14": 55.3046875,
+          "17": -26.015625,
+          "18": 26.279296875,
+          "19": 67.587890625,
+          "20": -57.568359375,
+          "21": 4.658203125,
+          "22": -5.009765625
+        },
+        "torques": {
+          "0": true,
+          "1": true,
+          "2": true,
+          "3": true,
+          "4": true,
+          "5": true,
+          "6": true,
+          "7": true,
+          "8": true,
+          "9": true,
+          "10": true,
+          "11": true,
+          "12": true,
+          "15": true,
+          "16": true,
+          "13": true,
+          "14": true,
+          "17": true,
+          "18": true,
+          "19": true,
+          "20": true,
+          "21": true,
+          "22": true
+        },
+        "is_important": false,
+        "lift_early_arrival": true,
+        "source_frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+        "start_ms": 2172,
+        "playback_cycle_end": true
+      }
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/12",
+      "gui": null,
+      "runtime": {
+        "frame_id": "71f5a572518046d9a6b21070390b6ec1",
+        "name": "제좌왼들25",
+        "time_ms": 61,
+        "angles": {
+          "0": -32.255859375,
+          "1": -0.263671875,
+          "2": -8.4375,
+          "3": 7.55859375,
+          "4": 18.0,
+          "5": -18.0,
+          "6": 75.05859375,
+          "7": -76.904296875,
+          "8": -10.546875,
+          "9": 2.548828125,
+          "10": 9.0,
+          "11": 4.0,
+          "12": 4.0,
+          "15": -8.0,
+          "16": 0.0,
+          "13": -52.91015625,
+          "14": 78.0,
+          "17": -29.970703125,
+          "18": 61.435546875,
+          "19": 66.0,
+          "20": -60.0,
+          "21": 15.0,
+          "22": -3.955078125
+        },
+        "torques": {
+          "0": true,
+          "1": true,
+          "2": true,
+          "3": true,
+          "4": true,
+          "5": true,
+          "6": true,
+          "7": true,
+          "8": true,
+          "9": true,
+          "10": true,
+          "11": true,
+          "12": true,
+          "15": true,
+          "16": true,
+          "13": true,
+          "14": true,
+          "17": true,
+          "18": true,
+          "19": true,
+          "20": true,
+          "21": true,
+          "22": true
+        },
+        "is_important": false,
+        "lift_early_arrival": true,
+        "source_frame_id": "71f5a572518046d9a6b21070390b6ec1",
+        "start_ms": 2450
+      }
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/frames/13",
+      "gui": null,
+      "runtime": {
+        "frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+        "name": "김오뒤3",
+        "time_ms": 145,
+        "angles": {
+          "0": -33.57421875,
+          "1": 0.52734375,
+          "2": -9.84375,
+          "3": 9.931640625,
+          "4": 18.0,
+          "5": -18.0,
+          "6": 67.060546875,
+          "7": -68.37890625,
+          "8": -10.986328125,
+          "9": 2.63671875,
+          "10": 1.845703125,
+          "11": -2.724609375,
+          "12": 2.548828125,
+          "15": 3.603515625,
+          "16": -1.0546875,
+          "13": -41.220703125,
+          "14": 55.3046875,
+          "17": -26.015625,
+          "18": 26.279296875,
+          "19": 67.587890625,
+          "20": -57.568359375,
+          "21": 4.658203125,
+          "22": -5.009765625
+        },
+        "torques": {
+          "0": true,
+          "1": true,
+          "2": true,
+          "3": true,
+          "4": true,
+          "5": true,
+          "6": true,
+          "7": true,
+          "8": true,
+          "9": true,
+          "10": true,
+          "11": true,
+          "12": true,
+          "15": true,
+          "16": true,
+          "13": true,
+          "14": true,
+          "17": true,
+          "18": true,
+          "19": true,
+          "20": true,
+          "21": true,
+          "22": true
+        },
+        "is_important": false,
+        "lift_early_arrival": true,
+        "source_frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+        "start_ms": 2511,
+        "playback_cycle_end": true
+      }
+    },
+    {
+      "path": "건기본자세에서제자리좌회전(골대)/max_seq_ms",
+      "gui": 1978,
+      "runtime": 2656
+    },
+    {
+      "path": "건김오뒤3/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건김오뒤3/frames/0/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건김오뒤3/frames/0/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건라인복귀우회전45도(4회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건라인복귀우회전45도(4회)/frames/2/angles/4",
+      "gui": 16.435546875,
+      "runtime": 18.0
+    },
+    {
+      "path": "건라인복귀우회전45도(4회)/frames/2/angles/5",
+      "gui": -17.314453125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건라인복귀우회전45도(4회)/frames/3/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건라인복귀우회전45도(4회)/frames/3/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건라인복귀좌회전45도(1회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건라인복귀좌회전45도(1회)/frames/2/angles/4",
+      "gui": 16.435546875,
+      "runtime": 18.0
+    },
+    {
+      "path": "건라인복귀좌회전45도(1회)/frames/2/angles/5",
+      "gui": -17.314453125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건라인복귀좌회전45도(1회)/frames/3/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건라인복귀좌회전45도(1회)/frames/3/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건라인복귀좌회전45도(4회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건라인복귀좌회전45도(4회)/frames/2/angles/4",
+      "gui": 16.435546875,
+      "runtime": 18.0
+    },
+    {
+      "path": "건라인복귀좌회전45도(4회)/frames/2/angles/5",
+      "gui": -17.314453125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건라인복귀좌회전45도(4회)/frames/3/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건라인복귀좌회전45도(4회)/frames/3/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건라인복귀좌회전45도(6회)",
+      "gui": null,
+      "runtime": {
+        "name": "건라인복귀좌회전45도(6회)",
+        "max_seq_ms": 11522,
+        "repeat_count": 6,
+        "playback_speed": 1.0,
+        "repeatable": true,
+        "start_pose": "오들430",
+        "end_pose": "김오뒤3",
+        "completion": {
+          "position_tolerance_deg": 5.0,
+          "settle_duration_ms": 80,
+          "settle_timeout_ms": 3000
+        },
+        "frames": [
+          {
+            "frame_id": "aa84a9f519b7402a8250b919f4639c3d",
+            "name": "오들430",
+            "time_ms": 55,
+            "angles": {
+              "0": -32.34375,
+              "1": -0.3515625,
+              "2": -8.4375,
+              "3": 7.55859375,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 74.35546875,
+              "7": -76.2890625,
+              "8": -10.546875,
+              "9": 2.4609375,
+              "10": 0.693359375,
+              "11": -3.0,
+              "12": 4.0,
+              "15": -1.0,
+              "16": 5.0,
+              "13": -89.82421875,
+              "14": 56.0,
+              "17": -67.236328125,
+              "18": 32.0,
+              "19": 55.0,
+              "20": -68.0,
+              "21": 2.0,
+              "22": -12.0
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "aa84a9f519b7402a8250b919f4639c3d",
+            "start_ms": 81
+          },
+          {
+            "frame_id": "46c8c5bda6924327837ded0d9612d346",
+            "name": "왼뒤407",
+            "time_ms": 120,
+            "angles": {
+              "0": -32.6953125,
+              "1": -0.439453125,
+              "2": -9.228515625,
+              "3": 8.61328125,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 69.609375,
+              "7": -70.927734375,
+              "8": -11.07421875,
+              "9": 2.63671875,
+              "10": 0.0,
+              "11": -3.0,
+              "12": 3.0,
+              "15": 3.0,
+              "16": -2.0,
+              "13": -59.0,
+              "14": 47.0,
+              "17": -34.453125,
+              "18": 31.904296875,
+              "19": 60.64453125,
+              "20": -74.0,
+              "21": 3.0,
+              "22": -4.5703125
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
+            "start_ms": 136
+          },
+          {
+            "frame_id": "ec62ecf478094eaca551707a406b2f02",
+            "name": "김왼들(앞먼저닿음)",
+            "time_ms": 62,
+            "angles": {
+              "0": -32.607421875,
+              "1": -0.087890625,
+              "2": -8.349609375,
+              "3": 7.646484375,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 73.564453125,
+              "7": -75.41015625,
+              "8": -10.634765625,
+              "9": 2.548828125,
+              "10": -0.263671875,
+              "11": -3.427734375,
+              "12": 4.658203125,
+              "15": -1.439453125,
+              "16": 4.955078125,
+              "13": -54.66796875,
+              "14": 79.1015625,
+              "17": -31.552734375,
+              "18": 55.1953125,
+              "19": 65.91796875,
+              "20": -61.875,
+              "21": 10.634765625,
+              "22": -3.515625
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
+            "start_ms": 338
+          },
+          {
+            "frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+            "name": "김오뒤3",
+            "time_ms": 110,
+            "angles": {
+              "0": -33.57421875,
+              "1": 0.52734375,
+              "2": -9.84375,
+              "3": 9.931640625,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 67.060546875,
+              "7": -68.37890625,
+              "8": -10.986328125,
+              "9": 2.63671875,
+              "10": 1.845703125,
+              "11": -2.724609375,
+              "12": 2.548828125,
+              "15": 3.603515625,
+              "16": -1.0546875,
+              "13": -41.220703125,
+              "14": 55.3046875,
+              "17": -26.015625,
+              "18": 26.279296875,
+              "19": 67.587890625,
+              "20": -57.568359375,
+              "21": 4.658203125,
+              "22": -5.009765625
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+            "start_ms": 400,
+            "_drag_original_start_ms": 422
+          }
+        ]
+      }
+    },
+    {
+      "path": "건미세0도/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건미세0도/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건미세0도/frames/0/angles/5",
+      "gui": -13.271484375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건미세0도/frames/1/angles/4",
+      "gui": 9.228515625,
+      "runtime": 18.0
+    },
+    {
+      "path": "건미세0도/frames/1/angles/5",
+      "gui": -10.01953125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건미세0도/frames/2/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건미세0도/frames/2/angles/5",
+      "gui": -13.271484375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건미세0도/frames/3/angles/4",
+      "gui": 9.140625,
+      "runtime": 18.0
+    },
+    {
+      "path": "건미세0도/frames/3/angles/5",
+      "gui": -8.96484375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건미세0도(허들10회)",
+      "gui": null,
+      "runtime": {
+        "name": "건미세0도(허들10회)",
+        "max_seq_ms": 3505,
+        "repeat_count": 10,
+        "playback_speed": 1.05,
+        "repeatable": true,
+        "start_pose": "건미세오들0도",
+        "end_pose": "건미세오뒤0도",
+        "completion": {
+          "position_tolerance_deg": 5.0,
+          "settle_duration_ms": 80,
+          "settle_timeout_ms": 3000
+        },
+        "frames": [
+          {
+            "frame_id": "774b84718f364c2d81776ac284a70527",
+            "name": "건미세오들0도",
+            "time_ms": 48,
+            "angles": {
+              "0": -64.0,
+              "1": -0.3515625,
+              "2": -8.4375,
+              "3": 7.55859375,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 74.35546875,
+              "7": -76.2890625,
+              "8": -10.546875,
+              "9": 2.4609375,
+              "10": 1.318359375,
+              "11": -3.0,
+              "12": 4.0,
+              "15": -4.669921875,
+              "16": 2.0,
+              "13": -77.41015625,
+              "14": 55.0,
+              "17": -69.994140625,
+              "18": 33.0,
+              "19": 79.716796875,
+              "20": -68.0,
+              "21": -5.0,
+              "22": -12.0
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "774b84718f364c2d81776ac284a70527",
+            "start_ms": 59
+          },
+          {
+            "frame_id": "371d18ee09e54270995f6170475b39e1",
+            "name": "건미세왼뒤0도",
+            "time_ms": 85,
+            "angles": {
+              "0": -64.0,
+              "1": -0.17578125,
+              "2": -9.404296875,
+              "3": 8.7890625,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 69.169921875,
+              "7": -70.48828125,
+              "8": -11.25,
+              "9": 4.5703125,
+              "10": 1.0,
+              "11": -3.0,
+              "12": 2.791015625,
+              "15": 2.8125,
+              "16": -2.197265625,
+              "13": -61.0,
+              "14": 52.0,
+              "17": -32.51953125,
+              "18": 30.1796875,
+              "19": 61.787109375,
+              "20": -69.0,
+              "21": 2.197265625,
+              "22": -3.8671875
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "371d18ee09e54270995f6170475b39e1",
+            "start_ms": 107
+          },
+          {
+            "frame_id": "fe6213c1022d430ea58e8ee9199b5c40",
+            "name": "건미세왼들0도",
+            "time_ms": 48,
+            "angles": {
+              "0": -64.0,
+              "1": -0.3515625,
+              "2": -8.4375,
+              "3": 7.55859375,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 74.35546875,
+              "7": -76.2890625,
+              "8": -10.546875,
+              "9": 2.4609375,
+              "10": 1.0,
+              "11": -3.0,
+              "12": 6.318359375,
+              "15": -2.0,
+              "16": 6.0,
+              "13": -52.0,
+              "14": 65.0,
+              "17": -30.70703125,
+              "18": 73.0,
+              "19": 64.0,
+              "20": -91.0,
+              "21": 16.0,
+              "22": 5.77734375
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "fe6213c1022d430ea58e8ee9199b5c40",
+            "start_ms": 252,
+            "_drag_original_start_ms": 252
+          },
+          {
+            "frame_id": "162c6248f1d24965a0b6ec9a866f3c10",
+            "name": "건미세오뒤0도",
+            "time_ms": 85,
+            "angles": {
+              "0": -64.0,
+              "1": 0.263671875,
+              "2": -9.755859375,
+              "3": 9.755859375,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 67.236328125,
+              "7": -68.818359375,
+              "8": -11.6015625,
+              "9": 4.833984375,
+              "10": 0.59375,
+              "11": -3.0,
+              "12": 3.669921875,
+              "15": 3.427734375,
+              "16": 0.087890625,
+              "13": -53.0,
+              "14": 58.0,
+              "17": -29.125,
+              "18": 34.0,
+              "19": 64.951171875,
+              "20": -65.0,
+              "21": 2.021484375,
+              "22": -4.482421875
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "162c6248f1d24965a0b6ec9a866f3c10",
+            "start_ms": 300
+          }
+        ]
+      }
+    },
+    {
+      "path": "건미세45도(5회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건미세45도(5회)/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건미세45도(5회)/frames/0/angles/5",
+      "gui": -13.271484375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건미세45도(5회)/frames/1/angles/4",
+      "gui": 9.228515625,
+      "runtime": 18.0
+    },
+    {
+      "path": "건미세45도(5회)/frames/1/angles/5",
+      "gui": -10.01953125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건미세45도(5회)/frames/2/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건미세45도(5회)/frames/2/angles/5",
+      "gui": -13.271484375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건미세45도(5회)/frames/3/angles/4",
+      "gui": 9.140625,
+      "runtime": 18.0
+    },
+    {
+      "path": "건미세45도(5회)/frames/3/angles/5",
+      "gui": -8.96484375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건미세90도/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건미세90도/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건미세90도/frames/0/angles/5",
+      "gui": -13.271484375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건미세90도/frames/1/angles/4",
+      "gui": 9.228515625,
+      "runtime": 18.0
+    },
+    {
+      "path": "건미세90도/frames/1/angles/5",
+      "gui": -10.01953125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건미세90도/frames/2/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건미세90도/frames/2/angles/5",
+      "gui": -13.271484375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건미세90도/frames/3/angles/4",
+      "gui": 9.140625,
+      "runtime": 18.0
+    },
+    {
+      "path": "건미세90도/frames/3/angles/5",
+      "gui": -8.96484375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건미세90도(1회)",
+      "gui": null,
+      "runtime": {
+        "name": "건미세90도(1회)",
+        "max_seq_ms": 3505,
+        "repeat_count": 1,
+        "playback_speed": 1.05,
+        "repeatable": true,
+        "start_pose": "건미세오들90도",
+        "end_pose": "건미세오뒤90도",
+        "completion": {
+          "position_tolerance_deg": 5.0,
+          "settle_duration_ms": 80,
+          "settle_timeout_ms": 3000
+        },
+        "frames": [
+          {
+            "frame_id": "44c1137283dc4f2d8f8b70c4c5b160f6",
+            "name": "건미세오들90도",
+            "time_ms": 48,
+            "angles": {
+              "0": 1.0,
+              "1": -0.3515625,
+              "2": -8.4375,
+              "3": 7.55859375,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 74.35546875,
+              "7": -76.2890625,
+              "8": -10.546875,
+              "9": 2.4609375,
+              "10": 1.318359375,
+              "11": -3.0,
+              "12": 4.0,
+              "15": -4.669921875,
+              "16": 2.0,
+              "13": -77.41015625,
+              "14": 55.0,
+              "17": -69.994140625,
+              "18": 33.0,
+              "19": 79.716796875,
+              "20": -68.0,
+              "21": -5.0,
+              "22": -12.0
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "44c1137283dc4f2d8f8b70c4c5b160f6",
+            "start_ms": 59
+          },
+          {
+            "frame_id": "e2cb3766c2ff4ba0a1223d1faa28a910",
+            "name": "건미세왼뒤90도",
+            "time_ms": 85,
+            "angles": {
+              "0": 1.0,
+              "1": -0.17578125,
+              "2": -9.404296875,
+              "3": 8.7890625,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 69.169921875,
+              "7": -70.48828125,
+              "8": -11.25,
+              "9": 4.5703125,
+              "10": 1.0,
+              "11": -3.0,
+              "12": 2.791015625,
+              "15": 2.8125,
+              "16": -2.197265625,
+              "13": -61.0,
+              "14": 52.0,
+              "17": -32.51953125,
+              "18": 30.1796875,
+              "19": 61.787109375,
+              "20": -69.0,
+              "21": 2.197265625,
+              "22": -3.8671875
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "e2cb3766c2ff4ba0a1223d1faa28a910",
+            "start_ms": 107
+          },
+          {
+            "frame_id": "83f944e7751248a88503fe3af783fdf5",
+            "name": "건미세왼들90도",
+            "time_ms": 48,
+            "angles": {
+              "0": 1.0,
+              "1": -0.3515625,
+              "2": -8.4375,
+              "3": 7.55859375,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 74.35546875,
+              "7": -76.2890625,
+              "8": -10.546875,
+              "9": 2.4609375,
+              "10": 1.0,
+              "11": -3.0,
+              "12": 6.318359375,
+              "15": -2.0,
+              "16": 6.0,
+              "13": -52.0,
+              "14": 65.0,
+              "17": -30.70703125,
+              "18": 73.0,
+              "19": 64.0,
+              "20": -91.0,
+              "21": 16.0,
+              "22": 5.77734375
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "83f944e7751248a88503fe3af783fdf5",
+            "start_ms": 252
+          },
+          {
+            "frame_id": "b9389d4f0d1849948a3cfeb8a305dae8",
+            "name": "건미세오뒤90도",
+            "time_ms": 85,
+            "angles": {
+              "0": 1.0,
+              "1": 0.263671875,
+              "2": -9.755859375,
+              "3": 9.755859375,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 67.236328125,
+              "7": -68.818359375,
+              "8": -11.6015625,
+              "9": 4.833984375,
+              "10": 0.59375,
+              "11": -3.0,
+              "12": 3.669921875,
+              "15": 3.427734375,
+              "16": 0.087890625,
+              "13": -53.0,
+              "14": 58.0,
+              "17": -29.125,
+              "18": 34.0,
+              "19": 64.951171875,
+              "20": -65.0,
+              "21": 2.021484375,
+              "22": -4.482421875
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "b9389d4f0d1849948a3cfeb8a305dae8",
+            "start_ms": 300
+          }
+        ]
+      }
+    },
+    {
+      "path": "건미세90도(2회)",
+      "gui": null,
+      "runtime": {
+        "name": "건미세90도(2회)",
+        "max_seq_ms": 3505,
+        "repeat_count": 2,
+        "playback_speed": 1.05,
+        "repeatable": true,
+        "start_pose": "건미세오들90도",
+        "end_pose": "건미세오뒤90도",
+        "completion": {
+          "position_tolerance_deg": 5.0,
+          "settle_duration_ms": 80,
+          "settle_timeout_ms": 3000
+        },
+        "frames": [
+          {
+            "frame_id": "44c1137283dc4f2d8f8b70c4c5b160f6",
+            "name": "건미세오들90도",
+            "time_ms": 48,
+            "angles": {
+              "0": 1.0,
+              "1": -0.3515625,
+              "2": -8.4375,
+              "3": 7.55859375,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 74.35546875,
+              "7": -76.2890625,
+              "8": -10.546875,
+              "9": 2.4609375,
+              "10": 1.318359375,
+              "11": -3.0,
+              "12": 4.0,
+              "15": -4.669921875,
+              "16": 2.0,
+              "13": -77.41015625,
+              "14": 55.0,
+              "17": -69.994140625,
+              "18": 33.0,
+              "19": 79.716796875,
+              "20": -68.0,
+              "21": -5.0,
+              "22": -12.0
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "44c1137283dc4f2d8f8b70c4c5b160f6",
+            "start_ms": 59
+          },
+          {
+            "frame_id": "e2cb3766c2ff4ba0a1223d1faa28a910",
+            "name": "건미세왼뒤90도",
+            "time_ms": 85,
+            "angles": {
+              "0": 1.0,
+              "1": -0.17578125,
+              "2": -9.404296875,
+              "3": 8.7890625,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 69.169921875,
+              "7": -70.48828125,
+              "8": -11.25,
+              "9": 4.5703125,
+              "10": 1.0,
+              "11": -3.0,
+              "12": 2.791015625,
+              "15": 2.8125,
+              "16": -2.197265625,
+              "13": -61.0,
+              "14": 52.0,
+              "17": -32.51953125,
+              "18": 30.1796875,
+              "19": 61.787109375,
+              "20": -69.0,
+              "21": 2.197265625,
+              "22": -3.8671875
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "e2cb3766c2ff4ba0a1223d1faa28a910",
+            "start_ms": 107
+          },
+          {
+            "frame_id": "83f944e7751248a88503fe3af783fdf5",
+            "name": "건미세왼들90도",
+            "time_ms": 48,
+            "angles": {
+              "0": 1.0,
+              "1": -0.3515625,
+              "2": -8.4375,
+              "3": 7.55859375,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 74.35546875,
+              "7": -76.2890625,
+              "8": -10.546875,
+              "9": 2.4609375,
+              "10": 1.0,
+              "11": -3.0,
+              "12": 6.318359375,
+              "15": -2.0,
+              "16": 6.0,
+              "13": -52.0,
+              "14": 65.0,
+              "17": -30.70703125,
+              "18": 73.0,
+              "19": 64.0,
+              "20": -91.0,
+              "21": 16.0,
+              "22": 5.77734375
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "83f944e7751248a88503fe3af783fdf5",
+            "start_ms": 252
+          },
+          {
+            "frame_id": "b9389d4f0d1849948a3cfeb8a305dae8",
+            "name": "건미세오뒤90도",
+            "time_ms": 85,
+            "angles": {
+              "0": 1.0,
+              "1": 0.263671875,
+              "2": -9.755859375,
+              "3": 9.755859375,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 67.236328125,
+              "7": -68.818359375,
+              "8": -11.6015625,
+              "9": 4.833984375,
+              "10": 0.59375,
+              "11": -3.0,
+              "12": 3.669921875,
+              "15": 3.427734375,
+              "16": 0.087890625,
+              "13": -53.0,
+              "14": 58.0,
+              "17": -29.125,
+              "18": 34.0,
+              "19": 64.951171875,
+              "20": -65.0,
+              "21": 2.021484375,
+              "22": -4.482421875
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "b9389d4f0d1849948a3cfeb8a305dae8",
+            "start_ms": 300
+          }
+        ]
+      }
+    },
+    {
+      "path": "건미세90도(3회)",
+      "gui": null,
+      "runtime": {
+        "name": "건미세90도(3회)",
+        "max_seq_ms": 3505,
+        "repeat_count": 3,
+        "playback_speed": 1.05,
+        "repeatable": true,
+        "start_pose": "건미세오들90도",
+        "end_pose": "건미세오뒤90도",
+        "completion": {
+          "position_tolerance_deg": 5.0,
+          "settle_duration_ms": 80,
+          "settle_timeout_ms": 3000
+        },
+        "frames": [
+          {
+            "frame_id": "44c1137283dc4f2d8f8b70c4c5b160f6",
+            "name": "건미세오들90도",
+            "time_ms": 48,
+            "angles": {
+              "0": 1.0,
+              "1": -0.3515625,
+              "2": -8.4375,
+              "3": 7.55859375,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 74.35546875,
+              "7": -76.2890625,
+              "8": -10.546875,
+              "9": 2.4609375,
+              "10": 1.318359375,
+              "11": -3.0,
+              "12": 4.0,
+              "15": -4.669921875,
+              "16": 2.0,
+              "13": -77.41015625,
+              "14": 55.0,
+              "17": -69.994140625,
+              "18": 33.0,
+              "19": 79.716796875,
+              "20": -68.0,
+              "21": -5.0,
+              "22": -12.0
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "44c1137283dc4f2d8f8b70c4c5b160f6",
+            "start_ms": 59
+          },
+          {
+            "frame_id": "e2cb3766c2ff4ba0a1223d1faa28a910",
+            "name": "건미세왼뒤90도",
+            "time_ms": 85,
+            "angles": {
+              "0": 1.0,
+              "1": -0.17578125,
+              "2": -9.404296875,
+              "3": 8.7890625,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 69.169921875,
+              "7": -70.48828125,
+              "8": -11.25,
+              "9": 4.5703125,
+              "10": 1.0,
+              "11": -3.0,
+              "12": 2.791015625,
+              "15": 2.8125,
+              "16": -2.197265625,
+              "13": -61.0,
+              "14": 52.0,
+              "17": -32.51953125,
+              "18": 30.1796875,
+              "19": 61.787109375,
+              "20": -69.0,
+              "21": 2.197265625,
+              "22": -3.8671875
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "e2cb3766c2ff4ba0a1223d1faa28a910",
+            "start_ms": 107
+          },
+          {
+            "frame_id": "83f944e7751248a88503fe3af783fdf5",
+            "name": "건미세왼들90도",
+            "time_ms": 48,
+            "angles": {
+              "0": 1.0,
+              "1": -0.3515625,
+              "2": -8.4375,
+              "3": 7.55859375,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 74.35546875,
+              "7": -76.2890625,
+              "8": -10.546875,
+              "9": 2.4609375,
+              "10": 1.0,
+              "11": -3.0,
+              "12": 6.318359375,
+              "15": -2.0,
+              "16": 6.0,
+              "13": -52.0,
+              "14": 65.0,
+              "17": -30.70703125,
+              "18": 73.0,
+              "19": 64.0,
+              "20": -91.0,
+              "21": 16.0,
+              "22": 5.77734375
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "83f944e7751248a88503fe3af783fdf5",
+            "start_ms": 252
+          },
+          {
+            "frame_id": "b9389d4f0d1849948a3cfeb8a305dae8",
+            "name": "건미세오뒤90도",
+            "time_ms": 85,
+            "angles": {
+              "0": 1.0,
+              "1": 0.263671875,
+              "2": -9.755859375,
+              "3": 9.755859375,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 67.236328125,
+              "7": -68.818359375,
+              "8": -11.6015625,
+              "9": 4.833984375,
+              "10": 0.59375,
+              "11": -3.0,
+              "12": 3.669921875,
+              "15": 3.427734375,
+              "16": 0.087890625,
+              "13": -53.0,
+              "14": 58.0,
+              "17": -29.125,
+              "18": 34.0,
+              "19": 64.951171875,
+              "20": -65.0,
+              "21": 2.021484375,
+              "22": -4.482421875
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "b9389d4f0d1849948a3cfeb8a305dae8",
+            "start_ms": 300
+          }
+        ]
+      }
+    },
+    {
+      "path": "건미세90도(4회)",
+      "gui": null,
+      "runtime": {
+        "name": "건미세90도(4회)",
+        "max_seq_ms": 3505,
+        "repeat_count": 4,
+        "playback_speed": 1.05,
+        "repeatable": true,
+        "start_pose": "건미세오들90도",
+        "end_pose": "건미세오뒤90도",
+        "completion": {
+          "position_tolerance_deg": 5.0,
+          "settle_duration_ms": 80,
+          "settle_timeout_ms": 3000
+        },
+        "frames": [
+          {
+            "frame_id": "44c1137283dc4f2d8f8b70c4c5b160f6",
+            "name": "건미세오들90도",
+            "time_ms": 48,
+            "angles": {
+              "0": 1.0,
+              "1": -0.3515625,
+              "2": -8.4375,
+              "3": 7.55859375,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 74.35546875,
+              "7": -76.2890625,
+              "8": -10.546875,
+              "9": 2.4609375,
+              "10": 1.318359375,
+              "11": -3.0,
+              "12": 4.0,
+              "15": -4.669921875,
+              "16": 2.0,
+              "13": -77.41015625,
+              "14": 55.0,
+              "17": -69.994140625,
+              "18": 33.0,
+              "19": 79.716796875,
+              "20": -68.0,
+              "21": -5.0,
+              "22": -12.0
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "44c1137283dc4f2d8f8b70c4c5b160f6",
+            "start_ms": 59
+          },
+          {
+            "frame_id": "e2cb3766c2ff4ba0a1223d1faa28a910",
+            "name": "건미세왼뒤90도",
+            "time_ms": 85,
+            "angles": {
+              "0": 1.0,
+              "1": -0.17578125,
+              "2": -9.404296875,
+              "3": 8.7890625,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 69.169921875,
+              "7": -70.48828125,
+              "8": -11.25,
+              "9": 4.5703125,
+              "10": 1.0,
+              "11": -3.0,
+              "12": 2.791015625,
+              "15": 2.8125,
+              "16": -2.197265625,
+              "13": -61.0,
+              "14": 52.0,
+              "17": -32.51953125,
+              "18": 30.1796875,
+              "19": 61.787109375,
+              "20": -69.0,
+              "21": 2.197265625,
+              "22": -3.8671875
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "e2cb3766c2ff4ba0a1223d1faa28a910",
+            "start_ms": 107
+          },
+          {
+            "frame_id": "83f944e7751248a88503fe3af783fdf5",
+            "name": "건미세왼들90도",
+            "time_ms": 48,
+            "angles": {
+              "0": 1.0,
+              "1": -0.3515625,
+              "2": -8.4375,
+              "3": 7.55859375,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 74.35546875,
+              "7": -76.2890625,
+              "8": -10.546875,
+              "9": 2.4609375,
+              "10": 1.0,
+              "11": -3.0,
+              "12": 6.318359375,
+              "15": -2.0,
+              "16": 6.0,
+              "13": -52.0,
+              "14": 65.0,
+              "17": -30.70703125,
+              "18": 73.0,
+              "19": 64.0,
+              "20": -91.0,
+              "21": 16.0,
+              "22": 5.77734375
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "83f944e7751248a88503fe3af783fdf5",
+            "start_ms": 252
+          },
+          {
+            "frame_id": "b9389d4f0d1849948a3cfeb8a305dae8",
+            "name": "건미세오뒤90도",
+            "time_ms": 85,
+            "angles": {
+              "0": 1.0,
+              "1": 0.263671875,
+              "2": -9.755859375,
+              "3": 9.755859375,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 67.236328125,
+              "7": -68.818359375,
+              "8": -11.6015625,
+              "9": 4.833984375,
+              "10": 0.59375,
+              "11": -3.0,
+              "12": 3.669921875,
+              "15": 3.427734375,
+              "16": 0.087890625,
+              "13": -53.0,
+              "14": 58.0,
+              "17": -29.125,
+              "18": 34.0,
+              "19": 64.951171875,
+              "20": -65.0,
+              "21": 2.021484375,
+              "22": -4.482421875
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "b9389d4f0d1849948a3cfeb8a305dae8",
+            "start_ms": 300
+          }
+        ]
+      }
+    },
+    {
+      "path": "건미세오뒤에서 기본자세45도/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건미세오뒤에서 기본자세45도/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건미세오뒤에서 기본자세45도/frames/0/angles/5",
+      "gui": -13.271484375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건미세오뒤에서 기본자세45도/frames/1/angles/4",
+      "gui": 20.7421875,
+      "runtime": 18.0
+    },
+    {
+      "path": "건미세오뒤에서 기본자세45도/frames/1/angles/5",
+      "gui": -18.6328125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건미세오뒤에서 기본자세90도/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건미세오뒤에서 기본자세90도/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건미세오뒤에서 기본자세90도/frames/0/angles/5",
+      "gui": -13.271484375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건미세오뒤에서 기본자세90도/frames/1/angles/4",
+      "gui": 20.830078125,
+      "runtime": 18.0
+    },
+    {
+      "path": "건미세오뒤에서 기본자세90도/frames/1/angles/5",
+      "gui": -18.369140625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건미세오뒤에서 오뒤0도/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건미세오뒤에서 오뒤0도/frames/0/angles/4",
+      "gui": 16.435546875,
+      "runtime": 18.0
+    },
+    {
+      "path": "건미세오뒤에서 오뒤0도/frames/0/angles/5",
+      "gui": -17.314453125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건미세오뒤에서 오뒤0도/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건미세오뒤에서 오뒤0도/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건미세오뒤에서 오뒤45도/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건미세오뒤에서 오뒤45도/frames/0/angles/4",
+      "gui": 16.435546875,
+      "runtime": 18.0
+    },
+    {
+      "path": "건미세오뒤에서 오뒤45도/frames/0/angles/5",
+      "gui": -17.314453125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건미세오뒤에서 오뒤45도/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건미세오뒤에서 오뒤45도/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건오뒤에서 기본자세(0도)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건오뒤에서 기본자세(0도)/frames/1/angles/4",
+      "gui": 20.7421875,
+      "runtime": 18.0
+    },
+    {
+      "path": "건오뒤에서 기본자세(0도)/frames/1/angles/5",
+      "gui": -18.6328125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건오뒤에서 기본자세(카메라45도)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건오뒤에서 기본자세(카메라45도)/frames/1/angles/4",
+      "gui": 20.7421875,
+      "runtime": 18.0
+    },
+    {
+      "path": "건오뒤에서 기본자세(카메라45도)/frames/1/angles/5",
+      "gui": -18.6328125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건오뒤에서 미세오뒤45도/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건오뒤에서 미세오뒤45도/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건오뒤에서 미세오뒤45도/frames/0/angles/5",
+      "gui": -13.271484375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건오뒤에서 미세오뒤45도/frames/1/angles/4",
+      "gui": 9.140625,
+      "runtime": 18.0
+    },
+    {
+      "path": "건오뒤에서 미세오뒤45도/frames/1/angles/5",
+      "gui": -8.96484375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건오뒤카메라90도/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건오뒤카메라90도/frames/0/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건오뒤카메라90도/frames/0/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건왼뒤에서 기본자세(0도)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건왼뒤에서 기본자세(0도)/frames/0/angles/4",
+      "gui": 16.435546875,
+      "runtime": 18.0
+    },
+    {
+      "path": "건왼뒤에서 기본자세(0도)/frames/0/angles/5",
+      "gui": -17.314453125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건왼뒤에서 기본자세(0도)/frames/1/angles/4",
+      "gui": 20.7421875,
+      "runtime": 18.0
+    },
+    {
+      "path": "건왼뒤에서 기본자세(0도)/frames/1/angles/5",
+      "gui": -18.6328125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건전진45도(2회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건전진45도(2회)/frames/2/angles/4",
+      "gui": 16.435546875,
+      "runtime": 18.0
+    },
+    {
+      "path": "건전진45도(2회)/frames/2/angles/5",
+      "gui": -17.314453125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건전진45도(2회)/frames/3/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건전진45도(2회)/frames/3/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건전진45도(4회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건전진45도(4회)/frames/2/angles/4",
+      "gui": 16.435546875,
+      "runtime": 18.0
+    },
+    {
+      "path": "건전진45도(4회)/frames/2/angles/5",
+      "gui": -17.314453125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건전진45도(4회)/frames/3/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건전진45도(4회)/frames/3/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건전진45도(6회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건전진45도(6회)/frames/2/angles/4",
+      "gui": 16.435546875,
+      "runtime": 18.0
+    },
+    {
+      "path": "건전진45도(6회)/frames/2/angles/5",
+      "gui": -17.314453125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건전진45도(6회)/frames/3/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건전진45도(6회)/frames/3/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건전진45도(8회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건전진45도(8회)/frames/2/angles/4",
+      "gui": 16.435546875,
+      "runtime": 18.0
+    },
+    {
+      "path": "건전진45도(8회)/frames/2/angles/5",
+      "gui": -17.314453125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건전진45도(8회)/frames/3/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건전진45도(8회)/frames/3/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건전진90도(2회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건전진90도(2회)/frames/2/angles/4",
+      "gui": 16.435546875,
+      "runtime": 18.0
+    },
+    {
+      "path": "건전진90도(2회)/frames/2/angles/5",
+      "gui": -17.314453125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건전진90도(2회)/frames/3/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건전진90도(2회)/frames/3/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건전진90도(4회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건전진90도(4회)/frames/2/angles/4",
+      "gui": 16.435546875,
+      "runtime": 18.0
+    },
+    {
+      "path": "건전진90도(4회)/frames/2/angles/5",
+      "gui": -17.314453125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건전진90도(4회)/frames/3/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건전진90도(4회)/frames/3/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건전진90도(6회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건전진90도(6회)/frames/2/angles/4",
+      "gui": 16.435546875,
+      "runtime": 18.0
+    },
+    {
+      "path": "건전진90도(6회)/frames/2/angles/5",
+      "gui": -17.314453125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건전진90도(6회)/frames/3/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건전진90도(6회)/frames/3/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건전진90도(8회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건전진90도(8회)/frames/2/angles/4",
+      "gui": 16.435546875,
+      "runtime": 18.0
+    },
+    {
+      "path": "건전진90도(8회)/frames/2/angles/5",
+      "gui": -17.314453125,
+      "runtime": -18.0
+    },
+    {
+      "path": "건전진90도(8회)/frames/3/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건전진90도(8회)/frames/3/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전0도(1회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건제자리좌회전0도(1회)/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전0도(1회)/frames/0/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전0도(1회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전0도(1회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전0도(2회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건제자리좌회전0도(2회)/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전0도(2회)/frames/0/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전0도(2회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전0도(2회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전0도(3회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건제자리좌회전0도(3회)/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전0도(3회)/frames/0/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전0도(3회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전0도(3회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전0도(4회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건제자리좌회전0도(4회)/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전0도(4회)/frames/0/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전0도(4회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전0도(4회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전0도(5회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건제자리좌회전0도(5회)/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전0도(5회)/frames/0/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전0도(5회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전0도(5회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전0도(6회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건제자리좌회전0도(6회)/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전0도(6회)/frames/0/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전0도(6회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전0도(6회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전45도(1회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건제자리좌회전45도(1회)/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전45도(1회)/frames/0/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전45도(1회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전45도(1회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전45도(2회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건제자리좌회전45도(2회)/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전45도(2회)/frames/0/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전45도(2회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전45도(2회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전45도(3회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건제자리좌회전45도(3회)/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전45도(3회)/frames/0/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전45도(3회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전45도(3회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전45도(4회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건제자리좌회전45도(4회)/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전45도(4회)/frames/0/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전45도(4회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전45도(4회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전45도(5회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건제자리좌회전45도(5회)/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전45도(5회)/frames/0/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전45도(5회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전45도(5회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전45도(6회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건제자리좌회전45도(6회)/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전45도(6회)/frames/0/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전45도(6회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전45도(6회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전90도(1회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건제자리좌회전90도(1회)/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전90도(1회)/frames/0/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전90도(1회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전90도(1회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전90도(2회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건제자리좌회전90도(2회)/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전90도(2회)/frames/0/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전90도(2회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전90도(2회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전90도(3회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건제자리좌회전90도(3회)/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전90도(3회)/frames/0/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전90도(3회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전90도(3회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전90도(4회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건제자리좌회전90도(4회)/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전90도(4회)/frames/0/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전90도(4회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전90도(4회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전90도(5회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건제자리좌회전90도(5회)/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전90도(5회)/frames/0/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전90도(5회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전90도(5회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전90도(6회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "건제자리좌회전90도(6회)/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전90도(6회)/frames/0/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "건제자리좌회전90도(6회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "건제자리좌회전90도(6회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "유미세오옆꽃게0도/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "유미세오옆꽃게0도/frames/0/angles/15",
+      "gui": -5.537109375,
+      "runtime": -7.537109375
+    },
+    {
+      "path": "유미세오옆꽃게0도/frames/0/angles/19",
+      "gui": 96.0,
+      "runtime": 97.0
+    },
+    {
+      "path": "유미세오옆꽃게0도/frames/0/angles/21",
+      "gui": -15.3125,
+      "runtime": -25.3125
+    },
+    {
+      "path": "유미세오옆꽃게0도/frames/0/angles/22",
+      "gui": -10.228515625,
+      "runtime": -9.228515625
+    },
+    {
+      "path": "유미세오옆꽃게0도/frames/0/angles/4",
+      "gui": 8.349609375,
+      "runtime": 18.0
+    },
+    {
+      "path": "유미세오옆꽃게0도/frames/0/angles/5",
+      "gui": -9.931640625,
+      "runtime": -18.0
+    },
+    {
+      "path": "유미세오옆꽃게0도/frames/0/frame_id",
+      "gui": "13e99d176d784db1a5c78c8a9215c252",
+      "runtime": "6a4a6c918da0463a8d3d6b525369961d"
+    },
+    {
+      "path": "유미세오옆꽃게0도/frames/0/name",
+      "gui": "Frame 797",
+      "runtime": "미세오옆꽃게--1"
+    },
+    {
+      "path": "유미세오옆꽃게0도/frames/0/source_frame_id",
+      "gui": "13e99d176d784db1a5c78c8a9215c252",
+      "runtime": "6a4a6c918da0463a8d3d6b525369961d"
+    },
+    {
+      "path": "유미세오옆꽃게0도/frames/1/angles/4",
+      "gui": 21.0,
+      "runtime": 18.0
+    },
+    {
+      "path": "유미세오옆꽃게0도/frames/1/angles/5",
+      "gui": -9.931640625,
+      "runtime": -18.0
+    },
+    {
+      "path": "유미세오옆꽃게0도/frames/2/angles/4",
+      "gui": 21.0,
+      "runtime": 18.0
+    },
+    {
+      "path": "유미세오옆꽃게0도/frames/2/angles/5",
+      "gui": -9.755859375,
+      "runtime": -18.0
+    },
+    {
+      "path": "유미세오옆꽃게0도/frames/3/angles/4",
+      "gui": 21.181640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "유미세오옆꽃게0도/frames/3/angles/5",
+      "gui": -17.578125,
+      "runtime": -18.0
+    },
+    {
+      "path": "유미세오옆꽃게0도/start_pose",
+      "gui": "Frame 797",
+      "runtime": "미세오옆꽃게--1"
+    },
+    {
+      "path": "유미세오옆꽃게90도/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "유미세오옆꽃게90도/frames/0/angles/15",
+      "gui": -5.537109375,
+      "runtime": -7.537109375
+    },
+    {
+      "path": "유미세오옆꽃게90도/frames/0/angles/19",
+      "gui": 96.0,
+      "runtime": 97.0
+    },
+    {
+      "path": "유미세오옆꽃게90도/frames/0/angles/21",
+      "gui": -15.0,
+      "runtime": -25.3125
+    },
+    {
+      "path": "유미세오옆꽃게90도/frames/0/angles/22",
+      "gui": -10.228515625,
+      "runtime": -9.228515625
+    },
+    {
+      "path": "유미세오옆꽃게90도/frames/0/angles/4",
+      "gui": 8.349609375,
+      "runtime": 18.0
+    },
+    {
+      "path": "유미세오옆꽃게90도/frames/0/angles/5",
+      "gui": -9.931640625,
+      "runtime": -18.0
+    },
+    {
+      "path": "유미세오옆꽃게90도/frames/1/angles/4",
+      "gui": 21.0,
+      "runtime": 18.0
+    },
+    {
+      "path": "유미세오옆꽃게90도/frames/1/angles/5",
+      "gui": -9.931640625,
+      "runtime": -18.0
+    },
+    {
+      "path": "유미세오옆꽃게90도/frames/2/angles/4",
+      "gui": 21.0,
+      "runtime": 18.0
+    },
+    {
+      "path": "유미세오옆꽃게90도/frames/2/angles/5",
+      "gui": -9.755859375,
+      "runtime": -18.0
+    },
+    {
+      "path": "유미세오옆꽃게90도/frames/3/angles/4",
+      "gui": 21.0,
+      "runtime": 18.0
+    },
+    {
+      "path": "유미세오옆꽃게90도/frames/3/angles/5",
+      "gui": -9.755859375,
+      "runtime": -18.0
+    },
+    {
+      "path": "유미세왼옆꽃게0도/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "유미세왼옆꽃게0도/frames/0/angles/4",
+      "gui": 20.7421875,
+      "runtime": 18.0
+    },
+    {
+      "path": "유미세왼옆꽃게0도/frames/0/angles/5",
+      "gui": -18.720703125,
+      "runtime": -18.0
+    },
+    {
+      "path": "유미세왼옆꽃게0도/frames/1/angles/4",
+      "gui": 19.3359375,
+      "runtime": 18.0
+    },
+    {
+      "path": "유미세왼옆꽃게0도/frames/1/angles/5",
+      "gui": -18.45703125,
+      "runtime": -18.0
+    },
+    {
+      "path": "유미세왼옆꽃게0도/frames/2/angles/4",
+      "gui": 17.666015625,
+      "runtime": 18.0
+    },
+    {
+      "path": "유미세왼옆꽃게0도/frames/2/angles/5",
+      "gui": -17.9296875,
+      "runtime": -18.0
+    },
+    {
+      "path": "유미세왼옆꽃게0도/frames/3/angles/4",
+      "gui": 22.0,
+      "runtime": 18.0
+    },
+    {
+      "path": "유미세왼옆꽃게0도/frames/3/angles/5",
+      "gui": -19.0,
+      "runtime": -18.0
+    },
+    {
+      "path": "유미세왼옆꽃게90도/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "유미세왼옆꽃게90도/frames/0/angles/4",
+      "gui": 20.7421875,
+      "runtime": 18.0
+    },
+    {
+      "path": "유미세왼옆꽃게90도/frames/0/angles/5",
+      "gui": -18.720703125,
+      "runtime": -18.0
+    },
+    {
+      "path": "유미세왼옆꽃게90도/frames/1/angles/4",
+      "gui": 19.3359375,
+      "runtime": 18.0
+    },
+    {
+      "path": "유미세왼옆꽃게90도/frames/1/angles/5",
+      "gui": -18.45703125,
+      "runtime": -18.0
+    },
+    {
+      "path": "유미세왼옆꽃게90도/frames/2/angles/4",
+      "gui": 17.666015625,
+      "runtime": 18.0
+    },
+    {
+      "path": "유미세왼옆꽃게90도/frames/2/angles/5",
+      "gui": -17.9296875,
+      "runtime": -18.0
+    },
+    {
+      "path": "유미세왼옆꽃게90도/frames/3/angles/4",
+      "gui": 22.0,
+      "runtime": 18.0
+    },
+    {
+      "path": "유미세왼옆꽃게90도/frames/3/angles/5",
+      "gui": -19.0,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐골넣기/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐공잡기리그랩까지 실전",
+      "gui": null,
+      "runtime": {
+        "name": "찐공잡기리그랩까지 실전",
+        "max_seq_ms": 8000,
+        "repeat_count": 1,
+        "playback_speed": 1.05,
+        "repeatable": true,
+        "start_pose": "음",
+        "end_pose": "기본자세4",
+        "completion": {
+          "position_tolerance_deg": 5.0,
+          "settle_duration_ms": 80,
+          "settle_timeout_ms": 3000
+        },
+        "frames": [
+          {
+            "frame_id": "fc6b61989c3f46398d96ea0a2fbed803",
+            "name": "음",
+            "time_ms": 550,
+            "angles": {
+              "0": -0.087890625,
+              "1": -0.439453125,
+              "2": -0.3515625,
+              "3": 0.263671875,
+              "4": 19.951171875,
+              "5": -21.005859375,
+              "6": 94.74609375,
+              "7": -94.74609375,
+              "8": -7.119140625,
+              "9": 2.0,
+              "10": -0.52734375,
+              "11": -4.130859375,
+              "12": 2.021484375,
+              "15": 3.779296875,
+              "16": -3.427734375,
+              "13": -80.771484375,
+              "14": 81.826171875,
+              "17": -126.298828125,
+              "18": 126.123046875,
+              "19": 131.66015625,
+              "20": -131.748046875,
+              "21": 5.712890625,
+              "22": -2.021484375
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "start_ms": 0,
+            "source_frame_id": "fc6b61989c3f46398d96ea0a2fbed803",
+            "lift_early_arrival": true
+          },
+          {
+            "frame_id": "2c4e582c5d3b42f7991aee9c595bc141",
+            "name": "잡기직전에 허리돌리기",
+            "time_ms": 500,
+            "angles": {
+              "0": -0.087890625,
+              "1": -0.439453125,
+              "2": -0.3515625,
+              "3": 0.263671875,
+              "4": 19.951171875,
+              "5": -21.005859375,
+              "6": 94.74609375,
+              "7": -94.74609375,
+              "8": -7.119140625,
+              "9": -0.3515625,
+              "10": -0.52734375,
+              "11": -67.1484375,
+              "12": 2.021484375,
+              "15": 3.779296875,
+              "16": -3.427734375,
+              "13": -80.771484375,
+              "14": 81.826171875,
+              "17": -126.298828125,
+              "18": 126.123046875,
+              "19": 131.66015625,
+              "20": -131.748046875,
+              "21": 5.712890625,
+              "22": -2.021484375
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "start_ms": 550,
+            "source_frame_id": "2c4e582c5d3b42f7991aee9c595bc141",
+            "lift_early_arrival": true
+          },
+          {
+            "frame_id": "0f3bb361384c45b99500df0f6aa32156",
+            "name": "허리돌리고숙임1",
+            "time_ms": 700,
+            "angles": {
+              "0": -0.615234375,
+              "1": -0.263671875,
+              "2": -0.87890625,
+              "3": -15.64453125,
+              "4": 18.369140625,
+              "5": -24.267578125,
+              "6": 92.63671875,
+              "7": -10.634765625,
+              "8": -7.20703125,
+              "9": 38.14453125,
+              "10": -0.791015625,
+              "11": -72.94921875,
+              "12": 1.845703125,
+              "15": 4.130859375,
+              "16": -3.779296875,
+              "13": -65.7421875,
+              "14": 65.7421875,
+              "17": -125.33203125,
+              "18": 123.486328125,
+              "19": 131.396484375,
+              "20": -132.626953125,
+              "21": 6.416015625,
+              "22": -3.076171875
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "0f3bb361384c45b99500df0f6aa32156",
+            "start_ms": 1050
+          },
+          {
+            "frame_id": "33d788bb392d44f0a6fc797ce28335cb",
+            "name": "손피기",
+            "time_ms": 800,
+            "angles": {
+              "0": -0.3515625,
+              "1": -0.263671875,
+              "2": -0.703125,
+              "3": -32.6953125,
+              "4": 20.126953125,
+              "5": -33.134765625,
+              "6": 93.1640625,
+              "7": 1.669921875,
+              "8": -7.20703125,
+              "9": 43.41796875,
+              "10": -1.845703125,
+              "11": -72.7734375,
+              "12": 2.724609375,
+              "15": 3.69140625,
+              "16": -2.98828125,
+              "13": -94.04296875,
+              "14": 93.955078125,
+              "17": -125.419921875,
+              "18": 125.244140625,
+              "19": 131.66015625,
+              "20": -132.802734375,
+              "21": 6.15234375,
+              "22": -2.021484375
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "start_ms": 1800,
+            "source_frame_id": "33d788bb392d44f0a6fc797ce28335cb",
+            "lift_early_arrival": true
+          },
+          {
+            "frame_id": "02884fcd811c44e0a647e04d6915d83d",
+            "name": "공잡음 최신2",
+            "time_ms": 900,
+            "angles": {
+              "0": -0.263671875,
+              "1": -0.3515625,
+              "2": -0.615234375,
+              "3": -28.30078125,
+              "4": 19.599609375,
+              "5": -31.453125,
+              "6": 94.306640625,
+              "7": 7.646484375,
+              "8": -7.20703125,
+              "9": 2.0,
+              "10": -0.703125,
+              "11": -73.65234375,
+              "12": 2.197265625,
+              "15": 4.130859375,
+              "16": -3.69140625,
+              "13": -89.736328125,
+              "14": 90.439453125,
+              "17": -126.03515625,
+              "18": 126.03515625,
+              "19": 131.66015625,
+              "20": -132.099609375,
+              "21": 6.064453125,
+              "22": -2.4609375
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "start_ms": 2600,
+            "source_frame_id": "02884fcd811c44e0a647e04d6915d83d",
+            "lift_early_arrival": true
+          },
+          {
+            "frame_id": "fc6b61989c3f46398d96ea0a2fbed803",
+            "name": "음",
+            "time_ms": 500,
+            "angles": {
+              "0": -0.087890625,
+              "1": -0.439453125,
+              "2": -0.3515625,
+              "3": 0.263671875,
+              "4": 19.951171875,
+              "5": -21.005859375,
+              "6": 94.74609375,
+              "7": -94.74609375,
+              "8": -7.119140625,
+              "9": 2.0,
+              "10": -0.52734375,
+              "11": -4.130859375,
+              "12": 2.021484375,
+              "15": 3.779296875,
+              "16": -3.427734375,
+              "13": -80.771484375,
+              "14": 81.826171875,
+              "17": -126.298828125,
+              "18": 126.123046875,
+              "19": 131.66015625,
+              "20": -131.748046875,
+              "21": 5.712890625,
+              "22": -2.021484375
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "start_ms": 3500,
+            "source_frame_id": "fc6b61989c3f46398d96ea0a2fbed803",
+            "lift_early_arrival": true
+          },
+          {
+            "name": "기본자세",
+            "time_ms": 900,
+            "angles": {
+              "0": 0.087890625,
+              "1": -0.17578125,
+              "2": -0.263671875,
+              "3": 0.263671875,
+              "4": 21.4453125,
+              "5": -21.26953125,
+              "6": 95.2734375,
+              "7": -95.2734375,
+              "8": -7.119140625,
+              "9": -3.0,
+              "10": 0.17578125,
+              "11": -4.130859375,
+              "12": 0.087890625,
+              "15": -0.439453125,
+              "16": -0.3515625,
+              "13": -44.033203125,
+              "14": 43.857421875,
+              "17": -12.392578125,
+              "18": 11.953125,
+              "19": 51.767578125,
+              "20": -52.294921875,
+              "21": 0.263671875,
+              "22": 0.087890625
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "frame_id": "44435feaee474cbdb0b5eb1dcfdc2cc7",
+            "start_ms": 4000,
+            "source_frame_id": "44435feaee474cbdb0b5eb1dcfdc2cc7",
+            "lift_early_arrival": true
+          },
+          {
+            "frame_id": "cfac1845088f4a5e8e8c46995081f377",
+            "name": "리그랩1",
+            "time_ms": 200,
+            "angles": {
+              "0": -0.17578125,
+              "1": -0.3515625,
+              "2": -0.439453125,
+              "3": -111.0,
+              "4": 20.126953125,
+              "5": -21.005859375,
+              "6": 94.658203125,
+              "7": -94.74609375,
+              "8": -7.20703125,
+              "9": 2.0,
+              "10": 0.17578125,
+              "11": -3.955078125,
+              "12": 0.966796875,
+              "15": 0.0,
+              "16": -1.142578125,
+              "13": -52.0,
+              "14": 49.0,
+              "17": -14.326171875,
+              "18": 13.18359375,
+              "19": 50.9765625,
+              "20": -52.3828125,
+              "21": 1.142578125,
+              "22": -1.142578125
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "start_ms": 4900,
+            "source_frame_id": "cfac1845088f4a5e8e8c46995081f377",
+            "lift_early_arrival": true
+          },
+          {
+            "frame_id": "e82eba456aa449deb68c6087e792537a",
+            "name": "리그랩2-2",
+            "time_ms": 300,
+            "angles": {
+              "0": -0.17578125,
+              "1": -0.3515625,
+              "2": -0.439453125,
+              "3": -111.0,
+              "4": 20.126953125,
+              "5": -21.005859375,
+              "6": 94.658203125,
+              "7": -94.74609375,
+              "8": -7.20703125,
+              "9": 50.009765625,
+              "10": 0.17578125,
+              "11": -3.955078125,
+              "12": 0.966796875,
+              "15": 0.0,
+              "16": -1.142578125,
+              "13": -52.0,
+              "14": 49.0,
+              "17": -14.326171875,
+              "18": 13.18359375,
+              "19": 50.9765625,
+              "20": -52.3828125,
+              "21": 1.142578125,
+              "22": -1.142578125
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "e82eba456aa449deb68c6087e792537a",
+            "start_ms": 5400
+          },
+          {
+            "frame_id": "cfac1845088f4a5e8e8c46995081f377",
+            "name": "리그랩1",
+            "time_ms": 100,
+            "angles": {
+              "0": -0.17578125,
+              "1": -0.3515625,
+              "2": -0.439453125,
+              "3": -111.0,
+              "4": 20.126953125,
+              "5": -21.005859375,
+              "6": 94.658203125,
+              "7": -94.74609375,
+              "8": -7.20703125,
+              "9": 2.0,
+              "10": 0.17578125,
+              "11": -3.955078125,
+              "12": 0.966796875,
+              "15": 0.0,
+              "16": -1.142578125,
+              "13": -52.0,
+              "14": 49.0,
+              "17": -14.326171875,
+              "18": 13.18359375,
+              "19": 50.9765625,
+              "20": -52.3828125,
+              "21": 1.142578125,
+              "22": -1.142578125
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "start_ms": 5700,
+            "source_frame_id": "cfac1845088f4a5e8e8c46995081f377",
+            "lift_early_arrival": true
+          },
+          {
+            "frame_id": "73761c7664294305af17ae5776dbca0d",
+            "name": "기본자세4",
+            "time_ms": 400,
+            "angles": {
+              "0": -33.22265625,
+              "1": -0.703125,
+              "2": -9.404296875,
+              "3": 8.525390625,
+              "4": 22.0,
+              "5": -19.0,
+              "6": 69.169921875,
+              "7": -70.48828125,
+              "8": -11.25,
+              "9": 2.724609375,
+              "10": 1.40625,
+              "11": -0.17578125,
+              "12": 3.1640625,
+              "15": 0.87890625,
+              "16": -0.52734375,
+              "13": -41.8359375,
+              "14": 41.30859375,
+              "17": -26.3671875,
+              "18": 23.90625,
+              "19": 65.0390625,
+              "20": -66.884765625,
+              "21": 3.076171875,
+              "22": -3.779296875
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": true,
+            "lift_early_arrival": true,
+            "source_frame_id": "73761c7664294305af17ae5776dbca0d",
+            "start_ms": 5800
+          }
+        ]
+      }
+    },
+    {
+      "path": "찐공잡기전후진-2(2회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐공잡기전후진-2(2회)/frames/0/angles/12",
+      "gui": 0.58203125,
+      "runtime": 1.58203125
+    },
+    {
+      "path": "찐공잡기전후진-2(2회)/frames/0/angles/15",
+      "gui": -3.296875,
+      "runtime": -1.296875
+    },
+    {
+      "path": "찐공잡기전후진-2(2회)/frames/0/angles/16",
+      "gui": 4.5703125,
+      "runtime": 6.5703125
+    },
+    {
+      "path": "찐공잡기전후진-2(2회)/frames/0/angles/4",
+      "gui": 9.66796875,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐공잡기전후진-2(2회)/frames/0/angles/5",
+      "gui": -9.66796875,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐공잡기전후진-2(2회)/frames/1/angles/4",
+      "gui": 10.546875,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐공잡기전후진-2(2회)/frames/1/angles/5",
+      "gui": -10.01953125,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐공잡기전후진-2(2회)/frames/2/angles/4",
+      "gui": 10.546875,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐공잡기전후진-2(2회)/frames/2/angles/5",
+      "gui": -10.01953125,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐공잡기전후진-2(2회)/frames/3/angles/4",
+      "gui": 10.37109375,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐공잡기전후진-2(2회)/frames/3/angles/5",
+      "gui": -10.1953125,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐공확인자세/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐공확인자세/frames/0/angles/4",
+      "gui": 20.302734375,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐공확인자세/frames/0/angles/5",
+      "gui": -27.59765625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐미세오뒤에서 오뒤(골대 카메라90도)",
+      "gui": null,
+      "runtime": {
+        "name": "찐미세오뒤에서 오뒤(골대 카메라90도)",
+        "max_seq_ms": 1212,
+        "repeat_count": 1,
+        "playback_speed": 1.05,
+        "repeatable": true,
+        "start_pose": "왼들401(회전준비90도)",
+        "end_pose": "오뒤412(회전준비90도)",
+        "completion": {
+          "position_tolerance_deg": 5.0,
+          "settle_duration_ms": 80,
+          "settle_timeout_ms": 3000
+        },
+        "frames": [
+          {
+            "frame_id": "059d2c5929a64676aa8b6c138012f8f4",
+            "name": "왼들401(회전준비90도)",
+            "time_ms": 67,
+            "angles": {
+              "0": 1.0,
+              "1": -0.3515625,
+              "2": -8.4375,
+              "3": 7.55859375,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 74.35546875,
+              "7": -76.2890625,
+              "8": -10.546875,
+              "9": 2.4609375,
+              "10": 0.0,
+              "11": 0.0,
+              "12": -1.66015625,
+              "15": -5.0,
+              "16": 4.0,
+              "13": -55.0,
+              "14": 80.0,
+              "17": -29.70703125,
+              "18": 56.337890625,
+              "19": 64.0,
+              "20": -58.0,
+              "21": 12.0,
+              "22": -1.7578125
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "059d2c5929a64676aa8b6c138012f8f4",
+            "start_ms": 50
+          },
+          {
+            "frame_id": "94f36aea9d384b58921e01457aed0bec",
+            "name": "오뒤412(회전준비90도)",
+            "time_ms": 118,
+            "angles": {
+              "0": 1.0,
+              "1": 0.0,
+              "2": -9.580078125,
+              "3": 9.580078125,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 67.67578125,
+              "7": -69.08203125,
+              "8": -11.42578125,
+              "9": 2.8125,
+              "10": -5.0,
+              "11": 0.0,
+              "12": -2.0,
+              "15": 2.0,
+              "16": -2.0,
+              "13": -43.59375,
+              "14": 57.568359375,
+              "17": -24.0,
+              "18": 28.0,
+              "19": 67.0,
+              "20": -60.0,
+              "21": 4.658203125,
+              "22": -1.318359375
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "94f36aea9d384b58921e01457aed0bec",
+            "start_ms": 117,
+            "playback_cycle_end": true
+          }
+        ]
+      }
+    },
+    {
+      "path": "찐미세오뒤에서 오옆꽃게90도/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐미세오뒤에서 오옆꽃게90도/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐미세오뒤에서 오옆꽃게90도/frames/0/angles/5",
+      "gui": -13.271484375,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐미세오뒤에서 오옆꽃게90도/frames/1/angles/4",
+      "gui": 21.181640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐미세오뒤에서 오옆꽃게90도/frames/1/angles/5",
+      "gui": -17.578125,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐미세오뒤에서오옆꽃게0도/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐미세오뒤에서오옆꽃게0도/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐미세오뒤에서오옆꽃게0도/frames/0/angles/5",
+      "gui": -13.271484375,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐미세오뒤에서오옆꽃게0도/frames/1/angles/4",
+      "gui": 21.181640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐미세오뒤에서오옆꽃게0도/frames/1/angles/5",
+      "gui": -17.578125,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐오뒤에서 오옆꽃게90도/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐오뒤에서 오옆꽃게90도/frames/0/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐오뒤에서 오옆꽃게90도/frames/0/angles/5",
+      "gui": -13.271484375,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐오뒤에서 오옆꽃게90도/frames/1/angles/4",
+      "gui": 21.181640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐오뒤에서 오옆꽃게90도/frames/1/angles/5",
+      "gui": -17.578125,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐오뒤에서미세오뒤(왼들)",
+      "gui": null,
+      "runtime": {
+        "name": "찐오뒤에서미세오뒤(왼들)",
+        "max_seq_ms": 3505,
+        "repeat_count": 1,
+        "playback_speed": 1.0,
+        "repeatable": true,
+        "start_pose": "왼들4111",
+        "end_pose": "미세오뒤401(90도)",
+        "completion": {
+          "position_tolerance_deg": 5.0,
+          "settle_duration_ms": 80,
+          "settle_timeout_ms": 3000
+        },
+        "frames": [
+          {
+            "frame_id": "c620d76507ae4fd09f5f447ebbba3722",
+            "name": "왼들4111",
+            "time_ms": 50,
+            "angles": {
+              "0": -60.0,
+              "1": -0.3515625,
+              "2": -8.4375,
+              "3": 7.55859375,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 74.35546875,
+              "7": -76.2890625,
+              "8": -10.546875,
+              "9": 2.4609375,
+              "10": -0.0,
+              "11": -1.0,
+              "12": 3.33984375,
+              "15": -5.0,
+              "16": 2.0,
+              "13": -55.0,
+              "14": 80.0,
+              "17": -29.70703125,
+              "18": 56.337890625,
+              "19": 64.0,
+              "20": -58.0,
+              "21": 12.0,
+              "22": -1.7578125
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "c620d76507ae4fd09f5f447ebbba3722",
+            "start_ms": 60
+          },
+          {
+            "frame_id": "0590d0d84c914ce69c68880e4ae3cda6",
+            "name": "미세오뒤401(90도)",
+            "time_ms": 105,
+            "angles": {
+              "0": 1.0,
+              "1": 0.263671875,
+              "2": -9.755859375,
+              "3": 9.755859375,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 67.236328125,
+              "7": -68.818359375,
+              "8": -11.6015625,
+              "9": 4.833984375,
+              "10": -3.0,
+              "11": 0.0,
+              "12": 1.669921875,
+              "15": 4.306640625,
+              "16": 0.087890625,
+              "13": -52.55859375,
+              "14": 62.0,
+              "17": -31.9921875,
+              "18": 33.0,
+              "19": 65.654296875,
+              "20": -65.0,
+              "21": 3.076171875,
+              "22": -4.482421875
+            },
+            "torques": {
+              "0": false,
+              "1": false,
+              "2": false,
+              "3": false,
+              "4": false,
+              "5": false,
+              "6": false,
+              "7": false,
+              "8": false,
+              "9": false,
+              "10": false,
+              "11": false,
+              "12": false,
+              "15": false,
+              "16": false,
+              "13": false,
+              "14": false,
+              "17": false,
+              "18": false,
+              "19": false,
+              "20": false,
+              "21": false,
+              "22": false
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "0590d0d84c914ce69c68880e4ae3cda6",
+            "start_ms": 110
+          }
+        ]
+      }
+    },
+    {
+      "path": "찐왼뒤에서기본자세(90도)",
+      "gui": null,
+      "runtime": {
+        "name": "찐왼뒤에서기본자세(90도)",
+        "max_seq_ms": 7045,
+        "repeat_count": 1,
+        "playback_speed": 0.9,
+        "repeatable": true,
+        "start_pose": "왼들401(90도)",
+        "end_pose": "기본자세카메라90도",
+        "completion": {
+          "position_tolerance_deg": 5.0,
+          "settle_duration_ms": 80,
+          "settle_timeout_ms": 3000
+        },
+        "frames": [
+          {
+            "frame_id": "29c39bedc9bf44ffb0cfd15a06cbdbd2",
+            "name": "왼들401(90도)",
+            "time_ms": 55,
+            "angles": {
+              "0": 1.0,
+              "1": -0.3515625,
+              "2": -8.4375,
+              "3": 7.55859375,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 74.35546875,
+              "7": -76.2890625,
+              "8": -10.546875,
+              "9": 2.4609375,
+              "10": -0.0,
+              "11": -1.0,
+              "12": 3.33984375,
+              "15": -5.0,
+              "16": 4.0,
+              "13": -55.0,
+              "14": 80.0,
+              "17": -29.70703125,
+              "18": 56.337890625,
+              "19": 64.0,
+              "20": -58.0,
+              "21": 12.0,
+              "22": -1.7578125
+            },
+            "torques": {
+              "0": false,
+              "1": false,
+              "2": false,
+              "3": false,
+              "4": false,
+              "5": false,
+              "6": false,
+              "7": false,
+              "8": false,
+              "9": false,
+              "10": false,
+              "11": false,
+              "12": false,
+              "15": false,
+              "16": false,
+              "13": false,
+              "14": false,
+              "17": false,
+              "18": false,
+              "19": false,
+              "20": false,
+              "21": false,
+              "22": false
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "29c39bedc9bf44ffb0cfd15a06cbdbd2",
+            "start_ms": 49
+          },
+          {
+            "frame_id": "741e73ef57a54bd0ace5144ae4767552",
+            "name": "기본자세카메라90도",
+            "time_ms": 100,
+            "angles": {
+              "0": -33.486328125,
+              "1": -0.439453125,
+              "2": -9.31640625,
+              "3": 8.525390625,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 68.466796875,
+              "7": -69.521484375,
+              "8": -11.337890625,
+              "9": 2.900390625,
+              "10": 0.966796875,
+              "11": -0.52734375,
+              "12": 3.1640625,
+              "15": 1.58203125,
+              "16": -2.8125,
+              "13": -48.0,
+              "14": 47.8125,
+              "17": -28.212890625,
+              "18": 25.83984375,
+              "19": 68.0,
+              "20": -67.67578125,
+              "21": 3.515625,
+              "22": -5.185546875
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "741e73ef57a54bd0ace5144ae4767552",
+            "start_ms": 104
+          }
+        ]
+      }
+    },
+    {
+      "path": "찐왼쪽게걸음(45도)",
+      "gui": null,
+      "runtime": {
+        "name": "찐왼쪽게걸음(45도)",
+        "max_seq_ms": 10340,
+        "repeat_count": 1,
+        "playback_speed": 0.8999999999999999,
+        "repeatable": true,
+        "start_pose": "왼옆으로왼들12",
+        "end_pose": "기본자세4",
+        "completion": {
+          "position_tolerance_deg": 5.0,
+          "settle_duration_ms": 80,
+          "settle_timeout_ms": 3000
+        },
+        "frames": [
+          {
+            "frame_id": "b581c26e1caf40cda6330a0e0aa72518",
+            "name": "왼옆으로왼들12",
+            "time_ms": 50,
+            "angles": {
+              "0": -33.22265625,
+              "1": -0.703125,
+              "2": -9.404296875,
+              "3": 8.525390625,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 69.169921875,
+              "7": -70.48828125,
+              "8": -11.25,
+              "9": 2.724609375,
+              "10": 1.40625,
+              "11": -0.17578125,
+              "12": 6.591796875,
+              "15": 0.87890625,
+              "16": 11.0,
+              "13": -45.0,
+              "14": 60.0,
+              "17": -26.3671875,
+              "18": 78.046875,
+              "19": 65.0390625,
+              "20": -85.0,
+              "21": 8.0,
+              "22": 3.427734375
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "b581c26e1caf40cda6330a0e0aa72518",
+            "start_ms": 50
+          },
+          {
+            "frame_id": "39853115ebd74e9a8eb40c1d9a35bd6e",
+            "name": "왼옆으로왼13",
+            "time_ms": 100,
+            "angles": {
+              "0": -33.57421875,
+              "1": -0.439453125,
+              "2": -9.66796875,
+              "3": 9.140625,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 68.291015625,
+              "7": -69.345703125,
+              "8": -11.337890625,
+              "9": 2.63671875,
+              "10": -3.076171875,
+              "11": -0.615234375,
+              "12": 1.494140625,
+              "15": 3.515625,
+              "16": 14.0,
+              "13": -43.06640625,
+              "14": 46.7578125,
+              "17": -29.00390625,
+              "18": 40.341796875,
+              "19": 69.78515625,
+              "20": -80.595703125,
+              "21": -2.373046875,
+              "22": 2.109375
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "39853115ebd74e9a8eb40c1d9a35bd6e",
+            "start_ms": 100
+          },
+          {
+            "frame_id": "0b99fb8de10d41f3bf1ade6e9137d4f9",
+            "name": "왼옆으로오들13",
+            "time_ms": 50,
+            "angles": {
+              "0": -33.486328125,
+              "1": -0.263671875,
+              "2": -9.66796875,
+              "3": 8.96484375,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 68.02734375,
+              "7": -69.609375,
+              "8": -11.337890625,
+              "9": 2.548828125,
+              "10": -2.0,
+              "11": 0.087890625,
+              "12": 3.427734375,
+              "15": -10.0,
+              "16": -5.185546875,
+              "13": -63.6328125,
+              "14": 53.0859375,
+              "17": -77.783203125,
+              "18": 29.00390625,
+              "19": 88.0,
+              "20": -67.1484375,
+              "21": -9.0,
+              "22": -13.0
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": false,
+            "lift_early_arrival": true,
+            "source_frame_id": "0b99fb8de10d41f3bf1ade6e9137d4f9",
+            "start_ms": 250
+          },
+          {
+            "frame_id": "73761c7664294305af17ae5776dbca0d",
+            "name": "기본자세4",
+            "time_ms": 100,
+            "angles": {
+              "0": -33.22265625,
+              "1": -0.703125,
+              "2": -9.404296875,
+              "3": 8.525390625,
+              "4": 18.0,
+              "5": -18.0,
+              "6": 69.169921875,
+              "7": -70.48828125,
+              "8": -11.25,
+              "9": 2.724609375,
+              "10": 1.40625,
+              "11": -0.17578125,
+              "12": 3.1640625,
+              "15": 0.87890625,
+              "16": -0.52734375,
+              "13": -41.8359375,
+              "14": 41.30859375,
+              "17": -26.3671875,
+              "18": 23.90625,
+              "19": 65.0390625,
+              "20": -66.884765625,
+              "21": 3.076171875,
+              "22": -3.779296875
+            },
+            "torques": {
+              "0": true,
+              "1": true,
+              "2": true,
+              "3": true,
+              "4": true,
+              "5": true,
+              "6": true,
+              "7": true,
+              "8": true,
+              "9": true,
+              "10": true,
+              "11": true,
+              "12": true,
+              "15": true,
+              "16": true,
+              "13": true,
+              "14": true,
+              "17": true,
+              "18": true,
+              "19": true,
+              "20": true,
+              "21": true,
+              "22": true
+            },
+            "is_important": true,
+            "lift_early_arrival": true,
+            "source_frame_id": "73761c7664294305af17ae5776dbca0d",
+            "start_ms": 300
+          }
+        ]
+      }
+    },
+    {
+      "path": "찐제자리우회전0도-1(2회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(2회)/frames/0/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(2회)/frames/0/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(2회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(2회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(3회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(3회)/frames/0/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(3회)/frames/0/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(3회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(3회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(5회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(5회)/frames/0/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(5회)/frames/0/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(5회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(5회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(7회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(7회)/frames/0/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(7회)/frames/0/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(7회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(7회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(9회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(9회)/frames/0/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(9회)/frames/0/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(9회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전0도-1(9회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전45도(9회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐제자리우회전45도(9회)/frames/0/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전45도(9회)/frames/0/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전45도(9회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전45도(9회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전45도-1(2회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐제자리우회전45도-1(2회)/frames/0/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전45도-1(2회)/frames/0/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전45도-1(2회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전45도-1(2회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전45도-1(3회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐제자리우회전45도-1(3회)/frames/0/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전45도-1(3회)/frames/0/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전45도-1(3회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전45도-1(3회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전45도-1(5회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐제자리우회전45도-1(5회)/frames/0/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전45도-1(5회)/frames/0/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전45도-1(5회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전45도-1(5회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전45도-1(7회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐제자리우회전45도-1(7회)/frames/0/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전45도-1(7회)/frames/0/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전45도-1(7회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전45도-1(7회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(2회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(2회)/frames/0/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(2회)/frames/0/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(2회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(2회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(3회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(3회)/frames/0/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(3회)/frames/0/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(3회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(3회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(5회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(5회)/frames/0/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(5회)/frames/0/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(5회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(5회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(7회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(7회)/frames/0/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(7회)/frames/0/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(7회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(7회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(9회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(9회)/frames/0/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(9회)/frames/0/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(9회)/frames/1/angles/4",
+      "gui": 16.5234375,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐제자리우회전90도-1(9회)/frames/1/angles/5",
+      "gui": -17.40234375,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐허들/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐허들/end_pose",
+      "gui": "오뒤412",
+      "runtime": "오뒤412(허들)"
+    },
+    {
+      "path": "찐허들/frames/11/angles/13",
+      "gui": -79.66015625,
+      "runtime": -86.66015625
+    },
+    {
+      "path": "찐허들/frames/11/angles/14",
+      "gui": 72.640625,
+      "runtime": 79.640625
+    },
+    {
+      "path": "찐허들/frames/12/angles/15",
+      "gui": -6.0,
+      "runtime": 0.703125
+    },
+    {
+      "path": "찐허들/frames/13/angles/0",
+      "gui": -0.966796875,
+      "runtime": -32.6953125
+    },
+    {
+      "path": "찐허들/frames/13/angles/1",
+      "gui": -0.263671875,
+      "runtime": -0.439453125
+    },
+    {
+      "path": "찐허들/frames/13/angles/10",
+      "gui": 0.1640625,
+      "runtime": -4.0
+    },
+    {
+      "path": "찐허들/frames/13/angles/11",
+      "gui": -0.087890625,
+      "runtime": 2.0
+    },
+    {
+      "path": "찐허들/frames/13/angles/12",
+      "gui": 3.943359375,
+      "runtime": -2.0
+    },
+    {
+      "path": "찐허들/frames/13/angles/13",
+      "gui": -67.6640625,
+      "runtime": -59.0
+    },
+    {
+      "path": "찐허들/frames/13/angles/14",
+      "gui": 66.0,
+      "runtime": 47.0
+    },
+    {
+      "path": "찐허들/frames/13/angles/15",
+      "gui": 1.23046875,
+      "runtime": 3.0
+    },
+    {
+      "path": "찐허들/frames/13/angles/16",
+      "gui": 2.9453125,
+      "runtime": -2.0
+    },
+    {
+      "path": "찐허들/frames/13/angles/17",
+      "gui": -31.81640625,
+      "runtime": -34.453125
+    },
+    {
+      "path": "찐허들/frames/13/angles/18",
+      "gui": 38.14453125,
+      "runtime": 31.904296875
+    },
+    {
+      "path": "찐허들/frames/13/angles/19",
+      "gui": 54.2734375,
+      "runtime": 60.64453125
+    },
+    {
+      "path": "찐허들/frames/13/angles/2",
+      "gui": -0.703125,
+      "runtime": -9.228515625
+    },
+    {
+      "path": "찐허들/frames/13/angles/20",
+      "gui": -67.412109375,
+      "runtime": -74.0
+    },
+    {
+      "path": "찐허들/frames/13/angles/21",
+      "gui": -1.318359375,
+      "runtime": 3.0
+    },
+    {
+      "path": "찐허들/frames/13/angles/22",
+      "gui": -9.4921875,
+      "runtime": -4.5703125
+    },
+    {
+      "path": "찐허들/frames/13/angles/3",
+      "gui": -7.20703125,
+      "runtime": 8.61328125
+    },
+    {
+      "path": "찐허들/frames/13/angles/4",
+      "gui": 30.76171875,
+      "runtime": 10.37109375
+    },
+    {
+      "path": "찐허들/frames/13/angles/5",
+      "gui": -14.23828125,
+      "runtime": -10.1953125
+    },
+    {
+      "path": "찐허들/frames/13/angles/6",
+      "gui": 79.189453125,
+      "runtime": 69.609375
+    },
+    {
+      "path": "찐허들/frames/13/angles/7",
+      "gui": -68.37890625,
+      "runtime": -70.927734375
+    },
+    {
+      "path": "찐허들/frames/13/angles/8",
+      "gui": 0.3515625,
+      "runtime": -11.07421875
+    },
+    {
+      "path": "찐허들/frames/13/angles/9",
+      "gui": -0.17578125,
+      "runtime": 2.63671875
+    },
+    {
+      "path": "찐허들/frames/13/frame_id",
+      "gui": "4bb16e7d829a4037acf0bf54f1a841e7",
+      "runtime": "46c8c5bda6924327837ded0d9612d346"
+    },
+    {
+      "path": "찐허들/frames/13/is_important",
+      "gui": false,
+      "runtime": true
+    },
+    {
+      "path": "찐허들/frames/13/name",
+      "gui": "허들찐13",
+      "runtime": "왼뒤407"
+    },
+    {
+      "path": "찐허들/frames/13/source_frame_id",
+      "gui": "4bb16e7d829a4037acf0bf54f1a841e7",
+      "runtime": "46c8c5bda6924327837ded0d9612d346"
+    },
+    {
+      "path": "찐허들/frames/13/time_ms",
+      "gui": 70,
+      "runtime": 100
+    },
+    {
+      "path": "찐허들/frames/14/angles/0",
+      "gui": -32.6953125,
+      "runtime": -32.34375
+    },
+    {
+      "path": "찐허들/frames/14/angles/1",
+      "gui": -0.439453125,
+      "runtime": -0.3515625
+    },
+    {
+      "path": "찐허들/frames/14/angles/11",
+      "gui": -3.0,
+      "runtime": 0.0
+    },
+    {
+      "path": "찐허들/frames/14/angles/12",
+      "gui": 3.0,
+      "runtime": -1.66015625
+    },
+    {
+      "path": "찐허들/frames/14/angles/13",
+      "gui": -59.0,
+      "runtime": -55.0
+    },
+    {
+      "path": "찐허들/frames/14/angles/14",
+      "gui": 47.0,
+      "runtime": 80.0
+    },
+    {
+      "path": "찐허들/frames/14/angles/15",
+      "gui": 3.0,
+      "runtime": -5.0
+    },
+    {
+      "path": "찐허들/frames/14/angles/16",
+      "gui": -2.0,
+      "runtime": 4.0
+    },
+    {
+      "path": "찐허들/frames/14/angles/17",
+      "gui": -34.453125,
+      "runtime": -29.70703125
+    },
+    {
+      "path": "찐허들/frames/14/angles/18",
+      "gui": 31.904296875,
+      "runtime": 56.337890625
+    },
+    {
+      "path": "찐허들/frames/14/angles/19",
+      "gui": 60.64453125,
+      "runtime": 64.0
+    },
+    {
+      "path": "찐허들/frames/14/angles/2",
+      "gui": -9.228515625,
+      "runtime": -8.4375
+    },
+    {
+      "path": "찐허들/frames/14/angles/20",
+      "gui": -74.0,
+      "runtime": -58.0
+    },
+    {
+      "path": "찐허들/frames/14/angles/21",
+      "gui": 3.0,
+      "runtime": 12.0
+    },
+    {
+      "path": "찐허들/frames/14/angles/22",
+      "gui": -4.5703125,
+      "runtime": -1.7578125
+    },
+    {
+      "path": "찐허들/frames/14/angles/3",
+      "gui": 8.61328125,
+      "runtime": 7.55859375
+    },
+    {
+      "path": "찐허들/frames/14/angles/4",
+      "gui": 18.0,
+      "runtime": 11.25
+    },
+    {
+      "path": "찐허들/frames/14/angles/5",
+      "gui": -18.0,
+      "runtime": -13.271484375
+    },
+    {
+      "path": "찐허들/frames/14/angles/6",
+      "gui": 69.609375,
+      "runtime": 74.35546875
+    },
+    {
+      "path": "찐허들/frames/14/angles/7",
+      "gui": -70.927734375,
+      "runtime": -76.2890625
+    },
+    {
+      "path": "찐허들/frames/14/angles/8",
+      "gui": -11.07421875,
+      "runtime": -10.546875
+    },
+    {
+      "path": "찐허들/frames/14/angles/9",
+      "gui": 2.63671875,
+      "runtime": 2.4609375
+    },
+    {
+      "path": "찐허들/frames/14/frame_id",
+      "gui": "46c8c5bda6924327837ded0d9612d346",
+      "runtime": "059d2c5929a64676aa8b6c138012f8f4"
+    },
+    {
+      "path": "찐허들/frames/14/name",
+      "gui": "왼뒤407",
+      "runtime": "왼들401"
+    },
+    {
+      "path": "찐허들/frames/14/source_frame_id",
+      "gui": "46c8c5bda6924327837ded0d9612d346",
+      "runtime": "059d2c5929a64676aa8b6c138012f8f4"
+    },
+    {
+      "path": "찐허들/frames/14/start_ms",
+      "gui": 5880,
+      "runtime": 6614
+    },
+    {
+      "path": "찐허들/frames/14/time_ms",
+      "gui": 300,
+      "runtime": 55
+    },
+    {
+      "path": "찐허들/frames/15/_drag_original_start_ms",
+      "gui": 6814,
+      "runtime": null
+    },
+    {
+      "path": "찐허들/frames/15/angles/0",
+      "gui": -32.34375,
+      "runtime": -33.310546875
+    },
+    {
+      "path": "찐허들/frames/15/angles/1",
+      "gui": -0.3515625,
+      "runtime": 0.0
+    },
+    {
+      "path": "찐허들/frames/15/angles/10",
+      "gui": -3.0,
+      "runtime": -5.0
+    },
+    {
+      "path": "찐허들/frames/15/angles/11",
+      "gui": -3.0,
+      "runtime": 0.0
+    },
+    {
+      "path": "찐허들/frames/15/angles/12",
+      "gui": -0.66015625,
+      "runtime": -2.0
+    },
+    {
+      "path": "찐허들/frames/15/angles/13",
+      "gui": -55.0,
+      "runtime": -41.59375
+    },
+    {
+      "path": "찐허들/frames/15/angles/14",
+      "gui": 80.0,
+      "runtime": 55.568359375
+    },
+    {
+      "path": "찐허들/frames/15/angles/15",
+      "gui": -5.0,
+      "runtime": 2.0
+    },
+    {
+      "path": "찐허들/frames/15/angles/16",
+      "gui": 4.0,
+      "runtime": -2.0
+    },
+    {
+      "path": "찐허들/frames/15/angles/17",
+      "gui": -29.70703125,
+      "runtime": -24.0
+    },
+    {
+      "path": "찐허들/frames/15/angles/18",
+      "gui": 56.337890625,
+      "runtime": 28.0
+    },
+    {
+      "path": "찐허들/frames/15/angles/19",
+      "gui": 65.0,
+      "runtime": 67.0
+    },
+    {
+      "path": "찐허들/frames/15/angles/2",
+      "gui": -8.4375,
+      "runtime": -9.580078125
+    },
+    {
+      "path": "찐허들/frames/15/angles/20",
+      "gui": -58.0,
+      "runtime": -60.0
+    },
+    {
+      "path": "찐허들/frames/15/angles/21",
+      "gui": 12.0,
+      "runtime": 4.658203125
+    },
+    {
+      "path": "찐허들/frames/15/angles/22",
+      "gui": -1.7578125,
+      "runtime": -1.318359375
+    },
+    {
+      "path": "찐허들/frames/15/angles/3",
+      "gui": 7.55859375,
+      "runtime": 9.580078125
+    },
+    {
+      "path": "찐허들/frames/15/angles/4",
+      "gui": 18.0,
+      "runtime": 9.66796875
+    },
+    {
+      "path": "찐허들/frames/15/angles/5",
+      "gui": -18.0,
+      "runtime": -9.140625
+    },
+    {
+      "path": "찐허들/frames/15/angles/6",
+      "gui": 74.35546875,
+      "runtime": 67.67578125
+    },
+    {
+      "path": "찐허들/frames/15/angles/7",
+      "gui": -76.2890625,
+      "runtime": -69.08203125
+    },
+    {
+      "path": "찐허들/frames/15/angles/8",
+      "gui": -10.546875,
+      "runtime": -11.42578125
+    },
+    {
+      "path": "찐허들/frames/15/angles/9",
+      "gui": 2.4609375,
+      "runtime": 2.8125
+    },
+    {
+      "path": "찐허들/frames/15/frame_id",
+      "gui": "059d2c5929a64676aa8b6c138012f8f4",
+      "runtime": "94f36aea9d384b58921e01457aed0bec"
+    },
+    {
+      "path": "찐허들/frames/15/name",
+      "gui": "왼들401",
+      "runtime": "오뒤412(허들)"
+    },
+    {
+      "path": "찐허들/frames/15/source_frame_id",
+      "gui": "059d2c5929a64676aa8b6c138012f8f4",
+      "runtime": "94f36aea9d384b58921e01457aed0bec"
+    },
+    {
+      "path": "찐허들/frames/15/start_ms",
+      "gui": 6818,
+      "runtime": 6669
+    },
+    {
+      "path": "찐허들/frames/15/time_ms",
+      "gui": 60,
+      "runtime": 120
+    },
+    {
+      "path": "찐허들/frames/16",
+      "gui": {
+        "frame_id": "94f36aea9d384b58921e01457aed0bec",
+        "name": "오뒤412",
+        "time_ms": 120,
+        "angles": {
+          "0": -33.310546875,
+          "1": 0.0,
+          "2": -9.580078125,
+          "3": 9.580078125,
+          "4": 18.0,
+          "5": -18.0,
+          "6": 67.67578125,
+          "7": -69.08203125,
+          "8": -11.42578125,
+          "9": 2.8125,
+          "10": -5.0,
+          "11": 0.0,
+          "12": -2.0,
+          "15": 2.0,
+          "16": -2.0,
+          "13": -41.59375,
+          "14": 55.568359375,
+          "17": -24.0,
+          "18": 28.0,
+          "19": 67.0,
+          "20": -60.0,
+          "21": 4.658203125,
+          "22": -1.318359375
+        },
+        "torques": {
+          "0": true,
+          "1": true,
+          "2": true,
+          "3": true,
+          "4": true,
+          "5": true,
+          "6": true,
+          "7": true,
+          "8": true,
+          "9": true,
+          "10": true,
+          "11": true,
+          "12": true,
+          "15": true,
+          "16": true,
+          "13": true,
+          "14": true,
+          "17": true,
+          "18": true,
+          "19": true,
+          "20": true,
+          "21": true,
+          "22": true
+        },
+        "is_important": true,
+        "lift_early_arrival": true,
+        "source_frame_id": "94f36aea9d384b58921e01457aed0bec",
+        "start_ms": 6878
+      },
+      "runtime": null
+    },
+    {
+      "path": "찐허들/max_seq_ms",
+      "gui": 7358,
+      "runtime": 7045
+    },
+    {
+      "path": "찐후진실전(1회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐후진실전(1회)/frames/0/angles/4",
+      "gui": 9.66796875,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진실전(1회)/frames/0/angles/5",
+      "gui": -9.66796875,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진실전(1회)/frames/1/angles/4",
+      "gui": 10.546875,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진실전(1회)/frames/1/angles/5",
+      "gui": -10.01953125,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진실전(1회)/frames/2/angles/4",
+      "gui": 10.546875,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진실전(1회)/frames/2/angles/5",
+      "gui": -10.01953125,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진실전(1회)/frames/3/angles/4",
+      "gui": 10.37109375,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진실전(1회)/frames/3/angles/5",
+      "gui": -10.1953125,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진실전-2(2회)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐후진실전-2(2회)/frames/0/angles/4",
+      "gui": 9.66796875,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진실전-2(2회)/frames/0/angles/5",
+      "gui": -9.66796875,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진실전-2(2회)/frames/1/angles/4",
+      "gui": 10.546875,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진실전-2(2회)/frames/1/angles/5",
+      "gui": -10.01953125,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진실전-2(2회)/frames/2/angles/4",
+      "gui": 10.546875,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진실전-2(2회)/frames/2/angles/5",
+      "gui": -10.01953125,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진실전-2(2회)/frames/3/angles/4",
+      "gui": 10.37109375,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진실전-2(2회)/frames/3/angles/5",
+      "gui": -10.1953125,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진에서 제자리좌회전(공)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐후진에서 제자리좌회전(공)/frames/0/angles/10",
+      "gui": -3.0,
+      "runtime": 0.0
+    },
+    {
+      "path": "찐후진에서 제자리좌회전(공)/frames/0/angles/11",
+      "gui": -3.0,
+      "runtime": 0.0
+    },
+    {
+      "path": "찐후진에서 제자리좌회전(공)/frames/0/angles/12",
+      "gui": -0.66015625,
+      "runtime": -1.66015625
+    },
+    {
+      "path": "찐후진에서 제자리좌회전(공)/frames/0/angles/19",
+      "gui": 65.0,
+      "runtime": 64.0
+    },
+    {
+      "path": "찐후진에서 제자리좌회전(공)/frames/2/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진에서 제자리좌회전(공)/frames/2/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진에서 제자리좌회전(공)/frames/4/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진에서 제자리좌회전(공)/frames/4/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진에서 제자리좌회전(공)/frames/6/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진에서 제자리좌회전(공)/frames/6/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진에서 제자리좌회전(공)/frames/8/angles/4",
+      "gui": 11.25,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진에서 제자리좌회전(공)/frames/8/angles/5",
+      "gui": -13.447265625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진에서 제자리좌회전(공)/frames/10",
+      "gui": null,
+      "runtime": {
+        "frame_id": "71f5a572518046d9a6b21070390b6ec1",
+        "name": "제좌왼들25",
+        "time_ms": 61,
+        "angles": {
+          "0": -32.255859375,
+          "1": -0.263671875,
+          "2": -8.4375,
+          "3": 7.55859375,
+          "4": 18.0,
+          "5": -18.0,
+          "6": 75.05859375,
+          "7": -76.904296875,
+          "8": -10.546875,
+          "9": 2.548828125,
+          "10": 9,
+          "11": 4,
+          "12": 4,
+          "13": -52.91015625,
+          "14": 78,
+          "15": -8,
+          "16": 0,
+          "17": -29.970703125,
+          "18": 61.435546875,
+          "19": 66,
+          "20": -60,
+          "21": 15,
+          "22": -3.955078125
+        },
+        "torques": {
+          "0": true,
+          "1": true,
+          "2": true,
+          "3": true,
+          "4": true,
+          "5": true,
+          "6": true,
+          "7": true,
+          "8": true,
+          "9": true,
+          "10": true,
+          "11": true,
+          "12": true,
+          "13": true,
+          "14": true,
+          "15": true,
+          "16": true,
+          "17": true,
+          "18": true,
+          "19": true,
+          "20": true,
+          "21": true,
+          "22": true
+        },
+        "is_important": false,
+        "lift_early_arrival": true,
+        "source_frame_id": "71f5a572518046d9a6b21070390b6ec1",
+        "start_ms": 2206
+      }
+    },
+    {
+      "path": "찐후진에서 제자리좌회전(공)/frames/11",
+      "gui": null,
+      "runtime": {
+        "frame_id": "94f36aea9d384b58921e01457aed0bec",
+        "name": "오뒤412",
+        "time_ms": 144,
+        "angles": {
+          "0": -33.310546875,
+          "1": 0.0,
+          "2": -9.580078125,
+          "3": 9.580078125,
+          "4": 18.0,
+          "5": -18.0,
+          "6": 67.67578125,
+          "7": -69.08203125,
+          "8": -11.42578125,
+          "9": 2.8125,
+          "10": -5.0,
+          "11": 0.0,
+          "12": -2.0,
+          "13": -41.59375,
+          "14": 55.568359375,
+          "15": 2.0,
+          "16": -2.0,
+          "17": -24.0,
+          "18": 28.0,
+          "19": 67.0,
+          "20": -60.0,
+          "21": 4.658203125,
+          "22": -1.318359375
+        },
+        "torques": {
+          "0": true,
+          "1": true,
+          "2": true,
+          "3": true,
+          "4": true,
+          "5": true,
+          "6": true,
+          "7": true,
+          "8": true,
+          "9": true,
+          "10": true,
+          "11": true,
+          "12": true,
+          "13": true,
+          "14": true,
+          "15": true,
+          "16": true,
+          "17": true,
+          "18": true,
+          "19": true,
+          "20": true,
+          "21": true,
+          "22": true
+        },
+        "is_important": false,
+        "lift_early_arrival": true,
+        "source_frame_id": "94f36aea9d384b58921e01457aed0bec",
+        "start_ms": 2267,
+        "_drag_original_start_ms": 145,
+        "playback_cycle_end": true
+      }
+    },
+    {
+      "path": "찐후진에서 제자리좌회전(공)/frames/12",
+      "gui": null,
+      "runtime": {
+        "frame_id": "71f5a572518046d9a6b21070390b6ec1",
+        "name": "제좌왼들25",
+        "time_ms": 61,
+        "angles": {
+          "0": -32.255859375,
+          "1": -0.263671875,
+          "2": -8.4375,
+          "3": 7.55859375,
+          "4": 18.0,
+          "5": -18.0,
+          "6": 75.05859375,
+          "7": -76.904296875,
+          "8": -10.546875,
+          "9": 2.548828125,
+          "10": 9,
+          "11": 4,
+          "12": 4,
+          "13": -52.91015625,
+          "14": 78,
+          "15": -8,
+          "16": 0,
+          "17": -29.970703125,
+          "18": 61.435546875,
+          "19": 66,
+          "20": -60,
+          "21": 15,
+          "22": -3.955078125
+        },
+        "torques": {
+          "0": true,
+          "1": true,
+          "2": true,
+          "3": true,
+          "4": true,
+          "5": true,
+          "6": true,
+          "7": true,
+          "8": true,
+          "9": true,
+          "10": true,
+          "11": true,
+          "12": true,
+          "13": true,
+          "14": true,
+          "15": true,
+          "16": true,
+          "17": true,
+          "18": true,
+          "19": true,
+          "20": true,
+          "21": true,
+          "22": true
+        },
+        "is_important": false,
+        "lift_early_arrival": true,
+        "source_frame_id": "71f5a572518046d9a6b21070390b6ec1",
+        "start_ms": 2545
+      }
+    },
+    {
+      "path": "찐후진에서 제자리좌회전(공)/frames/13",
+      "gui": null,
+      "runtime": {
+        "frame_id": "94f36aea9d384b58921e01457aed0bec",
+        "name": "오뒤412",
+        "time_ms": 144,
+        "angles": {
+          "0": -33.310546875,
+          "1": 0.0,
+          "2": -9.580078125,
+          "3": 9.580078125,
+          "4": 18.0,
+          "5": -18.0,
+          "6": 67.67578125,
+          "7": -69.08203125,
+          "8": -11.42578125,
+          "9": 2.8125,
+          "10": -5.0,
+          "11": 0.0,
+          "12": -2.0,
+          "13": -41.59375,
+          "14": 55.568359375,
+          "15": 2.0,
+          "16": -2.0,
+          "17": -24.0,
+          "18": 28.0,
+          "19": 67.0,
+          "20": -60.0,
+          "21": 4.658203125,
+          "22": -1.318359375
+        },
+        "torques": {
+          "0": true,
+          "1": true,
+          "2": true,
+          "3": true,
+          "4": true,
+          "5": true,
+          "6": true,
+          "7": true,
+          "8": true,
+          "9": true,
+          "10": true,
+          "11": true,
+          "12": true,
+          "13": true,
+          "14": true,
+          "15": true,
+          "16": true,
+          "17": true,
+          "18": true,
+          "19": true,
+          "20": true,
+          "21": true,
+          "22": true
+        },
+        "is_important": false,
+        "lift_early_arrival": true,
+        "source_frame_id": "94f36aea9d384b58921e01457aed0bec",
+        "start_ms": 2606,
+        "_drag_original_start_ms": 145,
+        "playback_cycle_end": true
+      }
+    },
+    {
+      "path": "찐후진에서 제자리좌회전(공)/frames/14",
+      "gui": null,
+      "runtime": {
+        "frame_id": "71f5a572518046d9a6b21070390b6ec1",
+        "name": "제좌왼들25",
+        "time_ms": 61,
+        "angles": {
+          "0": -32.255859375,
+          "1": -0.263671875,
+          "2": -8.4375,
+          "3": 7.55859375,
+          "4": 18.0,
+          "5": -18.0,
+          "6": 75.05859375,
+          "7": -76.904296875,
+          "8": -10.546875,
+          "9": 2.548828125,
+          "10": 9,
+          "11": 4,
+          "12": 4,
+          "13": -52.91015625,
+          "14": 78,
+          "15": -8,
+          "16": 0,
+          "17": -29.970703125,
+          "18": 61.435546875,
+          "19": 66,
+          "20": -60,
+          "21": 15,
+          "22": -3.955078125
+        },
+        "torques": {
+          "0": true,
+          "1": true,
+          "2": true,
+          "3": true,
+          "4": true,
+          "5": true,
+          "6": true,
+          "7": true,
+          "8": true,
+          "9": true,
+          "10": true,
+          "11": true,
+          "12": true,
+          "13": true,
+          "14": true,
+          "15": true,
+          "16": true,
+          "17": true,
+          "18": true,
+          "19": true,
+          "20": true,
+          "21": true,
+          "22": true
+        },
+        "is_important": false,
+        "lift_early_arrival": true,
+        "source_frame_id": "71f5a572518046d9a6b21070390b6ec1",
+        "start_ms": 2884
+      }
+    },
+    {
+      "path": "찐후진에서 제자리좌회전(공)/frames/15",
+      "gui": null,
+      "runtime": {
+        "frame_id": "94f36aea9d384b58921e01457aed0bec",
+        "name": "오뒤412",
+        "time_ms": 144,
+        "angles": {
+          "0": -33.310546875,
+          "1": 0.0,
+          "2": -9.580078125,
+          "3": 9.580078125,
+          "4": 18.0,
+          "5": -18.0,
+          "6": 67.67578125,
+          "7": -69.08203125,
+          "8": -11.42578125,
+          "9": 2.8125,
+          "10": -5.0,
+          "11": 0.0,
+          "12": -2.0,
+          "13": -41.59375,
+          "14": 55.568359375,
+          "15": 2.0,
+          "16": -2.0,
+          "17": -24.0,
+          "18": 28.0,
+          "19": 67.0,
+          "20": -60.0,
+          "21": 4.658203125,
+          "22": -1.318359375
+        },
+        "torques": {
+          "0": true,
+          "1": true,
+          "2": true,
+          "3": true,
+          "4": true,
+          "5": true,
+          "6": true,
+          "7": true,
+          "8": true,
+          "9": true,
+          "10": true,
+          "11": true,
+          "12": true,
+          "13": true,
+          "14": true,
+          "15": true,
+          "16": true,
+          "17": true,
+          "18": true,
+          "19": true,
+          "20": true,
+          "21": true,
+          "22": true
+        },
+        "is_important": false,
+        "lift_early_arrival": true,
+        "source_frame_id": "94f36aea9d384b58921e01457aed0bec",
+        "start_ms": 2945,
+        "_drag_original_start_ms": 145,
+        "playback_cycle_end": true
+      }
+    },
+    {
+      "path": "찐후진에서 제자리좌회전(공)/max_seq_ms",
+      "gui": 2072,
+      "runtime": 3089
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/completion/position_tolerance_deg",
+      "gui": 2.0,
+      "runtime": 5.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/0/angles/10",
+      "gui": -3.0,
+      "runtime": 0.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/0/angles/11",
+      "gui": -3.0,
+      "runtime": 0.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/0/angles/12",
+      "gui": -0.66015625,
+      "runtime": -1.66015625
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/0/angles/19",
+      "gui": 65.0,
+      "runtime": 64.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/1/angles/4",
+      "gui": 9.66796875,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/1/angles/5",
+      "gui": -8.876953125,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/2/angles/11",
+      "gui": 12.0,
+      "runtime": 10.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/2/angles/15",
+      "gui": -3.548828125,
+      "runtime": -4.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/2/angles/18",
+      "gui": 19.0,
+      "runtime": 18.80859375
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/2/angles/22",
+      "gui": -22.0,
+      "runtime": -19.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/2/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/2/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/3/angles/4",
+      "gui": 9.66796875,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/3/angles/5",
+      "gui": -8.876953125,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/4/angles/11",
+      "gui": 12.0,
+      "runtime": 10.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/4/angles/15",
+      "gui": -3.548828125,
+      "runtime": -4.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/4/angles/18",
+      "gui": 19.0,
+      "runtime": 18.80859375
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/4/angles/22",
+      "gui": -22.0,
+      "runtime": -19.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/4/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/4/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/5/angles/4",
+      "gui": 9.66796875,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/5/angles/5",
+      "gui": -8.876953125,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/6/angles/11",
+      "gui": 12.0,
+      "runtime": 10.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/6/angles/15",
+      "gui": -3.548828125,
+      "runtime": -4.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/6/angles/18",
+      "gui": 19.0,
+      "runtime": 18.80859375
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/6/angles/22",
+      "gui": -22.0,
+      "runtime": -19.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/6/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/6/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/7/angles/4",
+      "gui": 9.66796875,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/7/angles/5",
+      "gui": -8.876953125,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/8/angles/11",
+      "gui": 12.0,
+      "runtime": 10.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/8/angles/15",
+      "gui": -3.548828125,
+      "runtime": -4.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/8/angles/18",
+      "gui": 19.0,
+      "runtime": 18.80859375
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/8/angles/22",
+      "gui": -22.0,
+      "runtime": -19.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/8/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/8/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/9/angles/4",
+      "gui": 9.66796875,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/9/angles/5",
+      "gui": -8.876953125,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/10/angles/11",
+      "gui": 12.0,
+      "runtime": 10.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/10/angles/15",
+      "gui": -3.548828125,
+      "runtime": -4.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/10/angles/18",
+      "gui": 19.0,
+      "runtime": 18.80859375
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/10/angles/22",
+      "gui": -22.0,
+      "runtime": -19.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/10/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/10/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/11/angles/4",
+      "gui": 9.66796875,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/11/angles/5",
+      "gui": -8.876953125,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/12/angles/11",
+      "gui": 12.0,
+      "runtime": 10.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/12/angles/15",
+      "gui": -3.548828125,
+      "runtime": -4.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/12/angles/18",
+      "gui": 19.0,
+      "runtime": 18.80859375
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/12/angles/22",
+      "gui": -22.0,
+      "runtime": -19.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/12/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/12/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/13/angles/4",
+      "gui": 9.66796875,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/13/angles/5",
+      "gui": -8.876953125,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/14/angles/11",
+      "gui": 12.0,
+      "runtime": 10.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/14/angles/15",
+      "gui": -3.548828125,
+      "runtime": -4.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/14/angles/18",
+      "gui": 19.0,
+      "runtime": 18.80859375
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/14/angles/22",
+      "gui": -22.0,
+      "runtime": -19.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/14/angles/4",
+      "gui": 9.931640625,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/14/angles/5",
+      "gui": -9.228515625,
+      "runtime": -18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/15/angles/4",
+      "gui": 9.66796875,
+      "runtime": 18.0
+    },
+    {
+      "path": "찐후진하고 제자리우회전(공)/frames/15/angles/5",
+      "gui": -8.876953125,
+      "runtime": -18.0
+    }
+  ]
+}

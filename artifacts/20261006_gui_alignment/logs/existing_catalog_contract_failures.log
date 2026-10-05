@@ -1,0 +1,1955 @@
+.....FFFFFFFFF.FFF.......FF....FFF..FFFFFF.FF................FFFFFFFF.F. [ 63%]
+.......FF.FFFFFFF.FFFF..FFFFF.FFFFFFFFFF..                               [100%]
+=================================== FAILURES ===================================
+____________ test_catalog30_forward_preserves_supplied_motion[45-2] ____________
+
+angle = 45, count = 2
+
+    @pytest.mark.parametrize("angle,count", [
+        (45, 2), (45, 4), (45, 6), (45, 8),
+        (90, 4), (90, 6), (90, 8),
+    ])
+    def test_catalog30_forward_preserves_supplied_motion(angle, count):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        by_name = {motion["name"]: motion for motion in motions}
+        expected_name = f"찐전진{angle}({count}회)"
+        expected_aliases = {
+            (45, 2): ("ball_camera_down_forward_2",),
+            (45, 4): ("sdk_forward_4", "line_forward_4", "post_ball_forward_4", "ball_camera_down_forward_4"),
+            (45, 6): ("line_forward_6", "post_ball_forward_6"),
+            (45, 8): ("post_ball_forward_8",),
+            (90, 4): ("goal_camera_90_forward_4",),
+            (90, 6): ("goal_camera_90_forward_6",),
+            (90, 8): (),
+        }
+        for alias in expected_aliases[angle, count]:
+>           assert aliases[alias] == expected_name
+E           AssertionError: assert '건전진45도(2회)' == '찐전진45(2회)'
+E             - 찐전진45(2회)
+E             ? ^
+E             + 건전진45도(2회)
+E             ? ^    +
+
+src/mission_control/test/test_production_motion_catalog_contract.py:45: AssertionError
+____________ test_catalog30_forward_preserves_supplied_motion[45-4] ____________
+
+angle = 45, count = 4
+
+    @pytest.mark.parametrize("angle,count", [
+        (45, 2), (45, 4), (45, 6), (45, 8),
+        (90, 4), (90, 6), (90, 8),
+    ])
+    def test_catalog30_forward_preserves_supplied_motion(angle, count):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        by_name = {motion["name"]: motion for motion in motions}
+        expected_name = f"찐전진{angle}({count}회)"
+        expected_aliases = {
+            (45, 2): ("ball_camera_down_forward_2",),
+            (45, 4): ("sdk_forward_4", "line_forward_4", "post_ball_forward_4", "ball_camera_down_forward_4"),
+            (45, 6): ("line_forward_6", "post_ball_forward_6"),
+            (45, 8): ("post_ball_forward_8",),
+            (90, 4): ("goal_camera_90_forward_4",),
+            (90, 6): ("goal_camera_90_forward_6",),
+            (90, 8): (),
+        }
+        for alias in expected_aliases[angle, count]:
+>           assert aliases[alias] == expected_name
+E           AssertionError: assert '건전진45도(4회)' == '찐전진45(4회)'
+E             - 찐전진45(4회)
+E             ? ^
+E             + 건전진45도(4회)
+E             ? ^    +
+
+src/mission_control/test/test_production_motion_catalog_contract.py:45: AssertionError
+____________ test_catalog30_forward_preserves_supplied_motion[45-6] ____________
+
+angle = 45, count = 6
+
+    @pytest.mark.parametrize("angle,count", [
+        (45, 2), (45, 4), (45, 6), (45, 8),
+        (90, 4), (90, 6), (90, 8),
+    ])
+    def test_catalog30_forward_preserves_supplied_motion(angle, count):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        by_name = {motion["name"]: motion for motion in motions}
+        expected_name = f"찐전진{angle}({count}회)"
+        expected_aliases = {
+            (45, 2): ("ball_camera_down_forward_2",),
+            (45, 4): ("sdk_forward_4", "line_forward_4", "post_ball_forward_4", "ball_camera_down_forward_4"),
+            (45, 6): ("line_forward_6", "post_ball_forward_6"),
+            (45, 8): ("post_ball_forward_8",),
+            (90, 4): ("goal_camera_90_forward_4",),
+            (90, 6): ("goal_camera_90_forward_6",),
+            (90, 8): (),
+        }
+        for alias in expected_aliases[angle, count]:
+>           assert aliases[alias] == expected_name
+E           AssertionError: assert '건전진45도(6회)' == '찐전진45(6회)'
+E             - 찐전진45(6회)
+E             ? ^
+E             + 건전진45도(6회)
+E             ? ^    +
+
+src/mission_control/test/test_production_motion_catalog_contract.py:45: AssertionError
+____________ test_catalog30_forward_preserves_supplied_motion[45-8] ____________
+
+angle = 45, count = 8
+
+    @pytest.mark.parametrize("angle,count", [
+        (45, 2), (45, 4), (45, 6), (45, 8),
+        (90, 4), (90, 6), (90, 8),
+    ])
+    def test_catalog30_forward_preserves_supplied_motion(angle, count):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        by_name = {motion["name"]: motion for motion in motions}
+        expected_name = f"찐전진{angle}({count}회)"
+        expected_aliases = {
+            (45, 2): ("ball_camera_down_forward_2",),
+            (45, 4): ("sdk_forward_4", "line_forward_4", "post_ball_forward_4", "ball_camera_down_forward_4"),
+            (45, 6): ("line_forward_6", "post_ball_forward_6"),
+            (45, 8): ("post_ball_forward_8",),
+            (90, 4): ("goal_camera_90_forward_4",),
+            (90, 6): ("goal_camera_90_forward_6",),
+            (90, 8): (),
+        }
+        for alias in expected_aliases[angle, count]:
+>           assert aliases[alias] == expected_name
+E           AssertionError: assert '건전진45도(8회)' == '찐전진45(8회)'
+E             - 찐전진45(8회)
+E             ? ^
+E             + 건전진45도(8회)
+E             ? ^    +
+
+src/mission_control/test/test_production_motion_catalog_contract.py:45: AssertionError
+____________ test_catalog30_forward_preserves_supplied_motion[90-4] ____________
+
+angle = 90, count = 4
+
+    @pytest.mark.parametrize("angle,count", [
+        (45, 2), (45, 4), (45, 6), (45, 8),
+        (90, 4), (90, 6), (90, 8),
+    ])
+    def test_catalog30_forward_preserves_supplied_motion(angle, count):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        by_name = {motion["name"]: motion for motion in motions}
+        expected_name = f"찐전진{angle}({count}회)"
+        expected_aliases = {
+            (45, 2): ("ball_camera_down_forward_2",),
+            (45, 4): ("sdk_forward_4", "line_forward_4", "post_ball_forward_4", "ball_camera_down_forward_4"),
+            (45, 6): ("line_forward_6", "post_ball_forward_6"),
+            (45, 8): ("post_ball_forward_8",),
+            (90, 4): ("goal_camera_90_forward_4",),
+            (90, 6): ("goal_camera_90_forward_6",),
+            (90, 8): (),
+        }
+        for alias in expected_aliases[angle, count]:
+>           assert aliases[alias] == expected_name
+E           AssertionError: assert '건전진90도(4회)' == '찐전진90(4회)'
+E             - 찐전진90(4회)
+E             ? ^
+E             + 건전진90도(4회)
+E             ? ^    +
+
+src/mission_control/test/test_production_motion_catalog_contract.py:45: AssertionError
+____________ test_catalog30_forward_preserves_supplied_motion[90-6] ____________
+
+angle = 90, count = 6
+
+    @pytest.mark.parametrize("angle,count", [
+        (45, 2), (45, 4), (45, 6), (45, 8),
+        (90, 4), (90, 6), (90, 8),
+    ])
+    def test_catalog30_forward_preserves_supplied_motion(angle, count):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        by_name = {motion["name"]: motion for motion in motions}
+        expected_name = f"찐전진{angle}({count}회)"
+        expected_aliases = {
+            (45, 2): ("ball_camera_down_forward_2",),
+            (45, 4): ("sdk_forward_4", "line_forward_4", "post_ball_forward_4", "ball_camera_down_forward_4"),
+            (45, 6): ("line_forward_6", "post_ball_forward_6"),
+            (45, 8): ("post_ball_forward_8",),
+            (90, 4): ("goal_camera_90_forward_4",),
+            (90, 6): ("goal_camera_90_forward_6",),
+            (90, 8): (),
+        }
+        for alias in expected_aliases[angle, count]:
+>           assert aliases[alias] == expected_name
+E           AssertionError: assert '건전진90도(6회)' == '찐전진90(6회)'
+E             - 찐전진90(6회)
+E             ? ^
+E             + 건전진90도(6회)
+E             ? ^    +
+
+src/mission_control/test/test_production_motion_catalog_contract.py:45: AssertionError
+____________ test_catalog30_forward_preserves_supplied_motion[90-8] ____________
+
+angle = 90, count = 8
+
+    @pytest.mark.parametrize("angle,count", [
+        (45, 2), (45, 4), (45, 6), (45, 8),
+        (90, 4), (90, 6), (90, 8),
+    ])
+    def test_catalog30_forward_preserves_supplied_motion(angle, count):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        by_name = {motion["name"]: motion for motion in motions}
+        expected_name = f"찐전진{angle}({count}회)"
+        expected_aliases = {
+            (45, 2): ("ball_camera_down_forward_2",),
+            (45, 4): ("sdk_forward_4", "line_forward_4", "post_ball_forward_4", "ball_camera_down_forward_4"),
+            (45, 6): ("line_forward_6", "post_ball_forward_6"),
+            (45, 8): ("post_ball_forward_8",),
+            (90, 4): ("goal_camera_90_forward_4",),
+            (90, 6): ("goal_camera_90_forward_6",),
+            (90, 8): (),
+        }
+        for alias in expected_aliases[angle, count]:
+            assert aliases[alias] == expected_name
+>       motion = by_name[expected_name]
+E       KeyError: '찐전진90(8회)'
+
+src/mission_control/test/test_production_motion_catalog_contract.py:46: KeyError
+______ test_catalog30_replaces_only_requested_forward_motions_and_aliases ______
+
+    def test_catalog30_replaces_only_requested_forward_motions_and_aliases():
+        manifest = json.loads((RUNTIME_CATALOG_PATH.parent / "catalog30_forward_update_manifest.json").read_text())
+        motions = json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        catalog = {m["name"]: m for m in motions}
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        # Hurdle/retreat imports plus three camera-specific turn preparations.
+>       assert len(catalog) == len(motions) == manifest["after_count"] + 5
+E       AssertionError: assert 86 == (84 + 5)
+E        +  where 86 = len([{'completion': {'position_tolerance_deg': 5.0, 'settle_duration_ms': 80, 'settle_timeout_ms': 3000}, 'end_pose': '기본자...929e7a4449aa8dbcdd4f1d130026', 'is_important': False, 'lift_early_arrival': True, ...}], 'max_seq_ms': 7045, ...}, ...])
+
+src/mission_control/test/test_production_motion_catalog_contract.py:66: AssertionError
+___ test_post_ball_transition_contains_only_camera_without_stationary_pause ____
+
+    def test_post_ball_transition_contains_only_camera_without_stationary_pause():
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]}
+        assert MotionCommandBridgeNode.POST_BALL_GOAL_TRANSITION_SEQUENCE == (
+            "post_ball_camera_90", MotionCommandBridgeNode.POST_BALL_CAMERA_DWELL_MARKER,
+        )
+        assert MotionCommandBridgeNode.POST_BALL_CAMERA_PAUSE_SEC == 0.0
+        assert MotionCommandBridgeNode.ACTION_TO_MOTION_ID["POST_BALL_GOAL_TRANSITION"] == "post_ball_camera_90"
+        assert motions[aliases["post_ball_camera_90"]]["frames"]
+>       assert aliases["line_forward_6"] == "찐전진45(6회)"
+E       AssertionError: assert '건전진45도(6회)' == '찐전진45(6회)'
+E         - 찐전진45(6회)
+E         ? ^
+E         + 건전진45도(6회)
+E         ? ^    +
+
+src/mission_control/test/test_production_motion_catalog_contract.py:122: AssertionError
+______ test_post_shot_fixed_turns_and_forward_resolve_to_runtime_motions _______
+
+    def test_post_shot_fixed_turns_and_forward_resolve_to_runtime_motions():
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {
+            m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        }
+        expected = {
+            "POST_SHOT_TURN_RIGHT_9": ("찐기본자세에서 제자리 우회전(골대)", 1),
+            "POST_SHOT_TURN_LEFT_4": ("건기본자세에서제자리좌회전(골대)", 1),
+            "POST_SHOT_FORWARD": ("찐전진45(6회)", 3),
+        }
+        for action, (name, count) in expected.items():
+            motion_id = MotionCommandBridgeNode.motion_id_for_action(action)
+>           assert aliases[motion_id] == name
+E           AssertionError: assert '건기본자세에서제자리우회전(골대)' == '찐기본자세에서 제자리 우회전(골대)'
+E             - 찐기본자세에서 제자리 우회전(골대)
+E             ? ^      -   -
+E             + 건기본자세에서제자리우회전(골대)
+E             ? ^
+
+src/mission_control/test/test_production_motion_catalog_contract.py:146: AssertionError
+____________ test_updated_forward_and_stationary_right_turn_catalog ____________
+
+    def test_updated_forward_and_stationary_right_turn_catalog():
+        aliases = yaml.safe_load(ALIAS_PATH.read_text(encoding="utf-8"))[
+            "motion_aliases"
+        ]
+        motions = json.loads(RUNTIME_CATALOG_PATH.read_text(encoding="utf-8"))[
+            "motions"
+        ]
+        by_name = {motion["name"]: motion for motion in motions}
+        assert len(by_name) == len(motions)
+    
+        for prefix in ("전진45도-1", "전진0도-1", "전진90도-1"):
+            for count in (2, 4, 6, 8, 10):
+>               motion = by_name[f"{prefix}({count}회)"]
+E               KeyError: '전진45도-1(2회)'
+
+src/mission_control/test/test_production_motion_catalog_contract.py:162: KeyError
+_________ test_production_alias_catalog_contains_only_approved_aliases _________
+
+    def test_production_alias_catalog_contains_only_approved_aliases():
+        payload = yaml.safe_load(ALIAS_PATH.read_text(encoding="utf-8"))
+>       assert payload == {
+            "motion_aliases": {
+                "sdk_pickup": "찐공잡기리그랩까지 실전",
+                "sdk_hurdle": "허들실실전",
+                "sdk_forward_4": "찐전진45(4회)",
+                "line_forward_2": "전진45도-1(2회)",
+                "line_forward_4": "찐전진45(4회)",
+                "line_forward_6": "찐전진45(6회)",
+                "line_forward_8": "전진45도-1(8회)",
+                "line_forward_10": "전진45도-1(10회)",
+                "line_turn_left_4": "좌회전실실전(4회)",
+                "line_turn_left_6": "좌회전실실전(6회)",
+                "line_turn_left_8": "좌회전실실전(8회)",
+                "line_turn_left_10": "좌회전실실전(10회)",
+                "line_turn_left_12": "좌회전실실전(12회)",
+                "line_turn_left_15": "좌회전실실전(15회)",
+                "line_turn_right_2": "우회전실실전(4회)",
+                "line_turn_right_4": "우회전실실전(6회)",
+                "line_turn_right_6": "우회전실실전(8회)",
+                "line_turn_right_8": "우회전실실전(10회)",
+                "line_turn_right_10": "우회전실실전(12회)",
+                "line_turn_right_large": "우회전실실전(15회)",
+                **{
+                    f"line_recovery_left_{count}": f"라인복귀좌회전({count}회)"
+                    for count in (2, 3, 4, 5, 6, 7, 8, 10, 13)
+                },
+                **{
+                    f"line_recovery_right_{count}": f"라인복귀우회전({count}회)"
+                    for count in (2, 3, 4, 5, 6, 7, 8, 10, 12, 15)
+                },
+                "line_search_left_2": "건제자리좌회전45도(2회)",
+                "line_search_right_5": "찐제자리우회전45도-1(5회)",
+                "stationary_turn_left": "건제자리좌회전45도(6회)",
+                "stationary_turn_right": "찐제자리우회전45도(9회)",
+                "ball_camera_down_forward_2": "전진0도-1(2회)",
+                "ball_camera_down_forward_4": "전진0도-1(4회)",
+                "ball_camera_down_forward_6": (
+                    "전진0도-1(6회)"
+                ),
+                "ball_general_fine_forward_8": "찐미세45도-4",
+                "pickup_fine_forward_0": "찐미세0도-4",
+                "hurdle_fine_forward_10": "찐미세0도-4(허들10회)",
+                "pickup_fine_prepare": "찐오뒤에서미세오뒤",
+                "pickup_crab_prepare": "오뒤에서 기본자세(픽업 카메라0도)",
+                "pickup_crab_right_0": "찐미세오옆꽃게0-1(1회)",
+                "pickup_fine_to_crab_right_0": "찐미세오뒤에서오옆꽃게0도",
+                "pickup_crab_left_0": "찐미세왼옆꽃게0도-1",
+                "pickup_lost_ball_backward_1": "찐후진실전(1회)",
+                "pickup_pre_backward_camera_down": (
+                    "찐공잡기전후진-2(2회)"
+                ),
+                "pickup_grasp_check_pose": "찐공확인자세",
+                "pickup_retreat_2": "찐후진실전(1회)",
+                "pickup_second_backward_turn_left": "찐후진에서 제자리좌회전(공)",
+                "pickup_first_backward_turn_right": "찐후진하고 제자리우회전(공)",
+                "pickup_first_turn_right_7": "찐제자리우회전45도-1(7회)",
+                "pickup_second_turn_left_3": "건제자리좌회전45도(3회)",
+                "pickup_first_turn_right_9": "찐제자리우회전45도(9회)",
+                "pickup_first_to_right_back_camera_45": (
+                    "왼뒤에서 오뒤로(카메라45도)"
+                ),
+                **{
+                    f"pickup_camera_down_turn_left_{count}": (
+                        f"건제자리좌회전0도({count}회)"
+                    )
+                    for count in range(1, 7)
+                },
+                **{
+                    f"pickup_camera_down_turn_right_{count}": (
+                        f"찐제자리우회전0도-1({count}회)"
+                    )
+                    for count in range(1, 10)
+                },
+                "post_ball_forward_4": "찐전진45(4회)",
+                "post_ball_forward_6": "찐전진45(6회)",
+                "post_shot_default_turn_right": "찐기본자세에서 제자리 우회전(골대)",
+                "post_shot_default_turn_left": "건기본자세에서제자리좌회전(골대)",
+                "post_shot_turn_right_9": "찐제자리우회전45도(9회)",
+                "post_ball_forward_8": "찐전진45(8회)",
+                "post_ball_camera_90": "찐오뒤카메라90도",
+                "goal_camera_90_forward_2": "전진90도-1(2회)",
+                "goal_camera_90_forward_4": "찐전진90(4회)",
+                "goal_camera_90_forward_6": "찐전진90(6회)",
+                **{
+                    f"goal_camera_90_fine_forward_{count}": f"미세90도-4({count}회)"
+                    for count in range(1, 5)
+                },
+                "goal_camera_90_crab_right": "찐미세오옆꽃게90-1(1회)",
+                "goal_fine_to_crab_right_90": "찐미세오뒤에서 오옆꽃게90도",
+                "goal_camera_90_crab_left": "찐미세왼옆꽃게90도-1",
+                "goal_forward_to_crab_right_90": "찐오뒤에서 오옆꽃게90도",
+                "goal_forward_to_default_90": "찐오뒤에서기본자세(골대 카메라90도)",
+                "goal_fine_to_default_90": "찐미세오뒤에서기본자세(골대 카메라90도)",
+                **{
+                    f"post_ball_line_turn_right_{count}": (
+                        ("찐제자리우회전45도(9회)" if count == 9
+                         else f"찐제자리우회전45도-1({count}회)")
+                    )
+                    for count in range(1, 10)
+                },
+                "post_ball_line_turn_left_1": "건제자리좌회전45도(1회)",
+                "post_ball_line_turn_left_2": "건제자리좌회전45도(2회)",
+                "post_ball_line_turn_left_3": "건제자리좌회전45도(3회)",
+                "post_ball_line_turn_left_4": "건제자리좌회전45도(4회)",
+                "post_ball_line_turn_left_5": "건제자리좌회전45도(5회)",
+                "post_ball_line_turn_left_6": "건제자리좌회전45도(6회)",
+                **{
+                    f"goal_camera_90_turn_right_{count}": (
+                        f"찐제자리우회전90도-1({count}회)"
+                    )
+                    for count in (2, 3, 5, 7, 9)
+                },
+                **{
+                    f"goal_camera_90_turn_left_{count}": (
+                        f"건제자리좌회전90도({count}회)"
+                    )
+                    for count in range(1, 7)
+                },
+                "goal_shot": "찐골넣기",
+                "goal_fine_to_default": "찐미세오뒤에서기본자세",
+                "sdk_default_to_right_back": "기본에서 오뒤 실실전",
+                "pickup": "찐공잡기리그랩까지 실전",
+                "hurdle": "허들실실전",
+                "forward": "전진45도-1(8회)",
+            }
+        }
+E       AssertionError: assert {'motion_alia...서 오뒤0도', ...}} == {'motion_alia...세45도-4', ...}}
+E         Differing items:
+E         {'motion_aliases': {'ball_camera_down_forward_2': '건전진45도(2회)', 'ball_camera_down_forward_4': '건전진45도(4회)', 'ball_general_fine_forward_8': '건미세45도(5회)', 'fine_to_turn_ready_0': '건미세오뒤에서 오뒤0도', ...}} != {'motion_aliases': {'ball_camera_down_forward_2': '전진0도-1(2회)', 'ball_camera_down_forward_4': '전진0도-1(4회)', 'ball_camera_down_forward_6': '전진0도-1(6회)', 'ball_general_fine_forward_8': '찐미세45도-4', ...}}
+E         Full diff:
+E           {
+E         -  'motion_aliases': {'ball_camera_down_forward_2': '전진0도-1(2회)',
+E         ?                                                      ^ --
+E         +  'motion_aliases': ...
+E         
+E         ...Full output truncated (258 lines hidden), use '-vv' to show
+
+src/mission_control/test/test_production_motion_catalog_contract.py:193: AssertionError
+_______ test_latest_pickup_and_grasp_check_motion_definitions_are_mapped _______
+
+    def test_latest_pickup_and_grasp_check_motion_definitions_are_mapped():
+        aliases = yaml.safe_load(
+            ALIAS_PATH.read_text(encoding="utf-8")
+        )["motion_aliases"]
+        motions = yaml.safe_load(
+            RUNTIME_CATALOG_PATH.read_text(encoding="utf-8")
+        )["motions"]
+        by_name = {motion["name"]: motion for motion in motions}
+    
+        expected = {
+            "미세45도-1": (3505, 1, 1.0, "오들401", "미세오뒤401"),
+            "미세0도-1": (
+                3505,
+                1,
+                1.0,
+                "오들401(0도)",
+                "미세오뒤401(0도)",
+            ),
+            "찐공잡기리그랩까지 실전": (
+                8000,
+                1,
+                1.05,
+                "음",
+                "기본자세4",
+            ),
+            "찐공확인자세": (7045, 1, 1.0, "찐공확인자세", "찐공확인자세"),
+        }
+        for name, metadata in expected.items():
+>           motion = by_name[name]
+E           KeyError: '미세45도-1'
+
+src/mission_control/test/test_production_motion_catalog_contract.py:510: KeyError
+________ test_top_loss_forward_uses_existing_camera0_two_repeat_motion _________
+
+    def test_top_loss_forward_uses_existing_camera0_two_repeat_motion():
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]}
+        motion_id = MotionCommandBridgeNode.ACTION_TO_MOTION_ID["BALL_LOST_FORWARD_2"]
+        assert motion_id == "ball_camera_down_forward_2"
+>       assert aliases[motion_id] == "전진0도-1(2회)"
+E       AssertionError: assert '건전진45도(2회)' == '전진0도-1(2회)'
+E         - 전진0도-1(2회)
+E         + 건전진45도(2회)
+
+src/mission_control/test/test_production_motion_catalog_contract.py:543: AssertionError
+_ test_updated_fine_frames_match_supplied_walking_data[\ucc10\ubbf8\uc1380\ub3c4-4-9abdda081d4406738b7e731707ce690d2207ad82287cedc5c0db1fa230d0eb75] _
+
+name = '찐미세0도-4'
+digest = '9abdda081d4406738b7e731707ce690d2207ad82287cedc5c0db1fa230d0eb75'
+
+    @pytest.mark.parametrize('name,digest', [
+        # Camera-0 source: artifacts/20260929_camera_motion_update/source_robot_motions.json
+        ('찐미세0도-4', '9abdda081d4406738b7e731707ce690d2207ad82287cedc5c0db1fa230d0eb75'),
+        ('찐미세45도-4', '7eb93d40e4fea5441dc4b603443bd5cc46f626ee6d4742895912d44dc649e4a0'),
+        ('찐미세90도-4(1회)', '05a8bf2428764b71f8bd4cf6b4663227facd5a34cd489de6e977186e86af704f'),
+    ])
+    def test_updated_fine_frames_match_supplied_walking_data(name, digest):
+        motions = {m['name']: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())['motions']}
+>       encoded = json.dumps(motions[name]['frames'], sort_keys=True, separators=(',', ':'))
+E       KeyError: '찐미세0도-4'
+
+src/mission_control/test/test_production_motion_catalog_contract.py:573: KeyError
+_ test_updated_fine_frames_match_supplied_walking_data[\ucc10\ubbf8\uc13845\ub3c4-4-7eb93d40e4fea5441dc4b603443bd5cc46f626ee6d4742895912d44dc649e4a0] _
+
+name = '찐미세45도-4'
+digest = '7eb93d40e4fea5441dc4b603443bd5cc46f626ee6d4742895912d44dc649e4a0'
+
+    @pytest.mark.parametrize('name,digest', [
+        # Camera-0 source: artifacts/20260929_camera_motion_update/source_robot_motions.json
+        ('찐미세0도-4', '9abdda081d4406738b7e731707ce690d2207ad82287cedc5c0db1fa230d0eb75'),
+        ('찐미세45도-4', '7eb93d40e4fea5441dc4b603443bd5cc46f626ee6d4742895912d44dc649e4a0'),
+        ('찐미세90도-4(1회)', '05a8bf2428764b71f8bd4cf6b4663227facd5a34cd489de6e977186e86af704f'),
+    ])
+    def test_updated_fine_frames_match_supplied_walking_data(name, digest):
+        motions = {m['name']: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())['motions']}
+>       encoded = json.dumps(motions[name]['frames'], sort_keys=True, separators=(',', ':'))
+E       KeyError: '찐미세45도-4'
+
+src/mission_control/test/test_production_motion_catalog_contract.py:573: KeyError
+_ test_updated_fine_frames_match_supplied_walking_data[\ucc10\ubbf8\uc13890\ub3c4-4(1\ud68c)-05a8bf2428764b71f8bd4cf6b4663227facd5a34cd489de6e977186e86af704f] _
+
+name = '찐미세90도-4(1회)'
+digest = '05a8bf2428764b71f8bd4cf6b4663227facd5a34cd489de6e977186e86af704f'
+
+    @pytest.mark.parametrize('name,digest', [
+        # Camera-0 source: artifacts/20260929_camera_motion_update/source_robot_motions.json
+        ('찐미세0도-4', '9abdda081d4406738b7e731707ce690d2207ad82287cedc5c0db1fa230d0eb75'),
+        ('찐미세45도-4', '7eb93d40e4fea5441dc4b603443bd5cc46f626ee6d4742895912d44dc649e4a0'),
+        ('찐미세90도-4(1회)', '05a8bf2428764b71f8bd4cf6b4663227facd5a34cd489de6e977186e86af704f'),
+    ])
+    def test_updated_fine_frames_match_supplied_walking_data(name, digest):
+        motions = {m['name']: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())['motions']}
+>       encoded = json.dumps(motions[name]['frames'], sort_keys=True, separators=(',', ':'))
+E       KeyError: '찐미세90도-4(1회)'
+
+src/mission_control/test/test_production_motion_catalog_contract.py:573: KeyError
+_ test_import15_requested_motions_match_source_with_five_degree_tolerance[pickup-\ucc10\uacf5\uc7a1\uae30\ub9ac\uadf8\ub7a9\uae4c\uc9c0 \uc2e4\uc804-b466c0860852e7a2e4d6dc55baf04d22822d8d3a96e522a10ca4510268a96909] _
+
+motion_id = 'pickup', name = '찐공잡기리그랩까지 실전'
+digest = 'b466c0860852e7a2e4d6dc55baf04d22822d8d3a96e522a10ca4510268a96909'
+
+    @pytest.mark.parametrize("motion_id,name,digest", [
+        ("pickup", "찐공잡기리그랩까지 실전",
+         "b466c0860852e7a2e4d6dc55baf04d22822d8d3a96e522a10ca4510268a96909"),
+        ("pickup_pre_backward_camera_down", "찐공잡기전후진-2(2회)",
+         "7bc8b060ba29ab42314be112a6077132ac3284e3398e45e57afa48a6f3cf7715"),
+    ])
+    def test_import15_requested_motions_match_source_with_five_degree_tolerance(
+        motion_id, name, digest,
+    ):
+        """Preserve supplied data, including the catalog36 pickup update."""
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {
+            motion["name"]: motion
+            for motion in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        }
+>       assert aliases[motion_id] == name
+E       AssertionError: assert '건공잡기' == '찐공잡기리그랩까지 실전'
+E         - 찐공잡기리그랩까지 실전
+E         + 건공잡기
+
+src/mission_control/test/test_production_motion_catalog_contract.py:615: AssertionError
+_ test_import15_requested_motions_match_source_with_five_degree_tolerance[pickup_pre_backward_camera_down-\ucc10\uacf5\uc7a1\uae30\uc804\ud6c4\uc9c4-2(2\ud68c)-7bc8b060ba29ab42314be112a6077132ac3284e3398e45e57afa48a6f3cf7715] _
+
+motion_id = 'pickup_pre_backward_camera_down', name = '찐공잡기전후진-2(2회)'
+digest = '7bc8b060ba29ab42314be112a6077132ac3284e3398e45e57afa48a6f3cf7715'
+
+    @pytest.mark.parametrize("motion_id,name,digest", [
+        ("pickup", "찐공잡기리그랩까지 실전",
+         "b466c0860852e7a2e4d6dc55baf04d22822d8d3a96e522a10ca4510268a96909"),
+        ("pickup_pre_backward_camera_down", "찐공잡기전후진-2(2회)",
+         "7bc8b060ba29ab42314be112a6077132ac3284e3398e45e57afa48a6f3cf7715"),
+    ])
+    def test_import15_requested_motions_match_source_with_five_degree_tolerance(
+        motion_id, name, digest,
+    ):
+        """Preserve supplied data, including the catalog36 pickup update."""
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {
+            motion["name"]: motion
+            for motion in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        }
+        assert aliases[motion_id] == name
+        motion = motions[name]
+        assert motion["completion"]["position_tolerance_deg"] == 5.0
+        encoded = json.dumps(
+            motion, sort_keys=True, separators=(",", ":"), ensure_ascii=False,
+        )
+>       assert hashlib.sha256(encoded.encode()).hexdigest() == digest
+E       AssertionError: assert 'd52eb238e0bf...d910c5e97594e' == '7bc8b060ba29...a48a6f3cf7715'
+E         - 7bc8b060ba29ab42314be112a6077132ac3284e3398e45e57afa48a6f3cf7715
+E         + d52eb238e0bf9f152164192cfa4cac676cb55cfb7e008150c4dd910c5e97594e
+
+src/mission_control/test/test_production_motion_catalog_contract.py:621: AssertionError
+_ test_recovery_turns_resolve_to_same_direction_and_repeat_count[LEFT-\uc88c-counts0-LEFT] _
+
+line_side = 'LEFT', direction = 'LEFT', korean = '좌'
+counts = (2, 3, 4, 5, 6, 7, ...)
+
+    @pytest.mark.parametrize('line_side', ['LEFT', 'RIGHT'])
+    @pytest.mark.parametrize('direction,korean,counts', [
+        ('LEFT', '좌', (2, 3, 4, 5, 6, 7, 8, 10, 13)),
+        ('RIGHT', '우', (2, 3, 4, 5, 6, 7, 8, 10, 12, 15)),
+    ])
+    def test_recovery_turns_resolve_to_same_direction_and_repeat_count(line_side, direction, korean, counts):
+        from mission_control.motion_command_gate import normalize_general_action
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())['motion_aliases']
+        motions = {m['name']: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())['motions']}
+        for count in counts:
+            action = f'RECOVER_{line_side}_TURN_{direction}_{count}'
+            assert normalize_general_action(action) == action
+>           motion_id = MotionCommandBridgeNode.ACTION_TO_MOTION_ID[action]
+E           KeyError: 'RECOVER_LEFT_TURN_LEFT_2'
+
+src/mission_control/test/test_production_motion_catalog_contract.py:636: KeyError
+_ test_recovery_turns_resolve_to_same_direction_and_repeat_count[LEFT-\uc88c-counts0-RIGHT] _
+
+line_side = 'RIGHT', direction = 'LEFT', korean = '좌'
+counts = (2, 3, 4, 5, 6, 7, ...)
+
+    @pytest.mark.parametrize('line_side', ['LEFT', 'RIGHT'])
+    @pytest.mark.parametrize('direction,korean,counts', [
+        ('LEFT', '좌', (2, 3, 4, 5, 6, 7, 8, 10, 13)),
+        ('RIGHT', '우', (2, 3, 4, 5, 6, 7, 8, 10, 12, 15)),
+    ])
+    def test_recovery_turns_resolve_to_same_direction_and_repeat_count(line_side, direction, korean, counts):
+        from mission_control.motion_command_gate import normalize_general_action
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())['motion_aliases']
+        motions = {m['name']: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())['motions']}
+        for count in counts:
+            action = f'RECOVER_{line_side}_TURN_{direction}_{count}'
+            assert normalize_general_action(action) == action
+>           motion_id = MotionCommandBridgeNode.ACTION_TO_MOTION_ID[action]
+E           KeyError: 'RECOVER_RIGHT_TURN_LEFT_2'
+
+src/mission_control/test/test_production_motion_catalog_contract.py:636: KeyError
+_ test_recovery_turns_resolve_to_same_direction_and_repeat_count[RIGHT-\uc6b0-counts1-LEFT] _
+
+line_side = 'LEFT', direction = 'RIGHT', korean = '우'
+counts = (2, 3, 4, 5, 6, 7, ...)
+
+    @pytest.mark.parametrize('line_side', ['LEFT', 'RIGHT'])
+    @pytest.mark.parametrize('direction,korean,counts', [
+        ('LEFT', '좌', (2, 3, 4, 5, 6, 7, 8, 10, 13)),
+        ('RIGHT', '우', (2, 3, 4, 5, 6, 7, 8, 10, 12, 15)),
+    ])
+    def test_recovery_turns_resolve_to_same_direction_and_repeat_count(line_side, direction, korean, counts):
+        from mission_control.motion_command_gate import normalize_general_action
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())['motion_aliases']
+        motions = {m['name']: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())['motions']}
+        for count in counts:
+            action = f'RECOVER_{line_side}_TURN_{direction}_{count}'
+            assert normalize_general_action(action) == action
+>           motion_id = MotionCommandBridgeNode.ACTION_TO_MOTION_ID[action]
+E           KeyError: 'RECOVER_LEFT_TURN_RIGHT_2'
+
+src/mission_control/test/test_production_motion_catalog_contract.py:636: KeyError
+_ test_recovery_turns_resolve_to_same_direction_and_repeat_count[RIGHT-\uc6b0-counts1-RIGHT] _
+
+line_side = 'RIGHT', direction = 'RIGHT', korean = '우'
+counts = (2, 3, 4, 5, 6, 7, ...)
+
+    @pytest.mark.parametrize('line_side', ['LEFT', 'RIGHT'])
+    @pytest.mark.parametrize('direction,korean,counts', [
+        ('LEFT', '좌', (2, 3, 4, 5, 6, 7, 8, 10, 13)),
+        ('RIGHT', '우', (2, 3, 4, 5, 6, 7, 8, 10, 12, 15)),
+    ])
+    def test_recovery_turns_resolve_to_same_direction_and_repeat_count(line_side, direction, korean, counts):
+        from mission_control.motion_command_gate import normalize_general_action
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())['motion_aliases']
+        motions = {m['name']: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())['motions']}
+        for count in counts:
+            action = f'RECOVER_{line_side}_TURN_{direction}_{count}'
+            assert normalize_general_action(action) == action
+>           motion_id = MotionCommandBridgeNode.ACTION_TO_MOTION_ID[action]
+E           KeyError: 'RECOVER_RIGHT_TURN_RIGHT_2'
+
+src/mission_control/test/test_production_motion_catalog_contract.py:636: KeyError
+_ test_recovery_cycle_matches_supplied_catalog[\uc88c-839d8a59316168882e987e8610386a31df77005f5de0cb15ecd6c8b6f2713174] _
+
+side = '좌'
+digest = '839d8a59316168882e987e8610386a31df77005f5de0cb15ecd6c8b6f2713174'
+
+    @pytest.mark.parametrize('side,digest', [
+        ('좌', '839d8a59316168882e987e8610386a31df77005f5de0cb15ecd6c8b6f2713174'),
+        ('우', '4d5a9601ab7d363b9e92d73e24283060aeba763a7075e692c94fd96e93123384'),
+    ])
+    def test_recovery_cycle_matches_supplied_catalog(side, digest):
+        motions = {m['name']: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())['motions']}
+        fields = ('angles', 'torques', 'start_ms', 'time_ms')
+>       frames = [{k: f[k] for k in fields} for f in motions[f'찐라인복귀{side}회전45도(4회)']['frames']]
+E       KeyError: '찐라인복귀좌회전45도(4회)'
+
+src/mission_control/test/test_production_motion_catalog_contract.py:666: KeyError
+_ test_recovery_cycle_matches_supplied_catalog[\uc6b0-4d5a9601ab7d363b9e92d73e24283060aeba763a7075e692c94fd96e93123384] _
+
+side = '우'
+digest = '4d5a9601ab7d363b9e92d73e24283060aeba763a7075e692c94fd96e93123384'
+
+    @pytest.mark.parametrize('side,digest', [
+        ('좌', '839d8a59316168882e987e8610386a31df77005f5de0cb15ecd6c8b6f2713174'),
+        ('우', '4d5a9601ab7d363b9e92d73e24283060aeba763a7075e692c94fd96e93123384'),
+    ])
+    def test_recovery_cycle_matches_supplied_catalog(side, digest):
+        motions = {m['name']: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())['motions']}
+        fields = ('angles', 'torques', 'start_ms', 'time_ms')
+>       frames = [{k: f[k] for k in fields} for f in motions[f'찐라인복귀{side}회전45도(4회)']['frames']]
+E       KeyError: '찐라인복귀우회전45도(4회)'
+
+src/mission_control/test/test_production_motion_catalog_contract.py:666: KeyError
+_ test_imported_motions_preserve_source_except_tolerance_and_added_turns[pickup_retreat_2-\ucc10\ud6c4\uc9c4\uc2e4\uc804(1\ud68c)-1a4484895f37b3749c582281fc37a572ca1eef7be6a41a8ec1f7c5b292b89140] _
+
+motion_id = 'pickup_retreat_2', name = '찐후진실전(1회)'
+digest = '1a4484895f37b3749c582281fc37a572ca1eef7be6a41a8ec1f7c5b292b89140'
+
+    @pytest.mark.parametrize("motion_id,name,digest", [
+        ("pickup_retreat_2", "찐후진실전(1회)",
+         "1a4484895f37b3749c582281fc37a572ca1eef7be6a41a8ec1f7c5b292b89140"),
+        ("pickup_first_backward_turn_right", "찐후진하고 제자리우회전(공)",
+         "0568d0a09ea18182611e4ed34efe2d96943c0faf52107ce6c3683ab34f1c6005"),
+        ("post_shot_default_turn_right", "찐기본자세에서 제자리 우회전(골대)",
+         "d1adb58605677ed92b853640e7cb9125cb5c605f3eefab010c1397c78e84a844"),
+        ("post_shot_default_turn_left", "건기본자세에서제자리좌회전(골대)",
+         "455de963e21cd376d3da174e3c9da2423ec1964747dbf1beb7e1dab826a55009"),
+        ("pickup_second_backward_turn_left", "찐후진에서 제자리좌회전(공)",
+         "9735e143053bbc33496d68f0d3fe521432478df41bd86bcc03472c3577480418"),
+        ("pickup_crab_left_0", "찐미세왼옆꽃게0도-1",
+         "931415b970ab5d0dcf2bbdc4052079801f953a096a9ba28e3a5013856711929e"),
+        ("goal_camera_90_crab_left", "찐미세왼옆꽃게90도-1",
+         "dba9db69d2bc5342abe6a0812ae672b234acbf5687053b3dd7f40eab2a7bb7d7"),
+    ])
+    def test_imported_motions_preserve_source_except_tolerance_and_added_turns(
+        motion_id, name, digest,
+    ):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {
+            m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        }
+        assert aliases[motion_id] == name
+        motion = motions[name]
+        assert motion["completion"]["position_tolerance_deg"] == 5.0
+        original_turn_counts = {
+            "post_shot_default_turn_right": 7,
+            "post_shot_default_turn_left": 4,
+            "pickup_first_backward_turn_right": 7,
+            "pickup_second_backward_turn_left": 4,
+        }
+        if motion_id in original_turn_counts:
+            # Verify the original prefix independently of the added turn sets.
+            motion = dict(motion)
+            motion["frames"] = motion["frames"][
+                :2 + 2 * original_turn_counts[motion_id]
+            ]
+            last_frame = motion["frames"][-1]
+            motion["max_seq_ms"] = last_frame["start_ms"] + last_frame["time_ms"]
+        encoded = json.dumps(
+            motion, sort_keys=True, separators=(",", ":"), ensure_ascii=False,
+        )
+>       assert hashlib.sha256(encoded.encode()).hexdigest() == digest
+E       AssertionError: assert '700b83e05878...5e7b620451165' == '1a4484895f37...7c5b292b89140'
+E         - 1a4484895f37b3749c582281fc37a572ca1eef7be6a41a8ec1f7c5b292b89140
+E         + 700b83e058788fe0248c19a70ab70fb71ffe4229a61bee5fb455e7b620451165
+
+src/mission_control/test/test_production_motion_catalog_contract.py:771: AssertionError
+_ test_imported_motions_preserve_source_except_tolerance_and_added_turns[pickup_first_backward_turn_right-\ucc10\ud6c4\uc9c4\ud558\uace0 \uc81c\uc790\ub9ac\uc6b0\ud68c\uc804(\uacf5)-0568d0a09ea18182611e4ed34efe2d96943c0faf52107ce6c3683ab34f1c6005] _
+
+motion_id = 'pickup_first_backward_turn_right', name = '찐후진하고 제자리우회전(공)'
+digest = '0568d0a09ea18182611e4ed34efe2d96943c0faf52107ce6c3683ab34f1c6005'
+
+    @pytest.mark.parametrize("motion_id,name,digest", [
+        ("pickup_retreat_2", "찐후진실전(1회)",
+         "1a4484895f37b3749c582281fc37a572ca1eef7be6a41a8ec1f7c5b292b89140"),
+        ("pickup_first_backward_turn_right", "찐후진하고 제자리우회전(공)",
+         "0568d0a09ea18182611e4ed34efe2d96943c0faf52107ce6c3683ab34f1c6005"),
+        ("post_shot_default_turn_right", "찐기본자세에서 제자리 우회전(골대)",
+         "d1adb58605677ed92b853640e7cb9125cb5c605f3eefab010c1397c78e84a844"),
+        ("post_shot_default_turn_left", "건기본자세에서제자리좌회전(골대)",
+         "455de963e21cd376d3da174e3c9da2423ec1964747dbf1beb7e1dab826a55009"),
+        ("pickup_second_backward_turn_left", "찐후진에서 제자리좌회전(공)",
+         "9735e143053bbc33496d68f0d3fe521432478df41bd86bcc03472c3577480418"),
+        ("pickup_crab_left_0", "찐미세왼옆꽃게0도-1",
+         "931415b970ab5d0dcf2bbdc4052079801f953a096a9ba28e3a5013856711929e"),
+        ("goal_camera_90_crab_left", "찐미세왼옆꽃게90도-1",
+         "dba9db69d2bc5342abe6a0812ae672b234acbf5687053b3dd7f40eab2a7bb7d7"),
+    ])
+    def test_imported_motions_preserve_source_except_tolerance_and_added_turns(
+        motion_id, name, digest,
+    ):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {
+            m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        }
+        assert aliases[motion_id] == name
+        motion = motions[name]
+        assert motion["completion"]["position_tolerance_deg"] == 5.0
+        original_turn_counts = {
+            "post_shot_default_turn_right": 7,
+            "post_shot_default_turn_left": 4,
+            "pickup_first_backward_turn_right": 7,
+            "pickup_second_backward_turn_left": 4,
+        }
+        if motion_id in original_turn_counts:
+            # Verify the original prefix independently of the added turn sets.
+            motion = dict(motion)
+            motion["frames"] = motion["frames"][
+                :2 + 2 * original_turn_counts[motion_id]
+            ]
+            last_frame = motion["frames"][-1]
+            motion["max_seq_ms"] = last_frame["start_ms"] + last_frame["time_ms"]
+        encoded = json.dumps(
+            motion, sort_keys=True, separators=(",", ":"), ensure_ascii=False,
+        )
+>       assert hashlib.sha256(encoded.encode()).hexdigest() == digest
+E       AssertionError: assert 'e5fa9fd9d639...56317d9a8ca53' == '0568d0a09ea1...83ab34f1c6005'
+E         - 0568d0a09ea18182611e4ed34efe2d96943c0faf52107ce6c3683ab34f1c6005
+E         + e5fa9fd9d639793a3af4caebb4a2d8730903a24511ab333003156317d9a8ca53
+
+src/mission_control/test/test_production_motion_catalog_contract.py:771: AssertionError
+_ test_imported_motions_preserve_source_except_tolerance_and_added_turns[post_shot_default_turn_right-\ucc10\uae30\ubcf8\uc790\uc138\uc5d0\uc11c \uc81c\uc790\ub9ac \uc6b0\ud68c\uc804(\uace8\ub300)-d1adb58605677ed92b853640e7cb9125cb5c605f3eefab010c1397c78e84a844] _
+
+motion_id = 'post_shot_default_turn_right', name = '찐기본자세에서 제자리 우회전(골대)'
+digest = 'd1adb58605677ed92b853640e7cb9125cb5c605f3eefab010c1397c78e84a844'
+
+    @pytest.mark.parametrize("motion_id,name,digest", [
+        ("pickup_retreat_2", "찐후진실전(1회)",
+         "1a4484895f37b3749c582281fc37a572ca1eef7be6a41a8ec1f7c5b292b89140"),
+        ("pickup_first_backward_turn_right", "찐후진하고 제자리우회전(공)",
+         "0568d0a09ea18182611e4ed34efe2d96943c0faf52107ce6c3683ab34f1c6005"),
+        ("post_shot_default_turn_right", "찐기본자세에서 제자리 우회전(골대)",
+         "d1adb58605677ed92b853640e7cb9125cb5c605f3eefab010c1397c78e84a844"),
+        ("post_shot_default_turn_left", "건기본자세에서제자리좌회전(골대)",
+         "455de963e21cd376d3da174e3c9da2423ec1964747dbf1beb7e1dab826a55009"),
+        ("pickup_second_backward_turn_left", "찐후진에서 제자리좌회전(공)",
+         "9735e143053bbc33496d68f0d3fe521432478df41bd86bcc03472c3577480418"),
+        ("pickup_crab_left_0", "찐미세왼옆꽃게0도-1",
+         "931415b970ab5d0dcf2bbdc4052079801f953a096a9ba28e3a5013856711929e"),
+        ("goal_camera_90_crab_left", "찐미세왼옆꽃게90도-1",
+         "dba9db69d2bc5342abe6a0812ae672b234acbf5687053b3dd7f40eab2a7bb7d7"),
+    ])
+    def test_imported_motions_preserve_source_except_tolerance_and_added_turns(
+        motion_id, name, digest,
+    ):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {
+            m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        }
+>       assert aliases[motion_id] == name
+E       AssertionError: assert '건기본자세에서제자리우회전(골대)' == '찐기본자세에서 제자리 우회전(골대)'
+E         - 찐기본자세에서 제자리 우회전(골대)
+E         ? ^      -   -
+E         + 건기본자세에서제자리우회전(골대)
+E         ? ^
+
+src/mission_control/test/test_production_motion_catalog_contract.py:751: AssertionError
+_ test_imported_motions_preserve_source_except_tolerance_and_added_turns[post_shot_default_turn_left-\uac74\uae30\ubcf8\uc790\uc138\uc5d0\uc11c\uc81c\uc790\ub9ac\uc88c\ud68c\uc804(\uace8\ub300)-455de963e21cd376d3da174e3c9da2423ec1964747dbf1beb7e1dab826a55009] _
+
+motion_id = 'post_shot_default_turn_left', name = '건기본자세에서제자리좌회전(골대)'
+digest = '455de963e21cd376d3da174e3c9da2423ec1964747dbf1beb7e1dab826a55009'
+
+    @pytest.mark.parametrize("motion_id,name,digest", [
+        ("pickup_retreat_2", "찐후진실전(1회)",
+         "1a4484895f37b3749c582281fc37a572ca1eef7be6a41a8ec1f7c5b292b89140"),
+        ("pickup_first_backward_turn_right", "찐후진하고 제자리우회전(공)",
+         "0568d0a09ea18182611e4ed34efe2d96943c0faf52107ce6c3683ab34f1c6005"),
+        ("post_shot_default_turn_right", "찐기본자세에서 제자리 우회전(골대)",
+         "d1adb58605677ed92b853640e7cb9125cb5c605f3eefab010c1397c78e84a844"),
+        ("post_shot_default_turn_left", "건기본자세에서제자리좌회전(골대)",
+         "455de963e21cd376d3da174e3c9da2423ec1964747dbf1beb7e1dab826a55009"),
+        ("pickup_second_backward_turn_left", "찐후진에서 제자리좌회전(공)",
+         "9735e143053bbc33496d68f0d3fe521432478df41bd86bcc03472c3577480418"),
+        ("pickup_crab_left_0", "찐미세왼옆꽃게0도-1",
+         "931415b970ab5d0dcf2bbdc4052079801f953a096a9ba28e3a5013856711929e"),
+        ("goal_camera_90_crab_left", "찐미세왼옆꽃게90도-1",
+         "dba9db69d2bc5342abe6a0812ae672b234acbf5687053b3dd7f40eab2a7bb7d7"),
+    ])
+    def test_imported_motions_preserve_source_except_tolerance_and_added_turns(
+        motion_id, name, digest,
+    ):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {
+            m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        }
+        assert aliases[motion_id] == name
+        motion = motions[name]
+        assert motion["completion"]["position_tolerance_deg"] == 5.0
+        original_turn_counts = {
+            "post_shot_default_turn_right": 7,
+            "post_shot_default_turn_left": 4,
+            "pickup_first_backward_turn_right": 7,
+            "pickup_second_backward_turn_left": 4,
+        }
+        if motion_id in original_turn_counts:
+            # Verify the original prefix independently of the added turn sets.
+            motion = dict(motion)
+            motion["frames"] = motion["frames"][
+                :2 + 2 * original_turn_counts[motion_id]
+            ]
+            last_frame = motion["frames"][-1]
+            motion["max_seq_ms"] = last_frame["start_ms"] + last_frame["time_ms"]
+        encoded = json.dumps(
+            motion, sort_keys=True, separators=(",", ":"), ensure_ascii=False,
+        )
+>       assert hashlib.sha256(encoded.encode()).hexdigest() == digest
+E       AssertionError: assert '4fb51729ef18...c548e44236ce3' == '455de963e21c...1dab826a55009'
+E         - 455de963e21cd376d3da174e3c9da2423ec1964747dbf1beb7e1dab826a55009
+E         + 4fb51729ef18f6e7f7de08149eb4f7a1206d2e4fc844769a4b1c548e44236ce3
+
+src/mission_control/test/test_production_motion_catalog_contract.py:771: AssertionError
+_ test_imported_motions_preserve_source_except_tolerance_and_added_turns[pickup_second_backward_turn_left-\ucc10\ud6c4\uc9c4\uc5d0\uc11c \uc81c\uc790\ub9ac\uc88c\ud68c\uc804(\uacf5)-9735e143053bbc33496d68f0d3fe521432478df41bd86bcc03472c3577480418] _
+
+motion_id = 'pickup_second_backward_turn_left', name = '찐후진에서 제자리좌회전(공)'
+digest = '9735e143053bbc33496d68f0d3fe521432478df41bd86bcc03472c3577480418'
+
+    @pytest.mark.parametrize("motion_id,name,digest", [
+        ("pickup_retreat_2", "찐후진실전(1회)",
+         "1a4484895f37b3749c582281fc37a572ca1eef7be6a41a8ec1f7c5b292b89140"),
+        ("pickup_first_backward_turn_right", "찐후진하고 제자리우회전(공)",
+         "0568d0a09ea18182611e4ed34efe2d96943c0faf52107ce6c3683ab34f1c6005"),
+        ("post_shot_default_turn_right", "찐기본자세에서 제자리 우회전(골대)",
+         "d1adb58605677ed92b853640e7cb9125cb5c605f3eefab010c1397c78e84a844"),
+        ("post_shot_default_turn_left", "건기본자세에서제자리좌회전(골대)",
+         "455de963e21cd376d3da174e3c9da2423ec1964747dbf1beb7e1dab826a55009"),
+        ("pickup_second_backward_turn_left", "찐후진에서 제자리좌회전(공)",
+         "9735e143053bbc33496d68f0d3fe521432478df41bd86bcc03472c3577480418"),
+        ("pickup_crab_left_0", "찐미세왼옆꽃게0도-1",
+         "931415b970ab5d0dcf2bbdc4052079801f953a096a9ba28e3a5013856711929e"),
+        ("goal_camera_90_crab_left", "찐미세왼옆꽃게90도-1",
+         "dba9db69d2bc5342abe6a0812ae672b234acbf5687053b3dd7f40eab2a7bb7d7"),
+    ])
+    def test_imported_motions_preserve_source_except_tolerance_and_added_turns(
+        motion_id, name, digest,
+    ):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {
+            m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        }
+        assert aliases[motion_id] == name
+        motion = motions[name]
+        assert motion["completion"]["position_tolerance_deg"] == 5.0
+        original_turn_counts = {
+            "post_shot_default_turn_right": 7,
+            "post_shot_default_turn_left": 4,
+            "pickup_first_backward_turn_right": 7,
+            "pickup_second_backward_turn_left": 4,
+        }
+        if motion_id in original_turn_counts:
+            # Verify the original prefix independently of the added turn sets.
+            motion = dict(motion)
+            motion["frames"] = motion["frames"][
+                :2 + 2 * original_turn_counts[motion_id]
+            ]
+            last_frame = motion["frames"][-1]
+            motion["max_seq_ms"] = last_frame["start_ms"] + last_frame["time_ms"]
+        encoded = json.dumps(
+            motion, sort_keys=True, separators=(",", ":"), ensure_ascii=False,
+        )
+>       assert hashlib.sha256(encoded.encode()).hexdigest() == digest
+E       AssertionError: assert '38cdc7268465...d80f2cd9e3c7f' == '9735e143053b...72c3577480418'
+E         - 9735e143053bbc33496d68f0d3fe521432478df41bd86bcc03472c3577480418
+E         + 38cdc7268465a3204780ed4f68dfa482f6746e32350d892d5e9d80f2cd9e3c7f
+
+src/mission_control/test/test_production_motion_catalog_contract.py:771: AssertionError
+_ test_imported_motions_preserve_source_except_tolerance_and_added_turns[pickup_crab_left_0-\ucc10\ubbf8\uc138\uc67c\uc606\uaf43\uac8c0\ub3c4-1-931415b970ab5d0dcf2bbdc4052079801f953a096a9ba28e3a5013856711929e] _
+
+motion_id = 'pickup_crab_left_0', name = '찐미세왼옆꽃게0도-1'
+digest = '931415b970ab5d0dcf2bbdc4052079801f953a096a9ba28e3a5013856711929e'
+
+    @pytest.mark.parametrize("motion_id,name,digest", [
+        ("pickup_retreat_2", "찐후진실전(1회)",
+         "1a4484895f37b3749c582281fc37a572ca1eef7be6a41a8ec1f7c5b292b89140"),
+        ("pickup_first_backward_turn_right", "찐후진하고 제자리우회전(공)",
+         "0568d0a09ea18182611e4ed34efe2d96943c0faf52107ce6c3683ab34f1c6005"),
+        ("post_shot_default_turn_right", "찐기본자세에서 제자리 우회전(골대)",
+         "d1adb58605677ed92b853640e7cb9125cb5c605f3eefab010c1397c78e84a844"),
+        ("post_shot_default_turn_left", "건기본자세에서제자리좌회전(골대)",
+         "455de963e21cd376d3da174e3c9da2423ec1964747dbf1beb7e1dab826a55009"),
+        ("pickup_second_backward_turn_left", "찐후진에서 제자리좌회전(공)",
+         "9735e143053bbc33496d68f0d3fe521432478df41bd86bcc03472c3577480418"),
+        ("pickup_crab_left_0", "찐미세왼옆꽃게0도-1",
+         "931415b970ab5d0dcf2bbdc4052079801f953a096a9ba28e3a5013856711929e"),
+        ("goal_camera_90_crab_left", "찐미세왼옆꽃게90도-1",
+         "dba9db69d2bc5342abe6a0812ae672b234acbf5687053b3dd7f40eab2a7bb7d7"),
+    ])
+    def test_imported_motions_preserve_source_except_tolerance_and_added_turns(
+        motion_id, name, digest,
+    ):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {
+            m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        }
+>       assert aliases[motion_id] == name
+E       AssertionError: assert '유미세왼옆꽃게0도' == '찐미세왼옆꽃게0도-1'
+E         - 찐미세왼옆꽃게0도-1
+E         ? ^        --
+E         + 유미세왼옆꽃게0도
+E         ? ^
+
+src/mission_control/test/test_production_motion_catalog_contract.py:751: AssertionError
+_ test_imported_motions_preserve_source_except_tolerance_and_added_turns[goal_camera_90_crab_left-\ucc10\ubbf8\uc138\uc67c\uc606\uaf43\uac8c90\ub3c4-1-dba9db69d2bc5342abe6a0812ae672b234acbf5687053b3dd7f40eab2a7bb7d7] _
+
+motion_id = 'goal_camera_90_crab_left', name = '찐미세왼옆꽃게90도-1'
+digest = 'dba9db69d2bc5342abe6a0812ae672b234acbf5687053b3dd7f40eab2a7bb7d7'
+
+    @pytest.mark.parametrize("motion_id,name,digest", [
+        ("pickup_retreat_2", "찐후진실전(1회)",
+         "1a4484895f37b3749c582281fc37a572ca1eef7be6a41a8ec1f7c5b292b89140"),
+        ("pickup_first_backward_turn_right", "찐후진하고 제자리우회전(공)",
+         "0568d0a09ea18182611e4ed34efe2d96943c0faf52107ce6c3683ab34f1c6005"),
+        ("post_shot_default_turn_right", "찐기본자세에서 제자리 우회전(골대)",
+         "d1adb58605677ed92b853640e7cb9125cb5c605f3eefab010c1397c78e84a844"),
+        ("post_shot_default_turn_left", "건기본자세에서제자리좌회전(골대)",
+         "455de963e21cd376d3da174e3c9da2423ec1964747dbf1beb7e1dab826a55009"),
+        ("pickup_second_backward_turn_left", "찐후진에서 제자리좌회전(공)",
+         "9735e143053bbc33496d68f0d3fe521432478df41bd86bcc03472c3577480418"),
+        ("pickup_crab_left_0", "찐미세왼옆꽃게0도-1",
+         "931415b970ab5d0dcf2bbdc4052079801f953a096a9ba28e3a5013856711929e"),
+        ("goal_camera_90_crab_left", "찐미세왼옆꽃게90도-1",
+         "dba9db69d2bc5342abe6a0812ae672b234acbf5687053b3dd7f40eab2a7bb7d7"),
+    ])
+    def test_imported_motions_preserve_source_except_tolerance_and_added_turns(
+        motion_id, name, digest,
+    ):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {
+            m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        }
+>       assert aliases[motion_id] == name
+E       AssertionError: assert '유미세왼옆꽃게90도' == '찐미세왼옆꽃게90도-1'
+E         - 찐미세왼옆꽃게90도-1
+E         ? ^         --
+E         + 유미세왼옆꽃게90도
+E         ? ^
+
+src/mission_control/test/test_production_motion_catalog_contract.py:751: AssertionError
+_ test_composite_extended_turn_sets_preserve_pose_and_timing[post_shot_default_turn_right-7-9-\uc81c\uc6b0\uc624\ub4e425-\uc624\ub4a4415-3531] _
+
+motion_id = 'post_shot_default_turn_right', original_count = 7, turn_count = 9
+turn_pose = '제우오들25', end_pose = '오뒤415', duration_ms = 3531
+
+    @pytest.mark.parametrize("motion_id,original_count,turn_count,turn_pose,end_pose,duration_ms", [
+        ("post_shot_default_turn_right", 7, 9, "제우오들25", "오뒤415", 3531),
+        ("post_shot_default_turn_left", 4, 6, "제좌왼들25", "김오뒤3", 2656),
+        ("pickup_first_backward_turn_right", 7, 11, "제우오들25", "오뒤415", 4144),
+        ("pickup_second_backward_turn_left", 4, 7, "제좌왼들25", "오뒤412", 3089),
+    ])
+    def test_composite_extended_turn_sets_preserve_pose_and_timing(
+        motion_id, original_count, turn_count, turn_pose, end_pose, duration_ms,
+    ):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {
+            m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        }
+        motion = motions[aliases[motion_id]]
+        frames = motion["frames"]
+        assert motion["repeat_count"] == 1
+        assert motion["playback_speed"] == 1.0
+>       assert motion["end_pose"] == end_pose
+E       AssertionError: assert '김오뒤3' == '오뒤415'
+E         - 오뒤415
+E         + 김오뒤3
+
+src/mission_control/test/test_production_motion_catalog_contract.py:791: AssertionError
+_ test_composite_extended_turn_sets_preserve_pose_and_timing[pickup_first_backward_turn_right-7-11-\uc81c\uc6b0\uc624\ub4e425-\uc624\ub4a4415-4144] _
+
+motion_id = 'pickup_first_backward_turn_right', original_count = 7
+turn_count = 11, turn_pose = '제우오들25', end_pose = '오뒤415', duration_ms = 4144
+
+    @pytest.mark.parametrize("motion_id,original_count,turn_count,turn_pose,end_pose,duration_ms", [
+        ("post_shot_default_turn_right", 7, 9, "제우오들25", "오뒤415", 3531),
+        ("post_shot_default_turn_left", 4, 6, "제좌왼들25", "김오뒤3", 2656),
+        ("pickup_first_backward_turn_right", 7, 11, "제우오들25", "오뒤415", 4144),
+        ("pickup_second_backward_turn_left", 4, 7, "제좌왼들25", "오뒤412", 3089),
+    ])
+    def test_composite_extended_turn_sets_preserve_pose_and_timing(
+        motion_id, original_count, turn_count, turn_pose, end_pose, duration_ms,
+    ):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {
+            m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        }
+        motion = motions[aliases[motion_id]]
+        frames = motion["frames"]
+        assert motion["repeat_count"] == 1
+        assert motion["playback_speed"] == 1.0
+        assert motion["end_pose"] == end_pose
+        start_pose = (
+            "김왼들(앞먼저닿음)" if motion_id == "post_shot_default_turn_left" else "왼들401"
+        )
+>       assert [frame["name"] for frame in frames] == (
+            [start_pose, end_pose] + [turn_pose, end_pose] * turn_count
+        )
+E       AssertionError: assert ['왼들401', '오뒤... '오뒤415', ...] == ['왼들401', '오뒤... '오뒤415', ...]
+E         Right contains 8 more items, first extra item: '제우오들25'
+E         Full diff:
+E           [
+E            '왼들401',
+E            '오뒤415',
+E            '제우오들25',
+E            '오뒤415',...
+E         
+E         ...Full output truncated (22 lines hidden), use '-vv' to show
+
+src/mission_control/test/test_production_motion_catalog_contract.py:795: AssertionError
+_____ test_pickup_crab_preparation_preserves_body_motion_with_camera_down ______
+
+    def test_pickup_crab_preparation_preserves_body_motion_with_camera_down():
+        import copy
+    
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]}
+>       expected = copy.deepcopy(motions["찐오뒤에서 기본자세(카메라45도)"])
+E       KeyError: '찐오뒤에서 기본자세(카메라45도)'
+
+src/mission_control/test/test_production_motion_catalog_contract.py:868: KeyError
+_ test_goal_single_retreat_preserves_original_frames_and_three_cycle_pickup_motion _
+
+    def test_goal_single_retreat_preserves_original_frames_and_three_cycle_pickup_motion():
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())['motion_aliases']
+        data = json.loads(RUNTIME_CATALOG_PATH.read_text())
+        motions = {motion['name']: motion for motion in data['motions']}
+>       original = motions['후진실전-2(3회)']
+E       KeyError: '후진실전-2(3회)'
+
+src/mission_control/test/test_production_motion_catalog_contract.py:883: KeyError
+_ test_goal_depth_selection_resolves_to_requested_runtime_motion[1.281-GOAL_CAMERA_90_FORWARD-\ucc10\uc804\uc9c490(6\ud68c)-3] _
+
+depth = 1.281, expected_action = 'GOAL_CAMERA_90_FORWARD', name = '찐전진90(6회)'
+repeats = 3
+
+    @pytest.mark.parametrize('depth,expected_action,name,repeats', [
+        (1.281, 'GOAL_CAMERA_90_FORWARD', '찐전진90(6회)', 3),
+        (1.280, 'GOAL_CAMERA_90_FORWARD_2', '찐전진90(4회)', 2),
+        (0.851, 'GOAL_CAMERA_90_FORWARD_2', '찐전진90(4회)', 2),
+        (0.850, 'GOAL_CAMERA90_FINE_FORWARD_3', '찐미세90도-4(3회)', 3),
+        (0.501, 'GOAL_CAMERA90_FINE_FORWARD_3', '찐미세90도-4(3회)', 3),
+        (0.500, 'GOAL_CAMERA90_FINE_FORWARD_1', '찐미세90도-4(1회)', 1),
+        (0.431, 'GOAL_CAMERA90_FINE_FORWARD_1', '찐미세90도-4(1회)', 1),
+        (0.389, 'GOAL_CAMERA90_BACKWARD_1', '찐후진실전(1회)', 1),
+    ])
+    def test_goal_depth_selection_resolves_to_requested_runtime_motion(
+        depth, expected_action, name, repeats,
+    ):
+        from step.goal_navigation_planner import GoalNavigationPlanner
+    
+        command = GoalNavigationPlanner().plan({
+            'detected': True, 'confidence': 0.9, 'depth_valid': True,
+            'depth_m': depth, 'offset_x_px': 0, 'score_now': True,
+        })
+        assert command.action == expected_action
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {
+            motion['name']: motion
+            for motion in json.loads(RUNTIME_CATALOG_PATH.read_text())['motions']
+        }
+        motion_id = MotionCommandBridgeNode.motion_id_for_action(command.action)
+>       assert aliases[motion_id] == name
+E       AssertionError: assert '건전진90도(6회)' == '찐전진90(6회)'
+E         - 찐전진90(6회)
+E         ? ^
+E         + 건전진90도(6회)
+E         ? ^    +
+
+src/mission_control/test/test_production_motion_catalog_contract.py:937: AssertionError
+_ test_goal_depth_selection_resolves_to_requested_runtime_motion[1.28-GOAL_CAMERA_90_FORWARD_2-\ucc10\uc804\uc9c490(4\ud68c)-2] _
+
+depth = 1.28, expected_action = 'GOAL_CAMERA_90_FORWARD_2', name = '찐전진90(4회)'
+repeats = 2
+
+    @pytest.mark.parametrize('depth,expected_action,name,repeats', [
+        (1.281, 'GOAL_CAMERA_90_FORWARD', '찐전진90(6회)', 3),
+        (1.280, 'GOAL_CAMERA_90_FORWARD_2', '찐전진90(4회)', 2),
+        (0.851, 'GOAL_CAMERA_90_FORWARD_2', '찐전진90(4회)', 2),
+        (0.850, 'GOAL_CAMERA90_FINE_FORWARD_3', '찐미세90도-4(3회)', 3),
+        (0.501, 'GOAL_CAMERA90_FINE_FORWARD_3', '찐미세90도-4(3회)', 3),
+        (0.500, 'GOAL_CAMERA90_FINE_FORWARD_1', '찐미세90도-4(1회)', 1),
+        (0.431, 'GOAL_CAMERA90_FINE_FORWARD_1', '찐미세90도-4(1회)', 1),
+        (0.389, 'GOAL_CAMERA90_BACKWARD_1', '찐후진실전(1회)', 1),
+    ])
+    def test_goal_depth_selection_resolves_to_requested_runtime_motion(
+        depth, expected_action, name, repeats,
+    ):
+        from step.goal_navigation_planner import GoalNavigationPlanner
+    
+        command = GoalNavigationPlanner().plan({
+            'detected': True, 'confidence': 0.9, 'depth_valid': True,
+            'depth_m': depth, 'offset_x_px': 0, 'score_now': True,
+        })
+        assert command.action == expected_action
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {
+            motion['name']: motion
+            for motion in json.loads(RUNTIME_CATALOG_PATH.read_text())['motions']
+        }
+        motion_id = MotionCommandBridgeNode.motion_id_for_action(command.action)
+>       assert aliases[motion_id] == name
+E       AssertionError: assert '건전진90도(4회)' == '찐전진90(4회)'
+E         - 찐전진90(4회)
+E         ? ^
+E         + 건전진90도(4회)
+E         ? ^    +
+
+src/mission_control/test/test_production_motion_catalog_contract.py:937: AssertionError
+_ test_goal_depth_selection_resolves_to_requested_runtime_motion[0.851-GOAL_CAMERA_90_FORWARD_2-\ucc10\uc804\uc9c490(4\ud68c)-2] _
+
+depth = 0.851, expected_action = 'GOAL_CAMERA_90_FORWARD_2', name = '찐전진90(4회)'
+repeats = 2
+
+    @pytest.mark.parametrize('depth,expected_action,name,repeats', [
+        (1.281, 'GOAL_CAMERA_90_FORWARD', '찐전진90(6회)', 3),
+        (1.280, 'GOAL_CAMERA_90_FORWARD_2', '찐전진90(4회)', 2),
+        (0.851, 'GOAL_CAMERA_90_FORWARD_2', '찐전진90(4회)', 2),
+        (0.850, 'GOAL_CAMERA90_FINE_FORWARD_3', '찐미세90도-4(3회)', 3),
+        (0.501, 'GOAL_CAMERA90_FINE_FORWARD_3', '찐미세90도-4(3회)', 3),
+        (0.500, 'GOAL_CAMERA90_FINE_FORWARD_1', '찐미세90도-4(1회)', 1),
+        (0.431, 'GOAL_CAMERA90_FINE_FORWARD_1', '찐미세90도-4(1회)', 1),
+        (0.389, 'GOAL_CAMERA90_BACKWARD_1', '찐후진실전(1회)', 1),
+    ])
+    def test_goal_depth_selection_resolves_to_requested_runtime_motion(
+        depth, expected_action, name, repeats,
+    ):
+        from step.goal_navigation_planner import GoalNavigationPlanner
+    
+        command = GoalNavigationPlanner().plan({
+            'detected': True, 'confidence': 0.9, 'depth_valid': True,
+            'depth_m': depth, 'offset_x_px': 0, 'score_now': True,
+        })
+        assert command.action == expected_action
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {
+            motion['name']: motion
+            for motion in json.loads(RUNTIME_CATALOG_PATH.read_text())['motions']
+        }
+        motion_id = MotionCommandBridgeNode.motion_id_for_action(command.action)
+>       assert aliases[motion_id] == name
+E       AssertionError: assert '건전진90도(4회)' == '찐전진90(4회)'
+E         - 찐전진90(4회)
+E         ? ^
+E         + 건전진90도(4회)
+E         ? ^    +
+
+src/mission_control/test/test_production_motion_catalog_contract.py:937: AssertionError
+_ test_goal_depth_selection_resolves_to_requested_runtime_motion[0.85-GOAL_CAMERA90_FINE_FORWARD_3-\ucc10\ubbf8\uc13890\ub3c4-4(3\ud68c)-3] _
+
+depth = 0.85, expected_action = 'GOAL_CAMERA90_FINE_FORWARD_3'
+name = '찐미세90도-4(3회)', repeats = 3
+
+    @pytest.mark.parametrize('depth,expected_action,name,repeats', [
+        (1.281, 'GOAL_CAMERA_90_FORWARD', '찐전진90(6회)', 3),
+        (1.280, 'GOAL_CAMERA_90_FORWARD_2', '찐전진90(4회)', 2),
+        (0.851, 'GOAL_CAMERA_90_FORWARD_2', '찐전진90(4회)', 2),
+        (0.850, 'GOAL_CAMERA90_FINE_FORWARD_3', '찐미세90도-4(3회)', 3),
+        (0.501, 'GOAL_CAMERA90_FINE_FORWARD_3', '찐미세90도-4(3회)', 3),
+        (0.500, 'GOAL_CAMERA90_FINE_FORWARD_1', '찐미세90도-4(1회)', 1),
+        (0.431, 'GOAL_CAMERA90_FINE_FORWARD_1', '찐미세90도-4(1회)', 1),
+        (0.389, 'GOAL_CAMERA90_BACKWARD_1', '찐후진실전(1회)', 1),
+    ])
+    def test_goal_depth_selection_resolves_to_requested_runtime_motion(
+        depth, expected_action, name, repeats,
+    ):
+        from step.goal_navigation_planner import GoalNavigationPlanner
+    
+        command = GoalNavigationPlanner().plan({
+            'detected': True, 'confidence': 0.9, 'depth_valid': True,
+            'depth_m': depth, 'offset_x_px': 0, 'score_now': True,
+        })
+        assert command.action == expected_action
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {
+            motion['name']: motion
+            for motion in json.loads(RUNTIME_CATALOG_PATH.read_text())['motions']
+        }
+        motion_id = MotionCommandBridgeNode.motion_id_for_action(command.action)
+>       assert aliases[motion_id] == name
+E       AssertionError: assert '건미세90도(3회)' == '찐미세90도-4(3회)'
+E         - 찐미세90도-4(3회)
+E         ? ^     --
+E         + 건미세90도(3회)
+E         ? ^
+
+src/mission_control/test/test_production_motion_catalog_contract.py:937: AssertionError
+_ test_goal_depth_selection_resolves_to_requested_runtime_motion[0.501-GOAL_CAMERA90_FINE_FORWARD_3-\ucc10\ubbf8\uc13890\ub3c4-4(3\ud68c)-3] _
+
+depth = 0.501, expected_action = 'GOAL_CAMERA90_FINE_FORWARD_3'
+name = '찐미세90도-4(3회)', repeats = 3
+
+    @pytest.mark.parametrize('depth,expected_action,name,repeats', [
+        (1.281, 'GOAL_CAMERA_90_FORWARD', '찐전진90(6회)', 3),
+        (1.280, 'GOAL_CAMERA_90_FORWARD_2', '찐전진90(4회)', 2),
+        (0.851, 'GOAL_CAMERA_90_FORWARD_2', '찐전진90(4회)', 2),
+        (0.850, 'GOAL_CAMERA90_FINE_FORWARD_3', '찐미세90도-4(3회)', 3),
+        (0.501, 'GOAL_CAMERA90_FINE_FORWARD_3', '찐미세90도-4(3회)', 3),
+        (0.500, 'GOAL_CAMERA90_FINE_FORWARD_1', '찐미세90도-4(1회)', 1),
+        (0.431, 'GOAL_CAMERA90_FINE_FORWARD_1', '찐미세90도-4(1회)', 1),
+        (0.389, 'GOAL_CAMERA90_BACKWARD_1', '찐후진실전(1회)', 1),
+    ])
+    def test_goal_depth_selection_resolves_to_requested_runtime_motion(
+        depth, expected_action, name, repeats,
+    ):
+        from step.goal_navigation_planner import GoalNavigationPlanner
+    
+        command = GoalNavigationPlanner().plan({
+            'detected': True, 'confidence': 0.9, 'depth_valid': True,
+            'depth_m': depth, 'offset_x_px': 0, 'score_now': True,
+        })
+        assert command.action == expected_action
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {
+            motion['name']: motion
+            for motion in json.loads(RUNTIME_CATALOG_PATH.read_text())['motions']
+        }
+        motion_id = MotionCommandBridgeNode.motion_id_for_action(command.action)
+>       assert aliases[motion_id] == name
+E       AssertionError: assert '건미세90도(3회)' == '찐미세90도-4(3회)'
+E         - 찐미세90도-4(3회)
+E         ? ^     --
+E         + 건미세90도(3회)
+E         ? ^
+
+src/mission_control/test/test_production_motion_catalog_contract.py:937: AssertionError
+_ test_goal_depth_selection_resolves_to_requested_runtime_motion[0.5-GOAL_CAMERA90_FINE_FORWARD_1-\ucc10\ubbf8\uc13890\ub3c4-4(1\ud68c)-1] _
+
+depth = 0.5, expected_action = 'GOAL_CAMERA90_FINE_FORWARD_1'
+name = '찐미세90도-4(1회)', repeats = 1
+
+    @pytest.mark.parametrize('depth,expected_action,name,repeats', [
+        (1.281, 'GOAL_CAMERA_90_FORWARD', '찐전진90(6회)', 3),
+        (1.280, 'GOAL_CAMERA_90_FORWARD_2', '찐전진90(4회)', 2),
+        (0.851, 'GOAL_CAMERA_90_FORWARD_2', '찐전진90(4회)', 2),
+        (0.850, 'GOAL_CAMERA90_FINE_FORWARD_3', '찐미세90도-4(3회)', 3),
+        (0.501, 'GOAL_CAMERA90_FINE_FORWARD_3', '찐미세90도-4(3회)', 3),
+        (0.500, 'GOAL_CAMERA90_FINE_FORWARD_1', '찐미세90도-4(1회)', 1),
+        (0.431, 'GOAL_CAMERA90_FINE_FORWARD_1', '찐미세90도-4(1회)', 1),
+        (0.389, 'GOAL_CAMERA90_BACKWARD_1', '찐후진실전(1회)', 1),
+    ])
+    def test_goal_depth_selection_resolves_to_requested_runtime_motion(
+        depth, expected_action, name, repeats,
+    ):
+        from step.goal_navigation_planner import GoalNavigationPlanner
+    
+        command = GoalNavigationPlanner().plan({
+            'detected': True, 'confidence': 0.9, 'depth_valid': True,
+            'depth_m': depth, 'offset_x_px': 0, 'score_now': True,
+        })
+        assert command.action == expected_action
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {
+            motion['name']: motion
+            for motion in json.loads(RUNTIME_CATALOG_PATH.read_text())['motions']
+        }
+        motion_id = MotionCommandBridgeNode.motion_id_for_action(command.action)
+>       assert aliases[motion_id] == name
+E       AssertionError: assert '건미세90도(1회)' == '찐미세90도-4(1회)'
+E         - 찐미세90도-4(1회)
+E         ? ^     --
+E         + 건미세90도(1회)
+E         ? ^
+
+src/mission_control/test/test_production_motion_catalog_contract.py:937: AssertionError
+_ test_goal_depth_selection_resolves_to_requested_runtime_motion[0.431-GOAL_CAMERA90_FINE_FORWARD_1-\ucc10\ubbf8\uc13890\ub3c4-4(1\ud68c)-1] _
+
+depth = 0.431, expected_action = 'GOAL_CAMERA90_FINE_FORWARD_1'
+name = '찐미세90도-4(1회)', repeats = 1
+
+    @pytest.mark.parametrize('depth,expected_action,name,repeats', [
+        (1.281, 'GOAL_CAMERA_90_FORWARD', '찐전진90(6회)', 3),
+        (1.280, 'GOAL_CAMERA_90_FORWARD_2', '찐전진90(4회)', 2),
+        (0.851, 'GOAL_CAMERA_90_FORWARD_2', '찐전진90(4회)', 2),
+        (0.850, 'GOAL_CAMERA90_FINE_FORWARD_3', '찐미세90도-4(3회)', 3),
+        (0.501, 'GOAL_CAMERA90_FINE_FORWARD_3', '찐미세90도-4(3회)', 3),
+        (0.500, 'GOAL_CAMERA90_FINE_FORWARD_1', '찐미세90도-4(1회)', 1),
+        (0.431, 'GOAL_CAMERA90_FINE_FORWARD_1', '찐미세90도-4(1회)', 1),
+        (0.389, 'GOAL_CAMERA90_BACKWARD_1', '찐후진실전(1회)', 1),
+    ])
+    def test_goal_depth_selection_resolves_to_requested_runtime_motion(
+        depth, expected_action, name, repeats,
+    ):
+        from step.goal_navigation_planner import GoalNavigationPlanner
+    
+        command = GoalNavigationPlanner().plan({
+            'detected': True, 'confidence': 0.9, 'depth_valid': True,
+            'depth_m': depth, 'offset_x_px': 0, 'score_now': True,
+        })
+>       assert command.action == expected_action
+E       AssertionError: assert 'SHOT' == 'GOAL_CAMERA90_FINE_FORWARD_1'
+E         - GOAL_CAMERA90_FINE_FORWARD_1
+E         + SHOT
+
+src/mission_control/test/test_production_motion_catalog_contract.py:930: AssertionError
+________ test_line_return_right_four_preserves_catalog32_motion[RIGHT] _________
+
+action = 'RIGHT'
+
+    @pytest.mark.parametrize("action", [
+        "RIGHT",
+        "RECOVER_RIGHT_TURN_RIGHT_4",
+        "RECOVER_LEFT_TURN_RIGHT_4",
+        "BALL_APPROACH_RECOVER_RIGHT_4",
+    ])
+    def test_line_return_right_four_preserves_catalog32_motion(action):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {
+            motion["name"]: motion
+            for motion in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        }
+        source_path = RUNTIME_CATALOG_PATH.parent / "catalog32_right_recovery_source.json"
+        expected = json.loads(source_path.read_text())["motions"][0]
+        assert expected["name"] == "찐라인복귀우회전45 도(4회)"
+        assert expected["repeat_count"] == 4
+        expected["completion"]["position_tolerance_deg"] = 5.0
+        motion_id = MotionCommandBridgeNode.motion_id_for_action(action)
+        assert motion_id == "line_recovery_right_4"
+>       assert aliases[motion_id] == expected["name"]
+E       AssertionError: assert '건라인복귀우회전45도(4회)' == '찐라인복귀우회전45 도(4회)'
+E         - 찐라인복귀우회전45 도(4회)
+E         ? ^         -
+E         + 건라인복귀우회전45도(4회)
+E         ? ^
+
+src/mission_control/test/test_production_motion_catalog_contract.py:962: AssertionError
+_ test_line_return_right_four_preserves_catalog32_motion[RECOVER_RIGHT_TURN_RIGHT_4] _
+
+action = 'RECOVER_RIGHT_TURN_RIGHT_4'
+
+    @pytest.mark.parametrize("action", [
+        "RIGHT",
+        "RECOVER_RIGHT_TURN_RIGHT_4",
+        "RECOVER_LEFT_TURN_RIGHT_4",
+        "BALL_APPROACH_RECOVER_RIGHT_4",
+    ])
+    def test_line_return_right_four_preserves_catalog32_motion(action):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {
+            motion["name"]: motion
+            for motion in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        }
+        source_path = RUNTIME_CATALOG_PATH.parent / "catalog32_right_recovery_source.json"
+        expected = json.loads(source_path.read_text())["motions"][0]
+        assert expected["name"] == "찐라인복귀우회전45 도(4회)"
+        assert expected["repeat_count"] == 4
+        expected["completion"]["position_tolerance_deg"] = 5.0
+        motion_id = MotionCommandBridgeNode.motion_id_for_action(action)
+        assert motion_id == "line_recovery_right_4"
+>       assert aliases[motion_id] == expected["name"]
+E       AssertionError: assert '건라인복귀우회전45도(4회)' == '찐라인복귀우회전45 도(4회)'
+E         - 찐라인복귀우회전45 도(4회)
+E         ? ^         -
+E         + 건라인복귀우회전45도(4회)
+E         ? ^
+
+src/mission_control/test/test_production_motion_catalog_contract.py:962: AssertionError
+_ test_line_return_right_four_preserves_catalog32_motion[RECOVER_LEFT_TURN_RIGHT_4] _
+
+action = 'RECOVER_LEFT_TURN_RIGHT_4'
+
+    @pytest.mark.parametrize("action", [
+        "RIGHT",
+        "RECOVER_RIGHT_TURN_RIGHT_4",
+        "RECOVER_LEFT_TURN_RIGHT_4",
+        "BALL_APPROACH_RECOVER_RIGHT_4",
+    ])
+    def test_line_return_right_four_preserves_catalog32_motion(action):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {
+            motion["name"]: motion
+            for motion in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        }
+        source_path = RUNTIME_CATALOG_PATH.parent / "catalog32_right_recovery_source.json"
+        expected = json.loads(source_path.read_text())["motions"][0]
+        assert expected["name"] == "찐라인복귀우회전45 도(4회)"
+        assert expected["repeat_count"] == 4
+        expected["completion"]["position_tolerance_deg"] = 5.0
+        motion_id = MotionCommandBridgeNode.motion_id_for_action(action)
+        assert motion_id == "line_recovery_right_4"
+>       assert aliases[motion_id] == expected["name"]
+E       AssertionError: assert '건라인복귀우회전45도(4회)' == '찐라인복귀우회전45 도(4회)'
+E         - 찐라인복귀우회전45 도(4회)
+E         ? ^         -
+E         + 건라인복귀우회전45도(4회)
+E         ? ^
+
+src/mission_control/test/test_production_motion_catalog_contract.py:962: AssertionError
+_ test_line_return_right_four_preserves_catalog32_motion[BALL_APPROACH_RECOVER_RIGHT_4] _
+
+action = 'BALL_APPROACH_RECOVER_RIGHT_4'
+
+    @pytest.mark.parametrize("action", [
+        "RIGHT",
+        "RECOVER_RIGHT_TURN_RIGHT_4",
+        "RECOVER_LEFT_TURN_RIGHT_4",
+        "BALL_APPROACH_RECOVER_RIGHT_4",
+    ])
+    def test_line_return_right_four_preserves_catalog32_motion(action):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {
+            motion["name"]: motion
+            for motion in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        }
+        source_path = RUNTIME_CATALOG_PATH.parent / "catalog32_right_recovery_source.json"
+        expected = json.loads(source_path.read_text())["motions"][0]
+        assert expected["name"] == "찐라인복귀우회전45 도(4회)"
+        assert expected["repeat_count"] == 4
+        expected["completion"]["position_tolerance_deg"] = 5.0
+        motion_id = MotionCommandBridgeNode.motion_id_for_action(action)
+        assert motion_id == "line_recovery_right_4"
+>       assert aliases[motion_id] == expected["name"]
+E       AssertionError: assert '건라인복귀우회전45도(4회)' == '찐라인복귀우회전45 도(4회)'
+E         - 찐라인복귀우회전45 도(4회)
+E         ? ^         -
+E         + 건라인복귀우회전45도(4회)
+E         ? ^
+
+src/mission_control/test/test_production_motion_catalog_contract.py:962: AssertionError
+_ test_catalog29_right_crab_motions_preserve_source_except_tolerance[pickup_crab_right_0-\ucc10\ubbf8\uc138\uc624\uc606\uaf43\uac8c0-1(1\ud68c)-4-955855ee4ea1ba22b9f2d65746e30a845f97b177505fa4a2f678de9737b004e5] _
+
+alias = 'pickup_crab_right_0', name = '찐미세오옆꽃게0-1(1회)', frame_count = 4
+digest = '955855ee4ea1ba22b9f2d65746e30a845f97b177505fa4a2f678de9737b004e5'
+
+    @pytest.mark.parametrize("alias,name,frame_count,digest", [
+        ("pickup_crab_right_0", "찐미세오옆꽃게0-1(1회)", 4,
+         "955855ee4ea1ba22b9f2d65746e30a845f97b177505fa4a2f678de9737b004e5"),
+        ("goal_camera_90_crab_right", "찐미세오옆꽃게90-1(1회)", 4,
+         "ef4fd376232c750ce52d6f9c374f44fd7c665873bc1d2d7bbc65b6732eb90a3b"),
+        ("pickup_fine_to_crab_right_0", "찐미세오뒤에서오옆꽃게0도", 2,
+         "5058c68644682c32c76d1d07fba4e566d9089a87cd669954e8aa38ba5055c6f0"),
+        ("goal_fine_to_crab_right_90", "찐미세오뒤에서 오옆꽃게90도", 2,
+         "ba38d07ef6ba1ea0a4398f5d6667e45ab97463875deacf6cfc7e6a11ffd152b1"),
+        ("goal_forward_to_crab_right_90", "찐오뒤에서 오옆꽃게90도", 2,
+         "0579a746404e812d0b2fcee308bb59d0ac8301068371e4c4977cf996382b5f7b"),
+    ])
+    def test_catalog29_right_crab_motions_preserve_source_except_tolerance(
+        alias, name, frame_count, digest,
+    ):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+>       assert aliases[alias] == name
+E       AssertionError: assert '유미세오옆꽃게0도' == '찐미세오옆꽃게0-1(1회)'
+E         - 찐미세오옆꽃게0-1(1회)
+E         + 유미세오옆꽃게0도
+
+src/mission_control/test/test_production_motion_catalog_contract.py:997: AssertionError
+_ test_catalog29_right_crab_motions_preserve_source_except_tolerance[goal_camera_90_crab_right-\ucc10\ubbf8\uc138\uc624\uc606\uaf43\uac8c90-1(1\ud68c)-4-ef4fd376232c750ce52d6f9c374f44fd7c665873bc1d2d7bbc65b6732eb90a3b] _
+
+alias = 'goal_camera_90_crab_right', name = '찐미세오옆꽃게90-1(1회)', frame_count = 4
+digest = 'ef4fd376232c750ce52d6f9c374f44fd7c665873bc1d2d7bbc65b6732eb90a3b'
+
+    @pytest.mark.parametrize("alias,name,frame_count,digest", [
+        ("pickup_crab_right_0", "찐미세오옆꽃게0-1(1회)", 4,
+         "955855ee4ea1ba22b9f2d65746e30a845f97b177505fa4a2f678de9737b004e5"),
+        ("goal_camera_90_crab_right", "찐미세오옆꽃게90-1(1회)", 4,
+         "ef4fd376232c750ce52d6f9c374f44fd7c665873bc1d2d7bbc65b6732eb90a3b"),
+        ("pickup_fine_to_crab_right_0", "찐미세오뒤에서오옆꽃게0도", 2,
+         "5058c68644682c32c76d1d07fba4e566d9089a87cd669954e8aa38ba5055c6f0"),
+        ("goal_fine_to_crab_right_90", "찐미세오뒤에서 오옆꽃게90도", 2,
+         "ba38d07ef6ba1ea0a4398f5d6667e45ab97463875deacf6cfc7e6a11ffd152b1"),
+        ("goal_forward_to_crab_right_90", "찐오뒤에서 오옆꽃게90도", 2,
+         "0579a746404e812d0b2fcee308bb59d0ac8301068371e4c4977cf996382b5f7b"),
+    ])
+    def test_catalog29_right_crab_motions_preserve_source_except_tolerance(
+        alias, name, frame_count, digest,
+    ):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+>       assert aliases[alias] == name
+E       AssertionError: assert '유미세오옆꽃게90도' == '찐미세오옆꽃게90-1(1회)'
+E         - 찐미세오옆꽃게90-1(1회)
+E         + 유미세오옆꽃게90도
+
+src/mission_control/test/test_production_motion_catalog_contract.py:997: AssertionError
+_ test_catalog29_right_crab_motions_preserve_source_except_tolerance[pickup_fine_to_crab_right_0-\ucc10\ubbf8\uc138\uc624\ub4a4\uc5d0\uc11c\uc624\uc606\uaf43\uac8c0\ub3c4-2-5058c68644682c32c76d1d07fba4e566d9089a87cd669954e8aa38ba5055c6f0] _
+
+alias = 'pickup_fine_to_crab_right_0', name = '찐미세오뒤에서오옆꽃게0도', frame_count = 2
+digest = '5058c68644682c32c76d1d07fba4e566d9089a87cd669954e8aa38ba5055c6f0'
+
+    @pytest.mark.parametrize("alias,name,frame_count,digest", [
+        ("pickup_crab_right_0", "찐미세오옆꽃게0-1(1회)", 4,
+         "955855ee4ea1ba22b9f2d65746e30a845f97b177505fa4a2f678de9737b004e5"),
+        ("goal_camera_90_crab_right", "찐미세오옆꽃게90-1(1회)", 4,
+         "ef4fd376232c750ce52d6f9c374f44fd7c665873bc1d2d7bbc65b6732eb90a3b"),
+        ("pickup_fine_to_crab_right_0", "찐미세오뒤에서오옆꽃게0도", 2,
+         "5058c68644682c32c76d1d07fba4e566d9089a87cd669954e8aa38ba5055c6f0"),
+        ("goal_fine_to_crab_right_90", "찐미세오뒤에서 오옆꽃게90도", 2,
+         "ba38d07ef6ba1ea0a4398f5d6667e45ab97463875deacf6cfc7e6a11ffd152b1"),
+        ("goal_forward_to_crab_right_90", "찐오뒤에서 오옆꽃게90도", 2,
+         "0579a746404e812d0b2fcee308bb59d0ac8301068371e4c4977cf996382b5f7b"),
+    ])
+    def test_catalog29_right_crab_motions_preserve_source_except_tolerance(
+        alias, name, frame_count, digest,
+    ):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+>       assert aliases[alias] == name
+E       AssertionError: assert '건미세오뒤에서 기본자세45도' == '찐미세오뒤에서오옆꽃게0도'
+E         - 찐미세오뒤에서오옆꽃게0도
+E         + 건미세오뒤에서 기본자세45도
+
+src/mission_control/test/test_production_motion_catalog_contract.py:997: AssertionError
+_ test_catalog29_right_crab_motions_preserve_source_except_tolerance[goal_fine_to_crab_right_90-\ucc10\ubbf8\uc138\uc624\ub4a4\uc5d0\uc11c \uc624\uc606\uaf43\uac8c90\ub3c4-2-ba38d07ef6ba1ea0a4398f5d6667e45ab97463875deacf6cfc7e6a11ffd152b1] _
+
+alias = 'goal_fine_to_crab_right_90', name = '찐미세오뒤에서 오옆꽃게90도', frame_count = 2
+digest = 'ba38d07ef6ba1ea0a4398f5d6667e45ab97463875deacf6cfc7e6a11ffd152b1'
+
+    @pytest.mark.parametrize("alias,name,frame_count,digest", [
+        ("pickup_crab_right_0", "찐미세오옆꽃게0-1(1회)", 4,
+         "955855ee4ea1ba22b9f2d65746e30a845f97b177505fa4a2f678de9737b004e5"),
+        ("goal_camera_90_crab_right", "찐미세오옆꽃게90-1(1회)", 4,
+         "ef4fd376232c750ce52d6f9c374f44fd7c665873bc1d2d7bbc65b6732eb90a3b"),
+        ("pickup_fine_to_crab_right_0", "찐미세오뒤에서오옆꽃게0도", 2,
+         "5058c68644682c32c76d1d07fba4e566d9089a87cd669954e8aa38ba5055c6f0"),
+        ("goal_fine_to_crab_right_90", "찐미세오뒤에서 오옆꽃게90도", 2,
+         "ba38d07ef6ba1ea0a4398f5d6667e45ab97463875deacf6cfc7e6a11ffd152b1"),
+        ("goal_forward_to_crab_right_90", "찐오뒤에서 오옆꽃게90도", 2,
+         "0579a746404e812d0b2fcee308bb59d0ac8301068371e4c4977cf996382b5f7b"),
+    ])
+    def test_catalog29_right_crab_motions_preserve_source_except_tolerance(
+        alias, name, frame_count, digest,
+    ):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+>       assert aliases[alias] == name
+E       AssertionError: assert '건미세오뒤에서 기본자세90도' == '찐미세오뒤에서 오옆꽃게90도'
+E         - 찐미세오뒤에서 오옆꽃게90도
+E         + 건미세오뒤에서 기본자세90도
+
+src/mission_control/test/test_production_motion_catalog_contract.py:997: AssertionError
+_ test_catalog29_right_crab_motions_preserve_source_except_tolerance[goal_forward_to_crab_right_90-\ucc10\uc624\ub4a4\uc5d0\uc11c \uc624\uc606\uaf43\uac8c90\ub3c4-2-0579a746404e812d0b2fcee308bb59d0ac8301068371e4c4977cf996382b5f7b] _
+
+alias = 'goal_forward_to_crab_right_90', name = '찐오뒤에서 오옆꽃게90도', frame_count = 2
+digest = '0579a746404e812d0b2fcee308bb59d0ac8301068371e4c4977cf996382b5f7b'
+
+    @pytest.mark.parametrize("alias,name,frame_count,digest", [
+        ("pickup_crab_right_0", "찐미세오옆꽃게0-1(1회)", 4,
+         "955855ee4ea1ba22b9f2d65746e30a845f97b177505fa4a2f678de9737b004e5"),
+        ("goal_camera_90_crab_right", "찐미세오옆꽃게90-1(1회)", 4,
+         "ef4fd376232c750ce52d6f9c374f44fd7c665873bc1d2d7bbc65b6732eb90a3b"),
+        ("pickup_fine_to_crab_right_0", "찐미세오뒤에서오옆꽃게0도", 2,
+         "5058c68644682c32c76d1d07fba4e566d9089a87cd669954e8aa38ba5055c6f0"),
+        ("goal_fine_to_crab_right_90", "찐미세오뒤에서 오옆꽃게90도", 2,
+         "ba38d07ef6ba1ea0a4398f5d6667e45ab97463875deacf6cfc7e6a11ffd152b1"),
+        ("goal_forward_to_crab_right_90", "찐오뒤에서 오옆꽃게90도", 2,
+         "0579a746404e812d0b2fcee308bb59d0ac8301068371e4c4977cf996382b5f7b"),
+    ])
+    def test_catalog29_right_crab_motions_preserve_source_except_tolerance(
+        alias, name, frame_count, digest,
+    ):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+>       assert aliases[alias] == name
+E       AssertionError: assert '건오뒤에서 기본자세(카메라45도)' == '찐오뒤에서 오옆꽃게90도'
+E         - 찐오뒤에서 오옆꽃게90도
+E         + 건오뒤에서 기본자세(카메라45도)
+
+src/mission_control/test/test_production_motion_catalog_contract.py:997: AssertionError
+____ test_pickup_camera_down_forward_request_resolves_to_existing_motion[2] ____
+
+count = 2
+
+    @pytest.mark.parametrize("count", [2, 4])
+    def test_pickup_camera_down_forward_request_resolves_to_existing_motion(count):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]}
+        motion_id = (MotionCommandBridgeNode.PICKUP_CAMERA_DOWN_MOTION_IDS["STRAIGHT_2"]
+                     if count == 4 else "ball_camera_down_forward_2")
+>       assert aliases[motion_id] == f"찐전진45({count}회)"
+E       AssertionError: assert '건전진45도(2회)' == '찐전진45(2회)'
+E         - 찐전진45(2회)
+E         ? ^
+E         + 건전진45도(2회)
+E         ? ^    +
+
+src/mission_control/test/test_production_motion_catalog_contract.py:1029: AssertionError
+____ test_pickup_camera_down_forward_request_resolves_to_existing_motion[4] ____
+
+count = 4
+
+    @pytest.mark.parametrize("count", [2, 4])
+    def test_pickup_camera_down_forward_request_resolves_to_existing_motion(count):
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        motions = {m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]}
+        motion_id = (MotionCommandBridgeNode.PICKUP_CAMERA_DOWN_MOTION_IDS["STRAIGHT_2"]
+                     if count == 4 else "ball_camera_down_forward_2")
+>       assert aliases[motion_id] == f"찐전진45({count}회)"
+E       AssertionError: assert '건전진45도(4회)' == '찐전진45(4회)'
+E         - 찐전진45(4회)
+E         ? ^
+E         + 건전진45도(4회)
+E         ? ^    +
+
+src/mission_control/test/test_production_motion_catalog_contract.py:1029: AssertionError
+__________ test_pickup_forward_preserves_original_camera45_frames[2] ___________
+
+count = 2
+
+    @pytest.mark.parametrize("count", [2, 4])
+    def test_pickup_forward_preserves_original_camera45_frames(count):
+        motions = {m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]}
+>       base = motions["찐전진45(4회)"]
+E       KeyError: '찐전진45(4회)'
+
+src/mission_control/test/test_production_motion_catalog_contract.py:1037: KeyError
+__________ test_pickup_forward_preserves_original_camera45_frames[4] ___________
+
+count = 4
+
+    @pytest.mark.parametrize("count", [2, 4])
+    def test_pickup_forward_preserves_original_camera45_frames(count):
+        motions = {m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]}
+>       base = motions["찐전진45(4회)"]
+E       KeyError: '찐전진45(4회)'
+
+src/mission_control/test/test_production_motion_catalog_contract.py:1037: KeyError
+_ test_stationary_left_turns_preserve_latest_catalog29_data[0-e9bfd6d522b113c852991f998a9f0b06b860e25e256106b658bb95c3ac5d05bc] _
+
+camera = 0
+digest = 'e9bfd6d522b113c852991f998a9f0b06b860e25e256106b658bb95c3ac5d05bc'
+
+    @pytest.mark.parametrize("camera,digest", [
+        (0, "e9bfd6d522b113c852991f998a9f0b06b860e25e256106b658bb95c3ac5d05bc"),
+        (45, "b88c956306ed650997fe3355b2374e34fd089e4e03eab08fb28d67282b6a1a72"),
+        (90, "431236af4a758dac798edd50204dc1d309ffe4c3e01337d9425661d8c665d24e"),
+    ])
+    def test_stationary_left_turns_preserve_latest_catalog29_data(camera, digest):
+        """Preserve supplied left turns; camera 0 uses the 2026-09-29 update."""
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        catalog = {
+            motion["name"]: motion
+            for motion in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        }
+        prefix = {
+            0: "pickup_camera_down_turn_left",
+            45: "post_ball_line_turn_left",
+            90: "goal_camera_90_turn_left",
+        }[camera]
+        motions = []
+        for count in range(1, 7):
+            name = f"건제자리좌회전{camera}도({count}회)"
+            assert aliases[f"{prefix}_{count}"] == name
+            motion = catalog[name]
+            assert motion["repeat_count"] == count
+            assert motion["completion"]["position_tolerance_deg"] == 5.0
+            motions.append(motion)
+        encoded = json.dumps(
+            motions, sort_keys=True, separators=(",", ":"), ensure_ascii=False,
+        )
+>       assert hashlib.sha256(encoded.encode()).hexdigest() == digest
+E       AssertionError: assert '085fa68ceace...fa652049c706c' == 'e9bfd6d522b1...b95c3ac5d05bc'
+E         - e9bfd6d522b113c852991f998a9f0b06b860e25e256106b658bb95c3ac5d05bc
+E         + 085fa68ceaceaa9d1fd48f3a2d7c0e77992a7c69e04703b2f90fa652049c706c
+
+src/mission_control/test/test_production_motion_catalog_contract.py:1073: AssertionError
+_ test_stationary_left_turns_preserve_latest_catalog29_data[45-b88c956306ed650997fe3355b2374e34fd089e4e03eab08fb28d67282b6a1a72] _
+
+camera = 45
+digest = 'b88c956306ed650997fe3355b2374e34fd089e4e03eab08fb28d67282b6a1a72'
+
+    @pytest.mark.parametrize("camera,digest", [
+        (0, "e9bfd6d522b113c852991f998a9f0b06b860e25e256106b658bb95c3ac5d05bc"),
+        (45, "b88c956306ed650997fe3355b2374e34fd089e4e03eab08fb28d67282b6a1a72"),
+        (90, "431236af4a758dac798edd50204dc1d309ffe4c3e01337d9425661d8c665d24e"),
+    ])
+    def test_stationary_left_turns_preserve_latest_catalog29_data(camera, digest):
+        """Preserve supplied left turns; camera 0 uses the 2026-09-29 update."""
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        catalog = {
+            motion["name"]: motion
+            for motion in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        }
+        prefix = {
+            0: "pickup_camera_down_turn_left",
+            45: "post_ball_line_turn_left",
+            90: "goal_camera_90_turn_left",
+        }[camera]
+        motions = []
+        for count in range(1, 7):
+            name = f"건제자리좌회전{camera}도({count}회)"
+            assert aliases[f"{prefix}_{count}"] == name
+            motion = catalog[name]
+            assert motion["repeat_count"] == count
+            assert motion["completion"]["position_tolerance_deg"] == 5.0
+            motions.append(motion)
+        encoded = json.dumps(
+            motions, sort_keys=True, separators=(",", ":"), ensure_ascii=False,
+        )
+>       assert hashlib.sha256(encoded.encode()).hexdigest() == digest
+E       AssertionError: assert 'a72f96b06480...1093157d7d2d6' == 'b88c956306ed...d67282b6a1a72'
+E         - b88c956306ed650997fe3355b2374e34fd089e4e03eab08fb28d67282b6a1a72
+E         + a72f96b064805532b58ca065edea6c216b55392de27d56e02911093157d7d2d6
+
+src/mission_control/test/test_production_motion_catalog_contract.py:1073: AssertionError
+_ test_stationary_left_turns_preserve_latest_catalog29_data[90-431236af4a758dac798edd50204dc1d309ffe4c3e01337d9425661d8c665d24e] _
+
+camera = 90
+digest = '431236af4a758dac798edd50204dc1d309ffe4c3e01337d9425661d8c665d24e'
+
+    @pytest.mark.parametrize("camera,digest", [
+        (0, "e9bfd6d522b113c852991f998a9f0b06b860e25e256106b658bb95c3ac5d05bc"),
+        (45, "b88c956306ed650997fe3355b2374e34fd089e4e03eab08fb28d67282b6a1a72"),
+        (90, "431236af4a758dac798edd50204dc1d309ffe4c3e01337d9425661d8c665d24e"),
+    ])
+    def test_stationary_left_turns_preserve_latest_catalog29_data(camera, digest):
+        """Preserve supplied left turns; camera 0 uses the 2026-09-29 update."""
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        catalog = {
+            motion["name"]: motion
+            for motion in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]
+        }
+        prefix = {
+            0: "pickup_camera_down_turn_left",
+            45: "post_ball_line_turn_left",
+            90: "goal_camera_90_turn_left",
+        }[camera]
+        motions = []
+        for count in range(1, 7):
+            name = f"건제자리좌회전{camera}도({count}회)"
+            assert aliases[f"{prefix}_{count}"] == name
+            motion = catalog[name]
+            assert motion["repeat_count"] == count
+            assert motion["completion"]["position_tolerance_deg"] == 5.0
+            motions.append(motion)
+        encoded = json.dumps(
+            motions, sort_keys=True, separators=(",", ":"), ensure_ascii=False,
+        )
+>       assert hashlib.sha256(encoded.encode()).hexdigest() == digest
+E       AssertionError: assert '11de106adf5f...963e8dad2e11c' == '431236af4a75...661d8c665d24e'
+E         - 431236af4a758dac798edd50204dc1d309ffe4c3e01337d9425661d8c665d24e
+E         + 11de106adf5f2e28622a1c2366fd822a551d2cd6cc80aa59026963e8dad2e11c
+
+src/mission_control/test/test_production_motion_catalog_contract.py:1073: AssertionError
+____ test_hurdle_preserves_catalog37_source_except_tolerance_and_pose_label ____
+
+    def test_hurdle_preserves_catalog37_source_except_tolerance_and_pose_label():
+        archive = RUNTIME_CATALOG_PATH.parent / "20260929_catalog37_hurdle_update"
+        source = json.loads((archive / "source_hurdle.json").read_text())
+        before = json.loads((archive / "runtime_before.json").read_text())
+        current = json.loads(RUNTIME_CATALOG_PATH.read_text())
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+        assert aliases["hurdle"] == "찐허들"
+        expected = copy.deepcopy(source)
+        expected["completion"]["position_tolerance_deg"] = 5.0
+        expected["end_pose"] = "오뒤412(허들)"
+        for frame in expected["frames"]:
+            if frame["name"] == "오뒤412":
+                frame["name"] = "오뒤412(허들)"
+        for index, motion in enumerate(before["motions"]):
+            if motion["name"] == "찐허들":
+                before["motions"][index] = expected
+        # Only the requested hurdle changes; preserve every other motion and order.
+>       assert current == before
+E       AssertionError: assert {'motions': [... 'version': 1} == {'motions': [... 'version': 1}
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'motions': [{'completion': {'position_tolerance_deg': 5.0, 'settle_duration_ms': 80, 'settle_timeout_ms': 3000}, 'end...29e7a4449aa8dbcdd4f1d130026', 'is_important': False, 'lift_early_arrival': True, ...}], 'max_seq_ms': 7045, ...}, ...]} != {'motions': [{'completion': {'position_tolerance_deg': 5.0, 'settle_duration_ms': 80, 'settle_timeout_ms': 3000}, 'end...5b57ed8f4b9cada466d433c0eccf', 'is_important': True, 'lift_early_arrival': True, ...}], 'max_seq_ms': 7045, ...}, ...]}
+E         Full diff:
+E           {
+E            'motions': [{'com...
+E         
+E         ...Full output truncated (29703 lines hidden), use '-vv' to show
+
+src/mission_control/test/test_production_motion_catalog_contract.py:1093: AssertionError
+_____ test_fine_turn_import_preserves_source_and_unrelated_runtime_motions _____
+
+    def test_fine_turn_import_preserves_source_and_unrelated_runtime_motions():
+        archive = RUNTIME_CATALOG_PATH.parent / "20260929_fine_turn_transition"
+        source = {m["name"]: m for m in json.loads((archive / "source_robot_motions33.json").read_text())["motions"]}
+        before = {m["name"]: m for m in json.loads((archive / "runtime_before.json").read_text())["motions"]}
+        current = {m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]}
+        aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+>       assert len(current) == len(before) + 3
+E       AssertionError: assert 86 == (86 + 3)
+E        +  where 86 = len({'건공잡기': {'completion': {'position_tolerance_deg': 5.0, 'settle_duration_ms': 80, 'settle_timeout_ms': 3000}, 'end_pos...89fd42234e79a10e6d885149ea5e', 'is_important': False, 'lift_early_arrival': True, ...}], 'max_seq_ms': 7045, ...}, ...})
+E        +  and   86 = len({'미세오뒤에서 오옆꽃게90도': {'completion': {'position_tolerance_deg': 5.0, 'settle_duration_ms': 80, 'settle_timeout_ms': 3000}...ec7c52aa4ac598e71c4693a20a41', 'is_important': False, 'lift_early_arrival': True, ...}], 'max_seq_ms': 7045, ...}, ...})
+
+src/mission_control/test/test_production_motion_catalog_contract.py:1108: AssertionError
+__ test_catalog34_replaces_only_requested_retreats_with_five_degree_tolerance __
+
+    def test_catalog34_replaces_only_requested_retreats_with_five_degree_tolerance():
+        archive = RUNTIME_CATALOG_PATH.parent / "20260929_catalog34_retreat_update"
+        source = {m["name"]: m for m in json.loads((archive / "source_requested_motions.json").read_text())["motions"]}
+        before = json.loads((archive / "runtime_before.json").read_text())
+        current = json.loads(RUNTIME_CATALOG_PATH.read_text())
+        expected = copy.deepcopy(before)
+        assert set(source) == {"찐후진실전-2(2회)", "찐후진실전(1회)"}
+        for index, motion in enumerate(expected["motions"]):
+            if motion["name"] in source:
+                replacement = copy.deepcopy(source[motion["name"]])
+                replacement["completion"]["position_tolerance_deg"] = 5.0
+                expected["motions"][index] = replacement
+>       assert current == expected
+E       AssertionError: assert {'motions': [... 'version': 1} == {'motions': [... 'version': 1}
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'motions': [{'completion': {'position_tolerance_deg': 5.0, 'settle_duration_ms': 80, 'settle_timeout_ms': 3000}, 'end...29e7a4449aa8dbcdd4f1d130026', 'is_important': False, 'lift_early_arrival': True, ...}], 'max_seq_ms': 7045, ...}, ...]} != {'motions': [{'completion': {'position_tolerance_deg': 5.0, 'settle_duration_ms': 80, 'settle_timeout_ms': 3000}, 'end...5b57ed8f4b9cada466d433c0eccf', 'is_important': True, 'lift_early_arrival': True, ...}], 'max_seq_ms': 7045, ...}, ...]}
+E         Full diff:
+E           {
+E            'motions': [{'com...
+E         
+E         ...Full output truncated (34505 lines hidden), use '-vv' to show
+
+src/mission_control/test/test_production_motion_catalog_contract.py:1145: AssertionError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog30_forward_preserves_supplied_motion[45-2]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog30_forward_preserves_supplied_motion[45-4]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog30_forward_preserves_supplied_motion[45-6]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog30_forward_preserves_supplied_motion[45-8]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog30_forward_preserves_supplied_motion[90-4]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog30_forward_preserves_supplied_motion[90-6]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog30_forward_preserves_supplied_motion[90-8]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog30_replaces_only_requested_forward_motions_and_aliases
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_post_ball_transition_contains_only_camera_without_stationary_pause
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_post_shot_fixed_turns_and_forward_resolve_to_runtime_motions
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_updated_forward_and_stationary_right_turn_catalog
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_production_alias_catalog_contains_only_approved_aliases
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_latest_pickup_and_grasp_check_motion_definitions_are_mapped
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_top_loss_forward_uses_existing_camera0_two_repeat_motion
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_updated_fine_frames_match_supplied_walking_data[\ucc10\ubbf8\uc1380\ub3c4-4-9abdda081d4406738b7e731707ce690d2207ad82287cedc5c0db1fa230d0eb75]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_updated_fine_frames_match_supplied_walking_data[\ucc10\ubbf8\uc13845\ub3c4-4-7eb93d40e4fea5441dc4b603443bd5cc46f626ee6d4742895912d44dc649e4a0]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_updated_fine_frames_match_supplied_walking_data[\ucc10\ubbf8\uc13890\ub3c4-4(1\ud68c)-05a8bf2428764b71f8bd4cf6b4663227facd5a34cd489de6e977186e86af704f]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_import15_requested_motions_match_source_with_five_degree_tolerance[pickup-\ucc10\uacf5\uc7a1\uae30\ub9ac\uadf8\ub7a9\uae4c\uc9c0 \uc2e4\uc804-b466c0860852e7a2e4d6dc55baf04d22822d8d3a96e522a10ca4510268a96909]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_import15_requested_motions_match_source_with_five_degree_tolerance[pickup_pre_backward_camera_down-\ucc10\uacf5\uc7a1\uae30\uc804\ud6c4\uc9c4-2(2\ud68c)-7bc8b060ba29ab42314be112a6077132ac3284e3398e45e57afa48a6f3cf7715]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_recovery_turns_resolve_to_same_direction_and_repeat_count[LEFT-\uc88c-counts0-LEFT]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_recovery_turns_resolve_to_same_direction_and_repeat_count[LEFT-\uc88c-counts0-RIGHT]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_recovery_turns_resolve_to_same_direction_and_repeat_count[RIGHT-\uc6b0-counts1-LEFT]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_recovery_turns_resolve_to_same_direction_and_repeat_count[RIGHT-\uc6b0-counts1-RIGHT]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_recovery_cycle_matches_supplied_catalog[\uc88c-839d8a59316168882e987e8610386a31df77005f5de0cb15ecd6c8b6f2713174]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_recovery_cycle_matches_supplied_catalog[\uc6b0-4d5a9601ab7d363b9e92d73e24283060aeba763a7075e692c94fd96e93123384]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_imported_motions_preserve_source_except_tolerance_and_added_turns[pickup_retreat_2-\ucc10\ud6c4\uc9c4\uc2e4\uc804(1\ud68c)-1a4484895f37b3749c582281fc37a572ca1eef7be6a41a8ec1f7c5b292b89140]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_imported_motions_preserve_source_except_tolerance_and_added_turns[pickup_first_backward_turn_right-\ucc10\ud6c4\uc9c4\ud558\uace0 \uc81c\uc790\ub9ac\uc6b0\ud68c\uc804(\uacf5)-0568d0a09ea18182611e4ed34efe2d96943c0faf52107ce6c3683ab34f1c6005]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_imported_motions_preserve_source_except_tolerance_and_added_turns[post_shot_default_turn_right-\ucc10\uae30\ubcf8\uc790\uc138\uc5d0\uc11c \uc81c\uc790\ub9ac \uc6b0\ud68c\uc804(\uace8\ub300)-d1adb58605677ed92b853640e7cb9125cb5c605f3eefab010c1397c78e84a844]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_imported_motions_preserve_source_except_tolerance_and_added_turns[post_shot_default_turn_left-\uac74\uae30\ubcf8\uc790\uc138\uc5d0\uc11c\uc81c\uc790\ub9ac\uc88c\ud68c\uc804(\uace8\ub300)-455de963e21cd376d3da174e3c9da2423ec1964747dbf1beb7e1dab826a55009]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_imported_motions_preserve_source_except_tolerance_and_added_turns[pickup_second_backward_turn_left-\ucc10\ud6c4\uc9c4\uc5d0\uc11c \uc81c\uc790\ub9ac\uc88c\ud68c\uc804(\uacf5)-9735e143053bbc33496d68f0d3fe521432478df41bd86bcc03472c3577480418]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_imported_motions_preserve_source_except_tolerance_and_added_turns[pickup_crab_left_0-\ucc10\ubbf8\uc138\uc67c\uc606\uaf43\uac8c0\ub3c4-1-931415b970ab5d0dcf2bbdc4052079801f953a096a9ba28e3a5013856711929e]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_imported_motions_preserve_source_except_tolerance_and_added_turns[goal_camera_90_crab_left-\ucc10\ubbf8\uc138\uc67c\uc606\uaf43\uac8c90\ub3c4-1-dba9db69d2bc5342abe6a0812ae672b234acbf5687053b3dd7f40eab2a7bb7d7]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_composite_extended_turn_sets_preserve_pose_and_timing[post_shot_default_turn_right-7-9-\uc81c\uc6b0\uc624\ub4e425-\uc624\ub4a4415-3531]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_composite_extended_turn_sets_preserve_pose_and_timing[pickup_first_backward_turn_right-7-11-\uc81c\uc6b0\uc624\ub4e425-\uc624\ub4a4415-4144]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_pickup_crab_preparation_preserves_body_motion_with_camera_down
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_goal_single_retreat_preserves_original_frames_and_three_cycle_pickup_motion
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_goal_depth_selection_resolves_to_requested_runtime_motion[1.281-GOAL_CAMERA_90_FORWARD-\ucc10\uc804\uc9c490(6\ud68c)-3]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_goal_depth_selection_resolves_to_requested_runtime_motion[1.28-GOAL_CAMERA_90_FORWARD_2-\ucc10\uc804\uc9c490(4\ud68c)-2]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_goal_depth_selection_resolves_to_requested_runtime_motion[0.851-GOAL_CAMERA_90_FORWARD_2-\ucc10\uc804\uc9c490(4\ud68c)-2]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_goal_depth_selection_resolves_to_requested_runtime_motion[0.85-GOAL_CAMERA90_FINE_FORWARD_3-\ucc10\ubbf8\uc13890\ub3c4-4(3\ud68c)-3]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_goal_depth_selection_resolves_to_requested_runtime_motion[0.501-GOAL_CAMERA90_FINE_FORWARD_3-\ucc10\ubbf8\uc13890\ub3c4-4(3\ud68c)-3]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_goal_depth_selection_resolves_to_requested_runtime_motion[0.5-GOAL_CAMERA90_FINE_FORWARD_1-\ucc10\ubbf8\uc13890\ub3c4-4(1\ud68c)-1]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_goal_depth_selection_resolves_to_requested_runtime_motion[0.431-GOAL_CAMERA90_FINE_FORWARD_1-\ucc10\ubbf8\uc13890\ub3c4-4(1\ud68c)-1]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_line_return_right_four_preserves_catalog32_motion[RIGHT]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_line_return_right_four_preserves_catalog32_motion[RECOVER_RIGHT_TURN_RIGHT_4]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_line_return_right_four_preserves_catalog32_motion[RECOVER_LEFT_TURN_RIGHT_4]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_line_return_right_four_preserves_catalog32_motion[BALL_APPROACH_RECOVER_RIGHT_4]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog29_right_crab_motions_preserve_source_except_tolerance[pickup_crab_right_0-\ucc10\ubbf8\uc138\uc624\uc606\uaf43\uac8c0-1(1\ud68c)-4-955855ee4ea1ba22b9f2d65746e30a845f97b177505fa4a2f678de9737b004e5]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog29_right_crab_motions_preserve_source_except_tolerance[goal_camera_90_crab_right-\ucc10\ubbf8\uc138\uc624\uc606\uaf43\uac8c90-1(1\ud68c)-4-ef4fd376232c750ce52d6f9c374f44fd7c665873bc1d2d7bbc65b6732eb90a3b]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog29_right_crab_motions_preserve_source_except_tolerance[pickup_fine_to_crab_right_0-\ucc10\ubbf8\uc138\uc624\ub4a4\uc5d0\uc11c\uc624\uc606\uaf43\uac8c0\ub3c4-2-5058c68644682c32c76d1d07fba4e566d9089a87cd669954e8aa38ba5055c6f0]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog29_right_crab_motions_preserve_source_except_tolerance[goal_fine_to_crab_right_90-\ucc10\ubbf8\uc138\uc624\ub4a4\uc5d0\uc11c \uc624\uc606\uaf43\uac8c90\ub3c4-2-ba38d07ef6ba1ea0a4398f5d6667e45ab97463875deacf6cfc7e6a11ffd152b1]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog29_right_crab_motions_preserve_source_except_tolerance[goal_forward_to_crab_right_90-\ucc10\uc624\ub4a4\uc5d0\uc11c \uc624\uc606\uaf43\uac8c90\ub3c4-2-0579a746404e812d0b2fcee308bb59d0ac8301068371e4c4977cf996382b5f7b]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_pickup_camera_down_forward_request_resolves_to_existing_motion[2]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_pickup_camera_down_forward_request_resolves_to_existing_motion[4]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_pickup_forward_preserves_original_camera45_frames[2]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_pickup_forward_preserves_original_camera45_frames[4]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_stationary_left_turns_preserve_latest_catalog29_data[0-e9bfd6d522b113c852991f998a9f0b06b860e25e256106b658bb95c3ac5d05bc]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_stationary_left_turns_preserve_latest_catalog29_data[45-b88c956306ed650997fe3355b2374e34fd089e4e03eab08fb28d67282b6a1a72]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_stationary_left_turns_preserve_latest_catalog29_data[90-431236af4a758dac798edd50204dc1d309ffe4c3e01337d9425661d8c665d24e]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_hurdle_preserves_catalog37_source_except_tolerance_and_pose_label
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_fine_turn_import_preserves_source_and_unrelated_runtime_motions
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog34_replaces_only_requested_retreats_with_five_degree_tolerance
+62 failed, 52 passed in 8.91s

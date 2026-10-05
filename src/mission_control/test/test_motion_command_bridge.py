@@ -107,7 +107,7 @@ class FakeBridge:
         MotionCommandBridgeNode.POST_BALL_GOAL_TRANSITION_SEQUENCE
     )
 
-    def __init__(self):
+    def __init__(self, *, advance_transition_dwells=True):
         self.last_sent_command_id = None
         self.motion_in_progress = False
         self.active_command_id = None
@@ -128,6 +128,10 @@ class FakeBridge:
         self.last_physical_motion_id = None
         self.pending_turn_request = None
         self.turn_prepare_motion_id = None
+        self.transition_dwell_until = None
+        self.transition_pending_request = None
+        self.transition_pending_status = None
+        self.transition_motion_id = None
         self.head_override_state = {}
         self.head_override_received_at = None
         self.pickup_initial_align_dwell_until = None
@@ -178,6 +182,9 @@ class FakeBridge:
             "_is_forward_motion",
             "_turn_prepare_motion",
             "_transition_prepare_motion",
+            "_send_executor_payload",
+            "_check_transition_dwell",
+            "_transition_has_existing_post_dwell",
             "_publish_executor_request",
             "navigation_command_callback",
             "_start_next_pickup_motion",
@@ -193,6 +200,19 @@ class FakeBridge:
                 name,
                 MethodType(getattr(MotionCommandBridgeNode, name), self),
             )
+
+        if advance_transition_dwells:
+            # Sequence tests skip only the new pauses; timing tests drive them explicitly.
+            for name in ("_publish_executor_request", "executor_status_callback"):
+                original = getattr(self, name)
+
+                def advance(*args, _original=original, **kwargs):
+                    result = _original(*args, **kwargs)
+                    if self.transition_dwell_until is not None:
+                        self._check_transition_dwell(self.transition_dwell_until)
+                    return result
+
+                setattr(self, name, advance)
 
     @staticmethod
     def _is_integer(value):
@@ -547,6 +567,7 @@ EXPECTED_PRODUCTION_ACTIONS = {
     "BALL_FINE_FORWARD_8": "ball_general_fine_forward_8",
     "BALL_LOST_FORWARD_2": "ball_camera_down_forward_2",
     "BALL_LOST_FORWARD_4": "ball_camera_down_forward_4",
+    "HURDLE_LOST_BACKWARD_1": "pickup_lost_ball_backward_1",
     "LINE_LOST_TURN_LEFT": "line_search_left_2",
     "LINE_LOST_TURN_RIGHT": "line_search_right_5",
     "LINE_SPARSE_FORWARD": "line_forward_2",

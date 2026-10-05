@@ -44,6 +44,7 @@ def build_mock_vision_input(scenario: str) -> tuple[str, dict[str, Any]]:
             "ground_projection_valid": True,
             "ground_heading_error_deg": SCENARIO_HEADING_ERROR_DEG[normalized],
             "filtered_lateral_offset_norm": 0.0,
+            "lateral_offset_px": 0.0,
             "heading_quality": 1.0,
             "geometry_quality": 1.0,
             "detection_quality": 1.0,

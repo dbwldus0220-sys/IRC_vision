@@ -45,9 +45,10 @@ if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK)
       "External SDK must create a CMake target named robot_control")
   endif()
   if(NOT EXISTS "${ROBOT_MOTION_SDK_DIR}/fake_robot_motion_sdk_test_support.hpp"
-      AND NOT EXISTS "${ROBOT_MOTION_SDK_DIR}/playback_diagnostics.hpp")
+      AND NOT EXISTS "${ROBOT_MOTION_SDK_DIR}/playback_diagnostics.hpp"
+      AND NOT EXISTS "${ROBOT_MOTION_SDK_DIR}/gui_alignment.hpp")
     message(FATAL_ERROR
-      "External SDK needs tools/apply_common_playback_sdk.py before this build")
+      "Use external_sdk/gui_aligned or apply the reviewed legacy SDK patch")
   endif()
 
   add_library(irc_step_motion_sdk_compile_probe SHARED
@@ -212,6 +213,9 @@ install(FILES
   "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/robot_motions_runtime.json"
   "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/20261002_common_playback/robot_motions_pc.json"
   DESTINATION share/${PROJECT_NAME}/config)
+install(FILES
+  "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/20261006_gui_alignment/reference/robot_motions(10).json"
+  DESTINATION share/${PROJECT_NAME}/config RENAME robot_motions_gui_20261005.json)
 install(PROGRAMS
   scripts/manual_motion_request.py
   scripts/validate_motion_catalog.py
@@ -233,6 +237,22 @@ if(BUILD_TESTING)
         $<TARGET_FILE:test_common_playback>
         "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/robot_motions_runtime.json"
         "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/20261002_common_playback/robot_motions_pc.json")
+  endif()
+  if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK AND
+      EXISTS "${ROBOT_MOTION_SDK_DIR}/gui_alignment.hpp")
+    add_test(NAME test_latest_gui_execution
+      COMMAND ${Python3_EXECUTABLE}
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../tools/verify_latest_gui_execution.py"
+        --gui "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/20261006_gui_alignment/reference/sdk_gui.py"
+        --probe $<TARGET_FILE:gui_execution_probe>
+        --output "${CMAKE_CURRENT_BINARY_DIR}/gui_comparison"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/20261006_gui_alignment/reference/robot_motions(10).json"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/robot_motions_runtime.json"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/20261006_gui_alignment/robot_motions_gui_state.json")
+    # SDK subdirectory is EXCLUDE_FROM_ALL; ensure the real player probe is built.
+    add_custom_target(gui_comparison_probe ALL DEPENDS gui_execution_probe test_gui_alignment test_motion_pattern test_motion_callback)
+    add_test(NAME test_gui_alignment_contract
+      COMMAND $<TARGET_FILE:test_gui_alignment> "${CMAKE_CURRENT_BINARY_DIR}")
   endif()
   ament_add_gtest(test_catalog_only_core test/test_catalog_only_core.cpp)
   if(TARGET test_catalog_only_core)

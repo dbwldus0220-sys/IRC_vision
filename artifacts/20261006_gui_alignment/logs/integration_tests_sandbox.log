@@ -1,0 +1,110 @@
+Internal ctest changing into directory: /home/sy/IRC_vision/build/irc_step_motion_executor
+Test project /home/sy/IRC_vision/build/irc_step_motion_executor
+      Start 15: test_test_hurdle_head_override_launch.py
+ 1/11 Test #15: test_test_hurdle_head_override_launch.py ...........***Timeout  30.03 sec
+-- run_test.py: extra environment variables:
+ - ROS_LOG_DIR=/home/sy/IRC_vision/build/irc_step_motion_executor/ros_test_logs
+-- run_test.py: extra environment variables to append:
+ - AMENT_PREFIX_PATH+=/home/sy/IRC_vision/install/irc_step_motion_executor
+ - LD_LIBRARY_PATH+=/home/sy/IRC_vision/install/irc_step_motion_executor/lib
+-- run_test.py: invoking following command in '/home/sy/IRC_vision/build/irc_step_motion_executor':
+ - /usr/bin/python3 -m launch_testing.launch_test /home/sy/IRC_vision/src/irc_step_motion_executor/test/test_hurdle_head_override_launch.py --junit-xml=/home/sy/IRC_vision/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_hurdle_head_override_launch.py.xunit.xml --package-name=irc_step_motion_executor
+[INFO] [launch]: All log files can be found below /home/sy/IRC_vision/build/irc_step_motion_executor/ros_test_logs/2026-10-06-02-01-08-741555-0-0-12
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [sdk_motion_executor-1]: process started with pid [15]
+[INFO] [python3-2]: process started with pid [17]
+[sdk_motion_executor-1] [37;1m2026-10-06 02:01:08.760 [31;1m[[37;1mTRANSPORT_UDP[31;1m Error] [37mError creating socket: Operation not permitted[34;1m -> Function [36minit[m
+[sdk_motion_executor-1] [37;1m2026-10-06 02:01:08.761 [31;1m[[37;1mRTPS_PARTICIPANT[31;1m Error] [37mUser transport failed to register.[34;1m -> Function [36mRTPSParticipantImpl[m
+[sdk_motion_executor-1] getifaddrs: Operation not permitted
+[sdk_motion_executor-1] getifaddrs: Operation not permitted
+[sdk_motion_executor-1] getifaddrs: Operation not permitted
+[sdk_motion_executor-1] [0m[INFO]: Motion position tolerance check: DISABLED[0m
+[sdk_motion_executor-1] [33m[WARN]: Simulated backend only: no SDK or hardware access is available[0m
+getifaddrs: Operation not permitted
+getifaddrs: Operation not permitted
+getifaddrs: Operation not permitted
+[37;1m2026-10-06 02:01:08.773 [31;1m[[37;1mTRANSPORT_UDP[31;1m Error] [37mError creating socket: Operation not permitted[34;1m -> Function [36minit[m
+[37;1m2026-10-06 02:01:08.773 [31;1m[[37;1mRTPS_PARTICIPANT[31;1m Error] [37mUser transport failed to register.[34;1m -> Function [36mRTPSParticipantImpl[m
+test_bottom_boundary_hold_release_and_other_camera_ownership (irc_step_motion_executor.TestHurdleHeadOverride) ... [sdk_motion_executor-1] [0m[INFO]: Hurdle bottom dy 120.0 px: camera 0-degree hold latched (motor 0 -60.0 deg)[0m
+[sdk_motion_executor-1] [0m[INFO]: Hurdle camera 0-degree hold cleared[0m
+[sdk_motion_executor-1] [0m[INFO]: Hurdle bottom dy 120.0 px: camera 0-degree hold latched (motor 0 -60.0 deg)[0m
+[sdk_motion_executor-1] [0m[INFO]: Hurdle camera 0-degree hold cleared[0m
+[sdk_motion_executor-1] [0m[INFO]: Hurdle bottom dy 120.0 px: camera 0-degree hold latched (motor 0 -60.0 deg)[0m
+[sdk_motion_executor-1] [0m[INFO]: Hurdle camera 0-degree hold cleared[0m
+[sdk_motion_executor-1] [0m[INFO]: Camera 90-degree hold enabled: motor 0 1.0 deg[0m
+[sdk_motion_executor-1] [0m[INFO]: Hurdle bottom dy 120.0 px: camera 0-degree hold latched (motor 0 -60.0 deg)[0m
+[sdk_motion_executor-1] [0m[INFO]: Hurdle camera 0-degree hold cleared[0m
+ok
+
+----------------------------------------------------------------------
+Ran 1 test in 5.500s
+
+OK
+
+      Start 16: test_test_ball_head_override_launch.py
+ 2/11 Test #16: test_test_ball_head_override_launch.py .............***Timeout  30.03 sec
+-- run_test.py: extra environment variables:
+ - ROS_LOG_DIR=/home/sy/IRC_vision/build/irc_step_motion_executor/ros_test_logs
+-- run_test.py: extra environment variables to append:
+ - AMENT_PREFIX_PATH+=/home/sy/IRC_vision/install/irc_step_motion_executor
+ - LD_LIBRARY_PATH+=/home/sy/IRC_vision/install/irc_step_motion_executor/lib
+-- run_test.py: invoking following command in '/home/sy/IRC_vision/build/irc_step_motion_executor':
+ - /usr/bin/python3 -m launch_testing.launch_test /home/sy/IRC_vision/src/irc_step_motion_executor/test/test_ball_head_override_launch.py --junit-xml=/home/sy/IRC_vision/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_ball_head_override_launch.py.xunit.xml --package-name=irc_step_motion_executor
+[INFO] [launch]: All log files can be found below /home/sy/IRC_vision/build/irc_step_motion_executor/ros_test_logs/2026-10-06-02-01-38-778691-0-0-37
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [sdk_motion_executor-1]: process started with pid [40]
+[INFO] [python3-2]: process started with pid [42]
+[sdk_motion_executor-1] getifaddrs: Operation not permitted
+[sdk_motion_executor-1] getifaddrs: Operation not permitted
+[sdk_motion_executor-1] getifaddrs: Operation not permitted
+[sdk_motion_executor-1] [37;1m2026-10-06 02:01:38.798 [31;1m[[37;1mTRANSPORT_UDP[31;1m Error] [37mError creating socket: Operation not permitted[34;1m -> Function [36minit[m
+[sdk_motion_executor-1] [37;1m2026-10-06 02:01:38.798 [31;1m[[37;1mRTPS_PARTICIPANT[31;1m Error] [37mUser transport failed to register.[34;1m -> Function [36mRTPSParticipantImpl[m
+[sdk_motion_executor-1] [0m[INFO]: Motion position tolerance check: DISABLED[0m
+[sdk_motion_executor-1] [33m[WARN]: Simulated backend only: no SDK or hardware access is available[0m
+getifaddrs: Operation not permitted
+getifaddrs: Operation not permitted
+getifaddrs: Operation not permitted
+[37;1m2026-10-06 02:01:38.810 [31;1m[[37;1mTRANSPORT_UDP[31;1m Error] [37mError creating socket: Operation not permitted[34;1m -> Function [36minit[m
+[37;1m2026-10-06 02:01:38.810 [31;1m[[37;1mRTPS_PARTICIPANT[31;1m Error] [37mUser transport failed to register.[34;1m -> Function [36mRTPSParticipantImpl[m
+test_ball_camera_hold_across_motion_boundaries (irc_step_motion_executor.TestBallHeadOverride) ... [sdk_motion_executor-1] [0m[INFO]: Ball entered bottom trigger: motor 0 override -64.0 deg latched[0m
+[sdk_motion_executor-1] [0m[INFO]: Ball entered bottom trigger: motor 0 override -64.0 deg latched[0m
+[sdk_motion_executor-1] [0m[INFO]: Ball entered bottom trigger: motor 0 override -64.0 deg latched[0m
+[sdk_motion_executor-1] [0m[INFO]: Ball entered bottom trigger: motor 0 override -64.0 deg latched[0m
+[sdk_motion_executor-1] [0m[INFO]: Ball entered bottom trigger: motor 0 override -64.0 deg latched[0m
+ok
+
+----------------------------------------------------------------------
+Ran 1 test in 4.179s
+
+OK
+
+      Start 17: test_test_goal_head_override_launch.py
+ 3/11 Test #17: test_test_goal_head_override_launch.py .............   Passed   15.51 sec
+      Start 18: test_test_sdk_executor_node_launch.py
+ 4/11 Test #18: test_test_sdk_executor_node_launch.py ..............   Passed    5.50 sec
+      Start 19: test_test_backend_selection_rejected_launch.py
+ 5/11 Test #19: test_test_backend_selection_rejected_launch.py .....   Passed    4.25 sec
+      Start 20: sdk_cmake_empty_path
+ 6/11 Test #20: sdk_cmake_empty_path ...............................   Passed    0.24 sec
+      Start 21: sdk_cmake_nonexistent_path
+ 7/11 Test #21: sdk_cmake_nonexistent_path .........................   Passed    0.23 sec
+      Start 22: sdk_cmake_missing_required_files
+ 8/11 Test #22: sdk_cmake_missing_required_files ...................   Passed    0.24 sec
+      Start 23: sdk_cmake_missing_robot_control_target
+ 9/11 Test #23: sdk_cmake_missing_robot_control_target .............   Passed    0.24 sec
+      Start 24: sdk_cmake_fake_sdk_build
+10/11 Test #24: sdk_cmake_fake_sdk_build ...........................   Passed    1.90 sec
+      Start 25: sdk_cmake_disabled_build_has_no_hardware_symbols
+11/11 Test #25: sdk_cmake_disabled_build_has_no_hardware_symbols ...   Passed    1.40 sec
+
+82% tests passed, 2 tests failed out of 11
+
+Label Time Summary:
+launch_test    =  85.31 sec*proc (5 tests)
+
+Total Test time (real) =  89.56 sec
+
+The following tests FAILED:
+	 15 - test_test_hurdle_head_override_launch.py (Timeout)
+	 16 - test_test_ball_head_override_launch.py (Timeout)
+Errors while running CTest

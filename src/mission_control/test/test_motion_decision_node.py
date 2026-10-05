@@ -2254,6 +2254,7 @@ def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
             "ground_projection_valid": True,
             "ground_heading_error_deg": 0.0,
             "filtered_lateral_offset_norm": 0.0,
+            "lateral_offset_px": 0.0,
             "heading_quality": 0.9,
             "geometry_quality": 0.9,
             "detection_quality": 0.9,
@@ -4807,6 +4808,7 @@ def test_two_hurdles_disable_only_hurdle_and_resume_other_modes(next_source):
     inputs = {"hurdle": hurdle_info_for_node(), "line": {
         "detected": True, "ground_projection_valid": True,
         "ground_heading_error_deg": 0.0, "filtered_lateral_offset_norm": 0.0,
+        "lateral_offset_px": 0.0,
         "heading_quality": 0.9, "geometry_quality": 0.9, "detection_quality": 0.9,
     }}
     if next_source == "ball":

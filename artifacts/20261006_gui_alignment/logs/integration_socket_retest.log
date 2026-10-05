@@ -1,0 +1,13 @@
+Internal ctest changing into directory: /home/sy/IRC_vision/build/irc_step_motion_executor
+Test project /home/sy/IRC_vision/build/irc_step_motion_executor
+    Start 15: test_test_hurdle_head_override_launch.py
+1/2 Test #15: test_test_hurdle_head_override_launch.py ...   Passed    5.93 sec
+    Start 16: test_test_ball_head_override_launch.py
+2/2 Test #16: test_test_ball_head_override_launch.py .....   Passed    4.57 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Label Time Summary:
+launch_test    =  10.50 sec*proc (2 tests)
+
+Total Test time (real) =  10.50 sec

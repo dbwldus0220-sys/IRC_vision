@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import math
 from typing import Any
 
@@ -29,6 +29,7 @@ class HurdleNavigationConfig:
     close_turn_stop_bottom_distance_px: float = 100.0
     positioning_turn_min_angle_deg: float = 70.0
     center_turn_min_angle_deg: float = 15.0
+    lost_side_deadband_norm: float = 0.10
 
 
 @dataclass(frozen=True)
@@ -54,6 +55,9 @@ class HurdleActionCommand:
     depth_fallback_requested: bool = False
     center_steering_deg: float | None = None
     fine_sequence_requested: bool = False
+    recovery_active: bool = False
+    last_seen_side: str | None = None
+    turn_count: int | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Return a rounded JSON-compatible representation."""
@@ -88,6 +92,9 @@ class HurdleActionCommand:
             "close_rotation_blocked": self.close_rotation_blocked,
             "depth_fallback_requested": self.depth_fallback_requested,
             "fine_sequence_requested": self.fine_sequence_requested,
+            "recovery_active": self.recovery_active,
+            "last_seen_side": self.last_seen_side,
+            **({"turn_count": self.turn_count} if self.turn_count is not None else {}),
             "approach_motion": (
                 self.action
                 if self.action == "STRAIGHT" or approach_level is not None
@@ -128,11 +135,59 @@ class HurdleNavigationPlanner:
         self.config = config or HurdleNavigationConfig()
         self.close_rotation_blocked = False
         self.fine_approach_active = False
+        self.last_seen_side: str | None = None
+        self.recovery_active = False
 
     def reset(self) -> None:
         """Release the near-hurdle turn block only after mission completion."""
         self.close_rotation_blocked = False
         self.fine_approach_active = False
+        self.last_seen_side = None
+        self.recovery_active = False
+
+    def observe(self, info: dict[str, Any]) -> None:
+        """Remember the screen side even while an executing motion blocks planning."""
+        if info.get("detected") is False:
+            if (
+                info.get("raw_detected") is not True
+                and self.last_seen_side in {"LEFT", "RIGHT"}
+            ):
+                self.recovery_active = True
+            return
+        confidence = _number(info, "confidence")
+        if (
+            info.get("detected") is not True
+            or info.get("confirmation_confirmed") is False
+            or confidence is None or confidence < self.config.min_confidence
+        ):
+            return
+        # Bottom loss must not reuse an older lateral observation to authorize a turn.
+        self.last_seen_side = None
+        bottom = _number(info, "bottom_distance_px")
+        if bottom is None or bottom < 0.0:
+            return
+        if bottom <= self.config.close_turn_stop_bottom_distance_px:
+            self.last_seen_side = "BOTTOM"
+            return
+        width = _number(info, "image_width")
+        center = _number(info, "center_x")
+        offset = _number(info, "camera_center_offset_x_px")
+        if width is None or width <= 1.0:
+            return
+        if center is not None:
+            offset = center - width / 2.0
+        if offset is None or abs(offset) > width / 2.0:
+            return
+        normalized = offset / (width / 2.0)
+        if abs(normalized) > self.config.lost_side_deadband_norm:
+            self.last_seen_side = "RIGHT" if normalized > 0.0 else "LEFT"
+
+    def _recovery_turn(self, direction: str, reason: str) -> HurdleActionCommand:
+        """Use the smallest calibrated stationary turn and reobserve after completion."""
+        return replace(
+            self.wait(reason), valid=True, action=f"ALIGN_{direction}",
+            turn_count=2 if direction == "RIGHT" else 1,
+        )
 
     def wait(self, reason: str) -> HurdleActionCommand:
         """Return a non-action command for missing or unsafe input."""
@@ -152,13 +207,28 @@ class HurdleNavigationPlanner:
             ground_gap_in_go_range=False,
             go_now=False,
             close_rotation_blocked=self.close_rotation_blocked,
+            recovery_active=self.recovery_active,
+            last_seen_side=self.last_seen_side,
         )
 
     def plan(
         self, hurdle_info: dict[str, Any], *, positioning: bool = False,
     ) -> HurdleActionCommand:
-        """Use the line intersection before fine approach; never turn in fine mode."""
+        """Use the line intersection, with discrete recovery after target loss."""
+        self.observe(hurdle_info)
         if not bool(hurdle_info.get("detected", False)):
+            if hurdle_info.get("raw_detected") is True:
+                return self.wait("hurdle_confirmation_pending")
+            if hurdle_info.get("detected") is False and self.last_seen_side == "BOTTOM":
+                return replace(
+                    self.wait("hurdle_lost_below_image"),
+                    valid=True, action="HURDLE_LOST_BACKWARD_1",
+                )
+            if (
+                hurdle_info.get("detected") is False
+                and self.recovery_active and self.last_seen_side in {"LEFT", "RIGHT"}
+            ):
+                return self._recovery_turn(self.last_seen_side, "hurdle_lost_search_last_side")
             return self.wait("hurdle_not_detected")
         confidence = _number(hurdle_info, "confidence")
         if confidence is None or confidence < self.config.min_confidence:
@@ -193,6 +263,22 @@ class HurdleNavigationPlanner:
             "camera_bottom_gap_m",
         )
         hurdle_angle = _number(hurdle_info, "hurdle_angle_deg")
+        if self.recovery_active:
+            # Lateral-loss recovery is the exception to the normal fine-mode turn block.
+            if hurdle_info.get("confirmation_confirmed") is False:
+                return self.wait("hurdle_confirmation_pending")
+            if hurdle_angle is None:
+                return self.wait("hurdle_recovery_waiting_for_parallel_angle")
+            if not bottom_distance_valid:
+                return self.wait("missing_valid_hurdle_bottom_distance")
+            if abs(hurdle_angle) > self.config.go_angle_tolerance_deg:
+                direction = "LEFT" if hurdle_angle > 0.0 else "RIGHT"
+                return replace(
+                    self._recovery_turn(direction, "hurdle_reacquired_parallel_alignment"),
+                    confidence=confidence, depth_m=depth, hurdle_angle_deg=hurdle_angle,
+                    bottom_distance_px=bottom_distance_px,
+                )
+            self.recovery_active = False
         if hurdle_angle is None and not self.close_rotation_blocked and not positioning:
             return self.wait("missing_hurdle_parallel_angle")
         parallel = (
@@ -330,4 +416,6 @@ class HurdleNavigationPlanner:
             bottom_distance_px=bottom_distance_px,
             close_rotation_blocked=self.close_rotation_blocked,
             fine_sequence_requested=fine_sequence_requested,
+            recovery_active=self.recovery_active,
+            last_seen_side=self.last_seen_side,
         )

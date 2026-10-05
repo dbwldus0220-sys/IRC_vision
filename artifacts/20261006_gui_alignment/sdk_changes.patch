@@ -1,0 +1,939 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -28,24 +28,21 @@
+ 
+ add_executable(test_motion_callback test_motion_callback.cpp)
+ target_link_libraries(test_motion_callback PRIVATE motion_core)
++target_compile_options(test_motion_callback PRIVATE -UNDEBUG)
++target_compile_options(test_motion_pattern PRIVATE -UNDEBUG)
+ 
+ add_library(motion_player_core
+     robot_motion_player.cpp
+ )
+ target_include_directories(motion_player_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+-target_link_libraries(motion_player_core PUBLIC motion_core)
++target_compile_definitions(motion_player_core PUBLIC IRC_STEP_GUI_ALIGNMENT_VERSION=20261006)
++target_link_libraries(motion_player_core PUBLIC motion_core Threads::Threads)
+ target_compile_options(motion_player_core PRIVATE -Wall -Wextra -Wpedantic)
+-
+-add_executable(test_robot_motion_player test_robot_motion_player.cpp)
+-target_link_libraries(test_robot_motion_player PRIVATE motion_player_core)
+-target_compile_options(test_robot_motion_player PRIVATE -Wall -Wextra -Wpedantic)
+ 
+ enable_testing()
+ add_test(NAME motion_pattern_test COMMAND test_motion_pattern)
+ add_test(NAME motion_callback_test COMMAND test_motion_callback)
+-add_executable(test_gui_playback test_gui_playback.cpp)
+-target_link_libraries(test_gui_playback PRIVATE motion_player_core)
+-add_test(NAME gui_playback_test COMMAND test_gui_playback)
++
+ add_executable(gui_trace_probe gui_trace_probe.cpp)
+ target_link_libraries(gui_trace_probe PRIVATE motion_core)
+ 
+@@ -75,6 +72,9 @@
+     message(WARNING "DYNAMIXEL SDK not found: irc_robot target will not be built")
+ endif()
+ 
+-add_executable(test_frame_arrival test_frame_arrival.cpp)
+-target_link_libraries(test_frame_arrival PRIVATE motion_player_core)
+-add_test(NAME frame_arrival_test COMMAND test_frame_arrival)
++add_executable(gui_execution_probe gui_execution_probe.cpp)
++target_link_libraries(gui_execution_probe PRIVATE motion_player_core Threads::Threads)
++add_executable(test_gui_alignment test_gui_alignment.cpp)
++target_link_libraries(test_gui_alignment PRIVATE motion_player_core)
++target_compile_options(test_gui_alignment PRIVATE -UNDEBUG)
++add_test(NAME gui_alignment_contract COMMAND test_gui_alignment ${CMAKE_CURRENT_BINARY_DIR})
+--- a/dynamixel_motion_hardware.cpp
++++ b/dynamixel_motion_hardware.cpp
+@@ -61,6 +61,13 @@
+         return true;
+     } catch (const std::exception& e) { setError(e.what()); return false; }
+       catch (...) { setError("unknown hardware initialization error"); return false; }
++}
++
++bool DynamixelMotionHardware::prepareImmediatePlayback() noexcept {
++    if (!ready() || !dxl_.WriteZeroProfiles()) {
++        setError("failed to set Profile Acceleration/Velocity to zero"); return false;
++    }
++    return true;
+ }
+ 
+ bool DynamixelMotionHardware::commandImmediatePosition(
+--- a/dynamixel_motion_hardware.hpp
++++ b/dynamixel_motion_hardware.hpp
+@@ -22,6 +22,7 @@
+ 
+     bool initialize() noexcept override;
+     [[nodiscard]] bool ready() const noexcept override;
++    bool prepareImmediatePlayback() noexcept override;
+     bool commandPosition(
+         const JointAngles& goal_deg,
+         const std::vector<int>& motor_ids,
+--- a/gui_alignment.hpp
++++ b/gui_alignment.hpp
+@@ -0,0 +1,3 @@
++#pragma once
++// 빌드 시 실제 GUI 호환 경로를 구형 SDK 패치와 구분한다.
++#define IRC_STEP_GUI_ALIGNMENT_VERSION 20261006
+--- a/gui_execution_probe.cpp
++++ b/gui_execution_probe.cpp
+@@ -0,0 +1,59 @@
++#include "robot_motion_player.hpp"
++#include "gui_playback.hpp"
++#include <iostream>
++#include <iomanip>
++#include <sstream>
++using namespace irc_step;
++struct Bus : IMotionHardware {
++    double ms{1000}, read_delay{0}, write_delay{0};
++    JointAngles present;
++    bool initialize() noexcept override { return true; }
++    bool ready() const noexcept override { return true; }
++    bool commandPosition(const JointAngles&, const std::vector<int>&, uint32_t, uint32_t) noexcept override { return false; }
++    bool commandImmediatePosition(const JointAngles& goal, const std::vector<int>& ids) noexcept override {
++        std::cout << "W\t" << ms;
++        for (int id : ids) std::cout << '\t' << id << ':' << goal.at(id) << ':' << guiPositionRaw(goal.at(id));
++        std::cout << '\n'; ms += write_delay; return true;
++    }
++    bool readPresentPositions(JointAngles& value) noexcept override {
++        std::cout << "R\t" << ms << '\n'; ms += read_delay; value = present; return true;
++    }
++    bool holdCurrentPosition(uint32_t) noexcept override { return true; }
++    bool setTorqueEnabled(bool) noexcept override { return true; }
++    std::string_view lastError() const noexcept override { return {}; }
++};
++int main(int argc, char** argv) {
++    if (argc == 2 && std::string(argv[1]) == "--raw") {
++        std::cout << std::setprecision(17);
++        for (int raw = 0; raw < 4095; ++raw) {
++            const double angle = (raw + .5 - 2048) * (360.0 / 4096.0);
++            for (double value : {angle, std::nextafter(angle, -INFINITY), std::nextafter(angle, INFINITY)})
++                std::cout << value << '\t' << guiPositionRaw(value) << '\n';
++        }
++        for (double angle : {-1080., -540., -180., 180., 540., 1080.})
++            std::cout << angle << '\t' << guiPositionRaw(angle) << '\n';
++        return 0;
++    }
++    if (argc < 6) return 1;
++    std::cout << std::setprecision(17);
++    Bus bus; bus.read_delay=std::stod(argv[4]); bus.write_delay=std::stod(argv[5]);
++    for(int id=0; id<23; ++id) bus.present[id]=id*.25-3;
++    RobotMotionPlayer p(argv[1],bus,[&]{return RobotMotionPlayer::Clock::time_point(
++        std::chrono::duration_cast<RobotMotionPlayer::Clock::duration>(std::chrono::duration<double,std::milli>(bus.ms)));});
++    std::vector<double> periods; std::istringstream in(argv[3]); std::string token;
++    while(std::getline(in,token,',')) periods.push_back(std::stod(token));
++    if(argc>7) p.configureDiagnostics(5,argv[7],true);
++    if(!p.initialize() || p.start(argv[2])!=StartResult::Accepted) { std::cerr<<p.lastError(); return 2; }
++    if(argc>6 && std::string(argv[6])!="-" && p.queueNext(argv[6])!=QueueResult::Queued) return 3;
++    std::uint64_t completed=0;
++    for(int tick=0; tick<1000000; ++tick) {
++        bus.ms += periods[tick%periods.size()];
++        p.update();
++        if(p.completionSequence()!=completed) {
++            completed=p.completionSequence();std::cout<<"C\t"<<bus.ms<<'\t'<<completed<<'\n';
++        }
++        std::cout<<"T\t"<<bus.ms<<'\t'<<p.playbackTimelineMs()<<'\t'<<p.playbackRepeat()<<'\t'<<p.running()<<'\n';
++        if(!p.running()) return p.succeeded()?0:4;
++    }
++    return 5;
++}
+--- a/motion_hardware.hpp
++++ b/motion_hardware.hpp
+@@ -20,6 +20,8 @@
+     virtual bool initialize() noexcept = 0;
+     [[nodiscard]] virtual bool ready() const noexcept = 0;
+ 
++    virtual bool prepareImmediatePlayback() noexcept { return true; }
++
+     virtual bool commandPosition(
+         const JointAngles& goal_deg,
+         const std::vector<int>& motor_ids,
+--- a/motion_pattern.cpp
++++ b/motion_pattern.cpp
+@@ -181,6 +181,7 @@
+         if (const auto it = object.find("torques"); it != object.end())
+             for (const auto& [id, value] : it->second.object())
+                 frame.torques[std::stoi(id)] = value.boolean();
++        frame.frame_id = optionalString(object, "frame_id", "");
+         frame.lift_early_arrival = optionalBool(object, "lift_early_arrival", false);
+         frame.playback_cycle_end = optionalBool(object, "playback_cycle_end", false);
+         frames.push_back(std::move(frame));
+@@ -243,16 +244,16 @@
+         || completion_.settle_timeout_ms < completion_.settle_duration_ms) {
+         throw std::runtime_error("invalid motion completion metadata");
+     }
+-    buildTrajectories();
++    // 구형 quintic sample()의 궤적은 호출 시 생성한다. GUI 플레이어는 사용하지 않는다.
+ }
+ 
+ void MotionPattern::validate() {
+-    std::sort(frames_.begin(), frames_.end(), [](const auto& a, const auto& b) {
++    std::stable_sort(frames_.begin(), frames_.end(), [](const auto& a, const auto& b) {
+         return a.start_ms < b.start_ms;
+     });
+     duration_ms_ = 0;
+     for (std::size_t i = 0; i < frames_.size(); ++i) {
+-        const auto& frame = frames_[i];
++        auto& frame = frames_[i];
+         for (const auto& [id, value] : frame.angles) {
+             if (id < 0 || id >= 23 || !std::isfinite(value))
+                 throw std::runtime_error("invalid motor target in frame: " + frame.name);
+@@ -260,11 +261,23 @@
+         if (frame.start_ms < 0 || frame.time_ms <= 0)
+             throw std::runtime_error("invalid frame time: " + frame.name);
+         if (i > 0 && frames_[i - 1].start_ms + frames_[i - 1].time_ms > frame.start_ms)
+-            throw std::runtime_error("overlapping GUI frames: " + frames_[i - 1].name + " / " + frame.name);
++            frame.start_ms = frames_[i - 1].start_ms + frames_[i - 1].time_ms;
+         duration_ms_ = std::max(duration_ms_, frame.start_ms + frame.time_ms);
+     }
+-    if (max_seq_ms_ < duration_ms_)
+-        throw std::runtime_error("max_seq_ms is shorter than motion frames");
++    if (max_seq_ms_ < duration_ms_) {
++        auto limit = max_seq_ms_;
++        for (auto it = frames_.rbegin(); it != frames_.rend(); ++it) {
++            if (it->start_ms + it->time_ms > limit) it->start_ms = limit - it->time_ms;
++            limit = it->start_ms;
++        }
++        const auto offset = std::max<std::int64_t>(0, -frames_.front().start_ms);
++        duration_ms_ = 0;
++        for (auto& frame : frames_) {
++            frame.start_ms += offset;
++            duration_ms_ = std::max(duration_ms_, frame.start_ms + frame.time_ms);
++        }
++        max_seq_ms_ = std::max(max_seq_ms_, duration_ms_);
++    }
+ }
+ 
+ void MotionPattern::setInitialAngles(JointAngles angles) {
+@@ -290,7 +303,7 @@
+                + segment.c2) * u + segment.c1) * u + segment.c0);
+ }
+ 
+-void MotionPattern::buildTrajectories() {
++void MotionPattern::buildTrajectories() const {
+     trajectories_.clear();
+     if (frames_.empty()) return;
+ 
+@@ -377,6 +390,7 @@
+ }
+ 
+ MotionTarget MotionPattern::sample(std::int64_t motion_time_ms) const {
++    if (trajectories_.empty()) buildTrajectories();
+     const auto t = std::max<std::int64_t>(0, motion_time_ms);
+     MotionTarget target;
+     target.time_ms = t;
+--- a/motion_pattern.hpp
++++ b/motion_pattern.hpp
+@@ -20,6 +20,7 @@
+     TorqueStates torques;
+     bool lift_early_arrival{false};
+     bool playback_cycle_end{false};
++    std::string frame_id;
+ };
+ 
+ // callback이 SDK로 전송할 현재 시각의 목표값.
+@@ -88,11 +89,11 @@
+     static double evaluateSegment(const QuinticSegment& segment,
+                                   std::int64_t motion_time_ms);
+     void validate();
+-    void buildTrajectories();
++    void buildTrajectories() const;
+ 
+     std::vector<MotionFrame> frames_;
+     JointAngles initial_angles_;
+-    std::unordered_map<int, std::vector<QuinticSegment>> trajectories_;
++    mutable std::unordered_map<int, std::vector<QuinticSegment>> trajectories_;
+     std::int64_t max_seq_ms_{0};
+     std::int64_t duration_ms_{0};
+     int repeat_count_{1};
+--- a/playback_trace.hpp
++++ b/playback_trace.hpp
+@@ -0,0 +1,78 @@
++#pragma once
++#include "gui_playback.hpp"
++#include <array>
++#include <atomic>
++#include <chrono>
++#include <fstream>
++#include <iomanip>
++#include <memory>
++#include <stdexcept>
++#include <thread>
++
++namespace irc_step {
++struct PlaybackTraceRow {
++    const char* event{""};
++    std::array<char, 256> motion{};
++    std::uint64_t run{0};
++    double begin_ms{0}, end_ms{0};
++    std::int64_t timeline_ms{0};
++    int repeat{0}, frame{-1};
++    bool success{true};
++    std::array<double, 23> angles{};
++    std::array<bool, 23> ids{};
++};
++// 단일 제어 스레드 -> 파일 기록 스레드. 루프에서 파일 I/O/lock/할당을 하지 않는다.
++class PlaybackTrace {
++public:
++    static constexpr std::size_t capacity = 8192;
++    explicit PlaybackTrace(const std::string& path) : rows_(new PlaybackTraceRow[capacity]), out_(path) {
++        if (!out_) throw std::runtime_error("cannot open playback trace: " + path);
++        out_ << "run,motion,event,begin_ms,end_ms,duration_ms,timeline_ms,repeat,frame,success";
++        for (int id = 0; id < 23; ++id) out_ << ",deg_" << id;
++        for (int id = 0; id < 23; ++id) out_ << ",raw_" << id;
++        out_ << '\n' << std::setprecision(17);
++        worker_ = std::thread([this] { consume(); });
++    }
++    ~PlaybackTrace() {
++        stop_.store(true);
++        worker_.join();
++        out_ << "# dropped_rows=" << dropped_.load() << '\n';
++    }
++    void push(const PlaybackTraceRow& row) noexcept {
++        const auto head = head_.load(std::memory_order_relaxed);
++        const auto next = (head + 1) % capacity;
++        if (next == tail_.load(std::memory_order_acquire)) { ++dropped_; return; }
++        rows_[head] = row;
++        head_.store(next, std::memory_order_release);
++    }
++private:
++    void consume() {
++        while (!stop_.load() || tail_.load() != head_.load()) {
++            auto tail = tail_.load(std::memory_order_relaxed);
++            if (tail == head_.load(std::memory_order_acquire)) {
++                std::this_thread::sleep_for(std::chrono::milliseconds(10));
++                continue;
++            }
++            const auto& r = rows_[tail];
++            out_ << r.run << ',' << std::quoted(r.motion.data()) << ',' << r.event << ','
++                 << r.begin_ms << ',' << r.end_ms << ',' << r.end_ms-r.begin_ms << ','
++                 << r.timeline_ms << ',' << r.repeat << ',' << r.frame << ',' << r.success;
++            for (int id = 0; id < 23; ++id) {
++                out_ << ',';
++                if (r.ids[id]) out_ << r.angles[id];
++            }
++            for (int id = 0; id < 23; ++id) {
++                out_ << ',';
++                if (r.ids[id]) out_ << guiPositionRaw(r.angles[id]);
++            }
++            out_ << '\n';
++            tail_.store((tail + 1) % capacity, std::memory_order_release);
++        }
++    }
++    std::unique_ptr<PlaybackTraceRow[]> rows_;
++    std::ofstream out_;
++    std::thread worker_;
++    std::atomic<std::size_t> head_{0}, tail_{0}, dropped_{0};
++    std::atomic<bool> stop_{false};
++};
++}
+--- a/robot_motion_player.cpp
++++ b/robot_motion_player.cpp
+@@ -3,6 +3,7 @@
+ 
+ #include <algorithm>
+ #include <cmath>
++#include <cstdio>
+ #include <exception>
+ #include <iostream>
+ #include <stdexcept>
+@@ -14,6 +15,9 @@
+ namespace {
+ constexpr std::uint32_t kCancelHoldDurationMs = 0;
+ constexpr auto kPositionCheckInterval = std::chrono::milliseconds(20);
++double guiSeconds(RobotMotionPlayer::Clock::time_point value) {
++    return std::chrono::duration_cast<std::chrono::nanoseconds>(value.time_since_epoch()).count() / 1e9;
++}
+ }
+ 
+ RobotMotionPlayer::RobotMotionPlayer(
+@@ -87,6 +91,12 @@
+         if (pattern.frames().empty()) {
+             last_error_ = "motion has no frames: " + name;
+             return StartResult::InvalidMotion;
++        }
++        current_motion_ = name;
++        ++trace_run_;
++        if (!hardware_->prepareImmediatePlayback()) {
++            fail(MotionError::CommunicationError, "cannot set playback profiles to zero");
++            return StartResult::HardwareNotReady;
+         }
+         if (!readStartAngles()) return StartResult::HardwareNotReady;
+         startup_active_ = false;
+@@ -166,7 +176,10 @@
+     playback_frames_ = pattern.frames();
+     for (auto& frame : playback_frames_) frame.angles = correctedFrameAngles(frame);
+     command_ids_.reserve(kMotionMotorCount);
+-    for (int id = 0; id < kMotionMotorCount; ++id) command_angles_[id] = 0.0;
++    command_angles_ = start_angles_;
++    queued_boundary_pending_ = false;
++    trace_timeline_ms_ = 0;
++    trace_frame_ = -1;
+     cycle_start_ms_ = 0;
+     feedback_sampled_ = false;
+     next_frame_ = 0;
+@@ -183,6 +196,7 @@
+     last_position_check_at_ = Clock::time_point{};
+     within_tolerance_ = false;
+     started_at_ = now;
++    gui_started_sec_ = guiSeconds(now);
+     status_ = MotionStatus::Running;
+ }
+ 
+@@ -194,8 +208,11 @@
+     queued_motion_.clear();
+     last_completed_motion_ = current_motion_;
+     ++completion_sequence_;
+-    // 예약 전환도 새 모션이므로 실기 시작각을 다시 읽는다.
+-    if (!readStartAngles()) return true;
++    // SDK queue는 조합 연결: 직전 명령 자세를 이어받는다. 새 start()만 PP를 읽는다.
++    // 조합 타임라인과 동일하게 완료된 프레임의 논리 목표각을 누적한다.
++    // wrapped raw/중간각을 새 원본으로 삼으면 ±360도 표현이 달라질 수 있다.
++    for (const auto& frame : playback_frames_)
++        for (const auto& [id, angle] : frame.angles) start_angles_[id] = angle;
+     resetMotionRuntime(*next, std::move(next_name), now_());
+     static_cast<void>(now);
+     error_ = MotionError::None;
+@@ -219,6 +236,7 @@
+ 
+ bool RobotMotionPlayer::readStartAngles() {
+     JointAngles present;
++    const auto read_begin = now_();
+     if (!hardware_->readPresentPositions(present)) {
+         fail(MotionError::PresentPositionReadFailed, "cannot capture actual start pose");
+         return false;
+@@ -233,12 +251,14 @@
+             return false;
+         }
+     }
++    traceEvent("initial", read_begin, true, present);
+     start_angles_ = present;
+     feedback_angles_ = std::move(present);
+     return true;
+ }
+ 
+ void RobotMotionPlayer::markSucceeded() {
++    traceEvent(startup_active_ ? "arrived" : "goals_complete", now_(), true);
+     status_ = MotionStatus::Succeeded;
+     error_ = MotionError::None;
+     last_error_.clear();
+@@ -249,27 +269,37 @@
+ }
+ 
+ bool RobotMotionPlayer::sendGuiSample(std::int64_t timeline_ms, bool boundary) {
++    trace_timeline_ms_ = timeline_ms;
+     const auto target = sampleGuiMotion(playback_frames_, start_angles_, timeline_ms, boundary);
+     command_ids_.clear();
+     for (int id = 0; id < kMotionMotorCount; ++id) {
+         if (!target.commanded[id] && !joint_overrides_.contains(id)) continue;
+-        const auto override = joint_overrides_.find(id);
+-        const double angle = override == joint_overrides_.end() ? target.angles[id] : override->second;
++        const double angle = target.commanded[id] ? target.angles[id] : command_angles_.at(id);
+         command_angles_[id] = angle;
+         command_ids_.push_back(id);
+         final_goal_deg_[id] = (guiPositionRaw(angle) - 2048) * (360.0 / 4096.0);
+     }
+-    if (!command_ids_.empty() && !hardware_->commandImmediatePosition(command_angles_, command_ids_)) {
++    traceEvent("planned", now_(), true, command_angles_, &command_ids_);
++    for (int id : command_ids_) {
++        if (const auto override = joint_overrides_.find(id); override != joint_overrides_.end()) {
++            command_angles_[id] = override->second;
++            final_goal_deg_[id] = (guiPositionRaw(override->second) - 2048) * (360.0 / 4096.0);
++        }
++    }
++    if (!command_ids_.empty() && !writeGoals(command_angles_, command_ids_, "sample")) {
+         fail(MotionError::FrameSendFailed, std::string(hardware_->lastError()));
+         return false;
+     }
+     const auto now = now_();
+-    if (boundary || !feedback_sampled_ || now - last_feedback_at_ >= std::chrono::milliseconds(10)) {
++    if (boundary || !feedback_sampled_ || guiSeconds(now) - last_feedback_sec_ >= 0.010) {
+         last_feedback_at_ = now;
++        last_feedback_sec_ = guiSeconds(now);
+         feedback_sampled_ = true;
+         // GUI 재생과 같이 피드백은 관측용이다. 시작 자세/정착 검사는 별도다.
+         JointAngles present;
+-        if (hardware_->readPresentPositions(present)) feedback_angles_ = std::move(present);
++        const bool ok = hardware_->readPresentPositions(present);
++        traceEvent("feedback", now, ok, present);
++        if (ok) feedback_angles_ = std::move(present);
+     }
+     return true;
+ }
+@@ -279,7 +309,12 @@
+         fail(MotionError::InternalError, "running motion has no pattern");
+         return status_;
+     }
+-    const double real_ms = std::chrono::duration<double, std::milli>(now - started_at_).count();
++    if (queued_boundary_pending_) {
++        if (now - queued_boundary_at_ >= std::chrono::milliseconds(queued_hold_ms_))
++            activateQueuedMotion(now);
++        return status_;
++    }
++    const double real_ms = (guiSeconds(now) - gui_started_sec_) * 1000.0;
+     auto timeline_ms = static_cast<std::int64_t>(real_ms * pattern_->playbackSpeed() + 1e-7);
+     const auto sequence_end = pattern_->durationMs();
+     std::int64_t boundary_ms = sequence_end;
+@@ -288,50 +323,81 @@
+         if (frame.playback_cycle_end && cycle_start_ms_ < end && end < boundary_ms)
+             boundary_ms = end;
+     }
+-    // GUI 보간은 유지하되, 프레임 끝을 건너뛰지 않고 실제 도착을 확인한다.
+-    // 시작 자세 전환은 기존의 최종 안정화 검사만 사용한다.
+-    const bool check_frames = position_tolerance_enabled_ && !startup_active_;
++    // GUI gate는 도착 검사가 아니다. 직전에 활성화했던 프레임의 종점을
++    // 전송한 뒤, 같은 tick에서 경계 sample을 보낸다. 늦은 tick도 시계는 유지한다.
+     timeline_ms = std::min(timeline_ms, boundary_ms);
+-    bool frame_boundary = false;
+-    if (check_frames && next_frame_ < playback_frames_.size()) {
+-        const auto& frame = playback_frames_[next_frame_];
+-        const auto frame_end = frame.start_ms + frame.time_ms;
+-        frame_boundary = timeline_ms >= frame_end;
+-        if (frame_boundary) timeline_ms = frame_end;
++    if (gated_frame_ != nullptr) {
++        const auto end = gated_frame_->start_ms + gated_frame_->time_ms;
++        if (timeline_ms >= end) {
++            JointAngles endpoint = gated_frame_->angles;
++            for (const auto& [id, value] : joint_overrides_)
++                if (endpoint.contains(id)) endpoint[id] = value;
++            std::vector<int> ids;
++            for (int id = 0; id < kMotionMotorCount; ++id)
++                if (endpoint.contains(id)) ids.push_back(id);
++            trace_timeline_ms_ = end;
++            if (ids.empty() || !writeGoals(endpoint, ids, "endpoint")) {
++                fail(MotionError::FrameSendFailed, "frame endpoint write failed");
++                return status_;
++            }
++            for (const auto& [id, angle] : endpoint) command_angles_[id] = angle;
++            timeline_ms = end;
++            gated_frame_ = nullptr;
++        }
+     }
+     const bool boundary = timeline_ms >= boundary_ms;
+-    if (!sendGuiSample(timeline_ms, boundary || frame_boundary)) return status_;
+-    if (frame_boundary) {
+-        gated_frame_ = &playback_frames_[next_frame_];
+-        gated_goal_ids_ = command_ids_;
+-        gated_goal_deg_.clear();
+-        for (const int id : gated_goal_ids_) gated_goal_deg_[id] = final_goal_deg_.at(id);
+-        if (!gateCurrentFrame(now_(), timeline_ms)) return status_;
+-        ++next_frame_;
++    trace_frame_ = -1;
++    for (std::size_t i = 0; i < playback_frames_.size(); ++i) {
++        const auto& f = playback_frames_[i];
++        if ((f.start_ms <= timeline_ms && timeline_ms < f.start_ms + f.time_ms) ||
++            (boundary && timeline_ms == f.start_ms + f.time_ms)) {
++            trace_frame_ = static_cast<int>(i); break;
++        }
++    }
++    if (!sendGuiSample(timeline_ms, boundary)) return status_;
++    for (const auto& frame : playback_frames_) {
++        const auto end = frame.start_ms + frame.time_ms;
++        if ((frame.start_ms <= timeline_ms && timeline_ms < end) ||
++            (boundary && timeline_ms == end)) {
++            gated_frame_ = &frame;
++            break;
++        }
+     }
+     if (!boundary) return status_;
+     if (boundary_ms < sequence_end) {
++        traceEvent("cycle", now_(), true);
++        gated_frame_ = nullptr;
+         cycle_start_ms_ = boundary_ms;
+         for (const auto& frame : playback_frames_)
+             if (frame.start_ms + frame.time_ms == boundary_ms)
+                 for (const auto& [id, angle] : frame.angles) start_angles_[id] = angle;
+         // 통신 완료 이후 시계를 재시작해 GUI 반복 경계의 지연을 재현한다.
++        gui_started_sec_ = guiSeconds(now_()) - boundary_ms / (1000.0 * pattern_->playbackSpeed());
+         started_at_ = now_() - std::chrono::duration_cast<Clock::duration>(
+             std::chrono::duration<double, std::milli>(boundary_ms / pattern_->playbackSpeed()));
+         feedback_sampled_ = false;
+         return status_;
+     }
+     if (repeat_ < pattern_->repeatCount()) {
++        traceEvent("repeat", now_(), true);
+         ++repeat_;
++        gated_frame_ = nullptr;
+         next_frame_ = 0;
+         for (const auto& [id, angle] : playback_frames_.back().angles) start_angles_[id] = angle;
+         cycle_start_ms_ = 0;
++        trace_timeline_ms_ = 0;
+         started_at_ = now_();
++        gui_started_sec_ = guiSeconds(started_at_);
+         feedback_sampled_ = false;
+         return status_;
+     }
+-    if (activateQueuedMotion(now_())) return status_;
+-    if (position_tolerance_enabled_ || startup_active_) {
++    if (queued_pattern_ != nullptr) {
++        traceEvent("goals_complete", now_(), true);
++        if (queued_hold_ms_ == 0) activateQueuedMotion(now_());
++        else { queued_boundary_pending_ = true; queued_boundary_at_ = now_(); }
++        return status_;
++    }
++    if (startup_active_) {
+         final_goal_ids_.clear();
+         for (const auto& [id, angle] : final_goal_deg_) final_goal_ids_.push_back(id);
+         status_ = MotionStatus::Settling;
+@@ -342,76 +408,6 @@
+     }
+     markSucceeded();
+     return status_;
+-}
+-
+-bool RobotMotionPlayer::gateCurrentFrame(
+-    Clock::time_point now, std::int64_t timeline_ms) {
+-    if (gated_frame_ == nullptr) return true;
+-    const auto frame_end_ms = gated_frame_->start_ms + gated_frame_->time_ms;
+-    if (timeline_ms < frame_end_ms) return true;
+-
+-    started_at_ = now - std::chrono::duration_cast<Clock::duration>(
+-        std::chrono::duration<double, std::milli>(
+-            frame_end_ms / pattern_->playbackSpeed()));
+-    if (frame_gate_wait_started_at_ == Clock::time_point{})
+-        frame_gate_wait_started_at_ = now;
+-    if (frame_gate_last_check_at_ != Clock::time_point{}
+-        && now - frame_gate_last_check_at_ < kPositionCheckInterval) {
+-        return false;
+-    }
+-    frame_gate_last_check_at_ = now;
+-
+-    JointAngles present_deg;
+-    if (!hardware_->readPresentPositions(present_deg)) {
+-        const auto wait_ms =
+-            std::chrono::duration_cast<std::chrono::milliseconds>(
+-                now - frame_gate_wait_started_at_).count();
+-        if (wait_ms <= pattern_->completion().settle_timeout_ms) return false;
+-        static_cast<void>(hardware_->holdCurrentPosition(kCancelHoldDurationMs));
+-        fail(
+-            MotionError::PresentPositionReadFailed,
+-            hardware_->lastError().empty()
+-                ? "failed to read frame Present Position"
+-                : std::string(hardware_->lastError()));
+-        return false;
+-    }
+-
+-    bool reached = !gated_goal_ids_.empty();
+-    double worst_error = 0.0;
+-    int worst_id = -1;
+-    for (const int motor_id : gated_goal_ids_) {
+-        const auto goal = gated_goal_deg_.find(motor_id);
+-        const auto present = present_deg.find(motor_id);
+-        const double error = (
+-            goal == gated_goal_deg_.end() || present == present_deg.end()
+-            || !std::isfinite(present->second))
+-            ? 1e9 : std::abs(goal->second - present->second);
+-        if (error > worst_error) {
+-            worst_error = error;
+-            worst_id = motor_id;
+-        }
+-        if (error > pattern_->completion().position_tolerance_deg)
+-            reached = false;
+-    }
+-    if (reached) {
+-        gated_frame_ = nullptr;
+-        gated_goal_deg_.clear();
+-        gated_goal_ids_.clear();
+-        frame_gate_wait_started_at_ = Clock::time_point{};
+-        frame_gate_last_check_at_ = Clock::time_point{};
+-        return true;
+-    }
+-
+-    const auto wait_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+-        now - frame_gate_wait_started_at_).count();
+-    if (wait_ms <= pattern_->completion().settle_timeout_ms) return false;
+-    static_cast<void>(hardware_->holdCurrentPosition(kCancelHoldDurationMs));
+-    fail(
+-        MotionError::PositionTimeout,
+-        "frame goal was not reached; motor "
+-            + std::to_string(worst_id) + " error="
+-            + std::to_string(worst_error) + "deg");
+-    return false;
+ }
+ 
+ MotionStatus RobotMotionPlayer::updateSettling(Clock::time_point now) {
+@@ -620,6 +616,24 @@
+ JointAngles RobotMotionPlayer::correctedFrameAngles(
+     const MotionFrame& frame) const {
+     JointAngles corrected = frame.angles;
++    if (policy_reference_ && !startup_active_) {
++        const auto& frames = policy_reference_->motion(current_motion_).frames();
++        const MotionFrame* matched = nullptr;
++        for (const auto& candidate : frames) {
++            if ((!frame.frame_id.empty() && candidate.frame_id == frame.frame_id &&
++                 candidate.start_ms == frame.start_ms) ||
++                (candidate.name == frame.name && candidate.start_ms == frame.start_ms)) {
++                if (matched) throw std::runtime_error("ambiguous policy reference frame");
++                matched = &candidate;
++            }
++        }
++        if (!matched) throw std::runtime_error("missing policy reference frame: " + frame.name);
++        for (int id : {0, 4, 5}) {
++            if ((id == 0 && head_override_enabled_) || (id != 0 && shoulder_override_enabled_)) continue;
++            if (matched->angles.contains(id)) corrected[id] = matched->angles.at(id);
++            else corrected.erase(id);
++        }
++    }
+     for (auto& [motor_id, degree] : corrected) {
+         if (const auto correction = corrections_deg_.find(motor_id);
+             correction != corrections_deg_.end()) {
+@@ -635,6 +649,7 @@
+ }
+ 
+ void RobotMotionPlayer::setJointOverride(int motor_id, double target_deg) {
++    if (motor_id == 0 && !head_override_enabled_) return;
+     if (motor_id < 0 || motor_id >= kMotionMotorCount || !std::isfinite(target_deg))
+         throw std::invalid_argument("invalid joint override");
+     joint_overrides_[motor_id] = target_deg;
+@@ -661,6 +676,7 @@
+             if (!std::isfinite(angles[id])) throw std::invalid_argument("non-finite startup angle");
+             frame.angles[id] = angles[id];
+         }
++        if (!hardware_->prepareImmediatePlayback()) return false;
+         if (!readStartAngles() || start_angles_.size() != kMotionMotorCount) return false;
+         MotionCompletion completion;
+         completion.position_tolerance_deg = 5.0;
+@@ -685,4 +701,47 @@
+     return update();
+ }
+ 
++void RobotMotionPlayer::configureJointPolicy(const std::string& reference, bool head, bool shoulder) {
++    if (running()) throw std::logic_error("cannot change policy during playback");
++    if (!head || !shoulder)
++        policy_reference_ = std::make_unique<MotionLibrary>(MotionLibrary::loadGuiJson(reference));
++    else policy_reference_.reset();
++    head_override_enabled_ = head;
++    shoulder_override_enabled_ = shoulder;
++    if (!head) joint_overrides_.erase(0);
++}
++void RobotMotionPlayer::setQueuedTransitionHoldMs(std::int64_t ms) {
++    if (ms < 0) throw std::invalid_argument("negative queue hold");
++    queued_hold_ms_ = ms;
++}
++void RobotMotionPlayer::configureDiagnostics(double tick_ms, const std::string& path, bool goals) {
++    if (running() || tick_ms <= 0) throw std::invalid_argument("invalid trace configuration");
++    trace_.reset();
++    trace_goals_ = goals;
++    if (!path.empty()) trace_ = std::make_unique<PlaybackTrace>(path);
++}
++void RobotMotionPlayer::traceEvent(const char* event, Clock::time_point begin, bool success,
++                                  const JointAngles& angles, const std::vector<int>* ids) {
++    if (!trace_) return;
++    PlaybackTraceRow row;
++    row.run = trace_run_;
++    std::snprintf(row.motion.data(), row.motion.size(), "%s", current_motion_.c_str());
++    row.event = event;
++    row.begin_ms = std::chrono::duration<double, std::milli>(begin.time_since_epoch()).count();
++    row.end_ms = std::chrono::duration<double, std::milli>(now_().time_since_epoch()).count();
++    row.timeline_ms = trace_timeline_ms_; row.repeat = repeat_; row.frame = trace_frame_;
++    row.success = success;
++    if (trace_goals_) for (const auto& [id, value] : angles) {
++        if (id >= 0 && id < 23 && (!ids || std::find(ids->begin(), ids->end(), id) != ids->end())) { row.ids[id] = true; row.angles[id] = value; }
++    }
++    trace_->push(row);
++}
++bool RobotMotionPlayer::writeGoals(const JointAngles& goals, const std::vector<int>& ids,
++                                  const char* event) {
++    const auto begin = now_();
++    const bool ok = hardware_->commandImmediatePosition(goals, ids);
++    traceEvent(event, begin, ok, goals, &ids);
++    return ok;
++}
++
+ }  // namespace irc_step
+--- a/robot_motion_player.hpp
++++ b/robot_motion_player.hpp
+@@ -2,6 +2,8 @@
+ 
+ #include "motion_hardware.hpp"
+ #include "motion_pattern.hpp"
++#include "gui_alignment.hpp"
++#include "playback_trace.hpp"
+ 
+ #include <chrono>
+ #include <functional>
+@@ -10,6 +12,7 @@
+ #include <memory>
+ #include <string>
+ #include <string_view>
++#include <stdexcept>
+ #include <tuple>
+ #include <vector>
+ 
+@@ -91,9 +94,18 @@
+     bool initialize() noexcept;
+     bool startPoseTransition(const std::vector<double>& angles, std::int64_t duration_ms) noexcept;
+     MotionStatus updateStartupPose() noexcept;
+-    void setPositionToleranceEnabled(bool enabled) noexcept { position_tolerance_enabled_ = enabled; }
++    // 일반 재생의 성공은 목표 전송 완료다. 위치 검사는 startup에만 적용한다.
++    void setPositionToleranceEnabled(bool enabled) {
++        if (enabled) throw std::invalid_argument("GUI playback cannot enable arrival waits");
++    }
++    [[nodiscard]] bool completionConfirmsArrival() const noexcept { return startup_active_ && succeeded(); }
+     void setJointOverride(int motor_id, double target_deg);
+     void clearJointOverride(int motor_id) noexcept;
++    void configureJointPolicy(const std::string& reference, bool head, bool shoulder);
++    void setQueuedTransitionHoldMs(std::int64_t ms);
++    void configureDiagnostics(double tick_ms, const std::string& path, bool goals);
++    [[nodiscard]] int playbackRepeat() const noexcept { return repeat_; }
++    [[nodiscard]] std::int64_t playbackTimelineMs() const noexcept { return trace_timeline_ms_; }
+     [[nodiscard]] bool hardwareReady() const noexcept;
+ 
+     [[nodiscard]] std::vector<std::string> motionNames() const;
+@@ -143,8 +155,10 @@
+ private:
+     using FrameCorrectionKey = std::tuple<std::string, std::string, int>;
+ 
++    bool writeGoals(const JointAngles& goals, const std::vector<int>& ids, const char* event);
++    void traceEvent(const char* event, Clock::time_point begin, bool success,
++                    const JointAngles& angles = {}, const std::vector<int>* ids = nullptr);
+     bool sendGuiSample(std::int64_t timeline_ms, bool boundary);
+-    bool gateCurrentFrame(Clock::time_point now, std::int64_t timeline_ms);
+     bool readStartAngles();
+     void markSucceeded();
+     MotionStatus updateRunning(Clock::time_point now);
+@@ -161,6 +175,16 @@
+     void fail(MotionError error, std::string message) noexcept;
+     JointAngles correctedFrameAngles(const MotionFrame& frame) const;
+ 
++    std::unique_ptr<PlaybackTrace> trace_;
++    bool trace_goals_{false};
++    std::uint64_t trace_run_{0};
++    std::int64_t trace_timeline_ms_{0};
++    int trace_frame_{-1};
++    std::unique_ptr<MotionLibrary> policy_reference_;
++    bool head_override_enabled_{true}, shoulder_override_enabled_{true};
++    std::int64_t queued_hold_ms_{0};
++    bool queued_boundary_pending_{false};
++    Clock::time_point queued_boundary_at_{};
+     Now now_{Clock::now};
+     JointAngles start_angles_;
+     JointAngles feedback_angles_;
+@@ -170,9 +194,10 @@
+     std::vector<MotionFrame> playback_frames_;
+     std::unique_ptr<MotionPattern> startup_pattern_;
+     std::int64_t cycle_start_ms_{0};
++    double gui_started_sec_{0.0};
++    double last_feedback_sec_{0.0};
+     Clock::time_point last_feedback_at_{};
+     bool feedback_sampled_{false};
+-    bool position_tolerance_enabled_{true};
+     bool startup_active_{false};
+     MotionLibrary library_;
+     std::unique_ptr<IMotionHardware> owned_hardware_;
+--- a/step_dynamixel.cpp
++++ b/step_dynamixel.cpp
+@@ -265,6 +265,11 @@
+         }
+     }
+ 
++    return WriteZeroProfiles();
++}
++
++bool Dxl::WriteZeroProfiles() {
++    if (!port_opened_) return false;
+     dynamixel::GroupSyncWrite acceleration(
+         portHandler, packetHandler, DxlReg_ProfileAcceleration, 4);
+     dynamixel::GroupSyncWrite velocity(
+@@ -278,7 +283,6 @@
+     if (velocity.txPacket() != COMM_SUCCESS) return false;
+     acceleration.clearParam();
+     velocity.clearParam();
+-    std::cout << "[Info] Time-based profiles ready for all motors" << std::endl;
+     return true;
+ }
+ 
+--- a/step_dynamixel.hpp
++++ b/step_dynamixel.hpp
+@@ -215,6 +215,7 @@
+         virtual void SetThetaRef(const VectorXd&);
+         virtual int16_t SetPresentMode(int16_t Mode); 
+         virtual bool syncWriteTheta();
++        bool WriteZeroProfiles();
+         virtual bool ConfigureTimeBasedProfile();
+         virtual bool syncWriteTimeBasedTheta(
+             const VectorXd& theta, const std::vector<int>& motor_ids,
+--- a/test_gui_alignment.cpp
++++ b/test_gui_alignment.cpp
+@@ -0,0 +1,71 @@
++#include "robot_motion_player.hpp"
++#include "mock_motion_hardware.hpp"
++#include "gui_playback.hpp"
++#include <cassert>
++#include <fstream>
++#include <filesystem>
++#include <iostream>
++using namespace irc_step;
++int main(int argc, char** argv) {
++    assert(argc==2);
++    const auto path=std::filesystem::path(argv[1])/"alignment_contract.json";
++    std::ofstream(path)<<R"({"motions":[{"name":"a","max_seq_ms":5000,"repeat_count":1,
++      "start_pose":"same","end_pose":"same","frames":[
++        {"name":"a","start_ms":0,"time_ms":20,"angles":{"0":10.25,"1":20}},
++        {"name":"b","start_ms":20,"time_ms":20,"angles":{"2":40},"torques":{"2":false}}]}]})";
++    for (int scenario=0; scenario<8; ++scenario) {
++        MockMotionHardware hw; JointAngles initial;
++        for(int id=0; id<23; ++id) initial[id]=1.0;
++        hw.setPresentPositions(initial); hw.setAutoReachGoal(false);
++        double ms=1000;
++        RobotMotionPlayer p(path.string(),hw,[&] {return RobotMotionPlayer::Clock::time_point(
++            std::chrono::milliseconds(static_cast<int>(ms)));});
++        assert(p.initialize());
++        bool rejected_gate=false;
++        try { p.setPositionToleranceEnabled(true); } catch(const std::invalid_argument&) { rejected_gate=true; }
++        assert(rejected_gate);
++        p.configureJointPolicy(path.string(), scenario==6, true);
++        if(scenario==0) {
++            hw.setReadSuccess(false);
++            assert(p.start("a")==StartResult::HardwareNotReady);
++            assert(hw.commandCount()==0); continue;
++        }
++        if(scenario==7) {
++            assert(p.startPoseTransition(std::vector<double>(23,15),20));
++            ms+=20; p.update(); assert(p.status()==MotionStatus::Settling);
++            ms+=100; p.update(); assert(!p.succeeded());
++            hw.setPresentPositions(JointAngles{});
++            ms+=3100; p.update(); assert(p.result()==MotionError::PositionTimeout);continue;
++        }
++        assert(p.start("a")==StartResult::Accepted);
++        assert(p.start("a")==StartResult::RejectedBusy);
++        ms+=5; p.update();
++        assert(hw.lastDurationMs()==0 && hw.lastAccelerationMs()==0);
++        if(scenario==1) {
++            assert(p.queueNext("a")==QueueResult::Queued);
++            hw.setCommandSuccess(false); ms+=20; p.update();
++            assert(p.result()==MotionError::FrameSendFailed && !p.hasQueuedMotion());continue;
++        }
++        if(scenario==2) { assert(p.cancel()==CancelResult::Cancelled);assert(hw.holdCount()==1);continue; }
++        if(scenario==3) { assert(p.emergencyStop());assert(!p.hardwareReady());continue; }
++        if(scenario==4) hw.setReadSuccess(false); // observation failure never adds a position gate
++        if(scenario==5) {
++            assert(p.queueNext("a")==QueueResult::Queued);
++            p.setQueuedTransitionHoldMs(20);
++        }
++        if(scenario==6) p.setJointOverride(0,-64.25);
++        for(int i=0; p.running() && i<100; ++i) {ms+=5; p.update();}
++        assert(p.succeeded());assert(!p.completionConfirmsArrival());assert(ms<1200);
++        assert(std::abs(hw.commandedPositions().at(1)-20)<1e-9);
++        assert(std::abs(hw.commandedPositions().at(2)-40)<1e-9);
++        assert(hw.ready()); // natural completion never disables torque
++        if(scenario==6) assert(hw.commandedPositions().at(0)==-64.25);
++        if(scenario==5) assert(p.completionSequence()==2);
++        if(scenario==4) hw.setReadSuccess(true);
++        assert(p.start("a")==StartResult::Accepted);
++        p.update();
++        if(scenario!=6) assert(hw.commandedPositions().at(0)==1.0); // new start reads PP, not old goal
++        assert(hw.commandedPositions().at(1)==1.0);
++    }
++    std::cout<<"PASS start read failure, goal failure/queue purge, cancel, E-stop, feedback failure, queue hold, override, startup settling\n";
++}
+--- a/test_motion_pattern.cpp
++++ b/test_motion_pattern.cpp
+@@ -106,6 +106,7 @@
+             MotionFrame{"near_max", 0, 1000, {{1, 170.0}}, {}},
+             MotionFrame{"wrapped", 1000, 1000, {{1, -170.0}}, {}},
+         }, 2000);
++        static_cast<void>(invalid_boundary.sample(0));
+     } catch (const std::runtime_error&) {
+         boundary_rejected = true;
+     }

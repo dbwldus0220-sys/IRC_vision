@@ -75,11 +75,43 @@ def test_invalid_geometry_cannot_start_alignment(changes):
     assert not decision.valid
 
 
-def test_default_only_reports_angle_and_count():
+def test_default_applies_offset_alignment():
     decision = MotionDecisionPlanner().plan("LINE_TRACK", {"line": sample()}, .1)
-    assert decision.action == "RECOVER_RIGHT_TURN_LEFT_4"
+    assert decision.valid and decision.action == "LINE_OFFSET_TURN_RIGHT_3"
     assert decision.source_command["offset_reference_steering_deg"] == 40.
     assert decision.source_command["offset_reference_turn_count"] == 3
+
+
+def test_recorded_large_left_offset_uses_stationary_left_turn_by_default():
+    data = sample(
+        -75.8, -507.9, ground_heading_error_deg=31.99,
+        filtered_heading_error_deg=49.3, filtered_lateral_offset_norm=-.795,
+        turn_angle_deg=3.6,
+    )
+    assert planner(-1.).plan("LINE_TRACK", {"line": data}, .1).action == (
+        "RECOVER_LEFT_TURN_RIGHT_4")
+    decision = MotionDecisionPlanner().plan("LINE_TRACK", {"line": data}, .1)
+    assert decision.valid and decision.action == "LINE_OFFSET_TURN_LEFT_5"
+    assert decision.source_command["turn_angle_deg"] == 75.
+    assert decision.source_command["linear_speed_mps"] == 0.
+
+
+@pytest.mark.parametrize("sign", [-1, 1])
+@pytest.mark.parametrize("offset", [99.9, 100., 100.1])
+def test_default_pixel_limit_boundary(sign, offset):
+    data = sample(sign * 40., sign * offset)
+    decision = MotionDecisionPlanner().plan("LINE_TRACK", {"line": data}, .1)
+    assert decision.valid
+    assert decision.action.startswith("LINE_OFFSET_TURN_") == (offset > 100.)
+
+
+@pytest.mark.parametrize("changes", [
+    {"offset_reference_valid": False}, {"lateral_offset_px": None},
+])
+def test_enabled_default_stops_on_missing_alignment_geometry(changes):
+    decision = MotionDecisionPlanner().plan("LINE_TRACK", {"line": sample(**changes)}, .1)
+    assert not decision.valid
+    assert decision.reason == "line_offset_alignment_invalid_reference"
 
 
 @pytest.mark.parametrize("stamp", [None, True, 9_000_000_000, 10_000_000_000])
@@ -137,7 +169,8 @@ def test_turn_completion_waits_then_replans_new_frame(monkeypatch):
 
 
 @pytest.mark.parametrize("robot", [False, True])
-def test_launch_exposes_pixel_threshold(monkeypatch, tmp_path, robot):
+@pytest.mark.parametrize("override", [None, "-1.0", "180.0"])
+def test_launch_exposes_pixel_threshold(monkeypatch, tmp_path, robot, override):
     from launch_ros.actions import Node
     from test_full_system_launch import node_parameters
     if robot:
@@ -146,8 +179,10 @@ def test_launch_exposes_pixel_threshold(monkeypatch, tmp_path, robot):
         from test_full_system_launch import launch_description, launch_context as default_context
     description = launch_description(monkeypatch, tmp_path)
     context = default_context(description)
-    assert context.launch_configurations["line_offset_align_enter_px"] == "-1.0"
-    context.launch_configurations["line_offset_align_enter_px"] = "100.0"
+    assert context.launch_configurations["line_offset_align_enter_px"] == "100.0"
+    if override is not None:
+        context.launch_configurations["line_offset_align_enter_px"] = override
     node = next(e for e in description.entities if isinstance(e, Node)
                 and e.node_executable == "motion_decision_node")
-    assert node_parameters(node, context)["line_offset_align_enter_px"] == 100.
+    expected = 100. if override is None else float(override)
+    assert node_parameters(node, context)["line_offset_align_enter_px"] == expected

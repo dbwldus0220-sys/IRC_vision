@@ -206,7 +206,7 @@ def test_close_turn_block_survives_missing_depth_detection_and_pixel_increase():
     assert command.action == "WAIT"
     assert not command.depth_fallback_requested
     assert planner.close_rotation_blocked
-    assert planner.plan({"detected": False}).action == "WAIT"
+    assert planner.plan({"detected": False}).action == "HURDLE_LOST_BACKWARD_1"
     command = planner.plan(hurdle_info(
         bottom_distance_px=150, depth_m=0.4, hurdle_angle_deg=20.0,
     ))

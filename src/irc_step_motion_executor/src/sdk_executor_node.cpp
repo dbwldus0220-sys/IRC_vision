@@ -68,6 +68,12 @@ public:
       "explicit_torque_approval", false);
     const bool position_tolerance_enabled = declare_parameter<bool>(
       "position_tolerance_enabled", false);
+#ifdef IRC_STEP_GUI_ALIGNMENT_VERSION
+    if (position_tolerance_enabled) {
+      throw std::runtime_error("GUI playback requires position_tolerance_enabled=false; "
+        "startup pose arrival checks remain separate");
+    }
+#endif
     const std::int64_t poll_period_ms = positive_parameter_or_default(
       "poll_period_ms", kDefaultPollPeriodMs);
     const std::int64_t running_polls = nonnegative_parameter_or_default(

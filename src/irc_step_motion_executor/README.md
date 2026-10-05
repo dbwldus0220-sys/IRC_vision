@@ -1,5 +1,227 @@
 # IRC STEP Motion Executor C++ Wrapper
 
+## 2026-10-06 최신 GUI 실기 재생 정렬
+
+이번 실행 경로는 `external_sdk/gui_aligned`의 실제 C++ SDK이다. 아래 10월 2일
+기록의 외부 Jetson SDK/단일 송신 정책과 구분한다. 현재 PC에는 그 Jetson 경로와
+실행 중인 로봇 바이너리가 없었으므로, 넘어졌을 당시 어떤 바이너리가 실행됐는지는
+확인하지 못했다. 현재 PC의 `/home/sy/step_sdk_gui_20260930/cpp_sdk` 소스를
+작업 폴더에 복사해 수정하고 **실제 Dynamixel 라이브러리를 링크한 ROS 실행기까지
+빌드**했다. 원래 SDK 폴더, Downloads 원본, runtime JSON, alias 및 작업 중이던
+mission_control 변경은 건드리지 않았다.
+
+모터·로봇 동역학 시뮬레이터는 실행하지 않았다. 아래 수치는 가상 시계/가짜 통신
+결과이며, 넘어짐 해결이나 실제 200Hz 달성을 의미하지 않는다.
+
+### 대표 모션에서 확인한 데이터
+
+사용자 지정 모션은 **건전진45도(6회)**다. `line_forward_6`, `post_ball_forward_6`
+alias가 이 이름을 선택한다. 일반 `STRAIGHT`, `STRAIGHT_3` 등의 매핑은 미션 상태에
+따라 bridge에서 선택된다. SDK는 JSON의 `playback_speed=1.0`, `repeat_count=6`을
+각각 한 번만 적용한다.
+
+| 프레임 | 시작 ms | 길이 ms |
+|---|---:|---:|
+| 김오들(앞먼저닿음) | 90 | 60 |
+| 왼뒤407 | 150 | 105 |
+| 김왼들(앞먼저닿음) | 339 | 62 |
+| 김오뒤3 | 403 | 110 |
+
+사이클 길이는 513ms, 명목 6회 길이는 3078ms다. `max_seq_ms=11522`는 종료시각이
+아니다. 시작 90ms, 중간 84ms와 2ms 공백은 자세 유지 시간이다.
+
+**첨부 자료끼리도 서로 다르다.** 파일명 `robot_motions(10).json`이 요청 문서의
+SHA-256 `fd90be1f…75b488`과 일치하는 최신 export(75모션)다. Downloads의 다른
+`robot_motions.json`은 84모션이므로 사용하지 않았다. state는 495시퀀스/75체크이며
+체크된 11모션의 프레임이 export와 다르다. timing repairs의 아직 적용 가능한
+`before` fingerprint는 0개다. 제공 문서의 “state/export 동일” 주장은 현재
+첨부 state에는 성립하지 않는다.
+
+대표 모션의 차이:
+
+| 항목 | GUI state | 첨부 export | runtime |
+|---|---:|---:|---:|
+| 첫 프레임 ID 19 | 59 | 58 | 58 |
+| 세 번째 프레임 ID 20 | -62.875 | -61.875 | -61.875 |
+| 세 번째 ID 4 / 5 | 16.435546875 / -17.314453125 | 동일 | 18 / -18 |
+| 네 번째 ID 4 / 5 | 16.5234375 / -17.40234375 | 동일 | 18 / -18 |
+| completion 허용오차 | 2 | 2 | 5 |
+
+**ID 4·5의 18/-18은 사용자가 확인한 의도된 정책이며 그대로 유지했다.** 허용오차
+metadata도 기존 5도를 유지하되 일반 재생의 대기에 사용하지 않는다. state의 현재
+로드 항목은 `건전진45도(8회)`이고 편집 타임라인은 해당 저장 프레임과 같다.
+실제 재생 당시 UI 배속·반복과 어느 데이터가 로드됐는지는 첨부만으로 알 수 없다.
+`play_motion_page_sequence()`는 UI spinbox 값을 사용하고, 저장 항목 불러오기는
+저장된 배속·반복을 spinbox에 넣는다. 로그에는 실제 실행값을 따로 기록해야 한다.
+
+전체 차이와 원본 해시:
+[`audit.json`](../../artifacts/20261006_gui_alignment/audit.json),
+[`catalog_diff.csv`](../../artifacts/20261006_gui_alignment/catalog_diff.csv).
+GUI/state/repair/export 원본은 `artifacts/20261006_gui_alignment/reference/`에
+바이트 그대로 보존했다. `robot_motions_gui_state.json`은 state의 체크된 항목을
+추출한 별도 검증 입력이다. runtime 교체본이 아니다.
+
+### 실행 차이와 수정
+
+| 항목 | 확인한 기존 코드 | 현재 GUI 호환 경로 |
+|---|---|---|
+| PC 보간 | 로컬 SDK에 이미 cosine/shortest/lift가 있었음 | 그대로 사용, GUI 실제 함수로 각도/raw 검증 |
+| 프레임 경계 | 로컬 SDK는 tolerance=true일 때 도착 gate, false일 때 경계 종점 보장 없이 sample. ROS 기본은 이미 false | 활성 프레임 종점 전송 후 같은 tick의 경계 sample. 일반 경계 시계 유지 |
+| 10/2 패치와 차이 | callback당 최대 한 송신, 관측 피드백 미추가 | 최신 GUI와 같이 경계에서는 두 송신 가능, 10ms 조건의 SyncRead |
+| 시작 | 실제 PP 재읽기는 로컬 SDK에 이미 있음 | 새 start마다 profile 0 준비 후 PP 필수 읽기, 실패 시 시작 거절 |
+| 프로파일 | 초기화 시 0 설정만 보장 | 새 재생/시작 자세 전환 전 108/112를 0으로 설정, 반복 sample은 Goal만 전송 |
+| 반복/조합 경계 | 도착 검사/시계 경로가 섞여 있었음 | 최종 송신과 강제 피드백 완료 후 시계 재시작 |
+| queue | 로컬 SDK는 새 PP를 읽음 | 조합처럼 이전 프레임의 논리 목표각을 누적해 연결, 추가 읽기 없음 |
+| 위치 대기 | frame gate 및 final settling 존재 | 일반 재생에서 제거. startup의 실제 도착/안정화 검사는 유지 |
+| completion | Succeeded 의미가 불명확 | 메시지에 목표 전송 완료/실제 도착 미확인을 명시, SDK `completionConfirmsArrival()` 제공 |
+| 로더 | overlap 거절, 구형 quintic 궤적을 로드 중 생성 | GUI stable sort/겹침 정리, 구형 궤적은 legacy sample 호출 때만 생성 |
+| 모터 설정 | 로컬 SDK는 이미 PID/Operating Mode 쓰기를 제거한 버전 | 유지. 실제 GUI PID 값은 미측정이며 850/0/0을 넣지 않음 |
+
+`gui_playback.hpp`는 Python 음수 나머지, shortest-angle, 소수값, lift flag+이름,
+80% 도착 명령 후 20% 유지, wrap/clamp, ties-to-even raw 변환을 구현한다.
+프레임에 없는 관절에는 0을 쓰지 않는다. 활성 프레임은 그 프레임 관절만 쓰고,
+공백은 이전 자세를 누적해 전송한다. 각도는 degree로 유지되어
+`DynamixelMotionHardware::commandImmediatePosition → Dxl::WriteGoalDegrees →
+GroupSyncWrite(116,4)`로 간다. 이 경로에는 radian/방향/영점 가산 변환이 없다.
+모터 자체의 Drive Mode 방향 bit/Homing Offset은 보존되므로 실측 비교가 필요하다.
+
+위치 읽기는 `GroupSyncRead(132,4)`, Protocol 2.0, 4Mbps, ID 0..22다. GUI의 새 재생
+시작은 필요한 ID별 개별 Present Position 읽기지만 SDK는 전체 23축 SyncRead다.
+양쪽 모두 읽기 완료 후 시계를 시작하므로 시작각 역할은 같지만 **시작 준비의
+실제 버스 시간과 패킷 수는 같다고 검증하지 않았다**. 초기화의 torque OFF →
+firmware 42+/Drive Mode bit 2 준비 → PP/Goal 선등록 → torque ON 경로도 SDK의
+기존 준비 절차로 남아 있다. 실제 재생 중에는 torque flags를 적용하지 않는다.
+자연 완료는 마지막 Goal/토크 유지, cancel은 PP hold, E-stop은 torque OFF다.
+목표 송신 실패는 실패/queue 제거, 재생 중 관측 read 실패는 기록 후 진행한다.
+필수 시작 read 및 startup settling 실패 처리는 유지한다.
+
+`position_tolerance_enabled=true`는 GUI 모드에서 명시적으로 거절한다. ROS 노드는
+하드웨어 객체 생성 전에 이를 검사한다. `settle_duration_ms=0`으로 metadata만
+바꾸는 우회는 사용하지 않는다.
+
+호출 경로:
+`motion_decision_node → motion_command_bridge_node → /motion/executor/request →
+SdkExecutorDriver/SdkExecutorCore(alias·중복·busy·timeout) → RobotMotionPlayerBackend →
+ProductionRobotMotionRuntimeFactory → RobotMotionPlayer::start/update → sendGuiSample /
+writeGoals → DynamixelMotionHardware → Dxl → Dynamixel SDK`.
+`MotionCallback::sample`의 구형 quintic 경로와 GUI의 단일 프레임 이동은 이 경로가 아니다.
+
+미션 bridge의 자세 전환 전후 1초, 공 집기 1/3초, 슈팅 준비 2초 등의 대기와
+head override는 사용자의 기존 작업이므로 유지했다. 따라서 **전체 경기 명령열은
+GUI 조합과 자동으로 같지 않다**. SDK queue의 연결과 새 start 요청을 구분했다.
+새 요청은 PP 재읽기, queue/내부 반복은 이전 논리 목표를 이어받는다. timeout,
+취소·선점 정책은 executor/bridge 테스트 대상으로 유지했다.
+
+### 빌드 및 설정
+
+```bash
+source /opt/ros/humble/setup.bash
+colcon build --packages-select irc_step_motion_executor --cmake-args \
+  -DIRC_STEP_ENABLE_ROBOT_MOTION_SDK=ON \
+  -DROBOT_MOTION_SDK_DIR="$PWD/external_sdk/gui_aligned" \
+  -DDYNAMIXEL_SDK_INCLUDE_DIR=/opt/ros/humble/include \
+  -DDYNAMIXEL_SDK_LIBRARY=/opt/ros/humble/lib/libdynamixel_sdk.so \
+  -DCMAKE_BUILD_TYPE=RelWithDebInfo
+source install/setup.bash
+```
+
+현재 빌드의 `sdk_motion_executor`는 실제 `libdynamixel_sdk.so`를 링크한다. 소스 및
+바이너리 해시와 CMake 설정은 `artifacts/20261006_gui_alignment/build_manifest.json`에
+기록한다. 다른 장치에는 위 SDK 경로로 다시 빌드해야 하며 이 PC의 x86_64 바이너리를
+Jetson에 그대로 복사하는 방식은 아니다.
+
+분리 비교 launch는 기본적으로 simulated이며 모터를 열지 않는다:
+
+```bash
+ros2 launch irc_step_motion_executor sdk_gui_alignment.launch.py
+```
+
+기본 입력은 현재 runtime, head override OFF, shoulder 정책 ON(사용자 18/-18 유지),
+startup 자세 자동 이동 OFF, queue hold 0ms, 제어 목표 5ms, trace ON이다. 기준
+reference는 이번 최신 export다. 실제 모터용으로는 `backend_type:=robot_motion_player`,
+`enable_robot_hardware:=true`, 기존 승인 플래그 `explicit_torque_approval:=true`,
+확인된 `robot_device_path`를 명시한다. **이 실기 실행은 이번 작업에서 하지 않았다.**
+사용자의 4/5 정책을 유지한 시험과 export 자체 비교를 혼동하지 않는다. 원본 그 자체
+시험에는 `motion_json_path`에 보존 export를 명시한다. 전체 production은 기존의
+head/shoulder 기본 ON 및 startup/미션 정책을 유지한다.
+
+실제 launch 후 대표 요청은 다음 한 번의 명령이다. repeat_count=6을 추가로 6번
+요청하지 않는다:
+
+```bash
+ros2 run irc_step_motion_executor manual_motion_request.py --ros-args \
+  -p motion_id:=line_forward_6 -p timeout_ms:=15000
+```
+
+비교 launch는 최신 export에 대응하는 모션에 사용한다. runtime 전용 모션에서
+원본 복원 OFF 옵션의 reference 대응이 없으면 추측하지 않고 거절한다.
+
+### 검증 결과와 로그
+
+`tools/verify_latest_gui_execution.py`는 첨부 GUI의 AST에서 **실제**
+`start_motion_playback/anim_step/scrub_timeline/gate_timeline_on_frame_arrival`,
+보간/raw 변환 및 composer 저장 함수를 실행한다. Qt/UI와 통신만 대체한다.
+C++ 쪽은 production의 같은 `motion_player_core`에 가짜 통신/시계만 주입한다.
+하드웨어 객체를 만들지 않는다. 전체 75 export + 86 runtime + 75 state 모션을
+두 tick/통신 조건으로 비교하고, synthetic는 추가 지연·배속 조건으로 비교한다.
+GUI를 새로 구현한 보간끼리 비교한 결과가 아니다.
+
+- **530 사례 통과**: raw 반올림 경계/인접값 12,291개 검사 포함.
+- 목표 전송 88,034회, 관측 읽기 42,906회(일반 시나리오 집계), raw 오차 0,
+  degree 오차 허용 `1e-9` 이내, 가상 이벤트 시각 차이 `1e-6 ms` 이내.
+- 0.9/1.0/1.05 source×전체 배속의 GUI 조합 저장, 내부/전체 반복, 겹침 정리,
+  앞/중간 공백, lift true/false, 부분 관절, 늦은 tick 및 송신/읽기 지연 포함.
+- SDK queue는 실제 GUI composer가 만든 두 모션 연결 타임라인의 쓰기/읽기 및
+  경계·최종 완료 시각과 직접 비교했다. 새 standalone start의 PP 재읽기도 단위 검증했다.
+- 정상 재생은 가짜 PP가 목표에 도착하지 않아도 전송 완료한다. 필수 read 실패,
+  Goal 실패/queue 해제, cancel, E-stop, override, startup settling/timeout을 별도 검사했다.
+- 플레이어·래퍼 18개 + 통합/빌드 설정 11개로 **CTest 29개 통과**. 샌드박스에서
+  소켓 제한과 함께 timeout이 난 ROS simulated launch 2개는 제한 밖에서 재실행해 통과했다.
+- runtime import/허용오차 정책 테스트 6개 통과.
+- 별도 실행한 기존 전체 catalog contract는 **62 실패/52 통과**. 예: 현재 `건전진`
+  alias에 과거 `찐전진`을 기대한다. runtime/alias와 해당 테스트는 이번 수정 대상이
+  아니며 실패를 숨기거나 이를 통과시키려고 모션 데이터를 바꾸지 않았다.
+
+[`comparison/results.json`](../../artifacts/20261006_gui_alignment/comparison/results.json),
+[`대표 목표·타이밍 요약`](../../artifacts/20261006_gui_alignment/representative_timing.json),
+[`목표/피드백 가상 SDK trace`](../../artifacts/20261006_gui_alignment/logs/representative_virtual_sdk_trace.csv),
+[`빌드·테스트 로그`](../../artifacts/20261006_gui_alignment/logs).
+각 대표 trace JSON에는 GUI와 C++의 모든 degree/raw/송신·read·tick·완료 이벤트가 있다.
+
+| 대표 모션 가상 조건 | 전체 시간(시작 read 포함) | Goal 전송 | 송신 간격 min / mean / max |
+|---|---:|---:|---:|
+| tick 5ms, 송수신 지연 0 | 3090ms | 642 | 0 / 4.81279 / 5ms |
+| tick 5/17/83/6ms 순환, read 16ms/write 1ms | 3256ms | 90 | 1 / 36.15730 / 100ms |
+
+동일 callback의 경계 이중 전송 때문에 지연 0 가상 조건의 min은 0이다. 가상의
+read 16ms는 USB latency_timer 16ms를 재현했다는 뜻이 아니다. 실제 USB/SDK/OS 지연은
+다시 측정해야 한다. 5ms는 목표 주기이며 ROS single-thread timer와 동기식 통신으로
+항상 그 간격이 되는 것은 아니다.
+
+### 실측에 남은 항목
+
+현재 환경에 `/sys/bus/usb-serial/devices`가 없어 대상 장치 latency는 미측정이다.
+사용자가 전달한 조사 PC의 16ms는 외부 관측으로만 기록했다. 정상 GUI의 PID,
+Operating/Drive Mode, Homing Offset, current/PWM/position limit 및 모델/firmware는
+추정하지 않는다. `tools/capture_dynamixel_settings.py`는 SDK 생성자 없이 해당
+레지스터를 **읽기만** 하는 수집 도구이며 실행 시 포트를 독점해야 한다.
+X-series 주소표에 해당하는 모델인지 모델 번호와 함께 확인한다.
+
+`tools/trace_sdk_gui.py --gui /실제/GUI/sdk_gui.py --output /tmp/gui.jsonl`은 원본 GUI를
+수정하지 않고 실제 재생 배속·반복·초기각·목표/raw·read 및 경계 시각을 기록한다.
+GUI 자체의 자동저장 동작은 그대로이므로 보존 reference가 아닌 실제 GUI 작업
+폴더에서 사용한다. SDK trace는 `planned`(override 전), `sample/endpoint`(실제 송신),
+`feedback`, `initial`, `cycle/repeat`, `goals_complete/arrived`와 송수신 소요시간을
+담는다. 8192행 bounded queue에서 넘친 기록 수는 파일 마지막에 표시하며 제어
+스레드에서 파일 쓰기를 하지 않는다. trace 자체의 비용도 실측에서 고려해야 한다.
+
+실기 전에는 먼저 동역학 시뮬레이션 또는 로봇을 지지한 상태에서 같은 초기각·입력
+데이터·전원으로 확인해야 한다. 이번의 ±180 경계 합성 사례는 수치 검사 전용이다.
+지지된 로봇에서 GUI/SDK 설정 snapshot, 송신 간격 분포, SyncRead 시간, 경계 처리
+시간, 전체 길이, 실제 PP 추종 오차, 다음 명령 연결 시간을 수집한 뒤 비교한다.
+송신 성공을 모터 수신/실제 도착/넘어짐 해결로 해석하지 않는다.
+
+
 ## 2026-10-02 공통 재생 경로 수정 및 검증
 
 현재 production은 외부 SDK를 연결해 사용한다. 아래의 과거 catalog-only 단계

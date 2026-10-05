@@ -1,4 +1,4 @@
-"""Validate image-based normal navigation with a supplementary corner distance gate."""
+"""Validate ordinary tracking and independent confirmed-corner selection."""
 import pytest
 from mission_control.motion_decision_node import MotionDecisionNode
 from mission_control.motion_decision_planner import MotionDecision, MotionDecisionPlanner, MotionDecisionConfig
@@ -6,7 +6,7 @@ from test_line_corner_memory import CornerHarness
 
 
 def info(**updates):
-    data=dict(detected=True,filtered_heading_error_deg=1.9,
+    data=dict(detected=True,filtered_heading_error_deg=1.9,lateral_offset_px=0.,
               filtered_lateral_offset_norm=-.194,turn_angle_deg=79.5,turn_consistency=1.,
               heading_quality=.95,geometry_quality=.95,detection_quality=.95,
               ground_projection_valid=False,corner_preview_confirmed=True,
@@ -40,18 +40,30 @@ def test_recorded_wait_scene_now_publishes_normal_forward(node):
 
 
 @pytest.mark.parametrize('action',['STRAIGHT','RECOVER_LEFT_TURN_LEFT_4','RECOVER_RIGHT_TURN_RIGHT_4'])
-@pytest.mark.parametrize('distance',[None,.1,.89])
-def test_corner_memory_does_not_replace_normal_forward_or_recovery(node,action,distance):
+@pytest.mark.parametrize('distance',[None,.1501,.89])
+def test_unready_corner_preserves_normal_forward_or_recovery(node,action,distance):
     decision=apply(node,action,corner_start_distance_m=distance,corner_start_depth_valid=distance is not None)
     assert decision.action==action and decision.valid
 
 
 @pytest.mark.parametrize('side',['LEFT','RIGHT'])
-def test_distance_delays_far_turn_but_never_creates_turn(node,side):
+def test_distance_delays_far_turn_and_selects_near_corner_independently(node,side):
     assert apply(node,side,corner_direction=side).action=='STRAIGHT_1'
     result=apply(node,side,corner_direction=side,corner_start_distance_m=.15)
-    assert result.action==side and result.valid and result.reason=='line_tracking'
-    assert apply(node,'STRAIGHT',corner_direction=side,corner_start_distance_m=.1).action=='STRAIGHT'
+    assert result.action==side and result.valid and result.reason=='line_corner_ready'
+    assert apply(node,'STRAIGHT',corner_direction=side,corner_start_distance_m=.1).action==side
+
+
+@pytest.mark.parametrize('side', ['LEFT', 'RIGHT'])
+@pytest.mark.parametrize('action', [
+    'STRAIGHT', 'RECOVER_LEFT_TURN_LEFT_4', 'RECOVER_RIGHT_TURN_RIGHT_4',
+    'LINE_HEADING_TURN_RIGHT_7', 'LINE_OFFSET_TURN_LEFT_5',
+])
+def test_near_corner_overrides_tracking_action_in_image_mode(node, side, action):
+    result = apply(node, action, corner_direction=side, corner_start_distance_m=.15)
+    assert result.valid and result.action == side
+    assert result.source_command['motion'] == side
+    assert result.source_command['corner_previous_action'] == action
 
 
 @pytest.mark.parametrize('updates',[

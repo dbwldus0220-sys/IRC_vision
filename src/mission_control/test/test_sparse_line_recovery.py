@@ -27,6 +27,7 @@ def sparse_info(heading=8., direction="RIGHT", distance=.4):
         corner_direction=direction, corner_start_distance_m=distance,
         heading_quality=.8, geometry_quality=.8, detection_quality=.8,
         filtered_lateral_offset_norm=.29, heading_error_deg=12.9,
+        lateral_offset_px=0.,
         filtered_heading_error_deg=12.9, turn_angle_deg=78.2, turn_consistency=.9,
     )
 

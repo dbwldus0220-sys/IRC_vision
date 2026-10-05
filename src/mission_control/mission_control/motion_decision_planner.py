@@ -81,7 +81,7 @@ class MotionDecisionConfig:
     goal_reacquire_center_deg: float = 5.0
     goal_reacquire_center_norm: float = 0.10
     line_heading_source: str = "ground"
-    line_offset_align_enter_px: float = -1.0
+    line_offset_align_enter_px: float = 100.0
 
 
 class MotionDecisionPlanner:
@@ -330,7 +330,14 @@ class MotionDecisionPlanner:
         command = self._plan_source(source, info, dt_sec)
         if source == "hurdle" and info is not None:
             command.update(reference)
-            command["alignment_reference"] = "line_hurdle_intersection"
+            command["alignment_reference"] = (
+                "last_seen_screen_side"
+                if command.get("reason") in {
+                    "hurdle_lost_search_last_side", "hurdle_lost_below_image",
+                }
+                else "hurdle_parallel_angle" if command.get("recovery_active")
+                else "line_hurdle_intersection"
+            )
         if source == "hurdle":
             command["hurdle_stage"] = "FINE_APPROACH" if hurdle_positioning else "RECOGNITION_APPROACH"
         if hurdle_positioning:
@@ -766,12 +773,14 @@ class MotionDecisionPlanner:
                 })
         if source == "hurdle" and command.action in {"ALIGN_LEFT", "ALIGN_RIGHT"}:
             direction = "LEFT" if command.action == "ALIGN_LEFT" else "RIGHT"
-            # Use calibrated turns toward the object center, independent of Line.
-            angle = max(
-                abs(command.center_steering_deg),
-                self.STATIONARY_TURN_MIN_DEG[direction],
-            )
-            count = self._turn_repeat_count(angle, direction)
+            # Recovery supplies fixed small counts; other turns retain center steering.
+            count = command.turn_count
+            if count is None:
+                angle = max(
+                    abs(command.center_steering_deg or 0.0),
+                    self.STATIONARY_TURN_MIN_DEG[direction],
+                )
+                count = self._turn_repeat_count(angle, direction)
             result.update({
                 "turn_direction": direction,
                 "turn_count": count,

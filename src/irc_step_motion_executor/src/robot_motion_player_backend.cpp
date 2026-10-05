@@ -199,6 +199,12 @@ irc_step::MotionError BorrowedRobotMotionPlayerApi::result() const
 
 std::string BorrowedRobotMotionPlayerApi::last_error() const
 {
+#ifdef IRC_STEP_GUI_ALIGNMENT_VERSION
+  if (player_.succeeded()) {
+    return player_.completionConfirmsArrival() ? "physical arrival confirmed" :
+      "planned Goal Position transmission complete; physical arrival not confirmed";
+  }
+#endif
   return std::string(player_.lastError());
 }
 

@@ -12,6 +12,8 @@ def line_info(**overrides):
         "ground_projection_valid": True,
         "ground_heading_error_deg": 0.0,
         "filtered_lateral_offset_norm": 0.0,
+        # Isolate filtered-heading policy; pixel alignment has dedicated samples.
+        "lateral_offset_px": 0.0,
         "heading_quality": 0.9,
         "geometry_quality": 0.9,
         "detection_quality": 0.9,

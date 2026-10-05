@@ -142,7 +142,7 @@ def test_corner_survives_loss_but_waits_for_fresh_distance_after_completion(cloc
     command = node.publish_vision()[-1]
     assert command['action'] == direction
     assert command['source'] == 'line'
-    assert command['reason'] == 'line_tracking'
+    assert command['reason'] == 'line_corner_ready'
     assert command['source_command']['corner_from_memory'] is True
     assert node.pending_line_corner is None
     assert MotionCommandBridgeNode.ACTION_TO_MOTION_ID[direction] == f'line_recovery_{direction.lower()}_4'
@@ -421,6 +421,84 @@ def test_distant_corner_preserves_local_line_recovery(clock):
     result = node.publish_vision(line=info)[-1]
     assert result['action'] == 'RECOVER_LEFT_TURN_LEFT_4'
     assert node.pending_line_corner is not None
+
+
+@pytest.mark.parametrize('side', ['LEFT', 'RIGHT'])
+@pytest.mark.parametrize('updates,ordinary_action', [
+    ({'ground_heading_error_deg': 0., 'turn_angle_deg': 0.}, 'STRAIGHT'),
+    ({'ground_heading_error_deg': -20., 'filtered_lateral_offset_norm': -.3,
+      'turn_angle_deg': 0.},
+     'RECOVER_LEFT_TURN_LEFT_4'),
+    ({'ground_heading_error_deg': 75.83}, 'LINE_HEADING_TURN_RIGHT_7'),
+    ({'ground_heading_error_deg': 31.99, 'filtered_lateral_offset_norm': -.795,
+      'lateral_offset_px': -507.9, 'offset_reference_valid': True,
+      'offset_reference_steering_deg': -75.8, 'turn_angle_deg': 3.6},
+     'LINE_OFFSET_TURN_LEFT_5'),
+    ({'ground_heading_error_deg': 0., 'filtered_heading_error_deg': 0.,
+      'heading_error_deg': 55., 'turn_angle_deg': 0.}, 'STOP'),
+])
+def test_near_confirmed_corner_does_not_require_normal_turn_candidate(
+    clock, side, updates, ordinary_action,
+):
+    node = CornerHarness(phase='LINE_TRACK')
+    info = corner_info(side, **updates)
+    ordinary = node.planner.plan('LINE_TRACK', {'line': info}, .1)
+    assert ordinary.action == ordinary_action
+    if ordinary_action == 'STOP':
+        assert ordinary.reason == 'straight_heading_not_aligned'
+    result = node.publish_vision(line=info)[-1]
+    assert result['valid'] and result['action'] == side
+    command = result['source_command']
+    assert command['motion'] == side
+    assert command['corner_previous_action'] == ordinary_action
+    assert command['alignment_reference'] == 'confirmed_corner'
+    assert 'turn_count' not in command
+
+
+@pytest.mark.parametrize('updates', [
+    {'corner_start_distance_m': .1501}, {'corner_start_distance_m': None},
+    {'corner_start_depth_valid': False}, {'corner_preview_confirmed': False},
+    {'corner_preview_held': True}, {'corner_direction': 'LEFT'},
+])
+def test_remembered_direction_alone_cannot_replace_normal_forward(clock, updates):
+    node = CornerHarness(phase='LINE_TRACK')
+    remembered = corner_info(corner_start_distance_m=.8)
+    receive_line(node, clock, remembered)
+    info = corner_info(ground_heading_error_deg=0., turn_angle_deg=0., **updates)
+    result = node.publish_vision(line=info)[-1]
+    assert result['valid'] and result['action'] == 'STRAIGHT'
+    assert node.pending_line_corner['corner_direction'] == 'RIGHT'
+
+
+def test_corner_switch_does_not_bypass_invalid_offset_geometry(clock):
+    node = CornerHarness(phase='LINE_TRACK')
+    info = corner_info(ground_heading_error_deg=0., turn_angle_deg=0.,
+                       lateral_offset_px=200., offset_reference_valid=False)
+    result = node.publish_vision(line=info)[-1]
+    assert not result['valid'] and result['action'] == 'STOP'
+    assert result['reason'] == 'line_offset_alignment_invalid_reference'
+
+
+def test_independent_corner_switch_waits_for_motion_and_settle_then_resumes_line(clock):
+    node = CornerHarness(phase='LINE_TRACK')
+    node.LINE_TURN_PRE_MOTION_SETTLE_SEC = 1.
+    current = start_line(node)
+    near = corner_info(ground_heading_error_deg=0., turn_angle_deg=0.)
+    receive_line(node, clock, near)
+    assert node.publish_vision() == []
+    release_general(node, current)
+    assert node.publish_vision()[-1]['action'] == 'WAIT'
+    receive_line(node, clock, near)
+    assert node.publish_vision() == []
+    clock[0] += .9
+    assert node.publish_vision(line=near) == []
+    clock[0] += .11
+    turn = node.publish_vision(line=near)[-1]
+    assert turn['action'] == 'RIGHT' and turn['reason'] == 'line_corner_ready'
+    assert node.pending_line_corner is None
+    release_general(node, turn)
+    receive_line(node, clock, near)
+    assert node.publish_vision()[-1]['action'] == 'STRAIGHT'
 
 
 def test_corner_short_approach_alias_resolves_to_existing_camera45_gait():

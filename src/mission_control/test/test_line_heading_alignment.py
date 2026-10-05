@@ -58,6 +58,36 @@ def test_large_heading_does_not_bypass_geometry_or_quality_checks(updates):
     assert not decision.valid
 
 
+def test_recorded_right_corner_can_be_seen_without_selecting_corner_motion():
+    planner = MotionDecisionPlanner()
+    corner = dict(corner_preview_confirmed=True, corner_direction="RIGHT",
+                  corner_start_depth_valid=True, corner_preview_held=False)
+    far = line_info(
+        **corner, ground_heading_error_deg=2.72, filtered_heading_error_deg=-1.4,
+        filtered_lateral_offset_norm=.057, lateral_offset_px=44.4,
+        turn_angle_deg=70.2, corner_start_distance_m=.62,
+    )
+    # Even reliable right preview cannot bypass the minimum local heading of 5 deg.
+    decision = planner.plan("LINE_TRACK", {"line": far}, .1)
+    assert decision.valid and decision.action == "STRAIGHT"
+    assert decision.reason == "turn_approach_pending"
+
+    near = {**far, "ground_projection_valid": False, "ground_heading_error_deg": None,
+            "filtered_heading_error_deg": 19.7, "corner_start_distance_m": .43}
+    decision = planner.plan("LINE_TRACK", {"line": near}, .1)
+    assert not decision.valid and decision.reason == "invalid_ground_line_geometry"
+
+    steep = {**far, "ground_heading_error_deg": 75.83,
+             "filtered_heading_error_deg": 63.2, "filtered_lateral_offset_norm": .639,
+             "lateral_offset_px": 430.1, "offset_reference_valid": True,
+             "offset_reference_steering_deg": 73.4, "turn_angle_deg": -13.7,
+             "corner_start_distance_m": .1}
+    decision = planner.plan("LINE_TRACK", {"line": steep}, .1)
+    # Even a close confirmed corner does not override the earlier >45-deg branch.
+    assert decision.valid and decision.action == "LINE_HEADING_TURN_RIGHT_7"
+    assert decision.reason == "line_large_ground_heading"
+
+
 @pytest.mark.parametrize("side", [-1, 1])
 def test_raw_cross_line_blocks_forward_even_when_filtered_and_ground_angles_are_small(side):
     decision = MotionDecisionPlanner().plan("LINE_TRACK", {"line": line_info(

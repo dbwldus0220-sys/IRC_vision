@@ -1051,6 +1051,8 @@ class Yolo26Detector(Node):
             return None
         motion_id = str(payload.get("motion_id", ""))
         labels = {
+            "__TRANSITION_PRE_DWELL__": "POSTURE / WAIT BEFORE TRANSITION",
+            "__TRANSITION_POST_DWELL__": "POSTURE / WAIT AFTER TRANSITION",
             "pickup_fine_prepare": "PICKUP / PREPARE FINE STEP",
             "__PICKUP_FINE_PRE_DWELL__": "PICKUP / WAIT BEFORE FINE STEP",
             "pickup_fine_forward_0": "PICKUP / FINE FORWARD",
@@ -1088,6 +1090,8 @@ class Yolo26Detector(Node):
                 label = "HURDLE / FORWARD 4"
             elif motion_id == "pickup_fine_forward_0":
                 label = "HURDLE / FINE FORWARD"
+            elif motion_id == "pickup_lost_ball_backward_1":
+                label = "HURDLE / BACKWARD (1 CYCLE)"
         if action.startswith("LINE_LOST_TURN_"):
             label = "LINE LOST | SEARCH " + ("LEFT" if "_LEFT" in action else "RIGHT")
         if motion_id == "ball_general_fine_forward_8":
@@ -1672,6 +1676,7 @@ class Yolo26Detector(Node):
             "WAIT_SCORE_CONFIRMATION": "GOAL HOLD",
         }
         hurdle_labels = {
+            "HURDLE_LOST_BACKWARD_1": "HURDLE / BACKWARD (1 CYCLE)",
             "TURN_LEFT": "HURDLE TURN LEFT",
             "TURN_RIGHT": "HURDLE TURN RIGHT",
             "ALIGN_LEFT": "HURDLE PARALLEL LEFT",

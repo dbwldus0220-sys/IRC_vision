@@ -1,0 +1,56 @@
+[
+  {
+    "case": "robot_motions_runtime.json/건전진45도(6회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+    "log": "trace_1dac30ed318b.json",
+    "write_count": 90,
+    "min_interval_ms": 1.0,
+    "mean_interval_ms": 36.157303370786515,
+    "max_interval_ms": 100.0,
+    "virtual_elapsed_ms": 3256.0
+  },
+  {
+    "case": "robot_motions_gui_state.json/건전진45도(6회)/[5.0]/0/0",
+    "log": "trace_553b6a9b1556.json",
+    "write_count": 642,
+    "min_interval_ms": 0.0,
+    "mean_interval_ms": 4.812792511700468,
+    "max_interval_ms": 5.0,
+    "virtual_elapsed_ms": 3090.0
+  },
+  {
+    "case": "robot_motions(10).json/건전진45도(6회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+    "log": "trace_94f4dd48dfa8.json",
+    "write_count": 90,
+    "min_interval_ms": 1.0,
+    "mean_interval_ms": 36.157303370786515,
+    "max_interval_ms": 100.0,
+    "virtual_elapsed_ms": 3256.0
+  },
+  {
+    "case": "robot_motions(10).json/건전진45도(6회)/[5.0]/0/0",
+    "log": "trace_9b7729a15c32.json",
+    "write_count": 642,
+    "min_interval_ms": 0.0,
+    "mean_interval_ms": 4.812792511700468,
+    "max_interval_ms": 5.0,
+    "virtual_elapsed_ms": 3090.0
+  },
+  {
+    "case": "robot_motions_runtime.json/건전진45도(6회)/[5.0]/0/0",
+    "log": "trace_b1d3b83df8c8.json",
+    "write_count": 642,
+    "min_interval_ms": 0.0,
+    "mean_interval_ms": 4.812792511700468,
+    "max_interval_ms": 5.0,
+    "virtual_elapsed_ms": 3090.0
+  },
+  {
+    "case": "robot_motions_gui_state.json/건전진45도(6회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+    "log": "trace_c06f801601fe.json",
+    "write_count": 90,
+    "min_interval_ms": 1.0,
+    "mean_interval_ms": 36.157303370786515,
+    "max_interval_ms": 100.0,
+    "virtual_elapsed_ms": 3256.0
+  }
+]

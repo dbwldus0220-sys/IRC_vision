@@ -373,7 +373,7 @@ std::optional<MotionStatus> SdkExecutorCore::poll(std::uint64_t now_ms)
   completion_sequence_ = current_sequence;
   if (completion_boundary && queued_) {
     MotionStatus completed = status_for_active(
-      "SUCCEEDED", "", "motion completed at seamless queue boundary");
+      "SUCCEEDED", "", "planned goal transmission completed at queue boundary; physical arrival not confirmed");
     active_ = ActiveRequest{queued_->request, now_ms, queued_->timeout_ms};
     queued_.reset();
     queued_running_status_pending_ = true;

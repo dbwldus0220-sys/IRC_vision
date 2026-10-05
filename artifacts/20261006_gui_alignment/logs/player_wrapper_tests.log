@@ -1,0 +1,45 @@
+Internal ctest changing into directory: /home/sy/IRC_vision/build/irc_step_motion_executor
+Test project /home/sy/IRC_vision/build/irc_step_motion_executor
+      Start  1: test_latest_gui_execution
+ 1/18 Test  #1: test_latest_gui_execution ...........   Passed    8.96 sec
+      Start  2: test_gui_alignment_contract
+ 2/18 Test  #2: test_gui_alignment_contract .........   Passed    0.00 sec
+      Start  3: test_catalog_only_core
+ 3/18 Test  #3: test_catalog_only_core ..............   Passed    0.05 sec
+      Start  4: test_motion_json_catalog
+ 4/18 Test  #4: test_motion_json_catalog ............   Passed    0.04 sec
+      Start  5: test_sdk_executor_core
+ 5/18 Test  #5: test_sdk_executor_core ..............   Passed    0.05 sec
+      Start  6: test_queue_control_tick
+ 6/18 Test  #6: test_queue_control_tick .............   Passed    0.04 sec
+      Start  7: test_robot_motion_player_backend
+ 7/18 Test  #7: test_robot_motion_player_backend ....   Passed    0.04 sec
+      Start  8: test_simulated_motion_backend
+ 8/18 Test  #8: test_simulated_motion_backend .......   Passed    0.04 sec
+      Start  9: test_robot_motion_runtime_config
+ 9/18 Test  #9: test_robot_motion_runtime_config ....   Passed    0.04 sec
+      Start 10: test_robot_motion_parameter_types
+10/18 Test #10: test_robot_motion_parameter_types ...   Passed    0.05 sec
+      Start 11: test_motion_backend_factory
+11/18 Test #11: test_motion_backend_factory .........   Passed    0.04 sec
+      Start 12: test_sdk_executor_driver
+12/18 Test #12: test_sdk_executor_driver ............   Passed    0.05 sec
+      Start 13: test_startup_pose_gate
+13/18 Test #13: test_startup_pose_gate ..............   Passed    0.04 sec
+      Start 14: test_startup_pose_catalog
+14/18 Test #14: test_startup_pose_catalog ...........   Passed    0.10 sec
+      Start 15: test_validate_motion_catalog
+15/18 Test #15: test_validate_motion_catalog ........   Passed    0.04 sec
+      Start 16: motion_pattern_test
+16/18 Test #16: motion_pattern_test .................   Passed    0.00 sec
+      Start 17: motion_callback_test
+17/18 Test #17: motion_callback_test ................   Passed    0.08 sec
+      Start 18: gui_alignment_contract
+18/18 Test #18: gui_alignment_contract ..............   Passed    0.01 sec
+
+100% tests passed, 0 tests failed out of 18
+
+Label Time Summary:
+gtest    =   0.58 sec*proc (12 tests)
+
+Total Test time (real) =   9.68 sec

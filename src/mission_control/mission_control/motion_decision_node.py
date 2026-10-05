@@ -253,7 +253,7 @@ class MotionDecisionNode(Node):
         self.declare_parameter("general_motion_transient_retry_limit", 2)
 
         self.declare_parameter("line_heading_source", "ground")
-        self.declare_parameter("line_offset_align_enter_px", -1.0)
+        self.declare_parameter("line_offset_align_enter_px", 100.0)
         self.declare_parameter("line_timeout_sec", 0.50)
         self.declare_parameter("ball_timeout_sec", 0.50)
         self.declare_parameter("goal_timeout_sec", 0.50)
@@ -969,6 +969,8 @@ class MotionDecisionNode(Node):
                     # Keep the last visible side current while a motion owns the gate.
                     self.planner._update_goal_tracking(payload, 0.0)
                 if source == "hurdle":
+                    if self.active_special_command_id is None:
+                        self.planner.hurdle_planner.observe(payload)
                     MotionDecisionNode._latch_hurdle_positioning_entry(self, payload)
                     MotionDecisionNode._latch_hurdle_final_sequence(self, payload)
                 if (
@@ -1705,6 +1707,7 @@ class MotionDecisionNode(Node):
         """Keep a confirmed final checkpoint across motion completion and occlusion."""
         if (
             getattr(self, "pending_hurdle_final_sequence", None) is not None
+            or self.planner.hurdle_planner.recovery_active
             or self.active_special_command_id is not None
             or not self.executor_auto_ready
             or self.phase_manager.hurdles_completed >= self.phase_manager.required_hurdles
@@ -2900,7 +2903,7 @@ class MotionDecisionNode(Node):
     def _apply_pending_line_corner(
         self, decision: MotionDecision, info: dict[str, Any] | None = None,
     ) -> MotionDecision:
-        """Gate an already selected corner turn without replacing normal line tracking."""
+        """Select a confirmed nearby corner independently of the tracking action."""
         if (
             self.mission_phase not in {"AUTO", "LINE_TRACK"}
             or self.active_special_command_id is not None
@@ -2983,27 +2986,48 @@ class MotionDecisionNode(Node):
                 reason="line_corner_waiting_for_usable_line",
                 sdk_motion_requested=False, requires_ack=False, source_command=metadata,
             )
-        # Remembering a bend must not replace normal tracking or local recovery.
-        # Only a confirmed LEFT/RIGHT candidate needs the additional distance gate.
-        if not decision.valid or decision.action not in {"LEFT", "RIGHT"}:
-            return decision
         fresh_distance = bool(
             info.get("corner_preview_confirmed") is True
             and info.get("corner_preview_held") is not True
             and info.get("corner_start_depth_valid") is True
-            and info.get("corner_direction") == corner["corner_direction"] == decision.action
+            and info.get("corner_direction") == corner["corner_direction"]
             and distance is not None and distance > 0.0
         )
-        if not fresh_distance:
+        turn_distance = getattr(
+            self, "line_corner_turn_distance_m",
+            MotionDecisionNode.LINE_CORNER_TURN_DISTANCE_M,
+        )
+        if (
+            fresh_distance and distance <= turn_distance
+            and (decision.valid or decision.reason == "straight_heading_not_aligned")
+        ):
+            direction = corner["corner_direction"]
+            # The confirmed corner supplies direction; local heading need not
+            # first cross the normal LEFT/RIGHT classification threshold.
+            # Do not carry a replaced correction's turn count or motion metadata.
+            return MotionDecision(
+                phase=self.mission_phase, source="line", action=direction, valid=True,
+                reason="line_corner_ready", sdk_motion_requested=False, requires_ack=False,
+                source_command={
+                    **corner, "valid": True, "motion": direction,
+                    "reason": "line_corner_ready", "corner_from_memory": True,
+                    "corner_start_distance_m": distance,
+                    "corner_turn_distance_m": turn_distance,
+                    "corner_previous_action": decision.action,
+                    "alignment_reference": "confirmed_corner",
+                    "catalog_motion_available": True,
+                },
+            )
+        # Until the corner is ready, preserve ordinary forward/recovery decisions
+        # and the existing distance gate for normal LEFT/RIGHT candidates.
+        if not decision.valid or decision.action not in {"LEFT", "RIGHT"}:
+            return decision
+        if not fresh_distance or decision.action != corner["corner_direction"]:
             return MotionDecision(
                 phase=self.mission_phase, source="line", action="WAIT", valid=False,
                 reason="line_corner_waiting_for_fresh_distance",
                 sdk_motion_requested=False, requires_ack=False, source_command=metadata,
             )
-        turn_distance = getattr(
-            self, "line_corner_turn_distance_m",
-            MotionDecisionNode.LINE_CORNER_TURN_DISTANCE_M,
-        )
         metadata.update(
             corner_start_distance_m=distance, corner_turn_distance_m=turn_distance,
         )

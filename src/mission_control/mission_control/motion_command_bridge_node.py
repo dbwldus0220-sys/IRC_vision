@@ -57,6 +57,13 @@ class MotionCommandBridgeNode(Node):
     PICKUP_FINE_PREPARE_MOTION_ID = "pickup_fine_prepare"
     PICKUP_FINE_PRE_DWELL_MARKER = "__PICKUP_FINE_PRE_DWELL__"
     PICKUP_FINE_PRE_DWELL_SEC = 1.0
+    TRANSITION_DWELL_SEC = 1.0
+    TRANSITION_MOTION_IDS = frozenset({
+        "pickup_fine_prepare", "pickup_fine_to_crab_right_0",
+        "pickup_forward_to_crab_0", "goal_fine_to_crab_right_90",
+        "goal_forward_to_crab_right_90",
+        "fine_to_turn_ready_0", "fine_to_turn_ready_45", "fine_to_turn_ready_90",
+    })
     PICKUP_FINE_RIGHT_CRAB_PREPARE_MOTION_ID = "pickup_fine_to_crab_right_0"
     PICKUP_DWELL_SEC = 1.0
     PICKUP_TURN_DWELL_SEC = 1.0
@@ -202,6 +209,8 @@ class MotionCommandBridgeNode(Node):
         "BALL_FINE_FORWARD_8": "ball_general_fine_forward_8",
         "BALL_LOST_FORWARD_2": "ball_camera_down_forward_2",
         "BALL_LOST_FORWARD_4": "ball_camera_down_forward_4",
+        # Reuse the existing one-cycle retreat without entering the pickup sequence.
+        "HURDLE_LOST_BACKWARD_1": "pickup_lost_ball_backward_1",
         "BALL_APPROACH_RECOVER_LEFT_4": "line_recovery_left_4",
         "BALL_APPROACH_RECOVER_RIGHT_4": "line_recovery_right_4",
         "LINE_LOST_TURN_LEFT": "line_search_left_2",
@@ -333,6 +342,10 @@ class MotionCommandBridgeNode(Node):
         self.last_physical_motion_id: str | None = None
         self.pending_turn_request: dict[str, Any] | None = None
         self.turn_prepare_motion_id: str | None = None
+        self.transition_dwell_until: float | None = None
+        self.transition_pending_request: dict[str, Any] | None = None
+        self.transition_pending_status: dict[str, Any] | None = None
+        self.transition_motion_id: str | None = None
         self.head_override_state: dict[str, Any] = {}
         self.head_override_received_at: float | None = None
         self.pickup_initial_align_dwell_until: float | None = None
@@ -1149,13 +1162,20 @@ class MotionCommandBridgeNode(Node):
             self.get_logger().info(
                 f"Preparing motion transition: {prepare_motion} -> {motion_id}"
             )
-        request_message = String()
-        request_message.data = json.dumps(
-            request_payload,
-            ensure_ascii=True,
-            separators=(",", ":"),
-        )
-        self.executor_request_publisher.publish(request_message)
+        if request_payload["motion_id"] in MotionCommandBridgeNode.TRANSITION_MOTION_IDS:
+            self.transition_motion_id = request_payload["motion_id"]
+            self.transition_pending_request = request_payload
+            self.transition_dwell_until = (
+                time.monotonic() + MotionCommandBridgeNode.TRANSITION_DWELL_SEC
+            )
+            self.publish_motion_status(
+                status="RUNNING", action=action, command_id=command_id,
+                event_id=event_id, request_id=request_id,
+                motion_id="__TRANSITION_PRE_DWELL__",
+                message="holding still for one second before posture transition",
+            )
+            return
+        self._send_executor_payload(request_payload)
         if action == "PICKUP_NOW" and motion_id in {
             self.PICKUP_FINE_PREPARE_MOTION_ID, "pickup_fine_forward_0",
         }:
@@ -1163,6 +1183,54 @@ class MotionCommandBridgeNode(Node):
                 f"Pickup fine motion requested: motion_id={motion_id}, "
                 f"command_id={command_id}, request_id={request_id}"
             )
+
+    def _send_executor_payload(self, request_payload: dict[str, Any]) -> None:
+        """Send an already prepared payload without inserting another transition."""
+        request_message = String()
+        request_message.data = json.dumps(
+            request_payload,
+            ensure_ascii=True,
+            separators=(",", ":"),
+        )
+        self.executor_request_publisher.publish(request_message)
+
+    def _check_transition_dwell(self, now: float | None = None) -> bool:
+        """Keep the command locked through both sides of a posture transition."""
+        deadline = self.transition_dwell_until
+        if deadline is None:
+            return False
+        if (time.monotonic() if now is None else now) < deadline:
+            return True
+        self.transition_dwell_until = None
+        if self.transition_pending_request is not None:
+            request = self.transition_pending_request
+            self.transition_pending_request = None
+            self._send_executor_payload(request)
+        elif self.transition_pending_status is not None:
+            status = self.transition_pending_status
+            self.transition_pending_status = None
+            self.transition_motion_id = None
+            # Resume the existing sequence/checkpoint logic only after settling.
+            message = String()
+            message.data = json.dumps(status)
+            self.executor_status_callback(message)
+        return True
+
+    def _transition_has_existing_post_dwell(self, motion_id: str) -> bool:
+        if self.active_motion_id != motion_id:
+            return False
+        if (
+            self.active_action == "PICKUP_NOW"
+            and motion_id == self.PICKUP_FINE_PREPARE_MOTION_ID
+        ):
+            return True
+        next_index = self.active_sequence_index + 1
+        return bool(
+            self.active_action in self.GOAL_CRAB_ACTIONS
+            and next_index < len(self.active_pickup_sequence)
+            and self.active_pickup_sequence[next_index]
+            == MotionCommandBridgeNode.GOAL_CRAB_PRE_DWELL_MARKER
+        )
 
     def navigation_command_callback(self, msg: String) -> None:
         """Validate and translate one navigation command."""
@@ -1597,6 +1665,8 @@ class MotionCommandBridgeNode(Node):
 
     def _check_atomic_dwell(self, now: float | None = None) -> None:
         """Advance a dwell stage without blocking ROS callbacks."""
+        if self._check_transition_dwell(now):
+            return
         if (
             self.active_dwell_until is None
             and self.pickup_initial_align_dwell_until is None
@@ -1715,6 +1785,10 @@ class MotionCommandBridgeNode(Node):
         self.motion_in_progress = False
         self.pending_turn_request = None
         self.turn_prepare_motion_id = None
+        self.transition_dwell_until = None
+        self.transition_pending_request = None
+        self.transition_pending_status = None
+        self.transition_motion_id = None
         self.active_command_id = None
         self.active_event_id = None
         self.active_action = None
@@ -1824,6 +1898,28 @@ class MotionCommandBridgeNode(Node):
             return
 
         action = self.active_action if is_active else self.queued_action
+        if is_active and self.transition_motion_id is not None:
+            if payload["motion_id"] != self.transition_motion_id:
+                return
+            if self.transition_dwell_until is not None:
+                # Neither an unsent preparation nor duplicate completion advances a pause.
+                return
+            if payload["status"] == "SUCCEEDED":
+                if not self._transition_has_existing_post_dwell(payload["motion_id"]):
+                    self.transition_pending_status = dict(payload)
+                    self.transition_dwell_until = (
+                        time.monotonic() + MotionCommandBridgeNode.TRANSITION_DWELL_SEC
+                    )
+                    self.publish_motion_status(
+                        status="RUNNING", action=action, command_id=self.active_command_id,
+                        event_id=self.active_event_id, request_id=self.active_request_id,
+                        motion_id="__TRANSITION_POST_DWELL__",
+                        message="holding still for one second after posture transition",
+                    )
+                    return
+                self.transition_motion_id = None
+            elif payload["status"] in self.TERMINAL_STATUSES:
+                self.transition_motion_id = None
         if (
             is_active and action == "PICKUP_NOW"
             and self.active_dwell_until is not None

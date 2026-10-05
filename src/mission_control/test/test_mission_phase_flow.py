@@ -285,6 +285,8 @@ def line_info(heading=0.0, offset=0.0):
         "ground_heading_error_deg": heading,
         "filtered_heading_error_deg": heading,
         "filtered_lateral_offset_norm": offset,
+        # Phase tests keep raw pixel alignment inside its limit.
+        "lateral_offset_px": 0.0,
         "heading_quality": 0.95,
         "geometry_quality": 0.95,
         "detection_quality": 0.95,
