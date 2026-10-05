@@ -13,7 +13,14 @@ namespace irc_step {
 struct PlaybackTraceRow {
     const char* event{""};
     std::array<char, 256> motion{};
+    std::array<char, 256> frame_name{};
+    bool lift_early{false}, cycle_end{false};
     std::uint64_t run{0};
+    std::uint64_t event_seq{0}, tick{0};
+    std::int64_t begin_ns{0}, end_ns{0}, evaluate_ns{0};
+    std::int64_t frame_start_ms{0}, frame_duration_ms{0};
+    double speed{1.0};
+    int repeat_target{1};
     double begin_ms{0}, end_ms{0};
     std::int64_t timeline_ms{0};
     int repeat{0}, frame{-1};
@@ -30,6 +37,7 @@ public:
         out_ << "run,motion,event,begin_ms,end_ms,duration_ms,timeline_ms,repeat,frame,success";
         for (int id = 0; id < 23; ++id) out_ << ",deg_" << id;
         for (int id = 0; id < 23; ++id) out_ << ",raw_" << id;
+        out_ << ",event_seq,tick,begin_ns,end_ns,evaluate_ns,speed,repeat_target,frame_start_ms,frame_duration_ms,frame_name,lift_early,cycle_end";
         out_ << '\n' << std::setprecision(17);
         worker_ = std::thread([this] { consume(); });
     }
@@ -54,7 +62,13 @@ private:
                 continue;
             }
             const auto& r = rows_[tail];
-            out_ << r.run << ',' << std::quoted(r.motion.data()) << ',' << r.event << ','
+            // CSV의 따옴표는 backslash가 아니라 두 번 써서 escape한다.
+            out_ << r.run << ",\"";
+            for (const char* c = r.motion.data(); *c; ++c) {
+                if (*c == '"') out_ << '"';
+                out_ << *c;
+            }
+            out_ << "\"," << r.event << ','
                  << r.begin_ms << ',' << r.end_ms << ',' << r.end_ms-r.begin_ms << ','
                  << r.timeline_ms << ',' << r.repeat << ',' << r.frame << ',' << r.success;
             for (int id = 0; id < 23; ++id) {
@@ -65,7 +79,14 @@ private:
                 out_ << ',';
                 if (r.ids[id]) out_ << guiPositionRaw(r.angles[id]);
             }
-            out_ << '\n';
+            out_ << ',' << r.event_seq << ',' << r.tick << ',' << r.begin_ns << ','
+                 << r.end_ns << ',' << r.evaluate_ns << ',' << r.speed << ','
+                 << r.repeat_target << ',' << r.frame_start_ms << ',' << r.frame_duration_ms << ",\"";
+            for (const char* c = r.frame_name.data(); *c; ++c) {
+                if (*c == '"') out_ << '"';
+                out_ << *c;
+            }
+            out_ << "\"," << r.lift_early << ',' << r.cycle_end << '\n';
             tail_.store((tail + 1) % capacity, std::memory_order_release);
         }
     }

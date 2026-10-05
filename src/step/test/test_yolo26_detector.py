@@ -331,6 +331,16 @@ def test_ball_overlay_rejects_info_outside_rgb_stamp_tolerance():
     assert detector._ball_info_stamp_delta_ms == 51.0
 
 
+@pytest.mark.parametrize('delta_ms,accepted', [(200, True), (300, True), (301, False)])
+def test_ball_overlay_relaxed_default_accepts_recorded_latency(delta_ms, accepted):
+    detector = _detector_with_ball_info_stamp(
+        info_stamp_ns=1_000_000_000,
+        overlay_stamp_ns=1_000_000_000 + delta_ms * 1_000_000,
+    )
+    del detector.overlay_max_stamp_delta_sec
+    assert (detector._fresh_ball_info() is not None) is accepted
+
+
 def test_recent_ball_info_remains_available_when_rgb_stamp_is_stale():
     """Expose analyzer status without reusing stale geometry."""
     detector = _detector_with_ball_info_stamp(

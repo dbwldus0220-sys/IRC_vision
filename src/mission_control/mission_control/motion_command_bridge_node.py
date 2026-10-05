@@ -1255,6 +1255,8 @@ class MotionCommandBridgeNode(Node):
         if payload.get("valid") is not True:
             command = payload.get("source_command")
             checks = command.get("line_input_checks") if isinstance(command, dict) else None
+            if checks and checks.get("failed_checks"):
+                self.get_logger().info(f"Line input rejected: {checks['failed_checks']}")
             self.get_logger().info(
                 f"Command ignored: valid is not true, action={action}, "
                 f"reason={payload.get('reason')}, line_input_checks={checks}"

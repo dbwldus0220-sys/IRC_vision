@@ -145,9 +145,9 @@ def test_robot_launch_passes_realsense_topic_parameters(
     )
     assert (
         context.launch_configurations["overlay_max_stamp_delta_sec"]
-        == "0.12"
+        == "0.30"
     )
-    assert detector_parameters["overlay_max_stamp_delta_sec"] == 0.12
+    assert detector_parameters["overlay_max_stamp_delta_sec"] == 0.30
 
     vision_parameters = executor_parameters(
         nodes["unified_vision_node"],
@@ -173,7 +173,7 @@ def test_robot_launch_passes_realsense_topic_parameters(
     )
     assert decision_parameters["goal_control_range_m"] == 2.0
     assert decision_parameters["pickup_fine_step_distance_m"] == 0.550
-    assert decision_parameters["pickup_fine_align_bottom_distance_px"] == 120
+    assert decision_parameters["pickup_fine_align_bottom_distance_px"] == 270
 
 
 def test_robot_launch_waits_for_enter(monkeypatch, tmp_path):

@@ -1,0 +1,640 @@
+{
+  "motions": [
+    {
+      "name": "partial_0.9",
+      "frames": [
+        {
+          "name": "오들",
+          "start_ms": 20,
+          "time_ms": 65,
+          "angles": {
+            "0": 179.9,
+            "1": -180.0
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "오들",
+          "start_ms": 85,
+          "time_ms": 72,
+          "angles": {
+            "0": -179.9
+          },
+          "lift_early_arrival": false
+        },
+        {
+          "name": "ordinary",
+          "start_ms": 200,
+          "time_ms": 50,
+          "angles": {
+            "2": -27.125
+          },
+          "lift_early_arrival": true,
+          "playback_cycle_end": true
+        },
+        {
+          "name": "들기",
+          "start_ms": 250,
+          "time_ms": 100,
+          "angles": {
+            "0": -350.5,
+            "3": 180.0
+          },
+          "lift_early_arrival": true
+        }
+      ],
+      "max_seq_ms": 10000,
+      "playback_speed": 0.9,
+      "repeat_count": 3,
+      "start_pose": "link",
+      "end_pose": "link"
+    },
+    {
+      "name": "partial_1",
+      "frames": [
+        {
+          "name": "오들",
+          "start_ms": 20,
+          "time_ms": 65,
+          "angles": {
+            "0": 179.9,
+            "1": -180.0
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "오들",
+          "start_ms": 85,
+          "time_ms": 72,
+          "angles": {
+            "0": -179.9
+          },
+          "lift_early_arrival": false
+        },
+        {
+          "name": "ordinary",
+          "start_ms": 200,
+          "time_ms": 50,
+          "angles": {
+            "2": -27.125
+          },
+          "lift_early_arrival": true,
+          "playback_cycle_end": true
+        },
+        {
+          "name": "들기",
+          "start_ms": 250,
+          "time_ms": 100,
+          "angles": {
+            "0": -350.5,
+            "3": 180.0
+          },
+          "lift_early_arrival": true
+        }
+      ],
+      "max_seq_ms": 10000,
+      "playback_speed": 1,
+      "repeat_count": 3,
+      "start_pose": "link",
+      "end_pose": "link"
+    },
+    {
+      "name": "partial_1.05",
+      "frames": [
+        {
+          "name": "오들",
+          "start_ms": 20,
+          "time_ms": 65,
+          "angles": {
+            "0": 179.9,
+            "1": -180.0
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "오들",
+          "start_ms": 85,
+          "time_ms": 72,
+          "angles": {
+            "0": -179.9
+          },
+          "lift_early_arrival": false
+        },
+        {
+          "name": "ordinary",
+          "start_ms": 200,
+          "time_ms": 50,
+          "angles": {
+            "2": -27.125
+          },
+          "lift_early_arrival": true,
+          "playback_cycle_end": true
+        },
+        {
+          "name": "들기",
+          "start_ms": 250,
+          "time_ms": 100,
+          "angles": {
+            "0": -350.5,
+            "3": 180.0
+          },
+          "lift_early_arrival": true
+        }
+      ],
+      "max_seq_ms": 10000,
+      "playback_speed": 1.05,
+      "repeat_count": 3,
+      "start_pose": "link",
+      "end_pose": "link"
+    },
+    {
+      "name": "partial_2.0",
+      "frames": [
+        {
+          "name": "오들",
+          "start_ms": 20,
+          "time_ms": 65,
+          "angles": {
+            "0": 179.9,
+            "1": -180.0
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "오들",
+          "start_ms": 85,
+          "time_ms": 72,
+          "angles": {
+            "0": -179.9
+          },
+          "lift_early_arrival": false
+        },
+        {
+          "name": "ordinary",
+          "start_ms": 200,
+          "time_ms": 50,
+          "angles": {
+            "2": -27.125
+          },
+          "lift_early_arrival": true,
+          "playback_cycle_end": true
+        },
+        {
+          "name": "들기",
+          "start_ms": 250,
+          "time_ms": 100,
+          "angles": {
+            "0": -350.5,
+            "3": 180.0
+          },
+          "lift_early_arrival": true
+        }
+      ],
+      "max_seq_ms": 10000,
+      "playback_speed": 2.0,
+      "repeat_count": 3,
+      "start_pose": "link",
+      "end_pose": "link"
+    },
+    {
+      "name": "overlap",
+      "frames": [
+        {
+          "name": "normal",
+          "start_ms": 40,
+          "time_ms": 60,
+          "angles": {
+            "0": 30.25
+          }
+        },
+        {
+          "name": "normal",
+          "start_ms": 40,
+          "time_ms": 50,
+          "angles": {
+            "0": 30.25
+          }
+        }
+      ],
+      "max_seq_ms": 80,
+      "playback_speed": 1,
+      "repeat_count": 2,
+      "start_pose": "link",
+      "end_pose": "link"
+    },
+    {
+      "name": "saved_composer",
+      "frames": [
+        {
+          "name": "오들",
+          "start_ms": 25,
+          "time_ms": 72,
+          "angles": {
+            "0": 30.25
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "normal",
+          "start_ms": 97,
+          "time_ms": 72,
+          "angles": {
+            "0": 30.25
+          },
+          "playback_cycle_end": true
+        },
+        {
+          "name": "오들",
+          "start_ms": 169,
+          "time_ms": 73,
+          "angles": {
+            "0": 30.25
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "normal",
+          "start_ms": 242,
+          "time_ms": 72,
+          "angles": {
+            "0": 30.25
+          },
+          "playback_cycle_end": true
+        }
+      ],
+      "max_seq_ms": 1314,
+      "playback_speed": 1.05,
+      "repeat_count": 2,
+      "start_pose": "link",
+      "end_pose": "link"
+    },
+    {
+      "name": "composer_0.9_0.9",
+      "frames": [
+        {
+          "name": "오들",
+          "start_ms": 25,
+          "time_ms": 72,
+          "angles": {
+            "0": 30.25
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "normal",
+          "start_ms": 97,
+          "time_ms": 72,
+          "angles": {
+            "0": 30.25
+          },
+          "playback_cycle_end": true
+        },
+        {
+          "name": "오들",
+          "start_ms": 169,
+          "time_ms": 73,
+          "angles": {
+            "0": 30.25
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "normal",
+          "start_ms": 242,
+          "time_ms": 72,
+          "angles": {
+            "0": 30.25
+          },
+          "playback_cycle_end": true
+        }
+      ],
+      "max_seq_ms": 1314,
+      "playback_speed": 0.9,
+      "repeat_count": 2,
+      "start_pose": "link",
+      "end_pose": "link"
+    },
+    {
+      "name": "composer_0.9_1.0",
+      "frames": [
+        {
+          "name": "오들",
+          "start_ms": 25,
+          "time_ms": 72,
+          "angles": {
+            "0": 30.25
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "normal",
+          "start_ms": 97,
+          "time_ms": 72,
+          "angles": {
+            "0": 30.25
+          },
+          "playback_cycle_end": true
+        },
+        {
+          "name": "오들",
+          "start_ms": 169,
+          "time_ms": 73,
+          "angles": {
+            "0": 30.25
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "normal",
+          "start_ms": 242,
+          "time_ms": 72,
+          "angles": {
+            "0": 30.25
+          },
+          "playback_cycle_end": true
+        }
+      ],
+      "max_seq_ms": 1314,
+      "playback_speed": 1.0,
+      "repeat_count": 2,
+      "start_pose": "link",
+      "end_pose": "link"
+    },
+    {
+      "name": "composer_1.0_0.9",
+      "frames": [
+        {
+          "name": "오들",
+          "start_ms": 25,
+          "time_ms": 65,
+          "angles": {
+            "0": 30.25
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "normal",
+          "start_ms": 90,
+          "time_ms": 65,
+          "angles": {
+            "0": 30.25
+          },
+          "playback_cycle_end": true
+        },
+        {
+          "name": "오들",
+          "start_ms": 155,
+          "time_ms": 65,
+          "angles": {
+            "0": 30.25
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "normal",
+          "start_ms": 220,
+          "time_ms": 65,
+          "angles": {
+            "0": 30.25
+          },
+          "playback_cycle_end": true
+        }
+      ],
+      "max_seq_ms": 1285,
+      "playback_speed": 0.9,
+      "repeat_count": 2,
+      "start_pose": "link",
+      "end_pose": "link"
+    },
+    {
+      "name": "composer_1.0_1.0",
+      "frames": [
+        {
+          "name": "오들",
+          "start_ms": 25,
+          "time_ms": 65,
+          "angles": {
+            "0": 30.25
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "normal",
+          "start_ms": 90,
+          "time_ms": 65,
+          "angles": {
+            "0": 30.25
+          },
+          "playback_cycle_end": true
+        },
+        {
+          "name": "오들",
+          "start_ms": 155,
+          "time_ms": 65,
+          "angles": {
+            "0": 30.25
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "normal",
+          "start_ms": 220,
+          "time_ms": 65,
+          "angles": {
+            "0": 30.25
+          },
+          "playback_cycle_end": true
+        }
+      ],
+      "max_seq_ms": 1285,
+      "playback_speed": 1.0,
+      "repeat_count": 2,
+      "start_pose": "link",
+      "end_pose": "link"
+    },
+    {
+      "name": "composer_1.0_1.05",
+      "frames": [
+        {
+          "name": "오들",
+          "start_ms": 25,
+          "time_ms": 65,
+          "angles": {
+            "0": 30.25
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "normal",
+          "start_ms": 90,
+          "time_ms": 65,
+          "angles": {
+            "0": 30.25
+          },
+          "playback_cycle_end": true
+        },
+        {
+          "name": "오들",
+          "start_ms": 155,
+          "time_ms": 65,
+          "angles": {
+            "0": 30.25
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "normal",
+          "start_ms": 220,
+          "time_ms": 65,
+          "angles": {
+            "0": 30.25
+          },
+          "playback_cycle_end": true
+        }
+      ],
+      "max_seq_ms": 1285,
+      "playback_speed": 1.05,
+      "repeat_count": 2,
+      "start_pose": "link",
+      "end_pose": "link"
+    },
+    {
+      "name": "composer_1.05_0.9",
+      "frames": [
+        {
+          "name": "오들",
+          "start_ms": 25,
+          "time_ms": 62,
+          "angles": {
+            "0": 30.25
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "normal",
+          "start_ms": 87,
+          "time_ms": 62,
+          "angles": {
+            "0": 30.25
+          },
+          "playback_cycle_end": true
+        },
+        {
+          "name": "오들",
+          "start_ms": 149,
+          "time_ms": 62,
+          "angles": {
+            "0": 30.25
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "normal",
+          "start_ms": 211,
+          "time_ms": 62,
+          "angles": {
+            "0": 30.25
+          },
+          "playback_cycle_end": true
+        }
+      ],
+      "max_seq_ms": 1273,
+      "playback_speed": 0.9,
+      "repeat_count": 2,
+      "start_pose": "link",
+      "end_pose": "link"
+    },
+    {
+      "name": "composer_1.05_1.0",
+      "frames": [
+        {
+          "name": "오들",
+          "start_ms": 25,
+          "time_ms": 62,
+          "angles": {
+            "0": 30.25
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "normal",
+          "start_ms": 87,
+          "time_ms": 62,
+          "angles": {
+            "0": 30.25
+          },
+          "playback_cycle_end": true
+        },
+        {
+          "name": "오들",
+          "start_ms": 149,
+          "time_ms": 62,
+          "angles": {
+            "0": 30.25
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "normal",
+          "start_ms": 211,
+          "time_ms": 62,
+          "angles": {
+            "0": 30.25
+          },
+          "playback_cycle_end": true
+        }
+      ],
+      "max_seq_ms": 1273,
+      "playback_speed": 1.0,
+      "repeat_count": 2,
+      "start_pose": "link",
+      "end_pose": "link"
+    },
+    {
+      "name": "composer_1.05_1.05",
+      "frames": [
+        {
+          "name": "오들",
+          "start_ms": 25,
+          "time_ms": 62,
+          "angles": {
+            "0": 30.25
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "normal",
+          "start_ms": 87,
+          "time_ms": 62,
+          "angles": {
+            "0": 30.25
+          },
+          "playback_cycle_end": true
+        },
+        {
+          "name": "오들",
+          "start_ms": 149,
+          "time_ms": 62,
+          "angles": {
+            "0": 30.25
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "normal",
+          "start_ms": 211,
+          "time_ms": 62,
+          "angles": {
+            "0": 30.25
+          },
+          "playback_cycle_end": true
+        }
+      ],
+      "max_seq_ms": 1273,
+      "playback_speed": 1.05,
+      "repeat_count": 2,
+      "start_pose": "link",
+      "end_pose": "link"
+    }
+  ]
+}

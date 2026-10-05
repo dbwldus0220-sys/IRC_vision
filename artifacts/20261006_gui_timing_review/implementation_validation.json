@@ -1,0 +1,37 @@
+{
+  "architecture": "x86_64",
+  "scope": "local build and install; no Jetson deployment or hardware access",
+  "catalogs": {
+    "robot_motions_runtime.json": {
+      "source_sha256": "7c63d8a34c0aa08910e0bcade5ed1e139ec51d05cea042d6a73db3f906989625",
+      "installed_sha256": "7c63d8a34c0aa08910e0bcade5ed1e139ec51d05cea042d6a73db3f906989625",
+      "source_unchanged": true,
+      "motion_count": 82
+    },
+    "robot_motions_pc.json": {
+      "source_sha256": "efeaa05b34309e99d3bb18a06e0bfe46ca72d532c6ac8cfe4d47b97d253343a4",
+      "installed_sha256": "efeaa05b34309e99d3bb18a06e0bfe46ca72d532c6ac8cfe4d47b97d253343a4",
+      "source_unchanged": true,
+      "motion_count": 82
+    }
+  },
+  "source_sha256": {
+    "tools/trace_sdk_gui.py": "a85eeb1a1cceeb95a8358acab8051b297d7443d68dfeb6c6c4aef8106ece3c09",
+    "tools/compare_playback_traces.py": "b66ee8eba17ef8b06dbd58c1f816297ebf23f4471b1e64ec43f085e8431b57c9",
+    "tools/test_playback_traces.py": "3cbfcd010eadfea435a7d27b344929af5e0c5310a749570bc38d397d0dd605f6",
+    "external_sdk/gui_aligned/robot_motion_player.cpp": "f22d341943bf40c9f0296068576e4d8688da668e21e5cf203a4f22e45129b7c4",
+    "external_sdk/gui_aligned/robot_motion_player.hpp": "221c6c4135f6e3390cd036ba57501cb230f3e3112ce7a3363ccaab6c8d9bcdef",
+    "external_sdk/gui_aligned/playback_trace.hpp": "252567b48498afda84f93bc59518c123ab0ec758089f44eec75f18b0b041d673",
+    "external_sdk/gui_aligned/recorded_execution_probe.cpp": "1985135b13169e5dd8f23e7cfb956dcc489bbeae0b64e03712eed23de5f4f88f",
+    "external_sdk/gui_aligned/CMakeLists.txt": "54cf26d8e954041a7255db77cd31732d1481a6140dad5baefdfa0a4103ab0326"
+  },
+  "installed_binary_sha256": "6933260ac9caf0d6ba04bf9e127de688cc9315e2abac465d63ee1c570c301503",
+  "verification": {
+    "pytest_passed": 12,
+    "ctest_passed": 3,
+    "gui_cpp_virtual_cases": 386
+  },
+  "physical_hardware_accessed": false,
+  "live_robot_timing_replay_implemented": false,
+  "recorded_clock_cpp_probe_implemented": true
+}

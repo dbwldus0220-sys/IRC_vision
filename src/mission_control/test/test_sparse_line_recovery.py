@@ -153,9 +153,11 @@ def test_stationary_confirmation_and_motion_completion_require_new_captures(monk
     monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: clock[0])
     monkeypatch.setattr(MotionDecisionNode, "_current_ros_time_ns", lambda self: int(clock[0] * 1e9))
     node = LiveInputHarness(phase="LINE_TRACK")
+    # Keep this recovery-boundary test outside the calibrated corner entry.
+    node.line_corner_turn_distance_m = .15
     node.LINE_TURN_PRE_MOTION_SETTLE_SEC = 1.
     # No preview influence: once confirmed, the usual offset/heading rule requests recovery.
-    info = {**sparse_info(), "turn_angle_deg": 0.}
+    info = {**sparse_info(), "turn_angle_deg": 0., "corner_preview_confirmed": False}
     def frame():
         observe(node, clock, "line", {**info, "rgb_stamp_ns": int((clock[0] + .005) * 1e9)})
     frame()
@@ -232,7 +234,7 @@ def test_configured_quality_threshold_applies_to_sparse_recovery():
     assert not policy.eligible
 
 
-def test_recorded_two_point_corner_replays_to_bounded_motion(monkeypatch):
+def test_recorded_two_point_corner_enters_corner_instead_of_fit_recovery(monkeypatch):
     import rclpy
     from std_msgs.msg import String
     from step.yolo_line_analyzer import YoloLineAnalyzer
@@ -273,8 +275,9 @@ def test_recorded_two_point_corner_replays_to_bounded_motion(monkeypatch):
         assert outputs[-1]["ground_two_point_candidate"] is not None
         motions = [m for m in node.publisher.messages if m["valid"]]
         assert len(motions) == 1
-        assert motions[0]["action"] == "LINE_HEADING_TURN_RIGHT_2"
-        assert motions[0]["source_command"]["turn_angle_deg"] == 15.
+        assert motions[0]["action"] == "RIGHT"
+        assert motions[0]["reason"] == "line_corner_ready"
+        assert motions[0]["source_command"]["corner_without_ground_fit"] is True
     finally:
         if analyzer is not None:
             analyzer.destroy_node()

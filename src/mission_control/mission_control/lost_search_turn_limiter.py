@@ -10,6 +10,9 @@ from .motion_decision_planner import MotionDecision, MotionDecisionPlanner
 class LostSearchTurnLimiter:
     """Keep independent budgets until a target supports a published command."""
 
+    CORNER_SEARCH_MAX_ANGLE_DEG = 45.0
+    CORNER_SEARCH_MAX_TURNS = 3
+
     def __init__(
         self, max_turns: int = 3, max_angle_deg: float = 90.0, *,
         staged_sources: tuple[str, ...] = (), max_reverse_turns: int = 6,
@@ -21,6 +24,7 @@ class LostSearchTurnLimiter:
         self.staged_sources = frozenset(staged_sources)
         self.max_reverse_turns = min(max_reverse_turns, 6)
         self.first_directions: dict[str, str] = {}
+        self.corner_directions: dict[str, str] = {}
         self.failed_sources: set[str] = set()
         self.max_turns = max_turns
         self.max_angle_deg = max_angle_deg
@@ -74,11 +78,20 @@ class LostSearchTurnLimiter:
     def filter(self, decision: MotionDecision, observations: dict) -> MotionDecision:
         """Inspect candidates without spending budget on unpublished decisions."""
         source = decision.source
+        if decision.phase not in {"AUTO", "LINE_TRACK"} or source not in {"line", "none"}:
+            self.corner_directions.pop("line", None)
         if source not in self.counts:
             return decision
         angle = self.search_angle(decision, observations.get(source))
         if angle is None:
             return decision
+        corner_direction = self.corner_directions.get(source)
+        if (source == "line" and decision.action.startswith("LINE_LOST_TURN_")
+                and decision.source_command.get("corner_search_pending") is True):
+            corner_direction = corner_direction or decision.source_command.get("remembered_corner_direction")
+        if (source == "line" and decision.action.startswith("LINE_LOST_TURN_")
+                and corner_direction in {"LEFT", "RIGHT"}):
+            return self._filter_corner(decision, observations.get(source), corner_direction)
         if source in self.staged_sources:
             return self._filter_staged(decision, observations.get(source))
         diagnostic = {
@@ -106,6 +119,8 @@ class LostSearchTurnLimiter:
         info = observations.get(source)
         angle = self.search_angle(decision, info)
         if angle is not None:
+            if decision.source_command.get("lost_search_stage") == "CORNER":
+                self.corner_directions.setdefault(source, decision.source_command["turn_direction"])
             if decision.source_command.get("lost_search_stage") in {"INITIAL", "EXTEND", "REVERSE"}:
                 self.first_directions.setdefault(
                     source, decision.source_command["lost_search_initial_direction"],
@@ -114,6 +129,7 @@ class LostSearchTurnLimiter:
             self.angles[source] += angle
         elif (
             info is not None and info.get("detected") is True
+            and decision.source_command.get("corner_pending") is not True
             and info.get("confirmation_confirmed", True) is True
             and decision.action not in {"WAIT", "STOP", "BALL_LOST_STOP", "GOAL_LOST_STOP"}
             and not decision.action.startswith("POST_SHOT_TURN_")
@@ -122,7 +138,63 @@ class LostSearchTurnLimiter:
             self.counts[source] = 0
             self.angles[source] = 0.0
             self.first_directions.pop(source, None)
+            self.corner_directions.pop(source, None)
             self.failed_sources.discard(source)
+
+    def complete_corner(self) -> None:
+        """Rearm only after the actual corner motion has succeeded."""
+        self.counts["line"] = 0
+        self.angles["line"] = 0.0
+        self.first_directions.pop("line", None)
+        self.corner_directions.pop("line", None)
+        self.failed_sources.discard("line")
+
+    def _filter_corner(self, decision: MotionDecision, info: dict | None, direction: str) -> MotionDecision:
+        """Reobserve after each small turn; never reverse or refund earlier search."""
+        source = decision.source
+        max_turns = min(self.max_turns, self.CORNER_SEARCH_MAX_TURNS)
+        max_angle = min(self.max_angle_deg, self.CORNER_SEARCH_MAX_ANGLE_DEG)
+        count = 1 if direction == "LEFT" else 2
+        angle = MotionDecisionPlanner._turn_angle_deg(count, direction)
+        command = {
+            **decision.source_command,
+            "lost_search_stage": "CORNER", "lost_search_reverse": False,
+            "lost_search_turns_used": self.counts[source],
+            "lost_search_angle_used_deg": self.angles[source],
+            "lost_search_max_turns": max_turns, "lost_search_max_angle_deg": max_angle,
+        }
+        reason = None
+        visible_reacquire = bool(
+            decision.source_command.get("corner_ground_reacquire") is True
+            and info is not None and info.get("detected") is True
+            and info.get("corner_preview_confirmed") is True
+            and info.get("corner_preview_raw_detected") is True
+            and info.get("corner_preview_held") is not True
+            and info.get("corner_direction") == direction
+        )
+        if source in self.failed_sources:
+            reason = "lost_search_motion_failed"
+        elif (self.counts[source] >= max_turns or self.angles[source] + angle > max_angle):
+            reason = "lost_search_turn_limit_reached"
+        elif info is None or (info.get("detected") is not False and not visible_reacquire):
+            reason = "lost_search_waiting_for_fresh_vision"
+        elif info.get("raw_detected") is True and not visible_reacquire:
+            reason = "lost_search_waiting_for_confirmation"
+        if reason is not None:
+            return replace(decision, action="WAIT", valid=False, sdk_motion_requested=False,
+                           requires_ack=False, reason=reason,
+                           source_command={**command, "blocked_search_action": decision.action})
+        action = f"LINE_LOST_TURN_{direction}_{count}"
+        command.update(
+            motion=action, reason="line_lost_turn_toward_remembered_corner",
+            direction_source="remembered_corner",
+            turn_direction=direction, turn_count=count, turn_angle_deg=angle,
+            turn_repeat_deg=None,
+        )
+        if "target_heading_change_deg" in command:
+            command["target_heading_change_deg"] = angle if direction == "LEFT" else -angle
+        return replace(decision, action=action,
+                       reason="line_lost_turn_toward_remembered_corner", source_command=command)
 
     @staticmethod
     def _search_family(action: str) -> tuple[str, str] | None:
@@ -139,7 +211,7 @@ class LostSearchTurnLimiter:
 
     def record_failure(self, source: str, action: str) -> None:
         """A failed turn cannot advance into a differently named search motion."""
-        if (source in self.staged_sources and self.counts[source] > 0
+        if ((source in self.staged_sources or source in self.corner_directions) and self.counts[source] > 0
                 and (self._search_family(action) is not None or action == "PICKUP_NOW")):
             self.failed_sources.add(source)
 

@@ -236,6 +236,12 @@ def generate_launch_description() -> LaunchDescription:
                     LaunchConfiguration("lost_search_max_angle_deg"), value_type=float
                 ),
                 "line_heading_source": LaunchConfiguration("line_heading_source"),
+                "line_corner_memory_timeout_sec": ParameterValue(
+                    LaunchConfiguration("line_corner_memory_timeout_sec"), value_type=float
+                ),
+                "line_corner_turn_distance_m": ParameterValue(
+                    corner_turn_margin_m, value_type=float
+                ),
                 "line_offset_align_enter_px": ParameterValue(
                     LaunchConfiguration("line_offset_align_enter_px"), value_type=float
                 ),
@@ -388,7 +394,7 @@ def generate_launch_description() -> LaunchDescription:
             ),
             DeclareLaunchArgument(
                 "overlay_max_stamp_delta_sec",
-                default_value="0.12",
+                default_value="0.30",
                 description=(
                     "Maximum RGB timestamp difference used only for the "
                     "detector debug overlay. This does not relax RGB-depth "
@@ -439,7 +445,10 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument(
                 "corner_straight_motion_distance_m", default_value="0.05"
             ),
-            DeclareLaunchArgument("corner_turn_margin_m", default_value="0.15"),
+            DeclareLaunchArgument("line_corner_memory_timeout_sec", default_value="15.0",
+                                  description="Maximum seconds since a real confirmed corner observation."),
+            DeclareLaunchArgument("corner_turn_margin_m", default_value="0.40",
+                                  description="Provisional confirmed-corner entry distance; calibrate on the robot."),
             DeclareLaunchArgument("ball_tracking_range_m", default_value="1.5"),
             DeclareLaunchArgument("ball_control_range_m", default_value="1.5"),
             DeclareLaunchArgument(
@@ -452,7 +461,7 @@ def generate_launch_description() -> LaunchDescription:
             ),
             DeclareLaunchArgument(
                 "pickup_fine_align_bottom_distance_px",
-                default_value="140",
+                default_value="270",
                 description=(
                     "Allow lateral alignment and backward pickup stages only "
                     "when the Ball center is this close to the image bottom."

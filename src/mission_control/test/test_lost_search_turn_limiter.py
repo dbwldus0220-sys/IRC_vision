@@ -16,6 +16,78 @@ def turn(action='LINE_LOST_TURN_RIGHT', source='line', reason='search', **comman
     return MotionDecision('AUTO', source, action, True, reason, False, False, command)
 
 
+@pytest.mark.parametrize('side,count', [('LEFT', 1), ('RIGHT', 2)])
+def test_corner_search_uses_three_small_turns_and_never_reverses(side, count):
+    limiter = LostSearchTurnLimiter(staged_sources=('line',))
+    lost = {'line': {'detected': False, 'raw_detected': False}}
+    request = turn('LINE_LOST_TURN_LEFT', corner_search_pending=True,
+                   remembered_corner_direction=side)
+    # An earlier provisional direction must not override the bend.
+    limiter.first_directions['line'] = 'LEFT' if side == 'RIGHT' else 'RIGHT'
+    for used in range(3):
+        result = limiter.filter(request, lost)
+        assert result.action == f'LINE_LOST_TURN_{side}_{count}'
+        assert result.source_command['motion'] == result.action
+        assert result.source_command['turn_angle_deg'] == 15.
+        for _ in range(5):
+            assert limiter.filter(request, lost) == result
+        assert limiter.counts['line'] == used
+        limiter.record_published(result, lost)
+        # A lost metadata hint must not restart the ordinary 45-degree/reverse search.
+        request = turn('LINE_LOST_TURN_LEFT')
+    assert limiter.angles['line'] == 45.
+    assert limiter.filter(request, lost).reason == 'lost_search_turn_limit_reached'
+    tracking = turn('STRAIGHT')
+    limiter.record_published(tracking, {'line': {'detected': True, 'confirmation_confirmed': False}})
+    assert not limiter.filter(request, lost).valid
+    limiter.record_published(tracking, {'line': {'detected': True, 'confirmation_confirmed': True}})
+    assert limiter.filter(request, lost).source_command['lost_search_stage'] == 'INITIAL'
+
+
+@pytest.mark.parametrize('info,reason', [
+    (None, 'lost_search_waiting_for_fresh_vision'),
+    ({'detected': False, 'raw_detected': True}, 'lost_search_waiting_for_confirmation'),
+    ({'detected': True}, 'lost_search_waiting_for_fresh_vision'),
+])
+def test_corner_search_waits_for_explicit_fresh_loss(info, reason):
+    limiter = LostSearchTurnLimiter(staged_sources=('line',))
+    request = turn(corner_search_pending=True, remembered_corner_direction='RIGHT')
+    result = limiter.filter(request, {'line': info})
+    assert not result.valid and result.reason == reason
+    assert limiter.counts['line'] == 0
+
+
+def test_corner_search_shares_prior_angle_budget_and_failure_latch():
+    limiter = LostSearchTurnLimiter(staged_sources=('line',))
+    lost = {'line': {'detected': False}}
+    ordinary = limiter.filter(turn('LINE_LOST_TURN_LEFT'), lost)
+    limiter.record_published(ordinary, lost)
+    assert limiter.angles['line'] == 45.
+    corner = turn(corner_search_pending=True, remembered_corner_direction='RIGHT')
+    assert limiter.filter(corner, lost).reason == 'lost_search_turn_limit_reached'
+    limiter.record_published(turn('STRAIGHT'), {'line': {'detected': True}})
+    small = limiter.filter(corner, lost)
+    limiter.record_published(small, lost)
+    limiter.record_failure('line', small.action)
+    assert limiter.filter(corner, lost).reason == 'lost_search_motion_failed'
+    assert limiter.angles['line'] == 15.
+
+
+@pytest.mark.parametrize('limits,allowed', [
+    ({'max_turns': 0}, 0), ({'max_turns': 1}, 1),
+    ({'max_angle_deg': 14.}, 0), ({'max_angle_deg': 30.}, 2),
+])
+def test_corner_search_honors_stricter_configured_limits(limits, allowed):
+    limiter = LostSearchTurnLimiter(staged_sources=('line',), **limits)
+    lost = {'line': {'detected': False}}
+    corner = turn(corner_search_pending=True, remembered_corner_direction='RIGHT')
+    for _ in range(allowed):
+        result = limiter.filter(corner, lost)
+        assert result.valid
+        limiter.record_published(result, lost)
+    assert limiter.filter(corner, lost).reason == 'lost_search_turn_limit_reached'
+
+
 def test_candidates_do_not_spend_budget_and_failed_requests_are_not_refunded():
     limiter = LostSearchTurnLimiter()
     lost = {'line': {'detected': False}}

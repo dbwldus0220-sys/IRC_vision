@@ -13,6 +13,11 @@ from test_sparse_line_recovery import sparse_info
 from test_wait_refresh_and_fine_settle import LiveInputHarness
 
 
+def unconfirmed_sparse_info(**kwargs):
+    """Isolate ordinary ground recovery; confirmed corners own their recovery."""
+    return {**sparse_info(**kwargs), 'corner_preview_confirmed': False}
+
+
 @pytest.fixture
 def clock(monkeypatch):
     now = [10.0]
@@ -23,6 +28,8 @@ def clock(monkeypatch):
 
 def node_for(phase='LINE_TRACK'):
     node = LiveInputHarness(phase=phase)
+    # Exercise recovery outside the entry radius; near corners have priority.
+    node.line_corner_turn_distance_m = 0.15
     if phase == 'POST_BALL_LINE_ALIGN':
         node.phase_manager.pickups_completed = 1
         node.phase_manager.ball_grasp_results[1] = 'GRABBED'
@@ -31,7 +38,7 @@ def node_for(phase='LINE_TRACK'):
 
 
 def frame(node, clock, info=None, **updates):
-    payload = {**(sparse_info() if info is None else info),
+    payload = {**(unconfirmed_sparse_info() if info is None else info),
                'rgb_stamp_ns': int(clock[0] * 1e9), **updates}
     before = len(node.publisher.messages)
     MotionDecisionNode._info_callback(node, 'line')(String(data=json.dumps(payload)))
@@ -73,7 +80,7 @@ def finish_turn(node, clock, command):
 def test_visible_invalid_ground_turns_toward_last_seen_line(clock, phase, side, count):
     node = node_for(phase)
     sign = 1 if side == 'RIGHT' else -1
-    info = {**sparse_info(), 'filtered_lateral_offset_norm': sign * 0.3}
+    info = {**unconfirmed_sparse_info(), 'filtered_lateral_offset_norm': sign * 0.3}
     command = start_turn(node, clock, info)
     assert command['action'] == f'LINE_HEADING_TURN_{side}_{count}'
     assert command['source_command']['direction_source'] == 'last_seen_line'
@@ -93,7 +100,7 @@ def test_pickup_exit_direction_overrides_opposite_visible_line(clock, section, s
     assert node.mission_phase == 'POST_BALL_LINE_ALIGN'
     assert node.planner.post_ball_line_search_direction == side
     # Deliberately disagree with the pickup exit direction.
-    info = {**sparse_info(), 'filtered_lateral_offset_norm': -0.4 if side == 'RIGHT' else 0.4}
+    info = {**unconfirmed_sparse_info(), 'filtered_lateral_offset_norm': -0.4 if side == 'RIGHT' else 0.4}
     command = start_turn(node, clock, info)
     assert command['action'] == f'POST_BALL_LINE_TURN_{side}_{count}'
     assert command['source_command']['direction_source'] == 'pickup_exit_turn'
@@ -107,7 +114,7 @@ def test_pickup_exit_direction_overrides_opposite_visible_line(clock, section, s
 def test_recovery_repeats_beyond_two_turns_until_normal_three_point_fit(clock, phase):
     node = node_for(phase)
     for _ in range(3):
-        command = start_turn(node, clock, sparse_info())
+        command = start_turn(node, clock, unconfirmed_sparse_info())
         # Replanning during execution cannot enqueue another turn.
         clock[0] += 0.1
         assert frame(node, clock) == []
@@ -152,7 +159,7 @@ def test_expired_received_input_cancels_pending_recovery(clock):
 @pytest.mark.parametrize('phase', ['LINE_TRACK', 'POST_BALL_LINE_ALIGN'])
 def test_even_valid_ground_captured_during_dwell_cannot_resume_motion(clock, phase):
     node = node_for(phase)
-    command = start_turn(node, clock, sparse_info())
+    command = start_turn(node, clock, unconfirmed_sparse_info())
     finish_turn(node, clock, command)
     normal = {**line_info(), 'ground_projection_enabled': True, 'ground_fit_point_count': 3}
     commands = frame(node, clock, normal, rgb_stamp_ns=node.line_offset_min_rgb_stamp_ns - 1)
@@ -164,7 +171,7 @@ def test_even_valid_ground_captured_during_dwell_cannot_resume_motion(clock, pha
 @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT', 'REJECTED'])
 def test_recovery_failure_cannot_be_bypassed_by_opposite_line_side(clock, status):
     node = node_for()
-    command = start_turn(node, clock, sparse_info())
+    command = start_turn(node, clock, unconfirmed_sparse_info())
     if status != 'REJECTED':
         node.send_status(command['action'], command['command_id'], 'RUNNING')
     node.send_status(command['action'], command['command_id'], status)
@@ -199,14 +206,14 @@ def test_no_known_line_side_keeps_waiting(clock):
 
 def test_nearest_visible_point_selects_side_instead_of_extrapolated_offset(clock):
     node = node_for()
-    info = {**sparse_info(), 'center_points_px': [[100, 600], [200, 400]], 'image_width': 1280}
+    info = {**unconfirmed_sparse_info(), 'center_points_px': [[100, 600], [200, 400]], 'image_width': 1280}
     assert start_turn(node, clock, info)['action'] == 'LINE_HEADING_TURN_LEFT_1'
 
 
 def test_centered_current_line_keeps_previously_seen_side(clock):
     node = node_for()
     node.planner.last_line_seen_direction = 'LEFT'
-    info = {**sparse_info(), 'filtered_lateral_offset_norm': 0.0}
+    info = {**unconfirmed_sparse_info(), 'filtered_lateral_offset_norm': 0.0}
     assert start_turn(node, clock, info)['action'] == 'LINE_HEADING_TURN_LEFT_1'
 
 
@@ -229,7 +236,7 @@ def test_image_heading_mode_keeps_existing_policy(clock):
 
 def test_pickup_recovery_waits_for_camera_instead_of_larger_blind_search(clock):
     node = node_for('POST_BALL_LINE_ALIGN')
-    command = start_turn(node, clock, sparse_info())
+    command = start_turn(node, clock, unconfirmed_sparse_info())
     finish_turn(node, clock, command)
     before = len(node.publisher.messages)
     for _ in range(8):
@@ -243,7 +250,7 @@ def test_pickup_recovery_waits_for_camera_instead_of_larger_blind_search(clock):
 @pytest.mark.parametrize('capture_offset', [-0.6, 0.6])
 def test_delayed_or_future_normal_fit_cannot_end_recovery(clock, phase, capture_offset):
     node = node_for(phase)
-    command = start_turn(node, clock, sparse_info())
+    command = start_turn(node, clock, unconfirmed_sparse_info())
     finish_turn(node, clock, command)
     clock[0] += 2.0
     normal = {**line_info(), 'ground_projection_enabled': True, 'ground_fit_point_count': 3}
@@ -255,7 +262,7 @@ def test_delayed_or_future_normal_fit_cannot_end_recovery(clock, phase, capture_
 
 def test_failed_recovery_does_not_start_different_search_when_line_disappears(clock):
     node = node_for()
-    command = start_turn(node, clock, sparse_info())
+    command = start_turn(node, clock, unconfirmed_sparse_info())
     node.send_status(command['action'], command['command_id'], 'REJECTED')
     for _ in range(8):
         clock[0] += 0.2
@@ -268,7 +275,7 @@ def test_failed_recovery_does_not_start_different_search_when_line_disappears(cl
 
 def test_two_point_valid_flag_cannot_end_active_recovery(clock):
     node = node_for()
-    command = start_turn(node, clock, sparse_info())
+    command = start_turn(node, clock, unconfirmed_sparse_info())
     finish_turn(node, clock, command)
     commands = frame(node, clock, {**line_info(), 'ground_projection_enabled': True,
                                   'ground_fit_point_count': 2})

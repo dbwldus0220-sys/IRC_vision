@@ -1,0 +1,3472 @@
+{
+  "gui_sha256": "ce6b871a14af1187a5e3f221834265649e1e819cb6b529487d75a090c7e2d527",
+  "cases": [
+    {
+      "case": "raw_rounding_half_steps_and_neighbors",
+      "values": 12291
+    },
+    {
+      "case": "robot_motions_runtime.json/찐공확인자세/[5.0]/0/0",
+      "events": 228,
+      "writes": 91,
+      "reads": 46,
+      "completed_ms": 450.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐공확인자세/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 36,
+      "writes": 12,
+      "reads": 12,
+      "completed_ms": 531.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전45도-1(2회)/[5.0]/0/0",
+      "events": 366,
+      "writes": 148,
+      "reads": 73,
+      "completed_ms": 720.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전45도-1(2회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 60,
+      "writes": 22,
+      "reads": 19,
+      "completed_ms": 792.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전45도-1(3회)/[5.0]/0/0",
+      "events": 546,
+      "writes": 222,
+      "reads": 107,
+      "completed_ms": 1080.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전45도-1(3회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 89,
+      "writes": 33,
+      "reads": 28,
+      "completed_ms": 1252.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전45도-1(5회)/[5.0]/0/0",
+      "events": 895,
+      "writes": 370,
+      "reads": 164,
+      "completed_ms": 1800.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전45도-1(5회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 147,
+      "writes": 55,
+      "reads": 46,
+      "completed_ms": 2017.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전45도-1(7회)/[5.0]/0/0",
+      "events": 1243,
+      "writes": 518,
+      "reads": 220,
+      "completed_ms": 2520.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전45도-1(7회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 205,
+      "writes": 77,
+      "reads": 64,
+      "completed_ms": 2871.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전0도-1(2회)/[5.0]/0/0",
+      "events": 366,
+      "writes": 148,
+      "reads": 73,
+      "completed_ms": 720.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전0도-1(2회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 60,
+      "writes": 22,
+      "reads": 19,
+      "completed_ms": 792.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전0도-1(3회)/[5.0]/0/0",
+      "events": 546,
+      "writes": 222,
+      "reads": 107,
+      "completed_ms": 1080.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전0도-1(3회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 89,
+      "writes": 33,
+      "reads": 28,
+      "completed_ms": 1252.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전0도-1(5회)/[5.0]/0/0",
+      "events": 895,
+      "writes": 370,
+      "reads": 164,
+      "completed_ms": 1800.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전0도-1(5회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 147,
+      "writes": 55,
+      "reads": 46,
+      "completed_ms": 2017.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전0도-1(7회)/[5.0]/0/0",
+      "events": 1243,
+      "writes": 518,
+      "reads": 220,
+      "completed_ms": 2520.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전0도-1(7회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 205,
+      "writes": 77,
+      "reads": 64,
+      "completed_ms": 2871.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전90도-1(3회)/[5.0]/0/0",
+      "events": 546,
+      "writes": 222,
+      "reads": 107,
+      "completed_ms": 1080.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전90도-1(3회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 89,
+      "writes": 33,
+      "reads": 28,
+      "completed_ms": 1252.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전90도-1(5회)/[5.0]/0/0",
+      "events": 895,
+      "writes": 370,
+      "reads": 164,
+      "completed_ms": 1800.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전90도-1(5회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 147,
+      "writes": 55,
+      "reads": 46,
+      "completed_ms": 2017.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전90도-1(7회)/[5.0]/0/0",
+      "events": 1243,
+      "writes": 518,
+      "reads": 220,
+      "completed_ms": 2520.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전90도-1(7회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 205,
+      "writes": 77,
+      "reads": 64,
+      "completed_ms": 2871.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전45도(9회)/[5.0]/0/0",
+      "events": 1591,
+      "writes": 666,
+      "reads": 276,
+      "completed_ms": 3240.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전45도(9회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 263,
+      "writes": 99,
+      "reads": 82,
+      "completed_ms": 3636.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전0도-1(9회)/[5.0]/0/0",
+      "events": 1591,
+      "writes": 666,
+      "reads": 276,
+      "completed_ms": 3240.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전0도-1(9회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 263,
+      "writes": 99,
+      "reads": 82,
+      "completed_ms": 3636.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전90도-1(9회)/[5.0]/0/0",
+      "events": 1591,
+      "writes": 666,
+      "reads": 276,
+      "completed_ms": 3240.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전90도-1(9회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 263,
+      "writes": 99,
+      "reads": 82,
+      "completed_ms": 3636.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐후진실전-2(2회)/[5.0]/0/0",
+      "events": 537,
+      "writes": 220,
+      "reads": 104,
+      "completed_ms": 1060.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐후진실전-2(2회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 87,
+      "writes": 33,
+      "reads": 27,
+      "completed_ms": 1153.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐공잡기전후진-2(2회)/[5.0]/0/0",
+      "events": 542,
+      "writes": 222,
+      "reads": 105,
+      "completed_ms": 1070.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐공잡기전후진-2(2회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 87,
+      "writes": 33,
+      "reads": 27,
+      "completed_ms": 1153.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐후진하고 제자리우회전(공)/[5.0]/0/0",
+      "events": 1442,
+      "writes": 602,
+      "reads": 253,
+      "completed_ms": 2930.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐후진하고 제자리우회전(공)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 241,
+      "writes": 89,
+      "reads": 76,
+      "completed_ms": 3408.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐후진에서 제자리좌회전(공)/[5.0]/0/0",
+      "events": 1028,
+      "writes": 426,
+      "reads": 185,
+      "completed_ms": 2080.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐후진에서 제자리좌회전(공)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 158,
+      "writes": 58,
+      "reads": 50,
+      "completed_ms": 2195.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐골넣기/[5.0]/0/0",
+      "events": 1100,
+      "writes": 455,
+      "reads": 194,
+      "completed_ms": 2250.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐골넣기/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 160,
+      "writes": 56,
+      "reads": 52,
+      "completed_ms": 2325.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐후진실전(1회)/[5.0]/0/0",
+      "events": 256,
+      "writes": 104,
+      "reads": 51,
+      "completed_ms": 500.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐후진실전(1회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 38,
+      "writes": 14,
+      "reads": 12,
+      "completed_ms": 533.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐미세오뒤에서 오옆꽃게90도/[5.0]/0/0",
+      "events": 117,
+      "writes": 47,
+      "reads": 24,
+      "completed_ms": 225.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐미세오뒤에서 오옆꽃게90도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 24,
+      "writes": 8,
+      "reads": 8,
+      "completed_ms": 352.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐미세오뒤에서오옆꽃게0도/[5.0]/0/0",
+      "events": 117,
+      "writes": 47,
+      "reads": 24,
+      "completed_ms": 225.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐미세오뒤에서오옆꽃게0도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 24,
+      "writes": 8,
+      "reads": 8,
+      "completed_ms": 352.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐오뒤에서 오옆꽃게90도/[5.0]/0/0",
+      "events": 120,
+      "writes": 48,
+      "reads": 25,
+      "completed_ms": 230.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐오뒤에서 오옆꽃게90도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 24,
+      "writes": 8,
+      "reads": 8,
+      "completed_ms": 352.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐허들/[5.0]/0/0",
+      "events": 3357,
+      "writes": 1417,
+      "reads": 539,
+      "completed_ms": 7000.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐허들/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 490,
+      "writes": 174,
+      "reads": 158,
+      "completed_ms": 7036.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전90도-1(2회)/[5.0]/0/0",
+      "events": 366,
+      "writes": 148,
+      "reads": 73,
+      "completed_ms": 720.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐제자리우회전90도-1(2회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 60,
+      "writes": 22,
+      "reads": 19,
+      "completed_ms": 792.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/유미세오옆꽃게0도/[5.0]/0/0",
+      "events": 270,
+      "writes": 110,
+      "reads": 53,
+      "completed_ms": 530.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/유미세오옆꽃게0도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 45,
+      "writes": 17,
+      "reads": 14,
+      "completed_ms": 579.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/유미세왼옆꽃게0도/[5.0]/0/0",
+      "events": 248,
+      "writes": 101,
+      "reads": 49,
+      "completed_ms": 485.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/유미세왼옆꽃게0도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 38,
+      "writes": 14,
+      "reads": 12,
+      "completed_ms": 533.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/유미세오옆꽃게90도/[5.0]/0/0",
+      "events": 270,
+      "writes": 110,
+      "reads": 53,
+      "completed_ms": 530.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/유미세오옆꽃게90도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 45,
+      "writes": 17,
+      "reads": 14,
+      "completed_ms": 579.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/유미세왼옆꽃게90도/[5.0]/0/0",
+      "events": 248,
+      "writes": 101,
+      "reads": 49,
+      "completed_ms": 485.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/유미세왼옆꽃게90도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 38,
+      "writes": 14,
+      "reads": 12,
+      "completed_ms": 533.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건라인복귀좌회전45도(1회)/[5.0]/0/0",
+      "events": 260,
+      "writes": 106,
+      "reads": 51,
+      "completed_ms": 510.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건라인복귀좌회전45도(1회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 41,
+      "writes": 15,
+      "reads": 13,
+      "completed_ms": 556.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건전진45도(2회)/[5.0]/0/0",
+      "events": 523,
+      "writes": 214,
+      "reads": 102,
+      "completed_ms": 1030.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건전진45도(2회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 80,
+      "writes": 30,
+      "reads": 25,
+      "completed_ms": 1096.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건라인복귀우회전45도(4회)/[5.0]/0/0",
+      "events": 1051,
+      "writes": 440,
+      "reads": 186,
+      "completed_ms": 2120.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건라인복귀우회전45도(4회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 173,
+      "writes": 67,
+      "reads": 53,
+      "completed_ms": 2358.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건전진45도(4회)/[5.0]/0/0",
+      "events": 1023,
+      "writes": 428,
+      "reads": 182,
+      "completed_ms": 2060.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건전진45도(4회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 158,
+      "writes": 60,
+      "reads": 49,
+      "completed_ms": 2176.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건전진45도(6회)/[5.0]/0/0",
+      "events": 1523,
+      "writes": 642,
+      "reads": 262,
+      "completed_ms": 3090.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건전진45도(6회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 236,
+      "writes": 90,
+      "reads": 73,
+      "completed_ms": 3256.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건전진45도(8회)/[5.0]/0/0",
+      "events": 2019,
+      "writes": 856,
+      "reads": 338,
+      "completed_ms": 4120.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건전진45도(8회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 314,
+      "writes": 120,
+      "reads": 97,
+      "completed_ms": 4336.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건라인복귀좌회전45도(4회)/[5.0]/0/0",
+      "events": 1051,
+      "writes": 440,
+      "reads": 186,
+      "completed_ms": 2120.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건라인복귀좌회전45도(4회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 172,
+      "writes": 66,
+      "reads": 53,
+      "completed_ms": 2357.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건전진90도(8회)/[5.0]/0/0",
+      "events": 2019,
+      "writes": 856,
+      "reads": 338,
+      "completed_ms": 4120.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건전진90도(8회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 322,
+      "writes": 128,
+      "reads": 97,
+      "completed_ms": 4344.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건전진90도(2회)/[5.0]/0/0",
+      "events": 523,
+      "writes": 214,
+      "reads": 102,
+      "completed_ms": 1030.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건전진90도(2회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 82,
+      "writes": 32,
+      "reads": 25,
+      "completed_ms": 1098.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건전진90도(4회)/[5.0]/0/0",
+      "events": 1023,
+      "writes": 428,
+      "reads": 182,
+      "completed_ms": 2060.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건전진90도(4회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 162,
+      "writes": 64,
+      "reads": 49,
+      "completed_ms": 2180.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건전진90도(6회)/[5.0]/0/0",
+      "events": 1523,
+      "writes": 642,
+      "reads": 262,
+      "completed_ms": 3090.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건전진90도(6회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 242,
+      "writes": 96,
+      "reads": 73,
+      "completed_ms": 3262.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건오뒤에서 기본자세(카메라45도)/[5.0]/0/0",
+      "events": 107,
+      "writes": 43,
+      "reads": 22,
+      "completed_ms": 205.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건오뒤에서 기본자세(카메라45도)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 21,
+      "writes": 7,
+      "reads": 7,
+      "completed_ms": 252.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건오뒤카메라90도/[5.0]/0/0",
+      "events": 54,
+      "writes": 21,
+      "reads": 12,
+      "completed_ms": 100.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건오뒤카메라90도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 12,
+      "writes": 4,
+      "reads": 4,
+      "completed_ms": 173.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건오뒤에서 기본자세(0도)/[5.0]/0/0",
+      "events": 110,
+      "writes": 44,
+      "reads": 23,
+      "completed_ms": 210.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건오뒤에서 기본자세(0도)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 21,
+      "writes": 7,
+      "reads": 7,
+      "completed_ms": 252.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건왼뒤에서 기본자세(0도)/[5.0]/0/0",
+      "events": 115,
+      "writes": 46,
+      "reads": 24,
+      "completed_ms": 220.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건왼뒤에서 기본자세(0도)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 24,
+      "writes": 8,
+      "reads": 8,
+      "completed_ms": 352.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건김오뒤3/[5.0]/0/0",
+      "events": 54,
+      "writes": 21,
+      "reads": 12,
+      "completed_ms": 100.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건김오뒤3/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 12,
+      "writes": 4,
+      "reads": 4,
+      "completed_ms": 173.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전45도(5회)/[5.0]/0/0",
+      "events": 847,
+      "writes": 350,
+      "reads": 156,
+      "completed_ms": 1700.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전45도(5회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 132,
+      "writes": 50,
+      "reads": 41,
+      "completed_ms": 1816.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전45도(6회)/[5.0]/0/0",
+      "events": 1012,
+      "writes": 420,
+      "reads": 183,
+      "completed_ms": 2040.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전45도(6회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 158,
+      "writes": 60,
+      "reads": 49,
+      "completed_ms": 2176.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전45도(1회)/[5.0]/0/0",
+      "events": 174,
+      "writes": 70,
+      "reads": 35,
+      "completed_ms": 340.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전45도(1회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 28,
+      "writes": 10,
+      "reads": 9,
+      "completed_ms": 376.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전45도(2회)/[5.0]/0/0",
+      "events": 346,
+      "writes": 140,
+      "reads": 69,
+      "completed_ms": 680.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전45도(2회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 54,
+      "writes": 20,
+      "reads": 17,
+      "completed_ms": 736.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전45도(3회)/[5.0]/0/0",
+      "events": 517,
+      "writes": 210,
+      "reads": 102,
+      "completed_ms": 1020.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전45도(3회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 80,
+      "writes": 30,
+      "reads": 25,
+      "completed_ms": 1096.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전45도(4회)/[5.0]/0/0",
+      "events": 682,
+      "writes": 280,
+      "reads": 129,
+      "completed_ms": 1360.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전45도(4회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 106,
+      "writes": 40,
+      "reads": 33,
+      "completed_ms": 1456.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전90도(3회)/[5.0]/0/0",
+      "events": 517,
+      "writes": 210,
+      "reads": 102,
+      "completed_ms": 1020.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전90도(3회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 80,
+      "writes": 30,
+      "reads": 25,
+      "completed_ms": 1096.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전90도(1회)/[5.0]/0/0",
+      "events": 174,
+      "writes": 70,
+      "reads": 35,
+      "completed_ms": 340.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전90도(1회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 28,
+      "writes": 10,
+      "reads": 9,
+      "completed_ms": 376.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전90도(2회)/[5.0]/0/0",
+      "events": 346,
+      "writes": 140,
+      "reads": 69,
+      "completed_ms": 680.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전90도(2회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 54,
+      "writes": 20,
+      "reads": 17,
+      "completed_ms": 736.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전90도(4회)/[5.0]/0/0",
+      "events": 682,
+      "writes": 280,
+      "reads": 129,
+      "completed_ms": 1360.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전90도(4회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 106,
+      "writes": 40,
+      "reads": 33,
+      "completed_ms": 1456.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전90도(5회)/[5.0]/0/0",
+      "events": 847,
+      "writes": 350,
+      "reads": 156,
+      "completed_ms": 1700.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전90도(5회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 132,
+      "writes": 50,
+      "reads": 41,
+      "completed_ms": 1816.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전90도(6회)/[5.0]/0/0",
+      "events": 1012,
+      "writes": 420,
+      "reads": 183,
+      "completed_ms": 2040.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전90도(6회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 158,
+      "writes": 60,
+      "reads": 49,
+      "completed_ms": 2176.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전0도(2회)/[5.0]/0/0",
+      "events": 351,
+      "writes": 142,
+      "reads": 70,
+      "completed_ms": 690.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전0도(2회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 54,
+      "writes": 20,
+      "reads": 17,
+      "completed_ms": 736.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전0도(1회)/[5.0]/0/0",
+      "events": 177,
+      "writes": 71,
+      "reads": 36,
+      "completed_ms": 345.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전0도(1회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 28,
+      "writes": 10,
+      "reads": 9,
+      "completed_ms": 376.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전0도(3회)/[5.0]/0/0",
+      "events": 524,
+      "writes": 213,
+      "reads": 103,
+      "completed_ms": 1035.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전0도(3회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 80,
+      "writes": 30,
+      "reads": 25,
+      "completed_ms": 1096.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전0도(4회)/[5.0]/0/0",
+      "events": 691,
+      "writes": 284,
+      "reads": 130,
+      "completed_ms": 1380.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전0도(4회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 106,
+      "writes": 40,
+      "reads": 33,
+      "completed_ms": 1456.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전0도(5회)/[5.0]/0/0",
+      "events": 858,
+      "writes": 355,
+      "reads": 157,
+      "completed_ms": 1725.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전0도(5회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 132,
+      "writes": 50,
+      "reads": 41,
+      "completed_ms": 1816.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전0도(6회)/[5.0]/0/0",
+      "events": 1025,
+      "writes": 426,
+      "reads": 184,
+      "completed_ms": 2070.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건제자리좌회전0도(6회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 158,
+      "writes": 60,
+      "reads": 49,
+      "completed_ms": 2176.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건기본자세에서제자리좌회전(골대)/[5.0]/0/0",
+      "events": 1312,
+      "writes": 547,
+      "reads": 231,
+      "completed_ms": 2665.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건기본자세에서제자리좌회전(골대)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 210,
+      "writes": 78,
+      "reads": 66,
+      "completed_ms": 2915.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세45도(5회)/[5.0]/0/0",
+      "events": 928,
+      "writes": 390,
+      "reads": 167,
+      "completed_ms": 1850.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세45도(5회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 157,
+      "writes": 61,
+      "reads": 48,
+      "completed_ms": 2155.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건공잡기/[5.0]/0/0",
+      "events": 2666,
+      "writes": 1121,
+      "reads": 434,
+      "completed_ms": 5550.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건공잡기/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 387,
+      "writes": 135,
+      "reads": 126,
+      "completed_ms": 5597.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세오뒤에서 기본자세45도/[5.0]/0/0",
+      "events": 102,
+      "writes": 41,
+      "reads": 21,
+      "completed_ms": 195.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세오뒤에서 기본자세45도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 21,
+      "writes": 7,
+      "reads": 7,
+      "completed_ms": 252.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건오뒤에서 미세오뒤45도/[5.0]/0/0",
+      "events": 97,
+      "writes": 39,
+      "reads": 20,
+      "completed_ms": 185.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건오뒤에서 미세오뒤45도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 18,
+      "writes": 6,
+      "reads": 6,
+      "completed_ms": 218.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세0도/[5.0]/0/0",
+      "events": 928,
+      "writes": 390,
+      "reads": 167,
+      "completed_ms": 1850.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세0도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 157,
+      "writes": 61,
+      "reads": 48,
+      "completed_ms": 2155.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세90도/[5.0]/0/0",
+      "events": 928,
+      "writes": 390,
+      "reads": 167,
+      "completed_ms": 1850.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세90도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 157,
+      "writes": 61,
+      "reads": 48,
+      "completed_ms": 2155.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세오뒤에서 오뒤45도/[5.0]/0/0",
+      "events": 117,
+      "writes": 47,
+      "reads": 24,
+      "completed_ms": 225.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세오뒤에서 오뒤45도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 24,
+      "writes": 8,
+      "reads": 8,
+      "completed_ms": 352.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세오뒤에서 오뒤0도/[5.0]/0/0",
+      "events": 130,
+      "writes": 52,
+      "reads": 27,
+      "completed_ms": 250.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세오뒤에서 오뒤0도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 24,
+      "writes": 8,
+      "reads": 8,
+      "completed_ms": 352.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세오뒤에서 기본자세90도/[5.0]/0/0",
+      "events": 120,
+      "writes": 48,
+      "reads": 25,
+      "completed_ms": 230.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세오뒤에서 기본자세90도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 24,
+      "writes": 8,
+      "reads": 8,
+      "completed_ms": 352.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건기본자세에서제자리우회전(골대)/[5.0]/0/0",
+      "events": 2108,
+      "writes": 885,
+      "reads": 357,
+      "completed_ms": 4325.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건기본자세에서제자리우회전(골대)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 342,
+      "writes": 126,
+      "reads": 108,
+      "completed_ms": 4845.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건라인복귀좌회전45도(6회)/[5.0]/0/0",
+      "events": 1564,
+      "writes": 660,
+      "reads": 267,
+      "completed_ms": 3180.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건라인복귀좌회전45도(6회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 257,
+      "writes": 99,
+      "reads": 79,
+      "completed_ms": 3494.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세0도(허들10회)/[5.0]/0/0",
+      "events": 1831,
+      "writes": 780,
+      "reads": 310,
+      "completed_ms": 3700.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세0도(허들10회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 313,
+      "writes": 123,
+      "reads": 95,
+      "completed_ms": 4218.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세90도(1회)/[5.0]/0/0",
+      "events": 191,
+      "writes": 78,
+      "reads": 38,
+      "completed_ms": 370.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세90도(1회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 34,
+      "writes": 12,
+      "reads": 11,
+      "completed_ms": 432.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세90도(2회)/[5.0]/0/0",
+      "events": 380,
+      "writes": 156,
+      "reads": 75,
+      "completed_ms": 740.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세90도(2회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 64,
+      "writes": 24,
+      "reads": 20,
+      "completed_ms": 893.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세90도(3회)/[5.0]/0/0",
+      "events": 566,
+      "writes": 234,
+      "reads": 109,
+      "completed_ms": 1110.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세90도(3회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 95,
+      "writes": 37,
+      "reads": 29,
+      "completed_ms": 1278.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세90도(4회)/[5.0]/0/0",
+      "events": 747,
+      "writes": 312,
+      "reads": 138,
+      "completed_ms": 1480.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/건미세90도(4회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 127,
+      "writes": 49,
+      "reads": 39,
+      "completed_ms": 1694.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐미세오뒤에서 오뒤(골대 카메라90도)/[5.0]/0/0",
+      "events": 117,
+      "writes": 47,
+      "reads": 24,
+      "completed_ms": 225.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_runtime.json/찐미세오뒤에서 오뒤(골대 카메라90도)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 24,
+      "writes": 8,
+      "reads": 8,
+      "completed_ms": 352.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐공확인자세/[5.0]/0/0",
+      "events": 228,
+      "writes": 91,
+      "reads": 46,
+      "completed_ms": 450.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐공확인자세/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 36,
+      "writes": 12,
+      "reads": 12,
+      "completed_ms": 531.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전45도-1(2회)/[5.0]/0/0",
+      "events": 366,
+      "writes": 148,
+      "reads": 73,
+      "completed_ms": 720.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전45도-1(2회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 60,
+      "writes": 22,
+      "reads": 19,
+      "completed_ms": 792.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전45도-1(3회)/[5.0]/0/0",
+      "events": 546,
+      "writes": 222,
+      "reads": 107,
+      "completed_ms": 1080.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전45도-1(3회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 89,
+      "writes": 33,
+      "reads": 28,
+      "completed_ms": 1252.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전45도-1(5회)/[5.0]/0/0",
+      "events": 895,
+      "writes": 370,
+      "reads": 164,
+      "completed_ms": 1800.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전45도-1(5회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 147,
+      "writes": 55,
+      "reads": 46,
+      "completed_ms": 2017.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전45도-1(7회)/[5.0]/0/0",
+      "events": 1243,
+      "writes": 518,
+      "reads": 220,
+      "completed_ms": 2520.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전45도-1(7회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 205,
+      "writes": 77,
+      "reads": 64,
+      "completed_ms": 2871.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전0도-1(2회)/[5.0]/0/0",
+      "events": 366,
+      "writes": 148,
+      "reads": 73,
+      "completed_ms": 720.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전0도-1(2회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 60,
+      "writes": 22,
+      "reads": 19,
+      "completed_ms": 792.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전0도-1(3회)/[5.0]/0/0",
+      "events": 546,
+      "writes": 222,
+      "reads": 107,
+      "completed_ms": 1080.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전0도-1(3회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 89,
+      "writes": 33,
+      "reads": 28,
+      "completed_ms": 1252.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전0도-1(5회)/[5.0]/0/0",
+      "events": 895,
+      "writes": 370,
+      "reads": 164,
+      "completed_ms": 1800.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전0도-1(5회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 147,
+      "writes": 55,
+      "reads": 46,
+      "completed_ms": 2017.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전0도-1(7회)/[5.0]/0/0",
+      "events": 1243,
+      "writes": 518,
+      "reads": 220,
+      "completed_ms": 2520.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전0도-1(7회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 205,
+      "writes": 77,
+      "reads": 64,
+      "completed_ms": 2871.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전90도-1(3회)/[5.0]/0/0",
+      "events": 546,
+      "writes": 222,
+      "reads": 107,
+      "completed_ms": 1080.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전90도-1(3회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 89,
+      "writes": 33,
+      "reads": 28,
+      "completed_ms": 1252.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전90도-1(5회)/[5.0]/0/0",
+      "events": 895,
+      "writes": 370,
+      "reads": 164,
+      "completed_ms": 1800.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전90도-1(5회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 147,
+      "writes": 55,
+      "reads": 46,
+      "completed_ms": 2017.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전90도-1(7회)/[5.0]/0/0",
+      "events": 1243,
+      "writes": 518,
+      "reads": 220,
+      "completed_ms": 2520.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전90도-1(7회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 205,
+      "writes": 77,
+      "reads": 64,
+      "completed_ms": 2871.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전45도(9회)/[5.0]/0/0",
+      "events": 1591,
+      "writes": 666,
+      "reads": 276,
+      "completed_ms": 3240.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전45도(9회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 263,
+      "writes": 99,
+      "reads": 82,
+      "completed_ms": 3636.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전0도-1(9회)/[5.0]/0/0",
+      "events": 1591,
+      "writes": 666,
+      "reads": 276,
+      "completed_ms": 3240.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전0도-1(9회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 263,
+      "writes": 99,
+      "reads": 82,
+      "completed_ms": 3636.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전90도-1(9회)/[5.0]/0/0",
+      "events": 1591,
+      "writes": 666,
+      "reads": 276,
+      "completed_ms": 3240.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전90도-1(9회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 263,
+      "writes": 99,
+      "reads": 82,
+      "completed_ms": 3636.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐후진실전-2(2회)/[5.0]/0/0",
+      "events": 537,
+      "writes": 220,
+      "reads": 104,
+      "completed_ms": 1060.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐후진실전-2(2회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 87,
+      "writes": 33,
+      "reads": 27,
+      "completed_ms": 1153.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐공잡기전후진-2(2회)/[5.0]/0/0",
+      "events": 542,
+      "writes": 222,
+      "reads": 105,
+      "completed_ms": 1070.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐공잡기전후진-2(2회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 87,
+      "writes": 33,
+      "reads": 27,
+      "completed_ms": 1153.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐후진하고 제자리우회전(공)/[5.0]/0/0",
+      "events": 1442,
+      "writes": 602,
+      "reads": 253,
+      "completed_ms": 2930.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐후진하고 제자리우회전(공)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 241,
+      "writes": 89,
+      "reads": 76,
+      "completed_ms": 3408.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐후진에서 제자리좌회전(공)/[5.0]/0/0",
+      "events": 1028,
+      "writes": 426,
+      "reads": 185,
+      "completed_ms": 2080.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐후진에서 제자리좌회전(공)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 158,
+      "writes": 58,
+      "reads": 50,
+      "completed_ms": 2195.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐골넣기/[5.0]/0/0",
+      "events": 1100,
+      "writes": 455,
+      "reads": 194,
+      "completed_ms": 2250.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐골넣기/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 160,
+      "writes": 56,
+      "reads": 52,
+      "completed_ms": 2325.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐후진실전(1회)/[5.0]/0/0",
+      "events": 256,
+      "writes": 104,
+      "reads": 51,
+      "completed_ms": 500.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐후진실전(1회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 38,
+      "writes": 14,
+      "reads": 12,
+      "completed_ms": 533.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐미세오뒤에서 오옆꽃게90도/[5.0]/0/0",
+      "events": 117,
+      "writes": 47,
+      "reads": 24,
+      "completed_ms": 225.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐미세오뒤에서 오옆꽃게90도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 24,
+      "writes": 8,
+      "reads": 8,
+      "completed_ms": 352.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐미세오뒤에서오옆꽃게0도/[5.0]/0/0",
+      "events": 117,
+      "writes": 47,
+      "reads": 24,
+      "completed_ms": 225.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐미세오뒤에서오옆꽃게0도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 24,
+      "writes": 8,
+      "reads": 8,
+      "completed_ms": 352.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐오뒤에서 오옆꽃게90도/[5.0]/0/0",
+      "events": 120,
+      "writes": 48,
+      "reads": 25,
+      "completed_ms": 230.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐오뒤에서 오옆꽃게90도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 24,
+      "writes": 8,
+      "reads": 8,
+      "completed_ms": 352.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐허들/[5.0]/0/0",
+      "events": 3357,
+      "writes": 1417,
+      "reads": 539,
+      "completed_ms": 7000.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐허들/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 490,
+      "writes": 174,
+      "reads": 158,
+      "completed_ms": 7036.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전90도-1(2회)/[5.0]/0/0",
+      "events": 366,
+      "writes": 148,
+      "reads": 73,
+      "completed_ms": 720.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐제자리우회전90도-1(2회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 60,
+      "writes": 22,
+      "reads": 19,
+      "completed_ms": 792.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/유미세오옆꽃게0도/[5.0]/0/0",
+      "events": 270,
+      "writes": 110,
+      "reads": 53,
+      "completed_ms": 530.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/유미세오옆꽃게0도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 45,
+      "writes": 17,
+      "reads": 14,
+      "completed_ms": 579.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/유미세왼옆꽃게0도/[5.0]/0/0",
+      "events": 248,
+      "writes": 101,
+      "reads": 49,
+      "completed_ms": 485.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/유미세왼옆꽃게0도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 38,
+      "writes": 14,
+      "reads": 12,
+      "completed_ms": 533.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/유미세오옆꽃게90도/[5.0]/0/0",
+      "events": 270,
+      "writes": 110,
+      "reads": 53,
+      "completed_ms": 530.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/유미세오옆꽃게90도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 45,
+      "writes": 17,
+      "reads": 14,
+      "completed_ms": 579.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/유미세왼옆꽃게90도/[5.0]/0/0",
+      "events": 248,
+      "writes": 101,
+      "reads": 49,
+      "completed_ms": 485.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/유미세왼옆꽃게90도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 38,
+      "writes": 14,
+      "reads": 12,
+      "completed_ms": 533.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건라인복귀좌회전45도(1회)/[5.0]/0/0",
+      "events": 260,
+      "writes": 106,
+      "reads": 51,
+      "completed_ms": 510.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건라인복귀좌회전45도(1회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 41,
+      "writes": 15,
+      "reads": 13,
+      "completed_ms": 556.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건전진45도(2회)/[5.0]/0/0",
+      "events": 523,
+      "writes": 214,
+      "reads": 102,
+      "completed_ms": 1030.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건전진45도(2회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 80,
+      "writes": 30,
+      "reads": 25,
+      "completed_ms": 1096.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건라인복귀우회전45도(4회)/[5.0]/0/0",
+      "events": 1051,
+      "writes": 440,
+      "reads": 186,
+      "completed_ms": 2120.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건라인복귀우회전45도(4회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 173,
+      "writes": 67,
+      "reads": 53,
+      "completed_ms": 2358.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건전진45도(4회)/[5.0]/0/0",
+      "events": 1023,
+      "writes": 428,
+      "reads": 182,
+      "completed_ms": 2060.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건전진45도(4회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 158,
+      "writes": 60,
+      "reads": 49,
+      "completed_ms": 2176.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건전진45도(6회)/[5.0]/0/0",
+      "events": 1523,
+      "writes": 642,
+      "reads": 262,
+      "completed_ms": 3090.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건전진45도(6회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 236,
+      "writes": 90,
+      "reads": 73,
+      "completed_ms": 3256.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건전진45도(8회)/[5.0]/0/0",
+      "events": 2019,
+      "writes": 856,
+      "reads": 338,
+      "completed_ms": 4120.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건전진45도(8회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 314,
+      "writes": 120,
+      "reads": 97,
+      "completed_ms": 4336.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건라인복귀좌회전45도(4회)/[5.0]/0/0",
+      "events": 1051,
+      "writes": 440,
+      "reads": 186,
+      "completed_ms": 2120.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건라인복귀좌회전45도(4회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 172,
+      "writes": 66,
+      "reads": 53,
+      "completed_ms": 2357.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건전진90도(8회)/[5.0]/0/0",
+      "events": 2019,
+      "writes": 856,
+      "reads": 338,
+      "completed_ms": 4120.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건전진90도(8회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 322,
+      "writes": 128,
+      "reads": 97,
+      "completed_ms": 4344.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건전진90도(2회)/[5.0]/0/0",
+      "events": 523,
+      "writes": 214,
+      "reads": 102,
+      "completed_ms": 1030.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건전진90도(2회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 82,
+      "writes": 32,
+      "reads": 25,
+      "completed_ms": 1098.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건전진90도(4회)/[5.0]/0/0",
+      "events": 1023,
+      "writes": 428,
+      "reads": 182,
+      "completed_ms": 2060.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건전진90도(4회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 162,
+      "writes": 64,
+      "reads": 49,
+      "completed_ms": 2180.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건전진90도(6회)/[5.0]/0/0",
+      "events": 1523,
+      "writes": 642,
+      "reads": 262,
+      "completed_ms": 3090.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건전진90도(6회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 242,
+      "writes": 96,
+      "reads": 73,
+      "completed_ms": 3262.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건오뒤에서 기본자세(카메라45도)/[5.0]/0/0",
+      "events": 107,
+      "writes": 43,
+      "reads": 22,
+      "completed_ms": 205.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건오뒤에서 기본자세(카메라45도)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 21,
+      "writes": 7,
+      "reads": 7,
+      "completed_ms": 252.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건오뒤카메라90도/[5.0]/0/0",
+      "events": 54,
+      "writes": 21,
+      "reads": 12,
+      "completed_ms": 100.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건오뒤카메라90도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 12,
+      "writes": 4,
+      "reads": 4,
+      "completed_ms": 173.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건오뒤에서 기본자세(0도)/[5.0]/0/0",
+      "events": 110,
+      "writes": 44,
+      "reads": 23,
+      "completed_ms": 210.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건오뒤에서 기본자세(0도)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 21,
+      "writes": 7,
+      "reads": 7,
+      "completed_ms": 252.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건왼뒤에서 기본자세(0도)/[5.0]/0/0",
+      "events": 115,
+      "writes": 46,
+      "reads": 24,
+      "completed_ms": 220.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건왼뒤에서 기본자세(0도)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 24,
+      "writes": 8,
+      "reads": 8,
+      "completed_ms": 352.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건김오뒤3/[5.0]/0/0",
+      "events": 54,
+      "writes": 21,
+      "reads": 12,
+      "completed_ms": 100.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건김오뒤3/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 12,
+      "writes": 4,
+      "reads": 4,
+      "completed_ms": 173.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전45도(5회)/[5.0]/0/0",
+      "events": 847,
+      "writes": 350,
+      "reads": 156,
+      "completed_ms": 1700.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전45도(5회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 132,
+      "writes": 50,
+      "reads": 41,
+      "completed_ms": 1816.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전45도(6회)/[5.0]/0/0",
+      "events": 1012,
+      "writes": 420,
+      "reads": 183,
+      "completed_ms": 2040.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전45도(6회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 158,
+      "writes": 60,
+      "reads": 49,
+      "completed_ms": 2176.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전45도(1회)/[5.0]/0/0",
+      "events": 174,
+      "writes": 70,
+      "reads": 35,
+      "completed_ms": 340.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전45도(1회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 28,
+      "writes": 10,
+      "reads": 9,
+      "completed_ms": 376.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전45도(2회)/[5.0]/0/0",
+      "events": 346,
+      "writes": 140,
+      "reads": 69,
+      "completed_ms": 680.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전45도(2회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 54,
+      "writes": 20,
+      "reads": 17,
+      "completed_ms": 736.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전45도(3회)/[5.0]/0/0",
+      "events": 517,
+      "writes": 210,
+      "reads": 102,
+      "completed_ms": 1020.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전45도(3회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 80,
+      "writes": 30,
+      "reads": 25,
+      "completed_ms": 1096.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전45도(4회)/[5.0]/0/0",
+      "events": 682,
+      "writes": 280,
+      "reads": 129,
+      "completed_ms": 1360.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전45도(4회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 106,
+      "writes": 40,
+      "reads": 33,
+      "completed_ms": 1456.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전90도(3회)/[5.0]/0/0",
+      "events": 517,
+      "writes": 210,
+      "reads": 102,
+      "completed_ms": 1020.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전90도(3회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 80,
+      "writes": 30,
+      "reads": 25,
+      "completed_ms": 1096.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전90도(1회)/[5.0]/0/0",
+      "events": 174,
+      "writes": 70,
+      "reads": 35,
+      "completed_ms": 340.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전90도(1회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 28,
+      "writes": 10,
+      "reads": 9,
+      "completed_ms": 376.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전90도(2회)/[5.0]/0/0",
+      "events": 346,
+      "writes": 140,
+      "reads": 69,
+      "completed_ms": 680.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전90도(2회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 54,
+      "writes": 20,
+      "reads": 17,
+      "completed_ms": 736.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전90도(4회)/[5.0]/0/0",
+      "events": 682,
+      "writes": 280,
+      "reads": 129,
+      "completed_ms": 1360.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전90도(4회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 106,
+      "writes": 40,
+      "reads": 33,
+      "completed_ms": 1456.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전90도(5회)/[5.0]/0/0",
+      "events": 847,
+      "writes": 350,
+      "reads": 156,
+      "completed_ms": 1700.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전90도(5회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 132,
+      "writes": 50,
+      "reads": 41,
+      "completed_ms": 1816.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전90도(6회)/[5.0]/0/0",
+      "events": 1012,
+      "writes": 420,
+      "reads": 183,
+      "completed_ms": 2040.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전90도(6회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 158,
+      "writes": 60,
+      "reads": 49,
+      "completed_ms": 2176.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전0도(2회)/[5.0]/0/0",
+      "events": 351,
+      "writes": 142,
+      "reads": 70,
+      "completed_ms": 690.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전0도(2회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 54,
+      "writes": 20,
+      "reads": 17,
+      "completed_ms": 736.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전0도(1회)/[5.0]/0/0",
+      "events": 177,
+      "writes": 71,
+      "reads": 36,
+      "completed_ms": 345.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전0도(1회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 28,
+      "writes": 10,
+      "reads": 9,
+      "completed_ms": 376.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전0도(3회)/[5.0]/0/0",
+      "events": 524,
+      "writes": 213,
+      "reads": 103,
+      "completed_ms": 1035.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전0도(3회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 80,
+      "writes": 30,
+      "reads": 25,
+      "completed_ms": 1096.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전0도(4회)/[5.0]/0/0",
+      "events": 691,
+      "writes": 284,
+      "reads": 130,
+      "completed_ms": 1380.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전0도(4회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 106,
+      "writes": 40,
+      "reads": 33,
+      "completed_ms": 1456.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전0도(5회)/[5.0]/0/0",
+      "events": 858,
+      "writes": 355,
+      "reads": 157,
+      "completed_ms": 1725.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전0도(5회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 132,
+      "writes": 50,
+      "reads": 41,
+      "completed_ms": 1816.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전0도(6회)/[5.0]/0/0",
+      "events": 1025,
+      "writes": 426,
+      "reads": 184,
+      "completed_ms": 2070.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건제자리좌회전0도(6회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 158,
+      "writes": 60,
+      "reads": 49,
+      "completed_ms": 2176.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건기본자세에서제자리좌회전(골대)/[5.0]/0/0",
+      "events": 1312,
+      "writes": 547,
+      "reads": 231,
+      "completed_ms": 2665.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건기본자세에서제자리좌회전(골대)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 210,
+      "writes": 78,
+      "reads": 66,
+      "completed_ms": 2915.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세45도(5회)/[5.0]/0/0",
+      "events": 928,
+      "writes": 390,
+      "reads": 167,
+      "completed_ms": 1850.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세45도(5회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 157,
+      "writes": 61,
+      "reads": 48,
+      "completed_ms": 2155.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건공잡기/[5.0]/0/0",
+      "events": 2666,
+      "writes": 1121,
+      "reads": 434,
+      "completed_ms": 5550.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건공잡기/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 387,
+      "writes": 135,
+      "reads": 126,
+      "completed_ms": 5597.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세오뒤에서 기본자세45도/[5.0]/0/0",
+      "events": 102,
+      "writes": 41,
+      "reads": 21,
+      "completed_ms": 195.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세오뒤에서 기본자세45도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 21,
+      "writes": 7,
+      "reads": 7,
+      "completed_ms": 252.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건오뒤에서 미세오뒤45도/[5.0]/0/0",
+      "events": 97,
+      "writes": 39,
+      "reads": 20,
+      "completed_ms": 185.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건오뒤에서 미세오뒤45도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 18,
+      "writes": 6,
+      "reads": 6,
+      "completed_ms": 218.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세0도/[5.0]/0/0",
+      "events": 928,
+      "writes": 390,
+      "reads": 167,
+      "completed_ms": 1850.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세0도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 157,
+      "writes": 61,
+      "reads": 48,
+      "completed_ms": 2155.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세90도/[5.0]/0/0",
+      "events": 928,
+      "writes": 390,
+      "reads": 167,
+      "completed_ms": 1850.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세90도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 157,
+      "writes": 61,
+      "reads": 48,
+      "completed_ms": 2155.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세오뒤에서 오뒤45도/[5.0]/0/0",
+      "events": 117,
+      "writes": 47,
+      "reads": 24,
+      "completed_ms": 225.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세오뒤에서 오뒤45도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 24,
+      "writes": 8,
+      "reads": 8,
+      "completed_ms": 352.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세오뒤에서 오뒤0도/[5.0]/0/0",
+      "events": 130,
+      "writes": 52,
+      "reads": 27,
+      "completed_ms": 250.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세오뒤에서 오뒤0도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 24,
+      "writes": 8,
+      "reads": 8,
+      "completed_ms": 352.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세오뒤에서 기본자세90도/[5.0]/0/0",
+      "events": 120,
+      "writes": 48,
+      "reads": 25,
+      "completed_ms": 230.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세오뒤에서 기본자세90도/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 24,
+      "writes": 8,
+      "reads": 8,
+      "completed_ms": 352.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건기본자세에서제자리우회전(골대)/[5.0]/0/0",
+      "events": 2108,
+      "writes": 885,
+      "reads": 357,
+      "completed_ms": 4325.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건기본자세에서제자리우회전(골대)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 342,
+      "writes": 126,
+      "reads": 108,
+      "completed_ms": 4845.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건라인복귀좌회전45도(6회)/[5.0]/0/0",
+      "events": 1564,
+      "writes": 660,
+      "reads": 267,
+      "completed_ms": 3180.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건라인복귀좌회전45도(6회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 257,
+      "writes": 99,
+      "reads": 79,
+      "completed_ms": 3494.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세0도(허들10회)/[5.0]/0/0",
+      "events": 1831,
+      "writes": 780,
+      "reads": 310,
+      "completed_ms": 3700.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세0도(허들10회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 313,
+      "writes": 123,
+      "reads": 95,
+      "completed_ms": 4218.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세90도(1회)/[5.0]/0/0",
+      "events": 191,
+      "writes": 78,
+      "reads": 38,
+      "completed_ms": 370.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세90도(1회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 34,
+      "writes": 12,
+      "reads": 11,
+      "completed_ms": 432.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세90도(2회)/[5.0]/0/0",
+      "events": 380,
+      "writes": 156,
+      "reads": 75,
+      "completed_ms": 740.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세90도(2회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 64,
+      "writes": 24,
+      "reads": 20,
+      "completed_ms": 893.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세90도(3회)/[5.0]/0/0",
+      "events": 566,
+      "writes": 234,
+      "reads": 109,
+      "completed_ms": 1110.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세90도(3회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 95,
+      "writes": 37,
+      "reads": 29,
+      "completed_ms": 1278.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세90도(4회)/[5.0]/0/0",
+      "events": 747,
+      "writes": 312,
+      "reads": 138,
+      "completed_ms": 1480.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/건미세90도(4회)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 127,
+      "writes": 49,
+      "reads": 39,
+      "completed_ms": 1694.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐미세오뒤에서 오뒤(골대 카메라90도)/[5.0]/0/0",
+      "events": 117,
+      "writes": 47,
+      "reads": 24,
+      "completed_ms": 225.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "robot_motions_pc.json/찐미세오뒤에서 오뒤(골대 카메라90도)/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 24,
+      "writes": 8,
+      "reads": 8,
+      "completed_ms": 352.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/partial_0.9/[5.0]/0/0",
+      "events": 605,
+      "writes": 249,
+      "reads": 118,
+      "completed_ms": 1185.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/partial_0.9/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 118,
+      "writes": 46,
+      "reads": 36,
+      "completed_ms": 1615.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/partial_0.9/[5.0]/10/2",
+      "events": 239,
+      "writes": 87,
+      "reads": 76,
+      "completed_ms": 1309.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/partial_0.9/[350.0, 5.0]/0/0",
+      "events": 38,
+      "writes": 14,
+      "reads": 12,
+      "completed_ms": 2125.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/partial_1/[5.0]/0/0",
+      "events": 541,
+      "writes": 222,
+      "reads": 108,
+      "completed_ms": 1050.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/partial_1/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 119,
+      "writes": 47,
+      "reads": 36,
+      "completed_ms": 1616.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/partial_1/[5.0]/10/2",
+      "events": 221,
+      "writes": 81,
+      "reads": 70,
+      "completed_ms": 1207.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/partial_1/[350.0, 5.0]/0/0",
+      "events": 38,
+      "writes": 14,
+      "reads": 12,
+      "completed_ms": 2125.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/partial_1.05/[5.0]/0/0",
+      "events": 526,
+      "writes": 216,
+      "reads": 105,
+      "completed_ms": 1020.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/partial_1.05/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 107,
+      "writes": 43,
+      "reads": 32,
+      "completed_ms": 1437.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/partial_1.05/[5.0]/10/2",
+      "events": 212,
+      "writes": 78,
+      "reads": 67,
+      "completed_ms": 1156.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/partial_1.05/[350.0, 5.0]/0/0",
+      "events": 38,
+      "writes": 14,
+      "reads": 12,
+      "completed_ms": 2125.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/partial_2.0/[5.0]/0/0",
+      "events": 281,
+      "writes": 117,
+      "reads": 58,
+      "completed_ms": 525.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/partial_2.0/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 80,
+      "writes": 32,
+      "reads": 24,
+      "completed_ms": 1076.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/partial_2.0/[5.0]/10/2",
+      "events": 122,
+      "writes": 48,
+      "reads": 37,
+      "completed_ms": 646.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/partial_2.0/[350.0, 5.0]/0/0",
+      "events": 38,
+      "writes": 14,
+      "reads": 12,
+      "completed_ms": 2125.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/overlap/[5.0]/0/0",
+      "events": 118,
+      "writes": 48,
+      "reads": 25,
+      "completed_ms": 220.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/overlap/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 30,
+      "writes": 12,
+      "reads": 9,
+      "completed_ms": 378.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/overlap/[5.0]/10/2",
+      "events": 54,
+      "writes": 20,
+      "reads": 17,
+      "completed_ms": 290.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/overlap/[350.0, 5.0]/0/0",
+      "events": 16,
+      "writes": 6,
+      "reads": 5,
+      "completed_ms": 710.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/saved_composer/[5.0]/0/0",
+      "events": 317,
+      "writes": 130,
+      "reads": 64,
+      "completed_ms": 610.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/saved_composer/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 58,
+      "writes": 24,
+      "reads": 17,
+      "completed_ms": 740.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/saved_composer/[5.0]/10/2",
+      "events": 130,
+      "writes": 48,
+      "reads": 41,
+      "completed_ms": 706.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/saved_composer/[350.0, 5.0]/0/0",
+      "events": 30,
+      "writes": 12,
+      "reads": 9,
+      "completed_ms": 1420.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_0.9_0.9/[5.0]/0/0",
+      "events": 367,
+      "writes": 150,
+      "reads": 74,
+      "completed_ms": 710.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_0.9_0.9/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 69,
+      "writes": 27,
+      "reads": 21,
+      "completed_ms": 918.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_0.9_0.9/[5.0]/10/2",
+      "events": 148,
+      "writes": 54,
+      "reads": 47,
+      "completed_ms": 808.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_0.9_0.9/[350.0, 5.0]/0/0",
+      "events": 30,
+      "writes": 12,
+      "reads": 9,
+      "completed_ms": 1420.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_0.9_1.0/[5.0]/0/0",
+      "events": 327,
+      "writes": 134,
+      "reads": 66,
+      "completed_ms": 630.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_0.9_1.0/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 62,
+      "writes": 24,
+      "reads": 19,
+      "completed_ms": 794.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_0.9_1.0/[5.0]/10/2",
+      "events": 136,
+      "writes": 50,
+      "reads": 43,
+      "completed_ms": 740.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_0.9_1.0/[350.0, 5.0]/0/0",
+      "events": 30,
+      "writes": 12,
+      "reads": 9,
+      "completed_ms": 1420.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.0_0.9/[5.0]/0/0",
+      "events": 332,
+      "writes": 136,
+      "reads": 67,
+      "completed_ms": 640.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.0_0.9/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 62,
+      "writes": 24,
+      "reads": 19,
+      "completed_ms": 794.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.0_0.9/[5.0]/10/2",
+      "events": 136,
+      "writes": 50,
+      "reads": 43,
+      "completed_ms": 740.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.0_0.9/[350.0, 5.0]/0/0",
+      "events": 30,
+      "writes": 12,
+      "reads": 9,
+      "completed_ms": 1420.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.0_1.0/[5.0]/0/0",
+      "events": 297,
+      "writes": 122,
+      "reads": 60,
+      "completed_ms": 570.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.0_1.0/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 58,
+      "writes": 24,
+      "reads": 17,
+      "completed_ms": 740.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.0_1.0/[5.0]/10/2",
+      "events": 124,
+      "writes": 46,
+      "reads": 39,
+      "completed_ms": 672.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.0_1.0/[350.0, 5.0]/0/0",
+      "events": 30,
+      "writes": 12,
+      "reads": 9,
+      "completed_ms": 1420.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.0_1.05/[5.0]/0/0",
+      "events": 287,
+      "writes": 118,
+      "reads": 58,
+      "completed_ms": 550.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.0_1.05/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 58,
+      "writes": 24,
+      "reads": 17,
+      "completed_ms": 740.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.0_1.05/[5.0]/10/2",
+      "events": 118,
+      "writes": 44,
+      "reads": 37,
+      "completed_ms": 638.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.0_1.05/[350.0, 5.0]/0/0",
+      "events": 30,
+      "writes": 12,
+      "reads": 9,
+      "completed_ms": 1420.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.05_0.9/[5.0]/0/0",
+      "events": 322,
+      "writes": 132,
+      "reads": 65,
+      "completed_ms": 620.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.05_0.9/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 58,
+      "writes": 24,
+      "reads": 17,
+      "completed_ms": 740.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.05_0.9/[5.0]/10/2",
+      "events": 130,
+      "writes": 48,
+      "reads": 41,
+      "completed_ms": 706.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.05_0.9/[350.0, 5.0]/0/0",
+      "events": 30,
+      "writes": 12,
+      "reads": 9,
+      "completed_ms": 1420.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.05_1.0/[5.0]/0/0",
+      "events": 287,
+      "writes": 118,
+      "reads": 58,
+      "completed_ms": 550.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.05_1.0/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 58,
+      "writes": 24,
+      "reads": 17,
+      "completed_ms": 740.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.05_1.0/[5.0]/10/2",
+      "events": 118,
+      "writes": 44,
+      "reads": 37,
+      "completed_ms": 638.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.05_1.0/[350.0, 5.0]/0/0",
+      "events": 30,
+      "writes": 12,
+      "reads": 9,
+      "completed_ms": 1420.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.05_1.05/[5.0]/0/0",
+      "events": 277,
+      "writes": 114,
+      "reads": 56,
+      "completed_ms": 530.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.05_1.05/[5.0, 17.0, 83.0, 6.0]/16/1",
+      "events": 58,
+      "writes": 24,
+      "reads": 17,
+      "completed_ms": 740.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.05_1.05/[5.0]/10/2",
+      "events": 112,
+      "writes": 42,
+      "reads": 35,
+      "completed_ms": 604.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "synthetic.json/composer_1.05_1.05/[350.0, 5.0]/0/0",
+      "events": 30,
+      "writes": 12,
+      "reads": 9,
+      "completed_ms": 1420.0,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    },
+    {
+      "case": "queue_vs_actual_gui_composer",
+      "events": 101,
+      "max_raw_error": 0,
+      "max_event_time_error_ms": 0
+    }
+  ],
+  "passed": 386
+}

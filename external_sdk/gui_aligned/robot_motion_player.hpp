@@ -178,6 +178,8 @@ private:
     std::unique_ptr<PlaybackTrace> trace_;
     bool trace_goals_{false};
     std::uint64_t trace_run_{0};
+    std::uint64_t trace_event_seq_{0}, trace_tick_{0};
+    Clock::time_point trace_evaluate_at_{};
     std::int64_t trace_timeline_ms_{0};
     int trace_frame_{-1};
     std::unique_ptr<MotionLibrary> policy_reference_;

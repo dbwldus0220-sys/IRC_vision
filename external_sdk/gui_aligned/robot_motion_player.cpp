@@ -94,6 +94,11 @@ StartResult RobotMotionPlayer::start(std::string_view motion_name) noexcept {
         }
         current_motion_ = name;
         ++trace_run_;
+        trace_tick_ = 0;
+        trace_evaluate_at_ = Clock::time_point{};
+        trace_timeline_ms_ = 0;
+        trace_frame_ = -1;
+        repeat_ = 1;
         if (!hardware_->prepareImmediatePlayback()) {
             fail(MotionError::CommunicationError, "cannot set playback profiles to zero");
             return StartResult::HardwareNotReady;
@@ -128,6 +133,7 @@ QueueResult RobotMotionPlayer::queueNext(std::string_view motion_name) noexcept 
             return QueueResult::IncompatibleTransition;
         queued_motion_ = name;
         queued_pattern_ = &next;
+        traceEvent("queue_accept", now_(), true);
         return QueueResult::Queued;
     } catch (const std::exception& error) {
         last_error_ = error.what();
@@ -198,6 +204,15 @@ void RobotMotionPlayer::resetMotionRuntime(
     started_at_ = now;
     gui_started_sec_ = guiSeconds(now);
     status_ = MotionStatus::Running;
+    // 유효 프레임은 정책/보정을 적용한 값이다. 기록은 재생 알고리즘을 바꾸지 않는다.
+    if (trace_) {
+        traceEvent("run_start", now, true, start_angles_);
+        for (std::size_t i = 0; i < playback_frames_.size(); ++i) {
+            trace_frame_ = static_cast<int>(i);
+            traceEvent("definition", now, true, playback_frames_[i].angles);
+        }
+        trace_frame_ = -1;
+    }
 }
 
 bool RobotMotionPlayer::activateQueuedMotion(Clock::time_point now) {
@@ -213,7 +228,11 @@ bool RobotMotionPlayer::activateQueuedMotion(Clock::time_point now) {
     // wrapped raw/중간각을 새 원본으로 삼으면 ±360도 표현이 달라질 수 있다.
     for (const auto& frame : playback_frames_)
         for (const auto& [id, angle] : frame.angles) start_angles_[id] = angle;
+    ++trace_run_;
+    trace_tick_ = 0;
+    trace_evaluate_at_ = Clock::time_point{};
     resetMotionRuntime(*next, std::move(next_name), now_());
+    traceEvent("queue_activate", now_(), true);
     static_cast<void>(now);
     error_ = MotionError::None;
     last_error_.clear();
@@ -223,8 +242,13 @@ bool RobotMotionPlayer::activateQueuedMotion(Clock::time_point now) {
 MotionStatus RobotMotionPlayer::update() noexcept {
     try {
         const auto now = now_();
-        if (status_ == MotionStatus::Running) return updateRunning(now);
-        if (status_ == MotionStatus::Settling) return updateSettling(now);
+        if (status_ == MotionStatus::Running || status_ == MotionStatus::Settling) {
+            ++trace_tick_;
+            trace_evaluate_at_ = now;
+            traceEvent("tick", now, true);
+            if (status_ == MotionStatus::Running) return updateRunning(now);
+            return updateSettling(now);
+        }
         return status_;
     } catch (const std::exception& error) {
         fail(MotionError::InternalError, error.what());
@@ -238,10 +262,12 @@ bool RobotMotionPlayer::readStartAngles() {
     JointAngles present;
     const auto read_begin = now_();
     if (!hardware_->readPresentPositions(present)) {
+        traceEvent("initial", read_begin, false);
         fail(MotionError::PresentPositionReadFailed, "cannot capture actual start pose");
         return false;
     }
     if (present.size() != kMotionMotorCount) {
+        traceEvent("initial", read_begin, false);
         fail(MotionError::PresentPositionReadFailed, "incomplete actual start pose");
         return false;
     }
@@ -669,6 +695,13 @@ bool RobotMotionPlayer::startPoseTransition(
     try {
         if (angles.size() != kMotionMotorCount || duration_ms <= 0)
             throw std::invalid_argument("startup pose requires 23 angles and positive duration");
+        current_motion_ = "STEP startup";
+        ++trace_run_;
+        trace_tick_ = 0;
+        trace_evaluate_at_ = Clock::time_point{};
+        trace_timeline_ms_ = 0;
+        trace_frame_ = -1;
+        repeat_ = 1;
         MotionFrame frame;
         frame.name = "STEP startup";
         frame.time_ms = duration_ms;
@@ -725,10 +758,28 @@ void RobotMotionPlayer::traceEvent(const char* event, Clock::time_point begin, b
     if (!trace_) return;
     PlaybackTraceRow row;
     row.run = trace_run_;
+    row.event_seq = ++trace_event_seq_;
+    row.tick = trace_tick_;
     std::snprintf(row.motion.data(), row.motion.size(), "%s", current_motion_.c_str());
     row.event = event;
-    row.begin_ms = std::chrono::duration<double, std::milli>(begin.time_since_epoch()).count();
-    row.end_ms = std::chrono::duration<double, std::milli>(now_().time_since_epoch()).count();
+    const auto end = now_();
+    row.begin_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(begin.time_since_epoch()).count();
+    row.end_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end.time_since_epoch()).count();
+    row.evaluate_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(trace_evaluate_at_.time_since_epoch()).count();
+    row.begin_ms = row.begin_ns / 1e6;
+    row.end_ms = row.end_ns / 1e6;
+    if (pattern_) {
+        row.speed = pattern_->playbackSpeed();
+        row.repeat_target = pattern_->repeatCount();
+    }
+    if (trace_frame_ >= 0 && static_cast<std::size_t>(trace_frame_) < playback_frames_.size()) {
+        row.frame_start_ms = playback_frames_[trace_frame_].start_ms;
+        row.frame_duration_ms = playback_frames_[trace_frame_].time_ms;
+        const auto& frame = playback_frames_[trace_frame_];
+        std::snprintf(row.frame_name.data(), row.frame_name.size(), "%s", frame.name.c_str());
+        row.lift_early = frame.lift_early_arrival;
+        row.cycle_end = frame.playback_cycle_end;
+    }
     row.timeline_ms = trace_timeline_ms_; row.repeat = repeat_; row.frame = trace_frame_;
     row.success = success;
     if (trace_goals_) for (const auto& [id, value] : angles) {

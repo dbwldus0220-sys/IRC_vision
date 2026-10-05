@@ -23,6 +23,7 @@ class CornerHarness(MissionFlowHarness):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.line_corner_turn_distance_m = 0.15
         # These tests isolate memory/freshness gates; three-hit confirmation is tested separately.
         self.planner.line_planner.config = replace(
             self.planner.line_planner.config, direction_confirmation_frames=1)
@@ -92,6 +93,7 @@ def test_visible_corner_separates_clock_rejection_from_occlusion(
     node.latest_time['line'] = clock[0]
     node.pending_line_corner = {
         'corner_direction': 'RIGHT', 'motion_completed_at': clock[0] - 2,
+        'last_confirmed_at': clock[0] - 2,
         'minimum_rgb_stamp_ns': ros_now - 2_000_000_000,
     }
     decision = node.planner.plan('LINE_TRACK', {'line': info}, .1)
@@ -265,9 +267,9 @@ def test_same_corner_is_not_remembered_again_until_visible_clear(clock):
     release_general(node, turn)
     assert node.planner.last_line_seen_direction is None
     receive_line(node, clock, corner_info())
-    next_straight = node.publish_vision()[-1]
-    assert next_straight['action'] == 'RIGHT'
-    release_general(node, next_straight)
+    repeated_corner = node.publish_vision()[-1]
+    assert repeated_corner['action'] == 'WAIT'
+    assert repeated_corner['reason'] == 'line_corner_waiting_for_clear'
     receive_line(node, clock, {'detected': False})
     receive_line(node, clock, corner_info())
     assert node.pending_line_corner is None
@@ -547,36 +549,39 @@ def test_first_corner_seen_after_motion_rejects_delayed_capture(clock, monkeypat
 def test_corner_allows_fresh_loss_search_but_keeps_budget_and_memory(clock, side):
     node = CornerHarness(phase='LINE_TRACK')
     current = start_line(node)
-    x = 500 if side == 'LEFT' else 800
-    receive_line(node, clock, corner_info('LEFT', center_points_px=[[x, 700], [640, 400]]))
+    # The nearest point is on the opposite side of the actual bend.
+    x = 800 if side == 'LEFT' else 500
+    receive_line(node, clock, corner_info(side, center_points_px=[[x, 700], [640, 400]]))
     release_general(node, current)
-    opposite = 'RIGHT' if side == 'LEFT' else 'LEFT'
-    initial = 3 if side == 'LEFT' else 5
     small = 1 if side == 'LEFT' else 2
-    reverse = 2 if side == 'LEFT' else 1
-    sequence = [(side, initial)] + [(side, small)] * 3 + [(opposite, reverse)] * 6
+    sequence = [(side, small)] * 3
     for direction, repeats in sequence:
         expected = f'LINE_LOST_TURN_{direction}_{repeats}'
         clock[0] += .1
         command = node.publish_vision(line={'detected': False, 'rgb_stamp_ns': round(clock[0] * 1e9)})[-1]
         assert command['action'] == expected
         assert command['source_command']['corner_search_pending']
-        assert node.pending_line_corner['corner_direction'] == 'LEFT'
+        assert node.pending_line_corner['corner_direction'] == side
+        assert command['source_command']['turn_angle_deg'] == 15.
+        assert command['source_command']['lost_search_max_angle_deg'] == 45.
         count = len(node.publisher.messages)
         assert node.publish_vision(line={'detected': False, 'rgb_stamp_ns': round((clock[0] + .01) * 1e9)}) == []
         assert len(node.publisher.messages) == count
         release_general(node, command)
+        # The just-consumed observation must not authorize the next turn.
+        assert not any(c['valid'] for c in node.publish_vision())
     clock[0] += .1
     blocked = node.publish_vision(line={'detected': False, 'rgb_stamp_ns': round(clock[0] * 1e9)})[-1]
     assert blocked['reason'] == 'lost_search_turn_limit_reached'
     assert not blocked['valid']
+    assert node.lost_search_turn_limiter.angles['line'] == 45.
     # Reacquiring Line alone cannot authorize advancing toward the remembered bend.
     receive_line(node, clock, {**line_info(), 'corner_preview_confirmed': False})
     forward = node.publish_vision()[-1]
     assert forward['action'] == 'STRAIGHT'
     release_general(node, forward)
-    receive_line(node, clock, corner_info('LEFT'))
-    assert node.publish_vision()[-1]['action'] == 'LEFT'
+    receive_line(node, clock, corner_info(side))
+    assert node.publish_vision()[-1]['action'] == side
 
 
 @pytest.mark.parametrize('stamp', [None, True, 10_000_000_000, 10_010_000_000, 99_000_000_000])

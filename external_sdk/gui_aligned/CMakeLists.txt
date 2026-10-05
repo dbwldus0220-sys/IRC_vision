@@ -74,6 +74,8 @@ endif()
 
 add_executable(gui_execution_probe gui_execution_probe.cpp)
 target_link_libraries(gui_execution_probe PRIVATE motion_player_core Threads::Threads)
+add_executable(recorded_execution_probe recorded_execution_probe.cpp)
+target_link_libraries(recorded_execution_probe PRIVATE motion_player_core Threads::Threads)
 add_executable(test_gui_alignment test_gui_alignment.cpp)
 target_link_libraries(test_gui_alignment PRIVATE motion_player_core)
 target_compile_options(test_gui_alignment PRIVATE -UNDEBUG)

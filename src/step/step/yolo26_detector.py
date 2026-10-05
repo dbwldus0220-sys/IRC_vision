@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import ast
+from collections import deque
 from dataclasses import asdict, dataclass
 import hashlib
 import json
@@ -36,7 +37,6 @@ from std_msgs.msg import String
 
 from step.approach_distance import HURDLE_FINE_DISTANCE_M
 from step.ball_navigation_planner import valid_ball_ground_steering
-from step.depth_frame_cache import image_stamp_ns
 from step.line_navigation_planner import (
     LINE_RECOVERY_TURN_ANGLES_DEG,
     numbered_turn_motion_metadata,
@@ -137,17 +137,17 @@ class Yolo26Detector(Node):
         self.declare_parameter("line_info_timeout_sec", 0.8)
         self.declare_parameter("show_line_metrics", True)
         self.declare_parameter("ball_info_topic", "/vision/ball_info")
-        self.declare_parameter("ball_info_timeout_sec", 0.8)
+        self.declare_parameter("ball_info_timeout_sec", 1.0)
         self.declare_parameter("show_ball_metrics", True)
         self.declare_parameter("ball_tracking_range_m", 1.5)
         self.declare_parameter("ball_control_range_m", 1.5)
         self.declare_parameter("goal_info_topic", "/vision/goal_info")
-        self.declare_parameter("goal_info_timeout_sec", 0.8)
+        self.declare_parameter("goal_info_timeout_sec", 1.0)
         self.declare_parameter("show_goal_metrics", True)
         self.declare_parameter("goal_tracking_range_m", 2.0)
         self.declare_parameter("goal_control_range_m", 2.0)
         self.declare_parameter("hurdle_info_topic", "/vision/hurdle_info")
-        self.declare_parameter("hurdle_info_timeout_sec", 0.8)
+        self.declare_parameter("hurdle_info_timeout_sec", 1.0)
         self.declare_parameter("show_hurdle_metrics", True)
         self.declare_parameter("hurdle_tracking_range_m", 1.0)
         self.declare_parameter("hurdle_control_range_m", 1.0)
@@ -162,7 +162,7 @@ class Yolo26Detector(Node):
             "/navigation/decision_debug",
         )
         self.declare_parameter("decision_debug_timeout_sec", 0.5)
-        self.declare_parameter("overlay_max_stamp_delta_sec", 0.05)
+        self.declare_parameter("overlay_max_stamp_delta_sec", 0.30)
         self.declare_parameter("metrics_mode", "auto")
         self.declare_parameter("confidence_threshold", 0.25)
         self.declare_parameter("ball_confidence_threshold", 0.20)
@@ -451,6 +451,8 @@ class Yolo26Detector(Node):
         self.latest_decision_debug_time: float | None = None
         self._overlay_rgb_stamp_ns: int | None = None
         self._ball_info_stamp_delta_ms: float | None = None
+        self._overlay_frames = deque(maxlen=8)
+        self._overlay_display_lag_ms = 0.0
 
         self.camera_control_specs = self._camera_control_specs()
         self.camera_control_values = {
@@ -1215,7 +1217,7 @@ class Yolo26Detector(Node):
             delta_ms = abs(info_stamp_ns - expected_stamp_ns) / 1_000_000.0
             self._ball_info_stamp_delta_ms = delta_ms
             max_delta_ms = (
-                getattr(self, "overlay_max_stamp_delta_sec", 0.05)
+                getattr(self, "overlay_max_stamp_delta_sec", 0.30)
                 * 1000.0
             )
             if delta_ms > max_delta_ms:
@@ -1809,8 +1811,8 @@ class Yolo26Detector(Node):
         info = self._fresh_ball_info()
         recent_info = self._recent_ball_info()
         calibrated_center_x = (
-            self._number(info, "robot_center_x_px")
-            if info is not None
+            self._number(recent_info, "robot_center_x_px")
+            if recent_info is not None
             else None
         )
         center_x = int(
@@ -1928,16 +1930,10 @@ class Yolo26Detector(Node):
 
         panel_width = min(390, max(250, width - 24))
         if info is None:
-            stamp_delta = getattr(self, "_ball_info_stamp_delta_ms", None)
             analyzer_badge = self._confirmation_badge(recent_info)
             rows = [
                 "BALL METRICS",
                 f"Planner     : {planner_action}",
-                (
-                    f"Frame sync  : STALE ({stamp_delta:.1f} ms)"
-                    if stamp_delta is not None
-                    else "NO MATCHED BALL INFO"
-                ),
                 f"Analyzer    : {analyzer_badge}",
             ]
             if recent_info is not None:
@@ -2984,7 +2980,6 @@ class Yolo26Detector(Node):
         metrics_mode = self._active_metrics_mode()
         decision = self._fresh_motion_command()
         ball_info = self._fresh_ball_info()
-        recent_ball_info = self._recent_ball_info()
         goal_info = self._fresh_goal_info()
         hurdle_info = self._fresh_hurdle_info()
         line_info = self._fresh_line_info()
@@ -3061,15 +3056,9 @@ class Yolo26Detector(Node):
             )
             if depth is not None:
                 label = f"{label} | DEPTH {depth:.2f}m"
-            if detection.class_name == "ball" and confirmation_info is None:
-                badge = (
-                    "INFO STALE"
-                    if recent_ball_info is not None
-                    else "RAW YOLO"
-                )
-            else:
+            if confirmation_info is not None:
                 badge = self._confirmation_badge(confirmation_info)
-            label = f"{label} | {badge}"
+                label = f"{label} | {badge}"
             cv2.rectangle(annotated, (left, top), (right, bottom), color, 2)
             cv2.circle(annotated, tuple(detection.center), 4, color, -1)
             cv2.putText(
@@ -3294,6 +3283,38 @@ class Yolo26Detector(Node):
             and self.annotated_publisher.get_subscription_count() > 0
         )
 
+    def _select_overlay_frame(self, image, detections, header):
+        """Match delayed Ball analysis to cached RGB, without delaying detection."""
+        stamp = int(header.stamp.sec) * 1_000_000_000 + int(header.stamp.nanosec)
+        frames = self._overlay_frames
+        now = time.monotonic()
+        current = (image, detections, header, stamp, now)
+        recent = self._recent_ball_info()
+        self._overlay_display_lag_ms = 0.0
+        if (self._active_metrics_mode() != "ball"
+                or not any(d.class_name == "ball" for d in detections)):
+            frames.clear()
+            return current[:3]
+        # Eight RGB frames bound memory; wall time also bounds freezes on stalls.
+        if frames and stamp <= frames[-1][3]:
+            frames.clear()
+        frames.append(current)
+        while frames and now - frames[0][4] > 0.3:
+            frames.popleft()
+        info_stamp = (recent or {}).get("rgb_stamp_ns")
+        if type(info_stamp) is not int or info_stamp <= 0:
+            return current[:3]
+        tolerance_ns = int(self.overlay_max_stamp_delta_sec * 1e9)
+        # Keep live RGB when analysis is already within the display tolerance.
+        if abs(stamp - info_stamp) <= tolerance_ns:
+            return current[:3]
+        matched = min(frames, key=lambda frame: abs(frame[3] - info_stamp))
+        if (abs(matched[3] - info_stamp) > tolerance_ns
+                or not 0 <= stamp - matched[3] <= 300_000_000):
+            return current[:3]
+        self._overlay_display_lag_ms = (stamp - matched[3]) / 1e6
+        return matched[:3]
+
     def _image_callback(self, message: Image) -> None:
         now = time.monotonic()
         minimum_interval = 1.0 / self.max_fps if self.max_fps > 0 else 0.0
@@ -3333,17 +3354,30 @@ class Yolo26Detector(Node):
             self._publish_detections(message, detections)
             publish_annotated = self._annotated_image_has_subscriber()
             if publish_annotated or self.display:
-                self._overlay_rgb_stamp_ns = image_stamp_ns(message)
+                display_rgb, display_detections, display_header = self._select_overlay_frame(
+                    image, detections, message.header,
+                )
+                self._overlay_rgb_stamp_ns = (
+                    int(display_header.stamp.sec) * 1_000_000_000
+                    + int(display_header.stamp.nanosec)
+                )
                 try:
-                    annotated = self._draw_detections(image, detections)
+                    annotated = self._draw_detections(display_rgb, display_detections)
                 finally:
                     self._overlay_rgb_stamp_ns = None
+
+                if self._overlay_display_lag_ms > 0:
+                    cv2.putText(
+                        annotated, f"Display lag: {self._overlay_display_lag_ms:.0f} ms",
+                        (12, annotated.shape[0] - 12), cv2.FONT_HERSHEY_SIMPLEX,
+                        0.55, (0, 255, 255), 1, cv2.LINE_AA,
+                    )
 
                 if publish_annotated:
                     annotated_message = self.bridge.cv2_to_imgmsg(
                         annotated, encoding="bgr8"
                     )
-                    annotated_message.header = message.header
+                    annotated_message.header = display_header
                     self.annotated_publisher.publish(annotated_message)
 
                 if self.display:

@@ -727,7 +727,7 @@ class YoloLineAnalyzer(DepthFrameConsumer, Node):
         self.declare_parameter("corner_hold_sec", 0.30)
         self.declare_parameter("corner_distance_filter_size", 5)
         self.declare_parameter("corner_straight_motion_distance_m", 0.05)
-        self.declare_parameter("corner_turn_margin_m", 0.15)
+        self.declare_parameter("corner_turn_margin_m", 0.40)
 
         # ====================================================
         # Quality calculation
