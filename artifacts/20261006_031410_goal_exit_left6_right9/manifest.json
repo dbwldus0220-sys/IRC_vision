@@ -1,0 +1,51 @@
+{
+  "changes": [
+    {
+      "file": "artifacts/robot_motions_runtime.json",
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "before_turns": 4,
+      "after_turns": 6,
+      "repeat_count": 1,
+      "before_max_seq_ms": 1978,
+      "after_max_seq_ms": 2656,
+      "appended_block_shift_ms": 678
+    },
+    {
+      "file": "artifacts/robot_motions_runtime.json",
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "before_turns": 7,
+      "after_turns": 9,
+      "repeat_count": 1,
+      "before_max_seq_ms": 3591,
+      "after_max_seq_ms": 4302,
+      "appended_block_shift_ms": 711
+    },
+    {
+      "file": "artifacts/robot_motions_pc.json",
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "before_turns": 4,
+      "after_turns": 6,
+      "repeat_count": 1,
+      "before_max_seq_ms": 1978,
+      "after_max_seq_ms": 2656,
+      "appended_block_shift_ms": 678
+    },
+    {
+      "file": "artifacts/robot_motions_pc.json",
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "before_turns": 7,
+      "after_turns": 9,
+      "repeat_count": 1,
+      "before_max_seq_ms": 3591,
+      "after_max_seq_ms": 4302,
+      "appended_block_shift_ms": 711
+    }
+  ],
+  "unchanged_other_motions": true,
+  "unchanged_existing_frames": true,
+  "runtime_reference_policy_match": true,
+  "sha256": {
+    "artifacts/robot_motions_runtime.json": "3c0d16bb17d53c6f3c51250f281e76f8d531f0d011e9e67529ded929881eaaab",
+    "artifacts/robot_motions_pc.json": "e26325890a440b016b73ccb570731f85ac94c5fab1fd82e090dd7d88268dafa0"
+  }
+}

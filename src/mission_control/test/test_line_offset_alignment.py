@@ -1,4 +1,4 @@
-"""Check offset-point steering independently of the local line slope."""
+"""Keep image offsets separate from physical heading correction."""
 
 from dataclasses import replace
 
@@ -14,7 +14,7 @@ from test_wait_refresh_and_fine_settle import LiveInputHarness, observe
 
 def sample(angle=40.0, offset=200.0, **changes):
     data = {
-        **line_info(heading=-15.0, offset=0.7),
+        **line_info(heading=20.0, offset=0.7),
         "lateral_offset_px": offset,
         "offset_reference_valid": True,
         "offset_reference_x_px": 710.0 + offset,
@@ -29,20 +29,20 @@ def planner(threshold=100.0):
     return MotionDecisionPlanner(MotionDecisionConfig(line_offset_align_enter_px=threshold))
 
 
-@pytest.mark.parametrize("angle,direction,count,yaw", [
-    (15., "RIGHT", 2, 15.), (29.999, "RIGHT", 2, 15.),
-    (30., "RIGHT", 3, 30.), (40., "RIGHT", 3, 30.),
-    (45., "RIGHT", 5, 45.), (65., "RIGHT", 7, 65.),
-    (89., "RIGHT", 7, 65.), (-15., "LEFT", 1, 15.),
-    (-30., "LEFT", 2, 30.), (-45., "LEFT", 3, 45.),
-    (-89., "LEFT", 5, 75.),
+@pytest.mark.parametrize("heading,direction,count,yaw", [
+    (10.01, "RIGHT", 2, 15.), (29.999, "RIGHT", 2, 15.),
+    (30., "RIGHT", 3, 30.), (45., "RIGHT", 5, 45.),
+    (-10.01, "LEFT", 1, 15.), (-30., "LEFT", 2, 30.),
+    (-45., "LEFT", 3, 45.),
 ])
-def test_turn_count_uses_offset_point_angle_and_catalog(angle, direction, count, yaw):
-    decision = planner().plan("LINE_TRACK", {"line": sample(angle)}, .1)
-    action = f"LINE_OFFSET_TURN_{direction}_{count}"
+@pytest.mark.parametrize("image_point_angle", [-80., 0., 80., None])
+def test_turn_count_uses_heading_not_image_point(heading, direction, count, yaw, image_point_angle):
+    data = sample(image_point_angle, ground_heading_error_deg=heading)
+    decision = planner().plan("LINE_TRACK", {"line": data}, .1)
+    action = f"LINE_HEADING_TURN_{direction}_{count}"
     assert decision.valid and decision.action == action
-    assert decision.source_command["turn_count"] == count
     assert decision.source_command["turn_angle_deg"] == yaw
+    assert decision.source_command["alignment_reference"] == "ground_heading"
     assert decision.source_command["linear_speed_mps"] == 0.
     assert decision.source_command["lateral_speed_mps"] == 0.
     assert normalize_general_action(action) == action
@@ -51,67 +51,89 @@ def test_turn_count_uses_offset_point_angle_and_catalog(angle, direction, count,
     assert MotionDecisionNode._needs_correction_dwell(action)
 
 
-def test_right_point_overrides_left_recovery_from_line_slope():
-    data = sample()
-    assert planner(-1.).plan("LINE_TRACK", {"line": data}, .1).action == "RECOVER_RIGHT_TURN_LEFT_4"
-    assert planner().plan("LINE_TRACK", {"line": data}, .1).action == "LINE_OFFSET_TURN_RIGHT_3"
+@pytest.mark.parametrize("phase", ["AUTO", "LINE_TRACK", "LINE_TRACK_AFTER_PICKUP"])
+def test_recorded_aligned_left_offset_uses_short_forward(phase):
+    data = sample(-50.675, -156.98, ground_heading_error_deg=-5.57,
+                  filtered_heading_error_deg=6.7, heading_error_deg=6.7,
+                  filtered_lateral_offset_norm=-.245, turn_angle_deg=12.1)
+    decision = planner().plan(phase, {"line": data}, .1)
+    assert decision.valid and decision.action == "STRAIGHT_1"
+    assert decision.reason == "line_offset_short_forward"
+    assert decision.source_command["target_heading_change_deg"] == 0.
+    assert decision.source_command["recovery_side"] is None
+    assert decision.source_command["turn_angle_deg"] is None
+    assert decision.source_command["turn_count"] is None
+    assert decision.source_command["offset_reference_turn_count"] == 0
+    assert MotionCommandBridgeNode.motion_id_for_action(decision.action) == "line_forward_2"
 
 
-@pytest.mark.parametrize("angle,offset", [(0., 200.), (14.999, 200.), (40., 100.)])
-def test_aligned_or_inside_limit_returns_to_normal_decision(angle, offset):
-    data = sample(angle, offset)
-    assert planner().plan("LINE_TRACK", {"line": data}, .1).action == (
-        planner(-1.).plan("LINE_TRACK", {"line": data}, .1).action)
-
-
-@pytest.mark.parametrize("changes", [
-    {"offset_reference_valid": False}, {"offset_reference_steering_deg": None},
-    {"offset_reference_steering_deg": float("nan")},
-    {"offset_reference_steering_deg": 90.}, {"lateral_offset_px": None},
-    {"heading_quality": 0.1}, {"detected": False},
-])
-def test_invalid_geometry_cannot_start_alignment(changes):
-    decision = planner().plan("LINE_TRACK", {"line": sample(**changes)}, .1)
-    assert not decision.valid
-
-
-def test_default_applies_offset_alignment():
-    decision = MotionDecisionPlanner().plan("LINE_TRACK", {"line": sample()}, .1)
-    assert decision.valid and decision.action == "LINE_OFFSET_TURN_RIGHT_3"
-    assert decision.source_command["offset_reference_steering_deg"] == 40.
-    assert decision.source_command["offset_reference_turn_count"] == 3
-
-
-def test_recorded_large_left_offset_uses_stationary_left_turn_by_default():
-    data = sample(
-        -75.8, -507.9, ground_heading_error_deg=31.99,
-        filtered_heading_error_deg=49.3, filtered_lateral_offset_norm=-.795,
-        turn_angle_deg=3.6,
-    )
-    assert planner(-1.).plan("LINE_TRACK", {"line": data}, .1).action == (
-        "RECOVER_LEFT_TURN_RIGHT_4")
-    decision = MotionDecisionPlanner().plan("LINE_TRACK", {"line": data}, .1)
-    assert decision.valid and decision.action == "LINE_OFFSET_TURN_LEFT_5"
-    assert decision.source_command["turn_angle_deg"] == 75.
-    assert decision.source_command["linear_speed_mps"] == 0.
+@pytest.mark.parametrize("heading", [-10., 0., 10.])
+@pytest.mark.parametrize("offset", [-500., -100.1, 100.1, 500.])
+def test_aligned_offset_never_requests_stationary_yaw(heading, offset):
+    data = sample(80., offset, ground_heading_error_deg=heading,
+                  filtered_heading_error_deg=heading)
+    decision = planner().plan("LINE_TRACK", {"line": data}, .1)
+    assert decision.valid and decision.action == "STRAIGHT_1"
 
 
 @pytest.mark.parametrize("sign", [-1, 1])
 @pytest.mark.parametrize("offset", [99.9, 100., 100.1])
-def test_default_pixel_limit_boundary(sign, offset):
-    data = sample(sign * 40., sign * offset)
-    decision = MotionDecisionPlanner().plan("LINE_TRACK", {"line": data}, .1)
+def test_pixel_limit_only_selects_short_forward_when_heading_aligned(sign, offset):
+    data = sample(sign * 80., sign * offset, ground_heading_error_deg=0.,
+                  filtered_heading_error_deg=0., filtered_lateral_offset_norm=0.)
+    decision = planner().plan("LINE_TRACK", {"line": data}, .1)
     assert decision.valid
-    assert decision.action.startswith("LINE_OFFSET_TURN_") == (offset > 100.)
+    assert decision.action == ("STRAIGHT_1" if offset > 100. else "STRAIGHT")
+
+
+def test_disabled_policy_preserves_original_recovery():
+    data = sample(-80.)
+    assert planner(-1.).plan("LINE_TRACK", {"line": data}, .1).action == "RECOVER_RIGHT_TURN_RIGHT_4"
 
 
 @pytest.mark.parametrize("changes", [
-    {"offset_reference_valid": False}, {"lateral_offset_px": None},
+    {"ground_projection_valid": False}, {"ground_heading_error_deg": None},
+    {"ground_heading_error_deg": float("nan")}, {"lateral_offset_px": None},
+    {"heading_quality": .1}, {"detected": False},
 ])
-def test_enabled_default_stops_on_missing_alignment_geometry(changes):
-    decision = MotionDecisionPlanner().plan("LINE_TRACK", {"line": sample(**changes)}, .1)
-    assert not decision.valid
-    assert decision.reason == "line_offset_alignment_invalid_reference"
+def test_invalid_geometry_cannot_start_alignment(changes):
+    assert not planner().plan("LINE_TRACK", {"line": sample(**changes)}, .1).valid
+
+
+def test_raw_cross_line_still_vetoes_short_forward():
+    data = sample(80., ground_heading_error_deg=5., heading_error_deg=55.)
+    decision = planner().plan("LINE_TRACK", {"line": data}, .1)
+    assert not decision.valid and decision.reason == "straight_heading_not_aligned"
+
+
+def test_candidate_generation_preserves_base_planner_state():
+    p = planner()
+    base = p.line_planner
+    base.previous_motion = "RIGHT"
+    base.previous_angular_speed_rad_s = .2
+    base.turn_candidate = "LEFT"
+    base.turn_candidate_hits = 2
+    result = p._line_offset_alignment(sample(), {"valid": True, "motion": "RIGHT"})
+    assert result["motion"] == "LINE_HEADING_TURN_RIGHT_2"
+    assert (base.previous_motion, base.previous_angular_speed_rad_s,
+            base.turn_candidate, base.turn_candidate_hits) == ("RIGHT", .2, "LEFT", 2)
+
+
+def test_recorded_stop_loop_finishes_settle_with_unchanged_geometry(monkeypatch):
+    clock = [10.]
+    monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: clock[0])
+    node = LiveInputHarness(phase="AUTO")
+    node.LINE_TURN_PRE_MOTION_SETTLE_SEC = 1.
+    data = sample(67.6, 311.6, ground_heading_error_deg=16.43,
+                  heading_error_deg=-5.76, filtered_heading_error_deg=-5.76,
+                  filtered_lateral_offset_norm=.481, turn_angle_deg=40.6)
+    for i in range(20):
+        clock[0] = 10. + i * .1
+        observe(node, clock, "line", data)
+    commands = [m for m in node.publisher.messages if m["valid"]]
+    assert len(commands) == 1
+    assert commands[0]["action"] == "LINE_HEADING_TURN_RIGHT_2"
+    assert commands[0]["source_command"]["turn_angle_deg"] == 15.
 
 
 @pytest.mark.parametrize("stamp", [None, True, 9_000_000_000, 10_000_000_000])
@@ -151,7 +173,7 @@ def test_turn_completion_waits_then_replans_new_frame(monkeypatch):
     clock[0] += 1.1
     observe(node, clock, "line", sample())
     command = node.publisher.messages[-1]
-    assert command["action"] == "LINE_OFFSET_TURN_RIGHT_3"
+    assert command["action"] == "LINE_HEADING_TURN_RIGHT_2"
     node.send_status(command["action"], command["command_id"], "RUNNING")
     node.send_status(command["action"], command["command_id"], "SUCCEEDED")
     deadline = node.correction_post_motion_dwell_until

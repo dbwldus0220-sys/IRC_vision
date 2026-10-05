@@ -1,0 +1,101 @@
+{
+  "source": "/home/jet/Downloads/robot_motions(47).json",
+  "source_sha256": "eb331d880ea3b48a8993ed5659f236cedc98450549469bc0b58c23afee74204b",
+  "source_motion_count": 75,
+  "before_count": 86,
+  "runtime_count": 82,
+  "derived_motions": [
+    {
+      "name": "건라인복귀좌회전45도(6회)",
+      "base": "건라인복귀좌회전45도(4회)",
+      "repeat_count": 6
+    },
+    {
+      "name": "건미세0도(허들10회)",
+      "base": "건미세0도",
+      "repeat_count": 10
+    },
+    {
+      "name": "건미세90도(1회)",
+      "base": "건미세90도",
+      "repeat_count": 1
+    },
+    {
+      "name": "건미세90도(2회)",
+      "base": "건미세90도",
+      "repeat_count": 2
+    },
+    {
+      "name": "건미세90도(3회)",
+      "base": "건미세90도",
+      "repeat_count": 3
+    },
+    {
+      "name": "건미세90도(4회)",
+      "base": "건미세90도",
+      "repeat_count": 4
+    },
+    {
+      "name": "찐미세오뒤에서 오뒤(골대 카메라90도)",
+      "base": "건미세오뒤에서 오뒤45도",
+      "camera_motor_0_deg": 1.0,
+      "frame_name_suffix": "(회전준비90도)"
+    }
+  ],
+  "removed_names": [
+    "찐공잡기리그랩까지 실전",
+    "찐오뒤에서미세오뒤(왼들)",
+    "찐왼뒤에서기본자세(90도)",
+    "찐왼쪽게걸음(45도)"
+  ],
+  "updated_names": [
+    "찐공잡기전후진-2(2회)",
+    "찐후진하고 제자리우회전(공)",
+    "찐후진에서 제자리좌회전(공)",
+    "찐허들",
+    "유미세오옆꽃게0도",
+    "유미세오옆꽃게90도",
+    "건라인복귀좌회전45도(1회)",
+    "건전진45도(2회)",
+    "건라인복귀우회전45도(4회)",
+    "건전진45도(4회)",
+    "건전진45도(6회)",
+    "건전진45도(8회)",
+    "건라인복귀좌회전45도(4회)",
+    "건오뒤에서 기본자세(카메라45도)",
+    "건기본자세에서제자리좌회전(골대)",
+    "건미세오뒤에서 오뒤45도",
+    "건기본자세에서제자리우회전(골대)",
+    "건라인복귀좌회전45도(6회)",
+    "찐미세오뒤에서 오뒤(골대 카메라90도)"
+  ],
+  "runtime_policy": {
+    "position_tolerance_deg": 5.0,
+    "fixed_joint_angles_deg": {
+      "4": 18.0,
+      "5": -18.0
+    },
+    "exceptions": [
+      "찐공잡기리그랩까지 실전",
+      "찐골넣기",
+      "찐허들"
+    ]
+  },
+  "runtime_path": "artifacts/robot_motions_runtime.json",
+  "reference_path": "artifacts/robot_motions_pc.json",
+  "runtime_sha256": "06f2ac779baec8b606d2b8dac01b842ec5e8f332dcd053ca88f442ec7a5dbf16",
+  "reference_sha256": "713eac97e6ae5b33e2473f1b9c4f06afb79337c2d3e625dcdfd34c0a4ca3de80",
+  "backup_runtime_sha256": "ce7184c2b87185d608e1d6abd7061b2f48f454f9210529e5be75f595303b1289",
+  "aliases_changed": false,
+  "validation": {
+    "aliases_resolve": true,
+    "motor_ids": "0..22",
+    "startup_pose_consistent": true,
+    "reference_frame_matching": true,
+    "source_motions_exact_after_runtime_policy": true,
+    "reference_runtime_match": true,
+    "python_tests_passed": 9,
+    "sdk_json_load_motion_count": 82,
+    "startup_policy_combinations_passed": 4
+  }
+}

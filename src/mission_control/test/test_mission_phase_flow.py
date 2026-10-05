@@ -2938,7 +2938,7 @@ def test_post_pickup_line_failure_blocks_camera_and_further_walking(monkeypatch,
     assert harness.active_special_command_id is None
 
 
-def test_post_pickup_line_timer_waits_for_actual_motion_and_disables_prequeue(monkeypatch):
+def test_post_pickup_line_timer_waits_for_actual_motion_and_allows_prequeue(monkeypatch):
     now = [10.0]
     monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: now[0])
     harness = MissionFlowHarness(phase="LINE_TRACK_AFTER_PICKUP")
@@ -2953,8 +2953,8 @@ def test_post_pickup_line_timer_waits_for_actual_motion_and_disables_prequeue(mo
     assert harness.post_ball_line_run_until == 41.0
     before = len(harness.publisher.messages)
     MotionDecisionNode._publish_decision(harness, harness.last_selected_decision, queue_while_locked=True)
-    assert len(harness.publisher.messages) == before
-    assert getattr(harness, "queued_general_command_id", None) is None
+    assert len(harness.publisher.messages) == before + 1
+    assert harness.queued_general_command_id == harness.publisher.messages[-1]["command_id"]
 
 
 def test_post_pickup_run_uses_the_normal_line_steering_and_loss_logic():
@@ -2995,7 +2995,8 @@ def test_post_pickup_corner_frames_use_normal_turn_after_motion_boundary(monkeyp
     callback = MotionDecisionNode._info_callback(harness, "line")
     for _ in range(15):
         callback(String(data=json.dumps(corner)))
-    assert harness.pending_line_decision is None
+    assert harness.pending_line_decision.action == "RIGHT"
+    assert getattr(harness, "queued_general_command_id", None) is None
     assert len(harness.publisher.messages) == 1
 
     now[0] = 13.2

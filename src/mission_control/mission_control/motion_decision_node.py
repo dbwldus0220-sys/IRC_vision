@@ -3139,9 +3139,6 @@ class MotionDecisionNode(Node):
 
     def _prepare_pending_line_decision(self, now: float) -> None:
         """Precompute the next decision from late-motion line frames."""
-        if self.mission_phase == "LINE_TRACK_AFTER_PICKUP":
-            # Check the ten-second boundary between motions, without a queued step.
-            return
         frames = self.active_line_motion_frames
         if not frames:
             return
@@ -3223,6 +3220,9 @@ class MotionDecisionNode(Node):
         ):
             return False
         for source in ("ball", "goal", "hurdle", "finish"):
+            if self.mission_phase == "LINE_TRACK_AFTER_PICKUP" and source in {"ball", "goal"}:
+                # This timed Line stage also masks these inputs in mission selection.
+                continue
             if source == "ball" and MotionDecisionNode._ball_navigation_blocked(self):
                 continue
             if (
@@ -3246,6 +3246,24 @@ class MotionDecisionNode(Node):
             ):
                 return False
         return True
+
+    def _line_prequeue_fits_deadline(self, decision: MotionDecision, now: float) -> bool:
+        """Reserve a timed-stage forward only when its full duration still fits."""
+        if self.mission_phase != "LINE_TRACK_AFTER_PICKUP":
+            return True
+        deadline = getattr(self, "post_ball_line_run_until", None)
+        started_at = self.active_line_motion_started_at
+        timing = MotionDecisionNode.LINE_MOTION_CAPTURE_CONFIG.get(decision.action)
+        if (
+            deadline is None or started_at is None or timing is None
+            or not decision.valid or decision.source != "line"
+            or not decision.action.startswith("STRAIGHT")
+            or not str(self.general_motion_gate.active_action).startswith("STRAIGHT")
+            or getattr(self, "post_ball_line_run_failed", False)
+        ):
+            return False
+        current_end = max(now, started_at + self.active_line_motion_duration_sec)
+        return current_end + timing[0] < deadline
 
     def _finish_line_motion_capture(self) -> None:
         """Replay captured frames into the existing line planner."""
@@ -3298,9 +3316,6 @@ class MotionDecisionNode(Node):
             return
         if self.safety_interlock.latched:
             return
-        if queue_while_locked and self.mission_phase == "LINE_TRACK_AFTER_PICKUP":
-            return
-
         if not self.executor_heartbeat_watchdog.executor_seen:
             # Do not race executor preflight/startup pose with navigation.
             self._reset_pre_motion_settle()
@@ -3438,6 +3453,12 @@ class MotionDecisionNode(Node):
         observations, ages = self._fresh_observations(
             now
         )
+        if queue_while_locked and (
+            precomputed_decision is None
+            or not MotionDecisionNode._line_only_prequeue_allowed(self, observations)
+            or not MotionDecisionNode._line_prequeue_fits_deadline(self, precomputed_decision, now)
+        ):
+            return
 
         sparse = getattr(self, "sparse_line_recovery", None)
         if sparse is None:

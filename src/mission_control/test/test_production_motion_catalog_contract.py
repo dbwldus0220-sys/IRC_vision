@@ -472,9 +472,10 @@ def test_production_motions_keep_approved_final_tolerances():
     for motion in catalog:
         assert motion["completion"]["position_tolerance_deg"] == 5.0
 
-    production_tolerance = motions_by_name[
-        "찐공잡기리그랩까지 실전"
-    ]["completion"]["position_tolerance_deg"]
+    aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+    production_tolerance = motions_by_name[aliases["sdk_pickup"]][
+        "completion"
+    ]["position_tolerance_deg"]
     assert 4.75 <= production_tolerance
     assert 5.25 > production_tolerance
 

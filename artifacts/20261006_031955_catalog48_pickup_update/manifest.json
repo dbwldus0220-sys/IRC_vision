@@ -1,0 +1,78 @@
+{
+  "source": "/home/jet/Downloads/robot_motions(48).json",
+  "source_sha256": "ec1d9a4109f2145221372f3c28c36feafcc75094b81e797947a937ed138961c2",
+  "updated_motion": "건공잡기",
+  "changes": [
+    {
+      "file": "artifacts/robot_motions_runtime.json",
+      "fields": [
+        {
+          "path": "/frames/2/angles/3",
+          "before": -16.611328125,
+          "after": -26.455078125
+        },
+        {
+          "path": "/frames/3/angles/3",
+          "before": -27.861328125,
+          "after": -33.92578125
+        },
+        {
+          "path": "/frames/4/angles/3",
+          "before": -28.1796875,
+          "after": -34.0
+        }
+      ]
+    },
+    {
+      "file": "artifacts/robot_motions_pc.json",
+      "fields": [
+        {
+          "path": "/frames/2/angles/3",
+          "before": -16.611328125,
+          "after": -26.455078125
+        },
+        {
+          "path": "/frames/2/angles/5",
+          "before": -31.552734375,
+          "after": -38.935546875
+        },
+        {
+          "path": "/frames/3/angles/3",
+          "before": -27.861328125,
+          "after": -33.92578125
+        },
+        {
+          "path": "/frames/3/angles/5",
+          "before": -37.03515625,
+          "after": -46.736328125
+        },
+        {
+          "path": "/frames/4/angles/3",
+          "before": -28.1796875,
+          "after": -34.0
+        },
+        {
+          "path": "/frames/4/angles/5",
+          "before": -37.123046875,
+          "after": -47.0
+        }
+      ]
+    }
+  ],
+  "unchanged_other_motions": 81,
+  "goal_exit_cycles": {
+    "left": 6,
+    "right": 9
+  },
+  "runtime_policy": {
+    "position_tolerance_deg": 5.0,
+    "fixed_angles": {
+      "4": 18.0,
+      "5": -18.0
+    }
+  },
+  "sha256": {
+    "artifacts/robot_motions_runtime.json": "7c63d8a34c0aa08910e0bcade5ed1e139ec51d05cea042d6a73db3f906989625",
+    "artifacts/robot_motions_pc.json": "efeaa05b34309e99d3bb18a06e0bfe46ca72d532c6ac8cfe4d47b97d253343a4"
+  }
+}

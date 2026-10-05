@@ -211,7 +211,7 @@ install(DIRECTORY include/ DESTINATION include)
 install(DIRECTORY config launch DESTINATION share/${PROJECT_NAME})
 install(FILES
   "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/robot_motions_runtime.json"
-  "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/20261002_common_playback/robot_motions_pc.json"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/robot_motions_pc.json"
   DESTINATION share/${PROJECT_NAME}/config)
 install(FILES
   "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/20261006_gui_alignment/reference/robot_motions(10).json"
@@ -372,7 +372,7 @@ if(BUILD_TESTING)
     target_link_libraries(test_startup_pose_catalog sdk_executor_driver)
     target_compile_definitions(test_startup_pose_catalog PRIVATE
       TEST_RUNTIME_CATALOG="${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/robot_motions_runtime.json"
-      TEST_PC_CATALOG="${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/20261002_common_playback/robot_motions_pc.json")
+      TEST_PC_CATALOG="${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/robot_motions_pc.json")
   endif()
 
   find_package(launch_testing_ament_cmake REQUIRED)

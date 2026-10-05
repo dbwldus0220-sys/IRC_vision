@@ -433,7 +433,7 @@ def test_distant_corner_preserves_local_line_recovery(clock):
     ({'ground_heading_error_deg': 31.99, 'filtered_lateral_offset_norm': -.795,
       'lateral_offset_px': -507.9, 'offset_reference_valid': True,
       'offset_reference_steering_deg': -75.8, 'turn_angle_deg': 3.6},
-     'LINE_OFFSET_TURN_LEFT_5'),
+     'LINE_HEADING_TURN_RIGHT_3'),
     ({'ground_heading_error_deg': 0., 'filtered_heading_error_deg': 0.,
       'heading_error_deg': 55., 'turn_angle_deg': 0.}, 'STOP'),
 ])
@@ -473,7 +473,7 @@ def test_remembered_direction_alone_cannot_replace_normal_forward(clock, updates
 def test_corner_switch_does_not_bypass_invalid_offset_geometry(clock):
     node = CornerHarness(phase='LINE_TRACK')
     info = corner_info(ground_heading_error_deg=0., turn_angle_deg=0.,
-                       lateral_offset_px=200., offset_reference_valid=False)
+                       lateral_offset_px=None, offset_reference_valid=False)
     result = node.publish_vision(line=info)[-1]
     assert not result['valid'] and result['action'] == 'STOP'
     assert result['reason'] == 'line_offset_alignment_invalid_reference'

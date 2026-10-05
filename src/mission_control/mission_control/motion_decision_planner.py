@@ -18,7 +18,9 @@ from step.goal_navigation_planner import GoalNavigationConfig, GoalNavigationPla
 from step.hurdle_navigation_planner import HurdleNavigationPlanner
 from step.line_navigation_planner import LineNavigationPlanner
 from step.line_navigation_planner import NavigationConfig
-from step.line_navigation_planner import valid_ground_heading, line_heading
+from step.line_navigation_planner import (
+    valid_ground_heading, line_heading, straight_heading_is_aligned,
+)
 
 from .goal_loss_timer import GoalLossTimer
 from .hurdle_line_fusion import build_hurdle_path_reference
@@ -789,14 +791,12 @@ class MotionDecisionPlanner:
         return result
 
     def _line_offset_alignment(self, info: dict, result: dict) -> dict:
-        """Prefer stationary steering to the offset point outside the pixel limit."""
+        """Separate heading correction from short, off-center forward steps."""
         angle = self._number(info, "offset_reference_steering_deg")
         reference_valid = (
             info.get("offset_reference_valid") is True
             and angle is not None and abs(angle) < 90.0
         )
-        direction = ("RIGHT" if angle >= 0.0 else "LEFT") if reference_valid else None
-        count = self._turn_repeat_count(angle, direction) if reference_valid else 0
         offset = self._number(info, "lateral_offset_px")
         threshold = self.config.line_offset_align_enter_px
         result.update({
@@ -805,32 +805,69 @@ class MotionDecisionPlanner:
             "offset_reference_x_px": self._number(info, "offset_reference_x_px"),
             "offset_reference_y_px": self._number(info, "offset_reference_y_px"),
             "offset_reference_steering_deg": angle if reference_valid else None,
-            "offset_reference_turn_direction": direction,
-            "offset_reference_turn_count": count,
+            # Image-point steering is diagnostic only, never a body yaw target.
+            "offset_reference_turn_direction": None,
+            "offset_reference_turn_count": 0,
             "offset_align_enter_px": threshold,
         })
         if threshold < 0.0 or not result["valid"]:
             return result
         if offset is not None and abs(offset) <= threshold:
             return result
-        if offset is None or not reference_valid:
-            stopped = self.line_planner.stop("line_offset_alignment_invalid_reference").to_dict()
-            return {**result, **stopped}
-        # Below the smallest calibrated turn, re-evaluate recovery/forward normally.
+        config = self.line_planner.config
+        heading = line_heading(info, config.heading_source)
+        # Build the candidate without stop(): it clears the base planner's
+        # confirmed direction and would restart the pre-turn dwell every 3 ticks.
+        candidate = {
+            **result,
+            "linear_speed_mps": 0.0, "lateral_speed_mps": 0.0,
+            "angular_speed_rad_s": 0.0, "angular_accel_rad_s2": 0.0,
+            "travel_distance_m": 0.0, "lateral_travel_distance_m": 0.0,
+            "target_heading_change_deg": 0.0,
+            "recovery_side": None, "turn_motion": None, "turn_level": None,
+            "turn_direction": None, "turn_count": None, "turn_angle_deg": None,
+            "approach_motion": None, "approach_level": None,
+            "corner_prepare": False,
+        }
+        if offset is None or heading is None:
+            return {**candidate, "valid": False, "motion": "STOP",
+                    "reason": "line_offset_alignment_invalid_reference"}
+        if abs(heading) <= config.straight_max_heading_deg:
+            if not straight_heading_is_aligned(info, config):
+                return {**candidate, "valid": False, "motion": "STOP",
+                        "reason": "straight_heading_not_aligned"}
+            # No calibrated lateral-only Line gait is available. Reobserve after
+            # the shortest normal forward instead of turning toward an image point.
+            speed = config.min_linear_speed_mps
+            return {
+                **candidate, "valid": True, "motion": "STRAIGHT_1",
+                "reason": "line_offset_short_forward",
+                "linear_speed_mps": speed,
+                "travel_distance_m": speed * config.command_duration_sec,
+                "steering_error_deg": heading,
+                "approach_motion": "STRAIGHT_1", "approach_level": 1,
+                "alignment_reference": "lateral_offset_short_forward",
+                "catalog_motion_available": True,
+            }
+        direction = "RIGHT" if heading > 0.0 else "LEFT"
+        count = self._turn_repeat_count(heading, direction)
         if count == 0:
-            return result
+            # Match post-pickup alignment for residual errors between 10 and 15 deg.
+            angles = (
+                self.LEFT_TURN_ANGLES_DEG if direction == "LEFT"
+                else self.RIGHT_TURN_ANGLES_DEG
+            )
+            count = min(angles, key=angles.get)
         yaw = self._turn_angle_deg(count, direction)
-        stopped = self.line_planner.stop("line_offset_alignment").to_dict()
         return {
-            **result, **stopped,
-            "valid": True,
-            "motion": f"LINE_OFFSET_TURN_{direction}_{count}",
-            "reason": "line_offset_alignment",
-            "steering_error_deg": angle,
-            "target_heading_change_deg": math.copysign(yaw, angle),
+            **candidate, "valid": True,
+            "motion": f"LINE_HEADING_TURN_{direction}_{count}",
+            "reason": "line_heading_alignment",
+            "steering_error_deg": heading,
+            "target_heading_change_deg": math.copysign(yaw, heading),
             "turn_direction": direction, "turn_count": count,
             "turn_angle_deg": yaw,
-            "alignment_reference": "offset_reference_image_point",
+            "alignment_reference": f"{config.heading_source}_heading",
             "catalog_motion_available": True,
         }
 
