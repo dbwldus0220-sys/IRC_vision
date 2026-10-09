@@ -52,7 +52,7 @@ def test_import_preserves_special_motions_and_other_joint_data(tmp_path):
     runtime = tmp_path / "runtime.json"
     aliases = tmp_path / "aliases.yaml"
     backup_dir = tmp_path / "backups"
-    exceptions = {"찐공잡기리그랩까지 실전", "찐골넣기", "찐허들"}
+    exceptions = {"찐공잡기리그랩까지 실전", "건공잡기", "찐골넣기", "찐허들"}
 
     def motion(name):
         return {
@@ -96,7 +96,7 @@ def test_import_preserves_special_motions_and_other_joint_data(tmp_path):
 def test_production_runtime_keeps_fixed_motor_angles():
     path = Path(__file__).resolve().parents[1] / "artifacts/robot_motions_runtime.json"
     motions = json.loads(path.read_text())["motions"]
-    exceptions = {"찐공잡기리그랩까지 실전", "찐골넣기", "찐허들"}
+    exceptions = {"찐공잡기리그랩까지 실전", "건공잡기", "찐골넣기", "찐허들"}
     # An exemption does not require retaining retired motions in a full replacement.
     assert motions
     for motion in motions:

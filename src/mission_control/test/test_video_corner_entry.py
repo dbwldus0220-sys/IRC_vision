@@ -7,7 +7,7 @@ from std_msgs.msg import String
 
 from mission_control.motion_decision_node import MotionDecisionNode
 from mission_control.motion_decision_planner import MotionDecisionPlanner
-from test_line_ground_fit_recovery import frame
+from test_line_ground_fit_recovery import frame, unconfirmed_sparse_info
 from test_motion_decision_planner import ball_info
 from test_sparse_line_recovery import sparse_info
 from test_wait_refresh_and_fine_settle import LiveInputHarness
@@ -23,28 +23,30 @@ def clock(monkeypatch):
 
 @pytest.mark.parametrize('direction', ['LEFT', 'RIGHT'])
 @pytest.mark.parametrize('ground_valid', [False, True])
-def test_confirmed_entry_precedes_fit_recovery_and_large_heading(clock, direction, ground_valid):
+def test_confirmed_corner_does_not_override_large_heading_or_failed_fit(clock, direction, ground_valid):
     node = LiveInputHarness(phase='LINE_TRACK')
     node.LINE_TURN_PRE_MOTION_SETTLE_SEC = 1.0
-    info = sparse_info(direction=direction, distance=.4)
+    node.line_corner_turn_distance_m = .4
+    info = {**unconfirmed_sparse_info(direction=direction, distance=.4),
+            'corner_preview_confirmed': True, 'ground_two_point_candidate': None}
     if ground_valid:
         info.update(ground_projection_valid=True, ground_heading_error_deg=45.5,
                     ground_fit_point_count=3, ground_fit_reason='ok')
     # The local offset or heading may point away from the confirmed corner.
     info['filtered_lateral_offset_norm'] = -.3
+    expected = node.planner.plan('LINE_TRACK', {'line': info}, .1)
     assert frame(node, clock, info) == []
     clock[0] += .5
     assert frame(node, clock, info) == []
     clock[0] += .51
     command = frame(node, clock, info)[-1]
-    assert command['valid'] and command['action'] == direction
-    assert command['reason'] == 'line_corner_ready'
-    assert command['source_command']['corner_without_ground_fit'] is not ground_valid
-    assert command['source_command']['corner_turn_distance_m'] == .4
-    assert 'invalid_ground_recovery' not in command['source_command']
-    node.send_status(direction, command['command_id'], 'RUNNING')
-    clock[0] += .1
-    assert frame(node, clock, info) == []
+    assert command['valid'] and command['action'] not in {'LEFT', 'RIGHT'}
+    if ground_valid:
+        assert command['action'] == expected.action
+        assert command['reason'] == expected.reason
+    else:
+        assert command['action'] == 'LINE_OFFSET_TURN_RIGHT_2'
+        assert command['source_command']['image_line_alignment']
 
 
 @pytest.mark.parametrize('updates', [
@@ -114,7 +116,7 @@ def test_launch_shares_one_corner_entry_distance(monkeypatch, tmp_path, robot, d
         from test_full_system_launch import launch_description, launch_context as default_context
     description = launch_description(monkeypatch, tmp_path)
     context = default_context(description)
-    assert context.launch_configurations['corner_turn_margin_m'] == '0.40'
+    assert context.launch_configurations['corner_turn_margin_m'] == '0.15'
     assert context.launch_configurations['line_corner_memory_timeout_sec'] == '15.0'
     context.launch_configurations['corner_turn_margin_m'] = distance
     context.launch_configurations['line_corner_memory_timeout_sec'] = '7.5'

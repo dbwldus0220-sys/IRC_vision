@@ -5,7 +5,6 @@ import math
 import re
 
 from .motion_decision_planner import MotionDecision, MotionDecisionPlanner
-from .sparse_line_recovery import usable_two_point_line
 
 
 class LostSearchTurnLimiter:
@@ -13,6 +12,7 @@ class LostSearchTurnLimiter:
 
     CORNER_SEARCH_MAX_ANGLE_DEG = 45.0
     CORNER_SEARCH_MAX_TURNS = 3
+    IMAGE_ALIGNMENT_MIN_PROGRESS_DEG = 3.0
 
     def __init__(
         self, max_turns: int = 3, max_angle_deg: float = 90.0, *,
@@ -31,6 +31,11 @@ class LostSearchTurnLimiter:
         self.max_angle_deg = max_angle_deg
         self.counts = dict.fromkeys(("line", "ball", "hurdle", "goal"), 0)
         self.angles = dict.fromkeys(self.counts, 0.0)
+        self.image_alignment_count = 0
+        self.image_alignment_angle = 0.0
+        self.image_alignment_error = None
+        self.image_alignment_direction = None
+        self.image_alignment_reversals = 0
 
     @staticmethod
     def search_angle(decision: MotionDecision, info: dict | None) -> float | None:
@@ -47,6 +52,7 @@ class LostSearchTurnLimiter:
         ))
         explicit_search = (
             "LOST_TURN" in action or "FINE_SEARCH_" in action
+            or decision.source_command.get("image_line_alignment") is True
             or decision.reason in {
                 "post_ball_line_search", "post_shot_line_search",
                 "turn_toward_last_seen_goal_side", "turn_toward_last_seen_ball_side",
@@ -86,6 +92,36 @@ class LostSearchTurnLimiter:
         angle = self.search_angle(decision, observations.get(source))
         if angle is None:
             return decision
+        if source == "line" and decision.source_command.get("image_line_alignment") is True:
+            # Visible alignment does not spend the blind-search allowance.
+            max_turns = min(self.max_turns, self.CORNER_SEARCH_MAX_TURNS)
+            max_angle = min(self.max_angle_deg, self.CORNER_SEARCH_MAX_ANGLE_DEG)
+            error = MotionDecisionPlanner._number(decision.source_command, "image_target_bearing_deg")
+            direction = decision.source_command.get("turn_direction")
+            reason = None
+            if source in self.failed_sources:
+                reason = "lost_search_motion_failed"
+            elif error is None:
+                reason = "line_image_alignment_missing_error"
+            elif (self.image_alignment_error is not None
+                  and abs(error) > self.image_alignment_error - self.IMAGE_ALIGNMENT_MIN_PROGRESS_DEG):
+                reason = "line_image_alignment_no_progress"
+            elif (self.image_alignment_reversals >= 1
+                  and direction != self.image_alignment_direction):
+                reason = "line_image_alignment_oscillating"
+            elif (self.image_alignment_count >= max_turns
+                  or self.image_alignment_angle + angle > max_angle):
+                reason = "line_image_alignment_limit_reached"
+            metadata = {**decision.source_command,
+                        "image_alignment_turns_used": self.image_alignment_count,
+                        "image_alignment_angle_used_deg": self.image_alignment_angle,
+                        "image_alignment_max_turns": max_turns,
+                        "image_alignment_max_angle_deg": max_angle}
+            if reason is not None:
+                return replace(decision, action="WAIT", valid=False, reason=reason,
+                               sdk_motion_requested=False, requires_ack=False,
+                               source_command={**metadata, "blocked_search_action": decision.action})
+            return replace(decision, source_command=metadata)
         corner_direction = self.corner_directions.get(source)
         if (source == "line" and decision.action.startswith("LINE_LOST_TURN_")
                 and decision.source_command.get("corner_search_pending") is True):
@@ -119,6 +155,18 @@ class LostSearchTurnLimiter:
             return
         info = observations.get(source)
         angle = self.search_angle(decision, info)
+        if source == "line" and decision.source_command.get("image_line_alignment") is True:
+            self.image_alignment_count += 1
+            self.image_alignment_angle += angle
+            self.image_alignment_error = abs(decision.source_command["image_target_bearing_deg"])
+            direction = decision.source_command.get("turn_direction")
+            if self.image_alignment_direction is not None and direction != self.image_alignment_direction:
+                self.image_alignment_reversals += 1
+            self.image_alignment_direction = direction
+            return
+        if (source == "line" and decision.action not in {"WAIT", "STOP"}
+                and info is not None and info.get("ground_projection_valid") is True):
+            self._reset_image_alignment()
         if angle is not None:
             if decision.source_command.get("lost_search_stage") == "CORNER":
                 self.corner_directions.setdefault(source, decision.source_command["turn_direction"])
@@ -149,6 +197,14 @@ class LostSearchTurnLimiter:
         self.first_directions.pop("line", None)
         self.corner_directions.pop("line", None)
         self.failed_sources.discard("line")
+        self._reset_image_alignment()
+
+    def _reset_image_alignment(self):
+        self.image_alignment_count = 0
+        self.image_alignment_angle = 0.0
+        self.image_alignment_error = None
+        self.image_alignment_direction = None
+        self.image_alignment_reversals = 0
 
     def _filter_corner(self, decision: MotionDecision, info: dict | None, direction: str) -> MotionDecision:
         """Reobserve after each small turn; never reverse or refund earlier search."""
@@ -165,29 +221,13 @@ class LostSearchTurnLimiter:
             "lost_search_max_turns": max_turns, "lost_search_max_angle_deg": max_angle,
         }
         reason = None
-        visible_reacquire = bool(
-            decision.source_command.get("corner_ground_reacquire") is True
-            and info is not None and info.get("detected") is True
-            and (
-                (info.get("corner_preview_confirmed") is True
-                 and info.get("corner_preview_raw_detected") is True
-                 and info.get("corner_preview_held") is not True
-                 and info.get("corner_direction") == direction)
-                or (decision.source_command.get("corner_search_pending") is True
-                    and decision.source_command.get("remembered_corner_direction") == direction
-                    and usable_two_point_line(info)
-                    and not (info.get("corner_preview_raw_detected") is True
-                             and info.get("corner_direction") in {"LEFT", "RIGHT"}
-                             and info["corner_direction"] != direction))
-            )
-        )
         if source in self.failed_sources:
             reason = "lost_search_motion_failed"
         elif (self.counts[source] >= max_turns or self.angles[source] + angle > max_angle):
             reason = "lost_search_turn_limit_reached"
-        elif info is None or (info.get("detected") is not False and not visible_reacquire):
+        elif info is None or info.get("detected") is not False:
             reason = "lost_search_waiting_for_fresh_vision"
-        elif info.get("raw_detected") is True and not visible_reacquire:
+        elif info.get("raw_detected") is True:
             reason = "lost_search_waiting_for_confirmation"
         if reason is not None:
             return replace(decision, action="WAIT", valid=False, sdk_motion_requested=False,

@@ -4,7 +4,7 @@ from collections import deque
 from dataclasses import replace
 import math
 
-from .motion_decision_planner import MotionDecision, MotionDecisionPlanner
+from .motion_decision_planner import MotionDecisionPlanner
 
 
 def usable_two_point_line(info, min_quality=.35):
@@ -29,10 +29,9 @@ class SparseLineRecovery:
     REQUIRED_FRAMES = 3
     MAX_HEADING_SPREAD_DEG = 5.0
     MAX_POINT_DRIFT_M = 0.015
-    ESCAPE_WAIT_SEC = 1.0
     MAX_MOTIONS = 2
-    # Initial conservative allowance for the existing two-cycle forward + margin.
-    MIN_FORWARD_CORNER_DISTANCE_M = 0.45
+    MIN_PROGRESS_M = 2 * MAX_POINT_DRIFT_M
+    MIN_PROGRESS_DEG = MAX_HEADING_SPREAD_DEG
 
     def __init__(self):
         self.samples = deque(maxlen=self.REQUIRED_FRAMES)
@@ -46,6 +45,9 @@ class SparseLineRecovery:
         self.normal_hits = 0
         self.motions_used = 0
         self.failed = False
+        self.pending_action = None
+        self.progress_reference = None
+        self.current_geometry = None
 
     def reset_observations(self):
         """Motion, phase changes and invalid frames discard evidence, not budget."""
@@ -96,6 +98,7 @@ class SparseLineRecovery:
                 if self.normal_hits >= self.REQUIRED_FRAMES:
                     self.motions_used = 0
                     self.failed = False
+                    self.progress_reference = None
             elif new_frame:
                 self.normal_hits = 0
             self.samples.clear()
@@ -129,7 +132,8 @@ class SparseLineRecovery:
             if (heading is None or abs(heading) >= 90. or len(points) != 2
                     or any(len(p) != 2 for p in points)
                     or any(type(v) not in (float, int) or not math.isfinite(v)
-                           for p in points for v in p)):
+                           for p in points for v in p)
+                    or any(p[1] <= 0. for p in points)):
                 raise ValueError("invalid two-point geometry")
             dx, dz = points[1][0] - points[0][0], points[1][1] - points[0][1]
             if (math.hypot(dx, dz) < .04 or dz < .025
@@ -152,75 +156,100 @@ class SparseLineRecovery:
             and all(math.dist(p, ref) <= self.MAX_POINT_DRIFT_M
                     for _, pair in self.samples for p, ref in zip(pair, self.samples[0][1]))
         )
-        if not self.stable or self.failed or self.motions_used >= self.MAX_MOTIONS:
+        if not self.stable or self.failed:
+            return info
+        slope = math.tan(math.radians(heading))
+        intercept = points[0][0] - slope * points[0][1]
+        lateral_distance = intercept / math.hypot(1., slope)
+        self.current_geometry = (distance, abs(lateral_distance), abs(heading))
+        if self.progress_reference is not None and self.pending_action is None:
+            previous = self.progress_reference
+            # Refund only completed movement with a newly confirmed improvement;
+            # merely seeing the same corner cannot restart the motion allowance.
+            progress = (
+                previous[0] - distance > self.MIN_PROGRESS_M
+                or (distance <= previous[0] + self.MIN_PROGRESS_M and (
+                    previous[1] - abs(lateral_distance) > self.MIN_PROGRESS_M
+                    or previous[2] - abs(heading) > self.MIN_PROGRESS_DEG
+                ))
+            )
+            if progress:
+                self.motions_used = 0
+            self.progress_reference = None
+        if self.motions_used >= self.MAX_MOTIONS:
             return info
         return {
             **info, "ground_projection_valid": True,
             "ground_heading_error_deg": heading, "ground_line_points_m": points,
             "ground_fit_point_count": 2, "ground_fit_mode": "TWO_POINT_CONFIRMED",
+            "ground_lateral_offset_m": lateral_distance,
+            "ground_lookahead_distance_m": points[-1][1],
         }
 
     @staticmethod
     def _wait(decision, reason):
-        return replace(decision, action="WAIT", valid=False, reason=reason,
-                       sdk_motion_requested=False, requires_ack=False,
-                       source_command={**decision.source_command, "valid": False,
-                           "motion": "STOP", "reason": reason, "linear_speed_mps": 0.,
-                           "lateral_speed_mps": 0., "angular_speed_rad_s": 0.})
+        return replace(
+            decision, action="WAIT", valid=False, reason=reason,
+            sdk_motion_requested=False, requires_ack=False,
+            source_command={
+                **decision.source_command, "valid": False, "motion": "STOP",
+                "reason": reason, "linear_speed_mps": 0.,
+                "lateral_speed_mps": 0., "angular_speed_rad_s": 0.,
+            },
+        )
 
     def constrain(self, decision, info, now):
-        """Use a short step or 15-degree turn, never an unbounded WAIT override."""
+        """Keep confirmed local recovery/corners, and shorten forward/heading steps."""
         if not self.eligible or decision.source != "line":
             return decision
         if self.failed or self.motions_used >= self.MAX_MOTIONS:
             return self._wait(decision, "sparse_line_motion_failed" if self.failed
                               else "sparse_line_motion_limit_reached")
-        direction = None
+        if decision.action == "POST_BALL_LINE_ALIGNED":
+            return decision
         if self.stable and decision.valid:
             if decision.action.startswith("STRAIGHT"):
-                if self._number(info, "corner_start_distance_m") > self.MIN_FORWARD_CORNER_DISTANCE_M:
+                turn_distance = decision.source_command.get("corner_turn_distance_m", .15)
+                if self._number(info, "corner_start_distance_m") > turn_distance:
                     return self._motion(decision, "LINE_SPARSE_FORWARD", "two_point_short_forward")
-            elif "TURN_RIGHT" in decision.action or decision.action == "RIGHT":
-                direction = "RIGHT"
-            elif "TURN_LEFT" in decision.action or decision.action == "LEFT":
-                direction = "LEFT"
+            elif (decision.action.startswith("RECOVER_")
+                  or (decision.action in {"LEFT", "RIGHT"}
+                      and decision.source_command.get("corner_turn_authorized") is True)):
+                return self._motion(decision, decision.action, decision.reason)
+            elif "TURN_RIGHT" in decision.action:
+                return self._turn(decision, "RIGHT", "two_point_short_turn")
+            elif "TURN_LEFT" in decision.action:
+                return self._turn(decision, "LEFT", "two_point_short_turn")
             else:
                 return decision
-        if direction is not None:
-            return self._turn(decision, direction, "two_point_short_turn")
         allowed_waits = {
             "invalid_ground_line_geometry", "line_corner_waiting_for_usable_line",
             "straight_heading_not_aligned", "line_corner_approach_heading_not_aligned",
         }
         if not decision.valid and decision.reason not in allowed_waits:
             return decision
-        # Fresh same-direction corners, not an old remembered direction, authorize a peek.
-        heading = self.samples[-1][0] if self.samples else None
-        sign = 1 if self.direction == "RIGHT" else -1
-        if (len(self.samples) == self.REQUIRED_FRAMES
-                and self.wait_since is not None and now - self.wait_since >= self.ESCAPE_WAIT_SEC
-                and heading is not None and heading * sign >= -10.0):
-            return self._turn(decision, self.direction, "sparse_line_wait_escape")
         return self._wait(decision, "sparse_line_waiting_for_confirmation")
 
     def _motion(self, decision, action, reason):
-        return replace(decision, action=action, valid=True, reason=reason,
-                       sdk_motion_requested=False, requires_ack=False,
-                       source_command={**decision.source_command, "valid": True,
-                           "motion": action, "reason": reason, "sparse_line_motion": True,
-                           "sparse_line_motions_used": self.motions_used,
-                           "sparse_line_max_motions": self.MAX_MOTIONS,
-                           "ground_fit_mode": "TWO_POINT_CONFIRMED" if self.stable else "TWO_POINT_UNSTABLE",
-                           "two_point_heading_deg": self.samples[-1][0],
-                           "two_point_corner_direction": self.direction,
-                           "linear_speed_mps": 0., "lateral_speed_mps": 0.,
-                           "angular_speed_rad_s": 0., "travel_distance_m": 0.,
-                           "lateral_travel_distance_m": 0., "target_heading_change_deg": 0.})
+        return replace(
+            decision, action=action, valid=True, reason=reason,
+            sdk_motion_requested=False, requires_ack=False,
+            source_command={
+                **decision.source_command, "valid": True,
+                "motion": action, "reason": reason, "sparse_line_motion": True,
+                "sparse_line_motions_used": self.motions_used,
+                "sparse_line_max_motions": self.MAX_MOTIONS,
+                "ground_fit_mode": "TWO_POINT_CONFIRMED" if self.stable else "TWO_POINT_UNSTABLE",
+                "two_point_heading_deg": self.samples[-1][0],
+                "two_point_corner_direction": self.direction,
+            },
+        )
 
     def _turn(self, decision, direction, reason):
         count = 1 if direction == "LEFT" else 2
         result = self._motion(decision, f"LINE_SPARSE_TURN_{direction}_{count}", reason)
-        return replace(result, source_command={**result.source_command,
+        return replace(result, source_command={
+            **result.source_command,
             "turn_direction": direction, "turn_count": count, "turn_angle_deg": 15.,
             "target_heading_change_deg": 15. if direction == "RIGHT" else -15.,
         })
@@ -229,9 +258,19 @@ class SparseLineRecovery:
         sparse_motion = decision.source_command.get("sparse_line_motion") is True
         if decision.valid and sparse_motion:
             self.motions_used += 1
+            self.pending_action = decision.action
+            self.progress_reference = self.current_geometry
         if decision.valid:
             if type(stamp) is int:
                 self.minimum_stamp = max(self.minimum_stamp, stamp)
             normal_hits = self.normal_hits if decision.source == "line" and not sparse_motion else 0
             self.reset_observations()
             self.normal_hits = normal_hits
+
+    def completed(self, action, status, stamp=None):
+        if self.pending_action == action:
+            self.failed = status != "SUCCEEDED"
+            self.pending_action = None
+            if type(stamp) is int:
+                self.minimum_stamp = max(self.minimum_stamp, stamp)
+            self.reset_observations()

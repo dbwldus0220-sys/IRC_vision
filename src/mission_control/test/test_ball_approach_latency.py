@@ -56,8 +56,8 @@ def start_approach(harness, clock):
     receive(harness, clock, 10.0, sample(9.98))
     command = harness.publisher.messages[-1]
     assert command["source"] == "ball" and command["action"] == "STRAIGHT"
-    receive(harness, clock, 10.15, sample(10.13))
-    assert len(harness.publisher.messages) == 1
+    # No newer frame arrived while walking; the consumed initial frame cannot
+    # dispatch another command at completion. Other tests cover live chaining.
     clock[0] = 10.2
     release_general(harness, command)
     return command
@@ -92,10 +92,10 @@ def test_near_or_unknown_candidate_retains_boundary_hold(clock, overrides):
 def test_confirmed_post_motion_frame_dispatches_without_timer_or_extra_pause(clock):
     harness = MissionFlowHarness()
     start_approach(harness, clock)
-    # Delayed pre-completion RGB cannot unlock the next motion.
+    # A recent moving frame can resume ordinary walking without a timer tick.
     receive(harness, clock, 10.23, sample(10.19))
-    assert harness.latest_info["ball"] is None
-    assert len(harness.publisher.messages) == 1
+    assert harness.latest_info["ball"] is not None
+    assert len(harness.publisher.messages) == 2
     receive(harness, clock, 10.25, sample(10.23))
     assert len(harness.publisher.messages) == 2
     assert harness.publisher.messages[-1]["action"] == "STRAIGHT"
@@ -184,7 +184,8 @@ def test_reobservation_does_not_reuse_geometry_after_camera_pause(clock):
     for now in (10.8, 10.85, 10.9):
         receive(harness, clock, now, sample(now - 0.02, detected=False))
     MotionDecisionNode._publish_decision(harness)
-    assert harness.publisher.messages[-1]["action"] == "WAIT"
+    assert harness.publisher.messages[-1]["action"] == "STOP"
+    assert harness.publisher.messages[-1]["reason"] == "ball_not_detected"
     assert not any(command["valid"] for command in harness.publisher.messages[1:])
 
 

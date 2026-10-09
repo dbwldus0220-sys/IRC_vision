@@ -1,0 +1,15 @@
+{
+  "source_file": "motion_imports/robot_motions(49).json",
+  "source_sha256": "71f1e6603d92531c0f5523fb667d1ae24d2214adb2389fec3256b0137c8b908b",
+  "motion": "건공잡기",
+  "before_sha256": "67e1a55de01480d998e4c04f1c970f14984830a3d4a72ffc180ac79e03c62649",
+  "after_sha256": "a0a64a67ba9a7de5d5c0c58bf1f0ad64d7814d3013224ba925337f08bbd7cf29",
+  "pose_renames": {
+    "미세후진오뒤(0도)": "미세후진오뒤(0도)(건공잡기)",
+    "미세오뒤4111(45도)": "미세오뒤4111(45도)(건공잡기)"
+  },
+  "restored_motors": [
+    "4",
+    "5"
+  ]
+}

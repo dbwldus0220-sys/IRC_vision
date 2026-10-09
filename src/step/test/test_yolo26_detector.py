@@ -11,6 +11,21 @@ from step.yolo26_detector import LetterboxInfo
 from step.yolo26_detector import Yolo26Detector
 
 
+@pytest.mark.parametrize("reason,label", [
+    ("invalid_ground_line_geometry", "GROUND INVALID"),
+    ("line_offset_target_invalid", "TARGET INVALID"),
+    ("low_line_quality", "LOW QUALITY"),
+])
+def test_line_stop_banner_explains_navigation_rejection(reason, label):
+    debug = {"source": "LINE", "decision": {"selected_action": "STOP", "reason": reason}}
+    assert Yolo26Detector._line_stop_banner(debug) == f"STOP | {label}"
+    debug["decision"]["selected_action"] = "RIGHT"
+    assert Yolo26Detector._line_stop_banner(debug) is None
+    debug["decision"]["selected_action"] = "STOP"
+    debug["source"] = "BALL"
+    assert Yolo26Detector._line_stop_banner(debug) is None
+
+
 @pytest.mark.parametrize('message', [
     'direct profile restore: Profile Velocity address=112 result=-1001',
     'failed to restore direct playback profiles: failed to restore direct playback profile',

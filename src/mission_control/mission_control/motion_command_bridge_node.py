@@ -30,7 +30,8 @@ class MotionCommandBridgeNode(Node):
     DWELL_MARKER = "__NON_BLOCKING_DWELL__"
     SHOT_PREPARE_DWELL_MARKER = "__SHOT_PREPARE_DWELL__"
     SHOT_PREPARE_MOTION_ID = "goal_fine_to_default"
-    SHOT_PREPARE_DWELL_SEC = 2.0
+    SHOT_FORWARD_PREPARE_MOTION_ID = "goal_forward_to_default"
+    SHOT_PREPARE_DWELL_SEC = 1.0
     GOAL_CRAB_ACTIONS = frozenset(
         {"GOAL_CAMERA90_CRAB_LEFT", "GOAL_CAMERA90_CRAB_RIGHT"}
     )
@@ -108,6 +109,11 @@ class MotionCommandBridgeNode(Node):
     }
     PICKUP_FINE_ALIGN_ACTIONS = frozenset(
         {
+            *{
+                f"BALL_PICKUP_FINE_TURN_{direction}_{count}"
+                for direction, counts in (("LEFT", range(1, 7)), ("RIGHT", (2, 3, 5, 7, 9)))
+                for count in counts
+            },
             "BALL_PICKUP_FINE_ALIGN_CONTINUE",
             "BALL_PICKUP_FINE_FORWARD",
             "BALL_PICKUP_FINE_SEARCH_LEFT",
@@ -125,6 +131,11 @@ class MotionCommandBridgeNode(Node):
         }
     )
     PICKUP_FINE_ALIGN_MOTION_IDS = {
+        **{
+            f"BALL_PICKUP_FINE_TURN_{direction}_{count}": f"pickup_camera_down_turn_{direction.lower()}_{count}"
+            for direction, counts in (("LEFT", range(1, 7)), ("RIGHT", (2, 3, 5, 7, 9)))
+            for count in counts
+        },
         "BALL_PICKUP_FINE_FORWARD": "pickup_fine_forward_0",
         "BALL_PICKUP_FINE_SEARCH_LEFT": "pickup_camera_down_turn_left_2",
         "BALL_PICKUP_FINE_SEARCH_RIGHT": "pickup_camera_down_turn_right_5",
@@ -340,6 +351,7 @@ class MotionCommandBridgeNode(Node):
         self.goal_crab_completed = False
         self.last_completed_motion_id: str | None = None
         self.last_physical_motion_id: str | None = None
+        self.shot_prepare_retry_motion_id: str | None = None
         self.pending_turn_request: dict[str, Any] | None = None
         self.turn_prepare_motion_id: str | None = None
         self.transition_dwell_until: float | None = None
@@ -543,6 +555,7 @@ class MotionCommandBridgeNode(Node):
     def _record_goal_motion_success(self, motion_id: str) -> None:
         """Track completed goal approach motions until scoring or a new pickup."""
         self.last_completed_motion_id = motion_id
+        self.shot_prepare_retry_motion_id = None
         if motion_id.startswith("goal_camera_90_fine_forward_"):
             self.goal_fine_forward_completed = True
         elif motion_id in {"goal_camera_90_crab_left", "goal_camera_90_crab_right"}:
@@ -1109,6 +1122,21 @@ class MotionCommandBridgeNode(Node):
                 return self.GOAL_FORWARD_CRAB_PREPARE_MOTION_ID
         return None
 
+    def _shot_prepare_motion(self) -> str | None:
+        """Select the scoring start posture from the last completed physical motion."""
+        retry = getattr(self, "shot_prepare_retry_motion_id", None)
+        if retry is not None:
+            # A failed preparation clears physical-state tracking, not this obligation.
+            return retry
+        previous = self.last_physical_motion_id or ""
+        if previous.startswith("goal_camera_90_fine_forward_"):
+            return self.SHOT_PREPARE_MOTION_ID
+        if (previous.startswith(("goal_camera_90_turn_", "goal_camera_90_forward_"))
+                or previous == "post_ball_camera_90"):
+            return MotionCommandBridgeNode.SHOT_FORWARD_PREPARE_MOTION_ID
+        # Crab steps and a completed preparation already end in the default posture.
+        return None
+
     def _publish_executor_request(
         self,
         *,
@@ -1402,17 +1430,18 @@ class MotionCommandBridgeNode(Node):
             if prepare_motion is not None:
                 pickup_sequence = (prepare_motion,) + pickup_sequence
             motion_id = pickup_sequence[0]
-        elif (
-            action == "SHOT"
-            and self.goal_fine_forward_completed
-            and not self.goal_crab_completed
-        ):
-            pickup_sequence = (
-                self.SHOT_PREPARE_MOTION_ID,
-                self.SHOT_PREPARE_DWELL_MARKER,
-                "goal_shot",
-            )
-            motion_id = pickup_sequence[0]
+        elif action == "SHOT":
+            prepare_motion = MotionCommandBridgeNode._shot_prepare_motion(self)
+            if prepare_motion is not None:
+                self.shot_prepare_retry_motion_id = prepare_motion
+                pickup_sequence = (
+                    prepare_motion,
+                    self.SHOT_PREPARE_DWELL_MARKER,
+                    "goal_shot",
+                )
+                motion_id = pickup_sequence[0]
+            else:
+                motion_id = self.motion_id_for_action(action)
         elif payload.get("source") == "hurdle" and action in {
             "ALIGN_LEFT", "ALIGN_RIGHT",
         }:
@@ -1465,8 +1494,8 @@ class MotionCommandBridgeNode(Node):
         # Different walking catalogs need not share pose names, so the SDK may
         # reject queueNext(). Reserve here and dispatch on success without dwell.
         walking_transition = bool(
-            motion_id.startswith(("line_forward_", "line_recovery_"))
-            and (self.active_motion_id or "").startswith(("line_forward_", "line_recovery_"))
+            motion_id.startswith(("line_forward_", "line_recovery_", "goal_camera_90_forward_", "goal_camera_90_fine_forward_"))
+            and (self.active_motion_id or "").startswith(("line_forward_", "line_recovery_", "goal_camera_90_forward_", "goal_camera_90_fine_forward_"))
             and motion_id != self.active_motion_id
         )
         defer_until_active_finishes = bool(
@@ -1603,7 +1632,7 @@ class MotionCommandBridgeNode(Node):
                 request_id=self.active_request_id,
                 motion_id=next_motion_id,
                 action=self.active_action,
-                message="holding still for two seconds after goal pose preparation",
+                message="holding still for one second after goal pose preparation",
             )
             return True
         if next_motion_id == self.FINE_ALIGN_MARKER:
@@ -1947,7 +1976,10 @@ class MotionCommandBridgeNode(Node):
                 self.turn_prepare_motion_id = None
                 self._publish_executor_request(**pending, prepare_pickup_fine=False)
                 return
-            payload["motion_id"] = pending["motion_id"]
+            # Goal capture must start when walking actually starts, after preparation.
+            if (payload["status"] != "RUNNING" or not pending["motion_id"].startswith(
+                    ("goal_camera_90_forward_", "goal_camera_90_fine_forward_"))):
+                payload["motion_id"] = pending["motion_id"]
             if payload["status"] in self.TERMINAL_STATUSES:
                 self.last_physical_motion_id = None
                 self.pending_turn_request = None

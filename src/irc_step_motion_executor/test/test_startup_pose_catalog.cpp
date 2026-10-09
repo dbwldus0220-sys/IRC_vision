@@ -130,4 +130,26 @@ TEST(StartupPoseCatalog, LoadsCatalog49ForwardStartWithEveryPolicyCombination)
   }
 }
 
+TEST(StartupPoseCatalog, LoadsCatalog51StartupWithEveryPolicyCombination)
+{
+  const std::vector<double> source{
+    -33.57421875, 0.52734375, -9.84375, 9.931640625, 16.5234375, -17.40234375,
+    67.060546875, -68.37890625, -10.986328125, 2.63671875, 1.845703125,
+    -2.724609375, 2.548828125, -45.220703125, 59.3046875, 3.603515625,
+    -1.0546875, -26.015625, 26.279296875, 67.587890625, -57.568359375,
+    2.658203125, -5.009765625};
+  for (bool head : {false, true}) {
+    for (bool shoulder : {false, true}) {
+      auto expected = source;
+      if (shoulder) {expected[4] = 18.0; expected[5] = -18.0;}
+      std::vector<double> actual;
+      std::string error;
+      ASSERT_TRUE(irc_step_motion_executor::load_startup_pose_with_policy(
+          TEST_RUNTIME_CATALOG, TEST_PC_CATALOG, "오뒤무게중심앞",
+          head, shoulder, actual, error)) << error;
+      EXPECT_EQ(actual, expected);
+    }
+  }
+}
+
 }  // namespace

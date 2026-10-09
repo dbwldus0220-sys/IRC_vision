@@ -85,27 +85,16 @@ def test_bad_geometry_and_unconfirmed_corners_never_escape(updates):
     assert not policy.constrain(wait_decision(), info, 11.1).valid
 
 
-@pytest.mark.parametrize("direction,action", [
-    ("RIGHT", "LINE_SPARSE_TURN_RIGHT_2"), ("LEFT", "LINE_SPARSE_TURN_LEFT_1"),
-])
-def test_persistent_wait_uses_fresh_corner_direction_and_only_15_degrees(direction, action):
+@pytest.mark.parametrize("direction", ["RIGHT", "LEFT"])
+def test_unstable_two_point_heading_never_escapes_into_motion(direction):
     policy = SparseLineRecovery()
     for i, t in enumerate((10., 10.2, 10.4, 10.6, 10.8, 11.1)):
         info = sparse_info(heading=(2. if i % 2 else 12.) * (1 if direction == "RIGHT" else -1),
                            direction=direction)
         prepare(policy, info, t)
-        if t < 11.:
-            assert not policy.constrain(wait_decision(), info, t).valid
-    result = policy.constrain(wait_decision(), info, 11.1)
+        assert not policy.constrain(wait_decision(), info, t).valid
     assert not policy.stable
-    assert result.valid and result.action == action
-    assert result.source_command["turn_angle_deg"] == 15.
-    assert normalize_general_action(action) == action
-    assert MotionCommandBridgeNode.motion_id_for_action(action).startswith("post_ball_line_turn_")
     assert policy.motions_used == 0
-    policy.published(result, 11_100_000_000)
-    assert policy.motions_used == 1
-    assert not policy.samples
 
 
 def test_normal_fit_three_new_frames_rearms_budget_but_invalid_frames_do_not():
@@ -145,10 +134,11 @@ def test_two_point_straight_is_short_and_requires_corner_clearance():
     assert result.action == "LINE_SPARSE_FORWARD"
     assert MotionCommandBridgeNode.motion_id_for_action(result.action) == "line_forward_2"
     assert MotionDecisionNode._needs_correction_dwell(result.action)
-    assert not policy.constrain(decision, {**promoted, "corner_start_distance_m": .4}, 10.2).valid
+    assert not policy.constrain(decision, {**promoted, "corner_start_distance_m": .15}, 10.2).valid
 
 
 def test_stationary_confirmation_and_motion_completion_require_new_captures(monkeypatch):
+    from test_line_ground_fit_recovery import unconfirmed_sparse_info
     clock = [10.]
     monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: clock[0])
     monkeypatch.setattr(MotionDecisionNode, "_current_ros_time_ns", lambda self: int(clock[0] * 1e9))
@@ -156,21 +146,21 @@ def test_stationary_confirmation_and_motion_completion_require_new_captures(monk
     # Keep this recovery-boundary test outside the calibrated corner entry.
     node.line_corner_turn_distance_m = .15
     node.LINE_TURN_PRE_MOTION_SETTLE_SEC = 1.
-    # No preview influence: once confirmed, the usual offset/heading rule requests recovery.
-    info = {**sparse_info(), "turn_angle_deg": 0., "corner_preview_confirmed": False}
+    # Current image geometry requests a small turn without promoting a ground fit.
+    info = {**unconfirmed_sparse_info(), "turn_angle_deg": 0.}
     def frame():
         observe(node, clock, "line", {**info, "rgb_stamp_ns": int((clock[0] + .005) * 1e9)})
     frame()
     frame()
     assert not any(m["valid"] for m in node.publisher.messages)
     frame()
-    assert node.last_selected_decision.action == "LINE_HEADING_TURN_RIGHT_2"
+    assert node.last_selected_decision.action == "LINE_OFFSET_TURN_RIGHT_2"
     assert node.sparse_line_recovery.motions_used == 0
     for _ in range(6):
         clock[0] += .2
         frame()
     command = next(m for m in node.publisher.messages if m["valid"])
-    assert command["action"] == "LINE_HEADING_TURN_RIGHT_2"
+    assert command["action"] == "LINE_OFFSET_TURN_RIGHT_2"
     assert node.sparse_line_recovery.motions_used == 0
     node.send_status(command["action"], command["command_id"], "RUNNING")
     node.send_status(command["action"], command["command_id"], "SUCCEEDED")
@@ -234,7 +224,7 @@ def test_configured_quality_threshold_applies_to_sparse_recovery():
     assert not policy.eligible
 
 
-def test_recorded_two_point_corner_reobserves_with_bounded_turn(monkeypatch):
+def test_recorded_two_point_corner_uses_confirmed_short_forward(monkeypatch):
     import rclpy
     from std_msgs.msg import String
     from step.yolo_line_analyzer import YoloLineAnalyzer
@@ -275,9 +265,9 @@ def test_recorded_two_point_corner_reobserves_with_bounded_turn(monkeypatch):
         assert outputs[-1]["ground_two_point_candidate"] is not None
         motions = [m for m in node.publisher.messages if m["valid"]]
         assert len(motions) == 1
-        assert motions[0]["action"] == "LINE_LOST_TURN_RIGHT_2"
-        assert motions[0]["source_command"]["corner_ground_reacquire"] is True
-        assert motions[0]["source_command"]["turn_angle_deg"] == 15.
+        assert motions[0]["action"] == "LINE_SPARSE_FORWARD"
+        assert motions[0]["source_command"]["ground_fit_mode"] == "TWO_POINT_CONFIRMED"
+        assert motions[0]["source_command"]["sparse_line_motion"]
     finally:
         if analyzer is not None:
             analyzer.destroy_node()

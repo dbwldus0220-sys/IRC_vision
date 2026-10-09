@@ -116,23 +116,23 @@ def test_robot_launch_defaults_are_production_ready(
         "robot_baud_rate": 4000000,
         "robot_motor_ids": list(range(23)),
         "startup_pose_enabled": True,
-        "startup_pose_name": "김오뒤3",
+        "startup_pose_name": "오뒤무게중심앞",
         "startup_pose_duration_ms": 4000,
         "ball_head_override_deg": -64.0,
     }
 
 
-def test_startup_target_matches_geon_right_back_pose(monkeypatch, tmp_path):
+def test_startup_target_matches_catalog51_front_weight_pose(monkeypatch, tmp_path):
     description = launch_description(monkeypatch, tmp_path)
     context = default_context(description)
     pose_name = context.launch_configurations["startup_pose_name"]
     root = Path(__file__).resolve().parents[3]
     for filename in ("robot_motions_runtime.json", "robot_motions_pc.json"):
         motions = json.loads((root / "artifacts" / filename).read_text())["motions"]
-        motion = next(m for m in motions if m["name"] == "건김오뒤3")
+        motion = next(m for m in motions if m["name"] == "오뒤무게중심앞")
         assert len(motion["frames"]) == 1
         target = motion["frames"][0]
-        assert pose_name == target["name"] == motion["start_pose"] == "김오뒤3"
+        assert pose_name == target["name"] == motion["start_pose"] == "오뒤무게중심앞"
         matches = [f for m in motions for f in m["frames"] if f["name"] == pose_name]
         assert matches
         assert all(f["angles"] == target["angles"] for f in matches)

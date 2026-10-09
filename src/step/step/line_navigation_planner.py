@@ -187,7 +187,7 @@ def line_heading(line_info: dict[str, Any], source: str) -> float | None:
 
 
 def straight_heading_is_aligned(line_info: dict[str, Any], config: NavigationConfig) -> bool:
-    """Require aligned local geometry before any discrete forward motion.
+    """Check local alignment before the separate corner-approach forward step.
 
     Raw image slope only vetoes forward motion; it never supplies ground yaw.
     This prevents a lagging image filter from hiding a newly visible cross-line.
@@ -486,16 +486,8 @@ class LineNavigationPlanner:
         turn_confirmation_pending = bool(
             motion == "STRAIGHT" and requested_motion in {"LEFT", "RIGHT"}
         )
-        if motion == "STRAIGHT" and not straight_heading_is_aligned(line_info, self.config):
-            # Wait without losing the evidence needed to confirm a turn next frame.
-            candidate, hits = self.turn_candidate, self.turn_candidate_hits
-            stopped = self.stop("straight_heading_not_aligned")
-            self.turn_candidate, self.turn_candidate_hits = candidate, hits
-            return replace(
-                stopped, heading_error_deg=heading, heading_component_deg=heading,
-                lateral_offset_norm=offset, preview_turn_deg=preview_turn,
-                line_quality=quality,
-            )
+        # Keep the October 1 combined heading/offset decision. An independent
+        # heading veto here can block both recovery and the selected forward step.
         control_steering_error = (
             0.0
             if (

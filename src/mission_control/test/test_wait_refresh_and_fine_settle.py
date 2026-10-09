@@ -77,27 +77,13 @@ def test_wait_does_not_reuse_expired_input(clock):
     assert not any(message['valid'] for message in node.publisher.messages)
 
 
-def test_goal_fine_wait_replans_changed_geometry_and_restarts_pause(clock):
+def test_goal_fine_forward_starts_without_fixed_pause(clock):
     node = LiveInputHarness(phase='GOAL_APPROACH')
     fine = goal_info(depth_m=.6, score_now=False, confirmation_confirmed=True)
     observe(node, clock, 'goal', fine)
     assert node.last_selected_decision.action.startswith('GOAL_CAMERA90_FINE_FORWARD_')
-    assert not node.publisher.messages
-    first_start = node.pre_motion_settle_started_at
-    clock[0] += .4
-    observe(node, clock, 'goal', {**fine, 'depth_valid': False})
-    assert not node.last_selected_decision.valid
-    assert node.pre_motion_settle_started_at is None
-    observe(node, clock, 'goal', fine)
-    assert node.pre_motion_settle_started_at > first_start
-    restart = node.pre_motion_settle_started_at
-    for elapsed in (.4, .8):
-        clock[0] = restart + elapsed
-        observe(node, clock, 'goal', fine)
-        assert not any(message['valid'] for message in node.publisher.messages)
-    clock[0] = restart + 1.
-    observe(node, clock, 'goal', fine)
     assert node.publisher.messages[-1]['action'].startswith('GOAL_CAMERA90_FINE_FORWARD_')
+    assert node.pre_motion_settle_started_at is None
 
 
 def test_post_motion_wait_stores_frames_but_requires_one_after_pause(clock):
@@ -117,8 +103,6 @@ def test_post_motion_wait_stores_frames_but_requires_one_after_pause(clock):
 @pytest.mark.parametrize('action,source,extra', [
     ('STRAIGHT_0', 'ball', {}), ('STRAIGHT_0', 'hurdle', {}),
     ('BALL_FINE_FORWARD_8', 'ball', {}),
-    ('GOAL_CAMERA90_FINE_FORWARD_1', 'goal', {}),
-    ('GOAL_CAMERA90_FINE_FORWARD_4', 'goal', {}),
     ('GO', 'hurdle', {'fine_sequence_requested': True}),
     ('GO', 'hurdle', {'depth_fallback_requested': True}),
 ])

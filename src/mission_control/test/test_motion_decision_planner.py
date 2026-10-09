@@ -1159,19 +1159,14 @@ def post_ball_return_line(**overrides):
 
 @pytest.mark.parametrize("heading", [-88.0, -35.0, -10.001, -10.0, 0.0, 10.0, 10.001, 24.591, 34.281, 88.0])
 @pytest.mark.parametrize("offset", [-0.93, -0.451, 0.0, 0.451, 0.93])
-def test_post_ball_keeps_turning_until_heading_is_aligned(heading, offset):
+def test_post_ball_reacquisition_hands_heading_and_offset_to_normal_tracking(heading, offset):
     result = MotionDecisionPlanner().plan(
         "POST_BALL_LINE_ALIGN", observations(line=post_ball_return_line(
             ground_heading_error_deg=heading, filtered_lateral_offset_norm=offset,
         )), 0.1,
     )
-    if abs(heading) <= 10.0:
-        assert result.action == "POST_BALL_LINE_ALIGNED"
-        assert result.reason == "post_ball_line_heading_aligned"
-    else:
-        direction = "RIGHT" if heading > 0 else "LEFT"
-        assert result.action.startswith(f"POST_BALL_LINE_TURN_{direction}_")
-        assert result.source_command["turn_count"] > 0
+    assert result.action == "POST_BALL_LINE_ALIGNED"
+    assert result.reason == "post_ball_line_reacquired"
     assert result.valid
     assert result.source_command["heading_error_deg"] == heading
     assert result.source_command["lateral_offset_norm"] == offset
@@ -1200,7 +1195,7 @@ def test_post_ball_handoff_does_not_change_legacy_post_shot_alignment():
     info = post_ball_return_line()
     assert planner.plan(
         "POST_BALL_LINE_ALIGN", observations(line=info), 0.1,
-    ).action == "POST_BALL_LINE_TURN_RIGHT_2"
+    ).action == "POST_BALL_LINE_ALIGNED"
     assert planner.plan(
         "POST_SHOT_LINE_ALIGN", observations(line=info), 0.1,
     ).action == "POST_SHOT_LINE_TURN_RIGHT_2"
@@ -2248,8 +2243,8 @@ def test_pickup_fine_forward_accepts_inclusive_robot_dx_window(offset_px):
 @pytest.mark.parametrize(
     ("offset_px", "expected_action"),
     [
-        (-71, "BALL_PICKUP_INITIAL_ALIGN_CONTINUE"),
-        (71, "BALL_PICKUP_INITIAL_ALIGN_CONTINUE"),
+        (-71, "BALL_PICKUP_INITIAL_CRAB_LEFT"),
+        (71, "BALL_PICKUP_INITIAL_CRAB_RIGHT"),
     ],
 )
 def test_pickup_pixel_offset_does_not_force_turn_below_fifteen_degrees(
@@ -2505,7 +2500,7 @@ def test_pickup_fine_alignment_uses_asymmetric_pixel_window(
 
 @pytest.mark.parametrize("bottom_distance_px", [271, 273, 280, 300, 400, 500, 600])
 @pytest.mark.parametrize("offset_px", [-31, 0, 51])
-def test_pickup_repeats_fine_approach_before_crab_or_backward(
+def test_pickup_corrects_lateral_error_before_repeating_fine_approach(
     bottom_distance_px,
     offset_px,
 ):
@@ -2518,7 +2513,8 @@ def test_pickup_repeats_fine_approach_before_crab_or_backward(
         )
     )
 
-    assert decision.action == "BALL_PICKUP_FINE_FORWARD"
+    assert decision.action == ("BALL_PICKUP_CRAB_LEFT" if offset_px < -30
+                               else "BALL_PICKUP_FINE_FORWARD")
     assert decision.valid is True
     assert decision.sdk_motion_requested is True
     assert decision.source_command["bottom_distance_px"] == bottom_distance_px
@@ -2882,7 +2878,7 @@ def test_pickup_fine_approach_stops_at_270_pixel_boundary(bottom_distance_px, ex
 def test_pickup_near_stage_survives_crab_sway_and_missing_observations():
     planner = MotionDecisionPlanner()
     for bottom, offset, action in [
-        (271, 60, 'BALL_PICKUP_FINE_FORWARD'),
+        (271, 60, 'BALL_PICKUP_CRAB_RIGHT'),
         (270, 60, 'BALL_PICKUP_CRAB_RIGHT'),
         (280, -40, 'BALL_PICKUP_CRAB_LEFT'),
         (275, 0, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'),
@@ -3129,7 +3125,7 @@ def test_line_alignment_uses_ground_heading_over_opposite_image_heading(phase):
     )
     assert decision.valid is True
     assert decision.action == (
-        "POST_BALL_LINE_TURN_RIGHT_2" if phase == "POST_BALL_LINE_ALIGN"
+        "POST_BALL_LINE_ALIGNED" if phase == "POST_BALL_LINE_ALIGN"
         else "POST_SHOT_LINE_ALIGNED"
     )
     assert decision.source_command["heading_error_deg"] == 20.0
@@ -3163,7 +3159,8 @@ def test_pickup_alignment_requires_both_bottom_and_lateral_bounds(
         ball_info(bottom_distance_px=bottom_distance_px, offset_x_px=offset_x_px),
     )
     expected = (
-        "BALL_PICKUP_FINE_FORWARD" if bottom_distance_px > 270 else lateral_action
+        "BALL_PICKUP_FINE_FORWARD"
+        if bottom_distance_px > 270 and -30 <= offset_x_px <= 55 else lateral_action
     )
     assert decision.valid is True
     assert decision.action == expected

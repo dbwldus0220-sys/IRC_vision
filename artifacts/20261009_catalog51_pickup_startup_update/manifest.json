@@ -1,0 +1,36 @@
+{
+  "source_file": "motion_imports/robot_motions(51).json",
+  "source_sha256": "6afb9e002df821c0de77964b22a1050ac1b53b546b0d41ef1803d74ab128211f",
+  "updated_motions": [
+    "건공잡기",
+    "오뒤무게중심앞"
+  ],
+  "startup_pose_before": "김오뒤3",
+  "startup_pose_after": "오뒤무게중심앞",
+  "catalogs": {
+    "robot_motions_runtime.json": {
+      "changed": [
+        "건공잡기"
+      ],
+      "added": [
+        "오뒤무게중심앞"
+      ],
+      "before_count": 82,
+      "after_count": 83,
+      "before_sha256": "a0a64a67ba9a7de5d5c0c58bf1f0ad64d7814d3013224ba925337f08bbd7cf29",
+      "after_sha256": "d8f2194cee148eaf170d424ee06a1fb33fc1fce80c31b63c0ae5b661b1e6ed46"
+    },
+    "robot_motions_pc.json": {
+      "changed": [
+        "건공잡기"
+      ],
+      "added": [
+        "오뒤무게중심앞"
+      ],
+      "before_count": 82,
+      "after_count": 83,
+      "before_sha256": "12f7af48abd73883504227e500df33a71a1b3aaec36bcceeaedf145ecf6090c3",
+      "after_sha256": "5850b943fa26028392158f58f553abb1e6054c249c4f1608817b95508bad3f95"
+    }
+  }
+}

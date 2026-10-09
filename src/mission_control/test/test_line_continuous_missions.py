@@ -112,7 +112,6 @@ def observe_walk_end(node, clock, info):
     (line_info(20., .4), line_info(-20., -.4), 'RECOVER_LEFT_TURN_LEFT_4'),
     (line_info(), corner_info('LEFT'), 'LEFT'),
     (line_info(), corner_info('RIGHT'), 'RIGHT'),
-    (line_info(), corner_info('RIGHT', ground_heading_error_deg=75.), 'RIGHT'),
     (corner_info('LEFT'), line_info(), 'STRAIGHT'),
     (corner_info('RIGHT'), line_info(), 'STRAIGHT'),
 ])
@@ -151,6 +150,17 @@ def test_walking_transition_is_reserved_and_dispatched_at_success_without_new_vi
     observe_walk_end(node, clock, line_info())
     assert len(node.publisher.messages) == 3
     assert node.publisher.messages[-1]['action'] == 'STRAIGHT'
+
+
+def test_near_corner_cannot_prequeue_over_a_stationary_heading_correction(clock, monkeypatch):
+    monkeypatch.setattr(MotionDecisionNode, '_current_ros_time_ns', lambda _: round(clock[0] * 1e9))
+    node = CornerHarness(phase='AUTO')
+    first = node.publish_vision(line={**line_info(), 'rgb_stamp_ns': round(clock[0] * 1e9)})[-1]
+    node.send_status(first['action'], first['command_id'], 'RUNNING')
+    observe_walk_end(node, clock, corner_info('RIGHT', ground_heading_error_deg=75.))
+    assert len(node.publisher.messages) == 1
+    assert getattr(node, 'queued_general_command_id', None) is None
+    assert node.general_motion_gate.active_command_id == first['command_id']
 
 
 @pytest.mark.parametrize('grasp,queues', [('NOT_GRABBED', True), ('UNKNOWN', True), ('GRABBED', False)])

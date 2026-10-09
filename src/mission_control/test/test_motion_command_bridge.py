@@ -319,7 +319,7 @@ def complete_active_motion(bridge, status="SUCCEEDED", error_code=""):
 
 
 @pytest.mark.parametrize("count", [1, 2, 3, 4])
-def test_fine_only_goal_approach_prepares_pose_then_waits_two_seconds(count, monkeypatch):
+def test_fine_only_goal_approach_prepares_pose_then_waits_one_second(count, monkeypatch):
     clock = [100.0]
     monkeypatch.setattr("mission_control.motion_command_bridge_node.time.monotonic", lambda: clock[0])
     bridge = FakeBridge()
@@ -333,7 +333,7 @@ def test_fine_only_goal_approach_prepares_pose_then_waits_two_seconds(count, mon
 
     clock[0] = 104.0
     complete_active_motion(bridge)
-    assert bridge.active_dwell_until == 106.0
+    assert bridge.active_dwell_until == 105.0
     assert bridge.motion_in_progress
     assert bridge.active_action == "SHOT"
     assert not any(m["action"] == "SHOT" and m["status"] == "SUCCEEDED"
@@ -344,12 +344,12 @@ def test_fine_only_goal_approach_prepares_pose_then_waits_two_seconds(count, mon
         status="SUCCEEDED", command_id=2, request_id=2,
         motion_id="goal_fine_to_default",
     ))
-    assert bridge.active_dwell_until == 106.0
+    assert bridge.active_dwell_until == 105.0
     bridge.navigation_command_callback(navigation_message(action="STRAIGHT", command_id=3))
     assert decoded_messages(bridge.motion_status_publisher)[-1]["error_code"] == "ATOMIC_SEQUENCE_LOCKED"
-    bridge._check_atomic_dwell(105.999)
+    bridge._check_atomic_dwell(104.999)
     assert len(bridge.executor_request_publisher.messages) == 2
-    bridge._check_atomic_dwell(106.0)
+    bridge._check_atomic_dwell(105.0)
     assert [m["motion_id"] for m in decoded_messages(bridge.executor_request_publisher)] == [
         f"goal_camera_90_fine_forward_{count}", "goal_fine_to_default", "goal_shot",
     ]
@@ -363,10 +363,9 @@ def test_fine_only_goal_approach_prepares_pose_then_waits_two_seconds(count, mon
 
 
 @pytest.mark.parametrize("actions", [
-    [], ["BALL_FINE_FORWARD_8"], ["GOAL_CAMERA_90_FORWARD"],
+    [], ["BALL_FINE_FORWARD_8"],
     ["GOAL_CAMERA90_CRAB_LEFT"],
     ["GOAL_CAMERA90_FINE_FORWARD_1", "GOAL_CAMERA90_CRAB_RIGHT"],
-    ["GOAL_CAMERA90_CRAB_LEFT", "GOAL_CAMERA90_FINE_FORWARD_2"],
 ])
 def test_shot_without_fine_only_approach_keeps_direct_scoring(actions):
     bridge = FakeBridge()
@@ -2001,7 +2000,8 @@ def test_pickup_distance_decisions_repeat_fine_then_crab_then_backward():
     sample = {
         "detected": True,
         "confidence": 0.9,
-        "offset_x_px": 56,
+        "offset_x_px": 0,
+        "bearing_deg": 0.0,
     }
 
     for command_id, bottom_distance_px in enumerate((threshold + 150, threshold + 100, threshold + 1), 8100):
@@ -2026,6 +2026,7 @@ def test_pickup_distance_decisions_repeat_fine_then_crab_then_backward():
     decision = planner.plan_ball_pickup_fine_alignment({
         **sample,
         "bottom_distance_px": threshold,
+        "offset_x_px": 56,
     })
     assert decision.action == "BALL_PICKUP_CRAB_RIGHT"
     bridge.navigation_command_callback(

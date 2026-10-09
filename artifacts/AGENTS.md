@@ -14,11 +14,14 @@
 
 - In every frame of every runtime motion, override motor ID 4 to 18 degrees and
   motor ID 5 to -18 degrees, except for these exact motion names:
-  `찐공잡기리그랩까지 실전`, `찐골넣기`, and `찐허들`.
+  `찐공잡기리그랩까지 실전`, `건공잡기`, `찐골넣기`, and `찐허들`.
 - Preserve motors 4 and 5 as supplied for those exceptions. Do not exempt other
   pickup, retreat, or goal-related motions based on a name substring.
 - Apply this fixed-joint policy on imports, replacements, and manual updates.
   Preserve other joint targets, torque flags, timing, speed, and repeat counts.
   Archived source snapshots must remain unchanged.
+- `건공잡기` preserves source motor values by user request (2026-10-09).
+  Its shared pose labels `미세후진오뒤(0도)` and `미세오뒤4111(45도)` use the
+  suffix `(건공잡기)` in runtime only, so other motions can keep their fixed arms.
 - `tools/upsert_motion_catalog.py` applies both runtime policies. Verify imports
   and the current catalog with `python3 -m pytest -q tools/test_upsert_motion_catalog.py`.

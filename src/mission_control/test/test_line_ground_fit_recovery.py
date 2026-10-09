@@ -15,7 +15,10 @@ from test_wait_refresh_and_fine_settle import LiveInputHarness
 
 def unconfirmed_sparse_info(**kwargs):
     """Isolate ordinary ground recovery; confirmed corners own their recovery."""
-    return {**sparse_info(**kwargs), 'corner_preview_confirmed': False}
+    return {**sparse_info(**kwargs), 'corner_preview_confirmed': False,
+            'image_width': 1280, 'image_height': 720, 'robot_center_x_px': 710.,
+            'center_points_px': [[1010, 650], [960, 450], [1100, 250]],
+            'corner_start_index': 1}
 
 
 @pytest.fixture
@@ -77,13 +80,14 @@ def finish_turn(node, clock, command):
 
 @pytest.mark.parametrize('phase', ['AUTO', 'LINE_TRACK', 'LINE_TRACK_AFTER_PICKUP'])
 @pytest.mark.parametrize('side,count', [('RIGHT', 2), ('LEFT', 1)])
-def test_visible_invalid_ground_turns_toward_last_seen_line(clock, phase, side, count):
+def test_visible_invalid_ground_aligns_to_current_image_line(clock, phase, side, count):
     node = node_for(phase)
     sign = 1 if side == 'RIGHT' else -1
-    info = {**unconfirmed_sparse_info(), 'filtered_lateral_offset_norm': sign * 0.3}
+    info = {**unconfirmed_sparse_info(), 'filtered_lateral_offset_norm': -sign * 0.3,
+            'center_points_px': [[710 + sign * 300, 650], [710 + sign * 250, 450]]}
     command = start_turn(node, clock, info)
-    assert command['action'] == f'LINE_HEADING_TURN_{side}_{count}'
-    assert command['source_command']['direction_source'] == 'last_seen_line'
+    assert command['action'] == f'LINE_OFFSET_TURN_{side}_{count}'
+    assert command['source_command']['direction_source'] == 'current_image_line'
     assert command['source_command']['turn_angle_deg'] == 15.0
     assert MotionCommandBridgeNode.motion_id_for_action(command['action']) == f'post_ball_line_turn_{side.lower()}_{count}'
     assert node.latest_info['line']['ground_projection_valid'] is False
@@ -91,7 +95,7 @@ def test_visible_invalid_ground_turns_toward_last_seen_line(clock, phase, side, 
 
 
 @pytest.mark.parametrize('section,side,count', [(1, 'RIGHT', 2), (2, 'LEFT', 1)])
-def test_pickup_exit_direction_overrides_opposite_visible_line(clock, section, side, count):
+def test_visible_line_overrides_pickup_exit_search_direction(clock, section, side, count):
     node = node_for('BALL_APPROACH')
     node.phase_manager.pickups_completed = section - 1
     assert node.phase_manager.start_special_action('PICKUP_NOW', 50)
@@ -101,24 +105,34 @@ def test_pickup_exit_direction_overrides_opposite_visible_line(clock, section, s
     assert node.planner.post_ball_line_search_direction == side
     # Deliberately disagree with the pickup exit direction.
     info = {**unconfirmed_sparse_info(), 'filtered_lateral_offset_norm': -0.4 if side == 'RIGHT' else 0.4}
+    sign = -1 if side == 'RIGHT' else 1
+    info['center_points_px'] = [[710 + sign * 300, 650], [710 + sign * 250, 450]]
     command = start_turn(node, clock, info)
-    assert command['action'] == f'POST_BALL_LINE_TURN_{side}_{count}'
-    assert command['source_command']['direction_source'] == 'pickup_exit_turn'
+    expected = 'LINE_OFFSET_TURN_LEFT_1' if side == 'RIGHT' else 'LINE_OFFSET_TURN_RIGHT_2'
+    assert command['action'] == expected
+    assert command['source_command']['direction_source'] == 'current_image_line'
     finish_turn(node, clock, command)
-    repeated = start_turn(node, clock, info)
-    assert repeated['action'] == command['action']
+    repeated = frame(node, clock, info)[-1]
+    assert not repeated['valid']
+    assert repeated['reason'] == 'line_image_alignment_no_progress'
     assert node.mission_phase == 'POST_BALL_LINE_ALIGN'
 
 
 @pytest.mark.parametrize('phase', ['LINE_TRACK', 'POST_BALL_LINE_ALIGN'])
-def test_recovery_repeats_beyond_two_turns_until_normal_three_point_fit(clock, phase):
+def test_image_alignment_is_limited_to_three_turns_until_normal_ground_fit(clock, phase):
     node = node_for(phase)
-    for _ in range(3):
-        command = start_turn(node, clock, unconfirmed_sparse_info())
+    for target_x in (1000., 900., 820.):
+        info = {**unconfirmed_sparse_info(),
+                'center_points_px': [[target_x+10, 650], [target_x, 450]]}
+        command = start_turn(node, clock, info)
         # Replanning during execution cannot enqueue another turn.
         clock[0] += 0.1
         assert frame(node, clock) == []
         finish_turn(node, clock, command)
+    blocked = frame(node, clock, {**unconfirmed_sparse_info(),
+        'center_points_px': [[780, 650], [770, 450]]})[-1]
+    assert not blocked['valid']
+    assert blocked['reason'] == 'line_image_alignment_limit_reached'
     normal = {**line_info(), 'ground_projection_enabled': True,
               'ground_fit_point_count': 3, 'ground_fit_reason': 'ok'}
     commands = frame(node, clock, normal)
@@ -186,7 +200,7 @@ def test_recovery_failure_cannot_be_bypassed_by_opposite_line_side(clock, status
     {'heading_quality': 0.1}, {'geometry_quality': None}, {'detection_quality': float('nan')},
     {'ground_projection_enabled': False}, {'ground_fit_reason': 'invalid_parameters'},
     {'ground_fit_reason': 'invalid_projection_or_fit'}, {'ground_fit_reason': 'nonfinite_fit'},
-    {'filtered_lateral_offset_norm': None}, {'detected': 'true'},
+    {'center_points_px': None}, {'detected': 'true'},
 ])
 def test_other_invalid_inputs_cannot_be_overridden(clock, updates):
     node = node_for()
@@ -196,10 +210,10 @@ def test_other_invalid_inputs_cannot_be_overridden(clock, updates):
         clock[0] += 0.2
 
 
-def test_no_known_line_side_keeps_waiting(clock):
+def test_missing_current_image_geometry_keeps_waiting(clock):
     node = node_for()
     for _ in range(8):
-        commands = frame(node, clock, filtered_lateral_offset_norm=0.0)
+        commands = frame(node, clock, center_points_px=None)
         assert not any(c['valid'] for c in commands)
         clock[0] += 0.2
 
@@ -207,14 +221,19 @@ def test_no_known_line_side_keeps_waiting(clock):
 def test_nearest_visible_point_selects_side_instead_of_extrapolated_offset(clock):
     node = node_for()
     info = {**unconfirmed_sparse_info(), 'center_points_px': [[100, 600], [200, 400]], 'image_width': 1280}
-    assert start_turn(node, clock, info)['action'] == 'LINE_HEADING_TURN_LEFT_1'
+    assert start_turn(node, clock, info)['action'] == 'LINE_OFFSET_TURN_LEFT_1'
 
 
-def test_centered_current_line_keeps_previously_seen_side(clock):
+def test_centered_current_line_does_not_repeat_previously_seen_side(clock):
     node = node_for()
     node.planner.last_line_seen_direction = 'LEFT'
-    info = {**unconfirmed_sparse_info(), 'filtered_lateral_offset_norm': 0.0}
-    assert start_turn(node, clock, info)['action'] == 'LINE_HEADING_TURN_LEFT_1'
+    info = {**unconfirmed_sparse_info(), 'filtered_lateral_offset_norm': 0.0,
+            'center_points_px': [[710, 650], [710, 450]]}
+    for _ in range(5):
+        commands = frame(node, clock, info)
+        assert not any(c['valid'] for c in commands)
+        assert node.last_selected_decision.reason == 'line_image_aligned_waiting_for_ground'
+        clock[0] += .4
 
 
 def test_valid_other_target_keeps_priority_over_line_recovery(clock):

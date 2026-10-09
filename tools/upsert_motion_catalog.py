@@ -21,6 +21,7 @@ POSITION_TOLERANCE_DEG = 5.0
 FIXED_JOINT_ANGLES_DEG = {"4": 18.0, "5": -18.0}
 FIXED_JOINT_EXEMPT_MOTIONS = frozenset({
     "찐공잡기리그랩까지 실전",
+    "건공잡기",
     "찐골넣기",
     "찐허들",
 })
@@ -35,6 +36,16 @@ def _with_runtime_policy(motion: dict) -> dict:
     if result["name"] not in FIXED_JOINT_EXEMPT_MOTIONS:
         for frame in result.get("frames", []):
             frame["angles"].update(FIXED_JOINT_ANGLES_DEG)
+    if result["name"] == "건공잡기":
+        # Shared pose names in other gaits still use the fixed arm angles.
+        pose_names = {name: name + "(건공잡기)" for name in (
+            "미세후진오뒤(0도)", "미세오뒤4111(45도)",
+        )}
+        for frame in result.get("frames", []):
+            frame["name"] = pose_names.get(frame.get("name"), frame.get("name"))
+        for key in ("start_pose", "end_pose"):
+            if key in result:
+                result[key] = pose_names.get(result[key], result[key])
     return result
 
 

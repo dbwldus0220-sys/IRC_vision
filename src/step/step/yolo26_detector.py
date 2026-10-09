@@ -3126,8 +3126,34 @@ class Yolo26Detector(Node):
             if line_lost is not None and running_banner is None:
                 cv2.rectangle(annotated, (0, 32), (annotated.shape[1], 96), (0, 0, 0), -1)
                 self._draw_action_banner(annotated, line_lost, (0, 100, 220))
+            elif running_banner is None:
+                line_stop = self._line_stop_banner(decision_debug)
+                if line_stop is not None:
+                    cv2.rectangle(annotated, (0, 32), (annotated.shape[1], 96), (0, 0, 0), -1)
+                    self._draw_action_banner(annotated, line_stop, (0, 100, 220))
             self._draw_grasp_verification_status(annotated)
         return annotated
+
+    @staticmethod
+    def _line_stop_banner(decision_debug: dict[str, Any] | None) -> str | None:
+        """Expose a navigation rejection without calling it an executor fault."""
+        if not isinstance(decision_debug, dict) or decision_debug.get("source") != "LINE":
+            return None
+        decision = decision_debug.get("decision", {})
+        if decision.get("selected_action") != "STOP":
+            return None
+        reason = str(decision.get("reason", "unknown"))
+        labels = {
+            "invalid_ground_line_geometry": "GROUND INVALID",
+            "invalid_image_line_geometry": "IMAGE GEOMETRY INVALID",
+            "invalid_line_geometry": "GEOMETRY INVALID",
+            "line_offset_target_invalid": "TARGET INVALID",
+            "low_line_quality": "LOW QUALITY",
+            "invalid_line_quality": "QUALITY MISSING",
+            "line_offset_motion_failed": "ALIGN MOTION FAILED",
+            "line_not_detected": "LINE NOT DETECTED",
+        }
+        return "STOP | " + labels.get(reason, reason.upper().replace("_", " "))
 
     @staticmethod
     def _line_lost_banner(decision_debug: dict[str, Any] | None) -> str | None:

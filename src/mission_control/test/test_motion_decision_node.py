@@ -3180,7 +3180,10 @@ def test_goal_motion_success_dwells_only_after_turns(monkeypatch, action):
     assert node.goal_post_motion_dwell_until == (
         11.0 if action.startswith('GOAL_CAMERA90_TURN_') else None
     )
-    if not action.startswith('GOAL_CAMERA90_TURN_'):
+    if MotionDecisionNode._is_continuous_goal_action(action):
+        assert node.general_motion_gate.has_required_fresh_vision()
+        assert getattr(node, 'correction_post_motion_dwell_until', None) is None
+    elif not action.startswith('GOAL_CAMERA90_TURN_'):
         assert node.latest_info['goal'] is None
         assert node.latest_time['goal'] is None
         assert not node.general_motion_gate.has_required_fresh_vision()

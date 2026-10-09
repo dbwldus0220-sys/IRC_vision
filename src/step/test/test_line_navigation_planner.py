@@ -109,8 +109,8 @@ def test_local_line_tracking_blocks_generic_turn_even_without_preview(direction)
 
     for _ in range(5):
         command = planner.plan(sample, 0.1, allow_corner_turns=False)
-        assert command.motion == "STOP"
-        assert command.reason == "straight_heading_not_aligned"
+        assert command.motion == "STRAIGHT"
+        assert command.reason == "corner_turn_suppressed"
     assert planner.turn_candidate is None
 
 
@@ -293,7 +293,7 @@ def test_far_curve_turn_starts_after_near_heading_reaches_corner():
     assert command.motion == "RIGHT"
 
 
-def test_conflicting_heading_and_preview_stops_instead_of_walking():
+def test_conflicting_heading_and_preview_keeps_slow_forward():
     planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
 
     command = planner.plan(
@@ -305,10 +305,11 @@ def test_conflicting_heading_and_preview_stops_instead_of_walking():
         0.1,
     )
 
-    assert command.motion == "STOP"
-    assert command.reason == "straight_heading_not_aligned"
+    assert command.valid
+    assert command.motion == "STRAIGHT"
+    assert command.reason == "conflicting_heading_and_preview"
     assert command.steering_error_deg == 0.0
-    assert command.linear_speed_mps == 0.0
+    assert command.linear_speed_mps == planner.config.min_linear_speed_mps
 
 
 def test_turn_requires_three_consecutive_frames():
@@ -322,8 +323,8 @@ def test_turn_requires_three_consecutive_frames():
     commands = [planner.plan(sample, 0.1) for _ in range(3)]
 
     assert [command.motion for command in commands] == [
-        "STOP",
-        "STOP",
+        "STRAIGHT",
+        "STRAIGHT",
         "RIGHT",
     ]
 
@@ -358,7 +359,7 @@ def test_large_offset_without_turn_heading_stays_straight(offset, heading):
         (0.593, -32.0, "RECOVER_RIGHT_TURN_LEFT_4", -1),
         (0.366, 15.0, "RECOVER_RIGHT_TURN_RIGHT_4", 1),
         (-0.40, -15.0, "RECOVER_LEFT_TURN_LEFT_4", -1),
-        (-0.40, 15.0, "STOP", 0),
+        (-0.40, 15.0, "STRAIGHT", 1),
     ],
 )
 def test_recovery_separates_line_side_from_turn_direction(
@@ -380,10 +381,9 @@ def test_recovery_separates_line_side_from_turn_direction(
     )
 
     assert command.motion == expected
-    if angular_sign:
-        assert command.angular_speed_rad_s * angular_sign > 0.0
-    else:
-        assert command.angular_speed_rad_s == command.linear_speed_mps == 0.0
+    assert command.angular_speed_rad_s * angular_sign > 0.0
+    if expected == "STRAIGHT":
+        assert command.valid and command.linear_speed_mps > 0.0
 
 
 def test_straight_line_heading_error_uses_recovery_not_plain_left():
@@ -594,8 +594,8 @@ def test_large_heading_toward_center_uses_confirmed_plain_right():
     commands = [planner.plan(line, 0.1) for _ in range(3)]
 
     assert [command.motion for command in commands] == [
-        "STOP",
-        "STOP",
+        "STRAIGHT",
+        "STRAIGHT",
         "RIGHT",
     ]
     assert commands[-1].reason == "line_tracking"
@@ -616,8 +616,9 @@ def test_reliable_opposite_preview_still_suppresses_plain_right():
         0.1,
     )
 
-    assert command.motion == "STOP"
-    assert command.reason == "straight_heading_not_aligned"
+    assert command.valid
+    assert command.motion == "STRAIGHT"
+    assert command.reason == "conflicting_heading_and_preview"
 
 
 @pytest.mark.parametrize(
@@ -802,7 +803,7 @@ def test_recovery_uses_ground_heading_when_image_heading_disagrees(sign):
     assert command.heading_error_deg == pytest.approx(sign * 14.11)
 
 
-def test_large_image_heading_vetoes_forward_without_becoming_ground_yaw():
+def test_image_heading_does_not_override_valid_ground_tracking():
     command = LineNavigationPlanner(NavigationConfig(heading_source="ground")).plan(
         line_info(
             ground_heading_error_deg=0.0,
@@ -811,9 +812,9 @@ def test_large_image_heading_vetoes_forward_without_becoming_ground_yaw():
         ),
         0.1,
     )
-    assert command.valid is False
-    assert command.motion == "STOP"
-    assert command.reason == "straight_heading_not_aligned"
+    assert command.valid is True
+    assert command.motion == "STRAIGHT"
+    assert command.reason == "line_tracking"
     assert command.heading_component_deg == 0.0
 
 

@@ -17,10 +17,12 @@ SOURCE_PATH = ROOT / MANIFEST["source_file"]
 SOURCE = next(
     m for m in json.loads(SOURCE_PATH.read_text())["motions"] if m["name"] == "전."
 )
-RUNTIME = json.loads((ROOT / "artifacts/robot_motions_runtime.json").read_text())
-PC = json.loads((ROOT / "artifacts/robot_motions_pc.json").read_text())
+# Catalog51 supersedes these forward motions; verify this import's saved result.
+FORWARD51 = ROOT / "artifacts/20261009_catalog51_forward_update"
+RUNTIME = json.loads((FORWARD51 / "robot_motions_runtime.before.json").read_text())
+PC = json.loads((FORWARD51 / "robot_motions_pc.before.json").read_text())
 ALIASES = yaml.safe_load(
-    (ROOT / "src/irc_step_motion_executor/config/motion_aliases.yaml").read_text()
+    (FORWARD51 / "motion_aliases.before.yaml").read_text()
 )["motion_aliases"]
 
 
@@ -55,14 +57,16 @@ def test_source_snapshot_is_byte_identical():
     assert hashlib.sha256(SOURCE_PATH.read_bytes()).hexdigest() == MANIFEST["source_sha256"]
 
 
-def test_pickup_uses_catalog49_regrasp_and_keeps_fixed_arm_targets():
-    source = next(m for m in json.loads(SOURCE_PATH.read_text())["motions"]
+def test_pickup_uses_catalog51_regrasp_and_preserves_source_arm_targets():
+    source = next(m for m in json.loads((ROOT / 'motion_imports/robot_motions(51).json').read_text())["motions"]
                   if m["name"] == "건공잡기")
     assert ALIASES["pickup"] == ALIASES["sdk_pickup"] == source["name"]
     expected = copy.deepcopy(source)
     expected["completion"]["position_tolerance_deg"] = 5.0
+    renames = json.loads((ROOT / "artifacts/20261009_pickup_source_arms_update/manifest.json").read_text())["pose_renames"]
     for frame in expected["frames"]:
-        frame["angles"].update({"4": 18.0, "5": -18.0})
+        frame["name"] = renames.get(frame["name"], frame["name"])
+    expected["end_pose"] = renames.get(expected["end_pose"], expected["end_pose"])
     actual = next(m for m in RUNTIME["motions"] if m["name"] == source["name"])
     assert actual == expected
     assert len(actual["frames"]) == 11
@@ -85,13 +89,25 @@ def test_only_forward_alias_targets_change():
     (RUNTIME, "robot_motions_runtime.json"), (PC, "robot_motions_pc.json"),
 ])
 def test_non_forward_motions_and_catalog_size_are_unchanged(catalog, filename):
+    # The later pickup/startup import is checked against the live catalog separately.
+    catalog = json.loads((ROOT / 'artifacts/20261009_catalog51_pickup_startup_update'
+                          / filename.replace('.json', '.before.json')).read_text())
     motions = {m["name"]: m for m in catalog["motions"]}
     assert len(motions) == len(catalog["motions"]) == 82
     assert not motions.keys() & MANIFEST["renames"].keys()
     unchanged = MANIFEST["unchanged_sha256"][filename]
     assert motions.keys() == unchanged.keys() | set(MANIFEST["renames"].values())
+    # Recovery was updated later; check its pre-update snapshot here.
+    recovery_update = ROOT / "artifacts/20261009_catalog49_line_recovery_update"
+    recovery_names = json.loads((recovery_update / "manifest.json").read_text())["updated_motions"]
+    previous = {m["name"]: m for m in json.loads(
+        (recovery_update / filename.replace(".json", ".before.json")).read_text()
+    )["motions"]}
     for name, digest in unchanged.items():
-        encoded = json.dumps(motions[name], ensure_ascii=False, sort_keys=True,
+        motion = previous[name] if name in recovery_names else motions[name]
+        if filename == "robot_motions_runtime.json" and name == "건공잡기":
+            motion = json.loads((ROOT / "artifacts/20261009_pickup_source_arms_update/pickup.before.json").read_text())
+        encoded = json.dumps(motion, ensure_ascii=False, sort_keys=True,
                              separators=(",", ":")).encode()
         assert hashlib.sha256(encoded).hexdigest() == digest, name
 

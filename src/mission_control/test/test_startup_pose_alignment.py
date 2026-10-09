@@ -37,7 +37,7 @@ def test_startup_pose_matches_double_jjin_six_repeat_forward(catalogs):
 def test_back_pose_motor_override_excludes_pickup_shot_and_hurdle(catalogs):
     _, current = catalogs
     for name, motion in current.items():
-        if name in EXCLUDED:
+        if name in EXCLUDED or name == "건공잡기":
             continue
         for frame in motion["frames"]:
             if "오뒤" in frame["name"]:

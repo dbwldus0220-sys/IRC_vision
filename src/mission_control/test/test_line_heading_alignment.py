@@ -16,10 +16,10 @@ from test_wait_refresh_and_fine_settle import LiveInputHarness, observe
     (-45.001, "LEFT", 3, 45.), (-60., "LEFT", 4, 60.),
 ])
 @pytest.mark.parametrize("offset", [-.7, 0., .7])
-def test_large_ground_heading_precedes_recovery_curve_and_offset_alignment(
+def test_disabled_position_mode_keeps_large_heading_priority(
     heading, direction, count, yaw, offset,
 ):
-    planner = MotionDecisionPlanner(MotionDecisionConfig(line_offset_align_enter_px=100.))
+    planner = MotionDecisionPlanner(MotionDecisionConfig(line_offset_align_enter_px=-1.))
     info = line_info(
         ground_heading_error_deg=heading, filtered_lateral_offset_norm=offset,
         turn_angle_deg=-heading, offset_reference_valid=True,
@@ -83,19 +83,19 @@ def test_recorded_right_corner_can_be_seen_without_selecting_corner_motion():
              "offset_reference_steering_deg": 73.4, "turn_angle_deg": -13.7,
              "corner_start_distance_m": .1}
     decision = planner.plan("LINE_TRACK", {"line": steep}, .1)
-    # Even a close confirmed corner does not override the earlier >45-deg branch.
+    # Large ground-heading correction remains independent of the offset target.
     assert decision.valid and decision.action == "LINE_HEADING_TURN_RIGHT_7"
     assert decision.reason == "line_large_ground_heading"
 
 
 @pytest.mark.parametrize("side", [-1, 1])
-def test_raw_cross_line_blocks_forward_even_when_filtered_and_ground_angles_are_small(side):
+def test_image_angle_alone_does_not_veto_ground_tracking(side):
     decision = MotionDecisionPlanner().plan("LINE_TRACK", {"line": line_info(
         ground_heading_error_deg=0., filtered_heading_error_deg=0.,
         heading_error_deg=side * 55.6,
     )}, .1)
-    assert not decision.valid
-    assert decision.reason == "straight_heading_not_aligned"
+    assert decision.valid and decision.action == "STRAIGHT"
+    assert decision.reason == "line_tracking"
 
 
 def test_stationary_turn_waits_before_execution_and_requires_post_dwell_capture(monkeypatch):

@@ -1,0 +1,23 @@
+{
+  "source_file": "motion_imports/robot_motions(49).json",
+  "source_sha256": "71f1e6603d92531c0f5523fb667d1ae24d2214adb2389fec3256b0137c8b908b",
+  "updated_motions": [
+    "건라인복귀좌회전45도(4회)",
+    "건라인복귀우회전45도(4회)"
+  ],
+  "pose_renames": {
+    "김오뒤3": "김오뒤3(라인복귀49)"
+  },
+  "aliases": {
+    "line_recovery_left_4": "건라인복귀좌회전45도(4회)",
+    "line_recovery_right_4": "건라인복귀우회전45도(4회)"
+  },
+  "before_sha256": {
+    "robot_motions_runtime.json": "526241b8b2e4ddfe478c4f95c7ac9d6c04f2abfa5fe9a6df122bf369a1148553",
+    "robot_motions_pc.json": "ac3a817e47837e10c359470f32942b2e6c65556bcbba68e1d4f83f9ab8b4bd89"
+  },
+  "after_sha256": {
+    "robot_motions_runtime.json": "67e1a55de01480d998e4c04f1c970f14984830a3d4a72ffc180ac79e03c62649",
+    "robot_motions_pc.json": "12f7af48abd73883504227e500df33a71a1b3aaec36bcceeaedf145ecf6090c3"
+  }
+}

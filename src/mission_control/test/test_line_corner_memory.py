@@ -55,6 +55,7 @@ def corner_info(direction='RIGHT', **overrides):
         'corner_preview_confirmed': True,
         'corner_direction': direction, 'corner_start_distance_m': .14,
         'corner_start_depth_valid': True, 'corner_preview_held': False,
+        'corner_start_lateral_offset_m': 0.,
         # A right corner can have its nearest visible point on the left.
         'center_points_px': [[550, 700], [950, 400]], 'image_width': 1280,
     }
@@ -109,17 +110,17 @@ def test_visible_corner_separates_clock_rejection_from_occlusion(
 
 
 @pytest.mark.parametrize('direction', ['LEFT', 'RIGHT'])
-def test_far_corner_cannot_convert_misaligned_turn_to_forward(clock, direction):
+def test_far_selected_corner_turn_uses_short_forward_without_lateral_target(clock, direction):
     node = CornerHarness(phase='LINE_TRACK')
     heading = 30. if direction == 'RIGHT' else -30.
     info = corner_info(direction, ground_heading_error_deg=heading,
-                       corner_start_distance_m=.4)
+                       corner_start_distance_m=.4, corner_start_lateral_offset_m=None)
     receive_line(node, clock, info)
     decision = node.planner.plan('LINE_TRACK', {'line': info}, .1)
     assert decision.action == direction
     gated = MotionDecisionNode._apply_pending_line_corner(node, decision, info)
-    assert not gated.valid and gated.action == 'WAIT'
-    assert gated.reason == 'line_corner_approach_heading_not_aligned'
+    assert gated.valid and gated.action == 'STRAIGHT_1'
+    assert gated.reason == 'line_corner_turn_too_far'
 
 
 @pytest.mark.parametrize('phase', ['AUTO', 'LINE_TRACK'])
@@ -144,7 +145,7 @@ def test_corner_survives_loss_but_waits_for_fresh_distance_after_completion(cloc
     command = node.publish_vision()[-1]
     assert command['action'] == direction
     assert command['source'] == 'line'
-    assert command['reason'] == 'line_corner_ready'
+    assert command['reason'] == 'line_tracking'
     assert command['source_command']['corner_from_memory'] is True
     assert node.pending_line_corner is None
     assert MotionCommandBridgeNode.ACTION_TO_MOTION_ID[direction] == f'line_recovery_{direction.lower()}_4'
@@ -158,7 +159,7 @@ def test_corner_is_kept_through_recovery_and_fresh_negative_frame(clock):
     node.send_status(current['action'], current['command_id'], 'RUNNING')
     receive_line(node, clock, corner_info('RIGHT'))
     release_general(node, current)
-    # Recovery retains its existing requirement for post-motion Vision.
+    # A fresh negative observation still overrides the earlier usable frame.
     receive_line(node, clock, {'detected': False})
     assert node.publish_vision()[-1]['action'] == 'WAIT'
     receive_line(node, clock, corner_info())
@@ -229,10 +230,11 @@ def test_memory_rechecks_corner_before_queueing_walking_correction(clock):
     receive_line(node, clock, corner_info())
     assert MotionDecisionNode._line_only_prequeue_allowed(node, {})
     count = len(node.publisher.messages)
-    MotionDecisionNode._publish_decision(node, node.last_selected_decision, queue_while_locked=True)
+    decision = node.planner.plan('AUTO', {'line': node.latest_info['line']}, .1)
+    MotionDecisionNode._publish_decision(node, decision, queue_while_locked=True)
     assert len(node.publisher.messages) == count + 1
     assert node.publisher.messages[-1]['action'] == 'RIGHT'
-    assert node.publisher.messages[-1]['reason'] == 'line_corner_ready'
+    assert node.publisher.messages[-1]['reason'] == 'line_tracking'
 
 
 def test_already_published_straight_is_finished_before_remembered_corner(clock):
@@ -304,7 +306,7 @@ def test_remembered_corner_cannot_bypass_executor_fault(clock):
     assert node.publish_vision(line={'detected': False}) == []
 
 
-@pytest.mark.parametrize('phase', ['POST_BALL_LINE_ALIGN', 'POST_SHOT_LINE_ALIGN', 'LINE_TRACK_AFTER_PICKUP'])
+@pytest.mark.parametrize('phase', ['POST_BALL_LINE_ALIGN', 'POST_SHOT_LINE_ALIGN'])
 def test_route_specific_alignment_does_not_remember_normal_corners(clock, phase):
     node = CornerHarness()
     start_line(node)
@@ -337,12 +339,11 @@ def test_video_recovery_then_distant_corner_approaches_and_reobserves(clock):
     node.send_status(current['action'], current['command_id'], 'RUNNING')
     receive_line(node, clock, corner_info(corner_start_distance_m=.9777))
     release_general(node, current)
-    # Fresh input from another source must not validate a moving line frame.
-    assert node.publish_vision(hurdle={'detected': False})[-1]['action'] == 'WAIT'
-    receive_line(node, clock, corner_info(corner_start_distance_m=.87))
-    forward = node.publish_vision()[-1]
+    # A recent walking frame remains usable at the completion boundary.
+    forward = node.publish_vision(hurdle={'detected': False})[-1]
     assert forward['action'] == 'STRAIGHT_1'
-    assert node.pending_line_corner['corner_start_distance_m'] == .87
+    assert node.pending_line_corner['corner_start_distance_m'] == .9777
+    clock[0] += 1.
     release_general(node, forward)
     assert node.publish_vision(hurdle={'detected': False})[-1]['action'] == 'WAIT'
     receive_line(node, clock, corner_info(corner_start_distance_m=.24))
@@ -407,7 +408,7 @@ def test_lost_corner_waits_for_observation_then_walks_without_extra_settle(clock
     assert node.publish_vision()[-1]['action'] == 'RIGHT'
 
 
-def test_distant_corner_preserves_local_line_recovery(clock):
+def test_distant_corner_preserves_local_recovery(clock):
     node = CornerHarness()
     info = corner_info(corner_start_distance_m=.87, ground_heading_error_deg=-20.,
                        filtered_lateral_offset_norm=-.3)
@@ -426,26 +427,23 @@ def test_distant_corner_preserves_local_line_recovery(clock):
     ({'ground_heading_error_deg': 31.99, 'filtered_lateral_offset_norm': -.795,
       'lateral_offset_px': -507.9, 'offset_reference_valid': True,
       'offset_reference_steering_deg': -75.8, 'turn_angle_deg': 3.6},
-     'RECOVER_LEFT_TURN_RIGHT_4'),
+     'STOP'),
     ({'ground_heading_error_deg': 0., 'filtered_heading_error_deg': 0.,
-      'heading_error_deg': 55., 'turn_angle_deg': 0.}, 'STOP'),
+      'heading_error_deg': 55., 'turn_angle_deg': 0.}, 'STRAIGHT'),
 ])
-def test_near_confirmed_corner_does_not_require_normal_turn_candidate(
+def test_near_confirmed_corner_preserves_normal_non_corner_decision(
     clock, side, updates, ordinary_action,
 ):
     node = CornerHarness(phase='LINE_TRACK')
     info = corner_info(side, **updates)
     ordinary = node.planner.plan('LINE_TRACK', {'line': info}, .1)
     assert ordinary.action == ordinary_action
-    if ordinary_action == 'STOP':
-        assert ordinary.reason == 'straight_heading_not_aligned'
-    result = node.publish_vision(line=info)[-1]
-    assert result['valid'] and result['action'] == side
-    command = result['source_command']
-    assert command['motion'] == side
-    assert command['corner_previous_action'] == ordinary_action
-    assert command['alignment_reference'] == 'confirmed_corner'
-    assert 'turn_count' not in command
+    receive_line(node, clock, info)
+    result = MotionDecisionNode._apply_pending_line_corner(node, ordinary, info)
+    assert result.action == ordinary.action
+    assert result.valid == ordinary.valid
+    assert result.reason == ordinary.reason
+    assert result.source_command == ordinary.source_command
 
 
 @pytest.mark.parametrize('updates', [
@@ -463,30 +461,29 @@ def test_remembered_direction_alone_cannot_replace_normal_forward(clock, updates
     assert node.pending_line_corner['corner_direction'] == 'RIGHT'
 
 
-def test_corner_switch_does_not_bypass_invalid_offset_geometry(clock):
+def test_pixel_reference_missing_does_not_block_valid_normal_forward(clock):
     node = CornerHarness(phase='LINE_TRACK')
+    node.planner.config = replace(node.planner.config, line_offset_align_enter_px=100.)
     info = corner_info(ground_heading_error_deg=0., turn_angle_deg=0.,
                        lateral_offset_px=None, offset_reference_valid=False)
     result = node.publish_vision(line=info)[-1]
-    assert not result['valid'] and result['action'] == 'STOP'
-    assert result['reason'] == 'line_offset_alignment_invalid_reference'
+    assert result['valid'] and result['action'] == 'STRAIGHT'
+    assert result['reason'] == 'line_tracking'
 
 
-def test_independent_corner_switch_waits_for_motion_then_resumes_without_settle(clock):
+def test_selected_corner_switch_waits_for_motion_then_resumes_without_settle(clock):
     node = CornerHarness(phase='LINE_TRACK')
     node.LINE_TURN_PRE_MOTION_SETTLE_SEC = 1.
     current = start_line(node)
-    near = corner_info(ground_heading_error_deg=0., turn_angle_deg=0.)
+    near = corner_info()
     receive_line(node, clock, near)
     assert node.publish_vision() == []
     release_general(node, current)
-    assert node.publish_vision()[-1]['action'] == 'WAIT'
-    receive_line(node, clock, near)
     turn = node.publish_vision()[-1]
-    assert turn['action'] == 'RIGHT' and turn['reason'] == 'line_corner_ready'
+    assert turn['action'] == 'RIGHT' and turn['reason'] == 'line_tracking'
     assert node.pending_line_corner is None
     release_general(node, turn)
-    receive_line(node, clock, near)
+    receive_line(node, clock, corner_info(ground_heading_error_deg=0., turn_angle_deg=0.))
     assert node.publish_vision()[-1]['action'] == 'STRAIGHT'
 
 
@@ -520,16 +517,25 @@ def test_production_clock_requires_recent_capture_stamp(clock, monkeypatch, stam
     assert result['action'] == ('RIGHT' if allowed else 'WAIT')
 
 
-def test_first_corner_seen_after_motion_rejects_delayed_capture(clock, monkeypatch):
+def test_first_corner_seen_after_discrete_turn_rejects_delayed_capture(clock, monkeypatch):
     node = CornerHarness()
-    current = start_line(node)
+    action = 'LINE_HEADING_TURN_RIGHT_2'
+    node.general_motion_gate.on_command_published(action, 100)
+    node.active_general_source = 'line'
+    node.send_status(action, 100, 'RUNNING')
     monkeypatch.setattr(MotionDecisionNode, '_current_ros_time_ns', lambda _: 10_000_000_000)
-    release_general(node, current)
+    node.send_status(action, 100, 'SUCCEEDED')
     receive_line(node, clock, corner_info(stamp={'sec': 9, 'nanosec': 900000000}))
-    assert node.publish_vision()[-1]['action'] == 'WAIT'
+    info = node.latest_info['line']
+    decision = node.planner.plan('LINE_TRACK', {'line': info}, .1)
+    result = MotionDecisionNode._apply_pending_line_corner(node, decision, info)
+    assert result.action == 'WAIT'
+    assert result.source_command['line_input_checks']['captured_after_motion'] is False
     monkeypatch.setattr(MotionDecisionNode, '_current_ros_time_ns', lambda _: 10_100_000_000)
     receive_line(node, clock, corner_info(stamp={'sec': 10, 'nanosec': 50000000}))
-    assert node.publish_vision()[-1]['action'] == 'RIGHT'
+    info = node.latest_info['line']
+    decision = node.planner.plan('LINE_TRACK', {'line': info}, .1)
+    assert MotionDecisionNode._apply_pending_line_corner(node, decision, info).action == 'RIGHT'
 
 
 @pytest.mark.parametrize('side', ['LEFT', 'RIGHT'])

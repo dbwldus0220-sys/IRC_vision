@@ -56,11 +56,9 @@ def test_elapsed_rest_never_authorizes_invalid_or_missing_goal(resting_goal, inv
     assert node.publish_vision(goal=score_ready_goal())[-1]['action'] == 'SHOT'
 
 
-def test_executed_fine_step_restarts_rest_and_existing_dwell_counts(resting_goal):
+def test_executed_fine_step_restarts_shot_rest_without_forward_dwell(resting_goal):
     node, clock = resting_goal
     outside = {**score_ready_goal(), 'depth_m': 0.49, 'score_now': False}
-    assert node.publish_vision(goal=outside) == []
-    clock[0] = 11.0
     motion = node.publish_vision(goal=outside)[-1]
     assert motion['action'] == 'GOAL_CAMERA90_FINE_FORWARD_1'
     assert node.goal_stationary_since is None
@@ -73,9 +71,6 @@ def test_executed_fine_step_restarts_rest_and_existing_dwell_counts(resting_goal
     clock[0] = 14.999
     assert node.publish_vision(goal=score_ready_goal()) == []
     clock[0] = 15.0
-    # The existing post-motion dwell discards its old image before re-observation.
-    assert node.publish_vision(goal=score_ready_goal()) == []
-    assert node.latest_info['goal'] is None
     assert node.publish_vision(goal=score_ready_goal())[-1]['action'] == 'SHOT'
 
 
@@ -83,8 +78,6 @@ def test_executed_fine_step_restarts_rest_and_existing_dwell_counts(resting_goal
 def test_failed_motion_does_not_reuse_old_rest(resting_goal, status):
     node, clock = resting_goal
     outside = {**score_ready_goal(), 'depth_m': 0.49, 'score_now': False}
-    node.publish_vision(goal=outside)
-    clock[0] = 11.0
     motion = node.publish_vision(goal=outside)[-1]
     if status != 'REJECTED':
         node.send_status(motion['action'], motion['command_id'], 'RUNNING')

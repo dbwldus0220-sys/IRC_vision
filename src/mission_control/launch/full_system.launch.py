@@ -422,7 +422,7 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("line_heading_source", default_value="ground",
                                   choices=["image", "ground"]),
             DeclareLaunchArgument("line_offset_align_enter_px", default_value="100.0",
-                                  description="Pixel offset limit for short forward / heading-only correction; negative disables."),
+                                  description="Pixel offset entry for ground-target turn/forward alignment; negative disables."),
             DeclareLaunchArgument("recovery_heading_turn_deg", default_value="10.0"),
             DeclareLaunchArgument(
                 "recovery_away_heading_turn_deg", default_value="3.0"
@@ -447,7 +447,7 @@ def generate_launch_description() -> LaunchDescription:
             ),
             DeclareLaunchArgument("line_corner_memory_timeout_sec", default_value="15.0",
                                   description="Maximum seconds since a real confirmed corner observation."),
-            DeclareLaunchArgument("corner_turn_margin_m", default_value="0.40",
+            DeclareLaunchArgument("corner_turn_margin_m", default_value="0.15",
                                   description="Provisional confirmed-corner entry distance; calibrate on the robot."),
             DeclareLaunchArgument("ball_tracking_range_m", default_value="1.5"),
             DeclareLaunchArgument("ball_control_range_m", default_value="1.5"),

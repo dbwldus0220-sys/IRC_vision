@@ -19,7 +19,7 @@ from step.hurdle_navigation_planner import HurdleNavigationPlanner
 from step.line_navigation_planner import LineNavigationPlanner
 from step.line_navigation_planner import NavigationConfig
 from step.line_navigation_planner import (
-    valid_ground_heading, line_heading, straight_heading_is_aligned,
+    valid_ground_heading, line_heading,
 )
 
 from .goal_loss_timer import GoalLossTimer
@@ -133,6 +133,9 @@ class MotionDecisionPlanner:
     BALL_LOST_LEFT_TURN_COUNT = 2
     BALL_LOST_RIGHT_TURN_COUNT = 5
     POST_SHOT_LINE_HEADING_TOLERANCE_DEG = 20.0
+    LINE_OFFSET_EXIT_RATIO = 0.8
+    LINE_OFFSET_EXIT_DISTANCE_M = 0.10
+    LINE_OFFSET_TARGET_TOLERANCE_DEG = 10.0
 
     def __init__(
         self,
@@ -164,6 +167,8 @@ class MotionDecisionPlanner:
             GoalNavigationConfig(control_start_depth_m=self.config.goal_control_range_m)
         )
         self.hurdle_planner = HurdleNavigationPlanner()
+        self.line_offset_alignment_active = False
+        self.line_offset_alignment_failed = False
         self.previous_source = "none"
         self.last_line_seen_direction: str | None = None
         self.ball_tracking_active = False
@@ -304,6 +309,8 @@ class MotionDecisionPlanner:
         source = self._select_source(normalized_phase, observations)
         if source not in {"line", "none"}:
             self.last_line_seen_direction = None
+            self.line_offset_alignment_active = False
+            self.line_offset_alignment_failed = False
         if source == "none":
             self._reset_previous_source()
             return MotionDecision(
@@ -733,6 +740,9 @@ class MotionDecisionPlanner:
         result = command.to_dict()
         if source == "line":
             result["heading_source"] = self.line_planner.config.heading_source
+            result = self._line_offset_alignment(info or {}, result)
+            if result.get("line_offset_alignment_active"):
+                return result
             if command.valid and command.motion.startswith("LINE_HEADING_TURN_"):
                 heading = command.heading_error_deg
                 direction = "RIGHT" if heading > 0.0 else "LEFT"
@@ -747,7 +757,6 @@ class MotionDecisionPlanner:
                     "catalog_motion_available": True,
                 })
                 return result
-            result = self._line_offset_alignment(info or {}, result)
         if source == "ball" and command.valid and command.motion == "STRAIGHT":
             distance = command.distance_m
             angle = command.steering_error_deg
@@ -791,39 +800,36 @@ class MotionDecisionPlanner:
         return result
 
     def _line_offset_alignment(self, info: dict, result: dict) -> dict:
-        """Separate heading correction from short, off-center forward steps."""
-        angle = self._number(info, "offset_reference_steering_deg")
-        reference_valid = (
-            info.get("offset_reference_valid") is True
-            and angle is not None and abs(angle) < 90.0
-        )
+        """Guard far recovery candidates without replacing ordinary tracking/corners."""
         offset = self._number(info, "lateral_offset_px")
         threshold = self.config.line_offset_align_enter_px
-        result.update({
-            "lateral_offset_px": offset,
-            "offset_reference_valid": reference_valid,
-            "offset_reference_x_px": self._number(info, "offset_reference_x_px"),
-            "offset_reference_y_px": self._number(info, "offset_reference_y_px"),
-            "offset_reference_steering_deg": angle if reference_valid else None,
-            # Image-point steering is diagnostic only, never a body yaw target.
-            "offset_reference_turn_direction": None,
-            "offset_reference_turn_count": 0,
-            "offset_align_enter_px": threshold,
-        })
-        if threshold < 0.0 or not result["valid"]:
+        result = {**result, "lateral_offset_px": offset,
+                  "offset_align_enter_px": threshold,
+                  "line_offset_alignment_active": False}
+        self.line_offset_alignment_active = False
+        if threshold < 0.0:
+            self.line_offset_alignment_failed = False
             return result
-        if offset is not None and abs(offset) <= threshold:
+        if not result["valid"]:
             return result
-        # Preserve the validated moving recovery selected by the line planner.
-        # Pixel displacement must not replace it with a stationary yaw correction.
-        if offset is not None and str(result.get("motion", "")).startswith("RECOVER_"):
+        if self.line_offset_alignment_failed:
+            return {**result, "valid": False, "motion": "STOP",
+                    "reason": "line_offset_motion_failed"}
+        # Pixel offset alone does not own steering. Keep the October 1 forward,
+        # corner and large-heading candidates, including near-line recovery.
+        if (not result["motion"].startswith("RECOVER_")
+                or offset is None or abs(offset) < threshold):
             return result
-        config = self.line_planner.config
-        heading = line_heading(info, config.heading_source)
-        # Build the candidate without stop(): it clears the base planner's
-        # confirmed direction and would restart the pre-turn dwell every 3 ticks.
+        target = self._line_offset_ground_target(info)
+        if target is not None and abs(target[3]) <= self.LINE_OFFSET_EXIT_DISTANCE_M:
+            return result
+
+        self.line_offset_alignment_active = True
         candidate = {
-            **result,
+            **result, "valid": False, "motion": "STOP",
+            "reason": "line_offset_target_invalid",
+            "line_offset_alignment_active": True,
+            "alignment_reference": "ground_line_target",
             "linear_speed_mps": 0.0, "lateral_speed_mps": 0.0,
             "angular_speed_rad_s": 0.0, "angular_accel_rad_s2": 0.0,
             "travel_distance_m": 0.0, "lateral_travel_distance_m": 0.0,
@@ -832,48 +838,76 @@ class MotionDecisionPlanner:
             "turn_direction": None, "turn_count": None, "turn_angle_deg": None,
             "approach_motion": None, "approach_level": None,
             "corner_prepare": False,
+            "recovery_max_lateral_distance_m": self.LINE_OFFSET_EXIT_DISTANCE_M,
+            "target_heading_tolerance_deg": self.LINE_OFFSET_TARGET_TOLERANCE_DEG,
         }
-        if offset is None or heading is None:
-            return {**candidate, "valid": False, "motion": "STOP",
-                    "reason": "line_offset_alignment_invalid_reference"}
-        if abs(heading) <= config.straight_max_heading_deg:
-            if not straight_heading_is_aligned(info, config):
-                return {**candidate, "valid": False, "motion": "STOP",
-                        "reason": "straight_heading_not_aligned"}
-            # No calibrated lateral-only Line gait is available. Reobserve after
-            # the shortest normal forward instead of turning toward an image point.
-            speed = config.min_linear_speed_mps
+        if target is None:
+            return candidate
+        lateral, forward, angle, distance = target
+        candidate.update(target_lateral_m=lateral, target_forward_m=forward,
+                         target_bearing_deg=angle, ground_lateral_offset_m=distance,
+                         steering_error_deg=angle)
+        if abs(angle) <= self.LINE_OFFSET_TARGET_TOLERANCE_DEG:
+            speed = self.line_planner.config.min_linear_speed_mps
             return {
                 **candidate, "valid": True, "motion": "STRAIGHT_1",
-                "reason": "line_offset_short_forward",
+                "reason": "line_offset_target_forward",
                 "linear_speed_mps": speed,
-                "travel_distance_m": speed * config.command_duration_sec,
-                "steering_error_deg": heading,
+                "travel_distance_m": speed * self.line_planner.config.command_duration_sec,
                 "approach_motion": "STRAIGHT_1", "approach_level": 1,
-                "alignment_reference": "lateral_offset_short_forward",
                 "catalog_motion_available": True,
             }
-        direction = "RIGHT" if heading > 0.0 else "LEFT"
-        count = self._turn_repeat_count(heading, direction)
-        if count == 0:
-            # Match post-pickup alignment for residual errors between 10 and 15 deg.
-            angles = (
-                self.LEFT_TURN_ANGLES_DEG if direction == "LEFT"
-                else self.RIGHT_TURN_ANGLES_DEG
-            )
-            count = min(angles, key=angles.get)
-        yaw = self._turn_angle_deg(count, direction)
+        direction = "RIGHT" if angle > 0.0 else "LEFT"
+        angles = self.RIGHT_TURN_ANGLES_DEG if direction == "RIGHT" else self.LEFT_TURN_ANGLES_DEG
+        # One smallest calibrated turn, then require a new stationary observation.
+        count = min(angles, key=angles.get)
+        yaw = angles[count]
         return {
-            **candidate, "valid": True,
-            "motion": f"LINE_HEADING_TURN_{direction}_{count}",
-            "reason": "line_heading_alignment",
-            "steering_error_deg": heading,
-            "target_heading_change_deg": math.copysign(yaw, heading),
-            "turn_direction": direction, "turn_count": count,
-            "turn_angle_deg": yaw,
-            "alignment_reference": f"{config.heading_source}_heading",
+            **candidate, "valid": True, "motion": f"LINE_OFFSET_TURN_{direction}_{count}",
+            "reason": "line_offset_target_turn",
+            "target_heading_change_deg": math.copysign(yaw, angle),
+            "turn_direction": direction, "turn_count": count, "turn_angle_deg": yaw,
             "catalog_motion_available": True,
         }
+
+    def _line_offset_ground_target(self, info: dict) -> tuple[float, float, float, float] | None:
+        """Keep the fitted target within the observed, pre-corner ground segment."""
+        heading = valid_ground_heading(info)
+        distance = self._number(info, "ground_lateral_offset_m")
+        lookahead = self._number(info, "ground_lookahead_distance_m")
+        points = info.get("ground_line_points_m")
+        minimum_points = 2 if info.get("ground_fit_mode") == "TWO_POINT_CONFIRMED" else 3
+        if (heading is None or abs(heading) >= 90.0 or distance is None
+                or lookahead is None or lookahead <= 0.0
+                or not isinstance(points, list) or len(points) < minimum_points):
+            return None
+        # A held preview remembers an old bend; the analyzer fits the current
+        # full path in that case. Only a currently observed bend needs a split.
+        current_corner = (
+            info.get("corner_preview_raw_detected") is True
+            or (info.get("corner_preview_confirmed") is True
+                and info.get("corner_preview_held") is not True)
+        )
+        if (current_corner
+                and info.get("ground_fit_segment") != "PRE_CORNER"):
+            return None
+        depths = []
+        for point in points:
+            if not isinstance(point, (list, tuple)) or len(point) != 2:
+                return None
+            x, z = self._number({"x": point[0]}, "x"), self._number({"z": point[1]}, "z")
+            if x is None or z is None or z <= 0.0:
+                return None
+            depths.append(z)
+        if max(depths) - min(depths) <= 1e-6:
+            return None
+        forward = min(max(lookahead, min(depths)), max(depths))
+        radians = math.radians(heading)
+        lateral = math.tan(radians) * forward + distance / math.cos(radians)
+        angle = math.degrees(math.atan2(lateral, forward))
+        if not all(math.isfinite(value) for value in (lateral, forward, angle)):
+            return None
+        return lateral, forward, angle, distance
 
     @classmethod
     def _turn_repeat_deg(cls, direction: str) -> float | None:
@@ -1300,6 +1334,16 @@ class MotionDecisionPlanner:
             "alignment_reference": "line_heading",
             "steering_error_deg": heading,
         }
+        if phase == "POST_BALL_LINE_ALIGN":
+            # Reacquisition ends this phase. Ordinary navigation owns position,
+            # heading and corners; aligning only the local tangent can turn away
+            # from a visible bend and restart the search indefinitely.
+            return MotionDecision(
+                phase=phase, source="line", action="POST_BALL_LINE_ALIGNED",
+                valid=True, reason="post_ball_line_reacquired",
+                sdk_motion_requested=False, requires_ack=False,
+                source_command=common,
+            )
         if abs(heading) <= heading_tolerance:
             return MotionDecision(
                 phase=phase,
@@ -1313,14 +1357,6 @@ class MotionDecisionPlanner:
             )
 
         count = self._turn_repeat_count(heading, direction)
-        if phase == "POST_BALL_LINE_ALIGN" and count == 0:
-            # The smallest available turn is 15 degrees; use it for the
-            # remaining 10..15-degree error instead of releasing alignment.
-            angles = (
-                self.RIGHT_TURN_ANGLES_DEG if direction == "RIGHT"
-                else self.LEFT_TURN_ANGLES_DEG
-            )
-            count = min(angles, key=angles.get)
         action = f"{prefix}_TURN_{direction}_{count}"
         available = bool(
             direction == "RIGHT"
@@ -1353,7 +1389,7 @@ class MotionDecisionPlanner:
         self,
         info: dict[str, Any] | None,
     ) -> MotionDecision:
-        """Repeat fine approach until close, then align laterally for pickup."""
+        """Align heading and lateral position before any further fine approach."""
         phase = "BALL_PICKUP_FINE_ALIGN"
         recovery = self._pickup_ball_loss_alignment(info, fine=True)
         if recovery is not None:
@@ -1436,61 +1472,76 @@ class MotionDecisionPlanner:
         ):
             self.pickup_fine_approach_complete = True
         common["pickup_fine_approach_complete"] = self.pickup_fine_approach_complete
+        correction = self._pickup_heading_correction(info, phase, common, fine=True)
+        if correction is not None:
+            return correction
+
+        if not (self.PICKUP_FINE_LEFT_BOUND_PX <= robot_center_offset_px
+                <= self.PICKUP_FINE_RIGHT_BOUND_PX):
+            direction = "RIGHT" if robot_center_offset_px > 0.0 else "LEFT"
+            return MotionDecision(
+                phase=phase, source="ball", action=f"BALL_PICKUP_CRAB_{direction}",
+                valid=True, reason=f"ball_pickup_crab_{direction.lower()}_required",
+                sdk_motion_requested=True, requires_ack=False,
+                source_command={**common, "lateral_direction": direction,
+                                "catalog_motion_available": True},
+            )
+
         if not self.pickup_fine_approach_complete:
             return MotionDecision(
-                phase=phase,
-                source="ball",
-                action="BALL_PICKUP_FINE_FORWARD",
-                valid=True,
-                reason="ball_pickup_fine_approach_still_required",
-                sdk_motion_requested=True,
-                requires_ack=False,
-                source_command={
-                    **common,
-                    "catalog_motion_available": True,
-                },
+                phase=phase, source="ball", action="BALL_PICKUP_FINE_FORWARD",
+                valid=True, reason="ball_pickup_fine_approach_still_required",
+                sdk_motion_requested=True, requires_ack=False,
+                source_command={**common, "catalog_motion_available": True},
             )
-
-        # BallAnalyzer computes this offset from the calibrated robot center;
-        # positive therefore means the ball is to the screen-right.
-        if (
-            self.PICKUP_FINE_LEFT_BOUND_PX
-            <= robot_center_offset_px
-            <= self.PICKUP_FINE_RIGHT_BOUND_PX
-        ):
-            return MotionDecision(
-                phase=phase,
-                source="ball",
-                action="BALL_PICKUP_FINE_ALIGN_CONTINUE",
-                valid=True,
-                reason="ball_pickup_fine_motion_complete_and_centered",
-                sdk_motion_requested=False,
-                requires_ack=False,
-                source_command={
-                    **common,
-                    "lateral_direction": "CENTERED",
-                    "catalog_motion_available": True,
-                },
-            )
-
-        direction = "RIGHT" if robot_center_offset_px > 0.0 else "LEFT"
         return MotionDecision(
-            phase=phase,
-            source="ball",
-            action=f"BALL_PICKUP_CRAB_{direction}",
+            phase=phase, source="ball", action="BALL_PICKUP_FINE_ALIGN_CONTINUE",
+            valid=True, reason="ball_pickup_fine_motion_complete_and_centered",
+            sdk_motion_requested=False, requires_ack=False,
+            source_command={**common, "lateral_direction": "CENTERED",
+                            "catalog_motion_available": True},
+        )
+
+    def _pickup_heading_correction(
+        self, info: dict, phase: str, common: dict, *, fine: bool,
+    ) -> MotionDecision | None:
+        """Both pickup checkpoints correct yaw before lateral/forward steps."""
+        angle, source = self.ball_planner.select_steering(info)
+        direction = "RIGHT" if angle is not None and angle > 0.0 else "LEFT"
+        tolerance = self.STATIONARY_TURN_MIN_DEG[direction]
+        common.update(steering_error_deg=angle, steering_source=source,
+                      heading_tolerance_deg=tolerance)
+        bottom = self._number(info, "bottom_distance_px")
+        # Preserve the existing near-foot turn prohibition; use pixels there.
+        if (self.pickup_close_alignment_active
+                or bottom is not None and bottom <= self.BALL_STATIONARY_TURN_MIN_BOTTOM_PX):
+            return None
+        if angle is None:
+            return MotionDecision(
+                phase=phase, source="ball", action="WAIT", valid=False,
+                reason="ball_pickup_waiting_for_heading",
+                sdk_motion_requested=False, requires_ack=False, source_command=common,
+            )
+        if abs(angle) < tolerance:
+            return None
+        if not self._ball_stationary_turn_allowed(info):
+            return MotionDecision(
+                phase=phase, source="ball", action="WAIT", valid=False,
+                reason="ball_pickup_waiting_for_safe_heading_correction",
+                sdk_motion_requested=False, requires_ack=False, source_command=common,
+            )
+        count = self._ball_turn_repeat_count(angle, direction)
+        prefix = "BALL_PICKUP_FINE_TURN" if fine else "BALL_PICKUP_CAMERA_DOWN_TURN"
+        return MotionDecision(
+            phase=phase, source="ball", action=f"{prefix}_{direction}_{count}",
             valid=True,
-            reason=(
-                "ball_pickup_crab_right_required"
-                if direction == "RIGHT"
-                else "ball_pickup_crab_left_required"
-            ),
-            sdk_motion_requested=True,
-            requires_ack=False,
-            source_command={
-                **common,
-                "lateral_direction": direction,
-                "catalog_motion_available": True,
-            },
+            reason=("ball_pickup_fine_heading_correction" if fine
+                    else "ball_pickup_initial_heading_correction"),
+            sdk_motion_requested=True, requires_ack=False,
+            source_command={**common, "turn_direction": direction,
+                            "turn_count": count, "turn_repeat_deg": None,
+                            "turn_angle_deg": self._ball_turn_angle_deg(count, direction),
+                            "catalog_motion_available": True},
         )
 
     def plan_ball_pickup_initial_alignment(
@@ -1555,11 +1606,7 @@ class MotionDecisionPlanner:
             abs(robot_center_offset_px)
             > self.PICKUP_INITIAL_CENTER_BOUND_PX
         )
-        # Ground heading owns turn direction; pixel position still owns crab steps.
-        if outside_center_window and steering_source != "ground_steering_angle_deg":
-            direction = "RIGHT" if robot_center_offset_px > 0.0 else "LEFT"
-        else:
-            direction = "RIGHT" if steering_error > 0.0 else "LEFT"
+        direction = "RIGHT" if steering_error > 0.0 else "LEFT"
         tolerance = self.STATIONARY_TURN_MIN_DEG[direction]
         common = {
             "steering_angle_deg": steering_angle,
@@ -1599,13 +1646,11 @@ class MotionDecisionPlanner:
                 source_command=common,
             )
 
-        if (
-            outside_center_window
-            and (
-                self.pickup_close_alignment_active
-                or bottom_distance_px <= self.BALL_STATIONARY_TURN_MIN_BOTTOM_PX
-            )
-        ):
+        correction = self._pickup_heading_correction(info, phase, common, fine=False)
+        if correction is not None:
+            return correction
+
+        if outside_center_window:
             direction = (
                 "RIGHT" if robot_center_offset_px > 0.0 else "LEFT"
             )
@@ -1623,30 +1668,6 @@ class MotionDecisionPlanner:
                     "close_crab_bottom_distance_px": (
                         self.PICKUP_CLOSE_CRAB_BOTTOM_DISTANCE_PX
                     ),
-                    "catalog_motion_available": True,
-                },
-            )
-
-        if (
-            not self.pickup_close_alignment_active
-            and self._ball_stationary_turn_allowed(info)
-            and abs(steering_error) >= tolerance
-        ):
-            count = self._ball_turn_repeat_count(steering_error, direction)
-            return MotionDecision(
-                phase=phase,
-                source="ball",
-                action=f"BALL_PICKUP_CAMERA_DOWN_TURN_{direction}_{count}",
-                valid=True,
-                reason="ball_pickup_initial_heading_correction",
-                sdk_motion_requested=True,
-                requires_ack=False,
-                source_command={
-                    **common,
-                    "turn_direction": direction,
-                    "turn_count": count,
-                    "turn_repeat_deg": None,
-                    "turn_angle_deg": self._ball_turn_angle_deg(count, direction),
                     "catalog_motion_available": True,
                 },
             )
@@ -2431,6 +2452,7 @@ class MotionDecisionPlanner:
 
     def _reset_source(self, source: str) -> None:
         if source == "line":
+            # Missing fresh frames between motions must not release position mode.
             self.line_planner.stop("source_changed")
         elif source == "ball":
             self.ball_planner.stop("source_changed")

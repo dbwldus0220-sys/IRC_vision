@@ -9,6 +9,7 @@ from mission_control.motion_decision_node import MotionDecisionNode as Node
 from test_line_corner_memory import CornerHarness, corner_info
 from test_mission_phase_flow import line_info, release_general
 from test_sparse_line_recovery import sparse_info
+from test_line_ground_fit_recovery import unconfirmed_sparse_info
 
 
 @pytest.fixture
@@ -44,15 +45,14 @@ def publish(node, clock, info):
     ('too_few_inliers', 4), ('degenerate_forward_span', 3),
     ('fit_did_not_converge', 4),
 ])
-def test_measured_near_corner_precedes_unusable_approach_fit(clock, direction, reason, count):
+def test_measured_near_corner_cannot_authorize_turn_without_tracking_geometry(clock, direction, reason, count):
     node = node_for()
     info = {**sparse_info(direction=direction, distance=.35),
             'ground_fit_reason': reason, 'ground_fit_input_point_count': count,
             'center_points_px': [[500 if direction == 'RIGHT' else 800, 700]], 'image_width': 1280}
     result = publish(node, clock, info)
-    assert result['action'] == direction and result['valid']
-    assert result['source_command']['corner_without_ground_fit']
-    assert 'invalid_ground_recovery' not in result['source_command']
+    assert not result['valid'] and result['action'] == 'WAIT'
+    assert result['action'] not in {'LEFT', 'RIGHT', 'STRAIGHT_1'}
 
 
 @pytest.mark.parametrize('updates', [
@@ -90,7 +90,7 @@ def test_expired_memory_blocks_both_search_and_ground_recovery(clock, next_info)
     assert result['action'] == 'WAIT' and result['reason'] == 'line_corner_memory_expired'
     assert node.pending_line_corner['last_confirmed_at'] == last_confirmed
     # Only a real new confirmation refreshes the expired memory.
-    result = publish(node, clock, sparse_info(distance=.35))
+    result = publish(node, clock, corner_info(corner_start_distance_m=.35))
     assert result['action'] == 'RIGHT'
 
 
@@ -120,29 +120,31 @@ def test_direction_conflict_after_search_does_not_reverse_or_refund(clock):
     assert node.lost_search_turn_limiter.angles['line'] == 15.
 
 
-def test_one_budget_covers_loss_visible_fit_recovery_and_partial_reacquisition(clock):
+def test_visible_alignment_does_not_spend_corner_loss_budget(clock):
     node = node_for()
     observe(node, clock, corner_info(corner_start_distance_m=.7))
-    for index, info in enumerate(({'detected': False}, sparse_info(distance=.7), {'detected': False})):
+    visible = {**unconfirmed_sparse_info(distance=.7), 'corner_preview_confirmed': True,
+               'ground_two_point_candidate': None}
+    for index, info in enumerate(({'detected': False}, visible, {'detected': False})):
         command = publish(node, clock, info)
-        assert command['action'] == 'LINE_LOST_TURN_RIGHT_2'
-        assert command['source_command']['lost_search_stage'] == 'CORNER'
-        assert node.lost_search_turn_limiter.angles['line'] == (index + 1) * 15.
+        expected = 'LINE_OFFSET_TURN_RIGHT_2' if info.get('detected') else 'LINE_LOST_TURN_RIGHT_2'
+        assert command['action'] == expected
+        assert node.lost_search_turn_limiter.angles['line'] == (15. if index < 2 else 30.)
         release_general(node, command)
-        assert not any(m['valid'] for m in node.publish_vision())
-        # Seeing the line without the bend permits normal forward, but no refund.
-        forward = publish(node, clock, {**line_info(), 'corner_preview_confirmed': False})
-        assert forward['action'] == 'STRAIGHT'
-        assert node.lost_search_turn_limiter.angles['line'] == (index + 1) * 15.
-        release_general(node, forward)
-    for info in ({'detected': False}, sparse_info(distance=.7)):
-        blocked = publish(node, clock, info)
-        assert not blocked['valid'] and blocked['reason'] == 'lost_search_turn_limit_reached'
-    corner = publish(node, clock, sparse_info(distance=.35))
+        if info.get('detected'):
+            assert node.lost_search_turn_limiter.image_alignment_angle == 15.
+            clock[0] += 1.01
+            Node._publish_decision(node)
+    command = publish(node, clock, {'detected': False})
+    assert command['valid'] and command['action'] == 'LINE_LOST_TURN_RIGHT_2'
+    release_general(node, command)
+    blocked = publish(node, clock, {'detected': False})
+    assert not blocked['valid'] and blocked['reason'] == 'lost_search_turn_limit_reached'
+    corner = publish(node, clock, corner_info(corner_start_distance_m=.35))
     assert corner['action'] == 'RIGHT'
-    assert node.lost_search_turn_limiter.angles['line'] == 45.
     release_general(node, corner)
     assert node.lost_search_turn_limiter.angles['line'] == 0.
+    assert node.lost_search_turn_limiter.image_alignment_angle == 0.
 
 
 def test_freshness_and_failure_still_outrank_corner_selection(clock):

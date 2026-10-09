@@ -2189,8 +2189,8 @@ def test_goal_approach_defers_crab_until_fresh_scoring_depth_without_dwell(monke
     assert forward["action"] == "GOAL_CAMERA90_FINE_FORWARD_1"
     release_general(harness, forward)
     assert harness.goal_post_motion_dwell_until is None
-    assert harness.latest_info["goal"] is None
-    assert not harness.general_motion_gate.has_required_fresh_vision()
+    assert harness.latest_info["goal"] == goal
+    assert harness.general_motion_gate.has_required_fresh_vision()
     goal = {**goal, "depth_m": 0.470}
     crab = harness.publish_vision(goal=goal)[-1]
     assert crab["action"] == "GOAL_CAMERA90_CRAB_RIGHT"
@@ -2833,7 +2833,7 @@ def test_pickup_top_loss_publication_consumes_forward_inside_special_lock(stage)
     assert not harness.pickup_fine_align_waiting
 
 
-def test_goal_depth_approach_remeasures_after_each_motion_before_shot(monkeypatch):
+def test_goal_depth_approach_uses_latest_depth_without_clearing_it_between_forwards(monkeypatch):
     now = [10.0]
     monkeypatch.setattr('mission_control.motion_decision_node.time.monotonic', lambda: now[0])
     harness = MissionFlowHarness(phase='GOAL_APPROACH')
@@ -2854,8 +2854,8 @@ def test_goal_depth_approach_remeasures_after_each_motion_before_shot(monkeypatc
         assert len(harness.publisher.messages) == published_count
         release_general(harness, command)
         assert harness.goal_post_motion_dwell_until is None
-        assert not harness.general_motion_gate.has_required_fresh_vision()
-        assert harness.latest_info['goal'] is None
+        assert harness.general_motion_gate.has_required_fresh_vision()
+        assert harness.latest_info['goal'] == sample
         assert len(harness.publisher.messages) == published_count
     command = harness.publish_vision(goal=score_ready_goal())[-1]
     assert command['action'] == 'SHOT'
@@ -2988,7 +2988,9 @@ def test_post_pickup_corner_frames_use_normal_turn_after_motion_boundary(monkeyp
         line_info(heading=8.9, offset=-0.256),
         turn_angle_deg=63.0,
         corner_preview_confirmed=True,
-        corner_start_distance_m=0.74,
+        corner_start_distance_m=0.14,
+        corner_start_depth_valid=True, corner_direction="RIGHT",
+        corner_preview_held=False,
         corner_approach_motion="STRAIGHT_5",
     )
     now[0] = 12.5
@@ -2996,14 +2998,16 @@ def test_post_pickup_corner_frames_use_normal_turn_after_motion_boundary(monkeyp
     for _ in range(15):
         callback(String(data=json.dumps(corner)))
     assert harness.pending_line_decision.action == "RIGHT"
-    assert getattr(harness, "queued_general_command_id", None) is None
-    assert len(harness.publisher.messages) == 1
+    following = harness.publisher.messages[-1]
+    assert harness.queued_general_command_id == following['command_id']
+    assert harness.general_motion_gate.active_command_id == first['command_id']
+    assert len(harness.publisher.messages) == 2
 
     now[0] = 13.2
     harness.send_status(first["action"], first["command_id"], "SUCCEEDED")
-    assert harness.planner.line_planner.previous_motion == "RIGHT"
-    following = harness.publish_vision(line=corner)[-1]
     assert following["action"] == "RIGHT"
+    harness.send_status(following['action'], following['command_id'], 'RUNNING')
+    assert harness.general_motion_gate.active_command_id == following['command_id']
     bridge = FakeBridge()
     bridge.navigation_command_callback(String(data=json.dumps(following)))
     assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == "line_recovery_right_4"
@@ -3071,9 +3075,12 @@ def test_line_recover_repeats_only_after_success_and_fresh_line(monkeypatch, hea
     now = [10.0]
     monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: now[0])
     harness = MissionFlowHarness(phase="LINE_TRACK")
+    harness._fresh_observations = MotionDecisionNode._fresh_observations.__get__(harness)
+    callback = MotionDecisionNode._info_callback(harness, 'line')
     sample = line_info(heading=heading, offset=offset)
     commands = []
     for _ in range(3):
+        callback(String(data=json.dumps(sample)))
         command = harness.publish_vision(line=sample)[-1]
         assert command["action"] == action
         commands.append(command["command_id"])
@@ -3083,12 +3090,13 @@ def test_line_recover_repeats_only_after_success_and_fresh_line(monkeypatch, hea
         assert harness.pending_line_decision is None
         now[0] += 1.0
         harness.send_status(action, command["command_id"], "SUCCEEDED")
-        assert harness.latest_info["line"] is None
-        assert not harness.general_motion_gate.has_required_fresh_vision()
+        assert harness.latest_info["line"] is not None
+        assert harness.general_motion_gate.has_required_fresh_vision()
         before = len(harness.publisher.messages)
         MotionDecisionNode._publish_decision(harness)
         assert not any(m["valid"] for m in harness.publisher.messages[before:])
     assert len(set(commands)) == 3
+    callback(String(data=json.dumps(line_info())))
     forward = harness.publish_vision(line=line_info())[-1]
     assert forward["action"] == "STRAIGHT"
 
