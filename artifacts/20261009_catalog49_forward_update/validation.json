@@ -1,0 +1,17 @@
+{
+  "pytest": {
+    "passed": 464,
+    "command": "source /opt/ros/humble/setup.bash && PYTHONPATH=\"$PWD/src/mission_control:$PWD/src/step:$PYTHONPATH\" python3 -m pytest -q src/mission_control/test/test_catalog49_forward_update.py tools/test_upsert_motion_catalog.py src/mission_control/test/test_motion_command_bridge.py src/mission_control/test/test_production_motion_catalog_contract.py::test_production_motions_keep_approved_final_tolerances src/irc_step_motion_executor/test/test_validate_motion_catalog.py"
+  },
+  "catalog_validation": "82 motions; all aliases resolve; motor IDs exactly 0..22",
+  "mock_playback": {
+    "passed": 106,
+    "queued_transitions_passed": 2,
+    "sdk": "external_sdk/gui_aligned",
+    "compile_command": "g++ -std=c++20 -O0 -pthread -I external_sdk/gui_aligned artifacts/20261009_catalog49_forward_update/verify_playback.cpp external_sdk/gui_aligned/robot_motion_player.cpp external_sdk/gui_aligned/motion_pattern.cpp -o /tmp/step_catalog49_playback",
+    "run_command": "/tmp/step_catalog49_playback artifacts/robot_motions_runtime.json artifacts/robot_motions_pc.json"
+  },
+  "installed_catalog_and_alias_bytes_match": true,
+  "robot_hardware_executed": false,
+  "dynamics_simulation_executed": false
+}

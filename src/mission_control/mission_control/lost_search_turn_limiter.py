@@ -5,6 +5,7 @@ import math
 import re
 
 from .motion_decision_planner import MotionDecision, MotionDecisionPlanner
+from .sparse_line_recovery import usable_two_point_line
 
 
 class LostSearchTurnLimiter:
@@ -167,10 +168,18 @@ class LostSearchTurnLimiter:
         visible_reacquire = bool(
             decision.source_command.get("corner_ground_reacquire") is True
             and info is not None and info.get("detected") is True
-            and info.get("corner_preview_confirmed") is True
-            and info.get("corner_preview_raw_detected") is True
-            and info.get("corner_preview_held") is not True
-            and info.get("corner_direction") == direction
+            and (
+                (info.get("corner_preview_confirmed") is True
+                 and info.get("corner_preview_raw_detected") is True
+                 and info.get("corner_preview_held") is not True
+                 and info.get("corner_direction") == direction)
+                or (decision.source_command.get("corner_search_pending") is True
+                    and decision.source_command.get("remembered_corner_direction") == direction
+                    and usable_two_point_line(info)
+                    and not (info.get("corner_preview_raw_detected") is True
+                             and info.get("corner_direction") in {"LEFT", "RIGHT"}
+                             and info["corner_direction"] != direction))
+            )
         )
         if source in self.failed_sources:
             reason = "lost_search_motion_failed"

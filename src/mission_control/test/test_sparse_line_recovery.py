@@ -234,7 +234,7 @@ def test_configured_quality_threshold_applies_to_sparse_recovery():
     assert not policy.eligible
 
 
-def test_recorded_two_point_corner_enters_corner_instead_of_fit_recovery(monkeypatch):
+def test_recorded_two_point_corner_reobserves_with_bounded_turn(monkeypatch):
     import rclpy
     from std_msgs.msg import String
     from step.yolo_line_analyzer import YoloLineAnalyzer
@@ -275,9 +275,9 @@ def test_recorded_two_point_corner_enters_corner_instead_of_fit_recovery(monkeyp
         assert outputs[-1]["ground_two_point_candidate"] is not None
         motions = [m for m in node.publisher.messages if m["valid"]]
         assert len(motions) == 1
-        assert motions[0]["action"] == "RIGHT"
-        assert motions[0]["reason"] == "line_corner_ready"
-        assert motions[0]["source_command"]["corner_without_ground_fit"] is True
+        assert motions[0]["action"] == "LINE_LOST_TURN_RIGHT_2"
+        assert motions[0]["source_command"]["corner_ground_reacquire"] is True
+        assert motions[0]["source_command"]["turn_angle_deg"] == 15.
     finally:
         if analyzer is not None:
             analyzer.destroy_node()

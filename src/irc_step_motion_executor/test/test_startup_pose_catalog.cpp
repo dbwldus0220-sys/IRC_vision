@@ -111,4 +111,23 @@ TEST(StartupPoseCatalog, PolicyOffChangesOnlySelectedAxesToVerifiedPcPose)
   EXPECT_TRUE(actual.empty());
 }
 
+TEST(StartupPoseCatalog, LoadsCatalog49ForwardStartWithEveryPolicyCombination)
+{
+  const std::vector<double> expected{
+    -32.34375, -0.3515625, -8.4375, 7.55859375, 18.0, -18.0,
+    74.35546875, -76.2890625, -10.546875, 2.4609375, 0.693359375,
+    -3.0, 4.0, -89.82421875, 57.0, -1.0, 6.0, -67.236328125,
+    32.0, 61.0, -68.0, 2.0, -12.0};
+  for (bool head : {false, true}) {
+    for (bool shoulder : {false, true}) {
+      std::vector<double> actual;
+      std::string error;
+      ASSERT_TRUE(irc_step_motion_executor::load_startup_pose_with_policy(
+          TEST_RUNTIME_CATALOG, TEST_PC_CATALOG, "김오들(앞먼저닿음)",
+          head, shoulder, actual, error)) << error;
+      EXPECT_EQ(actual, expected);
+    }
+  }
+}
+
 }  // namespace

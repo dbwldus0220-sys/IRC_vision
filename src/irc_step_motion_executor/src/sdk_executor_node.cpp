@@ -85,7 +85,7 @@ public:
     const bool startup_pose_enabled = declare_parameter<bool>(
       "startup_pose_enabled", false);
     const std::string startup_pose_name = declare_parameter<std::string>(
-      "startup_pose_name", "김오뒤3");
+      "startup_pose_name", "김오들(앞먼저닿음)");
     const std::int64_t startup_pose_duration_ms = positive_parameter_or_default(
       "startup_pose_duration_ms", 1800);
     enable_head_override_ = declare_parameter<bool>("enable_head_override", true);

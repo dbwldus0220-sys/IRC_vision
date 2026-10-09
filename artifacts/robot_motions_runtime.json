@@ -7426,13 +7426,13 @@
       ]
     },
     {
-      "name": "건전진45도(2회)",
+      "name": "전45도(2회)",
       "max_seq_ms": 11522,
       "repeat_count": 2,
       "playback_speed": 1.0,
       "repeatable": true,
       "start_pose": "김오들(앞먼저닿음)",
-      "end_pose": "김오뒤3",
+      "end_pose": "Frame 826",
       "completion": {
         "position_tolerance_deg": 5.0,
         "settle_duration_ms": 80,
@@ -7442,7 +7442,7 @@
         {
           "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
           "name": "김오들(앞먼저닿음)",
-          "time_ms": 60,
+          "time_ms": 55,
           "angles": {
             "0": -32.34375,
             "1": -0.3515625,
@@ -7556,7 +7556,7 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
-          "start_ms": 150,
+          "start_ms": 145,
           "_drag_original_start_ms": 145
         },
         {
@@ -7616,12 +7616,12 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
-          "start_ms": 339,
+          "start_ms": 334,
           "_drag_original_start_ms": 341
         },
         {
-          "frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
-          "name": "김오뒤3",
+          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "name": "Frame 826",
           "time_ms": 110,
           "angles": {
             "0": -33.57421875,
@@ -7639,13 +7639,13 @@
             "12": 2.548828125,
             "15": 3.603515625,
             "16": -1.0546875,
-            "13": -41.220703125,
-            "14": 55.3046875,
+            "13": -45.220703125,
+            "14": 59.3046875,
             "17": -26.015625,
             "18": 26.279296875,
             "19": 67.587890625,
             "20": -57.568359375,
-            "21": 4.658203125,
+            "21": 2.658203125,
             "22": -5.009765625
           },
           "torques": {
@@ -7675,9 +7675,9 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
-          "start_ms": 403,
-          "_drag_original_start_ms": 422
+          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "start_ms": 396,
+          "_drag_original_start_ms": 396
         }
       ]
     },
@@ -7938,13 +7938,13 @@
       ]
     },
     {
-      "name": "건전진45도(4회)",
+      "name": "전45도(4회)",
       "max_seq_ms": 11522,
       "repeat_count": 4,
       "playback_speed": 1.0,
       "repeatable": true,
       "start_pose": "김오들(앞먼저닿음)",
-      "end_pose": "김오뒤3",
+      "end_pose": "Frame 826",
       "completion": {
         "position_tolerance_deg": 5.0,
         "settle_duration_ms": 80,
@@ -7954,7 +7954,7 @@
         {
           "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
           "name": "김오들(앞먼저닿음)",
-          "time_ms": 60,
+          "time_ms": 55,
           "angles": {
             "0": -32.34375,
             "1": -0.3515625,
@@ -8068,7 +8068,7 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
-          "start_ms": 150,
+          "start_ms": 145,
           "_drag_original_start_ms": 145
         },
         {
@@ -8128,12 +8128,12 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
-          "start_ms": 339,
+          "start_ms": 334,
           "_drag_original_start_ms": 341
         },
         {
-          "frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
-          "name": "김오뒤3",
+          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "name": "Frame 826",
           "time_ms": 110,
           "angles": {
             "0": -33.57421875,
@@ -8151,13 +8151,13 @@
             "12": 2.548828125,
             "15": 3.603515625,
             "16": -1.0546875,
-            "13": -41.220703125,
-            "14": 55.3046875,
+            "13": -45.220703125,
+            "14": 59.3046875,
             "17": -26.015625,
             "18": 26.279296875,
             "19": 67.587890625,
             "20": -57.568359375,
-            "21": 4.658203125,
+            "21": 2.658203125,
             "22": -5.009765625
           },
           "torques": {
@@ -8187,20 +8187,20 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
-          "start_ms": 403,
-          "_drag_original_start_ms": 422
+          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "start_ms": 396,
+          "_drag_original_start_ms": 396
         }
       ]
     },
     {
-      "name": "건전진45도(6회)",
+      "name": "전45도(6회)",
       "max_seq_ms": 11522,
       "repeat_count": 6,
       "playback_speed": 1.0,
       "repeatable": true,
       "start_pose": "김오들(앞먼저닿음)",
-      "end_pose": "김오뒤3",
+      "end_pose": "Frame 826",
       "completion": {
         "position_tolerance_deg": 5.0,
         "settle_duration_ms": 80,
@@ -8210,7 +8210,7 @@
         {
           "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
           "name": "김오들(앞먼저닿음)",
-          "time_ms": 60,
+          "time_ms": 55,
           "angles": {
             "0": -32.34375,
             "1": -0.3515625,
@@ -8324,7 +8324,7 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
-          "start_ms": 150,
+          "start_ms": 145,
           "_drag_original_start_ms": 145
         },
         {
@@ -8384,12 +8384,12 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
-          "start_ms": 339,
+          "start_ms": 334,
           "_drag_original_start_ms": 341
         },
         {
-          "frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
-          "name": "김오뒤3",
+          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "name": "Frame 826",
           "time_ms": 110,
           "angles": {
             "0": -33.57421875,
@@ -8407,13 +8407,13 @@
             "12": 2.548828125,
             "15": 3.603515625,
             "16": -1.0546875,
-            "13": -41.220703125,
-            "14": 55.3046875,
+            "13": -45.220703125,
+            "14": 59.3046875,
             "17": -26.015625,
             "18": 26.279296875,
             "19": 67.587890625,
             "20": -57.568359375,
-            "21": 4.658203125,
+            "21": 2.658203125,
             "22": -5.009765625
           },
           "torques": {
@@ -8443,20 +8443,20 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
-          "start_ms": 403,
-          "_drag_original_start_ms": 422
+          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "start_ms": 396,
+          "_drag_original_start_ms": 396
         }
       ]
     },
     {
-      "name": "건전진45도(8회)",
+      "name": "전45도(8회)",
       "max_seq_ms": 11522,
       "repeat_count": 8,
       "playback_speed": 1.0,
       "repeatable": true,
       "start_pose": "김오들(앞먼저닿음)",
-      "end_pose": "김오뒤3",
+      "end_pose": "Frame 826",
       "completion": {
         "position_tolerance_deg": 5.0,
         "settle_duration_ms": 80,
@@ -8466,7 +8466,7 @@
         {
           "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
           "name": "김오들(앞먼저닿음)",
-          "time_ms": 60,
+          "time_ms": 55,
           "angles": {
             "0": -32.34375,
             "1": -0.3515625,
@@ -8580,7 +8580,7 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
-          "start_ms": 150,
+          "start_ms": 145,
           "_drag_original_start_ms": 145
         },
         {
@@ -8640,12 +8640,12 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
-          "start_ms": 339,
+          "start_ms": 334,
           "_drag_original_start_ms": 341
         },
         {
-          "frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
-          "name": "김오뒤3",
+          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "name": "Frame 826",
           "time_ms": 110,
           "angles": {
             "0": -33.57421875,
@@ -8663,13 +8663,13 @@
             "12": 2.548828125,
             "15": 3.603515625,
             "16": -1.0546875,
-            "13": -41.220703125,
-            "14": 55.3046875,
+            "13": -45.220703125,
+            "14": 59.3046875,
             "17": -26.015625,
             "18": 26.279296875,
             "19": 67.587890625,
             "20": -57.568359375,
-            "21": 4.658203125,
+            "21": 2.658203125,
             "22": -5.009765625
           },
           "torques": {
@@ -8699,9 +8699,9 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
-          "start_ms": 403,
-          "_drag_original_start_ms": 422
+          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "start_ms": 396,
+          "_drag_original_start_ms": 396
         }
       ]
     },
@@ -8959,13 +8959,13 @@
       ]
     },
     {
-      "name": "건전진90도(8회)",
+      "name": "전90도(8회)",
       "max_seq_ms": 11522,
       "repeat_count": 8,
       "playback_speed": 1.0,
       "repeatable": true,
-      "start_pose": "김오들90도",
-      "end_pose": "김오뒤3(90도)",
+      "start_pose": "김오들(앞먼저닿음)(90도)",
+      "end_pose": "Frame 826(90도)",
       "completion": {
         "position_tolerance_deg": 5.0,
         "settle_duration_ms": 80,
@@ -8973,9 +8973,9 @@
       },
       "frames": [
         {
-          "frame_id": "49595477f33d44c0bacba9b5607fea52",
-          "name": "김오들90도",
-          "time_ms": 60,
+          "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
+          "name": "김오들(앞먼저닿음)(90도)",
+          "time_ms": 55,
           "angles": {
             "0": 1.0,
             "1": -0.3515625,
@@ -8991,12 +8991,12 @@
             "11": -3.0,
             "12": 4.0,
             "15": -1.0,
-            "16": 5.0,
+            "16": 6.0,
             "13": -89.82421875,
-            "14": 56.0,
+            "14": 57.0,
             "17": -67.236328125,
             "18": 32.0,
-            "19": 58.0,
+            "19": 61.0,
             "20": -68.0,
             "21": 2.0,
             "22": -12.0
@@ -9028,12 +9028,13 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "49595477f33d44c0bacba9b5607fea52",
-          "start_ms": 90
+          "source_frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
+          "start_ms": 90,
+          "_drag_original_start_ms": 90
         },
         {
-          "frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
-          "name": "김왼뒤407(90도)",
+          "frame_id": "46c8c5bda6924327837ded0d9612d346",
+          "name": "왼뒤407(90도)",
           "time_ms": 105,
           "angles": {
             "0": 1.0,
@@ -9087,12 +9088,13 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
-          "start_ms": 150
+          "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
+          "start_ms": 145,
+          "_drag_original_start_ms": 145
         },
         {
-          "frame_id": "1162565c5fec444fa28d1944945ff20d",
-          "name": "김왼들90도",
+          "frame_id": "ec62ecf478094eaca551707a406b2f02",
+          "name": "김왼들(앞먼저닿음)(90도)",
           "time_ms": 62,
           "angles": {
             "0": 1.0,
@@ -9109,7 +9111,7 @@
             "11": -3.427734375,
             "12": 4.658203125,
             "15": -1.439453125,
-            "16": 4.955078125,
+            "16": 5.955078125,
             "13": -54.66796875,
             "14": 79.1015625,
             "17": -31.552734375,
@@ -9146,12 +9148,13 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "1162565c5fec444fa28d1944945ff20d",
-          "start_ms": 339
+          "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
+          "start_ms": 334,
+          "_drag_original_start_ms": 341
         },
         {
-          "frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
-          "name": "김오뒤3(90도)",
+          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "name": "Frame 826(90도)",
           "time_ms": 110,
           "angles": {
             "0": 1.0,
@@ -9169,13 +9172,13 @@
             "12": 2.548828125,
             "15": 3.603515625,
             "16": -1.0546875,
-            "13": -41.220703125,
-            "14": 55.3046875,
+            "13": -45.220703125,
+            "14": 59.3046875,
             "17": -26.015625,
             "18": 26.279296875,
             "19": 67.587890625,
             "20": -57.568359375,
-            "21": 4.658203125,
+            "21": 2.658203125,
             "22": -5.009765625
           },
           "torques": {
@@ -9205,19 +9208,20 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
-          "start_ms": 401
+          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "start_ms": 396,
+          "_drag_original_start_ms": 396
         }
       ]
     },
     {
-      "name": "건전진90도(2회)",
+      "name": "전90도(2회)",
       "max_seq_ms": 11522,
       "repeat_count": 2,
       "playback_speed": 1.0,
       "repeatable": true,
-      "start_pose": "김오들90도",
-      "end_pose": "김오뒤3(90도)",
+      "start_pose": "김오들(앞먼저닿음)(90도)",
+      "end_pose": "Frame 826(90도)",
       "completion": {
         "position_tolerance_deg": 5.0,
         "settle_duration_ms": 80,
@@ -9225,9 +9229,9 @@
       },
       "frames": [
         {
-          "frame_id": "49595477f33d44c0bacba9b5607fea52",
-          "name": "김오들90도",
-          "time_ms": 60,
+          "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
+          "name": "김오들(앞먼저닿음)(90도)",
+          "time_ms": 55,
           "angles": {
             "0": 1.0,
             "1": -0.3515625,
@@ -9243,12 +9247,12 @@
             "11": -3.0,
             "12": 4.0,
             "15": -1.0,
-            "16": 5.0,
+            "16": 6.0,
             "13": -89.82421875,
-            "14": 56.0,
+            "14": 57.0,
             "17": -67.236328125,
             "18": 32.0,
-            "19": 58.0,
+            "19": 61.0,
             "20": -68.0,
             "21": 2.0,
             "22": -12.0
@@ -9280,12 +9284,13 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "49595477f33d44c0bacba9b5607fea52",
-          "start_ms": 90
+          "source_frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
+          "start_ms": 90,
+          "_drag_original_start_ms": 90
         },
         {
-          "frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
-          "name": "김왼뒤407(90도)",
+          "frame_id": "46c8c5bda6924327837ded0d9612d346",
+          "name": "왼뒤407(90도)",
           "time_ms": 105,
           "angles": {
             "0": 1.0,
@@ -9339,12 +9344,13 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
-          "start_ms": 150
+          "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
+          "start_ms": 145,
+          "_drag_original_start_ms": 145
         },
         {
-          "frame_id": "1162565c5fec444fa28d1944945ff20d",
-          "name": "김왼들90도",
+          "frame_id": "ec62ecf478094eaca551707a406b2f02",
+          "name": "김왼들(앞먼저닿음)(90도)",
           "time_ms": 62,
           "angles": {
             "0": 1.0,
@@ -9361,7 +9367,7 @@
             "11": -3.427734375,
             "12": 4.658203125,
             "15": -1.439453125,
-            "16": 4.955078125,
+            "16": 5.955078125,
             "13": -54.66796875,
             "14": 79.1015625,
             "17": -31.552734375,
@@ -9398,12 +9404,13 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "1162565c5fec444fa28d1944945ff20d",
-          "start_ms": 339
+          "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
+          "start_ms": 334,
+          "_drag_original_start_ms": 341
         },
         {
-          "frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
-          "name": "김오뒤3(90도)",
+          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "name": "Frame 826(90도)",
           "time_ms": 110,
           "angles": {
             "0": 1.0,
@@ -9421,13 +9428,13 @@
             "12": 2.548828125,
             "15": 3.603515625,
             "16": -1.0546875,
-            "13": -41.220703125,
-            "14": 55.3046875,
+            "13": -45.220703125,
+            "14": 59.3046875,
             "17": -26.015625,
             "18": 26.279296875,
             "19": 67.587890625,
             "20": -57.568359375,
-            "21": 4.658203125,
+            "21": 2.658203125,
             "22": -5.009765625
           },
           "torques": {
@@ -9457,19 +9464,20 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
-          "start_ms": 401
+          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "start_ms": 396,
+          "_drag_original_start_ms": 396
         }
       ]
     },
     {
-      "name": "건전진90도(4회)",
+      "name": "전90도(4회)",
       "max_seq_ms": 11522,
       "repeat_count": 4,
       "playback_speed": 1.0,
       "repeatable": true,
-      "start_pose": "김오들90도",
-      "end_pose": "김오뒤3(90도)",
+      "start_pose": "김오들(앞먼저닿음)(90도)",
+      "end_pose": "Frame 826(90도)",
       "completion": {
         "position_tolerance_deg": 5.0,
         "settle_duration_ms": 80,
@@ -9477,9 +9485,9 @@
       },
       "frames": [
         {
-          "frame_id": "49595477f33d44c0bacba9b5607fea52",
-          "name": "김오들90도",
-          "time_ms": 60,
+          "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
+          "name": "김오들(앞먼저닿음)(90도)",
+          "time_ms": 55,
           "angles": {
             "0": 1.0,
             "1": -0.3515625,
@@ -9495,12 +9503,12 @@
             "11": -3.0,
             "12": 4.0,
             "15": -1.0,
-            "16": 5.0,
+            "16": 6.0,
             "13": -89.82421875,
-            "14": 56.0,
+            "14": 57.0,
             "17": -67.236328125,
             "18": 32.0,
-            "19": 58.0,
+            "19": 61.0,
             "20": -68.0,
             "21": 2.0,
             "22": -12.0
@@ -9532,12 +9540,13 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "49595477f33d44c0bacba9b5607fea52",
-          "start_ms": 90
+          "source_frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
+          "start_ms": 90,
+          "_drag_original_start_ms": 90
         },
         {
-          "frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
-          "name": "김왼뒤407(90도)",
+          "frame_id": "46c8c5bda6924327837ded0d9612d346",
+          "name": "왼뒤407(90도)",
           "time_ms": 105,
           "angles": {
             "0": 1.0,
@@ -9591,12 +9600,13 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
-          "start_ms": 150
+          "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
+          "start_ms": 145,
+          "_drag_original_start_ms": 145
         },
         {
-          "frame_id": "1162565c5fec444fa28d1944945ff20d",
-          "name": "김왼들90도",
+          "frame_id": "ec62ecf478094eaca551707a406b2f02",
+          "name": "김왼들(앞먼저닿음)(90도)",
           "time_ms": 62,
           "angles": {
             "0": 1.0,
@@ -9613,7 +9623,7 @@
             "11": -3.427734375,
             "12": 4.658203125,
             "15": -1.439453125,
-            "16": 4.955078125,
+            "16": 5.955078125,
             "13": -54.66796875,
             "14": 79.1015625,
             "17": -31.552734375,
@@ -9650,12 +9660,13 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "1162565c5fec444fa28d1944945ff20d",
-          "start_ms": 339
+          "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
+          "start_ms": 334,
+          "_drag_original_start_ms": 341
         },
         {
-          "frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
-          "name": "김오뒤3(90도)",
+          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "name": "Frame 826(90도)",
           "time_ms": 110,
           "angles": {
             "0": 1.0,
@@ -9673,13 +9684,13 @@
             "12": 2.548828125,
             "15": 3.603515625,
             "16": -1.0546875,
-            "13": -41.220703125,
-            "14": 55.3046875,
+            "13": -45.220703125,
+            "14": 59.3046875,
             "17": -26.015625,
             "18": 26.279296875,
             "19": 67.587890625,
             "20": -57.568359375,
-            "21": 4.658203125,
+            "21": 2.658203125,
             "22": -5.009765625
           },
           "torques": {
@@ -9709,19 +9720,20 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
-          "start_ms": 401
+          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "start_ms": 396,
+          "_drag_original_start_ms": 396
         }
       ]
     },
     {
-      "name": "건전진90도(6회)",
+      "name": "전90도(6회)",
       "max_seq_ms": 11522,
       "repeat_count": 6,
       "playback_speed": 1.0,
       "repeatable": true,
-      "start_pose": "김오들90도",
-      "end_pose": "김오뒤3(90도)",
+      "start_pose": "김오들(앞먼저닿음)(90도)",
+      "end_pose": "Frame 826(90도)",
       "completion": {
         "position_tolerance_deg": 5.0,
         "settle_duration_ms": 80,
@@ -9729,9 +9741,9 @@
       },
       "frames": [
         {
-          "frame_id": "49595477f33d44c0bacba9b5607fea52",
-          "name": "김오들90도",
-          "time_ms": 60,
+          "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
+          "name": "김오들(앞먼저닿음)(90도)",
+          "time_ms": 55,
           "angles": {
             "0": 1.0,
             "1": -0.3515625,
@@ -9747,12 +9759,12 @@
             "11": -3.0,
             "12": 4.0,
             "15": -1.0,
-            "16": 5.0,
+            "16": 6.0,
             "13": -89.82421875,
-            "14": 56.0,
+            "14": 57.0,
             "17": -67.236328125,
             "18": 32.0,
-            "19": 58.0,
+            "19": 61.0,
             "20": -68.0,
             "21": 2.0,
             "22": -12.0
@@ -9784,12 +9796,13 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "49595477f33d44c0bacba9b5607fea52",
-          "start_ms": 90
+          "source_frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
+          "start_ms": 90,
+          "_drag_original_start_ms": 90
         },
         {
-          "frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
-          "name": "김왼뒤407(90도)",
+          "frame_id": "46c8c5bda6924327837ded0d9612d346",
+          "name": "왼뒤407(90도)",
           "time_ms": 105,
           "angles": {
             "0": 1.0,
@@ -9843,12 +9856,13 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
-          "start_ms": 150
+          "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
+          "start_ms": 145,
+          "_drag_original_start_ms": 145
         },
         {
-          "frame_id": "1162565c5fec444fa28d1944945ff20d",
-          "name": "김왼들90도",
+          "frame_id": "ec62ecf478094eaca551707a406b2f02",
+          "name": "김왼들(앞먼저닿음)(90도)",
           "time_ms": 62,
           "angles": {
             "0": 1.0,
@@ -9865,7 +9879,7 @@
             "11": -3.427734375,
             "12": 4.658203125,
             "15": -1.439453125,
-            "16": 4.955078125,
+            "16": 5.955078125,
             "13": -54.66796875,
             "14": 79.1015625,
             "17": -31.552734375,
@@ -9902,12 +9916,13 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "1162565c5fec444fa28d1944945ff20d",
-          "start_ms": 339
+          "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
+          "start_ms": 334,
+          "_drag_original_start_ms": 341
         },
         {
-          "frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
-          "name": "김오뒤3(90도)",
+          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "name": "Frame 826(90도)",
           "time_ms": 110,
           "angles": {
             "0": 1.0,
@@ -9925,13 +9940,13 @@
             "12": 2.548828125,
             "15": 3.603515625,
             "16": -1.0546875,
-            "13": -41.220703125,
-            "14": 55.3046875,
+            "13": -45.220703125,
+            "14": 59.3046875,
             "17": -26.015625,
             "18": 26.279296875,
             "19": 67.587890625,
             "20": -57.568359375,
-            "21": 4.658203125,
+            "21": 2.658203125,
             "22": -5.009765625
           },
           "torques": {
@@ -9961,8 +9976,9 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
-          "start_ms": 401
+          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "start_ms": 396,
+          "_drag_original_start_ms": 396
         }
       ]
     },

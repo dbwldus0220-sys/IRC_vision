@@ -3078,7 +3078,7 @@ def test_line_recover_repeats_only_after_success_and_fresh_line(monkeypatch, hea
         assert command["action"] == action
         commands.append(command["command_id"])
         harness.send_status(action, command["command_id"], "RUNNING")
-        assert harness.active_line_motion_started_at is None
+        assert harness.active_line_motion_started_at == now[0]
         assert harness.publish_vision(line=sample) == []
         assert harness.pending_line_decision is None
         now[0] += 1.0

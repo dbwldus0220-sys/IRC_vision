@@ -515,7 +515,7 @@ def generate_launch_description() -> LaunchDescription:
                 description="Integer array; empty by default and therefore unsafe to run.",
             ),
             DeclareLaunchArgument("startup_pose_enabled", default_value="true"),
-            DeclareLaunchArgument("startup_pose_name", default_value="김오뒤3"),
+            DeclareLaunchArgument("startup_pose_name", default_value="김오들(앞먼저닿음)"),
             DeclareLaunchArgument("startup_pose_duration_ms", default_value="4000"),
             camera,
             detector,

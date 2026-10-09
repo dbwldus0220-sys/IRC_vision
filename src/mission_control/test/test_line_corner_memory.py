@@ -222,15 +222,17 @@ def test_phase_override_discards_corner(clock):
     assert node.pending_line_corner is None
 
 
-def test_memory_blocks_new_prequeue_but_preserves_normal_prequeue_policy(clock):
+def test_memory_rechecks_corner_before_queueing_walking_correction(clock):
     node = CornerHarness()
     start_line(node)
     assert MotionDecisionNode._line_only_prequeue_allowed(node, {})
     receive_line(node, clock, corner_info())
-    assert not MotionDecisionNode._line_only_prequeue_allowed(node, {})
+    assert MotionDecisionNode._line_only_prequeue_allowed(node, {})
     count = len(node.publisher.messages)
     MotionDecisionNode._publish_decision(node, node.last_selected_decision, queue_while_locked=True)
-    assert len(node.publisher.messages) == count
+    assert len(node.publisher.messages) == count + 1
+    assert node.publisher.messages[-1]['action'] == 'RIGHT'
+    assert node.publisher.messages[-1]['reason'] == 'line_corner_ready'
 
 
 def test_already_published_straight_is_finished_before_remembered_corner(clock):
@@ -278,19 +280,15 @@ def test_same_corner_is_not_remembered_again_until_visible_clear(clock):
     assert node.pending_line_corner['corner_direction'] == 'LEFT'
 
 
-def test_remembered_corner_retains_turn_settle_and_is_consumed_only_on_publish(clock):
+def test_remembered_walking_corner_has_no_stationary_turn_settle(clock):
     node = CornerHarness()
     node.LINE_TURN_PRE_MOTION_SETTLE_SEC = 1.
     current = start_line(node)
     receive_line(node, clock, corner_info())
     release_general(node, current)
     receive_line(node, clock, corner_info())
-    assert node.publish_vision() == []
-    assert node.pending_line_corner is not None
-    clock[0] += .9
-    assert node.publish_vision(line=corner_info()) == []
-    clock[0] += .11
-    assert node.publish_vision(line=corner_info())[-1]['action'] == 'RIGHT'
+    assert node.publish_vision()[-1]['action'] == 'RIGHT'
+    assert node.pre_motion_settle_started_at is None
     assert node.pending_line_corner is None
 
 
@@ -398,22 +396,15 @@ def test_late_arriving_frame_captured_before_completion_cannot_authorize_turn(cl
     assert node.publish_vision()[-1]['action'] == 'RIGHT'
 
 
-def test_loss_during_turn_settle_requires_new_full_settle(clock):
+def test_lost_corner_waits_for_observation_then_walks_without_extra_settle(clock):
     node = CornerHarness()
     node.LINE_TURN_PRE_MOTION_SETTLE_SEC = 1.
     current = start_line(node)
     receive_line(node, clock, corner_info())
     release_general(node, current)
-    receive_line(node, clock, corner_info())
-    assert node.publish_vision() == []
-    clock[0] += .9
     assert node.publish_vision(line={'detected': False})[-1]['action'] == 'WAIT'
     receive_line(node, clock, corner_info())
-    assert node.publish_vision() == []
-    clock[0] += .2
-    assert node.publish_vision(line=corner_info()) == []
-    clock[0] += .81
-    assert node.publish_vision(line=corner_info())[-1]['action'] == 'RIGHT'
+    assert node.publish_vision()[-1]['action'] == 'RIGHT'
 
 
 def test_distant_corner_preserves_local_line_recovery(clock):
@@ -435,7 +426,7 @@ def test_distant_corner_preserves_local_line_recovery(clock):
     ({'ground_heading_error_deg': 31.99, 'filtered_lateral_offset_norm': -.795,
       'lateral_offset_px': -507.9, 'offset_reference_valid': True,
       'offset_reference_steering_deg': -75.8, 'turn_angle_deg': 3.6},
-     'LINE_HEADING_TURN_RIGHT_3'),
+     'RECOVER_LEFT_TURN_RIGHT_4'),
     ({'ground_heading_error_deg': 0., 'filtered_heading_error_deg': 0.,
       'heading_error_deg': 55., 'turn_angle_deg': 0.}, 'STOP'),
 ])
@@ -481,7 +472,7 @@ def test_corner_switch_does_not_bypass_invalid_offset_geometry(clock):
     assert result['reason'] == 'line_offset_alignment_invalid_reference'
 
 
-def test_independent_corner_switch_waits_for_motion_and_settle_then_resumes_line(clock):
+def test_independent_corner_switch_waits_for_motion_then_resumes_without_settle(clock):
     node = CornerHarness(phase='LINE_TRACK')
     node.LINE_TURN_PRE_MOTION_SETTLE_SEC = 1.
     current = start_line(node)
@@ -491,11 +482,7 @@ def test_independent_corner_switch_waits_for_motion_and_settle_then_resumes_line
     release_general(node, current)
     assert node.publish_vision()[-1]['action'] == 'WAIT'
     receive_line(node, clock, near)
-    assert node.publish_vision() == []
-    clock[0] += .9
-    assert node.publish_vision(line=near) == []
-    clock[0] += .11
-    turn = node.publish_vision(line=near)[-1]
+    turn = node.publish_vision()[-1]
     assert turn['action'] == 'RIGHT' and turn['reason'] == 'line_corner_ready'
     assert node.pending_line_corner is None
     release_general(node, turn)

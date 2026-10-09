@@ -7,6 +7,24 @@ import math
 from .motion_decision_planner import MotionDecision, MotionDecisionPlanner
 
 
+def usable_two_point_line(info, min_quality=.35):
+    """Recognize visible short geometry without claiming a reliable heading."""
+    if not isinstance(info, dict):
+        return False
+    return (
+        info.get("detected") is True
+        and info.get("ground_projection_enabled") is True
+        and info.get("ground_projection_valid") is False
+        and info.get("ground_fit_reason") == "too_few_segment_points"
+        and info.get("ground_fit_segment") in {"PRE_CORNER", "FULL_PATH"}
+        and info.get("ground_fit_input_point_count") == 2
+        and all(
+            (MotionDecisionPlanner._number(info, key) or 0.) >= min_quality
+            for key in ("geometry_quality", "detection_quality")
+        )
+    )
+
+
 class SparseLineRecovery:
     REQUIRED_FRAMES = 3
     MAX_HEADING_SPREAD_DEG = 5.0

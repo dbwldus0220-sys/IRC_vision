@@ -1,6 +1,7 @@
 """Tests for the hardware-disabled robot full-system launch defaults."""
 
 import importlib.util
+import json
 from pathlib import Path
 
 from ament_index_python.packages import get_package_share_directory
@@ -115,10 +116,26 @@ def test_robot_launch_defaults_are_production_ready(
         "robot_baud_rate": 4000000,
         "robot_motor_ids": list(range(23)),
         "startup_pose_enabled": True,
-        "startup_pose_name": "김오뒤3",
+        "startup_pose_name": "김오들(앞먼저닿음)",
         "startup_pose_duration_ms": 4000,
         "ball_head_override_deg": -64.0,
     }
+
+
+def test_startup_target_matches_forward_first_frame(monkeypatch, tmp_path):
+    description = launch_description(monkeypatch, tmp_path)
+    context = default_context(description)
+    pose_name = context.launch_configurations["startup_pose_name"]
+    root = Path(__file__).resolve().parents[3]
+    for filename in ("robot_motions_runtime.json", "robot_motions_pc.json"):
+        motions = json.loads((root / "artifacts" / filename).read_text())["motions"]
+        forward = next(m for m in motions if m["name"] == "전45도(2회)")
+        target = forward["frames"][0]
+        assert pose_name == target["name"] == forward["start_pose"]
+        matches = [f for m in motions for f in m["frames"] if f["name"] == pose_name]
+        assert matches
+        assert all(f["angles"] == target["angles"] for f in matches)
+        assert all(target["torques"].values())
 
 
 def test_robot_launch_passes_realsense_topic_parameters(

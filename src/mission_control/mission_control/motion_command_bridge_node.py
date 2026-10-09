@@ -1462,9 +1462,16 @@ class MotionCommandBridgeNode(Node):
 
         request_id = command_id
         timeout_ms = self.timeout_ms_from_payload(payload)
+        # Different walking catalogs need not share pose names, so the SDK may
+        # reject queueNext(). Reserve here and dispatch on success without dwell.
+        walking_transition = bool(
+            motion_id.startswith(("line_forward_", "line_recovery_"))
+            and (self.active_motion_id or "").startswith(("line_forward_", "line_recovery_"))
+            and motion_id != self.active_motion_id
+        )
         defer_until_active_finishes = bool(
             self.motion_in_progress
-            and (action == "PICKUP_NOW" or self._is_stationary_turn(motion_id)
+            and (walking_transition or action == "PICKUP_NOW" or self._is_stationary_turn(motion_id)
                  or (motion_id in self.FINE_FORWARD_MOTION_IDS
                      and (self._is_forward_motion(self.active_motion_id or "")
                           or self._is_stationary_turn(self.active_motion_id or "")))

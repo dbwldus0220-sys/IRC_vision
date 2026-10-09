@@ -814,6 +814,10 @@ class MotionDecisionPlanner:
             return result
         if offset is not None and abs(offset) <= threshold:
             return result
+        # Preserve the validated moving recovery selected by the line planner.
+        # Pixel displacement must not replace it with a stationary yaw correction.
+        if offset is not None and str(result.get("motion", "")).startswith("RECOVER_"):
+            return result
         config = self.line_planner.config
         heading = line_heading(info, config.heading_source)
         # Build the candidate without stop(): it clears the base planner's
