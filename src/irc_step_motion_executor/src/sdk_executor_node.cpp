@@ -573,8 +573,11 @@ private:
       clear_hurdle_head_override();
     }
 
+    const bool is_pickup = motion_id == "pickup" || motion_id == "sdk_pickup" ||
+      motion_id == "pickup_400" || motion_id == "pickup_500";
+
     // Release only on accepted grasp/cancel, never on a rejected request.
-    if (status == "RUNNING" && (motion_id == "pickup" || motion_id == "sdk_pickup")) {
+    if (status == "RUNNING" && is_pickup) {
       ball_grasp_started_ = true;
       clear_ball_head_override();
     }
@@ -599,7 +602,7 @@ private:
     if (goal_head_override_latched_ &&
       ((status == "SUCCEEDED" && motion_id == "goal_shot") ||
       status == "CANCELLED" ||
-      (status == "RUNNING" && (motion_id == "pickup" || motion_id == "sdk_pickup"))))
+      (status == "RUNNING" && is_pickup)))
     {
       backend_->clear_joint_override(0);
       goal_head_override_latched_ = false;

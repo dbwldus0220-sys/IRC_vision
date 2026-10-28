@@ -1,0 +1,887 @@
+--- before/src/mission_control/README.md
++++ src/mission_control/README.md
+@@ -1093,12 +1093,19 @@
+ 관측 지연도 포함된다. 변경 후 먼저 모의 입력/시뮬레이션으로 확인하고,
+ 실기에서는 가까운 공을 지나치거나 오검출을 따라가지 않는지 지지 상태에서 검증한다.
+ 
+-픽업 초기·후진 후 제자리 회전은 기존 정렬 필요 조건에 더해
+-`depth_valid=true`, 신선한 `0 < depth_m <= 0.550`,
+-`bottom_distance_px > 120`을 모두 만족할 때만 허용한다.
+-기존 `distance_m` 접근·픽업 진입 정책과 `depth_m` 회전 허용 조건은 구분한다.
+-120px 이하에서는 회전하지 않으며 초기 좌우 오차는 꽃게걸음으로 보정한다.
+-관절 완료 허용 오차 5°와 픽업 고정 시퀀스는 변경하지 않는다.
++2026-10-28 공 정렬 정책: 일반 공 접근에서는 꽃게·이동식 라인복귀 대신
++제자리 좌/우회전으로만 방향을 맞춘다. 선택 조향각의 절댓값이 15도 이상이면
++기존 좌/우 회전표로 횟수를 고르고, 허용 오차 안이면 전진한다.
++일반 접근의 회전은 신선한 유효 깊이와 하단 여유 120px 초과를 요구한다.
++550mm 이내로 픽업 시퀀스에 진입하면 초기/미세 정렬 모두 최신
++`bottom_distance_px`가 **360px 초과일 때 제자리 회전만**, **360px 이하일 때 꽃게만**
++사용한다. 360px 이하에서는 각도 오차가 커도 회전하지 않는다.
++초기 꽃게 좌우 허용 범위는 -70~+70px, 미세 정렬은 -30~+55px를 유지한다.
++360px 초과에서 각도가 허용 범위 안이면 꽃게 없이 기존 거리별 전진을 수행한다.
++픽업 회전의 유효 깊이 조건 `0 < depth_m <= 0.550`, age 0~0.70초는 유지한다.
++픽셀값이 무효이면 두 정렬 모두 대기한다. 후진 후 체크포인트는 회전/꽃게 정렬 없이
++기존 450px 기준으로 `pickup_400` / `pickup_500`만 선택한다.
++관절 완료 허용 오차 5°와 잡기 후 퇴장 시퀀스는 변경하지 않는다.
+ 
+ - `pickup_fine_step_distance_m` 기본값 `0.550`: 550 mm 초과이면
+   `STRAIGHT` → `찐전진45(4회)`, 이하이면 `STRAIGHT_0` → `찐미세45도-4`다.
+@@ -1111,7 +1118,7 @@
+   공잡기 전 후진 단계로 넘어간다.
+ 
+ 매 동작 후 새 영상 확인을 거치며, 회전 후에만 3초 대기한다. 픽셀 간격이 유효하지
+-않으면 대기한다. `bottom_distance_px`는 화면 하단과 공 중심 사이 픽셀 간격이며,
++않으면 대기한다. `bottom_distance_px`는 화면 하단과 공 검출 상자의 아래 끝 사이 픽셀 간격이며,
+ 근접 게걸음 및 미세전진 이후 정렬에 계속 사용한다. 두 기준은 독립적이며
+ 두 full-system launch에서 인자로 조정할 수 있다. 기존
+ `pickup_fine_step_bottom_distance_px` 인자는 미터 단위의
+@@ -1145,10 +1152,10 @@
+ 방향 기억이 없거나 영상이
+ 오래됐거나 유실 미확정이면 회전하지 않는다. 화면은 실제 선택 명령에 따라
+ `BALL LOST | SEARCH LEFT/RIGHT`, `WAIT`, `SEARCH LIMIT`를 구분한다.
+-잡기 전 공의 `bottom_distance_px`가 100px 이하로 한 번 확인되면 해당 픽업은
+-기존 근접 정렬 상태를 유지한다. 이후 픽셀값이 커져도 제자리 회전 대신
+-미세전진·꽃게걸음을 사용한다. 새 픽업 시작과 종료 시 이 상태를 초기화하며,
+-잡기 후 고정 퇴장 회전과 라인 복귀 회전에는 적용하지 않는다.
++픽업의 회전/꽃게 구분은 과거 근접 상태를 고정하지 않고 현재의 360px 경계로 갱신한다.
++마지막 관측이 360px 이하였던 공을 놓치면 과거 좌우 방향만으로 회전하지 않는다.
++기존 재탐색 전후진 또는 대기로 재검출한 뒤 픽셀 오차를 확인한다.
++100px 이내 유실 시 후진 재탐색 기준과 잡기 후 고정 퇴장·라인 복귀 회전은 유지한다.
+ 마지막 공 검출 상자의 위쪽 끝이 화면 상단 10% 이내에 있고 이후
+ `detected=false`, `raw_detected=false`가 되면 좌우 탐색보다
+ 해당 단계의 미세 전진을 **3회** 실행한다. 2026-10-28부터 일반 2회 전진 대신
+@@ -1620,12 +1627,14 @@
+ 지면 피팅으로 100px 보정 목표를 계산할 수 있다. 현재 코너가 검출되면 `PRE_CORNER` 조건을
+ 유지하며, 과거 목표점 재사용이나 무효 지면 데이터에 대한 강제 전진은 허용하지 않는다.
+ 
+-일반 공 접근의 전진·이동식 라인복귀도 성공 완료 시 최근 공 입력을 유지한다.
++일반 공 접근의 전진은 성공 완료 시 최근 공 입력을 유지한다. 제자리 회전은 1초 대기 후 새 입력을 요구한다.
+ 일반 라인·공·골대·허들 보행은 예약된 다음 명령이 없고 최근 수신·촬영 입력이 있으면,
+ 완료 콜백에서 정상 판단 경로를 즉시 실행하여 다음 타이머 주기까지 기다리지 않는다.
+ 픽업 거리 진입, 입력 만료, 제자리 회전 후 재관측, 실행기 실패는 기존 검사를 따른다.
+ 공·허들 일반 접근도 실제 보행 RUNNING 이후 실행 시간 70%를 지난 서로 다른 최신 영상
+-3개에서 같은 전진/보행 복귀가 선택되면 다음 명령을 최대 한 개 SDK에 예약한다.
++3개에서 같은 보행이 선택되면 다음 명령을 최대 한 개 SDK에 예약한다.
++공은 전진→전진만 예약하며, 방향 보정이 필요하면 예약하지 않고 현재 보행 완료 후
++제자리 회전을 실행한다. 허들은 기존 전진/보행 복귀 예약을 유지한다.
+ 복귀→복귀는 일반 라인과 같이 종료 예상 시각 0.30초 전부터 예약한다.
+ 공 Depth ≤ 0.55 m, 허들 Depth ≤ 0.70 m, 검출 유실·미확정·무효 입력 또는
+ 정밀 접근 진입이 관측되면 새 예약을 막는다. 이미 수락된 한 개의 예약은 기존 정책대로
+@@ -1638,3 +1647,10 @@
+ 최종 판단에서 촬영 시각·코너 거리와 방향·제한 시간 검사를 다시 수행한다.
+ 제어 범위 밖의 유효한 거리로 검출된 공·골대는 일반 라인 보행 예약을 막지 않는다.
+ 가깝거나 거리가 불명확한 미확정 공의 확인 대기는 유지한다.
++
++2026-10-28 `robot_motions(56).json`의 제자리 좌회전 반영:
++90도 좌회전 2~5회 원본과 1회·6회 파생, `R골대후제자리좌회전`을 갱신했다.
++90도 좌회전은 `R제좌왼들90도`(118ms부터 56ms) → `R김오뒤90도`(174ms부터 130ms)로
++끝나며, 골대 후 좌회전 묶음도 원본의 새 자세·각도·시간을 반영한다.
++0도/45도 좌회전은 56번과 기존 데이터가 동일했다. 기존 별칭과 런타임 배속은 유지한다.
++모션 순서가 바뀌므로 시뮬레이션에서 전환을 확인하고, 실물에서는 지지 상태로 단독 검증한다.
+--- before/src/mission_control/mission_control/motion_decision_node.py
++++ src/mission_control/mission_control/motion_decision_node.py
+@@ -118,8 +118,6 @@
+     GOAL_FORWARD_CAPTURE_FRAMES = 3
+     APPROACH_WALK_DURATION_SEC = {
+         "STRAIGHT": .517 * 4 / .95,
+-        "BALL_APPROACH_RECOVER_LEFT_4": 2.080 / .95,
+-        "BALL_APPROACH_RECOVER_RIGHT_4": 2.060 / 1.0,
+         "RECOVER_LEFT_TURN_LEFT_4": 2.080 / .95,
+         "RECOVER_RIGHT_TURN_RIGHT_4": 2.060 / 1.0,
+     }
+@@ -2389,10 +2387,8 @@
+                         and self.ball_pickup_entry_pending
+                     )
+                     if status == "SUCCEEDED" and not pickup_entry_ready:
+-                        # A stationary correction consumes this motion
+-                        # boundary's single heading check. After the dwell,
+-                        # continue with the next distance-based approach;
+-                        # its completion schedules another heading check.
++                        # Turns reobserve after the dwell; ordinary approach
++                        # planning then checks the remaining heading error.
+                         self.ball_approach_alignment_pending = (
+                             not completed_approach_turn
+                         )
+@@ -2433,9 +2429,8 @@
+                         self.ball_last_visible_line_info = None
+                         self.get_logger().info(
+                             "BALL stationary correction complete; "
+-                            "waiting for post-motion dwell before the next "
+-                            "approach motion without "
+-                            "another same-boundary alignment check"
++                            "waiting for post-motion dwell and fresh vision "
++                            "before rechecking heading and distance"
+                         )
+                 if completed_source == "line":
+                     post_ball_line_correction = str(action).startswith(
+@@ -3571,7 +3566,8 @@
+ 
+     @staticmethod
+     def _is_continuous_ball_action(action: str | None) -> bool:
+-        return action in {"STRAIGHT", "BALL_APPROACH_RECOVER_LEFT_4", "BALL_APPROACH_RECOVER_RIGHT_4"}
++        # Visible-ball heading corrections are stationary and must reobserve.
++        return action == "STRAIGHT"
+ 
+     @staticmethod
+     def _is_continuous_hurdle_action(action: str | None) -> bool:
+--- before/src/mission_control/mission_control/motion_decision_planner.py
++++ src/mission_control/mission_control/motion_decision_planner.py
+@@ -124,9 +124,8 @@
+     STATIONARY_TURN_MIN_DEG = {"LEFT": 15.0, "RIGHT": 15.0}
+     STATIONARY_MAX_TURN_COUNTS = {"LEFT": 6, "RIGHT": 9}
+     PICKUP_INITIAL_CENTER_BOUND_PX = 70.0
+-    BALL_APPROACH_RECOVER_MIN_DEG = 15.0
+-    BALL_APPROACH_RECOVER_YAW_DEG = 30.0
+     BALL_STATIONARY_TURN_MIN_BOTTOM_PX = 120.0
++    PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX = 360.0
+     PICKUP_CLOSE_CRAB_BOTTOM_DISTANCE_PX = 100.0
+     PICKUP_FINE_LEFT_BOUND_PX = -30.0
+     PICKUP_FINE_RIGHT_BOUND_PX = 55.0
+@@ -767,21 +766,25 @@
+                 distance is not None
+                 and BALL_HURDLE_FINE_DISTANCE_M < distance <= self.config.ball_control_range_m
+                 and angle is not None
+-                and abs(angle) >= self.BALL_APPROACH_RECOVER_MIN_DEG
++                and abs(angle) >= self.STATIONARY_TURN_MIN_DEG["RIGHT" if angle > 0.0 else "LEFT"]
+             ):
++                if not self._ball_stationary_turn_allowed(info, pickup=False):
++                    return self.ball_planner.stop("ball_approach_waiting_for_safe_heading_correction").to_dict()
+                 direction = "RIGHT" if angle > 0.0 else "LEFT"
+-                motion = f"BALL_APPROACH_RECOVER_{direction}_4"
++                count = self._ball_turn_repeat_count(angle, direction)
++                yaw = self._ball_turn_angle_deg(count, direction)
++                motion = f"BALL_APPROACH_TURN_{direction}_{count}"
+                 result.update({
+                     "motion": motion,
+-                    "approach_motion": motion,
+-                    "reason": "ball_moving_heading_correction",
++                    "approach_motion": None,
++                    "reason": "ball_stationary_heading_correction",
++                    "linear_speed_mps": 0.0, "lateral_speed_mps": 0.0,
++                    "travel_distance_m": 0.0, "lateral_travel_distance_m": 0.0,
+                     "turn_direction": direction,
+-                    "turn_count": 4,
+-                    "turn_angle_deg": self.BALL_APPROACH_RECOVER_YAW_DEG,
+-                    "target_heading_change_deg": math.copysign(
+-                        self.BALL_APPROACH_RECOVER_YAW_DEG, angle,
+-                    ),
+-                    "recover_threshold_deg": self.BALL_APPROACH_RECOVER_MIN_DEG,
++                    "turn_count": count,
++                    "turn_angle_deg": yaw,
++                    "target_heading_change_deg": math.copysign(yaw, angle),
++                    "heading_tolerance_deg": self.STATIONARY_TURN_MIN_DEG[direction],
+                     "alignment_reference": "ball",
+                     "catalog_motion_available": True,
+                 })
+@@ -964,7 +967,7 @@
+         self,
+         info: dict[str, Any] | None,
+     ) -> MotionDecision:
+-        """Validate Ball steering; the ordinary approach chooses a moving correction."""
++        """Validate steering before ordinary approach selects a stationary correction."""
+         phase = "BALL_APPROACH_ALIGN"
+         if info is None or info.get("detected") is not True:
+             return MotionDecision(
+@@ -1001,7 +1004,7 @@
+             "steering_error_deg": steering_error,
+             "steering_source": steering_source,
+             "ground_forward_distance_m": self._number(info, "ground_forward_distance_m"),
+-            "recover_threshold_deg": self.BALL_APPROACH_RECOVER_MIN_DEG,
++            "heading_tolerance_deg": self.STATIONARY_TURN_MIN_DEG["RIGHT" if steering_error > 0 else "LEFT"],
+             "distance_m": distance,
+             "confidence": confidence,
+         }
+@@ -1010,7 +1013,7 @@
+             source="ball",
+             action="BALL_APPROACH_ALIGNED",
+             valid=True,
+-            reason="ball_approach_ready_for_moving_alignment",
++            reason="ball_approach_ready_for_heading_alignment",
+             sdk_motion_requested=False,
+             requires_ack=False,
+             source_command=common,
+@@ -1051,8 +1054,8 @@
+             source_command={},
+         )
+ 
+-    def _ball_stationary_turn_allowed(self, info: dict[str, Any]) -> bool:
+-        """Only a fresh, visible close Ball above the bottom limit may turn."""
++    def _ball_stationary_turn_allowed(self, info: dict[str, Any], *, pickup: bool = True) -> bool:
++        """Require fresh visible depth and bottom clearance for stationary yaw."""
+         depth = self._number(info, "depth_m")
+         depth_age = self._number(info, "depth_age_sec")
+         bottom = self._number(info, "bottom_distance_px")
+@@ -1060,7 +1063,7 @@
+             info.get("detected") is True
+             and info.get("depth_valid") is True
+             and depth is not None
+-            and 0.0 < depth <= BALL_HURDLE_FINE_DISTANCE_M
++            and 0.0 < depth <= (BALL_HURDLE_FINE_DISTANCE_M if pickup else self.config.ball_control_range_m)
+             and depth_age is not None
+             and 0.0 <= depth_age <= self.ball_planner.config.max_pickup_depth_age_sec
+             and bottom is not None
+@@ -1068,7 +1071,7 @@
+         )
+ 
+     def _remember_pickup_close_ball(self, info: dict[str, Any] | None) -> None:
+-        """Remember visible proximity and retain near-ball lateral alignment."""
++        """Remember proximity; visible alignment follows the current pixel range."""
+         if info is None or not (
+             info.get("detected") is True or info.get("raw_detected") is True
+         ):
+@@ -1082,8 +1085,7 @@
+             and bottom_distance >= 0.0
+         ):
+             self.pickup_last_visible_bottom_distance_px = bottom_distance
+-            if bottom_distance <= self.PICKUP_CLOSE_CRAB_BOTTOM_DISTANCE_PX:
+-                self.pickup_close_alignment_active = True
++            self.pickup_close_alignment_active = bottom_distance <= self.PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX
+ 
+     def _pickup_ball_loss_alignment(
+         self,
+@@ -1160,6 +1162,11 @@
+         motion completion. Pickup corrections retain the camera-down checkpoint.
+         """
+         direction = self.last_ball_turn_direction
++        if (phase in {"BALL_PICKUP_FINE_ALIGN", "BALL_PICKUP_INITIAL_ALIGN"}
++                and self.pickup_last_visible_bottom_distance_px is not None
++                and self.pickup_last_visible_bottom_distance_px <= self.PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX):
++            # Reacquire the close ball before choosing a pixel-based crab direction.
++            return None
+         if not (
+             info is not None and info.get("detected") is False
+             and info.get("raw_detected") is not True
+@@ -1485,8 +1492,9 @@
+         if correction is not None:
+             return correction
+ 
+-        if not (self.PICKUP_FINE_LEFT_BOUND_PX <= robot_center_offset_px
+-                <= self.PICKUP_FINE_RIGHT_BOUND_PX):
++        crab_allowed = bottom_distance_px <= self.PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX
++        if crab_allowed and not (self.PICKUP_FINE_LEFT_BOUND_PX <= robot_center_offset_px
++                                 <= self.PICKUP_FINE_RIGHT_BOUND_PX):
+             direction = "RIGHT" if robot_center_offset_px > 0.0 else "LEFT"
+             return MotionDecision(
+                 phase=phase, source="ball", action=f"BALL_PICKUP_CRAB_{direction}",
+@@ -1496,7 +1504,7 @@
+                                 "catalog_motion_available": True},
+             )
+ 
+-        if not self.pickup_fine_approach_complete:
++        if not self.pickup_fine_approach_complete or not crab_allowed:
+             return MotionDecision(
+                 phase=phase, source="ball", action="BALL_PICKUP_FINE_FORWARD",
+                 valid=True, reason="ball_pickup_fine_approach_still_required",
+@@ -1514,16 +1522,18 @@
+     def _pickup_heading_correction(
+         self, info: dict, phase: str, common: dict, *, fine: bool,
+     ) -> MotionDecision | None:
+-        """Both pickup checkpoints correct yaw before lateral/forward steps."""
++        """Use yaw above 360px and lateral alignment at or below 360px."""
+         angle, source = self.ball_planner.select_steering(info)
+         direction = "RIGHT" if angle is not None and angle > 0.0 else "LEFT"
+         tolerance = self.STATIONARY_TURN_MIN_DEG[direction]
+         common.update(steering_error_deg=angle, steering_source=source,
+                       heading_tolerance_deg=tolerance)
+         bottom = self._number(info, "bottom_distance_px")
+-        # Preserve the existing near-foot turn prohibition; use pixels there.
+-        if (self.pickup_close_alignment_active
+-                or bottom is not None and bottom <= self.BALL_STATIONARY_TURN_MIN_BOTTOM_PX):
++        common.update(
++            pickup_crab_max_bottom_distance_px=self.PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX,
++            pickup_alignment_mode="CRAB" if bottom is not None and bottom <= self.PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX else "TURN",
++        )
++        if bottom is not None and bottom <= self.PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX:
+             return None
+         if angle is None:
+             return MotionDecision(
+@@ -1597,7 +1607,6 @@
+         if (
+             confidence is None
+             or confidence < self.ball_planner.config.min_confidence
+-            or steering_error is None
+             or robot_center_offset_px is None
+         ):
+             return MotionDecision(
+@@ -1615,7 +1624,7 @@
+             abs(robot_center_offset_px)
+             > self.PICKUP_INITIAL_CENTER_BOUND_PX
+         )
+-        direction = "RIGHT" if steering_error > 0.0 else "LEFT"
++        direction = "RIGHT" if steering_error is not None and steering_error > 0.0 else "LEFT"
+         tolerance = self.STATIONARY_TURN_MIN_DEG[direction]
+         common = {
+             "steering_angle_deg": steering_angle,
+@@ -1659,7 +1668,7 @@
+         if correction is not None:
+             return correction
+ 
+-        if outside_center_window:
++        if outside_center_window and bottom_distance_px <= self.PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX:
+             direction = (
+                 "RIGHT" if robot_center_offset_px > 0.0 else "LEFT"
+             )
+@@ -1675,7 +1684,7 @@
+                     **common,
+                     "lateral_direction": direction,
+                     "close_crab_bottom_distance_px": (
+-                        self.PICKUP_CLOSE_CRAB_BOTTOM_DISTANCE_PX
++                        self.PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX
+                     ),
+                     "catalog_motion_available": True,
+                 },
+--- before/src/mission_control/test/test_ball_ground_alignment.py
++++ src/mission_control/test/test_ball_ground_alignment.py
+@@ -1,4 +1,4 @@
+-"""Keep moving BALL approach separate from close stationary alignment."""
++"""Use stationary BALL approach and the 360px pickup alignment boundary."""
+ 
+ import pytest
+ 
+@@ -26,13 +26,13 @@
+ 
+ 
+ @pytest.mark.parametrize("angle,action", [
+-    (-89.999, "BALL_APPROACH_RECOVER_LEFT_4"),
+-    (-20.0, "BALL_APPROACH_RECOVER_LEFT_4"),
+-    (-15.0, "BALL_APPROACH_RECOVER_LEFT_4"),
++    (-89.999, "BALL_APPROACH_TURN_LEFT_5"),
++    (-20.0, "BALL_APPROACH_TURN_LEFT_1"),
++    (-15.0, "BALL_APPROACH_TURN_LEFT_1"),
+     (-14.999, "STRAIGHT"), (0.0, "STRAIGHT"), (14.999, "STRAIGHT"),
+-    (15.0, "BALL_APPROACH_RECOVER_RIGHT_4"),
+-    (20.0, "BALL_APPROACH_RECOVER_RIGHT_4"),
+-    (89.999, "BALL_APPROACH_RECOVER_RIGHT_4"),
++    (15.0, "BALL_APPROACH_TURN_RIGHT_2"),
++    (20.0, "BALL_APPROACH_TURN_RIGHT_2"),
++    (89.999, "BALL_APPROACH_TURN_RIGHT_7"),
+ ])
+ @pytest.mark.parametrize("distance", [0.551, 0.9, 1.5])
+ def test_general_approach_uses_ground_angle_and_fifteen_degree_boundary(angle, action, distance):
+@@ -47,15 +47,16 @@
+     assert decision.action == action
+     assert decision.source_command["steering_error_deg"] == angle
+     assert decision.source_command["steering_source"] == "ground_steering_angle_deg"
+-    if "RECOVER" in action:
++    if "TURN" in action:
+         direction = "left" if angle < 0 else "right"
+-        assert MotionCommandBridgeNode.motion_id_for_action(action) == f"line_recovery_{direction}_4"
++        count = int(action.rsplit('_', 1)[1])
++        yaw = MotionDecisionPlanner._ball_turn_angle_deg(count, direction.upper())
++        assert MotionCommandBridgeNode.motion_id_for_action(action) == f"post_ball_line_turn_{direction}_{count}"
+         assert normalize_general_action(action) == action
+-        assert decision.source_command["turn_count"] == 4
+-        assert decision.source_command["turn_angle_deg"] == 30.0
+-        assert decision.source_command["target_heading_change_deg"] == (
+-            -30.0 if angle < 0 else 30.0
+-        )
++        assert decision.source_command["turn_count"] == count
++        assert decision.source_command["turn_angle_deg"] == yaw
++        assert decision.source_command["target_heading_change_deg"] == (-yaw if angle < 0 else yaw)
++
+ 
+ 
+ @pytest.mark.parametrize("angle", [-45.0, 45.0])
+@@ -91,7 +92,7 @@
+ 
+ @pytest.mark.parametrize("method,prefix", [
+     ("plan_ball_pickup_initial_alignment", "BALL_PICKUP_CAMERA_DOWN"),
+-    ("plan_ball_pickup_post_backward_alignment", "BALL_PICKUP_POST_BACKWARD"),
++    ("plan_ball_pickup_fine_alignment", "BALL_PICKUP_FINE"),
+ ])
+ @pytest.mark.parametrize("forward,angle,source,turn", [
+     (0.349999, -45.0, "near_image_angle", "LEFT_3"),
+@@ -114,7 +115,7 @@
+ 
+ 
+ @pytest.mark.parametrize("method", [
+-    "plan_ball_pickup_initial_alignment", "plan_ball_pickup_post_backward_alignment",
++    "plan_ball_pickup_initial_alignment", "plan_ball_pickup_fine_alignment",
+ ])
+ @pytest.mark.parametrize("changes", [
+     {"ground_projection_valid": False}, {"ground_forward_distance_m": None},
+@@ -139,11 +140,11 @@
+ 
+ @pytest.mark.parametrize("method", [
+     "plan_ball_pickup_initial_alignment",
+-    "plan_ball_pickup_post_backward_alignment",
++    "plan_ball_pickup_fine_alignment",
+ ])
+ @pytest.mark.parametrize("depth,bottom,allowed", [
+-    (0.55, 120.001, True), (0.55, 121, True), (0.4, 300, True),
+-    (0.551, 300, False), (1.5, 300, False),
++    (0.55, 360.001, True), (0.55, 361, True), (0.4, 450, True),
++    (0.551, 450, False), (1.5, 450, False),
+     (0.55, 120, False), (0.4, 100, False),
+     (None, 300, False), (0.0, 300, False), (-0.1, 300, False),
+     (float("nan"), 300, False), (0.5, None, False),
+@@ -158,7 +159,7 @@
+ 
+ @pytest.mark.parametrize("method", [
+     "plan_ball_pickup_initial_alignment",
+-    "plan_ball_pickup_post_backward_alignment",
++    "plan_ball_pickup_fine_alignment",
+ ])
+ @pytest.mark.parametrize("change", [
+     {"depth_valid": False}, {"depth_age_sec": None},
+@@ -171,18 +172,18 @@
+ 
+ 
+ @pytest.mark.parametrize("line_angle", [-80.0, 80.0])
+-def test_recover_targets_ball_even_when_line_points_the_other_way(line_angle):
++def test_stationary_turn_targets_ball_even_when_line_points_the_other_way(line_angle):
+     decision = MotionDecisionPlanner().plan("BALL_APPROACH", {
+         "ball": ball_sample(-30.0),
+         "line": {"detected": True, "ground_heading_error_deg": line_angle},
+     }, 0.1)
+     assert decision.source == "ball"
+-    assert decision.action == "BALL_APPROACH_RECOVER_LEFT_4"
++    assert decision.action == "BALL_APPROACH_TURN_LEFT_2"
+ 
+ 
+ @pytest.mark.parametrize("method", [
+     "plan_lost_ball_approach_alignment", "plan_ball_pickup_initial_alignment",
+-    "plan_ball_pickup_fine_alignment", "plan_ball_pickup_post_backward_alignment",
++    "plan_ball_pickup_fine_alignment", "plan_ball_pickup_fine_alignment",
+ ])
+ def test_lost_ball_never_uses_remembered_geometry_to_authorize_a_turn(method):
+     planner = MotionDecisionPlanner()
+--- before/src/mission_control/test/test_catalog54_55_update.py
++++ src/mission_control/test/test_catalog54_55_update.py
+@@ -20,7 +20,8 @@
+         path = ROOT / spec['path']
+         assert hashlib.sha256(path.read_bytes()).hexdigest() == spec['sha256']
+         sources[int(number)] = {m['name']: m for m in json.loads(path.read_text())['motions']}
+-    data = json.loads((ROOT / 'artifacts' / filename).read_text())['motions']
++    # Later catalog56 supersedes left turns; verify this import boundary.
++    data = json.loads((ROOT / 'artifacts/20261028_catalog56_ball360/before/artifacts' / filename).read_text())['motions']
+     actual = {m['name']: m for m in data}
+     assert len(actual) == len(data) == 90
+     expected = {name: copy.deepcopy(sources[spec['catalog']][spec['source']])
+--- before/src/mission_control/test/test_motion_decision_node.py
++++ src/mission_control/test/test_motion_decision_node.py
+@@ -2786,7 +2786,7 @@
+         ),
+     )
+     assert decision.source == "ball"
+-    assert decision.action == "BALL_APPROACH_RECOVER_LEFT_4"
++    assert decision.action == "BALL_APPROACH_TURN_LEFT_2"
+ 
+ 
+ def test_ball_approach_entry_after_line_release_has_no_initial_dwell(
+@@ -2838,7 +2838,7 @@
+     assert not node.general_motion_gate.has_required_fresh_vision()
+ 
+ 
+-def test_legacy_ball_turn_ack_keeps_dwell_but_next_plan_uses_moving_recover(
++def test_ball_turn_ack_keeps_dwell_and_next_plan_rechecks_heading(
+     monkeypatch,
+ ):
+     node = FreshMockInputNode()
+@@ -2878,14 +2878,14 @@
+             steering_angle_deg=-26.0,
+         ),
+     )
+-    assert decision.action == "BALL_APPROACH_RECOVER_LEFT_4"
++    assert decision.action == "BALL_APPROACH_TURN_LEFT_1"
+ 
+ 
+ @pytest.mark.parametrize("angle,recover_action", [
+-    (-30.0, "BALL_APPROACH_RECOVER_LEFT_4"),
+-    (26.0, "BALL_APPROACH_RECOVER_RIGHT_4"),
++    (-30.0, "BALL_APPROACH_TURN_LEFT_2"),
++    (26.0, "BALL_APPROACH_TURN_RIGHT_2"),
+ ])
+-def test_ball_recover_rechecks_new_angle_without_dwell_or_forced_forward(
++def test_ball_turn_rechecks_new_angle_after_dwell_without_forced_forward(
+     monkeypatch, angle, recover_action,
+ ):
+     from mission_control.motion_decision_planner import MotionDecisionPlanner
+@@ -2918,7 +2918,7 @@
+                 dynamics_command=None,
+             )
+ 
+-    # The same large error needs another recover, not a forced straight step.
++    # Reobserve after each stationary turn; a remaining error requests another turn.
+     for steering, expected in ((angle, recover_action), (angle, recover_action),
+                                (-8.0, "STRAIGHT")):
+         clock[0] += 0.1
+@@ -2931,7 +2931,12 @@
+         MotionDecisionNode._publish_decision(node)
+         assert len(node.publisher.messages) == count
+         complete_last_motion()
+-        assert node.ball_approach_alignment_pending is True
++        turning = expected.startswith("BALL_APPROACH_TURN_")
++        assert node.ball_approach_alignment_pending is (not turning)
++        if turning:
++            assert node.ball_post_motion_dwell_until == pytest.approx(clock[0] + 1.)
++            clock[0] += 1.
++            MotionDecisionNode._publish_decision(node)
+         assert node.ball_post_motion_dwell_until is None
+         assert node.latest_info["ball"] is None
+         assert not node.general_motion_gate.has_required_fresh_vision()
+@@ -3059,7 +3064,7 @@
+     reacquired = select_decision(
+         node,
+         ball=ball_info_for_node(
+-            distance_m=0.4, depth_m=0.4, bottom_distance_px=300,
++            distance_m=0.4, depth_m=0.4, bottom_distance_px=450,
+             steering_angle_deg=steering_angle_deg,
+             offset_x_norm=0.2,
+         ),
+@@ -3106,7 +3111,7 @@
+ @pytest.mark.parametrize("bottom_distance,expected_action", [
+     (100, "BALL_PICKUP_INITIAL_CRAB_RIGHT"),
+     (120, "BALL_PICKUP_INITIAL_CRAB_RIGHT"),
+-    (121, "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_3"),
++    (361, "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_3"),
+ ])
+ def test_pickup_initial_offset_selects_action_by_close_distance(
+     bottom_distance, expected_action,
+@@ -3259,7 +3264,7 @@
+             steering_angle_deg=26.0,
+         ),
+     )
+-    assert turn.action == "BALL_APPROACH_RECOVER_RIGHT_4"
++    assert turn.action == "BALL_APPROACH_TURN_RIGHT_2"
+ 
+     node.ball_approach_alignment_pending = True
+     straight = select_decision(
+@@ -4276,7 +4281,7 @@
+ 
+ @pytest.mark.parametrize("was_close,bottom_distance,expected", [
+     (True, None, False),
+-    (True, 101, False),
++    (True, 361, False),
+     (False, 100, True),
+ ])
+ def test_new_pickup_resets_close_latch_and_uses_current_observation(
+--- before/src/mission_control/test/test_motion_decision_planner.py
++++ src/mission_control/test/test_motion_decision_planner.py
+@@ -1005,8 +1005,8 @@
+     )
+ 
+     assert centering.source == "ball"
+-    assert centering.action == "BALL_APPROACH_RECOVER_LEFT_4"
+-    assert centering.reason == "ball_moving_heading_correction"
++    assert centering.action == "BALL_APPROACH_TURN_LEFT_3"
++    assert centering.reason == "ball_stationary_heading_correction"
+     assert resumed.source == "ball"
+     assert resumed.action == "STRAIGHT"
+     assert resumed.reason == "ball_aligned_discrete_approach"
+@@ -2162,7 +2162,7 @@
+         (-88.0, "BALL_APPROACH_TURN_LEFT_5", 5, 75.0),
+     ],
+ )
+-def test_general_ball_alignment_uses_moving_recover(
++def test_general_ball_alignment_uses_stationary_turn(
+     steering_error,
+     expected_action,
+     expected_count,
+@@ -2175,9 +2175,9 @@
+     )
+ 
+     direction = "LEFT" if steering_error < 0 else "RIGHT"
+-    assert decision.action == f"BALL_APPROACH_RECOVER_{direction}_4"
+-    assert decision.source_command["turn_count"] == 4
+-    assert decision.source_command["turn_angle_deg"] == 30.0
++    assert decision.action == expected_action
++    assert decision.source_command["turn_count"] == expected_count
++    assert decision.source_command["turn_angle_deg"] == expected_turn_angle
+     assert "CAMERA_DOWN" not in decision.action
+ 
+ 
+@@ -2195,7 +2195,7 @@
+ 
+     bearing_decision = planner.plan_ball_pickup_initial_alignment(
+         ball_info(steering_angle_deg=None, bearing_deg=-30.0,
+-                  depth_m=0.5, distance_m=0.5, bottom_distance_px=300)
++                  depth_m=0.5, distance_m=0.5, bottom_distance_px=450)
+     )
+     offset_decision = planner.plan_ball_pickup_initial_alignment(
+         ball_info(
+@@ -2513,7 +2513,7 @@
+         )
+     )
+ 
+-    assert decision.action == ("BALL_PICKUP_CRAB_LEFT" if offset_px < -30
++    assert decision.action == ("BALL_PICKUP_CRAB_LEFT" if bottom_distance_px <= 360 and offset_px < -30
+                                else "BALL_PICKUP_FINE_FORWARD")
+     assert decision.valid is True
+     assert decision.sdk_motion_requested is True
+@@ -2718,8 +2718,8 @@
+ 
+ @pytest.mark.parametrize("overrides", [
+     {"bottom_distance_px": None}, {"bottom_distance_px": -1},
+-    {"bottom_distance_px": float("nan")}, {"bottom_distance_px": 101},
+-    {"bottom_distance_px": 200},
++    {"bottom_distance_px": float("nan")}, {"bottom_distance_px": 361},
++    {"bottom_distance_px": 450},
+     {"confidence": 0.1}, {"detected": False, "raw_detected": False},
+ ])
+ def test_invalid_or_distant_ball_does_not_latch_close_pickup(overrides):
+@@ -2975,7 +2975,7 @@
+     info = ball_info(
+         steering_angle_deg=sign * angle, bearing_deg=-sign * 80,
+         distance_m=0.5, depth_m=0.5, offset_x_px=0, offset_x_norm=0.06,
+-        bottom_distance_px=300, pickup_x_tolerance_norm=0.08,
++        bottom_distance_px=450, pickup_x_tolerance_norm=0.08,
+     )
+     expected_count = min(count, 6)
+     expected_angle = {0: 0.0, 1: 15.0, 2: 30.0, 3: 45.0, 4: 60.0, 5: 75.0, 6: 90.0}[expected_count]
+--- before/src/mission_control/test/test_object_walk_prequeue.py
++++ src/mission_control/test/test_object_walk_prequeue.py
+@@ -42,8 +42,11 @@
+     return first
+ 
+ 
+-@pytest.mark.parametrize('source,phase', [('ball', 'BALL_APPROACH'), ('hurdle', 'HURDLE_APPROACH')])
+-@pytest.mark.parametrize('angles', [(0., 0.), (0., 25.), (25., 0.), (25., -25.)])
++@pytest.mark.parametrize('source,phase,angles', [
++    ('ball', 'BALL_APPROACH', (0., 0.)),
++    *[('hurdle', 'HURDLE_APPROACH', angles) for angles in
++      [(0., 0.), (0., 25.), (25., 0.), (25., -25.)]],
++])
+ def test_object_walk_queues_once_and_bridge_promotes_without_dwell(clock, source, phase, angles):
+     node, bridge = LiveInputHarness(phase=phase), FakeBridge()
+     first = start(node, clock, source, angles[0])
+@@ -132,7 +135,7 @@
+     assert second['command_id'] != first['command_id']
+ 
+ 
+-@pytest.mark.parametrize('source,phase', [('ball', 'BALL_APPROACH'), ('hurdle', 'HURDLE_APPROACH')])
++@pytest.mark.parametrize('source,phase', [('hurdle', 'HURDLE_APPROACH')])
+ def test_recovery_to_recovery_waits_until_last_point_three_seconds(clock, source, phase):
+     node = LiveInputHarness(phase=phase)
+     first = start(node, clock, source, 25.)
+--- before/src/mission_control/test/test_pickup_turn_crab_diagnosis.py
++++ src/mission_control/test/test_pickup_turn_crab_diagnosis.py
+@@ -18,7 +18,7 @@
+ 
+ @pytest.mark.parametrize('angle,prefix', [
+     (17.79, 'BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_'),
+-    (14.99, 'BALL_PICKUP_INITIAL_CRAB_RIGHT'),
++    (14.99, 'BALL_PICKUP_INITIAL_ALIGN_CONTINUE'),
+     (-15., 'BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_'),
+ ])
+ def test_pickup_uses_ground_heading_before_lateral_pixels(angle, prefix):
+@@ -26,20 +26,20 @@
+     assert decision.valid and decision.action.startswith(prefix)
+ 
+ 
+-def test_previous_close_capture_can_suppress_turn_after_bottom_distance_increases():
++def test_previous_close_capture_does_not_suppress_turn_above_360px():
+     planner = MotionDecisionPlanner()
+     planner._remember_pickup_close_ball(ground_ball(0., bottom=100))
+     decision = planner.plan_ball_pickup_initial_alignment(ground_ball(17.79))
+-    assert decision.action == 'BALL_PICKUP_INITIAL_CRAB_RIGHT'
+-    assert decision.source_command['pickup_close_alignment_active'] is True
++    assert decision.action.startswith('BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_')
++    assert decision.source_command['pickup_close_alignment_active'] is False
+     assert decision.source_command['bottom_distance_px'] == 414
+     # The same visible geometry without a previous close capture selects yaw.
+     fresh = MotionDecisionPlanner().plan_ball_pickup_initial_alignment(ground_ball(17.79))
+     assert fresh.action.startswith('BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_')
+ 
+ 
+-@pytest.mark.parametrize('bottom,prefix', [(120, 'BALL_PICKUP_INITIAL_CRAB_RIGHT'),
+-                                          (121, 'BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_')])
++@pytest.mark.parametrize('bottom,prefix', [(360, 'BALL_PICKUP_INITIAL_CRAB_RIGHT'),
++                                          (361, 'BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_')])
+ def test_near_foot_pixels_prevent_stationary_turn_even_without_close_latch(bottom, prefix):
+     decision = MotionDecisionPlanner().plan_ball_pickup_initial_alignment(ground_ball(25., bottom=bottom))
+     assert decision.action.startswith(prefix)
+--- before/src/mission_control/test/test_wait_refresh_and_fine_settle.py
++++ src/mission_control/test/test_wait_refresh_and_fine_settle.py
+@@ -54,7 +54,7 @@
+     observe(node, clock, 'ball', ground_ball(True, -25.))
+     command = node.publisher.messages[-1]
+     assert command['valid']
+-    assert command['action'] == 'BALL_APPROACH_RECOVER_LEFT_4'
++    assert command['action'] == 'BALL_APPROACH_TURN_LEFT_1'
+     assert command['source_command']['steering_error_deg'] == -25.
+ 
+ 
+--- before/src/mission_control/test/test_walking_boundary_dispatch.py
++++ src/mission_control/test/test_walking_boundary_dispatch.py
+@@ -18,10 +18,10 @@
+     return first
+ 
+ 
+-@pytest.mark.parametrize('initial', [0., -25., 25.])
++@pytest.mark.parametrize('initial', [0.])
+ @pytest.mark.parametrize('next_bearing,expected', [
+-    (0., 'STRAIGHT'), (-25., 'BALL_APPROACH_RECOVER_LEFT_4'),
+-    (25., 'BALL_APPROACH_RECOVER_RIGHT_4'),
++    (0., 'STRAIGHT'), (-25., 'BALL_APPROACH_TURN_LEFT_1'),
++    (25., 'BALL_APPROACH_TURN_RIGHT_2'),
+ ])
+ def test_ball_walking_dispatches_latest_direction_in_completion_callback(clock, initial, next_bearing, expected):
+     node = LiveInputHarness(phase='BALL_APPROACH')
+--- /dev/null
++++ src/mission_control/test/test_ball360_alignment.py
+@@ -0,0 +1,110 @@
++"""Current pickup pixels exclusively select yaw or crab; approach only uses yaw."""
++
++import pytest
++
++from mission_control.motion_decision_planner import MotionDecisionPlanner
++from mission_control.motion_decision_node import MotionDecisionNode
++from mission_control.motion_command_bridge_node import MotionCommandBridgeNode
++from test_ball_ground_alignment import ball_sample
++from test_continuous_approach import clock, fresh
++from test_wait_refresh_and_fine_settle import LiveInputHarness
++from test_motion_decision_planner import ball_info
++
++
++@pytest.mark.parametrize('method,turn,crab', [
++    ('plan_ball_pickup_initial_alignment', 'BALL_PICKUP_CAMERA_DOWN_TURN', 'BALL_PICKUP_INITIAL_CRAB'),
++    ('plan_ball_pickup_fine_alignment', 'BALL_PICKUP_FINE_TURN', 'BALL_PICKUP_CRAB'),
++])
++@pytest.mark.parametrize('bottom', [100, 359, 360, 360.001, 450, 600])
++@pytest.mark.parametrize('side', ['LEFT', 'RIGHT'])
++def test_pickup_360_boundary_uses_exactly_one_alignment_family(method, turn, crab, bottom, side):
++    sign = -1 if side == 'LEFT' else 1
++    decision = getattr(MotionDecisionPlanner(), method)(ball_sample(
++        sign * 30, depth_m=.5, distance_m=.5, offset_x_px=sign * 200,
++        bottom_distance_px=bottom,
++    ))
++    expected = f'{crab}_{side}' if bottom <= 360 else f'{turn}_{side}_{2 if side == "LEFT" else 3}'
++    assert decision.valid and decision.action == expected
++    assert decision.source_command['pickup_alignment_mode'] == ('CRAB' if bottom <= 360 else 'TURN')
++
++
++@pytest.mark.parametrize('method', ['plan_ball_pickup_initial_alignment', 'plan_ball_pickup_fine_alignment'])
++def test_current_pixels_override_previous_close_state_in_both_directions(method):
++    planner = MotionDecisionPlanner()
++    for bottom, family in [(100, 'CRAB'), (450, 'TURN'), (360, 'CRAB'), (361, 'TURN')]:
++        decision = getattr(planner, method)(ball_sample(
++            30, depth_m=.5, distance_m=.5, offset_x_px=-200, bottom_distance_px=bottom))
++        assert family in decision.action
++
++
++@pytest.mark.parametrize('method', ['plan_ball_pickup_initial_alignment', 'plan_ball_pickup_fine_alignment'])
++def test_far_pickup_aligned_heading_advances_without_crab_even_with_pixel_offset(method):
++    decision = getattr(MotionDecisionPlanner(), method)(ball_sample(
++        10, depth_m=.5, distance_m=.5, offset_x_px=200, bottom_distance_px=450))
++    assert decision.valid
++    assert 'CRAB' not in decision.action and 'TURN' not in decision.action
++
++
++@pytest.mark.parametrize('method', ['plan_ball_pickup_initial_alignment', 'plan_ball_pickup_fine_alignment'])
++def test_close_crab_can_use_pixels_without_valid_ground_angle(method):
++    decision = getattr(MotionDecisionPlanner(), method)(ball_sample(
++        30, ground_projection_valid=False, depth_m=.5, distance_m=.5,
++        offset_x_px=-200, bottom_distance_px=360))
++    assert decision.valid and decision.action.endswith('CRAB_LEFT')
++
++
++@pytest.mark.parametrize('bottom', [None, -1, float('nan'), float('inf'), True])
++@pytest.mark.parametrize('method', ['plan_ball_pickup_initial_alignment', 'plan_ball_pickup_fine_alignment'])
++def test_invalid_bottom_cannot_authorize_either_alignment(method, bottom):
++    decision = getattr(MotionDecisionPlanner(), method)(ball_sample(
++        30, depth_m=.5, distance_m=.5, offset_x_px=200, bottom_distance_px=bottom))
++    assert not decision.valid
++
++
++@pytest.mark.parametrize('method', ['plan_ball_pickup_initial_alignment', 'plan_ball_pickup_fine_alignment'])
++def test_close_lost_ball_never_switches_to_remembered_side_rotation(method):
++    planner = MotionDecisionPlanner()
++    info = ball_sample(30, depth_m=.5, distance_m=.5, offset_x_px=200,
++                       camera_center_offset_x_px=200, bottom_distance_px=360)
++    planner._update_ball_tracking(info, 0.)
++    getattr(planner, method)(info)
++    decision = getattr(planner, method)({'detected': False, 'raw_detected': False,
++                                        'ball_loss_confirmed': True})
++    assert 'TURN' not in decision.action
++
++
++@pytest.mark.parametrize('angle,action', [(-30, 'BALL_APPROACH_TURN_LEFT_2'),
++                                         (30, 'BALL_APPROACH_TURN_RIGHT_3')])
++def test_visible_approach_turns_without_translation_and_resolves_existing_mapping(angle, action):
++    decision = MotionDecisionPlanner().plan('BALL_APPROACH', {'ball': ball_sample(angle)}, .1)
++    assert decision.valid and decision.action == action
++    assert decision.source_command['travel_distance_m'] == 0
++    assert decision.source_command['linear_speed_mps'] == 0
++    assert MotionCommandBridgeNode.motion_id_for_action(action) == (
++        'post_ball_line_turn_left_2' if angle < 0 else 'post_ball_line_turn_right_3')
++    assert not MotionDecisionNode._is_continuous_ball_action(action)
++
++
++def test_forward_does_not_prequeue_stationary_turn_and_turn_requires_new_frame_after_dwell(clock):
++    node = LiveInputHarness(phase='BALL_APPROACH')
++    node.BALL_POST_MOTION_DWELL_SEC = 1.
++    fresh(node, clock, 'ball', ball_info(depth_m=.9))
++    first = node.publisher.messages[-1]
++    node.send_status(first['action'], first['command_id'], 'RUNNING', 'line_forward_4')
++    clock[0] += 1.8
++    for _ in range(4):
++        fresh(node, clock, 'ball', ball_info(depth_m=.9, bearing_deg=30), plan=False)
++    assert getattr(node, 'queued_general_command_id', None) is None
++    node.send_status(first['action'], first['command_id'], 'SUCCEEDED')
++    turn = node.publisher.messages[-1]
++    assert turn['action'] == 'BALL_APPROACH_TURN_RIGHT_3'
++    node.send_status(turn['action'], turn['command_id'], 'RUNNING', 'post_ball_line_turn_right_3')
++    node.send_status(turn['action'], turn['command_id'], 'SUCCEEDED')
++    assert node.ball_post_motion_dwell_until == pytest.approx(clock[0] + 1.)
++    before = len(node.publisher.messages)
++    fresh(node, clock, 'ball', ball_info(depth_m=.9))
++    assert len(node.publisher.messages) == before
++    clock[0] += 1.
++    MotionDecisionNode._publish_decision(node)
++    fresh(node, clock, 'ball', ball_info(depth_m=.9))
++    assert node.publisher.messages[-1]['action'] == 'STRAIGHT'
+--- /dev/null
++++ src/mission_control/test/test_catalog56_left_turn_update.py
+@@ -0,0 +1,51 @@
++"""Import exact supplied left turns, including derived counts, without other edits."""
++
++import copy
++import hashlib
++import json
++from pathlib import Path
++
++import pytest
++import yaml
++
++ROOT = Path(__file__).resolve().parents[3]
++UPDATE = ROOT / 'artifacts/20261028_catalog56_ball360'
++MANIFEST = json.loads((UPDATE / 'manifest.json').read_text())
++
++
++@pytest.mark.parametrize('filename', ['robot_motions_pc.json', 'robot_motions_runtime.json'])
++def test_catalog56_preserves_source_frames_repeats_speeds_and_unrelated_motions(filename):
++    source_path = ROOT / MANIFEST['source_file']
++    assert hashlib.sha256(source_path.read_bytes()).hexdigest() == MANIFEST['source_sha256']
++    source = {m['name']: m for m in json.loads(source_path.read_text())['motions']}
++    before = {m['name']: m for m in json.loads((UPDATE / 'before/artifacts' / filename).read_text())['motions']}
++    data = json.loads((ROOT / 'artifacts' / filename).read_text())['motions']
++    actual = {m['name']: m for m in data}
++    assert len(actual) == len(data) == len(before)
++    expected = {n: copy.deepcopy(source[n]) for n in MANIFEST['source_left_motions']}
++    for name, spec in MANIFEST['derived'].items():
++        expected[name] = {**copy.deepcopy(source[spec['source']]), 'name': name,
++                          'repeat_count': spec['repeat_count']}
++    for name, old in before.items():
++        wanted = expected.get(name, old)
++        if name in expected and 'runtime' in filename:
++            wanted['completion']['position_tolerance_deg'] = 5.
++            wanted['playback_speed'] = old['playback_speed']
++        assert actual[name] == wanted
++    for count in range(1, 7):
++        motion = actual[f'R제자리좌회전90도({count}회)']
++        assert [f['name'] for f in motion['frames']] == ['R제좌왼들90도', 'R김오뒤90도']
++        assert motion['end_pose'] == 'R김오뒤90도'
++        assert motion['repeat_count'] == count
++
++
++def test_existing_aliases_resolve_to_updated_turns():
++    relative = Path('src/irc_step_motion_executor/config/motion_aliases.yaml')
++    assert (ROOT / relative).read_bytes() == (UPDATE / 'before' / relative).read_bytes()
++    aliases = yaml.safe_load((ROOT / relative).read_text())['motion_aliases']
++    catalog = {m['name']:m for m in json.loads((ROOT / 'artifacts/robot_motions_runtime.json').read_text())['motions']}
++    assert set(aliases.values()) <= catalog.keys()
++    for count in range(1, 7):
++        motion = catalog[aliases[f'goal_camera_90_turn_left_{count}']]
++        assert motion['end_pose'] == 'R김오뒤90도'
++    assert catalog[aliases['post_shot_default_turn_left']]['end_pose'] == '오뒤무게중심앞'

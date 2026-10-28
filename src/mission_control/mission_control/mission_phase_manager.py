@@ -64,7 +64,7 @@ class MissionPhaseManager:
         "GO": ("hurdles_executed", "required_hurdles"),
     }
     EXECUTION_MOTIONS = {
-        "PICKUP_NOW": frozenset({"pickup", "pick_ball"}),
+        "PICKUP_NOW": frozenset({"pickup", "pick_ball", "pickup_400", "pickup_500"}),
         "SHOT": frozenset({"goal_shot", "shoot"}),
         "GO": frozenset({"hurdle", "forward"}),
     }

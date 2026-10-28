@@ -12,6 +12,7 @@ from rclpy.node import Node
 from std_msgs.msg import String
 
 from .safety_interlock import RECOVERABLE_MOTOR_ERROR_CODES
+from .pickup_grasp_selection import pickup_grasp_motion_id
 
 
 LEFT_RECOVERY_MOTION_IDS = {
@@ -177,6 +178,7 @@ class MotionCommandBridgeNode(Node):
     PICKUP_MOTION_TAIL = (
         # Fresh fine-alignment confirmation already completes the approach.
         "pickup_pre_backward_camera_down",
+        POST_BACKWARD_ALIGN_MARKER,
         "pickup",
         PICKUP_GRASP_CHECK_MOTION_ID,
         "pickup_retreat_2",
@@ -612,7 +614,7 @@ class MotionCommandBridgeNode(Node):
             request_id=self.active_request_id,
             motion_id=self.POST_BACKWARD_ALIGN_MARKER,
             action=self.active_action,
-            message="waiting for BALL alignment after pickup backward motion",
+            message="waiting for fresh BALL pixels to select grasp after retreat",
         )
 
     @classmethod
@@ -996,7 +998,7 @@ class MotionCommandBridgeNode(Node):
         event_id: int | None,
         payload: dict[str, Any],
     ) -> None:
-        """Apply camera-down heading or lateral pickup alignment."""
+        """Select a grasp at the post-retreat checkpoint before resuming."""
         parent_command_id = payload.get("active_special_command_id")
         parent_event_id = payload.get("active_special_event_id")
         checkpoint_matches = bool(
@@ -1017,10 +1019,29 @@ class MotionCommandBridgeNode(Node):
             )
             return
 
-        self.last_sent_command_id = command_id
-        self.pickup_post_backward_align_waiting = False
         if action == "BALL_PICKUP_POST_BACKWARD_ALIGN_CONTINUE":
+            source = payload.get("source_command")
+            grasp_motion = pickup_grasp_motion_id(
+                source.get("bottom_distance_px") if isinstance(source, dict) else None
+            )
+            next_index = self.active_sequence_index + 1
+            if (grasp_motion is None
+                    or next_index >= len(self.active_pickup_sequence)
+                    or self.active_pickup_sequence[next_index] != "pickup"):
+                self._publish_local_rejection(
+                    status="REJECTED", command_id=command_id, event_id=event_id,
+                    action=action, error_code="INVALID_PICKUP_GRASP_SELECTION",
+                    message="valid post-retreat pixels and pending grasp required",
+                )
+                return
+            sequence = list(self.active_pickup_sequence)
+            sequence[next_index] = grasp_motion
+            self.active_pickup_sequence = tuple(sequence)
+            self.last_sent_command_id = command_id
+            self.pickup_post_backward_align_waiting = False
             if not self._start_next_pickup_motion():
+                sequence[next_index] = "pickup"
+                self.active_pickup_sequence = tuple(sequence)
                 self.pickup_post_backward_align_waiting = True
                 self._publish_local_rejection(
                     status="REJECTED",
@@ -1032,6 +1053,8 @@ class MotionCommandBridgeNode(Node):
                 )
             return
 
+        self.last_sent_command_id = command_id
+        self.pickup_post_backward_align_waiting = False
         if action.startswith("BALL_PICKUP_POST_BACKWARD_TURN_"):
             initial_action = action.replace(
                 "BALL_PICKUP_POST_BACKWARD_TURN_",
@@ -1461,6 +1484,11 @@ class MotionCommandBridgeNode(Node):
                 self.motion_id_for_action(f"POST_BALL_LINE_TURN_{direction}_{count}")
                 if self._is_integer(count) else None
             )
+        elif (payload.get("source") == "ball"
+              and isinstance(payload.get("source_command"), dict)
+              and payload["source_command"].get("ball_entry_line_alignment") is True):
+            # Ball-owned entry alignment must retain the exact Line gait/count.
+            motion_id = self.motion_id_for_action(action)
         elif payload.get("source") in ("ball", "hurdle") and action in {
             "STRAIGHT", "STRAIGHT_0",
         }:

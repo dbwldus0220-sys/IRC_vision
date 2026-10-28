@@ -1,4 +1,4 @@
-"""Keep moving BALL approach separate from close stationary alignment."""
+"""Use stationary BALL approach and the 360px pickup alignment boundary."""
 
 import pytest
 
@@ -26,13 +26,13 @@ def ball_sample(angle, **changes):
 
 
 @pytest.mark.parametrize("angle,action", [
-    (-89.999, "BALL_APPROACH_RECOVER_LEFT_4"),
-    (-20.0, "BALL_APPROACH_RECOVER_LEFT_4"),
-    (-15.0, "BALL_APPROACH_RECOVER_LEFT_4"),
+    (-89.999, "BALL_APPROACH_TURN_LEFT_5"),
+    (-20.0, "BALL_APPROACH_TURN_LEFT_1"),
+    (-15.0, "BALL_APPROACH_TURN_LEFT_1"),
     (-14.999, "STRAIGHT"), (0.0, "STRAIGHT"), (14.999, "STRAIGHT"),
-    (15.0, "BALL_APPROACH_RECOVER_RIGHT_4"),
-    (20.0, "BALL_APPROACH_RECOVER_RIGHT_4"),
-    (89.999, "BALL_APPROACH_RECOVER_RIGHT_4"),
+    (15.0, "BALL_APPROACH_TURN_RIGHT_2"),
+    (20.0, "BALL_APPROACH_TURN_RIGHT_2"),
+    (89.999, "BALL_APPROACH_TURN_RIGHT_7"),
 ])
 @pytest.mark.parametrize("distance", [0.551, 0.9, 1.5])
 def test_general_approach_uses_ground_angle_and_fifteen_degree_boundary(angle, action, distance):
@@ -47,15 +47,16 @@ def test_general_approach_uses_ground_angle_and_fifteen_degree_boundary(angle, a
     assert decision.action == action
     assert decision.source_command["steering_error_deg"] == angle
     assert decision.source_command["steering_source"] == "ground_steering_angle_deg"
-    if "RECOVER" in action:
+    if "TURN" in action:
         direction = "left" if angle < 0 else "right"
-        assert MotionCommandBridgeNode.motion_id_for_action(action) == f"line_recovery_{direction}_4"
+        count = int(action.rsplit('_', 1)[1])
+        yaw = MotionDecisionPlanner._ball_turn_angle_deg(count, direction.upper())
+        assert MotionCommandBridgeNode.motion_id_for_action(action) == f"post_ball_line_turn_{direction}_{count}"
         assert normalize_general_action(action) == action
-        assert decision.source_command["turn_count"] == 4
-        assert decision.source_command["turn_angle_deg"] == 30.0
-        assert decision.source_command["target_heading_change_deg"] == (
-            -30.0 if angle < 0 else 30.0
-        )
+        assert decision.source_command["turn_count"] == count
+        assert decision.source_command["turn_angle_deg"] == yaw
+        assert decision.source_command["target_heading_change_deg"] == (-yaw if angle < 0 else yaw)
+
 
 
 @pytest.mark.parametrize("angle", [-45.0, 45.0])
@@ -91,7 +92,7 @@ def test_invalid_ground_projection_waits_without_pixel_fallback():
 
 @pytest.mark.parametrize("method,prefix", [
     ("plan_ball_pickup_initial_alignment", "BALL_PICKUP_CAMERA_DOWN"),
-    ("plan_ball_pickup_post_backward_alignment", "BALL_PICKUP_POST_BACKWARD"),
+    ("plan_ball_pickup_fine_alignment", "BALL_PICKUP_FINE"),
 ])
 @pytest.mark.parametrize("forward,angle,source,turn", [
     (0.349999, -45.0, "near_image_angle", "LEFT_3"),
@@ -114,7 +115,7 @@ def test_pickup_checkpoints_share_distance_based_steering(method, prefix, forwar
 
 
 @pytest.mark.parametrize("method", [
-    "plan_ball_pickup_initial_alignment", "plan_ball_pickup_post_backward_alignment",
+    "plan_ball_pickup_initial_alignment", "plan_ball_pickup_fine_alignment",
 ])
 @pytest.mark.parametrize("changes", [
     {"ground_projection_valid": False}, {"ground_forward_distance_m": None},
@@ -139,11 +140,11 @@ def test_close_crab_still_uses_pixel_side_when_ground_heading_points_opposite():
 
 @pytest.mark.parametrize("method", [
     "plan_ball_pickup_initial_alignment",
-    "plan_ball_pickup_post_backward_alignment",
+    "plan_ball_pickup_fine_alignment",
 ])
 @pytest.mark.parametrize("depth,bottom,allowed", [
-    (0.55, 120.001, True), (0.55, 121, True), (0.4, 300, True),
-    (0.551, 300, False), (1.5, 300, False),
+    (0.55, 360.001, True), (0.55, 361, True), (0.4, 450, True),
+    (0.551, 450, False), (1.5, 450, False),
     (0.55, 120, False), (0.4, 100, False),
     (None, 300, False), (0.0, 300, False), (-0.1, 300, False),
     (float("nan"), 300, False), (0.5, None, False),
@@ -158,7 +159,7 @@ def test_stationary_alignment_requires_close_depth_and_bottom_clearance(
 
 @pytest.mark.parametrize("method", [
     "plan_ball_pickup_initial_alignment",
-    "plan_ball_pickup_post_backward_alignment",
+    "plan_ball_pickup_fine_alignment",
 ])
 @pytest.mark.parametrize("change", [
     {"depth_valid": False}, {"depth_age_sec": None},
@@ -171,18 +172,18 @@ def test_stationary_alignment_rejects_invalid_or_stale_depth(method, change):
 
 
 @pytest.mark.parametrize("line_angle", [-80.0, 80.0])
-def test_recover_targets_ball_even_when_line_points_the_other_way(line_angle):
+def test_stationary_turn_targets_ball_even_when_line_points_the_other_way(line_angle):
     decision = MotionDecisionPlanner().plan("BALL_APPROACH", {
         "ball": ball_sample(-30.0),
         "line": {"detected": True, "ground_heading_error_deg": line_angle},
     }, 0.1)
     assert decision.source == "ball"
-    assert decision.action == "BALL_APPROACH_RECOVER_LEFT_4"
+    assert decision.action == "BALL_APPROACH_TURN_LEFT_2"
 
 
 @pytest.mark.parametrize("method", [
     "plan_lost_ball_approach_alignment", "plan_ball_pickup_initial_alignment",
-    "plan_ball_pickup_fine_alignment", "plan_ball_pickup_post_backward_alignment",
+    "plan_ball_pickup_fine_alignment", "plan_ball_pickup_fine_alignment",
 ])
 def test_lost_ball_never_uses_remembered_geometry_to_authorize_a_turn(method):
     planner = MotionDecisionPlanner()

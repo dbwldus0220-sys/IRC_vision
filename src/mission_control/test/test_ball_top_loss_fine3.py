@@ -16,8 +16,8 @@ ROOT = Path(__file__).resolve().parents[3]
 
 @pytest.mark.parametrize('catalog_name', ['robot_motions_runtime.json', 'robot_motions_pc.json'])
 @pytest.mark.parametrize('source,alias', [
-    ('건미세45도(5회)', 'ball_top_loss_fine_forward_45_3'),
-    ('건미세0도', 'pickup_top_loss_fine_forward_0_3'),
+    ('R미세(5회)', 'ball_top_loss_fine_forward_45_3'),
+    ('r미세0도', 'pickup_top_loss_fine_forward_0_3'),
 ])
 def test_three_cycle_catalog_changes_only_name_and_repeat_count(catalog_name, source, alias):
     aliases = yaml.safe_load((ROOT / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']

@@ -238,6 +238,9 @@ def generate_launch_description() -> LaunchDescription:
                 "lost_search_max_angle_deg": ParameterValue(
                     LaunchConfiguration("lost_search_max_angle_deg"), value_type=float
                 ),
+                "ball_entry_line_alignment_enabled": ParameterValue(
+                    LaunchConfiguration("ball_entry_line_alignment_enabled"), value_type=bool
+                ),
                 "line_heading_source": LaunchConfiguration("line_heading_source"),
                 "line_corner_memory_timeout_sec": ParameterValue(
                     LaunchConfiguration("line_corner_memory_timeout_sec"), value_type=float
@@ -413,6 +416,10 @@ def generate_launch_description() -> LaunchDescription:
                 ),
             ),
             DeclareLaunchArgument("initial_mission_phase", default_value="AUTO"),
+            DeclareLaunchArgument(
+                "ball_entry_line_alignment_enabled", default_value="true",
+                description="Use one Line-planned motion in Ball mode before tracking; false restores direct Ball entry.",
+            ),
             DeclareLaunchArgument("line_heading_source", default_value="ground",
                                   choices=["image", "ground"]),
             DeclareLaunchArgument("line_offset_align_enter_px", default_value="100.0",

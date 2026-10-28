@@ -1,0 +1,13 @@
+Internal ctest changing into directory: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+Test project /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+    Start  9: test_catalog_only_core
+1/2 Test  #9: test_catalog_only_core ...........   Passed    0.19 sec
+    Start 19: test_startup_pose_gate
+2/2 Test #19: test_startup_pose_gate ...........   Passed    0.18 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Label Time Summary:
+gtest    =   0.37 sec*proc (2 tests)
+
+Total Test time (real) =   0.38 sec

@@ -1,0 +1,529 @@
+--- before/src/mission_control/mission_control/motion_decision_node.py
++++ src/mission_control/mission_control/motion_decision_node.py
+@@ -19,6 +19,7 @@
+ 
+ from step.approach_distance import APPROACH_DISTANCE_LIMITS_M
+ from step.approach_distance import BALL_HURDLE_FINE_DISTANCE_M
++from step.approach_distance import HURDLE_FINE_DISTANCE_M
+ from step.line_navigation_planner import line_heading, straight_heading_is_aligned
+ from .sparse_line_recovery import SparseLineRecovery, usable_two_point_line
+ from step.hurdle_navigation_planner import HurdleNavigationPlanner
+@@ -29,6 +30,7 @@
+ from .executor_heartbeat_watchdog import HeartbeatStartupDelay
+ from .lost_search_turn_limiter import LostSearchTurnLimiter
+ from .goal_initial_search import GoalInitialSearch
++from .hurdle_line_fusion import build_hurdle_path_reference
+ from .mission_phase_manager import MissionPhaseManager
+ from .motion_command_gate import GeneralMotionCommandGate
+ from .motion_command_gate import normalize_general_action
+@@ -110,10 +112,18 @@
+         "GOAL_CAMERA_90_FORWARD": .517 * 6 / .95,
+         "GOAL_CAMERA_90_FORWARD_1": .517 * 2 / .95,
+         "GOAL_CAMERA_90_FORWARD_2": .517 * 4 / .95,
+-        **{f"GOAL_CAMERA90_FINE_FORWARD_{count}": .385 * count / .95
++        **{f"GOAL_CAMERA90_FINE_FORWARD_{count}": .383 * count / .9975
+            for count in range(1, 5)},
+     }
+     GOAL_FORWARD_CAPTURE_FRAMES = 3
++    APPROACH_WALK_DURATION_SEC = {
++        "STRAIGHT": .517 * 4 / .95,
++        "BALL_APPROACH_RECOVER_LEFT_4": 2.080 / .95,
++        "BALL_APPROACH_RECOVER_RIGHT_4": 2.060 / 1.0,
++        "RECOVER_LEFT_TURN_LEFT_4": 2.080 / .95,
++        "RECOVER_RIGHT_TURN_RIGHT_4": 2.060 / 1.0,
++    }
++    APPROACH_WALK_CAPTURE_FRAMES = 3
+     LINE_TIMEOUT_RECOVERY_FRAMES = 10
+     BALL_POST_MOTION_DWELL_SEC = 1.0  # Approach turns only.
+     HURDLE_POST_MOTION_DWELL_SEC = 1.0
+@@ -499,6 +509,11 @@
+         self.goal_stationary_since: float | None = None
+         self.goal_shot_settle_pending = False
+         self.goal_forward_started_at: float | None = None
++        self.approach_walk_started_at: float | None = None
++        self.approach_walk_capture_after_ns: int | None = None
++        self.approach_walk_last_stamp_ns: int | None = None
++        self.approach_walk_candidate: str | None = None
++        self.approach_walk_capture_count = 0
+         self.goal_forward_capture_after_ns: int | None = None
+         self.goal_forward_capture_count = 0
+         self.post_ball_line_dwell_until: float | None = None
+@@ -1108,6 +1123,8 @@
+                 self.general_motion_gate.on_new_vision_input()
+                 if source == "goal":
+                     MotionDecisionNode._prepare_pending_goal_decision(self, received_at)
++                elif source in {"ball", "hurdle"} and source == self.active_general_source:
++                    MotionDecisionNode._prepare_pending_approach_walk(self, received_at)
+                 if (
+                     dispatch_on_ball and source == "ball"
+                     and getattr(self, "ball_prepared_info", None) is payload
+@@ -2079,6 +2096,21 @@
+                 if status == "RUNNING":
+                     self.hurdle_stationary_since = None
+                     self.goal_stationary_since = None
++                    if (self.active_general_source in {"ball", "hurdle"}
++                            and action in MotionDecisionNode.APPROACH_WALK_DURATION_SEC
++                            and getattr(self, "approach_walk_started_at", None) is None
++                            and str(payload.get("motion_id", "")).startswith(
++                                ("line_forward_", "line_recovery_"))):
++                        self.approach_walk_started_at = status_receive_monotonic
++                        stamp = MotionDecisionNode._current_ros_time_ns(self)
++                        duration = MotionDecisionNode.APPROACH_WALK_DURATION_SEC[action]
++                        self.approach_walk_capture_after_ns = (
++                            stamp + int(duration * MotionDecisionNode.LINE_MOTION_CAPTURE_START_RATIO * 1e9)
++                            if stamp is not None else None
++                        )
++                        self.approach_walk_last_stamp_ns = None
++                        self.approach_walk_candidate = None
++                        self.approach_walk_capture_count = 0
+                     if (self.active_general_source == "goal"
+                             and MotionDecisionNode._is_continuous_goal_action(action)
+                             and getattr(self, "goal_forward_started_at", None) is None
+@@ -2137,6 +2169,8 @@
+                     status_receive_monotonic if status == "SUCCEEDED" else None
+                 )
+                 completed_source = self.active_general_source
++                self.approach_walk_started_at = None
++                self.approach_walk_capture_after_ns = None
+                 if command_id == getattr(self, "line_offset_motion_command_id", None):
+                     self.line_offset_motion_command_id = None
+                     self.planner.line_offset_alignment_failed = status != "SUCCEEDED"
+@@ -2207,6 +2241,13 @@
+                     self.line_offset_alignment_refresh_pending = str(action).startswith(
+                         ("LINE_OFFSET_TURN_", "LINE_HEADING_TURN_", "LINE_SPARSE_"))
+                 self.active_general_source = None
++                if (completed_source == "hurdle" and status == "SUCCEEDED"
++                        and MotionDecisionNode._is_continuous_hurdle_action(action)
++                        and self.mission_phase != "HURDLE_POSITIONING"
++                        and not getattr(self, "hurdle_positioning_entry_pending", False)
++                        and MotionDecisionNode._recent_walking_input(self, "hurdle", status_receive_monotonic)):
++                    gate = self.general_motion_gate
++                    gate.required_vision_generation = gate.vision_generation
+                 if (
+                     completed_source == "hurdle"
+                     and self.mission_phase == "HURDLE_POSITIONING"
+@@ -2458,6 +2499,9 @@
+                     status == "SUCCEEDED"
+                     and ((completed_source == "line" and MotionDecisionNode._is_continuous_line_action(action))
+                          or (completed_source == "ball" and MotionDecisionNode._is_continuous_ball_action(action))
++                         or (completed_source == "hurdle" and MotionDecisionNode._is_continuous_hurdle_action(action)
++                             and self.mission_phase != "HURDLE_POSITIONING"
++                             and not getattr(self, "hurdle_positioning_entry_pending", False))
+                          or (completed_source == "goal" and MotionDecisionNode._is_continuous_goal_action(action)))
+                     and getattr(self, "queued_general_command_id", None) is None
+                     and MotionDecisionNode._recent_walking_input(
+@@ -3529,6 +3573,91 @@
+     def _is_continuous_ball_action(action: str | None) -> bool:
+         return action in {"STRAIGHT", "BALL_APPROACH_RECOVER_LEFT_4", "BALL_APPROACH_RECOVER_RIGHT_4"}
+ 
++    @staticmethod
++    def _is_continuous_hurdle_action(action: str | None) -> bool:
++        return action in {"STRAIGHT", "RECOVER_LEFT_TURN_LEFT_4", "RECOVER_RIGHT_TURN_RIGHT_4"}
++
++    def _approach_walk_preview(self, observations: dict, now: float) -> dict | None:
++        """Preview ordinary approach walking without entering pickup or hurdle positioning."""
++        source = self.active_general_source
++        started = getattr(self, "approach_walk_started_at", None)
++        action = self.general_motion_gate.active_action
++        duration = MotionDecisionNode.APPROACH_WALK_DURATION_SEC.get(action)
++        if (source not in {"ball", "hurdle"} or started is None or duration is None
++                or not self.general_motion_gate.locked
++                or self.active_special_command_id is not None
++                or self.mission_phase == "HURDLE_POSITIONING"
++                or getattr(self, "hurdle_positioning_entry_pending", False)
++                or getattr(self, "ball_pickup_entry_pending", False)
++                or getattr(self, "ball_confirmation_pending_latched", False)
++                or getattr(self, "ball_lost_during_motion_pending", False)
++                or now < started + duration * MotionDecisionNode.LINE_MOTION_CAPTURE_START_RATIO
++                or not MotionDecisionNode._recent_walking_input(self, source, now)
++                or self.planner._select_source(self.mission_phase, observations) != source):
++            return None
++        info = observations.get(source)
++        stamp = MotionDecisionNode._detection_stamp_ns(info or {})
++        if stamp is None:
++            stamp = (info or {}).get("rgb_stamp_ns")
++        capture_after = getattr(self, "approach_walk_capture_after_ns", None)
++        if (not info or info.get("detected") is not True
++                or info.get("confirmation_confirmed") is False
++                or type(stamp) is not int or capture_after is None or stamp < capture_after):
++            return None
++        depth = MotionDecisionPlanner._number(info, "depth_m")
++        fine_distance = BALL_HURDLE_FINE_DISTANCE_M if source == "ball" else HURDLE_FINE_DISTANCE_M
++        if info.get("depth_valid") is not True or depth is None or depth <= fine_distance:
++            return None
++        if source == "hurdle":
++            if self.planner.hurdle_lock_active or self.planner.hurdle_planner.fine_approach_active:
++                return None
++            info = {**info, **build_hurdle_path_reference(info, observations.get("line")),
++                    "hurdle_positioning_active": False}
++        command = self.planner._plan_source(source, info, 0.0)
++        next_action = command.get("motion" if source == "ball" else "action")
++        allowed = (MotionDecisionNode._is_continuous_ball_action(next_action)
++                   if source == "ball" else MotionDecisionNode._is_continuous_hurdle_action(next_action))
++        if not command.get("valid") or not allowed:
++            return None
++        if ("RECOVER_" in str(action) and "RECOVER_" in str(next_action)
++                and now < started + duration - MotionDecisionNode.LINE_RECOVERY_PREQUEUE_LEAD_SEC):
++            return None
++        return command
++
++    def _prepare_pending_approach_walk(self, now: float) -> None:
++        """Reserve one walk from consecutive, distinct late-motion captures."""
++        if (getattr(self, "approach_walk_started_at", None) is None
++                or getattr(self, "queued_general_command_id", None) is not None):
++            return
++        observations, _ = self._fresh_observations(now)
++        command = MotionDecisionNode._approach_walk_preview(self, observations, now)
++        if command is None:
++            self.approach_walk_candidate = None
++            self.approach_walk_capture_count = 0
++            return
++        source = self.active_general_source
++        info = observations[source]
++        stamp = MotionDecisionNode._detection_stamp_ns(info)
++        if stamp is None:
++            stamp = info.get("rgb_stamp_ns")
++        last_stamp = getattr(self, "approach_walk_last_stamp_ns", None)
++        if last_stamp is not None and stamp <= last_stamp:
++            return
++        self.approach_walk_last_stamp_ns = stamp
++        action = command["motion" if source == "ball" else "action"]
++        if action != getattr(self, "approach_walk_candidate", None):
++            self.approach_walk_candidate = action
++            self.approach_walk_capture_count = 0
++        self.approach_walk_capture_count += 1
++        if self.approach_walk_capture_count < MotionDecisionNode.APPROACH_WALK_CAPTURE_FRAMES:
++            return
++        decision = MotionDecision(
++            phase=self.mission_phase, source=source, action=action, valid=True,
++            reason=command["reason"], sdk_motion_requested=False,
++            requires_ack=False, source_command=command,
++        )
++        MotionDecisionNode._publish_decision(self, decision, queue_while_locked=True)
++
+     def _prepare_pending_goal_decision(self, now: float) -> None:
+         """Reserve at most one forward from fresh, late-motion Goal observations."""
+         started_at = getattr(self, "goal_forward_started_at", None)
+@@ -3570,6 +3699,13 @@
+     def _walking_prequeue_allowed(self, decision: MotionDecision, observations: dict, now: float) -> bool:
+         if getattr(self, "queued_general_command_id", None) is not None:
+             return False
++        if decision.source in {"ball", "hurdle"}:
++            if not decision.valid or decision.requires_ack:
++                return False
++            command = MotionDecisionNode._approach_walk_preview(self, observations, now)
++            key = "motion" if decision.source == "ball" else "action"
++            return bool(decision.source == self.active_general_source and command
++                        and command.get(key) == decision.action)
+         if decision.source == "line":
+             recovery_chain = all(
+                 action in {"LEFT", "RIGHT"} or bool(action and action.startswith("RECOVER_"))
+@@ -4234,6 +4370,20 @@
+         )
+ 
+         self.publisher.publish(output)
++        if is_pickup_checkpoint_action and decision.valid and decision.sdk_motion_requested:
++            geometry = decision.source_command
++            self.get_logger().info(
++                f"Pickup alignment decision: command_id={self.command_id}, "
++                f"action={decision.action}, reason={decision.reason}, "
++                f"steering_deg={geometry.get('steering_error_deg')}, "
++                f"steering_source={geometry.get('steering_source')}, "
++                f"offset_px={geometry.get('offset_x_px')}, "
++                f"bottom_px={geometry.get('bottom_distance_px')}, "
++                f"close_alignment={geometry.get('pickup_close_alignment_active')}, "
++                f"depth_m={geometry.get('depth_m')}, "
++                f"depth_age_sec={geometry.get('depth_age_sec')}, "
++                f"rgb_stamp_ns={(observations.get('ball') or {}).get('rgb_stamp_ns')}"
++            )
+         search = getattr(self, "goal_initial_search", None)
+         if search is not None:
+             search.published(decision, self.command_id)
+--- before/src/mission_control/README.md
++++ src/mission_control/README.md
+@@ -1621,10 +1621,18 @@
+ 유지하며, 과거 목표점 재사용이나 무효 지면 데이터에 대한 강제 전진은 허용하지 않는다.
+ 
+ 일반 공 접근의 전진·이동식 라인복귀도 성공 완료 시 최근 공 입력을 유지한다.
+-일반 라인·공·골대 보행은 예약된 다음 명령이 없고 최근 수신·촬영 입력이 있으면,
++일반 라인·공·골대·허들 보행은 예약된 다음 명령이 없고 최근 수신·촬영 입력이 있으면,
+ 완료 콜백에서 정상 판단 경로를 즉시 실행하여 다음 타이머 주기까지 기다리지 않는다.
+ 픽업 거리 진입, 입력 만료, 제자리 회전 후 재관측, 실행기 실패는 기존 검사를 따른다.
+-공 접근 전진은 픽업 거리 진입을 완료 경계에서 다시 확인하므로 미리 SDK에 예약하지 않는다.
++공·허들 일반 접근도 실제 보행 RUNNING 이후 실행 시간 70%를 지난 서로 다른 최신 영상
++3개에서 같은 전진/보행 복귀가 선택되면 다음 명령을 최대 한 개 SDK에 예약한다.
++복귀→복귀는 일반 라인과 같이 종료 예상 시각 0.30초 전부터 예약한다.
++공 Depth ≤ 0.55 m, 허들 Depth ≤ 0.70 m, 검출 유실·미확정·무효 입력 또는
++정밀 접근 진입이 관측되면 새 예약을 막는다. 이미 수락된 한 개의 예약은 기존 정책대로
++완료한 뒤 정밀 단계로 전환하므로, 상황 변화에 대한 반응이 최대 한 모션 늦을 수 있다.
++BALL_SEARCH·GOAL_SEARCH·HURDLE_APPROACH의 라인 주행에도 동일한 공통 예약 경로를 쓴다.
++제자리 회전·꽃게·공잡기·허들 정밀 동작의 안정화 대기는 유지한다.
++골대 미세전진의 영상 수집 시각은 55번 카탈로그의 주기 383 ms와 런타임 배속 0.9975를 따른다.
+ 
+ 코너 보행 예약에도 현재 라인의 유효한 heading과 품질이 필요하다.
+ 최종 판단에서 촬영 시각·코너 거리와 방향·제한 시간 검사를 다시 수행한다.
+--- before/src/mission_control/test/test_line_continuous_missions.py
++++ src/mission_control/test/test_line_continuous_missions.py
+@@ -35,7 +35,10 @@
+     MotionDecisionNode._prepare_pending_line_decision(node, clock[0])
+ 
+ 
+-@pytest.mark.parametrize('phase', ['AUTO', 'LINE_TRACK', 'LINE_TRACK_AFTER_PICKUP'])
++@pytest.mark.parametrize('phase', [
++    'AUTO', 'LINE_TRACK', 'LINE_TRACK_AFTER_PICKUP',
++    'BALL_SEARCH', 'GOAL_SEARCH', 'HURDLE_APPROACH',
++])
+ def test_normal_line_queues_next_forward_before_current_finishes(clock, phase):
+     node, first = start_forward(phase)
+     capture(node, clock)
+@@ -123,11 +126,12 @@
+     (corner_info('LEFT'), line_info(), 'STRAIGHT'),
+     (corner_info('RIGHT'), line_info(), 'STRAIGHT'),
+ ])
++@pytest.mark.parametrize('phase', ['AUTO', 'BALL_SEARCH', 'GOAL_SEARCH', 'HURDLE_APPROACH'])
+ def test_walking_transition_is_sent_to_sdk_before_success_without_new_vision(
+-    clock, monkeypatch, initial, next_info, expected,
++    clock, monkeypatch, initial, next_info, expected, phase,
+ ):
+     monkeypatch.setattr(MotionDecisionNode, '_current_ros_time_ns', lambda _: round(clock[0] * 1e9))
+-    node, bridge = CornerHarness(phase='AUTO'), FakeBridge()
++    node, bridge = CornerHarness(phase=phase), FakeBridge()
+     node.LINE_TURN_PRE_MOTION_SETTLE_SEC = 1.
+     first = node.publish_vision(line={**initial, 'rgb_stamp_ns': round(clock[0] * 1e9)})[-1]
+     bridge.navigation_command_callback(String(data=json.dumps(first)))
+--- before/src/mission_control/test/test_continuous_approach.py
++++ src/mission_control/test/test_continuous_approach.py
+@@ -141,16 +141,16 @@
+     assert not node.publisher.messages[-1]['valid']
+ 
+ 
+-@pytest.mark.parametrize('first,second', [
+-    ('GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_2'),
+-    ('GOAL_CAMERA90_FINE_FORWARD_3', 'GOAL_CAMERA90_FINE_FORWARD_1'),
++@pytest.mark.parametrize('first,second,deferred', [
++    ('GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_2', False),
++    ('GOAL_CAMERA90_FINE_FORWARD_3', 'GOAL_CAMERA90_FINE_FORWARD_1', True),
+ ])
+-def test_bridge_reserves_different_goal_lengths_without_post_motion_dwell(first, second):
++def test_bridge_reserves_different_goal_lengths_without_post_motion_dwell(first, second, deferred):
+     bridge = FakeBridge()
+     bridge.navigation_command_callback(navigation_message(action=first, source='goal'))
+     bridge.navigation_command_callback(navigation_message(action=second, source='goal', command_id=8001))
+-    assert bridge.queued_request_deferred
+-    assert len(bridge.executor_request_publisher.messages) == 1
++    assert bridge.queued_request_deferred is deferred
++    assert len(bridge.executor_request_publisher.messages) == (1 if deferred else 2)
+     bridge.executor_status_callback(executor_status(status='SUCCEEDED', motion_id=bridge.ACTION_TO_MOTION_ID[first]))
+     requests = decoded_messages(bridge.executor_request_publisher)
+     assert requests[-1]['motion_id'] == bridge.ACTION_TO_MOTION_ID[second]
+--- before/src/mission_control/test/test_object_walk_prequeue.py
++++ src/mission_control/test/test_object_walk_prequeue.py
+@@ -0,0 +1,160 @@
++"""Replay object-owned walking through real input, decision and bridge callbacks."""
++
++import json
++from pathlib import Path
++
++import pytest
++import yaml
++from std_msgs.msg import String
++
++from mission_control.motion_decision_node import MotionDecisionNode
++from mission_control.motion_command_bridge_node import MotionCommandBridgeNode
++from test_continuous_approach import clock, fresh
++from test_wait_refresh_and_fine_settle import LiveInputHarness
++from test_motion_decision_planner import ball_info
++from test_hurdle_positioning import hurdle, line_info
++from test_motion_command_bridge import FakeBridge, decoded_messages, executor_status
++
++
++def sample(source, angle=0., **updates):
++    if source == 'ball':
++        return ball_info(depth_m=.9, bearing_deg=angle,
++                         confirmation_confirmed=True, **updates)
++    return hurdle(.9, **updates)
++
++
++def feed(node, clock, source, angle=0., **updates):
++    if source == 'hurdle':
++        # Moving the line/hurdle intersection requests ordinary walking recovery.
++        fresh(node, clock, 'line', line_info(x=710 + round(angle * 10)), plan=False)
++    fresh(node, clock, source, sample(source, angle, **updates), plan=False)
++
++
++def start(node, clock, source, angle=0.):
++    feed(node, clock, source, angle)
++    MotionDecisionNode._publish_decision(node)
++    first = node.publisher.messages[-1]
++    assert first['valid'] and first['source'] == source, first
++    motion = ('line_forward_4' if first['action'] == 'STRAIGHT'
++              else MotionCommandBridgeNode.motion_id_for_action(first['action']))
++    node.send_status(first['action'], first['command_id'], 'RUNNING', motion)
++    assert node.approach_walk_started_at == clock[0]
++    return first
++
++
++@pytest.mark.parametrize('source,phase', [('ball', 'BALL_APPROACH'), ('hurdle', 'HURDLE_APPROACH')])
++@pytest.mark.parametrize('angles', [(0., 0.), (0., 25.), (25., 0.), (25., -25.)])
++def test_object_walk_queues_once_and_bridge_promotes_without_dwell(clock, source, phase, angles):
++    node, bridge = LiveInputHarness(phase=phase), FakeBridge()
++    first = start(node, clock, source, angles[0])
++    bridge.navigation_command_callback(String(data=json.dumps(first)))
++    request = decoded_messages(bridge.executor_request_publisher)[-1]
++    for _ in range(3):
++        feed(node, clock, source, angles[1])
++    assert getattr(node, 'queued_general_command_id', None) is None
++    clock[0] = node.approach_walk_started_at + MotionDecisionNode.APPROACH_WALK_DURATION_SEC[first['action']] - .25
++    for _ in range(4):
++        feed(node, clock, source, angles[1])
++    second = node.publisher.messages[-1]
++    assert second['command_id'] != first['command_id']
++    assert second['action'] == ('STRAIGHT' if angles[1] == 0 else
++        f"{'BALL_APPROACH_' if source == 'ball' else ''}RECOVER_{'RIGHT' if angles[1] > 0 else 'LEFT'}"
++        + (f"_TURN_{'RIGHT' if angles[1] > 0 else 'LEFT'}" if source == 'hurdle' else '') + '_4')
++    assert len([m for m in node.publisher.messages if m['valid']]) == 2
++    bridge.navigation_command_callback(String(data=json.dumps(second)))
++    assert not bridge.queued_request_deferred
++    requests = decoded_messages(bridge.executor_request_publisher)
++    assert len(requests) == 2
++    bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
++    MotionDecisionNode._motion_status_callback(node, bridge.motion_status_publisher.messages[-1])
++    assert bridge.transition_dwell_until is None
++    assert getattr(node, 'correction_post_motion_dwell_until', None) is None
++    bridge.executor_status_callback(executor_status(**requests[-1], status='RUNNING'))
++    MotionDecisionNode._motion_status_callback(node, bridge.motion_status_publisher.messages[-1])
++    assert node.general_motion_gate.active_command_id == second['command_id']
++    assert node.approach_walk_started_at == clock[0]
++
++
++@pytest.mark.parametrize('source,phase', [('ball', 'BALL_APPROACH'), ('hurdle', 'HURDLE_APPROACH')])
++@pytest.mark.parametrize('blocker', ['near', 'lost', 'depth', 'confidence', 'unconfirmed', 'old', 'duplicate'])
++def test_object_queue_requires_fresh_confirmed_far_target(clock, source, phase, blocker):
++    node = LiveInputHarness(phase=phase)
++    start(node, clock, source)
++    clock[0] += 1.8
++    updates = {
++        'lost': {'detected': False, 'raw_detected': False},
++        'depth': {'depth_valid': False}, 'confidence': {'confidence': .1},
++        'unconfirmed': {'confirmation_confirmed': False},
++    }.get(blocker, {})
++    if blocker == 'near':
++        updates = {'depth_m': .5, 'distance_m': .5}
++    stamp = round(clock[0] * 1e9)
++    for _ in range(4):
++        info = sample(source)
++        info.update(updates)
++        if source == 'hurdle':
++            fresh(node, clock, 'line', line_info(), plan=False)
++        if blocker in {'old', 'duplicate'}:
++            from test_wait_refresh_and_fine_settle import observe
++            observe(node, clock, source, {**info, 'rgb_stamp_ns': 10_010_000_000 if blocker == 'old' else stamp}, plan=False)
++        else:
++            fresh(node, clock, source, info, plan=False)
++    assert getattr(node, 'queued_general_command_id', None) is None
++    assert not node.planner.ball_terminal_requested
++    assert not node.planner.hurdle_go_requested
++
++
++@pytest.mark.parametrize('source,phase', [('ball', 'BALL_APPROACH'), ('hurdle', 'HURDLE_APPROACH')])
++@pytest.mark.parametrize('status', ['FAILED', 'CANCELLED', 'TIMEOUT'])
++def test_object_queue_is_discarded_on_failure(clock, source, phase, status):
++    node = LiveInputHarness(phase=phase)
++    first = start(node, clock, source)
++    clock[0] += 1.8
++    for _ in range(3):
++        feed(node, clock, source)
++    assert node.queued_general_command_id is not None
++    node.send_status(first['action'], first['command_id'], status)
++    assert getattr(node, 'queued_general_command_id', None) is None
++    assert node.approach_walk_started_at is None
++    assert not node.general_motion_gate.has_required_fresh_vision()
++
++
++@pytest.mark.parametrize('source,phase', [('ball', 'BALL_APPROACH'), ('hurdle', 'HURDLE_APPROACH')])
++def test_without_reservation_completion_dispatches_recent_walk_immediately(clock, source, phase):
++    node = LiveInputHarness(phase=phase)
++    first = start(node, clock, source)
++    clock[0] += .1
++    feed(node, clock, source)
++    assert getattr(node, 'queued_general_command_id', None) is None
++    node.send_status(first['action'], first['command_id'], 'SUCCEEDED')
++    second = node.publisher.messages[-1]
++    assert second['valid'] and second['action'] == 'STRAIGHT'
++    assert second['command_id'] != first['command_id']
++
++
++@pytest.mark.parametrize('source,phase', [('ball', 'BALL_APPROACH'), ('hurdle', 'HURDLE_APPROACH')])
++def test_recovery_to_recovery_waits_until_last_point_three_seconds(clock, source, phase):
++    node = LiveInputHarness(phase=phase)
++    first = start(node, clock, source, 25.)
++    started = node.approach_walk_started_at
++    duration = MotionDecisionNode.APPROACH_WALK_DURATION_SEC[first['action']]
++    clock[0] = started + duration * .72
++    for _ in range(3):
++        feed(node, clock, source, -25.)
++    assert getattr(node, 'queued_general_command_id', None) is None
++    clock[0] = started + duration - .25
++    for _ in range(3):
++        feed(node, clock, source, -25.)
++    assert node.queued_general_command_id is not None
++
++
++def test_goal_and_object_capture_timing_matches_runtime_motion_data():
++    root = Path(__file__).resolve().parents[3]
++    aliases = yaml.safe_load((root / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']
++    catalog = {m['name']: m for m in json.loads((root / 'artifacts/robot_motions_runtime.json').read_text())['motions']}
++    for action, duration in {**MotionDecisionNode.APPROACH_WALK_DURATION_SEC,
++                             **MotionDecisionNode.GOAL_FORWARD_DURATION_SEC}.items():
++        motion_id = 'line_forward_4' if action == 'STRAIGHT' else MotionCommandBridgeNode.motion_id_for_action(action)
++        motion = catalog[aliases[motion_id]]
++        actual = max(f['start_ms'] + f['time_ms'] for f in motion['frames']) * motion['repeat_count'] / motion['playback_speed'] / 1000
++        assert duration == pytest.approx(actual), (action, duration, actual)
+--- before/src/mission_control/test/test_pickup_turn_crab_diagnosis.py
++++ src/mission_control/test/test_pickup_turn_crab_diagnosis.py
+@@ -0,0 +1,45 @@
++"""Reproduce turn/crab selection and the persistent near-ball turn block."""
++
++import pytest
++
++from mission_control.motion_decision_planner import MotionDecisionPlanner
++from test_motion_decision_planner import ball_info
++
++
++def ground_ball(angle, bottom=414, offset=194):
++    return ball_info(
++        depth_m=.44, bottom_distance_px=bottom, offset_x_px=offset,
++        ground_projection_enabled=True, ground_projection_valid=True,
++        ground_projection_scope='ball_approach_only',
++        ground_coordinate_frame='robot_x_right_z_forward',
++        ground_forward_distance_m=.640, ground_steering_angle_deg=angle,
++    )
++
++
++@pytest.mark.parametrize('angle,prefix', [
++    (17.79, 'BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_'),
++    (14.99, 'BALL_PICKUP_INITIAL_CRAB_RIGHT'),
++    (-15., 'BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_'),
++])
++def test_pickup_uses_ground_heading_before_lateral_pixels(angle, prefix):
++    decision = MotionDecisionPlanner().plan_ball_pickup_initial_alignment(ground_ball(angle))
++    assert decision.valid and decision.action.startswith(prefix)
++
++
++def test_previous_close_capture_can_suppress_turn_after_bottom_distance_increases():
++    planner = MotionDecisionPlanner()
++    planner._remember_pickup_close_ball(ground_ball(0., bottom=100))
++    decision = planner.plan_ball_pickup_initial_alignment(ground_ball(17.79))
++    assert decision.action == 'BALL_PICKUP_INITIAL_CRAB_RIGHT'
++    assert decision.source_command['pickup_close_alignment_active'] is True
++    assert decision.source_command['bottom_distance_px'] == 414
++    # The same visible geometry without a previous close capture selects yaw.
++    fresh = MotionDecisionPlanner().plan_ball_pickup_initial_alignment(ground_ball(17.79))
++    assert fresh.action.startswith('BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_')
++
++
++@pytest.mark.parametrize('bottom,prefix', [(120, 'BALL_PICKUP_INITIAL_CRAB_RIGHT'),
++                                          (121, 'BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_')])
++def test_near_foot_pixels_prevent_stationary_turn_even_without_close_latch(bottom, prefix):
++    decision = MotionDecisionPlanner().plan_ball_pickup_initial_alignment(ground_ball(25., bottom=bottom))
++    assert decision.action.startswith(prefix)

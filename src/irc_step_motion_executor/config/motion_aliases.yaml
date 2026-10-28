@@ -9,8 +9,8 @@
 # Left turns below 15 degrees are skipped; 90 degrees and above use six repeats.
 # Catalog52 R forward variants; 2/8-cycle commands retain their existing repeat counts.
 motion_aliases:
-  # Supplied 건공잡기 includes regrasp and preserves the source motor 4/5 angles.
-  sdk_pickup: "건공잡기"
+  # Legacy manual pickup IDs select 400; automatic pickup chooses after retreat.
+  sdk_pickup: "r공잡기 400"
   sdk_forward_4: "R전진45도(4회)"
   line_forward_2: "R전진45도(2회)"
   line_forward_4: "R전진45도(4회)"
@@ -33,19 +33,19 @@ motion_aliases:
   stationary_turn_left: "R제자리좌회전(6회)"
   stationary_turn_right: "R제자리우회전(9회)"
   # Keep stable IDs; the new fine gait uses the catalog's five repeats.
-  ball_general_fine_forward_8: "건미세45도(5회)"
-  ball_top_loss_fine_forward_45_3: "건미세45도(상단탐색3회)"
-  pickup_top_loss_fine_forward_0_3: "건미세0도(상단탐색3회)"
+  ball_general_fine_forward_8: "R미세(5회)"
+  ball_top_loss_fine_forward_45_3: "R미세45도(상단탐색3회)"
+  pickup_top_loss_fine_forward_0_3: "r미세0도(상단탐색3회)"
   # Keep legacy IDs; pickup forward uses the supplied camera-45 gait.
   ball_camera_down_forward_2: "R전진45도(2회)"
   ball_camera_down_forward_4: "R전진45도(4회)"
-  pickup_fine_forward_0: "건미세0도"
-  hurdle_fine_forward_10: "건미세0도(허들10회)"
-  pickup_fine_prepare: "건오뒤에서 미세오뒤45도"
+  pickup_fine_forward_0: "r미세0도"
+  hurdle_fine_forward_10: "r미세0도(허들10회)"
+  pickup_fine_prepare: "R오뒤에서미세오뒤45도"
   pickup_crab_right_0: "유미세오옆꽃게0도"
   # Legacy alias IDs now prepare the default posture for either crab direction.
-  pickup_fine_to_crab_right_0: "건미세오뒤에서 기본자세45도"
-  pickup_forward_to_crab_0: "R오뒤에서기본자세0도"
+  pickup_fine_to_crab_right_0: "R미세오뒤에서 기본자세45도"
+  pickup_forward_to_crab_0: "R오뒤에서 기본자세(0도)"
   pickup_crab_left_0: "유미세왼옆꽃게0도"
   pickup_pre_backward_camera_down: "찐공잡기전후진-2(2회)"
   # Close-ball recovery uses the supplied one-cycle retreat.
@@ -83,15 +83,15 @@ motion_aliases:
   goal_camera_90_forward_4: "R전진90도(4회)"
   goal_camera_90_forward_6: "R전진90도(6회)"
   goal_camera_90_backward_1: "찐후진실전(1회)"
-  goal_camera_90_fine_forward_1: "건미세90도(1회)"
-  goal_camera_90_fine_forward_2: "건미세90도(2회)"
-  goal_camera_90_fine_forward_3: "건미세90도(3회)"
-  goal_camera_90_fine_forward_4: "건미세90도(4회)"
+  goal_camera_90_fine_forward_1: "r마세90도(1회)"
+  goal_camera_90_fine_forward_2: "r마세90도(2회)"
+  goal_camera_90_fine_forward_3: "r마세90도(3회)"
+  goal_camera_90_fine_forward_4: "r마세90도(4회)"
   goal_camera_90_crab_right: "유미세오옆꽃게90도"
-  goal_fine_to_crab_right_90: "건미세오뒤에서 기본자세90도"
+  goal_fine_to_crab_right_90: "R미세오뒤에서 기본자세90도"
   goal_camera_90_crab_left: "유미세왼옆꽃게90도"
   # The existing goal head override supplies the camera-90 angle during playback.
-  goal_forward_to_crab_right_90: "건오뒤에서 기본자세(카메라45도)"
+  goal_forward_to_crab_right_90: "R오뒤에서 기본자세(카메라45도)"
   post_ball_line_turn_right_2: "R제자리우회전(2회)"
   post_ball_line_turn_right_3: "R제자리우회전(3회)"
   post_ball_line_turn_right_5: "R제자리우회전(5회("
@@ -115,16 +115,18 @@ motion_aliases:
   goal_camera_90_turn_left_5: "R제자리좌회전90도(5회)"
   goal_camera_90_turn_left_6: "R제자리좌회전90도(6회)"
   goal_shot: "찐골넣기"
-  goal_fine_to_default: "건미세오뒤에서 기본자세45도"
-  goal_forward_to_default: "건오뒤에서 기본자세(카메라45도)"
+  goal_fine_to_default: "R미세오뒤에서 기본자세45도"
+  goal_forward_to_default: "R오뒤에서 기본자세(카메라45도)"
 
-  pickup: "건공잡기"
+  pickup: "r공잡기 400"
+  pickup_400: "r공잡기 400"
+  pickup_500: "r공잡기500"
   hurdle: "찐허들"
 
   # Fine-forward exit posture before any in-place turn (camera pose in degrees).
-  fine_to_turn_ready_45: "건미세오뒤에서 오뒤45도"
-  fine_to_turn_ready_0: "건미세오뒤에서 오뒤0도"
-  fine_to_turn_ready_90: "찐미세오뒤에서 오뒤(골대 카메라90도)"
+  fine_to_turn_ready_45: "R미세오뒤에서 오뒤45도"
+  fine_to_turn_ready_0: "R미세오뒤에서 오뒤0도"
+  fine_to_turn_ready_90: "R미세오뒤에서 오뒤90도"
 
   # Catalog52 R variants available for explicit/manual requests.
   r_forward_0_4: "R전진0도(4회)"

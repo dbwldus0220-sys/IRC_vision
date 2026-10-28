@@ -34,6 +34,12 @@ def generate_test_description():
     )
     return launch.LaunchDescription([
         executor, launch_testing.actions.ReadyToTest(), launch_testing.util.KeepAliveProc(),
+        launch.actions.TimerAction(
+            period=15.0,
+            actions=[launch.actions.EmitEvent(event=launch.events.Shutdown(
+                reason="camera hold test timeout guard",
+            ))],
+        ),
     ]), {"executor": executor}
 
 
@@ -85,7 +91,7 @@ class TestBallHeadOverride(unittest.TestCase):
     def request(self, request_id, motion_id):
         self.publish(TOPICS[0], {
             "request_id": request_id, "command_id": request_id, "event_id": None,
-            "motion_id": motion_id, "action": "PICKUP_NOW" if motion_id == "pickup" else "STRAIGHT",
+            "motion_id": motion_id, "action": "PICKUP_NOW" if motion_id in {"pickup", "pickup_400", "pickup_500"} else "STRAIGHT",
             "timeout_ms": 3000,
         })
 
@@ -144,11 +150,16 @@ class TestBallHeadOverride(unittest.TestCase):
         self.hold(True)
         self.status(7, "SUCCEEDED")
         # Grasp motion retains its catalog camera frames and cannot re-latch.
-        self.request(8, "pickup")
-        self.status(8, "RUNNING")
-        self.ball()
-        self.hold(False)
-        self.status(8, "SUCCEEDED")
+        for request_id, motion in ((8, "pickup"), (9, "pickup_400"), (10, "pickup_500")):
+            self.navigation("line")
+            self.navigation("ball")
+            self.ball()
+            self.hold(True)
+            self.request(request_id, motion)
+            self.status(request_id, "RUNNING")
+            self.ball()
+            self.hold(False)
+            self.status(request_id, "SUCCEEDED")
         self.navigation("line")
         self.navigation("ball")
         self.ball()

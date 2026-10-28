@@ -1,0 +1,132 @@
+{
+  "factor": 0.95,
+  "target": "artifacts/robot_motions_runtime.json",
+  "changes": [
+    {
+      "name": "찐후진실전-2(2회)",
+      "before": 0.9,
+      "after": 0.855
+    },
+    {
+      "name": "찐공잡기전후진-2(2회)",
+      "before": 0.8999999999999999,
+      "after": 0.855
+    },
+    {
+      "name": "R후진에서제자리우회전(공)",
+      "before": 1.0,
+      "after": 0.95
+    },
+    {
+      "name": "R후진에서 제자리 좌회전",
+      "before": 1.0,
+      "after": 0.95
+    },
+    {
+      "name": "찐후진실전(1회)",
+      "before": 0.9,
+      "after": 0.855
+    },
+    {
+      "name": "R미세(5회)",
+      "before": 1.05,
+      "after": 0.9975
+    },
+    {
+      "name": "R미세오뒤에서 기본자세45도",
+      "before": 1.0,
+      "after": 0.95
+    },
+    {
+      "name": "R오뒤에서미세오뒤45도",
+      "before": 1.05,
+      "after": 0.9975
+    },
+    {
+      "name": "r미세0도",
+      "before": 1.05,
+      "after": 0.9975
+    },
+    {
+      "name": "r마세90도",
+      "before": 1.05,
+      "after": 0.9975
+    },
+    {
+      "name": "R미세오뒤에서 오뒤45도",
+      "before": 1.0,
+      "after": 0.95
+    },
+    {
+      "name": "R미세오뒤에서 오뒤0도",
+      "before": 1.0,
+      "after": 0.95
+    },
+    {
+      "name": "R미세오뒤에서 기본자세90도",
+      "before": 1.0,
+      "after": 0.95
+    },
+    {
+      "name": "r미세0도(허들10회)",
+      "before": 1.05,
+      "after": 0.9975
+    },
+    {
+      "name": "r마세90도(1회)",
+      "before": 1.05,
+      "after": 0.9975
+    },
+    {
+      "name": "r마세90도(2회)",
+      "before": 1.05,
+      "after": 0.9975
+    },
+    {
+      "name": "r마세90도(3회)",
+      "before": 1.05,
+      "after": 0.9975
+    },
+    {
+      "name": "r마세90도(4회)",
+      "before": 1.05,
+      "after": 0.9975
+    },
+    {
+      "name": "R미세오뒤에서 오뒤90도",
+      "before": 1.0,
+      "after": 0.95
+    },
+    {
+      "name": "R미세45도(상단탐색3회)",
+      "before": 1.05,
+      "after": 0.9975
+    },
+    {
+      "name": "r미세0도(상단탐색3회)",
+      "before": 1.05,
+      "after": 0.9975
+    },
+    {
+      "name": "r공잡기 400",
+      "before": 1.0,
+      "after": 0.95
+    },
+    {
+      "name": "r공잡기500",
+      "before": 1.0,
+      "after": 0.95
+    }
+  ],
+  "before_sha256": "82a61afd27a82db6416c1a7acad43c339509cce6152aa016f7dc60d1067ea090",
+  "after_sha256": "eab453e9053edd0d5ac9d2992dede5cd3702132554c0c6cc5c682ea90d81efd7",
+  "pc_reference_sha256": "67ebdaa0a7bfcd5e5d03c6f70e82ccfb8d39f1acaa734445ba2b9900e60da453",
+  "verification": "Only playback_speed changed in the 23 requested motions; every other field and motion preserved.",
+  "tests": {
+    "targeted_passed": 30,
+    "catalog_validation": "passed",
+    "git_diff_check": "passed",
+    "upsert_passed": 4,
+    "upsert_existing_failure": "test_production_runtime_preserves_original_shoulders_and_other_fields: runtime-only speed scaling differs from PC reference"
+  }
+}

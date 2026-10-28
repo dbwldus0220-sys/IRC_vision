@@ -1,0 +1,87 @@
+[
+  {
+    "path": "src/mission_control/README.md",
+    "before_sha256": "b7c090b7ceb9f386fc0bd541d588703339dfccfbc71329e59a45fb68f4059c41",
+    "after_sha256": "e21f453d27db16392b10bc420540f10dd6b57613499a9c5398575b04ac110346"
+  },
+  {
+    "path": "src/mission_control/mission_control/motion_command_bridge_node.py",
+    "before_sha256": "4a09e45af5625f1d4a48c8abed48e1cd3c008d681b1db13af3a58275f75bd1f2",
+    "after_sha256": "90d299785177dc7c924134fe44a2e82736c5aed37163d8b4a9aeec4dc5f29348"
+  },
+  {
+    "path": "src/mission_control/mission_control/motion_decision_planner.py",
+    "before_sha256": "5174ea406672a1cf0c38abcc3e2b57c75216bd15e5850b042dcf033772df7c14",
+    "after_sha256": "c0870240abb7f7a0016e4b8ecd01a66b97e2d5443c1074ea2ef3267c1e13004e"
+  },
+  {
+    "path": "src/mission_control/mission_control/mission_phase_manager.py",
+    "before_sha256": "a0bf34bb5a54686166a71cfdcaf63ab77613dc5894104f5b684b99a5522213c9",
+    "after_sha256": "2c9afdaa074bf52587339cc46b1d4eecf45d64464eeb22b3246dc8109f8839d9"
+  },
+  {
+    "path": "src/mission_control/test/test_ball_top_loss_fine3.py",
+    "before_sha256": "1acf8ef0aed7d45fe9f0064be7ad414c37104a4d10dabdec770e4e2379835dd9",
+    "after_sha256": "7df75705705e4c13e1a7c80f95cec9474febf0a304babc239390318cdc9bdf63"
+  },
+  {
+    "path": "src/mission_control/test/test_catalog53_turn_update.py",
+    "before_sha256": "765270bfbc9f54e0d6a43e4091c66529f33af16c97af030df2a4e4598ef1508d",
+    "after_sha256": "763a62da5fb93d1e4e626e0e323e831c24cfc468ff7ae80ad9f013939406deed"
+  },
+  {
+    "path": "src/mission_control/test/test_gait_transitions.py",
+    "before_sha256": "28dc233d7a9ced7267b19b077ea687bf39a23a7ecdff573227b39c79f4026ca1",
+    "after_sha256": "dcfe3f5d94007de5b5116621201b4140919eee545f71994730af4e67057dd6d2"
+  },
+  {
+    "path": "src/mission_control/test/test_motion_command_bridge.py",
+    "before_sha256": "74767f1d4b790976519ba46e6eb53d4f7e131fb3e6229b48756655c3e21c1714",
+    "after_sha256": "aeef5f7694b805e7097c17679e0927c43cb8b396beefcc85db7c80b5e14022e7"
+  },
+  {
+    "path": "src/mission_control/test/test_motion_decision_planner.py",
+    "before_sha256": "52396651b291c63876202ff12ee49fe8d21d7ed5db5497a93d5c5f3a5697ae79",
+    "after_sha256": "04c8469bdbd0dd883689bd00cd016cf899c09a882e0f70db46b2a2873545eb74"
+  },
+  {
+    "path": "src/irc_step_motion_executor/config/motion_aliases.yaml",
+    "before_sha256": "b8666b2d67a4ebb6eb09dc7cb49a58c0e22d12c70bbb1e5650b4d6d49aec93d3",
+    "after_sha256": "e11deff61b431f087231a0680074f88189d96b2ae30e5a7908c55c907095c113"
+  },
+  {
+    "path": "src/irc_step_motion_executor/src/sdk_executor_node.cpp",
+    "before_sha256": "ababc18055876861ebba72301ed62985b640f94fca623473feee02902f8b17e1",
+    "after_sha256": "e6e1803d7ff3ed12ee77e8ebcd04b87307bfa333fd276bc94fdc2b751edb5f01"
+  },
+  {
+    "path": "src/irc_step_motion_executor/test/test_ball_head_override_launch.py",
+    "before_sha256": "fe5daa1441d6cfaaf153ef023b46972bbf28bf01398cf2a0240edc2c7e66ab8d",
+    "after_sha256": "dc756845b6ce3168e7487d74b543325c58067fda7b50427ef8f698c92479b4ed"
+  },
+  {
+    "path": "src/irc_step_motion_executor/test/test_catalog_only_core.cpp",
+    "before_sha256": "49aa9cc2359b7cfc801e04c0c60deee795615e38f6aebacfa53145167f24f1bd",
+    "after_sha256": "8a6d8aedf64a31c1acc56440d324ef08dd348e2f7863eaafe5b277b84aec4596"
+  },
+  {
+    "path": "src/step/step/yolo26_detector.py",
+    "before_sha256": "8e51e7358347f4de24bdf179ee5d4185374aede6fe4834733f02f89d6a309114",
+    "after_sha256": "74f5568a0bb20be14d1dd785fb3626d8a784ae072f43892bc87be8d5e9f23167"
+  },
+  {
+    "path": "tools/upsert_motion_catalog.py",
+    "before_sha256": "e6fbc2459604679eae13e6c90eba1c825e192466df1b852c405ba1dea25c7204",
+    "after_sha256": "66c14bc344c3098b7b4ea3ddafce518ed89c6ce4647aa134e050483045126c5f"
+  },
+  {
+    "path": "artifacts/robot_motions_pc.json",
+    "before_sha256": "323964c8677c5fafa0139b79fa9c023abd8085affbee518408b5399aeeff90b5",
+    "after_sha256": "67ebdaa0a7bfcd5e5d03c6f70e82ccfb8d39f1acaa734445ba2b9900e60da453"
+  },
+  {
+    "path": "artifacts/robot_motions_runtime.json",
+    "before_sha256": "267feac3979111fb06fe81419909a9ac6f13c2554224fc2ca5edbb469105bad8",
+    "after_sha256": "82a61afd27a82db6416c1a7acad43c339509cce6152aa016f7dc60d1067ea090"
+  }
+]

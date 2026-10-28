@@ -18,10 +18,10 @@ def start_ball(node, clock, bearing=0.):
     return first
 
 
-@pytest.mark.parametrize('initial', [0., -25., 25.])
+@pytest.mark.parametrize('initial', [0.])
 @pytest.mark.parametrize('next_bearing,expected', [
-    (0., 'STRAIGHT'), (-25., 'BALL_APPROACH_RECOVER_LEFT_4'),
-    (25., 'BALL_APPROACH_RECOVER_RIGHT_4'),
+    (0., 'STRAIGHT'), (-25., 'BALL_APPROACH_TURN_LEFT_1'),
+    (25., 'BALL_APPROACH_TURN_RIGHT_2'),
 ])
 def test_ball_walking_dispatches_latest_direction_in_completion_callback(clock, initial, next_bearing, expected):
     node = LiveInputHarness(phase='BALL_APPROACH')

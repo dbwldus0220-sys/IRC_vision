@@ -1,0 +1,218 @@
+[
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진라인복귀좌",
+    "queue_after_ms": 1889.4736842105262,
+    "transport_delay_ms": 0,
+    "read_delay_ms": 0,
+    "continuous": false,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진라인복귀좌",
+    "queue_after_ms": 1989.4736842105262,
+    "transport_delay_ms": 100,
+    "read_delay_ms": 0,
+    "continuous": false,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진라인복귀좌",
+    "queue_after_ms": 1889.4736842105262,
+    "transport_delay_ms": 0,
+    "read_delay_ms": 16,
+    "continuous": false,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진라인복귀좌",
+    "queue_after_ms": 1989.4736842105262,
+    "transport_delay_ms": 100,
+    "read_delay_ms": 16,
+    "continuous": false,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진라인복귀좌",
+    "queue_after_ms": 1889.4736842105262,
+    "transport_delay_ms": 0,
+    "read_delay_ms": 0,
+    "continuous": true,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진라인복귀좌",
+    "queue_after_ms": 1989.4736842105262,
+    "transport_delay_ms": 100,
+    "read_delay_ms": 0,
+    "continuous": true,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진라인복귀좌",
+    "queue_after_ms": 1889.4736842105262,
+    "transport_delay_ms": 0,
+    "read_delay_ms": 16,
+    "continuous": true,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진라인복귀좌",
+    "queue_after_ms": 1989.4736842105262,
+    "transport_delay_ms": 100,
+    "read_delay_ms": 16,
+    "continuous": true,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진45도(6회)",
+    "queue_after_ms": 1889.4736842105262,
+    "transport_delay_ms": 0,
+    "read_delay_ms": 0,
+    "continuous": false,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진45도(6회)",
+    "queue_after_ms": 1989.4736842105262,
+    "transport_delay_ms": 100,
+    "read_delay_ms": 0,
+    "continuous": false,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진45도(6회)",
+    "queue_after_ms": 1889.4736842105262,
+    "transport_delay_ms": 0,
+    "read_delay_ms": 16,
+    "continuous": false,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진45도(6회)",
+    "queue_after_ms": 1989.4736842105262,
+    "transport_delay_ms": 100,
+    "read_delay_ms": 16,
+    "continuous": false,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진45도(6회)",
+    "queue_after_ms": 1889.4736842105262,
+    "transport_delay_ms": 0,
+    "read_delay_ms": 0,
+    "continuous": true,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진45도(6회)",
+    "queue_after_ms": 1989.4736842105262,
+    "transport_delay_ms": 100,
+    "read_delay_ms": 0,
+    "continuous": true,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진45도(6회)",
+    "queue_after_ms": 1889.4736842105262,
+    "transport_delay_ms": 0,
+    "read_delay_ms": 16,
+    "continuous": true,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진45도(6회)",
+    "queue_after_ms": 1989.4736842105262,
+    "transport_delay_ms": 100,
+    "read_delay_ms": 16,
+    "continuous": true,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R라인복귀우회전",
+    "second": "R라인복귀우회전",
+    "queue_after_ms": 1760.0,
+    "transport_delay_ms": 0,
+    "read_delay_ms": 0,
+    "continuous": false,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R라인복귀우회전",
+    "second": "R라인복귀우회전",
+    "queue_after_ms": 1860.0,
+    "transport_delay_ms": 100,
+    "read_delay_ms": 0,
+    "continuous": false,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R라인복귀우회전",
+    "second": "R라인복귀우회전",
+    "queue_after_ms": 1760.0,
+    "transport_delay_ms": 0,
+    "read_delay_ms": 16,
+    "continuous": false,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R라인복귀우회전",
+    "second": "R라인복귀우회전",
+    "queue_after_ms": 1860.0,
+    "transport_delay_ms": 100,
+    "read_delay_ms": 16,
+    "continuous": false,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R라인복귀우회전",
+    "second": "R라인복귀우회전",
+    "queue_after_ms": 1760.0,
+    "transport_delay_ms": 0,
+    "read_delay_ms": 0,
+    "continuous": true,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R라인복귀우회전",
+    "second": "R라인복귀우회전",
+    "queue_after_ms": 1860.0,
+    "transport_delay_ms": 100,
+    "read_delay_ms": 0,
+    "continuous": true,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R라인복귀우회전",
+    "second": "R라인복귀우회전",
+    "queue_after_ms": 1760.0,
+    "transport_delay_ms": 0,
+    "read_delay_ms": 16,
+    "continuous": true,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R라인복귀우회전",
+    "second": "R라인복귀우회전",
+    "queue_after_ms": 1860.0,
+    "transport_delay_ms": 100,
+    "read_delay_ms": 16,
+    "continuous": true,
+    "boundary_dispatch_gap_ms": 0.0
+  }
+]

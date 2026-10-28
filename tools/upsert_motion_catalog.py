@@ -26,11 +26,13 @@ def _with_runtime_policy(motion: dict) -> dict:
     result.setdefault("completion", {})["position_tolerance_deg"] = (
         POSITION_TOLERANCE_DEG
     )
-    if result["name"] == "건공잡기":
+    if result["name"] in {"건공잡기", "r공잡기 400", "r공잡기500"}:
         # Preserve existing runtime pose identities across catalog updates.
         pose_names = {name: name + "(건공잡기)" for name in (
             "미세후진오뒤(0도)", "미세오뒤4111(45도)",
         )}
+        if result["name"] != "건공잡기":
+            pose_names["건허리돌리고숙임"] = "건허리돌리고숙임(r공잡기)"
         for frame in result.get("frames", []):
             frame["name"] = pose_names.get(frame.get("name"), frame.get("name"))
         for key in ("start_pose", "end_pose"):

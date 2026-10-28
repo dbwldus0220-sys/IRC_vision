@@ -1005,8 +1005,8 @@ def test_reacquired_far_ball_cannot_fall_back_to_line_after_mission_entry():
     )
 
     assert centering.source == "ball"
-    assert centering.action == "BALL_APPROACH_RECOVER_LEFT_4"
-    assert centering.reason == "ball_moving_heading_correction"
+    assert centering.action == "BALL_APPROACH_TURN_LEFT_3"
+    assert centering.reason == "ball_stationary_heading_correction"
     assert resumed.source == "ball"
     assert resumed.action == "STRAIGHT"
     assert resumed.reason == "ball_aligned_discrete_approach"
@@ -2162,7 +2162,7 @@ def test_pickup_initial_alignment_uses_fifteen_degree_turn_threshold():
         (-88.0, "BALL_APPROACH_TURN_LEFT_5", 5, 75.0),
     ],
 )
-def test_general_ball_alignment_uses_moving_recover(
+def test_general_ball_alignment_uses_stationary_turn(
     steering_error,
     expected_action,
     expected_count,
@@ -2175,9 +2175,9 @@ def test_general_ball_alignment_uses_moving_recover(
     )
 
     direction = "LEFT" if steering_error < 0 else "RIGHT"
-    assert decision.action == f"BALL_APPROACH_RECOVER_{direction}_4"
-    assert decision.source_command["turn_count"] == 4
-    assert decision.source_command["turn_angle_deg"] == 30.0
+    assert decision.action == expected_action
+    assert decision.source_command["turn_count"] == expected_count
+    assert decision.source_command["turn_angle_deg"] == expected_turn_angle
     assert "CAMERA_DOWN" not in decision.action
 
 
@@ -2195,7 +2195,7 @@ def test_pickup_initial_alignment_uses_bearing_then_offset_fallback():
 
     bearing_decision = planner.plan_ball_pickup_initial_alignment(
         ball_info(steering_angle_deg=None, bearing_deg=-30.0,
-                  depth_m=0.5, distance_m=0.5, bottom_distance_px=300)
+                  depth_m=0.5, distance_m=0.5, bottom_distance_px=450)
     )
     offset_decision = planner.plan_ball_pickup_initial_alignment(
         ball_info(
@@ -2319,7 +2319,7 @@ def test_post_backward_alignment_waits_until_ball_is_visible():
     assert decision.valid is False
 
 
-def test_post_backward_alignment_corrects_heading_before_lateral_offset():
+def test_post_backward_checkpoint_selects_grasp_without_repeating_heading_alignment():
     decision = (
         MotionDecisionPlanner().plan_ball_pickup_post_backward_alignment(
             ball_info(
@@ -2331,11 +2331,11 @@ def test_post_backward_alignment_corrects_heading_before_lateral_offset():
         )
     )
 
-    assert decision.action == "BALL_PICKUP_POST_BACKWARD_TURN_RIGHT_3"
+    assert decision.action == "BALL_PICKUP_POST_BACKWARD_ALIGN_CONTINUE"
     assert decision.valid is True
 
 
-def test_post_backward_alignment_corrects_lateral_offset_after_heading():
+def test_post_backward_checkpoint_selects_grasp_without_repeating_lateral_alignment():
     decision = (
         MotionDecisionPlanner().plan_ball_pickup_post_backward_alignment(
             ball_info(
@@ -2346,7 +2346,7 @@ def test_post_backward_alignment_corrects_lateral_offset_after_heading():
         )
     )
 
-    assert decision.action == "BALL_PICKUP_POST_BACKWARD_CRAB_LEFT"
+    assert decision.action == "BALL_PICKUP_POST_BACKWARD_ALIGN_CONTINUE"
     assert decision.valid is True
 
 
@@ -2513,7 +2513,7 @@ def test_pickup_corrects_lateral_error_before_repeating_fine_approach(
         )
     )
 
-    assert decision.action == ("BALL_PICKUP_CRAB_LEFT" if offset_px < -30
+    assert decision.action == ("BALL_PICKUP_CRAB_LEFT" if bottom_distance_px <= 360 and offset_px < -30
                                else "BALL_PICKUP_FINE_FORWARD")
     assert decision.valid is True
     assert decision.sdk_motion_requested is True
@@ -2711,15 +2711,15 @@ def test_pickup_close_latch_survives_pixel_jitter_and_suppresses_fallback_turn()
     assert planner.plan_ball_pickup_initial_alignment(close).action.endswith("CRAB_RIGHT")
     jitter = {**close, "bottom_distance_px": 101}
     assert planner.plan_ball_pickup_initial_alignment(jitter).action.endswith("CRAB_RIGHT")
-    assert planner.plan_ball_pickup_post_backward_alignment(jitter).action.endswith("CRAB_RIGHT")
+    assert planner.plan_ball_pickup_post_backward_alignment(jitter).action.endswith("ALIGN_CONTINUE")
     planner.clear_collected_ball_tracking()
     assert planner.plan_ball_pickup_initial_alignment(jitter).action == "BALL_PICKUP_INITIAL_CRAB_RIGHT"
 
 
 @pytest.mark.parametrize("overrides", [
     {"bottom_distance_px": None}, {"bottom_distance_px": -1},
-    {"bottom_distance_px": float("nan")}, {"bottom_distance_px": 101},
-    {"bottom_distance_px": 200},
+    {"bottom_distance_px": float("nan")}, {"bottom_distance_px": 361},
+    {"bottom_distance_px": 450},
     {"confidence": 0.1}, {"detected": False, "raw_detected": False},
 ])
 def test_invalid_or_distant_ball_does_not_latch_close_pickup(overrides):
@@ -2975,7 +2975,7 @@ def test_alignment_uses_shared_turn_table_in_ball_line_and_goal_stages(
     info = ball_info(
         steering_angle_deg=sign * angle, bearing_deg=-sign * 80,
         distance_m=0.5, depth_m=0.5, offset_x_px=0, offset_x_norm=0.06,
-        bottom_distance_px=300, pickup_x_tolerance_norm=0.08,
+        bottom_distance_px=450, pickup_x_tolerance_norm=0.08,
     )
     expected_count = min(count, 6)
     expected_angle = {0: 0.0, 1: 15.0, 2: 30.0, 3: 45.0, 4: 60.0, 5: 75.0, 6: 90.0}[expected_count]
@@ -2996,8 +2996,6 @@ def test_alignment_uses_shared_turn_table_in_ball_line_and_goal_stages(
     for decision, prefix, aligned_action in (
         (planner.plan_ball_pickup_initial_alignment(info), "BALL_PICKUP_CAMERA_DOWN",
          "BALL_PICKUP_INITIAL_ALIGN_CONTINUE"),
-        (planner.plan_ball_pickup_post_backward_alignment(info),
-         "BALL_PICKUP_POST_BACKWARD", "BALL_PICKUP_POST_BACKWARD_ALIGN_CONTINUE"),
         (planner.plan("POST_SHOT_LINE_ALIGN", observations(
             line=line_info(ground_heading_error_deg=sign * angle)), 0.1),
          "POST_SHOT_LINE", "POST_SHOT_LINE_ALIGNED"),

@@ -1,0 +1,11 @@
+Internal ctest changing into directory: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+Test project /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+    Start 22: test_test_ball_head_override_launch.py
+1/1 Test #22: test_test_ball_head_override_launch.py ...   Passed   16.22 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Label Time Summary:
+launch_test    =  16.22 sec*proc (1 test)
+
+Total Test time (real) =  16.23 sec

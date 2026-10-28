@@ -1065,6 +1065,8 @@ class Yolo26Detector(Node):
             "pickup_crab_right_0": "PICKUP / SIDE STEP RIGHT",
             "pickup_pre_backward_camera_down": "PICKUP / BACKWARD (2 CYCLES)",
             "pickup": "PICKUP / GRASP",
+            "pickup_400": "PICKUP / GRASP 400",
+            "pickup_500": "PICKUP / GRASP 500",
             "pickup_grasp_check_pose": "PICKUP / CHECK BALL",
             "pickup_retreat_2": "PICKUP / BACKWARD (2 CYCLES)",
             "pickup_lost_ball_backward_1": "BALL REACQUIRE / BACKWARD (1 CYCLE)",

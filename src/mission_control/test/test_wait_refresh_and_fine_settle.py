@@ -54,7 +54,7 @@ def test_ball_wait_uses_new_ground_angle_instead_of_invalid_old_sample(clock):
     observe(node, clock, 'ball', ground_ball(True, -25.))
     command = node.publisher.messages[-1]
     assert command['valid']
-    assert command['action'] == 'BALL_APPROACH_RECOVER_LEFT_4'
+    assert command['action'] == 'BALL_APPROACH_TURN_LEFT_1'
     assert command['source_command']['steering_error_deg'] == -25.
 
 

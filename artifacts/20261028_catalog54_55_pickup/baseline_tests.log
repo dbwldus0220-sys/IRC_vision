@@ -1,0 +1,663 @@
+........................................................................ [  5%]
+........................................................................ [ 10%]
+........................................................................ [ 15%]
+........................................................................ [ 21%]
+........................................................................ [ 26%]
+........................................................................ [ 31%]
+...FF................................................................... [ 36%]
+........................................................................ [ 42%]
+........................................................................ [ 47%]
+........................................................................ [ 52%]
+........................................................................ [ 58%]
+........................................................................ [ 63%]
+........................................................................ [ 68%]
+........................................................................ [ 73%]
+........................................................................ [ 79%]
+................................................................F..F.... [ 84%]
+........................F.F..F.F..............F.....FFF...............FF [ 89%]
+F..F.......F............FFF............................................. [ 95%]
+.....F..............................................................     [100%]
+=================================== FAILURES ===================================
+_ test_default_line_recovery_follows_ground_in_recorded_opposing_heading_scene[-1] _
+
+side = -1
+
+    @pytest.mark.parametrize('side', [-1, 1])
+    def test_default_line_recovery_follows_ground_in_recorded_opposing_heading_scene(side):
+        decision = MotionDecisionPlanner().plan('LINE_TRACK', {'line': line_info(
+            ground_heading_error_deg=side * 18.21,
+            filtered_heading_error_deg=-side * 19.5,
+            filtered_lateral_offset_norm=side * 1.099,
+        )}, .1)
+        direction = 'RIGHT' if side > 0 else 'LEFT'
+        assert decision.valid
+>       assert decision.action == f'RECOVER_{direction}_TURN_{direction}_4'
+E       AssertionError: assert 'STRAIGHT' == 'RECOVER_LEFT_TURN_LEFT_4'
+E         - RECOVER_LEFT_TURN_LEFT_4
+E         + STRAIGHT
+
+src/mission_control/test/test_motion_decision_planner.py:37: AssertionError
+_ test_default_line_recovery_follows_ground_in_recorded_opposing_heading_scene[1] _
+
+side = 1
+
+    @pytest.mark.parametrize('side', [-1, 1])
+    def test_default_line_recovery_follows_ground_in_recorded_opposing_heading_scene(side):
+        decision = MotionDecisionPlanner().plan('LINE_TRACK', {'line': line_info(
+            ground_heading_error_deg=side * 18.21,
+            filtered_heading_error_deg=-side * 19.5,
+            filtered_lateral_offset_norm=side * 1.099,
+        )}, .1)
+        direction = 'RIGHT' if side > 0 else 'LEFT'
+        assert decision.valid
+>       assert decision.action == f'RECOVER_{direction}_TURN_{direction}_4'
+E       AssertionError: assert 'STRAIGHT' == 'RECOVER_RIGHT_TURN_RIGHT_4'
+E         - RECOVER_RIGHT_TURN_RIGHT_4
+E         + STRAIGHT
+
+src/mission_control/test/test_motion_decision_planner.py:37: AssertionError
+_ test_collected_ball_route_clears_stale_reservations_before_dwell[GOAL_APPROACH-GOAL_CAMERA90_FINE_FORWARD_2] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff96be2b00>
+phase = 'GOAL_APPROACH', expected_action = 'GOAL_CAMERA90_FINE_FORWARD_2'
+
+    @pytest.mark.parametrize("phase,expected_action", [
+        ("POST_BALL_LINE_ALIGN", "RECOVER_RIGHT_TURN_RIGHT_4"),
+        ("GOAL_APPROACH", "GOAL_CAMERA90_FINE_FORWARD_2"),
+    ])
+    def test_collected_ball_route_clears_stale_reservations_before_dwell(
+        monkeypatch, phase, expected_action,
+    ):
+        monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: 10.0)
+        harness = MissionFlowHarness(phase=phase)
+        harness.phase_manager.pickups_completed = 1
+        harness.phase_manager.ball_grasp_results[1] = "GRABBED"
+        seed_old_ball_navigation(harness)
+    
+        command = harness.publish_vision(
+            line=line_info(heading=34.0), goal=approaching_goal(),
+            ball={"detected": False, "raw_detected": False},
+        )[-1]
+    
+>       assert command["action"] == expected_action
+E       AssertionError: assert 'GOAL_CAMERA_90_FORWARD_2' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E         - GOAL_CAMERA90_FINE_FORWARD_2
+E         ?              -----
+E         + GOAL_CAMERA_90_FORWARD_2
+E         ?            +
+
+src/mission_control/test/test_mission_phase_flow.py:505: AssertionError
+______ test_post_ball_detection_loss_cannot_interrupt_timed_line_or_goal _______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff96a3f9d0>
+
+    def test_post_ball_detection_loss_cannot_interrupt_timed_line_or_goal(monkeypatch):
+        now = [10.0]
+        monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: now[0])
+        harness = MissionFlowHarness(phase="BALL_APPROACH")
+        pickup = publish_special(harness, "ball", pickup_ready_ball(), "PICKUP_NOW")
+        harness.phase_manager.record_active_pickup_grasp_result("GRABBED")
+        complete_active(harness, "PICKUP_NOW", pickup["command_id"])
+        receive = MotionDecisionNode._info_callback(harness, "ball")
+        receive(String(data=json.dumps({"detected": False, "raw_detected": True})))
+        line = harness.publish_vision(line=line_info())[-1]
+        assert line["source"] == "line"
+        assert line["mission_progress"]["ball_mode_active"] is False
+        release_general(harness, line)
+        receive(String(data=json.dumps(approaching_ball())))
+        now[0] = 20.0
+        transition = harness.publish_vision(line=line_info())[-1]
+        assert transition["action"] == "POST_BALL_GOAL_TRANSITION"
+        receive(String(data=json.dumps({"detected": False, "raw_detected": True})))
+        assert all(c["action"] == "WAIT" for c in harness.publish_vision())
+        complete_active(harness, transition["action"], transition["command_id"])
+        assert harness.mission_phase == "GOAL_APPROACH"
+        assert harness.goal_post_motion_dwell_until is None
+>       assert harness.publish_vision(goal=approaching_goal())[-1]["action"] == "GOAL_CAMERA90_FINE_FORWARD_2"
+E       AssertionError: assert 'GOAL_CAMERA_90_FORWARD_2' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E         - GOAL_CAMERA90_FINE_FORWARD_2
+E         ?              -----
+E         + GOAL_CAMERA_90_FORWARD_2
+E         ?            +
+
+src/mission_control/test/test_mission_phase_flow.py:564: AssertionError
+_______ test_ball_loss_waits_then_reacquired_ball_selects_moving_recover _______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff96acaf20>
+
+    def test_ball_loss_waits_then_reacquired_ball_selects_moving_recover(monkeypatch):
+        harness = MissionFlowHarness(phase="BALL_APPROACH")
+        harness.BALL_POST_MOTION_DWELL_SEC = 3.0
+        now = [10.0]
+        monkeypatch.setattr(
+            "mission_control.motion_decision_node.time.monotonic", lambda: now[0],
+        )
+        visible_ball = approaching_ball()
+        visible_ball["steering_angle_deg"] = -31.0
+        visible_ball["camera_center_offset_x_px"] = -100
+        approach = harness.publish_vision(ball=visible_ball, line=line_info(offset=-0.24))[-1]
+        assert approach["action"] == "BALL_APPROACH_RECOVER_LEFT_4"
+        MotionDecisionNode._track_ball_loss_during_motion(harness, visible_ball)
+        lost_ball = {"detected": False, "raw_detected": False, "ball_loss_confirmed": True}
+        MotionDecisionNode._track_ball_loss_during_motion(harness, lost_ball)
+        release_general(harness, approach)
+    
+        assert harness.ball_post_motion_dwell_until is None
+        assert not harness.general_motion_gate.has_required_fresh_vision()
+>       assert harness.publish_vision(ball=lost_ball)[-1]["action"] == "WAIT"
+E       AssertionError: assert 'BALL_APPROACH_TURN_LEFT_3' == 'WAIT'
+E         - WAIT
+E         + BALL_APPROACH_TURN_LEFT_3
+
+src/mission_control/test/test_mission_phase_flow.py:1040: AssertionError
+____ test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell _____
+
+    def test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell():
+        harness = MissionFlowHarness(phase="BALL_APPROACH")
+        close_ball = pickup_ready_ball()
+        close_ball.update(
+            {
+                "depth_m": 0.56,
+                "distance_m": 0.56,
+                "pickup_ready": False,
+                "pickup_now": False,
+            }
+        )
+    
+        MotionDecisionNode._latch_ball_pickup_entry(harness, close_ball)
+    
+>       assert harness.ball_pickup_entry_pending is True
+E       assert False is True
+E        +  where False = <test_mission_phase_flow.MissionFlowHarness object at 0xffff96be3970>.ball_pickup_entry_pending
+
+src/mission_control/test/test_mission_phase_flow.py:1083: AssertionError
+_____ test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment ______
+
+    def test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment():
+        harness = MissionFlowHarness(phase="BALL_APPROACH")
+        pickup = publish_special(
+            harness,
+            "ball",
+            pickup_ready_ball(),
+            "PICKUP_NOW",
+        )
+        harness.pickup_positioning_motion_running = True
+        harness.pickup_positioning_motion_id = "ball_camera_down_forward_2"
+        harness.pickup_positioning_ball_seen_during_motion = True
+        lost_ball = {"detected": False, "raw_detected": False, "ball_loss_confirmed": True}
+        MotionDecisionNode._track_pickup_positioning_ball_loss(
+            harness,
+            lost_ball,
+        )
+    
+        latch = harness.publish_vision(ball=lost_ball)[-1]
+        assert latch["action"] == harness.PICKUP_POSITIONING_LOSS_LATCH_ACTION
+        assert latch["sdk_motion_requested"] is False
+        assert latch["active_special_command_id"] == pickup["command_id"]
+    
+        harness.send_status(
+            "PICKUP_NOW",
+            pickup["command_id"],
+            "RUNNING",
+            motion_id=MotionDecisionNode.PICKUP_INITIAL_ALIGN_MARKER,
+        )
+        assert harness.pickup_initial_align_waiting is True
+        waiting = harness.publish_vision(ball=lost_ball)[-1]
+        assert waiting["action"] == "WAIT"
+        assert waiting["sdk_motion_requested"] is False
+    
+        left_ball = pickup_ready_ball()
+        left_ball["steering_angle_deg"] = -30.0
+        left_ball["offset_x_norm"] = -0.2
+        turn = harness.publish_vision(ball=left_ball)[-1]
+>       assert turn["action"] == "BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_1"
+E       AssertionError: assert 'BALL_PICKUP_...N_TURN_LEFT_2' == 'BALL_PICKUP_...N_TURN_LEFT_1'
+E         - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_1
+E         ?                                   ^
+E         + BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_2
+E         ?                                   ^
+
+src/mission_control/test/test_mission_phase_flow.py:1205: AssertionError
+_________________ test_full_course_mock_flow_without_ros_graph _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff96be3910>
+
+    def test_full_course_mock_flow_without_ros_graph(monkeypatch):
+        harness = MissionFlowHarness(required_ball_sections=1)
+    
+        straight = harness.publish_vision(line=line_info())
+        assert [item["action"] for item in straight] == ["STRAIGHT"]
+        repeated = harness.publish_vision(line=line_info())
+        assert repeated == []
+        release_general(harness, straight[0])
+    
+        recovery = harness.publish_vision(line=line_info(offset=-0.24))
+        assert [item["action"] for item in recovery] == ["STRAIGHT"]
+        assert recovery[0]["valid"] is True
+        assert recovery[0]["reason"] == "line_tracking"
+        assert map_action_to_motion_id(recovery[0]["action"]) == "forward"
+        assert harness.general_motion_gate.locked is True
+        release_general(harness, recovery[0])
+    
+        large = harness.publish_vision(line=line_info(offset=0.35))
+        assert [item["action"] for item in large] == ["STRAIGHT"]
+        assert large[0]["valid"] is True
+        assert map_action_to_motion_id(large[0]["action"]) == "forward"
+        release_general(harness, large[0])
+    
+        approach_ball = harness.publish_vision(
+            line=line_info(),
+            ball=approaching_ball(),
+        )
+        assert approach_ball[-1]["source"] == "ball"
+>       assert approach_ball[-1]["action"] == "STRAIGHT_2"
+E       AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E         - STRAIGHT_2
+E         ?         --
+E         + STRAIGHT
+
+src/mission_control/test/test_mission_phase_flow.py:1290: AssertionError
+___________ test_confirmed_approaching_hurdle_beats_approaching_ball ___________
+
+    def test_confirmed_approaching_hurdle_beats_approaching_ball():
+        harness = MissionFlowHarness()
+    
+        published = harness.publish_vision(
+            line=line_info(),
+            ball=approaching_ball(),
+            hurdle=approaching_hurdle(),
+        )
+    
+        assert published[-1]["source"] == "hurdle"
+>       assert published[-1]["action"] == "STRAIGHT_0"
+E       AssertionError: assert 'GO' == 'STRAIGHT_0'
+E         - STRAIGHT_0
+E         + GO
+
+src/mission_control/test/test_mission_phase_flow.py:1650: AssertionError
+__________ test_unconfirmed_hurdle_disappearance_resumes_ball_mission __________
+
+    def test_unconfirmed_hurdle_disappearance_resumes_ball_mission():
+        harness = MissionFlowHarness()
+        hurdle = go_ready_hurdle()
+        hurdle["confirmation_confirmed"] = False
+    
+        held = harness.publish_vision(
+            ball=approaching_ball(),
+            hurdle=hurdle,
+        )
+        assert held[-1]["source"] == "ball"
+>       assert held[-1]["action"] == "STRAIGHT_2"
+E       AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E         - STRAIGHT_2
+E         ?         --
+E         + STRAIGHT
+
+src/mission_control/test/test_mission_phase_flow.py:1808: AssertionError
+________ test_unconfirmed_hurdle_can_become_confirmed_and_take_priority ________
+
+    def test_unconfirmed_hurdle_can_become_confirmed_and_take_priority():
+        harness = MissionFlowHarness()
+        hurdle = approaching_hurdle()
+        hurdle["confirmation_confirmed"] = False
+    
+        held = harness.publish_vision(
+            line=line_info(),
+            ball=approaching_ball(),
+            hurdle=hurdle,
+        )
+        assert held[-1]["source"] == "ball"
+>       assert held[-1]["action"] == "STRAIGHT_2"
+E       AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E         - STRAIGHT_2
+E         ?         --
+E         + STRAIGHT
+
+src/mission_control/test/test_mission_phase_flow.py:1827: AssertionError
+_______________ test_absent_hurdle_keeps_ball_priority_over_line _______________
+
+    def test_absent_hurdle_keeps_ball_priority_over_line():
+        harness = MissionFlowHarness()
+    
+        published = harness.publish_vision(
+            line=line_info(),
+            ball=approaching_ball(),
+            hurdle=None,
+        )
+    
+        assert published[-1]["source"] == "ball"
+>       assert published[-1]["action"] == "STRAIGHT_2"
+E       AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E         - STRAIGHT_2
+E         ?         --
+E         + STRAIGHT
+
+src/mission_control/test/test_mission_phase_flow.py:1846: AssertionError
+_ test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[34.0-GOAL_CAMERA90_TURN_RIGHT_3-0.0-GOAL_CAMERA90_FINE_FORWARD_2] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff96ac9a80>
+initial_bearing = 34.0, initial_action = 'GOAL_CAMERA90_TURN_RIGHT_3'
+remaining_bearing = 0.0, next_action = 'GOAL_CAMERA90_FINE_FORWARD_2'
+
+    @pytest.mark.parametrize("initial_bearing,initial_action,remaining_bearing,next_action", [
+        (34.0, "GOAL_CAMERA90_TURN_RIGHT_3", 0.0, "GOAL_CAMERA90_FINE_FORWARD_2"),
+        (-35.0, "GOAL_CAMERA90_TURN_LEFT_1", -20.0, "GOAL_CAMERA90_TURN_LEFT_1"),
+        (-20.0, "GOAL_CAMERA90_TURN_LEFT_1", -15.0, "GOAL_CAMERA90_FINE_FORWARD_2"),
+    ])
+    def test_goal_camera90_turn_dwells_then_rechecks_fresh_goal(
+        monkeypatch, initial_bearing, initial_action, remaining_bearing, next_action,
+    ):
+        harness = MissionFlowHarness(phase="GOAL_APPROACH")
+    
+        correction = harness.publish_vision(
+            goal={
+                **approaching_goal(),
+                "depth_m": 0.9,
+                "ground_distance_m": 0.9,
+                "distance_m": 0.9,
+                "bearing_deg": initial_bearing,
+                "offset_x_norm": 0.3 if initial_bearing > 0 else -0.3,
+            }
+        )[-1]
+        assert correction["action"] == initial_action
+        release_general(harness, correction)
+    
+        published_count = len(harness.publisher.messages)
+        MotionDecisionNode._publish_decision(harness)
+        assert len(harness.publisher.messages) == published_count
+    
+        deadline = harness.goal_post_motion_dwell_until
+        monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: deadline)
+        MotionDecisionNode._publish_decision(harness)
+        forward = harness.publish_vision(
+            goal={
+                **approaching_goal(),
+                "depth_m": 0.9,
+                "ground_distance_m": 0.9,
+                "distance_m": 0.9,
+                "bearing_deg": remaining_bearing,
+                "offset_x_norm": 0.0,
+            }
+        )[-1]
+>       assert forward["action"] == next_action
+E       AssertionError: assert 'GOAL_CAMERA_90_FORWARD_2' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E         - GOAL_CAMERA90_FINE_FORWARD_2
+E         ?              -----
+E         + GOAL_CAMERA_90_FORWARD_2
+E         ?            +
+
+src/mission_control/test/test_mission_phase_flow.py:2134: AssertionError
+_ test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-35.0-GOAL_CAMERA90_TURN_LEFT_1--20.0-GOAL_CAMERA90_TURN_LEFT_1] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff96a10700>
+initial_bearing = -35.0, initial_action = 'GOAL_CAMERA90_TURN_LEFT_1'
+remaining_bearing = -20.0, next_action = 'GOAL_CAMERA90_TURN_LEFT_1'
+
+    @pytest.mark.parametrize("initial_bearing,initial_action,remaining_bearing,next_action", [
+        (34.0, "GOAL_CAMERA90_TURN_RIGHT_3", 0.0, "GOAL_CAMERA90_FINE_FORWARD_2"),
+        (-35.0, "GOAL_CAMERA90_TURN_LEFT_1", -20.0, "GOAL_CAMERA90_TURN_LEFT_1"),
+        (-20.0, "GOAL_CAMERA90_TURN_LEFT_1", -15.0, "GOAL_CAMERA90_FINE_FORWARD_2"),
+    ])
+    def test_goal_camera90_turn_dwells_then_rechecks_fresh_goal(
+        monkeypatch, initial_bearing, initial_action, remaining_bearing, next_action,
+    ):
+        harness = MissionFlowHarness(phase="GOAL_APPROACH")
+    
+        correction = harness.publish_vision(
+            goal={
+                **approaching_goal(),
+                "depth_m": 0.9,
+                "ground_distance_m": 0.9,
+                "distance_m": 0.9,
+                "bearing_deg": initial_bearing,
+                "offset_x_norm": 0.3 if initial_bearing > 0 else -0.3,
+            }
+        )[-1]
+>       assert correction["action"] == initial_action
+E       AssertionError: assert 'GOAL_CAMERA90_TURN_LEFT_2' == 'GOAL_CAMERA90_TURN_LEFT_1'
+E         - GOAL_CAMERA90_TURN_LEFT_1
+E         ?                         ^
+E         + GOAL_CAMERA90_TURN_LEFT_2
+E         ?                         ^
+
+src/mission_control/test/test_mission_phase_flow.py:2114: AssertionError
+_ test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-20.0-GOAL_CAMERA90_TURN_LEFT_1--15.0-GOAL_CAMERA90_FINE_FORWARD_2] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff96aa4910>
+initial_bearing = -20.0, initial_action = 'GOAL_CAMERA90_TURN_LEFT_1'
+remaining_bearing = -15.0, next_action = 'GOAL_CAMERA90_FINE_FORWARD_2'
+
+    @pytest.mark.parametrize("initial_bearing,initial_action,remaining_bearing,next_action", [
+        (34.0, "GOAL_CAMERA90_TURN_RIGHT_3", 0.0, "GOAL_CAMERA90_FINE_FORWARD_2"),
+        (-35.0, "GOAL_CAMERA90_TURN_LEFT_1", -20.0, "GOAL_CAMERA90_TURN_LEFT_1"),
+        (-20.0, "GOAL_CAMERA90_TURN_LEFT_1", -15.0, "GOAL_CAMERA90_FINE_FORWARD_2"),
+    ])
+    def test_goal_camera90_turn_dwells_then_rechecks_fresh_goal(
+        monkeypatch, initial_bearing, initial_action, remaining_bearing, next_action,
+    ):
+        harness = MissionFlowHarness(phase="GOAL_APPROACH")
+    
+        correction = harness.publish_vision(
+            goal={
+                **approaching_goal(),
+                "depth_m": 0.9,
+                "ground_distance_m": 0.9,
+                "distance_m": 0.9,
+                "bearing_deg": initial_bearing,
+                "offset_x_norm": 0.3 if initial_bearing > 0 else -0.3,
+            }
+        )[-1]
+        assert correction["action"] == initial_action
+        release_general(harness, correction)
+    
+        published_count = len(harness.publisher.messages)
+        MotionDecisionNode._publish_decision(harness)
+        assert len(harness.publisher.messages) == published_count
+    
+        deadline = harness.goal_post_motion_dwell_until
+        monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: deadline)
+        MotionDecisionNode._publish_decision(harness)
+        forward = harness.publish_vision(
+            goal={
+                **approaching_goal(),
+                "depth_m": 0.9,
+                "ground_distance_m": 0.9,
+                "distance_m": 0.9,
+                "bearing_deg": remaining_bearing,
+                "offset_x_norm": 0.0,
+            }
+        )[-1]
+>       assert forward["action"] == next_action
+E       AssertionError: assert 'GOAL_CAMERA90_TURN_LEFT_1' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E         - GOAL_CAMERA90_FINE_FORWARD_2
+E         + GOAL_CAMERA90_TURN_LEFT_1
+
+src/mission_control/test/test_mission_phase_flow.py:2134: AssertionError
+_ test_goal_depth_actions_follow_new_scoring_range[0.65-GOAL_CAMERA90_FINE_FORWARD_1] _
+
+depth = 0.65, action = 'GOAL_CAMERA90_FINE_FORWARD_1'
+
+    @pytest.mark.parametrize("depth,action", [
+        (0.65, "GOAL_CAMERA90_FINE_FORWARD_1"),
+        (0.50, "GOAL_CAMERA90_FINE_FORWARD_1"),
+        (0.389, "GOAL_CAMERA90_BACKWARD_1"),
+        (0.35, "GOAL_CAMERA90_BACKWARD_1"),
+    ])
+    def test_goal_depth_actions_follow_new_scoring_range(depth, action):
+        harness = MissionFlowHarness(phase="GOAL_APPROACH")
+        goal = {
+            **approaching_goal(),
+            "depth_m": depth,
+            "ground_distance_m": depth,
+            "distance_m": depth,
+            "bearing_deg": 0.0,
+            "offset_x_norm": 0.0,
+        }
+        decision = harness.publish_vision(goal=goal)[-1]
+>       assert decision["action"] == action
+E       AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_3' == 'GOAL_CAMERA90_FINE_FORWARD_1'
+E         - GOAL_CAMERA90_FINE_FORWARD_1
+E         ?                            ^
+E         + GOAL_CAMERA90_FINE_FORWARD_3
+E         ?                            ^
+
+src/mission_control/test/test_mission_phase_flow.py:2216: AssertionError
+___________ test_final_line_track_still_prioritizes_confirmed_hurdle ___________
+
+    def test_final_line_track_still_prioritizes_confirmed_hurdle():
+        harness = MissionFlowHarness()
+    
+        harness.phase_manager.ball_sections_processed = (
+            harness.phase_manager.required_ball_sections
+        )
+        harness.phase_manager.finish_enabled = True
+        harness.phase_manager.set_phase("LINE_TRACK")
+    
+        published = harness.publish_vision(
+            line=line_info(),
+            ball=pickup_ready_ball(),
+            goal=None,
+            hurdle=approaching_hurdle(),
+        )
+    
+        decision = published[-1]
+    
+        assert decision["phase"] == "LINE_TRACK"
+        assert decision["source"] == "hurdle"
+>       assert decision["action"] == "STRAIGHT_0"
+E       AssertionError: assert 'GO' == 'STRAIGHT_0'
+E         - STRAIGHT_0
+E         + GO
+
+src/mission_control/test/test_mission_phase_flow.py:2341: AssertionError
+______ test_ball_stationary_turn_requires_fresh_ball_before_next_approach ______
+
+    def test_ball_stationary_turn_requires_fresh_ball_before_next_approach():
+        harness = MissionFlowHarness(phase="BALL_APPROACH")
+        harness.BALL_POST_MOTION_DWELL_SEC = 0.0
+        off_center = approaching_ball()
+        off_center.update(
+            {
+                "depth_m": 0.70,
+                "ground_distance_m": 0.70,
+                "distance_m": 0.70,
+                "bearing_deg": 20.0,
+            }
+        )
+    
+        approach = harness.publish_vision(ball=off_center)
+        assert len(approach) == 1
+>       assert approach[0]["action"] == "STRAIGHT_2"
+E       AssertionError: assert 'BALL_APPROAC...COVER_RIGHT_4' == 'STRAIGHT_2'
+E         - STRAIGHT_2
+E         + BALL_APPROACH_RECOVER_RIGHT_4
+
+src/mission_control/test/test_mission_phase_flow.py:2531: AssertionError
+_____________ test_second_ball_uses_same_straight_distance_policy ______________
+
+    def test_second_ball_uses_same_straight_distance_policy():
+        harness = MissionFlowHarness(phase="BALL_APPROACH")
+        harness.phase_manager.pickups_completed = 1
+        ball = approaching_ball()
+        ball.update(
+            {
+                "depth_m": 0.70,
+                "ground_distance_m": 0.70,
+                "distance_m": 0.70,
+                "bearing_deg": -20.0,
+            }
+        )
+    
+        command = harness.publish_vision(ball=ball)
+    
+        assert len(command) == 1
+>       assert command[0]["action"] == "STRAIGHT_2"
+E       AssertionError: assert 'BALL_APPROACH_RECOVER_LEFT_4' == 'STRAIGHT_2'
+E         - STRAIGHT_2
+E         + BALL_APPROACH_RECOVER_LEFT_4
+
+src/mission_control/test/test_mission_phase_flow.py:2584: AssertionError
+___________ test_failed_first_pickup_keeps_straight_distance_policy ____________
+
+    def test_failed_first_pickup_keeps_straight_distance_policy():
+        harness = MissionFlowHarness(phase="BALL_APPROACH")
+        pickup = publish_special(
+            harness,
+            "ball",
+            pickup_ready_ball(),
+            "PICKUP_NOW",
+        )
+        harness.send_status("PICKUP_NOW", pickup["command_id"], "RUNNING")
+        harness.send_status("PICKUP_NOW", pickup["command_id"], "FAILED")
+        assert harness.pickups_completed == 0
+    
+        ball = approaching_ball()
+        ball.update(
+            {
+                "depth_m": 0.70,
+                "ground_distance_m": 0.70,
+                "distance_m": 0.70,
+                "bearing_deg": 20.0,
+            }
+        )
+        command = harness.publish_vision(ball=ball)
+    
+        assert len(command) == 1
+>       assert command[0]["action"] == "STRAIGHT_2"
+E       AssertionError: assert 'BALL_APPROAC...COVER_RIGHT_4' == 'STRAIGHT_2'
+E         - STRAIGHT_2
+E         + BALL_APPROACH_RECOVER_RIGHT_4
+
+src/mission_control/test/test_mission_phase_flow.py:2611: AssertionError
+_ test_line_recover_repeats_only_after_success_and_fresh_line[15.0-0.6-RECOVER_RIGHT_TURN_RIGHT_4] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff96694a00>
+heading = 15.0, offset = 0.6, action = 'RECOVER_RIGHT_TURN_RIGHT_4'
+
+    @pytest.mark.parametrize("heading,offset,action", [
+        (-30.0, -0.60, "RECOVER_LEFT_TURN_LEFT_4"),
+        (15.0, 0.60, "RECOVER_RIGHT_TURN_RIGHT_4"),
+        (-30.0, 0.60, "RECOVER_RIGHT_TURN_LEFT_4"),
+        (30.0, -0.60, "RECOVER_LEFT_TURN_RIGHT_4"),
+    ])
+    def test_line_recover_repeats_only_after_success_and_fresh_line(monkeypatch, heading, offset, action):
+        now = [10.0]
+        monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: now[0])
+        harness = MissionFlowHarness(phase="LINE_TRACK")
+        harness._fresh_observations = MotionDecisionNode._fresh_observations.__get__(harness)
+        callback = MotionDecisionNode._info_callback(harness, 'line')
+        sample = line_info(heading=heading, offset=offset)
+        commands = []
+        for _ in range(3):
+            callback(String(data=json.dumps(sample)))
+            command = harness.publish_vision(line=sample)[-1]
+>           assert command["action"] == action
+E           AssertionError: assert 'STRAIGHT' == 'RECOVER_RIGHT_TURN_RIGHT_4'
+E             - RECOVER_RIGHT_TURN_RIGHT_4
+E             + STRAIGHT
+
+src/mission_control/test/test_mission_phase_flow.py:3085: AssertionError
+----------------- generated xml file: /tmp/pickup_baseline.xml -----------------
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_motion_decision_planner.py::test_default_line_recovery_follows_ground_in_recorded_opposing_heading_scene[-1]
+FAILED src/mission_control/test/test_motion_decision_planner.py::test_default_line_recovery_follows_ground_in_recorded_opposing_heading_scene[1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_collected_ball_route_clears_stale_reservations_before_dwell[GOAL_APPROACH-GOAL_CAMERA90_FINE_FORWARD_2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_ball_detection_loss_cannot_interrupt_timed_line_or_goal
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_ball_loss_waits_then_reacquired_ball_selects_moving_recover
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_full_course_mock_flow_without_ros_graph
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_confirmed_approaching_hurdle_beats_approaching_ball
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_unconfirmed_hurdle_disappearance_resumes_ball_mission
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_unconfirmed_hurdle_can_become_confirmed_and_take_priority
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_absent_hurdle_keeps_ball_priority_over_line
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[34.0-GOAL_CAMERA90_TURN_RIGHT_3-0.0-GOAL_CAMERA90_FINE_FORWARD_2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-35.0-GOAL_CAMERA90_TURN_LEFT_1--20.0-GOAL_CAMERA90_TURN_LEFT_1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-20.0-GOAL_CAMERA90_TURN_LEFT_1--15.0-GOAL_CAMERA90_FINE_FORWARD_2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_depth_actions_follow_new_scoring_range[0.65-GOAL_CAMERA90_FINE_FORWARD_1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_final_line_track_still_prioritizes_confirmed_hurdle
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_ball_stationary_turn_requires_fresh_ball_before_next_approach
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_second_ball_uses_same_straight_distance_policy
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_failed_first_pickup_keeps_straight_distance_policy
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_line_recover_repeats_only_after_success_and_fresh_line[15.0-0.6-RECOVER_RIGHT_TURN_RIGHT_4]
+21 failed, 1343 passed in 7.20s

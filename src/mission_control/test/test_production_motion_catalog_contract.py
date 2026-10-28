@@ -128,6 +128,7 @@ def test_goal_shot_matches_supplied_motion_with_five_degree_tolerance():
     source_path = RUNTIME_CATALOG_PATH.parent / "20260929_goal_shot_update/source_shot.json"
     expected = json.loads(source_path.read_text(encoding="utf-8"))
     expected["completion"]["position_tolerance_deg"] = 5.0
+    expected["playback_speed"] *= .95
     assert target == expected
 
 
@@ -752,6 +753,9 @@ def test_imported_motions_preserve_source_except_tolerance_and_added_turns(
     assert aliases[motion_id] == name
     motion = motions[name]
     assert motion["completion"]["position_tolerance_deg"] == 5.0
+    if motion_id == "pickup_retreat_2":
+        assert motion["playback_speed"] == pytest.approx(.855)
+        motion = {**motion, "playback_speed": .9}
     original_turn_counts = {
         "post_shot_default_turn_right": 7,
         "post_shot_default_turn_left": 4,

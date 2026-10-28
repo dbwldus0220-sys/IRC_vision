@@ -76,8 +76,8 @@ def test_shot_aliases_resolve_to_existing_default_posture_motions():
     root = Path(__file__).resolve().parents[3]
     aliases = yaml.safe_load((root / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']
     motions = {m['name']: m for m in json.loads((root / 'artifacts/robot_motions_runtime.json').read_text())['motions']}
-    assert aliases['goal_forward_to_default'] == '건오뒤에서 기본자세(카메라45도)'
-    assert aliases['goal_fine_to_default'] == '건미세오뒤에서 기본자세45도'
+    assert aliases['goal_forward_to_default'] == 'R오뒤에서 기본자세(카메라45도)'
+    assert aliases['goal_fine_to_default'] == 'R미세오뒤에서 기본자세45도'
     for alias in ('goal_forward_to_default', 'goal_fine_to_default'):
         assert '기본자세' in motions[aliases[alias]]['end_pose']
 

@@ -1,0 +1,15 @@
+[INFO] [1793179451.737497348] [sdk_motion_executor]: Execution path: backend=robot_motion_player aliases=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor/share/irc_step_motion_executor/config/motion_aliases.yaml JSON=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor/share/irc_step_motion_executor/config/robot_motions_runtime.json port=/dev/ttyUSB0 baud=4000000 poll_ms=5
+[INFO] [1793179451.739023762] [sdk_motion_executor]: Compiled GUI alignment version: 20261028
+[INFO] [1793179451.750569005] [sdk_motion_executor]: Forward boundary feedback included in saved hold: yes
+[INFO] [1793179451.759648542] [sdk_motion_executor]: Interpolation: continuous quintic; motor 5: included
+[INFO] [1793179455.067313487] [sdk_motion_executor]: Motion position tolerance check: DISABLED
+[INFO] [1793179455.467559498] [sdk_motion_executor]: [STARTUP POSE] Current pose captured
+[INFO] [1793179455.467731087] [sdk_motion_executor]: [STARTUP POSE] Moving to 오뒤무게중심앞
+[INFO] [1793179459.515213083] [sdk_motion_executor]: [STARTUP POSE] Settling
+[INFO] [1793179459.611274003] [sdk_motion_executor]: [STARTUP POSE] Reached 오뒤무게중심앞
+[INFO] [1793179459.611927303] [sdk_motion_executor]: [STARTUP POSE] Holding for 2000 ms before AUTO
+[INFO] [1793179461.616229885] [sdk_motion_executor]: [STARTUP POSE] AUTO ready
+[INFO] [1793179489.916975479] [sdk_motion_executor]: Ball entered bottom trigger: motor 0 override -64.0 deg latched
+[INFO] [1793179546.582688449] [sdk_motion_executor]: Camera 90-degree hold enabled: motor 0 1.0 deg
+[INFO] [1793179591.060106758] [sdk_motion_executor]: Camera 90-degree hold cleared: goal_shot
+[INFO] [1793179621.113565924] [rclcpp]: signal_handler(SIGINT/SIGTERM)

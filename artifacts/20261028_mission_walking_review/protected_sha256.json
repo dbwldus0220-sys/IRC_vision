@@ -1,0 +1,6 @@
+{
+  "artifacts/robot_motions_runtime.json": "eab453e9053edd0d5ac9d2992dede5cd3702132554c0c6cc5c682ea90d81efd7",
+  "artifacts/robot_motions_pc.json": "67ebdaa0a7bfcd5e5d03c6f70e82ccfb8d39f1acaa734445ba2b9900e60da453",
+  "src/irc_step_motion_executor/config/motion_aliases.yaml": "e11deff61b431f087231a0680074f88189d96b2ae30e5a7908c55c907095c113",
+  "external_sdk/gui_aligned/robot_motion_player.cpp": "4579b544273b99023c5d4193f9f92a7dbe5e994cd4b530ac7b95427cc57376c2"
+}

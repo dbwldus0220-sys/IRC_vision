@@ -1,0 +1,753 @@
+--- before/src/mission_control/mission_control/ball_entry_line_alignment.py
++++ after/src/mission_control/mission_control/ball_entry_line_alignment.py
+@@ -0,0 +1,62 @@
++"""Optional one-motion Line alignment at the start of each Ball mission."""
++
++from dataclasses import dataclass
++
++from .motion_decision_planner import MotionDecision, MotionDecisionPlanner
++
++
++@dataclass
++class BallEntryLineAlignment:
++    """Count an accepted command, never candidate decisions or duplicate statuses."""
++
++    enabled: bool = True
++    state: str = 'IDLE'
++    command_id: int | None = None
++
++    @property
++    def pending(self) -> bool:
++        return self.state == 'PENDING'
++
++    @property
++    def active(self) -> bool:
++        return self.state in {'PENDING', 'QUEUED', 'RUNNING'}
++
++    def arm(self, queued_line_command_id: int | None = None) -> bool:
++        if not self.enabled or self.state != 'IDLE':
++            return False
++        self.state = 'PENDING'
++        if queued_line_command_id is not None:
++            # An accepted SDK reservation cannot safely be replaced mid-stride.
++            self.published(queued_line_command_id)
++        return True
++
++    def published(self, command_id: int) -> None:
++        if self.pending:
++            self.command_id = command_id
++            self.state = 'QUEUED'
++
++    def on_status(self, command_id: int | None, status: str) -> None:
++        if self.command_id is None or command_id != self.command_id or not self.active:
++            return
++        if status == 'RUNNING':
++            self.state = 'RUNNING'
++        elif status == 'SUCCEEDED':
++            self.state = 'DONE'
++        elif status in {'FAILED', 'TIMEOUT', 'CANCELLED', 'REJECTED', 'UNSUPPORTED'}:
++            self.state = 'FAILED'
++
++    def reset(self) -> None:
++        self.state = 'IDLE'
++        self.command_id = None
++
++    def select(self, planner: MotionDecisionPlanner, line_info: dict | None,
++               dt_sec: float) -> MotionDecision:
++        # Use the live Line planner, including its offset and heading policies.
++        # Node-level corner/freshness/settle gates still run with source=line.
++        command = planner._plan_source('line', line_info, dt_sec)
++        return MotionDecision(
++            phase='BALL_APPROACH', source='line', action=command['motion'],
++            valid=bool(command['valid']), reason=command['reason'],
++            sdk_motion_requested=False, requires_ack=False,
++            source_command={**command, 'ball_entry_line_alignment': True},
++        )
+--- before/src/mission_control/mission_control/motion_decision_node.py
++++ after/src/mission_control/mission_control/motion_decision_node.py
+@@ -25,6 +25,7 @@
+ from step.hurdle_navigation_planner import HurdleNavigationPlanner
+ 
+ from .ball_approach_observation import BallApproachObservation
++from .ball_entry_line_alignment import BallEntryLineAlignment
+ from .ball_loss_confirmation import BallLossConfirmation
+ from .executor_heartbeat_watchdog import ExecutorHeartbeatWatchdog
+ from .executor_heartbeat_watchdog import HeartbeatStartupDelay
+@@ -252,6 +253,10 @@
+         self.start_terminal_fd: int | None = None
+ 
+         self.declare_parameter("initial_mission_phase", "AUTO")
++        self.declare_parameter("ball_entry_line_alignment_enabled", True)
++        self.ball_entry_line_alignment = BallEntryLineAlignment(
++            enabled=bool(self.get_parameter("ball_entry_line_alignment_enabled").value),
++        )
+         self.declare_parameter("publish_rate_hz", 10.0)
+         self.declare_parameter("pre_motion_settle_sec", 0.0)
+         self.declare_parameter(
+@@ -1121,7 +1126,10 @@
+                 self.general_motion_gate.on_new_vision_input()
+                 if source == "goal":
+                     MotionDecisionNode._prepare_pending_goal_decision(self, received_at)
+-                elif source in {"ball", "hurdle"} and source == self.active_general_source:
++                elif source in {"ball", "hurdle"} and (
++                    source == self.active_general_source
++                    or source == "ball" and MotionDecisionNode._ball_entry_line_running(self)
++                ):
+                     MotionDecisionNode._prepare_pending_approach_walk(self, received_at)
+                 if (
+                     dispatch_on_ball and source == "ball"
+@@ -1592,6 +1600,9 @@
+ 
+     def _clear_ball_navigation_state(self) -> None:
+         """Discard approach reservations without releasing an executing motion."""
++        entry = getattr(self, "ball_entry_line_alignment", None)
++        if entry is not None:
++            entry.reset()
+         self.ball_approach_entry_pending = False
+         self.ball_approach_alignment_pending = False
+         self.ball_pickup_entry_pending = False
+@@ -1648,13 +1659,37 @@
+         ):
+             return
+ 
+-        # A Ball already inside the pickup-entry range is handled by the
+-        # PICKUP_NOW sequence and its camera-down alignment checkpoints.
+-        if distance <= config.pickup_sequence_start_distance_m:
++        # Direct entry keeps the existing close-ball pickup shortcut. With the
++        # optional Line alignment, even a first close detection gets one Line motion.
++        entry = getattr(self, "ball_entry_line_alignment", None)
++        if distance <= config.pickup_sequence_start_distance_m and not (entry and entry.enabled):
+             return
+ 
+         self.ball_approach_entry_pending = True
+         self.planner.ball_lock_active = True
++        if entry is not None:
++            queued_line = (getattr(self, "queued_general_command_id", None)
++                           if getattr(self, "queued_general_source", None) == "line" else None)
++            if entry.arm(queued_line):
++                self.phase_manager.set_phase("BALL_APPROACH")
++                if queued_line is not None:
++                    # The reservation already exists. Notify camera ownership
++                    # without sending a second executable motion or a stop.
++                    adopted = MotionDecision(
++                        phase="BALL_APPROACH", source="ball",
++                        action=self.queued_general_action, valid=False,
++                        reason="ball_entry_line_reservation_adopted",
++                        sdk_motion_requested=False, requires_ack=False,
++                        source_command={"ball_entry_line_alignment": True,
++                                        "adopted_command_id": queued_line},
++                    )
++                    self.last_selected_decision = adopted
++                    output = String()
++                    output.data = json.dumps(adopted.to_dict(), ensure_ascii=False)
++                    self.publisher.publish(output)
++                self.get_logger().info(
++                    f"BALL entry Line alignment armed: adopted_command_id={queued_line}"
++                )
+         entry_context = "during motion"
+         if not self.general_motion_gate.locked:
+             # The confirming stationary frame can start initial alignment.
+@@ -2061,6 +2096,9 @@
+                     None,
+                 )
+             ):
++                entry = getattr(self, "ball_entry_line_alignment", None)
++                if entry is not None:
++                    entry.on_status(command_id, status)
+                 self.queued_general_action = None
+                 self.queued_general_command_id = None
+                 self.queued_general_source = None
+@@ -2094,6 +2132,22 @@
+                 if status == "RUNNING":
+                     self.hurdle_stationary_since = None
+                     self.goal_stationary_since = None
++                    entry = getattr(self, "ball_entry_line_alignment", None)
++                    if entry is not None:
++                        entry.on_status(command_id, status)
++                    if (MotionDecisionNode._ball_entry_line_running(self)
++                            and action in MotionDecisionNode.LINE_MOTION_CAPTURE_CONFIG
++                            and getattr(self, "approach_walk_started_at", None) is None):
++                        self.approach_walk_started_at = status_receive_monotonic
++                        stamp = MotionDecisionNode._current_ros_time_ns(self)
++                        duration = MotionDecisionNode.LINE_MOTION_CAPTURE_CONFIG[action][0]
++                        self.approach_walk_capture_after_ns = (
++                            stamp + int(duration * MotionDecisionNode.LINE_MOTION_CAPTURE_START_RATIO * 1e9)
++                            if stamp is not None else None
++                        )
++                        self.approach_walk_last_stamp_ns = None
++                        self.approach_walk_candidate = None
++                        self.approach_walk_capture_count = 0
+                     if (self.active_general_source in {"ball", "hurdle"}
+                             and action in MotionDecisionNode.APPROACH_WALK_DURATION_SEC
+                             and getattr(self, "approach_walk_started_at", None) is None
+@@ -2150,11 +2204,22 @@
+                         str(action),
+                     )
+             if transition.released:
++                entry = getattr(self, "ball_entry_line_alignment", None)
++                if entry is not None:
++                    was_entry = entry.active and entry.command_id == command_id
++                    entry.on_status(command_id, status)
++                    if was_entry:
++                        self.get_logger().info(
++                            f"BALL entry Line alignment ended: command_id={command_id}, status={status}"
++                        )
+                 search = getattr(self, "goal_initial_search", None)
+                 if search is not None:
+                     search.completed(command_id, status)
+                 if status != "SUCCEEDED":
+                     # The bridge/executor discard the reservation on failure.
++                    if (entry is not None and entry.active
++                            and entry.command_id == getattr(self, "queued_general_command_id", None)):
++                        entry.on_status(entry.command_id, "CANCELLED")
+                     self.queued_general_action = None
+                     self.queued_general_command_id = None
+                     self.queued_general_source = None
+@@ -3085,7 +3150,8 @@
+     def _remember_line_corner(self, info: dict[str, Any]) -> None:
+         """Refresh real observations; require distinct frames to change direction."""
+         if (
+-            self.mission_phase not in MotionDecisionNode.LINE_CORNER_PHASES
++            (self.mission_phase not in MotionDecisionNode.LINE_CORNER_PHASES
++             and not MotionDecisionNode._ball_entry_line_active(self))
+             or self.active_special_command_id is not None
+             or self.active_general_source not in {None, "line"}
+         ):
+@@ -3177,7 +3243,8 @@
+     ) -> MotionDecision:
+         """Gate a selected corner turn while preserving ordinary line tracking."""
+         if (
+-            self.mission_phase not in MotionDecisionNode.LINE_CORNER_PHASES
++            (self.mission_phase not in MotionDecisionNode.LINE_CORNER_PHASES
++             and not MotionDecisionNode._ball_entry_line_active(self))
+             or self.active_special_command_id is not None
+             or decision.source not in {"line", "none"}
+             or self.mission_complete
+@@ -3506,6 +3573,9 @@
+ 
+     def _prepare_pending_line_decision(self, now: float) -> None:
+         """Precompute the next decision from late-motion line frames."""
++        if MotionDecisionNode._ball_entry_line_running(self):
++            # The next command now belongs to Ball observations, not another Line decision.
++            return
+         frames = self.active_line_motion_frames
+         if not frames:
+             return
+@@ -3569,16 +3639,27 @@
+         # Visible-ball heading corrections are stationary and must reobserve.
+         return action == "STRAIGHT"
+ 
++    def _ball_entry_line_active(self) -> bool:
++        entry = getattr(self, "ball_entry_line_alignment", None)
++        return bool(entry and entry.active)
++
++    def _ball_entry_line_running(self) -> bool:
++        entry = getattr(self, "ball_entry_line_alignment", None)
++        return bool(entry and entry.state == "RUNNING"
++                    and entry.command_id == self.general_motion_gate.active_command_id)
++
+     @staticmethod
+     def _is_continuous_hurdle_action(action: str | None) -> bool:
+         return action in {"STRAIGHT", "RECOVER_LEFT_TURN_LEFT_4", "RECOVER_RIGHT_TURN_RIGHT_4"}
+ 
+     def _approach_walk_preview(self, observations: dict, now: float) -> dict | None:
+         """Preview ordinary approach walking without entering pickup or hurdle positioning."""
+-        source = self.active_general_source
++        entry_running = MotionDecisionNode._ball_entry_line_running(self)
++        source = "ball" if entry_running else self.active_general_source
+         started = getattr(self, "approach_walk_started_at", None)
+         action = self.general_motion_gate.active_action
+-        duration = MotionDecisionNode.APPROACH_WALK_DURATION_SEC.get(action)
++        duration = (MotionDecisionNode.LINE_MOTION_CAPTURE_CONFIG.get(action, (None,))[0]
++                    if entry_running else MotionDecisionNode.APPROACH_WALK_DURATION_SEC.get(action))
+         if (source not in {"ball", "hurdle"} or started is None or duration is None
+                 or not self.general_motion_gate.locked
+                 or self.active_special_command_id is not None
+@@ -3631,7 +3712,7 @@
+             self.approach_walk_candidate = None
+             self.approach_walk_capture_count = 0
+             return
+-        source = self.active_general_source
++        source = "ball" if MotionDecisionNode._ball_entry_line_running(self) else self.active_general_source
+         info = observations[source]
+         stamp = MotionDecisionNode._detection_stamp_ns(info)
+         if stamp is None:
+@@ -3700,7 +3781,8 @@
+                 return False
+             command = MotionDecisionNode._approach_walk_preview(self, observations, now)
+             key = "motion" if decision.source == "ball" else "action"
+-            return bool(decision.source == self.active_general_source and command
++            return bool((decision.source == self.active_general_source
++                         or decision.source == "ball" and MotionDecisionNode._ball_entry_line_running(self)) and command
+                         and command.get(key) == decision.action)
+         if decision.source == "line":
+             recovery_chain = all(
+@@ -3763,7 +3845,8 @@
+         if not MotionDecisionNode._is_continuous_line_action(self.general_motion_gate.active_action):
+             return False
+         if (
+-            getattr(self, "ball_approach_entry_pending", False)
++            (getattr(self, "ball_approach_entry_pending", False)
++             and not getattr(getattr(self, "ball_entry_line_alignment", None), "pending", False))
+             or getattr(self, "hurdle_positioning_entry_pending", False)
+             or self.mission_phase == "HURDLE_POSITIONING"
+             or getattr(self, "ball_confirmation_pending_latched", False)
+@@ -3771,6 +3854,8 @@
+         ):
+             return False
+         for source in ("ball", "goal", "hurdle", "finish"):
++            if source == "ball" and getattr(getattr(self, "ball_entry_line_alignment", None), "pending", False):
++                continue
+             if self.mission_phase == "LINE_TRACK_AFTER_PICKUP" and source in {"ball", "goal"}:
+                 # This timed Line stage also masks these inputs in mission selection.
+                 continue
+@@ -4311,6 +4396,16 @@
+         self.command_id = next_command_id
+ 
+         payload = decision.to_dict()
++        entry = getattr(self, "ball_entry_line_alignment", None)
++        entry_line_decision = bool(entry and entry.pending and decision.source == "line")
++        if entry_line_decision:
++            # Preserve Line execution bookkeeping but expose this step as Ball mode.
++            payload["phase"] = "BALL_APPROACH"
++            payload["source"] = "ball"
++            payload["source_command"] = {**decision.source_command, "ball_entry_line_alignment": True}
++            self.last_selected_decision = replace(
++                decision, phase="BALL_APPROACH", source="ball", source_command=payload["source_command"],
++            )
+ 
+         payload.update(
+             {
+@@ -4366,6 +4461,12 @@
+         )
+ 
+         self.publisher.publish(output)
++        if entry_line_decision and is_general_motion:
++            entry.published(self.command_id)
++            self.get_logger().info(
++                f"BALL entry Line alignment requested: command_id={self.command_id}, "
++                f"action={decision.action}, queued={queue_while_locked}"
++            )
+         if is_pickup_checkpoint_action and decision.valid and decision.sdk_motion_requested:
+             geometry = decision.source_command
+             self.get_logger().info(
+@@ -5241,6 +5342,16 @@
+                 dt_sec,
+             )
+ 
++        entry = getattr(self, "ball_entry_line_alignment", None)
++        if entry is not None and entry.state == "FAILED":
++            return MotionDecision(
++                phase="BALL_APPROACH", source="ball", action="WAIT", valid=False,
++                reason="ball_entry_line_alignment_failed", sdk_motion_requested=False,
++                requires_ack=False, source_command={},
++            )
++        if entry is not None and entry.pending:
++            return entry.select(self.planner, observations.get("line"), dt_sec)
++
+         ball_info = observations.get("ball")
+         prepared_alignment = None
+         if (
+--- before/src/mission_control/mission_control/motion_command_bridge_node.py
++++ after/src/mission_control/mission_control/motion_command_bridge_node.py
+@@ -1484,6 +1484,11 @@
+                 self.motion_id_for_action(f"POST_BALL_LINE_TURN_{direction}_{count}")
+                 if self._is_integer(count) else None
+             )
++        elif (payload.get("source") == "ball"
++              and isinstance(payload.get("source_command"), dict)
++              and payload["source_command"].get("ball_entry_line_alignment") is True):
++            # Ball-owned entry alignment must retain the exact Line gait/count.
++            motion_id = self.motion_id_for_action(action)
+         elif payload.get("source") in ("ball", "hurdle") and action in {
+             "STRAIGHT", "STRAIGHT_0",
+         }:
+--- before/src/mission_control/launch/full_system.launch.py
++++ after/src/mission_control/launch/full_system.launch.py
+@@ -235,6 +235,9 @@
+                 "lost_search_max_angle_deg": ParameterValue(
+                     LaunchConfiguration("lost_search_max_angle_deg"), value_type=float
+                 ),
++                "ball_entry_line_alignment_enabled": ParameterValue(
++                    LaunchConfiguration("ball_entry_line_alignment_enabled"), value_type=bool
++                ),
+                 "line_heading_source": LaunchConfiguration("line_heading_source"),
+                 "line_corner_memory_timeout_sec": ParameterValue(
+                     LaunchConfiguration("line_corner_memory_timeout_sec"), value_type=float
+@@ -419,6 +422,10 @@
+                     "Initial planner phase before /mission/phase is received."
+                 ),
+             ),
++            DeclareLaunchArgument(
++                "ball_entry_line_alignment_enabled", default_value="true",
++                description="Use one Line-planned motion in Ball mode before tracking; false restores direct Ball entry.",
++            ),
+             DeclareLaunchArgument("line_heading_source", default_value="ground",
+                                   choices=["image", "ground"]),
+             DeclareLaunchArgument("line_offset_align_enter_px", default_value="100.0",
+--- before/src/mission_control/launch/full_system_robot.launch.py
++++ after/src/mission_control/launch/full_system_robot.launch.py
+@@ -238,6 +238,9 @@
+                 "lost_search_max_angle_deg": ParameterValue(
+                     LaunchConfiguration("lost_search_max_angle_deg"), value_type=float
+                 ),
++                "ball_entry_line_alignment_enabled": ParameterValue(
++                    LaunchConfiguration("ball_entry_line_alignment_enabled"), value_type=bool
++                ),
+                 "line_heading_source": LaunchConfiguration("line_heading_source"),
+                 "line_corner_memory_timeout_sec": ParameterValue(
+                     LaunchConfiguration("line_corner_memory_timeout_sec"), value_type=float
+@@ -413,6 +416,10 @@
+                 ),
+             ),
+             DeclareLaunchArgument("initial_mission_phase", default_value="AUTO"),
++            DeclareLaunchArgument(
++                "ball_entry_line_alignment_enabled", default_value="true",
++                description="Use one Line-planned motion in Ball mode before tracking; false restores direct Ball entry.",
++            ),
+             DeclareLaunchArgument("line_heading_source", default_value="ground",
+                                   choices=["image", "ground"]),
+             DeclareLaunchArgument("line_offset_align_enter_px", default_value="100.0",
+--- before/src/mission_control/test/test_ball_entry_line_alignment.py
++++ after/src/mission_control/test/test_ball_entry_line_alignment.py
+@@ -0,0 +1,304 @@
++"""Replay Line -> one Ball-owned Line motion -> Ball tracking without motors."""
++
++import json
++
++import pytest
++from std_msgs.msg import String
++
++from mission_control.ball_entry_line_alignment import BallEntryLineAlignment
++from mission_control.motion_decision_node import MotionDecisionNode as Node
++from test_continuous_approach import clock, fresh
++from test_wait_refresh_and_fine_settle import LiveInputHarness
++from test_mission_phase_flow import line_info
++from test_motion_decision_planner import ball_info
++from test_motion_command_bridge import FakeBridge, decoded_messages, executor_status
++
++
++def node_with_entry(enabled=True):
++    node = LiveInputHarness(phase='AUTO')
++    node.ball_entry_line_alignment = BallEntryLineAlignment(enabled=enabled)
++    return node
++
++
++def send(bridge, command):
++    bridge.navigation_command_callback(String(data=json.dumps(command)))
++    return decoded_messages(bridge.executor_request_publisher)[-1]
++
++
++def status(node, bridge, request, value):
++    bridge.executor_status_callback(executor_status(**request, status=value))
++    Node._motion_status_callback(node, bridge.motion_status_publisher.messages[-1])
++
++
++def start_line(node, bridge, clock):
++    fresh(node, clock, 'line', line_info())
++    command = node.publisher.messages[-1]
++    request = send(bridge, command)
++    status(node, bridge, request, 'RUNNING')
++    return command, request
++
++
++def late_line(node, clock, info):
++    clock[0] = node.active_line_motion_started_at + node.active_line_motion_duration_sec * .75
++    for _ in range(16):
++        fresh(node, clock, 'line', info, plan=False)
++
++
++@pytest.mark.parametrize('heading,offset,action', [
++    (0., 0., 'STRAIGHT'), (-20., -.3, 'RECOVER_LEFT_TURN_LEFT_4'),
++    (20., .3, 'RECOVER_RIGHT_TURN_RIGHT_4'),
++])
++def test_both_walking_boundaries_prequeue_one_command_without_transition_dwell(clock, heading, offset, action):
++    node, bridge = node_with_entry(), FakeBridge()
++    first, request = start_line(node, bridge, clock)
++    fresh(node, clock, 'ball', ball_info(depth_m=1.2, bearing_deg=30), plan=False)
++    assert node.mission_phase == 'BALL_APPROACH'
++    assert node.ball_entry_line_alignment.pending
++    late_line(node, clock, line_info(heading, offset))
++    entry = node.publisher.messages[-1]
++    assert entry['valid'] and entry['action'] == action
++    assert entry['source'] == 'ball' and entry['phase'] == 'BALL_APPROACH'
++    assert entry['source_command']['ball_entry_line_alignment']
++    assert node.queued_general_command_id == entry['command_id']
++    entry_request = send(bridge, entry)
++    assert len(bridge.executor_request_publisher.messages) == 2
++    if action == 'STRAIGHT':
++        assert entry_request['motion_id'] == 'line_forward_6'
++    assert not bridge.queued_request_deferred
++    status(node, bridge, request, 'SUCCEEDED')
++    status(node, bridge, entry_request, 'RUNNING')
++    assert Node._ball_entry_line_running(node)
++    clock[0] = node.active_line_motion_started_at + node.active_line_motion_duration_sec * .75
++    # The latest Ball angle has changed while the entry motion is executing.
++    for _ in range(4):
++        fresh(node, clock, 'ball', ball_info(depth_m=.9, bearing_deg=0.), plan=False)
++    follow = node.publisher.messages[-1]
++    assert follow['valid'] and follow['source'] == 'ball' and follow['action'] == 'STRAIGHT'
++    assert not follow['source_command'].get('ball_entry_line_alignment')
++    assert follow['command_id'] != entry['command_id']
++    follow_request = send(bridge, follow)
++    assert follow_request['motion_id'] == 'line_forward_4'
++    assert len(bridge.executor_request_publisher.messages) == 3
++    assert not bridge.queued_request_deferred
++    status(node, bridge, entry_request, 'SUCCEEDED')
++    assert node.ball_entry_line_alignment.state == 'DONE'
++    assert bridge.transition_dwell_until is None
++    assert getattr(node, 'correction_post_motion_dwell_until', None) is None
++    status(node, bridge, follow_request, 'RUNNING')
++    assert node.general_motion_gate.active_command_id == follow['command_id']
++    assert len([m for m in node.publisher.messages if m['valid']]) == 3
++
++
++@pytest.mark.parametrize('enabled', [True, False])
++def test_option_restores_direct_ball_entry_at_current_motion_completion(clock, enabled):
++    node, bridge = node_with_entry(enabled), FakeBridge()
++    _, request = start_line(node, bridge, clock)
++    clock[0] += .1
++    fresh(node, clock, 'ball', ball_info(depth_m=1.2, bearing_deg=30), plan=False)
++    fresh(node, clock, 'line', line_info(), plan=False)
++    status(node, bridge, request, 'SUCCEEDED')
++    next_command = node.publisher.messages[-1]
++    assert next_command['source'] == 'ball'
++    assert next_command['action'] == ('STRAIGHT' if enabled else 'BALL_APPROACH_TURN_RIGHT_3')
++    assert bool(next_command['source_command'].get('ball_entry_line_alignment')) is enabled
++
++
++def test_already_accepted_line_reservation_is_adopted_without_extra_line_motion(clock):
++    node, bridge = node_with_entry(), FakeBridge()
++    _, first_request = start_line(node, bridge, clock)
++    late_line(node, clock, line_info())
++    queued = node.publisher.messages[-1]
++    queued_request = send(bridge, queued)
++    assert node.queued_general_command_id == queued['command_id']
++    fresh(node, clock, 'ball', ball_info(depth_m=1.2), plan=False)
++    assert node.ball_entry_line_alignment.command_id == queued['command_id']
++    assert node.mission_phase == 'BALL_APPROACH'
++    ownership = node.publisher.messages[-1]
++    assert ownership['source'] == 'ball' and ownership['phase'] == 'BALL_APPROACH'
++    assert ownership['valid'] is False and ownership['action'] == queued['action']
++    assert ownership['source_command']['adopted_command_id'] == queued['command_id']
++    count = len(bridge.executor_request_publisher.messages)
++    send(bridge, ownership)
++    assert len(bridge.executor_request_publisher.messages) == count
++    assert node.queued_general_command_id == queued['command_id']
++    status(node, bridge, first_request, 'SUCCEEDED')
++    status(node, bridge, queued_request, 'RUNNING')
++    assert Node._ball_entry_line_running(node)
++    clock[0] += .2
++    fresh(node, clock, 'ball', ball_info(depth_m=.9, bearing_deg=-30), plan=False)
++    status(node, bridge, queued_request, 'SUCCEEDED')
++    assert node.publisher.messages[-1]['action'] == 'BALL_APPROACH_TURN_LEFT_2'
++    assert node.ball_entry_line_alignment.state == 'DONE'
++    assert len([m for m in node.publisher.messages if m['valid']]) == 3
++
++
++@pytest.mark.parametrize('changes', [{'detected': False}, {'ground_projection_valid': False}])
++def test_invalid_line_waits_without_consuming_the_single_alignment(clock, changes):
++    node = node_with_entry()
++    fresh(node, clock, 'line', {**line_info(), **changes}, plan=False)
++    fresh(node, clock, 'ball', ball_info(depth_m=1.2))
++    assert node.ball_entry_line_alignment.pending
++    assert not any(m['valid'] for m in node.publisher.messages)
++    fresh(node, clock, 'line', line_info())
++    assert node.publisher.messages[-1]['source_command']['ball_entry_line_alignment']
++
++
++@pytest.mark.parametrize('value', ['FAILED', 'TIMEOUT', 'CANCELLED', 'REJECTED'])
++def test_failed_entry_does_not_start_tracking_or_another_line_motion(clock, value):
++    node, bridge = node_with_entry(), FakeBridge()
++    fresh(node, clock, 'line', line_info(), plan=False)
++    fresh(node, clock, 'ball', ball_info(depth_m=1.2))
++    entry = node.publisher.messages[-1]
++    request = send(bridge, entry)
++    status(node, bridge, request, 'RUNNING')
++    status(node, bridge, request, value)
++    assert node.ball_entry_line_alignment.state == 'FAILED'
++    before = len(node.publisher.messages)
++    fresh(node, clock, 'line', line_info(), plan=False)
++    fresh(node, clock, 'ball', ball_info(depth_m=.9))
++    assert not any(m['valid'] for m in node.publisher.messages[before:])
++
++
++def test_completed_entry_is_not_rearmed_by_ball_loss_or_duplicates_but_next_ball_can_arm():
++    entry = BallEntryLineAlignment()
++    assert entry.arm()
++    entry.published(10)
++    entry.on_status(9, 'SUCCEEDED')
++    assert entry.state == 'QUEUED'
++    entry.on_status(10, 'RUNNING')
++    entry.on_status(10, 'SUCCEEDED')
++    entry.on_status(10, 'RUNNING')
++    assert entry.state == 'DONE' and not entry.arm()
++    entry.reset()
++    assert entry.arm() and entry.pending
++
++
++def test_close_ball_still_gets_one_line_motion_then_enters_existing_pickup(clock):
++    node, bridge = node_with_entry(), FakeBridge()
++    fresh(node, clock, 'line', line_info(), plan=False)
++    fresh(node, clock, 'ball', ball_info(depth_m=.5))
++    entry = node.publisher.messages[-1]
++    assert entry['action'] == 'STRAIGHT' and entry['source_command']['ball_entry_line_alignment']
++    request = send(bridge, entry)
++    status(node, bridge, request, 'RUNNING')
++    fresh(node, clock, 'ball', ball_info(depth_m=.5), plan=False)
++    status(node, bridge, request, 'SUCCEEDED')
++    assert node.publisher.messages[-1]['action'] == 'PICKUP_NOW'
++
++
++@pytest.mark.parametrize('value', ['FAILED', 'TIMEOUT', 'CANCELLED'])
++def test_failure_of_preceding_line_discards_reserved_entry_without_skipping_it(clock, value):
++    node, bridge = node_with_entry(), FakeBridge()
++    _, first_request = start_line(node, bridge, clock)
++    fresh(node, clock, 'ball', ball_info(depth_m=1.2), plan=False)
++    late_line(node, clock, line_info())
++    entry = node.publisher.messages[-1]
++    send(bridge, entry)
++    assert node.ball_entry_line_alignment.state == 'QUEUED'
++    status(node, bridge, first_request, value)
++    assert node.queued_general_command_id is None
++    assert node.ball_entry_line_alignment.state == 'FAILED'
++    before = len(node.publisher.messages)
++    fresh(node, clock, 'ball', ball_info(depth_m=.9))
++    assert not any(m['valid'] for m in node.publisher.messages[before:])
++
++
++def test_line_offset_policy_retains_short_forward_count_in_ball_mode(clock):
++    from test_line_offset_alignment import sample
++    node, bridge = node_with_entry(), FakeBridge()
++    fresh(node, clock, 'line', sample(target_angle=0., ground_heading_error_deg=-30.), plan=False)
++    fresh(node, clock, 'ball', ball_info(depth_m=1.2))
++    entry = node.publisher.messages[-1]
++    assert entry['action'] == 'STRAIGHT_1'
++    assert entry['source'] == 'ball' and entry['source_command']['line_offset_alignment_active']
++    request = send(bridge, entry)
++    assert request['motion_id'] == 'line_forward_2'
++    status(node, bridge, request, 'RUNNING')
++    assert node.active_line_motion_duration_sec == Node.LINE_MOTION_CAPTURE_CONFIG['STRAIGHT_1'][0]
++
++
++def test_stationary_line_alignment_executes_once_and_preserves_existing_settle(clock):
++    from test_line_offset_alignment import sample
++    node, bridge = node_with_entry(), FakeBridge()
++    fresh(node, clock, 'line', sample(target_angle=25., ground_heading_error_deg=-20.), plan=False)
++    fresh(node, clock, 'ball', ball_info(depth_m=1.2))
++    entry = node.publisher.messages[-1]
++    assert entry['action'] == 'LINE_OFFSET_TURN_RIGHT_2'
++    assert entry['source'] == 'ball' and entry['source_command']['ball_entry_line_alignment']
++    request = send(bridge, entry)
++    status(node, bridge, request, 'RUNNING')
++    for _ in range(4):
++        fresh(node, clock, 'ball', ball_info(depth_m=.9), plan=False)
++    assert getattr(node, 'queued_general_command_id', None) is None
++    status(node, bridge, request, 'SUCCEEDED')
++    assert node.ball_entry_line_alignment.state == 'DONE'
++    assert node.correction_post_motion_dwell_until > clock[0]
++    clock[0] = node.correction_post_motion_dwell_until + .01
++    # The existing settle gate clears old input on its first expired tick.
++    Node._publish_decision(node)
++    fresh(node, clock, 'line', line_info(), plan=False)
++    fresh(node, clock, 'ball', ball_info(depth_m=.9, bearing_deg=-30.))
++    assert node.publisher.messages[-1]['action'] == 'BALL_APPROACH_TURN_LEFT_2'
++    assert len([m for m in node.publisher.messages if m['valid']]) == 2
++
++
++@pytest.mark.parametrize('changes', [
++    {'depth_m': 1.501}, {'confidence': .1}, {'depth_valid': False},
++    {'detected': False, 'raw_detected': True},
++])
++def test_entry_retains_existing_ball_confirmation_and_range_checks(clock, changes):
++    node = node_with_entry()
++    fresh(node, clock, 'line', line_info(), plan=False)
++    fresh(node, clock, 'ball', ball_info(**{'depth_m': 1.2, **changes}))
++    assert node.ball_entry_line_alignment.state == 'IDLE'
++    assert not any(m['source_command'].get('ball_entry_line_alignment') for m in node.publisher.messages)
++
++
++@pytest.mark.parametrize('change', ['expired', 'future', 'lost', 'turn', 'pickup'])
++def test_entry_never_reserves_ball_forward_for_unusable_or_nonwalking_next_decision(clock, change):
++    node, bridge = node_with_entry(), FakeBridge()
++    fresh(node, clock, 'line', line_info(), plan=False)
++    fresh(node, clock, 'ball', ball_info(depth_m=1.2))
++    request = send(bridge, node.publisher.messages[-1])
++    status(node, bridge, request, 'RUNNING')
++    clock[0] += node.active_line_motion_duration_sec * .75
++    for _ in range(4):
++        updates = {'detected': False, 'raw_detected': False} if change == 'lost' else {}
++        updates.update(depth_m=.5 if change == 'pickup' else .9, bearing_deg=30 if change == 'turn' else 0.)
++        info = ball_info(**updates)
++        if change in {'expired', 'future'}:
++            from test_wait_refresh_and_fine_settle import observe
++            stamp = clock[0] + (1. if change == 'future' else -1.)
++            observe(node, clock, 'ball', {**info, 'rgb_stamp_ns': round(stamp * 1e9)}, plan=False)
++        else:
++            fresh(node, clock, 'ball', info, plan=False)
++    assert getattr(node, 'queued_general_command_id', None) is None
++
++
++@pytest.mark.parametrize('phase', ['AUTO', 'LINE_TRACK', 'BALL_SEARCH', 'BALL_APPROACH'])
++def test_entry_is_ball_mode_from_all_supported_initial_line_or_ball_phases(clock, phase):
++    node = node_with_entry()
++    node.phase_manager.set_phase(phase)
++    fresh(node, clock, 'line', line_info(), plan=False)
++    fresh(node, clock, 'ball', ball_info(depth_m=1.5))
++    command = node.publisher.messages[-1]
++    assert command['phase'] == 'BALL_APPROACH' and command['source'] == 'ball'
++    assert command['source_command']['ball_entry_line_alignment']
++
++
++@pytest.mark.parametrize('launch_name', ['full_system', 'full_system_robot'])
++@pytest.mark.parametrize('enabled', [None, 'false'])
++def test_launch_wires_enabled_default_and_rollback_to_decision_node(monkeypatch, tmp_path, launch_name, enabled):
++    import importlib
++    from launch_ros.actions import Node as LaunchNode
++    from test_full_system_launch import launch_context, node_parameters
++
++    module = importlib.import_module('test_' + launch_name + '_launch')
++    description = module.launch_description(monkeypatch, tmp_path)
++    overrides = {} if enabled is None else {'ball_entry_line_alignment_enabled': enabled}
++    context = launch_context(description, overrides)
++    decision_node = next(entity for entity in description.entities
++                         if isinstance(entity, LaunchNode)
++                         and entity.node_executable == 'motion_decision_node')
++    parameters = node_parameters(decision_node, context)
++    assert parameters['ball_entry_line_alignment_enabled'] is (enabled is None)
+--- before/src/mission_control/README.md
++++ after/src/mission_control/README.md
+@@ -1662,3 +1662,33 @@
+ 시작/종료 자세를 원본으로 교체했다. 반복은 1회, 배속은 원본의 0.95를 그대로 사용하며
+ 추가로 0.95를 곱하지 않는다. 런타임 완료 허용 오차 5°와 기존 골대 머리 각도 override는
+ 유지한다. 미세전진 후 기본자세 전환과 왼뒤 기본자세는 원본과 동일하여 그대로 유지한다.
++
++2026-10-28 공 최초 진입 시 라인 정렬 1회:
++`ball_entry_line_alignment_enabled`의 기본값은 `true`이다. 기존 확인 조건을 만족한
++1500mm 이내 공을 처음 인식하면 공 모드(`BALL_APPROACH`)로 전환하되, 현재 모션을
++마친 뒤 일반 라인 판단으로 선택한 모션을 정확히 한 번 실행한다. 전진 횟수·라인복귀·
++오프셋/코너 판단은 일반 라인 정책을 유지한다. 새 명령은 `source=ball`과
++`source_command.ball_entry_line_alignment=true`로 표시한다. 공 발견 전에 이미
++예약된 라인 모션이 있으면 그 예약을 한 번으로 계산하여 추가 라인 모션을 붙이지 않는다.
++이 경우 이미 발행한 명령의 source는 line이지만 현재 미션은 공 모드이다.
++별도의 `valid=false`, `source=ball` 알림으로 실행기의 카메라 소유권도 전환한다.
++이 알림은 모션 실행/정지 요청이 아니며 기존 예약을 변경하지 않는다.
++
++그 한 번의 모션 중에도 공 입력을 갱신하며 다음 판단은 최신 공 입력으로 기존 공 접근
++로직을 사용한다. 전진/라인복귀 보행의 두 전환 경계에는 별도 대기를 추가하지 않고 기존
++예약 경로와 완료 콜백 즉시 판단을 사용한다. 실제 보행 연결은 SDK의 자세·배속 호환성
++검사를 따르며, 제자리 회전의 기존 안정화/새 촬영 검사와 무효 입력 대기는 유지한다.
++라인 판단이 WAIT이면 한 번을 소모하지 않는다. 실행 실패 시 자동으로 공 추적으로
++넘어가지 않고 `ball_entry_line_alignment_failed`로 대기하므로 상태 확인 후 재시작한다.
++공을 놓쳤다 다시 발견해도 같은 공 미션에서는 정렬을 반복하지 않는다.
++
++기존의 직접 공 접근으로 복구하려면 실행을 종료하고 다음 옵션으로 재시작한다.
++`full_system.launch.py`에도 같은 옵션을 사용할 수 있다. 실행 중 파라미터 변경은 지원하지 않는다.
++
++```bash
++ros2 launch mission_control full_system_robot.launch.py ball_entry_line_alignment_enabled:=false
++```
++
++상태 관리는 `ball_entry_line_alignment.py`에 분리했다. 모터 없이 노드/브리지 상태를
++재생하는 `test_ball_entry_line_alignment.py`로 두 보행 경계, 최신 공 입력, 중복 방지,
++실패 처리, 기존 방식 복구를 검사한다. 실물에서는 지지 상태에서 전환부터 검증한다.

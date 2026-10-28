@@ -2786,7 +2786,7 @@ def test_ball_approach_entry_during_line_motion_requires_fresh_frame_without_dwe
         ),
     )
     assert decision.source == "ball"
-    assert decision.action == "BALL_APPROACH_RECOVER_LEFT_4"
+    assert decision.action == "BALL_APPROACH_TURN_LEFT_2"
 
 
 def test_ball_approach_entry_after_line_release_has_no_initial_dwell(
@@ -2838,7 +2838,7 @@ def test_ball_straight_success_requires_fresh_frame_without_dwell(monkeypatch):
     assert not node.general_motion_gate.has_required_fresh_vision()
 
 
-def test_legacy_ball_turn_ack_keeps_dwell_but_next_plan_uses_moving_recover(
+def test_ball_turn_ack_keeps_dwell_and_next_plan_rechecks_heading(
     monkeypatch,
 ):
     node = FreshMockInputNode()
@@ -2878,14 +2878,14 @@ def test_legacy_ball_turn_ack_keeps_dwell_but_next_plan_uses_moving_recover(
             steering_angle_deg=-26.0,
         ),
     )
-    assert decision.action == "BALL_APPROACH_RECOVER_LEFT_4"
+    assert decision.action == "BALL_APPROACH_TURN_LEFT_1"
 
 
 @pytest.mark.parametrize("angle,recover_action", [
-    (-30.0, "BALL_APPROACH_RECOVER_LEFT_4"),
-    (26.0, "BALL_APPROACH_RECOVER_RIGHT_4"),
+    (-30.0, "BALL_APPROACH_TURN_LEFT_2"),
+    (26.0, "BALL_APPROACH_TURN_RIGHT_2"),
 ])
-def test_ball_recover_rechecks_new_angle_without_dwell_or_forced_forward(
+def test_ball_turn_rechecks_new_angle_after_dwell_without_forced_forward(
     monkeypatch, angle, recover_action,
 ):
     from mission_control.motion_decision_planner import MotionDecisionPlanner
@@ -2918,7 +2918,7 @@ def test_ball_recover_rechecks_new_angle_without_dwell_or_forced_forward(
                 dynamics_command=None,
             )
 
-    # The same large error needs another recover, not a forced straight step.
+    # Reobserve after each stationary turn; a remaining error requests another turn.
     for steering, expected in ((angle, recover_action), (angle, recover_action),
                                (-8.0, "STRAIGHT")):
         clock[0] += 0.1
@@ -2931,7 +2931,12 @@ def test_ball_recover_rechecks_new_angle_without_dwell_or_forced_forward(
         MotionDecisionNode._publish_decision(node)
         assert len(node.publisher.messages) == count
         complete_last_motion()
-        assert node.ball_approach_alignment_pending is True
+        turning = expected.startswith("BALL_APPROACH_TURN_")
+        assert node.ball_approach_alignment_pending is (not turning)
+        if turning:
+            assert node.ball_post_motion_dwell_until == pytest.approx(clock[0] + 1.)
+            clock[0] += 1.
+            MotionDecisionNode._publish_decision(node)
         assert node.ball_post_motion_dwell_until is None
         assert node.latest_info["ball"] is None
         assert not node.general_motion_gate.has_required_fresh_vision()
@@ -3059,7 +3064,7 @@ def test_pickup_loss_reacquisition_reuses_camera_down_heading_planner(
     reacquired = select_decision(
         node,
         ball=ball_info_for_node(
-            distance_m=0.4, depth_m=0.4, bottom_distance_px=300,
+            distance_m=0.4, depth_m=0.4, bottom_distance_px=450,
             steering_angle_deg=steering_angle_deg,
             offset_x_norm=0.2,
         ),
@@ -3106,7 +3111,7 @@ def test_pickup_loss_reacquisition_uses_metric_distance_threshold(
 @pytest.mark.parametrize("bottom_distance,expected_action", [
     (100, "BALL_PICKUP_INITIAL_CRAB_RIGHT"),
     (120, "BALL_PICKUP_INITIAL_CRAB_RIGHT"),
-    (121, "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_3"),
+    (361, "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_3"),
 ])
 def test_pickup_initial_offset_selects_action_by_close_distance(
     bottom_distance, expected_action,
@@ -3259,7 +3264,7 @@ def test_general_ball_alignment_pending_uses_fresh_angle_then_distance():
             steering_angle_deg=26.0,
         ),
     )
-    assert turn.action == "BALL_APPROACH_RECOVER_RIGHT_4"
+    assert turn.action == "BALL_APPROACH_TURN_RIGHT_2"
 
     node.ball_approach_alignment_pending = True
     straight = select_decision(
@@ -4276,7 +4281,7 @@ def test_pickup_terminal_status_clears_close_ball_latch(status):
 
 @pytest.mark.parametrize("was_close,bottom_distance,expected", [
     (True, None, False),
-    (True, 101, False),
+    (True, 361, False),
     (False, 100, True),
 ])
 def test_new_pickup_resets_close_latch_and_uses_current_observation(

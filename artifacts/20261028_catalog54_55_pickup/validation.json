@@ -1,0 +1,70 @@
+{
+  "baseline": {
+    "passed": 1343,
+    "failures": [
+      "test.test_motion_decision_planner::test_default_line_recovery_follows_ground_in_recorded_opposing_heading_scene[-1]",
+      "test.test_motion_decision_planner::test_default_line_recovery_follows_ground_in_recorded_opposing_heading_scene[1]",
+      "test.test_mission_phase_flow::test_collected_ball_route_clears_stale_reservations_before_dwell[GOAL_APPROACH-GOAL_CAMERA90_FINE_FORWARD_2]",
+      "test.test_mission_phase_flow::test_post_ball_detection_loss_cannot_interrupt_timed_line_or_goal",
+      "test.test_mission_phase_flow::test_ball_loss_waits_then_reacquired_ball_selects_moving_recover",
+      "test.test_mission_phase_flow::test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell",
+      "test.test_mission_phase_flow::test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment",
+      "test.test_mission_phase_flow::test_full_course_mock_flow_without_ros_graph",
+      "test.test_mission_phase_flow::test_confirmed_approaching_hurdle_beats_approaching_ball",
+      "test.test_mission_phase_flow::test_unconfirmed_hurdle_disappearance_resumes_ball_mission",
+      "test.test_mission_phase_flow::test_unconfirmed_hurdle_can_become_confirmed_and_take_priority",
+      "test.test_mission_phase_flow::test_absent_hurdle_keeps_ball_priority_over_line",
+      "test.test_mission_phase_flow::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[34.0-GOAL_CAMERA90_TURN_RIGHT_3-0.0-GOAL_CAMERA90_FINE_FORWARD_2]",
+      "test.test_mission_phase_flow::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-35.0-GOAL_CAMERA90_TURN_LEFT_1--20.0-GOAL_CAMERA90_TURN_LEFT_1]",
+      "test.test_mission_phase_flow::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-20.0-GOAL_CAMERA90_TURN_LEFT_1--15.0-GOAL_CAMERA90_FINE_FORWARD_2]",
+      "test.test_mission_phase_flow::test_goal_depth_actions_follow_new_scoring_range[0.65-GOAL_CAMERA90_FINE_FORWARD_1]",
+      "test.test_mission_phase_flow::test_final_line_track_still_prioritizes_confirmed_hurdle",
+      "test.test_mission_phase_flow::test_ball_stationary_turn_requires_fresh_ball_before_next_approach",
+      "test.test_mission_phase_flow::test_second_ball_uses_same_straight_distance_policy",
+      "test.test_mission_phase_flow::test_failed_first_pickup_keeps_straight_distance_policy",
+      "test.test_mission_phase_flow::test_line_recover_repeats_only_after_success_and_fresh_line[15.0-0.6-RECOVER_RIGHT_TURN_RIGHT_4]"
+    ]
+  },
+  "regression": {
+    "passed": 1582,
+    "failures": [
+      "test.test_motion_decision_planner::test_default_line_recovery_follows_ground_in_recorded_opposing_heading_scene[-1]",
+      "test.test_motion_decision_planner::test_default_line_recovery_follows_ground_in_recorded_opposing_heading_scene[1]",
+      "test.test_mission_phase_flow::test_collected_ball_route_clears_stale_reservations_before_dwell[GOAL_APPROACH-GOAL_CAMERA90_FINE_FORWARD_2]",
+      "test.test_mission_phase_flow::test_post_ball_detection_loss_cannot_interrupt_timed_line_or_goal",
+      "test.test_mission_phase_flow::test_ball_loss_waits_then_reacquired_ball_selects_moving_recover",
+      "test.test_mission_phase_flow::test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell",
+      "test.test_mission_phase_flow::test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment",
+      "test.test_mission_phase_flow::test_full_course_mock_flow_without_ros_graph",
+      "test.test_mission_phase_flow::test_confirmed_approaching_hurdle_beats_approaching_ball",
+      "test.test_mission_phase_flow::test_unconfirmed_hurdle_disappearance_resumes_ball_mission",
+      "test.test_mission_phase_flow::test_unconfirmed_hurdle_can_become_confirmed_and_take_priority",
+      "test.test_mission_phase_flow::test_absent_hurdle_keeps_ball_priority_over_line",
+      "test.test_mission_phase_flow::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[34.0-GOAL_CAMERA90_TURN_RIGHT_3-0.0-GOAL_CAMERA90_FINE_FORWARD_2]",
+      "test.test_mission_phase_flow::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-35.0-GOAL_CAMERA90_TURN_LEFT_1--20.0-GOAL_CAMERA90_TURN_LEFT_1]",
+      "test.test_mission_phase_flow::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-20.0-GOAL_CAMERA90_TURN_LEFT_1--15.0-GOAL_CAMERA90_FINE_FORWARD_2]",
+      "test.test_mission_phase_flow::test_goal_depth_actions_follow_new_scoring_range[0.65-GOAL_CAMERA90_FINE_FORWARD_1]",
+      "test.test_mission_phase_flow::test_final_line_track_still_prioritizes_confirmed_hurdle",
+      "test.test_mission_phase_flow::test_ball_stationary_turn_requires_fresh_ball_before_next_approach",
+      "test.test_mission_phase_flow::test_second_ball_uses_same_straight_distance_policy",
+      "test.test_mission_phase_flow::test_failed_first_pickup_keeps_straight_distance_policy",
+      "test.test_mission_phase_flow::test_line_recover_repeats_only_after_success_and_fresh_line[15.0-0.6-RECOVER_RIGHT_TURN_RIGHT_4]"
+    ]
+  },
+  "new_regression_failures": [],
+  "runtime_and_pc_catalog_validation": "90 unique motions each; aliases resolve; motor IDs 0..22",
+  "new_runtime_pose_conflicts": [],
+  "cpp_tests_passed": [
+    "test_catalog_only_core",
+    "test_startup_pose_gate",
+    "test_test_ball_head_override_launch.py",
+    "test_test_goal_head_override_launch.py"
+  ],
+  "upsert_tests": {
+    "passed": 4,
+    "existing_failures": 1,
+    "reason": "Existing runtime-only playback_speed overrides differ from PC; reproduced against pre-edit snapshot."
+  },
+  "hardware_executed": false,
+  "dynamics_simulation_executed": false
+}

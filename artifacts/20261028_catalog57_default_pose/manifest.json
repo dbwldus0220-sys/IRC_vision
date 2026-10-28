@@ -1,0 +1,21 @@
+{
+  "source_file": "motion_imports/robot_motions(57).json",
+  "source_sha256": "3ac7e286076f6b2afa0c32ad8c51861a3e6457903eafa9e7a61d25ecef30aa92",
+  "renames": {
+    "건오뒤에서 기본자세(카메라45도)": "R오뒤에서 기본자세(카메라45도)",
+    "R오뒤에서기본자세0도": "R오뒤에서 기본자세(0도)"
+  },
+  "aliases": [
+    "pickup_forward_to_crab_0",
+    "goal_forward_to_crab_right_90",
+    "goal_forward_to_default"
+  ],
+  "source_speed": 0.95,
+  "runtime_position_tolerance_deg": 5.0,
+  "unchanged_basic_motions": [
+    "R미세오뒤에서 기본자세45도",
+    "R미세오뒤에서 기본자세90도",
+    "R왼뒤에서 기본자세0도"
+  ],
+  "excluded_unrelated_source_change": "R골대후제자리우회전"
+}

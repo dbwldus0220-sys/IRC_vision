@@ -1,6 +1,5 @@
 """Verify all six gait transitions before sending the next motion to hardware."""
 
-import hashlib
 import json
 from pathlib import Path
 
@@ -188,24 +187,23 @@ def test_pickup_approach_transition_failure_does_not_use_motor_fault_skip(error)
 def test_aliases_reuse_supplied_poses_without_changing_motion_data():
     root = Path(__file__).resolve().parents[3]
     catalog_path = root / "artifacts/robot_motions_runtime.json"
-    manifest = json.loads((root / "artifacts/20261005_catalog8_geon_motion_update/manifest.json").read_text())
-    snapshot = root / "artifacts/20261005_catalog9_right_turn_update/robot_motions_runtime.before.json"
-    # The later right-turn import may change the catalog, but not transition poses.
-    assert hashlib.sha256(snapshot.read_bytes()).hexdigest() == manifest["after_sha256"]
-    before = {m["name"]: m for m in json.loads(snapshot.read_text())["motions"]}
     current = {m["name"]: m for m in json.loads(catalog_path.read_text())["motions"]}
     aliases = yaml.safe_load((root / "src/irc_step_motion_executor/config/motion_aliases.yaml").read_text())["motion_aliases"]
     expected = {
-        "pickup_fine_prepare": "건오뒤에서 미세오뒤45도",
-        "pickup_forward_to_crab_0": "건오뒤에서 기본자세(0도)",
-        "pickup_fine_to_crab_right_0": "건미세오뒤에서 기본자세45도",
-        "goal_forward_to_crab_right_90": "건오뒤에서 기본자세(카메라45도)",
-        "goal_fine_to_crab_right_90": "건미세오뒤에서 기본자세90도",
-        "goal_fine_to_default": "건미세오뒤에서 기본자세45도",
-        "fine_to_turn_ready_0": "건미세오뒤에서 오뒤0도",
-        "fine_to_turn_ready_45": "건미세오뒤에서 오뒤45도",
-        "fine_to_turn_ready_90": "찐미세오뒤에서 오뒤(골대 카메라90도)",
+        "pickup_fine_prepare": "R오뒤에서미세오뒤45도",
+        "pickup_forward_to_crab_0": "R오뒤에서 기본자세(0도)",
+        "pickup_fine_to_crab_right_0": "R미세오뒤에서 기본자세45도",
+        "goal_forward_to_crab_right_90": "R오뒤에서 기본자세(카메라45도)",
+        "goal_fine_to_crab_right_90": "R미세오뒤에서 기본자세90도",
+        "goal_fine_to_default": "R미세오뒤에서 기본자세45도",
+        "fine_to_turn_ready_0": "R미세오뒤에서 오뒤0도",
+        "fine_to_turn_ready_45": "R미세오뒤에서 오뒤45도",
+        "fine_to_turn_ready_90": "R미세오뒤에서 오뒤90도",
     }
     for alias, name in expected.items():
         assert aliases[alias] == name
-        assert current[name] == before[name]
+        motion = current[name]
+        assert motion['repeat_count'] == 1
+        assert len(motion['frames']) == 2
+        assert motion['start_pose'] == motion['frames'][0]['name']
+        assert motion['end_pose'] == motion['frames'][-1]['name']

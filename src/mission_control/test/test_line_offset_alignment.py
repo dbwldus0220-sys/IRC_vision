@@ -43,6 +43,57 @@ def test_pixel_offset_does_not_replace_forward(offset):
 
 
 @pytest.mark.parametrize("sign", [-1, 1])
+def test_parallel_far_line_checks_target_even_when_heading_selects_forward(sign):
+    info = sample(offset=sign * 181.7, target_angle=sign * 30.,
+                  ground_heading_error_deg=-sign * 1.43,
+                  filtered_lateral_offset_norm=sign * .262,
+                  ground_lateral_offset_m=sign * .1294,
+                  ground_lookahead_distance_m=.211,
+                  ground_line_points_m=[[sign * .13, z] for z in (.15, .25, .4)])
+    baseline = planner(-1.).plan("LINE_TRACK", {"line": info}, .1)
+    decision = planner().plan("LINE_TRACK", {"line": info}, .1)
+    assert baseline.action == "STRAIGHT"
+    assert decision.valid
+    assert decision.action == ("LINE_OFFSET_TURN_RIGHT_2" if sign > 0 else "LINE_OFFSET_TURN_LEFT_1")
+    assert decision.reason == "line_offset_target_turn"
+
+
+@pytest.mark.parametrize("offset", [99.9, 100., 182.])
+@pytest.mark.parametrize("distance", [.10, .1001])
+def test_forward_guard_requires_both_pixel_and_ground_distance(offset, distance):
+    info = sample(offset=offset, ground_heading_error_deg=0.,
+                  ground_lateral_offset_m=distance)
+    decision = planner().plan("LINE_TRACK", {"line": info}, .1)
+    guarded = offset >= 100. and distance > .10
+    assert decision.source_command["line_offset_alignment_active"] is guarded
+    assert decision.action == ("LINE_OFFSET_TURN_RIGHT_2" if guarded else "STRAIGHT")
+
+
+def test_far_parallel_line_uses_short_forward_if_target_already_ahead():
+    info = sample(ground_heading_error_deg=0., ground_lateral_offset_m=.11,
+                  ground_lookahead_distance_m=1., ground_line_points_m=[[.11, z] for z in (.8, 1., 1.2)])
+    decision = planner().plan("LINE_TRACK", {"line": info}, .1)
+    assert decision.action == "STRAIGHT_1"
+    assert decision.reason == "line_offset_target_forward"
+
+
+@pytest.mark.parametrize("flag", ["corner_preview_confirmed", "corner_preview_raw_detected"])
+def test_new_forward_guard_preserves_corner_candidate(flag):
+    info = sample(ground_heading_error_deg=0., target_angle=30., **{flag: True})
+    result = {"valid": True, "motion": "STRAIGHT", "corner_prepare": False}
+    guarded = planner()._line_offset_alignment(info, result)
+    assert guarded["motion"] == "STRAIGHT"
+    assert not guarded["line_offset_alignment_active"]
+
+
+def test_far_forward_with_missing_target_does_not_blindly_advance():
+    info = sample(ground_heading_error_deg=0., ground_line_points_m=None)
+    decision = planner().plan("LINE_TRACK", {"line": info}, .1)
+    assert not decision.valid
+    assert decision.reason == "line_offset_target_invalid"
+
+
+@pytest.mark.parametrize("sign", [-1, 1])
 def test_recorded_near_line_now_continues_straight(sign):
     info = sample(offset=sign * 242.199, target_angle=sign * 18.8804,
                   ground_heading_error_deg=sign * 9.03,

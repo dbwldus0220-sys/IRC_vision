@@ -42,7 +42,7 @@ TEST(MotionAliasCatalog, LoadsLatestSdkAndCanonicalAliases)
   irc_step_motion_executor::MotionAliasCatalog catalog;
   std::string error;
   ASSERT_TRUE(catalog.load(TEST_ALIAS_CONFIG, error)) << error;
-  EXPECT_EQ(catalog.size(), 107U);
+  EXPECT_EQ(catalog.size(), 111U);
   for (const auto & [alias, motion] : {
       std::pair{"forward", "R전진45도(8회)"},
       std::pair{"line_forward_8", "R전진45도(8회)"},
@@ -59,7 +59,9 @@ TEST(MotionAliasCatalog, LoadsLatestSdkAndCanonicalAliases)
       std::pair{"stationary_turn_right", "R제자리우회전(9회)"},
       std::pair{"pickup_camera_down_turn_left_6", "R제자리좌회전0도(6회)"},
       std::pair{"pickup_camera_down_turn_right_9", "R제자리우회전0도(9회)"},
-      std::pair{"pickup", "건공잡기"}})
+      std::pair{"pickup", "r공잡기 400"},
+      std::pair{"pickup_400", "r공잡기 400"},
+      std::pair{"pickup_500", "r공잡기500"}})
   {
     EXPECT_EQ(catalog.resolve(alias), std::optional<std::string>(motion));
   }

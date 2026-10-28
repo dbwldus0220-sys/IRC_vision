@@ -41,7 +41,8 @@ def test_offset_forward_queues_and_promotes_without_clearing_vision(clock, phase
     first = node.publisher.messages[-1]
     assert first['action'] == 'STRAIGHT_1'
     node.send_status(first['action'], first['command_id'], 'RUNNING')
-    clock[0] += .7
+    clock[0] = (node.active_line_motion_started_at
+                + node.active_line_motion_duration_sec * MotionDecisionNode.LINE_MOTION_CAPTURE_START_RATIO)
     for _ in range(6):
         fresh(node, clock, 'line', aligned, plan=False)
     second = node.publisher.messages[-1]
@@ -140,16 +141,16 @@ def test_goal_forward_does_not_reuse_expired_vision(clock):
     assert not node.publisher.messages[-1]['valid']
 
 
-@pytest.mark.parametrize('first,second', [
-    ('GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_2'),
-    ('GOAL_CAMERA90_FINE_FORWARD_3', 'GOAL_CAMERA90_FINE_FORWARD_1'),
+@pytest.mark.parametrize('first,second,deferred', [
+    ('GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_2', False),
+    ('GOAL_CAMERA90_FINE_FORWARD_3', 'GOAL_CAMERA90_FINE_FORWARD_1', True),
 ])
-def test_bridge_reserves_different_goal_lengths_without_post_motion_dwell(first, second):
+def test_bridge_reserves_different_goal_lengths_without_post_motion_dwell(first, second, deferred):
     bridge = FakeBridge()
     bridge.navigation_command_callback(navigation_message(action=first, source='goal'))
     bridge.navigation_command_callback(navigation_message(action=second, source='goal', command_id=8001))
-    assert bridge.queued_request_deferred
-    assert len(bridge.executor_request_publisher.messages) == 1
+    assert bridge.queued_request_deferred is deferred
+    assert len(bridge.executor_request_publisher.messages) == (1 if deferred else 2)
     bridge.executor_status_callback(executor_status(status='SUCCEEDED', motion_id=bridge.ACTION_TO_MOTION_ID[first]))
     requests = decoded_messages(bridge.executor_request_publisher)
     assert requests[-1]['motion_id'] == bridge.ACTION_TO_MOTION_ID[second]

@@ -1,0 +1,2933 @@
+........................................................................ [  5%]
+........................................................................ [ 10%]
+....................................................FFFF.........F....FF [ 16%]
+F.........F..........FFFFFF............................................. [ 21%]
+..........FF............................................................ [ 27%]
+..................................FF..FFFF...FF......................... [ 32%]
+.F.............................................F..F..................... [ 38%]
+.......F.F..F.F..............F.....FFF...............FFF..F.......F..... [ 43%]
+.......FFF..................................................F........... [ 49%]
+.....................................F.................................. [ 54%]
+........................................................................ [ 60%]
+........................................................................ [ 65%]
+........................................................................ [ 71%]
+........................................................................ [ 76%]
+........................................................................ [ 82%]
+........................................................................ [ 87%]
+........................................................................ [ 92%]
+........................................................................ [ 98%]
+...........FFFF..FFFF                                                    [100%]
+=================================== FAILURES ===================================
+_________________ test_turn_waits_for_stable_half_second[LEFT] _________________
+
+action = 'LEFT'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9fb07850>
+
+    @pytest.mark.parametrize('action', ['LEFT', 'RIGHT'])
+    def test_turn_waits_for_stable_half_second(action, monkeypatch):
+        node = ReadinessPublishNode(general_decision(action))
+        clock = enable_test_settle(node, monkeypatch)
+    
+        MotionDecisionNode._publish_decision(node)
+>       assert node.publisher.messages == []
+E       assert [std_msgs.msg...sion_node"}')] == []
+E         Left contains one more item: std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"LEFT","valid":true,"reason":"line_ready","sdk_moti...e_special_event_id":null,"active_special_command_id":null,"mission_progress":{},"source_node":"motion_decision_node"}')
+E         Full diff:
+E         - []
+E         + [std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"LEFT","valid":true,"reason":"line_ready","sdk_motion_requested":false,"requires_ack":false,"source_command":{},"command_id":1,"event_id":null,"request_latched":false,"sdk_motion_id":null,"input_age_sec":{},"ball_tracking":{},"goal_tracking":{},"speci...
+E         
+E         ...Full output truncated (1 line hidden), use '-vv' to show
+
+src/mission_control/test/test_motion_decision_node.py:1352: AssertionError
+________________ test_turn_waits_for_stable_half_second[RIGHT] _________________
+
+action = 'RIGHT'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9fac4340>
+
+    @pytest.mark.parametrize('action', ['LEFT', 'RIGHT'])
+    def test_turn_waits_for_stable_half_second(action, monkeypatch):
+        node = ReadinessPublishNode(general_decision(action))
+        clock = enable_test_settle(node, monkeypatch)
+    
+        MotionDecisionNode._publish_decision(node)
+>       assert node.publisher.messages == []
+E       assert [std_msgs.msg...sion_node"}')] == []
+E         Left contains one more item: std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"RIGHT","valid":true,"reason":"line_ready","sdk_mot...e_special_event_id":null,"active_special_command_id":null,"mission_progress":{},"source_node":"motion_decision_node"}')
+E         Full diff:
+E         - []
+E         + [std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"RIGHT","valid":true,"reason":"line_ready","sdk_motion_requested":false,"requires_ack":false,"source_command":{},"command_id":1,"event_id":null,"request_latched":false,"sdk_motion_id":null,"input_age_sec":{},"ball_tracking":{},"goal_tracking":{},"spec...
+E         
+E         ...Full output truncated (1 line hidden), use '-vv' to show
+
+src/mission_control/test/test_motion_decision_node.py:1352: AssertionError
+_________________ test_changed_turn_candidate_restarts_settle __________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9fac4760>
+
+    def test_changed_turn_candidate_restarts_settle(monkeypatch):
+        node = ReadinessPublishNode(general_decision('LEFT'))
+        clock = enable_test_settle(node, monkeypatch)
+    
+        MotionDecisionNode._publish_decision(node)
+        clock[0] = 0.3
+        node.decision = general_decision('RIGHT')
+        MotionDecisionNode._publish_decision(node)
+    
+        clock[0] = 0.55
+        MotionDecisionNode._publish_decision(node)
+>       assert node.publisher.messages == []
+E       assert [std_msgs.msg...sion_node"}')] == []
+E         Left contains one more item: std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"LEFT","valid":true,"reason":"line_ready","sdk_moti...e_special_event_id":null,"active_special_command_id":null,"mission_progress":{},"source_node":"motion_decision_node"}')
+E         Full diff:
+E         - []
+E         + [std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"LEFT","valid":true,"reason":"line_ready","sdk_motion_requested":false,"requires_ack":false,"source_command":{},"command_id":1,"event_id":null,"request_latched":false,"sdk_motion_id":null,"input_age_sec":{},"ball_tracking":{},"goal_tracking":{},"speci...
+E         
+E         ...Full output truncated (1 line hidden), use '-vv' to show
+
+src/mission_control/test/test_motion_decision_node.py:1378: AssertionError
+________________ test_new_frame_keeps_same_candidate_start_time ________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9fb06530>
+
+    def test_new_frame_keeps_same_candidate_start_time(monkeypatch):
+        node = ReadinessPublishNode(general_decision('LEFT'))
+        node.latest_time = {'line': 1.0}
+        node.last_published_vision_stamp = {}
+        clock = enable_test_settle(node, monkeypatch)
+    
+        MotionDecisionNode._publish_decision(node)
+        clock[0] = 0.3
+        node.latest_time['line'] = 2.0
+        node.general_motion_gate.on_new_vision_input()
+        MotionDecisionNode._publish_decision(node)
+>       assert node.pre_motion_settle_started_at == 0.0
+E       assert None == 0.0
+E        +  where None = <test_motion_decision_node.ReadinessPublishNode object at 0xffff9fb07100>.pre_motion_settle_started_at
+
+src/mission_control/test/test_motion_decision_node.py:1397: AssertionError
+______________ test_stop_cancels_pending_turn_and_is_not_delayed _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9fac5c90>
+
+    def test_stop_cancels_pending_turn_and_is_not_delayed(monkeypatch):
+        node = ReadinessPublishNode(general_decision('LEFT'))
+        clock = enable_test_settle(node, monkeypatch)
+        MotionDecisionNode._publish_decision(node)
+    
+        clock[0] = 0.2
+        node.decision = general_decision('STOP')
+        MotionDecisionNode._publish_decision(node)
+    
+        payload = json.loads(node.publisher.messages[0].data)
+>       assert payload['action'] == 'STOP'
+E       AssertionError: assert 'LEFT' == 'STOP'
+E         - STOP
+E         + LEFT
+
+src/mission_control/test/test_motion_decision_node.py:1575: AssertionError
+________________ test_general_lock_does_not_precount_next_turn _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9fac4730>
+
+    def test_general_lock_does_not_precount_next_turn(monkeypatch):
+        node = ReadinessPublishNode(general_decision('STRAIGHT'))
+        clock = enable_test_settle(node, monkeypatch, start=10.0)
+        MotionDecisionNode._publish_decision(node)
+        node.decision = general_decision('LEFT')
+    
+        clock[0] = 20.0
+        MotionDecisionNode._publish_decision(node)
+        assert node.pre_motion_settle_started_at is None
+    
+        for status in ('RUNNING', 'SUCCEEDED'):
+            send_status(
+                node,
+                status=status,
+                action='STRAIGHT',
+                command_id=1,
+                event_id=None,
+                dynamics_command=None,
+            )
+        MotionDecisionNode._publish_decision(node)
+>       assert node.pre_motion_settle_started_at == 20.0
+E       assert None == 20.0
+E        +  where None = <test_motion_decision_node.ReadinessPublishNode object at 0xffff9fac7af0>.pre_motion_settle_started_at
+
+src/mission_control/test/test_motion_decision_node.py:1665: AssertionError
+____________ test_active_special_lock_does_not_precount_next_settle ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f952b90>
+
+    def test_active_special_lock_does_not_precount_next_settle(monkeypatch):
+        node = ReadinessPublishNode(general_decision('LEFT'))
+        clock = enable_test_settle(node, monkeypatch, start=10.0)
+        assert node.phase_manager.start_special_action('PICKUP_NOW', 7)
+    
+        MotionDecisionNode._publish_decision(node)
+        assert node.pre_motion_settle_started_at is None
+>       assert node.publisher.messages == []
+E       assert [std_msgs.msg...sion_node"}')] == []
+E         Left contains one more item: std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"LEFT","valid":true,"reason":"line_ready","sdk_moti...tive_special_event_id":null,"active_special_command_id":7,"mission_progress":{},"source_node":"motion_decision_node"}')
+E         Full diff:
+E         - []
+E         + [std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"LEFT","valid":true,"reason":"line_ready","sdk_motion_requested":false,"requires_ack":false,"source_command":{},"command_id":1,"event_id":null,"request_latched":false,"sdk_motion_id":null,"input_age_sec":{},"ball_tracking":{},"goal_tracking":{},"speci...
+E         
+E         ...Full output truncated (1 line hidden), use '-vv' to show
+
+src/mission_control/test/test_motion_decision_node.py:1682: AssertionError
+__________ test_published_turn_requires_a_new_settle_after_completion __________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9fac6260>
+
+    def test_published_turn_requires_a_new_settle_after_completion(monkeypatch):
+        node = ReadinessPublishNode(general_decision('LEFT'))
+        clock = enable_test_settle(node, monkeypatch)
+        MotionDecisionNode._publish_decision(node)
+        clock[0] = 0.5
+        MotionDecisionNode._publish_decision(node)
+    
+        for status in ('RUNNING', 'SUCCEEDED'):
+            send_status(
+                node,
+                status=status,
+                action='LEFT',
+                command_id=1,
+                event_id=None,
+                dynamics_command=None,
+            )
+>       assert node.correction_post_motion_dwell_until == 1.5
+E       AttributeError: 'ReadinessPublishNode' object has no attribute 'correction_post_motion_dwell_until'
+
+src/mission_control/test/test_motion_decision_node.py:1706: AttributeError
+_______ test_startup_hold_discards_commands_until_ready_and_fresh_vision _______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f953910>
+
+    def test_startup_hold_discards_commands_until_ready_and_fresh_vision(monkeypatch):
+        node = ReadinessPublishNode(general_decision('STRAIGHT'))
+        node.last_published_vision_stamp = {}
+        node.latest_info = {
+            source: None for source in MotionDecisionNode.SOURCES
+        }
+        node.latest_time = {
+            source: None for source in MotionDecisionNode.SOURCES
+        }
+        node.timeouts = {
+            source: 0.5 for source in MotionDecisionNode.SOURCES
+        }
+        clock = [1.0]
+        monkeypatch.setattr(time, 'monotonic', lambda: clock[0])
+    
+        hold_heartbeat = String()
+        hold_heartbeat.data = json.dumps(
+            {'sequence': 1, 'active': False, 'auto_ready': False}
+        )
+        MotionDecisionNode._executor_heartbeat_callback(node, hold_heartbeat)
+    
+        line_message = String()
+        line_message.data = json.dumps({'detected': True})
+        MotionDecisionNode._info_callback(node, 'line')(line_message)
+        MotionDecisionNode._publish_decision(node)
+    
+        assert node.publisher.messages == []
+        assert node.command_id == 0
+        assert node.latest_info['line'] is None
+        assert not node.safety_interlock.latched
+    
+        ready_heartbeat = String()
+        ready_heartbeat.data = json.dumps(
+            {'sequence': 2, 'active': False, 'auto_ready': True}
+        )
+        MotionDecisionNode._executor_heartbeat_callback(node, ready_heartbeat)
+        MotionDecisionNode._publish_decision(node)
+    
+        assert node.publisher.messages == []
+        assert node.command_id == 0
+    
+        clock[0] = 1.01
+>       MotionDecisionNode._info_callback(node, 'line')(line_message)
+
+src/mission_control/test/test_motion_decision_node.py:1955: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/mission_control/motion_decision_node.py:1090: in callback
+    MotionDecisionNode._remember_line_corner(self, payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_motion_decision_node.ReadinessPublishNode object at 0xffff9f952c20>
+info = {'detected': True}
+
+    def _remember_line_corner(self, info: dict[str, Any]) -> None:
+        """Refresh real observations; require distinct frames to change direction."""
+        if (
+            self.mission_phase not in MotionDecisionNode.LINE_CORNER_PHASES
+            or self.active_special_command_id is not None
+            or self.active_general_source not in {None, "line"}
+        ):
+            self.pending_line_corner = None
+            self.line_corner_rearm_required = False
+            return
+        gate = self.general_motion_gate
+        if gate.locked and gate.active_action in {"LEFT", "RIGHT"}:
+            return
+        if info.get("detected") is not True:
+            return
+        qualities = [MotionDecisionPlanner._number(info, key) for key in (
+            "heading_quality", "geometry_quality", "detection_quality",
+        )]
+        qualities = [value for value in qualities if value is not None]
+>       min_quality = self.planner.line_planner.config.min_line_quality
+E       AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+
+src/mission_control/mission_control/motion_decision_node.py:3104: AttributeError
+__ test_line_motion_uses_recent_valid_frames_at_capture_threshold[True-True] ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9fac7df0>
+latest_detected = True, latest_ground_valid = True
+
+    @pytest.mark.parametrize("latest_detected", [True, False])
+    @pytest.mark.parametrize("latest_ground_valid", [True, False])
+    def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
+        monkeypatch, latest_detected, latest_ground_valid,
+    ):
+        node = ReadinessPublishNode(general_decision("STRAIGHT"))
+        clock = [10.0]
+        monkeypatch.setattr(time, "monotonic", lambda: clock[0])
+    
+        class RecordingLinePlanner:
+            """Record replayed line frames for one capture-window test."""
+    
+            def __init__(self):
+                self.frames = []
+                self.config = type(
+                    "Config",
+                    (),
+                    {"min_line_quality": 0.35, "heading_source": "ground"},
+                )()
+    
+            def _reset_turn_state(self):
+                pass
+    
+            def plan(self, frame, _dt_sec, *, allow_corner_turns=True):
+                assert allow_corner_turns is True
+                self.frames.append(frame)
+    
+        recording_planner = RecordingLinePlanner()
+        node.planner.line_planner = recording_planner
+        node.planner.observe_line_for_search = lambda _info: None
+    
+        MotionDecisionNode._publish_decision(node)
+        send_status(
+            node,
+            status="RUNNING",
+            action="STRAIGHT",
+            command_id=1,
+            event_id=None,
+            dynamics_command=None,
+        )
+    
+>       assert node.active_line_motion_duration_sec == pytest.approx(2.467)
+E       assert 3.2652631578947373 == 2.467 ± 2.5e-06
+E        +  where 3.2652631578947373 = <test_motion_decision_node.ReadinessPublishNode object at 0xffff9fac7d60>.active_line_motion_duration_sec
+E        +  and   2.467 ± 2.5e-06 = <function approx at 0xffffb1387640>(2.467)
+E        +    where <function approx at 0xffffb1387640> = pytest.approx
+
+src/mission_control/test/test_motion_decision_node.py:2247: AssertionError
+__ test_line_motion_uses_recent_valid_frames_at_capture_threshold[True-False] __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9fac76d0>
+latest_detected = False, latest_ground_valid = True
+
+    @pytest.mark.parametrize("latest_detected", [True, False])
+    @pytest.mark.parametrize("latest_ground_valid", [True, False])
+    def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
+        monkeypatch, latest_detected, latest_ground_valid,
+    ):
+        node = ReadinessPublishNode(general_decision("STRAIGHT"))
+        clock = [10.0]
+        monkeypatch.setattr(time, "monotonic", lambda: clock[0])
+    
+        class RecordingLinePlanner:
+            """Record replayed line frames for one capture-window test."""
+    
+            def __init__(self):
+                self.frames = []
+                self.config = type(
+                    "Config",
+                    (),
+                    {"min_line_quality": 0.35, "heading_source": "ground"},
+                )()
+    
+            def _reset_turn_state(self):
+                pass
+    
+            def plan(self, frame, _dt_sec, *, allow_corner_turns=True):
+                assert allow_corner_turns is True
+                self.frames.append(frame)
+    
+        recording_planner = RecordingLinePlanner()
+        node.planner.line_planner = recording_planner
+        node.planner.observe_line_for_search = lambda _info: None
+    
+        MotionDecisionNode._publish_decision(node)
+        send_status(
+            node,
+            status="RUNNING",
+            action="STRAIGHT",
+            command_id=1,
+            event_id=None,
+            dynamics_command=None,
+        )
+    
+>       assert node.active_line_motion_duration_sec == pytest.approx(2.467)
+E       assert 3.2652631578947373 == 2.467 ± 2.5e-06
+E        +  where 3.2652631578947373 = <test_motion_decision_node.ReadinessPublishNode object at 0xffff9fac7e80>.active_line_motion_duration_sec
+E        +  and   2.467 ± 2.5e-06 = <function approx at 0xffffb1387640>(2.467)
+E        +    where <function approx at 0xffffb1387640> = pytest.approx
+
+src/mission_control/test/test_motion_decision_node.py:2247: AssertionError
+__ test_line_motion_uses_recent_valid_frames_at_capture_threshold[False-True] __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9fac7fd0>
+latest_detected = True, latest_ground_valid = False
+
+    @pytest.mark.parametrize("latest_detected", [True, False])
+    @pytest.mark.parametrize("latest_ground_valid", [True, False])
+    def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
+        monkeypatch, latest_detected, latest_ground_valid,
+    ):
+        node = ReadinessPublishNode(general_decision("STRAIGHT"))
+        clock = [10.0]
+        monkeypatch.setattr(time, "monotonic", lambda: clock[0])
+    
+        class RecordingLinePlanner:
+            """Record replayed line frames for one capture-window test."""
+    
+            def __init__(self):
+                self.frames = []
+                self.config = type(
+                    "Config",
+                    (),
+                    {"min_line_quality": 0.35, "heading_source": "ground"},
+                )()
+    
+            def _reset_turn_state(self):
+                pass
+    
+            def plan(self, frame, _dt_sec, *, allow_corner_turns=True):
+                assert allow_corner_turns is True
+                self.frames.append(frame)
+    
+        recording_planner = RecordingLinePlanner()
+        node.planner.line_planner = recording_planner
+        node.planner.observe_line_for_search = lambda _info: None
+    
+        MotionDecisionNode._publish_decision(node)
+        send_status(
+            node,
+            status="RUNNING",
+            action="STRAIGHT",
+            command_id=1,
+            event_id=None,
+            dynamics_command=None,
+        )
+    
+>       assert node.active_line_motion_duration_sec == pytest.approx(2.467)
+E       assert 3.2652631578947373 == 2.467 ± 2.5e-06
+E        +  where 3.2652631578947373 = <test_motion_decision_node.ReadinessPublishNode object at 0xffffa016d5d0>.active_line_motion_duration_sec
+E        +  and   2.467 ± 2.5e-06 = <function approx at 0xffffb1387640>(2.467)
+E        +    where <function approx at 0xffffb1387640> = pytest.approx
+
+src/mission_control/test/test_motion_decision_node.py:2247: AssertionError
+_ test_line_motion_uses_recent_valid_frames_at_capture_threshold[False-False] __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f92fa30>
+latest_detected = False, latest_ground_valid = False
+
+    @pytest.mark.parametrize("latest_detected", [True, False])
+    @pytest.mark.parametrize("latest_ground_valid", [True, False])
+    def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
+        monkeypatch, latest_detected, latest_ground_valid,
+    ):
+        node = ReadinessPublishNode(general_decision("STRAIGHT"))
+        clock = [10.0]
+        monkeypatch.setattr(time, "monotonic", lambda: clock[0])
+    
+        class RecordingLinePlanner:
+            """Record replayed line frames for one capture-window test."""
+    
+            def __init__(self):
+                self.frames = []
+                self.config = type(
+                    "Config",
+                    (),
+                    {"min_line_quality": 0.35, "heading_source": "ground"},
+                )()
+    
+            def _reset_turn_state(self):
+                pass
+    
+            def plan(self, frame, _dt_sec, *, allow_corner_turns=True):
+                assert allow_corner_turns is True
+                self.frames.append(frame)
+    
+        recording_planner = RecordingLinePlanner()
+        node.planner.line_planner = recording_planner
+        node.planner.observe_line_for_search = lambda _info: None
+    
+        MotionDecisionNode._publish_decision(node)
+        send_status(
+            node,
+            status="RUNNING",
+            action="STRAIGHT",
+            command_id=1,
+            event_id=None,
+            dynamics_command=None,
+        )
+    
+>       assert node.active_line_motion_duration_sec == pytest.approx(2.467)
+E       assert 3.2652631578947373 == 2.467 ± 2.5e-06
+E        +  where 3.2652631578947373 = <test_motion_decision_node.ReadinessPublishNode object at 0xffff9f92f790>.active_line_motion_duration_sec
+E        +  and   2.467 ± 2.5e-06 = <function approx at 0xffffb1387640>(2.467)
+E        +    where <function approx at 0xffffb1387640> = pytest.approx
+
+src/mission_control/test/test_motion_decision_node.py:2247: AssertionError
+__________ test_line_motion_capture_table_matches_deployed_timelines ___________
+
+    def test_line_motion_capture_table_matches_deployed_timelines():
+        expected = {
+            "STRAIGHT": (2.467, 10),
+            "STRAIGHT_1": (0.822, 5),
+            "STRAIGHT_2": (1.644, 10),
+            "STRAIGHT_3": (2.467, 10),
+            "STRAIGHT_4": (3.289, 15),
+            "LEFT": (7.365, 30),
+            "RIGHT": (7.105, 30),
+        }
+        left_timelines = {
+            2: (2.272, 10),
+            4: (3.198, 15),
+            6: (4.124, 20),
+            8: (5.050, 25),
+            10: (5.976, 30),
+            13: (7.365, 30),
+        }
+        right_timelines = {
+            4: (1.895, 5),
+            6: (2.842, 10),
+            8: (3.789, 15),
+            10: (4.737, 20),
+            12: (5.684, 25),
+            15: (7.105, 30),
+        }
+        for recovery_side in ("LEFT", "RIGHT"):
+            for suffix, timeline in left_timelines.items():
+                expected[
+                    f"RECOVER_{recovery_side}_TURN_LEFT_{suffix}"
+                ] = timeline
+            for suffix, timeline in right_timelines.items():
+                expected[
+                    f"RECOVER_{recovery_side}_TURN_RIGHT_{suffix}"
+                ] = timeline
+    
+>       assert MotionDecisionNode.LINE_MOTION_CAPTURE_CONFIG == expected
+E       AssertionError: assert {'LEFT': (2.1...265, 15), ...} == {'LEFT': (7.3...272, 10), ...}
+E         Differing items:
+E         {'RECOVER_RIGHT_TURN_RIGHT_12': (2.06, 15)} != {'RECOVER_RIGHT_TURN_RIGHT_12': (5.684, 25)}
+E         {'RECOVER_LEFT_TURN_RIGHT_15': (2.06, 15)} != {'RECOVER_LEFT_TURN_RIGHT_15': (7.105, 30)}
+E         {'RECOVER_LEFT_TURN_LEFT_4': (2.1894736842105265, 15)} != {'RECOVER_LEFT_TURN_LEFT_4': (3.198, 15)}
+E         {'STRAIGHT_4': (4.353684210526316, 15)} != {'STRAIGHT_4': (3.289, 15)}
+E         {'RECOVER_RIGHT_TURN_LEFT_8': (2.1894736842105265, 15)} != {'RECOVER_RIGHT_TURN_LEFT_8': (5.05, 25)}
+E         {'RECOVER_RIGHT_TURN_RIGHT_6': (2.06, 15)} != {'RECOVER_RIGHT_TURN_RIGHT_6': (2.842, 10)}...
+E         
+E         ...Full output truncated (145 lines hidden), use '-vv' to show
+
+src/mission_control/test/test_motion_decision_node.py:2350: AssertionError
+_________ test_line_prequeue_retries_after_temporary_target_disappears _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f2fe8f0>
+
+    def test_line_prequeue_retries_after_temporary_target_disappears(monkeypatch):
+        node = ReadinessPublishNode(general_decision('STRAIGHT'))
+        node.planner = MotionDecisionPlanner()
+        clock = [10.0]
+        monkeypatch.setattr(time, 'monotonic', lambda: clock[0])
+        line = {
+            'detected': True, 'ground_projection_valid': True,
+            'ground_heading_error_deg': 0., 'filtered_lateral_offset_norm': 0.,
+            'heading_quality': .9, 'geometry_quality': .9, 'detection_quality': .9,
+        }
+        observations = {'line': line, 'goal': {'raw_detected': True}}
+        node._fresh_observations = lambda _now: (dict(observations), {})
+        MotionDecisionNode._publish_decision(node)
+        send_status(node, status='RUNNING', action='STRAIGHT', command_id=1,
+                    event_id=None, dynamics_command=None)
+        clock[0] = 11.8
+        for _ in range(10):
+            MotionDecisionNode._collect_active_line_motion_frame(node, line, clock[0])
+        MotionDecisionNode._prepare_pending_line_decision(node, clock[0])
+        assert node.pending_line_decision is not None
+        assert len(node.publisher.messages) == 1
+    
+        # Still in the SAME running motion: the next frame may now queue straight.
+        observations['goal'] = None
+        clock[0] = 11.9
+>       assert MotionDecisionNode._collect_active_line_motion_frame(node, line, clock[0])
+E       AssertionError: assert False
+E        +  where False = <function MotionDecisionNode._collect_active_line_motion_frame at 0xffffa02f01f0>(<test_motion_decision_node.ReadinessPublishNode object at 0xffff9f2fe6b0>, {'detected': True, 'detection_quality': 0.9, 'filtered_lateral_offset_norm': 0.0, 'geometry_quality': 0.9, ...}, 11.9)
+E        +    where <function MotionDecisionNode._collect_active_line_motion_frame at 0xffffa02f01f0> = MotionDecisionNode._collect_active_line_motion_frame
+
+src/mission_control/test/test_motion_decision_node.py:2378: AssertionError
+_ test_mock_line_input_is_fresh_and_produces_action[turn_left-RECOVER_LEFT_TURN_LEFT_4] _
+
+scenario = 'turn_left', expected_action = 'RECOVER_LEFT_TURN_LEFT_4'
+
+    @pytest.mark.parametrize(
+        ("scenario", "expected_action"),
+        [
+            ("straight", "STRAIGHT"),
+            ("turn_left", "RECOVER_LEFT_TURN_LEFT_4"),
+            ("turn_right", "RECOVER_RIGHT_TURN_RIGHT_4"),
+        ],
+    )
+    def test_mock_line_input_is_fresh_and_produces_action(
+        scenario, expected_action
+    ):
+        node = FreshMockInputNode()
+        topic, payload = build_mock_vision_input(scenario)
+        assert topic == "/vision/line_info"
+    
+        message = String()
+        message.data = json.dumps(payload)
+        MotionDecisionNode._info_callback(node, "line")(message)
+    
+        received_at = node.latest_time["line"]
+        assert received_at is not None
+        observations, ages = MotionDecisionNode._fresh_observations(
+            node,
+            now=received_at + 0.1,
+        )
+        assert observations["line"] == payload
+        assert ages["line"] == pytest.approx(0.1)
+    
+        decision = MotionDecisionNode._select_mission_decision(
+            node,
+            observations,
+            0.1,
+        )
+        assert decision.reason != "no_fresh_detected_target"
+>       assert decision.action == expected_action
+E       AssertionError: assert 'STRAIGHT' == 'RECOVER_LEFT_TURN_LEFT_4'
+E         - RECOVER_LEFT_TURN_LEFT_4
+E         + STRAIGHT
+
+src/mission_control/test/test_motion_decision_node.py:3368: AssertionError
+_ test_mock_line_input_is_fresh_and_produces_action[turn_right-RECOVER_RIGHT_TURN_RIGHT_4] _
+
+scenario = 'turn_right', expected_action = 'RECOVER_RIGHT_TURN_RIGHT_4'
+
+    @pytest.mark.parametrize(
+        ("scenario", "expected_action"),
+        [
+            ("straight", "STRAIGHT"),
+            ("turn_left", "RECOVER_LEFT_TURN_LEFT_4"),
+            ("turn_right", "RECOVER_RIGHT_TURN_RIGHT_4"),
+        ],
+    )
+    def test_mock_line_input_is_fresh_and_produces_action(
+        scenario, expected_action
+    ):
+        node = FreshMockInputNode()
+        topic, payload = build_mock_vision_input(scenario)
+        assert topic == "/vision/line_info"
+    
+        message = String()
+        message.data = json.dumps(payload)
+        MotionDecisionNode._info_callback(node, "line")(message)
+    
+        received_at = node.latest_time["line"]
+        assert received_at is not None
+        observations, ages = MotionDecisionNode._fresh_observations(
+            node,
+            now=received_at + 0.1,
+        )
+        assert observations["line"] == payload
+        assert ages["line"] == pytest.approx(0.1)
+    
+        decision = MotionDecisionNode._select_mission_decision(
+            node,
+            observations,
+            0.1,
+        )
+        assert decision.reason != "no_fresh_detected_target"
+>       assert decision.action == expected_action
+E       AssertionError: assert 'STRAIGHT' == 'RECOVER_RIGHT_TURN_RIGHT_4'
+E         - RECOVER_RIGHT_TURN_RIGHT_4
+E         + STRAIGHT
+
+src/mission_control/test/test_motion_decision_node.py:3368: AssertionError
+_____ test_all_line_stationary_turns_pause_one_second_before_publish[LEFT] _____
+
+action = 'LEFT'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f4f1b10>
+
+    @pytest.mark.parametrize("action", [
+        "LEFT", "RIGHT", "LINE_LOST_TURN_LEFT", "LINE_LOST_TURN_RIGHT",
+        "POST_BALL_LINE_TURN_LEFT_2", "POST_BALL_LINE_TURN_RIGHT_3",
+        "POST_SHOT_LINE_TURN_LEFT_2", "POST_SHOT_LINE_TURN_RIGHT_3",
+    ])
+    def test_all_line_stationary_turns_pause_one_second_before_publish(action, monkeypatch):
+        clock = [10.0]
+        monkeypatch.setattr(time, "monotonic", lambda: clock[0])
+        node = ReadinessPublishNode(general_decision(action))
+        node._fresh_observations = lambda _now: ({"line": {"detected": not action.startswith("LINE_LOST_TURN_")}}, {})
+        node.LINE_TURN_PRE_MOTION_SETTLE_SEC = MotionDecisionNode.LINE_TURN_PRE_MOTION_SETTLE_SEC
+        node.pre_motion_settle_sec = 0.0
+>       MotionDecisionNode._publish_decision(node)
+
+src/mission_control/test/test_motion_decision_node.py:4582: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/mission_control/motion_decision_node.py:4072: in _publish_decision
+    decision = MotionDecisionNode._apply_pending_line_corner(
+src/mission_control/mission_control/motion_decision_node.py:3199: in _apply_pending_line_corner
+    MotionDecisionNode._remember_line_corner(self, info)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_motion_decision_node.ReadinessPublishNode object at 0xffff9f4f2650>
+info = {'detected': True}
+
+    def _remember_line_corner(self, info: dict[str, Any]) -> None:
+        """Refresh real observations; require distinct frames to change direction."""
+        if (
+            self.mission_phase not in MotionDecisionNode.LINE_CORNER_PHASES
+            or self.active_special_command_id is not None
+            or self.active_general_source not in {None, "line"}
+        ):
+            self.pending_line_corner = None
+            self.line_corner_rearm_required = False
+            return
+        gate = self.general_motion_gate
+        if gate.locked and gate.active_action in {"LEFT", "RIGHT"}:
+            return
+        if info.get("detected") is not True:
+            return
+        qualities = [MotionDecisionPlanner._number(info, key) for key in (
+            "heading_quality", "geometry_quality", "detection_quality",
+        )]
+        qualities = [value for value in qualities if value is not None]
+>       min_quality = self.planner.line_planner.config.min_line_quality
+E       AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+
+src/mission_control/mission_control/motion_decision_node.py:3104: AttributeError
+____ test_all_line_stationary_turns_pause_one_second_before_publish[RIGHT] _____
+
+action = 'RIGHT'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f4f12d0>
+
+    @pytest.mark.parametrize("action", [
+        "LEFT", "RIGHT", "LINE_LOST_TURN_LEFT", "LINE_LOST_TURN_RIGHT",
+        "POST_BALL_LINE_TURN_LEFT_2", "POST_BALL_LINE_TURN_RIGHT_3",
+        "POST_SHOT_LINE_TURN_LEFT_2", "POST_SHOT_LINE_TURN_RIGHT_3",
+    ])
+    def test_all_line_stationary_turns_pause_one_second_before_publish(action, monkeypatch):
+        clock = [10.0]
+        monkeypatch.setattr(time, "monotonic", lambda: clock[0])
+        node = ReadinessPublishNode(general_decision(action))
+        node._fresh_observations = lambda _now: ({"line": {"detected": not action.startswith("LINE_LOST_TURN_")}}, {})
+        node.LINE_TURN_PRE_MOTION_SETTLE_SEC = MotionDecisionNode.LINE_TURN_PRE_MOTION_SETTLE_SEC
+        node.pre_motion_settle_sec = 0.0
+>       MotionDecisionNode._publish_decision(node)
+
+src/mission_control/test/test_motion_decision_node.py:4582: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/mission_control/motion_decision_node.py:4072: in _publish_decision
+    decision = MotionDecisionNode._apply_pending_line_corner(
+src/mission_control/mission_control/motion_decision_node.py:3199: in _apply_pending_line_corner
+    MotionDecisionNode._remember_line_corner(self, info)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_motion_decision_node.ReadinessPublishNode object at 0xffff9f4f2320>
+info = {'detected': True}
+
+    def _remember_line_corner(self, info: dict[str, Any]) -> None:
+        """Refresh real observations; require distinct frames to change direction."""
+        if (
+            self.mission_phase not in MotionDecisionNode.LINE_CORNER_PHASES
+            or self.active_special_command_id is not None
+            or self.active_general_source not in {None, "line"}
+        ):
+            self.pending_line_corner = None
+            self.line_corner_rearm_required = False
+            return
+        gate = self.general_motion_gate
+        if gate.locked and gate.active_action in {"LEFT", "RIGHT"}:
+            return
+        if info.get("detected") is not True:
+            return
+        qualities = [MotionDecisionPlanner._number(info, key) for key in (
+            "heading_quality", "geometry_quality", "detection_quality",
+        )]
+        qualities = [value for value in qualities if value is not None]
+>       min_quality = self.planner.line_planner.config.min_line_quality
+E       AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+
+src/mission_control/mission_control/motion_decision_node.py:3104: AttributeError
+_ test_all_line_stationary_turns_pause_one_second_before_publish[POST_BALL_LINE_TURN_LEFT_2] _
+
+action = 'POST_BALL_LINE_TURN_LEFT_2'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f4f2c50>
+
+    @pytest.mark.parametrize("action", [
+        "LEFT", "RIGHT", "LINE_LOST_TURN_LEFT", "LINE_LOST_TURN_RIGHT",
+        "POST_BALL_LINE_TURN_LEFT_2", "POST_BALL_LINE_TURN_RIGHT_3",
+        "POST_SHOT_LINE_TURN_LEFT_2", "POST_SHOT_LINE_TURN_RIGHT_3",
+    ])
+    def test_all_line_stationary_turns_pause_one_second_before_publish(action, monkeypatch):
+        clock = [10.0]
+        monkeypatch.setattr(time, "monotonic", lambda: clock[0])
+        node = ReadinessPublishNode(general_decision(action))
+        node._fresh_observations = lambda _now: ({"line": {"detected": not action.startswith("LINE_LOST_TURN_")}}, {})
+        node.LINE_TURN_PRE_MOTION_SETTLE_SEC = MotionDecisionNode.LINE_TURN_PRE_MOTION_SETTLE_SEC
+        node.pre_motion_settle_sec = 0.0
+>       MotionDecisionNode._publish_decision(node)
+
+src/mission_control/test/test_motion_decision_node.py:4582: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/mission_control/motion_decision_node.py:4072: in _publish_decision
+    decision = MotionDecisionNode._apply_pending_line_corner(
+src/mission_control/mission_control/motion_decision_node.py:3199: in _apply_pending_line_corner
+    MotionDecisionNode._remember_line_corner(self, info)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_motion_decision_node.ReadinessPublishNode object at 0xffff9f4f0700>
+info = {'detected': True}
+
+    def _remember_line_corner(self, info: dict[str, Any]) -> None:
+        """Refresh real observations; require distinct frames to change direction."""
+        if (
+            self.mission_phase not in MotionDecisionNode.LINE_CORNER_PHASES
+            or self.active_special_command_id is not None
+            or self.active_general_source not in {None, "line"}
+        ):
+            self.pending_line_corner = None
+            self.line_corner_rearm_required = False
+            return
+        gate = self.general_motion_gate
+        if gate.locked and gate.active_action in {"LEFT", "RIGHT"}:
+            return
+        if info.get("detected") is not True:
+            return
+        qualities = [MotionDecisionPlanner._number(info, key) for key in (
+            "heading_quality", "geometry_quality", "detection_quality",
+        )]
+        qualities = [value for value in qualities if value is not None]
+>       min_quality = self.planner.line_planner.config.min_line_quality
+E       AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+
+src/mission_control/mission_control/motion_decision_node.py:3104: AttributeError
+_ test_all_line_stationary_turns_pause_one_second_before_publish[POST_BALL_LINE_TURN_RIGHT_3] _
+
+action = 'POST_BALL_LINE_TURN_RIGHT_3'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f715ff0>
+
+    @pytest.mark.parametrize("action", [
+        "LEFT", "RIGHT", "LINE_LOST_TURN_LEFT", "LINE_LOST_TURN_RIGHT",
+        "POST_BALL_LINE_TURN_LEFT_2", "POST_BALL_LINE_TURN_RIGHT_3",
+        "POST_SHOT_LINE_TURN_LEFT_2", "POST_SHOT_LINE_TURN_RIGHT_3",
+    ])
+    def test_all_line_stationary_turns_pause_one_second_before_publish(action, monkeypatch):
+        clock = [10.0]
+        monkeypatch.setattr(time, "monotonic", lambda: clock[0])
+        node = ReadinessPublishNode(general_decision(action))
+        node._fresh_observations = lambda _now: ({"line": {"detected": not action.startswith("LINE_LOST_TURN_")}}, {})
+        node.LINE_TURN_PRE_MOTION_SETTLE_SEC = MotionDecisionNode.LINE_TURN_PRE_MOTION_SETTLE_SEC
+        node.pre_motion_settle_sec = 0.0
+>       MotionDecisionNode._publish_decision(node)
+
+src/mission_control/test/test_motion_decision_node.py:4582: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/mission_control/motion_decision_node.py:4072: in _publish_decision
+    decision = MotionDecisionNode._apply_pending_line_corner(
+src/mission_control/mission_control/motion_decision_node.py:3199: in _apply_pending_line_corner
+    MotionDecisionNode._remember_line_corner(self, info)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_motion_decision_node.ReadinessPublishNode object at 0xffff9f714160>
+info = {'detected': True}
+
+    def _remember_line_corner(self, info: dict[str, Any]) -> None:
+        """Refresh real observations; require distinct frames to change direction."""
+        if (
+            self.mission_phase not in MotionDecisionNode.LINE_CORNER_PHASES
+            or self.active_special_command_id is not None
+            or self.active_general_source not in {None, "line"}
+        ):
+            self.pending_line_corner = None
+            self.line_corner_rearm_required = False
+            return
+        gate = self.general_motion_gate
+        if gate.locked and gate.active_action in {"LEFT", "RIGHT"}:
+            return
+        if info.get("detected") is not True:
+            return
+        qualities = [MotionDecisionPlanner._number(info, key) for key in (
+            "heading_quality", "geometry_quality", "detection_quality",
+        )]
+        qualities = [value for value in qualities if value is not None]
+>       min_quality = self.planner.line_planner.config.min_line_quality
+E       AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+
+src/mission_control/mission_control/motion_decision_node.py:3104: AttributeError
+_ test_all_line_stationary_turns_pause_one_second_before_publish[POST_SHOT_LINE_TURN_LEFT_2] _
+
+action = 'POST_SHOT_LINE_TURN_LEFT_2'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f92df60>
+
+    @pytest.mark.parametrize("action", [
+        "LEFT", "RIGHT", "LINE_LOST_TURN_LEFT", "LINE_LOST_TURN_RIGHT",
+        "POST_BALL_LINE_TURN_LEFT_2", "POST_BALL_LINE_TURN_RIGHT_3",
+        "POST_SHOT_LINE_TURN_LEFT_2", "POST_SHOT_LINE_TURN_RIGHT_3",
+    ])
+    def test_all_line_stationary_turns_pause_one_second_before_publish(action, monkeypatch):
+        clock = [10.0]
+        monkeypatch.setattr(time, "monotonic", lambda: clock[0])
+        node = ReadinessPublishNode(general_decision(action))
+        node._fresh_observations = lambda _now: ({"line": {"detected": not action.startswith("LINE_LOST_TURN_")}}, {})
+        node.LINE_TURN_PRE_MOTION_SETTLE_SEC = MotionDecisionNode.LINE_TURN_PRE_MOTION_SETTLE_SEC
+        node.pre_motion_settle_sec = 0.0
+>       MotionDecisionNode._publish_decision(node)
+
+src/mission_control/test/test_motion_decision_node.py:4582: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/mission_control/motion_decision_node.py:4072: in _publish_decision
+    decision = MotionDecisionNode._apply_pending_line_corner(
+src/mission_control/mission_control/motion_decision_node.py:3199: in _apply_pending_line_corner
+    MotionDecisionNode._remember_line_corner(self, info)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_motion_decision_node.ReadinessPublishNode object at 0xffff9f92e080>
+info = {'detected': True}
+
+    def _remember_line_corner(self, info: dict[str, Any]) -> None:
+        """Refresh real observations; require distinct frames to change direction."""
+        if (
+            self.mission_phase not in MotionDecisionNode.LINE_CORNER_PHASES
+            or self.active_special_command_id is not None
+            or self.active_general_source not in {None, "line"}
+        ):
+            self.pending_line_corner = None
+            self.line_corner_rearm_required = False
+            return
+        gate = self.general_motion_gate
+        if gate.locked and gate.active_action in {"LEFT", "RIGHT"}:
+            return
+        if info.get("detected") is not True:
+            return
+        qualities = [MotionDecisionPlanner._number(info, key) for key in (
+            "heading_quality", "geometry_quality", "detection_quality",
+        )]
+        qualities = [value for value in qualities if value is not None]
+>       min_quality = self.planner.line_planner.config.min_line_quality
+E       AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+
+src/mission_control/mission_control/motion_decision_node.py:3104: AttributeError
+_ test_all_line_stationary_turns_pause_one_second_before_publish[POST_SHOT_LINE_TURN_RIGHT_3] _
+
+action = 'POST_SHOT_LINE_TURN_RIGHT_3'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f6b7100>
+
+    @pytest.mark.parametrize("action", [
+        "LEFT", "RIGHT", "LINE_LOST_TURN_LEFT", "LINE_LOST_TURN_RIGHT",
+        "POST_BALL_LINE_TURN_LEFT_2", "POST_BALL_LINE_TURN_RIGHT_3",
+        "POST_SHOT_LINE_TURN_LEFT_2", "POST_SHOT_LINE_TURN_RIGHT_3",
+    ])
+    def test_all_line_stationary_turns_pause_one_second_before_publish(action, monkeypatch):
+        clock = [10.0]
+        monkeypatch.setattr(time, "monotonic", lambda: clock[0])
+        node = ReadinessPublishNode(general_decision(action))
+        node._fresh_observations = lambda _now: ({"line": {"detected": not action.startswith("LINE_LOST_TURN_")}}, {})
+        node.LINE_TURN_PRE_MOTION_SETTLE_SEC = MotionDecisionNode.LINE_TURN_PRE_MOTION_SETTLE_SEC
+        node.pre_motion_settle_sec = 0.0
+>       MotionDecisionNode._publish_decision(node)
+
+src/mission_control/test/test_motion_decision_node.py:4582: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/mission_control/motion_decision_node.py:4072: in _publish_decision
+    decision = MotionDecisionNode._apply_pending_line_corner(
+src/mission_control/mission_control/motion_decision_node.py:3199: in _apply_pending_line_corner
+    MotionDecisionNode._remember_line_corner(self, info)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_motion_decision_node.ReadinessPublishNode object at 0xffff9f6b7ee0>
+info = {'detected': True}
+
+    def _remember_line_corner(self, info: dict[str, Any]) -> None:
+        """Refresh real observations; require distinct frames to change direction."""
+        if (
+            self.mission_phase not in MotionDecisionNode.LINE_CORNER_PHASES
+            or self.active_special_command_id is not None
+            or self.active_general_source not in {None, "line"}
+        ):
+            self.pending_line_corner = None
+            self.line_corner_rearm_required = False
+            return
+        gate = self.general_motion_gate
+        if gate.locked and gate.active_action in {"LEFT", "RIGHT"}:
+            return
+        if info.get("detected") is not True:
+            return
+        qualities = [MotionDecisionPlanner._number(info, key) for key in (
+            "heading_quality", "geometry_quality", "detection_quality",
+        )]
+        qualities = [value for value in qualities if value is not None]
+>       min_quality = self.planner.line_planner.config.min_line_quality
+E       AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+
+src/mission_control/mission_control/motion_decision_node.py:3104: AttributeError
+____ test_enter_gate_discards_vision_until_enter_and_executor_ready[False] _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f4f21a0>
+executor_ready_at_enter = False
+
+    @pytest.mark.parametrize('executor_ready_at_enter', [False, True])
+    def test_enter_gate_discards_vision_until_enter_and_executor_ready(
+        monkeypatch, executor_ready_at_enter,
+    ):
+        node = ReadinessPublishNode(general_decision('STRAIGHT'))
+        node.decision_started = False
+        node.executor_auto_ready = executor_ready_at_enter
+        node.timeouts = {source: 0.5 for source in MotionDecisionNode.SOURCES}
+        monkeypatch.setattr(time, 'monotonic', lambda: 1.0)
+        read_fd, write_fd = os.pipe2(os.O_NONBLOCK)
+        node.start_terminal_fd = read_fd
+        message = String()
+        message.data = json.dumps({'detected': True})
+        try:
+            for source in MotionDecisionNode.SOURCES:
+                MotionDecisionNode._info_callback(node, source)(message)
+            MotionDecisionNode._publish_decision(node)
+            assert all(info is None for info in node.latest_info.values())
+            assert node.publisher.messages == []
+            assert node.command_id == 0
+            assert not node.decision_started
+    
+            os.write(write_fd, b'\n')
+            MotionDecisionNode._publish_decision(node)
+            assert node.decision_started
+            assert node.start_terminal_fd is None
+            MotionDecisionNode._publish_decision(node)
+            assert node.publisher.messages == []
+    
+            if not executor_ready_at_enter:
+                MotionDecisionNode._info_callback(node, 'line')(message)
+                assert node.latest_info['line'] is None
+                heartbeat = String()
+                heartbeat.data = json.dumps({'sequence': 1, 'auto_ready': True})
+                MotionDecisionNode._executor_heartbeat_callback(node, heartbeat)
+                MotionDecisionNode._publish_decision(node)
+                assert node.publisher.messages == []
+    
+>           MotionDecisionNode._info_callback(node, 'line')(message)
+
+src/mission_control/test/test_motion_decision_node.py:4662: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/mission_control/motion_decision_node.py:1090: in callback
+    MotionDecisionNode._remember_line_corner(self, payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_motion_decision_node.ReadinessPublishNode object at 0xffff9f4f1d20>
+info = {'detected': True}
+
+    def _remember_line_corner(self, info: dict[str, Any]) -> None:
+        """Refresh real observations; require distinct frames to change direction."""
+        if (
+            self.mission_phase not in MotionDecisionNode.LINE_CORNER_PHASES
+            or self.active_special_command_id is not None
+            or self.active_general_source not in {None, "line"}
+        ):
+            self.pending_line_corner = None
+            self.line_corner_rearm_required = False
+            return
+        gate = self.general_motion_gate
+        if gate.locked and gate.active_action in {"LEFT", "RIGHT"}:
+            return
+        if info.get("detected") is not True:
+            return
+        qualities = [MotionDecisionPlanner._number(info, key) for key in (
+            "heading_quality", "geometry_quality", "detection_quality",
+        )]
+        qualities = [value for value in qualities if value is not None]
+>       min_quality = self.planner.line_planner.config.min_line_quality
+E       AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+
+src/mission_control/mission_control/motion_decision_node.py:3104: AttributeError
+_____ test_enter_gate_discards_vision_until_enter_and_executor_ready[True] _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9fff36d0>
+executor_ready_at_enter = True
+
+    @pytest.mark.parametrize('executor_ready_at_enter', [False, True])
+    def test_enter_gate_discards_vision_until_enter_and_executor_ready(
+        monkeypatch, executor_ready_at_enter,
+    ):
+        node = ReadinessPublishNode(general_decision('STRAIGHT'))
+        node.decision_started = False
+        node.executor_auto_ready = executor_ready_at_enter
+        node.timeouts = {source: 0.5 for source in MotionDecisionNode.SOURCES}
+        monkeypatch.setattr(time, 'monotonic', lambda: 1.0)
+        read_fd, write_fd = os.pipe2(os.O_NONBLOCK)
+        node.start_terminal_fd = read_fd
+        message = String()
+        message.data = json.dumps({'detected': True})
+        try:
+            for source in MotionDecisionNode.SOURCES:
+                MotionDecisionNode._info_callback(node, source)(message)
+            MotionDecisionNode._publish_decision(node)
+            assert all(info is None for info in node.latest_info.values())
+            assert node.publisher.messages == []
+            assert node.command_id == 0
+            assert not node.decision_started
+    
+            os.write(write_fd, b'\n')
+            MotionDecisionNode._publish_decision(node)
+            assert node.decision_started
+            assert node.start_terminal_fd is None
+            MotionDecisionNode._publish_decision(node)
+            assert node.publisher.messages == []
+    
+            if not executor_ready_at_enter:
+                MotionDecisionNode._info_callback(node, 'line')(message)
+                assert node.latest_info['line'] is None
+                heartbeat = String()
+                heartbeat.data = json.dumps({'sequence': 1, 'auto_ready': True})
+                MotionDecisionNode._executor_heartbeat_callback(node, heartbeat)
+                MotionDecisionNode._publish_decision(node)
+                assert node.publisher.messages == []
+    
+>           MotionDecisionNode._info_callback(node, 'line')(message)
+
+src/mission_control/test/test_motion_decision_node.py:4662: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/mission_control/motion_decision_node.py:1090: in callback
+    MotionDecisionNode._remember_line_corner(self, payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_motion_decision_node.ReadinessPublishNode object at 0xffff9f4f08e0>
+info = {'detected': True}
+
+    def _remember_line_corner(self, info: dict[str, Any]) -> None:
+        """Refresh real observations; require distinct frames to change direction."""
+        if (
+            self.mission_phase not in MotionDecisionNode.LINE_CORNER_PHASES
+            or self.active_special_command_id is not None
+            or self.active_general_source not in {None, "line"}
+        ):
+            self.pending_line_corner = None
+            self.line_corner_rearm_required = False
+            return
+        gate = self.general_motion_gate
+        if gate.locked and gate.active_action in {"LEFT", "RIGHT"}:
+            return
+        if info.get("detected") is not True:
+            return
+        qualities = [MotionDecisionPlanner._number(info, key) for key in (
+            "heading_quality", "geometry_quality", "detection_quality",
+        )]
+        qualities = [value for value in qualities if value is not None]
+>       min_quality = self.planner.line_planner.config.min_line_quality
+E       AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+
+src/mission_control/mission_control/motion_decision_node.py:3104: AttributeError
+_____________ test_line_prequeue_ignores_only_completed_hurdles[2] _____________
+
+completed = 2
+
+    @pytest.mark.parametrize("completed", [0, 1, 2])
+    def test_line_prequeue_ignores_only_completed_hurdles(completed):
+        node = ReadinessPublishNode(general_decision("STRAIGHT"))
+        node.planner = MotionDecisionPlanner()
+        node.phase_manager.hurdles_completed = completed
+        observations = {"hurdle": hurdle_info_for_node()}
+>       assert MotionDecisionNode._line_only_prequeue_allowed(
+            node, observations,
+        ) is (completed == 2)
+E       AssertionError: assert False is (2 == 2)
+E        +  where False = <function MotionDecisionNode._line_only_prequeue_allowed at 0xffffa02f0940>(<test_motion_decision_node.ReadinessPublishNode object at 0xffff9f71aad0>, {'hurdle': {'bottom_distance_px': 200, 'camera_center_offset_x_px': 0, 'confidence': 0.9, 'confirmation_confirmed': True, ...}})
+E        +    where <function MotionDecisionNode._line_only_prequeue_allowed at 0xffffa02f0940> = MotionDecisionNode._line_only_prequeue_allowed
+
+src/mission_control/test/test_motion_decision_node.py:4872: AssertionError
+_ test_collected_ball_route_clears_stale_reservations_before_dwell[GOAL_APPROACH-GOAL_CAMERA90_FINE_FORWARD_2] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f73cc10>
+phase = 'GOAL_APPROACH', expected_action = 'GOAL_CAMERA90_FINE_FORWARD_2'
+
+    @pytest.mark.parametrize("phase,expected_action", [
+        ("POST_BALL_LINE_ALIGN", "RECOVER_RIGHT_TURN_RIGHT_4"),
+        ("GOAL_APPROACH", "GOAL_CAMERA90_FINE_FORWARD_2"),
+    ])
+    def test_collected_ball_route_clears_stale_reservations_before_dwell(
+        monkeypatch, phase, expected_action,
+    ):
+        monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: 10.0)
+        harness = MissionFlowHarness(phase=phase)
+        harness.phase_manager.pickups_completed = 1
+        harness.phase_manager.ball_grasp_results[1] = "GRABBED"
+        seed_old_ball_navigation(harness)
+    
+        command = harness.publish_vision(
+            line=line_info(heading=34.0), goal=approaching_goal(),
+            ball={"detected": False, "raw_detected": False},
+        )[-1]
+    
+>       assert command["action"] == expected_action
+E       AssertionError: assert 'GOAL_CAMERA_90_FORWARD_2' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E         - GOAL_CAMERA90_FINE_FORWARD_2
+E         ?              -----
+E         + GOAL_CAMERA_90_FORWARD_2
+E         ?            +
+
+src/mission_control/test/test_mission_phase_flow.py:505: AssertionError
+______ test_post_ball_detection_loss_cannot_interrupt_timed_line_or_goal _______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f71eb30>
+
+    def test_post_ball_detection_loss_cannot_interrupt_timed_line_or_goal(monkeypatch):
+        now = [10.0]
+        monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: now[0])
+        harness = MissionFlowHarness(phase="BALL_APPROACH")
+        pickup = publish_special(harness, "ball", pickup_ready_ball(), "PICKUP_NOW")
+        harness.phase_manager.record_active_pickup_grasp_result("GRABBED")
+        complete_active(harness, "PICKUP_NOW", pickup["command_id"])
+        receive = MotionDecisionNode._info_callback(harness, "ball")
+        receive(String(data=json.dumps({"detected": False, "raw_detected": True})))
+        line = harness.publish_vision(line=line_info())[-1]
+        assert line["source"] == "line"
+        assert line["mission_progress"]["ball_mode_active"] is False
+        release_general(harness, line)
+        receive(String(data=json.dumps(approaching_ball())))
+        now[0] = 20.0
+        transition = harness.publish_vision(line=line_info())[-1]
+        assert transition["action"] == "POST_BALL_GOAL_TRANSITION"
+        receive(String(data=json.dumps({"detected": False, "raw_detected": True})))
+        assert all(c["action"] == "WAIT" for c in harness.publish_vision())
+        complete_active(harness, transition["action"], transition["command_id"])
+        assert harness.mission_phase == "GOAL_APPROACH"
+        assert harness.goal_post_motion_dwell_until is None
+>       assert harness.publish_vision(goal=approaching_goal())[-1]["action"] == "GOAL_CAMERA90_FINE_FORWARD_2"
+E       AssertionError: assert 'GOAL_CAMERA_90_FORWARD_2' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E         - GOAL_CAMERA90_FINE_FORWARD_2
+E         ?              -----
+E         + GOAL_CAMERA_90_FORWARD_2
+E         ?            +
+
+src/mission_control/test/test_mission_phase_flow.py:564: AssertionError
+_______ test_ball_loss_waits_then_reacquired_ball_selects_moving_recover _______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f7169b0>
+
+    def test_ball_loss_waits_then_reacquired_ball_selects_moving_recover(monkeypatch):
+        harness = MissionFlowHarness(phase="BALL_APPROACH")
+        harness.BALL_POST_MOTION_DWELL_SEC = 3.0
+        now = [10.0]
+        monkeypatch.setattr(
+            "mission_control.motion_decision_node.time.monotonic", lambda: now[0],
+        )
+        visible_ball = approaching_ball()
+        visible_ball["steering_angle_deg"] = -31.0
+        visible_ball["camera_center_offset_x_px"] = -100
+        approach = harness.publish_vision(ball=visible_ball, line=line_info(offset=-0.24))[-1]
+>       assert approach["action"] == "BALL_APPROACH_RECOVER_LEFT_4"
+E       AssertionError: assert 'BALL_APPROACH_TURN_LEFT_2' == 'BALL_APPROACH_RECOVER_LEFT_4'
+E         - BALL_APPROACH_RECOVER_LEFT_4
+E         ?                ^^^^^^      ^
+E         + BALL_APPROACH_TURN_LEFT_2
+E         ?               ++ ^      ^
+
+src/mission_control/test/test_mission_phase_flow.py:1032: AssertionError
+____ test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell _____
+
+    def test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell():
+        harness = MissionFlowHarness(phase="BALL_APPROACH")
+        close_ball = pickup_ready_ball()
+        close_ball.update(
+            {
+                "depth_m": 0.56,
+                "distance_m": 0.56,
+                "pickup_ready": False,
+                "pickup_now": False,
+            }
+        )
+    
+        MotionDecisionNode._latch_ball_pickup_entry(harness, close_ball)
+    
+>       assert harness.ball_pickup_entry_pending is True
+E       assert False is True
+E        +  where False = <test_mission_phase_flow.MissionFlowHarness object at 0xffff9f71fdf0>.ball_pickup_entry_pending
+
+src/mission_control/test/test_mission_phase_flow.py:1083: AssertionError
+_____ test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment ______
+
+    def test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment():
+        harness = MissionFlowHarness(phase="BALL_APPROACH")
+        pickup = publish_special(
+            harness,
+            "ball",
+            pickup_ready_ball(),
+            "PICKUP_NOW",
+        )
+        harness.pickup_positioning_motion_running = True
+        harness.pickup_positioning_motion_id = "ball_camera_down_forward_2"
+        harness.pickup_positioning_ball_seen_during_motion = True
+        lost_ball = {"detected": False, "raw_detected": False, "ball_loss_confirmed": True}
+        MotionDecisionNode._track_pickup_positioning_ball_loss(
+            harness,
+            lost_ball,
+        )
+    
+        latch = harness.publish_vision(ball=lost_ball)[-1]
+        assert latch["action"] == harness.PICKUP_POSITIONING_LOSS_LATCH_ACTION
+        assert latch["sdk_motion_requested"] is False
+        assert latch["active_special_command_id"] == pickup["command_id"]
+    
+        harness.send_status(
+            "PICKUP_NOW",
+            pickup["command_id"],
+            "RUNNING",
+            motion_id=MotionDecisionNode.PICKUP_INITIAL_ALIGN_MARKER,
+        )
+        assert harness.pickup_initial_align_waiting is True
+        waiting = harness.publish_vision(ball=lost_ball)[-1]
+        assert waiting["action"] == "WAIT"
+        assert waiting["sdk_motion_requested"] is False
+    
+        left_ball = pickup_ready_ball()
+        left_ball["steering_angle_deg"] = -30.0
+        left_ball["offset_x_norm"] = -0.2
+        turn = harness.publish_vision(ball=left_ball)[-1]
+>       assert turn["action"] == "BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_1"
+E       AssertionError: assert 'BALL_PICKUP_...N_TURN_LEFT_2' == 'BALL_PICKUP_...N_TURN_LEFT_1'
+E         - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_1
+E         ?                                   ^
+E         + BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_2
+E         ?                                   ^
+
+src/mission_control/test/test_mission_phase_flow.py:1205: AssertionError
+_________________ test_full_course_mock_flow_without_ros_graph _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f2fe860>
+
+    def test_full_course_mock_flow_without_ros_graph(monkeypatch):
+        harness = MissionFlowHarness(required_ball_sections=1)
+    
+        straight = harness.publish_vision(line=line_info())
+        assert [item["action"] for item in straight] == ["STRAIGHT"]
+        repeated = harness.publish_vision(line=line_info())
+        assert repeated == []
+        release_general(harness, straight[0])
+    
+        recovery = harness.publish_vision(line=line_info(offset=-0.24))
+        assert [item["action"] for item in recovery] == ["STRAIGHT"]
+        assert recovery[0]["valid"] is True
+        assert recovery[0]["reason"] == "line_tracking"
+        assert map_action_to_motion_id(recovery[0]["action"]) == "forward"
+        assert harness.general_motion_gate.locked is True
+        release_general(harness, recovery[0])
+    
+        large = harness.publish_vision(line=line_info(offset=0.35))
+        assert [item["action"] for item in large] == ["STRAIGHT"]
+        assert large[0]["valid"] is True
+        assert map_action_to_motion_id(large[0]["action"]) == "forward"
+        release_general(harness, large[0])
+    
+        approach_ball = harness.publish_vision(
+            line=line_info(),
+            ball=approaching_ball(),
+        )
+        assert approach_ball[-1]["source"] == "ball"
+>       assert approach_ball[-1]["action"] == "STRAIGHT_2"
+E       AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E         - STRAIGHT_2
+E         ?         --
+E         + STRAIGHT
+
+src/mission_control/test/test_mission_phase_flow.py:1290: AssertionError
+___________ test_confirmed_approaching_hurdle_beats_approaching_ball ___________
+
+    def test_confirmed_approaching_hurdle_beats_approaching_ball():
+        harness = MissionFlowHarness()
+    
+        published = harness.publish_vision(
+            line=line_info(),
+            ball=approaching_ball(),
+            hurdle=approaching_hurdle(),
+        )
+    
+        assert published[-1]["source"] == "hurdle"
+>       assert published[-1]["action"] == "STRAIGHT_0"
+E       AssertionError: assert 'GO' == 'STRAIGHT_0'
+E         - STRAIGHT_0
+E         + GO
+
+src/mission_control/test/test_mission_phase_flow.py:1650: AssertionError
+__________ test_unconfirmed_hurdle_disappearance_resumes_ball_mission __________
+
+    def test_unconfirmed_hurdle_disappearance_resumes_ball_mission():
+        harness = MissionFlowHarness()
+        hurdle = go_ready_hurdle()
+        hurdle["confirmation_confirmed"] = False
+    
+        held = harness.publish_vision(
+            ball=approaching_ball(),
+            hurdle=hurdle,
+        )
+        assert held[-1]["source"] == "ball"
+>       assert held[-1]["action"] == "STRAIGHT_2"
+E       AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E         - STRAIGHT_2
+E         ?         --
+E         + STRAIGHT
+
+src/mission_control/test/test_mission_phase_flow.py:1808: AssertionError
+________ test_unconfirmed_hurdle_can_become_confirmed_and_take_priority ________
+
+    def test_unconfirmed_hurdle_can_become_confirmed_and_take_priority():
+        harness = MissionFlowHarness()
+        hurdle = approaching_hurdle()
+        hurdle["confirmation_confirmed"] = False
+    
+        held = harness.publish_vision(
+            line=line_info(),
+            ball=approaching_ball(),
+            hurdle=hurdle,
+        )
+        assert held[-1]["source"] == "ball"
+>       assert held[-1]["action"] == "STRAIGHT_2"
+E       AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E         - STRAIGHT_2
+E         ?         --
+E         + STRAIGHT
+
+src/mission_control/test/test_mission_phase_flow.py:1827: AssertionError
+_______________ test_absent_hurdle_keeps_ball_priority_over_line _______________
+
+    def test_absent_hurdle_keeps_ball_priority_over_line():
+        harness = MissionFlowHarness()
+    
+        published = harness.publish_vision(
+            line=line_info(),
+            ball=approaching_ball(),
+            hurdle=None,
+        )
+    
+        assert published[-1]["source"] == "ball"
+>       assert published[-1]["action"] == "STRAIGHT_2"
+E       AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E         - STRAIGHT_2
+E         ?         --
+E         + STRAIGHT
+
+src/mission_control/test/test_mission_phase_flow.py:1846: AssertionError
+_ test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[34.0-GOAL_CAMERA90_TURN_RIGHT_3-0.0-GOAL_CAMERA90_FINE_FORWARD_2] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f6ac880>
+initial_bearing = 34.0, initial_action = 'GOAL_CAMERA90_TURN_RIGHT_3'
+remaining_bearing = 0.0, next_action = 'GOAL_CAMERA90_FINE_FORWARD_2'
+
+    @pytest.mark.parametrize("initial_bearing,initial_action,remaining_bearing,next_action", [
+        (34.0, "GOAL_CAMERA90_TURN_RIGHT_3", 0.0, "GOAL_CAMERA90_FINE_FORWARD_2"),
+        (-35.0, "GOAL_CAMERA90_TURN_LEFT_1", -20.0, "GOAL_CAMERA90_TURN_LEFT_1"),
+        (-20.0, "GOAL_CAMERA90_TURN_LEFT_1", -15.0, "GOAL_CAMERA90_FINE_FORWARD_2"),
+    ])
+    def test_goal_camera90_turn_dwells_then_rechecks_fresh_goal(
+        monkeypatch, initial_bearing, initial_action, remaining_bearing, next_action,
+    ):
+        harness = MissionFlowHarness(phase="GOAL_APPROACH")
+    
+        correction = harness.publish_vision(
+            goal={
+                **approaching_goal(),
+                "depth_m": 0.9,
+                "ground_distance_m": 0.9,
+                "distance_m": 0.9,
+                "bearing_deg": initial_bearing,
+                "offset_x_norm": 0.3 if initial_bearing > 0 else -0.3,
+            }
+        )[-1]
+        assert correction["action"] == initial_action
+        release_general(harness, correction)
+    
+        published_count = len(harness.publisher.messages)
+        MotionDecisionNode._publish_decision(harness)
+        assert len(harness.publisher.messages) == published_count
+    
+        deadline = harness.goal_post_motion_dwell_until
+        monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: deadline)
+        MotionDecisionNode._publish_decision(harness)
+        forward = harness.publish_vision(
+            goal={
+                **approaching_goal(),
+                "depth_m": 0.9,
+                "ground_distance_m": 0.9,
+                "distance_m": 0.9,
+                "bearing_deg": remaining_bearing,
+                "offset_x_norm": 0.0,
+            }
+        )[-1]
+>       assert forward["action"] == next_action
+E       AssertionError: assert 'GOAL_CAMERA_90_FORWARD_2' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E         - GOAL_CAMERA90_FINE_FORWARD_2
+E         ?              -----
+E         + GOAL_CAMERA_90_FORWARD_2
+E         ?            +
+
+src/mission_control/test/test_mission_phase_flow.py:2134: AssertionError
+_ test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-35.0-GOAL_CAMERA90_TURN_LEFT_1--20.0-GOAL_CAMERA90_TURN_LEFT_1] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f71dea0>
+initial_bearing = -35.0, initial_action = 'GOAL_CAMERA90_TURN_LEFT_1'
+remaining_bearing = -20.0, next_action = 'GOAL_CAMERA90_TURN_LEFT_1'
+
+    @pytest.mark.parametrize("initial_bearing,initial_action,remaining_bearing,next_action", [
+        (34.0, "GOAL_CAMERA90_TURN_RIGHT_3", 0.0, "GOAL_CAMERA90_FINE_FORWARD_2"),
+        (-35.0, "GOAL_CAMERA90_TURN_LEFT_1", -20.0, "GOAL_CAMERA90_TURN_LEFT_1"),
+        (-20.0, "GOAL_CAMERA90_TURN_LEFT_1", -15.0, "GOAL_CAMERA90_FINE_FORWARD_2"),
+    ])
+    def test_goal_camera90_turn_dwells_then_rechecks_fresh_goal(
+        monkeypatch, initial_bearing, initial_action, remaining_bearing, next_action,
+    ):
+        harness = MissionFlowHarness(phase="GOAL_APPROACH")
+    
+        correction = harness.publish_vision(
+            goal={
+                **approaching_goal(),
+                "depth_m": 0.9,
+                "ground_distance_m": 0.9,
+                "distance_m": 0.9,
+                "bearing_deg": initial_bearing,
+                "offset_x_norm": 0.3 if initial_bearing > 0 else -0.3,
+            }
+        )[-1]
+>       assert correction["action"] == initial_action
+E       AssertionError: assert 'GOAL_CAMERA90_TURN_LEFT_2' == 'GOAL_CAMERA90_TURN_LEFT_1'
+E         - GOAL_CAMERA90_TURN_LEFT_1
+E         ?                         ^
+E         + GOAL_CAMERA90_TURN_LEFT_2
+E         ?                         ^
+
+src/mission_control/test/test_mission_phase_flow.py:2114: AssertionError
+_ test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-20.0-GOAL_CAMERA90_TURN_LEFT_1--15.0-GOAL_CAMERA90_FINE_FORWARD_2] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f2fd210>
+initial_bearing = -20.0, initial_action = 'GOAL_CAMERA90_TURN_LEFT_1'
+remaining_bearing = -15.0, next_action = 'GOAL_CAMERA90_FINE_FORWARD_2'
+
+    @pytest.mark.parametrize("initial_bearing,initial_action,remaining_bearing,next_action", [
+        (34.0, "GOAL_CAMERA90_TURN_RIGHT_3", 0.0, "GOAL_CAMERA90_FINE_FORWARD_2"),
+        (-35.0, "GOAL_CAMERA90_TURN_LEFT_1", -20.0, "GOAL_CAMERA90_TURN_LEFT_1"),
+        (-20.0, "GOAL_CAMERA90_TURN_LEFT_1", -15.0, "GOAL_CAMERA90_FINE_FORWARD_2"),
+    ])
+    def test_goal_camera90_turn_dwells_then_rechecks_fresh_goal(
+        monkeypatch, initial_bearing, initial_action, remaining_bearing, next_action,
+    ):
+        harness = MissionFlowHarness(phase="GOAL_APPROACH")
+    
+        correction = harness.publish_vision(
+            goal={
+                **approaching_goal(),
+                "depth_m": 0.9,
+                "ground_distance_m": 0.9,
+                "distance_m": 0.9,
+                "bearing_deg": initial_bearing,
+                "offset_x_norm": 0.3 if initial_bearing > 0 else -0.3,
+            }
+        )[-1]
+        assert correction["action"] == initial_action
+        release_general(harness, correction)
+    
+        published_count = len(harness.publisher.messages)
+        MotionDecisionNode._publish_decision(harness)
+        assert len(harness.publisher.messages) == published_count
+    
+        deadline = harness.goal_post_motion_dwell_until
+        monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: deadline)
+        MotionDecisionNode._publish_decision(harness)
+        forward = harness.publish_vision(
+            goal={
+                **approaching_goal(),
+                "depth_m": 0.9,
+                "ground_distance_m": 0.9,
+                "distance_m": 0.9,
+                "bearing_deg": remaining_bearing,
+                "offset_x_norm": 0.0,
+            }
+        )[-1]
+>       assert forward["action"] == next_action
+E       AssertionError: assert 'GOAL_CAMERA90_TURN_LEFT_1' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E         - GOAL_CAMERA90_FINE_FORWARD_2
+E         + GOAL_CAMERA90_TURN_LEFT_1
+
+src/mission_control/test/test_mission_phase_flow.py:2134: AssertionError
+_ test_goal_depth_actions_follow_new_scoring_range[0.65-GOAL_CAMERA90_FINE_FORWARD_1] _
+
+depth = 0.65, action = 'GOAL_CAMERA90_FINE_FORWARD_1'
+
+    @pytest.mark.parametrize("depth,action", [
+        (0.65, "GOAL_CAMERA90_FINE_FORWARD_1"),
+        (0.50, "GOAL_CAMERA90_FINE_FORWARD_1"),
+        (0.389, "GOAL_CAMERA90_BACKWARD_1"),
+        (0.35, "GOAL_CAMERA90_BACKWARD_1"),
+    ])
+    def test_goal_depth_actions_follow_new_scoring_range(depth, action):
+        harness = MissionFlowHarness(phase="GOAL_APPROACH")
+        goal = {
+            **approaching_goal(),
+            "depth_m": depth,
+            "ground_distance_m": depth,
+            "distance_m": depth,
+            "bearing_deg": 0.0,
+            "offset_x_norm": 0.0,
+        }
+        decision = harness.publish_vision(goal=goal)[-1]
+>       assert decision["action"] == action
+E       AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_3' == 'GOAL_CAMERA90_FINE_FORWARD_1'
+E         - GOAL_CAMERA90_FINE_FORWARD_1
+E         ?                            ^
+E         + GOAL_CAMERA90_FINE_FORWARD_3
+E         ?                            ^
+
+src/mission_control/test/test_mission_phase_flow.py:2216: AssertionError
+___________ test_final_line_track_still_prioritizes_confirmed_hurdle ___________
+
+    def test_final_line_track_still_prioritizes_confirmed_hurdle():
+        harness = MissionFlowHarness()
+    
+        harness.phase_manager.ball_sections_processed = (
+            harness.phase_manager.required_ball_sections
+        )
+        harness.phase_manager.finish_enabled = True
+        harness.phase_manager.set_phase("LINE_TRACK")
+    
+        published = harness.publish_vision(
+            line=line_info(),
+            ball=pickup_ready_ball(),
+            goal=None,
+            hurdle=approaching_hurdle(),
+        )
+    
+        decision = published[-1]
+    
+        assert decision["phase"] == "LINE_TRACK"
+        assert decision["source"] == "hurdle"
+>       assert decision["action"] == "STRAIGHT_0"
+E       AssertionError: assert 'GO' == 'STRAIGHT_0'
+E         - STRAIGHT_0
+E         + GO
+
+src/mission_control/test/test_mission_phase_flow.py:2341: AssertionError
+______ test_ball_stationary_turn_requires_fresh_ball_before_next_approach ______
+
+    def test_ball_stationary_turn_requires_fresh_ball_before_next_approach():
+        harness = MissionFlowHarness(phase="BALL_APPROACH")
+        harness.BALL_POST_MOTION_DWELL_SEC = 0.0
+        off_center = approaching_ball()
+        off_center.update(
+            {
+                "depth_m": 0.70,
+                "ground_distance_m": 0.70,
+                "distance_m": 0.70,
+                "bearing_deg": 20.0,
+            }
+        )
+    
+        approach = harness.publish_vision(ball=off_center)
+        assert len(approach) == 1
+>       assert approach[0]["action"] == "STRAIGHT_2"
+E       AssertionError: assert 'BALL_APPROACH_TURN_RIGHT_2' == 'STRAIGHT_2'
+E         - STRAIGHT_2
+E         + BALL_APPROACH_TURN_RIGHT_2
+
+src/mission_control/test/test_mission_phase_flow.py:2531: AssertionError
+_____________ test_second_ball_uses_same_straight_distance_policy ______________
+
+    def test_second_ball_uses_same_straight_distance_policy():
+        harness = MissionFlowHarness(phase="BALL_APPROACH")
+        harness.phase_manager.pickups_completed = 1
+        ball = approaching_ball()
+        ball.update(
+            {
+                "depth_m": 0.70,
+                "ground_distance_m": 0.70,
+                "distance_m": 0.70,
+                "bearing_deg": -20.0,
+            }
+        )
+    
+        command = harness.publish_vision(ball=ball)
+    
+        assert len(command) == 1
+>       assert command[0]["action"] == "STRAIGHT_2"
+E       AssertionError: assert 'BALL_APPROACH_TURN_LEFT_1' == 'STRAIGHT_2'
+E         - STRAIGHT_2
+E         + BALL_APPROACH_TURN_LEFT_1
+
+src/mission_control/test/test_mission_phase_flow.py:2584: AssertionError
+___________ test_failed_first_pickup_keeps_straight_distance_policy ____________
+
+    def test_failed_first_pickup_keeps_straight_distance_policy():
+        harness = MissionFlowHarness(phase="BALL_APPROACH")
+        pickup = publish_special(
+            harness,
+            "ball",
+            pickup_ready_ball(),
+            "PICKUP_NOW",
+        )
+        harness.send_status("PICKUP_NOW", pickup["command_id"], "RUNNING")
+        harness.send_status("PICKUP_NOW", pickup["command_id"], "FAILED")
+        assert harness.pickups_completed == 0
+    
+        ball = approaching_ball()
+        ball.update(
+            {
+                "depth_m": 0.70,
+                "ground_distance_m": 0.70,
+                "distance_m": 0.70,
+                "bearing_deg": 20.0,
+            }
+        )
+        command = harness.publish_vision(ball=ball)
+    
+        assert len(command) == 1
+>       assert command[0]["action"] == "STRAIGHT_2"
+E       AssertionError: assert 'BALL_APPROACH_TURN_RIGHT_2' == 'STRAIGHT_2'
+E         - STRAIGHT_2
+E         + BALL_APPROACH_TURN_RIGHT_2
+
+src/mission_control/test/test_mission_phase_flow.py:2611: AssertionError
+_ test_line_recover_repeats_only_after_success_and_fresh_line[15.0-0.6-RECOVER_RIGHT_TURN_RIGHT_4] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f4f1de0>
+heading = 15.0, offset = 0.6, action = 'RECOVER_RIGHT_TURN_RIGHT_4'
+
+    @pytest.mark.parametrize("heading,offset,action", [
+        (-30.0, -0.60, "RECOVER_LEFT_TURN_LEFT_4"),
+        (15.0, 0.60, "RECOVER_RIGHT_TURN_RIGHT_4"),
+        (-30.0, 0.60, "RECOVER_RIGHT_TURN_LEFT_4"),
+        (30.0, -0.60, "RECOVER_LEFT_TURN_RIGHT_4"),
+    ])
+    def test_line_recover_repeats_only_after_success_and_fresh_line(monkeypatch, heading, offset, action):
+        now = [10.0]
+        monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: now[0])
+        harness = MissionFlowHarness(phase="LINE_TRACK")
+        harness._fresh_observations = MotionDecisionNode._fresh_observations.__get__(harness)
+        callback = MotionDecisionNode._info_callback(harness, 'line')
+        sample = line_info(heading=heading, offset=offset)
+        commands = []
+        for _ in range(3):
+            callback(String(data=json.dumps(sample)))
+            command = harness.publish_vision(line=sample)[-1]
+>           assert command["action"] == action
+E           AssertionError: assert 'STRAIGHT' == 'RECOVER_RIGHT_TURN_RIGHT_4'
+E             - RECOVER_RIGHT_TURN_RIGHT_4
+E             + STRAIGHT
+
+src/mission_control/test/test_mission_phase_flow.py:3085: AssertionError
+________ test_recognition_approach_blocks_new_line_prequeue[1.001-True] ________
+
+clock = [10.0], depth = 1.001, allowed = True
+
+    @pytest.mark.parametrize("depth,allowed", [(1.001, True), (1.0, False), (0.7, False), (0.551, False), (0.55, False)])
+    def test_recognition_approach_blocks_new_line_prequeue(clock, depth, allowed):
+        node = HurdleHarness()
+>       assert MotionDecisionNode._line_only_prequeue_allowed(
+            node, {"hurdle": hurdle(depth)},
+        ) is allowed
+E       AssertionError: assert False is True
+E        +  where False = <function MotionDecisionNode._line_only_prequeue_allowed at 0xffffa02f0940>(<test_hurdle_positioning.HurdleHarness object at 0xffff9f2fcb50>, {'hurdle': {'bbox': [400, 300, 1000, 500], 'bottom_distance_px': 200, 'camera_center_offset_x_px': 0, 'confidence': 0.9, ...}})
+E        +    where <function MotionDecisionNode._line_only_prequeue_allowed at 0xffffa02f0940> = MotionDecisionNode._line_only_prequeue_allowed
+
+src/mission_control/test/test_hurdle_positioning.py:255: AssertionError
+______________ test_cpp_executor_defaults_are_safe_and_simulated _______________
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+>           content, package_prefix = get_resource('packages', package_name)
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+resource_type = 'packages', resource_name = 'step'
+
+    def get_resource(resource_type, resource_name):
+        """
+        Get the content of a specific resource and its prefix path.
+    
+        :param resource_type: the type of the resource
+        :type resource_type: str
+        :param resource_names: the name of the resource
+        :type resource_name: str
+        :returns: a tuple of the content (bytes) of the resource and its prefix path
+        :raises: :exc:`EnvironmentError`
+        :raises: :exc:`OSError`
+        :raises: :exc:`LookupError`
+        :raises: :exc:`InvalidResourceTypeNameError`
+        :raises: :exc:`InvalidResourceNameError`
+        """
+        assert resource_type, 'The resource type must not be empty'
+        assert resource_name, 'The resource name must not be empty'
+        if _name_is_invalid(resource_type):
+            raise InvalidResourceTypeNameError(
+                "Resource type '%s' is invalid" % resource_type)
+        if _name_is_invalid(resource_name):
+            raise InvalidResourceNameError(
+                "Resource name '%s' is invalid" % resource_name)
+        for path in get_search_paths():
+            resource_path = os.path.join(path, RESOURCE_INDEX_SUBFOLDER, resource_type, resource_name)
+            if os.path.isfile(resource_path):
+                try:
+                    with open(resource_path, 'r') as h:
+                        content = h.read()
+                except OSError as e:
+                    raise OSError(
+                        "Could not open the resource '%s' of type '%s':\n%s"
+                        % (resource_name, resource_type, e))
+                return content, path
+>       raise LookupError(
+            "Could not find the resource '%s' of type '%s'" % (resource_name, resource_type))
+E       LookupError: Could not find the resource 'step' of type 'packages'
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/resources.py:86: LookupError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f5adfc0>
+tmp_path = PosixPath('/tmp/pytest-of-jet/pytest-2/test_cpp_executor_defaults_are0')
+
+    def test_cpp_executor_defaults_are_safe_and_simulated(
+        monkeypatch,
+        tmp_path,
+    ):
+        description = launch_description(monkeypatch, tmp_path)
+        executor = next(
+            node
+            for node in description.entities
+            if isinstance(node, Node)
+            and node.node_executable == "sdk_motion_executor"
+        )
+>       parameters = node_parameters(executor, launch_context(description))
+
+src/mission_control/test/test_full_system_launch.py:107: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/test/test_full_system_launch.py:49: in launch_context
+    entity.execute(context)
+/opt/ros/humble/lib/python3.10/site-packages/launch/actions/declare_launch_argument.py:215: in execute
+    perform_substitutions(context, self.default_value)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:85: in perform
+    path_components = [
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:86: in <listcomp>
+    perform_substitutions(context, component_substitutions)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:80: in perform
+    result = self.find(package)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:113: in find
+    return get_package_share_directory(package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:80: in get_package_share_directory
+    path = os.path.join(get_package_prefix(package_name), 'share', package_name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+            content, package_prefix = get_resource('packages', package_name)
+        except LookupError:
+>           raise PackageNotFoundError(
+                "package '{}' not found, searching: {}".format(package_name, get_search_paths()))
+E           ament_index_python.packages.PackageNotFoundError: "package 'step' not found, searching: ['/opt/ros/humble']"
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:60: PackageNotFoundError
+_________________ test_production_arguments_reach_cpp_executor _________________
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+>           content, package_prefix = get_resource('packages', package_name)
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+resource_type = 'packages', resource_name = 'step'
+
+    def get_resource(resource_type, resource_name):
+        """
+        Get the content of a specific resource and its prefix path.
+    
+        :param resource_type: the type of the resource
+        :type resource_type: str
+        :param resource_names: the name of the resource
+        :type resource_name: str
+        :returns: a tuple of the content (bytes) of the resource and its prefix path
+        :raises: :exc:`EnvironmentError`
+        :raises: :exc:`OSError`
+        :raises: :exc:`LookupError`
+        :raises: :exc:`InvalidResourceTypeNameError`
+        :raises: :exc:`InvalidResourceNameError`
+        """
+        assert resource_type, 'The resource type must not be empty'
+        assert resource_name, 'The resource name must not be empty'
+        if _name_is_invalid(resource_type):
+            raise InvalidResourceTypeNameError(
+                "Resource type '%s' is invalid" % resource_type)
+        if _name_is_invalid(resource_name):
+            raise InvalidResourceNameError(
+                "Resource name '%s' is invalid" % resource_name)
+        for path in get_search_paths():
+            resource_path = os.path.join(path, RESOURCE_INDEX_SUBFOLDER, resource_type, resource_name)
+            if os.path.isfile(resource_path):
+                try:
+                    with open(resource_path, 'r') as h:
+                        content = h.read()
+                except OSError as e:
+                    raise OSError(
+                        "Could not open the resource '%s' of type '%s':\n%s"
+                        % (resource_name, resource_type, e))
+                return content, path
+>       raise LookupError(
+            "Could not find the resource '%s' of type '%s'" % (resource_name, resource_type))
+E       LookupError: Could not find the resource 'step' of type 'packages'
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/resources.py:86: LookupError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f3e7be0>
+tmp_path = PosixPath('/tmp/pytest-of-jet/pytest-2/test_production_arguments_reac0')
+
+    def test_production_arguments_reach_cpp_executor(monkeypatch, tmp_path):
+        description = launch_description(monkeypatch, tmp_path)
+        executor = next(
+            node
+            for node in description.entities
+            if isinstance(node, Node)
+            and node.node_executable == "sdk_motion_executor"
+        )
+>       context = launch_context(
+            description,
+            {
+                "backend_type": "robot_motion_player",
+                "enable_robot_hardware": "true",
+                "explicit_torque_approval": "true",
+                "position_tolerance_enabled": "true",
+                "motion_json_path": "/tmp/robot_motions.json",
+            },
+        )
+
+src/mission_control/test/test_full_system_launch.py:139: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/test/test_full_system_launch.py:49: in launch_context
+    entity.execute(context)
+/opt/ros/humble/lib/python3.10/site-packages/launch/actions/declare_launch_argument.py:215: in execute
+    perform_substitutions(context, self.default_value)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:85: in perform
+    path_components = [
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:86: in <listcomp>
+    perform_substitutions(context, component_substitutions)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:80: in perform
+    result = self.find(package)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:113: in find
+    return get_package_share_directory(package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:80: in get_package_share_directory
+    path = os.path.join(get_package_prefix(package_name), 'share', package_name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+            content, package_prefix = get_resource('packages', package_name)
+        except LookupError:
+>           raise PackageNotFoundError(
+                "package '{}' not found, searching: {}".format(package_name, get_search_paths()))
+E           ament_index_python.packages.PackageNotFoundError: "package 'step' not found, searching: ['/opt/ros/humble']"
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:60: PackageNotFoundError
+______________ test_overlay_tolerance_is_separate_from_depth_sync ______________
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+>           content, package_prefix = get_resource('packages', package_name)
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+resource_type = 'packages', resource_name = 'step'
+
+    def get_resource(resource_type, resource_name):
+        """
+        Get the content of a specific resource and its prefix path.
+    
+        :param resource_type: the type of the resource
+        :type resource_type: str
+        :param resource_names: the name of the resource
+        :type resource_name: str
+        :returns: a tuple of the content (bytes) of the resource and its prefix path
+        :raises: :exc:`EnvironmentError`
+        :raises: :exc:`OSError`
+        :raises: :exc:`LookupError`
+        :raises: :exc:`InvalidResourceTypeNameError`
+        :raises: :exc:`InvalidResourceNameError`
+        """
+        assert resource_type, 'The resource type must not be empty'
+        assert resource_name, 'The resource name must not be empty'
+        if _name_is_invalid(resource_type):
+            raise InvalidResourceTypeNameError(
+                "Resource type '%s' is invalid" % resource_type)
+        if _name_is_invalid(resource_name):
+            raise InvalidResourceNameError(
+                "Resource name '%s' is invalid" % resource_name)
+        for path in get_search_paths():
+            resource_path = os.path.join(path, RESOURCE_INDEX_SUBFOLDER, resource_type, resource_name)
+            if os.path.isfile(resource_path):
+                try:
+                    with open(resource_path, 'r') as h:
+                        content = h.read()
+                except OSError as e:
+                    raise OSError(
+                        "Could not open the resource '%s' of type '%s':\n%s"
+                        % (resource_name, resource_type, e))
+                return content, path
+>       raise LookupError(
+            "Could not find the resource '%s' of type '%s'" % (resource_name, resource_type))
+E       LookupError: Could not find the resource 'step' of type 'packages'
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/resources.py:86: LookupError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f3988e0>
+tmp_path = PosixPath('/tmp/pytest-of-jet/pytest-2/test_overlay_tolerance_is_sepa0')
+
+    def test_overlay_tolerance_is_separate_from_depth_sync(
+        monkeypatch,
+        tmp_path,
+    ):
+        description = launch_description(monkeypatch, tmp_path)
+>       context = launch_context(description)
+
+src/mission_control/test/test_full_system_launch.py:167: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/test/test_full_system_launch.py:49: in launch_context
+    entity.execute(context)
+/opt/ros/humble/lib/python3.10/site-packages/launch/actions/declare_launch_argument.py:215: in execute
+    perform_substitutions(context, self.default_value)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:85: in perform
+    path_components = [
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:86: in <listcomp>
+    perform_substitutions(context, component_substitutions)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:80: in perform
+    result = self.find(package)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:113: in find
+    return get_package_share_directory(package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:80: in get_package_share_directory
+    path = os.path.join(get_package_prefix(package_name), 'share', package_name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+            content, package_prefix = get_resource('packages', package_name)
+        except LookupError:
+>           raise PackageNotFoundError(
+                "package '{}' not found, searching: {}".format(package_name, get_search_paths()))
+E           ament_index_python.packages.PackageNotFoundError: "package 'step' not found, searching: ['/opt/ros/humble']"
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:60: PackageNotFoundError
+______________ test_detector_defaults_to_prebuilt_tensorrt_engine ______________
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+>           content, package_prefix = get_resource('packages', package_name)
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+resource_type = 'packages', resource_name = 'step'
+
+    def get_resource(resource_type, resource_name):
+        """
+        Get the content of a specific resource and its prefix path.
+    
+        :param resource_type: the type of the resource
+        :type resource_type: str
+        :param resource_names: the name of the resource
+        :type resource_name: str
+        :returns: a tuple of the content (bytes) of the resource and its prefix path
+        :raises: :exc:`EnvironmentError`
+        :raises: :exc:`OSError`
+        :raises: :exc:`LookupError`
+        :raises: :exc:`InvalidResourceTypeNameError`
+        :raises: :exc:`InvalidResourceNameError`
+        """
+        assert resource_type, 'The resource type must not be empty'
+        assert resource_name, 'The resource name must not be empty'
+        if _name_is_invalid(resource_type):
+            raise InvalidResourceTypeNameError(
+                "Resource type '%s' is invalid" % resource_type)
+        if _name_is_invalid(resource_name):
+            raise InvalidResourceNameError(
+                "Resource name '%s' is invalid" % resource_name)
+        for path in get_search_paths():
+            resource_path = os.path.join(path, RESOURCE_INDEX_SUBFOLDER, resource_type, resource_name)
+            if os.path.isfile(resource_path):
+                try:
+                    with open(resource_path, 'r') as h:
+                        content = h.read()
+                except OSError as e:
+                    raise OSError(
+                        "Could not open the resource '%s' of type '%s':\n%s"
+                        % (resource_name, resource_type, e))
+                return content, path
+>       raise LookupError(
+            "Could not find the resource '%s' of type '%s'" % (resource_name, resource_type))
+E       LookupError: Could not find the resource 'step' of type 'packages'
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/resources.py:86: LookupError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f3fba30>
+tmp_path = PosixPath('/tmp/pytest-of-jet/pytest-2/test_detector_defaults_to_preb0')
+
+    def test_detector_defaults_to_prebuilt_tensorrt_engine(monkeypatch, tmp_path):
+        description = launch_description(monkeypatch, tmp_path)
+>       context = launch_context(description)
+
+src/mission_control/test/test_full_system_launch.py:211: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/test/test_full_system_launch.py:49: in launch_context
+    entity.execute(context)
+/opt/ros/humble/lib/python3.10/site-packages/launch/actions/declare_launch_argument.py:215: in execute
+    perform_substitutions(context, self.default_value)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:85: in perform
+    path_components = [
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:86: in <listcomp>
+    perform_substitutions(context, component_substitutions)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:80: in perform
+    result = self.find(package)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:113: in find
+    return get_package_share_directory(package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:80: in get_package_share_directory
+    path = os.path.join(get_package_prefix(package_name), 'share', package_name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+            content, package_prefix = get_resource('packages', package_name)
+        except LookupError:
+>           raise PackageNotFoundError(
+                "package '{}' not found, searching: {}".format(package_name, get_search_paths()))
+E           ament_index_python.packages.PackageNotFoundError: "package 'step' not found, searching: ['/opt/ros/humble']"
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:60: PackageNotFoundError
+_______________ test_robot_launch_defaults_are_production_ready ________________
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+>           content, package_prefix = get_resource('packages', package_name)
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+resource_type = 'packages', resource_name = 'step'
+
+    def get_resource(resource_type, resource_name):
+        """
+        Get the content of a specific resource and its prefix path.
+    
+        :param resource_type: the type of the resource
+        :type resource_type: str
+        :param resource_names: the name of the resource
+        :type resource_name: str
+        :returns: a tuple of the content (bytes) of the resource and its prefix path
+        :raises: :exc:`EnvironmentError`
+        :raises: :exc:`OSError`
+        :raises: :exc:`LookupError`
+        :raises: :exc:`InvalidResourceTypeNameError`
+        :raises: :exc:`InvalidResourceNameError`
+        """
+        assert resource_type, 'The resource type must not be empty'
+        assert resource_name, 'The resource name must not be empty'
+        if _name_is_invalid(resource_type):
+            raise InvalidResourceTypeNameError(
+                "Resource type '%s' is invalid" % resource_type)
+        if _name_is_invalid(resource_name):
+            raise InvalidResourceNameError(
+                "Resource name '%s' is invalid" % resource_name)
+        for path in get_search_paths():
+            resource_path = os.path.join(path, RESOURCE_INDEX_SUBFOLDER, resource_type, resource_name)
+            if os.path.isfile(resource_path):
+                try:
+                    with open(resource_path, 'r') as h:
+                        content = h.read()
+                except OSError as e:
+                    raise OSError(
+                        "Could not open the resource '%s' of type '%s':\n%s"
+                        % (resource_name, resource_type, e))
+                return content, path
+>       raise LookupError(
+            "Could not find the resource '%s' of type '%s'" % (resource_name, resource_type))
+E       LookupError: Could not find the resource 'step' of type 'packages'
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/resources.py:86: LookupError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f3ed9f0>
+tmp_path = PosixPath('/tmp/pytest-of-jet/pytest-2/test_robot_launch_defaults_are0')
+
+    def test_robot_launch_defaults_are_production_ready(
+        monkeypatch,
+        tmp_path,
+    ):
+        description = launch_description(monkeypatch, tmp_path)
+>       context = default_context(description)
+
+src/mission_control/test/test_full_system_robot_launch.py:80: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/test/test_full_system_robot_launch.py:45: in default_context
+    entity.execute(context)
+/opt/ros/humble/lib/python3.10/site-packages/launch/actions/declare_launch_argument.py:215: in execute
+    perform_substitutions(context, self.default_value)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:85: in perform
+    path_components = [
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:86: in <listcomp>
+    perform_substitutions(context, component_substitutions)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:80: in perform
+    result = self.find(package)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:113: in find
+    return get_package_share_directory(package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:80: in get_package_share_directory
+    path = os.path.join(get_package_prefix(package_name), 'share', package_name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+            content, package_prefix = get_resource('packages', package_name)
+        except LookupError:
+>           raise PackageNotFoundError(
+                "package '{}' not found, searching: {}".format(package_name, get_search_paths()))
+E           ament_index_python.packages.PackageNotFoundError: "package 'step' not found, searching: ['/opt/ros/humble']"
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:60: PackageNotFoundError
+___________ test_startup_target_matches_catalog51_front_weight_pose ____________
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+>           content, package_prefix = get_resource('packages', package_name)
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+resource_type = 'packages', resource_name = 'step'
+
+    def get_resource(resource_type, resource_name):
+        """
+        Get the content of a specific resource and its prefix path.
+    
+        :param resource_type: the type of the resource
+        :type resource_type: str
+        :param resource_names: the name of the resource
+        :type resource_name: str
+        :returns: a tuple of the content (bytes) of the resource and its prefix path
+        :raises: :exc:`EnvironmentError`
+        :raises: :exc:`OSError`
+        :raises: :exc:`LookupError`
+        :raises: :exc:`InvalidResourceTypeNameError`
+        :raises: :exc:`InvalidResourceNameError`
+        """
+        assert resource_type, 'The resource type must not be empty'
+        assert resource_name, 'The resource name must not be empty'
+        if _name_is_invalid(resource_type):
+            raise InvalidResourceTypeNameError(
+                "Resource type '%s' is invalid" % resource_type)
+        if _name_is_invalid(resource_name):
+            raise InvalidResourceNameError(
+                "Resource name '%s' is invalid" % resource_name)
+        for path in get_search_paths():
+            resource_path = os.path.join(path, RESOURCE_INDEX_SUBFOLDER, resource_type, resource_name)
+            if os.path.isfile(resource_path):
+                try:
+                    with open(resource_path, 'r') as h:
+                        content = h.read()
+                except OSError as e:
+                    raise OSError(
+                        "Could not open the resource '%s' of type '%s':\n%s"
+                        % (resource_name, resource_type, e))
+                return content, path
+>       raise LookupError(
+            "Could not find the resource '%s' of type '%s'" % (resource_name, resource_type))
+E       LookupError: Could not find the resource 'step' of type 'packages'
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/resources.py:86: LookupError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9f9fb7c0>
+tmp_path = PosixPath('/tmp/pytest-of-jet/pytest-2/test_startup_target_matches_ca0')
+
+    def test_startup_target_matches_catalog51_front_weight_pose(monkeypatch, tmp_path):
+        description = launch_description(monkeypatch, tmp_path)
+>       context = default_context(description)
+
+src/mission_control/test/test_full_system_robot_launch.py:130: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/test/test_full_system_robot_launch.py:45: in default_context
+    entity.execute(context)
+/opt/ros/humble/lib/python3.10/site-packages/launch/actions/declare_launch_argument.py:215: in execute
+    perform_substitutions(context, self.default_value)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:85: in perform
+    path_components = [
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:86: in <listcomp>
+    perform_substitutions(context, component_substitutions)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:80: in perform
+    result = self.find(package)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:113: in find
+    return get_package_share_directory(package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:80: in get_package_share_directory
+    path = os.path.join(get_package_prefix(package_name), 'share', package_name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+            content, package_prefix = get_resource('packages', package_name)
+        except LookupError:
+>           raise PackageNotFoundError(
+                "package '{}' not found, searching: {}".format(package_name, get_search_paths()))
+E           ament_index_python.packages.PackageNotFoundError: "package 'step' not found, searching: ['/opt/ros/humble']"
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:60: PackageNotFoundError
+_____________ test_robot_launch_passes_realsense_topic_parameters ______________
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+>           content, package_prefix = get_resource('packages', package_name)
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+resource_type = 'packages', resource_name = 'step'
+
+    def get_resource(resource_type, resource_name):
+        """
+        Get the content of a specific resource and its prefix path.
+    
+        :param resource_type: the type of the resource
+        :type resource_type: str
+        :param resource_names: the name of the resource
+        :type resource_name: str
+        :returns: a tuple of the content (bytes) of the resource and its prefix path
+        :raises: :exc:`EnvironmentError`
+        :raises: :exc:`OSError`
+        :raises: :exc:`LookupError`
+        :raises: :exc:`InvalidResourceTypeNameError`
+        :raises: :exc:`InvalidResourceNameError`
+        """
+        assert resource_type, 'The resource type must not be empty'
+        assert resource_name, 'The resource name must not be empty'
+        if _name_is_invalid(resource_type):
+            raise InvalidResourceTypeNameError(
+                "Resource type '%s' is invalid" % resource_type)
+        if _name_is_invalid(resource_name):
+            raise InvalidResourceNameError(
+                "Resource name '%s' is invalid" % resource_name)
+        for path in get_search_paths():
+            resource_path = os.path.join(path, RESOURCE_INDEX_SUBFOLDER, resource_type, resource_name)
+            if os.path.isfile(resource_path):
+                try:
+                    with open(resource_path, 'r') as h:
+                        content = h.read()
+                except OSError as e:
+                    raise OSError(
+                        "Could not open the resource '%s' of type '%s':\n%s"
+                        % (resource_name, resource_type, e))
+                return content, path
+>       raise LookupError(
+            "Could not find the resource '%s' of type '%s'" % (resource_name, resource_type))
+E       LookupError: Could not find the resource 'step' of type 'packages'
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/resources.py:86: LookupError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9fa3c5b0>
+tmp_path = PosixPath('/tmp/pytest-of-jet/pytest-2/test_robot_launch_passes_reals0')
+
+    def test_robot_launch_passes_realsense_topic_parameters(
+        monkeypatch,
+        tmp_path,
+    ):
+        description = launch_description(monkeypatch, tmp_path)
+>       context = default_context(description)
+
+src/mission_control/test/test_full_system_robot_launch.py:154: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/test/test_full_system_robot_launch.py:45: in default_context
+    entity.execute(context)
+/opt/ros/humble/lib/python3.10/site-packages/launch/actions/declare_launch_argument.py:215: in execute
+    perform_substitutions(context, self.default_value)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:85: in perform
+    path_components = [
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:86: in <listcomp>
+    perform_substitutions(context, component_substitutions)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:80: in perform
+    result = self.find(package)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:113: in find
+    return get_package_share_directory(package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:80: in get_package_share_directory
+    path = os.path.join(get_package_prefix(package_name), 'share', package_name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+            content, package_prefix = get_resource('packages', package_name)
+        except LookupError:
+>           raise PackageNotFoundError(
+                "package '{}' not found, searching: {}".format(package_name, get_search_paths()))
+E           ament_index_python.packages.PackageNotFoundError: "package 'step' not found, searching: ['/opt/ros/humble']"
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:60: PackageNotFoundError
+______________________ test_robot_launch_waits_for_enter _______________________
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+>           content, package_prefix = get_resource('packages', package_name)
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+resource_type = 'packages', resource_name = 'step'
+
+    def get_resource(resource_type, resource_name):
+        """
+        Get the content of a specific resource and its prefix path.
+    
+        :param resource_type: the type of the resource
+        :type resource_type: str
+        :param resource_names: the name of the resource
+        :type resource_name: str
+        :returns: a tuple of the content (bytes) of the resource and its prefix path
+        :raises: :exc:`EnvironmentError`
+        :raises: :exc:`OSError`
+        :raises: :exc:`LookupError`
+        :raises: :exc:`InvalidResourceTypeNameError`
+        :raises: :exc:`InvalidResourceNameError`
+        """
+        assert resource_type, 'The resource type must not be empty'
+        assert resource_name, 'The resource name must not be empty'
+        if _name_is_invalid(resource_type):
+            raise InvalidResourceTypeNameError(
+                "Resource type '%s' is invalid" % resource_type)
+        if _name_is_invalid(resource_name):
+            raise InvalidResourceNameError(
+                "Resource name '%s' is invalid" % resource_name)
+        for path in get_search_paths():
+            resource_path = os.path.join(path, RESOURCE_INDEX_SUBFOLDER, resource_type, resource_name)
+            if os.path.isfile(resource_path):
+                try:
+                    with open(resource_path, 'r') as h:
+                        content = h.read()
+                except OSError as e:
+                    raise OSError(
+                        "Could not open the resource '%s' of type '%s':\n%s"
+                        % (resource_name, resource_type, e))
+                return content, path
+>       raise LookupError(
+            "Could not find the resource '%s' of type '%s'" % (resource_name, resource_type))
+E       LookupError: Could not find the resource 'step' of type 'packages'
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/resources.py:86: LookupError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9fa888e0>
+tmp_path = PosixPath('/tmp/pytest-of-jet/pytest-2/test_robot_launch_waits_for_en0')
+
+    def test_robot_launch_waits_for_enter(monkeypatch, tmp_path):
+        description = launch_description(monkeypatch, tmp_path)
+>       context = default_context(description)
+
+src/mission_control/test/test_full_system_robot_launch.py:206: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/test/test_full_system_robot_launch.py:45: in default_context
+    entity.execute(context)
+/opt/ros/humble/lib/python3.10/site-packages/launch/actions/declare_launch_argument.py:215: in execute
+    perform_substitutions(context, self.default_value)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:85: in perform
+    path_components = [
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:86: in <listcomp>
+    perform_substitutions(context, component_substitutions)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:80: in perform
+    result = self.find(package)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:113: in find
+    return get_package_share_directory(package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:80: in get_package_share_directory
+    path = os.path.join(get_package_prefix(package_name), 'share', package_name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+            content, package_prefix = get_resource('packages', package_name)
+        except LookupError:
+>           raise PackageNotFoundError(
+                "package '{}' not found, searching: {}".format(package_name, get_search_paths()))
+E           ament_index_python.packages.PackageNotFoundError: "package 'step' not found, searching: ['/opt/ros/humble']"
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:60: PackageNotFoundError
+---------------- generated xml file: /tmp/ball_entry_before.xml ----------------
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_motion_decision_node.py::test_turn_waits_for_stable_half_second[LEFT]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_turn_waits_for_stable_half_second[RIGHT]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_changed_turn_candidate_restarts_settle
+FAILED src/mission_control/test/test_motion_decision_node.py::test_new_frame_keeps_same_candidate_start_time
+FAILED src/mission_control/test/test_motion_decision_node.py::test_stop_cancels_pending_turn_and_is_not_delayed
+FAILED src/mission_control/test/test_motion_decision_node.py::test_general_lock_does_not_precount_next_turn
+FAILED src/mission_control/test/test_motion_decision_node.py::test_active_special_lock_does_not_precount_next_settle
+FAILED src/mission_control/test/test_motion_decision_node.py::test_published_turn_requires_a_new_settle_after_completion
+FAILED src/mission_control/test/test_motion_decision_node.py::test_startup_hold_discards_commands_until_ready_and_fresh_vision
+FAILED src/mission_control/test/test_motion_decision_node.py::test_line_motion_uses_recent_valid_frames_at_capture_threshold[True-True]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_line_motion_uses_recent_valid_frames_at_capture_threshold[True-False]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_line_motion_uses_recent_valid_frames_at_capture_threshold[False-True]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_line_motion_uses_recent_valid_frames_at_capture_threshold[False-False]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_line_motion_capture_table_matches_deployed_timelines
+FAILED src/mission_control/test/test_motion_decision_node.py::test_line_prequeue_retries_after_temporary_target_disappears
+FAILED src/mission_control/test/test_motion_decision_node.py::test_mock_line_input_is_fresh_and_produces_action[turn_left-RECOVER_LEFT_TURN_LEFT_4]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_mock_line_input_is_fresh_and_produces_action[turn_right-RECOVER_RIGHT_TURN_RIGHT_4]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_all_line_stationary_turns_pause_one_second_before_publish[LEFT]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_all_line_stationary_turns_pause_one_second_before_publish[RIGHT]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_all_line_stationary_turns_pause_one_second_before_publish[POST_BALL_LINE_TURN_LEFT_2]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_all_line_stationary_turns_pause_one_second_before_publish[POST_BALL_LINE_TURN_RIGHT_3]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_all_line_stationary_turns_pause_one_second_before_publish[POST_SHOT_LINE_TURN_LEFT_2]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_all_line_stationary_turns_pause_one_second_before_publish[POST_SHOT_LINE_TURN_RIGHT_3]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_enter_gate_discards_vision_until_enter_and_executor_ready[False]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_enter_gate_discards_vision_until_enter_and_executor_ready[True]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_line_prequeue_ignores_only_completed_hurdles[2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_collected_ball_route_clears_stale_reservations_before_dwell[GOAL_APPROACH-GOAL_CAMERA90_FINE_FORWARD_2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_ball_detection_loss_cannot_interrupt_timed_line_or_goal
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_ball_loss_waits_then_reacquired_ball_selects_moving_recover
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_full_course_mock_flow_without_ros_graph
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_confirmed_approaching_hurdle_beats_approaching_ball
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_unconfirmed_hurdle_disappearance_resumes_ball_mission
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_unconfirmed_hurdle_can_become_confirmed_and_take_priority
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_absent_hurdle_keeps_ball_priority_over_line
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[34.0-GOAL_CAMERA90_TURN_RIGHT_3-0.0-GOAL_CAMERA90_FINE_FORWARD_2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-35.0-GOAL_CAMERA90_TURN_LEFT_1--20.0-GOAL_CAMERA90_TURN_LEFT_1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-20.0-GOAL_CAMERA90_TURN_LEFT_1--15.0-GOAL_CAMERA90_FINE_FORWARD_2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_depth_actions_follow_new_scoring_range[0.65-GOAL_CAMERA90_FINE_FORWARD_1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_final_line_track_still_prioritizes_confirmed_hurdle
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_ball_stationary_turn_requires_fresh_ball_before_next_approach
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_second_ball_uses_same_straight_distance_policy
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_failed_first_pickup_keeps_straight_distance_policy
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_line_recover_repeats_only_after_success_and_fresh_line[15.0-0.6-RECOVER_RIGHT_TURN_RIGHT_4]
+FAILED src/mission_control/test/test_hurdle_positioning.py::test_recognition_approach_blocks_new_line_prequeue[1.001-True]
+FAILED src/mission_control/test/test_full_system_launch.py::test_cpp_executor_defaults_are_safe_and_simulated
+FAILED src/mission_control/test/test_full_system_launch.py::test_production_arguments_reach_cpp_executor
+FAILED src/mission_control/test/test_full_system_launch.py::test_overlay_tolerance_is_separate_from_depth_sync
+FAILED src/mission_control/test/test_full_system_launch.py::test_detector_defaults_to_prebuilt_tensorrt_engine
+FAILED src/mission_control/test/test_full_system_robot_launch.py::test_robot_launch_defaults_are_production_ready
+FAILED src/mission_control/test/test_full_system_robot_launch.py::test_startup_target_matches_catalog51_front_weight_pose
+FAILED src/mission_control/test/test_full_system_robot_launch.py::test_robot_launch_passes_realsense_topic_parameters
+FAILED src/mission_control/test/test_full_system_robot_launch.py::test_robot_launch_waits_for_enter
+54 failed, 1263 passed in 15.23s

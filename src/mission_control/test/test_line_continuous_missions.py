@@ -35,7 +35,10 @@ def capture(node, clock):
     MotionDecisionNode._prepare_pending_line_decision(node, clock[0])
 
 
-@pytest.mark.parametrize('phase', ['AUTO', 'LINE_TRACK', 'LINE_TRACK_AFTER_PICKUP'])
+@pytest.mark.parametrize('phase', [
+    'AUTO', 'LINE_TRACK', 'LINE_TRACK_AFTER_PICKUP',
+    'BALL_SEARCH', 'GOAL_SEARCH', 'HURDLE_APPROACH',
+])
 def test_normal_line_queues_next_forward_before_current_finishes(clock, phase):
     node, first = start_forward(phase)
     capture(node, clock)
@@ -123,17 +126,25 @@ def observe_walk_end(node, clock, info):
     (corner_info('LEFT'), line_info(), 'STRAIGHT'),
     (corner_info('RIGHT'), line_info(), 'STRAIGHT'),
 ])
+@pytest.mark.parametrize('phase', ['AUTO', 'BALL_SEARCH', 'GOAL_SEARCH', 'HURDLE_APPROACH'])
 def test_walking_transition_is_sent_to_sdk_before_success_without_new_vision(
-    clock, monkeypatch, initial, next_info, expected,
+    clock, monkeypatch, initial, next_info, expected, phase,
 ):
     monkeypatch.setattr(MotionDecisionNode, '_current_ros_time_ns', lambda _: round(clock[0] * 1e9))
-    node, bridge = CornerHarness(phase='AUTO'), FakeBridge()
+    node, bridge = CornerHarness(phase=phase), FakeBridge()
     node.LINE_TURN_PRE_MOTION_SETTLE_SEC = 1.
     first = node.publish_vision(line={**initial, 'rgb_stamp_ns': round(clock[0] * 1e9)})[-1]
     bridge.navigation_command_callback(String(data=json.dumps(first)))
     first_request = decoded_messages(bridge.executor_request_publisher)[-1]
     node.send_status(first['action'], first['command_id'], 'RUNNING')
     observe_walk_end(node, clock, next_info)
+    if first['action'].startswith('RECOVER_') and expected.startswith('RECOVER_'):
+        assert len(node.publisher.messages) == 1
+        clock[0] = (node.active_line_motion_started_at + node.active_line_motion_duration_sec
+                    - MotionDecisionNode.LINE_RECOVERY_PREQUEUE_LEAD_SEC + .01)
+        MotionDecisionNode._info_callback(node, 'line')(String(data=json.dumps({
+            **next_info, 'rgb_stamp_ns': round(clock[0] * 1e9),
+        })))
     assert len(node.publisher.messages) == 2
     queued = node.publisher.messages[-1]
     assert queued['action'] == expected and queued['valid']

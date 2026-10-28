@@ -1,0 +1,16 @@
+{
+  "tests": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "153",
+    "time": "1.595",
+    "timestamp": "2026-10-28T20:15:21.533887",
+    "hostname": "jet"
+  },
+  "upsert_tests": "4 passed; 1 preexisting runtime/PC playback_speed equality failure",
+  "runtime_catalog_validator": "OK: 90 motions, aliases and motor IDs valid",
+  "installed_catalog_matches": true,
+  "installed_aliases_match": true
+}

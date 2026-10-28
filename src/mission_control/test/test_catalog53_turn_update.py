@@ -10,6 +10,8 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[3]
 UPDATE = ROOT / "artifacts/20261028_catalog53_turn_queue"
+# Catalog54/55 supersedes backward and fine data; verify this import boundary.
+DEPLOYED = ROOT / "artifacts/20261028_ball_top_loss_fine2/before"
 MANIFEST = json.loads((UPDATE / "manifest.json").read_text())
 SPEED1_MOTIONS = set(json.loads((ROOT / "artifacts/20261028_forward_speed1_boundary/speed_update.json").read_text())["motions"])
 SOURCE_PATH = ROOT / MANIFEST["source_file"]
@@ -18,7 +20,7 @@ SOURCE = {m["name"]: m for m in json.loads(SOURCE_PATH.read_text())["motions"]}
 
 @pytest.mark.parametrize("filename", ["robot_motions_runtime.json", "robot_motions_pc.json"])
 def test_turn_import_preserves_source_and_unrelated_motions(filename):
-    motions = json.loads((ROOT / "artifacts" / filename).read_text())["motions"]
+    motions = json.loads((DEPLOYED / "artifacts" / filename).read_text())["motions"]
     actual = {m["name"]: m for m in motions}
     assert len(actual) == len(motions) == 86
     expected = {n: copy.deepcopy(SOURCE[n]) for n in MANIFEST["source_turn_motions"]}
@@ -46,9 +48,9 @@ def test_turn_import_preserves_source_and_unrelated_motions(filename):
 def test_aliases_preserve_commands_and_select_new_turns():
     path = "src/irc_step_motion_executor/config/motion_aliases.yaml"
     before = yaml.safe_load((UPDATE / "before" / path).read_text())["motion_aliases"]
-    aliases = yaml.safe_load((ROOT / path).read_text())["motion_aliases"]
+    aliases = yaml.safe_load((DEPLOYED / path).read_text())["motion_aliases"]
     motions = {m["name"]: m for m in json.loads(
-        (ROOT / "artifacts/robot_motions_runtime.json").read_text())["motions"]}
+        (DEPLOYED / "artifacts/robot_motions_runtime.json").read_text())["motions"]}
     assert aliases == {key: MANIFEST["renames"].get(value, value) for key, value in before.items()}
     assert set(aliases.values()) <= motions.keys()
     assert aliases["pickup_second_backward_turn_left"] == "R후진에서 제자리 좌회전"
