@@ -1,0 +1,13 @@
+[ 25%] Built target gtest
+[ 50%] Built target gtest_main
+[ 75%] Built target catalog_only_core
+[ 87%] Building CXX object CMakeFiles/test_catalog_only_core.dir/test/test_catalog_only_core.cpp.o
+[100%] Linking CXX executable test_catalog_only_core
+[100%] Built target test_catalog_only_core
+[ 20%] Built target gtest
+[ 40%] Built target catalog_only_core
+[ 60%] Built target gtest_main
+[ 80%] Built target sdk_executor_core
+[ 90%] Building CXX object CMakeFiles/test_sdk_executor_core.dir/test/test_sdk_executor_core.cpp.o
+[100%] Linking CXX executable test_sdk_executor_core
+[100%] Built target test_sdk_executor_core

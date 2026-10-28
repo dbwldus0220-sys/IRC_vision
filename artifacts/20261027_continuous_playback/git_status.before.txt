@@ -1,0 +1,31 @@
+ M artifacts/AGENTS.md
+ M artifacts/robot_motions_pc.json
+ M artifacts/robot_motions_runtime.json
+ M src/irc_step_motion_executor/CMakeLists.txt
+ M src/irc_step_motion_executor/README.md
+ M src/irc_step_motion_executor/config/motion_aliases.yaml
+ M src/irc_step_motion_executor/include/irc_step_motion_executor/robot_motion_runtime_config.hpp
+ M src/irc_step_motion_executor/launch/sdk_gui_alignment.launch.py
+ M src/irc_step_motion_executor/scripts/manual_motion_request.py
+ M src/irc_step_motion_executor/src/sdk_executor_node.cpp
+ M src/irc_step_motion_executor/test/test_production_robot_motion_runtime_factory.cpp
+ M src/irc_step_motion_executor/test/test_robot_motion_runtime_config.cpp
+ M src/irc_step_motion_executor/test/test_startup_pose_catalog.cpp
+ M src/mission_control/launch/full_system_robot.launch.py
+ M src/mission_control/mission_control/motion_decision_node.py
+ M src/mission_control/test/test_catalog51_forward_update.py
+ M src/mission_control/test/test_full_system_robot_launch.py
+ M tools/test_playback_traces.py
+ M tools/test_upsert_motion_catalog.py
+ M tools/trace_sdk_gui.py
+ M tools/upsert_motion_catalog.py
+ M tools/verify_latest_gui_execution.py
+?? artifacts/20261027_catalog40_forward_pickup_update/
+?? artifacts/20261027_continuous_playback/
+?? artifacts/20261027_forward_execution_diagnosis/
+?? artifacts/20261027_restore_original_shoulders/
+?? motion_imports/robot_motions(40)(1).json
+?? src/irc_step_motion_executor/include/irc_step_motion_executor/callback_timing_trace.hpp
+?? src/irc_step_motion_executor/test/test_callback_timing_trace.cpp
+?? src/mission_control/test/test_catalog40_forward_pickup_update.py
+?? tools/analyze_callback_timing.py

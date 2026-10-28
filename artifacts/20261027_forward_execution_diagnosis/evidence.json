@@ -1,0 +1,58 @@
+{
+  "execution_log": "/home/jet/.ros/log/python3_3681_1793091646698.log",
+  "events": [
+    {
+      "line": 14,
+      "text": "[INFO] [1793091672.737193717] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=2"
+    },
+    {
+      "line": 15,
+      "text": "[INFO] [1793091673.730292587] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT"
+    },
+    {
+      "line": 16,
+      "text": "[INFO] [1793091676.134849849] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_RIGHT_TURN_RIGHT_4, command_id=3"
+    },
+    {
+      "line": 17,
+      "text": "[INFO] [1793091677.120979394] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT"
+    },
+    {
+      "line": 18,
+      "text": "[INFO] [1793091679.264279082] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4"
+    },
+    {
+      "line": 23,
+      "text": "[INFO] [1793091682.464204312] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=6"
+    },
+    {
+      "line": 24,
+      "text": "[INFO] [1793091683.339535115] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT"
+    },
+    {
+      "line": 36,
+      "text": "[INFO] [1793091686.732690477] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT"
+    },
+    {
+      "line": 39,
+      "text": "[INFO] [1793091689.023887575] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT"
+    }
+  ],
+  "installed_catalog_resolves_to": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/robot_motions_runtime.json",
+  "math_verification": {
+    "status": "passed",
+    "forward_variants": 8,
+    "samples": 18400,
+    "test_source": "/home/jet/IRC/external_sdk/robot_motion_player_sdk_work_20260801/final step/test_gui_parity.py",
+    "in_memory_harness_adjustments": [
+      "Use integer timeline as actual playback does",
+      "Initialize probe MotionFrame.lift_early_arrival=true to match all tested forward frames"
+    ],
+    "original_test_status": "Unmodified harness fails: probe flag defaults false; not used as evidence of a forward playback bug"
+  },
+  "limits": [
+    "GUI file used on the comparison PC is not independently identified",
+    "No matching physical yaw, motor feedback, or bus timing traces",
+    "Mock timings are synthetic; source motion repeat count set to 6 for equal comparison"
+  ]
+}

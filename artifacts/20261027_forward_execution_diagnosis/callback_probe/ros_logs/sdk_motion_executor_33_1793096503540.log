@@ -1,0 +1,4 @@
+[INFO] [1793096503.590189720] [sdk_motion_executor]: Motion position tolerance check: DISABLED
+[WARN] [1793096503.596640423] [sdk_motion_executor]: Simulated backend only: no SDK or hardware access is available
+[INFO] [1793096519.614647018] [sdk_motion_executor]: Ball entered bottom trigger: motor 0 override -64.0 deg latched
+[INFO] [1793096527.616035298] [rclcpp]: signal_handler(SIGINT/SIGTERM)

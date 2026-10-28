@@ -11,6 +11,8 @@ import launch_testing.asserts
 from launch_ros.actions import Node
 import rclpy
 from std_msgs.msg import String
+from rcl_interfaces.srv import SetParameters
+from rclpy.parameter import Parameter
 
 
 def generate_test_description():
@@ -21,6 +23,7 @@ def generate_test_description():
         output="screen",
         parameters=[{
             "backend_type": "simulated",
+            "exclude_motor_5": True,
             "enable_robot_hardware": False,
             "poll_period_ms": 20,
             "running_polls": 5,
@@ -305,6 +308,7 @@ class TestSdkExecutorTopics(unittest.TestCase):
 
     def test_simulated_executor_publishes_repeated_liveness_heartbeats(self):
         first = self._wait_for_heartbeat_count(2)
+        self.assertEqual(first["motor_5_status"], "excluded_unconfirmed")
         self.assertEqual(first["backend_type"], "simulated")
         self.assertIsInstance(first["active"], bool)
         self.assertIs(first["auto_ready"], True)
@@ -312,6 +316,21 @@ class TestSdkExecutorTopics(unittest.TestCase):
         sequences = [heartbeat["sequence"] for heartbeat in self.heartbeats]
         self.assertEqual(sequences, sorted(sequences))
         self.assertEqual(len(sequences), len(set(sequences)))
+
+    def test_playback_options_require_restart(self):
+        client = self.node.create_client(
+            SetParameters, "/sdk_motion_executor_launch_test/set_parameters")
+        self.assertTrue(client.wait_for_service(timeout_sec=1.0))
+        request = SetParameters.Request()
+        request.parameters = [
+            Parameter("exclude_motor_5", value=False).to_parameter_msg(),
+            Parameter("continuous_interpolation", value=False).to_parameter_msg(),
+        ]
+        future = client.call_async(request)
+        rclpy.spin_until_future_complete(self.node, future, timeout_sec=1.0)
+        self.assertTrue(future.done())
+        self.assertTrue(all(not result.successful for result in future.result().results))
+        self.node.destroy_client(client)
 
     def _wait_for_heartbeat_count(self, count, timeout=5.0):
         deadline = time.monotonic() + timeout

@@ -1,0 +1,55 @@
+{
+  "changes": {
+    "artifacts/robot_motions_runtime.json": [
+      {
+        "name": "건라인복귀좌회전45도(1회)",
+        "before": 1.0,
+        "after": 0.9
+      },
+      {
+        "name": "R라인복귀우회전",
+        "before": 1.0,
+        "after": 0.9
+      },
+      {
+        "name": "R전진라인복귀좌",
+        "before": 1.0,
+        "after": 0.9
+      },
+      {
+        "name": "R전진라인복귀좌(6회)",
+        "before": 1.0,
+        "after": 0.9
+      }
+    ],
+    "artifacts/robot_motions_pc.json": [
+      {
+        "name": "건라인복귀좌회전45도(1회)",
+        "before": 1.0,
+        "after": 0.9
+      },
+      {
+        "name": "R라인복귀우회전",
+        "before": 1.0,
+        "after": 0.9
+      },
+      {
+        "name": "R전진라인복귀좌",
+        "before": 1.0,
+        "after": 0.9
+      },
+      {
+        "name": "R전진라인복귀좌(6회)",
+        "before": 1.0,
+        "after": 0.9
+      }
+    ]
+  },
+  "only_playback_speed_changed": true,
+  "runtime_tolerance_deg": 5.0,
+  "backup_files": {
+    "robot_motions_pc.before.json": "e75343bd4715da3f23977ac5bb5ef1e74565bcb2dcffa68cdad167c97b8a7beb",
+    "test_catalog52_r_update.before.py": "5b7c7b4191e8e323fc6543273a6d48fbd74970c50fcac887bc2f85100a71f430",
+    "robot_motions_runtime.before.json": "0ae982d3f9a145298b8b449362daedf740bf7ca1699bbfb5f3ef66bc16ded03d"
+  }
+}

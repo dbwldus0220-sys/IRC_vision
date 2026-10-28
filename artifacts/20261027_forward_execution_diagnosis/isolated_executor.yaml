@@ -1,0 +1,24 @@
+# Match full_system_robot playback settings without vision or decision nodes.
+# Hardware remains disabled unless both flags are explicitly overridden.
+sdk_motion_executor:
+  ros__parameters:
+    backend_type: robot_motion_player
+    enable_robot_hardware: false
+    explicit_torque_approval: false
+    motion_json_path: /home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/robot_motions_runtime.json
+    policy_reference_json_path: /home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/robot_motions_pc.json
+    motion_aliases_file: /home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/config/motion_aliases.yaml
+    robot_device_path: /dev/ttyUSB0
+    robot_baud_rate: 4000000
+    robot_motor_ids: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
+    poll_period_ms: 5
+    position_tolerance_enabled: false
+    queued_transition_hold_ms: 0
+    enable_head_override: true
+    enable_shoulder_override: false
+    startup_pose_enabled: true
+    startup_pose_name: 오뒤무게중심앞
+    startup_pose_duration_ms: 4000
+    motion_trace_enabled: true
+    motion_trace_goals: true
+    motion_trace_path: /tmp/step_forward_isolated.csv

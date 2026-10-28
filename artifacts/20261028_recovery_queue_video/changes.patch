@@ -1,0 +1,212 @@
+--- before/external_sdk/gui_aligned/robot_motion_player.cpp
++++ external_sdk/gui_aligned/robot_motion_player.cpp
+@@ -17,6 +17,18 @@
+ constexpr auto kPositionCheckInterval = std::chrono::milliseconds(20);
+ double guiSeconds(RobotMotionPlayer::Clock::time_point value) {
+     return std::chrono::duration_cast<std::chrono::nanoseconds>(value.time_since_epoch()).count() / 1e9;
++}
++bool isLineRecoveryMotion(std::string_view name) {
++    return name == "R전진라인복귀좌" || name == "R라인복귀우회전";
++}
++bool isLineWalkingMotion(std::string_view name) {
++    return name.starts_with("R전진45도(") || isLineRecoveryMotion(name);
++}
++bool sameEntryFrame(const MotionFrame& a, const MotionFrame& b) {
++    return a.name == b.name && a.start_ms == b.start_ms && a.time_ms == b.time_ms
++        && a.angles == b.angles && a.torques == b.torques
++        && a.lift_early_arrival == b.lift_early_arrival
++        && a.playback_cycle_end == b.playback_cycle_end && a.stop_at_end == b.stop_at_end;
+ }
+ }
+ 
+@@ -170,6 +182,15 @@
+     const MotionPattern& next, std::string_view next_name) const noexcept {
+     // 같은 repeatable 모션은 기존 내부 repeat_count 순환과 같은 경계입니다.
+     if (current_name == next_name && current.repeatable()) return true;
++    // 승인된 라인 보행은 모두 오른발 뒤에서 끝나며 같은 첫 이동 자세를 사용한다.
++    // 카메라/보행 원본이 바뀌면 첫 프레임 검사를 통과해야 예약할 수 있다.
++    if (isLineWalkingMotion(current_name) && isLineWalkingMotion(next_name)
++        && (isLineRecoveryMotion(current_name) || isLineRecoveryMotion(next_name))
++        && current.repeatable() && next.repeatable()
++        && !current.frames().empty() && !next.frames().empty()
++        && current.playbackSpeed() == next.playbackSpeed()
++        && current.startPose() == next.startPose()
++        && sameEntryFrame(current.frames().front(), next.frames().front())) return true;
+     // 반복 횟수만 다른 동일 주기도 내부 반복과 같은 경계로 예약한다.
+     // 자세 이름만으로 추정하지 않고 대기/정지/각도/토크까지 비교한다.
+     if (current.repeatable() && next.repeatable()
+@@ -271,7 +292,7 @@
+ RobotMotionPlayer::Clock::time_point RobotMotionPlayer::forwardBoundaryStart(
+     const MotionPattern& next, std::string_view next_name, Clock::time_point now) const noexcept {
+     const auto forward = [](std::string_view name) {
+-        return name.starts_with("R전진45도(") || name.starts_with("R전진90도(")
++        return isLineWalkingMotion(name) || name.starts_with("R전진90도(")
+             || name.starts_with("R전진0도(");
+     };
+     if (!account_forward_boundary_feedback_ || !forward(current_motion_) || !forward(next_name)
+--- before/external_sdk/gui_aligned/test_forward_timing.cpp
++++ external_sdk/gui_aligned/test_forward_timing.cpp
+@@ -108,9 +108,9 @@
+     // Feedback must consume physical hold time, not add another hold before it.
+     for (bool queued : {false, true}) for (bool enabled : {false, true})
+     for (bool continuous : {false, true}) for (int delay : {0, 16, 140})
+-    for (bool forward : {false, true}) for (int explicit_hold : {0, 25}) {
++    for (const std::string name : {"turn", "R전진45도(6회)", "R전진라인복귀좌", "R라인복귀우회전"})
++    for (int explicit_hold : {0, 25}) {
+         if (!queued && explicit_hold != 0) continue;
+-        const std::string name = forward ? "R전진45도(6회)" : "turn";
+         std::ofstream(path) << "{\"motions\":[{\"name\":\"" << name
+             << "\",\"max_seq_ms\":290,\"repeat_count\":"
+             << (queued ? 1 : 2) << R"(,"frames":[
+@@ -138,7 +138,7 @@
+             ms += explicit_hold;
+             player.update();
+         }
+-        const bool accounted = enabled && forward && explicit_hold == 0;
++        const bool accounted = enabled && name != "turn" && explicit_hold == 0;
+         const int hold_end = accounted ? std::max(380, ms) : ms + 90;
+         ms = hold_end;
+         player.update();
+@@ -149,4 +149,59 @@
+         assert(hardware.goals.at(1) < 1);  // A long read cannot jump into the lift.
+         assert(hardware.prepares == 1);
+     }
++
++    // Approved line gaits share the entry frame, but their final joint targets differ.
++    std::ofstream(path) << R"JSON({"motions":[
++      {"name":"R전진45도(6회)","max_seq_ms":380,"repeat_count":2,"start_pose":"lift","end_pose":"back","frames":[
++        {"name":"lift","start_ms":90,"time_ms":100,"angles":{"1":10}},
++        {"name":"back","start_ms":280,"time_ms":100,"stop_at_end":true,"angles":{"1":0}}]},
++      {"name":"R전진라인복귀좌","max_seq_ms":380,"repeat_count":4,"start_pose":"lift","end_pose":"left_back","frames":[
++        {"name":"lift","start_ms":90,"time_ms":100,"angles":{"1":10}},
++        {"name":"left_back","start_ms":280,"time_ms":100,"stop_at_end":true,"angles":{"1":2}}]},
++      {"name":"R라인복귀우회전","max_seq_ms":380,"repeat_count":4,"start_pose":"lift","end_pose":"right_back","frames":[
++        {"name":"lift","start_ms":90,"time_ms":100,"angles":{"1":10}},
++        {"name":"right_back","start_ms":280,"time_ms":100,"stop_at_end":true,"angles":{"1":-2}}]},
++      {"name":"R전진45도(2회)","max_seq_ms":380,"start_pose":"lift","end_pose":"changed_back","frames":[
++        {"name":"lift","start_ms":90,"time_ms":100,"angles":{"1":20}},
++        {"name":"changed_back","start_ms":280,"time_ms":100,"angles":{"1":0}}]},
++      {"name":"R전진90도(6회)","max_seq_ms":380,"start_pose":"lift","end_pose":"camera_back","frames":[
++        {"name":"lift","start_ms":90,"time_ms":100,"angles":{"1":10}},
++        {"name":"camera_back","start_ms":280,"time_ms":100,"angles":{"1":0}}]}
++    ]})JSON";
++    const std::vector<std::string> names = {"R전진45도(6회)", "R전진라인복귀좌", "R라인복귀우회전"};
++    for (bool continuous : {false, true}) for (const auto& first : names)
++    for (const auto& second : names) {
++        TimingHardware hardware;
++        int ms = 0;
++        RobotMotionPlayer player(path, hardware, [&] {
++            return RobotMotionPlayer::Clock::time_point(std::chrono::milliseconds(ms));
++        });
++        player.setContinuousInterpolation(continuous);
++        player.setForwardBoundaryFeedbackAccounting(true);
++        assert(player.initialize());
++        assert(player.start(first) == StartResult::Accepted);
++        assert(player.queueNext("R전진45도(2회)") == QueueResult::IncompatibleTransition);
++        assert(player.queueNext("R전진90도(6회)") == QueueResult::IncompatibleTransition);
++        assert(player.queueNext(second) == QueueResult::Queued);
++        const int boundary = first == names[0] ? 760 : 1520;
++        const int total = boundary + (second == names[0] ? 760 : 1520);
++        const double endpoint = first == names[0] ? 0. : first == names[1] ? 2. : -2.;
++        for (ms = 5; player.running() && ms <= total + 100; ms += 5) {
++            player.update();
++            if (ms >= boundary && ms <= boundary + 90)
++                assert(hardware.goals.at(1) == endpoint);
++            if (ms == boundary + 95) {
++                // Start from the commanded endpoint, not the stale measured zero.
++                assert(hardware.goals.at(1) > endpoint);
++                assert(hardware.goals.at(1) < endpoint + 1.);
++            }
++            const int cycle_time = ms % 380;
++            if (cycle_time >= 190 && cycle_time <= 280)
++                assert(hardware.goals.at(1) == 10);  // Explicit internal hold remains.
++        }
++        assert(player.succeeded());
++        assert(ms - 5 == total);
++        assert(player.completionSequence() == 2);
++        assert(hardware.prepares == 1);
++    }
+ }
+--- before/src/mission_control/mission_control/motion_command_bridge_node.py
++++ src/mission_control/mission_control/motion_command_bridge_node.py
+@@ -1491,24 +1491,25 @@
+ 
+         request_id = command_id
+         timeout_ms = self.timeout_ms_from_payload(payload)
+-        # Repeat-count variants share a cycle; let the SDK validate their frames
+-        # and queue them before completion. Other gait changes still wait here.
+-        forward_groups = (
+-            {"forward", "sdk_forward_4"}
++        # Line forward/recovery share an entry frame. The SDK validates it before
++        # queueing, so the boundary needs no second start-position read.
++        seamless_walking_groups = (
++            {"forward", "sdk_forward_4", "line_recovery_left_4",
++             "line_recovery_left_6", "line_recovery_right_4"}
+             | {f"{prefix}_{count}" for prefix in (
+                 "line_forward", "ball_camera_down_forward", "post_ball_forward",
+             ) for count in (2, 4, 6, 8)},
+             {f"goal_camera_90_forward_{count}" for count in (2, 4, 6, 8)},
+         )
+-        same_forward_cycle = any(
++        compatible_walking_transition = any(
+             motion_id in group and self.active_motion_id in group
+-            for group in forward_groups
++            for group in seamless_walking_groups
+         )
+         walking_transition = bool(
+             motion_id.startswith(("line_forward_", "line_recovery_", "goal_camera_90_forward_", "goal_camera_90_fine_forward_"))
+             and (self.active_motion_id or "").startswith(("line_forward_", "line_recovery_", "goal_camera_90_forward_", "goal_camera_90_fine_forward_"))
+             and motion_id != self.active_motion_id
+-            and not same_forward_cycle
++            and not compatible_walking_transition
+         )
+         defer_until_active_finishes = bool(
+             self.motion_in_progress
+--- before/src/mission_control/test/test_line_continuous_missions.py
++++ src/mission_control/test/test_line_continuous_missions.py
+@@ -115,7 +115,7 @@
+     (corner_info('LEFT'), line_info(), 'STRAIGHT'),
+     (corner_info('RIGHT'), line_info(), 'STRAIGHT'),
+ ])
+-def test_walking_transition_is_reserved_and_dispatched_at_success_without_new_vision(
++def test_walking_transition_is_sent_to_sdk_before_success_without_new_vision(
+     clock, monkeypatch, initial, next_info, expected,
+ ):
+     monkeypatch.setattr(MotionDecisionNode, '_current_ros_time_ns', lambda _: round(clock[0] * 1e9))
+@@ -131,12 +131,12 @@
+     assert queued['action'] == expected and queued['valid']
+     assert node.general_motion_gate.active_command_id == first['command_id']
+     bridge.navigation_command_callback(String(data=json.dumps(queued)))
+-    assert bridge.queued_request_deferred
+-    assert len(bridge.executor_request_publisher.messages) == 1
++    assert not bridge.queued_request_deferred
++    assert len(bridge.executor_request_publisher.messages) == 2
+     clock[0] = node.active_line_motion_started_at + node.active_line_motion_duration_sec
+     finished_at = clock[0]
+     bridge.executor_status_callback(executor_status(**first_request, status='SUCCEEDED'))
+-    # The existing completion callback dispatches immediately, with no timer or RGB input.
++    # Completion promotes the existing SDK reservation without a second start request.
+     requests = decoded_messages(bridge.executor_request_publisher)
+     assert len(requests) == 2 and requests[-1]['command_id'] == queued['command_id']
+     assert clock[0] == finished_at
+@@ -222,7 +222,8 @@
+     MotionDecisionNode._motion_status_callback(node, bridge.motion_status_publisher.messages[-1])
+     assert getattr(node, 'queued_general_command_id', None) is None
+     assert bridge.queued_request_id is None
+-    assert len(bridge.executor_request_publisher.messages) == 1
++    # The SDK reservation was already sent; failure must not dispatch it again.
++    assert len(bridge.executor_request_publisher.messages) == 2
+ 
+ 
+ def test_walking_capture_windows_match_active_recovery_catalogs():
+--- before/src/mission_control/test/test_motion_command_bridge.py
++++ src/mission_control/test/test_motion_command_bridge.py
+@@ -313,7 +313,7 @@
+     assert len(bridge.executor_request_publisher.messages) == 2
+ 
+ 
+-@pytest.mark.parametrize("second", ["LEFT", "GOAL_CAMERA_90_FORWARD_1"])
++@pytest.mark.parametrize("second", ["GOAL_CAMERA_90_FORWARD_1"])
+ def test_forward_to_other_gait_still_waits_for_completion(second):
+     bridge = FakeBridge()
+     bridge.navigation_command_callback(navigation_message(action="STRAIGHT_2"))

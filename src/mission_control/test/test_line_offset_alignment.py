@@ -43,15 +43,14 @@ def test_pixel_offset_does_not_replace_forward(offset):
 
 
 @pytest.mark.parametrize("sign", [-1, 1])
-def test_recorded_near_line_recovers_instead_of_stationary_alignment(sign):
+def test_recorded_near_line_now_continues_straight(sign):
     info = sample(offset=sign * 242.199, target_angle=sign * 18.8804,
                   ground_heading_error_deg=sign * 9.03,
                   filtered_lateral_offset_norm=sign * .378,
                   heading_error_deg=-sign * 8.3, turn_angle_deg=3.3)
     baseline = planner(-1.).plan("LINE_TRACK", {"line": info}, .1)
     decision = planner().plan("LINE_TRACK", {"line": info}, .1)
-    side = "RIGHT" if sign > 0 else "LEFT"
-    assert decision.valid and decision.action == baseline.action == f"RECOVER_{side}_TURN_{side}_4"
+    assert decision.valid and decision.action == baseline.action == "STRAIGHT"
     assert not decision.source_command["line_offset_alignment_active"]
 
 
@@ -59,7 +58,7 @@ def test_recorded_near_line_recovers_instead_of_stationary_alignment(sign):
 @pytest.mark.parametrize("offset", [99.9, 100., 100.1])
 def test_far_recovery_guard_keeps_inclusive_pixel_threshold(sign, offset):
     info = sample(offset=sign*offset, target_angle=sign*25.,
-                  ground_heading_error_deg=-sign*10., filtered_lateral_offset_norm=sign*.7)
+                  ground_heading_error_deg=-sign*20., filtered_lateral_offset_norm=sign*.7)
     decision = planner().plan("LINE_TRACK", {"line": info}, .1)
     assert decision.valid
     if offset < 100.:
@@ -87,9 +86,9 @@ def test_large_ground_heading_is_not_reversed_by_offset_target(heading):
 
 def test_guard_does_not_latch_when_next_frame_selects_normal_recovery():
     p = planner()
-    first = p.plan("LINE_TRACK", {"line": sample(target_angle=25., ground_heading_error_deg=-10.)}, .1)
+    first = p.plan("LINE_TRACK", {"line": sample(target_angle=25., ground_heading_error_deg=-20.)}, .1)
     assert first.action == "LINE_OFFSET_TURN_RIGHT_2"
-    result = p.plan("LINE_TRACK", {"line": sample(target_angle=18.88, ground_heading_error_deg=9.03,
+    result = p.plan("LINE_TRACK", {"line": sample(target_angle=24., ground_heading_error_deg=24.,
                       filtered_lateral_offset_norm=.378)}, .1)
     assert result.action == "RECOVER_RIGHT_TURN_RIGHT_4"
     assert not p.line_offset_alignment_active
@@ -104,14 +103,14 @@ def test_guard_does_not_latch_when_next_frame_selects_normal_recovery():
     {"corner_preview_confirmed": True, "ground_fit_segment": "FULL_PATH"},
 ])
 def test_unusable_ground_cannot_authorize_far_recovery(changes):
-    info = sample(target_angle=25., ground_heading_error_deg=-10.)
+    info = sample(target_angle=25., ground_heading_error_deg=-20.)
     info.update(changes)
     decision = planner().plan("LINE_TRACK", {"line": info}, .1)
     assert not decision.valid
 
 
 def test_target_is_clamped_to_observed_segment_before_corner():
-    info = sample(target_angle=20., ground_heading_error_deg=-10.,
+    info = sample(target_angle=20., ground_heading_error_deg=-20.,
                   ground_line_points_m=[[.18, .35], [.18, .4], [.18, .45]],
                   ground_lookahead_distance_m=.5,
                   corner_preview_confirmed=True, ground_fit_segment="PRE_CORNER")

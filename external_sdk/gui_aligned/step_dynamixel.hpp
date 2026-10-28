@@ -4,9 +4,11 @@
 #include <eigen3/Eigen/Dense>
 #include <vector>
 #include <string>
+#include <stdexcept>
 #include <thread>
 #include <chrono>
 #include "dynamixel_sdk/dynamixel_sdk.h"
+#include "bus_diagnostics.hpp"
 
 // #include <unordered_map> //자료구조 중 더 빠른 map탐색 key:value
 
@@ -142,6 +144,8 @@ class Dxl
 
         int16_t Mode = Position_Control_Mode;
         bool port_opened_ = false;
+        bool exclude_motor_5_ = false;
+        irc_step::BusDiagnostics bus_diagnostics_;
 
         VectorXd Start_set = VectorXd::Zero(NUMBER_OF_DYNAMIXELS);
 
@@ -186,8 +190,15 @@ class Dxl
     public:
         Dxl(); // 생성자는 포트·모터에 접근하지 않는다.
         bool Initialize(const std::string& device, int baud);
+        void SetExcludeMotor5(bool excluded) {
+            if (port_opened_) throw std::logic_error("cannot change motor exclusion on an open port");
+            exclude_motor_5_ = excluded;
+        }
+        bool MotorEnabled(int id) const { return !(exclude_motor_5_ && id == 5); }
+        bool VerifyTorqueEnabled(bool enabled);
         bool WriteGoalDegrees(const std::vector<double>& angles, const std::vector<int>& ids);
         bool ReadPositionDegrees(std::vector<double>& angles);
+        irc_step::BusDiagnostics BusDiagnostics() const { return bus_diagnostics_; }
         ~Dxl(); //소멸자
 
 // ************************************ GETTERS ***************************************** //

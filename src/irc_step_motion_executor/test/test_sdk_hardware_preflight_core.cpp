@@ -218,3 +218,19 @@ TEST(SdkHardwarePreflightParser, RejectsMalformedMotorIdLists)
 }
 
 }  // namespace
+
+TEST(SdkHardwarePreflightParser, ExclusionPreservesLogicalIdsAndReportsUnknownTorque)
+{
+  auto args = valid_arguments();
+  args.push_back("--exclude-motor-5");
+  const auto parsed = irc_step_motion_executor::parse_hardware_preflight_arguments(args);
+  ASSERT_TRUE(parsed);
+  EXPECT_TRUE(parsed.config.exclude_motor_5);
+  EXPECT_EQ(parsed.config.motor_ids.size(), 23U);
+  EXPECT_EQ(parsed.config.motor_ids.at(5), 5);
+  FakePreflightFactory factory;
+  factory.result.runtime_owner = std::make_shared<int>(1);
+  const auto result = irc_step_motion_executor::run_hardware_preflight(factory, parsed.config);
+  EXPECT_EQ(result.exit_code, 0);
+  EXPECT_NE(result.output.find("EXCLUDED / UNCONFIRMED"), std::string::npos);
+}

@@ -157,6 +157,7 @@ class GuiTrace:
                         extra['snapshot'] = dict(frames=copy.deepcopy(editor.motion_sequence),
                             max_seq_ms=editor.max_seq_ms, repeat_count=editor.playback_repeat_target,
                             playback_speed=editor.playback_speed,
+                            continuous_motion_enabled=bool(getattr(editor, 'continuous_motion_enabled', False)),
                             composer_segments=copy.deepcopy(getattr(editor, 'composer_playback_segments', [])),
                             initial_deg=dict(editor.start_angles))
                         extra['playback_origin_ns'] = int(editor.anim_start_time * 1e9)
@@ -180,6 +181,10 @@ class GuiTrace:
             ('restart_playback_cycle', 'restart'), ('stop_motion_sequence', 'goals_complete'),
             ('update_3d_robot', 'gui_3d'),
         ):
+            # Older Jetson GUIs restart inline in anim_step; its tick record
+            # already includes the next repeat and timeline in that version.
+            if name == 'restart_playback_cycle' and not hasattr(gui.SDKMotionEditor, name):
+                continue
             wrap(name, event)
 
         def wrap_ui(cls, name, event):

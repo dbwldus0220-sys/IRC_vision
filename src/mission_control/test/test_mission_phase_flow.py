@@ -2799,16 +2799,16 @@ def test_top_loss_forward_rechecks_new_vision_without_motion_dwell(monkeypatch):
     harness.ball_approach_alignment_pending = True
     lost = {"detected": False, "raw_detected": False, "ball_loss_confirmed": True}
     forward = harness.publish_vision(ball=lost)[-1]
-    assert forward["action"] == "BALL_LOST_FORWARD_2"
+    assert forward["action"] == "BALL_LOST_FINE_FORWARD_3"
     assert harness.planner.ball_top_loss_forward_sent is True
     harness.send_status(forward["action"], forward["command_id"], "RUNNING")
     assert harness.publish_vision(ball=lost) == []
     harness.send_status(forward["action"], forward["command_id"], "SUCCEEDED")
     assert harness.ball_post_motion_dwell_until is None
     assert not harness.general_motion_gate.has_required_fresh_vision()
-    assert harness.publish_vision(ball=None)[-1]["action"] == "WAIT"
-    search = harness.publish_vision(ball=lost)[-1]
-    assert search["action"] == "WAIT"
+    assert not any(m['valid'] for m in harness.publish_vision(ball=None))
+    assert not any(m['valid'] for m in harness.publish_vision(ball=lost))
+    assert harness.planner.ball_top_loss_forward_sent
 
 
 @pytest.mark.parametrize("stage", ["INITIAL", "FINE"])

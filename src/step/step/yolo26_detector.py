@@ -1058,6 +1058,8 @@ class Yolo26Detector(Node):
             "pickup_fine_prepare": "PICKUP / PREPARE FINE STEP",
             "__PICKUP_FINE_PRE_DWELL__": "PICKUP / WAIT BEFORE FINE STEP",
             "pickup_fine_forward_0": "PICKUP / FINE FORWARD",
+            "ball_top_loss_fine_forward_45_3": "BALL / FINE SEARCH 3",
+            "pickup_top_loss_fine_forward_0_3": "PICKUP / FINE SEARCH 3",
             "pickup_crab_prepare": "PICKUP / PREPARE SIDE STEP",
             "pickup_crab_left_0": "PICKUP / SIDE STEP LEFT",
             "pickup_crab_right_0": "PICKUP / SIDE STEP RIGHT",
@@ -3191,6 +3193,9 @@ class Yolo26Detector(Node):
         if decision.get("reason") == "lost_search_turn_limit_reached":
             return "BALL LOST | SEARCH LIMIT"
         action = str(decision.get("selected_action", ""))
+        if action in {"BALL_LOST_FINE_FORWARD_3", "BALL_PICKUP_INITIAL_SEARCH_FORWARD",
+                      "BALL_PICKUP_FINE_SEARCH_FORWARD"}:
+            return "BALL LOST | FINE SEARCH 3"
         if action.startswith(("BALL_APPROACH_TURN_", "BALL_PICKUP_CAMERA_DOWN_TURN_",
                               "BALL_PICKUP_FINE_SEARCH_")):
             for direction in ("LEFT", "RIGHT"):

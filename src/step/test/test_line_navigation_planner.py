@@ -357,8 +357,8 @@ def test_large_offset_without_turn_heading_stays_straight(offset, heading):
     ("offset", "heading", "expected", "angular_sign"),
     [
         (0.593, -32.0, "RECOVER_RIGHT_TURN_LEFT_4", -1),
-        (0.366, 15.0, "RECOVER_RIGHT_TURN_RIGHT_4", 1),
-        (-0.40, -15.0, "RECOVER_LEFT_TURN_LEFT_4", -1),
+        (0.366, 20.0, "RECOVER_RIGHT_TURN_RIGHT_4", 1),
+        (-0.40, -20.0, "RECOVER_LEFT_TURN_LEFT_4", -1),
         (-0.40, 15.0, "STRAIGHT", 1),
     ],
 )
@@ -431,7 +431,7 @@ def test_moderate_offset_and_parallel_line_can_continue_straight():
     assert command.motion == "STRAIGHT"
 
 
-def test_robot_right_of_line_pointing_farther_right_recovers_at_three_deg():
+def test_recorded_nine_degree_heading_now_continues_straight():
     planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
 
     command = planner.plan(
@@ -443,8 +443,7 @@ def test_robot_right_of_line_pointing_farther_right_recovers_at_three_deg():
         0.1,
     )
 
-    assert command.motion == "RECOVER_LEFT_TURN_LEFT_4"
-    assert command.angular_speed_rad_s < 0.0
+    assert command.motion == "STRAIGHT"
 
 
 @pytest.mark.parametrize(
@@ -460,12 +459,15 @@ def test_robot_right_of_line_pointing_farther_right_recovers_at_three_deg():
         (0.30, 3.0, "RECOVER_RIGHT_TURN_RIGHT_4"),
     ],
 )
-def test_off_center_robot_uses_asymmetric_heading_deadband(
+def test_explicit_asymmetric_heading_deadband_remains_configurable(
     offset,
     heading,
     expected,
 ):
-    planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
+    planner = LineNavigationPlanner(NavigationConfig(
+        heading_source="ground", recovery_heading_turn_deg=10.,
+        recovery_away_heading_turn_deg=3.,
+    ))
 
     command = planner.plan(
         line_info(
@@ -483,8 +485,8 @@ def test_off_center_robot_uses_asymmetric_heading_deadband(
 @pytest.mark.parametrize(
     ("heading", "expected_level"),
     [
-        (10.0, 1),
-        (15.0, 1),
+        (20.0, 1),
+        (20.001, 1),
         (22.499, 1),
         (22.5, 2),
         (37.499, 2),
@@ -545,14 +547,14 @@ def test_small_heading_and_centered_offset_stays_straight():
     assert command.motion == "STRAIGHT"
 
 
-def test_ten_degree_recovery_threshold_uses_numbered_turn_not_plain_right():
+def test_twenty_degree_recovery_threshold_uses_numbered_turn_not_plain_right():
     planner = LineNavigationPlanner(
         NavigationConfig(heading_source="ground", direction_confirmation_frames=1)
     )
 
     command = planner.plan(
         line_info(
-            ground_heading_error_deg=12.4,
+            ground_heading_error_deg=20.0,
             filtered_lateral_offset_norm=0.106,
             turn_angle_deg=0.2,
             path_turn_delta_deg=0.3,
@@ -663,7 +665,7 @@ def test_matching_curve_does_not_hide_emergency_offset_recovery():
     command = planner.plan(
         line_info(
             filtered_lateral_offset_norm=0.56,
-            ground_heading_error_deg=6.3,
+            ground_heading_error_deg=20.0,
             turn_angle_deg=48.8,
             turn_consistency=0.9,
         ),
@@ -789,7 +791,7 @@ def test_unsafe_input_produces_stop(sample, reason):
 def test_recovery_uses_ground_heading_when_image_heading_disagrees(sign):
     command = LineNavigationPlanner(NavigationConfig(heading_source="ground")).plan(
         line_info(
-            ground_heading_error_deg=sign * 14.11,
+            ground_heading_error_deg=sign * 24.11,
             filtered_heading_error_deg=sign * -15.2,
             heading_error_deg=sign * -16.0,
             filtered_lateral_offset_norm=sign * 0.642,
@@ -800,7 +802,7 @@ def test_recovery_uses_ground_heading_when_image_heading_disagrees(sign):
     )
     direction = "RIGHT" if sign > 0 else "LEFT"
     assert command.motion == f"RECOVER_{direction}_TURN_{direction}_4"
-    assert command.heading_error_deg == pytest.approx(sign * 14.11)
+    assert command.heading_error_deg == pytest.approx(sign * 24.11)
 
 
 def test_image_heading_does_not_override_valid_ground_tracking():

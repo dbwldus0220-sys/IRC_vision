@@ -1,0 +1,47 @@
+{
+  "trace": "build/gui_execution_alignment/packet_fault_continuous.csv",
+  "dropped_rows": 0,
+  "limitations": "Host calls only: TX success is not motor receipt or physical arrival. Missing-ID masks mean unavailable responses, not proof of the failed physical device. Callback dispatch and USB latency require separate observations.",
+  "tx_interval_ms": {
+    "count": 2,
+    "mean": 100.0,
+    "p95": 100.0,
+    "p99": 100.0,
+    "max": 100.0
+  },
+  "syncwrite_duration_ms": {
+    "count": 3,
+    "mean": 0.0,
+    "p95": 0.0,
+    "p99": 0.0,
+    "max": 0.0
+  },
+  "syncread_duration_ms": {
+    "count": 5,
+    "mean": 0.0,
+    "p95": 0.0,
+    "p99": 0.0,
+    "max": 0.0
+  },
+  "tx_failures": 1,
+  "rx_failures": [
+    {
+      "time_ms": 150.0,
+      "sdk_result": "-1",
+      "result_valid": "1",
+      "missing_ids": [
+        6
+      ]
+    }
+  ],
+  "boundaries": [],
+  "runs": [
+    {
+      "run": "1",
+      "motion": "only5",
+      "continuous": "1",
+      "exclude_motor_5": "1",
+      "duration_ms": null
+    }
+  ]
+}

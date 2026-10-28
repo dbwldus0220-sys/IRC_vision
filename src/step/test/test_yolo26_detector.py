@@ -492,6 +492,8 @@ def test_ball_top_loss_banner_shows_forward_search_before_side():
 
 @pytest.mark.parametrize('motion_id,expected', [
     ('pickup_fine_forward_0', 'PICKUP / FINE FORWARD'),
+    ('ball_top_loss_fine_forward_45_3', 'BALL / FINE SEARCH 3'),
+    ('pickup_top_loss_fine_forward_0_3', 'PICKUP / FINE SEARCH 3'),
     ('__PICKUP_FINE_PRE_DWELL__', 'PICKUP / WAIT BEFORE FINE STEP'),
     ('pickup_pre_backward_camera_down', 'PICKUP / BACKWARD (2 CYCLES)'),
     ('pickup_retreat_2', 'PICKUP / BACKWARD (2 CYCLES)'),
@@ -751,6 +753,9 @@ def test_line_loss_overlay_does_not_claim_another_missions_wait(phase, locked, v
 
 
 @pytest.mark.parametrize('action,reason,expected', [
+    ('BALL_LOST_FINE_FORWARD_3', '', 'FINE SEARCH 3'),
+    ('BALL_PICKUP_INITIAL_SEARCH_FORWARD', '', 'FINE SEARCH 3'),
+    ('BALL_PICKUP_FINE_SEARCH_FORWARD', '', 'FINE SEARCH 3'),
     ('BALL_APPROACH_TURN_RIGHT_5', '', 'SEARCH RIGHT'),
     ('BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_2', '', 'SEARCH LEFT'),
     ('BALL_PICKUP_FINE_SEARCH_RIGHT', '', 'SEARCH RIGHT'),

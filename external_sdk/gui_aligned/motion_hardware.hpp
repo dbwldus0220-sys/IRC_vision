@@ -1,6 +1,7 @@
 #pragma once
 
 #include "motion_pattern.hpp"
+#include "bus_diagnostics.hpp"
 
 #include <cstdint>
 #include <string_view>
@@ -19,8 +20,12 @@ public:
 
     virtual bool initialize() noexcept = 0;
     [[nodiscard]] virtual bool ready() const noexcept = 0;
+    [[nodiscard]] virtual bool motorEnabled(int id) const noexcept {
+        return id >= 0 && id < kMotionMotorCount;
+    }
 
     virtual bool prepareImmediatePlayback() noexcept { return true; }
+    [[nodiscard]] virtual BusDiagnostics busDiagnostics() const noexcept { return {}; }
 
     virtual bool commandPosition(
         const JointAngles& goal_deg,

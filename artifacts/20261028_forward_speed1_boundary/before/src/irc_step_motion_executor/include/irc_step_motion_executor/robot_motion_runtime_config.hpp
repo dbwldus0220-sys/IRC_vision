@@ -1,0 +1,68 @@
+#ifndef IRC_STEP_MOTION_EXECUTOR__ROBOT_MOTION_RUNTIME_CONFIG_HPP_
+#define IRC_STEP_MOTION_EXECUTOR__ROBOT_MOTION_RUNTIME_CONFIG_HPP_
+
+#include <cstdint>
+#include <map>
+#include <string>
+#include <vector>
+
+namespace irc_step_motion_executor
+{
+
+struct RobotMotionRuntimeConfig
+{
+  std::string motion_json_path;
+  // The production factory passes these values to the SDK after validating
+  // that they exactly match the supported hardware profile.
+  bool enable_robot_hardware{false};
+  std::string device_path;
+  std::int64_t baud_rate{0};
+  std::vector<std::int64_t> motor_ids;
+  bool explicit_torque_approval{false};
+  bool continuous_interpolation{true};
+  bool exclude_motor_5{false};
+  bool enable_head_override{true};
+  bool enable_shoulder_override{false};
+  std::string policy_reference_json_path;
+  std::int64_t queued_transition_hold_ms{0};
+  std::int64_t expected_tick_ms{5};
+  bool motion_trace_enabled{false};
+  bool motion_trace_goals{false};
+  std::string motion_trace_path;
+};
+
+struct RobotMotionRuntimeConfigResult
+{
+  RobotMotionRuntimeConfig config;
+  std::string error_code;
+  std::string message;
+
+  explicit operator bool() const noexcept
+  {
+    return error_code.empty();
+  }
+};
+
+RobotMotionRuntimeConfig make_robot_motion_runtime_config(
+  std::string motion_json_path,
+  bool enable_robot_hardware,
+  std::string device_path,
+  std::int64_t baud_rate,
+  std::vector<std::int64_t> motor_ids,
+  bool explicit_torque_approval);
+
+RobotMotionRuntimeConfigResult parse_robot_motion_runtime_config(
+  const std::map<std::string, std::string> & settings);
+
+RobotMotionRuntimeConfigResult validate_robot_motion_runtime_config(
+  const RobotMotionRuntimeConfig & config);
+
+RobotMotionRuntimeConfigResult validate_robot_hardware_initialization_policy(
+  const RobotMotionRuntimeConfig & config);
+
+RobotMotionRuntimeConfigResult validate_robot_hardware_preflight_policy(
+  const RobotMotionRuntimeConfig & config);
+
+}  // namespace irc_step_motion_executor
+
+#endif  // IRC_STEP_MOTION_EXECUTOR__ROBOT_MOTION_RUNTIME_CONFIG_HPP_

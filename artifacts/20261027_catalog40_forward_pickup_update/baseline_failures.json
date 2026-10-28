@@ -1,0 +1,5 @@
+{
+  "failed_count": 69,
+  "passed_count": 488,
+  "note": "Counts from the pre-edit test run. Pytest cache contained older failures and is not used as evidence."
+}

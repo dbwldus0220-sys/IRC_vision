@@ -103,6 +103,7 @@ def test_post_motion_wait_stores_frames_but_requires_one_after_pause(clock):
 @pytest.mark.parametrize('action,source,extra', [
     ('STRAIGHT_0', 'ball', {}), ('STRAIGHT_0', 'hurdle', {}),
     ('BALL_FINE_FORWARD_8', 'ball', {}),
+    ('BALL_LOST_FINE_FORWARD_3', 'ball', {}),
     ('GO', 'hurdle', {'fine_sequence_requested': True}),
     ('GO', 'hurdle', {'depth_fallback_requested': True}),
 ])
@@ -116,6 +117,8 @@ def test_each_fine_action_requires_full_second(clock, action, source, extra):
 
 @pytest.mark.parametrize('action,flag,extra', [
     ('BALL_PICKUP_FINE_FORWARD', 'pickup_fine_align_waiting', {}),
+    ('BALL_PICKUP_FINE_SEARCH_FORWARD', 'pickup_fine_align_waiting', {}),
+    ('BALL_PICKUP_INITIAL_SEARCH_FORWARD', 'pickup_initial_align_waiting', {}),
     ('BALL_PICKUP_INITIAL_ALIGN_CONTINUE', 'pickup_initial_align_waiting', {'pickup_approach_motion': 'STRAIGHT_0'}),
 ])
 def test_fine_checkpoint_waits_inside_pickup_lock_without_deadlock(clock, action, flag, extra):

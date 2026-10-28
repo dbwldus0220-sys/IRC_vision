@@ -1,0 +1,18 @@
+{
+  "source_r_motions": 29,
+  "derived_motions": 8,
+  "replaced_motions": 32,
+  "total_runtime_motions": 88,
+  "changed_aliases": 46,
+  "added_aliases": 8,
+  "all_runtime_tolerances_deg": [
+    5.0
+  ],
+  "source_identical_to_download": true,
+  "hardware_execution": false,
+  "installed_paths": {
+    "robot_motions_runtime.json": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/robot_motions_runtime.json",
+    "robot_motions_pc.json": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/robot_motions_pc.json",
+    "motion_aliases.yaml": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/config/motion_aliases.yaml"
+  }
+}

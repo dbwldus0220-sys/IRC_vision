@@ -1,0 +1,37 @@
+Consolidate compiler generated dependencies of target motion_core
+[  8%] Built target motion_core
+Consolidate compiler generated dependencies of target test_motion_pattern
+Consolidate compiler generated dependencies of target test_motion_callback
+[ 20%] Built target test_motion_pattern
+[ 20%] Built target test_motion_callback
+Consolidate compiler generated dependencies of target gui_trace_probe
+Consolidate compiler generated dependencies of target motion_player_core
+[ 31%] Built target gui_trace_probe
+[ 31%] Built target motion_player_core
+Consolidate compiler generated dependencies of target test_continuous_interpolation
+Consolidate compiler generated dependencies of target continuous_trace_probe
+[ 37%] Building CXX object CMakeFiles/continuous_trace_probe.dir/continuous_trace_probe.cpp.o
+[ 40%] Built target test_continuous_interpolation
+[ 42%] Building CXX object CMakeFiles/test_forward_continuation.dir/test_forward_continuation.cpp.o
+[ 45%] Linking CXX executable continuous_trace_probe
+[ 45%] Built target continuous_trace_probe
+Consolidate compiler generated dependencies of target robot_control
+[ 60%] Built target robot_control
+Consolidate compiler generated dependencies of target gui_execution_probe
+[ 65%] Built target gui_execution_probe
+Consolidate compiler generated dependencies of target recorded_execution_probe
+[ 71%] Built target recorded_execution_probe
+Consolidate compiler generated dependencies of target test_gui_alignment
+[ 77%] Built target test_gui_alignment
+Consolidate compiler generated dependencies of target test_continuous_hardware
+[ 91%] Built target test_continuous_hardware
+Consolidate compiler generated dependencies of target irc_robot
+[ 97%] Built target irc_robot
+[100%] Linking CXX executable test_forward_continuation
+[100%] Built target test_forward_continuation
+[ 42%] Built target motion_core
+[ 71%] Built target motion_player_core
+Consolidate compiler generated dependencies of target test_forward_continuation
+[ 85%] Building CXX object CMakeFiles/test_forward_continuation.dir/test_forward_continuation.cpp.o
+[100%] Linking CXX executable test_forward_continuation
+[100%] Built target test_forward_continuation

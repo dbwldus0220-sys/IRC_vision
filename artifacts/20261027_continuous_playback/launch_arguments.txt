@@ -1,0 +1,37 @@
+Arguments (pass arguments as '<name>:=<value>'):
+
+    'continuous_interpolation':
+        no description given
+        (default: 'true')
+
+    'exclude_motor_5':
+        no description given
+        (default: 'false')
+
+    'backend_type':
+        no description given
+        (default: 'simulated')
+
+    'enable_robot_hardware':
+        no description given
+        (default: 'false')
+
+    'explicit_torque_approval':
+        no description given
+        (default: 'false')
+
+    'robot_device_path':
+        no description given
+        (default: '')
+
+    'motion_json_path':
+        no description given
+        (default: PathJoinSubstitution('FindPackageShare(pkg='irc_step_motion_executor'), 'config', 'robot_motions_runtime.json''))
+
+    'enable_shoulder_override':
+        no description given
+        (default: 'false')
+
+    'motion_trace_path':
+        no description given
+        (default: '/tmp/step_gui_alignment.csv')

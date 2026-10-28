@@ -1,0 +1,1380 @@
+--- before/artifacts/robot_motions_pc.json
++++ artifacts/robot_motions_pc.json
+@@ -18957,6 +18957,512 @@
+           "_drag_original_start_ms": 180
+         }
+       ]
++    },
++    {
++      "name": "건미세45도(상단탐색2회)",
++      "max_seq_ms": 3505,
++      "repeat_count": 2,
++      "playback_speed": 1.0,
++      "repeatable": true,
++      "start_pose": "미세오들45",
++      "end_pose": "미세오뒤4111(45도)",
++      "completion": {
++        "position_tolerance_deg": 2.0,
++        "settle_duration_ms": 80,
++        "settle_timeout_ms": 3000
++      },
++      "frames": [
++        {
++          "frame_id": "8891d36ce6354a7c8ec4ab65c2b9fd06",
++          "name": "미세오들45",
++          "time_ms": 48,
++          "angles": {
++            "0": -32.0,
++            "1": -0.3515625,
++            "2": -8.4375,
++            "3": 7.55859375,
++            "4": 11.25,
++            "5": -13.271484375,
++            "6": 74.35546875,
++            "7": -76.2890625,
++            "8": -10.546875,
++            "9": 2.4609375,
++            "10": 1.318359375,
++            "11": -3.0,
++            "12": 4.0,
++            "15": -4.669921875,
++            "16": 2.0,
++            "13": -77.41015625,
++            "14": 55.0,
++            "17": -69.994140625,
++            "18": 33.0,
++            "19": 79.716796875,
++            "20": -68.0,
++            "21": -5.0,
++            "22": -12.0
++          },
++          "torques": {
++            "0": true,
++            "1": true,
++            "2": true,
++            "3": true,
++            "4": true,
++            "5": true,
++            "6": true,
++            "7": true,
++            "8": true,
++            "9": true,
++            "10": true,
++            "11": true,
++            "12": true,
++            "15": true,
++            "16": true,
++            "13": true,
++            "14": true,
++            "17": true,
++            "18": true,
++            "19": true,
++            "20": true,
++            "21": true,
++            "22": true
++          },
++          "is_important": false,
++          "lift_early_arrival": true,
++          "source_frame_id": "8891d36ce6354a7c8ec4ab65c2b9fd06",
++          "start_ms": 59,
++          "_drag_original_start_ms": 59
++        },
++        {
++          "frame_id": "499b2843bc5448c7b1c0aa62c048b404",
++          "name": "미세왼뒤4111(45도)",
++          "time_ms": 85,
++          "angles": {
++            "0": -32.0,
++            "1": -0.17578125,
++            "2": -9.404296875,
++            "3": 8.7890625,
++            "4": 9.228515625,
++            "5": -10.01953125,
++            "6": 69.169921875,
++            "7": -70.48828125,
++            "8": -11.25,
++            "9": 4.5703125,
++            "10": 1.0,
++            "11": -3.0,
++            "12": 2.791015625,
++            "15": 2.8125,
++            "16": -2.197265625,
++            "13": -61.0,
++            "14": 52.0,
++            "17": -32.51953125,
++            "18": 30.1796875,
++            "19": 61.787109375,
++            "20": -69.0,
++            "21": 2.197265625,
++            "22": -3.8671875
++          },
++          "torques": {
++            "0": true,
++            "1": true,
++            "2": true,
++            "3": true,
++            "4": true,
++            "5": true,
++            "6": true,
++            "7": true,
++            "8": true,
++            "9": true,
++            "10": true,
++            "11": true,
++            "12": true,
++            "15": true,
++            "16": true,
++            "13": true,
++            "14": true,
++            "17": true,
++            "18": true,
++            "19": true,
++            "20": true,
++            "21": true,
++            "22": true
++          },
++          "is_important": false,
++          "lift_early_arrival": true,
++          "source_frame_id": "499b2843bc5448c7b1c0aa62c048b404",
++          "start_ms": 107
++        },
++        {
++          "frame_id": "21cb6f689e824fbe861899784162c45e",
++          "name": "미세왼들4112(45도)",
++          "time_ms": 48,
++          "angles": {
++            "0": -32.0,
++            "1": -0.3515625,
++            "2": -8.4375,
++            "3": 7.55859375,
++            "4": 11.25,
++            "5": -13.271484375,
++            "6": 74.35546875,
++            "7": -76.2890625,
++            "8": -10.546875,
++            "9": 2.4609375,
++            "10": 1.0,
++            "11": -3.0,
++            "12": 6.318359375,
++            "15": -2.0,
++            "16": 6.0,
++            "13": -52.0,
++            "14": 65.0,
++            "17": -30.70703125,
++            "18": 73.0,
++            "19": 64.0,
++            "20": -91.0,
++            "21": 16.0,
++            "22": 5.77734375
++          },
++          "torques": {
++            "0": true,
++            "1": true,
++            "2": true,
++            "3": true,
++            "4": true,
++            "5": true,
++            "6": true,
++            "7": true,
++            "8": true,
++            "9": true,
++            "10": true,
++            "11": true,
++            "12": true,
++            "15": true,
++            "16": true,
++            "13": true,
++            "14": true,
++            "17": true,
++            "18": true,
++            "19": true,
++            "20": true,
++            "21": true,
++            "22": true
++          },
++          "is_important": false,
++          "lift_early_arrival": true,
++          "source_frame_id": "21cb6f689e824fbe861899784162c45e",
++          "start_ms": 252
++        },
++        {
++          "frame_id": "77bbea5d712240ddb81613ad2f719988",
++          "name": "미세오뒤4111(45도)",
++          "time_ms": 85,
++          "angles": {
++            "0": -32.0,
++            "1": 0.263671875,
++            "2": -9.755859375,
++            "3": 9.755859375,
++            "4": 9.140625,
++            "5": -8.96484375,
++            "6": 67.236328125,
++            "7": -68.818359375,
++            "8": -11.6015625,
++            "9": 4.833984375,
++            "10": 0.59375,
++            "11": -3.0,
++            "12": 3.669921875,
++            "15": 3.427734375,
++            "16": 0.087890625,
++            "13": -53.0,
++            "14": 58.0,
++            "17": -29.125,
++            "18": 34.0,
++            "19": 64.951171875,
++            "20": -65.0,
++            "21": 2.021484375,
++            "22": -4.482421875
++          },
++          "torques": {
++            "0": true,
++            "1": true,
++            "2": true,
++            "3": true,
++            "4": true,
++            "5": true,
++            "6": true,
++            "7": true,
++            "8": true,
++            "9": true,
++            "10": true,
++            "11": true,
++            "12": true,
++            "15": true,
++            "16": true,
++            "13": true,
++            "14": true,
++            "17": true,
++            "18": true,
++            "19": true,
++            "20": true,
++            "21": true,
++            "22": true
++          },
++          "is_important": false,
++          "lift_early_arrival": true,
++          "source_frame_id": "77bbea5d712240ddb81613ad2f719988",
++          "start_ms": 300
++        }
++      ]
++    },
++    {
++      "name": "건미세0도(상단탐색2회)",
++      "max_seq_ms": 3505,
++      "repeat_count": 2,
++      "playback_speed": 1.0,
++      "repeatable": true,
++      "start_pose": "건미세오들0도",
++      "end_pose": "건미세오뒤0도",
++      "completion": {
++        "position_tolerance_deg": 2.0,
++        "settle_duration_ms": 80,
++        "settle_timeout_ms": 3000
++      },
++      "frames": [
++        {
++          "frame_id": "774b84718f364c2d81776ac284a70527",
++          "name": "건미세오들0도",
++          "time_ms": 48,
++          "angles": {
++            "0": -64.0,
++            "1": -0.3515625,
++            "2": -8.4375,
++            "3": 7.55859375,
++            "4": 11.25,
++            "5": -13.271484375,
++            "6": 74.35546875,
++            "7": -76.2890625,
++            "8": -10.546875,
++            "9": 2.4609375,
++            "10": 1.318359375,
++            "11": -3.0,
++            "12": 4.0,
++            "15": -4.669921875,
++            "16": 2.0,
++            "13": -77.41015625,
++            "14": 55.0,
++            "17": -69.994140625,
++            "18": 33.0,
++            "19": 79.716796875,
++            "20": -68.0,
++            "21": -5.0,
++            "22": -12.0
++          },
++          "torques": {
++            "0": true,
++            "1": true,
++            "2": true,
++            "3": true,
++            "4": true,
++            "5": true,
++            "6": true,
++            "7": true,
++            "8": true,
++            "9": true,
++            "10": true,
++            "11": true,
++            "12": true,
++            "15": true,
++            "16": true,
++            "13": true,
++            "14": true,
++            "17": true,
++            "18": true,
++            "19": true,
++            "20": true,
++            "21": true,
++            "22": true
++          },
++          "is_important": false,
++          "lift_early_arrival": true,
++          "source_frame_id": "774b84718f364c2d81776ac284a70527",
++          "start_ms": 59
++        },
++        {
++          "frame_id": "371d18ee09e54270995f6170475b39e1",
++          "name": "건미세왼뒤0도",
++          "time_ms": 85,
++          "angles": {
++            "0": -64.0,
++            "1": -0.17578125,
++            "2": -9.404296875,
++            "3": 8.7890625,
++            "4": 9.228515625,
++            "5": -10.01953125,
++            "6": 69.169921875,
++            "7": -70.48828125,
++            "8": -11.25,
++            "9": 4.5703125,
++            "10": 1.0,
++            "11": -3.0,
++            "12": 2.791015625,
++            "15": 2.8125,
++            "16": -2.197265625,
++            "13": -61.0,
++            "14": 52.0,
++            "17": -32.51953125,
++            "18": 30.1796875,
++            "19": 61.787109375,
++            "20": -69.0,
++            "21": 2.197265625,
++            "22": -3.8671875
++          },
++          "torques": {
++            "0": true,
++            "1": true,
++            "2": true,
++            "3": true,
++            "4": true,
++            "5": true,
++            "6": true,
++            "7": true,
++            "8": true,
++            "9": true,
++            "10": true,
++            "11": true,
++            "12": true,
++            "15": true,
++            "16": true,
++            "13": true,
++            "14": true,
++            "17": true,
++            "18": true,
++            "19": true,
++            "20": true,
++            "21": true,
++            "22": true
++          },
++          "is_important": false,
++          "lift_early_arrival": true,
++          "source_frame_id": "371d18ee09e54270995f6170475b39e1",
++          "start_ms": 107
++        },
++        {
++          "frame_id": "fe6213c1022d430ea58e8ee9199b5c40",
++          "name": "건미세왼들0도",
++          "time_ms": 48,
++          "angles": {
++            "0": -64.0,
++            "1": -0.3515625,
++            "2": -8.4375,
++            "3": 7.55859375,
++            "4": 11.25,
++            "5": -13.271484375,
++            "6": 74.35546875,
++            "7": -76.2890625,
++            "8": -10.546875,
++            "9": 2.4609375,
++            "10": 1.0,
++            "11": -3.0,
++            "12": 6.318359375,
++            "15": -2.0,
++            "16": 6.0,
++            "13": -52.0,
++            "14": 65.0,
++            "17": -30.70703125,
++            "18": 73.0,
++            "19": 64.0,
++            "20": -91.0,
++            "21": 16.0,
++            "22": 5.77734375
++          },
++          "torques": {
++            "0": true,
++            "1": true,
++            "2": true,
++            "3": true,
++            "4": true,
++            "5": true,
++            "6": true,
++            "7": true,
++            "8": true,
++            "9": true,
++            "10": true,
++            "11": true,
++            "12": true,
++            "15": true,
++            "16": true,
++            "13": true,
++            "14": true,
++            "17": true,
++            "18": true,
++            "19": true,
++            "20": true,
++            "21": true,
++            "22": true
++          },
++          "is_important": false,
++          "lift_early_arrival": true,
++          "source_frame_id": "fe6213c1022d430ea58e8ee9199b5c40",
++          "start_ms": 252,
++          "_drag_original_start_ms": 252
++        },
++        {
++          "frame_id": "162c6248f1d24965a0b6ec9a866f3c10",
++          "name": "건미세오뒤0도",
++          "time_ms": 85,
++          "angles": {
++            "0": -64.0,
++            "1": 0.263671875,
++            "2": -9.755859375,
++            "3": 9.755859375,
++            "4": 9.140625,
++            "5": -8.96484375,
++            "6": 67.236328125,
++            "7": -68.818359375,
++            "8": -11.6015625,
++            "9": 4.833984375,
++            "10": 0.59375,
++            "11": -3.0,
++            "12": 3.669921875,
++            "15": 3.427734375,
++            "16": 0.087890625,
++            "13": -53.0,
++            "14": 58.0,
++            "17": -29.125,
++            "18": 34.0,
++            "19": 64.951171875,
++            "20": -65.0,
++            "21": 2.021484375,
++            "22": -4.482421875
++          },
++          "torques": {
++            "0": true,
++            "1": true,
++            "2": true,
++            "3": true,
++            "4": true,
++            "5": true,
++            "6": true,
++            "7": true,
++            "8": true,
++            "9": true,
++            "10": true,
++            "11": true,
++            "12": true,
++            "15": true,
++            "16": true,
++            "13": true,
++            "14": true,
++            "17": true,
++            "18": true,
++            "19": true,
++            "20": true,
++            "21": true,
++            "22": true
++          },
++          "is_important": false,
++          "lift_early_arrival": true,
++          "source_frame_id": "162c6248f1d24965a0b6ec9a866f3c10",
++          "start_ms": 300
++        }
++      ]
+     }
+   ]
+ }
+--- before/artifacts/robot_motions_runtime.json
++++ artifacts/robot_motions_runtime.json
+@@ -18957,6 +18957,512 @@
+           "_drag_original_start_ms": 180
+         }
+       ]
++    },
++    {
++      "name": "건미세45도(상단탐색2회)",
++      "max_seq_ms": 3505,
++      "repeat_count": 2,
++      "playback_speed": 1.0,
++      "repeatable": true,
++      "start_pose": "미세오들45",
++      "end_pose": "미세오뒤4111(45도)",
++      "completion": {
++        "position_tolerance_deg": 5.0,
++        "settle_duration_ms": 80,
++        "settle_timeout_ms": 3000
++      },
++      "frames": [
++        {
++          "frame_id": "8891d36ce6354a7c8ec4ab65c2b9fd06",
++          "name": "미세오들45",
++          "time_ms": 48,
++          "angles": {
++            "0": -32.0,
++            "1": -0.3515625,
++            "2": -8.4375,
++            "3": 7.55859375,
++            "4": 11.25,
++            "5": -13.271484375,
++            "6": 74.35546875,
++            "7": -76.2890625,
++            "8": -10.546875,
++            "9": 2.4609375,
++            "10": 1.318359375,
++            "11": -3.0,
++            "12": 4.0,
++            "15": -4.669921875,
++            "16": 2.0,
++            "13": -77.41015625,
++            "14": 55.0,
++            "17": -69.994140625,
++            "18": 33.0,
++            "19": 79.716796875,
++            "20": -68.0,
++            "21": -5.0,
++            "22": -12.0
++          },
++          "torques": {
++            "0": true,
++            "1": true,
++            "2": true,
++            "3": true,
++            "4": true,
++            "5": true,
++            "6": true,
++            "7": true,
++            "8": true,
++            "9": true,
++            "10": true,
++            "11": true,
++            "12": true,
++            "15": true,
++            "16": true,
++            "13": true,
++            "14": true,
++            "17": true,
++            "18": true,
++            "19": true,
++            "20": true,
++            "21": true,
++            "22": true
++          },
++          "is_important": false,
++          "lift_early_arrival": true,
++          "source_frame_id": "8891d36ce6354a7c8ec4ab65c2b9fd06",
++          "start_ms": 59,
++          "_drag_original_start_ms": 59
++        },
++        {
++          "frame_id": "499b2843bc5448c7b1c0aa62c048b404",
++          "name": "미세왼뒤4111(45도)",
++          "time_ms": 85,
++          "angles": {
++            "0": -32.0,
++            "1": -0.17578125,
++            "2": -9.404296875,
++            "3": 8.7890625,
++            "4": 9.228515625,
++            "5": -10.01953125,
++            "6": 69.169921875,
++            "7": -70.48828125,
++            "8": -11.25,
++            "9": 4.5703125,
++            "10": 1.0,
++            "11": -3.0,
++            "12": 2.791015625,
++            "15": 2.8125,
++            "16": -2.197265625,
++            "13": -61.0,
++            "14": 52.0,
++            "17": -32.51953125,
++            "18": 30.1796875,
++            "19": 61.787109375,
++            "20": -69.0,
++            "21": 2.197265625,
++            "22": -3.8671875
++          },
++          "torques": {
++            "0": true,
++            "1": true,
++            "2": true,
++            "3": true,
++            "4": true,
++            "5": true,
++            "6": true,
++            "7": true,
++            "8": true,
++            "9": true,
++            "10": true,
++            "11": true,
++            "12": true,
++            "15": true,
++            "16": true,
++            "13": true,
++            "14": true,
++            "17": true,
++            "18": true,
++            "19": true,
++            "20": true,
++            "21": true,
++            "22": true
++          },
++          "is_important": false,
++          "lift_early_arrival": true,
++          "source_frame_id": "499b2843bc5448c7b1c0aa62c048b404",
++          "start_ms": 107
++        },
++        {
++          "frame_id": "21cb6f689e824fbe861899784162c45e",
++          "name": "미세왼들4112(45도)",
++          "time_ms": 48,
++          "angles": {
++            "0": -32.0,
++            "1": -0.3515625,
++            "2": -8.4375,
++            "3": 7.55859375,
++            "4": 11.25,
++            "5": -13.271484375,
++            "6": 74.35546875,
++            "7": -76.2890625,
++            "8": -10.546875,
++            "9": 2.4609375,
++            "10": 1.0,
++            "11": -3.0,
++            "12": 6.318359375,
++            "15": -2.0,
++            "16": 6.0,
++            "13": -52.0,
++            "14": 65.0,
++            "17": -30.70703125,
++            "18": 73.0,
++            "19": 64.0,
++            "20": -91.0,
++            "21": 16.0,
++            "22": 5.77734375
++          },
++          "torques": {
++            "0": true,
++            "1": true,
++            "2": true,
++            "3": true,
++            "4": true,
++            "5": true,
++            "6": true,
++            "7": true,
++            "8": true,
++            "9": true,
++            "10": true,
++            "11": true,
++            "12": true,
++            "15": true,
++            "16": true,
++            "13": true,
++            "14": true,
++            "17": true,
++            "18": true,
++            "19": true,
++            "20": true,
++            "21": true,
++            "22": true
++          },
++          "is_important": false,
++          "lift_early_arrival": true,
++          "source_frame_id": "21cb6f689e824fbe861899784162c45e",
++          "start_ms": 252
++        },
++        {
++          "frame_id": "77bbea5d712240ddb81613ad2f719988",
++          "name": "미세오뒤4111(45도)",
++          "time_ms": 85,
++          "angles": {
++            "0": -32.0,
++            "1": 0.263671875,
++            "2": -9.755859375,
++            "3": 9.755859375,
++            "4": 9.140625,
++            "5": -8.96484375,
++            "6": 67.236328125,
++            "7": -68.818359375,
++            "8": -11.6015625,
++            "9": 4.833984375,
++            "10": 0.59375,
++            "11": -3.0,
++            "12": 3.669921875,
++            "15": 3.427734375,
++            "16": 0.087890625,
++            "13": -53.0,
++            "14": 58.0,
++            "17": -29.125,
++            "18": 34.0,
++            "19": 64.951171875,
++            "20": -65.0,
++            "21": 2.021484375,
++            "22": -4.482421875
++          },
++          "torques": {
++            "0": true,
++            "1": true,
++            "2": true,
++            "3": true,
++            "4": true,
++            "5": true,
++            "6": true,
++            "7": true,
++            "8": true,
++            "9": true,
++            "10": true,
++            "11": true,
++            "12": true,
++            "15": true,
++            "16": true,
++            "13": true,
++            "14": true,
++            "17": true,
++            "18": true,
++            "19": true,
++            "20": true,
++            "21": true,
++            "22": true
++          },
++          "is_important": false,
++          "lift_early_arrival": true,
++          "source_frame_id": "77bbea5d712240ddb81613ad2f719988",
++          "start_ms": 300
++        }
++      ]
++    },
++    {
++      "name": "건미세0도(상단탐색2회)",
++      "max_seq_ms": 3505,
++      "repeat_count": 2,
++      "playback_speed": 1.0,
++      "repeatable": true,
++      "start_pose": "건미세오들0도",
++      "end_pose": "건미세오뒤0도",
++      "completion": {
++        "position_tolerance_deg": 5.0,
++        "settle_duration_ms": 80,
++        "settle_timeout_ms": 3000
++      },
++      "frames": [
++        {
++          "frame_id": "774b84718f364c2d81776ac284a70527",
++          "name": "건미세오들0도",
++          "time_ms": 48,
++          "angles": {
++            "0": -64.0,
++            "1": -0.3515625,
++            "2": -8.4375,
++            "3": 7.55859375,
++            "4": 11.25,
++            "5": -13.271484375,
++            "6": 74.35546875,
++            "7": -76.2890625,
++            "8": -10.546875,
++            "9": 2.4609375,
++            "10": 1.318359375,
++            "11": -3.0,
++            "12": 4.0,
++            "15": -4.669921875,
++            "16": 2.0,
++            "13": -77.41015625,
++            "14": 55.0,
++            "17": -69.994140625,
++            "18": 33.0,
++            "19": 79.716796875,
++            "20": -68.0,
++            "21": -5.0,
++            "22": -12.0
++          },
++          "torques": {
++            "0": true,
++            "1": true,
++            "2": true,
++            "3": true,
++            "4": true,
++            "5": true,
++            "6": true,
++            "7": true,
++            "8": true,
++            "9": true,
++            "10": true,
++            "11": true,
++            "12": true,
++            "15": true,
++            "16": true,
++            "13": true,
++            "14": true,
++            "17": true,
++            "18": true,
++            "19": true,
++            "20": true,
++            "21": true,
++            "22": true
++          },
++          "is_important": false,
++          "lift_early_arrival": true,
++          "source_frame_id": "774b84718f364c2d81776ac284a70527",
++          "start_ms": 59
++        },
++        {
++          "frame_id": "371d18ee09e54270995f6170475b39e1",
++          "name": "건미세왼뒤0도",
++          "time_ms": 85,
++          "angles": {
++            "0": -64.0,
++            "1": -0.17578125,
++            "2": -9.404296875,
++            "3": 8.7890625,
++            "4": 9.228515625,
++            "5": -10.01953125,
++            "6": 69.169921875,
++            "7": -70.48828125,
++            "8": -11.25,
++            "9": 4.5703125,
++            "10": 1.0,
++            "11": -3.0,
++            "12": 2.791015625,
++            "15": 2.8125,
++            "16": -2.197265625,
++            "13": -61.0,
++            "14": 52.0,
++            "17": -32.51953125,
++            "18": 30.1796875,
++            "19": 61.787109375,
++            "20": -69.0,
++            "21": 2.197265625,
++            "22": -3.8671875
++          },
++          "torques": {
++            "0": true,
++            "1": true,
++            "2": true,
++            "3": true,
++            "4": true,
++            "5": true,
++            "6": true,
++            "7": true,
++            "8": true,
++            "9": true,
++            "10": true,
++            "11": true,
++            "12": true,
++            "15": true,
++            "16": true,
++            "13": true,
++            "14": true,
++            "17": true,
++            "18": true,
++            "19": true,
++            "20": true,
++            "21": true,
++            "22": true
++          },
++          "is_important": false,
++          "lift_early_arrival": true,
++          "source_frame_id": "371d18ee09e54270995f6170475b39e1",
++          "start_ms": 107
++        },
++        {
++          "frame_id": "fe6213c1022d430ea58e8ee9199b5c40",
++          "name": "건미세왼들0도",
++          "time_ms": 48,
++          "angles": {
++            "0": -64.0,
++            "1": -0.3515625,
++            "2": -8.4375,
++            "3": 7.55859375,
++            "4": 11.25,
++            "5": -13.271484375,
++            "6": 74.35546875,
++            "7": -76.2890625,
++            "8": -10.546875,
++            "9": 2.4609375,
++            "10": 1.0,
++            "11": -3.0,
++            "12": 6.318359375,
++            "15": -2.0,
++            "16": 6.0,
++            "13": -52.0,
++            "14": 65.0,
++            "17": -30.70703125,
++            "18": 73.0,
++            "19": 64.0,
++            "20": -91.0,
++            "21": 16.0,
++            "22": 5.77734375
++          },
++          "torques": {
++            "0": true,
++            "1": true,
++            "2": true,
++            "3": true,
++            "4": true,
++            "5": true,
++            "6": true,
++            "7": true,
++            "8": true,
++            "9": true,
++            "10": true,
++            "11": true,
++            "12": true,
++            "15": true,
++            "16": true,
++            "13": true,
++            "14": true,
++            "17": true,
++            "18": true,
++            "19": true,
++            "20": true,
++            "21": true,
++            "22": true
++          },
++          "is_important": false,
++          "lift_early_arrival": true,
++          "source_frame_id": "fe6213c1022d430ea58e8ee9199b5c40",
++          "start_ms": 252,
++          "_drag_original_start_ms": 252
++        },
++        {
++          "frame_id": "162c6248f1d24965a0b6ec9a866f3c10",
++          "name": "건미세오뒤0도",
++          "time_ms": 85,
++          "angles": {
++            "0": -64.0,
++            "1": 0.263671875,
++            "2": -9.755859375,
++            "3": 9.755859375,
++            "4": 9.140625,
++            "5": -8.96484375,
++            "6": 67.236328125,
++            "7": -68.818359375,
++            "8": -11.6015625,
++            "9": 4.833984375,
++            "10": 0.59375,
++            "11": -3.0,
++            "12": 3.669921875,
++            "15": 3.427734375,
++            "16": 0.087890625,
++            "13": -53.0,
++            "14": 58.0,
++            "17": -29.125,
++            "18": 34.0,
++            "19": 64.951171875,
++            "20": -65.0,
++            "21": 2.021484375,
++            "22": -4.482421875
++          },
++          "torques": {
++            "0": true,
++            "1": true,
++            "2": true,
++            "3": true,
++            "4": true,
++            "5": true,
++            "6": true,
++            "7": true,
++            "8": true,
++            "9": true,
++            "10": true,
++            "11": true,
++            "12": true,
++            "15": true,
++            "16": true,
++            "13": true,
++            "14": true,
++            "17": true,
++            "18": true,
++            "19": true,
++            "20": true,
++            "21": true,
++            "22": true
++          },
++          "is_important": false,
++          "lift_early_arrival": true,
++          "source_frame_id": "162c6248f1d24965a0b6ec9a866f3c10",
++          "start_ms": 300
++        }
++      ]
+     }
+   ]
+ }
+--- before/src/irc_step_motion_executor/config/motion_aliases.yaml
++++ src/irc_step_motion_executor/config/motion_aliases.yaml
+@@ -34,6 +34,8 @@
+   stationary_turn_right: "R제자리우회전(9회)"
+   # Keep stable IDs; the new fine gait uses the catalog's five repeats.
+   ball_general_fine_forward_8: "건미세45도(5회)"
++  ball_top_loss_fine_forward_45_2: "건미세45도(상단탐색2회)"
++  pickup_top_loss_fine_forward_0_2: "건미세0도(상단탐색2회)"
+   # Keep legacy IDs; pickup forward uses the supplied camera-45 gait.
+   ball_camera_down_forward_2: "R전진45도(2회)"
+   ball_camera_down_forward_4: "R전진45도(4회)"
+--- before/src/mission_control/README.md
++++ src/mission_control/README.md
+@@ -1118,10 +1118,12 @@
+ 잡기 후 고정 퇴장 회전과 라인 복귀 회전에는 적용하지 않는다.
+ 마지막 공 검출 상자의 위쪽 끝이 화면 상단 10% 이내에 있고 이후
+ `detected=false`, `raw_detected=false`가 되면 좌우 탐색보다
+-해당 단계의 미세 전진을 한 번 실행한다. 2026-10-28부터 일반 2회 전진 대신
+-일반 접근·잡기 초기 정렬은 `ball_general_fine_forward_8`(현재 45° 미세 모션),
+-잡기 미세 정렬은 `pickup_fine_forward_0`을 사용한다. 별칭의 숫자를 새 반복 횟수로
+-해석하지 않고 기존 미세 모션 전체를 한 번 실행한다.
++해당 단계의 미세 전진을 **2회** 실행한다. 2026-10-28부터 일반 2회 전진 대신
++일반 접근·잡기 초기 정렬은 `ball_top_loss_fine_forward_45_2`,
++잡기 미세 정렬은 `pickup_top_loss_fine_forward_0_2`를 사용한다.
++두 모션은 기존 45°/0° 미세 모션에서 이름과 반복 횟수만 바꾼 것이며,
++일반 접근·정렬용 기존 5회 모션은 유지한다. 준비 자세와 정지를 거친 뒤에도
++선택한 2회 모션을 유지하고, 완료 후 새 영상으로 재판단한다.
+ 720px 높이에서는 상단 72px까지이며,
+ `MotionDecisionPlanner.BALL_LOST_TOP_EDGE_RATIO`에서 기준을 조정한다.
+ 이 조건은 상단 이탈의 영상 기반 추정이며, 일반 접근과 픽업 초기·미세 정렬에
+--- before/src/mission_control/mission_control/motion_command_bridge_node.py
++++ src/mission_control/mission_control/motion_command_bridge_node.py
+@@ -144,7 +144,7 @@
+             for direction, counts in (("LEFT", (1, 3)), ("RIGHT", (2, 5)))
+             for count in counts
+         },
+-        "BALL_PICKUP_FINE_SEARCH_FORWARD": "pickup_fine_forward_0",
++        "BALL_PICKUP_FINE_SEARCH_FORWARD": "pickup_top_loss_fine_forward_0_2",
+         "BALL_PICKUP_FINE_SEARCH_FORWARD_4": "ball_camera_down_forward_4",
+         "BALL_PICKUP_FINE_SEARCH_BACKWARD": "pickup_lost_ball_backward_1",
+         "BALL_PICKUP_CRAB_RIGHT": "pickup_crab_right_0",
+@@ -218,6 +218,7 @@
+             for count in counts
+         },
+         "BALL_FINE_FORWARD_8": "ball_general_fine_forward_8",
++        "BALL_LOST_FINE_FORWARD_2": "ball_top_loss_fine_forward_45_2",
+         "BALL_LOST_FORWARD_2": "ball_camera_down_forward_2",
+         "BALL_LOST_FORWARD_4": "ball_camera_down_forward_4",
+         # Reuse the existing one-cycle retreat without entering the pickup sequence.
+@@ -324,6 +325,7 @@
+     }
+     FINE_FORWARD_MOTION_IDS = frozenset({
+         "ball_general_fine_forward_8", "pickup_fine_forward_0", HURDLE_FINAL_FINE_MOTION_ID,
++        "ball_top_loss_fine_forward_45_2", "pickup_top_loss_fine_forward_0_2",
+         *(f"goal_camera_90_fine_forward_{count}" for count in range(1, 5)),
+     })
+     DEFAULT_TIMEOUT_MS = 12000
+@@ -376,6 +378,7 @@
+         self.pickup_motor_failures: list[dict[str, Any]] = []
+         self.pickup_last_stage_succeeded = True
+         self.pending_pickup_crab_motion_id = None
++        self.pending_pickup_fine_motion_id: str | None = None
+         self.pickup_positioning_dwell_motion_id: str | None = None
+         self.queued_command_id: int | None = None
+         self.queued_event_id: int | None = None
+@@ -818,7 +821,7 @@
+         elif action == "BALL_PICKUP_INITIAL_SEARCH_FORWARD_4":
+             motion_id = "ball_camera_down_forward_4"
+         elif action == "BALL_PICKUP_INITIAL_SEARCH_FORWARD":
+-            motion_id = "ball_general_fine_forward_8"
++            motion_id = "ball_top_loss_fine_forward_45_2"
+         elif action.startswith("BALL_PICKUP_INITIAL_CRAB_"):
+             fine_action = action.replace("INITIAL_", "", 1)
+             motion_id = self.PICKUP_FINE_ALIGN_MOTION_IDS[fine_action]
+@@ -1096,6 +1099,7 @@
+                 or motion_id.startswith("pickup_camera_down_turn_")
+                 or self.last_physical_motion_id in {
+                     "pickup_fine_forward_0", self.HURDLE_FINAL_FINE_MOTION_ID,
++                    "pickup_top_loss_fine_forward_0_2",
+                 }):
+             return "fine_to_turn_ready_0"
+         return "fine_to_turn_ready_45"
+@@ -1164,9 +1168,10 @@
+         if (
+             prepare_pickup_fine
+             and action == "PICKUP_NOW"
+-            and motion_id == "pickup_fine_forward_0"
++            and motion_id in {"pickup_fine_forward_0", "pickup_top_loss_fine_forward_0_2"}
+         ):
+             # Keep the existing checkpoint/sequence pending until both motions finish.
++            self.pending_pickup_fine_motion_id = motion_id
+             motion_id = self.PICKUP_FINE_PREPARE_MOTION_ID
+             self.active_motion_id = motion_id
+         request_payload = {
+@@ -1738,6 +1743,8 @@
+         self.active_dwell_until = None
+         if self.active_motion_id == MotionCommandBridgeNode.PICKUP_FINE_PRE_DWELL_MARKER:
+             self.pickup_positioning_dwell_motion_id = None
++            fine_motion_id = self.pending_pickup_fine_motion_id or "pickup_fine_forward_0"
++            self.pending_pickup_fine_motion_id = None
+             if self.pickup_positioning_loss_pending:
+                 checkpoint = (
+                     self.PICKUP_INITIAL_ALIGN_MARKER
+@@ -1745,7 +1752,7 @@
+                 )
+                 self._enter_pickup_positioning_loss_reacquisition(checkpoint)
+                 return
+-            self.active_motion_id = "pickup_fine_forward_0"
++            self.active_motion_id = fine_motion_id
+             self._publish_executor_request(
+                 action=self.active_action, command_id=self.active_command_id,
+                 event_id=self.active_event_id, request_id=self.active_request_id,
+@@ -1833,6 +1840,7 @@
+ 
+     def _clear_active_request(self) -> None:
+         """Release the bridge after a terminal executor status."""
++        self.pending_pickup_fine_motion_id = None
+         self.motion_in_progress = False
+         self.pending_turn_request = None
+         self.turn_prepare_motion_id = None
+--- before/src/mission_control/mission_control/motion_command_gate.py
++++ src/mission_control/mission_control/motion_command_gate.py
+@@ -19,6 +19,7 @@
+         "FINE_FORWARD_STEP",
+         "APPROACH_GOAL",
+         "BALL_FINE_FORWARD_8",
++        "BALL_LOST_FINE_FORWARD_2",
+         "BALL_LOST_FORWARD_2",
+         "BALL_LOST_FORWARD_4",
+         "HURDLE_LOST_BACKWARD_1",
+--- before/src/mission_control/mission_control/motion_decision_node.py
++++ src/mission_control/mission_control/motion_decision_node.py
+@@ -4585,6 +4585,7 @@
+         fine_forward = (
+             decision.action in {
+                 "STRAIGHT_0", "BALL_FINE_FORWARD_8", "BALL_PICKUP_FINE_FORWARD",
++                "BALL_LOST_FINE_FORWARD_2",
+                 "BALL_PICKUP_INITIAL_SEARCH_FORWARD", "BALL_PICKUP_FINE_SEARCH_FORWARD",
+                 "SLOW_APPROACH", "FINE_FORWARD_STEP",
+             }
+--- before/src/mission_control/mission_control/motion_decision_planner.py
++++ src/mission_control/mission_control/motion_decision_planner.py
+@@ -1026,7 +1026,7 @@
+             and self._ball_top_loss_forward_pending()
+         ):
+             return self._ball_top_loss_forward_decision(
+-                "BALL_APPROACH_LOST_ALIGN", "BALL_FINE_FORWARD_8"
++                "BALL_APPROACH_LOST_ALIGN", "BALL_LOST_FINE_FORWARD_2"
+             )
+         recovery = self._ball_lost_turn_decision(info, "BALL_APPROACH_LOST_ALIGN")
+         if recovery is not None:
+@@ -2099,7 +2099,7 @@
+             return {**recovery.source_command, "valid": True, "motion": recovery.action, "reason": recovery.reason}
+         if not stopping and self._ball_top_loss_forward_pending():
+             decision = self._ball_top_loss_forward_decision(
+-                "BALL_APPROACH_LOST_ALIGN", "BALL_FINE_FORWARD_8"
++                "BALL_APPROACH_LOST_ALIGN", "BALL_LOST_FINE_FORWARD_2"
+             )
+             return {
+                 **decision.source_command,
+--- before/src/mission_control/test/test_mission_phase_flow.py
++++ src/mission_control/test/test_mission_phase_flow.py
+@@ -2799,7 +2799,7 @@
+     harness.ball_approach_alignment_pending = True
+     lost = {"detected": False, "raw_detected": False, "ball_loss_confirmed": True}
+     forward = harness.publish_vision(ball=lost)[-1]
+-    assert forward["action"] == "BALL_FINE_FORWARD_8"
++    assert forward["action"] == "BALL_LOST_FINE_FORWARD_2"
+     assert harness.planner.ball_top_loss_forward_sent is True
+     harness.send_status(forward["action"], forward["command_id"], "RUNNING")
+     assert harness.publish_vision(ball=lost) == []
+--- before/src/mission_control/test/test_motion_command_bridge.py
++++ src/mission_control/test/test_motion_command_bridge.py
+@@ -150,6 +150,7 @@
+         self.pickup_motor_failures = []
+         self.pickup_last_stage_succeeded = True
+         self.pending_pickup_crab_motion_id = None
++        self.pending_pickup_fine_motion_id = None
+         self.pickup_positioning_dwell_motion_id = None
+         self.queued_command_id = None
+         self.queued_event_id = None
+@@ -590,6 +591,7 @@
+         for count in counts
+     },
+     "BALL_FINE_FORWARD_8": "ball_general_fine_forward_8",
++    "BALL_LOST_FINE_FORWARD_2": "ball_top_loss_fine_forward_45_2",
+     "BALL_LOST_FORWARD_2": "ball_camera_down_forward_2",
+     "BALL_LOST_FORWARD_4": "ball_camera_down_forward_4",
+     "HURDLE_LOST_BACKWARD_1": "pickup_lost_ball_backward_1",
+@@ -2461,7 +2463,7 @@
+     bridge.navigation_command_callback(fine_alignment_message(
+         f"BALL_PICKUP_{stage}_SEARCH_FORWARD"
+     ))
+-    motion = "pickup_fine_forward_0" if stage == "FINE" else "ball_general_fine_forward_8"
++    motion = "pickup_top_loss_fine_forward_0_2" if stage == "FINE" else "ball_top_loss_fine_forward_45_2"
+     if stage == "FINE":
+         assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == "pickup_fine_prepare"
+         bridge.executor_status_callback(executor_status(
+--- before/src/mission_control/test/test_motion_decision_planner.py
++++ src/mission_control/test/test_motion_decision_planner.py
+@@ -2779,7 +2779,7 @@
+ 
+ 
+ @pytest.mark.parametrize("method,action", [
+-    ("plan_lost_ball_approach_alignment", "BALL_FINE_FORWARD_8"),
++    ("plan_lost_ball_approach_alignment", "BALL_LOST_FINE_FORWARD_2"),
+     ("plan_ball_pickup_initial_alignment", "BALL_PICKUP_INITIAL_SEARCH_FORWARD"),
+     ("plan_ball_pickup_fine_alignment", "BALL_PICKUP_FINE_SEARCH_FORWARD"),
+ ])
+@@ -2827,12 +2827,12 @@
+     )), 0.1)
+     lost = {"detected": False, "raw_detected": False}
+     assert planner.plan("AUTO", observations(ball=lost), 0.1).action == "BALL_LOST_STOP"
+-    assert planner.plan("AUTO", observations(ball=lost), 0.4).action == "BALL_FINE_FORWARD_8"
++    assert planner.plan("AUTO", observations(ball=lost), 0.4).action == "BALL_LOST_FINE_FORWARD_2"
+     for info in (None, {"detected": False, "raw_detected": True}):
+-        assert planner.plan("AUTO", observations(ball=info), 1.0).action != "BALL_FINE_FORWARD_8"
++        assert planner.plan("AUTO", observations(ball=info), 1.0).action != "BALL_LOST_FINE_FORWARD_2"
+         assert planner.plan_ball_pickup_initial_alignment(info).action == "WAIT"
+         assert planner.plan_ball_pickup_fine_alignment(info).action == "WAIT"
+-        assert planner.plan_lost_ball_approach_alignment(info).action != "BALL_FINE_FORWARD_8"
++        assert planner.plan_lost_ball_approach_alignment(info).action != "BALL_LOST_FINE_FORWARD_2"
+ 
+ 
+ def test_raw_latest_ball_position_updates_and_clears_top_edge_memory():
+--- before/src/mission_control/test/test_production_motion_catalog_contract.py
++++ src/mission_control/test/test_production_motion_catalog_contract.py
+@@ -539,8 +539,8 @@
+ def test_top_loss_forward_uses_existing_general_fine_motion():
+     aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+     motions = {m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]}
+-    motion_id = MotionCommandBridgeNode.ACTION_TO_MOTION_ID["BALL_FINE_FORWARD_8"]
+-    assert motion_id == "ball_general_fine_forward_8"
++    motion_id = MotionCommandBridgeNode.ACTION_TO_MOTION_ID["BALL_LOST_FINE_FORWARD_2"]
++    assert motion_id == "ball_top_loss_fine_forward_45_2"
+     assert motion_id in MotionCommandBridgeNode.FINE_FORWARD_MOTION_IDS
+     assert aliases[motion_id] in motions
+ 
+--- before/src/mission_control/test/test_wait_refresh_and_fine_settle.py
++++ src/mission_control/test/test_wait_refresh_and_fine_settle.py
+@@ -103,6 +103,7 @@
+ @pytest.mark.parametrize('action,source,extra', [
+     ('STRAIGHT_0', 'ball', {}), ('STRAIGHT_0', 'hurdle', {}),
+     ('BALL_FINE_FORWARD_8', 'ball', {}),
++    ('BALL_LOST_FINE_FORWARD_2', 'ball', {}),
+     ('GO', 'hurdle', {'fine_sequence_requested': True}),
+     ('GO', 'hurdle', {'depth_fallback_requested': True}),
+ ])
+--- before/src/step/step/yolo26_detector.py
++++ src/step/step/yolo26_detector.py
+@@ -1058,6 +1058,8 @@
+             "pickup_fine_prepare": "PICKUP / PREPARE FINE STEP",
+             "__PICKUP_FINE_PRE_DWELL__": "PICKUP / WAIT BEFORE FINE STEP",
+             "pickup_fine_forward_0": "PICKUP / FINE FORWARD",
++            "ball_top_loss_fine_forward_45_2": "BALL / FINE SEARCH 2",
++            "pickup_top_loss_fine_forward_0_2": "PICKUP / FINE SEARCH 2",
+             "pickup_crab_prepare": "PICKUP / PREPARE SIDE STEP",
+             "pickup_crab_left_0": "PICKUP / SIDE STEP LEFT",
+             "pickup_crab_right_0": "PICKUP / SIDE STEP RIGHT",
+@@ -3191,6 +3193,9 @@
+         if decision.get("reason") == "lost_search_turn_limit_reached":
+             return "BALL LOST | SEARCH LIMIT"
+         action = str(decision.get("selected_action", ""))
++        if action in {"BALL_LOST_FINE_FORWARD_2", "BALL_PICKUP_INITIAL_SEARCH_FORWARD",
++                      "BALL_PICKUP_FINE_SEARCH_FORWARD"}:
++            return "BALL LOST | FINE SEARCH 2"
+         if action.startswith(("BALL_APPROACH_TURN_", "BALL_PICKUP_CAMERA_DOWN_TURN_",
+                               "BALL_PICKUP_FINE_SEARCH_")):
+             for direction in ("LEFT", "RIGHT"):
+--- before/src/step/test/test_yolo26_detector.py
++++ src/step/test/test_yolo26_detector.py
+@@ -492,6 +492,8 @@
+ 
+ @pytest.mark.parametrize('motion_id,expected', [
+     ('pickup_fine_forward_0', 'PICKUP / FINE FORWARD'),
++    ('ball_top_loss_fine_forward_45_2', 'BALL / FINE SEARCH 2'),
++    ('pickup_top_loss_fine_forward_0_2', 'PICKUP / FINE SEARCH 2'),
+     ('__PICKUP_FINE_PRE_DWELL__', 'PICKUP / WAIT BEFORE FINE STEP'),
+     ('pickup_pre_backward_camera_down', 'PICKUP / BACKWARD (2 CYCLES)'),
+     ('pickup_retreat_2', 'PICKUP / BACKWARD (2 CYCLES)'),
+@@ -751,6 +753,9 @@
+ 
+ 
+ @pytest.mark.parametrize('action,reason,expected', [
++    ('BALL_LOST_FINE_FORWARD_2', '', 'FINE SEARCH 2'),
++    ('BALL_PICKUP_INITIAL_SEARCH_FORWARD', '', 'FINE SEARCH 2'),
++    ('BALL_PICKUP_FINE_SEARCH_FORWARD', '', 'FINE SEARCH 2'),
+     ('BALL_APPROACH_TURN_RIGHT_5', '', 'SEARCH RIGHT'),
+     ('BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_2', '', 'SEARCH LEFT'),
+     ('BALL_PICKUP_FINE_SEARCH_RIGHT', '', 'SEARCH RIGHT'),
+--- /dev/null
++++ src/mission_control/test/test_ball_top_loss_fine2.py
+@@ -0,0 +1,57 @@
++"""Top-edge reacquisition takes exactly two fine cycles in the current posture."""
++
++import json
++from pathlib import Path
++
++import pytest
++import yaml
++
++from mission_control.motion_command_bridge_node import MotionCommandBridgeNode as Bridge
++from mission_control.motion_command_gate import GENERAL_ACTIONS
++from test_ball_lost_turn_revision import tracked_planner, plan, MISSING
++
++
++ROOT = Path(__file__).resolve().parents[3]
++
++
++@pytest.mark.parametrize('catalog_name', ['robot_motions_runtime.json', 'robot_motions_pc.json'])
++@pytest.mark.parametrize('source,alias', [
++    ('건미세45도(5회)', 'ball_top_loss_fine_forward_45_2'),
++    ('건미세0도', 'pickup_top_loss_fine_forward_0_2'),
++])
++def test_two_cycle_catalog_changes_only_name_and_repeat_count(catalog_name, source, alias):
++    aliases = yaml.safe_load((ROOT / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']
++    catalog = json.loads((ROOT / 'artifacts' / catalog_name).read_text())['motions']
++    motions = {m['name']: m for m in catalog}
++    assert len(motions) == len(catalog)
++    original = motions[source]
++    assert original['repeat_count'] == 5
++    expected = {**original, 'name': aliases[alias], 'repeat_count': 2}
++    assert motions[aliases[alias]] == expected
++    assert alias in Bridge.FINE_FORWARD_MOTION_IDS
++
++
++@pytest.mark.parametrize('stage', ['normal', 'approach', 'INITIAL', 'FINE'])
++def test_top_loss_selects_fine_search_once_per_visible_observation(stage):
++    planner = tracked_planner('RIGHT')
++    planner.last_ball_inside_image = False
++    planner.last_ball_top_edge_ratio = .05
++    planner.pickup_last_visible_bottom_distance_px = 300
++    decision = plan(planner, stage, MISSING)
++    expected = (f'BALL_PICKUP_{stage}_SEARCH_FORWARD'
++                if stage in {'INITIAL', 'FINE'} else 'BALL_LOST_FINE_FORWARD_2')
++    assert decision.valid and decision.action == expected
++    assert decision.reason == 'ball_lost_at_top_edge_forward_search'
++    assert decision.source_command['lost_ball_top_forward']
++    if stage in {'normal', 'approach'}:
++        assert decision.action in GENERAL_ACTIONS
++        assert Bridge.motion_id_for_action(decision.action) == 'ball_top_loss_fine_forward_45_2'
++    planner.mark_ball_top_loss_forward_sent()
++    assert plan(planner, stage, MISSING).action != expected
++
++
++def test_preparation_uses_camera_zero_after_two_cycle_pickup_search():
++    from test_motion_command_bridge import FakeBridge
++    bridge = FakeBridge()
++    bridge.last_physical_motion_id = 'pickup_top_loss_fine_forward_0_2'
++    assert bridge._turn_prepare_motion('pickup_camera_down_turn_right_2') == 'fine_to_turn_ready_0'

@@ -1,0 +1,6 @@
+[ 42%] Built target motion_core
+[ 71%] Built target motion_player_core
+Consolidate compiler generated dependencies of target test_forward_timing
+[ 85%] Building CXX object robot_motion_sdk/CMakeFiles/test_forward_timing.dir/test_forward_timing.cpp.o
+[100%] Linking CXX executable test_forward_timing
+[100%] Built target test_forward_timing

@@ -1,0 +1,12 @@
+{
+  "build": "passed (irc_step_motion_executor, mission_control)",
+  "focused_ctest": "5/5 passed",
+  "excluded_status_ros_integration": "passed, simulated hardware",
+  "standalone_sdk": "5/5 passed",
+  "legacy_gui_cases": 524,
+  "latest_pc_gui_direct_comparison": "not performed: source not available",
+  "robot_hardware_test": "not performed",
+  "motion_json": "unchanged, verified SHA256",
+  "rollback_source": "verified in temporary directory",
+  "baseline_regressions": "64 Python, 6 C++ tests and ball head heartbeat launch failure reproduced before change"
+}

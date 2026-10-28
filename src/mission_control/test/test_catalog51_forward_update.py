@@ -14,6 +14,7 @@ from mission_control.motion_decision_node import MotionDecisionNode as Node
 
 ROOT = Path(__file__).resolve().parents[3]
 UPDATE = ROOT / 'artifacts/20261009_catalog51_forward_update'
+NEXT_UPDATE = ROOT / 'artifacts/20261027_catalog40_forward_pickup_update'
 MANIFEST = json.loads((UPDATE / 'manifest.json').read_text())
 SOURCE_PATH = ROOT / MANIFEST['source_file']
 SOURCE = {m['name']: m for m in json.loads(SOURCE_PATH.read_text())['motions']}
@@ -23,7 +24,8 @@ ALIASES = yaml.safe_load((ROOT / 'src/irc_step_motion_executor/config/motion_ali
 @pytest.mark.parametrize('filename', ['robot_motions_runtime.json', 'robot_motions_pc.json'])
 def test_forward_import_matches_source_and_preserves_other_motions(filename):
     before = {m['name']: m for m in json.loads((UPDATE / filename.replace('.json', '.before.json')).read_text())['motions']}
-    motions = json.loads((ROOT / 'artifacts' / filename).read_text())['motions']
+    # The later 전. import supersedes these gaits; verify the saved boundary.
+    motions = json.loads((NEXT_UPDATE / filename.replace('.json', '.before.json')).read_text())['motions']
     current = {m['name']: m for m in motions}
     assert len(current) == len(motions) == len(before) == 83
     assert current.keys() == before.keys() - MANIFEST['renames'].keys() | set(MANIFEST['renames'].values())
@@ -50,10 +52,12 @@ def test_forward_import_matches_source_and_preserves_other_motions(filename):
 def test_all_normal_forward_aliases_resolve_and_fine_gaits_are_preserved():
     expected = {key: MANIFEST['renames'].get(name, name)
                 for key, name in MANIFEST['aliases_before'].items()}
-    assert ALIASES == expected
-    assert sum(name in MANIFEST['renames'].values() for name in ALIASES.values()) == 14
-    runtime = {m['name'] for m in json.loads((ROOT / 'artifacts/robot_motions_runtime.json').read_text())['motions']}
-    assert set(ALIASES.values()) <= runtime
+    expected['goal_forward_to_default'] = '건오뒤에서 기본자세(카메라45도)'
+    aliases = yaml.safe_load((NEXT_UPDATE / 'motion_aliases.before.yaml').read_text())['motion_aliases']
+    assert aliases == expected
+    assert sum(name in MANIFEST['renames'].values() for name in aliases.values()) == 14
+    runtime = {m['name'] for m in json.loads((NEXT_UPDATE / 'robot_motions_runtime.before.json').read_text())['motions']}
+    assert set(aliases.values()) <= runtime
     assert not runtime & MANIFEST['renames'].keys()
     assert hashlib.sha256(SOURCE_PATH.read_bytes()).hexdigest() == MANIFEST['source_sha256']
 
@@ -69,3 +73,13 @@ def test_next_motion_capture_uses_the_new_catalog_duration(action):
     actual = (Node.LINE_MOTION_CAPTURE_CONFIG[action][0] if action.startswith('STRAIGHT')
               else Node.GOAL_FORWARD_DURATION_SEC[action])
     assert actual == pytest.approx(expected)
+
+
+@pytest.mark.parametrize('action', ['LEFT', 'RIGHT', 'RECOVER_LEFT_TURN_LEFT_4', 'RECOVER_RIGHT_TURN_RIGHT_4'])
+def test_recovery_preview_uses_four_cycles_at_approved_speed(action):
+    runtime = {m['name']: m for m in json.loads((ROOT / 'artifacts/robot_motions_runtime.json').read_text())['motions']}
+    motion = runtime[ALIASES[Bridge.motion_id_for_action(action)]]
+    assert motion['repeat_count'] == 4
+    assert motion['playback_speed'] == 0.90
+    duration = max(f['start_ms'] + f['time_ms'] for f in motion['frames']) * 4 / motion['playback_speed'] / 1000
+    assert Node.LINE_MOTION_CAPTURE_CONFIG[action][0] == pytest.approx(duration)

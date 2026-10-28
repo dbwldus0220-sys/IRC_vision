@@ -81,6 +81,7 @@ TEST(RobotHardwareInitializationPolicy, DefaultConfigDisablesHardware)
   EXPECT_EQ(config.baud_rate, 0);
   EXPECT_TRUE(config.motor_ids.empty());
   EXPECT_FALSE(config.explicit_torque_approval);
+  EXPECT_FALSE(config.enable_shoulder_override);
 
   const auto result =
     irc_step_motion_executor::validate_robot_hardware_initialization_policy(

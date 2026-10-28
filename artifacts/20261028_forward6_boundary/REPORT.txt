@@ -1,0 +1,51 @@
+2026-10-28 전체 미션 자동 전진 6회 -> 6회 경계 조사
+
+상태: 실기 추가 대기는 아직 원인 미확정/미해결. 이번 조사에서는 제어 코드,
+모션 JSON, GUI 옵션, 명시적 정지와 보행 시간표를 변경하지 않았다.
+앞선 서로 다른 반복 횟수의 예약 수정으로 이 증상까지 해결됐다고 간주하지 않는다.
+
+실제 마지막 실기 로그
+- 2026-10-28 01:01 시작한 전체 미션 로그를 읽었다. 이 시각은 최근 파일에 기록된
+  세션 식별자이며 현재 조사 시각이 아니다.
+- last_run_decisions.log: command_id=154 STRAIGHT 사전 요청은 1793116926.505530811,
+  이전 STRAIGHT 완료는 1793116927.571958582. 약 1.0664초 전에 요청됐다.
+- 위 기록은 판단 노드의 요청 시각이다. SDK 수락/실제 목표 송신 시각을 입증하지 않는다.
+- 실행기는 robot_motion_player, GUI alignment 20261028, continuous quintic,
+  poll 5ms, position tolerance check OFF였다. last_run_executor.log 참조.
+- 해당 실기에서 모터 목표 trace가 없어 명령 경계의 물리적 정지 길이를 역산할 수 없다.
+
+재현 검사
+- 실제 카탈로그의 0/45/90도 전진 6+6과 내부 12회 반복 비교: 보간 ON/OFF,
+  정상 tick 및 주입 통신 지연 포함 12시나리오의 모든 W/R 목표/시각과 완료 시각 일치.
+  verify_forward_queue.py / forward_queue_comparison.json 참조.
+- 자동 판단 -> bridge -> 상태 콜백을 연결해 6회 -> 6회 -> 6회를 검사했다.
+  새 영상으로 실행 중 예약, 이전 완료, 다음 RUNNING, 다음 예약 창 재설정 확인.
+  새 start 요청/transition dwell 없이 다음 명령으로 승격했다.
+- 새 분석기 및 관련 경로의 범위 시험 10개 통과. focused_tests.log 참조.
+- 탐색 과정의 넓은 기존 시험은 165통과/6실패. mission_queue_tests.log 참조.
+  기존 시간표/회복 정책 기대값 충돌과 앞선 다른 전진 길이 예약 변경에 대한
+  오래된 defer 기대값이 포함되며, 전체 미션 시험 통과를 주장하지 않는다.
+
+추가 분석 기능 (tools/analyze_motor_timing.py)
+- motion_transitions 필드: repeat / queued / restart 구분.
+- 저장된 선행 대기(real ms), 마지막 Goal 종료 -> 다음 Goal 시작 시간,
+  첫 몸통/다리 ID 6..22 raw 목표 변화까지 시간, 시작 자세 읽기 횟수,
+  경계 강제 피드백을 포함한 다음 송신 전 피드백 읽기 소요시간 기록.
+- 머리 override 변화는 보행 재개로 계산하지 않으며, 실패 쓰기나 뒤의 다른 모션은 제외.
+- raw 목표 변화는 실제 모터 움직임/추종/접지 측정이 아니다.
+- virtual_boundary_timing.json: 읽기 16ms/쓰기 1ms를 주입한 가상 예제.
+  내부 반복과 6회 묶음 경계 모두 다음 Goal까지 21ms, 첫 몸체 raw 변화까지 131ms.
+  저장된 90ms/.9=100ms 대기와 통신 시간을 구분하는 예제이며 실측값이 아니다.
+  이것을 사용자가 보고한 정지의 원인이라고 판단하지 않는다.
+
+다음 지지시험 기록
+기존 full_system_robot launch 명령 끝에 다음 인수만 추가한다:
+  motion_trace_enabled:=true motion_trace_goals:=true motion_trace_path:=/tmp/step_forward6_real.csv
+기존 모션/배속/GUI/토크 설정은 그대로 둔다. 새로 토크를 켜거나 로봇을 구동하지 않았다.
+실행기를 안전하게 종료하여 trace footer 및 callback trace가 기록된 뒤:
+  python3 tools/analyze_motor_timing.py /tmp/step_forward6_real.csv --output /tmp/step_forward6_real.timing.json
+  python3 tools/analyze_callback_timing.py /tmp/step_forward6_real.csv.callbacks.csv --output /tmp/step_forward6_real.callbacks.json
+
+queued 경계의 전송 간격이 내부 repeat보다 길면 재생/통신/스케줄링 시간을 조사한다.
+restart와 initial read가 나타나면 실제 SDK 예약이 이루어지지 않은 상위 경로를 조사한다.
+실측 전까지 임의로 대기 제거, 속도 연결, 피드백 생략을 적용하지 않는다.

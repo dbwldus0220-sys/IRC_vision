@@ -19,8 +19,11 @@ struct RobotMotionRuntimeConfig
   std::int64_t baud_rate{0};
   std::vector<std::int64_t> motor_ids;
   bool explicit_torque_approval{false};
+  bool continuous_interpolation{true};
+  bool account_forward_boundary_feedback{false};
+  bool exclude_motor_5{false};
   bool enable_head_override{true};
-  bool enable_shoulder_override{true};
+  bool enable_shoulder_override{false};
   std::string policy_reference_json_path;
   std::int64_t queued_transition_hold_ms{0};
   std::int64_t expected_tick_ms{5};

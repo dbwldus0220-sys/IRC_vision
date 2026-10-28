@@ -66,7 +66,7 @@ std::string hardware_preflight_usage()
 {
   return
     "Usage: sdk_hardware_preflight --device <path> --baud <integer> "
-    "--motor-ids <comma-separated IDs> "
+    "--motor-ids <comma-separated IDs> [--exclude-motor-5] "
     "--confirm-hardware-access PREFLIGHT_ONLY_TORQUE_OFF\n"
     "The confirmation approves hardware port access only. It does not approve "
     "torque ON.\n"
@@ -88,6 +88,11 @@ HardwarePreflightArgumentsResult parse_hardware_preflight_arguments(
 
     for (std::size_t index = 0; index < arguments.size(); ++index) {
       const std::string & option = arguments[index];
+      if (option == "--exclude-motor-5") {
+        if (config.exclude_motor_5) return {{}, "duplicate option: --exclude-motor-5"};
+        config.exclude_motor_5 = true;
+        continue;
+      }
       if (option != "--device" && option != "--baud" &&
         option != "--motor-ids" &&
         option != "--confirm-hardware-access")
@@ -176,7 +181,8 @@ HardwarePreflightCommandResult run_hardware_preflight(
     return {
       0,
       "Hardware preflight succeeded. Torque remains OFF; hardware is not "
-      "motion-ready.\n",
+      "motion-ready.\n" + std::string(config.exclude_motor_5 ?
+        "Motor 5: EXCLUDED / UNCONFIRMED; torque OFF attempted, state unconfirmed.\n" : ""),
       ""};
   } catch (const std::exception & exception) {
     return {

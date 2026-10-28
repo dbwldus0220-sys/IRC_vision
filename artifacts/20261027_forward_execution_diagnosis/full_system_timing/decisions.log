@@ -1,0 +1,48 @@
+[INFO] [1793097344.418089466] [motion_decision_node]: line info: /vision/line_info
+[INFO] [1793097344.420827714] [motion_decision_node]: ball info: /vision/ball_info
+[INFO] [1793097344.423099134] [motion_decision_node]: goal info: /vision/goal_info
+[INFO] [1793097344.425445404] [motion_decision_node]: hurdle info: /vision/hurdle_info
+[INFO] [1793097344.427607317] [motion_decision_node]: finish info: /vision/finish_info
+[INFO] [1793097344.437600476] [motion_decision_node]: Mission phase: AUTO
+[INFO] [1793097344.438499187] [motion_decision_node]: Unified command: /navigation/motion_command
+[INFO] [1793097344.439352394] [motion_decision_node]: Motion status: /motion/status
+[INFO] [1793097344.440095197] [motion_decision_node]: Grasp detections: /vision/detections
+[INFO] [1793097344.440839761] [motion_decision_node]: Executor heartbeat: /motion/executor/heartbeat
+[INFO] [1793097344.441854764] [motion_decision_node]: Decision debug: /navigation/decision_debug
+[INFO] [1793097344.442660865] [motion_decision_node]: Press ENTER in the launch terminal to start vision decisions after the startup pose is ready.
+[INFO] [1793097360.338831352] [motion_decision_node]: ENTER received; waiting for startup readiness and fresh vision.
+[INFO] [1793097362.819930733] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_RIGHT_TURN_RIGHT_4, command_id=2
+[INFO] [1793097363.866219920] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793097365.550417663] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_RIGHT_TURN_RIGHT_4, command_id=3
+[INFO] [1793097366.006776644] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4
+[INFO] [1793097367.922351960] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=4
+[INFO] [1793097368.136720798] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4
+[INFO] [1793097368.664243026] [motion_decision_node]: Line corner remembered: {'corner_direction': 'RIGHT', 'corner_start_distance_m': 1.1586, 'last_confirmed_at': 5888.520290681, 'last_observation_id': 1793097368545565186, 'search_started': False, 'observed_during_action': 'STRAIGHT', 'observed_during_command_id': 4, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793097370.962316209] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_RIGHT_TURN_RIGHT_4, command_id=5
+[INFO] [1793097371.540819137] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793097371.716672946] [motion_decision_node]: BALL approach entry latched during motion: distance_m=1.058
+[INFO] [1793097372.068435351] [motion_decision_node]: BALL near/unknown candidate; waiting for confirmation after the current motion
+[INFO] [1793097372.289156644] [motion_decision_node]: BALL confirmation completed; releasing pending hold
+[INFO] [1793097372.577803532] [motion_decision_node]: BALL near/unknown candidate; waiting for confirmation after the current motion
+[INFO] [1793097373.684414814] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4
+[INFO] [1793097374.344112645] [motion_decision_node]: BALL lost during 57-150 cm approach motion; remembering the last Ball side for the motion boundary
+[INFO] [1793097375.900121602] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_RECOVER_LEFT_4
+[INFO] [1793097375.904384242] [motion_decision_node]: BALL motion boundary: wait_sec=0.003, next_action=BALL_LOST_FORWARD_4, reobserved=False
+[INFO] [1793097378.185074465] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_LOST_FORWARD_4
+[INFO] [1793097378.341315598] [motion_decision_node]: BALL motion boundary: wait_sec=0.154, next_action=BALL_APPROACH_TURN_LEFT_3, reobserved=False
+[INFO] [1793097379.384564699] [motion_decision_node]: BALL post-motion dwell started: 1.0s after action=BALL_APPROACH_TURN_LEFT_3
+[INFO] [1793097379.385476115] [motion_decision_node]: BALL stationary correction complete; waiting for post-motion dwell before the next approach motion without another same-boundary alignment check
+[INFO] [1793097379.386246055] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_TURN_LEFT_3
+[INFO] [1793097379.415441351] [motion_decision_node]: Line corner remembered: {'corner_direction': 'LEFT', 'corner_start_distance_m': 1.2865, 'last_confirmed_at': 5899.271397547, 'last_observation_id': 1793097379286552246, 'search_started': False, 'observed_during_action': None, 'observed_during_command_id': None, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793097380.939255698] [motion_decision_node]: BALL motion boundary: wait_sec=1.553, next_action=BALL_APPROACH_TURN_LEFT_1, reobserved=False
+[INFO] [1793097381.066297855] [motion_decision_node]: General motion lock released: status=FAILED, action=BALL_APPROACH_TURN_LEFT_1
+[INFO] [1793097385.152214170] [motion_decision_node]: BALL near/unknown candidate; waiting for confirmation after the current motion
+[INFO] [1793097385.656079548] [motion_decision_node]: BALL raw detection lost; releasing pending hold
+[INFO] [1793097386.042201894] [motion_decision_node]: BALL motion boundary: wait_sec=4.972, next_action=BALL_LOST_FORWARD_2, reobserved=False
+[INFO] [1793097386.170442899] [motion_decision_node]: General motion lock released: status=FAILED, action=BALL_LOST_FORWARD_2
+[INFO] [1793097386.589488766] [motion_decision_node]: BALL near/unknown candidate; waiting for confirmation after the current motion
+[INFO] [1793097387.102409294] [motion_decision_node]: BALL raw detection lost; releasing pending hold
+[INFO] [1793097389.419397838] [motion_decision_node]: BALL near/unknown candidate; waiting for confirmation after the current motion
+[INFO] [1793097390.025764982] [motion_decision_node]: BALL raw detection lost; releasing pending hold
+[INFO] [1793097392.543362350] [motion_decision_node]: BALL near/unknown candidate; waiting for confirmation after the current motion
+[INFO] [1793097393.186347353] [motion_decision_node]: BALL raw detection lost; releasing pending hold

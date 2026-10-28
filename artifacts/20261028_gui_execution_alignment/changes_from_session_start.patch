@@ -1,0 +1,1188 @@
+--- before/external_sdk/gui_aligned/CMakeLists.txt
++++ external_sdk/gui_aligned/CMakeLists.txt
+@@ -19,6 +19,11 @@
+ )
+ target_include_directories(motion_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+ target_compile_options(motion_core PRIVATE -Wall -Wextra -Wpedantic)
++if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
++    # Python은 곱셈/덧셈을 각각 반올림한다. ARM FMA 결합은 half-step에서
++    # 동일 degree를 다른 raw로 바꿀 수 있으므로 하위 전송 타깃에도 전파한다.
++    target_compile_options(motion_core PUBLIC -ffp-contract=off)
++endif()
+ 
+ add_executable(test_motion_pattern test_motion_pattern.cpp)
+ target_link_libraries(test_motion_pattern PRIVATE motion_core)
+@@ -35,7 +40,7 @@
+     robot_motion_player.cpp
+ )
+ target_include_directories(motion_player_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+-target_compile_definitions(motion_player_core PUBLIC IRC_STEP_GUI_ALIGNMENT_VERSION=20261027)
++target_compile_definitions(motion_player_core PUBLIC IRC_STEP_GUI_ALIGNMENT_VERSION=20261028)
+ target_link_libraries(motion_player_core PUBLIC motion_core Threads::Threads)
+ target_compile_options(motion_player_core PRIVATE -Wall -Wextra -Wpedantic)
+ 
+--- before/external_sdk/gui_aligned/dynamixel_motion_hardware.cpp
++++ external_sdk/gui_aligned/dynamixel_motion_hardware.cpp
+@@ -25,6 +25,7 @@
+ }
+ 
+ bool DynamixelMotionHardware::preflight() noexcept {
++    const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
+     try {
+         if (!dxl_.Initialize(config_.device_path, config_.baud_rate)) {
+             setError("failed to open DYNAMIXEL port"); return false;
+@@ -43,6 +44,7 @@
+ }
+ 
+ bool DynamixelMotionHardware::initialize() noexcept {
++    const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
+     try {
+         if (!preflight()) return false;
+         if (!dxl_.ConfigureTimeBasedProfile()) {
+@@ -65,6 +67,7 @@
+ }
+ 
+ bool DynamixelMotionHardware::prepareImmediatePlayback() noexcept {
++    const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
+     if (!ready() || !dxl_.VerifyTorqueEnabled(true) || !dxl_.WriteZeroProfiles()) {
+         setError("torque OFF/unconfirmed or failed to set Profile Acceleration/Velocity to zero"); return false;
+     }
+@@ -73,6 +76,7 @@
+ 
+ bool DynamixelMotionHardware::commandImmediatePosition(
+     const JointAngles& goals, const std::vector<int>& ids) noexcept {
++    const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
+     if (!ready()) { setError("hardware is not ready"); return false; }
+     for (const int id : ids) {
+         if (!motorEnabled(id) && id == 5) continue;
+@@ -90,12 +94,14 @@
+ }
+ 
+ bool DynamixelMotionHardware::ready() const noexcept {
++    const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
+     return initialized_ && dxl_.IsReady();
+ }
+ 
+ bool DynamixelMotionHardware::commandPosition(
+     const JointAngles& goal_deg, const std::vector<int>& motor_ids,
+     std::uint32_t duration_ms, std::uint32_t acceleration_ms) noexcept {
++    const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
+     if (!ready()) {
+         setError("DYNAMIXEL hardware is not initialized");
+         return false;
+@@ -120,6 +126,7 @@
+ 
+ bool DynamixelMotionHardware::readPresentPositions(
+     JointAngles& positions_deg) noexcept {
++    const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
+     if (!ready()) {
+         setError("DYNAMIXEL hardware is not initialized");
+         return false;
+@@ -144,6 +151,7 @@
+ 
+ bool DynamixelMotionHardware::holdCurrentPosition(
+     std::uint32_t stop_duration_ms) noexcept {
++    const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
+     JointAngles current_deg;
+     if (!readPresentPositions(current_deg)) return false;
+     std::vector<int> motor_ids;
+@@ -155,6 +163,7 @@
+ }
+ 
+ bool DynamixelMotionHardware::setTorqueEnabled(bool enabled) noexcept {
++    const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
+     if (!dxl_.IsReady()) {
+         setError("DYNAMIXEL port is not ready");
+         return false;
+--- before/external_sdk/gui_aligned/dynamixel_motion_hardware.hpp
++++ external_sdk/gui_aligned/dynamixel_motion_hardware.hpp
+@@ -4,6 +4,7 @@
+ #include "motion_hardware.hpp"
+ 
+ #include <string>
++#include <mutex>
+ 
+ namespace irc_step {
+ 
+@@ -37,6 +38,10 @@
+         std::uint32_t stop_duration_ms) noexcept override;
+     bool setTorqueEnabled(bool enabled) noexcept override;
+     [[nodiscard]] std::string_view lastError() const noexcept override;
++    [[nodiscard]] BusDiagnostics busDiagnostics() const noexcept override {
++        const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
++        return dxl_.BusDiagnostics();
++    }
+ 
+ private:
+     void setError(std::string message) noexcept;
+@@ -48,6 +53,8 @@
+     Eigen::VectorXd desired_rad_;
+     std::string last_error_;
+     bool initialized_{false};
++    // initialize -> preflight 및 hold -> read/write의 중첩 호출도 직렬화한다.
++    mutable std::recursive_mutex bus_mutex_;
+ };
+ 
+ }  // namespace irc_step
+--- before/external_sdk/gui_aligned/gui_alignment.hpp
++++ external_sdk/gui_aligned/gui_alignment.hpp
+@@ -1,3 +1,3 @@
+ #pragma once
+ // 빌드 시 실제 GUI 호환 경로를 구형 SDK 패치와 구분한다.
+-#define IRC_STEP_GUI_ALIGNMENT_VERSION 20261027
++#define IRC_STEP_GUI_ALIGNMENT_VERSION 20261028
+--- before/external_sdk/gui_aligned/gui_execution_probe.cpp
++++ external_sdk/gui_aligned/gui_execution_probe.cpp
+@@ -7,6 +7,9 @@
+ struct Bus : IMotionHardware {
+     double ms{1000}, read_delay{0}, write_delay{0};
+     JointAngles present;
++    bool exclude_5{false}, fail_feedback{false};
++    int reads{0};
++    bool motorEnabled(int id) const noexcept override { return id>=0 && id<23 && !(exclude_5 && id==5); }
+     bool initialize() noexcept override { return true; }
+     bool ready() const noexcept override { return true; }
+     bool commandPosition(const JointAngles&, const std::vector<int>&, uint32_t, uint32_t) noexcept override { return false; }
+@@ -16,7 +19,11 @@
+         std::cout << '\n'; ms += write_delay; return true;
+     }
+     bool readPresentPositions(JointAngles& value) noexcept override {
+-        std::cout << "R\t" << ms << '\n'; ms += read_delay; value = present; return true;
++        std::cout << "R\t" << ms << '\n'; ms += read_delay;
++        if (fail_feedback && reads++ > 0) return false;
++        value = present;
++        if (exclude_5) value.erase(5);
++        return true;
+     }
+     bool holdCurrentPosition(uint32_t) noexcept override { return true; }
+     bool setTorqueEnabled(bool) noexcept override { return true; }
+@@ -40,13 +47,25 @@
+     for(int id=0; id<23; ++id) bus.present[id]=id*.25-3;
+     RobotMotionPlayer p(argv[1],bus,[&]{return RobotMotionPlayer::Clock::time_point(
+         std::chrono::duration_cast<RobotMotionPlayer::Clock::duration>(std::chrono::duration<double,std::milli>(bus.ms)));});
+-    const bool continuous = argc > 6 && std::string(argv[6]) == "--continuous";
++    bool continuous = false;
++    std::string queue, trace;
++    for (int i=6; i<argc; ++i) {
++        const std::string option=argv[i];
++        if (option=="--continuous") continuous=true;
++        else if (option=="--exclude-5") bus.exclude_5=true;
++        else if (option=="--feedback-timeout") bus.fail_feedback=true;
++        else if (option=="--queue" && i+1<argc) queue=argv[++i];
++        else if (option=="--trace" && i+1<argc) trace=argv[++i];
++        else if (i==6 && option!="-") queue=option;
++        else if (i==7) trace=option;
++        else if (option!="-") return 1;
++    }
+     p.setContinuousInterpolation(continuous); // default: archived cosine GUI oracle
+     std::vector<double> periods; std::istringstream in(argv[3]); std::string token;
+     while(std::getline(in,token,',')) periods.push_back(std::stod(token));
+-    if(argc>7) p.configureDiagnostics(5,argv[7],true);
++    if(!trace.empty()) p.configureDiagnostics(5,trace,true);
+     if(!p.initialize() || p.start(argv[2])!=StartResult::Accepted) { std::cerr<<p.lastError(); return 2; }
+-    if(argc>6 && !continuous && std::string(argv[6])!="-" && p.queueNext(argv[6])!=QueueResult::Queued) return 3;
++    if(!queue.empty() && p.queueNext(queue)!=QueueResult::Queued) return 3;
+     std::uint64_t completed=0;
+     for(int tick=0; tick<1000000; ++tick) {
+         bus.ms += periods[tick%periods.size()];
+--- before/external_sdk/gui_aligned/gui_playback.hpp
++++ external_sdk/gui_aligned/gui_playback.hpp
+@@ -43,7 +43,7 @@
+ // 구간 생성은 시작/반복 경계에서만 한다. 5ms 샘플링에서는 할당하지 않는다.
+ class GuiContinuousTrajectory {
+     struct Segment {
+-        double start_ms{}, end_ms{}, duration_sec{};
++        double start_ms{}, end_ms{}, duration_ms{};
+         GuiSample start, goal;
+         std::array<bool, 23> active{};
+         std::array<double, 23> delta{}, v0{}, v1{};
+@@ -51,7 +51,7 @@
+     std::vector<Segment> segments_;
+ public:
+     void reset(const std::vector<MotionFrame>& frames, const JointAngles& initial,
+-               double speed) {
++               double /* speed */) {
+         segments_.clear();
+         segments_.reserve(frames.size());
+         GuiSample pose;
+@@ -63,7 +63,9 @@
+             Segment s;
+             s.start_ms = frame.start_ms;
+             s.end_ms = frame.start_ms + frame.time_ms;
+-            s.duration_sec = frame.time_ms / (1000.0 * speed);
++            // 저장된 프레임 시각에는 원본 배속이 반영되어 있다. 전체 배속은
++            // 플레이어 시계에서만 적용하고 경계속도는 재생 ms 기준으로 계산한다.
++            s.duration_ms = static_cast<double>(frame.time_ms);
+             s.start = pose;
+             for (const auto& [id, goal] : frame.angles) {
+                 if (!pose.commanded.at(id)) s.start.angles.at(id) = goal;
+@@ -90,27 +92,33 @@
+                     a.goal.angles[id] < -180 || a.goal.angles[id] > 179.912109375 ||
+                     b.goal.angles[id] < -180 || b.goal.angles[id] > 179.912109375) continue;
+                 a.v1[id] = b.v0[id] = std::copysign(std::min(
+-                    std::abs(a.delta[id] / a.duration_sec),
+-                    std::abs(b.delta[id] / b.duration_sec)), a.delta[id]);
++                    std::abs(a.delta[id] / a.duration_ms),
++                    std::abs(b.delta[id] / b.duration_ms)), a.delta[id]);
+             }
+         }
+     }
+-    GuiSample sample(double time_ms) const {
++    GuiSample sample(double time_ms, bool boundary = false) const {
+         if (segments_.empty()) return {};
+         GuiSample pose = segments_.front().start;
+         for (const auto& s : segments_) {
+             if (time_ms < s.start_ms) return pose;
++            if (time_ms == s.end_ms && (boundary || time_ms == segments_.back().end_ms)) {
++                pose = s.goal;
++                pose.commanded = s.active;
++                return pose;
++            }
+             if (time_ms >= s.end_ms) { pose = s.goal; continue; }
+             pose = s.start;
++            pose.commanded = s.active;
+             const double u = std::clamp((time_ms - s.start_ms) / (s.end_ms - s.start_ms), 0.0, 1.0);
+             for (int id = 0; id < 23; ++id) {
+                 if (!s.active[id]) continue;
+-                const double m0 = s.v0[id] * s.duration_sec, m1 = s.v1[id] * s.duration_sec;
++                const double m0 = s.v0[id] * s.duration_ms, m1 = s.v1[id] * s.duration_ms;
+                 const double d = s.delta[id];
+                 const double c3 = 10*d - 6*m0 - 4*m1;
+                 const double c4 = -15*d + 8*m0 + 7*m1;
+                 const double c5 = 6*d - 3*m0 - 3*m1;
+-                pose.angles[id] = s.start.angles[id] + m0*u + c3*u*u*u + c4*u*u*u*u + c5*u*u*u*u*u;
++                pose.angles[id] = s.start.angles[id] + m0*u + u*u*u*(c3 + u*(c4 + u*c5));
+                 pose.commanded[id] = true;
+             }
+             return pose;
+--- before/external_sdk/gui_aligned/motion_hardware.hpp
++++ external_sdk/gui_aligned/motion_hardware.hpp
+@@ -1,6 +1,7 @@
+ #pragma once
+ 
+ #include "motion_pattern.hpp"
++#include "bus_diagnostics.hpp"
+ 
+ #include <cstdint>
+ #include <string_view>
+@@ -24,6 +25,7 @@
+     }
+ 
+     virtual bool prepareImmediatePlayback() noexcept { return true; }
++    [[nodiscard]] virtual BusDiagnostics busDiagnostics() const noexcept { return {}; }
+ 
+     virtual bool commandPosition(
+         const JointAngles& goal_deg,
+--- before/external_sdk/gui_aligned/playback_trace.hpp
++++ external_sdk/gui_aligned/playback_trace.hpp
+@@ -25,6 +25,9 @@
+     std::int64_t timeline_ms{0};
+     int repeat{0}, frame{-1};
+     bool success{true};
++    bool continuous{true}, exclude_motor_5{false}, bus_result_valid{false};
++    int bus_result{0};
++    std::uint32_t missing_ids{0};
+     std::array<double, 23> angles{};
+     std::array<bool, 23> ids{};
+ };
+@@ -38,6 +41,7 @@
+         for (int id = 0; id < 23; ++id) out_ << ",deg_" << id;
+         for (int id = 0; id < 23; ++id) out_ << ",raw_" << id;
+         out_ << ",event_seq,tick,begin_ns,end_ns,evaluate_ns,speed,repeat_target,frame_start_ms,frame_duration_ms,frame_name,lift_early,cycle_end";
++        out_ << ",continuous,exclude_motor_5,bus_result_valid,bus_result,missing_ids_mask";
+         out_ << '\n' << std::setprecision(17);
+         worker_ = std::thread([this] { consume(); });
+     }
+@@ -86,7 +90,9 @@
+                 if (*c == '"') out_ << '"';
+                 out_ << *c;
+             }
+-            out_ << "\"," << r.lift_early << ',' << r.cycle_end << '\n';
++            out_ << "\"," << r.lift_early << ',' << r.cycle_end << ','
++                 << r.continuous << ',' << r.exclude_motor_5 << ',' << r.bus_result_valid
++                 << ',' << r.bus_result << ',' << r.missing_ids << '\n';
+             tail_.store((tail + 1) % capacity, std::memory_order_release);
+         }
+     }
+--- before/external_sdk/gui_aligned/recorded_execution_probe.cpp
++++ external_sdk/gui_aligned/recorded_execution_probe.cpp
+@@ -70,10 +70,16 @@
+         std::vector<RecordedTick> ticks;
+         std::string line;
+         bool have_initial = false;
++        bool continuous = false; // 보간 옵션이 없는 기존 기록은 코사인 GUI 기록이다.
+         while (std::getline(input, line)) {
+             std::istringstream row(line);
+             char kind; row >> kind;
+-            if (kind == 'I') {
++            if (kind == 'O') {
++                int mode;
++                if (have_initial || !(row >> mode) || (mode!=0 && mode!=1))
++                    throw std::runtime_error("invalid interpolation option");
++                continuous = mode != 0;
++            } else if (kind == 'I') {
+                 if (have_initial || !ticks.empty()) throw std::runtime_error("misplaced initial angles");
+                 for (int id=0; id<23; ++id) {
+                     double value; if (!(row >> value) || !std::isfinite(value)) throw std::runtime_error("invalid initial angle");
+@@ -110,6 +116,7 @@
+             return RobotMotionPlayer::Clock::time_point(std::chrono::duration_cast<RobotMotionPlayer::Clock::duration>(
+                 std::chrono::duration<double, std::milli>(bus.ms)));
+         });
++        player.setContinuousInterpolation(continuous);
+         if (!player.initialize() || player.start("recorded_gui") != StartResult::Accepted)
+             throw std::runtime_error("cannot start recorded motion");
+         for (const auto& tick : ticks) {
+--- before/external_sdk/gui_aligned/robot_motion_player.cpp
++++ external_sdk/gui_aligned/robot_motion_player.cpp
+@@ -187,7 +187,7 @@
+             else ++it;
+         }
+     }
+-    if (continuous_interpolation_)
++    if (continuous_interpolation_ && !startup_active_)
+         continuous_trajectory_.reset(playback_frames_, start_angles_, pattern.playbackSpeed());
+     command_ids_.reserve(kMotionMotorCount);
+     command_angles_ = start_angles_;
+@@ -217,6 +217,7 @@
+         traceEvent("run_start", now, true, start_angles_);
+         for (std::size_t i = 0; i < playback_frames_.size(); ++i) {
+             trace_frame_ = static_cast<int>(i);
++            traceEvent("source_definition", now, true, pattern.frames()[i].angles);
+             traceEvent("definition", now, true, playback_frames_[i].angles);
+         }
+         trace_frame_ = -1;
+@@ -307,7 +308,8 @@
+ 
+ bool RobotMotionPlayer::sendGuiSample(std::int64_t timeline_ms, bool boundary) {
+     trace_timeline_ms_ = timeline_ms;
+-    const auto target = continuous_interpolation_ ? continuous_trajectory_.sample(timeline_ms) :
++    // 단일 자세 적용은 코사인, 보행 시퀀스는 선택한 연속 ON/OFF를 사용한다.
++    const auto target = continuous_interpolation_ && !startup_active_ ? continuous_trajectory_.sample(timeline_ms, boundary) :
+         sampleGuiMotion(playback_frames_, start_angles_, timeline_ms, boundary);
+     command_ids_.clear();
+     for (int id = 0; id < kMotionMotorCount; ++id) {
+@@ -365,28 +367,7 @@
+     // GUI gate는 도착 검사가 아니다. 직전에 활성화했던 프레임의 종점을
+     // 전송한 뒤, 같은 tick에서 경계 sample을 보낸다. 늦은 tick도 시계는 유지한다.
+     timeline_ms = std::min(timeline_ms, boundary_ms);
+-    if (continuous_interpolation_) {
+-        // 늦은 콜백도 지나간 모든 종점을 먼저 전송한다. 시계는 늦추지 않는다.
+-        while (next_frame_ < playback_frames_.size()) {
+-            const auto& frame = playback_frames_[next_frame_];
+-            const auto end = frame.start_ms + frame.time_ms;
+-            if (end > timeline_ms) break;
+-            auto endpoint = frame.angles;
+-            std::vector<int> ids;
+-            for (auto& [id, angle] : endpoint) {
+-                if (joint_overrides_.contains(id)) angle = joint_overrides_.at(id);
+-                ids.push_back(id);
+-                command_angles_[id] = angle;
+-            }
+-            trace_timeline_ms_ = end;
+-            if (!ids.empty() && !writeGoals(endpoint, ids, "endpoint")) {
+-                fail(MotionError::FrameSendFailed, "frame endpoint write failed");
+-                return status_;
+-            }
+-            ++next_frame_;
+-        }
+-    }
+-    if (!continuous_interpolation_ && gated_frame_ != nullptr) {
++    if (gated_frame_ != nullptr) {
+         const auto end = gated_frame_->start_ms + gated_frame_->time_ms;
+         if (timeline_ms >= end) {
+             JointAngles endpoint = gated_frame_->angles;
+@@ -432,11 +413,10 @@
+             if (frame.start_ms + frame.time_ms == boundary_ms)
+                 for (const auto& [id, angle] : frame.angles) start_angles_[id] = angle;
+         // 통신 완료 이후 시계를 재시작해 GUI 반복 경계의 지연을 재현한다.
+-        if (!continuous_interpolation_) {
+-            gui_started_sec_ = guiSeconds(now_()) - boundary_ms / (1000.0 * pattern_->playbackSpeed());
+-            started_at_ = now_() - std::chrono::duration_cast<Clock::duration>(
+-                std::chrono::duration<double, std::milli>(boundary_ms / pattern_->playbackSpeed()));
+-        }
++        const auto restarted_at = now_();
++        gui_started_sec_ = guiSeconds(restarted_at) - boundary_ms / (1000.0 * pattern_->playbackSpeed());
++        started_at_ = restarted_at - std::chrono::duration_cast<Clock::duration>(
++            std::chrono::duration<double, std::milli>(boundary_ms / pattern_->playbackSpeed()));
+         feedback_sampled_ = false;
+         return status_;
+     }
+@@ -451,12 +431,8 @@
+             continuous_trajectory_.reset(playback_frames_, start_angles_, pattern_->playbackSpeed());
+         cycle_start_ms_ = 0;
+         trace_timeline_ms_ = 0;
+-        if (continuous_interpolation_) {
+-            gui_started_sec_ += sequence_end / (1000.0 * pattern_->playbackSpeed());
+-        } else {
+-            started_at_ = now_();
+-            gui_started_sec_ = guiSeconds(started_at_);
+-        }
++        started_at_ = now_();
++        gui_started_sec_ = guiSeconds(started_at_);
+         feedback_sampled_ = false;
+         return status_;
+     }
+@@ -577,6 +553,7 @@
+         return CancelResult::HoldFailed;
+     }
+     status_ = MotionStatus::Cancelled;
++    traceEvent("cancel", now_(), true);
+     error_ = MotionError::None;
+     last_error_.clear();
+     pattern_ = nullptr;
+@@ -588,6 +565,7 @@
+ bool RobotMotionPlayer::emergencyStop() noexcept {
+     if (hardware_ == nullptr) return false;
+     const bool success = hardware_->setTorqueEnabled(false);
++    traceEvent("emergency_stop", now_(), success);
+     initialized_ = false;
+     status_ = success ? MotionStatus::Cancelled : MotionStatus::Failed;
+     if (!success) {
+@@ -674,6 +652,7 @@
+ 
+ void RobotMotionPlayer::fail(
+     MotionError error, std::string message) noexcept {
++    traceEvent("fault", now_(), false);
+     error_ = error;
+     last_error_ = std::move(message);
+     status_ = MotionStatus::Failed;
+@@ -830,6 +809,15 @@
+     }
+     row.timeline_ms = trace_timeline_ms_; row.repeat = repeat_; row.frame = trace_frame_;
+     row.success = success;
++    row.continuous = continuous_interpolation_ && !startup_active_;
++    row.exclude_motor_5 = !hardware_->motorEnabled(5);
++    if (std::string_view(event) == "sample" || std::string_view(event) == "endpoint" ||
++        std::string_view(event) == "feedback" || std::string_view(event) == "initial") {
++        const auto bus = hardware_->busDiagnostics();
++        row.bus_result_valid = bus.valid;
++        row.bus_result = bus.result;
++        row.missing_ids = bus.missing_ids;
++    }
+     if (trace_goals_) for (const auto& [id, value] : angles) {
+         if (id >= 0 && id < 23 && (!ids || std::find(ids->begin(), ids->end(), id) != ids->end())) { row.ids[id] = true; row.angles[id] = value; }
+     }
+--- before/external_sdk/gui_aligned/step_dynamixel.cpp
++++ external_sdk/gui_aligned/step_dynamixel.cpp
+@@ -59,6 +59,7 @@
+ }
+ 
+ bool Dxl::WriteGoalDegrees(const std::vector<double>& angles, const std::vector<int>& ids) {
++    bus_diagnostics_ = {};
+     if (!port_opened_ || angles.size() != NUMBER_OF_DYNAMIXELS || ids.empty()) return false;
+     dynamixel::GroupSyncWrite writer(portHandler, packetHandler, DxlReg_GoalPosition, 4);
+     bool any = false;
+@@ -70,17 +71,23 @@
+         getParam(irc_step::guiPositionRaw(angles[id]), data);
+         if (!writer.addParam(static_cast<uint8_t>(id), data)) return false;
+     }
+-    return !any || writer.txPacket() == COMM_SUCCESS;
++    if (!any) return true;
++    bus_diagnostics_ = {true, writer.txPacket(), 0};
++    return bus_diagnostics_.result == COMM_SUCCESS;
+ }
+ 
+ bool Dxl::ReadPositionDegrees(std::vector<double>& angles) {
++    bus_diagnostics_ = {};
+     if (!port_opened_) return false;
+     dynamixel::GroupSyncRead reader(portHandler, packetHandler, DxlReg_PresentPosition, 4);
+     for (int id = 0; id < NUMBER_OF_DYNAMIXELS; ++id)
+         if (MotorEnabled(id) && !reader.addParam(id)) return false;
+-    if (reader.txRxPacket() != COMM_SUCCESS) return false;
++    bus_diagnostics_ = {true, reader.txRxPacket(), 0};
+     for (int id = 0; id < NUMBER_OF_DYNAMIXELS; ++id)
+-        if (MotorEnabled(id) && !reader.isAvailable(id, DxlReg_PresentPosition, 4)) return false;
++        if (MotorEnabled(id) && !reader.isAvailable(id, DxlReg_PresentPosition, 4))
++            bus_diagnostics_.missing_ids |= std::uint32_t{1} << id;
++    // 일부 응답이 있어도 실패한 읽기를 완전한 시작 자세로 사용하지 않는다.
++    if (bus_diagnostics_.result != COMM_SUCCESS || bus_diagnostics_.missing_ids != 0) return false;
+     angles.resize(NUMBER_OF_DYNAMIXELS);
+     for (int id = 0; id < NUMBER_OF_DYNAMIXELS; ++id) {
+         if (!MotorEnabled(id)) continue;
+--- before/external_sdk/gui_aligned/step_dynamixel.hpp
++++ external_sdk/gui_aligned/step_dynamixel.hpp
+@@ -8,6 +8,7 @@
+ #include <thread>
+ #include <chrono>
+ #include "dynamixel_sdk/dynamixel_sdk.h"
++#include "bus_diagnostics.hpp"
+ 
+ // #include <unordered_map> //자료구조 중 더 빠른 map탐색 key:value
+ 
+@@ -144,6 +145,7 @@
+         int16_t Mode = Position_Control_Mode;
+         bool port_opened_ = false;
+         bool exclude_motor_5_ = false;
++        irc_step::BusDiagnostics bus_diagnostics_;
+ 
+         VectorXd Start_set = VectorXd::Zero(NUMBER_OF_DYNAMIXELS);
+ 
+@@ -196,6 +198,7 @@
+         bool VerifyTorqueEnabled(bool enabled);
+         bool WriteGoalDegrees(const std::vector<double>& angles, const std::vector<int>& ids);
+         bool ReadPositionDegrees(std::vector<double>& angles);
++        irc_step::BusDiagnostics BusDiagnostics() const { return bus_diagnostics_; }
+         ~Dxl(); //소멸자
+ 
+ // ************************************ GETTERS ***************************************** //
+--- before/external_sdk/gui_aligned/test_continuous_hardware.cpp
++++ external_sdk/gui_aligned/test_continuous_hardware.cpp
+@@ -66,5 +66,36 @@
+         }
+         assert(samples>20 && off5>=2);
+     }
+-    std::cout<<"PASS actual player -> hardware -> Dxl -> fake SDK packets; exclusion, torque checks, seed, profiles, startup, repeat, emergency OFF\n";
++    // 제외 관절만 있는 활성 프레임에서는 다른 관절로 대체 전송하지 않는다.
++    std::ofstream(path)<<R"({"motions":[{"name":"only5","max_seq_ms":300,"frames":[
++      {"name":"A","start_ms":0,"time_ms":100,"angles":{"1":20}},
++      {"name":"B","start_ms":100,"time_ms":100,"angles":{"5":80}},
++      {"name":"C","start_ms":200,"time_ms":100,"angles":{"2":30}}]}]})";
++    for(bool continuous : {false,true}) {
++        dynamixel::reset();
++        DynamixelMotionHardwareConfig config; config.exclude_motor_5=true;
++        dynamixel::offline=5;
++        DynamixelMotionHardware hw(config);
++        int ms=0;
++        RobotMotionPlayer p(path,hw,[&]{return RobotMotionPlayer::Clock::time_point(std::chrono::milliseconds(ms));});
++        p.setContinuousInterpolation(continuous);
++        p.configureDiagnostics(5,std::string(argv[1])+(continuous ? "/packet_fault_continuous.csv" : "/packet_fault_cosine.csv"),true);
++        assert(p.initialize() && p.start("only5")==StartResult::Accepted);
++        p.update(); ms=100; p.update();
++        dynamixel::events.clear();
++        ms=125; p.update();
++        for(const auto& e:dynamixel::events) assert(e.type!='W');
++        assert(p.playbackTimelineMs()==125 && p.running());
++        // 일반 피드백 누락은 시간을 늘리지 않지만 SDK 오류/누락 ID는 남긴다.
++        dynamixel::offline=6;
++        ms=150; p.update();
++        assert(p.running() && p.playbackTimelineMs()==150);
++        assert(hw.busDiagnostics().valid && hw.busDiagnostics().result==-1);
++        assert(hw.busDiagnostics().missing_ids==(1u<<6));
++        dynamixel::write_failure=true;
++        ms=200; p.update();
++        assert(p.result()==MotionError::FrameSendFailed);
++        assert(hw.busDiagnostics().result==-1001);
++    }
++    std::cout<<"PASS actual player -> hardware -> Dxl -> fake SDK packets; exclusion, torque checks, seed, profiles, startup, repeat, timeout, write failure, emergency OFF\n";
+ }
+--- before/external_sdk/gui_aligned/test_continuous_interpolation.cpp
++++ external_sdk/gui_aligned/test_continuous_interpolation.cpp
+@@ -18,6 +18,12 @@
+ }
+ int main() {
+     GuiContinuousTrajectory t;
++    t.reset({frame(10,0,100),frame(20,100,100)},{{1,0}},1);
++    assert(angle(t,50)==3.4375 && angle(t,100)==10 && angle(t,150)==16.5625);
++    // 100 ms 경계의 공유속도는 100 deg/s. 양쪽 가속도는 0으로 수렴한다.
++    const double epsilon=0.0001;
++    assert(std::abs((angle(t,100)-angle(t,100-epsilon))/(epsilon/1000)-100)<1e-5);
++    assert(std::abs((angle(t,100+epsilon)-angle(t,100))/(epsilon/1000)-100)<1e-5);
+     std::vector<MotionFrame> frames{frame(20,0),frame(60,1000)};
+     t.reset(frames,{{1,0},{2,7}},1);
+     boundary(t,1000,20);
+@@ -46,5 +52,6 @@
+     assert(sampleGuiMotion(frames,{{1,0}},800).angles[1]==40);
+     assert(guiShortestDelta(170,-170)==20 && guiShortestDelta(-170,170)==-20);
+     assert(guiShortestDelta(0,-540)==-180);
++    assert(guiPositionRaw(-131.5283203125)==552);
+     std::cout<<"PASS velocity/acceleration continuity, stops, gap, partial, wrap, endpoints, lift OFF fallback\n";
+ }
+--- before/external_sdk/gui_aligned/test_gui_alignment.cpp
++++ external_sdk/gui_aligned/test_gui_alignment.cpp
+@@ -32,7 +32,9 @@
+         }
+         if(scenario==7) {
+             assert(p.startPoseTransition(std::vector<double>(23,15),20));
+-            ms+=20; p.update(); assert(p.status()==MotionStatus::Settling);
++            ms+=5; p.update();
++            assert(std::abs(hw.commandedPositions().at(1)-(1+14*(1-std::cos(std::acos(-1.0)*.25))/2))<1e-9);
++            ms+=15; p.update(); assert(p.status()==MotionStatus::Settling);
+             ms+=100; p.update(); assert(!p.succeeded());
+             hw.setPresentPositions(JointAngles{});
+             ms+=3100; p.update(); assert(p.result()==MotionError::PositionTimeout);continue;
+--- before/external_sdk/gui_aligned/test_support/dynamixel_sdk/dynamixel_sdk.h
++++ external_sdk/gui_aligned/test_support/dynamixel_sdk/dynamixel_sdk.h
+@@ -15,8 +15,10 @@
+ inline std::vector<Event> events;
+ inline std::array<std::map<int,uint32_t>,23> registers;
+ inline int offline = -1, torque_read_failure = -1;
++inline bool write_failure = false;
+ inline void reset() {
+     events.clear(); offline = torque_read_failure = -1;
++    write_failure = false;
+     for (int id=0; id<23; ++id) registers[id] = {{6,42},{10,4},{64,0},{132,uint32_t(2048+id)}};
+ }
+ class PortHandler {
+@@ -55,7 +57,12 @@
+         uint32_t value=0; for(int i=0;i<event_.size;++i) value|=uint32_t(data[i])<<(i*8);
+         event_.data[id]=value; return true;
+     }
+-    int txPacket() { events.push_back(event_); for(auto [id,value]:event_.data) if(id!=offline) registers.at(id)[event_.address]=value; return 0; }
++    int txPacket() {
++        events.push_back(event_);
++        if(write_failure) return -1001;
++        for(auto [id,value]:event_.data) if(id!=offline) registers.at(id)[event_.address]=value;
++        return 0;
++    }
+     void clearParam() { event_.data.clear(); }
+ };
+ class GroupSyncRead {
+--- before/src/irc_step_motion_executor/CMakeLists.txt
++++ src/irc_step_motion_executor/CMakeLists.txt
+@@ -268,6 +268,13 @@
+         "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/robot_motions_runtime.json")
+     add_test(NAME test_gui_alignment_contract
+       COMMAND $<TARGET_FILE:test_gui_alignment> "${CMAKE_CURRENT_BINARY_DIR}")
++    add_test(NAME test_gui_execution_specification
++      COMMAND ${Python3_EXECUTABLE}
++        "${CMAKE_CURRENT_SOURCE_DIR}/../../tools/verify_gui_execution_contract.py"
++        --probe $<TARGET_FILE:gui_execution_probe>
++        --archived-gui "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/20261006_gui_alignment/reference/sdk_gui.py"
++        --output "${CMAKE_CURRENT_BINARY_DIR}/gui_specification"
++        "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/robot_motions_runtime.json")
+   endif()
+   ament_add_gtest(test_catalog_only_core test/test_catalog_only_core.cpp)
+   if(TARGET test_catalog_only_core)
+--- before/src/irc_step_motion_executor/README.md
++++ src/irc_step_motion_executor/README.md
+@@ -1,3 +1,9 @@
++2026-10-28 GUI 실행 경계 보완: 연속 모드도 직전 활성 프레임 종점만 처리하고,
++반복·cycle 통신 완료 후 시계를 재설정합니다. 부분 프레임은 해당 ID만 전송하며
++ARM raw 반올림의 FMA 차이를 방지합니다. 단일 자세는 코사인 경로를 사용합니다.
++[이번 구현·검증·실행·복원 보고서](../../artifacts/20261028_gui_execution_alignment/REPORT.md)를 확인하세요.
++최신 GUI 원본 hash와 실제 모터 동작은 아직 대조하지 못했습니다.
++
+ 2026-10-27 실행기 업데이트: `continuous_interpolation=true`(기본),
+ `exclude_motor_5=false`(기본)를 지원합니다. 연속 모드는 5차 보간과 전체 프레임 시간을
+ 사용하고, OFF는 기존 코사인 보간입니다. 제외한 5번의 상태는 `excluded_unconfirmed`로
+--- before/src/irc_step_motion_executor/launch/sdk_gui_alignment.launch.py
++++ src/irc_step_motion_executor/launch/sdk_gui_alignment.launch.py
+@@ -9,7 +9,6 @@
+ 
+ def generate_launch_description():
+     share = FindPackageShare('irc_step_motion_executor')
+-    baseline = PathJoinSubstitution([share, 'config', 'robot_motions_pc.json'])
+     return LaunchDescription([
+         DeclareLaunchArgument('continuous_interpolation', default_value='true'),
+         DeclareLaunchArgument('exclude_motor_5', default_value='false'),
+@@ -31,7 +30,7 @@
+                  'robot_baud_rate': 4000000,
+                  'robot_motor_ids': list(range(23)),
+                  'motion_json_path': LaunchConfiguration('motion_json_path'),
+-                 'policy_reference_json_path': baseline,
++                 'policy_reference_json_path': LaunchConfiguration('motion_json_path'),
+                  'enable_head_override': False,
+                  'enable_shoulder_override': ParameterValue(LaunchConfiguration('enable_shoulder_override'), value_type=bool),
+                  'position_tolerance_enabled': False,
+--- before/src/irc_step_motion_executor/src/sdk_executor_node.cpp
++++ src/irc_step_motion_executor/src/sdk_executor_node.cpp
+@@ -77,6 +77,12 @@
+ #endif
+     const std::int64_t poll_period_ms = positive_parameter_or_default(
+       "poll_period_ms", kDefaultPollPeriodMs);
++    RCLCPP_INFO(get_logger(), "Execution path: backend=%s aliases=%s JSON=%s port=%s baud=%ld poll_ms=%ld",
++      backend_type.c_str(), alias_path.c_str(), motion_json_path.c_str(),
++      robot_device_path.c_str(), static_cast<long>(robot_baud_rate), static_cast<long>(poll_period_ms));
++#ifdef IRC_STEP_GUI_ALIGNMENT_VERSION
++    RCLCPP_INFO(get_logger(), "Compiled GUI alignment version: %d", IRC_STEP_GUI_ALIGNMENT_VERSION);
++#endif
+     const std::int64_t running_polls = nonnegative_parameter_or_default(
+       "running_polls", kDefaultRunningPolls);
+     const std::int64_t settling_polls = nonnegative_parameter_or_default(
+@@ -154,8 +160,12 @@
+       motion_json_path, enable_robot_hardware, robot_device_path,
+       robot_baud_rate, robot_motor_ids, explicit_torque_approval);
+     auto & playback_config = backend_options.robot_motion_player;
+-    playback_config.continuous_interpolation = declare_parameter<bool>("continuous_interpolation", true);
+-    exclude_motor_5_ = declare_parameter<bool>("exclude_motor_5", false);
++    rcl_interfaces::msg::ParameterDescriptor playback_option;
++    playback_option.read_only = true;
++    playback_option.description = "Restart the node to change playback mode or motor discovery policy";
++    playback_config.continuous_interpolation = declare_parameter<bool>(
++      "continuous_interpolation", true, playback_option);
++    exclude_motor_5_ = declare_parameter<bool>("exclude_motor_5", false, playback_option);
+     playback_config.exclude_motor_5 = exclude_motor_5_;
+     RCLCPP_INFO(get_logger(), "Interpolation: %s; motor 5: %s",
+       playback_config.continuous_interpolation ? "continuous quintic" : "legacy cosine",
+--- before/src/irc_step_motion_executor/test/test_catalog_only_core.cpp
++++ src/irc_step_motion_executor/test/test_catalog_only_core.cpp
+@@ -42,23 +42,23 @@
+   irc_step_motion_executor::MotionAliasCatalog catalog;
+   std::string error;
+   ASSERT_TRUE(catalog.load(TEST_ALIAS_CONFIG, error)) << error;
+-  EXPECT_EQ(catalog.size(), 98U);
++  EXPECT_EQ(catalog.size(), 107U);
+   for (const auto & [alias, motion] : {
+-      std::pair{"forward", "건전진45도(8회)"},
+-      std::pair{"line_forward_8", "건전진45도(8회)"},
+-      std::pair{"goal_camera_90_forward_2", "건전진90도(2회)"},
+-      std::pair{"line_turn_right_large", "찐제자리우회전45도(9회)"},
+-      std::pair{"line_recovery_left_4", "건라인복귀좌회전45도(4회)"},
+-      std::pair{"line_recovery_left_6", "건라인복귀좌회전45도(6회)"},
+-      std::pair{"line_recovery_right_4", "건라인복귀우회전45도(4회)"},
++      std::pair{"forward", "R전진45도(8회)"},
++      std::pair{"line_forward_8", "R전진45도(8회)"},
++      std::pair{"goal_camera_90_forward_2", "R전진90도(2회)"},
++      std::pair{"line_turn_right_large", "R제자리우회전(9회)"},
++      std::pair{"line_recovery_left_4", "R전진라인복귀좌"},
++      std::pair{"line_recovery_left_6", "R전진라인복귀좌"},
++      std::pair{"line_recovery_right_4", "R라인복귀우회전"},
+       std::pair{"pickup_crab_right_0", "유미세오옆꽃게0도"},
+       std::pair{"pickup_crab_left_0", "유미세왼옆꽃게0도"},
+       std::pair{"goal_camera_90_crab_right", "유미세오옆꽃게90도"},
+       std::pair{"goal_camera_90_crab_left", "유미세왼옆꽃게90도"},
+       std::pair{"stationary_turn_left", "건제자리좌회전45도(6회)"},
+-      std::pair{"stationary_turn_right", "찐제자리우회전45도(9회)"},
++      std::pair{"stationary_turn_right", "R제자리우회전(9회)"},
+       std::pair{"pickup_camera_down_turn_left_6", "건제자리좌회전0도(6회)"},
+-      std::pair{"pickup_camera_down_turn_right_9", "찐제자리우회전0도-1(9회)"},
++      std::pair{"pickup_camera_down_turn_right_9", "R제자리우회전0도(9회)"},
+       std::pair{"pickup", "건공잡기"}})
+   {
+     EXPECT_EQ(catalog.resolve(alias), std::optional<std::string>(motion));
+--- before/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp
++++ src/irc_step_motion_executor/test/test_sdk_executor_core.cpp
+@@ -48,7 +48,7 @@
+     request_json(1, "forward"), 100);
+ 
+   ASSERT_EQ(backend.started_motion_names.size(), 1U);
+-  EXPECT_EQ(backend.started_motion_names[0], "건전진45도(8회)");
++  EXPECT_EQ(backend.started_motion_names[0], "R전진45도(8회)");
+   EXPECT_EQ(status.status, "RUNNING");
+   EXPECT_TRUE(core.has_active_request());
+ }
+@@ -242,7 +242,7 @@
+   EXPECT_EQ(status.error_code, "BUSY");
+   EXPECT_EQ(status.request_id, 11);
+   ASSERT_EQ(backend.started_motion_names.size(), 1U);
+-  EXPECT_EQ(backend.started_motion_names[0], "건전진45도(8회)");
++  EXPECT_EQ(backend.started_motion_names[0], "R전진45도(8회)");
+ }
+ 
+ TEST(SdkExecutorCore, TimeoutCancelsAndReturnsFailedWithCorrelation)
+@@ -374,7 +374,7 @@
+     request_json(31, "forward", "STRAIGHT"), 101);
+   EXPECT_EQ(queued.status, "QUEUED");
+   ASSERT_EQ(backend.queued_motion_names.size(), 1U);
+-  EXPECT_EQ(backend.queued_motion_names[0], "건전진45도(8회)");
++  EXPECT_EQ(backend.queued_motion_names[0], "R전진45도(8회)");
+ 
+   backend.sequence = 1;
+   const auto completed = core.poll(200);
+--- before/src/irc_step_motion_executor/test/test_sdk_executor_driver.cpp
++++ src/irc_step_motion_executor/test/test_sdk_executor_driver.cpp
+@@ -107,7 +107,7 @@
+   EXPECT_EQ(string_field(fixture.published[0], "status"), "RUNNING");
+   EXPECT_EQ(int_field(fixture.published[0], "request_id"), 1);
+   ASSERT_EQ(fixture.backend.started_motion_names.size(), 1U);
+-  EXPECT_EQ(fixture.backend.started_motion_names[0], "건전진45도(8회)");
++  EXPECT_EQ(fixture.backend.started_motion_names[0], "R전진45도(8회)");
+ }
+ 
+ TEST(SdkExecutorDriver, InvalidAndUnsupportedRequestsPublishRejections)
+--- before/src/irc_step_motion_executor/test/test_sdk_executor_node_launch.py
++++ src/irc_step_motion_executor/test/test_sdk_executor_node_launch.py
+@@ -11,6 +11,8 @@
+ from launch_ros.actions import Node
+ import rclpy
+ from std_msgs.msg import String
++from rcl_interfaces.srv import SetParameters
++from rclpy.parameter import Parameter
+ 
+ 
+ def generate_test_description():
+@@ -315,6 +317,21 @@
+         self.assertEqual(sequences, sorted(sequences))
+         self.assertEqual(len(sequences), len(set(sequences)))
+ 
++    def test_playback_options_require_restart(self):
++        client = self.node.create_client(
++            SetParameters, "/sdk_motion_executor_launch_test/set_parameters")
++        self.assertTrue(client.wait_for_service(timeout_sec=1.0))
++        request = SetParameters.Request()
++        request.parameters = [
++            Parameter("exclude_motor_5", value=False).to_parameter_msg(),
++            Parameter("continuous_interpolation", value=False).to_parameter_msg(),
++        ]
++        future = client.call_async(request)
++        rclpy.spin_until_future_complete(self.node, future, timeout_sec=1.0)
++        self.assertTrue(future.done())
++        self.assertTrue(all(not result.successful for result in future.result().results))
++        self.node.destroy_client(client)
++
+     def _wait_for_heartbeat_count(self, count, timeout=5.0):
+         deadline = time.monotonic() + timeout
+         while time.monotonic() < deadline:
+--- before/tools/analyze_callback_timing.py
++++ tools/analyze_callback_timing.py
+@@ -16,6 +16,7 @@
+         return None
+     values = sorted(values)
+     return {"count": len(values), "mean": statistics.mean(values),
++            "p95": values[math.ceil(0.95 * len(values)) - 1],
+             "p99": values[math.ceil(0.99 * len(values)) - 1], "max": values[-1]}
+ 
+ 
+--- before/tools/compare_playback_traces.py
++++ tools/compare_playback_traces.py
+@@ -162,7 +162,10 @@
+                    key=lambda r: r['tick'])
+     if not ticks:
+         raise ValueError('no measured playback ticks')
+-    script = ['I ' + ' '.join(str(initial[i]) for i in range(23))]
++    continuous = start['snapshot'].get('continuous_motion_enabled', False)
++    if not isinstance(continuous, bool):
++        raise ValueError('continuous_motion_enabled must be a boolean')
++    script = [f'O {int(continuous)}', 'I ' + ' '.join(str(initial[i]) for i in range(23))]
+     previous_time = -1
+     total_writes = 0
+     for tick in ticks:
+--- before/tools/test_playback_traces.py
++++ tools/test_playback_traces.py
+@@ -198,7 +198,7 @@
+     result = {}
+     for name in ['gui_execution_probe', 'recorded_execution_probe']:
+         binary = directory/name
+-        subprocess.run(['g++', '-std=c++20', '-O0', '-pthread', '-I', str(sdk),
++        subprocess.run(['g++', '-std=c++20', '-O2', '-ffp-contract=off', '-pthread', '-I', str(sdk),
+                         str(sdk/f'{name}.cpp'), str(sdk/'robot_motion_player.cpp'),
+                         str(sdk/'motion_pattern.cpp'), '-o', str(binary)], check=True)
+         result[name] = binary
+@@ -241,7 +241,8 @@
+     motion = motion_fixture()
+     ns = load_gui(ROOT/'artifacts/20261006_gui_alignment/reference/sdk_gui.py')
+     periods, read_delay, write_delay = [5, 17, 6], 2, 1
+-    records = oracle(ns, motion, periods, read_delay, write_delay)
++    # 요청된 부분 관절 누적 규칙을 구형 GUI oracle에도 명시적으로 적용한다.
++    records = oracle(ns, motion, periods, read_delay, write_delay, carry_all_repeat_goals=True)
+     initial = {i: i*.25-3 for i in range(23)}
+     origin_ms = 1000 + read_delay
+     rows = [dict(event='session', schema_version=2),
+--- before/tools/trace_sdk_gui.py
++++ tools/trace_sdk_gui.py
+@@ -157,6 +157,7 @@
+                         extra['snapshot'] = dict(frames=copy.deepcopy(editor.motion_sequence),
+                             max_seq_ms=editor.max_seq_ms, repeat_count=editor.playback_repeat_target,
+                             playback_speed=editor.playback_speed,
++                            continuous_motion_enabled=bool(getattr(editor, 'continuous_motion_enabled', False)),
+                             composer_segments=copy.deepcopy(getattr(editor, 'composer_playback_segments', [])),
+                             initial_deg=dict(editor.start_angles))
+                         extra['playback_origin_ns'] = int(editor.anim_start_time * 1e9)
+--- before/tools/verify_continuous_playback.py
++++ tools/verify_continuous_playback.py
+@@ -24,7 +24,7 @@
+         pose.update(goals)
+         result.append(dict(frame=frame, start=start, goal=pose.copy(),
+                            delta={j: (v-start[j]+180) % 360-180 for j, v in goals.items()},
+-                           h=frame['time_ms']/1000/motion.get('playback_speed', 1), v0={}, v1={}))
++                           h=frame['time_ms'], v0={}, v1={}))
+     for a, b in zip(result, result[1:]):
+         fa, fb = a['frame'], b['frame']
+         if (fa['start_ms']+fa['time_ms'] != fb['start_ms'] or
+@@ -57,7 +57,7 @@
+         for j, d in s['delta'].items():
+             m0, m1 = s['v0'].get(j, 0)*s['h'], s['v1'].get(j, 0)*s['h']
+             c3, c4, c5 = 10*d-6*m0-4*m1, -15*d+8*m0+7*m1, 6*d-3*m0-3*m1
+-            pose[j] = s['start'][j]+m0*u+c3*u*u*u+c4*u*u*u*u+c5*u*u*u*u*u
++            pose[j] = s['start'][j]+m0*u+u*u*u*(c3+u*(c4+u*c5))
+         return pose
+     return pose
+ 
+--- /dev/null
++++ external_sdk/gui_aligned/bus_diagnostics.hpp
+@@ -0,0 +1,11 @@
++#pragma once
++#include <cstdint>
++
++namespace irc_step {
++// SDK 결과와 응답 누락을 분리한다. SyncWrite 성공은 수신 확인이 아니다.
++struct BusDiagnostics {
++    bool valid{false};
++    int result{0};
++    std::uint32_t missing_ids{0};
++};
++}
+--- /dev/null
++++ tools/verify_gui_execution_contract.py
+@@ -0,0 +1,211 @@
++#!/usr/bin/env python3
++"""Compare every player I/O event with the supplied 2026-10-28 specification.
++
++This is an independent specification oracle, not the missing latest PC GUI.
++The archived GUI is used only to generate exported composer fixtures.
++"""
++import argparse
++import copy
++import json
++import math
++from pathlib import Path
++import subprocess
++
++from verify_continuous_playback import raw, segments, sample
++from verify_latest_gui_execution import load_gui, synthetic, parse_trace, compare
++
++
++def normalize(motion):
++    """The GUI packs overlapping frames; mirror its documented catalog loader."""
++    motion = copy.deepcopy(motion)
++    frames = motion['frames'] = sorted(motion['frames'], key=lambda f: f['start_ms'])
++    end = 0
++    for f in frames:
++        f['start_ms'] = max(end, f['start_ms'])
++        end = f['start_ms'] + f['time_ms']
++    if end > motion['max_seq_ms']:
++        limit = motion['max_seq_ms']
++        for f in reversed(frames):
++            f['start_ms'] = min(f['start_ms'], limit-f['time_ms'])
++            limit = f['start_ms']
++        offset = max(0, -frames[0]['start_ms'])
++        for f in frames:
++            f['start_ms'] += offset
++    return motion
++
++
++def oracle(motion, periods, read_delay, write_delay, continuous, excluded=False, queued=None):
++    clock = 1000.0
++    records = [['R', clock]]
++    clock += read_delay
++    initial = {i: i*.25-3 for i in range(23)}
++    if excluded:
++        initial.pop(5)
++    command = initial.copy()
++    repeat, completed, cycle_start, gated, last_read = 1, 0, 0, None, None
++    started = clock/1000
++
++    def prepare(m):
++        m = normalize(m)
++        if excluded:
++            for f in m['frames']:
++                f['angles'].pop('5', None)
++        return m, segments(m, initial)
++
++    motion, parts = prepare(motion)
++    running = True
++    for tick in range(1000000):
++        clock += periods[tick % len(periods)]
++        requested = int((clock/1000-started)*1000*motion.get('playback_speed', 1)+1e-7)
++        end = max(f['start_ms']+f['time_ms'] for f in motion['frames'])
++        boundary = min([end]+[f['start_ms']+f['time_ms'] for f in motion['frames']
++                              if f.get('playback_cycle_end') and cycle_start < f['start_ms']+f['time_ms']])
++        timeline = min(requested, boundary)
++        writes = []
++        if gated is not None and timeline >= gated['start_ms']+gated['time_ms']:
++            writes.append({int(j): a for j, a in gated['angles'].items()})
++            timeline = gated['start_ms']+gated['time_ms']
++            gated = None
++        at_boundary = timeline >= boundary
++        active = next((f for f in motion['frames'] if f['start_ms'] <= timeline < f['start_ms']+f['time_ms']
++                       or at_boundary and timeline == f['start_ms']+f['time_ms']), None)
++        if active:
++            if at_boundary:
++                target = {int(j): a for j, a in active['angles'].items()}
++            elif continuous:
++                all_angles = sample(parts, timeline)
++                target = {int(j): all_angles[int(j)] for j in active['angles']}
++            else:
++                pose = initial.copy()
++                for f in motion['frames']:
++                    if f['start_ms']+f['time_ms'] <= active['start_ms']:
++                        pose.update({int(j): a for j, a in f['angles'].items()})
++                lift = active.get('lift_early_arrival') and any(s in active['name'] for s in ('발들', '들기', '오들', '왼들'))
++                duration = max(1, active['time_ms']*(.8 if lift else 1))
++                u = max(0, min(1, (timeline-active['start_ms'])/duration))
++                progress = .5-.5*math.cos(math.pi*u)
++                target = {int(j): pose[int(j)]+((a-pose[int(j)]+180)%360-180)*progress
++                          for j, a in active['angles'].items()}
++            # Cosine endpoints use shortest-angle arithmetic, as the GUI does.
++            if at_boundary and not continuous:
++                pose = initial.copy()
++                for f in motion['frames']:
++                    if f['start_ms']+f['time_ms'] <= active['start_ms']:
++                        pose.update({int(j): a for j, a in f['angles'].items()})
++                target = {int(j): pose[int(j)]+((a-pose[int(j)]+180)%360-180) for j,a in active['angles'].items()}
++        else:
++            target = initial.copy()
++            for f in motion['frames']:
++                if f['start_ms']+f['time_ms'] <= timeline:
++                    target.update({int(j): a for j,a in f['angles'].items()})
++        writes.append(target)
++        for values in writes:
++            if values:
++                records.append(['W', clock, {j: (a, raw(a)) for j,a in sorted(values.items())}])
++                command.update(values)
++                clock += write_delay
++        if at_boundary or last_read is None or clock/1000-last_read >= .010:
++            last_read = clock/1000
++            records.append(['R', clock])
++            clock += read_delay
++        if active:
++            gated = active
++        if at_boundary:
++            if boundary < end:
++                cycle_start = boundary
++                for f in motion['frames']:
++                    if f['start_ms']+f['time_ms'] == boundary:
++                        initial.update({int(j): a for j,a in f['angles'].items()})
++                started = clock/1000-boundary/(1000*motion.get('playback_speed',1))
++                gated, last_read = None, None
++            elif repeat < motion.get('repeat_count',1):
++                for f in motion['frames']:
++                    initial.update({int(j): a for j,a in f['angles'].items()})
++                parts = segments(motion, initial)
++                repeat += 1
++                cycle_start, timeline, gated, last_read, started = 0, 0, None, None, clock/1000
++            else:
++                completed += 1
++                records.append(['C', clock, completed])
++                if queued is None:
++                    running = False
++                else:
++                    initial = command.copy()
++                    motion, parts = prepare(queued)
++                    queued = None
++                    repeat, cycle_start, timeline, gated, last_read, started = 1, 0, 0, None, None, clock/1000
++        records.append(['T', clock, timeline, repeat, int(running)])
++        if not running:
++            return records
++    raise AssertionError('oracle did not terminate')
++
++
++def fixtures(gui):
++    motions = synthetic(load_gui(gui))['motions']
++    def frame(name, start, goal, **options):
++        return dict(name=name, start_ms=start, time_ms=100, angles=goal, **options)
++    base = dict(name='same_direction', max_seq_ms=300, repeat_count=2, playback_speed=1,
++                start_pose='link', end_pose='link', frames=[frame('A',0,{'0':10}),frame('B',100,{'0':20})])
++    motions.append(base)
++    for mode in ('reverse','stationary','landing_a','landing_b','stop','cycle','missing_joint','only_5','gap','wrap'):
++        m=copy.deepcopy(base); m['name']=mode
++        a,b=m['frames']
++        if mode=='reverse': b['angles']['0']=-10
++        if mode=='stationary': b['angles']['0']=10
++        if mode=='landing_a': a['name']='A[착지]'
++        if mode=='landing_b': b['name']='B[착지]'
++        if mode=='stop': a['stop_at_end']=True
++        if mode=='cycle': a['playback_cycle_end']=True
++        if mode=='missing_joint': b['angles']={'1':20}
++        if mode=='only_5': b['angles']={'5':45};m['frames'].append(frame('C',200,{'1':15}))
++        if mode=='gap': b['start_ms']=150
++        if mode=='wrap': a['angles']={'0':179.9};b['angles']={'0':-179.9}
++        motions.append(m)
++    return {'motions':motions}
++
++
++def main():
++    ap=argparse.ArgumentParser(description=__doc__)
++    ap.add_argument('--probe',type=Path,required=True)
++    ap.add_argument('--archived-gui',type=Path,required=True)
++    ap.add_argument('--output',type=Path,required=True)
++    ap.add_argument('catalogs',type=Path,nargs='+')
++    args=ap.parse_args();args.output.mkdir(parents=True,exist_ok=True)
++    fixture=args.output/'spec_fixtures.json'
++    fixture.write_text(json.dumps(fixtures(args.archived_gui),ensure_ascii=False,indent=2)+'\n')
++    cases=[]
++    for path in [*args.catalogs,fixture]:
++        motions=json.loads(path.read_text())['motions']
++        for motion in motions:
++            scenarios=[([5.0],0,0,False,False),([5.,17.,83.,6.],16,1,False,False)]
++            if path==fixture:
++                scenarios += [([350.,5.],0,0,False,False),([5.,17.],16,1,True,True)]
++            for continuous in (False,True):
++                for periods,rd,wd,excluded,timeout in scenarios:
++                    label=[str(path),motion['name'],continuous,periods,rd,wd,excluded,timeout]
++                    expected=oracle(motion,periods,rd,wd,continuous,excluded)
++                    command=[str(args.probe),str(path),motion['name'],','.join(map(str,periods)),str(rd),str(wd)]
++                    if continuous:command.append('--continuous')
++                    if excluded:command.append('--exclude-5')
++                    if timeout:command.append('--feedback-timeout')
++                    actual=parse_trace(subprocess.check_output(command,text=True))
++                    try:compare(expected,actual,label)
++                    except AssertionError:
++                        (args.output/'first_failure.json').write_text(json.dumps(dict(case=label,expected=expected,actual=actual),ensure_ascii=False))
++                        raise
++                    cases.append(dict(case=label,events=len(actual),writes=sum(r[0]=='W' for r in actual),raw_mismatches=0))
++    for continuous in (False, True):
++        motion=fixtures(args.archived_gui)['motions'][-2]
++        for excluded in (False, True):
++            expected=oracle(motion,[5.,17.,83.],16,1,continuous,excluded,queued=motion)
++            command=[str(args.probe),str(fixture),motion['name'],'5,17,83','16','1','--queue',motion['name']]
++            if continuous:command.append('--continuous')
++            if excluded:command.append('--exclude-5')
++            actual=parse_trace(subprocess.check_output(command,text=True))
++            compare(expected,actual,['queue',continuous,excluded])
++            cases.append(dict(case=['queue',continuous,excluded],events=len(actual),raw_mismatches=0))
++    result=dict(oracle='2026-10-28 user specification; not latest GUI source',passed=len(cases),cases=cases)
++    (args.output/'results.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
++    print(f'PASS {len(cases)} cases; every write/read/order/ID/degree/raw/timestamp compared')
++
++if __name__=='__main__':main()
+--- /dev/null
++++ tools/analyze_motor_timing.py
+@@ -0,0 +1,67 @@
++#!/usr/bin/env python3
++"""Summarize recorded TX/RX timing; never access the motor bus."""
++import argparse
++import csv
++import json
++import math
++import statistics
++from pathlib import Path
++
++
++def stats(values):
++    if not values:
++        return None
++    values=sorted(values)
++    return dict(count=len(values),mean=statistics.mean(values),
++                p95=values[math.ceil(.95*len(values))-1],
++                p99=values[math.ceil(.99*len(values))-1],max=values[-1])
++
++
++def summarize(path):
++    lines=path.read_text().splitlines()
++    footer=[line for line in lines if line.startswith('# dropped_rows=')]
++    rows=list(csv.DictReader(line for line in lines if line and not line.startswith('#')))
++    tx=[r for r in rows if r['event'] in ('sample','endpoint')]
++    rx=[r for r in rows if r['event'] in ('initial','feedback')]
++    intervals=[float(b['begin_ms'])-float(a['begin_ms']) for a,b in zip(tx,tx[1:])]
++    failure=[]
++    for r in rx:
++        if r['success']=='0':
++            mask=int(r.get('missing_ids_mask') or 0)
++            failure.append(dict(time_ms=float(r['begin_ms']),sdk_result=r.get('bus_result'),
++                                result_valid=r.get('bus_result_valid'),
++                                missing_ids=[i for i in range(23) if mask&(1<<i)]))
++    boundaries=[]
++    for r in rows:
++        if r['event'] not in ('repeat','cycle','queue_accept','queue_activate','goals_complete'):
++            continue
++        t=float(r['begin_ms'])
++        before=next((w for w in reversed(tx) if float(w['begin_ms'])<=t),None)
++        after=next((w for w in tx if float(w['begin_ms'])>t),None)
++        boundaries.append(dict(event=r['event'],time_ms=t,
++            surrounding_tx_gap_ms=float(after['begin_ms'])-float(before['begin_ms']) if before and after else None))
++    runs=[]
++    for run in sorted({r['run'] for r in rows}):
++        subset=[r for r in rows if r['run']==run]
++        start=next((r for r in subset if r['event']=='run_start'),None)
++        end=next((r for r in reversed(subset) if r['event'] in ('goals_complete','cancel','emergency_stop')),None)
++        if start:
++            runs.append(dict(run=run,motion=start['motion'],continuous=start.get('continuous'),
++                exclude_motor_5=start.get('exclude_motor_5'),
++                duration_ms=float(end['end_ms'])-float(start['begin_ms']) if end else None))
++    return dict(trace=str(path),dropped_rows=int(footer[-1].split('=')[1]) if footer else None,
++        limitations='Host calls only: TX success is not motor receipt or physical arrival. Missing-ID masks mean unavailable responses, not proof of the failed physical device. Callback dispatch and USB latency require separate observations.',
++        tx_interval_ms=stats(intervals),syncwrite_duration_ms=stats([float(r['duration_ms']) for r in tx]),
++        syncread_duration_ms=stats([float(r['duration_ms']) for r in rx]),
++        tx_failures=sum(r['success']=='0' for r in tx),rx_failures=failure,
++        boundaries=boundaries,runs=runs)
++
++
++def main():
++    ap=argparse.ArgumentParser(description=__doc__)
++    ap.add_argument('trace',type=Path);ap.add_argument('--output',type=Path,required=True)
++    args=ap.parse_args();result=summarize(args.trace)
++    args.output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
++    print(json.dumps({key:result[key] for key in ('tx_interval_ms','syncwrite_duration_ms','syncread_duration_ms')},indent=2))
++
++if __name__=='__main__':main()

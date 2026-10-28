@@ -1,0 +1,133 @@
+{
+  "scope": "Synthetic clock and mock hardware; not measured robot timing or yaw",
+  "sdk": "/home/jet/IRC/external_sdk/robot_motion_player_sdk_work_20260801/final step",
+  "inputs": {
+    "/home/jet/IRC/IRC-STEP/IRC_vision_latest/motion_imports/robot_motions(40)(1).json": "6afb9e002df821c0de77964b22a1050ac1b53b546b0d41ef1803d74ab128211f",
+    "/home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/robot_motions_runtime.json": "bc4be53bb966d1457c0b34636f037745f0b4840604f0061a4fb89477e6900498",
+    "/home/jet/IRC/external_sdk/robot_motion_player_sdk_work_20260801/final step/sdk_gui.py": "1c3e8e00b7cb90a4a3416572e1bde8c58bb4853956315dea0053801e5888598b",
+    "/home/jet/IRC/external_sdk/robot_motion_player_sdk_work_20260801/final step/robot_motion_player.cpp": "7376285d939f58458cdaec919a781d7bb8238993329897ae3a7749b406aa9eeb",
+    "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/sdk_motion_executor": "9b4e4cd14722f74f5b60e2ffe85757628ee8a70741d665668c5889f34f0667d4"
+  },
+  "angle_differences": [
+    [
+      3,
+      "4",
+      16.435546875,
+      18.0
+    ],
+    [
+      3,
+      "5",
+      -17.314453125,
+      -18.0
+    ],
+    [
+      4,
+      "4",
+      16.5234375,
+      18.0
+    ],
+    [
+      4,
+      "5",
+      -17.40234375,
+      -18.0
+    ]
+  ],
+  "sdk_runs": [
+    {
+      "name": "전.",
+      "queued": false,
+      "completion": [
+        {
+          "time_ms": 3060,
+          "sequence": 1,
+          "reads": 1
+        }
+      ],
+      "duration_ms": 3060,
+      "writes": 613,
+      "reads": 1,
+      "last_motion_endpoint_count": 24
+    },
+    {
+      "name": "전45도(6회)",
+      "queued": false,
+      "completion": [
+        {
+          "time_ms": 3390,
+          "sequence": 1,
+          "reads": 1
+        }
+      ],
+      "duration_ms": 3390,
+      "writes": 679,
+      "reads": 1,
+      "last_motion_endpoint_count": 24
+    },
+    {
+      "name": "전45도(6회)",
+      "queued": true,
+      "completion": [
+        {
+          "time_ms": 3395,
+          "sequence": 1,
+          "reads": 1
+        },
+        {
+          "time_ms": 6785,
+          "sequence": 2,
+          "reads": 1
+        }
+      ],
+      "duration_ms": 6785,
+      "writes": 1357,
+      "reads": 1,
+      "last_motion_endpoint_count": 24
+    }
+  ],
+  "gui_runs": [
+    {
+      "duration_ms": 3060.0,
+      "reads": 259,
+      "writes": 636,
+      "assumed_read_ms": 0,
+      "assumed_visual_ms": 0
+    },
+    {
+      "duration_ms": 3090.0,
+      "reads": 260,
+      "writes": 641,
+      "assumed_read_ms": 5,
+      "assumed_visual_ms": 0
+    },
+    {
+      "duration_ms": 3130.0,
+      "reads": 260,
+      "writes": 389,
+      "assumed_read_ms": 10,
+      "assumed_visual_ms": 0
+    },
+    {
+      "duration_ms": 3185.0,
+      "reads": 150,
+      "writes": 372,
+      "assumed_read_ms": 0,
+      "assumed_visual_ms": 20
+    },
+    {
+      "duration_ms": 3250.0,
+      "reads": 149,
+      "writes": 188,
+      "assumed_read_ms": 10,
+      "assumed_visual_ms": 20
+    }
+  ],
+  "runtime_gui_same_speed_zero_cost": {
+    "duration_ms": 3390.0,
+    "reads": 283,
+    "writes": 702,
+    "assumed_read_ms": 0,
+    "assumed_visual_ms": 0
+  }
+}

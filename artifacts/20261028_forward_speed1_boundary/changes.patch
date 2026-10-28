@@ -1,0 +1,721 @@
+--- before/artifacts/robot_motions_pc.json
++++ after/artifacts/robot_motions_pc.json
+@@ -7294,7 +7294,7 @@
+       "name": "R전진45도(2회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 2,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "김오들(앞먼저닿음)",
+       "end_pose": "Frame 826",
+@@ -7549,7 +7549,7 @@
+       "name": "R라인복귀우회전",
+       "max_seq_ms": 11522,
+       "repeat_count": 4,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "김오들(앞먼저닿음)",
+       "end_pose": "건건라인우오뒤무게중심뒤",
+@@ -7803,7 +7803,7 @@
+       "name": "R전진45도(4회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 4,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "김오들(앞먼저닿음)",
+       "end_pose": "Frame 826",
+@@ -8058,7 +8058,7 @@
+       "name": "R전진45도(6회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 6,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "김오들(앞먼저닿음)",
+       "end_pose": "Frame 826",
+@@ -8313,7 +8313,7 @@
+       "name": "R전진45도(8회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 8,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "김오들(앞먼저닿음)",
+       "end_pose": "Frame 826",
+@@ -8568,7 +8568,7 @@
+       "name": "R전진라인복귀좌",
+       "max_seq_ms": 11522,
+       "repeat_count": 4,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "김오들(앞먼저닿음)",
+       "end_pose": "라인복귀좌오뒤",
+@@ -8822,7 +8822,7 @@
+       "name": "R전진90도(8회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 8,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "R김오들90도",
+       "end_pose": "R김오뒤90도",
+@@ -9074,7 +9074,7 @@
+       "name": "R전진90도(2회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 2,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "R김오들90도",
+       "end_pose": "R김오뒤90도",
+@@ -9326,7 +9326,7 @@
+       "name": "R전진90도(4회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 4,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "R김오들90도",
+       "end_pose": "R김오뒤90도",
+@@ -9578,7 +9578,7 @@
+       "name": "R전진90도(6회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 6,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "R김오들90도",
+       "end_pose": "R김오뒤90도",
+@@ -13523,7 +13523,7 @@
+       "name": "건미세45도(5회)",
+       "max_seq_ms": 3505,
+       "repeat_count": 5,
+-      "playback_speed": 1.05,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "미세오들45",
+       "end_pose": "미세오뒤4111(45도)",
+@@ -14710,7 +14710,7 @@
+       "name": "건미세0도",
+       "max_seq_ms": 3505,
+       "repeat_count": 5,
+-      "playback_speed": 1.05,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "건미세오들0도",
+       "end_pose": "건미세오뒤0도",
+@@ -14963,7 +14963,7 @@
+       "name": "건미세90도",
+       "max_seq_ms": 3505,
+       "repeat_count": 5,
+-      "playback_speed": 1.05,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "건미세오들90도",
+       "end_pose": "건미세오뒤90도",
+@@ -16585,7 +16585,7 @@
+       "name": "건미세0도(허들10회)",
+       "max_seq_ms": 3505,
+       "repeat_count": 10,
+-      "playback_speed": 1.05,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "건미세오들0도",
+       "end_pose": "건미세오뒤0도",
+@@ -16838,7 +16838,7 @@
+       "name": "건미세90도(1회)",
+       "max_seq_ms": 3505,
+       "repeat_count": 1,
+-      "playback_speed": 1.05,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "건미세오들90도",
+       "end_pose": "건미세오뒤90도",
+@@ -17090,7 +17090,7 @@
+       "name": "건미세90도(2회)",
+       "max_seq_ms": 3505,
+       "repeat_count": 2,
+-      "playback_speed": 1.05,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "건미세오들90도",
+       "end_pose": "건미세오뒤90도",
+@@ -17342,7 +17342,7 @@
+       "name": "건미세90도(3회)",
+       "max_seq_ms": 3505,
+       "repeat_count": 3,
+-      "playback_speed": 1.05,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "건미세오들90도",
+       "end_pose": "건미세오뒤90도",
+@@ -17594,7 +17594,7 @@
+       "name": "건미세90도(4회)",
+       "max_seq_ms": 3505,
+       "repeat_count": 4,
+-      "playback_speed": 1.05,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "건미세오들90도",
+       "end_pose": "건미세오뒤90도",
+@@ -18055,7 +18055,7 @@
+       "name": "R전진0도(4회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 4,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "R김오들0도",
+       "end_pose": "R김오뒤0도",
+@@ -18307,7 +18307,7 @@
+       "name": "R전진0도(6회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 6,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "R김오들0도",
+       "end_pose": "R김오뒤0도",
+--- before/artifacts/robot_motions_runtime.json
++++ after/artifacts/robot_motions_runtime.json
+@@ -7294,7 +7294,7 @@
+       "name": "R전진45도(2회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 2,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "김오들(앞먼저닿음)",
+       "end_pose": "Frame 826",
+@@ -7549,7 +7549,7 @@
+       "name": "R라인복귀우회전",
+       "max_seq_ms": 11522,
+       "repeat_count": 4,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "김오들(앞먼저닿음)",
+       "end_pose": "건건라인우오뒤무게중심뒤",
+@@ -7803,7 +7803,7 @@
+       "name": "R전진45도(4회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 4,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "김오들(앞먼저닿음)",
+       "end_pose": "Frame 826",
+@@ -8058,7 +8058,7 @@
+       "name": "R전진45도(6회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 6,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "김오들(앞먼저닿음)",
+       "end_pose": "Frame 826",
+@@ -8313,7 +8313,7 @@
+       "name": "R전진45도(8회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 8,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "김오들(앞먼저닿음)",
+       "end_pose": "Frame 826",
+@@ -8568,7 +8568,7 @@
+       "name": "R전진라인복귀좌",
+       "max_seq_ms": 11522,
+       "repeat_count": 4,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "김오들(앞먼저닿음)",
+       "end_pose": "라인복귀좌오뒤",
+@@ -8822,7 +8822,7 @@
+       "name": "R전진90도(8회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 8,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "R김오들90도",
+       "end_pose": "R김오뒤90도",
+@@ -9074,7 +9074,7 @@
+       "name": "R전진90도(2회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 2,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "R김오들90도",
+       "end_pose": "R김오뒤90도",
+@@ -9326,7 +9326,7 @@
+       "name": "R전진90도(4회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 4,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "R김오들90도",
+       "end_pose": "R김오뒤90도",
+@@ -9578,7 +9578,7 @@
+       "name": "R전진90도(6회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 6,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "R김오들90도",
+       "end_pose": "R김오뒤90도",
+@@ -13523,7 +13523,7 @@
+       "name": "건미세45도(5회)",
+       "max_seq_ms": 3505,
+       "repeat_count": 5,
+-      "playback_speed": 1.05,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "미세오들45",
+       "end_pose": "미세오뒤4111(45도)",
+@@ -14710,7 +14710,7 @@
+       "name": "건미세0도",
+       "max_seq_ms": 3505,
+       "repeat_count": 5,
+-      "playback_speed": 1.05,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "건미세오들0도",
+       "end_pose": "건미세오뒤0도",
+@@ -14963,7 +14963,7 @@
+       "name": "건미세90도",
+       "max_seq_ms": 3505,
+       "repeat_count": 5,
+-      "playback_speed": 1.05,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "건미세오들90도",
+       "end_pose": "건미세오뒤90도",
+@@ -16585,7 +16585,7 @@
+       "name": "건미세0도(허들10회)",
+       "max_seq_ms": 3505,
+       "repeat_count": 10,
+-      "playback_speed": 1.05,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "건미세오들0도",
+       "end_pose": "건미세오뒤0도",
+@@ -16838,7 +16838,7 @@
+       "name": "건미세90도(1회)",
+       "max_seq_ms": 3505,
+       "repeat_count": 1,
+-      "playback_speed": 1.05,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "건미세오들90도",
+       "end_pose": "건미세오뒤90도",
+@@ -17090,7 +17090,7 @@
+       "name": "건미세90도(2회)",
+       "max_seq_ms": 3505,
+       "repeat_count": 2,
+-      "playback_speed": 1.05,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "건미세오들90도",
+       "end_pose": "건미세오뒤90도",
+@@ -17342,7 +17342,7 @@
+       "name": "건미세90도(3회)",
+       "max_seq_ms": 3505,
+       "repeat_count": 3,
+-      "playback_speed": 1.05,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "건미세오들90도",
+       "end_pose": "건미세오뒤90도",
+@@ -17594,7 +17594,7 @@
+       "name": "건미세90도(4회)",
+       "max_seq_ms": 3505,
+       "repeat_count": 4,
+-      "playback_speed": 1.05,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "건미세오들90도",
+       "end_pose": "건미세오뒤90도",
+@@ -18055,7 +18055,7 @@
+       "name": "R전진0도(4회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 4,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "R김오들0도",
+       "end_pose": "R김오뒤0도",
+@@ -18307,7 +18307,7 @@
+       "name": "R전진0도(6회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 6,
+-      "playback_speed": 0.9,
++      "playback_speed": 1.0,
+       "repeatable": true,
+       "start_pose": "R김오들0도",
+       "end_pose": "R김오뒤0도",
+--- before/external_sdk/gui_aligned/gui_execution_probe.cpp
++++ after/external_sdk/gui_aligned/gui_execution_probe.cpp
+@@ -52,6 +52,7 @@
+     for (int i=6; i<argc; ++i) {
+         const std::string option=argv[i];
+         if (option=="--continuous") continuous=true;
++        else if (option=="--account-forward-feedback") p.setForwardBoundaryFeedbackAccounting(true);
+         else if (option=="--exclude-5") bus.exclude_5=true;
+         else if (option=="--feedback-timeout") bus.fail_feedback=true;
+         else if (option=="--queue" && i+1<argc) queue=argv[++i];
+--- before/external_sdk/gui_aligned/robot_motion_player.cpp
++++ after/external_sdk/gui_aligned/robot_motion_player.cpp
+@@ -230,11 +230,13 @@
+     status_ = MotionStatus::Running;
+     // 유효 프레임은 정책/보정을 적용한 값이다. 기록은 재생 알고리즘을 바꾸지 않는다.
+     if (trace_) {
+-        traceEvent("run_start", now, true, start_angles_);
++        // 재생 기준 시각은 대기 중 통신을 포함할 수 있지만 관측 이벤트는 소급하지 않는다.
++        const auto recorded_at = now_();
++        traceEvent("run_start", recorded_at, true, start_angles_);
+         for (std::size_t i = 0; i < playback_frames_.size(); ++i) {
+             trace_frame_ = static_cast<int>(i);
+-            traceEvent("source_definition", now, true, pattern.frames()[i].angles);
+-            traceEvent("definition", now, true, playback_frames_[i].angles);
++            traceEvent("source_definition", recorded_at, true, pattern.frames()[i].angles);
++            traceEvent("definition", recorded_at, true, playback_frames_[i].angles);
+         }
+         trace_frame_ = -1;
+     }
+@@ -256,12 +258,30 @@
+     ++trace_run_;
+     trace_tick_ = 0;
+     trace_evaluate_at_ = Clock::time_point{};
+-    resetMotionRuntime(*next, std::move(next_name), now_());
++    const auto started = queued_hold_ms_ == 0
++        ? forwardBoundaryStart(*next, next_name, now_()) : now_();
++    resetMotionRuntime(*next, std::move(next_name), started);
+     traceEvent("queue_activate", now_(), true);
+     static_cast<void>(now);
+     error_ = MotionError::None;
+     last_error_.clear();
+     return true;
++}
++
++RobotMotionPlayer::Clock::time_point RobotMotionPlayer::forwardBoundaryStart(
++    const MotionPattern& next, std::string_view next_name, Clock::time_point now) const noexcept {
++    const auto forward = [](std::string_view name) {
++        return name.starts_with("R전진45도(") || name.starts_with("R전진90도(")
++            || name.starts_with("R전진0도(");
++    };
++    if (!account_forward_boundary_feedback_ || !forward(current_motion_) || !forward(next_name)
++        || next.frames().empty() || now < last_goal_written_at_) return now;
++    // 마지막 Goal 이후 로봇은 이미 정지 자세를 유지한다. 관측용 읽기 시간을
++    // 저장된 선행 대기에 포함하되, 첫 이동 프레임까지 건너뛰지는 않는다.
++    const auto hold = std::chrono::duration_cast<Clock::duration>(
++        std::chrono::duration<double, std::milli>(
++            next.frames().front().start_ms / next.playbackSpeed()));
++    return now - std::min(now - last_goal_written_at_, hold);
+ }
+ 
+ MotionStatus RobotMotionPlayer::update() noexcept {
+@@ -447,7 +467,7 @@
+             continuous_trajectory_.reset(playback_frames_, start_angles_, pattern_->playbackSpeed());
+         cycle_start_ms_ = 0;
+         trace_timeline_ms_ = 0;
+-        started_at_ = now_();
++        started_at_ = forwardBoundaryStart(*pattern_, current_motion_, now_());
+         gui_started_sec_ = guiSeconds(started_at_);
+         feedback_sampled_ = false;
+         return status_;
+@@ -786,6 +806,10 @@
+     if (running()) throw std::logic_error("cannot change interpolation during playback");
+     continuous_interpolation_ = enabled;
+ }
++void RobotMotionPlayer::setForwardBoundaryFeedbackAccounting(bool enabled) {
++    if (running()) throw std::logic_error("cannot change boundary timing during playback");
++    account_forward_boundary_feedback_ = enabled;
++}
+ void RobotMotionPlayer::setQueuedTransitionHoldMs(std::int64_t ms) {
+     if (ms < 0) throw std::invalid_argument("negative queue hold");
+     queued_hold_ms_ = ms;
+@@ -843,6 +867,7 @@
+                                   const char* event) {
+     const auto begin = now_();
+     const bool ok = hardware_->commandImmediatePosition(goals, ids);
++    if (ok) last_goal_written_at_ = now_();
+     traceEvent(event, begin, ok, goals, &ids);
+     return ok;
+ }
+--- before/external_sdk/gui_aligned/robot_motion_player.hpp
++++ after/external_sdk/gui_aligned/robot_motion_player.hpp
+@@ -94,6 +94,7 @@
+ 
+     bool initialize() noexcept;
+     void setContinuousInterpolation(bool enabled);
++    void setForwardBoundaryFeedbackAccounting(bool enabled);
+     bool startPoseTransition(const std::vector<double>& angles, std::int64_t duration_ms) noexcept;
+     MotionStatus updateStartupPose() noexcept;
+     // 일반 재생의 성공은 목표 전송 완료다. 위치 검사는 startup에만 적용한다.
+@@ -155,6 +156,8 @@
+     void shutdown() noexcept;
+ 
+ private:
++    Clock::time_point forwardBoundaryStart(const MotionPattern& next,
++        std::string_view next_name, Clock::time_point now) const noexcept;
+     using FrameCorrectionKey = std::tuple<std::string, std::string, int>;
+ 
+     bool writeGoals(const JointAngles& goals, const std::vector<int>& ids, const char* event);
+@@ -191,6 +194,8 @@
+     Clock::time_point queued_boundary_at_{};
+     Now now_{Clock::now};
+     bool continuous_interpolation_{true};
++    bool account_forward_boundary_feedback_{false};
++    Clock::time_point last_goal_written_at_{};
+     GuiContinuousTrajectory continuous_trajectory_;
+     JointAngles start_angles_;
+     JointAngles feedback_angles_;
+--- before/external_sdk/gui_aligned/test_forward_timing.cpp
++++ after/external_sdk/gui_aligned/test_forward_timing.cpp
+@@ -24,6 +24,16 @@
+     bool holdCurrentPosition(uint32_t) noexcept override { return true; }
+     bool setTorqueEnabled(bool) noexcept override { return true; }
+     std::string_view lastError() const noexcept override { return {}; }
++};
++
++struct BoundaryReadHardware : TimingHardware {
++    int* clock = nullptr;
++    int boundary_delay_ms = 0;
++    bool readPresentPositions(JointAngles& values) noexcept override {
++        if (*clock == 290) *clock += boundary_delay_ms;
++        values = present;
++        return true;
++    }
+ };
+ 
+ int main(int argc, char** argv) {
+@@ -94,4 +104,49 @@
+         assert(player.completionSequence() == 2);
+         assert(hardware.prepares == 1);
+     }
++
++    // Feedback must consume physical hold time, not add another hold before it.
++    for (bool queued : {false, true}) for (bool enabled : {false, true})
++    for (bool continuous : {false, true}) for (int delay : {0, 16, 140})
++    for (bool forward : {false, true}) for (int explicit_hold : {0, 25}) {
++        if (!queued && explicit_hold != 0) continue;
++        const std::string name = forward ? "R전진45도(6회)" : "turn";
++        std::ofstream(path) << "{\"motions\":[{\"name\":\"" << name
++            << "\",\"max_seq_ms\":290,\"repeat_count\":"
++            << (queued ? 1 : 2) << R"(,"frames":[
++              {"name":"lift","start_ms":90,"time_ms":100,"angles":{"1":10}},
++              {"name":"back","start_ms":190,"time_ms":100,"stop_at_end":true,"angles":{"1":0}}
++            ]}]})";
++        int ms = 0;
++        BoundaryReadHardware hardware;
++        hardware.clock = &ms;
++        hardware.boundary_delay_ms = delay;
++        RobotMotionPlayer player(path, hardware, [&] {
++            return RobotMotionPlayer::Clock::time_point(std::chrono::milliseconds(ms));
++        });
++        player.setContinuousInterpolation(continuous);
++        player.setForwardBoundaryFeedbackAccounting(enabled);
++        player.setQueuedTransitionHoldMs(explicit_hold);
++        assert(player.initialize());
++        assert(player.start(name) == StartResult::Accepted);
++        if (queued) assert(player.queueNext(name) == QueueResult::Queued);
++        for (ms = 5; ms < 290; ms += 5) player.update();
++        player.update();
++        assert(ms == 290 + delay);
++        assert(hardware.goals.at(1) == 0);
++        if (explicit_hold > 0) {
++            ms += explicit_hold;
++            player.update();
++        }
++        const bool accounted = enabled && forward && explicit_hold == 0;
++        const int hold_end = accounted ? std::max(380, ms) : ms + 90;
++        ms = hold_end;
++        player.update();
++        assert(hardware.goals.at(1) == 0);  // Full saved hold; no skipped movement.
++        ms += 5;
++        player.update();
++        assert(hardware.goals.at(1) > 0);
++        assert(hardware.goals.at(1) < 1);  // A long read cannot jump into the lift.
++        assert(hardware.prepares == 1);
++    }
+ }
+--- before/src/irc_step_motion_executor/include/irc_step_motion_executor/robot_motion_runtime_config.hpp
++++ after/src/irc_step_motion_executor/include/irc_step_motion_executor/robot_motion_runtime_config.hpp
+@@ -20,6 +20,7 @@
+   std::vector<std::int64_t> motor_ids;
+   bool explicit_torque_approval{false};
+   bool continuous_interpolation{true};
++  bool account_forward_boundary_feedback{false};
+   bool exclude_motor_5{false};
+   bool enable_head_override{true};
+   bool enable_shoulder_override{false};
+--- before/src/irc_step_motion_executor/launch/sdk_gui_alignment.launch.py
++++ after/src/irc_step_motion_executor/launch/sdk_gui_alignment.launch.py
+@@ -37,6 +37,7 @@
+                  'startup_pose_enabled': False,
+                  'poll_period_ms': 5,
+                  'queued_transition_hold_ms': 0,
++                 'account_forward_boundary_feedback': False,
+                  'motion_trace_enabled': True,
+                  'motion_trace_goals': True,
+                  'motion_trace_path': LaunchConfiguration('motion_trace_path'),
+--- before/src/irc_step_motion_executor/src/production_robot_motion_runtime_factory.cpp
++++ after/src/irc_step_motion_executor/src/production_robot_motion_runtime_factory.cpp
+@@ -18,6 +18,11 @@
+ template<typename PlayerT>
+ void configure_playback(PlayerT & player, const RobotMotionRuntimeConfig & config)
+ {
++  if constexpr (requires { player.setForwardBoundaryFeedbackAccounting(false); }) {
++    player.setForwardBoundaryFeedbackAccounting(config.account_forward_boundary_feedback);
++  } else if (config.account_forward_boundary_feedback) {
++    throw std::runtime_error("external SDK lacks forward boundary timing support");
++  }
+   if constexpr (requires { player.setContinuousInterpolation(config.continuous_interpolation); }) {
+     player.setContinuousInterpolation(config.continuous_interpolation);
+   } else if (config.continuous_interpolation) {
+--- before/src/irc_step_motion_executor/src/sdk_executor_node.cpp
++++ after/src/irc_step_motion_executor/src/sdk_executor_node.cpp
+@@ -165,6 +165,10 @@
+     playback_option.description = "Restart the node to change playback mode or motor discovery policy";
+     playback_config.continuous_interpolation = declare_parameter<bool>(
+       "continuous_interpolation", true, playback_option);
++    playback_config.account_forward_boundary_feedback = declare_parameter<bool>(
++      "account_forward_boundary_feedback", true, playback_option);
++    RCLCPP_INFO(get_logger(), "Forward boundary feedback included in saved hold: %s",
++      playback_config.account_forward_boundary_feedback ? "yes" : "no (GUI timing)");
+     exclude_motor_5_ = declare_parameter<bool>("exclude_motor_5", false, playback_option);
+     playback_config.exclude_motor_5 = exclude_motor_5_;
+     RCLCPP_INFO(get_logger(), "Interpolation: %s; motor 5: %s",
+--- before/src/mission_control/launch/full_system_robot.launch.py
++++ after/src/mission_control/launch/full_system_robot.launch.py
+@@ -309,6 +309,7 @@
+                 "enable_head_override": ParameterValue(LaunchConfiguration("enable_head_override"), value_type=bool),
+                 "enable_shoulder_override": ParameterValue(LaunchConfiguration("enable_shoulder_override"), value_type=bool),
+                 "queued_transition_hold_ms": ParameterValue(LaunchConfiguration("queued_transition_hold_ms"), value_type=int),
++                "account_forward_boundary_feedback": ParameterValue(LaunchConfiguration("account_forward_boundary_feedback"), value_type=bool),
+                 "motion_trace_enabled": ParameterValue(LaunchConfiguration("motion_trace_enabled"), value_type=bool),
+                 "motion_trace_goals": ParameterValue(LaunchConfiguration("motion_trace_goals"), value_type=bool),
+                 "motion_trace_path": ParameterValue(LaunchConfiguration("motion_trace_path"), value_type=str),
+@@ -358,6 +359,7 @@
+             DeclareLaunchArgument("enable_head_override", default_value="true"),
+             DeclareLaunchArgument("enable_shoulder_override", default_value="false"),
+             DeclareLaunchArgument("queued_transition_hold_ms", default_value="0"),
++            DeclareLaunchArgument("account_forward_boundary_feedback", default_value="true"),
+             DeclareLaunchArgument("motion_trace_enabled", default_value="false"),
+             DeclareLaunchArgument("motion_trace_goals", default_value="false"),
+             DeclareLaunchArgument("motion_trace_path", default_value=""),
+--- before/src/mission_control/mission_control/motion_decision_node.py
++++ after/src/mission_control/mission_control/motion_decision_node.py
+@@ -89,25 +89,25 @@
+     EXECUTOR_WATCHDOG_PERIOD_SEC = 0.1
+     LINE_MOTION_CAPTURE_CONFIG = {
+         # Preserve every stored 90ms hold in each 517ms R forward cycle.
+-        "STRAIGHT": (.517 * 6 / .90, 10),
+-        "STRAIGHT_1": (.517 * 2 / .90, 5),
+-        "STRAIGHT_2": (.517 * 4 / .90, 10),
+-        "STRAIGHT_3": (.517 * 6 / .90, 10),
+-        "STRAIGHT_4": (.517 * 8 / .90, 15),
+-        "LEFT": (2.080 / .90, 15),
+-        "RIGHT": (2.060 / .90, 15),
+-        **{f"RECOVER_{side}_TURN_LEFT_{suffix}": (2.080 / .90, 15)
++        "STRAIGHT": (.517 * 6 / 1.0, 10),
++        "STRAIGHT_1": (.517 * 2 / 1.0, 5),
++        "STRAIGHT_2": (.517 * 4 / 1.0, 10),
++        "STRAIGHT_3": (.517 * 6 / 1.0, 10),
++        "STRAIGHT_4": (.517 * 8 / 1.0, 15),
++        "LEFT": (2.080 / 1.0, 15),
++        "RIGHT": (2.060 / 1.0, 15),
++        **{f"RECOVER_{side}_TURN_LEFT_{suffix}": (2.080 / 1.0, 15)
+            for side in ("LEFT", "RIGHT") for suffix in (2, 4, 6, 8, 10, 13)},
+-        **{f"RECOVER_{side}_TURN_RIGHT_{suffix}": (2.060 / .90, 15)
++        **{f"RECOVER_{side}_TURN_RIGHT_{suffix}": (2.060 / 1.0, 15)
+            for side in ("LEFT", "RIGHT") for suffix in (4, 6, 8, 10, 12, 15)},
+     }
+     LINE_MOTION_CAPTURE_START_RATIO = 0.70
+     # Full stored cycle duration, including its leading hold.
+     GOAL_FORWARD_DURATION_SEC = {
+-        "GOAL_CAMERA_90_FORWARD": .517 * 6 / .90,
+-        "GOAL_CAMERA_90_FORWARD_1": .517 * 2 / .90,
+-        "GOAL_CAMERA_90_FORWARD_2": .517 * 4 / .90,
+-        **{f"GOAL_CAMERA90_FINE_FORWARD_{count}": .385 * count / 1.05
++        "GOAL_CAMERA_90_FORWARD": .517 * 6 / 1.0,
++        "GOAL_CAMERA_90_FORWARD_1": .517 * 2 / 1.0,
++        "GOAL_CAMERA_90_FORWARD_2": .517 * 4 / 1.0,
++        **{f"GOAL_CAMERA90_FINE_FORWARD_{count}": .385 * count / 1.0
+            for count in range(1, 5)},
+     }
+     GOAL_FORWARD_CAPTURE_FRAMES = 3
+--- before/src/mission_control/test/test_catalog52_r_update.py
++++ after/src/mission_control/test/test_catalog52_r_update.py
+@@ -13,6 +13,7 @@
+ SOURCE_PATH = ROOT/MANIFEST['source_file']
+ SOURCE = {m['name']: m for m in json.loads(SOURCE_PATH.read_text())['motions']}
+ TURN_UPDATE = json.loads((ROOT/'artifacts/20261028_catalog53_turn_queue/manifest.json').read_text())
++SPEED1_MOTIONS = set(json.loads((ROOT/'artifacts/20261028_forward_speed1_boundary/speed_update.json').read_text())['motions'])
+ SUPERSEDED_TURNS = set(TURN_UPDATE['source_turn_motions']) | set(TURN_UPDATE['derived'])
+ 
+ 
+@@ -33,9 +34,9 @@
+         if name in SUPERSEDED_TURNS:
+             continue  # Exact replacements are checked in test_catalog53_turn_update.py.
+         if name.startswith(('R전진0도(', 'R전진45도(', 'R전진90도(')):
+-            motion['playback_speed'] = 0.90
++            motion['playback_speed'] = 1.0
+         if '라인복귀' in name:
+-            motion['playback_speed'] = 0.90  # Subsequent approved four-cycle recovery.
++            motion['playback_speed'] = 1.0  # Subsequent approved four-cycle recovery.
+         if 'runtime' in filename:
+             motion['completion']['position_tolerance_deg'] = 5.0
+         assert actual[name] == motion
+@@ -47,8 +48,8 @@
+         if name == '건라인복귀좌회전45도(1회)':
+             continue
+         unchanged = copy.deepcopy(before[name])
+-        if '라인복귀' in name:
+-            unchanged['playback_speed'] = 0.90
++        if name in SPEED1_MOTIONS:
++            unchanged['playback_speed'] = 1.0
+         assert actual[name] == unchanged
+     assert not (MANIFEST['renames'].keys() & actual.keys())
+     if 'runtime' in filename:
+@@ -94,8 +95,8 @@
+         motions = json.loads((ROOT/'artifacts'/filename).read_text())['motions']
+         recoveries = {m['name']: m for m in motions if '라인복귀' in m['name']}
+         assert set(recoveries) == {'R라인복귀우회전', 'R전진라인복귀좌'}
+-        assert all(m['repeat_count'] == 4 and m['playback_speed'] == 0.90 for m in recoveries.values())
++        assert all(m['repeat_count'] == 4 and m['playback_speed'] == 1.0 for m in recoveries.values())
+         forwards = [m for m in motions if m['name'].startswith(('R전진45도(', 'R전진90도(', 'R전진0도('))]
+         assert len(forwards) == 10
+-        assert all(m['playback_speed'] == 0.90 for m in forwards)
++        assert all(m['playback_speed'] == 1.0 for m in forwards)
+         assert all(target in recoveries for key, target in aliases.items() if key.startswith('line_recovery_'))
+--- before/src/mission_control/test/test_catalog53_turn_update.py
++++ after/src/mission_control/test/test_catalog53_turn_update.py
+@@ -11,6 +11,7 @@
+ ROOT = Path(__file__).resolve().parents[3]
+ UPDATE = ROOT / "artifacts/20261028_catalog53_turn_queue"
+ MANIFEST = json.loads((UPDATE / "manifest.json").read_text())
++SPEED1_MOTIONS = set(json.loads((ROOT / "artifacts/20261028_forward_speed1_boundary/speed_update.json").read_text())["motions"])
+ SOURCE_PATH = ROOT / MANIFEST["source_file"]
+ SOURCE = {m["name"]: m for m in json.loads(SOURCE_PATH.read_text())["motions"]}
+ 
+@@ -36,7 +37,9 @@
+     for motion in before:
+         name = motion["name"]
+         if name not in MANIFEST["renames"] and name not in expected:
+-            assert actual[name] == motion  # Includes every forward hold, angle and speed.
++            if name in SPEED1_MOTIONS:
++                motion["playback_speed"] = 1.0
++            assert actual[name] == motion  # Every forward hold and angle is preserved.
+     assert not (actual.keys() & MANIFEST["renames"].keys())
+ 
+ 

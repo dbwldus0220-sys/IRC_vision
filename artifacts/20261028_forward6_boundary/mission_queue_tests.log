@@ -1,0 +1,115 @@
+............F.F.........................FF............F..F.............. [ 42%]
+........................................................................ [ 84%]
+...........................                                              [100%]
+=================================== FAILURES ===================================
+____________ test_timed_queue_does_not_bypass_turn_boundary[RIGHT] _____________
+
+clock = [10.0], action = 'RIGHT'
+
+    @pytest.mark.parametrize('action', ['RIGHT', 'LINE_HEADING_TURN_RIGHT_2', 'RECOVER_LEFT_TURN_LEFT_4'])
+    def test_timed_queue_does_not_bypass_turn_boundary(clock, action):
+        node, _ = start_forward('LINE_TRACK_AFTER_PICKUP')
+        decision = replace(node.last_selected_decision, action=action)
+        MotionDecisionNode._publish_decision(node, decision, queue_while_locked=True)
+>       assert len(node.publisher.messages) == 1
+E       AssertionError: assert 2 == 1
+E        +  where 2 = len([{'action': 'STRAIGHT', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': N...ion': 'RIGHT', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}])
+E        +    where [{'action': 'STRAIGHT', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': N...ion': 'RIGHT', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}] = <test_mission_phase_flow.CapturePublisher object at 0xffff8cf099c0>.messages
+E        +      where <test_mission_phase_flow.CapturePublisher object at 0xffff8cf099c0> = <test_mission_phase_flow.MissionFlowHarness object at 0xffff8cf093c0>.publisher
+
+src/mission_control/test/test_line_continuous_missions.py:92: AssertionError
+___ test_timed_queue_does_not_bypass_turn_boundary[RECOVER_LEFT_TURN_LEFT_4] ___
+
+clock = [10.0], action = 'RECOVER_LEFT_TURN_LEFT_4'
+
+    @pytest.mark.parametrize('action', ['RIGHT', 'LINE_HEADING_TURN_RIGHT_2', 'RECOVER_LEFT_TURN_LEFT_4'])
+    def test_timed_queue_does_not_bypass_turn_boundary(clock, action):
+        node, _ = start_forward('LINE_TRACK_AFTER_PICKUP')
+        decision = replace(node.last_selected_decision, action=action)
+        MotionDecisionNode._publish_decision(node, decision, queue_while_locked=True)
+>       assert len(node.publisher.messages) == 1
+E       AssertionError: assert 2 == 1
+E        +  where 2 = len([{'action': 'STRAIGHT', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': N..._TURN_LEFT_4', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}])
+E        +    where [{'action': 'STRAIGHT', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': N..._TURN_LEFT_4', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}] = <test_mission_phase_flow.CapturePublisher object at 0xffff8cd83910>.messages
+E        +      where <test_mission_phase_flow.CapturePublisher object at 0xffff8cd83910> = <test_mission_phase_flow.MissionFlowHarness object at 0xffff8cd83340>.publisher
+
+src/mission_control/test/test_line_continuous_missions.py:92: AssertionError
+_ test_offset_forward_queues_and_promotes_without_clearing_vision[LINE_TRACK] __
+
+clock = [10.769999999999998], phase = 'LINE_TRACK'
+
+    @pytest.mark.parametrize('phase', ['LINE_TRACK', 'LINE_TRACK_AFTER_PICKUP'])
+    def test_offset_forward_queues_and_promotes_without_clearing_vision(clock, phase):
+        node = LiveInputHarness(phase=phase)
+        aligned = sample(target_angle=0., ground_heading_error_deg=-30.)
+        fresh(node, clock, 'line', aligned)
+        first = node.publisher.messages[-1]
+        assert first['action'] == 'STRAIGHT_1'
+        node.send_status(first['action'], first['command_id'], 'RUNNING')
+        clock[0] += .7
+        for _ in range(6):
+            fresh(node, clock, 'line', aligned, plan=False)
+        second = node.publisher.messages[-1]
+>       assert second['command_id'] != first['command_id']
+E       assert 1 != 1
+
+src/mission_control/test/test_continuous_approach.py:48: AssertionError
+_ test_offset_forward_queues_and_promotes_without_clearing_vision[LINE_TRACK_AFTER_PICKUP] _
+
+clock = [10.769999999999998], phase = 'LINE_TRACK_AFTER_PICKUP'
+
+    @pytest.mark.parametrize('phase', ['LINE_TRACK', 'LINE_TRACK_AFTER_PICKUP'])
+    def test_offset_forward_queues_and_promotes_without_clearing_vision(clock, phase):
+        node = LiveInputHarness(phase=phase)
+        aligned = sample(target_angle=0., ground_heading_error_deg=-30.)
+        fresh(node, clock, 'line', aligned)
+        first = node.publisher.messages[-1]
+        assert first['action'] == 'STRAIGHT_1'
+        node.send_status(first['action'], first['command_id'], 'RUNNING')
+        clock[0] += .7
+        for _ in range(6):
+            fresh(node, clock, 'line', aligned, plan=False)
+        second = node.publisher.messages[-1]
+>       assert second['command_id'] != first['command_id']
+E       assert 1 != 1
+
+src/mission_control/test/test_continuous_approach.py:48: AssertionError
+_______ test_goal_failure_clears_reserved_motion_and_requires_new_vision _______
+
+clock = [12.44]
+
+    def test_goal_failure_clears_reserved_motion_and_requires_new_vision(clock):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+        first = start_goal(node, clock, 1.5)
+        clock[0] += 2.4
+        for _ in range(3):
+            fresh(node, clock, 'goal', goal_info(depth_m=1.5, score_now=False), plan=False)
+>       assert node.queued_general_command_id is not None
+E       AttributeError: 'LiveInputHarness' object has no attribute 'queued_general_command_id'
+
+src/mission_control/test/test_continuous_approach.py:117: AttributeError
+_ test_bridge_reserves_different_goal_lengths_without_post_motion_dwell[GOAL_CAMERA_90_FORWARD-GOAL_CAMERA_90_FORWARD_2] _
+
+first = 'GOAL_CAMERA_90_FORWARD', second = 'GOAL_CAMERA_90_FORWARD_2'
+
+    @pytest.mark.parametrize('first,second', [
+        ('GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_2'),
+        ('GOAL_CAMERA90_FINE_FORWARD_3', 'GOAL_CAMERA90_FINE_FORWARD_1'),
+    ])
+    def test_bridge_reserves_different_goal_lengths_without_post_motion_dwell(first, second):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=first, source='goal'))
+        bridge.navigation_command_callback(navigation_message(action=second, source='goal', command_id=8001))
+>       assert bridge.queued_request_deferred
+E       assert False
+E        +  where False = <test_motion_command_bridge.FakeBridge object at 0xffff8cf0a6b0>.queued_request_deferred
+
+src/mission_control/test/test_continuous_approach.py:151: AssertionError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_line_continuous_missions.py::test_timed_queue_does_not_bypass_turn_boundary[RIGHT]
+FAILED src/mission_control/test/test_line_continuous_missions.py::test_timed_queue_does_not_bypass_turn_boundary[RECOVER_LEFT_TURN_LEFT_4]
+FAILED src/mission_control/test/test_continuous_approach.py::test_offset_forward_queues_and_promotes_without_clearing_vision[LINE_TRACK]
+FAILED src/mission_control/test/test_continuous_approach.py::test_offset_forward_queues_and_promotes_without_clearing_vision[LINE_TRACK_AFTER_PICKUP]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_failure_clears_reserved_motion_and_requires_new_vision
+FAILED src/mission_control/test/test_continuous_approach.py::test_bridge_reserves_different_goal_lengths_without_post_motion_dwell[GOAL_CAMERA_90_FORWARD-GOAL_CAMERA_90_FORWARD_2]
+6 failed, 165 passed, 340 deselected in 1.40s

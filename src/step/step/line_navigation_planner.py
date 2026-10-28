@@ -29,8 +29,8 @@ class NavigationConfig:
     min_linear_speed_mps: float = 0.015
     recovery_lateral_speed_mps: float = 0.025
     recovery_turn_speed_rad_s: float = 0.22
-    recovery_heading_turn_deg: float = 10.0
-    recovery_away_heading_turn_deg: float = 3.0
+    recovery_heading_turn_deg: float = 20.0
+    recovery_away_heading_turn_deg: float = 20.0
     curve_follow_max_offset_norm: float = 0.55
     recovery_straight_offset_norm: float = 0.45
     recovery_parallel_heading_deg: float = 2.0
@@ -469,8 +469,13 @@ class LineNavigationPlanner:
         )
         straight_line_turn_suppressed = bool(
             requested_motion in {"LEFT", "RIGHT"}
-            and curve_is_reliable
-            and not curve_matches_requested_motion
+            and (
+                (curve_is_reliable and not curve_matches_requested_motion)
+                # LEFT/RIGHT use the recovery gait too; do not bypass the
+                # relaxed heading deadband on a line without a reliable curve.
+                or (not curve_is_reliable
+                    and abs(heading) < self.config.recovery_heading_turn_deg)
+            )
         )
         if straight_line_turn_suppressed:
             requested_motion = "STRAIGHT"

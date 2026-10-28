@@ -1,0 +1,8 @@
+Consolidate compiler generated dependencies of target motion_core
+[ 42%] Built target motion_core
+Consolidate compiler generated dependencies of target motion_player_core
+[ 71%] Built target motion_player_core
+Consolidate compiler generated dependencies of target test_forward_continuation
+[ 85%] Building CXX object robot_motion_sdk/CMakeFiles/test_forward_continuation.dir/test_forward_continuation.cpp.o
+[100%] Linking CXX executable test_forward_continuation
+[100%] Built target test_forward_continuation

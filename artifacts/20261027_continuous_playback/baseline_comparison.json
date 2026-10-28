@@ -1,0 +1,8 @@
+{
+  "python_failures_identical": true,
+  "python_failure_count": 64,
+  "catalog_core_baseline_failures": 1,
+  "executor_core_baseline_failures": 4,
+  "executor_driver_baseline_failures": 1,
+  "ball_head_launch_baseline_failure_reproduced": true
+}

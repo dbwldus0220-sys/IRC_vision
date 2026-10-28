@@ -1,0 +1,65 @@
+2026-10-28 전진 1배속 및 일반 전진 경계 피드백 중복 대기 수정
+
+적용
+- 일반 전진(0/45/90도) 10개, 미세 전진 8개, 좌우 라인복귀 2개: PC/runtime 모두 1.0배속.
+- speed_update.json의 정확한 20개 목록 참조. 관절각, 프레임 시간/순서, 반복 횟수,
+  torque, 저장된 대기, runtime tolerance 5도, 회전/자세전환 모션은 보존.
+- 다음 전진을 예약하는 판단 노드의 예상 시간도 동일한 1.0배속으로 갱신.
+  일반 6회 전진의 명목 길이는 517ms * 6 = 3102ms.
+
+수정한 재생기 경로
+기존: 마지막 Goal 전송 -> 동기 피드백 읽기 -> 다음 반복/예약의 시각을 0으로 재설정
+      -> JSON 선행 대기 전체를 다시 기다림.
+피드백 중 이미 최종 자세를 유지했지만 그 시간이 선행 대기에 포함되지 않았다.
+수정: 마지막 Goal 전송 완료 이후 경과시간을 일반 전진의 선행 대기에 포함한다.
+- saved_hold=first_frame.start_ms/playback_speed; credit=min(elapsed,saved_hold).
+- 새 시각 원점=현재시각-credit. 90ms hold 자체는 유지한다.
+- 통신이 90ms보다 늦더라도 첫 이동 구간을 건너뛰지 않고 시작점부터 진행한다.
+- 반복 및 다음 전진 예약 모두 적용하여 6+6과 내부 12회의 동작을 일치시킨다.
+- 현재/다음 이름 모두 R전진0/45/90도 계열일 때만 적용.
+- queued_transition_hold_ms가 양수인 명시적 명령 대기는 그대로 유지.
+- 내부 90ms gap, stop_at_end, 경계 감속, 보간 수식, 관측 읽기 횟수/오류 정책,
+  위치확인/비상정지/취소 절차를 변경하지 않음.
+- 로그의 run_start 관측시각을 소급하지 않도록 재생 원점과 관측 이벤트 시각을 분리.
+
+실행 설정
+full_system_robot 및 sdk_motion_executor 기본 account_forward_boundary_feedback=true.
+실행 중 변경은 금지하고 노드 재시작 때 적용한다. GUI 동작 비교용
+sdk_gui_alignment.launch.py는 false를 명시해 기존 GUI 재생 계약을 유지한다.
+일반 전진 이외 모션은 이 옵션으로 영향을 받지 않는다.
+
+최신 실기 로그에서 별도로 확인된 대기
+2026-10-28 13:43 세션의 latest_decisions.log / latest_bridge.log를 보존했다.
+- STRAIGHT 사전 예약 연결 사례가 존재한다.
+- 시각 1793162687.790 완료 -> 1793162689.862 다음 STRAIGHT 요청은 2.072초 차이.
+  그 사이 bridge에는 WAIT/lost_search_turn_limit_reached가 반복되고,
+  이후 geometry_usable=False, detected=False도 기록됐다.
+- 이는 모터 시퀀스에 삽입된 고정 정지와 달리 상위 판단의 명령 보류다.
+  원본 영상/상세 입력 기록 없이 검출 실패의 원인까지 확정할 수 없다.
+  라인을 못 보는 상태에서 전진을 강제하거나 탐색 제한을 해제하지 않았다.
+- 이번 변경으로 이 2.072초까지 해결됐다고 주장하지 않는다.
+
+검증
+- Python 관련 454개 통과: python_final.log.
+- C++ 가상 하드웨어: 피드백 0/16/140ms, 보간 ON/OFF, 반복/예약,
+  전진/비전진, 옵션 ON/OFF, 명시적 25ms 연결 대기를 교차 검사.
+  선행 대기 전체 보존, 늦은 읽기의 첫 프레임 건너뛰기 방지, 준비 API 1회 확인.
+- 실제 카탈로그 0/45/90도, 보간 ON/OFF, 정상/지연 통신 12시나리오에서
+  새 옵션 ON의 6+6 Goal/Read 이벤트·시각과 내부 12회 반복이 정확히 일치.
+  verify_forward_queue.py / forward_queue_comparison.json 참조.
+- feedback_before_after.json은 RX16ms/TX1ms/tick5ms 가상 예제이다.
+  1배속에서 중복 통신 대기를 줄이면 총 주기가 감소하지만, 거친 통신 주기로
+  샘플링한 첫 raw 변화 시점은 동일할 수도 있다. 실기 개선량으로 해석하지 않는다.
+- 기존 GUI 비교/재생/실행기 CTest 27개 모두 통과. cpp_tests.log 참조.
+- 카탈로그 86개, alias 누락 없음, 모터 ID 0..22 확인.
+- 두 실행 패키지 빌드/설치 완료. build.log / build_final.log 참조.
+- 로봇 실기 구동, 토크 변경, 프로세스 재시작은 수행하지 않음.
+
+적용/남은 확인
+안전하게 노드를 종료한 뒤 기존 전체 미션 명령으로 재시작하면 1배속과 새 경계 정책 적용.
+실제 균형과 속도 변화는 가상 검증을 통과한 뒤 지지 장치에서 먼저 확인해야 한다.
+모션 trace를 함께 기록하면 재생기 통신 지연과 판단 WAIT를 구분할 수 있다:
+motion_trace_enabled:=true motion_trace_goals:=true motion_trace_path:=/tmp/step_forward1_real.csv
+
+변경 전 파일은 before/에 보존. changes.patch는 이번 요청 시작 상태와의 차이이며,
+기존 미커밋 변경을 포함한 전체 git HEAD 차이가 아니다. sha256.json 참조.

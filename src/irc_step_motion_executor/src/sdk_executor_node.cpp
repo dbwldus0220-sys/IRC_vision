@@ -1,4 +1,5 @@
 #include "irc_step_motion_executor/motion_backend_factory.hpp"
+#include "irc_step_motion_executor/callback_timing_trace.hpp"
 #include "irc_step_motion_executor/sdk_executor_core.hpp"
 #include "irc_step_motion_executor/sdk_executor_driver.hpp"
 #include "irc_step_motion_executor/startup_pose_gate.hpp"
@@ -76,6 +77,12 @@ public:
 #endif
     const std::int64_t poll_period_ms = positive_parameter_or_default(
       "poll_period_ms", kDefaultPollPeriodMs);
+    RCLCPP_INFO(get_logger(), "Execution path: backend=%s aliases=%s JSON=%s port=%s baud=%ld poll_ms=%ld",
+      backend_type.c_str(), alias_path.c_str(), motion_json_path.c_str(),
+      robot_device_path.c_str(), static_cast<long>(robot_baud_rate), static_cast<long>(poll_period_ms));
+#ifdef IRC_STEP_GUI_ALIGNMENT_VERSION
+    RCLCPP_INFO(get_logger(), "Compiled GUI alignment version: %d", IRC_STEP_GUI_ALIGNMENT_VERSION);
+#endif
     const std::int64_t running_polls = nonnegative_parameter_or_default(
       "running_polls", kDefaultRunningPolls);
     const std::int64_t settling_polls = nonnegative_parameter_or_default(
@@ -89,7 +96,7 @@ public:
     const std::int64_t startup_pose_duration_ms = positive_parameter_or_default(
       "startup_pose_duration_ms", 1800);
     enable_head_override_ = declare_parameter<bool>("enable_head_override", true);
-    const bool enable_shoulder_override = declare_parameter<bool>("enable_shoulder_override", true);
+    const bool enable_shoulder_override = declare_parameter<bool>("enable_shoulder_override", false);
     const std::string policy_reference_json = declare_parameter<std::string>(
       "policy_reference_json_path", ament_index_cpp::get_package_share_directory(
         "irc_step_motion_executor") + "/config/robot_motions_pc.json");
@@ -100,6 +107,9 @@ public:
     const auto motion_trace_path = declare_parameter<std::string>("motion_trace_path", "");
     if (queued_transition_hold_ms < 0 || (motion_trace_enabled && motion_trace_path.empty())) {
       throw std::invalid_argument("queue hold must be nonnegative; enabled trace needs a file path");
+    }
+    if (motion_trace_enabled) {
+      callback_timing_trace_.configure(motion_trace_path + ".callbacks.csv");
     }
     ball_head_override_enabled_ = declare_parameter<bool>(
       "ball_head_override_enabled", true);
@@ -150,6 +160,20 @@ public:
       motion_json_path, enable_robot_hardware, robot_device_path,
       robot_baud_rate, robot_motor_ids, explicit_torque_approval);
     auto & playback_config = backend_options.robot_motion_player;
+    rcl_interfaces::msg::ParameterDescriptor playback_option;
+    playback_option.read_only = true;
+    playback_option.description = "Restart the node to change playback mode or motor discovery policy";
+    playback_config.continuous_interpolation = declare_parameter<bool>(
+      "continuous_interpolation", true, playback_option);
+    playback_config.account_forward_boundary_feedback = declare_parameter<bool>(
+      "account_forward_boundary_feedback", true, playback_option);
+    RCLCPP_INFO(get_logger(), "Forward boundary feedback included in saved hold: %s",
+      playback_config.account_forward_boundary_feedback ? "yes" : "no (GUI timing)");
+    exclude_motor_5_ = declare_parameter<bool>("exclude_motor_5", false, playback_option);
+    playback_config.exclude_motor_5 = exclude_motor_5_;
+    RCLCPP_INFO(get_logger(), "Interpolation: %s; motor 5: %s",
+      playback_config.continuous_interpolation ? "continuous quintic" : "legacy cosine",
+      playback_config.exclude_motor_5 ? "EXCLUDED / UNCONFIRMED (제외/미확인)" : "included");
     playback_config.enable_head_override = enable_head_override_;
     playback_config.enable_shoulder_override = enable_shoulder_override;
     playback_config.policy_reference_json_path = policy_reference_json;
@@ -222,6 +246,8 @@ public:
     driver_ = std::make_unique<SdkExecutorDriver>(
       *core_, steady_now_ms,
       [this](const std::string & payload) {
+        CallbackTimingTrace::Scope timing(
+          callback_timing_trace_, "status_publish", core_->has_active_request());
         handle_head_override_status(payload);
         std_msgs::msg::String message;
         message.data = payload;
@@ -231,39 +257,63 @@ public:
     request_subscription_ = create_subscription<std_msgs::msg::String>(
       "/motion/executor/request", 10,
       [this](const std_msgs::msg::String::SharedPtr message) {
+        CallbackTimingTrace::Scope timing(
+          callback_timing_trace_, "request", core_->has_active_request());
         driver_->handle_request(message->data);
       });
     cancel_subscription_ = create_subscription<std_msgs::msg::String>(
       "/motion/executor/cancel", 10,
       [this](const std_msgs::msg::String::SharedPtr message) {
+        CallbackTimingTrace::Scope timing(
+          callback_timing_trace_, "cancel", core_->has_active_request());
         driver_->handle_cancel(message->data);
       });
     ball_info_subscription_ = create_subscription<std_msgs::msg::String>(
       "/vision/ball_info", 10,
       [this](const std_msgs::msg::String::SharedPtr message) {
+        CallbackTimingTrace::Scope timing(
+          callback_timing_trace_, "ball_info", core_->has_active_request());
         handle_ball_info(message->data);
       });
     navigation_subscription_ = create_subscription<std_msgs::msg::String>(
       "/navigation/motion_command", 10,
       [this](const std_msgs::msg::String::SharedPtr message) {
+        CallbackTimingTrace::Scope timing(
+          callback_timing_trace_, "navigation", core_->has_active_request());
         handle_hurdle_navigation(message->data);
       });
     hurdle_info_subscription_ = create_subscription<std_msgs::msg::String>(
       "/vision/hurdle_info", 10,
       [this](const std_msgs::msg::String::SharedPtr message) {
+        CallbackTimingTrace::Scope timing(
+          callback_timing_trace_, "hurdle_info", core_->has_active_request());
         handle_hurdle_info(message->data);
       });
     poll_timer_ = create_wall_timer(
       std::chrono::milliseconds(poll_period_ms),
       [this]() {
+        CallbackTimingTrace::Scope timing(
+          callback_timing_trace_, "poll_timer", core_->has_active_request());
         const auto now_ms = steady_now_ms();
-        update_ball_head_override(now_ms);
-        update_hurdle_head_override(now_ms);
-        driver_->poll();
+        {
+          CallbackTimingTrace::Scope head_timing(
+            callback_timing_trace_, "head_update", core_->has_active_request());
+          update_ball_head_override(now_ms);
+          update_hurdle_head_override(now_ms);
+        }
+        {
+          CallbackTimingTrace::Scope driver_timing(
+            callback_timing_trace_, "driver_poll", core_->has_active_request());
+          driver_->poll();
+        }
       });
     heartbeat_timer_ = create_wall_timer(
       std::chrono::milliseconds(heartbeat_period_ms),
-      [this, backend_type]() {publish_heartbeat(backend_type);});
+      [this, backend_type]() {
+        CallbackTimingTrace::Scope timing(
+          callback_timing_trace_, "heartbeat", core_->has_active_request());
+        publish_heartbeat(backend_type);
+      });
 
     if (backend_type == "simulated") {
       RCLCPP_WARN(
@@ -566,6 +616,9 @@ private:
     json_object_object_add(
       object, "backend_type", json_object_new_string(backend_type.c_str()));
     json_object_object_add(
+      object, "motor_5_status", json_object_new_string(
+        exclude_motor_5_ ? "excluded_unconfirmed" : "included"));
+    json_object_object_add(
       object, "active", json_object_new_boolean(core_->has_active_request()));
     json_object_object_add(
       object, "auto_ready",
@@ -631,6 +684,7 @@ private:
   // Declared first so the injected factory outlives backend construction/use.
   std::unique_ptr<RobotMotionRuntimeFactory> robot_motion_runtime_factory_;
 #endif
+  CallbackTimingTrace callback_timing_trace_;
   // Declared before the backend so borrowed SDK runtime state outlives it.
   std::shared_ptr<void> runtime_owner_;
   std::unique_ptr<MotionBackend> backend_;
@@ -651,6 +705,7 @@ private:
   bool ball_control_active_{false};
   bool ball_grasp_started_{false};
   bool enable_head_override_{true};
+  bool exclude_motor_5_{false};
   bool ball_head_override_enabled_{true};
   bool ball_head_override_latched_{false};
   double ball_head_override_deg_{-64.0};

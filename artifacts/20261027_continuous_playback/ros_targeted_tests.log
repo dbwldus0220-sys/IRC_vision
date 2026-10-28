@@ -1,0 +1,154 @@
+Internal ctest changing into directory: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+Test project /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+      Start  1: test_callback_timing_trace
+ 1/28 Test  #1: test_callback_timing_trace .........................   Passed    0.18 sec
+      Start  2: test_legacy_cosine_execution
+ 2/28 Test  #2: test_legacy_cosine_execution .......................   Passed   69.01 sec
+      Start  3: test_continuous_interpolation
+ 3/28 Test  #3: test_continuous_interpolation ......................   Passed    0.00 sec
+      Start  4: test_continuous_hardware
+ 4/28 Test  #4: test_continuous_hardware ...........................   Passed    0.02 sec
+      Start  5: test_continuous_playback_parity
+ 5/28 Test  #5: test_continuous_playback_parity ....................***Failed    3.10 sec
+Traceback (most recent call last):
+  File "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/../../tools/verify_continuous_playback.py", line 150, in <module>
+    main()
+  File "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/../../tools/verify_continuous_playback.py", line 144, in main
+    result['real_player_execution'] = {str(c): compare_execution(args.raw_probe, c) for c in args.catalogs}
+  File "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/../../tools/verify_continuous_playback.py", line 144, in <dictcomp>
+    result['real_player_execution'] = {str(c): compare_execution(args.raw_probe, c) for c in args.catalogs}
+  File "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/../../tools/verify_continuous_playback.py", line 98, in compare_execution
+    output = subprocess.check_output([str(probe), str(catalog), motion['name'],
+  File "/usr/lib/python3.10/subprocess.py", line 421, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+  File "/usr/lib/python3.10/subprocess.py", line 526, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/robot_motion_sdk/gui_execution_probe', '/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/../../artifacts/robot_motions_runtime.json', '찐공확인자세', '5', '0', '0', '--continuous']' returned non-zero exit status 3.
+
+      Start  6: test_gui_alignment_contract
+ 6/28 Test  #6: test_gui_alignment_contract ........................   Passed    0.01 sec
+      Start  7: test_catalog_only_core
+ 7/28 Test  #7: test_catalog_only_core .............................***Failed    0.19 sec
+-- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+ - /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_catalog_only_core --gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_catalog_only_core.gtest.xml
+Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+[==========] Running 10 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from MotionAliasCatalog
+[ RUN      ] MotionAliasCatalog.LoadsLatestSdkAndCanonicalAliases
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:45: Failure
+Expected equality of these values:
+  catalog.size()
+    Which is: 99
+  98U
+    Which is: 98
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:64: Failure
+Expected equality of these values:
+  catalog.resolve(alias)
+    Which is: 40-byte object <F8-41 B5-C9 FF-FF 00-00 0E-00 00-00 00-00 00-00 EC-A0 84-34 35-EB 8F-84 28-38 ED-9A 8C-29 00-00 01-00 00-00 00-00 00-00>
+  std::optional<std::string>(motion)
+    Which is: 40-byte object <00-A2 45-D5 AA-AA 00-00 14-00 00-00 00-00 00-00 14-00 00-00 00-00 00-00 54-07 D9-A6 FF-FF 00-00 01-1B EA-A6 FF-FF 00-00>
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:64: Failure
+Expected equality of these values:
+  catalog.resolve(alias)
+    Which is: 40-byte object <F8-41 B5-C9 FF-FF 00-00 0E-00 00-00 00-00 00-00 EC-A0 84-34 35-EB 8F-84 28-38 ED-9A 8C-29 00-00 01-00 00-00 00-00 00-00>
+  std::optional<std::string>(motion)
+    Which is: 40-byte object <00-A2 45-D5 AA-AA 00-00 14-00 00-00 00-00 00-00 14-00 00-00 00-00 00-00 54-07 D9-A6 FF-FF 00-00 01-1B EA-A6 FF-FF 00-00>
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:64: Failure
+Expected equality of these values:
+  catalog.resolve(alias)
+    Which is: 40-byte object <F8-41 B5-C9 FF-FF 00-00 0E-00 00-00 00-00 00-00 EC-A0 84-39 30-EB 8F-84 28-32 ED-9A 8C-29 00-00 01-00 00-00 00-00 00-00>
+  std::optional<std::string>(motion)
+    Which is: 40-byte object <00-A2 45-D5 AA-AA 00-00 14-00 00-00 00-00 00-00 14-00 00-00 00-00 00-00 54-07 D9-A6 FF-FF 00-00 01-1B EA-A6 FF-FF 00-00>
+[  FAILED  ] MotionAliasCatalog.LoadsLatestSdkAndCanonicalAliases (2 ms)
+[----------] 1 test from MotionAliasCatalog (2 ms total)
+
+[----------] 8 tests from CatalogOnlyCore
+[ RUN      ] CatalogOnlyCore.PreservesCorrelationFieldsAndRejectsExecution
+[       OK ] CatalogOnlyCore.PreservesCorrelationFieldsAndRejectsExecution (2 ms)
+[ RUN      ] CatalogOnlyCore.RejectsInvalidJsonSafely
+[       OK ] CatalogOnlyCore.RejectsInvalidJsonSafely (2 ms)
+[ RUN      ] CatalogOnlyCore.DistinguishesRequiredNullEventIdFromMissingEventId
+[       OK ] CatalogOnlyCore.DistinguishesRequiredNullEventIdFromMissingEventId (2 ms)
+[ RUN      ] CatalogOnlyCore.RequiresEveryRequestContractField
+[       OK ] CatalogOnlyCore.RequiresEveryRequestContractField (1 ms)
+[ RUN      ] CatalogOnlyCore.RejectsUnknownAliasWithoutFallback
+[       OK ] CatalogOnlyCore.RejectsUnknownAliasWithoutFallback (2 ms)
+[ RUN      ] CatalogOnlyCore.SerializedStatusContainsContractFields
+[       OK ] CatalogOnlyCore.SerializedStatusContainsContractFields (2 ms)
+[ RUN      ] CatalogOnlyCore.SerializedStatusPreservesNullCorrelationTypes
+[       OK ] CatalogOnlyCore.SerializedStatusPreservesNullCorrelationTypes (3 ms)
+[ RUN      ] CatalogOnlyCore.CancelNeverTouchesHardware
+[       OK ] CatalogOnlyCore.CancelNeverTouchesHardware (1 ms)
+[----------] 8 tests from CatalogOnlyCore (15 ms total)
+
+[----------] 1 test from CatalogOnlyContract
+[ RUN      ] CatalogOnlyContract.SharedVectorsPreserveFieldsWithoutFallback
+[       OK ] CatalogOnlyContract.SharedVectorsPreserveFieldsWithoutFallback (2 ms)
+[----------] 1 test from CatalogOnlyContract (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 10 tests from 3 test suites ran. (19 ms total)
+[  PASSED  ] 9 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] MotionAliasCatalog.LoadsLatestSdkAndCanonicalAliases
+
+ 1 FAILED TEST
+-- run_test.py: return code 1
+-- run_test.py: inject classname prefix into gtest result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_catalog_only_core.gtest.xml'
+-- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_catalog_only_core.gtest.xml'
+
+      Start  8: test_motion_json_catalog
+ 8/28 Test  #8: test_motion_json_catalog ...........................   Passed    0.18 sec
+      Start  9: test_queue_control_tick
+ 9/28 Test  #9: test_queue_control_tick ............................   Passed    0.17 sec
+      Start 10: test_robot_motion_player_backend
+10/28 Test #10: test_robot_motion_player_backend ...................   Passed    0.17 sec
+      Start 11: test_simulated_motion_backend
+11/28 Test #11: test_simulated_motion_backend ......................   Passed    0.18 sec
+      Start 12: test_robot_motion_runtime_config
+12/28 Test #12: test_robot_motion_runtime_config ...................   Passed    0.17 sec
+      Start 13: test_robot_motion_parameter_types
+13/28 Test #13: test_robot_motion_parameter_types ..................   Passed    0.16 sec
+      Start 14: test_motion_backend_factory
+14/28 Test #14: test_motion_backend_factory ........................   Passed    0.16 sec
+      Start 15: test_startup_pose_gate
+15/28 Test #15: test_startup_pose_gate .............................   Passed    0.16 sec
+      Start 16: test_startup_pose_catalog
+16/28 Test #16: test_startup_pose_catalog ..........................   Passed    1.58 sec
+      Start 17: sdk_cmake_empty_path
+17/28 Test #17: sdk_cmake_empty_path ...............................   Passed    0.89 sec
+      Start 18: sdk_cmake_nonexistent_path
+18/28 Test #18: sdk_cmake_nonexistent_path .........................   Passed    0.85 sec
+      Start 19: sdk_cmake_missing_required_files
+19/28 Test #19: sdk_cmake_missing_required_files ...................   Passed    0.88 sec
+      Start 20: sdk_cmake_missing_robot_control_target
+20/28 Test #20: sdk_cmake_missing_robot_control_target .............   Passed    0.87 sec
+      Start 21: sdk_cmake_fake_sdk_build
+21/28 Test #21: sdk_cmake_fake_sdk_build ...........................   Passed   29.88 sec
+      Start 22: sdk_cmake_disabled_build_has_no_hardware_symbols
+22/28 Test #22: sdk_cmake_disabled_build_has_no_hardware_symbols ...   Passed   27.27 sec
+      Start 23: test_validate_motion_catalog
+23/28 Test #23: test_validate_motion_catalog .......................   Passed    0.16 sec
+      Start 24: motion_pattern_test
+24/28 Test #24: motion_pattern_test ................................   Passed    0.02 sec
+      Start 25: motion_callback_test
+25/28 Test #25: motion_callback_test ...............................   Passed    0.09 sec
+      Start 26: gui_alignment_contract
+26/28 Test #26: gui_alignment_contract .............................   Passed    0.02 sec
+      Start 27: continuous_hardware_contract
+27/28 Test #27: continuous_hardware_contract .......................   Passed    0.03 sec
+      Start 28: continuous_interpolation_contract
+28/28 Test #28: continuous_interpolation_contract ..................   Passed    0.01 sec
+
+93% tests passed, 2 tests failed out of 28
+
+Label Time Summary:
+gtest    =   3.32 sec*proc (11 tests)
+
+Total Test time (real) = 136.45 sec
+
+The following tests FAILED:
+	  5 - test_continuous_playback_parity (Failed)
+	  7 - test_catalog_only_core (Failed)
+Errors while running CTest

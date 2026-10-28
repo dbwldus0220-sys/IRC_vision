@@ -1,0 +1,26 @@
+{
+  "specification_cases": 892,
+  "events": 332644,
+  "raw_boundary_cases": 12291,
+  "cpp_ctest_passed": 33,
+  "ros_launch_ctest_passed": 5,
+  "latest_xunit_tests": 113,
+  "python_tests": 12,
+  "mission_existing_failures": 293,
+  "latest_gui_reference_available": false,
+  "physical_motion_executed": false,
+  "physical_audit": {
+    "operation": "read2ByteTxRx(model address 0); not SyncRead/Goal timing",
+    "baud": 4000000,
+    "sdk_result_counts": {
+      "-3001": 23
+    },
+    "read_ms": {
+      "mean": 34.907474739130436,
+      "p95": 35.230585,
+      "p99": 35.395008,
+      "max": 35.395008
+    },
+    "motor_writes": 0
+  }
+}

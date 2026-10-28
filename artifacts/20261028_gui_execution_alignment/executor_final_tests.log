@@ -1,0 +1,75 @@
+Internal ctest changing into directory: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+Test project /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+      Start  8: test_gui_execution_specification
+      Start  2: test_legacy_cosine_execution
+ 1/33 Test  #8: test_gui_execution_specification ...................   Passed   52.15 sec
+      Start  6: test_continuous_playback_parity
+ 2/33 Test  #2: test_legacy_cosine_execution .......................   Passed   68.74 sec
+      Start 25: sdk_cmake_fake_sdk_build
+ 3/33 Test #25: sdk_cmake_fake_sdk_build ...........................   Passed    5.50 sec
+      Start 26: sdk_cmake_disabled_build_has_no_hardware_symbols
+ 4/33 Test  #6: test_continuous_playback_parity ....................   Passed   24.61 sec
+      Start 20: test_startup_pose_catalog
+ 5/33 Test #20: test_startup_pose_catalog ..........................   Passed    1.62 sec
+      Start  1: test_callback_timing_trace
+ 6/33 Test  #1: test_callback_timing_trace .........................   Passed    0.18 sec
+      Start 21: sdk_cmake_empty_path
+ 7/33 Test #26: sdk_cmake_disabled_build_has_no_hardware_symbols ...   Passed    4.48 sec
+      Start 24: sdk_cmake_missing_robot_control_target
+ 8/33 Test #21: sdk_cmake_empty_path ...............................   Passed    0.84 sec
+      Start 23: sdk_cmake_missing_required_files
+ 9/33 Test #24: sdk_cmake_missing_robot_control_target .............   Passed    0.85 sec
+      Start 22: sdk_cmake_nonexistent_path
+10/33 Test #23: sdk_cmake_missing_required_files ...................   Passed    0.85 sec
+      Start 29: motion_callback_test
+11/33 Test #29: motion_callback_test ...............................   Passed    0.09 sec
+      Start 12: test_queue_control_tick
+12/33 Test #22: sdk_cmake_nonexistent_path .........................   Passed    0.88 sec
+      Start 18: test_sdk_executor_driver
+13/33 Test #12: test_queue_control_tick ............................   Passed    0.16 sec
+      Start  9: test_catalog_only_core
+14/33 Test #18: test_sdk_executor_driver ...........................   Passed    0.18 sec
+      Start 31: continuous_hardware_contract
+15/33 Test #31: continuous_hardware_contract .......................   Passed    0.05 sec
+      Start 11: test_sdk_executor_core
+16/33 Test  #9: test_catalog_only_core .............................   Passed    0.19 sec
+      Start 14: test_simulated_motion_backend
+17/33 Test #14: test_simulated_motion_backend ......................   Passed    0.18 sec
+      Start 16: test_robot_motion_parameter_types
+18/33 Test #11: test_sdk_executor_core .............................   Passed    0.20 sec
+      Start 17: test_motion_backend_factory
+19/33 Test #16: test_robot_motion_parameter_types ..................   Passed    0.16 sec
+      Start 10: test_motion_json_catalog
+20/33 Test #17: test_motion_backend_factory ........................   Passed    0.16 sec
+      Start 19: test_startup_pose_gate
+21/33 Test #19: test_startup_pose_gate .............................   Passed    0.16 sec
+      Start 27: test_validate_motion_catalog
+22/33 Test #10: test_motion_json_catalog ...........................   Passed    0.17 sec
+      Start 15: test_robot_motion_runtime_config
+23/33 Test #27: test_validate_motion_catalog .......................   Passed    0.17 sec
+      Start  5: test_continuous_hardware
+24/33 Test #15: test_robot_motion_runtime_config ...................   Passed    0.17 sec
+      Start 13: test_robot_motion_player_backend
+25/33 Test  #5: test_continuous_hardware ...........................   Passed    0.05 sec
+      Start 33: forward_timing_contract
+26/33 Test #33: forward_timing_contract ............................   Passed    0.01 sec
+      Start  3: test_forward_timing
+27/33 Test  #3: test_forward_timing ................................   Passed    0.01 sec
+      Start 30: gui_alignment_contract
+28/33 Test #30: gui_alignment_contract .............................   Passed    0.01 sec
+      Start 32: continuous_interpolation_contract
+29/33 Test #32: continuous_interpolation_contract ..................   Passed    0.01 sec
+      Start 28: motion_pattern_test
+30/33 Test #28: motion_pattern_test ................................   Passed    0.01 sec
+      Start  7: test_gui_alignment_contract
+31/33 Test  #7: test_gui_alignment_contract ........................   Passed    0.01 sec
+      Start  4: test_continuous_interpolation
+32/33 Test  #4: test_continuous_interpolation ......................   Passed    0.01 sec
+33/33 Test #13: test_robot_motion_player_backend ...................   Passed    0.16 sec
+
+100% tests passed, 0 tests failed out of 33
+
+Label Time Summary:
+gtest    =   3.70 sec*proc (13 tests)
+
+Total Test time (real) =  81.56 sec

@@ -1,0 +1,8 @@
+{
+  "baseline": "/tmp/step_alignment_baseline_workspace",
+  "unchanged_mission_files": 239,
+  "shared_readonly_test_data": [
+    "artifacts",
+    "motion_imports"
+  ]
+}

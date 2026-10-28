@@ -1,0 +1,49 @@
+{
+  "trace": "artifacts/20261028_gui_execution_alignment/virtual_delayed_trace.csv",
+  "dropped_rows": 0,
+  "limitations": "Host calls only: TX success is not motor receipt or physical arrival. Missing-ID masks mean unavailable responses, not proof of the failed physical device. Callback dispatch and USB latency require separate observations.",
+  "tx_interval_ms": {
+    "count": 16,
+    "mean": 40.0625,
+    "p95": 92.0,
+    "p99": 92.0,
+    "max": 92.0
+  },
+  "syncwrite_duration_ms": {
+    "count": 17,
+    "mean": 1.0,
+    "p95": 1.0,
+    "p99": 1.0,
+    "max": 1.0
+  },
+  "syncread_duration_ms": {
+    "count": 12,
+    "mean": 16.0,
+    "p95": 16.0,
+    "p99": 16.0,
+    "max": 16.0
+  },
+  "tx_failures": 0,
+  "rx_failures": [],
+  "boundaries": [
+    {
+      "event": "repeat",
+      "time_ms": 1359.0,
+      "surrounding_tx_gap_ms": 22.0
+    },
+    {
+      "event": "goals_complete",
+      "time_ms": 1724.0,
+      "surrounding_tx_gap_ms": null
+    }
+  ],
+  "runs": [
+    {
+      "run": "1",
+      "motion": "delayed_boundary",
+      "continuous": "1",
+      "exclude_motor_5": "0",
+      "duration_ms": 708.0
+    }
+  ]
+}

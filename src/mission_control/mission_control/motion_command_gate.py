@@ -19,6 +19,7 @@ GENERAL_ACTIONS = frozenset(
         "FINE_FORWARD_STEP",
         "APPROACH_GOAL",
         "BALL_FINE_FORWARD_8",
+        "BALL_LOST_FINE_FORWARD_3",
         "BALL_LOST_FORWARD_2",
         "BALL_LOST_FORWARD_4",
         "HURDLE_LOST_BACKWARD_1",

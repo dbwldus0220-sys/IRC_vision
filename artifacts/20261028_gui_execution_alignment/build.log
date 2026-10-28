@@ -1,0 +1,37 @@
+Consolidate compiler generated dependencies of target motion_core
+[  8%] Built target motion_core
+Consolidate compiler generated dependencies of target test_motion_callback
+Consolidate compiler generated dependencies of target test_motion_pattern
+[ 20%] Built target test_motion_pattern
+[ 20%] Built target test_motion_callback
+Consolidate compiler generated dependencies of target gui_trace_probe
+Consolidate compiler generated dependencies of target motion_player_core
+[ 22%] Building CXX object CMakeFiles/motion_player_core.dir/robot_motion_player.cpp.o
+[ 28%] Built target gui_trace_probe
+Consolidate compiler generated dependencies of target continuous_trace_probe
+[ 34%] Built target continuous_trace_probe
+Consolidate compiler generated dependencies of target test_continuous_interpolation
+[ 40%] Built target test_continuous_interpolation
+[ 42%] Linking CXX static library libmotion_player_core.a
+[ 42%] Built target motion_player_core
+Consolidate compiler generated dependencies of target gui_execution_probe
+Consolidate compiler generated dependencies of target robot_control
+[ 45%] Linking CXX executable gui_execution_probe
+[ 60%] Built target robot_control
+Consolidate compiler generated dependencies of target recorded_execution_probe
+[ 62%] Linking CXX executable recorded_execution_probe
+[ 65%] Built target gui_execution_probe
+Consolidate compiler generated dependencies of target test_gui_alignment
+[ 68%] Linking CXX executable test_gui_alignment
+[ 71%] Built target recorded_execution_probe
+Consolidate compiler generated dependencies of target test_continuous_hardware
+[ 74%] Building CXX object CMakeFiles/test_continuous_hardware.dir/test_continuous_hardware.cpp.o
+[ 77%] Built target test_gui_alignment
+Consolidate compiler generated dependencies of target test_forward_timing
+[ 80%] Linking CXX executable test_forward_timing
+[ 82%] Built target test_forward_timing
+Consolidate compiler generated dependencies of target irc_robot
+[ 85%] Linking CXX executable irc_robot
+[ 88%] Built target irc_robot
+[ 91%] Linking CXX executable test_continuous_hardware
+[100%] Built target test_continuous_hardware

@@ -1,0 +1,20 @@
+[
+  "artifacts/robot_motions_pc.json",
+  "artifacts/robot_motions_runtime.json",
+  "external_sdk/gui_aligned/CMakeLists.txt",
+  "external_sdk/gui_aligned/continuous_trace_probe.cpp",
+  "external_sdk/gui_aligned/gui_playback.hpp",
+  "external_sdk/gui_aligned/motion_pattern.cpp",
+  "external_sdk/gui_aligned/motion_pattern.hpp",
+  "external_sdk/gui_aligned/robot_motion_player.cpp",
+  "external_sdk/gui_aligned/robot_motion_player.hpp",
+  "external_sdk/gui_aligned/test_forward_continuation.cpp",
+  "src/irc_step_motion_executor/CMakeLists.txt",
+  "src/irc_step_motion_executor/config/motion_aliases.yaml",
+  "src/mission_control/mission_control/motion_command_bridge_node.py",
+  "src/mission_control/mission_control/motion_decision_node.py",
+  "src/mission_control/test/test_catalog51_forward_update.py",
+  "src/mission_control/test/test_catalog52_r_update.py",
+  "src/mission_control/test/test_motion_command_bridge.py",
+  "tools/verify_continuous_playback.py"
+]

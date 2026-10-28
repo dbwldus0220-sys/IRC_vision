@@ -1,0 +1,10 @@
+[INFO] [1793162651.462910293] [motion_decision_node]: Line motion boundary: wait_sec=1.139, next_action=RECOVER_RIGHT_TURN_RIGHT_4, reason=line_center_recovery
+[INFO] [1793162653.482298101] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=13
+[INFO] [1793162654.211929795] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4
+[INFO] [1793162657.076371859] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_LEFT_TURN_LEFT_4, command_id=14
+[INFO] [1793162658.142850603] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793162660.220685291] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_LEFT_TURN_LEFT_4, command_id=15
+[INFO] [1793162660.959678809] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+[INFO] [1793162662.610225176] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_RIGHT_TURN_RIGHT_4, command_id=16
+[INFO] [1793162663.392681219] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+[INFO] [1793162666.145928292] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4

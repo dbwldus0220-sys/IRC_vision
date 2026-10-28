@@ -38,7 +38,7 @@ def test_upsert_normalizes_new_replaced_and_unreferenced_motions(tmp_path, sourc
     assert all(m["completion"]["position_tolerance_deg"] == 5.0
                for m in motions.values())
     assert motions["new"]["frames"] == [
-        {"angles": {"0": 42.0, "4": 18.0, "5": -18.0}}
+        {"angles": {"0": 42.0}}
     ]
     assert motions["new"]["completion"]["settle_timeout_ms"] == 3000
     assert json.loads(source.read_text()) == source_payload
@@ -66,7 +66,7 @@ def test_import_preserves_special_motions_and_other_joint_data(tmp_path):
             }],
         }
 
-    # Similar task names must not accidentally inherit an exemption.
+    # Preserve shoulders for ordinary and special motions alike.
     source_payload = {"motions": [motion(name) for name in sorted(exceptions)] + [
         motion("찐공잡기전후진-2(2회)"), motion("찐기본자세에서 제자리 우회전(골대)"),
     ]}
@@ -86,23 +86,23 @@ def test_import_preserves_special_motions_and_other_joint_data(tmp_path):
     for supplied in source_payload["motions"] + [original["motions"][1]]:
         expected = copy.deepcopy(supplied)
         expected["completion"]["position_tolerance_deg"] = 5.0
-        if supplied["name"] not in exceptions:
-            expected["frames"][0]["angles"].update({"4": 18.0, "5": -18.0})
         assert result[supplied["name"]] == expected
     assert json.loads(source.read_text()) == source_payload
     assert json.loads(next(backup_dir.glob("*.json")).read_text()) == original
 
 
-def test_production_runtime_keeps_fixed_motor_angles():
-    path = Path(__file__).resolve().parents[1] / "artifacts/robot_motions_runtime.json"
+def test_production_runtime_preserves_original_shoulders_and_other_fields():
+    root = Path(__file__).resolve().parents[1]
+    path = root / "artifacts/robot_motions_runtime.json"
     motions = json.loads(path.read_text())["motions"]
-    exceptions = {"찐공잡기리그랩까지 실전", "건공잡기", "찐골넣기", "찐허들"}
-    # An exemption does not require retaining retired motions in a full replacement.
-    assert motions
+    original = {m["name"]: m for m in json.loads(
+        (root / "artifacts/robot_motions_pc.json").read_text())["motions"]}
+    # Compare against the current PC catalog; motion families can be replaced.
+    from upsert_motion_catalog import _with_runtime_policy
+    assert {m["name"] for m in motions} == original.keys()
     for motion in motions:
-        if motion["name"] in exceptions:
-            continue
+        assert motion == _with_runtime_policy(original[motion["name"]])
+    for motion in motions:
         for index, frame in enumerate(motion["frames"]):
-            assert (frame["angles"]["4"], frame["angles"]["5"]) == (18, -18), (
-                motion["name"], index,
-            )
+            source = original[motion["name"]]["frames"][index]
+            assert all(frame["angles"][joint] == source["angles"][joint] for joint in ("4", "5"))

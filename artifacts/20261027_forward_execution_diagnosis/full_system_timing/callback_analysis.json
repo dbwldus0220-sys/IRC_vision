@@ -1,0 +1,543 @@
+{
+  "trace": "artifacts/20261027_forward_execution_diagnosis/full_system_timing/callbacks.csv",
+  "sessions": [
+    {
+      "records": 0,
+      "dropped": 0
+    },
+    {
+      "records": 45544,
+      "dropped": 0
+    }
+  ],
+  "limitations": "Nested scopes overlap. Unmeasured time may include ROS dispatch and OS scheduling; it is not proof of CPU starvation. Thread CPU excludes blocked/descheduled time. Abrupt termination may lose buffered data.",
+  "all": {
+    "callbacks": {
+      "ball_info": {
+        "wall_ms": {
+          "count": 422,
+          "mean": 0.2011315971563981,
+          "p99": 1.999317,
+          "max": 3.210293
+        },
+        "thread_cpu_ms": {
+          "count": 422,
+          "mean": 0.14220420853080568,
+          "p99": 0.26032,
+          "max": 0.3064
+        }
+      },
+      "driver_poll": {
+        "wall_ms": {
+          "count": 3724,
+          "mean": 0.5399970700859291,
+          "p99": 1.970292,
+          "max": 119.279809
+        },
+        "thread_cpu_ms": {
+          "count": 3724,
+          "mean": 0.3851398925886144,
+          "p99": 0.683904,
+          "max": 12.890656
+        }
+      },
+      "head_update": {
+        "wall_ms": {
+          "count": 3724,
+          "mean": 0.005782397959183673,
+          "p99": 0.0088,
+          "max": 3.754275
+        },
+        "thread_cpu_ms": {
+          "count": 3724,
+          "mean": 0.0026223243823845326,
+          "p99": 0.004896,
+          "max": 0.04624
+        }
+      },
+      "heartbeat": {
+        "wall_ms": {
+          "count": 38,
+          "mean": 0.37701373684210526,
+          "p99": 1.802064,
+          "max": 1.802064
+        },
+        "thread_cpu_ms": {
+          "count": 38,
+          "mean": 0.18443705263157895,
+          "p99": 0.269824,
+          "max": 0.269824
+        }
+      },
+      "hurdle_info": {
+        "wall_ms": {
+          "count": 423,
+          "mean": 0.09017838061465722,
+          "p99": 0.20759,
+          "max": 0.803829
+        },
+        "thread_cpu_ms": {
+          "count": 423,
+          "mean": 0.08001656737588653,
+          "p99": 0.164448,
+          "max": 0.189856
+        }
+      },
+      "navigation": {
+        "wall_ms": {
+          "count": 6,
+          "mean": 0.13927833333333334,
+          "p99": 0.187429,
+          "max": 0.187429
+        },
+        "thread_cpu_ms": {
+          "count": 6,
+          "mean": 0.13037333333333334,
+          "p99": 0.15216,
+          "max": 0.15216
+        }
+      },
+      "poll_timer": {
+        "wall_ms": {
+          "count": 3724,
+          "mean": 0.5606629100429645,
+          "p99": 2.020021,
+          "max": 119.297089
+        },
+        "thread_cpu_ms": {
+          "count": 3724,
+          "mean": 0.3991010784103115,
+          "p99": 0.70624,
+          "max": 12.906816
+        }
+      },
+      "request": {
+        "wall_ms": {
+          "count": 1,
+          "mean": 0.319656,
+          "p99": 0.319656,
+          "max": 0.319656
+        },
+        "thread_cpu_ms": {
+          "count": 1,
+          "mean": 0.281312,
+          "p99": 0.281312,
+          "max": 0.281312
+        }
+      },
+      "status_publish": {
+        "wall_ms": {
+          "count": 21,
+          "mean": 0.18909438095238096,
+          "p99": 0.320584,
+          "max": 0.320584
+        },
+        "thread_cpu_ms": {
+          "count": 21,
+          "mean": 0.15488457142857143,
+          "p99": 0.230816,
+          "max": 0.230816
+        }
+      }
+    },
+    "active_poll_interval_ms": {
+      "count": 3717,
+      "mean": 5.037788571966253,
+      "p99": 7.308609000407159,
+      "max": 57.76852699927986
+    },
+    "over_7_5_count": 33,
+    "slow_intervals": [
+      {
+        "start_ms": 5880302.967034,
+        "next_start_ms": 5880326.777804,
+        "interval_ms": 23.810770000331104,
+        "previous_poll_wall_ms": 23.665966,
+        "previous_poll_cpu_ms": 2.940352,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 0.1448039999231696,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5883722.984458,
+        "next_start_ms": 5883734.366293,
+        "interval_ms": 11.381834999658167,
+        "previous_poll_wall_ms": 11.177062,
+        "previous_poll_cpu_ms": 1.288032,
+        "other_callback_wall_ms": 0.08182699978351593,
+        "unmeasured_between_callbacks_ms": 0.12294600065797567,
+        "other_callbacks": [
+          {
+            "callback": "heartbeat",
+            "start_ms": 5883734.1924,
+            "end_ms": 5883734.274227,
+            "wall_ms": 0.081827,
+            "cpu_ms": 0.080352,
+            "active": true,
+            "session": 2
+          }
+        ]
+      },
+      {
+        "start_ms": 5884203.048478,
+        "next_start_ms": 5884210.562563,
+        "interval_ms": 7.514085000380874,
+        "previous_poll_wall_ms": 0.714515,
+        "previous_poll_cpu_ms": 0.70624,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 6.799569999799132,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5884528.038883,
+        "next_start_ms": 5884536.373246,
+        "interval_ms": 8.33436300046742,
+        "previous_poll_wall_ms": 0.355817,
+        "previous_poll_cpu_ms": 0.35088,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 7.978546000085771,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5884603.074137,
+        "next_start_ms": 5884611.373683,
+        "interval_ms": 8.299545999616385,
+        "previous_poll_wall_ms": 0.494413,
+        "previous_poll_cpu_ms": 0.486528,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 7.8051330000162125,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5885858.15896,
+        "next_start_ms": 5885865.724279,
+        "interval_ms": 7.5653190007433295,
+        "previous_poll_wall_ms": 0.637456,
+        "previous_poll_cpu_ms": 0.630656,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 6.92786299996078,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5885865.724279,
+        "next_start_ms": 5885873.958447,
+        "interval_ms": 8.234167999587953,
+        "previous_poll_wall_ms": 0.464108,
+        "previous_poll_cpu_ms": 0.457696,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 7.770060000009835,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5887128.041579,
+        "next_start_ms": 5887137.670056,
+        "interval_ms": 9.628477000631392,
+        "previous_poll_wall_ms": 0.452652,
+        "previous_poll_cpu_ms": 0.450176,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 9.175825000740588,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5887168.112713,
+        "next_start_ms": 5887182.252445,
+        "interval_ms": 14.139732000418007,
+        "previous_poll_wall_ms": 0.961305,
+        "previous_poll_cpu_ms": 0.465216,
+        "other_callback_wall_ms": 0.17705999966710806,
+        "unmeasured_between_callbacks_ms": 13.001367000862956,
+        "other_callbacks": [
+          {
+            "callback": "ball_info",
+            "start_ms": 5887179.242766,
+            "end_ms": 5887179.419826,
+            "wall_ms": 0.17706,
+            "cpu_ms": 0.170816,
+            "active": true,
+            "session": 2
+          }
+        ]
+      },
+      {
+        "start_ms": 5887348.139913,
+        "next_start_ms": 5887355.659214,
+        "interval_ms": 7.5193010000512,
+        "previous_poll_wall_ms": 0.495085,
+        "previous_poll_cpu_ms": 0.487872,
+        "other_callback_wall_ms": 0.1396519998088479,
+        "unmeasured_between_callbacks_ms": 6.884564000181854,
+        "other_callbacks": [
+          {
+            "callback": "ball_info",
+            "start_ms": 5887348.816282,
+            "end_ms": 5887348.955934,
+            "wall_ms": 0.139652,
+            "cpu_ms": 0.137024,
+            "active": true,
+            "session": 2
+          }
+        ]
+      },
+      {
+        "start_ms": 5887993.062157,
+        "next_start_ms": 5888006.130468,
+        "interval_ms": 13.068310999311507,
+        "previous_poll_wall_ms": 12.965589,
+        "previous_poll_cpu_ms": 1.61184,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 0.102721999399364,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5888423.17075,
+        "next_start_ms": 5888431.89898,
+        "interval_ms": 8.728230000473559,
+        "previous_poll_wall_ms": 0.825014,
+        "previous_poll_cpu_ms": 0.689376,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 7.90321599971503,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5888538.13339,
+        "next_start_ms": 5888545.771159,
+        "interval_ms": 7.637768999673426,
+        "previous_poll_wall_ms": 0.563151,
+        "previous_poll_cpu_ms": 0.537856,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 7.0746179996058345,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5889133.430232,
+        "next_start_ms": 5889144.925319,
+        "interval_ms": 11.495087000541389,
+        "previous_poll_wall_ms": 0.642801,
+        "previous_poll_cpu_ms": 0.56464,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 10.852285999804735,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5889308.13918,
+        "next_start_ms": 5889318.546717,
+        "interval_ms": 10.407537000253797,
+        "previous_poll_wall_ms": 10.202924,
+        "previous_poll_cpu_ms": 0.648736,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 0.20461300015449524,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5890613.213859,
+        "next_start_ms": 5890625.232831,
+        "interval_ms": 12.01897200010717,
+        "previous_poll_wall_ms": 0.403083,
+        "previous_poll_cpu_ms": 0.39568,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 11.615889000706375,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5891398.602869,
+        "next_start_ms": 5891416.192164,
+        "interval_ms": 17.589294999837875,
+        "previous_poll_wall_ms": 15.748094,
+        "previous_poll_cpu_ms": 1.458464,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 1.8412009999155998,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5891533.1418,
+        "next_start_ms": 5891541.30771,
+        "interval_ms": 8.165909999981523,
+        "previous_poll_wall_ms": 0.336873,
+        "previous_poll_cpu_ms": 0.334528,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 7.82903700042516,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5893413.250354,
+        "next_start_ms": 5893421.040063,
+        "interval_ms": 7.789708999916911,
+        "previous_poll_wall_ms": 0.458188,
+        "previous_poll_cpu_ms": 0.452384,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 7.33152100071311,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5893504.56498,
+        "next_start_ms": 5893512.182012,
+        "interval_ms": 7.617031999863684,
+        "previous_poll_wall_ms": 0.516174,
+        "previous_poll_cpu_ms": 0.509312,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 7.1008580001071095,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5893548.190608,
+        "next_start_ms": 5893605.959135,
+        "interval_ms": 57.76852699927986,
+        "previous_poll_wall_ms": 57.622795,
+        "previous_poll_cpu_ms": 3.827904,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 0.14573199953883886,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5893808.269992,
+        "next_start_ms": 5893816.211193,
+        "interval_ms": 7.941200999543071,
+        "previous_poll_wall_ms": 0.61736,
+        "previous_poll_cpu_ms": 0.440672,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 7.3238409999758005,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5893868.194896,
+        "next_start_ms": 5893876.207651,
+        "interval_ms": 8.012754999101162,
+        "previous_poll_wall_ms": 0.336937,
+        "previous_poll_cpu_ms": 0.335488,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 7.675817999988794,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5894493.2338,
+        "next_start_ms": 5894500.931986,
+        "interval_ms": 7.6981860008090734,
+        "previous_poll_wall_ms": 0.281351,
+        "previous_poll_cpu_ms": 0.278144,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 7.4168350007385015,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5895068.249371,
+        "next_start_ms": 5895080.195029,
+        "interval_ms": 11.945658000186086,
+        "previous_poll_wall_ms": 0.416683,
+        "previous_poll_cpu_ms": 0.413056,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 11.528974999673665,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5895253.322719,
+        "next_start_ms": 5895261.316241,
+        "interval_ms": 7.993521999567747,
+        "previous_poll_wall_ms": 0.311976,
+        "previous_poll_cpu_ms": 0.304768,
+        "other_callback_wall_ms": 3.1052330005913973,
+        "unmeasured_between_callbacks_ms": 4.576312999241054,
+        "other_callbacks": [
+          {
+            "callback": "ball_info",
+            "start_ms": 5895257.991482,
+            "end_ms": 5895261.096715,
+            "wall_ms": 3.105233,
+            "cpu_ms": 0.256736,
+            "active": true,
+            "session": 2
+          }
+        ]
+      },
+      {
+        "start_ms": 5895503.321902,
+        "next_start_ms": 5895513.871331,
+        "interval_ms": 10.54942899942398,
+        "previous_poll_wall_ms": 0.421067,
+        "previous_poll_cpu_ms": 0.37536,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 10.128361999988556,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5895763.269635,
+        "next_start_ms": 5895781.603269,
+        "interval_ms": 18.333633999340236,
+        "previous_poll_wall_ms": 18.229471,
+        "previous_poll_cpu_ms": 1.673472,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 0.10416299942880869,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5896723.271555,
+        "next_start_ms": 5896731.219732,
+        "interval_ms": 7.94817699957639,
+        "previous_poll_wall_ms": 0.336105,
+        "previous_poll_cpu_ms": 0.333696,
+        "other_callback_wall_ms": 0.20723700057715178,
+        "unmeasured_between_callbacks_ms": 7.404834998771548,
+        "other_callbacks": [
+          {
+            "callback": "heartbeat",
+            "start_ms": 5896723.618797,
+            "end_ms": 5896723.826034,
+            "wall_ms": 0.207237,
+            "cpu_ms": 0.2048,
+            "active": true,
+            "session": 2
+          }
+        ]
+      },
+      {
+        "start_ms": 5897473.31125,
+        "next_start_ms": 5897481.967285,
+        "interval_ms": 8.656034999527037,
+        "previous_poll_wall_ms": 0.7813,
+        "previous_poll_cpu_ms": 0.738944,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 7.874734999611974,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5897908.315714,
+        "next_start_ms": 5897916.874627,
+        "interval_ms": 8.558912999927998,
+        "previous_poll_wall_ms": 0.345481,
+        "previous_poll_cpu_ms": 0.342496,
+        "other_callback_wall_ms": 0.13958799932152033,
+        "unmeasured_between_callbacks_ms": 8.073844000697136,
+        "other_callbacks": [
+          {
+            "callback": "ball_info",
+            "start_ms": 5897910.480123,
+            "end_ms": 5897910.619711,
+            "wall_ms": 0.139588,
+            "cpu_ms": 0.134848,
+            "active": true,
+            "session": 2
+          }
+        ]
+      },
+      {
+        "start_ms": 5897948.29683,
+        "next_start_ms": 5897956.725531,
+        "interval_ms": 8.428700999356806,
+        "previous_poll_wall_ms": 0.497293,
+        "previous_poll_cpu_ms": 0.430592,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 7.9314079992473125,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 5898198.35355,
+        "next_start_ms": 5898213.63744,
+        "interval_ms": 15.283889999613166,
+        "previous_poll_wall_ms": 15.130478,
+        "previous_poll_cpu_ms": 1.82032,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 0.15341199934482574,
+        "other_callbacks": []
+      }
+    ]
+  }
+}

@@ -1,0 +1,48 @@
+[INFO] [1793097641.306978477] [motion_decision_node]: line info: /vision/line_info
+[INFO] [1793097641.309181383] [motion_decision_node]: ball info: /vision/ball_info
+[INFO] [1793097641.310817746] [motion_decision_node]: goal info: /vision/goal_info
+[INFO] [1793097641.312416700] [motion_decision_node]: hurdle info: /vision/hurdle_info
+[INFO] [1793097641.313959236] [motion_decision_node]: finish info: /vision/finish_info
+[INFO] [1793097641.324852258] [motion_decision_node]: Mission phase: AUTO
+[INFO] [1793097641.325753273] [motion_decision_node]: Unified command: /navigation/motion_command
+[INFO] [1793097641.326473932] [motion_decision_node]: Motion status: /motion/status
+[INFO] [1793097641.327194943] [motion_decision_node]: Grasp detections: /vision/detections
+[INFO] [1793097641.328191961] [motion_decision_node]: Executor heartbeat: /motion/executor/heartbeat
+[INFO] [1793097641.328968398] [motion_decision_node]: Decision debug: /navigation/decision_debug
+[INFO] [1793097641.331063461] [motion_decision_node]: Press ENTER in the launch terminal to start vision decisions after the startup pose is ready.
+[INFO] [1793097656.725966028] [motion_decision_node]: ENTER received; waiting for startup readiness and fresh vision.
+[INFO] [1793097659.224280700] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_RIGHT_TURN_RIGHT_4, command_id=2
+[INFO] [1793097660.251940111] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793097661.845338466] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_RIGHT_TURN_RIGHT_4, command_id=3
+[INFO] [1793097662.389473272] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4
+[INFO] [1793097663.763642228] [motion_decision_node]: Line corner remembered: {'corner_direction': 'RIGHT', 'corner_start_distance_m': 1.1904, 'last_confirmed_at': 6183.619602124, 'last_observation_id': 1793097663621731934, 'search_started': False, 'observed_during_action': 'RECOVER_RIGHT_TURN_RIGHT_4', 'observed_during_command_id': 3, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793097664.070897020] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_RIGHT_TURN_RIGHT_4, command_id=4
+[INFO] [1793097664.521343525] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4
+[INFO] [1793097666.637917400] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4
+[INFO] [1793097666.644251774] [motion_decision_node]: Pre-motion settle started: action=LINE_OFFSET_TURN_RIGHT_2, source=line, duration=1.000
+[INFO] [1793097666.863399566] [motion_decision_node]: BALL approach entry latched while stationary: distance_m=1.160
+[INFO] [1793097669.009889934] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_RECOVER_RIGHT_4
+[INFO] [1793097669.012955550] [motion_decision_node]: BALL motion boundary: wait_sec=0.002, next_action=STRAIGHT, reobserved=False
+[INFO] [1793097671.310699304] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793097671.316534076] [motion_decision_node]: BALL motion boundary: wait_sec=0.004, next_action=STRAIGHT, reobserved=False
+[INFO] [1793097672.459015528] [motion_decision_node]: BALL pickup entry latched: distance_m=0.550
+[INFO] [1793097673.596198783] [motion_decision_node]: BALL pickup entry pending; waiting for fresh vision
+[INFO] [1793097673.598103396] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793097673.703795490] [motion_decision_node]: Special motion lock enabled: action=PICKUP_NOW, command_id=8, event_id=1, dynamics_command=None
+[INFO] [1793097673.705688390] [motion_decision_node]: Special motion lock enabled: action=PICKUP_NOW, command_id=8, event_id=1, dynamics_command=None
+[INFO] [1793097673.869093012] [motion_decision_node]: BALL near/unknown candidate; waiting for confirmation after the current motion
+[INFO] [1793097674.305460052] [motion_decision_node]: BALL confirmation completed; releasing pending hold
+[INFO] [1793097674.326501072] [motion_decision_node]: Pre-motion settle started: action=BALL_PICKUP_INITIAL_ALIGN_CONTINUE, source=ball, duration=1.000
+[INFO] [1793097675.326533107] [motion_decision_node]: Pre-motion settle complete: action=BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+[INFO] [1793097675.334127718] [motion_decision_node]: Special motion lock enabled: action=PICKUP_NOW, command_id=8, event_id=1, dynamics_command=None
+[INFO] [1793097676.341623079] [motion_decision_node]: Special motion lock enabled: action=PICKUP_NOW, command_id=8, event_id=1, dynamics_command=None
+[INFO] [1793097676.359430413] [motion_decision_node]: Special motion lock enabled: action=PICKUP_NOW, command_id=8, event_id=1, dynamics_command=None
+[INFO] [1793097676.543180788] [motion_decision_node]: Special motion lock enabled: action=PICKUP_NOW, command_id=8, event_id=1, dynamics_command=None
+[INFO] [1793097677.590619145] [motion_decision_node]: Special motion lock enabled: action=PICKUP_NOW, command_id=8, event_id=1, dynamics_command=None
+[INFO] [1793097677.607661874] [motion_decision_node]: Special motion lock enabled: action=PICKUP_NOW, command_id=8, event_id=1, dynamics_command=None
+[INFO] [1793097679.467533030] [motion_decision_node]: Special motion lock enabled: action=PICKUP_NOW, command_id=8, event_id=1, dynamics_command=None
+[INFO] [1793097680.488604814] [motion_decision_node]: Special motion lock enabled: action=PICKUP_NOW, command_id=8, event_id=1, dynamics_command=None
+[INFO] [1793097681.331589017] [motion_decision_node]: Special motion lock enabled: action=PICKUP_NOW, command_id=8, event_id=1, dynamics_command=None
+[INFO] [1793097682.340636526] [motion_decision_node]: Special motion lock enabled: action=PICKUP_NOW, command_id=8, event_id=1, dynamics_command=None
+[INFO] [1793097682.462111575] [motion_decision_node]: Special motion lock released: status=FAILED, action=PICKUP_NOW, command_id=8, event_id=1, error_code=TURN_PREPARATION_FAILED, motion_id=pickup_camera_down_turn_left_3, message=motion transition preparation failed: SDK_PRESENT_POSITION_READ_FAILED cannot start from actual position: failed to read all DYNAMIXEL positions
+[INFO] [1793097682.463825333] [motion_decision_node]: Mission phase advanced after special motion: status=FAILED, action=PICKUP_NOW, previous_phase=AUTO, next_phase=BALL_APPROACH

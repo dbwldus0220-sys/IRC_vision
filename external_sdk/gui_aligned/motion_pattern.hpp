@@ -21,6 +21,7 @@ struct MotionFrame {
     bool lift_early_arrival{false};
     bool playback_cycle_end{false};
     std::string frame_id;
+    bool stop_at_end{false};
 };
 
 // callback이 SDK로 전송할 현재 시각의 목표값.

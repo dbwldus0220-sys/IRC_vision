@@ -1,3 +1,16 @@
+2026-10-28 GUI 실행 경계 보완: 연속 모드도 직전 활성 프레임 종점만 처리하고,
+반복·cycle 통신 완료 후 시계를 재설정합니다. 부분 프레임은 해당 ID만 전송하며
+ARM raw 반올림의 FMA 차이를 방지합니다. 단일 자세는 코사인 경로를 사용합니다.
+[이번 구현·검증·실행·복원 보고서](../../artifacts/20261028_gui_execution_alignment/REPORT.md)를 확인하세요.
+최신 GUI 원본 hash와 실제 모터 동작은 아직 대조하지 못했습니다.
+
+2026-10-27 실행기 업데이트: `continuous_interpolation=true`(기본),
+`exclude_motor_5=false`(기본)를 지원합니다. 연속 모드는 5차 보간과 전체 프레임 시간을
+사용하고, OFF는 기존 코사인 보간입니다. 제외한 5번의 상태는 `excluded_unconfirmed`로
+보고하며 전체 토크 OFF는 5번에도 시도합니다.
+[설정·검증·복원 절차](../../artifacts/20261027_continuous_playback/REPORT.md)를 먼저 확인하세요.
+아래의 이전 GUI 비교 기록은 당시 구현에 대한 기록입니다.
+
 # IRC STEP Motion Executor C++ Wrapper
 
 ## 2026-10-09 이동형 라인복귀 연결 대기 제거
@@ -539,7 +552,7 @@ Torque OFF 경로는 유지하며, 이번 테스트에서는 fake hardware만 �
 | 파라미터 | 기본값 | 의미 |
 |---|---|---|
 | enable_head_override | true | false이면 PC 원본 ID 0 사용, head ROS override 차단 |
-| enable_shoulder_override | true | false이면 PC 원본 ID 4·5 사용 |
+| enable_shoulder_override | false | PC 원본 ID 4·5 사용. 어깨 고정 정책은 기본 비활성화 |
 | policy_reference_json_path | install/config/robot_motions_pc.json | OFF일 때 참조하는 검증된 PC 원본 |
 | queued_transition_hold_ms | 0 | 성공한 마지막 Goal 이후 activation까지 최소 대기시간 |
 | position_tolerance_enabled | false | 일반 모션 종료 검사만 제어. 시작 자세 위치 검사·안정화·AUTO 전 대기에는 영향 없음 |
@@ -547,19 +560,18 @@ Torque OFF 경로는 유지하며, 이번 테스트에서는 fake hardware만 �
 | motion_trace_path | 빈 문자열 | trace 활성화 시 필수 출력 경로 |
 | motion_trace_goals | false | 상세 23축 degree Goal 추가 |
 
-일반 모션의 shoulder ON 정책은 18/-18이며 예외는 정확히
-`찐공잡기리그랩까지 실전`, `찐골넣기`, `찐허들` 세 이름이다.
+2026-10-27 사용자 요청으로 모든 runtime 모션과 시작 자세의 어깨를 PC 원본 값으로
+복원했다. 일반 실행은 shoulder OFF이며, 가져오기 도구도 원본 어깨 값을 보존한다.
+외부 SDK의 기존 shoulder ON 옵션은 구형 18/-18 정책을 다시 켜므로 사용하지 않는다.
 head ON은 기존 JSON과 ball/goal/hurdle runtime policy를 유지한다.
 OFF일 때는 frame_id 또는 name+start_ms로 PC 프레임을 확인하고 해당 축만
 복원한다. 매칭 불가·모호한 데이터는 추측하지 않고 실행 전 거절한다.
-현재 원본이 없는 위 Jetson 전용 2모션은 OFF 시험을 할 수 없다.
-따라서 전체 경기 실행을 OFF로 바꾸는 대신 PC 대응이 있는 대표 모션을 사용한다.
+현재 배포된 83개 모션은 모두 PC 원본과 대응하며 shoulder OFF 재생을 검증했다.
 startup pose에도 같은 ON/OFF 축 선택을 적용하며, catalog 오류는 hardware
 backend 생성 전에 검출한다(`startup_pose_catalog.cpp:89`, `sdk_executor_node.cpp:172`).
 
-나중에 로봇을 지지한 상태에서 동일 시작 자세·전원·모션으로 기본 ON/ON을
-기록한 뒤, head와 shoulder를 각각 하나씩 OFF로 바꿔 비교한다. 그 다음
-정책을 고정하고 queue hold만 0/20/50/100ms로 바꾼다. 이번에는 실시하지 않았다.
+실기 비교는 로봇을 지지하고 동일 시작 자세·전원·모션으로 진행한다.
+기본값은 head ON / shoulder OFF이며, 어깨 정책과 다른 재생 조건을 동시에 바꾸지 않는다.
 0ms도 다음 callback에서 activation하며 첫 Goal은 한 callback 더 뒤다.
 5ms 주기가 정확하다면 final→activation→첫 Goal은 약 5ms→5ms이다.
 hold 값은 최솟값이며 timer jitter와 송신 시간만큼 길어질 수 있다.
@@ -590,6 +602,23 @@ shoulder_override, [옵션 Goal 0..22] 순서다. 값이 없는 Goal은 NaN이�
 head_override는 동적 ID 0 override 활성 상태, shoulder_override는
 예외를 제외한 shoulder 정책 활성 상태다. elapsed/queue delay와 progress는
 제어 clock, write_started/goal_interval/write_ms는 실제 steady clock을 사용한다.
+
+2026-10-27 추가: `motion_trace_enabled=true`이면 같은 경로에
+`.callbacks.csv`를 붙인 노드 콜백 계측 파일도 생성한다. 예를 들어
+`/tmp/step_line_original_shoulders.csv.callbacks.csv`이다. 타이머, 머리 목표 갱신,
+driver poll, 요청/취소, 영상 메시지, 상태/heartbeat 발행의 시작·종료 시각과
+경과 시간, 해당 스레드의 CPU 사용 시간을 기록한다. 각도나 타이머 주기는 바꾸지 않는다.
+단일 executor 스레드를 전제로 하며, 중첩된 구간의 시간을 합산하면 안 된다.
+최대 262144개 기록을 사전 할당한 메모리에 쌓고 정상 종료(Ctrl+C) 때만 저장한다.
+한도 이후에는 기록을 버리고 dropped를 집계한다. 강제 종료나 전원 차단 시에는
+기록을 잃을 수 있다. 진단 비활성 상태에서는 clock 측정과 파일 생성을 하지 않는다.
+계측 자체에도 작은 비용이 있으므로 실측 시간은 계측을 켠 조건의 결과로 해석한다.
+
+`python3 tools/analyze_callback_timing.py /tmp/step_line_original_shoulders.csv.callbacks.csv
+--output /tmp/step_callback_analysis.json`으로 분석한다(명령은 한 줄로 실행).
+콜백 밖의 미계측 시간은 ROS dispatch와 OS scheduling 등을 포함하므로 CPU 부족으로
+단정하지 않는다. 실제 vision inference 없이 simulated backend와 분리된 토픽으로
+콜백만 시험하는 도구는 `artifacts/20261027_forward_execution_diagnosis/probe_callback_timing.py`다.
 
 ### 오프라인 검증 결과와 한계
 

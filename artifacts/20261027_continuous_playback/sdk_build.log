@@ -1,0 +1,46 @@
+Consolidate compiler generated dependencies of target motion_core
+[  9%] Built target motion_core
+Consolidate compiler generated dependencies of target test_motion_callback
+Consolidate compiler generated dependencies of target test_motion_pattern
+[ 18%] Built target test_motion_pattern
+[ 21%] Built target test_motion_callback
+Consolidate compiler generated dependencies of target gui_trace_probe
+Consolidate compiler generated dependencies of target motion_player_core
+[ 30%] Built target gui_trace_probe
+[ 30%] Building CXX object CMakeFiles/motion_player_core.dir/robot_motion_player.cpp.o
+Consolidate compiler generated dependencies of target continuous_trace_probe
+[ 36%] Built target continuous_trace_probe
+Consolidate compiler generated dependencies of target test_continuous_interpolation
+[ 42%] Built target test_continuous_interpolation
+[ 45%] Linking CXX static library libmotion_player_core.a
+[ 45%] Built target motion_player_core
+Consolidate compiler generated dependencies of target gui_execution_probe
+Consolidate compiler generated dependencies of target robot_control
+[ 48%] Building CXX object CMakeFiles/gui_execution_probe.dir/gui_execution_probe.cpp.o
+[ 51%] Building CXX object CMakeFiles/robot_control.dir/robot_motion_player_dynamixel.cpp.o
+[ 54%] Linking CXX executable gui_execution_probe
+[ 54%] Built target gui_execution_probe
+Consolidate compiler generated dependencies of target recorded_execution_probe
+[ 57%] Building CXX object CMakeFiles/recorded_execution_probe.dir/recorded_execution_probe.cpp.o
+[ 60%] Building CXX object CMakeFiles/robot_control.dir/dynamixel_motion_hardware.cpp.o
+[ 63%] Linking CXX executable recorded_execution_probe
+[ 63%] Built target recorded_execution_probe
+Consolidate compiler generated dependencies of target test_gui_alignment
+[ 66%] Building CXX object CMakeFiles/test_gui_alignment.dir/test_gui_alignment.cpp.o
+[ 69%] Linking CXX executable test_gui_alignment
+[ 69%] Built target test_gui_alignment
+[ 72%] Building CXX object CMakeFiles/robot_control.dir/step_dynamixel.cpp.o
+[ 75%] Building CXX object CMakeFiles/robot_control.dir/dynamixel_controller.cpp.o
+Consolidate compiler generated dependencies of target test_continuous_hardware
+[ 78%] Building CXX object CMakeFiles/test_continuous_hardware.dir/test_continuous_hardware.cpp.o
+[ 81%] Linking CXX static library librobot_control.a
+[ 81%] Built target robot_control
+[ 84%] Building CXX object CMakeFiles/test_continuous_hardware.dir/dynamixel_motion_hardware.cpp.o
+[ 87%] Building CXX object CMakeFiles/test_continuous_hardware.dir/step_dynamixel.cpp.o
+[ 90%] Building CXX object CMakeFiles/test_continuous_hardware.dir/dynamixel_controller.cpp.o
+Consolidate compiler generated dependencies of target irc_robot
+[ 93%] Building CXX object CMakeFiles/irc_robot.dir/main.cpp.o
+[ 96%] Linking CXX executable test_continuous_hardware
+[ 96%] Built target test_continuous_hardware
+[100%] Linking CXX executable irc_robot
+[100%] Built target irc_robot

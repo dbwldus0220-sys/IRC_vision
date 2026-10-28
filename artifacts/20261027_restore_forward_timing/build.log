@@ -1,0 +1,47 @@
+Starting >>> irc_step_motion_executor
+--- stderr: irc_step_motion_executor
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/external_sdk/gui_aligned/test_motion_pattern.cpp: In function ‘int main()’:
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/external_sdk/gui_aligned/test_motion_pattern.cpp:66:54: warning: missing initializer for member ‘irc_step::MotionFrame::frame_id’ [-Wmissing-field-initializers]
+   66 |         MotionFrame{"20deg", 0, 1000, {{1, 20.0}}, {}},
+      |                                                      ^
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/external_sdk/gui_aligned/test_motion_pattern.cpp:67:57: warning: missing initializer for member ‘irc_step::MotionFrame::frame_id’ [-Wmissing-field-initializers]
+   67 |         MotionFrame{"40deg", 1000, 1000, {{1, 40.0}}, {}},
+      |                                                         ^
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/external_sdk/gui_aligned/test_motion_pattern.cpp:84:53: warning: missing initializer for member ‘irc_step::MotionFrame::frame_id’ [-Wmissing-field-initializers]
+   84 |         MotionFrame{"peak", 0, 1000, {{1, 20.0}}, {}},
+      |                                                     ^
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/external_sdk/gui_aligned/test_motion_pattern.cpp:85:58: warning: missing initializer for member ‘irc_step::MotionFrame::frame_id’ [-Wmissing-field-initializers]
+   85 |         MotionFrame{"return", 1000, 1000, {{1, 10.0}}, {}},
+      |                                                          ^
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/external_sdk/gui_aligned/test_motion_pattern.cpp:94:52: warning: missing initializer for member ‘irc_step::MotionFrame::frame_id’ [-Wmissing-field-initializers]
+   94 |         MotionFrame{"hold", 0, 1000, {{1, 0.0}}, {}},
+      |                                                    ^
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/external_sdk/gui_aligned/test_motion_pattern.cpp:95:58: warning: missing initializer for member ‘irc_step::MotionFrame::frame_id’ [-Wmissing-field-initializers]
+   95 |         MotionFrame{"target", 1500, 500, {{1, 100.0}}, {}},
+      |                                                          ^
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/external_sdk/gui_aligned/test_motion_pattern.cpp:106:62: warning: missing initializer for member ‘irc_step::MotionFrame::frame_id’ [-Wmissing-field-initializers]
+  106 |             MotionFrame{"near_max", 0, 1000, {{1, 170.0}}, {}},
+      |                                                              ^
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/external_sdk/gui_aligned/test_motion_pattern.cpp:107:65: warning: missing initializer for member ‘irc_step::MotionFrame::frame_id’ [-Wmissing-field-initializers]
+  107 |             MotionFrame{"wrapped", 1000, 1000, {{1, -170.0}}, {}},
+      |                                                                 ^
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/external_sdk/gui_aligned/test_motion_callback.cpp: In function ‘int main()’:
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/external_sdk/gui_aligned/test_motion_callback.cpp:14:52: warning: missing initializer for member ‘irc_step::MotionFrame::frame_id’ [-Wmissing-field-initializers]
+   14 |         MotionFrame{"start", 0, 20, {{1, 20.0}}, {}},
+      |                                                    ^
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/external_sdk/gui_aligned/test_motion_callback.cpp:15:54: warning: missing initializer for member ‘irc_step::MotionFrame::frame_id’ [-Wmissing-field-initializers]
+   15 |         MotionFrame{"finish", 20, 20, {{1, 40.0}}, {}},
+      |                                                      ^
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/external_sdk/gui_aligned/test_motion_callback.cpp:44:66: warning: missing initializer for member ‘irc_step::MotionFrame::frame_id’ [-Wmissing-field-initializers]
+   44 |         MotionPattern({MotionFrame{"fail", 0, 10, {{1, 10.0}}, {}}}, 10),
+      |                                                                  ^
+---
+[Processing: irc_step_motion_executor]
+[Processing: irc_step_motion_executor]
+Finished <<< irc_step_motion_executor [1min 7s]
+Starting >>> mission_control
+[Processing: mission_control]
+Finished <<< mission_control [31.1s]
+
+Summary: 2 packages finished [1min 38s]
+  1 package had stderr output: irc_step_motion_executor

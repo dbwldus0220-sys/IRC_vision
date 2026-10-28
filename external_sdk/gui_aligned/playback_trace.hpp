@@ -25,6 +25,9 @@ struct PlaybackTraceRow {
     std::int64_t timeline_ms{0};
     int repeat{0}, frame{-1};
     bool success{true};
+    bool continuous{true}, exclude_motor_5{false}, bus_result_valid{false};
+    int bus_result{0};
+    std::uint32_t missing_ids{0};
     std::array<double, 23> angles{};
     std::array<bool, 23> ids{};
 };
@@ -38,6 +41,7 @@ public:
         for (int id = 0; id < 23; ++id) out_ << ",deg_" << id;
         for (int id = 0; id < 23; ++id) out_ << ",raw_" << id;
         out_ << ",event_seq,tick,begin_ns,end_ns,evaluate_ns,speed,repeat_target,frame_start_ms,frame_duration_ms,frame_name,lift_early,cycle_end";
+        out_ << ",continuous,exclude_motor_5,bus_result_valid,bus_result,missing_ids_mask";
         out_ << '\n' << std::setprecision(17);
         worker_ = std::thread([this] { consume(); });
     }
@@ -86,7 +90,9 @@ private:
                 if (*c == '"') out_ << '"';
                 out_ << *c;
             }
-            out_ << "\"," << r.lift_early << ',' << r.cycle_end << '\n';
+            out_ << "\"," << r.lift_early << ',' << r.cycle_end << ','
+                 << r.continuous << ',' << r.exclude_motor_5 << ',' << r.bus_result_valid
+                 << ',' << r.bus_result << ',' << r.missing_ids << '\n';
             tail_.store((tail + 1) % capacity, std::memory_order_release);
         }
     }

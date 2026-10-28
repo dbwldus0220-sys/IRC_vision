@@ -1,0 +1,329 @@
+{
+  "trace": "artifacts/20261027_forward_execution_diagnosis/no_display/callbacks.csv",
+  "sessions": [
+    {
+      "records": 49490,
+      "dropped": 0
+    }
+  ],
+  "limitations": "Nested scopes overlap. Unmeasured time may include ROS dispatch and OS scheduling; it is not proof of CPU starvation. Thread CPU excludes blocked/descheduled time. Abrupt termination may lose buffered data.",
+  "all": {
+    "callbacks": {
+      "ball_info": {
+        "wall_ms": {
+          "count": 448,
+          "mean": 0.17237754464285715,
+          "p99": 0.64412,
+          "max": 1.845027
+        },
+        "thread_cpu_ms": {
+          "count": 448,
+          "mean": 0.15211192857142858,
+          "p99": 0.313824,
+          "max": 0.49904
+        }
+      },
+      "driver_poll": {
+        "wall_ms": {
+          "count": 3703,
+          "mean": 0.5102458633540372,
+          "p99": 1.689213,
+          "max": 118.44742
+        },
+        "thread_cpu_ms": {
+          "count": 3703,
+          "mean": 0.4039459638131245,
+          "p99": 0.71152,
+          "max": 8.040352
+        }
+      },
+      "head_update": {
+        "wall_ms": {
+          "count": 3703,
+          "mean": 0.006167991898460707,
+          "p99": 0.021025,
+          "max": 0.22164
+        },
+        "thread_cpu_ms": {
+          "count": 3703,
+          "mean": 0.003978223062381853,
+          "p99": 0.016224,
+          "max": 0.027392
+        }
+      },
+      "heartbeat": {
+        "wall_ms": {
+          "count": 35,
+          "mean": 0.23161985714285716,
+          "p99": 0.419983,
+          "max": 0.419983
+        },
+        "thread_cpu_ms": {
+          "count": 35,
+          "mean": 0.18297782857142858,
+          "p99": 0.2416,
+          "max": 0.2416
+        }
+      },
+      "hurdle_info": {
+        "wall_ms": {
+          "count": 450,
+          "mean": 0.08311612,
+          "p99": 0.252489,
+          "max": 1.441173
+        },
+        "thread_cpu_ms": {
+          "count": 450,
+          "mean": 0.0690227911111111,
+          "p99": 0.17488,
+          "max": 0.20896
+        }
+      },
+      "navigation": {
+        "wall_ms": {
+          "count": 26,
+          "mean": 0.1444506923076923,
+          "p99": 0.214984,
+          "max": 0.214984
+        },
+        "thread_cpu_ms": {
+          "count": 26,
+          "mean": 0.1378843076923077,
+          "p99": 0.207904,
+          "max": 0.207904
+        }
+      },
+      "poll_timer": {
+        "wall_ms": {
+          "count": 3703,
+          "mean": 0.5303547148258169,
+          "p99": 1.731647,
+          "max": 118.468669
+        },
+        "thread_cpu_ms": {
+          "count": 3703,
+          "mean": 0.42024257953011074,
+          "p99": 0.734848,
+          "max": 8.057824
+        }
+      },
+      "request": {
+        "wall_ms": {
+          "count": 2,
+          "mean": 0.2567135,
+          "p99": 0.344973,
+          "max": 0.344973
+        },
+        "thread_cpu_ms": {
+          "count": 2,
+          "mean": 0.19430399999999998,
+          "p99": 0.222432,
+          "max": 0.222432
+        }
+      },
+      "status_publish": {
+        "wall_ms": {
+          "count": 25,
+          "mean": 0.19258184,
+          "p99": 0.388174,
+          "max": 0.388174
+        },
+        "thread_cpu_ms": {
+          "count": 25,
+          "mean": 0.15504384,
+          "p99": 0.22448,
+          "max": 0.22448
+        }
+      }
+    },
+    "active_poll_interval_ms": {
+      "count": 3696,
+      "mean": 5.020241031385666,
+      "p99": 6.379497000016272,
+      "max": 26.65053700003773
+    },
+    "over_7_5_count": 15,
+    "slow_intervals": [
+      {
+        "start_ms": 6176685.662713,
+        "next_start_ms": 6176709.69444,
+        "interval_ms": 24.031727000139654,
+        "previous_poll_wall_ms": 23.90097,
+        "previous_poll_cpu_ms": 2.747328,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 0.1307569993659854,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 6178980.749503,
+        "next_start_ms": 6178988.726595,
+        "interval_ms": 7.97709200065583,
+        "previous_poll_wall_ms": 0.261578,
+        "previous_poll_cpu_ms": 0.257568,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 7.715514000505209,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 6180105.78937,
+        "next_start_ms": 6180117.703821,
+        "interval_ms": 11.914450999349356,
+        "previous_poll_wall_ms": 11.716268,
+        "previous_poll_cpu_ms": 1.26576,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 0.19818300008773804,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 6183175.933011,
+        "next_start_ms": 6183185.084641,
+        "interval_ms": 9.151630000211298,
+        "previous_poll_wall_ms": 0.493778,
+        "previous_poll_cpu_ms": 0.464256,
+        "other_callback_wall_ms": 0.19139899965375662,
+        "unmeasured_between_callbacks_ms": 8.46645300090313,
+        "other_callbacks": [
+          {
+            "callback": "ball_info",
+            "start_ms": 6183183.326785,
+            "end_ms": 6183183.518184,
+            "wall_ms": 0.191399,
+            "cpu_ms": 0.149472,
+            "active": true,
+            "session": 1
+          }
+        ]
+      },
+      {
+        "start_ms": 6185140.999135,
+        "next_start_ms": 6185149.127495,
+        "interval_ms": 8.128360000438988,
+        "previous_poll_wall_ms": 0.481138,
+        "previous_poll_cpu_ms": 0.443936,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 7.647222000174224,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 6186726.015928,
+        "next_start_ms": 6186741.427402,
+        "interval_ms": 15.411473999731243,
+        "previous_poll_wall_ms": 15.2611,
+        "previous_poll_cpu_ms": 2.235392,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 0.15037399996072054,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 6187176.091807,
+        "next_start_ms": 6187185.096263,
+        "interval_ms": 9.004455999471247,
+        "previous_poll_wall_ms": 0.477201,
+        "previous_poll_cpu_ms": 0.4728,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 8.527254999615252,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 6187216.070863,
+        "next_start_ms": 6187223.754279,
+        "interval_ms": 7.683415999636054,
+        "previous_poll_wall_ms": 0.439984,
+        "previous_poll_cpu_ms": 0.348992,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 7.243431999348104,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 6187226.079867,
+        "next_start_ms": 6187233.73541,
+        "interval_ms": 7.655543000437319,
+        "previous_poll_wall_ms": 0.630711,
+        "previous_poll_cpu_ms": 0.618336,
+        "other_callback_wall_ms": 0.2757219998165965,
+        "unmeasured_between_callbacks_ms": 6.74911000020802,
+        "other_callbacks": [
+          {
+            "callback": "ball_info",
+            "start_ms": 6187228.635384,
+            "end_ms": 6187228.911106,
+            "wall_ms": 0.275722,
+            "cpu_ms": 0.268128,
+            "active": true,
+            "session": 1
+          }
+        ]
+      },
+      {
+        "start_ms": 6188876.116668,
+        "next_start_ms": 6188902.767205,
+        "interval_ms": 26.65053700003773,
+        "previous_poll_wall_ms": 26.515429,
+        "previous_poll_cpu_ms": 3.417248,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 0.1351079996675253,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 6190166.192554,
+        "next_start_ms": 6190173.753149,
+        "interval_ms": 7.560595000162721,
+        "previous_poll_wall_ms": 7.36686,
+        "previous_poll_cpu_ms": 0.60672,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 0.1937349997460842,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 6191176.234524,
+        "next_start_ms": 6191189.262326,
+        "interval_ms": 13.027801999822259,
+        "previous_poll_wall_ms": 12.855251,
+        "previous_poll_cpu_ms": 1.404608,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 0.17255100049078465,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 6192151.195939,
+        "next_start_ms": 6192160.874946,
+        "interval_ms": 9.679007000289857,
+        "previous_poll_wall_ms": 0.339852,
+        "previous_poll_cpu_ms": 0.337376,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 9.339154999703169,
+        "other_callbacks": []
+      },
+      {
+        "start_ms": 6196197.587648,
+        "next_start_ms": 6196213.161493,
+        "interval_ms": 15.573845000006258,
+        "previous_poll_wall_ms": 15.313035,
+        "previous_poll_cpu_ms": 2.31536,
+        "other_callback_wall_ms": 0.008799999952316284,
+        "unmeasured_between_callbacks_ms": 0.2520099999383092,
+        "other_callbacks": [
+          {
+            "callback": "ball_info",
+            "start_ms": 6196213.025424,
+            "end_ms": 6196213.034224,
+            "wall_ms": 0.0088,
+            "cpu_ms": 0.004448,
+            "active": true,
+            "session": 1
+          }
+        ]
+      },
+      {
+        "start_ms": 6197446.414043,
+        "next_start_ms": 6197462.055346,
+        "interval_ms": 15.641303000040352,
+        "previous_poll_wall_ms": 14.314535,
+        "previous_poll_cpu_ms": 1.7552,
+        "other_callback_wall_ms": 0,
+        "unmeasured_between_callbacks_ms": 1.3267679996788502,
+        "other_callbacks": []
+      }
+    ]
+  }
+}

@@ -1,0 +1,201 @@
+--- before/src/mission_control/README.md
++++ src/mission_control/README.md
+@@ -1118,7 +1118,11 @@
+ 잡기 후 고정 퇴장 회전과 라인 복귀 회전에는 적용하지 않는다.
+ 마지막 공 검출 상자의 위쪽 끝이 화면 상단 10% 이내에 있고 이후
+ `detected=false`, `raw_detected=false`가 되면 좌우 탐색보다
+-`전진0도-1(2회)`를 우선 실행한다. 720px 높이에서는 상단 72px까지이며,
++해당 단계의 미세 전진을 한 번 실행한다. 2026-10-28부터 일반 2회 전진 대신
++일반 접근·잡기 초기 정렬은 `ball_general_fine_forward_8`(현재 45° 미세 모션),
++잡기 미세 정렬은 `pickup_fine_forward_0`을 사용한다. 별칭의 숫자를 새 반복 횟수로
++해석하지 않고 기존 미세 모션 전체를 한 번 실행한다.
++720px 높이에서는 상단 72px까지이며,
+ `MotionDecisionPlanner.BALL_LOST_TOP_EDGE_RATIO`에서 기준을 조정한다.
+ 이 조건은 상단 이탈의 영상 기반 추정이며, 일반 접근과 픽업 초기·미세 정렬에
+ 적용한다. 높이/검출 상자가 없거나 유효하지 않으면 상단 이탈로 판단하지 않는다.
+--- before/src/mission_control/mission_control/motion_command_bridge_node.py
++++ src/mission_control/mission_control/motion_command_bridge_node.py
+@@ -144,7 +144,7 @@
+             for direction, counts in (("LEFT", (1, 3)), ("RIGHT", (2, 5)))
+             for count in counts
+         },
+-        "BALL_PICKUP_FINE_SEARCH_FORWARD": "ball_camera_down_forward_2",
++        "BALL_PICKUP_FINE_SEARCH_FORWARD": "pickup_fine_forward_0",
+         "BALL_PICKUP_FINE_SEARCH_FORWARD_4": "ball_camera_down_forward_4",
+         "BALL_PICKUP_FINE_SEARCH_BACKWARD": "pickup_lost_ball_backward_1",
+         "BALL_PICKUP_CRAB_RIGHT": "pickup_crab_right_0",
+@@ -818,7 +818,7 @@
+         elif action == "BALL_PICKUP_INITIAL_SEARCH_FORWARD_4":
+             motion_id = "ball_camera_down_forward_4"
+         elif action == "BALL_PICKUP_INITIAL_SEARCH_FORWARD":
+-            motion_id = "ball_camera_down_forward_2"
++            motion_id = "ball_general_fine_forward_8"
+         elif action.startswith("BALL_PICKUP_INITIAL_CRAB_"):
+             fine_action = action.replace("INITIAL_", "", 1)
+             motion_id = self.PICKUP_FINE_ALIGN_MOTION_IDS[fine_action]
+--- before/src/mission_control/mission_control/motion_decision_node.py
++++ src/mission_control/mission_control/motion_decision_node.py
+@@ -4585,6 +4585,7 @@
+         fine_forward = (
+             decision.action in {
+                 "STRAIGHT_0", "BALL_FINE_FORWARD_8", "BALL_PICKUP_FINE_FORWARD",
++                "BALL_PICKUP_INITIAL_SEARCH_FORWARD", "BALL_PICKUP_FINE_SEARCH_FORWARD",
+                 "SLOW_APPROACH", "FINE_FORWARD_STEP",
+             }
+             or decision.action.startswith("GOAL_CAMERA90_FINE_FORWARD_")
+@@ -4598,9 +4599,9 @@
+         pickup_fine_checkpoint = bool(
+             fine_forward and self.active_special_action == "PICKUP_NOW"
+             and (
+-                (decision.action == "BALL_PICKUP_FINE_FORWARD"
++                (decision.action in {"BALL_PICKUP_FINE_FORWARD", "BALL_PICKUP_FINE_SEARCH_FORWARD"}
+                  and self.pickup_fine_align_waiting)
+-                or (decision.action == "BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
++                or (decision.action in {"BALL_PICKUP_INITIAL_ALIGN_CONTINUE", "BALL_PICKUP_INITIAL_SEARCH_FORWARD"}
+                     and self.pickup_initial_align_waiting)
+             )
+         )
+--- before/src/mission_control/mission_control/motion_decision_planner.py
++++ src/mission_control/mission_control/motion_decision_planner.py
+@@ -1026,7 +1026,7 @@
+             and self._ball_top_loss_forward_pending()
+         ):
+             return self._ball_top_loss_forward_decision(
+-                "BALL_APPROACH_LOST_ALIGN", "BALL_LOST_FORWARD_2"
++                "BALL_APPROACH_LOST_ALIGN", "BALL_FINE_FORWARD_8"
+             )
+         recovery = self._ball_lost_turn_decision(info, "BALL_APPROACH_LOST_ALIGN")
+         if recovery is not None:
+@@ -2099,7 +2099,7 @@
+             return {**recovery.source_command, "valid": True, "motion": recovery.action, "reason": recovery.reason}
+         if not stopping and self._ball_top_loss_forward_pending():
+             decision = self._ball_top_loss_forward_decision(
+-                "BALL_APPROACH_LOST_ALIGN", "BALL_LOST_FORWARD_2"
++                "BALL_APPROACH_LOST_ALIGN", "BALL_FINE_FORWARD_8"
+             )
+             return {
+                 **decision.source_command,
+--- before/src/mission_control/test/test_mission_phase_flow.py
++++ src/mission_control/test/test_mission_phase_flow.py
+@@ -2799,16 +2799,16 @@
+     harness.ball_approach_alignment_pending = True
+     lost = {"detected": False, "raw_detected": False, "ball_loss_confirmed": True}
+     forward = harness.publish_vision(ball=lost)[-1]
+-    assert forward["action"] == "BALL_LOST_FORWARD_2"
++    assert forward["action"] == "BALL_FINE_FORWARD_8"
+     assert harness.planner.ball_top_loss_forward_sent is True
+     harness.send_status(forward["action"], forward["command_id"], "RUNNING")
+     assert harness.publish_vision(ball=lost) == []
+     harness.send_status(forward["action"], forward["command_id"], "SUCCEEDED")
+     assert harness.ball_post_motion_dwell_until is None
+     assert not harness.general_motion_gate.has_required_fresh_vision()
+-    assert harness.publish_vision(ball=None)[-1]["action"] == "WAIT"
+-    search = harness.publish_vision(ball=lost)[-1]
+-    assert search["action"] == "WAIT"
++    assert not any(m['valid'] for m in harness.publish_vision(ball=None))
++    assert not any(m['valid'] for m in harness.publish_vision(ball=lost))
++    assert harness.planner.ball_top_loss_forward_sent
+ 
+ 
+ @pytest.mark.parametrize("stage", ["INITIAL", "FINE"])
+--- before/src/mission_control/test/test_motion_command_bridge.py
++++ src/mission_control/test/test_motion_command_bridge.py
+@@ -2451,7 +2451,7 @@
+ 
+ 
+ @pytest.mark.parametrize("stage", ["INITIAL", "FINE"])
+-def test_pickup_top_loss_forward_returns_to_checkpoint_without_dwell(stage):
++def test_pickup_top_loss_fine_forward_returns_to_same_checkpoint(stage):
+     bridge = FakeBridge()
+     if stage == "FINE":
+         enter_pickup_fine_alignment(bridge)
+@@ -2461,16 +2461,26 @@
+     bridge.navigation_command_callback(fine_alignment_message(
+         f"BALL_PICKUP_{stage}_SEARCH_FORWARD"
+     ))
+-    motion = "ball_camera_down_forward_2"
++    motion = "pickup_fine_forward_0" if stage == "FINE" else "ball_general_fine_forward_8"
+     if stage == "FINE":
+-        assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == "fine_to_turn_ready_45"
++        assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == "pickup_fine_prepare"
+         bridge.executor_status_callback(executor_status(
+-            status="SUCCEEDED", motion_id="fine_to_turn_ready_45",
++            status="SUCCEEDED", motion_id="pickup_fine_prepare",
+         ))
++        assert bridge.active_dwell_until is not None
++        bridge._check_atomic_dwell(bridge.active_dwell_until - .001)
++        assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == "pickup_fine_prepare"
++        bridge._check_atomic_dwell(bridge.active_dwell_until)
+     assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == motion
+     bridge.executor_status_callback(executor_status(status="SUCCEEDED", motion_id=motion))
+     count = len(bridge.executor_request_publisher.messages)
+-    assert bridge.active_dwell_until is None
++    assert bridge.active_dwell_until is not None
++    assert not bridge.pickup_initial_align_waiting
++    assert not bridge.pickup_fine_align_waiting
++    bridge._check_atomic_dwell(bridge.active_dwell_until - .001)
++    assert not bridge.pickup_initial_align_waiting
++    assert not bridge.pickup_fine_align_waiting
++    bridge._check_atomic_dwell(bridge.active_dwell_until)
+     assert bridge.pickup_initial_align_waiting is (stage == "INITIAL")
+     assert bridge.pickup_fine_align_waiting is (stage == "FINE")
+     assert bridge.pickup_fixed_sequence_started is False
+--- before/src/mission_control/test/test_motion_decision_planner.py
++++ src/mission_control/test/test_motion_decision_planner.py
+@@ -2779,7 +2779,7 @@
+ 
+ 
+ @pytest.mark.parametrize("method,action", [
+-    ("plan_lost_ball_approach_alignment", "BALL_LOST_FORWARD_2"),
++    ("plan_lost_ball_approach_alignment", "BALL_FINE_FORWARD_8"),
+     ("plan_ball_pickup_initial_alignment", "BALL_PICKUP_INITIAL_SEARCH_FORWARD"),
+     ("plan_ball_pickup_fine_alignment", "BALL_PICKUP_FINE_SEARCH_FORWARD"),
+ ])
+@@ -2827,12 +2827,12 @@
+     )), 0.1)
+     lost = {"detected": False, "raw_detected": False}
+     assert planner.plan("AUTO", observations(ball=lost), 0.1).action == "BALL_LOST_STOP"
+-    assert planner.plan("AUTO", observations(ball=lost), 0.4).action == "BALL_LOST_FORWARD_2"
++    assert planner.plan("AUTO", observations(ball=lost), 0.4).action == "BALL_FINE_FORWARD_8"
+     for info in (None, {"detected": False, "raw_detected": True}):
+-        assert planner.plan("AUTO", observations(ball=info), 1.0).action != "BALL_LOST_FORWARD_2"
++        assert planner.plan("AUTO", observations(ball=info), 1.0).action != "BALL_FINE_FORWARD_8"
+         assert planner.plan_ball_pickup_initial_alignment(info).action == "WAIT"
+         assert planner.plan_ball_pickup_fine_alignment(info).action == "WAIT"
+-        assert planner.plan_lost_ball_approach_alignment(info).action != "BALL_LOST_FORWARD_2"
++        assert planner.plan_lost_ball_approach_alignment(info).action != "BALL_FINE_FORWARD_8"
+ 
+ 
+ def test_raw_latest_ball_position_updates_and_clears_top_edge_memory():
+--- before/src/mission_control/test/test_production_motion_catalog_contract.py
++++ src/mission_control/test/test_production_motion_catalog_contract.py
+@@ -536,13 +536,13 @@
+     assert check_pose["frames"][0]["time_ms"] == 400
+ 
+ 
+-def test_top_loss_forward_uses_existing_camera0_two_repeat_motion():
++def test_top_loss_forward_uses_existing_general_fine_motion():
+     aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
+     motions = {m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]}
+-    motion_id = MotionCommandBridgeNode.ACTION_TO_MOTION_ID["BALL_LOST_FORWARD_2"]
+-    assert motion_id == "ball_camera_down_forward_2"
+-    assert aliases[motion_id] == "전진0도-1(2회)"
+-    assert motions[aliases[motion_id]]["repeat_count"] == 2
++    motion_id = MotionCommandBridgeNode.ACTION_TO_MOTION_ID["BALL_FINE_FORWARD_8"]
++    assert motion_id == "ball_general_fine_forward_8"
++    assert motion_id in MotionCommandBridgeNode.FINE_FORWARD_MOTION_IDS
++    assert aliases[motion_id] in motions
+ 
+ 
+ @pytest.mark.parametrize('count', range(1, 5))
+--- before/src/mission_control/test/test_wait_refresh_and_fine_settle.py
++++ src/mission_control/test/test_wait_refresh_and_fine_settle.py
+@@ -116,6 +116,8 @@
+ 
+ @pytest.mark.parametrize('action,flag,extra', [
+     ('BALL_PICKUP_FINE_FORWARD', 'pickup_fine_align_waiting', {}),
++    ('BALL_PICKUP_FINE_SEARCH_FORWARD', 'pickup_fine_align_waiting', {}),
++    ('BALL_PICKUP_INITIAL_SEARCH_FORWARD', 'pickup_initial_align_waiting', {}),
+     ('BALL_PICKUP_INITIAL_ALIGN_CONTINUE', 'pickup_initial_align_waiting', {'pickup_approach_motion': 'STRAIGHT_0'}),
+ ])
+ def test_fine_checkpoint_waits_inside_pickup_lock_without_deadlock(clock, action, flag, extra):

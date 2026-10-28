@@ -1,0 +1,46 @@
+{
+  "scope": "Simulated backend only; no vision inference, serial I/O or physical movement.",
+  "phases": [
+    {
+      "name": "idle_messages",
+      "start_ms": 5023469.118156,
+      "end_ms": 5031470.703607,
+      "published_messages": 0
+    },
+    {
+      "name": "three_topics_30hz",
+      "start_ms": 5031470.709079,
+      "end_ms": 5039471.219869001,
+      "published_messages": 690
+    },
+    {
+      "name": "three_topics_30hz_head_active",
+      "start_ms": 5039471.224668999,
+      "end_ms": 5047472.994689,
+      "published_messages": 693
+    }
+  ],
+  "statuses": [
+    {
+      "status": "RUNNING",
+      "action": "MANUAL_TEST",
+      "command_id": 9001,
+      "event_id": null,
+      "request_id": 9001,
+      "motion_id": "line_forward_6",
+      "error_code": "",
+      "message": "motion start accepted"
+    },
+    {
+      "status": "RUNNING",
+      "action": "MANUAL_TEST",
+      "command_id": 9001,
+      "event_id": null,
+      "request_id": 9001,
+      "motion_id": "line_forward_6",
+      "error_code": "",
+      "message": "simulated motion running"
+    }
+  ],
+  "exit_code": 0
+}

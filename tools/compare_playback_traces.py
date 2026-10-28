@@ -162,7 +162,10 @@ def export_replay(trace, run, directory):
                    key=lambda r: r['tick'])
     if not ticks:
         raise ValueError('no measured playback ticks')
-    script = ['I ' + ' '.join(str(initial[i]) for i in range(23))]
+    continuous = start['snapshot'].get('continuous_motion_enabled', False)
+    if not isinstance(continuous, bool):
+        raise ValueError('continuous_motion_enabled must be a boolean')
+    script = [f'O {int(continuous)}', 'I ' + ' '.join(str(initial[i]) for i in range(23))]
     previous_time = -1
     total_writes = 0
     for tick in ticks:

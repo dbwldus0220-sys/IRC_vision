@@ -1,0 +1,7 @@
+Starting >>> irc_step_motion_executor
+Finished <<< irc_step_motion_executor [5.62s]
+Starting >>> mission_control
+[Processing: mission_control]
+Finished <<< mission_control [33.1s]
+
+Summary: 2 packages finished [39.7s]

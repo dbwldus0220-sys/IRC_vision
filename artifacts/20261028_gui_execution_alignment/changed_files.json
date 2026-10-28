@@ -1,0 +1,38 @@
+{
+  "modified": [
+    "external_sdk/gui_aligned/CMakeLists.txt",
+    "external_sdk/gui_aligned/dynamixel_motion_hardware.cpp",
+    "external_sdk/gui_aligned/dynamixel_motion_hardware.hpp",
+    "external_sdk/gui_aligned/gui_alignment.hpp",
+    "external_sdk/gui_aligned/gui_execution_probe.cpp",
+    "external_sdk/gui_aligned/gui_playback.hpp",
+    "external_sdk/gui_aligned/motion_hardware.hpp",
+    "external_sdk/gui_aligned/playback_trace.hpp",
+    "external_sdk/gui_aligned/recorded_execution_probe.cpp",
+    "external_sdk/gui_aligned/robot_motion_player.cpp",
+    "external_sdk/gui_aligned/step_dynamixel.cpp",
+    "external_sdk/gui_aligned/step_dynamixel.hpp",
+    "external_sdk/gui_aligned/test_continuous_hardware.cpp",
+    "external_sdk/gui_aligned/test_continuous_interpolation.cpp",
+    "external_sdk/gui_aligned/test_gui_alignment.cpp",
+    "external_sdk/gui_aligned/test_support/dynamixel_sdk/dynamixel_sdk.h",
+    "src/irc_step_motion_executor/CMakeLists.txt",
+    "src/irc_step_motion_executor/README.md",
+    "src/irc_step_motion_executor/launch/sdk_gui_alignment.launch.py",
+    "src/irc_step_motion_executor/src/sdk_executor_node.cpp",
+    "src/irc_step_motion_executor/test/test_catalog_only_core.cpp",
+    "src/irc_step_motion_executor/test/test_sdk_executor_core.cpp",
+    "src/irc_step_motion_executor/test/test_sdk_executor_driver.cpp",
+    "src/irc_step_motion_executor/test/test_sdk_executor_node_launch.py",
+    "tools/analyze_callback_timing.py",
+    "tools/compare_playback_traces.py",
+    "tools/test_playback_traces.py",
+    "tools/trace_sdk_gui.py",
+    "tools/verify_continuous_playback.py"
+  ],
+  "added": [
+    "external_sdk/gui_aligned/bus_diagnostics.hpp",
+    "tools/verify_gui_execution_contract.py",
+    "tools/analyze_motor_timing.py"
+  ]
+}

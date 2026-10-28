@@ -1,0 +1,8 @@
+[INFO] [1793097346.853565327] [sdk_motion_executor]: Motion position tolerance check: DISABLED
+[INFO] [1793097346.870568238] [sdk_motion_executor]: [STARTUP POSE] Current pose captured
+[INFO] [1793097346.870828021] [sdk_motion_executor]: [STARTUP POSE] Moving to 오뒤무게중심앞
+[INFO] [1793097350.901416024] [sdk_motion_executor]: [STARTUP POSE] Settling
+[INFO] [1793097350.997519065] [sdk_motion_executor]: [STARTUP POSE] Reached 오뒤무게중심앞
+[INFO] [1793097350.997672957] [sdk_motion_executor]: [STARTUP POSE] Holding for 2000 ms before AUTO
+[INFO] [1793097353.000652696] [sdk_motion_executor]: [STARTUP POSE] AUTO ready
+[INFO] [1793097417.683896727] [rclcpp]: signal_handler(SIGINT/SIGTERM)

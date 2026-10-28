@@ -84,13 +84,21 @@ def test_timed_stage_waits_for_already_queued_forward_before_transition(clock):
     assert node.publisher.messages[-1]['action'] == 'POST_BALL_GOAL_TRANSITION'
 
 
-@pytest.mark.parametrize('action', ['RIGHT', 'LINE_HEADING_TURN_RIGHT_2', 'RECOVER_LEFT_TURN_LEFT_4'])
-def test_timed_queue_does_not_bypass_turn_boundary(clock, action):
+@pytest.mark.parametrize('action,queued', [
+    ('RIGHT', True), ('LINE_HEADING_TURN_RIGHT_2', False),
+    ('RECOVER_LEFT_TURN_LEFT_4', True),
+])
+def test_timed_queue_only_prequeues_walking_turns(clock, action, queued):
     node, _ = start_forward('LINE_TRACK_AFTER_PICKUP')
     decision = replace(node.last_selected_decision, action=action)
     MotionDecisionNode._publish_decision(node, decision, queue_while_locked=True)
-    assert len(node.publisher.messages) == 1
-    assert getattr(node, 'queued_general_command_id', None) is None
+    assert len(node.publisher.messages) == (2 if queued else 1)
+    queued_id = getattr(node, 'queued_general_command_id', None)
+    if queued:
+        assert node.publisher.messages[-1]['action'] == action
+        assert queued_id == node.publisher.messages[-1]['command_id']
+    else:
+        assert queued_id is None
 
 
 def observe_walk_end(node, clock, info):
@@ -115,7 +123,7 @@ def observe_walk_end(node, clock, info):
     (corner_info('LEFT'), line_info(), 'STRAIGHT'),
     (corner_info('RIGHT'), line_info(), 'STRAIGHT'),
 ])
-def test_walking_transition_is_reserved_and_dispatched_at_success_without_new_vision(
+def test_walking_transition_is_sent_to_sdk_before_success_without_new_vision(
     clock, monkeypatch, initial, next_info, expected,
 ):
     monkeypatch.setattr(MotionDecisionNode, '_current_ros_time_ns', lambda _: round(clock[0] * 1e9))
@@ -131,12 +139,12 @@ def test_walking_transition_is_reserved_and_dispatched_at_success_without_new_vi
     assert queued['action'] == expected and queued['valid']
     assert node.general_motion_gate.active_command_id == first['command_id']
     bridge.navigation_command_callback(String(data=json.dumps(queued)))
-    assert bridge.queued_request_deferred
-    assert len(bridge.executor_request_publisher.messages) == 1
+    assert not bridge.queued_request_deferred
+    assert len(bridge.executor_request_publisher.messages) == 2
     clock[0] = node.active_line_motion_started_at + node.active_line_motion_duration_sec
     finished_at = clock[0]
     bridge.executor_status_callback(executor_status(**first_request, status='SUCCEEDED'))
-    # The existing completion callback dispatches immediately, with no timer or RGB input.
+    # Completion promotes the existing SDK reservation without a second start request.
     requests = decoded_messages(bridge.executor_request_publisher)
     assert len(requests) == 2 and requests[-1]['command_id'] == queued['command_id']
     assert clock[0] == finished_at
@@ -222,7 +230,8 @@ def test_failed_walking_drops_reserved_correction_in_node_and_bridge(clock, stat
     MotionDecisionNode._motion_status_callback(node, bridge.motion_status_publisher.messages[-1])
     assert getattr(node, 'queued_general_command_id', None) is None
     assert bridge.queued_request_id is None
-    assert len(bridge.executor_request_publisher.messages) == 1
+    # The SDK reservation was already sent; failure must not dispatch it again.
+    assert len(bridge.executor_request_publisher.messages) == 2
 
 
 def test_walking_capture_windows_match_active_recovery_catalogs():

@@ -1,0 +1,12 @@
+[
+  "external_sdk/gui_aligned/CMakeLists.txt",
+  "external_sdk/gui_aligned/continuous_trace_probe.cpp",
+  "external_sdk/gui_aligned/gui_playback.hpp",
+  "external_sdk/gui_aligned/motion_pattern.cpp",
+  "external_sdk/gui_aligned/motion_pattern.hpp",
+  "external_sdk/gui_aligned/robot_motion_player.cpp",
+  "external_sdk/gui_aligned/robot_motion_player.hpp",
+  "src/irc_step_motion_executor/CMakeLists.txt",
+  "src/mission_control/mission_control/motion_command_bridge_node.py",
+  "src/mission_control/test/test_motion_command_bridge.py"
+]

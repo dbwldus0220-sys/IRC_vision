@@ -59,27 +59,38 @@ Dxl::~Dxl() {
 }
 
 bool Dxl::WriteGoalDegrees(const std::vector<double>& angles, const std::vector<int>& ids) {
+    bus_diagnostics_ = {};
     if (!port_opened_ || angles.size() != NUMBER_OF_DYNAMIXELS || ids.empty()) return false;
     dynamixel::GroupSyncWrite writer(portHandler, packetHandler, DxlReg_GoalPosition, 4);
+    bool any = false;
     for (const int id : ids) {
+        if (!MotorEnabled(id)) continue;
+        any = true;
         if (id < 0 || id >= NUMBER_OF_DYNAMIXELS || !std::isfinite(angles[id])) return false;
         uint8_t data[4]{};
         getParam(irc_step::guiPositionRaw(angles[id]), data);
         if (!writer.addParam(static_cast<uint8_t>(id), data)) return false;
     }
-    return writer.txPacket() == COMM_SUCCESS;
+    if (!any) return true;
+    bus_diagnostics_ = {true, writer.txPacket(), 0};
+    return bus_diagnostics_.result == COMM_SUCCESS;
 }
 
 bool Dxl::ReadPositionDegrees(std::vector<double>& angles) {
+    bus_diagnostics_ = {};
     if (!port_opened_) return false;
     dynamixel::GroupSyncRead reader(portHandler, packetHandler, DxlReg_PresentPosition, 4);
     for (int id = 0; id < NUMBER_OF_DYNAMIXELS; ++id)
-        if (!reader.addParam(id)) return false;
-    if (reader.txRxPacket() != COMM_SUCCESS) return false;
+        if (MotorEnabled(id) && !reader.addParam(id)) return false;
+    bus_diagnostics_ = {true, reader.txRxPacket(), 0};
     for (int id = 0; id < NUMBER_OF_DYNAMIXELS; ++id)
-        if (!reader.isAvailable(id, DxlReg_PresentPosition, 4)) return false;
+        if (MotorEnabled(id) && !reader.isAvailable(id, DxlReg_PresentPosition, 4))
+            bus_diagnostics_.missing_ids |= std::uint32_t{1} << id;
+    // 일부 응답이 있어도 실패한 읽기를 완전한 시작 자세로 사용하지 않는다.
+    if (bus_diagnostics_.result != COMM_SUCCESS || bus_diagnostics_.missing_ids != 0) return false;
     angles.resize(NUMBER_OF_DYNAMIXELS);
     for (int id = 0; id < NUMBER_OF_DYNAMIXELS; ++id) {
+        if (!MotorEnabled(id)) continue;
         const auto raw = static_cast<std::int32_t>(reader.getData(id, DxlReg_PresentPosition, 4));
         angles[id] = std::clamp((raw - 2048.0) * (360.0 / 4096.0), -180.0, 179.912109375);
     }
@@ -229,6 +240,7 @@ bool Dxl::ConfigureTimeBasedProfile()
     // Drive Mode는 EEPROM이므로 호출 전 토크가 OFF여야 한다. GUI와 같이
     // 펌웨어 V42+ 및 bit2 적용 여부를 모든 관절에서 확인한다.
     for (uint8_t i = 0; i < NUMBER_OF_DYNAMIXELS; ++i) {
+        if (!MotorEnabled(dxl_id[i])) continue;
         uint8_t firmware = 0;
         uint8_t drive_mode = 0;
         uint8_t error = 0;
@@ -276,6 +288,7 @@ bool Dxl::WriteZeroProfiles() {
         portHandler, packetHandler, DxlReg_ProfileVelocity, 4);
     uint8_t zero[4] = {0, 0, 0, 0};
     for (uint8_t i = 0; i < NUMBER_OF_DYNAMIXELS; ++i) {
+        if (!MotorEnabled(dxl_id[i])) continue;
         if (!acceleration.addParam(dxl_id[i], zero)
             || !velocity.addParam(dxl_id[i], zero)) return false;
     }
@@ -308,6 +321,7 @@ bool Dxl::syncWriteTimeBasedTheta(const VectorXd& theta,
     getParam(static_cast<int32_t>(acceleration_ms), acceleration_param);
 
     for (const int id : motor_ids) {
+        if (!MotorEnabled(id)) continue;
         if (id < 0 || id >= NUMBER_OF_DYNAMIXELS) return false;
         uint8_t goal_param[4] = {0};
         const double absolute_rad = theta[id] + PI;
@@ -431,21 +445,39 @@ int16_t Dxl::SetPresentMode(int16_t Mode)
     }
 }
 
+bool Dxl::VerifyTorqueEnabled(bool enabled)
+{
+    if (!port_opened_) return false;
+    for (int id = 0; id < NUMBER_OF_DYNAMIXELS; ++id) {
+        if (!MotorEnabled(id)) continue;
+        uint8_t value = 0, error = 0;
+        const int result = packetHandler->read1ByteTxRx(
+            portHandler, id, DxlReg_TorqueEnable, &value, &error);
+        if (result != COMM_SUCCESS || error != 0 || value != (enabled ? 1 : 0)) {
+            std::cerr << "[Error] Torque verification failed, ID: " << id << std::endl;
+            return false;
+        }
+    }
+    return true;
+}
+
 bool Dxl::SetTorqueEnabled(bool enabled)
 {
     if (!port_opened_) return false;
     bool success = true;
-    for (uint8_t i = 0; i < NUMBER_OF_DYNAMIXELS; ++i) {
+    for (int id = 0; id < NUMBER_OF_DYNAMIXELS; ++id) {
+        if (enabled && !MotorEnabled(id)) continue;
         uint8_t error = 0;
         const int result = packetHandler->write1ByteTxRx(
-            portHandler, dxl_id[i], DxlReg_TorqueEnable, enabled ? 1 : 0, &error);
+            portHandler, id, DxlReg_TorqueEnable, enabled ? 1 : 0, &error);
         if (result != COMM_SUCCESS || error != 0) {
             std::cerr << "[Error] Torque " << (enabled ? "ON" : "OFF")
-                      << " failed, ID: " << int(dxl_id[i]) << std::endl;
-            success = false;
+                      << " failed, ID: " << id << std::endl;
+            // 전체 OFF는 제외 모터에도 시도한다. 제외 모터의 상태는 미확인이다.
+            if (MotorEnabled(id)) success = false;
         }
     }
-    return success;
+    return success && VerifyTorqueEnabled(enabled);
 }
 
 bool Dxl::IsReady() const

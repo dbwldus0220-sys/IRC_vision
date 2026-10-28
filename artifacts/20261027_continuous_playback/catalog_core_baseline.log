@@ -1,0 +1,93 @@
+Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+[==========] Running 10 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from MotionAliasCatalog
+[ RUN      ] MotionAliasCatalog.LoadsLatestSdkAndCanonicalAliases
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:45: Failure
+Expected equality of these values:
+  catalog.size()
+    Which is: 99
+  96U
+    Which is: 96
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:59: Failure
+Expected equality of these values:
+  catalog.resolve(alias)
+    Which is: 40-byte object <78-95 71-D5 FF-FF 00-00 0E-00 00-00 00-00 00-00 EC-A0 84-34 35-EB 8F-84 28-38 ED-9A 8C-29 00-00 01-8A 64-AE AA-AA 00-00>
+  std::optional<std::string>(motion)
+    Which is: 40-byte object <B0-EB 65-D1 AA-AA 00-00 14-00 00-00 00-00 00-00 14-00 00-00 00-00 00-00 BC-42 64-AE AA-AA 00-00 01-00 00-00 AA-AA 00-00>
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:59: Failure
+Expected equality of these values:
+  catalog.resolve(alias)
+    Which is: 40-byte object <78-95 71-D5 FF-FF 00-00 0E-00 00-00 00-00 00-00 EC-A0 84-34 35-EB 8F-84 28-38 ED-9A 8C-29 00-00 01-8A 64-AE AA-AA 00-00>
+  std::optional<std::string>(motion)
+    Which is: 40-byte object <B0-EB 65-D1 AA-AA 00-00 14-00 00-00 00-00 00-00 14-00 00-00 00-00 00-00 BC-42 64-AE AA-AA 00-00 01-00 00-00 AA-AA 00-00>
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:59: Failure
+Expected equality of these values:
+  catalog.resolve(alias)
+    Which is: 40-byte object <78-95 71-D5 FF-FF 00-00 0E-00 00-00 00-00 00-00 EC-A0 84-39 30-EB 8F-84 28-32 ED-9A 8C-29 00-00 01-8A 64-AE AA-AA 00-00>
+  std::optional<std::string>(motion)
+    Which is: 40-byte object <B0-EB 65-D1 AA-AA 00-00 14-00 00-00 00-00 00-00 14-00 00-00 00-00 00-00 BC-42 64-AE AA-AA 00-00 01-00 00-00 AA-AA 00-00>
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:59: Failure
+Expected equality of these values:
+  catalog.resolve(alias)
+    Which is: 40-byte object <A0-E4 65-D1 AA-AA 00-00 23-00 00-00 00-00 00-00 23-00 00-00 00-00 00-00 28-32 ED-9A 8C-29 00-00 01-8A 64-AE AA-AA 00-00>
+  std::optional<std::string>(motion)
+    Which is: 40-byte object <00-D7 65-D1 AA-AA 00-00 26-00 00-00 00-00 00-00 26-00 00-00 00-00 00-00 BC-42 64-AE AA-AA 00-00 01-00 00-00 AA-AA 00-00>
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:59: Failure
+Expected equality of these values:
+  catalog.resolve(alias)
+    Which is: 40-byte object <50-E6 65-D1 AA-AA 00-00 23-00 00-00 00-00 00-00 23-00 00-00 00-00 00-00 28-32 ED-9A 8C-29 00-00 01-8A 64-AE AA-AA 00-00>
+  std::optional<std::string>(motion)
+    Which is: 40-byte object <A0-E4 65-D1 AA-AA 00-00 24-00 00-00 00-00 00-00 24-00 00-00 00-00 00-00 BC-42 64-AE AA-AA 00-00 01-00 00-00 AA-AA 00-00>
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:59: Failure
+Expected equality of these values:
+  catalog.resolve(alias)
+    Which is: 40-byte object <50-E2 65-D1 AA-AA 00-00 20-00 00-00 00-00 00-00 20-00 00-00 00-00 00-00 28-32 ED-9A 8C-29 00-00 01-8A 64-AE AA-AA 00-00>
+  std::optional<std::string>(motion)
+    Which is: 40-byte object <50-E6 65-D1 AA-AA 00-00 22-00 00-00 00-00 00-00 22-00 00-00 00-00 00-00 BC-42 64-AE AA-AA 00-00 01-00 00-00 AA-AA 00-00>
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:59: Failure
+Expected equality of these values:
+  catalog.resolve(alias)
+    Which is: 40-byte object <50-E2 65-D1 AA-AA 00-00 1F-00 00-00 00-00 00-00 1F-00 00-00 00-00 00-00 28-32 ED-9A 8C-29 00-00 01-8A 64-AE AA-AA 00-00>
+  std::optional<std::string>(motion)
+    Which is: 40-byte object <50-E6 65-D1 AA-AA 00-00 21-00 00-00 00-00 00-00 21-00 00-00 00-00 00-00 BC-42 64-AE AA-AA 00-00 01-00 00-00 AA-AA 00-00>
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:59: Failure
+Expected equality of these values:
+  catalog.resolve(alias)
+    Which is: 40-byte object <78-95 71-D5 FF-FF 00-00 0C-00 00-00 00-00 00-00 EA-B1 B4-EA B3-B5 EC-9E A1-EA B8-B0 00-29 00-00 01-8A 64-AE AA-AA 00-00>
+  std::optional<std::string>(motion)
+    Which is: 40-byte object <A0-E8 65-D1 AA-AA 00-00 22-00 00-00 00-00 00-00 22-00 00-00 00-00 00-00 BC-42 64-AE AA-AA 00-00 01-00 00-00 AA-AA 00-00>
+[  FAILED  ] MotionAliasCatalog.LoadsLatestSdkAndCanonicalAliases (3 ms)
+[----------] 1 test from MotionAliasCatalog (3 ms total)
+
+[----------] 8 tests from CatalogOnlyCore
+[ RUN      ] CatalogOnlyCore.PreservesCorrelationFieldsAndRejectsExecution
+[       OK ] CatalogOnlyCore.PreservesCorrelationFieldsAndRejectsExecution (2 ms)
+[ RUN      ] CatalogOnlyCore.RejectsInvalidJsonSafely
+[       OK ] CatalogOnlyCore.RejectsInvalidJsonSafely (2 ms)
+[ RUN      ] CatalogOnlyCore.DistinguishesRequiredNullEventIdFromMissingEventId
+[       OK ] CatalogOnlyCore.DistinguishesRequiredNullEventIdFromMissingEventId (2 ms)
+[ RUN      ] CatalogOnlyCore.RequiresEveryRequestContractField
+[       OK ] CatalogOnlyCore.RequiresEveryRequestContractField (1 ms)
+[ RUN      ] CatalogOnlyCore.RejectsUnknownAliasWithoutFallback
+[       OK ] CatalogOnlyCore.RejectsUnknownAliasWithoutFallback (1 ms)
+[ RUN      ] CatalogOnlyCore.SerializedStatusContainsContractFields
+[       OK ] CatalogOnlyCore.SerializedStatusContainsContractFields (2 ms)
+[ RUN      ] CatalogOnlyCore.SerializedStatusPreservesNullCorrelationTypes
+[       OK ] CatalogOnlyCore.SerializedStatusPreservesNullCorrelationTypes (2 ms)
+[ RUN      ] CatalogOnlyCore.CancelNeverTouchesHardware
+[       OK ] CatalogOnlyCore.CancelNeverTouchesHardware (1 ms)
+[----------] 8 tests from CatalogOnlyCore (14 ms total)
+
+[----------] 1 test from CatalogOnlyContract
+[ RUN      ] CatalogOnlyContract.SharedVectorsPreserveFieldsWithoutFallback
+[       OK ] CatalogOnlyContract.SharedVectorsPreserveFieldsWithoutFallback (2 ms)
+[----------] 1 test from CatalogOnlyContract (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 10 tests from 3 test suites ran. (19 ms total)
+[  PASSED  ] 9 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] MotionAliasCatalog.LoadsLatestSdkAndCanonicalAliases
+
+ 1 FAILED TEST

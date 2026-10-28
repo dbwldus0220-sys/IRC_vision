@@ -1,0 +1,61 @@
+Internal ctest changing into directory: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+Test project /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+    Start 18: test_test_hurdle_head_override_launch.py
+1/2 Test #18: test_test_hurdle_head_override_launch.py ...   Passed    6.87 sec
+    Start 19: test_test_ball_head_override_launch.py
+2/2 Test #19: test_test_ball_head_override_launch.py .....***Failed    1.77 sec
+-- run_test.py: extra environment variables:
+ - ROS_LOG_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ros_test_logs
+-- run_test.py: extra environment variables to append:
+ - AMENT_PREFIX_PATH+=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor
+ - LD_LIBRARY_PATH+=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor/lib
+-- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+ - /usr/bin/python3 -m launch_testing.launch_test /home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_ball_head_override_launch.py --junit-xml=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_ball_head_override_launch.py.xunit.xml --package-name=irc_step_motion_executor
+[INFO] [launch]: All log files can be found below /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ros_test_logs/2026-10-27-22-50-16-404352-jet-15781
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [sdk_motion_executor-1]: process started with pid [15785]
+[INFO] [python3-2]: process started with pid [15787]
+[sdk_motion_executor-1] [INFO] [1793109016.520926327] [ball_head_override_test_executor]: Interpolation: continuous quintic; motor 5: included
+[sdk_motion_executor-1] [INFO] [1793109016.521259108] [ball_head_override_test_executor]: Motion position tolerance check: DISABLED
+[sdk_motion_executor-1] [WARN] [1793109016.524385824] [ball_head_override_test_executor]: Simulated backend only: no SDK or hardware access is available
+test_ball_camera_hold_across_motion_boundaries (irc_step_motion_executor.TestBallHeadOverride) ... [sdk_motion_executor-1] [INFO] [1793109016.896301125] [ball_head_override_test_executor]: Ball entered bottom trigger: motor 0 override -64.0 deg latched
+FAIL
+
+======================================================================
+FAIL: test_ball_camera_hold_across_motion_boundaries (irc_step_motion_executor.TestBallHeadOverride)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_ball_head_override_launch.py", line 108, in test_ball_camera_hold_across_motion_boundaries
+    self.hold(True)
+  File "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_ball_head_override_launch.py", line 98, in hold
+    self.assertIs(self.heartbeats[-1]["ball_head_override_active"], enabled)
+AssertionError: False is not True
+
+----------------------------------------------------------------------
+Ran 1 test in 0.512s
+
+FAILED (failures=1)
+[INFO] [python3-2]: sending signal 'SIGINT' to process[python3-2]
+[INFO] [sdk_motion_executor-1]: sending signal 'SIGINT' to process[sdk_motion_executor-1]
+[sdk_motion_executor-1] [INFO] [1793109016.985507296] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[INFO] [python3-2]: process has finished cleanly [pid 15787]
+[INFO] [sdk_motion_executor-1]: process has finished cleanly [pid 15785]
+
+----------------------------------------------------------------------
+Ran 0 tests in 0.000s
+
+OK
+-- run_test.py: return code 1
+-- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_ball_head_override_launch.py.xunit.xml'
+
+
+50% tests passed, 1 tests failed out of 2
+
+Label Time Summary:
+launch_test    =   8.64 sec*proc (2 tests)
+
+Total Test time (real) =   8.65 sec
+
+The following tests FAILED:
+	 19 - test_test_ball_head_override_launch.py (Failed)
+Errors while running CTest

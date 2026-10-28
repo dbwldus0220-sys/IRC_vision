@@ -1,0 +1,11 @@
+[INFO] [1793116874.386051824] [sdk_motion_executor]: Execution path: backend=robot_motion_player aliases=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor/share/irc_step_motion_executor/config/motion_aliases.yaml JSON=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor/share/irc_step_motion_executor/config/robot_motions_runtime.json port=/dev/ttyUSB0 baud=4000000 poll_ms=5
+[INFO] [1793116874.386398621] [sdk_motion_executor]: Compiled GUI alignment version: 20261028
+[INFO] [1793116874.389471311] [sdk_motion_executor]: Interpolation: continuous quintic; motor 5: included
+[INFO] [1793116877.361891350] [sdk_motion_executor]: Motion position tolerance check: DISABLED
+[INFO] [1793116877.762238502] [sdk_motion_executor]: [STARTUP POSE] Current pose captured
+[INFO] [1793116877.762431886] [sdk_motion_executor]: [STARTUP POSE] Moving to 오뒤무게중심앞
+[INFO] [1793116881.793819901] [sdk_motion_executor]: [STARTUP POSE] Settling
+[INFO] [1793116881.889845469] [sdk_motion_executor]: [STARTUP POSE] Reached 오뒤무게중심앞
+[INFO] [1793116881.889983522] [sdk_motion_executor]: [STARTUP POSE] Holding for 2000 ms before AUTO
+[INFO] [1793116883.893555007] [sdk_motion_executor]: [STARTUP POSE] AUTO ready
+[INFO] [1793116961.537998508] [rclcpp]: signal_handler(SIGINT/SIGTERM)

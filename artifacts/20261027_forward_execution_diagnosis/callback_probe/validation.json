@@ -1,0 +1,36 @@
+{
+  "unit_tests": {
+    "callback_timing_trace": "2/2 passed",
+    "existing_sdk_executor_driver": "8/9 passed; existing RequestPublishesImmediateRunningStatus expects legacy 찐찐전진45(8회), current catalog resolves 전45도(8회). Driver code unchanged."
+  },
+  "simulated_exit_code": 0,
+  "messages": {
+    "idle_messages": {
+      "published": 0,
+      "recorded_callbacks": 0
+    },
+    "three_topics_30hz": {
+      "published": 690,
+      "recorded_callbacks": 690
+    },
+    "three_topics_30hz_head_active": {
+      "published": 693,
+      "recorded_callbacks": 693
+    }
+  },
+  "recorded": [
+    {
+      "records": 15816,
+      "dropped": 0
+    }
+  ],
+  "installed_binary": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/sdk_motion_executor",
+  "binary_sha256": "f3cef2046d95a2ce2378eb0576c7fb38cf8210592cd1055e6945a7b7de906b01",
+  "runtime_json_sha256": "cfabd44c35a4a8c433e68ccd662efd578760db55e10e2699c0518753bd9d589a",
+  "limits": [
+    "Simulated backend with synthetic messages; no actual vision inference or robot I/O.",
+    "Restricted UDP transport logged warnings, but local communication delivered every published synthetic message.",
+    "No scheduling, priority, angle, speed or motion sequence changes.",
+    "Callback file flushes on normal shutdown; abrupt termination loses buffered data."
+  ]
+}

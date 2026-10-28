@@ -139,6 +139,23 @@ def test_writer_closes_and_does_not_overwrite(tmp_path):
         TraceWriter(path, {})
 
 
+def test_legacy_gui_without_separate_restart_keeps_commands():
+    gui = fake_gui()
+    delattr(gui.SDKMotionEditor, 'restart_playback_cycle')
+    plain = gui.SDKMotionEditor()
+    plain.start_motion_playback()
+    plain.anim_step()
+    rows = []
+    GuiTrace(rows.append, 'legacy').install(gui)
+    traced = gui.SDKMotionEditor()
+    traced.start_motion_playback()
+    traced.anim_step()
+    assert traced.commands == plain.commands
+    tick = next(row for row in rows if row['event'] == 'tick')
+    assert tick['next_repeat'] == 1
+    assert tick['next_timeline_ms'] == 20
+
+
 def test_gui_packet_capture_excludes_rejected_motor_parameters():
     gui = fake_gui()
     gui.COMM_SUCCESS = 0
@@ -181,7 +198,7 @@ def binaries(tmp_path_factory):
     result = {}
     for name in ['gui_execution_probe', 'recorded_execution_probe']:
         binary = directory/name
-        subprocess.run(['g++', '-std=c++20', '-O0', '-pthread', '-I', str(sdk),
+        subprocess.run(['g++', '-std=c++20', '-O2', '-ffp-contract=off', '-pthread', '-I', str(sdk),
                         str(sdk/f'{name}.cpp'), str(sdk/'robot_motion_player.cpp'),
                         str(sdk/'motion_pattern.cpp'), '-o', str(binary)], check=True)
         result[name] = binary
@@ -224,7 +241,8 @@ def measured_fixture(tmp_path):
     motion = motion_fixture()
     ns = load_gui(ROOT/'artifacts/20261006_gui_alignment/reference/sdk_gui.py')
     periods, read_delay, write_delay = [5, 17, 6], 2, 1
-    records = oracle(ns, motion, periods, read_delay, write_delay)
+    # 요청된 부분 관절 누적 규칙을 구형 GUI oracle에도 명시적으로 적용한다.
+    records = oracle(ns, motion, periods, read_delay, write_delay, carry_all_repeat_goals=True)
     initial = {i: i*.25-3 for i in range(23)}
     origin_ms = 1000 + read_delay
     rows = [dict(event='session', schema_version=2),

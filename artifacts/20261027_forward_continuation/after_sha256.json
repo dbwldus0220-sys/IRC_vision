@@ -1,0 +1,20 @@
+{
+  "artifacts/robot_motions_pc.json": "a630d63c1ece04d494a791e263eb6fba289038f0e9b233e81e27934d86f7325f",
+  "artifacts/robot_motions_runtime.json": "974b89fe034f4cdd5eaab8860ff96e909064acd8999bf49bc0b3752c16d521b9",
+  "external_sdk/gui_aligned/CMakeLists.txt": "ba4ffe0a654d971460b1cf106bafcc6d490376f285411175d81b9977ba858937",
+  "external_sdk/gui_aligned/continuous_trace_probe.cpp": "7c59afd9be51a50e3bb097628d3aaaa79a168b44db626a774698cab947c7d405",
+  "external_sdk/gui_aligned/gui_playback.hpp": "718db9137aaa1fe4bfb8a8ba15b46d672105f38d454d017743591553d1668f98",
+  "external_sdk/gui_aligned/motion_pattern.cpp": "f5d79f864bde63e511561393d22fa963a3af2e9780a904234fd9c65bb7817bdc",
+  "external_sdk/gui_aligned/motion_pattern.hpp": "c8a3c807b5b037a222fb2698766567a26eceb00781b9610144a27d2508774cf0",
+  "external_sdk/gui_aligned/robot_motion_player.cpp": "8bda4cf83e8b7eba7aadd4e32bdc9a72d9786df41d2f8966cf68a0ffe52ccedc",
+  "external_sdk/gui_aligned/robot_motion_player.hpp": "fe591c4f668193afc790617074d7db6d0d987337867af4e4b9c58385e84a07c2",
+  "external_sdk/gui_aligned/test_forward_continuation.cpp": "b387c535162b1c0890448acf57aafac18c2537433c86465052d540976f0628af",
+  "src/irc_step_motion_executor/CMakeLists.txt": "057d466691bb04038c9830e7179e4672cf1e3936c69193d807885eb7fbf50711",
+  "src/irc_step_motion_executor/config/motion_aliases.yaml": "c6e74ae26d6ddddc248facfa45105ae062b18f282c82328ba841d1452190e93c",
+  "src/mission_control/mission_control/motion_command_bridge_node.py": "a8c7d2495a97f441b706d91169fea2b880c6b696bbea93cc1e7f2d8204c0b3b9",
+  "src/mission_control/mission_control/motion_decision_node.py": "28a2cd1c855d83d37b3efbe7ffa03f39f0bde541837f2bb17f82c9bcf0f58199",
+  "src/mission_control/test/test_catalog51_forward_update.py": "9f38b18b6428620b4c7b11337e3cf6d1540b7a967f4e84e108484cb7bcf94499",
+  "src/mission_control/test/test_catalog52_r_update.py": "3091d8811bdb81d812af3c0ef30887f4896b1589fa631c8b831d80e73a3ad3cd",
+  "src/mission_control/test/test_motion_command_bridge.py": "52244b1ffc31e528d1114b4c08c7e410ab6c1d063233e039fd65543bdddea635",
+  "tools/verify_continuous_playback.py": "794aa04e89d35ecc1a2e36ba333540151d9248cbd7d539257033c6a6870316e3"
+}

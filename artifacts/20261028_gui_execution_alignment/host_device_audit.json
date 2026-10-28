@@ -1,0 +1,10 @@
+{
+  "ports": [
+    "/dev/ttyUSB0",
+    "/dev/serial/by-id/usb-FTDI_USB__-__Serial_Converter_FTAKRKTW-if00-port0"
+  ],
+  "usb_latency": {
+    "/sys/bus/usb-serial/devices/ttyUSB0/latency_timer": "16"
+  },
+  "executors": []
+}

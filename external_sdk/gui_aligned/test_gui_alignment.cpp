@@ -32,7 +32,9 @@ int main(int argc, char** argv) {
         }
         if(scenario==7) {
             assert(p.startPoseTransition(std::vector<double>(23,15),20));
-            ms+=20; p.update(); assert(p.status()==MotionStatus::Settling);
+            ms+=5; p.update();
+            assert(std::abs(hw.commandedPositions().at(1)-(1+14*(1-std::cos(std::acos(-1.0)*.25))/2))<1e-9);
+            ms+=15; p.update(); assert(p.status()==MotionStatus::Settling);
             ms+=100; p.update(); assert(!p.succeeded());
             hw.setPresentPositions(JointAngles{});
             ms+=3100; p.update(); assert(p.result()==MotionError::PositionTimeout);continue;

@@ -1,0 +1,762 @@
+{
+  "user_observation": "Left drift decreased but remained in this run. Earlier report places onset in first forward segment.",
+  "sessions": [
+    {
+      "records": 0,
+      "dropped": 0
+    },
+    {
+      "records": 45544,
+      "dropped": 0
+    }
+  ],
+  "sources": {
+    "callbacks.csv": "6480bd0638fec1cb1ee4fc959d04194fe89d466601a9e67654e7bc8d95b2df2e",
+    "motion.csv": "5b31fb4594dc073973d7b67f1eb10affb92d60d00e7106a772a3768a29014f0e"
+  },
+  "scope": "Host-side intervals and wall/thread CPU accounting. Wall minus CPU is blocked/descheduled time, not identification of a particular competing process. Startup position reads excluded from intra-motion write intervals.",
+  "forward_motions": [
+    {
+      "motion_number": 1,
+      "motion": "전45도(6회)",
+      "max_intervals_by_repeat_ms": {
+        "1": 5.912315,
+        "2": 6.737714,
+        "3": 6.709232,
+        "4": 8.853737,
+        "5": 7.316768,
+        "6": 6.816211
+      },
+      "slow_write_events": [
+        {
+          "repeat": 4,
+          "frame": 3,
+          "timeline_ms": 432.0,
+          "goal_interval_ms": 8.853737,
+          "sdk_tick_interval_ms": 5.651477,
+          "sdk_before_write_ms": 3.4054009998217225,
+          "write_call_ms": 0.704851,
+          "current_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5882503.530811,
+            "end_ms": 5882507.773066,
+            "wall_ms": 4.242255,
+            "cpu_ms": 0.671808,
+            "active": true,
+            "session": 2
+          },
+          "previous_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5882497.894279,
+            "end_ms": 5882498.333618,
+            "wall_ms": 0.439339,
+            "cpu_ms": 0.437504,
+            "active": true,
+            "session": 2
+          },
+          "other_callbacks_between_polls": [],
+          "current_nested_scopes": [
+            {
+              "callback": "head_update",
+              "start_ms": 5882503.540923,
+              "end_ms": 5882503.544955,
+              "wall_ms": 0.004032,
+              "cpu_ms": 0.00272,
+              "active": true,
+              "session": 2
+            },
+            {
+              "callback": "driver_poll",
+              "start_ms": 5882503.547835,
+              "end_ms": 5882507.76897,
+              "wall_ms": 4.221135,
+              "cpu_ms": 0.65536,
+              "active": true,
+              "session": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "motion_number": 4,
+      "motion": "전45도(6회)",
+      "max_intervals_by_repeat_ms": {
+        "1": 9.704672,
+        "2": 8.253561,
+        "3": 14.589535,
+        "4": 6.154562,
+        "5": 12.017852,
+        "6": 9.001773
+      },
+      "slow_write_events": [
+        {
+          "repeat": 1,
+          "frame": 2,
+          "timeline_ms": 383.0,
+          "goal_interval_ms": 8.752294,
+          "sdk_tick_interval_ms": 8.719718,
+          "sdk_before_write_ms": 0.35754499956965446,
+          "write_call_ms": 0.181221,
+          "current_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5888431.89898,
+            "end_ms": 5888432.578997,
+            "wall_ms": 0.680017,
+            "cpu_ms": 0.628928,
+            "active": true,
+            "session": 2
+          },
+          "previous_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5888423.17075,
+            "end_ms": 5888423.995764,
+            "wall_ms": 0.825014,
+            "cpu_ms": 0.689376,
+            "active": true,
+            "session": 2
+          },
+          "other_callbacks_between_polls": [],
+          "current_nested_scopes": [
+            {
+              "callback": "head_update",
+              "start_ms": 5888431.913956,
+              "end_ms": 5888431.918532,
+              "wall_ms": 0.004576,
+              "cpu_ms": 0.003104,
+              "active": true,
+              "session": 2
+            },
+            {
+              "callback": "driver_poll",
+              "start_ms": 5888431.922116,
+              "end_ms": 5888432.576149,
+              "wall_ms": 0.654033,
+              "cpu_ms": 0.610624,
+              "active": true,
+              "session": 2
+            }
+          ]
+        },
+        {
+          "repeat": 1,
+          "frame": 3,
+          "timeline_ms": 486.0,
+          "goal_interval_ms": 9.704672,
+          "sdk_tick_interval_ms": 7.750636,
+          "sdk_before_write_ms": 2.28233200032264,
+          "write_call_ms": 0.159332,
+          "current_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5888545.771159,
+            "end_ms": 5888548.450845,
+            "wall_ms": 2.679686,
+            "cpu_ms": 0.69184,
+            "active": true,
+            "session": 2
+          },
+          "previous_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5888538.13339,
+            "end_ms": 5888538.696541,
+            "wall_ms": 0.563151,
+            "cpu_ms": 0.537856,
+            "active": true,
+            "session": 2
+          },
+          "other_callbacks_between_polls": [],
+          "current_nested_scopes": [
+            {
+              "callback": "head_update",
+              "start_ms": 5888545.785079,
+              "end_ms": 5888545.790935,
+              "wall_ms": 0.005856,
+              "cpu_ms": 0.003808,
+              "active": true,
+              "session": 2
+            },
+            {
+              "callback": "driver_poll",
+              "start_ms": 5888545.794775,
+              "end_ms": 5888548.445853,
+              "wall_ms": 2.651078,
+              "cpu_ms": 0.666976,
+              "active": true,
+              "session": 2
+            }
+          ]
+        },
+        {
+          "repeat": 2,
+          "frame": 2,
+          "timeline_ms": 380.0,
+          "goal_interval_ms": 8.253561,
+          "sdk_tick_interval_ms": 7.83931,
+          "sdk_before_write_ms": 0.5757590001448989,
+          "write_call_ms": 0.140804,
+          "current_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5888990.02582,
+            "end_ms": 5888991.731977,
+            "wall_ms": 1.706157,
+            "cpu_ms": 0.565376,
+            "active": true,
+            "session": 2
+          },
+          "previous_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5888983.070629,
+            "end_ms": 5888983.402222,
+            "wall_ms": 0.331593,
+            "cpu_ms": 0.32992,
+            "active": true,
+            "session": 2
+          },
+          "other_callbacks_between_polls": [],
+          "current_nested_scopes": [
+            {
+              "callback": "head_update",
+              "start_ms": 5888990.036125,
+              "end_ms": 5888990.039709,
+              "wall_ms": 0.003584,
+              "cpu_ms": 0.002592,
+              "active": true,
+              "session": 2
+            },
+            {
+              "callback": "driver_poll",
+              "start_ms": 5888990.042557,
+              "end_ms": 5888991.727113,
+              "wall_ms": 1.684556,
+              "cpu_ms": 0.548416,
+              "active": true,
+              "session": 2
+            }
+          ]
+        },
+        {
+          "repeat": 3,
+          "frame": -1,
+          "timeline_ms": 9.0,
+          "goal_interval_ms": 11.277545,
+          "sdk_tick_interval_ms": 11.498287,
+          "sdk_before_write_ms": 0.07040200009942055,
+          "write_call_ms": 0.141955,
+          "current_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5889144.925319,
+            "end_ms": 5889145.255471,
+            "wall_ms": 0.330152,
+            "cpu_ms": 0.322336,
+            "active": true,
+            "session": 2
+          },
+          "previous_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5889133.430232,
+            "end_ms": 5889134.073033,
+            "wall_ms": 0.642801,
+            "cpu_ms": 0.56464,
+            "active": true,
+            "session": 2
+          },
+          "other_callbacks_between_polls": [],
+          "current_nested_scopes": [
+            {
+              "callback": "head_update",
+              "start_ms": 5889144.936455,
+              "end_ms": 5889144.940743,
+              "wall_ms": 0.004288,
+              "cpu_ms": 0.002592,
+              "active": true,
+              "session": 2
+            },
+            {
+              "callback": "driver_poll",
+              "start_ms": 5889144.944007,
+              "end_ms": 5889145.253903,
+              "wall_ms": 0.309896,
+              "cpu_ms": 0.308384,
+              "active": true,
+              "session": 2
+            }
+          ]
+        },
+        {
+          "repeat": 3,
+          "frame": 1,
+          "timeline_ms": 156.0,
+          "goal_interval_ms": 14.589535,
+          "sdk_tick_interval_ms": 5.054885,
+          "sdk_before_write_ms": 9.683645999990404,
+          "write_call_ms": 0.1473,
+          "current_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5889308.13918,
+            "end_ms": 5889318.342104,
+            "wall_ms": 10.202924,
+            "cpu_ms": 0.648736,
+            "active": true,
+            "session": 2
+          },
+          "previous_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5889303.097319,
+            "end_ms": 5889304.411658,
+            "wall_ms": 1.314339,
+            "cpu_ms": 0.405888,
+            "active": true,
+            "session": 2
+          },
+          "other_callbacks_between_polls": [],
+          "current_nested_scopes": [
+            {
+              "callback": "head_update",
+              "start_ms": 5889308.151052,
+              "end_ms": 5889308.154348,
+              "wall_ms": 0.003296,
+              "cpu_ms": 0.00224,
+              "active": true,
+              "session": 2
+            },
+            {
+              "callback": "driver_poll",
+              "start_ms": 5889308.157196,
+              "end_ms": 5889318.336504,
+              "wall_ms": 10.179308,
+              "cpu_ms": 0.62976,
+              "active": true,
+              "session": 2
+            }
+          ]
+        },
+        {
+          "repeat": 5,
+          "frame": -1,
+          "timeline_ms": 325.0,
+          "goal_interval_ms": 12.017852,
+          "sdk_tick_interval_ms": 12.022876,
+          "sdk_before_write_ms": 0.17053299956023693,
+          "write_call_ms": 0.163428,
+          "current_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5890625.232831,
+            "end_ms": 5890625.680363,
+            "wall_ms": 0.447532,
+            "cpu_ms": 0.43904,
+            "active": true,
+            "session": 2
+          },
+          "previous_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5890613.213859,
+            "end_ms": 5890613.616942,
+            "wall_ms": 0.403083,
+            "cpu_ms": 0.39568,
+            "active": true,
+            "session": 2
+          },
+          "other_callbacks_between_polls": [],
+          "current_nested_scopes": [
+            {
+              "callback": "head_update",
+              "start_ms": 5890625.244832,
+              "end_ms": 5890625.24976,
+              "wall_ms": 0.004928,
+              "cpu_ms": 0.0032,
+              "active": true,
+              "session": 2
+            },
+            {
+              "callback": "driver_poll",
+              "start_ms": 5890625.25312,
+              "end_ms": 5890625.678251,
+              "wall_ms": 0.425131,
+              "cpu_ms": 0.422272,
+              "active": true,
+              "session": 2
+            }
+          ]
+        },
+        {
+          "repeat": 6,
+          "frame": -1,
+          "timeline_ms": 72.0,
+          "goal_interval_ms": 9.001773,
+          "sdk_tick_interval_ms": 7.457733,
+          "sdk_before_write_ms": 1.6119780000299215,
+          "write_call_ms": 0.13738,
+          "current_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5890908.20517,
+            "end_ms": 5890912.578405,
+            "wall_ms": 4.373235,
+            "cpu_ms": 0.418816,
+            "active": true,
+            "session": 2
+          },
+          "previous_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5890903.215663,
+            "end_ms": 5890903.546392,
+            "wall_ms": 0.330729,
+            "cpu_ms": 0.307232,
+            "active": true,
+            "session": 2
+          },
+          "other_callbacks_between_polls": [
+            {
+              "callback": "ball_info",
+              "start_ms": 5890904.287659,
+              "end_ms": 5890904.464368,
+              "wall_ms": 0.176709,
+              "cpu_ms": 0.169824,
+              "active": true,
+              "session": 2
+            }
+          ],
+          "current_nested_scopes": [
+            {
+              "callback": "head_update",
+              "start_ms": 5890908.218099,
+              "end_ms": 5890908.222131,
+              "wall_ms": 0.004032,
+              "cpu_ms": 0.002624,
+              "active": true,
+              "session": 2
+            },
+            {
+              "callback": "driver_poll",
+              "start_ms": 5890908.225459,
+              "end_ms": 5890912.574245,
+              "wall_ms": 4.348786,
+              "cpu_ms": 0.399616,
+              "active": true,
+              "session": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "motion_number": 7,
+      "motion": "전45도(4회)",
+      "max_intervals_by_repeat_ms": {
+        "1": 7.505221,
+        "2": 7.983378,
+        "3": 7.294496,
+        "4": 11.328714
+      },
+      "slow_write_events": [
+        {
+          "repeat": 1,
+          "frame": 2,
+          "timeline_ms": 355.0,
+          "goal_interval_ms": 7.505221,
+          "sdk_tick_interval_ms": 7.489381,
+          "sdk_before_write_ms": 0.23370200023055077,
+          "write_call_ms": 0.139172,
+          "current_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5896175.822501,
+            "end_ms": 5896176.299058,
+            "wall_ms": 0.476557,
+            "cpu_ms": 0.445952,
+            "active": true,
+            "session": 2
+          },
+          "previous_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5896168.332544,
+            "end_ms": 5896168.780172,
+            "wall_ms": 0.447628,
+            "cpu_ms": 0.440512,
+            "active": true,
+            "session": 2
+          },
+          "other_callbacks_between_polls": [],
+          "current_nested_scopes": [
+            {
+              "callback": "head_update",
+              "start_ms": 5896175.832774,
+              "end_ms": 5896175.835686,
+              "wall_ms": 0.002912,
+              "cpu_ms": 0.002176,
+              "active": true,
+              "session": 2
+            },
+            {
+              "callback": "driver_poll",
+              "start_ms": 5896175.838822,
+              "end_ms": 5896176.296914,
+              "wall_ms": 0.458092,
+              "cpu_ms": 0.433152,
+              "active": true,
+              "session": 2
+            }
+          ]
+        },
+        {
+          "repeat": 2,
+          "frame": 2,
+          "timeline_ms": 348.0,
+          "goal_interval_ms": 7.983378,
+          "sdk_tick_interval_ms": 7.969937,
+          "sdk_before_write_ms": 0.20762200001627207,
+          "write_call_ms": 0.135459,
+          "current_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5896731.219732,
+            "end_ms": 5896731.6728,
+            "wall_ms": 0.453068,
+            "cpu_ms": 0.444928,
+            "active": true,
+            "session": 2
+          },
+          "previous_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5896723.271555,
+            "end_ms": 5896723.60766,
+            "wall_ms": 0.336105,
+            "cpu_ms": 0.333696,
+            "active": true,
+            "session": 2
+          },
+          "other_callbacks_between_polls": [
+            {
+              "callback": "heartbeat",
+              "start_ms": 5896723.618797,
+              "end_ms": 5896723.826034,
+              "wall_ms": 0.207237,
+              "cpu_ms": 0.2048,
+              "active": true,
+              "session": 2
+            }
+          ],
+          "current_nested_scopes": [
+            {
+              "callback": "head_update",
+              "start_ms": 5896731.232213,
+              "end_ms": 5896731.235797,
+              "wall_ms": 0.003584,
+              "cpu_ms": 0.002592,
+              "active": true,
+              "session": 2
+            },
+            {
+              "callback": "driver_poll",
+              "start_ms": 5896731.238773,
+              "end_ms": 5896731.670848,
+              "wall_ms": 0.432075,
+              "cpu_ms": 0.430272,
+              "active": true,
+              "session": 2
+            }
+          ]
+        },
+        {
+          "repeat": 4,
+          "frame": -1,
+          "timeline_ms": 7.0,
+          "goal_interval_ms": 8.358556,
+          "sdk_tick_interval_ms": 8.661924,
+          "sdk_before_write_ms": 0.0924509996548295,
+          "write_call_ms": 0.304328,
+          "current_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5897481.967285,
+            "end_ms": 5897482.493827,
+            "wall_ms": 0.526542,
+            "cpu_ms": 0.35408,
+            "active": true,
+            "session": 2
+          },
+          "previous_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5897473.31125,
+            "end_ms": 5897474.09255,
+            "wall_ms": 0.7813,
+            "cpu_ms": 0.738944,
+            "active": true,
+            "session": 2
+          },
+          "other_callbacks_between_polls": [],
+          "current_nested_scopes": [
+            {
+              "callback": "head_update",
+              "start_ms": 5897481.977078,
+              "end_ms": 5897481.980182,
+              "wall_ms": 0.003104,
+              "cpu_ms": 0.002336,
+              "active": true,
+              "session": 2
+            },
+            {
+              "callback": "driver_poll",
+              "start_ms": 5897481.983222,
+              "end_ms": 5897482.492387,
+              "wall_ms": 0.509165,
+              "cpu_ms": 0.34224,
+              "active": true,
+              "session": 2
+            }
+          ]
+        },
+        {
+          "repeat": 4,
+          "frame": 2,
+          "timeline_ms": 361.0,
+          "goal_interval_ms": 10.683257,
+          "sdk_tick_interval_ms": 7.400707,
+          "sdk_before_write_ms": 3.4725709995254874,
+          "write_call_ms": 0.16762,
+          "current_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5897875.701705,
+            "end_ms": 5897879.543342,
+            "wall_ms": 3.841637,
+            "cpu_ms": 0.654848,
+            "active": true,
+            "session": 2
+          },
+          "previous_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5897868.314182,
+            "end_ms": 5897868.716945,
+            "wall_ms": 0.402763,
+            "cpu_ms": 0.40032,
+            "active": true,
+            "session": 2
+          },
+          "other_callbacks_between_polls": [],
+          "current_nested_scopes": [
+            {
+              "callback": "head_update",
+              "start_ms": 5897875.712329,
+              "end_ms": 5897875.716809,
+              "wall_ms": 0.00448,
+              "cpu_ms": 0.002784,
+              "active": true,
+              "session": 2
+            },
+            {
+              "callback": "driver_poll",
+              "start_ms": 5897875.719753,
+              "end_ms": 5897879.538413,
+              "wall_ms": 3.81866,
+              "cpu_ms": 0.635616,
+              "active": true,
+              "session": 2
+            }
+          ]
+        },
+        {
+          "repeat": 4,
+          "frame": 2,
+          "timeline_ms": 398.0,
+          "goal_interval_ms": 11.328714,
+          "sdk_tick_interval_ms": 8.579361,
+          "sdk_before_write_ms": 2.926029000431299,
+          "write_call_ms": 0.23223,
+          "current_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5897916.874627,
+            "end_ms": 5897920.188283,
+            "wall_ms": 3.313656,
+            "cpu_ms": 0.674976,
+            "active": true,
+            "session": 2
+          },
+          "previous_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5897908.315714,
+            "end_ms": 5897908.661195,
+            "wall_ms": 0.345481,
+            "cpu_ms": 0.342496,
+            "active": true,
+            "session": 2
+          },
+          "other_callbacks_between_polls": [
+            {
+              "callback": "ball_info",
+              "start_ms": 5897910.480123,
+              "end_ms": 5897910.619711,
+              "wall_ms": 0.139588,
+              "cpu_ms": 0.134848,
+              "active": true,
+              "session": 2
+            }
+          ],
+          "current_nested_scopes": [
+            {
+              "callback": "head_update",
+              "start_ms": 5897916.886596,
+              "end_ms": 5897916.890692,
+              "wall_ms": 0.004096,
+              "cpu_ms": 0.002944,
+              "active": true,
+              "session": 2
+            },
+            {
+              "callback": "driver_poll",
+              "start_ms": 5897916.893668,
+              "end_ms": 5897920.183034,
+              "wall_ms": 3.289366,
+              "cpu_ms": 0.65488,
+              "active": true,
+              "session": 2
+            }
+          ]
+        },
+        {
+          "repeat": 4,
+          "frame": 3,
+          "timeline_ms": 434.0,
+          "goal_interval_ms": 8.520288,
+          "sdk_tick_interval_ms": 8.44595,
+          "sdk_before_write_ms": 0.28951200004667044,
+          "write_call_ms": 0.115907,
+          "current_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5897956.725531,
+            "end_ms": 5897957.237353,
+            "wall_ms": 0.511822,
+            "cpu_ms": 0.45136,
+            "active": true,
+            "session": 2
+          },
+          "previous_poll": {
+            "callback": "poll_timer",
+            "start_ms": 5897948.29683,
+            "end_ms": 5897948.794123,
+            "wall_ms": 0.497293,
+            "cpu_ms": 0.430592,
+            "active": true,
+            "session": 2
+          },
+          "other_callbacks_between_polls": [],
+          "current_nested_scopes": [
+            {
+              "callback": "head_update",
+              "start_ms": 5897956.735324,
+              "end_ms": 5897956.738812,
+              "wall_ms": 0.003488,
+              "cpu_ms": 0.002464,
+              "active": true,
+              "session": 2
+            },
+            {
+              "callback": "driver_poll",
+              "start_ms": 5897956.742172,
+              "end_ms": 5897957.235561,
+              "wall_ms": 0.493389,
+              "cpu_ms": 0.438016,
+              "active": true,
+              "session": 2
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

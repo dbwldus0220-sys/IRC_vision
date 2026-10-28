@@ -150,6 +150,7 @@ class FakeBridge:
         self.pickup_motor_failures = []
         self.pickup_last_stage_succeeded = True
         self.pending_pickup_crab_motion_id = None
+        self.pending_pickup_fine_motion_id = None
         self.pickup_positioning_dwell_motion_id = None
         self.queued_command_id = None
         self.queued_event_id = None
@@ -294,6 +295,32 @@ def test_straight_queue_ack_is_forwarded_without_releasing_active_motion():
     complete_active_motion(bridge)
     assert bridge.active_command_id == 8001
     assert len(bridge.executor_request_publisher.messages) == 2
+
+
+@pytest.mark.parametrize("first,second,expected", [
+    ("STRAIGHT_2", "STRAIGHT_3", ["line_forward_4", "line_forward_6"]),
+    ("STRAIGHT_3", "STRAIGHT_1", ["line_forward_6", "line_forward_2"]),
+    ("GOAL_CAMERA_90_FORWARD_1", "GOAL_CAMERA_90_FORWARD_2",
+     ["goal_camera_90_forward_2", "goal_camera_90_forward_4"]),
+])
+def test_forward_repeat_variants_are_sent_before_current_motion_finishes(first, second, expected):
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(navigation_message(action=first))
+    bridge.navigation_command_callback(navigation_message(action=second, command_id=8001))
+    assert [r["motion_id"] for r in decoded_messages(bridge.executor_request_publisher)] == expected
+    assert not bridge.queued_request_deferred
+    complete_active_motion(bridge)
+    assert bridge.active_command_id == 8001
+    assert len(bridge.executor_request_publisher.messages) == 2
+
+
+@pytest.mark.parametrize("second", ["GOAL_CAMERA_90_FORWARD_1"])
+def test_forward_to_other_gait_still_waits_for_completion(second):
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(navigation_message(action="STRAIGHT_2"))
+    bridge.navigation_command_callback(navigation_message(action=second, command_id=8001))
+    assert len(bridge.executor_request_publisher.messages) == 1
+    assert bridge.queued_request_deferred
 
 
 def complete_active_motion(bridge, status="SUCCEEDED", error_code=""):
@@ -564,6 +591,7 @@ EXPECTED_PRODUCTION_ACTIONS = {
         for count in counts
     },
     "BALL_FINE_FORWARD_8": "ball_general_fine_forward_8",
+    "BALL_LOST_FINE_FORWARD_3": "ball_top_loss_fine_forward_45_3",
     "BALL_LOST_FORWARD_2": "ball_camera_down_forward_2",
     "BALL_LOST_FORWARD_4": "ball_camera_down_forward_4",
     "HURDLE_LOST_BACKWARD_1": "pickup_lost_ball_backward_1",
@@ -2425,7 +2453,7 @@ def test_pickup_fine_search_uses_camera_down_turn_and_returns_after_dwell(direct
 
 
 @pytest.mark.parametrize("stage", ["INITIAL", "FINE"])
-def test_pickup_top_loss_forward_returns_to_checkpoint_without_dwell(stage):
+def test_pickup_top_loss_fine_forward_returns_to_same_checkpoint(stage):
     bridge = FakeBridge()
     if stage == "FINE":
         enter_pickup_fine_alignment(bridge)
@@ -2435,16 +2463,26 @@ def test_pickup_top_loss_forward_returns_to_checkpoint_without_dwell(stage):
     bridge.navigation_command_callback(fine_alignment_message(
         f"BALL_PICKUP_{stage}_SEARCH_FORWARD"
     ))
-    motion = "ball_camera_down_forward_2"
+    motion = "pickup_top_loss_fine_forward_0_3" if stage == "FINE" else "ball_top_loss_fine_forward_45_3"
     if stage == "FINE":
-        assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == "fine_to_turn_ready_45"
+        assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == "pickup_fine_prepare"
         bridge.executor_status_callback(executor_status(
-            status="SUCCEEDED", motion_id="fine_to_turn_ready_45",
+            status="SUCCEEDED", motion_id="pickup_fine_prepare",
         ))
+        assert bridge.active_dwell_until is not None
+        bridge._check_atomic_dwell(bridge.active_dwell_until - .001)
+        assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == "pickup_fine_prepare"
+        bridge._check_atomic_dwell(bridge.active_dwell_until)
     assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == motion
     bridge.executor_status_callback(executor_status(status="SUCCEEDED", motion_id=motion))
     count = len(bridge.executor_request_publisher.messages)
-    assert bridge.active_dwell_until is None
+    assert bridge.active_dwell_until is not None
+    assert not bridge.pickup_initial_align_waiting
+    assert not bridge.pickup_fine_align_waiting
+    bridge._check_atomic_dwell(bridge.active_dwell_until - .001)
+    assert not bridge.pickup_initial_align_waiting
+    assert not bridge.pickup_fine_align_waiting
+    bridge._check_atomic_dwell(bridge.active_dwell_until)
     assert bridge.pickup_initial_align_waiting is (stage == "INITIAL")
     assert bridge.pickup_fine_align_waiting is (stage == "FINE")
     assert bridge.pickup_fixed_sequence_started is False
@@ -2779,10 +2817,10 @@ def test_pickup_right_crab_does_not_prepare_from_old_fine_history(intervening):
 @pytest.mark.parametrize("distance,action,motion_name", [
     (0.549, "STRAIGHT_0", "건미세45도(5회)"),
     (0.550, "STRAIGHT_0", "건미세45도(5회)"),
-    (0.550001, "STRAIGHT", "전45도(4회)"),
-    (0.570, "STRAIGHT", "전45도(4회)"),
-    (0.700, "STRAIGHT", "전45도(4회)"),
-    (0.700001, "STRAIGHT", "전45도(4회)"),
+    (0.550001, "STRAIGHT", "R전진45도(4회)"),
+    (0.570, "STRAIGHT", "R전진45도(4회)"),
+    (0.700, "STRAIGHT", "R전진45도(4회)"),
+    (0.700001, "STRAIGHT", "R전진45도(4회)"),
 ])
 def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
     source, distance, action, motion_name,
@@ -2808,7 +2846,7 @@ def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
     decision = planner.plan("AUTO", {source: sample, "line": route}, 0.1)
     if source == "hurdle":
         assert decision.source == "hurdle"
-        motion_name = "건미세0도" if distance <= 0.700 else "전45도(4회)"
+        motion_name = "건미세0도" if distance <= 0.700 else "R전진45도(4회)"
         action = "STRAIGHT_0" if distance <= 0.700 else action
     bridge = FakeBridge()
     if source == "ball" and distance <= 0.550:

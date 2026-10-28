@@ -536,13 +536,13 @@ def test_latest_pickup_and_grasp_check_motion_definitions_are_mapped():
     assert check_pose["frames"][0]["time_ms"] == 400
 
 
-def test_top_loss_forward_uses_existing_camera0_two_repeat_motion():
+def test_top_loss_forward_uses_existing_general_fine_motion():
     aliases = yaml.safe_load(ALIAS_PATH.read_text())["motion_aliases"]
     motions = {m["name"]: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())["motions"]}
-    motion_id = MotionCommandBridgeNode.ACTION_TO_MOTION_ID["BALL_LOST_FORWARD_2"]
-    assert motion_id == "ball_camera_down_forward_2"
-    assert aliases[motion_id] == "전진0도-1(2회)"
-    assert motions[aliases[motion_id]]["repeat_count"] == 2
+    motion_id = MotionCommandBridgeNode.ACTION_TO_MOTION_ID["BALL_LOST_FINE_FORWARD_3"]
+    assert motion_id == "ball_top_loss_fine_forward_45_3"
+    assert motion_id in MotionCommandBridgeNode.FINE_FORWARD_MOTION_IDS
+    assert aliases[motion_id] in motions
 
 
 @pytest.mark.parametrize('count', range(1, 5))

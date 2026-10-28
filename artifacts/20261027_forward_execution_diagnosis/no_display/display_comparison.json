@@ -1,0 +1,152 @@
+{
+  "user_observation": "Left drift approximately unchanged with display disabled.",
+  "scope": "Compare first forward motion only; later motion sequences differ.",
+  "display_on_first_forward": {
+    "number": 1,
+    "motion": "전45도(6회)",
+    "start_relative_s": 0.0,
+    "duration_ms": 3418.34,
+    "ticks": 681,
+    "endpoints": 24,
+    "write_failures": 0,
+    "dropped_rows": 0,
+    "queue_delay_ms": 0.0,
+    "goal_interval_ms": {
+      "mean": 4.988465155882353,
+      "p99_nearest_rank": 6.701456,
+      "max": 8.853737,
+      "over_7_5": 1,
+      "over_10": 0
+    },
+    "write_call_ms": {
+      "mean": 0.1440333205882353,
+      "p99_nearest_rank": 0.704851,
+      "max": 0.928792,
+      "over_7_5": 0,
+      "over_10": 0
+    },
+    "update_to_write_ms": {
+      "mean": 0.19025945587850668,
+      "p99_nearest_rank": 0.6034399997442961,
+      "max": 3.4054009998217225,
+      "over_7_5": 0,
+      "over_10": 0
+    },
+    "head_flags": [
+      0
+    ],
+    "shoulder_flags": [
+      0
+    ],
+    "motor_counts": [
+      23
+    ],
+    "gap_from_previous_last_write_ms": null,
+    "largest_command_step": {
+      "repeat": 1,
+      "frame": 0,
+      "timeline_from_ms": 109.0,
+      "timeline_to_ms": 114.0,
+      "interval_ms": 5.181673,
+      "tick_interval_ms": 5.157256,
+      "update_to_write_ms": 0.21191000007092953,
+      "write_ms": 0.168868,
+      "largest_step_motor_id": 13,
+      "largest_step_deg": -7.953617519531193
+    },
+    "slow_intervals": [
+      {
+        "repeat": 4,
+        "frame": 3,
+        "timeline_from_ms": 427.0,
+        "timeline_to_ms": 432.0,
+        "interval_ms": 8.853737,
+        "tick_interval_ms": 5.651477,
+        "update_to_write_ms": 3.4054009998217225,
+        "write_ms": 0.704851,
+        "largest_step_motor_id": 18,
+        "largest_step_deg": -1.6860204678471007
+      }
+    ],
+    "catalog_validation": {
+      "max_error_deg": 7.105427357601002e-14,
+      "compared_angles": 15663,
+      "all_endpoints_in_order": true
+    }
+  },
+  "display_off_first_forward": {
+    "number": 1,
+    "motion": "전45도(6회)",
+    "start_relative_s": 0.0,
+    "duration_ms": 3416.83,
+    "ticks": 681,
+    "endpoints": 24,
+    "write_failures": 0,
+    "dropped_rows": 0,
+    "queue_delay_ms": 0.0,
+    "goal_interval_ms": {
+      "mean": 4.988313267647059,
+      "p99_nearest_rank": 6.87334,
+      "max": 8.001125,
+      "over_7_5": 1,
+      "over_10": 0
+    },
+    "write_call_ms": {
+      "mean": 0.14680749264705883,
+      "p99_nearest_rank": 0.321772,
+      "max": 1.694142,
+      "over_7_5": 0,
+      "over_10": 0
+    },
+    "update_to_write_ms": {
+      "mean": 0.19851335294215994,
+      "p99_nearest_rank": 0.4536490002647042,
+      "max": 2.5592620000243187,
+      "over_7_5": 0,
+      "over_10": 0
+    },
+    "head_flags": [
+      0
+    ],
+    "shoulder_flags": [
+      0
+    ],
+    "motor_counts": [
+      23
+    ],
+    "gap_from_previous_last_write_ms": null,
+    "largest_command_step": {
+      "repeat": 5,
+      "frame": 0,
+      "timeline_from_ms": 107.0,
+      "timeline_to_ms": 113.0,
+      "interval_ms": 5.912217,
+      "tick_interval_ms": 5.85135,
+      "update_to_write_ms": 0.14410199970006943,
+      "write_ms": 0.13146,
+      "largest_step_motor_id": 13,
+      "largest_step_deg": -9.384654683813991
+    },
+    "slow_intervals": [
+      {
+        "repeat": 5,
+        "frame": -1,
+        "timeline_from_ms": 8.0,
+        "timeline_to_ms": 15.0,
+        "interval_ms": 8.001125,
+        "tick_interval_ms": 7.98794,
+        "update_to_write_ms": 0.07033900078386068,
+        "write_ms": 0.155717,
+        "largest_step_motor_id": 0,
+        "largest_step_deg": 0.0
+      }
+    ],
+    "catalog_validation": {
+      "max_error_deg": 6.394884621840902e-14,
+      "compared_angles": 15663,
+      "dynamic_head_angles_excluded": 0,
+      "all_endpoints_in_order": true
+    }
+  },
+  "interpretation": "No marked improvement in first-forward timing or observed drift. This pair does not support display rendering as the principal cause. GUI playback has not yet been recorded."
+}

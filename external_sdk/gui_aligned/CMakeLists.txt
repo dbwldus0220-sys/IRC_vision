@@ -19,6 +19,11 @@ add_library(motion_core
 )
 target_include_directories(motion_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_options(motion_core PRIVATE -Wall -Wextra -Wpedantic)
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    # Python은 곱셈/덧셈을 각각 반올림한다. ARM FMA 결합은 half-step에서
+    # 동일 degree를 다른 raw로 바꿀 수 있으므로 하위 전송 타깃에도 전파한다.
+    target_compile_options(motion_core PUBLIC -ffp-contract=off)
+endif()
 
 add_executable(test_motion_pattern test_motion_pattern.cpp)
 target_link_libraries(test_motion_pattern PRIVATE motion_core)
@@ -35,7 +40,7 @@ add_library(motion_player_core
     robot_motion_player.cpp
 )
 target_include_directories(motion_player_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_compile_definitions(motion_player_core PUBLIC IRC_STEP_GUI_ALIGNMENT_VERSION=20261006)
+target_compile_definitions(motion_player_core PUBLIC IRC_STEP_GUI_ALIGNMENT_VERSION=20261028)
 target_link_libraries(motion_player_core PUBLIC motion_core Threads::Threads)
 target_compile_options(motion_player_core PRIVATE -Wall -Wextra -Wpedantic)
 
@@ -80,3 +85,21 @@ add_executable(test_gui_alignment test_gui_alignment.cpp)
 target_link_libraries(test_gui_alignment PRIVATE motion_player_core)
 target_compile_options(test_gui_alignment PRIVATE -UNDEBUG)
 add_test(NAME gui_alignment_contract COMMAND test_gui_alignment ${CMAKE_CURRENT_BINARY_DIR})
+
+# 실제 하드웨어 구현을 가짜 SDK 헤더로 컴파일해 패킷 주소와 ID를 검사한다.
+add_executable(test_continuous_hardware test_continuous_hardware.cpp
+    dynamixel_motion_hardware.cpp step_dynamixel.cpp dynamixel_controller.cpp)
+target_include_directories(test_continuous_hardware BEFORE PRIVATE test_support)
+target_link_libraries(test_continuous_hardware PRIVATE motion_player_core Eigen3::Eigen)
+target_compile_options(test_continuous_hardware PRIVATE -UNDEBUG)
+add_test(NAME continuous_hardware_contract COMMAND test_continuous_hardware ${CMAKE_CURRENT_BINARY_DIR})
+add_executable(continuous_trace_probe continuous_trace_probe.cpp)
+target_link_libraries(continuous_trace_probe PRIVATE motion_core)
+add_executable(test_continuous_interpolation test_continuous_interpolation.cpp)
+target_link_libraries(test_continuous_interpolation PRIVATE motion_core)
+target_compile_options(test_continuous_interpolation PRIVATE -UNDEBUG)
+add_test(NAME continuous_interpolation_contract COMMAND test_continuous_interpolation)
+add_executable(test_forward_timing test_forward_timing.cpp)
+target_link_libraries(test_forward_timing PRIVATE motion_player_core)
+target_compile_options(test_forward_timing PRIVATE -UNDEBUG)
+add_test(NAME forward_timing_contract COMMAND test_forward_timing ${CMAKE_CURRENT_BINARY_DIR})

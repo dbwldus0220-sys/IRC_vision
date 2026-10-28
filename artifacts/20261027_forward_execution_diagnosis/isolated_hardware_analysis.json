@@ -1,0 +1,48 @@
+{
+  "trace_sha256": "5570c98f3221b4f14d55322fee44a72e4345c1bef60c4b73cd390927d98131ee",
+  "scope": "Host-side goal-write calls and requested angles; no in-motion measured joint positions or physical yaw",
+  "runs": [
+    {
+      "motion": "전45도(6회)",
+      "elapsed_ms": 3410.26,
+      "tick_rows": 680,
+      "reported_ticks": 680,
+      "endpoint_count": 24,
+      "write_failures": 0,
+      "dropped_rows": 0,
+      "goal_interval_mean_ms": 4.991954132547865,
+      "goal_interval_p99_ms": 5.188541,
+      "goal_interval_max_ms": 9.396226,
+      "max_goal_error_vs_catalog_deg": 7.815970093361102e-14,
+      "angle_comparisons": 15640,
+      "mismatches_above_1e_8_deg": 0,
+      "head_override_active": false,
+      "slow_goal_intervals": [
+        {
+          "repeat": 3,
+          "frame": 0,
+          "timeline_ms": 147.0,
+          "interval_ms": 9.396226
+        }
+      ]
+    },
+    {
+      "motion": "전45도(6회)",
+      "elapsed_ms": 3411.63054000004,
+      "tick_rows": 680,
+      "reported_ticks": 680,
+      "endpoint_count": 24,
+      "write_failures": 0,
+      "dropped_rows": 0,
+      "goal_interval_mean_ms": 4.991255347569956,
+      "goal_interval_p99_ms": 5.163356,
+      "goal_interval_max_ms": 5.220478,
+      "max_goal_error_vs_catalog_deg": 8.526512829121202e-14,
+      "angle_comparisons": 15640,
+      "mismatches_above_1e_8_deg": 0,
+      "head_override_active": false,
+      "slow_goal_intervals": []
+    }
+  ],
+  "interval_scope": "Within each motion only; the first write interval may include idle time since the previous motion and is excluded."
+}

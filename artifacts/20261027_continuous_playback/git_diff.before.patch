@@ -1,0 +1,5116 @@
+diff --git a/artifacts/AGENTS.md b/artifacts/AGENTS.md
+index 6de6c7d..d729357 100644
+--- a/artifacts/AGENTS.md
++++ b/artifacts/AGENTS.md
+@@ -12,16 +12,13 @@
+   `test_production_motions_keep_approved_final_tolerances` in
+   `src/mission_control/test/test_production_motion_catalog_contract.py`.
+ 
+-- In every frame of every runtime motion, override motor ID 4 to 18 degrees and
+-  motor ID 5 to -18 degrees, except for these exact motion names:
+-  `찐공잡기리그랩까지 실전`, `건공잡기`, `찐골넣기`, and `찐허들`.
+-- Preserve motors 4 and 5 as supplied for those exceptions. Do not exempt other
+-  pickup, retreat, or goal-related motions based on a name substring.
+-- Apply this fixed-joint policy on imports, replacements, and manual updates.
+-  Preserve other joint targets, torque flags, timing, speed, and repeat counts.
+-  Archived source snapshots must remain unchanged.
+-- `건공잡기` preserves source motor values by user request (2026-10-09).
+-  Its shared pose labels `미세후진오뒤(0도)` and `미세오뒤4111(45도)` use the
+-  suffix `(건공잡기)` in runtime only, so other motions can keep their fixed arms.
+-- `tools/upsert_motion_catalog.py` applies both runtime policies. Verify imports
+-  and the current catalog with `python3 -m pytest -q tools/test_upsert_motion_catalog.py`.
++- Preserve source motor ID 4 and 5 values in every motion, including startup
++  poses. The user revoked the 18/-18 degree fixed-shoulder policy on 2026-10-27.
++  Do not reintroduce it on import, replacement, manual update, or normal playback.
++- `robot_motions_pc.json` preserves the original shoulder targets for the
++  current deployed catalog. Match by motion and frame identity when restoring
++  runtime shoulder targets; preserve all other fields and archived snapshots.
++- Keep the existing `(건공잡기)` runtime pose-name suffixes for compatibility.
++- `tools/upsert_motion_catalog.py` normalizes completion tolerance and preserves
++  supplied joint targets. Verify with
++  `python3 -m pytest -q tools/test_upsert_motion_catalog.py`.
+diff --git a/artifacts/robot_motions_pc.json b/artifacts/robot_motions_pc.json
+index 3ae522d..2d7e842 100644
+--- a/artifacts/robot_motions_pc.json
++++ b/artifacts/robot_motions_pc.json
+@@ -7426,13 +7426,13 @@
+       ]
+     },
+     {
+-      "name": "건전진45도(2회)",
++      "name": "전45도(2회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 2,
+-      "playback_speed": 1.0,
++      "playback_speed": 0.9,
+       "repeatable": true,
+       "start_pose": "김오들(앞먼저닿음)",
+-      "end_pose": "김오뒤3(건전진)",
++      "end_pose": "Frame 826",
+       "completion": {
+         "position_tolerance_deg": 2.0,
+         "settle_duration_ms": 80,
+@@ -7442,7 +7442,7 @@
+         {
+           "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
+           "name": "김오들(앞먼저닿음)",
+-          "time_ms": 60,
++          "time_ms": 55,
+           "angles": {
+             "0": -32.34375,
+             "1": -0.3515625,
+@@ -7556,7 +7556,7 @@
+           "is_important": false,
+           "lift_early_arrival": true,
+           "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
+-          "start_ms": 150,
++          "start_ms": 145,
+           "_drag_original_start_ms": 145
+         },
+         {
+@@ -7616,37 +7616,37 @@
+           "is_important": false,
+           "lift_early_arrival": true,
+           "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
+-          "start_ms": 339,
++          "start_ms": 334,
+           "_drag_original_start_ms": 341
+         },
+         {
+-          "frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+-          "name": "김오뒤3(건전진)",
++          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "name": "Frame 826",
+           "time_ms": 110,
+           "angles": {
+             "0": -33.57421875,
+-            "1": 0.703125,
+-            "2": -10.01953125,
+-            "3": 10.107421875,
+-            "4": 16.435546875,
+-            "5": -17.138671875,
+-            "6": 66.796875,
+-            "7": -68.115234375,
++            "1": 0.52734375,
++            "2": -9.84375,
++            "3": 9.931640625,
++            "4": 16.5234375,
++            "5": -17.40234375,
++            "6": 67.060546875,
++            "7": -68.37890625,
+             "8": -10.986328125,
+-            "9": 2.724609375,
+-            "10": 2.28515625,
+-            "11": -2.63671875,
+-            "12": 2.4609375,
+-            "15": 3.427734375,
++            "9": 2.63671875,
++            "10": 1.845703125,
++            "11": -2.724609375,
++            "12": 2.548828125,
++            "15": 3.603515625,
+             "16": -1.0546875,
+-            "13": -40.95703125,
+-            "14": 54.84375,
+-            "17": -26.982421875,
+-            "18": 27.24609375,
+-            "19": 67.763671875,
+-            "20": -57.12890625,
+-            "21": 2.833984375,
+-            "22": -5.2734375
++            "13": -45.220703125,
++            "14": 59.3046875,
++            "17": -26.015625,
++            "18": 26.279296875,
++            "19": 67.587890625,
++            "20": -57.568359375,
++            "21": 2.658203125,
++            "22": -5.009765625
+           },
+           "torques": {
+             "0": true,
+@@ -7675,9 +7675,9 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+-          "start_ms": 403,
+-          "_drag_original_start_ms": 422
++          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "start_ms": 396,
++          "_drag_original_start_ms": 396
+         }
+       ]
+     },
+@@ -7938,13 +7938,13 @@
+       ]
+     },
+     {
+-      "name": "건전진45도(4회)",
++      "name": "전45도(4회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 4,
+-      "playback_speed": 1.0,
++      "playback_speed": 0.9,
+       "repeatable": true,
+       "start_pose": "김오들(앞먼저닿음)",
+-      "end_pose": "김오뒤3(건전진)",
++      "end_pose": "Frame 826",
+       "completion": {
+         "position_tolerance_deg": 2.0,
+         "settle_duration_ms": 80,
+@@ -7954,7 +7954,7 @@
+         {
+           "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
+           "name": "김오들(앞먼저닿음)",
+-          "time_ms": 60,
++          "time_ms": 55,
+           "angles": {
+             "0": -32.34375,
+             "1": -0.3515625,
+@@ -8068,7 +8068,7 @@
+           "is_important": false,
+           "lift_early_arrival": true,
+           "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
+-          "start_ms": 150,
++          "start_ms": 145,
+           "_drag_original_start_ms": 145
+         },
+         {
+@@ -8128,37 +8128,37 @@
+           "is_important": false,
+           "lift_early_arrival": true,
+           "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
+-          "start_ms": 339,
++          "start_ms": 334,
+           "_drag_original_start_ms": 341
+         },
+         {
+-          "frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+-          "name": "김오뒤3(건전진)",
++          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "name": "Frame 826",
+           "time_ms": 110,
+           "angles": {
+             "0": -33.57421875,
+-            "1": 0.703125,
+-            "2": -10.01953125,
+-            "3": 10.107421875,
+-            "4": 16.435546875,
+-            "5": -17.138671875,
+-            "6": 66.796875,
+-            "7": -68.115234375,
++            "1": 0.52734375,
++            "2": -9.84375,
++            "3": 9.931640625,
++            "4": 16.5234375,
++            "5": -17.40234375,
++            "6": 67.060546875,
++            "7": -68.37890625,
+             "8": -10.986328125,
+-            "9": 2.724609375,
+-            "10": 2.28515625,
+-            "11": -2.63671875,
+-            "12": 2.4609375,
+-            "15": 3.427734375,
++            "9": 2.63671875,
++            "10": 1.845703125,
++            "11": -2.724609375,
++            "12": 2.548828125,
++            "15": 3.603515625,
+             "16": -1.0546875,
+-            "13": -40.95703125,
+-            "14": 54.84375,
+-            "17": -26.982421875,
+-            "18": 27.24609375,
+-            "19": 67.763671875,
+-            "20": -57.12890625,
+-            "21": 2.833984375,
+-            "22": -5.2734375
++            "13": -45.220703125,
++            "14": 59.3046875,
++            "17": -26.015625,
++            "18": 26.279296875,
++            "19": 67.587890625,
++            "20": -57.568359375,
++            "21": 2.658203125,
++            "22": -5.009765625
+           },
+           "torques": {
+             "0": true,
+@@ -8187,20 +8187,20 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+-          "start_ms": 403,
+-          "_drag_original_start_ms": 422
++          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "start_ms": 396,
++          "_drag_original_start_ms": 396
+         }
+       ]
+     },
+     {
+-      "name": "건전진45도(6회)",
++      "name": "전45도(6회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 6,
+-      "playback_speed": 1.0,
++      "playback_speed": 0.9,
+       "repeatable": true,
+       "start_pose": "김오들(앞먼저닿음)",
+-      "end_pose": "김오뒤3(건전진)",
++      "end_pose": "Frame 826",
+       "completion": {
+         "position_tolerance_deg": 2.0,
+         "settle_duration_ms": 80,
+@@ -8210,7 +8210,7 @@
+         {
+           "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
+           "name": "김오들(앞먼저닿음)",
+-          "time_ms": 62,
++          "time_ms": 55,
+           "angles": {
+             "0": -32.34375,
+             "1": -0.3515625,
+@@ -8264,12 +8264,13 @@
+           "is_important": false,
+           "lift_early_arrival": true,
+           "source_frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
+-          "start_ms": 99
++          "start_ms": 90,
++          "_drag_original_start_ms": 90
+         },
+         {
+           "frame_id": "46c8c5bda6924327837ded0d9612d346",
+           "name": "왼뒤407",
+-          "time_ms": 110,
++          "time_ms": 105,
+           "angles": {
+             "0": -32.6953125,
+             "1": -0.439453125,
+@@ -8323,8 +8324,8 @@
+           "is_important": false,
+           "lift_early_arrival": true,
+           "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
+-          "start_ms": 161,
+-          "_drag_original_start_ms": 164
++          "start_ms": 145,
++          "_drag_original_start_ms": 145
+         },
+         {
+           "frame_id": "ec62ecf478094eaca551707a406b2f02",
+@@ -8383,37 +8384,37 @@
+           "is_important": false,
+           "lift_early_arrival": true,
+           "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
+-          "start_ms": 346,
++          "start_ms": 334,
+           "_drag_original_start_ms": 341
+         },
+         {
+-          "frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+-          "name": "김오뒤3(건전진)",
++          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "name": "Frame 826",
+           "time_ms": 110,
+           "angles": {
+             "0": -33.57421875,
+-            "1": 0.703125,
+-            "2": -10.01953125,
+-            "3": 10.107421875,
+-            "4": 16.435546875,
+-            "5": -17.138671875,
+-            "6": 66.796875,
+-            "7": -68.115234375,
++            "1": 0.52734375,
++            "2": -9.84375,
++            "3": 9.931640625,
++            "4": 16.5234375,
++            "5": -17.40234375,
++            "6": 67.060546875,
++            "7": -68.37890625,
+             "8": -10.986328125,
+-            "9": 2.724609375,
+-            "10": 2.28515625,
+-            "11": -2.63671875,
+-            "12": 2.4609375,
+-            "15": 3.427734375,
++            "9": 2.63671875,
++            "10": 1.845703125,
++            "11": -2.724609375,
++            "12": 2.548828125,
++            "15": 3.603515625,
+             "16": -1.0546875,
+-            "13": -40.95703125,
+-            "14": 54.84375,
+-            "17": -26.982421875,
+-            "18": 27.24609375,
+-            "19": 67.763671875,
+-            "20": -57.12890625,
+-            "21": 2.833984375,
+-            "22": -5.2734375
++            "13": -45.220703125,
++            "14": 59.3046875,
++            "17": -26.015625,
++            "18": 26.279296875,
++            "19": 67.587890625,
++            "20": -57.568359375,
++            "21": 2.658203125,
++            "22": -5.009765625
+           },
+           "torques": {
+             "0": true,
+@@ -8442,20 +8443,20 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+-          "start_ms": 410,
+-          "_drag_original_start_ms": 422
++          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "start_ms": 396,
++          "_drag_original_start_ms": 396
+         }
+       ]
+     },
+     {
+-      "name": "건전진45도(8회)",
++      "name": "전45도(8회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 8,
+-      "playback_speed": 1.0,
++      "playback_speed": 0.9,
+       "repeatable": true,
+       "start_pose": "김오들(앞먼저닿음)",
+-      "end_pose": "김오뒤3(건전진)",
++      "end_pose": "Frame 826",
+       "completion": {
+         "position_tolerance_deg": 2.0,
+         "settle_duration_ms": 80,
+@@ -8465,7 +8466,7 @@
+         {
+           "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
+           "name": "김오들(앞먼저닿음)",
+-          "time_ms": 60,
++          "time_ms": 55,
+           "angles": {
+             "0": -32.34375,
+             "1": -0.3515625,
+@@ -8579,7 +8580,7 @@
+           "is_important": false,
+           "lift_early_arrival": true,
+           "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
+-          "start_ms": 150,
++          "start_ms": 145,
+           "_drag_original_start_ms": 145
+         },
+         {
+@@ -8639,37 +8640,37 @@
+           "is_important": false,
+           "lift_early_arrival": true,
+           "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
+-          "start_ms": 339,
++          "start_ms": 334,
+           "_drag_original_start_ms": 341
+         },
+         {
+-          "frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+-          "name": "김오뒤3(건전진)",
++          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "name": "Frame 826",
+           "time_ms": 110,
+           "angles": {
+             "0": -33.57421875,
+-            "1": 0.703125,
+-            "2": -10.01953125,
+-            "3": 10.107421875,
+-            "4": 16.435546875,
+-            "5": -17.138671875,
+-            "6": 66.796875,
+-            "7": -68.115234375,
++            "1": 0.52734375,
++            "2": -9.84375,
++            "3": 9.931640625,
++            "4": 16.5234375,
++            "5": -17.40234375,
++            "6": 67.060546875,
++            "7": -68.37890625,
+             "8": -10.986328125,
+-            "9": 2.724609375,
+-            "10": 2.28515625,
+-            "11": -2.63671875,
+-            "12": 2.4609375,
+-            "15": 3.427734375,
++            "9": 2.63671875,
++            "10": 1.845703125,
++            "11": -2.724609375,
++            "12": 2.548828125,
++            "15": 3.603515625,
+             "16": -1.0546875,
+-            "13": -40.95703125,
+-            "14": 54.84375,
+-            "17": -26.982421875,
+-            "18": 27.24609375,
+-            "19": 67.763671875,
+-            "20": -57.12890625,
+-            "21": 2.833984375,
+-            "22": -5.2734375
++            "13": -45.220703125,
++            "14": 59.3046875,
++            "17": -26.015625,
++            "18": 26.279296875,
++            "19": 67.587890625,
++            "20": -57.568359375,
++            "21": 2.658203125,
++            "22": -5.009765625
+           },
+           "torques": {
+             "0": true,
+@@ -8698,9 +8699,9 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+-          "start_ms": 403,
+-          "_drag_original_start_ms": 422
++          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "start_ms": 396,
++          "_drag_original_start_ms": 396
+         }
+       ]
+     },
+@@ -8958,13 +8959,13 @@
+       ]
+     },
+     {
+-      "name": "건전진90도(8회)",
++      "name": "전90도(8회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 8,
+-      "playback_speed": 1.0,
++      "playback_speed": 0.9,
+       "repeatable": true,
+-      "start_pose": "김오들90도",
+-      "end_pose": "김오뒤3(90도)",
++      "start_pose": "김오들(앞먼저닿음)(90도)",
++      "end_pose": "Frame 826(90도)",
+       "completion": {
+         "position_tolerance_deg": 2.0,
+         "settle_duration_ms": 80,
+@@ -8972,9 +8973,9 @@
+       },
+       "frames": [
+         {
+-          "frame_id": "49595477f33d44c0bacba9b5607fea52",
+-          "name": "김오들90도",
+-          "time_ms": 60,
++          "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
++          "name": "김오들(앞먼저닿음)(90도)",
++          "time_ms": 55,
+           "angles": {
+             "0": 1.0,
+             "1": -0.3515625,
+@@ -8990,12 +8991,12 @@
+             "11": -3.0,
+             "12": 4.0,
+             "15": -1.0,
+-            "16": 5.0,
++            "16": 6.0,
+             "13": -89.82421875,
+-            "14": 56.0,
++            "14": 57.0,
+             "17": -67.236328125,
+             "18": 32.0,
+-            "19": 58.0,
++            "19": 61.0,
+             "20": -68.0,
+             "21": 2.0,
+             "22": -12.0
+@@ -9027,12 +9028,13 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "49595477f33d44c0bacba9b5607fea52",
+-          "start_ms": 90
++          "source_frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
++          "start_ms": 90,
++          "_drag_original_start_ms": 90
+         },
+         {
+-          "frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
+-          "name": "김왼뒤407(90도)",
++          "frame_id": "46c8c5bda6924327837ded0d9612d346",
++          "name": "왼뒤407(90도)",
+           "time_ms": 105,
+           "angles": {
+             "0": 1.0,
+@@ -9086,12 +9088,13 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
+-          "start_ms": 150
++          "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
++          "start_ms": 145,
++          "_drag_original_start_ms": 145
+         },
+         {
+-          "frame_id": "1162565c5fec444fa28d1944945ff20d",
+-          "name": "김왼들90도",
++          "frame_id": "ec62ecf478094eaca551707a406b2f02",
++          "name": "김왼들(앞먼저닿음)(90도)",
+           "time_ms": 62,
+           "angles": {
+             "0": 1.0,
+@@ -9108,7 +9111,7 @@
+             "11": -3.427734375,
+             "12": 4.658203125,
+             "15": -1.439453125,
+-            "16": 4.955078125,
++            "16": 5.955078125,
+             "13": -54.66796875,
+             "14": 79.1015625,
+             "17": -31.552734375,
+@@ -9145,12 +9148,13 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "1162565c5fec444fa28d1944945ff20d",
+-          "start_ms": 339
++          "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
++          "start_ms": 334,
++          "_drag_original_start_ms": 341
+         },
+         {
+-          "frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
+-          "name": "김오뒤3(90도)",
++          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "name": "Frame 826(90도)",
+           "time_ms": 110,
+           "angles": {
+             "0": 1.0,
+@@ -9168,13 +9172,13 @@
+             "12": 2.548828125,
+             "15": 3.603515625,
+             "16": -1.0546875,
+-            "13": -41.220703125,
+-            "14": 55.3046875,
++            "13": -45.220703125,
++            "14": 59.3046875,
+             "17": -26.015625,
+             "18": 26.279296875,
+             "19": 67.587890625,
+             "20": -57.568359375,
+-            "21": 4.658203125,
++            "21": 2.658203125,
+             "22": -5.009765625
+           },
+           "torques": {
+@@ -9204,19 +9208,20 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
+-          "start_ms": 401
++          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "start_ms": 396,
++          "_drag_original_start_ms": 396
+         }
+       ]
+     },
+     {
+-      "name": "건전진90도(2회)",
++      "name": "전90도(2회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 2,
+-      "playback_speed": 1.0,
++      "playback_speed": 0.9,
+       "repeatable": true,
+-      "start_pose": "김오들90도",
+-      "end_pose": "김오뒤3(90도)",
++      "start_pose": "김오들(앞먼저닿음)(90도)",
++      "end_pose": "Frame 826(90도)",
+       "completion": {
+         "position_tolerance_deg": 2.0,
+         "settle_duration_ms": 80,
+@@ -9224,9 +9229,9 @@
+       },
+       "frames": [
+         {
+-          "frame_id": "49595477f33d44c0bacba9b5607fea52",
+-          "name": "김오들90도",
+-          "time_ms": 60,
++          "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
++          "name": "김오들(앞먼저닿음)(90도)",
++          "time_ms": 55,
+           "angles": {
+             "0": 1.0,
+             "1": -0.3515625,
+@@ -9242,12 +9247,12 @@
+             "11": -3.0,
+             "12": 4.0,
+             "15": -1.0,
+-            "16": 5.0,
++            "16": 6.0,
+             "13": -89.82421875,
+-            "14": 56.0,
++            "14": 57.0,
+             "17": -67.236328125,
+             "18": 32.0,
+-            "19": 58.0,
++            "19": 61.0,
+             "20": -68.0,
+             "21": 2.0,
+             "22": -12.0
+@@ -9279,12 +9284,13 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "49595477f33d44c0bacba9b5607fea52",
+-          "start_ms": 90
++          "source_frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
++          "start_ms": 90,
++          "_drag_original_start_ms": 90
+         },
+         {
+-          "frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
+-          "name": "김왼뒤407(90도)",
++          "frame_id": "46c8c5bda6924327837ded0d9612d346",
++          "name": "왼뒤407(90도)",
+           "time_ms": 105,
+           "angles": {
+             "0": 1.0,
+@@ -9338,12 +9344,13 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
+-          "start_ms": 150
++          "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
++          "start_ms": 145,
++          "_drag_original_start_ms": 145
+         },
+         {
+-          "frame_id": "1162565c5fec444fa28d1944945ff20d",
+-          "name": "김왼들90도",
++          "frame_id": "ec62ecf478094eaca551707a406b2f02",
++          "name": "김왼들(앞먼저닿음)(90도)",
+           "time_ms": 62,
+           "angles": {
+             "0": 1.0,
+@@ -9360,7 +9367,7 @@
+             "11": -3.427734375,
+             "12": 4.658203125,
+             "15": -1.439453125,
+-            "16": 4.955078125,
++            "16": 5.955078125,
+             "13": -54.66796875,
+             "14": 79.1015625,
+             "17": -31.552734375,
+@@ -9397,12 +9404,13 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "1162565c5fec444fa28d1944945ff20d",
+-          "start_ms": 339
++          "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
++          "start_ms": 334,
++          "_drag_original_start_ms": 341
+         },
+         {
+-          "frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
+-          "name": "김오뒤3(90도)",
++          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "name": "Frame 826(90도)",
+           "time_ms": 110,
+           "angles": {
+             "0": 1.0,
+@@ -9420,13 +9428,13 @@
+             "12": 2.548828125,
+             "15": 3.603515625,
+             "16": -1.0546875,
+-            "13": -41.220703125,
+-            "14": 55.3046875,
++            "13": -45.220703125,
++            "14": 59.3046875,
+             "17": -26.015625,
+             "18": 26.279296875,
+             "19": 67.587890625,
+             "20": -57.568359375,
+-            "21": 4.658203125,
++            "21": 2.658203125,
+             "22": -5.009765625
+           },
+           "torques": {
+@@ -9456,19 +9464,20 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
+-          "start_ms": 401
++          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "start_ms": 396,
++          "_drag_original_start_ms": 396
+         }
+       ]
+     },
+     {
+-      "name": "건전진90도(4회)",
++      "name": "전90도(4회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 4,
+-      "playback_speed": 1.0,
++      "playback_speed": 0.9,
+       "repeatable": true,
+-      "start_pose": "김오들90도",
+-      "end_pose": "김오뒤3(90도)",
++      "start_pose": "김오들(앞먼저닿음)(90도)",
++      "end_pose": "Frame 826(90도)",
+       "completion": {
+         "position_tolerance_deg": 2.0,
+         "settle_duration_ms": 80,
+@@ -9476,9 +9485,9 @@
+       },
+       "frames": [
+         {
+-          "frame_id": "49595477f33d44c0bacba9b5607fea52",
+-          "name": "김오들90도",
+-          "time_ms": 60,
++          "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
++          "name": "김오들(앞먼저닿음)(90도)",
++          "time_ms": 55,
+           "angles": {
+             "0": 1.0,
+             "1": -0.3515625,
+@@ -9494,12 +9503,12 @@
+             "11": -3.0,
+             "12": 4.0,
+             "15": -1.0,
+-            "16": 5.0,
++            "16": 6.0,
+             "13": -89.82421875,
+-            "14": 56.0,
++            "14": 57.0,
+             "17": -67.236328125,
+             "18": 32.0,
+-            "19": 58.0,
++            "19": 61.0,
+             "20": -68.0,
+             "21": 2.0,
+             "22": -12.0
+@@ -9531,12 +9540,13 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "49595477f33d44c0bacba9b5607fea52",
+-          "start_ms": 90
++          "source_frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
++          "start_ms": 90,
++          "_drag_original_start_ms": 90
+         },
+         {
+-          "frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
+-          "name": "김왼뒤407(90도)",
++          "frame_id": "46c8c5bda6924327837ded0d9612d346",
++          "name": "왼뒤407(90도)",
+           "time_ms": 105,
+           "angles": {
+             "0": 1.0,
+@@ -9590,12 +9600,13 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
+-          "start_ms": 150
++          "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
++          "start_ms": 145,
++          "_drag_original_start_ms": 145
+         },
+         {
+-          "frame_id": "1162565c5fec444fa28d1944945ff20d",
+-          "name": "김왼들90도",
++          "frame_id": "ec62ecf478094eaca551707a406b2f02",
++          "name": "김왼들(앞먼저닿음)(90도)",
+           "time_ms": 62,
+           "angles": {
+             "0": 1.0,
+@@ -9612,7 +9623,7 @@
+             "11": -3.427734375,
+             "12": 4.658203125,
+             "15": -1.439453125,
+-            "16": 4.955078125,
++            "16": 5.955078125,
+             "13": -54.66796875,
+             "14": 79.1015625,
+             "17": -31.552734375,
+@@ -9649,12 +9660,13 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "1162565c5fec444fa28d1944945ff20d",
+-          "start_ms": 339
++          "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
++          "start_ms": 334,
++          "_drag_original_start_ms": 341
+         },
+         {
+-          "frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
+-          "name": "김오뒤3(90도)",
++          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "name": "Frame 826(90도)",
+           "time_ms": 110,
+           "angles": {
+             "0": 1.0,
+@@ -9672,13 +9684,13 @@
+             "12": 2.548828125,
+             "15": 3.603515625,
+             "16": -1.0546875,
+-            "13": -41.220703125,
+-            "14": 55.3046875,
++            "13": -45.220703125,
++            "14": 59.3046875,
+             "17": -26.015625,
+             "18": 26.279296875,
+             "19": 67.587890625,
+             "20": -57.568359375,
+-            "21": 4.658203125,
++            "21": 2.658203125,
+             "22": -5.009765625
+           },
+           "torques": {
+@@ -9708,19 +9720,20 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
+-          "start_ms": 401
++          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "start_ms": 396,
++          "_drag_original_start_ms": 396
+         }
+       ]
+     },
+     {
+-      "name": "건전진90도(6회)",
++      "name": "전90도(6회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 6,
+-      "playback_speed": 1.0,
++      "playback_speed": 0.9,
+       "repeatable": true,
+-      "start_pose": "김오들90도",
+-      "end_pose": "김오뒤3(90도)",
++      "start_pose": "김오들(앞먼저닿음)(90도)",
++      "end_pose": "Frame 826(90도)",
+       "completion": {
+         "position_tolerance_deg": 2.0,
+         "settle_duration_ms": 80,
+@@ -9728,9 +9741,9 @@
+       },
+       "frames": [
+         {
+-          "frame_id": "49595477f33d44c0bacba9b5607fea52",
+-          "name": "김오들90도",
+-          "time_ms": 60,
++          "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
++          "name": "김오들(앞먼저닿음)(90도)",
++          "time_ms": 55,
+           "angles": {
+             "0": 1.0,
+             "1": -0.3515625,
+@@ -9746,12 +9759,12 @@
+             "11": -3.0,
+             "12": 4.0,
+             "15": -1.0,
+-            "16": 5.0,
++            "16": 6.0,
+             "13": -89.82421875,
+-            "14": 56.0,
++            "14": 57.0,
+             "17": -67.236328125,
+             "18": 32.0,
+-            "19": 58.0,
++            "19": 61.0,
+             "20": -68.0,
+             "21": 2.0,
+             "22": -12.0
+@@ -9783,12 +9796,13 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "49595477f33d44c0bacba9b5607fea52",
+-          "start_ms": 90
++          "source_frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
++          "start_ms": 90,
++          "_drag_original_start_ms": 90
+         },
+         {
+-          "frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
+-          "name": "김왼뒤407(90도)",
++          "frame_id": "46c8c5bda6924327837ded0d9612d346",
++          "name": "왼뒤407(90도)",
+           "time_ms": 105,
+           "angles": {
+             "0": 1.0,
+@@ -9842,12 +9856,13 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
+-          "start_ms": 150
++          "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
++          "start_ms": 145,
++          "_drag_original_start_ms": 145
+         },
+         {
+-          "frame_id": "1162565c5fec444fa28d1944945ff20d",
+-          "name": "김왼들90도",
++          "frame_id": "ec62ecf478094eaca551707a406b2f02",
++          "name": "김왼들(앞먼저닿음)(90도)",
+           "time_ms": 62,
+           "angles": {
+             "0": 1.0,
+@@ -9864,7 +9879,7 @@
+             "11": -3.427734375,
+             "12": 4.658203125,
+             "15": -1.439453125,
+-            "16": 4.955078125,
++            "16": 5.955078125,
+             "13": -54.66796875,
+             "14": 79.1015625,
+             "17": -31.552734375,
+@@ -9901,12 +9916,13 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "1162565c5fec444fa28d1944945ff20d",
+-          "start_ms": 339
++          "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
++          "start_ms": 334,
++          "_drag_original_start_ms": 341
+         },
+         {
+-          "frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
+-          "name": "김오뒤3(90도)",
++          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "name": "Frame 826(90도)",
+           "time_ms": 110,
+           "angles": {
+             "0": 1.0,
+@@ -9924,13 +9940,13 @@
+             "12": 2.548828125,
+             "15": 3.603515625,
+             "16": -1.0546875,
+-            "13": -41.220703125,
+-            "14": 55.3046875,
++            "13": -45.220703125,
++            "14": 59.3046875,
+             "17": -26.015625,
+             "18": 26.279296875,
+             "19": 67.587890625,
+             "20": -57.568359375,
+-            "21": 4.658203125,
++            "21": 2.658203125,
+             "22": -5.009765625
+           },
+           "torques": {
+@@ -9960,8 +9976,9 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
+-          "start_ms": 401
++          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "start_ms": 396,
++          "_drag_original_start_ms": 396
+         }
+       ]
+     },
+diff --git a/artifacts/robot_motions_runtime.json b/artifacts/robot_motions_runtime.json
+index 4174d78..67df801 100644
+--- a/artifacts/robot_motions_runtime.json
++++ b/artifacts/robot_motions_runtime.json
+@@ -24,8 +24,8 @@
+             "1": 31.025390625,
+             "2": -9.4921875,
+             "3": -15.556640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 20.302734375,
++            "5": -27.59765625,
+             "6": 68.291015625,
+             "7": -83.583984375,
+             "8": -11.42578125,
+@@ -100,8 +100,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -159,8 +159,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -234,8 +234,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -293,8 +293,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -368,8 +368,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -427,8 +427,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -502,8 +502,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -562,8 +562,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -637,8 +637,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -696,8 +696,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -771,8 +771,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -830,8 +830,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -905,8 +905,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -964,8 +964,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -1039,8 +1039,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -1098,8 +1098,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -1173,8 +1173,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -1232,8 +1232,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -1307,8 +1307,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -1366,8 +1366,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -1441,8 +1441,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -1500,8 +1500,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -1575,8 +1575,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -1634,8 +1634,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -1709,8 +1709,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -1768,8 +1768,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -1843,8 +1843,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -1902,8 +1902,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -1977,8 +1977,8 @@
+             "1": -0.3515625,
+             "2": -9.140625,
+             "3": 8.26171875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.66796875,
++            "5": -9.66796875,
+             "6": 68.818359375,
+             "7": -70.224609375,
+             "8": -11.162109375,
+@@ -2036,8 +2036,8 @@
+             "1": -0.263671875,
+             "2": -9.31640625,
+             "3": 8.701171875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 10.546875,
++            "5": -10.01953125,
+             "6": 69.2578125,
+             "7": -70.6640625,
+             "8": -11.162109375,
+@@ -2095,8 +2095,8 @@
+             "1": -0.263671875,
+             "2": -9.31640625,
+             "3": 8.701171875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 10.546875,
++            "5": -10.01953125,
+             "6": 69.2578125,
+             "7": -70.6640625,
+             "8": -11.162109375,
+@@ -2154,8 +2154,8 @@
+             "1": -0.439453125,
+             "2": -9.228515625,
+             "3": 8.61328125,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 10.37109375,
++            "5": -10.1953125,
+             "6": 69.609375,
+             "7": -70.927734375,
+             "8": -11.07421875,
+@@ -2229,8 +2229,8 @@
+             "1": -0.3515625,
+             "2": -9.140625,
+             "3": 8.26171875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.66796875,
++            "5": -9.66796875,
+             "6": 68.818359375,
+             "7": -70.224609375,
+             "8": -11.162109375,
+@@ -2288,8 +2288,8 @@
+             "1": -0.263671875,
+             "2": -9.31640625,
+             "3": 8.701171875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 10.546875,
++            "5": -10.01953125,
+             "6": 69.2578125,
+             "7": -70.6640625,
+             "8": -11.162109375,
+@@ -2347,8 +2347,8 @@
+             "1": -0.263671875,
+             "2": -9.31640625,
+             "3": 8.701171875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 10.546875,
++            "5": -10.01953125,
+             "6": 69.2578125,
+             "7": -70.6640625,
+             "8": -11.162109375,
+@@ -2406,8 +2406,8 @@
+             "1": -0.439453125,
+             "2": -9.228515625,
+             "3": 8.61328125,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 10.37109375,
++            "5": -10.1953125,
+             "6": 69.609375,
+             "7": -70.927734375,
+             "8": -11.07421875,
+@@ -2540,8 +2540,8 @@
+             "1": 0.17578125,
+             "2": -9.66796875,
+             "3": 9.755859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.66796875,
++            "5": -8.876953125,
+             "6": 67.1484375,
+             "7": -68.5546875,
+             "8": -11.513671875,
+@@ -2600,8 +2600,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -2659,8 +2659,8 @@
+             "1": 0.17578125,
+             "2": -9.66796875,
+             "3": 9.755859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.66796875,
++            "5": -8.876953125,
+             "6": 67.1484375,
+             "7": -68.5546875,
+             "8": -11.513671875,
+@@ -2719,8 +2719,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -2778,8 +2778,8 @@
+             "1": 0.17578125,
+             "2": -9.66796875,
+             "3": 9.755859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.66796875,
++            "5": -8.876953125,
+             "6": 67.1484375,
+             "7": -68.5546875,
+             "8": -11.513671875,
+@@ -2838,8 +2838,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -2897,8 +2897,8 @@
+             "1": 0.17578125,
+             "2": -9.66796875,
+             "3": 9.755859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.66796875,
++            "5": -8.876953125,
+             "6": 67.1484375,
+             "7": -68.5546875,
+             "8": -11.513671875,
+@@ -2957,8 +2957,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -3016,8 +3016,8 @@
+             "1": 0.17578125,
+             "2": -9.66796875,
+             "3": 9.755859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.66796875,
++            "5": -8.876953125,
+             "6": 67.1484375,
+             "7": -68.5546875,
+             "8": -11.513671875,
+@@ -3076,8 +3076,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -3135,8 +3135,8 @@
+             "1": 0.17578125,
+             "2": -9.66796875,
+             "3": 9.755859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.66796875,
++            "5": -8.876953125,
+             "6": 67.1484375,
+             "7": -68.5546875,
+             "8": -11.513671875,
+@@ -3195,8 +3195,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -3254,8 +3254,8 @@
+             "1": 0.17578125,
+             "2": -9.66796875,
+             "3": 9.755859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.66796875,
++            "5": -8.876953125,
+             "6": 67.1484375,
+             "7": -68.5546875,
+             "8": -11.513671875,
+@@ -3314,8 +3314,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -3373,8 +3373,8 @@
+             "1": 0.17578125,
+             "2": -9.66796875,
+             "3": 9.755859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.66796875,
++            "5": -8.876953125,
+             "6": 67.1484375,
+             "7": -68.5546875,
+             "8": -11.513671875,
+@@ -3568,8 +3568,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -3688,8 +3688,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -3808,8 +3808,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -3928,8 +3928,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -4376,8 +4376,8 @@
+             "1": -0.3515625,
+             "2": -9.140625,
+             "3": 8.26171875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.66796875,
++            "5": -9.66796875,
+             "6": 68.818359375,
+             "7": -70.224609375,
+             "8": -11.162109375,
+@@ -4435,8 +4435,8 @@
+             "1": -0.263671875,
+             "2": -9.31640625,
+             "3": 8.701171875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 10.546875,
++            "5": -10.01953125,
+             "6": 69.2578125,
+             "7": -70.6640625,
+             "8": -11.162109375,
+@@ -4494,8 +4494,8 @@
+             "1": -0.263671875,
+             "2": -9.31640625,
+             "3": 8.701171875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 10.546875,
++            "5": -10.01953125,
+             "6": 69.2578125,
+             "7": -70.6640625,
+             "8": -11.162109375,
+@@ -4553,8 +4553,8 @@
+             "1": -0.439453125,
+             "2": -9.228515625,
+             "3": 8.61328125,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 10.37109375,
++            "5": -10.1953125,
+             "6": 69.609375,
+             "7": -70.927734375,
+             "8": -11.07421875,
+@@ -4628,8 +4628,8 @@
+             "1": -0.3515625,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.271484375,
+             "6": 74.35546875,
+             "7": -76.2890625,
+             "8": -10.546875,
+@@ -4688,8 +4688,8 @@
+             "1": -0.3515625,
+             "2": -9.931640625,
+             "3": 8.876953125,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 21.181640625,
++            "5": -17.578125,
+             "6": 67.763671875,
+             "7": -69.2578125,
+             "8": -11.337890625,
+@@ -4763,8 +4763,8 @@
+             "1": -0.3515625,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.271484375,
+             "6": 74.35546875,
+             "7": -76.2890625,
+             "8": -10.546875,
+@@ -4822,8 +4822,8 @@
+             "1": -0.3515625,
+             "2": -9.931640625,
+             "3": 8.876953125,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 21.181640625,
++            "5": -17.578125,
+             "6": 67.763671875,
+             "7": -69.2578125,
+             "8": -11.337890625,
+@@ -4897,8 +4897,8 @@
+             "1": -0.3515625,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.271484375,
+             "6": 74.35546875,
+             "7": -76.2890625,
+             "8": -10.546875,
+@@ -4956,8 +4956,8 @@
+             "1": -0.3515625,
+             "2": -9.931640625,
+             "3": 8.876953125,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 21.181640625,
++            "5": -17.578125,
+             "6": 67.763671875,
+             "7": -69.2578125,
+             "8": -11.337890625,
+@@ -6052,8 +6052,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -6111,8 +6111,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -6186,8 +6186,8 @@
+             "1": 0.0,
+             "2": -8.701171875,
+             "3": 9.140625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 8.349609375,
++            "5": -9.931640625,
+             "6": 68.37890625,
+             "7": -69.9609375,
+             "8": -11.42578125,
+@@ -6245,8 +6245,8 @@
+             "1": 0.0,
+             "2": -8.701171875,
+             "3": 9.140625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 21.0,
++            "5": -9.931640625,
+             "6": 68.37890625,
+             "7": -69.9609375,
+             "8": -11.42578125,
+@@ -6304,8 +6304,8 @@
+             "1": -0.3515625,
+             "2": -8.96484375,
+             "3": 9.31640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 21.0,
++            "5": -9.755859375,
+             "6": 67.8515625,
+             "7": -69.521484375,
+             "8": -11.513671875,
+@@ -6363,8 +6363,8 @@
+             "1": -0.3515625,
+             "2": -9.931640625,
+             "3": 8.876953125,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 21.181640625,
++            "5": -17.578125,
+             "6": 67.763671875,
+             "7": -69.2578125,
+             "8": -11.337890625,
+@@ -6438,8 +6438,8 @@
+             "1": -0.791015625,
+             "2": -9.66796875,
+             "3": 8.7890625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 20.7421875,
++            "5": -18.720703125,
+             "6": 68.73046875,
+             "7": -70.048828125,
+             "8": -11.337890625,
+@@ -6497,8 +6497,8 @@
+             "1": -0.3515625,
+             "2": -9.755859375,
+             "3": 8.96484375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 19.3359375,
++            "5": -18.45703125,
+             "6": 68.37890625,
+             "7": -69.697265625,
+             "8": -11.337890625,
+@@ -6556,8 +6556,8 @@
+             "1": -0.439453125,
+             "2": -9.931640625,
+             "3": 8.96484375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 17.666015625,
++            "5": -17.9296875,
+             "6": 67.939453125,
+             "7": -69.2578125,
+             "8": -11.513671875,
+@@ -6615,8 +6615,8 @@
+             "1": -0.703125,
+             "2": -9.404296875,
+             "3": 8.525390625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 22.0,
++            "5": -19.0,
+             "6": 69.169921875,
+             "7": -70.48828125,
+             "8": -11.25,
+@@ -6690,8 +6690,8 @@
+             "1": 0.0,
+             "2": -8.701171875,
+             "3": 9.140625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 8.349609375,
++            "5": -9.931640625,
+             "6": 68.37890625,
+             "7": -69.9609375,
+             "8": -11.42578125,
+@@ -6749,8 +6749,8 @@
+             "1": 0.0,
+             "2": -8.701171875,
+             "3": 9.140625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 21.0,
++            "5": -9.931640625,
+             "6": 68.37890625,
+             "7": -69.9609375,
+             "8": -11.42578125,
+@@ -6808,8 +6808,8 @@
+             "1": -0.3515625,
+             "2": -8.96484375,
+             "3": 9.31640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 21.0,
++            "5": -9.755859375,
+             "6": 67.8515625,
+             "7": -69.521484375,
+             "8": -11.513671875,
+@@ -6867,8 +6867,8 @@
+             "1": -0.3515625,
+             "2": -8.96484375,
+             "3": 9.31640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 21.0,
++            "5": -9.755859375,
+             "6": 67.8515625,
+             "7": -69.521484375,
+             "8": -11.513671875,
+@@ -6942,8 +6942,8 @@
+             "1": -0.791015625,
+             "2": -9.66796875,
+             "3": 8.7890625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 20.7421875,
++            "5": -18.720703125,
+             "6": 68.73046875,
+             "7": -70.048828125,
+             "8": -11.337890625,
+@@ -7001,8 +7001,8 @@
+             "1": -0.3515625,
+             "2": -9.755859375,
+             "3": 8.96484375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 19.3359375,
++            "5": -18.45703125,
+             "6": 68.37890625,
+             "7": -69.697265625,
+             "8": -11.337890625,
+@@ -7060,8 +7060,8 @@
+             "1": -0.439453125,
+             "2": -9.931640625,
+             "3": 8.96484375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 17.666015625,
++            "5": -17.9296875,
+             "6": 67.939453125,
+             "7": -69.2578125,
+             "8": -11.513671875,
+@@ -7119,8 +7119,8 @@
+             "1": -0.703125,
+             "2": -9.404296875,
+             "3": 8.525390625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 22.0,
++            "5": -19.0,
+             "6": 69.169921875,
+             "7": -70.48828125,
+             "8": -11.25,
+@@ -7313,8 +7313,8 @@
+             "1": -0.087890625,
+             "2": -8.349609375,
+             "3": 7.646484375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.435546875,
++            "5": -17.314453125,
+             "6": 73.564453125,
+             "7": -75.41015625,
+             "8": -10.634765625,
+@@ -7372,8 +7372,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -7426,13 +7426,13 @@
+       ]
+     },
+     {
+-      "name": "건전진45도(2회)",
++      "name": "전45도(2회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 2,
+-      "playback_speed": 1.0,
++      "playback_speed": 0.9,
+       "repeatable": true,
+       "start_pose": "김오들(앞먼저닿음)",
+-      "end_pose": "김오뒤3(건전진)",
++      "end_pose": "Frame 826",
+       "completion": {
+         "position_tolerance_deg": 5.0,
+         "settle_duration_ms": 80,
+@@ -7442,7 +7442,7 @@
+         {
+           "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
+           "name": "김오들(앞먼저닿음)",
+-          "time_ms": 60,
++          "time_ms": 55,
+           "angles": {
+             "0": -32.34375,
+             "1": -0.3515625,
+@@ -7556,7 +7556,7 @@
+           "is_important": false,
+           "lift_early_arrival": true,
+           "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
+-          "start_ms": 150,
++          "start_ms": 145,
+           "_drag_original_start_ms": 145
+         },
+         {
+@@ -7568,8 +7568,8 @@
+             "1": -0.087890625,
+             "2": -8.349609375,
+             "3": 7.646484375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.435546875,
++            "5": -17.314453125,
+             "6": 73.564453125,
+             "7": -75.41015625,
+             "8": -10.634765625,
+@@ -7616,37 +7616,37 @@
+           "is_important": false,
+           "lift_early_arrival": true,
+           "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
+-          "start_ms": 339,
++          "start_ms": 334,
+           "_drag_original_start_ms": 341
+         },
+         {
+-          "frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+-          "name": "김오뒤3(건전진)",
++          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "name": "Frame 826",
+           "time_ms": 110,
+           "angles": {
+             "0": -33.57421875,
+-            "1": 0.703125,
+-            "2": -10.01953125,
+-            "3": 10.107421875,
+-            "4": 18.0,
+-            "5": -18.0,
+-            "6": 66.796875,
+-            "7": -68.115234375,
++            "1": 0.52734375,
++            "2": -9.84375,
++            "3": 9.931640625,
++            "4": 16.5234375,
++            "5": -17.40234375,
++            "6": 67.060546875,
++            "7": -68.37890625,
+             "8": -10.986328125,
+-            "9": 2.724609375,
+-            "10": 2.28515625,
+-            "11": -2.63671875,
+-            "12": 2.4609375,
+-            "15": 3.427734375,
++            "9": 2.63671875,
++            "10": 1.845703125,
++            "11": -2.724609375,
++            "12": 2.548828125,
++            "15": 3.603515625,
+             "16": -1.0546875,
+-            "13": -40.95703125,
+-            "14": 54.84375,
+-            "17": -26.982421875,
+-            "18": 27.24609375,
+-            "19": 67.763671875,
+-            "20": -57.12890625,
+-            "21": 2.833984375,
+-            "22": -5.2734375
++            "13": -45.220703125,
++            "14": 59.3046875,
++            "17": -26.015625,
++            "18": 26.279296875,
++            "19": 67.587890625,
++            "20": -57.568359375,
++            "21": 2.658203125,
++            "22": -5.009765625
+           },
+           "torques": {
+             "0": true,
+@@ -7675,9 +7675,9 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+-          "start_ms": 403,
+-          "_drag_original_start_ms": 422
++          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "start_ms": 396,
++          "_drag_original_start_ms": 396
+         }
+       ]
+     },
+@@ -7824,8 +7824,8 @@
+             "1": -0.087890625,
+             "2": -8.349609375,
+             "3": 7.646484375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.435546875,
++            "5": -17.314453125,
+             "6": 73.564453125,
+             "7": -75.41015625,
+             "8": -10.634765625,
+@@ -7884,8 +7884,8 @@
+             "1": 0.703125,
+             "2": -10.01953125,
+             "3": 10.107421875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.435546875,
++            "5": -17.138671875,
+             "6": 66.796875,
+             "7": -68.115234375,
+             "8": -10.986328125,
+@@ -7938,13 +7938,13 @@
+       ]
+     },
+     {
+-      "name": "건전진45도(4회)",
++      "name": "전45도(4회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 4,
+-      "playback_speed": 1.0,
++      "playback_speed": 0.9,
+       "repeatable": true,
+       "start_pose": "김오들(앞먼저닿음)",
+-      "end_pose": "김오뒤3(건전진)",
++      "end_pose": "Frame 826",
+       "completion": {
+         "position_tolerance_deg": 5.0,
+         "settle_duration_ms": 80,
+@@ -7954,7 +7954,7 @@
+         {
+           "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
+           "name": "김오들(앞먼저닿음)",
+-          "time_ms": 60,
++          "time_ms": 55,
+           "angles": {
+             "0": -32.34375,
+             "1": -0.3515625,
+@@ -8068,7 +8068,7 @@
+           "is_important": false,
+           "lift_early_arrival": true,
+           "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
+-          "start_ms": 150,
++          "start_ms": 145,
+           "_drag_original_start_ms": 145
+         },
+         {
+@@ -8080,8 +8080,8 @@
+             "1": -0.087890625,
+             "2": -8.349609375,
+             "3": 7.646484375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.435546875,
++            "5": -17.314453125,
+             "6": 73.564453125,
+             "7": -75.41015625,
+             "8": -10.634765625,
+@@ -8128,37 +8128,37 @@
+           "is_important": false,
+           "lift_early_arrival": true,
+           "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
+-          "start_ms": 339,
++          "start_ms": 334,
+           "_drag_original_start_ms": 341
+         },
+         {
+-          "frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+-          "name": "김오뒤3(건전진)",
++          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "name": "Frame 826",
+           "time_ms": 110,
+           "angles": {
+             "0": -33.57421875,
+-            "1": 0.703125,
+-            "2": -10.01953125,
+-            "3": 10.107421875,
+-            "4": 18.0,
+-            "5": -18.0,
+-            "6": 66.796875,
+-            "7": -68.115234375,
++            "1": 0.52734375,
++            "2": -9.84375,
++            "3": 9.931640625,
++            "4": 16.5234375,
++            "5": -17.40234375,
++            "6": 67.060546875,
++            "7": -68.37890625,
+             "8": -10.986328125,
+-            "9": 2.724609375,
+-            "10": 2.28515625,
+-            "11": -2.63671875,
+-            "12": 2.4609375,
+-            "15": 3.427734375,
++            "9": 2.63671875,
++            "10": 1.845703125,
++            "11": -2.724609375,
++            "12": 2.548828125,
++            "15": 3.603515625,
+             "16": -1.0546875,
+-            "13": -40.95703125,
+-            "14": 54.84375,
+-            "17": -26.982421875,
+-            "18": 27.24609375,
+-            "19": 67.763671875,
+-            "20": -57.12890625,
+-            "21": 2.833984375,
+-            "22": -5.2734375
++            "13": -45.220703125,
++            "14": 59.3046875,
++            "17": -26.015625,
++            "18": 26.279296875,
++            "19": 67.587890625,
++            "20": -57.568359375,
++            "21": 2.658203125,
++            "22": -5.009765625
+           },
+           "torques": {
+             "0": true,
+@@ -8187,20 +8187,20 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+-          "start_ms": 403,
+-          "_drag_original_start_ms": 422
++          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "start_ms": 396,
++          "_drag_original_start_ms": 396
+         }
+       ]
+     },
+     {
+-      "name": "건전진45도(6회)",
++      "name": "전45도(6회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 6,
+-      "playback_speed": 1.0,
++      "playback_speed": 0.9,
+       "repeatable": true,
+       "start_pose": "김오들(앞먼저닿음)",
+-      "end_pose": "김오뒤3(건전진)",
++      "end_pose": "Frame 826",
+       "completion": {
+         "position_tolerance_deg": 5.0,
+         "settle_duration_ms": 80,
+@@ -8210,7 +8210,7 @@
+         {
+           "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
+           "name": "김오들(앞먼저닿음)",
+-          "time_ms": 62,
++          "time_ms": 55,
+           "angles": {
+             "0": -32.34375,
+             "1": -0.3515625,
+@@ -8264,12 +8264,13 @@
+           "is_important": false,
+           "lift_early_arrival": true,
+           "source_frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
+-          "start_ms": 99
++          "start_ms": 90,
++          "_drag_original_start_ms": 90
+         },
+         {
+           "frame_id": "46c8c5bda6924327837ded0d9612d346",
+           "name": "왼뒤407",
+-          "time_ms": 110,
++          "time_ms": 105,
+           "angles": {
+             "0": -32.6953125,
+             "1": -0.439453125,
+@@ -8323,8 +8324,8 @@
+           "is_important": false,
+           "lift_early_arrival": true,
+           "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
+-          "start_ms": 161,
+-          "_drag_original_start_ms": 164
++          "start_ms": 145,
++          "_drag_original_start_ms": 145
+         },
+         {
+           "frame_id": "ec62ecf478094eaca551707a406b2f02",
+@@ -8335,8 +8336,8 @@
+             "1": -0.087890625,
+             "2": -8.349609375,
+             "3": 7.646484375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.435546875,
++            "5": -17.314453125,
+             "6": 73.564453125,
+             "7": -75.41015625,
+             "8": -10.634765625,
+@@ -8383,37 +8384,37 @@
+           "is_important": false,
+           "lift_early_arrival": true,
+           "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
+-          "start_ms": 346,
++          "start_ms": 334,
+           "_drag_original_start_ms": 341
+         },
+         {
+-          "frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+-          "name": "김오뒤3(건전진)",
++          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "name": "Frame 826",
+           "time_ms": 110,
+           "angles": {
+             "0": -33.57421875,
+-            "1": 0.703125,
+-            "2": -10.01953125,
+-            "3": 10.107421875,
+-            "4": 18.0,
+-            "5": -18.0,
+-            "6": 66.796875,
+-            "7": -68.115234375,
++            "1": 0.52734375,
++            "2": -9.84375,
++            "3": 9.931640625,
++            "4": 16.5234375,
++            "5": -17.40234375,
++            "6": 67.060546875,
++            "7": -68.37890625,
+             "8": -10.986328125,
+-            "9": 2.724609375,
+-            "10": 2.28515625,
+-            "11": -2.63671875,
+-            "12": 2.4609375,
+-            "15": 3.427734375,
++            "9": 2.63671875,
++            "10": 1.845703125,
++            "11": -2.724609375,
++            "12": 2.548828125,
++            "15": 3.603515625,
+             "16": -1.0546875,
+-            "13": -40.95703125,
+-            "14": 54.84375,
+-            "17": -26.982421875,
+-            "18": 27.24609375,
+-            "19": 67.763671875,
+-            "20": -57.12890625,
+-            "21": 2.833984375,
+-            "22": -5.2734375
++            "13": -45.220703125,
++            "14": 59.3046875,
++            "17": -26.015625,
++            "18": 26.279296875,
++            "19": 67.587890625,
++            "20": -57.568359375,
++            "21": 2.658203125,
++            "22": -5.009765625
+           },
+           "torques": {
+             "0": true,
+@@ -8442,20 +8443,20 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+-          "start_ms": 410,
+-          "_drag_original_start_ms": 422
++          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "start_ms": 396,
++          "_drag_original_start_ms": 396
+         }
+       ]
+     },
+     {
+-      "name": "건전진45도(8회)",
++      "name": "전45도(8회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 8,
+-      "playback_speed": 1.0,
++      "playback_speed": 0.9,
+       "repeatable": true,
+       "start_pose": "김오들(앞먼저닿음)",
+-      "end_pose": "김오뒤3(건전진)",
++      "end_pose": "Frame 826",
+       "completion": {
+         "position_tolerance_deg": 5.0,
+         "settle_duration_ms": 80,
+@@ -8465,7 +8466,7 @@
+         {
+           "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
+           "name": "김오들(앞먼저닿음)",
+-          "time_ms": 60,
++          "time_ms": 55,
+           "angles": {
+             "0": -32.34375,
+             "1": -0.3515625,
+@@ -8579,7 +8580,7 @@
+           "is_important": false,
+           "lift_early_arrival": true,
+           "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
+-          "start_ms": 150,
++          "start_ms": 145,
+           "_drag_original_start_ms": 145
+         },
+         {
+@@ -8591,8 +8592,8 @@
+             "1": -0.087890625,
+             "2": -8.349609375,
+             "3": 7.646484375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.435546875,
++            "5": -17.314453125,
+             "6": 73.564453125,
+             "7": -75.41015625,
+             "8": -10.634765625,
+@@ -8639,37 +8640,37 @@
+           "is_important": false,
+           "lift_early_arrival": true,
+           "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
+-          "start_ms": 339,
++          "start_ms": 334,
+           "_drag_original_start_ms": 341
+         },
+         {
+-          "frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+-          "name": "김오뒤3(건전진)",
++          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "name": "Frame 826",
+           "time_ms": 110,
+           "angles": {
+             "0": -33.57421875,
+-            "1": 0.703125,
+-            "2": -10.01953125,
+-            "3": 10.107421875,
+-            "4": 18.0,
+-            "5": -18.0,
+-            "6": 66.796875,
+-            "7": -68.115234375,
++            "1": 0.52734375,
++            "2": -9.84375,
++            "3": 9.931640625,
++            "4": 16.5234375,
++            "5": -17.40234375,
++            "6": 67.060546875,
++            "7": -68.37890625,
+             "8": -10.986328125,
+-            "9": 2.724609375,
+-            "10": 2.28515625,
+-            "11": -2.63671875,
+-            "12": 2.4609375,
+-            "15": 3.427734375,
++            "9": 2.63671875,
++            "10": 1.845703125,
++            "11": -2.724609375,
++            "12": 2.548828125,
++            "15": 3.603515625,
+             "16": -1.0546875,
+-            "13": -40.95703125,
+-            "14": 54.84375,
+-            "17": -26.982421875,
+-            "18": 27.24609375,
+-            "19": 67.763671875,
+-            "20": -57.12890625,
+-            "21": 2.833984375,
+-            "22": -5.2734375
++            "13": -45.220703125,
++            "14": 59.3046875,
++            "17": -26.015625,
++            "18": 26.279296875,
++            "19": 67.587890625,
++            "20": -57.568359375,
++            "21": 2.658203125,
++            "22": -5.009765625
+           },
+           "torques": {
+             "0": true,
+@@ -8698,9 +8699,9 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "bd5f89fd42234e79a10e6d885149ea5e",
+-          "start_ms": 403,
+-          "_drag_original_start_ms": 422
++          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "start_ms": 396,
++          "_drag_original_start_ms": 396
+         }
+       ]
+     },
+@@ -8845,8 +8846,8 @@
+             "1": -0.087890625,
+             "2": -8.349609375,
+             "3": 7.646484375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.435546875,
++            "5": -17.314453125,
+             "6": 73.564453125,
+             "7": -75.41015625,
+             "8": -10.634765625,
+@@ -8904,8 +8905,8 @@
+             "1": 0.703125,
+             "2": -10.01953125,
+             "3": 10.107421875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.435546875,
++            "5": -17.138671875,
+             "6": 66.796875,
+             "7": -68.115234375,
+             "8": -10.986328125,
+@@ -8958,13 +8959,13 @@
+       ]
+     },
+     {
+-      "name": "건전진90도(8회)",
++      "name": "전90도(8회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 8,
+-      "playback_speed": 1.0,
++      "playback_speed": 0.9,
+       "repeatable": true,
+-      "start_pose": "김오들90도",
+-      "end_pose": "김오뒤3(90도)",
++      "start_pose": "김오들(앞먼저닿음)(90도)",
++      "end_pose": "Frame 826(90도)",
+       "completion": {
+         "position_tolerance_deg": 5.0,
+         "settle_duration_ms": 80,
+@@ -8972,9 +8973,9 @@
+       },
+       "frames": [
+         {
+-          "frame_id": "49595477f33d44c0bacba9b5607fea52",
+-          "name": "김오들90도",
+-          "time_ms": 60,
++          "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
++          "name": "김오들(앞먼저닿음)(90도)",
++          "time_ms": 55,
+           "angles": {
+             "0": 1.0,
+             "1": -0.3515625,
+@@ -8990,12 +8991,12 @@
+             "11": -3.0,
+             "12": 4.0,
+             "15": -1.0,
+-            "16": 5.0,
++            "16": 6.0,
+             "13": -89.82421875,
+-            "14": 56.0,
++            "14": 57.0,
+             "17": -67.236328125,
+             "18": 32.0,
+-            "19": 58.0,
++            "19": 61.0,
+             "20": -68.0,
+             "21": 2.0,
+             "22": -12.0
+@@ -9027,12 +9028,13 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "49595477f33d44c0bacba9b5607fea52",
+-          "start_ms": 90
++          "source_frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
++          "start_ms": 90,
++          "_drag_original_start_ms": 90
+         },
+         {
+-          "frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
+-          "name": "김왼뒤407(90도)",
++          "frame_id": "46c8c5bda6924327837ded0d9612d346",
++          "name": "왼뒤407(90도)",
+           "time_ms": 105,
+           "angles": {
+             "0": 1.0,
+@@ -9086,20 +9088,21 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
+-          "start_ms": 150
++          "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
++          "start_ms": 145,
++          "_drag_original_start_ms": 145
+         },
+         {
+-          "frame_id": "1162565c5fec444fa28d1944945ff20d",
+-          "name": "김왼들90도",
++          "frame_id": "ec62ecf478094eaca551707a406b2f02",
++          "name": "김왼들(앞먼저닿음)(90도)",
+           "time_ms": 62,
+           "angles": {
+             "0": 1.0,
+             "1": -0.087890625,
+             "2": -8.349609375,
+             "3": 7.646484375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.435546875,
++            "5": -17.314453125,
+             "6": 73.564453125,
+             "7": -75.41015625,
+             "8": -10.634765625,
+@@ -9108,7 +9111,7 @@
+             "11": -3.427734375,
+             "12": 4.658203125,
+             "15": -1.439453125,
+-            "16": 4.955078125,
++            "16": 5.955078125,
+             "13": -54.66796875,
+             "14": 79.1015625,
+             "17": -31.552734375,
+@@ -9145,20 +9148,21 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "1162565c5fec444fa28d1944945ff20d",
+-          "start_ms": 339
++          "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
++          "start_ms": 334,
++          "_drag_original_start_ms": 341
+         },
+         {
+-          "frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
+-          "name": "김오뒤3(90도)",
++          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "name": "Frame 826(90도)",
+           "time_ms": 110,
+           "angles": {
+             "0": 1.0,
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -9168,13 +9172,13 @@
+             "12": 2.548828125,
+             "15": 3.603515625,
+             "16": -1.0546875,
+-            "13": -41.220703125,
+-            "14": 55.3046875,
++            "13": -45.220703125,
++            "14": 59.3046875,
+             "17": -26.015625,
+             "18": 26.279296875,
+             "19": 67.587890625,
+             "20": -57.568359375,
+-            "21": 4.658203125,
++            "21": 2.658203125,
+             "22": -5.009765625
+           },
+           "torques": {
+@@ -9204,19 +9208,20 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
+-          "start_ms": 401
++          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "start_ms": 396,
++          "_drag_original_start_ms": 396
+         }
+       ]
+     },
+     {
+-      "name": "건전진90도(2회)",
++      "name": "전90도(2회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 2,
+-      "playback_speed": 1.0,
++      "playback_speed": 0.9,
+       "repeatable": true,
+-      "start_pose": "김오들90도",
+-      "end_pose": "김오뒤3(90도)",
++      "start_pose": "김오들(앞먼저닿음)(90도)",
++      "end_pose": "Frame 826(90도)",
+       "completion": {
+         "position_tolerance_deg": 5.0,
+         "settle_duration_ms": 80,
+@@ -9224,9 +9229,9 @@
+       },
+       "frames": [
+         {
+-          "frame_id": "49595477f33d44c0bacba9b5607fea52",
+-          "name": "김오들90도",
+-          "time_ms": 60,
++          "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
++          "name": "김오들(앞먼저닿음)(90도)",
++          "time_ms": 55,
+           "angles": {
+             "0": 1.0,
+             "1": -0.3515625,
+@@ -9242,12 +9247,12 @@
+             "11": -3.0,
+             "12": 4.0,
+             "15": -1.0,
+-            "16": 5.0,
++            "16": 6.0,
+             "13": -89.82421875,
+-            "14": 56.0,
++            "14": 57.0,
+             "17": -67.236328125,
+             "18": 32.0,
+-            "19": 58.0,
++            "19": 61.0,
+             "20": -68.0,
+             "21": 2.0,
+             "22": -12.0
+@@ -9279,12 +9284,13 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "49595477f33d44c0bacba9b5607fea52",
+-          "start_ms": 90
++          "source_frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
++          "start_ms": 90,
++          "_drag_original_start_ms": 90
+         },
+         {
+-          "frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
+-          "name": "김왼뒤407(90도)",
++          "frame_id": "46c8c5bda6924327837ded0d9612d346",
++          "name": "왼뒤407(90도)",
+           "time_ms": 105,
+           "angles": {
+             "0": 1.0,
+@@ -9338,20 +9344,21 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
+-          "start_ms": 150
++          "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
++          "start_ms": 145,
++          "_drag_original_start_ms": 145
+         },
+         {
+-          "frame_id": "1162565c5fec444fa28d1944945ff20d",
+-          "name": "김왼들90도",
++          "frame_id": "ec62ecf478094eaca551707a406b2f02",
++          "name": "김왼들(앞먼저닿음)(90도)",
+           "time_ms": 62,
+           "angles": {
+             "0": 1.0,
+             "1": -0.087890625,
+             "2": -8.349609375,
+             "3": 7.646484375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.435546875,
++            "5": -17.314453125,
+             "6": 73.564453125,
+             "7": -75.41015625,
+             "8": -10.634765625,
+@@ -9360,7 +9367,7 @@
+             "11": -3.427734375,
+             "12": 4.658203125,
+             "15": -1.439453125,
+-            "16": 4.955078125,
++            "16": 5.955078125,
+             "13": -54.66796875,
+             "14": 79.1015625,
+             "17": -31.552734375,
+@@ -9397,20 +9404,21 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "1162565c5fec444fa28d1944945ff20d",
+-          "start_ms": 339
++          "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
++          "start_ms": 334,
++          "_drag_original_start_ms": 341
+         },
+         {
+-          "frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
+-          "name": "김오뒤3(90도)",
++          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "name": "Frame 826(90도)",
+           "time_ms": 110,
+           "angles": {
+             "0": 1.0,
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -9420,13 +9428,13 @@
+             "12": 2.548828125,
+             "15": 3.603515625,
+             "16": -1.0546875,
+-            "13": -41.220703125,
+-            "14": 55.3046875,
++            "13": -45.220703125,
++            "14": 59.3046875,
+             "17": -26.015625,
+             "18": 26.279296875,
+             "19": 67.587890625,
+             "20": -57.568359375,
+-            "21": 4.658203125,
++            "21": 2.658203125,
+             "22": -5.009765625
+           },
+           "torques": {
+@@ -9456,19 +9464,20 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
+-          "start_ms": 401
++          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "start_ms": 396,
++          "_drag_original_start_ms": 396
+         }
+       ]
+     },
+     {
+-      "name": "건전진90도(4회)",
++      "name": "전90도(4회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 4,
+-      "playback_speed": 1.0,
++      "playback_speed": 0.9,
+       "repeatable": true,
+-      "start_pose": "김오들90도",
+-      "end_pose": "김오뒤3(90도)",
++      "start_pose": "김오들(앞먼저닿음)(90도)",
++      "end_pose": "Frame 826(90도)",
+       "completion": {
+         "position_tolerance_deg": 5.0,
+         "settle_duration_ms": 80,
+@@ -9476,9 +9485,9 @@
+       },
+       "frames": [
+         {
+-          "frame_id": "49595477f33d44c0bacba9b5607fea52",
+-          "name": "김오들90도",
+-          "time_ms": 60,
++          "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
++          "name": "김오들(앞먼저닿음)(90도)",
++          "time_ms": 55,
+           "angles": {
+             "0": 1.0,
+             "1": -0.3515625,
+@@ -9494,12 +9503,12 @@
+             "11": -3.0,
+             "12": 4.0,
+             "15": -1.0,
+-            "16": 5.0,
++            "16": 6.0,
+             "13": -89.82421875,
+-            "14": 56.0,
++            "14": 57.0,
+             "17": -67.236328125,
+             "18": 32.0,
+-            "19": 58.0,
++            "19": 61.0,
+             "20": -68.0,
+             "21": 2.0,
+             "22": -12.0
+@@ -9531,12 +9540,13 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "49595477f33d44c0bacba9b5607fea52",
+-          "start_ms": 90
++          "source_frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
++          "start_ms": 90,
++          "_drag_original_start_ms": 90
+         },
+         {
+-          "frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
+-          "name": "김왼뒤407(90도)",
++          "frame_id": "46c8c5bda6924327837ded0d9612d346",
++          "name": "왼뒤407(90도)",
+           "time_ms": 105,
+           "angles": {
+             "0": 1.0,
+@@ -9590,20 +9600,21 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
+-          "start_ms": 150
++          "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
++          "start_ms": 145,
++          "_drag_original_start_ms": 145
+         },
+         {
+-          "frame_id": "1162565c5fec444fa28d1944945ff20d",
+-          "name": "김왼들90도",
++          "frame_id": "ec62ecf478094eaca551707a406b2f02",
++          "name": "김왼들(앞먼저닿음)(90도)",
+           "time_ms": 62,
+           "angles": {
+             "0": 1.0,
+             "1": -0.087890625,
+             "2": -8.349609375,
+             "3": 7.646484375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.435546875,
++            "5": -17.314453125,
+             "6": 73.564453125,
+             "7": -75.41015625,
+             "8": -10.634765625,
+@@ -9612,7 +9623,7 @@
+             "11": -3.427734375,
+             "12": 4.658203125,
+             "15": -1.439453125,
+-            "16": 4.955078125,
++            "16": 5.955078125,
+             "13": -54.66796875,
+             "14": 79.1015625,
+             "17": -31.552734375,
+@@ -9649,20 +9660,21 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "1162565c5fec444fa28d1944945ff20d",
+-          "start_ms": 339
++          "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
++          "start_ms": 334,
++          "_drag_original_start_ms": 341
+         },
+         {
+-          "frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
+-          "name": "김오뒤3(90도)",
++          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "name": "Frame 826(90도)",
+           "time_ms": 110,
+           "angles": {
+             "0": 1.0,
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -9672,13 +9684,13 @@
+             "12": 2.548828125,
+             "15": 3.603515625,
+             "16": -1.0546875,
+-            "13": -41.220703125,
+-            "14": 55.3046875,
++            "13": -45.220703125,
++            "14": 59.3046875,
+             "17": -26.015625,
+             "18": 26.279296875,
+             "19": 67.587890625,
+             "20": -57.568359375,
+-            "21": 4.658203125,
++            "21": 2.658203125,
+             "22": -5.009765625
+           },
+           "torques": {
+@@ -9708,19 +9720,20 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
+-          "start_ms": 401
++          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "start_ms": 396,
++          "_drag_original_start_ms": 396
+         }
+       ]
+     },
+     {
+-      "name": "건전진90도(6회)",
++      "name": "전90도(6회)",
+       "max_seq_ms": 11522,
+       "repeat_count": 6,
+-      "playback_speed": 1.0,
++      "playback_speed": 0.9,
+       "repeatable": true,
+-      "start_pose": "김오들90도",
+-      "end_pose": "김오뒤3(90도)",
++      "start_pose": "김오들(앞먼저닿음)(90도)",
++      "end_pose": "Frame 826(90도)",
+       "completion": {
+         "position_tolerance_deg": 5.0,
+         "settle_duration_ms": 80,
+@@ -9728,9 +9741,9 @@
+       },
+       "frames": [
+         {
+-          "frame_id": "49595477f33d44c0bacba9b5607fea52",
+-          "name": "김오들90도",
+-          "time_ms": 60,
++          "frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
++          "name": "김오들(앞먼저닿음)(90도)",
++          "time_ms": 55,
+           "angles": {
+             "0": 1.0,
+             "1": -0.3515625,
+@@ -9746,12 +9759,12 @@
+             "11": -3.0,
+             "12": 4.0,
+             "15": -1.0,
+-            "16": 5.0,
++            "16": 6.0,
+             "13": -89.82421875,
+-            "14": 56.0,
++            "14": 57.0,
+             "17": -67.236328125,
+             "18": 32.0,
+-            "19": 58.0,
++            "19": 61.0,
+             "20": -68.0,
+             "21": 2.0,
+             "22": -12.0
+@@ -9783,12 +9796,13 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "49595477f33d44c0bacba9b5607fea52",
+-          "start_ms": 90
++          "source_frame_id": "2f087ea84efe437c866aa4d3c8b18f1b",
++          "start_ms": 90,
++          "_drag_original_start_ms": 90
+         },
+         {
+-          "frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
+-          "name": "김왼뒤407(90도)",
++          "frame_id": "46c8c5bda6924327837ded0d9612d346",
++          "name": "왼뒤407(90도)",
+           "time_ms": 105,
+           "angles": {
+             "0": 1.0,
+@@ -9842,20 +9856,21 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "cb015adc81bc49c4be3b4f5cfa45b1ef",
+-          "start_ms": 150
++          "source_frame_id": "46c8c5bda6924327837ded0d9612d346",
++          "start_ms": 145,
++          "_drag_original_start_ms": 145
+         },
+         {
+-          "frame_id": "1162565c5fec444fa28d1944945ff20d",
+-          "name": "김왼들90도",
++          "frame_id": "ec62ecf478094eaca551707a406b2f02",
++          "name": "김왼들(앞먼저닿음)(90도)",
+           "time_ms": 62,
+           "angles": {
+             "0": 1.0,
+             "1": -0.087890625,
+             "2": -8.349609375,
+             "3": 7.646484375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.435546875,
++            "5": -17.314453125,
+             "6": 73.564453125,
+             "7": -75.41015625,
+             "8": -10.634765625,
+@@ -9864,7 +9879,7 @@
+             "11": -3.427734375,
+             "12": 4.658203125,
+             "15": -1.439453125,
+-            "16": 4.955078125,
++            "16": 5.955078125,
+             "13": -54.66796875,
+             "14": 79.1015625,
+             "17": -31.552734375,
+@@ -9901,20 +9916,21 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "1162565c5fec444fa28d1944945ff20d",
+-          "start_ms": 339
++          "source_frame_id": "ec62ecf478094eaca551707a406b2f02",
++          "start_ms": 334,
++          "_drag_original_start_ms": 341
+         },
+         {
+-          "frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
+-          "name": "김오뒤3(90도)",
++          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "name": "Frame 826(90도)",
+           "time_ms": 110,
+           "angles": {
+             "0": 1.0,
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -9924,13 +9940,13 @@
+             "12": 2.548828125,
+             "15": 3.603515625,
+             "16": -1.0546875,
+-            "13": -41.220703125,
+-            "14": 55.3046875,
++            "13": -45.220703125,
++            "14": 59.3046875,
+             "17": -26.015625,
+             "18": 26.279296875,
+             "19": 67.587890625,
+             "20": -57.568359375,
+-            "21": 4.658203125,
++            "21": 2.658203125,
+             "22": -5.009765625
+           },
+           "torques": {
+@@ -9960,8 +9976,9 @@
+           },
+           "is_important": false,
+           "lift_early_arrival": true,
+-          "source_frame_id": "db14929e7a4449aa8dbcdd4f1d130026",
+-          "start_ms": 401
++          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
++          "start_ms": 396,
++          "_drag_original_start_ms": 396
+         }
+       ]
+     },
+@@ -10047,8 +10064,8 @@
+             "1": -0.3515625,
+             "2": -9.228515625,
+             "3": 8.349609375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 20.7421875,
++            "5": -18.6328125,
+             "6": 68.818359375,
+             "7": -69.78515625,
+             "8": -11.337890625,
+@@ -10122,8 +10139,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -10256,8 +10273,8 @@
+             "1": -0.3515625,
+             "2": -9.228515625,
+             "3": 8.349609375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 20.7421875,
++            "5": -18.6328125,
+             "6": 68.818359375,
+             "7": -69.78515625,
+             "8": -11.337890625,
+@@ -10331,8 +10348,8 @@
+             "1": -0.087890625,
+             "2": -8.349609375,
+             "3": 7.646484375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.435546875,
++            "5": -17.314453125,
+             "6": 73.564453125,
+             "7": -75.41015625,
+             "8": -10.634765625,
+@@ -10390,8 +10407,8 @@
+             "1": -0.3515625,
+             "2": -9.228515625,
+             "3": 8.349609375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 20.7421875,
++            "5": -18.6328125,
+             "6": 68.818359375,
+             "7": -69.78515625,
+             "8": -11.337890625,
+@@ -10465,8 +10482,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -10540,8 +10557,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -10599,8 +10616,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -10674,8 +10691,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -10733,8 +10750,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -10808,8 +10825,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -10867,8 +10884,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -10942,8 +10959,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -11001,8 +11018,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -11076,8 +11093,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -11135,8 +11152,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -11210,8 +11227,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -11269,8 +11286,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -11344,8 +11361,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -11403,8 +11420,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -11478,8 +11495,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -11537,8 +11554,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -11612,8 +11629,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -11671,8 +11688,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -11746,8 +11763,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -11805,8 +11822,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -11880,8 +11897,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -11939,8 +11956,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -12014,8 +12031,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -12073,8 +12090,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -12148,8 +12165,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -12207,8 +12224,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -12283,8 +12300,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -12342,8 +12359,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -12418,8 +12435,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -12477,8 +12494,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -12553,8 +12570,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -12612,8 +12629,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -12688,8 +12705,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -12747,8 +12764,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -12823,8 +12840,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -12882,8 +12899,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -12958,8 +12975,8 @@
+             "1": -0.087890625,
+             "2": -8.349609375,
+             "3": 7.646484375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.435546875,
++            "5": -17.314453125,
+             "6": 73.564453125,
+             "7": -75.41015625,
+             "8": -10.634765625,
+@@ -13017,8 +13034,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -13077,8 +13094,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -13136,8 +13153,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -13196,8 +13213,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -13255,8 +13272,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -13315,8 +13332,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -13374,8 +13391,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -13434,8 +13451,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -13493,8 +13510,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -13553,8 +13570,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -13612,8 +13629,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -13672,8 +13689,8 @@
+             "1": -0.263671875,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.447265625,
+             "6": 75.05859375,
+             "7": -76.904296875,
+             "8": -10.546875,
+@@ -13731,8 +13748,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -13807,8 +13824,8 @@
+             "1": -0.3515625,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.271484375,
+             "6": 74.35546875,
+             "7": -76.2890625,
+             "8": -10.546875,
+@@ -13867,8 +13884,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 8.7890625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.228515625,
++            "5": -10.01953125,
+             "6": 69.169921875,
+             "7": -70.48828125,
+             "8": -11.25,
+@@ -13926,8 +13943,8 @@
+             "1": -0.3515625,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.271484375,
+             "6": 74.35546875,
+             "7": -76.2890625,
+             "8": -10.546875,
+@@ -13985,8 +14002,8 @@
+             "1": 0.263671875,
+             "2": -9.755859375,
+             "3": 9.755859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.140625,
++            "5": -8.96484375,
+             "6": 67.236328125,
+             "7": -68.818359375,
+             "8": -11.6015625,
+@@ -14725,8 +14742,8 @@
+             "1": -0.3515625,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.271484375,
+             "6": 74.35546875,
+             "7": -76.2890625,
+             "8": -10.546875,
+@@ -14784,8 +14801,8 @@
+             "1": -0.3515625,
+             "2": -9.228515625,
+             "3": 8.349609375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 20.7421875,
++            "5": -18.6328125,
+             "6": 68.818359375,
+             "7": -69.78515625,
+             "8": -11.337890625,
+@@ -14859,8 +14876,8 @@
+             "1": -0.3515625,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.271484375,
+             "6": 74.35546875,
+             "7": -76.2890625,
+             "8": -10.546875,
+@@ -14919,8 +14936,8 @@
+             "1": 0.263671875,
+             "2": -9.755859375,
+             "3": 9.755859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.140625,
++            "5": -8.96484375,
+             "6": 67.236328125,
+             "7": -68.818359375,
+             "8": -11.6015625,
+@@ -14994,8 +15011,8 @@
+             "1": -0.3515625,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.271484375,
+             "6": 74.35546875,
+             "7": -76.2890625,
+             "8": -10.546875,
+@@ -15053,8 +15070,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 8.7890625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.228515625,
++            "5": -10.01953125,
+             "6": 69.169921875,
+             "7": -70.48828125,
+             "8": -11.25,
+@@ -15112,8 +15129,8 @@
+             "1": -0.3515625,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.271484375,
+             "6": 74.35546875,
+             "7": -76.2890625,
+             "8": -10.546875,
+@@ -15172,8 +15189,8 @@
+             "1": 0.263671875,
+             "2": -9.755859375,
+             "3": 9.755859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.140625,
++            "5": -8.96484375,
+             "6": 67.236328125,
+             "7": -68.818359375,
+             "8": -11.6015625,
+@@ -15247,8 +15264,8 @@
+             "1": -0.3515625,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.271484375,
+             "6": 74.35546875,
+             "7": -76.2890625,
+             "8": -10.546875,
+@@ -15306,8 +15323,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 8.7890625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.228515625,
++            "5": -10.01953125,
+             "6": 69.169921875,
+             "7": -70.48828125,
+             "8": -11.25,
+@@ -15365,8 +15382,8 @@
+             "1": -0.3515625,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.271484375,
+             "6": 74.35546875,
+             "7": -76.2890625,
+             "8": -10.546875,
+@@ -15424,8 +15441,8 @@
+             "1": 0.263671875,
+             "2": -9.755859375,
+             "3": 9.755859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.140625,
++            "5": -8.96484375,
+             "6": 67.236328125,
+             "7": -68.818359375,
+             "8": -11.6015625,
+@@ -15499,8 +15516,8 @@
+             "1": -0.087890625,
+             "2": -8.349609375,
+             "3": 7.646484375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.435546875,
++            "5": -17.314453125,
+             "6": 73.564453125,
+             "7": -75.41015625,
+             "8": -10.634765625,
+@@ -15558,8 +15575,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -15633,8 +15650,8 @@
+             "1": -0.087890625,
+             "2": -8.349609375,
+             "3": 7.646484375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.435546875,
++            "5": -17.314453125,
+             "6": 73.564453125,
+             "7": -75.41015625,
+             "8": -10.634765625,
+@@ -15692,8 +15709,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -15768,8 +15785,8 @@
+             "1": -0.3515625,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.271484375,
+             "6": 74.35546875,
+             "7": -76.2890625,
+             "8": -10.546875,
+@@ -15827,8 +15844,8 @@
+             "1": -0.439453125,
+             "2": -9.31640625,
+             "3": 8.525390625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 20.830078125,
++            "5": -18.369140625,
+             "6": 68.466796875,
+             "7": -69.521484375,
+             "8": -11.337890625,
+@@ -15902,8 +15919,8 @@
+             "1": -0.087890625,
+             "2": -8.349609375,
+             "3": 7.646484375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.435546875,
++            "5": -17.314453125,
+             "6": 73.564453125,
+             "7": -75.41015625,
+             "8": -10.634765625,
+@@ -15961,8 +15978,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -16021,8 +16038,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -16081,8 +16098,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -16141,8 +16158,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -16201,8 +16218,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -16261,8 +16278,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -16321,8 +16338,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -16381,8 +16398,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -16441,8 +16458,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -16501,8 +16518,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -16561,8 +16578,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -16621,8 +16638,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -16681,8 +16698,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -16741,8 +16758,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -16801,8 +16818,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -16861,8 +16878,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -16921,8 +16938,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -16981,8 +16998,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 9.404296875,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.931640625,
++            "5": -9.228515625,
+             "6": 68.115234375,
+             "7": -69.43359375,
+             "8": -11.337890625,
+@@ -17041,8 +17058,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -17235,8 +17252,8 @@
+             "1": -0.087890625,
+             "2": -8.349609375,
+             "3": 7.646484375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.435546875,
++            "5": -17.314453125,
+             "6": 73.564453125,
+             "7": -75.41015625,
+             "8": -10.634765625,
+@@ -17294,8 +17311,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -17370,8 +17387,8 @@
+             "1": -0.3515625,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.271484375,
+             "6": 74.35546875,
+             "7": -76.2890625,
+             "8": -10.546875,
+@@ -17429,8 +17446,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 8.7890625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.228515625,
++            "5": -10.01953125,
+             "6": 69.169921875,
+             "7": -70.48828125,
+             "8": -11.25,
+@@ -17488,8 +17505,8 @@
+             "1": -0.3515625,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.271484375,
+             "6": 74.35546875,
+             "7": -76.2890625,
+             "8": -10.546875,
+@@ -17548,8 +17565,8 @@
+             "1": 0.263671875,
+             "2": -9.755859375,
+             "3": 9.755859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.140625,
++            "5": -8.96484375,
+             "6": 67.236328125,
+             "7": -68.818359375,
+             "8": -11.6015625,
+@@ -17623,8 +17640,8 @@
+             "1": -0.3515625,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.271484375,
+             "6": 74.35546875,
+             "7": -76.2890625,
+             "8": -10.546875,
+@@ -17682,8 +17699,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 8.7890625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.228515625,
++            "5": -10.01953125,
+             "6": 69.169921875,
+             "7": -70.48828125,
+             "8": -11.25,
+@@ -17741,8 +17758,8 @@
+             "1": -0.3515625,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.271484375,
+             "6": 74.35546875,
+             "7": -76.2890625,
+             "8": -10.546875,
+@@ -17800,8 +17817,8 @@
+             "1": 0.263671875,
+             "2": -9.755859375,
+             "3": 9.755859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.140625,
++            "5": -8.96484375,
+             "6": 67.236328125,
+             "7": -68.818359375,
+             "8": -11.6015625,
+@@ -17875,8 +17892,8 @@
+             "1": -0.3515625,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.271484375,
+             "6": 74.35546875,
+             "7": -76.2890625,
+             "8": -10.546875,
+@@ -17934,8 +17951,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 8.7890625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.228515625,
++            "5": -10.01953125,
+             "6": 69.169921875,
+             "7": -70.48828125,
+             "8": -11.25,
+@@ -17993,8 +18010,8 @@
+             "1": -0.3515625,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.271484375,
+             "6": 74.35546875,
+             "7": -76.2890625,
+             "8": -10.546875,
+@@ -18052,8 +18069,8 @@
+             "1": 0.263671875,
+             "2": -9.755859375,
+             "3": 9.755859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.140625,
++            "5": -8.96484375,
+             "6": 67.236328125,
+             "7": -68.818359375,
+             "8": -11.6015625,
+@@ -18127,8 +18144,8 @@
+             "1": -0.3515625,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.271484375,
+             "6": 74.35546875,
+             "7": -76.2890625,
+             "8": -10.546875,
+@@ -18186,8 +18203,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 8.7890625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.228515625,
++            "5": -10.01953125,
+             "6": 69.169921875,
+             "7": -70.48828125,
+             "8": -11.25,
+@@ -18245,8 +18262,8 @@
+             "1": -0.3515625,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.271484375,
+             "6": 74.35546875,
+             "7": -76.2890625,
+             "8": -10.546875,
+@@ -18304,8 +18321,8 @@
+             "1": 0.263671875,
+             "2": -9.755859375,
+             "3": 9.755859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.140625,
++            "5": -8.96484375,
+             "6": 67.236328125,
+             "7": -68.818359375,
+             "8": -11.6015625,
+@@ -18379,8 +18396,8 @@
+             "1": -0.3515625,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.271484375,
+             "6": 74.35546875,
+             "7": -76.2890625,
+             "8": -10.546875,
+@@ -18438,8 +18455,8 @@
+             "1": -0.17578125,
+             "2": -9.404296875,
+             "3": 8.7890625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.228515625,
++            "5": -10.01953125,
+             "6": 69.169921875,
+             "7": -70.48828125,
+             "8": -11.25,
+@@ -18497,8 +18514,8 @@
+             "1": -0.3515625,
+             "2": -8.4375,
+             "3": 7.55859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 11.25,
++            "5": -13.271484375,
+             "6": 74.35546875,
+             "7": -76.2890625,
+             "8": -10.546875,
+@@ -18556,8 +18573,8 @@
+             "1": 0.263671875,
+             "2": -9.755859375,
+             "3": 9.755859375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 9.140625,
++            "5": -8.96484375,
+             "6": 67.236328125,
+             "7": -68.818359375,
+             "8": -11.6015625,
+@@ -18631,8 +18648,8 @@
+             "1": -0.087890625,
+             "2": -8.349609375,
+             "3": 7.646484375,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.435546875,
++            "5": -17.314453125,
+             "6": 73.564453125,
+             "7": -75.41015625,
+             "8": -10.634765625,
+@@ -18690,8 +18707,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+@@ -18765,8 +18782,8 @@
+             "1": 0.52734375,
+             "2": -9.84375,
+             "3": 9.931640625,
+-            "4": 18.0,
+-            "5": -18.0,
++            "4": 16.5234375,
++            "5": -17.40234375,
+             "6": 67.060546875,
+             "7": -68.37890625,
+             "8": -10.986328125,
+diff --git a/src/irc_step_motion_executor/CMakeLists.txt b/src/irc_step_motion_executor/CMakeLists.txt
+index f304b4e..23f0802 100644
+--- a/src/irc_step_motion_executor/CMakeLists.txt
++++ b/src/irc_step_motion_executor/CMakeLists.txt
+@@ -224,6 +224,9 @@ install(PROGRAMS
+ if(BUILD_TESTING)
+   find_package(Python3 REQUIRED COMPONENTS Interpreter)
+   find_package(ament_cmake_gtest REQUIRED)
++  ament_add_gtest(test_callback_timing_trace test/test_callback_timing_trace.cpp)
++  target_compile_features(test_callback_timing_trace PRIVATE cxx_std_17)
++  target_include_directories(test_callback_timing_trace PRIVATE include)
+   if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK AND
+       EXISTS "${ROBOT_MOTION_SDK_DIR}/playback_diagnostics.hpp")
+     add_executable(test_common_playback test/test_common_playback.cpp)
+diff --git a/src/irc_step_motion_executor/README.md b/src/irc_step_motion_executor/README.md
+index 0bf42ca..4e291c5 100644
+--- a/src/irc_step_motion_executor/README.md
++++ b/src/irc_step_motion_executor/README.md
+@@ -539,7 +539,7 @@ Torque OFF 경로는 유지하며, 이번 테스트에서는 fake hardware만 
+ | 파라미터 | 기본값 | 의미 |
+ |---|---|---|
+ | enable_head_override | true | false이면 PC 원본 ID 0 사용, head ROS override 차단 |
+-| enable_shoulder_override | true | false이면 PC 원본 ID 4·5 사용 |
++| enable_shoulder_override | false | PC 원본 ID 4·5 사용. 어깨 고정 정책은 기본 비활성화 |
+ | policy_reference_json_path | install/config/robot_motions_pc.json | OFF일 때 참조하는 검증된 PC 원본 |
+ | queued_transition_hold_ms | 0 | 성공한 마지막 Goal 이후 activation까지 최소 대기시간 |
+ | position_tolerance_enabled | false | 일반 모션 종료 검사만 제어. 시작 자세 위치 검사·안정화·AUTO 전 대기에는 영향 없음 |
+@@ -547,19 +547,18 @@ Torque OFF 경로는 유지하며, 이번 테스트에서는 fake hardware만 
+ | motion_trace_path | 빈 문자열 | trace 활성화 시 필수 출력 경로 |
+ | motion_trace_goals | false | 상세 23축 degree Goal 추가 |
+ 
+-일반 모션의 shoulder ON 정책은 18/-18이며 예외는 정확히
+-`찐공잡기리그랩까지 실전`, `찐골넣기`, `찐허들` 세 이름이다.
++2026-10-27 사용자 요청으로 모든 runtime 모션과 시작 자세의 어깨를 PC 원본 값으로
++복원했다. 일반 실행은 shoulder OFF이며, 가져오기 도구도 원본 어깨 값을 보존한다.
++외부 SDK의 기존 shoulder ON 옵션은 구형 18/-18 정책을 다시 켜므로 사용하지 않는다.
+ head ON은 기존 JSON과 ball/goal/hurdle runtime policy를 유지한다.
+ OFF일 때는 frame_id 또는 name+start_ms로 PC 프레임을 확인하고 해당 축만
+ 복원한다. 매칭 불가·모호한 데이터는 추측하지 않고 실행 전 거절한다.
+-현재 원본이 없는 위 Jetson 전용 2모션은 OFF 시험을 할 수 없다.
+-따라서 전체 경기 실행을 OFF로 바꾸는 대신 PC 대응이 있는 대표 모션을 사용한다.
++현재 배포된 83개 모션은 모두 PC 원본과 대응하며 shoulder OFF 재생을 검증했다.
+ startup pose에도 같은 ON/OFF 축 선택을 적용하며, catalog 오류는 hardware
+ backend 생성 전에 검출한다(`startup_pose_catalog.cpp:89`, `sdk_executor_node.cpp:172`).
+ 
+-나중에 로봇을 지지한 상태에서 동일 시작 자세·전원·모션으로 기본 ON/ON을
+-기록한 뒤, head와 shoulder를 각각 하나씩 OFF로 바꿔 비교한다. 그 다음
+-정책을 고정하고 queue hold만 0/20/50/100ms로 바꾼다. 이번에는 실시하지 않았다.
++실기 비교는 로봇을 지지하고 동일 시작 자세·전원·모션으로 진행한다.
++기본값은 head ON / shoulder OFF이며, 어깨 정책과 다른 재생 조건을 동시에 바꾸지 않는다.
+ 0ms도 다음 callback에서 activation하며 첫 Goal은 한 callback 더 뒤다.
+ 5ms 주기가 정확하다면 final→activation→첫 Goal은 약 5ms→5ms이다.
+ hold 값은 최솟값이며 timer jitter와 송신 시간만큼 길어질 수 있다.
+@@ -591,6 +590,23 @@ head_override는 동적 ID 0 override 활성 상태, shoulder_override는
+ 예외를 제외한 shoulder 정책 활성 상태다. elapsed/queue delay와 progress는
+ 제어 clock, write_started/goal_interval/write_ms는 실제 steady clock을 사용한다.
+ 
++2026-10-27 추가: `motion_trace_enabled=true`이면 같은 경로에
++`.callbacks.csv`를 붙인 노드 콜백 계측 파일도 생성한다. 예를 들어
++`/tmp/step_line_original_shoulders.csv.callbacks.csv`이다. 타이머, 머리 목표 갱신,
++driver poll, 요청/취소, 영상 메시지, 상태/heartbeat 발행의 시작·종료 시각과
++경과 시간, 해당 스레드의 CPU 사용 시간을 기록한다. 각도나 타이머 주기는 바꾸지 않는다.
++단일 executor 스레드를 전제로 하며, 중첩된 구간의 시간을 합산하면 안 된다.
++최대 262144개 기록을 사전 할당한 메모리에 쌓고 정상 종료(Ctrl+C) 때만 저장한다.
++한도 이후에는 기록을 버리고 dropped를 집계한다. 강제 종료나 전원 차단 시에는
++기록을 잃을 수 있다. 진단 비활성 상태에서는 clock 측정과 파일 생성을 하지 않는다.
++계측 자체에도 작은 비용이 있으므로 실측 시간은 계측을 켠 조건의 결과로 해석한다.
++
++`python3 tools/analyze_callback_timing.py /tmp/step_line_original_shoulders.csv.callbacks.csv
++--output /tmp/step_callback_analysis.json`으로 분석한다(명령은 한 줄로 실행).
++콜백 밖의 미계측 시간은 ROS dispatch와 OS scheduling 등을 포함하므로 CPU 부족으로
++단정하지 않는다. 실제 vision inference 없이 simulated backend와 분리된 토픽으로
++콜백만 시험하는 도구는 `artifacts/20261027_forward_execution_diagnosis/probe_callback_timing.py`다.
++
+ ### 오프라인 검증 결과와 한계
+ 
+ - `irc_step_motion_executor`, `mission_control`, `step` 빌드 성공. launch/full_system 실행 없음.
+diff --git a/src/irc_step_motion_executor/config/motion_aliases.yaml b/src/irc_step_motion_executor/config/motion_aliases.yaml
+index a2ba612..a8738b1 100644
+--- a/src/irc_step_motion_executor/config/motion_aliases.yaml
++++ b/src/irc_step_motion_executor/config/motion_aliases.yaml
+@@ -7,16 +7,16 @@
+ # Visible-target alignment: left 15/30/45/60/75/90+ degrees -> 1/2/3/4/5/6 repeats.
+ # Right 15/30/45/65/95+ degrees -> 2/3/5/7/9 repeats; below minimum: no turn.
+ # Left turns below 15 degrees are skipped; 90 degrees and above use six repeats.
+-# Forward variants use catalog51 건전진; preserve 2/4/6/8-cycle command counts.
++# Forward variants use robot_motions(40)(1).json 전.; camera poses and repeats follow names.
+ motion_aliases:
+-  # Catalog51 건공잡기 includes regrasp and preserves the source motor 4/5 angles.
++  # Supplied 건공잡기 includes regrasp and preserves the source motor 4/5 angles.
+   sdk_pickup: "건공잡기"
+-  sdk_forward_4: "건전진45도(4회)"
+-  line_forward_2: "건전진45도(2회)"
+-  line_forward_4: "건전진45도(4회)"
+-  line_forward_6: "건전진45도(6회)"
+-  line_forward_8: "건전진45도(8회)"
+-  forward: "건전진45도(8회)"
++  sdk_forward_4: "전45도(4회)"
++  line_forward_2: "전45도(2회)"
++  line_forward_4: "전45도(4회)"
++  line_forward_6: "전45도(6회)"
++  line_forward_8: "전45도(8회)"
++  forward: "전45도(8회)"
+   line_turn_right_2: "찐제자리우회전45도-1(2회)"
+   line_turn_right_3: "찐제자리우회전45도-1(3회)"
+   line_turn_right_5: "찐제자리우회전45도-1(5회)"
+@@ -35,8 +35,8 @@ motion_aliases:
+   # Keep stable IDs; the new fine gait uses the catalog's five repeats.
+   ball_general_fine_forward_8: "건미세45도(5회)"
+   # Keep legacy IDs; pickup forward uses the supplied camera-45 gait.
+-  ball_camera_down_forward_2: "건전진45도(2회)"
+-  ball_camera_down_forward_4: "건전진45도(4회)"
++  ball_camera_down_forward_2: "전45도(2회)"
++  ball_camera_down_forward_4: "전45도(4회)"
+   pickup_fine_forward_0: "건미세0도"
+   hurdle_fine_forward_10: "건미세0도(허들10회)"
+   pickup_fine_prepare: "건오뒤에서 미세오뒤45도"
+@@ -69,17 +69,17 @@ motion_aliases:
+   pickup_camera_down_turn_right_5: "찐제자리우회전0도-1(5회)"
+   pickup_camera_down_turn_right_7: "찐제자리우회전0도-1(7회)"
+   pickup_camera_down_turn_right_9: "찐제자리우회전0도-1(9회)"
+-  post_ball_forward_4: "건전진45도(4회)"
+-  post_ball_forward_6: "건전진45도(6회)"
++  post_ball_forward_4: "전45도(4회)"
++  post_ball_forward_6: "전45도(6회)"
+   post_shot_turn_right_9: "찐제자리우회전45도(9회)"
+   # Composite exit turns contain nine right / six left yaw cycles; play once.
+   post_shot_default_turn_right: "건기본자세에서제자리우회전(골대)"
+   post_shot_default_turn_left: "건기본자세에서제자리좌회전(골대)"
+-  post_ball_forward_8: "건전진45도(8회)"
++  post_ball_forward_8: "전45도(8회)"
+   post_ball_camera_90: "건오뒤카메라90도"
+-  goal_camera_90_forward_2: "건전진90도(2회)"
+-  goal_camera_90_forward_4: "건전진90도(4회)"
+-  goal_camera_90_forward_6: "건전진90도(6회)"
++  goal_camera_90_forward_2: "전90도(2회)"
++  goal_camera_90_forward_4: "전90도(4회)"
++  goal_camera_90_forward_6: "전90도(6회)"
+   goal_camera_90_backward_1: "찐후진실전(1회)"
+   goal_camera_90_fine_forward_1: "건미세90도(1회)"
+   goal_camera_90_fine_forward_2: "건미세90도(2회)"
+diff --git a/src/irc_step_motion_executor/include/irc_step_motion_executor/robot_motion_runtime_config.hpp b/src/irc_step_motion_executor/include/irc_step_motion_executor/robot_motion_runtime_config.hpp
+index ce185df..bf9fa44 100644
+--- a/src/irc_step_motion_executor/include/irc_step_motion_executor/robot_motion_runtime_config.hpp
++++ b/src/irc_step_motion_executor/include/irc_step_motion_executor/robot_motion_runtime_config.hpp
+@@ -20,7 +20,7 @@ struct RobotMotionRuntimeConfig
+   std::vector<std::int64_t> motor_ids;
+   bool explicit_torque_approval{false};
+   bool enable_head_override{true};
+-  bool enable_shoulder_override{true};
++  bool enable_shoulder_override{false};
+   std::string policy_reference_json_path;
+   std::int64_t queued_transition_hold_ms{0};
+   std::int64_t expected_tick_ms{5};
+diff --git a/src/irc_step_motion_executor/launch/sdk_gui_alignment.launch.py b/src/irc_step_motion_executor/launch/sdk_gui_alignment.launch.py
+index 1f71f8b..96a3e80 100644
+--- a/src/irc_step_motion_executor/launch/sdk_gui_alignment.launch.py
++++ b/src/irc_step_motion_executor/launch/sdk_gui_alignment.launch.py
+@@ -1,4 +1,4 @@
+-"""Isolated playback comparison; preserve the approved runtime shoulder targets."""
++"""Isolated playback comparison using the original shoulder targets."""
+ from launch import LaunchDescription
+ from launch.actions import DeclareLaunchArgument
+ from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+@@ -9,14 +9,14 @@ from launch_ros.substitutions import FindPackageShare
+ 
+ def generate_launch_description():
+     share = FindPackageShare('irc_step_motion_executor')
+-    baseline = PathJoinSubstitution([share, 'config', 'robot_motions_gui_20261005.json'])
++    baseline = PathJoinSubstitution([share, 'config', 'robot_motions_pc.json'])
+     return LaunchDescription([
+         DeclareLaunchArgument('backend_type', default_value='simulated'),
+         DeclareLaunchArgument('enable_robot_hardware', default_value='false'),
+         DeclareLaunchArgument('explicit_torque_approval', default_value='false'),
+         DeclareLaunchArgument('robot_device_path', default_value=''),
+         DeclareLaunchArgument('motion_json_path', default_value=PathJoinSubstitution([share, 'config', 'robot_motions_runtime.json'])),
+-        DeclareLaunchArgument('enable_shoulder_override', default_value='true'),
++        DeclareLaunchArgument('enable_shoulder_override', default_value='false'),
+         DeclareLaunchArgument('motion_trace_path', default_value='/tmp/step_gui_alignment.csv'),
+         Node(package='irc_step_motion_executor', executable='sdk_motion_executor',
+              name='sdk_motion_executor', output='screen', parameters=[{
+diff --git a/src/irc_step_motion_executor/scripts/manual_motion_request.py b/src/irc_step_motion_executor/scripts/manual_motion_request.py
+old mode 100644
+new mode 100755
+diff --git a/src/irc_step_motion_executor/src/sdk_executor_node.cpp b/src/irc_step_motion_executor/src/sdk_executor_node.cpp
+index 6bbc7f7..45ebe6c 100644
+--- a/src/irc_step_motion_executor/src/sdk_executor_node.cpp
++++ b/src/irc_step_motion_executor/src/sdk_executor_node.cpp
+@@ -1,4 +1,5 @@
+ #include "irc_step_motion_executor/motion_backend_factory.hpp"
++#include "irc_step_motion_executor/callback_timing_trace.hpp"
+ #include "irc_step_motion_executor/sdk_executor_core.hpp"
+ #include "irc_step_motion_executor/sdk_executor_driver.hpp"
+ #include "irc_step_motion_executor/startup_pose_gate.hpp"
+@@ -89,7 +90,7 @@ public:
+     const std::int64_t startup_pose_duration_ms = positive_parameter_or_default(
+       "startup_pose_duration_ms", 1800);
+     enable_head_override_ = declare_parameter<bool>("enable_head_override", true);
+-    const bool enable_shoulder_override = declare_parameter<bool>("enable_shoulder_override", true);
++    const bool enable_shoulder_override = declare_parameter<bool>("enable_shoulder_override", false);
+     const std::string policy_reference_json = declare_parameter<std::string>(
+       "policy_reference_json_path", ament_index_cpp::get_package_share_directory(
+         "irc_step_motion_executor") + "/config/robot_motions_pc.json");
+@@ -101,6 +102,9 @@ public:
+     if (queued_transition_hold_ms < 0 || (motion_trace_enabled && motion_trace_path.empty())) {
+       throw std::invalid_argument("queue hold must be nonnegative; enabled trace needs a file path");
+     }
++    if (motion_trace_enabled) {
++      callback_timing_trace_.configure(motion_trace_path + ".callbacks.csv");
++    }
+     ball_head_override_enabled_ = declare_parameter<bool>(
+       "ball_head_override_enabled", true);
+     ball_head_override_deg_ = declare_parameter<double>(
+@@ -222,6 +226,8 @@ public:
+     driver_ = std::make_unique<SdkExecutorDriver>(
+       *core_, steady_now_ms,
+       [this](const std::string & payload) {
++        CallbackTimingTrace::Scope timing(
++          callback_timing_trace_, "status_publish", core_->has_active_request());
+         handle_head_override_status(payload);
+         std_msgs::msg::String message;
+         message.data = payload;
+@@ -231,39 +237,63 @@ public:
+     request_subscription_ = create_subscription<std_msgs::msg::String>(
+       "/motion/executor/request", 10,
+       [this](const std_msgs::msg::String::SharedPtr message) {
++        CallbackTimingTrace::Scope timing(
++          callback_timing_trace_, "request", core_->has_active_request());
+         driver_->handle_request(message->data);
+       });
+     cancel_subscription_ = create_subscription<std_msgs::msg::String>(
+       "/motion/executor/cancel", 10,
+       [this](const std_msgs::msg::String::SharedPtr message) {
++        CallbackTimingTrace::Scope timing(
++          callback_timing_trace_, "cancel", core_->has_active_request());
+         driver_->handle_cancel(message->data);
+       });
+     ball_info_subscription_ = create_subscription<std_msgs::msg::String>(
+       "/vision/ball_info", 10,
+       [this](const std_msgs::msg::String::SharedPtr message) {
++        CallbackTimingTrace::Scope timing(
++          callback_timing_trace_, "ball_info", core_->has_active_request());
+         handle_ball_info(message->data);
+       });
+     navigation_subscription_ = create_subscription<std_msgs::msg::String>(
+       "/navigation/motion_command", 10,
+       [this](const std_msgs::msg::String::SharedPtr message) {
++        CallbackTimingTrace::Scope timing(
++          callback_timing_trace_, "navigation", core_->has_active_request());
+         handle_hurdle_navigation(message->data);
+       });
+     hurdle_info_subscription_ = create_subscription<std_msgs::msg::String>(
+       "/vision/hurdle_info", 10,
+       [this](const std_msgs::msg::String::SharedPtr message) {
++        CallbackTimingTrace::Scope timing(
++          callback_timing_trace_, "hurdle_info", core_->has_active_request());
+         handle_hurdle_info(message->data);
+       });
+     poll_timer_ = create_wall_timer(
+       std::chrono::milliseconds(poll_period_ms),
+       [this]() {
++        CallbackTimingTrace::Scope timing(
++          callback_timing_trace_, "poll_timer", core_->has_active_request());
+         const auto now_ms = steady_now_ms();
+-        update_ball_head_override(now_ms);
+-        update_hurdle_head_override(now_ms);
+-        driver_->poll();
++        {
++          CallbackTimingTrace::Scope head_timing(
++            callback_timing_trace_, "head_update", core_->has_active_request());
++          update_ball_head_override(now_ms);
++          update_hurdle_head_override(now_ms);
++        }
++        {
++          CallbackTimingTrace::Scope driver_timing(
++            callback_timing_trace_, "driver_poll", core_->has_active_request());
++          driver_->poll();
++        }
+       });
+     heartbeat_timer_ = create_wall_timer(
+       std::chrono::milliseconds(heartbeat_period_ms),
+-      [this, backend_type]() {publish_heartbeat(backend_type);});
++      [this, backend_type]() {
++        CallbackTimingTrace::Scope timing(
++          callback_timing_trace_, "heartbeat", core_->has_active_request());
++        publish_heartbeat(backend_type);
++      });
+ 
+     if (backend_type == "simulated") {
+       RCLCPP_WARN(
+@@ -631,6 +661,7 @@ private:
+   // Declared first so the injected factory outlives backend construction/use.
+   std::unique_ptr<RobotMotionRuntimeFactory> robot_motion_runtime_factory_;
+ #endif
++  CallbackTimingTrace callback_timing_trace_;
+   // Declared before the backend so borrowed SDK runtime state outlives it.
+   std::shared_ptr<void> runtime_owner_;
+   std::unique_ptr<MotionBackend> backend_;
+diff --git a/src/irc_step_motion_executor/test/test_production_robot_motion_runtime_factory.cpp b/src/irc_step_motion_executor/test/test_production_robot_motion_runtime_factory.cpp
+index 6d51527..9af28c1 100644
+--- a/src/irc_step_motion_executor/test/test_production_robot_motion_runtime_factory.cpp
++++ b/src/irc_step_motion_executor/test/test_production_robot_motion_runtime_factory.cpp
+@@ -24,6 +24,8 @@ irc_step_motion_executor::RobotMotionRuntimeConfig complete_runtime_config()
+     config.motor_ids.push_back(motor_id);
+   }
+   config.explicit_torque_approval = true;
++  // This legacy fake SDK does not expose configureJointPolicy.
++  config.enable_shoulder_override = true;
+   return config;
+ }
+ 
+diff --git a/src/irc_step_motion_executor/test/test_robot_motion_runtime_config.cpp b/src/irc_step_motion_executor/test/test_robot_motion_runtime_config.cpp
+index eafb230..f227c34 100644
+--- a/src/irc_step_motion_executor/test/test_robot_motion_runtime_config.cpp
++++ b/src/irc_step_motion_executor/test/test_robot_motion_runtime_config.cpp
+@@ -81,6 +81,7 @@ TEST(RobotHardwareInitializationPolicy, DefaultConfigDisablesHardware)
+   EXPECT_EQ(config.baud_rate, 0);
+   EXPECT_TRUE(config.motor_ids.empty());
+   EXPECT_FALSE(config.explicit_torque_approval);
++  EXPECT_FALSE(config.enable_shoulder_override);
+ 
+   const auto result =
+     irc_step_motion_executor::validate_robot_hardware_initialization_policy(
+diff --git a/src/irc_step_motion_executor/test/test_startup_pose_catalog.cpp b/src/irc_step_motion_executor/test/test_startup_pose_catalog.cpp
+index 7192ba1..4b9325b 100644
+--- a/src/irc_step_motion_executor/test/test_startup_pose_catalog.cpp
++++ b/src/irc_step_motion_executor/test/test_startup_pose_catalog.cpp
+@@ -74,14 +74,16 @@ TEST(StartupPoseCatalog, RejectsRepeatedNameWithMissingMotor)
+ 
+ TEST(StartupPoseCatalog, LoadsGeonStartupPoseWithDefaultPolicy)
+ {
+-  std::vector<double> angles;
++  std::vector<double> angles, original;
+   std::string error;
+   ASSERT_TRUE(irc_step_motion_executor::load_startup_pose_with_policy(
+       TEST_RUNTIME_CATALOG, TEST_PC_CATALOG, "김오뒤3",
+-      true, true, angles, error)) << error;
++      true, false, angles, error)) << error;
++  ASSERT_TRUE(irc_step_motion_executor::load_startup_pose_angles(
++      TEST_PC_CATALOG, "김오뒤3", original, error)) << error;
+   ASSERT_EQ(angles.size(), 23U);
+-  EXPECT_DOUBLE_EQ(angles[4], 18.0);
+-  EXPECT_DOUBLE_EQ(angles[5], -18.0);
++  EXPECT_DOUBLE_EQ(angles[4], original[4]);
++  EXPECT_DOUBLE_EQ(angles[5], original[5]);
+   EXPECT_DOUBLE_EQ(angles[13], -41.220703125);
+   EXPECT_DOUBLE_EQ(angles[14], 55.3046875);
+ }
+@@ -141,7 +143,6 @@ TEST(StartupPoseCatalog, LoadsCatalog51StartupWithEveryPolicyCombination)
+   for (bool head : {false, true}) {
+     for (bool shoulder : {false, true}) {
+       auto expected = source;
+-      if (shoulder) {expected[4] = 18.0; expected[5] = -18.0;}
+       std::vector<double> actual;
+       std::string error;
+       ASSERT_TRUE(irc_step_motion_executor::load_startup_pose_with_policy(
+diff --git a/src/mission_control/launch/full_system_robot.launch.py b/src/mission_control/launch/full_system_robot.launch.py
+index 5c672b8..0eab4cb 100644
+--- a/src/mission_control/launch/full_system_robot.launch.py
++++ b/src/mission_control/launch/full_system_robot.launch.py
+@@ -354,7 +354,7 @@ def generate_launch_description() -> LaunchDescription:
+     return LaunchDescription(
+         [
+             DeclareLaunchArgument("enable_head_override", default_value="true"),
+-            DeclareLaunchArgument("enable_shoulder_override", default_value="true"),
++            DeclareLaunchArgument("enable_shoulder_override", default_value="false"),
+             DeclareLaunchArgument("queued_transition_hold_ms", default_value="0"),
+             DeclareLaunchArgument("motion_trace_enabled", default_value="false"),
+             DeclareLaunchArgument("motion_trace_goals", default_value="false"),
+diff --git a/src/mission_control/mission_control/motion_decision_node.py b/src/mission_control/mission_control/motion_decision_node.py
+index 7b41e52..169678f 100644
+--- a/src/mission_control/mission_control/motion_decision_node.py
++++ b/src/mission_control/mission_control/motion_decision_node.py
+@@ -88,11 +88,12 @@ class MotionDecisionNode(Node):
+     DEFAULT_EXECUTOR_HEARTBEAT_STARTUP_GRACE_SEC = 5.0
+     EXECUTOR_WATCHDOG_PERIOD_SEC = 0.1
+     LINE_MOTION_CAPTURE_CONFIG = {
+-        "STRAIGHT": (3.120, 10),
+-        "STRAIGHT_1": (1.026, 5),
+-        "STRAIGHT_2": (2.052, 10),
+-        "STRAIGHT_3": (3.120, 10),
+-        "STRAIGHT_4": (4.104, 15),
++        # The 전. timeline is 506 ms per cycle; wall time includes speed 0.9.
++        "STRAIGHT": (3.036 / 0.9, 10),
++        "STRAIGHT_1": (1.012 / 0.9, 5),
++        "STRAIGHT_2": (2.024 / 0.9, 10),
++        "STRAIGHT_3": (3.036 / 0.9, 10),
++        "STRAIGHT_4": (4.048 / 0.9, 15),
+         "LEFT": (2.120, 15),
+         "RIGHT": (2.104, 15),
+         **{
+@@ -123,9 +124,9 @@ class MotionDecisionNode(Node):
+     LINE_MOTION_CAPTURE_START_RATIO = 0.70
+     # Last frame end * repeats / playback speed in the deployed camera-90 catalog.
+     GOAL_FORWARD_DURATION_SEC = {
+-        "GOAL_CAMERA_90_FORWARD": 3.066,
+-        "GOAL_CAMERA_90_FORWARD_1": 1.022,
+-        "GOAL_CAMERA_90_FORWARD_2": 2.044,
++        "GOAL_CAMERA_90_FORWARD": 3.036 / 0.9,
++        "GOAL_CAMERA_90_FORWARD_1": 1.012 / 0.9,
++        "GOAL_CAMERA_90_FORWARD_2": 2.024 / 0.9,
+         **{f"GOAL_CAMERA90_FINE_FORWARD_{count}": .385 * count / 1.05
+            for count in range(1, 5)},
+     }
+diff --git a/src/mission_control/test/test_catalog51_forward_update.py b/src/mission_control/test/test_catalog51_forward_update.py
+index 7c7a41e..796baa9 100644
+--- a/src/mission_control/test/test_catalog51_forward_update.py
++++ b/src/mission_control/test/test_catalog51_forward_update.py
+@@ -14,6 +14,7 @@ from mission_control.motion_decision_node import MotionDecisionNode as Node
+ 
+ ROOT = Path(__file__).resolve().parents[3]
+ UPDATE = ROOT / 'artifacts/20261009_catalog51_forward_update'
++NEXT_UPDATE = ROOT / 'artifacts/20261027_catalog40_forward_pickup_update'
+ MANIFEST = json.loads((UPDATE / 'manifest.json').read_text())
+ SOURCE_PATH = ROOT / MANIFEST['source_file']
+ SOURCE = {m['name']: m for m in json.loads(SOURCE_PATH.read_text())['motions']}
+@@ -23,7 +24,8 @@ ALIASES = yaml.safe_load((ROOT / 'src/irc_step_motion_executor/config/motion_ali
+ @pytest.mark.parametrize('filename', ['robot_motions_runtime.json', 'robot_motions_pc.json'])
+ def test_forward_import_matches_source_and_preserves_other_motions(filename):
+     before = {m['name']: m for m in json.loads((UPDATE / filename.replace('.json', '.before.json')).read_text())['motions']}
+-    motions = json.loads((ROOT / 'artifacts' / filename).read_text())['motions']
++    # The later 전. import supersedes these gaits; verify the saved boundary.
++    motions = json.loads((NEXT_UPDATE / filename.replace('.json', '.before.json')).read_text())['motions']
+     current = {m['name']: m for m in motions}
+     assert len(current) == len(motions) == len(before) == 83
+     assert current.keys() == before.keys() - MANIFEST['renames'].keys() | set(MANIFEST['renames'].values())
+@@ -50,10 +52,12 @@ def test_forward_import_matches_source_and_preserves_other_motions(filename):
+ def test_all_normal_forward_aliases_resolve_and_fine_gaits_are_preserved():
+     expected = {key: MANIFEST['renames'].get(name, name)
+                 for key, name in MANIFEST['aliases_before'].items()}
+-    assert ALIASES == expected
+-    assert sum(name in MANIFEST['renames'].values() for name in ALIASES.values()) == 14
+-    runtime = {m['name'] for m in json.loads((ROOT / 'artifacts/robot_motions_runtime.json').read_text())['motions']}
+-    assert set(ALIASES.values()) <= runtime
++    expected['goal_forward_to_default'] = '건오뒤에서 기본자세(카메라45도)'
++    aliases = yaml.safe_load((NEXT_UPDATE / 'motion_aliases.before.yaml').read_text())['motion_aliases']
++    assert aliases == expected
++    assert sum(name in MANIFEST['renames'].values() for name in aliases.values()) == 14
++    runtime = {m['name'] for m in json.loads((NEXT_UPDATE / 'robot_motions_runtime.before.json').read_text())['motions']}
++    assert set(aliases.values()) <= runtime
+     assert not runtime & MANIFEST['renames'].keys()
+     assert hashlib.sha256(SOURCE_PATH.read_bytes()).hexdigest() == MANIFEST['source_sha256']
+ 
+diff --git a/src/mission_control/test/test_full_system_robot_launch.py b/src/mission_control/test/test_full_system_robot_launch.py
+index a18e309..6d4c9eb 100644
+--- a/src/mission_control/test/test_full_system_robot_launch.py
++++ b/src/mission_control/test/test_full_system_robot_launch.py
+@@ -102,7 +102,7 @@ def test_robot_launch_defaults_are_production_ready(
+         "explicit_torque_approval": True,
+         "position_tolerance_enabled": False,
+         "enable_head_override": True,
+-        "enable_shoulder_override": True,
++        "enable_shoulder_override": False,
+         "queued_transition_hold_ms": 0,
+         "motion_trace_enabled": False,
+         "motion_trace_path": "",
+@@ -138,8 +138,9 @@ def test_startup_target_matches_catalog51_front_weight_pose(monkeypatch, tmp_pat
+         assert all(f["angles"] == target["angles"] for f in matches)
+         assert all(target["torques"].values())
+         if filename == "robot_motions_runtime.json":
+-            assert target["angles"]["4"] == 18.0
+-            assert target["angles"]["5"] == -18.0
++            pc = json.loads((root / "artifacts/robot_motions_pc.json").read_text())["motions"]
++            original = next(m for m in pc if m["name"] == "오뒤무게중심앞")["frames"][0]
++            assert target["angles"] == original["angles"]
+ 
+ 
+ def test_robot_launch_passes_realsense_topic_parameters(
+diff --git a/tools/test_playback_traces.py b/tools/test_playback_traces.py
+index e73604f..88d54f4 100644
+--- a/tools/test_playback_traces.py
++++ b/tools/test_playback_traces.py
+@@ -139,6 +139,23 @@ def test_writer_closes_and_does_not_overwrite(tmp_path):
+         TraceWriter(path, {})
+ 
+ 
++def test_legacy_gui_without_separate_restart_keeps_commands():
++    gui = fake_gui()
++    delattr(gui.SDKMotionEditor, 'restart_playback_cycle')
++    plain = gui.SDKMotionEditor()
++    plain.start_motion_playback()
++    plain.anim_step()
++    rows = []
++    GuiTrace(rows.append, 'legacy').install(gui)
++    traced = gui.SDKMotionEditor()
++    traced.start_motion_playback()
++    traced.anim_step()
++    assert traced.commands == plain.commands
++    tick = next(row for row in rows if row['event'] == 'tick')
++    assert tick['next_repeat'] == 1
++    assert tick['next_timeline_ms'] == 20
++
++
+ def test_gui_packet_capture_excludes_rejected_motor_parameters():
+     gui = fake_gui()
+     gui.COMM_SUCCESS = 0
+diff --git a/tools/test_upsert_motion_catalog.py b/tools/test_upsert_motion_catalog.py
+index 9031840..b800c18 100644
+--- a/tools/test_upsert_motion_catalog.py
++++ b/tools/test_upsert_motion_catalog.py
+@@ -38,7 +38,7 @@ def test_upsert_normalizes_new_replaced_and_unreferenced_motions(tmp_path, sourc
+     assert all(m["completion"]["position_tolerance_deg"] == 5.0
+                for m in motions.values())
+     assert motions["new"]["frames"] == [
+-        {"angles": {"0": 42.0, "4": 18.0, "5": -18.0}}
++        {"angles": {"0": 42.0}}
+     ]
+     assert motions["new"]["completion"]["settle_timeout_ms"] == 3000
+     assert json.loads(source.read_text()) == source_payload
+@@ -66,7 +66,7 @@ def test_import_preserves_special_motions_and_other_joint_data(tmp_path):
+             }],
+         }
+ 
+-    # Similar task names must not accidentally inherit an exemption.
++    # Preserve shoulders for ordinary and special motions alike.
+     source_payload = {"motions": [motion(name) for name in sorted(exceptions)] + [
+         motion("찐공잡기전후진-2(2회)"), motion("찐기본자세에서 제자리 우회전(골대)"),
+     ]}
+@@ -86,23 +86,28 @@ def test_import_preserves_special_motions_and_other_joint_data(tmp_path):
+     for supplied in source_payload["motions"] + [original["motions"][1]]:
+         expected = copy.deepcopy(supplied)
+         expected["completion"]["position_tolerance_deg"] = 5.0
+-        if supplied["name"] not in exceptions:
+-            expected["frames"][0]["angles"].update({"4": 18.0, "5": -18.0})
+         assert result[supplied["name"]] == expected
+     assert json.loads(source.read_text()) == source_payload
+     assert json.loads(next(backup_dir.glob("*.json")).read_text()) == original
+ 
+ 
+-def test_production_runtime_keeps_fixed_motor_angles():
+-    path = Path(__file__).resolve().parents[1] / "artifacts/robot_motions_runtime.json"
++def test_production_runtime_preserves_original_shoulders_and_other_fields():
++    root = Path(__file__).resolve().parents[1]
++    path = root / "artifacts/robot_motions_runtime.json"
+     motions = json.loads(path.read_text())["motions"]
+-    exceptions = {"찐공잡기리그랩까지 실전", "건공잡기", "찐골넣기", "찐허들"}
+-    # An exemption does not require retaining retired motions in a full replacement.
+-    assert motions
++    original = {m["name"]: m for m in json.loads(
++        (root / "artifacts/robot_motions_pc.json").read_text())["motions"]}
++    before = json.loads((root / "artifacts/20261027_restore_original_shoulders/"
++                         "robot_motions_runtime.before.json").read_text())["motions"]
++    import copy
++    expected = copy.deepcopy(before)
++    for motion in expected:
++        for frame, source in zip(motion["frames"], original[motion["name"]]["frames"], strict=True):
++            assert frame["frame_id"] == source["frame_id"]
++            for joint in ("4", "5"):
++                frame["angles"][joint] = source["angles"][joint]
++    assert motions == expected
+     for motion in motions:
+-        if motion["name"] in exceptions:
+-            continue
+         for index, frame in enumerate(motion["frames"]):
+-            assert (frame["angles"]["4"], frame["angles"]["5"]) == (18, -18), (
+-                motion["name"], index,
+-            )
++            source = original[motion["name"]]["frames"][index]
++            assert all(frame["angles"][joint] == source["angles"][joint] for joint in ("4", "5"))
+diff --git a/tools/trace_sdk_gui.py b/tools/trace_sdk_gui.py
+index 82c62bd..5877cec 100644
+--- a/tools/trace_sdk_gui.py
++++ b/tools/trace_sdk_gui.py
+@@ -180,6 +180,10 @@ class GuiTrace:
+             ('restart_playback_cycle', 'restart'), ('stop_motion_sequence', 'goals_complete'),
+             ('update_3d_robot', 'gui_3d'),
+         ):
++            # Older Jetson GUIs restart inline in anim_step; its tick record
++            # already includes the next repeat and timeline in that version.
++            if name == 'restart_playback_cycle' and not hasattr(gui.SDKMotionEditor, name):
++                continue
+             wrap(name, event)
+ 
+         def wrap_ui(cls, name, event):
+diff --git a/tools/upsert_motion_catalog.py b/tools/upsert_motion_catalog.py
+index 174bb48..8430f24 100644
+--- a/tools/upsert_motion_catalog.py
++++ b/tools/upsert_motion_catalog.py
+@@ -18,26 +18,16 @@ import yaml
+ 
+ 
+ POSITION_TOLERANCE_DEG = 5.0
+-FIXED_JOINT_ANGLES_DEG = {"4": 18.0, "5": -18.0}
+-FIXED_JOINT_EXEMPT_MOTIONS = frozenset({
+-    "찐공잡기리그랩까지 실전",
+-    "건공잡기",
+-    "찐골넣기",
+-    "찐허들",
+-})
+ 
+ 
+ def _with_runtime_policy(motion: dict) -> dict:
+-    """Apply STEP's completion and fixed-joint policies to a runtime copy."""
++    """Normalize completion tolerance while preserving supplied joint targets."""
+     result = copy.deepcopy(motion)
+     result.setdefault("completion", {})["position_tolerance_deg"] = (
+         POSITION_TOLERANCE_DEG
+     )
+-    if result["name"] not in FIXED_JOINT_EXEMPT_MOTIONS:
+-        for frame in result.get("frames", []):
+-            frame["angles"].update(FIXED_JOINT_ANGLES_DEG)
+     if result["name"] == "건공잡기":
+-        # Shared pose names in other gaits still use the fixed arm angles.
++        # Preserve existing runtime pose identities across catalog updates.
+         pose_names = {name: name + "(건공잡기)" for name in (
+             "미세후진오뒤(0도)", "미세오뒤4111(45도)",
+         )}
+diff --git a/tools/verify_latest_gui_execution.py b/tools/verify_latest_gui_execution.py
+index 0c1adc1..16a9924 100644
+--- a/tools/verify_latest_gui_execution.py
++++ b/tools/verify_latest_gui_execution.py
+@@ -211,7 +211,7 @@ def main():
+                          reads=sum(r[0]=='R' for r in actual),completed_ms=actual[-1][1]-1000,
+                          max_raw_error=0,max_event_time_error_ms=0)
+                 summary.append(row)
+-                if motion['name']=='건전진45도(6회)' or path==fixture:
++                if motion['name'] in ('건전진45도(6회)', '전45도(6회)') or path==fixture:
+                     tag=hashlib.sha256(label.encode()).hexdigest()[:12]
+                     (args.output/f'trace_{tag}.json').write_text(json.dumps({'case':label,'gui':expected,'cpp':actual},ensure_ascii=False))
+     # Compare SDK queue directly with the actual GUI's saved composer path.

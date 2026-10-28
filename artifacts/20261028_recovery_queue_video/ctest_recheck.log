@@ -1,0 +1,12 @@
+Internal ctest changing into directory: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+Test project /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+    Start 2: test_legacy_cosine_execution
+1/3 Test #2: test_legacy_cosine_execution .....   Passed   70.28 sec
+    Start 3: test_forward_timing
+2/3 Test #3: test_forward_timing ..............   Passed    0.32 sec
+    Start 5: test_continuous_hardware
+3/3 Test #5: test_continuous_hardware .........   Passed    0.04 sec
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =  70.65 sec

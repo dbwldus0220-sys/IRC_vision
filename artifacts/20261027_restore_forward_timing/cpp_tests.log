@@ -1,0 +1,21 @@
+Internal ctest changing into directory: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+Test project /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+    Start  3: test_forward_timing
+1/6 Test  #3: test_forward_timing ................   Passed    0.01 sec
+    Start  4: test_continuous_interpolation
+2/6 Test  #4: test_continuous_interpolation ......   Passed    0.00 sec
+    Start  5: test_continuous_hardware
+3/6 Test  #5: test_continuous_hardware ...........   Passed    0.01 sec
+    Start  6: test_continuous_playback_parity
+4/6 Test  #6: test_continuous_playback_parity ....   Passed   24.79 sec
+    Start 11: test_queue_control_tick
+5/6 Test #11: test_queue_control_tick ............   Passed    0.16 sec
+    Start 12: test_robot_motion_player_backend
+6/6 Test #12: test_robot_motion_player_backend ...   Passed    0.16 sec
+
+100% tests passed, 0 tests failed out of 6
+
+Label Time Summary:
+gtest    =   0.32 sec*proc (2 tests)
+
+Total Test time (real) =  25.15 sec

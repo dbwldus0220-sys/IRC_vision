@@ -1,0 +1,1008 @@
+Starting >>> irc_step_motion_executor
+UpdateCTestConfiguration  from :/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/CTestConfiguration.ini
+Parse Config file:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/CTestConfiguration.ini
+   Site: jet
+   Build name: (empty)
+ Add coverage exclude regular expressions.
+Create new tag: 20261027-1344 - Experimental
+UpdateCTestConfiguration  from :/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/CTestConfiguration.ini
+Parse Config file:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/CTestConfiguration.ini
+Test project /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 1
+      Start  1: test_callback_timing_trace
+
+1: Test command: /usr/bin/python3 "-u" "/opt/ros/humble/share/ament_cmake_test/cmake/run_test.py" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_callback_timing_trace.gtest.xml" "--package-name" "irc_step_motion_executor" "--output-file" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ament_cmake_gtest/test_callback_timing_trace.txt" "--command" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_callback_timing_trace" "--gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_callback_timing_trace.gtest.xml"
+1: Test timeout computed to be: 60
+1: -- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+1:  - /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_callback_timing_trace --gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_callback_timing_trace.gtest.xml
+1: Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+1: [==========] Running 2 tests from 1 test suite.
+1: [----------] Global test environment set-up.
+1: [----------] 2 tests from CallbackTimingTrace
+1: [ RUN      ] CallbackTimingTrace.BuffersUntilShutdownAndBoundsStorage
+1: [       OK ] CallbackTimingTrace.BuffersUntilShutdownAndBoundsStorage (2 ms)
+1: [ RUN      ] CallbackTimingTrace.SeparatesWallTimeFromThreadCpuTime
+1: [       OK ] CallbackTimingTrace.SeparatesWallTimeFromThreadCpuTime (21 ms)
+1: [----------] 2 tests from CallbackTimingTrace (23 ms total)
+1: 
+1: [----------] Global test environment tear-down
+1: [==========] 2 tests from 1 test suite ran. (23 ms total)
+1: [  PASSED  ] 2 tests.
+1: -- run_test.py: return code 0
+1: -- run_test.py: inject classname prefix into gtest result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_callback_timing_trace.gtest.xml'
+1: -- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_callback_timing_trace.gtest.xml'
+ 1/33 Test  #1: test_callback_timing_trace .........................   Passed    0.19 sec
+test 2
+      Start  2: test_latest_gui_execution
+
+2: Test command: /usr/bin/python3 "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/../../tools/verify_latest_gui_execution.py" "--gui" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/../../artifacts/20261006_gui_alignment/reference/sdk_gui.py" "--probe" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/robot_motion_sdk/gui_execution_probe" "--output" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/gui_comparison" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/../../artifacts/20261006_gui_alignment/reference/robot_motions(10).json" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/../../artifacts/robot_motions_runtime.json" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/../../artifacts/20261006_gui_alignment/robot_motions_gui_state.json"
+2: Test timeout computed to be: 10000000
+2: Traceback (most recent call last):
+[Processing: irc_step_motion_executor]
+[Processing: irc_step_motion_executor]
+2:   File "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/../../tools/verify_latest_gui_execution.py", line 245, in <module>
+2:     if __name__=='__main__':main()
+2:   File "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/../../tools/verify_latest_gui_execution.py", line 209, in main
+2:     compare(expected,actual,label)
+2:   File "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/../../tools/verify_latest_gui_execution.py", line 143, in compare
+2:     assert a[2][joint][1]==b[2][joint][1],(name,index,joint,a,b)
+2: AssertionError: ('synthetic.json/partial_0.9/[5.0]/0/0', 203, 1, ['W', 1400.0, {0: (-350.5, 2156), 1: (-2.75, 2017), 2: (-27.125, 1739), 3: (180.0, 4095), 4: (-2.0, 2025), 5: (-1.75, 2028), 6: (-1.5, 2031), 7: (-1.25, 2034), 8: (-1.0, 2037), 9: (-0.75, 2039), 10: (-0.5, 2042), 11: (-0.25, 2045), 12: (0.0, 2048), 13: (0.25, 2051), 14: (0.5, 2054), 15: (0.75, 2057), 16: (1.0, 2059), 17: (1.25, 2062), 18: (1.5, 2065), 19: (1.75, 2068), 20: (2.0, 2071), 21: (2.25, 2074), 22: (2.5, 2076)}], ['W', 1400.0, {0: (-350.5, 2156), 1: (-180.0, 0), 2: (-27.125, 1739), 3: (180.0, 4095), 4: (-2.0, 2025), 5: (-1.75, 2028), 6: (-1.5, 2031), 7: (-1.25, 2034), 8: (-1.0, 2037), 9: (-0.75, 2039), 10: (-0.5, 2042), 11: (-0.25, 2045), 12: (0.0, 2048), 13: (0.25, 2051), 14: (0.5, 2054), 15: (0.75, 2057), 16: (1.0, 2059), 17: (1.25, 2062), 18: (1.5, 2065), 19: (1.75, 2068), 20: (2.0, 2071), 21: (2.25, 2074), 22: (2.5, 2076)}])
+ 2/33 Test  #2: test_latest_gui_execution ..........................***Failed   68.19 sec
+test 3
+      Start  3: test_continuous_hardware
+
+3: Test command: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/robot_motion_sdk/test_continuous_hardware "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor"
+3: Test timeout computed to be: 10000000
+3: [Error] Torque OFF failed, ID: 5
+3: [Error] Torque OFF failed, ID: 5
+3: [Error] Torque OFF failed, ID: 5
+3: [Error] Torque OFF failed, ID: 6
+3: [Error] Torque OFF failed, ID: 5
+3: [Error] Torque verification failed, ID: 6
+3: [Error] Torque OFF failed, ID: 5
+3: [Error] Torque verification failed, ID: 6
+3: [Error] Torque OFF failed, ID: 5
+3: [Error] Torque verification failed, ID: 6
+3: [Error] Torque OFF failed, ID: 5
+3: [Error] Torque OFF failed, ID: 5
+3: PASS actual player -> hardware -> Dxl -> fake SDK packets; exclusion, torque checks, seed, profiles, startup, repeat, emergency OFF
+ 3/33 Test  #3: test_continuous_hardware ...........................   Passed    0.02 sec
+test 4
+      Start  4: test_continuous_playback_parity
+
+4: Test command: /usr/bin/python3 "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/../../tools/verify_continuous_playback.py" "--probe" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/robot_motion_sdk/continuous_trace_probe" "--raw-probe" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/robot_motion_sdk/gui_execution_probe" "--output" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/continuous_parity.json" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/../../artifacts/robot_motions_runtime.json"
+4: Test timeout computed to be: 10000000
+4: {
+4:   "oracle": "user specification, latest PC GUI unavailable",
+4:   "catalogs": {
+4:     "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/../../artifacts/robot_motions_runtime.json": {
+4:       "motions": 83,
+4:       "joint_samples": 611133,
+4:       "maximum_angle_error_deg": 2.842170943040401e-14,
+4:       "raw_mismatches": 0
+4:     }
+4:   },
+4:   "rounding_boundary_cases": 12291
+4: }
+ 4/33 Test  #4: test_continuous_playback_parity ....................   Passed    2.86 sec
+test 5
+      Start  5: test_gui_alignment_contract
+
+5: Test command: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/robot_motion_sdk/test_gui_alignment "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor"
+5: Test timeout computed to be: 10000000
+5: PASS start read failure, goal failure/queue purge, cancel, E-stop, feedback failure, queue hold, override, startup settling
+ 5/33 Test  #5: test_gui_alignment_contract ........................   Passed    0.01 sec
+test 6
+      Start  6: test_catalog_only_core
+
+6: Test command: /usr/bin/python3 "-u" "/opt/ros/humble/share/ament_cmake_test/cmake/run_test.py" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_catalog_only_core.gtest.xml" "--package-name" "irc_step_motion_executor" "--output-file" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ament_cmake_gtest/test_catalog_only_core.txt" "--command" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_catalog_only_core" "--gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_catalog_only_core.gtest.xml"
+6: Test timeout computed to be: 60
+6: -- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+6:  - /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_catalog_only_core --gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_catalog_only_core.gtest.xml
+6: Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+6: [==========] Running 10 tests from 3 test suites.
+6: [----------] Global test environment set-up.
+6: [----------] 1 test from MotionAliasCatalog
+6: [ RUN      ] MotionAliasCatalog.LoadsLatestSdkAndCanonicalAliases
+6: /home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:45: Failure
+6: Expected equality of these values:
+6:   catalog.size()
+6:     Which is: 99
+6:   98U
+6:     Which is: 98
+6: /home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:64: Failure
+6: Expected equality of these values:
+6:   catalog.resolve(alias)
+6:     Which is: 40-byte object <48-08 21-E0 FF-FF 00-00 0E-00 00-00 00-00 00-00 EC-A0 84-34 35-EB 8F-84 28-38 ED-9A 8C-29 00-00 01-00 00-00 00-00 00-00>
+6:   std::optional<std::string>(motion)
+6:     Which is: 40-byte object <00-52 44-F3 AA-AA 00-00 14-00 00-00 00-00 00-00 14-00 00-00 00-00 00-00 54-07 D2-86 FF-FF 00-00 01-1B E3-86 FF-FF 00-00>
+6: /home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:64: Failure
+6: Expected equality of these values:
+6:   catalog.resolve(alias)
+6:     Which is: 40-byte object <48-08 21-E0 FF-FF 00-00 0E-00 00-00 00-00 00-00 EC-A0 84-34 35-EB 8F-84 28-38 ED-9A 8C-29 00-00 01-00 00-00 00-00 00-00>
+6:   std::optional<std::string>(motion)
+6:     Which is: 40-byte object <00-52 44-F3 AA-AA 00-00 14-00 00-00 00-00 00-00 14-00 00-00 00-00 00-00 54-07 D2-86 FF-FF 00-00 01-1B E3-86 FF-FF 00-00>
+6: /home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_catalog_only_core.cpp:64: Failure
+6: Expected equality of these values:
+6:   catalog.resolve(alias)
+6:     Which is: 40-byte object <48-08 21-E0 FF-FF 00-00 0E-00 00-00 00-00 00-00 EC-A0 84-39 30-EB 8F-84 28-32 ED-9A 8C-29 00-00 01-00 00-00 00-00 00-00>
+6:   std::optional<std::string>(motion)
+6:     Which is: 40-byte object <00-52 44-F3 AA-AA 00-00 14-00 00-00 00-00 00-00 14-00 00-00 00-00 00-00 54-07 D2-86 FF-FF 00-00 01-1B E3-86 FF-FF 00-00>
+6: [  FAILED  ] MotionAliasCatalog.LoadsLatestSdkAndCanonicalAliases (2 ms)
+6: [----------] 1 test from MotionAliasCatalog (2 ms total)
+6: 
+6: [----------] 8 tests from CatalogOnlyCore
+6: [ RUN      ] CatalogOnlyCore.PreservesCorrelationFieldsAndRejectsExecution
+6: [       OK ] CatalogOnlyCore.PreservesCorrelationFieldsAndRejectsExecution (9 ms)
+6: [ RUN      ] CatalogOnlyCore.RejectsInvalidJsonSafely
+6: [       OK ] CatalogOnlyCore.RejectsInvalidJsonSafely (1 ms)
+6: [ RUN      ] CatalogOnlyCore.DistinguishesRequiredNullEventIdFromMissingEventId
+6: [       OK ] CatalogOnlyCore.DistinguishesRequiredNullEventIdFromMissingEventId (2 ms)
+6: [ RUN      ] CatalogOnlyCore.RequiresEveryRequestContractField
+6: [       OK ] CatalogOnlyCore.RequiresEveryRequestContractField (1 ms)
+6: [ RUN      ] CatalogOnlyCore.RejectsUnknownAliasWithoutFallback
+6: [       OK ] CatalogOnlyCore.RejectsUnknownAliasWithoutFallback (2 ms)
+6: [ RUN      ] CatalogOnlyCore.SerializedStatusContainsContractFields
+6: [       OK ] CatalogOnlyCore.SerializedStatusContainsContractFields (2 ms)
+6: [ RUN      ] CatalogOnlyCore.SerializedStatusPreservesNullCorrelationTypes
+6: [       OK ] CatalogOnlyCore.SerializedStatusPreservesNullCorrelationTypes (1 ms)
+6: [ RUN      ] CatalogOnlyCore.CancelNeverTouchesHardware
+6: [       OK ] CatalogOnlyCore.CancelNeverTouchesHardware (2 ms)
+6: [----------] 8 tests from CatalogOnlyCore (20 ms total)
+6: 
+6: [----------] 1 test from CatalogOnlyContract
+6: [ RUN      ] CatalogOnlyContract.SharedVectorsPreserveFieldsWithoutFallback
+6: [       OK ] CatalogOnlyContract.SharedVectorsPreserveFieldsWithoutFallback (1 ms)
+6: [----------] 1 test from CatalogOnlyContract (1 ms total)
+6: 
+6: [----------] Global test environment tear-down
+6: [==========] 10 tests from 3 test suites ran. (23 ms total)
+6: [  PASSED  ] 9 tests.
+6: [  FAILED  ] 1 test, listed below:
+6: [  FAILED  ] MotionAliasCatalog.LoadsLatestSdkAndCanonicalAliases
+6: 
+6:  1 FAILED TEST
+6: -- run_test.py: return code 1
+6: -- run_test.py: inject classname prefix into gtest result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_catalog_only_core.gtest.xml'
+6: -- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_catalog_only_core.gtest.xml'
+ 6/33 Test  #6: test_catalog_only_core .............................***Failed    0.19 sec
+test 7
+      Start  7: test_motion_json_catalog
+
+7: Test command: /usr/bin/python3 "-u" "/opt/ros/humble/share/ament_cmake_test/cmake/run_test.py" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_motion_json_catalog.gtest.xml" "--package-name" "irc_step_motion_executor" "--output-file" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ament_cmake_gtest/test_motion_json_catalog.txt" "--command" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_motion_json_catalog" "--gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_motion_json_catalog.gtest.xml"
+7: Test timeout computed to be: 60
+7: -- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+7:  - /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_motion_json_catalog --gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_motion_json_catalog.gtest.xml
+7: Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+7: [==========] Running 3 tests from 1 test suite.
+7: [----------] Global test environment set-up.
+7: [----------] 3 tests from MotionJsonCatalog
+7: [ RUN      ] MotionJsonCatalog.CandidateCatalogMatchesExecutorLoaderContract
+7: [       OK ] MotionJsonCatalog.CandidateCatalogMatchesExecutorLoaderContract (17 ms)
+7: [ RUN      ] MotionJsonCatalog.RejectsInvalidJsonWithClearError
+7: [       OK ] MotionJsonCatalog.RejectsInvalidJsonWithClearError (0 ms)
+7: [ RUN      ] MotionJsonCatalog.RejectsMissingRequiredFramesField
+7: [       OK ] MotionJsonCatalog.RejectsMissingRequiredFramesField (0 ms)
+7: [----------] 3 tests from MotionJsonCatalog (17 ms total)
+7: 
+7: [----------] Global test environment tear-down
+7: [==========] 3 tests from 1 test suite ran. (17 ms total)
+7: [  PASSED  ] 3 tests.
+7: -- run_test.py: return code 0
+7: -- run_test.py: inject classname prefix into gtest result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_motion_json_catalog.gtest.xml'
+7: -- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_motion_json_catalog.gtest.xml'
+ 7/33 Test  #7: test_motion_json_catalog ...........................   Passed    0.18 sec
+test 8
+      Start  8: test_sdk_executor_core
+
+8: Test command: /usr/bin/python3 "-u" "/opt/ros/humble/share/ament_cmake_test/cmake/run_test.py" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_core.gtest.xml" "--package-name" "irc_step_motion_executor" "--output-file" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ament_cmake_gtest/test_sdk_executor_core.txt" "--command" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_sdk_executor_core" "--gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_core.gtest.xml"
+8: Test timeout computed to be: 60
+8: -- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+8:  - /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_sdk_executor_core --gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_core.gtest.xml
+8: Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+8: [==========] Running 20 tests from 1 test suite.
+8: [----------] Global test environment set-up.
+8: [----------] 20 tests from SdkExecutorCore
+8: [ RUN      ] SdkExecutorCore.ResolvesForwardAliasBeforeStartingBackend
+8: /home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:51: Failure
+8: Expected equality of these values:
+8:   backend.started_motion_names[0]
+8:     Which is: "\xEC\xA0\x84" "45\xEB\x8F\x84(8\xED\x9A\x8C)"
+8:     As Text: "전45도(8회)"
+8:   "건전진45도(8회)"
+8:     Which is: "\xEA\xB1\xB4\xEC\xA0\x84\xEC\xA7\x84" "45\xEB\x8F\x84(8\xED\x9A\x8C)"
+8:     As Text: "건전진45도(8회)"
+8: [  FAILED  ] SdkExecutorCore.ResolvesForwardAliasBeforeStartingBackend (2 ms)
+8: [ RUN      ] SdkExecutorCore.ResolvesPickupAliasWithoutFallback
+8: [       OK ] SdkExecutorCore.ResolvesPickupAliasWithoutFallback (2 ms)
+8: [ RUN      ] SdkExecutorCore.UnsupportedMotionNeverCallsBackend
+8: [       OK ] SdkExecutorCore.UnsupportedMotionNeverCallsBackend (1 ms)
+8: [ RUN      ] SdkExecutorCore.CorrelatedRejectionNeverStartsOrActivatesBackend
+8: [       OK ] SdkExecutorCore.CorrelatedRejectionNeverStartsOrActivatesBackend (2 ms)
+8: [ RUN      ] SdkExecutorCore.CorrelatedRejectionPreservesInvalidRequestHandling
+8: [       OK ] SdkExecutorCore.CorrelatedRejectionPreservesInvalidRequestHandling (2 ms)
+8: [ RUN      ] SdkExecutorCore.PreservesCorrelationIncludingNullIds
+8: [       OK ] SdkExecutorCore.PreservesCorrelationIncludingNullIds (1 ms)
+8: [ RUN      ] SdkExecutorCore.MapsRunningSettlingAndSucceeded
+8: [       OK ] SdkExecutorCore.MapsRunningSettlingAndSucceeded (2 ms)
+8: [ RUN      ] SdkExecutorCore.MapsBackendFailureToFailedTerminal
+8: [       OK ] SdkExecutorCore.MapsBackendFailureToFailedTerminal (1 ms)
+8: [ RUN      ] SdkExecutorCore.CancelRequestCompletesWhenBackendReportsCancelled
+8: [       OK ] SdkExecutorCore.CancelRequestCompletesWhenBackendReportsCancelled (2 ms)
+8: [ RUN      ] SdkExecutorCore.RejectsCancelWithoutActiveRequest
+8: [       OK ] SdkExecutorCore.RejectsCancelWithoutActiveRequest (2 ms)
+8: [ RUN      ] SdkExecutorCore.RejectsStaleCancelWithoutTouchingActiveRequest
+8: [       OK ] SdkExecutorCore.RejectsStaleCancelWithoutTouchingActiveRequest (1 ms)
+8: [ RUN      ] SdkExecutorCore.RejectsSecondStartWhileActive
+8: /home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:245: Failure
+8: Expected equality of these values:
+8:   backend.started_motion_names[0]
+8:     Which is: "\xEC\xA0\x84" "45\xEB\x8F\x84(8\xED\x9A\x8C)"
+8:     As Text: "전45도(8회)"
+8:   "건전진45도(8회)"
+8:     Which is: "\xEA\xB1\xB4\xEC\xA0\x84\xEC\xA7\x84" "45\xEB\x8F\x84(8\xED\x9A\x8C)"
+8:     As Text: "건전진45도(8회)"
+8: [  FAILED  ] SdkExecutorCore.RejectsSecondStartWhileActive (2 ms)
+8: [ RUN      ] SdkExecutorCore.TimeoutCancelsAndReturnsFailedWithCorrelation
+8: [       OK ] SdkExecutorCore.TimeoutCancelsAndReturnsFailedWithCorrelation (2 ms)
+8: [ RUN      ] SdkExecutorCore.AllowsNewRequestAfterTerminalStatus
+8: [       OK ] SdkExecutorCore.AllowsNewRequestAfterTerminalStatus (1 ms)
+8: [ RUN      ] SdkExecutorCore.BackendStartExceptionBecomesFailed
+8: [       OK ] SdkExecutorCore.BackendStartExceptionBecomesFailed (2 ms)
+8: [ RUN      ] SdkExecutorCore.ExplicitBackendStartRejectionStaysRejected
+8: [       OK ] SdkExecutorCore.ExplicitBackendStartRejectionStaysRejected (1 ms)
+8: [ RUN      ] SdkExecutorCore.BackendPollExceptionBecomesFailedAndReleasesRequest
+8: [       OK ] SdkExecutorCore.BackendPollExceptionBecomesFailedAndReleasesRequest (1 ms)
+8: [ RUN      ] SdkExecutorCore.BackendCancelExceptionBecomesFailedTerminal
+8: [       OK ] SdkExecutorCore.BackendCancelExceptionBecomesFailedTerminal (2 ms)
+8: [ RUN      ] SdkExecutorCore.RejectsInvalidRequestWithoutCallingBackend
+8: [       OK ] SdkExecutorCore.RejectsInvalidRequestWithoutCallingBackend (1 ms)
+8: [ RUN      ] SdkExecutorCore.PromotesOneQueuedRequestAtSeamlessBoundary
+8: /home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:377: Failure
+8: Expected equality of these values:
+8:   backend.queued_motion_names[0]
+8:     Which is: "\xEC\xA0\x84" "45\xEB\x8F\x84(8\xED\x9A\x8C)"
+8:     As Text: "전45도(8회)"
+8:   "건전진45도(8회)"
+8:     Which is: "\xEA\xB1\xB4\xEC\xA0\x84\xEC\xA7\x84" "45\xEB\x8F\x84(8\xED\x9A\x8C)"
+8:     As Text: "건전진45도(8회)"
+8: [  FAILED  ] SdkExecutorCore.PromotesOneQueuedRequestAtSeamlessBoundary (2 ms)
+8: [----------] 20 tests from SdkExecutorCore (33 ms total)
+8: 
+8: [----------] Global test environment tear-down
+8: [==========] 20 tests from 1 test suite ran. (33 ms total)
+8: [  PASSED  ] 17 tests.
+8: [  FAILED  ] 3 tests, listed below:
+8: [  FAILED  ] SdkExecutorCore.ResolvesForwardAliasBeforeStartingBackend
+8: [  FAILED  ] SdkExecutorCore.RejectsSecondStartWhileActive
+8: [  FAILED  ] SdkExecutorCore.PromotesOneQueuedRequestAtSeamlessBoundary
+8: 
+8:  3 FAILED TESTS
+8: -- run_test.py: return code 1
+8: -- run_test.py: inject classname prefix into gtest result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_core.gtest.xml'
+8: -- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_core.gtest.xml'
+ 8/33 Test  #8: test_sdk_executor_core .............................***Failed    0.20 sec
+test 9
+      Start  9: test_queue_control_tick
+
+9: Test command: /usr/bin/python3 "-u" "/opt/ros/humble/share/ament_cmake_test/cmake/run_test.py" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_queue_control_tick.gtest.xml" "--package-name" "irc_step_motion_executor" "--output-file" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ament_cmake_gtest/test_queue_control_tick.txt" "--command" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_queue_control_tick" "--gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_queue_control_tick.gtest.xml"
+9: Test timeout computed to be: 60
+9: -- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+9:  - /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_queue_control_tick --gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_queue_control_tick.gtest.xml
+9: Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+9: [==========] Running 2 tests from 1 test suite.
+9: [----------] Global test environment set-up.
+9: [----------] 2 tests from QueueControlTick
+9: [ RUN      ] QueueControlTick.ActivationStatusDoesNotSkipBackendUpdate
+9: [       OK ] QueueControlTick.ActivationStatusDoesNotSkipBackendUpdate (2 ms)
+9: [ RUN      ] QueueControlTick.FailureOnActivationTickIsReportedImmediately
+9: [       OK ] QueueControlTick.FailureOnActivationTickIsReportedImmediately (1 ms)
+9: [----------] 2 tests from QueueControlTick (3 ms total)
+9: 
+9: [----------] Global test environment tear-down
+9: [==========] 2 tests from 1 test suite ran. (3 ms total)
+9: [  PASSED  ] 2 tests.
+9: -- run_test.py: return code 0
+9: -- run_test.py: inject classname prefix into gtest result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_queue_control_tick.gtest.xml'
+9: -- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_queue_control_tick.gtest.xml'
+ 9/33 Test  #9: test_queue_control_tick ............................   Passed    0.17 sec
+test 10
+      Start 10: test_robot_motion_player_backend
+
+10: Test command: /usr/bin/python3 "-u" "/opt/ros/humble/share/ament_cmake_test/cmake/run_test.py" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_robot_motion_player_backend.gtest.xml" "--package-name" "irc_step_motion_executor" "--output-file" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ament_cmake_gtest/test_robot_motion_player_backend.txt" "--command" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_robot_motion_player_backend" "--gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_robot_motion_player_backend.gtest.xml"
+10: Test timeout computed to be: 60
+10: -- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+10:  - /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_robot_motion_player_backend --gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_robot_motion_player_backend.gtest.xml
+10: Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+10: [==========] Running 9 tests from 1 test suite.
+10: [----------] Global test environment set-up.
+10: [----------] 9 tests from RobotMotionPlayerBackend
+10: [ RUN      ] RobotMotionPlayerBackend.PassesResolvedMotionNameWithoutModification
+10: [       OK ] RobotMotionPlayerBackend.PassesResolvedMotionNameWithoutModification (0 ms)
+10: [ RUN      ] RobotMotionPlayerBackend.ForwardsAbsoluteJointOverride
+10: [       OK ] RobotMotionPlayerBackend.ForwardsAbsoluteJointOverride (0 ms)
+10: [ RUN      ] RobotMotionPlayerBackend.MapsEveryKnownStartResult
+10: [       OK ] RobotMotionPlayerBackend.MapsEveryKnownStartResult (0 ms)
+10: [ RUN      ] RobotMotionPlayerBackend.UnknownStartResultFailsSafely
+10: [       OK ] RobotMotionPlayerBackend.UnknownStartResultFailsSafely (0 ms)
+10: [ RUN      ] RobotMotionPlayerBackend.MapsEveryKnownCancelResult
+10: [       OK ] RobotMotionPlayerBackend.MapsEveryKnownCancelResult (0 ms)
+10: [ RUN      ] RobotMotionPlayerBackend.MapsEveryKnownMotionStatus
+10: [       OK ] RobotMotionPlayerBackend.MapsEveryKnownMotionStatus (0 ms)
+10: [ RUN      ] RobotMotionPlayerBackend.MapsSdkFailureCodeAndMessage
+10: [       OK ] RobotMotionPlayerBackend.MapsSdkFailureCodeAndMessage (0 ms)
+10: [ RUN      ] RobotMotionPlayerBackend.UnknownStatusBecomesFailed
+10: [       OK ] RobotMotionPlayerBackend.UnknownStatusBecomesFailed (0 ms)
+10: [ RUN      ] RobotMotionPlayerBackend.ConvertsInjectedApiExceptionsSafely
+10: [       OK ] RobotMotionPlayerBackend.ConvertsInjectedApiExceptionsSafely (1 ms)
+10: [----------] 9 tests from RobotMotionPlayerBackend (1 ms total)
+10: 
+10: [----------] Global test environment tear-down
+10: [==========] 9 tests from 1 test suite ran. (1 ms total)
+10: [  PASSED  ] 9 tests.
+10: -- run_test.py: return code 0
+10: -- run_test.py: inject classname prefix into gtest result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_robot_motion_player_backend.gtest.xml'
+10: -- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_robot_motion_player_backend.gtest.xml'
+10/33 Test #10: test_robot_motion_player_backend ...................   Passed    0.16 sec
+test 11
+      Start 11: test_simulated_motion_backend
+
+11: Test command: /usr/bin/python3 "-u" "/opt/ros/humble/share/ament_cmake_test/cmake/run_test.py" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_simulated_motion_backend.gtest.xml" "--package-name" "irc_step_motion_executor" "--output-file" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ament_cmake_gtest/test_simulated_motion_backend.txt" "--command" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_simulated_motion_backend" "--gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_simulated_motion_backend.gtest.xml"
+11: Test timeout computed to be: 60
+11: -- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+11:  - /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_simulated_motion_backend --gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_simulated_motion_backend.gtest.xml
+11: Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+11: [==========] Running 4 tests from 1 test suite.
+11: [----------] Global test environment set-up.
+11: [----------] 4 tests from SimulatedMotionBackend
+11: [ RUN      ] SimulatedMotionBackend.TransitionsByPollCountWithoutSleeping
+11: [       OK ] SimulatedMotionBackend.TransitionsByPollCountWithoutSleeping (0 ms)
+11: [ RUN      ] SimulatedMotionBackend.CancelIsReportedOnNextPoll
+11: [       OK ] SimulatedMotionBackend.CancelIsReportedOnNextPoll (0 ms)
+11: [ RUN      ] SimulatedMotionBackend.RejectsCancelAndSecondStartWhenActiveStateDisallowsIt
+11: [       OK ] SimulatedMotionBackend.RejectsCancelAndSecondStartWhenActiveStateDisallowsIt (0 ms)
+11: [ RUN      ] SimulatedMotionBackend.SupportsConfiguredStartAndPollFailures
+11: [       OK ] SimulatedMotionBackend.SupportsConfiguredStartAndPollFailures (0 ms)
+11: [----------] 4 tests from SimulatedMotionBackend (0 ms total)
+11: 
+11: [----------] Global test environment tear-down
+11: [==========] 4 tests from 1 test suite ran. (1 ms total)
+11: [  PASSED  ] 4 tests.
+11: -- run_test.py: return code 0
+11: -- run_test.py: inject classname prefix into gtest result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_simulated_motion_backend.gtest.xml'
+11: -- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_simulated_motion_backend.gtest.xml'
+11/33 Test #11: test_simulated_motion_backend ......................   Passed    0.16 sec
+test 12
+      Start 12: test_robot_motion_runtime_config
+
+12: Test command: /usr/bin/python3 "-u" "/opt/ros/humble/share/ament_cmake_test/cmake/run_test.py" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_robot_motion_runtime_config.gtest.xml" "--package-name" "irc_step_motion_executor" "--output-file" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ament_cmake_gtest/test_robot_motion_runtime_config.txt" "--command" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_robot_motion_runtime_config" "--gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_robot_motion_runtime_config.gtest.xml"
+12: Test timeout computed to be: 60
+12: -- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+12:  - /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_robot_motion_runtime_config --gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_robot_motion_runtime_config.gtest.xml
+12: Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+12: [==========] Running 21 tests from 3 test suites.
+12: [----------] Global test environment set-up.
+12: [----------] 4 tests from RobotMotionRuntimeConfig
+12: [ RUN      ] RobotMotionRuntimeConfig.RejectsMissingPath
+12: [       OK ] RobotMotionRuntimeConfig.RejectsMissingPath (0 ms)
+12: [ RUN      ] RobotMotionRuntimeConfig.RejectsMissingFile
+12: [       OK ] RobotMotionRuntimeConfig.RejectsMissingFile (0 ms)
+12: [ RUN      ] RobotMotionRuntimeConfig.RejectsUnknownSetting
+12: [       OK ] RobotMotionRuntimeConfig.RejectsUnknownSetting (0 ms)
+12: [ RUN      ] RobotMotionRuntimeConfig.CopiesTypedRosParameterValues
+12: [       OK ] RobotMotionRuntimeConfig.CopiesTypedRosParameterValues (0 ms)
+12: [----------] 4 tests from RobotMotionRuntimeConfig (0 ms total)
+12: 
+12: [----------] 15 tests from RobotHardwareInitializationPolicy
+12: [ RUN      ] RobotHardwareInitializationPolicy.DefaultConfigDisablesHardware
+12: [       OK ] RobotHardwareInitializationPolicy.DefaultConfigDisablesHardware (0 ms)
+12: [ RUN      ] RobotHardwareInitializationPolicy.RequiresDevicePath
+12: [       OK ] RobotHardwareInitializationPolicy.RequiresDevicePath (0 ms)
+12: [ RUN      ] RobotHardwareInitializationPolicy.RejectsZeroBaudRate
+12: [       OK ] RobotHardwareInitializationPolicy.RejectsZeroBaudRate (0 ms)
+12: [ RUN      ] RobotHardwareInitializationPolicy.RejectsNegativeBaudRate
+12: [       OK ] RobotHardwareInitializationPolicy.RejectsNegativeBaudRate (0 ms)
+12: [ RUN      ] RobotHardwareInitializationPolicy.RequiresMotorIds
+12: [       OK ] RobotHardwareInitializationPolicy.RequiresMotorIds (0 ms)
+12: [ RUN      ] RobotHardwareInitializationPolicy.RejectsDuplicateMotorIds
+12: [       OK ] RobotHardwareInitializationPolicy.RejectsDuplicateMotorIds (0 ms)
+12: [ RUN      ] RobotHardwareInitializationPolicy.RejectsIdsOutsideCurrentSdkRange
+12: [       OK ] RobotHardwareInitializationPolicy.RejectsIdsOutsideCurrentSdkRange (0 ms)
+12: [ RUN      ] RobotHardwareInitializationPolicy.RequiresTorqueApproval
+12: [       OK ] RobotHardwareInitializationPolicy.RequiresTorqueApproval (0 ms)
+12: [ RUN      ] RobotHardwareInitializationPolicy.RejectsDevicePathMismatch
+12: [       OK ] RobotHardwareInitializationPolicy.RejectsDevicePathMismatch (0 ms)
+12: [ RUN      ] RobotHardwareInitializationPolicy.AcceptsAlternateUsbEnumeration
+12: [       OK ] RobotHardwareInitializationPolicy.AcceptsAlternateUsbEnumeration (0 ms)
+12: [ RUN      ] RobotHardwareInitializationPolicy.RejectsBaudRateMismatch
+12: [       OK ] RobotHardwareInitializationPolicy.RejectsBaudRateMismatch (0 ms)
+12: [ RUN      ] RobotHardwareInitializationPolicy.RejectsIncompleteMotorIdSet
+12: [       OK ] RobotHardwareInitializationPolicy.RejectsIncompleteMotorIdSet (0 ms)
+12: [ RUN      ] RobotHardwareInitializationPolicy.AcceptsReversedCompleteMotorIdSet
+12: [       OK ] RobotHardwareInitializationPolicy.AcceptsReversedCompleteMotorIdSet (1 ms)
+12: [ RUN      ] RobotHardwareInitializationPolicy.AcceptsAllPrerequisites
+12: [       OK ] RobotHardwareInitializationPolicy.AcceptsAllPrerequisites (0 ms)
+12: [ RUN      ] RobotHardwareInitializationPolicy.RequiresMotionJsonPath
+12: [       OK ] RobotHardwareInitializationPolicy.RequiresMotionJsonPath (0 ms)
+12: [----------] 15 tests from RobotHardwareInitializationPolicy (1 ms total)
+12: 
+12: [----------] 2 tests from RobotHardwarePreflightPolicy
+12: [ RUN      ] RobotHardwarePreflightPolicy.DoesNotRequireMotionJsonOrTorqueApproval
+12: [       OK ] RobotHardwarePreflightPolicy.DoesNotRequireMotionJsonOrTorqueApproval (0 ms)
+12: [ RUN      ] RobotHardwarePreflightPolicy.EnforcesFixedHardwareProfile
+12: [       OK ] RobotHardwarePreflightPolicy.EnforcesFixedHardwareProfile (0 ms)
+12: [----------] 2 tests from RobotHardwarePreflightPolicy (0 ms total)
+12: 
+12: [----------] Global test environment tear-down
+12: [==========] 21 tests from 3 test suites ran. (1 ms total)
+12: [  PASSED  ] 21 tests.
+12: -- run_test.py: return code 0
+12: -- run_test.py: inject classname prefix into gtest result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_robot_motion_runtime_config.gtest.xml'
+12: -- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_robot_motion_runtime_config.gtest.xml'
+12/33 Test #12: test_robot_motion_runtime_config ...................   Passed    0.16 sec
+test 13
+      Start 13: test_robot_motion_parameter_types
+
+13: Test command: /usr/bin/python3 "-u" "/opt/ros/humble/share/ament_cmake_test/cmake/run_test.py" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_robot_motion_parameter_types.gtest.xml" "--package-name" "irc_step_motion_executor" "--output-file" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ament_cmake_gtest/test_robot_motion_parameter_types.txt" "--command" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_robot_motion_parameter_types" "--gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_robot_motion_parameter_types.gtest.xml"
+13: Test timeout computed to be: 60
+13: -- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+13:  - /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_robot_motion_parameter_types --gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_robot_motion_parameter_types.gtest.xml
+13: Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+13: [==========] Running 1 test from 1 test suite.
+13: [----------] Global test environment set-up.
+13: [----------] 1 test from RobotMotionParameterTypes
+13: [ RUN      ] RobotMotionParameterTypes.RejectsValuesOfTheWrongRosType
+13: [       OK ] RobotMotionParameterTypes.RejectsValuesOfTheWrongRosType (3 ms)
+13: [----------] 1 test from RobotMotionParameterTypes (3 ms total)
+13: 
+13: [----------] Global test environment tear-down
+13: [==========] 1 test from 1 test suite ran. (3 ms total)
+13: [  PASSED  ] 1 test.
+13: -- run_test.py: return code 0
+13: -- run_test.py: inject classname prefix into gtest result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_robot_motion_parameter_types.gtest.xml'
+13: -- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_robot_motion_parameter_types.gtest.xml'
+13/33 Test #13: test_robot_motion_parameter_types ..................   Passed    0.17 sec
+test 14
+      Start 14: test_motion_backend_factory
+
+14: Test command: /usr/bin/python3 "-u" "/opt/ros/humble/share/ament_cmake_test/cmake/run_test.py" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_motion_backend_factory.gtest.xml" "--package-name" "irc_step_motion_executor" "--output-file" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ament_cmake_gtest/test_motion_backend_factory.txt" "--command" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_motion_backend_factory" "--gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_motion_backend_factory.gtest.xml"
+14: Test timeout computed to be: 60
+14: -- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+14:  - /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_motion_backend_factory --gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_motion_backend_factory.gtest.xml
+14: Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+14: [==========] Running 9 tests from 1 test suite.
+14: [----------] Global test environment set-up.
+14: [----------] 9 tests from MotionBackendFactory
+14: [ RUN      ] MotionBackendFactory.DefaultAndExplicitSimulatedCreateBackend
+14: [       OK ] MotionBackendFactory.DefaultAndExplicitSimulatedCreateBackend (0 ms)
+14: [ RUN      ] MotionBackendFactory.PassesSimulatedConfiguration
+14: [       OK ] MotionBackendFactory.PassesSimulatedConfiguration (0 ms)
+14: [ RUN      ] MotionBackendFactory.RejectsUnknownTypeWithoutFallback
+14: [       OK ] MotionBackendFactory.RejectsUnknownTypeWithoutFallback (0 ms)
+14: [ RUN      ] MotionBackendFactory.RealBackendRequestFailsWithoutSimulatedFallback
+14: [       OK ] MotionBackendFactory.RealBackendRequestFailsWithoutSimulatedFallback (0 ms)
+14: [ RUN      ] MotionBackendFactory.EnabledRealBackendRequiresBuiltRuntime
+14: [       OK ] MotionBackendFactory.EnabledRealBackendRequiresBuiltRuntime (0 ms)
+14: [ RUN      ] MotionBackendFactory.ProductionPolicyFailureNeverFallsBack
+14: [       OK ] MotionBackendFactory.ProductionPolicyFailureNeverFallsBack (0 ms)
+14: [ RUN      ] MotionBackendFactory.FixedProfileMismatchDoesNotCallRuntimeFactory
+14: [       OK ] MotionBackendFactory.FixedProfileMismatchDoesNotCallRuntimeFactory (0 ms)
+14: [ RUN      ] MotionBackendFactory.PassesConfigAndPreservesRuntimeOwnership
+14: [       OK ] MotionBackendFactory.PassesConfigAndPreservesRuntimeOwnership (0 ms)
+14: [ RUN      ] MotionBackendFactory.RuntimeFactoryFailureNeverFallsBack
+14: [       OK ] MotionBackendFactory.RuntimeFactoryFailureNeverFallsBack (0 ms)
+14: [----------] 9 tests from MotionBackendFactory (0 ms total)
+14: 
+14: [----------] Global test environment tear-down
+14: [==========] 9 tests from 1 test suite ran. (0 ms total)
+14: [  PASSED  ] 9 tests.
+14: -- run_test.py: return code 0
+14: -- run_test.py: inject classname prefix into gtest result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_motion_backend_factory.gtest.xml'
+14: -- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_motion_backend_factory.gtest.xml'
+14/33 Test #14: test_motion_backend_factory ........................   Passed    0.17 sec
+test 15
+      Start 15: test_sdk_executor_driver
+
+15: Test command: /usr/bin/python3 "-u" "/opt/ros/humble/share/ament_cmake_test/cmake/run_test.py" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_driver.gtest.xml" "--package-name" "irc_step_motion_executor" "--output-file" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ament_cmake_gtest/test_sdk_executor_driver.txt" "--command" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_sdk_executor_driver" "--gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_driver.gtest.xml"
+15: Test timeout computed to be: 60
+15: -- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+15:  - /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_sdk_executor_driver --gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_driver.gtest.xml
+15: Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+15: [==========] Running 9 tests from 1 test suite.
+15: [----------] Global test environment set-up.
+15: [----------] 9 tests from SdkExecutorDriver
+15: [ RUN      ] SdkExecutorDriver.RequestPublishesImmediateRunningStatus
+15: /home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_sdk_executor_driver.cpp:110: Failure
+15: Expected equality of these values:
+15:   fixture.backend.started_motion_names[0]
+15:     Which is: "\xEC\xA0\x84" "45\xEB\x8F\x84(8\xED\x9A\x8C)"
+15:     As Text: "전45도(8회)"
+15:   "건전진45도(8회)"
+15:     Which is: "\xEA\xB1\xB4\xEC\xA0\x84\xEC\xA7\x84" "45\xEB\x8F\x84(8\xED\x9A\x8C)"
+15:     As Text: "건전진45도(8회)"
+15: [  FAILED  ] SdkExecutorDriver.RequestPublishesImmediateRunningStatus (2 ms)
+15: [ RUN      ] SdkExecutorDriver.InvalidAndUnsupportedRequestsPublishRejections
+15: [       OK ] SdkExecutorDriver.InvalidAndUnsupportedRequestsPublishRejections (3 ms)
+15: [ RUN      ] SdkExecutorDriver.NullableCorrelationFieldsRemainNull
+15: [       OK ] SdkExecutorDriver.NullableCorrelationFieldsRemainNull (2 ms)
+15: [ RUN      ] SdkExecutorDriver.CancelCallbackPublishesAndTerminalPollPublishes
+15: [       OK ] SdkExecutorDriver.CancelCallbackPublishesAndTerminalPollPublishes (2 ms)
+15: [ RUN      ] SdkExecutorDriver.StaleCancelDoesNotCancelActiveMotion
+15: [       OK ] SdkExecutorDriver.StaleCancelDoesNotCancelActiveMotion (2 ms)
+15: [ RUN      ] SdkExecutorDriver.PollWithoutActiveRequestPublishesNothing
+15: [       OK ] SdkExecutorDriver.PollWithoutActiveRequestPublishesNothing (1 ms)
+15: [ RUN      ] SdkExecutorDriver.TerminalPollPublishesSucceededStatus
+15: [       OK ] SdkExecutorDriver.TerminalPollPublishesSucceededStatus (2 ms)
+15: [ RUN      ] SdkExecutorDriver.SuppressesIdenticalRunningStatusAtControlRate
+15: [       OK ] SdkExecutorDriver.SuppressesIdenticalRunningStatusAtControlRate (2 ms)
+15: [ RUN      ] SdkExecutorDriver.BackendExceptionPublishesFailedWithoutEscaping
+15: [       OK ] SdkExecutorDriver.BackendExceptionPublishesFailedWithoutEscaping (1 ms)
+15: [----------] 9 tests from SdkExecutorDriver (17 ms total)
+15: 
+15: [----------] Global test environment tear-down
+15: [==========] 9 tests from 1 test suite ran. (17 ms total)
+15: [  PASSED  ] 8 tests.
+15: [  FAILED  ] 1 test, listed below:
+15: [  FAILED  ] SdkExecutorDriver.RequestPublishesImmediateRunningStatus
+15: 
+15:  1 FAILED TEST
+15: -- run_test.py: return code 1
+15: -- run_test.py: inject classname prefix into gtest result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_driver.gtest.xml'
+15: -- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_driver.gtest.xml'
+15/33 Test #15: test_sdk_executor_driver ...........................***Failed    0.19 sec
+test 16
+      Start 16: test_startup_pose_gate
+
+16: Test command: /usr/bin/python3 "-u" "/opt/ros/humble/share/ament_cmake_test/cmake/run_test.py" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_startup_pose_gate.gtest.xml" "--package-name" "irc_step_motion_executor" "--output-file" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ament_cmake_gtest/test_startup_pose_gate.txt" "--command" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_startup_pose_gate" "--gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_startup_pose_gate.gtest.xml"
+16: Test timeout computed to be: 60
+16: -- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+16:  - /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_startup_pose_gate --gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_startup_pose_gate.gtest.xml
+16: Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+16: [==========] Running 4 tests from 1 test suite.
+16: [----------] Global test environment set-up.
+16: [----------] 4 tests from StartupPoseGate
+16: [ RUN      ] StartupPoseGate.DoesNotStartBeforeFirstReadyPollAndStartsExactlyOnce
+16: [       OK ] StartupPoseGate.DoesNotStartBeforeFirstReadyPollAndStartsExactlyOnce (2 ms)
+16: [ RUN      ] StartupPoseGate.HoldsForTwoSecondsAfterSuccessThenAllowsNavigation
+16: [       OK ] StartupPoseGate.HoldsForTwoSecondsAfterSuccessThenAllowsNavigation (2 ms)
+16: [ RUN      ] StartupPoseGate.FailurePermanentlyKeepsNavigationBlocked
+16: [       OK ] StartupPoseGate.FailurePermanentlyKeepsNavigationBlocked (2 ms)
+16: [ RUN      ] StartupPoseGate.DisabledGateNeverRunsAndAllowsSimulatedNavigation
+16: [       OK ] StartupPoseGate.DisabledGateNeverRunsAndAllowsSimulatedNavigation (0 ms)
+16: [----------] 4 tests from StartupPoseGate (6 ms total)
+16: 
+16: [----------] Global test environment tear-down
+16: [==========] 4 tests from 1 test suite ran. (6 ms total)
+16: [  PASSED  ] 4 tests.
+16: -- run_test.py: return code 0
+16: -- run_test.py: inject classname prefix into gtest result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_startup_pose_gate.gtest.xml'
+16: -- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_startup_pose_gate.gtest.xml'
+16/33 Test #16: test_startup_pose_gate .............................   Passed    0.17 sec
+test 17
+      Start 17: test_startup_pose_catalog
+
+17: Test command: /usr/bin/python3 "-u" "/opt/ros/humble/share/ament_cmake_test/cmake/run_test.py" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_startup_pose_catalog.gtest.xml" "--package-name" "irc_step_motion_executor" "--output-file" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ament_cmake_gtest/test_startup_pose_catalog.txt" "--command" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_startup_pose_catalog" "--gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_startup_pose_catalog.gtest.xml"
+17: Test timeout computed to be: 60
+17: -- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+17:  - /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_startup_pose_catalog --gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_startup_pose_catalog.gtest.xml
+17: Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+17: [==========] Running 7 tests from 1 test suite.
+17: [----------] Global test environment set-up.
+17: [----------] 7 tests from StartupPoseCatalog
+17: [ RUN      ] StartupPoseCatalog.AcceptsRepeatedNameWithIdenticalAngles
+17: [       OK ] StartupPoseCatalog.AcceptsRepeatedNameWithIdenticalAngles (1 ms)
+17: [ RUN      ] StartupPoseCatalog.RejectsRepeatedNameWithDifferentAngles
+17: [       OK ] StartupPoseCatalog.RejectsRepeatedNameWithDifferentAngles (0 ms)
+17: [ RUN      ] StartupPoseCatalog.RejectsRepeatedNameWithMissingMotor
+17: [       OK ] StartupPoseCatalog.RejectsRepeatedNameWithMissingMotor (1 ms)
+17: [ RUN      ] StartupPoseCatalog.LoadsGeonStartupPoseWithDefaultPolicy
+17: [       OK ] StartupPoseCatalog.LoadsGeonStartupPoseWithDefaultPolicy (159 ms)
+17: [ RUN      ] StartupPoseCatalog.PolicyOffChangesOnlySelectedAxesToVerifiedPcPose
+17: [       OK ] StartupPoseCatalog.PolicyOffChangesOnlySelectedAxesToVerifiedPcPose (517 ms)
+17: [ RUN      ] StartupPoseCatalog.LoadsCatalog49ForwardStartWithEveryPolicyCombination
+17: [       OK ] StartupPoseCatalog.LoadsCatalog49ForwardStartWithEveryPolicyCombination (359 ms)
+17: [ RUN      ] StartupPoseCatalog.LoadsCatalog51StartupWithEveryPolicyCombination
+17: [       OK ] StartupPoseCatalog.LoadsCatalog51StartupWithEveryPolicyCombination (357 ms)
+17: [----------] 7 tests from StartupPoseCatalog (1394 ms total)
+17: 
+17: [----------] Global test environment tear-down
+17: [==========] 7 tests from 1 test suite ran. (1394 ms total)
+17: [  PASSED  ] 7 tests.
+17: -- run_test.py: return code 0
+17: -- run_test.py: inject classname prefix into gtest result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_startup_pose_catalog.gtest.xml'
+17: -- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_startup_pose_catalog.gtest.xml'
+17/33 Test #17: test_startup_pose_catalog ..........................   Passed    1.57 sec
+test 18
+      Start 18: test_test_hurdle_head_override_launch.py
+
+18: Test command: /usr/bin/python3 "-u" "/opt/ros/humble/share/ament_cmake_test/cmake/run_test.py" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_hurdle_head_override_launch.py.xunit.xml" "--package-name" "irc_step_motion_executor" "--output-file" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/launch_test/test_test_hurdle_head_override_launch.py.txt" "--env" "ROS_LOG_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ros_test_logs" "--append-env" "AMENT_PREFIX_PATH=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor" "LD_LIBRARY_PATH=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor/lib" "--command" "/usr/bin/python3" "-m" "launch_testing.launch_test" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_hurdle_head_override_launch.py" "--junit-xml=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_hurdle_head_override_launch.py.xunit.xml" "--package-name=irc_step_motion_executor"
+18: Test timeout computed to be: 30
+18: -- run_test.py: extra environment variables:
+18:  - ROS_LOG_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ros_test_logs
+18: -- run_test.py: extra environment variables to append:
+18:  - AMENT_PREFIX_PATH+=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor
+18:  - LD_LIBRARY_PATH+=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor/lib
+18: -- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+18:  - /usr/bin/python3 -m launch_testing.launch_test /home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_hurdle_head_override_launch.py --junit-xml=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_hurdle_head_override_launch.py.xunit.xml --package-name=irc_step_motion_executor
+18: [INFO] [launch]: All log files can be found below /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ros_test_logs/2026-10-27-22-46-05-433823-jet-855
+18: [INFO] [launch]: Default logging verbosity is set to INFO
+18: [INFO] [sdk_motion_executor-1]: process started with pid [859]
+18: [INFO] [python3-2]: process started with pid [861]
+18: [sdk_motion_executor-1] getifaddrs: Operation not permitted
+18: [sdk_motion_executor-1] getifaddrs: Operation not permitted
+18: [sdk_motion_executor-1] getifaddrs: Operation not permitted
+18: [sdk_motion_executor-1] [37;1m2026-10-27 22:46:05.551 [31;1m[[37;1mTRANSPORT_UDP[31;1m Error] [37mError creating socket: Operation not permitted[34;1m -> Function [36minit[m
+18: [sdk_motion_executor-1] [37;1m2026-10-27 22:46:05.551 [31;1m[[37;1mRTPS_PARTICIPANT[31;1m Error] [37mUser transport failed to register.[34;1m -> Function [36mRTPSParticipantImpl[m
+18: [sdk_motion_executor-1] [INFO] [1793108765.576805064] [hurdle_head_override_test_executor]: Interpolation: continuous quintic; motor 5: included
+18: [sdk_motion_executor-1] [INFO] [1793108765.577195152] [hurdle_head_override_test_executor]: Motion position tolerance check: DISABLED
+18: [sdk_motion_executor-1] [WARN] [1793108765.582129781] [hurdle_head_override_test_executor]: Simulated backend only: no SDK or hardware access is available
+18: getifaddrs: Operation not permitted
+18: getifaddrs: Operation not permitted
+18: getifaddrs: Operation not permitted
+18: [37;1m2026-10-27 22:46:05.835 [31;1m[[37;1mTRANSPORT_UDP[31;1m Error] [37mError creating socket: Operation not permitted[34;1m -> Function [36minit[m
+18: [37;1m2026-10-27 22:46:05.835 [31;1m[[37;1mRTPS_PARTICIPANT[31;1m Error] [37mUser transport failed to register.[34;1m -> Function [36mRTPSParticipantImpl[m
+18: test_bottom_boundary_hold_release_and_other_camera_ownership (irc_step_motion_executor.TestHurdleHeadOverride) ... [sdk_motion_executor-1] [INFO] [1793108766.625097411] [hurdle_head_override_test_executor]: Hurdle bottom dy 120.0 px: camera 0-degree hold latched (motor 0 -60.0 deg)
+18: [sdk_motion_executor-1] [INFO] [1793108767.464052371] [hurdle_head_override_test_executor]: Hurdle camera 0-degree hold cleared
+18: [sdk_motion_executor-1] [INFO] [1793108768.343846350] [hurdle_head_override_test_executor]: Hurdle bottom dy 120.0 px: camera 0-degree hold latched (motor 0 -60.0 deg)
+18: [sdk_motion_executor-1] [INFO] [1793108769.785745645] [hurdle_head_override_test_executor]: Hurdle camera 0-degree hold cleared
+18: [sdk_motion_executor-1] [INFO] [1793108770.063990848] [hurdle_head_override_test_executor]: Hurdle bottom dy 120.0 px: camera 0-degree hold latched (motor 0 -60.0 deg)
+18: [sdk_motion_executor-1] [INFO] [1793108770.202491130] [hurdle_head_override_test_executor]: Hurdle camera 0-degree hold cleared
+18: [sdk_motion_executor-1] [INFO] [1793108771.082518163] [hurdle_head_override_test_executor]: Camera 90-degree hold enabled: motor 0 1.0 deg
+18: [sdk_motion_executor-1] [INFO] [1793108771.144215477] [hurdle_head_override_test_executor]: Hurdle bottom dy 120.0 px: camera 0-degree hold latched (motor 0 -60.0 deg)
+18: [sdk_motion_executor-1] [INFO] [1793108771.263900941] [hurdle_head_override_test_executor]: Hurdle camera 0-degree hold cleared
+18: ok
+18: 
+18: ----------------------------------------------------------------------
+18: Ran 1 test in 5.841s
+18: 
+18: OK
+18/33 Test #18: test_test_hurdle_head_override_launch.py ...........***Timeout  30.03 sec
+[Processing: irc_step_motion_executor]
+test 19
+      Start 19: test_test_ball_head_override_launch.py
+
+19: Test command: /usr/bin/python3 "-u" "/opt/ros/humble/share/ament_cmake_test/cmake/run_test.py" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_ball_head_override_launch.py.xunit.xml" "--package-name" "irc_step_motion_executor" "--output-file" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/launch_test/test_test_ball_head_override_launch.py.txt" "--env" "ROS_LOG_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ros_test_logs" "--append-env" "AMENT_PREFIX_PATH=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor" "LD_LIBRARY_PATH=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor/lib" "--command" "/usr/bin/python3" "-m" "launch_testing.launch_test" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_ball_head_override_launch.py" "--junit-xml=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_ball_head_override_launch.py.xunit.xml" "--package-name=irc_step_motion_executor"
+19: Test timeout computed to be: 30
+19: -- run_test.py: extra environment variables:
+19:  - ROS_LOG_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ros_test_logs
+19: -- run_test.py: extra environment variables to append:
+19:  - AMENT_PREFIX_PATH+=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor
+19:  - LD_LIBRARY_PATH+=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor/lib
+19: -- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+19:  - /usr/bin/python3 -m launch_testing.launch_test /home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_ball_head_override_launch.py --junit-xml=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_ball_head_override_launch.py.xunit.xml --package-name=irc_step_motion_executor
+19: [INFO] [launch]: All log files can be found below /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ros_test_logs/2026-10-27-22-46-35-364941-jet-887
+19: [INFO] [launch]: Default logging verbosity is set to INFO
+19: [INFO] [sdk_motion_executor-1]: process started with pid [891]
+19: [INFO] [python3-2]: process started with pid [893]
+19: [sdk_motion_executor-1] getifaddrs: Operation not permitted
+19: [sdk_motion_executor-1] getifaddrs: Operation not permitted
+19: [sdk_motion_executor-1] getifaddrs: Operation not permitted
+19: [sdk_motion_executor-1] [37;1m2026-10-27 22:46:35.461 [31;1m[[37;1mTRANSPORT_UDP[31;1m Error] [37mError creating socket: Operation not permitted[34;1m -> Function [36minit[m
+19: [sdk_motion_executor-1] [37;1m2026-10-27 22:46:35.461 [31;1m[[37;1mRTPS_PARTICIPANT[31;1m Error] [37mUser transport failed to register.[34;1m -> Function [36mRTPSParticipantImpl[m
+19: [sdk_motion_executor-1] [INFO] [1793108795.486799231] [ball_head_override_test_executor]: Interpolation: continuous quintic; motor 5: included
+19: [sdk_motion_executor-1] [INFO] [1793108795.487230344] [ball_head_override_test_executor]: Motion position tolerance check: DISABLED
+19: [sdk_motion_executor-1] [WARN] [1793108795.491048211] [ball_head_override_test_executor]: Simulated backend only: no SDK or hardware access is available
+19: getifaddrs: Operation not permitted
+19: getifaddrs: Operation not permitted
+19: getifaddrs: Operation not permitted
+19: [37;1m2026-10-27 22:46:35.679 [31;1m[[37;1mTRANSPORT_UDP[31;1m Error] [37mError creating socket: Operation not permitted[34;1m -> Function [36minit[m
+19: [37;1m2026-10-27 22:46:35.679 [31;1m[[37;1mRTPS_PARTICIPANT[31;1m Error] [37mUser transport failed to register.[34;1m -> Function [36mRTPSParticipantImpl[m
+19: test_ball_camera_hold_across_motion_boundaries (irc_step_motion_executor.TestBallHeadOverride) ... [sdk_motion_executor-1] [INFO] [1793108795.726679138] [ball_head_override_test_executor]: Ball entered bottom trigger: motor 0 override -64.0 deg latched
+19: [sdk_motion_executor-1] [INFO] [1793108795.853500283] [ball_head_override_test_executor]: Ball entered bottom trigger: motor 0 override -64.0 deg latched
+19: [sdk_motion_executor-1] [INFO] [1793108796.452983012] [ball_head_override_test_executor]: Ball entered bottom trigger: motor 0 override -64.0 deg latched
+19: [sdk_motion_executor-1] [INFO] [1793108798.494183929] [ball_head_override_test_executor]: Ball entered bottom trigger: motor 0 override -64.0 deg latched
+19: [sdk_motion_executor-1] [INFO] [1793108799.674072870] [ball_head_override_test_executor]: Ball entered bottom trigger: motor 0 override -64.0 deg latched
+19: ok
+19: 
+19: ----------------------------------------------------------------------
+19: Ran 1 test in 4.377s
+19: 
+19: OK
+19/33 Test #19: test_test_ball_head_override_launch.py .............***Timeout  30.02 sec
+[Processing: irc_step_motion_executor]
+test 20
+      Start 20: test_test_goal_head_override_launch.py
+
+20: Test command: /usr/bin/python3 "-u" "/opt/ros/humble/share/ament_cmake_test/cmake/run_test.py" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_goal_head_override_launch.py.xunit.xml" "--package-name" "irc_step_motion_executor" "--output-file" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/launch_test/test_test_goal_head_override_launch.py.txt" "--env" "ROS_LOG_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ros_test_logs" "--append-env" "AMENT_PREFIX_PATH=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor" "LD_LIBRARY_PATH=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor/lib" "--command" "/usr/bin/python3" "-m" "launch_testing.launch_test" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_goal_head_override_launch.py" "--junit-xml=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_goal_head_override_launch.py.xunit.xml" "--package-name=irc_step_motion_executor"
+20: Test timeout computed to be: 30
+20: -- run_test.py: extra environment variables:
+20:  - ROS_LOG_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ros_test_logs
+20: -- run_test.py: extra environment variables to append:
+20:  - AMENT_PREFIX_PATH+=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor
+20:  - LD_LIBRARY_PATH+=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor/lib
+20: -- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+20:  - /usr/bin/python3 -m launch_testing.launch_test /home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_goal_head_override_launch.py --junit-xml=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_goal_head_override_launch.py.xunit.xml --package-name=irc_step_motion_executor
+20: [INFO] [launch]: All log files can be found below /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ros_test_logs/2026-10-27-22-47-05-345218-jet-919
+20: [INFO] [launch]: Default logging verbosity is set to INFO
+20: [INFO] [sdk_motion_executor-1]: process started with pid [923]
+20: [INFO] [python3-2]: process started with pid [925]
+20: [sdk_motion_executor-1] getifaddrs: Operation not permitted
+20: [sdk_motion_executor-1] getifaddrs: Operation not permitted
+20: [sdk_motion_executor-1] getifaddrs: Operation not permitted
+20: [sdk_motion_executor-1] [37;1m2026-10-27 22:47:05.439 [31;1m[[37;1mTRANSPORT_UDP[31;1m Error] [37mError creating socket: Operation not permitted[34;1m -> Function [36minit[m
+20: [sdk_motion_executor-1] [37;1m2026-10-27 22:47:05.440 [31;1m[[37;1mRTPS_PARTICIPANT[31;1m Error] [37mUser transport failed to register.[34;1m -> Function [36mRTPSParticipantImpl[m
+20: [sdk_motion_executor-1] [INFO] [1793108825.460084284] [goal_head_override_test_executor]: Interpolation: continuous quintic; motor 5: included
+20: [sdk_motion_executor-1] [INFO] [1793108825.460390177] [goal_head_override_test_executor]: Motion position tolerance check: DISABLED
+20: [sdk_motion_executor-1] [WARN] [1793108825.463242519] [goal_head_override_test_executor]: Simulated backend only: no SDK or hardware access is available
+20: getifaddrs: Operation not permitted
+20: getifaddrs: Operation not permitted
+20: getifaddrs: Operation not permitted
+20: [37;1m2026-10-27 22:47:05.640 [31;1m[[37;1mTRANSPORT_UDP[31;1m Error] [37mError creating socket: Operation not permitted[34;1m -> Function [36minit[m
+20: [37;1m2026-10-27 22:47:05.640 [31;1m[[37;1mRTPS_PARTICIPANT[31;1m Error] [37mUser transport failed to register.[34;1m -> Function [36mRTPSParticipantImpl[m
+20: test_hold_starts_after_camera_success_and_lasts_through_shot (irc_step_motion_executor.TestGoalHeadOverride) ... [sdk_motion_executor-1] [INFO] [1793108825.705434636] [goal_head_override_test_executor]: Ball entered bottom trigger: motor 0 override -64.0 deg latched
+20: [sdk_motion_executor-1] [INFO] [1793108827.103511422] [goal_head_override_test_executor]: Camera 90-degree hold enabled: motor 0 1.0 deg
+20: [sdk_motion_executor-1] [INFO] [1793108828.803493306] [goal_head_override_test_executor]: Camera 90-degree hold cleared: goal_shot
+20: [sdk_motion_executor-1] [INFO] [1793108829.083459307] [goal_head_override_test_executor]: Camera 90-degree hold enabled: motor 0 1.0 deg
+20: [sdk_motion_executor-1] [INFO] [1793108829.123536512] [goal_head_override_test_executor]: Camera 90-degree hold cleared: goal_camera_90_crab_left
+20: [sdk_motion_executor-1] [INFO] [1793108829.403514381] [goal_head_override_test_executor]: Camera 90-degree hold enabled: motor 0 1.0 deg
+20: [sdk_motion_executor-1] [INFO] [1793108829.406175488] [goal_head_override_test_executor]: Camera 90-degree hold cleared: pickup
+20: [sdk_motion_executor-1] [INFO] [1793108829.963629515] [goal_head_override_test_executor]: Camera 90-degree hold enabled: motor 0 1.0 deg
+20: ok
+20: 
+20: ----------------------------------------------------------------------
+20: Ran 1 test in 4.590s
+20: 
+20: OK
+20: [INFO] [python3-2]: sending signal 'SIGINT' to process[python3-2]
+[Processing: irc_step_motion_executor]
+20: [INFO] [sdk_motion_executor-1]: sending signal 'SIGINT' to process[sdk_motion_executor-1]
+20: [sdk_motion_executor-1] [INFO] [1793108840.449087705] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+20: [INFO] [python3-2]: process has finished cleanly [pid 925]
+20: [INFO] [sdk_motion_executor-1]: process has finished cleanly [pid 923]
+20: 
+20: ----------------------------------------------------------------------
+20: Ran 0 tests in 0.000s
+20: 
+20: OK
+20: -- run_test.py: return code 0
+20: -- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_goal_head_override_launch.py.xunit.xml'
+20/33 Test #20: test_test_goal_head_override_launch.py .............   Passed   16.19 sec
+test 21
+      Start 21: test_test_sdk_executor_node_launch.py
+
+21: Test command: /usr/bin/python3 "-u" "/opt/ros/humble/share/ament_cmake_test/cmake/run_test.py" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_sdk_executor_node_launch.py.xunit.xml" "--package-name" "irc_step_motion_executor" "--output-file" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/launch_test/test_test_sdk_executor_node_launch.py.txt" "--env" "ROS_LOG_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ros_test_logs" "--append-env" "AMENT_PREFIX_PATH=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor" "LD_LIBRARY_PATH=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor/lib" "--command" "/usr/bin/python3" "-m" "launch_testing.launch_test" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_sdk_executor_node_launch.py" "--junit-xml=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_sdk_executor_node_launch.py.xunit.xml" "--package-name=irc_step_motion_executor"
+21: Test timeout computed to be: 30
+21: -- run_test.py: extra environment variables:
+21:  - ROS_LOG_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ros_test_logs
+21: -- run_test.py: extra environment variables to append:
+21:  - AMENT_PREFIX_PATH+=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor
+21:  - LD_LIBRARY_PATH+=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor/lib
+21: -- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+21:  - /usr/bin/python3 -m launch_testing.launch_test /home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_sdk_executor_node_launch.py --junit-xml=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_sdk_executor_node_launch.py.xunit.xml --package-name=irc_step_motion_executor
+21: [INFO] [launch]: All log files can be found below /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ros_test_logs/2026-10-27-22-47-21-574035-jet-951
+21: [INFO] [launch]: Default logging verbosity is set to INFO
+21: [INFO] [sdk_motion_executor-1]: process started with pid [955]
+21: [INFO] [python3-2]: process started with pid [957]
+21: [sdk_motion_executor-1] getifaddrs: Operation not permitted
+21: [sdk_motion_executor-1] getifaddrs: Operation not permitted
+21: [sdk_motion_executor-1] getifaddrs: Operation not permitted
+21: [sdk_motion_executor-1] [37;1m2026-10-27 22:47:21.667 [31;1m[[37;1mTRANSPORT_UDP[31;1m Error] [37mError creating socket: Operation not permitted[34;1m -> Function [36minit[m
+21: [sdk_motion_executor-1] [37;1m2026-10-27 22:47:21.667 [31;1m[[37;1mRTPS_PARTICIPANT[31;1m Error] [37mUser transport failed to register.[34;1m -> Function [36mRTPSParticipantImpl[m
+21: [sdk_motion_executor-1] [INFO] [1793108841.689959777] [sdk_motion_executor_launch_test]: Interpolation: continuous quintic; motor 5: included
+21: [sdk_motion_executor-1] [INFO] [1793108841.690275367] [sdk_motion_executor_launch_test]: Motion position tolerance check: DISABLED
+21: [sdk_motion_executor-1] [WARN] [1793108841.693044794] [sdk_motion_executor_launch_test]: Simulated backend only: no SDK or hardware access is available
+21: getifaddrs: Operation not permitted
+21: getifaddrs: Operation not permitted
+21: getifaddrs: Operation not permitted
+21: [37;1m2026-10-27 22:47:21.882 [31;1m[[37;1mTRANSPORT_UDP[31;1m Error] [37mError creating socket: Operation not permitted[34;1m -> Function [36minit[m
+21: [37;1m2026-10-27 22:47:21.882 [31;1m[[37;1mRTPS_PARTICIPANT[31;1m Error] [37mUser transport failed to register.[34;1m -> Function [36mRTPSParticipantImpl[m
+21: test_ball_bottom_trigger_latches_override_until_pickup_starts (irc_step_motion_executor.TestSdkExecutorTopics) ... [sdk_motion_executor-1] [INFO] [1793108841.978997852] [sdk_motion_executor_launch_test]: Ball entered bottom trigger: motor 0 override -64.0 deg latched
+21: ok
+21: test_simulated_executor_publishes_repeated_liveness_heartbeats (irc_step_motion_executor.TestSdkExecutorTopics) ... ok
+21: test_simulated_topic_contract (irc_step_motion_executor.TestSdkExecutorTopics) ... ok
+21: 
+21: ----------------------------------------------------------------------
+21: Ran 3 tests in 1.371s
+21: 
+21: OK
+21: [INFO] [python3-2]: sending signal 'SIGINT' to process[python3-2]
+21: [INFO] [sdk_motion_executor-1]: sending signal 'SIGINT' to process[sdk_motion_executor-1]
+21: [sdk_motion_executor-1] [INFO] [1793108846.676075205] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+21: [INFO] [python3-2]: process has finished cleanly [pid 957]
+21: [INFO] [sdk_motion_executor-1]: process has finished cleanly [pid 955]
+21: test_process_exited_cleanly (irc_step_motion_executor.TestSdkExecutorShutdown) ... ok
+21: 
+21: ----------------------------------------------------------------------
+21: Ran 1 test in 0.000s
+21: 
+21: OK
+21: -- run_test.py: return code 0
+21: -- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_sdk_executor_node_launch.py.xunit.xml'
+21/33 Test #21: test_test_sdk_executor_node_launch.py ..............   Passed    6.22 sec
+test 22
+      Start 22: test_test_backend_selection_rejected_launch.py
+
+22: Test command: /usr/bin/python3 "-u" "/opt/ros/humble/share/ament_cmake_test/cmake/run_test.py" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_backend_selection_rejected_launch.py.xunit.xml" "--package-name" "irc_step_motion_executor" "--output-file" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/launch_test/test_test_backend_selection_rejected_launch.py.txt" "--env" "ROS_LOG_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ros_test_logs" "EXPECT_ROBOT_MOTION_PLAYER_BACKEND_BUILT=1" "--append-env" "AMENT_PREFIX_PATH=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor" "LD_LIBRARY_PATH=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor/lib" "--command" "/usr/bin/python3" "-m" "launch_testing.launch_test" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_backend_selection_rejected_launch.py" "--junit-xml=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_backend_selection_rejected_launch.py.xunit.xml" "--package-name=irc_step_motion_executor"
+22: Test timeout computed to be: 30
+22: -- run_test.py: extra environment variables:
+22:  - EXPECT_ROBOT_MOTION_PLAYER_BACKEND_BUILT=1
+22:  - ROS_LOG_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ros_test_logs
+22: -- run_test.py: extra environment variables to append:
+22:  - AMENT_PREFIX_PATH+=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor
+22:  - LD_LIBRARY_PATH+=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor/lib
+22: -- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+22:  - /usr/bin/python3 -m launch_testing.launch_test /home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_backend_selection_rejected_launch.py --junit-xml=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_backend_selection_rejected_launch.py.xunit.xml --package-name=irc_step_motion_executor
+22: 
+22: Starting test run irc_step_motion_executor.test_backend_selection_rejected_launch.launch_tests[unknown]
+22: [INFO] [launch]: All log files can be found below /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ros_test_logs/2026-10-27-22-47-27-706239-jet-983
+22: [INFO] [launch]: Default logging verbosity is set to INFO
+22: test_node_reports_error_and_exits[unknown] (irc_step_motion_executor.TestRejectedBackendSelection) ... [INFO] [sdk_motion_executor-1]: process started with pid [985]
+22: [INFO] [python3-2]: process started with pid [987]
+22: [sdk_motion_executor-1] getifaddrs: Operation not permitted
+22: [sdk_motion_executor-1] getifaddrs: Operation not permitted
+22: [sdk_motion_executor-1] getifaddrs: Operation not permitted
+22: [sdk_motion_executor-1] [37;1m2026-10-27 22:47:27.792 [31;1m[[37;1mTRANSPORT_UDP[31;1m Error] [37mError creating socket: Operation not permitted[34;1m -> Function [36minit[m
+22: [sdk_motion_executor-1] [37;1m2026-10-27 22:47:27.792 [31;1m[[37;1mRTPS_PARTICIPANT[31;1m Error] [37mUser transport failed to register.[34;1m -> Function [36mRTPSParticipantImpl[m
+22: [sdk_motion_executor-1] [INFO] [1793108847.811554087] [sdk_executor_reject_unknown]: Interpolation: continuous quintic; motor 5: included
+22: [sdk_motion_executor-1] [FATAL] [1793108847.816651941] [sdk_motion_executor]: UNSUPPORTED_BACKEND_TYPE: unsupported backend_type 'unknown'; allowed values are: simulated, robot_motion_player
+22: [ERROR] [sdk_motion_executor-1]: process has died [pid 985, exit code 1, cmd '/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor/lib/irc_step_motion_executor/sdk_motion_executor --ros-args -r __node:=sdk_executor_reject_unknown --params-file /tmp/launch_params_kr673bwl'].
+22: ok
+22: 
+22: ----------------------------------------------------------------------
+22: Ran 1 test in 0.160s
+22: 
+22: OK
+22: [INFO] [python3-2]: sending signal 'SIGINT' to process[python3-2]
+22: [INFO] [python3-2]: process has finished cleanly [pid 987]
+22: test_exit_code_is_failure[unknown] (irc_step_motion_executor.TestRejectedBackendExitCode) ... ok
+22: 
+22: ----------------------------------------------------------------------
+22: Ran 1 test in 0.001s
+22: 
+22: OK
+22: 
+22: Starting test run irc_step_motion_executor.test_backend_selection_rejected_launch.launch_tests[robot_motion_player]
+22: [INFO] [launch]: All log files can be found below /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/ros_test_logs/2026-10-27-22-47-27-706239-jet-983
+22: [INFO] [launch]: Default logging verbosity is set to INFO
+22: test_node_reports_error_and_exits[robot_motion_player] (irc_step_motion_executor.TestRejectedBackendSelection) ... [INFO] [sdk_motion_executor-3]: process started with pid [1000]
+22: [INFO] [python3-4]: process started with pid [1002]
+22: [sdk_motion_executor-3] getifaddrs: Operation not permitted
+22: [sdk_motion_executor-3] getifaddrs: Operation not permitted
+22: [sdk_motion_executor-3] getifaddrs: Operation not permitted
+22: [sdk_motion_executor-3] [37;1m2026-10-27 22:47:29.829 [31;1m[[37;1mTRANSPORT_UDP[31;1m Error] [37mError creating socket: Operation not permitted[34;1m -> Function [36minit[m
+22: [sdk_motion_executor-3] [37;1m2026-10-27 22:47:29.829 [31;1m[[37;1mRTPS_PARTICIPANT[31;1m Error] [37mUser transport failed to register.[34;1m -> Function [36mRTPSParticipantImpl[m
+22: [sdk_motion_executor-3] [INFO] [1793108849.850023185] [sdk_executor_reject_robot_motion_player]: Interpolation: continuous quintic; motor 5: included
+22: [sdk_motion_executor-3] [FATAL] [1793108849.855423318] [sdk_motion_executor]: ROBOT_HARDWARE_NOT_ENABLED: RobotMotionPlayer hardware requires enable_robot_hardware=true
+22: [ERROR] [sdk_motion_executor-3]: process has died [pid 1000, exit code 1, cmd '/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor/lib/irc_step_motion_executor/sdk_motion_executor --ros-args -r __node:=sdk_executor_reject_robot_motion_player --params-file /tmp/launch_params_8a_l5210'].
+22: ok
+22: 
+22: ----------------------------------------------------------------------
+22: Ran 1 test in 0.162s
+22: 
+22: OK
+22: [INFO] [python3-4]: sending signal 'SIGINT' to process[python3-4]
+22: [INFO] [python3-4]: process has finished cleanly [pid 1002]
+22: test_exit_code_is_failure[robot_motion_player] (irc_step_motion_executor.TestRejectedBackendExitCode) ... ok
+22: 
+22: ----------------------------------------------------------------------
+22: Ran 1 test in 0.000s
+22: 
+22: OK
+22: -- run_test.py: return code 0
+22: -- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_test_backend_selection_rejected_launch.py.xunit.xml'
+22/33 Test #22: test_test_backend_selection_rejected_launch.py .....   Passed    4.86 sec
+test 23
+      Start 23: sdk_cmake_empty_path
+
+23: Test command: /usr/bin/cmake "-DPACKAGE_SOURCE_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor" "-DTEST_BINARY_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/sdk_cmake_tests/sdk_cmake_empty_path" "-DSDK_DIR=" "-DEXPECT_SUCCESS=FALSE" "-DEXPECTED_ERROR=requires ROBOT_MOTION_SDK_DIR" "-P" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/run_sdk_cmake_case.cmake"
+23: Test timeout computed to be: 10000000
+23/33 Test #23: sdk_cmake_empty_path ...............................   Passed    0.89 sec
+test 24
+      Start 24: sdk_cmake_nonexistent_path
+
+24: Test command: /usr/bin/cmake "-DPACKAGE_SOURCE_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor" "-DTEST_BINARY_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/sdk_cmake_tests/sdk_cmake_nonexistent_path" "-DSDK_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/sdk_path_that_does_not_exist" "-DEXPECT_SUCCESS=FALSE" "-DEXPECTED_ERROR=is not an existing directory" "-P" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/run_sdk_cmake_case.cmake"
+24: Test timeout computed to be: 10000000
+24/33 Test #24: sdk_cmake_nonexistent_path .........................   Passed    0.88 sec
+test 25
+      Start 25: sdk_cmake_missing_required_files
+
+25: Test command: /usr/bin/cmake "-DPACKAGE_SOURCE_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor" "-DTEST_BINARY_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/sdk_cmake_tests/sdk_cmake_missing_required_files" "-DSDK_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/fixtures/missing_files_sdk" "-DEXPECT_SUCCESS=FALSE" "-DEXPECTED_ERROR=missing required file: robot_motion_player.hpp" "-P" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/run_sdk_cmake_case.cmake"
+25: Test timeout computed to be: 10000000
+25/33 Test #25: sdk_cmake_missing_required_files ...................   Passed    0.87 sec
+test 26
+      Start 26: sdk_cmake_missing_robot_control_target
+
+26: Test command: /usr/bin/cmake "-DPACKAGE_SOURCE_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor" "-DTEST_BINARY_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/sdk_cmake_tests/sdk_cmake_missing_robot_control_target" "-DSDK_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/fixtures/missing_target_sdk" "-DEXPECT_SUCCESS=FALSE" "-DEXPECTED_ERROR=must create a CMake target named robot_control" "-P" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/run_sdk_cmake_case.cmake"
+26: Test timeout computed to be: 10000000
+26/33 Test #26: sdk_cmake_missing_robot_control_target .............   Passed    0.87 sec
+test 27
+      Start 27: sdk_cmake_fake_sdk_build
+
+27: Test command: /usr/bin/cmake "-DPACKAGE_SOURCE_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor" "-DTEST_BINARY_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/sdk_cmake_tests/sdk_cmake_fake_sdk_build" "-DSDK_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/fixtures/fake_robot_motion_sdk" "-DEXPECT_SUCCESS=TRUE" "-DEXPECTED_ERROR=" "-P" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/run_sdk_cmake_case.cmake"
+27: Test timeout computed to be: 10000000
+27/33 Test #27: sdk_cmake_fake_sdk_build ...........................   Passed   56.27 sec
+[Processing: irc_step_motion_executor]
+[Processing: irc_step_motion_executor]
+test 28
+      Start 28: sdk_cmake_disabled_build_has_no_hardware_symbols
+
+28: Test command: /usr/bin/cmake "-DPACKAGE_SOURCE_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor" "-DTEST_BINARY_DIR=/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/sdk_cmake_tests/sdk_disabled" "-P" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/run_sdk_disabled_case.cmake"
+28: Test timeout computed to be: 10000000
+28/33 Test #28: sdk_cmake_disabled_build_has_no_hardware_symbols ...   Passed   33.27 sec
+[Processing: irc_step_motion_executor]
+test 29
+      Start 29: test_validate_motion_catalog
+
+29: Test command: /usr/bin/python3 "/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_validate_motion_catalog.py"
+29: Test timeout computed to be: 10000000
+29: ...
+29: ----------------------------------------------------------------------
+29: Ran 3 tests in 0.001s
+29: 
+29: OK
+29/33 Test #29: test_validate_motion_catalog .......................   Passed    0.15 sec
+test 30
+      Start 30: motion_pattern_test
+
+30: Test command: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/robot_motion_sdk/test_motion_pattern
+30: Test timeout computed to be: 10000000
+30: GUI-compatible pattern tests passed
+30/33 Test #30: motion_pattern_test ................................   Passed    0.01 sec
+test 31
+      Start 31: motion_callback_test
+
+31: Test command: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/robot_motion_sdk/test_motion_callback
+31: Test timeout computed to be: 10000000
+31: Motion callback tests passed
+31/33 Test #31: motion_callback_test ...............................   Passed    0.09 sec
+test 32
+      Start 32: gui_alignment_contract
+
+32: Test command: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/robot_motion_sdk/test_gui_alignment "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/robot_motion_sdk"
+32: Test timeout computed to be: 10000000
+32: PASS start read failure, goal failure/queue purge, cancel, E-stop, feedback failure, queue hold, override, startup settling
+32/33 Test #32: gui_alignment_contract .............................   Passed    0.01 sec
+test 33
+      Start 33: continuous_hardware_contract
+
+33: Test command: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/robot_motion_sdk/test_continuous_hardware "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/robot_motion_sdk"
+33: Test timeout computed to be: 10000000
+33: [Error] Torque OFF failed, ID: 5
+33: [Error] Torque OFF failed, ID: 5
+33: [Error] Torque OFF failed, ID: 5
+33: [Error] Torque OFF failed, ID: 6
+33: [Error] Torque OFF failed, ID: 5
+33: [Error] Torque verification failed, ID: 6
+33: [Error] Torque OFF failed, ID: 5
+33: [Error] Torque verification failed, ID: 6
+33: [Error] Torque OFF failed, ID: 5
+33: [Error] Torque verification failed, ID: 6
+33: [Error] Torque OFF failed, ID: 5
+33: [Error] Torque OFF failed, ID: 5
+33: PASS actual player -> hardware -> Dxl -> fake SDK packets; exclusion, torque checks, seed, profiles, startup, repeat, emergency OFF
+33/33 Test #33: continuous_hardware_contract .......................   Passed    0.02 sec
+
+82% tests passed, 6 tests failed out of 33
+
+Label Time Summary:
+gtest          =   3.67 sec*proc (13 tests)
+launch_test    =  87.33 sec*proc (5 tests)
+
+Total Test time (real) = 255.44 sec
+
+The following tests FAILED:
+	  2 - test_latest_gui_execution (Failed)
+	  6 - test_catalog_only_core (Failed)
+	  8 - test_sdk_executor_core (Failed)
+	 15 - test_sdk_executor_driver (Failed)
+	 18 - test_test_hurdle_head_override_launch.py (Timeout)
+	 19 - test_test_ball_head_override_launch.py (Timeout)
+Errors while running CTest
+Output from these tests are in: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/Testing/Temporary/LastTest.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely.
+--- stderr: irc_step_motion_executor
+Errors while running CTest
+Output from these tests are in: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/Testing/Temporary/LastTest.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely.
+---
+Finished <<< irc_step_motion_executor [4min 16s]	[ with test failures ]
+
+Summary: 1 package finished [4min 16s]
+  1 package had stderr output: irc_step_motion_executor
+  1 package had test failures: irc_step_motion_executor

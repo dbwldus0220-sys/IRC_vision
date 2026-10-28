@@ -1,0 +1,32 @@
+{
+  "oracle": "user specification, latest PC GUI unavailable",
+  "catalogs": {
+    "artifacts/robot_motions_pc.json": {
+      "motions": 86,
+      "joint_samples": 640642,
+      "maximum_angle_error_deg": 0,
+      "raw_mismatches": 0
+    },
+    "artifacts/robot_motions_runtime.json": {
+      "motions": 86,
+      "joint_samples": 640642,
+      "maximum_angle_error_deg": 0,
+      "raw_mismatches": 0
+    }
+  },
+  "rounding_boundary_cases": 12291,
+  "real_player_execution": {
+    "artifacts/robot_motions_pc.json": {
+      "motions": 86,
+      "scenarios_per_motion": 2,
+      "joint_samples": 724431,
+      "raw_mismatches": 0
+    },
+    "artifacts/robot_motions_runtime.json": {
+      "motions": 86,
+      "scenarios_per_motion": 2,
+      "joint_samples": 724431,
+      "raw_mismatches": 0
+    }
+  }
+}

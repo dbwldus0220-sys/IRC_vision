@@ -18,26 +18,16 @@ import yaml
 
 
 POSITION_TOLERANCE_DEG = 5.0
-FIXED_JOINT_ANGLES_DEG = {"4": 18.0, "5": -18.0}
-FIXED_JOINT_EXEMPT_MOTIONS = frozenset({
-    "찐공잡기리그랩까지 실전",
-    "건공잡기",
-    "찐골넣기",
-    "찐허들",
-})
 
 
 def _with_runtime_policy(motion: dict) -> dict:
-    """Apply STEP's completion and fixed-joint policies to a runtime copy."""
+    """Normalize completion tolerance while preserving supplied joint targets."""
     result = copy.deepcopy(motion)
     result.setdefault("completion", {})["position_tolerance_deg"] = (
         POSITION_TOLERANCE_DEG
     )
-    if result["name"] not in FIXED_JOINT_EXEMPT_MOTIONS:
-        for frame in result.get("frames", []):
-            frame["angles"].update(FIXED_JOINT_ANGLES_DEG)
     if result["name"] == "건공잡기":
-        # Shared pose names in other gaits still use the fixed arm angles.
+        # Preserve existing runtime pose identities across catalog updates.
         pose_names = {name: name + "(건공잡기)" for name in (
             "미세후진오뒤(0도)", "미세오뒤4111(45도)",
         )}

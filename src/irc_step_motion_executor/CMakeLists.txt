@@ -224,6 +224,9 @@ install(PROGRAMS
 if(BUILD_TESTING)
   find_package(Python3 REQUIRED COMPONENTS Interpreter)
   find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(test_callback_timing_trace test/test_callback_timing_trace.cpp)
+  target_compile_features(test_callback_timing_trace PRIVATE cxx_std_17)
+  target_include_directories(test_callback_timing_trace PRIVATE include)
   if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK AND
       EXISTS "${ROBOT_MOTION_SDK_DIR}/playback_diagnostics.hpp")
     add_executable(test_common_playback test/test_common_playback.cpp)
@@ -240,9 +243,10 @@ if(BUILD_TESTING)
   endif()
   if(IRC_STEP_ENABLE_ROBOT_MOTION_SDK AND
       EXISTS "${ROBOT_MOTION_SDK_DIR}/gui_alignment.hpp")
-    add_test(NAME test_latest_gui_execution
+    add_test(NAME test_legacy_cosine_execution
       COMMAND ${Python3_EXECUTABLE}
         "${CMAKE_CURRENT_SOURCE_DIR}/../../tools/verify_latest_gui_execution.py"
+        --carry-all-repeat-goals
         --gui "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/20261006_gui_alignment/reference/sdk_gui.py"
         --probe $<TARGET_FILE:gui_execution_probe>
         --output "${CMAKE_CURRENT_BINARY_DIR}/gui_comparison"
@@ -250,9 +254,27 @@ if(BUILD_TESTING)
         "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/robot_motions_runtime.json"
         "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/20261006_gui_alignment/robot_motions_gui_state.json")
     # SDK subdirectory is EXCLUDE_FROM_ALL; ensure the real player probe is built.
-    add_custom_target(gui_comparison_probe ALL DEPENDS gui_execution_probe test_gui_alignment test_motion_pattern test_motion_callback)
+    add_custom_target(gui_comparison_probe ALL DEPENDS gui_execution_probe test_gui_alignment test_motion_pattern test_motion_callback test_continuous_hardware continuous_trace_probe test_continuous_interpolation test_forward_timing)
+    add_test(NAME test_forward_timing COMMAND $<TARGET_FILE:test_forward_timing> "${CMAKE_CURRENT_BINARY_DIR}")
+    add_test(NAME test_continuous_interpolation COMMAND $<TARGET_FILE:test_continuous_interpolation>)
+    add_test(NAME test_continuous_hardware
+      COMMAND $<TARGET_FILE:test_continuous_hardware> "${CMAKE_CURRENT_BINARY_DIR}")
+    add_test(NAME test_continuous_playback_parity
+      COMMAND ${Python3_EXECUTABLE}
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../tools/verify_continuous_playback.py"
+        --probe $<TARGET_FILE:continuous_trace_probe>
+        --raw-probe $<TARGET_FILE:gui_execution_probe>
+        --output "${CMAKE_CURRENT_BINARY_DIR}/continuous_parity.json"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/robot_motions_runtime.json")
     add_test(NAME test_gui_alignment_contract
       COMMAND $<TARGET_FILE:test_gui_alignment> "${CMAKE_CURRENT_BINARY_DIR}")
+    add_test(NAME test_gui_execution_specification
+      COMMAND ${Python3_EXECUTABLE}
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../tools/verify_gui_execution_contract.py"
+        --probe $<TARGET_FILE:gui_execution_probe>
+        --archived-gui "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/20261006_gui_alignment/reference/sdk_gui.py"
+        --output "${CMAKE_CURRENT_BINARY_DIR}/gui_specification"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/robot_motions_runtime.json")
   endif()
   ament_add_gtest(test_catalog_only_core test/test_catalog_only_core.cpp)
   if(TARGET test_catalog_only_core)

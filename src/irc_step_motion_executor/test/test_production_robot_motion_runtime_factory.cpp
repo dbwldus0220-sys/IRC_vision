@@ -24,6 +24,9 @@ irc_step_motion_executor::RobotMotionRuntimeConfig complete_runtime_config()
     config.motor_ids.push_back(motor_id);
   }
   config.explicit_torque_approval = true;
+  // This legacy fake SDK does not expose configureJointPolicy.
+  config.enable_shoulder_override = true;
+  config.continuous_interpolation = false;
   return config;
 }
 

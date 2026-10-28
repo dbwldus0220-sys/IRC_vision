@@ -1,0 +1,90 @@
+[INFO] [1793095920.516245487] [motion_decision_node]: line info: /vision/line_info
+[INFO] [1793095920.519609970] [motion_decision_node]: ball info: /vision/ball_info
+[INFO] [1793095920.523312000] [motion_decision_node]: goal info: /vision/goal_info
+[INFO] [1793095920.527725250] [motion_decision_node]: hurdle info: /vision/hurdle_info
+[INFO] [1793095920.529535863] [motion_decision_node]: finish info: /vision/finish_info
+[INFO] [1793095920.535865330] [motion_decision_node]: Mission phase: AUTO
+[INFO] [1793095920.536677898] [motion_decision_node]: Unified command: /navigation/motion_command
+[INFO] [1793095920.537400512] [motion_decision_node]: Motion status: /motion/status
+[INFO] [1793095920.538129301] [motion_decision_node]: Grasp detections: /vision/detections
+[INFO] [1793095920.538845162] [motion_decision_node]: Executor heartbeat: /motion/executor/heartbeat
+[INFO] [1793095920.539748197] [motion_decision_node]: Decision debug: /navigation/decision_debug
+[INFO] [1793095920.541218705] [motion_decision_node]: Press ENTER in the launch terminal to start vision decisions after the startup pose is ready.
+[INFO] [1793095946.936744769] [motion_decision_node]: ENTER received; waiting for startup readiness and fresh vision.
+[INFO] [1793095949.557349831] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=2
+[INFO] [1793095950.563359001] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793095952.944096905] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_RIGHT_TURN_RIGHT_4, command_id=3
+[INFO] [1793095953.959687839] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793095954.675695263] [motion_decision_node]: BALL near/unknown candidate; waiting for confirmation after the current motion
+[INFO] [1793095956.104588796] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4
+[INFO] [1793095956.118282797] [motion_decision_node]: Pre-motion settle started: action=LINE_OFFSET_TURN_RIGHT_2, source=line, duration=1.000
+[INFO] [1793095956.437821378] [motion_decision_node]: Line motion boundary: wait_sec=0.333, next_action=STRAIGHT, reason=turn_approach_pending
+[INFO] [1793095958.920179963] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_RIGHT_TURN_LEFT_4, command_id=5
+[INFO] [1793095959.627540711] [motion_decision_node]: Line corner remembered: {'corner_direction': 'RIGHT', 'corner_start_distance_m': 0.9165, 'last_confirmed_at': 4479.483553577, 'last_observation_id': 1793095959468000488, 'search_started': False, 'observed_during_action': 'STRAIGHT', 'observed_during_command_id': 4, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793095959.856081869] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793095960.680746752] [motion_decision_node]: BALL approach entry latched during motion: distance_m=1.305
+[INFO] [1793095961.658714583] [motion_decision_node]: Line corner remembered: {'corner_direction': 'RIGHT', 'corner_start_distance_m': 0.5871, 'last_confirmed_at': 4481.514736986, 'last_observation_id': 1793095961436081543, 'search_started': False, 'observed_during_action': 'RECOVER_RIGHT_TURN_LEFT_4', 'observed_during_command_id': 5, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793095961.748349495] [motion_decision_node]: Line corner remembered: {'corner_direction': 'RIGHT', 'corner_start_distance_m': 0.5512, 'last_confirmed_at': 4481.604387514, 'last_observation_id': 1793095961536153320, 'search_started': False, 'observed_during_action': 'RECOVER_RIGHT_TURN_LEFT_4', 'observed_during_command_id': 5, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793095961.864395516] [motion_decision_node]: Line corner remembered: {'corner_direction': 'RIGHT', 'corner_start_distance_m': 0.5689, 'last_confirmed_at': 4481.720407967, 'last_observation_id': 1793095961569510742, 'search_started': False, 'observed_during_action': 'RECOVER_RIGHT_TURN_LEFT_4', 'observed_during_command_id': 5, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793095961.908344067] [motion_decision_node]: Line corner remembered: {'corner_direction': 'RIGHT', 'corner_start_distance_m': 0.5331, 'last_confirmed_at': 4481.764129822, 'last_observation_id': 1793095961669582764, 'search_started': False, 'observed_during_action': 'RECOVER_RIGHT_TURN_LEFT_4', 'observed_during_command_id': 5, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793095961.992469762] [motion_decision_node]: Line corner remembered: {'corner_direction': 'RIGHT', 'corner_start_distance_m': 0.5689, 'last_confirmed_at': 4481.848494084, 'last_observation_id': 1793095961702940186, 'search_started': False, 'observed_during_action': 'RECOVER_RIGHT_TURN_LEFT_4', 'observed_during_command_id': 5, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793095962.029560607] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_LEFT_4
+[INFO] [1793095963.453388677] [motion_decision_node]: BALL near/unknown candidate; waiting for confirmation after the current motion
+[INFO] [1793095964.160724670] [motion_decision_node]: BALL confirmation completed; releasing pending hold
+[INFO] [1793095964.333223541] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793095964.335801568] [motion_decision_node]: BALL motion boundary: wait_sec=0.002, next_action=BALL_APPROACH_RECOVER_RIGHT_4, reobserved=False
+[INFO] [1793095964.993957431] [motion_decision_node]: BALL near/unknown candidate; waiting for confirmation after the current motion
+[INFO] [1793095966.472666952] [motion_decision_node]: BALL confirmation completed; releasing pending hold
+[INFO] [1793095966.483354112] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_RECOVER_RIGHT_4
+[INFO] [1793095966.489838718] [motion_decision_node]: BALL motion boundary: wait_sec=0.002, next_action=BALL_APPROACH_RECOVER_LEFT_4, reobserved=False
+[INFO] [1793095967.334414422] [motion_decision_node]: BALL near/unknown candidate; waiting for confirmation after the current motion
+[INFO] [1793095968.203699709] [motion_decision_node]: BALL raw detection lost; releasing pending hold
+[INFO] [1793095968.251700760] [motion_decision_node]: BALL lost during 57-150 cm approach motion; remembering the last Ball side for the motion boundary
+[INFO] [1793095968.643763900] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_RECOVER_LEFT_4
+[INFO] [1793095968.657452364] [motion_decision_node]: BALL motion boundary: wait_sec=0.001, next_action=BALL_APPROACH_TURN_LEFT_3, reobserved=False
+[INFO] [1793095969.695251144] [motion_decision_node]: BALL post-motion dwell started: 1.0s after action=BALL_APPROACH_TURN_LEFT_3
+[INFO] [1793095969.696688370] [motion_decision_node]: BALL stationary correction complete; waiting for post-motion dwell before the next approach motion without another same-boundary alignment check
+[INFO] [1793095969.697965879] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_TURN_LEFT_3
+[INFO] [1793095971.239717136] [motion_decision_node]: BALL motion boundary: wait_sec=1.542, next_action=BALL_APPROACH_TURN_LEFT_1, reobserved=False
+[INFO] [1793095971.606464202] [motion_decision_node]: BALL post-motion dwell started: 1.0s after action=BALL_APPROACH_TURN_LEFT_1
+[INFO] [1793095971.607386181] [motion_decision_node]: BALL stationary correction complete; waiting for post-motion dwell before the next approach motion without another same-boundary alignment check
+[INFO] [1793095971.608208829] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_TURN_LEFT_1
+[INFO] [1793095972.840693820] [motion_decision_node]: BALL motion boundary: wait_sec=1.230, next_action=BALL_APPROACH_TURN_LEFT_1, reobserved=False
+[INFO] [1793095973.219764730] [motion_decision_node]: BALL post-motion dwell started: 1.0s after action=BALL_APPROACH_TURN_LEFT_1
+[INFO] [1793095973.220698709] [motion_decision_node]: BALL stationary correction complete; waiting for post-motion dwell before the next approach motion without another same-boundary alignment check
+[INFO] [1793095973.221466732] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_TURN_LEFT_1
+[INFO] [1793095974.537405603] [motion_decision_node]: BALL motion boundary: wait_sec=1.317, next_action=BALL_APPROACH_TURN_LEFT_1, reobserved=False
+[INFO] [1793095974.914676137] [motion_decision_node]: BALL post-motion dwell started: 1.0s after action=BALL_APPROACH_TURN_LEFT_1
+[INFO] [1793095974.915573699] [motion_decision_node]: BALL stationary correction complete; waiting for post-motion dwell before the next approach motion without another same-boundary alignment check
+[INFO] [1793095974.916316153] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_TURN_LEFT_1
+[INFO] [1793095976.137901153] [motion_decision_node]: BALL motion boundary: wait_sec=1.222, next_action=BALL_APPROACH_TURN_RIGHT_2, reobserved=False
+[INFO] [1793095976.897990406] [motion_decision_node]: BALL post-motion dwell started: 1.0s after action=BALL_APPROACH_TURN_RIGHT_2
+[INFO] [1793095976.898918754] [motion_decision_node]: BALL stationary correction complete; waiting for post-motion dwell before the next approach motion without another same-boundary alignment check
+[INFO] [1793095976.899827868] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_TURN_RIGHT_2
+[INFO] [1793095978.237173094] [motion_decision_node]: BALL motion boundary: wait_sec=1.338, next_action=BALL_APPROACH_TURN_RIGHT_2, reobserved=False
+[INFO] [1793095978.993816446] [motion_decision_node]: BALL post-motion dwell started: 1.0s after action=BALL_APPROACH_TURN_RIGHT_2
+[INFO] [1793095978.995540368] [motion_decision_node]: BALL stationary correction complete; waiting for post-motion dwell before the next approach motion without another same-boundary alignment check
+[INFO] [1793095978.997476457] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_TURN_RIGHT_2
+[INFO] [1793095980.253297369] [motion_decision_node]: Line corner remembered: {'corner_direction': 'RIGHT', 'corner_start_distance_m': 1.5632, 'last_confirmed_at': 4500.109000946, 'last_observation_id': 1793095980016074219, 'search_started': False, 'observed_during_action': None, 'observed_during_command_id': None, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793095980.337533169] [motion_decision_node]: BALL motion boundary: wait_sec=1.343, next_action=BALL_APPROACH_TURN_RIGHT_2, reobserved=False
+[INFO] [1793095981.092429068] [motion_decision_node]: BALL post-motion dwell started: 1.0s after action=BALL_APPROACH_TURN_RIGHT_2
+[INFO] [1793095981.093348903] [motion_decision_node]: BALL stationary correction complete; waiting for post-motion dwell before the next approach motion without another same-boundary alignment check
+[INFO] [1793095981.094099645] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_TURN_RIGHT_2
+[INFO] [1793095981.328535599] [motion_decision_node]: Line corner remembered: {'corner_direction': 'RIGHT', 'corner_start_distance_m': 1.6369, 'last_confirmed_at': 4501.184505552, 'last_observation_id': 1793095981116831543, 'search_started': False, 'observed_during_action': None, 'observed_during_command_id': None, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793095982.330591306] [motion_decision_node]: Line corner remembered: {'corner_direction': 'RIGHT', 'corner_start_distance_m': 1.1477, 'last_confirmed_at': 4502.186664942, 'last_observation_id': 1793095982150880859, 'search_started': False, 'observed_during_action': None, 'observed_during_command_id': None, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793095982.338400749] [motion_decision_node]: BALL motion boundary: wait_sec=1.245, next_action=BALL_APPROACH_TURN_RIGHT_2, reobserved=False
+[INFO] [1793095982.468304184] [motion_decision_node]: General motion lock released: status=FAILED, action=BALL_APPROACH_TURN_RIGHT_2
+[INFO] [1793095982.492009291] [motion_decision_node]: Line corner remembered: {'corner_direction': 'RIGHT', 'corner_start_distance_m': 1.0504, 'last_confirmed_at': 4502.34806251, 'last_observation_id': 1793095982284308594, 'search_started': False, 'observed_during_action': None, 'observed_during_command_id': None, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793095982.910049859] [motion_decision_node]: Line corner remembered: {'corner_direction': 'LEFT', 'corner_start_distance_m': 1.112, 'last_confirmed_at': 4502.766005028, 'last_observation_id': 1793095982751310791, 'search_started': False, 'observed_during_action': None, 'observed_during_command_id': None, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793095982.995175188] [motion_decision_node]: Line corner remembered: {'corner_direction': 'LEFT', 'corner_start_distance_m': 1.0848, 'last_confirmed_at': 4502.851205239, 'last_observation_id': 1793095982851382813, 'search_started': False, 'observed_during_action': None, 'observed_during_command_id': None, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793095983.071411490] [motion_decision_node]: Line corner remembered: {'corner_direction': 'LEFT', 'corner_start_distance_m': 1.0575, 'last_confirmed_at': 4502.927342658, 'last_observation_id': 1793095982918097412, 'search_started': False, 'observed_during_action': None, 'observed_during_command_id': None, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793095983.167695736] [motion_decision_node]: Line corner remembered: {'corner_direction': 'LEFT', 'corner_start_distance_m': 1.0306, 'last_confirmed_at': 4503.022110603, 'last_observation_id': 1793095982951454834, 'search_started': False, 'observed_during_action': None, 'observed_during_command_id': None, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793095983.241434268] [motion_decision_node]: Line corner remembered: {'corner_direction': 'LEFT', 'corner_start_distance_m': 0.9989, 'last_confirmed_at': 4503.097402749, 'last_observation_id': 1793095983018169434, 'search_started': False, 'observed_during_action': None, 'observed_during_command_id': None, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793095983.392459821] [motion_decision_node]: Line corner remembered: {'corner_direction': 'LEFT', 'corner_start_distance_m': 0.9865, 'last_confirmed_at': 4503.248410382, 'last_observation_id': 1793095983184956055, 'search_started': False, 'observed_during_action': None, 'observed_during_command_id': None, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793095983.491314414] [motion_decision_node]: Line corner remembered: {'corner_direction': 'LEFT', 'corner_start_distance_m': 0.965, 'last_confirmed_at': 4503.344892137, 'last_observation_id': 1793095983251670654, 'search_started': False, 'observed_during_action': None, 'observed_during_command_id': None, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793095983.586480451] [motion_decision_node]: Line corner remembered: {'corner_direction': 'LEFT', 'corner_start_distance_m': 0.9592, 'last_confirmed_at': 4503.442300064, 'last_observation_id': 1793095983351742676, 'search_started': False, 'observed_during_action': None, 'observed_during_command_id': None, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793095985.107425213] [motion_decision_node]: Line corner remembered: {'corner_direction': 'RIGHT', 'corner_start_distance_m': 0.757, 'last_confirmed_at': 4504.963398494, 'last_observation_id': 1793095984919544922, 'search_started': False, 'observed_during_action': None, 'observed_during_command_id': None, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793095993.447068367] [motion_decision_node]: BALL near/unknown candidate; waiting for confirmation after the current motion
+[INFO] [1793095994.074244174] [motion_decision_node]: BALL raw detection lost; releasing pending hold
+[INFO] [1793095994.537710482] [motion_decision_node]: BALL motion boundary: wait_sec=12.068, next_action=BALL_LOST_FORWARD_4, reobserved=False
+[INFO] [1793095994.666714457] [motion_decision_node]: General motion lock released: status=FAILED, action=BALL_LOST_FORWARD_4

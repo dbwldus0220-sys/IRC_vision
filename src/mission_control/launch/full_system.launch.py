@@ -423,9 +423,9 @@ def generate_launch_description() -> LaunchDescription:
                                   choices=["image", "ground"]),
             DeclareLaunchArgument("line_offset_align_enter_px", default_value="100.0",
                                   description="Pixel offset entry for ground-target turn/forward alignment; negative disables."),
-            DeclareLaunchArgument("recovery_heading_turn_deg", default_value="10.0"),
+            DeclareLaunchArgument("recovery_heading_turn_deg", default_value="20.0"),
             DeclareLaunchArgument(
-                "recovery_away_heading_turn_deg", default_value="3.0"
+                "recovery_away_heading_turn_deg", default_value="20.0"
             ),
             DeclareLaunchArgument(
                 "curve_follow_max_offset_norm", default_value="0.55"

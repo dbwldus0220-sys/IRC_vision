@@ -11,6 +11,7 @@ namespace irc_step {
 DynamixelMotionHardware::DynamixelMotionHardware(DynamixelMotionHardwareConfig config)
     : config_(std::move(config)), desired_deg_(NUMBER_OF_DYNAMIXELS, 0.0), controller_(&dxl_),
       desired_rad_(Eigen::VectorXd::Zero(NUMBER_OF_DYNAMIXELS)) {
+    dxl_.SetExcludeMotor5(config_.exclude_motor_5);
     auto ids = config_.motor_ids;
     std::sort(ids.begin(), ids.end());
     if (config_.device_path.empty() || config_.baud_rate <= 0 || ids.size() != 23)
@@ -24,6 +25,7 @@ void DynamixelMotionHardware::setError(std::string message) noexcept {
 }
 
 bool DynamixelMotionHardware::preflight() noexcept {
+    const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
     try {
         if (!dxl_.Initialize(config_.device_path, config_.baud_rate)) {
             setError("failed to open DYNAMIXEL port"); return false;
@@ -42,6 +44,7 @@ bool DynamixelMotionHardware::preflight() noexcept {
 }
 
 bool DynamixelMotionHardware::initialize() noexcept {
+    const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
     try {
         if (!preflight()) return false;
         if (!dxl_.ConfigureTimeBasedProfile()) {
@@ -64,16 +67,19 @@ bool DynamixelMotionHardware::initialize() noexcept {
 }
 
 bool DynamixelMotionHardware::prepareImmediatePlayback() noexcept {
-    if (!ready() || !dxl_.WriteZeroProfiles()) {
-        setError("failed to set Profile Acceleration/Velocity to zero"); return false;
+    const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
+    if (!ready() || !dxl_.VerifyTorqueEnabled(true) || !dxl_.WriteZeroProfiles()) {
+        setError("torque OFF/unconfirmed or failed to set Profile Acceleration/Velocity to zero"); return false;
     }
     return true;
 }
 
 bool DynamixelMotionHardware::commandImmediatePosition(
     const JointAngles& goals, const std::vector<int>& ids) noexcept {
+    const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
     if (!ready()) { setError("hardware is not ready"); return false; }
     for (const int id : ids) {
+        if (!motorEnabled(id) && id == 5) continue;
         const auto value = goals.find(id);
         if (id < 0 || id >= 23 || value == goals.end() || !std::isfinite(value->second)) {
             setError("invalid immediate motor goal"); return false;
@@ -88,12 +94,14 @@ bool DynamixelMotionHardware::commandImmediatePosition(
 }
 
 bool DynamixelMotionHardware::ready() const noexcept {
+    const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
     return initialized_ && dxl_.IsReady();
 }
 
 bool DynamixelMotionHardware::commandPosition(
     const JointAngles& goal_deg, const std::vector<int>& motor_ids,
     std::uint32_t duration_ms, std::uint32_t acceleration_ms) noexcept {
+    const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
     if (!ready()) {
         setError("DYNAMIXEL hardware is not initialized");
         return false;
@@ -118,6 +126,7 @@ bool DynamixelMotionHardware::commandPosition(
 
 bool DynamixelMotionHardware::readPresentPositions(
     JointAngles& positions_deg) noexcept {
+    const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
     if (!ready()) {
         setError("DYNAMIXEL hardware is not initialized");
         return false;
@@ -127,7 +136,8 @@ bool DynamixelMotionHardware::readPresentPositions(
             setError("Present Position SyncRead failed"); return false;
         }
         positions_deg.clear();
-        for (int id = 0; id < 23; ++id) positions_deg[id] = desired_deg_[id];
+        for (int id = 0; id < 23; ++id)
+            if (motorEnabled(id)) positions_deg[id] = desired_deg_[id];
         last_error_.clear();
         return true;
     } catch (const std::exception& error) {
@@ -141,6 +151,7 @@ bool DynamixelMotionHardware::readPresentPositions(
 
 bool DynamixelMotionHardware::holdCurrentPosition(
     std::uint32_t stop_duration_ms) noexcept {
+    const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
     JointAngles current_deg;
     if (!readPresentPositions(current_deg)) return false;
     std::vector<int> motor_ids;
@@ -152,6 +163,7 @@ bool DynamixelMotionHardware::holdCurrentPosition(
 }
 
 bool DynamixelMotionHardware::setTorqueEnabled(bool enabled) noexcept {
+    const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
     if (!dxl_.IsReady()) {
         setError("DYNAMIXEL port is not ready");
         return false;

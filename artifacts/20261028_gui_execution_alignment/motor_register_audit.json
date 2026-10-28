@@ -1,0 +1,263 @@
+{
+  "port": "/dev/ttyUSB0",
+  "baud": 4000000,
+  "protocol": 2.0,
+  "motor_writes": 0,
+  "begin_ns": 2206674107046,
+  "motors": {
+    "0": {
+      "model": {
+        "address": 0,
+        "bytes": 2,
+        "raw": 0,
+        "begin_ns": 2206685437595,
+        "end_ns": 2206720513037,
+        "sdk_result": -3001,
+        "device_error": 0
+      }
+    },
+    "1": {
+      "model": {
+        "address": 0,
+        "bytes": 2,
+        "raw": 0,
+        "begin_ns": 2206720724758,
+        "end_ns": 2206755567806,
+        "sdk_result": -3001,
+        "device_error": 0
+      }
+    },
+    "2": {
+      "model": {
+        "address": 0,
+        "bytes": 2,
+        "raw": 0,
+        "begin_ns": 2206755694339,
+        "end_ns": 2206790527146,
+        "sdk_result": -3001,
+        "device_error": 0
+      }
+    },
+    "3": {
+      "model": {
+        "address": 0,
+        "bytes": 2,
+        "raw": 0,
+        "begin_ns": 2206790640655,
+        "end_ns": 2206825394419,
+        "sdk_result": -3001,
+        "device_error": 0
+      }
+    },
+    "4": {
+      "model": {
+        "address": 0,
+        "bytes": 2,
+        "raw": 0,
+        "begin_ns": 2206825509784,
+        "end_ns": 2206860278108,
+        "sdk_result": -3001,
+        "device_error": 0
+      }
+    },
+    "5": {
+      "model": {
+        "address": 0,
+        "bytes": 2,
+        "raw": 0,
+        "begin_ns": 2206860364896,
+        "end_ns": 2206895138468,
+        "sdk_result": -3001,
+        "device_error": 0
+      }
+    },
+    "6": {
+      "model": {
+        "address": 0,
+        "bytes": 2,
+        "raw": 0,
+        "begin_ns": 2206895229736,
+        "end_ns": 2206930019949,
+        "sdk_result": -3001,
+        "device_error": 0
+      }
+    },
+    "7": {
+      "model": {
+        "address": 0,
+        "bytes": 2,
+        "raw": 0,
+        "begin_ns": 2206930113745,
+        "end_ns": 2206964889301,
+        "sdk_result": -3001,
+        "device_error": 0
+      }
+    },
+    "8": {
+      "model": {
+        "address": 0,
+        "bytes": 2,
+        "raw": 0,
+        "begin_ns": 2206964983322,
+        "end_ns": 2206999758366,
+        "sdk_result": -3001,
+        "device_error": 0
+      }
+    },
+    "9": {
+      "model": {
+        "address": 0,
+        "bytes": 2,
+        "raw": 0,
+        "begin_ns": 2206999847522,
+        "end_ns": 2207034678793,
+        "sdk_result": -3001,
+        "device_error": 0
+      }
+    },
+    "10": {
+      "model": {
+        "address": 0,
+        "bytes": 2,
+        "raw": 0,
+        "begin_ns": 2207034829199,
+        "end_ns": 2207069805661,
+        "sdk_result": -3001,
+        "device_error": 0
+      }
+    },
+    "11": {
+      "model": {
+        "address": 0,
+        "bytes": 2,
+        "raw": 0,
+        "begin_ns": 2207069939458,
+        "end_ns": 2207104843084,
+        "sdk_result": -3001,
+        "device_error": 0
+      }
+    },
+    "12": {
+      "model": {
+        "address": 0,
+        "bytes": 2,
+        "raw": 0,
+        "begin_ns": 2207104977970,
+        "end_ns": 2207139802297,
+        "sdk_result": -3001,
+        "device_error": 0
+      }
+    },
+    "13": {
+      "model": {
+        "address": 0,
+        "bytes": 2,
+        "raw": 0,
+        "begin_ns": 2207139927839,
+        "end_ns": 2207174791623,
+        "sdk_result": -3001,
+        "device_error": 0
+      }
+    },
+    "14": {
+      "model": {
+        "address": 0,
+        "bytes": 2,
+        "raw": 0,
+        "begin_ns": 2207174918924,
+        "end_ns": 2207209785301,
+        "sdk_result": -3001,
+        "device_error": 0
+      }
+    },
+    "15": {
+      "model": {
+        "address": 0,
+        "bytes": 2,
+        "raw": 0,
+        "begin_ns": 2207209906266,
+        "end_ns": 2207244682622,
+        "sdk_result": -3001,
+        "device_error": 0
+      }
+    },
+    "16": {
+      "model": {
+        "address": 0,
+        "bytes": 2,
+        "raw": 0,
+        "begin_ns": 2207244807396,
+        "end_ns": 2207279792018,
+        "sdk_result": -3001,
+        "device_error": 0
+      }
+    },
+    "17": {
+      "model": {
+        "address": 0,
+        "bytes": 2,
+        "raw": 0,
+        "begin_ns": 2207280341258,
+        "end_ns": 2207315736266,
+        "sdk_result": -3001,
+        "device_error": 0
+      }
+    },
+    "18": {
+      "model": {
+        "address": 0,
+        "bytes": 2,
+        "raw": 0,
+        "begin_ns": 2207316023126,
+        "end_ns": 2207351018693,
+        "sdk_result": -3001,
+        "device_error": 0
+      }
+    },
+    "19": {
+      "model": {
+        "address": 0,
+        "bytes": 2,
+        "raw": 0,
+        "begin_ns": 2207351184716,
+        "end_ns": 2207386171610,
+        "sdk_result": -3001,
+        "device_error": 0
+      }
+    },
+    "20": {
+      "model": {
+        "address": 0,
+        "bytes": 2,
+        "raw": 0,
+        "begin_ns": 2207386326688,
+        "end_ns": 2207421295853,
+        "sdk_result": -3001,
+        "device_error": 0
+      }
+    },
+    "21": {
+      "model": {
+        "address": 0,
+        "bytes": 2,
+        "raw": 0,
+        "begin_ns": 2207421486262,
+        "end_ns": 2207456366367,
+        "sdk_result": -3001,
+        "device_error": 0
+      }
+    },
+    "22": {
+      "model": {
+        "address": 0,
+        "bytes": 2,
+        "raw": 0,
+        "begin_ns": 2207456534182,
+        "end_ns": 2207491764767,
+        "sdk_result": -3001,
+        "device_error": 0
+      }
+    }
+  },
+  "end_ns": 2207494658239
+}

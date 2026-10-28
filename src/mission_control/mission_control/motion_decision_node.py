@@ -88,45 +88,26 @@ class MotionDecisionNode(Node):
     DEFAULT_EXECUTOR_HEARTBEAT_STARTUP_GRACE_SEC = 5.0
     EXECUTOR_WATCHDOG_PERIOD_SEC = 0.1
     LINE_MOTION_CAPTURE_CONFIG = {
-        "STRAIGHT": (3.120, 10),
-        "STRAIGHT_1": (1.026, 5),
-        "STRAIGHT_2": (2.052, 10),
-        "STRAIGHT_3": (3.120, 10),
-        "STRAIGHT_4": (4.104, 15),
-        "LEFT": (2.120, 15),
-        "RIGHT": (2.104, 15),
-        **{
-            f"RECOVER_{line_side}_TURN_LEFT_{suffix}": timing
-            for line_side in ("LEFT", "RIGHT")
-            for suffix, timing in {
-                2: (2.272, 10),
-                4: (2.120, 15),
-                6: (4.124, 20),
-                8: (5.050, 25),
-                10: (5.976, 30),
-                13: (7.365, 30),
-            }.items()
-        },
-        **{
-            f"RECOVER_{line_side}_TURN_RIGHT_{suffix}": timing
-            for line_side in ("LEFT", "RIGHT")
-            for suffix, timing in {
-                4: (2.104, 15),
-                6: (2.842, 10),
-                8: (3.789, 15),
-                10: (4.737, 20),
-                12: (5.684, 25),
-                15: (7.105, 30),
-            }.items()
-        },
+        # Preserve every stored 90ms hold in each 517ms R forward cycle.
+        "STRAIGHT": (.517 * 6 / 1.0, 10),
+        "STRAIGHT_1": (.517 * 2 / 1.0, 5),
+        "STRAIGHT_2": (.517 * 4 / 1.0, 10),
+        "STRAIGHT_3": (.517 * 6 / 1.0, 10),
+        "STRAIGHT_4": (.517 * 8 / 1.0, 15),
+        "LEFT": (2.080 / 1.0, 15),
+        "RIGHT": (2.060 / 1.0, 15),
+        **{f"RECOVER_{side}_TURN_LEFT_{suffix}": (2.080 / 1.0, 15)
+           for side in ("LEFT", "RIGHT") for suffix in (2, 4, 6, 8, 10, 13)},
+        **{f"RECOVER_{side}_TURN_RIGHT_{suffix}": (2.060 / 1.0, 15)
+           for side in ("LEFT", "RIGHT") for suffix in (4, 6, 8, 10, 12, 15)},
     }
     LINE_MOTION_CAPTURE_START_RATIO = 0.70
-    # Last frame end * repeats / playback speed in the deployed camera-90 catalog.
+    # Full stored cycle duration, including its leading hold.
     GOAL_FORWARD_DURATION_SEC = {
-        "GOAL_CAMERA_90_FORWARD": 3.066,
-        "GOAL_CAMERA_90_FORWARD_1": 1.022,
-        "GOAL_CAMERA_90_FORWARD_2": 2.044,
-        **{f"GOAL_CAMERA90_FINE_FORWARD_{count}": .385 * count / 1.05
+        "GOAL_CAMERA_90_FORWARD": .517 * 6 / 1.0,
+        "GOAL_CAMERA_90_FORWARD_1": .517 * 2 / 1.0,
+        "GOAL_CAMERA_90_FORWARD_2": .517 * 4 / 1.0,
+        **{f"GOAL_CAMERA90_FINE_FORWARD_{count}": .385 * count / 1.0
            for count in range(1, 5)},
     }
     GOAL_FORWARD_CAPTURE_FRAMES = 3
@@ -291,8 +272,8 @@ class MotionDecisionNode(Node):
             max_angle_deg=float(self.get_parameter("lost_search_max_angle_deg").value),
         )
         self.declare_parameter("enable_ball_lost_recovery", True)
-        self.declare_parameter("recovery_heading_turn_deg", 10.0)
-        self.declare_parameter("recovery_away_heading_turn_deg", 3.0)
+        self.declare_parameter("recovery_heading_turn_deg", 20.0)
+        self.declare_parameter("recovery_away_heading_turn_deg", 20.0)
         self.declare_parameter("curve_follow_max_offset_norm", 0.55)
         self.declare_parameter("ball_tracking_range_m", 1.5)
         self.declare_parameter("ball_control_range_m", 1.5)
@@ -4604,6 +4585,8 @@ class MotionDecisionNode(Node):
         fine_forward = (
             decision.action in {
                 "STRAIGHT_0", "BALL_FINE_FORWARD_8", "BALL_PICKUP_FINE_FORWARD",
+                "BALL_LOST_FINE_FORWARD_3",
+                "BALL_PICKUP_INITIAL_SEARCH_FORWARD", "BALL_PICKUP_FINE_SEARCH_FORWARD",
                 "SLOW_APPROACH", "FINE_FORWARD_STEP",
             }
             or decision.action.startswith("GOAL_CAMERA90_FINE_FORWARD_")
@@ -4617,9 +4600,9 @@ class MotionDecisionNode(Node):
         pickup_fine_checkpoint = bool(
             fine_forward and self.active_special_action == "PICKUP_NOW"
             and (
-                (decision.action == "BALL_PICKUP_FINE_FORWARD"
+                (decision.action in {"BALL_PICKUP_FINE_FORWARD", "BALL_PICKUP_FINE_SEARCH_FORWARD"}
                  and self.pickup_fine_align_waiting)
-                or (decision.action == "BALL_PICKUP_INITIAL_ALIGN_CONTINUE"
+                or (decision.action in {"BALL_PICKUP_INITIAL_ALIGN_CONTINUE", "BALL_PICKUP_INITIAL_SEARCH_FORWARD"}
                     and self.pickup_initial_align_waiting)
             )
         )

@@ -1,0 +1,59 @@
+[철회됨] 이 보고서의 전진 대기 생략 및 경계 속도 연결 변경은 보행 이상 제보 후 복원했습니다. 최신 상태: ../20261027_restore_forward_timing/REPORT.txt
+
+2026-10-27 전진 연속 연결 / 라인복귀 4회 / 1.0배속 적용
+
+적용 상태
+- 일반 전진 0/45/90도 10개 모션: playback_speed=1.0.
+- 라인복귀는 R라인복귀우회전, R전진라인복귀좌 두 개만 남김. 각각 repeat_count=4, playback_speed=1.0.
+- 남아 있던 1회/6회 라인복귀 모션 제거. 호환 명령 line_recovery_left_6도 4회 모션으로 연결.
+- runtime 모든 모션의 completion.position_tolerance_deg=5.0 유지.
+- 원본 motion_imports/robot_motions(52).json, 모터 각도/ID, 프레임 내부 시간과 대기는 보존.
+
+정지 원인과 수정
+기존 1초 전진 대기는 이미 제거된 상태였다. 다만 새 R 전진의 첫 프레임 start_ms=90이 매 반복과 다음 모션에 재적용됐고, 연속 보간도 개별 모션 끝에서 속도를 0으로 만들었다. 서로 다른 반복 횟수의 전진은 Python bridge가 완료 후 전달하고 SDK도 자세명 차이 때문에 연결을 거부할 수 있었다.
+- 카탈로그 continuation_group으로 같은 카메라 자세의 일반 전진을 명시적으로 연결.
+- 연속 보간 ON에서 반복 및 예약된 다음 전진의 시작 대기 90ms 생략. 최초 실행의 시작 대기와 내부 90ms 대기는 유지.
+- 다음 전진이 마지막 구간 시작 전에 예약되면 같은 방향 관절의 경계 속도 연결. 반전/0이동/착지/래핑/명시적 stop은 기존 정지 규칙 유지.
+- 이미 마지막 보간이 시작된 뒤 들어온 예약은 계수를 바꾸지 않아 목표각 점프를 방지. 이 경우 감속은 남지만 다음 모션의 시작 대기는 추가하지 않는다.
+- 마지막 전진 후에는 정상 정지. 다른 카메라 자세나 라인복귀와의 연결에는 전진 연결 규칙을 적용하지 않음.
+- continuous_interpolation=false이면 기존 코사인 및 반복 대기 시간 유지.
+- R 카탈로그와 단축된 반복 시간에 맞게 다음 영상 수집 시간 보정. 70% 시점 및 필요한 프레임 수/안전 확인 조건은 유지.
+
+실제 적용 경로
+motion_decision_node -> motion_command_bridge_node -> sdk_motion_executor -> ProductionRobotMotionRuntimeFactory -> RobotMotionPlayerBackend -> external_sdk/gui_aligned/RobotMotionPlayer -> DynamixelMotionHardware -> Dxl::WriteGoalDegrees -> GroupSyncWrite(116, 4).
+CMake SDK 경로는 이 저장소의 external_sdk/gui_aligned이며, install 실행 파일은 build/irc_step_motion_executor/sdk_motion_executor에 연결돼 있다. 설치 카탈로그도 수정한 artifacts/robot_motions_runtime.json에 연결돼 있다.
+Protocol 2.0 / 4,000,000bps / 5ms 목표 전송 설정 유지. PID, 전류 제한, Shutdown, 토크 절차 변경 없음.
+
+빌드/검증
+- colcon build: irc_step_motion_executor, mission_control 2개 성공. 기존 테스트의 frame_id 생략 초기화 경고 있음.
+- standalone CTest 6/6 통과.
+- ROS 관련 CTest 9/9 통과: 전진 연결, 코사인 회귀, 연속 보간, fake SDK 전송, queue/backend/config/startup.
+- Python 범위 테스트 43개 통과. 이전 이름 전45도(4회)를 기대하던 테스트도 현재 R전진45도(4회)로 갱신.
+- 독립 Python 수식과 runtime 86개 비교: 621,690 관절 샘플, 최대 각도 오차 2.85e-14도 미만, raw 불일치 0.
+- 실제 C++ player+fake hardware: 5ms 및 불규칙 주기/통신 지연 172시나리오, 684,342 관절 샘플, raw 불일치 0.
+- 반올림 경계 12,291개 일치.
+- 늦은 예약 시 목표각 불연속 없음, 이른 예약 시 경계 속도 유지, 4회→6회 예약, 카메라 변경 차단, 명시적 정지와 OFF 회귀 확인.
+- 새 PC GUI 파일을 직접 실행한 대조는 아님. 독립 기준 계산에 이번 전진 연결 규칙을 추가했으며, 보관된 구 GUI는 코사인 OFF 회귀에 사용.
+- 실기 토크 ON/보행 테스트는 실행하지 않음. 흔들림/접지 안정성 개선을 입증하지 않음.
+
+실행 설정
+현재 launch 기본값 continuous_interpolation:=true queued_transition_hold_ms:=0 사용.
+실행 중인 노드는 기존 프로세스이므로 안전하게 정지한 뒤 기존 실행 명령으로 재시작해야 새 바이너리/카탈로그가 적용됨.
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+하드웨어를 켜지 않는 확인 실행:
+ros2 launch irc_step_motion_executor sdk_gui_alignment.launch.py backend_type:=simulated continuous_interpolation:=true
+기존 full_system_robot 실행 명령에도 continuous_interpolation:=true queued_transition_hold_ms:=0 사용. 실제 장치/토크 승인 인수는 기존 설정 유지.
+
+복원 (이번 요청 직전 상태)
+저장소 루트에서 실행 중 노드를 안전하게 정지한 뒤:
+tar -xzf artifacts/20261027_forward_continuation/before.tar.gz -C .
+cp artifacts/20261027_forward_continuation/additional_before/tools/verify_continuous_playback.py tools/verify_continuous_playback.py
+source /opt/ros/humble/setup.bash
+CMAKE_BUILD_PARALLEL_LEVEL=2 colcon build --packages-select irc_step_motion_executor mission_control --symlink-install
+source install/setup.bash
+이후 기존 실행 명령으로 재시작. 새 테스트 파일은 남아도 복원된 CMake에서 사용하지 않음.
+백업 파일별 체크섬 대조 완료. changed_files.json, before_sha256.json, after_sha256.json 참조.
+
+실기 확인 항목
+로봇을 지지한 상태에서 전진 반복 및 4회→6회 연속 명령의 목표/피드백 로그를 먼저 확인. 경계 90ms 정지 제거, 명시적 정지, 반전 관절 동작, 좌우 라인복귀가 정확히 4회인지 확인. 이후 보행 중 흔들림/접지 및 균형 확인. 전진 연결로 사이클이 빨라지므로 실제 보행 안정성은 별도 검증 필요.

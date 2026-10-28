@@ -1,0 +1,7 @@
+[INFO] [1793162679.264992833] [motion_decision_node]: Line offset alignment: action=STRAIGHT_1, offset_px=-134.891, target_lateral_m=-0.06834007565794886, target_forward_m=0.5, target_bearing_deg=-7.782969170015432, ground_lateral_offset_m=-0.2151009954797979, turn_count=None, turn_angle_deg=None
+[INFO] [1793162679.266115080] [motion_decision_node]: Line motion boundary: wait_sec=1.105, next_action=STRAIGHT_1, reason=line_offset_target_forward
+[INFO] [1793162701.516544189] [motion_decision_node]: Line corner remembered: {'corner_direction': 'RIGHT', 'corner_start_distance_m': 0.8893, 'last_confirmed_at': 1282.983138701, 'last_observation_id': 1793162701319654053, 'search_started': False, 'observed_during_action': 'STRAIGHT', 'observed_during_command_id': 57, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793162702.930817870] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT_1, command_id=58
+[INFO] [1793162704.035208290] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793162704.883271028] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_RIGHT_TURN_RIGHT_4, command_id=59
+[INFO] [1793162705.229091683] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT_1

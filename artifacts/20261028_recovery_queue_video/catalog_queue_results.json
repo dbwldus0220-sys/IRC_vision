@@ -1,0 +1,290 @@
+[
+  {
+    "first": "R전진45도(6회)",
+    "second": "R전진45도(6회)",
+    "continuous": false,
+    "read_delay_ms": 0,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진45도(6회)",
+    "second": "R전진라인복귀좌",
+    "continuous": false,
+    "read_delay_ms": 0,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진45도(6회)",
+    "second": "R라인복귀우회전",
+    "continuous": false,
+    "read_delay_ms": 0,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진45도(6회)",
+    "continuous": false,
+    "read_delay_ms": 0,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진라인복귀좌",
+    "continuous": false,
+    "read_delay_ms": 0,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R라인복귀우회전",
+    "continuous": false,
+    "read_delay_ms": 0,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R라인복귀우회전",
+    "second": "R전진45도(6회)",
+    "continuous": false,
+    "read_delay_ms": 0,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R라인복귀우회전",
+    "second": "R전진라인복귀좌",
+    "continuous": false,
+    "read_delay_ms": 0,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R라인복귀우회전",
+    "second": "R라인복귀우회전",
+    "continuous": false,
+    "read_delay_ms": 0,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진45도(6회)",
+    "second": "R전진45도(6회)",
+    "continuous": false,
+    "read_delay_ms": 16,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진45도(6회)",
+    "second": "R전진라인복귀좌",
+    "continuous": false,
+    "read_delay_ms": 16,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진45도(6회)",
+    "second": "R라인복귀우회전",
+    "continuous": false,
+    "read_delay_ms": 16,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진45도(6회)",
+    "continuous": false,
+    "read_delay_ms": 16,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진라인복귀좌",
+    "continuous": false,
+    "read_delay_ms": 16,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R라인복귀우회전",
+    "continuous": false,
+    "read_delay_ms": 16,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R라인복귀우회전",
+    "second": "R전진45도(6회)",
+    "continuous": false,
+    "read_delay_ms": 16,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R라인복귀우회전",
+    "second": "R전진라인복귀좌",
+    "continuous": false,
+    "read_delay_ms": 16,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R라인복귀우회전",
+    "second": "R라인복귀우회전",
+    "continuous": false,
+    "read_delay_ms": 16,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진45도(6회)",
+    "second": "R전진45도(6회)",
+    "continuous": true,
+    "read_delay_ms": 0,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진45도(6회)",
+    "second": "R전진라인복귀좌",
+    "continuous": true,
+    "read_delay_ms": 0,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진45도(6회)",
+    "second": "R라인복귀우회전",
+    "continuous": true,
+    "read_delay_ms": 0,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진45도(6회)",
+    "continuous": true,
+    "read_delay_ms": 0,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진라인복귀좌",
+    "continuous": true,
+    "read_delay_ms": 0,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R라인복귀우회전",
+    "continuous": true,
+    "read_delay_ms": 0,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R라인복귀우회전",
+    "second": "R전진45도(6회)",
+    "continuous": true,
+    "read_delay_ms": 0,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R라인복귀우회전",
+    "second": "R전진라인복귀좌",
+    "continuous": true,
+    "read_delay_ms": 0,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R라인복귀우회전",
+    "second": "R라인복귀우회전",
+    "continuous": true,
+    "read_delay_ms": 0,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진45도(6회)",
+    "second": "R전진45도(6회)",
+    "continuous": true,
+    "read_delay_ms": 16,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진45도(6회)",
+    "second": "R전진라인복귀좌",
+    "continuous": true,
+    "read_delay_ms": 16,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진45도(6회)",
+    "second": "R라인복귀우회전",
+    "continuous": true,
+    "read_delay_ms": 16,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진45도(6회)",
+    "continuous": true,
+    "read_delay_ms": 16,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R전진라인복귀좌",
+    "continuous": true,
+    "read_delay_ms": 16,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R전진라인복귀좌",
+    "second": "R라인복귀우회전",
+    "continuous": true,
+    "read_delay_ms": 16,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R라인복귀우회전",
+    "second": "R전진45도(6회)",
+    "continuous": true,
+    "read_delay_ms": 16,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R라인복귀우회전",
+    "second": "R전진라인복귀좌",
+    "continuous": true,
+    "read_delay_ms": 16,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  },
+  {
+    "first": "R라인복귀우회전",
+    "second": "R라인복귀우회전",
+    "continuous": true,
+    "read_delay_ms": 16,
+    "initial_reads": 1,
+    "boundary_dispatch_gap_ms": 0.0
+  }
+]

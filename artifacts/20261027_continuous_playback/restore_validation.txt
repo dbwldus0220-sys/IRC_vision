@@ -1,0 +1,3 @@
+Source/settings/motion JSON restored. Evidence and backup retained.
+Rebuild before running; installed binary is still the new version.
+Verified all modified file hashes against original backup; added code files removed. Tested in /tmp only.

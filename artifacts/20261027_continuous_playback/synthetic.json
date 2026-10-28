@@ -1,0 +1,290 @@
+{
+  "motions": [
+    {
+      "name": "synthetic_0.5",
+      "max_seq_ms": 1000,
+      "repeat_count": 3,
+      "playback_speed": 0.5,
+      "frames": [
+        {
+          "name": "발들기",
+          "start_ms": 50,
+          "time_ms": 100,
+          "angles": {
+            "1": 20,
+            "5": 55
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "same",
+          "start_ms": 150,
+          "time_ms": 200,
+          "angles": {
+            "1": 60,
+            "5": 75
+          }
+        },
+        {
+          "name": "reverse",
+          "start_ms": 350,
+          "time_ms": 100,
+          "angles": {
+            "1": 30
+          },
+          "stop_at_end": true
+        },
+        {
+          "name": "[착지]",
+          "start_ms": 450,
+          "time_ms": 100,
+          "angles": {
+            "1": 20,
+            "2": 170
+          }
+        },
+        {
+          "name": "wrap",
+          "start_ms": 600,
+          "time_ms": 100,
+          "angles": {
+            "1": 0,
+            "2": -170
+          }
+        },
+        {
+          "name": "partial",
+          "start_ms": 700,
+          "time_ms": 100,
+          "angles": {
+            "5": 10
+          },
+          "playback_cycle_end": true
+        },
+        {
+          "name": "tail",
+          "start_ms": 800,
+          "time_ms": 200,
+          "angles": {
+            "2": -150
+          }
+        }
+      ]
+    },
+    {
+      "name": "synthetic_1",
+      "max_seq_ms": 1000,
+      "repeat_count": 3,
+      "playback_speed": 1,
+      "frames": [
+        {
+          "name": "발들기",
+          "start_ms": 50,
+          "time_ms": 100,
+          "angles": {
+            "1": 20,
+            "5": 55
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "same",
+          "start_ms": 150,
+          "time_ms": 200,
+          "angles": {
+            "1": 60,
+            "5": 75
+          }
+        },
+        {
+          "name": "reverse",
+          "start_ms": 350,
+          "time_ms": 100,
+          "angles": {
+            "1": 30
+          },
+          "stop_at_end": true
+        },
+        {
+          "name": "[착지]",
+          "start_ms": 450,
+          "time_ms": 100,
+          "angles": {
+            "1": 20,
+            "2": 170
+          }
+        },
+        {
+          "name": "wrap",
+          "start_ms": 600,
+          "time_ms": 100,
+          "angles": {
+            "1": 0,
+            "2": -170
+          }
+        },
+        {
+          "name": "partial",
+          "start_ms": 700,
+          "time_ms": 100,
+          "angles": {
+            "5": 10
+          },
+          "playback_cycle_end": true
+        },
+        {
+          "name": "tail",
+          "start_ms": 800,
+          "time_ms": 200,
+          "angles": {
+            "2": -150
+          }
+        }
+      ]
+    },
+    {
+      "name": "synthetic_2",
+      "max_seq_ms": 1000,
+      "repeat_count": 3,
+      "playback_speed": 2,
+      "frames": [
+        {
+          "name": "발들기",
+          "start_ms": 50,
+          "time_ms": 100,
+          "angles": {
+            "1": 20,
+            "5": 55
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "same",
+          "start_ms": 150,
+          "time_ms": 200,
+          "angles": {
+            "1": 60,
+            "5": 75
+          }
+        },
+        {
+          "name": "reverse",
+          "start_ms": 350,
+          "time_ms": 100,
+          "angles": {
+            "1": 30
+          },
+          "stop_at_end": true
+        },
+        {
+          "name": "[착지]",
+          "start_ms": 450,
+          "time_ms": 100,
+          "angles": {
+            "1": 20,
+            "2": 170
+          }
+        },
+        {
+          "name": "wrap",
+          "start_ms": 600,
+          "time_ms": 100,
+          "angles": {
+            "1": 0,
+            "2": -170
+          }
+        },
+        {
+          "name": "partial",
+          "start_ms": 700,
+          "time_ms": 100,
+          "angles": {
+            "5": 10
+          },
+          "playback_cycle_end": true
+        },
+        {
+          "name": "tail",
+          "start_ms": 800,
+          "time_ms": 200,
+          "angles": {
+            "2": -150
+          }
+        }
+      ]
+    },
+    {
+      "name": "composed_baked",
+      "max_seq_ms": 1000,
+      "repeat_count": 1,
+      "playback_speed": 1,
+      "frames": [
+        {
+          "name": "발들기",
+          "start_ms": 50,
+          "time_ms": 100,
+          "angles": {
+            "1": 20,
+            "5": 55
+          },
+          "lift_early_arrival": true
+        },
+        {
+          "name": "same",
+          "start_ms": 150,
+          "time_ms": 200,
+          "angles": {
+            "1": 60,
+            "5": 75
+          }
+        },
+        {
+          "name": "reverse",
+          "start_ms": 350,
+          "time_ms": 100,
+          "angles": {
+            "1": 30
+          },
+          "stop_at_end": true
+        },
+        {
+          "name": "[착지]",
+          "start_ms": 450,
+          "time_ms": 100,
+          "angles": {
+            "1": 20,
+            "2": 170
+          }
+        },
+        {
+          "name": "wrap",
+          "start_ms": 600,
+          "time_ms": 100,
+          "angles": {
+            "1": 0,
+            "2": -170
+          }
+        },
+        {
+          "name": "partial",
+          "start_ms": 700,
+          "time_ms": 100,
+          "angles": {
+            "5": 10
+          },
+          "playback_cycle_end": true
+        },
+        {
+          "name": "tail",
+          "start_ms": 800,
+          "time_ms": 200,
+          "angles": {
+            "2": -150
+          }
+        }
+      ],
+      "source_playback_speed": 0.5,
+      "source_repeat_count": 3
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+FFF..                                                                    [100%]
+=================================== FAILURES ===================================
+_ test_forward_repeat_variants_are_sent_before_current_motion_finishes[STRAIGHT_2-STRAIGHT_3-expected0] _
+
+first = 'STRAIGHT_2', second = 'STRAIGHT_3'
+expected = ['line_forward_4', 'line_forward_6']
+
+    @pytest.mark.parametrize("first,second,expected", [
+        ("STRAIGHT_2", "STRAIGHT_3", ["line_forward_4", "line_forward_6"]),
+        ("STRAIGHT_3", "STRAIGHT_1", ["line_forward_6", "line_forward_2"]),
+        ("GOAL_CAMERA_90_FORWARD_1", "GOAL_CAMERA_90_FORWARD_2",
+         ["goal_camera_90_forward_2", "goal_camera_90_forward_4"]),
+    ])
+    def test_forward_repeat_variants_are_sent_before_current_motion_finishes(first, second, expected):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=first))
+        bridge.navigation_command_callback(navigation_message(action=second, command_id=8001))
+>       assert [r["motion_id"] for r in decoded_messages(bridge.executor_request_publisher)] == expected
+E       AssertionError: assert ['line_forward_4'] == ['line_forwar...ne_forward_6']
+E         Right contains one more item: 'line_forward_6'
+E         Full diff:
+E         - ['line_forward_4', 'line_forward_6']
+E         + ['line_forward_4']
+
+src/mission_control/test/test_motion_command_bridge.py:309: AssertionError
+_ test_forward_repeat_variants_are_sent_before_current_motion_finishes[STRAIGHT_3-STRAIGHT_1-expected1] _
+
+first = 'STRAIGHT_3', second = 'STRAIGHT_1'
+expected = ['line_forward_6', 'line_forward_2']
+
+    @pytest.mark.parametrize("first,second,expected", [
+        ("STRAIGHT_2", "STRAIGHT_3", ["line_forward_4", "line_forward_6"]),
+        ("STRAIGHT_3", "STRAIGHT_1", ["line_forward_6", "line_forward_2"]),
+        ("GOAL_CAMERA_90_FORWARD_1", "GOAL_CAMERA_90_FORWARD_2",
+         ["goal_camera_90_forward_2", "goal_camera_90_forward_4"]),
+    ])
+    def test_forward_repeat_variants_are_sent_before_current_motion_finishes(first, second, expected):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=first))
+        bridge.navigation_command_callback(navigation_message(action=second, command_id=8001))
+>       assert [r["motion_id"] for r in decoded_messages(bridge.executor_request_publisher)] == expected
+E       AssertionError: assert ['line_forward_6'] == ['line_forwar...ne_forward_2']
+E         Right contains one more item: 'line_forward_2'
+E         Full diff:
+E         - ['line_forward_6', 'line_forward_2']
+E         + ['line_forward_6']
+
+src/mission_control/test/test_motion_command_bridge.py:309: AssertionError
+_ test_forward_repeat_variants_are_sent_before_current_motion_finishes[GOAL_CAMERA_90_FORWARD_1-GOAL_CAMERA_90_FORWARD_2-expected2] _
+
+first = 'GOAL_CAMERA_90_FORWARD_1', second = 'GOAL_CAMERA_90_FORWARD_2'
+expected = ['goal_camera_90_forward_2', 'goal_camera_90_forward_4']
+
+    @pytest.mark.parametrize("first,second,expected", [
+        ("STRAIGHT_2", "STRAIGHT_3", ["line_forward_4", "line_forward_6"]),
+        ("STRAIGHT_3", "STRAIGHT_1", ["line_forward_6", "line_forward_2"]),
+        ("GOAL_CAMERA_90_FORWARD_1", "GOAL_CAMERA_90_FORWARD_2",
+         ["goal_camera_90_forward_2", "goal_camera_90_forward_4"]),
+    ])
+    def test_forward_repeat_variants_are_sent_before_current_motion_finishes(first, second, expected):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=first))
+        bridge.navigation_command_callback(navigation_message(action=second, command_id=8001))
+>       assert [r["motion_id"] for r in decoded_messages(bridge.executor_request_publisher)] == expected
+E       AssertionError: assert ['goal_camera_90_forward_2'] == ['goal_camera...90_forward_4']
+E         Right contains one more item: 'goal_camera_90_forward_4'
+E         Full diff:
+E         - ['goal_camera_90_forward_2', 'goal_camera_90_forward_4']
+E         + ['goal_camera_90_forward_2']
+
+src/mission_control/test/test_motion_command_bridge.py:309: AssertionError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_forward_repeat_variants_are_sent_before_current_motion_finishes[STRAIGHT_2-STRAIGHT_3-expected0]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_forward_repeat_variants_are_sent_before_current_motion_finishes[STRAIGHT_3-STRAIGHT_1-expected1]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_forward_repeat_variants_are_sent_before_current_motion_finishes[GOAL_CAMERA_90_FORWARD_1-GOAL_CAMERA_90_FORWARD_2-expected2]
+3 failed, 2 passed, 430 deselected in 0.99s

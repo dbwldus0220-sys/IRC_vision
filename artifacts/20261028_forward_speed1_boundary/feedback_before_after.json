@@ -1,0 +1,524 @@
+{
+  "False": {
+    "trace": "/tmp/step_speed1_feedback_False.csv",
+    "dropped_rows": 0,
+    "limitations": "Host calls only: TX success is not motor receipt or physical arrival. Missing-ID masks mean unavailable responses, not proof of the failed physical device. Callback dispatch and USB latency require separate observations.",
+    "tx_interval_ms": {
+      "count": 347,
+      "mean": 19.095100864553313,
+      "p95": 22.0,
+      "p99": 22.0,
+      "max": 22.0
+    },
+    "syncwrite_duration_ms": {
+      "count": 348,
+      "mean": 1.0,
+      "p95": 1.0,
+      "p99": 1.0,
+      "max": 1.0
+    },
+    "syncread_duration_ms": {
+      "count": 301,
+      "mean": 16.0,
+      "p95": 16.0,
+      "p99": 16.0,
+      "max": 16.0
+    },
+    "tx_failures": 0,
+    "rx_failures": [],
+    "boundaries": [
+      {
+        "event": "queue_accept",
+        "time_ms": 1016.0,
+        "surrounding_tx_gap_ms": null
+      },
+      {
+        "event": "repeat",
+        "time_ms": 1570.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "repeat",
+        "time_ms": 2124.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "repeat",
+        "time_ms": 2678.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "repeat",
+        "time_ms": 3232.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "repeat",
+        "time_ms": 3786.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "goals_complete",
+        "time_ms": 4340.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "queue_activate",
+        "time_ms": 4340.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "repeat",
+        "time_ms": 4894.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "repeat",
+        "time_ms": 5448.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "repeat",
+        "time_ms": 6002.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "repeat",
+        "time_ms": 6556.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "repeat",
+        "time_ms": 7110.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "goals_complete",
+        "time_ms": 7664.0,
+        "surrounding_tx_gap_ms": null
+      }
+    ],
+    "runs": [
+      {
+        "run": "1",
+        "motion": "R전진45도(6회)",
+        "continuous": "1",
+        "exclude_motor_5": "0",
+        "duration_ms": 3324.0
+      },
+      {
+        "run": "2",
+        "motion": "R전진45도(6회)",
+        "continuous": "1",
+        "exclude_motor_5": "0",
+        "duration_ms": 3324.0
+      }
+    ],
+    "motion_transitions": [
+      {
+        "kind": "repeat",
+        "from_run": "1",
+        "to_run": "1",
+        "motion": "R전진45도(6회)",
+        "next_motion": "R전진45도(6회)",
+        "boundary_ms": 1570.0,
+        "saved_leading_hold_ms": 90.0,
+        "last_tx_end_to_next_tx_start_ms": 21.0,
+        "last_tx_end_to_first_body_raw_change_ms": 109.0,
+        "initial_position_reads": 0,
+        "feedback_read_duration_before_next_tx_ms": 16.0
+      },
+      {
+        "kind": "repeat",
+        "from_run": "1",
+        "to_run": "1",
+        "motion": "R전진45도(6회)",
+        "next_motion": "R전진45도(6회)",
+        "boundary_ms": 2124.0,
+        "saved_leading_hold_ms": 90.0,
+        "last_tx_end_to_next_tx_start_ms": 21.0,
+        "last_tx_end_to_first_body_raw_change_ms": 109.0,
+        "initial_position_reads": 0,
+        "feedback_read_duration_before_next_tx_ms": 16.0
+      },
+      {
+        "kind": "repeat",
+        "from_run": "1",
+        "to_run": "1",
+        "motion": "R전진45도(6회)",
+        "next_motion": "R전진45도(6회)",
+        "boundary_ms": 2678.0,
+        "saved_leading_hold_ms": 90.0,
+        "last_tx_end_to_next_tx_start_ms": 21.0,
+        "last_tx_end_to_first_body_raw_change_ms": 109.0,
+        "initial_position_reads": 0,
+        "feedback_read_duration_before_next_tx_ms": 16.0
+      },
+      {
+        "kind": "repeat",
+        "from_run": "1",
+        "to_run": "1",
+        "motion": "R전진45도(6회)",
+        "next_motion": "R전진45도(6회)",
+        "boundary_ms": 3232.0,
+        "saved_leading_hold_ms": 90.0,
+        "last_tx_end_to_next_tx_start_ms": 21.0,
+        "last_tx_end_to_first_body_raw_change_ms": 109.0,
+        "initial_position_reads": 0,
+        "feedback_read_duration_before_next_tx_ms": 16.0
+      },
+      {
+        "kind": "repeat",
+        "from_run": "1",
+        "to_run": "1",
+        "motion": "R전진45도(6회)",
+        "next_motion": "R전진45도(6회)",
+        "boundary_ms": 3786.0,
+        "saved_leading_hold_ms": 90.0,
+        "last_tx_end_to_next_tx_start_ms": 21.0,
+        "last_tx_end_to_first_body_raw_change_ms": 109.0,
+        "initial_position_reads": 0,
+        "feedback_read_duration_before_next_tx_ms": 16.0
+      },
+      {
+        "kind": "queued",
+        "from_run": "1",
+        "to_run": "2",
+        "motion": "R전진45도(6회)",
+        "next_motion": "R전진45도(6회)",
+        "boundary_ms": 4340.0,
+        "saved_leading_hold_ms": 90.0,
+        "last_tx_end_to_next_tx_start_ms": 21.0,
+        "last_tx_end_to_first_body_raw_change_ms": 109.0,
+        "initial_position_reads": 0,
+        "feedback_read_duration_before_next_tx_ms": 16.0
+      },
+      {
+        "kind": "repeat",
+        "from_run": "2",
+        "to_run": "2",
+        "motion": "R전진45도(6회)",
+        "next_motion": "R전진45도(6회)",
+        "boundary_ms": 4894.0,
+        "saved_leading_hold_ms": 90.0,
+        "last_tx_end_to_next_tx_start_ms": 21.0,
+        "last_tx_end_to_first_body_raw_change_ms": 109.0,
+        "initial_position_reads": 0,
+        "feedback_read_duration_before_next_tx_ms": 16.0
+      },
+      {
+        "kind": "repeat",
+        "from_run": "2",
+        "to_run": "2",
+        "motion": "R전진45도(6회)",
+        "next_motion": "R전진45도(6회)",
+        "boundary_ms": 5448.0,
+        "saved_leading_hold_ms": 90.0,
+        "last_tx_end_to_next_tx_start_ms": 21.0,
+        "last_tx_end_to_first_body_raw_change_ms": 109.0,
+        "initial_position_reads": 0,
+        "feedback_read_duration_before_next_tx_ms": 16.0
+      },
+      {
+        "kind": "repeat",
+        "from_run": "2",
+        "to_run": "2",
+        "motion": "R전진45도(6회)",
+        "next_motion": "R전진45도(6회)",
+        "boundary_ms": 6002.0,
+        "saved_leading_hold_ms": 90.0,
+        "last_tx_end_to_next_tx_start_ms": 21.0,
+        "last_tx_end_to_first_body_raw_change_ms": 109.0,
+        "initial_position_reads": 0,
+        "feedback_read_duration_before_next_tx_ms": 16.0
+      },
+      {
+        "kind": "repeat",
+        "from_run": "2",
+        "to_run": "2",
+        "motion": "R전진45도(6회)",
+        "next_motion": "R전진45도(6회)",
+        "boundary_ms": 6556.0,
+        "saved_leading_hold_ms": 90.0,
+        "last_tx_end_to_next_tx_start_ms": 21.0,
+        "last_tx_end_to_first_body_raw_change_ms": 109.0,
+        "initial_position_reads": 0,
+        "feedback_read_duration_before_next_tx_ms": 16.0
+      },
+      {
+        "kind": "repeat",
+        "from_run": "2",
+        "to_run": "2",
+        "motion": "R전진45도(6회)",
+        "next_motion": "R전진45도(6회)",
+        "boundary_ms": 7110.0,
+        "saved_leading_hold_ms": 90.0,
+        "last_tx_end_to_next_tx_start_ms": 21.0,
+        "last_tx_end_to_first_body_raw_change_ms": 109.0,
+        "initial_position_reads": 0,
+        "feedback_read_duration_before_next_tx_ms": 16.0
+      }
+    ]
+  },
+  "True": {
+    "trace": "/tmp/step_speed1_feedback_True.csv",
+    "dropped_rows": 0,
+    "limitations": "Host calls only: TX success is not motor receipt or physical arrival. Missing-ID masks mean unavailable responses, not proof of the failed physical device. Callback dispatch and USB latency require separate observations.",
+    "tx_interval_ms": {
+      "count": 336,
+      "mean": 19.0,
+      "p95": 22.0,
+      "p99": 22.0,
+      "max": 22.0
+    },
+    "syncwrite_duration_ms": {
+      "count": 337,
+      "mean": 1.0,
+      "p95": 1.0,
+      "p99": 1.0,
+      "max": 1.0
+    },
+    "syncread_duration_ms": {
+      "count": 290,
+      "mean": 16.0,
+      "p95": 16.0,
+      "p99": 16.0,
+      "max": 16.0
+    },
+    "tx_failures": 0,
+    "rx_failures": [],
+    "boundaries": [
+      {
+        "event": "queue_accept",
+        "time_ms": 1016.0,
+        "surrounding_tx_gap_ms": null
+      },
+      {
+        "event": "repeat",
+        "time_ms": 1570.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "repeat",
+        "time_ms": 2102.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "repeat",
+        "time_ms": 2634.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "repeat",
+        "time_ms": 3166.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "repeat",
+        "time_ms": 3698.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "goals_complete",
+        "time_ms": 4230.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "queue_activate",
+        "time_ms": 4230.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "repeat",
+        "time_ms": 4762.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "repeat",
+        "time_ms": 5294.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "repeat",
+        "time_ms": 5826.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "repeat",
+        "time_ms": 6358.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "repeat",
+        "time_ms": 6890.0,
+        "surrounding_tx_gap_ms": 22.0
+      },
+      {
+        "event": "goals_complete",
+        "time_ms": 7422.0,
+        "surrounding_tx_gap_ms": null
+      }
+    ],
+    "runs": [
+      {
+        "run": "1",
+        "motion": "R전진45도(6회)",
+        "continuous": "1",
+        "exclude_motor_5": "0",
+        "duration_ms": 3214.0
+      },
+      {
+        "run": "2",
+        "motion": "R전진45도(6회)",
+        "continuous": "1",
+        "exclude_motor_5": "0",
+        "duration_ms": 3192.0
+      }
+    ],
+    "motion_transitions": [
+      {
+        "kind": "repeat",
+        "from_run": "1",
+        "to_run": "1",
+        "motion": "R전진45도(6회)",
+        "next_motion": "R전진45도(6회)",
+        "boundary_ms": 1570.0,
+        "saved_leading_hold_ms": 90.0,
+        "last_tx_end_to_next_tx_start_ms": 21.0,
+        "last_tx_end_to_first_body_raw_change_ms": 109.0,
+        "initial_position_reads": 0,
+        "feedback_read_duration_before_next_tx_ms": 16.0
+      },
+      {
+        "kind": "repeat",
+        "from_run": "1",
+        "to_run": "1",
+        "motion": "R전진45도(6회)",
+        "next_motion": "R전진45도(6회)",
+        "boundary_ms": 2102.0,
+        "saved_leading_hold_ms": 90.0,
+        "last_tx_end_to_next_tx_start_ms": 21.0,
+        "last_tx_end_to_first_body_raw_change_ms": 109.0,
+        "initial_position_reads": 0,
+        "feedback_read_duration_before_next_tx_ms": 16.0
+      },
+      {
+        "kind": "repeat",
+        "from_run": "1",
+        "to_run": "1",
+        "motion": "R전진45도(6회)",
+        "next_motion": "R전진45도(6회)",
+        "boundary_ms": 2634.0,
+        "saved_leading_hold_ms": 90.0,
+        "last_tx_end_to_next_tx_start_ms": 21.0,
+        "last_tx_end_to_first_body_raw_change_ms": 109.0,
+        "initial_position_reads": 0,
+        "feedback_read_duration_before_next_tx_ms": 16.0
+      },
+      {
+        "kind": "repeat",
+        "from_run": "1",
+        "to_run": "1",
+        "motion": "R전진45도(6회)",
+        "next_motion": "R전진45도(6회)",
+        "boundary_ms": 3166.0,
+        "saved_leading_hold_ms": 90.0,
+        "last_tx_end_to_next_tx_start_ms": 21.0,
+        "last_tx_end_to_first_body_raw_change_ms": 109.0,
+        "initial_position_reads": 0,
+        "feedback_read_duration_before_next_tx_ms": 16.0
+      },
+      {
+        "kind": "repeat",
+        "from_run": "1",
+        "to_run": "1",
+        "motion": "R전진45도(6회)",
+        "next_motion": "R전진45도(6회)",
+        "boundary_ms": 3698.0,
+        "saved_leading_hold_ms": 90.0,
+        "last_tx_end_to_next_tx_start_ms": 21.0,
+        "last_tx_end_to_first_body_raw_change_ms": 109.0,
+        "initial_position_reads": 0,
+        "feedback_read_duration_before_next_tx_ms": 16.0
+      },
+      {
+        "kind": "queued",
+        "from_run": "1",
+        "to_run": "2",
+        "motion": "R전진45도(6회)",
+        "next_motion": "R전진45도(6회)",
+        "boundary_ms": 4230.0,
+        "saved_leading_hold_ms": 90.0,
+        "last_tx_end_to_next_tx_start_ms": 21.0,
+        "last_tx_end_to_first_body_raw_change_ms": 109.0,
+        "initial_position_reads": 0,
+        "feedback_read_duration_before_next_tx_ms": 16.0
+      },
+      {
+        "kind": "repeat",
+        "from_run": "2",
+        "to_run": "2",
+        "motion": "R전진45도(6회)",
+        "next_motion": "R전진45도(6회)",
+        "boundary_ms": 4762.0,
+        "saved_leading_hold_ms": 90.0,
+        "last_tx_end_to_next_tx_start_ms": 21.0,
+        "last_tx_end_to_first_body_raw_change_ms": 109.0,
+        "initial_position_reads": 0,
+        "feedback_read_duration_before_next_tx_ms": 16.0
+      },
+      {
+        "kind": "repeat",
+        "from_run": "2",
+        "to_run": "2",
+        "motion": "R전진45도(6회)",
+        "next_motion": "R전진45도(6회)",
+        "boundary_ms": 5294.0,
+        "saved_leading_hold_ms": 90.0,
+        "last_tx_end_to_next_tx_start_ms": 21.0,
+        "last_tx_end_to_first_body_raw_change_ms": 109.0,
+        "initial_position_reads": 0,
+        "feedback_read_duration_before_next_tx_ms": 16.0
+      },
+      {
+        "kind": "repeat",
+        "from_run": "2",
+        "to_run": "2",
+        "motion": "R전진45도(6회)",
+        "next_motion": "R전진45도(6회)",
+        "boundary_ms": 5826.0,
+        "saved_leading_hold_ms": 90.0,
+        "last_tx_end_to_next_tx_start_ms": 21.0,
+        "last_tx_end_to_first_body_raw_change_ms": 109.0,
+        "initial_position_reads": 0,
+        "feedback_read_duration_before_next_tx_ms": 16.0
+      },
+      {
+        "kind": "repeat",
+        "from_run": "2",
+        "to_run": "2",
+        "motion": "R전진45도(6회)",
+        "next_motion": "R전진45도(6회)",
+        "boundary_ms": 6358.0,
+        "saved_leading_hold_ms": 90.0,
+        "last_tx_end_to_next_tx_start_ms": 21.0,
+        "last_tx_end_to_first_body_raw_change_ms": 109.0,
+        "initial_position_reads": 0,
+        "feedback_read_duration_before_next_tx_ms": 16.0
+      },
+      {
+        "kind": "repeat",
+        "from_run": "2",
+        "to_run": "2",
+        "motion": "R전진45도(6회)",
+        "next_motion": "R전진45도(6회)",
+        "boundary_ms": 6890.0,
+        "saved_leading_hold_ms": 90.0,
+        "last_tx_end_to_next_tx_start_ms": 21.0,
+        "last_tx_end_to_first_body_raw_change_ms": 109.0,
+        "initial_position_reads": 0,
+        "feedback_read_duration_before_next_tx_ms": 16.0
+      }
+    ]
+  }
+}

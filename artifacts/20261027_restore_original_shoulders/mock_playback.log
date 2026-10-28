@@ -1,0 +1,167 @@
+[Info] Motion succeeded: 건공잡기
+[Playback summary] motion=건공잡기 ticks=1111 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=11 goal_failures=0 queue_delay_ms=0 elapsed_ms=5550 trace_dropped=0
+[Info] Motion succeeded: 건기본자세에서제자리우회전(골대)
+[Playback summary] motion=건기본자세에서제자리우회전(골대) ticks=866 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=20 goal_failures=0 queue_delay_ms=0 elapsed_ms=4325 trace_dropped=0
+[Info] Motion succeeded: 건기본자세에서제자리좌회전(골대)
+[Playback summary] motion=건기본자세에서제자리좌회전(골대) ticks=534 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=14 goal_failures=0 queue_delay_ms=0 elapsed_ms=2665 trace_dropped=0
+[Info] Motion succeeded: 건김오뒤3
+[Playback summary] motion=건김오뒤3 ticks=21 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=1 goal_failures=0 queue_delay_ms=0 elapsed_ms=100 trace_dropped=0
+[Info] Motion succeeded: 건라인복귀우회전45도(4회)
+[Playback summary] motion=건라인복귀우회전45도(4회) ticks=425 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=16 goal_failures=0 queue_delay_ms=0 elapsed_ms=2120 trace_dropped=0
+[Info] Motion succeeded: 건라인복귀좌회전45도(1회)
+[Playback summary] motion=건라인복귀좌회전45도(1회) ticks=103 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=4 goal_failures=0 queue_delay_ms=0 elapsed_ms=510 trace_dropped=0
+[Info] Motion succeeded: 건라인복귀좌회전45도(4회)
+[Playback summary] motion=건라인복귀좌회전45도(4회) ticks=425 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=16 goal_failures=0 queue_delay_ms=0 elapsed_ms=2120 trace_dropped=0
+[Info] Motion succeeded: 건라인복귀좌회전45도(6회)
+[Playback summary] motion=건라인복귀좌회전45도(6회) ticks=637 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=24 goal_failures=0 queue_delay_ms=0 elapsed_ms=3180 trace_dropped=0
+[Info] Motion succeeded: 건미세0도
+[Playback summary] motion=건미세0도 ticks=371 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=20 goal_failures=0 queue_delay_ms=0 elapsed_ms=1850 trace_dropped=0
+[Info] Motion succeeded: 건미세0도(허들10회)
+[Playback summary] motion=건미세0도(허들10회) ticks=741 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=40 goal_failures=0 queue_delay_ms=0 elapsed_ms=3700 trace_dropped=0
+[Info] Motion succeeded: 건미세45도(5회)
+[Playback summary] motion=건미세45도(5회) ticks=371 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=20 goal_failures=0 queue_delay_ms=0 elapsed_ms=1850 trace_dropped=0
+[Info] Motion succeeded: 건미세90도
+[Playback summary] motion=건미세90도 ticks=371 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=20 goal_failures=0 queue_delay_ms=0 elapsed_ms=1850 trace_dropped=0
+[Info] Motion succeeded: 건미세90도(1회)
+[Playback summary] motion=건미세90도(1회) ticks=75 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=4 goal_failures=0 queue_delay_ms=0 elapsed_ms=370 trace_dropped=0
+[Info] Motion succeeded: 건미세90도(2회)
+[Playback summary] motion=건미세90도(2회) ticks=149 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=8 goal_failures=0 queue_delay_ms=0 elapsed_ms=740 trace_dropped=0
+[Info] Motion succeeded: 건미세90도(3회)
+[Playback summary] motion=건미세90도(3회) ticks=223 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=12 goal_failures=0 queue_delay_ms=0 elapsed_ms=1110 trace_dropped=0
+[Info] Motion succeeded: 건미세90도(4회)
+[Playback summary] motion=건미세90도(4회) ticks=297 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=16 goal_failures=0 queue_delay_ms=0 elapsed_ms=1480 trace_dropped=0
+[Info] Motion succeeded: 건미세오뒤에서 기본자세45도
+[Playback summary] motion=건미세오뒤에서 기본자세45도 ticks=40 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=2 goal_failures=0 queue_delay_ms=0 elapsed_ms=195 trace_dropped=0
+[Info] Motion succeeded: 건미세오뒤에서 기본자세90도
+[Playback summary] motion=건미세오뒤에서 기본자세90도 ticks=47 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=2 goal_failures=0 queue_delay_ms=0 elapsed_ms=230 trace_dropped=0
+[Info] Motion succeeded: 건미세오뒤에서 오뒤0도
+[Playback summary] motion=건미세오뒤에서 오뒤0도 ticks=51 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=2 goal_failures=0 queue_delay_ms=0 elapsed_ms=250 trace_dropped=0
+[Info] Motion succeeded: 건미세오뒤에서 오뒤45도
+[Playback summary] motion=건미세오뒤에서 오뒤45도 ticks=46 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=2 goal_failures=0 queue_delay_ms=0 elapsed_ms=225 trace_dropped=0
+[Info] Motion succeeded: 건오뒤에서 기본자세(0도)
+[Playback summary] motion=건오뒤에서 기본자세(0도) ticks=43 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=2 goal_failures=0 queue_delay_ms=0 elapsed_ms=210 trace_dropped=0
+[Info] Motion succeeded: 건오뒤에서 기본자세(카메라45도)
+[Playback summary] motion=건오뒤에서 기본자세(카메라45도) ticks=42 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=2 goal_failures=0 queue_delay_ms=0 elapsed_ms=205 trace_dropped=0
+[Info] Motion succeeded: 건오뒤에서 미세오뒤45도
+[Playback summary] motion=건오뒤에서 미세오뒤45도 ticks=38 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=2 goal_failures=0 queue_delay_ms=0 elapsed_ms=185 trace_dropped=0
+[Info] Motion succeeded: 건오뒤카메라90도
+[Playback summary] motion=건오뒤카메라90도 ticks=21 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=1 goal_failures=0 queue_delay_ms=0 elapsed_ms=100 trace_dropped=0
+[Info] Motion succeeded: 건왼뒤에서 기본자세(0도)
+[Playback summary] motion=건왼뒤에서 기본자세(0도) ticks=45 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=2 goal_failures=0 queue_delay_ms=0 elapsed_ms=220 trace_dropped=0
+[Info] Motion succeeded: 건제자리좌회전0도(1회)
+[Playback summary] motion=건제자리좌회전0도(1회) ticks=70 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=2 goal_failures=0 queue_delay_ms=0 elapsed_ms=345 trace_dropped=0
+[Info] Motion succeeded: 건제자리좌회전0도(2회)
+[Playback summary] motion=건제자리좌회전0도(2회) ticks=139 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=4 goal_failures=0 queue_delay_ms=0 elapsed_ms=690 trace_dropped=0
+[Info] Motion succeeded: 건제자리좌회전0도(3회)
+[Playback summary] motion=건제자리좌회전0도(3회) ticks=208 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=6 goal_failures=0 queue_delay_ms=0 elapsed_ms=1035 trace_dropped=0
+[Info] Motion succeeded: 건제자리좌회전0도(4회)
+[Playback summary] motion=건제자리좌회전0도(4회) ticks=277 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=8 goal_failures=0 queue_delay_ms=0 elapsed_ms=1380 trace_dropped=0
+[Info] Motion succeeded: 건제자리좌회전0도(5회)
+[Playback summary] motion=건제자리좌회전0도(5회) ticks=346 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=10 goal_failures=0 queue_delay_ms=0 elapsed_ms=1725 trace_dropped=0
+[Info] Motion succeeded: 건제자리좌회전0도(6회)
+[Playback summary] motion=건제자리좌회전0도(6회) ticks=415 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=12 goal_failures=0 queue_delay_ms=0 elapsed_ms=2070 trace_dropped=0
+[Info] Motion succeeded: 건제자리좌회전45도(1회)
+[Playback summary] motion=건제자리좌회전45도(1회) ticks=69 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=2 goal_failures=0 queue_delay_ms=0 elapsed_ms=340 trace_dropped=0
+[Info] Motion succeeded: 건제자리좌회전45도(2회)
+[Playback summary] motion=건제자리좌회전45도(2회) ticks=137 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=4 goal_failures=0 queue_delay_ms=0 elapsed_ms=680 trace_dropped=0
+[Info] Motion succeeded: 건제자리좌회전45도(3회)
+[Playback summary] motion=건제자리좌회전45도(3회) ticks=205 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=6 goal_failures=0 queue_delay_ms=0 elapsed_ms=1020 trace_dropped=0
+[Info] Motion succeeded: 건제자리좌회전45도(4회)
+[Playback summary] motion=건제자리좌회전45도(4회) ticks=273 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=8 goal_failures=0 queue_delay_ms=0 elapsed_ms=1360 trace_dropped=0
+[Info] Motion succeeded: 건제자리좌회전45도(5회)
+[Playback summary] motion=건제자리좌회전45도(5회) ticks=341 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=10 goal_failures=0 queue_delay_ms=0 elapsed_ms=1700 trace_dropped=0
+[Info] Motion succeeded: 건제자리좌회전45도(6회)
+[Playback summary] motion=건제자리좌회전45도(6회) ticks=409 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=12 goal_failures=0 queue_delay_ms=0 elapsed_ms=2040 trace_dropped=0
+[Info] Motion succeeded: 건제자리좌회전90도(1회)
+[Playback summary] motion=건제자리좌회전90도(1회) ticks=69 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=2 goal_failures=0 queue_delay_ms=0 elapsed_ms=340 trace_dropped=0
+[Info] Motion succeeded: 건제자리좌회전90도(2회)
+[Playback summary] motion=건제자리좌회전90도(2회) ticks=137 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=4 goal_failures=0 queue_delay_ms=0 elapsed_ms=680 trace_dropped=0
+[Info] Motion succeeded: 건제자리좌회전90도(3회)
+[Playback summary] motion=건제자리좌회전90도(3회) ticks=205 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=6 goal_failures=0 queue_delay_ms=0 elapsed_ms=1020 trace_dropped=0
+[Info] Motion succeeded: 건제자리좌회전90도(4회)
+[Playback summary] motion=건제자리좌회전90도(4회) ticks=273 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=8 goal_failures=0 queue_delay_ms=0 elapsed_ms=1360 trace_dropped=0
+[Info] Motion succeeded: 건제자리좌회전90도(5회)
+[Playback summary] motion=건제자리좌회전90도(5회) ticks=341 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=10 goal_failures=0 queue_delay_ms=0 elapsed_ms=1700 trace_dropped=0
+[Info] Motion succeeded: 건제자리좌회전90도(6회)
+[Playback summary] motion=건제자리좌회전90도(6회) ticks=409 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=12 goal_failures=0 queue_delay_ms=0 elapsed_ms=2040 trace_dropped=0
+[Info] Motion succeeded: 오뒤무게중심앞
+[Playback summary] motion=오뒤무게중심앞 ticks=81 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=4 goal_failures=0 queue_delay_ms=0 elapsed_ms=400 trace_dropped=0
+[Info] Motion succeeded: 유미세오옆꽃게0도
+[Playback summary] motion=유미세오옆꽃게0도 ticks=107 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=4 goal_failures=0 queue_delay_ms=0 elapsed_ms=530 trace_dropped=0
+[Info] Motion succeeded: 유미세오옆꽃게90도
+[Playback summary] motion=유미세오옆꽃게90도 ticks=107 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=4 goal_failures=0 queue_delay_ms=0 elapsed_ms=530 trace_dropped=0
+[Info] Motion succeeded: 유미세왼옆꽃게0도
+[Playback summary] motion=유미세왼옆꽃게0도 ticks=98 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=4 goal_failures=0 queue_delay_ms=0 elapsed_ms=485 trace_dropped=0
+[Info] Motion succeeded: 유미세왼옆꽃게90도
+[Playback summary] motion=유미세왼옆꽃게90도 ticks=98 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=4 goal_failures=0 queue_delay_ms=0 elapsed_ms=485 trace_dropped=0
+[Info] Motion succeeded: 전45도(2회)
+[Playback summary] motion=전45도(2회) ticks=227 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=8 goal_failures=0 queue_delay_ms=0 elapsed_ms=1130 trace_dropped=0
+[Info] Motion succeeded: 전45도(4회)
+[Playback summary] motion=전45도(4회) ticks=453 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=16 goal_failures=0 queue_delay_ms=0 elapsed_ms=2260 trace_dropped=0
+[Info] Motion succeeded: 전45도(6회)
+[Playback summary] motion=전45도(6회) ticks=679 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=24 goal_failures=0 queue_delay_ms=0 elapsed_ms=3390 trace_dropped=0
+[Info] Motion succeeded: 전45도(8회)
+[Playback summary] motion=전45도(8회) ticks=905 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=32 goal_failures=0 queue_delay_ms=0 elapsed_ms=4520 trace_dropped=0
+[Info] Motion succeeded: 전90도(2회)
+[Playback summary] motion=전90도(2회) ticks=227 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=8 goal_failures=0 queue_delay_ms=0 elapsed_ms=1130 trace_dropped=0
+[Info] Motion succeeded: 전90도(4회)
+[Playback summary] motion=전90도(4회) ticks=453 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=16 goal_failures=0 queue_delay_ms=0 elapsed_ms=2260 trace_dropped=0
+[Info] Motion succeeded: 전90도(6회)
+[Playback summary] motion=전90도(6회) ticks=679 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=24 goal_failures=0 queue_delay_ms=0 elapsed_ms=3390 trace_dropped=0
+[Info] Motion succeeded: 전90도(8회)
+[Playback summary] motion=전90도(8회) ticks=905 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=32 goal_failures=0 queue_delay_ms=0 elapsed_ms=4520 trace_dropped=0
+[Info] Motion succeeded: 찐골넣기
+[Playback summary] motion=찐골넣기 ticks=451 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=5 goal_failures=0 queue_delay_ms=0 elapsed_ms=2250 trace_dropped=0
+[Info] Motion succeeded: 찐공잡기전후진-2(2회)
+[Playback summary] motion=찐공잡기전후진-2(2회) ticks=215 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=8 goal_failures=0 queue_delay_ms=0 elapsed_ms=1070 trace_dropped=0
+[Info] Motion succeeded: 찐공확인자세
+[Playback summary] motion=찐공확인자세 ticks=91 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=1 goal_failures=0 queue_delay_ms=0 elapsed_ms=450 trace_dropped=0
+[Info] Motion succeeded: 찐미세오뒤에서 오뒤(골대 카메라90도)
+[Playback summary] motion=찐미세오뒤에서 오뒤(골대 카메라90도) ticks=46 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=2 goal_failures=0 queue_delay_ms=0 elapsed_ms=225 trace_dropped=0
+[Info] Motion succeeded: 찐미세오뒤에서 오옆꽃게90도
+[Playback summary] motion=찐미세오뒤에서 오옆꽃게90도 ticks=46 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=2 goal_failures=0 queue_delay_ms=0 elapsed_ms=225 trace_dropped=0
+[Info] Motion succeeded: 찐미세오뒤에서오옆꽃게0도
+[Playback summary] motion=찐미세오뒤에서오옆꽃게0도 ticks=46 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=2 goal_failures=0 queue_delay_ms=0 elapsed_ms=225 trace_dropped=0
+[Info] Motion succeeded: 찐오뒤에서 오옆꽃게90도
+[Playback summary] motion=찐오뒤에서 오옆꽃게90도 ticks=47 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=2 goal_failures=0 queue_delay_ms=0 elapsed_ms=230 trace_dropped=0
+[Info] Motion succeeded: 찐제자리우회전0도-1(2회)
+[Playback summary] motion=찐제자리우회전0도-1(2회) ticks=145 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=4 goal_failures=0 queue_delay_ms=0 elapsed_ms=720 trace_dropped=0
+[Info] Motion succeeded: 찐제자리우회전0도-1(3회)
+[Playback summary] motion=찐제자리우회전0도-1(3회) ticks=217 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=6 goal_failures=0 queue_delay_ms=0 elapsed_ms=1080 trace_dropped=0
+[Info] Motion succeeded: 찐제자리우회전0도-1(5회)
+[Playback summary] motion=찐제자리우회전0도-1(5회) ticks=361 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=10 goal_failures=0 queue_delay_ms=0 elapsed_ms=1800 trace_dropped=0
+[Info] Motion succeeded: 찐제자리우회전0도-1(7회)
+[Playback summary] motion=찐제자리우회전0도-1(7회) ticks=505 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=14 goal_failures=0 queue_delay_ms=0 elapsed_ms=2520 trace_dropped=0
+[Info] Motion succeeded: 찐제자리우회전0도-1(9회)
+[Playback summary] motion=찐제자리우회전0도-1(9회) ticks=649 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=18 goal_failures=0 queue_delay_ms=0 elapsed_ms=3240 trace_dropped=0
+[Info] Motion succeeded: 찐제자리우회전45도(9회)
+[Playback summary] motion=찐제자리우회전45도(9회) ticks=649 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=18 goal_failures=0 queue_delay_ms=0 elapsed_ms=3240 trace_dropped=0
+[Info] Motion succeeded: 찐제자리우회전45도-1(2회)
+[Playback summary] motion=찐제자리우회전45도-1(2회) ticks=145 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=4 goal_failures=0 queue_delay_ms=0 elapsed_ms=720 trace_dropped=0
+[Info] Motion succeeded: 찐제자리우회전45도-1(3회)
+[Playback summary] motion=찐제자리우회전45도-1(3회) ticks=217 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=6 goal_failures=0 queue_delay_ms=0 elapsed_ms=1080 trace_dropped=0
+[Info] Motion succeeded: 찐제자리우회전45도-1(5회)
+[Playback summary] motion=찐제자리우회전45도-1(5회) ticks=361 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=10 goal_failures=0 queue_delay_ms=0 elapsed_ms=1800 trace_dropped=0
+[Info] Motion succeeded: 찐제자리우회전45도-1(7회)
+[Playback summary] motion=찐제자리우회전45도-1(7회) ticks=505 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=14 goal_failures=0 queue_delay_ms=0 elapsed_ms=2520 trace_dropped=0
+[Info] Motion succeeded: 찐제자리우회전90도-1(2회)
+[Playback summary] motion=찐제자리우회전90도-1(2회) ticks=145 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=4 goal_failures=0 queue_delay_ms=0 elapsed_ms=720 trace_dropped=0
+[Info] Motion succeeded: 찐제자리우회전90도-1(3회)
+[Playback summary] motion=찐제자리우회전90도-1(3회) ticks=217 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=6 goal_failures=0 queue_delay_ms=0 elapsed_ms=1080 trace_dropped=0
+[Info] Motion succeeded: 찐제자리우회전90도-1(5회)
+[Playback summary] motion=찐제자리우회전90도-1(5회) ticks=361 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=10 goal_failures=0 queue_delay_ms=0 elapsed_ms=1800 trace_dropped=0
+[Info] Motion succeeded: 찐제자리우회전90도-1(7회)
+[Playback summary] motion=찐제자리우회전90도-1(7회) ticks=505 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=14 goal_failures=0 queue_delay_ms=0 elapsed_ms=2520 trace_dropped=0
+[Info] Motion succeeded: 찐제자리우회전90도-1(9회)
+[Playback summary] motion=찐제자리우회전90도-1(9회) ticks=649 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=18 goal_failures=0 queue_delay_ms=0 elapsed_ms=3240 trace_dropped=0
+[Info] Motion succeeded: 찐허들
+[Playback summary] motion=찐허들 ticks=1401 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=17 goal_failures=0 queue_delay_ms=0 elapsed_ms=7000 trace_dropped=0
+[Info] Motion succeeded: 찐후진실전(1회)
+[Playback summary] motion=찐후진실전(1회) ticks=101 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=4 goal_failures=0 queue_delay_ms=0 elapsed_ms=500 trace_dropped=0
+[Info] Motion succeeded: 찐후진실전-2(2회)
+[Playback summary] motion=찐후진실전-2(2회) ticks=213 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=8 goal_failures=0 queue_delay_ms=0 elapsed_ms=1060 trace_dropped=0
+[Info] Motion succeeded: 찐후진에서 제자리좌회전(공)
+[Playback summary] motion=찐후진에서 제자리좌회전(공) ticks=417 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=10 goal_failures=0 queue_delay_ms=0 elapsed_ms=2080 trace_dropped=0
+[Info] Motion succeeded: 찐후진하고 제자리우회전(공)
+[Playback summary] motion=찐후진하고 제자리우회전(공) ticks=587 mean_interval_ms=5 max_interval_ms=5 over_7.5/10/20=0/0/0 final_corrections=16 goal_failures=0 queue_delay_ms=0 elapsed_ms=2930 trace_dropped=0
+PASS motions=83 original_shoulder_endpoints=802

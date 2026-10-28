@@ -1,0 +1,15 @@
+{
+  "machine": "aarch64",
+  "uname": [
+    "Linux",
+    "jet",
+    "5.15.199-tegra",
+    "#1 SMP PREEMPT Thu Jul 16 11:27:38 PDT 2026",
+    "aarch64",
+    "aarch64"
+  ],
+  "ros": "humble",
+  "ament": "/opt/ros/humble",
+  "ld_library_path": "/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib:/usr/local/cuda-12.6/lib64:",
+  "git_head": "ea64ba3c0878ef894369188c088469be62bd789d"
+}

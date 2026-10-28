@@ -1,0 +1,58 @@
+{
+  "artifacts/robot_motions_pc.json": {
+    "before": "9c30167e406ec2d7f6c6e8ce9db23e83154221a392add1296521fb5a15638ea2",
+    "after": "91f20cd38b5bd4a45b724b59efaef4e9296f614cbaa6aa94f654a636b2b6da23"
+  },
+  "artifacts/robot_motions_runtime.json": {
+    "before": "eb36abea8302658133122ac7f3dc8897256e1fc940292fe74b8e7b75d68315d2",
+    "after": "3e044e79090315d6e4e5e5daffbcf043ea6b0d2c0b3dd716948ce762b21b49ad"
+  },
+  "external_sdk/gui_aligned/gui_execution_probe.cpp": {
+    "before": "15b51600ece64b55132ff25632e02f9bf18a8efcd061cbf9ad89b05d47c80f8d",
+    "after": "96c0f05474e43681c8377287302916f440e4165a2cf62fe0d7d503639ece97fa"
+  },
+  "external_sdk/gui_aligned/robot_motion_player.cpp": {
+    "before": "1ca6c0b7797629b476af60d81e2845978e175c6adef69bd3f9b7fb1fcaefe34f",
+    "after": "bc90d754d3c537ba9edc45a295aa3c6272f1ba32208c53aa92166ec679a8aede"
+  },
+  "external_sdk/gui_aligned/robot_motion_player.hpp": {
+    "before": "efe06027fc87c1aa837f58a24c247f35b970cae0e013d09b7b447578ee55e3ba",
+    "after": "c38f3659ed07c6d8225b90e7c003c9436f0bee5feac8359ee077befb2c317a9d"
+  },
+  "external_sdk/gui_aligned/test_forward_timing.cpp": {
+    "before": "18de5d3abd93df2a3710d1ed8a4fdfeb54fc6d54f222aa9f914f246d658ce4f8",
+    "after": "e1b6cf190f0c7047219912f598081191e5aeed9a653c30cb795efba8bda26ef4"
+  },
+  "src/irc_step_motion_executor/include/irc_step_motion_executor/robot_motion_runtime_config.hpp": {
+    "before": "24082ca7e043ef8b1f34c82a1ccffb9d48805ccfc083ab3cf0a3c8eccc343ac1",
+    "after": "530138aaab50094f5ce68b4309f07506158fb65a5340dbc9a895a52e288d5bd2"
+  },
+  "src/irc_step_motion_executor/launch/sdk_gui_alignment.launch.py": {
+    "before": "096feb1e92fa96f450c5c4c7cadabcb93eb2f988916791ab57d26168e39149a0",
+    "after": "a975829734a3859ff34f0580b42ba136290f952e59817dc27429f47546337ba7"
+  },
+  "src/irc_step_motion_executor/src/production_robot_motion_runtime_factory.cpp": {
+    "before": "dfb8a2bbb75d1844113e8435e6144667c12aa6f326804002852205750fc8db55",
+    "after": "adff8b1e849059b550c41a58bea93a653c42982011a334183e95cd8229a874f9"
+  },
+  "src/irc_step_motion_executor/src/sdk_executor_node.cpp": {
+    "before": "6758e2c0a2996e19efabc07ca9107196292c3e69703d7613330e23c19ba5d53c",
+    "after": "ababc18055876861ebba72301ed62985b640f94fca623473feee02902f8b17e1"
+  },
+  "src/mission_control/launch/full_system_robot.launch.py": {
+    "before": "a39e19fa0d1cd3a95146da09367dee8da26248bd9f3a4543ea5167b9ea434309",
+    "after": "8aa3df6481a29924bb2cb8a85d41b4506b1d753e6c10f31367be15b6bb061161"
+  },
+  "src/mission_control/mission_control/motion_decision_node.py": {
+    "before": "b7a241163694840fc6719d4a5b622eaa5fcf2da8bf32a60669eae1d1f0a98d01",
+    "after": "c453a225b6474297fb97ffc9edfef2cecf6d8b95591d303bc1ebb4914cf9ba5b"
+  },
+  "src/mission_control/test/test_catalog52_r_update.py": {
+    "before": "7faa856041540845a0a17044debd63f4937adec960d1b6c020af4ea65b13da09",
+    "after": "9a0f344c74ad77a2878ccf9b994de823f1b814149e877361f9011e7d01269766"
+  },
+  "src/mission_control/test/test_catalog53_turn_update.py": {
+    "before": "991d7fe33c44f8ac5aac6e665ada26b740758fc038a316afe15f3698c81df38f",
+    "after": "765270bfbc9f54e0d6a43e4091c66529f33af16c97af030df2a4e4598ef1508d"
+  }
+}

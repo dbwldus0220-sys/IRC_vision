@@ -1,0 +1,8 @@
+Starting >>> irc_step_motion_executor
+Starting >>> step
+Finished <<< irc_step_motion_executor [0.97s]
+Finished <<< step [3.12s]
+Starting >>> mission_control
+Finished <<< mission_control [3.01s]
+
+Summary: 3 packages finished [7.01s]

@@ -1,0 +1,9 @@
+[INFO] [1793097643.796561321] [sdk_motion_executor]: Motion position tolerance check: DISABLED
+[INFO] [1793097643.818401286] [sdk_motion_executor]: [STARTUP POSE] Current pose captured
+[INFO] [1793097643.818544873] [sdk_motion_executor]: [STARTUP POSE] Moving to 오뒤무게중심앞
+[INFO] [1793097647.844426196] [sdk_motion_executor]: [STARTUP POSE] Settling
+[INFO] [1793097647.924725109] [sdk_motion_executor]: [STARTUP POSE] Reached 오뒤무게중심앞
+[INFO] [1793097647.924895929] [sdk_motion_executor]: [STARTUP POSE] Holding for 2000 ms before AUTO
+[INFO] [1793097649.928340989] [sdk_motion_executor]: [STARTUP POSE] AUTO ready
+[INFO] [1793097672.831134583] [sdk_motion_executor]: Ball entered bottom trigger: motor 0 override -64.0 deg latched
+[INFO] [1793097719.889124372] [rclcpp]: signal_handler(SIGINT/SIGTERM)

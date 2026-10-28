@@ -1,0 +1,39 @@
+Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+[==========] Running 9 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 9 tests from SdkExecutorDriver
+[ RUN      ] SdkExecutorDriver.RequestPublishesImmediateRunningStatus
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_sdk_executor_driver.cpp:110: Failure
+Expected equality of these values:
+  fixture.backend.started_motion_names[0]
+    Which is: "\xEC\xA0\x84" "45\xEB\x8F\x84(8\xED\x9A\x8C)"
+    As Text: "전45도(8회)"
+  "찐찐전진45(8회)"
+    Which is: "\xEC\xB0\x90\xEC\xB0\x90\xEC\xA0\x84\xEC\xA7\x84" "45(8\xED\x9A\x8C)"
+    As Text: "찐찐전진45(8회)"
+[  FAILED  ] SdkExecutorDriver.RequestPublishesImmediateRunningStatus (2 ms)
+[ RUN      ] SdkExecutorDriver.InvalidAndUnsupportedRequestsPublishRejections
+[       OK ] SdkExecutorDriver.InvalidAndUnsupportedRequestsPublishRejections (1 ms)
+[ RUN      ] SdkExecutorDriver.NullableCorrelationFieldsRemainNull
+[       OK ] SdkExecutorDriver.NullableCorrelationFieldsRemainNull (2 ms)
+[ RUN      ] SdkExecutorDriver.CancelCallbackPublishesAndTerminalPollPublishes
+[       OK ] SdkExecutorDriver.CancelCallbackPublishesAndTerminalPollPublishes (1 ms)
+[ RUN      ] SdkExecutorDriver.StaleCancelDoesNotCancelActiveMotion
+[       OK ] SdkExecutorDriver.StaleCancelDoesNotCancelActiveMotion (2 ms)
+[ RUN      ] SdkExecutorDriver.PollWithoutActiveRequestPublishesNothing
+[       OK ] SdkExecutorDriver.PollWithoutActiveRequestPublishesNothing (1 ms)
+[ RUN      ] SdkExecutorDriver.TerminalPollPublishesSucceededStatus
+[       OK ] SdkExecutorDriver.TerminalPollPublishesSucceededStatus (1 ms)
+[ RUN      ] SdkExecutorDriver.SuppressesIdenticalRunningStatusAtControlRate
+[       OK ] SdkExecutorDriver.SuppressesIdenticalRunningStatusAtControlRate (2 ms)
+[ RUN      ] SdkExecutorDriver.BackendExceptionPublishesFailedWithoutEscaping
+[       OK ] SdkExecutorDriver.BackendExceptionPublishesFailedWithoutEscaping (2 ms)
+[----------] 9 tests from SdkExecutorDriver (15 ms total)
+
+[----------] Global test environment tear-down
+[==========] 9 tests from 1 test suite ran. (16 ms total)
+[  PASSED  ] 8 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] SdkExecutorDriver.RequestPublishesImmediateRunningStatus
+
+ 1 FAILED TEST

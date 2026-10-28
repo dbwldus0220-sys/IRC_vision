@@ -1,0 +1,145 @@
+{
+  "callbacks": {
+    "ball_info": {
+      "wall_ms": {
+        "count": 82,
+        "mean": 0.1592959512195122,
+        "p99": 0.255433,
+        "max": 0.255433
+      },
+      "thread_cpu_ms": {
+        "count": 82,
+        "mean": 0.14899668292682927,
+        "p99": 0.1968,
+        "max": 0.1968
+      }
+    },
+    "driver_poll": {
+      "wall_ms": {
+        "count": 681,
+        "mean": 0.46476175477239356,
+        "p99": 1.429045,
+        "max": 23.884938
+      },
+      "thread_cpu_ms": {
+        "count": 681,
+        "mean": 0.3940287342143906,
+        "p99": 0.65552,
+        "max": 2.732704
+      }
+    },
+    "head_update": {
+      "wall_ms": {
+        "count": 681,
+        "mean": 0.004930829662261381,
+        "p99": 0.00864,
+        "max": 0.119972
+      },
+      "thread_cpu_ms": {
+        "count": 681,
+        "mean": 0.0027654860499265787,
+        "p99": 0.004736,
+        "max": 0.011072
+      }
+    },
+    "heartbeat": {
+      "wall_ms": {
+        "count": 6,
+        "mean": 0.18556433333333333,
+        "p99": 0.2146,
+        "max": 0.2146
+      },
+      "thread_cpu_ms": {
+        "count": 6,
+        "mean": 0.18058133333333334,
+        "p99": 0.212512,
+        "max": 0.212512
+      }
+    },
+    "hurdle_info": {
+      "wall_ms": {
+        "count": 82,
+        "mean": 0.13812681707317073,
+        "p99": 0.218184,
+        "max": 0.218184
+      },
+      "thread_cpu_ms": {
+        "count": 82,
+        "mean": 0.1306411707317073,
+        "p99": 0.17296,
+        "max": 0.17296
+      }
+    },
+    "navigation": {
+      "wall_ms": {
+        "count": 1,
+        "mean": 0.197479,
+        "p99": 0.197479,
+        "max": 0.197479
+      },
+      "thread_cpu_ms": {
+        "count": 1,
+        "mean": 0.167936,
+        "p99": 0.167936,
+        "max": 0.167936
+      }
+    },
+    "poll_timer": {
+      "wall_ms": {
+        "count": 681,
+        "mean": 0.48299202055800294,
+        "p99": 1.450965,
+        "max": 23.90097
+      },
+      "thread_cpu_ms": {
+        "count": 681,
+        "mean": 0.4094154713656388,
+        "p99": 0.67248,
+        "max": 2.747328
+      }
+    },
+    "status_publish": {
+      "wall_ms": {
+        "count": 2,
+        "mean": 0.1696865,
+        "p99": 0.210024,
+        "max": 0.210024
+      },
+      "thread_cpu_ms": {
+        "count": 2,
+        "mean": 0.163552,
+        "p99": 0.2024,
+        "max": 0.2024
+      }
+    }
+  },
+  "active_poll_interval_ms": {
+    "count": 680,
+    "mean": 5.022264392647947,
+    "p99": 6.379497000016272,
+    "max": 24.031727000139654
+  },
+  "over_7_5_count": 2,
+  "slow_intervals": [
+    {
+      "start_ms": 6176685.662713,
+      "next_start_ms": 6176709.69444,
+      "interval_ms": 24.031727000139654,
+      "previous_poll_wall_ms": 23.90097,
+      "previous_poll_cpu_ms": 2.747328,
+      "other_callback_wall_ms": 0,
+      "unmeasured_between_callbacks_ms": 0.1307569993659854,
+      "other_callbacks": []
+    },
+    {
+      "start_ms": 6178980.749503,
+      "next_start_ms": 6178988.726595,
+      "interval_ms": 7.97709200065583,
+      "previous_poll_wall_ms": 0.261578,
+      "previous_poll_cpu_ms": 0.257568,
+      "other_callback_wall_ms": 0,
+      "unmeasured_between_callbacks_ms": 7.715514000505209,
+      "other_callbacks": []
+    }
+  ]
+}

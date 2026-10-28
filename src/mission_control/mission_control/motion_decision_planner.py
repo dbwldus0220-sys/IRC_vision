@@ -58,8 +58,8 @@ class MotionDecisionConfig:
     """Tunable mission-selection and lost-ball recovery limits."""
 
     enable_ball_lost_recovery: bool = True
-    recovery_heading_turn_deg: float = 10.0
-    recovery_away_heading_turn_deg: float = 3.0
+    recovery_heading_turn_deg: float = 20.0
+    recovery_away_heading_turn_deg: float = 20.0
     curve_follow_max_offset_norm: float = 0.55
     ball_tracking_range_m: float = 1.5
     ball_control_range_m: float = 1.5
@@ -1026,7 +1026,7 @@ class MotionDecisionPlanner:
             and self._ball_top_loss_forward_pending()
         ):
             return self._ball_top_loss_forward_decision(
-                "BALL_APPROACH_LOST_ALIGN", "BALL_LOST_FORWARD_2"
+                "BALL_APPROACH_LOST_ALIGN", "BALL_LOST_FINE_FORWARD_3"
             )
         recovery = self._ball_lost_turn_decision(info, "BALL_APPROACH_LOST_ALIGN")
         if recovery is not None:
@@ -2099,7 +2099,7 @@ class MotionDecisionPlanner:
             return {**recovery.source_command, "valid": True, "motion": recovery.action, "reason": recovery.reason}
         if not stopping and self._ball_top_loss_forward_pending():
             decision = self._ball_top_loss_forward_decision(
-                "BALL_APPROACH_LOST_ALIGN", "BALL_LOST_FORWARD_2"
+                "BALL_APPROACH_LOST_ALIGN", "BALL_LOST_FINE_FORWARD_3"
             )
             return {
                 **decision.source_command,

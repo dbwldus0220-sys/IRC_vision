@@ -1,0 +1,24 @@
+-- The CXX compiler identification is GNU 11.4.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Looking for C++ include pthread.h
+-- Looking for C++ include pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /tmp/step_gui_alignment_before_build
+[ 28%] Building CXX object CMakeFiles/motion_core.dir/motion_pattern.cpp.o
+[ 28%] Building CXX object CMakeFiles/motion_core.dir/motion_callback.cpp.o
+[ 42%] Linking CXX static library libmotion_core.a
+[ 42%] Built target motion_core
+[ 57%] Building CXX object CMakeFiles/motion_player_core.dir/robot_motion_player.cpp.o
+[ 71%] Linking CXX static library libmotion_player_core.a
+[ 71%] Built target motion_player_core
+[ 85%] Building CXX object CMakeFiles/gui_execution_probe.dir/gui_execution_probe.cpp.o
+[100%] Linking CXX executable gui_execution_probe
+[100%] Built target gui_execution_probe

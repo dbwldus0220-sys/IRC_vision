@@ -18,6 +18,16 @@ namespace
 template<typename PlayerT>
 void configure_playback(PlayerT & player, const RobotMotionRuntimeConfig & config)
 {
+  if constexpr (requires { player.setForwardBoundaryFeedbackAccounting(false); }) {
+    player.setForwardBoundaryFeedbackAccounting(config.account_forward_boundary_feedback);
+  } else if (config.account_forward_boundary_feedback) {
+    throw std::runtime_error("external SDK lacks forward boundary timing support");
+  }
+  if constexpr (requires { player.setContinuousInterpolation(config.continuous_interpolation); }) {
+    player.setContinuousInterpolation(config.continuous_interpolation);
+  } else if (config.continuous_interpolation) {
+    throw std::runtime_error("external SDK lacks continuous interpolation; rebuild with external_sdk/gui_aligned");
+  }
   if constexpr (requires {
       player.configureJointPolicy(config.policy_reference_json_path,
         config.enable_head_override, config.enable_shoulder_override);
@@ -77,12 +87,23 @@ StartupPoseUpdate update_startup_pose(PlayerT & player)
   }
 }
 
+template<typename ConfigT>
+void configure_motor_exclusion(ConfigT & sdk_config, bool excluded) {
+  if constexpr (requires { sdk_config.exclude_motor_5 = excluded; }) {
+    sdk_config.exclude_motor_5 = excluded;
+  } else if (excluded) {
+    throw std::runtime_error("external SDK lacks motor 5 exclusion");
+  }
+}
+
 irc_step::DynamixelMotionHardwareConfig to_sdk_hardware_config(
   const RobotMotionRuntimeConfig & config)
 {
   irc_step::DynamixelMotionHardwareConfig sdk_config;
   sdk_config.device_path = config.device_path;
   sdk_config.baud_rate = config.baud_rate;
+  configure_motor_exclusion(sdk_config, config.exclude_motor_5);
+  sdk_config.motor_ids.clear();
   sdk_config.motor_ids.reserve(config.motor_ids.size());
   for (const std::int64_t motor_id : config.motor_ids) {
     if (motor_id < std::numeric_limits<int>::min() ||

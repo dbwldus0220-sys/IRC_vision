@@ -1,0 +1,33 @@
+[INFO] [launch]: All log files can be found below /tmp/step-continuous-baseline/ros_logs/2026-10-27-22-51-05-046709-jet-16520
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [sdk_motion_executor-1]: process started with pid [16523]
+[INFO] [python3-2]: process started with pid [16527]
+[sdk_motion_executor-1] [INFO] [1793109065.166954964] [ball_head_override_test_executor]: Motion position tolerance check: DISABLED
+[sdk_motion_executor-1] [WARN] [1793109065.170988230] [ball_head_override_test_executor]: Simulated backend only: no SDK or hardware access is available
+test_ball_camera_hold_across_motion_boundaries (test_ball_baseline.TestBallHeadOverride) ... [sdk_motion_executor-1] [INFO] [1793109065.533757720] [ball_head_override_test_executor]: Ball entered bottom trigger: motor 0 override -64.0 deg latched
+FAIL
+
+======================================================================
+FAIL: test_ball_camera_hold_across_motion_boundaries (test_ball_baseline.TestBallHeadOverride)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/step-continuous-baseline/test_ball_baseline.py", line 108, in test_ball_camera_hold_across_motion_boundaries
+    self.hold(True)
+  File "/tmp/step-continuous-baseline/test_ball_baseline.py", line 98, in hold
+    self.assertIs(self.heartbeats[-1]["ball_head_override_active"], enabled)
+AssertionError: False is not True
+
+----------------------------------------------------------------------
+Ran 1 test in 0.503s
+
+FAILED (failures=1)
+[INFO] [python3-2]: sending signal 'SIGINT' to process[python3-2]
+[INFO] [sdk_motion_executor-1]: sending signal 'SIGINT' to process[sdk_motion_executor-1]
+[sdk_motion_executor-1] [INFO] [1793109065.625672537] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[INFO] [python3-2]: process has finished cleanly [pid 16527]
+[INFO] [sdk_motion_executor-1]: process has finished cleanly [pid 16523]
+
+----------------------------------------------------------------------
+Ran 0 tests in 0.000s
+
+OK

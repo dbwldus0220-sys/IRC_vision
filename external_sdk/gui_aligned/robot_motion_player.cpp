@@ -18,6 +18,18 @@ constexpr auto kPositionCheckInterval = std::chrono::milliseconds(20);
 double guiSeconds(RobotMotionPlayer::Clock::time_point value) {
     return std::chrono::duration_cast<std::chrono::nanoseconds>(value.time_since_epoch()).count() / 1e9;
 }
+bool isLineRecoveryMotion(std::string_view name) {
+    return name == "R전진라인복귀좌" || name == "R라인복귀우회전";
+}
+bool isLineWalkingMotion(std::string_view name) {
+    return name.starts_with("R전진45도(") || isLineRecoveryMotion(name);
+}
+bool sameEntryFrame(const MotionFrame& a, const MotionFrame& b) {
+    return a.name == b.name && a.start_ms == b.start_ms && a.time_ms == b.time_ms
+        && a.angles == b.angles && a.torques == b.torques
+        && a.lift_early_arrival == b.lift_early_arrival
+        && a.playback_cycle_end == b.playback_cycle_end && a.stop_at_end == b.stop_at_end;
+}
 }
 
 RobotMotionPlayer::RobotMotionPlayer(
@@ -170,6 +182,31 @@ bool RobotMotionPlayer::canSeamlesslyTransition(
     const MotionPattern& next, std::string_view next_name) const noexcept {
     // 같은 repeatable 모션은 기존 내부 repeat_count 순환과 같은 경계입니다.
     if (current_name == next_name && current.repeatable()) return true;
+    // 승인된 라인 보행은 모두 오른발 뒤에서 끝나며 같은 첫 이동 자세를 사용한다.
+    // 카메라/보행 원본이 바뀌면 첫 프레임 검사를 통과해야 예약할 수 있다.
+    if (isLineWalkingMotion(current_name) && isLineWalkingMotion(next_name)
+        && (isLineRecoveryMotion(current_name) || isLineRecoveryMotion(next_name))
+        && current.repeatable() && next.repeatable()
+        && !current.frames().empty() && !next.frames().empty()
+        && current.playbackSpeed() == next.playbackSpeed()
+        && current.startPose() == next.startPose()
+        && sameEntryFrame(current.frames().front(), next.frames().front())) return true;
+    // 반복 횟수만 다른 동일 주기도 내부 반복과 같은 경계로 예약한다.
+    // 자세 이름만으로 추정하지 않고 대기/정지/각도/토크까지 비교한다.
+    if (current.repeatable() && next.repeatable()
+        && current.startPose() == next.startPose()
+        && current.endPose() == next.endPose()
+        && current.durationMs() == next.durationMs()
+        && current.playbackSpeed() == next.playbackSpeed()
+        && current.frames().size() == next.frames().size()
+        && std::equal(current.frames().begin(), current.frames().end(), next.frames().begin(),
+            [](const MotionFrame& a, const MotionFrame& b) {
+                return a.name == b.name && a.start_ms == b.start_ms && a.time_ms == b.time_ms
+                    && a.angles == b.angles && a.torques == b.torques
+                    && a.lift_early_arrival == b.lift_early_arrival
+                    && a.playback_cycle_end == b.playback_cycle_end
+                    && a.stop_at_end == b.stop_at_end;
+            })) return true;
     return !current.endPose().empty()
         && !next.startPose().empty()
         && current.endPose() == next.startPose();
@@ -180,7 +217,15 @@ void RobotMotionPlayer::resetMotionRuntime(
     pattern_ = &pattern;
     current_motion_ = std::move(name);
     playback_frames_ = pattern.frames();
-    for (auto& frame : playback_frames_) frame.angles = correctedFrameAngles(frame);
+    for (auto& frame : playback_frames_) {
+        frame.angles = correctedFrameAngles(frame);
+        for (auto it = frame.angles.begin(); it != frame.angles.end();) {
+            if (!hardware_->motorEnabled(it->first)) it = frame.angles.erase(it);
+            else ++it;
+        }
+    }
+    if (continuous_interpolation_ && !startup_active_)
+        continuous_trajectory_.reset(playback_frames_, start_angles_, pattern.playbackSpeed());
     command_ids_.reserve(kMotionMotorCount);
     command_angles_ = start_angles_;
     queued_boundary_pending_ = false;
@@ -206,10 +251,13 @@ void RobotMotionPlayer::resetMotionRuntime(
     status_ = MotionStatus::Running;
     // 유효 프레임은 정책/보정을 적용한 값이다. 기록은 재생 알고리즘을 바꾸지 않는다.
     if (trace_) {
-        traceEvent("run_start", now, true, start_angles_);
+        // 재생 기준 시각은 대기 중 통신을 포함할 수 있지만 관측 이벤트는 소급하지 않는다.
+        const auto recorded_at = now_();
+        traceEvent("run_start", recorded_at, true, start_angles_);
         for (std::size_t i = 0; i < playback_frames_.size(); ++i) {
             trace_frame_ = static_cast<int>(i);
-            traceEvent("definition", now, true, playback_frames_[i].angles);
+            traceEvent("source_definition", recorded_at, true, pattern.frames()[i].angles);
+            traceEvent("definition", recorded_at, true, playback_frames_[i].angles);
         }
         trace_frame_ = -1;
     }
@@ -231,12 +279,30 @@ bool RobotMotionPlayer::activateQueuedMotion(Clock::time_point now) {
     ++trace_run_;
     trace_tick_ = 0;
     trace_evaluate_at_ = Clock::time_point{};
-    resetMotionRuntime(*next, std::move(next_name), now_());
+    const auto started = queued_hold_ms_ == 0
+        ? forwardBoundaryStart(*next, next_name, now_()) : now_();
+    resetMotionRuntime(*next, std::move(next_name), started);
     traceEvent("queue_activate", now_(), true);
     static_cast<void>(now);
     error_ = MotionError::None;
     last_error_.clear();
     return true;
+}
+
+RobotMotionPlayer::Clock::time_point RobotMotionPlayer::forwardBoundaryStart(
+    const MotionPattern& next, std::string_view next_name, Clock::time_point now) const noexcept {
+    const auto forward = [](std::string_view name) {
+        return isLineWalkingMotion(name) || name.starts_with("R전진90도(")
+            || name.starts_with("R전진0도(");
+    };
+    if (!account_forward_boundary_feedback_ || !forward(current_motion_) || !forward(next_name)
+        || next.frames().empty() || now < last_goal_written_at_) return now;
+    // 마지막 Goal 이후 로봇은 이미 정지 자세를 유지한다. 관측용 읽기 시간을
+    // 저장된 선행 대기에 포함하되, 첫 이동 프레임까지 건너뛰지는 않는다.
+    const auto hold = std::chrono::duration_cast<Clock::duration>(
+        std::chrono::duration<double, std::milli>(
+            next.frames().front().start_ms / next.playbackSpeed()));
+    return now - std::min(now - last_goal_written_at_, hold);
 }
 
 MotionStatus RobotMotionPlayer::update() noexcept {
@@ -266,7 +332,10 @@ bool RobotMotionPlayer::readStartAngles() {
         fail(MotionError::PresentPositionReadFailed, "cannot capture actual start pose");
         return false;
     }
-    if (present.size() != kMotionMotorCount) {
+    bool complete = true;
+    for (int id = 0; id < kMotionMotorCount; ++id)
+        if (hardware_->motorEnabled(id) && !present.contains(id)) complete = false;
+    if (!complete) {
         traceEvent("initial", read_begin, false);
         fail(MotionError::PresentPositionReadFailed, "incomplete actual start pose");
         return false;
@@ -296,9 +365,12 @@ void RobotMotionPlayer::markSucceeded() {
 
 bool RobotMotionPlayer::sendGuiSample(std::int64_t timeline_ms, bool boundary) {
     trace_timeline_ms_ = timeline_ms;
-    const auto target = sampleGuiMotion(playback_frames_, start_angles_, timeline_ms, boundary);
+    // 단일 자세 적용은 코사인, 보행 시퀀스는 선택한 연속 ON/OFF를 사용한다.
+    const auto target = continuous_interpolation_ && !startup_active_ ? continuous_trajectory_.sample(timeline_ms, boundary) :
+        sampleGuiMotion(playback_frames_, start_angles_, timeline_ms, boundary);
     command_ids_.clear();
     for (int id = 0; id < kMotionMotorCount; ++id) {
+        if (!hardware_->motorEnabled(id)) continue;
         if (!target.commanded[id] && !joint_overrides_.contains(id)) continue;
         const double angle = target.commanded[id] ? target.angles[id] : command_angles_.at(id);
         command_angles_[id] = angle;
@@ -362,7 +434,7 @@ MotionStatus RobotMotionPlayer::updateRunning(Clock::time_point now) {
             for (int id = 0; id < kMotionMotorCount; ++id)
                 if (endpoint.contains(id)) ids.push_back(id);
             trace_timeline_ms_ = end;
-            if (ids.empty() || !writeGoals(endpoint, ids, "endpoint")) {
+            if (!ids.empty() && !writeGoals(endpoint, ids, "endpoint")) {
                 fail(MotionError::FrameSendFailed, "frame endpoint write failed");
                 return status_;
             }
@@ -398,8 +470,9 @@ MotionStatus RobotMotionPlayer::updateRunning(Clock::time_point now) {
             if (frame.start_ms + frame.time_ms == boundary_ms)
                 for (const auto& [id, angle] : frame.angles) start_angles_[id] = angle;
         // 통신 완료 이후 시계를 재시작해 GUI 반복 경계의 지연을 재현한다.
-        gui_started_sec_ = guiSeconds(now_()) - boundary_ms / (1000.0 * pattern_->playbackSpeed());
-        started_at_ = now_() - std::chrono::duration_cast<Clock::duration>(
+        const auto restarted_at = now_();
+        gui_started_sec_ = guiSeconds(restarted_at) - boundary_ms / (1000.0 * pattern_->playbackSpeed());
+        started_at_ = restarted_at - std::chrono::duration_cast<Clock::duration>(
             std::chrono::duration<double, std::milli>(boundary_ms / pattern_->playbackSpeed()));
         feedback_sampled_ = false;
         return status_;
@@ -409,10 +482,13 @@ MotionStatus RobotMotionPlayer::updateRunning(Clock::time_point now) {
         ++repeat_;
         gated_frame_ = nullptr;
         next_frame_ = 0;
-        for (const auto& [id, angle] : playback_frames_.back().angles) start_angles_[id] = angle;
+        for (const auto& frame : playback_frames_)
+            for (const auto& [id, angle] : frame.angles) start_angles_[id] = angle;
+        if (continuous_interpolation_)
+            continuous_trajectory_.reset(playback_frames_, start_angles_, pattern_->playbackSpeed());
         cycle_start_ms_ = 0;
         trace_timeline_ms_ = 0;
-        started_at_ = now_();
+        started_at_ = forwardBoundaryStart(*pattern_, current_motion_, now_());
         gui_started_sec_ = guiSeconds(started_at_);
         feedback_sampled_ = false;
         return status_;
@@ -534,6 +610,7 @@ CancelResult RobotMotionPlayer::cancel() noexcept {
         return CancelResult::HoldFailed;
     }
     status_ = MotionStatus::Cancelled;
+    traceEvent("cancel", now_(), true);
     error_ = MotionError::None;
     last_error_.clear();
     pattern_ = nullptr;
@@ -545,6 +622,7 @@ CancelResult RobotMotionPlayer::cancel() noexcept {
 bool RobotMotionPlayer::emergencyStop() noexcept {
     if (hardware_ == nullptr) return false;
     const bool success = hardware_->setTorqueEnabled(false);
+    traceEvent("emergency_stop", now_(), success);
     initialized_ = false;
     status_ = success ? MotionStatus::Cancelled : MotionStatus::Failed;
     if (!success) {
@@ -631,6 +709,7 @@ void RobotMotionPlayer::shutdown() noexcept {
 
 void RobotMotionPlayer::fail(
     MotionError error, std::string message) noexcept {
+    traceEvent("fault", now_(), false);
     error_ = error;
     last_error_ = std::move(message);
     status_ = MotionStatus::Failed;
@@ -678,6 +757,7 @@ void RobotMotionPlayer::setJointOverride(int motor_id, double target_deg) {
     if (motor_id == 0 && !head_override_enabled_) return;
     if (motor_id < 0 || motor_id >= kMotionMotorCount || !std::isfinite(target_deg))
         throw std::invalid_argument("invalid joint override");
+    if (hardware_ && !hardware_->motorEnabled(motor_id)) return;
     joint_overrides_[motor_id] = target_deg;
     // 대기 중에도 ROS의 카메라 이동 요청은 다음 모션을 기다리지 않는다.
     if (hardwareReady() && !running()) {
@@ -710,7 +790,7 @@ bool RobotMotionPlayer::startPoseTransition(
             frame.angles[id] = angles[id];
         }
         if (!hardware_->prepareImmediatePlayback()) return false;
-        if (!readStartAngles() || start_angles_.size() != kMotionMotorCount) return false;
+        if (!readStartAngles()) return false;
         MotionCompletion completion;
         completion.position_tolerance_deg = 5.0;
         startup_pattern_ = std::make_unique<MotionPattern>(std::vector<MotionFrame>{frame},
@@ -742,6 +822,14 @@ void RobotMotionPlayer::configureJointPolicy(const std::string& reference, bool 
     head_override_enabled_ = head;
     shoulder_override_enabled_ = shoulder;
     if (!head) joint_overrides_.erase(0);
+}
+void RobotMotionPlayer::setContinuousInterpolation(bool enabled) {
+    if (running()) throw std::logic_error("cannot change interpolation during playback");
+    continuous_interpolation_ = enabled;
+}
+void RobotMotionPlayer::setForwardBoundaryFeedbackAccounting(bool enabled) {
+    if (running()) throw std::logic_error("cannot change boundary timing during playback");
+    account_forward_boundary_feedback_ = enabled;
 }
 void RobotMotionPlayer::setQueuedTransitionHoldMs(std::int64_t ms) {
     if (ms < 0) throw std::invalid_argument("negative queue hold");
@@ -782,6 +870,15 @@ void RobotMotionPlayer::traceEvent(const char* event, Clock::time_point begin, b
     }
     row.timeline_ms = trace_timeline_ms_; row.repeat = repeat_; row.frame = trace_frame_;
     row.success = success;
+    row.continuous = continuous_interpolation_ && !startup_active_;
+    row.exclude_motor_5 = !hardware_->motorEnabled(5);
+    if (std::string_view(event) == "sample" || std::string_view(event) == "endpoint" ||
+        std::string_view(event) == "feedback" || std::string_view(event) == "initial") {
+        const auto bus = hardware_->busDiagnostics();
+        row.bus_result_valid = bus.valid;
+        row.bus_result = bus.result;
+        row.missing_ids = bus.missing_ids;
+    }
     if (trace_goals_) for (const auto& [id, value] : angles) {
         if (id >= 0 && id < 23 && (!ids || std::find(ids->begin(), ids->end(), id) != ids->end())) { row.ids[id] = true; row.angles[id] = value; }
     }
@@ -791,6 +888,7 @@ bool RobotMotionPlayer::writeGoals(const JointAngles& goals, const std::vector<i
                                   const char* event) {
     const auto begin = now_();
     const bool ok = hardware_->commandImmediatePosition(goals, ids);
+    if (ok) last_goal_written_at_ = now_();
     traceEvent(event, begin, ok, goals, &ids);
     return ok;
 }

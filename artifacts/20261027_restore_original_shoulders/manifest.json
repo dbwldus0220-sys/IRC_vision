@@ -1,0 +1,3243 @@
+{
+  "source": "artifacts/robot_motions_pc.json",
+  "source_sha256": "1536b80b319851533c624dfaae5d0f4609adb132e0c89039cd7755e4520de3a4",
+  "before_sha256": "bc4be53bb966d1457c0b34636f037745f0b4840604f0061a4fb89477e6900498",
+  "after_sha256": "cfabd44c35a4a8c433e68ccd662efd578760db55e10e2699c0518753bd9d589a",
+  "motions": 83,
+  "changed_motions": 80,
+  "changed_values": 458,
+  "other_fields_unchanged": true,
+  "changes": [
+    {
+      "motion": "찐공확인자세",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 20.302734375
+    },
+    {
+      "motion": "찐공확인자세",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -27.59765625
+    },
+    {
+      "motion": "찐제자리우회전45도-1(2회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "찐제자리우회전45도-1(2회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "찐제자리우회전45도-1(2회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "찐제자리우회전45도-1(2회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "찐제자리우회전45도-1(3회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "찐제자리우회전45도-1(3회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "찐제자리우회전45도-1(3회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "찐제자리우회전45도-1(3회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "찐제자리우회전45도-1(5회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "찐제자리우회전45도-1(5회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "찐제자리우회전45도-1(5회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "찐제자리우회전45도-1(5회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "찐제자리우회전45도-1(7회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "찐제자리우회전45도-1(7회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "찐제자리우회전45도-1(7회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "찐제자리우회전45도-1(7회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "찐제자리우회전0도-1(2회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "찐제자리우회전0도-1(2회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "찐제자리우회전0도-1(2회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "찐제자리우회전0도-1(2회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "찐제자리우회전0도-1(3회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "찐제자리우회전0도-1(3회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "찐제자리우회전0도-1(3회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "찐제자리우회전0도-1(3회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "찐제자리우회전0도-1(5회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "찐제자리우회전0도-1(5회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "찐제자리우회전0도-1(5회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "찐제자리우회전0도-1(5회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "찐제자리우회전0도-1(7회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "찐제자리우회전0도-1(7회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "찐제자리우회전0도-1(7회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "찐제자리우회전0도-1(7회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "찐제자리우회전90도-1(3회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "찐제자리우회전90도-1(3회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "찐제자리우회전90도-1(3회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "찐제자리우회전90도-1(3회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "찐제자리우회전90도-1(5회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "찐제자리우회전90도-1(5회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "찐제자리우회전90도-1(5회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "찐제자리우회전90도-1(5회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "찐제자리우회전90도-1(7회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "찐제자리우회전90도-1(7회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "찐제자리우회전90도-1(7회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "찐제자리우회전90도-1(7회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "찐제자리우회전45도(9회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "찐제자리우회전45도(9회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "찐제자리우회전45도(9회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "찐제자리우회전45도(9회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "찐제자리우회전0도-1(9회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "찐제자리우회전0도-1(9회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "찐제자리우회전0도-1(9회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "찐제자리우회전0도-1(9회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "찐제자리우회전90도-1(9회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "찐제자리우회전90도-1(9회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "찐제자리우회전90도-1(9회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "찐제자리우회전90도-1(9회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "찐후진실전-2(2회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.66796875
+    },
+    {
+      "motion": "찐후진실전-2(2회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.66796875
+    },
+    {
+      "motion": "찐후진실전-2(2회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 10.546875
+    },
+    {
+      "motion": "찐후진실전-2(2회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -10.01953125
+    },
+    {
+      "motion": "찐후진실전-2(2회)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 10.546875
+    },
+    {
+      "motion": "찐후진실전-2(2회)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -10.01953125
+    },
+    {
+      "motion": "찐후진실전-2(2회)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 10.37109375
+    },
+    {
+      "motion": "찐후진실전-2(2회)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -10.1953125
+    },
+    {
+      "motion": "찐공잡기전후진-2(2회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.66796875
+    },
+    {
+      "motion": "찐공잡기전후진-2(2회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.66796875
+    },
+    {
+      "motion": "찐공잡기전후진-2(2회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 10.546875
+    },
+    {
+      "motion": "찐공잡기전후진-2(2회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -10.01953125
+    },
+    {
+      "motion": "찐공잡기전후진-2(2회)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 10.546875
+    },
+    {
+      "motion": "찐공잡기전후진-2(2회)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -10.01953125
+    },
+    {
+      "motion": "찐공잡기전후진-2(2회)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 10.37109375
+    },
+    {
+      "motion": "찐공잡기전후진-2(2회)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -10.1953125
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.66796875
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -8.876953125
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.66796875
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -8.876953125
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 4,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 4,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 5,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.66796875
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 5,
+      "joint": "5",
+      "before": -18.0,
+      "after": -8.876953125
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 6,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 6,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 7,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.66796875
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 7,
+      "joint": "5",
+      "before": -18.0,
+      "after": -8.876953125
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 8,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 8,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 9,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.66796875
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 9,
+      "joint": "5",
+      "before": -18.0,
+      "after": -8.876953125
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 10,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 10,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 11,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.66796875
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 11,
+      "joint": "5",
+      "before": -18.0,
+      "after": -8.876953125
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 12,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 12,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 13,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.66796875
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 13,
+      "joint": "5",
+      "before": -18.0,
+      "after": -8.876953125
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 14,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 14,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 15,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.66796875
+    },
+    {
+      "motion": "찐후진하고 제자리우회전(공)",
+      "frame_index": 15,
+      "joint": "5",
+      "before": -18.0,
+      "after": -8.876953125
+    },
+    {
+      "motion": "찐후진에서 제자리좌회전(공)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "찐후진에서 제자리좌회전(공)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "찐후진에서 제자리좌회전(공)",
+      "frame_index": 4,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "찐후진에서 제자리좌회전(공)",
+      "frame_index": 4,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "찐후진에서 제자리좌회전(공)",
+      "frame_index": 6,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "찐후진에서 제자리좌회전(공)",
+      "frame_index": 6,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "찐후진에서 제자리좌회전(공)",
+      "frame_index": 8,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "찐후진에서 제자리좌회전(공)",
+      "frame_index": 8,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "찐후진실전(1회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.66796875
+    },
+    {
+      "motion": "찐후진실전(1회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.66796875
+    },
+    {
+      "motion": "찐후진실전(1회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 10.546875
+    },
+    {
+      "motion": "찐후진실전(1회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -10.01953125
+    },
+    {
+      "motion": "찐후진실전(1회)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 10.546875
+    },
+    {
+      "motion": "찐후진실전(1회)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -10.01953125
+    },
+    {
+      "motion": "찐후진실전(1회)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 10.37109375
+    },
+    {
+      "motion": "찐후진실전(1회)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -10.1953125
+    },
+    {
+      "motion": "찐미세오뒤에서 오옆꽃게90도",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "찐미세오뒤에서 오옆꽃게90도",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.271484375
+    },
+    {
+      "motion": "찐미세오뒤에서 오옆꽃게90도",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 21.181640625
+    },
+    {
+      "motion": "찐미세오뒤에서 오옆꽃게90도",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.578125
+    },
+    {
+      "motion": "찐미세오뒤에서오옆꽃게0도",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "찐미세오뒤에서오옆꽃게0도",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.271484375
+    },
+    {
+      "motion": "찐미세오뒤에서오옆꽃게0도",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 21.181640625
+    },
+    {
+      "motion": "찐미세오뒤에서오옆꽃게0도",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.578125
+    },
+    {
+      "motion": "찐오뒤에서 오옆꽃게90도",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "찐오뒤에서 오옆꽃게90도",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.271484375
+    },
+    {
+      "motion": "찐오뒤에서 오옆꽃게90도",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 21.181640625
+    },
+    {
+      "motion": "찐오뒤에서 오옆꽃게90도",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.578125
+    },
+    {
+      "motion": "찐제자리우회전90도-1(2회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "찐제자리우회전90도-1(2회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "찐제자리우회전90도-1(2회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "찐제자리우회전90도-1(2회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "유미세오옆꽃게0도",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 8.349609375
+    },
+    {
+      "motion": "유미세오옆꽃게0도",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.931640625
+    },
+    {
+      "motion": "유미세오옆꽃게0도",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 21.0
+    },
+    {
+      "motion": "유미세오옆꽃게0도",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.931640625
+    },
+    {
+      "motion": "유미세오옆꽃게0도",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 21.0
+    },
+    {
+      "motion": "유미세오옆꽃게0도",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.755859375
+    },
+    {
+      "motion": "유미세오옆꽃게0도",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 21.181640625
+    },
+    {
+      "motion": "유미세오옆꽃게0도",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.578125
+    },
+    {
+      "motion": "유미세왼옆꽃게0도",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 20.7421875
+    },
+    {
+      "motion": "유미세왼옆꽃게0도",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -18.720703125
+    },
+    {
+      "motion": "유미세왼옆꽃게0도",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 19.3359375
+    },
+    {
+      "motion": "유미세왼옆꽃게0도",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -18.45703125
+    },
+    {
+      "motion": "유미세왼옆꽃게0도",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 17.666015625
+    },
+    {
+      "motion": "유미세왼옆꽃게0도",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.9296875
+    },
+    {
+      "motion": "유미세왼옆꽃게0도",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 22.0
+    },
+    {
+      "motion": "유미세왼옆꽃게0도",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -19.0
+    },
+    {
+      "motion": "유미세오옆꽃게90도",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 8.349609375
+    },
+    {
+      "motion": "유미세오옆꽃게90도",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.931640625
+    },
+    {
+      "motion": "유미세오옆꽃게90도",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 21.0
+    },
+    {
+      "motion": "유미세오옆꽃게90도",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.931640625
+    },
+    {
+      "motion": "유미세오옆꽃게90도",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 21.0
+    },
+    {
+      "motion": "유미세오옆꽃게90도",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.755859375
+    },
+    {
+      "motion": "유미세오옆꽃게90도",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 21.0
+    },
+    {
+      "motion": "유미세오옆꽃게90도",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.755859375
+    },
+    {
+      "motion": "유미세왼옆꽃게90도",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 20.7421875
+    },
+    {
+      "motion": "유미세왼옆꽃게90도",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -18.720703125
+    },
+    {
+      "motion": "유미세왼옆꽃게90도",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 19.3359375
+    },
+    {
+      "motion": "유미세왼옆꽃게90도",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -18.45703125
+    },
+    {
+      "motion": "유미세왼옆꽃게90도",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 17.666015625
+    },
+    {
+      "motion": "유미세왼옆꽃게90도",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.9296875
+    },
+    {
+      "motion": "유미세왼옆꽃게90도",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 22.0
+    },
+    {
+      "motion": "유미세왼옆꽃게90도",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -19.0
+    },
+    {
+      "motion": "건라인복귀좌회전45도(1회)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.435546875
+    },
+    {
+      "motion": "건라인복귀좌회전45도(1회)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.314453125
+    },
+    {
+      "motion": "건라인복귀좌회전45도(1회)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건라인복귀좌회전45도(1회)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "전45도(2회)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.435546875
+    },
+    {
+      "motion": "전45도(2회)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.314453125
+    },
+    {
+      "motion": "전45도(2회)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "전45도(2회)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건라인복귀우회전45도(4회)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.435546875
+    },
+    {
+      "motion": "건라인복귀우회전45도(4회)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.314453125
+    },
+    {
+      "motion": "건라인복귀우회전45도(4회)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.435546875
+    },
+    {
+      "motion": "건라인복귀우회전45도(4회)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.138671875
+    },
+    {
+      "motion": "전45도(4회)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.435546875
+    },
+    {
+      "motion": "전45도(4회)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.314453125
+    },
+    {
+      "motion": "전45도(4회)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "전45도(4회)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "전45도(6회)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.435546875
+    },
+    {
+      "motion": "전45도(6회)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.314453125
+    },
+    {
+      "motion": "전45도(6회)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "전45도(6회)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "전45도(8회)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.435546875
+    },
+    {
+      "motion": "전45도(8회)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.314453125
+    },
+    {
+      "motion": "전45도(8회)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "전45도(8회)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건라인복귀좌회전45도(4회)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.435546875
+    },
+    {
+      "motion": "건라인복귀좌회전45도(4회)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.314453125
+    },
+    {
+      "motion": "건라인복귀좌회전45도(4회)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.435546875
+    },
+    {
+      "motion": "건라인복귀좌회전45도(4회)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.138671875
+    },
+    {
+      "motion": "전90도(8회)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.435546875
+    },
+    {
+      "motion": "전90도(8회)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.314453125
+    },
+    {
+      "motion": "전90도(8회)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "전90도(8회)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "전90도(2회)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.435546875
+    },
+    {
+      "motion": "전90도(2회)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.314453125
+    },
+    {
+      "motion": "전90도(2회)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "전90도(2회)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "전90도(4회)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.435546875
+    },
+    {
+      "motion": "전90도(4회)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.314453125
+    },
+    {
+      "motion": "전90도(4회)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "전90도(4회)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "전90도(6회)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.435546875
+    },
+    {
+      "motion": "전90도(6회)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.314453125
+    },
+    {
+      "motion": "전90도(6회)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "전90도(6회)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건오뒤에서 기본자세(카메라45도)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 20.7421875
+    },
+    {
+      "motion": "건오뒤에서 기본자세(카메라45도)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -18.6328125
+    },
+    {
+      "motion": "건오뒤카메라90도",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건오뒤카메라90도",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건오뒤에서 기본자세(0도)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 20.7421875
+    },
+    {
+      "motion": "건오뒤에서 기본자세(0도)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -18.6328125
+    },
+    {
+      "motion": "건왼뒤에서 기본자세(0도)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.435546875
+    },
+    {
+      "motion": "건왼뒤에서 기본자세(0도)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.314453125
+    },
+    {
+      "motion": "건왼뒤에서 기본자세(0도)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 20.7421875
+    },
+    {
+      "motion": "건왼뒤에서 기본자세(0도)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -18.6328125
+    },
+    {
+      "motion": "건김오뒤3",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건김오뒤3",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건제자리좌회전45도(5회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건제자리좌회전45도(5회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건제자리좌회전45도(5회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건제자리좌회전45도(5회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건제자리좌회전45도(6회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건제자리좌회전45도(6회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건제자리좌회전45도(6회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건제자리좌회전45도(6회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건제자리좌회전45도(1회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건제자리좌회전45도(1회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건제자리좌회전45도(1회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건제자리좌회전45도(1회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건제자리좌회전45도(2회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건제자리좌회전45도(2회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건제자리좌회전45도(2회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건제자리좌회전45도(2회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건제자리좌회전45도(3회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건제자리좌회전45도(3회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건제자리좌회전45도(3회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건제자리좌회전45도(3회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건제자리좌회전45도(4회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건제자리좌회전45도(4회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건제자리좌회전45도(4회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건제자리좌회전45도(4회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건제자리좌회전90도(3회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건제자리좌회전90도(3회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건제자리좌회전90도(3회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건제자리좌회전90도(3회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건제자리좌회전90도(1회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건제자리좌회전90도(1회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건제자리좌회전90도(1회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건제자리좌회전90도(1회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건제자리좌회전90도(2회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건제자리좌회전90도(2회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건제자리좌회전90도(2회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건제자리좌회전90도(2회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건제자리좌회전90도(4회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건제자리좌회전90도(4회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건제자리좌회전90도(4회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건제자리좌회전90도(4회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건제자리좌회전90도(5회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건제자리좌회전90도(5회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건제자리좌회전90도(5회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건제자리좌회전90도(5회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건제자리좌회전90도(6회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건제자리좌회전90도(6회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건제자리좌회전90도(6회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건제자리좌회전90도(6회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건제자리좌회전0도(2회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건제자리좌회전0도(2회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건제자리좌회전0도(2회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건제자리좌회전0도(2회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건제자리좌회전0도(1회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건제자리좌회전0도(1회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건제자리좌회전0도(1회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건제자리좌회전0도(1회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건제자리좌회전0도(3회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건제자리좌회전0도(3회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건제자리좌회전0도(3회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건제자리좌회전0도(3회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건제자리좌회전0도(4회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건제자리좌회전0도(4회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건제자리좌회전0도(4회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건제자리좌회전0도(4회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건제자리좌회전0도(5회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건제자리좌회전0도(5회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건제자리좌회전0도(5회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건제자리좌회전0도(5회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건제자리좌회전0도(6회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건제자리좌회전0도(6회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건제자리좌회전0도(6회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건제자리좌회전0도(6회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.435546875
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.314453125
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 4,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 4,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 5,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 5,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 6,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 6,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 7,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 7,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 8,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 8,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 9,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 9,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 10,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 10,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 11,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 11,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 12,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 12,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.447265625
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 13,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건기본자세에서제자리좌회전(골대)",
+      "frame_index": 13,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건미세45도(5회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건미세45도(5회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.271484375
+    },
+    {
+      "motion": "건미세45도(5회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.228515625
+    },
+    {
+      "motion": "건미세45도(5회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -10.01953125
+    },
+    {
+      "motion": "건미세45도(5회)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건미세45도(5회)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.271484375
+    },
+    {
+      "motion": "건미세45도(5회)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.140625
+    },
+    {
+      "motion": "건미세45도(5회)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -8.96484375
+    },
+    {
+      "motion": "건미세오뒤에서 기본자세45도",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건미세오뒤에서 기본자세45도",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.271484375
+    },
+    {
+      "motion": "건미세오뒤에서 기본자세45도",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 20.7421875
+    },
+    {
+      "motion": "건미세오뒤에서 기본자세45도",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -18.6328125
+    },
+    {
+      "motion": "건오뒤에서 미세오뒤45도",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건오뒤에서 미세오뒤45도",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.271484375
+    },
+    {
+      "motion": "건오뒤에서 미세오뒤45도",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.140625
+    },
+    {
+      "motion": "건오뒤에서 미세오뒤45도",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -8.96484375
+    },
+    {
+      "motion": "건미세0도",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건미세0도",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.271484375
+    },
+    {
+      "motion": "건미세0도",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.228515625
+    },
+    {
+      "motion": "건미세0도",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -10.01953125
+    },
+    {
+      "motion": "건미세0도",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건미세0도",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.271484375
+    },
+    {
+      "motion": "건미세0도",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.140625
+    },
+    {
+      "motion": "건미세0도",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -8.96484375
+    },
+    {
+      "motion": "건미세90도",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건미세90도",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.271484375
+    },
+    {
+      "motion": "건미세90도",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.228515625
+    },
+    {
+      "motion": "건미세90도",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -10.01953125
+    },
+    {
+      "motion": "건미세90도",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건미세90도",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.271484375
+    },
+    {
+      "motion": "건미세90도",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.140625
+    },
+    {
+      "motion": "건미세90도",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -8.96484375
+    },
+    {
+      "motion": "건미세오뒤에서 오뒤45도",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.435546875
+    },
+    {
+      "motion": "건미세오뒤에서 오뒤45도",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.314453125
+    },
+    {
+      "motion": "건미세오뒤에서 오뒤45도",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건미세오뒤에서 오뒤45도",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건미세오뒤에서 오뒤0도",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.435546875
+    },
+    {
+      "motion": "건미세오뒤에서 오뒤0도",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.314453125
+    },
+    {
+      "motion": "건미세오뒤에서 오뒤0도",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건미세오뒤에서 오뒤0도",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건미세오뒤에서 기본자세90도",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건미세오뒤에서 기본자세90도",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.271484375
+    },
+    {
+      "motion": "건미세오뒤에서 기본자세90도",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 20.830078125
+    },
+    {
+      "motion": "건미세오뒤에서 기본자세90도",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -18.369140625
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.435546875
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.314453125
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 4,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 4,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 5,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 5,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 6,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 6,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 7,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 7,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 8,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 8,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 9,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 9,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 10,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 10,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 11,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 11,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 12,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 12,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 13,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 13,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 14,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 14,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 15,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 15,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 16,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 16,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 17,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 17,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 18,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.931640625
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 18,
+      "joint": "5",
+      "before": -18.0,
+      "after": -9.228515625
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 19,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건기본자세에서제자리우회전(골대)",
+      "frame_index": 19,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건라인복귀좌회전45도(6회)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.435546875
+    },
+    {
+      "motion": "건라인복귀좌회전45도(6회)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.314453125
+    },
+    {
+      "motion": "건라인복귀좌회전45도(6회)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "건라인복귀좌회전45도(6회)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "건미세0도(허들10회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건미세0도(허들10회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.271484375
+    },
+    {
+      "motion": "건미세0도(허들10회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.228515625
+    },
+    {
+      "motion": "건미세0도(허들10회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -10.01953125
+    },
+    {
+      "motion": "건미세0도(허들10회)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건미세0도(허들10회)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.271484375
+    },
+    {
+      "motion": "건미세0도(허들10회)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.140625
+    },
+    {
+      "motion": "건미세0도(허들10회)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -8.96484375
+    },
+    {
+      "motion": "건미세90도(1회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건미세90도(1회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.271484375
+    },
+    {
+      "motion": "건미세90도(1회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.228515625
+    },
+    {
+      "motion": "건미세90도(1회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -10.01953125
+    },
+    {
+      "motion": "건미세90도(1회)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건미세90도(1회)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.271484375
+    },
+    {
+      "motion": "건미세90도(1회)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.140625
+    },
+    {
+      "motion": "건미세90도(1회)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -8.96484375
+    },
+    {
+      "motion": "건미세90도(2회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건미세90도(2회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.271484375
+    },
+    {
+      "motion": "건미세90도(2회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.228515625
+    },
+    {
+      "motion": "건미세90도(2회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -10.01953125
+    },
+    {
+      "motion": "건미세90도(2회)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건미세90도(2회)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.271484375
+    },
+    {
+      "motion": "건미세90도(2회)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.140625
+    },
+    {
+      "motion": "건미세90도(2회)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -8.96484375
+    },
+    {
+      "motion": "건미세90도(3회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건미세90도(3회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.271484375
+    },
+    {
+      "motion": "건미세90도(3회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.228515625
+    },
+    {
+      "motion": "건미세90도(3회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -10.01953125
+    },
+    {
+      "motion": "건미세90도(3회)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건미세90도(3회)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.271484375
+    },
+    {
+      "motion": "건미세90도(3회)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.140625
+    },
+    {
+      "motion": "건미세90도(3회)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -8.96484375
+    },
+    {
+      "motion": "건미세90도(4회)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건미세90도(4회)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.271484375
+    },
+    {
+      "motion": "건미세90도(4회)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.228515625
+    },
+    {
+      "motion": "건미세90도(4회)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -10.01953125
+    },
+    {
+      "motion": "건미세90도(4회)",
+      "frame_index": 2,
+      "joint": "4",
+      "before": 18.0,
+      "after": 11.25
+    },
+    {
+      "motion": "건미세90도(4회)",
+      "frame_index": 2,
+      "joint": "5",
+      "before": -18.0,
+      "after": -13.271484375
+    },
+    {
+      "motion": "건미세90도(4회)",
+      "frame_index": 3,
+      "joint": "4",
+      "before": 18.0,
+      "after": 9.140625
+    },
+    {
+      "motion": "건미세90도(4회)",
+      "frame_index": 3,
+      "joint": "5",
+      "before": -18.0,
+      "after": -8.96484375
+    },
+    {
+      "motion": "찐미세오뒤에서 오뒤(골대 카메라90도)",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.435546875
+    },
+    {
+      "motion": "찐미세오뒤에서 오뒤(골대 카메라90도)",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.314453125
+    },
+    {
+      "motion": "찐미세오뒤에서 오뒤(골대 카메라90도)",
+      "frame_index": 1,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "찐미세오뒤에서 오뒤(골대 카메라90도)",
+      "frame_index": 1,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    },
+    {
+      "motion": "오뒤무게중심앞",
+      "frame_index": 0,
+      "joint": "4",
+      "before": 18.0,
+      "after": 16.5234375
+    },
+    {
+      "motion": "오뒤무게중심앞",
+      "frame_index": 0,
+      "joint": "5",
+      "before": -18.0,
+      "after": -17.40234375
+    }
+  ],
+  "deployment": {
+    "binary": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/sdk_motion_executor",
+    "binary_sha256": "014660ae10f9765b92a11c44487f1e1081017b1b4a87f0b0ceaaf00ea441ccea",
+    "runtime_matches_workspace": true,
+    "launch_defaults_to_original_shoulders": true,
+    "restart_required": true
+  },
+  "verification": {
+    "pytest_policy_launch_forward_tolerance": 15,
+    "mock_motions": 83,
+    "mock_original_shoulder_endpoints": 802,
+    "robot_actuated_by_agent": false,
+    "cpp_tests": {
+      "test_robot_motion_runtime_config": {
+        "tests": 21,
+        "failures": 0,
+        "errors": 0
+      },
+      "test_startup_pose_catalog": {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0
+      }
+    }
+  }
+}

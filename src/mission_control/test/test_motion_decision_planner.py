@@ -2779,7 +2779,7 @@ def test_ball_loss_recovery_can_be_disabled():
 
 
 @pytest.mark.parametrize("method,action", [
-    ("plan_lost_ball_approach_alignment", "BALL_LOST_FORWARD_2"),
+    ("plan_lost_ball_approach_alignment", "BALL_LOST_FINE_FORWARD_3"),
     ("plan_ball_pickup_initial_alignment", "BALL_PICKUP_INITIAL_SEARCH_FORWARD"),
     ("plan_ball_pickup_fine_alignment", "BALL_PICKUP_FINE_SEARCH_FORWARD"),
 ])
@@ -2827,12 +2827,12 @@ def test_top_loss_general_recovery_stops_first_and_requires_fresh_loss():
     )), 0.1)
     lost = {"detected": False, "raw_detected": False}
     assert planner.plan("AUTO", observations(ball=lost), 0.1).action == "BALL_LOST_STOP"
-    assert planner.plan("AUTO", observations(ball=lost), 0.4).action == "BALL_LOST_FORWARD_2"
+    assert planner.plan("AUTO", observations(ball=lost), 0.4).action == "BALL_LOST_FINE_FORWARD_3"
     for info in (None, {"detected": False, "raw_detected": True}):
-        assert planner.plan("AUTO", observations(ball=info), 1.0).action != "BALL_LOST_FORWARD_2"
+        assert planner.plan("AUTO", observations(ball=info), 1.0).action != "BALL_LOST_FINE_FORWARD_3"
         assert planner.plan_ball_pickup_initial_alignment(info).action == "WAIT"
         assert planner.plan_ball_pickup_fine_alignment(info).action == "WAIT"
-        assert planner.plan_lost_ball_approach_alignment(info).action != "BALL_LOST_FORWARD_2"
+        assert planner.plan_lost_ball_approach_alignment(info).action != "BALL_LOST_FINE_FORWARD_3"
 
 
 def test_raw_latest_ball_position_updates_and_clears_top_edge_memory():

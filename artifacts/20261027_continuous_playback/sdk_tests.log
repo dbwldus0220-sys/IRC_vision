@@ -1,0 +1,16 @@
+Internal ctest changing into directory: /tmp/step-continuous-sdk
+Test project /tmp/step-continuous-sdk
+    Start 1: motion_pattern_test
+1/5 Test #1: motion_pattern_test .................   Passed    0.01 sec
+    Start 2: motion_callback_test
+2/5 Test #2: motion_callback_test ................   Passed    0.09 sec
+    Start 3: gui_alignment_contract
+3/5 Test #3: gui_alignment_contract ..............   Passed    0.01 sec
+    Start 4: continuous_hardware_contract
+4/5 Test #4: continuous_hardware_contract ........   Passed    0.01 sec
+    Start 5: continuous_interpolation_contract
+5/5 Test #5: continuous_interpolation_contract ...   Passed    0.01 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Total Test time (real) =   0.13 sec

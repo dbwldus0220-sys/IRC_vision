@@ -1,0 +1,7 @@
+Starting >>> step
+Finished <<< step [3.01s]
+Starting >>> mission_control
+[Processing: mission_control]
+Finished <<< mission_control [30.1s]
+
+Summary: 2 packages finished [33.9s]

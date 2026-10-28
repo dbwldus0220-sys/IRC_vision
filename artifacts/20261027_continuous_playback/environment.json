@@ -1,0 +1,17 @@
+{
+  "architecture": "aarch64",
+  "sdk_packages": "libeigen3-dev\t3.4.0-2ubuntu2\nlibjson-c-dev:arm64\t0.15-3~ubuntu1.22.04.2\nros-humble-dynamixel-sdk\t4.0.3-1jammy.20260307.131019\n",
+  "sdk_dir": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/external_sdk/gui_aligned",
+  "sdk_alignment_version": 20261027,
+  "binary": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/sdk_motion_executor",
+  "binary_sha256": "280766e4c2b59ad958c7fd5bfc3095b6ec901452d3dd0bb83c21d1fee219e598",
+  "configured_port": "/dev/ttyUSB0",
+  "visible_usb_ports": [],
+  "protocol": 2.0,
+  "baud": 4000000,
+  "timer_ms": 5,
+  "feedback_ms": 10,
+  "motion_json_unchanged": true,
+  "motor_hardware_executed": false,
+  "latest_pc_gui_available": false
+}

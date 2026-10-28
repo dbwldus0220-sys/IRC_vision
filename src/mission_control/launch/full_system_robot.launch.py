@@ -304,9 +304,12 @@ def generate_launch_description() -> LaunchDescription:
                     value_type=bool,
                 ),
                 "poll_period_ms": 5,
+                "continuous_interpolation": ParameterValue(LaunchConfiguration("continuous_interpolation"), value_type=bool),
+                "exclude_motor_5": ParameterValue(LaunchConfiguration("exclude_motor_5"), value_type=bool),
                 "enable_head_override": ParameterValue(LaunchConfiguration("enable_head_override"), value_type=bool),
                 "enable_shoulder_override": ParameterValue(LaunchConfiguration("enable_shoulder_override"), value_type=bool),
                 "queued_transition_hold_ms": ParameterValue(LaunchConfiguration("queued_transition_hold_ms"), value_type=int),
+                "account_forward_boundary_feedback": ParameterValue(LaunchConfiguration("account_forward_boundary_feedback"), value_type=bool),
                 "motion_trace_enabled": ParameterValue(LaunchConfiguration("motion_trace_enabled"), value_type=bool),
                 "motion_trace_goals": ParameterValue(LaunchConfiguration("motion_trace_goals"), value_type=bool),
                 "motion_trace_path": ParameterValue(LaunchConfiguration("motion_trace_path"), value_type=str),
@@ -354,8 +357,9 @@ def generate_launch_description() -> LaunchDescription:
     return LaunchDescription(
         [
             DeclareLaunchArgument("enable_head_override", default_value="true"),
-            DeclareLaunchArgument("enable_shoulder_override", default_value="true"),
+            DeclareLaunchArgument("enable_shoulder_override", default_value="false"),
             DeclareLaunchArgument("queued_transition_hold_ms", default_value="0"),
+            DeclareLaunchArgument("account_forward_boundary_feedback", default_value="true"),
             DeclareLaunchArgument("motion_trace_enabled", default_value="false"),
             DeclareLaunchArgument("motion_trace_goals", default_value="false"),
             DeclareLaunchArgument("motion_trace_path", default_value=""),
@@ -413,9 +417,9 @@ def generate_launch_description() -> LaunchDescription:
                                   choices=["image", "ground"]),
             DeclareLaunchArgument("line_offset_align_enter_px", default_value="100.0",
                                   description="Pixel offset entry for ground-target turn/forward alignment; negative disables."),
-            DeclareLaunchArgument("recovery_heading_turn_deg", default_value="10.0"),
+            DeclareLaunchArgument("recovery_heading_turn_deg", default_value="20.0"),
             DeclareLaunchArgument(
-                "recovery_away_heading_turn_deg", default_value="3.0"
+                "recovery_away_heading_turn_deg", default_value="20.0"
             ),
             DeclareLaunchArgument(
                 "curve_follow_max_offset_norm", default_value="0.55"
@@ -505,6 +509,8 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument(
                 "robot_device_path", default_value="/dev/ttyUSB0"
             ),
+            DeclareLaunchArgument("continuous_interpolation", default_value="true"),
+            DeclareLaunchArgument("exclude_motor_5", default_value="false"),
             DeclareLaunchArgument("robot_baud_rate", default_value="4000000"),
             DeclareLaunchArgument(
                 "robot_motor_ids",

@@ -1,0 +1,11 @@
+{
+  "artifacts/robot_motions_runtime.json": "0d2fc7114495de580bb14448e892312e8d31aa049f4a20504d2454fd52032df0",
+  "artifacts/robot_motions_pc.json": "289f627e9dc437f7fc5ab24d11a55ec0be665e4a42fe804cec380f3dad7f2479",
+  "src/irc_step_motion_executor/config/motion_aliases.yaml": "c6e74ae26d6ddddc248facfa45105ae062b18f282c82328ba841d1452190e93c",
+  "external_sdk/gui_aligned/robot_motion_player.cpp": "530d78c274eda19995a5d43953feb510d866bb9f9263493d51670d8eb2722e44",
+  "external_sdk/gui_aligned/test_forward_timing.cpp": "3cce575697a0b6666dedc0a519091fae2e836b7792db145f3446490f49c55ce7",
+  "src/mission_control/mission_control/motion_command_bridge_node.py": "5cafb41a49f892bb7eaec3213c44dcb49f44f3fd1c787fcd3a662f81e168079b",
+  "src/mission_control/test/test_motion_command_bridge.py": "874d2536fa51c7c606964f8543bb40186b3c51d7c564b4b203a6464c163fea15",
+  "src/mission_control/test/test_catalog52_r_update.py": "e289993026a9ff76fb96e6d651c6e57f3a0a65adc40859abba9318c05a9d30b0",
+  "src/irc_step_motion_executor/test/test_catalog_only_core.cpp": "addba10d76beafff001b78e3c0e0844f66f633f6ffb93767f08f5d2f4c5d143f"
+}

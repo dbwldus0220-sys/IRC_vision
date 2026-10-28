@@ -1,0 +1,898 @@
+{
+  "file": "artifacts/20261027_forward_execution_diagnosis/full_system_timing/motion.csv",
+  "sha256": "5b31fb4594dc073973d7b67f1eb10affb92d60d00e7106a772a3768a29014f0e",
+  "runs": [
+    {
+      "number": 1,
+      "motion": "전45도(6회)",
+      "start_relative_s": 0.0,
+      "duration_ms": 3418.34,
+      "ticks": 681,
+      "endpoints": 24,
+      "write_failures": 0,
+      "dropped_rows": 0,
+      "queue_delay_ms": 0.0,
+      "goal_interval_ms": {
+        "mean": 4.988465155882353,
+        "p99_nearest_rank": 6.701456,
+        "max": 8.853737,
+        "over_7_5": 1,
+        "over_10": 0
+      },
+      "write_call_ms": {
+        "mean": 0.1440333205882353,
+        "p99_nearest_rank": 0.704851,
+        "max": 0.928792,
+        "over_7_5": 0,
+        "over_10": 0
+      },
+      "update_to_write_ms": {
+        "mean": 0.19025945587850668,
+        "p99_nearest_rank": 0.6034399997442961,
+        "max": 3.4054009998217225,
+        "over_7_5": 0,
+        "over_10": 0
+      },
+      "head_flags": [
+        0
+      ],
+      "shoulder_flags": [
+        0
+      ],
+      "motor_counts": [
+        23
+      ],
+      "gap_from_previous_last_write_ms": null,
+      "largest_command_step": {
+        "repeat": 1,
+        "frame": 0,
+        "timeline_from_ms": 109.0,
+        "timeline_to_ms": 114.0,
+        "interval_ms": 5.181673,
+        "tick_interval_ms": 5.157256,
+        "update_to_write_ms": 0.21191000007092953,
+        "write_ms": 0.168868,
+        "largest_step_motor_id": 13,
+        "largest_step_deg": -7.953617519531193
+      },
+      "slow_intervals": [
+        {
+          "repeat": 4,
+          "frame": 3,
+          "timeline_from_ms": 427.0,
+          "timeline_to_ms": 432.0,
+          "interval_ms": 8.853737,
+          "tick_interval_ms": 5.651477,
+          "update_to_write_ms": 3.4054009998217225,
+          "write_ms": 0.704851,
+          "largest_step_motor_id": 18,
+          "largest_step_deg": -1.6860204678471007
+        }
+      ],
+      "catalog_validation": {
+        "max_error_deg": 7.105427357601002e-14,
+        "compared_angles": 15663,
+        "all_endpoints_in_order": true
+      }
+    },
+    {
+      "number": 2,
+      "motion": "건라인복귀우회전45도(4회)",
+      "start_relative_s": 3.4200061590000987,
+      "duration_ms": 2137.64915900026,
+      "ticks": 427,
+      "endpoints": 16,
+      "write_failures": 0,
+      "dropped_rows": 0,
+      "queue_delay_ms": 4.646107,
+      "goal_interval_ms": {
+        "mean": 4.987274569411765,
+        "p99_nearest_rank": 7.370786,
+        "max": 9.423576,
+        "over_7_5": 4,
+        "over_10": 0
+      },
+      "write_call_ms": {
+        "mean": 0.14949665882352942,
+        "p99_nearest_rank": 1.06886,
+        "max": 2.284476,
+        "over_7_5": 0,
+        "over_10": 0
+      },
+      "update_to_write_ms": {
+        "mean": 0.22372781175900908,
+        "p99_nearest_rank": 1.052059999667108,
+        "max": 4.702939999289811,
+        "over_7_5": 0,
+        "over_10": 0
+      },
+      "head_flags": [
+        0
+      ],
+      "shoulder_flags": [
+        0
+      ],
+      "motor_counts": [
+        23
+      ],
+      "gap_from_previous_last_write_ms": 15.592027000151575,
+      "largest_command_step": {
+        "repeat": 2,
+        "frame": 0,
+        "timeline_from_ms": 104.0,
+        "timeline_to_ms": 111.0,
+        "interval_ms": 6.84802,
+        "tick_interval_ms": 6.843604,
+        "update_to_write_ms": 0.16045199986547232,
+        "write_ms": 0.13514,
+        "largest_step_motor_id": 13,
+        "largest_step_deg": -13.009657108002095
+      },
+      "slow_intervals": [
+        {
+          "repeat": 1,
+          "frame": 3,
+          "timeline_from_ms": 429.0,
+          "timeline_to_ms": 434.0,
+          "interval_ms": 9.423576,
+          "tick_interval_ms": 5.084005,
+          "update_to_write_ms": 4.702939999289811,
+          "write_ms": 0.190341,
+          "largest_step_motor_id": 18,
+          "largest_step_deg": -1.2765645994399009
+        },
+        {
+          "repeat": 1,
+          "frame": 3,
+          "timeline_from_ms": 469.0,
+          "timeline_to_ms": 476.0,
+          "interval_ms": 7.528838,
+          "tick_interval_ms": 7.519334,
+          "update_to_write_ms": 0.40189800038933754,
+          "write_ms": 0.168005,
+          "largest_step_motor_id": 18,
+          "largest_step_deg": -2.2705689533663005
+        },
+        {
+          "repeat": 2,
+          "frame": -1,
+          "timeline_from_ms": 264.0,
+          "timeline_to_ms": 273.0,
+          "interval_ms": 8.413054,
+          "tick_interval_ms": 8.339707,
+          "update_to_write_ms": 0.21664599981158972,
+          "write_ms": 0.211941,
+          "largest_step_motor_id": 0,
+          "largest_step_deg": 0.0
+        },
+        {
+          "repeat": 2,
+          "frame": 2,
+          "timeline_from_ms": 339.0,
+          "timeline_to_ms": 348.0,
+          "interval_ms": 9.421719,
+          "tick_interval_ms": 8.293946,
+          "update_to_write_ms": 1.3550749998539686,
+          "write_ms": 0.234183,
+          "largest_step_motor_id": 14,
+          "largest_step_deg": 6.6220878412174
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "motion": "건라인복귀우회전45도(4회)",
+      "start_relative_s": 5.5627484120000155,
+      "duration_ms": 2126.96852400061,
+      "ticks": 422,
+      "endpoints": 16,
+      "write_failures": 0,
+      "dropped_rows": 0,
+      "queue_delay_ms": 0.0,
+      "goal_interval_ms": {
+        "mean": 5.01857244655582,
+        "p99_nearest_rank": 7.529607,
+        "max": 13.595781,
+        "over_7_5": 5,
+        "over_10": 1
+      },
+      "write_call_ms": {
+        "mean": 0.14556050356294536,
+        "p99_nearest_rank": 0.441611,
+        "max": 1.185183,
+        "over_7_5": 0,
+        "over_10": 0
+      },
+      "update_to_write_ms": {
+        "mean": 0.21092018999177034,
+        "p99_nearest_rank": 0.7193470001220703,
+        "max": 4.8099819999188185,
+        "over_7_5": 0,
+        "over_10": 0
+      },
+      "head_flags": [
+        0
+      ],
+      "shoulder_flags": [
+        0
+      ],
+      "motor_counts": [
+        23
+      ],
+      "gap_from_previous_last_write_ms": 12.40407000016421,
+      "largest_command_step": {
+        "repeat": 3,
+        "frame": 0,
+        "timeline_from_ms": 108.0,
+        "timeline_to_ms": 113.0,
+        "interval_ms": 4.856384,
+        "tick_interval_ms": 4.866368,
+        "update_to_write_ms": 0.14745999965816736,
+        "write_ms": 0.136292,
+        "largest_step_motor_id": 13,
+        "largest_step_deg": -9.526165350567695
+      },
+      "slow_intervals": [
+        {
+          "repeat": 1,
+          "frame": -1,
+          "timeline_from_ms": 7.0,
+          "timeline_to_ms": 15.0,
+          "interval_ms": 8.242905,
+          "tick_interval_ms": 8.237465,
+          "update_to_write_ms": 0.06566600035876036,
+          "write_ms": 0.127427,
+          "largest_step_motor_id": 0,
+          "largest_step_deg": 0.0
+        },
+        {
+          "repeat": 3,
+          "frame": 1,
+          "timeline_from_ms": 208.0,
+          "timeline_to_ms": 218.0,
+          "interval_ms": 9.688383,
+          "tick_interval_ms": 9.654622,
+          "update_to_write_ms": 0.23939800076186657,
+          "write_ms": 0.153476,
+          "largest_step_motor_id": 17,
+          "largest_step_deg": 3.995444696061199
+        },
+        {
+          "repeat": 3,
+          "frame": -1,
+          "timeline_from_ms": 248.0,
+          "timeline_to_ms": 262.0,
+          "interval_ms": 13.595781,
+          "tick_interval_ms": 14.15218,
+          "update_to_write_ms": 0.1629479993134737,
+          "write_ms": 0.120163,
+          "largest_step_motor_id": 0,
+          "largest_step_deg": 0.0
+        },
+        {
+          "repeat": 3,
+          "frame": -1,
+          "timeline_from_ms": 288.0,
+          "timeline_to_ms": 293.0,
+          "interval_ms": 9.696735,
+          "tick_interval_ms": 5.049381,
+          "update_to_write_ms": 4.8099819999188185,
+          "write_ms": 0.155941,
+          "largest_step_motor_id": 0,
+          "largest_step_deg": 0.0
+        },
+        {
+          "repeat": 3,
+          "frame": 3,
+          "timeline_from_ms": 428.0,
+          "timeline_to_ms": 436.0,
+          "interval_ms": 7.529607,
+          "tick_interval_ms": 7.527878,
+          "update_to_write_ms": 0.2694799993187189,
+          "write_ms": 0.190565,
+          "largest_step_motor_id": 18,
+          "largest_step_deg": -2.0617330102788003
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "motion": "전45도(6회)",
+      "start_relative_s": 7.6900763699999075,
+      "duration_ms": 3402.31336299982,
+      "ticks": 677,
+      "endpoints": 24,
+      "write_failures": 0,
+      "dropped_rows": 0,
+      "queue_delay_ms": 0.0,
+      "goal_interval_ms": {
+        "mean": 5.011694711538461,
+        "p99_nearest_rank": 8.253561,
+        "max": 14.589535,
+        "over_7_5": 7,
+        "over_10": 3
+      },
+      "write_call_ms": {
+        "mean": 0.15139364349112425,
+        "p99_nearest_rank": 0.895319,
+        "max": 1.981268,
+        "over_7_5": 0,
+        "over_10": 0
+      },
+      "update_to_write_ms": {
+        "mean": 0.20771726033066196,
+        "p99_nearest_rank": 0.9478330006822944,
+        "max": 9.683645999990404,
+        "over_7_5": 1,
+        "over_10": 0
+      },
+      "head_flags": [
+        0
+      ],
+      "shoulder_flags": [
+        0
+      ],
+      "motor_counts": [
+        23
+      ],
+      "gap_from_previous_last_write_ms": 27.007397999987006,
+      "largest_command_step": {
+        "repeat": 1,
+        "frame": 0,
+        "timeline_from_ms": 114.0,
+        "timeline_to_ms": 119.0,
+        "interval_ms": 5.085862,
+        "tick_interval_ms": 5.057029,
+        "update_to_write_ms": 0.18787700030952692,
+        "write_ms": 0.163076,
+        "largest_step_motor_id": 13,
+        "largest_step_deg": -8.128869469969004
+      },
+      "slow_intervals": [
+        {
+          "repeat": 1,
+          "frame": 2,
+          "timeline_from_ms": 375.0,
+          "timeline_to_ms": 383.0,
+          "interval_ms": 8.752294,
+          "tick_interval_ms": 8.719718,
+          "update_to_write_ms": 0.35754499956965446,
+          "write_ms": 0.181221,
+          "largest_step_motor_id": 14,
+          "largest_step_deg": 2.3113320171879934
+        },
+        {
+          "repeat": 1,
+          "frame": 3,
+          "timeline_from_ms": 479.0,
+          "timeline_to_ms": 486.0,
+          "interval_ms": 9.704672,
+          "tick_interval_ms": 7.750636,
+          "update_to_write_ms": 2.28233200032264,
+          "write_ms": 0.159332,
+          "largest_step_motor_id": 18,
+          "largest_step_deg": -1.794552914169099
+        },
+        {
+          "repeat": 2,
+          "frame": 2,
+          "timeline_from_ms": 373.0,
+          "timeline_to_ms": 380.0,
+          "interval_ms": 8.253561,
+          "tick_interval_ms": 7.83931,
+          "update_to_write_ms": 0.5757590001448989,
+          "write_ms": 0.140804,
+          "largest_step_motor_id": 14,
+          "largest_step_deg": 3.0682293608979876
+        },
+        {
+          "repeat": 3,
+          "frame": -1,
+          "timeline_from_ms": 508.0,
+          "timeline_to_ms": 9.0,
+          "interval_ms": 11.277545,
+          "tick_interval_ms": 11.498287,
+          "update_to_write_ms": 0.07040200009942055,
+          "write_ms": 0.141955,
+          "largest_step_motor_id": 0,
+          "largest_step_deg": 0.0
+        },
+        {
+          "repeat": 3,
+          "frame": 1,
+          "timeline_from_ms": 152.0,
+          "timeline_to_ms": 156.0,
+          "interval_ms": 14.589535,
+          "tick_interval_ms": 5.054885,
+          "update_to_write_ms": 9.683645999990404,
+          "write_ms": 0.1473,
+          "largest_step_motor_id": 17,
+          "largest_step_deg": 0.521584317624999
+        },
+        {
+          "repeat": 5,
+          "frame": -1,
+          "timeline_from_ms": 314.0,
+          "timeline_to_ms": 325.0,
+          "interval_ms": 12.017852,
+          "tick_interval_ms": 12.022876,
+          "update_to_write_ms": 0.17053299956023693,
+          "write_ms": 0.163428,
+          "largest_step_motor_id": 0,
+          "largest_step_deg": 0.0
+        },
+        {
+          "repeat": 6,
+          "frame": -1,
+          "timeline_from_ms": 65.0,
+          "timeline_to_ms": 72.0,
+          "interval_ms": 9.001773,
+          "tick_interval_ms": 7.457733,
+          "update_to_write_ms": 1.6119780000299215,
+          "write_ms": 0.13738,
+          "largest_step_motor_id": 0,
+          "largest_step_deg": 0.0
+        }
+      ],
+      "catalog_validation": {
+        "max_error_deg": 7.105427357601002e-14,
+        "compared_angles": 15571,
+        "all_endpoints_in_order": true
+      }
+    },
+    {
+      "number": 5,
+      "motion": "건라인복귀우회전45도(4회)",
+      "start_relative_s": 11.09561468300037,
+      "duration_ms": 2136.94423799962,
+      "ticks": 426,
+      "endpoints": 16,
+      "write_failures": 0,
+      "dropped_rows": 0,
+      "queue_delay_ms": 0.0,
+      "goal_interval_ms": {
+        "mean": 4.988298054117647,
+        "p99_nearest_rank": 7.31232,
+        "max": 8.240888,
+        "over_7_5": 3,
+        "over_10": 0
+      },
+      "write_call_ms": {
+        "mean": 0.13773438823529413,
+        "p99_nearest_rank": 0.374794,
+        "max": 1.72347,
+        "over_7_5": 0,
+        "over_10": 0
+      },
+      "update_to_write_ms": {
+        "mean": 0.19345217411789825,
+        "p99_nearest_rank": 0.8605659995228052,
+        "max": 1.0586519995704293,
+        "over_7_5": 0,
+        "over_10": 0
+      },
+      "head_flags": [
+        0
+      ],
+      "shoulder_flags": [
+        0
+      ],
+      "motor_counts": [
+        23
+      ],
+      "gap_from_previous_last_write_ms": 19.866155000403523,
+      "largest_command_step": {
+        "repeat": 3,
+        "frame": 0,
+        "timeline_from_ms": 107.0,
+        "timeline_to_ms": 113.0,
+        "interval_ms": 4.245391,
+        "tick_interval_ms": 5.029189,
+        "update_to_write_ms": 0.14035500027239323,
+        "write_ms": 0.128196,
+        "largest_step_motor_id": 13,
+        "largest_step_deg": -11.407818366552199
+      },
+      "slow_intervals": [
+        {
+          "repeat": 1,
+          "frame": 0,
+          "timeline_from_ms": 119.0,
+          "timeline_to_ms": 127.0,
+          "interval_ms": 8.240888,
+          "tick_interval_ms": 8.191672,
+          "update_to_write_ms": 0.1733479993417859,
+          "write_ms": 1.72347,
+          "largest_step_motor_id": 13,
+          "largest_step_deg": -6.967737322485505
+        },
+        {
+          "repeat": 4,
+          "frame": 3,
+          "timeline_from_ms": 409.0,
+          "timeline_to_ms": 417.0,
+          "interval_ms": 7.809261,
+          "tick_interval_ms": 7.790285,
+          "update_to_write_ms": 0.2587270000949502,
+          "write_ms": 0.149956,
+          "largest_step_motor_id": 18,
+          "largest_step_deg": -1.077281446580301
+        },
+        {
+          "repeat": 4,
+          "frame": 3,
+          "timeline_from_ms": 500.0,
+          "timeline_to_ms": 508.0,
+          "interval_ms": 7.621769,
+          "tick_interval_ms": 7.621001,
+          "update_to_write_ms": 0.242854000069201,
+          "write_ms": 0.141124,
+          "largest_step_motor_id": 18,
+          "largest_step_deg": -1.3675184709627004
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "motion": "건라인복귀좌회전45도(4회)",
+      "start_relative_s": 13.245197556999512,
+      "duration_ms": 2196.37463099975,
+      "ticks": 428,
+      "endpoints": 16,
+      "write_failures": 0,
+      "dropped_rows": 0,
+      "queue_delay_ms": 0.0,
+      "goal_interval_ms": {
+        "mean": 5.007809461358314,
+        "p99_nearest_rank": 7.977361,
+        "max": 12.070045,
+        "over_7_5": 7,
+        "over_10": 2
+      },
+      "write_call_ms": {
+        "mean": 0.13743657845433255,
+        "p99_nearest_rank": 0.302472,
+        "max": 1.747054,
+        "over_7_5": 0,
+        "over_10": 0
+      },
+      "update_to_write_ms": {
+        "mean": 0.1855100609091671,
+        "p99_nearest_rank": 0.4346039993688464,
+        "max": 1.0286349998787045,
+        "over_7_5": 0,
+        "over_10": 0
+      },
+      "head_flags": [
+        0
+      ],
+      "shoulder_flags": [
+        0
+      ],
+      "motor_counts": [
+        23
+      ],
+      "gap_from_previous_last_write_ms": 71.85792199987918,
+      "largest_command_step": {
+        "repeat": 1,
+        "frame": 0,
+        "timeline_from_ms": 97.0,
+        "timeline_to_ms": 103.0,
+        "interval_ms": 5.051941,
+        "tick_interval_ms": 5.03034,
+        "update_to_write_ms": 0.13562000077217817,
+        "write_ms": 0.133635,
+        "largest_step_motor_id": 13,
+        "largest_step_deg": -10.204853789249405
+      },
+      "slow_intervals": [
+        {
+          "repeat": 1,
+          "frame": 1,
+          "timeline_from_ms": 203.0,
+          "timeline_to_ms": 210.0,
+          "interval_ms": 7.737067,
+          "tick_interval_ms": 7.760172,
+          "update_to_write_ms": 0.1679720003157854,
+          "write_ms": 0.131332,
+          "largest_step_motor_id": 17,
+          "largest_step_deg": 2.887092517316603
+        },
+        {
+          "repeat": 1,
+          "frame": -1,
+          "timeline_from_ms": 262.0,
+          "timeline_to_ms": 270.0,
+          "interval_ms": 8.071637,
+          "tick_interval_ms": 8.033299,
+          "update_to_write_ms": 0.17280500009655952,
+          "write_ms": 0.162052,
+          "largest_step_motor_id": 0,
+          "largest_step_deg": 0.0
+        },
+        {
+          "repeat": 2,
+          "frame": 2,
+          "timeline_from_ms": 354.0,
+          "timeline_to_ms": 362.0,
+          "interval_ms": 7.78142,
+          "tick_interval_ms": 7.716587,
+          "update_to_write_ms": 0.2071730000898242,
+          "write_ms": 0.13658,
+          "largest_step_motor_id": 14,
+          "largest_step_deg": 7.677326889356294
+        },
+        {
+          "repeat": 3,
+          "frame": 2,
+          "timeline_from_ms": 394.0,
+          "timeline_to_ms": 406.0,
+          "interval_ms": 12.070045,
+          "tick_interval_ms": 11.976667,
+          "update_to_write_ms": 0.28688700031489134,
+          "write_ms": 0.171717,
+          "largest_step_motor_id": 0,
+          "largest_step_deg": 0.0
+        },
+        {
+          "repeat": 4,
+          "frame": -1,
+          "timeline_from_ms": 534.0,
+          "timeline_to_ms": 6.0,
+          "interval_ms": 8.838632,
+          "tick_interval_ms": 9.072847,
+          "update_to_write_ms": 0.09126600064337254,
+          "write_ms": 0.171685,
+          "largest_step_motor_id": 0,
+          "largest_step_deg": 0.0
+        },
+        {
+          "repeat": 4,
+          "frame": -1,
+          "timeline_from_ms": 42.0,
+          "timeline_to_ms": 50.0,
+          "interval_ms": 7.977361,
+          "tick_interval_ms": 7.984018,
+          "update_to_write_ms": 0.06608100049197674,
+          "write_ms": 0.157029,
+          "largest_step_motor_id": 0,
+          "largest_step_deg": 0.0
+        },
+        {
+          "repeat": 4,
+          "frame": -1,
+          "timeline_from_ms": 292.0,
+          "timeline_to_ms": 303.0,
+          "interval_ms": 11.026978,
+          "tick_interval_ms": 10.990497,
+          "update_to_write_ms": 0.1833650004118681,
+          "write_ms": 0.157924,
+          "largest_step_motor_id": 0,
+          "largest_step_deg": 0.0
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "motion": "전45도(4회)",
+      "start_relative_s": 15.46028896899987,
+      "duration_ms": 2277.56098800059,
+      "ticks": 454,
+      "endpoints": 16,
+      "write_failures": 0,
+      "dropped_rows": 0,
+      "queue_delay_ms": 0.0,
+      "goal_interval_ms": {
+        "mean": 4.983448894039735,
+        "p99_nearest_rank": 7.983378,
+        "max": 11.328714,
+        "over_7_5": 6,
+        "over_10": 2
+      },
+      "write_call_ms": {
+        "mean": 0.14490561810154526,
+        "p99_nearest_rank": 0.673234,
+        "max": 2.183546,
+        "over_7_5": 0,
+        "over_10": 0
+      },
+      "update_to_write_ms": {
+        "mean": 0.19801415231235112,
+        "p99_nearest_rank": 0.9766330001875758,
+        "max": 3.4725709995254874,
+        "over_7_5": 0,
+        "over_10": 0
+      },
+      "head_flags": [
+        0
+      ],
+      "shoulder_flags": [
+        0
+      ],
+      "motor_counts": [
+        23
+      ],
+      "gap_from_previous_last_write_ms": 37.477721999399364,
+      "largest_command_step": {
+        "repeat": 1,
+        "frame": 0,
+        "timeline_from_ms": 114.0,
+        "timeline_to_ms": 119.0,
+        "interval_ms": 5.001956,
+        "tick_interval_ms": 4.9985,
+        "update_to_write_ms": 0.14096399955451488,
+        "write_ms": 0.121603,
+        "largest_step_motor_id": 13,
+        "largest_step_deg": -8.099256045792302
+      },
+      "slow_intervals": [
+        {
+          "repeat": 1,
+          "frame": 2,
+          "timeline_from_ms": 348.0,
+          "timeline_to_ms": 355.0,
+          "interval_ms": 7.505221,
+          "tick_interval_ms": 7.489381,
+          "update_to_write_ms": 0.23370200023055077,
+          "write_ms": 0.139172,
+          "largest_step_motor_id": 14,
+          "largest_step_deg": 6.317147894757198
+        },
+        {
+          "repeat": 2,
+          "frame": 2,
+          "timeline_from_ms": 341.0,
+          "timeline_to_ms": 348.0,
+          "interval_ms": 7.983378,
+          "tick_interval_ms": 7.969937,
+          "update_to_write_ms": 0.20762200001627207,
+          "write_ms": 0.135459,
+          "largest_step_motor_id": 14,
+          "largest_step_deg": 4.3556861188097
+        },
+        {
+          "repeat": 4,
+          "frame": -1,
+          "timeline_from_ms": 508.0,
+          "timeline_to_ms": 7.0,
+          "interval_ms": 8.358556,
+          "tick_interval_ms": 8.661924,
+          "update_to_write_ms": 0.0924509996548295,
+          "write_ms": 0.304328,
+          "largest_step_motor_id": 0,
+          "largest_step_deg": 0.0
+        },
+        {
+          "repeat": 4,
+          "frame": 2,
+          "timeline_from_ms": 354.0,
+          "timeline_to_ms": 361.0,
+          "interval_ms": 10.683257,
+          "tick_interval_ms": 7.400707,
+          "update_to_write_ms": 3.4725709995254874,
+          "write_ms": 0.16762,
+          "largest_step_motor_id": 14,
+          "largest_step_deg": 7.034374513927403
+        },
+        {
+          "repeat": 4,
+          "frame": 2,
+          "timeline_from_ms": 390.0,
+          "timeline_to_ms": 398.0,
+          "interval_ms": 11.328714,
+          "tick_interval_ms": 8.579361,
+          "update_to_write_ms": 2.926029000431299,
+          "write_ms": 0.23223,
+          "largest_step_motor_id": 0,
+          "largest_step_deg": 0.0
+        },
+        {
+          "repeat": 4,
+          "frame": 3,
+          "timeline_from_ms": 426.0,
+          "timeline_to_ms": 434.0,
+          "interval_ms": 8.520288,
+          "tick_interval_ms": 8.44595,
+          "update_to_write_ms": 0.28951200004667044,
+          "write_ms": 0.115907,
+          "largest_step_motor_id": 18,
+          "largest_step_deg": -2.7209018024450984
+        }
+      ],
+      "catalog_validation": {
+        "max_error_deg": 7.283063041541027e-14,
+        "compared_angles": 10442,
+        "all_endpoints_in_order": true
+      }
+    },
+    {
+      "number": 8,
+      "motion": "건제자리좌회전45도(3회)",
+      "start_relative_s": 17.89535765200015,
+      "duration_ms": 1040.46003600024,
+      "ticks": 207,
+      "endpoints": 6,
+      "write_failures": 0,
+      "dropped_rows": 0,
+      "queue_delay_ms": 0.0,
+      "goal_interval_ms": {
+        "mean": 4.977783417475728,
+        "p99_nearest_rank": 6.290981,
+        "max": 6.635918,
+        "over_7_5": 0,
+        "over_10": 0
+      },
+      "write_call_ms": {
+        "mean": 0.140587213592233,
+        "p99_nearest_rank": 0.74162,
+        "max": 1.563209,
+        "over_7_5": 0,
+        "over_10": 0
+      },
+      "update_to_write_ms": {
+        "mean": 0.12539226214121124,
+        "p99_nearest_rank": 0.31511300057172775,
+        "max": 0.9154160004109144,
+        "over_7_5": 0,
+        "over_10": 0
+      },
+      "head_flags": [
+        0
+      ],
+      "shoulder_flags": [
+        0
+      ],
+      "motor_counts": [
+        23
+      ],
+      "gap_from_previous_last_write_ms": 174.44237999990582,
+      "largest_command_step": {
+        "repeat": 1,
+        "frame": 0,
+        "timeline_from_ms": 139.0,
+        "timeline_to_ms": 144.0,
+        "interval_ms": 4.834079,
+        "tick_interval_ms": 4.902529,
+        "update_to_write_ms": 0.08550600055605173,
+        "write_ms": 0.062562,
+        "largest_step_motor_id": 18,
+        "largest_step_deg": 6.331702437568502
+      },
+      "slow_intervals": []
+    },
+    {
+      "number": 9,
+      "motion": "건제자리좌회전45도(1회)",
+      "start_relative_s": 20.500475060000085,
+      "duration_ms": 119.232352000661,
+      "ticks": 1,
+      "endpoints": 0,
+      "write_failures": 0,
+      "dropped_rows": 0,
+      "queue_delay_ms": 0.0,
+      "goal_interval_ms": null,
+      "write_call_ms": null,
+      "update_to_write_ms": null,
+      "head_flags": [],
+      "shoulder_flags": [],
+      "motor_counts": []
+    },
+    {
+      "number": 10,
+      "motion": "전45도(2회)",
+      "start_relative_s": 25.595575481999667,
+      "duration_ms": 120.426750999875,
+      "ticks": 1,
+      "endpoints": 0,
+      "write_failures": 0,
+      "dropped_rows": 0,
+      "queue_delay_ms": 0.0,
+      "goal_interval_ms": null,
+      "write_call_ms": null,
+      "update_to_write_ms": null,
+      "head_flags": [],
+      "shoulder_flags": [],
+      "motor_counts": []
+    }
+  ]
+}

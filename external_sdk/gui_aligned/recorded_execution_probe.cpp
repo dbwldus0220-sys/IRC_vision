@@ -70,10 +70,16 @@ int main(int argc, char** argv) {
         std::vector<RecordedTick> ticks;
         std::string line;
         bool have_initial = false;
+        bool continuous = false; // 보간 옵션이 없는 기존 기록은 코사인 GUI 기록이다.
         while (std::getline(input, line)) {
             std::istringstream row(line);
             char kind; row >> kind;
-            if (kind == 'I') {
+            if (kind == 'O') {
+                int mode;
+                if (have_initial || !(row >> mode) || (mode!=0 && mode!=1))
+                    throw std::runtime_error("invalid interpolation option");
+                continuous = mode != 0;
+            } else if (kind == 'I') {
                 if (have_initial || !ticks.empty()) throw std::runtime_error("misplaced initial angles");
                 for (int id=0; id<23; ++id) {
                     double value; if (!(row >> value) || !std::isfinite(value)) throw std::runtime_error("invalid initial angle");
@@ -110,6 +116,7 @@ int main(int argc, char** argv) {
             return RobotMotionPlayer::Clock::time_point(std::chrono::duration_cast<RobotMotionPlayer::Clock::duration>(
                 std::chrono::duration<double, std::milli>(bus.ms)));
         });
+        player.setContinuousInterpolation(continuous);
         if (!player.initialize() || player.start("recorded_gui") != StartResult::Accepted)
             throw std::runtime_error("cannot start recorded motion");
         for (const auto& tick : ticks) {

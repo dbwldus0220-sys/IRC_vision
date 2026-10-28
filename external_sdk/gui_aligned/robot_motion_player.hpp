@@ -3,6 +3,7 @@
 #include "motion_hardware.hpp"
 #include "motion_pattern.hpp"
 #include "gui_alignment.hpp"
+#include "gui_playback.hpp"
 #include "playback_trace.hpp"
 
 #include <chrono>
@@ -92,6 +93,8 @@ public:
     RobotMotionPlayer& operator=(const RobotMotionPlayer&) = delete;
 
     bool initialize() noexcept;
+    void setContinuousInterpolation(bool enabled);
+    void setForwardBoundaryFeedbackAccounting(bool enabled);
     bool startPoseTransition(const std::vector<double>& angles, std::int64_t duration_ms) noexcept;
     MotionStatus updateStartupPose() noexcept;
     // 일반 재생의 성공은 목표 전송 완료다. 위치 검사는 startup에만 적용한다.
@@ -153,6 +156,8 @@ public:
     void shutdown() noexcept;
 
 private:
+    Clock::time_point forwardBoundaryStart(const MotionPattern& next,
+        std::string_view next_name, Clock::time_point now) const noexcept;
     using FrameCorrectionKey = std::tuple<std::string, std::string, int>;
 
     bool writeGoals(const JointAngles& goals, const std::vector<int>& ids, const char* event);
@@ -188,6 +193,10 @@ private:
     bool queued_boundary_pending_{false};
     Clock::time_point queued_boundary_at_{};
     Now now_{Clock::now};
+    bool continuous_interpolation_{true};
+    bool account_forward_boundary_feedback_{false};
+    Clock::time_point last_goal_written_at_{};
+    GuiContinuousTrajectory continuous_trajectory_;
     JointAngles start_angles_;
     JointAngles feedback_angles_;
     JointAngles command_angles_;

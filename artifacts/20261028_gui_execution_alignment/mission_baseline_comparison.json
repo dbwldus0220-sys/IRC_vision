@@ -1,0 +1,13 @@
+{
+  "current_failed": 293,
+  "baseline_failed": 293,
+  "only_current": [],
+  "only_baseline": [],
+  "baseline_errors": [
+    {
+      "classname": "test.test_sdk_motion_stub_node",
+      "name": "test_invalid_command_is_ignored",
+      "time": "0.061"
+    }
+  ]
+}

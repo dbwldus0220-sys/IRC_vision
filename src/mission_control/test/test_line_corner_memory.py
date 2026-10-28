@@ -70,8 +70,8 @@ def start_line(node):
 
 
 @pytest.mark.parametrize('capture_age_sec,held,ground_valid,expected', [
-    (.1, False, True, 'RECOVER_LEFT_TURN_LEFT_4'),
-    (.1, True, True, 'RECOVER_LEFT_TURN_LEFT_4'),
+    (.1, False, True, 'STRAIGHT'),
+    (.1, True, True, 'STRAIGHT'),
     (-.1, False, True, 'WAIT'),
     (.6, False, True, 'WAIT'),
     (.1, True, False, 'WAIT'),

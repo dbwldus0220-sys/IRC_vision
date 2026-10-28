@@ -1,0 +1,211 @@
+"""Tests for the hardware-disabled robot full-system launch defaults."""
+
+import importlib.util
+import json
+from pathlib import Path
+
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchContext
+from launch.actions import DeclareLaunchArgument
+from launch_ros.actions import Node
+
+
+LEGACY_EXECUTABLES = {
+    "legacy_motion_executor_adapter",
+    "motion_executor_node",
+    "legacy_motion_status_adapter",
+    "sdk_motion_stub_node",
+}
+
+
+def launch_description(monkeypatch, tmp_path):
+    """Load the robot launch description without executing it."""
+    monkeypatch.setenv("ROS_LOG_DIR", str(tmp_path / "ros_logs"))
+    launch_path = (
+        Path(__file__).resolve().parents[1]
+        / "launch"
+        / "full_system_robot.launch.py"
+    )
+    spec = importlib.util.spec_from_file_location(
+        "full_system_robot_launch",
+        launch_path,
+    )
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.generate_launch_description()
+
+
+def default_context(description):
+    """Populate a launch context with declared default arguments."""
+    context = LaunchContext()
+    for entity in description.entities:
+        if isinstance(entity, DeclareLaunchArgument):
+            entity.execute(context)
+    return context
+
+
+def executor_parameters(executor, context):
+    """Evaluate sdk_motion_executor parameters in one launch context."""
+    parameters = executor._Node__parameters[0]
+    output = {}
+    for name, value in parameters.items():
+        key = "".join(part.text for part in name)
+        output[key] = value.evaluate(context) if hasattr(value, "evaluate") else value
+    return output
+
+
+def test_robot_launch_has_one_cpp_executor_and_no_legacy_nodes(
+    monkeypatch,
+    tmp_path,
+):
+    description = launch_description(monkeypatch, tmp_path)
+    executables = [
+        entity.node_executable
+        for entity in description.entities
+        if isinstance(entity, Node)
+    ]
+
+    assert executables.count("sdk_motion_executor") == 1
+    assert "motion_command_bridge_node" in executables
+    assert set(executables).isdisjoint(LEGACY_EXECUTABLES)
+
+
+def test_robot_launch_defaults_are_production_ready(
+    monkeypatch,
+    tmp_path,
+):
+    description = launch_description(monkeypatch, tmp_path)
+    context = default_context(description)
+    executor = next(
+        entity
+        for entity in description.entities
+        if isinstance(entity, Node)
+        and entity.node_executable == "sdk_motion_executor"
+    )
+    parameters = executor_parameters(executor, context)
+
+    assert context.launch_configurations["enable_camera"] == "true"
+    assert context.launch_configurations["device"] == "tensorrt"
+    assert context.launch_configurations["model_path"].endswith(
+        "/step/models/best.engine"
+    )
+    assert context.launch_configurations["display"] == "true"
+    assert context.launch_configurations["initial_mission_phase"] == "AUTO"
+    assert parameters == {
+        "backend_type": "robot_motion_player",
+        "enable_robot_hardware": True,
+        "poll_period_ms": 5,
+        "continuous_interpolation": True,
+        "exclude_motor_5": False,
+        "running_polls": 2,
+        "settling_polls": 1,
+        "explicit_torque_approval": True,
+        "position_tolerance_enabled": False,
+        "enable_head_override": True,
+        "enable_shoulder_override": False,
+        "queued_transition_hold_ms": 0,
+        "motion_trace_enabled": False,
+        "motion_trace_path": "",
+        "motion_trace_goals": False,
+        "motion_json_path": str(
+            Path(get_package_share_directory("irc_step_motion_executor"))
+            / "config"
+            / "robot_motions_runtime.json"
+        ),
+        "robot_device_path": "/dev/ttyUSB0",
+        "robot_baud_rate": 4000000,
+        "robot_motor_ids": list(range(23)),
+        "startup_pose_enabled": True,
+        "startup_pose_name": "오뒤무게중심앞",
+        "startup_pose_duration_ms": 4000,
+        "ball_head_override_deg": -64.0,
+    }
+
+
+def test_startup_target_matches_catalog51_front_weight_pose(monkeypatch, tmp_path):
+    description = launch_description(monkeypatch, tmp_path)
+    context = default_context(description)
+    pose_name = context.launch_configurations["startup_pose_name"]
+    root = Path(__file__).resolve().parents[3]
+    for filename in ("robot_motions_runtime.json", "robot_motions_pc.json"):
+        motions = json.loads((root / "artifacts" / filename).read_text())["motions"]
+        motion = next(m for m in motions if m["name"] == "오뒤무게중심앞")
+        assert len(motion["frames"]) == 1
+        target = motion["frames"][0]
+        assert pose_name == target["name"] == motion["start_pose"] == "오뒤무게중심앞"
+        matches = [f for m in motions for f in m["frames"] if f["name"] == pose_name]
+        assert matches
+        assert all(f["angles"] == target["angles"] for f in matches)
+        assert all(target["torques"].values())
+        if filename == "robot_motions_runtime.json":
+            pc = json.loads((root / "artifacts/robot_motions_pc.json").read_text())["motions"]
+            original = next(m for m in pc if m["name"] == "오뒤무게중심앞")["frames"][0]
+            assert target["angles"] == original["angles"]
+
+
+def test_robot_launch_passes_realsense_topic_parameters(
+    monkeypatch,
+    tmp_path,
+):
+    description = launch_description(monkeypatch, tmp_path)
+    context = default_context(description)
+    nodes = {
+        entity.node_executable: entity
+        for entity in description.entities
+        if isinstance(entity, Node)
+    }
+
+    detector_parameters = executor_parameters(
+        nodes["yolo26_detector"],
+        context,
+    )
+    assert detector_parameters["image_topic"] == (
+        "/camera/camera/color/image_raw"
+    )
+    assert (
+        context.launch_configurations["max_rgb_depth_delta_sec"] == "0.05"
+    )
+    assert (
+        context.launch_configurations["overlay_max_stamp_delta_sec"]
+        == "0.30"
+    )
+    assert detector_parameters["overlay_max_stamp_delta_sec"] == 0.30
+
+    vision_parameters = executor_parameters(
+        nodes["unified_vision_node"],
+        context,
+    )
+    assert vision_parameters["image_topic"] == (
+        "/camera/camera/color/image_raw"
+    )
+    assert vision_parameters["depth_topic"] == (
+        "/camera/camera/aligned_depth_to_color/image_raw"
+    )
+    assert vision_parameters["camera_info_topic"] == (
+        "/camera/camera/color/camera_info"
+    )
+    assert vision_parameters["max_rgb_depth_delta_sec"] == 0.05
+    assert vision_parameters["head_down_trigger_bottom_distance_px"] == 120
+    assert vision_parameters["roi_x_min_ratio"] == 0.0
+    assert vision_parameters["roi_x_max_ratio"] == 1.0
+
+    decision_parameters = executor_parameters(
+        nodes["motion_decision_node"],
+        context,
+    )
+    assert decision_parameters["goal_control_range_m"] == 2.0
+    assert decision_parameters["pickup_fine_step_distance_m"] == 0.550
+    assert decision_parameters["pickup_fine_align_bottom_distance_px"] == 270
+
+
+def test_robot_launch_waits_for_enter(monkeypatch, tmp_path):
+    description = launch_description(monkeypatch, tmp_path)
+    context = default_context(description)
+    decision = next(
+        entity for entity in description.entities
+        if isinstance(entity, Node)
+        and entity.node_executable == "motion_decision_node"
+    )
+    assert executor_parameters(decision, context)["wait_for_enter"] is True

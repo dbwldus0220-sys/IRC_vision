@@ -1,0 +1,63 @@
+Internal ctest changing into directory: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+Test project /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+      Start  1: test_callback_timing_trace
+ 1/27 Test  #1: test_callback_timing_trace ..........   Passed    0.19 sec
+      Start  2: test_legacy_cosine_execution
+ 2/27 Test  #2: test_legacy_cosine_execution ........   Passed   69.41 sec
+      Start  3: test_forward_timing
+ 3/27 Test  #3: test_forward_timing .................   Passed    0.03 sec
+      Start  4: test_continuous_interpolation
+ 4/27 Test  #4: test_continuous_interpolation .......   Passed    0.01 sec
+      Start  5: test_continuous_hardware
+ 5/27 Test  #5: test_continuous_hardware ............   Passed    0.04 sec
+      Start  6: test_continuous_playback_parity
+ 6/27 Test  #6: test_continuous_playback_parity .....   Passed   24.83 sec
+      Start  7: test_gui_alignment_contract
+ 7/27 Test  #7: test_gui_alignment_contract .........   Passed    0.01 sec
+      Start  8: test_gui_execution_specification
+ 8/27 Test  #8: test_gui_execution_specification ....   Passed   51.73 sec
+      Start  9: test_catalog_only_core
+ 9/27 Test  #9: test_catalog_only_core ..............   Passed    0.18 sec
+      Start 10: test_motion_json_catalog
+10/27 Test #10: test_motion_json_catalog ............   Passed    0.17 sec
+      Start 11: test_sdk_executor_core
+11/27 Test #11: test_sdk_executor_core ..............   Passed    0.20 sec
+      Start 12: test_queue_control_tick
+12/27 Test #12: test_queue_control_tick .............   Passed    0.16 sec
+      Start 13: test_robot_motion_player_backend
+13/27 Test #13: test_robot_motion_player_backend ....   Passed    0.16 sec
+      Start 14: test_simulated_motion_backend
+14/27 Test #14: test_simulated_motion_backend .......   Passed    0.16 sec
+      Start 15: test_robot_motion_runtime_config
+15/27 Test #15: test_robot_motion_runtime_config ....   Passed    0.17 sec
+      Start 16: test_robot_motion_parameter_types
+16/27 Test #16: test_robot_motion_parameter_types ...   Passed    0.17 sec
+      Start 17: test_motion_backend_factory
+17/27 Test #17: test_motion_backend_factory .........   Passed    0.16 sec
+      Start 18: test_sdk_executor_driver
+18/27 Test #18: test_sdk_executor_driver ............   Passed    0.19 sec
+      Start 19: test_startup_pose_gate
+19/27 Test #19: test_startup_pose_gate ..............   Passed    0.18 sec
+      Start 20: test_startup_pose_catalog
+20/27 Test #20: test_startup_pose_catalog ...........   Passed    1.60 sec
+      Start 21: test_validate_motion_catalog
+21/27 Test #21: test_validate_motion_catalog ........   Passed    0.15 sec
+      Start 22: motion_pattern_test
+22/27 Test #22: motion_pattern_test .................   Passed    0.01 sec
+      Start 23: motion_callback_test
+23/27 Test #23: motion_callback_test ................   Passed    0.09 sec
+      Start 24: gui_alignment_contract
+24/27 Test #24: gui_alignment_contract ..............   Passed    0.01 sec
+      Start 25: continuous_hardware_contract
+25/27 Test #25: continuous_hardware_contract ........   Passed    0.04 sec
+      Start 26: continuous_interpolation_contract
+26/27 Test #26: continuous_interpolation_contract ...   Passed    0.01 sec
+      Start 27: forward_timing_contract
+27/27 Test #27: forward_timing_contract .............   Passed    0.03 sec
+
+100% tests passed, 0 tests failed out of 27
+
+Label Time Summary:
+gtest    =   3.68 sec*proc (13 tests)
+
+Total Test time (real) = 150.09 sec

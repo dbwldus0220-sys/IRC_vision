@@ -144,7 +144,7 @@ class MotionCommandBridgeNode(Node):
             for direction, counts in (("LEFT", (1, 3)), ("RIGHT", (2, 5)))
             for count in counts
         },
-        "BALL_PICKUP_FINE_SEARCH_FORWARD": "ball_camera_down_forward_2",
+        "BALL_PICKUP_FINE_SEARCH_FORWARD": "pickup_top_loss_fine_forward_0_3",
         "BALL_PICKUP_FINE_SEARCH_FORWARD_4": "ball_camera_down_forward_4",
         "BALL_PICKUP_FINE_SEARCH_BACKWARD": "pickup_lost_ball_backward_1",
         "BALL_PICKUP_CRAB_RIGHT": "pickup_crab_right_0",
@@ -218,6 +218,7 @@ class MotionCommandBridgeNode(Node):
             for count in counts
         },
         "BALL_FINE_FORWARD_8": "ball_general_fine_forward_8",
+        "BALL_LOST_FINE_FORWARD_3": "ball_top_loss_fine_forward_45_3",
         "BALL_LOST_FORWARD_2": "ball_camera_down_forward_2",
         "BALL_LOST_FORWARD_4": "ball_camera_down_forward_4",
         # Reuse the existing one-cycle retreat without entering the pickup sequence.
@@ -324,6 +325,7 @@ class MotionCommandBridgeNode(Node):
     }
     FINE_FORWARD_MOTION_IDS = frozenset({
         "ball_general_fine_forward_8", "pickup_fine_forward_0", HURDLE_FINAL_FINE_MOTION_ID,
+        "ball_top_loss_fine_forward_45_3", "pickup_top_loss_fine_forward_0_3",
         *(f"goal_camera_90_fine_forward_{count}" for count in range(1, 5)),
     })
     DEFAULT_TIMEOUT_MS = 12000
@@ -376,6 +378,7 @@ class MotionCommandBridgeNode(Node):
         self.pickup_motor_failures: list[dict[str, Any]] = []
         self.pickup_last_stage_succeeded = True
         self.pending_pickup_crab_motion_id = None
+        self.pending_pickup_fine_motion_id: str | None = None
         self.pickup_positioning_dwell_motion_id: str | None = None
         self.queued_command_id: int | None = None
         self.queued_event_id: int | None = None
@@ -818,7 +821,7 @@ class MotionCommandBridgeNode(Node):
         elif action == "BALL_PICKUP_INITIAL_SEARCH_FORWARD_4":
             motion_id = "ball_camera_down_forward_4"
         elif action == "BALL_PICKUP_INITIAL_SEARCH_FORWARD":
-            motion_id = "ball_camera_down_forward_2"
+            motion_id = "ball_top_loss_fine_forward_45_3"
         elif action.startswith("BALL_PICKUP_INITIAL_CRAB_"):
             fine_action = action.replace("INITIAL_", "", 1)
             motion_id = self.PICKUP_FINE_ALIGN_MOTION_IDS[fine_action]
@@ -1096,6 +1099,7 @@ class MotionCommandBridgeNode(Node):
                 or motion_id.startswith("pickup_camera_down_turn_")
                 or self.last_physical_motion_id in {
                     "pickup_fine_forward_0", self.HURDLE_FINAL_FINE_MOTION_ID,
+                    "pickup_top_loss_fine_forward_0_3",
                 }):
             return "fine_to_turn_ready_0"
         return "fine_to_turn_ready_45"
@@ -1164,9 +1168,10 @@ class MotionCommandBridgeNode(Node):
         if (
             prepare_pickup_fine
             and action == "PICKUP_NOW"
-            and motion_id == "pickup_fine_forward_0"
+            and motion_id in {"pickup_fine_forward_0", "pickup_top_loss_fine_forward_0_3"}
         ):
             # Keep the existing checkpoint/sequence pending until both motions finish.
+            self.pending_pickup_fine_motion_id = motion_id
             motion_id = self.PICKUP_FINE_PREPARE_MOTION_ID
             self.active_motion_id = motion_id
         request_payload = {
@@ -1491,12 +1496,25 @@ class MotionCommandBridgeNode(Node):
 
         request_id = command_id
         timeout_ms = self.timeout_ms_from_payload(payload)
-        # Different walking catalogs need not share pose names, so the SDK may
-        # reject queueNext(). Reserve here and dispatch on success without dwell.
+        # Line forward/recovery share an entry frame. The SDK validates it before
+        # queueing, so the boundary needs no second start-position read.
+        seamless_walking_groups = (
+            {"forward", "sdk_forward_4", "line_recovery_left_4",
+             "line_recovery_left_6", "line_recovery_right_4"}
+            | {f"{prefix}_{count}" for prefix in (
+                "line_forward", "ball_camera_down_forward", "post_ball_forward",
+            ) for count in (2, 4, 6, 8)},
+            {f"goal_camera_90_forward_{count}" for count in (2, 4, 6, 8)},
+        )
+        compatible_walking_transition = any(
+            motion_id in group and self.active_motion_id in group
+            for group in seamless_walking_groups
+        )
         walking_transition = bool(
             motion_id.startswith(("line_forward_", "line_recovery_", "goal_camera_90_forward_", "goal_camera_90_fine_forward_"))
             and (self.active_motion_id or "").startswith(("line_forward_", "line_recovery_", "goal_camera_90_forward_", "goal_camera_90_fine_forward_"))
             and motion_id != self.active_motion_id
+            and not compatible_walking_transition
         )
         defer_until_active_finishes = bool(
             self.motion_in_progress
@@ -1725,6 +1743,8 @@ class MotionCommandBridgeNode(Node):
         self.active_dwell_until = None
         if self.active_motion_id == MotionCommandBridgeNode.PICKUP_FINE_PRE_DWELL_MARKER:
             self.pickup_positioning_dwell_motion_id = None
+            fine_motion_id = self.pending_pickup_fine_motion_id or "pickup_fine_forward_0"
+            self.pending_pickup_fine_motion_id = None
             if self.pickup_positioning_loss_pending:
                 checkpoint = (
                     self.PICKUP_INITIAL_ALIGN_MARKER
@@ -1732,7 +1752,7 @@ class MotionCommandBridgeNode(Node):
                 )
                 self._enter_pickup_positioning_loss_reacquisition(checkpoint)
                 return
-            self.active_motion_id = "pickup_fine_forward_0"
+            self.active_motion_id = fine_motion_id
             self._publish_executor_request(
                 action=self.active_action, command_id=self.active_command_id,
                 event_id=self.active_event_id, request_id=self.active_request_id,
@@ -1820,6 +1840,7 @@ class MotionCommandBridgeNode(Node):
 
     def _clear_active_request(self) -> None:
         """Release the bridge after a terminal executor status."""
+        self.pending_pickup_fine_motion_id = None
         self.motion_in_progress = False
         self.pending_turn_request = None
         self.turn_prepare_motion_id = None

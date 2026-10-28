@@ -1,0 +1,79 @@
+[INFO] [1793162608.946402391] [motion_decision_node]: line info: /vision/line_info
+[INFO] [1793162608.948854651] [motion_decision_node]: ball info: /vision/ball_info
+[INFO] [1793162608.950763592] [motion_decision_node]: goal info: /vision/goal_info
+[INFO] [1793162608.952636148] [motion_decision_node]: hurdle info: /vision/hurdle_info
+[INFO] [1793162608.954489631] [motion_decision_node]: finish info: /vision/finish_info
+[INFO] [1793162608.960765086] [motion_decision_node]: Mission phase: AUTO
+[INFO] [1793162608.961615648] [motion_decision_node]: Unified command: /navigation/motion_command
+[INFO] [1793162608.962390400] [motion_decision_node]: Motion status: /motion/status
+[INFO] [1793162608.963150527] [motion_decision_node]: Grasp detections: /vision/detections
+[INFO] [1793162608.963971968] [motion_decision_node]: Executor heartbeat: /motion/executor/heartbeat
+[INFO] [1793162608.964728479] [motion_decision_node]: Decision debug: /navigation/decision_debug
+[INFO] [1793162608.965524895] [motion_decision_node]: Press ENTER in the launch terminal to start vision decisions after the startup pose is ready.
+[INFO] [1793162632.463864761] [motion_decision_node]: ENTER received; waiting for startup readiness and fresh vision.
+[INFO] [1793162632.562826023] [motion_decision_node]: Pre-motion settle started: action=LINE_OFFSET_TURN_LEFT_1, source=line, duration=1.000
+[INFO] [1793162632.807207991] [motion_decision_node]: Line corner remembered: {'corner_direction': 'LEFT', 'corner_start_distance_m': 1.4245, 'last_confirmed_at': 1214.274499128, 'last_observation_id': 1793162632603125732, 'search_started': False, 'observed_during_action': 'STRAIGHT', 'observed_during_command_id': 1, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793162635.612488409] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=2
+[INFO] [1793162636.704326576] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793162640.259583415] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793162640.262959062] [motion_decision_node]: Pre-motion settle started: action=LINE_HEADING_TURN_RIGHT_7, source=line, duration=1.000
+[INFO] [1793162640.865093153] [motion_decision_node]: Pre-motion settle started: action=LINE_HEADING_TURN_LEFT_5, source=line, duration=1.000
+[INFO] [1793162641.162179412] [motion_decision_node]: Pre-motion settle reset: previous=LINE_HEADING_TURN_LEFT_5, next=LINE_HEADING_TURN_LEFT_4
+[INFO] [1793162641.163119319] [motion_decision_node]: Pre-motion settle started: action=LINE_HEADING_TURN_LEFT_4, source=line, duration=1.000
+[INFO] [1793162641.562968395] [motion_decision_node]: Pre-motion settle reset: previous=LINE_HEADING_TURN_LEFT_4, next=LINE_HEADING_TURN_LEFT_3
+[INFO] [1793162641.564500645] [motion_decision_node]: Pre-motion settle started: action=LINE_HEADING_TURN_LEFT_3, source=line, duration=1.000
+[INFO] [1793162642.064370267] [motion_decision_node]: Line motion boundary: wait_sec=1.803, next_action=RECOVER_LEFT_TURN_LEFT_4, reason=line_center_recovery
+[INFO] [1793162644.881789533] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+[INFO] [1793162644.884559780] [motion_decision_node]: Pre-motion settle started: action=LINE_LOST_TURN_LEFT_1, source=line, duration=1.000
+[INFO] [1793162645.562196428] [motion_decision_node]: Pre-motion settle started: action=LINE_LOST_TURN_LEFT_1, source=line, duration=1.000
+[INFO] [1793162646.564244369] [motion_decision_node]: Pre-motion settle complete: action=LINE_LOST_TURN_LEFT_1
+[INFO] [1793162646.568549584] [motion_decision_node]: Line motion boundary: wait_sec=1.681, next_action=LINE_LOST_TURN_LEFT_1, reason=line_lost_turn_toward_remembered_corner
+[INFO] [1793162647.314083311] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=LINE_LOST_TURN_LEFT_1
+[INFO] [1793162648.462357267] [motion_decision_node]: Pre-motion settle started: action=LINE_LOST_TURN_LEFT_1, source=line, duration=1.000
+[INFO] [1793162649.562338936] [motion_decision_node]: Pre-motion settle complete: action=LINE_LOST_TURN_LEFT_1
+[INFO] [1793162649.568281971] [motion_decision_node]: Line motion boundary: wait_sec=2.248, next_action=LINE_LOST_TURN_LEFT_1, reason=line_lost_turn_toward_remembered_corner
+[INFO] [1793162650.322815487] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=LINE_LOST_TURN_LEFT_1
+[INFO] [1793162651.462910293] [motion_decision_node]: Line motion boundary: wait_sec=1.139, next_action=RECOVER_RIGHT_TURN_RIGHT_4, reason=line_center_recovery
+[INFO] [1793162653.482298101] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=13
+[INFO] [1793162654.211929795] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4
+[INFO] [1793162657.076371859] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_LEFT_TURN_LEFT_4, command_id=14
+[INFO] [1793162658.142850603] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793162660.220685291] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_LEFT_TURN_LEFT_4, command_id=15
+[INFO] [1793162660.959678809] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+[INFO] [1793162662.610225176] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_RIGHT_TURN_RIGHT_4, command_id=16
+[INFO] [1793162663.392681219] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+[INFO] [1793162666.145928292] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4
+[INFO] [1793162666.150146905] [motion_decision_node]: Pre-motion settle started: action=LINE_LOST_TURN_RIGHT_5, source=line, duration=1.000
+[INFO] [1793162667.162442703] [motion_decision_node]: Pre-motion settle complete: action=LINE_LOST_TURN_RIGHT_5
+[INFO] [1793162667.165105549] [motion_decision_node]: Line motion boundary: wait_sec=1.016, next_action=LINE_LOST_TURN_RIGHT_5, reason=line_lost_turn_toward_last_seen_side
+[INFO] [1793162669.408038030] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=LINE_LOST_TURN_RIGHT_5
+[INFO] [1793162669.848028655] [motion_decision_node]: Line corner remembered: {'corner_direction': 'RIGHT', 'corner_start_distance_m': 0.9792, 'last_confirmed_at': 1251.315197423, 'last_observation_id': 1793162669696746582, 'search_started': False, 'observed_during_action': None, 'observed_during_command_id': None, 'motion_completed_at': 1250.874947429, 'minimum_rgb_stamp_ns': 1793162669406795746}
+[INFO] [1793162670.563275615] [motion_decision_node]: Pre-motion settle started: action=LINE_OFFSET_TURN_RIGHT_2, source=line, duration=1.000
+[INFO] [1793162670.664333917] [motion_decision_node]: Line motion boundary: wait_sec=1.255, next_action=STRAIGHT, reason=line_tracking
+[INFO] [1793162673.478419240] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=19
+[INFO] [1793162674.612539185] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793162678.158990358] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793162678.962592975] [motion_decision_node]: Pre-motion settle started: action=LINE_OFFSET_TURN_LEFT_1, source=line, duration=1.000
+[INFO] [1793162679.264992833] [motion_decision_node]: Line offset alignment: action=STRAIGHT_1, offset_px=-134.891, target_lateral_m=-0.06834007565794886, target_forward_m=0.5, target_bearing_deg=-7.782969170015432, ground_lateral_offset_m=-0.2151009954797979, turn_count=None, turn_angle_deg=None
+[INFO] [1793162679.266115080] [motion_decision_node]: Line motion boundary: wait_sec=1.105, next_action=STRAIGHT_1, reason=line_offset_target_forward
+[INFO] [1793162680.864062531] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT_1
+[INFO] [1793162680.962253490] [motion_decision_node]: Pre-motion settle started: action=LINE_OFFSET_TURN_LEFT_1, source=line, duration=1.000
+[INFO] [1793162681.065111836] [motion_decision_node]: Line motion boundary: wait_sec=0.198, next_action=RECOVER_RIGHT_TURN_LEFT_4, reason=line_center_recovery
+[INFO] [1793162683.076793504] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=32
+[INFO] [1793162683.853513273] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_LEFT_4
+[INFO] [1793162687.790108617] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793162689.862862044] [motion_decision_node]: Line motion boundary: wait_sec=2.072, next_action=STRAIGHT, reason=line_tracking
+[INFO] [1793162692.659603992] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_RIGHT_TURN_RIGHT_4, command_id=55
+[INFO] [1793162693.793659744] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793162695.847650700] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=56
+[INFO] [1793162696.540614557] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4
+[INFO] [1793162699.414953243] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=57
+[INFO] [1793162700.480260464] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793162701.516544189] [motion_decision_node]: Line corner remembered: {'corner_direction': 'RIGHT', 'corner_start_distance_m': 0.8893, 'last_confirmed_at': 1282.983138701, 'last_observation_id': 1793162701319654053, 'search_started': False, 'observed_during_action': 'STRAIGHT', 'observed_during_command_id': 57, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793162702.930817870] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT_1, command_id=58
+[INFO] [1793162704.035208290] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793162704.883271028] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_RIGHT_TURN_RIGHT_4, command_id=59
+[INFO] [1793162705.229091683] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT_1
+[INFO] [1793162707.555941812] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_LEFT_TURN_RIGHT_4, command_id=60
+[INFO] [1793162707.979791537] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4
+[INFO] [1793162710.542281794] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_RIGHT_4

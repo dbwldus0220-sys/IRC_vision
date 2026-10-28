@@ -45,7 +45,7 @@ class Dummy:
         if name == 'horizontalScrollBar': return lambda: self
         return lambda *args, **kwargs: None
 
-def oracle(ns, motion, periods, read_delay, write_delay, queued=None):
+def oracle(ns, motion, periods, read_delay, write_delay, queued=None, carry_all_repeat_goals=False):
     p = ns['Oracle']()
     clock = [1000.0]
     records = []
@@ -111,7 +111,12 @@ def oracle(ns, motion, periods, read_delay, write_delay, queued=None):
         p.start_motion_playback(real_robot=True)
         for tick in range(1000000):
             clock[0] += periods[tick % len(periods)]
+            previous_repeat = p.playback_repeat_current
             p.anim_step()
+            if carry_all_repeat_goals and p.playback_repeat_current > previous_repeat:
+                # 20261027 requirement fixes the archived GUI's partial-frame repeat bug.
+                for frame in p.motion_sequence:
+                    p.start_angles.update({int(j): a for j, a in frame['angles'].items()})
             records.append(['T', clock[0], p.current_timeline_ms, p.playback_repeat_current, int(p.is_playing)])
             if not p.is_playing:
                 return records
@@ -182,6 +187,7 @@ def synthetic(ns):
 
 def main():
     ap=argparse.ArgumentParser()
+    ap.add_argument('--carry-all-repeat-goals', action='store_true', help='Apply the requested repeat-state fix to the archived GUI oracle')
     ap.add_argument('--gui',type=Path,required=True)
     ap.add_argument('--probe',type=Path,required=True)
     ap.add_argument('--output',type=Path,required=True)
@@ -203,7 +209,7 @@ def main():
             if path==fixture: scenarios += [([5.0],10,2),([350.0,5.0],0,0)]
             for periods,read_delay,write_delay in scenarios:
                 label=f'{path.name}/{motion["name"]}/{periods}/{read_delay}/{write_delay}'
-                expected=oracle(ns,motion,periods,read_delay,write_delay)
+                expected=oracle(ns,motion,periods,read_delay,write_delay, carry_all_repeat_goals=args.carry_all_repeat_goals)
                 output=subprocess.check_output([str(args.probe),str(path),motion['name'],','.join(map(str,periods)),str(read_delay),str(write_delay)],text=True)
                 actual=parse_trace(output)
                 compare(expected,actual,label)
@@ -211,7 +217,7 @@ def main():
                          reads=sum(r[0]=='R' for r in actual),completed_ms=actual[-1][1]-1000,
                          max_raw_error=0,max_event_time_error_ms=0)
                 summary.append(row)
-                if motion['name']=='건전진45도(6회)' or path==fixture:
+                if motion['name'] in ('건전진45도(6회)', '전45도(6회)') or path==fixture:
                     tag=hashlib.sha256(label.encode()).hexdigest()[:12]
                     (args.output/f'trace_{tag}.json').write_text(json.dumps({'case':label,'gui':expected,'cpp':actual},ensure_ascii=False))
     # Compare SDK queue directly with the actual GUI's saved composer path.
@@ -239,7 +245,7 @@ def main():
     (args.output/'queue_comparison.json').write_text(json.dumps(dict(gui=expected,cpp=actual),ensure_ascii=False))
     summary.append(dict(case='queue_vs_actual_gui_composer',events=len(actual),max_raw_error=0,max_event_time_error_ms=0))
     (args.output/'results.json').write_text(json.dumps({'gui_sha256':hashlib.sha256(args.gui.read_bytes()).hexdigest(),
-        'cases':summary,'passed':len(summary)},ensure_ascii=False,indent=2)+'\n')
+        'carry_all_repeat_goals':args.carry_all_repeat_goals, 'cases':summary,'passed':len(summary)},ensure_ascii=False,indent=2)+'\n')
     print(f'PASS {len(summary)} cases: actual GUI functions vs C++ player, every write/read/raw/event')
 
 if __name__=='__main__':main()

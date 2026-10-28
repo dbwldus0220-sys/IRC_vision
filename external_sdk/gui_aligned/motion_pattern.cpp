@@ -184,6 +184,7 @@ MotionPattern parseMotionObject(const Json::Object& root) {
         frame.frame_id = optionalString(object, "frame_id", "");
         frame.lift_early_arrival = optionalBool(object, "lift_early_arrival", false);
         frame.playback_cycle_end = optionalBool(object, "playback_cycle_end", false);
+        frame.stop_at_end = optionalBool(object, "stop_at_end", false);
         frames.push_back(std::move(frame));
     }
     MotionCompletion completion;

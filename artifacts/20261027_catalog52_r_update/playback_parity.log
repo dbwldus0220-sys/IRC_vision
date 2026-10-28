@@ -1,0 +1,20 @@
+{
+  "oracle": "user specification, latest PC GUI unavailable",
+  "catalogs": {
+    "artifacts/robot_motions_runtime.json": {
+      "motions": 88,
+      "joint_samples": 638618,
+      "maximum_angle_error_deg": 2.842170943040401e-14,
+      "raw_mismatches": 0
+    }
+  },
+  "rounding_boundary_cases": 12291,
+  "real_player_execution": {
+    "artifacts/robot_motions_runtime.json": {
+      "motions": 88,
+      "scenarios_per_motion": 2,
+      "joint_samples": 723212,
+      "raw_mismatches": 0
+    }
+  }
+}

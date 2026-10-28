@@ -97,12 +97,15 @@ def test_robot_launch_defaults_are_production_ready(
         "backend_type": "robot_motion_player",
         "enable_robot_hardware": True,
         "poll_period_ms": 5,
+        "continuous_interpolation": True,
+        "account_forward_boundary_feedback": True,
+        "exclude_motor_5": False,
         "running_polls": 2,
         "settling_polls": 1,
         "explicit_torque_approval": True,
         "position_tolerance_enabled": False,
         "enable_head_override": True,
-        "enable_shoulder_override": True,
+        "enable_shoulder_override": False,
         "queued_transition_hold_ms": 0,
         "motion_trace_enabled": False,
         "motion_trace_path": "",
@@ -138,8 +141,9 @@ def test_startup_target_matches_catalog51_front_weight_pose(monkeypatch, tmp_pat
         assert all(f["angles"] == target["angles"] for f in matches)
         assert all(target["torques"].values())
         if filename == "robot_motions_runtime.json":
-            assert target["angles"]["4"] == 18.0
-            assert target["angles"]["5"] == -18.0
+            pc = json.loads((root / "artifacts/robot_motions_pc.json").read_text())["motions"]
+            original = next(m for m in pc if m["name"] == "오뒤무게중심앞")["frames"][0]
+            assert target["angles"] == original["angles"]
 
 
 def test_robot_launch_passes_realsense_topic_parameters(
