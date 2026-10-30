@@ -34,8 +34,10 @@ def catalogs():
 
 def test_every_original_and_derived_motion_uses_latest_source_data():
     source, pc, runtime = catalogs()
-    assert len(source) == 74 and len(pc) == len(runtime) == 103
-    assert pc.keys() == runtime.keys() == source.keys() | DERIVED.keys() | {f'R골넣기{n}번구역' for n in range(1, 5)}
+    added62 = json.loads((ROOT / 'artifacts/20261030_catalog62_ball500/manifest.json').read_text())['motions']
+    goal_turn_transition = {'r미세오뒤에서 오뒤90도'}
+    assert len(source) == 74 and len(pc) == len(runtime) == 103 + len(added62) + len(goal_turn_transition)
+    assert pc.keys() == runtime.keys() == source.keys() | DERIVED.keys() | added62.keys() | goal_turn_transition | {f'R골넣기{n}번구역' for n in range(1, 5)}
     for name, original in source.items():
         assert pc[name] == original
     for name, spec in DERIVED.items():
@@ -65,16 +67,19 @@ def test_every_original_and_derived_motion_uses_latest_source_data():
 
 def test_routes_use_new_crab_shot_and_fine_gaits_and_startup_stays_unambiguous():
     source, pc, runtime = catalogs()
+    catalog62 = json.loads((ROOT / 'artifacts/20261030_catalog62_ball500/source62.json').read_text())
+    source62 = {m['name']: m for m in catalog62['motions']}
     aliases = yaml.safe_load((ROOT / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']
     assert set(aliases.values()) <= runtime.keys()
     assert aliases['goal_shot'] == 'R골넣기1번구역'
     expected = {'goal_camera_90_crab_right': '유미세오옆꽃게90도',
-                'pickup_crab_right_0': '유미세오옆꽃게0도', 'pickup_fine_forward_0': 'r미세0도'}
+                'pickup_crab_right_0': '유미세오옆꽃게0도', 'pickup_fine_forward_0': 'r미세0도 공잡기용'}
     for alias, name in expected.items():
         assert aliases[alias] == name
-        assert runtime[name]['frames'] == source[name]['frames']
+        original = source62[name] if alias == 'pickup_fine_forward_0' else source[name]
+        assert runtime[name]['frames'] == original['frames']
     for n in range(1, 5):
-        assert aliases[f'goal_camera_90_fine_forward_{n}'] == f'R미세90도({n}회)'
+        assert aliases[f'goal_camera_90_fine_forward_{n}'] == f'r미세 골대전용({n}회)'
     matches = [f['angles'] for m in runtime.values() for f in m['frames'] if f['name'] == '오뒤무게중심앞']
     assert matches and all(pose == matches[0] for pose in matches)
     assert matches[0] == source['R오뒤45도']['frames'][0]['angles']

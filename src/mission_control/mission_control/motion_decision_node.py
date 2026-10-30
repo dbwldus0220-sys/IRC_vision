@@ -18,7 +18,7 @@ from rclpy.node import Node
 from std_msgs.msg import String
 
 from step.approach_distance import APPROACH_DISTANCE_LIMITS_M
-from step.approach_distance import BALL_HURDLE_FINE_DISTANCE_M
+from step.approach_distance import BALL_PICKUP_DISTANCE_M
 from step.approach_distance import HURDLE_FINE_DISTANCE_M
 from step.ball_navigation_planner import BallNavigationPlanner
 from step.line_navigation_planner import line_heading, straight_heading_is_aligned
@@ -27,6 +27,7 @@ from step.hurdle_navigation_planner import HurdleNavigationPlanner
 
 from .ball_approach_observation import BallApproachObservation
 from .ball_entry_line_alignment import BallEntryLineAlignment
+from .pickup_walk_reservation import PickupWalkReservation
 from .ball_loss_confirmation import BallLossConfirmation
 from .executor_heartbeat_watchdog import ExecutorHeartbeatWatchdog
 from .executor_heartbeat_watchdog import HeartbeatStartupDelay
@@ -116,12 +117,12 @@ class MotionDecisionNode(Node):
         "GOAL_CAMERA_90_FORWARD_2": .517 * 4 / .95,
         "GOAL_CAMERA90_RECOVER_LEFT_4": 2.080 / .95,
         "GOAL_CAMERA90_RECOVER_RIGHT_4": 2.060 / .95,
-        **{f"GOAL_CAMERA90_FINE_FORWARD_{count}": .376 * count / .9975
+        **{f"GOAL_CAMERA90_FINE_FORWARD_{count}": .385 * count / .95
            for count in range(1, 5)},
     }
     GOAL_FORWARD_CAPTURE_FRAMES = 3
     APPROACH_WALK_DURATION_SEC = {
-        "BALL_APPROACH_FINE_FORWARD_5": .376 * 5 / .9975,
+        "BALL_APPROACH_FINE_FORWARD_5": .386 * 5 / .9975,
         "STRAIGHT": .517 * 4 / .95,
         "RECOVER_LEFT_TURN_LEFT_4": 2.080 / .95,
         "RECOVER_RIGHT_TURN_RIGHT_4": 2.060 / .95,
@@ -303,7 +304,7 @@ class MotionDecisionNode(Node):
         self.declare_parameter("ball_control_range_m", 1.5)
         self.declare_parameter(
             "pickup_fine_step_distance_m",
-            0.550,
+            BALL_PICKUP_DISTANCE_M,
         )
         self.declare_parameter(
             "pickup_fine_align_bottom_distance_px",
@@ -1153,6 +1154,20 @@ class MotionDecisionNode(Node):
                             )
                 self.executor_ready_requires_fresh_vision = False
                 self.general_motion_gate.on_new_vision_input()
+                reservation = getattr(self, "pickup_walk_reservation", None)
+                if source == "ball" and reservation is not None:
+                    if (self.active_special_action == "PICKUP_NOW"
+                            and not self.pickup_fixed_sequence_started
+                            and not self.pickup_positioning_ball_lost_pending):
+                        reservation.observe(
+                            self.planner, payload, received_at,
+                            MotionDecisionNode._current_ros_time_ns(self), self.timeouts["ball"],
+                            image_stamp=MotionDecisionNode._detection_stamp_ns(payload),
+                        )
+                        if reservation.decision(received_at, self.timeouts["ball"]) is not None:
+                            MotionDecisionNode._publish_decision(self)
+                    else:
+                        reservation.reset()
                 if source == "goal":
                     MotionDecisionNode._prepare_post_ball_goal_preview(self, received_at)
                     MotionDecisionNode._prepare_pending_goal_decision(self, received_at)
@@ -1920,7 +1935,7 @@ class MotionDecisionNode(Node):
                 return
 
         config = self.planner.ball_planner.config
-        pickup_distance = (BALL_HURDLE_FINE_DISTANCE_M if entry_active
+        pickup_distance = (BALL_PICKUP_DISTANCE_M if entry_active
                            else config.pickup_sequence_start_distance_m)
         confidence = self.planner._number(payload, "confidence")
         distance = self.planner._number(payload, "distance_m")
@@ -2684,6 +2699,12 @@ class MotionDecisionNode(Node):
         self.goal_stationary_since = (
             status_receive_monotonic if result.terminal and status == "SUCCEEDED" else None
         )
+        if action == "PICKUP_NOW":
+            reservation = getattr(self, "pickup_walk_reservation", None)
+            if reservation is None:
+                reservation = self.pickup_walk_reservation = PickupWalkReservation()
+            reservation.on_status(payload, status_receive_monotonic,
+                                  MotionDecisionNode._current_ros_time_ns(self))
         if not result.terminal:
             if (
                 action == "PICKUP_NOW"
@@ -3006,6 +3027,9 @@ class MotionDecisionNode(Node):
 
     def _invalidate_pickup_ball_input(self) -> None:
         """Require a Ball frame captured after the pickup checkpoint."""
+        reservation = getattr(self, "pickup_walk_reservation", None)
+        if reservation is not None:
+            reservation.reset()
         self.ball_min_rgb_stamp_ns = MotionDecisionNode._current_ros_time_ns(self)
         self.ball_prepared_info = None
         self.ball_prepared_observation = None
@@ -3787,7 +3811,7 @@ class MotionDecisionNode(Node):
                 or type(stamp) is not int or capture_after is None or stamp < capture_after):
             return None
         depth = MotionDecisionPlanner._number(info, "depth_m")
-        fine_distance = BALL_HURDLE_FINE_DISTANCE_M if source == "ball" else HURDLE_FINE_DISTANCE_M
+        fine_distance = BALL_PICKUP_DISTANCE_M if source == "ball" else HURDLE_FINE_DISTANCE_M
         if info.get("depth_valid") is not True or depth is None or depth <= fine_distance:
             return None
         if source == "hurdle":
@@ -4865,7 +4889,9 @@ class MotionDecisionNode(Node):
                 self,
                 decision,
             )
-            if is_pickup_positioning_loss_latch:
+            if decision.source_command.get("pickup_walk_prequeue") is True:
+                self.pickup_walk_reservation.published()
+            elif is_pickup_positioning_loss_latch:
                 self.pickup_positioning_loss_latch_sent = True
             elif is_pickup_initial_align_action:
                 self.pickup_initial_align_waiting = False
@@ -5090,6 +5116,9 @@ class MotionDecisionNode(Node):
         now: float,
     ) -> bool:
         """Recheck fresh decisions while settling before turns or fine steps."""
+        if decision.source_command.get("pickup_walk_prequeue") is True:
+            self._reset_pre_motion_settle()
+            return True
         if ((decision.source == "line" and MotionDecisionNode._is_continuous_line_action(decision.action))
                 or (decision.source == "goal" and MotionDecisionNode._is_continuous_goal_action(decision.action)
                     and not getattr(self, "goal_shot_settle_pending", False))):
@@ -5698,6 +5727,13 @@ class MotionDecisionNode(Node):
             return self.planner.plan_ball_pickup_post_backward_alignment(
                 observations.get("ball")
             )
+        reservation = getattr(self, "pickup_walk_reservation", None)
+        if (self.active_special_action == "PICKUP_NOW" and reservation is not None
+                and not self.pickup_fixed_sequence_started
+                and not self.pickup_positioning_ball_lost_pending):
+            reserved = reservation.decision(time.monotonic(), self.timeouts["ball"])
+            if reserved is not None:
+                return reserved
         if self.active_special_command_id is not None:
             locked_phase = f"{planning_phase}_LOCK"
             return self.planner.plan(

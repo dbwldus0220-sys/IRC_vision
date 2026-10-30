@@ -111,9 +111,9 @@ class TestBallHeadOverride(unittest.TestCase):
         self.navigation("ball")
         self.request(89, "ball_approach_fine_forward_45_5")
         self.status(89, "RUNNING")
-        self.ball(head_down_requested=should_request_head_down(.550001, True, .05))
+        self.ball(head_down_requested=should_request_head_down(.500001, True, .05))
         self.hold(False)
-        self.ball(head_down_requested=should_request_head_down(.550, True, .05))
+        self.ball(head_down_requested=should_request_head_down(.500, True, .05))
         self.hold(True)
         self.assertFalse(any(s["request_id"] == 89 and s["status"] == "SUCCEEDED"
                              for s in self.statuses))

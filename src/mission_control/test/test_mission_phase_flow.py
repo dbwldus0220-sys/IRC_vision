@@ -978,8 +978,8 @@ def test_ball_pickup_entry_requires_fresh_frame_without_general_motion_dwell(mon
     close_ball = pickup_ready_ball()
     close_ball.update(
         {
-            "depth_m": 0.54,
-            "distance_m": 0.54,
+            "depth_m": 0.49,
+            "distance_m": 0.49,
             "pickup_ready": False,
             "pickup_now": False,
         }

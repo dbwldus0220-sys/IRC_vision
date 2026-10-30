@@ -7,7 +7,7 @@ from dataclasses import dataclass
 import math
 from typing import Any
 
-from .approach_distance import BALL_HURDLE_FINE_DISTANCE_M
+from .approach_distance import BALL_PICKUP_DISTANCE_M
 from .approach_distance import BALL_FINE_APPROACH_DISTANCE_M
 from .approach_distance import approach_level_from_motion
 from .approach_distance import ball_hurdle_approach_motion
@@ -33,7 +33,7 @@ class BallNavigationConfig:
     fallback_half_fov_deg: float = 35.0
     control_start_depth_m: float = 1.50
     max_pickup_depth_age_sec: float = 0.70
-    pickup_sequence_start_distance_m: float = BALL_HURDLE_FINE_DISTANCE_M
+    pickup_sequence_start_distance_m: float = BALL_PICKUP_DISTANCE_M
     slowdown_depth_m: float = 1.0
     fine_step_depth_m: float = 0.95
     pickup_depth_m: float = 0.07
@@ -378,9 +378,9 @@ class BallNavigationPlanner:
         distance_m: float,
     ) -> str:
         """Fine-walk at camera 45 before the separate camera-down pickup entry."""
-        if BALL_HURDLE_FINE_DISTANCE_M < distance_m <= BALL_FINE_APPROACH_DISTANCE_M:
+        if BALL_PICKUP_DISTANCE_M < distance_m <= BALL_FINE_APPROACH_DISTANCE_M:
             return "BALL_APPROACH_FINE_FORWARD_5"
-        return ball_hurdle_approach_motion(distance_m)
+        return ball_hurdle_approach_motion(distance_m, fine_distance_m=BALL_PICKUP_DISTANCE_M)
 
     def _approach_speed(
         self,

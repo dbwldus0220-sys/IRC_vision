@@ -1,0 +1,59 @@
+{
+  "source_sha256": "7359f07086879d2c7f9ef1fa6c0e4d29f2f41156045664782ca44a8ecc537828",
+  "runtime_speed_factor": 0.95,
+  "motions": {
+    "r미세45도": {
+      "source": "r미세45도",
+      "repeat_count": 5
+    },
+    "r미세0도 공잡기용": {
+      "source": "r미세0도 공잡기용",
+      "repeat_count": 5
+    },
+    "r미세 0도 허들용": {
+      "source": "r미세 0도 허들용",
+      "repeat_count": 5
+    },
+    "r미세 골대전용": {
+      "source": "r미세 골대전용",
+      "repeat_count": 5
+    },
+    "r미세0도 공잡기용(상단탐색3회)": {
+      "source": "r미세0도 공잡기용",
+      "repeat_count": 3
+    },
+    "r미세 0도 허들용(10회)": {
+      "source": "r미세 0도 허들용",
+      "repeat_count": 10
+    },
+    "r미세 골대전용(1회)": {
+      "source": "r미세 골대전용",
+      "repeat_count": 1
+    },
+    "r미세 골대전용(2회)": {
+      "source": "r미세 골대전용",
+      "repeat_count": 2
+    },
+    "r미세 골대전용(3회)": {
+      "source": "r미세 골대전용",
+      "repeat_count": 3
+    },
+    "r미세 골대전용(4회)": {
+      "source": "r미세 골대전용",
+      "repeat_count": 4
+    }
+  },
+  "aliases": {
+    "ball_approach_fine_forward_45_5": "r미세45도",
+    "ball_general_fine_forward_8": "r미세0도 공잡기용",
+    "pickup_fine_forward_0": "r미세0도 공잡기용",
+    "ball_top_loss_fine_forward_45_3": "r미세0도 공잡기용(상단탐색3회)",
+    "pickup_top_loss_fine_forward_0_3": "r미세0도 공잡기용(상단탐색3회)",
+    "hurdle_fine_forward_5": "r미세 0도 허들용",
+    "hurdle_fine_forward_10": "r미세 0도 허들용(10회)",
+    "goal_camera_90_fine_forward_1": "r미세 골대전용(1회)",
+    "goal_camera_90_fine_forward_2": "r미세 골대전용(2회)",
+    "goal_camera_90_fine_forward_3": "r미세 골대전용(3회)",
+    "goal_camera_90_fine_forward_4": "r미세 골대전용(4회)"
+  }
+}

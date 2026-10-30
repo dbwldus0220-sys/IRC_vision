@@ -125,7 +125,7 @@ def test_hurdle_forward_and_turn_prepare_before_fine_and_final_ten_cycles():
             assert requests(bridge)[-1]["motion_id"] == "pickup_fine_prepare"
             finish_request(bridge)
             assert requests(bridge)[-1]["motion_id"] == (
-                "hurdle_fine_forward_10" if target == "GO" else "pickup_fine_forward_0"
+                "hurdle_fine_forward_10" if target == "GO" else "hurdle_fine_forward_5"
             )
 
 
@@ -198,7 +198,7 @@ def test_aliases_reuse_supplied_poses_without_changing_motion_data():
         "goal_fine_to_default": "R미세오뒤에서 기본자세45도",
         "fine_to_turn_ready_0": "R미세오뒤에서 오뒤0도",
         "fine_to_turn_ready_45": "R미세오뒤에서 오뒤45도",
-        "fine_to_turn_ready_90": "R미세오뒤에서 오뒤90도",
+        "fine_to_turn_ready_90": "r미세오뒤에서 오뒤90도",
     }
     for alias, name in expected.items():
         assert aliases[alias] == name

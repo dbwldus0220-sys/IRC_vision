@@ -1,4 +1,4 @@
-"""Replay Ball-owned Line approach until 550 mm without motors."""
+"""Replay Ball-owned Line approach through fine/pickup handoff without motors."""
 
 import json
 
@@ -168,7 +168,7 @@ def test_invalid_line_at_610mm_uses_ground_ball_forward(clock, changes):
     request = send(bridge, command)
     assert request['motion_id'] == 'line_forward_4'
     status(node, bridge, request, 'RUNNING')
-    fresh(node, clock, 'ball', ball_info(depth_m=.550), plan=False)
+    fresh(node, clock, 'ball', ball_info(depth_m=.500), plan=False)
     assert node.ball_pickup_entry_pending
     status(node, bridge, request, 'SUCCEEDED')
     assert node.publisher.messages[-1]['action'] == 'PICKUP_NOW'
@@ -256,7 +256,7 @@ def test_close_after_reservation_finishes_accepted_walk_then_enters_pickup_witho
     queued = node.publisher.messages[-1]
     queued_request = send(bridge, queued)
     assert node.ball_entry_line_alignment.queued_command_id == queued['command_id']
-    fresh(node, clock, 'ball', ball_info(depth_m=.55), plan=False)
+    fresh(node, clock, 'ball', ball_info(depth_m=.50), plan=False)
     assert node.ball_pickup_entry_pending
     status(node, bridge, first_request, 'SUCCEEDED')
     status(node, bridge, queued_request, 'RUNNING')
@@ -491,11 +491,11 @@ def test_ball_only_heading_bins_and_existing_recovery_direction(angle, kind, cou
     assert decision.valid and planner.line_planner.config is config
 
 
-def test_line_then_ground_ball_approach_until_550mm_waits_for_current_motion(clock):
+def test_line_then_ground_ball_approach_until_500mm_waits_for_current_motion(clock):
     node, bridge = node_with_entry(), FakeBridge()
     fresh(node, clock, 'line', line_info(), plan=False)
     fresh(node, clock, 'ball', ball_info(depth_m=1.2))
-    for distance in (1.0, .8, .600001, .550):
+    for distance in (1.0, .8, .600001, .500):
         command = node.publisher.messages[-1]
         assert command['action'] == 'STRAIGHT_2'
         assert command['source_command']['ball_entry_line_alignment']
@@ -514,7 +514,7 @@ def test_line_then_ground_ball_approach_until_550mm_waits_for_current_motion(clo
     assert [r['motion_id'] for r in decoded_messages(bridge.executor_request_publisher)] == ['line_forward_4'] * 4
 
 
-@pytest.mark.parametrize('distance', [.549, .550])
+@pytest.mark.parametrize('distance', [.499, .500])
 def test_close_crossing_during_original_line_motion_skips_entry_step(clock, distance):
     node, bridge = node_with_entry(), FakeBridge()
     _, request = start_line(node, bridge, clock)

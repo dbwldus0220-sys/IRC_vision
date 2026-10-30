@@ -1,0 +1,9 @@
+{
+  "source_sha256": "7359f07086879d2c7f9ef1fa6c0e4d29f2f41156045664782ca44a8ecc537828",
+  "added_motion": "r미세오뒤에서 오뒤90도",
+  "alias": "fine_to_turn_ready_90",
+  "runtime_playback_speed": 0.9975,
+  "pre_dwell_sec": 1.0,
+  "post_dwell_sec": 1.0,
+  "new_regression_failures": []
+}

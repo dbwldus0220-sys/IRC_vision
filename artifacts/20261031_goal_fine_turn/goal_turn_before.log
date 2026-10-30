@@ -1,0 +1,581 @@
+.........FF..........................F.F...........F.F...........F.F.... [ 27%]
+.......F.F...........F.F...F......F...........FFFF...................... [ 54%]
+.F....F................................................................. [ 82%]
+...............................................                          [100%]
+=================================== FAILURES ===================================
+_ test_all_six_transition_types_pause_exactly_once_on_both_sides[BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45] _
+
+clock = [11.0], previous = 'BALL_FINE_FORWARD_8', target = 'STRAIGHT'
+prepare = 'fine_to_turn_ready_45'
+
+    @pytest.mark.parametrize("previous,target,prepare", [
+        case for case in CASES if case[:2] not in {
+            ("GOAL_CAMERA_90_FORWARD", "GOAL_CAMERA90_FINE_FORWARD_1"),
+            ("GOAL_CAMERA90_FINE_FORWARD_1", "GOAL_CAMERA_90_FORWARD"),
+        }
+    ])
+    def test_all_six_transition_types_pause_exactly_once_on_both_sides(clock, previous, target, prepare):
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+>       check_both_pauses(bridge, clock, prepare, bridge.motion_id_for_action(target))
+
+src/mission_control/test/test_transition_dwells.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+bridge = <test_motion_command_bridge.FakeBridge object at 0xffff76921000>
+clock = [11.0], prepare = 'fine_to_turn_ready_45', target = 'line_forward_6'
+
+    def check_both_pauses(bridge, clock, prepare, target):
+        start = len(requests(bridge))
+        beginning = clock[0]
+        assert bridge.motion_in_progress
+        assert bridge.transition_dwell_until == beginning + 1.0
+        clock[0] = beginning + .999
+        bridge._check_atomic_dwell()
+        assert len(requests(bridge)) == start
+        clock[0] = beginning + 1.0
+        bridge._check_atomic_dwell()
+>       assert [r["motion_id"] for r in requests(bridge)[start:]] == [prepare]
+E       AssertionError: assert ['fine_to_turn_ready_0'] == ['fine_to_turn_ready_45']
+E         At index 0 diff: 'fine_to_turn_ready_0' != 'fine_to_turn_ready_45'
+E         Full diff:
+E         - ['fine_to_turn_ready_45']
+E         ?                      ^^
+E         + ['fine_to_turn_ready_0']
+E         ?                      ^
+
+src/mission_control/test/test_transition_dwells.py:29: AssertionError
+_ test_all_six_transition_types_pause_exactly_once_on_both_sides[BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45] _
+
+clock = [11.0], previous = 'BALL_FINE_FORWARD_8', target = 'TURN_LEFT'
+prepare = 'fine_to_turn_ready_45'
+
+    @pytest.mark.parametrize("previous,target,prepare", [
+        case for case in CASES if case[:2] not in {
+            ("GOAL_CAMERA_90_FORWARD", "GOAL_CAMERA90_FINE_FORWARD_1"),
+            ("GOAL_CAMERA90_FINE_FORWARD_1", "GOAL_CAMERA_90_FORWARD"),
+        }
+    ])
+    def test_all_six_transition_types_pause_exactly_once_on_both_sides(clock, previous, target, prepare):
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+>       check_both_pauses(bridge, clock, prepare, bridge.motion_id_for_action(target))
+
+src/mission_control/test/test_transition_dwells.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+bridge = <test_motion_command_bridge.FakeBridge object at 0xffff76973a30>
+clock = [11.0], prepare = 'fine_to_turn_ready_45'
+target = 'stationary_turn_left'
+
+    def check_both_pauses(bridge, clock, prepare, target):
+        start = len(requests(bridge))
+        beginning = clock[0]
+        assert bridge.motion_in_progress
+        assert bridge.transition_dwell_until == beginning + 1.0
+        clock[0] = beginning + .999
+        bridge._check_atomic_dwell()
+        assert len(requests(bridge)) == start
+        clock[0] = beginning + 1.0
+        bridge._check_atomic_dwell()
+>       assert [r["motion_id"] for r in requests(bridge)[start:]] == [prepare]
+E       AssertionError: assert ['fine_to_turn_ready_0'] == ['fine_to_turn_ready_45']
+E         At index 0 diff: 'fine_to_turn_ready_0' != 'fine_to_turn_ready_45'
+E         Full diff:
+E         - ['fine_to_turn_ready_45']
+E         ?                      ^^
+E         + ['fine_to_turn_ready_0']
+E         ?                      ^
+
+src/mission_control/test/test_transition_dwells.py:29: AssertionError
+_ test_transition_finishes_before_target_and_rejects_interleaved_commands[BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45] _
+
+previous = 'BALL_FINE_FORWARD_8', target = 'STRAIGHT'
+prepare = 'fine_to_turn_ready_45'
+
+    @pytest.mark.parametrize("previous,target,prepare", CASES)
+    def test_transition_finishes_before_target_and_rejects_interleaved_commands(previous, target, prepare):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        start = len(requests(bridge))
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+        prep_request = requests(bridge)[-1]
+>       assert prep_request["motion_id"] == prepare
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_gait_transitions.py:53: AssertionError
+_ test_transition_finishes_before_target_and_rejects_interleaved_commands[BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45] _
+
+previous = 'BALL_FINE_FORWARD_8', target = 'TURN_LEFT'
+prepare = 'fine_to_turn_ready_45'
+
+    @pytest.mark.parametrize("previous,target,prepare", CASES)
+    def test_transition_finishes_before_target_and_rejects_interleaved_commands(previous, target, prepare):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        start = len(requests(bridge))
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+        prep_request = requests(bridge)[-1]
+>       assert prep_request["motion_id"] == prepare
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_gait_transitions.py:53: AssertionError
+_ test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45] _
+
+previous = 'BALL_FINE_FORWARD_8', target = 'STRAIGHT'
+prepare = 'fine_to_turn_ready_45', status = 'FAILED'
+error = 'SDK_COMMUNICATION_ERROR'
+
+    @pytest.mark.parametrize("previous,target,prepare", CASES)
+    @pytest.mark.parametrize("status,error", [
+        ("FAILED", "SDK_COMMUNICATION_ERROR"), ("TIMEOUT", "TIMEOUT"),
+        ("CANCELLED", ""), ("REJECTED", "INVALID_MOTION"),
+    ])
+    def test_preparation_failure_never_sends_target(previous, target, prepare, status, error):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        start = len(requests(bridge))
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+>       assert requests(bridge)[-1]["motion_id"] == prepare
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_gait_transitions.py:83: AssertionError
+_ test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45] _
+
+previous = 'BALL_FINE_FORWARD_8', target = 'TURN_LEFT'
+prepare = 'fine_to_turn_ready_45', status = 'FAILED'
+error = 'SDK_COMMUNICATION_ERROR'
+
+    @pytest.mark.parametrize("previous,target,prepare", CASES)
+    @pytest.mark.parametrize("status,error", [
+        ("FAILED", "SDK_COMMUNICATION_ERROR"), ("TIMEOUT", "TIMEOUT"),
+        ("CANCELLED", ""), ("REJECTED", "INVALID_MOTION"),
+    ])
+    def test_preparation_failure_never_sends_target(previous, target, prepare, status, error):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        start = len(requests(bridge))
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+>       assert requests(bridge)[-1]["motion_id"] == prepare
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_gait_transitions.py:83: AssertionError
+_ test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45] _
+
+previous = 'BALL_FINE_FORWARD_8', target = 'STRAIGHT'
+prepare = 'fine_to_turn_ready_45', status = 'TIMEOUT', error = 'TIMEOUT'
+
+    @pytest.mark.parametrize("previous,target,prepare", CASES)
+    @pytest.mark.parametrize("status,error", [
+        ("FAILED", "SDK_COMMUNICATION_ERROR"), ("TIMEOUT", "TIMEOUT"),
+        ("CANCELLED", ""), ("REJECTED", "INVALID_MOTION"),
+    ])
+    def test_preparation_failure_never_sends_target(previous, target, prepare, status, error):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        start = len(requests(bridge))
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+>       assert requests(bridge)[-1]["motion_id"] == prepare
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_gait_transitions.py:83: AssertionError
+_ test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45] _
+
+previous = 'BALL_FINE_FORWARD_8', target = 'TURN_LEFT'
+prepare = 'fine_to_turn_ready_45', status = 'TIMEOUT', error = 'TIMEOUT'
+
+    @pytest.mark.parametrize("previous,target,prepare", CASES)
+    @pytest.mark.parametrize("status,error", [
+        ("FAILED", "SDK_COMMUNICATION_ERROR"), ("TIMEOUT", "TIMEOUT"),
+        ("CANCELLED", ""), ("REJECTED", "INVALID_MOTION"),
+    ])
+    def test_preparation_failure_never_sends_target(previous, target, prepare, status, error):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        start = len(requests(bridge))
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+>       assert requests(bridge)[-1]["motion_id"] == prepare
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_gait_transitions.py:83: AssertionError
+_ test_preparation_failure_never_sends_target[CANCELLED--BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45] _
+
+previous = 'BALL_FINE_FORWARD_8', target = 'STRAIGHT'
+prepare = 'fine_to_turn_ready_45', status = 'CANCELLED', error = ''
+
+    @pytest.mark.parametrize("previous,target,prepare", CASES)
+    @pytest.mark.parametrize("status,error", [
+        ("FAILED", "SDK_COMMUNICATION_ERROR"), ("TIMEOUT", "TIMEOUT"),
+        ("CANCELLED", ""), ("REJECTED", "INVALID_MOTION"),
+    ])
+    def test_preparation_failure_never_sends_target(previous, target, prepare, status, error):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        start = len(requests(bridge))
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+>       assert requests(bridge)[-1]["motion_id"] == prepare
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_gait_transitions.py:83: AssertionError
+_ test_preparation_failure_never_sends_target[CANCELLED--BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45] _
+
+previous = 'BALL_FINE_FORWARD_8', target = 'TURN_LEFT'
+prepare = 'fine_to_turn_ready_45', status = 'CANCELLED', error = ''
+
+    @pytest.mark.parametrize("previous,target,prepare", CASES)
+    @pytest.mark.parametrize("status,error", [
+        ("FAILED", "SDK_COMMUNICATION_ERROR"), ("TIMEOUT", "TIMEOUT"),
+        ("CANCELLED", ""), ("REJECTED", "INVALID_MOTION"),
+    ])
+    def test_preparation_failure_never_sends_target(previous, target, prepare, status, error):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        start = len(requests(bridge))
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+>       assert requests(bridge)[-1]["motion_id"] == prepare
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_gait_transitions.py:83: AssertionError
+_ test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45] _
+
+previous = 'BALL_FINE_FORWARD_8', target = 'STRAIGHT'
+prepare = 'fine_to_turn_ready_45', status = 'REJECTED', error = 'INVALID_MOTION'
+
+    @pytest.mark.parametrize("previous,target,prepare", CASES)
+    @pytest.mark.parametrize("status,error", [
+        ("FAILED", "SDK_COMMUNICATION_ERROR"), ("TIMEOUT", "TIMEOUT"),
+        ("CANCELLED", ""), ("REJECTED", "INVALID_MOTION"),
+    ])
+    def test_preparation_failure_never_sends_target(previous, target, prepare, status, error):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        start = len(requests(bridge))
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+>       assert requests(bridge)[-1]["motion_id"] == prepare
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_gait_transitions.py:83: AssertionError
+_ test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45] _
+
+previous = 'BALL_FINE_FORWARD_8', target = 'TURN_LEFT'
+prepare = 'fine_to_turn_ready_45', status = 'REJECTED', error = 'INVALID_MOTION'
+
+    @pytest.mark.parametrize("previous,target,prepare", CASES)
+    @pytest.mark.parametrize("status,error", [
+        ("FAILED", "SDK_COMMUNICATION_ERROR"), ("TIMEOUT", "TIMEOUT"),
+        ("CANCELLED", ""), ("REJECTED", "INVALID_MOTION"),
+    ])
+    def test_preparation_failure_never_sends_target(previous, target, prepare, status, error):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        start = len(requests(bridge))
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+>       assert requests(bridge)[-1]["motion_id"] == prepare
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_gait_transitions.py:83: AssertionError
+_ test_queued_transition_uses_actual_completed_predecessor[SUCCEEDED-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45] _
+
+previous = 'BALL_FINE_FORWARD_8', target = 'STRAIGHT'
+prepare = 'fine_to_turn_ready_45', status = 'SUCCEEDED'
+
+    @pytest.mark.parametrize("previous,target,prepare", [
+        ("STRAIGHT", "BALL_FINE_FORWARD_8", "pickup_fine_prepare"),
+        ("TURN_LEFT", "BALL_FINE_FORWARD_8", "pickup_fine_prepare"),
+        ("BALL_FINE_FORWARD_8", "STRAIGHT", "fine_to_turn_ready_45"),
+    ])
+    @pytest.mark.parametrize("status", ["SUCCEEDED", "FAILED"])
+    def test_queued_transition_uses_actual_completed_predecessor(previous, target, prepare, status):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+        assert len(requests(bridge)) == 1
+        assert bridge.queued_request_deferred
+        finish_request(bridge, status)
+        if status == "SUCCEEDED":
+>           assert requests(bridge)[-1]["motion_id"] == prepare
+E           AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E             - fine_to_turn_ready_45
+E             ?                    ^^
+E             + fine_to_turn_ready_0
+E             ?                    ^
+
+src/mission_control/test/test_gait_transitions.py:104: AssertionError
+_______ test_queued_fine_does_not_use_history_from_before_active_retreat _______
+
+    def test_queued_fine_does_not_use_history_from_before_active_retreat():
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action="STRAIGHT", command_id=1))
+        finish_request(bridge)
+        bridge.navigation_command_callback(navigation_message(action="GOAL_CAMERA90_BACKWARD_1", command_id=2))
+        bridge.navigation_command_callback(navigation_message(action="GOAL_CAMERA90_FINE_FORWARD_1", command_id=3))
+        assert bridge.pending_turn_request is None
+>       assert requests(bridge)[-1]["motion_id"] == "goal_camera_90_fine_forward_1"
+E       AssertionError: assert 'line_forward_6' == 'goal_camera_...ine_forward_1'
+E         - goal_camera_90_fine_forward_1
+E         + line_forward_6
+
+src/mission_control/test/test_gait_transitions.py:149: AssertionError
+_ test_each_mission_prepares_before_turn_and_keeps_command_lock[line-BALL_FINE_FORWARD_8-TURN_LEFT-45] _
+
+source = 'line', fine = 'BALL_FINE_FORWARD_8', turn = 'TURN_LEFT', angle = 45
+
+    @pytest.mark.parametrize("source,fine,turn,angle", [
+        ("line", "BALL_FINE_FORWARD_8", "TURN_LEFT", 45),
+        ("line", "BALL_FINE_FORWARD_8", "TURN_RIGHT", 45),
+        ("ball", "BALL_FINE_FORWARD_8", "BALL_APPROACH_TURN_LEFT_2", 45),
+        ("ball", "BALL_FINE_FORWARD_8", "BALL_APPROACH_TURN_RIGHT_3", 45),
+        ("hurdle", "STRAIGHT_0", "ALIGN_LEFT", 0),
+        ("hurdle", "STRAIGHT_0", "ALIGN_RIGHT", 0),
+        *[("goal", f"GOAL_CAMERA90_FINE_FORWARD_{count}",
+           f"GOAL_CAMERA90_TURN_{side}_{repeat}", 90)
+          for count in range(1, 5) for side, repeat in (("LEFT", 1), ("RIGHT", 3))],
+    ])
+    def test_each_mission_prepares_before_turn_and_keeps_command_lock(source, fine, turn, angle):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(
+            source=source, action=fine, command_id=1,
+        ))
+        finish_physical(bridge)
+        bridge.navigation_command_callback(navigation_message(
+            source=source, action=turn, command_id=2,
+            source_command={"turn_count": 2 if turn == "ALIGN_LEFT" else 3},
+        ))
+        prep = requests(bridge)[-1]
+        target = bridge.active_motion_id
+>       assert prep["motion_id"] == f"fine_to_turn_ready_{angle}"
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_fine_turn_transition.py:46: AssertionError
+_ test_each_mission_prepares_before_turn_and_keeps_command_lock[line-BALL_FINE_FORWARD_8-TURN_RIGHT-45] _
+
+source = 'line', fine = 'BALL_FINE_FORWARD_8', turn = 'TURN_RIGHT', angle = 45
+
+    @pytest.mark.parametrize("source,fine,turn,angle", [
+        ("line", "BALL_FINE_FORWARD_8", "TURN_LEFT", 45),
+        ("line", "BALL_FINE_FORWARD_8", "TURN_RIGHT", 45),
+        ("ball", "BALL_FINE_FORWARD_8", "BALL_APPROACH_TURN_LEFT_2", 45),
+        ("ball", "BALL_FINE_FORWARD_8", "BALL_APPROACH_TURN_RIGHT_3", 45),
+        ("hurdle", "STRAIGHT_0", "ALIGN_LEFT", 0),
+        ("hurdle", "STRAIGHT_0", "ALIGN_RIGHT", 0),
+        *[("goal", f"GOAL_CAMERA90_FINE_FORWARD_{count}",
+           f"GOAL_CAMERA90_TURN_{side}_{repeat}", 90)
+          for count in range(1, 5) for side, repeat in (("LEFT", 1), ("RIGHT", 3))],
+    ])
+    def test_each_mission_prepares_before_turn_and_keeps_command_lock(source, fine, turn, angle):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(
+            source=source, action=fine, command_id=1,
+        ))
+        finish_physical(bridge)
+        bridge.navigation_command_callback(navigation_message(
+            source=source, action=turn, command_id=2,
+            source_command={"turn_count": 2 if turn == "ALIGN_LEFT" else 3},
+        ))
+        prep = requests(bridge)[-1]
+        target = bridge.active_motion_id
+>       assert prep["motion_id"] == f"fine_to_turn_ready_{angle}"
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_fine_turn_transition.py:46: AssertionError
+_ test_each_mission_prepares_before_turn_and_keeps_command_lock[ball-BALL_FINE_FORWARD_8-BALL_APPROACH_TURN_LEFT_2-45] _
+
+source = 'ball', fine = 'BALL_FINE_FORWARD_8'
+turn = 'BALL_APPROACH_TURN_LEFT_2', angle = 45
+
+    @pytest.mark.parametrize("source,fine,turn,angle", [
+        ("line", "BALL_FINE_FORWARD_8", "TURN_LEFT", 45),
+        ("line", "BALL_FINE_FORWARD_8", "TURN_RIGHT", 45),
+        ("ball", "BALL_FINE_FORWARD_8", "BALL_APPROACH_TURN_LEFT_2", 45),
+        ("ball", "BALL_FINE_FORWARD_8", "BALL_APPROACH_TURN_RIGHT_3", 45),
+        ("hurdle", "STRAIGHT_0", "ALIGN_LEFT", 0),
+        ("hurdle", "STRAIGHT_0", "ALIGN_RIGHT", 0),
+        *[("goal", f"GOAL_CAMERA90_FINE_FORWARD_{count}",
+           f"GOAL_CAMERA90_TURN_{side}_{repeat}", 90)
+          for count in range(1, 5) for side, repeat in (("LEFT", 1), ("RIGHT", 3))],
+    ])
+    def test_each_mission_prepares_before_turn_and_keeps_command_lock(source, fine, turn, angle):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(
+            source=source, action=fine, command_id=1,
+        ))
+        finish_physical(bridge)
+        bridge.navigation_command_callback(navigation_message(
+            source=source, action=turn, command_id=2,
+            source_command={"turn_count": 2 if turn == "ALIGN_LEFT" else 3},
+        ))
+        prep = requests(bridge)[-1]
+        target = bridge.active_motion_id
+>       assert prep["motion_id"] == f"fine_to_turn_ready_{angle}"
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_fine_turn_transition.py:46: AssertionError
+_ test_each_mission_prepares_before_turn_and_keeps_command_lock[ball-BALL_FINE_FORWARD_8-BALL_APPROACH_TURN_RIGHT_3-45] _
+
+source = 'ball', fine = 'BALL_FINE_FORWARD_8'
+turn = 'BALL_APPROACH_TURN_RIGHT_3', angle = 45
+
+    @pytest.mark.parametrize("source,fine,turn,angle", [
+        ("line", "BALL_FINE_FORWARD_8", "TURN_LEFT", 45),
+        ("line", "BALL_FINE_FORWARD_8", "TURN_RIGHT", 45),
+        ("ball", "BALL_FINE_FORWARD_8", "BALL_APPROACH_TURN_LEFT_2", 45),
+        ("ball", "BALL_FINE_FORWARD_8", "BALL_APPROACH_TURN_RIGHT_3", 45),
+        ("hurdle", "STRAIGHT_0", "ALIGN_LEFT", 0),
+        ("hurdle", "STRAIGHT_0", "ALIGN_RIGHT", 0),
+        *[("goal", f"GOAL_CAMERA90_FINE_FORWARD_{count}",
+           f"GOAL_CAMERA90_TURN_{side}_{repeat}", 90)
+          for count in range(1, 5) for side, repeat in (("LEFT", 1), ("RIGHT", 3))],
+    ])
+    def test_each_mission_prepares_before_turn_and_keeps_command_lock(source, fine, turn, angle):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(
+            source=source, action=fine, command_id=1,
+        ))
+        finish_physical(bridge)
+        bridge.navigation_command_callback(navigation_message(
+            source=source, action=turn, command_id=2,
+            source_command={"turn_count": 2 if turn == "ALIGN_LEFT" else 3},
+        ))
+        prep = requests(bridge)[-1]
+        target = bridge.active_motion_id
+>       assert prep["motion_id"] == f"fine_to_turn_ready_{angle}"
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_fine_turn_transition.py:46: AssertionError
+_________ test_queued_turn_waits_for_actual_fine_completion[SUCCEEDED] _________
+
+fine_status = 'SUCCEEDED'
+
+    @pytest.mark.parametrize("fine_status", ["SUCCEEDED", "FAILED", "CANCELLED"])
+    def test_queued_turn_waits_for_actual_fine_completion(fine_status):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action="BALL_FINE_FORWARD_8", command_id=1))
+        bridge.navigation_command_callback(navigation_message(action="TURN_RIGHT", command_id=2))
+        assert len(requests(bridge)) == 1
+        assert bridge.queued_request_deferred
+        finish_physical(bridge, fine_status)
+        if fine_status == "SUCCEEDED":
+>           assert requests(bridge)[-1]["motion_id"] == "fine_to_turn_ready_45"
+E           AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E             - fine_to_turn_ready_45
+E             ?                    ^^
+E             + fine_to_turn_ready_0
+E             ?                    ^
+
+src/mission_control/test/test_fine_turn_transition.py:114: AssertionError
+_________________ test_intervening_walk_discards_old_fine_pose _________________
+
+    def test_intervening_walk_discards_old_fine_pose():
+        bridge = FakeBridge()
+        for command_id, action in enumerate(("BALL_FINE_FORWARD_8", "STRAIGHT", "TURN_LEFT"), 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            complete_active_motion(bridge)
+>       assert [r["motion_id"] for r in requests(bridge)] == [
+            "ball_general_fine_forward_8", "fine_to_turn_ready_45",
+            "line_forward_6", "stationary_turn_left",
+        ]
+E       AssertionError: assert ['ball_genera...ry_turn_left'] == ['ball_genera...ry_turn_left']
+E         At index 1 diff: 'fine_to_turn_ready_0' != 'fine_to_turn_ready_45'
+E         Full diff:
+E           [
+E            'ball_general_fine_forward_8',
+E         -  'fine_to_turn_ready_45',
+E         ?                      ^^
+E         +  'fine_to_turn_ready_0',...
+E         
+E         ...Full output truncated (5 lines hidden), use '-vv' to show
+
+src/mission_control/test/test_fine_turn_transition.py:137: AssertionError
+---------------- generated xml file: /tmp/goal_turn_before.xml -----------------
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_transition_dwells.py::test_all_six_transition_types_pause_exactly_once_on_both_sides[BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_transition_dwells.py::test_all_six_transition_types_pause_exactly_once_on_both_sides[BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_transition_finishes_before_target_and_rejects_interleaved_commands[BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_transition_finishes_before_target_and_rejects_interleaved_commands[BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[CANCELLED--BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[CANCELLED--BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_queued_transition_uses_actual_completed_predecessor[SUCCEEDED-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_queued_fine_does_not_use_history_from_before_active_retreat
+FAILED src/mission_control/test/test_fine_turn_transition.py::test_each_mission_prepares_before_turn_and_keeps_command_lock[line-BALL_FINE_FORWARD_8-TURN_LEFT-45]
+FAILED src/mission_control/test/test_fine_turn_transition.py::test_each_mission_prepares_before_turn_and_keeps_command_lock[line-BALL_FINE_FORWARD_8-TURN_RIGHT-45]
+FAILED src/mission_control/test/test_fine_turn_transition.py::test_each_mission_prepares_before_turn_and_keeps_command_lock[ball-BALL_FINE_FORWARD_8-BALL_APPROACH_TURN_LEFT_2-45]
+FAILED src/mission_control/test/test_fine_turn_transition.py::test_each_mission_prepares_before_turn_and_keeps_command_lock[ball-BALL_FINE_FORWARD_8-BALL_APPROACH_TURN_RIGHT_3-45]
+FAILED src/mission_control/test/test_fine_turn_transition.py::test_queued_turn_waits_for_actual_fine_completion[SUCCEEDED]
+FAILED src/mission_control/test/test_fine_turn_transition.py::test_intervening_walk_discards_old_fine_pose
+20 failed, 243 passed in 2.08s

@@ -122,14 +122,14 @@ def test_valid_general_approach_does_not_emit_raw_numbered_turn(
     assert not command.motion.startswith(("TURN_LEFT_", "TURN_RIGHT_"))
 
 
-def test_fresh_distance_starts_pickup_sequence_at_550mm_without_vision_gate():
+def test_fresh_distance_starts_pickup_sequence_at_500mm_without_vision_gate():
     planner = BallNavigationPlanner()
 
     command = planner.plan(
         ball_info(
             depth_m=0.62,
             ground_distance_m=0.30,
-            distance_m=0.550,
+            distance_m=0.500,
             pickup_ready=False,
             pickup_now=False,
         ),
@@ -142,7 +142,7 @@ def test_fresh_distance_starts_pickup_sequence_at_550mm_without_vision_gate():
     assert command.linear_speed_mps == 0.0
     assert command.pickup_now is True
     assert command.pickup_approach_motion is None
-    assert command.distance_m == 0.550
+    assert command.distance_m == 0.500
     assert command.ground_distance_m == 0.30
 
 
@@ -182,13 +182,13 @@ def test_pickup_now_false_still_starts_sequence_at_close_distance():
     assert command.pickup_approach_motion is None
 
 
-def test_pickup_sequence_does_not_start_above_550mm():
+def test_pickup_sequence_does_not_start_above_500mm():
     planner = BallNavigationPlanner()
 
     command = planner.plan(
         ball_info(
             depth_m=0.40,
-            distance_m=0.551,
+            distance_m=0.500001,
             ground_distance_m=0.15,
             pickup_ready=True,
             pickup_now=True,
@@ -465,11 +465,12 @@ def test_unsafe_input_produces_stop(sample, reason):
 
 
 @pytest.mark.parametrize("distance,expected", [
-    (0.549, "STRAIGHT_0"), (0.550, "STRAIGHT_0"),
-    (0.550001, "BALL_APPROACH_FINE_FORWARD_5"),
+    (0.499, "STRAIGHT_0"), (0.500, "STRAIGHT_0"),
+    (0.500001, "BALL_APPROACH_FINE_FORWARD_5"),
+    (0.550, "BALL_APPROACH_FINE_FORWARD_5"),
     (0.6, "BALL_APPROACH_FINE_FORWARD_5"), (0.600001, "STRAIGHT"), (0.7, "STRAIGHT"),
 ])
-def test_general_ball_550mm_boundary_when_pickup_entry_is_lower(distance, expected):
+def test_general_ball_500mm_boundary_when_pickup_entry_is_lower(distance, expected):
     planner = BallNavigationPlanner(BallNavigationConfig(
         pickup_sequence_start_distance_m=0.2,
     ))

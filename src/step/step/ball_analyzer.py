@@ -25,7 +25,7 @@ from std_msgs.msg import String
 
 from .approach_distance import approach_level_from_motion
 from .approach_distance import ball_hurdle_approach_motion
-from .approach_distance import BALL_HURDLE_FINE_DISTANCE_M
+from .approach_distance import BALL_PICKUP_DISTANCE_M
 from .depth_frame_cache import DepthFrame
 from .depth_frame_cache import DepthFrameCache
 from .depth_frame_cache import DepthFrameConsumer
@@ -139,12 +139,12 @@ def should_request_head_down(
     depth_valid: bool,
     depth_age_sec: float | None,
 ) -> bool:
-    """Lower the camera at the fresh 550 mm pickup boundary, even while walking."""
+    """Lower the camera at the fresh 500 mm pickup boundary, even while walking."""
     return (
         depth_valid is True
         and isinstance(distance_m, (int, float)) and not isinstance(distance_m, bool)
         and math.isfinite(distance_m)
-        and 0.0 < distance_m <= BALL_HURDLE_FINE_DISTANCE_M
+        and 0.0 < distance_m <= BALL_PICKUP_DISTANCE_M
         and isinstance(depth_age_sec, (int, float)) and not isinstance(depth_age_sec, bool)
         and math.isfinite(depth_age_sec) and 0.0 <= depth_age_sec <= 0.70
     )
@@ -1488,10 +1488,12 @@ class BallAnalyzer(DepthFrameConsumer, Node):
                 ground_distance_m=target.ground_distance_m,
                 distance_m=target.distance_m,
                 approach_motion=ball_hurdle_approach_motion(
-                    target.distance_m
+                    target.distance_m, fine_distance_m=BALL_PICKUP_DISTANCE_M,
                 ),
                 approach_level=approach_level_from_motion(
-                    ball_hurdle_approach_motion(target.distance_m)
+                    ball_hurdle_approach_motion(
+                        target.distance_m, fine_distance_m=BALL_PICKUP_DISTANCE_M,
+                    )
                 ),
                 approach_target_distance_m=target.distance_m,
                 depth_valid=target.depth_valid,

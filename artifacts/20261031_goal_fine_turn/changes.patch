@@ -1,0 +1,476 @@
+--- before/artifacts/robot_motions_pc.json
++++ artifacts/robot_motions_pc.json
+@@ -25356,6 +25356,140 @@
+           "start_ms": 300
+         }
+       ]
++    },
++    {
++      "name": "r미세오뒤에서 오뒤90도",
++      "max_seq_ms": 11522,
++      "repeat_count": 1,
++      "playback_speed": 1.05,
++      "repeatable": true,
++      "start_pose": "R김왼들90도",
++      "end_pose": "R김오뒤90도",
++      "completion": {
++        "position_tolerance_deg": 2.0,
++        "settle_duration_ms": 80,
++        "settle_timeout_ms": 3000
++      },
++      "frames": [
++        {
++          "frame_id": "f0d0395f9d3d43b4bb3938d53dadc454",
++          "name": "R김왼들90도",
++          "time_ms": 60,
++          "angles": {
++            "0": 1.0,
++            "1": -0.087890625,
++            "2": -8.349609375,
++            "3": 7.646484375,
++            "4": 16.435546875,
++            "5": -17.314453125,
++            "6": 73.564453125,
++            "7": -75.41015625,
++            "8": -10.634765625,
++            "9": 2.548828125,
++            "10": -0.263671875,
++            "11": -3.427734375,
++            "12": 4.658203125,
++            "15": -1.439453125,
++            "16": 5.955078125,
++            "13": -54.66796875,
++            "14": 79.1015625,
++            "17": -31.552734375,
++            "18": 55.1953125,
++            "19": 65.91796875,
++            "20": -61.875,
++            "21": 10.634765625,
++            "22": -3.515625
++          },
++          "torques": {
++            "0": true,
++            "1": true,
++            "2": true,
++            "3": true,
++            "4": true,
++            "5": true,
++            "6": true,
++            "7": true,
++            "8": true,
++            "9": true,
++            "10": true,
++            "11": true,
++            "12": true,
++            "15": true,
++            "16": true,
++            "13": true,
++            "14": true,
++            "17": true,
++            "18": true,
++            "19": true,
++            "20": true,
++            "21": true,
++            "22": true
++          },
++          "is_important": false,
++          "lift_early_arrival": true,
++          "source_frame_id": "f0d0395f9d3d43b4bb3938d53dadc454",
++          "start_ms": 0
++        },
++        {
++          "frame_id": "df6f0b727be54af6b978d50c5ebfee07",
++          "name": "R김오뒤90도",
++          "time_ms": 100,
++          "angles": {
++            "0": 1.0,
++            "1": 0.52734375,
++            "2": -9.84375,
++            "3": 9.931640625,
++            "4": 16.5234375,
++            "5": -17.40234375,
++            "6": 67.060546875,
++            "7": -68.37890625,
++            "8": -10.986328125,
++            "9": 2.63671875,
++            "10": 1.845703125,
++            "11": -2.724609375,
++            "12": 2.548828125,
++            "15": 3.603515625,
++            "16": -1.0546875,
++            "13": -45.220703125,
++            "14": 59.3046875,
++            "17": -26.015625,
++            "18": 26.279296875,
++            "19": 67.587890625,
++            "20": -57.568359375,
++            "21": 2.658203125,
++            "22": -5.009765625
++          },
++          "torques": {
++            "0": true,
++            "1": true,
++            "2": true,
++            "3": true,
++            "4": true,
++            "5": true,
++            "6": true,
++            "7": true,
++            "8": true,
++            "9": true,
++            "10": true,
++            "11": true,
++            "12": true,
++            "15": true,
++            "16": true,
++            "13": true,
++            "14": true,
++            "17": true,
++            "18": true,
++            "19": true,
++            "20": true,
++            "21": true,
++            "22": true
++          },
++          "is_important": false,
++          "lift_early_arrival": true,
++          "source_frame_id": "df6f0b727be54af6b978d50c5ebfee07",
++          "start_ms": 60
++        }
++      ]
+     }
+   ]
+ }
+--- before/artifacts/robot_motions_runtime.json
++++ artifacts/robot_motions_runtime.json
+@@ -25356,6 +25356,140 @@
+           "start_ms": 300
+         }
+       ]
++    },
++    {
++      "name": "r미세오뒤에서 오뒤90도",
++      "max_seq_ms": 11522,
++      "repeat_count": 1,
++      "playback_speed": 0.9975,
++      "repeatable": true,
++      "start_pose": "R김왼들90도",
++      "end_pose": "R김오뒤90도",
++      "completion": {
++        "position_tolerance_deg": 5.0,
++        "settle_duration_ms": 80,
++        "settle_timeout_ms": 3000
++      },
++      "frames": [
++        {
++          "frame_id": "f0d0395f9d3d43b4bb3938d53dadc454",
++          "name": "R김왼들90도",
++          "time_ms": 60,
++          "angles": {
++            "0": 1.0,
++            "1": -0.087890625,
++            "2": -8.349609375,
++            "3": 7.646484375,
++            "4": 16.435546875,
++            "5": -17.314453125,
++            "6": 73.564453125,
++            "7": -75.41015625,
++            "8": -10.634765625,
++            "9": 2.548828125,
++            "10": -0.263671875,
++            "11": -3.427734375,
++            "12": 4.658203125,
++            "15": -1.439453125,
++            "16": 5.955078125,
++            "13": -54.66796875,
++            "14": 79.1015625,
++            "17": -31.552734375,
++            "18": 55.1953125,
++            "19": 65.91796875,
++            "20": -61.875,
++            "21": 10.634765625,
++            "22": -3.515625
++          },
++          "torques": {
++            "0": true,
++            "1": true,
++            "2": true,
++            "3": true,
++            "4": true,
++            "5": true,
++            "6": true,
++            "7": true,
++            "8": true,
++            "9": true,
++            "10": true,
++            "11": true,
++            "12": true,
++            "15": true,
++            "16": true,
++            "13": true,
++            "14": true,
++            "17": true,
++            "18": true,
++            "19": true,
++            "20": true,
++            "21": true,
++            "22": true
++          },
++          "is_important": false,
++          "lift_early_arrival": true,
++          "source_frame_id": "f0d0395f9d3d43b4bb3938d53dadc454",
++          "start_ms": 0
++        },
++        {
++          "frame_id": "df6f0b727be54af6b978d50c5ebfee07",
++          "name": "R김오뒤90도",
++          "time_ms": 100,
++          "angles": {
++            "0": 1.0,
++            "1": 0.52734375,
++            "2": -9.84375,
++            "3": 9.931640625,
++            "4": 16.5234375,
++            "5": -17.40234375,
++            "6": 67.060546875,
++            "7": -68.37890625,
++            "8": -10.986328125,
++            "9": 2.63671875,
++            "10": 1.845703125,
++            "11": -2.724609375,
++            "12": 2.548828125,
++            "15": 3.603515625,
++            "16": -1.0546875,
++            "13": -45.220703125,
++            "14": 59.3046875,
++            "17": -26.015625,
++            "18": 26.279296875,
++            "19": 67.587890625,
++            "20": -57.568359375,
++            "21": 2.658203125,
++            "22": -5.009765625
++          },
++          "torques": {
++            "0": true,
++            "1": true,
++            "2": true,
++            "3": true,
++            "4": true,
++            "5": true,
++            "6": true,
++            "7": true,
++            "8": true,
++            "9": true,
++            "10": true,
++            "11": true,
++            "12": true,
++            "15": true,
++            "16": true,
++            "13": true,
++            "14": true,
++            "17": true,
++            "18": true,
++            "19": true,
++            "20": true,
++            "21": true,
++            "22": true
++          },
++          "is_important": false,
++          "lift_early_arrival": true,
++          "source_frame_id": "df6f0b727be54af6b978d50c5ebfee07",
++          "start_ms": 60
++        }
++      ]
+     }
+   ]
+ }
+--- before/src/irc_step_motion_executor/config/motion_aliases.yaml
++++ src/irc_step_motion_executor/config/motion_aliases.yaml
+@@ -141,7 +141,7 @@
+   # Fine-forward exit posture before any in-place turn (camera pose in degrees).
+   fine_to_turn_ready_45: "R미세오뒤에서 오뒤45도"
+   fine_to_turn_ready_0: "R미세오뒤에서 오뒤0도"
+-  fine_to_turn_ready_90: "R미세오뒤에서 오뒤90도"
++  fine_to_turn_ready_90: "r미세오뒤에서 오뒤90도"
+ 
+   # Catalog52 R variants available for explicit/manual requests.
+   r_forward_0_4: "R전진0도(4회)"
+--- before/src/mission_control/README.md
++++ src/mission_control/README.md
+@@ -1,4 +1,17 @@
+ # mission_control
++
++## 골대 미세 전진 후 제자리 회전
++
++골대 미세 전진을 마치고 제자리 회전으로 전환할 때는 `1초 대기 →
++r미세오뒤에서 오뒤90도 → 1초 대기 → 제자리 회전` 순서를 지킨다.
++회전을 미리 요청한 경우에도 미세 전진 완료 후부터 이 순서를 적용하며,
++골대 진입 시 대기 생략 옵션으로 이 두 대기를 건너뛰지 않는다.
++전환 모션이 실패하면 회전을 시작하지 않는다.
++
++`fine_to_turn_ready_90`은 catalog62의 소문자 `r미세오뒤에서 오뒤90도`를
++사용한다. 원본 배속 1.05에 0.95를 곱해 실행 배속은 0.9975이고, 관절 목표와
++프레임 시간은 원본을 보존한다. 변경 전 파일과 원본은
++`artifacts/20261031_goal_fine_turn/`에 보관한다.
+ 
+ ## Ball 500mm 이하 잡기 접근의 연속 예약
+ 
+--- before/src/mission_control/mission_control/motion_command_bridge_node.py
++++ src/mission_control/mission_control/motion_command_bridge_node.py
+@@ -1215,7 +1215,9 @@
+                 or time.monotonic() - self.head_override_received_at > 1.0):
+             state = {}
+         if (state.get("goal_head_override_active") is True
+-                or motion_id.startswith("goal_camera_90_") or goal_fine_to_recovery):
++                or motion_id.startswith("goal_camera_90_") or goal_fine_to_recovery
++                or (self._is_stationary_turn(motion_id)
++                    and (self.last_physical_motion_id or "").startswith("goal_camera_90_fine_forward_"))):
+             return "fine_to_turn_ready_90"
+         if (state.get("ball_head_override_active") is True
+                 or state.get("hurdle_head_override_active") is True
+@@ -1259,6 +1261,10 @@
+         self, action: str, motion_id: str, request_id: int | None = None,
+     ) -> bool:
+         """Keep interpolation, but omit timed-Goal entry and Goal walking pauses."""
++        # Turning out of the Goal fine stance always needs both support-change holds.
++        if (self._is_stationary_turn(motion_id)
++                and (self.last_physical_motion_id or "").startswith("goal_camera_90_fine_forward_")):
++            return False
+         if (request_id is not None
+                 and request_id == getattr(self, "goal_handoff_command_id", None)
+                 and action.startswith("GOAL_")):
+--- before/src/mission_control/test/test_catalog60_full_import.py
++++ src/mission_control/test/test_catalog60_full_import.py
+@@ -35,8 +35,9 @@
+ def test_every_original_and_derived_motion_uses_latest_source_data():
+     source, pc, runtime = catalogs()
+     added62 = json.loads((ROOT / 'artifacts/20261030_catalog62_ball500/manifest.json').read_text())['motions']
+-    assert len(source) == 74 and len(pc) == len(runtime) == 103 + len(added62)
+-    assert pc.keys() == runtime.keys() == source.keys() | DERIVED.keys() | added62.keys() | {f'R골넣기{n}번구역' for n in range(1, 5)}
++    goal_turn_transition = {'r미세오뒤에서 오뒤90도'}
++    assert len(source) == 74 and len(pc) == len(runtime) == 103 + len(added62) + len(goal_turn_transition)
++    assert pc.keys() == runtime.keys() == source.keys() | DERIVED.keys() | added62.keys() | goal_turn_transition | {f'R골넣기{n}번구역' for n in range(1, 5)}
+     for name, original in source.items():
+         assert pc[name] == original
+     for name, spec in DERIVED.items():
+--- before/src/mission_control/test/test_catalog62_fine_motions.py
++++ src/mission_control/test/test_catalog62_fine_motions.py
+@@ -36,7 +36,8 @@
+     source = {m['name']: m for m in json.loads(raw)['motions']}
+     actual = catalog(ROOT / 'artifacts' / filename)
+     before = catalog(UPDATE / 'before/artifacts' / filename)
+-    assert actual.keys() == before.keys() | MANIFEST['motions'].keys()
++    # The later Goal turn update adds one source62 support transition.
++    assert actual.keys() == before.keys() | MANIFEST['motions'].keys() | {'r미세오뒤에서 오뒤90도'}
+     for name, original in before.items():
+         assert actual[name] == original, name
+     for name, spec in MANIFEST['motions'].items():
+@@ -52,7 +53,8 @@
+ def test_aliases_change_only_requested_fine_gaits():
+     before = yaml.safe_load((UPDATE / 'before' / ALIAS_PATH).read_text())['motion_aliases']
+     aliases = yaml.safe_load((ROOT / ALIAS_PATH).read_text())['motion_aliases']
+-    assert aliases == {**before, **MANIFEST['aliases']}
++    assert aliases == {**before, **MANIFEST['aliases'],
++                       'fine_to_turn_ready_90': 'r미세오뒤에서 오뒤90도'}
+     runtime = catalog(ROOT / 'artifacts/robot_motions_runtime.json')
+     assert set(aliases.values()) <= runtime.keys()
+     expected = {
+--- before/src/mission_control/test/test_gait_transitions.py
++++ src/mission_control/test/test_gait_transitions.py
+@@ -198,7 +198,7 @@
+         "goal_fine_to_default": "R미세오뒤에서 기본자세45도",
+         "fine_to_turn_ready_0": "R미세오뒤에서 오뒤0도",
+         "fine_to_turn_ready_45": "R미세오뒤에서 오뒤45도",
+-        "fine_to_turn_ready_90": "R미세오뒤에서 오뒤90도",
++        "fine_to_turn_ready_90": "r미세오뒤에서 오뒤90도",
+     }
+     for alias, name in expected.items():
+         assert aliases[alias] == name
+--- /dev/null
++++ src/mission_control/test/test_goal_fine_turn_transition.py
+@@ -0,0 +1,85 @@
++"""Verify Goal fine-to-turn support changes, dwell boundaries and source fidelity."""
++
++import copy
++import json
++from pathlib import Path
++
++import pytest
++import yaml
++
++from test_gait_transitions import finish_request, requests
++from test_motion_command_bridge import FakeBridge, decoded_messages, navigation_message
++from test_transition_dwells import check_both_pauses, clock
++
++
++ROOT = Path(__file__).resolve().parents[3]
++UPDATE = ROOT / 'artifacts/20261031_goal_fine_turn'
++ALIAS_PATH = Path('src/irc_step_motion_executor/config/motion_aliases.yaml')
++
++
++@pytest.mark.parametrize('count', range(1, 5))
++@pytest.mark.parametrize('side', ['LEFT', 'RIGHT'])
++@pytest.mark.parametrize('queued', [False, True])
++def test_goal_fine_then_turn_waits_before_and_after_preparation(clock, count, side, queued):
++    bridge = FakeBridge(advance_transition_dwells=False)
++    bridge.navigation_command_callback(navigation_message(
++        source='goal', action=f'GOAL_CAMERA90_FINE_FORWARD_{count}', command_id=1,
++    ))
++    turn = navigation_message(source='goal', action=f'GOAL_CAMERA90_TURN_{side}_1', command_id=2)
++    if queued:
++        bridge.navigation_command_callback(turn)
++        assert len(requests(bridge)) == 1
++        assert bridge.transition_dwell_until is None
++        clock[0] += 2.0
++        finish_request(bridge)
++    else:
++        finish_request(bridge)
++        bridge.navigation_command_callback(turn)
++    target = f'goal_camera_90_turn_{side.lower()}_1'
++    check_both_pauses(bridge, clock, 'fine_to_turn_ready_90', target)
++    finish_request(bridge)
++    assert not bridge.motion_in_progress
++
++
++@pytest.mark.parametrize('action', ['GOAL_CAMERA90_TURN_LEFT_1', 'GOAL_CAMERA90_TURN_RIGHT_1',
++                                  'TURN_LEFT', 'TURN_RIGHT'])
++def test_goal_fine_turn_cannot_use_handoff_pause_bypass(clock, action):
++    bridge = FakeBridge(advance_transition_dwells=False)
++    bridge.last_physical_motion_id = 'goal_camera_90_fine_forward_2'
++    bridge.goal_handoff_command_id = 2
++    # No heartbeat: the completed Goal gait still determines the 90-degree pose.
++    bridge.navigation_command_callback(navigation_message(source='goal', action=action, command_id=2))
++    check_both_pauses(bridge, clock, 'fine_to_turn_ready_90', bridge.motion_id_for_action(action))
++
++
++@pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT', 'CANCELLED', 'REJECTED'])
++def test_goal_preparation_failure_never_starts_turn(clock, status):
++    bridge = FakeBridge(advance_transition_dwells=False)
++    bridge.last_physical_motion_id = 'goal_camera_90_fine_forward_4'
++    bridge.navigation_command_callback(navigation_message(
++        source='goal', action='GOAL_CAMERA90_TURN_RIGHT_1', command_id=2,
++    ))
++    clock[0] += 1.0
++    bridge._check_atomic_dwell()
++    finish_request(bridge, status, 'TEST_FAILURE')
++    clock[0] += 10.0
++    bridge._check_atomic_dwell()
++    assert [r['motion_id'] for r in requests(bridge)] == ['fine_to_turn_ready_90']
++    assert not bridge.motion_in_progress
++    assert decoded_messages(bridge.motion_status_publisher)[-1]['error_code'] == 'TURN_PREPARATION_FAILED'
++
++
++@pytest.mark.parametrize('filename', ['robot_motions_pc.json', 'robot_motions_runtime.json'])
++def test_only_requested_source_motion_added_with_correct_runtime_speed(filename):
++    source = json.loads((UPDATE / 'source62.json').read_text())['motions']
++    expected = copy.deepcopy(next(m for m in source if m['name'] == 'r미세오뒤에서 오뒤90도'))
++    if 'runtime' in filename:
++        expected['playback_speed'] = .9975
++        expected['completion']['position_tolerance_deg'] = 5.0
++    before = json.loads((UPDATE / 'before/artifacts' / filename).read_text())
++    actual = json.loads((ROOT / 'artifacts' / filename).read_text())
++    assert actual == {**before, 'motions': [*before['motions'], expected]}
++    assert max(f['start_ms'] + f['time_ms'] for f in expected['frames']) == 160
++    aliases = yaml.safe_load((ROOT / ALIAS_PATH).read_text())['motion_aliases']
++    old_aliases = yaml.safe_load((UPDATE / 'before' / ALIAS_PATH).read_text())['motion_aliases']
++    assert aliases == {**old_aliases, 'fine_to_turn_ready_90': expected['name']}

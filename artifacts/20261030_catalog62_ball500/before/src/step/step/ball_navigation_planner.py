@@ -1,0 +1,541 @@
+#!/usr/bin/env python3
+"""Convert ball geometry into bounded, hardware-independent motion targets."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+import math
+from typing import Any
+
+from .approach_distance import BALL_HURDLE_FINE_DISTANCE_M
+from .approach_distance import BALL_FINE_APPROACH_DISTANCE_M
+from .approach_distance import approach_level_from_motion
+from .approach_distance import ball_hurdle_approach_motion
+from .line_navigation_planner import numbered_turn_motion_metadata
+
+
+@dataclass(frozen=True)
+class BallNavigationConfig:
+    """Tunable limits for ball alignment and approach commands."""
+
+    min_confidence: float = 0.35
+    max_linear_speed_mps: float = 0.04
+    min_linear_speed_mps: float = 0.012
+    max_angular_speed_rad_s: float = 0.50
+    max_angular_accel_rad_s2: float = 1.00
+    bearing_gain: float = 1.0
+    steering_response_sec: float = 0.70
+    turn_enter_deg: float = 5.0
+    turn_exit_deg: float = 2.5
+    path_center_deadband_norm: float = 0.05
+    path_center_deadband_max_depth_m: float = 0.60
+    image_steering_max_forward_m: float = 0.35
+    fallback_half_fov_deg: float = 35.0
+    control_start_depth_m: float = 1.50
+    max_pickup_depth_age_sec: float = 0.70
+    pickup_sequence_start_distance_m: float = BALL_HURDLE_FINE_DISTANCE_M
+    slowdown_depth_m: float = 1.0
+    fine_step_depth_m: float = 0.95
+    pickup_depth_m: float = 0.07
+    pickup_trigger_depth_m: float = 0.48
+    pickup_depth_tolerance_m: float = 0.02
+    command_duration_sec: float = 0.40
+
+
+@dataclass(frozen=True)
+class BallNavigationCommand:
+    """One abstract ball-approach command for a behavior layer."""
+
+    valid: bool
+    motion: str
+    reason: str
+    linear_speed_mps: float
+    lateral_speed_mps: float
+    angular_speed_rad_s: float
+    angular_accel_rad_s2: float
+    command_duration_sec: float
+    travel_distance_m: float
+    lateral_travel_distance_m: float
+    target_heading_change_deg: float
+    bearing_error_deg: float | None
+    offset_x_norm: float | None
+    depth_m: float | None
+    distance_m: float | None
+    ground_distance_m: float | None
+    distance_error_m: float | None
+    confidence: float
+    depth_valid: bool
+    pickup_ready: bool
+    pickup_now: bool
+    pickup_approach_motion: str | None
+    steering_error_deg: float | None = None
+    steering_source: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return a rounded JSON-compatible representation."""
+        approach_motion = (
+            self.pickup_approach_motion
+            if self.motion == "PICKUP_NOW"
+            else self.motion
+        )
+        approach_level = (
+            approach_level_from_motion(approach_motion)
+            if isinstance(approach_motion, str)
+            else None
+        )
+        turn_motion, turn_level, turn_angle_deg = (
+            numbered_turn_motion_metadata(self.motion)
+        )
+        return {
+            "valid": self.valid,
+            "motion": self.motion,
+            "reason": self.reason,
+            "linear_speed_mps": round(self.linear_speed_mps, 4),
+            "lateral_speed_mps": round(self.lateral_speed_mps, 4),
+            "angular_speed_rad_s": round(self.angular_speed_rad_s, 4),
+            "angular_accel_rad_s2": round(
+                self.angular_accel_rad_s2,
+                4,
+            ),
+            "command_duration_sec": round(self.command_duration_sec, 3),
+            "travel_distance_m": round(self.travel_distance_m, 4),
+            "lateral_travel_distance_m": round(
+                self.lateral_travel_distance_m,
+                4,
+            ),
+            "target_heading_change_deg": round(
+                self.target_heading_change_deg,
+                3,
+            ),
+            "steering_error_deg": _round_optional(self.steering_error_deg, 3),
+            "steering_source": self.steering_source,
+            "bearing_error_deg": _round_optional(
+                self.bearing_error_deg,
+                3,
+            ),
+            "offset_x_norm": _round_optional(self.offset_x_norm, 6),
+            "depth_m": _round_optional(self.depth_m, 3),
+            "distance_m": _round_optional(self.distance_m, 3),
+            "ground_distance_m": _round_optional(
+                self.ground_distance_m,
+                3,
+            ),
+            "distance_error_m": _round_optional(
+                self.distance_error_m,
+                3,
+            ),
+            "confidence": round(self.confidence, 4),
+            "depth_valid": self.depth_valid,
+            "pickup_ready": self.pickup_ready,
+            "pickup_now": self.pickup_now,
+            "pickup_approach_motion": self.pickup_approach_motion,
+            "approach_motion": (
+                approach_motion
+                if approach_motion == "STRAIGHT" or approach_level is not None
+                else None
+            ),
+            "approach_level": approach_level,
+            "approach_target_distance_m": _round_optional(
+                self.distance_m,
+                3,
+            ),
+            "turn_motion": turn_motion,
+            "turn_level": turn_level,
+            "turn_angle_deg": turn_angle_deg,
+        }
+
+
+def _round_optional(value: float | None, digits: int) -> float | None:
+    if value is None:
+        return None
+    return round(value, digits)
+
+
+def _clamp(value: float, low: float, high: float) -> float:
+    return max(low, min(high, value))
+
+
+def _number(data: dict[str, Any], key: str) -> float | None:
+    value = data.get(key)
+    if value is None or isinstance(value, bool):
+        return None
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    return number if math.isfinite(number) else None
+
+
+def valid_ball_ground_steering(info: dict[str, Any]) -> float | None:
+    """Read calibrated ball steering in the robot ground coordinate frame."""
+    if (
+        info.get("ground_projection_enabled") is not True
+        or info.get("ground_projection_valid") is not True
+        or info.get("ground_projection_scope") != "ball_approach_only"
+        or info.get("ground_coordinate_frame") != "robot_x_right_z_forward"
+    ):
+        return None
+    angle = _number(info, "ground_steering_angle_deg")
+    return angle if angle is not None and abs(angle) < 90.0 else None
+
+
+class BallNavigationPlanner:
+    """Create ball alignment and approach targets from ``ball_info``."""
+
+    def __init__(
+        self,
+        config: BallNavigationConfig | None = None,
+    ) -> None:
+        self.config = config or BallNavigationConfig()
+        self.previous_motion = "STOP"
+        self.previous_angular_speed_rad_s = 0.0
+
+    def stop(self, reason: str) -> BallNavigationCommand:
+        """Create an immediate stop and reset steering state."""
+        self.previous_motion = "STOP"
+        self.previous_angular_speed_rad_s = 0.0
+        return BallNavigationCommand(
+            valid=False,
+            motion="STOP",
+            reason=reason,
+            linear_speed_mps=0.0,
+            lateral_speed_mps=0.0,
+            angular_speed_rad_s=0.0,
+            angular_accel_rad_s2=0.0,
+            command_duration_sec=self.config.command_duration_sec,
+            travel_distance_m=0.0,
+            lateral_travel_distance_m=0.0,
+            target_heading_change_deg=0.0,
+            bearing_error_deg=None,
+            offset_x_norm=None,
+            depth_m=None,
+            distance_m=None,
+            ground_distance_m=None,
+            distance_error_m=None,
+            confidence=0.0,
+            depth_valid=False,
+            pickup_ready=False,
+            pickup_now=False,
+            pickup_approach_motion=None,
+        )
+
+    def plan(
+        self,
+        ball_info: dict[str, Any],
+        dt_sec: float,
+    ) -> BallNavigationCommand:
+        """Generate one safe alignment, approach, or pickup target."""
+        if not bool(ball_info.get("detected", False)):
+            return self.stop("ball_not_detected")
+
+        confidence = _number(ball_info, "confidence")
+        if confidence is None or confidence < self.config.min_confidence:
+            return self.stop("low_ball_confidence")
+
+        bearing = _number(ball_info, "bearing_deg")
+        offset = _number(ball_info, "offset_x_norm")
+        depth = _number(ball_info, "depth_m")
+        distance = _number(ball_info, "distance_m")
+        ground_distance = _number(ball_info, "ground_distance_m")
+        steering_error, steering_source = self.select_steering(ball_info)
+        if steering_error is None:
+            return self.stop("invalid_ball_alignment")
+
+        depth_valid = bool(ball_info.get("depth_valid", False))
+        pickup_ready = bool(ball_info.get("pickup_ready", False))
+
+        # depth_valid/depth_age describe the aligned sample's validity and
+        # freshness; distance_m is the sole BALL range-control value.
+        if (
+            not depth_valid
+            or distance is None
+            or distance <= 0.0
+        ):
+            return self.stop("missing_valid_ball_distance")
+
+        # pickup_ready gates only the later fixed grasp block. A fresh valid
+        # distance independently owns entry into the atomic pickup sequence.
+        if distance <= self.config.pickup_sequence_start_distance_m:
+            depth_age = _number(ball_info, "depth_age_sec")
+            if (
+                depth_age is None
+                or depth_age < 0.0
+                or depth_age > self.config.max_pickup_depth_age_sec
+            ):
+                return self.stop("stale_ball_distance_for_pickup_sequence")
+
+            return self._pickup_command(
+                bearing,
+                offset,
+                depth,
+                distance,
+                ground_distance,
+                confidence,
+                pickup_ready,
+            )
+
+        speed = self._approach_speed(distance, pickup_ready)
+        motion = self._general_approach_motion(
+            distance,
+        )
+        if motion == "BALL_APPROACH_FINE_FORWARD_5":
+            depth_age = _number(ball_info, "depth_age_sec")
+            if depth_age is None or not 0.0 <= depth_age <= self.config.max_pickup_depth_age_sec:
+                return self.stop("stale_ball_distance_for_fine_approach")
+        return self._moving_command(
+            motion=motion,
+            reason="ball_aligned_discrete_approach",
+            linear_speed_mps=speed,
+            steering_error_deg=steering_error,
+            steering_source=steering_source,
+            dt_sec=dt_sec,
+            bearing=bearing,
+            offset=offset,
+            depth=depth,
+            distance=distance,
+            ground_distance=ground_distance,
+            confidence=confidence,
+            depth_valid=True,
+            pickup_ready=pickup_ready,
+            pickup_now=False,
+        )
+
+    def select_steering(self, info: dict[str, Any]) -> tuple[float | None, str]:
+        """Use image geometry at ground-forward <=35 cm, ground geometry beyond.
+
+        Old publishers without projection metadata keep their image behavior.
+        Invalid projection data cannot establish which distance branch applies.
+        """
+        if info.get("head_down_requested") is True:
+            # The 45-degree ground calibration is invalid once lowering starts.
+            return self._steering_error(
+                _number(info, "steering_angle_deg"),
+                _number(info, "bearing_deg"),
+                _number(info, "offset_x_norm"),
+                _number(info, "distance_m"),
+            ), "camera_down_image_angle"
+        source = "legacy_image_angle"
+        if "ground_projection_enabled" in info:
+            forward = _number(info, "ground_forward_distance_m")
+            if (
+                info.get("ground_projection_enabled") is not True
+                or info.get("ground_projection_valid") is not True
+                or info.get("ground_projection_scope") != "ball_approach_only"
+                or info.get("ground_coordinate_frame") != "robot_x_right_z_forward"
+                or forward is None
+                or forward <= 0.0
+            ):
+                return None, "invalid_ground_projection"
+            if forward > self.config.image_steering_max_forward_m:
+                angle = valid_ball_ground_steering(info)
+                return (
+                    self.config.bearing_gain * angle if angle is not None else None,
+                    "ground_steering_angle_deg",
+                )
+            source = "near_image_angle"
+        return self._steering_error(
+            _number(info, "steering_angle_deg"),
+            _number(info, "bearing_deg"),
+            _number(info, "offset_x_norm"),
+            _number(info, "distance_m"),
+        ), source
+
+    def approach_steering_error(self, info: dict[str, Any]) -> float | None:
+        """Use the same distance-based steering policy as pickup alignment."""
+        return self.select_steering(info)[0]
+
+    def _steering_error(
+        self,
+        steering_angle_deg: float | None,
+        bearing_deg: float | None,
+        offset_x_norm: float | None,
+        distance_m: float | None,
+    ) -> float | None:
+        """Prefer the bottom-center path angle, then camera-ray fallbacks."""
+        if steering_angle_deg is not None:
+            if (
+                offset_x_norm is not None
+                and distance_m is not None
+                and abs(offset_x_norm)
+                <= self.config.path_center_deadband_norm
+                and distance_m
+                <= self.config.path_center_deadband_max_depth_m
+            ):
+                return 0.0
+            return self.config.bearing_gain * steering_angle_deg
+        if bearing_deg is not None:
+            return self.config.bearing_gain * bearing_deg
+        if offset_x_norm is None:
+            return None
+        return (
+            self.config.bearing_gain
+            * offset_x_norm
+            * self.config.fallback_half_fov_deg
+        )
+
+    def _general_approach_motion(
+        self,
+        distance_m: float,
+    ) -> str:
+        """Fine-walk at camera 45 before the separate camera-down pickup entry."""
+        if BALL_HURDLE_FINE_DISTANCE_M < distance_m <= BALL_FINE_APPROACH_DISTANCE_M:
+            return "BALL_APPROACH_FINE_FORWARD_5"
+        return ball_hurdle_approach_motion(distance_m)
+
+    def _approach_speed(
+        self,
+        distance_m: float,
+        pickup_ready: bool,
+    ) -> float:
+        """Reduce forward speed smoothly near pickup distance."""
+        span = max(
+            self.config.slowdown_depth_m - self.config.pickup_depth_m,
+            1e-3,
+        )
+        scale = _clamp(
+            (distance_m - self.config.pickup_depth_m) / span,
+            0.0,
+            1.0,
+        )
+        speed = self.config.min_linear_speed_mps + scale * (
+            self.config.max_linear_speed_mps
+            - self.config.min_linear_speed_mps
+        )
+        if pickup_ready:
+            speed = min(speed, self.config.min_linear_speed_mps)
+        return _clamp(
+            speed,
+            self.config.min_linear_speed_mps,
+            self.config.max_linear_speed_mps,
+        )
+
+    def _limited_angular_speed(
+        self,
+        steering_error_deg: float,
+        dt_sec: float,
+    ) -> tuple[float, float]:
+        """Convert steering error to an acceleration-limited angular speed."""
+        desired = math.radians(steering_error_deg) / max(
+            self.config.steering_response_sec,
+            1e-3,
+        )
+        desired = _clamp(
+            desired,
+            -self.config.max_angular_speed_rad_s,
+            self.config.max_angular_speed_rad_s,
+        )
+        dt_sec = _clamp(dt_sec, 1e-3, 1.0)
+        max_delta = self.config.max_angular_accel_rad_s2 * dt_sec
+        delta = _clamp(
+            desired - self.previous_angular_speed_rad_s,
+            -max_delta,
+            max_delta,
+        )
+        speed = self.previous_angular_speed_rad_s + delta
+        return speed, delta / dt_sec
+
+    def _moving_command(
+        self,
+        *,
+        motion: str,
+        reason: str,
+        linear_speed_mps: float,
+        steering_error_deg: float,
+        steering_source: str,
+        dt_sec: float,
+        bearing: float | None,
+        offset: float | None,
+        depth: float | None,
+        distance: float | None,
+        ground_distance: float | None,
+        confidence: float,
+        depth_valid: bool,
+        pickup_ready: bool,
+        pickup_now: bool,
+    ) -> BallNavigationCommand:
+        """Build one moving command and retain steering state."""
+        angular_speed, angular_accel = self._limited_angular_speed(
+            steering_error_deg,
+            dt_sec,
+        )
+        duration = self.config.command_duration_sec
+        self.previous_motion = motion
+        self.previous_angular_speed_rad_s = angular_speed
+        distance_error = (
+            distance - self.config.pickup_depth_m
+            if distance is not None
+            else None
+        )
+        _, _, numbered_turn_angle_deg = numbered_turn_motion_metadata(
+            motion
+        )
+        return BallNavigationCommand(
+            valid=True,
+            motion=motion,
+            reason=reason,
+            linear_speed_mps=linear_speed_mps,
+            lateral_speed_mps=0.0,
+            angular_speed_rad_s=angular_speed,
+            angular_accel_rad_s2=angular_accel,
+            command_duration_sec=duration,
+            travel_distance_m=linear_speed_mps * duration,
+            lateral_travel_distance_m=0.0,
+            target_heading_change_deg=(
+                numbered_turn_angle_deg
+                if numbered_turn_angle_deg is not None
+                else math.degrees(angular_speed * duration)
+            ),
+            steering_error_deg=steering_error_deg,
+            steering_source=steering_source,
+            bearing_error_deg=bearing,
+            offset_x_norm=offset,
+            depth_m=depth,
+            distance_m=distance,
+            ground_distance_m=ground_distance,
+            distance_error_m=distance_error,
+            confidence=confidence,
+            depth_valid=depth_valid,
+            pickup_ready=pickup_ready,
+            pickup_now=pickup_now,
+            pickup_approach_motion=None,
+        )
+
+    def _pickup_command(
+        self,
+        bearing: float | None,
+        offset: float | None,
+        depth: float,
+        distance: float | None,
+        ground_distance: float | None,
+        confidence: float,
+        pickup_ready: bool,
+    ) -> BallNavigationCommand:
+        """Hold general approach and request the atomic pickup sequence."""
+        self.previous_motion = "PICKUP_NOW"
+        self.previous_angular_speed_rad_s = 0.0
+        return BallNavigationCommand(
+            valid=True,
+            motion="PICKUP_NOW",
+            reason="ball_distance_entered_pickup_sequence",
+            linear_speed_mps=0.0,
+            lateral_speed_mps=0.0,
+            angular_speed_rad_s=0.0,
+            angular_accel_rad_s2=0.0,
+            command_duration_sec=self.config.command_duration_sec,
+            travel_distance_m=0.0,
+            lateral_travel_distance_m=0.0,
+            target_heading_change_deg=0.0,
+            bearing_error_deg=bearing,
+            offset_x_norm=offset,
+            depth_m=depth,
+            distance_m=distance,
+            ground_distance_m=ground_distance,
+            distance_error_m=distance - self.config.pickup_depth_m,
+            confidence=confidence,
+            depth_valid=True,
+            pickup_ready=pickup_ready,
+            pickup_now=True,
+            # Distance approach is deliberately selected later from a fresh
+            # frame, after the heading-alignment checkpoint.
+            pickup_approach_motion=None,
+        )

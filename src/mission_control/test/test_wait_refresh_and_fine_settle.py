@@ -151,6 +151,7 @@ def test_hurdle_go_waits_for_fresh_fine_sequence_decision(clock):
 def test_pickup_preparation_is_followed_by_full_second_before_fine(clock):
     bridge = FakeBridge()
     enter_pickup_fine_alignment(bridge)
+    bridge.last_physical_motion_id = "pickup_crab_right_0"  # A real support-posture change.
     bridge.navigation_command_callback(fine_alignment_message('BALL_PICKUP_FINE_FORWARD'))
     bridge.executor_status_callback(executor_status(status='SUCCEEDED', motion_id='pickup_fine_prepare'))
     count = len(bridge.executor_request_publisher.messages)
@@ -173,6 +174,7 @@ def test_pickup_loss_pending_during_preparation_skips_fine_after_pause(clock):
     from test_motion_command_bridge import pickup_positioning_loss_message
     bridge = FakeBridge()
     enter_pickup_fine_alignment(bridge)
+    bridge.last_physical_motion_id = "pickup_crab_right_0"  # A real support-posture change.
     bridge.navigation_command_callback(fine_alignment_message('BALL_PICKUP_FINE_FORWARD'))
     bridge.executor_status_callback(executor_status(status='SUCCEEDED', motion_id='pickup_fine_prepare'))
     bridge.navigation_command_callback(pickup_positioning_loss_message(bridge, 'pickup_fine_prepare', command_id=9000))

@@ -1,0 +1,782 @@
+--- before/src/mission_control/mission_control/motion_command_bridge_node.py
++++ after/src/mission_control/mission_control/motion_command_bridge_node.py
+@@ -10,6 +10,8 @@
+ import rclpy
+ from rclpy.node import Node
+ from std_msgs.msg import String
++
++from .pickup_walk_reservation import PICKUP_WALK_DURATIONS, pickup_walk_motion
+ 
+ from .safety_interlock import RECOVERABLE_MOTOR_ERROR_CODES
+ from .pickup_grasp_selection import pickup_grasp_motion_id
+@@ -393,6 +395,7 @@
+         self.pickup_last_stage_succeeded = True
+         self.pending_pickup_crab_motion_id = None
+         self.pending_pickup_fine_motion_id: str | None = None
++        self.pickup_queued_request: dict[str, Any] | None = None
+         self.pickup_positioning_dwell_motion_id: str | None = None
+         self.queued_command_id: int | None = None
+         self.queued_event_id: int | None = None
+@@ -524,6 +527,17 @@
+             "source_node": "motion_command_bridge_node",
+             "motion_in_progress": self.motion_in_progress,
+         }
++        if (action == "PICKUP_NOW" and status == "RUNNING"
++                and motion_id in PICKUP_WALK_DURATIONS
++                and motion_id == self.active_motion_id
++                and self.pending_turn_request is None and self.transition_motion_id is None
++                and self.active_dwell_until is None
++                and not self.pickup_fixed_sequence_started
++                and (self.pickup_initial_align_correction_active or self.pickup_fine_align_correction_active)):
++            payload["pickup_alignment_stage"] = (
++                "initial" if self.pickup_initial_align_correction_active
++                and not self.pickup_fine_positioning_complete else "fine"
++            )
+         if completed_motion_id is not None:
+             payload["completed_motion_id"] = completed_motion_id
+         if verification_window_complete is not None:
+@@ -851,6 +865,77 @@
+             timeout_ms=self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS,
+         )
+ 
++    def _handle_pickup_walk_prequeue(self, payload: dict[str, Any]) -> None:
++        """Keep the parent pickup locked while reserving one identical gait."""
++        command = payload.get("source_command") or {}
++        motion_id = pickup_walk_motion(payload["action"], self.active_motion_id)
++        if (payload["command_id"] in {self.last_sent_command_id, self.active_request_id}
++                or payload.get("source") != "ball"
++                or not self.motion_in_progress or self.active_action != "PICKUP_NOW"
++                or payload.get("active_special_command_id") != self.active_command_id
++                or payload.get("active_special_event_id") != self.active_event_id
++                or command.get("pickup_running_request_id") != self.active_request_id
++                or motion_id is None or motion_id != self.active_motion_id
++                or command.get("pickup_queue_motion_id") != motion_id
++                or type(command.get("pickup_queue_frame_count")) is not int
++                or command["pickup_queue_frame_count"] < 3
++                or getattr(self, "pickup_queued_request", None) is not None
++                or self.queued_request_id is not None
++                or self.pickup_fixed_sequence_started or self.pickup_positioning_loss_pending
++                or self.active_dwell_until is not None or self.transition_dwell_until is not None
++                or self.pending_turn_request is not None
++                or self.pickup_initial_align_waiting or self.pickup_fine_align_waiting
++                or not (self.pickup_initial_align_correction_active or self.pickup_fine_align_correction_active)):
++            self._publish_local_rejection(
++                status="REJECTED", command_id=payload["command_id"], event_id=payload.get("event_id"),
++                action=payload["action"], error_code="PICKUP_QUEUE_NOT_AVAILABLE",
++                message="only one identical running pickup gait can be reserved",
++            )
++            return
++        request = dict(action="PICKUP_NOW", command_id=self.active_command_id,
++                       event_id=self.active_event_id, request_id=payload["command_id"],
++                       motion_id=motion_id, timeout_ms=self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS)
++        self.pickup_queued_request = {**request, "reservation_action": payload["action"]}
++        self.last_sent_command_id = payload["command_id"]
++        # The SDK validates the actual motion's repeatability/entry compatibility.
++        # No preparation or second pickup sequence may be inserted here.
++        self._send_executor_payload(request)
++
++    def _handle_pickup_queue_status(self, payload: dict[str, Any]) -> bool:
++        """Consume queue bookkeeping without completing the parent pickup."""
++        queued = getattr(self, "pickup_queued_request", None)
++        if queued is None:
++            return False
++        if payload["request_id"] == queued["request_id"]:
++            if (payload["command_id"] != queued["command_id"]
++                    or payload["event_id"] != queued["event_id"]
++                    or payload["motion_id"] != queued["motion_id"]):
++                return True
++            if payload["status"] in self.TERMINAL_STATUSES:
++                self.pickup_queued_request = None
++                self._publish_local_rejection(
++                    status="REJECTED", command_id=queued["request_id"], event_id=None,
++                    action=queued["reservation_action"],
++                    error_code=payload["error_code"] or "PICKUP_QUEUE_REJECTED",
++                    message=payload["message"],
++                )
++            return True
++        if payload["request_id"] != self.active_request_id or payload["motion_id"] != self.active_motion_id:
++            return False
++        if payload["status"] == "SUCCEEDED":
++            self.last_physical_motion_id = self.active_motion_id
++            self.last_pickup_motion_id = self.active_motion_id
++            self.pickup_last_stage_succeeded = True
++            self.pickup_consecutive_motor_failures = 0
++            self.active_request_id = queued["request_id"]
++            self.pickup_queued_request = None
++            # The SDK next emits RUNNING with the new request ID. Keep checkpoint
++            # flags and sequence position: this is still the same pickup step.
++            return True
++        if payload["status"] in self.TERMINAL_STATUSES:
++            self.pickup_queued_request = None
++        return False
++
+     def _handle_pickup_fine_align_command(
+         self,
+         *,
+@@ -1230,6 +1315,7 @@
+             prepare_pickup_fine
+             and action == "PICKUP_NOW"
+             and motion_id in {"pickup_fine_forward_0", "pickup_top_loss_fine_forward_0_3"}
++            and self.last_physical_motion_id not in self.FINE_FORWARD_MOTION_IDS
+         ):
+             # Keep the existing checkpoint/sequence pending until both motions finish.
+             self.pending_pickup_fine_motion_id = motion_id
+@@ -1381,6 +1467,11 @@
+                 event_id=event_id,
+                 payload=payload,
+             )
++            return
++
++        if (isinstance(payload.get("source_command"), dict)
++                and payload["source_command"].get("pickup_walk_prequeue") is True):
++            self._handle_pickup_walk_prequeue(payload)
+             return
+ 
+         if action in self.PICKUP_FINE_ALIGN_ACTIONS:
+@@ -1956,6 +2047,7 @@
+     def _clear_active_request(self) -> None:
+         """Release the bridge after a terminal executor status."""
+         self.pending_pickup_fine_motion_id = None
++        self.pickup_queued_request = None
+         self.motion_in_progress = False
+         self.pending_turn_request = None
+         self.turn_prepare_motion_id = None
+@@ -2062,6 +2154,14 @@
+             self.get_logger().info(
+                 "Executor status ignored: bridge has no active request"
+             )
++            return
++        pickup_queue_failed = bool(
++            getattr(self, "pickup_queued_request", None) is not None
++            and payload["request_id"] == self.active_request_id
++            and payload["status"] in self.TERMINAL_STATUSES
++            and payload["status"] != "SUCCEEDED"
++        )
++        if self._handle_pickup_queue_status(payload):
+             return
+         is_active = payload["request_id"] == self.active_request_id
+         is_queued = payload["request_id"] == self.queued_request_id
+@@ -2173,6 +2273,7 @@
+         if (
+             is_active
+             and action == "PICKUP_NOW"
++            and not pickup_queue_failed
+             and payload["motion_id"] != "post_ball_camera_90"
+             and payload["motion_id"] != "ball_lost_camera_down_backward_2"
+             and payload["motion_id"] != self.PICKUP_FINE_PREPARE_MOTION_ID
+--- before/src/mission_control/mission_control/motion_decision_node.py
++++ after/src/mission_control/mission_control/motion_decision_node.py
+@@ -27,6 +27,7 @@
+ 
+ from .ball_approach_observation import BallApproachObservation
+ from .ball_entry_line_alignment import BallEntryLineAlignment
++from .pickup_walk_reservation import PickupWalkReservation
+ from .ball_loss_confirmation import BallLossConfirmation
+ from .executor_heartbeat_watchdog import ExecutorHeartbeatWatchdog
+ from .executor_heartbeat_watchdog import HeartbeatStartupDelay
+@@ -1153,6 +1154,20 @@
+                             )
+                 self.executor_ready_requires_fresh_vision = False
+                 self.general_motion_gate.on_new_vision_input()
++                reservation = getattr(self, "pickup_walk_reservation", None)
++                if source == "ball" and reservation is not None:
++                    if (self.active_special_action == "PICKUP_NOW"
++                            and not self.pickup_fixed_sequence_started
++                            and not self.pickup_positioning_ball_lost_pending):
++                        reservation.observe(
++                            self.planner, payload, received_at,
++                            MotionDecisionNode._current_ros_time_ns(self), self.timeouts["ball"],
++                            image_stamp=MotionDecisionNode._detection_stamp_ns(payload),
++                        )
++                        if reservation.decision(received_at, self.timeouts["ball"]) is not None:
++                            MotionDecisionNode._publish_decision(self)
++                    else:
++                        reservation.reset()
+                 if source == "goal":
+                     MotionDecisionNode._prepare_post_ball_goal_preview(self, received_at)
+                     MotionDecisionNode._prepare_pending_goal_decision(self, received_at)
+@@ -2684,6 +2699,12 @@
+         self.goal_stationary_since = (
+             status_receive_monotonic if result.terminal and status == "SUCCEEDED" else None
+         )
++        if action == "PICKUP_NOW":
++            reservation = getattr(self, "pickup_walk_reservation", None)
++            if reservation is None:
++                reservation = self.pickup_walk_reservation = PickupWalkReservation()
++            reservation.on_status(payload, status_receive_monotonic,
++                                  MotionDecisionNode._current_ros_time_ns(self))
+         if not result.terminal:
+             if (
+                 action == "PICKUP_NOW"
+@@ -3006,6 +3027,9 @@
+ 
+     def _invalidate_pickup_ball_input(self) -> None:
+         """Require a Ball frame captured after the pickup checkpoint."""
++        reservation = getattr(self, "pickup_walk_reservation", None)
++        if reservation is not None:
++            reservation.reset()
+         self.ball_min_rgb_stamp_ns = MotionDecisionNode._current_ros_time_ns(self)
+         self.ball_prepared_info = None
+         self.ball_prepared_observation = None
+@@ -4865,7 +4889,9 @@
+                 self,
+                 decision,
+             )
+-            if is_pickup_positioning_loss_latch:
++            if decision.source_command.get("pickup_walk_prequeue") is True:
++                self.pickup_walk_reservation.published()
++            elif is_pickup_positioning_loss_latch:
+                 self.pickup_positioning_loss_latch_sent = True
+             elif is_pickup_initial_align_action:
+                 self.pickup_initial_align_waiting = False
+@@ -5090,6 +5116,9 @@
+         now: float,
+     ) -> bool:
+         """Recheck fresh decisions while settling before turns or fine steps."""
++        if decision.source_command.get("pickup_walk_prequeue") is True:
++            self._reset_pre_motion_settle()
++            return True
+         if ((decision.source == "line" and MotionDecisionNode._is_continuous_line_action(decision.action))
+                 or (decision.source == "goal" and MotionDecisionNode._is_continuous_goal_action(decision.action)
+                     and not getattr(self, "goal_shot_settle_pending", False))):
+@@ -5698,6 +5727,13 @@
+             return self.planner.plan_ball_pickup_post_backward_alignment(
+                 observations.get("ball")
+             )
++        reservation = getattr(self, "pickup_walk_reservation", None)
++        if (self.active_special_action == "PICKUP_NOW" and reservation is not None
++                and not self.pickup_fixed_sequence_started
++                and not self.pickup_positioning_ball_lost_pending):
++            reserved = reservation.decision(time.monotonic(), self.timeouts["ball"])
++            if reserved is not None:
++                return reserved
+         if self.active_special_command_id is not None:
+             locked_phase = f"{planning_phase}_LOCK"
+             return self.planner.plan(
+--- before/src/mission_control/README.md
++++ after/src/mission_control/README.md
+@@ -1,4 +1,31 @@
+ # mission_control
++
++## Ball 500mm 이하 잡기 접근의 연속 예약
++
++500mm 이하에서도 같은 미세 전진 또는 같은 방향 꽃게를 반복할 때는 실행 중인
++동작 후반의 서로 다른 공 영상 3장으로 다음 한 동작을 SDK에 예약한다. 기존
++잡기 시퀀스의 소유권은 유지하며, 예약 경계에서 별도의 준비 자세·고정 대기·
++정지 후 재촬영 단계를 끼우지 않는다. 첫 공잡기 미세 보행의 호환 ID도 같은
++예약 정책을 쓴다. 예약 없이 완료된 뒤 다시 미세 전진을 선택해도 직전 동작이
++미세 보행이면 불필요한 미세 준비 자세를 반복하지 않는다.
++
++`미세오뒤→기본자세`, `오뒤→미세오뒤`, `미세오뒤→오뒤` 등 기존의 모든 발·지지
++자세 전환은 전후 1초 대기를 유지한다. 제자리 회전도 완료 후 1초 안정화 및
++새 영상 확인을 유지한다. 동작 종류나 꽃게 방향이 바뀌면 미리 실행하지 않고
++현재 동작을 마친 뒤 기존 전환 판단을 거친다. 모션 JSON 내부의 시간·홀드·
++관절값과 최종 후진·잡기·그랩 확인 순서는 변경하지 않는다.
++
++예약에는 500mm 이하의 유효하고 최신인 공 거리, 신뢰도, 정렬 조건이 필요하다.
++270px 미세 접근 완료 관측, 새로운 방향 보정, 공 소실, 오래된/중복 영상은
++추가 전진 예약을 막는다. 이미 승인된 한 동작은 완료한 뒤 다시 판단하므로,
++270px 경계를 넘어갈 수 있다. 예약 거절 시에는 완료 후 새 영상으로 판단하며,
++현재 동작이 실패·취소·타임아웃되면 예약을 폐기한다. 유효 관측이 부족하면
++안전을 위한 대기는 남는다.
++
++변경 전 파일과 검증 기록은 `artifacts/20261030_pickup_continuous/`에 있다.
++SDK의 가짜 모터 통신 테스트는 예약 경계와 상태 처리를 검사할 뿐 균형을 검증하지
++않는다. 실물 적용 전에 동역학 시뮬레이션에서 연속 미세·꽃게의 이동량과 지지
++자세 연결을 확인한다.
+ 
+ ## 2026-10-30 Ball 500mm 카메라 전환 및 catalog62 미세 전진
+ 
+--- before/src/mission_control/test/test_motion_command_bridge.py
++++ after/src/mission_control/test/test_motion_command_bridge.py
+@@ -151,6 +151,7 @@
+         self.pickup_last_stage_succeeded = True
+         self.pending_pickup_crab_motion_id = None
+         self.pending_pickup_fine_motion_id = None
++        self.pickup_queued_request = None
+         self.pickup_positioning_dwell_motion_id = None
+         self.queued_command_id = None
+         self.queued_event_id = None
+@@ -173,6 +174,8 @@
+             "_handle_pickup_initial_align_command",
+             "_enter_pickup_fine_align_checkpoint",
+             "_handle_pickup_fine_align_command",
++            "_handle_pickup_walk_prequeue",
++            "_handle_pickup_queue_status",
+             "_enter_pickup_positioning_loss_reacquisition",
+             "_handle_pickup_positioning_loss_latch",
+             "_enter_pickup_post_backward_align_checkpoint",
+@@ -1949,6 +1952,7 @@
+ def test_pickup_fine_preparation_must_finish_before_pre_grasp_fine_forward():
+     bridge = FakeBridge()
+     enter_pickup_fine_alignment(bridge)
++    bridge.last_physical_motion_id = "pickup_crab_right_0"  # A real support-posture change.
+     start = len(bridge.executor_request_publisher.messages)
+     bridge.navigation_command_callback(fine_alignment_message("BALL_PICKUP_FINE_FORWARD"))
+     requests = decoded_messages(bridge.executor_request_publisher)[start:]
+@@ -1983,6 +1987,7 @@
+ def test_pickup_fine_preparation_failure_never_starts_fine_motion(status, error_code):
+     bridge = FakeBridge()
+     enter_pickup_fine_alignment(bridge)
++    bridge.last_physical_motion_id = "pickup_crab_right_0"  # A real support-posture change.
+     start = len(bridge.executor_request_publisher.messages)
+     bridge.navigation_command_callback(fine_alignment_message("BALL_PICKUP_FINE_FORWARD"))
+     complete_active_motion(bridge, status, error_code)
+@@ -2036,7 +2041,7 @@
+     bridge.navigation_command_callback(
+         fine_alignment_message("BALL_PICKUP_FINE_FORWARD")
+     )
+-    complete_pickup_fine_preparation(bridge)
++    assert bridge.active_dwell_until is None
+     request = decoded_messages(bridge.executor_request_publisher)[-1]
+     assert request["motion_id"] == "pickup_fine_forward_0"
+     assert request["action"] == "PICKUP_NOW"
+@@ -2076,7 +2081,7 @@
+         bridge.navigation_command_callback(
+             fine_alignment_message(decision.action, command_id=command_id)
+         )
+-        complete_pickup_fine_preparation(bridge)
++        assert bridge.active_dwell_until is None
+         requests = decoded_messages(bridge.executor_request_publisher)
+         assert requests[-1]["motion_id"] == "pickup_fine_forward_0"
+         complete_pickup_motion_and_dwell(bridge, "pickup_fine_forward_0")
+@@ -2499,15 +2504,7 @@
+         f"BALL_PICKUP_{stage}_SEARCH_FORWARD"
+     ))
+     motion = "pickup_top_loss_fine_forward_0_3" if stage == "FINE" else "ball_top_loss_fine_forward_45_3"
+-    if stage == "FINE":
+-        assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == "pickup_fine_prepare"
+-        bridge.executor_status_callback(executor_status(
+-            status="SUCCEEDED", motion_id="pickup_fine_prepare",
+-        ))
+-        assert bridge.active_dwell_until is not None
+-        bridge._check_atomic_dwell(bridge.active_dwell_until - .001)
+-        assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == "pickup_fine_prepare"
+-        bridge._check_atomic_dwell(bridge.active_dwell_until)
++    assert bridge.active_dwell_until is None
+     assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == motion
+     bridge.executor_status_callback(executor_status(status="SUCCEEDED", motion_id=motion))
+     count = len(bridge.executor_request_publisher.messages)
+@@ -2543,6 +2540,7 @@
+ def test_nonrecoverable_fine_correction_failure_never_starts_backward(failed_motion):
+     bridge = FakeBridge()
+     enter_pickup_fine_alignment(bridge)
++    bridge.last_physical_motion_id = "pickup_crab_right_0"  # A real support-posture change.
+     bridge.navigation_command_callback(fine_alignment_message('BALL_PICKUP_FINE_FORWARD'))
+     if failed_motion == 'pickup_fine_forward_0':
+         complete_pickup_fine_preparation(bridge)
+--- before/src/mission_control/test/test_wait_refresh_and_fine_settle.py
++++ after/src/mission_control/test/test_wait_refresh_and_fine_settle.py
+@@ -151,6 +151,7 @@
+ def test_pickup_preparation_is_followed_by_full_second_before_fine(clock):
+     bridge = FakeBridge()
+     enter_pickup_fine_alignment(bridge)
++    bridge.last_physical_motion_id = "pickup_crab_right_0"  # A real support-posture change.
+     bridge.navigation_command_callback(fine_alignment_message('BALL_PICKUP_FINE_FORWARD'))
+     bridge.executor_status_callback(executor_status(status='SUCCEEDED', motion_id='pickup_fine_prepare'))
+     count = len(bridge.executor_request_publisher.messages)
+@@ -173,6 +174,7 @@
+     from test_motion_command_bridge import pickup_positioning_loss_message
+     bridge = FakeBridge()
+     enter_pickup_fine_alignment(bridge)
++    bridge.last_physical_motion_id = "pickup_crab_right_0"  # A real support-posture change.
+     bridge.navigation_command_callback(fine_alignment_message('BALL_PICKUP_FINE_FORWARD'))
+     bridge.executor_status_callback(executor_status(status='SUCCEEDED', motion_id='pickup_fine_prepare'))
+     bridge.navigation_command_callback(pickup_positioning_loss_message(bridge, 'pickup_fine_prepare', command_id=9000))
+--- /dev/null
++++ after/src/mission_control/mission_control/pickup_walk_reservation.py
+@@ -0,0 +1,128 @@
++"""Reserve only identical pickup gaits from fresh late-motion Ball frames."""
++
++from copy import copy
++from dataclasses import replace
++
++from step.approach_distance import BALL_PICKUP_DISTANCE_M
++
++
++PICKUP_WALK_DURATIONS = {
++    'ball_general_fine_forward_8': .376 * 5 / .9975,
++    'pickup_fine_forward_0': .376 * 5 / .9975,
++    'pickup_crab_left_0': .482 / .95,
++    'pickup_crab_right_0': .500 / .9025,
++}
++
++PICKUP_WALK_ACTIONS = {
++    'BALL_PICKUP_FINE_FORWARD': 'pickup_fine_forward_0',
++    'BALL_PICKUP_CRAB_LEFT': 'pickup_crab_left_0',
++    'BALL_PICKUP_CRAB_RIGHT': 'pickup_crab_right_0',
++    'BALL_PICKUP_INITIAL_CRAB_LEFT': 'pickup_crab_left_0',
++    'BALL_PICKUP_INITIAL_CRAB_RIGHT': 'pickup_crab_right_0',
++}
++
++
++def pickup_walk_motion(action, current):
++    """Retain the legacy first-step alias; both fine IDs resolve to the same gait."""
++    selected = PICKUP_WALK_ACTIONS.get(action)
++    if selected == 'pickup_fine_forward_0' and current == 'ball_general_fine_forward_8':
++        return current
++    return selected
++
++
++class PickupWalkReservation:
++    """One reservation per running gait; turns and posture changes never queue."""
++
++    CAPTURE_RATIO = .70
++    REQUIRED_FRAMES = 3
++
++    def __init__(self):
++        self.reset()
++
++    def reset(self):
++        self.key = None
++        self.motion_id = None
++        self.stage = None
++        self.capture_after_ns = None
++        self.started_at = None
++        self.last_stamp = None
++        self.count = 0
++        self.pending = False
++        self.forward_complete = False
++        self.ready = None
++        self.observed_at = None
++
++    def on_status(self, payload, now, ros_now):
++        motion = payload.get('motion_id')
++        if (payload.get('status') != 'RUNNING' or motion not in PICKUP_WALK_DURATIONS
++                or payload.get('pickup_alignment_stage') not in {'initial', 'fine'}):
++            self.reset()
++            return
++        key = (payload.get('command_id'), payload.get('request_id'), motion)
++        if key == self.key:
++            return
++        self.reset()
++        self.key = key
++        self.motion_id = motion
++        self.stage = payload['pickup_alignment_stage']
++        self.started_at = now
++        if type(ros_now) is int:
++            self.capture_after_ns = ros_now + int(PICKUP_WALK_DURATIONS[motion] * self.CAPTURE_RATIO * 1e9)
++
++    def observe(self, planner, info, now, ros_now, max_age, image_stamp=None):
++        self.ready = None
++        if self.observed_at is not None and now - self.observed_at > max_age:
++            self.count = 0
++        self.observed_at = now
++        if self.key is None or self.pending:
++            return
++        number = planner._number
++        distance = number(info, 'distance_m')
++        age = number(info, 'depth_age_sec')
++        confidence = number(info, 'confidence')
++        stamp = image_stamp if image_stamp is not None else (info or {}).get('rgb_stamp_ns')
++        if (not info or info.get('detected') is not True
++                or info.get('confirmation_confirmed') is False
++                or info.get('depth_valid') is not True
++                or distance is None or not 0 < distance <= BALL_PICKUP_DISTANCE_M
++                or age is None or not 0 <= age <= planner.ball_planner.config.max_pickup_depth_age_sec
++                or confidence is None or confidence < planner.ball_planner.config.min_confidence
++                or type(stamp) is not int or type(ros_now) is not int
++                or self.capture_after_ns is None or stamp < self.capture_after_ns
++                or now < self.started_at + PICKUP_WALK_DURATIONS[self.motion_id] * self.CAPTURE_RATIO
++                or not 0 <= ros_now - stamp <= int(max_age * 1e9)):
++            self.count = 0
++            return
++        if self.last_stamp is not None and stamp <= self.last_stamp:
++            return
++        self.last_stamp = stamp
++        bottom = number(info, 'bottom_distance_px')
++        if bottom is not None and 0 <= bottom <= planner.config.pickup_fine_align_bottom_distance_px:
++            self.forward_complete = True
++        # Preview must not latch completion or advance loss recovery on the real planner.
++        preview = copy(planner)
++        decision = (preview.plan_ball_pickup_initial_alignment(info) if self.stage == 'initial'
++                    else preview.plan_ball_pickup_fine_alignment(info))
++        if (not decision.valid or pickup_walk_motion(decision.action, self.motion_id) != self.motion_id
++                or self.motion_id in {'pickup_fine_forward_0', 'ball_general_fine_forward_8'}
++                and self.forward_complete):
++            self.count = 0
++            return
++        self.count += 1
++        if self.count >= self.REQUIRED_FRAMES:
++            self.ready = replace(decision, reason='pickup_same_gait_reserved_from_late_ball_frames',
++                                 source_command={**decision.source_command,
++                                                 'pickup_walk_prequeue': True,
++                                                 'pickup_running_request_id': self.key[1],
++                                                 'pickup_queue_motion_id': self.motion_id,
++                                                 'pickup_queue_frame_count': self.count})
++
++    def decision(self, now, max_age):
++        if (not self.pending and self.ready is not None and self.observed_at is not None
++                and 0 <= now - self.observed_at <= max_age):
++            return self.ready
++        return None
++
++    def published(self):
++        self.pending = True
++        self.ready = None
+--- /dev/null
++++ after/src/mission_control/test/test_pickup_continuous_walk.py
+@@ -0,0 +1,263 @@
++"""Replay pickup prequeue, real checkpoint ownership, and failure boundaries."""
++
++import json
++from pathlib import Path
++
++import pytest
++import yaml
++from std_msgs.msg import String
++
++from mission_control.motion_decision_node import MotionDecisionNode as Node
++from mission_control.motion_command_bridge_node import MotionCommandBridgeNode as Bridge
++from mission_control.motion_decision_planner import MotionDecisionPlanner
++from mission_control.pickup_walk_reservation import (
++    PickupWalkReservation, PICKUP_WALK_DURATIONS,
++)
++from test_continuous_approach import clock, fresh
++from test_wait_refresh_and_fine_settle import LiveInputHarness
++from test_motion_command_bridge import FakeBridge, decoded_messages, executor_status, navigation_message
++from test_motion_decision_planner import ball_info
++
++
++def ball(**changes):
++    return ball_info(**{
++        'depth_m': .49, 'distance_m': .49, 'depth_age_sec': .05,
++        'confirmation_confirmed': True, 'bottom_distance_px': 340,
++        'offset_x_px': 0, 'steering_angle_deg': 0., 'head_down_requested': True,
++        **changes,
++    })
++
++
++def forward_status(node, bridge, request, status, **changes):
++    before = len(bridge.motion_status_publisher.messages)
++    bridge.executor_status_callback(executor_status(**request, status=status, **changes))
++    for message in bridge.motion_status_publisher.messages[before:]:
++        Node._motion_status_callback(node, message)
++
++
++def start(node, bridge, clock, sample=None):
++    sample = sample or ball()
++    fresh(node, clock, 'ball', sample)
++    parent = node.publisher.messages[-1]
++    assert parent['action'] == 'PICKUP_NOW'
++    bridge.navigation_command_callback(String(data=json.dumps(parent)))
++    Node._motion_status_callback(node, bridge.motion_status_publisher.messages[-1])
++    fresh(node, clock, 'ball', sample)
++    command = node.publisher.messages[-1]
++    bridge.navigation_command_callback(String(data=json.dumps(command)))
++    request = decoded_messages(bridge.executor_request_publisher)[-1]
++    forward_status(node, bridge, request, 'RUNNING')
++    return parent, request
++
++
++def late_frames(node, clock, sample=None, count=3):
++    reservation = node.pickup_walk_reservation
++    clock[0] = reservation.started_at + PICKUP_WALK_DURATIONS[reservation.motion_id] * .75
++    for _ in range(count):
++        fresh(node, clock, 'ball', sample or ball(), plan=False)
++
++
++@pytest.mark.parametrize('motion,offset', [
++    ('ball_general_fine_forward_8', 0), ('pickup_crab_left_0', -100), ('pickup_crab_right_0', 100),
++])
++def test_same_gait_reserves_one_step_and_keeps_parent_pickup_locked(clock, motion, offset):
++    node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge(advance_transition_dwells=False)
++    bridge.last_physical_motion_id = motion
++    parent, first = start(node, bridge, clock, ball(offset_x_px=offset))
++    assert first['motion_id'] == motion
++    assert bridge.transition_dwell_until is None and bridge.active_dwell_until is None
++    for _ in range(3):
++        fresh(node, clock, 'ball', ball(offset_x_px=offset), plan=False)
++    assert not node.pickup_walk_reservation.pending
++    late_frames(node, clock, ball(offset_x_px=offset))
++    queued = node.publisher.messages[-1]
++    assert queued['source_command']['pickup_walk_prequeue']
++    assert node.pickup_walk_reservation.pending
++    bridge.navigation_command_callback(String(data=json.dumps(queued)))
++    second = decoded_messages(bridge.executor_request_publisher)[-1]
++    assert second['motion_id'] == motion
++    assert second['command_id'] == parent['command_id']
++    assert second['request_id'] != first['request_id']
++    assert bridge.transition_dwell_until is None and bridge.active_dwell_until is None
++    forward_status(node, bridge, second, 'QUEUED')
++    count = len(node.publisher.messages)
++    for _ in range(4):
++        fresh(node, clock, 'ball', ball(offset_x_px=offset), plan=False)
++    assert len(node.publisher.messages) == count
++    forward_status(node, bridge, first, 'SUCCEEDED')
++    assert bridge.active_request_id == second['request_id']
++    assert node.active_special_command_id == parent['command_id']
++    assert not bridge.pickup_initial_align_waiting and not bridge.pickup_fine_align_waiting
++    forward_status(node, bridge, first, 'SUCCEEDED')  # Stale duplicate cannot advance.
++    forward_status(node, bridge, second, 'RUNNING')
++    assert node.pickup_walk_reservation.key[1] == second['request_id']
++    assert not node.pickup_walk_reservation.pending
++    # Only one chunk was reserved. With no new frames it finishes at a checkpoint.
++    forward_status(node, bridge, second, 'SUCCEEDED')
++    assert bridge.pickup_initial_align_waiting or bridge.pickup_fine_align_waiting
++    assert node.latest_info['ball'] is None
++    assert node.active_special_command_id == parent['command_id']
++
++
++@pytest.mark.parametrize('change', [
++    {'bottom_distance_px': 270}, {'offset_x_px': 80}, {'distance_m': .501},
++    {'depth_valid': False}, {'depth_age_sec': .701}, {'confidence': .1},
++    {'confirmation_confirmed': False}, {'detected': False, 'raw_detected': False},
++])
++def test_late_invalid_or_changed_target_does_not_reserve(clock, change):
++    node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
++    bridge.last_physical_motion_id = 'pickup_fine_forward_0'
++    start(node, bridge, clock)
++    late_frames(node, clock, ball(**change))
++    assert not node.pickup_walk_reservation.pending
++    assert not any(m.get('source_command', {}).get('pickup_walk_prequeue') for m in node.publisher.messages)
++
++
++def test_repeated_image_and_camera_preparation_cannot_reserve(clock):
++    planner, reservation = MotionDecisionPlanner(), PickupWalkReservation()
++    payload = dict(status='RUNNING', command_id=1, request_id=1, motion_id='pickup_fine_forward_0',
++                   pickup_alignment_stage='fine')
++    reservation.on_status(payload, 10., 10_000_000_000)
++    sample = ball(rgb_stamp_ns=11_500_000_000)
++    for _ in range(5):
++        reservation.observe(planner, sample, 11.5, 11_500_000_000, .5)
++    assert reservation.count == 1 and reservation.ready is None
++    reservation.on_status({**payload, 'motion_id': 'pickup_fine_prepare'}, 11.6, 11_600_000_000)
++    assert reservation.key is None
++
++
++@pytest.mark.parametrize('status,error', [('FAILED', 'SDK_COMMUNICATION_ERROR'), ('TIMEOUT', 'TIMEOUT'), ('CANCELLED', '')])
++def test_active_failure_discards_reservation_and_does_not_skip_failed_motion(clock, status, error):
++    node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
++    bridge.last_physical_motion_id = 'pickup_fine_forward_0'
++    _, first = start(node, bridge, clock)
++    late_frames(node, clock)
++    bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
++    second = decoded_messages(bridge.executor_request_publisher)[-1]
++    forward_status(node, bridge, first, status, error_code=error)
++    assert bridge.pickup_queued_request is None and not bridge.motion_in_progress
++    assert not node.pickup_walk_reservation.pending
++    count = len(bridge.executor_request_publisher.messages)
++    forward_status(node, bridge, second, 'RUNNING')
++    assert len(bridge.executor_request_publisher.messages) == count
++    assert not bridge.motion_in_progress
++
++
++def test_sdk_queue_rejection_falls_back_to_fresh_checkpoint(clock):
++    node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
++    bridge.last_physical_motion_id = 'pickup_fine_forward_0'
++    _, first = start(node, bridge, clock)
++    late_frames(node, clock)
++    bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
++    second = decoded_messages(bridge.executor_request_publisher)[-1]
++    forward_status(node, bridge, second, 'REJECTED', error_code='INCOMPATIBLE_TRANSITION')
++    assert bridge.motion_in_progress and bridge.active_request_id == first['request_id']
++    forward_status(node, bridge, first, 'SUCCEEDED')
++    assert bridge.pickup_fine_align_waiting
++    assert node.latest_info['ball'] is None
++
++
++def test_repeated_fine_at_checkpoint_skips_redundant_prepare(clock):
++    node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge(advance_transition_dwells=False)
++    bridge.last_physical_motion_id = 'pickup_fine_forward_0'
++    _, first = start(node, bridge, clock)
++    forward_status(node, bridge, first, 'SUCCEEDED')
++    fresh(node, clock, 'ball', ball())
++    bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
++    assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_fine_forward_0'
++    assert bridge.transition_dwell_until is None and bridge.active_dwell_until is None
++    second = decoded_messages(bridge.executor_request_publisher)[-1]
++    forward_status(node, bridge, second, 'RUNNING')
++    late_frames(node, clock)
++    assert node.publisher.messages[-1]['source_command']['pickup_queue_motion_id'] == 'pickup_fine_forward_0'
++
++
++@pytest.mark.parametrize('change', [
++    {'active_special_command_id': -1}, {'active_special_event_id': -1},
++    {'action': 'BALL_PICKUP_CRAB_LEFT'},
++])
++def test_wrong_parent_or_gait_cannot_queue(clock, change):
++    node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
++    bridge.last_physical_motion_id = 'pickup_fine_forward_0'
++    _, first = start(node, bridge, clock)
++    late_frames(node, clock)
++    command = {**node.publisher.messages[-1], **change}
++    count = len(bridge.executor_request_publisher.messages)
++    bridge.navigation_command_callback(String(data=json.dumps(command)))
++    assert len(bridge.executor_request_publisher.messages) == count
++    assert bridge.pickup_queued_request is None
++    assert bridge.active_request_id == first['request_id']
++
++
++def test_only_one_queue_and_three_successive_chunks_keep_one_pickup(clock):
++    node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
++    bridge.last_physical_motion_id = 'pickup_fine_forward_0'
++    parent, current = start(node, bridge, clock)
++    ids = {current['request_id']}
++    for _ in range(3):
++        late_frames(node, clock)
++        command = node.publisher.messages[-1]
++        bridge.navigation_command_callback(String(data=json.dumps(command)))
++        following = decoded_messages(bridge.executor_request_publisher)[-1]
++        assert following['request_id'] not in ids
++        ids.add(following['request_id'])
++        before = len(bridge.executor_request_publisher.messages)
++        bridge.navigation_command_callback(String(data=json.dumps(command)))
++        assert len(bridge.executor_request_publisher.messages) == before
++        forward_status(node, bridge, following, 'QUEUED')
++        forward_status(node, bridge, current, 'SUCCEEDED')
++        forward_status(node, bridge, following, 'RUNNING')
++        assert node.active_special_command_id == parent['command_id']
++        assert node.pickups_completed == 0
++        current = following
++    late_frames(node, clock, ball(bottom_distance_px=270))
++    assert not node.pickup_walk_reservation.pending
++    forward_status(node, bridge, current, 'SUCCEEDED')
++    fresh(node, clock, 'ball', ball(bottom_distance_px=270))
++    command = node.publisher.messages[-1]
++    assert command['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
++    bridge.navigation_command_callback(String(data=json.dumps(command)))
++    assert bridge.active_motion_id == 'pickup_pre_backward_camera_down'
++
++
++def test_stationary_turn_checkpoint_keeps_one_second_and_fresh_frame(clock):
++    node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
++    bridge.last_physical_motion_id = 'pickup_camera_down_turn_right_3'
++    _, request = start(node, bridge, clock, ball(bottom_distance_px=400, steering_angle_deg=30.,
++                                               offset_x_norm=.3, offset_x_px=120))
++    assert request['motion_id'] == 'pickup_camera_down_turn_right_3'
++    assert node.pickup_walk_reservation.key is None
++    forward_status(node, bridge, request, 'SUCCEEDED')
++    assert bridge.active_dwell_until == clock[0] + Bridge.PICKUP_TURN_DWELL_SEC
++    assert not bridge.pickup_initial_align_waiting
++
++
++def test_all_existing_support_transition_ids_keep_their_pause(clock):
++    for motion in Bridge.TRANSITION_MOTION_IDS:
++        bridge = FakeBridge(advance_transition_dwells=False)
++        bridge.motion_in_progress = True
++        bridge.active_action = 'PICKUP_NOW'
++        bridge.active_command_id = bridge.active_event_id = bridge.active_request_id = 1
++        bridge.active_motion_id = motion
++        bridge._publish_executor_request(action='PICKUP_NOW', command_id=1, event_id=1,
++                                        request_id=1, motion_id=motion, timeout_ms=20000,
++                                        prepare_pickup_fine=False)
++        assert not bridge.executor_request_publisher.messages, motion
++        assert bridge.transition_dwell_until == clock[0] + Bridge.TRANSITION_DWELL_SEC
++        clock[0] += Bridge.TRANSITION_DWELL_SEC
++        bridge._check_transition_dwell()
++        request = decoded_messages(bridge.executor_request_publisher)[-1]
++        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
++        assert (bridge.transition_dwell_until or bridge.active_dwell_until) == clock[0] + 1., motion
++
++
++def test_reservation_durations_match_current_runtime():
++    root = Path(__file__).resolve().parents[3]
++    aliases = yaml.safe_load((root / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']
++    assert aliases['ball_general_fine_forward_8'] == aliases['pickup_fine_forward_0']
++    motions = {m['name']: m for m in json.loads((root / 'artifacts/robot_motions_runtime.json').read_text())['motions']}
++    for motion_id, duration in PICKUP_WALK_DURATIONS.items():
++        motion = motions[aliases[motion_id]]
++        assert motion['repeatable']
++        assert duration == pytest.approx(max(f['start_ms'] + f['time_ms'] for f in motion['frames'])
++                                         / 1000 * motion['repeat_count'] / motion['playback_speed'])

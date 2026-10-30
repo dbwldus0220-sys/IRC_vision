@@ -33,7 +33,9 @@ def approach_motion_for_distance(distance_m: float | None) -> str:
     return "STRAIGHT"
 
 
+# Legacy helper default; Ball callers supply their separate pickup threshold.
 BALL_HURDLE_FINE_DISTANCE_M = 0.550
+BALL_PICKUP_DISTANCE_M = 0.500
 # Start fine walking before entering the camera-down pickup sequence.
 BALL_FINE_APPROACH_DISTANCE_M = 0.600
 HURDLE_FINE_DISTANCE_M = 0.700

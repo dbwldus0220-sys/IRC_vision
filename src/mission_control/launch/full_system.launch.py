@@ -424,7 +424,7 @@ def generate_launch_description() -> LaunchDescription:
             ),
             DeclareLaunchArgument(
                 "ball_entry_line_alignment_enabled", default_value="true",
-                description="Use Ball-only Line/ground approach until 600 mm, then fine walking; camera-down pickup starts at 550 mm.",
+                description="Use Ball-only Line/ground approach until 600 mm, then fine walking; camera-down pickup starts at 500 mm.",
             ),
             DeclareLaunchArgument("line_heading_source", default_value="ground",
                                   choices=["image", "ground"]),
@@ -460,7 +460,7 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("ball_control_range_m", default_value="1.5"),
             DeclareLaunchArgument(
                 "pickup_fine_step_distance_m",
-                default_value="0.550",
+                default_value="0.500",
                 description=(
                     "Use pickup fine steps at or below this Ball distance "
                     "in meters; use four-repeat forward steps above it."

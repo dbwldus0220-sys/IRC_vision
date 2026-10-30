@@ -61,7 +61,7 @@ def test_pickup_crossing_does_not_commit_another_forward(clock):
     first = start_ball(node, clock)
     clock[0] += 1.9
     fresh(node, clock, 'ball', ball_info(depth_m=.8), plan=False)
-    fresh(node, clock, 'ball', ball_info(depth_m=.54), plan=False)
+    fresh(node, clock, 'ball', ball_info(depth_m=.49), plan=False)
     assert node.ball_pickup_entry_pending
     assert getattr(node, 'queued_general_command_id', None) is None
     before = len(node.publisher.messages)

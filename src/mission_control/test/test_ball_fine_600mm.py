@@ -15,13 +15,15 @@ from test_motion_command_bridge import FakeBridge, decoded_messages
 @pytest.mark.parametrize('distance,action', [
     (.600001, 'STRAIGHT_2'), (.600, 'BALL_APPROACH_FINE_FORWARD_5'),
     (.580, 'BALL_APPROACH_FINE_FORWARD_5'), (.550001, 'BALL_APPROACH_FINE_FORWARD_5'),
-    (.550, 'PICKUP_NOW'),
+    (.550, 'BALL_APPROACH_FINE_FORWARD_5'),
+    (.500001, 'BALL_APPROACH_FINE_FORWARD_5'), (.500, 'PICKUP_NOW'),
+    (.499999, 'PICKUP_NOW'),
 ])
 def test_line_completion_uses_separate_fine_and_pickup_boundaries(clock, distance, action):
     node, bridge = node_with_entry(), FakeBridge()
     _, request = start_line(node, bridge, clock)
     fresh(node, clock, 'ball', ground_ball_info(depth_m=distance), plan=False)
-    assert node.ball_pickup_entry_pending is (distance <= .550)
+    assert node.ball_pickup_entry_pending is (distance <= .500)
     status(node, bridge, request, 'SUCCEEDED')
     command = node.publisher.messages[-1]
     assert command['valid'] and command['action'] == action
@@ -37,9 +39,9 @@ def test_line_completion_uses_separate_fine_and_pickup_boundaries(clock, distanc
     assert fine['motion_id'] == 'ball_approach_fine_forward_45_5'
     assert bridge.transition_dwell_until is None
     status(node, bridge, fine, 'RUNNING')
-    fresh(node, clock, 'ball', ground_ball_info(depth_m=.550), plan=False)
+    fresh(node, clock, 'ball', ground_ball_info(depth_m=.500), plan=False)
     status(node, bridge, fine, 'SUCCEEDED')
-    fresh(node, clock, 'ball', ground_ball_info(depth_m=.550))
+    fresh(node, clock, 'ball', ground_ball_info(depth_m=.500))
     assert node.publisher.messages[-1]['action'] == 'PICKUP_NOW'
     assert getattr(node, 'ball_post_motion_dwell_until', None) is None
     assert getattr(node, 'correction_post_motion_dwell_until', None) is None
@@ -59,14 +61,14 @@ def test_invalid_fine_distance_does_not_release_entry(clock, changes):
     assert not node.ball_pickup_entry_pending
 
 
-def test_fine_alias_keeps_camera_45_and_existing_body_cycle():
+def test_fine_alias_uses_supplied_camera45_gait():
     root = Path(__file__).resolve().parents[3]
     aliases = yaml.safe_load((root / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())
-    assert aliases['motion_aliases']['ball_approach_fine_forward_45_5'] == 'R미세(5회)'
+    assert aliases['motion_aliases']['ball_approach_fine_forward_45_5'] == 'r미세45도'
     motions = json.loads((root / 'artifacts/robot_motions_runtime.json').read_text())['motions']
-    fine = next(m for m in motions if m['name'] == 'R미세(5회)')
+    fine = next(m for m in motions if m['name'] == 'r미세45도')
     assert fine['repeat_count'] == 5
-    assert all(-34 < frame['angles']['0'] < -30 for frame in fine['frames'])
+    assert all(frame['angles']['0'] == -34.0 for frame in fine['frames'])
 
 
 def test_camera45_fine_preparation_keeps_both_one_second_pauses(clock):

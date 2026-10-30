@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="20" skipped="0" tests="289" time="2.269" timestamp="2026-10-31T00:13:37.486028" hostname="jet"><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_fine_then_turn_waits_before_and_after_preparation[False-LEFT-1]" time="0.004" /><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_fine_then_turn_waits_before_and_after_preparation[False-LEFT-2]" time="0.003" /><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_fine_then_turn_waits_before_and_after_preparation[False-LEFT-3]" time="0.002" /><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_fine_then_turn_waits_before_and_after_preparation[False-LEFT-4]" time="0.002" /><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_fine_then_turn_waits_before_and_after_preparation[False-RIGHT-1]" time="0.002" /><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_fine_then_turn_waits_before_and_after_preparation[False-RIGHT-2]" time="0.002" /><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_fine_then_turn_waits_before_and_after_preparation[False-RIGHT-3]" time="0.002" /><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_fine_then_turn_waits_before_and_after_preparation[False-RIGHT-4]" time="0.002" /><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_fine_then_turn_waits_before_and_after_preparation[True-LEFT-1]" time="0.002" /><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_fine_then_turn_waits_before_and_after_preparation[True-LEFT-2]" time="0.002" /><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_fine_then_turn_waits_before_and_after_preparation[True-LEFT-3]" time="0.002" /><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_fine_then_turn_waits_before_and_after_preparation[True-LEFT-4]" time="0.002" /><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_fine_then_turn_waits_before_and_after_preparation[True-RIGHT-1]" time="0.002" /><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_fine_then_turn_waits_before_and_after_preparation[True-RIGHT-2]" time="0.002" /><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_fine_then_turn_waits_before_and_after_preparation[True-RIGHT-3]" time="0.002" /><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_fine_then_turn_waits_before_and_after_preparation[True-RIGHT-4]" time="0.002" /><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_fine_turn_cannot_use_handoff_pause_bypass[GOAL_CAMERA90_TURN_LEFT_1]" time="0.002" /><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_fine_turn_cannot_use_handoff_pause_bypass[GOAL_CAMERA90_TURN_RIGHT_1]" time="0.002" /><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_fine_turn_cannot_use_handoff_pause_bypass[TURN_LEFT]" time="0.002" /><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_fine_turn_cannot_use_handoff_pause_bypass[TURN_RIGHT]" time="0.003" /><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_preparation_failure_never_starts_turn[FAILED]" time="0.002" /><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_preparation_failure_never_starts_turn[TIMEOUT]" time="0.002" /><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_preparation_failure_never_starts_turn[CANCELLED]" time="0.002" /><testcase classname="test.test_goal_fine_turn_transition" name="test_goal_preparation_failure_never_starts_turn[REJECTED]" time="0.002" /><testcase classname="test.test_goal_fine_turn_transition" name="test_only_requested_source_motion_added_with_correct_runtime_speed[robot_motions_pc.json]" time="0.080" /><testcase classname="test.test_goal_fine_turn_transition" name="test_only_requested_source_motion_added_with_correct_runtime_speed[robot_motions_runtime.json]" time="0.078" /><testcase classname="test.test_transition_dwells" name="test_all_six_transition_types_pause_exactly_once_on_both_sides[STRAIGHT-BALL_FINE_FORWARD_8-pickup_fine_prepare]" time="0.003" /><testcase classname="test.test_transition_dwells" name="test_all_six_transition_types_pause_exactly_once_on_both_sides[TURN_LEFT-BALL_FINE_FORWARD_8-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_transition_dwells" name="test_all_six_transition_types_pause_exactly_once_on_both_sides[TURN_RIGHT-BALL_FINE_FORWARD_8-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_transition_dwells" name="test_all_six_transition_types_pause_exactly_once_on_both_sides[GOAL_CAMERA90_TURN_LEFT_1-GOAL_CAMERA90_FINE_FORWARD_1-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_transition_dwells" name="test_all_six_transition_types_pause_exactly_once_on_both_sides[GOAL_CAMERA90_TURN_RIGHT_2-GOAL_CAMERA90_FINE_FORWARD_1-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_transition_dwells" name="test_all_six_transition_types_pause_exactly_once_on_both_sides[GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_CRAB_LEFT-goal_forward_to_crab_right_90]" time="0.002" /><testcase classname="test.test_transition_dwells" name="test_all_six_transition_types_pause_exactly_once_on_both_sides[GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_CRAB_RIGHT-goal_forward_to_crab_right_90]" time="0.002" /><testcase classname="test.test_transition_dwells" name="test_all_six_transition_types_pause_exactly_once_on_both_sides[GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_CRAB_LEFT-goal_fine_to_crab_right_90]" time="0.002" /><testcase classname="test.test_transition_dwells" name="test_all_six_transition_types_pause_exactly_once_on_both_sides[GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_CRAB_RIGHT-goal_fine_to_crab_right_90]" time="0.002" /><testcase classname="test.test_transition_dwells" name="test_all_six_transition_types_pause_exactly_once_on_both_sides[BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]" time="0.004"><failure message="AssertionError: assert ['fine_to_turn_ready_0'] == ['fine_to_turn_ready_45']&#10;  At index 0 diff: 'fine_to_turn_ready_0' != 'fine_to_turn_ready_45'&#10;  Full diff:&#10;  - ['fine_to_turn_ready_45']&#10;  ?                      ^^&#10;  + ['fine_to_turn_ready_0']&#10;  ?                      ^">clock = [11.0], previous = 'BALL_FINE_FORWARD_8', target = 'STRAIGHT'
+prepare = 'fine_to_turn_ready_45'
+
+    @pytest.mark.parametrize("previous,target,prepare", [
+        case for case in CASES if case[:2] not in {
+            ("GOAL_CAMERA_90_FORWARD", "GOAL_CAMERA90_FINE_FORWARD_1"),
+            ("GOAL_CAMERA90_FINE_FORWARD_1", "GOAL_CAMERA_90_FORWARD"),
+        }
+    ])
+    def test_all_six_transition_types_pause_exactly_once_on_both_sides(clock, previous, target, prepare):
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+&gt;       check_both_pauses(bridge, clock, prepare, bridge.motion_id_for_action(target))
+
+src/mission_control/test/test_transition_dwells.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+bridge = &lt;test_motion_command_bridge.FakeBridge object at 0xffff7a98df90&gt;
+clock = [11.0], prepare = 'fine_to_turn_ready_45', target = 'line_forward_6'
+
+    def check_both_pauses(bridge, clock, prepare, target):
+        start = len(requests(bridge))
+        beginning = clock[0]
+        assert bridge.motion_in_progress
+        assert bridge.transition_dwell_until == beginning + 1.0
+        clock[0] = beginning + .999
+        bridge._check_atomic_dwell()
+        assert len(requests(bridge)) == start
+        clock[0] = beginning + 1.0
+        bridge._check_atomic_dwell()
+&gt;       assert [r["motion_id"] for r in requests(bridge)[start:]] == [prepare]
+E       AssertionError: assert ['fine_to_turn_ready_0'] == ['fine_to_turn_ready_45']
+E         At index 0 diff: 'fine_to_turn_ready_0' != 'fine_to_turn_ready_45'
+E         Full diff:
+E         - ['fine_to_turn_ready_45']
+E         ?                      ^^
+E         + ['fine_to_turn_ready_0']
+E         ?                      ^
+
+src/mission_control/test/test_transition_dwells.py:29: AssertionError</failure></testcase><testcase classname="test.test_transition_dwells" name="test_all_six_transition_types_pause_exactly_once_on_both_sides[BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45]" time="0.003"><failure message="AssertionError: assert ['fine_to_turn_ready_0'] == ['fine_to_turn_ready_45']&#10;  At index 0 diff: 'fine_to_turn_ready_0' != 'fine_to_turn_ready_45'&#10;  Full diff:&#10;  - ['fine_to_turn_ready_45']&#10;  ?                      ^^&#10;  + ['fine_to_turn_ready_0']&#10;  ?                      ^">clock = [11.0], previous = 'BALL_FINE_FORWARD_8', target = 'TURN_LEFT'
+prepare = 'fine_to_turn_ready_45'
+
+    @pytest.mark.parametrize("previous,target,prepare", [
+        case for case in CASES if case[:2] not in {
+            ("GOAL_CAMERA_90_FORWARD", "GOAL_CAMERA90_FINE_FORWARD_1"),
+            ("GOAL_CAMERA90_FINE_FORWARD_1", "GOAL_CAMERA_90_FORWARD"),
+        }
+    ])
+    def test_all_six_transition_types_pause_exactly_once_on_both_sides(clock, previous, target, prepare):
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+&gt;       check_both_pauses(bridge, clock, prepare, bridge.motion_id_for_action(target))
+
+src/mission_control/test/test_transition_dwells.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+bridge = &lt;test_motion_command_bridge.FakeBridge object at 0xffff7a9463e0&gt;
+clock = [11.0], prepare = 'fine_to_turn_ready_45'
+target = 'stationary_turn_left'
+
+    def check_both_pauses(bridge, clock, prepare, target):
+        start = len(requests(bridge))
+        beginning = clock[0]
+        assert bridge.motion_in_progress
+        assert bridge.transition_dwell_until == beginning + 1.0
+        clock[0] = beginning + .999
+        bridge._check_atomic_dwell()
+        assert len(requests(bridge)) == start
+        clock[0] = beginning + 1.0
+        bridge._check_atomic_dwell()
+&gt;       assert [r["motion_id"] for r in requests(bridge)[start:]] == [prepare]
+E       AssertionError: assert ['fine_to_turn_ready_0'] == ['fine_to_turn_ready_45']
+E         At index 0 diff: 'fine_to_turn_ready_0' != 'fine_to_turn_ready_45'
+E         Full diff:
+E         - ['fine_to_turn_ready_45']
+E         ?                      ^^
+E         + ['fine_to_turn_ready_0']
+E         ?                      ^
+
+src/mission_control/test/test_transition_dwells.py:29: AssertionError</failure></testcase><testcase classname="test.test_transition_dwells" name="test_all_six_transition_types_pause_exactly_once_on_both_sides[GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_TURN_RIGHT_2-fine_to_turn_ready_90]" time="0.002" /><testcase classname="test.test_transition_dwells" name="test_pickup_explicit_preparations_share_the_same_timing[ball_camera_down_forward_4-BALL_PICKUP_CRAB_LEFT-pickup_forward_to_crab_0-pickup_crab_left_0]" time="0.002" /><testcase classname="test.test_transition_dwells" name="test_pickup_explicit_preparations_share_the_same_timing[ball_camera_down_forward_4-BALL_PICKUP_CRAB_RIGHT-pickup_forward_to_crab_0-pickup_crab_right_0]" time="0.002" /><testcase classname="test.test_transition_dwells" name="test_pickup_explicit_preparations_share_the_same_timing[pickup_fine_forward_0-BALL_PICKUP_CRAB_LEFT-pickup_fine_to_crab_right_0-pickup_crab_left_0]" time="0.002" /><testcase classname="test.test_transition_dwells" name="test_pickup_explicit_preparations_share_the_same_timing[pickup_fine_forward_0-BALL_PICKUP_CRAB_RIGHT-pickup_fine_to_crab_right_0-pickup_crab_right_0]" time="0.002" /><testcase classname="test.test_transition_dwells" name="test_pickup_explicit_preparations_share_the_same_timing[ball_camera_down_forward_4-BALL_PICKUP_FINE_FORWARD-pickup_fine_prepare-pickup_fine_forward_0]" time="0.002" /><testcase classname="test.test_transition_dwells" name="test_hurdle_transition_preserves_one_second_pauses[STRAIGHT-STRAIGHT_0]" time="0.002" /><testcase classname="test.test_transition_dwells" name="test_hurdle_transition_preserves_one_second_pauses[ALIGN_RIGHT-GO]" time="0.002" /><testcase classname="test.test_transition_dwells" name="test_transition_failure_never_starts_post_pause_or_target[FAILED]" time="0.002" /><testcase classname="test.test_transition_dwells" name="test_transition_failure_never_starts_post_pause_or_target[TIMEOUT]" time="0.002" /><testcase classname="test.test_transition_dwells" name="test_transition_failure_never_starts_post_pause_or_target[CANCELLED]" time="0.002" /><testcase classname="test.test_transition_dwells" name="test_transition_failure_never_starts_post_pause_or_target[REJECTED]" time="0.001" /><testcase classname="test.test_transition_dwells" name="test_transition_lock_covers_both_pauses_and_ignores_wrong_status" time="0.002" /><testcase classname="test.test_transition_dwells" name="test_clearing_command_discards_pending_timer_work[False]" time="0.001" /><testcase classname="test.test_transition_dwells" name="test_clearing_command_discards_pending_timer_work[True]" time="0.001" /><testcase classname="test.test_transition_dwells" name="test_queued_transition_pause_begins_after_predecessor_completion" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_transition_finishes_before_target_and_rejects_interleaved_commands[STRAIGHT-BALL_FINE_FORWARD_8-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_transition_finishes_before_target_and_rejects_interleaved_commands[TURN_LEFT-BALL_FINE_FORWARD_8-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_transition_finishes_before_target_and_rejects_interleaved_commands[TURN_RIGHT-BALL_FINE_FORWARD_8-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_transition_finishes_before_target_and_rejects_interleaved_commands[GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_FINE_FORWARD_1-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_transition_finishes_before_target_and_rejects_interleaved_commands[GOAL_CAMERA90_TURN_LEFT_1-GOAL_CAMERA90_FINE_FORWARD_1-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_transition_finishes_before_target_and_rejects_interleaved_commands[GOAL_CAMERA90_TURN_RIGHT_2-GOAL_CAMERA90_FINE_FORWARD_1-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_transition_finishes_before_target_and_rejects_interleaved_commands[GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_CRAB_LEFT-goal_forward_to_crab_right_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_transition_finishes_before_target_and_rejects_interleaved_commands[GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_CRAB_RIGHT-goal_forward_to_crab_right_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_transition_finishes_before_target_and_rejects_interleaved_commands[GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_CRAB_LEFT-goal_fine_to_crab_right_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_transition_finishes_before_target_and_rejects_interleaved_commands[GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_CRAB_RIGHT-goal_fine_to_crab_right_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_transition_finishes_before_target_and_rejects_interleaved_commands[BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]" time="0.002"><failure message="AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'&#10;  - fine_to_turn_ready_45&#10;  ?                    ^^&#10;  + fine_to_turn_ready_0&#10;  ?                    ^">previous = 'BALL_FINE_FORWARD_8', target = 'STRAIGHT'
+prepare = 'fine_to_turn_ready_45'
+
+    @pytest.mark.parametrize("previous,target,prepare", CASES)
+    def test_transition_finishes_before_target_and_rejects_interleaved_commands(previous, target, prepare):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        start = len(requests(bridge))
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+        prep_request = requests(bridge)[-1]
+&gt;       assert prep_request["motion_id"] == prepare
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_gait_transitions.py:53: AssertionError</failure></testcase><testcase classname="test.test_gait_transitions" name="test_transition_finishes_before_target_and_rejects_interleaved_commands[GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA_90_FORWARD-fine_to_turn_ready_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_transition_finishes_before_target_and_rejects_interleaved_commands[BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45]" time="0.002"><failure message="AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'&#10;  - fine_to_turn_ready_45&#10;  ?                    ^^&#10;  + fine_to_turn_ready_0&#10;  ?                    ^">previous = 'BALL_FINE_FORWARD_8', target = 'TURN_LEFT'
+prepare = 'fine_to_turn_ready_45'
+
+    @pytest.mark.parametrize("previous,target,prepare", CASES)
+    def test_transition_finishes_before_target_and_rejects_interleaved_commands(previous, target, prepare):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        start = len(requests(bridge))
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+        prep_request = requests(bridge)[-1]
+&gt;       assert prep_request["motion_id"] == prepare
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_gait_transitions.py:53: AssertionError</failure></testcase><testcase classname="test.test_gait_transitions" name="test_transition_finishes_before_target_and_rejects_interleaved_commands[GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_TURN_RIGHT_2-fine_to_turn_ready_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-STRAIGHT-BALL_FINE_FORWARD_8-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-TURN_LEFT-BALL_FINE_FORWARD_8-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-TURN_RIGHT-BALL_FINE_FORWARD_8-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_FINE_FORWARD_1-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-GOAL_CAMERA90_TURN_LEFT_1-GOAL_CAMERA90_FINE_FORWARD_1-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-GOAL_CAMERA90_TURN_RIGHT_2-GOAL_CAMERA90_FINE_FORWARD_1-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_CRAB_LEFT-goal_forward_to_crab_right_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_CRAB_RIGHT-goal_forward_to_crab_right_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_CRAB_LEFT-goal_fine_to_crab_right_90]" time="0.059" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_CRAB_RIGHT-goal_fine_to_crab_right_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]" time="0.003"><failure message="AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'&#10;  - fine_to_turn_ready_45&#10;  ?                    ^^&#10;  + fine_to_turn_ready_0&#10;  ?                    ^">previous = 'BALL_FINE_FORWARD_8', target = 'STRAIGHT'
+prepare = 'fine_to_turn_ready_45', status = 'FAILED'
+error = 'SDK_COMMUNICATION_ERROR'
+
+    @pytest.mark.parametrize("previous,target,prepare", CASES)
+    @pytest.mark.parametrize("status,error", [
+        ("FAILED", "SDK_COMMUNICATION_ERROR"), ("TIMEOUT", "TIMEOUT"),
+        ("CANCELLED", ""), ("REJECTED", "INVALID_MOTION"),
+    ])
+    def test_preparation_failure_never_sends_target(previous, target, prepare, status, error):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        start = len(requests(bridge))
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+&gt;       assert requests(bridge)[-1]["motion_id"] == prepare
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_gait_transitions.py:83: AssertionError</failure></testcase><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA_90_FORWARD-fine_to_turn_ready_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45]" time="0.003"><failure message="AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'&#10;  - fine_to_turn_ready_45&#10;  ?                    ^^&#10;  + fine_to_turn_ready_0&#10;  ?                    ^">previous = 'BALL_FINE_FORWARD_8', target = 'TURN_LEFT'
+prepare = 'fine_to_turn_ready_45', status = 'FAILED'
+error = 'SDK_COMMUNICATION_ERROR'
+
+    @pytest.mark.parametrize("previous,target,prepare", CASES)
+    @pytest.mark.parametrize("status,error", [
+        ("FAILED", "SDK_COMMUNICATION_ERROR"), ("TIMEOUT", "TIMEOUT"),
+        ("CANCELLED", ""), ("REJECTED", "INVALID_MOTION"),
+    ])
+    def test_preparation_failure_never_sends_target(previous, target, prepare, status, error):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        start = len(requests(bridge))
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+&gt;       assert requests(bridge)[-1]["motion_id"] == prepare
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_gait_transitions.py:83: AssertionError</failure></testcase><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_TURN_RIGHT_2-fine_to_turn_ready_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-STRAIGHT-BALL_FINE_FORWARD_8-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-TURN_LEFT-BALL_FINE_FORWARD_8-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-TURN_RIGHT-BALL_FINE_FORWARD_8-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_FINE_FORWARD_1-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-GOAL_CAMERA90_TURN_LEFT_1-GOAL_CAMERA90_FINE_FORWARD_1-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-GOAL_CAMERA90_TURN_RIGHT_2-GOAL_CAMERA90_FINE_FORWARD_1-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_CRAB_LEFT-goal_forward_to_crab_right_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_CRAB_RIGHT-goal_forward_to_crab_right_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_CRAB_LEFT-goal_fine_to_crab_right_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_CRAB_RIGHT-goal_fine_to_crab_right_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]" time="0.002"><failure message="AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'&#10;  - fine_to_turn_ready_45&#10;  ?                    ^^&#10;  + fine_to_turn_ready_0&#10;  ?                    ^">previous = 'BALL_FINE_FORWARD_8', target = 'STRAIGHT'
+prepare = 'fine_to_turn_ready_45', status = 'TIMEOUT', error = 'TIMEOUT'
+
+    @pytest.mark.parametrize("previous,target,prepare", CASES)
+    @pytest.mark.parametrize("status,error", [
+        ("FAILED", "SDK_COMMUNICATION_ERROR"), ("TIMEOUT", "TIMEOUT"),
+        ("CANCELLED", ""), ("REJECTED", "INVALID_MOTION"),
+    ])
+    def test_preparation_failure_never_sends_target(previous, target, prepare, status, error):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        start = len(requests(bridge))
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+&gt;       assert requests(bridge)[-1]["motion_id"] == prepare
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_gait_transitions.py:83: AssertionError</failure></testcase><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA_90_FORWARD-fine_to_turn_ready_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45]" time="0.002"><failure message="AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'&#10;  - fine_to_turn_ready_45&#10;  ?                    ^^&#10;  + fine_to_turn_ready_0&#10;  ?                    ^">previous = 'BALL_FINE_FORWARD_8', target = 'TURN_LEFT'
+prepare = 'fine_to_turn_ready_45', status = 'TIMEOUT', error = 'TIMEOUT'
+
+    @pytest.mark.parametrize("previous,target,prepare", CASES)
+    @pytest.mark.parametrize("status,error", [
+        ("FAILED", "SDK_COMMUNICATION_ERROR"), ("TIMEOUT", "TIMEOUT"),
+        ("CANCELLED", ""), ("REJECTED", "INVALID_MOTION"),
+    ])
+    def test_preparation_failure_never_sends_target(previous, target, prepare, status, error):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        start = len(requests(bridge))
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+&gt;       assert requests(bridge)[-1]["motion_id"] == prepare
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_gait_transitions.py:83: AssertionError</failure></testcase><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_TURN_RIGHT_2-fine_to_turn_ready_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[CANCELLED--STRAIGHT-BALL_FINE_FORWARD_8-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[CANCELLED--TURN_LEFT-BALL_FINE_FORWARD_8-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[CANCELLED--TURN_RIGHT-BALL_FINE_FORWARD_8-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[CANCELLED--GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_FINE_FORWARD_1-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[CANCELLED--GOAL_CAMERA90_TURN_LEFT_1-GOAL_CAMERA90_FINE_FORWARD_1-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[CANCELLED--GOAL_CAMERA90_TURN_RIGHT_2-GOAL_CAMERA90_FINE_FORWARD_1-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[CANCELLED--GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_CRAB_LEFT-goal_forward_to_crab_right_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[CANCELLED--GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_CRAB_RIGHT-goal_forward_to_crab_right_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[CANCELLED--GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_CRAB_LEFT-goal_fine_to_crab_right_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[CANCELLED--GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_CRAB_RIGHT-goal_fine_to_crab_right_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[CANCELLED--BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]" time="0.003"><failure message="AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'&#10;  - fine_to_turn_ready_45&#10;  ?                    ^^&#10;  + fine_to_turn_ready_0&#10;  ?                    ^">previous = 'BALL_FINE_FORWARD_8', target = 'STRAIGHT'
+prepare = 'fine_to_turn_ready_45', status = 'CANCELLED', error = ''
+
+    @pytest.mark.parametrize("previous,target,prepare", CASES)
+    @pytest.mark.parametrize("status,error", [
+        ("FAILED", "SDK_COMMUNICATION_ERROR"), ("TIMEOUT", "TIMEOUT"),
+        ("CANCELLED", ""), ("REJECTED", "INVALID_MOTION"),
+    ])
+    def test_preparation_failure_never_sends_target(previous, target, prepare, status, error):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        start = len(requests(bridge))
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+&gt;       assert requests(bridge)[-1]["motion_id"] == prepare
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_gait_transitions.py:83: AssertionError</failure></testcase><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[CANCELLED--GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA_90_FORWARD-fine_to_turn_ready_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[CANCELLED--BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45]" time="0.002"><failure message="AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'&#10;  - fine_to_turn_ready_45&#10;  ?                    ^^&#10;  + fine_to_turn_ready_0&#10;  ?                    ^">previous = 'BALL_FINE_FORWARD_8', target = 'TURN_LEFT'
+prepare = 'fine_to_turn_ready_45', status = 'CANCELLED', error = ''
+
+    @pytest.mark.parametrize("previous,target,prepare", CASES)
+    @pytest.mark.parametrize("status,error", [
+        ("FAILED", "SDK_COMMUNICATION_ERROR"), ("TIMEOUT", "TIMEOUT"),
+        ("CANCELLED", ""), ("REJECTED", "INVALID_MOTION"),
+    ])
+    def test_preparation_failure_never_sends_target(previous, target, prepare, status, error):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        start = len(requests(bridge))
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+&gt;       assert requests(bridge)[-1]["motion_id"] == prepare
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_gait_transitions.py:83: AssertionError</failure></testcase><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[CANCELLED--GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_TURN_RIGHT_2-fine_to_turn_ready_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-STRAIGHT-BALL_FINE_FORWARD_8-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-TURN_LEFT-BALL_FINE_FORWARD_8-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-TURN_RIGHT-BALL_FINE_FORWARD_8-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_FINE_FORWARD_1-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-GOAL_CAMERA90_TURN_LEFT_1-GOAL_CAMERA90_FINE_FORWARD_1-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-GOAL_CAMERA90_TURN_RIGHT_2-GOAL_CAMERA90_FINE_FORWARD_1-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_CRAB_LEFT-goal_forward_to_crab_right_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_CRAB_RIGHT-goal_forward_to_crab_right_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_CRAB_LEFT-goal_fine_to_crab_right_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_CRAB_RIGHT-goal_fine_to_crab_right_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]" time="0.002"><failure message="AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'&#10;  - fine_to_turn_ready_45&#10;  ?                    ^^&#10;  + fine_to_turn_ready_0&#10;  ?                    ^">previous = 'BALL_FINE_FORWARD_8', target = 'STRAIGHT'
+prepare = 'fine_to_turn_ready_45', status = 'REJECTED', error = 'INVALID_MOTION'
+
+    @pytest.mark.parametrize("previous,target,prepare", CASES)
+    @pytest.mark.parametrize("status,error", [
+        ("FAILED", "SDK_COMMUNICATION_ERROR"), ("TIMEOUT", "TIMEOUT"),
+        ("CANCELLED", ""), ("REJECTED", "INVALID_MOTION"),
+    ])
+    def test_preparation_failure_never_sends_target(previous, target, prepare, status, error):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        start = len(requests(bridge))
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+&gt;       assert requests(bridge)[-1]["motion_id"] == prepare
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_gait_transitions.py:83: AssertionError</failure></testcase><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA_90_FORWARD-fine_to_turn_ready_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45]" time="0.003"><failure message="AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'&#10;  - fine_to_turn_ready_45&#10;  ?                    ^^&#10;  + fine_to_turn_ready_0&#10;  ?                    ^">previous = 'BALL_FINE_FORWARD_8', target = 'TURN_LEFT'
+prepare = 'fine_to_turn_ready_45', status = 'REJECTED', error = 'INVALID_MOTION'
+
+    @pytest.mark.parametrize("previous,target,prepare", CASES)
+    @pytest.mark.parametrize("status,error", [
+        ("FAILED", "SDK_COMMUNICATION_ERROR"), ("TIMEOUT", "TIMEOUT"),
+        ("CANCELLED", ""), ("REJECTED", "INVALID_MOTION"),
+    ])
+    def test_preparation_failure_never_sends_target(previous, target, prepare, status, error):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        finish_request(bridge)
+        start = len(requests(bridge))
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+&gt;       assert requests(bridge)[-1]["motion_id"] == prepare
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_gait_transitions.py:83: AssertionError</failure></testcase><testcase classname="test.test_gait_transitions" name="test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_TURN_RIGHT_2-fine_to_turn_ready_90]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_queued_transition_uses_actual_completed_predecessor[SUCCEEDED-STRAIGHT-BALL_FINE_FORWARD_8-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_queued_transition_uses_actual_completed_predecessor[SUCCEEDED-TURN_LEFT-BALL_FINE_FORWARD_8-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_queued_transition_uses_actual_completed_predecessor[SUCCEEDED-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]" time="0.002"><failure message="AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'&#10;  - fine_to_turn_ready_45&#10;  ?                    ^^&#10;  + fine_to_turn_ready_0&#10;  ?                    ^">previous = 'BALL_FINE_FORWARD_8', target = 'STRAIGHT'
+prepare = 'fine_to_turn_ready_45', status = 'SUCCEEDED'
+
+    @pytest.mark.parametrize("previous,target,prepare", [
+        ("STRAIGHT", "BALL_FINE_FORWARD_8", "pickup_fine_prepare"),
+        ("TURN_LEFT", "BALL_FINE_FORWARD_8", "pickup_fine_prepare"),
+        ("BALL_FINE_FORWARD_8", "STRAIGHT", "fine_to_turn_ready_45"),
+    ])
+    @pytest.mark.parametrize("status", ["SUCCEEDED", "FAILED"])
+    def test_queued_transition_uses_actual_completed_predecessor(previous, target, prepare, status):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
+        bridge.navigation_command_callback(navigation_message(action=target, command_id=2))
+        assert len(requests(bridge)) == 1
+        assert bridge.queued_request_deferred
+        finish_request(bridge, status)
+        if status == "SUCCEEDED":
+&gt;           assert requests(bridge)[-1]["motion_id"] == prepare
+E           AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E             - fine_to_turn_ready_45
+E             ?                    ^^
+E             + fine_to_turn_ready_0
+E             ?                    ^
+
+src/mission_control/test/test_gait_transitions.py:104: AssertionError</failure></testcase><testcase classname="test.test_gait_transitions" name="test_queued_transition_uses_actual_completed_predecessor[FAILED-STRAIGHT-BALL_FINE_FORWARD_8-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_queued_transition_uses_actual_completed_predecessor[FAILED-TURN_LEFT-BALL_FINE_FORWARD_8-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_queued_transition_uses_actual_completed_predecessor[FAILED-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_hurdle_forward_and_turn_prepare_before_fine_and_final_ten_cycles" time="0.004" /><testcase classname="test.test_gait_transitions" name="test_same_gait_keeps_existing_queue_behavior[STRAIGHT]" time="0.001" /><testcase classname="test.test_gait_transitions" name="test_same_gait_keeps_existing_queue_behavior[BALL_FINE_FORWARD_8]" time="0.001" /><testcase classname="test.test_gait_transitions" name="test_queued_fine_does_not_use_history_from_before_active_retreat" time="0.002"><failure message="AssertionError: assert 'line_forward_6' == 'goal_camera_...ine_forward_1'&#10;  - goal_camera_90_fine_forward_1&#10;  + line_forward_6">def test_queued_fine_does_not_use_history_from_before_active_retreat():
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action="STRAIGHT", command_id=1))
+        finish_request(bridge)
+        bridge.navigation_command_callback(navigation_message(action="GOAL_CAMERA90_BACKWARD_1", command_id=2))
+        bridge.navigation_command_callback(navigation_message(action="GOAL_CAMERA90_FINE_FORWARD_1", command_id=3))
+        assert bridge.pending_turn_request is None
+&gt;       assert requests(bridge)[-1]["motion_id"] == "goal_camera_90_fine_forward_1"
+E       AssertionError: assert 'line_forward_6' == 'goal_camera_...ine_forward_1'
+E         - goal_camera_90_fine_forward_1
+E         + line_forward_6
+
+src/mission_control/test/test_gait_transitions.py:149: AssertionError</failure></testcase><testcase classname="test.test_gait_transitions" name="test_pickup_forward_to_crab_preparation_cannot_be_skipped_on_motor_fault[FAILED-SDK_COMMUNICATION_ERROR-LEFT]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_pickup_forward_to_crab_preparation_cannot_be_skipped_on_motor_fault[FAILED-SDK_COMMUNICATION_ERROR-RIGHT]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_pickup_forward_to_crab_preparation_cannot_be_skipped_on_motor_fault[FAILED-SDK_POSITION_TIMEOUT-LEFT]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_pickup_forward_to_crab_preparation_cannot_be_skipped_on_motor_fault[FAILED-SDK_POSITION_TIMEOUT-RIGHT]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_pickup_forward_to_crab_preparation_cannot_be_skipped_on_motor_fault[TIMEOUT-TIMEOUT-LEFT]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_pickup_forward_to_crab_preparation_cannot_be_skipped_on_motor_fault[TIMEOUT-TIMEOUT-RIGHT]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_pickup_forward_to_crab_preparation_cannot_be_skipped_on_motor_fault[CANCELLED--LEFT]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_pickup_forward_to_crab_preparation_cannot_be_skipped_on_motor_fault[CANCELLED--RIGHT]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_pickup_approach_transition_failure_does_not_use_motor_fault_skip[SDK_COMMUNICATION_ERROR]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_pickup_approach_transition_failure_does_not_use_motor_fault_skip[SDK_POSITION_TIMEOUT]" time="0.002" /><testcase classname="test.test_gait_transitions" name="test_aliases_reuse_supplied_poses_without_changing_motion_data" time="0.036" /><testcase classname="test.test_fine_turn_transition" name="test_each_mission_prepares_before_turn_and_keeps_command_lock[line-BALL_FINE_FORWARD_8-TURN_LEFT-45]" time="0.003"><failure message="AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'&#10;  - fine_to_turn_ready_45&#10;  ?                    ^^&#10;  + fine_to_turn_ready_0&#10;  ?                    ^">source = 'line', fine = 'BALL_FINE_FORWARD_8', turn = 'TURN_LEFT', angle = 45
+
+    @pytest.mark.parametrize("source,fine,turn,angle", [
+        ("line", "BALL_FINE_FORWARD_8", "TURN_LEFT", 45),
+        ("line", "BALL_FINE_FORWARD_8", "TURN_RIGHT", 45),
+        ("ball", "BALL_FINE_FORWARD_8", "BALL_APPROACH_TURN_LEFT_2", 45),
+        ("ball", "BALL_FINE_FORWARD_8", "BALL_APPROACH_TURN_RIGHT_3", 45),
+        ("hurdle", "STRAIGHT_0", "ALIGN_LEFT", 0),
+        ("hurdle", "STRAIGHT_0", "ALIGN_RIGHT", 0),
+        *[("goal", f"GOAL_CAMERA90_FINE_FORWARD_{count}",
+           f"GOAL_CAMERA90_TURN_{side}_{repeat}", 90)
+          for count in range(1, 5) for side, repeat in (("LEFT", 1), ("RIGHT", 3))],
+    ])
+    def test_each_mission_prepares_before_turn_and_keeps_command_lock(source, fine, turn, angle):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(
+            source=source, action=fine, command_id=1,
+        ))
+        finish_physical(bridge)
+        bridge.navigation_command_callback(navigation_message(
+            source=source, action=turn, command_id=2,
+            source_command={"turn_count": 2 if turn == "ALIGN_LEFT" else 3},
+        ))
+        prep = requests(bridge)[-1]
+        target = bridge.active_motion_id
+&gt;       assert prep["motion_id"] == f"fine_to_turn_ready_{angle}"
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_fine_turn_transition.py:46: AssertionError</failure></testcase><testcase classname="test.test_fine_turn_transition" name="test_each_mission_prepares_before_turn_and_keeps_command_lock[line-BALL_FINE_FORWARD_8-TURN_RIGHT-45]" time="0.003"><failure message="AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'&#10;  - fine_to_turn_ready_45&#10;  ?                    ^^&#10;  + fine_to_turn_ready_0&#10;  ?                    ^">source = 'line', fine = 'BALL_FINE_FORWARD_8', turn = 'TURN_RIGHT', angle = 45
+
+    @pytest.mark.parametrize("source,fine,turn,angle", [
+        ("line", "BALL_FINE_FORWARD_8", "TURN_LEFT", 45),
+        ("line", "BALL_FINE_FORWARD_8", "TURN_RIGHT", 45),
+        ("ball", "BALL_FINE_FORWARD_8", "BALL_APPROACH_TURN_LEFT_2", 45),
+        ("ball", "BALL_FINE_FORWARD_8", "BALL_APPROACH_TURN_RIGHT_3", 45),
+        ("hurdle", "STRAIGHT_0", "ALIGN_LEFT", 0),
+        ("hurdle", "STRAIGHT_0", "ALIGN_RIGHT", 0),
+        *[("goal", f"GOAL_CAMERA90_FINE_FORWARD_{count}",
+           f"GOAL_CAMERA90_TURN_{side}_{repeat}", 90)
+          for count in range(1, 5) for side, repeat in (("LEFT", 1), ("RIGHT", 3))],
+    ])
+    def test_each_mission_prepares_before_turn_and_keeps_command_lock(source, fine, turn, angle):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(
+            source=source, action=fine, command_id=1,
+        ))
+        finish_physical(bridge)
+        bridge.navigation_command_callback(navigation_message(
+            source=source, action=turn, command_id=2,
+            source_command={"turn_count": 2 if turn == "ALIGN_LEFT" else 3},
+        ))
+        prep = requests(bridge)[-1]
+        target = bridge.active_motion_id
+&gt;       assert prep["motion_id"] == f"fine_to_turn_ready_{angle}"
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_fine_turn_transition.py:46: AssertionError</failure></testcase><testcase classname="test.test_fine_turn_transition" name="test_each_mission_prepares_before_turn_and_keeps_command_lock[ball-BALL_FINE_FORWARD_8-BALL_APPROACH_TURN_LEFT_2-45]" time="0.002"><failure message="AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'&#10;  - fine_to_turn_ready_45&#10;  ?                    ^^&#10;  + fine_to_turn_ready_0&#10;  ?                    ^">source = 'ball', fine = 'BALL_FINE_FORWARD_8'
+turn = 'BALL_APPROACH_TURN_LEFT_2', angle = 45
+
+    @pytest.mark.parametrize("source,fine,turn,angle", [
+        ("line", "BALL_FINE_FORWARD_8", "TURN_LEFT", 45),
+        ("line", "BALL_FINE_FORWARD_8", "TURN_RIGHT", 45),
+        ("ball", "BALL_FINE_FORWARD_8", "BALL_APPROACH_TURN_LEFT_2", 45),
+        ("ball", "BALL_FINE_FORWARD_8", "BALL_APPROACH_TURN_RIGHT_3", 45),
+        ("hurdle", "STRAIGHT_0", "ALIGN_LEFT", 0),
+        ("hurdle", "STRAIGHT_0", "ALIGN_RIGHT", 0),
+        *[("goal", f"GOAL_CAMERA90_FINE_FORWARD_{count}",
+           f"GOAL_CAMERA90_TURN_{side}_{repeat}", 90)
+          for count in range(1, 5) for side, repeat in (("LEFT", 1), ("RIGHT", 3))],
+    ])
+    def test_each_mission_prepares_before_turn_and_keeps_command_lock(source, fine, turn, angle):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(
+            source=source, action=fine, command_id=1,
+        ))
+        finish_physical(bridge)
+        bridge.navigation_command_callback(navigation_message(
+            source=source, action=turn, command_id=2,
+            source_command={"turn_count": 2 if turn == "ALIGN_LEFT" else 3},
+        ))
+        prep = requests(bridge)[-1]
+        target = bridge.active_motion_id
+&gt;       assert prep["motion_id"] == f"fine_to_turn_ready_{angle}"
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_fine_turn_transition.py:46: AssertionError</failure></testcase><testcase classname="test.test_fine_turn_transition" name="test_each_mission_prepares_before_turn_and_keeps_command_lock[ball-BALL_FINE_FORWARD_8-BALL_APPROACH_TURN_RIGHT_3-45]" time="0.003"><failure message="AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'&#10;  - fine_to_turn_ready_45&#10;  ?                    ^^&#10;  + fine_to_turn_ready_0&#10;  ?                    ^">source = 'ball', fine = 'BALL_FINE_FORWARD_8'
+turn = 'BALL_APPROACH_TURN_RIGHT_3', angle = 45
+
+    @pytest.mark.parametrize("source,fine,turn,angle", [
+        ("line", "BALL_FINE_FORWARD_8", "TURN_LEFT", 45),
+        ("line", "BALL_FINE_FORWARD_8", "TURN_RIGHT", 45),
+        ("ball", "BALL_FINE_FORWARD_8", "BALL_APPROACH_TURN_LEFT_2", 45),
+        ("ball", "BALL_FINE_FORWARD_8", "BALL_APPROACH_TURN_RIGHT_3", 45),
+        ("hurdle", "STRAIGHT_0", "ALIGN_LEFT", 0),
+        ("hurdle", "STRAIGHT_0", "ALIGN_RIGHT", 0),
+        *[("goal", f"GOAL_CAMERA90_FINE_FORWARD_{count}",
+           f"GOAL_CAMERA90_TURN_{side}_{repeat}", 90)
+          for count in range(1, 5) for side, repeat in (("LEFT", 1), ("RIGHT", 3))],
+    ])
+    def test_each_mission_prepares_before_turn_and_keeps_command_lock(source, fine, turn, angle):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(
+            source=source, action=fine, command_id=1,
+        ))
+        finish_physical(bridge)
+        bridge.navigation_command_callback(navigation_message(
+            source=source, action=turn, command_id=2,
+            source_command={"turn_count": 2 if turn == "ALIGN_LEFT" else 3},
+        ))
+        prep = requests(bridge)[-1]
+        target = bridge.active_motion_id
+&gt;       assert prep["motion_id"] == f"fine_to_turn_ready_{angle}"
+E       AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E         - fine_to_turn_ready_45
+E         ?                    ^^
+E         + fine_to_turn_ready_0
+E         ?                    ^
+
+src/mission_control/test/test_fine_turn_transition.py:46: AssertionError</failure></testcase><testcase classname="test.test_fine_turn_transition" name="test_each_mission_prepares_before_turn_and_keeps_command_lock[hurdle-STRAIGHT_0-ALIGN_LEFT-0]" time="0.003" /><testcase classname="test.test_fine_turn_transition" name="test_each_mission_prepares_before_turn_and_keeps_command_lock[hurdle-STRAIGHT_0-ALIGN_RIGHT-0]" time="0.002" /><testcase classname="test.test_fine_turn_transition" name="test_each_mission_prepares_before_turn_and_keeps_command_lock[goal-GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_TURN_LEFT_1-90]" time="0.002" /><testcase classname="test.test_fine_turn_transition" name="test_each_mission_prepares_before_turn_and_keeps_command_lock[goal-GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_TURN_RIGHT_3-90]" time="0.002" /><testcase classname="test.test_fine_turn_transition" name="test_each_mission_prepares_before_turn_and_keeps_command_lock[goal-GOAL_CAMERA90_FINE_FORWARD_2-GOAL_CAMERA90_TURN_LEFT_1-90]" time="0.002" /><testcase classname="test.test_fine_turn_transition" name="test_each_mission_prepares_before_turn_and_keeps_command_lock[goal-GOAL_CAMERA90_FINE_FORWARD_2-GOAL_CAMERA90_TURN_RIGHT_3-90]" time="0.003" /><testcase classname="test.test_fine_turn_transition" name="test_each_mission_prepares_before_turn_and_keeps_command_lock[goal-GOAL_CAMERA90_FINE_FORWARD_3-GOAL_CAMERA90_TURN_LEFT_1-90]" time="0.003" /><testcase classname="test.test_fine_turn_transition" name="test_each_mission_prepares_before_turn_and_keeps_command_lock[goal-GOAL_CAMERA90_FINE_FORWARD_3-GOAL_CAMERA90_TURN_RIGHT_3-90]" time="0.003" /><testcase classname="test.test_fine_turn_transition" name="test_each_mission_prepares_before_turn_and_keeps_command_lock[goal-GOAL_CAMERA90_FINE_FORWARD_4-GOAL_CAMERA90_TURN_LEFT_1-90]" time="0.002" /><testcase classname="test.test_fine_turn_transition" name="test_each_mission_prepares_before_turn_and_keeps_command_lock[goal-GOAL_CAMERA90_FINE_FORWARD_4-GOAL_CAMERA90_TURN_RIGHT_3-90]" time="0.003" /><testcase classname="test.test_fine_turn_transition" name="test_live_camera_hold_selects_transition[ball_head_override_active-0]" time="0.002" /><testcase classname="test.test_fine_turn_transition" name="test_live_camera_hold_selects_transition[hurdle_head_override_active-0]" time="0.002" /><testcase classname="test.test_fine_turn_transition" name="test_live_camera_hold_selects_transition[goal_head_override_active-90]" time="0.002" /><testcase classname="test.test_fine_turn_transition" name="test_preparation_failure_never_starts_turn_even_in_pickup[False-FAILED-SDK_POSITION_TIMEOUT]" time="0.002" /><testcase classname="test.test_fine_turn_transition" name="test_preparation_failure_never_starts_turn_even_in_pickup[False-FAILED-SDK_COMMUNICATION_ERROR]" time="0.002" /><testcase classname="test.test_fine_turn_transition" name="test_preparation_failure_never_starts_turn_even_in_pickup[False-TIMEOUT-TIMEOUT]" time="0.002" /><testcase classname="test.test_fine_turn_transition" name="test_preparation_failure_never_starts_turn_even_in_pickup[False-CANCELLED-]" time="0.002" /><testcase classname="test.test_fine_turn_transition" name="test_preparation_failure_never_starts_turn_even_in_pickup[False-REJECTED-INVALID_MOTION]" time="0.002" /><testcase classname="test.test_fine_turn_transition" name="test_preparation_failure_never_starts_turn_even_in_pickup[True-FAILED-SDK_POSITION_TIMEOUT]" time="0.002" /><testcase classname="test.test_fine_turn_transition" name="test_preparation_failure_never_starts_turn_even_in_pickup[True-FAILED-SDK_COMMUNICATION_ERROR]" time="0.003" /><testcase classname="test.test_fine_turn_transition" name="test_preparation_failure_never_starts_turn_even_in_pickup[True-TIMEOUT-TIMEOUT]" time="0.002" /><testcase classname="test.test_fine_turn_transition" name="test_preparation_failure_never_starts_turn_even_in_pickup[True-CANCELLED-]" time="0.002" /><testcase classname="test.test_fine_turn_transition" name="test_preparation_failure_never_starts_turn_even_in_pickup[True-REJECTED-INVALID_MOTION]" time="0.002" /><testcase classname="test.test_fine_turn_transition" name="test_queued_turn_waits_for_actual_fine_completion[SUCCEEDED]" time="0.002"><failure message="AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'&#10;  - fine_to_turn_ready_45&#10;  ?                    ^^&#10;  + fine_to_turn_ready_0&#10;  ?                    ^">fine_status = 'SUCCEEDED'
+
+    @pytest.mark.parametrize("fine_status", ["SUCCEEDED", "FAILED", "CANCELLED"])
+    def test_queued_turn_waits_for_actual_fine_completion(fine_status):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action="BALL_FINE_FORWARD_8", command_id=1))
+        bridge.navigation_command_callback(navigation_message(action="TURN_RIGHT", command_id=2))
+        assert len(requests(bridge)) == 1
+        assert bridge.queued_request_deferred
+        finish_physical(bridge, fine_status)
+        if fine_status == "SUCCEEDED":
+&gt;           assert requests(bridge)[-1]["motion_id"] == "fine_to_turn_ready_45"
+E           AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E             - fine_to_turn_ready_45
+E             ?                    ^^
+E             + fine_to_turn_ready_0
+E             ?                    ^
+
+src/mission_control/test/test_fine_turn_transition.py:114: AssertionError</failure></testcase><testcase classname="test.test_fine_turn_transition" name="test_queued_turn_waits_for_actual_fine_completion[FAILED]" time="0.001" /><testcase classname="test.test_fine_turn_transition" name="test_queued_turn_waits_for_actual_fine_completion[CANCELLED]" time="0.001" /><testcase classname="test.test_fine_turn_transition" name="test_walking_recovery_does_not_add_a_transition[BALL_APPROACH_RECOVER_LEFT_4]" time="0.001" /><testcase classname="test.test_fine_turn_transition" name="test_walking_recovery_does_not_add_a_transition[BALL_APPROACH_RECOVER_RIGHT_4]" time="0.002" /><testcase classname="test.test_fine_turn_transition" name="test_intervening_walk_discards_old_fine_pose" time="0.003"><failure message="AssertionError: assert ['ball_genera...ry_turn_left'] == ['ball_genera...ry_turn_left']&#10;  At index 1 diff: 'fine_to_turn_ready_0' != 'fine_to_turn_ready_45'&#10;  Full diff:&#10;    [&#10;     'ball_general_fine_forward_8',&#10;  -  'fine_to_turn_ready_45',&#10;  ?                      ^^&#10;  +  'fine_to_turn_ready_0',...&#10;  &#10;  ...Full output truncated (5 lines hidden), use '-vv' to show">def test_intervening_walk_discards_old_fine_pose():
+        bridge = FakeBridge()
+        for command_id, action in enumerate(("BALL_FINE_FORWARD_8", "STRAIGHT", "TURN_LEFT"), 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            complete_active_motion(bridge)
+&gt;       assert [r["motion_id"] for r in requests(bridge)] == [
+            "ball_general_fine_forward_8", "fine_to_turn_ready_45",
+            "line_forward_6", "stationary_turn_left",
+        ]
+E       AssertionError: assert ['ball_genera...ry_turn_left'] == ['ball_genera...ry_turn_left']
+E         At index 1 diff: 'fine_to_turn_ready_0' != 'fine_to_turn_ready_45'
+E         Full diff:
+E           [
+E            'ball_general_fine_forward_8',
+E         -  'fine_to_turn_ready_45',
+E         ?                      ^^
+E         +  'fine_to_turn_ready_0',...
+E         
+E         ...Full output truncated (5 lines hidden), use '-vv' to show
+
+src/mission_control/test/test_fine_turn_transition.py:137: AssertionError</failure></testcase><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[0-GOAL_CAMERA90_FINE_FORWARD_3-0.57]" time="0.002" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[0-GOAL_CAMERA90_FINE_FORWARD_3-0.6]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[0-GOAL_CAMERA90_FINE_FORWARD_3-0.849999]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[0-GOAL_CAMERA90_FINE_FORWARD_3-0.85]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[14.999-GOAL_CAMERA90_FINE_FORWARD_3-0.57]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[14.999-GOAL_CAMERA90_FINE_FORWARD_3-0.6]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[14.999-GOAL_CAMERA90_FINE_FORWARD_3-0.849999]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[14.999-GOAL_CAMERA90_FINE_FORWARD_3-0.85]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[15-GOAL_CAMERA90_FINE_FORWARD_3-0.57]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[15-GOAL_CAMERA90_FINE_FORWARD_3-0.6]" time="0.002" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[15-GOAL_CAMERA90_FINE_FORWARD_3-0.849999]" time="0.002" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[15-GOAL_CAMERA90_FINE_FORWARD_3-0.85]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[29.999-GOAL_CAMERA90_FINE_FORWARD_3-0.57]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[29.999-GOAL_CAMERA90_FINE_FORWARD_3-0.6]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[29.999-GOAL_CAMERA90_FINE_FORWARD_3-0.849999]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[29.999-GOAL_CAMERA90_FINE_FORWARD_3-0.85]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[30-GOAL_CAMERA90_TURN_RIGHT_3-0.57]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[30-GOAL_CAMERA90_TURN_RIGHT_3-0.6]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[30-GOAL_CAMERA90_TURN_RIGHT_3-0.849999]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[30-GOAL_CAMERA90_TURN_RIGHT_3-0.85]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[30.001-GOAL_CAMERA90_TURN_RIGHT_3-0.57]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[30.001-GOAL_CAMERA90_TURN_RIGHT_3-0.6]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[30.001-GOAL_CAMERA90_TURN_RIGHT_3-0.849999]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[30.001-GOAL_CAMERA90_TURN_RIGHT_3-0.85]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[45-GOAL_CAMERA90_TURN_RIGHT_5-0.57]" time="0.002" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[45-GOAL_CAMERA90_TURN_RIGHT_5-0.6]" time="0.002" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[45-GOAL_CAMERA90_TURN_RIGHT_5-0.849999]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[45-GOAL_CAMERA90_TURN_RIGHT_5-0.85]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-7.999-GOAL_CAMERA90_FINE_FORWARD_3-0.57]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-7.999-GOAL_CAMERA90_FINE_FORWARD_3-0.6]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-7.999-GOAL_CAMERA90_FINE_FORWARD_3-0.849999]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-7.999-GOAL_CAMERA90_FINE_FORWARD_3-0.85]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-8-GOAL_CAMERA90_FINE_FORWARD_3-0.57]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-8-GOAL_CAMERA90_FINE_FORWARD_3-0.6]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-8-GOAL_CAMERA90_FINE_FORWARD_3-0.849999]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-8-GOAL_CAMERA90_FINE_FORWARD_3-0.85]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-29.999-GOAL_CAMERA90_FINE_FORWARD_3-0.57]" time="0.002" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-29.999-GOAL_CAMERA90_FINE_FORWARD_3-0.6]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-29.999-GOAL_CAMERA90_FINE_FORWARD_3-0.849999]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-29.999-GOAL_CAMERA90_FINE_FORWARD_3-0.85]" time="0.002" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-30-GOAL_CAMERA90_TURN_LEFT_2-0.57]" time="0.002" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-30-GOAL_CAMERA90_TURN_LEFT_2-0.6]" time="0.002" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-30-GOAL_CAMERA90_TURN_LEFT_2-0.849999]" time="0.002" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-30-GOAL_CAMERA90_TURN_LEFT_2-0.85]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-30.001-GOAL_CAMERA90_TURN_LEFT_2-0.57]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-30.001-GOAL_CAMERA90_TURN_LEFT_2-0.6]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-30.001-GOAL_CAMERA90_TURN_LEFT_2-0.849999]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-30.001-GOAL_CAMERA90_TURN_LEFT_2-0.85]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-45-GOAL_CAMERA90_TURN_LEFT_3-0.57]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-45-GOAL_CAMERA90_TURN_LEFT_3-0.6]" time="0.002" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-45-GOAL_CAMERA90_TURN_LEFT_3-0.849999]" time="0.002" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_turns_by_backboard_bearing_before_advancing[-45-GOAL_CAMERA90_TURN_LEFT_3-0.85]" time="0.002" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_waits_for_valid_consistent_bearing[changes0]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_waits_for_valid_consistent_bearing[changes1]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_waits_for_valid_consistent_bearing[changes2]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_waits_for_valid_consistent_bearing[changes3]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_approach_waits_for_valid_consistent_bearing[changes4]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_fine_step_rechecks_turn_then_requires_fresh_view_before_advancing[30-200-GOAL_CAMERA90_TURN_RIGHT_3]" time="0.006" /><testcase classname="test.test_goal_fine_approach" name="test_fine_step_rechecks_turn_then_requires_fresh_view_before_advancing[-30--200-GOAL_CAMERA90_TURN_LEFT_2]" time="0.005" /><testcase classname="test.test_goal_fine_approach" name="test_just_above_850mm_still_uses_target_steering[0-GOAL_CAMERA_90_FORWARD_2]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_just_above_850mm_still_uses_target_steering[30-GOAL_CAMERA90_RECOVER_RIGHT_4]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_just_above_850mm_still_uses_target_steering[-30-GOAL_CAMERA90_RECOVER_LEFT_4]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_just_above_850mm_still_uses_target_steering[45-GOAL_CAMERA90_TURN_RIGHT_5]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_goal_walks_keep_posture_transition_without_pre_or_post_pause[goal_camera_90_forward_4-GOAL_CAMERA90_FINE_FORWARD_3-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_goal_fine_approach" name="test_goal_walks_keep_posture_transition_without_pre_or_post_pause[line_recovery_left_4-GOAL_CAMERA90_FINE_FORWARD_3-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_goal_fine_approach" name="test_goal_walks_keep_posture_transition_without_pre_or_post_pause[line_recovery_right_4-GOAL_CAMERA90_FINE_FORWARD_3-pickup_fine_prepare]" time="0.002" /><testcase classname="test.test_goal_fine_approach" name="test_goal_walks_keep_posture_transition_without_pre_or_post_pause[goal_camera_90_fine_forward_3-GOAL_CAMERA_90_FORWARD_2-fine_to_turn_ready_90]" time="0.002" /><testcase classname="test.test_goal_fine_approach" name="test_goal_walks_keep_posture_transition_without_pre_or_post_pause[goal_camera_90_fine_forward_3-GOAL_CAMERA90_RECOVER_LEFT_4-fine_to_turn_ready_90]" time="0.002" /><testcase classname="test.test_goal_fine_approach" name="test_goal_walks_keep_posture_transition_without_pre_or_post_pause[goal_camera_90_fine_forward_3-GOAL_CAMERA90_RECOVER_RIGHT_4-fine_to_turn_ready_90]" time="0.002" /><testcase classname="test.test_goal_fine_approach" name="test_failed_goal_posture_transition_never_starts_next_walk[FAILED]" time="0.002" /><testcase classname="test.test_goal_fine_approach" name="test_failed_goal_posture_transition_never_starts_next_walk[TIMEOUT]" time="0.002" /><testcase classname="test.test_goal_fine_approach" name="test_failed_goal_posture_transition_never_starts_next_walk[REJECTED]" time="0.002" /><testcase classname="test.test_goal_fine_approach" name="test_failed_goal_posture_transition_never_starts_next_walk[CANCELLED]" time="0.001" /><testcase classname="test.test_goal_fine_approach" name="test_850mm_handoff_reserves_fine_step_and_executes_without_extra_pause[0]" time="0.004" /><testcase classname="test.test_goal_fine_approach" name="test_850mm_handoff_reserves_fine_step_and_executes_without_extra_pause[-30]" time="0.004" /><testcase classname="test.test_goal_fine_approach" name="test_850mm_handoff_reserves_fine_step_and_executes_without_extra_pause[30]" time="0.003" /><testcase classname="test.test_goal_fine_approach" name="test_fine_step_to_fine_step_is_queued_without_a_dwell" time="0.002" /><testcase classname="test.test_catalog62_fine_motions" name="test_only_requested_gaits_added_and_all_source_fields_preserved[robot_motions_pc.json]" time="0.036" /><testcase classname="test.test_catalog62_fine_motions" name="test_only_requested_gaits_added_and_all_source_fields_preserved[robot_motions_runtime.json]" time="0.039" /><testcase classname="test.test_catalog62_fine_motions" name="test_aliases_change_only_requested_fine_gaits" time="0.057" /><testcase classname="test.test_catalog62_fine_motions" name="test_capture_duration_matches_scaled_runtime[BALL_APPROACH_FINE_FORWARD_5]" time="0.035" /><testcase classname="test.test_catalog62_fine_motions" name="test_capture_duration_matches_scaled_runtime[GOAL_CAMERA90_FINE_FORWARD_1]" time="0.034" /><testcase classname="test.test_catalog62_fine_motions" name="test_capture_duration_matches_scaled_runtime[GOAL_CAMERA90_FINE_FORWARD_2]" time="0.034" /><testcase classname="test.test_catalog62_fine_motions" name="test_capture_duration_matches_scaled_runtime[GOAL_CAMERA90_FINE_FORWARD_3]" time="0.035" /><testcase classname="test.test_catalog62_fine_motions" name="test_capture_duration_matches_scaled_runtime[GOAL_CAMERA90_FINE_FORWARD_4]" time="0.035" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[-50.0-0.600001]" time="0.002" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[-50.0-0.8]" time="0.001" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[-50.0-0.800001]" time="0.001" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[-50.0-1.5]" time="0.001" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[-30.0-0.600001]" time="0.001" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[-30.0-0.8]" time="0.001" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[-30.0-0.800001]" time="0.001" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[-30.0-1.5]" time="0.002" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[0.0-0.600001]" time="0.001" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[0.0-0.8]" time="0.001" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[0.0-0.800001]" time="0.001" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[0.0-1.5]" time="0.001" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[15.0-0.600001]" time="0.001" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[15.0-0.8]" time="0.001" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[15.0-0.800001]" time="0.001" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[15.0-1.5]" time="0.001" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[30.0-0.600001]" time="0.001" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[30.0-0.8]" time="0.001" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[30.0-0.800001]" time="0.001" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[30.0-1.5]" time="0.001" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[50.0-0.600001]" time="0.001" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[50.0-0.8]" time="0.001" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[50.0-0.800001]" time="0.001" /><testcase classname="test.test_catalog62_fine_motions" name="test_far_ball_line_and_ground_policy_is_unchanged[50.0-1.5]" time="0.002" /><testcase classname="test.test_catalog62_fine_motions" name="test_generic_fine_action_routes_to_its_own_mission[ball-ball_general_fine_forward_8]" time="0.002" /><testcase classname="test.test_catalog62_fine_motions" name="test_generic_fine_action_routes_to_its_own_mission[hurdle-hurdle_fine_forward_5]" time="0.001" /><testcase classname="test.test_catalog62_fine_motions" name="test_hurdle_new_fine_id_retains_posture_transition_handling" time="0.001" /></testsuite></testsuites>

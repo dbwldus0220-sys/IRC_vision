@@ -2723,8 +2723,8 @@ def test_ball_callback_latches_valid_pickup_entry_during_ball_motion():
             "detected": True,
             "confidence": 0.95,
             "depth_valid": True,
-            "depth_m": 0.55,
-            "distance_m": 0.55,
+            "depth_m": 0.50,
+            "distance_m": 0.50,
             "depth_age_sec": 0.05,
         }
     )
@@ -2946,7 +2946,7 @@ def test_ball_turn_rechecks_new_angle_after_dwell_without_forced_forward(
         )
 
     clock[0] += 0.1
-    receive_ball(angle, distance=0.55)
+    receive_ball(angle, distance=0.50)
     MotionDecisionNode._publish_decision(node)
     assert json.loads(node.publisher.messages[-1].data)["action"] == "PICKUP_NOW"
 
@@ -3078,9 +3078,9 @@ def test_pickup_loss_reacquisition_reuses_camera_down_heading_planner(
         (0.670, "STRAIGHT"),
         (0.571, "STRAIGHT"),
         (0.570, "STRAIGHT"),
-        (0.551, "STRAIGHT"),
-        (0.550, "STRAIGHT_0"),
-        (0.549, "STRAIGHT_0"),
+        (0.501, "STRAIGHT"),
+        (0.500, "STRAIGHT_0"),
+        (0.499, "STRAIGHT_0"),
         (0.470, "STRAIGHT_0"),
     ],
 )
@@ -3236,14 +3236,14 @@ def test_post_ball_transition_requires_fresh_goal_without_an_extra_dwell(monkeyp
     assert node.general_motion_gate.required_vision_generation == 6
 
 
-def test_550mm_entry_during_general_settle_preserves_motion_dwell():
+def test_500mm_entry_during_general_settle_preserves_motion_dwell():
     node = FreshMockInputNode()
     node.ball_post_motion_dwell_until = 20.0
     node.ball_approach_alignment_pending = True
 
     MotionDecisionNode._latch_ball_pickup_entry(
         node,
-        ball_info_for_node(distance_m=0.550),
+        ball_info_for_node(distance_m=0.500),
     )
 
     assert node.ball_pickup_entry_pending is True
@@ -4773,9 +4773,9 @@ def test_shot_rest_survives_candidate_changes_without_actual_motion(overrides):
 
 
 @pytest.mark.parametrize("distance,pickup_expected", [
-    (0.549, True), (0.550, True), (0.550001, False), (0.570, False),
+    (0.499, True), (0.500, True), (0.500001, False), (0.570, False),
 ])
-def test_ball_pickup_entry_uses_550mm_boundary(distance, pickup_expected):
+def test_ball_pickup_entry_uses_500mm_boundary(distance, pickup_expected):
     node = FreshMockInputNode()
     MotionDecisionNode._latch_ball_pickup_entry(
         node, ball_info_for_node(distance_m=distance),

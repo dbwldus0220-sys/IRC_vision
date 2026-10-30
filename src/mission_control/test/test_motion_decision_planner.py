@@ -201,7 +201,7 @@ def test_actual_ball_publisher_payload_contract():
             ball=vision_ball_payload(
                 depth_m=0.40,
                 ground_distance_m=0.15,
-                distance_m=0.55,
+                distance_m=0.50,
                 pickup_ready=True,
                 pickup_now=True,
             )
@@ -2214,7 +2214,7 @@ def test_pickup_initial_alignment_selects_fine_step_from_distance():
 def test_pickup_fine_forward_accepts_inclusive_robot_dx_window(offset_px):
     decision = MotionDecisionPlanner().plan_ball_pickup_initial_alignment(
         ball_info(
-            distance_m=0.550,
+            distance_m=0.500,
             offset_x_px=offset_px,
             bottom_distance_px=200,
             steering_angle_deg=0.0,
@@ -2272,7 +2272,7 @@ def test_close_pickup_alignment_uses_only_crab(offset_px, expected_action, botto
 def test_close_centered_pickup_does_not_use_stationary_turn():
     decision = MotionDecisionPlanner().plan_ball_pickup_initial_alignment(
         ball_info(
-            distance_m=0.550,
+            distance_m=0.500,
             offset_x_px=70,
             bottom_distance_px=100,
             steering_angle_deg=35.0,
@@ -2372,8 +2372,8 @@ def test_lost_ball_alignment_does_not_turn_from_image_half_memory(
     ("distance_m", "expected_motion"),
     [
         (0.670, "STRAIGHT"), (0.571, "STRAIGHT"),
-        (0.570, "STRAIGHT"), (0.551, "STRAIGHT"),
-        (0.550, "STRAIGHT_0"), (0.549, "STRAIGHT_0"),
+        (0.570, "STRAIGHT"), (0.501, "STRAIGHT"),
+        (0.500, "STRAIGHT_0"), (0.499, "STRAIGHT_0"),
         (0.470, "STRAIGHT_0"), (0.10, "STRAIGHT_0"),
     ],
 )

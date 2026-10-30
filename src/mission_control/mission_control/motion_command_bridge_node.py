@@ -11,6 +11,8 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 
+from .pickup_walk_reservation import PICKUP_WALK_DURATIONS, pickup_walk_motion
+
 from .safety_interlock import RECOVERABLE_MOTOR_ERROR_CODES
 from .pickup_grasp_selection import pickup_grasp_motion_id
 
@@ -337,7 +339,8 @@ class MotionCommandBridgeNode(Node):
     }
     FINE_FORWARD_MOTION_IDS = frozenset({
         "ball_approach_fine_forward_45_5",
-        "ball_general_fine_forward_8", "pickup_fine_forward_0", HURDLE_FINAL_FINE_MOTION_ID,
+        "ball_general_fine_forward_8", "pickup_fine_forward_0", "hurdle_fine_forward_5",
+        HURDLE_FINAL_FINE_MOTION_ID,
         "ball_top_loss_fine_forward_45_3", "pickup_top_loss_fine_forward_0_3",
         *(f"goal_camera_90_fine_forward_{count}" for count in range(1, 5)),
     })
@@ -392,6 +395,7 @@ class MotionCommandBridgeNode(Node):
         self.pickup_last_stage_succeeded = True
         self.pending_pickup_crab_motion_id = None
         self.pending_pickup_fine_motion_id: str | None = None
+        self.pickup_queued_request: dict[str, Any] | None = None
         self.pickup_positioning_dwell_motion_id: str | None = None
         self.queued_command_id: int | None = None
         self.queued_event_id: int | None = None
@@ -523,6 +527,17 @@ class MotionCommandBridgeNode(Node):
             "source_node": "motion_command_bridge_node",
             "motion_in_progress": self.motion_in_progress,
         }
+        if (action == "PICKUP_NOW" and status == "RUNNING"
+                and motion_id in PICKUP_WALK_DURATIONS
+                and motion_id == self.active_motion_id
+                and self.pending_turn_request is None and self.transition_motion_id is None
+                and self.active_dwell_until is None
+                and not self.pickup_fixed_sequence_started
+                and (self.pickup_initial_align_correction_active or self.pickup_fine_align_correction_active)):
+            payload["pickup_alignment_stage"] = (
+                "initial" if self.pickup_initial_align_correction_active
+                and not self.pickup_fine_positioning_complete else "fine"
+            )
         if completed_motion_id is not None:
             payload["completed_motion_id"] = completed_motion_id
         if verification_window_complete is not None:
@@ -850,6 +865,77 @@ class MotionCommandBridgeNode(Node):
             timeout_ms=self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS,
         )
 
+    def _handle_pickup_walk_prequeue(self, payload: dict[str, Any]) -> None:
+        """Keep the parent pickup locked while reserving one identical gait."""
+        command = payload.get("source_command") or {}
+        motion_id = pickup_walk_motion(payload["action"], self.active_motion_id)
+        if (payload["command_id"] in {self.last_sent_command_id, self.active_request_id}
+                or payload.get("source") != "ball"
+                or not self.motion_in_progress or self.active_action != "PICKUP_NOW"
+                or payload.get("active_special_command_id") != self.active_command_id
+                or payload.get("active_special_event_id") != self.active_event_id
+                or command.get("pickup_running_request_id") != self.active_request_id
+                or motion_id is None or motion_id != self.active_motion_id
+                or command.get("pickup_queue_motion_id") != motion_id
+                or type(command.get("pickup_queue_frame_count")) is not int
+                or command["pickup_queue_frame_count"] < 3
+                or getattr(self, "pickup_queued_request", None) is not None
+                or self.queued_request_id is not None
+                or self.pickup_fixed_sequence_started or self.pickup_positioning_loss_pending
+                or self.active_dwell_until is not None or self.transition_dwell_until is not None
+                or self.pending_turn_request is not None
+                or self.pickup_initial_align_waiting or self.pickup_fine_align_waiting
+                or not (self.pickup_initial_align_correction_active or self.pickup_fine_align_correction_active)):
+            self._publish_local_rejection(
+                status="REJECTED", command_id=payload["command_id"], event_id=payload.get("event_id"),
+                action=payload["action"], error_code="PICKUP_QUEUE_NOT_AVAILABLE",
+                message="only one identical running pickup gait can be reserved",
+            )
+            return
+        request = dict(action="PICKUP_NOW", command_id=self.active_command_id,
+                       event_id=self.active_event_id, request_id=payload["command_id"],
+                       motion_id=motion_id, timeout_ms=self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS)
+        self.pickup_queued_request = {**request, "reservation_action": payload["action"]}
+        self.last_sent_command_id = payload["command_id"]
+        # The SDK validates the actual motion's repeatability/entry compatibility.
+        # No preparation or second pickup sequence may be inserted here.
+        self._send_executor_payload(request)
+
+    def _handle_pickup_queue_status(self, payload: dict[str, Any]) -> bool:
+        """Consume queue bookkeeping without completing the parent pickup."""
+        queued = getattr(self, "pickup_queued_request", None)
+        if queued is None:
+            return False
+        if payload["request_id"] == queued["request_id"]:
+            if (payload["command_id"] != queued["command_id"]
+                    or payload["event_id"] != queued["event_id"]
+                    or payload["motion_id"] != queued["motion_id"]):
+                return True
+            if payload["status"] in self.TERMINAL_STATUSES:
+                self.pickup_queued_request = None
+                self._publish_local_rejection(
+                    status="REJECTED", command_id=queued["request_id"], event_id=None,
+                    action=queued["reservation_action"],
+                    error_code=payload["error_code"] or "PICKUP_QUEUE_REJECTED",
+                    message=payload["message"],
+                )
+            return True
+        if payload["request_id"] != self.active_request_id or payload["motion_id"] != self.active_motion_id:
+            return False
+        if payload["status"] == "SUCCEEDED":
+            self.last_physical_motion_id = self.active_motion_id
+            self.last_pickup_motion_id = self.active_motion_id
+            self.pickup_last_stage_succeeded = True
+            self.pickup_consecutive_motor_failures = 0
+            self.active_request_id = queued["request_id"]
+            self.pickup_queued_request = None
+            # The SDK next emits RUNNING with the new request ID. Keep checkpoint
+            # flags and sequence position: this is still the same pickup step.
+            return True
+        if payload["status"] in self.TERMINAL_STATUSES:
+            self.pickup_queued_request = None
+        return False
+
     def _handle_pickup_fine_align_command(
         self,
         *,
@@ -1129,14 +1215,16 @@ class MotionCommandBridgeNode(Node):
                 or time.monotonic() - self.head_override_received_at > 1.0):
             state = {}
         if (state.get("goal_head_override_active") is True
-                or motion_id.startswith("goal_camera_90_") or goal_fine_to_recovery):
+                or motion_id.startswith("goal_camera_90_") or goal_fine_to_recovery
+                or (self._is_stationary_turn(motion_id)
+                    and (self.last_physical_motion_id or "").startswith("goal_camera_90_fine_forward_"))):
             return "fine_to_turn_ready_90"
         if (state.get("ball_head_override_active") is True
                 or state.get("hurdle_head_override_active") is True
                 or motion_id.startswith("pickup_camera_down_turn_")
                 or self.last_physical_motion_id in {
                     "ball_general_fine_forward_8", "ball_top_loss_fine_forward_45_3",
-                    "pickup_fine_forward_0", self.HURDLE_FINAL_FINE_MOTION_ID,
+                    "pickup_fine_forward_0", "hurdle_fine_forward_5", self.HURDLE_FINAL_FINE_MOTION_ID,
                     "pickup_top_loss_fine_forward_0_3",
                 }):
             return "fine_to_turn_ready_0"
@@ -1173,6 +1261,10 @@ class MotionCommandBridgeNode(Node):
         self, action: str, motion_id: str, request_id: int | None = None,
     ) -> bool:
         """Keep interpolation, but omit timed-Goal entry and Goal walking pauses."""
+        # Turning out of the Goal fine stance always needs both support-change holds.
+        if (self._is_stationary_turn(motion_id)
+                and (self.last_physical_motion_id or "").startswith("goal_camera_90_fine_forward_")):
+            return False
         if (request_id is not None
                 and request_id == getattr(self, "goal_handoff_command_id", None)
                 and action.startswith("GOAL_")):
@@ -1229,6 +1321,7 @@ class MotionCommandBridgeNode(Node):
             prepare_pickup_fine
             and action == "PICKUP_NOW"
             and motion_id in {"pickup_fine_forward_0", "pickup_top_loss_fine_forward_0_3"}
+            and self.last_physical_motion_id not in self.FINE_FORWARD_MOTION_IDS
         ):
             # Keep the existing checkpoint/sequence pending until both motions finish.
             self.pending_pickup_fine_motion_id = motion_id
@@ -1380,6 +1473,11 @@ class MotionCommandBridgeNode(Node):
                 event_id=event_id,
                 payload=payload,
             )
+            return
+
+        if (isinstance(payload.get("source_command"), dict)
+                and payload["source_command"].get("pickup_walk_prequeue") is True):
+            self._handle_pickup_walk_prequeue(payload)
             return
 
         if action in self.PICKUP_FINE_ALIGN_ACTIONS:
@@ -1562,10 +1660,10 @@ class MotionCommandBridgeNode(Node):
         elif payload.get("source") in ("ball", "hurdle") and action in {
             "STRAIGHT", "STRAIGHT_0",
         }:
-            # Ball and Hurdle fine approach both resolve to the camera-0 gait.
+            # Each mission uses its own camera-0 fine gait.
             motion_id = (
                 "line_forward_4" if action == "STRAIGHT"
-                else "pickup_fine_forward_0" if payload.get("source") == "hurdle"
+                else "hurdle_fine_forward_5" if payload.get("source") == "hurdle"
                 else "ball_general_fine_forward_8"
             )
         else:
@@ -1955,6 +2053,7 @@ class MotionCommandBridgeNode(Node):
     def _clear_active_request(self) -> None:
         """Release the bridge after a terminal executor status."""
         self.pending_pickup_fine_motion_id = None
+        self.pickup_queued_request = None
         self.motion_in_progress = False
         self.pending_turn_request = None
         self.turn_prepare_motion_id = None
@@ -2061,6 +2160,14 @@ class MotionCommandBridgeNode(Node):
             self.get_logger().info(
                 "Executor status ignored: bridge has no active request"
             )
+            return
+        pickup_queue_failed = bool(
+            getattr(self, "pickup_queued_request", None) is not None
+            and payload["request_id"] == self.active_request_id
+            and payload["status"] in self.TERMINAL_STATUSES
+            and payload["status"] != "SUCCEEDED"
+        )
+        if self._handle_pickup_queue_status(payload):
             return
         is_active = payload["request_id"] == self.active_request_id
         is_queued = payload["request_id"] == self.queued_request_id
@@ -2172,6 +2279,7 @@ class MotionCommandBridgeNode(Node):
         if (
             is_active
             and action == "PICKUP_NOW"
+            and not pickup_queue_failed
             and payload["motion_id"] != "post_ball_camera_90"
             and payload["motion_id"] != "ball_lost_camera_down_backward_2"
             and payload["motion_id"] != self.PICKUP_FINE_PREPARE_MOTION_ID

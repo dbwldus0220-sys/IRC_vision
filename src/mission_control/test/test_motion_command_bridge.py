@@ -151,6 +151,7 @@ class FakeBridge:
         self.pickup_last_stage_succeeded = True
         self.pending_pickup_crab_motion_id = None
         self.pending_pickup_fine_motion_id = None
+        self.pickup_queued_request = None
         self.pickup_positioning_dwell_motion_id = None
         self.queued_command_id = None
         self.queued_event_id = None
@@ -173,6 +174,8 @@ class FakeBridge:
             "_handle_pickup_initial_align_command",
             "_enter_pickup_fine_align_checkpoint",
             "_handle_pickup_fine_align_command",
+            "_handle_pickup_walk_prequeue",
+            "_handle_pickup_queue_status",
             "_enter_pickup_positioning_loss_reacquisition",
             "_handle_pickup_positioning_loss_latch",
             "_enter_pickup_post_backward_align_checkpoint",
@@ -1949,6 +1952,7 @@ def test_pickup_distance_approach_skips_preparation_and_waits_for_fine_alignment
 def test_pickup_fine_preparation_must_finish_before_pre_grasp_fine_forward():
     bridge = FakeBridge()
     enter_pickup_fine_alignment(bridge)
+    bridge.last_physical_motion_id = "pickup_crab_right_0"  # A real support-posture change.
     start = len(bridge.executor_request_publisher.messages)
     bridge.navigation_command_callback(fine_alignment_message("BALL_PICKUP_FINE_FORWARD"))
     requests = decoded_messages(bridge.executor_request_publisher)[start:]
@@ -1983,6 +1987,7 @@ def test_pickup_fine_preparation_must_finish_before_pre_grasp_fine_forward():
 def test_pickup_fine_preparation_failure_never_starts_fine_motion(status, error_code):
     bridge = FakeBridge()
     enter_pickup_fine_alignment(bridge)
+    bridge.last_physical_motion_id = "pickup_crab_right_0"  # A real support-posture change.
     start = len(bridge.executor_request_publisher.messages)
     bridge.navigation_command_callback(fine_alignment_message("BALL_PICKUP_FINE_FORWARD"))
     complete_active_motion(bridge, status, error_code)
@@ -2036,7 +2041,7 @@ def test_fine_forward_success_requires_another_checkpoint_before_grab():
     bridge.navigation_command_callback(
         fine_alignment_message("BALL_PICKUP_FINE_FORWARD")
     )
-    complete_pickup_fine_preparation(bridge)
+    assert bridge.active_dwell_until is None
     request = decoded_messages(bridge.executor_request_publisher)[-1]
     assert request["motion_id"] == "pickup_fine_forward_0"
     assert request["action"] == "PICKUP_NOW"
@@ -2076,7 +2081,7 @@ def test_pickup_distance_decisions_repeat_fine_then_crab_then_backward():
         bridge.navigation_command_callback(
             fine_alignment_message(decision.action, command_id=command_id)
         )
-        complete_pickup_fine_preparation(bridge)
+        assert bridge.active_dwell_until is None
         requests = decoded_messages(bridge.executor_request_publisher)
         assert requests[-1]["motion_id"] == "pickup_fine_forward_0"
         complete_pickup_motion_and_dwell(bridge, "pickup_fine_forward_0")
@@ -2499,15 +2504,7 @@ def test_pickup_top_loss_fine_forward_returns_to_same_checkpoint(stage):
         f"BALL_PICKUP_{stage}_SEARCH_FORWARD"
     ))
     motion = "pickup_top_loss_fine_forward_0_3" if stage == "FINE" else "ball_top_loss_fine_forward_45_3"
-    if stage == "FINE":
-        assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == "pickup_fine_prepare"
-        bridge.executor_status_callback(executor_status(
-            status="SUCCEEDED", motion_id="pickup_fine_prepare",
-        ))
-        assert bridge.active_dwell_until is not None
-        bridge._check_atomic_dwell(bridge.active_dwell_until - .001)
-        assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == "pickup_fine_prepare"
-        bridge._check_atomic_dwell(bridge.active_dwell_until)
+    assert bridge.active_dwell_until is None
     assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == motion
     bridge.executor_status_callback(executor_status(status="SUCCEEDED", motion_id=motion))
     count = len(bridge.executor_request_publisher.messages)
@@ -2543,6 +2540,7 @@ def test_centered_pickup_starts_backward_without_repeating_fine_steps(earlier_fi
 def test_nonrecoverable_fine_correction_failure_never_starts_backward(failed_motion):
     bridge = FakeBridge()
     enter_pickup_fine_alignment(bridge)
+    bridge.last_physical_motion_id = "pickup_crab_right_0"  # A real support-posture change.
     bridge.navigation_command_callback(fine_alignment_message('BALL_PICKUP_FINE_FORWARD'))
     if failed_motion == 'pickup_fine_forward_0':
         complete_pickup_fine_preparation(bridge)
@@ -2858,14 +2856,17 @@ def test_pickup_crab_uses_latest_motion_for_preparation(intervening, direction):
     assert bridge.active_motion_id == f"pickup_crab_{direction.lower()}_0"
 
 
-@pytest.mark.parametrize("source", ["ball", "hurdle"])
-@pytest.mark.parametrize("distance,action,motion_name", [
-    (0.549, "STRAIGHT_0", "r미세0도"),
-    (0.550, "STRAIGHT_0", "r미세0도"),
-    (0.550001, "STRAIGHT", "R전진45도(4회)"),
-    (0.570, "STRAIGHT", "R전진45도(4회)"),
-    (0.700, "STRAIGHT", "R전진45도(4회)"),
-    (0.700001, "STRAIGHT", "R전진45도(4회)"),
+@pytest.mark.parametrize("source,distance,action,motion_name", [
+    ("ball", 0.499, "STRAIGHT_0", "r미세0도 공잡기용"),
+    ("ball", 0.500, "STRAIGHT_0", "r미세0도 공잡기용"),
+    *[("ball", distance, "BALL_APPROACH_FINE_FORWARD_5", "r미세45도")
+      for distance in (0.500001, 0.550, 0.570, 0.600)],
+    *[("ball", distance, "STRAIGHT", "R전진45도(4회)")
+      for distance in (0.600001, 0.700, 0.700001)],
+    # Hurdle keeps its existing range policy, independently of Ball's new boundary.
+    *[("hurdle", distance, "STRAIGHT_0", "r미세 0도 허들용")
+      for distance in (0.549, 0.550, 0.550001, 0.570, 0.700)],
+    ("hurdle", 0.700001, "STRAIGHT", "R전진45도(4회)"),
 ])
 def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
     source, distance, action, motion_name,
@@ -2891,13 +2892,8 @@ def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
     decision = planner.plan("AUTO", {source: sample, "line": route}, 0.1)
     if source == "hurdle":
         assert decision.source == "hurdle"
-        motion_name = "r미세0도" if distance <= 0.700 else "R전진45도(4회)"
-        action = "STRAIGHT_0" if distance <= 0.700 else action
-    elif .550 < distance <= .600:
-        action = "BALL_APPROACH_FINE_FORWARD_5"
-        motion_name = "R미세(5회)"
     bridge = FakeBridge()
-    if source == "ball" and distance <= 0.550:
+    if source == "ball" and distance <= 0.500:
         assert decision.action == "PICKUP_NOW"
         bridge.navigation_command_callback(navigation_message(action="PICKUP_NOW"))
         assert_pickup_initial_alignment_started(bridge)
@@ -2946,7 +2942,7 @@ def test_hurdle_fine_center_error_never_dispatches_turn(error, count, turn_angle
         source=decision.source, action=decision.action,
         source_command=decision.source_command,
     ))
-    assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == "pickup_fine_forward_0"
+    assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == "hurdle_fine_forward_5"
 
 
 @pytest.mark.parametrize("error,bottom,depth,expected", [
@@ -3055,9 +3051,9 @@ def test_hurdle_final_sequence_waits_until_current_motion_finishes():
 
 
 @pytest.mark.parametrize("depth,motion_id", [
-    (0.550, "pickup_fine_forward_0"),
-    (0.550001, "pickup_fine_forward_0"), (0.7, "pickup_fine_forward_0"),
-    (0.700001, "pickup_fine_forward_0"),
+    (0.550, "hurdle_fine_forward_5"),
+    (0.550001, "hurdle_fine_forward_5"), (0.7, "hurdle_fine_forward_5"),
+    (0.700001, "hurdle_fine_forward_5"),
 ])
 @pytest.mark.parametrize("angle", [None, 20.0])
 def test_close_hurdle_valid_depth_selects_actual_motion_without_turning(depth, motion_id, angle):

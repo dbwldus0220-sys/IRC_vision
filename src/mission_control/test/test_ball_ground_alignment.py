@@ -60,7 +60,7 @@ def test_general_approach_uses_ground_angle_and_fifteen_degree_boundary(angle, a
 
 
 @pytest.mark.parametrize("angle", [-45.0, 45.0])
-@pytest.mark.parametrize("distance", [0.4, 0.55])
+@pytest.mark.parametrize("distance", [0.4, 0.50])
 def test_close_distance_selects_pickup_instead_of_recover(angle, distance):
     decision = MotionDecisionPlanner().plan(
         "BALL_APPROACH",
@@ -143,9 +143,9 @@ def test_close_crab_still_uses_pixel_side_when_ground_heading_points_opposite():
     "plan_ball_pickup_fine_alignment",
 ])
 @pytest.mark.parametrize("depth,bottom,allowed", [
-    (0.55, 360.001, True), (0.55, 361, True), (0.4, 450, True),
-    (0.551, 450, False), (1.5, 450, False),
-    (0.55, 120, False), (0.4, 100, False),
+    (0.50, 360.001, True), (0.50, 361, True), (0.4, 450, True),
+    (0.501, 450, False), (1.5, 450, False),
+    (0.50, 120, False), (0.4, 100, False),
     (None, 300, False), (0.0, 300, False), (-0.1, 300, False),
     (float("nan"), 300, False), (0.5, None, False),
 ])

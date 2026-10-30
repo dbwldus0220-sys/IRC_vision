@@ -99,7 +99,7 @@ def test_hurdle_transition_preserves_one_second_pauses(clock, previous, target):
     finish_request(bridge)
     bridge.navigation_command_callback(navigation_message(source="hurdle", action=target, command_id=2))
     check_both_pauses(bridge, clock, "pickup_fine_prepare",
-                      "hurdle_fine_forward_10" if target == "GO" else "pickup_fine_forward_0")
+                      "hurdle_fine_forward_10" if target == "GO" else "hurdle_fine_forward_5")
 
 
 @pytest.mark.parametrize("status", ["FAILED", "TIMEOUT", "CANCELLED", "REJECTED"])

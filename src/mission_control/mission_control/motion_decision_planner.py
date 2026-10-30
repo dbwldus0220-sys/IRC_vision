@@ -9,7 +9,7 @@ import time
 from typing import Any
 
 from step.approach_distance import approach_level_from_motion
-from step.approach_distance import BALL_HURDLE_FINE_DISTANCE_M
+from step.approach_distance import BALL_PICKUP_DISTANCE_M
 from step.approach_distance import HURDLE_FINE_DISTANCE_M
 from step.approach_distance import ball_hurdle_approach_motion
 from step.ball_navigation_planner import BallNavigationConfig
@@ -68,7 +68,7 @@ class MotionDecisionConfig:
     curve_follow_max_offset_norm: float = 0.55
     ball_tracking_range_m: float = 1.5
     ball_control_range_m: float = 1.5
-    pickup_fine_step_distance_m: float = BALL_HURDLE_FINE_DISTANCE_M
+    pickup_fine_step_distance_m: float = BALL_PICKUP_DISTANCE_M
     pickup_fine_align_bottom_distance_px: int = 270
     ball_lost_stop_sec: float = 0.35
     ball_recovery_timeout_sec: float = 8.0
@@ -776,7 +776,7 @@ class MotionDecisionPlanner:
             angle = command.steering_error_deg
             if (
                 distance is not None
-                and BALL_HURDLE_FINE_DISTANCE_M < distance <= self.config.ball_control_range_m
+                and BALL_PICKUP_DISTANCE_M < distance <= self.config.ball_control_range_m
                 and angle is not None
                 and abs(angle) >= self.STATIONARY_TURN_MIN_DEG["RIGHT" if angle > 0.0 else "LEFT"]
             ):
@@ -1070,7 +1070,7 @@ class MotionDecisionPlanner:
             info.get("detected") is True
             and info.get("depth_valid") is True
             and depth is not None
-            and 0.0 < depth <= (BALL_HURDLE_FINE_DISTANCE_M if pickup else self.config.ball_control_range_m)
+            and 0.0 < depth <= (BALL_PICKUP_DISTANCE_M if pickup else self.config.ball_control_range_m)
             and depth_age is not None
             and 0.0 <= depth_age <= self.ball_planner.config.max_pickup_depth_age_sec
             and bottom is not None
