@@ -13,7 +13,7 @@ def visible(offset=400, depth=.6, **updates):
     return hurdle(depth, camera_center_offset_x_px=offset, **updates)
 
 
-@pytest.mark.parametrize("offset,direction,count", [(400, "RIGHT", 2), (-400, "LEFT", 1)])
+@pytest.mark.parametrize("offset,direction,count", [(400, "RIGHT", 1), (-400, "LEFT", 1)])
 def test_loss_repeats_small_stationary_turn_and_maps_to_catalog(offset, direction, count):
     planner = MotionDecisionPlanner()
     planner.plan("AUTO", {"hurdle": visible(offset)}, .1)
@@ -31,7 +31,9 @@ def test_loss_repeats_small_stationary_turn_and_maps_to_catalog(offset, directio
         assert requests[-1]["motion_id"] == f"post_ball_line_turn_{direction.lower()}_{count}"
 
 
-@pytest.mark.parametrize("angle,direction,count", [(12, "LEFT", 1), (-12, "RIGHT", 2)])
+@pytest.mark.parametrize("angle,direction,count", [(12, "LEFT", 1), (-15, "RIGHT", 1),
+                                                 (-60, "RIGHT", 6), (-75, "RIGHT", 7),
+                                                 (-90, "RIGHT", 9)])
 def test_reacquisition_aligns_parallel_before_near_go(angle, direction, count):
     planner = MotionDecisionPlanner()
     planner.plan("AUTO", {"hurdle": visible()}, .1)

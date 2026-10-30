@@ -1,0 +1,315 @@
+........................................................................ [ 11%]
+........................................................................ [ 23%]
+........................................................................ [ 35%]
+.................................................FFFF................... [ 47%]
+........................................................................ [ 59%]
+.......................................................................F [ 71%]
+..F............................F.F..F.F..............F.....FFF.......... [ 83%]
+.........FFF..F.......F............FFF.................................. [ 95%]
+............................                                             [100%]
+=================================== FAILURES ===================================
+_ test_launch_wires_enabled_default_and_rollback_to_decision_node[None-full_system] _
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:58: in get_package_prefix
+    content, package_prefix = get_resource('packages', package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/resources.py:86: in get_resource
+    raise LookupError(
+E   LookupError: Could not find the resource 'step' of type 'packages'
+
+During handling of the above exception, another exception occurred:
+src/mission_control/test/test_ball_entry_line_alignment.py:622: in test_launch_wires_enabled_default_and_rollback_to_decision_node
+    context = launch_context(description, overrides)
+src/mission_control/test/test_full_system_launch.py:49: in launch_context
+    entity.execute(context)
+/opt/ros/humble/lib/python3.10/site-packages/launch/actions/declare_launch_argument.py:215: in execute
+    perform_substitutions(context, self.default_value)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:85: in perform
+    path_components = [
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:86: in <listcomp>
+    perform_substitutions(context, component_substitutions)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:80: in perform
+    result = self.find(package)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:113: in find
+    return get_package_share_directory(package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:80: in get_package_share_directory
+    path = os.path.join(get_package_prefix(package_name), 'share', package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:60: in get_package_prefix
+    raise PackageNotFoundError(
+E   ament_index_python.packages.PackageNotFoundError: "package 'step' not found, searching: ['/opt/ros/humble']"
+_ test_launch_wires_enabled_default_and_rollback_to_decision_node[None-full_system_robot] _
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:58: in get_package_prefix
+    content, package_prefix = get_resource('packages', package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/resources.py:86: in get_resource
+    raise LookupError(
+E   LookupError: Could not find the resource 'step' of type 'packages'
+
+During handling of the above exception, another exception occurred:
+src/mission_control/test/test_ball_entry_line_alignment.py:622: in test_launch_wires_enabled_default_and_rollback_to_decision_node
+    context = launch_context(description, overrides)
+src/mission_control/test/test_full_system_launch.py:49: in launch_context
+    entity.execute(context)
+/opt/ros/humble/lib/python3.10/site-packages/launch/actions/declare_launch_argument.py:215: in execute
+    perform_substitutions(context, self.default_value)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:85: in perform
+    path_components = [
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:86: in <listcomp>
+    perform_substitutions(context, component_substitutions)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:80: in perform
+    result = self.find(package)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:113: in find
+    return get_package_share_directory(package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:80: in get_package_share_directory
+    path = os.path.join(get_package_prefix(package_name), 'share', package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:60: in get_package_prefix
+    raise PackageNotFoundError(
+E   ament_index_python.packages.PackageNotFoundError: "package 'step' not found, searching: ['/opt/ros/humble']"
+_ test_launch_wires_enabled_default_and_rollback_to_decision_node[false-full_system] _
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:58: in get_package_prefix
+    content, package_prefix = get_resource('packages', package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/resources.py:86: in get_resource
+    raise LookupError(
+E   LookupError: Could not find the resource 'step' of type 'packages'
+
+During handling of the above exception, another exception occurred:
+src/mission_control/test/test_ball_entry_line_alignment.py:622: in test_launch_wires_enabled_default_and_rollback_to_decision_node
+    context = launch_context(description, overrides)
+src/mission_control/test/test_full_system_launch.py:49: in launch_context
+    entity.execute(context)
+/opt/ros/humble/lib/python3.10/site-packages/launch/actions/declare_launch_argument.py:215: in execute
+    perform_substitutions(context, self.default_value)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:85: in perform
+    path_components = [
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:86: in <listcomp>
+    perform_substitutions(context, component_substitutions)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:80: in perform
+    result = self.find(package)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:113: in find
+    return get_package_share_directory(package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:80: in get_package_share_directory
+    path = os.path.join(get_package_prefix(package_name), 'share', package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:60: in get_package_prefix
+    raise PackageNotFoundError(
+E   ament_index_python.packages.PackageNotFoundError: "package 'step' not found, searching: ['/opt/ros/humble']"
+_ test_launch_wires_enabled_default_and_rollback_to_decision_node[false-full_system_robot] _
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:58: in get_package_prefix
+    content, package_prefix = get_resource('packages', package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/resources.py:86: in get_resource
+    raise LookupError(
+E   LookupError: Could not find the resource 'step' of type 'packages'
+
+During handling of the above exception, another exception occurred:
+src/mission_control/test/test_ball_entry_line_alignment.py:622: in test_launch_wires_enabled_default_and_rollback_to_decision_node
+    context = launch_context(description, overrides)
+src/mission_control/test/test_full_system_launch.py:49: in launch_context
+    entity.execute(context)
+/opt/ros/humble/lib/python3.10/site-packages/launch/actions/declare_launch_argument.py:215: in execute
+    perform_substitutions(context, self.default_value)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:85: in perform
+    path_components = [
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:86: in <listcomp>
+    perform_substitutions(context, component_substitutions)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:80: in perform
+    result = self.find(package)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:113: in find
+    return get_package_share_directory(package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:80: in get_package_share_directory
+    path = os.path.join(get_package_prefix(package_name), 'share', package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:60: in get_package_prefix
+    raise PackageNotFoundError(
+E   ament_index_python.packages.PackageNotFoundError: "package 'step' not found, searching: ['/opt/ros/humble']"
+_ test_collected_ball_route_clears_stale_reservations_before_dwell[GOAL_APPROACH-GOAL_CAMERA90_FINE_FORWARD_2] _
+src/mission_control/test/test_mission_phase_flow.py:505: in test_collected_ball_route_clears_stale_reservations_before_dwell
+    assert command["action"] == expected_action
+E   AssertionError: assert 'GOAL_CAMERA_90_FORWARD_2' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E     - GOAL_CAMERA90_FINE_FORWARD_2
+E     ?              -----
+E     + GOAL_CAMERA_90_FORWARD_2
+E     ?            +
+______ test_post_ball_detection_loss_cannot_interrupt_timed_line_or_goal _______
+src/mission_control/test/test_mission_phase_flow.py:564: in test_post_ball_detection_loss_cannot_interrupt_timed_line_or_goal
+    assert harness.publish_vision(goal=approaching_goal())[-1]["action"] == "GOAL_CAMERA90_FINE_FORWARD_2"
+E   AssertionError: assert 'GOAL_CAMERA_90_FORWARD_2' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E     - GOAL_CAMERA90_FINE_FORWARD_2
+E     ?              -----
+E     + GOAL_CAMERA_90_FORWARD_2
+E     ?            +
+_______ test_ball_loss_waits_then_reacquired_ball_selects_moving_recover _______
+src/mission_control/test/test_mission_phase_flow.py:1032: in test_ball_loss_waits_then_reacquired_ball_selects_moving_recover
+    assert approach["action"] == "BALL_APPROACH_RECOVER_LEFT_4"
+E   AssertionError: assert 'BALL_APPROACH_TURN_LEFT_2' == 'BALL_APPROACH_RECOVER_LEFT_4'
+E     - BALL_APPROACH_RECOVER_LEFT_4
+E     ?                ^^^^^^      ^
+E     + BALL_APPROACH_TURN_LEFT_2
+E     ?               ++ ^      ^
+____ test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell _____
+src/mission_control/test/test_mission_phase_flow.py:1083: in test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell
+    assert harness.ball_pickup_entry_pending is True
+E   assert False is True
+E    +  where False = <test_mission_phase_flow.MissionFlowHarness object at 0xffff7c86ac80>.ball_pickup_entry_pending
+_____ test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment ______
+src/mission_control/test/test_mission_phase_flow.py:1205: in test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment
+    assert turn["action"] == "BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_1"
+E   AssertionError: assert 'BALL_PICKUP_...N_TURN_LEFT_2' == 'BALL_PICKUP_...N_TURN_LEFT_1'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_1
+E     ?                                   ^
+E     + BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_2
+E     ?                                   ^
+_________________ test_full_course_mock_flow_without_ros_graph _________________
+src/mission_control/test/test_mission_phase_flow.py:1290: in test_full_course_mock_flow_without_ros_graph
+    assert approach_ball[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+___________ test_confirmed_approaching_hurdle_beats_approaching_ball ___________
+src/mission_control/test/test_mission_phase_flow.py:1650: in test_confirmed_approaching_hurdle_beats_approaching_ball
+    assert published[-1]["action"] == "STRAIGHT_0"
+E   AssertionError: assert 'GO' == 'STRAIGHT_0'
+E     - STRAIGHT_0
+E     + GO
+__________ test_unconfirmed_hurdle_disappearance_resumes_ball_mission __________
+src/mission_control/test/test_mission_phase_flow.py:1808: in test_unconfirmed_hurdle_disappearance_resumes_ball_mission
+    assert held[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+________ test_unconfirmed_hurdle_can_become_confirmed_and_take_priority ________
+src/mission_control/test/test_mission_phase_flow.py:1827: in test_unconfirmed_hurdle_can_become_confirmed_and_take_priority
+    assert held[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+_______________ test_absent_hurdle_keeps_ball_priority_over_line _______________
+src/mission_control/test/test_mission_phase_flow.py:1846: in test_absent_hurdle_keeps_ball_priority_over_line
+    assert published[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+_ test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[34.0-GOAL_CAMERA90_TURN_RIGHT_3-0.0-GOAL_CAMERA90_FINE_FORWARD_2] _
+src/mission_control/test/test_mission_phase_flow.py:2138: in test_goal_camera90_turn_dwells_then_rechecks_fresh_goal
+    assert forward["action"] == next_action
+E   AssertionError: assert 'GOAL_CAMERA_90_FORWARD_2' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E     - GOAL_CAMERA90_FINE_FORWARD_2
+E     ?              -----
+E     + GOAL_CAMERA_90_FORWARD_2
+E     ?            +
+_ test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-35.0-GOAL_CAMERA90_TURN_LEFT_1--20.0-GOAL_CAMERA90_TURN_LEFT_1] _
+src/mission_control/test/test_mission_phase_flow.py:2118: in test_goal_camera90_turn_dwells_then_rechecks_fresh_goal
+    assert correction["action"] == initial_action
+E   AssertionError: assert 'GOAL_CAMERA90_TURN_LEFT_2' == 'GOAL_CAMERA90_TURN_LEFT_1'
+E     - GOAL_CAMERA90_TURN_LEFT_1
+E     ?                         ^
+E     + GOAL_CAMERA90_TURN_LEFT_2
+E     ?                         ^
+_ test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-20.0-GOAL_CAMERA90_TURN_LEFT_1--15.0-GOAL_CAMERA90_FINE_FORWARD_2] _
+src/mission_control/test/test_mission_phase_flow.py:2138: in test_goal_camera90_turn_dwells_then_rechecks_fresh_goal
+    assert forward["action"] == next_action
+E   AssertionError: assert 'GOAL_CAMERA90_TURN_LEFT_1' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E     - GOAL_CAMERA90_FINE_FORWARD_2
+E     + GOAL_CAMERA90_TURN_LEFT_1
+_ test_goal_depth_actions_follow_new_scoring_range[0.65-GOAL_CAMERA90_FINE_FORWARD_1] _
+src/mission_control/test/test_mission_phase_flow.py:2220: in test_goal_depth_actions_follow_new_scoring_range
+    assert decision["action"] == action
+E   AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_3' == 'GOAL_CAMERA90_FINE_FORWARD_1'
+E     - GOAL_CAMERA90_FINE_FORWARD_1
+E     ?                            ^
+E     + GOAL_CAMERA90_FINE_FORWARD_3
+E     ?                            ^
+___________ test_final_line_track_still_prioritizes_confirmed_hurdle ___________
+src/mission_control/test/test_mission_phase_flow.py:2345: in test_final_line_track_still_prioritizes_confirmed_hurdle
+    assert decision["action"] == "STRAIGHT_0"
+E   AssertionError: assert 'GO' == 'STRAIGHT_0'
+E     - STRAIGHT_0
+E     + GO
+______ test_ball_stationary_turn_requires_fresh_ball_before_next_approach ______
+src/mission_control/test/test_mission_phase_flow.py:2535: in test_ball_stationary_turn_requires_fresh_ball_before_next_approach
+    assert approach[0]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'BALL_APPROACH_TURN_RIGHT_2' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     + BALL_APPROACH_TURN_RIGHT_2
+_____________ test_second_ball_uses_same_straight_distance_policy ______________
+src/mission_control/test/test_mission_phase_flow.py:2588: in test_second_ball_uses_same_straight_distance_policy
+    assert command[0]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'BALL_APPROACH_TURN_LEFT_1' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     + BALL_APPROACH_TURN_LEFT_1
+___________ test_failed_first_pickup_keeps_straight_distance_policy ____________
+src/mission_control/test/test_mission_phase_flow.py:2615: in test_failed_first_pickup_keeps_straight_distance_policy
+    assert command[0]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'BALL_APPROACH_TURN_RIGHT_2' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     + BALL_APPROACH_TURN_RIGHT_2
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_ball_entry_line_alignment.py::test_launch_wires_enabled_default_and_rollback_to_decision_node[None-full_system]
+FAILED src/mission_control/test/test_ball_entry_line_alignment.py::test_launch_wires_enabled_default_and_rollback_to_decision_node[None-full_system_robot]
+FAILED src/mission_control/test/test_ball_entry_line_alignment.py::test_launch_wires_enabled_default_and_rollback_to_decision_node[false-full_system]
+FAILED src/mission_control/test/test_ball_entry_line_alignment.py::test_launch_wires_enabled_default_and_rollback_to_decision_node[false-full_system_robot]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_collected_ball_route_clears_stale_reservations_before_dwell[GOAL_APPROACH-GOAL_CAMERA90_FINE_FORWARD_2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_ball_detection_loss_cannot_interrupt_timed_line_or_goal
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_ball_loss_waits_then_reacquired_ball_selects_moving_recover
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_full_course_mock_flow_without_ros_graph
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_confirmed_approaching_hurdle_beats_approaching_ball
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_unconfirmed_hurdle_disappearance_resumes_ball_mission
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_unconfirmed_hurdle_can_become_confirmed_and_take_priority
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_absent_hurdle_keeps_ball_priority_over_line
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[34.0-GOAL_CAMERA90_TURN_RIGHT_3-0.0-GOAL_CAMERA90_FINE_FORWARD_2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-35.0-GOAL_CAMERA90_TURN_LEFT_1--20.0-GOAL_CAMERA90_TURN_LEFT_1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-20.0-GOAL_CAMERA90_TURN_LEFT_1--15.0-GOAL_CAMERA90_FINE_FORWARD_2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_depth_actions_follow_new_scoring_range[0.65-GOAL_CAMERA90_FINE_FORWARD_1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_final_line_track_still_prioritizes_confirmed_hurdle
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_ball_stationary_turn_requires_fresh_ball_before_next_approach
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_second_ball_uses_same_straight_distance_policy
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_failed_first_pickup_keeps_straight_distance_policy
+22 failed, 582 passed in 8.90s

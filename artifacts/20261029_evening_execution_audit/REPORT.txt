@@ -1,0 +1,40 @@
+2026-10-29 어제 저녁 자동 전진 변경 재조사
+
+사용자 확인: GUI 단독은 정상이며 자동 주행에서만 전진이 달라짐.
+결론: 저녁에 자동 명령 발행/예약/미션 연결 코드는 변경됐다. 재생기 소스가
+같다는 사실로 전체 실행 조건도 같다고 결론내릴 수 없다.
+이번 조사는 코드/모션/실행 설정을 수정하지 않았으며 모터를 구동하지 않았다.
+
+변경 확인
+1) 18:47 백업 → 19:04 보존 patch: source=ball/hurdle 일반 접근의 선예약 추가.
+   현재 보행 70% 이후 최신 3프레임으로 다음 보행을 예약. 복귀→복귀는 마지막
+   0.30초에 예약. 허들 완료 콜백의 즉시 후속 판단도 추가. SDK/JSON은 이 작업에서
+   변경되지 않았지만 다음 모션이 독립 start()가 아닌 queue 경로를 탈 수 있다.
+   증거: artifacts/20261028_mission_walking_review/changes.patch, before/, protected_sha256.json.
+2) 20:37 빌드/20:38 patch: Ball 진입 때 라인 동작을 한번 실행하는 단계와
+   source=ball이어도 라인 gait/count를 그대로 발행하는 bridge 분기 추가.
+   실제20:58:52.848 로그에 Ball entry Line alignment ... queued=True가 기록됨.
+   증거: artifacts/20261028_ball_entry_line_once/change.patch 및
+   /home/jet/.ros/log/python3_13653_1793188691400.log.
+3) 18:07 원본54/55 반영,18:22 일부 모션배속 조정: 미세/후진/잡기/전환은 변경.
+   일반전진10종은 이 변경 전17:04 보존본,18:22 보존본,20:44 커밋,
+   오늘60번 교체 전까지 모든 필드 동일. 일반전진배속0.95는18시이전부터 존재.
+   오늘60번전체교체는 별도 지시이며 어제 원인과 분리했다.
+4) executor C++ 노드에도 pickup_400/500 시 머리 override 해제 대상 추가가 있음.
+   일반전진 보간 수식 변경은 아니며, 실제 적용시각은20:44 커밋만으로 특정하지 않음.
+
+바뀌지 않은 근거
+external_sdk/gui_aligned 전체는14:41 커밋부터 소스 diff 없음.
+robot_motion_player.cpp의18:47 보존SHA와 현재가 같음.
+16:54/18:24/20:58 실기 로그 모두 continuous quintic, poll5ms, baud4000000,
+forward boundary feedback=yes, motor5 included, position tolerance check disabled.
+외부 sdk_gui.py 수정시각은9/15이나 수정시각만으로 모든 환경 불변을 증명하지 않음.
+
+원인 후보와 한계
+start()는readStartAngles()로 실측 자세를 읽는다. activateQueuedMotion()은
+직전 모션 프레임의 목표각으로 start_angles_를 이어받고 새 실측 시작 읽기는 하지 않는다.
+따라서 같은 JSON이라도 전후 동작, 시작 상태, 연속 실행 여부로 실제 거동은 달라질 수 있다.
+자동만달라짐+저녁상위발행변경은 이 경로를 우선 비교할 근거이지만 낙상의 확정 원인은 아님.
+일반라인 선예약은16:54와18:24 로그에도 있으므로 선예약 전체가 저녁에 처음 생긴 것은 아니다.
+실제관절오차/모터쓰기사이시간/IMU의 전후 기록이 없어 정상추종 실패 원인을 확정할 수 없다.
+무중단 연결 요청을 임의로 되돌리거나 정지대기를 추가하지 않았다.

@@ -1,0 +1,23 @@
+[ 30%] Built target motion_core
+[ 40%] Building CXX object robot_motion_sdk/CMakeFiles/motion_player_core.dir/robot_motion_player.cpp.o
+[ 50%] Linking CXX static library libmotion_player_core.a
+[ 50%] Built target motion_player_core
+[ 70%] Building CXX object robot_motion_sdk/CMakeFiles/test_continuous_hardware.dir/test_continuous_hardware.cpp.o
+[ 70%] Building CXX object robot_motion_sdk/CMakeFiles/test_continuous_hardware.dir/dynamixel_motion_hardware.cpp.o
+[ 80%] Building CXX object robot_motion_sdk/CMakeFiles/test_continuous_hardware.dir/step_dynamixel.cpp.o
+[ 90%] Building CXX object robot_motion_sdk/CMakeFiles/test_continuous_hardware.dir/dynamixel_controller.cpp.o
+[100%] Linking CXX executable test_continuous_hardware
+[100%] Built target test_continuous_hardware
+[ 42%] Built target motion_core
+Consolidate compiler generated dependencies of target motion_player_core
+[ 71%] Built target motion_player_core
+[ 85%] Building CXX object robot_motion_sdk/CMakeFiles/test_gui_alignment.dir/test_gui_alignment.cpp.o
+[100%] Linking CXX executable test_gui_alignment
+[100%] Built target test_gui_alignment
+[ 42%] Built target motion_core
+[ 71%] Built target motion_player_core
+[ 85%] Building CXX object robot_motion_sdk/CMakeFiles/test_forward_timing.dir/test_forward_timing.cpp.o
+[100%] Linking CXX executable test_forward_timing
+[100%] Built target test_forward_timing
+[ 60%] Built target motion_core
+[100%] Built target test_continuous_interpolation

@@ -102,6 +102,7 @@ def test_catalog30_replaces_only_requested_forward_motions_and_aliases():
         expected_aliases[alias] = change["after"]
     expected_aliases["hurdle"] = "찐허들"
     expected_aliases["pickup_lost_ball_backward_1"] = "찐후진실전(1회)"
+    expected_aliases["ball_lost_camera_down_backward_2"] = "찐후진실전-2(2회)"
     expected_aliases.update({
         "fine_to_turn_ready_45": "찐미세오뒤에서 오뒤(45도)",
         "fine_to_turn_ready_0": "찐미세오뒤에서 오뒤(0도)",
@@ -239,6 +240,7 @@ def test_production_alias_catalog_contains_only_approved_aliases():
             "pickup_fine_to_crab_right_0": "찐미세오뒤에서오옆꽃게0도",
             "pickup_crab_left_0": "찐미세왼옆꽃게0도-1",
             "pickup_lost_ball_backward_1": "찐후진실전(1회)",
+            "ball_lost_camera_down_backward_2": "찐후진실전-2(2회)",
             "pickup_pre_backward_camera_down": (
                 "찐공잡기전후진-2(2회)"
             ),
@@ -589,14 +591,16 @@ def test_pickup_fine_preparation_resolves_to_requested_single_transition():
     assert aliases["pickup_fine_forward_0"] == "건미세0도"
 
 
-def test_pickup_retreat_keeps_command_id_with_one_repeat():
+def test_standalone_retreat_remains_available_but_is_not_in_pickup_sequence():
     aliases = yaml.safe_load(ALIAS_PATH.read_text())['motion_aliases']
     motions = {m['name']: m for m in json.loads(RUNTIME_CATALOG_PATH.read_text())['motions']}
     retreat = motions[aliases['pickup_retreat_2']]
     assert aliases['pickup_retreat_2'] == '찐후진실전(1회)'
     assert retreat['repeat_count'] == 1
-    assert MotionCommandBridgeNode.PICKUP_MOTION_TAIL[-1] == 'pickup_retreat_2'
-    assert MotionCommandBridgeNode.PICKUP_NO_BALL_MOTION_TAIL[-1] == 'pickup_retreat_2'
+    for tail in (MotionCommandBridgeNode.PICKUP_MOTION_TAIL,
+                 MotionCommandBridgeNode.PICKUP_NO_BALL_MOTION_TAIL):
+        assert 'pickup_retreat_2' not in tail
+        assert tail[-1] == 'pickup_grasp_check_pose'
 
 
 @pytest.mark.parametrize("motion_id,name,digest", [

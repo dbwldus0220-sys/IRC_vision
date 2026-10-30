@@ -6,6 +6,7 @@ from mission_control.motion_decision_node import MotionDecisionNode
 from test_line_offset_alignment import sample
 from test_motion_decision_planner import goal_info
 from test_mission_phase_flow import line_info
+from test_goal_target_steering import target_sample
 from test_line_corner_memory import corner_info
 from test_wait_refresh_and_fine_settle import LiveInputHarness, observe
 from test_motion_command_bridge import (
@@ -25,8 +26,8 @@ def fresh(node, clock, source, info, *, plan=True):
     observe(node, clock, source, {**info, 'rgb_stamp_ns': round((clock[0] + .01) * 1e9)}, plan=plan)
 
 
-def start_goal(node, clock, depth):
-    fresh(node, clock, 'goal', goal_info(depth_m=depth, score_now=False))
+def start_goal(node, clock, depth, angle=0):
+    fresh(node, clock, 'goal', target_sample(angle, depth))
     command = node.publisher.messages[-1]
     motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
     node.send_status(command['action'], command['command_id'], 'RUNNING', motion)
@@ -58,17 +59,20 @@ def test_offset_forward_queues_and_promotes_without_clearing_vision(clock, phase
     assert node.planner.line_offset_alignment_failed
 
 
-@pytest.mark.parametrize('depth', [1.5, 1., .7, .49])
-def test_goal_forward_queues_only_one_then_promotes_without_pause(clock, depth):
+@pytest.mark.parametrize('depth,angle', [
+    (depth, angle) for depth in (1.5, 1., .7, .570)
+    for angle in ((0, -30, 30) if depth > .850 else (0, -10, 10))
+])
+def test_goal_walking_queues_only_one_then_promotes_without_pause(clock, depth, angle):
     node = LiveInputHarness(phase='GOAL_APPROACH')
-    first = start_goal(node, clock, depth)
+    first = start_goal(node, clock, depth, angle)
     # Early images do not reserve a second chunk.
     for _ in range(3):
-        fresh(node, clock, 'goal', goal_info(depth_m=depth, score_now=False), plan=False)
+        fresh(node, clock, 'goal', target_sample(angle, depth), plan=False)
     assert getattr(node, 'queued_general_command_id', None) is None
     clock[0] = node.goal_forward_started_at + MotionDecisionNode.GOAL_FORWARD_DURATION_SEC[first['action']] * .75
     for _ in range(6):
-        fresh(node, clock, 'goal', goal_info(depth_m=depth, score_now=False), plan=False)
+        fresh(node, clock, 'goal', target_sample(angle, depth), plan=False)
     assert len([m for m in node.publisher.messages if m['valid']]) == 2
     second = node.publisher.messages[-1]
     assert second['action'] == first['action']
@@ -84,7 +88,7 @@ def test_goal_forward_queues_only_one_then_promotes_without_pause(clock, depth):
 
 @pytest.mark.parametrize('changes', [
     {'detected': False}, {'depth_valid': False}, {'confidence': .1},
-    {'confirmation_confirmed': False}, {'bearing_deg': 30.},
+    {'confirmation_confirmed': False}, {'bearing_deg': 45.},
     {'depth_m': .43, 'score_now': True}, {'depth_m': .35},
 ])
 def test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat(clock, changes):
@@ -101,10 +105,10 @@ def test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat(clock, chan
 
 def test_goal_queue_rejects_frames_captured_before_late_window(clock):
     node = LiveInputHarness(phase='GOAL_APPROACH')
-    start_goal(node, clock, .49)
+    start_goal(node, clock, .570)
     clock[0] += .3
     for i in range(4):
-        observe(node, clock, 'goal', goal_info(depth_m=.49, score_now=False,
+        observe(node, clock, 'goal', goal_info(depth_m=.570, score_now=False,
                 rgb_stamp_ns=10_050_000_000 + i * 10_000_000), plan=False)
     assert getattr(node, 'queued_general_command_id', None) is None
 
@@ -139,6 +143,48 @@ def test_goal_forward_does_not_reuse_expired_vision(clock):
     node.send_status(first['action'], first['command_id'], 'SUCCEEDED')
     MotionDecisionNode._publish_decision(node)
     assert not node.publisher.messages[-1]['valid']
+
+
+@pytest.mark.parametrize('initial_angle,next_angle,expected', [
+    (0, 30, 'GOAL_CAMERA90_RECOVER_RIGHT_4'),
+    (0, -30, 'GOAL_CAMERA90_RECOVER_LEFT_4'),
+    (30, 0, 'GOAL_CAMERA_90_FORWARD_2'),
+    (-30, 30, 'GOAL_CAMERA90_RECOVER_RIGHT_4'),
+])
+def test_goal_forward_and_recovery_queue_each_other(clock, initial_angle, next_angle, expected):
+    node = LiveInputHarness(phase='GOAL_APPROACH')
+    first = start_goal(node, clock, 1.0, initial_angle)
+    clock[0] += MotionDecisionNode.GOAL_FORWARD_DURATION_SEC[first['action']] * .75
+    for _ in range(3):
+        fresh(node, clock, 'goal', target_sample(next_angle), plan=False)
+        clock[0] += .01
+    second = node.publisher.messages[-1]
+    assert second['action'] == expected
+    assert node.queued_general_command_id == second['command_id']
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(navigation_message(action=first['action'], source='goal'))
+    bridge.navigation_command_callback(navigation_message(action=expected, source='goal', command_id=8001))
+    assert bridge.queued_request_id == 8001
+    # Preserve the bridge's existing boundary check between camera-90 forward
+    # and Line recovery, whose stored entry frames are different.
+    bridge.executor_status_callback(executor_status(
+        status='SUCCEEDED', motion_id=bridge.ACTION_TO_MOTION_ID[first['action']]))
+    assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == bridge.ACTION_TO_MOTION_ID[expected]
+
+
+def test_goal_prequeue_requires_three_consecutive_matching_actions(clock):
+    node = LiveInputHarness(phase='GOAL_APPROACH')
+    first = start_goal(node, clock, 1.0)
+    clock[0] += MotionDecisionNode.GOAL_FORWARD_DURATION_SEC[first['action']] * .75
+    for angle in (30, -30, 0, 30, -30, 30):
+        fresh(node, clock, 'goal', target_sample(angle), plan=False)
+        clock[0] += .01
+    assert getattr(node, 'queued_general_command_id', None) is None
+    for _ in range(2):
+        fresh(node, clock, 'goal', target_sample(30), plan=False)
+        clock[0] += .01
+    assert node.publisher.messages[-1]['action'] == 'GOAL_CAMERA90_RECOVER_RIGHT_4'
+    assert node.queued_general_command_id is not None
 
 
 @pytest.mark.parametrize('first,second,deferred', [

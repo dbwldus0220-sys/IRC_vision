@@ -1,0 +1,35 @@
+Starting >>> mission_control
+[Processing: mission_control]
+--- output: mission_control
+running egg_info
+writing ../../build/mission_control/mission_control.egg-info/PKG-INFO
+writing dependency_links to ../../build/mission_control/mission_control.egg-info/dependency_links.txt
+writing entry points to ../../build/mission_control/mission_control.egg-info/entry_points.txt
+writing requirements to ../../build/mission_control/mission_control.egg-info/requires.txt
+writing top-level names to ../../build/mission_control/mission_control.egg-info/top_level.txt
+reading manifest file '../../build/mission_control/mission_control.egg-info/SOURCES.txt'
+writing manifest file '../../build/mission_control/mission_control.egg-info/SOURCES.txt'
+running build
+running build_py
+copying mission_control/motion_decision_node.py -> /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/mission_control/build/lib/mission_control
+running install
+running install_lib
+copying /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/mission_control/build/lib/mission_control/motion_decision_node.py -> /home/jet/IRC/IRC-STEP/IRC_vision_latest/install/mission_control/lib/python3.10/site-packages/mission_control
+byte-compiling /home/jet/IRC/IRC-STEP/IRC_vision_latest/install/mission_control/lib/python3.10/site-packages/mission_control/motion_decision_node.py to motion_decision_node.cpython-310.pyc
+running install_data
+running install_egg_info
+removing '/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/mission_control/lib/python3.10/site-packages/mission_control-0.1.0-py3.10.egg-info' (and everything under it)
+Copying ../../build/mission_control/mission_control.egg-info to /home/jet/IRC/IRC-STEP/IRC_vision_latest/install/mission_control/lib/python3.10/site-packages/mission_control-0.1.0-py3.10.egg-info
+running install_scripts
+Installing legacy_motion_executor_adapter script to /home/jet/IRC/IRC-STEP/IRC_vision_latest/install/mission_control/lib/mission_control
+Installing legacy_motion_status_adapter script to /home/jet/IRC/IRC-STEP/IRC_vision_latest/install/mission_control/lib/mission_control
+Installing mock_mission_input_node script to /home/jet/IRC/IRC-STEP/IRC_vision_latest/install/mission_control/lib/mission_control
+Installing motion_command_bridge_node script to /home/jet/IRC/IRC-STEP/IRC_vision_latest/install/mission_control/lib/mission_control
+Installing motion_decision_node script to /home/jet/IRC/IRC-STEP/IRC_vision_latest/install/mission_control/lib/mission_control
+Installing motion_executor_node script to /home/jet/IRC/IRC-STEP/IRC_vision_latest/install/mission_control/lib/mission_control
+Installing sdk_motion_stub_node script to /home/jet/IRC/IRC-STEP/IRC_vision_latest/install/mission_control/lib/mission_control
+writing list of installed files to '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/mission_control/install.log'
+---
+Finished <<< mission_control [32.1s]
+
+Summary: 1 package finished [33.1s]

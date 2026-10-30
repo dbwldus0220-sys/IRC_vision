@@ -79,7 +79,7 @@ def finish_turn(node, clock, command):
 
 
 @pytest.mark.parametrize('phase', ['AUTO', 'LINE_TRACK', 'LINE_TRACK_AFTER_PICKUP'])
-@pytest.mark.parametrize('side,count', [('RIGHT', 2), ('LEFT', 1)])
+@pytest.mark.parametrize('side,count', [('RIGHT', 3), ('LEFT', 1)])
 def test_visible_invalid_ground_aligns_to_current_image_line(clock, phase, side, count):
     node = node_for(phase)
     sign = 1 if side == 'RIGHT' else -1
@@ -88,7 +88,7 @@ def test_visible_invalid_ground_aligns_to_current_image_line(clock, phase, side,
     command = start_turn(node, clock, info)
     assert command['action'] == f'LINE_OFFSET_TURN_{side}_{count}'
     assert command['source_command']['direction_source'] == 'current_image_line'
-    assert command['source_command']['turn_angle_deg'] == 15.0
+    assert command['source_command']['turn_angle_deg'] == (30.0 if side == 'RIGHT' else 15.0)
     assert MotionCommandBridgeNode.motion_id_for_action(command['action']) == f'post_ball_line_turn_{side.lower()}_{count}'
     assert node.latest_info['line']['ground_projection_valid'] is False
     assert not node.sparse_line_recovery.eligible
@@ -108,7 +108,7 @@ def test_visible_line_overrides_pickup_exit_search_direction(clock, section, sid
     sign = -1 if side == 'RIGHT' else 1
     info['center_points_px'] = [[710 + sign * 300, 650], [710 + sign * 250, 450]]
     command = start_turn(node, clock, info)
-    expected = 'LINE_OFFSET_TURN_LEFT_1' if side == 'RIGHT' else 'LINE_OFFSET_TURN_RIGHT_2'
+    expected = 'LINE_OFFSET_TURN_LEFT_1' if side == 'RIGHT' else 'LINE_OFFSET_TURN_RIGHT_3'
     assert command['action'] == expected
     assert command['source_command']['direction_source'] == 'current_image_line'
     finish_turn(node, clock, command)
@@ -121,7 +121,7 @@ def test_visible_line_overrides_pickup_exit_search_direction(clock, section, sid
 @pytest.mark.parametrize('phase', ['LINE_TRACK', 'POST_BALL_LINE_ALIGN'])
 def test_image_alignment_is_limited_to_three_turns_until_normal_ground_fit(clock, phase):
     node = node_for(phase)
-    for target_x in (1000., 900., 820.):
+    for target_x in (850., 830., 810.):
         info = {**unconfirmed_sparse_info(),
                 'center_points_px': [[target_x+10, 650], [target_x, 450]]}
         command = start_turn(node, clock, info)
@@ -130,7 +130,7 @@ def test_image_alignment_is_limited_to_three_turns_until_normal_ground_fit(clock
         assert frame(node, clock) == []
         finish_turn(node, clock, command)
     blocked = frame(node, clock, {**unconfirmed_sparse_info(),
-        'center_points_px': [[780, 650], [770, 450]]})[-1]
+        'center_points_px': [[800, 650], [790, 450]]})[-1]
     assert not blocked['valid']
     assert blocked['reason'] == 'line_image_alignment_limit_reached'
     normal = {**line_info(), 'ground_projection_enabled': True,

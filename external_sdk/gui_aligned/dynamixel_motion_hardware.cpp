@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <exception>
 #include <utility>
+#include <iostream>
 
 namespace irc_step {
 
@@ -72,6 +73,44 @@ bool DynamixelMotionHardware::prepareImmediatePlayback() noexcept {
         setError("torque OFF/unconfirmed or failed to set Profile Acceleration/Velocity to zero"); return false;
     }
     return true;
+}
+
+bool DynamixelMotionHardware::preparePlayback(bool allow_unconfirmed_torque) noexcept {
+    if (!allow_unconfirmed_torque) return prepareImmediatePlayback();
+    const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
+    if (!ready()) {
+        setError("hardware is not ready"); return false;
+    }
+    if (!dxl_.VerifyTorqueEnabled(true)) {
+        std::cerr << "[Warning] Continuing normal playback with torque OFF/unconfirmed; "
+                     "position_tolerance_enabled=false" << std::endl;
+    }
+    if (!dxl_.WriteZeroProfiles()) {
+        setError("failed to set playback profiles to zero"); return false;
+    }
+    last_error_.clear();
+    return true;
+}
+
+bool DynamixelMotionHardware::readAvailablePositions(JointAngles& positions_deg) noexcept {
+    const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
+    positions_deg.clear();
+    if (!ready()) { setError("hardware is not ready"); return false; }
+    try {
+        std::vector<double> available_deg;
+        if (!dxl_.ReadAvailablePositionDegrees(available_deg)) {
+            setError("no motor returned a valid Present Position"); return false;
+        }
+        for (int id = 0; id < NUMBER_OF_DYNAMIXELS; ++id)
+            if (motorEnabled(id) && std::isfinite(available_deg[id]))
+                positions_deg[id] = available_deg[id];
+        last_error_.clear();
+        return true;
+    } catch (const std::exception& error) {
+        setError(error.what()); return false;
+    } catch (...) {
+        setError("unknown partial Present Position read error"); return false;
+    }
 }
 
 bool DynamixelMotionHardware::commandImmediatePosition(

@@ -1,0 +1,162 @@
+{
+  "hardware_used": false,
+  "compared_to": "source59 requested gaits with mission repeat counts",
+  "continuous_interpolation": true,
+  "passed": 14,
+  "cases": [
+    {
+      "motion": "r미세0도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "writes": 380,
+      "source59_trace_equal": true,
+      "completion": [
+        "C\t2800\t1"
+      ]
+    },
+    {
+      "motion": "r미세0도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "writes": 58,
+      "source59_trace_equal": true,
+      "completion": [
+        "C\t3020\t1"
+      ]
+    },
+    {
+      "motion": "r미세0도(상단탐색3회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "writes": 228,
+      "source59_trace_equal": true,
+      "completion": [
+        "C\t2080\t1"
+      ]
+    },
+    {
+      "motion": "r미세0도(상단탐색3회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "writes": 34,
+      "source59_trace_equal": true,
+      "completion": [
+        "C\t2253\t1"
+      ]
+    },
+    {
+      "motion": "R미세90도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "writes": 380,
+      "source59_trace_equal": true,
+      "completion": [
+        "C\t2800\t1"
+      ]
+    },
+    {
+      "motion": "R미세90도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "writes": 58,
+      "source59_trace_equal": true,
+      "completion": [
+        "C\t3020\t1"
+      ]
+    },
+    {
+      "motion": "R미세90도(1회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "writes": 76,
+      "source59_trace_equal": true,
+      "completion": [
+        "C\t1360\t1"
+      ]
+    },
+    {
+      "motion": "R미세90도(1회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "writes": 11,
+      "source59_trace_equal": true,
+      "completion": [
+        "C\t1398\t1"
+      ]
+    },
+    {
+      "motion": "R미세90도(2회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "writes": 152,
+      "source59_trace_equal": true,
+      "completion": [
+        "C\t1720\t1"
+      ]
+    },
+    {
+      "motion": "R미세90도(2회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "writes": 22,
+      "source59_trace_equal": true,
+      "completion": [
+        "C\t1792\t1"
+      ]
+    },
+    {
+      "motion": "R미세90도(3회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "writes": 228,
+      "source59_trace_equal": true,
+      "completion": [
+        "C\t2080\t1"
+      ]
+    },
+    {
+      "motion": "R미세90도(3회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "writes": 34,
+      "source59_trace_equal": true,
+      "completion": [
+        "C\t2253\t1"
+      ]
+    },
+    {
+      "motion": "R미세90도(4회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "writes": 304,
+      "source59_trace_equal": true,
+      "completion": [
+        "C\t2440\t1"
+      ]
+    },
+    {
+      "motion": "R미세90도(4회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "writes": 47,
+      "source59_trace_equal": true,
+      "completion": [
+        "C\t2638\t1"
+      ]
+    }
+  ]
+}

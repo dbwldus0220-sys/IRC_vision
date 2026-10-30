@@ -16,7 +16,7 @@ def turn(action='LINE_LOST_TURN_RIGHT', source='line', reason='search', **comman
     return MotionDecision('AUTO', source, action, True, reason, False, False, command)
 
 
-@pytest.mark.parametrize('side,count', [('LEFT', 1), ('RIGHT', 2)])
+@pytest.mark.parametrize('side,count', [('LEFT', 1), ('RIGHT', 1)])
 def test_corner_search_uses_three_small_turns_and_never_reverses(side, count):
     limiter = LostSearchTurnLimiter(staged_sources=('line',))
     lost = {'line': {'detected': False, 'raw_detected': False}}
@@ -109,8 +109,8 @@ def test_candidates_do_not_spend_budget_and_failed_requests_are_not_refunded():
 def test_small_turns_stop_at_count_limit_and_direction_changes_do_not_cancel():
     limiter = LostSearchTurnLimiter()
     lost = {'line': {'detected': False}}
-    for action in ['POST_SHOT_LINE_TURN_RIGHT_2', 'POST_SHOT_LINE_TURN_LEFT_1',
-                   'POST_SHOT_LINE_TURN_RIGHT_2']:
+    for action in ['POST_SHOT_LINE_TURN_RIGHT_1', 'POST_SHOT_LINE_TURN_LEFT_1',
+                   'POST_SHOT_LINE_TURN_RIGHT_1']:
         decision = limiter.filter(turn(action), lost)
         assert decision.valid
         limiter.record_published(decision, lost)
@@ -151,15 +151,15 @@ def test_fixed_exit_and_visible_alignment_are_outside_search_budget():
     assert not limiter.filter(turn('POST_SHOT_LINE_TURN_RIGHT_5'), {}).valid
 
 
-@pytest.mark.parametrize('heading', [-20.0, -19.999, 0.0, 19.999, 20.0])
-def test_post_shot_heading_accepts_twenty_degrees_inclusive(heading):
+@pytest.mark.parametrize('heading', [-7.999, -5.0, 0.0, 14.999])
+def test_post_shot_alignment_respects_direction_specific_minimum(heading):
     decision = MotionDecisionPlanner().plan('POST_SHOT_LINE_ALIGN', {
         'line': line_info(ground_heading_error_deg=heading)}, 0.1)
     assert decision.action == 'POST_SHOT_LINE_ALIGNED'
-    assert decision.source_command['heading_tolerance_deg'] == 20.0
+    assert decision.source_command['heading_tolerance_deg'] == (15.0 if heading > 0.0 else 8.0)
 
 
-@pytest.mark.parametrize('heading,direction,count', [(-20.001, 'LEFT', 1), (20.001, 'RIGHT', 2)])
+@pytest.mark.parametrize('heading,direction,count', [(-20.001, 'LEFT', 1), (20.001, 'RIGHT', 1)])
 def test_post_shot_heading_outside_tolerance_still_turns(heading, direction, count):
     decision = MotionDecisionPlanner().plan('POST_SHOT_LINE_ALIGN', {
         'line': line_info(ground_heading_error_deg=heading)}, 0.1)
@@ -227,9 +227,9 @@ def test_launch_search_limits_reach_decision_node(monkeypatch, tmp_path, robot):
 
 @pytest.mark.parametrize('section', [1, 2])
 @pytest.mark.parametrize('heading,action', [
-    (-20.0, 'POST_SHOT_FORWARD'), (20.0, 'POST_SHOT_FORWARD'),
+    (-7.999, 'POST_SHOT_FORWARD'), (20.0, 'POST_SHOT_LINE_TURN_RIGHT_1'),
     (-20.001, 'POST_SHOT_LINE_TURN_LEFT_1'),
-    (20.001, 'POST_SHOT_LINE_TURN_RIGHT_2'),
+    (20.001, 'POST_SHOT_LINE_TURN_RIGHT_1'),
 ])
 def test_real_exit_route_reaches_heading_gate(monkeypatch, section, heading, action):
     from test_mission_phase_flow import post_shot_line_search_ready, line_info
@@ -238,7 +238,7 @@ def test_real_exit_route_reaches_heading_gate(monkeypatch, section, heading, act
     assert harness.mission_phase == 'POST_SHOT_LINE_ALIGN'
     command = harness.publish_vision(line=line_info(heading=heading))[-1]
     assert command['action'] == action
-    assert command['source_command']['heading_tolerance_deg'] == 20.0
+    assert command['source_command']['heading_tolerance_deg'] == (15.0 if heading > 0.0 else 8.0)
 
 
 @pytest.mark.parametrize('section,heading,search', [

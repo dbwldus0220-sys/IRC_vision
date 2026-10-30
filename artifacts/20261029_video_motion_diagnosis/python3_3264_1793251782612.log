@@ -1,0 +1,14 @@
+[INFO] [1793251829.675254864] [motion_command_bridge_node]: Command ignored: valid is not true, action=STOP, reason=ball_entry_waiting_for_valid_far_ball, line_input_checks=None
+[INFO] [1793251835.074162989] [motion_command_bridge_node]: Command ignored: valid is not true, action=STOP, reason=ball_entry_waiting_for_valid_far_ball, line_input_checks=None
+[INFO] [1793251854.073118288] [motion_command_bridge_node]: Command ignored: valid is not true, action=STOP, reason=ball_entry_waiting_for_valid_far_ball, line_input_checks=None
+[INFO] [1793251854.172802343] [motion_command_bridge_node]: Command ignored: valid is not true, action=STOP, reason=ball_entry_waiting_for_valid_far_ball, line_input_checks=None
+[INFO] [1793251854.274813996] [motion_command_bridge_node]: Command ignored: valid is not true, action=STOP, reason=ball_entry_waiting_for_valid_far_ball, line_input_checks=None
+[INFO] [1793251854.378068456] [motion_command_bridge_node]: Command ignored: valid is not true, action=STOP, reason=ball_entry_waiting_for_valid_far_ball, line_input_checks=None
+[INFO] [1793251854.473085188] [motion_command_bridge_node]: Command ignored: valid is not true, action=STOP, reason=ball_entry_waiting_for_valid_far_ball, line_input_checks=None
+[INFO] [1793251854.575399879] [motion_command_bridge_node]: Command ignored: valid is not true, action=STOP, reason=ball_entry_waiting_for_valid_far_ball, line_input_checks=None
+[INFO] [1793251854.673336876] [motion_command_bridge_node]: Command ignored: valid is not true, action=STOP, reason=ball_entry_waiting_for_valid_far_ball, line_input_checks=None
+[INFO] [1793251854.775741806] [motion_command_bridge_node]: Command ignored: valid is not true, action=STOP, reason=ball_entry_waiting_for_valid_far_ball, line_input_checks=None
+[INFO] [1793251854.876084672] [motion_command_bridge_node]: Command ignored: valid is not true, action=STOP, reason=ball_entry_waiting_for_valid_far_ball, line_input_checks=None
+[INFO] [1793251854.979535738] [motion_command_bridge_node]: Command ignored: valid is not true, action=STOP, reason=ball_entry_waiting_for_valid_far_ball, line_input_checks=None
+[INFO] [1793251924.941148187] [motion_command_bridge_node]: Goal crab pre-motion dwell started: 1.0s
+[INFO] [1793251925.990352249] [motion_command_bridge_node]: Atomic sequence advanced to goal_camera_90_crab_right

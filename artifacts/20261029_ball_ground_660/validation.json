@@ -1,0 +1,29 @@
+{
+  "hardware_executed": false,
+  "dynamics_simulation_executed": false,
+  "regression_tests_passed": 407,
+  "installed_tests_passed": 210,
+  "packages_built": [
+    "mission_control"
+  ],
+  "installed_sources_match": true,
+  "catalog60_data_speeds_aliases_unchanged": true,
+  "distance_reference": "distance_m",
+  "ball_ground_interval_m": {
+    "lower_exclusive": 0.55,
+    "upper_inclusive": 0.66
+  },
+  "steering_bins_deg": {
+    "forward4": "abs <= 15",
+    "recovery4": "15 < abs < 45",
+    "stationary_turn": "abs >= 45; existing left/right count table"
+  },
+  "ground_tracking_prequeue": false,
+  "sha256": {
+    "src/mission_control/mission_control/ball_entry_line_alignment.py": "363022a7921b86cbfe763595f93df3a6f8853e6b45700c2b0b9f13cffd7755f1",
+    "src/mission_control/mission_control/motion_decision_node.py": "9e2b757985b24ab2c67a93d5f958fd14962ad40c1f40a8cad67f512bfbd9cdf8",
+    "src/mission_control/test/test_ball_ground_tracking_range.py": "3be26d63e032869cc549a34d3f0de5dcba706c33972dd41c09fcb1ce5cd1ab29",
+    "src/mission_control/test/test_ball_entry_line_alignment.py": "ef89d4fdf2ced0b56c9e42157625749f5bc9ff97d89f5484087377028472f52c",
+    "src/mission_control/test/test_ball_entry_search_recovery.py": "75712e3e4aea4e83869e5af84d333dc0a03f1b1044d25e35933bfe932f65413f"
+  }
+}

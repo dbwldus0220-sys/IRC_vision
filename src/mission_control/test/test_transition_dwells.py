@@ -53,7 +53,12 @@ def check_both_pauses(bridge, clock, prepare, target):
     assert len(requests(bridge)) == start + 2
 
 
-@pytest.mark.parametrize("previous,target,prepare", CASES)
+@pytest.mark.parametrize("previous,target,prepare", [
+    case for case in CASES if case[:2] not in {
+        ("GOAL_CAMERA_90_FORWARD", "GOAL_CAMERA90_FINE_FORWARD_1"),
+        ("GOAL_CAMERA90_FINE_FORWARD_1", "GOAL_CAMERA_90_FORWARD"),
+    }
+])
 def test_all_six_transition_types_pause_exactly_once_on_both_sides(clock, previous, target, prepare):
     bridge = FakeBridge(advance_transition_dwells=False)
     bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))

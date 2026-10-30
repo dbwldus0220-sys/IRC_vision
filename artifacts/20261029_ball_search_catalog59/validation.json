@@ -1,0 +1,36 @@
+{
+  "hardware_executed": false,
+  "source_tests": {
+    "passed": 341
+  },
+  "installed_tests": {
+    "passed": 158
+  },
+  "cpp_fake_hardware_source59_trace_cases": 14,
+  "catalog_validation": {
+    "motions": 98,
+    "all_aliases_resolve": true,
+    "all_frames_have_motor_ids_0_to_22": true
+  },
+  "packages_built": [
+    "step",
+    "mission_control",
+    "irc_step_motion_executor"
+  ],
+  "catalog_tool_tests": {
+    "passed": 4,
+    "failed": 1,
+    "failure": "test_production_runtime_preserves_original_shoulders_and_other_fields",
+    "reason": "Existing runtime/PC playback_speed mismatch; ordinary forward remains 0.95 versus 1.0. Not changed in this task."
+  },
+  "broad_diagnostic_run": "baseline_tests.log included historical catalog assertions and overlapped the working catalog update; do not treat its failure count as a clean baseline. Focused final tests and explicit pre-edit snapshots are the change verification.",
+  "hashes": {
+    "artifacts/robot_motions_runtime.json": "a76ebc09994ec3e6fbe03edcaa25e0611e2105d6cfc101e205070dc56b73388e",
+    "artifacts/robot_motions_pc.json": "8c5ba70f3571c125c831c00a0db45749c7bae2b6a058c59f250480feb6583292",
+    "src/irc_step_motion_executor/config/motion_aliases.yaml": "c7a77c9601908bd71fd99f6d3dde0c1ce6d83e606f93bbf177684bd120d7746f",
+    "src/mission_control/mission_control/ball_entry_line_alignment.py": "131e573886645bd00ea0b9158a0e408e2ff9fcde51bae92719336fde972a9a53",
+    "src/mission_control/mission_control/motion_decision_node.py": "6f56821596a8e0d0419a1300ad51a7dc4e20cd461cf43a3394ecc3f9dd56cdb1",
+    "external_sdk/gui_aligned/robot_motion_player.cpp": "4579b544273b99023c5d4193f9f92a7dbe5e994cd4b530ac7b95427cc57376c2",
+    "external_sdk/gui_aligned/gui_playback.hpp": "1473d8addc903ffb81dac48e3ce61593aab56f21d32a079afd621c37300a8914"
+  }
+}

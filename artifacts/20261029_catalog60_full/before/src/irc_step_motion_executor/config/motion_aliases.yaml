@@ -1,0 +1,143 @@
+# Stable aliases for the latest SDK catalog.
+# Retained left-turn selection: 1/2/3/4/5/6 repeats = 15/30/45/60/75/90 degrees.
+# Catalog53 R left-turn gait: retain command counts; re-measure actual yaw.
+# Stationary right-turn bins: 15/30/45/60/75/90+ degrees -> 2/3/5/6/7/9 repeats.
+# Catalog52 R right-turn gait: retain command counts; re-measure actual yaw.
+# The 45/0/90 in catalog names identifies the camera pose, not the yaw angle.
+# Visible-target alignment: left 15/30/45/60/75/90+ degrees -> 1/2/3/4/5/6 repeats.
+# Right turns below 15 degrees are skipped; each lower bound is inclusive.
+# Left turns below 15 degrees are skipped; 90 degrees and above use six repeats.
+# Catalog52 R forward variants; 2/8-cycle commands retain their existing repeat counts.
+motion_aliases:
+  # Legacy manual pickup IDs select 400; automatic pickup chooses after retreat.
+  sdk_pickup: "r공잡기 400"
+  sdk_forward_4: "R전진45도(4회)"
+  line_forward_2: "R전진45도(2회)"
+  line_forward_4: "R전진45도(4회)"
+  line_forward_6: "R전진45도(6회)"
+  line_forward_8: "R전진45도(8회)"
+  forward: "R전진45도(8회)"
+  line_turn_right_2: "R제자리우회전(2회)"
+  line_turn_right_3: "R제자리우회전(3회)"
+  line_turn_right_5: "R제자리우회전(5회("
+  line_turn_right_6: "R제자리우회전(6회)"
+  line_turn_right_7: "R제자리우회전(7회)"
+  line_turn_right_9: "R제자리우회전(9회)"
+  line_turn_right_large: "R제자리우회전(9회)"
+  # Catalog52 R recovery motions; selected by TURN direction, not line side.
+  line_recovery_left_4: "R전진라인복귀좌"
+  # Legacy six-cycle ID now resolves to the approved four-cycle recovery.
+  line_recovery_left_6: "R전진라인복귀좌"
+  line_recovery_right_4: "R라인복귀우회전"
+  line_search_left_2: "R제자리좌회전(2회)"
+  line_search_right_5: "R제자리우회전(5회("
+  stationary_turn_left: "R제자리좌회전(6회)"
+  stationary_turn_right: "R제자리우회전(9회)"
+  # Stable IDs use source59 r미세0도 (five / three repeats).
+  ball_general_fine_forward_8: "r미세0도"
+  ball_top_loss_fine_forward_45_3: "r미세0도(상단탐색3회)"
+  pickup_top_loss_fine_forward_0_3: "r미세0도(상단탐색3회)"
+  # Keep legacy IDs; pickup forward uses the supplied camera-45 gait.
+  ball_camera_down_forward_2: "R전진45도(2회)"
+  ball_camera_down_forward_4: "R전진45도(4회)"
+  pickup_fine_forward_0: "r미세0도"
+  hurdle_fine_forward_10: "r미세0도(허들10회)"
+  pickup_fine_prepare: "R오뒤에서미세오뒤45도"
+  pickup_crab_right_0: "유미세오옆꽃게0도"
+  # Legacy alias IDs now prepare the default posture for either crab direction.
+  pickup_fine_to_crab_right_0: "R미세오뒤에서 기본자세45도"
+  pickup_forward_to_crab_0: "R오뒤에서 기본자세(0도)"
+  pickup_crab_left_0: "유미세왼옆꽃게0도"
+  pickup_pre_backward_camera_down: "찐공잡기전후진-2(2회)"
+  # Close-ball recovery uses the supplied one-cycle retreat.
+  pickup_lost_ball_backward_1: "찐후진실전(1회)"
+  pickup_grasp_check_pose: "찐공확인자세"
+  # Keep the legacy ID; post-grasp retreat now uses one cycle from catalog 26.
+  pickup_retreat_2: "찐후진실전(1회)"
+  # Composite motions include the exit turn; execute each only once.
+  pickup_first_backward_turn_right: "R후진에서제자리우회전(공)"
+  pickup_second_backward_turn_left: "R후진에서 제자리 좌회전"
+  pickup_first_turn_right_7: "R제자리우회전(7회)"
+  pickup_second_turn_left_3: "R제자리좌회전(3회)"
+  # Retain the former exit turn alias for compatibility.
+  pickup_first_turn_right_9: "R제자리우회전(9회)"
+  pickup_camera_down_turn_left_1: "R제자리좌회전0도(1회)"
+  pickup_camera_down_turn_left_2: "R제자리좌회전0도(2회)"
+  pickup_camera_down_turn_left_3: "R제자리좌회전0도(3회)"
+  pickup_camera_down_turn_left_4: "R제자리좌회전0도(4회)"
+  pickup_camera_down_turn_left_5: "R제자리좌회전0도(5회)"
+  pickup_camera_down_turn_left_6: "R제자리좌회전0도(6회)"
+  pickup_camera_down_turn_right_2: "R제자리우회전0도(2회)"
+  pickup_camera_down_turn_right_3: "R제자리우회전0도(3회)"
+  pickup_camera_down_turn_right_5: "R제자리우회전0도(5회)"
+  pickup_camera_down_turn_right_6: "R제자리우회전0도(6회)"
+  pickup_camera_down_turn_right_7: "R제자리우회전0도(7회)"
+  pickup_camera_down_turn_right_9: "R제자리우회전0도(9회)"
+  post_ball_forward_4: "R전진45도(4회)"
+  post_ball_forward_6: "R전진45도(6회)"
+  post_shot_turn_right_9: "R제자리우회전(9회)"
+  # Catalog53 exit composites contain seven right / five left cycles; play once.
+  post_shot_default_turn_right: "R골대후제자리우회전"
+  post_shot_default_turn_left: "R골대후제자리좌회전"
+  post_ball_forward_8: "R전진45도(8회)"
+  post_ball_camera_90: "R오뒤카메라90도"
+  goal_camera_90_forward_2: "R전진90도(2회)"
+  goal_camera_90_forward_4: "R전진90도(4회)"
+  goal_camera_90_forward_6: "R전진90도(6회)"
+  goal_camera_90_backward_1: "찐후진실전(1회)"
+  goal_camera_90_fine_forward_1: "R미세90도(1회)"
+  goal_camera_90_fine_forward_2: "R미세90도(2회)"
+  goal_camera_90_fine_forward_3: "R미세90도(3회)"
+  goal_camera_90_fine_forward_4: "R미세90도(4회)"
+  goal_camera_90_crab_right: "유미세오옆꽃게90도"
+  goal_fine_to_crab_right_90: "R미세오뒤에서 기본자세90도"
+  goal_camera_90_crab_left: "유미세왼옆꽃게90도"
+  # The existing goal head override supplies the camera-90 angle during playback.
+  goal_forward_to_crab_right_90: "R오뒤에서 기본자세(카메라45도)"
+  post_ball_line_turn_right_2: "R제자리우회전(2회)"
+  post_ball_line_turn_right_3: "R제자리우회전(3회)"
+  post_ball_line_turn_right_5: "R제자리우회전(5회("
+  post_ball_line_turn_right_6: "R제자리우회전(6회)"
+  post_ball_line_turn_right_7: "R제자리우회전(7회)"
+  post_ball_line_turn_right_9: "R제자리우회전(9회)"
+  post_ball_line_turn_left_1: "R제자리좌회전(1회)"
+  post_ball_line_turn_left_2: "R제자리좌회전(2회)"
+  post_ball_line_turn_left_3: "R제자리좌회전(3회)"
+  post_ball_line_turn_left_4: "R제자리좌회전(4회)"
+  post_ball_line_turn_left_5: "R제자리좌회전(5회)"
+  post_ball_line_turn_left_6: "R제자리좌회전(6회)"
+  goal_camera_90_turn_right_2: "R제자리우회전90도(2회)"
+  goal_camera_90_turn_right_3: "R제자리우회전90도(3회)"
+  goal_camera_90_turn_right_5: "R제자리우회전90도(5회)"
+  goal_camera_90_turn_right_6: "R제자리우회전90도(6회)"
+  goal_camera_90_turn_right_7: "R제자리우회전90도(7회)"
+  goal_camera_90_turn_right_9: "R제자리우회전90도(9회)"
+  goal_camera_90_turn_left_1: "R제자리좌회전90도(1회)"
+  goal_camera_90_turn_left_2: "R제자리좌회전90도(2회)"
+  goal_camera_90_turn_left_3: "R제자리좌회전90도(3회)"
+  goal_camera_90_turn_left_4: "R제자리좌회전90도(4회)"
+  goal_camera_90_turn_left_5: "R제자리좌회전90도(5회)"
+  goal_camera_90_turn_left_6: "R제자리좌회전90도(6회)"
+  goal_shot: "찐골넣기"
+  goal_fine_to_default: "R미세오뒤에서 기본자세45도"
+  goal_forward_to_default: "R오뒤에서 기본자세(카메라45도)"
+
+  pickup: "r공잡기 400"
+  pickup_400: "r공잡기 400"
+  pickup_500: "r공잡기500"
+  hurdle: "찐허들"
+
+  # Fine-forward exit posture before any in-place turn (camera pose in degrees).
+  fine_to_turn_ready_45: "R미세오뒤에서 오뒤45도"
+  fine_to_turn_ready_0: "R미세오뒤에서 오뒤0도"
+  fine_to_turn_ready_90: "R미세오뒤에서 오뒤90도"
+
+  # Catalog52 R variants available for explicit/manual requests.
+  r_forward_0_4: "R전진0도(4회)"
+  r_forward_0_6: "R전진0도(6회)"
+  r_turn_right_4: "R제자리우회전(4회)"
+  r_turn_right_90_4: "R제자리우회전90도(4회)"
+  r_turn_right_0_4: "R제자리우회전0도(4회)"
+  r_left_back_to_default_0: "R왼뒤에서 기본자세0도"
+  r_back_pose_45: "R오뒤45도"
+  r_forward_to_crab_90: "R오뒤에서오옆꽃게90도"

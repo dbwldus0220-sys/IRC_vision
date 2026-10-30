@@ -1,0 +1,13 @@
+........................................................................ [ 29%]
+......................................................................F. [ 59%]
+........................................................................ [ 88%]
+............................                                             [100%]
+=================================== FAILURES ===================================
+_ test_entry_never_reserves_ball_forward_for_unusable_or_nonwalking_next_decision[turn] _
+src/mission_control/test/test_ball_entry_line_alignment.py:448: in test_entry_never_reserves_ball_forward_for_unusable_or_nonwalking_next_decision
+    assert getattr(node, 'queued_general_command_id', None) is None
+E   AssertionError: assert 2 is None
+E    +  where 2 = getattr(<test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff8d22ec20>, 'queued_general_command_id', None)
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_ball_entry_line_alignment.py::test_entry_never_reserves_ball_forward_for_unusable_or_nonwalking_next_decision[turn]
+1 failed, 243 passed in 1.95s

@@ -555,7 +555,7 @@ Torque OFF 경로는 유지하며, 이번 테스트에서는 fake hardware만 �
 | enable_shoulder_override | false | PC 원본 ID 4·5 사용. 어깨 고정 정책은 기본 비활성화 |
 | policy_reference_json_path | install/config/robot_motions_pc.json | OFF일 때 참조하는 검증된 PC 원본 |
 | queued_transition_hold_ms | 0 | 성공한 마지막 Goal 이후 activation까지 최소 대기시간 |
-| position_tolerance_enabled | false | 일반 모션 종료 검사만 제어. 시작 자세 위치 검사·안정화·AUTO 전 대기에는 영향 없음 |
+| position_tolerance_enabled | false | 일반 모션 도달 대기 없이 진행하고 부분 모터 오류 후 다음 모션도 허용. 초기화·시작 자세·비상정지 검사는 유지 |
 | motion_trace_enabled | false | bounded trace를 종료 후 비동기 파일 기록 |
 | motion_trace_path | 빈 문자열 | trace 활성화 시 필수 출력 경로 |
 | motion_trace_goals | false | 상세 23축 degree Goal 추가 |
@@ -1030,11 +1030,23 @@ STEP 통합 기능이므로 이것까지 GUI와 동일하다는 뜻은 아니다
 공통 재생 정책으로 대체했다. SDK와 두 full_system launch 모두
 `position_tolerance_enabled=false`가 기본값이다. 일반 프레임·반복·queue는
 위치 도착을 기다리지 않는다. 예약이 없으면 마지막 Goal 송신 성공 callback에서
-완료한다. `true`를 명시하면 기존 모션 끝의 최대 100ms best-effort 검사만
-활성화하며, 프레임마다 3000ms 기다리는 옛 동작을 복원하지 않는다.
+완료한다. 현재 GUI SDK는 `true`를 명시하면 거절한다.
 시작 자세의 별도 위치 검사·80ms 안정화·AUTO 전 2초 대기는 유지한다.
 완료는 계획한 Goal 송신이 끝났다는 뜻이며 실제 관절 도착을 증명하지 않는다.
 검증은 `test_common_playback`과 startup gate의 가짜 하드웨어 검사로 수행한다.
+
+2026-10-29 경기 지속 정책 복원: `position_tolerance_enabled=false`이면 정상
+초기화 이후 일반 모션의 토크 OFF/미확인은 경고로 남기고 재생을 진행한다.
+새 모션의 전체 위치 읽기가 실패하면 관절별로 한 번 읽는다. 응답한 관절은
+새 실측각을 사용하고, 응답 없는 관절은 이전 실측각 또는 마지막 송신 성공
+목표각으로 보완한다. 이 값은 실제 도달각이 아니며 `initial_fallback` trace와
+미확인 ID 경고로 구분한다. 응답 복구 후에는 다시 새 실측각을 사용한다.
+관절별 읽기는 실패한 새 모션 시작에만 추가되며 정상 재생 주기는 유지한다.
+초기화/시작 자세/cancel/비상정지 검사는 완화하지 않는다. 전체 무응답, 보완할
+기준각 부재, 프로파일·Goal 송신 실패도 성공으로 처리하지 않는다. 고장 관절을
+자동으로 다시 켜거나 EEPROM/Shutdown 설정을 변경하지 않는다.
+가짜 버스 검증은 `continuous_hardware_contract`에 포함한다. 물리적 추종·균형은
+보장하지 않으므로 변경된 오류 후 진행 동작은 시뮬레이션에서 먼저 확인한다.
 
 GUI 전용 가상환경은 ROS Python 경로와 사용자 패키지를 배제해 실행해야 한다.
 관측된 버전은 Python 3.10.12, PyQt5 5.15.6, dynamixel-sdk 4.0.5,

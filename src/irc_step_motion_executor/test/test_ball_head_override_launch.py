@@ -18,6 +18,7 @@ TOPICS = (
     "/motion/executor/request", "/motion/executor/cancel",
     "/motion/executor/status", "/motion/executor/heartbeat",
     "/navigation/motion_command", "/vision/ball_info", "/vision/hurdle_info",
+    "/navigation/goal_camera_prepare",
 )
 
 
@@ -106,6 +107,31 @@ class TestBallHeadOverride(unittest.TestCase):
 
     def test_ball_camera_hold_across_motion_boundaries(self):
         self.wait(lambda: all(p.get_subscription_count() for p in self.publishers.values()))
+        from step.ball_analyzer import should_request_head_down
+        self.navigation("ball")
+        self.request(89, "ball_approach_fine_forward_45_5")
+        self.status(89, "RUNNING")
+        self.ball(head_down_requested=should_request_head_down(.550001, True, .05))
+        self.hold(False)
+        self.ball(head_down_requested=should_request_head_down(.550, True, .05))
+        self.hold(True)
+        self.assertFalse(any(s["request_id"] == 89 and s["status"] == "SUCCEEDED"
+                             for s in self.statuses))
+        self.publish(TOPICS[1], {"request_id": 89})
+        self.status(89, "CANCELLED")
+        self.hold(False)
+        # Interior loss must lower the camera without any detected Ball message.
+        for request_id, action in ((90, "BALL_LOST_BACKWARD_2"), (91, "PICKUP_NOW")):
+            self.publish(TOPICS[0], {
+                "request_id": request_id, "command_id": request_id, "event_id": None,
+                "motion_id": "ball_lost_camera_down_backward_2", "action": action,
+                "timeout_ms": 3000,
+            })
+            self.status(request_id, "RUNNING")
+            self.hold(True)
+            self.publish(TOPICS[1], {"request_id": request_id})
+            self.status(request_id, "CANCELLED")
+            self.hold(False)
         # Both moving corrections work even before a BALL navigation message arrives.
         for request_id, motion in ((1, "line_recovery_left_4"), (2, "line_recovery_right_4")):
             self.request(request_id, motion)

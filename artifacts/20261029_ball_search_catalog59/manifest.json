@@ -1,0 +1,36 @@
+{
+  "source_sha256": "434d10f85fcc1622406e20d9719c8c5049c100a001a55de6b1ea6ee06313b73f",
+  "motions": {
+    "r미세0도": {
+      "source": "r미세0도",
+      "repeat_count": 5
+    },
+    "r미세0도(상단탐색3회)": {
+      "source": "r미세0도",
+      "repeat_count": 3
+    },
+    "R미세90도": {
+      "source": "R미세90도",
+      "repeat_count": 5
+    },
+    "R미세90도(1회)": {
+      "source": "R미세90도",
+      "repeat_count": 1
+    },
+    "R미세90도(2회)": {
+      "source": "R미세90도",
+      "repeat_count": 2
+    },
+    "R미세90도(3회)": {
+      "source": "R미세90도",
+      "repeat_count": 3
+    },
+    "R미세90도(4회)": {
+      "source": "R미세90도",
+      "repeat_count": 4
+    }
+  },
+  "runtime_tolerance_deg": 5.0,
+  "goal_cycle_ms": 376,
+  "source_speed": 1.05
+}

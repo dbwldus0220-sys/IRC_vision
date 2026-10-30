@@ -1,0 +1,18 @@
+....F                                                                    [100%]
+=================================== FAILURES ===================================
+____ test_production_runtime_preserves_original_shoulders_and_other_fields _____
+tools/test_upsert_motion_catalog.py:104: in test_production_runtime_preserves_original_shoulders_and_other_fields
+    assert motion == _with_runtime_policy(original[motion["name"]])
+E   AssertionError: assert {'completion'...s': 7045, ...} == {'completion'...s': 7045, ...}
+E     Omitting 8 identical items, use -vv to show
+E     Differing items:
+E     {'playback_speed': 0.95} != {'playback_speed': 1.0}
+E     Full diff:
+E       {
+E        'completion': {'position_tolerance_deg': 5.0,
+E                       'settle_duration_ms': 80,...
+E     
+E     ...Full output truncated (67 lines hidden), use '-vv' to show
+=========================== short test summary info ============================
+FAILED tools/test_upsert_motion_catalog.py::test_production_runtime_preserves_original_shoulders_and_other_fields
+1 failed, 4 passed in 0.72s

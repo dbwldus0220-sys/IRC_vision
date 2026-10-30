@@ -1,0 +1,168 @@
+--- before/src/irc_step_motion_executor/config/motion_aliases.yaml
++++ after/src/irc_step_motion_executor/config/motion_aliases.yaml
+@@ -33,7 +33,7 @@
+   line_search_right_5: "R제자리우회전(5회("
+   stationary_turn_left: "R제자리좌회전(6회)"
+   stationary_turn_right: "R제자리우회전(9회)"
+-  # Stable IDs use catalog57 camera-0 fine gait (five / three repeats).
++  # Stable IDs use source59 r미세0도 (five / three repeats).
+   ball_general_fine_forward_8: "r미세0도"
+   ball_top_loss_fine_forward_45_3: "r미세0도(상단탐색3회)"
+   pickup_top_loss_fine_forward_0_3: "r미세0도(상단탐색3회)"
+@@ -85,10 +85,10 @@
+   goal_camera_90_forward_4: "R전진90도(4회)"
+   goal_camera_90_forward_6: "R전진90도(6회)"
+   goal_camera_90_backward_1: "찐후진실전(1회)"
+-  goal_camera_90_fine_forward_1: "r마세90도(1회)"
+-  goal_camera_90_fine_forward_2: "r마세90도(2회)"
+-  goal_camera_90_fine_forward_3: "r마세90도(3회)"
+-  goal_camera_90_fine_forward_4: "r마세90도(4회)"
++  goal_camera_90_fine_forward_1: "R미세90도(1회)"
++  goal_camera_90_fine_forward_2: "R미세90도(2회)"
++  goal_camera_90_fine_forward_3: "R미세90도(3회)"
++  goal_camera_90_fine_forward_4: "R미세90도(4회)"
+   goal_camera_90_crab_right: "유미세오옆꽃게90도"
+   goal_fine_to_crab_right_90: "R미세오뒤에서 기본자세90도"
+   goal_camera_90_crab_left: "유미세왼옆꽃게90도"
+--- before/src/mission_control/mission_control/ball_entry_line_alignment.py
++++ after/src/mission_control/mission_control/ball_entry_line_alignment.py
+@@ -76,6 +76,13 @@
+ 
+     def select(self, planner: MotionDecisionPlanner, line_info: dict | None,
+                dt_sec: float, ball_info: dict | None = None) -> MotionDecision:
++        if (self.pending and ball_info is not None
++                and ball_info.get('detected') is False
++                and ball_info.get('raw_detected') is not True
++                and ball_info.get('ball_loss_confirmed') is True):
++            # Keep Line approach armed for reacquisition. The existing Ball
++            # search owns turns, fresh-frame waits and the two-direction budget.
++            return planner.plan_lost_ball_approach_alignment(ball_info)
+         # Keep this policy local: normal Line, Goal and Hurdle retain their planners.
+         command = self._line_command(planner, line_info, ball_info)
+         return MotionDecision(
+--- before/src/mission_control/mission_control/motion_decision_node.py
++++ after/src/mission_control/mission_control/motion_decision_node.py
+@@ -113,7 +113,7 @@
+         "GOAL_CAMERA_90_FORWARD": .517 * 6 / .95,
+         "GOAL_CAMERA_90_FORWARD_1": .517 * 2 / .95,
+         "GOAL_CAMERA_90_FORWARD_2": .517 * 4 / .95,
+-        **{f"GOAL_CAMERA90_FINE_FORWARD_{count}": .383 * count / .9975
++        **{f"GOAL_CAMERA90_FINE_FORWARD_{count}": .376 * count / 1.05
+            for count in range(1, 5)},
+     }
+     GOAL_FORWARD_CAPTURE_FRAMES = 3
+@@ -4537,7 +4537,12 @@
+             entry.published(self.command_id)
+             self.get_logger().info(
+                 f"BALL entry Line alignment requested: command_id={self.command_id}, "
+-                f"action={decision.action}, queued={queue_while_locked}"
++                f"action={decision.action}, queued={queue_while_locked}, "
++                f"heading_deg={decision.source_command.get('heading_error_deg')}, "
++                f"heading_source={decision.source_command.get('heading_source')}, "
++                f"turn_count={decision.source_command.get('turn_count')}, "
++                f"turn_angle_deg={decision.source_command.get('turn_angle_deg')}, "
++                f"line_rgb_stamp_ns={(observations.get('line') or {}).get('rgb_stamp_ns')}"
+             )
+         if is_pickup_checkpoint_action and decision.valid and decision.sdk_motion_requested:
+             geometry = decision.source_command
+@@ -4583,6 +4588,10 @@
+         if decision.valid and decision.source == "hurdle" and decision.action == "GO":
+             self.pending_hurdle_final_sequence = None
+         limiter.record_published(decision, observations)
++        if entry_line_decision:
++            # A published approach with a verified Ball rearms its search too;
++            # Line bookkeeping alone would leave the previous Ball budget spent.
++            limiter.record_published(replace(decision, source="ball"), observations)
+         if (decision.valid and decision.source_command.get("lost_search_stage") == "CORNER"
+                 and getattr(self, "pending_line_corner", None) is not None):
+             self.pending_line_corner["search_started"] = True
+--- before/src/mission_control/test/test_catalog57_fine_forward_update.py
++++ after/src/mission_control/test/test_catalog57_fine_forward_update.py
+@@ -37,10 +37,14 @@
+     assert actual == expected
+ 
+ 
+-def test_all_active_fine_aliases_select_source57_camera_specific_gaits():
++def test_active_fine_aliases_preserve_camera_and_repeat_contract_after_source59():
+     aliases = yaml.safe_load((ROOT / ALIAS_PATH).read_text())['motion_aliases']
+     before = yaml.safe_load((UPDATE / 'before' / ALIAS_PATH).read_text())['motion_aliases']
+-    assert {key: aliases[key] for key in before} == {**before, **MANIFEST['alias_changes']}
++    goal_updates = {f'goal_camera_90_fine_forward_{n}': f'R미세90도({n}회)'
++                    for n in range(1, 5)}
++    assert {key: aliases[key] for key in before} == {
++        **before, **MANIFEST['alias_changes'], **goal_updates,
++    }
+     motions = json.loads((ROOT / 'artifacts/robot_motions_runtime.json').read_text())['motions']
+     catalog = {m['name']: m for m in motions}
+     assert len(catalog) == len(motions)
+@@ -51,7 +55,7 @@
+         'hurdle_fine_forward_10': ('r미세0도(허들10회)', 10, -64.0),
+         'ball_top_loss_fine_forward_45_3': ('r미세0도(상단탐색3회)', 3, -64.0),
+         'pickup_top_loss_fine_forward_0_3': ('r미세0도(상단탐색3회)', 3, -64.0),
+-        **{f'goal_camera_90_fine_forward_{n}': (f'r마세90도({n}회)', n, 1.0)
++        **{f'goal_camera_90_fine_forward_{n}': (f'R미세90도({n}회)', n, 1.0)
+            for n in range(1, 5)},
+     }
+     for alias, (name, count, head_angle) in expected.items():
+--- before/src/mission_control/test/test_catalog58_fine_import.py
++++ after/src/mission_control/test/test_catalog58_fine_import.py
+@@ -17,7 +17,7 @@
+     assert hashlib.sha256(raw).hexdigest() == MANIFEST['source_sha256']
+     source = {m['name']: m for m in json.loads(raw)['motions']}
+     before = {m['name']: m for m in json.loads((IMPORT / ('before_' + filename)).read_text())['motions']}
+-    actual = {m['name']: m for m in json.loads((ROOT / 'artifacts' / filename).read_text())['motions']}
++    actual = {m['name']: m for m in json.loads((ROOT / 'artifacts/20261029_ball_search_catalog59/before/artifacts' / filename).read_text())['motions']}
+     assert actual.keys() == before.keys()
+     assert len(MANIFEST['motions']) == 27
+     for name, motion in actual.items():
+--- before/src/mission_control/test/test_right_turn_bins.py
++++ after/src/mission_control/test/test_right_turn_bins.py
+@@ -118,7 +118,8 @@
+     assert hashlib.sha256(source_path.read_bytes()).hexdigest() == MANIFEST['source_sha256']
+     source = {m['name']: m for m in json.loads(source_path.read_text())['motions']}
+     before = json.loads((UPDATE / 'before/artifacts' / filename).read_text())
+-    actual = json.loads((ROOT / 'artifacts' / filename).read_text())
++    # Verify this import before the later source59 fine-gait replacement.
++    actual = json.loads((ROOT / 'artifacts/20261029_ball_search_catalog59/before/artifacts' / filename).read_text())
+     expected = copy.deepcopy(before)
+     for name, base in MANIFEST['derived'].items():
+         motion = copy.deepcopy(source[base])
+@@ -141,7 +142,9 @@
+ 
+ def test_only_six_repeat_aliases_added():
+     before = yaml.safe_load((UPDATE / 'before' / ALIAS_PATH).read_text())['motion_aliases']
+-    actual = yaml.safe_load((ROOT / ALIAS_PATH).read_text())['motion_aliases']
++    # Later source59 Goal aliases are covered by test_catalog59_fine_motion.
++    snapshot = ROOT / 'artifacts/20261029_ball_search_catalog59/before'
++    actual = yaml.safe_load((snapshot / ALIAS_PATH).read_text())['motion_aliases']
+     additions = {
+         'line_turn_right_6': 'R제자리우회전(6회)',
+         'post_ball_line_turn_right_6': 'R제자리우회전(6회)',
+--- before/src/mission_control/test/test_staged_lost_search.py
++++ after/src/mission_control/test/test_staged_lost_search.py
+@@ -135,7 +135,7 @@
+ def test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count(source, prefix, reason, side):
+     root = Path(__file__).resolve().parents[3]
+     aliases = yaml.safe_load((root / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']
+-    names = {m['name'] for m in json.loads((root / 'artifacts/robot_motions_runtime.json').read_text())['motions']}
++    catalog = {m['name']: m for m in json.loads((root / 'artifacts/robot_motions_runtime.json').read_text())['motions']}
+     policy = limiter()
+     lost = {source: {'detected': False}}
+     request = candidate(source, prefix, reason, side)
+@@ -152,9 +152,14 @@
+             motion = MotionCommandBridgeNode.ACTION_TO_MOTION_ID[result.action]
+         camera = 90 if source == 'goal' else 0 if prefix.startswith('BALL_PICKUP_') else 45
+         label = aliases[motion]
+-        assert f'{camera}도' in label and f'({count}회)' in label
++        # R camera-45 turns omit the camera suffix; one legacy name also has
++        # a mismatched closing bracket. The executable repeat field is authoritative.
++        camera_suffix = '' if camera == 45 else f'{camera}도'
++        direction_name = '좌회전' if direction == 'LEFT' else '우회전'
++        assert label.startswith(f'R제자리{direction_name}{camera_suffix}(')
++        assert catalog[label]['repeat_count'] == count
+         assert ('좌회전' if direction == 'LEFT' else '우회전') in label
+-        assert label in names
++        assert label in catalog
+         policy.record_published(result, lost)
+ 
+ 

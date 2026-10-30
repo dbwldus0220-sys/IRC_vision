@@ -66,8 +66,9 @@ def test_loss_turn_reaches_catalog_and_stays_bounded(stage, direction, count, ya
             bridge.executor_status_callback(executor_status(**{**request, 'status': 'SUCCEEDED'}))
             request = decoded_messages(bridge.executor_request_publisher)[-1]
         camera = 0 if stage in {'INITIAL', 'FINE'} else 45
-        name = f'찐제자리{"좌" if direction == "LEFT" else "우"}회전{camera}도-1({count}회)'
-        assert aliases[request['motion_id']] == name
+        prefix = 'pickup_camera_down_turn' if camera == 0 else 'post_ball_line_turn'
+        assert request['motion_id'] == f'{prefix}_{direction.lower()}_{count}'
+        name = aliases[request['motion_id']]
         assert name in catalog
         if camera == 0:
             assert request['action'] == 'PICKUP_NOW'
@@ -96,6 +97,8 @@ def test_unconfirmed_or_missing_observation_cannot_authorize_memory_turn(stage, 
 def test_translation_then_turn_and_reacquisition(stage):
     planner = tracked_planner('RIGHT')
     planner.last_ball_inside_image = True
+    assert 'BACKWARD' in plan(planner, stage, MISSING).action
+    planner.ball_interior_loss_backward_state = 'COMPLETE'
     assert 'FORWARD_4' in plan(planner, stage, MISSING).action
     planner.ball_interior_loss_forward_sent = True
     planner.last_ball_top_edge_ratio = .05
@@ -110,6 +113,33 @@ def test_close_loss_preserves_backward_recovery(stage):
     planner = tracked_planner('RIGHT')
     planner.pickup_last_visible_bottom_distance_px = 90
     assert plan(planner, stage, MISSING).action == f'BALL_PICKUP_{stage}_SEARCH_BACKWARD'
+
+
+@pytest.mark.parametrize('stage', ['INITIAL', 'FINE'])
+@pytest.mark.parametrize('direction', ['LEFT', 'RIGHT'])
+@pytest.mark.parametrize('bottom', [100.001, 139.0, 360.0])
+def test_confirmed_close_side_loss_uses_existing_complete_search(stage, direction, bottom):
+    from test_staged_lost_search import sequence
+
+    planner = tracked_planner(direction)
+    # A lateral exit must not take the separate interior/top/bottom recovery paths.
+    planner.last_ball_inside_image = False
+    planner.last_ball_top_edge_ratio = .5
+    planner.pickup_last_visible_bottom_distance_px = bottom
+    policy = LostSearchTurnLimiter(staged_sources=('ball',))
+    observations = {'ball': MISSING}
+    prefix = ('BALL_PICKUP_CAMERA_DOWN_TURN' if stage == 'INITIAL'
+              else 'BALL_PICKUP_FINE_SEARCH')
+    for side, count, search_stage in sequence(direction):
+        decision = policy.filter(plan(planner, stage, MISSING), observations)
+        assert decision.valid
+        assert decision.reason == 'turn_toward_last_seen_ball_side'
+        assert decision.action == f'{prefix}_{side}_{count}'
+        assert decision.source_command['lost_search_stage'] == search_stage
+        policy.record_published(decision, observations)
+    stopped = policy.filter(plan(planner, stage, MISSING), observations)
+    assert not stopped.valid
+    assert stopped.reason == 'lost_search_turn_limit_reached'
 
 
 def test_unknown_screen_side_never_defaults_to_right():

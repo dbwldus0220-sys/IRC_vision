@@ -21,10 +21,7 @@ def make_analyzer(depth_m=0.4, required_hits=1, robot_center_offset_px=0.0):
     analyzer.max_valid_depth_m = 6.0
     analyzer.detect_depth_m = 2.0
     analyzer.approach_depth_m = 0.5
-    analyzer.score_target_depth_m = 0.43
-    analyzer.score_depth_tolerance_m = 0.04
-    analyzer.score_left_bound_px = -90.0
-    analyzer.score_right_bound_px = 90.0
+    analyzer.score_target_depth_m = 0.51
     analyzer.direction_deadband_norm = 0.04
     analyzer.publish_empty_when_missing = True
     analyzer.fx = analyzer.fy = 600.0
@@ -69,10 +66,10 @@ def send(analyzer, published, detections):
 
 @pytest.mark.parametrize(
     "center_x,direction,action",
-    [(450, "LEFT", "GOAL_CAMERA90_TURN_LEFT_1"), (830, "RIGHT", "GOAL_CAMERA90_TURN_RIGHT_2")],
+    [(450, "LEFT", "GOAL_CAMERA90_TURN_LEFT_1"), (830, "RIGHT", "GOAL_CAMERA90_TURN_RIGHT_1")],
 )
 def test_standalone_backboard_center_reaches_navigation(center_x, direction, action):
-    analyzer, published = make_analyzer()
+    analyzer, published = make_analyzer(depth_m=0.5)
     board = detection(center_x=center_x)
     info = send(analyzer, published, [board])
 
@@ -149,7 +146,7 @@ def test_standalone_board_keeps_depth_gate(depth_m):
     assert GoalNavigationPlanner().plan(info).valid is False
 
 
-@pytest.mark.parametrize("depth_m", [0.43, 1.5, 2.0])
+@pytest.mark.parametrize("depth_m", [0.50, 1.5, 2.0])
 def test_backboard_depth_is_published_up_to_two_meters(depth_m):
     analyzer, published = make_analyzer(depth_m=depth_m)
     for _ in range(3):
@@ -157,22 +154,23 @@ def test_backboard_depth_is_published_up_to_two_meters(depth_m):
     assert info["detected"] is True
     assert info["depth_valid"] is True
     assert info["depth_m"] == depth_m
-    assert info["score_now"] is (depth_m == 0.43)
+    assert info["score_now"] is (depth_m == 0.50)
     if depth_m > 1.0:
-        assert GoalNavigationPlanner().plan(info).action == "GOAL_CAMERA_90_FORWARD"
+        assert GoalNavigationPlanner().plan(info).action == "GOAL_CAMERA_90_FORWARD_2"
 
 
-def test_goal_dropout_preserves_backboard_confirmation():
-    analyzer, published = make_analyzer(required_hits=30)
+@pytest.mark.parametrize('required_hits', [20, 30])
+def test_goal_dropout_preserves_backboard_confirmation(required_hits):
+    analyzer, published = make_analyzer(required_hits=required_hits)
     board = detection()
-    for index in range(29):
+    for index in range(required_hits - 1):
         detections = [detection("goal"), board] if index < 15 else [board]
         info = send(analyzer, published, detections)
         assert info["detected"] is False
         assert info["note"] == "goal_confirmation_pending"
     info = send(analyzer, published, [board])
     assert info["detected"] is True
-    assert info["confirmation_hits"] == 30
+    assert info["confirmation_hits"] == required_hits
     assert info["candidate_count"] == 1
 
 
@@ -185,7 +183,7 @@ def test_goal_cannot_keep_lost_backboard_active():
 
 
 def test_standalone_board_keeps_separate_score_confirmation():
-    analyzer, published = make_analyzer(depth_m=0.43)
+    analyzer, published = make_analyzer(depth_m=0.50)
     for _ in range(2):
         info = send(analyzer, published, [detection()])
         assert info["detected"] is True
@@ -221,7 +219,7 @@ def test_unreliable_goal_does_not_give_board_priority(goal_confidence):
 
 
 def test_calibrated_backboard_center_agrees_with_yaw_and_scoring():
-    analyzer, published = make_analyzer(depth_m=0.43, robot_center_offset_px=96.0)
+    analyzer, published = make_analyzer(depth_m=0.50, robot_center_offset_px=96.0)
     analyzer.cx = 650.0
     for _ in range(3):
         info = send(analyzer, published, [detection(center_x=736)])
@@ -231,20 +229,20 @@ def test_calibrated_backboard_center_agrees_with_yaw_and_scoring():
     assert info["offset_x_norm"] == 0.0
     assert info["bearing_deg"] == 0.0
     assert info["lateral_offset_m"] == 0.0
-    assert info["depth_m"] == 0.43
+    assert info["depth_m"] == 0.50
     assert info["score_now"] is True
     assert GoalNavigationPlanner().plan(info).action == "SHOT"
 
 
 def test_optical_image_center_is_left_of_calibrated_goal_axis():
-    analyzer, published = make_analyzer(robot_center_offset_px=96.0)
+    analyzer, published = make_analyzer(depth_m=0.5, robot_center_offset_px=96.0)
     info = send(analyzer, published, [detection(center_x=640)])
     assert info["offset_x_px"] == -96
     assert info["offset_x_norm"] == -0.15
     assert info["bearing_deg"] < 0.0
     assert info["horizontal_direction"] == "LEFT"
-    assert info["is_centered"] is False
-    assert GoalNavigationPlanner().plan(info).action == "GOAL_CAMERA90_CRAB_LEFT"
+    assert info["is_centered"] is True
+    assert GoalNavigationPlanner().plan(info).action == "WAIT_SCORE_CONFIRMATION"
 
 
 @pytest.mark.parametrize('width,offset,expected', [
@@ -267,7 +265,7 @@ def test_pending_goal_publishes_calibrated_axis_before_confirmation():
     assert info["robot_center_offset_px"] == 96.0
 
 
-@pytest.mark.parametrize('depth', [0.39, 0.43, 0.47])
+@pytest.mark.parametrize('depth', [0.50, 0.47, 0.509])
 @pytest.mark.parametrize('offset', [-90, -70, 0, 70, 90])
 def test_analyzer_confirms_new_scoring_rectangle(depth, offset):
     analyzer, published = make_analyzer(depth_m=depth, robot_center_offset_px=96.0)
@@ -280,13 +278,26 @@ def test_analyzer_confirms_new_scoring_rectangle(depth, offset):
 
 
 @pytest.mark.parametrize('depth,offset', [
-    (0.389, 0), (0.471, 0), (0.480, 0), (0.500, 0), (0.43, -91), (0.43, 91),
+    (0.429, 0), (0.570, 0), (0.511, -101), (0.550, 101), (0.50, -121), (0.50, 121),
 ])
 def test_analyzer_rejects_outside_new_scoring_rectangle(depth, offset):
     analyzer, published = make_analyzer(depth_m=depth, robot_center_offset_px=96.0)
     for _ in range(5):
         info = send(analyzer, published, [detection(center_x=736 + offset)])
         assert info['score_now'] is False
+
+
+@pytest.mark.parametrize('depth,offset,region', [
+    (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+    (.569, -100, 3), (.510, 0, 2), (.550, 0, 2),
+])
+def test_analyzer_confirms_each_zone_before_planner_requests_shot(depth, offset, region):
+    analyzer, published = make_analyzer(depth_m=depth)
+    for index in range(3):
+        info = send(analyzer, published, [detection(center_x=640 + offset)])
+        command = GoalNavigationPlanner().plan(info)
+        assert command.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+        assert command.shot_region == region
 
 
 @pytest.mark.parametrize('detections', [[], [detection()]])

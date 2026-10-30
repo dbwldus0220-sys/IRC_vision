@@ -20,6 +20,7 @@ TOPICS = (
     "/motion/executor/request", "/motion/executor/cancel",
     "/motion/executor/status", "/motion/executor/heartbeat", "/vision/ball_info",
     "/navigation/motion_command", "/vision/hurdle_info",
+    "/navigation/goal_camera_prepare",
 )
 
 
@@ -55,6 +56,7 @@ class TestGoalHeadOverride(unittest.TestCase):
         cls.heartbeats = []
         cls.request = cls.node.create_publisher(String, TOPIC_ROOT + TOPICS[0], 10)
         cls.cancel = cls.node.create_publisher(String, TOPIC_ROOT + TOPICS[1], 10)
+        cls.camera = cls.node.create_publisher(String, TOPIC_ROOT + TOPICS[-1], 1)
         cls.ball = cls.node.create_publisher(String, TOPIC_ROOT + TOPICS[4], 10)
         cls.status_sub = cls.node.create_subscription(
             String, TOPIC_ROOT + TOPICS[2],
@@ -107,8 +109,77 @@ class TestGoalHeadOverride(unittest.TestCase):
 
     def test_hold_starts_after_camera_success_and_lasts_through_shot(self):
         self.wait(lambda: all(pub.get_subscription_count() for pub in (
-            self.request, self.cancel, self.ball,
+            self.request, self.cancel, self.ball, self.camera,
         )))
+        self.hold(False)
+        # Direct timed-Line handoff raises the camera with the first accepted
+        # Goal gait, including line recovery, without a separate camera motion.
+        self.publish(self.request, {
+            "request_id": 200, "command_id": 200, "event_id": None,
+            "motion_id": "unsupported_goal_handoff",
+            "action": "GOAL_CAMERA90_RECOVER_RIGHT_4", "timeout_ms": 2000,
+        })
+        self.status(200, "REJECTED")
+        self.hold(False)
+        self.publish(self.camera, {
+            "request_id": 190, "stamp_ns": 1,
+            "phase": "LINE_TRACK_AFTER_PICKUP", "grasp": "GRABBED",
+        })
+        self.hold(False)
+        self.publish(self.camera, {
+            "request_id": 190, "stamp_ns": self.node.get_clock().now().nanoseconds,
+            "phase": "BALL_APPROACH", "grasp": "GRABBED",
+        })
+        self.hold(False)
+        self.send(190, "line_forward_6")
+        self.status(190, "RUNNING")
+        self.publish(self.camera, {
+            "request_id": 190, "stamp_ns": self.node.get_clock().now().nanoseconds,
+            "phase": "LINE_TRACK_AFTER_PICKUP", "grasp": "GRABBED",
+        })
+        self.wait(lambda: self.heartbeats[-1].get("goal_head_prepare_id") == 190)
+        self.assertTrue(self.heartbeats[-1]["active"])
+        self.assertTrue(self.heartbeats[-1]["goal_head_override_active"])
+        self.assertFalse(self.heartbeats[-1]["goal_head_transition_complete"])
+        self.status(190, "SUCCEEDED")
+        # Retries acknowledge the same ramp; they must not restart the interpolation.
+        self.publish(self.camera, {
+            "request_id": 190, "stamp_ns": self.node.get_clock().now().nanoseconds,
+            "phase": "LINE_TRACK_AFTER_PICKUP", "grasp": "GRABBED",
+        })
+        self.wait(lambda: self.heartbeats[-1].get("goal_head_transition_complete") is True)
+        self.send(191, "goal_shot")
+        self.status(191, "SUCCEEDED")
+        self.hold(False)
+        self.send(201, "line_forward_6")
+        self.status(201, "RUNNING")
+        self.publish(self.request, {
+            "request_id": 202, "command_id": 202, "event_id": None,
+            "motion_id": "line_recovery_right_4",
+            "action": "GOAL_CAMERA90_RECOVER_RIGHT_4", "timeout_ms": 2000,
+        })
+        # This simulated backend rejects overlap; a busy request must not tilt the head.
+        self.status(202, "REJECTED")
+        self.hold(False)
+        self.status(201, "SUCCEEDED")
+        self.publish(self.request, {
+            "request_id": 204, "command_id": 204, "event_id": None,
+            "motion_id": "line_recovery_right_4",
+            "action": "GOAL_CAMERA90_RECOVER_RIGHT_4", "timeout_ms": 2000,
+        })
+        self.status(204, "RUNNING")
+        self.hold(True)
+        self.status(204, "SUCCEEDED")
+        self.send(203, "goal_shot")
+        self.status(203, "SUCCEEDED")
+        self.hold(False)
+        self.publish(self.request, {
+            "request_id": 205, "command_id": 205, "event_id": None,
+            "motion_id": "goal_shot_region_3", "action": "SHOT", "timeout_ms": 2000,
+        })
+        self.status(205, "RUNNING")
+        self.hold(True)
+        self.status(205, "SUCCEEDED")
         self.hold(False)
         for index, forward in enumerate(("ball_camera_down_forward_2", "ball_camera_down_forward_4")):
             request_id = 100 + index * 3

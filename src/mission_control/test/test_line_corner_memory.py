@@ -546,7 +546,7 @@ def test_corner_allows_fresh_loss_search_but_keeps_budget_and_memory(clock, side
     x = 800 if side == 'LEFT' else 500
     receive_line(node, clock, corner_info(side, center_points_px=[[x, 700], [640, 400]]))
     release_general(node, current)
-    small = 1 if side == 'LEFT' else 2
+    small = 1
     sequence = [(side, small)] * 3
     for direction, repeats in sequence:
         expected = f'LINE_LOST_TURN_{direction}_{repeats}'

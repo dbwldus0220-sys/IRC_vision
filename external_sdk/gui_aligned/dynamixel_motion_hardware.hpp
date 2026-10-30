@@ -28,6 +28,8 @@ public:
     bool initialize() noexcept override;
     [[nodiscard]] bool ready() const noexcept override;
     bool prepareImmediatePlayback() noexcept override;
+    bool preparePlayback(bool allow_unconfirmed_torque) noexcept override;
+    bool readAvailablePositions(JointAngles& positions_deg) noexcept override;
     bool commandPosition(
         const JointAngles& goal_deg,
         const std::vector<int>& motor_ids,

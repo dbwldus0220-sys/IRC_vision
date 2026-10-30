@@ -3,6 +3,7 @@
 import pytest
 
 from step.goal_navigation_planner import GoalNavigationPlanner
+from step.goal_scoring import GOAL_SCORE_MIN_DEPTH_M
 
 
 def goal_info(**overrides):
@@ -11,7 +12,7 @@ def goal_info(**overrides):
         "detected": True,
         "confidence": 0.9,
         "depth_valid": True,
-        "depth_m": 0.43,
+        "depth_m": 0.50,
         "ground_distance_m": 0.5,
         "distance_m": 0.5,
         "bearing_deg": 0.0,
@@ -50,13 +51,13 @@ def test_centered_goal_at_900mm_uses_four_cycle_forward():
 
     assert command.valid is True
     assert command.action == "GOAL_CAMERA_90_FORWARD_2"
-    assert command.reason == "approach_goal_by_depth"
+    assert command.reason == "approach_goal_target_forward_4"
 
 
-def test_centered_goal_at_430mm_requests_score_motion():
+def test_centered_goal_at_500mm_requests_score_motion():
     planner = GoalNavigationPlanner()
 
-    command = planner.plan(goal_info(depth_m=0.43))
+    command = planner.plan(goal_info(depth_m=0.50))
 
     assert command.action == "SHOT"
     assert command.sdk_motion_requested is True
@@ -66,11 +67,11 @@ def test_goal_decision_uses_raw_depth_not_ground_distance():
     planner = GoalNavigationPlanner()
 
     command = planner.plan(
-        goal_info(depth_m=0.43, ground_distance_m=0.25)
+        goal_info(depth_m=0.50, ground_distance_m=0.25)
     )
 
     assert command.action == "SHOT"
-    assert command.depth_m == 0.43
+    assert command.depth_m == 0.50
 
 
 def test_goal_waits_until_analyzer_confirms_score_condition():
@@ -86,7 +87,7 @@ def test_misaligned_goal_crabs_before_scoring():
     planner = GoalNavigationPlanner()
 
     command = planner.plan(
-        goal_info(offset_x_px=-91, offset_x_norm=-0.2)
+        goal_info(offset_x_px=-121, offset_x_norm=-0.2)
     )
 
     assert command.action == "GOAL_CAMERA90_CRAB_LEFT"
@@ -96,8 +97,7 @@ def test_misaligned_goal_crabs_before_scoring():
 def test_centered_goal_below_scoring_range_retreats():
     planner = GoalNavigationPlanner()
     depth = (
-        planner.config.score_target_depth_m
-        - planner.config.score_depth_tolerance_m
+        GOAL_SCORE_MIN_DEPTH_M
         - 0.001
     )
     command = planner.plan(
@@ -109,21 +109,22 @@ def test_centered_goal_below_scoring_range_retreats():
     assert command.sdk_motion_requested is False
 
 
-def test_scoring_lower_boundary_is_inclusive_before_retreat():
+def test_scoring_lower_boundary_is_included():
     planner = GoalNavigationPlanner()
     boundary = (
-        planner.config.score_target_depth_m
-        - planner.config.score_depth_tolerance_m
+        GOAL_SCORE_MIN_DEPTH_M
     )
     at_boundary = planner.plan(goal_info(depth_m=boundary, score_now=False))
     below_boundary = planner.plan(
         goal_info(depth_m=boundary - 0.001, score_now=False)
     )
     assert at_boundary.action == "WAIT_SCORE_CONFIRMATION"
+    above_boundary = planner.plan(goal_info(depth_m=boundary + 0.001, score_now=False))
+    assert above_boundary.action == "WAIT_SCORE_CONFIRMATION"
     assert below_boundary.action == "GOAL_CAMERA90_BACKWARD_1"
 
 
-@pytest.mark.parametrize('depth', [0.39, 0.43, 0.47])
+@pytest.mark.parametrize('depth', [0.50, 0.47, 0.509])
 @pytest.mark.parametrize('offset_px', [-90, -70, 0, 70, 90])
 def test_inclusive_shot_rectangle(depth, offset_px):
     command = GoalNavigationPlanner().plan(goal_info(depth_m=depth, offset_x_px=offset_px))
@@ -131,7 +132,7 @@ def test_inclusive_shot_rectangle(depth, offset_px):
 
 
 @pytest.mark.parametrize('offset_px,action', [
-    (-91, 'GOAL_CAMERA90_CRAB_LEFT'), (91, 'GOAL_CAMERA90_CRAB_RIGHT'),
+    (-121, 'GOAL_CAMERA90_CRAB_LEFT'), (121, 'GOAL_CAMERA90_CRAB_RIGHT'),
 ])
 def test_outside_pixel_bounds_never_shoots(offset_px, action):
     command = GoalNavigationPlanner().plan(goal_info(offset_x_px=offset_px))
@@ -140,7 +141,7 @@ def test_outside_pixel_bounds_never_shoots(offset_px, action):
 
 
 @pytest.mark.parametrize('overrides', [
-    {'depth_m': 0.389}, {'depth_m': 0.471}, {'offset_x_px': None},
+    {'depth_m': 0.389}, {'depth_m': 0.571}, {'offset_x_px': None},
     {'offset_x_px': float('nan')}, {'score_now': None}, {'score_now': False},
 ])
 def test_invalid_or_unconfirmed_shot_is_blocked(overrides):
@@ -148,21 +149,22 @@ def test_invalid_or_unconfirmed_shot_is_blocked(overrides):
 
 
 @pytest.mark.parametrize('depth,action', [
-    (2.0, 'GOAL_CAMERA_90_FORWARD'),
-    (1.281, 'GOAL_CAMERA_90_FORWARD'),
+    (2.0, 'GOAL_CAMERA_90_FORWARD_2'),
+    (1.281, 'GOAL_CAMERA_90_FORWARD_2'),
     (1.280, 'GOAL_CAMERA_90_FORWARD_2'),
     (0.851, 'GOAL_CAMERA_90_FORWARD_2'),
     (0.850, 'GOAL_CAMERA90_FINE_FORWARD_3'),
-    (0.501, 'GOAL_CAMERA90_FINE_FORWARD_3'),
-    (0.500, 'GOAL_CAMERA90_FINE_FORWARD_1'),
+    (0.571, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+    (0.500, 'WAIT_SCORE_CONFIRMATION'),
     (0.470, 'WAIT_SCORE_CONFIRMATION'),
-    (0.471, 'GOAL_CAMERA90_FINE_FORWARD_1'),
+    (0.471, 'WAIT_SCORE_CONFIRMATION'),
     (0.430, 'WAIT_SCORE_CONFIRMATION'),
-    (0.410, 'WAIT_SCORE_CONFIRMATION'),
-    (0.390, 'WAIT_SCORE_CONFIRMATION'),
+    (0.570, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+    (0.410, 'GOAL_CAMERA90_BACKWARD_1'),
+    (0.390, 'GOAL_CAMERA90_BACKWARD_1'),
     (0.389, 'GOAL_CAMERA90_BACKWARD_1'),
 ])
-def test_depth_buckets_use_depth_z_and_include_upper_bound(depth, action):
+def test_goal_approach_switches_to_fine_at_850mm(depth, action):
     command = GoalNavigationPlanner().plan(goal_info(
         depth_m=depth, distance_m=0.2, ground_distance_m=0.1, score_now=False,
     ))
@@ -187,15 +189,13 @@ def test_too_close_and_off_center_retreats_before_lateral_alignment():
 
 @pytest.mark.parametrize('offset_px', [-200, 200])
 @pytest.mark.parametrize('depth,action', [
-    (2.0, 'GOAL_CAMERA_90_FORWARD'),
+    (2.0, 'GOAL_CAMERA_90_FORWARD_2'),
     (1.280, 'GOAL_CAMERA_90_FORWARD_2'),
     (0.851, 'GOAL_CAMERA_90_FORWARD_2'),
     (0.850, 'GOAL_CAMERA90_FINE_FORWARD_3'),
-    (0.501, 'GOAL_CAMERA90_FINE_FORWARD_3'),
-    (0.500, 'GOAL_CAMERA90_FINE_FORWARD_1'),
-    (0.471, 'GOAL_CAMERA90_FINE_FORWARD_1'),
+    (0.571, 'GOAL_CAMERA90_FINE_FORWARD_3'),
 ])
-def test_off_center_approach_uses_depth_bucket_without_crab(depth, action, offset_px):
+def test_far_approach_uses_measured_target_geometry(depth, action, offset_px):
     command = GoalNavigationPlanner().plan(goal_info(
         depth_m=depth, offset_x_px=offset_px, score_now=False,
     ))
@@ -204,8 +204,8 @@ def test_off_center_approach_uses_depth_bucket_without_crab(depth, action, offse
     assert command.depth_in_score_range is False
 
 
-@pytest.mark.parametrize('depth', [0.39, 0.43, 0.47])
-@pytest.mark.parametrize('offset_px,direction', [(-91, 'LEFT'), (91, 'RIGHT')])
+@pytest.mark.parametrize('depth', [0.50, 0.47, 0.509])
+@pytest.mark.parametrize('offset_px,direction', [(-121, 'LEFT'), (121, 'RIGHT')])
 def test_crab_is_reserved_for_inclusive_scoring_range(depth, offset_px, direction):
     command = GoalNavigationPlanner().plan(goal_info(
         depth_m=depth, offset_x_px=offset_px, score_now=False,
@@ -213,29 +213,30 @@ def test_crab_is_reserved_for_inclusive_scoring_range(depth, offset_px, directio
     assert command.action == f'GOAL_CAMERA90_CRAB_{direction}'
 
 
-@pytest.mark.parametrize('depth', [0.471, 0.480, 0.500])
-def test_fine_approach_overrides_stale_score_confirmation(depth):
+@pytest.mark.parametrize('depth', [0.571, 0.580, 0.600])
+def test_far_approach_overrides_stale_score_confirmation(depth):
     command = GoalNavigationPlanner().plan(goal_info(depth_m=depth, score_now=True))
-    assert command.action == 'GOAL_CAMERA90_FINE_FORWARD_1'
+    assert command.action == 'GOAL_CAMERA90_FINE_FORWARD_3'
     assert command.score_now is False
     assert command.sdk_motion_requested is False
 
 
-@pytest.mark.parametrize("depth", [0.39, 0.43, 0.47])
+@pytest.mark.parametrize("depth", [0.50, 0.47, 0.509])
 @pytest.mark.parametrize("offset,action", [
     (-250, "GOAL_CAMERA90_TURN_LEFT_1"),
     (-140.001, "GOAL_CAMERA90_TURN_LEFT_1"),
     (-140, "GOAL_CAMERA90_CRAB_LEFT"),
-    (-90.001, "GOAL_CAMERA90_CRAB_LEFT"),
+    (-120.001, "GOAL_CAMERA90_CRAB_LEFT"),
     (-90, "SHOT"), (0, "SHOT"), (90, "SHOT"),
-    (90.001, "GOAL_CAMERA90_CRAB_RIGHT"),
+    (120.001, "GOAL_CAMERA90_CRAB_RIGHT"),
     (140, "GOAL_CAMERA90_CRAB_RIGHT"),
-    (140.001, "GOAL_CAMERA90_TURN_RIGHT_2"),
-    (250, "GOAL_CAMERA90_TURN_RIGHT_2"),
+    (140.001, "GOAL_CAMERA90_TURN_RIGHT_1"),
+    (250, "GOAL_CAMERA90_TURN_RIGHT_1"),
 ])
 def test_scoring_alignment_pixel_boundaries(depth, offset, action):
     command = GoalNavigationPlanner().plan(goal_info(
         depth_m=depth, offset_x_px=offset, score_now=True,
+        bearing_deg=22.9 if offset > 0 else -22.9,
     ))
     assert command.action == action
     assert command.is_centered is (action == "SHOT")

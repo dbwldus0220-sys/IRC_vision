@@ -41,6 +41,7 @@ def test_upsert_normalizes_new_replaced_and_unreferenced_motions(tmp_path, sourc
         {"angles": {"0": 42.0}}
     ]
     assert motions["new"]["completion"]["settle_timeout_ms"] == 3000
+    assert motions["new"]["playback_speed"] == 0.95
     assert json.loads(source.read_text()) == source_payload
     assert json.loads(next(backup_dir.glob("*.json")).read_text()) == original
 
@@ -86,6 +87,8 @@ def test_import_preserves_special_motions_and_other_joint_data(tmp_path):
     for supplied in source_payload["motions"] + [original["motions"][1]]:
         expected = copy.deepcopy(supplied)
         expected["completion"]["position_tolerance_deg"] = 5.0
+        if supplied['name'] != 'unreferenced':
+            expected['playback_speed'] = 1.045
         assert result[supplied["name"]] == expected
     assert json.loads(source.read_text()) == source_payload
     assert json.loads(next(backup_dir.glob("*.json")).read_text()) == original
@@ -98,11 +101,38 @@ def test_production_runtime_preserves_original_shoulders_and_other_fields():
     original = {m["name"]: m for m in json.loads(
         (root / "artifacts/robot_motions_pc.json").read_text())["motions"]}
     # Compare against the current PC catalog; motion families can be replaced.
-    from upsert_motion_catalog import _with_runtime_policy
+    from upsert_motion_catalog import runtime_motion_from_source
     assert {m["name"] for m in motions} == original.keys()
     for motion in motions:
-        assert motion == _with_runtime_policy(original[motion["name"]])
+        assert motion == runtime_motion_from_source(original[motion["name"]])
     for motion in motions:
         for index, frame in enumerate(motion["frames"]):
             source = original[motion["name"]]["frames"][index]
             assert all(frame["angles"][joint] == source["angles"][joint] for joint in ("4", "5"))
+
+
+@pytest.mark.parametrize('speed,expected', [(1.0, .95), (1.05, .9975), (.9, .855), (.95, .9025)])
+def test_reimport_uses_source_speed_once_and_leaves_other_runtime_speeds(tmp_path, speed, expected):
+    source, runtime, aliases = [tmp_path / name for name in ('source.json', 'runtime.json', 'aliases.yaml')]
+    original = {'motions': [{'name': 'selected', 'playback_speed': speed, 'frames': []}]}
+    source.write_text(json.dumps(original))
+    runtime.write_text(json.dumps({'motions': [{'name': 'other', 'playback_speed': .7}]}))
+    aliases.write_text('motion_aliases:\n  selected_id: selected\n')
+    command = [sys.executable, str(Path(__file__).with_name('upsert_motion_catalog.py')),
+               '--source', str(source), '--runtime', str(runtime), '--aliases', str(aliases),
+               '--backup-dir', str(tmp_path / 'backups')]
+    subprocess.run(command, check=True, capture_output=True)
+    first = runtime.read_bytes()
+    subprocess.run(command, check=True, capture_output=True)
+    assert runtime.read_bytes() == first
+    actual = {m['name']: m for m in json.loads(first)['motions']}
+    assert actual['selected']['playback_speed'] == expected
+    assert actual['other']['playback_speed'] == .7
+    assert json.loads(source.read_text()) == original
+
+
+@pytest.mark.parametrize('speed', [0, -1, float('nan'), float('inf'), 'invalid', None, True])
+def test_invalid_source_speed_is_rejected(speed):
+    from upsert_motion_catalog import runtime_motion_from_source
+    with pytest.raises(ValueError):
+        runtime_motion_from_source({'name': 'bad', 'playback_speed': speed})

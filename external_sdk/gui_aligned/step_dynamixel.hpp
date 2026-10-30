@@ -198,6 +198,7 @@ class Dxl
         bool VerifyTorqueEnabled(bool enabled);
         bool WriteGoalDegrees(const std::vector<double>& angles, const std::vector<int>& ids);
         bool ReadPositionDegrees(std::vector<double>& angles);
+        bool ReadAvailablePositionDegrees(std::vector<double>& angles);
         irc_step::BusDiagnostics BusDiagnostics() const { return bus_diagnostics_; }
         ~Dxl(); //소멸자
 

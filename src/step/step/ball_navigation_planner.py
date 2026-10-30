@@ -8,6 +8,7 @@ import math
 from typing import Any
 
 from .approach_distance import BALL_HURDLE_FINE_DISTANCE_M
+from .approach_distance import BALL_FINE_APPROACH_DISTANCE_M
 from .approach_distance import approach_level_from_motion
 from .approach_distance import ball_hurdle_approach_motion
 from .line_navigation_planner import numbered_turn_motion_metadata
@@ -277,6 +278,10 @@ class BallNavigationPlanner:
         motion = self._general_approach_motion(
             distance,
         )
+        if motion == "BALL_APPROACH_FINE_FORWARD_5":
+            depth_age = _number(ball_info, "depth_age_sec")
+            if depth_age is None or not 0.0 <= depth_age <= self.config.max_pickup_depth_age_sec:
+                return self.stop("stale_ball_distance_for_fine_approach")
         return self._moving_command(
             motion=motion,
             reason="ball_aligned_discrete_approach",
@@ -301,6 +306,14 @@ class BallNavigationPlanner:
         Old publishers without projection metadata keep their image behavior.
         Invalid projection data cannot establish which distance branch applies.
         """
+        if info.get("head_down_requested") is True:
+            # The 45-degree ground calibration is invalid once lowering starts.
+            return self._steering_error(
+                _number(info, "steering_angle_deg"),
+                _number(info, "bearing_deg"),
+                _number(info, "offset_x_norm"),
+                _number(info, "distance_m"),
+            ), "camera_down_image_angle"
         source = "legacy_image_angle"
         if "ground_projection_enabled" in info:
             forward = _number(info, "ground_forward_distance_m")
@@ -364,7 +377,9 @@ class BallNavigationPlanner:
         self,
         distance_m: float,
     ) -> str:
-        """Use the same camera-45 distance policy as HURDLE approach."""
+        """Fine-walk at camera 45 before the separate camera-down pickup entry."""
+        if BALL_HURDLE_FINE_DISTANCE_M < distance_m <= BALL_FINE_APPROACH_DISTANCE_M:
+            return "BALL_APPROACH_FINE_FORWARD_5"
         return ball_hurdle_approach_motion(distance_m)
 
     def _approach_speed(

@@ -1,0 +1,421 @@
+#!/usr/bin/env python3
+"""Convert hurdle geometry into SDK-oriented jump action candidates."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, replace
+import math
+from typing import Any
+
+from .approach_distance import approach_level_from_motion
+from .approach_distance import ball_hurdle_approach_motion
+from .approach_distance import HURDLE_FINE_DISTANCE_M
+
+
+HURDLE_HEAD_DOWN_BOTTOM_DISTANCE_PX = 120
+
+
+@dataclass(frozen=True)
+class HurdleNavigationConfig:
+    """Provisional hurdle alignment and jump thresholds."""
+
+    min_confidence: float = 0.60
+    control_start_depth_m: float = 1.0
+    go_target_depth_m: float = 0.10
+    go_depth_tolerance_m: float = 0.10
+    final_sequence_start_depth_m: float = 0.540
+    go_angle_tolerance_deg: float = 8.0
+    path_center_tolerance_norm: float = 0.10
+    close_turn_stop_bottom_distance_px: float = 100.0
+    positioning_turn_min_angle_deg: float = 70.0
+    center_turn_min_angle_deg: float = 15.0
+    lost_side_deadband_norm: float = 0.10
+
+
+@dataclass(frozen=True)
+class HurdleActionCommand:
+    """One abstract hurdle action; it does not drive robot hardware."""
+
+    valid: bool
+    action: str
+    reason: str
+    sdk_motion_requested: bool
+    confidence: float
+    depth_m: float | None
+    distance_m: float | None
+    ground_gap_m: float | None
+    camera_bottom_gap_m: float | None
+    ground_gap_error_m: float | None
+    hurdle_angle_deg: float | None
+    is_parallel: bool
+    ground_gap_in_go_range: bool
+    go_now: bool
+    bottom_distance_px: float | None = None
+    close_rotation_blocked: bool = False
+    depth_fallback_requested: bool = False
+    center_steering_deg: float | None = None
+    fine_sequence_requested: bool = False
+    recovery_active: bool = False
+    last_seen_side: str | None = None
+    turn_count: int | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return a rounded JSON-compatible representation."""
+        approach_level = approach_level_from_motion(self.action)
+        return {
+            "valid": self.valid,
+            "action": self.action,
+            "reason": self.reason,
+            "sdk_motion_requested": self.sdk_motion_requested,
+            "confidence": round(self.confidence, 4),
+            "depth_m": _round_optional(self.depth_m, 3),
+            # Legacy distance keys carry raw Depth Z for compatibility.
+            "distance_m": _round_optional(self.depth_m, 3),
+            "ground_gap_m": _round_optional(self.depth_m, 3),
+            "camera_bottom_gap_m": _round_optional(
+                self.camera_bottom_gap_m,
+                3,
+            ),
+            "ground_gap_error_m": _round_optional(
+                self.ground_gap_error_m,
+                3,
+            ),
+            "hurdle_angle_deg": _round_optional(
+                self.hurdle_angle_deg,
+                3,
+            ),
+            "center_steering_deg": _round_optional(self.center_steering_deg, 3),
+            "is_parallel": self.is_parallel,
+            "ground_gap_in_go_range": self.ground_gap_in_go_range,
+            "go_now": self.go_now,
+            "bottom_distance_px": self.bottom_distance_px,
+            "close_rotation_blocked": self.close_rotation_blocked,
+            "depth_fallback_requested": self.depth_fallback_requested,
+            "fine_sequence_requested": self.fine_sequence_requested,
+            "recovery_active": self.recovery_active,
+            "last_seen_side": self.last_seen_side,
+            **({"turn_count": self.turn_count} if self.turn_count is not None else {}),
+            "approach_motion": (
+                self.action
+                if self.action == "STRAIGHT" or approach_level is not None
+                else None
+            ),
+            "approach_level": approach_level,
+            "approach_target_distance_m": _round_optional(
+                self.depth_m,
+                3,
+            ),
+        }
+
+
+def _round_optional(value: float | None, digits: int) -> float | None:
+    if value is None:
+        return None
+    return round(value, digits)
+
+
+def _number(data: dict[str, Any], key: str) -> float | None:
+    value = data.get(key)
+    if value is None or isinstance(value, bool):
+        return None
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    return number if math.isfinite(number) else None
+
+
+class HurdleNavigationPlanner:
+    """Choose a jump SDK action from one fresh ``hurdle_info`` sample."""
+
+    def __init__(
+        self,
+        config: HurdleNavigationConfig | None = None,
+    ) -> None:
+        self.config = config or HurdleNavigationConfig()
+        self.close_rotation_blocked = False
+        self.fine_approach_active = False
+        self.last_seen_side: str | None = None
+        self.recovery_active = False
+
+    def reset(self) -> None:
+        """Release the near-hurdle turn block only after mission completion."""
+        self.close_rotation_blocked = False
+        self.fine_approach_active = False
+        self.last_seen_side = None
+        self.recovery_active = False
+
+    def observe(self, info: dict[str, Any]) -> None:
+        """Remember the screen side even while an executing motion blocks planning."""
+        if info.get("detected") is False:
+            if (
+                info.get("raw_detected") is not True
+                and self.last_seen_side in {"LEFT", "RIGHT"}
+            ):
+                self.recovery_active = True
+            return
+        confidence = _number(info, "confidence")
+        if (
+            info.get("detected") is not True
+            or info.get("confirmation_confirmed") is False
+            or confidence is None or confidence < self.config.min_confidence
+        ):
+            return
+        # Bottom loss must not reuse an older lateral observation to authorize a turn.
+        self.last_seen_side = None
+        bottom = _number(info, "bottom_distance_px")
+        if bottom is None or bottom < 0.0:
+            return
+        if bottom <= self.config.close_turn_stop_bottom_distance_px:
+            self.last_seen_side = "BOTTOM"
+            return
+        width = _number(info, "image_width")
+        center = _number(info, "center_x")
+        offset = _number(info, "camera_center_offset_x_px")
+        if width is None or width <= 1.0:
+            return
+        if center is not None:
+            offset = center - width / 2.0
+        if offset is None or abs(offset) > width / 2.0:
+            return
+        normalized = offset / (width / 2.0)
+        if abs(normalized) > self.config.lost_side_deadband_norm:
+            self.last_seen_side = "RIGHT" if normalized > 0.0 else "LEFT"
+
+    def _recovery_turn(self, direction: str, reason: str) -> HurdleActionCommand:
+        """Use the smallest calibrated stationary turn and reobserve after completion."""
+        return replace(
+            self.wait(reason), valid=True, action=f"ALIGN_{direction}",
+            turn_count=2 if direction == "RIGHT" else 1,
+        )
+
+    def wait(self, reason: str) -> HurdleActionCommand:
+        """Return a non-action command for missing or unsafe input."""
+        return HurdleActionCommand(
+            valid=False,
+            action="WAIT",
+            reason=reason,
+            sdk_motion_requested=False,
+            confidence=0.0,
+            depth_m=None,
+            distance_m=None,
+            ground_gap_m=None,
+            camera_bottom_gap_m=None,
+            ground_gap_error_m=None,
+            hurdle_angle_deg=None,
+            is_parallel=False,
+            ground_gap_in_go_range=False,
+            go_now=False,
+            close_rotation_blocked=self.close_rotation_blocked,
+            recovery_active=self.recovery_active,
+            last_seen_side=self.last_seen_side,
+        )
+
+    def plan(
+        self, hurdle_info: dict[str, Any], *, positioning: bool = False,
+    ) -> HurdleActionCommand:
+        """Use the line intersection, with discrete recovery after target loss."""
+        self.observe(hurdle_info)
+        if not bool(hurdle_info.get("detected", False)):
+            if hurdle_info.get("raw_detected") is True:
+                return self.wait("hurdle_confirmation_pending")
+            if hurdle_info.get("detected") is False and self.last_seen_side == "BOTTOM":
+                return replace(
+                    self.wait("hurdle_lost_below_image"),
+                    valid=True, action="HURDLE_LOST_BACKWARD_1",
+                )
+            if (
+                hurdle_info.get("detected") is False
+                and self.recovery_active and self.last_seen_side in {"LEFT", "RIGHT"}
+            ):
+                return self._recovery_turn(self.last_seen_side, "hurdle_lost_search_last_side")
+            return self.wait("hurdle_not_detected")
+        confidence = _number(hurdle_info, "confidence")
+        if confidence is None or confidence < self.config.min_confidence:
+            return self.wait("low_hurdle_confidence")
+        bottom_distance_px = _number(hurdle_info, "bottom_distance_px")
+        bottom_distance_valid = (
+            bottom_distance_px is not None and bottom_distance_px >= 0.0
+        )
+        if (
+            bottom_distance_valid
+            and bottom_distance_px <= self.config.close_turn_stop_bottom_distance_px
+        ):
+            self.close_rotation_blocked = True
+        depth = _number(hurdle_info, "depth_m")
+        if (
+            not bool(hurdle_info.get("depth_valid", False))
+            or depth is None or depth <= 0.0
+        ):
+            return self.wait("missing_valid_hurdle_depth")
+        distance = depth
+        ground_gap = depth
+        if depth > self.config.control_start_depth_m:
+            return self.wait("hurdle_outside_control_range")
+        if positioning and (
+            depth <= HURDLE_FINE_DISTANCE_M
+            or hurdle_info.get("hurdle_positioning_active") is True
+        ):
+            self.fine_approach_active = True
+            self.close_rotation_blocked = True
+        camera_bottom_gap = _number(
+            hurdle_info,
+            "camera_bottom_gap_m",
+        )
+        hurdle_angle = _number(hurdle_info, "hurdle_angle_deg")
+        if self.recovery_active:
+            # Lateral-loss recovery is the exception to the normal fine-mode turn block.
+            if hurdle_info.get("confirmation_confirmed") is False:
+                return self.wait("hurdle_confirmation_pending")
+            if hurdle_angle is None:
+                return self.wait("hurdle_recovery_waiting_for_parallel_angle")
+            if not bottom_distance_valid:
+                return self.wait("missing_valid_hurdle_bottom_distance")
+            if abs(hurdle_angle) > self.config.go_angle_tolerance_deg:
+                direction = "LEFT" if hurdle_angle > 0.0 else "RIGHT"
+                return replace(
+                    self._recovery_turn(direction, "hurdle_reacquired_parallel_alignment"),
+                    confidence=confidence, depth_m=depth, hurdle_angle_deg=hurdle_angle,
+                    bottom_distance_px=bottom_distance_px,
+                )
+            self.recovery_active = False
+        if hurdle_angle is None and not self.close_rotation_blocked and not positioning:
+            return self.wait("missing_hurdle_parallel_angle")
+        parallel = (
+            hurdle_angle is not None
+            and abs(hurdle_angle) <= self.config.go_angle_tolerance_deg
+        )
+        center_steering = None
+        if positioning:
+            center_dx = _number(hurdle_info, "camera_center_offset_x_px")
+            if center_dx is None:
+                center_dx = _number(hurdle_info, "offset_x_px")
+            if center_dx is not None and bottom_distance_valid:
+                center_steering = math.degrees(
+                    math.atan2(center_dx, max(1.0, bottom_distance_px))
+                )
+            else:
+                center_steering = _number(hurdle_info, "bearing_deg")
+        path_reference_valid = hurdle_info.get("path_reference_valid") is True
+        path_offset = _number(hurdle_info, "path_offset_x_norm")
+        if positioning and not self.fine_approach_active and (
+            not path_reference_valid or path_offset is None
+            or hurdle_info.get("path_reference_source") == "held"
+        ):
+            return self.wait("waiting_for_fresh_hurdle_line_intersection")
+        path_centered = bool(
+            (positioning and self.fine_approach_active)
+            or not path_reference_valid or path_offset is None
+            or abs(path_offset) <= self.config.path_center_tolerance_norm
+        )
+        ground_gap_error = (
+            depth - self.config.go_target_depth_m
+        )
+        # Positioning includes two fixed fine advances before the hurdle motion.
+        ground_gap_in_range = (
+            depth <= self.config.final_sequence_start_depth_m + 1e-9
+            if positioning else (
+                abs(ground_gap_error)
+                <= self.config.go_depth_tolerance_m + 1e-9
+            )
+        )
+        ready_geometry = (
+            parallel
+            and path_centered
+            and ground_gap_in_range
+        )
+        analyzer_go_now = hurdle_info.get("go_now")
+        go_now = bool(
+            ready_geometry
+            and (
+                ready_geometry
+                if analyzer_go_now is None
+                else analyzer_go_now
+            )
+        )
+
+        alignment_needed = not path_centered or not parallel
+        positioning_turn_needed = positioning and not path_centered
+        fine_sequence_requested = bool(
+            positioning
+            and ground_gap_in_range
+            and self.fine_approach_active
+        )
+        if positioning:
+            # Only the final distance checkpoint may start the atomic sequence.
+            go_now = fine_sequence_requested
+        rotation_needed = positioning_turn_needed if positioning else alignment_needed
+        if (
+            rotation_needed
+            and not bottom_distance_valid
+            and not self.close_rotation_blocked
+        ):
+            return self.wait("missing_valid_hurdle_bottom_distance")
+
+        if fine_sequence_requested:
+            action = "GO"
+            reason = "hurdle_final_sequence_at_go_depth"
+        elif go_now:
+            action = "GO"
+            reason = "hurdle_parallel_at_close_depth"
+        elif positioning and self.fine_approach_active:
+            action = "STRAIGHT_0"
+            reason = "hurdle_fine_approach_without_rotation"
+        elif positioning and positioning_turn_needed:
+            if self.close_rotation_blocked:
+                return self.wait("hurdle_intersection_turn_blocked_near_bottom")
+            direction = "LEFT" if path_offset < 0.0 else "RIGHT"
+            action = f"RECOVER_{direction}_TURN_{direction}_4"
+            reason = "recover_to_hurdle_line_intersection"
+        elif positioning:
+            action = "STRAIGHT"
+            reason = "hurdle_intersection_aligned_approach"
+        elif self.close_rotation_blocked and not ready_geometry:
+            action = ball_hurdle_approach_motion(
+                depth, fine_distance_m=HURDLE_FINE_DISTANCE_M,
+            )
+            reason = "hurdle_close_distance_approach_without_rotation"
+        elif (
+            path_reference_valid
+            and path_offset is not None
+            and not path_centered
+        ):
+            action = "TURN_RIGHT" if path_offset > 0.0 else "TURN_LEFT"
+            reason = "align_to_hurdle_line_intersection"
+        elif not parallel:
+            action = "ALIGN_LEFT" if hurdle_angle > 0.0 else "ALIGN_RIGHT"
+            reason = "align_robot_parallel_to_hurdle"
+        elif ready_geometry:
+            action = "WAIT_GO_CONFIRMATION"
+            reason = "waiting_for_stable_hurdle_condition"
+        elif ground_gap_error > self.config.go_depth_tolerance_m:
+            action = ball_hurdle_approach_motion(
+                depth, fine_distance_m=HURDLE_FINE_DISTANCE_M,
+            )
+            reason = "hurdle_aligned_discrete_approach"
+        else:
+            action = "WAIT_GO_CONFIRMATION"
+            reason = "waiting_for_stable_hurdle_condition"
+
+        return HurdleActionCommand(
+            valid=True,
+            action=action,
+            reason=reason,
+            sdk_motion_requested=go_now,
+            confidence=confidence,
+            depth_m=depth,
+            distance_m=distance,
+            ground_gap_m=ground_gap,
+            camera_bottom_gap_m=camera_bottom_gap,
+            ground_gap_error_m=ground_gap_error,
+            hurdle_angle_deg=hurdle_angle,
+            center_steering_deg=center_steering,
+            is_parallel=parallel,
+            ground_gap_in_go_range=ground_gap_in_range,
+            go_now=go_now,
+            bottom_distance_px=bottom_distance_px,
+            close_rotation_blocked=self.close_rotation_blocked,
+            fine_sequence_requested=fine_sequence_requested,
+            recovery_active=self.recovery_active,
+            last_seen_side=self.last_seen_side,
+        )

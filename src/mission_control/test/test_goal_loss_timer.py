@@ -55,7 +55,7 @@ def test_first_miss_does_not_inherit_a_large_planner_dt(monkeypatch):
     repeated = planner.plan('GOAL_APPROACH', {'goal': missing(13)}, 3.)
     assert repeated.action == 'GOAL_LOST_STOP'
     search = planner.plan('GOAL_APPROACH', {'goal': missing(13.4)}, 3.)
-    assert search.action == 'GOAL_CAMERA90_TURN_RIGHT_2'
+    assert search.action == 'GOAL_CAMERA90_TURN_RIGHT_1'
     assert search.source_command['lost_elapsed_sec'] == .4
     planner.plan('GOAL_APPROACH', {'goal': goal_info(depth_m=1.)}, .1)
     now[0] = 13.5

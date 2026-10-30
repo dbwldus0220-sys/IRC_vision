@@ -1,0 +1,23 @@
+{
+  "related_suite": "1648 passed, 9 failed",
+  "new_failures": [],
+  "preexisting_failures": [
+    "src/mission_control/test/test_hurdle_positioning.py::test_recognition_approach_blocks_new_line_prequeue[1.001-True]",
+    "src/mission_control/test/test_line_offset_alignment.py::test_launch_exposes_pixel_threshold[-1.0-True]",
+    "src/mission_control/test/test_line_offset_alignment.py::test_launch_exposes_pixel_threshold[180.0-True]",
+    "src/mission_control/test/test_line_offset_alignment.py::test_launch_exposes_pixel_threshold[None-True]",
+    "src/mission_control/test/test_lost_search_turn_limiter.py::test_goal_exit_composites_already_contain_nine_and_six_turn_cycles",
+    "src/mission_control/test/test_lost_search_turn_limiter.py::test_launch_search_limits_reach_decision_node[True]",
+    "src/mission_control/test/test_motion_decision_planner.py::test_default_line_recovery_follows_ground_in_recorded_opposing_heading_scene[-1]",
+    "src/mission_control/test/test_motion_decision_planner.py::test_default_line_recovery_follows_ground_in_recorded_opposing_heading_scene[1]",
+    "src/mission_control/test/test_sparse_line_recovery.py::test_recorded_two_point_corner_uses_confirmed_short_forward"
+  ],
+  "new_boundary_and_catalog_tests": "51 passed",
+  "focused_suite_with_upsert": "98 passed, 1 preexisting runtime/PC playback_speed equality failure",
+  "catalog_validation": {
+    "runtime": "93 motions, all aliases resolve, motor IDs 0..22",
+    "pc": "93 motions, all aliases resolve, motor IDs 0..22"
+  },
+  "hardware_executed": false,
+  "dynamics_simulation_executed": false
+}

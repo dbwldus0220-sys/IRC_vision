@@ -1,0 +1,479 @@
+........................................................................ [  4%]
+...............................................FFFF.........F....FFF.... [  9%]
+.....F..............FF.................................................. [ 14%]
+.....FF................................................................. [ 18%]
+.............................FF..FFFF...FF..........................F... [ 23%]
+........................................................................ [ 28%]
+........................................................................ [ 33%]
+........................................................................ [ 37%]
+........................................................................ [ 42%]
+........................................................................ [ 47%]
+........................................................................ [ 51%]
+........................................................................ [ 56%]
+........................................................................ [ 61%]
+......................................................................F. [ 66%]
+.F..F.........................F.F..F.F..............F.....FFF........... [ 70%]
+........FFF..F.......F............FFF................................... [ 75%]
+........................................................................ [ 80%]
+........................................................................ [ 84%]
+........................................................................ [ 89%]
+........................................................................ [ 94%]
+.....F.F...........F.F...........F.F...........F.F...........F.F...F.... [ 99%]
+..............                                                           [100%]
+=================================== FAILURES ===================================
+_________________ test_turn_waits_for_stable_half_second[LEFT] _________________
+src/mission_control/test/test_motion_decision_node.py:1352: in test_turn_waits_for_stable_half_second
+    assert node.publisher.messages == []
+E   assert [std_msgs.msg...sion_node"}')] == []
+E     Left contains one more item: std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"LEFT","valid":true,"reason":"line_ready","sdk_moti...e_special_event_id":null,"active_special_command_id":null,"mission_progress":{},"source_node":"motion_decision_node"}')
+E     Full diff:
+E     - []
+E     + [std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"LEFT","valid":true,"reason":"line_ready","sdk_motion_requested":false,"requires_ack":false,"source_command":{},"command_id":1,"event_id":null,"request_latched":false,"sdk_motion_id":null,"input_age_sec":{},"ball_tracking":{},"goal_tracking":{},"speci...
+E     
+E     ...Full output truncated (1 line hidden), use '-vv' to show
+________________ test_turn_waits_for_stable_half_second[RIGHT] _________________
+src/mission_control/test/test_motion_decision_node.py:1352: in test_turn_waits_for_stable_half_second
+    assert node.publisher.messages == []
+E   assert [std_msgs.msg...sion_node"}')] == []
+E     Left contains one more item: std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"RIGHT","valid":true,"reason":"line_ready","sdk_mot...e_special_event_id":null,"active_special_command_id":null,"mission_progress":{},"source_node":"motion_decision_node"}')
+E     Full diff:
+E     - []
+E     + [std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"RIGHT","valid":true,"reason":"line_ready","sdk_motion_requested":false,"requires_ack":false,"source_command":{},"command_id":1,"event_id":null,"request_latched":false,"sdk_motion_id":null,"input_age_sec":{},"ball_tracking":{},"goal_tracking":{},"spec...
+E     
+E     ...Full output truncated (1 line hidden), use '-vv' to show
+_________________ test_changed_turn_candidate_restarts_settle __________________
+src/mission_control/test/test_motion_decision_node.py:1378: in test_changed_turn_candidate_restarts_settle
+    assert node.publisher.messages == []
+E   assert [std_msgs.msg...sion_node"}')] == []
+E     Left contains one more item: std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"LEFT","valid":true,"reason":"line_ready","sdk_moti...e_special_event_id":null,"active_special_command_id":null,"mission_progress":{},"source_node":"motion_decision_node"}')
+E     Full diff:
+E     - []
+E     + [std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"LEFT","valid":true,"reason":"line_ready","sdk_motion_requested":false,"requires_ack":false,"source_command":{},"command_id":1,"event_id":null,"request_latched":false,"sdk_motion_id":null,"input_age_sec":{},"ball_tracking":{},"goal_tracking":{},"speci...
+E     
+E     ...Full output truncated (1 line hidden), use '-vv' to show
+________________ test_new_frame_keeps_same_candidate_start_time ________________
+src/mission_control/test/test_motion_decision_node.py:1397: in test_new_frame_keeps_same_candidate_start_time
+    assert node.pre_motion_settle_started_at == 0.0
+E   assert None == 0.0
+E    +  where None = <test_motion_decision_node.ReadinessPublishNode object at 0xffff9cf37610>.pre_motion_settle_started_at
+______________ test_stop_cancels_pending_turn_and_is_not_delayed _______________
+src/mission_control/test/test_motion_decision_node.py:1575: in test_stop_cancels_pending_turn_and_is_not_delayed
+    assert payload['action'] == 'STOP'
+E   AssertionError: assert 'LEFT' == 'STOP'
+E     - STOP
+E     + LEFT
+________________ test_general_lock_does_not_precount_next_turn _________________
+src/mission_control/test/test_motion_decision_node.py:1665: in test_general_lock_does_not_precount_next_turn
+    assert node.pre_motion_settle_started_at == 20.0
+E   assert None == 20.0
+E    +  where None = <test_motion_decision_node.ReadinessPublishNode object at 0xffff9dec8cd0>.pre_motion_settle_started_at
+____________ test_active_special_lock_does_not_precount_next_settle ____________
+src/mission_control/test/test_motion_decision_node.py:1682: in test_active_special_lock_does_not_precount_next_settle
+    assert node.publisher.messages == []
+E   assert [std_msgs.msg...sion_node"}')] == []
+E     Left contains one more item: std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"LEFT","valid":true,"reason":"line_ready","sdk_moti...tive_special_event_id":null,"active_special_command_id":7,"mission_progress":{},"source_node":"motion_decision_node"}')
+E     Full diff:
+E     - []
+E     + [std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"LEFT","valid":true,"reason":"line_ready","sdk_motion_requested":false,"requires_ack":false,"source_command":{},"command_id":1,"event_id":null,"request_latched":false,"sdk_motion_id":null,"input_age_sec":{},"ball_tracking":{},"goal_tracking":{},"speci...
+E     
+E     ...Full output truncated (1 line hidden), use '-vv' to show
+__________ test_published_turn_requires_a_new_settle_after_completion __________
+src/mission_control/test/test_motion_decision_node.py:1706: in test_published_turn_requires_a_new_settle_after_completion
+    assert node.correction_post_motion_dwell_until == 1.5
+E   AttributeError: 'ReadinessPublishNode' object has no attribute 'correction_post_motion_dwell_until'
+_______ test_startup_hold_discards_commands_until_ready_and_fresh_vision _______
+src/mission_control/test/test_motion_decision_node.py:1955: in test_startup_hold_discards_commands_until_ready_and_fresh_vision
+    MotionDecisionNode._info_callback(node, 'line')(line_message)
+src/mission_control/mission_control/motion_decision_node.py:1096: in callback
+    MotionDecisionNode._remember_line_corner(self, payload)
+src/mission_control/mission_control/motion_decision_node.py:3192: in _remember_line_corner
+    min_quality = self.planner.line_planner.config.min_line_quality
+E   AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+__________ test_line_motion_capture_table_matches_deployed_timelines ___________
+src/mission_control/test/test_motion_decision_node.py:2349: in test_line_motion_capture_table_matches_deployed_timelines
+    assert MotionDecisionNode.LINE_MOTION_CAPTURE_CONFIG == expected
+E   AssertionError: assert {'LEFT': (2.1...265, 15), ...} == {'LEFT': (7.3...272, 10), ...}
+E     Differing items:
+E     {'RECOVER_RIGHT_TURN_RIGHT_6': (2.168421052631579, 15)} != {'RECOVER_RIGHT_TURN_RIGHT_6': (2.842, 10)}
+E     {'RECOVER_RIGHT_TURN_RIGHT_8': (2.168421052631579, 15)} != {'RECOVER_RIGHT_TURN_RIGHT_8': (3.789, 15)}
+E     {'RIGHT': (2.168421052631579, 15)} != {'RIGHT': (7.105, 30)}
+E     {'STRAIGHT_2': (2.176842105263158, 10)} != {'STRAIGHT_2': (1.644, 10)}
+E     {'RECOVER_RIGHT_TURN_LEFT_2': (2.1894736842105265, 15)} != {'RECOVER_RIGHT_TURN_LEFT_2': (2.272, 10)}
+E     {'RECOVER_LEFT_TURN_LEFT_8': (2.1894736842105265, 15)} != {'RECOVER_LEFT_TURN_LEFT_8': (5.05, 25)}...
+E     
+E     ...Full output truncated (143 lines hidden), use '-vv' to show
+_________ test_line_prequeue_retries_after_temporary_target_disappears _________
+src/mission_control/test/test_motion_decision_node.py:2377: in test_line_prequeue_retries_after_temporary_target_disappears
+    assert MotionDecisionNode._collect_active_line_motion_frame(node, line, clock[0])
+E   AssertionError: assert False
+E    +  where False = <function MotionDecisionNode._collect_active_line_motion_frame at 0xffff9e1d49d0>(<test_motion_decision_node.ReadinessPublishNode object at 0xffff9d44f7f0>, {'detected': True, 'detection_quality': 0.9, 'filtered_lateral_offset_norm': 0.0, 'geometry_quality': 0.9, ...}, 11.9)
+E    +    where <function MotionDecisionNode._collect_active_line_motion_frame at 0xffff9e1d49d0> = MotionDecisionNode._collect_active_line_motion_frame
+_ test_mock_line_input_is_fresh_and_produces_action[turn_left-RECOVER_LEFT_TURN_LEFT_4] _
+src/mission_control/test/test_motion_decision_node.py:3367: in test_mock_line_input_is_fresh_and_produces_action
+    assert decision.action == expected_action
+E   AssertionError: assert 'STRAIGHT' == 'RECOVER_LEFT_TURN_LEFT_4'
+E     - RECOVER_LEFT_TURN_LEFT_4
+E     + STRAIGHT
+_ test_mock_line_input_is_fresh_and_produces_action[turn_right-RECOVER_RIGHT_TURN_RIGHT_4] _
+src/mission_control/test/test_motion_decision_node.py:3367: in test_mock_line_input_is_fresh_and_produces_action
+    assert decision.action == expected_action
+E   AssertionError: assert 'STRAIGHT' == 'RECOVER_RIGHT_TURN_RIGHT_4'
+E     - RECOVER_RIGHT_TURN_RIGHT_4
+E     + STRAIGHT
+_____ test_all_line_stationary_turns_pause_one_second_before_publish[LEFT] _____
+src/mission_control/test/test_motion_decision_node.py:4581: in test_all_line_stationary_turns_pause_one_second_before_publish
+    MotionDecisionNode._publish_decision(node)
+src/mission_control/mission_control/motion_decision_node.py:4293: in _publish_decision
+    decision = MotionDecisionNode._apply_pending_line_corner(
+src/mission_control/mission_control/motion_decision_node.py:3290: in _apply_pending_line_corner
+    MotionDecisionNode._remember_line_corner(self, info)
+src/mission_control/mission_control/motion_decision_node.py:3192: in _remember_line_corner
+    min_quality = self.planner.line_planner.config.min_line_quality
+E   AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+____ test_all_line_stationary_turns_pause_one_second_before_publish[RIGHT] _____
+src/mission_control/test/test_motion_decision_node.py:4581: in test_all_line_stationary_turns_pause_one_second_before_publish
+    MotionDecisionNode._publish_decision(node)
+src/mission_control/mission_control/motion_decision_node.py:4293: in _publish_decision
+    decision = MotionDecisionNode._apply_pending_line_corner(
+src/mission_control/mission_control/motion_decision_node.py:3290: in _apply_pending_line_corner
+    MotionDecisionNode._remember_line_corner(self, info)
+src/mission_control/mission_control/motion_decision_node.py:3192: in _remember_line_corner
+    min_quality = self.planner.line_planner.config.min_line_quality
+E   AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+_ test_all_line_stationary_turns_pause_one_second_before_publish[POST_BALL_LINE_TURN_LEFT_2] _
+src/mission_control/test/test_motion_decision_node.py:4581: in test_all_line_stationary_turns_pause_one_second_before_publish
+    MotionDecisionNode._publish_decision(node)
+src/mission_control/mission_control/motion_decision_node.py:4293: in _publish_decision
+    decision = MotionDecisionNode._apply_pending_line_corner(
+src/mission_control/mission_control/motion_decision_node.py:3290: in _apply_pending_line_corner
+    MotionDecisionNode._remember_line_corner(self, info)
+src/mission_control/mission_control/motion_decision_node.py:3192: in _remember_line_corner
+    min_quality = self.planner.line_planner.config.min_line_quality
+E   AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+_ test_all_line_stationary_turns_pause_one_second_before_publish[POST_BALL_LINE_TURN_RIGHT_3] _
+src/mission_control/test/test_motion_decision_node.py:4581: in test_all_line_stationary_turns_pause_one_second_before_publish
+    MotionDecisionNode._publish_decision(node)
+src/mission_control/mission_control/motion_decision_node.py:4293: in _publish_decision
+    decision = MotionDecisionNode._apply_pending_line_corner(
+src/mission_control/mission_control/motion_decision_node.py:3290: in _apply_pending_line_corner
+    MotionDecisionNode._remember_line_corner(self, info)
+src/mission_control/mission_control/motion_decision_node.py:3192: in _remember_line_corner
+    min_quality = self.planner.line_planner.config.min_line_quality
+E   AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+_ test_all_line_stationary_turns_pause_one_second_before_publish[POST_SHOT_LINE_TURN_LEFT_2] _
+src/mission_control/test/test_motion_decision_node.py:4581: in test_all_line_stationary_turns_pause_one_second_before_publish
+    MotionDecisionNode._publish_decision(node)
+src/mission_control/mission_control/motion_decision_node.py:4293: in _publish_decision
+    decision = MotionDecisionNode._apply_pending_line_corner(
+src/mission_control/mission_control/motion_decision_node.py:3290: in _apply_pending_line_corner
+    MotionDecisionNode._remember_line_corner(self, info)
+src/mission_control/mission_control/motion_decision_node.py:3192: in _remember_line_corner
+    min_quality = self.planner.line_planner.config.min_line_quality
+E   AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+_ test_all_line_stationary_turns_pause_one_second_before_publish[POST_SHOT_LINE_TURN_RIGHT_3] _
+src/mission_control/test/test_motion_decision_node.py:4581: in test_all_line_stationary_turns_pause_one_second_before_publish
+    MotionDecisionNode._publish_decision(node)
+src/mission_control/mission_control/motion_decision_node.py:4293: in _publish_decision
+    decision = MotionDecisionNode._apply_pending_line_corner(
+src/mission_control/mission_control/motion_decision_node.py:3290: in _apply_pending_line_corner
+    MotionDecisionNode._remember_line_corner(self, info)
+src/mission_control/mission_control/motion_decision_node.py:3192: in _remember_line_corner
+    min_quality = self.planner.line_planner.config.min_line_quality
+E   AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+____ test_enter_gate_discards_vision_until_enter_and_executor_ready[False] _____
+src/mission_control/test/test_motion_decision_node.py:4661: in test_enter_gate_discards_vision_until_enter_and_executor_ready
+    MotionDecisionNode._info_callback(node, 'line')(message)
+src/mission_control/mission_control/motion_decision_node.py:1096: in callback
+    MotionDecisionNode._remember_line_corner(self, payload)
+src/mission_control/mission_control/motion_decision_node.py:3192: in _remember_line_corner
+    min_quality = self.planner.line_planner.config.min_line_quality
+E   AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+_____ test_enter_gate_discards_vision_until_enter_and_executor_ready[True] _____
+src/mission_control/test/test_motion_decision_node.py:4661: in test_enter_gate_discards_vision_until_enter_and_executor_ready
+    MotionDecisionNode._info_callback(node, 'line')(message)
+src/mission_control/mission_control/motion_decision_node.py:1096: in callback
+    MotionDecisionNode._remember_line_corner(self, payload)
+src/mission_control/mission_control/motion_decision_node.py:3192: in _remember_line_corner
+    min_quality = self.planner.line_planner.config.min_line_quality
+E   AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+_____________ test_line_prequeue_ignores_only_completed_hurdles[2] _____________
+src/mission_control/test/test_motion_decision_node.py:4871: in test_line_prequeue_ignores_only_completed_hurdles
+    assert MotionDecisionNode._line_only_prequeue_allowed(
+E   AssertionError: assert False is (2 == 2)
+E    +  where False = <function MotionDecisionNode._line_only_prequeue_allowed at 0xffff9e1d53f0>(<test_motion_decision_node.ReadinessPublishNode object at 0xffff9db8a9e0>, {'hurdle': {'bottom_distance_px': 200, 'camera_center_offset_x_px': 0, 'confidence': 0.9, 'confirmation_confirmed': True, ...}})
+E    +    where <function MotionDecisionNode._line_only_prequeue_allowed at 0xffff9e1d53f0> = MotionDecisionNode._line_only_prequeue_allowed
+_ test_collected_ball_route_clears_stale_reservations_before_dwell[GOAL_APPROACH-GOAL_CAMERA90_FINE_FORWARD_2] _
+src/mission_control/test/test_mission_phase_flow.py:505: in test_collected_ball_route_clears_stale_reservations_before_dwell
+    assert command["action"] == expected_action
+E   AssertionError: assert 'GOAL_CAMERA_90_FORWARD_2' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E     - GOAL_CAMERA90_FINE_FORWARD_2
+E     ?              -----
+E     + GOAL_CAMERA_90_FORWARD_2
+E     ?            +
+______ test_post_ball_detection_loss_cannot_interrupt_timed_line_or_goal _______
+src/mission_control/test/test_mission_phase_flow.py:564: in test_post_ball_detection_loss_cannot_interrupt_timed_line_or_goal
+    assert harness.publish_vision(goal=approaching_goal())[-1]["action"] == "GOAL_CAMERA90_FINE_FORWARD_2"
+E   AssertionError: assert 'GOAL_CAMERA_90_FORWARD_2' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E     - GOAL_CAMERA90_FINE_FORWARD_2
+E     ?              -----
+E     + GOAL_CAMERA_90_FORWARD_2
+E     ?            +
+_ test_post_shot_search_repeats_one_motion_at_a_time_until_line_visible[1-POST_SHOT_LINE_TURN_RIGHT_1-post_ball_line_turn_right_1] _
+src/mission_control/test/test_mission_phase_flow.py:645: in test_post_shot_search_repeats_one_motion_at_a_time_until_line_visible
+    assert command["action"] == action
+E   AssertionError: assert 'POST_SHOT_LINE_TURN_RIGHT_1' == 'POST_SHOT_LINE_TURN_RIGHT_2'
+E     - POST_SHOT_LINE_TURN_RIGHT_2
+E     ?                           ^
+E     + POST_SHOT_LINE_TURN_RIGHT_1
+E     ?                           ^
+_______ test_ball_loss_waits_then_reacquired_ball_selects_moving_recover _______
+src/mission_control/test/test_mission_phase_flow.py:1032: in test_ball_loss_waits_then_reacquired_ball_selects_moving_recover
+    assert approach["action"] == "BALL_APPROACH_RECOVER_LEFT_4"
+E   AssertionError: assert 'BALL_APPROACH_TURN_LEFT_2' == 'BALL_APPROACH_RECOVER_LEFT_4'
+E     - BALL_APPROACH_RECOVER_LEFT_4
+E     ?                ^^^^^^      ^
+E     + BALL_APPROACH_TURN_LEFT_2
+E     ?               ++ ^      ^
+____ test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell _____
+src/mission_control/test/test_mission_phase_flow.py:1083: in test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell
+    assert harness.ball_pickup_entry_pending is True
+E   assert False is True
+E    +  where False = <test_mission_phase_flow.MissionFlowHarness object at 0xffff9ce08430>.ball_pickup_entry_pending
+_____ test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment ______
+src/mission_control/test/test_mission_phase_flow.py:1205: in test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment
+    assert turn["action"] == "BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_1"
+E   AssertionError: assert 'BALL_PICKUP_...N_TURN_LEFT_2' == 'BALL_PICKUP_...N_TURN_LEFT_1'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_1
+E     ?                                   ^
+E     + BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_2
+E     ?                                   ^
+_________________ test_full_course_mock_flow_without_ros_graph _________________
+src/mission_control/test/test_mission_phase_flow.py:1290: in test_full_course_mock_flow_without_ros_graph
+    assert approach_ball[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+___________ test_confirmed_approaching_hurdle_beats_approaching_ball ___________
+src/mission_control/test/test_mission_phase_flow.py:1650: in test_confirmed_approaching_hurdle_beats_approaching_ball
+    assert published[-1]["action"] == "STRAIGHT_0"
+E   AssertionError: assert 'GO' == 'STRAIGHT_0'
+E     - STRAIGHT_0
+E     + GO
+__________ test_unconfirmed_hurdle_disappearance_resumes_ball_mission __________
+src/mission_control/test/test_mission_phase_flow.py:1808: in test_unconfirmed_hurdle_disappearance_resumes_ball_mission
+    assert held[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+________ test_unconfirmed_hurdle_can_become_confirmed_and_take_priority ________
+src/mission_control/test/test_mission_phase_flow.py:1827: in test_unconfirmed_hurdle_can_become_confirmed_and_take_priority
+    assert held[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+_______________ test_absent_hurdle_keeps_ball_priority_over_line _______________
+src/mission_control/test/test_mission_phase_flow.py:1846: in test_absent_hurdle_keeps_ball_priority_over_line
+    assert published[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+_ test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[34.0-GOAL_CAMERA90_TURN_RIGHT_3-0.0-GOAL_CAMERA90_FINE_FORWARD_2] _
+src/mission_control/test/test_mission_phase_flow.py:2138: in test_goal_camera90_turn_dwells_then_rechecks_fresh_goal
+    assert forward["action"] == next_action
+E   AssertionError: assert 'GOAL_CAMERA_90_FORWARD_2' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E     - GOAL_CAMERA90_FINE_FORWARD_2
+E     ?              -----
+E     + GOAL_CAMERA_90_FORWARD_2
+E     ?            +
+_ test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-35.0-GOAL_CAMERA90_TURN_LEFT_1--20.0-GOAL_CAMERA90_TURN_LEFT_1] _
+src/mission_control/test/test_mission_phase_flow.py:2118: in test_goal_camera90_turn_dwells_then_rechecks_fresh_goal
+    assert correction["action"] == initial_action
+E   AssertionError: assert 'GOAL_CAMERA90_TURN_LEFT_2' == 'GOAL_CAMERA90_TURN_LEFT_1'
+E     - GOAL_CAMERA90_TURN_LEFT_1
+E     ?                         ^
+E     + GOAL_CAMERA90_TURN_LEFT_2
+E     ?                         ^
+_ test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-20.0-GOAL_CAMERA90_TURN_LEFT_1--15.0-GOAL_CAMERA90_FINE_FORWARD_2] _
+src/mission_control/test/test_mission_phase_flow.py:2138: in test_goal_camera90_turn_dwells_then_rechecks_fresh_goal
+    assert forward["action"] == next_action
+E   AssertionError: assert 'GOAL_CAMERA90_TURN_LEFT_1' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E     - GOAL_CAMERA90_FINE_FORWARD_2
+E     + GOAL_CAMERA90_TURN_LEFT_1
+_ test_goal_depth_actions_follow_new_scoring_range[0.65-GOAL_CAMERA90_FINE_FORWARD_1] _
+src/mission_control/test/test_mission_phase_flow.py:2220: in test_goal_depth_actions_follow_new_scoring_range
+    assert decision["action"] == action
+E   AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_3' == 'GOAL_CAMERA90_FINE_FORWARD_1'
+E     - GOAL_CAMERA90_FINE_FORWARD_1
+E     ?                            ^
+E     + GOAL_CAMERA90_FINE_FORWARD_3
+E     ?                            ^
+___________ test_final_line_track_still_prioritizes_confirmed_hurdle ___________
+src/mission_control/test/test_mission_phase_flow.py:2345: in test_final_line_track_still_prioritizes_confirmed_hurdle
+    assert decision["action"] == "STRAIGHT_0"
+E   AssertionError: assert 'GO' == 'STRAIGHT_0'
+E     - STRAIGHT_0
+E     + GO
+______ test_ball_stationary_turn_requires_fresh_ball_before_next_approach ______
+src/mission_control/test/test_mission_phase_flow.py:2535: in test_ball_stationary_turn_requires_fresh_ball_before_next_approach
+    assert approach[0]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'BALL_APPROACH_TURN_RIGHT_1' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     + BALL_APPROACH_TURN_RIGHT_1
+_____________ test_second_ball_uses_same_straight_distance_policy ______________
+src/mission_control/test/test_mission_phase_flow.py:2588: in test_second_ball_uses_same_straight_distance_policy
+    assert command[0]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'BALL_APPROACH_TURN_LEFT_1' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     + BALL_APPROACH_TURN_LEFT_1
+___________ test_failed_first_pickup_keeps_straight_distance_policy ____________
+src/mission_control/test/test_mission_phase_flow.py:2615: in test_failed_first_pickup_keeps_straight_distance_policy
+    assert command[0]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'BALL_APPROACH_TURN_RIGHT_1' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     + BALL_APPROACH_TURN_RIGHT_1
+_ test_transition_finishes_before_target_and_rejects_interleaved_commands[BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45] _
+src/mission_control/test/test_gait_transitions.py:53: in test_transition_finishes_before_target_and_rejects_interleaved_commands
+    assert prep_request["motion_id"] == prepare
+E   AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E     - fine_to_turn_ready_45
+E     ?                    ^^
+E     + fine_to_turn_ready_0
+E     ?                    ^
+_ test_transition_finishes_before_target_and_rejects_interleaved_commands[BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45] _
+src/mission_control/test/test_gait_transitions.py:53: in test_transition_finishes_before_target_and_rejects_interleaved_commands
+    assert prep_request["motion_id"] == prepare
+E   AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E     - fine_to_turn_ready_45
+E     ?                    ^^
+E     + fine_to_turn_ready_0
+E     ?                    ^
+_ test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45] _
+src/mission_control/test/test_gait_transitions.py:83: in test_preparation_failure_never_sends_target
+    assert requests(bridge)[-1]["motion_id"] == prepare
+E   AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E     - fine_to_turn_ready_45
+E     ?                    ^^
+E     + fine_to_turn_ready_0
+E     ?                    ^
+_ test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45] _
+src/mission_control/test/test_gait_transitions.py:83: in test_preparation_failure_never_sends_target
+    assert requests(bridge)[-1]["motion_id"] == prepare
+E   AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E     - fine_to_turn_ready_45
+E     ?                    ^^
+E     + fine_to_turn_ready_0
+E     ?                    ^
+_ test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45] _
+src/mission_control/test/test_gait_transitions.py:83: in test_preparation_failure_never_sends_target
+    assert requests(bridge)[-1]["motion_id"] == prepare
+E   AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E     - fine_to_turn_ready_45
+E     ?                    ^^
+E     + fine_to_turn_ready_0
+E     ?                    ^
+_ test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45] _
+src/mission_control/test/test_gait_transitions.py:83: in test_preparation_failure_never_sends_target
+    assert requests(bridge)[-1]["motion_id"] == prepare
+E   AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E     - fine_to_turn_ready_45
+E     ?                    ^^
+E     + fine_to_turn_ready_0
+E     ?                    ^
+_ test_preparation_failure_never_sends_target[CANCELLED--BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45] _
+src/mission_control/test/test_gait_transitions.py:83: in test_preparation_failure_never_sends_target
+    assert requests(bridge)[-1]["motion_id"] == prepare
+E   AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E     - fine_to_turn_ready_45
+E     ?                    ^^
+E     + fine_to_turn_ready_0
+E     ?                    ^
+_ test_preparation_failure_never_sends_target[CANCELLED--BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45] _
+src/mission_control/test/test_gait_transitions.py:83: in test_preparation_failure_never_sends_target
+    assert requests(bridge)[-1]["motion_id"] == prepare
+E   AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E     - fine_to_turn_ready_45
+E     ?                    ^^
+E     + fine_to_turn_ready_0
+E     ?                    ^
+_ test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45] _
+src/mission_control/test/test_gait_transitions.py:83: in test_preparation_failure_never_sends_target
+    assert requests(bridge)[-1]["motion_id"] == prepare
+E   AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E     - fine_to_turn_ready_45
+E     ?                    ^^
+E     + fine_to_turn_ready_0
+E     ?                    ^
+_ test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45] _
+src/mission_control/test/test_gait_transitions.py:83: in test_preparation_failure_never_sends_target
+    assert requests(bridge)[-1]["motion_id"] == prepare
+E   AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E     - fine_to_turn_ready_45
+E     ?                    ^^
+E     + fine_to_turn_ready_0
+E     ?                    ^
+_ test_queued_transition_uses_actual_completed_predecessor[SUCCEEDED-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45] _
+src/mission_control/test/test_gait_transitions.py:104: in test_queued_transition_uses_actual_completed_predecessor
+    assert requests(bridge)[-1]["motion_id"] == prepare
+E   AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E     - fine_to_turn_ready_45
+E     ?                    ^^
+E     + fine_to_turn_ready_0
+E     ?                    ^
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_motion_decision_node.py::test_turn_waits_for_stable_half_second[LEFT]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_turn_waits_for_stable_half_second[RIGHT]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_changed_turn_candidate_restarts_settle
+FAILED src/mission_control/test/test_motion_decision_node.py::test_new_frame_keeps_same_candidate_start_time
+FAILED src/mission_control/test/test_motion_decision_node.py::test_stop_cancels_pending_turn_and_is_not_delayed
+FAILED src/mission_control/test/test_motion_decision_node.py::test_general_lock_does_not_precount_next_turn
+FAILED src/mission_control/test/test_motion_decision_node.py::test_active_special_lock_does_not_precount_next_settle
+FAILED src/mission_control/test/test_motion_decision_node.py::test_published_turn_requires_a_new_settle_after_completion
+FAILED src/mission_control/test/test_motion_decision_node.py::test_startup_hold_discards_commands_until_ready_and_fresh_vision
+FAILED src/mission_control/test/test_motion_decision_node.py::test_line_motion_capture_table_matches_deployed_timelines
+FAILED src/mission_control/test/test_motion_decision_node.py::test_line_prequeue_retries_after_temporary_target_disappears
+FAILED src/mission_control/test/test_motion_decision_node.py::test_mock_line_input_is_fresh_and_produces_action[turn_left-RECOVER_LEFT_TURN_LEFT_4]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_mock_line_input_is_fresh_and_produces_action[turn_right-RECOVER_RIGHT_TURN_RIGHT_4]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_all_line_stationary_turns_pause_one_second_before_publish[LEFT]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_all_line_stationary_turns_pause_one_second_before_publish[RIGHT]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_all_line_stationary_turns_pause_one_second_before_publish[POST_BALL_LINE_TURN_LEFT_2]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_all_line_stationary_turns_pause_one_second_before_publish[POST_BALL_LINE_TURN_RIGHT_3]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_all_line_stationary_turns_pause_one_second_before_publish[POST_SHOT_LINE_TURN_LEFT_2]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_all_line_stationary_turns_pause_one_second_before_publish[POST_SHOT_LINE_TURN_RIGHT_3]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_enter_gate_discards_vision_until_enter_and_executor_ready[False]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_enter_gate_discards_vision_until_enter_and_executor_ready[True]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_line_prequeue_ignores_only_completed_hurdles[2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_collected_ball_route_clears_stale_reservations_before_dwell[GOAL_APPROACH-GOAL_CAMERA90_FINE_FORWARD_2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_ball_detection_loss_cannot_interrupt_timed_line_or_goal
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_shot_search_repeats_one_motion_at_a_time_until_line_visible[1-POST_SHOT_LINE_TURN_RIGHT_1-post_ball_line_turn_right_1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_ball_loss_waits_then_reacquired_ball_selects_moving_recover
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_full_course_mock_flow_without_ros_graph
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_confirmed_approaching_hurdle_beats_approaching_ball
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_unconfirmed_hurdle_disappearance_resumes_ball_mission
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_unconfirmed_hurdle_can_become_confirmed_and_take_priority
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_absent_hurdle_keeps_ball_priority_over_line
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[34.0-GOAL_CAMERA90_TURN_RIGHT_3-0.0-GOAL_CAMERA90_FINE_FORWARD_2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-35.0-GOAL_CAMERA90_TURN_LEFT_1--20.0-GOAL_CAMERA90_TURN_LEFT_1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-20.0-GOAL_CAMERA90_TURN_LEFT_1--15.0-GOAL_CAMERA90_FINE_FORWARD_2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_depth_actions_follow_new_scoring_range[0.65-GOAL_CAMERA90_FINE_FORWARD_1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_final_line_track_still_prioritizes_confirmed_hurdle
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_ball_stationary_turn_requires_fresh_ball_before_next_approach
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_second_ball_uses_same_straight_distance_policy
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_failed_first_pickup_keeps_straight_distance_policy
+FAILED src/mission_control/test/test_gait_transitions.py::test_transition_finishes_before_target_and_rejects_interleaved_commands[BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_transition_finishes_before_target_and_rejects_interleaved_commands[BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[CANCELLED--BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[CANCELLED--BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_queued_transition_uses_actual_completed_predecessor[SUCCEEDED-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]
+52 failed, 1474 passed in 17.81s

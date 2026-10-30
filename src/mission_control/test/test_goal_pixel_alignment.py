@@ -7,7 +7,7 @@ from test_line_corner_memory import CornerHarness
 from test_mission_phase_flow import mark_next_ball_grabbed, release_general, score_ready_goal
 
 
-@pytest.mark.parametrize("direction,sign,count", [("RIGHT", 1, 2), ("LEFT", -1, 1)])
+@pytest.mark.parametrize("direction,sign,count", [("RIGHT", 1, 1), ("LEFT", -1, 1)])
 @pytest.mark.parametrize("final_offset,next_action", [(140, "CRAB"), (80, "SHOT")])
 def test_large_offset_repeats_only_after_one_second_and_new_capture(
     monkeypatch, direction, sign, count, final_offset, next_action,
@@ -23,7 +23,7 @@ def test_large_offset_repeats_only_after_one_second_and_new_capture(
     def sample(offset, captured_at=None):
         return {
             **score_ready_goal(), "offset_x_px": offset,
-            "offset_x_norm": offset / 640,
+            "offset_x_norm": offset / 640, "bearing_deg": sign * 22.9,
             "rgb_stamp_ns": round((now[0] if captured_at is None else captured_at) * 1e9),
         }
 

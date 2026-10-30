@@ -4,6 +4,7 @@
 #include <iostream>  
 #include <cmath>
 #include <stdexcept>
+#include <limits>
 
 // const char* getAvailableDeviceName()
 // {
@@ -95,6 +96,31 @@ bool Dxl::ReadPositionDegrees(std::vector<double>& angles) {
         angles[id] = std::clamp((raw - 2048.0) * (360.0 / 4096.0), -180.0, 179.912109375);
     }
     return true;
+}
+
+bool Dxl::ReadAvailablePositionDegrees(std::vector<double>& angles) {
+    bus_diagnostics_ = {};
+    angles.assign(NUMBER_OF_DYNAMIXELS, std::numeric_limits<double>::quiet_NaN());
+    if (!port_opened_) return false;
+    bus_diagnostics_.valid = true;
+    bool any = false;
+    // SyncRead 전체가 실패했을 때만 관절별로 읽는다. 실패 관절에는 값을 만들지 않는다.
+    for (int id = 0; id < NUMBER_OF_DYNAMIXELS; ++id) {
+        if (!MotorEnabled(id)) continue;
+        uint32_t raw = 0;
+        uint8_t error = 0;
+        const int result = packetHandler->read4ByteTxRx(
+            portHandler, id, DxlReg_PresentPosition, &raw, &error);
+        if (result != COMM_SUCCESS || error != 0) {
+            if (result != COMM_SUCCESS) bus_diagnostics_.result = result;
+            bus_diagnostics_.missing_ids |= std::uint32_t{1} << id;
+            continue;
+        }
+        angles[id] = std::clamp((static_cast<std::int32_t>(raw) - 2048.0)
+            * (360.0 / 4096.0), -180.0, 179.912109375);
+        any = true;
+    }
+    return any;
 }
 
 // ************************************ GETTERS ***************************************** //

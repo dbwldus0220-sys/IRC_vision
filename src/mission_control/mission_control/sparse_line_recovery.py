@@ -246,12 +246,20 @@ class SparseLineRecovery:
         )
 
     def _turn(self, decision, direction, reason):
-        count = 1 if direction == "LEFT" else 2
+        angle = MotionDecisionPlanner._number(decision.source_command, "steering_error_deg")
+        if angle is None:
+            angle = MotionDecisionPlanner._number(decision.source_command, "heading_error_deg")
+        if angle is None:
+            return self._wait(decision, "sparse_line_missing_turn_angle")
+        count = MotionDecisionPlanner._turn_repeat_count(angle, direction)
+        if count == 0:
+            return self._wait(decision, "sparse_line_below_stationary_turn_minimum")
+        yaw = MotionDecisionPlanner._turn_angle_deg(count, direction)
         result = self._motion(decision, f"LINE_SPARSE_TURN_{direction}_{count}", reason)
         return replace(result, source_command={
             **result.source_command,
-            "turn_direction": direction, "turn_count": count, "turn_angle_deg": 15.,
-            "target_heading_change_deg": 15. if direction == "RIGHT" else -15.,
+            "turn_direction": direction, "turn_count": count, "turn_angle_deg": yaw,
+            "target_heading_change_deg": yaw if direction == "RIGHT" else -yaw,
         })
 
     def published(self, decision, stamp):

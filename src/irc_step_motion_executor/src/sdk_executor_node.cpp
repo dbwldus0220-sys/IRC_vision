@@ -282,6 +282,11 @@ public:
           callback_timing_trace_, "navigation", core_->has_active_request());
         handle_hurdle_navigation(message->data);
       });
+    goal_camera_subscription_ = create_subscription<std_msgs::msg::String>(
+      "/navigation/goal_camera_prepare", 1,
+      [this](const std_msgs::msg::String::SharedPtr message) {
+        handle_goal_camera_prepare(message->data);
+      });
     hurdle_info_subscription_ = create_subscription<std_msgs::msg::String>(
       "/vision/hurdle_info", 10,
       [this](const std_msgs::msg::String::SharedPtr message) {
@@ -299,6 +304,7 @@ public:
           CallbackTimingTrace::Scope head_timing(
             callback_timing_trace_, "head_update", core_->has_active_request());
           update_ball_head_override(now_ms);
+          update_goal_head_override(now_ms);
           update_hurdle_head_override(now_ms);
         }
         {
@@ -323,6 +329,69 @@ public:
   }
 
 private:
+  void start_goal_head_override()
+  {
+    if (goal_head_override_latched_) {return;}
+    goal_head_start_deg_ = hurdle_head_override_latched_ ? hurdle_head_current_deg_ :
+      (ball_head_override_latched_ ? ball_head_override_deg_ : ball_head_camera_up_deg_);
+    clear_ball_head_override();
+    clear_hurdle_head_override();
+    goal_head_override_started_ms_ = steady_now_ms();
+    goal_head_override_latched_ = true;
+    update_goal_head_override(goal_head_override_started_ms_);
+  }
+
+  void handle_goal_camera_prepare(const std::string & payload)
+  {
+    if (!enable_head_override_ || !goal_head_override_enabled_ ||
+      !startup_pose_gate_->navigation_allowed()) {return;}
+    json_object * object = json_tokener_parse(payload.c_str());
+    if (object == nullptr) {return;}
+    json_object * id = nullptr;
+    json_object * stamp = nullptr;
+    json_object * phase = nullptr;
+    json_object * grasp = nullptr;
+    const bool valid =
+      json_object_object_get_ex(object, "request_id", &id) &&
+      json_object_get_type(id) == json_type_int && json_object_get_int64(id) > 0 &&
+      json_object_object_get_ex(object, "stamp_ns", &stamp) &&
+      json_object_get_type(stamp) == json_type_int && json_object_get_int64(stamp) > 0 &&
+      json_object_object_get_ex(object, "phase", &phase) &&
+      json_object_get_type(phase) == json_type_string &&
+      (std::string(json_object_get_string(phase)) == "LINE_TRACK_AFTER_PICKUP" ||
+      std::string(json_object_get_string(phase)) == "GOAL_APPROACH") &&
+      json_object_object_get_ex(object, "grasp", &grasp) &&
+      json_object_get_type(grasp) == json_type_string &&
+      std::string(json_object_get_string(grasp)) == "GRABBED";
+    const auto age = valid ? now().nanoseconds() - json_object_get_int64(stamp) : -1;
+    if (valid && age >= 0 && age <= 500000000) {
+      const auto request_id = json_object_get_int64(id);
+      if (goal_head_prepare_id_ != request_id) {
+        RCLCPP_INFO(get_logger(), "Goal camera preparation during Line: id=%ld", request_id);
+      }
+      goal_head_prepare_id_ = request_id;
+      start_goal_head_override();
+    }
+    json_object_put(object);
+  }
+
+  void update_goal_head_override(std::uint64_t now_ms)
+  {
+    if (!goal_head_override_latched_) {return;}
+    const auto elapsed_ms = now_ms >= goal_head_override_started_ms_ ?
+      now_ms - goal_head_override_started_ms_ : 0;
+    const double progress = std::min(
+      1.0, static_cast<double>(elapsed_ms) / static_cast<double>(ball_head_transition_ms_));
+    const double target = goal_head_start_deg_ +
+      (goal_head_override_deg_ - goal_head_start_deg_) * progress;
+    if (!backend_->set_joint_override(0, target)) {
+      goal_head_override_latched_ = false;
+      goal_head_prepare_id_ = 0;
+      backend_->clear_joint_override(0);
+      RCLCPP_ERROR(get_logger(), "Motion backend rejected goal camera override");
+    }
+  }
+
   void handle_hurdle_navigation(const std::string & payload)
   {
     if (!enable_head_override_) {return;}
@@ -513,7 +582,7 @@ private:
     ball_head_override_started_ms_ = steady_now_ms();
     RCLCPP_INFO(
       get_logger(),
-      "Ball entered bottom trigger: motor 0 override %.1f deg latched",
+      "Ball camera-down requested: motor 0 override %.1f deg latched",
       ball_head_override_deg_);
   }
 
@@ -563,7 +632,31 @@ private:
       json_object_get_type(motion_value) == json_type_string;
     const std::string status = valid ? json_object_get_string(status_value) : "";
     const std::string motion_id = valid ? json_object_get_string(motion_value) : "";
+    json_object * action_value = nullptr;
+    const std::string action = json_object_object_get_ex(object, "action", &action_value) &&
+      json_object_get_type(action_value) == json_type_string ?
+      json_object_get_string(action_value) : "";
+    const bool goal_action = action.rfind("GOAL_", 0) == 0 || action == "SHOT";
     json_object_put(object);
+
+    // Core emits RUNNING only when the request actually starts, not when queued.
+    if (status == "RUNNING" && motion_id == "ball_lost_camera_down_backward_2" &&
+      (action == "BALL_LOST_BACKWARD_2" || action == "PICKUP_NOW") &&
+      ball_head_override_enabled_ && !ball_head_override_latched_ &&
+      !goal_head_override_latched_ && !hurdle_head_override_latched_)
+    {
+      // Loss recovery has no visible Ball to trigger the usual look-down request.
+      ball_head_override_started_ms_ = steady_now_ms();
+      ball_head_override_latched_ = true;
+      update_ball_head_override(ball_head_override_started_ms_);
+      RCLCPP_INFO(get_logger(), "Ball loss retreat: camera-down transition started");
+    }
+    if (goal_action && status == "RUNNING" && goal_head_override_enabled_ &&
+      !goal_head_override_latched_)
+    {
+      start_goal_head_override();
+      RCLCPP_INFO(get_logger(), "Goal camera transition started with accepted Goal motion");
+    }
 
     if ((status == "SUCCEEDED" && (motion_id == "hurdle" || motion_id == "sdk_hurdle")) ||
       status == "CANCELLED")
@@ -592,6 +685,8 @@ private:
       clear_ball_head_override();
       if (backend_->set_joint_override(0, goal_head_override_deg_)) {
         goal_head_override_latched_ = true;
+        goal_head_start_deg_ = goal_head_override_deg_;
+        goal_head_override_started_ms_ = steady_now_ms();
         RCLCPP_INFO(
           get_logger(), "Camera 90-degree hold enabled: motor 0 %.1f deg",
           goal_head_override_deg_);
@@ -600,12 +695,14 @@ private:
       }
     }
     if (goal_head_override_latched_ &&
-      ((status == "SUCCEEDED" && motion_id == "goal_shot") ||
+      ((status == "SUCCEEDED" && (motion_id == "goal_shot" ||
+      motion_id.rfind("goal_shot_region_", 0) == 0)) ||
       status == "CANCELLED" ||
       (status == "RUNNING" && is_pickup)))
     {
       backend_->clear_joint_override(0);
       goal_head_override_latched_ = false;
+      goal_head_prepare_id_ = 0;
       RCLCPP_INFO(get_logger(), "Camera 90-degree hold cleared: %s", motion_id.c_str());
     }
   }
@@ -635,6 +732,12 @@ private:
     json_object_object_add(
       object, "goal_head_override_active",
       json_object_new_boolean(goal_head_override_latched_));
+    json_object_object_add(
+      object, "goal_head_prepare_id", json_object_new_int64(goal_head_prepare_id_));
+    json_object_object_add(
+      object, "goal_head_transition_complete", json_object_new_boolean(
+        goal_head_override_latched_ && steady_now_ms() >= goal_head_override_started_ms_ +
+        static_cast<std::uint64_t>(ball_head_transition_ms_)));
     json_object_object_add(
       object, "goal_head_override_deg",
       json_object_new_double(goal_head_override_deg_));
@@ -701,6 +804,7 @@ private:
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr
     ball_info_subscription_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr navigation_subscription_;
+  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr goal_camera_subscription_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr hurdle_info_subscription_;
   rclcpp::TimerBase::SharedPtr poll_timer_;
   rclcpp::TimerBase::SharedPtr heartbeat_timer_;
@@ -716,9 +820,12 @@ private:
   std::int64_t ball_head_transition_ms_{400};
   std::uint64_t ball_head_override_started_ms_{0};
   std::vector<std::string> ball_head_override_motion_ids_;
+  std::int64_t goal_head_prepare_id_{0};
   bool goal_head_override_enabled_{true};
   bool goal_head_override_latched_{false};
   double goal_head_override_deg_{1.0};
+  double goal_head_start_deg_{-33.0};
+  std::uint64_t goal_head_override_started_ms_{0};
   bool hurdle_control_active_{false};
   bool hurdle_line_monitor_active_{false};
   bool hurdle_ignore_until_clear_{false};

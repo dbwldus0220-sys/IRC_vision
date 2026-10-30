@@ -11,6 +11,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 
+from .goal_scoring import GOAL_SCORE_TARGET_DEPTH_M
 from .goal_navigation_planner import GoalNavigationConfig
 from .goal_navigation_planner import GoalNavigationPlanner
 
@@ -27,10 +28,7 @@ class GoalNavigationController(Node):
         self.declare_parameter("goal_timeout_sec", 0.50)
         self.declare_parameter("min_confidence", 0.55)
         self.declare_parameter("control_start_depth_m", 2.0)
-        self.declare_parameter("score_target_depth_m", 0.43)
-        self.declare_parameter("score_depth_tolerance_m", 0.04)
-        self.declare_parameter("score_left_bound_px", -90.0)
-        self.declare_parameter("score_right_bound_px", 90.0)
+        self.declare_parameter("score_target_depth_m", GOAL_SCORE_TARGET_DEPTH_M)
         self.declare_parameter("score_crab_max_offset_px", 140.0)
 
         config = GoalNavigationConfig(
@@ -41,11 +39,6 @@ class GoalNavigationController(Node):
             score_target_depth_m=self._float_parameter(
                 "score_target_depth_m"
             ),
-            score_depth_tolerance_m=self._float_parameter(
-                "score_depth_tolerance_m"
-            ),
-            score_left_bound_px=self._float_parameter("score_left_bound_px"),
-            score_right_bound_px=self._float_parameter("score_right_bound_px"),
             score_crab_max_offset_px=self._float_parameter("score_crab_max_offset_px"),
         )
         self.planner = GoalNavigationPlanner(config)

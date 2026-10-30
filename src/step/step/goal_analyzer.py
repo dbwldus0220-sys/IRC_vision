@@ -22,6 +22,10 @@ from rclpy.qos import ReliabilityPolicy
 from sensor_msgs.msg import CameraInfo, Image
 from std_msgs.msg import String
 
+from .goal_scoring import (
+    GOAL_SCORE_MIN_DEPTH_M, GOAL_SCORE_TARGET_DEPTH_M, GOAL_SCORE_MAX_DEPTH_M,
+    goal_shot_pixel_limit, goal_shot_region,
+)
 from .depth_frame_cache import DepthFrameCache
 from .depth_frame_cache import DepthFrameConsumer
 from .temporal_confirmation import depth_is_within_range
@@ -129,13 +133,10 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         self.declare_parameter("max_valid_depth_m", 6.0)
         self.declare_parameter("detect_depth_m", 2.0)
         self.declare_parameter("approach_depth_m", 1.0)
-        self.declare_parameter("score_target_depth_m", 0.43)
-        self.declare_parameter("score_depth_tolerance_m", 0.04)
-        self.declare_parameter("score_left_bound_px", -90.0)
-        self.declare_parameter("score_right_bound_px", 90.0)
+        self.declare_parameter("score_target_depth_m", GOAL_SCORE_TARGET_DEPTH_M)
         self.declare_parameter("direction_deadband_norm", 0.04)
         self.declare_parameter("confirmation_window_size", 40)
-        self.declare_parameter("confirmation_required_hits", 30)
+        self.declare_parameter("confirmation_required_hits", 10)
         self.declare_parameter("confirmation_max_missed_frames", 2)
         self.declare_parameter("confirmation_max_center_shift_norm", 0.18)
         self.declare_parameter("confirmation_min_area_ratio", 0.40)
@@ -179,18 +180,7 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         self.score_target_depth_m = self._float_parameter(
             "score_target_depth_m"
         )
-        self.score_depth_tolerance_m = max(
-            0.0,
-            self._float_parameter("score_depth_tolerance_m"),
-        )
-        self.score_left_bound_px = self._float_parameter("score_left_bound_px")
-        self.score_right_bound_px = self._float_parameter("score_right_bound_px")
-        if not (
-            math.isfinite(self.score_left_bound_px)
-            and math.isfinite(self.score_right_bound_px)
-            and self.score_left_bound_px <= self.score_right_bound_px
-        ):
-            raise ValueError("goal pixel bounds must be finite and ordered")
+
         self.direction_deadband_norm = max(
             0.0,
             self._float_parameter("direction_deadband_norm"),
@@ -543,7 +533,9 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         self,
         target: GoalCandidate,
     ) -> tuple[str, bool, bool, float | None, bool, str]:
-        centered = self.score_left_bound_px <= target.offset_x_px <= self.score_right_bound_px
+        centered = abs(target.offset_x_px) <= goal_shot_pixel_limit(
+            target.depth_m if target.depth_m is not None else GOAL_SCORE_TARGET_DEPTH_M
+        )
         if not target.depth_valid or target.depth_m is None:
             return (
                 "NO_DEPTH",
@@ -555,11 +547,9 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
             )
         error = target.depth_m - self.score_target_depth_m
         depth_in_range = (
-            self.score_target_depth_m - self.score_depth_tolerance_m
-            <= target.depth_m
-            <= self.score_target_depth_m + self.score_depth_tolerance_m
+            GOAL_SCORE_MIN_DEPTH_M <= target.depth_m < GOAL_SCORE_MAX_DEPTH_M
         )
-        score_now = depth_in_range and centered
+        score_now = goal_shot_region(target.depth_m, target.offset_x_px) is not None
         if score_now:
             return (
                 "SCORE_READY",
@@ -578,7 +568,7 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
                 False,
                 "align_goal_horizontally",
             )
-        if error > self.score_depth_tolerance_m:
+        if target.depth_m >= GOAL_SCORE_MAX_DEPTH_M:
             state = (
                 "APPROACH"
                 if target.depth_m <= self.approach_depth_m

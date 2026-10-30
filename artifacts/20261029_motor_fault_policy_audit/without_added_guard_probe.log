@@ -1,0 +1,6 @@
+healthy: position_tolerance=false; current=SUCCEEDED_without_arrival_confirmation; next=ACCEPTED; detail=
+motor5_torque_off: position_tolerance=false; current=SUCCEEDED_without_arrival_confirmation; next=ACCEPTED; detail=
+motor5_torque_read_failure: position_tolerance=false; current=SUCCEEDED_without_arrival_confirmation; next=ACCEPTED; detail=
+motor5_offline: position_tolerance=false; current=SUCCEEDED_without_arrival_confirmation; next=HardwareNotReady; detail=cannot capture actual start pose
+bus_write_failure: position_tolerance=false; current=FAILED; next=HardwareNotReady; detail=cannot set playback profiles to zero
+queued_motor5_offline: position_tolerance=false; current=SUCCEEDED_without_arrival_confirmation; next=HardwareNotReady; detail=cannot capture actual start pose

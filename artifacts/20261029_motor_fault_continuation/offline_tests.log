@@ -1,0 +1,14 @@
+Internal ctest changing into directory: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/robot_motion_sdk
+Test project /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/robot_motion_sdk
+    Start 3: gui_alignment_contract
+1/4 Test #3: gui_alignment_contract ..............   Passed    0.01 sec
+    Start 4: continuous_hardware_contract
+2/4 Test #4: continuous_hardware_contract ........   Passed    0.11 sec
+    Start 5: continuous_interpolation_contract
+3/4 Test #5: continuous_interpolation_contract ...   Passed    0.01 sec
+    Start 6: forward_timing_contract
+4/4 Test #6: forward_timing_contract .............   Passed    0.41 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Total Test time (real) =   0.54 sec

@@ -1,0 +1,102 @@
+........................................................................ [ 23%]
+........................................................................ [ 46%]
+.......................................FFFF...FFFF...................... [ 69%]
+.......................................F................................ [ 92%]
+....................FFF.                                                 [100%]
+=================================== FAILURES ===================================
+_ test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count[LEFT-line-LINE_LOST_TURN_-] _
+src/mission_control/test/test_staged_lost_search.py:155: in test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count
+    assert f'{camera}도' in label and f'({count}회)' in label
+E   AssertionError: assert ('45도' in 'R제자리좌회전(3회)')
+_ test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count[LEFT-line-POST_BALL_LINE_TURN_-post_ball_line_search] _
+src/mission_control/test/test_staged_lost_search.py:155: in test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count
+    assert f'{camera}도' in label and f'({count}회)' in label
+E   AssertionError: assert ('45도' in 'R제자리좌회전(3회)')
+_ test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count[LEFT-line-POST_SHOT_LINE_TURN_-post_shot_line_search] _
+src/mission_control/test/test_staged_lost_search.py:155: in test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count
+    assert f'{camera}도' in label and f'({count}회)' in label
+E   AssertionError: assert ('45도' in 'R제자리좌회전(3회)')
+_ test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count[LEFT-ball-BALL_APPROACH_TURN_-turn_toward_last_seen_ball_side] _
+src/mission_control/test/test_staged_lost_search.py:155: in test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count
+    assert f'{camera}도' in label and f'({count}회)' in label
+E   AssertionError: assert ('45도' in 'R제자리좌회전(3회)')
+_ test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count[RIGHT-line-LINE_LOST_TURN_-] _
+src/mission_control/test/test_staged_lost_search.py:155: in test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count
+    assert f'{camera}도' in label and f'({count}회)' in label
+E   AssertionError: assert ('45도' in 'R제자리우회전(5회(')
+_ test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count[RIGHT-line-POST_BALL_LINE_TURN_-post_ball_line_search] _
+src/mission_control/test/test_staged_lost_search.py:155: in test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count
+    assert f'{camera}도' in label and f'({count}회)' in label
+E   AssertionError: assert ('45도' in 'R제자리우회전(5회(')
+_ test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count[RIGHT-line-POST_SHOT_LINE_TURN_-post_shot_line_search] _
+src/mission_control/test/test_staged_lost_search.py:155: in test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count
+    assert f'{camera}도' in label and f'({count}회)' in label
+E   AssertionError: assert ('45도' in 'R제자리우회전(5회(')
+_ test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count[RIGHT-ball-BALL_APPROACH_TURN_-turn_toward_last_seen_ball_side] _
+src/mission_control/test/test_staged_lost_search.py:155: in test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count
+    assert f'{camera}도' in label and f'({count}회)' in label
+E   AssertionError: assert ('45도' in 'R제자리우회전(5회(')
+______ test_all_active_fine_aliases_select_source57_camera_specific_gaits ______
+src/mission_control/test/test_catalog57_fine_forward_update.py:43: in test_all_active_fine_aliases_select_source57_camera_specific_gaits
+    assert {key: aliases[key] for key in before} == {**before, **MANIFEST['alias_changes']}
+E   AssertionError: assert {'ball_camera...상단탐색3회)', ...} == {'ball_camera...상단탐색3회)', ...}
+E     Omitting 107 identical items, use -vv to show
+E     Differing items:
+E     {'goal_camera_90_fine_forward_2': 'R미세90도(2회)'} != {'goal_camera_90_fine_forward_2': 'r마세90도(2회)'}
+E     {'goal_camera_90_fine_forward_4': 'R미세90도(4회)'} != {'goal_camera_90_fine_forward_4': 'r마세90도(4회)'}
+E     {'goal_camera_90_fine_forward_3': 'R미세90도(3회)'} != {'goal_camera_90_fine_forward_3': 'r마세90도(3회)'}
+E     {'goal_camera_90_fine_forward_1': 'R미세90도(1회)'} != {'goal_camera_90_fine_forward_1': 'r마세90도(1회)'}
+E     Full diff:...
+E     
+E     ...Full output truncated (126 lines hidden), use '-vv' to show
+_ test_only_three_six_repeat_r_variants_added_and_source_data_preserved[robot_motions_pc.json] _
+src/mission_control/test/test_right_turn_bins.py:129: in test_only_three_six_repeat_r_variants_added_and_source_data_preserved
+    assert actual == expected
+E   AssertionError: assert {'motions': [... 'version': 1} == {'motions': [... 'version': 1}
+E     Omitting 1 identical items, use -vv to show
+E     Differing items:
+E     {'motions': [{'completion': {'position_tolerance_deg': 2.0, 'settle_duration_ms': 80, 'settle_timeout_ms': 3000}, 'end...5, ...}, 'frame_id': '0d2f6fcace1b408ab46ffcd4989d8efe', 'is_important': False, ...}], 'max_seq_ms': 12330, ...}, ...]} != {'motions': [{'completion': {'position_tolerance_deg': 2.0, 'settle_duration_ms': 80, 'settle_timeout_ms': 3000}, 'end...5, ...}, 'frame_id': '0d2f6fcace1b408ab46ffcd4989d8efe', 'is_important': False, ...}], 'max_seq_ms': 12330, ...}, ...]}
+E     Full diff:
+E       {
+E        'motions': [{'com...
+E     
+E     ...Full output truncated (19882 lines hidden), use '-vv' to show
+_ test_only_three_six_repeat_r_variants_added_and_source_data_preserved[robot_motions_runtime.json] _
+src/mission_control/test/test_right_turn_bins.py:129: in test_only_three_six_repeat_r_variants_added_and_source_data_preserved
+    assert actual == expected
+E   AssertionError: assert {'motions': [... 'version': 1} == {'motions': [... 'version': 1}
+E     Omitting 1 identical items, use -vv to show
+E     Differing items:
+E     {'motions': [{'completion': {'position_tolerance_deg': 5.0, 'settle_duration_ms': 80, 'settle_timeout_ms': 3000}, 'end...5, ...}, 'frame_id': '0d2f6fcace1b408ab46ffcd4989d8efe', 'is_important': False, ...}], 'max_seq_ms': 12330, ...}, ...]} != {'motions': [{'completion': {'position_tolerance_deg': 5.0, 'settle_duration_ms': 80, 'settle_timeout_ms': 3000}, 'end...5, ...}, 'frame_id': '0d2f6fcace1b408ab46ffcd4989d8efe', 'is_important': False, ...}], 'max_seq_ms': 12330, ...}, ...]}
+E     Full diff:
+E       {
+E        'motions': [{'com...
+E     
+E     ...Full output truncated (19882 lines hidden), use '-vv' to show
+______________________ test_only_six_repeat_aliases_added ______________________
+src/mission_control/test/test_right_turn_bins.py:151: in test_only_six_repeat_aliases_added
+    assert actual == {**before, **additions}
+E   AssertionError: assert {'ball_camera...상단탐색3회)', ...} == {'ball_camera...상단탐색3회)', ...}
+E     Omitting 111 identical items, use -vv to show
+E     Differing items:
+E     {'goal_camera_90_fine_forward_2': 'R미세90도(2회)'} != {'goal_camera_90_fine_forward_2': 'r마세90도(2회)'}
+E     {'goal_camera_90_fine_forward_4': 'R미세90도(4회)'} != {'goal_camera_90_fine_forward_4': 'r마세90도(4회)'}
+E     {'goal_camera_90_fine_forward_3': 'R미세90도(3회)'} != {'goal_camera_90_fine_forward_3': 'r마세90도(3회)'}
+E     {'goal_camera_90_fine_forward_1': 'R미세90도(1회)'} != {'goal_camera_90_fine_forward_1': 'r마세90도(1회)'}
+E     Full diff:...
+E     
+E     ...Full output truncated (130 lines hidden), use '-vv' to show
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_staged_lost_search.py::test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count[LEFT-line-LINE_LOST_TURN_-]
+FAILED src/mission_control/test/test_staged_lost_search.py::test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count[LEFT-line-POST_BALL_LINE_TURN_-post_ball_line_search]
+FAILED src/mission_control/test/test_staged_lost_search.py::test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count[LEFT-line-POST_SHOT_LINE_TURN_-post_shot_line_search]
+FAILED src/mission_control/test/test_staged_lost_search.py::test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count[LEFT-ball-BALL_APPROACH_TURN_-turn_toward_last_seen_ball_side]
+FAILED src/mission_control/test/test_staged_lost_search.py::test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count[RIGHT-line-LINE_LOST_TURN_-]
+FAILED src/mission_control/test/test_staged_lost_search.py::test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count[RIGHT-line-POST_BALL_LINE_TURN_-post_ball_line_search]
+FAILED src/mission_control/test/test_staged_lost_search.py::test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count[RIGHT-line-POST_SHOT_LINE_TURN_-post_shot_line_search]
+FAILED src/mission_control/test/test_staged_lost_search.py::test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count[RIGHT-ball-BALL_APPROACH_TURN_-turn_toward_last_seen_ball_side]
+FAILED src/mission_control/test/test_catalog57_fine_forward_update.py::test_all_active_fine_aliases_select_source57_camera_specific_gaits
+FAILED src/mission_control/test/test_right_turn_bins.py::test_only_three_six_repeat_r_variants_added_and_source_data_preserved[robot_motions_pc.json]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_only_three_six_repeat_r_variants_added_and_source_data_preserved[robot_motions_runtime.json]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_only_six_repeat_aliases_added
+12 failed, 300 passed in 6.72s

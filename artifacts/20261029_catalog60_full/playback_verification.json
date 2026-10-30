@@ -1,0 +1,1191 @@
+{
+  "hardware_used": false,
+  "continuous_interpolation": true,
+  "passed": 148,
+  "cases": [
+    {
+      "motion": "찐공확인자세",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "90abb89073dfa8cf918b9e2657bab5daf5108234ebc9306196d65d91261a760d"
+    },
+    {
+      "motion": "찐공확인자세",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "cd2b127dc1ec94522cf86ee2f91a6acb61d2fa7db9e560edf935d237d6623d73"
+    },
+    {
+      "motion": "찐후진실전-2(2회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "181390a902b521d981db50c4e06b1a9dd2517fa8e6b011da28b792c991e16006"
+    },
+    {
+      "motion": "찐후진실전-2(2회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "9480f124c82099aafb2ff63f0cfc11c4db9c3b81e046c3c06149e31f3cb112d9"
+    },
+    {
+      "motion": "찐공잡기전후진-2(2회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "4f257bcb7d0ecf0321e883b113db1064aa22d8c76513062ef934411f8fdad5ea"
+    },
+    {
+      "motion": "찐공잡기전후진-2(2회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "cbab223868058c081e17285066f3e81bbd584e0f56991c5019d8887d61d8c4bd"
+    },
+    {
+      "motion": "찐후진실전(1회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "25f4f81797de32fc1341e5f4fd46bbe3de1e67da0224e1405bc67d81560fea62"
+    },
+    {
+      "motion": "찐후진실전(1회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "f425af0c98fee1b5f6da36c2adebd60bbd1e925b831c5d97ec0281cf3dfb4931"
+    },
+    {
+      "motion": "찐미세오뒤에서 오옆꽃게90도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "f0090330824d8bb36b84934f8be3d16f491ee54eb02ee88513022f0396a0e99e"
+    },
+    {
+      "motion": "찐미세오뒤에서 오옆꽃게90도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "0e0de8e2c67a3f5432d84101106c2811f6f2bf5fd65574fa2474db10ddc006ef"
+    },
+    {
+      "motion": "찐미세오뒤에서오옆꽃게0도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "507a03732dd49509e5f0c43132f3ce9f5349fbd3b90ed63c8eb641b36b860774"
+    },
+    {
+      "motion": "찐미세오뒤에서오옆꽃게0도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "5c412d22716d7c674603aea899f3658e64c90e9bb919a7ec0ad64395969a0fc9"
+    },
+    {
+      "motion": "찐허들",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "1ebe88cdf389c31e0c8d1d52b8840781a79de17f8e4781ae2c356c81a35a1ef5"
+    },
+    {
+      "motion": "찐허들",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "bce7ae17e31f9ea92a35237fc1b1ff85954ac39560546faf7a9c2ec7a53df230"
+    },
+    {
+      "motion": "유미세오옆꽃게0도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "be2465ea156050335097d23ea2a9bf93171d786bbd694f4ed5aff0ad6ac58d39"
+    },
+    {
+      "motion": "유미세오옆꽃게0도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "fbebe9b60821f416e864a53d20771b641e6cabd068cbd0038d288b46a265fc4c"
+    },
+    {
+      "motion": "유미세왼옆꽃게0도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "c18ba3a083bc461c7b81b812da2299f23d8988b2030e15b9aac153ce55bc7553"
+    },
+    {
+      "motion": "유미세왼옆꽃게0도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "0d83e112db4eee014786b8107490b46a08277f48cded1cb27702f499e31f292a"
+    },
+    {
+      "motion": "유미세오옆꽃게90도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "0e8c68c2a80a145344de1aca4e208b008aa311583ff3b00ba2a08cd65eec9e73"
+    },
+    {
+      "motion": "유미세오옆꽃게90도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "2670a99df9ebd45109684ca8a76ed6e34349f59f26f0143073ceba879136933e"
+    },
+    {
+      "motion": "유미세왼옆꽃게90도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "3b328b3919788904f9e5ce5ea074e3d293795703ab438abdaa5b2dc87df5d39e"
+    },
+    {
+      "motion": "유미세왼옆꽃게90도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "bc11ce6bcc4f89571c7fcc1aeaca060c71a21f0e375c0cd112a312a773b648df"
+    },
+    {
+      "motion": "R오뒤에서 기본자세(카메라45도)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "f1faba22e74b588028e0aab238ecb5a59a05c848fecab6441c4ccf9133390a1a"
+    },
+    {
+      "motion": "R오뒤에서 기본자세(카메라45도)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "96085100daf6385c08a65169d48e4f42b36b2a9bbd00c80003d0d05753c18834"
+    },
+    {
+      "motion": "R오뒤에서 기본자세(0도)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "43ccf21a5f34dbf6f23ea0866732b1bd63965425250e8cf56044832d91f4b905"
+    },
+    {
+      "motion": "R오뒤에서 기본자세(0도)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "93779f557f65658e0162b870df81657b1a2c6c34d9e876c54b303b170b977804"
+    },
+    {
+      "motion": "건왼뒤에서 기본자세(0도)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "6dfc50f53b374fa3edd32210022e13d45da01169ffece0f9e0e4dd9bc7123888"
+    },
+    {
+      "motion": "건왼뒤에서 기본자세(0도)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "237d9c8233bc4a2278aba69d9bd699148282135209eb986a999749faf434e633"
+    },
+    {
+      "motion": "건김오뒤3",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "a02ac3163d3174b356f43b90e7b9177a841e15f45b9635e84cfe0993d43d895c"
+    },
+    {
+      "motion": "건김오뒤3",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "3ee5f2a0583f756b74ff0cfa90cf381343d0ed712d900918eb2e96b6b9da27ff"
+    },
+    {
+      "motion": "R미세오뒤에서 기본자세45도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "31753cf7a58146f441d43767cf86425a982586074813d8255509b8858a9aa10b"
+    },
+    {
+      "motion": "R미세오뒤에서 기본자세45도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "e5d4c17cc49164ab49c8225cbce4cfd9e046d4afaa8ccc9f0f12bcbd1e5c6ce5"
+    },
+    {
+      "motion": "R미세오뒤에서 오뒤45도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "73b476914e8fd7f61673a9c088b894f02240e14ea40d8b9f91a0ac9742fc3d9d"
+    },
+    {
+      "motion": "R미세오뒤에서 오뒤45도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "a06f8eb1fdcc08aa7c44b47f14c0a202e979d5548c133cea1d33bc1914b91cd5"
+    },
+    {
+      "motion": "R미세오뒤에서 오뒤0도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "8c8051f59a09e75d5b399d63a4f04fa9a2e37652befe6637b39c81c8f4e74b6e"
+    },
+    {
+      "motion": "R미세오뒤에서 오뒤0도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "740befd17a495af6c3e75563170576a7993ab107976ee4736d92cf19d7155e00"
+    },
+    {
+      "motion": "R미세오뒤에서 기본자세90도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "d565af1af0bab6748b782c4038f421e4c5f68f55fad51b64f91011be8fdf104a"
+    },
+    {
+      "motion": "R미세오뒤에서 기본자세90도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "39f23304b827b2f3088ad545f5254633e1e064b278ba322730d7bf964b1f1607"
+    },
+    {
+      "motion": "R전진45도(4회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "a253d9be235bd421443c6e9b41c66336744a4439b5545eb93b1effb2f562d0b2"
+    },
+    {
+      "motion": "R전진45도(4회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "db41cb2ed0d9447f7475d8bd6458805d6e4ced0ff7b2a9400379e23571a1b043"
+    },
+    {
+      "motion": "R라인복귀우회전",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "57f4cd710101afa21ec9bd80e6a73e56769666f6b3af1072b3004c4f42125e66"
+    },
+    {
+      "motion": "R라인복귀우회전",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "ed0fc03f1b9c510883e3eaa259a1ca8d6629a49de7cf03df812b4de0205ef68f"
+    },
+    {
+      "motion": "R전진라인복귀좌",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "c23537e7f5f897c9d8763f4905f9a7b4dbc6a7c96bd1f9d8d4c5ffea53c07817"
+    },
+    {
+      "motion": "R전진라인복귀좌",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "a827e6b9dbcf6fa3cea0fa63843c865d0e8202fa7da30261c8d31c1101ba1ec4"
+    },
+    {
+      "motion": "R제자리우회전(5회(",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "4eb1cadec6f815181492e7ab9b517e8317c880b6e1dcdfb39a23724a314b52cc"
+    },
+    {
+      "motion": "R제자리우회전(5회(",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "1b934506028080b77108ff130f5f85e768e9e148fa199cb8d3603fd1450ee53c"
+    },
+    {
+      "motion": "R전진45도(6회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "5b2f1fdb46e7cfbec9582922bf834868bf230f98d05768a95baab637e90b8b60"
+    },
+    {
+      "motion": "R전진45도(6회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "bcf783191365d500661e84641ebeb7e4872d2224681a01bc14ec61a7b32b8685"
+    },
+    {
+      "motion": "R전진90도(4회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "3f71782151ea7663525062574abc1da5ed4d278c0599d88451b319f324ba1fc5"
+    },
+    {
+      "motion": "R전진90도(4회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "706ab3389208ab70087c18813264f3710cb7a903381b8ed48881f9a5223619cd"
+    },
+    {
+      "motion": "R전진90도(6회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "a92982137234403623784a355293e8430c22537620add004a5104521ebb69668"
+    },
+    {
+      "motion": "R전진90도(6회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "c685e8e5b8e74697dc4caf2339cb734badd429cca16853056dbe746f781a88b0"
+    },
+    {
+      "motion": "R전진0도(4회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "a688606d38b19375b807410750e7b8efbc4b0c0f9affc335072485a81af0ce3c"
+    },
+    {
+      "motion": "R전진0도(4회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "0fea60c2ac5e581bce56ed5f31d55b117001e1e0c8bbdc05c714985c9a57a24d"
+    },
+    {
+      "motion": "R전진0도(6회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "36918accd23a2918f5419aed7b23bbc42f39257378947ff0cf99483164955287"
+    },
+    {
+      "motion": "R전진0도(6회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "ed3d5aa2ce57b2406be9e9b965223874e08a699de4af4fe345abd5c9e303c68f"
+    },
+    {
+      "motion": "R제자리우회전(2회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "1e69bc551bb026db79da799c3295f05bfa437cb9ebfc45c10cc6c3a61fc80205"
+    },
+    {
+      "motion": "R제자리우회전(2회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "19eea50a81181636f4f36751786415adf9f2f6aab18c821fa3521aafcb14b8d8"
+    },
+    {
+      "motion": "R제자리우회전(4회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "bc3da8d430f4d764bdfd0e36a954e9ed6590008ee2ae31936c1225f7fa5e31e7"
+    },
+    {
+      "motion": "R제자리우회전(4회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "f9bf64562e7501a81f84cb849c66fc3f55674fb4da2a6f917b5e0a54bd8d2dcc"
+    },
+    {
+      "motion": "R제자리우회전(7회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "fe8bad4c3c14d7f209f8159cac47eda6de679fd0c7731527885874c3b637a4e1"
+    },
+    {
+      "motion": "R제자리우회전(7회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "5b282b2690a6e24a29286431cd53b9eb8e07a04393dc16483fd13a0363cc14b2"
+    },
+    {
+      "motion": "R제자리우회전(9회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "47de1f0d73d4fc89a14ed619dff2970c4a41b19af16c713f61f8481fca144760"
+    },
+    {
+      "motion": "R제자리우회전(9회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "3f440944fdbd46750c1e1a15f385433eefa9b084bae0831db8e1d8284277f86b"
+    },
+    {
+      "motion": "R오뒤카메라90도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "2da5878e5a960287acd818378fab6a61b9dd9f5f4fef5bb08bebded7cfe7d641"
+    },
+    {
+      "motion": "R오뒤카메라90도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "0ad05d7d26a5afbe9099be0468d83ab3c10c500d53bc89cc686c3a210deddee9"
+    },
+    {
+      "motion": "R왼뒤에서 기본자세0도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "b01555ede8e2ff68c8dae7bc793f1d9b5c784d5b16980b2ec7803b52ded27f4c"
+    },
+    {
+      "motion": "R왼뒤에서 기본자세0도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "b5cf6711a3de0f300298c5bc5e8b145ea4dc668082e0c03a9928261e9457c692"
+    },
+    {
+      "motion": "R오뒤45도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "db97b192438a615cb4190941e91d662b979277006f52afc401b380cedd242de0"
+    },
+    {
+      "motion": "R오뒤45도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "81810232f20357897f8b99cf1f8b586417b01dc79646baeb147dc85036b20e2a"
+    },
+    {
+      "motion": "R제자리우회전90도(2회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "3e3b7fdc89c5941cd4de77ec6f684d06b7d71f0d8c1a9552956bbd5359c3fe3e"
+    },
+    {
+      "motion": "R제자리우회전90도(2회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "394458ec02a6b482d6a8779051f810f120d89f106bf5c0b4bd2b227512c733bd"
+    },
+    {
+      "motion": "R제자리우회전90도(4회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "a207255b5f522ae3fffe795023ab2b0e15702b0f95f52bcf493d07814e2480bc"
+    },
+    {
+      "motion": "R제자리우회전90도(4회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "2cd12077b76414aed272c1990e33c5f92c34a974c0873033503902084adf14ba"
+    },
+    {
+      "motion": "R제자리우회전90도(5회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "eef82df377d7bb80fd47f15705532a5079556b4c50b74aceaf260bc89a639536"
+    },
+    {
+      "motion": "R제자리우회전90도(5회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "eecb1afcc1d74c730acac1eff7638f6545ff5df9154a0022ee43d28777cbe76f"
+    },
+    {
+      "motion": "R제자리우회전90도(7회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "7cbf8b88592be5d23c4aac0c95c6162222f6c19b26294c4728e771ddc0ab4f17"
+    },
+    {
+      "motion": "R제자리우회전90도(7회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "72dbe7877e2215592dc93c367b362dc4fa82a5fa9e6f25cb44de291136232d24"
+    },
+    {
+      "motion": "R제자리우회전90도(9회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "8827edeb48c609bbb6fef8df474958ad30af20e0be0b6dcf627efd43e26a10fe"
+    },
+    {
+      "motion": "R제자리우회전90도(9회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "3fa664d66b4e64d411f7ad5310940ea2af66aa05265aa84324fccedad25d3546"
+    },
+    {
+      "motion": "R제자리우회전0도(9회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "60152f75bc270e3d09cf244268b041b829959653fb358bbe902f3f7f6fa07e11"
+    },
+    {
+      "motion": "R제자리우회전0도(9회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "d383ee23a12f399ea651769f8e44ad3876a81be7a9bc05658e943b50006a637c"
+    },
+    {
+      "motion": "R제자리우회전0도(2회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "c472ca5c34b1586c68055909f4a00a94911f10d111ad0c8b8c6341f4bc3762ca"
+    },
+    {
+      "motion": "R제자리우회전0도(2회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "085446b2cd139c3209c77ea49da4338c183aef3cccd75c896b84b4390cacaafe"
+    },
+    {
+      "motion": "R제자리우회전0도(4회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "302259d9543056e8a19b50446c9a974afe5bfc564ea48d6af434b7e26519d602"
+    },
+    {
+      "motion": "R제자리우회전0도(4회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "287a57753901198bbc4a709379c3be6fa2cf2641859fc6feadd4401ef098aee8"
+    },
+    {
+      "motion": "R제자리우회전0도(5회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "ba7945fbe4f0dacefccca35c86b54b99e630c3d95a94aaa95b3b4621450d05bf"
+    },
+    {
+      "motion": "R제자리우회전0도(5회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "c1c71eca7f181078d94d795215810984540b08a3afdb6d461eab0f89617940e6"
+    },
+    {
+      "motion": "R제자리우회전0도(7회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "d9115161a1f8c7ca6001af1d0fe4910c84a40f1014ab71d6a33abdfee7832a15"
+    },
+    {
+      "motion": "R제자리우회전0도(7회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "68ed0a324bf8f3f8b7b4cf78bb1a28010d5ef3b40ba52710bf95c82f432c41a2"
+    },
+    {
+      "motion": "R오뒤에서오옆꽃게90도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "cca33134d607ef5c806605ff8f6744e27c16956d2ba1b3e4cd5830871a84820f"
+    },
+    {
+      "motion": "R오뒤에서오옆꽃게90도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "7ccbac63180d9043678a03e9e2e45c83b48d89528a44ee0f871688d02a19e97d"
+    },
+    {
+      "motion": "R후진에서제자리우회전(공)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "4a87c1f1337f847e0ec3deaee198fcfad0404e7d9da73b96694b078bce69fed7"
+    },
+    {
+      "motion": "R후진에서제자리우회전(공)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "76d60eb7e30640d4add14bc3035ea179bb8ef060de874d3f4291c7527a5bcc87"
+    },
+    {
+      "motion": "R제자리좌회전(5회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "81891d62703c58a3bebd5a143eb08c4038cce6e7cd9c6264dcc72e9e6d2ef2f4"
+    },
+    {
+      "motion": "R제자리좌회전(5회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "717eeeb22def65f16b304c965dffb043066fe3da3579f14acd957ef57b7aa09b"
+    },
+    {
+      "motion": "R제자리좌회전(2회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "2a59e0820dd730b50602aac6a48a0491a96d54aff2fea7aece5eda11f898f9a3"
+    },
+    {
+      "motion": "R제자리좌회전(2회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "611b8902d70f3f2df3a94b80c8205fd583ec35bc74c1d288d4d3de50fc0aa074"
+    },
+    {
+      "motion": "R제자리좌회전(3회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "e813906041e9622ea7d89d57cf9137a9a9b71455e9214cce6fbc722e4431c4ba"
+    },
+    {
+      "motion": "R제자리좌회전(3회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "069b0994a58749002a9534cdb6c2a4e7fab15bc9b867b9d8a7bcdeb4a5245686"
+    },
+    {
+      "motion": "R제자리좌회전(4회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "3a3c1a980b60ffc720119acc55e129555563d2b444c41da86b6747787694d045"
+    },
+    {
+      "motion": "R제자리좌회전(4회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "1e64668f8b274a5f433e8c35fdbf630fb5df1e10d92d9fed4adee26868481ff5"
+    },
+    {
+      "motion": "R제자리좌회전0도(4회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "ac4172e00a96e102baec967797bd033018636c911a1ca5e78f925617e6f0261f"
+    },
+    {
+      "motion": "R제자리좌회전0도(4회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "5e662d935d49953d75bace1e16f5fdb2986b09b0272986dc759f6dc63f734a04"
+    },
+    {
+      "motion": "R제자리좌회전0도(2회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "138139fa2126c4a3b38fa47ff37b189daefd62f58756641e69a36078b953ac81"
+    },
+    {
+      "motion": "R제자리좌회전0도(2회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "1b8de139a6ae3c850abb2d9c08cab785bc059049946a607acf6b3978920f8f8a"
+    },
+    {
+      "motion": "R제자리좌회전0도(3회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "92aea532629559188e7cbd807facf2f8f2ca51b69c1893039935f3e30e1f4bbb"
+    },
+    {
+      "motion": "R제자리좌회전0도(3회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "1e6453e0029076eecbe352c7691f56004eeaa40570878ce947956445177abedb"
+    },
+    {
+      "motion": "R제자리좌회전0도(5회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "c42d0d0fff10365e42b0aa102cacc00e09dc3b5cf9eb5124b0200892202effb1"
+    },
+    {
+      "motion": "R제자리좌회전0도(5회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "f0e76a94e255d02b9f4f3f706df3eca98ad1832cff22d9c7ef809b42fb520408"
+    },
+    {
+      "motion": "R제자리좌회전90도(2회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "782f35f4ac242996e4eb7388753deb7657fc0371448751168676e53802fb3f2b"
+    },
+    {
+      "motion": "R제자리좌회전90도(2회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "cbeadbfd8c26ebb8df8abee3634a02d7f436c546e16c25bc5ced5454d20a18e9"
+    },
+    {
+      "motion": "R제자리좌회전90도(3회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "1642e15687bb6288c62eefc51b61de30b813d0df5095d0ff91012652f7c32bb1"
+    },
+    {
+      "motion": "R제자리좌회전90도(3회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "79290ab42b4066631254706c33c7f2b7e61da0c4ab8215ffc5d2289871c341ce"
+    },
+    {
+      "motion": "R제자리좌회전90도(4회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "bf10452e9d160bdac08b304c706d4d49b52e4f46bb2852122f50947a9aa1b89b"
+    },
+    {
+      "motion": "R제자리좌회전90도(4회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "e6de9a34537ae026bc021c8bcc37106092a360a2057ae2726cb7633dfae1b4be"
+    },
+    {
+      "motion": "R제자리좌회전90도(5회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "6ede21e19109bc38492b6aacc26b51a07adba56b6f96512ff259c259b824814c"
+    },
+    {
+      "motion": "R제자리좌회전90도(5회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "a2b35d7f8f29333dce377767c977098dad314b3b168379d6a504786cbff6d4db"
+    },
+    {
+      "motion": "R후진에서 제자리 좌회전",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "5c1aea2c3513f5de6b254d3e9bc464b37d3a0e8dac65e578038c5f700d8977d3"
+    },
+    {
+      "motion": "R후진에서 제자리 좌회전",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "6be5f0da25685d85fdb6bfc06762a6c086f9ded3df2b0e4dc5e29a334be43f86"
+    },
+    {
+      "motion": "R미세(5회)",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "0ba44e40d1083ee2710c82cc6ef57f3fa30713cabbcfd7373b54e9412ed43a9b"
+    },
+    {
+      "motion": "R미세(5회)",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "0471fb768dce56bdf12d09f74576511f189c3b99b10c9528a9076c5bb3aa9392"
+    },
+    {
+      "motion": "r공잡기 400",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "b18e519a212ecfd60fdfcae3b618cd863d09c317307a2a2857099b3bbf068020"
+    },
+    {
+      "motion": "r공잡기 400",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "21a6e48f66a5473bced3f32c0c935a4bd0b56ced1575a40c15b7f8c4b28e3ad9"
+    },
+    {
+      "motion": "r공잡기500",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "36434e091bc5a90a7129b64f372f5eb179e132c02c5d251069ed00556f83aad2"
+    },
+    {
+      "motion": "r공잡기500",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "cf57f37513e0ca0c5093128f1aa671db32824b17c9bc4e8dbc0c503b5a8155c4"
+    },
+    {
+      "motion": "r마세90도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "2d631187c4d77f1e07d943f50d94b6160afa45e8aabcf37e5a3bc8967982e059"
+    },
+    {
+      "motion": "r마세90도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "c89333ae4d457e575a46c8f9b67473a991849297023ac4bd1e5801928212bf78"
+    },
+    {
+      "motion": "r미세0도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "e0d9effa0ee18da2bfb6679bd32bfad786d0a8bddb2df259353e6aa093a4f3d5"
+    },
+    {
+      "motion": "r미세0도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "726e4106b11c1cdceb15783405b24e78383f1e0be448eb957f96eeeaa8f0ee32"
+    },
+    {
+      "motion": "R오뒤에서미세오뒤45도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "f26cb725959110e804bf85236d7b0bb923c4c516204772d79c126d3a67c3d1a9"
+    },
+    {
+      "motion": "R오뒤에서미세오뒤45도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "19e183dc8ff3d6944d838525bf1c513e625815db1c880557b14f3186b912cb25"
+    },
+    {
+      "motion": "R골대후제자리우회전",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "4a87c1f1337f847e0ec3deaee198fcfad0404e7d9da73b96694b078bce69fed7"
+    },
+    {
+      "motion": "R골대후제자리우회전",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "76d60eb7e30640d4add14bc3035ea179bb8ef060de874d3f4291c7527a5bcc87"
+    },
+    {
+      "motion": "R골대후제자리좌회전",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "5c1aea2c3513f5de6b254d3e9bc464b37d3a0e8dac65e578038c5f700d8977d3"
+    },
+    {
+      "motion": "R골대후제자리좌회전",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "6be5f0da25685d85fdb6bfc06762a6c086f9ded3df2b0e4dc5e29a334be43f86"
+    },
+    {
+      "motion": "R골넣기",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "1a2b8df5e01feeb5885d715b1820869f06b3c79c0c4f5533938b4923f35dc5de"
+    },
+    {
+      "motion": "R골넣기",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "87d9b92a03df4a297f9049e2e9ef60e437a32bada6c2b59eee71ccdd8e4ff831"
+    },
+    {
+      "motion": "R라인복귀좌90도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "31ec1f30728ada0b0cf85f9de95f10931c293d0e4e7d89cbeb27cbbc9c062ee7"
+    },
+    {
+      "motion": "R라인복귀좌90도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "2b2d4a77f96f1cc18337ee061a4ade365d1b82e5510974c304830b3466146b03"
+    },
+    {
+      "motion": "R라인복귀우회전90도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "d75ba9566aac2a16c73172712fc4931447c18c4474623baf5577993a4dcf79f5"
+    },
+    {
+      "motion": "R라인복귀우회전90도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "d8f038fcfce77514fe3991d3fab6d0a3b2b60a283341b32d08cb2a6ce047a4e6"
+    },
+    {
+      "motion": "R미세90도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "9da33fbaa2548874a99e81526a5085fddf3b232e882353214ac83ab1cc2fc128"
+    },
+    {
+      "motion": "R미세90도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "03b4eef7af783ee05a2c723339c8a51c42d00af28b62607b811dedfabe2fe9a9"
+    },
+    {
+      "motion": "R오뒤에서미세오뒤0도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "d2f136f2753db67d0bb45ce572b83599396395d1ea08dc30b1edda91f520a080"
+    },
+    {
+      "motion": "R오뒤에서미세오뒤0도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "1fed6ff12613aeabbbeb93999d4195e7e2b9c19a47eb9b2467b18cebb80ae153"
+    },
+    {
+      "motion": "R오뒤에서미세오뒤90도",
+      "tick_ms": "5",
+      "read_delay_ms": "0",
+      "write_delay_ms": "0",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "46abde710fcef8f20049fb22a85eacc9fef4e4634b57174f12672796564fdd4d"
+    },
+    {
+      "motion": "R오뒤에서미세오뒤90도",
+      "tick_ms": "5,17,83,6",
+      "read_delay_ms": "16",
+      "write_delay_ms": "1",
+      "source60_scaled_trace_equal": true,
+      "trace_sha256": "db7c24894181fd1dd0ed37ec8d16ee2010a02acdb0f7b704c3459030db947c49"
+    }
+  ]
+}

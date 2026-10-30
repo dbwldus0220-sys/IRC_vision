@@ -4,6 +4,112 @@
 #include <fstream>
 #include <iostream>
 using namespace irc_step;
+
+static uint32_t lastSentGoal(int id) {
+    for (auto event = dynamixel::events.rbegin(); event != dynamixel::events.rend(); ++event)
+        if (event->type == 'W' && event->address == 116 && event->data.contains(id))
+            return event->data.at(id);
+    assert(false);
+    return 0;
+}
+
+static void testCompetitionContinuation(const std::string& path) {
+    std::ofstream(path) << R"({"motions":[{"name":"continue","repeatable":true,
+      "start_pose":"same","end_pose":"same","max_seq_ms":100,"frames":[
+      {"name":"frame","start_ms":0,"time_ms":100,"angles":{"1":20,"5":80,"22":40}}]}]})";
+    for (bool continuous : {false, true}) for (bool queued : {false, true}) {
+        for (int fault = 0; fault < 5; ++fault) {
+            dynamixel::reset();
+            DynamixelMotionHardware hw;
+            int ms = 1000;
+            RobotMotionPlayer p(path, hw, [&] {
+                return RobotMotionPlayer::Clock::time_point(std::chrono::milliseconds(ms));
+            });
+            p.setPositionToleranceEnabled(false);
+            p.setContinuousInterpolation(continuous);
+            assert(p.initialize());
+            assert(p.start("continue") == StartResult::Accepted);
+            if (queued) assert(p.queueNext("continue") == QueueResult::Queued);
+            p.update();
+            if (fault == 0) dynamixel::registers[5][64] = 0;
+            if (fault == 1) dynamixel::torque_read_failure = 5;
+            if (fault == 2) dynamixel::offline = 5;
+            if (fault == 3) dynamixel::offline = 22;
+            if (fault == 4) dynamixel::position_error = 5;
+            for (int tick = 0; p.running() && tick < 100; ++tick) { ms += 5; p.update(); }
+            assert(p.succeeded() && !p.completionConfirmsArrival());
+            assert(p.completionSequence() == (queued ? 2 : 1));
+
+            // 정상 관절은 새 실측값, 응답 없는 관절만 직전 송신 목표를 사용한다.
+            dynamixel::registers[1][132] = 2160;
+            dynamixel::events.clear();
+            assert(p.start("continue") == StartResult::Accepted);
+            p.update();
+            assert(lastSentGoal(1) == 2160);
+            assert(lastSentGoal(5) == (fault == 2 || fault == 4 ? uint32_t(guiPositionRaw(80)) : 2053));
+            assert(lastSentGoal(22) == (fault == 3 ? uint32_t(guiPositionRaw(40)) : 2070));
+            for (const auto& event : dynamixel::events)
+                assert(!(event.type == 'w' && event.address == 64));
+            for (int tick = 0; p.running() && tick < 100; ++tick) { ms += 5; p.update(); }
+            assert(p.succeeded());
+
+            // 응답이 돌아오면 이전 목표 대신 다시 실측각에서 시작한다.
+            dynamixel::offline = dynamixel::position_error = dynamixel::torque_read_failure = -1;
+            dynamixel::registers[5][64] = 1;
+            dynamixel::registers[5][132] = 2222;
+            assert(p.start("continue") == StartResult::Accepted);
+            p.update();
+            assert(lastSentGoal(5) == 2222);
+            assert(p.emergencyStop());
+            assert(p.start("continue") == StartResult::HardwareNotReady);
+        }
+    }
+    for (int scenario = 0; scenario < 6; ++scenario) {
+        dynamixel::reset();
+        DynamixelMotionHardware hw;
+        int ms = 1000;
+        RobotMotionPlayer p(path, hw, [&] {
+            return RobotMotionPlayer::Clock::time_point(std::chrono::milliseconds(ms));
+        });
+        p.setPositionToleranceEnabled(false);
+        if (scenario == 0) dynamixel::offline = 5;
+        if (scenario == 0) { assert(!p.initialize()); continue; }
+        assert(p.initialize());
+        if (scenario == 1) {
+            dynamixel::offline = 5;
+            assert(p.start("continue") == StartResult::HardwareNotReady); // 기준각 없음
+            continue;
+        }
+        assert(p.start("continue") == StartResult::Accepted);
+        p.update(); ms += 50; p.update();
+        if (scenario == 2) {
+            assert(p.cancel() == CancelResult::Cancelled);
+            dynamixel::registers[5][64] = 0;
+            assert(!p.startPoseTransition(std::vector<double>(23, 0), 100));
+        } else if (scenario == 3) {
+            assert(p.cancel() == CancelResult::Cancelled);
+            dynamixel::all_offline = true;
+            assert(p.start("continue") == StartResult::HardwareNotReady);
+        } else if (scenario == 4) {
+            dynamixel::offline = 5;
+            assert(p.cancel() == CancelResult::HoldFailed);
+        } else {
+            const auto last_successful_goal = lastSentGoal(5);
+            dynamixel::write_failure = true;
+            ms += 50; p.update();
+            assert(p.result() == MotionError::FrameSendFailed);
+            assert(p.start("continue") == StartResult::HardwareNotReady); // 프로파일 송신 실패
+            dynamixel::write_failure = false;
+            dynamixel::offline = 5;
+            assert(p.start("continue") == StartResult::Accepted);
+            p.update();
+            assert(lastSentGoal(5) == last_successful_goal); // 실패한 목표로 덮어쓰지 않음
+        }
+    }
+    std::cout << "PASS competition continuation: 20 fault/queue/interpolation cases, "
+                 "6 strict-boundary/cache cases; no automatic torque re-enable\n";
+}
+
 int main(int argc,char** argv) {
     assert(argc==2);
     const std::string path=std::string(argv[1])+"/continuous_hardware.json";
@@ -97,5 +203,6 @@ int main(int argc,char** argv) {
         assert(p.result()==MotionError::FrameSendFailed);
         assert(hw.busDiagnostics().result==-1001);
     }
+    testCompetitionContinuation(path);
     std::cout<<"PASS actual player -> hardware -> Dxl -> fake SDK packets; exclusion, torque checks, seed, profiles, startup, repeat, timeout, write failure, emergency OFF\n";
 }

@@ -25,6 +25,13 @@ public:
     }
 
     virtual bool prepareImmediatePlayback() noexcept { return true; }
+    virtual bool preparePlayback(bool /* allow_unconfirmed_torque */) noexcept {
+        return prepareImmediatePlayback();
+    }
+    // 일반 모션 시작 시에만 사용한다. 반환된 항목은 실제 읽기에 성공한 관절이다.
+    virtual bool readAvailablePositions(JointAngles& positions_deg) noexcept {
+        return readPresentPositions(positions_deg);
+    }
     [[nodiscard]] virtual BusDiagnostics busDiagnostics() const noexcept { return {}; }
 
     virtual bool commandPosition(

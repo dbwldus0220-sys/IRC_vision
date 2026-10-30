@@ -42,6 +42,7 @@ RobotMotionPlayer::RobotMotionPlayer(
 RobotMotionPlayer::~RobotMotionPlayer() { shutdown(); }
 
 bool RobotMotionPlayer::initialize() noexcept {
+    last_known_angles_.clear();
     if (hardware_ == nullptr) {
         fail(MotionError::InternalError, "motion hardware is not configured");
         return false;
@@ -111,11 +112,12 @@ StartResult RobotMotionPlayer::start(std::string_view motion_name) noexcept {
         trace_timeline_ms_ = 0;
         trace_frame_ = -1;
         repeat_ = 1;
-        if (!hardware_->prepareImmediatePlayback()) {
-            fail(MotionError::CommunicationError, "cannot set playback profiles to zero");
+        if (!hardware_->preparePlayback(allow_unconfirmed_motion_)) {
+            fail(MotionError::CommunicationError, hardware_->lastError().empty()
+                ? "cannot set playback profiles to zero" : std::string(hardware_->lastError()));
             return StartResult::HardwareNotReady;
         }
-        if (!readStartAngles()) return StartResult::HardwareNotReady;
+        if (!readStartAngles(allow_unconfirmed_motion_)) return StartResult::HardwareNotReady;
         startup_active_ = false;
         clearQueuedMotion();
         resetMotionRuntime(pattern, name, now_());
@@ -324,30 +326,49 @@ MotionStatus RobotMotionPlayer::update() noexcept {
     return status_;
 }
 
-bool RobotMotionPlayer::readStartAngles() {
+bool RobotMotionPlayer::readStartAngles(bool allow_partial) {
     JointAngles present;
     const auto read_begin = now_();
     if (!hardware_->readPresentPositions(present)) {
         traceEvent("initial", read_begin, false);
-        fail(MotionError::PresentPositionReadFailed, "cannot capture actual start pose");
-        return false;
+        present.clear();
+        if (!allow_partial || !hardware_->readAvailablePositions(present)) {
+            fail(MotionError::PresentPositionReadFailed, "cannot capture actual start pose");
+            return false;
+        }
     }
     bool complete = true;
     for (int id = 0; id < kMotionMotorCount; ++id)
         if (hardware_->motorEnabled(id) && !present.contains(id)) complete = false;
-    if (!complete) {
-        traceEvent("initial", read_begin, false);
-        fail(MotionError::PresentPositionReadFailed, "incomplete actual start pose");
-        return false;
-    }
     for (const auto& [id, angle] : present) {
         if (id < 0 || id >= kMotionMotorCount || !std::isfinite(angle)) {
             fail(MotionError::PresentPositionReadFailed, "invalid actual start pose");
             return false;
         }
     }
-    traceEvent("initial", read_begin, true, present);
-    start_angles_ = present;
+    JointAngles initial = present;
+    std::uint32_t fallback_ids = 0;
+    for (int id = 0; id < kMotionMotorCount; ++id) {
+        if (!hardware_->motorEnabled(id) || present.contains(id)) continue;
+        const auto previous = last_known_angles_.find(id);
+        if (!allow_partial || present.empty() || previous == last_known_angles_.end()) {
+            traceEvent("initial", read_begin, false);
+            fail(MotionError::PresentPositionReadFailed, "incomplete actual start pose; no valid fallback");
+            return false;
+        }
+        initial[id] = previous->second;
+        fallback_ids |= std::uint32_t{1} << id;
+    }
+    if (!complete) {
+        std::cerr << "[Warning] Continuing normal playback with previous measured/sent angles; "
+                     "unconfirmed motor IDs:";
+        for (int id = 0; id < kMotionMotorCount; ++id)
+            if (fallback_ids & (std::uint32_t{1} << id)) std::cerr << ' ' << id;
+        std::cerr << std::endl;
+    }
+    traceEvent(complete ? "initial" : "initial_fallback", read_begin, complete, initial);
+    for (const auto& [id, angle] : present) last_known_angles_[id] = angle;
+    start_angles_ = std::move(initial);
     feedback_angles_ = std::move(present);
     return true;
 }
@@ -610,6 +631,8 @@ CancelResult RobotMotionPlayer::cancel() noexcept {
         return CancelResult::HoldFailed;
     }
     status_ = MotionStatus::Cancelled;
+    // hold가 보낸 현재 자세는 이 캐시에 없으므로 다음 시작에서 다시 읽는다.
+    last_known_angles_.clear();
     traceEvent("cancel", now_(), true);
     error_ = MotionError::None;
     last_error_.clear();
@@ -764,6 +787,7 @@ void RobotMotionPlayer::setJointOverride(int motor_id, double target_deg) {
         JointAngles goal{{motor_id, target_deg}};
         if (!hardware_->commandImmediatePosition(goal, std::vector<int>{motor_id}))
             throw std::runtime_error("failed to send idle joint override");
+        last_known_angles_[motor_id] = target_deg;
     }
 }
 void RobotMotionPlayer::clearJointOverride(int motor_id) noexcept {
@@ -873,7 +897,8 @@ void RobotMotionPlayer::traceEvent(const char* event, Clock::time_point begin, b
     row.continuous = continuous_interpolation_ && !startup_active_;
     row.exclude_motor_5 = !hardware_->motorEnabled(5);
     if (std::string_view(event) == "sample" || std::string_view(event) == "endpoint" ||
-        std::string_view(event) == "feedback" || std::string_view(event) == "initial") {
+        std::string_view(event) == "feedback" || std::string_view(event) == "initial" ||
+        std::string_view(event) == "initial_fallback") {
         const auto bus = hardware_->busDiagnostics();
         row.bus_result_valid = bus.valid;
         row.bus_result = bus.result;
@@ -888,7 +913,10 @@ bool RobotMotionPlayer::writeGoals(const JointAngles& goals, const std::vector<i
                                   const char* event) {
     const auto begin = now_();
     const bool ok = hardware_->commandImmediatePosition(goals, ids);
-    if (ok) last_goal_written_at_ = now_();
+    if (ok) {
+        last_goal_written_at_ = now_();
+        for (int id : ids) last_known_angles_[id] = goals.at(id);
+    }
     traceEvent(event, begin, ok, goals, &ids);
     return ok;
 }

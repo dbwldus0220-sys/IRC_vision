@@ -1,0 +1,17 @@
+{
+  "source_file": "motion_imports/robot_motions(57).json",
+  "source_sha256": "3ac7e286076f6b2afa0c32ad8c51861a3e6457903eafa9e7a61d25ecef30aa92",
+  "right_turn_min_angles_deg": {
+    "2": 15,
+    "3": 30,
+    "5": 45,
+    "6": 60,
+    "7": 75,
+    "9": 90
+  },
+  "derived": {
+    "R제자리우회전(6회)": "R제자리우회전(7회)",
+    "R제자리우회전0도(6회)": "R제자리우회전0도(7회)",
+    "R제자리우회전90도(6회)": "R제자리우회전90도(7회)"
+  }
+}

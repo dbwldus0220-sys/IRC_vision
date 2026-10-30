@@ -1,0 +1,148 @@
+Internal ctest changing into directory: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+Test project /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+      Start  1: test_callback_timing_trace
+ 1/12 Test  #1: test_callback_timing_trace .........   Passed    0.20 sec
+      Start  2: test_legacy_cosine_execution
+ 2/12 Test  #2: test_legacy_cosine_execution .......   Passed   76.51 sec
+      Start  6: test_continuous_playback_parity
+ 3/12 Test  #6: test_continuous_playback_parity ....   Passed   30.42 sec
+      Start  8: test_gui_execution_specification
+ 4/12 Test  #8: test_gui_execution_specification ...   Passed   63.25 sec
+      Start 11: test_sdk_executor_core
+ 5/12 Test #11: test_sdk_executor_core .............***Failed    0.21 sec
+-- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+ - /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_sdk_executor_core --gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_core.gtest.xml
+Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+[==========] Running 20 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 20 tests from SdkExecutorCore
+[ RUN      ] SdkExecutorCore.ResolvesForwardAliasBeforeStartingBackend
+[       OK ] SdkExecutorCore.ResolvesForwardAliasBeforeStartingBackend (2 ms)
+[ RUN      ] SdkExecutorCore.ResolvesPickupAliasWithoutFallback
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:65: Failure
+Expected equality of these values:
+  backend.started_motion_names[0]
+    Which is: "r\xEA\xB3\xB5\xEC\x9E\xA1\xEA\xB8\xB0 400"
+    As Text: "r공잡기 400"
+  "건공잡기"
+    Which is: "\xEA\xB1\xB4\xEA\xB3\xB5\xEC\x9E\xA1\xEA\xB8\xB0"
+    As Text: "건공잡기"
+[  FAILED  ] SdkExecutorCore.ResolvesPickupAliasWithoutFallback (2 ms)
+[ RUN      ] SdkExecutorCore.UnsupportedMotionNeverCallsBackend
+[       OK ] SdkExecutorCore.UnsupportedMotionNeverCallsBackend (2 ms)
+[ RUN      ] SdkExecutorCore.CorrelatedRejectionNeverStartsOrActivatesBackend
+[       OK ] SdkExecutorCore.CorrelatedRejectionNeverStartsOrActivatesBackend (3 ms)
+[ RUN      ] SdkExecutorCore.CorrelatedRejectionPreservesInvalidRequestHandling
+[       OK ] SdkExecutorCore.CorrelatedRejectionPreservesInvalidRequestHandling (2 ms)
+[ RUN      ] SdkExecutorCore.PreservesCorrelationIncludingNullIds
+[       OK ] SdkExecutorCore.PreservesCorrelationIncludingNullIds (2 ms)
+[ RUN      ] SdkExecutorCore.MapsRunningSettlingAndSucceeded
+[       OK ] SdkExecutorCore.MapsRunningSettlingAndSucceeded (2 ms)
+[ RUN      ] SdkExecutorCore.MapsBackendFailureToFailedTerminal
+[       OK ] SdkExecutorCore.MapsBackendFailureToFailedTerminal (2 ms)
+[ RUN      ] SdkExecutorCore.CancelRequestCompletesWhenBackendReportsCancelled
+[       OK ] SdkExecutorCore.CancelRequestCompletesWhenBackendReportsCancelled (2 ms)
+[ RUN      ] SdkExecutorCore.RejectsCancelWithoutActiveRequest
+[       OK ] SdkExecutorCore.RejectsCancelWithoutActiveRequest (2 ms)
+[ RUN      ] SdkExecutorCore.RejectsStaleCancelWithoutTouchingActiveRequest
+[       OK ] SdkExecutorCore.RejectsStaleCancelWithoutTouchingActiveRequest (2 ms)
+[ RUN      ] SdkExecutorCore.RejectsSecondStartWhileActive
+[       OK ] SdkExecutorCore.RejectsSecondStartWhileActive (2 ms)
+[ RUN      ] SdkExecutorCore.TimeoutCancelsAndReturnsFailedWithCorrelation
+[       OK ] SdkExecutorCore.TimeoutCancelsAndReturnsFailedWithCorrelation (2 ms)
+[ RUN      ] SdkExecutorCore.AllowsNewRequestAfterTerminalStatus
+[       OK ] SdkExecutorCore.AllowsNewRequestAfterTerminalStatus (2 ms)
+[ RUN      ] SdkExecutorCore.BackendStartExceptionBecomesFailed
+[       OK ] SdkExecutorCore.BackendStartExceptionBecomesFailed (2 ms)
+[ RUN      ] SdkExecutorCore.ExplicitBackendStartRejectionStaysRejected
+[       OK ] SdkExecutorCore.ExplicitBackendStartRejectionStaysRejected (1 ms)
+[ RUN      ] SdkExecutorCore.BackendPollExceptionBecomesFailedAndReleasesRequest
+[       OK ] SdkExecutorCore.BackendPollExceptionBecomesFailedAndReleasesRequest (2 ms)
+[ RUN      ] SdkExecutorCore.BackendCancelExceptionBecomesFailedTerminal
+[       OK ] SdkExecutorCore.BackendCancelExceptionBecomesFailedTerminal (2 ms)
+[ RUN      ] SdkExecutorCore.RejectsInvalidRequestWithoutCallingBackend
+[       OK ] SdkExecutorCore.RejectsInvalidRequestWithoutCallingBackend (1 ms)
+[ RUN      ] SdkExecutorCore.PromotesOneQueuedRequestAtSeamlessBoundary
+[       OK ] SdkExecutorCore.PromotesOneQueuedRequestAtSeamlessBoundary (1 ms)
+[----------] 20 tests from SdkExecutorCore (39 ms total)
+
+[----------] Global test environment tear-down
+[==========] 20 tests from 1 test suite ran. (39 ms total)
+[  PASSED  ] 19 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] SdkExecutorCore.ResolvesPickupAliasWithoutFallback
+
+ 1 FAILED TEST
+-- run_test.py: return code 1
+-- run_test.py: inject classname prefix into gtest result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_core.gtest.xml'
+-- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_core.gtest.xml'
+
+      Start 12: test_queue_control_tick
+ 6/12 Test #12: test_queue_control_tick ............   Passed    0.17 sec
+      Start 13: test_robot_motion_player_backend
+ 7/12 Test #13: test_robot_motion_player_backend ...   Passed    0.17 sec
+      Start 18: test_sdk_executor_driver
+ 8/12 Test #18: test_sdk_executor_driver ...........   Passed    0.18 sec
+      Start 19: test_startup_pose_gate
+ 9/12 Test #19: test_startup_pose_gate .............   Passed    0.18 sec
+      Start 20: test_startup_pose_catalog
+10/12 Test #20: test_startup_pose_catalog ..........***Failed    1.78 sec
+-- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+ - /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_startup_pose_catalog --gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_startup_pose_catalog.gtest.xml
+Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+[==========] Running 7 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 7 tests from StartupPoseCatalog
+[ RUN      ] StartupPoseCatalog.AcceptsRepeatedNameWithIdenticalAngles
+[       OK ] StartupPoseCatalog.AcceptsRepeatedNameWithIdenticalAngles (1 ms)
+[ RUN      ] StartupPoseCatalog.RejectsRepeatedNameWithDifferentAngles
+[       OK ] StartupPoseCatalog.RejectsRepeatedNameWithDifferentAngles (0 ms)
+[ RUN      ] StartupPoseCatalog.RejectsRepeatedNameWithMissingMotor
+[       OK ] StartupPoseCatalog.RejectsRepeatedNameWithMissingMotor (1 ms)
+[ RUN      ] StartupPoseCatalog.LoadsGeonStartupPoseWithDefaultPolicy
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_startup_pose_catalog.cpp:87: Failure
+Expected equality of these values:
+  angles[13]
+    Which is: -40.95703125
+  -41.220703125
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_startup_pose_catalog.cpp:88: Failure
+Expected equality of these values:
+  angles[14]
+    Which is: 54.84375
+  55.3046875
+[  FAILED  ] StartupPoseCatalog.LoadsGeonStartupPoseWithDefaultPolicy (181 ms)
+[ RUN      ] StartupPoseCatalog.PolicyOffChangesOnlySelectedAxesToVerifiedPcPose
+[       OK ] StartupPoseCatalog.PolicyOffChangesOnlySelectedAxesToVerifiedPcPose (591 ms)
+[ RUN      ] StartupPoseCatalog.LoadsCatalog49ForwardStartWithEveryPolicyCombination
+[       OK ] StartupPoseCatalog.LoadsCatalog49ForwardStartWithEveryPolicyCombination (412 ms)
+[ RUN      ] StartupPoseCatalog.LoadsCatalog51StartupWithEveryPolicyCombination
+[       OK ] StartupPoseCatalog.LoadsCatalog51StartupWithEveryPolicyCombination (407 ms)
+[----------] 7 tests from StartupPoseCatalog (1593 ms total)
+
+[----------] Global test environment tear-down
+[==========] 7 tests from 1 test suite ran. (1594 ms total)
+[  PASSED  ] 6 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] StartupPoseCatalog.LoadsGeonStartupPoseWithDefaultPolicy
+
+ 1 FAILED TEST
+-- run_test.py: return code 1
+-- run_test.py: inject classname prefix into gtest result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_startup_pose_catalog.gtest.xml'
+-- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_startup_pose_catalog.gtest.xml'
+
+      Start 33: motion_pattern_test
+11/12 Test #33: motion_pattern_test ................   Passed    0.01 sec
+      Start 34: motion_callback_test
+12/12 Test #34: motion_callback_test ...............   Passed    0.09 sec
+
+83% tests passed, 2 tests failed out of 12
+
+Label Time Summary:
+gtest    =   2.89 sec*proc (7 tests)
+
+Total Test time (real) = 173.20 sec
+
+The following tests FAILED:
+	 11 - test_sdk_executor_core (Failed)
+	 20 - test_startup_pose_catalog (Failed)
+Errors while running CTest

@@ -1,0 +1,379 @@
+{
+  "changed_runtime_files": false,
+  "playback_speeds_changed": false,
+  "paths": {
+    "source58": "/home/jet/Downloads/robot_motions(58).json",
+    "source57": "/home/jet/Downloads/robot_motions(57).json",
+    "pc": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/robot_motions_pc.json",
+    "runtime": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/robot_motions_runtime.json",
+    "installed": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/robot_motions_runtime.json"
+  },
+  "sha256": {
+    "source58": "df8c6322088173b77e900977ac355a0deb7c26dc38dfa013f5f984254cde9b92",
+    "source57": "3ac7e286076f6b2afa0c32ad8c51861a3e6457903eafa9e7a61d25ecef30aa92",
+    "pc": "6d5d0b28facff2ffd842764693a162d441d9767d778b83203f3b9a4b1cd2ace3",
+    "runtime": "ad397cdd1f966939d452b027395c64b7f95af9addcd649d8ed4149b9dd98b273",
+    "installed": "ad397cdd1f966939d452b027395c64b7f95af9addcd649d8ed4149b9dd98b273"
+  },
+  "fine_motion_checks": [
+    {
+      "target": "찐미세오뒤에서 오옆꽃게90도",
+      "source": "찐미세오뒤에서 오옆꽃게90도",
+      "runtime_frames_equal": true,
+      "pc_frames_equal": true,
+      "installed_frames_equal": true,
+      "source57_frames_equal": true
+    },
+    {
+      "target": "찐미세오뒤에서오옆꽃게0도",
+      "source": "찐미세오뒤에서오옆꽃게0도",
+      "runtime_frames_equal": true,
+      "pc_frames_equal": true,
+      "installed_frames_equal": true,
+      "source57_frames_equal": true
+    },
+    {
+      "target": "유미세오옆꽃게0도",
+      "source": "유미세오옆꽃게0도",
+      "runtime_frames_equal": true,
+      "pc_frames_equal": true,
+      "installed_frames_equal": true,
+      "source57_frames_equal": true
+    },
+    {
+      "target": "유미세왼옆꽃게0도",
+      "source": "유미세왼옆꽃게0도",
+      "runtime_frames_equal": true,
+      "pc_frames_equal": true,
+      "installed_frames_equal": true,
+      "source57_frames_equal": true
+    },
+    {
+      "target": "유미세오옆꽃게90도",
+      "source": "유미세오옆꽃게90도",
+      "runtime_frames_equal": true,
+      "pc_frames_equal": true,
+      "installed_frames_equal": true,
+      "source57_frames_equal": true
+    },
+    {
+      "target": "유미세왼옆꽃게90도",
+      "source": "유미세왼옆꽃게90도",
+      "runtime_frames_equal": true,
+      "pc_frames_equal": true,
+      "installed_frames_equal": true,
+      "source57_frames_equal": true
+    },
+    {
+      "target": "R미세오뒤에서 기본자세45도",
+      "source": "R미세오뒤에서 기본자세45도",
+      "runtime_frames_equal": true,
+      "pc_frames_equal": true,
+      "installed_frames_equal": true,
+      "source57_frames_equal": true
+    },
+    {
+      "target": "R미세오뒤에서 오뒤45도",
+      "source": "R미세오뒤에서 오뒤45도",
+      "runtime_frames_equal": true,
+      "pc_frames_equal": true,
+      "installed_frames_equal": true,
+      "source57_frames_equal": true
+    },
+    {
+      "target": "R미세오뒤에서 오뒤0도",
+      "source": "R미세오뒤에서 오뒤0도",
+      "runtime_frames_equal": true,
+      "pc_frames_equal": true,
+      "installed_frames_equal": true,
+      "source57_frames_equal": true
+    },
+    {
+      "target": "R미세오뒤에서 기본자세90도",
+      "source": "R미세오뒤에서 기본자세90도",
+      "runtime_frames_equal": true,
+      "pc_frames_equal": true,
+      "installed_frames_equal": true,
+      "source57_frames_equal": true
+    },
+    {
+      "target": "R미세(5회)",
+      "source": "R미세(5회)",
+      "runtime_frames_equal": true,
+      "pc_frames_equal": true,
+      "installed_frames_equal": true,
+      "source57_frames_equal": true
+    },
+    {
+      "target": "r마세90도",
+      "source": "r마세90도",
+      "runtime_frames_equal": true,
+      "pc_frames_equal": true,
+      "installed_frames_equal": true,
+      "source57_frames_equal": true
+    },
+    {
+      "target": "r미세0도",
+      "source": "r미세0도",
+      "runtime_frames_equal": true,
+      "pc_frames_equal": true,
+      "installed_frames_equal": true,
+      "source57_frames_equal": true
+    },
+    {
+      "target": "R오뒤에서미세오뒤45도",
+      "source": "R오뒤에서미세오뒤45도",
+      "runtime_frames_equal": true,
+      "pc_frames_equal": true,
+      "installed_frames_equal": true,
+      "source57_frames_equal": true
+    },
+    {
+      "target": "r미세0도(상단탐색3회)",
+      "source": "r미세0도",
+      "runtime_frames_equal": true,
+      "pc_frames_equal": true,
+      "installed_frames_equal": true,
+      "source57_frames_equal": true
+    },
+    {
+      "target": "r미세0도(허들10회)",
+      "source": "r미세0도",
+      "runtime_frames_equal": true,
+      "pc_frames_equal": true,
+      "installed_frames_equal": true,
+      "source57_frames_equal": true
+    },
+    {
+      "target": "r마세90도(1회)",
+      "source": "r마세90도",
+      "runtime_frames_equal": true,
+      "pc_frames_equal": true,
+      "installed_frames_equal": true,
+      "source57_frames_equal": true
+    },
+    {
+      "target": "r마세90도(2회)",
+      "source": "r마세90도",
+      "runtime_frames_equal": true,
+      "pc_frames_equal": true,
+      "installed_frames_equal": true,
+      "source57_frames_equal": true
+    },
+    {
+      "target": "r마세90도(3회)",
+      "source": "r마세90도",
+      "runtime_frames_equal": true,
+      "pc_frames_equal": true,
+      "installed_frames_equal": true,
+      "source57_frames_equal": true
+    },
+    {
+      "target": "r마세90도(4회)",
+      "source": "r마세90도",
+      "runtime_frames_equal": true,
+      "pc_frames_equal": true,
+      "installed_frames_equal": true,
+      "source57_frames_equal": true
+    }
+  ],
+  "source58_fine_back_poses": [
+    {
+      "motion": "R미세(5회)",
+      "frame_index": 3,
+      "pose": "미세오뒤4122",
+      "angles": {
+        "0": -32.0,
+        "1": 0.263671875,
+        "2": -9.755859375,
+        "3": 9.755859375,
+        "4": 9.140625,
+        "5": -8.96484375,
+        "6": 67.236328125,
+        "7": -68.818359375,
+        "8": -11.6015625,
+        "9": 4.833984375,
+        "10": 0.59375,
+        "11": -3.0,
+        "12": 3.251953125,
+        "15": 3.427734375,
+        "16": 0.52734375,
+        "13": -53.0,
+        "14": 60.64453125,
+        "17": -29.125,
+        "18": 31.904296875,
+        "19": 64.951171875,
+        "20": -60.029296875,
+        "21": 2.021484375,
+        "22": -5.712890625
+      }
+    },
+    {
+      "motion": "r공잡기 400",
+      "frame_index": 10,
+      "pose": "미세오뒤4111(45도)",
+      "angles": {
+        "0": -32.0,
+        "1": 0.263671875,
+        "2": -9.755859375,
+        "3": 9.755859375,
+        "4": 9.140625,
+        "5": -8.96484375,
+        "6": 67.236328125,
+        "7": -68.818359375,
+        "8": -11.6015625,
+        "9": 4.833984375,
+        "10": 0.59375,
+        "11": -3.0,
+        "12": 3.669921875,
+        "15": 3.427734375,
+        "16": 0.087890625,
+        "13": -53.0,
+        "14": 58.0,
+        "17": -29.125,
+        "18": 34.0,
+        "19": 64.951171875,
+        "20": -65.0,
+        "21": 2.021484375,
+        "22": -4.482421875
+      }
+    },
+    {
+      "motion": "r공잡기500",
+      "frame_index": 10,
+      "pose": "미세오뒤4111(45도)",
+      "angles": {
+        "0": -32.0,
+        "1": 0.263671875,
+        "2": -9.755859375,
+        "3": 9.755859375,
+        "4": 9.140625,
+        "5": -8.96484375,
+        "6": 67.236328125,
+        "7": -68.818359375,
+        "8": -11.6015625,
+        "9": 4.833984375,
+        "10": 0.59375,
+        "11": -3.0,
+        "12": 3.669921875,
+        "15": 3.427734375,
+        "16": 0.087890625,
+        "13": -53.0,
+        "14": 58.0,
+        "17": -29.125,
+        "18": 34.0,
+        "19": 64.951171875,
+        "20": -65.0,
+        "21": 2.021484375,
+        "22": -4.482421875
+      }
+    },
+    {
+      "motion": "r마세90도",
+      "frame_index": 3,
+      "pose": "r미세오뒤90도",
+      "angles": {
+        "0": 1.0,
+        "1": 0.263671875,
+        "2": -9.755859375,
+        "3": 9.755859375,
+        "4": 9.140625,
+        "5": -8.96484375,
+        "6": 67.236328125,
+        "7": -68.818359375,
+        "8": -11.6015625,
+        "9": 4.833984375,
+        "10": 0.59375,
+        "11": -3.0,
+        "12": 3.251953125,
+        "15": 3.427734375,
+        "16": 0.52734375,
+        "13": -53.0,
+        "14": 60.64453125,
+        "17": -29.125,
+        "18": 31.904296875,
+        "19": 64.951171875,
+        "20": -60.029296875,
+        "21": 2.021484375,
+        "22": -5.712890625
+      }
+    },
+    {
+      "motion": "r미세0도",
+      "frame_index": 3,
+      "pose": "r미세오뒤0도",
+      "angles": {
+        "0": -64.0,
+        "1": 0.263671875,
+        "2": -9.755859375,
+        "3": 9.755859375,
+        "4": 9.140625,
+        "5": -8.96484375,
+        "6": 67.236328125,
+        "7": -68.818359375,
+        "8": -11.6015625,
+        "9": 4.833984375,
+        "10": 0.59375,
+        "11": -3.0,
+        "12": 3.251953125,
+        "15": 3.427734375,
+        "16": 0.52734375,
+        "13": -53.0,
+        "14": 60.64453125,
+        "17": -29.125,
+        "18": 31.904296875,
+        "19": 64.951171875,
+        "20": -60.029296875,
+        "21": 2.021484375,
+        "22": -5.712890625
+      }
+    },
+    {
+      "motion": "R오뒤에서미세오뒤45도",
+      "frame_index": 1,
+      "pose": "미세오뒤4122",
+      "angles": {
+        "0": -32.0,
+        "1": 0.263671875,
+        "2": -9.755859375,
+        "3": 9.755859375,
+        "4": 9.140625,
+        "5": -8.96484375,
+        "6": 67.236328125,
+        "7": -68.818359375,
+        "8": -11.6015625,
+        "9": 4.833984375,
+        "10": 0.59375,
+        "11": -3.0,
+        "12": 3.251953125,
+        "15": 3.427734375,
+        "16": 0.52734375,
+        "13": -53.0,
+        "14": 60.64453125,
+        "17": -29.125,
+        "18": 31.904296875,
+        "19": 64.951171875,
+        "20": -60.029296875,
+        "21": 2.021484375,
+        "22": -5.712890625
+      }
+    }
+  ],
+  "gui_backend_diff_against_HEAD": "",
+  "limitations": [
+    "Comparison is against source58 on disk and current HEAD, not a supplied latest PC GUI.",
+    "Motion source equality does not establish physical stability.",
+    "Production account_forward_boundary_feedback=true differs from GUI timing mode used by specification probe."
+  ],
+  "verification": {
+    "mission_and_catalog_pytest": {
+      "passed": 210
+    },
+    "playback_specification_probe": {
+      "passed": 292,
+      "hardware_used": false,
+      "latest_PC_GUI_comparison": false
+    },
+    "runtime_catalog_unchanged_after_verification": true
+  }
+}

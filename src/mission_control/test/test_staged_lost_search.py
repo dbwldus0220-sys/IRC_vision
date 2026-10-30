@@ -36,8 +36,8 @@ def candidate(source, prefix, reason, side='RIGHT'):
 def sequence(side):
     opposite = 'LEFT' if side == 'RIGHT' else 'RIGHT'
     return ([(side, 3 if side == 'LEFT' else 5, 'INITIAL')]
-            + [(side, 1 if side == 'LEFT' else 2, 'EXTEND')] * 3
-            + [(opposite, 1 if opposite == 'LEFT' else 2, 'REVERSE')] * 6)
+            + [(side, 1, 'EXTEND')] * 3
+            + [(opposite, 1, 'REVERSE')] * 6)
 
 
 @pytest.mark.parametrize('source,prefix,reason', FAMILIES)
@@ -83,7 +83,7 @@ def test_missing_input_or_raw_candidate_does_not_spend_or_rearm(info, reason):
         assert not held.valid and held.reason == reason
         policy.record_published(held, {'line': info})
     assert policy.counts['line'] == 1
-    assert policy.filter(search, lost).action == 'LINE_LOST_TURN_RIGHT_2'
+    assert policy.filter(search, lost).action == 'LINE_LOST_TURN_RIGHT_1'
 
 
 def test_only_published_confirmed_tracking_rearms_and_other_targets_are_independent():
@@ -135,7 +135,7 @@ def test_hurdle_keeps_existing_limit_and_fixed_exit_is_not_search():
 def test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_count(source, prefix, reason, side):
     root = Path(__file__).resolve().parents[3]
     aliases = yaml.safe_load((root / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']
-    names = {m['name'] for m in json.loads((root / 'artifacts/robot_motions_runtime.json').read_text())['motions']}
+    catalog = {m['name']: m for m in json.loads((root / 'artifacts/robot_motions_runtime.json').read_text())['motions']}
     policy = limiter()
     lost = {source: {'detected': False}}
     request = candidate(source, prefix, reason, side)
@@ -152,9 +152,14 @@ def test_each_stage_resolves_to_existing_motion_with_correct_camera_and_repeat_c
             motion = MotionCommandBridgeNode.ACTION_TO_MOTION_ID[result.action]
         camera = 90 if source == 'goal' else 0 if prefix.startswith('BALL_PICKUP_') else 45
         label = aliases[motion]
-        assert f'{camera}도' in label and f'({count}회)' in label
+        # R camera-45 turns omit the camera suffix; one legacy name also has
+        # a mismatched closing bracket. The executable repeat field is authoritative.
+        camera_suffix = '' if camera == 45 else f'{camera}도'
+        direction_name = '좌회전' if direction == 'LEFT' else '우회전'
+        assert label.startswith(f'R제자리{direction_name}{camera_suffix}(')
+        assert catalog[label]['repeat_count'] == count
         assert ('좌회전' if direction == 'LEFT' else '우회전') in label
-        assert label in names
+        assert label in catalog
         policy.record_published(result, lost)
 
 

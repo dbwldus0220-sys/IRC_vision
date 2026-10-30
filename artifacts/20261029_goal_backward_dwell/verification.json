@@ -1,0 +1,12 @@
+{
+  "action": "GOAL_CAMERA90_BACKWARD_1",
+  "motion_id": "goal_camera_90_backward_1",
+  "pre_dwell_sec": 1.0,
+  "scope": "goal retreat only",
+  "existing_post_motion_dwell_preserved": true,
+  "motion_data_changed": false,
+  "tests": "570 passed",
+  "build": "mission_control succeeded",
+  "installed_source_matches": true,
+  "hardware_executed": false
+}

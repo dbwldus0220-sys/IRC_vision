@@ -1,0 +1,18 @@
+{
+  "hardware_executed": false,
+  "regression_tests_passed": 452,
+  "installed_tests_passed": 255,
+  "sdk_fake_queue_cases_passed": 9,
+  "sdk_probe_control_tick_ms": 5,
+  "sdk_boundary_write_gap_ms": 5,
+  "installed_node_matches_source": true,
+  "catalog60_unchanged": true,
+  "continuous_ranges_mm": [
+    "660 < distance <= 1500, Line reference",
+    "550 < distance <= 660, Ball ground steer"
+  ],
+  "ball_capture_required_distinct_frames": 3,
+  "stationary_turn_dwells_preserved": true,
+  "pickup_entry_blocks_further_queue": true,
+  "source_node_sha256": "05976bc5a7d6dac56acd78dab075a594b529e6c863b8bc1a180677f6ffe050b0"
+}

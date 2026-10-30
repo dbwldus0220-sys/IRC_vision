@@ -19,39 +19,43 @@ GENERAL_ACTIONS = frozenset(
         "FINE_FORWARD_STEP",
         "APPROACH_GOAL",
         "BALL_FINE_FORWARD_8",
+        "BALL_APPROACH_FINE_FORWARD_5",
         "BALL_LOST_FINE_FORWARD_3",
         "BALL_LOST_FORWARD_2",
         "BALL_LOST_FORWARD_4",
+        "BALL_LOST_BACKWARD_2",
         "HURDLE_LOST_BACKWARD_1",
         "BALL_APPROACH_RECOVER_LEFT_4",
         "BALL_APPROACH_RECOVER_RIGHT_4",
         "LINE_LOST_TURN_LEFT",
         "LINE_LOST_TURN_RIGHT",
         "LINE_SPARSE_FORWARD",
-        "LINE_SPARSE_TURN_LEFT_1",
-        "LINE_SPARSE_TURN_RIGHT_2",
+        *(f"LINE_SPARSE_TURN_LEFT_{count}" for count in range(1, 7)),
+        *(f"LINE_SPARSE_TURN_RIGHT_{count}" for count in (1, 2, 3, 5, 6, 7, 9)),
         *{
             f"LINE_OFFSET_TURN_{direction}_{count}"
             for direction, counts in (
-                ("LEFT", (1, 2, 3, 4, 5, 6)), ("RIGHT", (2, 3, 5, 7, 9)),
+                ("LEFT", (1, 2, 3, 4, 5, 6)), ("RIGHT", (1, 2, 3, 5, 6, 7, 9)),
             )
             for count in counts
         },
         *{
             f"LINE_HEADING_TURN_{direction}_{count}"
             for direction, counts in (
-                ("LEFT", (1, 2, 3, 4, 5, 6)), ("RIGHT", (2, 3, 5, 7, 9)),
+                ("LEFT", (1, 2, 3, 4, 5, 6)), ("RIGHT", (1, 2, 3, 5, 6, 7, 9)),
             )
             for count in counts
         },
         *{
             f"LINE_LOST_TURN_{direction}_{count}"
-            for direction, counts in (("LEFT", (1, 3)), ("RIGHT", (2, 5)))
+            for direction, counts in (("LEFT", (1, 3)), ("RIGHT", (1, 2, 5)))
             for count in counts
         },
         "GOAL_CAMERA_90_FORWARD",
         "GOAL_CAMERA_90_FORWARD_1",
         "GOAL_CAMERA_90_FORWARD_2",
+        "GOAL_CAMERA90_RECOVER_LEFT_4",
+        "GOAL_CAMERA90_RECOVER_RIGHT_4",
         "GOAL_CAMERA90_BACKWARD_1",
         *(f"GOAL_CAMERA90_FINE_FORWARD_{count}" for count in range(1, 5)),
         "GOAL_CAMERA90_CRAB_RIGHT",
@@ -62,13 +66,13 @@ GENERAL_ACTIONS = frozenset(
         *{
             f"POST_SHOT_LINE_TURN_{direction}_{count}"
             for direction, counts in (
-                ("RIGHT", (2, 3, 5, 7, 9)), ("LEFT", (1, 2, 3, 4, 5, 6)),
+                ("RIGHT", (1, 2, 3, 5, 6, 7, 9)), ("LEFT", (1, 2, 3, 4, 5, 6)),
             )
             for count in counts
         },
         *{
             f"POST_BALL_LINE_TURN_RIGHT_{count}"
-            for count in (2, 3, 5, 7, 9)
+            for count in (1, 2, 3, 5, 6, 7, 9)
         },
         *{
             f"POST_BALL_LINE_TURN_LEFT_{count}"
@@ -76,7 +80,7 @@ GENERAL_ACTIONS = frozenset(
         },
         *{
             f"GOAL_CAMERA90_TURN_RIGHT_{count}"
-            for count in (2, 3, 5, 7, 9)
+            for count in (1, 2, 3, 5, 6, 7, 9)
         },
         *{
             f"GOAL_CAMERA90_TURN_LEFT_{count}"
@@ -84,7 +88,7 @@ GENERAL_ACTIONS = frozenset(
         },
         *{
             f"BALL_APPROACH_TURN_RIGHT_{count}"
-            for count in (2, 3, 5, 7, 9)
+            for count in (1, 2, 3, 5, 6, 7, 9)
         },
         *{
             f"BALL_APPROACH_TURN_LEFT_{count}"
@@ -196,6 +200,7 @@ class GeneralMotionCommandGate:
             allow_missing_line_search
             and normalized in {
                 "POST_BALL_LINE_TURN_RIGHT_5", "POST_BALL_LINE_TURN_RIGHT_2",
+                "POST_BALL_LINE_TURN_RIGHT_1",
                 "POST_BALL_LINE_TURN_LEFT_1", "POST_BALL_LINE_TURN_LEFT_2",
                 "POST_BALL_LINE_TURN_LEFT_3",
             }

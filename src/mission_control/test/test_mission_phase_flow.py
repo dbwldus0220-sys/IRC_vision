@@ -324,7 +324,7 @@ def complete_post_shot_exit(harness, monkeypatch, correction_heading=0.0):
         assert harness.publish_vision(line=line_info(heading=correction_heading)) == []
         assert harness.observations["line"] is None
 
-        if abs(correction_heading) > 20.0:
+        if correction_heading >= 15.0 or correction_heading < -15.0:
             correction = harness.publish_vision(line=line_info(heading=correction_heading))[-1]
             assert correction["action"].startswith("POST_SHOT_LINE_TURN_")
             assert correction["source_command"]["heading_error_deg"] == correction_heading
@@ -338,7 +338,7 @@ def complete_post_shot_exit(harness, monkeypatch, correction_heading=0.0):
 
 
 @pytest.mark.parametrize("section", [1, 2])
-@pytest.mark.parametrize("heading", [0.0, 34.0, -58.0])
+@pytest.mark.parametrize("heading", [0.0, 14.999, 15.0, -15.0, -15.001, 20.0, -20.0, 34.0, -58.0])
 def test_post_shot_exit_turn_returns_to_normal_line(monkeypatch, section, heading):
     harness = MissionFlowHarness(phase="GOAL_APPROACH")
     harness.phase_manager.ball_sections_processed = section - 1
@@ -352,7 +352,7 @@ def test_post_shot_exit_turn_returns_to_normal_line(monkeypatch, section, headin
     assert harness.mission_phase == ("AUTO" if section == 1 else "LINE_TRACK")
     actions = [m["action"] for m in harness.publisher.messages]
     corrections = [a for a in actions if a.startswith("POST_SHOT_LINE_TURN_")]
-    assert len(corrections) == (1 if abs(heading) > 20.0 else 0)
+    assert len(corrections) == (1 if heading >= 15.0 or heading < -15.0 else 0)
     assert actions[-1] == "POST_SHOT_FORWARD"
 
 
@@ -486,7 +486,7 @@ def seed_old_ball_navigation(harness):
 
 @pytest.mark.parametrize("phase,expected_action", [
     ("POST_BALL_LINE_ALIGN", "RECOVER_RIGHT_TURN_RIGHT_4"),
-    ("GOAL_APPROACH", "GOAL_CAMERA90_FINE_FORWARD_2"),
+    ("GOAL_APPROACH", "GOAL_CAMERA_90_FORWARD_2"),
 ])
 def test_collected_ball_route_clears_stale_reservations_before_dwell(
     monkeypatch, phase, expected_action,
@@ -555,13 +555,17 @@ def test_post_ball_detection_loss_cannot_interrupt_timed_line_or_goal(monkeypatc
     receive(String(data=json.dumps(approaching_ball())))
     now[0] = 20.0
     transition = harness.publish_vision(line=line_info())[-1]
-    assert transition["action"] == "POST_BALL_GOAL_TRANSITION"
+    assert transition["action"] == "WAIT"
     receive(String(data=json.dumps({"detected": False, "raw_detected": True})))
     assert all(c["action"] == "WAIT" for c in harness.publish_vision())
-    complete_active(harness, transition["action"], transition["command_id"])
     assert harness.mission_phase == "GOAL_APPROACH"
     assert harness.goal_post_motion_dwell_until is None
-    assert harness.publish_vision(goal=approaching_goal())[-1]["action"] == "GOAL_CAMERA90_FINE_FORWARD_2"
+    # Model the executor camera-ready acknowledgement before fresh head-up Vision.
+    harness.post_ball_goal_camera_ready_at = now[0]
+    monkeypatch.setattr(MotionDecisionNode, "_current_ros_time_ns", lambda _: round(now[0] * 1e9))
+    assert harness.publish_vision(goal={
+        **approaching_goal(), "rgb_stamp_ns": round(now[0] * 1e9),
+    })[-1]["action"] == "GOAL_CAMERA_90_FORWARD_2"
 
 
 def test_post_shot_return_requires_new_ball_frame_and_resumes_acquisition(monkeypatch):
@@ -624,7 +628,7 @@ def post_shot_line_search_ready(monkeypatch, section):
 
 
 @pytest.mark.parametrize("section,action,motion_id", [
-    (1, "POST_SHOT_LINE_TURN_RIGHT_2", "post_ball_line_turn_right_2"),
+    (1, "POST_SHOT_LINE_TURN_RIGHT_1", "post_ball_line_turn_right_1"),
     (2, "POST_SHOT_LINE_TURN_LEFT_1", "post_ball_line_turn_left_1"),
 ])
 def test_post_shot_search_repeats_one_motion_at_a_time_until_line_visible(
@@ -637,8 +641,8 @@ def test_post_shot_search_repeats_one_motion_at_a_time_until_line_visible(
     direction = "RIGHT" if section == 1 else "LEFT"
     opposite = "LEFT" if direction == "RIGHT" else "RIGHT"
     turns = [(direction, 5 if direction == "RIGHT" else 3)]
-    turns += [(direction, 2 if direction == "RIGHT" else 1)] * 3
-    turns += [(opposite, 1 if opposite == "LEFT" else 2)] * 6
+    turns += [(direction, 1)] * 3
+    turns += [(opposite, 1)] * 6
     for side, count in turns:
         action = f"POST_SHOT_LINE_TURN_{side}_{count}"
         command = harness.publish_vision(line={"detected": False})[-1]
@@ -768,7 +772,7 @@ def test_post_shot_search_waits_one_second_before_and_after_turn(
     assert harness.publish_vision(line=sample) == []
     clock[0] += 0.02
     assert harness.publish_vision(line={"detected": False})[-1]["action"] == (
-        "POST_SHOT_LINE_TURN_RIGHT_2" if section == 1 else "POST_SHOT_LINE_TURN_LEFT_1"
+        "POST_SHOT_LINE_TURN_RIGHT_1" if section == 1 else "POST_SHOT_LINE_TURN_LEFT_1"
     )
 
 
@@ -831,9 +835,9 @@ def score_ready_goal():
         "bearing_deg": 0.0,
         "offset_x_norm": 0.0,
         "offset_x_px": 0,
-        "depth_m": 0.43,
-        "ground_distance_m": 0.43,
-        "distance_m": 0.43,
+        "depth_m": 0.50,
+        "ground_distance_m": 0.50,
+        "distance_m": 0.50,
         "depth_valid": True,
         "score_now": True,
     }
@@ -1014,7 +1018,7 @@ def test_ball_pickup_entry_requires_fresh_frame_without_general_motion_dwell(mon
     right_ball["offset_x_norm"] = 0.2
     alignment = harness.publish_vision(ball=right_ball)[-1]
     assert alignment["action"] == (
-        "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_2"
+        "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_1"
     )
 
 
@@ -1239,7 +1243,7 @@ def test_pickup_initial_alignment_requires_fresh_ball_and_depth():
         }
     )
     right = harness.publish_vision(ball=right_ball)[-1]
-    assert right["action"] == "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_2"
+    assert right["action"] == "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_1"
     assert right["active_special_command_id"] == pickup["command_id"]
     assert harness.pickup_initial_align_waiting is False
 
@@ -1347,13 +1351,13 @@ def test_full_course_mock_flow_without_ros_graph(monkeypatch):
         hurdle=None,
         goal=approaching_goal(),
     )
-    assert goal_approach[-1]["action"] == "GOAL_CAMERA90_FINE_FORWARD_2"
+    assert goal_approach[-1]["action"] == "GOAL_CAMERA_90_FORWARD_2"
     release_general(harness, goal_approach[-1])
     MotionDecisionNode._publish_decision(harness)
     goal_align = harness.publish_vision(goal={**aligning_goal(), "bearing_deg": 15.0})
-    assert goal_align[-1]["action"] == "GOAL_CAMERA90_TURN_RIGHT_2"
+    assert goal_align[-1]["action"] == "GOAL_CAMERA90_TURN_RIGHT_1"
     harness.send_status(
-        "GOAL_CAMERA90_TURN_RIGHT_2",
+        "GOAL_CAMERA90_TURN_RIGHT_1",
         goal_align[-1]["command_id"],
         "UNSUPPORTED",
     )
@@ -1945,6 +1949,10 @@ def test_pickup_success_publishes_once_and_advances_to_goal():
 
 
 @pytest.mark.parametrize("heading,offset,expected", [
+    (15.0, 0.3, "RECOVER_RIGHT_TURN_RIGHT_4"),
+    (-15.0, -0.3, "RECOVER_LEFT_TURN_LEFT_4"),
+    (14.999, 0.3, "STRAIGHT"),
+    (-14.999, -0.3, "STRAIGHT"),
     (34.281, 0.456579, "RECOVER_RIGHT_TURN_RIGHT_4"),
     (-35.0, -0.7, "RECOVER_LEFT_TURN_LEFT_4"),
     (0.0, 0.0, "STRAIGHT"),
@@ -1966,7 +1974,7 @@ def test_pickup_visible_line_starts_normal_run_without_stationary_alignment(
     assert harness.mission_phase == "LINE_TRACK_AFTER_PICKUP"
     assert harness.post_ball_line_run_until is None
     harness.send_status(command["action"], command["command_id"], "RUNNING")
-    assert harness.post_ball_line_run_until == 20.0
+    assert harness.post_ball_line_run_until == 17.0
 
 
 @pytest.mark.parametrize(
@@ -2015,7 +2023,7 @@ def test_post_pickup_search_repeats_only_after_dwell_and_new_missing_line(
     now[0] = 11.0
     assert harness.publish_vision(line={"detected": False}) == []
     second = harness.publish_vision(line={"detected": False})[-1]
-    assert second["action"] == "POST_BALL_LINE_TURN_RIGHT_2"
+    assert second["action"] == "POST_BALL_LINE_TURN_RIGHT_1"
     assert second["command_id"] != first["command_id"]
     assert harness.mission_phase == "POST_BALL_LINE_ALIGN"
 
@@ -2048,7 +2056,7 @@ def test_post_ball_search_hands_off_to_recover_after_dwell(
     assert harness.mission_phase == "LINE_TRACK_AFTER_PICKUP"
     assert not recovery["mission_progress"]["ball_mode_active"]
     harness.send_status(recovery["action"], recovery["command_id"], "RUNNING")
-    assert harness.post_ball_line_run_until == 21.0
+    assert harness.post_ball_line_run_until == 18.0
 
 
 def test_post_ball_line_turn_timeout_does_not_enter_line_lost_recovery():
@@ -2088,54 +2096,35 @@ def test_post_pickup_search_keeps_fixed_direction_after_opposite_side_seen(
     now[0] = 11.0
     assert harness.publish_vision(line={"detected": False}) == []
     repeated = harness.publish_vision(line={"detected": False})[-1]
-    assert repeated["action"] == f"POST_BALL_LINE_TURN_{direction}_{1 if direction == 'LEFT' else 2}"
+    assert repeated["action"] == f"POST_BALL_LINE_TURN_{direction}_{1}"
 
 
-@pytest.mark.parametrize("initial_bearing,initial_action,remaining_bearing,next_action", [
-    (34.0, "GOAL_CAMERA90_TURN_RIGHT_3", 0.0, "GOAL_CAMERA90_FINE_FORWARD_2"),
-    (-35.0, "GOAL_CAMERA90_TURN_LEFT_1", -20.0, "GOAL_CAMERA90_TURN_LEFT_1"),
-    (-20.0, "GOAL_CAMERA90_TURN_LEFT_1", -15.0, "GOAL_CAMERA90_FINE_FORWARD_2"),
+@pytest.mark.parametrize("initial_angle,initial_action,remaining_angle,next_action", [
+    (45.0, "GOAL_CAMERA90_TURN_RIGHT_5", 0.0, "GOAL_CAMERA_90_FORWARD_2"),
+    (-60.0, "GOAL_CAMERA90_TURN_LEFT_4", -45.0, "GOAL_CAMERA90_TURN_LEFT_3"),
+    (-45.0, "GOAL_CAMERA90_TURN_LEFT_3", -30.0, "GOAL_CAMERA90_RECOVER_LEFT_4"),
 ])
 def test_goal_camera90_turn_dwells_then_rechecks_fresh_goal(
-    monkeypatch, initial_bearing, initial_action, remaining_bearing, next_action,
+    monkeypatch, initial_angle, initial_action, remaining_angle, next_action,
 ):
+    from test_goal_target_steering import target_sample
+    now = [10.0]
+    monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: now[0])
     harness = MissionFlowHarness(phase="GOAL_APPROACH")
-
-    correction = harness.publish_vision(
-        goal={
-            **approaching_goal(),
-            "depth_m": 0.9,
-            "ground_distance_m": 0.9,
-            "distance_m": 0.9,
-            "bearing_deg": initial_bearing,
-            "offset_x_norm": 0.3 if initial_bearing > 0 else -0.3,
-        }
-    )[-1]
+    correction = harness.publish_vision(goal=target_sample(initial_angle))[-1]
     assert correction["action"] == initial_action
     release_general(harness, correction)
-
-    published_count = len(harness.publisher.messages)
-    MotionDecisionNode._publish_decision(harness)
-    assert len(harness.publisher.messages) == published_count
-
     deadline = harness.goal_post_motion_dwell_until
-    monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: deadline)
-    MotionDecisionNode._publish_decision(harness)
-    forward = harness.publish_vision(
-        goal={
-            **approaching_goal(),
-            "depth_m": 0.9,
-            "ground_distance_m": 0.9,
-            "distance_m": 0.9,
-            "bearing_deg": remaining_bearing,
-            "offset_x_norm": 0.0,
-        }
-    )[-1]
-    assert forward["action"] == next_action
-    assert forward["reason"] == (
-        "align_goal_yaw_camera90" if "TURN" in next_action
-        else "approach_goal_by_depth"
-    )
+    assert deadline == 11.0
+    now[0] = 10.999
+    assert harness.publish_vision(goal=target_sample(remaining_angle)) == []
+    now[0] = deadline
+    assert harness.publish_vision(goal=target_sample(remaining_angle)) == []
+    assert harness.latest_info['goal'] is None
+    now[0] += .01
+    following = harness.publish_vision(goal=target_sample(remaining_angle))[-1]
+    assert following["action"] == next_action
+    assert following['source_command']['target_steering_angle_deg'] == remaining_angle
 
 
 def test_goal_camera90_crab_rechecks_full_priority_with_fresh_goal(monkeypatch):
@@ -2169,10 +2158,10 @@ def test_goal_camera90_crab_rechecks_full_priority_with_fresh_goal(monkeypatch):
             "ground_distance_m": 0.9,
             "distance_m": 0.9,
             "bearing_deg": -30.0,
-            "offset_x_norm": 0.2,
+            "offset_x_norm": -0.2, "offset_x_px": -128,
         }
     )[-1]
-    assert yaw["action"] == "GOAL_CAMERA90_TURN_LEFT_2"
+    assert yaw["action"] == "GOAL_CAMERA90_TURN_LEFT_3"
 
 
 def test_goal_approach_defers_crab_until_fresh_scoring_depth_without_dwell(monkeypatch):
@@ -2182,11 +2171,11 @@ def test_goal_approach_defers_crab_until_fresh_scoring_depth_without_dwell(monke
     )
     harness = MissionFlowHarness(phase="GOAL_APPROACH")
     goal = {
-        **approaching_goal(), "depth_m": 0.475,
-        "bearing_deg": 14.0, "offset_x_norm": 0.2, "offset_x_px": 128,
+        **approaching_goal(), "depth_m": 0.575,
+        "bearing_deg": 1.0, "offset_x_norm": 0.2, "offset_x_px": 128,
     }
     forward = harness.publish_vision(goal=goal)[-1]
-    assert forward["action"] == "GOAL_CAMERA90_FINE_FORWARD_1"
+    assert forward["action"] == "GOAL_CAMERA90_FINE_FORWARD_3"
     release_general(harness, forward)
     assert harness.goal_post_motion_dwell_until is None
     assert harness.latest_info["goal"] == goal
@@ -2197,8 +2186,8 @@ def test_goal_approach_defers_crab_until_fresh_scoring_depth_without_dwell(monke
 
 
 @pytest.mark.parametrize("depth,action", [
-    (0.65, "GOAL_CAMERA90_FINE_FORWARD_1"),
-    (0.50, "GOAL_CAMERA90_FINE_FORWARD_1"),
+    (0.65, "GOAL_CAMERA90_FINE_FORWARD_3"),
+    (0.50, "WAIT_SCORE_CONFIRMATION"),
     (0.389, "GOAL_CAMERA90_BACKWARD_1"),
     (0.35, "GOAL_CAMERA90_BACKWARD_1"),
 ])
@@ -2214,7 +2203,7 @@ def test_goal_depth_actions_follow_new_scoring_range(depth, action):
     }
     decision = harness.publish_vision(goal=goal)[-1]
     assert decision["action"] == action
-    assert decision["valid"] is True
+    assert decision["valid"] is (action != "WAIT_SCORE_CONFIRMATION")
 
 
 def test_stale_wrong_and_duplicate_pickup_statuses_are_ignored():
@@ -2548,7 +2537,7 @@ def test_ball_stationary_turn_requires_fresh_ball_before_next_approach():
 
     turn = harness.publish_vision(ball=off_center)
     assert len(turn) == 1
-    assert turn[0]["action"] == "BALL_APPROACH_TURN_RIGHT_2"
+    assert turn[0]["action"] == "BALL_APPROACH_TURN_RIGHT_1"
     release_general(harness, turn[0])
 
     before = len(harness.publisher.messages)
@@ -2640,7 +2629,7 @@ def test_external_phase_override_accepts_only_valid_idle_phase():
 
 
 @pytest.mark.parametrize("completed_before", [0, 1])
-def test_post_pickup_line_run_then_camera_only_with_verified_ball(monkeypatch, completed_before):
+def test_post_pickup_line_run_then_goal_only_with_verified_ball(monkeypatch, completed_before):
     now = [10.0]
     monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: now[0])
     harness = MissionFlowHarness(phase="BALL_APPROACH")
@@ -2669,30 +2658,31 @@ def test_post_pickup_line_run_then_camera_only_with_verified_ball(monkeypatch, c
     assert first["mission_progress"]["ball_mode_active"] is False
     assert harness.post_ball_line_run_until is None
     harness.send_status(first["action"], first["command_id"], "RUNNING")
-    assert harness.post_ball_line_run_until == 21.0
-    now[0] = 16.0
+    assert harness.post_ball_line_run_until == 18.0
+    now[0] = 14.0
     harness.send_status(first["action"], first["command_id"], "SUCCEEDED")
     second = harness.publish_vision(line=line_info(), goal=approaching_goal(), ball=approaching_ball())[-1]
     assert second["source"] == "line"
     harness.send_status(second["action"], second["command_id"], "RUNNING")
-    assert harness.post_ball_line_run_until == 21.0
-    now[0] = 21.0
+    assert harness.post_ball_line_run_until == 18.0
+    now[0] = 18.0
     assert harness.publish_vision(line=line_info()) == []
     assert harness.mission_phase == "LINE_TRACK_AFTER_PICKUP"
-    now[0] = 23.1
+    now[0] = 18.1
     harness.send_status(second["action"], second["command_id"], "SUCCEEDED")
-    branch = harness.publish_vision(line=line_info(), goal=approaching_goal())[-1]
+    harness.post_ball_goal_camera_ready_at = now[0]
+    monkeypatch.setattr(MotionDecisionNode, "_current_ros_time_ns", lambda _: round(now[0] * 1e9))
+    branch = harness.publish_vision(line=line_info(), goal={
+        **approaching_goal(), "rgb_stamp_ns": round(now[0] * 1e9),
+    })[-1]
     assert branch["mission_progress"]["ball_mode_active"] is False
     assert harness.phase_manager.shots_completed == completed_before
-    assert branch["action"] == "POST_BALL_GOAL_TRANSITION"
+    assert branch["action"] == "GOAL_CAMERA_90_FORWARD_2"
     assert harness.phase_manager.ball_sections_processed == completed_before
-    assert harness.publish_vision(goal=approaching_goal())[-1]["action"] == "WAIT"
-    complete_active(harness, branch["action"], branch["command_id"])
     assert harness.mission_phase == "GOAL_APPROACH"
     assert getattr(harness, "goal_post_motion_dwell_until", None) is None
-    assert harness.latest_info["goal"] is None
-    assert harness.publish_vision()[-1]["action"] == "WAIT"
-    assert harness.publish_vision(goal=approaching_goal())[-1]["source"] == "goal"
+    assert harness.active_special_command_id is None
+    assert harness.publish_vision(goal=approaching_goal()) == []
 
 
 @pytest.mark.parametrize("completed_before", [0, 1])
@@ -2839,12 +2829,12 @@ def test_goal_depth_approach_uses_latest_depth_without_clearing_it_between_forwa
     harness = MissionFlowHarness(phase='GOAL_APPROACH')
     mark_next_ball_grabbed(harness)
     for depth, action in [
-        (1.5, 'GOAL_CAMERA_90_FORWARD'),
+        (1.5, 'GOAL_CAMERA_90_FORWARD_2'),
         (1.28, 'GOAL_CAMERA_90_FORWARD_2'),
         (1.025, 'GOAL_CAMERA_90_FORWARD_2'),
         (0.850, 'GOAL_CAMERA90_FINE_FORWARD_3'),
-        (0.500, 'GOAL_CAMERA90_FINE_FORWARD_1'),
-        (0.471, 'GOAL_CAMERA90_FINE_FORWARD_1'),
+        (0.600, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+        (0.571, 'GOAL_CAMERA90_FINE_FORWARD_3'),
     ]:
         sample = {**approaching_goal(), 'depth_m': depth, 'distance_m': 0.2}
         command = harness.publish_vision(goal=sample)[-1]
@@ -2938,7 +2928,7 @@ def test_post_pickup_line_failure_blocks_camera_and_further_walking(monkeypatch,
     assert harness.active_special_command_id is None
 
 
-def test_post_pickup_line_timer_waits_for_actual_motion_and_allows_prequeue(monkeypatch):
+def test_post_pickup_line_timer_waits_for_actual_motion_and_rejects_prequeue_past_seven_seconds(monkeypatch):
     now = [10.0]
     monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: now[0])
     harness = MissionFlowHarness(phase="LINE_TRACK_AFTER_PICKUP")
@@ -2950,11 +2940,13 @@ def test_post_pickup_line_timer_waits_for_actual_motion_and_allows_prequeue(monk
     assert getattr(harness, "post_ball_line_run_until", None) is None
     now[0] = 31.0
     harness.send_status(line["action"], line["command_id"], "RUNNING")
-    assert harness.post_ball_line_run_until == 41.0
+    assert harness.post_ball_line_run_until == 38.0
+    # Only one second remains, so another complete forward cannot fit.
+    now[0] = 37.0
     before = len(harness.publisher.messages)
     MotionDecisionNode._publish_decision(harness, harness.last_selected_decision, queue_while_locked=True)
-    assert len(harness.publisher.messages) == before + 1
-    assert harness.queued_general_command_id == harness.publisher.messages[-1]["command_id"]
+    assert len(harness.publisher.messages) == before
+    assert getattr(harness, "queued_general_command_id", None) is None
 
 
 def test_post_pickup_run_uses_the_normal_line_steering_and_loss_logic():
@@ -2974,9 +2966,7 @@ def test_post_pickup_run_uses_the_normal_line_steering_and_loss_logic():
         )
 
 
-def test_post_pickup_corner_frames_use_normal_turn_after_motion_boundary(monkeypatch):
-    from test_motion_command_bridge import FakeBridge, decoded_messages
-
+def test_post_pickup_corner_recovery_does_not_prequeue_past_seven_seconds(monkeypatch):
     now = [10.0]
     monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: now[0])
     harness = MissionFlowHarness(phase="LINE_TRACK_AFTER_PICKUP")
@@ -2993,36 +2983,27 @@ def test_post_pickup_corner_frames_use_normal_turn_after_motion_boundary(monkeyp
         corner_preview_held=False,
         corner_approach_motion="STRAIGHT_5",
     )
-    now[0] = 12.5
+    now[0] = 16.0
     callback = MotionDecisionNode._info_callback(harness, "line")
     for _ in range(15):
         callback(String(data=json.dumps(corner)))
     assert harness.pending_line_decision.action == "RIGHT"
-    following = harness.publisher.messages[-1]
-    assert harness.queued_general_command_id == following['command_id']
+    # A recovery cannot fit in the one second remaining in this stage.
+    assert getattr(harness, 'queued_general_command_id', None) is None
     assert harness.general_motion_gate.active_command_id == first['command_id']
-    assert len(harness.publisher.messages) == 2
-
-    now[0] = 13.2
-    harness.send_status(first["action"], first["command_id"], "SUCCEEDED")
-    assert following["action"] == "RIGHT"
-    harness.send_status(following['action'], following['command_id'], 'RUNNING')
-    assert harness.general_motion_gate.active_command_id == following['command_id']
-    bridge = FakeBridge()
-    bridge.navigation_command_callback(String(data=json.dumps(following)))
-    assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == "line_recovery_right_4"
+    assert len(harness.publisher.messages) == 1
 
 
-def test_post_pickup_camera_completion_allows_fresh_goal_without_pause(monkeypatch):
+
+
+def test_explicit_camera_completion_allows_fresh_goal_without_pause(monkeypatch):
     from test_motion_command_bridge import FakeBridge, complete_active_motion, decoded_messages
 
     now = [10.0]
     monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: now[0])
-    harness = MissionFlowHarness(phase="LINE_TRACK_AFTER_PICKUP")
+    harness = MissionFlowHarness(phase="POST_BALL_GOAL_TRANSITION")
     harness.phase_manager.pickups_completed = 1
     harness.phase_manager.ball_grasp_results[1] = "GRABBED"
-    line = harness.publish_vision(line=line_info())[-1]
-    release_general(harness, line)
     now[0] = 20.0
     camera = harness.publish_vision(line=line_info(), goal=approaching_goal())[-1]
     assert camera["action"] == "POST_BALL_GOAL_TRANSITION"
@@ -3131,7 +3112,7 @@ def test_repeated_line_lost_turns_each_wait_one_second(monkeypatch, direction, o
     harness = MissionFlowHarness(phase="LINE_TRACK")
     harness.LINE_TURN_PRE_MOTION_SETTLE_SEC = MotionDecisionNode.LINE_TURN_PRE_MOTION_SETTLE_SEC
     harness.planner.observe_line_for_search(line_info(offset=offset))
-    for repeats in (count, 1 if direction == "LEFT" else 2):
+    for repeats in (count, 1):
         assert harness.publish_vision(line={"detected": False}) == []
         now[0] += 0.999
         assert harness.publish_vision(line={"detected": False}) == []
@@ -3170,7 +3151,7 @@ def test_post_pickup_missing_line_repeats_search_without_new_vision(monkeypatch,
     assert not gate.has_required_fresh_vision()
     MotionDecisionNode._publish_decision(harness)
     second = harness.publisher.messages[-1]
-    assert second["action"] == f"POST_BALL_LINE_TURN_{direction}_{1 if direction == 'LEFT' else 2}"
+    assert second["action"] == f"POST_BALL_LINE_TURN_{direction}_{1}"
     assert second["command_id"] != first["command_id"]
     assert harness.mission_phase == "POST_BALL_LINE_ALIGN"
 

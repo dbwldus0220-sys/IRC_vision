@@ -24,13 +24,13 @@ def resting_goal(monkeypatch):
 
 def test_one_mm_boundary_noise_does_not_restart_shot_rest(resting_goal):
     node, clock = resting_goal
-    ready = {**score_ready_goal(), 'depth_m': 0.470}
-    outside = {**ready, 'depth_m': 0.471, 'score_now': False}
+    ready = {**score_ready_goal(), 'depth_m': 0.569}
+    outside = {**ready, 'depth_m': 0.570, 'score_now': False}
     assert node.publish_vision(goal=ready) == []
     for stamp in (10.4, 10.8):
         clock[0] = stamp
         assert node.publish_vision(goal=outside) == []
-        assert node.last_candidate_decision.action == 'GOAL_CAMERA90_FINE_FORWARD_1'
+        assert node.last_candidate_decision.action == 'GOAL_CAMERA90_FINE_FORWARD_3'
         assert node.goal_stationary_since == 10.0
     clock[0] = 10.999
     assert node.publish_vision(goal=ready) == []
@@ -58,9 +58,9 @@ def test_elapsed_rest_never_authorizes_invalid_or_missing_goal(resting_goal, inv
 
 def test_executed_fine_step_restarts_shot_rest_without_forward_dwell(resting_goal):
     node, clock = resting_goal
-    outside = {**score_ready_goal(), 'depth_m': 0.49, 'score_now': False}
+    outside = {**score_ready_goal(), 'depth_m': 0.60, 'score_now': False}
     motion = node.publish_vision(goal=outside)[-1]
-    assert motion['action'] == 'GOAL_CAMERA90_FINE_FORWARD_1'
+    assert motion['action'] == 'GOAL_CAMERA90_FINE_FORWARD_3'
     assert node.goal_stationary_since is None
     node.send_status(motion['action'], motion['command_id'], 'RUNNING')
     clock[0] = 14.0
@@ -77,7 +77,7 @@ def test_executed_fine_step_restarts_shot_rest_without_forward_dwell(resting_goa
 @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT', 'REJECTED'])
 def test_failed_motion_does_not_reuse_old_rest(resting_goal, status):
     node, clock = resting_goal
-    outside = {**score_ready_goal(), 'depth_m': 0.49, 'score_now': False}
+    outside = {**score_ready_goal(), 'depth_m': 0.60, 'score_now': False}
     motion = node.publish_vision(goal=outside)[-1]
     if status != 'REJECTED':
         node.send_status(motion['action'], motion['command_id'], 'RUNNING')

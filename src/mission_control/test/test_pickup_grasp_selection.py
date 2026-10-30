@@ -49,7 +49,7 @@ def test_post_retreat_selects_grasp_and_keeps_check_pose(pixels, expected):
     statuses = decoded_messages(bridge.motion_status_publisher)
     assert statuses[-1]['verification_window_complete'] is False
     bridge._check_atomic_dwell(bridge.active_dwell_until)
-    assert bridge.active_motion_id == 'pickup_retreat_2'
+    assert bridge.active_motion_id == 'pickup_first_backward_turn_right'
     assert any(s.get('verification_window_complete') is True
                for s in decoded_messages(bridge.motion_status_publisher))
 

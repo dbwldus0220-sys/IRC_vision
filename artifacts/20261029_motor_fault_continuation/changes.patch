@@ -1,0 +1,525 @@
+diff --git a/external_sdk/gui_aligned/dynamixel_motion_hardware.cpp b/external_sdk/gui_aligned/dynamixel_motion_hardware.cpp
+index 79e3939..cf2d5e8 100644
+--- a/external_sdk/gui_aligned/dynamixel_motion_hardware.cpp
++++ b/external_sdk/gui_aligned/dynamixel_motion_hardware.cpp
+@@ -5,6 +5,7 @@
+ #include <stdexcept>
+ #include <exception>
+ #include <utility>
++#include <iostream>
+ 
+ namespace irc_step {
+ 
+@@ -74,6 +75,44 @@ bool DynamixelMotionHardware::prepareImmediatePlayback() noexcept {
+     return true;
+ }
+ 
++bool DynamixelMotionHardware::preparePlayback(bool allow_unconfirmed_torque) noexcept {
++    if (!allow_unconfirmed_torque) return prepareImmediatePlayback();
++    const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
++    if (!ready()) {
++        setError("hardware is not ready"); return false;
++    }
++    if (!dxl_.VerifyTorqueEnabled(true)) {
++        std::cerr << "[Warning] Continuing normal playback with torque OFF/unconfirmed; "
++                     "position_tolerance_enabled=false" << std::endl;
++    }
++    if (!dxl_.WriteZeroProfiles()) {
++        setError("failed to set playback profiles to zero"); return false;
++    }
++    last_error_.clear();
++    return true;
++}
++
++bool DynamixelMotionHardware::readAvailablePositions(JointAngles& positions_deg) noexcept {
++    const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
++    positions_deg.clear();
++    if (!ready()) { setError("hardware is not ready"); return false; }
++    try {
++        std::vector<double> available_deg;
++        if (!dxl_.ReadAvailablePositionDegrees(available_deg)) {
++            setError("no motor returned a valid Present Position"); return false;
++        }
++        for (int id = 0; id < NUMBER_OF_DYNAMIXELS; ++id)
++            if (motorEnabled(id) && std::isfinite(available_deg[id]))
++                positions_deg[id] = available_deg[id];
++        last_error_.clear();
++        return true;
++    } catch (const std::exception& error) {
++        setError(error.what()); return false;
++    } catch (...) {
++        setError("unknown partial Present Position read error"); return false;
++    }
++}
++
+ bool DynamixelMotionHardware::commandImmediatePosition(
+     const JointAngles& goals, const std::vector<int>& ids) noexcept {
+     const std::lock_guard<std::recursive_mutex> lock(bus_mutex_);
+diff --git a/external_sdk/gui_aligned/dynamixel_motion_hardware.hpp b/external_sdk/gui_aligned/dynamixel_motion_hardware.hpp
+index 5860bdd..688033f 100644
+--- a/external_sdk/gui_aligned/dynamixel_motion_hardware.hpp
++++ b/external_sdk/gui_aligned/dynamixel_motion_hardware.hpp
+@@ -28,6 +28,8 @@ public:
+     bool initialize() noexcept override;
+     [[nodiscard]] bool ready() const noexcept override;
+     bool prepareImmediatePlayback() noexcept override;
++    bool preparePlayback(bool allow_unconfirmed_torque) noexcept override;
++    bool readAvailablePositions(JointAngles& positions_deg) noexcept override;
+     bool commandPosition(
+         const JointAngles& goal_deg,
+         const std::vector<int>& motor_ids,
+diff --git a/external_sdk/gui_aligned/motion_hardware.hpp b/external_sdk/gui_aligned/motion_hardware.hpp
+index a0178a7..3374c74 100644
+--- a/external_sdk/gui_aligned/motion_hardware.hpp
++++ b/external_sdk/gui_aligned/motion_hardware.hpp
+@@ -25,6 +25,13 @@ public:
+     }
+ 
+     virtual bool prepareImmediatePlayback() noexcept { return true; }
++    virtual bool preparePlayback(bool /* allow_unconfirmed_torque */) noexcept {
++        return prepareImmediatePlayback();
++    }
++    // 일반 모션 시작 시에만 사용한다. 반환된 항목은 실제 읽기에 성공한 관절이다.
++    virtual bool readAvailablePositions(JointAngles& positions_deg) noexcept {
++        return readPresentPositions(positions_deg);
++    }
+     [[nodiscard]] virtual BusDiagnostics busDiagnostics() const noexcept { return {}; }
+ 
+     virtual bool commandPosition(
+diff --git a/external_sdk/gui_aligned/robot_motion_player.cpp b/external_sdk/gui_aligned/robot_motion_player.cpp
+index 71ad842..1006b49 100644
+--- a/external_sdk/gui_aligned/robot_motion_player.cpp
++++ b/external_sdk/gui_aligned/robot_motion_player.cpp
+@@ -42,6 +42,7 @@ RobotMotionPlayer::RobotMotionPlayer(
+ RobotMotionPlayer::~RobotMotionPlayer() { shutdown(); }
+ 
+ bool RobotMotionPlayer::initialize() noexcept {
++    last_known_angles_.clear();
+     if (hardware_ == nullptr) {
+         fail(MotionError::InternalError, "motion hardware is not configured");
+         return false;
+@@ -111,11 +112,12 @@ StartResult RobotMotionPlayer::start(std::string_view motion_name) noexcept {
+         trace_timeline_ms_ = 0;
+         trace_frame_ = -1;
+         repeat_ = 1;
+-        if (!hardware_->prepareImmediatePlayback()) {
+-            fail(MotionError::CommunicationError, "cannot set playback profiles to zero");
++        if (!hardware_->preparePlayback(allow_unconfirmed_motion_)) {
++            fail(MotionError::CommunicationError, hardware_->lastError().empty()
++                ? "cannot set playback profiles to zero" : std::string(hardware_->lastError()));
+             return StartResult::HardwareNotReady;
+         }
+-        if (!readStartAngles()) return StartResult::HardwareNotReady;
++        if (!readStartAngles(allow_unconfirmed_motion_)) return StartResult::HardwareNotReady;
+         startup_active_ = false;
+         clearQueuedMotion();
+         resetMotionRuntime(pattern, name, now_());
+@@ -324,30 +326,49 @@ MotionStatus RobotMotionPlayer::update() noexcept {
+     return status_;
+ }
+ 
+-bool RobotMotionPlayer::readStartAngles() {
++bool RobotMotionPlayer::readStartAngles(bool allow_partial) {
+     JointAngles present;
+     const auto read_begin = now_();
+     if (!hardware_->readPresentPositions(present)) {
+         traceEvent("initial", read_begin, false);
+-        fail(MotionError::PresentPositionReadFailed, "cannot capture actual start pose");
+-        return false;
++        present.clear();
++        if (!allow_partial || !hardware_->readAvailablePositions(present)) {
++            fail(MotionError::PresentPositionReadFailed, "cannot capture actual start pose");
++            return false;
++        }
+     }
+     bool complete = true;
+     for (int id = 0; id < kMotionMotorCount; ++id)
+         if (hardware_->motorEnabled(id) && !present.contains(id)) complete = false;
+-    if (!complete) {
+-        traceEvent("initial", read_begin, false);
+-        fail(MotionError::PresentPositionReadFailed, "incomplete actual start pose");
+-        return false;
+-    }
+     for (const auto& [id, angle] : present) {
+         if (id < 0 || id >= kMotionMotorCount || !std::isfinite(angle)) {
+             fail(MotionError::PresentPositionReadFailed, "invalid actual start pose");
+             return false;
+         }
+     }
+-    traceEvent("initial", read_begin, true, present);
+-    start_angles_ = present;
++    JointAngles initial = present;
++    std::uint32_t fallback_ids = 0;
++    for (int id = 0; id < kMotionMotorCount; ++id) {
++        if (!hardware_->motorEnabled(id) || present.contains(id)) continue;
++        const auto previous = last_known_angles_.find(id);
++        if (!allow_partial || present.empty() || previous == last_known_angles_.end()) {
++            traceEvent("initial", read_begin, false);
++            fail(MotionError::PresentPositionReadFailed, "incomplete actual start pose; no valid fallback");
++            return false;
++        }
++        initial[id] = previous->second;
++        fallback_ids |= std::uint32_t{1} << id;
++    }
++    if (!complete) {
++        std::cerr << "[Warning] Continuing normal playback with previous measured/sent angles; "
++                     "unconfirmed motor IDs:";
++        for (int id = 0; id < kMotionMotorCount; ++id)
++            if (fallback_ids & (std::uint32_t{1} << id)) std::cerr << ' ' << id;
++        std::cerr << std::endl;
++    }
++    traceEvent(complete ? "initial" : "initial_fallback", read_begin, complete, initial);
++    for (const auto& [id, angle] : present) last_known_angles_[id] = angle;
++    start_angles_ = std::move(initial);
+     feedback_angles_ = std::move(present);
+     return true;
+ }
+@@ -610,6 +631,8 @@ CancelResult RobotMotionPlayer::cancel() noexcept {
+         return CancelResult::HoldFailed;
+     }
+     status_ = MotionStatus::Cancelled;
++    // hold가 보낸 현재 자세는 이 캐시에 없으므로 다음 시작에서 다시 읽는다.
++    last_known_angles_.clear();
+     traceEvent("cancel", now_(), true);
+     error_ = MotionError::None;
+     last_error_.clear();
+@@ -764,6 +787,7 @@ void RobotMotionPlayer::setJointOverride(int motor_id, double target_deg) {
+         JointAngles goal{{motor_id, target_deg}};
+         if (!hardware_->commandImmediatePosition(goal, std::vector<int>{motor_id}))
+             throw std::runtime_error("failed to send idle joint override");
++        last_known_angles_[motor_id] = target_deg;
+     }
+ }
+ void RobotMotionPlayer::clearJointOverride(int motor_id) noexcept {
+@@ -873,7 +897,8 @@ void RobotMotionPlayer::traceEvent(const char* event, Clock::time_point begin, b
+     row.continuous = continuous_interpolation_ && !startup_active_;
+     row.exclude_motor_5 = !hardware_->motorEnabled(5);
+     if (std::string_view(event) == "sample" || std::string_view(event) == "endpoint" ||
+-        std::string_view(event) == "feedback" || std::string_view(event) == "initial") {
++        std::string_view(event) == "feedback" || std::string_view(event) == "initial" ||
++        std::string_view(event) == "initial_fallback") {
+         const auto bus = hardware_->busDiagnostics();
+         row.bus_result_valid = bus.valid;
+         row.bus_result = bus.result;
+@@ -888,7 +913,10 @@ bool RobotMotionPlayer::writeGoals(const JointAngles& goals, const std::vector<i
+                                   const char* event) {
+     const auto begin = now_();
+     const bool ok = hardware_->commandImmediatePosition(goals, ids);
+-    if (ok) last_goal_written_at_ = now_();
++    if (ok) {
++        last_goal_written_at_ = now_();
++        for (int id : ids) last_known_angles_[id] = goals.at(id);
++    }
+     traceEvent(event, begin, ok, goals, &ids);
+     return ok;
+ }
+diff --git a/external_sdk/gui_aligned/robot_motion_player.hpp b/external_sdk/gui_aligned/robot_motion_player.hpp
+index dc1375b..6a2a775 100644
+--- a/external_sdk/gui_aligned/robot_motion_player.hpp
++++ b/external_sdk/gui_aligned/robot_motion_player.hpp
+@@ -97,9 +97,10 @@ public:
+     void setForwardBoundaryFeedbackAccounting(bool enabled);
+     bool startPoseTransition(const std::vector<double>& angles, std::int64_t duration_ms) noexcept;
+     MotionStatus updateStartupPose() noexcept;
+-    // 일반 재생의 성공은 목표 전송 완료다. 위치 검사는 startup에만 적용한다.
++    // false는 일반 모션의 부분 모터 오류 후 진행도 허용한다. startup 검사는 별도다.
+     void setPositionToleranceEnabled(bool enabled) {
+         if (enabled) throw std::invalid_argument("GUI playback cannot enable arrival waits");
++        allow_unconfirmed_motion_ = true;
+     }
+     [[nodiscard]] bool completionConfirmsArrival() const noexcept { return startup_active_ && succeeded(); }
+     void setJointOverride(int motor_id, double target_deg);
+@@ -164,7 +165,7 @@ private:
+     void traceEvent(const char* event, Clock::time_point begin, bool success,
+                     const JointAngles& angles = {}, const std::vector<int>* ids = nullptr);
+     bool sendGuiSample(std::int64_t timeline_ms, bool boundary);
+-    bool readStartAngles();
++    bool readStartAngles(bool allow_partial = false);
+     void markSucceeded();
+     MotionStatus updateRunning(Clock::time_point now);
+     MotionStatus updateSettling(Clock::time_point now);
+@@ -194,10 +195,13 @@ private:
+     Clock::time_point queued_boundary_at_{};
+     Now now_{Clock::now};
+     bool continuous_interpolation_{true};
++    bool allow_unconfirmed_motion_{false};
+     bool account_forward_boundary_feedback_{false};
+     Clock::time_point last_goal_written_at_{};
+     GuiContinuousTrajectory continuous_trajectory_;
+     JointAngles start_angles_;
++    // 실측 시작각과 송신에 성공한 Goal만 저장한다. 관절 도달을 확인한 값은 아니다.
++    JointAngles last_known_angles_;
+     JointAngles feedback_angles_;
+     JointAngles command_angles_;
+     JointAngles joint_overrides_;
+diff --git a/external_sdk/gui_aligned/step_dynamixel.cpp b/external_sdk/gui_aligned/step_dynamixel.cpp
+index 03c0447..a589c86 100644
+--- a/external_sdk/gui_aligned/step_dynamixel.cpp
++++ b/external_sdk/gui_aligned/step_dynamixel.cpp
+@@ -4,6 +4,7 @@
+ #include <iostream>  
+ #include <cmath>
+ #include <stdexcept>
++#include <limits>
+ 
+ // const char* getAvailableDeviceName()
+ // {
+@@ -97,6 +98,31 @@ bool Dxl::ReadPositionDegrees(std::vector<double>& angles) {
+     return true;
+ }
+ 
++bool Dxl::ReadAvailablePositionDegrees(std::vector<double>& angles) {
++    bus_diagnostics_ = {};
++    angles.assign(NUMBER_OF_DYNAMIXELS, std::numeric_limits<double>::quiet_NaN());
++    if (!port_opened_) return false;
++    bus_diagnostics_.valid = true;
++    bool any = false;
++    // SyncRead 전체가 실패했을 때만 관절별로 읽는다. 실패 관절에는 값을 만들지 않는다.
++    for (int id = 0; id < NUMBER_OF_DYNAMIXELS; ++id) {
++        if (!MotorEnabled(id)) continue;
++        uint32_t raw = 0;
++        uint8_t error = 0;
++        const int result = packetHandler->read4ByteTxRx(
++            portHandler, id, DxlReg_PresentPosition, &raw, &error);
++        if (result != COMM_SUCCESS || error != 0) {
++            if (result != COMM_SUCCESS) bus_diagnostics_.result = result;
++            bus_diagnostics_.missing_ids |= std::uint32_t{1} << id;
++            continue;
++        }
++        angles[id] = std::clamp((static_cast<std::int32_t>(raw) - 2048.0)
++            * (360.0 / 4096.0), -180.0, 179.912109375);
++        any = true;
++    }
++    return any;
++}
++
+ // ************************************ GETTERS ***************************************** //
+ 
+ //Getter() : 각도 읽기(raw->rad)
+diff --git a/external_sdk/gui_aligned/step_dynamixel.hpp b/external_sdk/gui_aligned/step_dynamixel.hpp
+index 5fc2411..0fadae5 100644
+--- a/external_sdk/gui_aligned/step_dynamixel.hpp
++++ b/external_sdk/gui_aligned/step_dynamixel.hpp
+@@ -198,6 +198,7 @@ class Dxl
+         bool VerifyTorqueEnabled(bool enabled);
+         bool WriteGoalDegrees(const std::vector<double>& angles, const std::vector<int>& ids);
+         bool ReadPositionDegrees(std::vector<double>& angles);
++        bool ReadAvailablePositionDegrees(std::vector<double>& angles);
+         irc_step::BusDiagnostics BusDiagnostics() const { return bus_diagnostics_; }
+         ~Dxl(); //소멸자
+ 
+diff --git a/external_sdk/gui_aligned/test_continuous_hardware.cpp b/external_sdk/gui_aligned/test_continuous_hardware.cpp
+index 3e49d25..5d12826 100644
+--- a/external_sdk/gui_aligned/test_continuous_hardware.cpp
++++ b/external_sdk/gui_aligned/test_continuous_hardware.cpp
+@@ -4,6 +4,112 @@
+ #include <fstream>
+ #include <iostream>
+ using namespace irc_step;
++
++static uint32_t lastSentGoal(int id) {
++    for (auto event = dynamixel::events.rbegin(); event != dynamixel::events.rend(); ++event)
++        if (event->type == 'W' && event->address == 116 && event->data.contains(id))
++            return event->data.at(id);
++    assert(false);
++    return 0;
++}
++
++static void testCompetitionContinuation(const std::string& path) {
++    std::ofstream(path) << R"({"motions":[{"name":"continue","repeatable":true,
++      "start_pose":"same","end_pose":"same","max_seq_ms":100,"frames":[
++      {"name":"frame","start_ms":0,"time_ms":100,"angles":{"1":20,"5":80,"22":40}}]}]})";
++    for (bool continuous : {false, true}) for (bool queued : {false, true}) {
++        for (int fault = 0; fault < 5; ++fault) {
++            dynamixel::reset();
++            DynamixelMotionHardware hw;
++            int ms = 1000;
++            RobotMotionPlayer p(path, hw, [&] {
++                return RobotMotionPlayer::Clock::time_point(std::chrono::milliseconds(ms));
++            });
++            p.setPositionToleranceEnabled(false);
++            p.setContinuousInterpolation(continuous);
++            assert(p.initialize());
++            assert(p.start("continue") == StartResult::Accepted);
++            if (queued) assert(p.queueNext("continue") == QueueResult::Queued);
++            p.update();
++            if (fault == 0) dynamixel::registers[5][64] = 0;
++            if (fault == 1) dynamixel::torque_read_failure = 5;
++            if (fault == 2) dynamixel::offline = 5;
++            if (fault == 3) dynamixel::offline = 22;
++            if (fault == 4) dynamixel::position_error = 5;
++            for (int tick = 0; p.running() && tick < 100; ++tick) { ms += 5; p.update(); }
++            assert(p.succeeded() && !p.completionConfirmsArrival());
++            assert(p.completionSequence() == (queued ? 2 : 1));
++
++            // 정상 관절은 새 실측값, 응답 없는 관절만 직전 송신 목표를 사용한다.
++            dynamixel::registers[1][132] = 2160;
++            dynamixel::events.clear();
++            assert(p.start("continue") == StartResult::Accepted);
++            p.update();
++            assert(lastSentGoal(1) == 2160);
++            assert(lastSentGoal(5) == (fault == 2 || fault == 4 ? uint32_t(guiPositionRaw(80)) : 2053));
++            assert(lastSentGoal(22) == (fault == 3 ? uint32_t(guiPositionRaw(40)) : 2070));
++            for (const auto& event : dynamixel::events)
++                assert(!(event.type == 'w' && event.address == 64));
++            for (int tick = 0; p.running() && tick < 100; ++tick) { ms += 5; p.update(); }
++            assert(p.succeeded());
++
++            // 응답이 돌아오면 이전 목표 대신 다시 실측각에서 시작한다.
++            dynamixel::offline = dynamixel::position_error = dynamixel::torque_read_failure = -1;
++            dynamixel::registers[5][64] = 1;
++            dynamixel::registers[5][132] = 2222;
++            assert(p.start("continue") == StartResult::Accepted);
++            p.update();
++            assert(lastSentGoal(5) == 2222);
++            assert(p.emergencyStop());
++            assert(p.start("continue") == StartResult::HardwareNotReady);
++        }
++    }
++    for (int scenario = 0; scenario < 6; ++scenario) {
++        dynamixel::reset();
++        DynamixelMotionHardware hw;
++        int ms = 1000;
++        RobotMotionPlayer p(path, hw, [&] {
++            return RobotMotionPlayer::Clock::time_point(std::chrono::milliseconds(ms));
++        });
++        p.setPositionToleranceEnabled(false);
++        if (scenario == 0) dynamixel::offline = 5;
++        if (scenario == 0) { assert(!p.initialize()); continue; }
++        assert(p.initialize());
++        if (scenario == 1) {
++            dynamixel::offline = 5;
++            assert(p.start("continue") == StartResult::HardwareNotReady); // 기준각 없음
++            continue;
++        }
++        assert(p.start("continue") == StartResult::Accepted);
++        p.update(); ms += 50; p.update();
++        if (scenario == 2) {
++            assert(p.cancel() == CancelResult::Cancelled);
++            dynamixel::registers[5][64] = 0;
++            assert(!p.startPoseTransition(std::vector<double>(23, 0), 100));
++        } else if (scenario == 3) {
++            assert(p.cancel() == CancelResult::Cancelled);
++            dynamixel::all_offline = true;
++            assert(p.start("continue") == StartResult::HardwareNotReady);
++        } else if (scenario == 4) {
++            dynamixel::offline = 5;
++            assert(p.cancel() == CancelResult::HoldFailed);
++        } else {
++            const auto last_successful_goal = lastSentGoal(5);
++            dynamixel::write_failure = true;
++            ms += 50; p.update();
++            assert(p.result() == MotionError::FrameSendFailed);
++            assert(p.start("continue") == StartResult::HardwareNotReady); // 프로파일 송신 실패
++            dynamixel::write_failure = false;
++            dynamixel::offline = 5;
++            assert(p.start("continue") == StartResult::Accepted);
++            p.update();
++            assert(lastSentGoal(5) == last_successful_goal); // 실패한 목표로 덮어쓰지 않음
++        }
++    }
++    std::cout << "PASS competition continuation: 20 fault/queue/interpolation cases, "
++                 "6 strict-boundary/cache cases; no automatic torque re-enable\n";
++}
++
+ int main(int argc,char** argv) {
+     assert(argc==2);
+     const std::string path=std::string(argv[1])+"/continuous_hardware.json";
+@@ -97,5 +203,6 @@ int main(int argc,char** argv) {
+         assert(p.result()==MotionError::FrameSendFailed);
+         assert(hw.busDiagnostics().result==-1001);
+     }
++    testCompetitionContinuation(path);
+     std::cout<<"PASS actual player -> hardware -> Dxl -> fake SDK packets; exclusion, torque checks, seed, profiles, startup, repeat, timeout, write failure, emergency OFF\n";
+ }
+diff --git a/external_sdk/gui_aligned/test_support/dynamixel_sdk/dynamixel_sdk.h b/external_sdk/gui_aligned/test_support/dynamixel_sdk/dynamixel_sdk.h
+index 401568a..75a1b53 100644
+--- a/external_sdk/gui_aligned/test_support/dynamixel_sdk/dynamixel_sdk.h
++++ b/external_sdk/gui_aligned/test_support/dynamixel_sdk/dynamixel_sdk.h
+@@ -16,9 +16,13 @@ inline std::vector<Event> events;
+ inline std::array<std::map<int,uint32_t>,23> registers;
+ inline int offline = -1, torque_read_failure = -1;
+ inline bool write_failure = false;
++inline bool all_offline = false;
++inline int position_error = -1;
+ inline void reset() {
+     events.clear(); offline = torque_read_failure = -1;
+     write_failure = false;
++    all_offline = false;
++    position_error = -1;
+     for (int id=0; id<23; ++id) registers[id] = {{6,42},{10,4},{64,0},{132,uint32_t(2048+id)}};
+ }
+ class PortHandler {
+@@ -33,7 +37,7 @@ public:
+     static PacketHandler* getPacketHandler(double protocol) { assert(protocol==2.0); static PacketHandler p; return &p; }
+     int read1ByteTxRx(PortHandler*, int id, int address, uint8_t* value, uint8_t* error) {
+         events.push_back({'r',address,1,{{id,0}}}); *error=0;
+-        if (id==offline || (address==64 && id==torque_read_failure)) return -1;
++        if (all_offline || id==offline || (address==64 && id==torque_read_failure)) return -1;
+         *value=registers.at(id)[address]; return 0;
+     }
+     int write1ByteTxRx(PortHandler*, int id, int address, uint8_t value, uint8_t* error) {
+@@ -44,8 +48,10 @@ public:
+     int write2ByteTxRx(PortHandler*, int id, int address, uint16_t value, uint8_t* error) {
+         events.push_back({'w',address,2,{{id,value}}}); *error=0; return id==offline ? -1 : 0;
+     }
+-    int read4ByteTxRx(PortHandler*, int id, int address, uint32_t* value) {
+-        *value=registers.at(id)[address]; return id==offline ? -1 : 0;
++    int read4ByteTxRx(PortHandler*, int id, int address, uint32_t* value, uint8_t* error = nullptr) {
++        events.push_back({'r',address,4,{{id,0}}});
++        if (error) *error = id == position_error ? 128 : 0;
++        *value=registers.at(id)[address]; return all_offline || id==offline ? -1 : 0;
+     }
+ };
+ class GroupSyncWrite {
+@@ -70,8 +76,8 @@ class GroupSyncRead {
+ public:
+     GroupSyncRead(PortHandler*,PacketHandler*,int address,int size):event_{'R',address,size,{}} {}
+     bool addParam(int id) { return event_.data.emplace(id,0).second; }
+-    int txRxPacket() { events.push_back(event_); return event_.data.contains(offline) ? -1 : 0; }
+-    bool isAvailable(int id,int,int) { return event_.data.contains(id) && id!=offline; }
++    int txRxPacket() { events.push_back(event_); return all_offline || event_.data.contains(offline) || event_.data.contains(position_error) ? -1 : 0; }
++    bool isAvailable(int id,int,int) { return !all_offline && event_.data.contains(id) && id!=offline && id!=position_error; }
+     uint32_t getData(int id,int address,int) { return registers.at(id)[address]; }
+     void clearParam() { event_.data.clear(); }
+ };
+diff --git a/src/irc_step_motion_executor/README.md b/src/irc_step_motion_executor/README.md
+index 887877a..113b1ad 100644
+--- a/src/irc_step_motion_executor/README.md
++++ b/src/irc_step_motion_executor/README.md
+@@ -555,7 +555,7 @@ Torque OFF 경로는 유지하며, 이번 테스트에서는 fake hardware만 
+ | enable_shoulder_override | false | PC 원본 ID 4·5 사용. 어깨 고정 정책은 기본 비활성화 |
+ | policy_reference_json_path | install/config/robot_motions_pc.json | OFF일 때 참조하는 검증된 PC 원본 |
+ | queued_transition_hold_ms | 0 | 성공한 마지막 Goal 이후 activation까지 최소 대기시간 |
+-| position_tolerance_enabled | false | 일반 모션 종료 검사만 제어. 시작 자세 위치 검사·안정화·AUTO 전 대기에는 영향 없음 |
++| position_tolerance_enabled | false | 일반 모션 도달 대기 없이 진행하고 부분 모터 오류 후 다음 모션도 허용. 초기화·시작 자세·비상정지 검사는 유지 |
+ | motion_trace_enabled | false | bounded trace를 종료 후 비동기 파일 기록 |
+ | motion_trace_path | 빈 문자열 | trace 활성화 시 필수 출력 경로 |
+ | motion_trace_goals | false | 상세 23축 degree Goal 추가 |
+@@ -1030,12 +1030,24 @@ STEP 통합 기능이므로 이것까지 GUI와 동일하다는 뜻은 아니다
+ 공통 재생 정책으로 대체했다. SDK와 두 full_system launch 모두
+ `position_tolerance_enabled=false`가 기본값이다. 일반 프레임·반복·queue는
+ 위치 도착을 기다리지 않는다. 예약이 없으면 마지막 Goal 송신 성공 callback에서
+-완료한다. `true`를 명시하면 기존 모션 끝의 최대 100ms best-effort 검사만
+-활성화하며, 프레임마다 3000ms 기다리는 옛 동작을 복원하지 않는다.
++완료한다. 현재 GUI SDK는 `true`를 명시하면 거절한다.
+ 시작 자세의 별도 위치 검사·80ms 안정화·AUTO 전 2초 대기는 유지한다.
+ 완료는 계획한 Goal 송신이 끝났다는 뜻이며 실제 관절 도착을 증명하지 않는다.
+ 검증은 `test_common_playback`과 startup gate의 가짜 하드웨어 검사로 수행한다.
+ 
++2026-10-29 경기 지속 정책 복원: `position_tolerance_enabled=false`이면 정상
++초기화 이후 일반 모션의 토크 OFF/미확인은 경고로 남기고 재생을 진행한다.
++새 모션의 전체 위치 읽기가 실패하면 관절별로 한 번 읽는다. 응답한 관절은
++새 실측각을 사용하고, 응답 없는 관절은 이전 실측각 또는 마지막 송신 성공
++목표각으로 보완한다. 이 값은 실제 도달각이 아니며 `initial_fallback` trace와
++미확인 ID 경고로 구분한다. 응답 복구 후에는 다시 새 실측각을 사용한다.
++관절별 읽기는 실패한 새 모션 시작에만 추가되며 정상 재생 주기는 유지한다.
++초기화/시작 자세/cancel/비상정지 검사는 완화하지 않는다. 전체 무응답, 보완할
++기준각 부재, 프로파일·Goal 송신 실패도 성공으로 처리하지 않는다. 고장 관절을
++자동으로 다시 켜거나 EEPROM/Shutdown 설정을 변경하지 않는다.
++가짜 버스 검증은 `continuous_hardware_contract`에 포함한다. 물리적 추종·균형은
++보장하지 않으므로 변경된 오류 후 진행 동작은 시뮬레이션에서 먼저 확인한다.
++
+ GUI 전용 가상환경은 ROS Python 경로와 사용자 패키지를 배제해 실행해야 한다.
+ 관측된 버전은 Python 3.10.12, PyQt5 5.15.6, dynamixel-sdk 4.0.5,
+ pyserial 3.5, numpy 1.21.5다. ROS/vision 환경의 numpy를 일괄 변경하지 않는다.

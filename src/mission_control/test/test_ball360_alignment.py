@@ -62,15 +62,21 @@ def test_invalid_bottom_cannot_authorize_either_alignment(method, bottom):
 
 
 @pytest.mark.parametrize('method', ['plan_ball_pickup_initial_alignment', 'plan_ball_pickup_fine_alignment'])
-def test_close_lost_ball_never_switches_to_remembered_side_rotation(method):
+@pytest.mark.parametrize('missing', [
+    None,
+    {'detected': False, 'raw_detected': False},
+    {'detected': False, 'raw_detected': False, 'ball_loss_confirmed': False},
+    {'detected': False, 'raw_detected': True, 'ball_loss_confirmed': True},
+])
+def test_close_ball_cannot_start_search_before_confirmed_loss(method, missing):
     planner = MotionDecisionPlanner()
     info = ball_sample(30, depth_m=.5, distance_m=.5, offset_x_px=200,
                        camera_center_offset_x_px=200, bottom_distance_px=360)
     planner._update_ball_tracking(info, 0.)
     getattr(planner, method)(info)
-    decision = getattr(planner, method)({'detected': False, 'raw_detected': False,
-                                        'ball_loss_confirmed': True})
-    assert 'TURN' not in decision.action
+    decision = getattr(planner, method)(missing)
+    assert not decision.valid
+    assert decision.reason != 'turn_toward_last_seen_ball_side'
 
 
 @pytest.mark.parametrize('angle,action', [(-30, 'BALL_APPROACH_TURN_LEFT_2'),

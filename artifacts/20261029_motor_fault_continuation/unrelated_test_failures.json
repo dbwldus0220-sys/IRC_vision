@@ -1,0 +1,10 @@
+{
+  "test_sdk_executor_core": {
+    "binary_mtime_kst": "2026-10-28T00:47:37.004475+09:00",
+    "link_command": "/usr/bin/c++ CMakeFiles/test_sdk_executor_core.dir/test/test_sdk_executor_core.cpp.o -o test_sdk_executor_core  gtest/libgtest_main.a gtest/libgtest.a libsdk_executor_core.a -pthread libcatalog_only_core.a /usr/lib/aarch64-linux-gnu/libjson-c.so /usr/lib/aarch64-linux-gnu/libyaml-cpp.so.0.7.0"
+  },
+  "test_startup_pose_catalog": {
+    "binary_mtime_kst": "2026-10-28T13:54:57.883613+09:00",
+    "link_command": "/usr/bin/c++ CMakeFiles/test_startup_pose_catalog.dir/test/test_startup_pose_catalog.cpp.o -o test_startup_pose_catalog  gtest/libgtest_main.a gtest/libgtest.a libsdk_executor_driver.a -pthread libsdk_executor_core.a libcatalog_only_core.a /usr/lib/aarch64-linux-gnu/libyaml-cpp.so.0.7.0 librobot_motion_runtime_config.a /usr/lib/aarch64-linux-gnu/libjson-c.so"
+  }
+}

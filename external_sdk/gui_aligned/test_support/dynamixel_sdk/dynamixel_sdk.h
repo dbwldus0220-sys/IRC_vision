@@ -16,9 +16,13 @@ inline std::vector<Event> events;
 inline std::array<std::map<int,uint32_t>,23> registers;
 inline int offline = -1, torque_read_failure = -1;
 inline bool write_failure = false;
+inline bool all_offline = false;
+inline int position_error = -1;
 inline void reset() {
     events.clear(); offline = torque_read_failure = -1;
     write_failure = false;
+    all_offline = false;
+    position_error = -1;
     for (int id=0; id<23; ++id) registers[id] = {{6,42},{10,4},{64,0},{132,uint32_t(2048+id)}};
 }
 class PortHandler {
@@ -33,7 +37,7 @@ public:
     static PacketHandler* getPacketHandler(double protocol) { assert(protocol==2.0); static PacketHandler p; return &p; }
     int read1ByteTxRx(PortHandler*, int id, int address, uint8_t* value, uint8_t* error) {
         events.push_back({'r',address,1,{{id,0}}}); *error=0;
-        if (id==offline || (address==64 && id==torque_read_failure)) return -1;
+        if (all_offline || id==offline || (address==64 && id==torque_read_failure)) return -1;
         *value=registers.at(id)[address]; return 0;
     }
     int write1ByteTxRx(PortHandler*, int id, int address, uint8_t value, uint8_t* error) {
@@ -44,8 +48,10 @@ public:
     int write2ByteTxRx(PortHandler*, int id, int address, uint16_t value, uint8_t* error) {
         events.push_back({'w',address,2,{{id,value}}}); *error=0; return id==offline ? -1 : 0;
     }
-    int read4ByteTxRx(PortHandler*, int id, int address, uint32_t* value) {
-        *value=registers.at(id)[address]; return id==offline ? -1 : 0;
+    int read4ByteTxRx(PortHandler*, int id, int address, uint32_t* value, uint8_t* error = nullptr) {
+        events.push_back({'r',address,4,{{id,0}}});
+        if (error) *error = id == position_error ? 128 : 0;
+        *value=registers.at(id)[address]; return all_offline || id==offline ? -1 : 0;
     }
 };
 class GroupSyncWrite {
@@ -70,8 +76,8 @@ class GroupSyncRead {
 public:
     GroupSyncRead(PortHandler*,PacketHandler*,int address,int size):event_{'R',address,size,{}} {}
     bool addParam(int id) { return event_.data.emplace(id,0).second; }
-    int txRxPacket() { events.push_back(event_); return event_.data.contains(offline) ? -1 : 0; }
-    bool isAvailable(int id,int,int) { return event_.data.contains(id) && id!=offline; }
+    int txRxPacket() { events.push_back(event_); return all_offline || event_.data.contains(offline) || event_.data.contains(position_error) ? -1 : 0; }
+    bool isAvailable(int id,int,int) { return !all_offline && event_.data.contains(id) && id!=offline && id!=position_error; }
     uint32_t getData(int id,int address,int) { return registers.at(id)[address]; }
     void clearParam() { event_.data.clear(); }
 };

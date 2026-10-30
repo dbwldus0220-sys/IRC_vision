@@ -41,12 +41,18 @@ def test_interior_loss_searches_once_and_rearms_on_reacquisition(stage):
 
     expected = ('BALL_LOST_FORWARD_4' if stage in {'approach', 'normal'}
                 else f'BALL_PICKUP_{stage}_SEARCH_FORWARD_4')
+    backward = ('BALL_LOST_BACKWARD_2' if stage in {'approach', 'normal'}
+                else f'BALL_PICKUP_{stage}_SEARCH_BACKWARD_2')
+    assert plan(missing) == backward
+    assert plan(missing) == backward  # Planning alone cannot consume a request.
+    planner.ball_interior_loss_backward_state = 'PENDING'
+    assert plan(missing) == 'WAIT'
+    planner.ball_interior_loss_backward_state = 'COMPLETE'
     assert plan(missing) == expected
-    assert plan(missing) == expected  # Planning alone cannot consume a request.
     planner.ball_interior_loss_forward_sent = True
     assert plan(missing) != expected
     planner._update_ball_tracking(visible, 0.0)
-    assert plan(missing) == expected
+    assert plan(missing) == backward
 
 
 @pytest.mark.parametrize('missing', [None, {'detected': False},
@@ -57,7 +63,7 @@ def test_interior_recovery_needs_confirmed_loss(missing):
     planner = MotionDecisionPlanner()
     planner._update_ball_tracking(ball_info(
         image_width=1280, image_height=720, bbox=[500,300,600,400]), 0.0)
-    assert planner.plan_lost_ball_approach_alignment(missing).action != 'BALL_LOST_FORWARD_4'
+    assert planner.plan_lost_ball_approach_alignment(missing).action not in {'BALL_LOST_FORWARD_4', 'BALL_LOST_BACKWARD_2'}
 
 
 @pytest.mark.parametrize('bbox', [None, [0,300,70,400], [1210,300,1280,400],
@@ -67,11 +73,12 @@ def test_edge_or_unknown_loss_does_not_use_interior_forward(bbox):
     planner._update_ball_tracking(ball_info(image_width=1280, image_height=720, bbox=bbox), 0.0)
     decision = planner.plan_lost_ball_approach_alignment({
         'detected': False, 'raw_detected': False, 'ball_loss_confirmed': True})
-    assert decision.action != 'BALL_LOST_FORWARD_4'
+    assert decision.action not in {'BALL_LOST_FORWARD_4', 'BALL_LOST_BACKWARD_2'}
 
 
 @pytest.mark.parametrize('stage', ['INITIAL', 'FINE'])
-def test_pickup_interior_recovery_keeps_parent_checkpoint(stage):
+@pytest.mark.parametrize('motion', ['BACKWARD_2', 'FORWARD_4'])
+def test_pickup_interior_recovery_keeps_parent_checkpoint(stage, motion):
     bridge = FakeBridge()
     if stage == 'FINE':
         enter_pickup_fine_alignment(bridge)
@@ -80,8 +87,9 @@ def test_pickup_interior_recovery_keeps_parent_checkpoint(stage):
     sequence = bridge.active_pickup_sequence
     parent = bridge.active_command_id
     bridge.navigation_command_callback(fine_alignment_message(
-        f'BALL_PICKUP_{stage}_SEARCH_FORWARD_4', command_id=8500))
-    assert bridge.active_motion_id == 'ball_camera_down_forward_4'
+        f'BALL_PICKUP_{stage}_SEARCH_{motion}', command_id=8500))
+    assert bridge.active_motion_id == ('ball_lost_camera_down_backward_2'
+                                       if motion == 'BACKWARD_2' else 'ball_camera_down_forward_4')
     assert bridge.active_command_id == parent
     complete_active_motion(bridge)
     assert bridge.active_pickup_sequence == sequence

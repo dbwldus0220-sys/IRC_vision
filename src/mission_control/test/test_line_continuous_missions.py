@@ -60,8 +60,8 @@ def test_timed_line_masks_only_the_same_targets_as_mission_selection(clock, sour
     assert MotionDecisionNode._line_only_prequeue_allowed(node, observations) is allowed
 
 
-@pytest.mark.parametrize('remaining,allowed', [(5., True), (2.467, False), (.1, False), (-.1, False)])
-def test_no_extra_queue_when_next_full_forward_will_not_fit(clock, remaining, allowed):
+@pytest.mark.parametrize('remaining,allowed', [(5., True), (2.001, True), (2., False), (.1, False), (-.1, False)])
+def test_no_extra_queue_when_next_forward_would_start_after_camera_raise(clock, remaining, allowed):
     node, _ = start_forward('LINE_TRACK_AFTER_PICKUP')
     current_end = node.active_line_motion_started_at + node.active_line_motion_duration_sec
     node.post_ball_line_run_until = current_end + remaining
@@ -74,7 +74,7 @@ def test_timed_stage_waits_for_already_queued_forward_before_transition(clock):
     capture(node, clock)
     second = node.publisher.messages[-1]
     # A slow executor may finish after the nominal duration. Drain the single
-    # accepted command; never change camera pose while that command is pending.
+    # accepted command before Goal control; camera preparation may overlap it.
     clock[0] = 21.
     node.send_status(first['action'], first['command_id'], 'SUCCEEDED')
     MotionDecisionNode._publish_decision(node)
@@ -84,7 +84,8 @@ def test_timed_stage_waits_for_already_queued_forward_before_transition(clock):
     assert len(node.publisher.messages) == 2
     node.send_status(second['action'], second['command_id'], 'SUCCEEDED')
     MotionDecisionNode._publish_decision(node)
-    assert node.publisher.messages[-1]['action'] == 'POST_BALL_GOAL_TRANSITION'
+    assert node.mission_phase == 'GOAL_APPROACH'
+    assert node.publisher.messages[-1]['action'] == 'WAIT'
 
 
 @pytest.mark.parametrize('action,queued', [

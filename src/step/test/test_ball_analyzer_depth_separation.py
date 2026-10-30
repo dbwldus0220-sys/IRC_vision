@@ -173,11 +173,15 @@ def test_ball_display_bottom_distance_is_zero_at_last_image_row():
     assert offsets == (0, 0)
 
 
-def test_head_down_pixel_trigger_includes_exact_120_pixel_boundary():
-    assert should_request_head_down(121, 120) is False
-    assert should_request_head_down(120, 120) is True
-    assert should_request_head_down(0, 120) is True
-    assert should_request_head_down(None, 120) is False
+@pytest.mark.parametrize('distance,valid,age,expected', [
+    (.600, True, .05, False), (.550001, True, .05, False),
+    (.550, True, .05, True), (.480, True, .70, True),
+    (.480, True, .701, False), (.480, False, .05, False),
+    (None, True, .05, False), (float('nan'), True, .05, False),
+    (.480, True, None, False), (.480, True, -.01, False),
+])
+def test_head_down_uses_fresh_550mm_distance(distance, valid, age, expected):
+    assert should_request_head_down(distance, valid, age) is expected
 
 
 def test_rgb_ball_remains_candidate_beyond_tracking_distance():
@@ -392,3 +396,39 @@ def test_ball_candidate_confidence_boundary(confidence, accepted):
     detection = {**_raw_detection(), "confidence": confidence}
     candidate = analyzer._build_candidate(detection, 1280, 720)
     assert (candidate is not None) is accepted
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+@pytest.mark.parametrize("confidence", [0.95, 0.83001])
+def test_highest_confidence_ball_beats_larger_central_candidate(reverse, confidence):
+    analyzer = _analyzer_with_depth(1.0, True)
+    analyzer.ball_class_name = "ball"
+    analyzer.head_down_trigger_bottom_distance_px = 120
+    analyzer.publish_empty_when_missing = True
+    analyzer.confirmation_filter = TemporalConfirmationFilter(window_size=3, required_hits=2)
+    analyzer.pickup_confirmation_filter = TemporalConfirmationFilter(window_size=5, required_hits=3)
+    analyzer._image_size_from_payload = lambda *_: (1280, 720)
+    analyzer._get_depth_cache = lambda: SimpleNamespace(latest=lambda: None)
+    empty = BallInfo(**{field.name: None for field in fields(BallInfo)})
+    analyzer._empty_info = lambda note: replace(
+        empty, detected=False, confidence=0.0, depth_valid=False,
+        pickup_ready=False, pickup_now=False, note=note,
+    )
+    published = []
+    analyzer.publisher = SimpleNamespace(publish=published.append)
+    stronger = {"class_name": "ball", "confidence": confidence,
+                "bbox": [100, 300, 120, 320], "center": [110, 310]}
+    weaker = {"class_name": "ball", "confidence": 0.83,
+              "bbox": [610, 420, 810, 620], "center": [710, 520]}
+    assert analyzer._build_candidate(stronger, 1280, 720).score < analyzer._build_candidate(weaker, 1280, 720).score
+    detections = [stronger, weaker] if not reverse else [weaker, stronger]
+    detections.append({**stronger, "class_name": "line", "confidence": 0.99})
+    message = String(data=json.dumps({"detections": detections}))
+    analyzer._detections_callback(message)
+    assert json.loads(published[-1].data)["detected"] is False
+    analyzer._detections_callback(message)
+    confirmed = json.loads(published[-1].data)
+    assert confirmed["detected"] is True
+    assert confirmed["confidence"] == confidence
+    assert confirmed["bbox"] == stronger["bbox"]
+    assert confirmed["candidate_count"] == 2

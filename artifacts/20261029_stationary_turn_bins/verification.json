@@ -1,0 +1,117 @@
+{
+  "left_bins": [
+    [
+      8,
+      1
+    ],
+    [
+      30,
+      2
+    ],
+    [
+      45,
+      3
+    ],
+    [
+      60,
+      4
+    ],
+    [
+      75,
+      5
+    ],
+    [
+      90,
+      6
+    ]
+  ],
+  "right_bins": [
+    [
+      15,
+      1
+    ],
+    [
+      30,
+      3
+    ],
+    [
+      45,
+      5
+    ],
+    [
+      60,
+      6
+    ],
+    [
+      75,
+      7
+    ],
+    [
+      90,
+      9
+    ]
+  ],
+  "boundary_rule": "inclusive lower bounds; below first bound means no stationary turn",
+  "recorded_scene": {
+    "bearing_deg": 22.9,
+    "depth_m": 0.41,
+    "offset_x_px": 384,
+    "action": "GOAL_CAMERA90_TURN_RIGHT_1",
+    "motion": "R제자리우회전90도(1회)"
+  },
+  "source_sha256": "93a8c70bd16c0a89c5ead2a9e4c7ffd58d7d2bda6345165534187619a56402ab",
+  "added_motions": [
+    "R제자리우회전(1회)",
+    "R제자리우회전0도(1회)",
+    "R제자리우회전90도(1회)"
+  ],
+  "original_96_motions_unchanged": true,
+  "runtime_speed": 0.855,
+  "pc_speed": 0.9,
+  "tests": {
+    "focused": "1819 passed",
+    "build": "step and mission_control succeeded",
+    "installed_source_and_recorded_scene": "passed",
+    "expanded_note": "Expanded suite contains pre-existing failures, reproduced with pre-change modules. The remaining new post-shot search expectation was corrected and passed in the focused final run."
+  },
+  "hardware_executed": false,
+  "simulation_required_before_hardware": true,
+  "grasp_diagnosis": {
+    "accepted_frames": 38,
+    "grabbed_frames": 27,
+    "required_grab_frames": 15,
+    "confidence_threshold": 0.25,
+    "mean_grab_confidence": 0.34148048140384535,
+    "latched_result": "GRABBED",
+    "logic_changed": false
+  },
+  "changed_existing_files": [
+    "artifacts/robot_motions_pc.json",
+    "artifacts/robot_motions_runtime.json",
+    "src/irc_step_motion_executor/config/motion_aliases.yaml",
+    "src/mission_control/mission_control/lost_search_turn_limiter.py",
+    "src/mission_control/mission_control/motion_command_bridge_node.py",
+    "src/mission_control/mission_control/motion_command_gate.py",
+    "src/mission_control/mission_control/motion_decision_node.py",
+    "src/mission_control/mission_control/motion_decision_planner.py",
+    "src/mission_control/mission_control/sparse_line_recovery.py",
+    "src/mission_control/test/test_catalog60_full_import.py",
+    "src/mission_control/test/test_goal_loss_timer.py",
+    "src/mission_control/test/test_goal_pixel_alignment.py",
+    "src/mission_control/test/test_hurdle_lost_recovery.py",
+    "src/mission_control/test/test_line_corner_memory.py",
+    "src/mission_control/test/test_line_offset_alignment.py",
+    "src/mission_control/test/test_lost_search_turn_limiter.py",
+    "src/mission_control/test/test_mission_phase_flow.py",
+    "src/mission_control/test/test_motion_command_bridge.py",
+    "src/mission_control/test/test_motion_decision_node.py",
+    "src/mission_control/test/test_motion_decision_planner.py",
+    "src/mission_control/test/test_right_turn_bins.py",
+    "src/mission_control/test/test_staged_lost_search.py",
+    "src/step/step/goal_navigation_planner.py",
+    "src/step/step/hurdle_navigation_planner.py",
+    "src/step/test/test_goal_backboard_selection.py",
+    "src/step/test/test_goal_navigation_planner.py"
+  ],
+  "new_source_file": "src/step/step/stationary_turns.py"
+}

@@ -1,0 +1,14 @@
+..................................................F..................... [ 34%]
+........................................................................ [ 69%]
+..............................................................           [100%]
+=================================== FAILURES ===================================
+_____ test_ground_turn_refreshes_ball_after_dwell_without_waiting_for_line _____
+src/mission_control/test/test_ball_ground_tracking_range.py:119: in test_ground_turn_refreshes_ball_after_dwell_without_waiting_for_line
+    assert request['motion_id'] == 'line_turn_right_6'
+E   AssertionError: assert 'post_ball_line_turn_right_6' == 'line_turn_right_6'
+E     - line_turn_right_6
+E     + post_ball_line_turn_right_6
+E     ? ++++++++++
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_ball_ground_tracking_range.py::test_ground_turn_refreshes_ball_after_dwell_without_waiting_for_line
+1 failed, 205 passed in 1.64s

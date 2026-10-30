@@ -418,15 +418,15 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("initial_mission_phase", default_value="AUTO"),
             DeclareLaunchArgument(
                 "ball_entry_line_alignment_enabled", default_value="true",
-                description="Use one Line-planned motion in Ball mode before tracking; false restores direct Ball entry.",
+                description="Use Ball-only Line/ground approach until 600 mm, then fine walking; camera-down pickup starts at 550 mm.",
             ),
             DeclareLaunchArgument("line_heading_source", default_value="ground",
                                   choices=["image", "ground"]),
             DeclareLaunchArgument("line_offset_align_enter_px", default_value="100.0",
                                   description="Pixel offset entry for ground-target turn/forward alignment; negative disables."),
-            DeclareLaunchArgument("recovery_heading_turn_deg", default_value="20.0"),
+            DeclareLaunchArgument("recovery_heading_turn_deg", default_value="15.0"),
             DeclareLaunchArgument(
-                "recovery_away_heading_turn_deg", default_value="20.0"
+                "recovery_away_heading_turn_deg", default_value="15.0"
             ),
             DeclareLaunchArgument(
                 "curve_follow_max_offset_norm", default_value="0.55"

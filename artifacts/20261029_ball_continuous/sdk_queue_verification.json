@@ -1,0 +1,70 @@
+{
+  "hardware_used": false,
+  "tick_ms": 5,
+  "passed": 9,
+  "cases": [
+    {
+      "first": "line_forward_4",
+      "second": "line_forward_4",
+      "write_gap_ms": 5.0,
+      "still_running_at_boundary": true,
+      "completed": 2
+    },
+    {
+      "first": "line_forward_4",
+      "second": "line_recovery_left_4",
+      "write_gap_ms": 5.0,
+      "still_running_at_boundary": true,
+      "completed": 2
+    },
+    {
+      "first": "line_forward_4",
+      "second": "line_recovery_right_4",
+      "write_gap_ms": 5.0,
+      "still_running_at_boundary": true,
+      "completed": 2
+    },
+    {
+      "first": "line_recovery_left_4",
+      "second": "line_forward_4",
+      "write_gap_ms": 5.0,
+      "still_running_at_boundary": true,
+      "completed": 2
+    },
+    {
+      "first": "line_recovery_left_4",
+      "second": "line_recovery_left_4",
+      "write_gap_ms": 5.0,
+      "still_running_at_boundary": true,
+      "completed": 2
+    },
+    {
+      "first": "line_recovery_left_4",
+      "second": "line_recovery_right_4",
+      "write_gap_ms": 5.0,
+      "still_running_at_boundary": true,
+      "completed": 2
+    },
+    {
+      "first": "line_recovery_right_4",
+      "second": "line_forward_4",
+      "write_gap_ms": 5.0,
+      "still_running_at_boundary": true,
+      "completed": 2
+    },
+    {
+      "first": "line_recovery_right_4",
+      "second": "line_recovery_left_4",
+      "write_gap_ms": 5.0,
+      "still_running_at_boundary": true,
+      "completed": 2
+    },
+    {
+      "first": "line_recovery_right_4",
+      "second": "line_recovery_right_4",
+      "write_gap_ms": 5.0,
+      "still_running_at_boundary": true,
+      "completed": 2
+    }
+  ]
+}

@@ -7,6 +7,7 @@ import argparse
 from collections import Counter
 import copy
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 import hashlib
 import json
 import os
@@ -18,6 +19,21 @@ import yaml
 
 
 POSITION_TOLERANCE_DEG = 5.0
+RUNTIME_SPEED_FACTOR = Decimal("0.95")
+
+
+def runtime_motion_from_source(motion: dict) -> dict:
+    """Build runtime data from unscaled source, never from prior runtime speed."""
+    raw_speed = motion.get("playback_speed", 1.0)
+    try:
+        speed = Decimal(str(raw_speed))
+    except InvalidOperation as exc:
+        raise ValueError("source playback_speed must be finite and positive") from exc
+    if not speed.is_finite() or speed <= 0:
+        raise ValueError("source playback_speed must be finite and positive")
+    result = _with_runtime_policy(motion)
+    result["playback_speed"] = float(speed * RUNTIME_SPEED_FACTOR)
+    return result
 
 
 def _with_runtime_policy(motion: dict) -> dict:
@@ -109,7 +125,7 @@ def main() -> int:
     replaced = []
     identical = []
     for name in sorted(required_names):
-        source_motion = _with_runtime_policy(source_by_name[name])
+        source_motion = runtime_motion_from_source(source_by_name[name])
         position = runtime_positions.get(name)
         if position is None:
             runtime_positions[name] = len(motions)

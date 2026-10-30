@@ -2211,6 +2211,8 @@ def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
     node = ReadinessPublishNode(general_decision("STRAIGHT"))
     clock = [10.0]
     monkeypatch.setattr(time, "monotonic", lambda: clock[0])
+    monkeypatch.setattr(MotionDecisionNode, "_current_ros_time_ns", lambda _: round(clock[0] * 1e9))
+    node.timeouts = {source: .5 for source in MotionDecisionNode.SOURCES}
 
     class RecordingLinePlanner:
         """Record replayed line frames for one capture-window test."""
@@ -2244,12 +2246,13 @@ def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
         dynamics_command=None,
     )
 
-    assert node.active_line_motion_duration_sec == pytest.approx(2.467)
+    assert node.active_line_motion_duration_sec == pytest.approx(.517 * 6 / .95)
     assert node.active_line_motion_target_frames == 10
 
     def valid_frame(frame_id):
         return {
             "frame": frame_id,
+            "rgb_stamp_ns": round(clock[0] * 1e9),
             "detected": True,
             "ground_projection_valid": True,
             "ground_heading_error_deg": 0.0,
@@ -2260,7 +2263,8 @@ def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
             "detection_quality": 0.9,
         }
 
-    clock[0] = 11.0
+    threshold = 10.0 + node.active_line_motion_duration_sec * .7
+    clock[0] = threshold - .1
     for frame_id in range(10):
         assert not MotionDecisionNode._collect_active_line_motion_frame(
             node,
@@ -2269,7 +2273,7 @@ def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
         )
     assert len(node.active_line_motion_frames) == 10
 
-    clock[0] = 11.73
+    clock[0] = threshold + .01
     capture_ready = MotionDecisionNode._collect_active_line_motion_frame(
         node,
         {"detected": False},
@@ -2286,12 +2290,8 @@ def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
         node,
         clock[0],
     )
-    assert (node.pending_line_decision is not None) is (
-        latest_detected and latest_ground_valid
-    )
-    assert len(node.publisher.messages) == (2 if latest_detected and latest_ground_valid else 1)
-    if not latest_detected:
-        node.decision = general_decision("LINE_LOST_TURN_LEFT")
+    assert node.pending_line_decision is not None
+    assert len(node.publisher.messages) == 2
 
     send_status(
         node,
@@ -2302,13 +2302,12 @@ def test_line_motion_uses_recent_valid_frames_at_capture_threshold(
         dynamics_command=None,
     )
 
-    assert len(recording_planner.frames) == (10 if latest_detected and latest_ground_valid else 20)
+    assert len(recording_planner.frames) == 10
     assert node.active_line_motion_frames == []
-    assert len(node.publisher.messages) == (2 if latest_detected and latest_ground_valid else 1)
+    assert len(node.publisher.messages) == 2
     MotionDecisionNode._publish_decision(node)
     assert len(node.publisher.messages) == 2
-    expected = "STRAIGHT" if latest_detected else "LINE_LOST_TURN_LEFT_3"
-    assert json.loads(node.publisher.messages[-1].data)["action"] == expected
+    assert json.loads(node.publisher.messages[-1].data)["action"] == "STRAIGHT"
 
 
 def test_line_motion_capture_table_matches_deployed_timelines():
@@ -2883,7 +2882,7 @@ def test_ball_turn_ack_keeps_dwell_and_next_plan_rechecks_heading(
 
 @pytest.mark.parametrize("angle,recover_action", [
     (-30.0, "BALL_APPROACH_TURN_LEFT_2"),
-    (26.0, "BALL_APPROACH_TURN_RIGHT_2"),
+    (26.0, "BALL_APPROACH_TURN_RIGHT_1"),
 ])
 def test_ball_turn_rechecks_new_angle_after_dwell_without_forced_forward(
     monkeypatch, angle, recover_action,
@@ -2920,7 +2919,7 @@ def test_ball_turn_rechecks_new_angle_after_dwell_without_forced_forward(
 
     # Reobserve after each stationary turn; a remaining error requests another turn.
     for steering, expected in ((angle, recover_action), (angle, recover_action),
-                               (-8.0, "STRAIGHT")):
+                               (-7.999, "STRAIGHT")):
         clock[0] += 0.1
         receive_ball(steering)
         MotionDecisionNode._publish_decision(node)
@@ -3041,7 +3040,7 @@ def test_pickup_positioning_loss_latches_without_general_recovery(monkeypatch):
     ("steering_angle_deg", "expected_action"),
     [
         (-30.0, "BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_2"),
-        (26.0, "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_2"),
+        (26.0, "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_1"),
     ],
 )
 def test_pickup_loss_reacquisition_reuses_camera_down_heading_planner(
@@ -3168,7 +3167,7 @@ def test_ball_settle_expiry_discards_frames_received_during_settle(monkeypatch):
 @pytest.mark.parametrize('action', [
     'GOAL_CAMERA_90_FORWARD',
     *(f'GOAL_CAMERA90_FINE_FORWARD_{count}' for count in range(1, 5)),
-    'GOAL_CAMERA90_TURN_RIGHT_2', 'GOAL_CAMERA90_TURN_LEFT_1',
+    'GOAL_CAMERA90_TURN_RIGHT_1', 'GOAL_CAMERA90_TURN_LEFT_1',
     'GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_CRAB_RIGHT',
     'GOAL_CAMERA90_BACKWARD_1',
 ])
@@ -3264,7 +3263,7 @@ def test_general_ball_alignment_pending_uses_fresh_angle_then_distance():
             steering_angle_deg=26.0,
         ),
     )
-    assert turn.action == "BALL_APPROACH_TURN_RIGHT_2"
+    assert turn.action == "BALL_APPROACH_TURN_RIGHT_1"
 
     node.ball_approach_alignment_pending = True
     straight = select_decision(
@@ -4734,7 +4733,7 @@ def test_shot_pause_survives_geometry_valid_reconfirmation_without_firing(monkey
     def decision(confirmed):
         return planner.plan("GOAL_APPROACH", {"goal": {
             "detected": True, "confidence": 0.9, "depth_valid": True,
-            "depth_m": 0.42, "offset_x_px": 18, "bearing_deg": 1.1,
+            "depth_m": 0.50, "offset_x_px": 18, "bearing_deg": 1.1,
             "score_now": confirmed,
         }}, 0.1)
     node = ReadinessPublishNode(decision(True))
@@ -4824,7 +4823,7 @@ def test_two_hurdles_disable_only_hurdle_and_resume_other_modes(next_source):
     elif next_source == "goal":
         inputs["goal"] = {
             "detected": True, "confidence": 0.9, "depth_valid": True,
-            "depth_m": 0.43, "distance_m": 0.43, "ground_distance_m": 0.43,
+            "depth_m": 0.50, "distance_m": 0.50, "ground_distance_m": 0.50,
             "bearing_deg": 0.0, "offset_x_norm": 0.0, "offset_x_px": 0,
         }
     assert select_decision(node, **inputs).source == next_source

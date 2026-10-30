@@ -1,0 +1,54 @@
+{
+  "source_file": "motion_imports/robot_motions(57).json",
+  "source_sha256": "3ac7e286076f6b2afa0c32ad8c51861a3e6457903eafa9e7a61d25ecef30aa92",
+  "motions": {
+    "r미세0도": {
+      "source": "r미세0도",
+      "repeat_count": 5
+    },
+    "r마세90도": {
+      "source": "r마세90도",
+      "repeat_count": 5
+    },
+    "r미세0도(상단탐색3회)": {
+      "source": "r미세0도",
+      "repeat_count": 3
+    },
+    "r미세0도(허들10회)": {
+      "source": "r미세0도",
+      "repeat_count": 10
+    },
+    "r마세90도(1회)": {
+      "source": "r마세90도",
+      "repeat_count": 1
+    },
+    "r마세90도(2회)": {
+      "source": "r마세90도",
+      "repeat_count": 2
+    },
+    "r마세90도(3회)": {
+      "source": "r마세90도",
+      "repeat_count": 3
+    },
+    "r마세90도(4회)": {
+      "source": "r마세90도",
+      "repeat_count": 4
+    }
+  },
+  "alias_changes": {
+    "ball_general_fine_forward_8": "r미세0도",
+    "ball_top_loss_fine_forward_45_3": "r미세0도(상단탐색3회)"
+  },
+  "runtime_position_tolerance_deg": 5.0,
+  "playback_speed": 1.05,
+  "before_comparison": {
+    "frames_equal_to_source57": true,
+    "runtime_speed": 0.9975,
+    "source_speed": 1.05,
+    "general_vs_camera0_joint_difference": {
+      "motor_id": 0,
+      "general_deg": -32.0,
+      "camera0_deg": -64.0
+    }
+  }
+}

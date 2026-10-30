@@ -25,6 +25,7 @@ from std_msgs.msg import String
 
 from .approach_distance import approach_level_from_motion
 from .approach_distance import ball_hurdle_approach_motion
+from .approach_distance import BALL_HURDLE_FINE_DISTANCE_M
 from .depth_frame_cache import DepthFrame
 from .depth_frame_cache import DepthFrameCache
 from .depth_frame_cache import DepthFrameConsumer
@@ -134,13 +135,18 @@ def ball_display_offsets_px(
 
 
 def should_request_head_down(
-    bottom_distance_px: int | None,
-    trigger_distance_px: int,
+    distance_m: float | None,
+    depth_valid: bool,
+    depth_age_sec: float | None,
 ) -> bool:
-    """Return whether a confirmed ball has entered the bottom trigger."""
+    """Lower the camera at the fresh 550 mm pickup boundary, even while walking."""
     return (
-        bottom_distance_px is not None
-        and bottom_distance_px <= max(0, trigger_distance_px)
+        depth_valid is True
+        and isinstance(distance_m, (int, float)) and not isinstance(distance_m, bool)
+        and math.isfinite(distance_m)
+        and 0.0 < distance_m <= BALL_HURDLE_FINE_DISTANCE_M
+        and isinstance(depth_age_sec, (int, float)) and not isinstance(depth_age_sec, bool)
+        and math.isfinite(depth_age_sec) and 0.0 <= depth_age_sec <= 0.70
     )
 
 
@@ -992,7 +998,7 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         )
 
         return BallCandidate(
-            confidence=round(confidence, 4),
+            confidence=confidence,
             bbox=bbox,
             center=center,
             width_px=width_px,
@@ -1348,7 +1354,8 @@ class BallAnalyzer(DepthFrameConsumer, Node):
             # depth sample must not turn a visible YOLO ball into "not seen".
             candidates.append(candidate)
 
-        candidates.sort(key=lambda item: item.score, reverse=True)
+        # Confidence owns target selection; geometry only breaks equal-confidence ties.
+        candidates.sort(key=lambda item: (item.confidence, item.score), reverse=True)
         if not candidates:
             confirmation = self.confirmation_filter.update(False)
             pickup_confirmation = self.pickup_confirmation_filter.update(
@@ -1411,8 +1418,7 @@ class BallAnalyzer(DepthFrameConsumer, Node):
                     "bearing_deg": target.bearing_deg,
                     "bottom_distance_px": bottom_distance,
                     "head_down_requested": should_request_head_down(
-                        bottom_distance,
-                        getattr(self, "head_down_trigger_bottom_distance_px", 120),
+                        target.distance_m, target.depth_valid, target.depth_age_sec,
                     ),
                 })
             return
@@ -1469,8 +1475,7 @@ class BallAnalyzer(DepthFrameConsumer, Node):
                     display_offsets[1] if display_offsets is not None else None
                 ),
                 head_down_requested=should_request_head_down(
-                    display_offsets[1] if display_offsets is not None else None,
-                    self.head_down_trigger_bottom_distance_px,
+                    target.distance_m, target.depth_valid, target.depth_age_sec,
                 ),
                 horizontal_direction=target.horizontal_direction,
                 steering_angle_deg=target.steering_angle_deg,

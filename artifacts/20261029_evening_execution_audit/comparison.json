@@ -1,0 +1,86 @@
+{
+  "user_symptom": "Only automatic driving changed; GUI standalone still normal",
+  "hardware_executed": false,
+  "production_modified": false,
+  "snapshot_paths": {
+    "before_1800": "artifacts/20261028_catalog54_55_pickup/before/artifacts/robot_motions_runtime.json",
+    "1822_held_at1847": "artifacts/20261028_catalog56_ball360/before/artifacts/robot_motions_runtime.json",
+    "before_today_catalog60": "artifacts/20261029_catalog60_full/before/artifacts/robot_motions_runtime.json"
+  },
+  "snapshot_sha256": {
+    "before_1800": "267feac3979111fb06fe81419909a9ac6f13c2554224fc2ca5edbb469105bad8",
+    "1822_held_at1847": "eab453e9053edd0d5ac9d2992dede5cd3702132554c0c6cc5c682ea90d81efd7",
+    "before_today_catalog60": "a76ebc09994ec3e6fbe03edcaa25e0611e2105d6cfc101e205070dc56b73388e",
+    "2044_commit": "fd7830fe18c5e163804187dd2edbdc344cf97d7e4173bdace6e3d84811ce6e5c"
+  },
+  "forward_objects_identical": {
+    "before_1800": {
+      "R전진45도(2회)": true,
+      "R전진45도(4회)": true,
+      "R전진45도(6회)": true,
+      "R전진45도(8회)": true,
+      "R전진90도(8회)": true,
+      "R전진90도(2회)": true,
+      "R전진90도(4회)": true,
+      "R전진90도(6회)": true,
+      "R전진0도(4회)": true,
+      "R전진0도(6회)": true
+    },
+    "1822_held_at1847": {
+      "R전진45도(2회)": true,
+      "R전진45도(4회)": true,
+      "R전진45도(6회)": true,
+      "R전진45도(8회)": true,
+      "R전진90도(8회)": true,
+      "R전진90도(2회)": true,
+      "R전진90도(4회)": true,
+      "R전진90도(6회)": true,
+      "R전진0도(4회)": true,
+      "R전진0도(6회)": true
+    },
+    "before_today_catalog60": {
+      "R전진45도(2회)": true,
+      "R전진45도(4회)": true,
+      "R전진45도(6회)": true,
+      "R전진45도(8회)": true,
+      "R전진90도(8회)": true,
+      "R전진90도(2회)": true,
+      "R전진90도(4회)": true,
+      "R전진90도(6회)": true,
+      "R전진0도(4회)": true,
+      "R전진0도(6회)": true
+    },
+    "2044_commit": {
+      "R전진45도(2회)": true,
+      "R전진45도(4회)": true,
+      "R전진45도(6회)": true,
+      "R전진45도(8회)": true,
+      "R전진90도(8회)": true,
+      "R전진90도(2회)": true,
+      "R전진90도(4회)": true,
+      "R전진90도(6회)": true,
+      "R전진0도(4회)": true,
+      "R전진0도(6회)": true
+    }
+  },
+  "player_matches_20261028_1441_commit": true,
+  "player_sha256": "4579b544273b99023c5d4193f9f92a7dbe5e994cd4b530ac7b95427cc57376c2",
+  "actual_log_settings_equal_at": [
+    "2026-10-28 16:54:26 KST",
+    "2026-10-28 18:24:11 KST",
+    "2026-10-28 20:58:10 KST"
+  ],
+  "settings": [
+    "continuous quintic",
+    "forward boundary feedback yes",
+    "motor5 included",
+    "poll5ms",
+    "baud4000000",
+    "position tolerance check disabled"
+  ],
+  "known_evening_changes": [
+    "18:47 baseline to19:04 patch: Ball/Hurdle walking prequeue and completion dispatch",
+    "20:37 build/20:38 patch: Ball entry Line alignment and exact Line gait mapping"
+  ],
+  "important_limit": "Ordinary Line prequeue already present in16:54 and18:24 logs; added prequeue was for Ball/Hurdle. No recorded joint/IMU trace establishes the cause of instability."
+}

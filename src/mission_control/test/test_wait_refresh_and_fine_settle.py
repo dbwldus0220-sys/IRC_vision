@@ -121,14 +121,13 @@ def test_each_fine_action_requires_full_second(clock, action, source, extra):
     ('BALL_PICKUP_INITIAL_SEARCH_FORWARD', 'pickup_initial_align_waiting', {}),
     ('BALL_PICKUP_INITIAL_ALIGN_CONTINUE', 'pickup_initial_align_waiting', {'pickup_approach_motion': 'STRAIGHT_0'}),
 ])
-def test_fine_checkpoint_waits_inside_pickup_lock_without_deadlock(clock, action, flag, extra):
+def test_fine_checkpoint_dispatches_without_extra_settle_inside_pickup_lock(clock, action, flag, extra):
     node = LiveInputHarness()
     assert node.phase_manager.start_special_action('PICKUP_NOW', 1)
     setattr(node, flag, True)
     decision = MotionDecision('BALL_PICKUP', 'ball', action, True, 'test', False, False, extra)
-    assert not node._pre_motion_settle_ready(decision, 10.)
-    assert not node._pre_motion_settle_ready(decision, 10.999)
-    assert node._pre_motion_settle_ready(decision, 11.)
+    assert node._pre_motion_settle_ready(decision, 10.)
+    assert node.pre_motion_settle_started_at is None
     setattr(node, flag, False)
     assert not node._pre_motion_settle_ready(decision, 12.)
 

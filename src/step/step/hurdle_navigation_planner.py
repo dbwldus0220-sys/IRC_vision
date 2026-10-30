@@ -186,7 +186,7 @@ class HurdleNavigationPlanner:
         """Use the smallest calibrated stationary turn and reobserve after completion."""
         return replace(
             self.wait(reason), valid=True, action=f"ALIGN_{direction}",
-            turn_count=2 if direction == "RIGHT" else 1,
+            turn_count=1,
         )
 
     def wait(self, reason: str) -> HurdleActionCommand:

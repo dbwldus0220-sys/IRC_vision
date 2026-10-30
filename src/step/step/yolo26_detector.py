@@ -1661,6 +1661,7 @@ class Yolo26Detector(Node):
             "LINE_LOST_TURN_RIGHT": "LINE LOST | SEARCH RIGHT",
         }
         ball_labels = {
+            "BALL_APPROACH_FINE_FORWARD_5": "BALL FINE FORWARD 5",
             "PICKUP_NOW": "PICK UP BALL",
             "TURN_LEFT": "BALL TURN LEFT",
             "TURN_RIGHT": "BALL TURN RIGHT",
@@ -1673,6 +1674,9 @@ class Yolo26Detector(Node):
             "STOP": "BALL STOP",
         }
         goal_labels = {
+            "GOAL_CAMERA_90_FORWARD_2": "GOAL / FORWARD 4",
+            "GOAL_CAMERA90_RECOVER_LEFT_4": "GOAL / RECOVER LEFT",
+            "GOAL_CAMERA90_RECOVER_RIGHT_4": "GOAL / RECOVER RIGHT",
             "GOAL_CAMERA90_BACKWARD_1": "GOAL BACKWARD (1 CYCLE)",
             "TURN_LEFT": "GOAL TURN LEFT",
             "TURN_RIGHT": "GOAL TURN RIGHT",

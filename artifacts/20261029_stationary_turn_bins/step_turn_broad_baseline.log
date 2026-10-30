@@ -1,0 +1,1098 @@
+..............................................FFFF.........F....FFF..... [  4%]
+....F..............FF................................................... [  9%]
+....FF.................................................................. [ 13%]
+............................FF..FFFF...FF..........................F.... [ 18%]
+........................................................................ [ 22%]
+........................................................................ [ 27%]
+........................................................................ [ 32%]
+........................................................................ [ 36%]
+........................................................................ [ 41%]
+........................................................................ [ 45%]
+........................................................................ [ 50%]
+........................................................................ [ 55%]
+..........................................................F..F.......... [ 59%]
+..................F.F..F.F..............F.....FFF...................FFF. [ 64%]
+.F.......F............FFF............................................... [ 68%]
+........................................................................ [ 73%]
+........................................................................ [ 78%]
+........................................................................ [ 82%]
+.................................................................F.F.... [ 87%]
+.......F.F...........F.F...........F.F...........F.F...F................ [ 91%]
+..FFFFFFFFFFFFF.F.FF..F.FFFFFFFF.FFFFFFFFF...........FFFFFFFFFFFFFFFFFFF [ 96%]
+F.F.FFFFFFFFFF.FFFFFFFFFFF.FFFFFFFFFFF.................                  [100%]
+=================================== FAILURES ===================================
+_________________ test_turn_waits_for_stable_half_second[LEFT] _________________
+src/mission_control/test/test_motion_decision_node.py:1352: in test_turn_waits_for_stable_half_second
+    assert node.publisher.messages == []
+E   assert [std_msgs.msg...sion_node"}')] == []
+E     Left contains one more item: std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"LEFT","valid":true,"reason":"line_ready","sdk_moti...e_special_event_id":null,"active_special_command_id":null,"mission_progress":{},"source_node":"motion_decision_node"}')
+E     Full diff:
+E     - []
+E     + [std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"LEFT","valid":true,"reason":"line_ready","sdk_motion_requested":false,"requires_ack":false,"source_command":{},"command_id":1,"event_id":null,"request_latched":false,"sdk_motion_id":null,"input_age_sec":{},"ball_tracking":{},"goal_tracking":{},"speci...
+E     
+E     ...Full output truncated (1 line hidden), use '-vv' to show
+________________ test_turn_waits_for_stable_half_second[RIGHT] _________________
+src/mission_control/test/test_motion_decision_node.py:1352: in test_turn_waits_for_stable_half_second
+    assert node.publisher.messages == []
+E   assert [std_msgs.msg...sion_node"}')] == []
+E     Left contains one more item: std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"RIGHT","valid":true,"reason":"line_ready","sdk_mot...e_special_event_id":null,"active_special_command_id":null,"mission_progress":{},"source_node":"motion_decision_node"}')
+E     Full diff:
+E     - []
+E     + [std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"RIGHT","valid":true,"reason":"line_ready","sdk_motion_requested":false,"requires_ack":false,"source_command":{},"command_id":1,"event_id":null,"request_latched":false,"sdk_motion_id":null,"input_age_sec":{},"ball_tracking":{},"goal_tracking":{},"spec...
+E     
+E     ...Full output truncated (1 line hidden), use '-vv' to show
+_________________ test_changed_turn_candidate_restarts_settle __________________
+src/mission_control/test/test_motion_decision_node.py:1378: in test_changed_turn_candidate_restarts_settle
+    assert node.publisher.messages == []
+E   assert [std_msgs.msg...sion_node"}')] == []
+E     Left contains one more item: std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"LEFT","valid":true,"reason":"line_ready","sdk_moti...e_special_event_id":null,"active_special_command_id":null,"mission_progress":{},"source_node":"motion_decision_node"}')
+E     Full diff:
+E     - []
+E     + [std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"LEFT","valid":true,"reason":"line_ready","sdk_motion_requested":false,"requires_ack":false,"source_command":{},"command_id":1,"event_id":null,"request_latched":false,"sdk_motion_id":null,"input_age_sec":{},"ball_tracking":{},"goal_tracking":{},"speci...
+E     
+E     ...Full output truncated (1 line hidden), use '-vv' to show
+________________ test_new_frame_keeps_same_candidate_start_time ________________
+src/mission_control/test/test_motion_decision_node.py:1397: in test_new_frame_keeps_same_candidate_start_time
+    assert node.pre_motion_settle_started_at == 0.0
+E   assert None == 0.0
+E    +  where None = <test_motion_decision_node.ReadinessPublishNode object at 0xffff8dc4d660>.pre_motion_settle_started_at
+______________ test_stop_cancels_pending_turn_and_is_not_delayed _______________
+src/mission_control/test/test_motion_decision_node.py:1575: in test_stop_cancels_pending_turn_and_is_not_delayed
+    assert payload['action'] == 'STOP'
+E   AssertionError: assert 'LEFT' == 'STOP'
+E     - STOP
+E     + LEFT
+________________ test_general_lock_does_not_precount_next_turn _________________
+src/mission_control/test/test_motion_decision_node.py:1665: in test_general_lock_does_not_precount_next_turn
+    assert node.pre_motion_settle_started_at == 20.0
+E   assert None == 20.0
+E    +  where None = <test_motion_decision_node.ReadinessPublishNode object at 0xffff8dc15e10>.pre_motion_settle_started_at
+____________ test_active_special_lock_does_not_precount_next_settle ____________
+src/mission_control/test/test_motion_decision_node.py:1682: in test_active_special_lock_does_not_precount_next_settle
+    assert node.publisher.messages == []
+E   assert [std_msgs.msg...sion_node"}')] == []
+E     Left contains one more item: std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"LEFT","valid":true,"reason":"line_ready","sdk_moti...tive_special_event_id":null,"active_special_command_id":7,"mission_progress":{},"source_node":"motion_decision_node"}')
+E     Full diff:
+E     - []
+E     + [std_msgs.msg.String(data='{"phase":"AUTO","source":"line","action":"LEFT","valid":true,"reason":"line_ready","sdk_motion_requested":false,"requires_ack":false,"source_command":{},"command_id":1,"event_id":null,"request_latched":false,"sdk_motion_id":null,"input_age_sec":{},"ball_tracking":{},"goal_tracking":{},"speci...
+E     
+E     ...Full output truncated (1 line hidden), use '-vv' to show
+__________ test_published_turn_requires_a_new_settle_after_completion __________
+src/mission_control/test/test_motion_decision_node.py:1706: in test_published_turn_requires_a_new_settle_after_completion
+    assert node.correction_post_motion_dwell_until == 1.5
+E   AttributeError: 'ReadinessPublishNode' object has no attribute 'correction_post_motion_dwell_until'
+_______ test_startup_hold_discards_commands_until_ready_and_fresh_vision _______
+src/mission_control/test/test_motion_decision_node.py:1955: in test_startup_hold_discards_commands_until_ready_and_fresh_vision
+    MotionDecisionNode._info_callback(node, 'line')(line_message)
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:1096: in callback
+    MotionDecisionNode._remember_line_corner(self, payload)
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:3192: in _remember_line_corner
+    min_quality = self.planner.line_planner.config.min_line_quality
+E   AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+__________ test_line_motion_capture_table_matches_deployed_timelines ___________
+src/mission_control/test/test_motion_decision_node.py:2349: in test_line_motion_capture_table_matches_deployed_timelines
+    assert MotionDecisionNode.LINE_MOTION_CAPTURE_CONFIG == expected
+E   AssertionError: assert {'LEFT': (2.1...265, 15), ...} == {'LEFT': (7.3...272, 10), ...}
+E     Differing items:
+E     {'LEFT': (2.1894736842105265, 15)} != {'LEFT': (7.365, 30)}
+E     {'RECOVER_LEFT_TURN_LEFT_2': (2.1894736842105265, 15)} != {'RECOVER_LEFT_TURN_LEFT_2': (2.272, 10)}
+E     {'RECOVER_RIGHT_TURN_LEFT_13': (2.1894736842105265, 15)} != {'RECOVER_RIGHT_TURN_LEFT_13': (7.365, 30)}
+E     {'STRAIGHT_3': (3.2652631578947373, 10)} != {'STRAIGHT_3': (2.467, 10)}
+E     {'RECOVER_LEFT_TURN_RIGHT_4': (2.168421052631579, 15)} != {'RECOVER_LEFT_TURN_RIGHT_4': (1.895, 5)}
+E     {'RECOVER_LEFT_TURN_RIGHT_12': (2.168421052631579, 15)} != {'RECOVER_LEFT_TURN_RIGHT_12': (5.684, 25)}...
+E     
+E     ...Full output truncated (143 lines hidden), use '-vv' to show
+_________ test_line_prequeue_retries_after_temporary_target_disappears _________
+src/mission_control/test/test_motion_decision_node.py:2377: in test_line_prequeue_retries_after_temporary_target_disappears
+    assert MotionDecisionNode._collect_active_line_motion_frame(node, line, clock[0])
+E   AssertionError: assert False
+E    +  where False = <function MotionDecisionNode._collect_active_line_motion_frame at 0xffff8e2d9a20>(<test_motion_decision_node.ReadinessPublishNode object at 0xffff8db83fd0>, {'detected': True, 'detection_quality': 0.9, 'filtered_lateral_offset_norm': 0.0, 'geometry_quality': 0.9, ...}, 11.9)
+E    +    where <function MotionDecisionNode._collect_active_line_motion_frame at 0xffff8e2d9a20> = MotionDecisionNode._collect_active_line_motion_frame
+_ test_mock_line_input_is_fresh_and_produces_action[turn_left-RECOVER_LEFT_TURN_LEFT_4] _
+src/mission_control/test/test_motion_decision_node.py:3367: in test_mock_line_input_is_fresh_and_produces_action
+    assert decision.action == expected_action
+E   AssertionError: assert 'STRAIGHT' == 'RECOVER_LEFT_TURN_LEFT_4'
+E     - RECOVER_LEFT_TURN_LEFT_4
+E     + STRAIGHT
+_ test_mock_line_input_is_fresh_and_produces_action[turn_right-RECOVER_RIGHT_TURN_RIGHT_4] _
+src/mission_control/test/test_motion_decision_node.py:3367: in test_mock_line_input_is_fresh_and_produces_action
+    assert decision.action == expected_action
+E   AssertionError: assert 'STRAIGHT' == 'RECOVER_RIGHT_TURN_RIGHT_4'
+E     - RECOVER_RIGHT_TURN_RIGHT_4
+E     + STRAIGHT
+_____ test_all_line_stationary_turns_pause_one_second_before_publish[LEFT] _____
+src/mission_control/test/test_motion_decision_node.py:4581: in test_all_line_stationary_turns_pause_one_second_before_publish
+    MotionDecisionNode._publish_decision(node)
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:4293: in _publish_decision
+    decision = MotionDecisionNode._apply_pending_line_corner(
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:3290: in _apply_pending_line_corner
+    MotionDecisionNode._remember_line_corner(self, info)
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:3192: in _remember_line_corner
+    min_quality = self.planner.line_planner.config.min_line_quality
+E   AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+____ test_all_line_stationary_turns_pause_one_second_before_publish[RIGHT] _____
+src/mission_control/test/test_motion_decision_node.py:4581: in test_all_line_stationary_turns_pause_one_second_before_publish
+    MotionDecisionNode._publish_decision(node)
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:4293: in _publish_decision
+    decision = MotionDecisionNode._apply_pending_line_corner(
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:3290: in _apply_pending_line_corner
+    MotionDecisionNode._remember_line_corner(self, info)
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:3192: in _remember_line_corner
+    min_quality = self.planner.line_planner.config.min_line_quality
+E   AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+_ test_all_line_stationary_turns_pause_one_second_before_publish[POST_BALL_LINE_TURN_LEFT_2] _
+src/mission_control/test/test_motion_decision_node.py:4581: in test_all_line_stationary_turns_pause_one_second_before_publish
+    MotionDecisionNode._publish_decision(node)
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:4293: in _publish_decision
+    decision = MotionDecisionNode._apply_pending_line_corner(
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:3290: in _apply_pending_line_corner
+    MotionDecisionNode._remember_line_corner(self, info)
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:3192: in _remember_line_corner
+    min_quality = self.planner.line_planner.config.min_line_quality
+E   AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+_ test_all_line_stationary_turns_pause_one_second_before_publish[POST_BALL_LINE_TURN_RIGHT_3] _
+src/mission_control/test/test_motion_decision_node.py:4581: in test_all_line_stationary_turns_pause_one_second_before_publish
+    MotionDecisionNode._publish_decision(node)
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:4293: in _publish_decision
+    decision = MotionDecisionNode._apply_pending_line_corner(
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:3290: in _apply_pending_line_corner
+    MotionDecisionNode._remember_line_corner(self, info)
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:3192: in _remember_line_corner
+    min_quality = self.planner.line_planner.config.min_line_quality
+E   AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+_ test_all_line_stationary_turns_pause_one_second_before_publish[POST_SHOT_LINE_TURN_LEFT_2] _
+src/mission_control/test/test_motion_decision_node.py:4581: in test_all_line_stationary_turns_pause_one_second_before_publish
+    MotionDecisionNode._publish_decision(node)
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:4293: in _publish_decision
+    decision = MotionDecisionNode._apply_pending_line_corner(
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:3290: in _apply_pending_line_corner
+    MotionDecisionNode._remember_line_corner(self, info)
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:3192: in _remember_line_corner
+    min_quality = self.planner.line_planner.config.min_line_quality
+E   AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+_ test_all_line_stationary_turns_pause_one_second_before_publish[POST_SHOT_LINE_TURN_RIGHT_3] _
+src/mission_control/test/test_motion_decision_node.py:4581: in test_all_line_stationary_turns_pause_one_second_before_publish
+    MotionDecisionNode._publish_decision(node)
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:4293: in _publish_decision
+    decision = MotionDecisionNode._apply_pending_line_corner(
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:3290: in _apply_pending_line_corner
+    MotionDecisionNode._remember_line_corner(self, info)
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:3192: in _remember_line_corner
+    min_quality = self.planner.line_planner.config.min_line_quality
+E   AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+____ test_enter_gate_discards_vision_until_enter_and_executor_ready[False] _____
+src/mission_control/test/test_motion_decision_node.py:4661: in test_enter_gate_discards_vision_until_enter_and_executor_ready
+    MotionDecisionNode._info_callback(node, 'line')(message)
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:1096: in callback
+    MotionDecisionNode._remember_line_corner(self, payload)
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:3192: in _remember_line_corner
+    min_quality = self.planner.line_planner.config.min_line_quality
+E   AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+_____ test_enter_gate_discards_vision_until_enter_and_executor_ready[True] _____
+src/mission_control/test/test_motion_decision_node.py:4661: in test_enter_gate_discards_vision_until_enter_and_executor_ready
+    MotionDecisionNode._info_callback(node, 'line')(message)
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:1096: in callback
+    MotionDecisionNode._remember_line_corner(self, payload)
+/tmp/step_stationary_turn_baseline/mission_control/motion_decision_node.py:3192: in _remember_line_corner
+    min_quality = self.planner.line_planner.config.min_line_quality
+E   AttributeError: 'PlannerTelemetry' object has no attribute 'line_planner'
+_____________ test_line_prequeue_ignores_only_completed_hurdles[2] _____________
+src/mission_control/test/test_motion_decision_node.py:4871: in test_line_prequeue_ignores_only_completed_hurdles
+    assert MotionDecisionNode._line_only_prequeue_allowed(
+E   AssertionError: assert False is (2 == 2)
+E    +  where False = <function MotionDecisionNode._line_only_prequeue_allowed at 0xffff8e2da440>(<test_motion_decision_node.ReadinessPublishNode object at 0xffff8d2f40d0>, {'hurdle': {'bottom_distance_px': 200, 'camera_center_offset_x_px': 0, 'confidence': 0.9, 'confirmation_confirmed': True, ...}})
+E    +    where <function MotionDecisionNode._line_only_prequeue_allowed at 0xffff8e2da440> = MotionDecisionNode._line_only_prequeue_allowed
+_ test_collected_ball_route_clears_stale_reservations_before_dwell[GOAL_APPROACH-GOAL_CAMERA90_FINE_FORWARD_2] _
+src/mission_control/test/test_mission_phase_flow.py:505: in test_collected_ball_route_clears_stale_reservations_before_dwell
+    assert command["action"] == expected_action
+E   AssertionError: assert 'GOAL_CAMERA_90_FORWARD_2' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E     - GOAL_CAMERA90_FINE_FORWARD_2
+E     ?              -----
+E     + GOAL_CAMERA_90_FORWARD_2
+E     ?            +
+______ test_post_ball_detection_loss_cannot_interrupt_timed_line_or_goal _______
+src/mission_control/test/test_mission_phase_flow.py:564: in test_post_ball_detection_loss_cannot_interrupt_timed_line_or_goal
+    assert harness.publish_vision(goal=approaching_goal())[-1]["action"] == "GOAL_CAMERA90_FINE_FORWARD_2"
+E   AssertionError: assert 'GOAL_CAMERA_90_FORWARD_2' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E     - GOAL_CAMERA90_FINE_FORWARD_2
+E     ?              -----
+E     + GOAL_CAMERA_90_FORWARD_2
+E     ?            +
+_______ test_ball_loss_waits_then_reacquired_ball_selects_moving_recover _______
+src/mission_control/test/test_mission_phase_flow.py:1032: in test_ball_loss_waits_then_reacquired_ball_selects_moving_recover
+    assert approach["action"] == "BALL_APPROACH_RECOVER_LEFT_4"
+E   AssertionError: assert 'BALL_APPROACH_TURN_LEFT_2' == 'BALL_APPROACH_RECOVER_LEFT_4'
+E     - BALL_APPROACH_RECOVER_LEFT_4
+E     ?                ^^^^^^      ^
+E     + BALL_APPROACH_TURN_LEFT_2
+E     ?               ++ ^      ^
+____ test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell _____
+src/mission_control/test/test_mission_phase_flow.py:1083: in test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell
+    assert harness.ball_pickup_entry_pending is True
+E   assert False is True
+E    +  where False = <test_mission_phase_flow.MissionFlowHarness object at 0xffff8d2f5570>.ball_pickup_entry_pending
+_____ test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment ______
+src/mission_control/test/test_mission_phase_flow.py:1205: in test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment
+    assert turn["action"] == "BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_1"
+E   AssertionError: assert 'BALL_PICKUP_...N_TURN_LEFT_2' == 'BALL_PICKUP_...N_TURN_LEFT_1'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_1
+E     ?                                   ^
+E     + BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_2
+E     ?                                   ^
+_________________ test_full_course_mock_flow_without_ros_graph _________________
+src/mission_control/test/test_mission_phase_flow.py:1290: in test_full_course_mock_flow_without_ros_graph
+    assert approach_ball[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+___________ test_confirmed_approaching_hurdle_beats_approaching_ball ___________
+src/mission_control/test/test_mission_phase_flow.py:1650: in test_confirmed_approaching_hurdle_beats_approaching_ball
+    assert published[-1]["action"] == "STRAIGHT_0"
+E   AssertionError: assert 'GO' == 'STRAIGHT_0'
+E     - STRAIGHT_0
+E     + GO
+__________ test_unconfirmed_hurdle_disappearance_resumes_ball_mission __________
+src/mission_control/test/test_mission_phase_flow.py:1808: in test_unconfirmed_hurdle_disappearance_resumes_ball_mission
+    assert held[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+________ test_unconfirmed_hurdle_can_become_confirmed_and_take_priority ________
+src/mission_control/test/test_mission_phase_flow.py:1827: in test_unconfirmed_hurdle_can_become_confirmed_and_take_priority
+    assert held[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+_______________ test_absent_hurdle_keeps_ball_priority_over_line _______________
+src/mission_control/test/test_mission_phase_flow.py:1846: in test_absent_hurdle_keeps_ball_priority_over_line
+    assert published[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+_ test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[34.0-GOAL_CAMERA90_TURN_RIGHT_3-0.0-GOAL_CAMERA90_FINE_FORWARD_2] _
+src/mission_control/test/test_mission_phase_flow.py:2138: in test_goal_camera90_turn_dwells_then_rechecks_fresh_goal
+    assert forward["action"] == next_action
+E   AssertionError: assert 'GOAL_CAMERA_90_FORWARD_2' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E     - GOAL_CAMERA90_FINE_FORWARD_2
+E     ?              -----
+E     + GOAL_CAMERA_90_FORWARD_2
+E     ?            +
+_ test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-35.0-GOAL_CAMERA90_TURN_LEFT_1--20.0-GOAL_CAMERA90_TURN_LEFT_1] _
+src/mission_control/test/test_mission_phase_flow.py:2118: in test_goal_camera90_turn_dwells_then_rechecks_fresh_goal
+    assert correction["action"] == initial_action
+E   AssertionError: assert 'GOAL_CAMERA90_TURN_LEFT_2' == 'GOAL_CAMERA90_TURN_LEFT_1'
+E     - GOAL_CAMERA90_TURN_LEFT_1
+E     ?                         ^
+E     + GOAL_CAMERA90_TURN_LEFT_2
+E     ?                         ^
+_ test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-20.0-GOAL_CAMERA90_TURN_LEFT_1--15.0-GOAL_CAMERA90_FINE_FORWARD_2] _
+src/mission_control/test/test_mission_phase_flow.py:2138: in test_goal_camera90_turn_dwells_then_rechecks_fresh_goal
+    assert forward["action"] == next_action
+E   AssertionError: assert 'GOAL_CAMERA90_TURN_LEFT_1' == 'GOAL_CAMERA90_FINE_FORWARD_2'
+E     - GOAL_CAMERA90_FINE_FORWARD_2
+E     + GOAL_CAMERA90_TURN_LEFT_1
+_ test_goal_depth_actions_follow_new_scoring_range[0.65-GOAL_CAMERA90_FINE_FORWARD_1] _
+src/mission_control/test/test_mission_phase_flow.py:2220: in test_goal_depth_actions_follow_new_scoring_range
+    assert decision["action"] == action
+E   AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_3' == 'GOAL_CAMERA90_FINE_FORWARD_1'
+E     - GOAL_CAMERA90_FINE_FORWARD_1
+E     ?                            ^
+E     + GOAL_CAMERA90_FINE_FORWARD_3
+E     ?                            ^
+___________ test_final_line_track_still_prioritizes_confirmed_hurdle ___________
+src/mission_control/test/test_mission_phase_flow.py:2345: in test_final_line_track_still_prioritizes_confirmed_hurdle
+    assert decision["action"] == "STRAIGHT_0"
+E   AssertionError: assert 'GO' == 'STRAIGHT_0'
+E     - STRAIGHT_0
+E     + GO
+______ test_ball_stationary_turn_requires_fresh_ball_before_next_approach ______
+src/mission_control/test/test_mission_phase_flow.py:2535: in test_ball_stationary_turn_requires_fresh_ball_before_next_approach
+    assert approach[0]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'BALL_APPROACH_TURN_RIGHT_2' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     + BALL_APPROACH_TURN_RIGHT_2
+_____________ test_second_ball_uses_same_straight_distance_policy ______________
+src/mission_control/test/test_mission_phase_flow.py:2588: in test_second_ball_uses_same_straight_distance_policy
+    assert command[0]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'BALL_APPROACH_TURN_LEFT_1' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     + BALL_APPROACH_TURN_LEFT_1
+___________ test_failed_first_pickup_keeps_straight_distance_policy ____________
+src/mission_control/test/test_mission_phase_flow.py:2615: in test_failed_first_pickup_keeps_straight_distance_policy
+    assert command[0]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'BALL_APPROACH_TURN_RIGHT_2' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     + BALL_APPROACH_TURN_RIGHT_2
+_ test_transition_finishes_before_target_and_rejects_interleaved_commands[BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45] _
+src/mission_control/test/test_gait_transitions.py:53: in test_transition_finishes_before_target_and_rejects_interleaved_commands
+    assert prep_request["motion_id"] == prepare
+E   AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E     - fine_to_turn_ready_45
+E     ?                    ^^
+E     + fine_to_turn_ready_0
+E     ?                    ^
+_ test_transition_finishes_before_target_and_rejects_interleaved_commands[BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45] _
+src/mission_control/test/test_gait_transitions.py:53: in test_transition_finishes_before_target_and_rejects_interleaved_commands
+    assert prep_request["motion_id"] == prepare
+E   AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E     - fine_to_turn_ready_45
+E     ?                    ^^
+E     + fine_to_turn_ready_0
+E     ?                    ^
+_ test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45] _
+src/mission_control/test/test_gait_transitions.py:83: in test_preparation_failure_never_sends_target
+    assert requests(bridge)[-1]["motion_id"] == prepare
+E   AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E     - fine_to_turn_ready_45
+E     ?                    ^^
+E     + fine_to_turn_ready_0
+E     ?                    ^
+_ test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45] _
+src/mission_control/test/test_gait_transitions.py:83: in test_preparation_failure_never_sends_target
+    assert requests(bridge)[-1]["motion_id"] == prepare
+E   AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E     - fine_to_turn_ready_45
+E     ?                    ^^
+E     + fine_to_turn_ready_0
+E     ?                    ^
+_ test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45] _
+src/mission_control/test/test_gait_transitions.py:83: in test_preparation_failure_never_sends_target
+    assert requests(bridge)[-1]["motion_id"] == prepare
+E   AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E     - fine_to_turn_ready_45
+E     ?                    ^^
+E     + fine_to_turn_ready_0
+E     ?                    ^
+_ test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45] _
+src/mission_control/test/test_gait_transitions.py:83: in test_preparation_failure_never_sends_target
+    assert requests(bridge)[-1]["motion_id"] == prepare
+E   AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E     - fine_to_turn_ready_45
+E     ?                    ^^
+E     + fine_to_turn_ready_0
+E     ?                    ^
+_ test_preparation_failure_never_sends_target[CANCELLED--BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45] _
+src/mission_control/test/test_gait_transitions.py:83: in test_preparation_failure_never_sends_target
+    assert requests(bridge)[-1]["motion_id"] == prepare
+E   AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E     - fine_to_turn_ready_45
+E     ?                    ^^
+E     + fine_to_turn_ready_0
+E     ?                    ^
+_ test_preparation_failure_never_sends_target[CANCELLED--BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45] _
+src/mission_control/test/test_gait_transitions.py:83: in test_preparation_failure_never_sends_target
+    assert requests(bridge)[-1]["motion_id"] == prepare
+E   AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E     - fine_to_turn_ready_45
+E     ?                    ^^
+E     + fine_to_turn_ready_0
+E     ?                    ^
+_ test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45] _
+src/mission_control/test/test_gait_transitions.py:83: in test_preparation_failure_never_sends_target
+    assert requests(bridge)[-1]["motion_id"] == prepare
+E   AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E     - fine_to_turn_ready_45
+E     ?                    ^^
+E     + fine_to_turn_ready_0
+E     ?                    ^
+_ test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45] _
+src/mission_control/test/test_gait_transitions.py:83: in test_preparation_failure_never_sends_target
+    assert requests(bridge)[-1]["motion_id"] == prepare
+E   AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E     - fine_to_turn_ready_45
+E     ?                    ^^
+E     + fine_to_turn_ready_0
+E     ?                    ^
+_ test_queued_transition_uses_actual_completed_predecessor[SUCCEEDED-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45] _
+src/mission_control/test/test_gait_transitions.py:104: in test_queued_transition_uses_actual_completed_predecessor
+    assert requests(bridge)[-1]["motion_id"] == prepare
+E   AssertionError: assert 'fine_to_turn_ready_0' == 'fine_to_turn_ready_45'
+E     - fine_to_turn_ready_45
+E     ?                    ^^
+E     + fine_to_turn_ready_0
+E     ?                    ^
+____________ test_catalog30_forward_preserves_supplied_motion[45-2] ____________
+src/mission_control/test/test_production_motion_catalog_contract.py:45: in test_catalog30_forward_preserves_supplied_motion
+    assert aliases[alias] == expected_name
+E   AssertionError: assert 'R전진45도(2회)' == '찐전진45(2회)'
+E     - 찐전진45(2회)
+E     ? ^
+E     + R전진45도(2회)
+E     ? ^    +
+____________ test_catalog30_forward_preserves_supplied_motion[45-4] ____________
+src/mission_control/test/test_production_motion_catalog_contract.py:45: in test_catalog30_forward_preserves_supplied_motion
+    assert aliases[alias] == expected_name
+E   AssertionError: assert 'R전진45도(4회)' == '찐전진45(4회)'
+E     - 찐전진45(4회)
+E     ? ^
+E     + R전진45도(4회)
+E     ? ^    +
+____________ test_catalog30_forward_preserves_supplied_motion[45-6] ____________
+src/mission_control/test/test_production_motion_catalog_contract.py:45: in test_catalog30_forward_preserves_supplied_motion
+    assert aliases[alias] == expected_name
+E   AssertionError: assert 'R전진45도(6회)' == '찐전진45(6회)'
+E     - 찐전진45(6회)
+E     ? ^
+E     + R전진45도(6회)
+E     ? ^    +
+____________ test_catalog30_forward_preserves_supplied_motion[45-8] ____________
+src/mission_control/test/test_production_motion_catalog_contract.py:45: in test_catalog30_forward_preserves_supplied_motion
+    assert aliases[alias] == expected_name
+E   AssertionError: assert 'R전진45도(8회)' == '찐전진45(8회)'
+E     - 찐전진45(8회)
+E     ? ^
+E     + R전진45도(8회)
+E     ? ^    +
+____________ test_catalog30_forward_preserves_supplied_motion[90-4] ____________
+src/mission_control/test/test_production_motion_catalog_contract.py:45: in test_catalog30_forward_preserves_supplied_motion
+    assert aliases[alias] == expected_name
+E   AssertionError: assert 'R전진90도(4회)' == '찐전진90(4회)'
+E     - 찐전진90(4회)
+E     ? ^
+E     + R전진90도(4회)
+E     ? ^    +
+____________ test_catalog30_forward_preserves_supplied_motion[90-6] ____________
+src/mission_control/test/test_production_motion_catalog_contract.py:45: in test_catalog30_forward_preserves_supplied_motion
+    assert aliases[alias] == expected_name
+E   AssertionError: assert 'R전진90도(6회)' == '찐전진90(6회)'
+E     - 찐전진90(6회)
+E     ? ^
+E     + R전진90도(6회)
+E     ? ^    +
+____________ test_catalog30_forward_preserves_supplied_motion[90-8] ____________
+src/mission_control/test/test_production_motion_catalog_contract.py:46: in test_catalog30_forward_preserves_supplied_motion
+    motion = by_name[expected_name]
+E   KeyError: '찐전진90(8회)'
+______ test_catalog30_replaces_only_requested_forward_motions_and_aliases ______
+src/mission_control/test/test_production_motion_catalog_contract.py:66: in test_catalog30_replaces_only_requested_forward_motions_and_aliases
+    assert len(catalog) == len(motions) == manifest["after_count"] + 5
+E   AssertionError: assert 99 == (84 + 5)
+E    +  where 99 = len([{'completion': {'position_tolerance_deg': 5.0, 'settle_duration_ms': 80, 'settle_timeout_ms': 3000}, 'end_pose': '공확인...ea7c184047c49d48e878419d1c81', 'is_important': False, 'lift_early_arrival': True, ...}], 'max_seq_ms': 7045, ...}, ...])
+___ test_post_ball_transition_contains_only_camera_without_stationary_pause ____
+src/mission_control/test/test_production_motion_catalog_contract.py:122: in test_post_ball_transition_contains_only_camera_without_stationary_pause
+    assert aliases["line_forward_6"] == "찐전진45(6회)"
+E   AssertionError: assert 'R전진45도(6회)' == '찐전진45(6회)'
+E     - 찐전진45(6회)
+E     ? ^
+E     + R전진45도(6회)
+E     ? ^    +
+______ test_goal_shot_matches_supplied_motion_with_five_degree_tolerance _______
+src/mission_control/test/test_production_motion_catalog_contract.py:127: in test_goal_shot_matches_supplied_motion_with_five_degree_tolerance
+    target = next(motion for motion in motions if motion["name"] == "찐골넣기")
+E   StopIteration
+______ test_post_shot_fixed_turns_and_forward_resolve_to_runtime_motions _______
+src/mission_control/test/test_production_motion_catalog_contract.py:147: in test_post_shot_fixed_turns_and_forward_resolve_to_runtime_motions
+    assert aliases[motion_id] == name
+E   AssertionError: assert 'R골대후제자리우회전' == '찐기본자세에서 제자리 우회전(골대)'
+E     - 찐기본자세에서 제자리 우회전(골대)
+E     + R골대후제자리우회전
+____________ test_updated_forward_and_stationary_right_turn_catalog ____________
+src/mission_control/test/test_production_motion_catalog_contract.py:163: in test_updated_forward_and_stationary_right_turn_catalog
+    motion = by_name[f"{prefix}({count}회)"]
+E   KeyError: '전진45도-1(2회)'
+_________ test_production_alias_catalog_contains_only_approved_aliases _________
+src/mission_control/test/test_production_motion_catalog_contract.py:194: in test_production_alias_catalog_contains_only_approved_aliases
+    assert payload == {
+E   AssertionError: assert {'motion_alia...단탐색3회)', ...}} == {'motion_alia...세45도-4', ...}}
+E     Differing items:
+E     {'motion_aliases': {'ball_camera_down_forward_2': 'R전진45도(2회)', 'ball_camera_down_forward_4': 'R전진45도(4회)', 'ball_general_fine_forward_8': 'r미세0도', 'ball_top_loss_fine_forward_45_3': 'r미세0도(상단탐색3회)', ...}} != {'motion_aliases': {'ball_camera_down_forward_2': '전진0도-1(2회)', 'ball_camera_down_forward_4': '전진0도-1(4회)', 'ball_camera_down_forward_6': '전진0도-1(6회)', 'ball_general_fine_forward_8': '찐미세45도-4', ...}}
+E     Full diff:
+E       {
+E     -  'motion_aliases': {'ball_camera_down_forward_2': '전진0도-1(2회)',
+E     ?                                                      ^ --
+E     +  'motion_ali...
+E     
+E     ...Full output truncated (433 lines hidden), use '-vv' to show
+______________ test_pickup_does_not_use_intermediate_default_pose ______________
+src/mission_control/test/test_production_motion_catalog_contract.py:342: in test_pickup_does_not_use_intermediate_default_pose
+    assert aliases["goal_camera_90_turn_left_1"] == (
+E   AssertionError: assert 'R제자리좌회전90도(1회)' == '건제자리좌회전90도(1회)'
+E     - 건제자리좌회전90도(1회)
+E     ? ^
+E     + R제자리좌회전90도(1회)
+E     ? ^
+_________ test_every_production_bridge_motion_id_has_an_approved_alias _________
+src/mission_control/test/test_production_motion_catalog_contract.py:383: in test_every_production_bridge_motion_id_has_an_approved_alias
+    assert pickup_motion_ids <= set(aliases)
+E   AssertionError: assert {'__BALL_PICKUP_POST_BACKWARD_ALIGN_CHECK__', 'ball_camera_down_forward_4', 'ball_general_fine_forward_8', 'hurdle_fine_forward_10', 'line_forward_4', 'pickup', ...} <= {'ball_camera_down_forward_2', 'ball_camera_down_forward_4', 'ball_general_fine_forward_8', 'ball_top_loss_fine_forward_45_3', 'fine_to_turn_ready_0', 'fine_to_turn_ready_45', ...}
+E    +  where {'ball_camera_down_forward_2', 'ball_camera_down_forward_4', 'ball_general_fine_forward_8', 'ball_top_loss_fine_forward_45_3', 'fine_to_turn_ready_0', 'fine_to_turn_ready_45', ...} = set({'ball_camera_down_forward_2': 'R전진45도(2회)', 'ball_camera_down_forward_4': 'R전진45도(4회)', 'ball_general_fine_forward_8': 'r미세0도', 'ball_top_loss_fine_forward_45_3': 'r미세0도(상단탐색3회)', ...})
+______ test_counted_turn_aliases_match_family_direction_and_repeat_count _______
+src/mission_control/test/test_production_motion_catalog_contract.py:447: in test_counted_turn_aliases_match_family_direction_and_repeat_count
+    assert aliases[motion_id] == exact_name
+E   AssertionError: assert 'R제자리좌회전(6회)' == '건제자리좌회전45도(6회)'
+E     - 건제자리좌회전45도(6회)
+E     ? ^      ---
+E     + R제자리좌회전(6회)
+E     ? ^
+_______ test_latest_pickup_and_grasp_check_motion_definitions_are_mapped _______
+src/mission_control/test/test_production_motion_catalog_contract.py:512: in test_latest_pickup_and_grasp_check_motion_definitions_are_mapped
+    motion = by_name[name]
+E   KeyError: '미세45도-1'
+________ test_goal_fine_repeats_use_walking_cycle_not_pickup_frames[1] _________
+src/mission_control/test/test_production_motion_catalog_contract.py:557: in test_goal_fine_repeats_use_walking_cycle_not_pickup_frames
+    base = motions['건미세90도(1회)']
+E   KeyError: '건미세90도(1회)'
+________ test_goal_fine_repeats_use_walking_cycle_not_pickup_frames[2] _________
+src/mission_control/test/test_production_motion_catalog_contract.py:557: in test_goal_fine_repeats_use_walking_cycle_not_pickup_frames
+    base = motions['건미세90도(1회)']
+E   KeyError: '건미세90도(1회)'
+________ test_goal_fine_repeats_use_walking_cycle_not_pickup_frames[3] _________
+src/mission_control/test/test_production_motion_catalog_contract.py:557: in test_goal_fine_repeats_use_walking_cycle_not_pickup_frames
+    base = motions['건미세90도(1회)']
+E   KeyError: '건미세90도(1회)'
+________ test_goal_fine_repeats_use_walking_cycle_not_pickup_frames[4] _________
+src/mission_control/test/test_production_motion_catalog_contract.py:557: in test_goal_fine_repeats_use_walking_cycle_not_pickup_frames
+    base = motions['건미세90도(1회)']
+E   KeyError: '건미세90도(1회)'
+_ test_updated_fine_frames_match_supplied_walking_data[\ucc10\ubbf8\uc1380\ub3c4-4-9abdda081d4406738b7e731707ce690d2207ad82287cedc5c0db1fa230d0eb75] _
+src/mission_control/test/test_production_motion_catalog_contract.py:575: in test_updated_fine_frames_match_supplied_walking_data
+    encoded = json.dumps(motions[name]['frames'], sort_keys=True, separators=(',', ':'))
+E   KeyError: '찐미세0도-4'
+_ test_updated_fine_frames_match_supplied_walking_data[\ucc10\ubbf8\uc13845\ub3c4-4-7eb93d40e4fea5441dc4b603443bd5cc46f626ee6d4742895912d44dc649e4a0] _
+src/mission_control/test/test_production_motion_catalog_contract.py:575: in test_updated_fine_frames_match_supplied_walking_data
+    encoded = json.dumps(motions[name]['frames'], sort_keys=True, separators=(',', ':'))
+E   KeyError: '찐미세45도-4'
+_ test_updated_fine_frames_match_supplied_walking_data[\ucc10\ubbf8\uc13890\ub3c4-4(1\ud68c)-05a8bf2428764b71f8bd4cf6b4663227facd5a34cd489de6e977186e86af704f] _
+src/mission_control/test/test_production_motion_catalog_contract.py:575: in test_updated_fine_frames_match_supplied_walking_data
+    encoded = json.dumps(motions[name]['frames'], sort_keys=True, separators=(',', ':'))
+E   KeyError: '찐미세90도-4(1회)'
+_____ test_pickup_fine_preparation_resolves_to_requested_single_transition _____
+src/mission_control/test/test_production_motion_catalog_contract.py:586: in test_pickup_fine_preparation_resolves_to_requested_single_transition
+    assert aliases[prepare_id] == "건오뒤에서 미세오뒤45도"
+E   AssertionError: assert 'R오뒤에서미세오뒤45도' == '건오뒤에서 미세오뒤45도'
+E     - 건오뒤에서 미세오뒤45도
+E     ? ^    -
+E     + R오뒤에서미세오뒤45도
+E     ? ^
+_ test_import15_requested_motions_match_source_with_five_degree_tolerance[pickup-\ucc10\uacf5\uc7a1\uae30\ub9ac\uadf8\ub7a9\uae4c\uc9c0 \uc2e4\uc804-b466c0860852e7a2e4d6dc55baf04d22822d8d3a96e522a10ca4510268a96909] _
+src/mission_control/test/test_production_motion_catalog_contract.py:619: in test_import15_requested_motions_match_source_with_five_degree_tolerance
+    assert aliases[motion_id] == name
+E   AssertionError: assert 'r공잡기 400' == '찐공잡기리그랩까지 실전'
+E     - 찐공잡기리그랩까지 실전
+E     + r공잡기 400
+_ test_import15_requested_motions_match_source_with_five_degree_tolerance[pickup_pre_backward_camera_down-\ucc10\uacf5\uc7a1\uae30\uc804\ud6c4\uc9c4-2(2\ud68c)-7bc8b060ba29ab42314be112a6077132ac3284e3398e45e57afa48a6f3cf7715] _
+src/mission_control/test/test_production_motion_catalog_contract.py:625: in test_import15_requested_motions_match_source_with_five_degree_tolerance
+    assert hashlib.sha256(encoded.encode()).hexdigest() == digest
+E   AssertionError: assert '819d3a00ea95...db4b064d0c75a' == '7bc8b060ba29...a48a6f3cf7715'
+E     - 7bc8b060ba29ab42314be112a6077132ac3284e3398e45e57afa48a6f3cf7715
+E     + 819d3a00ea95234483654576cc06c7d0b32ef85caf8a4038d80db4b064d0c75a
+_ test_recovery_turns_resolve_to_same_direction_and_repeat_count[LEFT-\uc88c-counts0-LEFT] _
+src/mission_control/test/test_production_motion_catalog_contract.py:640: in test_recovery_turns_resolve_to_same_direction_and_repeat_count
+    motion_id = MotionCommandBridgeNode.ACTION_TO_MOTION_ID[action]
+E   KeyError: 'RECOVER_LEFT_TURN_LEFT_2'
+_ test_recovery_turns_resolve_to_same_direction_and_repeat_count[LEFT-\uc88c-counts0-RIGHT] _
+src/mission_control/test/test_production_motion_catalog_contract.py:640: in test_recovery_turns_resolve_to_same_direction_and_repeat_count
+    motion_id = MotionCommandBridgeNode.ACTION_TO_MOTION_ID[action]
+E   KeyError: 'RECOVER_RIGHT_TURN_LEFT_2'
+_ test_recovery_turns_resolve_to_same_direction_and_repeat_count[RIGHT-\uc6b0-counts1-LEFT] _
+src/mission_control/test/test_production_motion_catalog_contract.py:640: in test_recovery_turns_resolve_to_same_direction_and_repeat_count
+    motion_id = MotionCommandBridgeNode.ACTION_TO_MOTION_ID[action]
+E   KeyError: 'RECOVER_LEFT_TURN_RIGHT_2'
+_ test_recovery_turns_resolve_to_same_direction_and_repeat_count[RIGHT-\uc6b0-counts1-RIGHT] _
+src/mission_control/test/test_production_motion_catalog_contract.py:640: in test_recovery_turns_resolve_to_same_direction_and_repeat_count
+    motion_id = MotionCommandBridgeNode.ACTION_TO_MOTION_ID[action]
+E   KeyError: 'RECOVER_RIGHT_TURN_RIGHT_2'
+______________ test_line_search_uses_requested_stationary_motions ______________
+src/mission_control/test/test_production_motion_catalog_contract.py:659: in test_line_search_uses_requested_stationary_motions
+    assert aliases[motion_id] == name
+E   AssertionError: assert 'R제자리좌회전(2회)' == '건제자리좌회전45도(2회)'
+E     - 건제자리좌회전45도(2회)
+E     ? ^      ---
+E     + R제자리좌회전(2회)
+E     ? ^
+_ test_recovery_cycle_matches_supplied_catalog[\uc88c-839d8a59316168882e987e8610386a31df77005f5de0cb15ecd6c8b6f2713174] _
+src/mission_control/test/test_production_motion_catalog_contract.py:670: in test_recovery_cycle_matches_supplied_catalog
+    frames = [{k: f[k] for k in fields} for f in motions[f'찐라인복귀{side}회전45도(4회)']['frames']]
+E   KeyError: '찐라인복귀좌회전45도(4회)'
+_ test_recovery_cycle_matches_supplied_catalog[\uc6b0-4d5a9601ab7d363b9e92d73e24283060aeba763a7075e692c94fd96e93123384] _
+src/mission_control/test/test_production_motion_catalog_contract.py:670: in test_recovery_cycle_matches_supplied_catalog
+    frames = [{k: f[k] for k in fields} for f in motions[f'찐라인복귀{side}회전45도(4회)']['frames']]
+E   KeyError: '찐라인복귀우회전45도(4회)'
+_____ test_calibrated_right_turn_aliases_resolve_to_supplied_catalog[2-15] _____
+src/mission_control/test/test_production_motion_catalog_contract.py:728: in test_calibrated_right_turn_aliases_resolve_to_supplied_catalog
+    assert aliases[f"{prefix}_{count}"] == name
+E   AssertionError: assert 'R제자리우회전(2회)' == '찐제자리우회전45도-1(2회)'
+E     - 찐제자리우회전45도-1(2회)
+E     + R제자리우회전(2회)
+_____ test_calibrated_right_turn_aliases_resolve_to_supplied_catalog[3-30] _____
+src/mission_control/test/test_production_motion_catalog_contract.py:728: in test_calibrated_right_turn_aliases_resolve_to_supplied_catalog
+    assert aliases[f"{prefix}_{count}"] == name
+E   AssertionError: assert 'R제자리우회전(3회)' == '찐제자리우회전45도-1(3회)'
+E     - 찐제자리우회전45도-1(3회)
+E     + R제자리우회전(3회)
+_____ test_calibrated_right_turn_aliases_resolve_to_supplied_catalog[5-45] _____
+src/mission_control/test/test_production_motion_catalog_contract.py:728: in test_calibrated_right_turn_aliases_resolve_to_supplied_catalog
+    assert aliases[f"{prefix}_{count}"] == name
+E   AssertionError: assert 'R제자리우회전(5회(' == '찐제자리우회전45도-1(5회)'
+E     - 찐제자리우회전45도-1(5회)
+E     + R제자리우회전(5회(
+_____ test_calibrated_right_turn_aliases_resolve_to_supplied_catalog[7-65] _____
+src/mission_control/test/test_production_motion_catalog_contract.py:721: in test_calibrated_right_turn_aliases_resolve_to_supplied_catalog
+    assert MotionDecisionPlanner.RIGHT_TURN_ANGLES_DEG[count] == angle
+E   assert 75.0 == 65
+_____ test_calibrated_right_turn_aliases_resolve_to_supplied_catalog[9-95] _____
+src/mission_control/test/test_production_motion_catalog_contract.py:721: in test_calibrated_right_turn_aliases_resolve_to_supplied_catalog
+    assert MotionDecisionPlanner.RIGHT_TURN_ANGLES_DEG[count] == angle
+E   assert 90.0 == 95
+_ test_imported_motions_preserve_source_except_tolerance_and_added_turns[pickup_retreat_2-\ucc10\ud6c4\uc9c4\uc2e4\uc804(1\ud68c)-1a4484895f37b3749c582281fc37a572ca1eef7be6a41a8ec1f7c5b292b89140] _
+src/mission_control/test/test_production_motion_catalog_contract.py:778: in test_imported_motions_preserve_source_except_tolerance_and_added_turns
+    assert hashlib.sha256(encoded.encode()).hexdigest() == digest
+E   AssertionError: assert '70ce91e45300...889146cc831bf' == '1a4484895f37...7c5b292b89140'
+E     - 1a4484895f37b3749c582281fc37a572ca1eef7be6a41a8ec1f7c5b292b89140
+E     + 70ce91e45300986c6f0bf38673eb7693a015811ada8185e2dab889146cc831bf
+_ test_imported_motions_preserve_source_except_tolerance_and_added_turns[pickup_first_backward_turn_right-\ucc10\ud6c4\uc9c4\ud558\uace0 \uc81c\uc790\ub9ac\uc6b0\ud68c\uc804(\uacf5)-0568d0a09ea18182611e4ed34efe2d96943c0faf52107ce6c3683ab34f1c6005] _
+src/mission_control/test/test_production_motion_catalog_contract.py:755: in test_imported_motions_preserve_source_except_tolerance_and_added_turns
+    assert aliases[motion_id] == name
+E   AssertionError: assert 'R후진에서제자리우회전(공)' == '찐후진하고 제자리우회전(공)'
+E     - 찐후진하고 제자리우회전(공)
+E     ? ^  ^^^
+E     + R후진에서제자리우회전(공)
+E     ? ^  ^^
+_ test_imported_motions_preserve_source_except_tolerance_and_added_turns[post_shot_default_turn_right-\ucc10\uae30\ubcf8\uc790\uc138\uc5d0\uc11c \uc81c\uc790\ub9ac \uc6b0\ud68c\uc804(\uace8\ub300)-d1adb58605677ed92b853640e7cb9125cb5c605f3eefab010c1397c78e84a844] _
+src/mission_control/test/test_production_motion_catalog_contract.py:755: in test_imported_motions_preserve_source_except_tolerance_and_added_turns
+    assert aliases[motion_id] == name
+E   AssertionError: assert 'R골대후제자리우회전' == '찐기본자세에서 제자리 우회전(골대)'
+E     - 찐기본자세에서 제자리 우회전(골대)
+E     + R골대후제자리우회전
+_ test_imported_motions_preserve_source_except_tolerance_and_added_turns[post_shot_default_turn_left-\uac74\uae30\ubcf8\uc790\uc138\uc5d0\uc11c\uc81c\uc790\ub9ac\uc88c\ud68c\uc804(\uace8\ub300)-455de963e21cd376d3da174e3c9da2423ec1964747dbf1beb7e1dab826a55009] _
+src/mission_control/test/test_production_motion_catalog_contract.py:755: in test_imported_motions_preserve_source_except_tolerance_and_added_turns
+    assert aliases[motion_id] == name
+E   AssertionError: assert 'R골대후제자리좌회전' == '건기본자세에서제자리좌회전(골대)'
+E     - 건기본자세에서제자리좌회전(골대)
+E     + R골대후제자리좌회전
+_ test_imported_motions_preserve_source_except_tolerance_and_added_turns[pickup_second_backward_turn_left-\ucc10\ud6c4\uc9c4\uc5d0\uc11c \uc81c\uc790\ub9ac\uc88c\ud68c\uc804(\uacf5)-9735e143053bbc33496d68f0d3fe521432478df41bd86bcc03472c3577480418] _
+src/mission_control/test/test_production_motion_catalog_contract.py:755: in test_imported_motions_preserve_source_except_tolerance_and_added_turns
+    assert aliases[motion_id] == name
+E   AssertionError: assert 'R후진에서 제자리 좌회전' == '찐후진에서 제자리좌회전(공)'
+E     - 찐후진에서 제자리좌회전(공)
+E     ? ^           ---
+E     + R후진에서 제자리 좌회전
+E     ? ^        +
+_ test_imported_motions_preserve_source_except_tolerance_and_added_turns[pickup_crab_left_0-\ucc10\ubbf8\uc138\uc67c\uc606\uaf43\uac8c0\ub3c4-1-931415b970ab5d0dcf2bbdc4052079801f953a096a9ba28e3a5013856711929e] _
+src/mission_control/test/test_production_motion_catalog_contract.py:755: in test_imported_motions_preserve_source_except_tolerance_and_added_turns
+    assert aliases[motion_id] == name
+E   AssertionError: assert '유미세왼옆꽃게0도' == '찐미세왼옆꽃게0도-1'
+E     - 찐미세왼옆꽃게0도-1
+E     ? ^        --
+E     + 유미세왼옆꽃게0도
+E     ? ^
+_ test_imported_motions_preserve_source_except_tolerance_and_added_turns[goal_camera_90_crab_left-\ucc10\ubbf8\uc138\uc67c\uc606\uaf43\uac8c90\ub3c4-1-dba9db69d2bc5342abe6a0812ae672b234acbf5687053b3dd7f40eab2a7bb7d7] _
+src/mission_control/test/test_production_motion_catalog_contract.py:755: in test_imported_motions_preserve_source_except_tolerance_and_added_turns
+    assert aliases[motion_id] == name
+E   AssertionError: assert '유미세왼옆꽃게90도' == '찐미세왼옆꽃게90도-1'
+E     - 찐미세왼옆꽃게90도-1
+E     ? ^         --
+E     + 유미세왼옆꽃게90도
+E     ? ^
+_ test_composite_extended_turn_sets_preserve_pose_and_timing[post_shot_default_turn_right-7-9-\uc81c\uc6b0\uc624\ub4e425-\uc624\ub4a4415-3531] _
+src/mission_control/test/test_production_motion_catalog_contract.py:797: in test_composite_extended_turn_sets_preserve_pose_and_timing
+    assert motion["playback_speed"] == 1.0
+E   assert 0.95 == 1.0
+_ test_composite_extended_turn_sets_preserve_pose_and_timing[post_shot_default_turn_left-4-6-\uc81c\uc88c\uc67c\ub4e425-\uae40\uc624\ub4a43-2656] _
+src/mission_control/test/test_production_motion_catalog_contract.py:797: in test_composite_extended_turn_sets_preserve_pose_and_timing
+    assert motion["playback_speed"] == 1.0
+E   assert 0.95 == 1.0
+_ test_composite_extended_turn_sets_preserve_pose_and_timing[pickup_first_backward_turn_right-7-11-\uc81c\uc6b0\uc624\ub4e425-\uc624\ub4a4415-4144] _
+src/mission_control/test/test_production_motion_catalog_contract.py:797: in test_composite_extended_turn_sets_preserve_pose_and_timing
+    assert motion["playback_speed"] == 1.0
+E   assert 0.95 == 1.0
+_ test_composite_extended_turn_sets_preserve_pose_and_timing[pickup_second_backward_turn_left-4-7-\uc81c\uc88c\uc67c\ub4e425-\uc624\ub4a4412-3089] _
+src/mission_control/test/test_production_motion_catalog_contract.py:797: in test_composite_extended_turn_sets_preserve_pose_and_timing
+    assert motion["playback_speed"] == 1.0
+E   assert 0.95 == 1.0
+_ test_pickup_retreat_exit_and_dwell_order[0-\ucc10\ud6c4\uc9c4\ud558\uace0 \uc81c\uc790\ub9ac\uc6b0\ud68c\uc804(\uacf5)] _
+src/mission_control/test/test_production_motion_catalog_contract.py:829: in test_pickup_retreat_exit_and_dwell_order
+    assert [aliases[motion_id] for motion_id in sequence[:-1]] == [
+src/mission_control/test/test_production_motion_catalog_contract.py:829: in <listcomp>
+    assert [aliases[motion_id] for motion_id in sequence[:-1]] == [
+E   KeyError: '__BALL_PICKUP_POST_BACKWARD_ALIGN_CHECK__'
+_ test_pickup_retreat_exit_and_dwell_order[1-\ucc10\ud6c4\uc9c4\uc5d0\uc11c \uc81c\uc790\ub9ac\uc88c\ud68c\uc804(\uacf5)] _
+src/mission_control/test/test_production_motion_catalog_contract.py:829: in test_pickup_retreat_exit_and_dwell_order
+    assert [aliases[motion_id] for motion_id in sequence[:-1]] == [
+src/mission_control/test/test_production_motion_catalog_contract.py:829: in <listcomp>
+    assert [aliases[motion_id] for motion_id in sequence[:-1]] == [
+E   KeyError: '__BALL_PICKUP_POST_BACKWARD_ALIGN_CHECK__'
+_ test_general_right_uses_line_return_four_repeats_and_first_pickup_uses_composite _
+src/mission_control/test/test_production_motion_catalog_contract.py:840: in test_general_right_uses_line_return_four_repeats_and_first_pickup_uses_composite
+    assert aliases[MotionCommandBridgeNode.ACTION_TO_MOTION_ID["RIGHT"]] == (
+E   AssertionError: assert 'R라인복귀우회전' == '건라인복귀우회전45도(4회)'
+E     - 건라인복귀우회전45도(4회)
+E     + R라인복귀우회전
+_________ test_unavailable_stationary_right_counts_are_not_accepted[1] _________
+src/mission_control/test/test_production_motion_catalog_contract.py:866: in test_unavailable_stationary_right_counts_are_not_accepted
+    assert f"post_ball_line_turn_right_{count}" not in aliases
+E   AssertionError: assert 'post_ball_line_turn_right_1' not in {'ball_camera_down_forward_2': 'R전진45도(2회)', 'ball_camera_down_forward_4': 'R전진45도(4회)', 'ball_general_fine_forward_8': 'r미세0도', 'ball_top_loss_fine_forward_45_3': 'r미세0도(상단탐색3회)', ...}
+_________ test_unavailable_stationary_right_counts_are_not_accepted[6] _________
+src/mission_control/test/test_production_motion_catalog_contract.py:859: in test_unavailable_stationary_right_counts_are_not_accepted
+    assert normalize_general_action(approach) is None
+E   AssertionError: assert 'BALL_APPROACH_TURN_RIGHT_6' is None
+E    +  where 'BALL_APPROACH_TURN_RIGHT_6' = <function normalize_general_action at 0xffff8e4b9990>('BALL_APPROACH_TURN_RIGHT_6')
+_____ test_pickup_crab_preparation_preserves_body_motion_with_camera_down ______
+src/mission_control/test/test_production_motion_catalog_contract.py:875: in test_pickup_crab_preparation_preserves_body_motion_with_camera_down
+    expected = copy.deepcopy(motions["찐오뒤에서 기본자세(카메라45도)"])
+E   KeyError: '찐오뒤에서 기본자세(카메라45도)'
+_ test_goal_single_retreat_preserves_original_frames_and_three_cycle_pickup_motion _
+src/mission_control/test/test_production_motion_catalog_contract.py:890: in test_goal_single_retreat_preserves_original_frames_and_three_cycle_pickup_motion
+    original = motions['후진실전-2(3회)']
+E   KeyError: '후진실전-2(3회)'
+___________ test_close_ball_backward_uses_supplied_one_cycle_retreat ___________
+src/mission_control/test/test_production_motion_catalog_contract.py:907: in test_close_ball_backward_uses_supplied_one_cycle_retreat
+    assert frame["angles"]["4"] == 18
+E   assert 9.66796875 == 18
+_ test_goal_depth_selection_resolves_to_requested_runtime_motion[1.281-GOAL_CAMERA_90_FORWARD-\ucc10\uc804\uc9c490(6\ud68c)-3] _
+src/mission_control/test/test_production_motion_catalog_contract.py:944: in test_goal_depth_selection_resolves_to_requested_runtime_motion
+    assert aliases[motion_id] == name
+E   AssertionError: assert 'R전진90도(6회)' == '찐전진90(6회)'
+E     - 찐전진90(6회)
+E     ? ^
+E     + R전진90도(6회)
+E     ? ^    +
+_ test_goal_depth_selection_resolves_to_requested_runtime_motion[1.28-GOAL_CAMERA_90_FORWARD_2-\ucc10\uc804\uc9c490(4\ud68c)-2] _
+src/mission_control/test/test_production_motion_catalog_contract.py:944: in test_goal_depth_selection_resolves_to_requested_runtime_motion
+    assert aliases[motion_id] == name
+E   AssertionError: assert 'R전진90도(4회)' == '찐전진90(4회)'
+E     - 찐전진90(4회)
+E     ? ^
+E     + R전진90도(4회)
+E     ? ^    +
+_ test_goal_depth_selection_resolves_to_requested_runtime_motion[0.851-GOAL_CAMERA_90_FORWARD_2-\ucc10\uc804\uc9c490(4\ud68c)-2] _
+src/mission_control/test/test_production_motion_catalog_contract.py:944: in test_goal_depth_selection_resolves_to_requested_runtime_motion
+    assert aliases[motion_id] == name
+E   AssertionError: assert 'R전진90도(4회)' == '찐전진90(4회)'
+E     - 찐전진90(4회)
+E     ? ^
+E     + R전진90도(4회)
+E     ? ^    +
+_ test_goal_depth_selection_resolves_to_requested_runtime_motion[0.85-GOAL_CAMERA90_FINE_FORWARD_3-\ucc10\ubbf8\uc13890\ub3c4-4(3\ud68c)-3] _
+src/mission_control/test/test_production_motion_catalog_contract.py:944: in test_goal_depth_selection_resolves_to_requested_runtime_motion
+    assert aliases[motion_id] == name
+E   AssertionError: assert 'R미세90도(3회)' == '찐미세90도-4(3회)'
+E     - 찐미세90도-4(3회)
+E     ? ^     --
+E     + R미세90도(3회)
+E     ? ^
+_ test_goal_depth_selection_resolves_to_requested_runtime_motion[0.501-GOAL_CAMERA90_FINE_FORWARD_3-\ucc10\ubbf8\uc13890\ub3c4-4(3\ud68c)-3] _
+src/mission_control/test/test_production_motion_catalog_contract.py:944: in test_goal_depth_selection_resolves_to_requested_runtime_motion
+    assert aliases[motion_id] == name
+E   AssertionError: assert 'R미세90도(3회)' == '찐미세90도-4(3회)'
+E     - 찐미세90도-4(3회)
+E     ? ^     --
+E     + R미세90도(3회)
+E     ? ^
+_ test_goal_depth_selection_resolves_to_requested_runtime_motion[0.5-GOAL_CAMERA90_FINE_FORWARD_1-\ucc10\ubbf8\uc13890\ub3c4-4(1\ud68c)-1] _
+src/mission_control/test/test_production_motion_catalog_contract.py:944: in test_goal_depth_selection_resolves_to_requested_runtime_motion
+    assert aliases[motion_id] == name
+E   AssertionError: assert 'R미세90도(1회)' == '찐미세90도-4(1회)'
+E     - 찐미세90도-4(1회)
+E     ? ^     --
+E     + R미세90도(1회)
+E     ? ^
+_ test_goal_depth_selection_resolves_to_requested_runtime_motion[0.431-GOAL_CAMERA90_FINE_FORWARD_1-\ucc10\ubbf8\uc13890\ub3c4-4(1\ud68c)-1] _
+src/mission_control/test/test_production_motion_catalog_contract.py:937: in test_goal_depth_selection_resolves_to_requested_runtime_motion
+    assert command.action == expected_action
+E   AssertionError: assert 'SHOT' == 'GOAL_CAMERA90_FINE_FORWARD_1'
+E     - GOAL_CAMERA90_FINE_FORWARD_1
+E     + SHOT
+________ test_line_return_right_four_preserves_catalog32_motion[RIGHT] _________
+src/mission_control/test/test_production_motion_catalog_contract.py:969: in test_line_return_right_four_preserves_catalog32_motion
+    assert aliases[motion_id] == expected["name"]
+E   AssertionError: assert 'R라인복귀우회전' == '찐라인복귀우회전45 도(4회)'
+E     - 찐라인복귀우회전45 도(4회)
+E     + R라인복귀우회전
+_ test_line_return_right_four_preserves_catalog32_motion[RECOVER_RIGHT_TURN_RIGHT_4] _
+src/mission_control/test/test_production_motion_catalog_contract.py:969: in test_line_return_right_four_preserves_catalog32_motion
+    assert aliases[motion_id] == expected["name"]
+E   AssertionError: assert 'R라인복귀우회전' == '찐라인복귀우회전45 도(4회)'
+E     - 찐라인복귀우회전45 도(4회)
+E     + R라인복귀우회전
+_ test_line_return_right_four_preserves_catalog32_motion[RECOVER_LEFT_TURN_RIGHT_4] _
+src/mission_control/test/test_production_motion_catalog_contract.py:969: in test_line_return_right_four_preserves_catalog32_motion
+    assert aliases[motion_id] == expected["name"]
+E   AssertionError: assert 'R라인복귀우회전' == '찐라인복귀우회전45 도(4회)'
+E     - 찐라인복귀우회전45 도(4회)
+E     + R라인복귀우회전
+_ test_line_return_right_four_preserves_catalog32_motion[BALL_APPROACH_RECOVER_RIGHT_4] _
+src/mission_control/test/test_production_motion_catalog_contract.py:969: in test_line_return_right_four_preserves_catalog32_motion
+    assert aliases[motion_id] == expected["name"]
+E   AssertionError: assert 'R라인복귀우회전' == '찐라인복귀우회전45 도(4회)'
+E     - 찐라인복귀우회전45 도(4회)
+E     + R라인복귀우회전
+_ test_removed_goal_default_preparations_have_no_dangling_alias[goal_forward_to_default_90-\ucc10\uc624\ub4a4\uc5d0\uc11c\uae30\ubcf8\uc790\uc138(\uace8\ub300 \uce74\uba54\ub77c90\ub3c4)] _
+src/mission_control/test/test_production_motion_catalog_contract.py:983: in test_removed_goal_default_preparations_have_no_dangling_alias
+    assert aliases["goal_fine_to_default"] == "건미세오뒤에서 기본자세45도"
+E   AssertionError: assert 'R미세오뒤에서 기본자세45도' == '건미세오뒤에서 기본자세45도'
+E     - 건미세오뒤에서 기본자세45도
+E     ? ^
+E     + R미세오뒤에서 기본자세45도
+E     ? ^
+_ test_removed_goal_default_preparations_have_no_dangling_alias[goal_fine_to_default_90-\ucc10\ubbf8\uc138\uc624\ub4a4\uc5d0\uc11c\uae30\ubcf8\uc790\uc138(\uace8\ub300 \uce74\uba54\ub77c90\ub3c4)] _
+src/mission_control/test/test_production_motion_catalog_contract.py:983: in test_removed_goal_default_preparations_have_no_dangling_alias
+    assert aliases["goal_fine_to_default"] == "건미세오뒤에서 기본자세45도"
+E   AssertionError: assert 'R미세오뒤에서 기본자세45도' == '건미세오뒤에서 기본자세45도'
+E     - 건미세오뒤에서 기본자세45도
+E     ? ^
+E     + R미세오뒤에서 기본자세45도
+E     ? ^
+_ test_catalog29_right_crab_motions_preserve_source_except_tolerance[pickup_crab_right_0-\ucc10\ubbf8\uc138\uc624\uc606\uaf43\uac8c0-1(1\ud68c)-4-955855ee4ea1ba22b9f2d65746e30a845f97b177505fa4a2f678de9737b004e5] _
+src/mission_control/test/test_production_motion_catalog_contract.py:1004: in test_catalog29_right_crab_motions_preserve_source_except_tolerance
+    assert aliases[alias] == name
+E   AssertionError: assert '유미세오옆꽃게0도' == '찐미세오옆꽃게0-1(1회)'
+E     - 찐미세오옆꽃게0-1(1회)
+E     + 유미세오옆꽃게0도
+_ test_catalog29_right_crab_motions_preserve_source_except_tolerance[goal_camera_90_crab_right-\ucc10\ubbf8\uc138\uc624\uc606\uaf43\uac8c90-1(1\ud68c)-4-ef4fd376232c750ce52d6f9c374f44fd7c665873bc1d2d7bbc65b6732eb90a3b] _
+src/mission_control/test/test_production_motion_catalog_contract.py:1004: in test_catalog29_right_crab_motions_preserve_source_except_tolerance
+    assert aliases[alias] == name
+E   AssertionError: assert '유미세오옆꽃게90도' == '찐미세오옆꽃게90-1(1회)'
+E     - 찐미세오옆꽃게90-1(1회)
+E     + 유미세오옆꽃게90도
+_ test_catalog29_right_crab_motions_preserve_source_except_tolerance[pickup_fine_to_crab_right_0-\ucc10\ubbf8\uc138\uc624\ub4a4\uc5d0\uc11c\uc624\uc606\uaf43\uac8c0\ub3c4-2-5058c68644682c32c76d1d07fba4e566d9089a87cd669954e8aa38ba5055c6f0] _
+src/mission_control/test/test_production_motion_catalog_contract.py:1004: in test_catalog29_right_crab_motions_preserve_source_except_tolerance
+    assert aliases[alias] == name
+E   AssertionError: assert 'R미세오뒤에서 기본자세45도' == '찐미세오뒤에서오옆꽃게0도'
+E     - 찐미세오뒤에서오옆꽃게0도
+E     + R미세오뒤에서 기본자세45도
+_ test_catalog29_right_crab_motions_preserve_source_except_tolerance[goal_fine_to_crab_right_90-\ucc10\ubbf8\uc138\uc624\ub4a4\uc5d0\uc11c \uc624\uc606\uaf43\uac8c90\ub3c4-2-ba38d07ef6ba1ea0a4398f5d6667e45ab97463875deacf6cfc7e6a11ffd152b1] _
+src/mission_control/test/test_production_motion_catalog_contract.py:1004: in test_catalog29_right_crab_motions_preserve_source_except_tolerance
+    assert aliases[alias] == name
+E   AssertionError: assert 'R미세오뒤에서 기본자세90도' == '찐미세오뒤에서 오옆꽃게90도'
+E     - 찐미세오뒤에서 오옆꽃게90도
+E     + R미세오뒤에서 기본자세90도
+_ test_catalog29_right_crab_motions_preserve_source_except_tolerance[goal_forward_to_crab_right_90-\ucc10\uc624\ub4a4\uc5d0\uc11c \uc624\uc606\uaf43\uac8c90\ub3c4-2-0579a746404e812d0b2fcee308bb59d0ac8301068371e4c4977cf996382b5f7b] _
+src/mission_control/test/test_production_motion_catalog_contract.py:1004: in test_catalog29_right_crab_motions_preserve_source_except_tolerance
+    assert aliases[alias] == name
+E   AssertionError: assert 'R오뒤에서 기본자세(카메라45도)' == '찐오뒤에서 오옆꽃게90도'
+E     - 찐오뒤에서 오옆꽃게90도
+E     + R오뒤에서 기본자세(카메라45도)
+____ test_pickup_camera_down_forward_request_resolves_to_existing_motion[2] ____
+src/mission_control/test/test_production_motion_catalog_contract.py:1036: in test_pickup_camera_down_forward_request_resolves_to_existing_motion
+    assert aliases[motion_id] == f"찐전진45({count}회)"
+E   AssertionError: assert 'R전진45도(2회)' == '찐전진45(2회)'
+E     - 찐전진45(2회)
+E     ? ^
+E     + R전진45도(2회)
+E     ? ^    +
+____ test_pickup_camera_down_forward_request_resolves_to_existing_motion[4] ____
+src/mission_control/test/test_production_motion_catalog_contract.py:1036: in test_pickup_camera_down_forward_request_resolves_to_existing_motion
+    assert aliases[motion_id] == f"찐전진45({count}회)"
+E   AssertionError: assert 'R전진45도(4회)' == '찐전진45(4회)'
+E     - 찐전진45(4회)
+E     ? ^
+E     + R전진45도(4회)
+E     ? ^    +
+__________ test_pickup_forward_preserves_original_camera45_frames[2] ___________
+src/mission_control/test/test_production_motion_catalog_contract.py:1044: in test_pickup_forward_preserves_original_camera45_frames
+    base = motions["찐전진45(4회)"]
+E   KeyError: '찐전진45(4회)'
+__________ test_pickup_forward_preserves_original_camera45_frames[4] ___________
+src/mission_control/test/test_production_motion_catalog_contract.py:1044: in test_pickup_forward_preserves_original_camera45_frames
+    base = motions["찐전진45(4회)"]
+E   KeyError: '찐전진45(4회)'
+_ test_stationary_left_turns_preserve_latest_catalog29_data[0-e9bfd6d522b113c852991f998a9f0b06b860e25e256106b658bb95c3ac5d05bc] _
+src/mission_control/test/test_production_motion_catalog_contract.py:1072: in test_stationary_left_turns_preserve_latest_catalog29_data
+    assert aliases[f"{prefix}_{count}"] == name
+E   AssertionError: assert 'R제자리좌회전0도(1회)' == '건제자리좌회전0도(1회)'
+E     - 건제자리좌회전0도(1회)
+E     ? ^
+E     + R제자리좌회전0도(1회)
+E     ? ^
+_ test_stationary_left_turns_preserve_latest_catalog29_data[45-b88c956306ed650997fe3355b2374e34fd089e4e03eab08fb28d67282b6a1a72] _
+src/mission_control/test/test_production_motion_catalog_contract.py:1072: in test_stationary_left_turns_preserve_latest_catalog29_data
+    assert aliases[f"{prefix}_{count}"] == name
+E   AssertionError: assert 'R제자리좌회전(1회)' == '건제자리좌회전45도(1회)'
+E     - 건제자리좌회전45도(1회)
+E     ? ^      ---
+E     + R제자리좌회전(1회)
+E     ? ^
+_ test_stationary_left_turns_preserve_latest_catalog29_data[90-431236af4a758dac798edd50204dc1d309ffe4c3e01337d9425661d8c665d24e] _
+src/mission_control/test/test_production_motion_catalog_contract.py:1072: in test_stationary_left_turns_preserve_latest_catalog29_data
+    assert aliases[f"{prefix}_{count}"] == name
+E   AssertionError: assert 'R제자리좌회전90도(1회)' == '건제자리좌회전90도(1회)'
+E     - 건제자리좌회전90도(1회)
+E     ? ^
+E     + R제자리좌회전90도(1회)
+E     ? ^
+____ test_hurdle_preserves_catalog37_source_except_tolerance_and_pose_label ____
+src/mission_control/test/test_production_motion_catalog_contract.py:1100: in test_hurdle_preserves_catalog37_source_except_tolerance_and_pose_label
+    assert current == before
+E   AssertionError: assert {'motions': [... 'version': 1} == {'motions': [... 'version': 1}
+E     Omitting 1 identical items, use -vv to show
+E     Differing items:
+E     {'motions': [{'completion': {'position_tolerance_deg': 5.0, 'settle_duration_ms': 80, 'settle_timeout_ms': 3000}, 'end...a7c184047c49d48e878419d1c81', 'is_important': False, 'lift_early_arrival': True, ...}], 'max_seq_ms': 7045, ...}, ...]} != {'motions': [{'completion': {'position_tolerance_deg': 5.0, 'settle_duration_ms': 80, 'settle_timeout_ms': 3000}, 'end...5b57ed8f4b9cada466d433c0eccf', 'is_important': True, 'lift_early_arrival': True, ...}], 'max_seq_ms': 7045, ...}, ...]}
+E     Full diff:
+E       {
+E        'motions': [{'com...
+E     
+E     ...Full output truncated (34204 lines hidden), use '-vv' to show
+_____ test_fine_turn_import_preserves_source_and_unrelated_runtime_motions _____
+src/mission_control/test/test_production_motion_catalog_contract.py:1115: in test_fine_turn_import_preserves_source_and_unrelated_runtime_motions
+    assert len(current) == len(before) + 3
+E   AssertionError: assert 99 == (86 + 3)
+E    +  where 99 = len({'R골넣기': {'completion': {'position_tolerance_deg': 5.0, 'settle_duration_ms': 80, 'settle_timeout_ms': 3000}, 'end_pos...8fe1ea64385b8080d6711c42999', 'is_important': False, 'lift_early_arrival': True, ...}], 'max_seq_ms': 11522, ...}, ...})
+E    +  and   86 = len({'미세오뒤에서 오옆꽃게90도': {'completion': {'position_tolerance_deg': 5.0, 'settle_duration_ms': 80, 'settle_timeout_ms': 3000}...ec7c52aa4ac598e71c4693a20a41', 'is_important': False, 'lift_early_arrival': True, ...}], 'max_seq_ms': 7045, ...}, ...})
+__ test_catalog34_replaces_only_requested_retreats_with_five_degree_tolerance __
+src/mission_control/test/test_production_motion_catalog_contract.py:1152: in test_catalog34_replaces_only_requested_retreats_with_five_degree_tolerance
+    assert current == expected
+E   AssertionError: assert {'motions': [... 'version': 1} == {'motions': [... 'version': 1}
+E     Omitting 1 identical items, use -vv to show
+E     Differing items:
+E     {'motions': [{'completion': {'position_tolerance_deg': 5.0, 'settle_duration_ms': 80, 'settle_timeout_ms': 3000}, 'end...a7c184047c49d48e878419d1c81', 'is_important': False, 'lift_early_arrival': True, ...}], 'max_seq_ms': 7045, ...}, ...]} != {'motions': [{'completion': {'position_tolerance_deg': 5.0, 'settle_duration_ms': 80, 'settle_timeout_ms': 3000}, 'end...5b57ed8f4b9cada466d433c0eccf', 'is_important': True, 'lift_early_arrival': True, ...}], 'max_seq_ms': 7045, ...}, ...]}
+E     Full diff:
+E       {
+E        'motions': [{'com...
+E     
+E     ...Full output truncated (37620 lines hidden), use '-vv' to show
+_ test_hurdle_final_fine_uses_ten_repeats_without_changing_shared_five_repeat_gait _
+src/mission_control/test/test_production_motion_catalog_contract.py:1176: in test_hurdle_final_fine_uses_ten_repeats_without_changing_shared_five_repeat_gait
+    assert original == expected
+E   AssertionError: assert {'completion'...s': 3505, ...} == {'completion'...s': 3505, ...}
+E     Omitting 4 identical items, use -vv to show
+E     Differing items:
+E     {'start_pose': 'R미세오들0도'} != {'start_pose': '건미세오들0도'}
+E     {'end_pose': 'R미세오뒤0도-1'} != {'end_pose': '건미세오뒤0도'}
+E     {'frames': [{'angles': {'0': -64.0, '1': -0.3515625, '10': 0.966796875, '11': -3.0, ...}, 'frame_id': '5541728becc14be...671875, ...}, 'frame_id': '57c81c823a4b445da1378e3a6aab6598', 'is_important': False, 'lift_early_arrival': True, ...}]} != {'frames': [{'angles': {'0': -64.0, '1': -0.3515625, '10': 1.318359375, '11': -3.0, ...}, 'frame_id': '774b84718f364c2...: -3.0, ...}, 'frame_id': '162c6248f1d24965a0b...
+E     
+E     ...Full output truncated (412 lines hidden), use '-vv' to show
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_motion_decision_node.py::test_turn_waits_for_stable_half_second[LEFT]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_turn_waits_for_stable_half_second[RIGHT]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_changed_turn_candidate_restarts_settle
+FAILED src/mission_control/test/test_motion_decision_node.py::test_new_frame_keeps_same_candidate_start_time
+FAILED src/mission_control/test/test_motion_decision_node.py::test_stop_cancels_pending_turn_and_is_not_delayed
+FAILED src/mission_control/test/test_motion_decision_node.py::test_general_lock_does_not_precount_next_turn
+FAILED src/mission_control/test/test_motion_decision_node.py::test_active_special_lock_does_not_precount_next_settle
+FAILED src/mission_control/test/test_motion_decision_node.py::test_published_turn_requires_a_new_settle_after_completion
+FAILED src/mission_control/test/test_motion_decision_node.py::test_startup_hold_discards_commands_until_ready_and_fresh_vision
+FAILED src/mission_control/test/test_motion_decision_node.py::test_line_motion_capture_table_matches_deployed_timelines
+FAILED src/mission_control/test/test_motion_decision_node.py::test_line_prequeue_retries_after_temporary_target_disappears
+FAILED src/mission_control/test/test_motion_decision_node.py::test_mock_line_input_is_fresh_and_produces_action[turn_left-RECOVER_LEFT_TURN_LEFT_4]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_mock_line_input_is_fresh_and_produces_action[turn_right-RECOVER_RIGHT_TURN_RIGHT_4]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_all_line_stationary_turns_pause_one_second_before_publish[LEFT]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_all_line_stationary_turns_pause_one_second_before_publish[RIGHT]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_all_line_stationary_turns_pause_one_second_before_publish[POST_BALL_LINE_TURN_LEFT_2]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_all_line_stationary_turns_pause_one_second_before_publish[POST_BALL_LINE_TURN_RIGHT_3]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_all_line_stationary_turns_pause_one_second_before_publish[POST_SHOT_LINE_TURN_LEFT_2]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_all_line_stationary_turns_pause_one_second_before_publish[POST_SHOT_LINE_TURN_RIGHT_3]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_enter_gate_discards_vision_until_enter_and_executor_ready[False]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_enter_gate_discards_vision_until_enter_and_executor_ready[True]
+FAILED src/mission_control/test/test_motion_decision_node.py::test_line_prequeue_ignores_only_completed_hurdles[2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_collected_ball_route_clears_stale_reservations_before_dwell[GOAL_APPROACH-GOAL_CAMERA90_FINE_FORWARD_2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_ball_detection_loss_cannot_interrupt_timed_line_or_goal
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_ball_loss_waits_then_reacquired_ball_selects_moving_recover
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_full_course_mock_flow_without_ros_graph
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_confirmed_approaching_hurdle_beats_approaching_ball
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_unconfirmed_hurdle_disappearance_resumes_ball_mission
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_unconfirmed_hurdle_can_become_confirmed_and_take_priority
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_absent_hurdle_keeps_ball_priority_over_line
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[34.0-GOAL_CAMERA90_TURN_RIGHT_3-0.0-GOAL_CAMERA90_FINE_FORWARD_2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-35.0-GOAL_CAMERA90_TURN_LEFT_1--20.0-GOAL_CAMERA90_TURN_LEFT_1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_camera90_turn_dwells_then_rechecks_fresh_goal[-20.0-GOAL_CAMERA90_TURN_LEFT_1--15.0-GOAL_CAMERA90_FINE_FORWARD_2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_depth_actions_follow_new_scoring_range[0.65-GOAL_CAMERA90_FINE_FORWARD_1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_final_line_track_still_prioritizes_confirmed_hurdle
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_ball_stationary_turn_requires_fresh_ball_before_next_approach
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_second_ball_uses_same_straight_distance_policy
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_failed_first_pickup_keeps_straight_distance_policy
+FAILED src/mission_control/test/test_gait_transitions.py::test_transition_finishes_before_target_and_rejects_interleaved_commands[BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_transition_finishes_before_target_and_rejects_interleaved_commands[BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[FAILED-SDK_COMMUNICATION_ERROR-BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[TIMEOUT-TIMEOUT-BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[CANCELLED--BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[CANCELLED--BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_preparation_failure_never_sends_target[REJECTED-INVALID_MOTION-BALL_FINE_FORWARD_8-TURN_LEFT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_gait_transitions.py::test_queued_transition_uses_actual_completed_predecessor[SUCCEEDED-BALL_FINE_FORWARD_8-STRAIGHT-fine_to_turn_ready_45]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog30_forward_preserves_supplied_motion[45-2]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog30_forward_preserves_supplied_motion[45-4]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog30_forward_preserves_supplied_motion[45-6]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog30_forward_preserves_supplied_motion[45-8]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog30_forward_preserves_supplied_motion[90-4]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog30_forward_preserves_supplied_motion[90-6]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog30_forward_preserves_supplied_motion[90-8]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog30_replaces_only_requested_forward_motions_and_aliases
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_post_ball_transition_contains_only_camera_without_stationary_pause
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_goal_shot_matches_supplied_motion_with_five_degree_tolerance
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_post_shot_fixed_turns_and_forward_resolve_to_runtime_motions
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_updated_forward_and_stationary_right_turn_catalog
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_production_alias_catalog_contains_only_approved_aliases
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_pickup_does_not_use_intermediate_default_pose
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_every_production_bridge_motion_id_has_an_approved_alias
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_counted_turn_aliases_match_family_direction_and_repeat_count
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_latest_pickup_and_grasp_check_motion_definitions_are_mapped
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_goal_fine_repeats_use_walking_cycle_not_pickup_frames[1]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_goal_fine_repeats_use_walking_cycle_not_pickup_frames[2]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_goal_fine_repeats_use_walking_cycle_not_pickup_frames[3]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_goal_fine_repeats_use_walking_cycle_not_pickup_frames[4]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_updated_fine_frames_match_supplied_walking_data[\ucc10\ubbf8\uc1380\ub3c4-4-9abdda081d4406738b7e731707ce690d2207ad82287cedc5c0db1fa230d0eb75]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_updated_fine_frames_match_supplied_walking_data[\ucc10\ubbf8\uc13845\ub3c4-4-7eb93d40e4fea5441dc4b603443bd5cc46f626ee6d4742895912d44dc649e4a0]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_updated_fine_frames_match_supplied_walking_data[\ucc10\ubbf8\uc13890\ub3c4-4(1\ud68c)-05a8bf2428764b71f8bd4cf6b4663227facd5a34cd489de6e977186e86af704f]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_pickup_fine_preparation_resolves_to_requested_single_transition
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_import15_requested_motions_match_source_with_five_degree_tolerance[pickup-\ucc10\uacf5\uc7a1\uae30\ub9ac\uadf8\ub7a9\uae4c\uc9c0 \uc2e4\uc804-b466c0860852e7a2e4d6dc55baf04d22822d8d3a96e522a10ca4510268a96909]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_import15_requested_motions_match_source_with_five_degree_tolerance[pickup_pre_backward_camera_down-\ucc10\uacf5\uc7a1\uae30\uc804\ud6c4\uc9c4-2(2\ud68c)-7bc8b060ba29ab42314be112a6077132ac3284e3398e45e57afa48a6f3cf7715]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_recovery_turns_resolve_to_same_direction_and_repeat_count[LEFT-\uc88c-counts0-LEFT]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_recovery_turns_resolve_to_same_direction_and_repeat_count[LEFT-\uc88c-counts0-RIGHT]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_recovery_turns_resolve_to_same_direction_and_repeat_count[RIGHT-\uc6b0-counts1-LEFT]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_recovery_turns_resolve_to_same_direction_and_repeat_count[RIGHT-\uc6b0-counts1-RIGHT]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_line_search_uses_requested_stationary_motions
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_recovery_cycle_matches_supplied_catalog[\uc88c-839d8a59316168882e987e8610386a31df77005f5de0cb15ecd6c8b6f2713174]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_recovery_cycle_matches_supplied_catalog[\uc6b0-4d5a9601ab7d363b9e92d73e24283060aeba763a7075e692c94fd96e93123384]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_calibrated_right_turn_aliases_resolve_to_supplied_catalog[2-15]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_calibrated_right_turn_aliases_resolve_to_supplied_catalog[3-30]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_calibrated_right_turn_aliases_resolve_to_supplied_catalog[5-45]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_calibrated_right_turn_aliases_resolve_to_supplied_catalog[7-65]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_calibrated_right_turn_aliases_resolve_to_supplied_catalog[9-95]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_imported_motions_preserve_source_except_tolerance_and_added_turns[pickup_retreat_2-\ucc10\ud6c4\uc9c4\uc2e4\uc804(1\ud68c)-1a4484895f37b3749c582281fc37a572ca1eef7be6a41a8ec1f7c5b292b89140]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_imported_motions_preserve_source_except_tolerance_and_added_turns[pickup_first_backward_turn_right-\ucc10\ud6c4\uc9c4\ud558\uace0 \uc81c\uc790\ub9ac\uc6b0\ud68c\uc804(\uacf5)-0568d0a09ea18182611e4ed34efe2d96943c0faf52107ce6c3683ab34f1c6005]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_imported_motions_preserve_source_except_tolerance_and_added_turns[post_shot_default_turn_right-\ucc10\uae30\ubcf8\uc790\uc138\uc5d0\uc11c \uc81c\uc790\ub9ac \uc6b0\ud68c\uc804(\uace8\ub300)-d1adb58605677ed92b853640e7cb9125cb5c605f3eefab010c1397c78e84a844]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_imported_motions_preserve_source_except_tolerance_and_added_turns[post_shot_default_turn_left-\uac74\uae30\ubcf8\uc790\uc138\uc5d0\uc11c\uc81c\uc790\ub9ac\uc88c\ud68c\uc804(\uace8\ub300)-455de963e21cd376d3da174e3c9da2423ec1964747dbf1beb7e1dab826a55009]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_imported_motions_preserve_source_except_tolerance_and_added_turns[pickup_second_backward_turn_left-\ucc10\ud6c4\uc9c4\uc5d0\uc11c \uc81c\uc790\ub9ac\uc88c\ud68c\uc804(\uacf5)-9735e143053bbc33496d68f0d3fe521432478df41bd86bcc03472c3577480418]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_imported_motions_preserve_source_except_tolerance_and_added_turns[pickup_crab_left_0-\ucc10\ubbf8\uc138\uc67c\uc606\uaf43\uac8c0\ub3c4-1-931415b970ab5d0dcf2bbdc4052079801f953a096a9ba28e3a5013856711929e]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_imported_motions_preserve_source_except_tolerance_and_added_turns[goal_camera_90_crab_left-\ucc10\ubbf8\uc138\uc67c\uc606\uaf43\uac8c90\ub3c4-1-dba9db69d2bc5342abe6a0812ae672b234acbf5687053b3dd7f40eab2a7bb7d7]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_composite_extended_turn_sets_preserve_pose_and_timing[post_shot_default_turn_right-7-9-\uc81c\uc6b0\uc624\ub4e425-\uc624\ub4a4415-3531]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_composite_extended_turn_sets_preserve_pose_and_timing[post_shot_default_turn_left-4-6-\uc81c\uc88c\uc67c\ub4e425-\uae40\uc624\ub4a43-2656]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_composite_extended_turn_sets_preserve_pose_and_timing[pickup_first_backward_turn_right-7-11-\uc81c\uc6b0\uc624\ub4e425-\uc624\ub4a4415-4144]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_composite_extended_turn_sets_preserve_pose_and_timing[pickup_second_backward_turn_left-4-7-\uc81c\uc88c\uc67c\ub4e425-\uc624\ub4a4412-3089]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_pickup_retreat_exit_and_dwell_order[0-\ucc10\ud6c4\uc9c4\ud558\uace0 \uc81c\uc790\ub9ac\uc6b0\ud68c\uc804(\uacf5)]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_pickup_retreat_exit_and_dwell_order[1-\ucc10\ud6c4\uc9c4\uc5d0\uc11c \uc81c\uc790\ub9ac\uc88c\ud68c\uc804(\uacf5)]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_general_right_uses_line_return_four_repeats_and_first_pickup_uses_composite
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_unavailable_stationary_right_counts_are_not_accepted[1]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_unavailable_stationary_right_counts_are_not_accepted[6]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_pickup_crab_preparation_preserves_body_motion_with_camera_down
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_goal_single_retreat_preserves_original_frames_and_three_cycle_pickup_motion
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_close_ball_backward_uses_supplied_one_cycle_retreat
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_goal_depth_selection_resolves_to_requested_runtime_motion[1.281-GOAL_CAMERA_90_FORWARD-\ucc10\uc804\uc9c490(6\ud68c)-3]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_goal_depth_selection_resolves_to_requested_runtime_motion[1.28-GOAL_CAMERA_90_FORWARD_2-\ucc10\uc804\uc9c490(4\ud68c)-2]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_goal_depth_selection_resolves_to_requested_runtime_motion[0.851-GOAL_CAMERA_90_FORWARD_2-\ucc10\uc804\uc9c490(4\ud68c)-2]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_goal_depth_selection_resolves_to_requested_runtime_motion[0.85-GOAL_CAMERA90_FINE_FORWARD_3-\ucc10\ubbf8\uc13890\ub3c4-4(3\ud68c)-3]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_goal_depth_selection_resolves_to_requested_runtime_motion[0.501-GOAL_CAMERA90_FINE_FORWARD_3-\ucc10\ubbf8\uc13890\ub3c4-4(3\ud68c)-3]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_goal_depth_selection_resolves_to_requested_runtime_motion[0.5-GOAL_CAMERA90_FINE_FORWARD_1-\ucc10\ubbf8\uc13890\ub3c4-4(1\ud68c)-1]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_goal_depth_selection_resolves_to_requested_runtime_motion[0.431-GOAL_CAMERA90_FINE_FORWARD_1-\ucc10\ubbf8\uc13890\ub3c4-4(1\ud68c)-1]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_line_return_right_four_preserves_catalog32_motion[RIGHT]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_line_return_right_four_preserves_catalog32_motion[RECOVER_RIGHT_TURN_RIGHT_4]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_line_return_right_four_preserves_catalog32_motion[RECOVER_LEFT_TURN_RIGHT_4]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_line_return_right_four_preserves_catalog32_motion[BALL_APPROACH_RECOVER_RIGHT_4]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_removed_goal_default_preparations_have_no_dangling_alias[goal_forward_to_default_90-\ucc10\uc624\ub4a4\uc5d0\uc11c\uae30\ubcf8\uc790\uc138(\uace8\ub300 \uce74\uba54\ub77c90\ub3c4)]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_removed_goal_default_preparations_have_no_dangling_alias[goal_fine_to_default_90-\ucc10\ubbf8\uc138\uc624\ub4a4\uc5d0\uc11c\uae30\ubcf8\uc790\uc138(\uace8\ub300 \uce74\uba54\ub77c90\ub3c4)]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog29_right_crab_motions_preserve_source_except_tolerance[pickup_crab_right_0-\ucc10\ubbf8\uc138\uc624\uc606\uaf43\uac8c0-1(1\ud68c)-4-955855ee4ea1ba22b9f2d65746e30a845f97b177505fa4a2f678de9737b004e5]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog29_right_crab_motions_preserve_source_except_tolerance[goal_camera_90_crab_right-\ucc10\ubbf8\uc138\uc624\uc606\uaf43\uac8c90-1(1\ud68c)-4-ef4fd376232c750ce52d6f9c374f44fd7c665873bc1d2d7bbc65b6732eb90a3b]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog29_right_crab_motions_preserve_source_except_tolerance[pickup_fine_to_crab_right_0-\ucc10\ubbf8\uc138\uc624\ub4a4\uc5d0\uc11c\uc624\uc606\uaf43\uac8c0\ub3c4-2-5058c68644682c32c76d1d07fba4e566d9089a87cd669954e8aa38ba5055c6f0]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog29_right_crab_motions_preserve_source_except_tolerance[goal_fine_to_crab_right_90-\ucc10\ubbf8\uc138\uc624\ub4a4\uc5d0\uc11c \uc624\uc606\uaf43\uac8c90\ub3c4-2-ba38d07ef6ba1ea0a4398f5d6667e45ab97463875deacf6cfc7e6a11ffd152b1]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog29_right_crab_motions_preserve_source_except_tolerance[goal_forward_to_crab_right_90-\ucc10\uc624\ub4a4\uc5d0\uc11c \uc624\uc606\uaf43\uac8c90\ub3c4-2-0579a746404e812d0b2fcee308bb59d0ac8301068371e4c4977cf996382b5f7b]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_pickup_camera_down_forward_request_resolves_to_existing_motion[2]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_pickup_camera_down_forward_request_resolves_to_existing_motion[4]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_pickup_forward_preserves_original_camera45_frames[2]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_pickup_forward_preserves_original_camera45_frames[4]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_stationary_left_turns_preserve_latest_catalog29_data[0-e9bfd6d522b113c852991f998a9f0b06b860e25e256106b658bb95c3ac5d05bc]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_stationary_left_turns_preserve_latest_catalog29_data[45-b88c956306ed650997fe3355b2374e34fd089e4e03eab08fb28d67282b6a1a72]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_stationary_left_turns_preserve_latest_catalog29_data[90-431236af4a758dac798edd50204dc1d309ffe4c3e01337d9425661d8c665d24e]
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_hurdle_preserves_catalog37_source_except_tolerance_and_pose_label
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_fine_turn_import_preserves_source_and_unrelated_runtime_motions
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_catalog34_replaces_only_requested_retreats_with_five_degree_tolerance
+FAILED src/mission_control/test/test_production_motion_catalog_contract.py::test_hurdle_final_fine_uses_ten_repeats_without_changing_shared_five_repeat_gait
+138 failed, 1429 passed in 42.68s

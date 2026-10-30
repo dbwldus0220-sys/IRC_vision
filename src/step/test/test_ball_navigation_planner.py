@@ -79,7 +79,7 @@ def test_ball_at_68cm_uses_four_repeat_forward():
         (0.80, "STRAIGHT"),
         (1.50, "STRAIGHT"),
         (0.70, "STRAIGHT"),
-        (0.60, "STRAIGHT"),
+        (0.60, "BALL_APPROACH_FINE_FORWARD_5"),
         (0.50, "PICKUP_NOW"),
     ],
 )
@@ -201,7 +201,7 @@ def test_pickup_sequence_does_not_start_above_550mm():
     assert command.pickup_now is False
 
 
-def test_580mm_keeps_general_ball_approach():
+def test_580mm_fine_walks_without_entering_camera_down_pickup():
     command = BallNavigationPlanner().plan(
         ball_info(
             depth_m=0.40,
@@ -213,8 +213,19 @@ def test_580mm_keeps_general_ball_approach():
         0.1,
     )
 
-    assert command.motion == "STRAIGHT"
+    assert command.motion == "BALL_APPROACH_FINE_FORWARD_5"
     assert command.pickup_now is False
+
+
+def test_camera_down_uses_image_angle_instead_of_camera45_ground_calibration():
+    info = ball_info(
+        distance_m=.550, head_down_requested=True, steering_angle_deg=-12.,
+        offset_x_norm=-.2, ground_projection_enabled=True,
+        ground_projection_valid=False, ground_steering_angle_deg=40.,
+    )
+    angle, source = BallNavigationPlanner().select_steering(info)
+    assert angle == -12.
+    assert source == 'camera_down_image_angle'
 
 
 def test_invalid_distance_never_falls_back_to_ground_distance():
@@ -291,7 +302,7 @@ def test_bottom_center_path_angle_has_priority_over_camera_bearing():
         0.1,
     )
 
-    assert command.motion == "STRAIGHT"
+    assert command.motion == "BALL_APPROACH_FINE_FORWARD_5"
     assert command.linear_speed_mps > 0.0
 
 
@@ -408,12 +419,12 @@ def test_ball_occurrence_does_not_change_straight_distance_bucket(
         0.1,
     )
 
-    assert command.motion == "STRAIGHT"
+    assert command.motion == ("BALL_APPROACH_FINE_FORWARD_5" if ground_distance <= .6 else "STRAIGHT")
     assert command.linear_speed_mps > 0.0
     assert command.reason == "ball_aligned_discrete_approach"
 
 
-@pytest.mark.parametrize("distance_m", [1.5, 0.9, 0.681, 0.571])
+@pytest.mark.parametrize("distance_m", [1.5, 0.9, 0.681, 0.600001])
 def test_general_ball_approach_always_uses_four_repeat_forward(distance_m):
     planner = BallNavigationPlanner()
 
@@ -455,7 +466,8 @@ def test_unsafe_input_produces_stop(sample, reason):
 
 @pytest.mark.parametrize("distance,expected", [
     (0.549, "STRAIGHT_0"), (0.550, "STRAIGHT_0"),
-    (0.550001, "STRAIGHT"), (0.7, "STRAIGHT"),
+    (0.550001, "BALL_APPROACH_FINE_FORWARD_5"),
+    (0.6, "BALL_APPROACH_FINE_FORWARD_5"), (0.600001, "STRAIGHT"), (0.7, "STRAIGHT"),
 ])
 def test_general_ball_550mm_boundary_when_pickup_entry_is_lower(distance, expected):
     planner = BallNavigationPlanner(BallNavigationConfig(

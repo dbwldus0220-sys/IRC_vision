@@ -1,0 +1,5320 @@
+{
+  "oracle": "2026-10-28 user specification; not latest GUI source",
+  "passed": 292,
+  "cases": [
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "찐미세오뒤에서 오옆꽃게90도",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 122,
+      "writes": 49,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "찐미세오뒤에서 오옆꽃게90도",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 24,
+      "writes": 8,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "찐미세오뒤에서 오옆꽃게90도",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 122,
+      "writes": 49,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "찐미세오뒤에서 오옆꽃게90도",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 24,
+      "writes": 8,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "찐미세오뒤에서오옆꽃게0도",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 122,
+      "writes": 49,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "찐미세오뒤에서오옆꽃게0도",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 24,
+      "writes": 8,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "찐미세오뒤에서오옆꽃게0도",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 122,
+      "writes": 49,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "찐미세오뒤에서오옆꽃게0도",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 24,
+      "writes": 8,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "유미세오옆꽃게0도",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 283,
+      "writes": 115,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "유미세오옆꽃게0도",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 48,
+      "writes": 18,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "유미세오옆꽃게0도",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 283,
+      "writes": 115,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "유미세오옆꽃게0도",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 48,
+      "writes": 18,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "유미세왼옆꽃게0도",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 260,
+      "writes": 106,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "유미세왼옆꽃게0도",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 41,
+      "writes": 15,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "유미세왼옆꽃게0도",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 260,
+      "writes": 106,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "유미세왼옆꽃게0도",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 41,
+      "writes": 15,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "유미세오옆꽃게90도",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 283,
+      "writes": 115,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "유미세오옆꽃게90도",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 48,
+      "writes": 18,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "유미세오옆꽃게90도",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 283,
+      "writes": 115,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "유미세오옆꽃게90도",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 48,
+      "writes": 18,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "유미세왼옆꽃게90도",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 260,
+      "writes": 106,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "유미세왼옆꽃게90도",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 41,
+      "writes": 15,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "유미세왼옆꽃게90도",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 260,
+      "writes": 106,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "유미세왼옆꽃게90도",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 41,
+      "writes": 15,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R전진45도(4회)",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 1079,
+      "writes": 452,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R전진45도(4회)",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 172,
+      "writes": 66,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R전진45도(4회)",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 1079,
+      "writes": 452,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R전진45도(4회)",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 172,
+      "writes": 66,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R전진45도(6회)",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 1607,
+      "writes": 678,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R전진45도(6회)",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 258,
+      "writes": 100,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R전진45도(6회)",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 1607,
+      "writes": 678,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R전진45도(6회)",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 258,
+      "writes": 100,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R미세(5회)",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 963,
+      "writes": 405,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R미세(5회)",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 164,
+      "writes": 64,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R미세(5회)",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 963,
+      "writes": 405,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R미세(5회)",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 164,
+      "writes": 64,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R미세오뒤에서 기본자세45도",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 115,
+      "writes": 46,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R미세오뒤에서 기본자세45도",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 21,
+      "writes": 7,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R미세오뒤에서 기본자세45도",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 115,
+      "writes": 46,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R미세오뒤에서 기본자세45도",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 21,
+      "writes": 7,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R오뒤에서미세오뒤45도",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 100,
+      "writes": 40,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R오뒤에서미세오뒤45도",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 21,
+      "writes": 7,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R오뒤에서미세오뒤45도",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 100,
+      "writes": 40,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R오뒤에서미세오뒤45도",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 21,
+      "writes": 7,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r미세0도",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 917,
+      "writes": 385,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r미세0도",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 159,
+      "writes": 63,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r미세0도",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 917,
+      "writes": 385,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r미세0도",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 159,
+      "writes": 63,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r마세90도",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 917,
+      "writes": 385,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r마세90도",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 159,
+      "writes": 63,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r마세90도",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 917,
+      "writes": 385,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r마세90도",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 159,
+      "writes": 63,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R미세오뒤에서 오뒤45도",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 122,
+      "writes": 49,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R미세오뒤에서 오뒤45도",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 24,
+      "writes": 8,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R미세오뒤에서 오뒤45도",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 122,
+      "writes": 49,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R미세오뒤에서 오뒤45도",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 24,
+      "writes": 8,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R미세오뒤에서 오뒤0도",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 147,
+      "writes": 59,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R미세오뒤에서 오뒤0도",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 25,
+      "writes": 9,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R미세오뒤에서 오뒤0도",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 147,
+      "writes": 59,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R미세오뒤에서 오뒤0도",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 25,
+      "writes": 9,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R미세오뒤에서 기본자세90도",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 130,
+      "writes": 52,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R미세오뒤에서 기본자세90도",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 25,
+      "writes": 9,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R미세오뒤에서 기본자세90도",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 130,
+      "writes": 52,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "R미세오뒤에서 기본자세90도",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 25,
+      "writes": 9,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r미세0도(허들10회)",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 1809,
+      "writes": 770,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r미세0도(허들10회)",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 316,
+      "writes": 126,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r미세0도(허들10회)",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 1809,
+      "writes": 770,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r미세0도(허들10회)",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 316,
+      "writes": 126,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r마세90도(1회)",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 189,
+      "writes": 77,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r마세90도(1회)",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 34,
+      "writes": 12,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r마세90도(1회)",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 189,
+      "writes": 77,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r마세90도(1회)",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 34,
+      "writes": 12,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r마세90도(2회)",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 375,
+      "writes": 154,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r마세90도(2회)",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 65,
+      "writes": 25,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r마세90도(2회)",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 375,
+      "writes": 154,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r마세90도(2회)",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 65,
+      "writes": 25,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r마세90도(3회)",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 559,
+      "writes": 231,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r마세90도(3회)",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 96,
+      "writes": 38,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r마세90도(3회)",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 559,
+      "writes": 231,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r마세90도(3회)",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 96,
+      "writes": 38,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r마세90도(4회)",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 738,
+      "writes": 308,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r마세90도(4회)",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 128,
+      "writes": 50,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r마세90도(4회)",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 738,
+      "writes": 308,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r마세90도(4회)",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 128,
+      "writes": 50,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r미세0도(상단탐색3회)",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 559,
+      "writes": 231,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r미세0도(상단탐색3회)",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 96,
+      "writes": 38,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r미세0도(상단탐색3회)",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 559,
+      "writes": 231,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/probe_catalog.json",
+        "r미세0도(상단탐색3회)",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 96,
+      "writes": 38,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_0.9",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 605,
+      "writes": 249,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_0.9",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 118,
+      "writes": 46,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_0.9",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 38,
+      "writes": 14,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_0.9",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 158,
+      "writes": 60,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_0.9",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 605,
+      "writes": 249,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_0.9",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 118,
+      "writes": 46,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_0.9",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 38,
+      "writes": 14,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_0.9",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 158,
+      "writes": 60,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_1",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 541,
+      "writes": 222,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_1",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 119,
+      "writes": 47,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_1",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 38,
+      "writes": 14,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_1",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 149,
+      "writes": 57,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_1",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 541,
+      "writes": 222,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_1",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 119,
+      "writes": 47,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_1",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 38,
+      "writes": 14,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_1",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 149,
+      "writes": 57,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_1.05",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 526,
+      "writes": 216,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_1.05",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 107,
+      "writes": 43,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_1.05",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 38,
+      "writes": 14,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_1.05",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 143,
+      "writes": 55,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_1.05",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 526,
+      "writes": 216,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_1.05",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 107,
+      "writes": 43,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_1.05",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 38,
+      "writes": 14,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_1.05",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 143,
+      "writes": 55,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_2.0",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 281,
+      "writes": 117,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_2.0",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 80,
+      "writes": 32,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_2.0",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 38,
+      "writes": 14,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_2.0",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 87,
+      "writes": 35,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_2.0",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 281,
+      "writes": 117,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_2.0",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 80,
+      "writes": 32,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_2.0",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 38,
+      "writes": 14,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "partial_2.0",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 87,
+      "writes": 35,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "overlap",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 118,
+      "writes": 48,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "overlap",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 30,
+      "writes": 12,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "overlap",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 16,
+      "writes": 6,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "overlap",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 36,
+      "writes": 14,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "overlap",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 118,
+      "writes": 48,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "overlap",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 30,
+      "writes": 12,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "overlap",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 16,
+      "writes": 6,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "overlap",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 36,
+      "writes": 14,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "saved_composer",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 317,
+      "writes": 130,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "saved_composer",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 58,
+      "writes": 24,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "saved_composer",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 30,
+      "writes": 12,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "saved_composer",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 88,
+      "writes": 34,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "saved_composer",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 317,
+      "writes": 130,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "saved_composer",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 58,
+      "writes": 24,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "saved_composer",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 30,
+      "writes": 12,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "saved_composer",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 88,
+      "writes": 34,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_0.9_0.9",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 367,
+      "writes": 150,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_0.9_0.9",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 69,
+      "writes": 27,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_0.9_0.9",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 30,
+      "writes": 12,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_0.9_0.9",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 100,
+      "writes": 38,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_0.9_0.9",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 367,
+      "writes": 150,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_0.9_0.9",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 69,
+      "writes": 27,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_0.9_0.9",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 30,
+      "writes": 12,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_0.9_0.9",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 100,
+      "writes": 38,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_0.9_1.0",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 327,
+      "writes": 134,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_0.9_1.0",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 62,
+      "writes": 24,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_0.9_1.0",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 30,
+      "writes": 12,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_0.9_1.0",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 88,
+      "writes": 34,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_0.9_1.0",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 327,
+      "writes": 134,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_0.9_1.0",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 62,
+      "writes": 24,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_0.9_1.0",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 30,
+      "writes": 12,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_0.9_1.0",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 88,
+      "writes": 34,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_0.9",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 332,
+      "writes": 136,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_0.9",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 62,
+      "writes": 24,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_0.9",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 30,
+      "writes": 12,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_0.9",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 88,
+      "writes": 34,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_0.9",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 332,
+      "writes": 136,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_0.9",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 62,
+      "writes": 24,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_0.9",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 30,
+      "writes": 12,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_0.9",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 88,
+      "writes": 34,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_1.0",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 297,
+      "writes": 122,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_1.0",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 58,
+      "writes": 24,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_1.0",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 30,
+      "writes": 12,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_1.0",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 82,
+      "writes": 32,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_1.0",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 297,
+      "writes": 122,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_1.0",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 58,
+      "writes": 24,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_1.0",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 30,
+      "writes": 12,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_1.0",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 82,
+      "writes": 32,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_1.05",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 287,
+      "writes": 118,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_1.05",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 58,
+      "writes": 24,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_1.05",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 30,
+      "writes": 12,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_1.05",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 82,
+      "writes": 32,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_1.05",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 287,
+      "writes": 118,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_1.05",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 58,
+      "writes": 24,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_1.05",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 30,
+      "writes": 12,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.0_1.05",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 82,
+      "writes": 32,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_0.9",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 322,
+      "writes": 132,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_0.9",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 58,
+      "writes": 24,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_0.9",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 30,
+      "writes": 12,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_0.9",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 88,
+      "writes": 34,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_0.9",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 322,
+      "writes": 132,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_0.9",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 58,
+      "writes": 24,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_0.9",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 30,
+      "writes": 12,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_0.9",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 88,
+      "writes": 34,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_1.0",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 287,
+      "writes": 118,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_1.0",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 58,
+      "writes": 24,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_1.0",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 30,
+      "writes": 12,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_1.0",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 82,
+      "writes": 32,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_1.0",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 287,
+      "writes": 118,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_1.0",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 58,
+      "writes": 24,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_1.0",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 30,
+      "writes": 12,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_1.0",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 82,
+      "writes": 32,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_1.05",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 277,
+      "writes": 114,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_1.05",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 58,
+      "writes": 24,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_1.05",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 30,
+      "writes": 12,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_1.05",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 82,
+      "writes": 32,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_1.05",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 277,
+      "writes": 114,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_1.05",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 58,
+      "writes": 24,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_1.05",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 30,
+      "writes": 12,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "composer_1.05_1.05",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 82,
+      "writes": 32,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "same_direction",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 207,
+      "writes": 84,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "same_direction",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 39,
+      "writes": 15,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "same_direction",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 16,
+      "writes": 6,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "same_direction",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 54,
+      "writes": 20,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "same_direction",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 207,
+      "writes": 84,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "same_direction",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 39,
+      "writes": 15,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "same_direction",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 16,
+      "writes": 6,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "same_direction",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 54,
+      "writes": 20,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "reverse",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 207,
+      "writes": 84,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "reverse",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 39,
+      "writes": 15,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "reverse",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 16,
+      "writes": 6,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "reverse",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 54,
+      "writes": 20,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "reverse",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 207,
+      "writes": 84,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "reverse",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 39,
+      "writes": 15,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "reverse",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 16,
+      "writes": 6,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "reverse",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 54,
+      "writes": 20,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "stationary",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 207,
+      "writes": 84,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "stationary",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 39,
+      "writes": 15,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "stationary",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 16,
+      "writes": 6,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "stationary",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 54,
+      "writes": 20,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "stationary",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 207,
+      "writes": 84,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "stationary",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 39,
+      "writes": 15,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "stationary",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 16,
+      "writes": 6,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "stationary",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 54,
+      "writes": 20,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "landing_a",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 207,
+      "writes": 84,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "landing_a",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 39,
+      "writes": 15,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "landing_a",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 16,
+      "writes": 6,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "landing_a",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 54,
+      "writes": 20,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "landing_a",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 207,
+      "writes": 84,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "landing_a",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 39,
+      "writes": 15,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "landing_a",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 16,
+      "writes": 6,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "landing_a",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 54,
+      "writes": 20,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "landing_b",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 207,
+      "writes": 84,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "landing_b",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 39,
+      "writes": 15,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "landing_b",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 16,
+      "writes": 6,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "landing_b",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 54,
+      "writes": 20,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "landing_b",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 207,
+      "writes": 84,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "landing_b",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 39,
+      "writes": 15,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "landing_b",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 16,
+      "writes": 6,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "landing_b",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 54,
+      "writes": 20,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "stop",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 207,
+      "writes": 84,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "stop",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 39,
+      "writes": 15,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "stop",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 16,
+      "writes": 6,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "stop",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 54,
+      "writes": 20,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "stop",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 207,
+      "writes": 84,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "stop",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 39,
+      "writes": 15,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "stop",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 16,
+      "writes": 6,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "stop",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 54,
+      "writes": 20,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "cycle",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 209,
+      "writes": 84,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "cycle",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 51,
+      "writes": 19,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "cycle",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 26,
+      "writes": 10,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "cycle",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 66,
+      "writes": 24,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "cycle",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 209,
+      "writes": 84,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "cycle",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 51,
+      "writes": 19,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "cycle",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 26,
+      "writes": 10,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "cycle",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 66,
+      "writes": 24,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "missing_joint",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 207,
+      "writes": 84,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "missing_joint",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 39,
+      "writes": 15,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "missing_joint",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 16,
+      "writes": 6,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "missing_joint",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 54,
+      "writes": 20,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "missing_joint",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 207,
+      "writes": 84,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "missing_joint",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 39,
+      "writes": 15,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "missing_joint",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 16,
+      "writes": 6,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "missing_joint",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 54,
+      "writes": 20,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "only_5",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 308,
+      "writes": 126,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "only_5",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 53,
+      "writes": 21,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "only_5",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 19,
+      "writes": 8,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "only_5",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 72,
+      "writes": 22,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "only_5",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 308,
+      "writes": 126,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "only_5",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 53,
+      "writes": 21,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "only_5",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 19,
+      "writes": 8,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "only_5",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 72,
+      "writes": 22,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "gap",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 258,
+      "writes": 104,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "gap",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 51,
+      "writes": 19,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "gap",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 15,
+      "writes": 5,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "gap",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 66,
+      "writes": 24,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "gap",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 258,
+      "writes": 104,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "gap",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 51,
+      "writes": 19,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "gap",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 15,
+      "writes": 5,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "gap",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 66,
+      "writes": 24,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "wrap",
+        false,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 207,
+      "writes": 84,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "wrap",
+        false,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 39,
+      "writes": 15,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "wrap",
+        false,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 16,
+      "writes": 6,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "wrap",
+        false,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 54,
+      "writes": 20,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "wrap",
+        true,
+        [
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 207,
+      "writes": 84,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "wrap",
+        true,
+        [
+          5.0,
+          17.0,
+          83.0,
+          6.0
+        ],
+        16,
+        1,
+        false,
+        false
+      ],
+      "events": 39,
+      "writes": 15,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "wrap",
+        true,
+        [
+          350.0,
+          5.0
+        ],
+        0,
+        0,
+        false,
+        false
+      ],
+      "events": 16,
+      "writes": 6,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "artifacts/20261029_catalog58_audit/playback/spec_fixtures.json",
+        "wrap",
+        true,
+        [
+          5.0,
+          17.0
+        ],
+        16,
+        1,
+        true,
+        true
+      ],
+      "events": 54,
+      "writes": 20,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "queue",
+        false,
+        false
+      ],
+      "events": 83,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "queue",
+        false,
+        true
+      ],
+      "events": 83,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "queue",
+        true,
+        false
+      ],
+      "events": 83,
+      "raw_mismatches": 0
+    },
+    {
+      "case": [
+        "queue",
+        true,
+        true
+      ],
+      "events": 83,
+      "raw_mismatches": 0
+    }
+  ]
+}

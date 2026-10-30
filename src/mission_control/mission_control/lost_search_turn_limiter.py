@@ -211,7 +211,7 @@ class LostSearchTurnLimiter:
         source = decision.source
         max_turns = min(self.max_turns, self.CORNER_SEARCH_MAX_TURNS)
         max_angle = min(self.max_angle_deg, self.CORNER_SEARCH_MAX_ANGLE_DEG)
-        count = 1 if direction == "LEFT" else 2
+        count = 1
         angle = MotionDecisionPlanner._turn_angle_deg(count, direction)
         command = {
             **decision.source_command,
@@ -312,7 +312,7 @@ class LostSearchTurnLimiter:
             )
         direction = first if stage != "REVERSE" else ("RIGHT" if first == "LEFT" else "LEFT")
         count = (3 if direction == "LEFT" else 5) if stage == "INITIAL" else (
-            1 if direction == "LEFT" else 2
+            1
         )
         angle = MotionDecisionPlanner._turn_angle_deg(count, direction)
         command.update(

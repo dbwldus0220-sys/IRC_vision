@@ -154,13 +154,13 @@ def test_stationary_confirmation_and_motion_completion_require_new_captures(monk
     frame()
     assert not any(m["valid"] for m in node.publisher.messages)
     frame()
-    assert node.last_selected_decision.action == "LINE_OFFSET_TURN_RIGHT_2"
+    assert node.last_selected_decision.action == "LINE_OFFSET_TURN_RIGHT_3"
     assert node.sparse_line_recovery.motions_used == 0
     for _ in range(6):
         clock[0] += .2
         frame()
     command = next(m for m in node.publisher.messages if m["valid"])
-    assert command["action"] == "LINE_OFFSET_TURN_RIGHT_2"
+    assert command["action"] == "LINE_OFFSET_TURN_RIGHT_3"
     assert node.sparse_line_recovery.motions_used == 0
     node.send_status(command["action"], command["command_id"], "RUNNING")
     node.send_status(command["action"], command["command_id"], "SUCCEEDED")

@@ -14,8 +14,10 @@ from step.approach_distance import HURDLE_FINE_DISTANCE_M
 from step.approach_distance import ball_hurdle_approach_motion
 from step.ball_navigation_planner import BallNavigationConfig
 from step.ball_navigation_planner import BallNavigationPlanner
+from step.goal_scoring import GOAL_SCORE_MAX_DEPTH_M
 from step.goal_navigation_planner import GoalNavigationConfig, GoalNavigationPlanner
 from step.hurdle_navigation_planner import HurdleNavigationPlanner
+from step.stationary_turns import STATIONARY_TURN_MIN_DEG, stationary_turn_repeat_count
 from step.line_navigation_planner import LineNavigationPlanner
 from step.line_navigation_planner import NavigationConfig
 from step.line_navigation_planner import (
@@ -61,8 +63,8 @@ class MotionDecisionConfig:
     """Tunable mission-selection and lost-ball recovery limits."""
 
     enable_ball_lost_recovery: bool = True
-    recovery_heading_turn_deg: float = 20.0
-    recovery_away_heading_turn_deg: float = 20.0
+    recovery_heading_turn_deg: float = 15.0
+    recovery_away_heading_turn_deg: float = 15.0
     curve_follow_max_offset_norm: float = 0.55
     ball_tracking_range_m: float = 1.5
     ball_control_range_m: float = 1.5
@@ -116,12 +118,16 @@ class MotionDecisionPlanner:
         "hurdle": ("depth_valid",),
         "line": ("detected",),
     }
-    # Stationary left turns use 15-degree bins, capped at six repeats.
+    # Nominal yaw for search budgets; error thresholds live in stationary_turns.
     LEFT_TURN_ANGLES_DEG = {
         1: 15.0, 2: 30.0, 3: 45.0, 4: 60.0, 5: 75.0, 6: 90.0,
     }
-    RIGHT_TURN_ANGLES_DEG = {2: 15.0, 3: 30.0, 5: 45.0, 7: 65.0, 9: 95.0}
-    STATIONARY_TURN_MIN_DEG = {"LEFT": 15.0, "RIGHT": 15.0}
+    # Retain count 2 metadata for compatibility with existing explicit commands.
+    # The new count 1 yaw estimate must be checked in simulation and on the robot.
+    RIGHT_TURN_ANGLES_DEG = {
+        1: 15.0, 2: 15.0, 3: 30.0, 5: 45.0, 6: 60.0, 7: 75.0, 9: 90.0,
+    }
+    STATIONARY_TURN_MIN_DEG = STATIONARY_TURN_MIN_DEG
     STATIONARY_MAX_TURN_COUNTS = {"LEFT": 6, "RIGHT": 9}
     PICKUP_INITIAL_CENTER_BOUND_PX = 70.0
     BALL_STATIONARY_TURN_MIN_BOTTOM_PX = 120.0
@@ -134,7 +140,7 @@ class MotionDecisionPlanner:
     # Fixed lost-ball search turns: left two repeats, right five repeats.
     BALL_LOST_LEFT_TURN_COUNT = 2
     BALL_LOST_RIGHT_TURN_COUNT = 5
-    POST_SHOT_LINE_HEADING_TOLERANCE_DEG = 20.0
+    POST_SHOT_LINE_HEADING_TOLERANCE_DEG = 15.0
     LINE_OFFSET_EXIT_RATIO = 0.8
     LINE_OFFSET_EXIT_DISTANCE_M = 0.10
     LINE_OFFSET_TARGET_TOLERANCE_DEG = 10.0
@@ -183,6 +189,7 @@ class MotionDecisionPlanner:
         self.ball_top_loss_forward_sent = False
         self.last_ball_inside_image = False
         self.ball_interior_loss_forward_sent = False
+        self.ball_interior_loss_backward_state = "IDLE"
         self.pickup_close_alignment_active = False
         self.pickup_fine_approach_complete = False
         self.pickup_last_visible_bottom_distance_px: float | None = None
@@ -725,6 +732,8 @@ class MotionDecisionPlanner:
                 return self._lost_goal_recovery_command()
             alignment = self._goal_camera90_alignment_command(info)
             if alignment is not None:
+                if alignment.get("valid") and alignment.get("action") == "GOAL_CAMERA_90_FORWARD_2":
+                    self.goal_recovery_centering = False
                 return alignment
             if self.goal_recovery_centering and self._is_detected_goal(info):
                 self.goal_recovery_centering = False
@@ -749,6 +758,9 @@ class MotionDecisionPlanner:
                 heading = command.heading_error_deg
                 direction = "RIGHT" if heading > 0.0 else "LEFT"
                 count = self._turn_repeat_count(heading, direction)
+                if count == 0:
+                    return {**result, "valid": False, "motion": "STOP",
+                            "reason": "line_heading_below_stationary_turn_minimum"}
                 yaw = self._turn_angle_deg(count, direction)
                 result.update({
                     "motion": f"LINE_HEADING_TURN_{direction}_{count}",
@@ -790,14 +802,17 @@ class MotionDecisionPlanner:
                 })
         if source == "hurdle" and command.action in {"ALIGN_LEFT", "ALIGN_RIGHT"}:
             direction = "LEFT" if command.action == "ALIGN_LEFT" else "RIGHT"
-            # Recovery supplies fixed small counts; other turns retain center steering.
+            # Both sides use measured geometry; blind searches keep an explicit count.
             count = command.turn_count
-            if count is None:
-                angle = max(
-                    abs(command.center_steering_deg or 0.0),
-                    self.STATIONARY_TURN_MIN_DEG[direction],
-                )
+            angle = command.hurdle_angle_deg
+            if angle is None:
+                angle = command.center_steering_deg
+            if angle is not None:
                 count = self._turn_repeat_count(angle, direction)
+            elif count is None:
+                return self.hurdle_planner.wait("hurdle_missing_stationary_turn_angle").to_dict()
+            if count == 0:
+                return self.hurdle_planner.wait("hurdle_below_stationary_turn_minimum").to_dict()
             result.update({
                 "turn_direction": direction,
                 "turn_count": count,
@@ -859,7 +874,9 @@ class MotionDecisionPlanner:
         candidate.update(target_lateral_m=lateral, target_forward_m=forward,
                          target_bearing_deg=angle, ground_lateral_offset_m=distance,
                          steering_error_deg=angle)
-        if abs(angle) <= self.LINE_OFFSET_TARGET_TOLERANCE_DEG:
+        direction = "RIGHT" if angle > 0.0 else "LEFT"
+        count = self._turn_repeat_count(angle, direction)
+        if count == 0 and abs(angle) <= self.LINE_OFFSET_TARGET_TOLERANCE_DEG:
             speed = self.line_planner.config.min_linear_speed_mps
             return {
                 **candidate, "valid": True, "motion": "STRAIGHT_1",
@@ -869,10 +886,9 @@ class MotionDecisionPlanner:
                 "approach_motion": "STRAIGHT_1", "approach_level": 1,
                 "catalog_motion_available": True,
             }
-        direction = "RIGHT" if angle > 0.0 else "LEFT"
         angles = self.RIGHT_TURN_ANGLES_DEG if direction == "RIGHT" else self.LEFT_TURN_ANGLES_DEG
-        # One smallest calibrated turn, then require a new stationary observation.
-        count = min(angles, key=angles.get)
+        if count == 0:
+            return {**candidate, "reason": "line_offset_below_stationary_turn_minimum"}
         yaw = angles[count]
         return {
             **candidate, "valid": True, "motion": f"LINE_OFFSET_TURN_{direction}_{count}",
@@ -936,21 +952,12 @@ class MotionDecisionPlanner:
 
     @classmethod
     def _turn_repeat_count(cls, angle_deg: float, direction: str) -> int:
-        """Select the largest allowed turn that does not exceed the error."""
-        angles = (
-            cls.LEFT_TURN_ANGLES_DEG
-            if direction == "LEFT" else cls.RIGHT_TURN_ANGLES_DEG
-        )
-        return max(
-            (count for count, angle in angles.items()
-             if angle <= abs(angle_deg)
-             and count <= cls.STATIONARY_MAX_TURN_COUNTS[direction]),
-            default=0,
-        )
+        """Use the same inclusive error-angle bins in every mission."""
+        return stationary_turn_repeat_count(angle_deg, direction)
 
     @classmethod
     def _ball_turn_repeat_count(cls, angle_deg: float, direction: str) -> int:
-        """Select a turn no larger than the visible-ball heading error."""
+        """Select repetitions from the visible-ball heading error."""
         return cls._turn_repeat_count(angle_deg, direction)
 
     @classmethod
@@ -1026,7 +1033,7 @@ class MotionDecisionPlanner:
         """Search confirmed loss using translation first, then the last screen side."""
         if info is not None:
             self._update_ball_tracking(info, 0.0)
-        recovery = self._ball_interior_loss_forward_decision(
+        recovery = self._ball_interior_loss_recovery_decision(
             info, "BALL_APPROACH_LOST_ALIGN", "BALL_LOST_FORWARD_4",
         )
         if recovery is not None:
@@ -1103,7 +1110,7 @@ class MotionDecisionPlanner:
         ):
             return None
         stage = "FINE" if fine else "INITIAL"
-        recovery = self._ball_interior_loss_forward_decision(
+        recovery = self._ball_interior_loss_recovery_decision(
             info, f"BALL_PICKUP_{stage}_ALIGN", f"BALL_PICKUP_{stage}_SEARCH_FORWARD_4",
         )
         if recovery is not None:
@@ -1162,11 +1169,7 @@ class MotionDecisionPlanner:
         motion completion. Pickup corrections retain the camera-down checkpoint.
         """
         direction = self.last_ball_turn_direction
-        if (phase in {"BALL_PICKUP_FINE_ALIGN", "BALL_PICKUP_INITIAL_ALIGN"}
-                and self.pickup_last_visible_bottom_distance_px is not None
-                and self.pickup_last_visible_bottom_distance_px <= self.PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX):
-            # Reacquire the close ball before choosing a pixel-based crab direction.
-            return None
+        # The 360px yaw restriction applies to visible alignment, not confirmed loss.
         if not (
             info is not None and info.get("detected") is False
             and info.get("raw_detected") is not True
@@ -1197,10 +1200,10 @@ class MotionDecisionPlanner:
             },
         )
 
-    def _ball_interior_loss_forward_decision(
+    def _ball_interior_loss_recovery_decision(
         self, info: dict[str, Any] | None, phase: str, action: str,
     ) -> MotionDecision | None:
-        """Search once after confirmed loss inside the image, never on a stale frame."""
+        """Retreat two cycles, then advance only after success and fresh confirmed loss."""
         if not (
             info is not None and info.get("detected") is False
             and info.get("raw_detected") is not True
@@ -1209,6 +1212,23 @@ class MotionDecisionPlanner:
             and not self.ball_interior_loss_forward_sent
         ):
             return None
+        if self.ball_interior_loss_backward_state == "PENDING":
+            return MotionDecision(
+                phase=phase, source="ball", action="WAIT", valid=False,
+                reason="ball_interior_loss_backward_not_completed",
+                sdk_motion_requested=False, requires_ack=False, source_command={},
+            )
+        if self.ball_interior_loss_backward_state == "IDLE":
+            backward = (action.replace("SEARCH_FORWARD_4", "SEARCH_BACKWARD_2")
+                        if action.startswith("BALL_PICKUP_") else "BALL_LOST_BACKWARD_2")
+            return MotionDecision(
+                phase=phase, source="ball", action=backward, valid=True,
+                reason="ball_lost_inside_image_backward_search", sdk_motion_requested=True,
+                requires_ack=False, source_command={
+                    "lost_ball_interior_backward": True, "backward_count": 2,
+                    "catalog_motion_available": True,
+                },
+            )
         return MotionDecision(
             phase=phase, source="ball", action=action, valid=True,
             reason="ball_lost_inside_image_forward_search", sdk_motion_requested=True,
@@ -1340,6 +1360,8 @@ class MotionDecisionPlanner:
             if phase == "POST_BALL_LINE_ALIGN"
             else self.POST_SHOT_LINE_HEADING_TOLERANCE_DEG
         )
+        if phase == "POST_SHOT_LINE_ALIGN":
+            heading_tolerance = self.STATIONARY_TURN_MIN_DEG[direction]
         offset_tolerance = self.line_planner.config.recovery_exit_offset_norm
         common = {
             "heading_error_deg": heading,
@@ -1360,7 +1382,7 @@ class MotionDecisionPlanner:
                 sdk_motion_requested=False, requires_ack=False,
                 source_command=common,
             )
-        if abs(heading) <= heading_tolerance:
+        if abs(heading) < heading_tolerance:
             return MotionDecision(
                 phase=phase,
                 source="line",
@@ -1781,74 +1803,24 @@ class MotionDecisionPlanner:
         self,
         info: dict[str, Any] | None,
     ) -> dict[str, Any] | None:
-        """Correct far-target heading; delegate scoring-depth pixel alignment."""
-        if not self._is_detected_goal(info) or info is None:
+        """Use the same target-point steering as the standalone Goal planner."""
+        if info is None:
             return None
-        confidence = self._number(info, "confidence")
         depth = self._number(info, "depth_m")
-        offset = self._number(info, "offset_x_norm")
-        if (
-            confidence is None
-            or confidence < self.goal_planner.config.min_confidence
-            or info.get("depth_valid") is not True
-            or depth is None
-            or offset is None
-        ):
+        if depth is None or depth < GOAL_SCORE_MAX_DEPTH_M:
             return None
-        if depth > self.config.goal_control_range_m:
-            return None
-        scoring_max_depth = (
-            self.goal_planner.config.score_target_depth_m
-            + self.goal_planner.config.score_depth_tolerance_m
-        )
-        if depth <= scoring_max_depth:
-            return None
-        bearing = self._number(info, "bearing_deg")
-        centered_by_bearing = bool(
-            bearing is not None
-            and abs(bearing) <= self.config.goal_reacquire_center_deg
-        )
-        if bearing is None:
-            return {
-                "valid": False,
-                "action": "WAIT",
-                "reason": "missing_goal_bearing_for_camera90_alignment",
-                "sdk_motion_requested": False,
-                "confidence": confidence,
-                "depth_m": depth,
-                "distance_m": self._number(info, "distance_m"),
-                "bearing_error_deg": None,
-                "offset_x_norm": offset,
-                "is_centered": False,
-                "score_now": False,
-            }
-        if centered_by_bearing:
-            return None
-
-        direction = "RIGHT" if bearing > 0.0 else "LEFT"
-        count = self._goal_turn_repeat_count(bearing, direction)
-        if count == 0:
-            return None
-        return {
-            "valid": True,
-            "action": f"GOAL_CAMERA90_TURN_{direction}_{count}",
-            "reason": "align_goal_yaw_camera90",
-            "sdk_motion_requested": False,
-            "confidence": confidence,
-            "depth_m": depth,
-            "distance_m": self._number(info, "distance_m"),
-            "depth_error_m": None,
-            "bearing_error_deg": bearing,
-            "offset_x_norm": offset,
-            "is_centered": False,
-            "depth_in_score_range": False,
-            "score_now": False,
-            "turn_direction": direction,
-            "turn_count": count,
-            "turn_repeat_deg": self._turn_repeat_deg(direction),
-            "turn_angle_deg": self._turn_angle_deg(count, direction),
-            "catalog_motion_available": True,
-        }
+        command = self.goal_planner.plan(info).to_dict()
+        action = command["action"]
+        if action.startswith("GOAL_CAMERA90_TURN_"):
+            direction, count_text = action.removeprefix("GOAL_CAMERA90_TURN_").rsplit("_", 1)
+            count = int(count_text)
+            command.update(
+                turn_direction=direction, turn_count=count,
+                turn_repeat_deg=self._turn_repeat_deg(direction),
+                turn_angle_deg=self._turn_angle_deg(count, direction),
+                catalog_motion_available=True,
+            )
+        return command
 
     @staticmethod
     def _number(data: dict[str, Any] | None, key: str) -> float | None:
@@ -1953,6 +1925,7 @@ class MotionDecisionPlanner:
             self.ball_top_loss_forward_sent = False
             self.last_ball_inside_image = False
             self.ball_interior_loss_forward_sent = False
+            self.ball_interior_loss_backward_state = "IDLE"
             bbox = info.get("bbox")
             image_height = self._number(info, "image_height")
             if isinstance(bbox, (list, tuple)) and len(bbox) == 4:
@@ -2023,11 +1996,11 @@ class MotionDecisionPlanner:
         """Preserve translation recovery before a bounded last-side search turn."""
         direction = self.last_ball_turn_direction
         stopping = self.ball_lost_elapsed_sec <= self.config.ball_lost_stop_sec
-        recovery = self._ball_interior_loss_forward_decision(
+        recovery = self._ball_interior_loss_recovery_decision(
             info, "BALL_APPROACH_LOST_ALIGN", "BALL_LOST_FORWARD_4",
         )
         if not stopping and recovery is not None:
-            return {**recovery.source_command, "valid": True, "motion": recovery.action, "reason": recovery.reason}
+            return {**recovery.source_command, "valid": recovery.valid, "motion": recovery.action, "reason": recovery.reason}
         if not stopping and self._ball_top_loss_forward_pending():
             decision = self._ball_top_loss_forward_decision(
                 "BALL_APPROACH_LOST_ALIGN", "BALL_LOST_FINE_FORWARD_3"
@@ -2107,6 +2080,7 @@ class MotionDecisionPlanner:
         self.ball_top_loss_forward_sent = False
         self.last_ball_inside_image = False
         self.ball_interior_loss_forward_sent = False
+        self.ball_interior_loss_backward_state = "IDLE"
         self.pickup_last_visible_bottom_distance_px = None
         self.last_ball_turn_direction = None
         self.last_ball_line_offset_norm = None
@@ -2266,7 +2240,7 @@ class MotionDecisionPlanner:
             angular_speed = 0.0
             reason = "goal_lost_stop_before_search"
         else:
-            count = 1 if direction == "LEFT" else 2
+            count = 1
             action = f"GOAL_CAMERA90_TURN_{direction}_{count}"
             sign = 1.0 if direction == "RIGHT" else -1.0
             angular_speed = sign * self.config.goal_recovery_turn_rad_s

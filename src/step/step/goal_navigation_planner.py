@@ -8,6 +8,15 @@ import math
 from typing import Any
 
 from .approach_distance import approach_level_from_motion
+from .stationary_turns import stationary_turn_repeat_count
+from .goal_scoring import (
+    GOAL_SCORE_MIN_DEPTH_M, GOAL_SCORE_TARGET_DEPTH_M, GOAL_SCORE_MAX_DEPTH_M,
+    goal_shot_pixel_limit, goal_shot_region,
+)
+
+
+GOAL_FINE_APPROACH_MAX_DEPTH_M = 0.850
+GOAL_FINE_APPROACH_TURN_MIN_DEG = 30.0
 
 
 @dataclass(frozen=True)
@@ -16,10 +25,7 @@ class GoalNavigationConfig:
 
     min_confidence: float = 0.55
     control_start_depth_m: float = 2.0
-    score_target_depth_m: float = 0.43
-    score_depth_tolerance_m: float = 0.04
-    score_left_bound_px: float = -90.0
-    score_right_bound_px: float = 90.0
+    score_target_depth_m: float = GOAL_SCORE_TARGET_DEPTH_M
     score_crab_max_offset_px: float = 140.0
 
 
@@ -40,6 +46,9 @@ class GoalActionCommand:
     is_centered: bool
     depth_in_score_range: bool
     score_now: bool
+    shot_region: int | None = None
+    target_steering_angle_deg: float | None = None
+    target_lateral_error_m: float | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Return a rounded JSON-compatible representation."""
@@ -61,6 +70,10 @@ class GoalActionCommand:
             "is_centered": self.is_centered,
             "depth_in_score_range": self.depth_in_score_range,
             "score_now": self.score_now,
+            "shot_region": self.shot_region,
+            "target_steering_angle_deg": _round_optional(self.target_steering_angle_deg, 3),
+            "target_lateral_error_m": _round_optional(self.target_lateral_error_m, 6),
+            "target_forward_error_m": _round_optional(self.depth_error_m, 3),
             "approach_motion": (
                 self.action
                 if self.action == "STRAIGHT" or approach_level is not None
@@ -137,50 +150,88 @@ class GoalNavigationPlanner:
         offset_px = _number(goal_info, "offset_x_px")
         if offset_px is None:
             return self.wait("invalid_goal_alignment")
-        centered = self.config.score_left_bound_px <= offset_px <= self.config.score_right_bound_px
+        region = goal_shot_region(depth, offset_px)
+        centered = abs(offset_px) <= goal_shot_pixel_limit(depth)
         depth_error = depth - self.config.score_target_depth_m
         depth_in_range = (
-            self.config.score_target_depth_m - self.config.score_depth_tolerance_m
-            <= depth
-            <= self.config.score_target_depth_m + self.config.score_depth_tolerance_m
+            GOAL_SCORE_MIN_DEPTH_M <= depth < GOAL_SCORE_MAX_DEPTH_M
         )
-        ready_geometry = centered and depth_in_range
+        ready_geometry = region is not None
         analyzer_score_now = goal_info.get("score_now")
         score_now = bool(
             ready_geometry
             and analyzer_score_now is True
         )
+        target_steering = None
+        lateral_error = None
 
         if score_now:
             action = "SHOT"
             reason = "goal_centered_at_scoring_depth"
-        elif depth < self.config.score_target_depth_m - self.config.score_depth_tolerance_m:
+        elif depth < GOAL_SCORE_MIN_DEPTH_M:
             action = "GOAL_CAMERA90_BACKWARD_1"
             reason = "retreat_goal_to_scoring_depth"
         elif depth_in_range and not centered:
             direction = "RIGHT" if offset_px > 0.0 else "LEFT"
             if abs(offset_px) > self.config.score_crab_max_offset_px:
                 # Re-evaluate pixels after each completed turn and stationary pause.
-                count = 2 if direction == "RIGHT" else 1
-                action = f"GOAL_CAMERA90_TURN_{direction}_{count}"
-                reason = "align_goal_large_pixel_offset_camera90"
+                if bearing is None:
+                    return self.wait("missing_goal_bearing_for_camera90_alignment")
+                if bearing * offset_px < 0.0:
+                    return self.wait("goal_bearing_pixel_direction_mismatch")
+                count = stationary_turn_repeat_count(bearing, direction)
+                if count == 0:
+                    # Pixels still require correction even below the yaw bin.
+                    action = f"GOAL_CAMERA90_CRAB_{direction}"
+                    reason = "align_goal_pixels_below_turn_minimum"
+                else:
+                    action = f"GOAL_CAMERA90_TURN_{direction}_{count}"
+                    reason = "align_goal_large_pixel_offset_camera90"
             else:
                 action = f"GOAL_CAMERA90_CRAB_{direction}"
                 reason = "align_goal_lateral_camera90"
         elif ready_geometry:
             action = "WAIT_SCORE_CONFIRMATION"
             reason = "waiting_for_stable_score_condition"
-        elif depth_error > self.config.score_depth_tolerance_m:
-            # Use camera Depth Z directly; ground distance is a different metric.
-            if depth > 1.280:
-                action = "GOAL_CAMERA_90_FORWARD"
-            elif depth > 0.850:
-                action = "GOAL_CAMERA_90_FORWARD_2"
-            elif depth > 0.500:
-                action = "GOAL_CAMERA90_FINE_FORWARD_3"
+        elif GOAL_SCORE_MAX_DEPTH_M <= depth <= GOAL_FINE_APPROACH_MAX_DEPTH_M:
+            if bearing is None:
+                return self.wait("missing_goal_bearing_for_camera90_alignment")
+            if abs(bearing) >= 90.0:
+                return self.wait("invalid_goal_bearing_for_camera90_alignment")
+            if bearing * offset_px < 0.0:
+                return self.wait("goal_bearing_pixel_direction_mismatch")
+            direction = "RIGHT" if bearing > 0.0 else "LEFT"
+            if abs(bearing) >= GOAL_FINE_APPROACH_TURN_MIN_DEG:
+                count = stationary_turn_repeat_count(bearing, direction)
+                action = f"GOAL_CAMERA90_TURN_{direction}_{count}"
+                reason = "align_goal_yaw_before_fine_approach"
             else:
-                action = "GOAL_CAMERA90_FINE_FORWARD_1"
-            reason = "approach_goal_by_depth"
+                action = "GOAL_CAMERA90_FINE_FORWARD_3"
+                reason = "approach_goal_by_depth"
+        elif depth > GOAL_FINE_APPROACH_MAX_DEPTH_M:
+            # The board is elevated: use its measured X/Z, not a floor-ray
+            # intersection. Steer toward the stopping point 510 mm before it.
+            lateral_error = _number(goal_info, "lateral_offset_m")
+            if ("lateral_offset_m" not in goal_info
+                    and bearing is not None and abs(bearing) < 90.0):
+                lateral_error = depth * math.tan(math.radians(bearing))
+            if lateral_error is None or depth_error <= 0.0:
+                return self.wait("missing_valid_goal_target_geometry")
+            if lateral_error * offset_px < 0.0:
+                return self.wait("goal_target_pixel_direction_mismatch")
+            # Suppress floating-point roundoff at inclusive angular boundaries.
+            target_steering = round(math.degrees(math.atan2(lateral_error, depth_error)), 9)
+            direction = "RIGHT" if target_steering > 0.0 else "LEFT"
+            if abs(target_steering) <= 15.0:
+                action = "GOAL_CAMERA_90_FORWARD_2"
+                reason = "approach_goal_target_forward_4"
+            elif abs(target_steering) < 45.0:
+                action = f"GOAL_CAMERA90_RECOVER_{direction}_4"
+                reason = "approach_goal_target_recovery"
+            else:
+                count = stationary_turn_repeat_count(target_steering, direction)
+                action = f"GOAL_CAMERA90_TURN_{direction}_{count}"
+                reason = "approach_goal_target_stationary_turn"
         else:
             return self.wait("goal_too_close_hold")
 
@@ -198,4 +249,7 @@ class GoalNavigationPlanner:
             is_centered=centered,
             depth_in_score_range=depth_in_range,
             score_now=score_now,
+            shot_region=region,
+            target_steering_angle_deg=target_steering,
+            target_lateral_error_m=lateral_error,
         )

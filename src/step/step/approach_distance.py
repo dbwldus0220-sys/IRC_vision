@@ -34,6 +34,8 @@ def approach_motion_for_distance(distance_m: float | None) -> str:
 
 
 BALL_HURDLE_FINE_DISTANCE_M = 0.550
+# Start fine walking before entering the camera-down pickup sequence.
+BALL_FINE_APPROACH_DISTANCE_M = 0.600
 HURDLE_FINE_DISTANCE_M = 0.700
 
 

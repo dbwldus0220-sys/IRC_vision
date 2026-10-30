@@ -29,8 +29,8 @@ class NavigationConfig:
     min_linear_speed_mps: float = 0.015
     recovery_lateral_speed_mps: float = 0.025
     recovery_turn_speed_rad_s: float = 0.22
-    recovery_heading_turn_deg: float = 20.0
-    recovery_away_heading_turn_deg: float = 20.0
+    recovery_heading_turn_deg: float = 15.0
+    recovery_away_heading_turn_deg: float = 15.0
     curve_follow_max_offset_norm: float = 0.55
     recovery_straight_offset_norm: float = 0.45
     recovery_parallel_heading_deg: float = 2.0

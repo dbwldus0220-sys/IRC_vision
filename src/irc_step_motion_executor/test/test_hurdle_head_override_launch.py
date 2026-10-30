@@ -6,6 +6,8 @@ import time
 import unittest
 
 import launch
+import launch.actions
+import launch.events
 import launch_testing
 import launch_testing.actions
 import launch_testing.util
@@ -19,6 +21,7 @@ TOPICS = (
     "/motion/executor/request", "/motion/executor/cancel",
     "/motion/executor/status", "/motion/executor/heartbeat",
     "/navigation/motion_command", "/vision/hurdle_info", "/vision/ball_info",
+    "/navigation/goal_camera_prepare",
 )
 
 
@@ -37,6 +40,12 @@ def generate_test_description():
     return launch.LaunchDescription([
         executor, launch_testing.actions.ReadyToTest(),
         launch_testing.util.KeepAliveProc(),
+        launch.actions.TimerAction(
+            period=15.0,
+            actions=[launch.actions.EmitEvent(event=launch.events.Shutdown(
+                reason="hurdle camera test timeout guard",
+            ))],
+        ),
     ]), {"executor": executor}
 
 

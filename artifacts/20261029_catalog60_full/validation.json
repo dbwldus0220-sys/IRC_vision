@@ -1,0 +1,30 @@
+{
+  "hardware_executed": false,
+  "source_motions": 74,
+  "derived_motions": 22,
+  "runtime_speed_policy": "unscaled source playback_speed * 0.95, applied once",
+  "targeted_tests_passed": 124,
+  "installed_tests_passed": 101,
+  "startup_tests_passed": 4,
+  "cpp_fake_hardware_trace_comparisons_passed": 148,
+  "expanded_regression": {
+    "passed": 586,
+    "failed": 18,
+    "baseline_failed": 18,
+    "same_failed_test_ids": true,
+    "note": "Existing mission phase expectation failures reproduced with pre-update motion_decision_node.py; initial run also missed workspace ROS environment, corrected for final run."
+  },
+  "packages_built": [
+    "mission_control",
+    "irc_step_motion_executor"
+  ],
+  "all_aliases_resolve": true,
+  "source_and_installed_decision_node_identical": true,
+  "sha256": {
+    "artifacts/robot_motions_runtime.json": "d356ac471b6d6e5cfe1f52d15bb2e7bccec39b0393a4d23763cc540d3643a5a8",
+    "artifacts/robot_motions_pc.json": "e40c53bab17b5096db0264b86d1b43f8d31fbcab48acaa44e012d8457a04eb79",
+    "src/irc_step_motion_executor/config/motion_aliases.yaml": "bea779d5f64a430b094097bfb75704fd1cc14adca865ab2ad3f41a36364b5f35",
+    "src/mission_control/mission_control/motion_decision_node.py": "7a948c3babd37165fba1d9863143462e15647127906440f5a39f22a847985607",
+    "tools/upsert_motion_catalog.py": "4b77ec1566244b87bbcde30a2a7bce9e6e8bb80c3e437163cc9d4abb785a0b32"
+  }
+}

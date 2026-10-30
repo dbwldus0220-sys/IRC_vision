@@ -54,7 +54,7 @@ def test_parallel_far_line_checks_target_even_when_heading_selects_forward(sign)
     decision = planner().plan("LINE_TRACK", {"line": info}, .1)
     assert baseline.action == "STRAIGHT"
     assert decision.valid
-    assert decision.action == ("LINE_OFFSET_TURN_RIGHT_2" if sign > 0 else "LINE_OFFSET_TURN_LEFT_1")
+    assert decision.action == ("LINE_OFFSET_TURN_RIGHT_3" if sign > 0 else "LINE_OFFSET_TURN_LEFT_2")
     assert decision.reason == "line_offset_target_turn"
 
 
@@ -66,7 +66,9 @@ def test_forward_guard_requires_both_pixel_and_ground_distance(offset, distance)
     decision = planner().plan("LINE_TRACK", {"line": info}, .1)
     guarded = offset >= 100. and distance > .10
     assert decision.source_command["line_offset_alignment_active"] is guarded
-    assert decision.action == ("LINE_OFFSET_TURN_RIGHT_2" if guarded else "STRAIGHT")
+    assert decision.action == ("STOP" if guarded else "STRAIGHT")
+    if guarded:
+        assert decision.reason == "line_offset_below_stationary_turn_minimum"
 
 
 def test_far_parallel_line_uses_short_forward_if_target_already_ahead():
@@ -115,11 +117,11 @@ def test_far_recovery_guard_keeps_inclusive_pixel_threshold(sign, offset):
     if offset < 100.:
         assert decision.action.startswith("RECOVER_")
     else:
-        assert decision.action == ("LINE_OFFSET_TURN_RIGHT_2" if sign > 0 else "LINE_OFFSET_TURN_LEFT_1")
+        assert decision.action == ("LINE_OFFSET_TURN_RIGHT_1" if sign > 0 else "LINE_OFFSET_TURN_LEFT_1")
         assert abs(decision.source_command["ground_lateral_offset_m"]) > .10
 
 
-@pytest.mark.parametrize("target", [-10., 0., 10.])
+@pytest.mark.parametrize("target", [-7.999, 0., 10.])
 def test_far_recovery_guard_allows_short_forward_when_target_aligned(target):
     info = sample(target_angle=target, ground_heading_error_deg=-35., heading_error_deg=55.)
     decision = planner().plan("LINE_TRACK", {"line": info}, .1)
@@ -138,7 +140,7 @@ def test_large_ground_heading_is_not_reversed_by_offset_target(heading):
 def test_guard_does_not_latch_when_next_frame_selects_normal_recovery():
     p = planner()
     first = p.plan("LINE_TRACK", {"line": sample(target_angle=25., ground_heading_error_deg=-20.)}, .1)
-    assert first.action == "LINE_OFFSET_TURN_RIGHT_2"
+    assert first.action == "LINE_OFFSET_TURN_RIGHT_1"
     result = p.plan("LINE_TRACK", {"line": sample(target_angle=24., ground_heading_error_deg=24.,
                       filtered_lateral_offset_norm=.378)}, .1)
     assert result.action == "RECOVER_RIGHT_TURN_RIGHT_4"

@@ -1,0 +1,82 @@
+2026-10-29 모터 오류 후 경기 진행 정책 점검
+
+결론
+이전의 일반 모터 오류 후 미션 진행 정책과 position_tolerance_enabled=false
+전달은 남아 있다. 그러나 현재 GUI SDK의 새 단독 모션 시작 검사에서 모터
+문제를 HardwareNotReady로 반환하며, 상위 노드는 이를 영구 잠금 처리한다.
+따라서 '일부 모터 문제가 있어도 다음 동작을 계속 수행'이라는 사용자 의도는
+현재 모든 실행 경로에서 보존되지 않는다. 명령행 옵션 누락 문제가 아니다.
+
+역사와 실행 경로
+- 45fa1dd (2026-09-15): position_tolerance_enabled 옵션 추가와 함께
+  SDK_COMMUNICATION_ERROR / SDK_FRAME_SEND_FAILED /
+  SDK_PRESENT_POSITION_READ_FAILED / SDK_POSITION_TIMEOUT을 critical에서 분리.
+  SDK_HARDWARE_NOT_READY는 당시에도 critical로 유지했다.
+- 현재 Python source와 install의 safety_interlock.py, motion_decision_node.py,
+  motion_command_bridge_node.py는 바이트 단위로 동일하다.
+- 현재 일반 재생의 setPositionToleranceEnabled(false)는 값 저장/분기 없이
+  반환한다. true는 예외다. 일반 완료는 원래 목표 전송 완료로 처리되며
+  startup 도달 검사는 별개다. false가 토크/통신 검사 전체를 해제하지 않는다.
+- aa0b70d (2026-10-28)에 prepareImmediatePlayback의 VerifyTorqueEnabled(true)
+  조건이 추가됐다. 현재까지 해당 SDK 소스는 이 커밋과 차이가 없다.
+- 토크 검사 실패 -> RobotMotionPlayer::start에서 내부 error는 CommunicationError,
+  반환값은 HardwareNotReady -> ROS backend는 반환값을 SDK_HARDWARE_NOT_READY로
+  매핑 -> SafetyInterlock이 재시작까지 전체 모션 발행을 잠근다.
+- 독립 start는 readStartAngles도 필수다. 이것도 실패 시 같은 반환값을 사용한다.
+- 실행 중 관측용 위치 읽기 실패는 trace에 기록하고 진행한다. SyncWrite 송신이
+  성공하는 한 모터 개별 응답 부재가 목표 전송 완료를 막지 않는다.
+- queue 연결은 직전 목표를 이어받으며 독립 start의 토크/시작각 검사를 거치지
+  않는다. 일반/예약 재생 중 계속 가다가 다음 독립 start에서 막힐 수 있다.
+- pickup의 제한적 다음 단계 진행도 남아 있다. 지정된 recoverable 오류만
+  적용하고 연속 2회 실패 시 sequence를 끝낸다. 준비 동작 등은 예외다.
+
+실행 로그와 일치
+/home/jet/.ros/log/sdk_motion_executor_7267_1793272391186.log에서 확인:
+  Motion position tolerance check: DISABLED
+  Interpolation: continuous quintic; motor 5: included
+/home/jet/.ros/log/python3_7263_1793272391886.log:
+  1793272540.237518539 SHOT SUCCEEDED, physical arrival not confirmed
+  1793272541.358664117 POST_SHOT_TURN_RIGHT_9 요청
+  1793272541.453246396 SDK_HARDWARE_NOT_READY critical latch
+사용자 첨부 화면: Torque verification failed, ID: 5.
+이 로그는 물리적 단선/토크 OFF/오류 응답을 서로 구분하지 못한다.
+
+가짜 버스 실험 (probe.cpp, 실물 장치 접근 없음)
+현재 실제 player/hardware/Dxl 소스를 test_support SDK 헤더로 직접 컴파일했다.
+모든 경우 position_tolerance=false, continuous_interpolation=true를 지정하고
+정상 초기화 및 첫 start 후 오류를 주입했다. 첫 모션 완료 후 독립 start를 시도.
+1. 정상: 현재 모션 완료, 다음 start 성공.
+2. ID5 Torque Enable=0, 읽기 응답 유지: 현재 완료, 다음 HardwareNotReady.
+3. ID5 토크 읽기만 실패: 현재 완료, 다음 HardwareNotReady.
+4. ID5 모든 읽기 응답 없음: 현재 완료, 다음 HardwareNotReady.
+5. 버스 송신 실패: 현재 FAILED, 다음 HardwareNotReady.
+6. ID5 응답 없음 + 이미 예약된 동일 모션: 두 모션 완료, 그다음 독립 start 실패.
+전체 6개 사례의 assertions 통과. 결과: current_probe.log.
+가짜 버스 완료는 물리적 관절 도달/균형 유지가 아니다.
+
+추가된 검사만 분리한 대조 실험
+/tmp의 하드웨어 소스 사본에서 VerifyTorqueEnabled(true) 조건 하나만 제거해
+동일 6개 사례를 실행했다. 현재 player와 나머지 하드웨어 동작은 유지했다.
+이것은 전체 과거 버전 재현이 아닌 단일 조건의 영향 비교다.
+ID5 토크 OFF와 토크 읽기만 실패한 경우 다음 start가 성공했다.
+완전 응답 부재는 readStartAngles 실패로 여전히 막혔다.
+전체 6개 사례 assertions 통과. 결과: without_added_guard_probe.log.
+대조용 실행 파일은 /tmp에만 있으며 설치 실행 파일은 바꾸지 않았다.
+
+상위 정책 테스트
+test_safety_interlock 전체와 decision의 복구 가능한 실패 후 다음 명령/critical
+잠금, bridge의 pickup 오류 후 진행/연속 실패/복구 기록 검사: 36 passed.
+최초 실행은 PYTHONPATH가 ROS 경로를 덮어써 rclpy import에 실패했다.
+ROS 환경과 기존 PYTHONPATH를 보존해 재실행한 결과가 policy_tests.log다.
+
+수정 방향 (이번 조사에서는 적용하지 않음)
+모터 문제의 종류와 실행기 자체 불능을 구분하고, 경기 진행 정책을 새 start의
+토크 상태 검사·부분 시작각 읽기·오류 매핑까지 일관되게 적용해야 한다.
+SDK_HARDWARE_NOT_READY 전체를 무조건 무시하거나 토크 검사 한 줄만 삭제하는
+방법은 완전 통신 단절과 다음 시작각 처리 문제를 해결하지 못한다.
+유효하지 않은 각도를 실제 측정값처럼 사용하지 않도록 fallback/제외 기준과
+기록이 필요하다. 로봇 동작 변경은 가짜 버스 검증 이후 시뮬레이션에서 먼저
+평가해야 하며, 실제 경기 지속 가능성은 이 오프라인 시험으로 입증하지 않는다.
+
+이번 변경은 이 감사 폴더의 재현 소스/로그/보고서뿐이다.
+런타임 소스, 설정, 설치 바이너리, 모터 전원/토크, 실행 프로세스는 변경하지 않았다.

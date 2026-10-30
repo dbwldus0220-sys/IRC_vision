@@ -1,0 +1,17 @@
+{
+  "imported_motion_count": 27,
+  "source58_sha256": "df8c6322088173b77e900977ac355a0deb7c26dc38dfa013f5f984254cde9b92",
+  "source_tests_passed": 796,
+  "focused_capture_tests_passed": 4,
+  "pre_existing_tool_test_failure": "test_production_runtime_preserves_original_shoulders_and_other_fields: pre-import PC/runtime speed difference, 41 mismatching motions; speeds unchanged",
+  "build_packages": [
+    "mission_control",
+    "irc_step_motion_executor"
+  ],
+  "build_success": true,
+  "installed_node_path": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/mission_control/lib/python3.10/site-packages/mission_control/motion_decision_node.py",
+  "installed_node_matches_source": true,
+  "installed_catalog_matches_runtime": true,
+  "hardware_executed": false,
+  "installed_smoke_tests_passed": 21
+}

@@ -1,0 +1,21 @@
+{
+  "last_completed_goal_motion": {
+    "forward": "direct goal_shot",
+    "fine_forward": "direct goal_shot",
+    "crab": "direct goal_shot",
+    "stationary_turn": "goal_forward_to_default -> existing 1 second dwell -> goal_shot"
+  },
+  "preparation_alias": "goal_forward_to_default",
+  "preparation_motion": "R오뒤에서 기본자세(카메라45도)",
+  "source_file": "/home/jet/Downloads/robot_motions(60).json",
+  "source_sha256": "93a8c70bd16c0a89c5ead2a9e4c7ffd58d7d2bda6345165534187619a56402ab",
+  "existing_pc_matches_source": true,
+  "existing_runtime_matches_source_with_policy": true,
+  "runtime_playback_speed": 0.9025,
+  "position_tolerance_deg": 5.0,
+  "motion_data_modified": false,
+  "tests": "562 passed",
+  "hardware_executed": false,
+  "build": "mission_control succeeded",
+  "installed_verification": "source equality and six preparation routes passed"
+}

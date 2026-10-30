@@ -1,0 +1,60 @@
+2026-10-29 일반 모션의 부분 모터 오류 후 경기 진행 복원
+
+요청 범위
+position_tolerance_enabled=false로 일부 모터가 응답하지 않아도 경기를 계속
+진행하려던 기존 정책을 복원한다. 정상 보간/목표각/배속/미션 판단은 변경하지 않는다.
+
+수정
+1. RobotMotionPlayer가 setPositionToleranceEnabled(false)를 받으면 일반 모션
+   시작에 부분 모터 오류 허용 경로를 사용한다. ROS의 기존 옵션 전달은 유지한다.
+2. 일반 시작 전 토크 OFF/미확인은 ID 오류와 진행 경고를 남기고 프로파일 설정을
+   계속한다. 포트 준비 실패/프로파일 송신 실패는 기존처럼 시작을 거절한다.
+3. 전체 Present Position 읽기가 실패할 때만 관절별 읽기를 한 번 수행한다.
+   새 실측값을 우선하며 누락 관절은 마지막 실측 시작각 또는 마지막 송신 성공
+   Goal로 보완한다. 송신 실패 목표는 저장하지 않는다. 응답 복구 시 실측값으로
+   복귀한다. 미확인 ID와 initial_fallback trace를 남긴다.
+4. 초기화, 시작 자세 도달, cancel, 비상정지의 엄격한 검사는 유지한다.
+   전체 무응답이나 누락 관절을 보완할 기준각이 없으면 시작을 거절한다.
+   cancel 성공 후에는 hold 이전의 목표 캐시를 비워 다음 시작에서 다시 읽는다.
+5. ROS 오류 분류/critical latch는 변경하지 않았다. 부분 모터 문제를 시작
+   단계에서 처리하므로 그 이유만으로 HardwareNotReady가 올라가지 않는다.
+
+변경 파일
+external_sdk/gui_aligned의 player/hardware/Dxl 및 해당 헤더 7개,
+가짜 SDK/기존 하드웨어 테스트 2개, executor README 1개.
+원래 작업 중이던 mission_control, motion aliases, JSON 등의 변경은 유지했다.
+변경 전체는 changes.patch, 소스와 설치 실행 파일 SHA256은 sha256.json 참조.
+
+검증
+- 실제 player -> 실제 hardware -> 실제 Dxl 코드를 가짜 SDK로 시험했다.
+- 추가한 20개 조합: 코사인/연속 보간 × 단독/예약 × 토크 OFF/토크 읽기 실패/
+  5번 단절/22번 단절/5번 위치 오류 응답. 다음 모션 시작, 정상 관절의 새 실측값,
+  누락 관절의 직전 송신 목표, 복구 후 실측 사용, 자동 토크 ON 없음 확인.
+- 추가한 6개 경계 사례: 초기화 실패, 기준각 없음, startup 엄격 검사,
+  전체 무응답, cancel 엄격 검사, 송신 실패 목표의 캐시 오염 방지.
+- continuous_hardware_contract, gui_alignment_contract,
+  forward_timing_contract, continuous_interpolation_contract 모두 통과.
+  offline_tests.log 참조.
+- 추가 정상 재생/ROS wrapper 회귀 12개 대상 중 10개 통과, 기존 데이터 기대값
+  불일치로 2개 실패. GUI 코사인 비교, 연속 보간 비교, GUI 실행 사양, queue,
+  backend, driver, startup gate 검사는 통과했다. regression_tests.log 참조.
+- 실패한 test_sdk_executor_core는 pickup 기대값 '건공잡기'와 현재 'r공잡기 400'
+  차이, test_startup_pose_catalog는 '김오뒤3' ID13/14의 고정 기대각 차이다.
+  두 실행 파일은 각각 10/28 00:47, 13:54에 빌드된 그대로이고 이번에 재링크되지
+  않았다. 링크 대상에도 수정한 SDK가 없으며 해당 테스트/구현 소스도 변경하지
+  않았다. 이번 수정과 무관한 카탈로그 기대값 문제로 분리하고 수정하지 않았다.
+  링크와 시각 증거: unrelated_test_failures.json.
+- irc_step_motion_executor colcon build 및 install 완료. build_install.log 참조.
+  설치 바이너리에 새 경고와 initial_fallback 경로가 포함됐음을 확인했다.
+- 실물 모터 명령, 실행 중 노드 재시작, GUI 실행은 하지 않았다.
+
+사용과 한계
+기존 실행 명령의 position_tolerance_enabled:=false를 그대로 사용한다.
+다음 노드 실행부터 설치된 코드가 적용된다. 정상 초기화와 필요한 시작 자세
+확인을 마친 이후의 일반 모션에 적용되며, 처음부터 모터가 응답하지 않는
+토크 초기화 실패를 무시하는 변경은 아니다.
+모터가 완전히 응답하지 않는 경우에도 나머지 유효 응답이 있고 기준각이 있어야
+시작한다. 관절별 읽기는 실패한 시작에만 발생하지만 그만큼 통신 지연이 늘 수 있다.
+이전 목표는 실제 자세를 뜻하지 않으며, 고장 관절의 움직임/균형은 보장하지 않는다.
+오류 후 진행 동작은 시뮬레이션에서 먼저 평가해야 한다. 이번 가짜 버스 검증은
+동역학 시뮬레이션이 아니며, 실물 보행 안정성을 검증하지 않았다.

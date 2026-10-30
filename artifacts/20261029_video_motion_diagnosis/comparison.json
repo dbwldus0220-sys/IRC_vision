@@ -1,0 +1,418 @@
+{
+  "runtime_modified_by_review": false,
+  "hardware_executed": false,
+  "files": {
+    "source59": {
+      "path": "/home/jet/Downloads/robot_motions(59).json",
+      "sha256": "434d10f85fcc1622406e20d9719c8c5049c100a001a55de6b1ea6ee06313b73f"
+    },
+    "runtime": {
+      "path": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/robot_motions_runtime.json",
+      "sha256": "ad397cdd1f966939d452b027395c64b7f95af9addcd649d8ed4149b9dd98b273"
+    },
+    "pc": {
+      "path": "/home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/robot_motions_pc.json",
+      "sha256": "6d5d0b28facff2ffd842764693a162d441d9767d778b83203f3b9a4b1cd2ace3"
+    }
+  },
+  "log_evidence": {
+    "python3_3262_1793251782680.log": {
+      "path": "/home/jet/.ros/log/python3_3262_1793251782680.log",
+      "sha256": "a63d019708574e7c2e3c2ed0ff4bb506e5c1a78721e9c1252d388b9873111408"
+    },
+    "python3_3264_1793251782612.log": {
+      "path": "/home/jet/.ros/log/python3_3264_1793251782612.log",
+      "sha256": "15ca7b638451a6fa231c105980a1e46a975b72f953231bb63e6c0b7832afbcba"
+    },
+    "sdk_motion_executor_3266_1793251660514.log": {
+      "path": "/home/jet/.ros/log/sdk_motion_executor_3266_1793251660514.log",
+      "sha256": "4b75a12da2a9adbb769b77efb0ea0e725ba241b7c1074e7819775ac93d93852d"
+    }
+  },
+  "comparisons": [
+    {
+      "runtime_name": "r미세0도",
+      "source59_name": "r미세0도",
+      "frames_equal": false,
+      "runtime_speed": 1.05,
+      "source59_speed": 1.05,
+      "runtime_repeat": 5,
+      "source59_repeat": 5,
+      "frame_differences": [
+        {
+          "frame": 2,
+          "field": "time_ms",
+          "runtime": 55,
+          "source59": 48
+        },
+        {
+          "frame": 3,
+          "field": "angles.1",
+          "runtime": 0.263671875,
+          "source59": 0.17578125
+        },
+        {
+          "frame": 3,
+          "field": "angles.2",
+          "runtime": -9.755859375,
+          "source59": -9.84375
+        },
+        {
+          "frame": 3,
+          "field": "angles.3",
+          "runtime": 9.755859375,
+          "source59": 9.931640625
+        },
+        {
+          "frame": 3,
+          "field": "angles.4",
+          "runtime": 9.140625,
+          "source59": 10.107421875
+        },
+        {
+          "frame": 3,
+          "field": "angles.5",
+          "runtime": -8.96484375,
+          "source59": -8.876953125
+        },
+        {
+          "frame": 3,
+          "field": "angles.6",
+          "runtime": 67.236328125,
+          "source59": 66.97265625
+        },
+        {
+          "frame": 3,
+          "field": "angles.7",
+          "runtime": -68.818359375,
+          "source59": -68.5546875
+        },
+        {
+          "frame": 3,
+          "field": "angles.8",
+          "runtime": -11.6015625,
+          "source59": -11.513671875
+        },
+        {
+          "frame": 3,
+          "field": "angles.10",
+          "runtime": 0.59375,
+          "source59": 1.0546875
+        },
+        {
+          "frame": 3,
+          "field": "angles.11",
+          "runtime": -3.0,
+          "source59": -2.63671875
+        },
+        {
+          "frame": 3,
+          "field": "angles.12",
+          "runtime": 3.251953125,
+          "source59": 3.33984375
+        },
+        {
+          "frame": 3,
+          "field": "angles.13",
+          "runtime": -53.0,
+          "source59": -52.646484375
+        },
+        {
+          "frame": 3,
+          "field": "angles.15",
+          "runtime": 3.427734375,
+          "source59": 2.8125
+        },
+        {
+          "frame": 3,
+          "field": "angles.16",
+          "runtime": 0.52734375,
+          "source59": -1.58203125
+        },
+        {
+          "frame": 3,
+          "field": "angles.17",
+          "runtime": -29.125,
+          "source59": -30.146484375
+        },
+        {
+          "frame": 3,
+          "field": "angles.18",
+          "runtime": 31.904296875,
+          "source59": 32.783203125
+        },
+        {
+          "frame": 3,
+          "field": "angles.19",
+          "runtime": 64.951171875,
+          "source59": 64.3359375
+        },
+        {
+          "frame": 3,
+          "field": "angles.20",
+          "runtime": -60.029296875,
+          "source59": -60.380859375
+        },
+        {
+          "frame": 3,
+          "field": "angles.21",
+          "runtime": 2.021484375,
+          "source59": 3.251953125
+        },
+        {
+          "frame": 3,
+          "field": "angles.22",
+          "runtime": -5.712890625,
+          "source59": -8.26171875
+        },
+        {
+          "frame": 3,
+          "field": "frame_id",
+          "runtime": "3a5edf379c544da9814ef21249638a67",
+          "source59": "57c81c823a4b445da1378e3a6aab6598"
+        },
+        {
+          "frame": 3,
+          "field": "name",
+          "runtime": "r미세오뒤0도",
+          "source59": "R미세오뒤0도-1"
+        },
+        {
+          "frame": 3,
+          "field": "source_frame_id",
+          "runtime": "3a5edf379c544da9814ef21249638a67",
+          "source59": "57c81c823a4b445da1378e3a6aab6598"
+        },
+        {
+          "frame": 3,
+          "field": "start_ms",
+          "runtime": 303,
+          "source59": 296
+        }
+      ]
+    },
+    {
+      "runtime_name": "r마세90도(3회)",
+      "source59_name": "r마세90도",
+      "frames_equal": true,
+      "runtime_speed": 1.05,
+      "source59_speed": 1.05,
+      "runtime_repeat": 3,
+      "source59_repeat": 5,
+      "frame_differences": []
+    },
+    {
+      "runtime_name": "r마세90도(3회)",
+      "source59_name": "R미세90도",
+      "frames_equal": false,
+      "runtime_speed": 1.05,
+      "source59_speed": 1.05,
+      "runtime_repeat": 3,
+      "source59_repeat": 5,
+      "frame_differences": [
+        {
+          "frame": 2,
+          "field": "time_ms",
+          "runtime": 55,
+          "source59": 48
+        },
+        {
+          "frame": 3,
+          "field": "angles.1",
+          "runtime": 0.263671875,
+          "source59": 0.17578125
+        },
+        {
+          "frame": 3,
+          "field": "angles.2",
+          "runtime": -9.755859375,
+          "source59": -9.84375
+        },
+        {
+          "frame": 3,
+          "field": "angles.3",
+          "runtime": 9.755859375,
+          "source59": 9.931640625
+        },
+        {
+          "frame": 3,
+          "field": "angles.4",
+          "runtime": 9.140625,
+          "source59": 10.107421875
+        },
+        {
+          "frame": 3,
+          "field": "angles.5",
+          "runtime": -8.96484375,
+          "source59": -8.876953125
+        },
+        {
+          "frame": 3,
+          "field": "angles.6",
+          "runtime": 67.236328125,
+          "source59": 66.97265625
+        },
+        {
+          "frame": 3,
+          "field": "angles.7",
+          "runtime": -68.818359375,
+          "source59": -68.5546875
+        },
+        {
+          "frame": 3,
+          "field": "angles.8",
+          "runtime": -11.6015625,
+          "source59": -11.513671875
+        },
+        {
+          "frame": 3,
+          "field": "angles.10",
+          "runtime": 0.59375,
+          "source59": 1.0546875
+        },
+        {
+          "frame": 3,
+          "field": "angles.11",
+          "runtime": -3.0,
+          "source59": -2.63671875
+        },
+        {
+          "frame": 3,
+          "field": "angles.12",
+          "runtime": 3.251953125,
+          "source59": 3.33984375
+        },
+        {
+          "frame": 3,
+          "field": "angles.13",
+          "runtime": -53.0,
+          "source59": -52.646484375
+        },
+        {
+          "frame": 3,
+          "field": "angles.15",
+          "runtime": 3.427734375,
+          "source59": 2.8125
+        },
+        {
+          "frame": 3,
+          "field": "angles.16",
+          "runtime": 0.52734375,
+          "source59": -1.58203125
+        },
+        {
+          "frame": 3,
+          "field": "angles.17",
+          "runtime": -29.125,
+          "source59": -30.146484375
+        },
+        {
+          "frame": 3,
+          "field": "angles.18",
+          "runtime": 31.904296875,
+          "source59": 32.783203125
+        },
+        {
+          "frame": 3,
+          "field": "angles.19",
+          "runtime": 64.951171875,
+          "source59": 64.3359375
+        },
+        {
+          "frame": 3,
+          "field": "angles.20",
+          "runtime": -60.029296875,
+          "source59": -60.380859375
+        },
+        {
+          "frame": 3,
+          "field": "angles.21",
+          "runtime": 2.021484375,
+          "source59": 3.251953125
+        },
+        {
+          "frame": 3,
+          "field": "angles.22",
+          "runtime": -5.712890625,
+          "source59": -8.26171875
+        },
+        {
+          "frame": 3,
+          "field": "frame_id",
+          "runtime": "dec999336936488d84f0dd243e6c5e4b",
+          "source59": "32f60d5c72fa467fabf171d7ba9a72f6"
+        },
+        {
+          "frame": 3,
+          "field": "name",
+          "runtime": "r미세오뒤90도",
+          "source59": "R미세오뒤90도-1"
+        },
+        {
+          "frame": 3,
+          "field": "source_frame_id",
+          "runtime": "dec999336936488d84f0dd243e6c5e4b",
+          "source59": "32f60d5c72fa467fabf171d7ba9a72f6"
+        },
+        {
+          "frame": 3,
+          "field": "start_ms",
+          "runtime": 303,
+          "source59": 296
+        }
+      ]
+    },
+    {
+      "runtime_name": "R전진45도(6회)",
+      "source59_name": "R전진45도(6회)",
+      "frames_equal": true,
+      "runtime_speed": 0.95,
+      "source59_speed": 1.0,
+      "runtime_repeat": 6,
+      "source59_repeat": 6,
+      "frame_differences": []
+    },
+    {
+      "runtime_name": "R전진90도(4회)",
+      "source59_name": "R전진90도(4회)",
+      "frames_equal": true,
+      "runtime_speed": 0.95,
+      "source59_speed": 1.0,
+      "runtime_repeat": 4,
+      "source59_repeat": 4,
+      "frame_differences": []
+    },
+    {
+      "runtime_name": "R미세오뒤에서 기본자세90도",
+      "source59_name": "R미세오뒤에서 기본자세90도",
+      "frames_equal": true,
+      "runtime_speed": 0.95,
+      "source59_speed": 1.0,
+      "runtime_repeat": 1,
+      "source59_repeat": 1,
+      "frame_differences": []
+    },
+    {
+      "runtime_name": "유미세오옆꽃게90도",
+      "source59_name": "유미세오옆꽃게90도",
+      "frames_equal": true,
+      "runtime_speed": 0.9025,
+      "source59_speed": 0.95,
+      "runtime_repeat": 1,
+      "source59_repeat": 1,
+      "frame_differences": []
+    }
+  ],
+  "validation": {
+    "passed": 255,
+    "failed": 13,
+    "failed_reason": "Existing tests expect fine_to_turn_ready_45 after BALL_FINE_FORWARD_8, current code selects fine_to_turn_ready_0; no code edited.",
+    "files": [
+      "test_ball_entry_line_alignment.py",
+      "test_gait_transitions.py",
+      "test_transition_dwells.py",
+      "test_catalog58_fine_import.py"
+    ]
+  },
+  "user_confirmed_gui_goal_fine_motion": "R미세90도"
+}

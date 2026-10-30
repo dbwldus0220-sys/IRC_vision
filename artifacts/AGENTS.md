@@ -1,5 +1,18 @@
 # Runtime Motion Policy
 
+- On every motion replacement/import, set runtime `playback_speed` to the
+  supplied original speed multiplied by **0.95**, for every motion family.
+  This standing user instruction was reaffirmed on 2026-10-29.
+- Keep `robot_motions_pc.json` and archived input files at the original speed.
+  Derive repeat/camera variants from that unscaled source, then apply 0.95 once.
+  Never multiply the existing runtime speed again or exempt fine/turn/crab motions.
+- Use `tools/upsert_motion_catalog.py:runtime_motion_from_source` for imports.
+  Reimporting the same source must produce identical data, not cumulative slowing.
+  Its `_with_runtime_policy` helper only normalizes tolerance/pose identities and
+  must not be used alone to import source motions.
+- Update motion-duration/capture/prequeue estimates when source timing or runtime
+  speed changes. Verify against the actual generated runtime catalog.
+
 - Every motion in `robot_motions_runtime.json` must use
   `completion.position_tolerance_deg = 5.0`, including hurdle motions.
 - Apply this policy on every JSON replacement, import, and manual motion update,

@@ -1,5 +1,6 @@
 """Scoring preparation follows the last completed posture, not historical gait flags."""
 
+import copy
 import json
 from pathlib import Path
 
@@ -22,14 +23,35 @@ def finish_sequence(bridge):
     raise AssertionError('motion sequence did not finish')
 
 
+@pytest.mark.parametrize('previous', [None, 'GOAL_CAMERA90_TURN_LEFT_1', 'GOAL_CAMERA90_TURN_RIGHT_1'])
+@pytest.mark.parametrize('last_action', [
+    'GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_1', 'GOAL_CAMERA_90_FORWARD_2',
+    *[f'GOAL_CAMERA90_FINE_FORWARD_{n}' for n in range(1, 5)],
+    'GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_CRAB_RIGHT',
+])
+def test_last_forward_or_crab_goes_directly_to_shot_even_after_a_turn(previous, last_action):
+    bridge = FakeBridge()
+    for command_id, action in enumerate(filter(None, (previous, last_action)), 1):
+        bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+        finish_sequence(bridge)
+    requests_before = len(bridge.executor_request_publisher.messages)
+    bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+    assert bridge.active_motion_id == 'goal_shot'
+    assert bridge.active_pickup_sequence == ()
+    assert bridge.active_dwell_until is None
+    assert [m['motion_id'] for m in decoded_messages(bridge.executor_request_publisher)[requests_before:]] == ['goal_shot']
+    finish_sequence(bridge)
+    assert decoded_messages(bridge.motion_status_publisher)[-1]['status'] == 'SUCCEEDED'
+
+
 @pytest.mark.parametrize('actions,prepare', [
-    (['GOAL_CAMERA90_FINE_FORWARD_1'], 'goal_fine_to_default'),
-    (['GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_FINE_FORWARD_2'], 'goal_fine_to_default'),
     (['GOAL_CAMERA90_TURN_LEFT_1'], 'goal_forward_to_default'),
-    (['GOAL_CAMERA90_TURN_RIGHT_9'], 'goal_forward_to_default'),
-    (['GOAL_CAMERA_90_FORWARD'], 'goal_forward_to_default'),
+    *[([f'GOAL_CAMERA90_TURN_RIGHT_{n}'], 'goal_forward_to_default') for n in (1, 2, 3, 5, 6, 7, 9)],
+    *[([f'GOAL_CAMERA90_TURN_LEFT_{n}'], 'goal_forward_to_default') for n in range(2, 7)],
     (['POST_BALL_GOAL_TRANSITION'], 'goal_forward_to_default'),
     (['GOAL_CAMERA90_FINE_FORWARD_1', 'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_forward_to_default'),
+    (['GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_forward_to_default'),
+    (['GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_forward_to_default'),
     (['GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_FINE_FORWARD_1',
       'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_forward_to_default'),
 ])
@@ -80,11 +102,20 @@ def test_shot_aliases_resolve_to_existing_default_posture_motions():
     assert aliases['goal_fine_to_default'] == 'R미세오뒤에서 기본자세45도'
     for alias in ('goal_forward_to_default', 'goal_fine_to_default'):
         assert '기본자세' in motions[aliases[alias]]['end_pose']
+    source = json.loads((root / 'artifacts/20261029_catalog60_full/source60.json').read_text())
+    name = aliases['goal_forward_to_default']
+    original = next(m for m in source['motions'] if m['name'] == name)
+    pc = json.loads((root / 'artifacts/robot_motions_pc.json').read_text())
+    assert next(m for m in pc['motions'] if m['name'] == name) == original
+    expected = copy.deepcopy(original)
+    expected['playback_speed'] = .9025
+    expected['completion']['position_tolerance_deg'] = 5.0
+    assert motions[name] == expected
 
 
 @pytest.mark.parametrize('previous,prepare', [
     ('goal_camera_90_turn_left_1', 'goal_forward_to_default'),
-    ('goal_camera_90_fine_forward_1', 'goal_fine_to_default'),
+    ('goal_camera_90_turn_right_1', 'goal_forward_to_default'),
 ])
 def test_retry_after_failed_preparation_cannot_skip_it(previous, prepare):
     bridge = FakeBridge()

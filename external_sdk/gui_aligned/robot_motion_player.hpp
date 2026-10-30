@@ -97,9 +97,10 @@ public:
     void setForwardBoundaryFeedbackAccounting(bool enabled);
     bool startPoseTransition(const std::vector<double>& angles, std::int64_t duration_ms) noexcept;
     MotionStatus updateStartupPose() noexcept;
-    // 일반 재생의 성공은 목표 전송 완료다. 위치 검사는 startup에만 적용한다.
+    // false는 일반 모션의 부분 모터 오류 후 진행도 허용한다. startup 검사는 별도다.
     void setPositionToleranceEnabled(bool enabled) {
         if (enabled) throw std::invalid_argument("GUI playback cannot enable arrival waits");
+        allow_unconfirmed_motion_ = true;
     }
     [[nodiscard]] bool completionConfirmsArrival() const noexcept { return startup_active_ && succeeded(); }
     void setJointOverride(int motor_id, double target_deg);
@@ -164,7 +165,7 @@ private:
     void traceEvent(const char* event, Clock::time_point begin, bool success,
                     const JointAngles& angles = {}, const std::vector<int>* ids = nullptr);
     bool sendGuiSample(std::int64_t timeline_ms, bool boundary);
-    bool readStartAngles();
+    bool readStartAngles(bool allow_partial = false);
     void markSucceeded();
     MotionStatus updateRunning(Clock::time_point now);
     MotionStatus updateSettling(Clock::time_point now);
@@ -194,10 +195,13 @@ private:
     Clock::time_point queued_boundary_at_{};
     Now now_{Clock::now};
     bool continuous_interpolation_{true};
+    bool allow_unconfirmed_motion_{false};
     bool account_forward_boundary_feedback_{false};
     Clock::time_point last_goal_written_at_{};
     GuiContinuousTrajectory continuous_trajectory_;
     JointAngles start_angles_;
+    // 실측 시작각과 송신에 성공한 Goal만 저장한다. 관절 도달을 확인한 값은 아니다.
+    JointAngles last_known_angles_;
     JointAngles feedback_angles_;
     JointAngles command_angles_;
     JointAngles joint_overrides_;
