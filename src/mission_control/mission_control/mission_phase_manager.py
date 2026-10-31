@@ -133,6 +133,9 @@ class MissionPhaseManager:
         self.hurdles_executed = 0
         self._active_execution_counted = False
         self.pickups_completed = 0
+        self.ball_modes_confirmed = 0
+        self.active_ball_mode_index: int | None = None
+        self.last_pickup_ball_index = 0
         self.ball_grasp_results = {
             index: self.GRASP_UNKNOWN
             for index in range(1, self.required_pickups + 1)
@@ -225,6 +228,36 @@ class MissionPhaseManager:
             setattr(self, fields[0], getattr(self, fields[0]) + 1)
             self._active_execution_counted = True
 
+    def ball_mode_entry_blocked(self) -> bool:
+        """A reserved second mode may finish, but no third mode may enter."""
+        return (
+            self.active_ball_mode_index is None
+            and self.ball_modes_confirmed >= self.required_pickups
+        )
+
+    def confirm_ball_mode(self) -> bool:
+        """Consume one mode at confirmation, never again for its later frames."""
+        if self.active_ball_mode_index is not None:
+            return True
+        # Keep explicit/legacy mission progress consistent with confirmed modes.
+        used = max(self.ball_modes_confirmed, self.pickups_completed, self.pickups_executed)
+        if used >= self.required_pickups:
+            return False
+        self.ball_modes_confirmed = used + 1
+        self.active_ball_mode_index = self.ball_modes_confirmed
+        return True
+
+    @property
+    def completed_ball_index(self) -> int:
+        """Identify the exited pickup even when an earlier mode failed."""
+        return self.last_pickup_ball_index or self.pickups_completed
+
+    def fail_ball_mode(self) -> None:
+        """Consume a failed mode without claiming a completed course section."""
+        if self.active_ball_mode_index is None:
+            return
+        self.active_ball_mode_index = None
+
     def complete_post_ball_line_align(self) -> bool:
         """Advance only after post-pickup line alignment completes."""
         if (
@@ -234,11 +267,11 @@ class MissionPhaseManager:
             return False
         self.current_phase = "LINE_TRACK_AFTER_PICKUP"
         self.post_ball_goal_transition_failed = False
-        if self.grasp_result_for_ball(self.pickups_completed) != self.GRASPED:
+        if self.grasp_result_for_ball(self.completed_ball_index) != self.GRASPED:
             # An empty pickup resumes object selection as soon as Line is found.
-            if self.pickups_completed > self.ball_sections_processed:
+            if self.completed_ball_index > self.ball_sections_processed:
                 self.ball_sections_processed = min(
-                    self.ball_sections_processed + 1, self.required_ball_sections
+                    self.completed_ball_index, self.required_ball_sections
                 )
                 self._update_finish_enabled()
             self.current_phase = "AUTO"
@@ -249,15 +282,15 @@ class MissionPhaseManager:
         if (
             self.current_phase != "LINE_TRACK_AFTER_PICKUP"
             or self.active_special_command_id is not None
-            or self.pickups_completed <= self.ball_sections_processed
+            or self.completed_ball_index <= self.ball_sections_processed
         ):
             return False
-        if self.grasp_result_for_ball(self.pickups_completed) == self.GRASPED:
+        if self.grasp_result_for_ball(self.completed_ball_index) == self.GRASPED:
             self.current_phase = "POST_BALL_GOAL_TRANSITION"
         else:
             # Passing an empty pickup consumes its course section, not a shot.
             self.ball_sections_processed = min(
-                self.ball_sections_processed + 1, self.required_ball_sections
+                self.completed_ball_index, self.required_ball_sections
             )
             self._update_finish_enabled()
             self.current_phase = "LINE_TRACK" if self.finish_enabled else "AUTO"
@@ -279,13 +312,16 @@ class MissionPhaseManager:
         if self.execution_limit_reached(normalized_action):
             return False
 
+        if normalized_action == "PICKUP_NOW" and not self.confirm_ball_mode():
+            return False
+
         self._active_execution_counted = False
         self.active_special_action = normalized_action
         self.active_special_command_id = command_id
         self.active_special_running = False
         self._active_special_origin_phase = self.current_phase
         if normalized_action == "PICKUP_NOW":
-            attempt = self.pickups_completed + 1
+            attempt = self.active_ball_mode_index
             self.active_pickup_attempt = (
                 attempt if attempt in self.ball_grasp_results else None
             )
@@ -355,7 +391,9 @@ class MissionPhaseManager:
 
     def grasp_result_for_next_shot(self) -> str:
         """Return the result belonging to the next unprocessed BALL section."""
-        return self.grasp_result_for_ball(self.ball_sections_processed + 1)
+        return self.grasp_result_for_ball(max(
+            self.ball_sections_processed + 1, self.completed_ball_index,
+        ))
 
     def handle_motion_status(
         self,
@@ -440,6 +478,8 @@ class MissionPhaseManager:
 
         if action == "PICKUP_NOW":
             if succeeded:
+                self.last_pickup_ball_index = self.active_pickup_attempt or self.pickups_completed + 1
+                self.active_ball_mode_index = None
                 self.pickup_failure_count = 0
                 self.pickups_completed = min(
                     self.pickups_completed + 1,
@@ -452,6 +492,7 @@ class MissionPhaseManager:
             if status in {"REJECTED", "FAILED", "TIMEOUT"}:
                 self.pickup_failure_count += 1
 
+            self.fail_ball_mode()
             self.current_phase = "BALL_APPROACH"
             return
 
@@ -472,7 +513,7 @@ class MissionPhaseManager:
                     self.required_shots,
                 )
                 self.ball_sections_processed = min(
-                    self.ball_sections_processed + 1,
+                    max(self.ball_sections_processed + 1, self.completed_ball_index),
                     self.required_ball_sections,
                 )
                 self._update_finish_enabled()
@@ -538,13 +579,17 @@ class MissionPhaseManager:
         return {
             "current_phase": self.current_phase,
             "ball_mode_active": (
-                self.active_special_action == "PICKUP_NOW"
+                self.active_ball_mode_index is not None
+                or self.active_special_action == "PICKUP_NOW"
                 or self.current_phase in {
                     "BALL_SEARCH", "BALL_APPROACH",
                     "POST_BALL_LINE_ALIGN",
                 }
             ),
             "pickups_executed": self.pickups_executed,
+            "ball_modes_confirmed": self.ball_modes_confirmed,
+            "ball_modes_remaining": max(0, self.required_pickups - self.ball_modes_confirmed),
+            "active_ball_mode_index": self.active_ball_mode_index,
             "shots_executed": self.shots_executed,
             "hurdles_executed": self.hurdles_executed,
             "pickups_completed": self.pickups_completed,

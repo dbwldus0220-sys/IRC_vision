@@ -83,6 +83,7 @@ def test_recorded_wait_geometry_recovers_then_shoots_in_entered_zone():
 ])
 @pytest.mark.parametrize('previous_motion', [
     'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+    'goal_camera_90_crab_left',
     'goal_camera_90_turn_right_1',
 ])
 def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
@@ -105,7 +106,10 @@ def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
     motions = [m['motion_id'] for m in decoded_messages(bridge.executor_request_publisher)]
     expected = [f'goal_shot_region_{region}']
     if 'turn' in previous_motion:
-        expected.insert(0, 'goal_forward_to_default')
+        expected.insert(0, 'goal_fine_prepare_90')
+    elif previous_motion.startswith('goal_camera_90_crab_'):
+        side = previous_motion.rsplit('_', 1)[1]
+        expected.insert(0, f'goal_crab_{side}_to_fine_90')
     assert motions == expected
     assert decoded_messages(bridge.motion_status_publisher)[-1]['status'] == 'SUCCEEDED'
 
@@ -127,7 +131,7 @@ def test_region_shots_count_once_and_keep_post_shot_route(region, previous_shots
     manager.shots_executed = manager.shots_completed = previous_shots
     manager.ball_sections_processed = previous_shots
     assert manager.start_special_action('SHOT', 100)
-    manager.handle_motion_status('SHOT', 100, 'RUNNING', motion_id='goal_forward_to_default')
+    manager.handle_motion_status('SHOT', 100, 'RUNNING', motion_id='goal_fine_prepare_90')
     assert manager.shots_executed == previous_shots
     for _ in range(2):
         manager.handle_motion_status('SHOT', 100, 'RUNNING', motion_id=f'goal_shot_region_{region}')
@@ -144,7 +148,7 @@ def test_import_preserves_source_targets_and_applies_speed_once():
     root = Path(__file__).resolve().parents[3]
     def catalog(relative):
         return {m['name']: m for m in json.loads((root / relative).read_text())['motions']}
-    source = catalog('artifacts/20261030_goal_shot_regions/source_shots.json')
+    source = catalog('artifacts/20261031_catalog64_goal_prepare/source64.json')
     pc = catalog('artifacts/robot_motions_pc.json')
     runtime = catalog('artifacts/robot_motions_runtime.json')
     aliases = yaml.safe_load((root / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']

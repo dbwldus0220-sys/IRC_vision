@@ -1,0 +1,42 @@
+{
+  "recorded_session": "2026-10-31-21-39-31-675635-jet-11274",
+  "recorded_first_exit_dwell_start_ros_sec": 1793450477.980038,
+  "recorded_first_pickup_success_ros_sec": 1793450478.49366,
+  "recorded_first_line_dispatch_ros_sec": 1793450479.402788,
+  "recorded_first_goal_recovery_reserved_ros_sec": 1793450488.72398,
+  "recorded_previous_goal_forward_completed_ros_sec": 1793450489.147646,
+  "baseline_result": {
+    "failed": 609,
+    "passed": 5219,
+    "errors": 1
+  },
+  "focused_result": {
+    "passed": 236
+  },
+  "sdk_ctest": {
+    "passed": 6
+  },
+  "runtime_goal_walking_pairs": 25,
+  "runtime_motors_actuated": false,
+  "notes": [
+    "Existing pickup sequence wire format retained; successful final exit rest is skipped.",
+    "Post-turn capture cutoff moves at completion; search and safety gates remain.",
+    "Fine-to-backward replaces the half-second pre-hold with one second, without stacking.",
+    "Executor package rebuilt; Python installed egg-link resolves updated source. Combined colcon build interrupted during Python packaging."
+  ],
+  "full_final_result": {
+    "failed": 606,
+    "passed": 5310,
+    "errors": 1,
+    "new_failures_vs_baseline": 0
+  },
+  "continuity_tests": {
+    "passed": 89
+  },
+  "executor_tests": {
+    "ctest_passed": 3,
+    "ctest_failed": 1,
+    "failure": "Pre-existing catalog expectation: pickup resolves to r공잡기 400, test expects 건공잡기. Test and alias untouched by this change."
+  },
+  "superseded_by_user_correction": "Intentional 0.5s dwells restored; earlier no-dwell results are historical."
+}

@@ -1,0 +1,692 @@
+{
+  "unused_source_transitions": [
+    "rr오뒤에서 미세오뒤(골대용90도)",
+    "rr오뒤에서 미세오뒤(0도)",
+    "rr오뒤에서 미세오뒤90도",
+    "r오옆에서 미세오뒤(90도)",
+    "r왼옆에서 미세오뒤(90도)"
+  ],
+  "other_same_name_source_differences": {
+    "R후진에서 제자리 좌회전": {
+      "changed_fields": [
+        "frames"
+      ],
+      "aliases": [
+        "pickup_second_backward_turn_left"
+      ],
+      "frame_changed_fields": [
+        "angles"
+      ],
+      "changed_motor_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "max_index_aligned_angle_difference_deg": 2.0
+    },
+    "R오뒤45도": {
+      "changed_fields": [
+        "frames"
+      ],
+      "aliases": [
+        "r_back_pose_45"
+      ],
+      "frame_changed_fields": [
+        "angles"
+      ],
+      "changed_motor_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "max_index_aligned_angle_difference_deg": 1.4765625
+    },
+    "R골넣기1번구역": {
+      "changed_fields": [
+        "frames"
+      ],
+      "aliases": [
+        "goal_shot",
+        "goal_shot_region_1"
+      ],
+      "frame_changed_fields": [
+        "start_ms",
+        "time_ms"
+      ],
+      "changed_motor_ids": [],
+      "max_index_aligned_angle_difference_deg": 0.0
+    },
+    "R제자리우회전(4회)": {
+      "changed_fields": [
+        "frames"
+      ],
+      "aliases": [
+        "r_turn_right_4"
+      ],
+      "frame_changed_fields": [
+        "angles"
+      ],
+      "changed_motor_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "max_index_aligned_angle_difference_deg": 1.4765625
+    },
+    "R제자리우회전(9회)": {
+      "changed_fields": [
+        "frames"
+      ],
+      "aliases": [
+        "line_turn_right_9",
+        "line_turn_right_large",
+        "stationary_turn_right",
+        "pickup_first_turn_right_9",
+        "post_shot_turn_right_9",
+        "post_ball_line_turn_right_9"
+      ],
+      "frame_changed_fields": [
+        "angles"
+      ],
+      "changed_motor_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "max_index_aligned_angle_difference_deg": 1.4765625
+    },
+    "R제자리좌회전(4회)": {
+      "changed_fields": [
+        "frames"
+      ],
+      "aliases": [
+        "post_ball_line_turn_left_4"
+      ],
+      "frame_changed_fields": [
+        "angles"
+      ],
+      "changed_motor_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "max_index_aligned_angle_difference_deg": 2.0
+    },
+    "R전진45도(6회)": {
+      "changed_fields": [
+        "end_pose",
+        "frames"
+      ],
+      "aliases": [
+        "line_forward_6",
+        "post_ball_forward_6"
+      ],
+      "frame_changed_fields": [
+        "angles",
+        "name"
+      ],
+      "changed_motor_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "max_index_aligned_angle_difference_deg": 1.4765625
+    },
+    "R제자리우회전(2회)": {
+      "changed_fields": [
+        "frames"
+      ],
+      "aliases": [
+        "line_turn_right_2",
+        "post_ball_line_turn_right_2"
+      ],
+      "frame_changed_fields": [
+        "angles"
+      ],
+      "changed_motor_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "max_index_aligned_angle_difference_deg": 1.4765625
+    },
+    "R제자리좌회전(2회)": {
+      "changed_fields": [
+        "frames"
+      ],
+      "aliases": [
+        "line_search_left_2",
+        "post_ball_line_turn_left_2"
+      ],
+      "frame_changed_fields": [
+        "angles"
+      ],
+      "changed_motor_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "max_index_aligned_angle_difference_deg": 2.0
+    },
+    "r공잡기 400": {
+      "changed_fields": [
+        "frames"
+      ],
+      "aliases": [
+        "sdk_pickup",
+        "pickup",
+        "pickup_400"
+      ],
+      "frame_changed_fields": [
+        "angles"
+      ],
+      "changed_motor_ids": [
+        3,
+        5
+      ],
+      "max_index_aligned_angle_difference_deg": 6.0
+    },
+    "R제자리우회전(7회)": {
+      "changed_fields": [
+        "frames"
+      ],
+      "aliases": [
+        "line_turn_right_7",
+        "pickup_first_turn_right_7",
+        "post_ball_line_turn_right_7"
+      ],
+      "frame_changed_fields": [
+        "angles"
+      ],
+      "changed_motor_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "max_index_aligned_angle_difference_deg": 1.4765625
+    },
+    "R제자리좌회전(3회)": {
+      "changed_fields": [
+        "frames"
+      ],
+      "aliases": [
+        "pickup_second_turn_left_3",
+        "post_ball_line_turn_left_3"
+      ],
+      "frame_changed_fields": [
+        "angles"
+      ],
+      "changed_motor_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "max_index_aligned_angle_difference_deg": 2.0
+    },
+    "R골대후제자리우회전": {
+      "changed_fields": [
+        "frames"
+      ],
+      "aliases": [
+        "post_shot_default_turn_right"
+      ],
+      "frame_changed_fields": [
+        "angles"
+      ],
+      "changed_motor_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "max_index_aligned_angle_difference_deg": 1.4765625
+    },
+    "R제자리우회전(5회(": {
+      "changed_fields": [
+        "frames"
+      ],
+      "aliases": [
+        "line_turn_right_5",
+        "line_search_right_5",
+        "post_ball_line_turn_right_5"
+      ],
+      "frame_changed_fields": [
+        "angles"
+      ],
+      "changed_motor_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "max_index_aligned_angle_difference_deg": 1.4765625
+    },
+    "r공잡기500": {
+      "changed_fields": [
+        "frames"
+      ],
+      "aliases": [
+        "pickup_500"
+      ],
+      "frame_changed_fields": [
+        "angles"
+      ],
+      "changed_motor_ids": [
+        3,
+        5
+      ],
+      "max_index_aligned_angle_difference_deg": 3.0
+    },
+    "R후진에서제자리우회전(공)": {
+      "changed_fields": [
+        "frames"
+      ],
+      "aliases": [
+        "pickup_first_backward_turn_right"
+      ],
+      "frame_changed_fields": [
+        "angles"
+      ],
+      "changed_motor_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "max_index_aligned_angle_difference_deg": 1.4765625
+    },
+    "R전진45도(4회)": {
+      "changed_fields": [
+        "end_pose",
+        "frames"
+      ],
+      "aliases": [
+        "sdk_forward_4",
+        "line_forward_4",
+        "ball_camera_down_forward_4",
+        "post_ball_forward_4"
+      ],
+      "frame_changed_fields": [
+        "angles",
+        "name"
+      ],
+      "changed_motor_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "max_index_aligned_angle_difference_deg": 1.4765625
+    },
+    "R제자리좌회전(5회)": {
+      "changed_fields": [
+        "frames"
+      ],
+      "aliases": [
+        "post_ball_line_turn_left_5"
+      ],
+      "frame_changed_fields": [
+        "angles"
+      ],
+      "changed_motor_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "max_index_aligned_angle_difference_deg": 2.0
+    },
+    "찐허들": {
+      "changed_fields": [
+        "frames"
+      ],
+      "aliases": [
+        "hurdle"
+      ],
+      "frame_changed_fields": [
+        "angles"
+      ],
+      "changed_motor_ids": [
+        22
+      ],
+      "max_index_aligned_angle_difference_deg": 2.0
+    },
+    "R골대후제자리좌회전": {
+      "changed_fields": [
+        "frames"
+      ],
+      "aliases": [
+        "post_shot_default_turn_left"
+      ],
+      "frame_changed_fields": [
+        "angles"
+      ],
+      "changed_motor_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "max_index_aligned_angle_difference_deg": 2.0
+    }
+  },
+  "active_transition_aliases_without_exact_source_name": {
+    "goal_fine_to_default": "R미세오뒤에서 기본자세45도",
+    "goal_forward_to_default": "R오뒤에서 기본자세(카메라45도)",
+    "r_forward_to_crab_90": "R오뒤에서오옆꽃게90도"
+  }
+}

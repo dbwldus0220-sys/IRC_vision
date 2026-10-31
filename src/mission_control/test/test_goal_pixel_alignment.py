@@ -9,7 +9,7 @@ from test_mission_phase_flow import mark_next_ball_grabbed, release_general, sco
 
 @pytest.mark.parametrize("direction,sign,count", [("RIGHT", 1, 1), ("LEFT", -1, 1)])
 @pytest.mark.parametrize("final_offset,next_action", [(140, "CRAB"), (80, "SHOT")])
-def test_large_offset_repeats_only_after_one_second_and_new_capture(
+def test_large_offset_repeats_only_after_half_second_and_new_capture(
     monkeypatch, direction, sign, count, final_offset, next_action,
 ):
     now = [10.0]
@@ -35,7 +35,7 @@ def test_large_offset_repeats_only_after_one_second_and_new_capture(
         assert node.publish_vision(goal=sample(sign * 200)) == []
         now[0] += .9
         release_general(node, command)
-        deadline = now[0] + 1.0
+        deadline = now[0] + .5
         assert node.goal_post_motion_dwell_until == pytest.approx(deadline)
         now[0] = deadline - .001
         assert node.publish_vision(goal=sample(sign * 200)) == []

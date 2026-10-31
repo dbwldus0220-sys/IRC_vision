@@ -112,6 +112,6 @@ def test_stationary_turn_waits_before_execution_and_requires_post_dwell_capture(
     assert command["action"] == "LINE_HEADING_TURN_RIGHT_5"
     node.send_status(command["action"], command["command_id"], "RUNNING")
     node.send_status(command["action"], command["command_id"], "SUCCEEDED")
-    assert node.correction_post_motion_dwell_until >= clock[0] + 1.
+    assert node.correction_post_motion_dwell_until >= clock[0] + .5
     assert node.latest_info["line"] is None
     assert node.line_offset_alignment_refresh_pending

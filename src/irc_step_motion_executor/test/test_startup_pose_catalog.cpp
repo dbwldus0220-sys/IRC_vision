@@ -84,8 +84,9 @@ TEST(StartupPoseCatalog, LoadsGeonStartupPoseWithDefaultPolicy)
   ASSERT_EQ(angles.size(), 23U);
   EXPECT_DOUBLE_EQ(angles[4], original[4]);
   EXPECT_DOUBLE_EQ(angles[5], original[5]);
-  EXPECT_DOUBLE_EQ(angles[13], -41.220703125);
-  EXPECT_DOUBLE_EQ(angles[14], 55.3046875);
+  // These non-overridden joints retain the verified PC pose.
+  EXPECT_DOUBLE_EQ(angles[13], original[13]);
+  EXPECT_DOUBLE_EQ(angles[14], original[14]);
 }
 
 TEST(StartupPoseCatalog, PolicyOffChangesOnlySelectedAxesToVerifiedPcPose)

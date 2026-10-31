@@ -1,0 +1,1115 @@
+..............................................FFFFFFFFFFFFFFF........... [  6%]
+..FFFFFFFFFF............FFFFFFFFFFFFFFFFFFFFFF.FFFFFFFFFFFFFFFF......... [ 12%]
+.......................F...................F............................ [ 18%]
+.......F...................F...................................F........ [ 24%]
+...........F...................................F...................F.... [ 31%]
+...............................F...................F.................... [ 37%]
+...............FF........FF.F........................................... [ 43%]
+........................................................................ [ 49%]
+...................F.................................................... [ 55%]
+........................................................................ [ 62%]
+........................................................................ [ 68%]
+........................................................................ [ 74%]
+..................................................................FFFFFF [ 80%]
+FFFFFFFFFFFF...........................................F................ [ 86%]
+...........F.F..F.F.F..F..F......F.F...FFF.............................F [ 93%]
+F.F............FFF............................FF...FFFF................. [ 99%]
+........                                                                 [100%]
+=================================== FAILURES ===================================
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.43-120-1] _
+src/mission_control/test/test_goal_shot_regions.py:113: in test_confirmed_region_reaches_selected_motion_after_existing_preparation
+    assert motions == expected
+E   AssertionError: assert ['goal_crab_r...hot_region_1'] == ['goal_crab_r...hot_region_1']
+E     At index 0 diff: 'goal_crab_right_to_fine_90' != 'goal_crab_right_to_turn_90'
+E     Full diff:
+E     - ['goal_crab_right_to_turn_90', 'goal_shot_region_1']
+E     ?                      ^^^
+E     + ['goal_crab_right_to_fine_90', 'goal_shot_region_1']
+E     ?                      ^^ +
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.509--120-4] _
+src/mission_control/test/test_goal_shot_regions.py:113: in test_confirmed_region_reaches_selected_motion_after_existing_preparation
+    assert motions == expected
+E   AssertionError: assert ['goal_crab_r...hot_region_4'] == ['goal_crab_r...hot_region_4']
+E     At index 0 diff: 'goal_crab_right_to_fine_90' != 'goal_crab_right_to_turn_90'
+E     Full diff:
+E     - ['goal_crab_right_to_turn_90', 'goal_shot_region_4']
+E     ?                      ^^^
+E     + ['goal_crab_right_to_fine_90', 'goal_shot_region_4']
+E     ?                      ^^ +
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.51-100-2] _
+src/mission_control/test/test_goal_shot_regions.py:113: in test_confirmed_region_reaches_selected_motion_after_existing_preparation
+    assert motions == expected
+E   AssertionError: assert ['goal_crab_r...hot_region_2'] == ['goal_crab_r...hot_region_2']
+E     At index 0 diff: 'goal_crab_right_to_fine_90' != 'goal_crab_right_to_turn_90'
+E     Full diff:
+E     - ['goal_crab_right_to_turn_90', 'goal_shot_region_2']
+E     ?                      ^^^
+E     + ['goal_crab_right_to_fine_90', 'goal_shot_region_2']
+E     ?                      ^^ +
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.569--100-3] _
+src/mission_control/test/test_goal_shot_regions.py:113: in test_confirmed_region_reaches_selected_motion_after_existing_preparation
+    assert motions == expected
+E   AssertionError: assert ['goal_crab_r...hot_region_3'] == ['goal_crab_r...hot_region_3']
+E     At index 0 diff: 'goal_crab_right_to_fine_90' != 'goal_crab_right_to_turn_90'
+E     Full diff:
+E     - ['goal_crab_right_to_turn_90', 'goal_shot_region_3']
+E     ?                      ^^^
+E     + ['goal_crab_right_to_fine_90', 'goal_shot_region_3']
+E     ?                      ^^ +
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.51-0-2] _
+src/mission_control/test/test_goal_shot_regions.py:113: in test_confirmed_region_reaches_selected_motion_after_existing_preparation
+    assert motions == expected
+E   AssertionError: assert ['goal_crab_r...hot_region_2'] == ['goal_crab_r...hot_region_2']
+E     At index 0 diff: 'goal_crab_right_to_fine_90' != 'goal_crab_right_to_turn_90'
+E     Full diff:
+E     - ['goal_crab_right_to_turn_90', 'goal_shot_region_2']
+E     ?                      ^^^
+E     + ['goal_crab_right_to_fine_90', 'goal_shot_region_2']
+E     ?                      ^^ +
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.43-120-1] _
+src/mission_control/test/test_goal_shot_regions.py:113: in test_confirmed_region_reaches_selected_motion_after_existing_preparation
+    assert motions == expected
+E   AssertionError: assert ['goal_crab_l...hot_region_1'] == ['goal_crab_l...hot_region_1']
+E     At index 0 diff: 'goal_crab_left_to_fine_90' != 'goal_crab_left_to_turn_90'
+E     Full diff:
+E     - ['goal_crab_left_to_turn_90', 'goal_shot_region_1']
+E     ?                     ^^^
+E     + ['goal_crab_left_to_fine_90', 'goal_shot_region_1']
+E     ?                     ^^ +
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.509--120-4] _
+src/mission_control/test/test_goal_shot_regions.py:113: in test_confirmed_region_reaches_selected_motion_after_existing_preparation
+    assert motions == expected
+E   AssertionError: assert ['goal_crab_l...hot_region_4'] == ['goal_crab_l...hot_region_4']
+E     At index 0 diff: 'goal_crab_left_to_fine_90' != 'goal_crab_left_to_turn_90'
+E     Full diff:
+E     - ['goal_crab_left_to_turn_90', 'goal_shot_region_4']
+E     ?                     ^^^
+E     + ['goal_crab_left_to_fine_90', 'goal_shot_region_4']
+E     ?                     ^^ +
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.51-100-2] _
+src/mission_control/test/test_goal_shot_regions.py:113: in test_confirmed_region_reaches_selected_motion_after_existing_preparation
+    assert motions == expected
+E   AssertionError: assert ['goal_crab_l...hot_region_2'] == ['goal_crab_l...hot_region_2']
+E     At index 0 diff: 'goal_crab_left_to_fine_90' != 'goal_crab_left_to_turn_90'
+E     Full diff:
+E     - ['goal_crab_left_to_turn_90', 'goal_shot_region_2']
+E     ?                     ^^^
+E     + ['goal_crab_left_to_fine_90', 'goal_shot_region_2']
+E     ?                     ^^ +
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.569--100-3] _
+src/mission_control/test/test_goal_shot_regions.py:113: in test_confirmed_region_reaches_selected_motion_after_existing_preparation
+    assert motions == expected
+E   AssertionError: assert ['goal_crab_l...hot_region_3'] == ['goal_crab_l...hot_region_3']
+E     At index 0 diff: 'goal_crab_left_to_fine_90' != 'goal_crab_left_to_turn_90'
+E     Full diff:
+E     - ['goal_crab_left_to_turn_90', 'goal_shot_region_3']
+E     ?                     ^^^
+E     + ['goal_crab_left_to_fine_90', 'goal_shot_region_3']
+E     ?                     ^^ +
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.51-0-2] _
+src/mission_control/test/test_goal_shot_regions.py:113: in test_confirmed_region_reaches_selected_motion_after_existing_preparation
+    assert motions == expected
+E   AssertionError: assert ['goal_crab_l...hot_region_2'] == ['goal_crab_l...hot_region_2']
+E     At index 0 diff: 'goal_crab_left_to_fine_90' != 'goal_crab_left_to_turn_90'
+E     Full diff:
+E     - ['goal_crab_left_to_turn_90', 'goal_shot_region_2']
+E     ?                     ^^^
+E     + ['goal_crab_left_to_fine_90', 'goal_shot_region_2']
+E     ?                     ^^ +
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.43-120-1] _
+src/mission_control/test/test_goal_shot_regions.py:113: in test_confirmed_region_reaches_selected_motion_after_existing_preparation
+    assert motions == expected
+E   AssertionError: assert ['goal_fine_p...hot_region_1'] == ['goal_forwar...hot_region_1']
+E     At index 0 diff: 'goal_fine_prepare_90' != 'goal_forward_to_default'
+E     Full diff:
+E     - ['goal_forward_to_default', 'goal_shot_region_1']
+E     ?         ^ ^  ^ ^^^^^^^^^^
+E     + ['goal_fine_prepare_90', 'goal_shot_region_1']
+E     ?         ^^^^^ ^^  ^ ^^
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.509--120-4] _
+src/mission_control/test/test_goal_shot_regions.py:113: in test_confirmed_region_reaches_selected_motion_after_existing_preparation
+    assert motions == expected
+E   AssertionError: assert ['goal_fine_p...hot_region_4'] == ['goal_forwar...hot_region_4']
+E     At index 0 diff: 'goal_fine_prepare_90' != 'goal_forward_to_default'
+E     Full diff:
+E     - ['goal_forward_to_default', 'goal_shot_region_4']
+E     ?         ^ ^  ^ ^^^^^^^^^^
+E     + ['goal_fine_prepare_90', 'goal_shot_region_4']
+E     ?         ^^^^^ ^^  ^ ^^
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.51-100-2] _
+src/mission_control/test/test_goal_shot_regions.py:113: in test_confirmed_region_reaches_selected_motion_after_existing_preparation
+    assert motions == expected
+E   AssertionError: assert ['goal_fine_p...hot_region_2'] == ['goal_forwar...hot_region_2']
+E     At index 0 diff: 'goal_fine_prepare_90' != 'goal_forward_to_default'
+E     Full diff:
+E     - ['goal_forward_to_default', 'goal_shot_region_2']
+E     ?         ^ ^  ^ ^^^^^^^^^^
+E     + ['goal_fine_prepare_90', 'goal_shot_region_2']
+E     ?         ^^^^^ ^^  ^ ^^
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.569--100-3] _
+src/mission_control/test/test_goal_shot_regions.py:113: in test_confirmed_region_reaches_selected_motion_after_existing_preparation
+    assert motions == expected
+E   AssertionError: assert ['goal_fine_p...hot_region_3'] == ['goal_forwar...hot_region_3']
+E     At index 0 diff: 'goal_fine_prepare_90' != 'goal_forward_to_default'
+E     Full diff:
+E     - ['goal_forward_to_default', 'goal_shot_region_3']
+E     ?         ^ ^  ^ ^^^^^^^^^^
+E     + ['goal_fine_prepare_90', 'goal_shot_region_3']
+E     ?         ^^^^^ ^^  ^ ^^
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.51-0-2] _
+src/mission_control/test/test_goal_shot_regions.py:113: in test_confirmed_region_reaches_selected_motion_after_existing_preparation
+    assert motions == expected
+E   AssertionError: assert ['goal_fine_p...hot_region_2'] == ['goal_forwar...hot_region_2']
+E     At index 0 diff: 'goal_fine_prepare_90' != 'goal_forward_to_default'
+E     Full diff:
+E     - ['goal_forward_to_default', 'goal_shot_region_2']
+E     ?         ^ ^  ^ ^^^^^^^^^^
+E     + ['goal_fine_prepare_90', 'goal_shot_region_2']
+E     ?         ^^^^^ ^^  ^ ^^
+_________ test_import_preserves_source_targets_and_applies_speed_once __________
+src/mission_control/test/test_goal_shot_regions.py:158: in test_import_preserves_source_targets_and_applies_speed_once
+    assert pc[name] == source[name]
+E   AssertionError: assert {'completion'...s': 7045, ...} == {'completion'...s': 7045, ...}
+E     Omitting 8 identical items, use -vv to show
+E     Differing items:
+E     {'frames': [{'angles': {'0': 1.0, '1': 0.263671875, '10': 0.12109375, '11': 0.47265625, ...}, 'frame_id': '04db93766a0...234375, ...}, 'frame_id': '33793df19f394f76817dac9bfab34294', 'is_important': False, 'lift_early_arrival': True, ...}]} != {'frames': [{'angles': {'0': 1.0, '1': 0.263671875, '10': 0.12109375, '11': 0.47265625, ...}, 'frame_id': '04db93766a0...234375, ...}, 'frame_id': '33793df19f394f76817dac9bfab34294', 'is_important': False, 'lift_early_arrival': True, ...}]}
+E     Full diff:
+E       {
+E        'completion': {'p...
+E     
+E     ...Full output truncated (286 lines hidden), use '-vv' to show
+_ test_last_forward_goes_directly_to_shot_even_after_a_turn[GOAL_CAMERA_90_FORWARD-None] _
+src/mission_control/test/test_shot_start_posture.py:38: in test_last_forward_goes_directly_to_shot_even_after_a_turn
+    assert bridge.active_motion_id == 'goal_shot'
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E     - goal_shot
+E     + goal_fine_prepare_90
+_ test_last_forward_goes_directly_to_shot_even_after_a_turn[GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_TURN_LEFT_1] _
+src/mission_control/test/test_shot_start_posture.py:38: in test_last_forward_goes_directly_to_shot_even_after_a_turn
+    assert bridge.active_motion_id == 'goal_shot'
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E     - goal_shot
+E     + goal_fine_prepare_90
+_ test_last_forward_goes_directly_to_shot_even_after_a_turn[GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_TURN_RIGHT_1] _
+src/mission_control/test/test_shot_start_posture.py:38: in test_last_forward_goes_directly_to_shot_even_after_a_turn
+    assert bridge.active_motion_id == 'goal_shot'
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E     - goal_shot
+E     + goal_fine_prepare_90
+_ test_last_forward_goes_directly_to_shot_even_after_a_turn[GOAL_CAMERA_90_FORWARD_1-None] _
+src/mission_control/test/test_shot_start_posture.py:38: in test_last_forward_goes_directly_to_shot_even_after_a_turn
+    assert bridge.active_motion_id == 'goal_shot'
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E     - goal_shot
+E     + goal_fine_prepare_90
+_ test_last_forward_goes_directly_to_shot_even_after_a_turn[GOAL_CAMERA_90_FORWARD_1-GOAL_CAMERA90_TURN_LEFT_1] _
+src/mission_control/test/test_shot_start_posture.py:38: in test_last_forward_goes_directly_to_shot_even_after_a_turn
+    assert bridge.active_motion_id == 'goal_shot'
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E     - goal_shot
+E     + goal_fine_prepare_90
+_ test_last_forward_goes_directly_to_shot_even_after_a_turn[GOAL_CAMERA_90_FORWARD_1-GOAL_CAMERA90_TURN_RIGHT_1] _
+src/mission_control/test/test_shot_start_posture.py:38: in test_last_forward_goes_directly_to_shot_even_after_a_turn
+    assert bridge.active_motion_id == 'goal_shot'
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E     - goal_shot
+E     + goal_fine_prepare_90
+_ test_last_forward_goes_directly_to_shot_even_after_a_turn[GOAL_CAMERA_90_FORWARD_2-None] _
+src/mission_control/test/test_shot_start_posture.py:38: in test_last_forward_goes_directly_to_shot_even_after_a_turn
+    assert bridge.active_motion_id == 'goal_shot'
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E     - goal_shot
+E     + goal_fine_prepare_90
+_ test_last_forward_goes_directly_to_shot_even_after_a_turn[GOAL_CAMERA_90_FORWARD_2-GOAL_CAMERA90_TURN_LEFT_1] _
+src/mission_control/test/test_shot_start_posture.py:38: in test_last_forward_goes_directly_to_shot_even_after_a_turn
+    assert bridge.active_motion_id == 'goal_shot'
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E     - goal_shot
+E     + goal_fine_prepare_90
+_ test_last_forward_goes_directly_to_shot_even_after_a_turn[GOAL_CAMERA_90_FORWARD_2-GOAL_CAMERA90_TURN_RIGHT_1] _
+src/mission_control/test/test_shot_start_posture.py:38: in test_last_forward_goes_directly_to_shot_even_after_a_turn
+    assert bridge.active_motion_id == 'goal_shot'
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E     - goal_shot
+E     + goal_fine_prepare_90
+_ test_last_motion_selects_preparation_and_half_second_pause[actions0-goal_forward_to_default] _
+src/mission_control/test/test_shot_start_posture.py:65: in test_last_motion_selects_preparation_and_half_second_pause
+    assert bridge.active_motion_id == prepare
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_forward_to_default'
+E     - goal_forward_to_default
+E     + goal_fine_prepare_90
+_ test_last_motion_selects_preparation_and_half_second_pause[actions1-goal_forward_to_default] _
+src/mission_control/test/test_shot_start_posture.py:65: in test_last_motion_selects_preparation_and_half_second_pause
+    assert bridge.active_motion_id == prepare
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_forward_to_default'
+E     - goal_forward_to_default
+E     + goal_fine_prepare_90
+_ test_last_motion_selects_preparation_and_half_second_pause[actions2-goal_forward_to_default] _
+src/mission_control/test/test_shot_start_posture.py:65: in test_last_motion_selects_preparation_and_half_second_pause
+    assert bridge.active_motion_id == prepare
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_forward_to_default'
+E     - goal_forward_to_default
+E     + goal_fine_prepare_90
+_ test_last_motion_selects_preparation_and_half_second_pause[actions3-goal_forward_to_default] _
+src/mission_control/test/test_shot_start_posture.py:65: in test_last_motion_selects_preparation_and_half_second_pause
+    assert bridge.active_motion_id == prepare
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_forward_to_default'
+E     - goal_forward_to_default
+E     + goal_fine_prepare_90
+_ test_last_motion_selects_preparation_and_half_second_pause[actions4-goal_forward_to_default] _
+src/mission_control/test/test_shot_start_posture.py:65: in test_last_motion_selects_preparation_and_half_second_pause
+    assert bridge.active_motion_id == prepare
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_forward_to_default'
+E     - goal_forward_to_default
+E     + goal_fine_prepare_90
+_ test_last_motion_selects_preparation_and_half_second_pause[actions5-goal_forward_to_default] _
+src/mission_control/test/test_shot_start_posture.py:65: in test_last_motion_selects_preparation_and_half_second_pause
+    assert bridge.active_motion_id == prepare
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_forward_to_default'
+E     - goal_forward_to_default
+E     + goal_fine_prepare_90
+_ test_last_motion_selects_preparation_and_half_second_pause[actions6-goal_forward_to_default] _
+src/mission_control/test/test_shot_start_posture.py:65: in test_last_motion_selects_preparation_and_half_second_pause
+    assert bridge.active_motion_id == prepare
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_forward_to_default'
+E     - goal_forward_to_default
+E     + goal_fine_prepare_90
+_ test_last_motion_selects_preparation_and_half_second_pause[actions7-goal_forward_to_default] _
+src/mission_control/test/test_shot_start_posture.py:65: in test_last_motion_selects_preparation_and_half_second_pause
+    assert bridge.active_motion_id == prepare
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_forward_to_default'
+E     - goal_forward_to_default
+E     + goal_fine_prepare_90
+_ test_last_motion_selects_preparation_and_half_second_pause[actions8-goal_forward_to_default] _
+src/mission_control/test/test_shot_start_posture.py:65: in test_last_motion_selects_preparation_and_half_second_pause
+    assert bridge.active_motion_id == prepare
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_forward_to_default'
+E     - goal_forward_to_default
+E     + goal_fine_prepare_90
+_ test_last_motion_selects_preparation_and_half_second_pause[actions9-goal_forward_to_default] _
+src/mission_control/test/test_shot_start_posture.py:65: in test_last_motion_selects_preparation_and_half_second_pause
+    assert bridge.active_motion_id == prepare
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_forward_to_default'
+E     - goal_forward_to_default
+E     + goal_fine_prepare_90
+_ test_last_motion_selects_preparation_and_half_second_pause[actions10-goal_forward_to_default] _
+src/mission_control/test/test_shot_start_posture.py:65: in test_last_motion_selects_preparation_and_half_second_pause
+    assert bridge.active_motion_id == prepare
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_forward_to_default'
+E     - goal_forward_to_default
+E     + goal_fine_prepare_90
+_ test_last_motion_selects_preparation_and_half_second_pause[actions11-goal_forward_to_default] _
+src/mission_control/test/test_shot_start_posture.py:65: in test_last_motion_selects_preparation_and_half_second_pause
+    assert bridge.active_motion_id == prepare
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_forward_to_default'
+E     - goal_forward_to_default
+E     + goal_fine_prepare_90
+_ test_last_motion_selects_preparation_and_half_second_pause[actions12-goal_forward_to_default] _
+src/mission_control/test/test_shot_start_posture.py:65: in test_last_motion_selects_preparation_and_half_second_pause
+    assert bridge.active_motion_id == prepare
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_forward_to_default'
+E     - goal_forward_to_default
+E     + goal_fine_prepare_90
+_ test_last_motion_selects_preparation_and_half_second_pause[actions13-goal_forward_to_default] _
+src/mission_control/test/test_shot_start_posture.py:65: in test_last_motion_selects_preparation_and_half_second_pause
+    assert bridge.active_motion_id == prepare
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_forward_to_default'
+E     - goal_forward_to_default
+E     + goal_fine_prepare_90
+_ test_last_motion_selects_preparation_and_half_second_pause[actions14-goal_forward_to_default] _
+src/mission_control/test/test_shot_start_posture.py:65: in test_last_motion_selects_preparation_and_half_second_pause
+    assert bridge.active_motion_id == prepare
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_forward_to_default'
+E     - goal_forward_to_default
+E     + goal_fine_prepare_90
+_ test_last_motion_selects_preparation_and_half_second_pause[actions15-goal_forward_to_default] _
+src/mission_control/test/test_shot_start_posture.py:65: in test_last_motion_selects_preparation_and_half_second_pause
+    assert bridge.active_motion_id == prepare
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_forward_to_default'
+E     - goal_forward_to_default
+E     + goal_fine_prepare_90
+_ test_last_motion_selects_preparation_and_half_second_pause[actions16-goal_forward_to_default] _
+src/mission_control/test/test_shot_start_posture.py:65: in test_last_motion_selects_preparation_and_half_second_pause
+    assert bridge.active_motion_id == prepare
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_forward_to_default'
+E     - goal_forward_to_default
+E     + goal_fine_prepare_90
+_ test_last_motion_selects_preparation_and_half_second_pause[actions17-goal_forward_to_default] _
+src/mission_control/test/test_shot_start_posture.py:65: in test_last_motion_selects_preparation_and_half_second_pause
+    assert bridge.active_motion_id == prepare
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_forward_to_default'
+E     - goal_forward_to_default
+E     + goal_fine_prepare_90
+______ test_forward_posture_preparation_failure_never_sends_shot[FAILED] _______
+src/mission_control/test/test_shot_start_posture.py:92: in test_forward_posture_preparation_failure_never_sends_shot
+    assert [m['motion_id'] for m in decoded_messages(bridge.executor_request_publisher)] == [
+E   AssertionError: assert ['goal_fine_prepare_90'] == ['goal_forward_to_default']
+E     At index 0 diff: 'goal_fine_prepare_90' != 'goal_forward_to_default'
+E     Full diff:
+E     - ['goal_forward_to_default']
+E     + ['goal_fine_prepare_90']
+______ test_forward_posture_preparation_failure_never_sends_shot[TIMEOUT] ______
+src/mission_control/test/test_shot_start_posture.py:92: in test_forward_posture_preparation_failure_never_sends_shot
+    assert [m['motion_id'] for m in decoded_messages(bridge.executor_request_publisher)] == [
+E   AssertionError: assert ['goal_fine_prepare_90'] == ['goal_forward_to_default']
+E     At index 0 diff: 'goal_fine_prepare_90' != 'goal_forward_to_default'
+E     Full diff:
+E     - ['goal_forward_to_default']
+E     + ['goal_fine_prepare_90']
+_____ test_forward_posture_preparation_failure_never_sends_shot[CANCELLED] _____
+src/mission_control/test/test_shot_start_posture.py:92: in test_forward_posture_preparation_failure_never_sends_shot
+    assert [m['motion_id'] for m in decoded_messages(bridge.executor_request_publisher)] == [
+E   AssertionError: assert ['goal_fine_prepare_90'] == ['goal_forward_to_default']
+E     At index 0 diff: 'goal_fine_prepare_90' != 'goal_forward_to_default'
+E     Full diff:
+E     - ['goal_forward_to_default']
+E     + ['goal_fine_prepare_90']
+_____ test_forward_posture_preparation_failure_never_sends_shot[REJECTED] ______
+src/mission_control/test/test_shot_start_posture.py:92: in test_forward_posture_preparation_failure_never_sends_shot
+    assert [m['motion_id'] for m in decoded_messages(bridge.executor_request_publisher)] == [
+E   AssertionError: assert ['goal_fine_prepare_90'] == ['goal_forward_to_default']
+E     At index 0 diff: 'goal_fine_prepare_90' != 'goal_forward_to_default'
+E     Full diff:
+E     - ['goal_forward_to_default']
+E     + ['goal_fine_prepare_90']
+_ test_retry_after_failed_preparation_cannot_skip_it[goal_camera_90_turn_left_1-goal_forward_to_default] _
+src/mission_control/test/test_shot_start_posture.py:128: in test_retry_after_failed_preparation_cannot_skip_it
+    assert bridge.active_motion_id == prepare
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_forward_to_default'
+E     - goal_forward_to_default
+E     + goal_fine_prepare_90
+_ test_retry_after_failed_preparation_cannot_skip_it[goal_camera_90_turn_right_1-goal_forward_to_default] _
+src/mission_control/test/test_shot_start_posture.py:128: in test_retry_after_failed_preparation_cannot_skip_it
+    assert bridge.active_motion_id == prepare
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_forward_to_default'
+E     - goal_forward_to_default
+E     + goal_fine_prepare_90
+_ test_retry_after_failed_preparation_cannot_skip_it[goal_camera_90_crab_left-goal_crab_left_to_turn_90] _
+src/mission_control/test/test_shot_start_posture.py:128: in test_retry_after_failed_preparation_cannot_skip_it
+    assert bridge.active_motion_id == prepare
+E   AssertionError: assert 'goal_crab_left_to_fine_90' == 'goal_crab_left_to_turn_90'
+E     - goal_crab_left_to_turn_90
+E     ?                   ^^^
+E     + goal_crab_left_to_fine_90
+E     ?                   ^^ +
+_ test_retry_after_failed_preparation_cannot_skip_it[goal_camera_90_crab_right-goal_crab_right_to_turn_90] _
+src/mission_control/test/test_shot_start_posture.py:128: in test_retry_after_failed_preparation_cannot_skip_it
+    assert bridge.active_motion_id == prepare
+E   AssertionError: assert 'goal_crab_right_to_fine_90' == 'goal_crab_right_to_turn_90'
+E     - goal_crab_right_to_turn_90
+E     ?                    ^^^
+E     + goal_crab_right_to_fine_90
+E     ?                    ^^ +
+____________ test_one_mm_boundary_noise_does_not_restart_shot_rest _____________
+src/mission_control/test/test_goal_shot_settle.py:29: in test_one_mm_boundary_noise_does_not_restart_shot_rest
+    assert node.publish_vision(goal=ready) == []
+E   AssertionError: assert [{'action': '...': None, ...}] == []
+E     Left contains one more item: {'action': 'GOAL_SHOT_PREPARE', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}
+E     Full diff:
+E       [
+E     -  ,
+E     +  {'action': 'GOAL_SHOT_PREPARE',
+E     +   'active_special_action': None,
+E     +   'active_special_command_id': None,...
+E     
+E     ...Full output truncated (78 lines hidden), use '-vv' to show
+_______ test_elapsed_rest_never_authorizes_invalid_or_missing_goal[None] _______
+src/mission_control/test/test_goal_shot_settle.py:49: in test_elapsed_rest_never_authorizes_invalid_or_missing_goal
+    assert node.publish_vision(goal=score_ready_goal()) == []
+E   AssertionError: assert [{'action': '...': None, ...}] == []
+E     Left contains one more item: {'action': 'GOAL_SHOT_PREPARE', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}
+E     Full diff:
+E       [
+E     -  ,
+E     +  {'action': 'GOAL_SHOT_PREPARE',
+E     +   'active_special_action': None,
+E     +   'active_special_command_id': None,...
+E     
+E     ...Full output truncated (78 lines hidden), use '-vv' to show
+_____ test_elapsed_rest_never_authorizes_invalid_or_missing_goal[invalid1] _____
+src/mission_control/test/test_goal_shot_settle.py:49: in test_elapsed_rest_never_authorizes_invalid_or_missing_goal
+    assert node.publish_vision(goal=score_ready_goal()) == []
+E   AssertionError: assert [{'action': '...': None, ...}] == []
+E     Left contains one more item: {'action': 'GOAL_SHOT_PREPARE', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}
+E     Full diff:
+E       [
+E     -  ,
+E     +  {'action': 'GOAL_SHOT_PREPARE',
+E     +   'active_special_action': None,
+E     +   'active_special_command_id': None,...
+E     
+E     ...Full output truncated (78 lines hidden), use '-vv' to show
+_____ test_elapsed_rest_never_authorizes_invalid_or_missing_goal[invalid2] _____
+src/mission_control/test/test_goal_shot_settle.py:49: in test_elapsed_rest_never_authorizes_invalid_or_missing_goal
+    assert node.publish_vision(goal=score_ready_goal()) == []
+E   AssertionError: assert [{'action': '...': None, ...}] == []
+E     Left contains one more item: {'action': 'GOAL_SHOT_PREPARE', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}
+E     Full diff:
+E       [
+E     -  ,
+E     +  {'action': 'GOAL_SHOT_PREPARE',
+E     +   'active_special_action': None,
+E     +   'active_special_command_id': None,...
+E     
+E     ...Full output truncated (78 lines hidden), use '-vv' to show
+_____ test_elapsed_rest_never_authorizes_invalid_or_missing_goal[invalid3] _____
+src/mission_control/test/test_goal_shot_settle.py:49: in test_elapsed_rest_never_authorizes_invalid_or_missing_goal
+    assert node.publish_vision(goal=score_ready_goal()) == []
+E   AssertionError: assert [{'action': '...': None, ...}] == []
+E     Left contains one more item: {'action': 'GOAL_SHOT_PREPARE', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}
+E     Full diff:
+E       [
+E     -  ,
+E     +  {'action': 'GOAL_SHOT_PREPARE',
+E     +   'active_special_action': None,
+E     +   'active_special_command_id': None,...
+E     
+E     ...Full output truncated (78 lines hidden), use '-vv' to show
+_______ test_executed_fine_step_restarts_shot_rest_without_forward_dwell _______
+src/mission_control/test/test_goal_shot_settle.py:72: in test_executed_fine_step_restarts_shot_rest_without_forward_dwell
+    assert node.publish_vision(goal=score_ready_goal()) == []
+E   AssertionError: assert [{'action': '...': None, ...}] == []
+E     Left contains one more item: {'action': 'GOAL_SHOT_PREPARE', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}
+E     Full diff:
+E       [
+E     -  ,
+E     +  {'action': 'GOAL_SHOT_PREPARE',
+E     +   'active_special_action': None,
+E     +   'active_special_command_id': None,...
+E     
+E     ...Full output truncated (78 lines hidden), use '-vv' to show
+______________ test_failed_motion_does_not_reuse_old_rest[FAILED] ______________
+src/mission_control/test/test_goal_shot_settle.py:87: in test_failed_motion_does_not_reuse_old_rest
+    assert node.publish_vision(goal=score_ready_goal()) == []
+E   AssertionError: assert [{'action': '...': None, ...}] == []
+E     Left contains one more item: {'action': 'GOAL_SHOT_PREPARE', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}
+E     Full diff:
+E       [
+E     -  ,
+E     +  {'action': 'GOAL_SHOT_PREPARE',
+E     +   'active_special_action': None,
+E     +   'active_special_command_id': None,...
+E     
+E     ...Full output truncated (78 lines hidden), use '-vv' to show
+_____________ test_failed_motion_does_not_reuse_old_rest[TIMEOUT] ______________
+src/mission_control/test/test_goal_shot_settle.py:87: in test_failed_motion_does_not_reuse_old_rest
+    assert node.publish_vision(goal=score_ready_goal()) == []
+E   AssertionError: assert [{'action': '...': None, ...}] == []
+E     Left contains one more item: {'action': 'GOAL_SHOT_PREPARE', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}
+E     Full diff:
+E       [
+E     -  ,
+E     +  {'action': 'GOAL_SHOT_PREPARE',
+E     +   'active_special_action': None,
+E     +   'active_special_command_id': None,...
+E     
+E     ...Full output truncated (78 lines hidden), use '-vv' to show
+_____________ test_failed_motion_does_not_reuse_old_rest[REJECTED] _____________
+src/mission_control/test/test_goal_shot_settle.py:87: in test_failed_motion_does_not_reuse_old_rest
+    assert node.publish_vision(goal=score_ready_goal()) == []
+E   AssertionError: assert [{'action': '...': None, ...}] == []
+E     Left contains one more item: {'action': 'GOAL_SHOT_PREPARE', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}
+E     Full diff:
+E       [
+E     -  ,
+E     +  {'action': 'GOAL_SHOT_PREPARE',
+E     +   'active_special_action': None,
+E     +   'active_special_command_id': None,...
+E     
+E     ...Full output truncated (78 lines hidden), use '-vv' to show
+_______ test_executor_motion_or_startup_hold_invalidates_rest[True-True] _______
+src/mission_control/test/test_goal_shot_settle.py:112: in test_executor_motion_or_startup_hold_invalidates_rest
+    assert node.goal_stationary_since == 12.0
+E   assert None == 12.0
+E    +  where None = <test_mission_phase_flow.MissionFlowHarness object at 0xffff8f710250>.goal_stationary_since
+______ test_executor_motion_or_startup_hold_invalidates_rest[False-False] ______
+src/mission_control/test/test_goal_shot_settle.py:112: in test_executor_motion_or_startup_hold_invalidates_rest
+    assert node.goal_stationary_since == 12.0
+E   assert None == 12.0
+E    +  where None = <test_mission_phase_flow.MissionFlowHarness object at 0xffff8f564fd0>.goal_stationary_since
+______________ test_unknown_executor_state_cannot_authorize_shot _______________
+src/mission_control/test/test_goal_shot_settle.py:122: in test_unknown_executor_state_cannot_authorize_shot
+    assert node.publish_vision(goal=score_ready_goal()) == []
+E   AssertionError: assert [{'action': '...': None, ...}] == []
+E     Left contains one more item: {'action': 'GOAL_SHOT_PREPARE', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}
+E     Full diff:
+E       [
+E     -  ,
+E     +  {'action': 'GOAL_SHOT_PREPARE',
+E     +   'active_special_action': None,
+E     +   'active_special_command_id': None,...
+E     
+E     ...Full output truncated (78 lines hidden), use '-vv' to show
+_ test_requested_route_and_exact_half_second_holds[goal_camera_90_crab_right-SHOT-goal_crab_right_to_turn_90-goal_shot-r\uc624\uc606\uc5d0\uc11c \uc624\ub4a490\ub3c4] _
+src/mission_control/test/test_catalog63_transitions.py:97: in test_requested_route_and_exact_half_second_holds
+    check_both_pauses(bridge, clock, prepare, target)
+src/mission_control/test/test_transition_dwells.py:29: in check_both_pauses
+    assert [r["motion_id"] for r in requests(bridge)[start:]] == [prepare]
+E   AssertionError: assert ['goal_crab_right_to_fine_90'] == ['goal_crab_right_to_turn_90']
+E     At index 0 diff: 'goal_crab_right_to_fine_90' != 'goal_crab_right_to_turn_90'
+E     Full diff:
+E     - ['goal_crab_right_to_turn_90']
+E     ?                      ^^^
+E     + ['goal_crab_right_to_fine_90']
+E     ?                      ^^ +
+_ test_requested_route_and_exact_half_second_holds[goal_camera_90_crab_left-SHOT-goal_crab_left_to_turn_90-goal_shot-r\uc67c\uc606\uc5d0\uc11c \uc624\ub4a490\ub3c4] _
+src/mission_control/test/test_catalog63_transitions.py:97: in test_requested_route_and_exact_half_second_holds
+    check_both_pauses(bridge, clock, prepare, target)
+src/mission_control/test/test_transition_dwells.py:29: in check_both_pauses
+    assert [r["motion_id"] for r in requests(bridge)[start:]] == [prepare]
+E   AssertionError: assert ['goal_crab_left_to_fine_90'] == ['goal_crab_left_to_turn_90']
+E     At index 0 diff: 'goal_crab_left_to_fine_90' != 'goal_crab_left_to_turn_90'
+E     Full diff:
+E     - ['goal_crab_left_to_turn_90']
+E     ?                     ^^^
+E     + ['goal_crab_left_to_fine_90']
+E     ?                     ^^ +
+_ test_failed_transition_never_sends_target[FAILED-goal_camera_90_crab_right-SHOT-goal_crab_right_to_turn_90-goal_shot-r\uc624\uc606\uc5d0\uc11c \uc624\ub4a490\ub3c4] _
+src/mission_control/test/test_catalog63_transitions.py:107: in test_failed_transition_never_sends_target
+    assert request['motion_id'] == prepare
+E   AssertionError: assert 'goal_crab_right_to_fine_90' == 'goal_crab_right_to_turn_90'
+E     - goal_crab_right_to_turn_90
+E     ?                    ^^^
+E     + goal_crab_right_to_fine_90
+E     ?                    ^^ +
+_ test_failed_transition_never_sends_target[FAILED-goal_camera_90_crab_left-SHOT-goal_crab_left_to_turn_90-goal_shot-r\uc67c\uc606\uc5d0\uc11c \uc624\ub4a490\ub3c4] _
+src/mission_control/test/test_catalog63_transitions.py:107: in test_failed_transition_never_sends_target
+    assert request['motion_id'] == prepare
+E   AssertionError: assert 'goal_crab_left_to_fine_90' == 'goal_crab_left_to_turn_90'
+E     - goal_crab_left_to_turn_90
+E     ?                   ^^^
+E     + goal_crab_left_to_fine_90
+E     ?                   ^^ +
+_ test_failed_transition_never_sends_target[TIMEOUT-goal_camera_90_crab_right-SHOT-goal_crab_right_to_turn_90-goal_shot-r\uc624\uc606\uc5d0\uc11c \uc624\ub4a490\ub3c4] _
+src/mission_control/test/test_catalog63_transitions.py:107: in test_failed_transition_never_sends_target
+    assert request['motion_id'] == prepare
+E   AssertionError: assert 'goal_crab_right_to_fine_90' == 'goal_crab_right_to_turn_90'
+E     - goal_crab_right_to_turn_90
+E     ?                    ^^^
+E     + goal_crab_right_to_fine_90
+E     ?                    ^^ +
+_ test_failed_transition_never_sends_target[TIMEOUT-goal_camera_90_crab_left-SHOT-goal_crab_left_to_turn_90-goal_shot-r\uc67c\uc606\uc5d0\uc11c \uc624\ub4a490\ub3c4] _
+src/mission_control/test/test_catalog63_transitions.py:107: in test_failed_transition_never_sends_target
+    assert request['motion_id'] == prepare
+E   AssertionError: assert 'goal_crab_left_to_fine_90' == 'goal_crab_left_to_turn_90'
+E     - goal_crab_left_to_turn_90
+E     ?                   ^^^
+E     + goal_crab_left_to_fine_90
+E     ?                   ^^ +
+_ test_failed_transition_never_sends_target[CANCELLED-goal_camera_90_crab_right-SHOT-goal_crab_right_to_turn_90-goal_shot-r\uc624\uc606\uc5d0\uc11c \uc624\ub4a490\ub3c4] _
+src/mission_control/test/test_catalog63_transitions.py:107: in test_failed_transition_never_sends_target
+    assert request['motion_id'] == prepare
+E   AssertionError: assert 'goal_crab_right_to_fine_90' == 'goal_crab_right_to_turn_90'
+E     - goal_crab_right_to_turn_90
+E     ?                    ^^^
+E     + goal_crab_right_to_fine_90
+E     ?                    ^^ +
+_ test_failed_transition_never_sends_target[CANCELLED-goal_camera_90_crab_left-SHOT-goal_crab_left_to_turn_90-goal_shot-r\uc67c\uc606\uc5d0\uc11c \uc624\ub4a490\ub3c4] _
+src/mission_control/test/test_catalog63_transitions.py:107: in test_failed_transition_never_sends_target
+    assert request['motion_id'] == prepare
+E   AssertionError: assert 'goal_crab_left_to_fine_90' == 'goal_crab_left_to_turn_90'
+E     - goal_crab_left_to_turn_90
+E     ?                   ^^^
+E     + goal_crab_left_to_fine_90
+E     ?                   ^^ +
+_ test_failed_transition_never_sends_target[REJECTED-goal_camera_90_crab_right-SHOT-goal_crab_right_to_turn_90-goal_shot-r\uc624\uc606\uc5d0\uc11c \uc624\ub4a490\ub3c4] _
+src/mission_control/test/test_catalog63_transitions.py:107: in test_failed_transition_never_sends_target
+    assert request['motion_id'] == prepare
+E   AssertionError: assert 'goal_crab_right_to_fine_90' == 'goal_crab_right_to_turn_90'
+E     - goal_crab_right_to_turn_90
+E     ?                    ^^^
+E     + goal_crab_right_to_fine_90
+E     ?                    ^^ +
+_ test_failed_transition_never_sends_target[REJECTED-goal_camera_90_crab_left-SHOT-goal_crab_left_to_turn_90-goal_shot-r\uc67c\uc606\uc5d0\uc11c \uc624\ub4a490\ub3c4] _
+src/mission_control/test/test_catalog63_transitions.py:107: in test_failed_transition_never_sends_target
+    assert request['motion_id'] == prepare
+E   AssertionError: assert 'goal_crab_left_to_fine_90' == 'goal_crab_left_to_turn_90'
+E     - goal_crab_left_to_turn_90
+E     ?                   ^^^
+E     + goal_crab_left_to_fine_90
+E     ?                   ^^ +
+_____ test_shot_without_fine_only_approach_keeps_direct_scoring[actions0] ______
+src/mission_control/test/test_motion_command_bridge.py:388: in test_shot_without_fine_only_approach_keeps_direct_scoring
+    assert bridge.active_motion_id == "goal_shot"
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E     - goal_shot
+E     + goal_fine_prepare_90
+_____ test_shot_without_fine_only_approach_keeps_direct_scoring[actions1] ______
+src/mission_control/test/test_motion_command_bridge.py:388: in test_shot_without_fine_only_approach_keeps_direct_scoring
+    assert bridge.active_motion_id == "goal_shot"
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E     - goal_shot
+E     + goal_fine_prepare_90
+___ test_shot_waits_for_running_fine_motion_and_uses_only_completed_history ____
+src/mission_control/test/test_motion_command_bridge.py:422: in test_shot_waits_for_running_fine_motion_and_uses_only_completed_history
+    assert bridge.active_motion_id == "goal_shot"
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E     - goal_shot
+E     + goal_fine_prepare_90
+__________ test_shot_retry_does_not_repeat_completed_pose_preparation __________
+src/mission_control/test/test_motion_command_bridge.py:434: in test_shot_retry_does_not_repeat_completed_pose_preparation
+    assert bridge.active_motion_id == "goal_shot"
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E     - goal_shot
+E     + goal_fine_prepare_90
+________ test_production_action_mapping_contains_only_approved_contract ________
+src/mission_control/test/test_motion_command_bridge.py:683: in test_production_action_mapping_contains_only_approved_contract
+    assert MotionCommandBridgeNode.ACTION_TO_MOTION_ID == (
+E   AssertionError: assert {'ALIGN_LEFT'...rd_45_5', ...} == {'ALIGN_LEFT'...rd_45_5', ...}
+E     Omitting 142 identical items, use -vv to show
+E     Left contains 1 more item:
+E     {'GOAL_SHOT_PREPARE': 'goal_fine_prepare_90'}
+E     Full diff:
+E       {
+E        'ALIGN_LEFT': 'stationary_turn_left',
+E        'ALIGN_RIGHT': 'stationary_turn_right',...
+E     
+E     ...Full output truncated (143 lines hidden), use '-vv' to show
+________ test_supported_action_builds_executor_request[SHOT-goal_shot] _________
+src/mission_control/test/test_motion_command_bridge.py:707: in test_supported_action_builds_executor_request
+    assert requests == [
+E   AssertionError: assert [{'action': '...are_90', ...}] == [{'action': '...l_shot', ...}]
+E     At index 0 diff: {'action': 'SHOT', 'command_id': 8000, 'event_id': 8, 'request_id': 8000, 'motion_id': 'goal_fine_prepare_90', 'timeout_ms': 12000} != {'action': 'SHOT', 'command_id': 8000, 'event_id': 8, 'request_id': 8000, 'motion_id': 'goal_shot', 'timeout_ms': 12000}
+E     Full diff:
+E       [
+E        {'action': 'SHOT',
+E         'command_id': 8000,
+E         'event_id': 8,
+E     -   'motion_id': 'goal_shot',...
+E     
+E     ...Full output truncated (5 lines hidden), use '-vv' to show
+____________ test_post_shot_exit_turn_returns_to_normal_line[0.0-1] ____________
+src/mission_control/test/test_mission_phase_flow.py:346: in test_post_shot_exit_turn_returns_to_normal_line
+    shot = publish_special(harness, "goal", score_ready_goal(), "SHOT")
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+____________ test_post_shot_exit_turn_returns_to_normal_line[0.0-2] ____________
+src/mission_control/test/test_mission_phase_flow.py:346: in test_post_shot_exit_turn_returns_to_normal_line
+    shot = publish_special(harness, "goal", score_ready_goal(), "SHOT")
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+__________ test_post_shot_exit_turn_returns_to_normal_line[14.999-1] ___________
+src/mission_control/test/test_mission_phase_flow.py:346: in test_post_shot_exit_turn_returns_to_normal_line
+    shot = publish_special(harness, "goal", score_ready_goal(), "SHOT")
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+__________ test_post_shot_exit_turn_returns_to_normal_line[14.999-2] ___________
+src/mission_control/test/test_mission_phase_flow.py:346: in test_post_shot_exit_turn_returns_to_normal_line
+    shot = publish_special(harness, "goal", score_ready_goal(), "SHOT")
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+___________ test_post_shot_exit_turn_returns_to_normal_line[15.0-1] ____________
+src/mission_control/test/test_mission_phase_flow.py:346: in test_post_shot_exit_turn_returns_to_normal_line
+    shot = publish_special(harness, "goal", score_ready_goal(), "SHOT")
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+___________ test_post_shot_exit_turn_returns_to_normal_line[15.0-2] ____________
+src/mission_control/test/test_mission_phase_flow.py:346: in test_post_shot_exit_turn_returns_to_normal_line
+    shot = publish_special(harness, "goal", score_ready_goal(), "SHOT")
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+___________ test_post_shot_exit_turn_returns_to_normal_line[-15.0-1] ___________
+src/mission_control/test/test_mission_phase_flow.py:346: in test_post_shot_exit_turn_returns_to_normal_line
+    shot = publish_special(harness, "goal", score_ready_goal(), "SHOT")
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+___________ test_post_shot_exit_turn_returns_to_normal_line[-15.0-2] ___________
+src/mission_control/test/test_mission_phase_flow.py:346: in test_post_shot_exit_turn_returns_to_normal_line
+    shot = publish_special(harness, "goal", score_ready_goal(), "SHOT")
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+__________ test_post_shot_exit_turn_returns_to_normal_line[-15.001-1] __________
+src/mission_control/test/test_mission_phase_flow.py:346: in test_post_shot_exit_turn_returns_to_normal_line
+    shot = publish_special(harness, "goal", score_ready_goal(), "SHOT")
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+__________ test_post_shot_exit_turn_returns_to_normal_line[-15.001-2] __________
+src/mission_control/test/test_mission_phase_flow.py:346: in test_post_shot_exit_turn_returns_to_normal_line
+    shot = publish_special(harness, "goal", score_ready_goal(), "SHOT")
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+___________ test_post_shot_exit_turn_returns_to_normal_line[20.0-1] ____________
+src/mission_control/test/test_mission_phase_flow.py:346: in test_post_shot_exit_turn_returns_to_normal_line
+    shot = publish_special(harness, "goal", score_ready_goal(), "SHOT")
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+___________ test_post_shot_exit_turn_returns_to_normal_line[20.0-2] ____________
+src/mission_control/test/test_mission_phase_flow.py:346: in test_post_shot_exit_turn_returns_to_normal_line
+    shot = publish_special(harness, "goal", score_ready_goal(), "SHOT")
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+___________ test_post_shot_exit_turn_returns_to_normal_line[-20.0-1] ___________
+src/mission_control/test/test_mission_phase_flow.py:346: in test_post_shot_exit_turn_returns_to_normal_line
+    shot = publish_special(harness, "goal", score_ready_goal(), "SHOT")
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+___________ test_post_shot_exit_turn_returns_to_normal_line[-20.0-2] ___________
+src/mission_control/test/test_mission_phase_flow.py:346: in test_post_shot_exit_turn_returns_to_normal_line
+    shot = publish_special(harness, "goal", score_ready_goal(), "SHOT")
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+___________ test_post_shot_exit_turn_returns_to_normal_line[34.0-1] ____________
+src/mission_control/test/test_mission_phase_flow.py:346: in test_post_shot_exit_turn_returns_to_normal_line
+    shot = publish_special(harness, "goal", score_ready_goal(), "SHOT")
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+___________ test_post_shot_exit_turn_returns_to_normal_line[34.0-2] ____________
+src/mission_control/test/test_mission_phase_flow.py:346: in test_post_shot_exit_turn_returns_to_normal_line
+    shot = publish_special(harness, "goal", score_ready_goal(), "SHOT")
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+___________ test_post_shot_exit_turn_returns_to_normal_line[-58.0-1] ___________
+src/mission_control/test/test_mission_phase_flow.py:346: in test_post_shot_exit_turn_returns_to_normal_line
+    shot = publish_special(harness, "goal", score_ready_goal(), "SHOT")
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+___________ test_post_shot_exit_turn_returns_to_normal_line[-58.0-2] ___________
+src/mission_control/test/test_mission_phase_flow.py:346: in test_post_shot_exit_turn_returns_to_normal_line
+    shot = publish_special(harness, "goal", score_ready_goal(), "SHOT")
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+____ test_post_shot_return_requires_new_ball_frame_and_resumes_acquisition _____
+src/mission_control/test/test_mission_phase_flow.py:575: in test_post_shot_return_requires_new_ball_frame_and_resumes_acquisition
+    shot = publish_special(harness, "goal", score_ready_goal(), "SHOT")
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+_______ test_ball_loss_waits_then_reacquired_ball_selects_moving_recover _______
+src/mission_control/test/test_mission_phase_flow.py:1036: in test_ball_loss_waits_then_reacquired_ball_selects_moving_recover
+    assert approach["action"] == "BALL_APPROACH_RECOVER_LEFT_4"
+E   AssertionError: assert 'BALL_APPROACH_TURN_LEFT_2' == 'BALL_APPROACH_RECOVER_LEFT_4'
+E     - BALL_APPROACH_RECOVER_LEFT_4
+E     ?                ^^^^^^      ^
+E     + BALL_APPROACH_TURN_LEFT_2
+E     ?               ++ ^      ^
+____ test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell _____
+src/mission_control/test/test_mission_phase_flow.py:1087: in test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell
+    assert harness.ball_pickup_entry_pending is True
+E   assert False is True
+E    +  where False = <test_mission_phase_flow.MissionFlowHarness object at 0xffff8f2b9e40>.ball_pickup_entry_pending
+_____ test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment ______
+src/mission_control/test/test_mission_phase_flow.py:1209: in test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment
+    assert turn["action"] == "BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_1"
+E   AssertionError: assert 'BALL_PICKUP_...N_TURN_LEFT_2' == 'BALL_PICKUP_...N_TURN_LEFT_1'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_1
+E     ?                                   ^
+E     + BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_2
+E     ?                                   ^
+_________________ test_full_course_mock_flow_without_ros_graph _________________
+src/mission_control/test/test_mission_phase_flow.py:1294: in test_full_course_mock_flow_without_ros_graph
+    assert approach_ball[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+_ test_special_failure_or_timeout_returns_to_safe_approach_phase[FAILED-SHOT-GOAL_APPROACH-goal-observation1] _
+src/mission_control/test/test_mission_phase_flow.py:1460: in test_special_failure_or_timeout_returns_to_safe_approach_phase
+    command = publish_special(
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+_ test_special_failure_or_timeout_returns_to_safe_approach_phase[TIMEOUT-SHOT-GOAL_APPROACH-goal-observation1] _
+src/mission_control/test/test_mission_phase_flow.py:1460: in test_special_failure_or_timeout_returns_to_safe_approach_phase
+    command = publish_special(
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+_ test_special_failure_limit_blocks_reexecution_after_target_reappears[SHOT-GOAL_APPROACH-goal-observation1-shot_failures_exhausted] _
+src/mission_control/test/test_mission_phase_flow.py:1531: in test_special_failure_limit_blocks_reexecution_after_target_reappears
+    first = publish_special(
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+___________ test_confirmed_approaching_hurdle_beats_approaching_ball ___________
+src/mission_control/test/test_mission_phase_flow.py:1654: in test_confirmed_approaching_hurdle_beats_approaching_ball
+    assert published[-1]["action"] == "STRAIGHT_0"
+E   AssertionError: assert 'GO' == 'STRAIGHT_0'
+E     - STRAIGHT_0
+E     + GO
+____________ test_hurdle_can_appear_after_shot_without_fixed_order _____________
+src/mission_control/test/test_mission_phase_flow.py:1691: in test_hurdle_can_appear_after_shot_without_fixed_order
+    shot = publish_special(
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+__________ test_unconfirmed_hurdle_disappearance_resumes_ball_mission __________
+src/mission_control/test/test_mission_phase_flow.py:1812: in test_unconfirmed_hurdle_disappearance_resumes_ball_mission
+    assert held[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+________ test_unconfirmed_hurdle_can_become_confirmed_and_take_priority ________
+src/mission_control/test/test_mission_phase_flow.py:1831: in test_unconfirmed_hurdle_can_become_confirmed_and_take_priority
+    assert held[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+_______________ test_absent_hurdle_keeps_ball_priority_over_line _______________
+src/mission_control/test/test_mission_phase_flow.py:1850: in test_absent_hurdle_keeps_ball_priority_over_line
+    assert published[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+__________ test_shot_success_updates_one_section_and_returns_to_line ___________
+src/mission_control/test/test_mission_phase_flow.py:2236: in test_shot_success_updates_one_section_and_returns_to_line
+    command = publish_special(
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+________ test_last_shot_enables_finish_flag_and_continues_line_driving _________
+src/mission_control/test/test_mission_phase_flow.py:2258: in test_last_shot_enables_finish_flag_and_continues_line_driving
+    command = publish_special(
+src/mission_control/test/test_mission_phase_flow.py:930: in publish_special
+    assert len(matching) == 1
+E   assert 0 == 1
+E    +  where 0 = len([])
+___________ test_final_line_track_still_prioritizes_confirmed_hurdle ___________
+src/mission_control/test/test_mission_phase_flow.py:2330: in test_final_line_track_still_prioritizes_confirmed_hurdle
+    assert decision["action"] == "STRAIGHT_0"
+E   AssertionError: assert 'GO' == 'STRAIGHT_0'
+E     - STRAIGHT_0
+E     + GO
+______ test_ball_stationary_turn_requires_fresh_ball_before_next_approach ______
+src/mission_control/test/test_mission_phase_flow.py:2520: in test_ball_stationary_turn_requires_fresh_ball_before_next_approach
+    assert approach[0]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'BALL_APPROACH_TURN_RIGHT_1' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     + BALL_APPROACH_TURN_RIGHT_1
+_____________ test_second_ball_uses_same_straight_distance_policy ______________
+src/mission_control/test/test_mission_phase_flow.py:2573: in test_second_ball_uses_same_straight_distance_policy
+    assert command[0]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'BALL_APPROACH_TURN_LEFT_1' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     + BALL_APPROACH_TURN_LEFT_1
+___________ test_failed_first_pickup_keeps_straight_distance_policy ____________
+src/mission_control/test/test_mission_phase_flow.py:2600: in test_failed_first_pickup_keeps_straight_distance_policy
+    assert command[0]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'BALL_APPROACH_TURN_RIGHT_1' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     + BALL_APPROACH_TURN_RIGHT_1
+__ test_next_grabbed_ball_restores_goal_route_after_empty_pickup[NOT_GRABBED] __
+src/mission_control/test/test_mission_phase_flow.py:2771: in test_next_grabbed_ball_restores_goal_route_after_empty_pickup
+    assert transition["action"] == "POST_BALL_GOAL_TRANSITION"
+E   AssertionError: assert 'WAIT' == 'POST_BALL_GOAL_TRANSITION'
+E     - POST_BALL_GOAL_TRANSITION
+E     + WAIT
+____ test_next_grabbed_ball_restores_goal_route_after_empty_pickup[UNKNOWN] ____
+src/mission_control/test/test_mission_phase_flow.py:2771: in test_next_grabbed_ball_restores_goal_route_after_empty_pickup
+    assert transition["action"] == "POST_BALL_GOAL_TRANSITION"
+E   AssertionError: assert 'WAIT' == 'POST_BALL_GOAL_TRANSITION'
+E     - POST_BALL_GOAL_TRANSITION
+E     + WAIT
+_ test_goal_depth_approach_uses_latest_depth_without_clearing_it_between_forwards _
+src/mission_control/test/test_mission_phase_flow.py:2851: in test_goal_depth_approach_uses_latest_depth_without_clearing_it_between_forwards
+    assert command['action'] == 'SHOT'
+E   AssertionError: assert 'GOAL_SHOT_PREPARE' == 'SHOT'
+E     - SHOT
+E     + GOAL_SHOT_PREPARE
+_ test_shot_rest_survives_detection_loss_but_requires_current_permission[None] _
+src/mission_control/test/test_mission_phase_flow.py:2863: in test_shot_rest_survives_detection_loss_but_requires_current_permission
+    assert harness.publish_vision(goal=score_ready_goal()) == []
+E   AssertionError: assert [{'action': '...': None, ...}] == []
+E     Left contains one more item: {'action': 'GOAL_SHOT_PREPARE', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}
+E     Full diff:
+E       [
+E     -  ,
+E     +  {'action': 'GOAL_SHOT_PREPARE',
+E     +   'active_special_action': None,
+E     +   'active_special_command_id': None,...
+E     
+E     ...Full output truncated (78 lines hidden), use '-vv' to show
+_ test_shot_rest_survives_detection_loss_but_requires_current_permission[lost_confirmation1] _
+src/mission_control/test/test_mission_phase_flow.py:2863: in test_shot_rest_survives_detection_loss_but_requires_current_permission
+    assert harness.publish_vision(goal=score_ready_goal()) == []
+E   AssertionError: assert [{'action': '...': None, ...}] == []
+E     Left contains one more item: {'action': 'GOAL_SHOT_PREPARE', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}
+E     Full diff:
+E       [
+E     -  ,
+E     +  {'action': 'GOAL_SHOT_PREPARE',
+E     +   'active_special_action': None,
+E     +   'active_special_command_id': None,...
+E     
+E     ...Full output truncated (78 lines hidden), use '-vv' to show
+_ test_shot_rest_survives_detection_loss_but_requires_current_permission[lost_confirmation2] _
+src/mission_control/test/test_mission_phase_flow.py:2863: in test_shot_rest_survives_detection_loss_but_requires_current_permission
+    assert harness.publish_vision(goal=score_ready_goal()) == []
+E   AssertionError: assert [{'action': '...': None, ...}] == []
+E     Left contains one more item: {'action': 'GOAL_SHOT_PREPARE', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}
+E     Full diff:
+E       [
+E     -  ,
+E     +  {'action': 'GOAL_SHOT_PREPARE',
+E     +   'active_special_action': None,
+E     +   'active_special_command_id': None,...
+E     
+E     ...Full output truncated (78 lines hidden), use '-vv' to show
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.43-120-1]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.509--120-4]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.51-100-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.569--100-3]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.51-0-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.43-120-1]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.509--120-4]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.51-100-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.569--100-3]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.51-0-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.43-120-1]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.509--120-4]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.51-100-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.569--100-3]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.51-0-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_import_preserves_source_targets_and_applies_speed_once
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_forward_goes_directly_to_shot_even_after_a_turn[GOAL_CAMERA_90_FORWARD-None]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_forward_goes_directly_to_shot_even_after_a_turn[GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_TURN_LEFT_1]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_forward_goes_directly_to_shot_even_after_a_turn[GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_TURN_RIGHT_1]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_forward_goes_directly_to_shot_even_after_a_turn[GOAL_CAMERA_90_FORWARD_1-None]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_forward_goes_directly_to_shot_even_after_a_turn[GOAL_CAMERA_90_FORWARD_1-GOAL_CAMERA90_TURN_LEFT_1]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_forward_goes_directly_to_shot_even_after_a_turn[GOAL_CAMERA_90_FORWARD_1-GOAL_CAMERA90_TURN_RIGHT_1]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_forward_goes_directly_to_shot_even_after_a_turn[GOAL_CAMERA_90_FORWARD_2-None]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_forward_goes_directly_to_shot_even_after_a_turn[GOAL_CAMERA_90_FORWARD_2-GOAL_CAMERA90_TURN_LEFT_1]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_forward_goes_directly_to_shot_even_after_a_turn[GOAL_CAMERA_90_FORWARD_2-GOAL_CAMERA90_TURN_RIGHT_1]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions0-goal_forward_to_default]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions1-goal_forward_to_default]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions2-goal_forward_to_default]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions3-goal_forward_to_default]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions4-goal_forward_to_default]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions5-goal_forward_to_default]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions6-goal_forward_to_default]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions7-goal_forward_to_default]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions8-goal_forward_to_default]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions9-goal_forward_to_default]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions10-goal_forward_to_default]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions11-goal_forward_to_default]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions12-goal_forward_to_default]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions13-goal_forward_to_default]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions14-goal_forward_to_default]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions15-goal_forward_to_default]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions16-goal_forward_to_default]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions17-goal_forward_to_default]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_forward_posture_preparation_failure_never_sends_shot[FAILED]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_forward_posture_preparation_failure_never_sends_shot[TIMEOUT]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_forward_posture_preparation_failure_never_sends_shot[CANCELLED]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_forward_posture_preparation_failure_never_sends_shot[REJECTED]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_retry_after_failed_preparation_cannot_skip_it[goal_camera_90_turn_left_1-goal_forward_to_default]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_retry_after_failed_preparation_cannot_skip_it[goal_camera_90_turn_right_1-goal_forward_to_default]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_retry_after_failed_preparation_cannot_skip_it[goal_camera_90_crab_left-goal_crab_left_to_turn_90]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_retry_after_failed_preparation_cannot_skip_it[goal_camera_90_crab_right-goal_crab_right_to_turn_90]
+FAILED src/mission_control/test/test_goal_shot_settle.py::test_one_mm_boundary_noise_does_not_restart_shot_rest
+FAILED src/mission_control/test/test_goal_shot_settle.py::test_elapsed_rest_never_authorizes_invalid_or_missing_goal[None]
+FAILED src/mission_control/test/test_goal_shot_settle.py::test_elapsed_rest_never_authorizes_invalid_or_missing_goal[invalid1]
+FAILED src/mission_control/test/test_goal_shot_settle.py::test_elapsed_rest_never_authorizes_invalid_or_missing_goal[invalid2]
+FAILED src/mission_control/test/test_goal_shot_settle.py::test_elapsed_rest_never_authorizes_invalid_or_missing_goal[invalid3]
+FAILED src/mission_control/test/test_goal_shot_settle.py::test_executed_fine_step_restarts_shot_rest_without_forward_dwell
+FAILED src/mission_control/test/test_goal_shot_settle.py::test_failed_motion_does_not_reuse_old_rest[FAILED]
+FAILED src/mission_control/test/test_goal_shot_settle.py::test_failed_motion_does_not_reuse_old_rest[TIMEOUT]
+FAILED src/mission_control/test/test_goal_shot_settle.py::test_failed_motion_does_not_reuse_old_rest[REJECTED]
+FAILED src/mission_control/test/test_goal_shot_settle.py::test_executor_motion_or_startup_hold_invalidates_rest[True-True]
+FAILED src/mission_control/test/test_goal_shot_settle.py::test_executor_motion_or_startup_hold_invalidates_rest[False-False]
+FAILED src/mission_control/test/test_goal_shot_settle.py::test_unknown_executor_state_cannot_authorize_shot
+FAILED src/mission_control/test/test_catalog63_transitions.py::test_requested_route_and_exact_half_second_holds[goal_camera_90_crab_right-SHOT-goal_crab_right_to_turn_90-goal_shot-r\uc624\uc606\uc5d0\uc11c \uc624\ub4a490\ub3c4]
+FAILED src/mission_control/test/test_catalog63_transitions.py::test_requested_route_and_exact_half_second_holds[goal_camera_90_crab_left-SHOT-goal_crab_left_to_turn_90-goal_shot-r\uc67c\uc606\uc5d0\uc11c \uc624\ub4a490\ub3c4]
+FAILED src/mission_control/test/test_catalog63_transitions.py::test_failed_transition_never_sends_target[FAILED-goal_camera_90_crab_right-SHOT-goal_crab_right_to_turn_90-goal_shot-r\uc624\uc606\uc5d0\uc11c \uc624\ub4a490\ub3c4]
+FAILED src/mission_control/test/test_catalog63_transitions.py::test_failed_transition_never_sends_target[FAILED-goal_camera_90_crab_left-SHOT-goal_crab_left_to_turn_90-goal_shot-r\uc67c\uc606\uc5d0\uc11c \uc624\ub4a490\ub3c4]
+FAILED src/mission_control/test/test_catalog63_transitions.py::test_failed_transition_never_sends_target[TIMEOUT-goal_camera_90_crab_right-SHOT-goal_crab_right_to_turn_90-goal_shot-r\uc624\uc606\uc5d0\uc11c \uc624\ub4a490\ub3c4]
+FAILED src/mission_control/test/test_catalog63_transitions.py::test_failed_transition_never_sends_target[TIMEOUT-goal_camera_90_crab_left-SHOT-goal_crab_left_to_turn_90-goal_shot-r\uc67c\uc606\uc5d0\uc11c \uc624\ub4a490\ub3c4]
+FAILED src/mission_control/test/test_catalog63_transitions.py::test_failed_transition_never_sends_target[CANCELLED-goal_camera_90_crab_right-SHOT-goal_crab_right_to_turn_90-goal_shot-r\uc624\uc606\uc5d0\uc11c \uc624\ub4a490\ub3c4]
+FAILED src/mission_control/test/test_catalog63_transitions.py::test_failed_transition_never_sends_target[CANCELLED-goal_camera_90_crab_left-SHOT-goal_crab_left_to_turn_90-goal_shot-r\uc67c\uc606\uc5d0\uc11c \uc624\ub4a490\ub3c4]
+FAILED src/mission_control/test/test_catalog63_transitions.py::test_failed_transition_never_sends_target[REJECTED-goal_camera_90_crab_right-SHOT-goal_crab_right_to_turn_90-goal_shot-r\uc624\uc606\uc5d0\uc11c \uc624\ub4a490\ub3c4]
+FAILED src/mission_control/test/test_catalog63_transitions.py::test_failed_transition_never_sends_target[REJECTED-goal_camera_90_crab_left-SHOT-goal_crab_left_to_turn_90-goal_shot-r\uc67c\uc606\uc5d0\uc11c \uc624\ub4a490\ub3c4]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_without_fine_only_approach_keeps_direct_scoring[actions0]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_without_fine_only_approach_keeps_direct_scoring[actions1]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_waits_for_running_fine_motion_and_uses_only_completed_history
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_retry_does_not_repeat_completed_pose_preparation
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_production_action_mapping_contains_only_approved_contract
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_supported_action_builds_executor_request[SHOT-goal_shot]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_shot_exit_turn_returns_to_normal_line[0.0-1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_shot_exit_turn_returns_to_normal_line[0.0-2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_shot_exit_turn_returns_to_normal_line[14.999-1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_shot_exit_turn_returns_to_normal_line[14.999-2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_shot_exit_turn_returns_to_normal_line[15.0-1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_shot_exit_turn_returns_to_normal_line[15.0-2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_shot_exit_turn_returns_to_normal_line[-15.0-1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_shot_exit_turn_returns_to_normal_line[-15.0-2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_shot_exit_turn_returns_to_normal_line[-15.001-1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_shot_exit_turn_returns_to_normal_line[-15.001-2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_shot_exit_turn_returns_to_normal_line[20.0-1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_shot_exit_turn_returns_to_normal_line[20.0-2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_shot_exit_turn_returns_to_normal_line[-20.0-1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_shot_exit_turn_returns_to_normal_line[-20.0-2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_shot_exit_turn_returns_to_normal_line[34.0-1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_shot_exit_turn_returns_to_normal_line[34.0-2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_shot_exit_turn_returns_to_normal_line[-58.0-1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_shot_exit_turn_returns_to_normal_line[-58.0-2]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_post_shot_return_requires_new_ball_frame_and_resumes_acquisition
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_ball_loss_waits_then_reacquired_ball_selects_moving_recover
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_full_course_mock_flow_without_ros_graph
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_special_failure_or_timeout_returns_to_safe_approach_phase[FAILED-SHOT-GOAL_APPROACH-goal-observation1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_special_failure_or_timeout_returns_to_safe_approach_phase[TIMEOUT-SHOT-GOAL_APPROACH-goal-observation1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_special_failure_limit_blocks_reexecution_after_target_reappears[SHOT-GOAL_APPROACH-goal-observation1-shot_failures_exhausted]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_confirmed_approaching_hurdle_beats_approaching_ball
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_hurdle_can_appear_after_shot_without_fixed_order
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_unconfirmed_hurdle_disappearance_resumes_ball_mission
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_unconfirmed_hurdle_can_become_confirmed_and_take_priority
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_absent_hurdle_keeps_ball_priority_over_line
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_shot_success_updates_one_section_and_returns_to_line
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_last_shot_enables_finish_flag_and_continues_line_driving
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_final_line_track_still_prioritizes_confirmed_hurdle
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_ball_stationary_turn_requires_fresh_ball_before_next_approach
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_second_ball_uses_same_straight_distance_policy
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_failed_first_pickup_keeps_straight_distance_policy
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_next_grabbed_ball_restores_goal_route_after_empty_pickup[NOT_GRABBED]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_next_grabbed_ball_restores_goal_route_after_empty_pickup[UNKNOWN]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_goal_depth_approach_uses_latest_depth_without_clearing_it_between_forwards
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_shot_rest_survives_detection_loss_but_requires_current_permission[None]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_shot_rest_survives_detection_loss_but_requires_current_permission[lost_confirmation1]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_shot_rest_survives_detection_loss_but_requires_current_permission[lost_confirmation2]
+122 failed, 1038 passed in 14.89s

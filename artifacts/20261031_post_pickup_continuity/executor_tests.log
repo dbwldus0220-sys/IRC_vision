@@ -1,0 +1,88 @@
+Internal ctest changing into directory: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+Test project /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+    Start  3: test_forward_timing
+1/4 Test  #3: test_forward_timing ................   Passed    0.38 sec
+    Start 11: test_sdk_executor_core
+2/4 Test #11: test_sdk_executor_core .............***Failed    0.20 sec
+-- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+ - /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_sdk_executor_core --gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_core.gtest.xml
+Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+[==========] Running 20 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 20 tests from SdkExecutorCore
+[ RUN      ] SdkExecutorCore.ResolvesForwardAliasBeforeStartingBackend
+[       OK ] SdkExecutorCore.ResolvesForwardAliasBeforeStartingBackend (3 ms)
+[ RUN      ] SdkExecutorCore.ResolvesPickupAliasWithoutFallback
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_sdk_executor_core.cpp:65: Failure
+Expected equality of these values:
+  backend.started_motion_names[0]
+    Which is: "r\xEA\xB3\xB5\xEC\x9E\xA1\xEA\xB8\xB0 400"
+    As Text: "r공잡기 400"
+  "건공잡기"
+    Which is: "\xEA\xB1\xB4\xEA\xB3\xB5\xEC\x9E\xA1\xEA\xB8\xB0"
+    As Text: "건공잡기"
+[  FAILED  ] SdkExecutorCore.ResolvesPickupAliasWithoutFallback (2 ms)
+[ RUN      ] SdkExecutorCore.UnsupportedMotionNeverCallsBackend
+[       OK ] SdkExecutorCore.UnsupportedMotionNeverCallsBackend (2 ms)
+[ RUN      ] SdkExecutorCore.CorrelatedRejectionNeverStartsOrActivatesBackend
+[       OK ] SdkExecutorCore.CorrelatedRejectionNeverStartsOrActivatesBackend (3 ms)
+[ RUN      ] SdkExecutorCore.CorrelatedRejectionPreservesInvalidRequestHandling
+[       OK ] SdkExecutorCore.CorrelatedRejectionPreservesInvalidRequestHandling (2 ms)
+[ RUN      ] SdkExecutorCore.PreservesCorrelationIncludingNullIds
+[       OK ] SdkExecutorCore.PreservesCorrelationIncludingNullIds (2 ms)
+[ RUN      ] SdkExecutorCore.MapsRunningSettlingAndSucceeded
+[       OK ] SdkExecutorCore.MapsRunningSettlingAndSucceeded (2 ms)
+[ RUN      ] SdkExecutorCore.MapsBackendFailureToFailedTerminal
+[       OK ] SdkExecutorCore.MapsBackendFailureToFailedTerminal (3 ms)
+[ RUN      ] SdkExecutorCore.CancelRequestCompletesWhenBackendReportsCancelled
+[       OK ] SdkExecutorCore.CancelRequestCompletesWhenBackendReportsCancelled (2 ms)
+[ RUN      ] SdkExecutorCore.RejectsCancelWithoutActiveRequest
+[       OK ] SdkExecutorCore.RejectsCancelWithoutActiveRequest (2 ms)
+[ RUN      ] SdkExecutorCore.RejectsStaleCancelWithoutTouchingActiveRequest
+[       OK ] SdkExecutorCore.RejectsStaleCancelWithoutTouchingActiveRequest (2 ms)
+[ RUN      ] SdkExecutorCore.RejectsSecondStartWhileActive
+[       OK ] SdkExecutorCore.RejectsSecondStartWhileActive (2 ms)
+[ RUN      ] SdkExecutorCore.TimeoutCancelsAndReturnsFailedWithCorrelation
+[       OK ] SdkExecutorCore.TimeoutCancelsAndReturnsFailedWithCorrelation (2 ms)
+[ RUN      ] SdkExecutorCore.AllowsNewRequestAfterTerminalStatus
+[       OK ] SdkExecutorCore.AllowsNewRequestAfterTerminalStatus (2 ms)
+[ RUN      ] SdkExecutorCore.BackendStartExceptionBecomesFailed
+[       OK ] SdkExecutorCore.BackendStartExceptionBecomesFailed (2 ms)
+[ RUN      ] SdkExecutorCore.ExplicitBackendStartRejectionStaysRejected
+[       OK ] SdkExecutorCore.ExplicitBackendStartRejectionStaysRejected (3 ms)
+[ RUN      ] SdkExecutorCore.BackendPollExceptionBecomesFailedAndReleasesRequest
+[       OK ] SdkExecutorCore.BackendPollExceptionBecomesFailedAndReleasesRequest (2 ms)
+[ RUN      ] SdkExecutorCore.BackendCancelExceptionBecomesFailedTerminal
+[       OK ] SdkExecutorCore.BackendCancelExceptionBecomesFailedTerminal (2 ms)
+[ RUN      ] SdkExecutorCore.RejectsInvalidRequestWithoutCallingBackend
+[       OK ] SdkExecutorCore.RejectsInvalidRequestWithoutCallingBackend (2 ms)
+[ RUN      ] SdkExecutorCore.PromotesOneQueuedRequestAtSeamlessBoundary
+[       OK ] SdkExecutorCore.PromotesOneQueuedRequestAtSeamlessBoundary (2 ms)
+[----------] 20 tests from SdkExecutorCore (44 ms total)
+
+[----------] Global test environment tear-down
+[==========] 20 tests from 1 test suite ran. (44 ms total)
+[  PASSED  ] 19 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] SdkExecutorCore.ResolvesPickupAliasWithoutFallback
+
+ 1 FAILED TEST
+-- run_test.py: return code 1
+-- run_test.py: inject classname prefix into gtest result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_core.gtest.xml'
+-- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_core.gtest.xml'
+
+    Start 12: test_queue_control_tick
+3/4 Test #12: test_queue_control_tick ............   Passed    0.16 sec
+    Start 13: test_robot_motion_player_backend
+4/4 Test #13: test_robot_motion_player_backend ...   Passed    0.16 sec
+
+75% tests passed, 1 tests failed out of 4
+
+Label Time Summary:
+gtest    =   0.52 sec*proc (3 tests)
+
+Total Test time (real) =   0.91 sec
+
+The following tests FAILED:
+	 11 - test_sdk_executor_core (Failed)
+Errors while running CTest

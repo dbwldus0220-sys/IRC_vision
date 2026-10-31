@@ -1,4 +1,4 @@
-"""Regression coverage for one-second corrections and the second-ball route."""
+"""Regression coverage for half-second corrections and the second-ball route."""
 
 from pathlib import Path
 import json
@@ -103,7 +103,7 @@ def test_pickup_interior_recovery_keeps_parent_checkpoint(stage, motion):
     ('BALL_FINE_FORWARD_8','ball'), ('GOAL_CAMERA90_FINE_FORWARD_2','goal'),
     ('GOAL_CAMERA90_CRAB_LEFT','goal'), ('GOAL_CAMERA90_BACKWARD_1','goal'),
 ])
-def test_correction_success_reserves_one_second_and_needs_fresh_vision(monkeypatch, action, source):
+def test_correction_success_reserves_half_second_and_needs_fresh_vision(monkeypatch, action, source):
     clock = [10.0]
     monkeypatch.setattr(time, 'monotonic', lambda: clock[0])
     node = ReadinessPublishNode(general_decision("STRAIGHT"))
@@ -111,12 +111,12 @@ def test_correction_success_reserves_one_second_and_needs_fresh_vision(monkeypat
     node.general_motion_gate.on_command_published(action, 31)
     send_status(node, status='RUNNING', action=action, command_id=31, event_id=None, dynamics_command=None)
     send_status(node, status='SUCCEEDED', action=action, command_id=31, event_id=None, dynamics_command=None)
-    assert node.correction_post_motion_dwell_until == 11.0
+    assert node.correction_post_motion_dwell_until == 10.5
     node.publisher.messages.clear()
-    clock[0] = 10.999
+    clock[0] = 10.499
     MotionDecisionNode._publish_decision(node)
     assert not node.publisher.messages
-    clock[0] = 11.0
+    clock[0] = 10.5
     MotionDecisionNode._publish_decision(node)
     assert not node.publisher.messages
     assert node.latest_info[source] is None
@@ -143,7 +143,7 @@ def test_duplicate_hurdle_fine_completion_cannot_skip_pause_or_count_twice(monke
             status='SUCCEEDED', command_id=8100, request_id=first_id,
             motion_id='hurdle_fine_forward_10'))
     assert bridge.hurdle_sequence_fine_completed == 1
-    assert bridge.active_dwell_until == 11.0
+    assert bridge.active_dwell_until == 10.5
     assert len(bridge.executor_request_publisher.messages) == 1
 
 

@@ -1,0 +1,68 @@
+{
+  "source_sha256": "599d6e2705dee455ee8b2824f370666dec0c34215396e5c2cb6cb97ff8c9395b",
+  "runtime_speed_factor": 0.95,
+  "transition_dwell_sec": 0.5,
+  "aliases": {
+    "pickup_fine_prepare": "rr오뒤에서 미세오뒤(45도)",
+    "fine_to_turn_ready_0": "rr미세오뒤에서 오뒤0도",
+    "fine_to_turn_ready_45": "rr미세오뒤에서 오뒤45도",
+    "fine_to_turn_ready_90": "rr미세오뒤에서 오뒤90도",
+    "pickup_fine_to_crab_right_0": "r미세오뒤에서 오옆0도",
+    "pickup_fine_to_crab_left_0": "r미세오뒤에서 왼옆0도",
+    "pickup_forward_to_crab_0": "r오뒤에서 오옆꽃게0도",
+    "pickup_forward_to_crab_left_0": "r오뒤에서 왼옆0도",
+    "goal_fine_to_crab_right_90": "r미세오뒤에서 오옆 90도",
+    "goal_fine_to_crab_left_90": "r미세오뒤에서왼옆90도",
+    "goal_forward_to_crab_right_90": "r오뒤에서 오옆꽃게90도",
+    "goal_forward_to_crab_left_90": "r오뒤에서 왼옆으로90도",
+    "goal_crab_right_to_turn_90": "r오옆에서 오뒤90도",
+    "goal_crab_left_to_turn_90": "r왼옆에서 오뒤90도",
+    "pickup_crab_right_to_fine_0": "r오옆에서 미세오뒤(0도)",
+    "pickup_crab_left_to_fine_0": "r왼옆에서 미세오뒤(0도)",
+    "pickup_crab_right_to_left_0": "r오옆에서 왼옆0도",
+    "pickup_crab_left_to_right_0": "r왼옆에서 오옆0도",
+    "goal_crab_right_to_left_90": "r오옆에서 왼옆90도",
+    "goal_crab_left_to_right_90": "r왼옆에서 오옆90도",
+    "pickup_crab_right_to_turn_0": "r오옆에서 오뒤0도",
+    "pickup_crab_left_to_turn_0": "r왼옆에서 오뒤0도"
+  },
+  "motion_names": [
+    "rr오뒤에서 미세오뒤(45도)",
+    "rr미세오뒤에서 오뒤0도",
+    "rr미세오뒤에서 오뒤45도",
+    "rr미세오뒤에서 오뒤90도",
+    "r미세오뒤에서 오옆0도",
+    "r미세오뒤에서 왼옆0도",
+    "r오뒤에서 오옆꽃게0도",
+    "r오뒤에서 왼옆0도",
+    "r미세오뒤에서 오옆 90도",
+    "r미세오뒤에서왼옆90도",
+    "r오뒤에서 오옆꽃게90도",
+    "r오뒤에서 왼옆으로90도",
+    "r오옆에서 오뒤90도",
+    "r왼옆에서 오뒤90도",
+    "r오옆에서 미세오뒤(0도)",
+    "r왼옆에서 미세오뒤(0도)",
+    "r오옆에서 왼옆0도",
+    "r왼옆에서 오옆0도",
+    "r오옆에서 왼옆90도",
+    "r왼옆에서 오옆90도",
+    "r오옆에서 오뒤0도",
+    "r왼옆에서 오뒤0도"
+  ],
+  "pose_renames": {
+    "rr미세오뒤에서 오뒤45도": {
+      "오뒤무게중심앞": "오뒤무게중심앞(rr미세오뒤에서 오뒤45도)"
+    }
+  },
+  "revised_table_policy": {
+    "ball_fine_to_turn": "fine_to_turn_ready_0 (including ball_approach_fine_forward_45_5)",
+    "goal_fine_to_turn_or_recovery": "fine_to_turn_ready_90",
+    "hurdle_fine_to_turn": "fine_to_turn_ready_0 for the currently routed camera-zero gaits",
+    "fine_to_general_forward": "existing support-preparation routes preserved",
+    "pickup_crab_entry_from_fine": "Ball and Hurdle only",
+    "goal_crab_entry_from_fine": "Goal only",
+    "hurdle_fine_entry_depth_m": 0.7,
+    "hurdle_camera_down_bottom_distance_px": 120
+  }
+}

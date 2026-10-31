@@ -1,0 +1,23 @@
+Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+[==========] Running 7 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 7 tests from StartupPoseCatalog
+[ RUN      ] StartupPoseCatalog.AcceptsRepeatedNameWithIdenticalAngles
+[       OK ] StartupPoseCatalog.AcceptsRepeatedNameWithIdenticalAngles (1 ms)
+[ RUN      ] StartupPoseCatalog.RejectsRepeatedNameWithDifferentAngles
+[       OK ] StartupPoseCatalog.RejectsRepeatedNameWithDifferentAngles (0 ms)
+[ RUN      ] StartupPoseCatalog.RejectsRepeatedNameWithMissingMotor
+[       OK ] StartupPoseCatalog.RejectsRepeatedNameWithMissingMotor (0 ms)
+[ RUN      ] StartupPoseCatalog.LoadsGeonStartupPoseWithDefaultPolicy
+[       OK ] StartupPoseCatalog.LoadsGeonStartupPoseWithDefaultPolicy (238 ms)
+[ RUN      ] StartupPoseCatalog.PolicyOffChangesOnlySelectedAxesToVerifiedPcPose
+[       OK ] StartupPoseCatalog.PolicyOffChangesOnlySelectedAxesToVerifiedPcPose (781 ms)
+[ RUN      ] StartupPoseCatalog.LoadsCatalog49ForwardStartWithEveryPolicyCombination
+[       OK ] StartupPoseCatalog.LoadsCatalog49ForwardStartWithEveryPolicyCombination (540 ms)
+[ RUN      ] StartupPoseCatalog.LoadsCatalog51StartupWithEveryPolicyCombination
+[       OK ] StartupPoseCatalog.LoadsCatalog51StartupWithEveryPolicyCombination (540 ms)
+[----------] 7 tests from StartupPoseCatalog (2100 ms total)
+
+[----------] Global test environment tear-down
+[==========] 7 tests from 1 test suite ran. (2100 ms total)
+[  PASSED  ] 7 tests.

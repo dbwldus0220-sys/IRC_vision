@@ -34,7 +34,8 @@ def test_only_requested_gaits_added_and_all_source_fields_preserved(filename):
     raw = (UPDATE / 'source62.json').read_bytes()
     assert hashlib.sha256(raw).hexdigest() == MANIFEST['source_sha256']
     source = {m['name']: m for m in json.loads(raw)['motions']}
-    actual = catalog(ROOT / 'artifacts' / filename)
+    # Validate the import before catalog63 superseded its camera-45 fine gait.
+    actual = catalog(ROOT / 'artifacts/20261031_catalog63_crab_fine/before/artifacts' / filename)
     before = catalog(UPDATE / 'before/artifacts' / filename)
     # The later Goal turn update adds one source62 support transition.
     assert actual.keys() == before.keys() | MANIFEST['motions'].keys() | {'r미세오뒤에서 오뒤90도'}
@@ -52,7 +53,7 @@ def test_only_requested_gaits_added_and_all_source_fields_preserved(filename):
 
 def test_aliases_change_only_requested_fine_gaits():
     before = yaml.safe_load((UPDATE / 'before' / ALIAS_PATH).read_text())['motion_aliases']
-    aliases = yaml.safe_load((ROOT / ALIAS_PATH).read_text())['motion_aliases']
+    aliases = yaml.safe_load((ROOT / 'artifacts/20261031_catalog63_transitions/before' / ALIAS_PATH).read_text())['motion_aliases']
     assert aliases == {**before, **MANIFEST['aliases'],
                        'fine_to_turn_ready_90': 'r미세오뒤에서 오뒤90도'}
     runtime = catalog(ROOT / 'artifacts/robot_motions_runtime.json')

@@ -21,10 +21,10 @@ def finish_physical(bridge, status="SUCCEEDED", **updates):
 
 
 @pytest.mark.parametrize("source,fine,turn,angle", [
-    ("line", "BALL_FINE_FORWARD_8", "TURN_LEFT", 45),
-    ("line", "BALL_FINE_FORWARD_8", "TURN_RIGHT", 45),
-    ("ball", "BALL_FINE_FORWARD_8", "BALL_APPROACH_TURN_LEFT_2", 45),
-    ("ball", "BALL_FINE_FORWARD_8", "BALL_APPROACH_TURN_RIGHT_3", 45),
+    ("line", "BALL_FINE_FORWARD_8", "TURN_LEFT", 0),
+    ("line", "BALL_FINE_FORWARD_8", "TURN_RIGHT", 0),
+    ("ball", "BALL_FINE_FORWARD_8", "BALL_APPROACH_TURN_LEFT_2", 0),
+    ("ball", "BALL_FINE_FORWARD_8", "BALL_APPROACH_TURN_RIGHT_3", 0),
     ("hurdle", "STRAIGHT_0", "ALIGN_LEFT", 0),
     ("hurdle", "STRAIGHT_0", "ALIGN_RIGHT", 0),
     *[("goal", f"GOAL_CAMERA90_FINE_FORWARD_{count}",
@@ -66,9 +66,9 @@ def test_each_mission_prepares_before_turn_and_keeps_command_lock(source, fine, 
 
 @pytest.mark.parametrize("flag,angle", [
     ("ball_head_override_active", 0), ("hurdle_head_override_active", 0),
-    ("goal_head_override_active", 90),
+    ("goal_head_override_active", 0),
 ])
-def test_live_camera_hold_selects_transition(flag, angle, monkeypatch):
+def test_ball_turn_uses_camera_zero_support_even_with_other_head_owner(flag, angle, monkeypatch):
     monkeypatch.setattr("mission_control.motion_command_bridge_node.time.monotonic", lambda: 10.0)
     bridge = FakeBridge()
     bridge.navigation_command_callback(navigation_message(action="BALL_FINE_FORWARD_8", command_id=1))
@@ -111,7 +111,7 @@ def test_queued_turn_waits_for_actual_fine_completion(fine_status):
     assert bridge.queued_request_deferred
     finish_physical(bridge, fine_status)
     if fine_status == "SUCCEEDED":
-        assert requests(bridge)[-1]["motion_id"] == "fine_to_turn_ready_45"
+        assert requests(bridge)[-1]["motion_id"] == "fine_to_turn_ready_0"
         assert bridge.active_command_id == 2
         finish_physical(bridge)
         assert requests(bridge)[-1]["motion_id"] == "stationary_turn_right"
@@ -135,6 +135,6 @@ def test_intervening_walk_discards_old_fine_pose():
         bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
         complete_active_motion(bridge)
     assert [r["motion_id"] for r in requests(bridge)] == [
-        "ball_general_fine_forward_8", "fine_to_turn_ready_45",
+        "ball_general_fine_forward_8", "fine_to_turn_ready_0",
         "line_forward_6", "stationary_turn_left",
     ]

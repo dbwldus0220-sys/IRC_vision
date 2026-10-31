@@ -37,7 +37,7 @@ struct BoundaryReadHardware : TimingHardware {
 };
 
 int main(int argc, char** argv) {
-    assert(argc == 2);
+    assert(argc == 2 || argc == 3);
     const auto path = (std::filesystem::path(argv[1]) / "forward_timing.json").string();
     std::ofstream(path) << R"({"motions":[{
       "name":"forward","max_seq_ms":290,"repeat_count":2,"frames":[
@@ -203,5 +203,60 @@ int main(int argc, char** argv) {
         assert(ms - 5 == total);
         assert(player.completionSequence() == 2);
         assert(hardware.prepares == 1);
+    }
+
+    // Camera ownership is required for Goal/Line recovery cross-camera queues.
+    // Reject body/timing/torque mismatches even while the head is overridden.
+    std::ofstream(path) << R"JSON({"motions":[
+      {"name":"R전진90도(4회)","max_seq_ms":380,"repeat_count":2,"start_pose":"head_up_lift","end_pose":"head_up_back","frames":[
+        {"name":"head_up_lift","start_ms":90,"time_ms":100,"angles":{"0":1,"1":10},"torques":{"0":true,"1":true}},
+        {"name":"head_up_back","start_ms":280,"time_ms":100,"angles":{"0":1,"1":0}}]},
+      {"name":"R전진라인복귀좌","max_seq_ms":380,"repeat_count":2,"start_pose":"lift","end_pose":"left_back","frames":[
+        {"name":"lift","start_ms":90,"time_ms":100,"angles":{"0":-32,"1":10},"torques":{"0":true,"1":true}},
+        {"name":"left_back","start_ms":280,"time_ms":100,"angles":{"0":-32,"1":2}}]},
+      {"name":"R라인복귀우회전","max_seq_ms":380,"repeat_count":2,"start_pose":"lift","end_pose":"right_back","frames":[
+        {"name":"lift","start_ms":90,"time_ms":100,"angles":{"0":-32,"1":20},"torques":{"0":true,"1":true}},
+        {"name":"right_back","start_ms":280,"time_ms":100,"angles":{"0":-32,"1":-2}}]}
+    ]})JSON";
+    for (bool reverse : {false, true}) {
+        TimingHardware hardware;
+        int ms = 0;
+        RobotMotionPlayer player(path, hardware, [&] {
+            return RobotMotionPlayer::Clock::time_point(std::chrono::milliseconds(ms));
+        });
+        assert(player.initialize());
+        const auto first = reverse ? "R전진라인복귀좌" : "R전진90도(4회)";
+        const auto second = reverse ? "R전진90도(4회)" : "R전진라인복귀좌";
+        assert(player.start(first) == StartResult::Accepted);
+        assert(player.queueNext(second) == QueueResult::IncompatibleTransition);
+        player.setJointOverride(0, 1.);
+        assert(player.queueNext("R라인복귀우회전") == QueueResult::IncompatibleTransition);
+        assert(player.queueNext(second) == QueueResult::Queued);
+        for (ms = 5; player.running() && ms < 2000; ms += 5) player.update();
+        assert(player.succeeded());
+        assert(player.completionSequence() == 2);
+        assert(hardware.prepares == 1);
+    }
+    // Optional production-catalog replay: no motor device is opened by TimingHardware.
+    if (argc == 3) {
+        const std::vector<std::string> goal_walks = {
+            "R전진90도(2회)", "R전진90도(4회)", "R전진90도(6회)",
+            "R전진라인복귀좌", "R라인복귀우회전",
+        };
+        for (const auto& first : goal_walks) for (const auto& second : goal_walks) {
+            TimingHardware hardware;
+            int ms = 0;
+            RobotMotionPlayer player(argv[2], hardware, [&] {
+                return RobotMotionPlayer::Clock::time_point(std::chrono::milliseconds(ms));
+            });
+            assert(player.initialize());
+            player.setJointOverride(0, 1.);
+            assert(player.start(first) == StartResult::Accepted);
+            assert(player.queueNext(second) == QueueResult::Queued);
+            for (ms = 5; player.running() && ms < 20000; ms += 5) player.update();
+            assert(player.succeeded());
+            assert(player.completionSequence() == 2);
+            assert(hardware.prepares == 1);
+        }
     }
 }

@@ -22,18 +22,20 @@ DERIVED = {**MANIFEST['derived_motions'], **{
 }}
 
 
-def catalogs():
+def catalogs(artifact_dir=ROOT / 'artifacts'):
     raw = (UPDATE / 'source60.json').read_bytes()
     assert hashlib.sha256(raw).hexdigest() == MANIFEST['source_sha256']
     return [{m['name']: m for m in payload['motions']} for payload in (
         json.loads(raw),
-        json.loads((ROOT / 'artifacts/robot_motions_pc.json').read_text()),
-        json.loads((ROOT / 'artifacts/robot_motions_runtime.json').read_text()),
+        json.loads((artifact_dir / 'robot_motions_pc.json').read_text()),
+        json.loads((artifact_dir / 'robot_motions_runtime.json').read_text()),
     )]
 
 
 def test_every_original_and_derived_motion_uses_latest_source_data():
-    source, pc, runtime = catalogs()
+    # Catalog63 replaces five gaits; retain this earlier import's snapshot check.
+    source, pc, runtime = catalogs(
+        ROOT / 'artifacts/20261031_catalog63_crab_fine/before/artifacts')
     added62 = json.loads((ROOT / 'artifacts/20261030_catalog62_ball500/manifest.json').read_text())['motions']
     goal_turn_transition = {'r미세오뒤에서 오뒤90도'}
     assert len(source) == 74 and len(pc) == len(runtime) == 103 + len(added62) + len(goal_turn_transition)
@@ -69,6 +71,8 @@ def test_routes_use_new_crab_shot_and_fine_gaits_and_startup_stays_unambiguous()
     source, pc, runtime = catalogs()
     catalog62 = json.loads((ROOT / 'artifacts/20261030_catalog62_ball500/source62.json').read_text())
     source62 = {m['name']: m for m in catalog62['motions']}
+    source63 = {m['name']: m for m in json.loads((ROOT /
+        'artifacts/20261031_catalog63_crab_fine/source63.json').read_text())['motions']}
     aliases = yaml.safe_load((ROOT / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']
     assert set(aliases.values()) <= runtime.keys()
     assert aliases['goal_shot'] == 'R골넣기1번구역'
@@ -76,7 +80,7 @@ def test_routes_use_new_crab_shot_and_fine_gaits_and_startup_stays_unambiguous()
                 'pickup_crab_right_0': '유미세오옆꽃게0도', 'pickup_fine_forward_0': 'r미세0도 공잡기용'}
     for alias, name in expected.items():
         assert aliases[alias] == name
-        original = source62[name] if alias == 'pickup_fine_forward_0' else source[name]
+        original = source62[name] if alias == 'pickup_fine_forward_0' else source63[name]
         assert runtime[name]['frames'] == original['frames']
     for n in range(1, 5):
         assert aliases[f'goal_camera_90_fine_forward_{n}'] == f'r미세 골대전용({n}회)'

@@ -1,0 +1,202 @@
+........................................................................ [ 15%]
+...............................................................FF....... [ 31%]
+.......................................FF....FF....FF................... [ 47%]
+........................................................................ [ 62%]
+...........F.F..F.F..............F.....FFF.............................. [ 78%]
+..F............FFF............................FF........................ [ 94%]
+........................FF                                               [100%]
+=================================== FAILURES ===================================
+______________ test_each_completed_turn_uses_new_image_direction _______________
+src/mission_control/test/test_image_line_alignment.py:60: in test_each_completed_turn_uses_new_image_direction
+    assert node.lost_search_turn_limiter.image_alignment_angle == 30.
+E   assert 45.0 == 30.0
+E    +  where 45.0 = <mission_control.lost_search_turn_limiter.LostSearchTurnLimiter object at 0xffff9d40c280>.image_alignment_angle
+E    +    where <mission_control.lost_search_turn_limiter.LostSearchTurnLimiter object at 0xffff9d40c280> = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff9d40da20>.lost_search_turn_limiter
+_____ test_ground_fit_flicker_does_not_restart_equivalent_alignment_pause ______
+src/mission_control/test/test_image_line_alignment.py:74: in test_ground_fit_flicker_does_not_restart_equivalent_alignment_pause
+    assert node.pre_motion_settle_started_at == start
+E   assert 10.2 == 10.0
+E    +  where 10.2 = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff9c5f6200>.pre_motion_settle_started_at
+_ test_disabled_position_mode_keeps_large_heading_priority[-0.7-64.9-RIGHT-5-45.0] _
+src/mission_control/test/test_line_heading_alignment.py:30: in test_disabled_position_mode_keeps_large_heading_priority
+    assert decision.valid and decision.action == action
+E   AssertionError: assert (True and 'LINE_HEADING_TURN_RIGHT_6' == 'LINE_HEADING_TURN_RIGHT_5'
+E    +  where True = MotionDecision(phase='LINE_TRACK', source='line', action='LINE_HEADING_TURN_RIGHT_6', valid=True, reason='line_large_g...'turn_direction': 'RIGHT', 'turn_count': 6, 'alignment_reference': 'ground_heading', 'catalog_motion_available': True}).valid
+E     - LINE_HEADING_TURN_RIGHT_5
+E     ?                         ^
+E     + LINE_HEADING_TURN_RIGHT_6
+E     ?                         ^)
+_ test_disabled_position_mode_keeps_large_heading_priority[-0.7-65.0-RIGHT-7-65.0] _
+src/mission_control/test/test_line_heading_alignment.py:30: in test_disabled_position_mode_keeps_large_heading_priority
+    assert decision.valid and decision.action == action
+E   AssertionError: assert (True and 'LINE_HEADING_TURN_RIGHT_6' == 'LINE_HEADING_TURN_RIGHT_7'
+E    +  where True = MotionDecision(phase='LINE_TRACK', source='line', action='LINE_HEADING_TURN_RIGHT_6', valid=True, reason='line_large_g...'turn_direction': 'RIGHT', 'turn_count': 6, 'alignment_reference': 'ground_heading', 'catalog_motion_available': True}).valid
+E     - LINE_HEADING_TURN_RIGHT_7
+E     ?                         ^
+E     + LINE_HEADING_TURN_RIGHT_6
+E     ?                         ^)
+_ test_disabled_position_mode_keeps_large_heading_priority[0.0-64.9-RIGHT-5-45.0] _
+src/mission_control/test/test_line_heading_alignment.py:30: in test_disabled_position_mode_keeps_large_heading_priority
+    assert decision.valid and decision.action == action
+E   AssertionError: assert (True and 'LINE_HEADING_TURN_RIGHT_6' == 'LINE_HEADING_TURN_RIGHT_5'
+E    +  where True = MotionDecision(phase='LINE_TRACK', source='line', action='LINE_HEADING_TURN_RIGHT_6', valid=True, reason='line_large_g...'turn_direction': 'RIGHT', 'turn_count': 6, 'alignment_reference': 'ground_heading', 'catalog_motion_available': True}).valid
+E     - LINE_HEADING_TURN_RIGHT_5
+E     ?                         ^
+E     + LINE_HEADING_TURN_RIGHT_6
+E     ?                         ^)
+_ test_disabled_position_mode_keeps_large_heading_priority[0.0-65.0-RIGHT-7-65.0] _
+src/mission_control/test/test_line_heading_alignment.py:30: in test_disabled_position_mode_keeps_large_heading_priority
+    assert decision.valid and decision.action == action
+E   AssertionError: assert (True and 'LINE_HEADING_TURN_RIGHT_6' == 'LINE_HEADING_TURN_RIGHT_7'
+E    +  where True = MotionDecision(phase='LINE_TRACK', source='line', action='LINE_HEADING_TURN_RIGHT_6', valid=True, reason='line_large_g...'turn_direction': 'RIGHT', 'turn_count': 6, 'alignment_reference': 'ground_heading', 'catalog_motion_available': True}).valid
+E     - LINE_HEADING_TURN_RIGHT_7
+E     ?                         ^
+E     + LINE_HEADING_TURN_RIGHT_6
+E     ?                         ^)
+_ test_disabled_position_mode_keeps_large_heading_priority[0.7-64.9-RIGHT-5-45.0] _
+src/mission_control/test/test_line_heading_alignment.py:30: in test_disabled_position_mode_keeps_large_heading_priority
+    assert decision.valid and decision.action == action
+E   AssertionError: assert (True and 'LINE_HEADING_TURN_RIGHT_6' == 'LINE_HEADING_TURN_RIGHT_5'
+E    +  where True = MotionDecision(phase='LINE_TRACK', source='line', action='LINE_HEADING_TURN_RIGHT_6', valid=True, reason='line_large_g...'turn_direction': 'RIGHT', 'turn_count': 6, 'alignment_reference': 'ground_heading', 'catalog_motion_available': True}).valid
+E     - LINE_HEADING_TURN_RIGHT_5
+E     ?                         ^
+E     + LINE_HEADING_TURN_RIGHT_6
+E     ?                         ^)
+_ test_disabled_position_mode_keeps_large_heading_priority[0.7-65.0-RIGHT-7-65.0] _
+src/mission_control/test/test_line_heading_alignment.py:30: in test_disabled_position_mode_keeps_large_heading_priority
+    assert decision.valid and decision.action == action
+E   AssertionError: assert (True and 'LINE_HEADING_TURN_RIGHT_6' == 'LINE_HEADING_TURN_RIGHT_7'
+E    +  where True = MotionDecision(phase='LINE_TRACK', source='line', action='LINE_HEADING_TURN_RIGHT_6', valid=True, reason='line_large_g...'turn_direction': 'RIGHT', 'turn_count': 6, 'alignment_reference': 'ground_heading', 'catalog_motion_available': True}).valid
+E     - LINE_HEADING_TURN_RIGHT_7
+E     ?                         ^
+E     + LINE_HEADING_TURN_RIGHT_6
+E     ?                         ^)
+_______ test_ball_loss_waits_then_reacquired_ball_selects_moving_recover _______
+src/mission_control/test/test_mission_phase_flow.py:1036: in test_ball_loss_waits_then_reacquired_ball_selects_moving_recover
+    assert approach["action"] == "BALL_APPROACH_RECOVER_LEFT_4"
+E   AssertionError: assert 'BALL_APPROACH_TURN_LEFT_2' == 'BALL_APPROACH_RECOVER_LEFT_4'
+E     - BALL_APPROACH_RECOVER_LEFT_4
+E     ?                ^^^^^^      ^
+E     + BALL_APPROACH_TURN_LEFT_2
+E     ?               ++ ^      ^
+____ test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell _____
+src/mission_control/test/test_mission_phase_flow.py:1087: in test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell
+    assert harness.ball_pickup_entry_pending is True
+E   assert False is True
+E    +  where False = <test_mission_phase_flow.MissionFlowHarness object at 0xffff9d7ad540>.ball_pickup_entry_pending
+_____ test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment ______
+src/mission_control/test/test_mission_phase_flow.py:1209: in test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment
+    assert turn["action"] == "BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_1"
+E   AssertionError: assert 'BALL_PICKUP_...N_TURN_LEFT_2' == 'BALL_PICKUP_...N_TURN_LEFT_1'
+E     - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_1
+E     ?                                   ^
+E     + BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_2
+E     ?                                   ^
+_________________ test_full_course_mock_flow_without_ros_graph _________________
+src/mission_control/test/test_mission_phase_flow.py:1294: in test_full_course_mock_flow_without_ros_graph
+    assert approach_ball[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+___________ test_confirmed_approaching_hurdle_beats_approaching_ball ___________
+src/mission_control/test/test_mission_phase_flow.py:1654: in test_confirmed_approaching_hurdle_beats_approaching_ball
+    assert published[-1]["action"] == "STRAIGHT_0"
+E   AssertionError: assert 'GO' == 'STRAIGHT_0'
+E     - STRAIGHT_0
+E     + GO
+__________ test_unconfirmed_hurdle_disappearance_resumes_ball_mission __________
+src/mission_control/test/test_mission_phase_flow.py:1812: in test_unconfirmed_hurdle_disappearance_resumes_ball_mission
+    assert held[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+________ test_unconfirmed_hurdle_can_become_confirmed_and_take_priority ________
+src/mission_control/test/test_mission_phase_flow.py:1831: in test_unconfirmed_hurdle_can_become_confirmed_and_take_priority
+    assert held[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+_______________ test_absent_hurdle_keeps_ball_priority_over_line _______________
+src/mission_control/test/test_mission_phase_flow.py:1850: in test_absent_hurdle_keeps_ball_priority_over_line
+    assert published[-1]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'STRAIGHT' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     ?         --
+E     + STRAIGHT
+___________ test_final_line_track_still_prioritizes_confirmed_hurdle ___________
+src/mission_control/test/test_mission_phase_flow.py:2330: in test_final_line_track_still_prioritizes_confirmed_hurdle
+    assert decision["action"] == "STRAIGHT_0"
+E   AssertionError: assert 'GO' == 'STRAIGHT_0'
+E     - STRAIGHT_0
+E     + GO
+______ test_ball_stationary_turn_requires_fresh_ball_before_next_approach ______
+src/mission_control/test/test_mission_phase_flow.py:2520: in test_ball_stationary_turn_requires_fresh_ball_before_next_approach
+    assert approach[0]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'BALL_APPROACH_TURN_RIGHT_1' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     + BALL_APPROACH_TURN_RIGHT_1
+_____________ test_second_ball_uses_same_straight_distance_policy ______________
+src/mission_control/test/test_mission_phase_flow.py:2573: in test_second_ball_uses_same_straight_distance_policy
+    assert command[0]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'BALL_APPROACH_TURN_LEFT_1' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     + BALL_APPROACH_TURN_LEFT_1
+___________ test_failed_first_pickup_keeps_straight_distance_policy ____________
+src/mission_control/test/test_mission_phase_flow.py:2600: in test_failed_first_pickup_keeps_straight_distance_policy
+    assert command[0]["action"] == "STRAIGHT_2"
+E   AssertionError: assert 'BALL_APPROACH_TURN_RIGHT_1' == 'STRAIGHT_2'
+E     - STRAIGHT_2
+E     + BALL_APPROACH_TURN_RIGHT_1
+__ test_next_grabbed_ball_restores_goal_route_after_empty_pickup[NOT_GRABBED] __
+src/mission_control/test/test_mission_phase_flow.py:2771: in test_next_grabbed_ball_restores_goal_route_after_empty_pickup
+    assert transition["action"] == "POST_BALL_GOAL_TRANSITION"
+E   AssertionError: assert 'WAIT' == 'POST_BALL_GOAL_TRANSITION'
+E     - POST_BALL_GOAL_TRANSITION
+E     + WAIT
+____ test_next_grabbed_ball_restores_goal_route_after_empty_pickup[UNKNOWN] ____
+src/mission_control/test/test_mission_phase_flow.py:2771: in test_next_grabbed_ball_restores_goal_route_after_empty_pickup
+    assert transition["action"] == "POST_BALL_GOAL_TRANSITION"
+E   AssertionError: assert 'WAIT' == 'POST_BALL_GOAL_TRANSITION'
+E     - POST_BALL_GOAL_TRANSITION
+E     + WAIT
+________ test_pickup_preparation_is_followed_by_full_second_before_fine ________
+src/mission_control/test/test_wait_refresh_and_fine_settle.py:158: in test_pickup_preparation_is_followed_by_full_second_before_fine
+    assert bridge.active_dwell_until == pytest.approx(clock[0] + 1.)
+E   assert None == 11.0 ± 1.1e-05
+E    +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff9c5f6ad0>.active_dwell_until
+E    +  and   11.0 ± 1.1e-05 = <function approx at 0xffffae5275b0>((10.0 + 1.0))
+E    +    where <function approx at 0xffffae5275b0> = pytest.approx
+______ test_pickup_loss_pending_during_preparation_skips_fine_after_pause ______
+src/mission_control/test/test_wait_refresh_and_fine_settle.py:185: in test_pickup_loss_pending_during_preparation_skips_fine_after_pause
+    assert bridge.pickup_fine_align_waiting
+E   assert False
+E    +  where False = <test_motion_command_bridge.FakeBridge object at 0xffffad312c20>.pickup_fine_align_waiting
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_image_line_alignment.py::test_each_completed_turn_uses_new_image_direction
+FAILED src/mission_control/test/test_image_line_alignment.py::test_ground_fit_flicker_does_not_restart_equivalent_alignment_pause
+FAILED src/mission_control/test/test_line_heading_alignment.py::test_disabled_position_mode_keeps_large_heading_priority[-0.7-64.9-RIGHT-5-45.0]
+FAILED src/mission_control/test/test_line_heading_alignment.py::test_disabled_position_mode_keeps_large_heading_priority[-0.7-65.0-RIGHT-7-65.0]
+FAILED src/mission_control/test/test_line_heading_alignment.py::test_disabled_position_mode_keeps_large_heading_priority[0.0-64.9-RIGHT-5-45.0]
+FAILED src/mission_control/test/test_line_heading_alignment.py::test_disabled_position_mode_keeps_large_heading_priority[0.0-65.0-RIGHT-7-65.0]
+FAILED src/mission_control/test/test_line_heading_alignment.py::test_disabled_position_mode_keeps_large_heading_priority[0.7-64.9-RIGHT-5-45.0]
+FAILED src/mission_control/test/test_line_heading_alignment.py::test_disabled_position_mode_keeps_large_heading_priority[0.7-65.0-RIGHT-7-65.0]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_ball_loss_waits_then_reacquired_ball_selects_moving_recover
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_idle_ball_pickup_entry_crossing_is_latched_without_general_dwell
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_pickup_positioning_loss_returns_to_fresh_camera_down_alignment
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_full_course_mock_flow_without_ros_graph
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_confirmed_approaching_hurdle_beats_approaching_ball
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_unconfirmed_hurdle_disappearance_resumes_ball_mission
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_unconfirmed_hurdle_can_become_confirmed_and_take_priority
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_absent_hurdle_keeps_ball_priority_over_line
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_final_line_track_still_prioritizes_confirmed_hurdle
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_ball_stationary_turn_requires_fresh_ball_before_next_approach
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_second_ball_uses_same_straight_distance_policy
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_failed_first_pickup_keeps_straight_distance_policy
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_next_grabbed_ball_restores_goal_route_after_empty_pickup[NOT_GRABBED]
+FAILED src/mission_control/test/test_mission_phase_flow.py::test_next_grabbed_ball_restores_goal_route_after_empty_pickup[UNKNOWN]
+FAILED src/mission_control/test/test_wait_refresh_and_fine_settle.py::test_pickup_preparation_is_followed_by_full_second_before_fine
+FAILED src/mission_control/test/test_wait_refresh_and_fine_settle.py::test_pickup_loss_pending_during_preparation_skips_fine_after_pause
+24 failed, 434 passed in 5.46s

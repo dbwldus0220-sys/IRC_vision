@@ -42,7 +42,7 @@ TEST(MotionAliasCatalog, LoadsLatestSdkAndCanonicalAliases)
   irc_step_motion_executor::MotionAliasCatalog catalog;
   std::string error;
   ASSERT_TRUE(catalog.load(TEST_ALIAS_CONFIG, error)) << error;
-  EXPECT_EQ(catalog.size(), 111U);
+  EXPECT_EQ(catalog.size(), 145U);
   for (const auto & [alias, motion] : {
       std::pair{"forward", "R전진45도(8회)"},
       std::pair{"line_forward_8", "R전진45도(8회)"},
@@ -53,6 +53,15 @@ TEST(MotionAliasCatalog, LoadsLatestSdkAndCanonicalAliases)
       std::pair{"line_recovery_right_4", "R라인복귀우회전"},
       std::pair{"pickup_crab_right_0", "유미세오옆꽃게0도"},
       std::pair{"pickup_crab_left_0", "유미세왼옆꽃게0도"},
+      std::pair{"pickup_fine_prepare", "rr오뒤에서 미세오뒤(45도)"},
+      std::pair{"pickup_fine_prepare_0", "rr오뒤에서 미세오뒤(0도)"},
+      std::pair{"goal_fine_prepare_90", "rr오뒤에서 미세오뒤90도"},
+      std::pair{"goal_crab_right_to_fine_90", "r오옆에서 미세오뒤(90도)"},
+      std::pair{"goal_crab_left_to_fine_90", "r왼옆에서 미세오뒤(90도)"},
+      std::pair{"hurdle_fine_prepare_0", "rr오뒤에서 미세오뒤(0도)"},
+      std::pair{"pickup_fine_to_crab_left_0", "r미세오뒤에서 왼옆0도"},
+      std::pair{"goal_crab_right_to_turn_90", "r오옆에서 오뒤90도"},
+      std::pair{"fine_to_turn_ready_45", "rr미세오뒤에서 오뒤45도"},
       std::pair{"goal_camera_90_crab_right", "유미세오옆꽃게90도"},
       std::pair{"goal_camera_90_crab_left", "유미세왼옆꽃게90도"},
       std::pair{"stationary_turn_left", "R제자리좌회전(6회)"},

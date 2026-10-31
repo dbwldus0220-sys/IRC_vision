@@ -21,17 +21,17 @@ def harness():
 
 @pytest.mark.parametrize("suffix", ["LEFT_1", "LEFT_3", "RIGHT_2", "RIGHT_5"])
 @pytest.mark.parametrize("first", ["OFFSET", "LOST"])
-def test_alternating_search_and_alignment_execute_current_decision_after_one_second(suffix, first):
+def test_alternating_search_and_alignment_execute_current_decision_after_half_second(suffix, first):
     node = harness()
     actions = [f"LINE_{first}_TURN_{suffix}",
                f"LINE_{'LOST' if first == 'OFFSET' else 'OFFSET'}_TURN_{suffix}"]
     # Keep this equivalence tied to the actual executor mapping.
     bridge = MotionCommandBridgeNode
     assert bridge.ACTION_TO_MOTION_ID[actions[0]] == bridge.ACTION_TO_MOTION_ID[actions[1]]
-    for i, elapsed in enumerate((0., .1, .2, .3, .4, .5, .6, .7, .8, .999)):
+    for i, elapsed in enumerate((0., .05, .1, .15, .2, .25, .3, .35, .4, .499)):
         assert not node._pre_motion_settle_ready(decision(actions[i % 2]), 10. + elapsed)
         assert node.pre_motion_settle_started_at == 10.
-    assert node._pre_motion_settle_ready(decision(actions[1]), 11.)
+    assert node._pre_motion_settle_ready(decision(actions[1]), 10.5)
     assert node.pre_motion_settle_started_at is None
 
 
@@ -41,8 +41,8 @@ def test_different_direction_or_amount_restarts_pause(changed):
     assert not node._pre_motion_settle_ready(decision("LINE_OFFSET_TURN_RIGHT_2"), 10.)
     assert not node._pre_motion_settle_ready(decision(changed), 10.5)
     assert node.pre_motion_settle_started_at == 10.5
-    assert not node._pre_motion_settle_ready(decision(changed), 11.)
-    assert node._pre_motion_settle_ready(decision(changed), 11.5)
+    assert not node._pre_motion_settle_ready(decision(changed), 10.999)
+    assert node._pre_motion_settle_ready(decision(changed), 11.)
 
 
 @pytest.mark.parametrize("interruption", ["invalid", "walking", "corner", "locked"])

@@ -17,16 +17,16 @@ CASES = [
     ("STRAIGHT", "BALL_FINE_FORWARD_8", "pickup_fine_prepare"),
     ("TURN_LEFT", "BALL_FINE_FORWARD_8", "pickup_fine_prepare"),
     ("TURN_RIGHT", "BALL_FINE_FORWARD_8", "pickup_fine_prepare"),
-    ("GOAL_CAMERA_90_FORWARD", "GOAL_CAMERA90_FINE_FORWARD_1", "pickup_fine_prepare"),
-    ("GOAL_CAMERA90_TURN_LEFT_1", "GOAL_CAMERA90_FINE_FORWARD_1", "pickup_fine_prepare"),
-    ("GOAL_CAMERA90_TURN_RIGHT_2", "GOAL_CAMERA90_FINE_FORWARD_1", "pickup_fine_prepare"),
-    *[("GOAL_CAMERA_90_FORWARD", f"GOAL_CAMERA90_CRAB_{side}", "goal_forward_to_crab_right_90")
+    ("GOAL_CAMERA_90_FORWARD", "GOAL_CAMERA90_FINE_FORWARD_1", "goal_fine_prepare_90"),
+    ("GOAL_CAMERA90_TURN_LEFT_1", "GOAL_CAMERA90_FINE_FORWARD_1", "goal_fine_prepare_90"),
+    ("GOAL_CAMERA90_TURN_RIGHT_2", "GOAL_CAMERA90_FINE_FORWARD_1", "goal_fine_prepare_90"),
+    *[("GOAL_CAMERA_90_FORWARD", f"GOAL_CAMERA90_CRAB_{side}", f"goal_forward_to_crab_{side.lower()}_90")
       for side in ("LEFT", "RIGHT")],
-    *[("GOAL_CAMERA90_FINE_FORWARD_1", f"GOAL_CAMERA90_CRAB_{side}", "goal_fine_to_crab_right_90")
+    *[("GOAL_CAMERA90_FINE_FORWARD_1", f"GOAL_CAMERA90_CRAB_{side}", f"goal_fine_to_crab_{side.lower()}_90")
       for side in ("LEFT", "RIGHT")],
-    ("BALL_FINE_FORWARD_8", "STRAIGHT", "fine_to_turn_ready_45"),
+    ("BALL_FINE_FORWARD_8", "STRAIGHT", "fine_to_turn_ready_0"),
     ("GOAL_CAMERA90_FINE_FORWARD_1", "GOAL_CAMERA_90_FORWARD", "fine_to_turn_ready_90"),
-    ("BALL_FINE_FORWARD_8", "TURN_LEFT", "fine_to_turn_ready_45"),
+    ("BALL_FINE_FORWARD_8", "TURN_LEFT", "fine_to_turn_ready_0"),
     ("GOAL_CAMERA90_FINE_FORWARD_1", "GOAL_CAMERA90_TURN_RIGHT_2", "fine_to_turn_ready_90"),
 ]
 
@@ -90,7 +90,7 @@ def test_preparation_failure_never_sends_target(previous, target, prepare, statu
 @pytest.mark.parametrize("previous,target,prepare", [
     ("STRAIGHT", "BALL_FINE_FORWARD_8", "pickup_fine_prepare"),
     ("TURN_LEFT", "BALL_FINE_FORWARD_8", "pickup_fine_prepare"),
-    ("BALL_FINE_FORWARD_8", "STRAIGHT", "fine_to_turn_ready_45"),
+    ("BALL_FINE_FORWARD_8", "STRAIGHT", "fine_to_turn_ready_0"),
 ])
 @pytest.mark.parametrize("status", ["SUCCEEDED", "FAILED"])
 def test_queued_transition_uses_actual_completed_predecessor(previous, target, prepare, status):
@@ -139,13 +139,17 @@ def test_same_gait_keeps_existing_queue_behavior(action):
     assert [r["motion_id"] for r in requests(bridge)] == [bridge.motion_id_for_action(action)] * 2
 
 
-def test_queued_fine_does_not_use_history_from_before_active_retreat():
+def test_goal_fine_after_retreat_uses_goal_entry_transition():
     bridge = FakeBridge()
     bridge.navigation_command_callback(navigation_message(action="STRAIGHT", command_id=1))
     finish_request(bridge)
     bridge.navigation_command_callback(navigation_message(action="GOAL_CAMERA90_BACKWARD_1", command_id=2))
+    bridge._check_atomic_dwell(bridge.active_dwell_until)
+    finish_request(bridge)
     bridge.navigation_command_callback(navigation_message(action="GOAL_CAMERA90_FINE_FORWARD_1", command_id=3))
-    assert bridge.pending_turn_request is None
+    assert bridge.pending_turn_request["motion_id"] == "goal_camera_90_fine_forward_1"
+    assert requests(bridge)[-1]["motion_id"] == "goal_fine_prepare_90"
+    finish_request(bridge)
     assert requests(bridge)[-1]["motion_id"] == "goal_camera_90_fine_forward_1"
 
 
@@ -163,7 +167,8 @@ def test_pickup_forward_to_crab_preparation_cannot_be_skipped_on_motor_fault(sid
     bridge.navigation_command_callback(fine_alignment_message(
         f"BALL_PICKUP_INITIAL_CRAB_{side}", command_id=8002,
     ))
-    assert requests(bridge)[-1]["motion_id"] == "pickup_forward_to_crab_0"
+    assert requests(bridge)[-1]["motion_id"] == (
+        "pickup_forward_to_crab_0" if side == "RIGHT" else "pickup_forward_to_crab_left_0")
     finish_request(bridge, status, error)
     assert not bridge.motion_in_progress
     assert f"pickup_crab_{side.lower()}_0" not in [r["motion_id"] for r in requests(bridge)]
@@ -190,20 +195,20 @@ def test_aliases_reuse_supplied_poses_without_changing_motion_data():
     current = {m["name"]: m for m in json.loads(catalog_path.read_text())["motions"]}
     aliases = yaml.safe_load((root / "src/irc_step_motion_executor/config/motion_aliases.yaml").read_text())["motion_aliases"]
     expected = {
-        "pickup_fine_prepare": "R오뒤에서미세오뒤45도",
-        "pickup_forward_to_crab_0": "R오뒤에서 기본자세(0도)",
-        "pickup_fine_to_crab_right_0": "R미세오뒤에서 기본자세45도",
-        "goal_forward_to_crab_right_90": "R오뒤에서 기본자세(카메라45도)",
-        "goal_fine_to_crab_right_90": "R미세오뒤에서 기본자세90도",
+        "pickup_fine_prepare": "rr오뒤에서 미세오뒤(45도)",
+        "pickup_forward_to_crab_0": "r오뒤에서 오옆꽃게0도",
+        "pickup_fine_to_crab_right_0": "r미세오뒤에서 오옆0도",
+        "goal_forward_to_crab_right_90": "r오뒤에서 오옆꽃게90도",
+        "goal_fine_to_crab_right_90": "r미세오뒤에서 오옆 90도",
         "goal_fine_to_default": "R미세오뒤에서 기본자세45도",
-        "fine_to_turn_ready_0": "R미세오뒤에서 오뒤0도",
-        "fine_to_turn_ready_45": "R미세오뒤에서 오뒤45도",
-        "fine_to_turn_ready_90": "r미세오뒤에서 오뒤90도",
+        "fine_to_turn_ready_0": "rr미세오뒤에서 오뒤0도",
+        "fine_to_turn_ready_45": "rr미세오뒤에서 오뒤45도",
+        "fine_to_turn_ready_90": "rr미세오뒤에서 오뒤90도",
     }
     for alias, name in expected.items():
         assert aliases[alias] == name
         motion = current[name]
         assert motion['repeat_count'] == 1
-        assert len(motion['frames']) == 2
+        assert 1 <= len(motion['frames']) <= 3
         assert motion['start_pose'] == motion['frames'][0]['name']
         assert motion['end_pose'] == motion['frames'][-1]['name']

@@ -1,0 +1,58 @@
+Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+[==========] Running 10 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from MotionAliasCatalog
+[ RUN      ] MotionAliasCatalog.LoadsLatestSdkAndCanonicalAliases
+[       OK ] MotionAliasCatalog.LoadsLatestSdkAndCanonicalAliases (3 ms)
+[----------] 1 test from MotionAliasCatalog (3 ms total)
+
+[----------] 8 tests from CatalogOnlyCore
+[ RUN      ] CatalogOnlyCore.PreservesCorrelationFieldsAndRejectsExecution
+[       OK ] CatalogOnlyCore.PreservesCorrelationFieldsAndRejectsExecution (2 ms)
+[ RUN      ] CatalogOnlyCore.RejectsInvalidJsonSafely
+[       OK ] CatalogOnlyCore.RejectsInvalidJsonSafely (2 ms)
+[ RUN      ] CatalogOnlyCore.DistinguishesRequiredNullEventIdFromMissingEventId
+[       OK ] CatalogOnlyCore.DistinguishesRequiredNullEventIdFromMissingEventId (2 ms)
+[ RUN      ] CatalogOnlyCore.RequiresEveryRequestContractField
+[       OK ] CatalogOnlyCore.RequiresEveryRequestContractField (2 ms)
+[ RUN      ] CatalogOnlyCore.RejectsUnknownAliasWithoutFallback
+[       OK ] CatalogOnlyCore.RejectsUnknownAliasWithoutFallback (2 ms)
+[ RUN      ] CatalogOnlyCore.SerializedStatusContainsContractFields
+[       OK ] CatalogOnlyCore.SerializedStatusContainsContractFields (2 ms)
+[ RUN      ] CatalogOnlyCore.SerializedStatusPreservesNullCorrelationTypes
+[       OK ] CatalogOnlyCore.SerializedStatusPreservesNullCorrelationTypes (2 ms)
+[ RUN      ] CatalogOnlyCore.CancelNeverTouchesHardware
+[       OK ] CatalogOnlyCore.CancelNeverTouchesHardware (2 ms)
+[----------] 8 tests from CatalogOnlyCore (18 ms total)
+
+[----------] 1 test from CatalogOnlyContract
+[ RUN      ] CatalogOnlyContract.SharedVectorsPreserveFieldsWithoutFallback
+[       OK ] CatalogOnlyContract.SharedVectorsPreserveFieldsWithoutFallback (3 ms)
+[----------] 1 test from CatalogOnlyContract (3 ms total)
+
+[----------] Global test environment tear-down
+[==========] 10 tests from 3 test suites ran. (25 ms total)
+[  PASSED  ] 10 tests.
+Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+[==========] Running 7 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 7 tests from StartupPoseCatalog
+[ RUN      ] StartupPoseCatalog.AcceptsRepeatedNameWithIdenticalAngles
+[       OK ] StartupPoseCatalog.AcceptsRepeatedNameWithIdenticalAngles (1 ms)
+[ RUN      ] StartupPoseCatalog.RejectsRepeatedNameWithDifferentAngles
+[       OK ] StartupPoseCatalog.RejectsRepeatedNameWithDifferentAngles (0 ms)
+[ RUN      ] StartupPoseCatalog.RejectsRepeatedNameWithMissingMotor
+[       OK ] StartupPoseCatalog.RejectsRepeatedNameWithMissingMotor (0 ms)
+[ RUN      ] StartupPoseCatalog.LoadsGeonStartupPoseWithDefaultPolicy
+[       OK ] StartupPoseCatalog.LoadsGeonStartupPoseWithDefaultPolicy (242 ms)
+[ RUN      ] StartupPoseCatalog.PolicyOffChangesOnlySelectedAxesToVerifiedPcPose
+[       OK ] StartupPoseCatalog.PolicyOffChangesOnlySelectedAxesToVerifiedPcPose (783 ms)
+[ RUN      ] StartupPoseCatalog.LoadsCatalog49ForwardStartWithEveryPolicyCombination
+[       OK ] StartupPoseCatalog.LoadsCatalog49ForwardStartWithEveryPolicyCombination (548 ms)
+[ RUN      ] StartupPoseCatalog.LoadsCatalog51StartupWithEveryPolicyCombination
+[       OK ] StartupPoseCatalog.LoadsCatalog51StartupWithEveryPolicyCombination (545 ms)
+[----------] 7 tests from StartupPoseCatalog (2120 ms total)
+
+[----------] Global test environment tear-down
+[==========] 7 tests from 1 test suite ran. (2120 ms total)
+[  PASSED  ] 7 tests.

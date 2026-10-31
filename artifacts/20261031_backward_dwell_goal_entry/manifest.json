@@ -1,0 +1,7 @@
+{
+  "source": "/home/jet/Downloads/robot_motions(63).json",
+  "source_sha256": "599d6e2705dee455ee8b2824f370666dec0c34215396e5c2cb6cb97ff8c9395b",
+  "alias": "goal_fine_prepare_90",
+  "replaced_motion": "rr오뒤에서 미세오뒤(골대용90도)",
+  "new_motion": "rr오뒤에서 미세오뒤90도"
+}

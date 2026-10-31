@@ -77,9 +77,10 @@ def test_only_requested_source_motion_added_with_correct_runtime_speed(filename)
         expected['playback_speed'] = .9975
         expected['completion']['position_tolerance_deg'] = 5.0
     before = json.loads((UPDATE / 'before/artifacts' / filename).read_text())
-    actual = json.loads((ROOT / 'artifacts' / filename).read_text())
+    # This import predates the catalog63 gait and transition replacements.
+    actual = json.loads((ROOT / 'artifacts/20261031_catalog63_crab_fine/before/artifacts' / filename).read_text())
     assert actual == {**before, 'motions': [*before['motions'], expected]}
     assert max(f['start_ms'] + f['time_ms'] for f in expected['frames']) == 160
-    aliases = yaml.safe_load((ROOT / ALIAS_PATH).read_text())['motion_aliases']
+    aliases = yaml.safe_load((ROOT / 'artifacts/20261031_catalog63_transitions/before' / ALIAS_PATH).read_text())['motion_aliases']
     old_aliases = yaml.safe_load((UPDATE / 'before' / ALIAS_PATH).read_text())['motion_aliases']
     assert aliases == {**old_aliases, 'fine_to_turn_ready_90': expected['name']}

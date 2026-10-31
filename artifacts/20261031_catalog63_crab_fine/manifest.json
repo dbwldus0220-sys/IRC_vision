@@ -1,0 +1,20 @@
+{
+  "source_sha256": "599d6e2705dee455ee8b2824f370666dec0c34215396e5c2cb6cb97ff8c9395b",
+  "runtime_speed_factor": 0.95,
+  "replaced_motions": [
+    "유미세오옆꽃게0도",
+    "유미세왼옆꽃게0도",
+    "유미세오옆꽃게90도",
+    "유미세왼옆꽃게90도",
+    "r미세45도"
+  ],
+  "added_motions": [],
+  "motion_names": [
+    "유미세오옆꽃게0도",
+    "유미세왼옆꽃게0도",
+    "유미세오옆꽃게90도",
+    "유미세왼옆꽃게90도",
+    "r미세45도"
+  ],
+  "aliases_changed": false
+}

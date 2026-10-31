@@ -248,7 +248,7 @@ def test_all_existing_support_transition_ids_keep_their_pause(clock):
         bridge._check_transition_dwell()
         request = decoded_messages(bridge.executor_request_publisher)[-1]
         bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
-        assert (bridge.transition_dwell_until or bridge.active_dwell_until) == clock[0] + 1., motion
+        assert (bridge.transition_dwell_until or bridge.active_dwell_until) == clock[0] + .5, motion
 
 
 def test_reservation_durations_match_current_runtime():

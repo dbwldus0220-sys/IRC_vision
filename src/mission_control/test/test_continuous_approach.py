@@ -208,7 +208,7 @@ def test_goal_preparation_status_does_not_start_forward_capture(clock):
     node = LiveInputHarness(phase='GOAL_APPROACH')
     fresh(node, clock, 'goal', goal_info(depth_m=.7, score_now=False))
     command = node.publisher.messages[-1]
-    node.send_status(command['action'], command['command_id'], 'RUNNING', 'pickup_fine_prepare')
+    node.send_status(command['action'], command['command_id'], 'RUNNING', 'goal_fine_prepare_90')
     clock[0] += 2.
     for _ in range(4):
         fresh(node, clock, 'goal', goal_info(depth_m=.7, score_now=False), plan=False)
@@ -223,11 +223,11 @@ def test_bridge_reports_actual_goal_preparation_before_walking():
     bridge.last_physical_motion_id = 'goal_camera_90_forward_4'
     bridge.navigation_command_callback(navigation_message(
         action='GOAL_CAMERA90_FINE_FORWARD_3', source='goal'))
-    bridge.executor_status_callback(executor_status(motion_id='pickup_fine_prepare'))
+    bridge.executor_status_callback(executor_status(motion_id='goal_fine_prepare_90'))
     status = decoded_messages(bridge.motion_status_publisher)[-1]
     assert status['action'] == 'GOAL_CAMERA90_FINE_FORWARD_3'
     assert status['status'] == 'RUNNING'
-    assert status['motion_id'] == 'pickup_fine_prepare'
+    assert status['motion_id'] == 'goal_fine_prepare_90'
 
 
 @pytest.mark.parametrize('blocker', ['turn', 'invalid', 'deadline'])

@@ -1,0 +1,16 @@
+{
+  "focused_tests": {
+    "passed": 559,
+    "failed": 0,
+    "log": "focused_tests.txt"
+  },
+  "catalog_validation": "143 motions; aliases resolve; frame motor IDs exactly 0..22",
+  "hardware_executed": false,
+  "full_suite_passed": false,
+  "broad_check_note": "Broad tests include historical catalog/timing failures. The initial broad run loaded pre-edit Python modules but continued reading live catalog files during the import; it is not a pristine catalog baseline. Some legacy lifecycle tests still expect immediate SHOT rather than GOAL_SHOT_PREPARE.",
+  "runtime_source_speed_factor": 0.95,
+  "ball_two_cycle_threshold_px": 200.0,
+  "ball_threshold_equality": "one cycle",
+  "goal_region_observation_sec": 1.0,
+  "goal_depth_bounds": "existing lower inclusive / upper exclusive"
+}

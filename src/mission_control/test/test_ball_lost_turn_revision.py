@@ -148,7 +148,7 @@ def test_unknown_screen_side_never_defaults_to_right():
     assert not plan(planner, 'approach', MISSING).valid
 
 
-def test_node_confirms_loss_waits_one_second_and_requires_new_frames(monkeypatch):
+def test_node_confirms_loss_waits_half_second_and_requires_new_frames(monkeypatch):
     from std_msgs.msg import String
     from mission_control.motion_decision_node import MotionDecisionNode
     from test_wait_refresh_and_fine_settle import LiveInputHarness
@@ -177,7 +177,7 @@ def test_node_confirms_loss_waits_one_second_and_requires_new_frames(monkeypatch
         send_status(node, status=status, action=request['action'],
                     command_id=request['command_id'], event_id=None, dynamics_command=None)
     deadline = node.ball_post_motion_dwell_until
-    assert deadline == pytest.approx(clock[0] + 1.0)
+    assert deadline == pytest.approx(clock[0] + .5)
     node.publisher.messages.clear()
     for now in (deadline - .001, deadline):
         clock[0] = now

@@ -45,12 +45,14 @@ motion_aliases:
   pickup_fine_forward_0: "r미세0도 공잡기용"
   hurdle_fine_forward_5: "r미세 0도 허들용"
   hurdle_fine_forward_10: "r미세 0도 허들용(10회)"
-  pickup_fine_prepare: "R오뒤에서미세오뒤45도"
+  pickup_fine_prepare: "rr오뒤에서 미세오뒤(45도)"
   pickup_crab_right_0: "유미세오옆꽃게0도"
-  # Legacy alias IDs now prepare the default posture for either crab direction.
-  pickup_fine_to_crab_right_0: "R미세오뒤에서 기본자세45도"
-  pickup_forward_to_crab_0: "R오뒤에서 기본자세(0도)"
+  # Catalog63 uses separate right/left support-change motions.
+  pickup_fine_to_crab_right_0: "r미세오뒤에서 오옆0도"
+  pickup_forward_to_crab_0: "r오뒤에서 오옆꽃게0도"
   pickup_crab_left_0: "유미세왼옆꽃게0도"
+  pickup_crab_left_0_2: "r미세왼옆꽃개0도(2회)"
+  pickup_crab_right_0_2: "r미세오옆꽃게0도(2회)"
   pickup_pre_backward_camera_down: "찐공잡기전후진-2(2회)"
   # Close-ball recovery uses the supplied one-cycle retreat.
   pickup_lost_ball_backward_1: "찐후진실전(1회)"
@@ -95,10 +97,10 @@ motion_aliases:
   goal_camera_90_fine_forward_3: "r미세 골대전용(3회)"
   goal_camera_90_fine_forward_4: "r미세 골대전용(4회)"
   goal_camera_90_crab_right: "유미세오옆꽃게90도"
-  goal_fine_to_crab_right_90: "R미세오뒤에서 기본자세90도"
-  goal_camera_90_crab_left: "유미세왼옆꽃게90도"
-  # The existing goal head override supplies the camera-90 angle during playback.
-  goal_forward_to_crab_right_90: "R오뒤에서 기본자세(카메라45도)"
+  goal_fine_to_crab_right_90: "r미세오뒤에서 오옆 90도"
+  goal_camera_90_crab_left: "r미세왼옆꽃게90도"
+  # Catalog63 goal crab entry uses the supplied camera-90 posture.
+  goal_forward_to_crab_right_90: "r오뒤에서 오옆꽃게90도"
   post_ball_line_turn_right_1: "R제자리우회전(1회)"
   post_ball_line_turn_right_2: "R제자리우회전(2회)"
   post_ball_line_turn_right_3: "R제자리우회전(3회)"
@@ -139,9 +141,9 @@ motion_aliases:
   hurdle: "찐허들"
 
   # Fine-forward exit posture before any in-place turn (camera pose in degrees).
-  fine_to_turn_ready_45: "R미세오뒤에서 오뒤45도"
-  fine_to_turn_ready_0: "R미세오뒤에서 오뒤0도"
-  fine_to_turn_ready_90: "r미세오뒤에서 오뒤90도"
+  fine_to_turn_ready_45: "rr미세오뒤에서 오뒤45도"
+  fine_to_turn_ready_0: "rr미세오뒤에서 오뒤0도"
+  fine_to_turn_ready_90: "rr미세오뒤에서 오뒤90도"
 
   # Catalog52 R variants available for explicit/manual requests.
   r_forward_0_4: "R전진0도(4회)"
@@ -152,3 +154,26 @@ motion_aliases:
   r_left_back_to_default_0: "R왼뒤에서 기본자세0도"
   r_back_pose_45: "R오뒤45도"
   r_forward_to_crab_90: "R오뒤에서오옆꽃게90도"
+
+  # Catalog63 directional crab transitions.
+  pickup_fine_to_crab_left_0: "r미세오뒤에서 왼옆0도"
+  pickup_forward_to_crab_left_0: "r오뒤에서 왼옆0도"
+  goal_fine_to_crab_left_90: "r미세오뒤에서왼옆90도"
+  goal_forward_to_crab_left_90: "r오뒤에서 왼옆으로90도"
+  goal_crab_right_to_turn_90: "r오옆에서 오뒤90도"
+  goal_crab_left_to_turn_90: "r왼옆에서 오뒤90도"
+  pickup_crab_right_to_fine_0: "r오옆에서 미세오뒤(0도)"
+  pickup_crab_left_to_fine_0: "r왼옆에서 미세오뒤(0도)"
+  pickup_crab_right_to_left_0: "r오옆에서 왼옆0도"
+  pickup_crab_left_to_right_0: "r왼옆에서 오옆0도"
+  goal_crab_right_to_left_90: "r오옆에서 왼옆90도"
+  goal_crab_left_to_right_90: "r왼옆에서 오옆90도"
+  pickup_crab_right_to_turn_0: "r오옆에서 오뒤0도"
+  pickup_crab_left_to_turn_0: "r왼옆에서 오뒤0도"
+
+  # Pixel-triggered Hurdle camera-down entry.
+  hurdle_fine_prepare_0: "rr오뒤에서 미세오뒤(0도)"
+  pickup_fine_prepare_0: "rr오뒤에서 미세오뒤(0도)"
+  goal_fine_prepare_90: "rr오뒤에서 미세오뒤90도"
+  goal_crab_right_to_fine_90: "r오옆에서 미세오뒤(90도)"
+  goal_crab_left_to_fine_90: "r왼옆에서 미세오뒤(90도)"

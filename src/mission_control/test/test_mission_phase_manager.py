@@ -18,6 +18,9 @@ def test_default_initial_state():
         "current_phase": "AUTO",
         "ball_mode_active": False,
         "pickups_executed": 0,
+        "ball_modes_confirmed": 0,
+        "ball_modes_remaining": 2,
+        "active_ball_mode_index": None,
         "shots_executed": 0,
         "hurdles_executed": 0,
         "pickups_completed": 0,
@@ -85,7 +88,7 @@ def test_pickup_succeeded():
     assert manager.current_phase == "POST_BALL_LINE_ALIGN"
 
 
-def test_grasp_results_are_attempt_scoped_and_reset_on_retry():
+def test_failed_first_mode_keeps_its_result_separate_from_second_mode():
     manager = MissionPhaseManager(initial_phase="BALL_APPROACH")
     assert manager.start_special_action("PICKUP_NOW", 1)
     assert manager.active_pickup_attempt == 1
@@ -95,7 +98,9 @@ def test_grasp_results_are_attempt_scoped_and_reset_on_retry():
     manager.handle_motion_status("PICKUP_NOW", 1, "FAILED")
 
     assert manager.start_special_action("PICKUP_NOW", 2)
-    assert manager.grasp_result_for_ball(1) == "UNKNOWN"
+    assert manager.active_pickup_attempt == 2
+    assert manager.grasp_result_for_ball(1) == "GRABBED"
+    assert manager.grasp_result_for_ball(2) == "UNKNOWN"
 
 
 def test_first_and_second_ball_grasp_results_do_not_mix():
@@ -200,6 +205,7 @@ def test_pickup_failure_does_not_complete_section(status):
     assert manager.ball_sections_processed == 0
     assert manager.finish_enabled is False
     assert manager.current_phase == "BALL_APPROACH"
+    assert manager.ball_modes_confirmed == 1
 
 
 def test_failed_pickup_cannot_enable_finish():
@@ -208,6 +214,7 @@ def test_failed_pickup_cannot_enable_finish():
     assert manager.finish_enabled is False
     assert manager.ball_sections_processed == 0
     assert manager.current_phase == "BALL_APPROACH"
+    assert manager.ball_modes_confirmed == 1
 
 
 def test_pickup_failed_or_timeout_counts_toward_failure_limit():
@@ -696,13 +703,15 @@ def test_timed_line_cannot_consume_an_already_processed_empty_pickup():
     assert manager.shots_completed == 0
 
 
-def test_rejected_pickup_retries_are_bounded_by_failure_limit():
+def test_rejected_pickups_cannot_exceed_two_confirmed_modes():
     manager = MissionPhaseManager(initial_phase="BALL_APPROACH", max_pickup_failures=3)
-    for attempt in range(1, 4):
+    for attempt in range(1, 3):
         assert manager.start_special_action("PICKUP_NOW", attempt)
         manager.handle_motion_status("PICKUP_NOW", attempt, "REJECTED")
         assert manager.pickup_failure_count == attempt
-        assert manager.special_action_exhausted("PICKUP_NOW") is (attempt == 3)
+        assert not manager.special_action_exhausted("PICKUP_NOW")
+        assert manager.ball_modes_confirmed == attempt
+    assert not manager.start_special_action("PICKUP_NOW", 3)
     assert manager.pickups_completed == 0
 
 

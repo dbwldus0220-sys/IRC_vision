@@ -1,0 +1,49 @@
+[INFO] [launch]: All log files can be found below /tmp/step_hurdle_camera_ros_logs/2026-10-31-15-48-25-724612-jet-13
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [sdk_motion_executor-1]: process started with pid [15]
+[INFO] [python3-2]: process started with pid [19]
+[sdk_motion_executor-1] [37;1m2026-10-31 15:48:25.868 [31;1m[[37;1mTRANSPORT[31;1m Error] [37mAll whitelist interfaces were filtered out[34;1m -> Function [36mUDPv4Transport[m
+[sdk_motion_executor-1] [37;1m2026-10-31 15:48:25.869 [31;1m[[37;1mTRANSPORT_UDP[31;1m Error] [37mError creating socket: Operation not permitted[34;1m -> Function [36minit[m
+[sdk_motion_executor-1] [37;1m2026-10-31 15:48:25.869 [31;1m[[37;1mRTPS_PARTICIPANT[31;1m Error] [37mUser transport failed to register.[34;1m -> Function [36mRTPSParticipantImpl[m
+[sdk_motion_executor-1] getifaddrs: Operation not permitted
+[sdk_motion_executor-1] getifaddrs: Operation not permitted
+[sdk_motion_executor-1] getifaddrs: Operation not permitted
+[sdk_motion_executor-1] getifaddrs: Operation not permitted
+[sdk_motion_executor-1] [INFO] [1793429305.902074956] [hurdle_head_override_test_executor]: Execution path: backend=simulated aliases=/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/fixtures/hurdle_head_override_aliases.yaml JSON= port= baud=0 poll_ms=20
+[sdk_motion_executor-1] [INFO] [1793429305.902400500] [hurdle_head_override_test_executor]: Compiled GUI alignment version: 20261028
+[sdk_motion_executor-1] [INFO] [1793429305.903455502] [hurdle_head_override_test_executor]: Forward boundary feedback included in saved hold: yes
+[sdk_motion_executor-1] [INFO] [1793429305.903539568] [hurdle_head_override_test_executor]: Interpolation: continuous quintic; motor 5: included
+[sdk_motion_executor-1] [INFO] [1793429305.903613970] [hurdle_head_override_test_executor]: Motion position tolerance check: DISABLED
+[sdk_motion_executor-1] [WARN] [1793429305.910917603] [hurdle_head_override_test_executor]: Simulated backend only: no SDK or hardware access is available
+getifaddrs: Operation not permitted
+getifaddrs: Operation not permitted
+getifaddrs: Operation not permitted
+getifaddrs: Operation not permitted
+[37;1m2026-10-31 15:48:26.117 [31;1m[[37;1mTRANSPORT[31;1m Error] [37mAll whitelist interfaces were filtered out[34;1m -> Function [36mUDPv4Transport[m
+[37;1m2026-10-31 15:48:26.117 [31;1m[[37;1mTRANSPORT_UDP[31;1m Error] [37mError creating socket: Operation not permitted[34;1m -> Function [36minit[m
+[37;1m2026-10-31 15:48:26.118 [31;1m[[37;1mRTPS_PARTICIPANT[31;1m Error] [37mUser transport failed to register.[34;1m -> Function [36mRTPSParticipantImpl[m
+test_bottom_boundary_hold_release_and_other_camera_ownership (test_hurdle_head_override_launch.TestHurdleHeadOverride) ... [sdk_motion_executor-1] [INFO] [1793429306.913532927] [hurdle_head_override_test_executor]: Hurdle bottom dy 120.0 px: camera 0-degree hold latched (motor 0 -60.0 deg)
+[sdk_motion_executor-1] [INFO] [1793429307.753264622] [hurdle_head_override_test_executor]: Hurdle camera 0-degree hold cleared
+[sdk_motion_executor-1] [INFO] [1793429308.632605401] [hurdle_head_override_test_executor]: Hurdle bottom dy 120.0 px: camera 0-degree hold latched (motor 0 -60.0 deg)
+[sdk_motion_executor-1] [INFO] [1793429310.071381799] [hurdle_head_override_test_executor]: Hurdle camera 0-degree hold cleared
+[sdk_motion_executor-1] [INFO] [1793429310.352490874] [hurdle_head_override_test_executor]: Hurdle bottom dy 120.0 px: camera 0-degree hold latched (motor 0 -60.0 deg)
+[sdk_motion_executor-1] [INFO] [1793429310.491249656] [hurdle_head_override_test_executor]: Hurdle camera 0-degree hold cleared
+[sdk_motion_executor-1] [INFO] [1793429311.371314858] [hurdle_head_override_test_executor]: Camera 90-degree hold enabled: motor 0 1.0 deg
+[sdk_motion_executor-1] [INFO] [1793429311.432674903] [hurdle_head_override_test_executor]: Hurdle bottom dy 120.0 px: camera 0-degree hold latched (motor 0 -60.0 deg)
+[sdk_motion_executor-1] [INFO] [1793429311.552528107] [hurdle_head_override_test_executor]: Hurdle camera 0-degree hold cleared
+ok
+
+----------------------------------------------------------------------
+Ran 1 test in 5.833s
+
+OK
+[INFO] [python3-2]: sending signal 'SIGINT' to process[python3-2]
+[INFO] [sdk_motion_executor-1]: sending signal 'SIGINT' to process[sdk_motion_executor-1]
+[sdk_motion_executor-1] [INFO] [1793429320.878746386] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[INFO] [python3-2]: process has finished cleanly [pid 19]
+[INFO] [sdk_motion_executor-1]: process has finished cleanly [pid 15]
+
+----------------------------------------------------------------------
+Ran 0 tests in 0.000s
+
+OK

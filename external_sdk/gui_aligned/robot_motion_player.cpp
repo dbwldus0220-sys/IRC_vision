@@ -30,6 +30,21 @@ bool sameEntryFrame(const MotionFrame& a, const MotionFrame& b) {
         && a.lift_early_arrival == b.lift_early_arrival
         && a.playback_cycle_end == b.playback_cycle_end && a.stop_at_end == b.stop_at_end;
 }
+bool sameBodyEntryFrame(const MotionFrame& a, const MotionFrame& b) {
+    // 카메라는 별도 override가 소유할 때만 제외한다. 몸체/토크/시간은 동일해야 한다.
+    if (a.start_ms != b.start_ms || a.time_ms != b.time_ms || a.torques != b.torques
+        || a.lift_early_arrival != b.lift_early_arrival
+        || a.playback_cycle_end != b.playback_cycle_end || a.stop_at_end != b.stop_at_end)
+        return false;
+    if (a.angles.size() - a.angles.count(0) != b.angles.size() - b.angles.count(0))
+        return false;
+    for (const auto& [id, angle] : a.angles) {
+        if (id == 0) continue;
+        const auto other = b.angles.find(id);
+        if (other == b.angles.end() || other->second != angle) return false;
+    }
+    return true;
+}
 }
 
 RobotMotionPlayer::RobotMotionPlayer(
@@ -193,6 +208,15 @@ bool RobotMotionPlayer::canSeamlesslyTransition(
         && current.playbackSpeed() == next.playbackSpeed()
         && current.startPose() == next.startPose()
         && sameEntryFrame(current.frames().front(), next.frames().front())) return true;
+    // 골대 전진과 복귀 보행도 같은 몸체 진입을 사용한다. 카메라 고정이 없으면 거부한다.
+    const bool goal_recovery_pair =
+        (current_name.starts_with("R전진90도(") && isLineRecoveryMotion(next_name))
+        || (isLineRecoveryMotion(current_name) && next_name.starts_with("R전진90도("));
+    if (goal_recovery_pair && head_override_enabled_ && joint_overrides_.contains(0)
+        && current.repeatable() && next.repeatable()
+        && !current.frames().empty() && !next.frames().empty()
+        && current.playbackSpeed() == next.playbackSpeed()
+        && sameBodyEntryFrame(current.frames().front(), next.frames().front())) return true;
     // 반복 횟수만 다른 동일 주기도 내부 반복과 같은 경계로 예약한다.
     // 자세 이름만으로 추정하지 않고 대기/정지/각도/토크까지 비교한다.
     if (current.repeatable() && next.repeatable()

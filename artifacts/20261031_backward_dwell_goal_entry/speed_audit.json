@@ -1,0 +1,1127 @@
+{
+  "source63_matched_count": 90,
+  "pc_original_only_count": 50,
+  "mismatch_count": 0,
+  "motions": [
+    {
+      "motion": "찐공확인자세",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "찐후진실전-2(2회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "찐공잡기전후진-2(2회)",
+      "reference": "source63",
+      "original_speed": 0.8999999999999999,
+      "expected_runtime_speed": 0.8549999999999999,
+      "actual_runtime_speed": 0.8549999999999999,
+      "matches": true
+    },
+    {
+      "motion": "찐후진실전(1회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "찐미세오뒤에서 오옆꽃게90도",
+      "reference": "pc_original",
+      "original_speed": 0.95,
+      "expected_runtime_speed": 0.9025,
+      "actual_runtime_speed": 0.9025,
+      "matches": true
+    },
+    {
+      "motion": "찐미세오뒤에서오옆꽃게0도",
+      "reference": "pc_original",
+      "original_speed": 0.95,
+      "expected_runtime_speed": 0.9025,
+      "actual_runtime_speed": 0.9025,
+      "matches": true
+    },
+    {
+      "motion": "찐허들",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "유미세오옆꽃게0도",
+      "reference": "source63",
+      "original_speed": 0.95,
+      "expected_runtime_speed": 0.9025,
+      "actual_runtime_speed": 0.9025,
+      "matches": true
+    },
+    {
+      "motion": "유미세왼옆꽃게0도",
+      "reference": "source63",
+      "original_speed": 0.95,
+      "expected_runtime_speed": 0.9025,
+      "actual_runtime_speed": 0.9025,
+      "matches": true
+    },
+    {
+      "motion": "유미세오옆꽃게90도",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "유미세왼옆꽃게90도",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R오뒤에서 기본자세(카메라45도)",
+      "reference": "pc_original",
+      "original_speed": 0.95,
+      "expected_runtime_speed": 0.9025,
+      "actual_runtime_speed": 0.9025,
+      "matches": true
+    },
+    {
+      "motion": "R오뒤에서 기본자세(0도)",
+      "reference": "pc_original",
+      "original_speed": 0.95,
+      "expected_runtime_speed": 0.9025,
+      "actual_runtime_speed": 0.9025,
+      "matches": true
+    },
+    {
+      "motion": "건왼뒤에서 기본자세(0도)",
+      "reference": "pc_original",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "건김오뒤3",
+      "reference": "pc_original",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R미세오뒤에서 기본자세45도",
+      "reference": "pc_original",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R미세오뒤에서 오뒤45도",
+      "reference": "pc_original",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R미세오뒤에서 오뒤0도",
+      "reference": "pc_original",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R미세오뒤에서 기본자세90도",
+      "reference": "pc_original",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R전진45도(4회)",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R라인복귀우회전",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R전진라인복귀좌",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전(5회(",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R전진45도(6회)",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R전진90도(4회)",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R전진90도(6회)",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R전진0도(4회)",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R전진0도(6회)",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전(2회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전(4회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전(7회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전(9회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R오뒤카메라90도",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R왼뒤에서 기본자세0도",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R오뒤45도",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전90도(2회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전90도(4회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전90도(5회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전90도(7회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전90도(9회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전0도(9회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전0도(2회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전0도(4회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전0도(5회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전0도(7회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R오뒤에서오옆꽃게90도",
+      "reference": "pc_original",
+      "original_speed": 0.95,
+      "expected_runtime_speed": 0.9025,
+      "actual_runtime_speed": 0.9025,
+      "matches": true
+    },
+    {
+      "motion": "R후진에서제자리우회전(공)",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R제자리좌회전(5회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리좌회전(2회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리좌회전(3회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리좌회전(4회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리좌회전0도(4회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리좌회전0도(2회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리좌회전0도(3회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리좌회전0도(5회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리좌회전90도(2회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리좌회전90도(3회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리좌회전90도(4회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리좌회전90도(5회)",
+      "reference": "source63",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R후진에서 제자리 좌회전",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R미세(5회)",
+      "reference": "pc_original",
+      "original_speed": 1.05,
+      "expected_runtime_speed": 0.9975,
+      "actual_runtime_speed": 0.9975,
+      "matches": true
+    },
+    {
+      "motion": "r공잡기 400",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "r공잡기500",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "r마세90도",
+      "reference": "source63",
+      "original_speed": 1.05,
+      "expected_runtime_speed": 0.9975,
+      "actual_runtime_speed": 0.9975,
+      "matches": true
+    },
+    {
+      "motion": "r미세0도",
+      "reference": "pc_original",
+      "original_speed": 1.05,
+      "expected_runtime_speed": 0.9975,
+      "actual_runtime_speed": 0.9975,
+      "matches": true
+    },
+    {
+      "motion": "R오뒤에서미세오뒤45도",
+      "reference": "pc_original",
+      "original_speed": 1.05,
+      "expected_runtime_speed": 0.9975,
+      "actual_runtime_speed": 0.9975,
+      "matches": true
+    },
+    {
+      "motion": "R골대후제자리우회전",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R골대후제자리좌회전",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R골넣기",
+      "reference": "pc_original",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R라인복귀좌90도",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R라인복귀우회전90도",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R미세90도",
+      "reference": "pc_original",
+      "original_speed": 1.05,
+      "expected_runtime_speed": 0.9975,
+      "actual_runtime_speed": 0.9975,
+      "matches": true
+    },
+    {
+      "motion": "R오뒤에서미세오뒤0도",
+      "reference": "pc_original",
+      "original_speed": 1.05,
+      "expected_runtime_speed": 0.9975,
+      "actual_runtime_speed": 0.9975,
+      "matches": true
+    },
+    {
+      "motion": "R오뒤에서미세오뒤90도",
+      "reference": "pc_original",
+      "original_speed": 1.05,
+      "expected_runtime_speed": 0.9975,
+      "actual_runtime_speed": 0.9975,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전(3회)",
+      "reference": "pc_original",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전(6회)",
+      "reference": "pc_original",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리좌회전(1회)",
+      "reference": "pc_original",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리좌회전(6회)",
+      "reference": "pc_original",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전0도(3회)",
+      "reference": "pc_original",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전0도(6회)",
+      "reference": "pc_original",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리좌회전0도(1회)",
+      "reference": "pc_original",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리좌회전0도(6회)",
+      "reference": "pc_original",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전90도(3회)",
+      "reference": "pc_original",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전90도(6회)",
+      "reference": "pc_original",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리좌회전90도(1회)",
+      "reference": "pc_original",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리좌회전90도(6회)",
+      "reference": "pc_original",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R전진45도(2회)",
+      "reference": "pc_original",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R전진45도(8회)",
+      "reference": "pc_original",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R전진90도(2회)",
+      "reference": "pc_original",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "r미세0도(허들10회)",
+      "reference": "pc_original",
+      "original_speed": 1.05,
+      "expected_runtime_speed": 0.9975,
+      "actual_runtime_speed": 0.9975,
+      "matches": true
+    },
+    {
+      "motion": "r미세0도(상단탐색3회)",
+      "reference": "pc_original",
+      "original_speed": 1.05,
+      "expected_runtime_speed": 0.9975,
+      "actual_runtime_speed": 0.9975,
+      "matches": true
+    },
+    {
+      "motion": "R미세90도(1회)",
+      "reference": "pc_original",
+      "original_speed": 1.05,
+      "expected_runtime_speed": 0.9975,
+      "actual_runtime_speed": 0.9975,
+      "matches": true
+    },
+    {
+      "motion": "R미세90도(2회)",
+      "reference": "pc_original",
+      "original_speed": 1.05,
+      "expected_runtime_speed": 0.9975,
+      "actual_runtime_speed": 0.9975,
+      "matches": true
+    },
+    {
+      "motion": "R미세90도(3회)",
+      "reference": "pc_original",
+      "original_speed": 1.05,
+      "expected_runtime_speed": 0.9975,
+      "actual_runtime_speed": 0.9975,
+      "matches": true
+    },
+    {
+      "motion": "R미세90도(4회)",
+      "reference": "pc_original",
+      "original_speed": 1.05,
+      "expected_runtime_speed": 0.9975,
+      "actual_runtime_speed": 0.9975,
+      "matches": true
+    },
+    {
+      "motion": "R미세오뒤에서 오뒤90도",
+      "reference": "pc_original",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전(1회)",
+      "reference": "pc_original",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전0도(1회)",
+      "reference": "pc_original",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R제자리우회전90도(1회)",
+      "reference": "pc_original",
+      "original_speed": 0.9,
+      "expected_runtime_speed": 0.855,
+      "actual_runtime_speed": 0.855,
+      "matches": true
+    },
+    {
+      "motion": "R골넣기1번구역",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R골넣기2번구역",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R골넣기3번구역",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "R골넣기4번구역",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "r미세45도",
+      "reference": "source63",
+      "original_speed": 1.05,
+      "expected_runtime_speed": 0.9975,
+      "actual_runtime_speed": 0.9975,
+      "matches": true
+    },
+    {
+      "motion": "r미세0도 공잡기용",
+      "reference": "source63",
+      "original_speed": 1.05,
+      "expected_runtime_speed": 0.9975,
+      "actual_runtime_speed": 0.9975,
+      "matches": true
+    },
+    {
+      "motion": "r미세 0도 허들용",
+      "reference": "source63",
+      "original_speed": 1.05,
+      "expected_runtime_speed": 0.9975,
+      "actual_runtime_speed": 0.9975,
+      "matches": true
+    },
+    {
+      "motion": "r미세 골대전용",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "r미세0도 공잡기용(상단탐색3회)",
+      "reference": "pc_original",
+      "original_speed": 1.05,
+      "expected_runtime_speed": 0.9975,
+      "actual_runtime_speed": 0.9975,
+      "matches": true
+    },
+    {
+      "motion": "r미세 0도 허들용(10회)",
+      "reference": "pc_original",
+      "original_speed": 1.05,
+      "expected_runtime_speed": 0.9975,
+      "actual_runtime_speed": 0.9975,
+      "matches": true
+    },
+    {
+      "motion": "r미세 골대전용(1회)",
+      "reference": "pc_original",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "r미세 골대전용(2회)",
+      "reference": "pc_original",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "r미세 골대전용(3회)",
+      "reference": "pc_original",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "r미세 골대전용(4회)",
+      "reference": "pc_original",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "r미세오뒤에서 오뒤90도",
+      "reference": "pc_original",
+      "original_speed": 1.05,
+      "expected_runtime_speed": 0.9975,
+      "actual_runtime_speed": 0.9975,
+      "matches": true
+    },
+    {
+      "motion": "rr오뒤에서 미세오뒤(45도)",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "rr미세오뒤에서 오뒤0도",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "rr미세오뒤에서 오뒤45도",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "rr미세오뒤에서 오뒤90도",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "r미세오뒤에서 오옆0도",
+      "reference": "source63",
+      "original_speed": 0.95,
+      "expected_runtime_speed": 0.9025,
+      "actual_runtime_speed": 0.9025,
+      "matches": true
+    },
+    {
+      "motion": "r미세오뒤에서 왼옆0도",
+      "reference": "source63",
+      "original_speed": 0.95,
+      "expected_runtime_speed": 0.9025,
+      "actual_runtime_speed": 0.9025,
+      "matches": true
+    },
+    {
+      "motion": "r오뒤에서 오옆꽃게0도",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "r오뒤에서 왼옆0도",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "r미세오뒤에서 오옆 90도",
+      "reference": "source63",
+      "original_speed": 0.95,
+      "expected_runtime_speed": 0.9025,
+      "actual_runtime_speed": 0.9025,
+      "matches": true
+    },
+    {
+      "motion": "r미세오뒤에서왼옆90도",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "r오뒤에서 오옆꽃게90도",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "r오뒤에서 왼옆으로90도",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "r오옆에서 오뒤90도",
+      "reference": "source63",
+      "original_speed": 0.95,
+      "expected_runtime_speed": 0.9025,
+      "actual_runtime_speed": 0.9025,
+      "matches": true
+    },
+    {
+      "motion": "r왼옆에서 오뒤90도",
+      "reference": "source63",
+      "original_speed": 0.95,
+      "expected_runtime_speed": 0.9025,
+      "actual_runtime_speed": 0.9025,
+      "matches": true
+    },
+    {
+      "motion": "r오옆에서 미세오뒤(0도)",
+      "reference": "source63",
+      "original_speed": 0.9999999999999996,
+      "expected_runtime_speed": 0.9499999999999996,
+      "actual_runtime_speed": 0.9499999999999996,
+      "matches": true
+    },
+    {
+      "motion": "r왼옆에서 미세오뒤(0도)",
+      "reference": "source63",
+      "original_speed": 0.9999999999999996,
+      "expected_runtime_speed": 0.9499999999999996,
+      "actual_runtime_speed": 0.9499999999999996,
+      "matches": true
+    },
+    {
+      "motion": "r오옆에서 왼옆0도",
+      "reference": "source63",
+      "original_speed": 0.95,
+      "expected_runtime_speed": 0.9025,
+      "actual_runtime_speed": 0.9025,
+      "matches": true
+    },
+    {
+      "motion": "r왼옆에서 오옆0도",
+      "reference": "source63",
+      "original_speed": 0.95,
+      "expected_runtime_speed": 0.9025,
+      "actual_runtime_speed": 0.9025,
+      "matches": true
+    },
+    {
+      "motion": "r오옆에서 왼옆90도",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "r왼옆에서 오옆90도",
+      "reference": "source63",
+      "original_speed": 0.95,
+      "expected_runtime_speed": 0.9025,
+      "actual_runtime_speed": 0.9025,
+      "matches": true
+    },
+    {
+      "motion": "r오옆에서 오뒤0도",
+      "reference": "source63",
+      "original_speed": 0.95,
+      "expected_runtime_speed": 0.9025,
+      "actual_runtime_speed": 0.9025,
+      "matches": true
+    },
+    {
+      "motion": "r왼옆에서 오뒤0도",
+      "reference": "source63",
+      "original_speed": 1.05,
+      "expected_runtime_speed": 0.9975,
+      "actual_runtime_speed": 0.9975,
+      "matches": true
+    },
+    {
+      "motion": "rr오뒤에서 미세오뒤(0도)",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "rr오뒤에서 미세오뒤90도",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "r오옆에서 미세오뒤(90도)",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    },
+    {
+      "motion": "r왼옆에서 미세오뒤(90도)",
+      "reference": "source63",
+      "original_speed": 1.0,
+      "expected_runtime_speed": 0.95,
+      "actual_runtime_speed": 0.95,
+      "matches": true
+    }
+  ]
+}

@@ -2933,8 +2933,8 @@ def test_ball_turn_rechecks_new_angle_after_dwell_without_forced_forward(
         turning = expected.startswith("BALL_APPROACH_TURN_")
         assert node.ball_approach_alignment_pending is (not turning)
         if turning:
-            assert node.ball_post_motion_dwell_until == pytest.approx(clock[0] + 1.)
-            clock[0] += 1.
+            assert node.ball_post_motion_dwell_until == pytest.approx(clock[0] + .5)
+            clock[0] += .5
             MotionDecisionNode._publish_decision(node)
         assert node.ball_post_motion_dwell_until is None
         assert node.latest_info["ball"] is None
@@ -3182,7 +3182,7 @@ def test_goal_motion_success_dwells_only_after_turns(monkeypatch, action):
     send_status(node, status='SUCCEEDED', action=action, command_id=31,
                 event_id=None, dynamics_command=None)
     assert node.goal_post_motion_dwell_until == (
-        11.0 if action.startswith('GOAL_CAMERA90_TURN_') else None
+        10.5 if action.startswith('GOAL_CAMERA90_TURN_') else None
     )
     if MotionDecisionNode._is_continuous_goal_action(action):
         assert node.general_motion_gate.has_required_fresh_vision()
@@ -3191,11 +3191,11 @@ def test_goal_motion_success_dwells_only_after_turns(monkeypatch, action):
         assert node.latest_info['goal'] is None
         assert node.latest_time['goal'] is None
         assert not node.general_motion_gate.has_required_fresh_vision()
-    monkeypatch.setattr(time, 'monotonic', lambda: 11.0)
+    monkeypatch.setattr(time, 'monotonic', lambda: 10.5)
     send_status(node, status='SUCCEEDED', action=action, command_id=31,
                 event_id=None, dynamics_command=None)
     assert node.goal_post_motion_dwell_until == (
-        11.0 if action.startswith('GOAL_CAMERA90_TURN_') else None
+        10.5 if action.startswith('GOAL_CAMERA90_TURN_') else None
     )
 
 
@@ -4029,6 +4029,9 @@ def test_mission_progress_contains_exact_fields_and_values():
     assert progress == {
         'ball_mode_active': False,
         'pickups_executed': 1,
+        'ball_modes_confirmed': 1,
+        'ball_modes_remaining': 1,
+        'active_ball_mode_index': None,
         'shots_executed': 1,
         'hurdles_executed': 0,
         'pickups_completed': 1,
@@ -4352,21 +4355,21 @@ def test_ball_lost_debug_uses_fresh_loss_and_excludes_fixed_grasp(
     assert payload["ball_tracking"]["last_direction"] == "LEFT"
 
 
-def test_shot_waits_one_second_even_when_general_settle_is_disabled(monkeypatch):
+def test_shot_waits_half_second_even_when_general_settle_is_disabled(monkeypatch):
     node = ReadinessPublishNode(terminal_decision('goal', 'SHOT', 'GOAL_APPROACH'))
     node.SHOT_PRE_MOTION_SETTLE_SEC = MotionDecisionNode.SHOT_PRE_MOTION_SETTLE_SEC
-    assert node.SHOT_PRE_MOTION_SETTLE_SEC == 1.0
+    assert node.SHOT_PRE_MOTION_SETTLE_SEC == .5
     node.pre_motion_settle_sec = 0.0
     set_grasp_result_for_first_ball(node, 'GRABBED')
     clock = [10.0]
     monkeypatch.setattr(time, 'monotonic', lambda: clock[0])
-    for stamp in (10.0, 10.999):
+    for stamp in (10.0, 10.499):
         clock[0] = stamp
         MotionDecisionNode._publish_decision(node)
         assert node.publisher.messages == []
         assert node.active_special_command_id is None
         assert node.command_id == 0
-    clock[0] = 11.0
+    clock[0] = 10.5
     MotionDecisionNode._publish_decision(node)
     assert json.loads(node.publisher.messages[-1].data)['action'] == 'SHOT'
     assert node.active_special_command_id == 1
@@ -4394,8 +4397,8 @@ def test_line_lost_turn_waits_even_when_generic_settle_is_disabled():
     node.LINE_TURN_PRE_MOTION_SETTLE_SEC = MotionDecisionNode.LINE_TURN_PRE_MOTION_SETTLE_SEC
     node.pre_motion_settle_sec = 0.0
     assert not node._pre_motion_settle_ready(node.decision, 10.0)
-    assert not node._pre_motion_settle_ready(node.decision, 10.999)
-    assert node._pre_motion_settle_ready(node.decision, 11.0)
+    assert not node._pre_motion_settle_ready(node.decision, 10.499)
+    assert node._pre_motion_settle_ready(node.decision, 10.5)
 
 
 
@@ -4571,7 +4574,7 @@ def test_line_recover_does_not_wait_when_turn_direction_changes():
     "POST_BALL_LINE_TURN_LEFT_2", "POST_BALL_LINE_TURN_RIGHT_3",
     "POST_SHOT_LINE_TURN_LEFT_2", "POST_SHOT_LINE_TURN_RIGHT_3",
 ])
-def test_all_line_stationary_turns_pause_one_second_before_publish(action, monkeypatch):
+def test_all_line_stationary_turns_pause_half_second_before_publish(action, monkeypatch):
     clock = [10.0]
     monkeypatch.setattr(time, "monotonic", lambda: clock[0])
     node = ReadinessPublishNode(general_decision(action))
@@ -4580,10 +4583,10 @@ def test_all_line_stationary_turns_pause_one_second_before_publish(action, monke
     node.pre_motion_settle_sec = 0.0
     MotionDecisionNode._publish_decision(node)
     assert not node.publisher.messages
-    clock[0] = 10.999
+    clock[0] = 10.499
     MotionDecisionNode._publish_decision(node)
     assert not node.publisher.messages
-    clock[0] = 11.0
+    clock[0] = 10.5
     MotionDecisionNode._publish_decision(node)
     expected = {"LINE_LOST_TURN_LEFT": "LINE_LOST_TURN_LEFT_3",
                 "LINE_LOST_TURN_RIGHT": "LINE_LOST_TURN_RIGHT_5"}.get(action, action)
@@ -4615,8 +4618,8 @@ def test_line_turn_pause_starts_after_running_motion_ends():
     assert node.pre_motion_settle_started_at is None
     node.general_motion_gate.locked = False
     assert not node._pre_motion_settle_ready(node.decision, 20.0)
-    assert not node._pre_motion_settle_ready(node.decision, 20.999)
-    assert node._pre_motion_settle_ready(node.decision, 21.0)
+    assert not node._pre_motion_settle_ready(node.decision, 20.499)
+    assert node._pre_motion_settle_ready(node.decision, 20.5)
 
 
 
@@ -4742,14 +4745,14 @@ def test_shot_pause_survives_geometry_valid_reconfirmation_without_firing(monkey
     clock = [10.0]
     monkeypatch.setattr(time, "monotonic", lambda: clock[0])
     MotionDecisionNode._publish_decision(node)
-    for stamp, confirmed in [(10.5, False), (10.9, True), (11.5, False)]:
+    for stamp, confirmed in [(10.2, False), (10.4, True), (10.5, False)]:
         clock[0] = stamp
         node.decision = decision(confirmed)
         MotionDecisionNode._publish_decision(node)
         assert all(json.loads(m.data)["action"] != "SHOT" for m in node.publisher.messages)
         assert node.goal_stationary_since == 10.0
         assert node.active_special_command_id is None
-    clock[0] = 11.6
+    clock[0] = 10.6
     node.decision = decision(True)
     MotionDecisionNode._publish_decision(node)
     assert json.loads(node.publisher.messages[-1].data)["action"] == "SHOT"
@@ -4766,10 +4769,10 @@ def test_shot_rest_survives_candidate_changes_without_actual_motion(overrides):
     info = {"detected": True, "confidence": 0.9, "depth_valid": True,
             "depth_m": 0.42, "offset_x_px": 18, "score_now": False, **overrides}
     changed = MotionDecisionPlanner().plan("GOAL_APPROACH", {"goal": info}, 0.1)
-    node._pre_motion_settle_ready(changed, 10.5)
+    node._pre_motion_settle_ready(changed, 10.25)
     assert node.goal_stationary_since == 10.0
-    assert not node._pre_motion_settle_ready(node.decision, 10.999)
-    assert node._pre_motion_settle_ready(node.decision, 11.0)
+    assert not node._pre_motion_settle_ready(node.decision, 10.499)
+    assert node._pre_motion_settle_ready(node.decision, 10.5)
 
 
 @pytest.mark.parametrize("distance,pickup_expected", [

@@ -73,7 +73,7 @@ def test_fine_step_rechecks_turn_then_requires_fresh_view_before_advancing(
     node.send_status(turn['action'], turn['command_id'], 'RUNNING')
     node.send_status(turn['action'], turn['command_id'], 'SUCCEEDED')
     deadline = node.goal_post_motion_dwell_until
-    assert deadline == pytest.approx(clock[0] + 1.0)
+    assert deadline == pytest.approx(clock[0] + .5)
     published = len(node.publisher.messages)
     clock[0] = deadline - .001
     fresh(node, clock, 'goal', target_sample(0, .700))

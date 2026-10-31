@@ -1,0 +1,30 @@
+{
+  "aliases": {
+    "pickup_fine_prepare_0": "rr오뒤에서 미세오뒤(0도)",
+    "goal_fine_prepare_90": "rr오뒤에서 미세오뒤(골대용90도)",
+    "goal_crab_right_to_fine_90": "r오옆에서 미세오뒤(90도)",
+    "goal_crab_left_to_fine_90": "r왼옆에서 미세오뒤(90도)"
+  },
+  "waits_changed_to_half_second": {
+    "src/mission_control/mission_control/motion_command_bridge_node.py": [
+      "GOAL_CRAB_PRE_DWELL_SEC",
+      "GOAL_BACKWARD_PRE_DWELL_SEC",
+      "PICKUP_DWELL_SEC",
+      "PICKUP_TURN_DWELL_SEC",
+      "HURDLE_PRE_GO_DWELL_SEC"
+    ],
+    "src/mission_control/mission_control/motion_decision_node.py": [
+      "SHOT_PRE_MOTION_SETTLE_SEC",
+      "LINE_TURN_PRE_MOTION_SETTLE_SEC",
+      "FINE_FORWARD_PRE_MOTION_SETTLE_SEC",
+      "BALL_POST_MOTION_DWELL_SEC",
+      "HURDLE_POST_MOTION_DWELL_SEC",
+      "GOAL_POST_MOTION_DWELL_SEC",
+      "POST_BALL_LINE_DWELL_SEC",
+      "POST_SHOT_DWELL_SEC",
+      "CORRECTION_POST_MOTION_DWELL_SEC"
+    ]
+  },
+  "source_path": "/home/jet/Downloads/robot_motions(63).json",
+  "source_sha256": "599d6e2705dee455ee8b2824f370666dec0c34215396e5c2cb6cb97ff8c9395b"
+}

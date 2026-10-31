@@ -51,10 +51,10 @@ def frame(node, clock, info=None, **updates):
 
 def start_turn(node, clock, info):
     start = clock[0]
-    for elapsed in (0.0, 0.4, 0.8, 1.01):
+    for elapsed in (0.0, 0.2, 0.4, 0.51):
         clock[0] = start + elapsed
         commands = frame(node, clock, info)
-        if elapsed < 1.0:
+        if elapsed < .5:
             assert not any(command['valid'] for command in commands)
     command = commands[-1]
     assert command['valid'] and command['source_command']['invalid_ground_recovery']
@@ -67,8 +67,8 @@ def finish_turn(node, clock, command):
     node.send_status(command['action'], command['command_id'], 'SUCCEEDED')
     assert node.latest_info['line'] is None
     deadline = (getattr(node, 'post_ball_line_dwell_until', None)
-                or node.correction_post_motion_dwell_until)
-    assert deadline == clock[0] + 1.0
+                or getattr(node, 'correction_post_motion_dwell_until', None))
+    assert deadline == clock[0] + .5
     clock[0] = deadline - 0.01
     assert frame(node, clock) == []
     clock[0] = deadline

@@ -107,12 +107,12 @@ def test_post_motion_wait_stores_frames_but_requires_one_after_pause(clock):
     ('GO', 'hurdle', {'fine_sequence_requested': True}),
     ('GO', 'hurdle', {'depth_fallback_requested': True}),
 ])
-def test_each_fine_action_requires_full_second(clock, action, source, extra):
+def test_each_fine_action_requires_half_second(clock, action, source, extra):
     node = LiveInputHarness()
     decision = MotionDecision('AUTO', source, action, True, 'test', False, False, extra)
     assert not node._pre_motion_settle_ready(decision, 10.)
-    assert not node._pre_motion_settle_ready(decision, 10.999)
-    assert node._pre_motion_settle_ready(decision, 11.)
+    assert not node._pre_motion_settle_ready(decision, 10.499)
+    assert node._pre_motion_settle_ready(decision, 10.5)
 
 
 @pytest.mark.parametrize('action,flag,extra', [
@@ -141,7 +141,7 @@ def test_hurdle_go_waits_for_fresh_fine_sequence_decision(clock):
     assert node.last_selected_decision.source_command['fine_sequence_requested']
     assert not node.publisher.messages
     start = node.hurdle_stationary_since
-    for elapsed in (.4, .8, 1.):
+    for elapsed in (.2, .4, .5):
         clock[0] = start + elapsed
         observe(node, clock, 'hurdle', info)
     assert node.publisher.messages[-1]['action'] == 'GO'

@@ -1,0 +1,15 @@
+{
+  "source_sha256": "599d6e2705dee455ee8b2824f370666dec0c34215396e5c2cb6cb97ff8c9395b",
+  "added_motion": "rr오뒤에서 미세오뒤(0도)",
+  "added_alias": "hurdle_fine_prepare_0",
+  "runtime_speed_factor": 0.95,
+  "transition_dwell_sec": 0.5,
+  "camera_state_field": "hurdle_head_override_active",
+  "max_camera_state_age_sec": 1.0,
+  "camera_down_entry": "hurdle_fine_prepare_0",
+  "camera_up_entry": "pickup_fine_prepare",
+  "camera_down_exit": "fine_to_turn_ready_0",
+  "camera_up_exit": "fine_to_turn_ready_45",
+  "unknown_state_entry": "pickup_fine_prepare",
+  "unknown_state_exit": "fine_to_turn_ready_0"
+}

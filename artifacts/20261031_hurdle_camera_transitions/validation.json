@@ -1,0 +1,10 @@
+{
+  "python_tests_passed": 1318,
+  "cpp_catalog_tests_passed": 10,
+  "cpp_startup_tests_passed": 7,
+  "simulated_ros_camera_latch_test_passed": true,
+  "hardware_executed": false,
+  "catalog_motion_count": 137,
+  "existing_motion_objects_unchanged": 136,
+  "installed_catalogs_match_source": true
+}

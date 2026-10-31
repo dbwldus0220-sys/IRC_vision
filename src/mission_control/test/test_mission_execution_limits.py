@@ -56,12 +56,16 @@ def test_execution_counts_once_regardless_of_result(action, motion, counter, pha
 ])
 def test_preparation_does_not_consume_execution_budget(action, motion, counter, phase, source, preparation):
     manager = MissionPhaseManager(initial_phase=phase)
-    for command_id in (1, 2, 3):
+    attempts = (1, 2) if action == "PICKUP_NOW" else (1, 2, 3)
+    for command_id in attempts:
         assert manager.start_special_action(action, command_id)
         manager.handle_motion_status(action, command_id, "RUNNING", motion_id=preparation)
         assert getattr(manager, counter) == 0
         manager.handle_motion_status(action, command_id, "FAILED", motion_id=preparation)
     assert not manager.execution_limit_reached(action)
+    if action == "PICKUP_NOW":
+        assert manager.ball_modes_confirmed == 2
+        assert not manager.start_special_action(action, 3)
 
 
 @pytest.mark.parametrize("action,motion,counter,phase,source", MISSIONS)

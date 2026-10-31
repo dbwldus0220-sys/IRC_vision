@@ -58,7 +58,7 @@ def finish_turn(node, clock, command, status='SUCCEEDED'):
     node.send_status(command['action'], command['command_id'], status)
     if status == 'SUCCEEDED':
         deadline = node.goal_post_motion_dwell_until
-        assert deadline == pytest.approx(clock[0] + 1.)
+        assert deadline == pytest.approx(clock[0] + .5)
         assert not any(m['valid'] for m in goal_frame(node, clock))
         clock[0] = deadline
         Node._publish_decision(node)

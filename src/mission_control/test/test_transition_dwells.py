@@ -20,11 +20,11 @@ def check_both_pauses(bridge, clock, prepare, target):
     start = len(requests(bridge))
     beginning = clock[0]
     assert bridge.motion_in_progress
-    assert bridge.transition_dwell_until == beginning + 1.0
-    clock[0] = beginning + .999
+    assert bridge.transition_dwell_until == beginning + .5
+    clock[0] = beginning + .499
     bridge._check_atomic_dwell()
     assert len(requests(bridge)) == start
-    clock[0] = beginning + 1.0
+    clock[0] = beginning + .5
     bridge._check_atomic_dwell()
     assert [r["motion_id"] for r in requests(bridge)[start:]] == [prepare]
     prep_request = requests(bridge)[-1]
@@ -34,17 +34,17 @@ def check_both_pauses(bridge, clock, prepare, target):
     assert bridge.motion_in_progress
     assert len(requests(bridge)) == start + 1
     deadline = bridge.transition_dwell_until or bridge.active_dwell_until
-    assert deadline == completion + 1.0
+    assert deadline == completion + .5
     # Repeated completions must neither restart the timer nor finish the command.
-    clock[0] = completion + .5
+    clock[0] = completion + .25
     bridge.executor_status_callback(executor_status(**prep_request, status="SUCCEEDED"))
     assert (bridge.transition_dwell_until or bridge.active_dwell_until) == deadline
     bridge._check_atomic_dwell()
     assert len(requests(bridge)) == start + 1
-    clock[0] = completion + .999
+    clock[0] = completion + .499
     bridge._check_atomic_dwell()
     assert len(requests(bridge)) == start + 1
-    clock[0] = completion + 1.0
+    clock[0] = completion + .5
     bridge._check_atomic_dwell()
     assert [r["motion_id"] for r in requests(bridge)[start:]] == [prepare, target]
     assert bridge.transition_dwell_until is None
@@ -53,12 +53,7 @@ def check_both_pauses(bridge, clock, prepare, target):
     assert len(requests(bridge)) == start + 2
 
 
-@pytest.mark.parametrize("previous,target,prepare", [
-    case for case in CASES if case[:2] not in {
-        ("GOAL_CAMERA_90_FORWARD", "GOAL_CAMERA90_FINE_FORWARD_1"),
-        ("GOAL_CAMERA90_FINE_FORWARD_1", "GOAL_CAMERA_90_FORWARD"),
-    }
-])
+@pytest.mark.parametrize("previous,target,prepare", CASES)
 def test_all_six_transition_types_pause_exactly_once_on_both_sides(clock, previous, target, prepare):
     bridge = FakeBridge(advance_transition_dwells=False)
     bridge.navigation_command_callback(navigation_message(action=previous, command_id=1))
@@ -70,9 +65,9 @@ def test_all_six_transition_types_pause_exactly_once_on_both_sides(clock, previo
 
 
 @pytest.mark.parametrize("previous,action,prepare,target", [
-    ("ball_camera_down_forward_4", "BALL_PICKUP_CRAB_LEFT", "pickup_forward_to_crab_0", "pickup_crab_left_0"),
+    ("ball_camera_down_forward_4", "BALL_PICKUP_CRAB_LEFT", "pickup_forward_to_crab_left_0", "pickup_crab_left_0"),
     ("ball_camera_down_forward_4", "BALL_PICKUP_CRAB_RIGHT", "pickup_forward_to_crab_0", "pickup_crab_right_0"),
-    ("pickup_fine_forward_0", "BALL_PICKUP_CRAB_LEFT", "pickup_fine_to_crab_right_0", "pickup_crab_left_0"),
+    ("pickup_fine_forward_0", "BALL_PICKUP_CRAB_LEFT", "pickup_fine_to_crab_left_0", "pickup_crab_left_0"),
     ("pickup_fine_forward_0", "BALL_PICKUP_CRAB_RIGHT", "pickup_fine_to_crab_right_0", "pickup_crab_right_0"),
     ("ball_camera_down_forward_4", "BALL_PICKUP_FINE_FORWARD", "pickup_fine_prepare", "pickup_fine_forward_0"),
 ])
@@ -91,7 +86,7 @@ def test_pickup_explicit_preparations_share_the_same_timing(clock, previous, act
 
 
 @pytest.mark.parametrize("previous,target", [("STRAIGHT", "STRAIGHT_0"), ("ALIGN_RIGHT", "GO")])
-def test_hurdle_transition_preserves_one_second_pauses(clock, previous, target):
+def test_hurdle_transition_preserves_half_second_pauses(clock, previous, target):
     bridge = FakeBridge(advance_transition_dwells=False)
     bridge.navigation_command_callback(navigation_message(
         source="hurdle", action=previous, command_id=1, source_command={"turn_count": 2},

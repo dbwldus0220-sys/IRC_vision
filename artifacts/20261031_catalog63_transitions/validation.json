@@ -1,0 +1,13 @@
+{
+  "python_tests_passed": 1267,
+  "cpp_catalog_tests_passed": 10,
+  "cpp_startup_tests_passed": 7,
+  "catalog_motion_count": 136,
+  "alias_count": 140,
+  "added_transitions": 22,
+  "previous_motion_objects_unchanged": 114,
+  "transition_dwell_seconds_each_side": 0.5,
+  "hardware_executed": false,
+  "source_speed_factor": 0.95,
+  "installed_data_matches_source": true
+}

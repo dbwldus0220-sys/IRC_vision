@@ -1,0 +1,23 @@
+{
+  "backward_pre_hold_sec": 0.5,
+  "backward_post_hold_sec": 0.5,
+  "backward_aliases": [
+    "pickup_pre_backward_camera_down",
+    "pickup_lost_ball_backward_1",
+    "ball_lost_camera_down_backward_2",
+    "pickup_retreat_2",
+    "goal_camera_90_backward_1"
+  ],
+  "goal_entry_alias": "goal_fine_prepare_90",
+  "goal_entry_motion": "rr오뒤에서 미세오뒤90도",
+  "goal_entry_pc_speed": 1.0,
+  "goal_entry_runtime_speed": 0.95,
+  "speed_source63_count": 90,
+  "speed_pc_original_only_count": 50,
+  "speed_mismatches": 0,
+  "python_regression": "1675 passed; backward-specific suite 40 passed (36 overlap, 4 additional; 1679 distinct tests)",
+  "cpp_regression": "10 catalog core + 7 startup pose tests passed",
+  "catalog_validation": "140 motions, 145 aliases resolve, frame motor IDs exactly 0..22",
+  "physical_robot_executed": false,
+  "full_repository_suite": "Not rerun; previously recorded unrelated baseline failures remain outside this targeted regression."
+}

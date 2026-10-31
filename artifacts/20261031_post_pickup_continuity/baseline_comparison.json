@@ -1,0 +1,8 @@
+{
+  "new_failures": [],
+  "fixed_baseline_failures": [
+    "FAILED src/mission_control/test/test_goal_fine_approach.py::test_goal_walks_keep_posture_transition_without_pre_or_post_pause[goal_camera_90_fine_forward_3-GOAL_CAMERA90_RECOVER_LEFT_4-fine_to_turn_ready_90]",
+    "FAILED src/mission_control/test/test_goal_fine_approach.py::test_goal_walks_keep_posture_transition_without_pre_or_post_pause[goal_camera_90_fine_forward_3-GOAL_CAMERA90_RECOVER_RIGHT_4-fine_to_turn_ready_90]",
+    "FAILED src/mission_control/test/test_goal_fine_approach.py::test_goal_walks_keep_posture_transition_without_pre_or_post_pause[goal_camera_90_fine_forward_3-GOAL_CAMERA_90_FORWARD_2-fine_to_turn_ready_90]"
+  ]
+}

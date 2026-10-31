@@ -155,14 +155,12 @@ def test_failed_line_never_starts_goal_from_preview(clock):
     assert len(node.publisher.messages) == 1
 
 
-def test_line_to_goal_fine_preparation_has_no_fixed_dwell():
-    bridge = FakeBridge()
+def test_line_to_goal_fine_preparation_has_half_second_dwells(clock):
+    from test_transition_dwells import check_both_pauses
+    bridge = FakeBridge(advance_transition_dwells=False)
     bridge.last_physical_motion_id = 'line_forward_6'
     bridge.navigation_command_callback(navigation_message(action='GOAL_CAMERA90_FINE_FORWARD_3', command_id=1))
-    requests = decoded_messages(bridge.executor_request_publisher)
-    assert requests[0]['motion_id'] == 'pickup_fine_prepare'
-    assert bridge.transition_pending_request is None
-    assert not any('__TRANSITION_PRE_DWELL__' in str(m) for m in bridge.motion_status_publisher.messages)
+    check_both_pauses(bridge, clock, 'goal_fine_prepare_90', 'goal_camera_90_fine_forward_3')
 
 
 @pytest.mark.parametrize('previous', ['line_forward_6', 'post_ball_line_turn_right_3'])
@@ -171,15 +169,26 @@ def test_line_to_goal_fine_preparation_has_no_fixed_dwell():
     'GOAL_CAMERA90_RECOVER_RIGHT_4', 'GOAL_CAMERA90_TURN_LEFT_3',
     'GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_BACKWARD_1',
 ])
-def test_first_goal_navigation_has_no_transition_dwell(previous, action):
+def test_first_goal_navigation_preserves_support_transition_holds(clock, previous, action):
     from test_motion_command_bridge import complete_active_motion
+    from test_transition_dwells import check_both_pauses
 
-    bridge = FakeBridge()
+    bridge = FakeBridge(advance_transition_dwells=False)
     bridge.last_physical_motion_id = previous
+    target = bridge.motion_id_for_action(action)
+    prepare = bridge._transition_prepare_motion(target)
     bridge.navigation_command_callback(navigation_message(
         action=action, command_id=1, phase='GOAL_APPROACH',
         source_command={'post_ball_goal_handoff': True},
     ))
+    if prepare is not None:
+        check_both_pauses(bridge, clock, prepare, target)
+    backward = action == 'GOAL_CAMERA90_BACKWARD_1'
+    if backward:
+        assert not bridge.executor_request_publisher.messages
+        assert bridge.transition_dwell_until == clock[0] + .5
+        clock[0] += .5
+        bridge._check_atomic_dwell()
     assert bridge.executor_request_publisher.messages
     for _ in range(6):
         assert bridge.active_dwell_until is None
@@ -187,14 +196,19 @@ def test_first_goal_navigation_has_no_transition_dwell(previous, action):
         if not bridge.motion_in_progress:
             break
         complete_active_motion(bridge)
+        if backward and bridge.transition_dwell_until is not None:
+            assert bridge.transition_dwell_until == clock[0] + .5
+            clock[0] += .5
+            bridge._check_atomic_dwell()
     assert not bridge.motion_in_progress
     statuses = [json.loads(m.data) for m in bridge.motion_status_publisher.messages]
-    assert not any('DWELL' in str(s.get('motion_id')) for s in statuses)
-    # The exemption belongs only to the first transition command.
+    assert any('DWELL' in str(s.get('motion_id')) for s in statuses) == (prepare is not None or backward)
+    # Every backward command, including the handoff, owns its pre-motion hold.
     bridge.navigation_command_callback(navigation_message(
         action='GOAL_CAMERA90_BACKWARD_1', command_id=2, phase='GOAL_APPROACH',
     ))
-    assert bridge.active_dwell_until is not None
+    expected_hold = 1.0 if action.startswith('GOAL_CAMERA90_FINE_FORWARD_') else .5
+    assert bridge.transition_dwell_until == clock[0] + expected_hold
 
 
 def test_goal_preview_requires_matching_camera_acknowledgement(clock):

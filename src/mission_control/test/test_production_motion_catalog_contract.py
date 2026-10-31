@@ -833,8 +833,8 @@ def test_pickup_retreat_exit_and_dwell_order(completed, exit_name):
         "찐후진실전(1회)", exit_name,
     ]
     assert sequence[-1] == MotionCommandBridgeNode.DWELL_MARKER
-    assert MotionCommandBridgeNode.PICKUP_DWELL_SEC == 1.0
-    assert MotionCommandBridgeNode.PICKUP_TURN_DWELL_SEC == 1.0
+    assert MotionCommandBridgeNode.PICKUP_DWELL_SEC == .5
+    assert MotionCommandBridgeNode.PICKUP_TURN_DWELL_SEC == .5
 
 
 def test_general_right_uses_line_return_four_repeats_and_first_pickup_uses_composite():

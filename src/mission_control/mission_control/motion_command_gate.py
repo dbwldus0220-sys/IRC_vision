@@ -60,6 +60,7 @@ GENERAL_ACTIONS = frozenset(
         *(f"GOAL_CAMERA90_FINE_FORWARD_{count}" for count in range(1, 5)),
         "GOAL_CAMERA90_CRAB_RIGHT",
         "GOAL_CAMERA90_CRAB_LEFT",
+        "GOAL_SHOT_PREPARE",
         "POST_SHOT_TURN_RIGHT_9",
         "POST_SHOT_TURN_LEFT_4",
         "POST_SHOT_FORWARD",
