@@ -996,7 +996,7 @@ def test_pickup_fine_wait_uses_only_ball_and_blocks_other_sources():
             'detected': True,
             'confidence': 0.9,
             'offset_x_px': 56,
-            'bottom_distance_px': 40,
+            'bottom_distance_px': 200,
             'offset_x_norm': 0.2,
             'pickup_x_tolerance_norm': 0.08,
             'ground_distance_m': 0.20,
@@ -3108,8 +3108,8 @@ def test_pickup_loss_reacquisition_uses_metric_distance_threshold(
 
 
 @pytest.mark.parametrize("bottom_distance,expected_action", [
-    (100, "BALL_PICKUP_INITIAL_CRAB_RIGHT"),
-    (120, "BALL_PICKUP_INITIAL_CRAB_RIGHT"),
+    (100, "BALL_PICKUP_INITIAL_BACKWARD"),
+    (120, "BALL_PICKUP_INITIAL_BACKWARD"),
     (361, "BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_3"),
 ])
 def test_pickup_initial_offset_selects_action_by_close_distance(
@@ -4455,7 +4455,9 @@ def test_close_ball_retreat_checkpoint_requires_new_vision_before_repeat(fine):
     # A raw reappearance is enough to withhold another retreat pending confirmation.
     assert select_decision(node, ball={"detected": False, "raw_detected": True}).action == "WAIT"
     assert select_decision(node, ball=missing).action.endswith("SEARCH_BACKWARD")
-    assert select_decision(node, ball=close).action.endswith("CRAB_RIGHT")
+    assert select_decision(node, ball=close).action == (
+        "BALL_PICKUP_FINE_BACKWARD" if fine else "BALL_PICKUP_INITIAL_BACKWARD"
+    )
     assert not node.pickup_fixed_sequence_started
 
 

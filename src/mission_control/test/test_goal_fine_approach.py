@@ -12,7 +12,7 @@ from test_motion_command_bridge import FakeBridge, navigation_message
 from test_gait_transitions import finish_request, requests
 
 
-@pytest.mark.parametrize('depth', [.570, .600, .849999, .850])
+@pytest.mark.parametrize('depth,count', [(.590, 1), (.600, 1), (.849999, 4), (.850, 4)])
 @pytest.mark.parametrize('bearing,action', [
     (0, 'GOAL_CAMERA90_FINE_FORWARD_3'),
     (14.999, 'GOAL_CAMERA90_FINE_FORWARD_3'),
@@ -28,7 +28,9 @@ from test_gait_transitions import finish_request, requests
     (-30.001, 'GOAL_CAMERA90_TURN_LEFT_2'),
     (-45, 'GOAL_CAMERA90_TURN_LEFT_3'),
 ])
-def test_fine_approach_turns_by_backboard_bearing_before_advancing(depth, bearing, action):
+def test_fine_approach_turns_by_backboard_bearing_before_advancing(depth, count, bearing, action):
+    if action.startswith('GOAL_CAMERA90_FINE_FORWARD_'):
+        action = f'GOAL_CAMERA90_FINE_FORWARD_{count}'
     sample = target_sample(0, depth)
     sample.update(bearing_deg=bearing, offset_x_px=200 if bearing > 0 else -200 if bearing < 0 else 0)
     command = GoalNavigationPlanner().plan(sample)
@@ -83,7 +85,7 @@ def test_fine_step_rechecks_turn_then_requires_fresh_view_before_advancing(
     assert node.latest_info['goal'] is None
     clock[0] += .01
     fresh(node, clock, 'goal', target_sample(0, .700))
-    assert node.publisher.messages[-1]['action'] == 'GOAL_CAMERA90_FINE_FORWARD_3'
+    assert node.publisher.messages[-1]['action'] == 'GOAL_CAMERA90_FINE_FORWARD_4'
 
 
 @pytest.mark.parametrize('angle,action', [
@@ -138,7 +140,7 @@ def test_850mm_handoff_reserves_fine_step_and_executes_without_extra_pause(clock
         fresh(node, clock, 'goal', target_sample(30, .850), plan=False)
         clock[0] += .01
     second = node.publisher.messages[-1]
-    assert second['action'] == 'GOAL_CAMERA90_FINE_FORWARD_3'
+    assert second['action'] == 'GOAL_CAMERA90_FINE_FORWARD_4'
     assert node.queued_general_command_id == second['command_id']
 
     bridge = FakeBridge(advance_transition_dwells=False)
@@ -149,7 +151,7 @@ def test_850mm_handoff_reserves_fine_step_and_executes_without_extra_pause(clock
     assert requests(bridge)[-1]['motion_id'] == 'pickup_fine_prepare'
     assert bridge.transition_dwell_until is None
     finish_request(bridge)
-    assert requests(bridge)[-1]['motion_id'] == 'goal_camera_90_fine_forward_3'
+    assert requests(bridge)[-1]['motion_id'] == 'goal_camera_90_fine_forward_4'
     assert bridge.transition_dwell_until is None
 
 

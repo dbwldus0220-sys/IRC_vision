@@ -1,0 +1,57 @@
+{
+  "targeted_python_tests": {
+    "passed": 75,
+    "failed": 0
+  },
+  "extended_python_tests": {
+    "passed": 827,
+    "failed": 18,
+    "new_failures": 0,
+    "remaining_failures_verified_against_pre_change_python": true
+  },
+  "cpp_actual_catalog_queue_playback": "passed; forward/recovery pairs with and without head override, repeated reservations, endpoint/torque/speed rejection checks",
+  "executor_build": "passed",
+  "unchanged_existing_motions_per_catalog": 143,
+  "new_motions": [
+    "t라인복귀좌공용",
+    "t라인복귀우공용"
+  ],
+  "runtime_speed": 0.95,
+  "duration_seconds": {
+    "t라인복귀좌공용": 2.168421052631579,
+    "t라인복귀우공용": 2.1726315789473687
+  },
+  "hardware_motion_executed": false,
+  "logs": {
+    "baseline": "/tmp/step_catalog73_baseline.log",
+    "regression": "/tmp/step_catalog73_regression_final.log",
+    "executor_build": "/tmp/step_catalog73_executor_build.log"
+  },
+  "startup_pose_fix": {
+    "cause": "Source73 recovery end frames reused the configured startup pose name with different joint angles.",
+    "rename": {
+      "오뒤무게중심앞": "오뒤무게중심앞(공용복귀)"
+    },
+    "scope": [
+      "t라인복귀좌공용",
+      "t라인복귀우공용"
+    ],
+    "catalogs": [
+      "pc",
+      "runtime"
+    ],
+    "motion_values_changed": false,
+    "cpp_configured_startup_test": "failed before fix; passed after fix for all head/shoulder policy combinations",
+    "python_checks": {
+      "passed": 78,
+      "failed": 0
+    },
+    "all_startup_tests": {
+      "passed": 6,
+      "failed": 1,
+      "remaining_failure": "Catalog49 test refers to 김오들(앞먼저닿음), already absent before this fix"
+    },
+    "hardware_motion_executed": false,
+    "queue_replay": "passed against updated runtime catalog"
+  }
+}

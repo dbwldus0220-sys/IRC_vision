@@ -77,7 +77,7 @@ def test_normal_line_and_ball_line_steps_reserve_walks_without_waits(clock, head
     assert entry['source'] == 'ball' and entry['source_command']['ball_entry_line_alignment']
     entry_request = send(bridge, entry)
     assert entry_request['motion_id'] == ('line_forward_4' if action == 'STRAIGHT_2'
-                                        else 'line_recovery_left_4' if 'TURN_LEFT' in action
+                                        else 'line_recovery_ball_first_left_4' if 'TURN_LEFT' in action
                                         else 'line_recovery_right_4')
     assert not bridge.queued_request_deferred
     status(node, bridge, request, 'SUCCEEDED')
@@ -239,7 +239,7 @@ def test_ball_line_walk_transitions_are_sent_before_current_completion(clock, fi
     assert queued['command_id'] != first['command_id']
     next_request = send(bridge, queued)
     expected = ('line_forward_4' if next_heading == 0. else
-                'line_recovery_left_4' if next_heading < 0. else 'line_recovery_right_4')
+                'line_recovery_ball_first_left_4' if next_heading < 0. else 'line_recovery_right_4')
     assert next_request['motion_id'] == expected
     assert not bridge.queued_request_deferred
     assert bridge.active_command_id == first['command_id']
@@ -390,7 +390,7 @@ def test_ball_entry_uses_own_bins_instead_of_normal_line_offset_override(clock):
     assert entry['action'].endswith('TURN_LEFT_4')
     assert entry['source'] == 'ball' and entry['source_command']['ball_entry_line_alignment']
     request = send(bridge, entry)
-    assert request['motion_id'] == 'line_recovery_left_4'
+    assert request['motion_id'] == 'line_recovery_ball_first_left_4'
 
 
 def test_stationary_ball_line_alignment_repeats_after_settle_and_fresh_frames(clock):

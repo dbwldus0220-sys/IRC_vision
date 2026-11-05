@@ -1,0 +1,1338 @@
+{
+  "tested_before": 43218,
+  "tested_after": 43808,
+  "lost": [
+    {
+      "head_override": false,
+      "from_id": "goal_camera_90_crab_right",
+      "to_id": "goal_crab_left_to_right_90"
+    },
+    {
+      "head_override": false,
+      "from_id": "goal_camera_90_crab_right",
+      "to_id": "goal_crab_left_to_turn_90"
+    },
+    {
+      "head_override": false,
+      "from_id": "goal_crab_left_to_right_90",
+      "to_id": "goal_fine_to_crab_right_90"
+    },
+    {
+      "head_override": false,
+      "from_id": "goal_fine_to_crab_right_90",
+      "to_id": "goal_crab_left_to_right_90"
+    },
+    {
+      "head_override": false,
+      "from_id": "goal_fine_to_crab_right_90",
+      "to_id": "goal_crab_left_to_turn_90"
+    },
+    {
+      "head_override": false,
+      "from_id": "goal_forward_to_crab_right_90",
+      "to_id": "goal_crab_left_to_right_90"
+    },
+    {
+      "head_override": false,
+      "from_id": "goal_forward_to_crab_right_90",
+      "to_id": "goal_crab_left_to_turn_90"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_search_right_5",
+      "to_id": "line_turn_right_1"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_search_right_5",
+      "to_id": "line_turn_right_2"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_search_right_5",
+      "to_id": "line_turn_right_3"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_search_right_5",
+      "to_id": "line_turn_right_6"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_search_right_5",
+      "to_id": "line_turn_right_7"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_search_right_5",
+      "to_id": "line_turn_right_9"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_search_right_5",
+      "to_id": "line_turn_right_large"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_search_right_5",
+      "to_id": "pickup_first_turn_right_7"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_search_right_5",
+      "to_id": "pickup_first_turn_right_9"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_search_right_5",
+      "to_id": "post_ball_line_turn_right_1"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_search_right_5",
+      "to_id": "post_ball_line_turn_right_2"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_search_right_5",
+      "to_id": "post_ball_line_turn_right_3"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_search_right_5",
+      "to_id": "post_ball_line_turn_right_6"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_search_right_5",
+      "to_id": "post_ball_line_turn_right_7"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_search_right_5",
+      "to_id": "post_ball_line_turn_right_9"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_search_right_5",
+      "to_id": "post_shot_turn_right_9"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_search_right_5",
+      "to_id": "r_turn_right_4"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_search_right_5",
+      "to_id": "stationary_turn_right"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_1",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_1",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_1",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_2",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_2",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_2",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_3",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_3",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_3",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_5",
+      "to_id": "line_turn_right_1"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_5",
+      "to_id": "line_turn_right_2"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_5",
+      "to_id": "line_turn_right_3"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_5",
+      "to_id": "line_turn_right_6"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_5",
+      "to_id": "line_turn_right_7"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_5",
+      "to_id": "line_turn_right_9"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_5",
+      "to_id": "line_turn_right_large"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_5",
+      "to_id": "pickup_first_turn_right_7"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_5",
+      "to_id": "pickup_first_turn_right_9"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_1"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_2"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_3"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_6"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_7"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_9"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_5",
+      "to_id": "post_shot_turn_right_9"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_5",
+      "to_id": "r_turn_right_4"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_5",
+      "to_id": "stationary_turn_right"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_6",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_6",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_6",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_7",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_7",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_7",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_9",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_9",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_9",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_large",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_large",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "line_turn_right_large",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "pickup_crab_left_to_right_0",
+      "to_id": "pickup_fine_to_crab_right_0"
+    },
+    {
+      "head_override": false,
+      "from_id": "pickup_crab_right_0",
+      "to_id": "pickup_crab_left_to_right_0"
+    },
+    {
+      "head_override": false,
+      "from_id": "pickup_crab_right_0",
+      "to_id": "pickup_crab_left_to_turn_0"
+    },
+    {
+      "head_override": false,
+      "from_id": "pickup_crab_right_0_2",
+      "to_id": "pickup_crab_left_to_right_0"
+    },
+    {
+      "head_override": false,
+      "from_id": "pickup_crab_right_0_2",
+      "to_id": "pickup_crab_left_to_turn_0"
+    },
+    {
+      "head_override": false,
+      "from_id": "pickup_fine_to_crab_right_0",
+      "to_id": "pickup_crab_left_to_right_0"
+    },
+    {
+      "head_override": false,
+      "from_id": "pickup_fine_to_crab_right_0",
+      "to_id": "pickup_crab_left_to_turn_0"
+    },
+    {
+      "head_override": false,
+      "from_id": "pickup_first_backward_turn_right",
+      "to_id": "r_back_pose_45"
+    },
+    {
+      "head_override": false,
+      "from_id": "pickup_first_turn_right_7",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "pickup_first_turn_right_7",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "pickup_first_turn_right_7",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "pickup_first_turn_right_9",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "pickup_first_turn_right_9",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "pickup_first_turn_right_9",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "pickup_forward_to_crab_0",
+      "to_id": "pickup_crab_left_to_right_0"
+    },
+    {
+      "head_override": false,
+      "from_id": "pickup_forward_to_crab_0",
+      "to_id": "pickup_crab_left_to_turn_0"
+    },
+    {
+      "head_override": false,
+      "from_id": "pickup_second_backward_turn_left",
+      "to_id": "r_back_pose_45"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_1",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_1",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_1",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_2",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_2",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_2",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_3",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_3",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_3",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "line_turn_right_1"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "line_turn_right_2"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "line_turn_right_3"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "line_turn_right_6"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "line_turn_right_7"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "line_turn_right_9"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "line_turn_right_large"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "pickup_first_turn_right_7"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "pickup_first_turn_right_9"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_1"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_2"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_3"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_6"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_7"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_9"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "post_shot_turn_right_9"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "r_turn_right_4"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "stationary_turn_right"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_6",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_6",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_6",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_7",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_7",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_7",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_9",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_9",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_ball_line_turn_right_9",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_shot_default_turn_left",
+      "to_id": "r_back_pose_45"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_shot_default_turn_right",
+      "to_id": "r_back_pose_45"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_shot_turn_right_9",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_shot_turn_right_9",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "post_shot_turn_right_9",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "r_turn_right_4",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "r_turn_right_4",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "r_turn_right_4",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "stationary_turn_right",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "stationary_turn_right",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": false,
+      "from_id": "stationary_turn_right",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "goal_camera_90_crab_right",
+      "to_id": "goal_crab_left_to_right_90"
+    },
+    {
+      "head_override": true,
+      "from_id": "goal_camera_90_crab_right",
+      "to_id": "goal_crab_left_to_turn_90"
+    },
+    {
+      "head_override": true,
+      "from_id": "goal_crab_left_to_right_90",
+      "to_id": "goal_fine_to_crab_right_90"
+    },
+    {
+      "head_override": true,
+      "from_id": "goal_fine_to_crab_right_90",
+      "to_id": "goal_crab_left_to_right_90"
+    },
+    {
+      "head_override": true,
+      "from_id": "goal_fine_to_crab_right_90",
+      "to_id": "goal_crab_left_to_turn_90"
+    },
+    {
+      "head_override": true,
+      "from_id": "goal_forward_to_crab_right_90",
+      "to_id": "goal_crab_left_to_right_90"
+    },
+    {
+      "head_override": true,
+      "from_id": "goal_forward_to_crab_right_90",
+      "to_id": "goal_crab_left_to_turn_90"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_search_right_5",
+      "to_id": "line_turn_right_1"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_search_right_5",
+      "to_id": "line_turn_right_2"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_search_right_5",
+      "to_id": "line_turn_right_3"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_search_right_5",
+      "to_id": "line_turn_right_6"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_search_right_5",
+      "to_id": "line_turn_right_7"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_search_right_5",
+      "to_id": "line_turn_right_9"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_search_right_5",
+      "to_id": "line_turn_right_large"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_search_right_5",
+      "to_id": "pickup_first_turn_right_7"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_search_right_5",
+      "to_id": "pickup_first_turn_right_9"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_search_right_5",
+      "to_id": "post_ball_line_turn_right_1"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_search_right_5",
+      "to_id": "post_ball_line_turn_right_2"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_search_right_5",
+      "to_id": "post_ball_line_turn_right_3"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_search_right_5",
+      "to_id": "post_ball_line_turn_right_6"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_search_right_5",
+      "to_id": "post_ball_line_turn_right_7"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_search_right_5",
+      "to_id": "post_ball_line_turn_right_9"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_search_right_5",
+      "to_id": "post_shot_turn_right_9"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_search_right_5",
+      "to_id": "r_turn_right_4"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_search_right_5",
+      "to_id": "stationary_turn_right"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_1",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_1",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_1",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_2",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_2",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_2",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_3",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_3",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_3",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_5",
+      "to_id": "line_turn_right_1"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_5",
+      "to_id": "line_turn_right_2"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_5",
+      "to_id": "line_turn_right_3"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_5",
+      "to_id": "line_turn_right_6"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_5",
+      "to_id": "line_turn_right_7"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_5",
+      "to_id": "line_turn_right_9"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_5",
+      "to_id": "line_turn_right_large"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_5",
+      "to_id": "pickup_first_turn_right_7"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_5",
+      "to_id": "pickup_first_turn_right_9"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_1"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_2"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_3"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_6"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_7"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_9"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_5",
+      "to_id": "post_shot_turn_right_9"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_5",
+      "to_id": "r_turn_right_4"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_5",
+      "to_id": "stationary_turn_right"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_6",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_6",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_6",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_7",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_7",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_7",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_9",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_9",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_9",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_large",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_large",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "line_turn_right_large",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "pickup_crab_left_to_right_0",
+      "to_id": "pickup_fine_to_crab_right_0"
+    },
+    {
+      "head_override": true,
+      "from_id": "pickup_crab_right_0",
+      "to_id": "pickup_crab_left_to_right_0"
+    },
+    {
+      "head_override": true,
+      "from_id": "pickup_crab_right_0",
+      "to_id": "pickup_crab_left_to_turn_0"
+    },
+    {
+      "head_override": true,
+      "from_id": "pickup_crab_right_0_2",
+      "to_id": "pickup_crab_left_to_right_0"
+    },
+    {
+      "head_override": true,
+      "from_id": "pickup_crab_right_0_2",
+      "to_id": "pickup_crab_left_to_turn_0"
+    },
+    {
+      "head_override": true,
+      "from_id": "pickup_fine_to_crab_right_0",
+      "to_id": "pickup_crab_left_to_right_0"
+    },
+    {
+      "head_override": true,
+      "from_id": "pickup_fine_to_crab_right_0",
+      "to_id": "pickup_crab_left_to_turn_0"
+    },
+    {
+      "head_override": true,
+      "from_id": "pickup_first_backward_turn_right",
+      "to_id": "r_back_pose_45"
+    },
+    {
+      "head_override": true,
+      "from_id": "pickup_first_turn_right_7",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "pickup_first_turn_right_7",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "pickup_first_turn_right_7",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "pickup_first_turn_right_9",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "pickup_first_turn_right_9",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "pickup_first_turn_right_9",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "pickup_forward_to_crab_0",
+      "to_id": "pickup_crab_left_to_right_0"
+    },
+    {
+      "head_override": true,
+      "from_id": "pickup_forward_to_crab_0",
+      "to_id": "pickup_crab_left_to_turn_0"
+    },
+    {
+      "head_override": true,
+      "from_id": "pickup_second_backward_turn_left",
+      "to_id": "r_back_pose_45"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_1",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_1",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_1",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_2",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_2",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_2",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_3",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_3",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_3",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "line_turn_right_1"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "line_turn_right_2"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "line_turn_right_3"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "line_turn_right_6"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "line_turn_right_7"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "line_turn_right_9"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "line_turn_right_large"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "pickup_first_turn_right_7"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "pickup_first_turn_right_9"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_1"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_2"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_3"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_6"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_7"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "post_ball_line_turn_right_9"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "post_shot_turn_right_9"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "r_turn_right_4"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_5",
+      "to_id": "stationary_turn_right"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_6",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_6",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_6",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_7",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_7",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_7",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_9",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_9",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_ball_line_turn_right_9",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_shot_default_turn_left",
+      "to_id": "r_back_pose_45"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_shot_default_turn_right",
+      "to_id": "r_back_pose_45"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_shot_turn_right_9",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_shot_turn_right_9",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "post_shot_turn_right_9",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "r_turn_right_4",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "r_turn_right_4",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "r_turn_right_4",
+      "to_id": "post_ball_line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "stationary_turn_right",
+      "to_id": "line_search_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "stationary_turn_right",
+      "to_id": "line_turn_right_5"
+    },
+    {
+      "head_override": true,
+      "from_id": "stationary_turn_right",
+      "to_id": "post_ball_line_turn_right_5"
+    }
+  ],
+  "gained": [
+    {
+      "head_override": false,
+      "from_id": "goal_forward_to_crab_right_90",
+      "to_id": "r_forward_to_crab_90"
+    },
+    {
+      "head_override": false,
+      "from_id": "pickup_crab_right_0",
+      "to_id": "pickup_crab_right_0_2"
+    },
+    {
+      "head_override": false,
+      "from_id": "pickup_crab_right_0_2",
+      "to_id": "pickup_crab_right_0"
+    },
+    {
+      "head_override": false,
+      "from_id": "r_forward_to_crab_90",
+      "to_id": "goal_fine_to_crab_right_90"
+    },
+    {
+      "head_override": false,
+      "from_id": "r_forward_to_crab_90",
+      "to_id": "goal_forward_to_crab_right_90"
+    },
+    {
+      "head_override": true,
+      "from_id": "goal_forward_to_crab_right_90",
+      "to_id": "r_forward_to_crab_90"
+    },
+    {
+      "head_override": true,
+      "from_id": "pickup_crab_right_0",
+      "to_id": "pickup_crab_right_0_2"
+    },
+    {
+      "head_override": true,
+      "from_id": "pickup_crab_right_0_2",
+      "to_id": "pickup_crab_right_0"
+    },
+    {
+      "head_override": true,
+      "from_id": "r_forward_to_crab_90",
+      "to_id": "goal_fine_to_crab_right_90"
+    },
+    {
+      "head_override": true,
+      "from_id": "r_forward_to_crab_90",
+      "to_id": "goal_forward_to_crab_right_90"
+    }
+  ]
+}

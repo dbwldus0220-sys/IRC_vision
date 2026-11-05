@@ -1,0 +1,23 @@
+{
+  "startup_regression_found": "Different joint targets reused the default startup pose name 오뒤무게중심앞; actual C++ startup loader rejected it.",
+  "startup_fix": "Rename source70 frame/start/end pose identities to 오뒤무게중심앞(catalog70) in both catalogs, retaining all numeric data and the existing startup pose.",
+  "startup_cpp_test": "passed with all four head/shoulder override combinations",
+  "python_tests_passed": 205,
+  "sdk_mock_motions": 36,
+  "pc_runtime_traces_unchanged_by_pose_fix": true,
+  "automatic_queue_cases_compared": 546,
+  "automatic_queue_results_changed": 0,
+  "existing_head_override_off_camera_transition_rejections": 48,
+  "direct_sdk_queue_caveat": "Camera45 right-turn 5 repeats stores speed 0.8999999999999999 vs 0.9 for other repeat counts; strict SDK equality rejects cross-count queues. Automatic stationary turns defer until completion; source speed retained.",
+  "timing_caveat": "Right crab duration .5983379501 -> .55 sec; late-frame window .179501385 -> .165 sec. At ideal 30 FPS with <=50ms processing delay all 100 frame phases can reserve; at 10 FPS neither catalog gathers 3 late frames. Lower FPS/delay can reduce reservation opportunities, but fallback resumes sequentially.",
+  "tested_fallbacks": [
+    "no reservation at 10 FPS -> complete -> fresh Ball -> next right crab",
+    "SDK rejects right crab reservation -> complete -> fresh Ball -> next right crab",
+    "camera45 right-turn count changes wait for current completion"
+  ],
+  "hardware_used": false,
+  "catalog_sha256": {
+    "pc": "5cb07f7a342200562f6db264680107c2308b944076703647c9bd7040bafce0b5",
+    "runtime": "85774fbc7939a9350f40d218873b38c68809ea6bd26b2cd4a23202d04b6e684a"
+  }
+}

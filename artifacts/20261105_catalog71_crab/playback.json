@@ -1,0 +1,98 @@
+[
+  {
+    "name": "t미세오옆꽃게(0도)-1회",
+    "head_override": false,
+    "completions": [
+      "C\t1550\t1",
+      "C\t2100\t2"
+    ],
+    "pc_runtime_equal": true,
+    "head_min": -64.0,
+    "head_max": -3.0,
+    "trace_sha256": "8867ab9f204cc9b3df090686be03162c975abe457c566a6ddaba0d761427274a"
+  },
+  {
+    "name": "t미세오옆꽃게(0도)-1회",
+    "head_override": true,
+    "completions": [
+      "C\t1550\t1",
+      "C\t2100\t2"
+    ],
+    "pc_runtime_equal": true,
+    "head_min": 1.0,
+    "head_max": 1.0,
+    "trace_sha256": "71a7db1bcc61b52ae10caa2df681e45592aa79d5c80002767a30391313063bae"
+  },
+  {
+    "name": "t미세오옆꽃게(0도)-2회",
+    "head_override": false,
+    "completions": [
+      "C\t2100\t1",
+      "C\t3200\t2"
+    ],
+    "pc_runtime_equal": true,
+    "head_min": -64.0,
+    "head_max": -3.0,
+    "trace_sha256": "c21f4c50fd7d5a5e4acf028127e41f4c078cfb97e9e8357212960706203fac34"
+  },
+  {
+    "name": "t미세오옆꽃게(0도)-2회",
+    "head_override": true,
+    "completions": [
+      "C\t2100\t1",
+      "C\t3200\t2"
+    ],
+    "pc_runtime_equal": true,
+    "head_min": 1.0,
+    "head_max": 1.0,
+    "trace_sha256": "9c14451c2cee5bfda0ec1ecd81d5b6c918d4546c1c8ced40c63d9146a49505eb"
+  },
+  {
+    "name": "t미세오옆꽃게90도(1회)",
+    "head_override": false,
+    "completions": [
+      "C\t1550\t1",
+      "C\t2100\t2"
+    ],
+    "pc_runtime_equal": true,
+    "head_min": -64.0,
+    "head_max": 1.0,
+    "trace_sha256": "ffce4fe758456df09cb48cc57a96b3d00d887ee419294d278f22bd5acedcd2ae"
+  },
+  {
+    "name": "t미세오옆꽃게90도(1회)",
+    "head_override": true,
+    "completions": [
+      "C\t1550\t1",
+      "C\t2100\t2"
+    ],
+    "pc_runtime_equal": true,
+    "head_min": 1.0,
+    "head_max": 1.0,
+    "trace_sha256": "71a7db1bcc61b52ae10caa2df681e45592aa79d5c80002767a30391313063bae"
+  },
+  {
+    "name": "t미세오옆꽃게90도(2회)",
+    "head_override": false,
+    "completions": [
+      "C\t2100\t1",
+      "C\t3200\t2"
+    ],
+    "pc_runtime_equal": true,
+    "head_min": -64.0,
+    "head_max": 1.0,
+    "trace_sha256": "143a48c07a071adccc87c8305790b65b0b42d1281ce8925086a24b402b5a7cc7"
+  },
+  {
+    "name": "t미세오옆꽃게90도(2회)",
+    "head_override": true,
+    "completions": [
+      "C\t2100\t1",
+      "C\t3200\t2"
+    ],
+    "pc_runtime_equal": true,
+    "head_min": 1.0,
+    "head_max": 1.0,
+    "trace_sha256": "9c14451c2cee5bfda0ec1ecd81d5b6c918d4546c1c8ced40c63d9146a49505eb"
+  }
+]

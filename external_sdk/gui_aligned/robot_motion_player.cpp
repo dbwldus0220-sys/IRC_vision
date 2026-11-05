@@ -18,11 +18,15 @@ constexpr auto kPositionCheckInterval = std::chrono::milliseconds(20);
 double guiSeconds(RobotMotionPlayer::Clock::time_point value) {
     return std::chrono::duration_cast<std::chrono::nanoseconds>(value.time_since_epoch()).count() / 1e9;
 }
+bool isBallRecoveryMotion(std::string_view name) {
+    return name == "t라인복귀좌공용" || name == "t라인복귀우공용";
+}
 bool isLineRecoveryMotion(std::string_view name) {
     return name == "R전진라인복귀좌" || name == "R라인복귀우회전"
         || name == "R라인복귀좌90도" || name == "R라인복귀우회전90도"
         || name == "t라인복귀좌실전" || name == "t라인복귀우실전"
-        || name == "t라인복귀좌실전90도" || name == "t라인복귀우실전90도";
+        || name == "t라인복귀좌실전90도" || name == "t라인복귀우실전90도"
+        || isBallRecoveryMotion(name);
 }
 bool isLineWalkingMotion(std::string_view name) {
     return name.starts_with("R전진45도(") || name == "t전진실전"
@@ -30,6 +34,9 @@ bool isLineWalkingMotion(std::string_view name) {
 }
 bool isGoalForwardMotion(std::string_view name) {
     return name.starts_with("R전진90도(") || name.starts_with("t전진실전90도(");
+}
+bool isCamera45Turn(std::string_view name) {
+    return name.starts_with("R제자리좌회전(") || name.starts_with("t제자리우회전45도(");
 }
 bool sameEntryFrame(const MotionFrame& a, const MotionFrame& b) {
     return a.name == b.name && a.start_ms == b.start_ms && a.time_ms == b.time_ms
@@ -224,6 +231,38 @@ bool RobotMotionPlayer::canSeamlesslyTransition(
     const MotionPattern& next, std::string_view next_name) const noexcept {
     // 같은 repeatable 모션은 기존 내부 repeat_count 순환과 같은 경계입니다.
     if (current_name == next_name && current.repeatable()) return true;
+    // Ball 500-600 mm: keep the stored support-change motions, without an
+    // added dwell. Compare full body targets/torques, never pose names alone.
+    const bool fixed_head = head_override_enabled_ && joint_overrides_.contains(0);
+    const bool current_standard = isLineWalkingMotion(current_name)
+        || isCamera45Turn(current_name) || current_name == "rr미세오뒤에서 오뒤45도";
+    const bool next_standard = isLineWalkingMotion(next_name) || isCamera45Turn(next_name);
+    if ((isCamera45Turn(current_name) || isCamera45Turn(next_name)
+            || current_name == "rr미세오뒤에서 오뒤45도")
+        && current_standard && next_standard
+        && sameWalkingEndPose(current, next, fixed_head)) return true;
+    const bool current_fine = current_name == "t미세45도(5회)"
+        || current_name == "t오뒤에서 미세오뒤(45도)";
+    if (current_name == "t오뒤에서 미세오뒤(45도)" && next_name == "t미세45도(5회)"
+        && sameWalkingEndPose(current, next, fixed_head)) return true;
+    const bool to_fine = current_standard && next_name == "t오뒤에서 미세오뒤(45도)";
+    const bool from_fine = current_fine && next_name == "rr미세오뒤에서 오뒤45도";
+    if ((to_fine || from_fine) && next.repeatCount() == 1
+        && library_.contains("R전진45도(4회)") && library_.contains("t미세45도(5회)")) {
+        const auto& standing = library_.motion("R전진45도(4회)");
+        const auto& fine = library_.motion("t미세45도(5회)");
+        const bool complete_transition = std::all_of(next.frames().begin(), next.frames().end(),
+            [](const MotionFrame& frame) {
+                return frame.angles.size() == kMotionMotorCount
+                    && frame.torques.size() == kMotionMotorCount
+                    && std::all_of(frame.torques.begin(), frame.torques.end(),
+                        [](const auto& motor) { return motor.second; })
+                    && !frame.stop_at_end;
+            });
+        if (complete_transition
+            && sameWalkingEndPose(current, to_fine ? standing : fine, fixed_head)
+            && sameWalkingEndPose(next, to_fine ? fine : standing, fixed_head)) return true;
+    }
     // 전진/좌우 복귀는 공통 끝 자세에서 다음 보행의 첫 이동으로 이어간다.
     // 첫 이동의 이름/각도/시간이 달라도 전 관절 끝 목표와 토크는 같아야 한다.
     const auto forward = [](std::string_view name) {
@@ -233,8 +272,15 @@ bool RobotMotionPlayer::canSeamlesslyTransition(
     const bool walking_pair =
         (forward(current_name) || isLineRecoveryMotion(current_name))
         && (forward(next_name) || isLineRecoveryMotion(next_name));
+    // Catalog73 imports run at 0.95; existing walks retain their 1.0 speed.
+    // Only this pair may change speed at the verified full-body end pose.
+    const bool ball_speed_transition =
+        (isBallRecoveryMotion(current_name) && current.playbackSpeed() == 0.95
+            && next.playbackSpeed() == 1.0)
+        || (isBallRecoveryMotion(next_name) && next.playbackSpeed() == 0.95
+            && current.playbackSpeed() == 1.0);
     if (walking_pair && current.repeatable() && next.repeatable()
-        && current.playbackSpeed() == next.playbackSpeed()
+        && (current.playbackSpeed() == next.playbackSpeed() || ball_speed_transition)
         && sameWalkingEndPose(current, next,
             head_override_enabled_ && joint_overrides_.contains(0))) return true;
     // 승인된 라인 보행은 모두 오른발 뒤에서 끝나며 같은 첫 이동 자세를 사용한다.

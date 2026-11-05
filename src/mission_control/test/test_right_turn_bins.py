@@ -90,17 +90,21 @@ def test_left_boundaries_reach_pickup_ball_hurdle_sparse_and_post_shot(monkeypat
         assert not result.valid
 
 
-@pytest.mark.parametrize('camera', ['', '0도', '90도'])
-def test_one_repeat_variants_preserve_source60_gait_and_runtime_policy(camera):
-    source = json.loads((ROOT / 'artifacts/20261029_catalog60_full/source60.json').read_text())
-    original = next(m for m in source['motions'] if m['name'] == f'R제자리우회전{camera}(2회)')
+@pytest.mark.parametrize('camera', ['45도', '0도', '90도'])
+def test_one_repeat_variants_preserve_source70_gait_and_runtime_policy(camera):
+    source = json.loads((ROOT / 'artifacts/20261105_catalog70_requested/source_requested.json').read_text())
+    original = next(m for m in source['motions'] if m['name'] == f't제자리우회전{camera}(2회)')
     expected = copy.deepcopy(original)
-    expected.update(name=f'R제자리우회전{camera}(1회)', repeat_count=1)
+    expected.update(name=f't제자리우회전{camera}(1회)', repeat_count=1)
+    if camera == '45도':
+        expected['end_pose'] = '오뒤무게중심앞(catalog70)'
+        for frame in expected['frames']:
+            if frame['name'] == '오뒤무게중심앞':
+                frame['name'] = expected['end_pose']
     for suffix in ('pc', 'runtime'):
         catalog = json.loads((ROOT / f'artifacts/robot_motions_{suffix}.json').read_text())
         actual = next(m for m in catalog['motions'] if m['name'] == expected['name'])
         if suffix == 'runtime':
-            expected['playback_speed'] = .855
             expected['completion']['position_tolerance_deg'] = 5.0
         assert actual == expected
 
@@ -168,7 +172,7 @@ def test_sparse_confirmed_line_does_not_clamp_right_turn_to_two(angle, count):
 
 
 @pytest.mark.parametrize('count', COUNTS)
-def test_every_right_turn_route_resolves_to_matching_r_repeat_count(count):
+def test_every_right_turn_route_resolves_to_matching_t_repeat_count(count):
     aliases = yaml.safe_load((ROOT / ALIAS_PATH).read_text())['motion_aliases']
     catalog = {m['name']: m for m in json.loads(
         (ROOT / 'artifacts/robot_motions_runtime.json').read_text())['motions']}
@@ -182,7 +186,7 @@ def test_every_right_turn_route_resolves_to_matching_r_repeat_count(count):
     ]
     for action, mapping in routes:
         motion = catalog[aliases[mapping[action]]]
-        assert motion['name'].startswith('R제자리우회전')
+        assert motion['name'].startswith('t제자리우회전')
         assert motion['repeat_count'] == count
     assert f'BALL_PICKUP_POST_BACKWARD_TURN_RIGHT_{count}' in MotionCommandBridgeNode.PICKUP_POST_BACKWARD_ALIGN_ACTIONS
     assert f'BALL_PICKUP_POST_BACKWARD_TURN_RIGHT_{count}' in MotionDecisionNode.PICKUP_POST_BACKWARD_ALIGN_ACTIONS

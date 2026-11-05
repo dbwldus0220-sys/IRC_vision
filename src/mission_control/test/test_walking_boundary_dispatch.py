@@ -104,10 +104,9 @@ def test_line_to_ball_handoff_uses_confirmed_frame_received_while_walking(clock)
 
 
 @pytest.mark.parametrize('phase', ['AUTO', 'LINE_TRACK', 'LINE_TRACK_AFTER_PICKUP'])
-@pytest.mark.parametrize('bad', [None, 'stale', 'held', 'quality', 'calibration', 'target', 'deadline'])
+@pytest.mark.parametrize('bad', [None, 'stale', 'held', 'quality', 'calibration', 'target'])
 def test_short_corner_fit_cannot_prequeue_a_corner_or_forward(clock, phase, bad):
     node = LiveInputHarness(phase=phase)
-    node.post_ball_line_run_until = clock[0] + (2.1 if bad == 'deadline' else 30.)
     fresh(node, clock, 'line', line_info())
     first = node.publisher.messages[-1]
     node.send_status(first['action'], first['command_id'], 'RUNNING')

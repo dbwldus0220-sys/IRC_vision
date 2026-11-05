@@ -126,6 +126,7 @@ public:
         "line_forward_2", "line_forward_4", "line_forward_6",
         "line_forward_8", "sdk_forward_4", "forward",
         "line_recovery_left_4", "line_recovery_left_6", "line_recovery_right_4",
+        "line_recovery_ball_first_left_4", "line_recovery_ball_second_right_4",
         "ball_general_fine_forward_8", "ball_camera_down_forward_2",
         "ball_camera_down_forward_4"});
     goal_head_override_enabled_ = declare_parameter<bool>(
@@ -637,6 +638,17 @@ private:
       json_object_get_type(action_value) == json_type_string ?
       json_object_get_string(action_value) : "";
     const bool goal_action = action.rfind("GOAL_", 0) == 0 || action == "SHOT";
+    json_object * camera_id = nullptr;
+    const bool prepare_on_start = status == "RUNNING" &&
+      json_object_object_get_ex(object, "goal_head_prepare_id", &camera_id) &&
+      json_object_get_type(camera_id) == json_type_int && json_object_get_int64(camera_id) > 0;
+    if (prepare_on_start && goal_head_override_enabled_ &&
+      (!goal_head_override_latched_ || goal_head_prepare_id_ != json_object_get_int64(camera_id)))
+    {
+      goal_head_prepare_id_ = json_object_get_int64(camera_id);
+      start_goal_head_override();
+      RCLCPP_INFO(get_logger(), "Goal camera starts with third Line motion: id=%ld", goal_head_prepare_id_);
+    }
     json_object_put(object);
 
     // Core emits RUNNING only when the request actually starts, not when queued.

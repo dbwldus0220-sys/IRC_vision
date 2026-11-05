@@ -134,7 +134,7 @@ def test_fine_to_backward_holds_exactly_one_second_once(clock, previous, backwar
     ('POST_BALL_LINE_ALIGN', 'POST_BALL_LINE_TURN_RIGHT_5'),
     ('LINE_TRACK_AFTER_PICKUP', 'LINE_HEADING_TURN_RIGHT_5'),
 ])
-def test_turn_still_requires_post_completion_line_capture(clock, phase, action):
+def test_successful_turn_reuses_fresh_in_motion_line_without_dwell(clock, phase, action):
     node = finish_pickup(1)
     node.phase_manager.current_phase = phase
     node.active_general_source = 'line'
@@ -143,22 +143,11 @@ def test_turn_still_requires_post_completion_line_capture(clock, phase, action):
     receive(node, clock, 'line', line_info())
     clock[0] += .2
     node.send_status(action, 99, 'SUCCEEDED')
-    assert node.latest_info['line'] is None
-    deadline = (node.post_ball_line_dwell_until
-                or getattr(node, 'correction_post_motion_dwell_until', None))
-    assert deadline == clock[0] + .5
-    count = len(node.publisher.messages)
-    clock[0] = deadline - .001
-    receive(node, clock, 'line', line_info())
-    Node._publish_decision(node)
-    assert not any(m.get('valid') for m in node.publisher.messages[count:])
-    clock[0] = deadline
-    Node._publish_decision(node)
-    assert node.latest_info['line'] is None
-    clock[0] += .01
-    receive(node, clock, 'line', line_info())
-    Node._publish_decision(node)
+    assert node.latest_info['line'] is not None
+    assert node.post_ball_line_dwell_until is None
+    assert getattr(node, 'correction_post_motion_dwell_until', None) is None
     assert node.publisher.messages[-1]['valid']
+    assert node.publisher.messages[-1]['action'] == 'STRAIGHT'
 
 
 def test_queued_backward_one_second_starts_after_fine_motion_completion(clock):
@@ -180,7 +169,7 @@ def test_queued_backward_one_second_starts_after_fine_motion_completion(clock):
     ]
 
 
-def test_confirmed_two_point_forward_keeps_pre_walk_settle_after_pickup(clock):
+def test_confirmed_two_point_forward_starts_without_extra_settle_after_pickup(clock):
     from test_sparse_line_recovery import sparse_info
 
     node = LiveInputHarness(phase='LINE_TRACK_AFTER_PICKUP')
@@ -193,15 +182,6 @@ def test_confirmed_two_point_forward_keeps_pre_walk_settle_after_pickup(clock):
         Node._publish_decision(node)
         if index < 2:
             assert not any(m['valid'] for m in node.publisher.messages)
-    assert not any(m['valid'] for m in node.publisher.messages)
-    assert node.pre_motion_settle_started_at == 10.2
-    clock[0] = 10.699
-    receive(node, clock, 'line', info)
-    Node._publish_decision(node)
-    assert not any(m['valid'] for m in node.publisher.messages)
-    clock[0] = 10.701
-    receive(node, clock, 'line', info)
-    Node._publish_decision(node)
     valid = [m for m in node.publisher.messages if m['valid']]
     assert len(valid) == 1
     assert valid[0]['action'] == 'LINE_SPARSE_FORWARD'

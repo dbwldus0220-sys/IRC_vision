@@ -1,0 +1,218 @@
+[
+  {
+    "name": "r미세오뒤에서 오옆0도",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t1160\t1",
+    "trace_sha256": "804c3bf4077df709c4d4c596b056fa52e09d9298ae32594b18e80fd15db41113"
+  },
+  {
+    "name": "r미세오뒤에서 오옆 90도",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t1160\t1",
+    "trace_sha256": "658ddc5d4bd9d5ae79c2804057b2ca3855514c308ca8b08701576f8665b1e206"
+  },
+  {
+    "name": "r오뒤에서 오옆꽃게0도",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t1180\t1",
+    "trace_sha256": "64626886e93fc82ac8df8290dd57789e0e3e63aaaf8025366d222d77523db05f"
+  },
+  {
+    "name": "r오뒤에서 오옆꽃게90도",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t1180\t1",
+    "trace_sha256": "18bd61b55c805b2a5347d9ea7d4780096c7dbec3dae80fed338eb98f8c4d8b73"
+  },
+  {
+    "name": "t제자리우회전0도(2회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t1680\t1",
+    "trace_sha256": "2b9e39a77e5a0906969635efb484ec0851e64c9e5ef90251d3bcdaebeae62fc4"
+  },
+  {
+    "name": "t제자리우회전0도(3회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t2020\t1",
+    "trace_sha256": "708f59c87c4f1e557083ce40b9a9435e1848f95aff2cbc59635eb6924fd18f75"
+  },
+  {
+    "name": "t제자리우회전0도(5회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t2700\t1",
+    "trace_sha256": "4bb9f4392aba6c53a07c1e4d888a3f4b55750ca214ba18df3f0ebd44356fee30"
+  },
+  {
+    "name": "t제자리우회전0도(7회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t3380\t1",
+    "trace_sha256": "6c3ffb6200ae283680a04af072581d52aa78cff1846ce8ffcaa37d69e228ba60"
+  },
+  {
+    "name": "t제자리우회전0도(9회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t4060\t1",
+    "trace_sha256": "30705456bdb464aa7cfc471c55462f61c30a817eaa245cb705dabf6b06be59df"
+  },
+  {
+    "name": "t제자리우회전45도(2회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t1680\t1",
+    "trace_sha256": "9f3b68ae22b7a60796d6bef3aae7b97dcb7518de4aa3c6b50013949aafea3375"
+  },
+  {
+    "name": "t제자리우회전45도(3회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t2020\t1",
+    "trace_sha256": "2249f3b9076a1a61ca5f038de0ffce6afb73700a9407f3b3e1058d6ef09dcc5b"
+  },
+  {
+    "name": "t제자리우회전45도(5회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t2700\t1",
+    "trace_sha256": "b2e19b43a18f7ebf0c590f7f0c928245091c91bd89aeedb387e357e10dd6fb5b"
+  },
+  {
+    "name": "t제자리우회전45도(6회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t3040\t1",
+    "trace_sha256": "53a702951627217a5d37a1ed3715bbc0da9ddc9dcd361ba6dd08962f24cb54e9"
+  },
+  {
+    "name": "t제자리우회전45도(7회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t3380\t1",
+    "trace_sha256": "cc99154dd377863b80d1575c1f1dd80d8a17395c1c1767da403de633c650fd57"
+  },
+  {
+    "name": "t제자리우회전45도(9회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t4060\t1",
+    "trace_sha256": "deeac899287c96e93dab765a596d916ee24a02102875f1f06ca4200f57f258e9"
+  },
+  {
+    "name": "t제자리우회전90도(2회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t1680\t1",
+    "trace_sha256": "19f56d7fa553481255be9425fbb226be517e00f6c9ec52c62b3dda6913cf6c66"
+  },
+  {
+    "name": "t제자리우회전90도(3회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t2020\t1",
+    "trace_sha256": "b1c094664e5699f5732f40ded83412d5617ce5ff390e7e50b6d5bc14fc131dc8"
+  },
+  {
+    "name": "t제자리우회전90도(5회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t2700\t1",
+    "trace_sha256": "a270954a6f51f5e79e64f9a1bc855748bbd7b47184df8891c05a683a3d337cba"
+  },
+  {
+    "name": "t제자리우회전90도(6회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t3040\t1",
+    "trace_sha256": "08bda319825506d38530be50d8f29c6127ef8996c868b5e1dd0978a6519dc2df"
+  },
+  {
+    "name": "t제자리우회전90도(7회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t3380\t1",
+    "trace_sha256": "2fe3a0a63271a29c7c5652b4b05ebf2041bc23cffe84f6f6c877d61e1357a36e"
+  },
+  {
+    "name": "t제자리우회전90도(9회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t4060\t1",
+    "trace_sha256": "a3118b4ab4c04d06b83d40a3a67cd2c91eaec7c1b033ec78820085f059550b75"
+  },
+  {
+    "name": "t제자리우회전0도(6회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t3040\t1",
+    "trace_sha256": "755d0aa7a2d99892aa8a3cc704108578882a5b124a222fc5652d4cba782ce915"
+  },
+  {
+    "name": "t미세오옆꽃게(0도)-2회",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t2100\t1",
+    "trace_sha256": "3ab7d2f4acb4bb0ce890a82f5182793f5782f4c22ea1732e93158defd0b750cd"
+  },
+  {
+    "name": "t골대후 제자리좌회전",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t3640\t1",
+    "trace_sha256": "c2d4d890bb1842aee64211f1a27cef535b72103637fd01a020ee443607e3d71d"
+  },
+  {
+    "name": "t공후 제자리좌회전",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t3640\t1",
+    "trace_sha256": "c2d4d890bb1842aee64211f1a27cef535b72103637fd01a020ee443607e3d71d"
+  },
+  {
+    "name": "t골대후제자리우회전",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t4020\t1",
+    "trace_sha256": "190e525504c92e615db24f41c0bdedc0af71f6e131d474b73da055f56c265728"
+  },
+  {
+    "name": "t공후 제자리우회전",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t4020\t1",
+    "trace_sha256": "190e525504c92e615db24f41c0bdedc0af71f6e131d474b73da055f56c265728"
+  },
+  {
+    "name": "t미세오옆꽃게(0도)-1회",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t1550\t1",
+    "trace_sha256": "5f72d89b2662aef7cc05bb37bcc21a018ec5ea1279850841ffdd8c88614001b8"
+  },
+  {
+    "name": "t미세오옆꽃게90도(1회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t1550\t1",
+    "trace_sha256": "5e42fa03900ef480aaa6c7b9fb8c397582f7bd5dd286ab058f6b9892f7fe27c5"
+  },
+  {
+    "name": "t미세오옆꽃게90도(2회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t2100\t1",
+    "trace_sha256": "fa8c4896e7b5ae886c4087303cc9e62e60ef521d4ee10e7fbfc774faf672b5b2"
+  },
+  {
+    "name": "t제자리우회전0도(1회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t1340\t1",
+    "trace_sha256": "1c74666a725f2cbce50d15957d18ba9c85e5f5e06b43cfce32f0f57d5c79e835"
+  },
+  {
+    "name": "t제자리우회전0도(4회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t2360\t1",
+    "trace_sha256": "29f53283f3882ed415062b463ca87b63ad0620bdf6b1d45494624c68f251a00a"
+  },
+  {
+    "name": "t제자리우회전45도(1회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t1340\t1",
+    "trace_sha256": "581cadd52864416df4c41da22026a909b86513ba5e9fa18a9fc9fe2a3eb0dd30"
+  },
+  {
+    "name": "t제자리우회전45도(4회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t2360\t1",
+    "trace_sha256": "344bb44d17dfe992f4346a66c1e4fdc080e678ea0c8f9f8625571c0f66cf308b"
+  },
+  {
+    "name": "t제자리우회전90도(1회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t1340\t1",
+    "trace_sha256": "13c9527664b6aec1d8e51e2307b9d5b1ae0638fdfa96d03e1ec470371b87c2c2"
+  },
+  {
+    "name": "t제자리우회전90도(4회)",
+    "pc_runtime_trace_equal": true,
+    "completed": "C\t2360\t1",
+    "trace_sha256": "bd795f1982ba4a57156695d100eb5500994cc022ad9cde837e9184adca9c24e4"
+  }
+]

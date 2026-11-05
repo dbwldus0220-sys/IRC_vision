@@ -17,6 +17,8 @@ from .goal_scoring import (
 
 GOAL_FINE_APPROACH_MAX_DEPTH_M = 0.850
 GOAL_FINE_APPROACH_TURN_MIN_DEG = 30.0
+GOAL_FINE_STEP_DISTANCE_M = 0.030
+GOAL_FINE_MAX_REPEATS = 4
 
 
 @dataclass(frozen=True)
@@ -206,7 +208,13 @@ class GoalNavigationPlanner:
                 action = f"GOAL_CAMERA90_TURN_{direction}_{count}"
                 reason = "align_goal_yaw_before_fine_approach"
             else:
-                action = "GOAL_CAMERA90_FINE_FORWARD_3"
+                # Enter the scoring band strictly below its upper bound.
+                # Cap each request at four steps, then reobserve the actual depth.
+                remaining_steps = round(
+                    (depth - GOAL_SCORE_MAX_DEPTH_M) / GOAL_FINE_STEP_DISTANCE_M, 9,
+                )
+                count = min(GOAL_FINE_MAX_REPEATS, max(1, math.floor(remaining_steps) + 1))
+                action = f"GOAL_CAMERA90_FINE_FORWARD_{count}"
                 reason = "approach_goal_by_depth"
         elif depth > GOAL_FINE_APPROACH_MAX_DEPTH_M:
             # The board is elevated: use its measured X/Z, not a floor-ray

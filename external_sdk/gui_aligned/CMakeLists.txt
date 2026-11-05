@@ -103,3 +103,9 @@ add_executable(test_forward_timing test_forward_timing.cpp)
 target_link_libraries(test_forward_timing PRIVATE motion_player_core)
 target_compile_options(test_forward_timing PRIVATE -UNDEBUG)
 add_test(NAME forward_timing_contract COMMAND test_forward_timing ${CMAKE_CURRENT_BINARY_DIR})
+
+add_executable(test_ball_fine_queue test_ball_fine_queue.cpp)
+target_link_libraries(test_ball_fine_queue PRIVATE motion_player_core)
+target_compile_options(test_ball_fine_queue PRIVATE -UNDEBUG)
+add_test(NAME ball_fine_queue_contract COMMAND test_ball_fine_queue
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/robot_motions_runtime.json)

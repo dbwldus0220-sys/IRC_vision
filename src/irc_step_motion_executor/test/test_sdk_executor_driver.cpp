@@ -216,4 +216,27 @@ TEST(SdkExecutorDriver, BackendExceptionPublishesFailedWithoutEscaping)
     "BACKEND_EXCEPTION");
 }
 
+TEST(SdkExecutorDriver, ThirdMotionCameraStartsAtQueueBoundaryWithoutAnotherBackendPoll)
+{
+  DriverFixture fixture;
+  fixture.backend.queue_result = {true, "", "queued"};
+  fixture.driver.handle_request(request_json(2, "forward"));
+  auto third = request_json(3, "forward");
+  third.insert(third.size() - 1, ",\"goal_head_prepare_id\":3");
+  fixture.driver.handle_request(third);
+  ASSERT_EQ(fixture.published.size(), 2U);
+  EXPECT_EQ(string_field(fixture.published.back(), "status"), "QUEUED");
+  EXPECT_FALSE(fixture.core.take_queue_activation_status().has_value());
+  fixture.backend.sequence = 1;
+  fixture.driver.poll();
+  ASSERT_EQ(fixture.published.size(), 4U);
+  EXPECT_EQ(string_field(fixture.published[2], "status"), "SUCCEEDED");
+  EXPECT_EQ(int_field(fixture.published[2], "request_id"), 2);
+  EXPECT_EQ(string_field(fixture.published[3], "status"), "RUNNING");
+  EXPECT_EQ(int_field(fixture.published[3], "request_id"), 3);
+  EXPECT_EQ(int_field(fixture.published[3], "goal_head_prepare_id"), 3);
+  EXPECT_EQ(fixture.backend.poll_calls, 1);
+  EXPECT_FALSE(fixture.core.take_queue_activation_status().has_value());
+}
+
 }  // namespace

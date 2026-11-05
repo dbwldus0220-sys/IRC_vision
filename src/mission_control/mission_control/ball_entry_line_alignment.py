@@ -11,7 +11,6 @@ from .motion_decision_planner import MotionDecision, MotionDecisionPlanner
 
 FORWARD_MAX_HEADING_DEG = 15.0
 STATIONARY_MIN_HEADING_DEG = 45.0
-BALL_GROUND_TRACKING_DISTANCE_M = 0.800
 
 
 @dataclass
@@ -22,6 +21,7 @@ class BallEntryLineAlignment:
     state: str = 'IDLE'
     command_id: int | None = None
     queued_command_id: int | None = None
+    ground_tracking_active: bool = False
 
     @property
     def pending(self) -> bool:
@@ -69,6 +69,7 @@ class BallEntryLineAlignment:
         self.state = 'IDLE'
         self.command_id = None
         self.queued_command_id = None
+        self.ground_tracking_active = False
 
     def finish(self) -> None:
         """Finish only between motions; an executing step must complete first."""
@@ -94,8 +95,7 @@ class BallEntryLineAlignment:
             source_command={**command, 'ball_entry_line_alignment': True},
         )
 
-    @staticmethod
-    def _line_command(planner: MotionDecisionPlanner, line_info: dict | None,
+    def _line_command(self, planner: MotionDecisionPlanner, line_info: dict | None,
                       ball_info: dict | None) -> dict:
         line = planner.line_planner
         config = line.config
@@ -111,7 +111,12 @@ class BallEntryLineAlignment:
                 or confidence is None or confidence < ball_config.min_confidence
                 or depth_age is None or not 0 <= depth_age <= ball_config.max_pickup_depth_age_sec):
             return line.stop('ball_entry_waiting_for_valid_far_ball').to_dict()
-        if distance <= BALL_GROUND_TRACKING_DISTANCE_M:
+        ground_forward = number(ball_info, 'ground_forward_distance_m')
+        if (valid_ball_ground_steering(ball_info) is not None
+                and ground_forward is not None and ground_forward > 0.0):
+            self.ground_tracking_active = True
+        # Once acquired, do not steer back toward Line when Ball geometry drops out.
+        if self.ground_tracking_active:
             return BallEntryLineAlignment._ground_ball_command(planner, ball_info, distance)
         if not line_info or line_info.get('detected') is not True:
             return BallEntryLineAlignment._forward_without_line(

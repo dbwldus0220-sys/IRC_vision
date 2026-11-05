@@ -57,7 +57,7 @@ def test_both_pickups_resume_line_then_request_their_own_goal_camera(clock, ball
     assert node.planner.post_ball_line_search_direction == ('RIGHT' if ball_index == 1 else 'LEFT')
     if ball_index == 2:
         assert node.post_ball_goal_camera_request_id is None
-        assert node.post_ball_goal_camera_ready_at is None
+        assert getattr(node, 'post_ball_goal_camera_ready_at', None) is None
         assert node.post_ball_goal_camera_last_sent is None
         assert node.post_ball_goal_preview is None
         assert node.post_ball_goal_handoff_pending is False
@@ -80,45 +80,39 @@ def test_both_pickups_resume_line_then_request_their_own_goal_camera(clock, ball
     assert command['valid'] and command['action'] == action
     assert node.mission_phase == 'LINE_TRACK_AFTER_PICKUP'
     node.send_status(action, command['command_id'], 'RUNNING')
-    started_at = clock[0]
-    assert node.post_ball_line_run_until == started_at + Node.POST_BALL_LINE_RUN_SEC
-
-    if heading != 0.:
-        clock[0] += 1.0
+    assert node.post_ball_line_started_count == 1
+    from test_three_line_goal_handoff import reserve_line
+    for ordinal in (2, 3):
+        following = reserve_line(node, clock)
+        assert following['source_command']['post_pickup_line_index'] == ordinal
+        assert not camera_requests
         node.send_status(action, command['command_id'], 'SUCCEEDED')
-        clock[0] = node.correction_post_motion_dwell_until
-        Node._publish_decision(node)
-        clock[0] += .01
-        receive(node, clock, 'line', line_info())
-        Node._publish_decision(node)
-        command = node.publisher.messages[-1]
-        action = command['action']
-        assert command['valid'] and action == 'STRAIGHT'
+        command, action = following, following['action']
         node.send_status(action, command['command_id'], 'RUNNING')
-        assert node.post_ball_line_run_until == started_at + Node.POST_BALL_LINE_RUN_SEC
-
-    clock[0] = started_at + Node.POST_BALL_GOAL_PREVIEW_START_SEC
-    Node._publish_decision(node)
-    assert len(camera_requests) == 1
-    request_id = camera_requests[0]['request_id']
+        assert node.post_ball_line_started_count == ordinal
+        assert getattr(node, 'correction_post_motion_dwell_until', None) is None
+    request_id = command['source_command']['goal_head_prepare_id']
     assert request_id != 9_000_000_000
-    assert node.post_ball_goal_camera_ready_at is None
+    assert getattr(node, 'post_ball_goal_camera_ready_at', None) is None
     # A delayed acknowledgement from the first ball must not unlock the second.
     Node._executor_heartbeat_callback(node, String(data=json.dumps({
         'sequence': 99, 'goal_head_prepare_id': 9_000_000_000,
         'goal_head_transition_complete': True,
     })))
-    assert node.post_ball_goal_camera_ready_at is None
+    assert getattr(node, 'post_ball_goal_camera_ready_at', None) is None
     clock[0] += .4
     Node._executor_heartbeat_callback(node, String(data=json.dumps({
         'sequence': 100, 'goal_head_prepare_id': request_id,
         'goal_head_transition_complete': True,
     })))
-    clock[0] += .1
-    receive(node, clock, 'goal', goal())
+    for _ in range(3):
+        clock[0] += .1
+        receive(node, clock, 'goal', goal())
     receive(node, clock, 'line', line_info())
     assert node.vision_transport['line']['status'] == 'goal_camera_raised_line_frozen'
     node.send_status(action, command['command_id'], 'SUCCEEDED')
+    goal_command = node.publisher.messages[-1]
+    node.send_status(goal_command['action'], goal_command['command_id'], 'RUNNING')
     assert node.mission_phase == 'GOAL_APPROACH'
     assert node.publisher.messages[-1]['action'] == 'GOAL_CAMERA_90_FORWARD_2'
     assert node.publisher.messages[-1]['valid']
@@ -136,7 +130,7 @@ def test_second_pickup_failure_does_not_enter_line_or_reset_camera(clock, status
 def test_empty_second_pickup_clears_previous_camera_and_accepts_line(clock):
     node = finish_pickup(2, grasp='NOT_GRABBED')
     assert node.post_ball_goal_camera_request_id is None
-    assert node.post_ball_goal_camera_ready_at is None
+    assert getattr(node, 'post_ball_goal_camera_ready_at', None) is None
     assert node.post_ball_goal_camera_last_sent is None
     receive(node, clock, 'line', line_info())
     Node._publish_decision(node)

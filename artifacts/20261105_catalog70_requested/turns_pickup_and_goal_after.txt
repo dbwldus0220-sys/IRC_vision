@@ -1,0 +1,457 @@
+........................................................................ [ 25%]
+.............................................FF...................FFFFFF [ 50%]
+.F..FF.........................................F................F....... [ 75%]
+......................................................................F  [100%]
+=================================== FAILURES ===================================
+_ test_goal_close_and_far_alignment_share_all_boundaries[1.2-LEFT--1-boundaries0] _
+
+direction = 'LEFT', sign = -1
+boundaries = [(0.0, 0), (7.999, 0), (8.0, 1), (29.999, 1), (30.0, 2), (44.999, 2), ...]
+depth = 1.2
+
+    @pytest.mark.parametrize('direction,sign,boundaries', [
+        ('LEFT', -1, LEFT_BOUNDARIES), ('RIGHT', 1, BOUNDARIES),
+    ])
+    @pytest.mark.parametrize('depth', [.43, 1.2])
+    def test_goal_close_and_far_alignment_share_all_boundaries(direction, sign, boundaries, depth):
+        for angle, count in boundaries:
+            decision = MotionDecisionPlanner().plan('GOAL_APPROACH', observations(goal=goal_info(
+                depth_m=depth, offset_x_px=sign * 384, offset_x_norm=sign * .6,
+                bearing_deg=sign * angle, score_now=False,
+            )), .1)
+            if count:
+>               assert decision.action == f'GOAL_CAMERA90_TURN_{direction}_{count}'
+E               AssertionError: assert 'GOAL_CAMERA_90_FORWARD_2' == 'GOAL_CAMERA90_TURN_LEFT_1'
+E                 - GOAL_CAMERA90_TURN_LEFT_1
+E                 + GOAL_CAMERA_90_FORWARD_2
+
+src/mission_control/test/test_right_turn_bins.py:50: AssertionError
+_ test_goal_close_and_far_alignment_share_all_boundaries[1.2-RIGHT-1-boundaries1] _
+
+direction = 'RIGHT', sign = 1
+boundaries = [(0.0, 0), (14.999, 0), (15.0, 1), (29.999, 1), (30.0, 3), (44.999, 3), ...]
+depth = 1.2
+
+    @pytest.mark.parametrize('direction,sign,boundaries', [
+        ('LEFT', -1, LEFT_BOUNDARIES), ('RIGHT', 1, BOUNDARIES),
+    ])
+    @pytest.mark.parametrize('depth', [.43, 1.2])
+    def test_goal_close_and_far_alignment_share_all_boundaries(direction, sign, boundaries, depth):
+        for angle, count in boundaries:
+            decision = MotionDecisionPlanner().plan('GOAL_APPROACH', observations(goal=goal_info(
+                depth_m=depth, offset_x_px=sign * 384, offset_x_norm=sign * .6,
+                bearing_deg=sign * angle, score_now=False,
+            )), .1)
+            if count:
+>               assert decision.action == f'GOAL_CAMERA90_TURN_{direction}_{count}'
+E               AssertionError: assert 'GOAL_CAMERA9...COVER_RIGHT_4' == 'GOAL_CAMERA90_TURN_RIGHT_1'
+E                 - GOAL_CAMERA90_TURN_RIGHT_1
+E                 ?               -- ^       ^
+E                 + GOAL_CAMERA90_RECOVER_RIGHT_4
+E                 ?                ^^^^^^       ^
+
+src/mission_control/test/test_right_turn_bins.py:50: AssertionError
+_____ test_right_boundaries_reach_ball_pickup_goal_and_line_routes[15.0-1] _____
+
+angle = 15.0, count = 1
+
+    @pytest.mark.parametrize('angle,count', BOUNDARIES)
+    def test_right_boundaries_reach_ball_pickup_goal_and_line_routes(angle, count):
+        planner = MotionDecisionPlanner()
+        for selector in (planner._turn_repeat_count, planner._ball_turn_repeat_count,
+                         planner._goal_turn_repeat_count):
+            assert selector(angle, 'RIGHT') == count
+        ball = ball_info(steering_angle_deg=angle, bearing_deg=angle,
+                         depth_m=.8, distance_m=.8, bottom_distance_px=500,
+                         offset_x_px=0, offset_x_norm=.06)
+        pickup = {**ball, 'depth_m': .5, 'distance_m': .5, 'ground_distance_m': .5}
+        decisions = [
+            (planner.plan('BALL_APPROACH', observations(ball=ball), .1), 'BALL_APPROACH'),
+            (planner.plan_ball_pickup_initial_alignment(pickup), 'BALL_PICKUP_CAMERA_DOWN'),
+            (planner.plan_ball_pickup_fine_alignment(pickup), 'BALL_PICKUP_FINE'),
+            (MotionDecisionPlanner().plan('GOAL_APPROACH', observations(goal=goal_info(
+                depth_m=1.2, bearing_deg=angle)), .1), 'GOAL_CAMERA90'),
+            (MotionDecisionPlanner().plan('POST_SHOT_LINE_ALIGN', observations(line=line_info(
+                ground_heading_error_deg=angle)), .1), 'POST_SHOT_LINE'),
+        ]
+        for decision, prefix in decisions:
+            if count == 0:
+                assert 'TURN_RIGHT' not in decision.action
+            else:
+>               assert decision.action == f'{prefix}_TURN_RIGHT_{count}'
+E               AssertionError: assert 'GOAL_CAMERA9...COVER_RIGHT_4' == 'GOAL_CAMERA90_TURN_RIGHT_1'
+E                 - GOAL_CAMERA90_TURN_RIGHT_1
+E                 ?               -- ^       ^
+E                 + GOAL_CAMERA90_RECOVER_RIGHT_4
+E                 ?                ^^^^^^       ^
+
+src/mission_control/test/test_right_turn_bins.py:130: AssertionError
+____ test_right_boundaries_reach_ball_pickup_goal_and_line_routes[29.999-1] ____
+
+angle = 29.999, count = 1
+
+    @pytest.mark.parametrize('angle,count', BOUNDARIES)
+    def test_right_boundaries_reach_ball_pickup_goal_and_line_routes(angle, count):
+        planner = MotionDecisionPlanner()
+        for selector in (planner._turn_repeat_count, planner._ball_turn_repeat_count,
+                         planner._goal_turn_repeat_count):
+            assert selector(angle, 'RIGHT') == count
+        ball = ball_info(steering_angle_deg=angle, bearing_deg=angle,
+                         depth_m=.8, distance_m=.8, bottom_distance_px=500,
+                         offset_x_px=0, offset_x_norm=.06)
+        pickup = {**ball, 'depth_m': .5, 'distance_m': .5, 'ground_distance_m': .5}
+        decisions = [
+            (planner.plan('BALL_APPROACH', observations(ball=ball), .1), 'BALL_APPROACH'),
+            (planner.plan_ball_pickup_initial_alignment(pickup), 'BALL_PICKUP_CAMERA_DOWN'),
+            (planner.plan_ball_pickup_fine_alignment(pickup), 'BALL_PICKUP_FINE'),
+            (MotionDecisionPlanner().plan('GOAL_APPROACH', observations(goal=goal_info(
+                depth_m=1.2, bearing_deg=angle)), .1), 'GOAL_CAMERA90'),
+            (MotionDecisionPlanner().plan('POST_SHOT_LINE_ALIGN', observations(line=line_info(
+                ground_heading_error_deg=angle)), .1), 'POST_SHOT_LINE'),
+        ]
+        for decision, prefix in decisions:
+            if count == 0:
+                assert 'TURN_RIGHT' not in decision.action
+            else:
+>               assert decision.action == f'{prefix}_TURN_RIGHT_{count}'
+E               AssertionError: assert 'GOAL_CAMERA90_TURN_RIGHT_5' == 'GOAL_CAMERA90_TURN_RIGHT_1'
+E                 - GOAL_CAMERA90_TURN_RIGHT_1
+E                 ?                          ^
+E                 + GOAL_CAMERA90_TURN_RIGHT_5
+E                 ?                          ^
+
+src/mission_control/test/test_right_turn_bins.py:130: AssertionError
+_____ test_right_boundaries_reach_ball_pickup_goal_and_line_routes[30.0-3] _____
+
+angle = 30.0, count = 3
+
+    @pytest.mark.parametrize('angle,count', BOUNDARIES)
+    def test_right_boundaries_reach_ball_pickup_goal_and_line_routes(angle, count):
+        planner = MotionDecisionPlanner()
+        for selector in (planner._turn_repeat_count, planner._ball_turn_repeat_count,
+                         planner._goal_turn_repeat_count):
+            assert selector(angle, 'RIGHT') == count
+        ball = ball_info(steering_angle_deg=angle, bearing_deg=angle,
+                         depth_m=.8, distance_m=.8, bottom_distance_px=500,
+                         offset_x_px=0, offset_x_norm=.06)
+        pickup = {**ball, 'depth_m': .5, 'distance_m': .5, 'ground_distance_m': .5}
+        decisions = [
+            (planner.plan('BALL_APPROACH', observations(ball=ball), .1), 'BALL_APPROACH'),
+            (planner.plan_ball_pickup_initial_alignment(pickup), 'BALL_PICKUP_CAMERA_DOWN'),
+            (planner.plan_ball_pickup_fine_alignment(pickup), 'BALL_PICKUP_FINE'),
+            (MotionDecisionPlanner().plan('GOAL_APPROACH', observations(goal=goal_info(
+                depth_m=1.2, bearing_deg=angle)), .1), 'GOAL_CAMERA90'),
+            (MotionDecisionPlanner().plan('POST_SHOT_LINE_ALIGN', observations(line=line_info(
+                ground_heading_error_deg=angle)), .1), 'POST_SHOT_LINE'),
+        ]
+        for decision, prefix in decisions:
+            if count == 0:
+                assert 'TURN_RIGHT' not in decision.action
+            else:
+>               assert decision.action == f'{prefix}_TURN_RIGHT_{count}'
+E               AssertionError: assert 'GOAL_CAMERA90_TURN_RIGHT_5' == 'GOAL_CAMERA90_TURN_RIGHT_3'
+E                 - GOAL_CAMERA90_TURN_RIGHT_3
+E                 ?                          ^
+E                 + GOAL_CAMERA90_TURN_RIGHT_5
+E                 ?                          ^
+
+src/mission_control/test/test_right_turn_bins.py:130: AssertionError
+____ test_right_boundaries_reach_ball_pickup_goal_and_line_routes[44.999-3] ____
+
+angle = 44.999, count = 3
+
+    @pytest.mark.parametrize('angle,count', BOUNDARIES)
+    def test_right_boundaries_reach_ball_pickup_goal_and_line_routes(angle, count):
+        planner = MotionDecisionPlanner()
+        for selector in (planner._turn_repeat_count, planner._ball_turn_repeat_count,
+                         planner._goal_turn_repeat_count):
+            assert selector(angle, 'RIGHT') == count
+        ball = ball_info(steering_angle_deg=angle, bearing_deg=angle,
+                         depth_m=.8, distance_m=.8, bottom_distance_px=500,
+                         offset_x_px=0, offset_x_norm=.06)
+        pickup = {**ball, 'depth_m': .5, 'distance_m': .5, 'ground_distance_m': .5}
+        decisions = [
+            (planner.plan('BALL_APPROACH', observations(ball=ball), .1), 'BALL_APPROACH'),
+            (planner.plan_ball_pickup_initial_alignment(pickup), 'BALL_PICKUP_CAMERA_DOWN'),
+            (planner.plan_ball_pickup_fine_alignment(pickup), 'BALL_PICKUP_FINE'),
+            (MotionDecisionPlanner().plan('GOAL_APPROACH', observations(goal=goal_info(
+                depth_m=1.2, bearing_deg=angle)), .1), 'GOAL_CAMERA90'),
+            (MotionDecisionPlanner().plan('POST_SHOT_LINE_ALIGN', observations(line=line_info(
+                ground_heading_error_deg=angle)), .1), 'POST_SHOT_LINE'),
+        ]
+        for decision, prefix in decisions:
+            if count == 0:
+                assert 'TURN_RIGHT' not in decision.action
+            else:
+>               assert decision.action == f'{prefix}_TURN_RIGHT_{count}'
+E               AssertionError: assert 'GOAL_CAMERA90_TURN_RIGHT_6' == 'GOAL_CAMERA90_TURN_RIGHT_3'
+E                 - GOAL_CAMERA90_TURN_RIGHT_3
+E                 ?                          ^
+E                 + GOAL_CAMERA90_TURN_RIGHT_6
+E                 ?                          ^
+
+src/mission_control/test/test_right_turn_bins.py:130: AssertionError
+_____ test_right_boundaries_reach_ball_pickup_goal_and_line_routes[45.0-5] _____
+
+angle = 45.0, count = 5
+
+    @pytest.mark.parametrize('angle,count', BOUNDARIES)
+    def test_right_boundaries_reach_ball_pickup_goal_and_line_routes(angle, count):
+        planner = MotionDecisionPlanner()
+        for selector in (planner._turn_repeat_count, planner._ball_turn_repeat_count,
+                         planner._goal_turn_repeat_count):
+            assert selector(angle, 'RIGHT') == count
+        ball = ball_info(steering_angle_deg=angle, bearing_deg=angle,
+                         depth_m=.8, distance_m=.8, bottom_distance_px=500,
+                         offset_x_px=0, offset_x_norm=.06)
+        pickup = {**ball, 'depth_m': .5, 'distance_m': .5, 'ground_distance_m': .5}
+        decisions = [
+            (planner.plan('BALL_APPROACH', observations(ball=ball), .1), 'BALL_APPROACH'),
+            (planner.plan_ball_pickup_initial_alignment(pickup), 'BALL_PICKUP_CAMERA_DOWN'),
+            (planner.plan_ball_pickup_fine_alignment(pickup), 'BALL_PICKUP_FINE'),
+            (MotionDecisionPlanner().plan('GOAL_APPROACH', observations(goal=goal_info(
+                depth_m=1.2, bearing_deg=angle)), .1), 'GOAL_CAMERA90'),
+            (MotionDecisionPlanner().plan('POST_SHOT_LINE_ALIGN', observations(line=line_info(
+                ground_heading_error_deg=angle)), .1), 'POST_SHOT_LINE'),
+        ]
+        for decision, prefix in decisions:
+            if count == 0:
+                assert 'TURN_RIGHT' not in decision.action
+            else:
+>               assert decision.action == f'{prefix}_TURN_RIGHT_{count}'
+E               AssertionError: assert 'GOAL_CAMERA90_TURN_RIGHT_6' == 'GOAL_CAMERA90_TURN_RIGHT_5'
+E                 - GOAL_CAMERA90_TURN_RIGHT_5
+E                 ?                          ^
+E                 + GOAL_CAMERA90_TURN_RIGHT_6
+E                 ?                          ^
+
+src/mission_control/test/test_right_turn_bins.py:130: AssertionError
+____ test_right_boundaries_reach_ball_pickup_goal_and_line_routes[59.999-5] ____
+
+angle = 59.999, count = 5
+
+    @pytest.mark.parametrize('angle,count', BOUNDARIES)
+    def test_right_boundaries_reach_ball_pickup_goal_and_line_routes(angle, count):
+        planner = MotionDecisionPlanner()
+        for selector in (planner._turn_repeat_count, planner._ball_turn_repeat_count,
+                         planner._goal_turn_repeat_count):
+            assert selector(angle, 'RIGHT') == count
+        ball = ball_info(steering_angle_deg=angle, bearing_deg=angle,
+                         depth_m=.8, distance_m=.8, bottom_distance_px=500,
+                         offset_x_px=0, offset_x_norm=.06)
+        pickup = {**ball, 'depth_m': .5, 'distance_m': .5, 'ground_distance_m': .5}
+        decisions = [
+            (planner.plan('BALL_APPROACH', observations(ball=ball), .1), 'BALL_APPROACH'),
+            (planner.plan_ball_pickup_initial_alignment(pickup), 'BALL_PICKUP_CAMERA_DOWN'),
+            (planner.plan_ball_pickup_fine_alignment(pickup), 'BALL_PICKUP_FINE'),
+            (MotionDecisionPlanner().plan('GOAL_APPROACH', observations(goal=goal_info(
+                depth_m=1.2, bearing_deg=angle)), .1), 'GOAL_CAMERA90'),
+            (MotionDecisionPlanner().plan('POST_SHOT_LINE_ALIGN', observations(line=line_info(
+                ground_heading_error_deg=angle)), .1), 'POST_SHOT_LINE'),
+        ]
+        for decision, prefix in decisions:
+            if count == 0:
+                assert 'TURN_RIGHT' not in decision.action
+            else:
+>               assert decision.action == f'{prefix}_TURN_RIGHT_{count}'
+E               AssertionError: assert 'GOAL_CAMERA90_TURN_RIGHT_6' == 'GOAL_CAMERA90_TURN_RIGHT_5'
+E                 - GOAL_CAMERA90_TURN_RIGHT_5
+E                 ?                          ^
+E                 + GOAL_CAMERA90_TURN_RIGHT_6
+E                 ?                          ^
+
+src/mission_control/test/test_right_turn_bins.py:130: AssertionError
+____ test_right_boundaries_reach_ball_pickup_goal_and_line_routes[74.999-6] ____
+
+angle = 74.999, count = 6
+
+    @pytest.mark.parametrize('angle,count', BOUNDARIES)
+    def test_right_boundaries_reach_ball_pickup_goal_and_line_routes(angle, count):
+        planner = MotionDecisionPlanner()
+        for selector in (planner._turn_repeat_count, planner._ball_turn_repeat_count,
+                         planner._goal_turn_repeat_count):
+            assert selector(angle, 'RIGHT') == count
+        ball = ball_info(steering_angle_deg=angle, bearing_deg=angle,
+                         depth_m=.8, distance_m=.8, bottom_distance_px=500,
+                         offset_x_px=0, offset_x_norm=.06)
+        pickup = {**ball, 'depth_m': .5, 'distance_m': .5, 'ground_distance_m': .5}
+        decisions = [
+            (planner.plan('BALL_APPROACH', observations(ball=ball), .1), 'BALL_APPROACH'),
+            (planner.plan_ball_pickup_initial_alignment(pickup), 'BALL_PICKUP_CAMERA_DOWN'),
+            (planner.plan_ball_pickup_fine_alignment(pickup), 'BALL_PICKUP_FINE'),
+            (MotionDecisionPlanner().plan('GOAL_APPROACH', observations(goal=goal_info(
+                depth_m=1.2, bearing_deg=angle)), .1), 'GOAL_CAMERA90'),
+            (MotionDecisionPlanner().plan('POST_SHOT_LINE_ALIGN', observations(line=line_info(
+                ground_heading_error_deg=angle)), .1), 'POST_SHOT_LINE'),
+        ]
+        for decision, prefix in decisions:
+            if count == 0:
+                assert 'TURN_RIGHT' not in decision.action
+            else:
+>               assert decision.action == f'{prefix}_TURN_RIGHT_{count}'
+E               AssertionError: assert 'GOAL_CAMERA90_TURN_RIGHT_7' == 'GOAL_CAMERA90_TURN_RIGHT_6'
+E                 - GOAL_CAMERA90_TURN_RIGHT_6
+E                 ?                          ^
+E                 + GOAL_CAMERA90_TURN_RIGHT_7
+E                 ?                          ^
+
+src/mission_control/test/test_right_turn_bins.py:130: AssertionError
+_____ test_right_boundaries_reach_ball_pickup_goal_and_line_routes[90.0-9] _____
+
+angle = 90.0, count = 9
+
+    @pytest.mark.parametrize('angle,count', BOUNDARIES)
+    def test_right_boundaries_reach_ball_pickup_goal_and_line_routes(angle, count):
+        planner = MotionDecisionPlanner()
+        for selector in (planner._turn_repeat_count, planner._ball_turn_repeat_count,
+                         planner._goal_turn_repeat_count):
+            assert selector(angle, 'RIGHT') == count
+        ball = ball_info(steering_angle_deg=angle, bearing_deg=angle,
+                         depth_m=.8, distance_m=.8, bottom_distance_px=500,
+                         offset_x_px=0, offset_x_norm=.06)
+        pickup = {**ball, 'depth_m': .5, 'distance_m': .5, 'ground_distance_m': .5}
+        decisions = [
+            (planner.plan('BALL_APPROACH', observations(ball=ball), .1), 'BALL_APPROACH'),
+            (planner.plan_ball_pickup_initial_alignment(pickup), 'BALL_PICKUP_CAMERA_DOWN'),
+            (planner.plan_ball_pickup_fine_alignment(pickup), 'BALL_PICKUP_FINE'),
+            (MotionDecisionPlanner().plan('GOAL_APPROACH', observations(goal=goal_info(
+                depth_m=1.2, bearing_deg=angle)), .1), 'GOAL_CAMERA90'),
+            (MotionDecisionPlanner().plan('POST_SHOT_LINE_ALIGN', observations(line=line_info(
+                ground_heading_error_deg=angle)), .1), 'POST_SHOT_LINE'),
+        ]
+        for decision, prefix in decisions:
+            if count == 0:
+                assert 'TURN_RIGHT' not in decision.action
+            else:
+>               assert decision.action == f'{prefix}_TURN_RIGHT_{count}'
+E               AssertionError: assert 'WAIT' == 'GOAL_CAMERA90_TURN_RIGHT_9'
+E                 - GOAL_CAMERA90_TURN_RIGHT_9
+E                 + WAIT
+
+src/mission_control/test/test_right_turn_bins.py:130: AssertionError
+____ test_right_boundaries_reach_ball_pickup_goal_and_line_routes[180.0-9] _____
+
+angle = 180.0, count = 9
+
+    @pytest.mark.parametrize('angle,count', BOUNDARIES)
+    def test_right_boundaries_reach_ball_pickup_goal_and_line_routes(angle, count):
+        planner = MotionDecisionPlanner()
+        for selector in (planner._turn_repeat_count, planner._ball_turn_repeat_count,
+                         planner._goal_turn_repeat_count):
+            assert selector(angle, 'RIGHT') == count
+        ball = ball_info(steering_angle_deg=angle, bearing_deg=angle,
+                         depth_m=.8, distance_m=.8, bottom_distance_px=500,
+                         offset_x_px=0, offset_x_norm=.06)
+        pickup = {**ball, 'depth_m': .5, 'distance_m': .5, 'ground_distance_m': .5}
+        decisions = [
+            (planner.plan('BALL_APPROACH', observations(ball=ball), .1), 'BALL_APPROACH'),
+            (planner.plan_ball_pickup_initial_alignment(pickup), 'BALL_PICKUP_CAMERA_DOWN'),
+            (planner.plan_ball_pickup_fine_alignment(pickup), 'BALL_PICKUP_FINE'),
+            (MotionDecisionPlanner().plan('GOAL_APPROACH', observations(goal=goal_info(
+                depth_m=1.2, bearing_deg=angle)), .1), 'GOAL_CAMERA90'),
+            (MotionDecisionPlanner().plan('POST_SHOT_LINE_ALIGN', observations(line=line_info(
+                ground_heading_error_deg=angle)), .1), 'POST_SHOT_LINE'),
+        ]
+        for decision, prefix in decisions:
+            if count == 0:
+                assert 'TURN_RIGHT' not in decision.action
+            else:
+>               assert decision.action == f'{prefix}_TURN_RIGHT_{count}'
+E               AssertionError: assert 'WAIT' == 'GOAL_CAMERA90_TURN_RIGHT_9'
+E                 - GOAL_CAMERA90_TURN_RIGHT_9
+E                 + WAIT
+
+src/mission_control/test/test_right_turn_bins.py:130: AssertionError
+________ test_late_invalid_or_changed_target_does_not_reserve[change0] _________
+
+clock = [11.435714285714285], change = {'bottom_distance_px': 270}
+
+    @pytest.mark.parametrize('change', [
+        {'bottom_distance_px': 270}, {'offset_x_px': 80}, {'distance_m': .501},
+        {'depth_valid': False}, {'depth_age_sec': .701}, {'confidence': .1},
+        {'confirmation_confirmed': False}, {'detected': False, 'raw_detected': False},
+    ])
+    def test_late_invalid_or_changed_target_does_not_reserve(clock, change):
+        node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
+        bridge.last_physical_motion_id = 'pickup_fine_forward_0'
+        start(node, bridge, clock)
+        late_frames(node, clock, ball(**change))
+>       assert not node.pickup_walk_reservation.pending
+E       assert not True
+E        +  where True = <mission_control.pickup_walk_reservation.PickupWalkReservation object at 0xffff9572a6b0>.pending
+E        +    where <mission_control.pickup_walk_reservation.PickupWalkReservation object at 0xffff9572a6b0> = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff95729840>.pickup_walk_reservation
+
+src/mission_control/test/test_pickup_continuous_walk.py:112: AssertionError
+_______ test_only_one_queue_and_three_successive_chunks_keep_one_pickup ________
+
+clock = [15.682857142857141]
+
+    def test_only_one_queue_and_three_successive_chunks_keep_one_pickup(clock):
+        node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
+        bridge.last_physical_motion_id = 'pickup_fine_forward_0'
+        parent, current = start(node, bridge, clock)
+        ids = {current['request_id']}
+        for _ in range(3):
+            late_frames(node, clock)
+            command = node.publisher.messages[-1]
+            bridge.navigation_command_callback(String(data=json.dumps(command)))
+            following = decoded_messages(bridge.executor_request_publisher)[-1]
+            assert following['request_id'] not in ids
+            ids.add(following['request_id'])
+            before = len(bridge.executor_request_publisher.messages)
+            bridge.navigation_command_callback(String(data=json.dumps(command)))
+            assert len(bridge.executor_request_publisher.messages) == before
+            forward_status(node, bridge, following, 'QUEUED')
+            forward_status(node, bridge, current, 'SUCCEEDED')
+            forward_status(node, bridge, following, 'RUNNING')
+            assert node.active_special_command_id == parent['command_id']
+            assert node.pickups_completed == 0
+            current = following
+        late_frames(node, clock, ball(bottom_distance_px=270))
+>       assert not node.pickup_walk_reservation.pending
+E       assert not True
+E        +  where True = <mission_control.pickup_walk_reservation.PickupWalkReservation object at 0xffff94f63eb0>.pending
+E        +    where <mission_control.pickup_walk_reservation.PickupWalkReservation object at 0xffff94f63eb0> = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff94f63c40>.pickup_walk_reservation
+
+src/mission_control/test/test_pickup_continuous_walk.py:214: AssertionError
+_________ test_import_preserves_source_targets_and_applies_speed_once __________
+
+    def test_import_preserves_source_targets_and_applies_speed_once():
+        root = Path(__file__).resolve().parents[3]
+        def catalog(relative):
+            return {m['name']: m for m in json.loads((root / relative).read_text())['motions']}
+        source = catalog('artifacts/20261031_catalog64_goal_prepare/source64.json')
+        pc = catalog('artifacts/robot_motions_pc.json')
+        runtime = catalog('artifacts/robot_motions_runtime.json')
+        aliases = yaml.safe_load((root / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']
+        for region in range(1, 5):
+            name = f'R골넣기{region}번구역'
+            assert aliases[f'goal_shot_region_{region}'] == name
+>           assert pc[name] == source[name]
+E           AssertionError: assert {'completion'...s': 7045, ...} == {'completion'...s': 7045, ...}
+E             Omitting 8 identical items, use -vv to show
+E             Differing items:
+E             {'frames': [{'angles': {'0': 1.0, '1': 0.263671875, '10': 0.12109375, '11': 0.47265625, ...}, 'frame_id': '04db93766a0...234375, ...}, 'frame_id': '33793df19f394f76817dac9bfab34294', 'is_important': False, 'lift_early_arrival': True, ...}]} != {'frames': [{'angles': {'0': 1.0, '1': 0.263671875, '10': 0.12109375, '11': 0.47265625, ...}, 'frame_id': '04db93766a0...234375, ...}, 'frame_id': '33793df19f394f76817dac9bfab34294', 'is_important': False, 'lift_early_arrival': True, ...}]}
+E             Full diff:
+E               {
+E                'completion': {'p...
+E             
+E             ...Full output truncated (286 lines hidden), use '-vv' to show
+
+src/mission_control/test/test_goal_shot_regions.py:158: AssertionError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_right_turn_bins.py::test_goal_close_and_far_alignment_share_all_boundaries[1.2-LEFT--1-boundaries0]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_goal_close_and_far_alignment_share_all_boundaries[1.2-RIGHT-1-boundaries1]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[15.0-1]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[29.999-1]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[30.0-3]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[44.999-3]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[45.0-5]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[59.999-5]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[74.999-6]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[90.0-9]
+FAILED src/mission_control/test/test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[180.0-9]
+FAILED src/mission_control/test/test_pickup_continuous_walk.py::test_late_invalid_or_changed_target_does_not_reserve[change0]
+FAILED src/mission_control/test/test_pickup_continuous_walk.py::test_only_one_queue_and_three_successive_chunks_keep_one_pickup
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_import_preserves_source_targets_and_applies_speed_once
+14 failed, 273 passed in 4.51s

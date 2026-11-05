@@ -1,4 +1,4 @@
-"""Exercise forward queueing and the timed post-pickup motion boundary."""
+"""Exercise forward queueing and the counted post-pickup motion boundary."""
 
 from dataclasses import replace
 import json
@@ -16,6 +16,7 @@ from test_motion_command_bridge import FakeBridge, decoded_messages, executor_st
 def clock(monkeypatch):
     now = [10.]
     monkeypatch.setattr('mission_control.motion_decision_node.time.monotonic', lambda: now[0])
+    monkeypatch.setattr(MotionDecisionNode, '_current_ros_time_ns', lambda _: round(now[0] * 1e9))
     return now
 
 
@@ -31,7 +32,10 @@ def start_forward(phase):
 
 def capture(node, clock):
     clock[0] = node.active_line_motion_started_at + node.active_line_motion_duration_sec * .8
-    node.active_line_motion_frames = [line_info() for _ in range(10)]
+    node.active_line_motion_frames = [{**line_info(), 'rgb_stamp_ns': round((clock[0] - .01 * index) * 1e9)}
+                                      for index in reversed(range(10))]
+    node.observations['line'] = node.active_line_motion_frames[-1]
+    node.latest_time['line'] = clock[0]
     MotionDecisionNode._prepare_pending_line_decision(node, clock[0])
 
 
@@ -60,49 +64,30 @@ def test_timed_line_masks_only_the_same_targets_as_mission_selection(clock, sour
     assert MotionDecisionNode._line_only_prequeue_allowed(node, observations) is allowed
 
 
-@pytest.mark.parametrize('remaining,allowed', [(5., True), (2.001, True), (2., False), (.1, False), (-.1, False)])
-def test_no_extra_queue_when_next_forward_would_start_after_camera_raise(clock, remaining, allowed):
-    node, _ = start_forward('LINE_TRACK_AFTER_PICKUP')
-    current_end = node.active_line_motion_started_at + node.active_line_motion_duration_sec
-    node.post_ball_line_run_until = current_end + remaining
+@pytest.mark.parametrize('issued,allowed', [(1, True), (2, True), (3, False)])
+def test_no_fourth_line_command_can_be_reserved(clock, issued, allowed):
+    node, first = start_forward('LINE_TRACK_AFTER_PICKUP')
+    node.post_ball_line_command_ids = [first['command_id'] + i for i in range(issued)]
     capture(node, clock)
     assert (getattr(node, 'queued_general_command_id', None) is not None) is allowed
 
 
-def test_timed_stage_waits_for_already_queued_forward_before_transition(clock):
-    node, first = start_forward('LINE_TRACK_AFTER_PICKUP')
+def test_counted_stage_drains_third_command_before_transition(clock):
+    node, current = start_forward('LINE_TRACK_AFTER_PICKUP')
+    for ordinal in (2, 3):
+        capture(node, clock)
+        following = node.publisher.messages[-1]
+        assert following['source_command']['post_pickup_line_index'] == ordinal
+        clock[0] += 20.  # Elapsed time does not change the decision budget.
+        node.send_status(current['action'], current['command_id'], 'SUCCEEDED')
+        assert node.mission_phase == 'LINE_TRACK_AFTER_PICKUP'
+        node.send_status(following['action'], following['command_id'], 'RUNNING')
+        current = following
     capture(node, clock)
-    second = node.publisher.messages[-1]
-    # A slow executor may finish after the nominal duration. Drain the single
-    # accepted command before Goal control; camera preparation may overlap it.
-    clock[0] = 21.
-    node.send_status(first['action'], first['command_id'], 'SUCCEEDED')
-    MotionDecisionNode._publish_decision(node)
-    assert node.mission_phase == 'LINE_TRACK_AFTER_PICKUP'
-    node.send_status(second['action'], second['command_id'], 'RUNNING')
-    capture(node, clock)
-    assert len(node.publisher.messages) == 2
-    node.send_status(second['action'], second['command_id'], 'SUCCEEDED')
-    MotionDecisionNode._publish_decision(node)
+    assert len(node.publisher.messages) == 3
+    node.send_status(current['action'], current['command_id'], 'SUCCEEDED')
     assert node.mission_phase == 'GOAL_APPROACH'
     assert node.publisher.messages[-1]['action'] == 'WAIT'
-
-
-@pytest.mark.parametrize('action,queued', [
-    ('RIGHT', True), ('LINE_HEADING_TURN_RIGHT_2', False),
-    ('RECOVER_LEFT_TURN_LEFT_4', True),
-])
-def test_timed_queue_only_prequeues_walking_turns(clock, action, queued):
-    node, _ = start_forward('LINE_TRACK_AFTER_PICKUP')
-    decision = replace(node.last_selected_decision, action=action)
-    MotionDecisionNode._publish_decision(node, decision, queue_while_locked=True)
-    assert len(node.publisher.messages) == (2 if queued else 1)
-    queued_id = getattr(node, 'queued_general_command_id', None)
-    if queued:
-        assert node.publisher.messages[-1]['action'] == action
-        assert queued_id == node.publisher.messages[-1]['command_id']
-    else:
-        assert queued_id is None
 
 
 def observe_walk_end(node, clock, info):
@@ -224,6 +209,8 @@ def test_reservation_requires_fresh_camera_capture(clock, monkeypatch, age):
     info = {**line_info(), 'rgb_stamp_ns': round((clock[0] - age) * 1e9)}
     node.latest_info['line'] = info
     node.active_line_motion_frames = [info] * 10
+    node.observations['line'] = node.active_line_motion_frames[-1]
+    node.latest_time['line'] = clock[0]
     MotionDecisionNode._prepare_pending_line_decision(node, clock[0])
     assert getattr(node, 'queued_general_command_id', None) is None
 

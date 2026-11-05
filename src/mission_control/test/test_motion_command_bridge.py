@@ -859,8 +859,8 @@ def test_pickup_waits_locally_for_incompatible_active_motion_to_finish():
 
 
 @pytest.mark.parametrize("completed,exit_id,exit_name", [
-    (0, "pickup_first_backward_turn_right", "R후진에서제자리우회전(공)"),
-    (1, "pickup_second_backward_turn_left", "R후진에서 제자리 좌회전"),
+    (0, "pickup_first_backward_turn_right", "t공후 제자리우회전"),
+    (1, "pickup_second_backward_turn_left", "t공후 제자리좌회전"),
 ])
 def test_grasp_check_connects_directly_to_requested_exit_composite(completed, exit_id, exit_name):
     from pathlib import Path
@@ -2118,6 +2118,10 @@ def test_pickup_distance_decisions_repeat_fine_then_crab_then_backward():
     bridge.navigation_command_callback(
         fine_alignment_message(decision.action, command_id=8104)
     )
+    assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == "pickup_crab_right_to_fine_0"
+    bridge.executor_status_callback(executor_status(
+        status="SUCCEEDED", motion_id="pickup_crab_right_to_fine_0",
+    ))
     assert bridge.pickup_fixed_sequence_started is True
     assert decoded_messages(bridge.executor_request_publisher)[-1][
         "motion_id"
@@ -2224,6 +2228,10 @@ def test_pickup_crab_repeats_without_limit_until_pixel_window_is_met():
         )
     )
 
+    assert decoded_messages(bridge.executor_request_publisher)[-1]["motion_id"] == "pickup_crab_right_to_fine_0"
+    bridge.executor_status_callback(executor_status(
+        status="SUCCEEDED", motion_id="pickup_crab_right_to_fine_0",
+    ))
     motion_ids = [
         request["motion_id"]
         for request in decoded_messages(bridge.executor_request_publisher)
@@ -2566,7 +2574,8 @@ def test_camera_transition_cannot_start_while_line_motion_is_running():
 
 
 @pytest.mark.parametrize("stage", ["INITIAL", "FINE"])
-def test_close_ball_backward_runs_once_per_checkpoint_and_preserves_pickup_tail(stage):
+@pytest.mark.parametrize("suffix", ["SEARCH_BACKWARD", "BACKWARD"])
+def test_close_ball_backward_runs_once_per_checkpoint_and_preserves_pickup_tail(stage, suffix):
     bridge = FakeBridge()
     if stage == "FINE":
         enter_pickup_fine_alignment(bridge)
@@ -2575,7 +2584,7 @@ def test_close_ball_backward_runs_once_per_checkpoint_and_preserves_pickup_tail(
         bridge._check_atomic_dwell(bridge.pickup_initial_align_dwell_until)
     original_tail = bridge.active_pickup_sequence
     original_index = bridge.active_sequence_index
-    action = f"BALL_PICKUP_{stage}_SEARCH_BACKWARD"
+    action = f"BALL_PICKUP_{stage}_{suffix}"
     motion = "pickup_lost_ball_backward_1"
     for command_id in (8200, 8202):
         before = len(bridge.executor_request_publisher.messages)
@@ -2605,7 +2614,8 @@ def test_close_ball_backward_runs_once_per_checkpoint_and_preserves_pickup_tail(
 
 @pytest.mark.parametrize("stage", ["INITIAL", "FINE"])
 @pytest.mark.parametrize("status", ["FAILED", "TIMEOUT", "CANCELLED"])
-def test_close_ball_backward_failure_does_not_repeat_or_start_grasp(stage, status):
+@pytest.mark.parametrize("suffix", ["SEARCH_BACKWARD", "BACKWARD"])
+def test_close_ball_backward_failure_does_not_repeat_or_start_grasp(stage, status, suffix):
     bridge = FakeBridge()
     if stage == "FINE":
         enter_pickup_fine_alignment(bridge)
@@ -2613,14 +2623,14 @@ def test_close_ball_backward_failure_does_not_repeat_or_start_grasp(stage, statu
         bridge.navigation_command_callback(navigation_message(action="PICKUP_NOW"))
         bridge._check_atomic_dwell(bridge.pickup_initial_align_dwell_until)
     bridge.navigation_command_callback(fine_alignment_message(
-        f"BALL_PICKUP_{stage}_SEARCH_BACKWARD", 8200,
+        f"BALL_PICKUP_{stage}_{suffix}", 8200,
     ))
     before = len(bridge.executor_request_publisher.messages)
     complete_active_motion(bridge, status=status)
     assert not bridge.motion_in_progress
     assert bridge.active_dwell_until is None
     bridge.navigation_command_callback(fine_alignment_message(
-        f"BALL_PICKUP_{stage}_SEARCH_BACKWARD", 8201,
+        f"BALL_PICKUP_{stage}_{suffix}", 8201,
     ))
     assert len(bridge.executor_request_publisher.messages) == before
 

@@ -240,6 +240,9 @@ std::string CatalogOnlyCore::to_json(const MotionStatus & status)
   add_optional_string(object, "action", status.action);
   add_optional_int(object, "command_id", status.command_id);
   add_optional_int(object, "event_id", status.event_id);
+  if (status.goal_head_prepare_id) {
+    add_optional_int(object, "goal_head_prepare_id", status.goal_head_prepare_id);
+  }
   json_object_object_add(
     object, "request_id", json_object_new_int64(status.request_id));
   json_object_object_add(

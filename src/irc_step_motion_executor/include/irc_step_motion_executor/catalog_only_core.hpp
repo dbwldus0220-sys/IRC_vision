@@ -16,6 +16,7 @@ struct MotionRequest
   std::optional<std::int64_t> command_id;
   std::optional<std::int64_t> event_id;
   std::optional<std::string> action;
+  std::optional<std::int64_t> goal_head_prepare_id;
 };
 
 struct MotionStatus
@@ -28,6 +29,7 @@ struct MotionStatus
   std::string motion_id;
   std::string error_code;
   std::string message;
+  std::optional<std::int64_t> goal_head_prepare_id;
 };
 
 class MotionAliasCatalog

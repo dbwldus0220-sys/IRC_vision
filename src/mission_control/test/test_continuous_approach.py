@@ -230,16 +230,16 @@ def test_bridge_reports_actual_goal_preparation_before_walking():
     assert status['motion_id'] == 'goal_fine_prepare_90'
 
 
-@pytest.mark.parametrize('blocker', ['turn', 'invalid', 'deadline'])
-def test_offset_forward_reservation_respects_new_geometry_and_timed_exit(clock, blocker):
+@pytest.mark.parametrize('blocker', ['turn', 'invalid', 'count_exhausted'])
+def test_offset_forward_reservation_respects_geometry_and_count_limit(clock, blocker):
     node = LiveInputHarness(phase='LINE_TRACK_AFTER_PICKUP')
     aligned = sample(target_angle=0., ground_heading_error_deg=-30.)
     fresh(node, clock, 'line', aligned)
     first = node.publisher.messages[-1]
     node.send_status(first['action'], first['command_id'], 'RUNNING')
     clock[0] += .7
-    if blocker == 'deadline':
-        node.post_ball_line_run_until = clock[0] + .4
+    if blocker == 'count_exhausted':
+        node.post_ball_line_command_ids = [1, 2, 3]
         next_line = aligned
     elif blocker == 'turn':
         next_line = sample(target_angle=25., ground_heading_error_deg=-10.)
@@ -247,7 +247,10 @@ def test_offset_forward_reservation_respects_new_geometry_and_timed_exit(clock, 
         next_line = {**aligned, 'ground_projection_valid': False}
     for _ in range(6):
         fresh(node, clock, 'line', next_line, plan=False)
-    assert getattr(node, 'queued_general_command_id', None) is None
+    if blocker == 'turn':
+        assert node.queued_general_action.startswith('LINE_OFFSET_TURN_')
+    else:
+        assert getattr(node, 'queued_general_command_id', None) is None
 
 
 @pytest.mark.parametrize('phase', ['AUTO', 'LINE_TRACK', 'LINE_TRACK_AFTER_PICKUP'])
@@ -257,7 +260,6 @@ def test_walking_boundary_keeps_recent_corner_frame_without_another_capture(cloc
     node = LiveInputHarness(phase=phase)
     node.planner.line_planner.config = replace(
         node.planner.line_planner.config, direction_confirmation_frames=1)
-    node.post_ball_line_run_until = clock[0] + 30.
     initial = line_info(heading=-20., offset=-.3) if recovery else line_info()
     fresh(node, clock, 'line', initial)
     first = node.publisher.messages[-1]
@@ -295,20 +297,21 @@ def test_walking_boundary_still_rejects_expired_or_future_corner_capture(clock, 
 
 
 @pytest.mark.parametrize('start_recovery', [False, True])
-@pytest.mark.parametrize('deadline_fits', [False, True])
-def test_post_pickup_prequeue_includes_walking_recovery_in_both_directions(clock, start_recovery, deadline_fits):
+@pytest.mark.parametrize('decision_available', [False, True])
+def test_post_pickup_prequeue_includes_walking_recovery_in_both_directions(clock, start_recovery, decision_available):
     node = LiveInputHarness(phase='LINE_TRACK_AFTER_PICKUP')
     recovery = line_info(heading=-20., offset=-.3)
     fresh(node, clock, 'line', recovery if start_recovery else line_info())
     first = node.publisher.messages[-1]
     node.send_status(first['action'], first['command_id'], 'RUNNING')
     clock[0] = node.active_line_motion_started_at + node.active_line_motion_duration_sec * .75
-    node.post_ball_line_run_until = clock[0] + (30. if deadline_fits else .2)
+    if not decision_available:
+        node.post_ball_line_command_ids = [1, 2, 3]
     for _ in range(16):
         fresh(node, clock, 'line', line_info() if start_recovery else recovery, plan=False)
     queued = getattr(node, 'queued_general_command_id', None)
-    assert (queued is not None) is deadline_fits
-    if deadline_fits:
+    assert (queued is not None) is decision_available
+    if decision_available:
         assert node.publisher.messages[-1]['action'] == (
             'STRAIGHT' if start_recovery else 'RECOVER_LEFT_TURN_LEFT_4'
         )

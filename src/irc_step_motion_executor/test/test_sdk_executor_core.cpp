@@ -388,4 +388,40 @@ TEST(SdkExecutorCore, PromotesOneQueuedRequestAtSeamlessBoundary)
   EXPECT_EQ(promoted->status, "RUNNING");
 }
 
+TEST(SdkExecutorCore, CameraStartMetadataBelongsToQueuedRequestAndSurvivesPromotion)
+{
+  FakeMotionBackend backend;
+  backend.queue_result = {true, "", "queued"};
+  irc_step_motion_executor::SdkExecutorCore core(load_catalog(), backend);
+  const auto first = core.handle_request(request_json(80, "forward"), 100);
+  EXPECT_FALSE(first.goal_head_prepare_id.has_value());
+  auto next = request_json(81, "forward");
+  next.insert(next.size() - 1, ",\"goal_head_prepare_id\":81");
+  const auto queued = core.handle_request(next, 101);
+  ASSERT_EQ(queued.status, "QUEUED");
+  EXPECT_EQ(queued.goal_head_prepare_id, 81);
+  backend.sequence = 1;
+  const auto completed = core.poll(200);
+  ASSERT_TRUE(completed.has_value());
+  EXPECT_FALSE(completed->goal_head_prepare_id.has_value());
+  const auto running = core.poll(201);
+  ASSERT_TRUE(running.has_value());
+  EXPECT_EQ(running->status, "RUNNING");
+  EXPECT_EQ(running->goal_head_prepare_id, 81);
+  EXPECT_NE(irc_step_motion_executor::CatalogOnlyCore::to_json(*running).find(
+    "\"goal_head_prepare_id\":81"), std::string::npos);
+}
+
+TEST(SdkExecutorCore, InvalidCameraStartIdNeverStartsBackend)
+{
+  for (const auto & value : {"0", "-1", "true", "\"3\"", "null"}) {
+    FakeMotionBackend backend;
+    irc_step_motion_executor::SdkExecutorCore core(load_catalog(), backend);
+    auto request = request_json(90, "forward");
+    request.insert(request.size() - 1, std::string(",\"goal_head_prepare_id\":") + value);
+    EXPECT_EQ(core.handle_request(request, 100).status, "REJECTED");
+    EXPECT_TRUE(backend.started_motion_names.empty());
+  }
+}
+
 }  // namespace

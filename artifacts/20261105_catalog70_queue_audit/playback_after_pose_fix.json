@@ -1,0 +1,146 @@
+[
+  {
+    "name": "r미세오뒤에서 오옆0도",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "r미세오뒤에서 오옆 90도",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "r오뒤에서 오옆꽃게0도",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "r오뒤에서 오옆꽃게90도",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전0도(2회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전0도(3회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전0도(5회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전0도(7회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전0도(9회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전45도(2회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전45도(3회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전45도(5회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전45도(6회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전45도(7회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전45도(9회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전90도(2회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전90도(3회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전90도(5회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전90도(6회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전90도(7회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전90도(9회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전0도(6회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t미세오옆꽃게(0도)-2회",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t골대후 제자리좌회전",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t공후 제자리좌회전",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t골대후제자리우회전",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t공후 제자리우회전",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t미세오옆꽃게(0도)-1회",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t미세오옆꽃게90도(1회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t미세오옆꽃게90도(2회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전0도(1회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전0도(4회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전45도(1회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전45도(4회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전90도(1회)",
+    "command_trace_unchanged_after_pose_rename": true
+  },
+  {
+    "name": "t제자리우회전90도(4회)",
+    "command_trace_unchanged_after_pose_rename": true
+  }
+]

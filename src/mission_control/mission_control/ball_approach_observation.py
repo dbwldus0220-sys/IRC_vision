@@ -24,6 +24,7 @@ class BallApproachObservation:
         self.hits = 0
         self.observation = None
         self.observation_received_at = None
+        self.candidate = None
 
     @staticmethod
     def number(info, key):
@@ -47,8 +48,8 @@ class BallApproachObservation:
             and info.get("head_down_requested") is not True
         )
 
-    def matches_anchor(self, info):
-        anchor = self.anchor
+    def matches_anchor(self, info, *, anchor=None):
+        anchor = self.anchor if anchor is None else anchor
         if anchor is None:
             return False
         if any(info.get(key) != anchor.get(key) for key in ("image_width", "image_height")):
@@ -81,10 +82,11 @@ class BallApproachObservation:
             and abs(info["distance_m"] - anchor["distance_m"]) <= self.MAX_DISTANCE_CHANGE_M
         )
 
-    def observe(self, info, received_at, config):
+    def observe(self, info, received_at, config, *, preserve_gaps=False):
         """Prepare geometry during motion; do not grant a motion or pickup lock."""
         self.observation = None
         self.observation_received_at = None
+        self.candidate = None
         stamp = info.get("rgb_stamp_ns")
         if not isinstance(stamp, int) or isinstance(stamp, bool) or stamp <= 0:
             self.hits = 0
@@ -94,19 +96,28 @@ class BallApproachObservation:
         self.last_stamp_ns = stamp
         if info.get("detected") is True:
             self.hits = 0
-            if self.usable(info, config):
+            if (self.usable(info, config)
+                    and (not preserve_gaps or info.get("confirmation_confirmed") is not False)):
                 self.anchor = dict(info)
                 self.anchor_received_at = received_at
             else:
                 self.anchor = None
             return
         candidate = info.get("approach_candidate")
+        anchor_current = bool(
+            self.anchor is not None
+            and 0 <= received_at - self.anchor_received_at <= self.MAX_ANCHOR_AGE_SEC
+            and 0 < (stamp - self.anchor["rgb_stamp_ns"]) / 1e9 <= self.MAX_ANCHOR_AGE_SEC
+        )
+        if (preserve_gaps and anchor_current and info.get("detected") is False
+                and info.get("raw_detected") is False
+                and info.get("ball_loss_confirmed") is not True):
+            # Keep evidence across a short miss, but never expose old geometry.
+            return
         if (
             info.get("raw_detected") is not True
             or not isinstance(candidate, dict)
-            or self.anchor is None
-            or not 0 <= received_at - self.anchor_received_at <= self.MAX_ANCHOR_AGE_SEC
-            or not 0 < (stamp - self.anchor["rgb_stamp_ns"]) / 1e9 <= self.MAX_ANCHOR_AGE_SEC
+            or not anchor_current
         ):
             self.hits = 0
             return
@@ -117,6 +128,7 @@ class BallApproachObservation:
             self.hits = 0
             return
         self.hits += 1
+        self.candidate = current
         if self.hits >= self.REQUIRED_HITS:
             self.observation = {
                 **current, "detected": True, "pickup_now": False,

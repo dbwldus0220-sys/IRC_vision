@@ -49,6 +49,10 @@ void SdkExecutorDriver::poll()
   if (status) {
     publish(*status, status->status == "RUNNING");
   }
+  // Apply start-time overrides in the same poll that observed the SDK handoff.
+  if (const auto activated = core_.take_queue_activation_status()) {
+    publish(*activated);
+  }
 }
 
 void SdkExecutorDriver::publish(

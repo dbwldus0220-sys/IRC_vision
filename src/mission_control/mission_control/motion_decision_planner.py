@@ -24,6 +24,7 @@ from step.line_navigation_planner import (
     valid_ground_heading, line_heading,
 )
 
+from .pickup_fine_skip import pickup_fine_skip_limit
 from .pickup_grasp_selection import (
     PICKUP_GRASP_SPLIT_BOTTOM_DISTANCE_PX, pickup_grasp_motion_id,
 )
@@ -69,7 +70,7 @@ class MotionDecisionConfig:
     ball_tracking_range_m: float = 1.5
     ball_control_range_m: float = 1.5
     pickup_fine_step_distance_m: float = BALL_PICKUP_DISTANCE_M
-    pickup_fine_align_bottom_distance_px: int = 270
+    pickup_fine_align_bottom_distance_px: int = 220
     ball_lost_stop_sec: float = 0.35
     ball_recovery_timeout_sec: float = 8.0
     ball_recovery_turn_rad_s: float = 0.22
@@ -133,6 +134,7 @@ class MotionDecisionPlanner:
     BALL_STATIONARY_TURN_MIN_BOTTOM_PX = 120.0
     PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX = 360.0
     PICKUP_CLOSE_CRAB_BOTTOM_DISTANCE_PX = 100.0
+    PICKUP_VISIBLE_BACKWARD_BOTTOM_DISTANCE_PX = 100.0
     PICKUP_FINE_LEFT_BOUND_PX = -30.0
     PICKUP_FINE_RIGHT_BOUND_PX = 55.0
     BALL_LOST_TOP_EDGE_RATIO = 0.10
@@ -192,6 +194,7 @@ class MotionDecisionPlanner:
         self.ball_interior_loss_backward_state = "IDLE"
         self.pickup_close_alignment_active = False
         self.pickup_fine_approach_complete = False
+        self.pickup_last_completed_motion_id: str | None = None
         self.pickup_last_visible_bottom_distance_px: float | None = None
         self.last_ball_turn_direction: str | None = None
         self.post_ball_line_search_direction = "RIGHT"
@@ -771,7 +774,11 @@ class MotionDecisionPlanner:
                     "catalog_motion_available": True,
                 })
                 return result
-        if source == "ball" and command.valid and command.motion == "STRAIGHT":
+        if source == "ball" and command.valid and command.motion in {
+            "STRAIGHT", "BALL_APPROACH_FINE_FORWARD_5",
+        }:
+            if command.motion == "BALL_APPROACH_FINE_FORWARD_5":
+                result["ball_fine_alignment"] = True
             distance = command.distance_m
             angle = command.steering_error_deg
             if (
@@ -1503,6 +1510,10 @@ class MotionDecisionPlanner:
                 source_command=common,
             )
 
+        backward = self._pickup_visible_ball_backward(phase, common, fine=True)
+        if backward is not None:
+            return backward
+
         # Latch only a valid checkpoint observation, after the motion/dwell.
         # Crab/body sway must not restart forward approach for the same pickup.
         if bottom_distance_px <= max(
@@ -1526,7 +1537,12 @@ class MotionDecisionPlanner:
                                 "catalog_motion_available": True},
             )
 
-        if not self.pickup_fine_approach_complete or not crab_allowed:
+        skip_limit = pickup_fine_skip_limit(self.pickup_last_completed_motion_id)
+        fine_required = (bottom_distance_px >= skip_limit if skip_limit is not None
+                         else not self.pickup_fine_approach_complete)
+        common.update(pickup_last_completed_motion_id=self.pickup_last_completed_motion_id,
+                      pickup_fine_skip_limit_px=skip_limit)
+        if fine_required or not crab_allowed:
             return MotionDecision(
                 phase=phase, source="ball", action="BALL_PICKUP_FINE_FORWARD",
                 valid=True, reason="ball_pickup_fine_approach_still_required",
@@ -1539,6 +1555,28 @@ class MotionDecisionPlanner:
             sdk_motion_requested=False, requires_ack=False,
             source_command={**common, "lateral_direction": "CENTERED",
                             "catalog_motion_available": True},
+        )
+
+    def _pickup_visible_ball_backward(
+        self, phase: str, common: dict, *, fine: bool,
+    ) -> MotionDecision | None:
+        """Restore distance before alignment, one retreat per fresh checkpoint."""
+        if common["bottom_distance_px"] >= self.PICKUP_VISIBLE_BACKWARD_BOTTOM_DISTANCE_PX:
+            return None
+        stage = "FINE" if fine else "INITIAL"
+        return MotionDecision(
+            phase=phase, source="ball", action=f"BALL_PICKUP_{stage}_BACKWARD",
+            valid=True, reason="visible_ball_too_close_backward_required",
+            sdk_motion_requested=True, requires_ack=False,
+            source_command={
+                **common,
+                "pickup_alignment_mode": "BACKWARD",
+                "pickup_visible_backward_bottom_distance_px": (
+                    self.PICKUP_VISIBLE_BACKWARD_BOTTOM_DISTANCE_PX
+                ),
+                "backward_count": 1,
+                "catalog_motion_available": True,
+            },
         )
 
     def _pickup_heading_correction(
@@ -1685,6 +1723,10 @@ class MotionDecisionPlanner:
                 requires_ack=False,
                 source_command=common,
             )
+
+        backward = self._pickup_visible_ball_backward(phase, common, fine=False)
+        if backward is not None:
+            return backward
 
         correction = self._pickup_heading_correction(info, phase, common, fine=False)
         if correction is not None:

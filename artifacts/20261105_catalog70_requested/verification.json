@@ -1,0 +1,66 @@
+{
+  "source_sha256_verified": true,
+  "source_motions": 30,
+  "derived_motions": 6,
+  "source_speed_preserved": true,
+  "runtime_position_tolerance_deg": 5.0,
+  "alias_updates": 45,
+  "alias_added": "goal_camera_90_crab_right_2",
+  "unrelated_motions_unchanged_per_catalog": 107,
+  "catalog_validation": "PC and runtime: 143 unique motions; all aliases resolve; all joint IDs 0..22",
+  "new_contract_tests_passed": 117,
+  "sdk_mock_playback_passed": 36,
+  "pc_runtime_mock_traces_identical": true,
+  "regression_comparisons": [
+    {
+      "suite": "bridge_and_transitions",
+      "before_failures": 17,
+      "after_failures": 17,
+      "new_failures": [],
+      "remaining_failure_ids": [
+        "test_catalog63_transitions.py::test_requested_route_and_exact_half_second_holds[line_forward_4-BALL_APPROACH_FINE_FORWARD_5-pickup_fine_prepare-ball_approach_fine_forward_45_5-rr\\uc624\\ub4a4\\uc5d0\\uc11c \\ubbf8\\uc138\\uc624\\ub4a4(45\\ub3c4)]",
+        "test_catalog63_transitions.py::test_requested_route_and_exact_half_second_holds[line_recovery_left_4-BALL_APPROACH_FINE_FORWARD_5-pickup_fine_prepare-ball_approach_fine_forward_45_5-rr\\uc624\\ub4a4\\uc5d0\\uc11c \\ubbf8\\uc138\\uc624\\ub4a4(45\\ub3c4)]",
+        "test_catalog63_transitions.py::test_requested_route_and_exact_half_second_holds[line_recovery_right_4-BALL_APPROACH_FINE_FORWARD_5-pickup_fine_prepare-ball_approach_fine_forward_45_5-rr\\uc624\\ub4a4\\uc5d0\\uc11c \\ubbf8\\uc138\\uc624\\ub4a4(45\\ub3c4)]",
+        "test_catalog63_transitions.py::test_requested_route_and_exact_half_second_holds[stationary_turn_left-BALL_APPROACH_FINE_FORWARD_5-pickup_fine_prepare-ball_approach_fine_forward_45_5-rr\\uc624\\ub4a4\\uc5d0\\uc11c \\ubbf8\\uc138\\uc624\\ub4a4(45\\ub3c4)]",
+        "test_catalog63_transitions.py::test_requested_route_and_exact_half_second_holds[stationary_turn_right-BALL_APPROACH_FINE_FORWARD_5-pickup_fine_prepare-ball_approach_fine_forward_45_5-rr\\uc624\\ub4a4\\uc5d0\\uc11c \\ubbf8\\uc138\\uc624\\ub4a4(45\\ub3c4)]",
+        "test_motion_command_bridge.py::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.499-STRAIGHT_0-r\\ubbf8\\uc1380\\ub3c4 \\uacf5\\uc7a1\\uae30\\uc6a9]",
+        "test_motion_command_bridge.py::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.5-STRAIGHT_0-r\\ubbf8\\uc1380\\ub3c4 \\uacf5\\uc7a1\\uae30\\uc6a9]",
+        "test_motion_command_bridge.py::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.500001-BALL_APPROACH_FINE_FORWARD_5-r\\ubbf8\\uc13845\\ub3c4]",
+        "test_motion_command_bridge.py::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.55-BALL_APPROACH_FINE_FORWARD_5-r\\ubbf8\\uc13845\\ub3c4]",
+        "test_motion_command_bridge.py::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.57-BALL_APPROACH_FINE_FORWARD_5-r\\ubbf8\\uc13845\\ub3c4]",
+        "test_motion_command_bridge.py::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.6-BALL_APPROACH_FINE_FORWARD_5-r\\ubbf8\\uc13845\\ub3c4]",
+        "test_motion_command_bridge.py::test_production_action_mapping_contains_only_approved_contract",
+        "test_motion_command_bridge.py::test_shot_retry_does_not_repeat_completed_pose_preparation",
+        "test_motion_command_bridge.py::test_shot_waits_for_running_fine_motion_and_uses_only_completed_history",
+        "test_motion_command_bridge.py::test_shot_without_fine_only_approach_keeps_direct_scoring[actions0]",
+        "test_motion_command_bridge.py::test_shot_without_fine_only_approach_keeps_direct_scoring[actions1]",
+        "test_motion_command_bridge.py::test_supported_action_builds_executor_request[SHOT-goal_shot]"
+      ]
+    },
+    {
+      "suite": "turns_pickup_and_goal",
+      "before_failures": 17,
+      "after_failures": 14,
+      "new_failures": [],
+      "remaining_failure_ids": [
+        "test_goal_shot_regions.py::test_import_preserves_source_targets_and_applies_speed_once",
+        "test_pickup_continuous_walk.py::test_late_invalid_or_changed_target_does_not_reserve[change0]",
+        "test_pickup_continuous_walk.py::test_only_one_queue_and_three_successive_chunks_keep_one_pickup",
+        "test_right_turn_bins.py::test_goal_close_and_far_alignment_share_all_boundaries[1.2-LEFT--1-boundaries0]",
+        "test_right_turn_bins.py::test_goal_close_and_far_alignment_share_all_boundaries[1.2-RIGHT-1-boundaries1]",
+        "test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[15.0-1]",
+        "test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[180.0-9]",
+        "test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[29.999-1]",
+        "test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[30.0-3]",
+        "test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[44.999-3]",
+        "test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[45.0-5]",
+        "test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[59.999-5]",
+        "test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[74.999-6]",
+        "test_right_turn_bins.py::test_right_boundaries_reach_ball_pickup_goal_and_line_routes[90.0-9]"
+      ]
+    }
+  ],
+  "hardware_used": false,
+  "followup_startup_fix": "../20261105_catalog70_queue_audit/startup_fix.json",
+  "pose_identity_normalization": "오뒤무게중심앞 -> 오뒤무게중심앞(catalog70) for source70 motions only; original numeric data preserved"
+}

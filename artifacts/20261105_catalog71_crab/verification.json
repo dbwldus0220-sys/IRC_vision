@@ -1,0 +1,36 @@
+{
+  "source_file": "/home/jet/Downloads/robot_motions(71).json",
+  "source_sha256": "bbae3ec03bf4e675b97a83aecb3993d16fab981af2f0c89c31ccb5047f9d17e1",
+  "updated_motions": [
+    "t미세오옆꽃게90도(1회)",
+    "t미세오옆꽃게90도(2회)"
+  ],
+  "already_identical_motions": [
+    "t미세오옆꽃게(0도)-1회",
+    "t미세오옆꽃게(0도)-2회"
+  ],
+  "alias_changes": {},
+  "source_playback_speed": 1.0,
+  "duration_sec": {
+    "one_repeat": 0.55,
+    "two_repeats": 1.1
+  },
+  "runtime_position_tolerance_deg": 5.0,
+  "protected_source_files_unchanged": 96,
+  "other_motions_unchanged_per_catalog": 141,
+  "queue_cases_before_after": 43808,
+  "queue_results_changed": 0,
+  "queue_matrix_sha256": "bd2eb39b92bc078673226dc16610e90cbab206010b045b01b4781c2120a21247",
+  "python_tests_passed": 209,
+  "startup_cpp_test": "Passed: default startup pose with four head/shoulder policy combinations",
+  "catalog_validation": "Both catalogs: 143 unique motions, all aliases resolve, every frame motor ID set 0..22",
+  "pc_runtime_mock_runs_passed": 16,
+  "repeated_playback": "All four variants complete twice when self-queued; matching PC/runtime traces.",
+  "source_camera_note": "Camera90 variants frame index 2 changes motor0 from 1 to -64 deg. Preserved exactly as supplied. With a settled goal joint override, mock output stays at 1 deg; without the override the new camera-down motion is present.",
+  "unchanged_reservation_limit": "Same 0.55s camera0 motion and 0.165s late-frame window as catalog70. Existing low-FPS missed prequeue behavior is unchanged; no new scheduling logic.",
+  "hardware_used": false,
+  "catalog_sha256": {
+    "pc": "86fa00089f2594a025bc95c760d7590f113f17e72335209bde87b4923d304413",
+    "runtime": "e876f050e5fda90fcc4c24c29a76254707dd8077d5c1f2d99419ee7971161728"
+  }
+}

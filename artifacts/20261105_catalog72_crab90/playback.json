@@ -1,0 +1,50 @@
+[
+  {
+    "name": "t미세오옆꽃게90도(1회)",
+    "head_override": false,
+    "head_min": -3.0,
+    "head_max": 1.0,
+    "completions": [
+      "C\t1550\t1",
+      "C\t2100\t2"
+    ],
+    "pc_runtime_equal": true,
+    "trace_sha256": "f12ca0fdb4e7a096d91fe962809a6d53b547e5f1cc6a4f820abaea4bcf571c7d"
+  },
+  {
+    "name": "t미세오옆꽃게90도(1회)",
+    "head_override": true,
+    "head_min": 1.0,
+    "head_max": 1.0,
+    "completions": [
+      "C\t1550\t1",
+      "C\t2100\t2"
+    ],
+    "pc_runtime_equal": true,
+    "trace_sha256": "71a7db1bcc61b52ae10caa2df681e45592aa79d5c80002767a30391313063bae"
+  },
+  {
+    "name": "t미세오옆꽃게90도(2회)",
+    "head_override": false,
+    "head_min": -3.0,
+    "head_max": 1.0,
+    "completions": [
+      "C\t2100\t1",
+      "C\t3200\t2"
+    ],
+    "pc_runtime_equal": true,
+    "trace_sha256": "eb1d9966fdbed32fada0429e2a8dc36d3a1ac99522edd6fd4fdb596a9cd2d1d1"
+  },
+  {
+    "name": "t미세오옆꽃게90도(2회)",
+    "head_override": true,
+    "head_min": 1.0,
+    "head_max": 1.0,
+    "completions": [
+      "C\t2100\t1",
+      "C\t3200\t2"
+    ],
+    "pc_runtime_equal": true,
+    "trace_sha256": "9c14451c2cee5bfda0ec1ecd81d5b6c918d4546c1c8ced40c63d9146a49505eb"
+  }
+]

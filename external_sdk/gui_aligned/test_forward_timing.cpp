@@ -281,8 +281,9 @@ int main(int argc, char** argv) {
     }
     // Different entries may share a full commanded end pose. Keep this exception
     // restricted to forward/recovery, with torque, speed, and camera checks.
+    for (const std::string recovery_name : {"t라인복귀좌실전", "t라인복귀좌공용", "t라인복귀우공용"})
     for (int variant = 0; variant < 8; ++variant) {
-        const std::string recovery = variant == 7 ? "t미세45도(5회)" : "t라인복귀좌실전";
+        const std::string recovery = variant == 7 ? "t미세45도(5회)" : recovery_name;
         {
             std::ofstream fixture(path);
             fixture << "{\"motions\":[";
@@ -291,7 +292,8 @@ int main(int argc, char** argv) {
                 fixture << "{\"name\":\"" << (index ? recovery : "t전진실전")
                     << "\",\"max_seq_ms\":400,\"repeat_count\":2,\"repeatable\":"
                     << (index && variant == 5 ? "false" : "true")
-                    << ",\"playback_speed\":" << (index && variant == 4 ? .9 : 1.)
+                    << ",\"playback_speed\":" << (index && variant == 4 ? .9
+                        : index && recovery_name != "t라인복귀좌실전" ? .95 : 1.)
                     << ",\"start_pose\":\"" << (index ? "recovery_entry" : "forward_entry")
                     << "\",\"end_pose\":\"common_end\",\"frames\":[{\"name\":\"entry"
                     << index << "\",\"start_ms\":" << (index ? 79 : 80)
@@ -337,6 +339,7 @@ int main(int argc, char** argv) {
         };
         const std::vector<std::string> recoveries = {
             "t라인복귀좌실전", "t라인복귀우실전",
+            "t라인복귀좌공용", "t라인복귀우공용",
             "R라인복귀좌90도", "R라인복귀우회전90도",
         };
         auto walks = forwards;
@@ -344,9 +347,12 @@ int main(int argc, char** argv) {
         std::vector<std::pair<std::string, std::string>> connections;
         for (const auto& first : walks) for (const auto& second : walks)
             connections.emplace_back(first, second);
-        for (int first = 1; first <= 4; ++first) for (int second = 1; second <= 4; ++second)
+        for (int first = 1; first <= 4; ++first) for (int second = 1; second <= 4; ++second) {
             connections.emplace_back("r미세 골대전용(" + std::to_string(first) + "회)",
                                      "r미세 골대전용(" + std::to_string(second) + "회)");
+            connections.emplace_back("t미세0도(" + std::to_string(first) + "회)(골대74)",
+                                     "t미세0도(" + std::to_string(second) + "회)(골대74)");
+        }
         for (const auto& [first, second] : connections)
         for (bool fixed_head : {false, true}) {
             TimingHardware hardware;

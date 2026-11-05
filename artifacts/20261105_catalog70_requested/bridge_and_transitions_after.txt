@@ -1,0 +1,653 @@
+.........FF........FF.F................................................. [  8%]
+........................................................................ [ 17%]
+.............F.......................................................... [ 26%]
+........................................................................ [ 34%]
+........................................................................ [ 43%]
+..................................................FFFFFF................ [ 52%]
+....................................................................FFFF [ 60%]
+F....................................................................... [ 69%]
+........................................................................ [ 78%]
+........................................................................ [ 86%]
+........................................................................ [ 95%]
+......................................                                   [100%]
+=================================== FAILURES ===================================
+_____ test_shot_without_fine_only_approach_keeps_direct_scoring[actions0] ______
+
+actions = []
+
+    @pytest.mark.parametrize("actions", [
+        [], ["BALL_FINE_FORWARD_8"],
+    ])
+    def test_shot_without_fine_only_approach_keeps_direct_scoring(actions):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(actions, 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            complete_active_motion(bridge)
+            if bridge.motion_in_progress:
+                complete_active_motion(bridge)
+        bridge.navigation_command_callback(navigation_message(action="SHOT", command_id=10))
+>       assert bridge.active_motion_id == "goal_shot"
+E       AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E         - goal_shot
+E         + goal_fine_prepare_90
+
+src/mission_control/test/test_motion_command_bridge.py:388: AssertionError
+_____ test_shot_without_fine_only_approach_keeps_direct_scoring[actions1] ______
+
+actions = ['BALL_FINE_FORWARD_8']
+
+    @pytest.mark.parametrize("actions", [
+        [], ["BALL_FINE_FORWARD_8"],
+    ])
+    def test_shot_without_fine_only_approach_keeps_direct_scoring(actions):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(actions, 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            complete_active_motion(bridge)
+            if bridge.motion_in_progress:
+                complete_active_motion(bridge)
+        bridge.navigation_command_callback(navigation_message(action="SHOT", command_id=10))
+>       assert bridge.active_motion_id == "goal_shot"
+E       AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E         - goal_shot
+E         + goal_fine_prepare_90
+
+src/mission_control/test/test_motion_command_bridge.py:388: AssertionError
+___ test_shot_waits_for_running_fine_motion_and_uses_only_completed_history ____
+
+    def test_shot_waits_for_running_fine_motion_and_uses_only_completed_history():
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action="GOAL_CAMERA90_FINE_FORWARD_1", command_id=1))
+        assert not bridge.goal_fine_forward_completed
+        bridge.navigation_command_callback(navigation_message(action="SHOT", command_id=2))
+        assert decoded_messages(bridge.motion_status_publisher)[-1]["error_code"] == "REJECTED_BUSY"
+        assert len(bridge.executor_request_publisher.messages) == 1
+        complete_active_motion(bridge, "FAILED", "SDK_POSITION_TIMEOUT")
+        assert not bridge.goal_fine_forward_completed
+        bridge.navigation_command_callback(navigation_message(action="SHOT", command_id=3))
+>       assert bridge.active_motion_id == "goal_shot"
+E       AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E         - goal_shot
+E         + goal_fine_prepare_90
+
+src/mission_control/test/test_motion_command_bridge.py:422: AssertionError
+__________ test_shot_retry_does_not_repeat_completed_pose_preparation __________
+
+    def test_shot_retry_does_not_repeat_completed_pose_preparation():
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action="GOAL_CAMERA90_TURN_RIGHT_1", command_id=1))
+        complete_active_motion(bridge)
+        bridge.navigation_command_callback(navigation_message(action="SHOT", command_id=2))
+        complete_active_motion(bridge)
+        bridge._check_atomic_dwell(bridge.active_dwell_until)
+        complete_active_motion(bridge, "FAILED", "SDK_POSITION_TIMEOUT")
+        bridge.navigation_command_callback(navigation_message(action="SHOT", command_id=3))
+>       assert bridge.active_motion_id == "goal_shot"
+E       AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E         - goal_shot
+E         + goal_fine_prepare_90
+
+src/mission_control/test/test_motion_command_bridge.py:434: AssertionError
+________ test_production_action_mapping_contains_only_approved_contract ________
+
+    def test_production_action_mapping_contains_only_approved_contract():
+>       assert MotionCommandBridgeNode.ACTION_TO_MOTION_ID == (
+            EXPECTED_PRODUCTION_ACTIONS
+        )
+E       AssertionError: assert {'ALIGN_LEFT'...rd_45_5', ...} == {'ALIGN_LEFT'...rd_45_5', ...}
+E         Omitting 142 identical items, use -vv to show
+E         Left contains 1 more item:
+E         {'GOAL_SHOT_PREPARE': 'goal_fine_prepare_90'}
+E         Full diff:
+E           {
+E            'ALIGN_LEFT': 'stationary_turn_left',
+E            'ALIGN_RIGHT': 'stationary_turn_right',...
+E         
+E         ...Full output truncated (143 lines hidden), use '-vv' to show
+
+src/mission_control/test/test_motion_command_bridge.py:687: AssertionError
+________ test_supported_action_builds_executor_request[SHOT-goal_shot] _________
+
+action = 'SHOT', motion_id = 'goal_shot'
+
+    @pytest.mark.parametrize(
+        ("action", "motion_id"),
+        sorted(EXPECTED_PRODUCTION_ACTIONS.items()),
+    )
+    def test_supported_action_builds_executor_request(action, motion_id):
+        bridge = FakeBridge()
+    
+        bridge.navigation_command_callback(navigation_message(action=action))
+        if action in MotionCommandBridgeNode.GOAL_CRAB_ACTIONS:
+            assert not bridge.executor_request_publisher.messages
+            bridge._check_atomic_dwell(bridge.active_dwell_until)
+        if action == "GO":
+            assert bridge.active_motion_id == "hurdle_fine_forward_10"
+            complete_active_motion(bridge)
+            bridge._check_atomic_dwell(bridge.active_dwell_until)
+            assert bridge.active_motion_id == "hurdle"
+            return
+    
+        requests = decoded_messages(bridge.executor_request_publisher)
+>       assert requests == [
+            {
+                "action": action,
+                "command_id": 8000,
+                "event_id": 8,
+                "request_id": 8000,
+                "motion_id": motion_id,
+                "timeout_ms": 12000,
+            }
+        ]
+E       AssertionError: assert [{'action': '...are_90', ...}] == [{'action': '...l_shot', ...}]
+E         At index 0 diff: {'action': 'SHOT', 'command_id': 8000, 'event_id': 8, 'request_id': 8000, 'motion_id': 'goal_fine_prepare_90', 'timeout_ms': 12000} != {'action': 'SHOT', 'command_id': 8000, 'event_id': 8, 'request_id': 8000, 'motion_id': 'goal_shot', 'timeout_ms': 12000}
+E         Full diff:
+E           [
+E            {'action': 'SHOT',
+E             'command_id': 8000,
+E             'event_id': 8,
+E         -   'motion_id': 'goal_shot',...
+E         
+E         ...Full output truncated (5 lines hidden), use '-vv' to show
+
+src/mission_control/test/test_motion_command_bridge.py:711: AssertionError
+_ test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.499-STRAIGHT_0-r\ubbf8\uc1380\ub3c4 \uacf5\uc7a1\uae30\uc6a9] _
+
+source = 'ball', distance = 0.499, action = 'STRAIGHT_0'
+motion_name = 'r미세0도 공잡기용'
+
+    @pytest.mark.parametrize("source,distance,action,motion_name", [
+        ("ball", 0.499, "STRAIGHT_0", "r미세0도 공잡기용"),
+        ("ball", 0.500, "STRAIGHT_0", "r미세0도 공잡기용"),
+        *[("ball", distance, "BALL_APPROACH_FINE_FORWARD_5", "r미세45도")
+          for distance in (0.500001, 0.550, 0.570, 0.600)],
+        *[("ball", distance, "STRAIGHT", "R전진45도(4회)")
+          for distance in (0.600001, 0.700, 0.700001)],
+        # Hurdle keeps its existing range policy, independently of Ball's new boundary.
+        *[("hurdle", distance, "STRAIGHT_0", "r미세 0도 허들용")
+          for distance in (0.549, 0.550, 0.550001, 0.570, 0.700)],
+        ("hurdle", 0.700001, "STRAIGHT", "R전진45도(4회)"),
+    ])
+    def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
+        source, distance, action, motion_name,
+    ):
+        """Exercise normal approach and the default close-Ball pickup checkpoint."""
+        from pathlib import Path
+        import yaml
+        from test_motion_decision_planner import line_info
+    
+        planner = MotionDecisionPlanner()
+        sample = {
+            "detected": True, "confirmation_confirmed": True,
+            "confidence": 0.9, "depth_valid": True, "depth_age_sec": 0.05,
+            "distance_m": distance, "depth_m": distance,
+            "bearing_deg": 0.0, "steering_angle_deg": 0.0,
+            "offset_x_px": 0, "offset_x_norm": 0.0,
+            "bottom_distance_px": 200, "hurdle_angle_deg": 0.0,
+            "go_now": False, "pickup_ready": False, "pickup_now": False,
+        }
+        sample.update(bbox=[400, 300, 1000, 500], image_width=1280, image_height=720)
+        route = {**line_info(), "robot_center_x_px": 710,
+                 "center_points_px": [[710, 650], [710, 580], [710, 250]]}
+        decision = planner.plan("AUTO", {source: sample, "line": route}, 0.1)
+        if source == "hurdle":
+            assert decision.source == "hurdle"
+        bridge = FakeBridge()
+        if source == "ball" and distance <= 0.500:
+            assert decision.action == "PICKUP_NOW"
+            bridge.navigation_command_callback(navigation_message(action="PICKUP_NOW"))
+            assert_pickup_initial_alignment_started(bridge)
+            decision = planner.plan_ball_pickup_initial_alignment(sample)
+            assert decision.valid
+            assert decision.source_command["pickup_approach_motion"] == action
+            continue_pickup_after_initial_alignment(bridge, approach_motion=action)
+        else:
+            assert decision.valid
+            assert decision.action == action
+            bridge.navigation_command_callback(navigation_message(
+                source=decision.source, action=decision.action,
+                source_command=decision.source_command,
+            ))
+        request = decoded_messages(bridge.executor_request_publisher)[-1]
+        root = Path(__file__).resolve().parents[3]
+        aliases = yaml.safe_load((root / "src/irc_step_motion_executor/config/motion_aliases.yaml").read_text())["motion_aliases"]
+>       assert aliases[request["motion_id"]] == motion_name
+E       AssertionError: assert 't미세0도(5회)' == 'r미세0도 공잡기용'
+E         - r미세0도 공잡기용
+E         + t미세0도(5회)
+
+src/mission_control/test/test_motion_command_bridge.py:2921: AssertionError
+_ test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.5-STRAIGHT_0-r\ubbf8\uc1380\ub3c4 \uacf5\uc7a1\uae30\uc6a9] _
+
+source = 'ball', distance = 0.5, action = 'STRAIGHT_0'
+motion_name = 'r미세0도 공잡기용'
+
+    @pytest.mark.parametrize("source,distance,action,motion_name", [
+        ("ball", 0.499, "STRAIGHT_0", "r미세0도 공잡기용"),
+        ("ball", 0.500, "STRAIGHT_0", "r미세0도 공잡기용"),
+        *[("ball", distance, "BALL_APPROACH_FINE_FORWARD_5", "r미세45도")
+          for distance in (0.500001, 0.550, 0.570, 0.600)],
+        *[("ball", distance, "STRAIGHT", "R전진45도(4회)")
+          for distance in (0.600001, 0.700, 0.700001)],
+        # Hurdle keeps its existing range policy, independently of Ball's new boundary.
+        *[("hurdle", distance, "STRAIGHT_0", "r미세 0도 허들용")
+          for distance in (0.549, 0.550, 0.550001, 0.570, 0.700)],
+        ("hurdle", 0.700001, "STRAIGHT", "R전진45도(4회)"),
+    ])
+    def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
+        source, distance, action, motion_name,
+    ):
+        """Exercise normal approach and the default close-Ball pickup checkpoint."""
+        from pathlib import Path
+        import yaml
+        from test_motion_decision_planner import line_info
+    
+        planner = MotionDecisionPlanner()
+        sample = {
+            "detected": True, "confirmation_confirmed": True,
+            "confidence": 0.9, "depth_valid": True, "depth_age_sec": 0.05,
+            "distance_m": distance, "depth_m": distance,
+            "bearing_deg": 0.0, "steering_angle_deg": 0.0,
+            "offset_x_px": 0, "offset_x_norm": 0.0,
+            "bottom_distance_px": 200, "hurdle_angle_deg": 0.0,
+            "go_now": False, "pickup_ready": False, "pickup_now": False,
+        }
+        sample.update(bbox=[400, 300, 1000, 500], image_width=1280, image_height=720)
+        route = {**line_info(), "robot_center_x_px": 710,
+                 "center_points_px": [[710, 650], [710, 580], [710, 250]]}
+        decision = planner.plan("AUTO", {source: sample, "line": route}, 0.1)
+        if source == "hurdle":
+            assert decision.source == "hurdle"
+        bridge = FakeBridge()
+        if source == "ball" and distance <= 0.500:
+            assert decision.action == "PICKUP_NOW"
+            bridge.navigation_command_callback(navigation_message(action="PICKUP_NOW"))
+            assert_pickup_initial_alignment_started(bridge)
+            decision = planner.plan_ball_pickup_initial_alignment(sample)
+            assert decision.valid
+            assert decision.source_command["pickup_approach_motion"] == action
+            continue_pickup_after_initial_alignment(bridge, approach_motion=action)
+        else:
+            assert decision.valid
+            assert decision.action == action
+            bridge.navigation_command_callback(navigation_message(
+                source=decision.source, action=decision.action,
+                source_command=decision.source_command,
+            ))
+        request = decoded_messages(bridge.executor_request_publisher)[-1]
+        root = Path(__file__).resolve().parents[3]
+        aliases = yaml.safe_load((root / "src/irc_step_motion_executor/config/motion_aliases.yaml").read_text())["motion_aliases"]
+>       assert aliases[request["motion_id"]] == motion_name
+E       AssertionError: assert 't미세0도(5회)' == 'r미세0도 공잡기용'
+E         - r미세0도 공잡기용
+E         + t미세0도(5회)
+
+src/mission_control/test/test_motion_command_bridge.py:2921: AssertionError
+_ test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.500001-BALL_APPROACH_FINE_FORWARD_5-r\ubbf8\uc13845\ub3c4] _
+
+source = 'ball', distance = 0.500001, action = 'BALL_APPROACH_FINE_FORWARD_5'
+motion_name = 'r미세45도'
+
+    @pytest.mark.parametrize("source,distance,action,motion_name", [
+        ("ball", 0.499, "STRAIGHT_0", "r미세0도 공잡기용"),
+        ("ball", 0.500, "STRAIGHT_0", "r미세0도 공잡기용"),
+        *[("ball", distance, "BALL_APPROACH_FINE_FORWARD_5", "r미세45도")
+          for distance in (0.500001, 0.550, 0.570, 0.600)],
+        *[("ball", distance, "STRAIGHT", "R전진45도(4회)")
+          for distance in (0.600001, 0.700, 0.700001)],
+        # Hurdle keeps its existing range policy, independently of Ball's new boundary.
+        *[("hurdle", distance, "STRAIGHT_0", "r미세 0도 허들용")
+          for distance in (0.549, 0.550, 0.550001, 0.570, 0.700)],
+        ("hurdle", 0.700001, "STRAIGHT", "R전진45도(4회)"),
+    ])
+    def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
+        source, distance, action, motion_name,
+    ):
+        """Exercise normal approach and the default close-Ball pickup checkpoint."""
+        from pathlib import Path
+        import yaml
+        from test_motion_decision_planner import line_info
+    
+        planner = MotionDecisionPlanner()
+        sample = {
+            "detected": True, "confirmation_confirmed": True,
+            "confidence": 0.9, "depth_valid": True, "depth_age_sec": 0.05,
+            "distance_m": distance, "depth_m": distance,
+            "bearing_deg": 0.0, "steering_angle_deg": 0.0,
+            "offset_x_px": 0, "offset_x_norm": 0.0,
+            "bottom_distance_px": 200, "hurdle_angle_deg": 0.0,
+            "go_now": False, "pickup_ready": False, "pickup_now": False,
+        }
+        sample.update(bbox=[400, 300, 1000, 500], image_width=1280, image_height=720)
+        route = {**line_info(), "robot_center_x_px": 710,
+                 "center_points_px": [[710, 650], [710, 580], [710, 250]]}
+        decision = planner.plan("AUTO", {source: sample, "line": route}, 0.1)
+        if source == "hurdle":
+            assert decision.source == "hurdle"
+        bridge = FakeBridge()
+        if source == "ball" and distance <= 0.500:
+            assert decision.action == "PICKUP_NOW"
+            bridge.navigation_command_callback(navigation_message(action="PICKUP_NOW"))
+            assert_pickup_initial_alignment_started(bridge)
+            decision = planner.plan_ball_pickup_initial_alignment(sample)
+            assert decision.valid
+            assert decision.source_command["pickup_approach_motion"] == action
+            continue_pickup_after_initial_alignment(bridge, approach_motion=action)
+        else:
+            assert decision.valid
+            assert decision.action == action
+            bridge.navigation_command_callback(navigation_message(
+                source=decision.source, action=decision.action,
+                source_command=decision.source_command,
+            ))
+        request = decoded_messages(bridge.executor_request_publisher)[-1]
+        root = Path(__file__).resolve().parents[3]
+        aliases = yaml.safe_load((root / "src/irc_step_motion_executor/config/motion_aliases.yaml").read_text())["motion_aliases"]
+>       assert aliases[request["motion_id"]] == motion_name
+E       AssertionError: assert 't미세45도(5회)' == 'r미세45도'
+E         - r미세45도
+E         + t미세45도(5회)
+
+src/mission_control/test/test_motion_command_bridge.py:2921: AssertionError
+_ test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.55-BALL_APPROACH_FINE_FORWARD_5-r\ubbf8\uc13845\ub3c4] _
+
+source = 'ball', distance = 0.55, action = 'BALL_APPROACH_FINE_FORWARD_5'
+motion_name = 'r미세45도'
+
+    @pytest.mark.parametrize("source,distance,action,motion_name", [
+        ("ball", 0.499, "STRAIGHT_0", "r미세0도 공잡기용"),
+        ("ball", 0.500, "STRAIGHT_0", "r미세0도 공잡기용"),
+        *[("ball", distance, "BALL_APPROACH_FINE_FORWARD_5", "r미세45도")
+          for distance in (0.500001, 0.550, 0.570, 0.600)],
+        *[("ball", distance, "STRAIGHT", "R전진45도(4회)")
+          for distance in (0.600001, 0.700, 0.700001)],
+        # Hurdle keeps its existing range policy, independently of Ball's new boundary.
+        *[("hurdle", distance, "STRAIGHT_0", "r미세 0도 허들용")
+          for distance in (0.549, 0.550, 0.550001, 0.570, 0.700)],
+        ("hurdle", 0.700001, "STRAIGHT", "R전진45도(4회)"),
+    ])
+    def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
+        source, distance, action, motion_name,
+    ):
+        """Exercise normal approach and the default close-Ball pickup checkpoint."""
+        from pathlib import Path
+        import yaml
+        from test_motion_decision_planner import line_info
+    
+        planner = MotionDecisionPlanner()
+        sample = {
+            "detected": True, "confirmation_confirmed": True,
+            "confidence": 0.9, "depth_valid": True, "depth_age_sec": 0.05,
+            "distance_m": distance, "depth_m": distance,
+            "bearing_deg": 0.0, "steering_angle_deg": 0.0,
+            "offset_x_px": 0, "offset_x_norm": 0.0,
+            "bottom_distance_px": 200, "hurdle_angle_deg": 0.0,
+            "go_now": False, "pickup_ready": False, "pickup_now": False,
+        }
+        sample.update(bbox=[400, 300, 1000, 500], image_width=1280, image_height=720)
+        route = {**line_info(), "robot_center_x_px": 710,
+                 "center_points_px": [[710, 650], [710, 580], [710, 250]]}
+        decision = planner.plan("AUTO", {source: sample, "line": route}, 0.1)
+        if source == "hurdle":
+            assert decision.source == "hurdle"
+        bridge = FakeBridge()
+        if source == "ball" and distance <= 0.500:
+            assert decision.action == "PICKUP_NOW"
+            bridge.navigation_command_callback(navigation_message(action="PICKUP_NOW"))
+            assert_pickup_initial_alignment_started(bridge)
+            decision = planner.plan_ball_pickup_initial_alignment(sample)
+            assert decision.valid
+            assert decision.source_command["pickup_approach_motion"] == action
+            continue_pickup_after_initial_alignment(bridge, approach_motion=action)
+        else:
+            assert decision.valid
+            assert decision.action == action
+            bridge.navigation_command_callback(navigation_message(
+                source=decision.source, action=decision.action,
+                source_command=decision.source_command,
+            ))
+        request = decoded_messages(bridge.executor_request_publisher)[-1]
+        root = Path(__file__).resolve().parents[3]
+        aliases = yaml.safe_load((root / "src/irc_step_motion_executor/config/motion_aliases.yaml").read_text())["motion_aliases"]
+>       assert aliases[request["motion_id"]] == motion_name
+E       AssertionError: assert 't미세45도(5회)' == 'r미세45도'
+E         - r미세45도
+E         + t미세45도(5회)
+
+src/mission_control/test/test_motion_command_bridge.py:2921: AssertionError
+_ test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.57-BALL_APPROACH_FINE_FORWARD_5-r\ubbf8\uc13845\ub3c4] _
+
+source = 'ball', distance = 0.57, action = 'BALL_APPROACH_FINE_FORWARD_5'
+motion_name = 'r미세45도'
+
+    @pytest.mark.parametrize("source,distance,action,motion_name", [
+        ("ball", 0.499, "STRAIGHT_0", "r미세0도 공잡기용"),
+        ("ball", 0.500, "STRAIGHT_0", "r미세0도 공잡기용"),
+        *[("ball", distance, "BALL_APPROACH_FINE_FORWARD_5", "r미세45도")
+          for distance in (0.500001, 0.550, 0.570, 0.600)],
+        *[("ball", distance, "STRAIGHT", "R전진45도(4회)")
+          for distance in (0.600001, 0.700, 0.700001)],
+        # Hurdle keeps its existing range policy, independently of Ball's new boundary.
+        *[("hurdle", distance, "STRAIGHT_0", "r미세 0도 허들용")
+          for distance in (0.549, 0.550, 0.550001, 0.570, 0.700)],
+        ("hurdle", 0.700001, "STRAIGHT", "R전진45도(4회)"),
+    ])
+    def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
+        source, distance, action, motion_name,
+    ):
+        """Exercise normal approach and the default close-Ball pickup checkpoint."""
+        from pathlib import Path
+        import yaml
+        from test_motion_decision_planner import line_info
+    
+        planner = MotionDecisionPlanner()
+        sample = {
+            "detected": True, "confirmation_confirmed": True,
+            "confidence": 0.9, "depth_valid": True, "depth_age_sec": 0.05,
+            "distance_m": distance, "depth_m": distance,
+            "bearing_deg": 0.0, "steering_angle_deg": 0.0,
+            "offset_x_px": 0, "offset_x_norm": 0.0,
+            "bottom_distance_px": 200, "hurdle_angle_deg": 0.0,
+            "go_now": False, "pickup_ready": False, "pickup_now": False,
+        }
+        sample.update(bbox=[400, 300, 1000, 500], image_width=1280, image_height=720)
+        route = {**line_info(), "robot_center_x_px": 710,
+                 "center_points_px": [[710, 650], [710, 580], [710, 250]]}
+        decision = planner.plan("AUTO", {source: sample, "line": route}, 0.1)
+        if source == "hurdle":
+            assert decision.source == "hurdle"
+        bridge = FakeBridge()
+        if source == "ball" and distance <= 0.500:
+            assert decision.action == "PICKUP_NOW"
+            bridge.navigation_command_callback(navigation_message(action="PICKUP_NOW"))
+            assert_pickup_initial_alignment_started(bridge)
+            decision = planner.plan_ball_pickup_initial_alignment(sample)
+            assert decision.valid
+            assert decision.source_command["pickup_approach_motion"] == action
+            continue_pickup_after_initial_alignment(bridge, approach_motion=action)
+        else:
+            assert decision.valid
+            assert decision.action == action
+            bridge.navigation_command_callback(navigation_message(
+                source=decision.source, action=decision.action,
+                source_command=decision.source_command,
+            ))
+        request = decoded_messages(bridge.executor_request_publisher)[-1]
+        root = Path(__file__).resolve().parents[3]
+        aliases = yaml.safe_load((root / "src/irc_step_motion_executor/config/motion_aliases.yaml").read_text())["motion_aliases"]
+>       assert aliases[request["motion_id"]] == motion_name
+E       AssertionError: assert 't미세45도(5회)' == 'r미세45도'
+E         - r미세45도
+E         + t미세45도(5회)
+
+src/mission_control/test/test_motion_command_bridge.py:2921: AssertionError
+_ test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.6-BALL_APPROACH_FINE_FORWARD_5-r\ubbf8\uc13845\ub3c4] _
+
+source = 'ball', distance = 0.6, action = 'BALL_APPROACH_FINE_FORWARD_5'
+motion_name = 'r미세45도'
+
+    @pytest.mark.parametrize("source,distance,action,motion_name", [
+        ("ball", 0.499, "STRAIGHT_0", "r미세0도 공잡기용"),
+        ("ball", 0.500, "STRAIGHT_0", "r미세0도 공잡기용"),
+        *[("ball", distance, "BALL_APPROACH_FINE_FORWARD_5", "r미세45도")
+          for distance in (0.500001, 0.550, 0.570, 0.600)],
+        *[("ball", distance, "STRAIGHT", "R전진45도(4회)")
+          for distance in (0.600001, 0.700, 0.700001)],
+        # Hurdle keeps its existing range policy, independently of Ball's new boundary.
+        *[("hurdle", distance, "STRAIGHT_0", "r미세 0도 허들용")
+          for distance in (0.549, 0.550, 0.550001, 0.570, 0.700)],
+        ("hurdle", 0.700001, "STRAIGHT", "R전진45도(4회)"),
+    ])
+    def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
+        source, distance, action, motion_name,
+    ):
+        """Exercise normal approach and the default close-Ball pickup checkpoint."""
+        from pathlib import Path
+        import yaml
+        from test_motion_decision_planner import line_info
+    
+        planner = MotionDecisionPlanner()
+        sample = {
+            "detected": True, "confirmation_confirmed": True,
+            "confidence": 0.9, "depth_valid": True, "depth_age_sec": 0.05,
+            "distance_m": distance, "depth_m": distance,
+            "bearing_deg": 0.0, "steering_angle_deg": 0.0,
+            "offset_x_px": 0, "offset_x_norm": 0.0,
+            "bottom_distance_px": 200, "hurdle_angle_deg": 0.0,
+            "go_now": False, "pickup_ready": False, "pickup_now": False,
+        }
+        sample.update(bbox=[400, 300, 1000, 500], image_width=1280, image_height=720)
+        route = {**line_info(), "robot_center_x_px": 710,
+                 "center_points_px": [[710, 650], [710, 580], [710, 250]]}
+        decision = planner.plan("AUTO", {source: sample, "line": route}, 0.1)
+        if source == "hurdle":
+            assert decision.source == "hurdle"
+        bridge = FakeBridge()
+        if source == "ball" and distance <= 0.500:
+            assert decision.action == "PICKUP_NOW"
+            bridge.navigation_command_callback(navigation_message(action="PICKUP_NOW"))
+            assert_pickup_initial_alignment_started(bridge)
+            decision = planner.plan_ball_pickup_initial_alignment(sample)
+            assert decision.valid
+            assert decision.source_command["pickup_approach_motion"] == action
+            continue_pickup_after_initial_alignment(bridge, approach_motion=action)
+        else:
+            assert decision.valid
+            assert decision.action == action
+            bridge.navigation_command_callback(navigation_message(
+                source=decision.source, action=decision.action,
+                source_command=decision.source_command,
+            ))
+        request = decoded_messages(bridge.executor_request_publisher)[-1]
+        root = Path(__file__).resolve().parents[3]
+        aliases = yaml.safe_load((root / "src/irc_step_motion_executor/config/motion_aliases.yaml").read_text())["motion_aliases"]
+>       assert aliases[request["motion_id"]] == motion_name
+E       AssertionError: assert 't미세45도(5회)' == 'r미세45도'
+E         - r미세45도
+E         + t미세45도(5회)
+
+src/mission_control/test/test_motion_command_bridge.py:2921: AssertionError
+_ test_requested_route_and_exact_half_second_holds[line_forward_4-BALL_APPROACH_FINE_FORWARD_5-pickup_fine_prepare-ball_approach_fine_forward_45_5-rr\uc624\ub4a4\uc5d0\uc11c \ubbf8\uc138\uc624\ub4a4(45\ub3c4)] _
+
+clock = [10.0], previous = 'line_forward_4'
+action = 'BALL_APPROACH_FINE_FORWARD_5', prepare = 'pickup_fine_prepare'
+target = 'ball_approach_fine_forward_45_5', name = 'rr오뒤에서 미세오뒤(45도)'
+
+    @pytest.mark.parametrize('previous,action,prepare,target,name', CASES)
+    def test_requested_route_and_exact_half_second_holds(clock, previous, action, prepare, target, name):
+        aliases = yaml.safe_load((ROOT / ALIAS_PATH).read_text())['motion_aliases']
+>       assert aliases[prepare] == name
+E       AssertionError: assert 't오뒤에서 미세오뒤(45도)' == 'rr오뒤에서 미세오뒤(45도)'
+E         - rr오뒤에서 미세오뒤(45도)
+E         ? ^^
+E         + t오뒤에서 미세오뒤(45도)
+E         ? ^
+
+src/mission_control/test/test_catalog63_transitions.py:95: AssertionError
+_ test_requested_route_and_exact_half_second_holds[stationary_turn_left-BALL_APPROACH_FINE_FORWARD_5-pickup_fine_prepare-ball_approach_fine_forward_45_5-rr\uc624\ub4a4\uc5d0\uc11c \ubbf8\uc138\uc624\ub4a4(45\ub3c4)] _
+
+clock = [10.0], previous = 'stationary_turn_left'
+action = 'BALL_APPROACH_FINE_FORWARD_5', prepare = 'pickup_fine_prepare'
+target = 'ball_approach_fine_forward_45_5', name = 'rr오뒤에서 미세오뒤(45도)'
+
+    @pytest.mark.parametrize('previous,action,prepare,target,name', CASES)
+    def test_requested_route_and_exact_half_second_holds(clock, previous, action, prepare, target, name):
+        aliases = yaml.safe_load((ROOT / ALIAS_PATH).read_text())['motion_aliases']
+>       assert aliases[prepare] == name
+E       AssertionError: assert 't오뒤에서 미세오뒤(45도)' == 'rr오뒤에서 미세오뒤(45도)'
+E         - rr오뒤에서 미세오뒤(45도)
+E         ? ^^
+E         + t오뒤에서 미세오뒤(45도)
+E         ? ^
+
+src/mission_control/test/test_catalog63_transitions.py:95: AssertionError
+_ test_requested_route_and_exact_half_second_holds[stationary_turn_right-BALL_APPROACH_FINE_FORWARD_5-pickup_fine_prepare-ball_approach_fine_forward_45_5-rr\uc624\ub4a4\uc5d0\uc11c \ubbf8\uc138\uc624\ub4a4(45\ub3c4)] _
+
+clock = [10.0], previous = 'stationary_turn_right'
+action = 'BALL_APPROACH_FINE_FORWARD_5', prepare = 'pickup_fine_prepare'
+target = 'ball_approach_fine_forward_45_5', name = 'rr오뒤에서 미세오뒤(45도)'
+
+    @pytest.mark.parametrize('previous,action,prepare,target,name', CASES)
+    def test_requested_route_and_exact_half_second_holds(clock, previous, action, prepare, target, name):
+        aliases = yaml.safe_load((ROOT / ALIAS_PATH).read_text())['motion_aliases']
+>       assert aliases[prepare] == name
+E       AssertionError: assert 't오뒤에서 미세오뒤(45도)' == 'rr오뒤에서 미세오뒤(45도)'
+E         - rr오뒤에서 미세오뒤(45도)
+E         ? ^^
+E         + t오뒤에서 미세오뒤(45도)
+E         ? ^
+
+src/mission_control/test/test_catalog63_transitions.py:95: AssertionError
+_ test_requested_route_and_exact_half_second_holds[line_recovery_left_4-BALL_APPROACH_FINE_FORWARD_5-pickup_fine_prepare-ball_approach_fine_forward_45_5-rr\uc624\ub4a4\uc5d0\uc11c \ubbf8\uc138\uc624\ub4a4(45\ub3c4)] _
+
+clock = [10.0], previous = 'line_recovery_left_4'
+action = 'BALL_APPROACH_FINE_FORWARD_5', prepare = 'pickup_fine_prepare'
+target = 'ball_approach_fine_forward_45_5', name = 'rr오뒤에서 미세오뒤(45도)'
+
+    @pytest.mark.parametrize('previous,action,prepare,target,name', CASES)
+    def test_requested_route_and_exact_half_second_holds(clock, previous, action, prepare, target, name):
+        aliases = yaml.safe_load((ROOT / ALIAS_PATH).read_text())['motion_aliases']
+>       assert aliases[prepare] == name
+E       AssertionError: assert 't오뒤에서 미세오뒤(45도)' == 'rr오뒤에서 미세오뒤(45도)'
+E         - rr오뒤에서 미세오뒤(45도)
+E         ? ^^
+E         + t오뒤에서 미세오뒤(45도)
+E         ? ^
+
+src/mission_control/test/test_catalog63_transitions.py:95: AssertionError
+_ test_requested_route_and_exact_half_second_holds[line_recovery_right_4-BALL_APPROACH_FINE_FORWARD_5-pickup_fine_prepare-ball_approach_fine_forward_45_5-rr\uc624\ub4a4\uc5d0\uc11c \ubbf8\uc138\uc624\ub4a4(45\ub3c4)] _
+
+clock = [10.0], previous = 'line_recovery_right_4'
+action = 'BALL_APPROACH_FINE_FORWARD_5', prepare = 'pickup_fine_prepare'
+target = 'ball_approach_fine_forward_45_5', name = 'rr오뒤에서 미세오뒤(45도)'
+
+    @pytest.mark.parametrize('previous,action,prepare,target,name', CASES)
+    def test_requested_route_and_exact_half_second_holds(clock, previous, action, prepare, target, name):
+        aliases = yaml.safe_load((ROOT / ALIAS_PATH).read_text())['motion_aliases']
+>       assert aliases[prepare] == name
+E       AssertionError: assert 't오뒤에서 미세오뒤(45도)' == 'rr오뒤에서 미세오뒤(45도)'
+E         - rr오뒤에서 미세오뒤(45도)
+E         ? ^^
+E         + t오뒤에서 미세오뒤(45도)
+E         ? ^
+
+src/mission_control/test/test_catalog63_transitions.py:95: AssertionError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_without_fine_only_approach_keeps_direct_scoring[actions0]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_without_fine_only_approach_keeps_direct_scoring[actions1]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_waits_for_running_fine_motion_and_uses_only_completed_history
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_retry_does_not_repeat_completed_pose_preparation
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_production_action_mapping_contains_only_approved_contract
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_supported_action_builds_executor_request[SHOT-goal_shot]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.499-STRAIGHT_0-r\ubbf8\uc1380\ub3c4 \uacf5\uc7a1\uae30\uc6a9]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.5-STRAIGHT_0-r\ubbf8\uc1380\ub3c4 \uacf5\uc7a1\uae30\uc6a9]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.500001-BALL_APPROACH_FINE_FORWARD_5-r\ubbf8\uc13845\ub3c4]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.55-BALL_APPROACH_FINE_FORWARD_5-r\ubbf8\uc13845\ub3c4]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.57-BALL_APPROACH_FINE_FORWARD_5-r\ubbf8\uc13845\ub3c4]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.6-BALL_APPROACH_FINE_FORWARD_5-r\ubbf8\uc13845\ub3c4]
+FAILED src/mission_control/test/test_catalog63_transitions.py::test_requested_route_and_exact_half_second_holds[line_forward_4-BALL_APPROACH_FINE_FORWARD_5-pickup_fine_prepare-ball_approach_fine_forward_45_5-rr\uc624\ub4a4\uc5d0\uc11c \ubbf8\uc138\uc624\ub4a4(45\ub3c4)]
+FAILED src/mission_control/test/test_catalog63_transitions.py::test_requested_route_and_exact_half_second_holds[stationary_turn_left-BALL_APPROACH_FINE_FORWARD_5-pickup_fine_prepare-ball_approach_fine_forward_45_5-rr\uc624\ub4a4\uc5d0\uc11c \ubbf8\uc138\uc624\ub4a4(45\ub3c4)]
+FAILED src/mission_control/test/test_catalog63_transitions.py::test_requested_route_and_exact_half_second_holds[stationary_turn_right-BALL_APPROACH_FINE_FORWARD_5-pickup_fine_prepare-ball_approach_fine_forward_45_5-rr\uc624\ub4a4\uc5d0\uc11c \ubbf8\uc138\uc624\ub4a4(45\ub3c4)]
+FAILED src/mission_control/test/test_catalog63_transitions.py::test_requested_route_and_exact_half_second_holds[line_recovery_left_4-BALL_APPROACH_FINE_FORWARD_5-pickup_fine_prepare-ball_approach_fine_forward_45_5-rr\uc624\ub4a4\uc5d0\uc11c \ubbf8\uc138\uc624\ub4a4(45\ub3c4)]
+FAILED src/mission_control/test/test_catalog63_transitions.py::test_requested_route_and_exact_half_second_holds[line_recovery_right_4-BALL_APPROACH_FINE_FORWARD_5-pickup_fine_prepare-ball_approach_fine_forward_45_5-rr\uc624\ub4a4\uc5d0\uc11c \ubbf8\uc138\uc624\ub4a4(45\ub3c4)]
+17 failed, 813 passed in 6.45s

@@ -37,6 +37,7 @@ MotionStatus status_for_request(
   status.action = request.action;
   status.command_id = request.command_id;
   status.event_id = request.event_id;
+  status.goal_head_prepare_id = request.goal_head_prepare_id;
   status.request_id = request.request_id;
   status.motion_id = request.motion_id;
   status.error_code = error_code;
@@ -124,7 +125,7 @@ std::optional<ParsedRequest> parse_request(
 
   ParsedRequest parsed;
   std::string action;
-  const bool valid =
+  bool valid =
     get_required_string(object, "action", action) &&
     get_required_nullable_int(
       object, "command_id", parsed.request.command_id) &&
@@ -136,6 +137,12 @@ std::optional<ParsedRequest> parse_request(
       object, "motion_id", parsed.request.motion_id) &&
     get_required_positive_uint64(
       object, "timeout_ms", parsed.timeout_ms);
+  json_object * camera_id = nullptr;
+  if (json_object_object_get_ex(object, "goal_head_prepare_id", &camera_id)) {
+    valid = valid && json_object_get_type(camera_id) == json_type_int &&
+      json_object_get_int64(camera_id) > 0;
+    if (valid) {parsed.request.goal_head_prepare_id = json_object_get_int64(camera_id);}
+  }
   json_object_put(object);
 
   if (!valid) {
@@ -315,6 +322,15 @@ MotionStatus SdkExecutorCore::handle_cancel(const std::string & payload)
   }
 
   return status_for_active("RUNNING", "", "cancel requested");
+}
+
+std::optional<MotionStatus> SdkExecutorCore::take_queue_activation_status()
+{
+  if (!queued_running_status_pending_ || !active_) {
+    return std::nullopt;
+  }
+  queued_running_status_pending_ = false;
+  return status_for_active("RUNNING", "", "queued motion activated");
 }
 
 std::optional<MotionStatus> SdkExecutorCore::poll(std::uint64_t now_ms)

@@ -7,10 +7,10 @@ from step.approach_distance import BALL_PICKUP_DISTANCE_M
 
 
 PICKUP_WALK_DURATIONS = {
-    'ball_general_fine_forward_8': .388 * 5 / 1.05,
-    'pickup_fine_forward_0': .388 * 5 / 1.05,
+    'ball_general_fine_forward_8': .388 * 5 / (1.05 * .95),
+    'pickup_fine_forward_0': .388 * 5 / (1.05 * .95),
     'pickup_crab_left_0': .500 / .9025,
-    'pickup_crab_right_0': .540 / .9025,
+    'pickup_crab_right_0': .550 / 1.0,
 }
 
 PICKUP_WALK_ACTIONS = {
@@ -101,6 +101,8 @@ class PickupWalkReservation:
             self.forward_complete = True
         # Preview must not latch completion or advance loss recovery on the real planner.
         preview = copy(planner)
+        # A queued decision applies after this gait succeeds, not its predecessor.
+        preview.pickup_last_completed_motion_id = self.motion_id
         decision = (preview.plan_ball_pickup_initial_alignment(info) if self.stage == 'initial'
                     else preview.plan_ball_pickup_fine_alignment(info))
         if (not decision.valid or pickup_walk_motion(decision.action, self.motion_id) != self.motion_id

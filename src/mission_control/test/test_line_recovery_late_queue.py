@@ -27,7 +27,6 @@ def start_recovery(node, clock, sign):
 @pytest.mark.parametrize('aligned', [False, True])
 def test_late_frame_selects_recovery_or_forward_before_completion(clock, sign, phase, aligned):
     node = LiveInputHarness(phase=phase)
-    node.post_ball_line_run_until = clock[0] + 30.
     first = start_recovery(node, clock, sign)
     end = node.active_line_motion_started_at + node.active_line_motion_duration_sec
     clock[0] = end - Node.LINE_RECOVERY_PREQUEUE_LEAD_SEC

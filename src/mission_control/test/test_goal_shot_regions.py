@@ -162,5 +162,5 @@ def test_import_preserves_source_targets_and_applies_speed_once():
         assert runtime[name] == expected
         duration_ms = max(f['start_ms'] + f['time_ms'] for f in expected['frames']) / .95
         assert duration_ms + expected['completion']['settle_timeout_ms'] < FakeBridge.DEFAULT_TIMEOUT_MS
-    assert aliases['post_shot_default_turn_right'] == 'R골대후제자리우회전'
-    assert aliases['post_shot_default_turn_left'] == 'R골대후제자리좌회전'
+    assert aliases['post_shot_default_turn_right'] == 't골대후제자리우회전'
+    assert aliases['post_shot_default_turn_left'] == 't골대후 제자리좌회전'

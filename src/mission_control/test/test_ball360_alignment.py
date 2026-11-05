@@ -15,7 +15,7 @@ from test_motion_decision_planner import ball_info
     ('plan_ball_pickup_initial_alignment', 'BALL_PICKUP_CAMERA_DOWN_TURN', 'BALL_PICKUP_INITIAL_CRAB'),
     ('plan_ball_pickup_fine_alignment', 'BALL_PICKUP_FINE_TURN', 'BALL_PICKUP_CRAB'),
 ])
-@pytest.mark.parametrize('bottom', [100, 359, 360, 360.001, 450, 600])
+@pytest.mark.parametrize('bottom', [150, 359, 360, 360.001, 450, 600])
 @pytest.mark.parametrize('side', ['LEFT', 'RIGHT'])
 def test_pickup_360_boundary_uses_exactly_one_alignment_family(method, turn, crab, bottom, side):
     sign = -1 if side == 'LEFT' else 1
@@ -31,7 +31,7 @@ def test_pickup_360_boundary_uses_exactly_one_alignment_family(method, turn, cra
 @pytest.mark.parametrize('method', ['plan_ball_pickup_initial_alignment', 'plan_ball_pickup_fine_alignment'])
 def test_current_pixels_override_previous_close_state_in_both_directions(method):
     planner = MotionDecisionPlanner()
-    for bottom, family in [(100, 'CRAB'), (450, 'TURN'), (360, 'CRAB'), (361, 'TURN')]:
+    for bottom, family in [(150, 'CRAB'), (450, 'TURN'), (360, 'CRAB'), (361, 'TURN')]:
         decision = getattr(planner, method)(ball_sample(
             30, depth_m=.5, distance_m=.5, offset_x_px=-200, bottom_distance_px=bottom))
         assert family in decision.action

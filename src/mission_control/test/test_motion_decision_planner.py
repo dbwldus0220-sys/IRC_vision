@@ -2239,7 +2239,7 @@ def test_pickup_pixel_offset_does_not_force_turn_below_fifteen_degrees(
     decision = MotionDecisionPlanner().plan_ball_pickup_initial_alignment(
         ball_info(
             offset_x_px=offset_px,
-            bottom_distance_px=121,
+            bottom_distance_px=150,
             steering_angle_deg=0.0,
         )
     )
@@ -2255,7 +2255,7 @@ def test_pickup_pixel_offset_does_not_force_turn_below_fifteen_degrees(
         (71, "BALL_PICKUP_INITIAL_CRAB_RIGHT"),
     ],
 )
-@pytest.mark.parametrize("bottom_distance", [0, 99, 100])
+@pytest.mark.parametrize("bottom_distance", [150, 200, 360])
 def test_close_pickup_alignment_uses_only_crab(offset_px, expected_action, bottom_distance):
     decision = MotionDecisionPlanner().plan_ball_pickup_initial_alignment(
         ball_info(
@@ -2274,7 +2274,7 @@ def test_close_centered_pickup_does_not_use_stationary_turn():
         ball_info(
             distance_m=0.500,
             offset_x_px=70,
-            bottom_distance_px=100,
+            bottom_distance_px=150,
             steering_angle_deg=35.0,
         )
     )
@@ -2367,7 +2367,7 @@ def test_lost_ball_alignment_does_not_turn_from_image_half_memory(
     assert decision.source_command == {}
 
 
-@pytest.mark.parametrize("bottom_distance_px", [0, 500, 700])
+@pytest.mark.parametrize("bottom_distance_px", [150, 500, 700])
 @pytest.mark.parametrize(
     ("distance_m", "expected_motion"),
     [
@@ -2399,7 +2399,7 @@ def test_pickup_fine_step_distance_threshold_is_configurable():
         MotionDecisionConfig(pickup_fine_step_distance_m=0.40)
     )
     decision = planner.plan_ball_pickup_initial_alignment(
-        ball_info(distance_m=0.401, bottom_distance_px=80, steering_angle_deg=0.0)
+        ball_info(distance_m=0.401, bottom_distance_px=200, steering_angle_deg=0.0)
     )
 
     assert decision.source_command["pickup_approach_motion"] == "STRAIGHT"
@@ -2468,7 +2468,7 @@ def test_pickup_fine_alignment_uses_asymmetric_pixel_window(
 
     decision = planner.plan_ball_pickup_fine_alignment(
         ball_info(
-            bottom_distance_px=40,
+            bottom_distance_px=200,
             offset_x_px=offset_px,
             is_in_pickup_window=True,
         )
@@ -2524,9 +2524,9 @@ def test_pickup_fine_alignment_waits_without_valid_pixel_distance(
 @pytest.mark.parametrize(
     ("bottom_distance_px", "expected_action"),
     [
-        (81, "BALL_PICKUP_FINE_FORWARD"),
-        (80, "BALL_PICKUP_FINE_ALIGN_CONTINUE"),
-        (0, "BALL_PICKUP_FINE_ALIGN_CONTINUE"),
+        (201, "BALL_PICKUP_FINE_FORWARD"),
+        (200, "BALL_PICKUP_FINE_ALIGN_CONTINUE"),
+        (150, "BALL_PICKUP_FINE_ALIGN_CONTINUE"),
     ],
 )
 def test_pickup_fine_alignment_distance_is_separate_from_entry_threshold(
@@ -2536,7 +2536,7 @@ def test_pickup_fine_alignment_distance_is_separate_from_entry_threshold(
     planner = MotionDecisionPlanner(
         MotionDecisionConfig(
             pickup_fine_step_distance_m=0.570,
-            pickup_fine_align_bottom_distance_px=80,
+            pickup_fine_align_bottom_distance_px=200,
         )
     )
     info = ball_info(distance_m=0.570, bottom_distance_px=bottom_distance_px)
@@ -2546,13 +2546,13 @@ def test_pickup_fine_alignment_distance_is_separate_from_entry_threshold(
 
     assert initial.source_command["pickup_approach_motion"] == "STRAIGHT_0"
     assert fine.action == expected_action
-    assert fine.source_command["pickup_fine_align_bottom_distance_px"] == 80
+    assert fine.source_command["pickup_fine_align_bottom_distance_px"] == 200
 
 
 def test_centered_ball_not_ready_starts_pre_grab_sequence():
     decision = MotionDecisionPlanner().plan_ball_pickup_fine_alignment(
         ball_info(
-            bottom_distance_px=40,
+            bottom_distance_px=200,
             offset_x_norm=0.0,
             pickup_x_tolerance_norm=0.08,
             ground_distance_m=0.20,
@@ -2569,7 +2569,7 @@ def test_centered_ball_not_ready_starts_pre_grab_sequence():
 def test_centered_ball_outside_depth_window_starts_pre_grab_sequence():
     decision = MotionDecisionPlanner().plan_ball_pickup_fine_alignment(
         ball_info(
-            bottom_distance_px=40,
+            bottom_distance_px=200,
             offset_x_norm=0.0,
             pickup_x_tolerance_norm=0.08,
             pickup_ready=False,
@@ -2584,7 +2584,7 @@ def test_centered_ball_outside_depth_window_starts_pre_grab_sequence():
 def test_centered_ball_does_not_require_depth_to_start_pre_grab_sequence():
     decision = MotionDecisionPlanner().plan_ball_pickup_fine_alignment(
         ball_info(
-            bottom_distance_px=40,
+            bottom_distance_px=200,
             offset_x_norm=0.0,
             pickup_x_tolerance_norm=0.08,
             ground_distance_m=0.20,
@@ -2603,7 +2603,7 @@ def test_centered_ball_does_not_require_depth_to_start_pre_grab_sequence():
 def test_lateral_correction_remains_available_during_depth_dropout():
     decision = MotionDecisionPlanner().plan_ball_pickup_fine_alignment(
         ball_info(
-            bottom_distance_px=40,
+            bottom_distance_px=200,
             offset_x_norm=0.20,
             offset_x_px=56,
             depth_valid=False,
@@ -2620,7 +2620,7 @@ def test_lateral_correction_remains_available_during_depth_dropout():
 def test_fixed_fine_motion_is_not_repeated_when_depth_drops_out():
     decision = MotionDecisionPlanner().plan_ball_pickup_fine_alignment(
         ball_info(
-            bottom_distance_px=40,
+            bottom_distance_px=200,
             offset_x_norm=0.0,
             offset_x_px=0,
             depth_valid=False,
@@ -2679,10 +2679,10 @@ def test_close_pickup_loss_backs_up_one_cycle_and_reacquires(fine, offset):
         assert decision.reason == "close_ball_lost_backward_reacquisition"
         assert decision.source_command["backward_count"] == 1
         assert decision.sdk_motion_requested
-    centered = ball_info(distance_m=0.4, offset_x_px=0, bottom_distance_px=90)
+    centered = ball_info(distance_m=0.4, offset_x_px=0, bottom_distance_px=150)
     if fine:
         assert plan(centered).action == "BALL_PICKUP_FINE_ALIGN_CONTINUE"
-    assert plan({**centered, "bottom_distance_px": 40}).action.endswith("ALIGN_CONTINUE")
+    assert plan({**centered, "bottom_distance_px": 40}).action == f"BALL_PICKUP_{stage}_BACKWARD"
     planner.clear_collected_ball_tracking()
     assert not planner.pickup_close_alignment_active
 
@@ -2690,11 +2690,11 @@ def test_close_pickup_loss_backs_up_one_cycle_and_reacquires(fine, offset):
 def test_pickup_close_latch_survives_pixel_jitter_and_suppresses_fallback_turn():
     planner = MotionDecisionPlanner()
     close = ball_info(
-        distance_m=0.4, bottom_distance_px=100, offset_x_px=150,
+        distance_m=0.4, bottom_distance_px=150, offset_x_px=150,
         offset_x_norm=0.25, steering_angle_deg=40, pickup_x_tolerance_norm=0.08,
     )
     assert planner.plan_ball_pickup_initial_alignment(close).action.endswith("CRAB_RIGHT")
-    jitter = {**close, "bottom_distance_px": 101}
+    jitter = {**close, "bottom_distance_px": 151}
     assert planner.plan_ball_pickup_initial_alignment(jitter).action.endswith("CRAB_RIGHT")
     assert planner.plan_ball_pickup_post_backward_alignment(jitter).action.endswith("ALIGN_CONTINUE")
     planner.clear_collected_ball_tracking()
@@ -2845,8 +2845,8 @@ def test_goal_control_range_override_reaches_goal_subplanner():
 
 
 @pytest.mark.parametrize('bottom_distance_px,expected_action', [
-    (122, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'),
-    (134, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'),
+    (122, 'BALL_PICKUP_FINE_BACKWARD'),
+    (134, 'BALL_PICKUP_FINE_BACKWARD'),
     (258, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'),
     (269, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'),
     (270, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'),

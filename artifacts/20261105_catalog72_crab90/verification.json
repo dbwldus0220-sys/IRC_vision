@@ -1,0 +1,25 @@
+{
+  "source_sha256_verified": true,
+  "updated_motions": [
+    "t미세오옆꽃게90도(1회)",
+    "t미세오옆꽃게90도(2회)"
+  ],
+  "change": "Third frame motor 0: -64.0 -> 1.0; all four frames now use 1.0.",
+  "other_motion_fields_unchanged": true,
+  "unchanged_other_motions_per_catalog": 141,
+  "protected_controller_sdk_launch_alias_files_unchanged": 96,
+  "source_speed": 1.0,
+  "durations_sec": [
+    0.55,
+    1.1
+  ],
+  "alias_changes": {},
+  "queue_comparison_cases": 43808,
+  "queue_results_changed": 0,
+  "queue_matrix_sha256": "bd2eb39b92bc078673226dc16610e90cbab206010b045b01b4781c2120a21247",
+  "python_tests_passed": 209,
+  "startup_cpp_test": "passed with all four head/shoulder override combinations",
+  "pc_runtime_mock_runs_passed": 8,
+  "head_override_off_camera_dip_removed": true,
+  "hardware_used": false
+}

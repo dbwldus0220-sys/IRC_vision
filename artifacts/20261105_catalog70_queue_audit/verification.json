@@ -1,0 +1,315 @@
+{
+  "total_sdk_pairs_before": 43218,
+  "total_sdk_pairs_after": 43808,
+  "active_automatic_queue_cases": 546,
+  "automatic_queue_cases_changed": [],
+  "new_automatic_queue_blocks": [],
+  "existing_automatic_queue_rejections": 48,
+  "source_camera_variants": {
+    "r오뒤에서 오옆": [
+      "r오뒤에서 오옆꽃게0도",
+      "r오뒤에서 오옆꽃게90도"
+    ],
+    "r미세오뒤에서 오옆": [
+      "r미세오뒤에서 오옆0도",
+      "r미세오뒤에서 오옆 90도"
+    ],
+    "t미세오옆꽃게": [
+      "t미세오옆꽃게(0도)-2회",
+      "t미세오옆꽃게(0도)-1회",
+      "t미세오옆꽃게90도(1회)",
+      "t미세오옆꽃게90도(2회)"
+    ]
+  },
+  "timing_simulation": [
+    {
+      "stage": "before",
+      "fps": 10,
+      "processing_delay_sec": 0,
+      "phases_tested": 100,
+      "phases_with_reservation": 0,
+      "duration_sec": 0.5983379501385042,
+      "capture_window_sec": 0.17950138504155125
+    },
+    {
+      "stage": "before",
+      "fps": 10,
+      "processing_delay_sec": 0.03,
+      "phases_tested": 100,
+      "phases_with_reservation": 0,
+      "duration_sec": 0.5983379501385042,
+      "capture_window_sec": 0.17950138504155125
+    },
+    {
+      "stage": "before",
+      "fps": 10,
+      "processing_delay_sec": 0.05,
+      "phases_tested": 100,
+      "phases_with_reservation": 0,
+      "duration_sec": 0.5983379501385042,
+      "capture_window_sec": 0.17950138504155125
+    },
+    {
+      "stage": "before",
+      "fps": 10,
+      "processing_delay_sec": 0.1,
+      "phases_tested": 100,
+      "phases_with_reservation": 0,
+      "duration_sec": 0.5983379501385042,
+      "capture_window_sec": 0.17950138504155125
+    },
+    {
+      "stage": "before",
+      "fps": 15,
+      "processing_delay_sec": 0,
+      "phases_tested": 100,
+      "phases_with_reservation": 69,
+      "duration_sec": 0.5983379501385042,
+      "capture_window_sec": 0.17950138504155125
+    },
+    {
+      "stage": "before",
+      "fps": 15,
+      "processing_delay_sec": 0.03,
+      "phases_tested": 100,
+      "phases_with_reservation": 24,
+      "duration_sec": 0.5983379501385042,
+      "capture_window_sec": 0.17950138504155125
+    },
+    {
+      "stage": "before",
+      "fps": 15,
+      "processing_delay_sec": 0.05,
+      "phases_tested": 100,
+      "phases_with_reservation": 0,
+      "duration_sec": 0.5983379501385042,
+      "capture_window_sec": 0.17950138504155125
+    },
+    {
+      "stage": "before",
+      "fps": 15,
+      "processing_delay_sec": 0.1,
+      "phases_tested": 100,
+      "phases_with_reservation": 0,
+      "duration_sec": 0.5983379501385042,
+      "capture_window_sec": 0.17950138504155125
+    },
+    {
+      "stage": "before",
+      "fps": 20,
+      "processing_delay_sec": 0,
+      "phases_tested": 100,
+      "phases_with_reservation": 100,
+      "duration_sec": 0.5983379501385042,
+      "capture_window_sec": 0.17950138504155125
+    },
+    {
+      "stage": "before",
+      "fps": 20,
+      "processing_delay_sec": 0.03,
+      "phases_tested": 100,
+      "phases_with_reservation": 99,
+      "duration_sec": 0.5983379501385042,
+      "capture_window_sec": 0.17950138504155125
+    },
+    {
+      "stage": "before",
+      "fps": 20,
+      "processing_delay_sec": 0.05,
+      "phases_tested": 100,
+      "phases_with_reservation": 59,
+      "duration_sec": 0.5983379501385042,
+      "capture_window_sec": 0.17950138504155125
+    },
+    {
+      "stage": "before",
+      "fps": 20,
+      "processing_delay_sec": 0.1,
+      "phases_tested": 100,
+      "phases_with_reservation": 0,
+      "duration_sec": 0.5983379501385042,
+      "capture_window_sec": 0.17950138504155125
+    },
+    {
+      "stage": "before",
+      "fps": 30,
+      "processing_delay_sec": 0,
+      "phases_tested": 100,
+      "phases_with_reservation": 100,
+      "duration_sec": 0.5983379501385042,
+      "capture_window_sec": 0.17950138504155125
+    },
+    {
+      "stage": "before",
+      "fps": 30,
+      "processing_delay_sec": 0.03,
+      "phases_tested": 100,
+      "phases_with_reservation": 100,
+      "duration_sec": 0.5983379501385042,
+      "capture_window_sec": 0.17950138504155125
+    },
+    {
+      "stage": "before",
+      "fps": 30,
+      "processing_delay_sec": 0.05,
+      "phases_tested": 100,
+      "phases_with_reservation": 100,
+      "duration_sec": 0.5983379501385042,
+      "capture_window_sec": 0.17950138504155125
+    },
+    {
+      "stage": "before",
+      "fps": 30,
+      "processing_delay_sec": 0.1,
+      "phases_tested": 100,
+      "phases_with_reservation": 39,
+      "duration_sec": 0.5983379501385042,
+      "capture_window_sec": 0.17950138504155125
+    },
+    {
+      "stage": "after",
+      "fps": 10,
+      "processing_delay_sec": 0,
+      "phases_tested": 100,
+      "phases_with_reservation": 0,
+      "duration_sec": 0.55,
+      "capture_window_sec": 0.165
+    },
+    {
+      "stage": "after",
+      "fps": 10,
+      "processing_delay_sec": 0.03,
+      "phases_tested": 100,
+      "phases_with_reservation": 0,
+      "duration_sec": 0.55,
+      "capture_window_sec": 0.165
+    },
+    {
+      "stage": "after",
+      "fps": 10,
+      "processing_delay_sec": 0.05,
+      "phases_tested": 100,
+      "phases_with_reservation": 0,
+      "duration_sec": 0.55,
+      "capture_window_sec": 0.165
+    },
+    {
+      "stage": "after",
+      "fps": 10,
+      "processing_delay_sec": 0.1,
+      "phases_tested": 100,
+      "phases_with_reservation": 0,
+      "duration_sec": 0.55,
+      "capture_window_sec": 0.165
+    },
+    {
+      "stage": "after",
+      "fps": 15,
+      "processing_delay_sec": 0,
+      "phases_tested": 100,
+      "phases_with_reservation": 48,
+      "duration_sec": 0.55,
+      "capture_window_sec": 0.165
+    },
+    {
+      "stage": "after",
+      "fps": 15,
+      "processing_delay_sec": 0.03,
+      "phases_tested": 100,
+      "phases_with_reservation": 3,
+      "duration_sec": 0.55,
+      "capture_window_sec": 0.165
+    },
+    {
+      "stage": "after",
+      "fps": 15,
+      "processing_delay_sec": 0.05,
+      "phases_tested": 100,
+      "phases_with_reservation": 0,
+      "duration_sec": 0.55,
+      "capture_window_sec": 0.165
+    },
+    {
+      "stage": "after",
+      "fps": 15,
+      "processing_delay_sec": 0.1,
+      "phases_tested": 100,
+      "phases_with_reservation": 0,
+      "duration_sec": 0.55,
+      "capture_window_sec": 0.165
+    },
+    {
+      "stage": "after",
+      "fps": 20,
+      "processing_delay_sec": 0,
+      "phases_tested": 100,
+      "phases_with_reservation": 100,
+      "duration_sec": 0.55,
+      "capture_window_sec": 0.165
+    },
+    {
+      "stage": "after",
+      "fps": 20,
+      "processing_delay_sec": 0.03,
+      "phases_tested": 100,
+      "phases_with_reservation": 70,
+      "duration_sec": 0.55,
+      "capture_window_sec": 0.165
+    },
+    {
+      "stage": "after",
+      "fps": 20,
+      "processing_delay_sec": 0.05,
+      "phases_tested": 100,
+      "phases_with_reservation": 30,
+      "duration_sec": 0.55,
+      "capture_window_sec": 0.165
+    },
+    {
+      "stage": "after",
+      "fps": 20,
+      "processing_delay_sec": 0.1,
+      "phases_tested": 100,
+      "phases_with_reservation": 0,
+      "duration_sec": 0.55,
+      "capture_window_sec": 0.165
+    },
+    {
+      "stage": "after",
+      "fps": 30,
+      "processing_delay_sec": 0,
+      "phases_tested": 100,
+      "phases_with_reservation": 100,
+      "duration_sec": 0.55,
+      "capture_window_sec": 0.165
+    },
+    {
+      "stage": "after",
+      "fps": 30,
+      "processing_delay_sec": 0.03,
+      "phases_tested": 100,
+      "phases_with_reservation": 100,
+      "duration_sec": 0.55,
+      "capture_window_sec": 0.165
+    },
+    {
+      "stage": "after",
+      "fps": 30,
+      "processing_delay_sec": 0.05,
+      "phases_tested": 100,
+      "phases_with_reservation": 100,
+      "duration_sec": 0.55,
+      "capture_window_sec": 0.165
+    },
+    {
+      "stage": "after",
+      "fps": 30,
+      "processing_delay_sec": 0.1,
+      "phases_tested": 100,
+      "phases_with_reservation": 0,
+      "duration_sec": 0.55,
+      "capture_window_sec": 0.165
+    }
+  ],
+  "assumptions": "Ideal periodic fresh confirmed Ball frames, stable right-crab decision, configurable fixed processing delay; no hardware or measured FPS."
+}
