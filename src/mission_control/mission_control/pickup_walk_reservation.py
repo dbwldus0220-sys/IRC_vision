@@ -7,8 +7,8 @@ from step.approach_distance import BALL_PICKUP_DISTANCE_M
 
 
 PICKUP_WALK_DURATIONS = {
-    'ball_general_fine_forward_8': .376 * 5 / .9975,
-    'pickup_fine_forward_0': .376 * 5 / .9975,
+    'ball_general_fine_forward_8': .388 * 5 / 1.05,
+    'pickup_fine_forward_0': .388 * 5 / 1.05,
     'pickup_crab_left_0': .500 / .9025,
     'pickup_crab_right_0': .540 / .9025,
 }

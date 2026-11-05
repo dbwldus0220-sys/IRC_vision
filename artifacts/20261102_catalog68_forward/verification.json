@@ -1,0 +1,143 @@
+{
+  "backup": "/tmp/step_catalog68_xceau2vo",
+  "source_sha256": "190adabe71aa65375e95bb21964b967537dbf29f25420497ff38c431a2052fa8",
+  "catalogs": {
+    "runtime": {
+      "replaced": [
+        "R전진45도(4회)",
+        "t전진실전",
+        "R전진90도(4회)",
+        "R전진90도(6회)",
+        "R전진0도(4회)",
+        "R전진0도(6회)",
+        "R전진45도(2회)",
+        "R전진45도(8회)",
+        "R전진90도(2회)"
+      ],
+      "unchanged_count": 134
+    },
+    "pc": {
+      "replaced": [
+        "R전진45도(4회)",
+        "t전진실전",
+        "R전진90도(4회)",
+        "R전진90도(6회)",
+        "R전진0도(4회)",
+        "R전진0도(6회)",
+        "R전진45도(2회)",
+        "R전진45도(8회)",
+        "R전진90도(2회)"
+      ],
+      "unchanged_count": 134
+    }
+  },
+  "queue_results": [
+    {
+      "from": "t전진실전",
+      "to": "t전진실전",
+      "start_accepted": true,
+      "queue_result": "QUEUED",
+      "duration_ms": 3084
+    },
+    {
+      "from": "t전진실전",
+      "to": "R전진45도(2회)",
+      "start_accepted": true,
+      "queue_result": "QUEUED",
+      "duration_ms": 3084
+    },
+    {
+      "from": "t전진실전",
+      "to": "t라인복귀좌실전",
+      "start_accepted": true,
+      "queue_result": "INCOMPATIBLE_TRANSITION",
+      "duration_ms": 3084
+    },
+    {
+      "from": "t전진실전",
+      "to": "t라인복귀우실전",
+      "start_accepted": true,
+      "queue_result": "INCOMPATIBLE_TRANSITION",
+      "duration_ms": 3084
+    },
+    {
+      "from": "t라인복귀좌실전",
+      "to": "t전진실전",
+      "start_accepted": true,
+      "queue_result": "INCOMPATIBLE_TRANSITION",
+      "duration_ms": 2056
+    },
+    {
+      "from": "t라인복귀우실전",
+      "to": "t전진실전",
+      "start_accepted": true,
+      "queue_result": "INCOMPATIBLE_TRANSITION",
+      "duration_ms": 2064
+    },
+    {
+      "from": "t라인복귀좌실전",
+      "to": "t라인복귀좌실전",
+      "start_accepted": true,
+      "queue_result": "QUEUED",
+      "duration_ms": 2056
+    }
+  ],
+  "python_tests": {
+    "passed": 186,
+    "failed": 1,
+    "failure": "Legacy upsert test expects runtime speed source*0.95; explicit user instruction keeps source speed."
+  },
+  "cpp_forward_timing_test": "passed: legacy and t names, feedback delays 0/16/140ms, interpolation modes, explicit queue holds, entry and camera checks",
+  "controller_logic_unchanged_except_duration_maps": true,
+  "remaining_incompatible_transitions": "Existing entry checks retained. Left entry start_ms=79 vs forward=80 and motor12=2 vs forward=0. Right entry pose/frame names differ despite matching numeric entry targets and timings.",
+  "same_data_old_and_new_names_have_identical_feedback_accounting": [
+    {
+      "name": "t전진실전",
+      "simulated_read_delay_ms": 0,
+      "completion_times_ms": [
+        3090.0,
+        6180.0
+      ]
+    },
+    {
+      "name": "R전진45도(6회)",
+      "simulated_read_delay_ms": 0,
+      "completion_times_ms": [
+        3090.0,
+        6180.0
+      ]
+    },
+    {
+      "name": "t전진실전",
+      "simulated_read_delay_ms": 16,
+      "completion_times_ms": [
+        3171.0,
+        6321.0
+      ]
+    },
+    {
+      "name": "R전진45도(6회)",
+      "simulated_read_delay_ms": 16,
+      "completion_times_ms": [
+        3171.0,
+        6321.0
+      ]
+    },
+    {
+      "name": "t전진실전",
+      "simulated_read_delay_ms": 40,
+      "completion_times_ms": [
+        3285.0,
+        6525.0
+      ]
+    },
+    {
+      "name": "R전진45도(6회)",
+      "simulated_read_delay_ms": 40,
+      "completion_times_ms": [
+        3285.0,
+        6525.0
+      ]
+    }
+  ]
+}

@@ -1809,8 +1809,7 @@ class MotionCommandBridgeNode(Node):
 
         request_id = command_id
         timeout_ms = self.timeout_ms_from_payload(payload)
-        # Line forward/recovery share an entry frame. The SDK validates it before
-        # queueing, so the boundary needs no second start-position read.
+        # The SDK validates gait continuity before accepting a reservation.
         seamless_walking_groups = (
             {"forward", "sdk_forward_4", "line_recovery_left_4",
              "line_recovery_left_6", "line_recovery_right_4"}
@@ -1819,11 +1818,16 @@ class MotionCommandBridgeNode(Node):
             ) for count in (2, 4, 6, 8)},
             {f"goal_camera_90_forward_{count}" for count in (2, 4, 6, 8)}
             | {"line_recovery_left_4", "line_recovery_right_4"},
+            {f"goal_camera_90_fine_forward_{count}" for count in (1, 2, 3, 4)},
         )
         compatible_walking_transition = any(
             motion_id in group and self.active_motion_id in group
             for group in seamless_walking_groups
         )
+        if (goal_handoff
+                and self.active_motion_id in seamless_walking_groups[0]
+                and motion_id in seamless_walking_groups[1]):
+            compatible_walking_transition = True
         walking_transition = bool(
             motion_id.startswith(("line_forward_", "line_recovery_", "goal_camera_90_forward_", "goal_camera_90_fine_forward_"))
             and (self.active_motion_id or "").startswith(("line_forward_", "line_recovery_", "goal_camera_90_forward_", "goal_camera_90_fine_forward_"))

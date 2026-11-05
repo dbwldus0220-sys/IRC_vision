@@ -1,0 +1,337 @@
+{
+  "scope": "Investigate unintentional line gait boundary delays; intentional 0.5 second dwells excluded. No controller or SDK code changed.",
+  "queue_probe": [
+    {
+      "catalog": "current",
+      "from": "t전진실전",
+      "to": "t전진실전",
+      "start_accepted": true,
+      "queue_result": "QUEUED",
+      "duration_ms": 3084
+    },
+    {
+      "catalog": "current",
+      "from": "t전진실전",
+      "to": "R전진45도(2회)",
+      "start_accepted": true,
+      "queue_result": "QUEUED",
+      "duration_ms": 3084
+    },
+    {
+      "catalog": "current",
+      "from": "R전진45도(2회)",
+      "to": "t전진실전",
+      "start_accepted": true,
+      "queue_result": "QUEUED",
+      "duration_ms": 1028
+    },
+    {
+      "catalog": "current",
+      "from": "t전진실전",
+      "to": "t라인복귀좌실전",
+      "start_accepted": true,
+      "queue_result": "INCOMPATIBLE_TRANSITION",
+      "duration_ms": 3084
+    },
+    {
+      "catalog": "current",
+      "from": "t전진실전",
+      "to": "t라인복귀우실전",
+      "start_accepted": true,
+      "queue_result": "INCOMPATIBLE_TRANSITION",
+      "duration_ms": 3084
+    },
+    {
+      "catalog": "current",
+      "from": "t라인복귀좌실전",
+      "to": "t전진실전",
+      "start_accepted": true,
+      "queue_result": "INCOMPATIBLE_TRANSITION",
+      "duration_ms": 2056
+    },
+    {
+      "catalog": "current",
+      "from": "t라인복귀우실전",
+      "to": "t전진실전",
+      "start_accepted": true,
+      "queue_result": "INCOMPATIBLE_TRANSITION",
+      "duration_ms": 2064
+    },
+    {
+      "catalog": "current",
+      "from": "t라인복귀좌실전",
+      "to": "t라인복귀좌실전",
+      "start_accepted": true,
+      "queue_result": "QUEUED",
+      "duration_ms": 2056
+    },
+    {
+      "catalog": "current",
+      "from": "t라인복귀좌실전",
+      "to": "t라인복귀우실전",
+      "start_accepted": true,
+      "queue_result": "INCOMPATIBLE_TRANSITION",
+      "duration_ms": 2056
+    },
+    {
+      "catalog": "before67",
+      "from": "t전진실전",
+      "to": "t전진실전",
+      "start_accepted": true,
+      "queue_result": "QUEUED",
+      "duration_ms": 3084
+    },
+    {
+      "catalog": "before67",
+      "from": "t전진실전",
+      "to": "R전진45도(2회)",
+      "start_accepted": true,
+      "queue_result": "INCOMPATIBLE_TRANSITION",
+      "duration_ms": 3084
+    },
+    {
+      "catalog": "before67",
+      "from": "R전진45도(2회)",
+      "to": "t전진실전",
+      "start_accepted": true,
+      "queue_result": "INCOMPATIBLE_TRANSITION",
+      "duration_ms": 1090
+    },
+    {
+      "catalog": "before67",
+      "from": "t전진실전",
+      "to": "t라인복귀좌실전",
+      "start_accepted": true,
+      "queue_result": "INCOMPATIBLE_TRANSITION",
+      "duration_ms": 3084
+    },
+    {
+      "catalog": "before67",
+      "from": "t전진실전",
+      "to": "t라인복귀우실전",
+      "start_accepted": true,
+      "queue_result": "INCOMPATIBLE_TRANSITION",
+      "duration_ms": 3084
+    },
+    {
+      "catalog": "before67",
+      "from": "t라인복귀좌실전",
+      "to": "t전진실전",
+      "start_accepted": true,
+      "queue_result": "INCOMPATIBLE_TRANSITION",
+      "duration_ms": 2056
+    },
+    {
+      "catalog": "before67",
+      "from": "t라인복귀우실전",
+      "to": "t전진실전",
+      "start_accepted": true,
+      "queue_result": "INCOMPATIBLE_TRANSITION",
+      "duration_ms": 2064
+    },
+    {
+      "catalog": "before67",
+      "from": "t라인복귀좌실전",
+      "to": "t라인복귀좌실전",
+      "start_accepted": true,
+      "queue_result": "QUEUED",
+      "duration_ms": 2056
+    },
+    {
+      "catalog": "before67",
+      "from": "t라인복귀좌실전",
+      "to": "t라인복귀우실전",
+      "start_accepted": true,
+      "queue_result": "INCOMPATIBLE_TRANSITION",
+      "duration_ms": 2056
+    },
+    {
+      "catalog": "git_head",
+      "from": "R전진45도(6회)",
+      "to": "R전진라인복귀좌",
+      "start_accepted": true,
+      "queue_result": "QUEUED",
+      "duration_ms": 3270
+    },
+    {
+      "catalog": "git_head",
+      "from": "R전진45도(6회)",
+      "to": "R라인복귀우회전",
+      "start_accepted": true,
+      "queue_result": "QUEUED",
+      "duration_ms": 3270
+    },
+    {
+      "catalog": "git_head",
+      "from": "R전진라인복귀좌",
+      "to": "R전진45도(6회)",
+      "start_accepted": true,
+      "queue_result": "QUEUED",
+      "duration_ms": 2192
+    },
+    {
+      "catalog": "names_only_counterfactual",
+      "from": "R전진45도(6회)",
+      "to": "R전진라인복귀좌",
+      "start_accepted": true,
+      "queue_result": "QUEUED",
+      "duration_ms": 3084
+    },
+    {
+      "catalog": "names_only_counterfactual",
+      "from": "R전진45도(6회)",
+      "to": "R라인복귀우회전",
+      "start_accepted": true,
+      "queue_result": "INCOMPATIBLE_TRANSITION",
+      "duration_ms": 3084
+    },
+    {
+      "catalog": "names_only_counterfactual",
+      "from": "R전진라인복귀좌",
+      "to": "R전진45도(6회)",
+      "start_accepted": true,
+      "queue_result": "QUEUED",
+      "duration_ms": 2056
+    }
+  ],
+  "simulated_feedback_timing": [
+    {
+      "name": "t전진실전",
+      "simulated_feedback_delay_ms": 0,
+      "first_completion_ms": 3090.0,
+      "second_completion_ms": 6180.0,
+      "queued_motion_elapsed_ms": 3090.0
+    },
+    {
+      "name": "R전진45도(6회)",
+      "simulated_feedback_delay_ms": 0,
+      "first_completion_ms": 3090.0,
+      "second_completion_ms": 6180.0,
+      "queued_motion_elapsed_ms": 3090.0
+    },
+    {
+      "name": "t전진실전",
+      "simulated_feedback_delay_ms": 16,
+      "first_completion_ms": 3276.0,
+      "second_completion_ms": 6552.0,
+      "queued_motion_elapsed_ms": 3276.0
+    },
+    {
+      "name": "R전진45도(6회)",
+      "simulated_feedback_delay_ms": 16,
+      "first_completion_ms": 3171.0,
+      "second_completion_ms": 6321.0,
+      "queued_motion_elapsed_ms": 3150.0
+    },
+    {
+      "name": "t전진실전",
+      "simulated_feedback_delay_ms": 40,
+      "first_completion_ms": 3510.0,
+      "second_completion_ms": 7020.0,
+      "queued_motion_elapsed_ms": 3510.0
+    },
+    {
+      "name": "R전진45도(6회)",
+      "simulated_feedback_delay_ms": 40,
+      "first_completion_ms": 3285.0,
+      "second_completion_ms": 6525.0,
+      "queued_motion_elapsed_ms": 3240.0
+    }
+  ],
+  "duration_mismatch": [
+    {
+      "action": "STRAIGHT",
+      "motion_id": "line_forward_6",
+      "motion": "t전진실전",
+      "configured_sec": 3.2652631578947373,
+      "catalog_nominal_sec": 3.084,
+      "capture_start_late_by_sec": 0.12688421052631607,
+      "recovery_reservation_lead_sec": null
+    },
+    {
+      "action": "STRAIGHT_1",
+      "motion_id": "line_forward_2",
+      "motion": "R전진45도(2회)",
+      "configured_sec": 1.088421052631579,
+      "catalog_nominal_sec": 1.028,
+      "capture_start_late_by_sec": 0.042294736842105246,
+      "recovery_reservation_lead_sec": null
+    },
+    {
+      "action": "STRAIGHT_2",
+      "motion_id": "line_forward_4",
+      "motion": "R전진45도(4회)",
+      "configured_sec": 2.176842105263158,
+      "catalog_nominal_sec": 2.056,
+      "capture_start_late_by_sec": 0.08458947368421049,
+      "recovery_reservation_lead_sec": null
+    },
+    {
+      "action": "STRAIGHT_4",
+      "motion_id": "line_forward_8",
+      "motion": "R전진45도(8회)",
+      "configured_sec": 4.353684210526316,
+      "catalog_nominal_sec": 4.112,
+      "capture_start_late_by_sec": 0.16917894736842098,
+      "recovery_reservation_lead_sec": null
+    },
+    {
+      "action": "LEFT",
+      "motion_id": "line_recovery_left_4",
+      "motion": "t라인복귀좌실전",
+      "configured_sec": 2.1894736842105265,
+      "catalog_nominal_sec": 2.056,
+      "capture_start_late_by_sec": 0.09343157894736848,
+      "recovery_reservation_lead_sec": 0.16652631578947363
+    },
+    {
+      "action": "RIGHT",
+      "motion_id": "line_recovery_right_4",
+      "motion": "t라인복귀우실전",
+      "configured_sec": 2.168421052631579,
+      "catalog_nominal_sec": 2.064,
+      "capture_start_late_by_sec": 0.07309473684210527,
+      "recovery_reservation_lead_sec": 0.19557894736842107
+    }
+  ],
+  "confirmed_findings": [
+    "Current t forward-to-recovery and recovery-to-forward queue requests are rejected as INCOMPATIBLE_TRANSITION; identical forward requests are accepted.",
+    "Renaming only t forward/left-recovery to the legacy names in a disposable catalog makes their queue accepted. Right-recovery still fails: first pose name, start_ms (80 vs 79), and motor 12 angle (0 vs 2 degrees) differ.",
+    "Forward boundary feedback accounting excludes t motion names; a virtual read delay causes extra elapsed time despite an accepted same-motion queue. Simulator timings are not hardware measurements.",
+    "Line and pickup reservation duration constants differ from the imported catalog.",
+    "Decision node logs a prequeue request before executor acceptance; REJECTED clears its queued state without logging the rejection reason."
+  ],
+  "historical_evidence": {
+    "2026-11-01": "/home/jet/.ros/log/python3_3244_1793529766681.log",
+    "2026-11-02": "/home/jet/.ros/log/python3_8269_1793564682694.log",
+    "limitation": "Historical logs show requests, not SDK queue-accept events or per-motor timing. They cannot establish exact motor idle gaps or conclusively attribute every yesterday pause to the current-catalog reproduction."
+  },
+  "tests": {
+    "command": "PYTHONPATH=src/mission_control:src/step python3 -m pytest -q src/mission_control/test/test_line_continuous_missions.py src/mission_control/test/test_pickup_continuous_walk.py",
+    "passed": 90,
+    "failed": [
+      "test_walking_capture_windows_match_active_recovery_catalogs",
+      "test_reservation_durations_match_current_runtime"
+    ],
+    "failures": "Existing reservation estimates still use previous motion durations and speeds."
+  },
+  "ball_fine_unification": {
+    "renames": {
+      "r미세45도": "t미세45도(5회)",
+      "r미세0도 공잡기용": "t미세0도(5회)",
+      "r미세0도 공잡기용(상단탐색3회)": "t미세0도(3회)"
+    },
+    "changed_aliases": {
+      "ball_general_fine_forward_8": "t미세0도(5회)",
+      "ball_approach_fine_forward_45_5": "t미세45도(5회)",
+      "ball_top_loss_fine_forward_45_3": "t미세0도(3회)",
+      "pickup_top_loss_fine_forward_0_3": "t미세0도(3회)",
+      "pickup_fine_forward_0": "t미세0도(5회)"
+    }
+  },
+  "source_sha256": {
+    "external_sdk/gui_aligned/robot_motion_player.cpp": "0c5b715538fea250dd4e0c8b7523a7d0131f304b983b20dcfaa23acdbe3fc176",
+    "src/mission_control/mission_control/motion_decision_node.py": "85e2c59df31152d5294f9544d5224e19e13723cdc6867cd299f360c1e571f180",
+    "artifacts/robot_motions_runtime.json": "735aac0aebace4d55fc7b2f23ef0d04aa267444d9406bc0ee45fe0b109deda4f"
+  }
+}

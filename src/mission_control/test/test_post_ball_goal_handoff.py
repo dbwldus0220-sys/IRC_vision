@@ -267,3 +267,77 @@ def test_camera_preparation_respects_motion_and_grasp_gates(clock, blocked):
     clock[0] = 15.0
     Node._publish_decision(node)
     assert not node.camera_requests
+
+
+@pytest.mark.parametrize('angle,depth', [(0, 1.), (-25, 1.), (25, 1.), (0, .57)])
+def test_line_reserves_goal_after_three_head_up_images_and_promotes(clock, angle, depth):
+    node, first = start_line(clock)
+    raise_camera(node, clock)
+    for instant in (15.5, 15.6, 15.7):
+        clock[0] = instant
+        receive(node, clock, 'goal', goal(angle, depth_m=depth))
+    assert len(node.publisher.messages) == 2
+    second = node.publisher.messages[-1]
+    assert second['source'] == 'goal'
+    assert second['phase'] == 'GOAL_APPROACH'
+    assert second['source_command']['post_ball_goal_handoff'] is True
+    assert node.queued_general_command_id == second['command_id']
+    assert node.mission_phase == 'LINE_TRACK_AFTER_PICKUP'
+    assert node.general_motion_gate.active_command_id == first['command_id']
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(String(data=json.dumps(first)))
+    bridge.navigation_command_callback(String(data=json.dumps(second)))
+    fine = second['action'] == 'GOAL_CAMERA90_FINE_FORWARD_3'
+    assert bridge.queued_request_deferred is fine
+    assert len(decoded_messages(bridge.executor_request_publisher)) == (1 if fine else 2)
+    clock[0] = 16.0
+    node.send_status(first['action'], first['command_id'], 'SUCCEEDED')
+    assert len(node.publisher.messages) == 2
+    motion = 'goal_fine_prepare_90' if fine else bridge.ACTION_TO_MOTION_ID[second['action']]
+    node.send_status(second['action'], second['command_id'], 'RUNNING', motion)
+    assert node.mission_phase == 'GOAL_APPROACH'
+    assert node.general_motion_gate.active_command_id == second['command_id']
+    assert node.active_general_source == 'goal'
+    assert not node.post_ball_goal_handoff_pending
+    assert node.post_ball_line_run_until is None
+    assert (getattr(node, 'goal_forward_started_at', None) is None) is fine
+
+
+@pytest.mark.parametrize('blocker', ['duplicate', 'unconfirmed', 'turn', 'lost', 'head_not_ready'])
+def test_line_goal_reservation_requires_distinct_confirmed_walking_images(clock, blocker):
+    node, first = start_line(clock)
+    if blocker != 'head_not_ready':
+        raise_camera(node, clock)
+    for instant in (15.5, 15.6, 15.7, 15.8):
+        clock[0] = instant
+        info = goal(50 if blocker == 'turn' else 0)
+        if blocker == 'unconfirmed':
+            info['confirmation_confirmed'] = False
+        if blocker == 'lost':
+            info['detected'] = False
+        stamp = 15.5 if blocker == 'duplicate' else instant
+        Node._info_callback(node, 'goal')(String(data=json.dumps({
+            **info, 'rgb_stamp_ns': round(stamp * 1e9),
+        })))
+    assert getattr(node, 'queued_general_command_id', None) is None
+    assert len(node.publisher.messages) == 1
+
+
+@pytest.mark.parametrize('status', ['FAILED', 'REJECTED'])
+def test_line_goal_reservation_failure_leaves_no_phantom_handoff(clock, status):
+    node, first = start_line(clock)
+    raise_camera(node, clock)
+    for instant in (15.5, 15.6, 15.7):
+        clock[0] = instant
+        receive(node, clock, 'goal', goal())
+    second = node.publisher.messages[-1]
+    assert node.queued_general_command_id == second['command_id']
+    failed = first if status == 'FAILED' else second
+    node.send_status(failed['action'], failed['command_id'], status)
+    assert node.queued_general_command_id is None
+    assert node.mission_phase == 'LINE_TRACK_AFTER_PICKUP'
+    if status == 'REJECTED':
+        clock[0] = 15.8
+        node.send_status(first['action'], first['command_id'], 'SUCCEEDED')
+        assert node.mission_phase == 'GOAL_APPROACH'
+        assert node.publisher.messages[-1]['source'] == 'goal'

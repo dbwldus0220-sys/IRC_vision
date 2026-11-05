@@ -19,10 +19,17 @@ double guiSeconds(RobotMotionPlayer::Clock::time_point value) {
     return std::chrono::duration_cast<std::chrono::nanoseconds>(value.time_since_epoch()).count() / 1e9;
 }
 bool isLineRecoveryMotion(std::string_view name) {
-    return name == "R전진라인복귀좌" || name == "R라인복귀우회전";
+    return name == "R전진라인복귀좌" || name == "R라인복귀우회전"
+        || name == "R라인복귀좌90도" || name == "R라인복귀우회전90도"
+        || name == "t라인복귀좌실전" || name == "t라인복귀우실전"
+        || name == "t라인복귀좌실전90도" || name == "t라인복귀우실전90도";
 }
 bool isLineWalkingMotion(std::string_view name) {
-    return name.starts_with("R전진45도(") || isLineRecoveryMotion(name);
+    return name.starts_with("R전진45도(") || name == "t전진실전"
+        || name.starts_with("t전진실전45도(") || isLineRecoveryMotion(name);
+}
+bool isGoalForwardMotion(std::string_view name) {
+    return name.starts_with("R전진90도(") || name.starts_with("t전진실전90도(");
 }
 bool sameEntryFrame(const MotionFrame& a, const MotionFrame& b) {
     return a.name == b.name && a.start_ms == b.start_ms && a.time_ms == b.time_ms
@@ -42,6 +49,24 @@ bool sameBodyEntryFrame(const MotionFrame& a, const MotionFrame& b) {
         if (id == 0) continue;
         const auto other = b.angles.find(id);
         if (other == b.angles.end() || other->second != angle) return false;
+    }
+    return true;
+}
+bool sameWalkingEndPose(const MotionPattern& a, const MotionPattern& b, bool fixed_head) {
+    if (a.frames().empty() || b.frames().empty()) return false;
+    const auto& left = a.frames().back();
+    const auto& right = b.frames().back();
+    // 부분 관절 프레임은 이전 목표각이 남으므로 공통 끝 자세로 추정하지 않는다.
+    if (left.start_ms + left.time_ms != a.durationMs()
+        || right.start_ms + right.time_ms != b.durationMs()
+        || left.angles.size() != kMotionMotorCount || right.angles.size() != kMotionMotorCount
+        || left.torques != right.torques) return false;
+    for (int id = 0; id < kMotionMotorCount; ++id) {
+        const auto x = left.angles.find(id), y = right.angles.find(id);
+        const auto torque = left.torques.find(id);
+        if (x == left.angles.end() || y == right.angles.end()
+            || torque == left.torques.end() || !torque->second) return false;
+        if (!(fixed_head && id == 0) && x->second != y->second) return false;
     }
     return true;
 }
@@ -199,6 +224,19 @@ bool RobotMotionPlayer::canSeamlesslyTransition(
     const MotionPattern& next, std::string_view next_name) const noexcept {
     // 같은 repeatable 모션은 기존 내부 repeat_count 순환과 같은 경계입니다.
     if (current_name == next_name && current.repeatable()) return true;
+    // 전진/좌우 복귀는 공통 끝 자세에서 다음 보행의 첫 이동으로 이어간다.
+    // 첫 이동의 이름/각도/시간이 달라도 전 관절 끝 목표와 토크는 같아야 한다.
+    const auto forward = [](std::string_view name) {
+        return (isLineWalkingMotion(name) && !isLineRecoveryMotion(name))
+            || isGoalForwardMotion(name);
+    };
+    const bool walking_pair =
+        (forward(current_name) || isLineRecoveryMotion(current_name))
+        && (forward(next_name) || isLineRecoveryMotion(next_name));
+    if (walking_pair && current.repeatable() && next.repeatable()
+        && current.playbackSpeed() == next.playbackSpeed()
+        && sameWalkingEndPose(current, next,
+            head_override_enabled_ && joint_overrides_.contains(0))) return true;
     // 승인된 라인 보행은 모두 오른발 뒤에서 끝나며 같은 첫 이동 자세를 사용한다.
     // 카메라/보행 원본이 바뀌면 첫 프레임 검사를 통과해야 예약할 수 있다.
     if (isLineWalkingMotion(current_name) && isLineWalkingMotion(next_name)
@@ -210,8 +248,8 @@ bool RobotMotionPlayer::canSeamlesslyTransition(
         && sameEntryFrame(current.frames().front(), next.frames().front())) return true;
     // 골대 전진과 복귀 보행도 같은 몸체 진입을 사용한다. 카메라 고정이 없으면 거부한다.
     const bool goal_recovery_pair =
-        (current_name.starts_with("R전진90도(") && isLineRecoveryMotion(next_name))
-        || (isLineRecoveryMotion(current_name) && next_name.starts_with("R전진90도("));
+        (isGoalForwardMotion(current_name) && isLineRecoveryMotion(next_name))
+        || (isLineRecoveryMotion(current_name) && isGoalForwardMotion(next_name));
     if (goal_recovery_pair && head_override_enabled_ && joint_overrides_.contains(0)
         && current.repeatable() && next.repeatable()
         && !current.frames().empty() && !next.frames().empty()
@@ -318,8 +356,8 @@ bool RobotMotionPlayer::activateQueuedMotion(Clock::time_point now) {
 RobotMotionPlayer::Clock::time_point RobotMotionPlayer::forwardBoundaryStart(
     const MotionPattern& next, std::string_view next_name, Clock::time_point now) const noexcept {
     const auto forward = [](std::string_view name) {
-        return isLineWalkingMotion(name) || name.starts_with("R전진90도(")
-            || name.starts_with("R전진0도(");
+        return isLineWalkingMotion(name) || isGoalForwardMotion(name)
+            || name.starts_with("R전진0도(") || name.starts_with("t전진실전0도(");
     };
     if (!account_forward_boundary_feedback_ || !forward(current_motion_) || !forward(next_name)
         || next.frames().empty() || now < last_goal_written_at_) return now;

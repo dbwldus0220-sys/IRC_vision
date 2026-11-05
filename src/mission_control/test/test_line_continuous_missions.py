@@ -253,7 +253,22 @@ def test_walking_capture_windows_match_active_recovery_catalogs():
     root = Path(__file__).resolve().parents[3]
     aliases = yaml.safe_load((root / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']
     catalog = {m['name']: m for m in json.loads((root / 'artifacts/robot_motions_runtime.json').read_text())['motions']}
-    for action in ['LEFT', 'RIGHT', 'RECOVER_LEFT_TURN_LEFT_4', 'RECOVER_RIGHT_TURN_RIGHT_4']:
+    for action, (duration, _) in MotionDecisionNode.LINE_MOTION_CAPTURE_CONFIG.items():
+        motion_id = MotionCommandBridgeNode.motion_id_for_action(action)
+        if motion_id is None:
+            # Legacy recovery timing slots retain the active four-cycle gait.
+            assert action.startswith('RECOVER_')
+            motion_id = MotionCommandBridgeNode.motion_id_for_action(action.rsplit('_', 1)[0] + '_4')
+        motion = catalog[aliases[motion_id]]
+        actual = max(f['start_ms'] + f['time_ms'] for f in motion['frames']) * motion['repeat_count'] / motion['playback_speed'] / 1000
+        assert duration == pytest.approx(actual), action
+    for action, duration in MotionDecisionNode.GOAL_FORWARD_DURATION_SEC.items():
         motion = catalog[aliases[MotionCommandBridgeNode.motion_id_for_action(action)]]
         actual = max(f['start_ms'] + f['time_ms'] for f in motion['frames']) * motion['repeat_count'] / motion['playback_speed'] / 1000
-        assert MotionDecisionNode.LINE_MOTION_CAPTURE_CONFIG[action][0] == pytest.approx(actual)
+        assert duration == pytest.approx(actual), action
+    for action, duration in MotionDecisionNode.APPROACH_WALK_DURATION_SEC.items():
+        motion_id = ('ball_camera_down_forward_4' if action == 'STRAIGHT'
+                     else MotionCommandBridgeNode.motion_id_for_action(action))
+        motion = catalog[aliases[motion_id]]
+        actual = max(f['start_ms'] + f['time_ms'] for f in motion['frames']) * motion['repeat_count'] / motion['playback_speed'] / 1000
+        assert duration == pytest.approx(actual), action

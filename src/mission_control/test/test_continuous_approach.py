@@ -189,7 +189,7 @@ def test_goal_prequeue_requires_three_consecutive_matching_actions(clock):
 
 @pytest.mark.parametrize('first,second,deferred', [
     ('GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_2', False),
-    ('GOAL_CAMERA90_FINE_FORWARD_3', 'GOAL_CAMERA90_FINE_FORWARD_1', True),
+    ('GOAL_CAMERA90_FINE_FORWARD_3', 'GOAL_CAMERA90_FINE_FORWARD_1', False),
 ])
 def test_bridge_reserves_different_goal_lengths_without_post_motion_dwell(first, second, deferred):
     bridge = FakeBridge()
@@ -312,3 +312,37 @@ def test_post_pickup_prequeue_includes_walking_recovery_in_both_directions(clock
         assert node.publisher.messages[-1]['action'] == (
             'STRAIGHT' if start_recovery else 'RECOVER_LEFT_TURN_LEFT_4'
         )
+
+
+def test_short_goal_fine_reserves_with_ten_hz_images_and_150ms_latency(clock):
+    import json
+    from std_msgs.msg import String
+    node = LiveInputHarness(phase='GOAL_APPROACH')
+    first = start_goal(node, clock, .57)
+    started = node.goal_forward_started_at
+    duration = MotionDecisionNode.GOAL_FORWARD_DURATION_SEC[first['action']]
+    assert first['action'] == 'GOAL_CAMERA90_FINE_FORWARD_3'
+    for frame in range(1, 10):
+        captured = started + frame * .1
+        clock[0] = captured + .15
+        if clock[0] >= started + duration:
+            break
+        MotionDecisionNode._info_callback(node, 'goal')(String(data=json.dumps({
+            **target_sample(0, .57), 'rgb_stamp_ns': round(captured * 1e9),
+        })))
+        if getattr(node, 'queued_general_command_id', None) is not None:
+            break
+    assert node.queued_general_command_id is not None
+    assert clock[0] < started + duration - .1
+    assert node.publisher.messages[-1]['action'] == first['action']
+
+
+def test_goal_reservation_cannot_count_one_image_multiple_times(clock):
+    node = LiveInputHarness(phase='GOAL_APPROACH')
+    start_goal(node, clock, .57)
+    clock[0] += .75
+    fresh(node, clock, 'goal', target_sample(0, .57), plan=False)
+    for _ in range(5):
+        MotionDecisionNode._prepare_pending_goal_decision(node, clock[0])
+    assert node.goal_forward_capture_count == 1
+    assert getattr(node, 'queued_general_command_id', None) is None

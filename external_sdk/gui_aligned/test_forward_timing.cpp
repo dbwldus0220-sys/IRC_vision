@@ -108,7 +108,15 @@ int main(int argc, char** argv) {
     // Feedback must consume physical hold time, not add another hold before it.
     for (bool queued : {false, true}) for (bool enabled : {false, true})
     for (bool continuous : {false, true}) for (int delay : {0, 16, 140})
-    for (const std::string name : {"turn", "R전진45도(6회)", "R전진라인복귀좌", "R라인복귀우회전"})
+    for (const std::string name : {
+        "turn", "R전진45도(6회)", "R전진라인복귀좌", "R라인복귀우회전",
+        "t전진실전", "t전진실전45도(4회)", "t전진실전45도(6회)",
+        "t전진실전0도(4회)", "t전진실전0도(6회)",
+        "t전진실전90도(4회)", "t전진실전90도(6회)",
+        "t라인복귀좌실전", "t라인복귀우실전",
+        "t라인복귀좌실전90도", "t라인복귀우실전90도",
+        "R라인복귀좌90도", "R라인복귀우회전90도",
+    })
     for (int explicit_hold : {0, 25}) {
         if (!queued && explicit_hold != 0) continue;
         std::ofstream(path) << "{\"motions\":[{\"name\":\"" << name
@@ -237,26 +245,144 @@ int main(int argc, char** argv) {
         assert(player.completionSequence() == 2);
         assert(hardware.prepares == 1);
     }
+    // New catalog names use the existing entry-pose and camera checks.
+    for (const std::string forward : {"t전진실전", "t전진실전45도(6회)"})
+    for (const std::string recovery : {"t라인복귀좌실전", "t라인복귀우실전"}) {
+        const std::vector<std::string> names = {forward, recovery, "t전진실전90도(6회)"};
+        {
+            std::ofstream fixture(path);
+            fixture << "{\"motions\":[";
+            for (std::size_t i = 0; i < names.size(); ++i) {
+                if (i) fixture << ',';
+                const auto lift = i == 2 ? "head_up_lift" : "lift";
+                fixture << "{\"name\":\"" << names[i]
+                    << "\",\"max_seq_ms\":280,\"repeat_count\":2,\"start_pose\":\"" << lift
+                    << "\",\"end_pose\":\"back\",\"frames\":[{\"name\":\"" << lift
+                    << "\",\"start_ms\":80,\"time_ms\":100,\"angles\":{\"0\":"
+                    << (i == 2 ? 1 : -34) << ",\"1\":10}},"
+                    << "{\"name\":\"back\",\"start_ms\":180,\"time_ms\":100,"
+                    << "\"angles\":{\"1\":" << i << "}}]}";
+            }
+            fixture << "]}";
+        }
+        for (bool goal : {false, true}) for (bool reverse : {false, true}) {
+            TimingHardware hardware;
+            RobotMotionPlayer player(path, hardware);
+            assert(player.initialize());
+            const auto first = reverse ? recovery : names[goal ? 2 : 0];
+            const auto second = reverse ? names[goal ? 2 : 0] : recovery;
+            assert(player.start(first) == StartResult::Accepted);
+            if (goal) {
+                assert(player.queueNext(second) == QueueResult::IncompatibleTransition);
+                player.setJointOverride(0, 1.);
+            }
+            assert(player.queueNext(second) == QueueResult::Queued);
+        }
+    }
+    // Different entries may share a full commanded end pose. Keep this exception
+    // restricted to forward/recovery, with torque, speed, and camera checks.
+    for (int variant = 0; variant < 8; ++variant) {
+        const std::string recovery = variant == 7 ? "t미세45도(5회)" : "t라인복귀좌실전";
+        {
+            std::ofstream fixture(path);
+            fixture << "{\"motions\":[";
+            for (int index = 0; index < 2; ++index) {
+                if (index) fixture << ',';
+                fixture << "{\"name\":\"" << (index ? recovery : "t전진실전")
+                    << "\",\"max_seq_ms\":400,\"repeat_count\":2,\"repeatable\":"
+                    << (index && variant == 5 ? "false" : "true")
+                    << ",\"playback_speed\":" << (index && variant == 4 ? .9 : 1.)
+                    << ",\"start_pose\":\"" << (index ? "recovery_entry" : "forward_entry")
+                    << "\",\"end_pose\":\"common_end\",\"frames\":[{\"name\":\"entry"
+                    << index << "\",\"start_ms\":" << (index ? 79 : 80)
+                    << ",\"time_ms\":100,\"angles\":{\"12\":" << index * 2 << "}},"
+                    << "{\"name\":\"common_end\",\"start_ms\":200,\"time_ms\":100,\"angles\":{";
+                for (int id = 0; id < 23; ++id) {
+                    if (index && variant == 3 && id == 22) continue;
+                    if (id) fixture << ',';
+                    const double angle = id == 0 ? (index && variant == 6 ? 1. : -34.)
+                        : index && variant == 1 && id == 12 ? 2. : 0.;
+                    fixture << '"' << id << "\":" << angle;
+                }
+                fixture << "},\"torques\":{";
+                for (int id = 0; id < 23; ++id) {
+                    if (id) fixture << ',';
+                    fixture << '"' << id << "\":"
+                        << (index && variant == 2 && id == 12 ? "false" : "true");
+                }
+                fixture << "}}]}";
+            }
+            fixture << "]}";
+        }
+        for (bool reverse : {false, true}) {
+            TimingHardware hardware;
+            RobotMotionPlayer player(path, hardware);
+            assert(player.initialize());
+            assert(player.start(reverse ? recovery : "t전진실전") == StartResult::Accepted);
+            const auto next = reverse ? "t전진실전" : recovery;
+            assert(player.queueNext(next) == (variant == 0 ? QueueResult::Queued
+                                                          : QueueResult::IncompatibleTransition));
+            if (variant == 6) {
+                player.setJointOverride(0, 1.);
+                assert(player.queueNext(next) == QueueResult::Queued);
+            }
+        }
+    }
     // Optional production-catalog replay: no motor device is opened by TimingHardware.
     if (argc == 3) {
-        const std::vector<std::string> goal_walks = {
+        const auto catalog = MotionLibrary::loadGuiJson(argv[2]);
+        const std::vector<std::string> forwards = {
+            "t전진실전", "R전진45도(2회)", "R전진45도(4회)", "R전진45도(8회)",
             "R전진90도(2회)", "R전진90도(4회)", "R전진90도(6회)",
-            "R전진라인복귀좌", "R라인복귀우회전",
         };
-        for (const auto& first : goal_walks) for (const auto& second : goal_walks) {
+        const std::vector<std::string> recoveries = {
+            "t라인복귀좌실전", "t라인복귀우실전",
+            "R라인복귀좌90도", "R라인복귀우회전90도",
+        };
+        auto walks = forwards;
+        walks.insert(walks.end(), recoveries.begin(), recoveries.end());
+        std::vector<std::pair<std::string, std::string>> connections;
+        for (const auto& first : walks) for (const auto& second : walks)
+            connections.emplace_back(first, second);
+        for (int first = 1; first <= 4; ++first) for (int second = 1; second <= 4; ++second)
+            connections.emplace_back("r미세 골대전용(" + std::to_string(first) + "회)",
+                                     "r미세 골대전용(" + std::to_string(second) + "회)");
+        for (const auto& [first, second] : connections)
+        for (bool fixed_head : {false, true}) {
             TimingHardware hardware;
             int ms = 0;
             RobotMotionPlayer player(argv[2], hardware, [&] {
                 return RobotMotionPlayer::Clock::time_point(std::chrono::milliseconds(ms));
             });
+            player.setContinuousInterpolation(true);
+            player.setForwardBoundaryFeedbackAccounting(true);
             assert(player.initialize());
-            player.setJointOverride(0, 1.);
+            if (fixed_head) player.setJointOverride(0, 1.);
             assert(player.start(first) == StartResult::Accepted);
+            const auto& end = catalog.motion(first).frames().back().angles;
+            if (!fixed_head && end.at(0) != catalog.motion(second).frames().back().angles.at(0)) {
+                assert(player.queueNext(second) == QueueResult::IncompatibleTransition);
+                continue;
+            }
             assert(player.queueNext(second) == QueueResult::Queued);
-            for (ms = 5; player.running() && ms < 20000; ms += 5) player.update();
+            int activated_at = -1;
+            const auto hold_ms = catalog.motion(second).frames().front().start_ms
+                / catalog.motion(second).playbackSpeed();
+            for (ms = 5; player.running() && ms < 20000; ms += 5) {
+                player.update();
+                if (player.completionSequence() == 1) {
+                    if (activated_at < 0) activated_at = ms;
+                    // Activation can occur between the five-millisecond test ticks.
+                    if (ms - activated_at + 5 < hold_ms) {
+                        for (const auto& [id, angle] : end)
+                            assert(hardware.goals.at(id) == (fixed_head && id == 0 ? 1. : angle));
+                    }
+                }
+            }
             assert(player.succeeded());
             assert(player.completionSequence() == 2);
             assert(hardware.prepares == 1);
+            assert(activated_at >= 0);
         }
     }
 }
