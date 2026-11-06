@@ -36,9 +36,9 @@ def finish_observation_pause(node, bridge, clock):
 
 
 @pytest.mark.parametrize('bottom,expected', [
-    (219, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'),
-    (220, 'BALL_PICKUP_FINE_FORWARD'),
-    (221, 'BALL_PICKUP_FINE_FORWARD'),
+    (229, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'),
+    (230, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'),
+    (230.001, 'BALL_PICKUP_FINE_FORWARD'),
     (344, 'BALL_PICKUP_FINE_FORWARD'),
 ])
 def test_second_fine_waits_then_uses_only_post_pause_pixels(clock, bottom, expected):

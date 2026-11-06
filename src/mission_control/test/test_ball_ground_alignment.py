@@ -144,7 +144,8 @@ def test_close_crab_still_uses_pixel_side_when_ground_heading_points_opposite():
 ])
 @pytest.mark.parametrize("depth,bottom,allowed", [
     (0.50, 360.001, True), (0.50, 361, True), (0.4, 450, True),
-    (0.501, 450, False), (1.5, 450, False),
+    (0.501, 450, True), (0.52, 642, True), (0.60, 450, True),
+    (0.600001, 450, False), (1.5, 450, False),
     (0.50, 120, False), (0.4, 100, False),
     (None, 300, False), (0.0, 300, False), (-0.1, 300, False),
     (float("nan"), 300, False), (0.5, None, False),
@@ -169,6 +170,13 @@ def test_stationary_alignment_rejects_invalid_or_stale_depth(method, change):
     sample = ball_sample(30.0, depth_m=0.5, distance_m=0.5, **change)
     decision = getattr(MotionDecisionPlanner(), method)(sample)
     assert "_TURN_" not in decision.action
+
+
+@pytest.mark.parametrize("distance", [.501, .52, .60])
+def test_expanded_pickup_turn_range_does_not_expand_pickup_entry(distance):
+    sample = ball_sample(0., depth_m=distance, distance_m=distance)
+    decision = MotionDecisionPlanner().plan("BALL_APPROACH", {"ball": sample}, .1)
+    assert decision.action != "PICKUP_NOW"
 
 
 @pytest.mark.parametrize("line_angle", [-80.0, 80.0])

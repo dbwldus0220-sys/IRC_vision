@@ -13,6 +13,7 @@ import time
 from typing import Any
 
 import rclpy
+from rclpy.clock import Clock, ClockType
 from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 from std_msgs.msg import String
@@ -34,6 +35,7 @@ from step.hurdle_navigation_planner import HurdleNavigationPlanner
 from .ball_approach_observation import BallApproachObservation
 from .ball_entry_line_alignment import BallEntryLineAlignment
 from .pickup_walk_reservation import PickupWalkReservation
+from .pickup_crab_observation import PickupCrabObservation
 from .ball_loss_confirmation import BallLossConfirmation
 from .executor_heartbeat_watchdog import ExecutorHeartbeatWatchdog
 from .executor_heartbeat_watchdog import HeartbeatStartupDelay
@@ -339,7 +341,7 @@ class MotionDecisionNode(Node):
         )
         self.declare_parameter(
             "pickup_fine_align_bottom_distance_px",
-            220,
+            230,
         )
         self.declare_parameter("ball_lost_stop_sec", 0.35)
         self.declare_parameter("ball_recovery_timeout_sec", 8.0)
@@ -550,6 +552,7 @@ class MotionDecisionNode(Node):
         self.goal_post_motion_dwell_until: float | None = None
         self.goal_initial_search = GoalInitialSearch()
         self.goal_stationary_since: float | None = None
+        self.motion_stationary_since: float | None = None
         self.goal_shot_settle_pending = False
         self.goal_shot_observe_until: float | None = None
         self.goal_forward_started_at: float | None = None
@@ -762,6 +765,11 @@ class MotionDecisionNode(Node):
             10,
         )
         self._command_publisher_ready: bool | None = None
+        self.boundary_decision_enabled = True
+        self.boundary_decision_pending = False
+        self.boundary_decision_timer = None
+        self.boundary_decision_deadline = None
+        self.boundary_decision_clock = Clock(clock_type=ClockType.STEADY_TIME)
 
         publish_rate = max(
             1.0,
@@ -896,11 +904,13 @@ class MotionDecisionNode(Node):
             self.executor_active = active
             if active:
                 self.goal_stationary_since = None
+                self.motion_stationary_since = None
         auto_ready = payload.get("auto_ready")
         if isinstance(auto_ready, bool):
             if not auto_ready or not self.executor_auto_ready:
                 self.hurdle_stationary_since = None
                 self.goal_stationary_since = None
+                self.motion_stationary_since = None
             if not auto_ready:
                 self.pending_line_corner = None
                 self.line_corner_rearm_required = False
@@ -1002,6 +1012,7 @@ class MotionDecisionNode(Node):
         def callback(message: String) -> None:
             if not self.decision_started:
                 return
+            evaluation_serial = getattr(self, "decision_evaluation_serial", 0)
             try:
                 payload = json.loads(message.data)
 
@@ -1022,6 +1033,18 @@ class MotionDecisionNode(Node):
                 if stamp is None:
                     stamp = payload.get("rgb_stamp_ns")
                 ros_now = MotionDecisionNode._current_ros_time_ns(self)
+                crab_observation = getattr(self, "pickup_crab_observation", None)
+                if source == "ball" and crab_observation is not None:
+                    reservation = getattr(self, "pickup_walk_reservation", None)
+                    if (self.active_special_action == "PICKUP_NOW"
+                            and not self.pickup_fixed_sequence_started
+                            and not self.pickup_positioning_ball_lost_pending
+                            and not (reservation is not None and reservation.pending)):
+                        # Rejected/lost packets also invalidate older good samples.
+                        crab_observation.observe(self.planner, payload, received_at, ros_now,
+                                                 self.timeouts["ball"], image_stamp=stamp)
+                    else:
+                        crab_observation.reset()
                 valid_stamp = type(stamp) is int and stamp > 0
                 transport[source] = packet = {
                     "received_at": received_at,
@@ -1277,6 +1300,11 @@ class MotionDecisionNode(Node):
                     # Reuse all normal motion/dwell/safety gates, without
                     # waiting for the next 10 Hz decision timer tick.
                     MotionDecisionNode._publish_decision(self)
+
+                # Conditional reservations are released through the normal
+                # planner, including post-dwell capture and checkpoint guards.
+                if getattr(self, "decision_evaluation_serial", 0) == evaluation_serial:
+                    MotionDecisionNode._resume_boundary_decision(self, source=source)
 
             except (
                 json.JSONDecodeError,
@@ -1762,6 +1790,9 @@ class MotionDecisionNode(Node):
 
     def _clear_ball_navigation_state(self) -> None:
         """Discard approach reservations without releasing an executing motion."""
+        crab_observation = getattr(self, "pickup_crab_observation", None)
+        if crab_observation is not None:
+            crab_observation.reset()
         entry = getattr(self, "ball_entry_line_alignment", None)
         if entry is not None:
             entry.reset()
@@ -2213,6 +2244,7 @@ class MotionDecisionNode(Node):
         self.hurdle_post_motion_dwell_until = None
         self.hurdle_stationary_since = None
         self.goal_stationary_since = None
+        self.motion_stationary_since = None
         self.goal_shot_observe_until = None
         if MotionDecisionNode._ball_navigation_blocked(self):
             MotionDecisionNode._clear_ball_navigation_state(self)
@@ -2222,6 +2254,40 @@ class MotionDecisionNode(Node):
         )
 
     def _motion_status_callback(
+        self,
+        message: String,
+    ) -> None:
+        """Release a conditional continuation only for an owned status."""
+        try:
+            payload = json.loads(message.data)
+        except (json.JSONDecodeError, TypeError, ValueError):
+            payload = {}
+        if not isinstance(payload, dict):
+            payload = {}
+        command_id = payload.get("command_id")
+        action = payload.get("action")
+        owned = command_id is not None and (
+            (command_id == self.general_motion_gate.active_command_id
+             and action == self.general_motion_gate.active_action)
+            or (command_id == self.active_special_command_id
+                and action == self.active_special_action
+                and payload.get("event_id") == self.active_special_event_id)
+            or (command_id == getattr(self, "queued_general_command_id", None)
+                and action == getattr(self, "queued_general_action", None))
+        )
+        before = getattr(self, "command_id", None)
+        MotionDecisionNode._handle_motion_status(self, message)
+        if not owned:
+            return
+        if str(payload.get("status", "")).strip().upper() in {
+            "FAILED", "TIMEOUT", "REJECTED", "CANCELED", "CANCELLED", "UNSUPPORTED",
+        }:
+            self.boundary_decision_pending = False
+            MotionDecisionNode._cancel_boundary_decision_timer(self)
+        elif getattr(self, "command_id", None) == before:
+            MotionDecisionNode._resume_boundary_decision(self)
+
+    def _handle_motion_status(
         self,
         message: String,
     ) -> None:
@@ -2316,6 +2382,7 @@ class MotionDecisionNode(Node):
                 error_code,
             )
             if transition.matched:
+                MotionDecisionNode._record_stationary_status(self, payload, status_receive_monotonic)
                 if status == "RUNNING":
                     identifier = str(payload.get("motion_id", ""))
                     if identifier.startswith("ball_align_"):
@@ -2456,7 +2523,7 @@ class MotionDecisionNode(Node):
                     if status == "SUCCEEDED":
                         self.line_offset_alignment_refresh_pending = True
                 self.goal_stationary_since = (
-                    status_receive_monotonic if status == "SUCCEEDED" else None
+                    self.motion_stationary_since if status == "SUCCEEDED" else None
                 )
                 completed_source = self.active_general_source
                 reserved_line_turn = bool(
@@ -2593,7 +2660,7 @@ class MotionDecisionNode(Node):
                     )
                     if status == "SUCCEEDED":
                         # Include the motion that first crossed the entry distance.
-                        self.hurdle_stationary_since = status_receive_monotonic
+                        self.hurdle_stationary_since = self.motion_stationary_since
                         self.hurdle_post_motion_dwell_until = (
                             status_receive_monotonic
                             + MotionDecisionNode.HURDLE_POST_MOTION_DWELL_SEC
@@ -2916,6 +2983,8 @@ class MotionDecisionNode(Node):
             )
             return
 
+        MotionDecisionNode._record_stationary_status(self, payload, status_receive_monotonic)
+
         self._latch_critical_executor_fault(
             error_code=error_code,
             message=status_message,
@@ -2925,9 +2994,19 @@ class MotionDecisionNode(Node):
         )
 
         self.goal_stationary_since = (
-            status_receive_monotonic if result.terminal and status == "SUCCEEDED" else None
+            self.motion_stationary_since if result.terminal and status == "SUCCEEDED" else None
         )
+        completed_crab_sample = None
         if action == "PICKUP_NOW":
+            crab_observation = getattr(self, "pickup_crab_observation", None)
+            if crab_observation is None:
+                crab_observation = self.pickup_crab_observation = PickupCrabObservation()
+            ros_now = MotionDecisionNode._current_ros_time_ns(self)
+            if not self.pickup_positioning_ball_lost_pending:
+                completed_crab_sample = crab_observation.completed_sample(
+                    payload, status_receive_monotonic, ros_now, self.timeouts["ball"],
+                )
+            crab_observation.on_status(payload, status_receive_monotonic, ros_now)
             reservation = getattr(self, "pickup_walk_reservation", None)
             if reservation is None:
                 reservation = self.pickup_walk_reservation = PickupWalkReservation()
@@ -3011,6 +3090,14 @@ class MotionDecisionNode(Node):
                 self.pickup_positioning_motion_id = None
                 self.pickup_positioning_ball_seen_during_motion = False
                 MotionDecisionNode._invalidate_pickup_ball_input(self)
+                if completed_crab_sample is not None:
+                    # Keep original timestamps and use normal planner/dwell gates.
+                    self.latest_info["ball"], self.latest_time["ball"] = completed_crab_sample
+                    self.get_logger().info(
+                        "Pickup crab observation reused at successful checkpoint: "
+                        f"motion_id={payload.get('completed_motion_id')}, "
+                        f"rgb_stamp_ns={self.latest_info['ball'].get('rgb_stamp_ns')}"
+                    )
             elif (
                 action == "PICKUP_NOW"
                 and status == "RUNNING"
@@ -3058,6 +3145,8 @@ class MotionDecisionNode(Node):
                 f"dynamics_command="
                 f"{self.active_special_dynamics_command}"
             )
+            if completed_crab_sample is not None:
+                MotionDecisionNode._publish_decision(self)
             return
 
         completed_event_id = self.active_special_event_id
@@ -3375,6 +3464,9 @@ class MotionDecisionNode(Node):
 
     def _invalidate_pickup_ball_input(self) -> None:
         """Require a Ball frame captured after the pickup checkpoint."""
+        crab_observation = getattr(self, "pickup_crab_observation", None)
+        if crab_observation is not None:
+            crab_observation.reset()
         reservation = getattr(self, "pickup_walk_reservation", None)
         if reservation is not None:
             reservation.reset()
@@ -4888,7 +4980,100 @@ class MotionDecisionNode(Node):
         self.line_timeout_recovery_active = False
         self.general_motion_gate.rejected_action = None
 
+    def _cancel_boundary_decision_timer(self) -> None:
+        timer = getattr(self, "boundary_decision_timer", None)
+        if timer is not None:
+            timer.cancel()
+            self.destroy_timer(timer)
+        self.boundary_decision_timer = None
+        self.boundary_decision_deadline = None
+
+    def _resume_boundary_decision(self, *, source: str | None = None) -> None:
+        """Run the reserved next decision at a status/vision boundary."""
+        if (not getattr(self, "boundary_decision_enabled", False)
+                or not getattr(self, "boundary_decision_pending", False)
+                or self.general_motion_gate.locked
+                or getattr(self, "queued_general_command_id", None) is not None):
+            return
+        if self.active_special_command_id is not None and not any((
+            self.pickup_initial_align_waiting, self.pickup_fine_align_waiting,
+            self.pickup_post_backward_align_waiting,
+            getattr(self, "pickup_exit_dwell_complete", False),
+        )):
+            # Fixed sequences and their internal pauses belong to the bridge.
+            return
+        if source is not None:
+            owner = self.planner.source_for_phase(self.mission_phase)
+            if owner is None:
+                owner = getattr(getattr(self, "last_selected_decision", None), "source", None)
+            handoff = (
+                source == "ball" and any((
+                    getattr(self, "ball_approach_entry_pending", False),
+                    getattr(self, "ball_pickup_entry_pending", False),
+                    MotionDecisionNode._ball_entry_line_active(self),
+                ))
+                or source == "hurdle" and getattr(self, "hurdle_positioning_entry_pending", False)
+            )
+            if owner in self.SOURCES and source != owner and not handoff:
+                # Unrelated detector packets must not count the same steering
+                # image repeatedly toward direction confirmation.
+                return
+        MotionDecisionNode._publish_decision(self)
+
+    def _schedule_boundary_decision(self) -> None:
+        """Wake at existing deadlines instead of adding a decision timer tick."""
+        if (not getattr(self, "boundary_decision_enabled", False)
+                or not getattr(self, "boundary_decision_pending", False)
+                or self.safety_interlock.latched
+                or self.general_motion_gate.locked
+                or getattr(self, "queued_general_command_id", None) is not None):
+            MotionDecisionNode._cancel_boundary_decision_timer(self)
+            return
+        now = time.monotonic()
+        deadlines = [getattr(self, name, None) for name in (
+            "correction_post_motion_dwell_until", "hurdle_post_motion_dwell_until",
+            "post_shot_dwell_until", "goal_post_motion_dwell_until",
+            "post_ball_line_dwell_until", "ball_post_motion_dwell_until",
+            "goal_shot_observe_until", "pre_motion_settle_deadline",
+        )]
+        if getattr(self, "hurdle_stationary_since", None) is not None:
+            deadlines.append(self.hurdle_stationary_since + MotionDecisionNode.HURDLE_POST_MOTION_DWELL_SEC)
+        if getattr(self, "goal_shot_settle_pending", False):
+            since = getattr(self, "goal_stationary_since", None)
+            if since is not None:
+                deadlines.append(since + self.SHOT_PRE_MOTION_SETTLE_SEC)
+        deadline = min((value for value in deadlines if value is not None and value > now), default=None)
+        if deadline == getattr(self, "boundary_decision_deadline", None):
+            return
+        MotionDecisionNode._cancel_boundary_decision_timer(self)
+        if deadline is None or not hasattr(self, "create_timer"):
+            return
+
+        def resume():
+            if getattr(self, "boundary_decision_timer", None) is not timer:
+                return
+            MotionDecisionNode._cancel_boundary_decision_timer(self)
+            MotionDecisionNode._resume_boundary_decision(self)
+
+        self.boundary_decision_deadline = deadline
+        timer = self.create_timer(
+            max(.001, deadline - now), resume,
+            clock=getattr(self, "boundary_decision_clock", None),
+        )
+        self.boundary_decision_timer = timer
+
     def _publish_decision(
+        self,
+        precomputed_decision: MotionDecision | None = None,
+        queue_while_locked: bool = False,
+    ) -> None:
+        self.decision_evaluation_serial = getattr(self, "decision_evaluation_serial", 0) + 1
+        try:
+            MotionDecisionNode._publish_decision_impl(self, precomputed_decision, queue_while_locked)
+        finally:
+            MotionDecisionNode._schedule_boundary_decision(self)
+
+    def _publish_decision_impl(
         self,
         precomputed_decision: MotionDecision | None = None,
         queue_while_locked: bool = False,
@@ -5337,6 +5522,8 @@ class MotionDecisionNode(Node):
             self._reset_pre_motion_settle()
             return
 
+        if decision.valid:
+            self.boundary_decision_pending = True
         if (
             not queue_while_locked
             and self.mission_phase != "LINE_TRACK_AFTER_PICKUP"
@@ -5467,7 +5654,12 @@ class MotionDecisionNode(Node):
 
         self.publisher.publish(output)
         if is_general_motion or trigger or (decision.valid and decision.sdk_motion_requested):
+            self.motion_stationary_since = None
             self.line_boundary_dispatch_pending = False
+            # Reserve the next evaluation for every motion family. Existing SDK
+            # prequeues take precedence; fresh-image and dwell gates still own
+            # actions that cannot safely be committed before completion.
+            self.boundary_decision_pending = decision.action != "STOP"
         if ((is_general_motion or trigger)
                 and getattr(self, "pickup_exit_dwell_command_id", None) is not None):
             MotionDecisionNode._clear_pickup_exit_dwell(self)
@@ -5656,6 +5848,9 @@ class MotionDecisionNode(Node):
             )
             if decision.source_command.get("pickup_walk_prequeue") is True:
                 self.pickup_walk_reservation.published()
+                crab_observation = getattr(self, "pickup_crab_observation", None)
+                if crab_observation is not None:
+                    crab_observation.reset()
             elif is_pickup_positioning_loss_latch:
                 self.pickup_positioning_loss_latch_sent = True
             elif is_pickup_initial_align_action:
@@ -5695,6 +5890,10 @@ class MotionDecisionNode(Node):
 
             payload = {
                 "phase": self.mission_phase,
+                "boundary_decision": {
+                    "pending": getattr(self, "boundary_decision_pending", False),
+                    "deadline": getattr(self, "boundary_decision_deadline", None),
+                },
                 "sparse_line": (
                     self.sparse_line_recovery.diagnostics()
                     if getattr(self, "sparse_line_recovery", None) is not None else None
@@ -5869,11 +6068,24 @@ class MotionDecisionNode(Node):
         elif getattr(self, "goal_stationary_since", None) is None:
             self.goal_stationary_since = now
 
+    def _record_stationary_status(self, payload: dict, now: float) -> None:
+        """Share completed bridge holds without treating motion time as rest."""
+        status = str(payload.get("status", "")).upper()
+        if status == "QUEUED":
+            return
+        elapsed = payload.get("stationary_elapsed_sec")
+        if (status in {"RUNNING", "SUCCEEDED"} and type(elapsed) in {int, float}
+                and math.isfinite(elapsed) and elapsed >= 0):
+            self.motion_stationary_since = now - elapsed
+        else:
+            self.motion_stationary_since = now if status == "SUCCEEDED" else None
+
     def _reset_pre_motion_settle(self) -> None:
         """Discard a pending pre-motion settle candidate."""
         self.pre_motion_settle_source = None
         self.pre_motion_settle_action = None
         self.pre_motion_settle_started_at = None
+        self.pre_motion_settle_deadline = None
 
     def _pre_motion_settle_ready(
         self,
@@ -5985,6 +6197,9 @@ class MotionDecisionNode(Node):
             # Brief detection loss does not undo time already spent stationary.
             # Only a valid current decision or the existing latched GO reaches here.
             stationary_since = getattr(self, "hurdle_stationary_since", None)
+            completed_since = getattr(self, "motion_stationary_since", None)
+            if completed_since is not None and completed_since <= now:
+                stationary_since = completed_since
             if stationary_since is None:
                 self.hurdle_stationary_since = now
                 stationary_since = now
@@ -6018,13 +6233,15 @@ class MotionDecisionNode(Node):
                 )
             self.pre_motion_settle_source = decision.source
             self.pre_motion_settle_action = decision.action
-            self.pre_motion_settle_started_at = now
+            since = getattr(self, "motion_stationary_since", None)
+            self.pre_motion_settle_started_at = since if since is not None and since <= now else now
+            self.pre_motion_settle_deadline = self.pre_motion_settle_started_at + settle_sec
             self.get_logger().info(
                 "Pre-motion settle started: "
                 f"action={decision.action}, source={decision.source}, "
                 f"duration={settle_sec:.3f}"
             )
-            return settle_sec <= 0.0
+            return now >= self.pre_motion_settle_deadline
 
         if now - self.pre_motion_settle_started_at < settle_sec:
             return False

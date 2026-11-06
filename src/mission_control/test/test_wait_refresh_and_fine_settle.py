@@ -32,8 +32,10 @@ def clock(monkeypatch):
 
 def observe(node, clock, source, info, *, plan=True):
     clock[0] += .01
+    before = node.command_id
     MotionDecisionNode._info_callback(node, source)(String(data=json.dumps(info)))
-    if plan:
+    # A reserved continuation can now publish inside the vision callback.
+    if plan and node.command_id == before:
         MotionDecisionNode._publish_decision(node)
 
 

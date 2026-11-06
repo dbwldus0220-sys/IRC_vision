@@ -16,17 +16,46 @@ from test_motion_command_bridge import (
 from test_pickup_continuous_walk import ball
 
 
+@pytest.mark.parametrize('bottom,action', [
+    (229.999, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'),
+    (230, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'),
+    (230.001, 'BALL_PICKUP_FINE_FORWARD'),
+])
+def test_default_checkpoint_includes_230_boundary(bottom, action):
+    assert MotionDecisionPlanner().plan_ball_pickup_fine_alignment(
+        ball(bottom_distance_px=bottom)).action == action
+
+
+@pytest.mark.parametrize('robot', [False, True])
+def test_both_launch_defaults_use_230_and_accept_override(monkeypatch, tmp_path, robot):
+    from launch import LaunchContext
+    from launch.actions import DeclareLaunchArgument
+    from test_full_system_launch import launch_description
+    from test_full_system_robot_launch import launch_description as robot_description
+    description = (robot_description if robot else launch_description)(monkeypatch, tmp_path)
+    for value in (None, '240'):
+        context = LaunchContext()
+        if value is not None:
+            context.launch_configurations['pickup_fine_align_bottom_distance_px'] = value
+        for entity in description.entities:
+            if isinstance(entity, DeclareLaunchArgument):
+                entity.execute(context)
+        assert context.launch_configurations['pickup_fine_align_bottom_distance_px'] == (value or '230')
+
+
 @pytest.mark.parametrize('motion,limit', [
-    ('pickup_fine_forward_0', 220), ('ball_general_fine_forward_8', 220),
-    ('ball_approach_fine_forward_45_5', 220),
+    ('pickup_fine_forward_0', 230), ('ball_general_fine_forward_8', 230),
+    ('ball_approach_fine_forward_45_5', 230),
     ('pickup_crab_left_0', 270), ('pickup_crab_right_0', 270),
     ('pickup_crab_left_0_2', 270), ('pickup_crab_right_0_2', 270),
 ])
 @pytest.mark.parametrize('delta,action', [
     (-.001, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'),
-    (0, 'BALL_PICKUP_FINE_FORWARD'), (1, 'BALL_PICKUP_FINE_FORWARD'),
+    (0, 'BALL_PICKUP_FINE_FORWARD'), (.001, 'BALL_PICKUP_FINE_FORWARD'),
 ])
-def test_strict_limits_override_old_latched_distance(motion, limit, delta, action):
+def test_gait_limits_override_old_latched_distance(motion, limit, delta, action):
+    if limit == 230 and delta == 0:
+        action = 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
     planner = MotionDecisionPlanner()
     planner.pickup_last_completed_motion_id = motion
     planner.pickup_fine_approach_complete = True
@@ -70,7 +99,7 @@ def initial_checkpoint(node, bridge, clock, sample):
 
 @pytest.mark.parametrize('index', [1, 2])
 @pytest.mark.parametrize('motion,bottom,preparation', [
-    ('pickup_fine_forward_0', 219, None),
+    ('pickup_fine_forward_0', 230, None),
     ('pickup_crab_left_0', 269, 'pickup_crab_left_to_fine_0'),
     ('pickup_crab_right_0_2', 269, 'pickup_crab_right_to_fine_0'),
 ])
@@ -110,7 +139,7 @@ def test_both_modes_skip_forward_but_keep_retreat_and_grasp(clock, index, motion
 
 
 @pytest.mark.parametrize('motion,bottom', [
-    ('pickup_fine_forward_0', 220), ('pickup_crab_right_0', 270),
+    ('pickup_fine_forward_0', 230.001), ('pickup_crab_right_0', 270),
     ('line_forward_4', 200), (None, 200),
 ])
 def test_initial_step_remains_when_skip_condition_is_not_met(clock, motion, bottom):
@@ -145,7 +174,7 @@ def test_failed_crab_support_change_cannot_start_retreat_or_grasp(clock):
 
 
 @pytest.mark.parametrize('index', [1, 2])
-@pytest.mark.parametrize('offset,bottom', [(0, 219), (100, 269)])
+@pytest.mark.parametrize('offset,bottom', [(0, 230), (100, 269)])
 def test_completed_motion_status_drives_skip_in_both_modes(clock, index, offset, bottom):
     from test_pickup_continuous_walk import start, forward_status
     node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
@@ -185,7 +214,7 @@ def test_new_checkpoint_clears_history_when_last_motion_failed(clock):
     assert not bridge.pickup_fixed_sequence_started
 
 
-@pytest.mark.parametrize('bottom,reserved', [(219, False), (230, True)])
+@pytest.mark.parametrize('bottom,reserved', [(229, False), (230, False), (230.001, True)])
 def test_reservation_uses_current_gait_without_mutating_completed_history(bottom, reserved):
     from mission_control.pickup_walk_reservation import PickupWalkReservation
     planner, reservation = MotionDecisionPlanner(), PickupWalkReservation()

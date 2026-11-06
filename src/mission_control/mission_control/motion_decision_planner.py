@@ -9,7 +9,7 @@ import time
 from typing import Any
 
 from step.approach_distance import approach_level_from_motion
-from step.approach_distance import BALL_PICKUP_DISTANCE_M
+from step.approach_distance import BALL_PICKUP_DISTANCE_M, BALL_FINE_APPROACH_DISTANCE_M
 from step.approach_distance import HURDLE_FINE_DISTANCE_M
 from step.approach_distance import ball_hurdle_approach_motion
 from step.ball_navigation_planner import BallNavigationConfig
@@ -24,7 +24,7 @@ from step.line_navigation_planner import (
     valid_ground_heading, line_heading,
 )
 
-from .pickup_fine_skip import pickup_fine_skip_limit
+from .pickup_fine_skip import pickup_fine_can_skip, pickup_fine_skip_limit
 from .pickup_grasp_selection import (
     PICKUP_GRASP_SPLIT_BOTTOM_DISTANCE_PX, pickup_grasp_motion_id,
 )
@@ -70,7 +70,7 @@ class MotionDecisionConfig:
     ball_tracking_range_m: float = 1.5
     ball_control_range_m: float = 1.5
     pickup_fine_step_distance_m: float = BALL_PICKUP_DISTANCE_M
-    pickup_fine_align_bottom_distance_px: int = 220
+    pickup_fine_align_bottom_distance_px: int = 230
     ball_lost_stop_sec: float = 0.35
     ball_recovery_timeout_sec: float = 8.0
     ball_recovery_turn_rad_s: float = 0.22
@@ -1077,7 +1077,7 @@ class MotionDecisionPlanner:
             info.get("detected") is True
             and info.get("depth_valid") is True
             and depth is not None
-            and 0.0 < depth <= (BALL_PICKUP_DISTANCE_M if pickup else self.config.ball_control_range_m)
+            and 0.0 < depth <= (BALL_FINE_APPROACH_DISTANCE_M if pickup else self.config.ball_control_range_m)
             and depth_age is not None
             and 0.0 <= depth_age <= self.ball_planner.config.max_pickup_depth_age_sec
             and bottom is not None
@@ -1538,7 +1538,8 @@ class MotionDecisionPlanner:
             )
 
         skip_limit = pickup_fine_skip_limit(self.pickup_last_completed_motion_id)
-        fine_required = (bottom_distance_px >= skip_limit if skip_limit is not None
+        fine_required = (not pickup_fine_can_skip(self.pickup_last_completed_motion_id, bottom_distance_px)
+                         if skip_limit is not None
                          else not self.pickup_fine_approach_complete)
         common.update(pickup_last_completed_motion_id=self.pickup_last_completed_motion_id,
                       pickup_fine_skip_limit_px=skip_limit)

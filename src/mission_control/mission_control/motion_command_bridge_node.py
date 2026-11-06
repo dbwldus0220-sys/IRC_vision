@@ -12,7 +12,8 @@ from rclpy.node import Node
 from std_msgs.msg import String
 
 from .pickup_walk_reservation import PICKUP_WALK_DURATIONS, pickup_walk_motion
-from .pickup_fine_skip import pickup_fine_skip_limit
+from .pickup_crab_observation import PICKUP_CRAB_DURATIONS
+from .pickup_fine_skip import pickup_fine_can_skip
 from .ball_fine_approach import motion_id as ball_fine_motion_id, physical_motion_id
 
 from .safety_interlock import RECOVERABLE_MOTOR_ERROR_CODES
@@ -411,6 +412,8 @@ class MotionCommandBridgeNode(Node):
         self.goal_crab_completed = False
         self.last_completed_motion_id: str | None = None
         self.last_physical_motion_id: str | None = None
+        self.stationary_since: float | None = None
+        self.physical_request_key: tuple[int, int | None, int, str] | None = None
         self.shot_prepare_retry_motion_id: str | None = None
         self.pending_turn_request: dict[str, Any] | None = None
         self.turn_prepare_motion_id: str | None = None
@@ -582,8 +585,11 @@ class MotionCommandBridgeNode(Node):
             "source_node": "motion_command_bridge_node",
             "motion_in_progress": self.motion_in_progress,
         }
+        stationary_since = getattr(self, "stationary_since", None)
+        if stationary_since is not None:
+            payload["stationary_elapsed_sec"] = max(0.0, time.monotonic() - stationary_since)
         if (action == "PICKUP_NOW" and status == "RUNNING"
-                and motion_id in PICKUP_WALK_DURATIONS
+                and (motion_id in PICKUP_WALK_DURATIONS or motion_id in PICKUP_CRAB_DURATIONS)
                 and motion_id == self.active_motion_id
                 and self.pending_turn_request is None and self.transition_motion_id is None
                 and self.active_dwell_until is None
@@ -878,10 +884,9 @@ class MotionCommandBridgeNode(Node):
                 )
                 return
 
-            skip_limit = pickup_fine_skip_limit(self.last_physical_motion_id)
             bottom = source_command.get("bottom_distance_px")
-            skip_fine = (skip_limit is not None and type(bottom) in {int, float}
-                         and 0 <= bottom < skip_limit)
+            skip_fine = (type(bottom) in {int, float}
+                         and pickup_fine_can_skip(self.last_physical_motion_id, bottom))
             if (
                 approach_motion == "STRAIGHT_0"
                 and (self.pickup_fine_positioning_complete or skip_fine)
@@ -1494,9 +1499,7 @@ class MotionCommandBridgeNode(Node):
             )
             self.transition_motion_id = request_payload["motion_id"]
             self.transition_pending_request = request_payload
-            self.transition_dwell_until = (
-                time.monotonic() + dwell_sec
-            )
+            self.transition_dwell_until = MotionCommandBridgeNode._pre_motion_dwell_deadline(self, dwell_sec)
             self.publish_motion_status(
                 status="RUNNING", action=action, command_id=command_id,
                 event_id=event_id, request_id=request_id,
@@ -1504,6 +1507,7 @@ class MotionCommandBridgeNode(Node):
                 message=f"holding still for {dwell_sec:g} seconds before "
                         + ("backward motion" if backward else "posture transition"),
             )
+            self._check_transition_dwell()
             return
         self._send_executor_payload(request_payload)
         if action == "PICKUP_NOW" and motion_id in {
@@ -1516,6 +1520,13 @@ class MotionCommandBridgeNode(Node):
 
     def _send_executor_payload(self, request_payload: dict[str, Any]) -> None:
         """Send an already prepared payload without inserting another transition."""
+        # Queued requests conservatively clear credit too; only a matching
+        # completion can establish a new continuous stationary interval.
+        self.stationary_since = None
+        self.physical_request_key = (
+            request_payload["command_id"], request_payload.get("event_id"),
+            request_payload["request_id"], request_payload["motion_id"],
+        )
         camera = getattr(self, "post_pickup_goal_camera_request", None)
         if (camera is not None and request_payload.get("command_id") == camera[0]
                 and request_payload.get("motion_id") == camera[1]):
@@ -1527,6 +1538,12 @@ class MotionCommandBridgeNode(Node):
             separators=(",", ":"),
         )
         self.executor_request_publisher.publish(request_message)
+
+    def _pre_motion_dwell_deadline(self, duration: float) -> float:
+        """Count an already completed rest toward the next pre-motion hold."""
+        now = time.monotonic()
+        since = getattr(self, "stationary_since", None)
+        return max(now, since + duration) if since is not None and since <= now else now + duration
 
     def _check_transition_dwell(self, now: float | None = None) -> bool:
         """Hold both sides of a posture transition or backward motion."""
@@ -2014,9 +2031,7 @@ class MotionCommandBridgeNode(Node):
             dwell_sec = (MotionCommandBridgeNode.TRANSITION_DWELL_SEC
                          if previous in MotionCommandBridgeNode.TRANSITION_MOTION_IDS
                          else MotionCommandBridgeNode.GOAL_CRAB_PRE_DWELL_SEC)
-            self.active_dwell_until = (
-                time.monotonic() + dwell_sec
-            )
+            self.active_dwell_until = MotionCommandBridgeNode._pre_motion_dwell_deadline(self, dwell_sec)
             self.publish_motion_status(
                 status="RUNNING",
                 command_id=self.active_command_id,
@@ -2045,7 +2060,7 @@ class MotionCommandBridgeNode(Node):
             return True
         if next_motion_id == self.HURDLE_PRE_GO_DWELL_MARKER:
             self.active_motion_id = next_motion_id
-            self.active_dwell_until = time.monotonic() + self.HURDLE_PRE_GO_DWELL_SEC
+            self.active_dwell_until = MotionCommandBridgeNode._pre_motion_dwell_deadline(self, self.HURDLE_PRE_GO_DWELL_SEC)
             self.publish_motion_status(
                 status="RUNNING",
                 command_id=self.active_command_id,
@@ -2365,6 +2380,16 @@ class MotionCommandBridgeNode(Node):
                 "Executor status ignored: bridge has no active request"
             )
             return
+        key = (payload["command_id"], payload.get("event_id"), payload["request_id"], payload["motion_id"])
+        if key == getattr(self, "physical_request_key", None):
+            if payload["status"] == "SUCCEEDED":
+                self.stationary_since = time.monotonic()
+                # Replayed completion after a dwell must not restart the clock.
+                self.physical_request_key = None
+            elif payload["status"] != "QUEUED":
+                self.stationary_since = None
+                if payload["status"] in self.TERMINAL_STATUSES:
+                    self.physical_request_key = None
         pickup_queue_failed = bool(
             getattr(self, "pickup_queued_request", None) is not None
             and payload["request_id"] == self.active_request_id
