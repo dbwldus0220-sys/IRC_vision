@@ -67,8 +67,9 @@ def test_names_aliases_and_bridge_dispatch_remain_valid():
 
 
 @pytest.mark.parametrize('name', MANIFEST['imports'])
-def test_updated_motions_fit_timeout_and_keep_full_end_support(name):
-    motion = RUNTIME[name]
+def test_source80_motions_fit_timeout_and_keep_full_end_support(name):
+    # Source82 intentionally replaces pickup end poses; check source80's snapshot here.
+    motion = catalog(SNAPSHOT / 'artifacts/robot_motions_runtime.json')[name]
     before = catalog(UPDATE / 'before/artifacts/robot_motions_runtime.json')[name]
     duration = max(f['start_ms'] + f['time_ms'] for f in motion['frames'])
     assert duration * motion['repeat_count'] / motion['playback_speed'] + motion['completion']['settle_timeout_ms'] < Bridge.DEFAULT_TIMEOUT_MS

@@ -15,6 +15,7 @@ from mission_control.pickup_walk_reservation import PICKUP_WALK_DURATIONS
 ROOT = Path(__file__).resolve().parents[3]
 BEFORE = ROOT / 'artifacts/20261110_restore_original_speeds/before/artifacts'
 EXCEPTIONS = {'t허들찐', 'p공후 제자리좌회전', 'p골대후제자리좌회전'}
+CURRENT_EXCEPTIONS = {'t허들찐'}
 
 
 def catalog(path):
@@ -33,8 +34,8 @@ def seconds(alias):
 
 
 @pytest.mark.parametrize('original', SOURCE['motions'], ids=lambda m: m['name'])
-def test_only_three_motions_keep_source_speed_times_095(original):
-    factor = Decimal('.95') if original['name'] in EXCEPTIONS else Decimal('1')
+def test_current_runtime_speed_policy(original):
+    factor = Decimal('.95') if original['name'] in CURRENT_EXCEPTIONS else Decimal('1')
     expected = float(Decimal(str(original['playback_speed'])) * factor)
     assert MOTIONS[original['name']]['playback_speed'] == expected
 
@@ -77,6 +78,8 @@ def test_pickup_and_recovery_reservations_use_actual_speed(alias, estimate):
     ('GOAL_CAMERA_90_FORWARD', 'goal_camera_90_forward_6'),
     ('GOAL_CAMERA_90_FORWARD_1', 'goal_camera_90_forward_2'),
     ('GOAL_CAMERA_90_FORWARD_2', 'goal_camera_90_forward_4'),
+    ('GOAL_CAMERA90_RECOVER_LEFT_4', 'line_recovery_left_4'),
+    ('GOAL_CAMERA90_RECOVER_RIGHT_4', 'line_recovery_right_4'),
     *[(f'GOAL_CAMERA90_FINE_FORWARD_{n}', f'goal_camera_90_fine_forward_{n}') for n in range(1, 6)],
 ])
 def test_goal_reservations_use_actual_speed(action, alias):
@@ -86,3 +89,5 @@ def test_goal_reservations_use_actual_speed(action, alias):
 def test_approach_reservations_use_actual_speed():
     assert Node.APPROACH_WALK_DURATION_SEC['STRAIGHT'] == pytest.approx(seconds('line_forward_4'))
     assert Node.APPROACH_WALK_DURATION_SEC['BALL_APPROACH_FINE_FORWARD_5'] == pytest.approx(seconds('ball_align_fine_forward_45_5'))
+    assert Node.APPROACH_WALK_DURATION_SEC['RECOVER_LEFT_TURN_LEFT_4'] == pytest.approx(seconds('line_recovery_left_4'))
+    assert Node.APPROACH_WALK_DURATION_SEC['RECOVER_RIGHT_TURN_RIGHT_4'] == pytest.approx(seconds('line_recovery_right_4'))

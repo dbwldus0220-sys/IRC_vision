@@ -1,0 +1,123 @@
+{
+  "changes": [
+    {
+      "name": "t라인복귀우실전",
+      "before_speed": 1.05,
+      "after_speed": 1.0,
+      "before_duration_sec": 1.9657142857142857,
+      "after_duration_sec": 2.064
+    },
+    {
+      "name": "R라인복귀우회전90도",
+      "before_speed": 1.05,
+      "after_speed": 1.0,
+      "before_duration_sec": 1.9657142857142857,
+      "after_duration_sec": 2.064
+    },
+    {
+      "name": "t라인복귀우공용",
+      "before_speed": 1.05,
+      "after_speed": 1.0,
+      "before_duration_sec": 1.9657142857142857,
+      "after_duration_sec": 2.064
+    },
+    {
+      "name": "p라인복귀좌회전공용",
+      "before_speed": 1.05,
+      "after_speed": 1.0,
+      "before_duration_sec": 1.9619047619047618,
+      "after_duration_sec": 2.06
+    },
+    {
+      "name": "p전진45(6회)",
+      "before_speed": 1.05,
+      "after_speed": 1.0,
+      "before_duration_sec": 2.9371428571428573,
+      "after_duration_sec": 3.084
+    },
+    {
+      "name": "p라인복귀좌회전45도",
+      "before_speed": 1.05,
+      "after_speed": 1.0,
+      "before_duration_sec": 1.958095238095238,
+      "after_duration_sec": 2.056
+    },
+    {
+      "name": "p전진45(4회)",
+      "before_speed": 1.05,
+      "after_speed": 1.0,
+      "before_duration_sec": 1.958095238095238,
+      "after_duration_sec": 2.056
+    },
+    {
+      "name": "p전진90도(4회)",
+      "before_speed": 1.05,
+      "after_speed": 1.0,
+      "before_duration_sec": 1.958095238095238,
+      "after_duration_sec": 2.056
+    },
+    {
+      "name": "p전진90도(6회)",
+      "before_speed": 1.05,
+      "after_speed": 1.0,
+      "before_duration_sec": 2.9371428571428573,
+      "after_duration_sec": 3.084
+    },
+    {
+      "name": "p전진실전0도(4회)",
+      "before_speed": 1.05,
+      "after_speed": 1.0,
+      "before_duration_sec": 1.958095238095238,
+      "after_duration_sec": 2.056
+    },
+    {
+      "name": "p전진실전0도(6회)",
+      "before_speed": 1.05,
+      "after_speed": 1.0,
+      "before_duration_sec": 2.9371428571428573,
+      "after_duration_sec": 3.084
+    },
+    {
+      "name": "p라인복귀좌회전90도",
+      "before_speed": 1.05,
+      "after_speed": 1.0,
+      "before_duration_sec": 1.958095238095238,
+      "after_duration_sec": 2.056
+    },
+    {
+      "name": "p전진45(2회)",
+      "before_speed": 1.05,
+      "after_speed": 1.0,
+      "before_duration_sec": 0.979047619047619,
+      "after_duration_sec": 1.028
+    },
+    {
+      "name": "p전진45(8회)",
+      "before_speed": 1.05,
+      "after_speed": 1.0,
+      "before_duration_sec": 3.916190476190476,
+      "after_duration_sec": 4.112
+    },
+    {
+      "name": "p전진90도(2회)",
+      "before_speed": 1.05,
+      "after_speed": 1.0,
+      "before_duration_sec": 0.979047619047619,
+      "after_duration_sec": 1.028
+    }
+  ],
+  "new_test_failures": [],
+  "resolved_test_failures": [],
+  "before_summary": "127 failed, 1034 passed in 50.81s",
+  "after_summary": "127 failed, 1036 passed in 49.63s",
+  "hardware_executed": false,
+  "sdk_tests_passed": [
+    "forward_timing_contract",
+    "ball_fine_queue_contract"
+  ],
+  "walking_queue_pairs": 105,
+  "runtime_motion_count": 156,
+  "installed_catalog_and_module_match": true,
+  "pc_catalog_unchanged": true,
+  "source86_sha256": "0be84020fe9c50aae471cf912f22b9e38e12845070886037e8b3b9a1c0f75b5c"
+}

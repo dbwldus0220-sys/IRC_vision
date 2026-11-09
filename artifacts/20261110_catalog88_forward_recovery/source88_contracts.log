@@ -1,0 +1,975 @@
+.........................F.FFFFF.FFFF.FFFFF.FFFFF....................... [ 30%]
+........................................................................ [ 60%]
+........................................................................ [ 91%]
+.................FFFF                                                    [100%]
+=================================== FAILURES ===================================
+_ test_line_capture_duration_equals_actual_motion_playback[RECOVER_LEFT_TURN_LEFT_2] _
+
+action = 'RECOVER_LEFT_TURN_LEFT_2'
+
+    @pytest.mark.parametrize('action', list(Node.LINE_MOTION_CAPTURE_CONFIG))
+    def test_line_capture_duration_equals_actual_motion_playback(action):
+>       assert Node.LINE_MOTION_CAPTURE_CONFIG[action][0] == pytest.approx(seconds(Bridge.motion_id_for_action(action)))
+
+src/mission_control/test/test_catalog88_forward_recovery.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+alias = None
+
+    def seconds(alias):
+>       motion = RUNTIME[ALIASES[alias]]
+E       KeyError: None
+
+src/mission_control/test/test_catalog88_forward_recovery.py:39: KeyError
+_ test_line_capture_duration_equals_actual_motion_playback[RECOVER_LEFT_TURN_LEFT_6] _
+
+action = 'RECOVER_LEFT_TURN_LEFT_6'
+
+    @pytest.mark.parametrize('action', list(Node.LINE_MOTION_CAPTURE_CONFIG))
+    def test_line_capture_duration_equals_actual_motion_playback(action):
+>       assert Node.LINE_MOTION_CAPTURE_CONFIG[action][0] == pytest.approx(seconds(Bridge.motion_id_for_action(action)))
+
+src/mission_control/test/test_catalog88_forward_recovery.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+alias = None
+
+    def seconds(alias):
+>       motion = RUNTIME[ALIASES[alias]]
+E       KeyError: None
+
+src/mission_control/test/test_catalog88_forward_recovery.py:39: KeyError
+_ test_line_capture_duration_equals_actual_motion_playback[RECOVER_LEFT_TURN_LEFT_8] _
+
+action = 'RECOVER_LEFT_TURN_LEFT_8'
+
+    @pytest.mark.parametrize('action', list(Node.LINE_MOTION_CAPTURE_CONFIG))
+    def test_line_capture_duration_equals_actual_motion_playback(action):
+>       assert Node.LINE_MOTION_CAPTURE_CONFIG[action][0] == pytest.approx(seconds(Bridge.motion_id_for_action(action)))
+
+src/mission_control/test/test_catalog88_forward_recovery.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+alias = None
+
+    def seconds(alias):
+>       motion = RUNTIME[ALIASES[alias]]
+E       KeyError: None
+
+src/mission_control/test/test_catalog88_forward_recovery.py:39: KeyError
+_ test_line_capture_duration_equals_actual_motion_playback[RECOVER_LEFT_TURN_LEFT_10] _
+
+action = 'RECOVER_LEFT_TURN_LEFT_10'
+
+    @pytest.mark.parametrize('action', list(Node.LINE_MOTION_CAPTURE_CONFIG))
+    def test_line_capture_duration_equals_actual_motion_playback(action):
+>       assert Node.LINE_MOTION_CAPTURE_CONFIG[action][0] == pytest.approx(seconds(Bridge.motion_id_for_action(action)))
+
+src/mission_control/test/test_catalog88_forward_recovery.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+alias = None
+
+    def seconds(alias):
+>       motion = RUNTIME[ALIASES[alias]]
+E       KeyError: None
+
+src/mission_control/test/test_catalog88_forward_recovery.py:39: KeyError
+_ test_line_capture_duration_equals_actual_motion_playback[RECOVER_LEFT_TURN_LEFT_13] _
+
+action = 'RECOVER_LEFT_TURN_LEFT_13'
+
+    @pytest.mark.parametrize('action', list(Node.LINE_MOTION_CAPTURE_CONFIG))
+    def test_line_capture_duration_equals_actual_motion_playback(action):
+>       assert Node.LINE_MOTION_CAPTURE_CONFIG[action][0] == pytest.approx(seconds(Bridge.motion_id_for_action(action)))
+
+src/mission_control/test/test_catalog88_forward_recovery.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+alias = None
+
+    def seconds(alias):
+>       motion = RUNTIME[ALIASES[alias]]
+E       KeyError: None
+
+src/mission_control/test/test_catalog88_forward_recovery.py:39: KeyError
+_ test_line_capture_duration_equals_actual_motion_playback[RECOVER_RIGHT_TURN_LEFT_2] _
+
+action = 'RECOVER_RIGHT_TURN_LEFT_2'
+
+    @pytest.mark.parametrize('action', list(Node.LINE_MOTION_CAPTURE_CONFIG))
+    def test_line_capture_duration_equals_actual_motion_playback(action):
+>       assert Node.LINE_MOTION_CAPTURE_CONFIG[action][0] == pytest.approx(seconds(Bridge.motion_id_for_action(action)))
+
+src/mission_control/test/test_catalog88_forward_recovery.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+alias = None
+
+    def seconds(alias):
+>       motion = RUNTIME[ALIASES[alias]]
+E       KeyError: None
+
+src/mission_control/test/test_catalog88_forward_recovery.py:39: KeyError
+_ test_line_capture_duration_equals_actual_motion_playback[RECOVER_RIGHT_TURN_LEFT_6] _
+
+action = 'RECOVER_RIGHT_TURN_LEFT_6'
+
+    @pytest.mark.parametrize('action', list(Node.LINE_MOTION_CAPTURE_CONFIG))
+    def test_line_capture_duration_equals_actual_motion_playback(action):
+>       assert Node.LINE_MOTION_CAPTURE_CONFIG[action][0] == pytest.approx(seconds(Bridge.motion_id_for_action(action)))
+
+src/mission_control/test/test_catalog88_forward_recovery.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+alias = None
+
+    def seconds(alias):
+>       motion = RUNTIME[ALIASES[alias]]
+E       KeyError: None
+
+src/mission_control/test/test_catalog88_forward_recovery.py:39: KeyError
+_ test_line_capture_duration_equals_actual_motion_playback[RECOVER_RIGHT_TURN_LEFT_8] _
+
+action = 'RECOVER_RIGHT_TURN_LEFT_8'
+
+    @pytest.mark.parametrize('action', list(Node.LINE_MOTION_CAPTURE_CONFIG))
+    def test_line_capture_duration_equals_actual_motion_playback(action):
+>       assert Node.LINE_MOTION_CAPTURE_CONFIG[action][0] == pytest.approx(seconds(Bridge.motion_id_for_action(action)))
+
+src/mission_control/test/test_catalog88_forward_recovery.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+alias = None
+
+    def seconds(alias):
+>       motion = RUNTIME[ALIASES[alias]]
+E       KeyError: None
+
+src/mission_control/test/test_catalog88_forward_recovery.py:39: KeyError
+_ test_line_capture_duration_equals_actual_motion_playback[RECOVER_RIGHT_TURN_LEFT_10] _
+
+action = 'RECOVER_RIGHT_TURN_LEFT_10'
+
+    @pytest.mark.parametrize('action', list(Node.LINE_MOTION_CAPTURE_CONFIG))
+    def test_line_capture_duration_equals_actual_motion_playback(action):
+>       assert Node.LINE_MOTION_CAPTURE_CONFIG[action][0] == pytest.approx(seconds(Bridge.motion_id_for_action(action)))
+
+src/mission_control/test/test_catalog88_forward_recovery.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+alias = None
+
+    def seconds(alias):
+>       motion = RUNTIME[ALIASES[alias]]
+E       KeyError: None
+
+src/mission_control/test/test_catalog88_forward_recovery.py:39: KeyError
+_ test_line_capture_duration_equals_actual_motion_playback[RECOVER_RIGHT_TURN_LEFT_13] _
+
+action = 'RECOVER_RIGHT_TURN_LEFT_13'
+
+    @pytest.mark.parametrize('action', list(Node.LINE_MOTION_CAPTURE_CONFIG))
+    def test_line_capture_duration_equals_actual_motion_playback(action):
+>       assert Node.LINE_MOTION_CAPTURE_CONFIG[action][0] == pytest.approx(seconds(Bridge.motion_id_for_action(action)))
+
+src/mission_control/test/test_catalog88_forward_recovery.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+alias = None
+
+    def seconds(alias):
+>       motion = RUNTIME[ALIASES[alias]]
+E       KeyError: None
+
+src/mission_control/test/test_catalog88_forward_recovery.py:39: KeyError
+_ test_line_capture_duration_equals_actual_motion_playback[RECOVER_LEFT_TURN_RIGHT_6] _
+
+action = 'RECOVER_LEFT_TURN_RIGHT_6'
+
+    @pytest.mark.parametrize('action', list(Node.LINE_MOTION_CAPTURE_CONFIG))
+    def test_line_capture_duration_equals_actual_motion_playback(action):
+>       assert Node.LINE_MOTION_CAPTURE_CONFIG[action][0] == pytest.approx(seconds(Bridge.motion_id_for_action(action)))
+
+src/mission_control/test/test_catalog88_forward_recovery.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+alias = None
+
+    def seconds(alias):
+>       motion = RUNTIME[ALIASES[alias]]
+E       KeyError: None
+
+src/mission_control/test/test_catalog88_forward_recovery.py:39: KeyError
+_ test_line_capture_duration_equals_actual_motion_playback[RECOVER_LEFT_TURN_RIGHT_8] _
+
+action = 'RECOVER_LEFT_TURN_RIGHT_8'
+
+    @pytest.mark.parametrize('action', list(Node.LINE_MOTION_CAPTURE_CONFIG))
+    def test_line_capture_duration_equals_actual_motion_playback(action):
+>       assert Node.LINE_MOTION_CAPTURE_CONFIG[action][0] == pytest.approx(seconds(Bridge.motion_id_for_action(action)))
+
+src/mission_control/test/test_catalog88_forward_recovery.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+alias = None
+
+    def seconds(alias):
+>       motion = RUNTIME[ALIASES[alias]]
+E       KeyError: None
+
+src/mission_control/test/test_catalog88_forward_recovery.py:39: KeyError
+_ test_line_capture_duration_equals_actual_motion_playback[RECOVER_LEFT_TURN_RIGHT_10] _
+
+action = 'RECOVER_LEFT_TURN_RIGHT_10'
+
+    @pytest.mark.parametrize('action', list(Node.LINE_MOTION_CAPTURE_CONFIG))
+    def test_line_capture_duration_equals_actual_motion_playback(action):
+>       assert Node.LINE_MOTION_CAPTURE_CONFIG[action][0] == pytest.approx(seconds(Bridge.motion_id_for_action(action)))
+
+src/mission_control/test/test_catalog88_forward_recovery.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+alias = None
+
+    def seconds(alias):
+>       motion = RUNTIME[ALIASES[alias]]
+E       KeyError: None
+
+src/mission_control/test/test_catalog88_forward_recovery.py:39: KeyError
+_ test_line_capture_duration_equals_actual_motion_playback[RECOVER_LEFT_TURN_RIGHT_12] _
+
+action = 'RECOVER_LEFT_TURN_RIGHT_12'
+
+    @pytest.mark.parametrize('action', list(Node.LINE_MOTION_CAPTURE_CONFIG))
+    def test_line_capture_duration_equals_actual_motion_playback(action):
+>       assert Node.LINE_MOTION_CAPTURE_CONFIG[action][0] == pytest.approx(seconds(Bridge.motion_id_for_action(action)))
+
+src/mission_control/test/test_catalog88_forward_recovery.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+alias = None
+
+    def seconds(alias):
+>       motion = RUNTIME[ALIASES[alias]]
+E       KeyError: None
+
+src/mission_control/test/test_catalog88_forward_recovery.py:39: KeyError
+_ test_line_capture_duration_equals_actual_motion_playback[RECOVER_LEFT_TURN_RIGHT_15] _
+
+action = 'RECOVER_LEFT_TURN_RIGHT_15'
+
+    @pytest.mark.parametrize('action', list(Node.LINE_MOTION_CAPTURE_CONFIG))
+    def test_line_capture_duration_equals_actual_motion_playback(action):
+>       assert Node.LINE_MOTION_CAPTURE_CONFIG[action][0] == pytest.approx(seconds(Bridge.motion_id_for_action(action)))
+
+src/mission_control/test/test_catalog88_forward_recovery.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+alias = None
+
+    def seconds(alias):
+>       motion = RUNTIME[ALIASES[alias]]
+E       KeyError: None
+
+src/mission_control/test/test_catalog88_forward_recovery.py:39: KeyError
+_ test_line_capture_duration_equals_actual_motion_playback[RECOVER_RIGHT_TURN_RIGHT_6] _
+
+action = 'RECOVER_RIGHT_TURN_RIGHT_6'
+
+    @pytest.mark.parametrize('action', list(Node.LINE_MOTION_CAPTURE_CONFIG))
+    def test_line_capture_duration_equals_actual_motion_playback(action):
+>       assert Node.LINE_MOTION_CAPTURE_CONFIG[action][0] == pytest.approx(seconds(Bridge.motion_id_for_action(action)))
+
+src/mission_control/test/test_catalog88_forward_recovery.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+alias = None
+
+    def seconds(alias):
+>       motion = RUNTIME[ALIASES[alias]]
+E       KeyError: None
+
+src/mission_control/test/test_catalog88_forward_recovery.py:39: KeyError
+_ test_line_capture_duration_equals_actual_motion_playback[RECOVER_RIGHT_TURN_RIGHT_8] _
+
+action = 'RECOVER_RIGHT_TURN_RIGHT_8'
+
+    @pytest.mark.parametrize('action', list(Node.LINE_MOTION_CAPTURE_CONFIG))
+    def test_line_capture_duration_equals_actual_motion_playback(action):
+>       assert Node.LINE_MOTION_CAPTURE_CONFIG[action][0] == pytest.approx(seconds(Bridge.motion_id_for_action(action)))
+
+src/mission_control/test/test_catalog88_forward_recovery.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+alias = None
+
+    def seconds(alias):
+>       motion = RUNTIME[ALIASES[alias]]
+E       KeyError: None
+
+src/mission_control/test/test_catalog88_forward_recovery.py:39: KeyError
+_ test_line_capture_duration_equals_actual_motion_playback[RECOVER_RIGHT_TURN_RIGHT_10] _
+
+action = 'RECOVER_RIGHT_TURN_RIGHT_10'
+
+    @pytest.mark.parametrize('action', list(Node.LINE_MOTION_CAPTURE_CONFIG))
+    def test_line_capture_duration_equals_actual_motion_playback(action):
+>       assert Node.LINE_MOTION_CAPTURE_CONFIG[action][0] == pytest.approx(seconds(Bridge.motion_id_for_action(action)))
+
+src/mission_control/test/test_catalog88_forward_recovery.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+alias = None
+
+    def seconds(alias):
+>       motion = RUNTIME[ALIASES[alias]]
+E       KeyError: None
+
+src/mission_control/test/test_catalog88_forward_recovery.py:39: KeyError
+_ test_line_capture_duration_equals_actual_motion_playback[RECOVER_RIGHT_TURN_RIGHT_12] _
+
+action = 'RECOVER_RIGHT_TURN_RIGHT_12'
+
+    @pytest.mark.parametrize('action', list(Node.LINE_MOTION_CAPTURE_CONFIG))
+    def test_line_capture_duration_equals_actual_motion_playback(action):
+>       assert Node.LINE_MOTION_CAPTURE_CONFIG[action][0] == pytest.approx(seconds(Bridge.motion_id_for_action(action)))
+
+src/mission_control/test/test_catalog88_forward_recovery.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+alias = None
+
+    def seconds(alias):
+>       motion = RUNTIME[ALIASES[alias]]
+E       KeyError: None
+
+src/mission_control/test/test_catalog88_forward_recovery.py:39: KeyError
+_ test_line_capture_duration_equals_actual_motion_playback[RECOVER_RIGHT_TURN_RIGHT_15] _
+
+action = 'RECOVER_RIGHT_TURN_RIGHT_15'
+
+    @pytest.mark.parametrize('action', list(Node.LINE_MOTION_CAPTURE_CONFIG))
+    def test_line_capture_duration_equals_actual_motion_playback(action):
+>       assert Node.LINE_MOTION_CAPTURE_CONFIG[action][0] == pytest.approx(seconds(Bridge.motion_id_for_action(action)))
+
+src/mission_control/test/test_catalog88_forward_recovery.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+alias = None
+
+    def seconds(alias):
+>       motion = RUNTIME[ALIASES[alias]]
+E       KeyError: None
+
+src/mission_control/test/test_catalog88_forward_recovery.py:39: KeyError
+_ test_launch_wires_enabled_default_and_rollback_to_decision_node[None-full_system] _
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+>           content, package_prefix = get_resource('packages', package_name)
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+resource_type = 'packages', resource_name = 'step'
+
+    def get_resource(resource_type, resource_name):
+        """
+        Get the content of a specific resource and its prefix path.
+    
+        :param resource_type: the type of the resource
+        :type resource_type: str
+        :param resource_names: the name of the resource
+        :type resource_name: str
+        :returns: a tuple of the content (bytes) of the resource and its prefix path
+        :raises: :exc:`EnvironmentError`
+        :raises: :exc:`OSError`
+        :raises: :exc:`LookupError`
+        :raises: :exc:`InvalidResourceTypeNameError`
+        :raises: :exc:`InvalidResourceNameError`
+        """
+        assert resource_type, 'The resource type must not be empty'
+        assert resource_name, 'The resource name must not be empty'
+        if _name_is_invalid(resource_type):
+            raise InvalidResourceTypeNameError(
+                "Resource type '%s' is invalid" % resource_type)
+        if _name_is_invalid(resource_name):
+            raise InvalidResourceNameError(
+                "Resource name '%s' is invalid" % resource_name)
+        for path in get_search_paths():
+            resource_path = os.path.join(path, RESOURCE_INDEX_SUBFOLDER, resource_type, resource_name)
+            if os.path.isfile(resource_path):
+                try:
+                    with open(resource_path, 'r') as h:
+                        content = h.read()
+                except OSError as e:
+                    raise OSError(
+                        "Could not open the resource '%s' of type '%s':\n%s"
+                        % (resource_name, resource_type, e))
+                return content, path
+>       raise LookupError(
+            "Could not find the resource '%s' of type '%s'" % (resource_name, resource_type))
+E       LookupError: Could not find the resource 'step' of type 'packages'
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/resources.py:86: LookupError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff880976d0>
+tmp_path = PosixPath('/tmp/pytest-of-jet/pytest-12/test_launch_wires_enabled_defa0')
+launch_name = 'full_system', enabled = None
+
+    @pytest.mark.parametrize('launch_name', ['full_system', 'full_system_robot'])
+    @pytest.mark.parametrize('enabled', [None, 'false'])
+    def test_launch_wires_enabled_default_and_rollback_to_decision_node(monkeypatch, tmp_path, launch_name, enabled):
+        import importlib
+        from launch_ros.actions import Node as LaunchNode
+        from test_full_system_launch import launch_context, node_parameters
+    
+        module = importlib.import_module('test_' + launch_name + '_launch')
+        description = module.launch_description(monkeypatch, tmp_path)
+        overrides = {} if enabled is None else {'ball_entry_line_alignment_enabled': enabled}
+>       context = launch_context(description, overrides)
+
+src/mission_control/test/test_ball_entry_line_alignment.py:635: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/test/test_full_system_launch.py:49: in launch_context
+    entity.execute(context)
+/opt/ros/humble/lib/python3.10/site-packages/launch/actions/declare_launch_argument.py:215: in execute
+    perform_substitutions(context, self.default_value)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:85: in perform
+    path_components = [
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:86: in <listcomp>
+    perform_substitutions(context, component_substitutions)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:80: in perform
+    result = self.find(package)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:113: in find
+    return get_package_share_directory(package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:80: in get_package_share_directory
+    path = os.path.join(get_package_prefix(package_name), 'share', package_name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+            content, package_prefix = get_resource('packages', package_name)
+        except LookupError:
+>           raise PackageNotFoundError(
+                "package '{}' not found, searching: {}".format(package_name, get_search_paths()))
+E           ament_index_python.packages.PackageNotFoundError: "package 'step' not found, searching: ['/opt/ros/humble']"
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:60: PackageNotFoundError
+_ test_launch_wires_enabled_default_and_rollback_to_decision_node[None-full_system_robot] _
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+>           content, package_prefix = get_resource('packages', package_name)
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+resource_type = 'packages', resource_name = 'step'
+
+    def get_resource(resource_type, resource_name):
+        """
+        Get the content of a specific resource and its prefix path.
+    
+        :param resource_type: the type of the resource
+        :type resource_type: str
+        :param resource_names: the name of the resource
+        :type resource_name: str
+        :returns: a tuple of the content (bytes) of the resource and its prefix path
+        :raises: :exc:`EnvironmentError`
+        :raises: :exc:`OSError`
+        :raises: :exc:`LookupError`
+        :raises: :exc:`InvalidResourceTypeNameError`
+        :raises: :exc:`InvalidResourceNameError`
+        """
+        assert resource_type, 'The resource type must not be empty'
+        assert resource_name, 'The resource name must not be empty'
+        if _name_is_invalid(resource_type):
+            raise InvalidResourceTypeNameError(
+                "Resource type '%s' is invalid" % resource_type)
+        if _name_is_invalid(resource_name):
+            raise InvalidResourceNameError(
+                "Resource name '%s' is invalid" % resource_name)
+        for path in get_search_paths():
+            resource_path = os.path.join(path, RESOURCE_INDEX_SUBFOLDER, resource_type, resource_name)
+            if os.path.isfile(resource_path):
+                try:
+                    with open(resource_path, 'r') as h:
+                        content = h.read()
+                except OSError as e:
+                    raise OSError(
+                        "Could not open the resource '%s' of type '%s':\n%s"
+                        % (resource_name, resource_type, e))
+                return content, path
+>       raise LookupError(
+            "Could not find the resource '%s' of type '%s'" % (resource_name, resource_type))
+E       LookupError: Could not find the resource 'step' of type 'packages'
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/resources.py:86: LookupError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff878dbaf0>
+tmp_path = PosixPath('/tmp/pytest-of-jet/pytest-12/test_launch_wires_enabled_defa1')
+launch_name = 'full_system_robot', enabled = None
+
+    @pytest.mark.parametrize('launch_name', ['full_system', 'full_system_robot'])
+    @pytest.mark.parametrize('enabled', [None, 'false'])
+    def test_launch_wires_enabled_default_and_rollback_to_decision_node(monkeypatch, tmp_path, launch_name, enabled):
+        import importlib
+        from launch_ros.actions import Node as LaunchNode
+        from test_full_system_launch import launch_context, node_parameters
+    
+        module = importlib.import_module('test_' + launch_name + '_launch')
+        description = module.launch_description(monkeypatch, tmp_path)
+        overrides = {} if enabled is None else {'ball_entry_line_alignment_enabled': enabled}
+>       context = launch_context(description, overrides)
+
+src/mission_control/test/test_ball_entry_line_alignment.py:635: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/test/test_full_system_launch.py:49: in launch_context
+    entity.execute(context)
+/opt/ros/humble/lib/python3.10/site-packages/launch/actions/declare_launch_argument.py:215: in execute
+    perform_substitutions(context, self.default_value)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:85: in perform
+    path_components = [
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:86: in <listcomp>
+    perform_substitutions(context, component_substitutions)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:80: in perform
+    result = self.find(package)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:113: in find
+    return get_package_share_directory(package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:80: in get_package_share_directory
+    path = os.path.join(get_package_prefix(package_name), 'share', package_name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+            content, package_prefix = get_resource('packages', package_name)
+        except LookupError:
+>           raise PackageNotFoundError(
+                "package '{}' not found, searching: {}".format(package_name, get_search_paths()))
+E           ament_index_python.packages.PackageNotFoundError: "package 'step' not found, searching: ['/opt/ros/humble']"
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:60: PackageNotFoundError
+_ test_launch_wires_enabled_default_and_rollback_to_decision_node[false-full_system] _
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+>           content, package_prefix = get_resource('packages', package_name)
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+resource_type = 'packages', resource_name = 'step'
+
+    def get_resource(resource_type, resource_name):
+        """
+        Get the content of a specific resource and its prefix path.
+    
+        :param resource_type: the type of the resource
+        :type resource_type: str
+        :param resource_names: the name of the resource
+        :type resource_name: str
+        :returns: a tuple of the content (bytes) of the resource and its prefix path
+        :raises: :exc:`EnvironmentError`
+        :raises: :exc:`OSError`
+        :raises: :exc:`LookupError`
+        :raises: :exc:`InvalidResourceTypeNameError`
+        :raises: :exc:`InvalidResourceNameError`
+        """
+        assert resource_type, 'The resource type must not be empty'
+        assert resource_name, 'The resource name must not be empty'
+        if _name_is_invalid(resource_type):
+            raise InvalidResourceTypeNameError(
+                "Resource type '%s' is invalid" % resource_type)
+        if _name_is_invalid(resource_name):
+            raise InvalidResourceNameError(
+                "Resource name '%s' is invalid" % resource_name)
+        for path in get_search_paths():
+            resource_path = os.path.join(path, RESOURCE_INDEX_SUBFOLDER, resource_type, resource_name)
+            if os.path.isfile(resource_path):
+                try:
+                    with open(resource_path, 'r') as h:
+                        content = h.read()
+                except OSError as e:
+                    raise OSError(
+                        "Could not open the resource '%s' of type '%s':\n%s"
+                        % (resource_name, resource_type, e))
+                return content, path
+>       raise LookupError(
+            "Could not find the resource '%s' of type '%s'" % (resource_name, resource_type))
+E       LookupError: Could not find the resource 'step' of type 'packages'
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/resources.py:86: LookupError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff880948e0>
+tmp_path = PosixPath('/tmp/pytest-of-jet/pytest-12/test_launch_wires_enabled_defa2')
+launch_name = 'full_system', enabled = 'false'
+
+    @pytest.mark.parametrize('launch_name', ['full_system', 'full_system_robot'])
+    @pytest.mark.parametrize('enabled', [None, 'false'])
+    def test_launch_wires_enabled_default_and_rollback_to_decision_node(monkeypatch, tmp_path, launch_name, enabled):
+        import importlib
+        from launch_ros.actions import Node as LaunchNode
+        from test_full_system_launch import launch_context, node_parameters
+    
+        module = importlib.import_module('test_' + launch_name + '_launch')
+        description = module.launch_description(monkeypatch, tmp_path)
+        overrides = {} if enabled is None else {'ball_entry_line_alignment_enabled': enabled}
+>       context = launch_context(description, overrides)
+
+src/mission_control/test/test_ball_entry_line_alignment.py:635: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/test/test_full_system_launch.py:49: in launch_context
+    entity.execute(context)
+/opt/ros/humble/lib/python3.10/site-packages/launch/actions/declare_launch_argument.py:215: in execute
+    perform_substitutions(context, self.default_value)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:85: in perform
+    path_components = [
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:86: in <listcomp>
+    perform_substitutions(context, component_substitutions)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:80: in perform
+    result = self.find(package)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:113: in find
+    return get_package_share_directory(package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:80: in get_package_share_directory
+    path = os.path.join(get_package_prefix(package_name), 'share', package_name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+            content, package_prefix = get_resource('packages', package_name)
+        except LookupError:
+>           raise PackageNotFoundError(
+                "package '{}' not found, searching: {}".format(package_name, get_search_paths()))
+E           ament_index_python.packages.PackageNotFoundError: "package 'step' not found, searching: ['/opt/ros/humble']"
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:60: PackageNotFoundError
+_ test_launch_wires_enabled_default_and_rollback_to_decision_node[false-full_system_robot] _
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+>           content, package_prefix = get_resource('packages', package_name)
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+resource_type = 'packages', resource_name = 'step'
+
+    def get_resource(resource_type, resource_name):
+        """
+        Get the content of a specific resource and its prefix path.
+    
+        :param resource_type: the type of the resource
+        :type resource_type: str
+        :param resource_names: the name of the resource
+        :type resource_name: str
+        :returns: a tuple of the content (bytes) of the resource and its prefix path
+        :raises: :exc:`EnvironmentError`
+        :raises: :exc:`OSError`
+        :raises: :exc:`LookupError`
+        :raises: :exc:`InvalidResourceTypeNameError`
+        :raises: :exc:`InvalidResourceNameError`
+        """
+        assert resource_type, 'The resource type must not be empty'
+        assert resource_name, 'The resource name must not be empty'
+        if _name_is_invalid(resource_type):
+            raise InvalidResourceTypeNameError(
+                "Resource type '%s' is invalid" % resource_type)
+        if _name_is_invalid(resource_name):
+            raise InvalidResourceNameError(
+                "Resource name '%s' is invalid" % resource_name)
+        for path in get_search_paths():
+            resource_path = os.path.join(path, RESOURCE_INDEX_SUBFOLDER, resource_type, resource_name)
+            if os.path.isfile(resource_path):
+                try:
+                    with open(resource_path, 'r') as h:
+                        content = h.read()
+                except OSError as e:
+                    raise OSError(
+                        "Could not open the resource '%s' of type '%s':\n%s"
+                        % (resource_name, resource_type, e))
+                return content, path
+>       raise LookupError(
+            "Could not find the resource '%s' of type '%s'" % (resource_name, resource_type))
+E       LookupError: Could not find the resource 'step' of type 'packages'
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/resources.py:86: LookupError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff877ee0e0>
+tmp_path = PosixPath('/tmp/pytest-of-jet/pytest-12/test_launch_wires_enabled_defa3')
+launch_name = 'full_system_robot', enabled = 'false'
+
+    @pytest.mark.parametrize('launch_name', ['full_system', 'full_system_robot'])
+    @pytest.mark.parametrize('enabled', [None, 'false'])
+    def test_launch_wires_enabled_default_and_rollback_to_decision_node(monkeypatch, tmp_path, launch_name, enabled):
+        import importlib
+        from launch_ros.actions import Node as LaunchNode
+        from test_full_system_launch import launch_context, node_parameters
+    
+        module = importlib.import_module('test_' + launch_name + '_launch')
+        description = module.launch_description(monkeypatch, tmp_path)
+        overrides = {} if enabled is None else {'ball_entry_line_alignment_enabled': enabled}
+>       context = launch_context(description, overrides)
+
+src/mission_control/test/test_ball_entry_line_alignment.py:635: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/test/test_full_system_launch.py:49: in launch_context
+    entity.execute(context)
+/opt/ros/humble/lib/python3.10/site-packages/launch/actions/declare_launch_argument.py:215: in execute
+    perform_substitutions(context, self.default_value)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:85: in perform
+    path_components = [
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:86: in <listcomp>
+    perform_substitutions(context, component_substitutions)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:80: in perform
+    result = self.find(package)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:113: in find
+    return get_package_share_directory(package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:80: in get_package_share_directory
+    path = os.path.join(get_package_prefix(package_name), 'share', package_name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+            content, package_prefix = get_resource('packages', package_name)
+        except LookupError:
+>           raise PackageNotFoundError(
+                "package '{}' not found, searching: {}".format(package_name, get_search_paths()))
+E           ament_index_python.packages.PackageNotFoundError: "package 'step' not found, searching: ['/opt/ros/humble']"
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:60: PackageNotFoundError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_catalog88_forward_recovery.py::test_line_capture_duration_equals_actual_motion_playback[RECOVER_LEFT_TURN_LEFT_2]
+FAILED src/mission_control/test/test_catalog88_forward_recovery.py::test_line_capture_duration_equals_actual_motion_playback[RECOVER_LEFT_TURN_LEFT_6]
+FAILED src/mission_control/test/test_catalog88_forward_recovery.py::test_line_capture_duration_equals_actual_motion_playback[RECOVER_LEFT_TURN_LEFT_8]
+FAILED src/mission_control/test/test_catalog88_forward_recovery.py::test_line_capture_duration_equals_actual_motion_playback[RECOVER_LEFT_TURN_LEFT_10]
+FAILED src/mission_control/test/test_catalog88_forward_recovery.py::test_line_capture_duration_equals_actual_motion_playback[RECOVER_LEFT_TURN_LEFT_13]
+FAILED src/mission_control/test/test_catalog88_forward_recovery.py::test_line_capture_duration_equals_actual_motion_playback[RECOVER_RIGHT_TURN_LEFT_2]
+FAILED src/mission_control/test/test_catalog88_forward_recovery.py::test_line_capture_duration_equals_actual_motion_playback[RECOVER_RIGHT_TURN_LEFT_6]
+FAILED src/mission_control/test/test_catalog88_forward_recovery.py::test_line_capture_duration_equals_actual_motion_playback[RECOVER_RIGHT_TURN_LEFT_8]
+FAILED src/mission_control/test/test_catalog88_forward_recovery.py::test_line_capture_duration_equals_actual_motion_playback[RECOVER_RIGHT_TURN_LEFT_10]
+FAILED src/mission_control/test/test_catalog88_forward_recovery.py::test_line_capture_duration_equals_actual_motion_playback[RECOVER_RIGHT_TURN_LEFT_13]
+FAILED src/mission_control/test/test_catalog88_forward_recovery.py::test_line_capture_duration_equals_actual_motion_playback[RECOVER_LEFT_TURN_RIGHT_6]
+FAILED src/mission_control/test/test_catalog88_forward_recovery.py::test_line_capture_duration_equals_actual_motion_playback[RECOVER_LEFT_TURN_RIGHT_8]
+FAILED src/mission_control/test/test_catalog88_forward_recovery.py::test_line_capture_duration_equals_actual_motion_playback[RECOVER_LEFT_TURN_RIGHT_10]
+FAILED src/mission_control/test/test_catalog88_forward_recovery.py::test_line_capture_duration_equals_actual_motion_playback[RECOVER_LEFT_TURN_RIGHT_12]
+FAILED src/mission_control/test/test_catalog88_forward_recovery.py::test_line_capture_duration_equals_actual_motion_playback[RECOVER_LEFT_TURN_RIGHT_15]
+FAILED src/mission_control/test/test_catalog88_forward_recovery.py::test_line_capture_duration_equals_actual_motion_playback[RECOVER_RIGHT_TURN_RIGHT_6]
+FAILED src/mission_control/test/test_catalog88_forward_recovery.py::test_line_capture_duration_equals_actual_motion_playback[RECOVER_RIGHT_TURN_RIGHT_8]
+FAILED src/mission_control/test/test_catalog88_forward_recovery.py::test_line_capture_duration_equals_actual_motion_playback[RECOVER_RIGHT_TURN_RIGHT_10]
+FAILED src/mission_control/test/test_catalog88_forward_recovery.py::test_line_capture_duration_equals_actual_motion_playback[RECOVER_RIGHT_TURN_RIGHT_12]
+FAILED src/mission_control/test/test_catalog88_forward_recovery.py::test_line_capture_duration_equals_actual_motion_playback[RECOVER_RIGHT_TURN_RIGHT_15]
+FAILED src/mission_control/test/test_ball_entry_line_alignment.py::test_launch_wires_enabled_default_and_rollback_to_decision_node[None-full_system]
+FAILED src/mission_control/test/test_ball_entry_line_alignment.py::test_launch_wires_enabled_default_and_rollback_to_decision_node[None-full_system_robot]
+FAILED src/mission_control/test/test_ball_entry_line_alignment.py::test_launch_wires_enabled_default_and_rollback_to_decision_node[false-full_system]
+FAILED src/mission_control/test/test_ball_entry_line_alignment.py::test_launch_wires_enabled_default_and_rollback_to_decision_node[false-full_system_robot]
+24 failed, 213 passed in 3.76s

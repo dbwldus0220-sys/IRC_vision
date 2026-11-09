@@ -1,0 +1,18 @@
+{
+  "before_summary": "83 failed, 1062 passed in 17.68s",
+  "after_summary": "83 failed, 1099 passed in 18.52s",
+  "new_tests_summary": "38 passed in 1.85s",
+  "new_regression_failures": [],
+  "existing_failure_count": 83,
+  "sdk_tests_passed": 2,
+  "catalog_and_aliases_unchanged": true,
+  "hardware_executed": false,
+  "installed_modules_resolve_to_workspace_source": true,
+  "changed_source_sha256": {
+    "src/step/step/yolo_line_analyzer.py": "7783dd7e89a22b08e2c4bb8ed1564955c796797970a5c9c1b8d1f02e5b98a2b8",
+    "src/mission_control/mission_control/sparse_line_recovery.py": "c51c17f570985107278cb8de4b0189c3137febbf1ff340fc6c2f1af1b4fe0462",
+    "src/mission_control/mission_control/lost_search_turn_limiter.py": "7dfe8a1ca712261339f32808e516e975854ebae1cf6da83479ad2e61d4f2b5aa",
+    "src/mission_control/mission_control/motion_decision_node.py": "121e0d0acf2ab0afdd3d234925c01bc64d9a4dcdf6d61a522e0dc4095f67f725",
+    "src/mission_control/test/test_two_point_rotation.py": "78f251ecf4551ab40c77d5666384fdaf154e5eb519fd0b1d62fe98cd28ab90d0"
+  }
+}

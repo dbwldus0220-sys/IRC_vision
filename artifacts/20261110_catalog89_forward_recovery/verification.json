@@ -1,0 +1,61 @@
+{
+  "source_file": "/home/jet/Downloads/robot_motions(89).json",
+  "source_sha256": "16d99af61fd639c6d949f4b3867c5edfdacdefecc672f11b023e666e55813f87",
+  "original_source_unchanged": true,
+  "imported_motion_count": 15,
+  "runtime_playback_speed": 1.0,
+  "catalog_change_fields": [
+    "playback_speed"
+  ],
+  "duration_estimates_updated": 21,
+  "alias_file_unchanged": true,
+  "python_tests": {
+    "passed": 1023,
+    "pre_existing_failed": 128,
+    "new_regression_failures": []
+  },
+  "source89_contracts": {
+    "passed": 43
+  },
+  "cadence": {
+    "cases": 72,
+    "prequeued": 72,
+    "resumed": 72,
+    "minimum_queue_lead_sec": 0.206
+  },
+  "rejected_queue_recovery": [
+    {
+      "action": "STRAIGHT",
+      "rejection_cleared": true,
+      "resumed": "STRAIGHT"
+    },
+    {
+      "action": "RECOVER_LEFT_TURN_LEFT_4",
+      "rejection_cleared": true,
+      "resumed": "STRAIGHT"
+    },
+    {
+      "action": "RECOVER_RIGHT_TURN_RIGHT_4",
+      "rejection_cleared": true,
+      "resumed": "STRAIGHT"
+    }
+  ],
+  "sdk_contracts": "2/2 passed; production-catalog forward timing replay exit 0",
+  "startup_pose_catalog_tests": {
+    "passed": 6,
+    "failed": 1,
+    "failure": "Legacy test requests 김오들(앞먼저닿음), absent in both before and after catalogs."
+  },
+  "actual_launch_startup_pose": {
+    "name": "오뒤무게중심앞",
+    "unambiguous": true,
+    "all_23_motor_targets_present": true
+  },
+  "installed_catalog_and_decision_resolve_to_workspace": true,
+  "hardware_executed": false,
+  "test_notes": [
+    "Full historical suite was interrupted; incomplete_baseline files are not used for comparisons.",
+    "The additional queue baseline loads saved decision code and redirects catalog reads to saved files; it does not revert the workspace."
+  ],
+  "limits": "Synthetic vision/status callbacks and mock motor hardware; does not verify physical balance, real motor load, scheduling delays or camera dropouts."
+}

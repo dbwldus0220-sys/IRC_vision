@@ -109,10 +109,11 @@ def test_production_runtime_preserves_original_shoulders_and_other_fields():
             assert all(frame["angles"][joint] == source["angles"][joint] for joint in ("4", "5"))
 
 
-@pytest.mark.parametrize('name', ['selected', 't허들찐', 'p공후 제자리좌회전', 'p골대후제자리좌회전'])
+@pytest.mark.parametrize('name', ['selected', 't허들찐', 'p공후 제자리좌회전', 'p골대후제자리좌회전',
+                                  'p전진45(4회)', 'p라인복귀좌회전45도', 't라인복귀우공용'])
 @pytest.mark.parametrize('speed,scaled', [(1.0, .95), (1.05, .9975), (.9, .855), (.95, .9025)])
 def test_reimport_uses_source_speed_once_and_leaves_other_runtime_speeds(tmp_path, name, speed, scaled):
-    expected = speed if name == 'selected' else scaled
+    expected = scaled if name == 't허들찐' else speed
     source, runtime, aliases = [tmp_path / name for name in ('source.json', 'runtime.json', 'aliases.yaml')]
     original = {'motions': [{'name': name, 'playback_speed': speed, 'frames': []}]}
     source.write_text(json.dumps(original))

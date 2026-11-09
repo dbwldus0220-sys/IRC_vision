@@ -461,7 +461,7 @@ def continue_pickup_after_fine_alignment(bridge, command_id=8001):
     )
 
 
-def continue_pickup_after_backward(bridge, bottom_distance_px=400):
+def continue_pickup_after_backward(bridge, bottom_distance_px=320):
     """Supply the new post-retreat sample explicitly in sequence tests."""
     assert bridge.pickup_post_backward_align_waiting
     bridge.navigation_command_callback(navigation_message(
@@ -1330,7 +1330,7 @@ def test_pickup_missing_ball_aligns_after_camera_down_backward_motion():
         navigation_message(
             action="BALL_PICKUP_POST_BACKWARD_ALIGN_CONTINUE",
             command_id=8004,
-            source_command={"bottom_distance_px": 400},
+            source_command={"bottom_distance_px": 320},
             event_id=None,
             active_special_command_id=bridge.active_command_id,
             active_special_event_id=bridge.active_event_id,
@@ -3162,7 +3162,7 @@ def hurdle_fine_sequence_message(command_id=8100, depth=0.20):
     )
 
 
-@pytest.mark.parametrize("depth", [0.20, 0.43, 0.54])
+@pytest.mark.parametrize("depth", [0.20, 0.43, 0.45])
 def test_hurdle_sequence_runs_one_ten_repeat_motion_then_half_second_then_hurdle(monkeypatch, depth):
     clock = [10.0]
     monkeypatch.setattr("mission_control.motion_command_bridge_node.time.monotonic", lambda: clock[0])

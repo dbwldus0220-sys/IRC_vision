@@ -1,0 +1,106 @@
+{
+  "source_sha256": "550d3941fb9d68ba16a5898bdc4db3d9527a7a8b3474eb5d5fe8c5f10e344a19",
+  "original_source_unchanged": true,
+  "imported_motion_count": 15,
+  "runtime_playback_speed": 1.05,
+  "duration_estimates_updated": 21,
+  "baseline": "12 failed, 964 passed in 16.95s",
+  "after": "12 failed, 964 passed in 17.20s",
+  "new_regression_failures": [],
+  "source88_contracts": "59 passed in 1.93s",
+  "startup_pose_test": "passed",
+  "sdk_contracts": "Internal ctest changing into directory: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/gui_execution_alignment\nTest project /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/gui_execution_alignment\n    Start 6: forward_timing_contract\n1/2 Test #6: forward_timing_contract ..........   Passed    0.19 sec\n    Start 7: ball_fine_queue_contract\n2/2 Test #7: ball_fine_queue_contract .........   Passed   11.46 sec\n\n100% tests passed, 0 tests failed out of 2\n\nTotal Test time (real) =  11.65 sec\n",
+  "alias_file_unchanged": true,
+  "hardware_executed": false,
+  "installed_catalog_and_decision_resolve_to_workspace": true,
+  "duration_changes": [
+    {
+      "before": "# Catalog80 forward: 514ms per cycle at runtime speed 1.0, including holds.",
+      "after": "# Catalog88 forward: 514ms per cycle at source speed 1.05, including holds."
+    },
+    {
+      "before": "\"STRAIGHT\": (.514 * 6, 10),",
+      "after": "\"STRAIGHT\": (.514 * 6 / 1.05, 10),"
+    },
+    {
+      "before": "\"STRAIGHT_1\": (.514 * 2, 5),",
+      "after": "\"STRAIGHT_1\": (.514 * 2 / 1.05, 5),"
+    },
+    {
+      "before": "\"STRAIGHT_2\": (.514 * 4, 10),",
+      "after": "\"STRAIGHT_2\": (.514 * 4 / 1.05, 10),"
+    },
+    {
+      "before": "\"STRAIGHT_3\": (.514 * 6, 10),",
+      "after": "\"STRAIGHT_3\": (.514 * 6 / 1.05, 10),"
+    },
+    {
+      "before": "\"STRAIGHT_4\": (.514 * 8, 15),",
+      "after": "\"STRAIGHT_4\": (.514 * 8 / 1.05, 15),"
+    },
+    {
+      "before": "\"LEFT\": (2.056, 15),",
+      "after": "\"LEFT\": (2.056 / 1.05, 15),"
+    },
+    {
+      "before": "\"RIGHT\": (2.064, 15),",
+      "after": "\"RIGHT\": (2.064 / 1.05, 15),"
+    },
+    {
+      "before": "**{f\"RECOVER_{side}_TURN_LEFT_{suffix}\": (2.056, 15)",
+      "after": "**{f\"RECOVER_{side}_TURN_LEFT_{suffix}\": (2.056 / 1.05, 15)"
+    },
+    {
+      "before": "**{f\"RECOVER_{side}_TURN_RIGHT_{suffix}\": (2.064, 15)",
+      "after": "**{f\"RECOVER_{side}_TURN_RIGHT_{suffix}\": (2.064 / 1.05, 15)"
+    },
+    {
+      "before": "\"line_recovery_ball_first_left_4\": .515 * 4,",
+      "after": "\"line_recovery_ball_first_left_4\": .515 * 4 / 1.05,"
+    },
+    {
+      "before": "\"line_recovery_ball_second_right_4\": .516 * 4,",
+      "after": "\"line_recovery_ball_second_right_4\": .516 * 4 / 1.05,"
+    },
+    {
+      "before": "\"GOAL_CAMERA_90_FORWARD\": .514 * 6,",
+      "after": "\"GOAL_CAMERA_90_FORWARD\": .514 * 6 / 1.05,"
+    },
+    {
+      "before": "\"GOAL_CAMERA_90_FORWARD_1\": .514 * 2,",
+      "after": "\"GOAL_CAMERA_90_FORWARD_1\": .514 * 2 / 1.05,"
+    },
+    {
+      "before": "\"GOAL_CAMERA_90_FORWARD_2\": .514 * 4,",
+      "after": "\"GOAL_CAMERA_90_FORWARD_2\": .514 * 4 / 1.05,"
+    },
+    {
+      "before": "\"GOAL_CAMERA90_RECOVER_LEFT_4\": 2.056,",
+      "after": "\"GOAL_CAMERA90_RECOVER_LEFT_4\": 2.056 / 1.05,"
+    },
+    {
+      "before": "\"GOAL_CAMERA90_RECOVER_RIGHT_4\": 2.064,",
+      "after": "\"GOAL_CAMERA90_RECOVER_RIGHT_4\": 2.064 / 1.05,"
+    },
+    {
+      "before": "\"STRAIGHT\": .514 * 4,",
+      "after": "\"STRAIGHT\": .514 * 4 / 1.05,"
+    },
+    {
+      "before": "\"RECOVER_LEFT_TURN_LEFT_4\": 2.056,",
+      "after": "\"RECOVER_LEFT_TURN_LEFT_4\": 2.056 / 1.05,"
+    },
+    {
+      "before": "\"RECOVER_RIGHT_TURN_RIGHT_4\": 2.064,",
+      "after": "\"RECOVER_RIGHT_TURN_RIGHT_4\": 2.064 / 1.05,"
+    },
+    {
+      "before": "config = (.514 * 2, 3)",
+      "after": "config = (.514 * 2 / 1.05, 3)"
+    },
+    {
+      "before": "config = (.514 * 6, 3)",
+      "after": "config = (.514 * 6 / 1.05, 3)"
+    }
+  ]
+}

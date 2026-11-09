@@ -21,7 +21,7 @@ from step.stationary_turns import STATIONARY_TURN_MIN_DEG, stationary_turn_repea
 from step.line_navigation_planner import LineNavigationPlanner
 from step.line_navigation_planner import NavigationConfig
 from step.line_navigation_planner import (
-    valid_ground_heading, line_heading,
+    valid_ground_heading, line_heading, LINE_RECOVERY_MIN_ANGLE_DEG,
 )
 
 from .pickup_fine_skip import pickup_fine_can_skip, pickup_fine_skip_limit
@@ -144,7 +144,7 @@ class MotionDecisionPlanner:
     POST_SHOT_LINE_HEADING_TOLERANCE_DEG = 15.0
     LINE_OFFSET_EXIT_RATIO = 0.8
     LINE_OFFSET_EXIT_DISTANCE_M = 0.10
-    LINE_OFFSET_TARGET_TOLERANCE_DEG = 10.0
+    LINE_OFFSET_TARGET_TOLERANCE_DEG = LINE_RECOVERY_MIN_ANGLE_DEG
 
     def __init__(
         self,
@@ -344,8 +344,7 @@ class MotionDecisionPlanner:
             self.hurdle_lock_active or normalized_phase == "HURDLE_POSITIONING"
         )
         if source == "hurdle" and info is not None:
-            # Steering uses current intersection geometry, never a held target
-            # left over from before a recovery turn.
+            # Heading comes from the current line observation, never a held target.
             reference = build_hurdle_path_reference(info, observations.get("line"))
             info = {**info, **reference, "hurdle_positioning_active": hurdle_positioning}
         command = self._plan_source(source, info, dt_sec)
@@ -356,8 +355,7 @@ class MotionDecisionPlanner:
                 if command.get("reason") in {
                     "hurdle_lost_search_last_side", "hurdle_lost_below_image",
                 }
-                else "hurdle_parallel_angle" if command.get("recovery_active")
-                else "line_hurdle_intersection"
+                else "line_image_heading"
             )
         if source == "hurdle":
             command["hurdle_stage"] = "FINE_APPROACH" if hurdle_positioning else "RECOGNITION_APPROACH"
@@ -430,7 +428,14 @@ class MotionDecisionPlanner:
                 and self.hurdle_path_reference_age_sec
                 <= self.config.hurdle_path_reference_hold_sec
             ):
-                reference = dict(self.last_hurdle_path_reference)
+                # Holding intersection diagnostics must not hold a steering heading.
+                reference = {
+                    **self.last_hurdle_path_reference,
+                    **{key: reference[key] for key in (
+                        "line_heading_valid", "line_heading_deg",
+                        "line_heading_reference_source",
+                    )},
+                }
                 reference["path_reference_source"] = "held"
                 reference["path_reference_reason"] = (
                     "temporarily_held_line_hurdle_intersection"
@@ -752,6 +757,9 @@ class MotionDecisionPlanner:
                 else self.hurdle_planner.plan(info, positioning=True)
             )
         result = command.to_dict()
+        if source == "goal":
+            # Crab repeat thresholds use raw robot pixels, not the -40px shot target.
+            result["offset_x_px"] = self._number(info, "offset_x_px")
         if source == "line":
             result["heading_source"] = self.line_planner.config.heading_source
             result = self._line_offset_alignment(info or {}, result)
@@ -811,7 +819,10 @@ class MotionDecisionPlanner:
             direction = "LEFT" if command.action == "ALIGN_LEFT" else "RIGHT"
             # Both sides use measured geometry; blind searches keep an explicit count.
             count = command.turn_count
-            angle = command.hurdle_angle_deg
+            angle = (command.center_steering_deg
+                     if command.reason in {"hurdle_line_heading_alignment",
+                                           "hurdle_reacquired_line_alignment"}
+                     else command.hurdle_angle_deg)
             if angle is None:
                 angle = command.center_steering_deg
             if angle is not None:
@@ -878,12 +889,12 @@ class MotionDecisionPlanner:
         if target is None:
             return candidate
         lateral, forward, angle, distance = target
+        direction = "RIGHT" if angle > 0.0 else "LEFT"
         candidate.update(target_lateral_m=lateral, target_forward_m=forward,
                          target_bearing_deg=angle, ground_lateral_offset_m=distance,
-                         steering_error_deg=angle)
-        direction = "RIGHT" if angle > 0.0 else "LEFT"
-        count = self._turn_repeat_count(angle, direction)
-        if count == 0 and abs(angle) <= self.LINE_OFFSET_TARGET_TOLERANCE_DEG:
+                         steering_error_deg=angle,
+                         target_heading_tolerance_deg=self.LINE_OFFSET_TARGET_TOLERANCE_DEG)
+        if abs(angle) < self.LINE_OFFSET_TARGET_TOLERANCE_DEG:
             speed = self.line_planner.config.min_linear_speed_mps
             return {
                 **candidate, "valid": True, "motion": "STRAIGHT_1",
@@ -893,9 +904,8 @@ class MotionDecisionPlanner:
                 "approach_motion": "STRAIGHT_1", "approach_level": 1,
                 "catalog_motion_available": True,
             }
+        count = self._turn_repeat_count(angle, direction)
         angles = self.RIGHT_TURN_ANGLES_DEG if direction == "RIGHT" else self.LEFT_TURN_ANGLES_DEG
-        if count == 0:
-            return {**candidate, "reason": "line_offset_below_stationary_turn_minimum"}
         yaw = angles[count]
         return {
             **candidate, "valid": True, "motion": f"LINE_OFFSET_TURN_{direction}_{count}",
@@ -939,7 +949,7 @@ class MotionDecisionPlanner:
         forward = min(max(lookahead, min(depths)), max(depths))
         radians = math.radians(heading)
         lateral = math.tan(radians) * forward + distance / math.cos(radians)
-        angle = math.degrees(math.atan2(lateral, forward))
+        angle = round(math.degrees(math.atan2(lateral, forward)), 9)
         if not all(math.isfinite(value) for value in (lateral, forward, angle)):
             return None
         return lateral, forward, angle, distance
@@ -1372,7 +1382,7 @@ class MotionDecisionPlanner:
             else self.POST_SHOT_LINE_HEADING_TOLERANCE_DEG
         )
         if phase == "POST_SHOT_LINE_ALIGN":
-            heading_tolerance = self.STATIONARY_TURN_MIN_DEG[direction]
+            heading_tolerance = self.LINE_OFFSET_TARGET_TOLERANCE_DEG
         offset_tolerance = self.line_planner.config.recovery_exit_offset_norm
         common = {
             "heading_error_deg": heading,

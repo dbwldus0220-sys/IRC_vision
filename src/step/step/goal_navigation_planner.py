@@ -8,6 +8,7 @@ import math
 from typing import Any
 
 from .approach_distance import approach_level_from_motion
+from .line_navigation_planner import LINE_RECOVERY_MIN_ANGLE_DEG, LINE_RECOVERY_MAX_ANGLE_DEG
 from .stationary_turns import stationary_turn_repeat_count
 from .goal_scoring import (
     GOAL_SCORE_MIN_DEPTH_M, GOAL_SCORE_TARGET_DEPTH_M, GOAL_SCORE_MAX_DEPTH_M,
@@ -260,10 +261,10 @@ class GoalNavigationPlanner:
             # Suppress floating-point roundoff at inclusive angular boundaries.
             target_steering = round(math.degrees(math.atan2(lateral_error, depth_error)), 9)
             direction = "RIGHT" if target_steering > 0.0 else "LEFT"
-            if abs(target_steering) <= 15.0:
+            if abs(target_steering) < LINE_RECOVERY_MIN_ANGLE_DEG:
                 action = "GOAL_CAMERA_90_FORWARD_2"
                 reason = "approach_goal_target_forward_4"
-            elif abs(target_steering) < 45.0:
+            elif abs(target_steering) <= LINE_RECOVERY_MAX_ANGLE_DEG:
                 action = f"GOAL_CAMERA90_RECOVER_{direction}_4"
                 reason = "approach_goal_target_recovery"
             else:

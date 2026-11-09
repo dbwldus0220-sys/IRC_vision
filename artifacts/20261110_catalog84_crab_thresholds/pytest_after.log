@@ -1,0 +1,150 @@
+........................................................................ [ 14%]
+..................................FF.................................... [ 29%]
+...................................FF................................... [ 43%]
+...........................................F...........F................ [ 58%]
+...............................F......................F......F.F........ [ 73%]
+........................................................................ [ 87%]
+...........................................................F.            [100%]
+=================================== FAILURES ===================================
+_________ test_both_launch_defaults_use_230_and_accept_override[False] _________
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:58: in get_package_prefix
+    content, package_prefix = get_resource('packages', package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/resources.py:86: in get_resource
+    raise LookupError(
+E   LookupError: Could not find the resource 'step' of type 'packages'
+
+During handling of the above exception, another exception occurred:
+src/mission_control/test/test_pickup_fine_skip.py:42: in test_both_launch_defaults_use_230_and_accept_override
+    entity.execute(context)
+/opt/ros/humble/lib/python3.10/site-packages/launch/actions/declare_launch_argument.py:215: in execute
+    perform_substitutions(context, self.default_value)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:85: in perform
+    path_components = [
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:86: in <listcomp>
+    perform_substitutions(context, component_substitutions)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:80: in perform
+    result = self.find(package)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:113: in find
+    return get_package_share_directory(package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:80: in get_package_share_directory
+    path = os.path.join(get_package_prefix(package_name), 'share', package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:60: in get_package_prefix
+    raise PackageNotFoundError(
+E   ament_index_python.packages.PackageNotFoundError: "package 'step' not found, searching: ['/opt/ros/humble']"
+_________ test_both_launch_defaults_use_230_and_accept_override[True] __________
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:58: in get_package_prefix
+    content, package_prefix = get_resource('packages', package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/resources.py:86: in get_resource
+    raise LookupError(
+E   LookupError: Could not find the resource 'step' of type 'packages'
+
+During handling of the above exception, another exception occurred:
+src/mission_control/test/test_pickup_fine_skip.py:42: in test_both_launch_defaults_use_230_and_accept_override
+    entity.execute(context)
+/opt/ros/humble/lib/python3.10/site-packages/launch/actions/declare_launch_argument.py:215: in execute
+    perform_substitutions(context, self.default_value)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:85: in perform
+    path_components = [
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:86: in <listcomp>
+    perform_substitutions(context, component_substitutions)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:80: in perform
+    result = self.find(package)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:113: in find
+    return get_package_share_directory(package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:80: in get_package_share_directory
+    path = os.path.join(get_package_prefix(package_name), 'share', package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:60: in get_package_prefix
+    raise PackageNotFoundError(
+E   ament_index_python.packages.PackageNotFoundError: "package 'step' not found, searching: ['/opt/ros/humble']"
+_ test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit[1] _
+src/mission_control/test/test_pickup_fine_skip.py:295: in test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit
+    assert queued['request_id'] != first['request_id']
+E   assert 1 != 1
+_ test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit[2] _
+src/mission_control/test/test_pickup_fine_skip.py:295: in test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit
+    assert queued['request_id'] != first['request_id']
+E   assert 1 != 1
+______ test_same_gait_keeps_existing_queue_behavior[BALL_FINE_FORWARD_8] _______
+src/mission_control/test/test_gait_transitions.py:137: in test_same_gait_keeps_existing_queue_behavior
+    assert not bridge.queued_request_deferred
+E   assert not True
+E    +  where True = <test_motion_command_bridge.FakeBridge object at 0xffffa0fb9000>.queued_request_deferred
+________ test_aliases_reuse_supplied_poses_without_changing_motion_data ________
+src/mission_control/test/test_gait_transitions.py:209: in test_aliases_reuse_supplied_poses_without_changing_motion_data
+    assert aliases[alias] == name
+E   AssertionError: assert 'p오뒤에서 미세오뒤(45도)' == 'rr오뒤에서 미세오뒤(45도)'
+E     - rr오뒤에서 미세오뒤(45도)
+E     ? ^^
+E     + p오뒤에서 미세오뒤(45도)
+E     ? ^
+________ test_shot_aliases_resolve_to_existing_default_posture_motions _________
+src/mission_control/test/test_shot_start_posture.py:129: in test_shot_aliases_resolve_to_existing_default_posture_motions
+    assert motions[name] == expected
+E   AssertionError: assert {'completion'...s': 7045, ...} == {'completion'...s': 7045, ...}
+E     Omitting 8 identical items, use -vv to show
+E     Differing items:
+E     {'playback_speed': 0.95} != {'playback_speed': 0.9025}
+E     Full diff:
+E       {
+E        'completion': {'position_tolerance_deg': 5.0,
+E                       'settle_duration_ms': 80,...
+E     
+E     ...Full output truncated (118 lines hidden), use '-vv' to show
+________ test_cached_observation_does_not_replace_same_gait_reservation ________
+src/mission_control/test/test_pickup_crab_observation.py:189: in test_cached_observation_does_not_replace_same_gait_reservation
+    assert bridge.active_request_id == queued['request_id']
+E   assert 4 == 1
+E    +  where 4 = <test_motion_command_bridge.FakeBridge object at 0xffffa0efac20>.active_request_id
+___ test_latest_invalid_or_different_decision_discards_ready_sample[change6] ___
+src/mission_control/test/test_pickup_crab_observation.py:206: in test_latest_invalid_or_different_decision_discards_ready_sample
+    assert node.pickup_checkpoint_observation.sample is None
+E   AssertionError: assert {'bearing_deg': 0.0, 'bottom_distance_px': 99, 'camera_center_offset_x_px': 0, 'confidence': 0.9, ...} is None
+E    +  where {'bearing_deg': 0.0, 'bottom_distance_px': 99, 'camera_center_offset_x_px': 0, 'confidence': 0.9, ...} = <mission_control.pickup_checkpoint_observation.PickupCheckpointObservation object at 0xffffa0feda50>.sample
+E    +    where <mission_control.pickup_checkpoint_observation.PickupCheckpointObservation object at 0xffffa0feda50> = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffffa0fec5e0>.pickup_checkpoint_observation
+______ test_rejected_same_gait_queue_uses_fresh_checkpoint_and_can_resume ______
+src/mission_control/test/test_pickup_crab_observation.py:240: in test_rejected_same_gait_queue_uses_fresh_checkpoint_and_can_resume
+    assert node.pickup_fine_align_waiting
+E   assert False
+E    +  where False = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffffa15cd5d0>.pickup_fine_align_waiting
+_____ test_queued_backward_one_second_starts_after_fine_motion_completion ______
+src/mission_control/test/test_post_pickup_motion_continuity.py:160: in test_queued_backward_one_second_starts_after_fine_motion_completion
+    assert bridge.transition_dwell_until is None
+E   assert 10.5 is None
+E    +  where 10.5 = <test_motion_command_bridge.FakeBridge object at 0xffffa0fe8670>.transition_dwell_until
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_launch_defaults_use_230_and_accept_override[False]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_launch_defaults_use_230_and_accept_override[True]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit[1]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit[2]
+FAILED src/mission_control/test/test_gait_transitions.py::test_same_gait_keeps_existing_queue_behavior[BALL_FINE_FORWARD_8]
+FAILED src/mission_control/test/test_gait_transitions.py::test_aliases_reuse_supplied_poses_without_changing_motion_data
+FAILED src/mission_control/test/test_shot_start_posture.py::test_shot_aliases_resolve_to_existing_default_posture_motions
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_cached_observation_does_not_replace_same_gait_reservation
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_latest_invalid_or_different_decision_discards_ready_sample[change6]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_rejected_same_gait_queue_uses_fresh_checkpoint_and_can_resume
+FAILED src/mission_control/test/test_post_pickup_motion_continuity.py::test_queued_backward_one_second_starts_after_fine_motion_completion
+11 failed, 482 passed in 4.37s

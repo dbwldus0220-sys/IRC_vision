@@ -1,0 +1,81 @@
+{
+  "source_path": "/home/jet/Downloads/robot_motions(84).json",
+  "source_sha256": "c760bbc6490f16e70e4bae715cba27eb9efbe6d89c4d1acb143eb69a26971d3e",
+  "left_turn_imports": [
+    "p제자리좌회전45(5회)",
+    "p제자리좌회전45(1회)",
+    "p제자리좌회전45(2회)",
+    "p제자리좌회전45(3회)",
+    "p제자리좌회전45(4회)",
+    "p제자리좌회전45(6회)",
+    "p제자리좌회전0도(1회)",
+    "p제자리좌회전0도(2회)",
+    "p제자리좌회전0도(3회)",
+    "p제자리좌회전0도(4회)",
+    "p제자리좌회전0도(5회)",
+    "p제자리좌회전0도(6회)",
+    "p제자리좌회전90도(1회)",
+    "p제자리좌회전90도(2회)",
+    "p제자리좌회전90도(3회)",
+    "p제자리좌회전90도(4회)",
+    "p제자리좌회전90도(5회)",
+    "p제자리좌회전90도(6회)",
+    "p공후 제자리좌회전",
+    "p골대후제자리좌회전"
+  ],
+  "unchanged_from_catalog83": [
+    "p제자리좌회전45(5회)",
+    "p제자리좌회전45(1회)",
+    "p제자리좌회전45(2회)",
+    "p제자리좌회전45(3회)",
+    "p제자리좌회전45(4회)",
+    "p제자리좌회전45(6회)",
+    "p제자리좌회전0도(1회)",
+    "p제자리좌회전0도(2회)",
+    "p제자리좌회전0도(3회)",
+    "p제자리좌회전0도(4회)",
+    "p제자리좌회전0도(5회)",
+    "p제자리좌회전0도(6회)",
+    "p제자리좌회전90도(1회)",
+    "p제자리좌회전90도(2회)",
+    "p제자리좌회전90도(3회)",
+    "p제자리좌회전90도(4회)",
+    "p제자리좌회전90도(5회)",
+    "p제자리좌회전90도(6회)",
+    "p공후 제자리좌회전",
+    "p골대후제자리좌회전"
+  ],
+  "added_motions": [
+    "tt미세왼옆90도(2회)"
+  ],
+  "pose_renames": {
+    "오뒤무게중심앞": "오뒤무게중심앞(catalog77)"
+  },
+  "crab_two_repeat_thresholds_px": {
+    "ball": {
+      "right_gt": 200,
+      "left_lt": -100
+    },
+    "goal": {
+      "right_gt": 150,
+      "left_lt": -120
+    }
+  },
+  "validation": {
+    "focused_passed": 438,
+    "focused_deselected_historical_test": 1,
+    "new_tests_passed": 50,
+    "regression_before": {
+      "passed": 482,
+      "failed": 11
+    },
+    "regression_after": {
+      "passed": 482,
+      "failed": 11
+    },
+    "new_failures": [],
+    "sdk_queue_contract": "passed; 16 crab pairs and transition chains",
+    "installed_aliases_and_selection": "all four thresholds resolve to two-repeat catalog motions",
+    "robot_hardware_used": false
+  }
+}

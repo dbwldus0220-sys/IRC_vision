@@ -320,14 +320,63 @@ def analyze_ground_line(
     return result
 
 
+def analyze_corner_exit(
+    points: list[LinePoint], image_width: int, image_height: int,
+    parameters: dict[str, Any], *, corner_start_index: int | None,
+) -> dict[str, Any]:
+    """Measure the outgoing segment separately from the incoming ground fit."""
+    result = {
+        "corner_exit_image_heading_deg": None,
+        "corner_exit_ground_heading_deg": None,
+        "corner_exit_ground_valid": False,
+    }
+    if type(corner_start_index) is not int or not 0 <= corner_start_index < len(points) - 1:
+        return result
+    outgoing = points[corner_start_index:]
+    delta_x = outgoing[-1].x - outgoing[0].x
+    delta_y = outgoing[0].y - outgoing[-1].y
+    if not math.isfinite(delta_x) or not math.isfinite(delta_y) or math.hypot(delta_x, delta_y) < 20.0:
+        return result
+    result["corner_exit_image_heading_deg"] = math.degrees(math.atan2(delta_x, delta_y))
+    config = {**GROUND_PROJECTION_DEFAULTS, **parameters}
+    if not config["ground_projection_enabled"]:
+        return result
+    try:
+        ground = project_line_points_to_ground(outgoing, image_width, image_height, config)
+        if len(ground) < max(3, int(config["ground_fit_min_points"])):
+            return result
+        displacement = ground[-1] - ground[0]
+        if np.linalg.norm(displacement) < 0.05:
+            return result
+        centered = ground - np.mean(ground, axis=0)
+        _, _, axes = np.linalg.svd(centered, full_matrices=False)
+        direction = axes[0]
+        if float(direction @ displacement) < 0:
+            direction = -direction
+        residual = centered @ np.array([-direction[1], direction[0]])
+        threshold = float(config["ground_fit_outlier_residual_m"])
+        if not math.isfinite(threshold) or threshold <= 0 or np.max(np.abs(residual)) > threshold:
+            return result
+        heading = math.degrees(math.atan2(direction[0], direction[1]))
+        if not math.isfinite(heading) or abs(heading) > 100.0:
+            return result
+    except (TypeError, ValueError, OverflowError, np.linalg.LinAlgError):
+        return result
+    result.update(corner_exit_ground_valid=True, corner_exit_ground_heading_deg=heading)
+    return result
+
+
 def two_point_ground_candidate(
     points: list[LinePoint], image_width: int, image_height: int,
     parameters: dict[str, Any], *, corner_start_index: int | None,
+    rotation_only: bool = False,
 ) -> dict[str, Any] | None:
     """Publish a provisional direction, never an executable ground fit.
 
     Motion-side confirmation must check distinct stationary captures. Two points
     cannot provide an outlier residual, so normal three-point fitting stays intact.
+    A rotation-only candidate may have a short forward span; it never authorizes
+    the ordinary two-point walking fit.
     """
     if type(corner_start_index) is not int or corner_start_index != 1 or len(points) < 2:
         return None
@@ -341,7 +390,7 @@ def two_point_ground_candidate(
         dx, dz = ground[1] - ground[0]
         span = float(math.hypot(dx, dz))
         # Short baselines amplify detection jitter; reversed depth is ambiguous.
-        if span < 0.04 or dz < 0.025:
+        if span < 0.04 or dz <= 0.0 or (not rotation_only and dz < 0.025):
             return None
         heading = math.degrees(math.atan2(dx, dz))
         return {"heading_deg": heading, "points_m": ground.tolist(), "span_m": span}
@@ -1710,11 +1759,31 @@ class YoloLineAnalyzer(DepthFrameConsumer, Node):
                     and result.get("corner_preview_held") is not True else None
                 ),
             ))
+            result.update(analyze_corner_exit(
+                points if result["detected"] else [],
+                self.image_width, self.image_height, self.ground_projection_parameters,
+                corner_start_index=(result.get("corner_start_index")
+                                    if result.get("corner_preview_raw_detected") is True
+                                    and result.get("corner_preview_held") is not True else None),
+            ))
             result["ground_two_point_candidate"] = (
                 two_point_ground_candidate(
                     points, self.image_width, self.image_height,
                     self.ground_projection_parameters,
                     corner_start_index=result.get("corner_start_index"),
+                )
+                if result.get("ground_fit_reason") == "too_few_segment_points"
+                and result.get("ground_fit_input_point_count") == 2
+                and result.get("corner_preview_raw_detected") is True
+                and result.get("corner_preview_held") is not True
+                else None
+            )
+            result["ground_two_point_rotation_candidate"] = (
+                two_point_ground_candidate(
+                    points, self.image_width, self.image_height,
+                    self.ground_projection_parameters,
+                    corner_start_index=result.get("corner_start_index"),
+                    rotation_only=True,
                 )
                 if result.get("ground_fit_reason") == "too_few_segment_points"
                 and result.get("ground_fit_input_point_count") == 2

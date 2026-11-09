@@ -1,0 +1,56 @@
+...FFFF.........F..F.................................................... [ 29%]
+........................................................................ [ 59%]
+........................................................................ [ 88%]
+.......................FFF.                                              [100%]
+=================================== FAILURES ===================================
+____ test_heading_is_independent_of_intersection_position_and_validity[200] ____
+src/mission_control/test/test_hurdle_line_fusion.py:72: in test_heading_is_independent_of_intersection_position_and_validity
+    assert decision.source_command["turn_count"] == 2
+E   assert 1 == 2
+____ test_heading_is_independent_of_intersection_position_and_validity[500] ____
+src/mission_control/test/test_hurdle_line_fusion.py:72: in test_heading_is_independent_of_intersection_position_and_validity
+    assert decision.source_command["turn_count"] == 2
+E   assert 1 == 2
+____ test_heading_is_independent_of_intersection_position_and_validity[900] ____
+src/mission_control/test/test_hurdle_line_fusion.py:72: in test_heading_is_independent_of_intersection_position_and_validity
+    assert decision.source_command["turn_count"] == 2
+E   assert 1 == 2
+___ test_heading_is_independent_of_intersection_position_and_validity[1100] ____
+src/mission_control/test/test_hurdle_line_fusion.py:72: in test_heading_is_independent_of_intersection_position_and_validity
+    assert decision.source_command["turn_count"] == 2
+E   assert 1 == 2
+_ test_forward_reservation_uses_heading_even_with_opposite_or_missing_intersection[500-0] _
+src/mission_control/test/test_hurdle_heading_queue.py:43: in test_forward_reservation_uses_heading_even_with_opposite_or_missing_intersection
+    assert node.general_motion_gate.active_command_id == queued['command_id']
+E   assert None == 2
+E    +  where None = <mission_control.motion_command_gate.GeneralMotionCommandGate object at 0xffff8dc11540>.active_command_id
+E    +    where <mission_control.motion_command_gate.GeneralMotionCommandGate object at 0xffff8dc11540> = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff8dc11210>.general_motion_gate
+_ test_forward_reservation_uses_heading_even_with_opposite_or_missing_intersection[1100-0] _
+src/mission_control/test/test_hurdle_heading_queue.py:43: in test_forward_reservation_uses_heading_even_with_opposite_or_missing_intersection
+    assert node.general_motion_gate.active_command_id == queued['command_id']
+E   assert None == 2
+E    +  where None = <mission_control.motion_command_gate.GeneralMotionCommandGate object at 0xffff8db0e7d0>.active_command_id
+E    +    where <mission_control.motion_command_gate.GeneralMotionCommandGate object at 0xffff8db0e7d0> = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff8db0e8f0>.general_motion_gate
+_ test_small_line_slope_does_not_turn_toward_large_intersection_or_parallel_angle[1] _
+src/mission_control/test/test_hurdle_heading_only.py:102: in test_small_line_slope_does_not_turn_toward_large_intersection_or_parallel_angle
+    assert abs(decision.source_command['path_target_bearing_deg']) > 89
+E   KeyError: 'path_target_bearing_deg'
+_ test_small_line_slope_does_not_turn_toward_large_intersection_or_parallel_angle[5] _
+src/mission_control/test/test_hurdle_heading_only.py:102: in test_small_line_slope_does_not_turn_toward_large_intersection_or_parallel_angle
+    assert abs(decision.source_command['path_target_bearing_deg']) > 89
+E   KeyError: 'path_target_bearing_deg'
+_ test_small_line_slope_does_not_turn_toward_large_intersection_or_parallel_angle[13] _
+src/mission_control/test/test_hurdle_heading_only.py:102: in test_small_line_slope_does_not_turn_toward_large_intersection_or_parallel_angle
+    assert abs(decision.source_command['path_target_bearing_deg']) > 89
+E   KeyError: 'path_target_bearing_deg'
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_hurdle_line_fusion.py::test_heading_is_independent_of_intersection_position_and_validity[200]
+FAILED src/mission_control/test/test_hurdle_line_fusion.py::test_heading_is_independent_of_intersection_position_and_validity[500]
+FAILED src/mission_control/test/test_hurdle_line_fusion.py::test_heading_is_independent_of_intersection_position_and_validity[900]
+FAILED src/mission_control/test/test_hurdle_line_fusion.py::test_heading_is_independent_of_intersection_position_and_validity[1100]
+FAILED src/mission_control/test/test_hurdle_heading_queue.py::test_forward_reservation_uses_heading_even_with_opposite_or_missing_intersection[500-0]
+FAILED src/mission_control/test/test_hurdle_heading_queue.py::test_forward_reservation_uses_heading_even_with_opposite_or_missing_intersection[1100-0]
+FAILED src/mission_control/test/test_hurdle_heading_only.py::test_small_line_slope_does_not_turn_toward_large_intersection_or_parallel_angle[1]
+FAILED src/mission_control/test/test_hurdle_heading_only.py::test_small_line_slope_does_not_turn_toward_large_intersection_or_parallel_angle[5]
+FAILED src/mission_control/test/test_hurdle_heading_only.py::test_small_line_slope_does_not_turn_toward_large_intersection_or_parallel_angle[13]
+9 failed, 234 passed in 1.39s

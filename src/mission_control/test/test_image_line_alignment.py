@@ -45,7 +45,7 @@ def test_current_image_alignment_can_oppose_remembered_corner(clock, phase):
             'center_points_px': [[410, 650], [460, 450], [900, 250]]}
     command = start_turn(node, clock, info)
     assert node.pending_line_corner['corner_direction'] == 'RIGHT'
-    assert command['action'] == 'LINE_OFFSET_TURN_LEFT_1'
+    assert command['action'] == 'RECOVER_LEFT_TURN_LEFT_4'
     assert command['source_command']['direction_source'] == 'current_image_line'
     assert not command['source_command'].get('corner_search_pending')
 
@@ -56,8 +56,8 @@ def test_each_completed_turn_uses_new_image_direction(clock):
     finish_turn(node, clock, right)
     left = start_turn(node, clock, {**unconfirmed_sparse_info(),
                                   'center_points_px': [[540, 650], [560, 450]]})
-    assert left['action'] == 'LINE_OFFSET_TURN_LEFT_1'
-    assert node.lost_search_turn_limiter.image_alignment_angle == 30.
+    assert left['action'] == 'RECOVER_LEFT_TURN_LEFT_4'
+    assert node.lost_search_turn_limiter.image_alignment_angle == 15.
     assert node.lost_search_turn_limiter.angles['line'] == 0.
 
 
@@ -67,14 +67,13 @@ def test_ground_fit_flicker_does_not_restart_equivalent_alignment_pause(clock):
                   ground_projection_enabled=True, corner_preview_confirmed=False,
                   corner_preview_raw_detected=False)
     start = clock[0]
-    for elapsed, info in [(0., good), (.2, unconfirmed_sparse_info()), (.4, good),
-                          (.6, unconfirmed_sparse_info()), (.8, good)]:
+    for elapsed, info in [(0., good), (.2, unconfirmed_sparse_info()), (.4, good)]:
         clock[0] = start + elapsed
         assert not any(m['valid'] for m in frame(node, clock, info))
         assert node.pre_motion_settle_started_at == start
-    clock[0] = start + 1.01
+    clock[0] = start + .6
     command = frame(node, clock, unconfirmed_sparse_info())[-1]
-    assert command['valid'] and command['action'] == 'LINE_OFFSET_TURN_RIGHT_2'
+    assert command['valid'] and command['action'] == 'LINE_OFFSET_TURN_RIGHT_1'
     assert command['source_command']['image_line_alignment']
 
 

@@ -59,7 +59,8 @@ def late_line(node, clock, info):
 
 
 @pytest.mark.parametrize('heading,offset,action', [
-    (0., 0., 'STRAIGHT_2'), (-15., -.3, 'STRAIGHT_2'), (15., .3, 'STRAIGHT_2'),
+    (0., 0., 'STRAIGHT_2'), (-15., -.3, 'RECOVER_LEFT_TURN_LEFT_4'),
+    (15., .3, 'RECOVER_RIGHT_TURN_RIGHT_4'),
     (-30., .3, 'RECOVER_RIGHT_TURN_LEFT_4'), (30., -.3, 'RECOVER_LEFT_TURN_RIGHT_4'),
 ])
 def test_normal_line_and_ball_line_steps_reserve_walks_without_waits(clock, heading, offset, action):
@@ -83,7 +84,7 @@ def test_normal_line_and_ball_line_steps_reserve_walks_without_waits(clock, head
     status(node, bridge, request, 'SUCCEEDED')
     status(node, bridge, entry_request, 'RUNNING')
     if action == 'STRAIGHT_2':
-        assert node.active_line_motion_duration_sec == pytest.approx(.517 * 4 / .95)
+        assert node.active_line_motion_duration_sec == pytest.approx(.514 * 4 / 1.05)
     assert Node._ball_entry_line_running(node)
     late_line(node, clock, line_info(heading, offset))
     # Recovery-to-recovery reserves only near its end, as in ordinary Line.
@@ -408,7 +409,7 @@ def test_stationary_ball_line_alignment_repeats_after_settle_and_fresh_frames(cl
     assert node.correction_post_motion_dwell_until > clock[0]
     clock[0] = node.correction_post_motion_dwell_until + .01
     Node._publish_decision(node)
-    fresh(node, clock, 'line', line_info(heading=-45.), plan=False)
+    fresh(node, clock, 'line', line_info(heading=-50.001), plan=False)
     fresh(node, clock, 'ball', ball_info(depth_m=.9, bearing_deg=0.))
     assert node.publisher.messages[-1]['action'] == 'LINE_HEADING_TURN_LEFT_3'
     assert node.publisher.messages[-1]['source_command']['ball_entry_line_alignment']
@@ -461,9 +462,10 @@ def test_entry_is_ball_mode_from_all_supported_initial_line_or_ball_phases(clock
 
 
 @pytest.mark.parametrize('angle,kind,count', [
-    (0., 'forward', None), (14.999, 'forward', None), (15., 'forward', None),
+    (0., 'forward', None), (14.999, 'forward', None), (15., 'recovery', None),
     (15.001, 'recovery', None), (20., 'recovery', None), (30., 'recovery', None), (44.999, 'recovery', None),
-    (45., 'stationary', 5), (59.999, 'stationary', 5), (60., 'stationary', 6),
+    (45., 'recovery', None), (50., 'recovery', None), (50.001, 'stationary', 5),
+    (59.999, 'stationary', 5), (60., 'stationary', 6),
     (75., 'stationary', 7), (89.999, 'stationary', 7),
 ])
 @pytest.mark.parametrize('sign', [-1, 1])
@@ -602,7 +604,7 @@ def test_missing_line_does_not_bypass_ball_validity_or_pickup_boundary(change):
 def test_ball_entry_bins_are_not_replaced_by_normal_corner_policy(clock):
     from test_line_corner_memory import corner_info
     node = node_with_entry()
-    fresh(node, clock, 'line', corner_info(heading=10., distance=.1), plan=False)
+    fresh(node, clock, 'line', corner_info(ground_heading_error_deg=10., corner_start_distance_m=.1), plan=False)
     fresh(node, clock, 'ball', ball_info(depth_m=1.2))
     command = node.publisher.messages[-1]
     assert command['valid'] and command['action'] == 'STRAIGHT_2'

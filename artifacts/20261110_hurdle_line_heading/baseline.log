@@ -1,0 +1,140 @@
+................................F....................................... [  5%]
+........................................................................ [ 10%]
+........................................................................ [ 15%]
+........................................................................ [ 20%]
+..............................................F......................... [ 25%]
+.................F...................................................... [ 30%]
+........................................................................ [ 35%]
+........................................................................ [ 40%]
+........................................................................ [ 45%]
+........................................................................ [ 50%]
+F.........F...............FF........FF.F................................ [ 55%]
+........................................................................ [ 60%]
+..............................F......................................... [ 65%]
+.....F...........................F...................................... [ 70%]
+........................................................................ [ 75%]
+........................................................................ [ 80%]
+........................................................................ [ 85%]
+........................................................................ [ 90%]
+........................................................................ [ 95%]
+...........................................................              [100%]
+=================================== FAILURES ===================================
+________ test_camera_latch_update_before_queued_turn_selects_zero_exit _________
+src/mission_control/test/test_hurdle_camera_transitions.py:77: in test_camera_latch_update_before_queued_turn_selects_zero_exit
+    fine = decoded_messages(bridge.executor_request_publisher)[-1]
+E   IndexError: list index out of range
+____ test_bottom_retreat_waits_for_completion_pause_and_fresh_reacquisition ____
+src/mission_control/test/test_hurdle_lost_recovery.py:162: in test_bottom_retreat_waits_for_completion_pause_and_fresh_reacquisition
+    assert node.publish() == []
+E   AssertionError: assert [{'action': '...': None, ...}] == []
+E     Left contains one more item: {'action': 'HURDLE_LOST_BACKWARD_1', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}
+E     Full diff:
+E       [
+E     -  ,
+E     +  {'action': 'HURDLE_LOST_BACKWARD_1',
+E     +   'active_special_action': None,
+E     +   'active_special_command_id': None,...
+E     
+E     ...Full output truncated (100 lines hidden), use '-vv' to show
+________ test_recognition_approach_blocks_new_line_prequeue[1.001-True] ________
+src/mission_control/test/test_hurdle_positioning.py:255: in test_recognition_approach_blocks_new_line_prequeue
+    assert MotionDecisionNode._line_only_prequeue_allowed(
+E   AssertionError: assert False is True
+E    +  where False = <function MotionDecisionNode._line_only_prequeue_allowed at 0xffff793fe5f0>(<test_hurdle_positioning.HurdleHarness object at 0xffff78d79bd0>, {'hurdle': {'bbox': [400, 300, 1000, 500], 'bottom_distance_px': 200, 'camera_center_offset_x_px': 0, 'confidence': 0.9, ...}})
+E    +    where <function MotionDecisionNode._line_only_prequeue_allowed at 0xffff793fe5f0> = MotionDecisionNode._line_only_prequeue_allowed
+____ test_near_corner_cannot_prequeue_over_a_stationary_heading_correction _____
+src/mission_control/test/test_line_continuous_missions.py:209: in test_near_corner_cannot_prequeue_over_a_stationary_heading_correction
+    assert len(node.publisher.messages) == 1
+E   AssertionError: assert 2 == 1
+E    +  where 2 = len([{'action': 'STRAIGHT', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': N...TURN_RIGHT_7', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}])
+E    +    where [{'action': 'STRAIGHT', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': N...TURN_RIGHT_7', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}] = <test_mission_phase_flow.CapturePublisher object at 0xffff78b45630>.messages
+E    +      where <test_mission_phase_flow.CapturePublisher object at 0xffff78b45630> = <test_line_corner_memory.CornerHarness object at 0xffff78b47100>.publisher
+___ test_bad_line_or_stationary_turn_cannot_be_reserved_as_walking[updates3] ___
+src/mission_control/test/test_line_continuous_missions.py:245: in test_bad_line_or_stationary_turn_cannot_be_reserved_as_walking
+    assert getattr(node, 'queued_general_command_id', None) is None
+E   AssertionError: assert 2 is None
+E    +  where 2 = getattr(<test_mission_phase_flow.MissionFlowHarness object at 0xffff78aecb80>, 'queued_general_command_id', None)
+_____ test_shot_without_fine_only_approach_keeps_direct_scoring[actions0] ______
+src/mission_control/test/test_motion_command_bridge.py:390: in test_shot_without_fine_only_approach_keeps_direct_scoring
+    assert bridge.active_motion_id == "goal_shot"
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E     - goal_shot
+E     + goal_fine_prepare_90
+_____ test_shot_without_fine_only_approach_keeps_direct_scoring[actions1] ______
+src/mission_control/test/test_motion_command_bridge.py:390: in test_shot_without_fine_only_approach_keeps_direct_scoring
+    assert bridge.active_motion_id == "goal_shot"
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E     - goal_shot
+E     + goal_fine_prepare_90
+___ test_shot_waits_for_running_fine_motion_and_uses_only_completed_history ____
+src/mission_control/test/test_motion_command_bridge.py:424: in test_shot_waits_for_running_fine_motion_and_uses_only_completed_history
+    assert bridge.active_motion_id == "goal_shot"
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E     - goal_shot
+E     + goal_fine_prepare_90
+__________ test_shot_retry_does_not_repeat_completed_pose_preparation __________
+src/mission_control/test/test_motion_command_bridge.py:436: in test_shot_retry_does_not_repeat_completed_pose_preparation
+    assert bridge.active_motion_id == "goal_shot"
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E     - goal_shot
+E     + goal_fine_prepare_90
+________ test_production_action_mapping_contains_only_approved_contract ________
+src/mission_control/test/test_motion_command_bridge.py:689: in test_production_action_mapping_contains_only_approved_contract
+    assert MotionCommandBridgeNode.ACTION_TO_MOTION_ID == (
+E   AssertionError: assert {'ALIGN_LEFT'...rd_45_5', ...} == {'ALIGN_LEFT'...rd_45_5', ...}
+E     Omitting 142 identical items, use -vv to show
+E     Left contains 2 more items:
+E     {'GOAL_CAMERA90_FINE_FORWARD_5': 'goal_camera_90_fine_forward_5',
+E      'GOAL_SHOT_PREPARE': 'goal_fine_prepare_90'}
+E     Full diff:
+E       {
+E        'ALIGN_LEFT': 'stationary_turn_left',...
+E     
+E     ...Full output truncated (145 lines hidden), use '-vv' to show
+________ test_supported_action_builds_executor_request[SHOT-goal_shot] _________
+src/mission_control/test/test_motion_command_bridge.py:713: in test_supported_action_builds_executor_request
+    assert requests == [
+E   AssertionError: assert [{'action': '...are_90', ...}] == [{'action': '...l_shot', ...}]
+E     At index 0 diff: {'action': 'SHOT', 'command_id': 8000, 'event_id': 8, 'request_id': 8000, 'motion_id': 'goal_fine_prepare_90', 'timeout_ms': 12000} != {'action': 'SHOT', 'command_id': 8000, 'event_id': 8, 'request_id': 8000, 'motion_id': 'goal_shot', 'timeout_ms': 12000}
+E     Full diff:
+E       [
+E        {'action': 'SHOT',
+E         'command_id': 8000,
+E         'event_id': 8,
+E     -   'motion_id': 'goal_shot',...
+E     
+E     ...Full output truncated (5 lines hidden), use '-vv' to show
+__________ test_grasp_verification_uses_three_second_pause_after_pose __________
+src/mission_control/test/test_motion_command_bridge.py:982: in test_grasp_verification_uses_three_second_pause_after_pose
+    deliver_statuses()
+src/mission_control/test/test_motion_command_bridge.py:975: in deliver_statuses
+    MotionDecisionNode._motion_status_callback(node, message)
+src/mission_control/mission_control/motion_decision_node.py:2739: in _motion_status_callback
+    MotionDecisionNode._handle_motion_status(self, message)
+src/mission_control/mission_control/motion_decision_node.py:3548: in _handle_motion_status
+    payload, status_receive_monotonic, ros_now, self.timeouts["ball"],
+E   AttributeError: 'FakeDecisionNode' object has no attribute 'timeouts'
+_ test_failed_grasp_check_pose_keeps_grasp_unknown_and_continues_exit_composite _
+src/mission_control/test/test_motion_command_bridge.py:1741: in test_failed_grasp_check_pose_keeps_grasp_unknown_and_continues_exit_composite
+    MotionDecisionNode._motion_status_callback(node, message)
+src/mission_control/mission_control/motion_decision_node.py:2739: in _motion_status_callback
+    MotionDecisionNode._handle_motion_status(self, message)
+src/mission_control/mission_control/motion_decision_node.py:3548: in _handle_motion_status
+    payload, status_receive_monotonic, ros_now, self.timeouts["ball"],
+E   AttributeError: 'FakeDecisionNode' object has no attribute 'timeouts'
+- generated xml file: /home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/20261110_hurdle_line_heading/baseline.xml -
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_hurdle_camera_transitions.py::test_camera_latch_update_before_queued_turn_selects_zero_exit
+FAILED src/mission_control/test/test_hurdle_lost_recovery.py::test_bottom_retreat_waits_for_completion_pause_and_fresh_reacquisition
+FAILED src/mission_control/test/test_hurdle_positioning.py::test_recognition_approach_blocks_new_line_prequeue[1.001-True]
+FAILED src/mission_control/test/test_line_continuous_missions.py::test_near_corner_cannot_prequeue_over_a_stationary_heading_correction
+FAILED src/mission_control/test/test_line_continuous_missions.py::test_bad_line_or_stationary_turn_cannot_be_reserved_as_walking[updates3]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_without_fine_only_approach_keeps_direct_scoring[actions0]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_without_fine_only_approach_keeps_direct_scoring[actions1]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_waits_for_running_fine_motion_and_uses_only_completed_history
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_retry_does_not_repeat_completed_pose_preparation
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_production_action_mapping_contains_only_approved_contract
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_supported_action_builds_executor_request[SHOT-goal_shot]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_grasp_verification_uses_three_second_pause_after_pose
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_failed_grasp_check_pose_keeps_grasp_unknown_and_continues_exit_composite
+13 failed, 1414 passed in 10.20s

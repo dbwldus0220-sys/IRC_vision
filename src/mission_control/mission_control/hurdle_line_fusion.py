@@ -58,6 +58,34 @@ def build_hurdle_path_reference(
     hurdle_info: dict[str, Any] | None,
     line_info: dict[str, Any] | None,
 ) -> dict[str, Any]:
+    """Attach fresh image heading independently of the diagnostic intersection."""
+    reference = _build_hurdle_intersection_reference(hurdle_info, line_info)
+    heading = _number(line_info, "filtered_heading_error_deg")
+    if heading is None:
+        heading = _number(line_info, "heading_error_deg")
+    qualities = [
+        _number(line_info, key)
+        for key in ("heading_quality", "geometry_quality", "detection_quality")
+    ]
+    qualities = [quality for quality in qualities if quality is not None]
+    valid = bool(
+        line_info and line_info.get("detected") is True
+        and heading is not None and abs(heading) <= 90.0
+        and qualities and min(qualities) >= 0.35
+    )
+    # The ground homography is not calibrated for the lowered hurdle camera.
+    reference.update(
+        line_heading_valid=valid,
+        line_heading_deg=heading if valid else None,
+        line_heading_reference_source="fresh" if valid else "none",
+    )
+    return reference
+
+
+def _build_hurdle_intersection_reference(
+    hurdle_info: dict[str, Any] | None,
+    line_info: dict[str, Any] | None,
+) -> dict[str, Any]:
     """
     Estimate where the route line meets the hurdle's lower image edge.
 
@@ -196,6 +224,7 @@ def build_hurdle_path_reference(
         ],
         "path_offset_x_px": round(offset_px, 3),
         "path_offset_x_norm": round(offset_norm, 6),
+        "path_target_bearing_deg": math.degrees(math.atan2(offset_px, max(1.0, image_height - 1.0 - target_y))),
         "path_direction": direction,
         "path_bridge_segment_px": [
             [int(round(bridge_bottom_x)), int(round(bridge_bottom_y))],

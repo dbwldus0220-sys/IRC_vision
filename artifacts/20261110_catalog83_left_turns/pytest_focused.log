@@ -1,0 +1,57 @@
+.......................FFFFFF......FF................................... [ 30%]
+........................................................................ [ 61%]
+........................................................................ [ 92%]
+..................                                                       [100%]
+=================================== FAILURES ===================================
+_________ test_actual_speed_drives_all_camera45_reservation_windows[1] _________
+src/mission_control/test/test_catalog83_left_turns.py:91: in test_actual_speed_drives_all_camera45_reservation_windows
+    assert Node.LINE_TURN_CAPTURE_CONFIG[action][0] == pytest.approx(expected)
+E   KeyError: 'LINE_HEADING_TURN_LEFT_1'
+_________ test_actual_speed_drives_all_camera45_reservation_windows[2] _________
+src/mission_control/test/test_catalog83_left_turns.py:91: in test_actual_speed_drives_all_camera45_reservation_windows
+    assert Node.LINE_TURN_CAPTURE_CONFIG[action][0] == pytest.approx(expected)
+E   KeyError: 'LINE_HEADING_TURN_LEFT_2'
+_________ test_actual_speed_drives_all_camera45_reservation_windows[3] _________
+src/mission_control/test/test_catalog83_left_turns.py:91: in test_actual_speed_drives_all_camera45_reservation_windows
+    assert Node.LINE_TURN_CAPTURE_CONFIG[action][0] == pytest.approx(expected)
+E   KeyError: 'LINE_HEADING_TURN_LEFT_3'
+_________ test_actual_speed_drives_all_camera45_reservation_windows[4] _________
+src/mission_control/test/test_catalog83_left_turns.py:91: in test_actual_speed_drives_all_camera45_reservation_windows
+    assert Node.LINE_TURN_CAPTURE_CONFIG[action][0] == pytest.approx(expected)
+E   KeyError: 'LINE_HEADING_TURN_LEFT_4'
+_________ test_actual_speed_drives_all_camera45_reservation_windows[5] _________
+src/mission_control/test/test_catalog83_left_turns.py:91: in test_actual_speed_drives_all_camera45_reservation_windows
+    assert Node.LINE_TURN_CAPTURE_CONFIG[action][0] == pytest.approx(expected)
+E   KeyError: 'LINE_HEADING_TURN_LEFT_5'
+_________ test_actual_speed_drives_all_camera45_reservation_windows[6] _________
+src/mission_control/test/test_catalog83_left_turns.py:91: in test_actual_speed_drives_all_camera45_reservation_windows
+    assert Node.LINE_TURN_CAPTURE_CONFIG[action][0] == pytest.approx(expected)
+E   KeyError: 'LINE_HEADING_TURN_LEFT_6'
+________ test_faster_ball_turns_keep_prepare_and_fine_handoffs[-8.0-1] _________
+src/mission_control/test/test_catalog83_left_turns.py:109: in test_faster_ball_turns_keep_prepare_and_fine_handoffs
+    test_forward_turn_prepare_fine_prepare_turn_keeps_correction_dwells(clock, index, angle, True)
+src/mission_control/test/test_ball_fine_alignment_queue.py:72: in test_forward_turn_prepare_fine_prepare_turn_keeps_correction_dwells
+    assert command['action'].startswith(expected), command
+E   AssertionError: {'action': 'BALL_APPROACH_FINE_FORWARD_5', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}
+E   assert False
+E    +  where False = <built-in method startswith of str object at 0xffff97a4e240>('BALL_APPROACH_PREPARE_TURN')
+E    +    where <built-in method startswith of str object at 0xffff97a4e240> = 'BALL_APPROACH_FINE_FORWARD_5'.startswith
+________ test_faster_ball_turns_keep_prepare_and_fine_handoffs[-8.0-2] _________
+src/mission_control/test/test_catalog83_left_turns.py:109: in test_faster_ball_turns_keep_prepare_and_fine_handoffs
+    test_forward_turn_prepare_fine_prepare_turn_keeps_correction_dwells(clock, index, angle, True)
+src/mission_control/test/test_ball_fine_alignment_queue.py:72: in test_forward_turn_prepare_fine_prepare_turn_keeps_correction_dwells
+    assert command['action'].startswith(expected), command
+E   AssertionError: {'action': 'BALL_APPROACH_FINE_FORWARD_5', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}
+E   assert False
+E    +  where False = <built-in method startswith of str object at 0xffff974735f0>('BALL_APPROACH_PREPARE_TURN')
+E    +    where <built-in method startswith of str object at 0xffff974735f0> = 'BALL_APPROACH_FINE_FORWARD_5'.startswith
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_catalog83_left_turns.py::test_actual_speed_drives_all_camera45_reservation_windows[1]
+FAILED src/mission_control/test/test_catalog83_left_turns.py::test_actual_speed_drives_all_camera45_reservation_windows[2]
+FAILED src/mission_control/test/test_catalog83_left_turns.py::test_actual_speed_drives_all_camera45_reservation_windows[3]
+FAILED src/mission_control/test/test_catalog83_left_turns.py::test_actual_speed_drives_all_camera45_reservation_windows[4]
+FAILED src/mission_control/test/test_catalog83_left_turns.py::test_actual_speed_drives_all_camera45_reservation_windows[5]
+FAILED src/mission_control/test/test_catalog83_left_turns.py::test_actual_speed_drives_all_camera45_reservation_windows[6]
+FAILED src/mission_control/test/test_catalog83_left_turns.py::test_faster_ball_turns_keep_prepare_and_fine_handoffs[-8.0-1]
+FAILED src/mission_control/test/test_catalog83_left_turns.py::test_faster_ball_turns_keep_prepare_and_fine_handoffs[-8.0-2]
+8 failed, 226 passed in 8.79s

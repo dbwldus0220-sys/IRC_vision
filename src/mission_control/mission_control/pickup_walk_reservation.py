@@ -4,9 +4,9 @@ from copy import copy
 from dataclasses import replace
 
 from step.approach_distance import BALL_PICKUP_DISTANCE_M
+from .crab_motion_selection import crab_repeat_motion
 
 
-PICKUP_TWO_CYCLE_CRAB_OFFSET_PX = 200.0
 PICKUP_CRAB_DURATIONS = {
     'pickup_crab_left_0': .540 / .95,
     'pickup_crab_right_0': .550 / 1.0,
@@ -34,10 +34,7 @@ def pickup_walk_motion(action, current, command=None):
     if selected == 'pickup_fine_forward_0' and current == 'ball_general_fine_forward_8':
         return current
     offset = (command or {}).get('offset_x_px')
-    if (selected in {'pickup_crab_left_0', 'pickup_crab_right_0'}
-            and type(offset) in {int, float} and abs(offset) > PICKUP_TWO_CYCLE_CRAB_OFFSET_PX):
-        return selected + '_2'
-    return selected
+    return crab_repeat_motion(selected, offset)
 
 
 class PickupWalkReservation:

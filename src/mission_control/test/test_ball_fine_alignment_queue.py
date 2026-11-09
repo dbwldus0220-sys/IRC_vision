@@ -41,7 +41,10 @@ def test_bad_observations_never_authorize_near_forward_or_turn(updates):
 
 
 # Ground-projected Ball angles must be strictly below 90 degrees.
-@pytest.mark.parametrize('index,angle', [(1, -35.), (2, 35.), (1, -89.), (2, -89.)])
+@pytest.mark.parametrize('index,angle', [
+    (1, -35.), (2, 35.), (1, -89.), (2, -89.),
+    *((index, angle) for index in (1, 2) for angle in (15., 30., 45., 60., 75., 89.)),
+])
 @pytest.mark.parametrize('turn_first', [True, False])
 def test_forward_turn_prepare_fine_prepare_turn_keeps_correction_dwells(clock, index, angle, turn_first):
     node, bridge = node_with_entry(), FakeBridge(advance_transition_dwells=False)

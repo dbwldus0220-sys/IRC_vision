@@ -1,0 +1,17 @@
+Internal ctest changing into directory: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/gui_execution_alignment
+Test project /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/gui_execution_alignment
+    Start 6: forward_timing_contract
+1/2 Test #6: forward_timing_contract ..........   Passed    0.19 sec
+    Start 7: ball_fine_queue_contract
+2/2 Test #7: ball_fine_queue_contract .........Subprocess aborted***Exception:   9.21 sec
+Rejected: p전진90도(2회) -> R라인복귀우회전90도
+test_ball_fine_queue: /home/jet/IRC/IRC-STEP/IRC_vision_latest/external_sdk/gui_aligned/test_ball_fine_queue.cpp:155: main(int, char**)::<lambda(const string&, const string&, bool)>: Assertion `result == QueueResult::Queued' failed.
+
+
+50% tests passed, 1 tests failed out of 2
+
+Total Test time (real) =   9.40 sec
+
+The following tests FAILED:
+	  7 - ball_fine_queue_contract (Subprocess aborted)
+Errors while running CTest

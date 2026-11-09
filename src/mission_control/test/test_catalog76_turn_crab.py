@@ -109,7 +109,8 @@ def test_pickup_direction_switch_waits_half_second_without_pose_transition(clock
     bridge.last_physical_motion_id = f'pickup_crab_{side}_0{previous_count}'
     command = fine_alignment_message(f'BALL_PICKUP_CRAB_{opposite.upper()}')
     payload = json.loads(command.data)
-    payload['source_command'] = {'offset_x_px': 250 if next_count else 100}
+    offset = 250 if next_count else 100
+    payload['source_command'] = {'offset_x_px': -offset if opposite == 'left' else offset}
     command.data = json.dumps(payload)
     bridge.navigation_command_callback(command)
     assert not decoded_messages(bridge.executor_request_publisher)

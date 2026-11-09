@@ -60,7 +60,7 @@ motion_aliases:
   # Close-ball recovery uses the supplied one-cycle retreat.
   pickup_lost_ball_backward_1: "찐후진실전(1회)"
   ball_lost_camera_down_backward_2: "찐후진실전-2(2회)"
-  pickup_grasp_check_pose: "찐공확인자세"
+  pickup_grasp_check_pose: "n공확인자세"
   # Keep the legacy ID; post-grasp retreat now uses one cycle from catalog 26.
   pickup_retreat_2: "찐후진실전(1회)"
   # Composite motions include the exit turn; execute each only once.
@@ -182,8 +182,9 @@ motion_aliases:
   goal_crab_right_to_fine_90: "r오옆에서 미세오뒤(90도)"
   goal_crab_left_to_fine_90: "r왼옆에서 미세오뒤(90도)"
 
-  # Catalog70 two-cycle camera-90 crab, available for explicit/manual requests.
+  # Signed Robot dx thresholds select these two-cycle Goal crabs automatically.
   goal_camera_90_crab_right_2: "t미세오옆꽃게90도(2회)"
+  goal_camera_90_crab_left_2: "tt미세왼옆90도(2회)"
 
   # Camera-45 Ball alignment: explicit preparation and queued stationary turns.
   ball_align_prepare_fine_45: "p오뒤에서 미세오뒤(45도)"

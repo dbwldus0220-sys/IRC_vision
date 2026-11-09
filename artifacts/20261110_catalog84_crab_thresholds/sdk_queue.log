@@ -1,0 +1,19 @@
+Start testing: Nov 10 02:43 KST
+----------------------------------------------------------
+7/7 Testing: ball_fine_queue_contract
+7/7 Test: ball_fine_queue_contract
+Command: "/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/gui_execution_alignment/test_ball_fine_queue" "/home/jet/IRC/IRC-STEP/IRC_vision_latest/external_sdk/gui_aligned/../../artifacts/robot_motions_runtime.json"
+Directory: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/gui_execution_alignment
+"ball_fine_queue_contract" start time: Nov 10 02:43 KST
+Output:
+----------------------------------------------------------
+Six alignment chains, 75 fine pairs, 108 left-turn pairs, 24 walking/preparation pairs, 93 forward/recovery pairs, 16 crab queue pairs, four crab chains, three camera transition chains, five source79 exit chains, two source80 pickup chains, hurdle exit, two hurdle fine/recovery chains, 12 goal head-override pairs and rejected shortcuts passed
+<end of output>
+Test time =  11.34 sec
+----------------------------------------------------------
+Test Passed.
+"ball_fine_queue_contract" end time: Nov 10 02:43 KST
+"ball_fine_queue_contract" time elapsed: 00:00:11
+----------------------------------------------------------
+
+End testing: Nov 10 02:43 KST

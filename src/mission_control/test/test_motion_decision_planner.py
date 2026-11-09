@@ -3173,7 +3173,7 @@ def test_completed_hurdle_releases_close_turn_block_for_next_hurdle():
         line=line_info(robot_center_x_px=710,
                        center_points_px=[[500, 650], [500, 580], [500, 250]]),
     ), 0.1)
-    assert next_hurdle.action == "RECOVER_LEFT_TURN_LEFT_4"
+    assert next_hurdle.action == "ALIGN_LEFT"
 
 
 @pytest.mark.parametrize("phase", ["AUTO", "LINE_TRACK", "HURDLE_APPROACH", "HURDLE_SEARCH"])

@@ -1,0 +1,86 @@
+[
+  {
+    "before": "\"STRAIGHT\": (.514 * 6 / 1.05, 10),",
+    "after": "\"STRAIGHT\": (.514 * 6, 10),"
+  },
+  {
+    "before": "\"STRAIGHT_1\": (.514 * 2 / 1.05, 5),",
+    "after": "\"STRAIGHT_1\": (.514 * 2, 5),"
+  },
+  {
+    "before": "\"STRAIGHT_2\": (.514 * 4 / 1.05, 10),",
+    "after": "\"STRAIGHT_2\": (.514 * 4, 10),"
+  },
+  {
+    "before": "\"STRAIGHT_3\": (.514 * 6 / 1.05, 10),",
+    "after": "\"STRAIGHT_3\": (.514 * 6, 10),"
+  },
+  {
+    "before": "\"STRAIGHT_4\": (.514 * 8 / 1.05, 15),",
+    "after": "\"STRAIGHT_4\": (.514 * 8, 15),"
+  },
+  {
+    "before": "\"LEFT\": (2.056 / 1.05, 15),",
+    "after": "\"LEFT\": (2.056, 15),"
+  },
+  {
+    "before": "\"RIGHT\": (2.064 / 1.05, 15),",
+    "after": "\"RIGHT\": (2.064, 15),"
+  },
+  {
+    "before": "**{f\"RECOVER_{side}_TURN_LEFT_{suffix}\": (2.056 / 1.05, 15)",
+    "after": "**{f\"RECOVER_{side}_TURN_LEFT_{suffix}\": (2.056, 15)"
+  },
+  {
+    "before": "**{f\"RECOVER_{side}_TURN_RIGHT_{suffix}\": (2.064 / 1.05, 15)",
+    "after": "**{f\"RECOVER_{side}_TURN_RIGHT_{suffix}\": (2.064, 15)"
+  },
+  {
+    "before": "\"line_recovery_ball_first_left_4\": .515 * 4 / 1.05,",
+    "after": "\"line_recovery_ball_first_left_4\": .515 * 4,"
+  },
+  {
+    "before": "\"line_recovery_ball_second_right_4\": .516 * 4 / 1.05,",
+    "after": "\"line_recovery_ball_second_right_4\": .516 * 4,"
+  },
+  {
+    "before": "\"GOAL_CAMERA_90_FORWARD\": .514 * 6 / 1.05,",
+    "after": "\"GOAL_CAMERA_90_FORWARD\": .514 * 6,"
+  },
+  {
+    "before": "\"GOAL_CAMERA_90_FORWARD_1\": .514 * 2 / 1.05,",
+    "after": "\"GOAL_CAMERA_90_FORWARD_1\": .514 * 2,"
+  },
+  {
+    "before": "\"GOAL_CAMERA_90_FORWARD_2\": .514 * 4 / 1.05,",
+    "after": "\"GOAL_CAMERA_90_FORWARD_2\": .514 * 4,"
+  },
+  {
+    "before": "\"GOAL_CAMERA90_RECOVER_LEFT_4\": 2.056 / 1.05,",
+    "after": "\"GOAL_CAMERA90_RECOVER_LEFT_4\": 2.056,"
+  },
+  {
+    "before": "\"GOAL_CAMERA90_RECOVER_RIGHT_4\": 2.064 / 1.05,",
+    "after": "\"GOAL_CAMERA90_RECOVER_RIGHT_4\": 2.064,"
+  },
+  {
+    "before": "\"STRAIGHT\": .514 * 4 / 1.05,",
+    "after": "\"STRAIGHT\": .514 * 4,"
+  },
+  {
+    "before": "\"RECOVER_LEFT_TURN_LEFT_4\": 2.056 / 1.05,",
+    "after": "\"RECOVER_LEFT_TURN_LEFT_4\": 2.056,"
+  },
+  {
+    "before": "\"RECOVER_RIGHT_TURN_RIGHT_4\": 2.064 / 1.05,",
+    "after": "\"RECOVER_RIGHT_TURN_RIGHT_4\": 2.064,"
+  },
+  {
+    "before": "config = (.514 * 2 / 1.05, 3)",
+    "after": "config = (.514 * 2, 3)"
+  },
+  {
+    "before": "config = (.514 * 6 / 1.05, 3)",
+    "after": "config = (.514 * 6, 3)"
+  }
+]

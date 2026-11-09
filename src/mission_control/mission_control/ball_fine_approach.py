@@ -7,9 +7,9 @@ PREPARATIONS = {PREPARE_FINE, PREPARE_TURN}
 
 
 def camera45_turn_duration_sec(direction, count):
-    """Source78 left turns use a 355ms cycle at the unscaled source speed."""
+    """Source83 left turns use a 355ms cycle at the original 1.05 speed."""
     if direction == 'LEFT':
-        return .355 * count / .95
+        return .355 * count / 1.05
     return .300 * count / .9
 
 

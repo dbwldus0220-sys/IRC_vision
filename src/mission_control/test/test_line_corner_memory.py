@@ -50,7 +50,7 @@ def receive_line(node, clock, info):
 
 def corner_info(direction='RIGHT', **overrides):
     info = {
-        **line_info(heading=10. if direction == 'RIGHT' else -10.),
+        **line_info(heading=15. if direction == 'RIGHT' else -15.),
         'turn_angle_deg': 60. if direction == 'RIGHT' else -60.,
         'corner_preview_confirmed': True,
         'corner_direction': direction, 'corner_start_distance_m': .14,

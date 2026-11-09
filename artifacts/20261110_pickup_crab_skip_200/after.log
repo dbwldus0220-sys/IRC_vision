@@ -1,0 +1,117 @@
+............................................FFFFFF...................... [ 26%]
+............FF.......................................................... [ 53%]
+...................FF..........FF........FF.....F....................... [ 80%]
+......................................................                   [100%]
+=================================== FAILURES ===================================
+_ test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_fine_forward_0-270-None-1] _
+src/mission_control/test/test_pickup_fine_skip.py:133: in test_both_modes_skip_forward_but_keep_retreat_and_grasp
+    assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_400'
+E   AssertionError: assert 'pickup_500' == 'pickup_400'
+E     - pickup_400
+E     ?        ^
+E     + pickup_500
+E     ?        ^
+_ test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_fine_forward_0-270-None-2] _
+src/mission_control/test/test_pickup_fine_skip.py:133: in test_both_modes_skip_forward_but_keep_retreat_and_grasp
+    assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_400'
+E   AssertionError: assert 'pickup_500' == 'pickup_400'
+E     - pickup_400
+E     ?        ^
+E     + pickup_500
+E     ?        ^
+_ test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_left_0-200-pickup_crab_left_to_fine_0-1] _
+src/mission_control/test/test_pickup_fine_skip.py:133: in test_both_modes_skip_forward_but_keep_retreat_and_grasp
+    assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_400'
+E   AssertionError: assert 'pickup_500' == 'pickup_400'
+E     - pickup_400
+E     ?        ^
+E     + pickup_500
+E     ?        ^
+_ test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_left_0-200-pickup_crab_left_to_fine_0-2] _
+src/mission_control/test/test_pickup_fine_skip.py:133: in test_both_modes_skip_forward_but_keep_retreat_and_grasp
+    assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_400'
+E   AssertionError: assert 'pickup_500' == 'pickup_400'
+E     - pickup_400
+E     ?        ^
+E     + pickup_500
+E     ?        ^
+_ test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_right_0_2-200-pickup_crab_right_to_fine_0-1] _
+src/mission_control/test/test_pickup_fine_skip.py:133: in test_both_modes_skip_forward_but_keep_retreat_and_grasp
+    assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_400'
+E   AssertionError: assert 'pickup_500' == 'pickup_400'
+E     - pickup_400
+E     ?        ^
+E     + pickup_500
+E     ?        ^
+_ test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_right_0_2-200-pickup_crab_right_to_fine_0-2] _
+src/mission_control/test/test_pickup_fine_skip.py:133: in test_both_modes_skip_forward_but_keep_retreat_and_grasp
+    assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_400'
+E   AssertionError: assert 'pickup_500' == 'pickup_400'
+E     - pickup_400
+E     ?        ^
+E     + pickup_500
+E     ?        ^
+_ test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit[1] _
+src/mission_control/test/test_pickup_fine_skip.py:295: in test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit
+    assert queued['request_id'] != first['request_id']
+E   assert 1 != 1
+_ test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit[2] _
+src/mission_control/test/test_pickup_fine_skip.py:295: in test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit
+    assert queued['request_id'] != first['request_id']
+E   assert 1 != 1
+__ test_first_fixed_fine_counts_and_immediately_selects_retreat_then_grasp[1] __
+src/mission_control/test/test_pickup_fine_progress.py:136: in test_first_fixed_fine_counts_and_immediately_selects_retreat_then_grasp
+    assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_400'
+E   AssertionError: assert 'pickup_pre_b...d_camera_down' == 'pickup_400'
+E     - pickup_400
+E     + pickup_pre_backward_camera_down
+__ test_first_fixed_fine_counts_and_immediately_selects_retreat_then_grasp[2] __
+src/mission_control/test/test_pickup_fine_progress.py:136: in test_first_fixed_fine_counts_and_immediately_selects_retreat_then_grasp
+    assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_400'
+E   AssertionError: assert 'pickup_pre_b...d_camera_down' == 'pickup_400'
+E     - pickup_400
+E     + pickup_pre_backward_camera_down
+______ test_accepted_queue_retains_ownership_and_can_finish_next_step[1] _______
+src/mission_control/test/test_pickup_fine_progress.py:190: in test_accepted_queue_retains_ownership_and_can_finish_next_step
+    assert bridge.active_request_id == queued_request['request_id']
+E   assert 3 == 1
+E    +  where 3 = <test_motion_command_bridge.FakeBridge object at 0xffffa2015b70>.active_request_id
+______ test_accepted_queue_retains_ownership_and_can_finish_next_step[2] _______
+src/mission_control/test/test_pickup_fine_progress.py:190: in test_accepted_queue_retains_ownership_and_can_finish_next_step
+    assert bridge.active_request_id == queued_request['request_id']
+E   assert 3 == 1
+E    +  where 3 = <test_motion_command_bridge.FakeBridge object at 0xffffa201cb50>.active_request_id
+_ test_second_fine_without_usable_cache_uses_fresh_pixels_without_timed_pause[270.001-BALL_PICKUP_FINE_FORWARD] _
+src/mission_control/test/test_second_pickup_fine_observation.py:50: in test_second_fine_without_usable_cache_uses_fresh_pixels_without_timed_pause
+    assert repeated['motion_id'] == 'pickup_fine_forward_0'
+E   AssertionError: assert 'ball_general_fine_forward_8' == 'pickup_fine_forward_0'
+E     - pickup_fine_forward_0
+E     + ball_general_fine_forward_8
+_ test_second_fine_without_usable_cache_uses_fresh_pixels_without_timed_pause[344-BALL_PICKUP_FINE_FORWARD] _
+src/mission_control/test/test_second_pickup_fine_observation.py:50: in test_second_fine_without_usable_cache_uses_fresh_pixels_without_timed_pause
+    assert repeated['motion_id'] == 'pickup_fine_forward_0'
+E   AssertionError: assert 'ball_general_fine_forward_8' == 'pickup_fine_forward_0'
+E     - pickup_fine_forward_0
+E     + ball_general_fine_forward_8
+_____ test_second_fine_prequeue_promotes_without_checkpoint_or_extra_pause _____
+src/mission_control/test/test_second_pickup_fine_observation.py:85: in test_second_fine_prequeue_promotes_without_checkpoint_or_extra_pause
+    assert queued['request_id'] != request['request_id']
+E   assert 1 != 1
+- generated xml file: /home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/20261110_pickup_crab_skip_200/after.xml -
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_fine_forward_0-270-None-1]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_fine_forward_0-270-None-2]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_left_0-200-pickup_crab_left_to_fine_0-1]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_left_0-200-pickup_crab_left_to_fine_0-2]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_right_0_2-200-pickup_crab_right_to_fine_0-1]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_right_0_2-200-pickup_crab_right_to_fine_0-2]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit[1]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit[2]
+FAILED src/mission_control/test/test_pickup_fine_progress.py::test_first_fixed_fine_counts_and_immediately_selects_retreat_then_grasp[1]
+FAILED src/mission_control/test/test_pickup_fine_progress.py::test_first_fixed_fine_counts_and_immediately_selects_retreat_then_grasp[2]
+FAILED src/mission_control/test/test_pickup_fine_progress.py::test_accepted_queue_retains_ownership_and_can_finish_next_step[1]
+FAILED src/mission_control/test/test_pickup_fine_progress.py::test_accepted_queue_retains_ownership_and_can_finish_next_step[2]
+FAILED src/mission_control/test/test_second_pickup_fine_observation.py::test_second_fine_without_usable_cache_uses_fresh_pixels_without_timed_pause[270.001-BALL_PICKUP_FINE_FORWARD]
+FAILED src/mission_control/test/test_second_pickup_fine_observation.py::test_second_fine_without_usable_cache_uses_fresh_pixels_without_timed_pause[344-BALL_PICKUP_FINE_FORWARD]
+FAILED src/mission_control/test/test_second_pickup_fine_observation.py::test_second_fine_prequeue_promotes_without_checkpoint_or_extra_pause
+15 failed, 255 passed in 3.22s

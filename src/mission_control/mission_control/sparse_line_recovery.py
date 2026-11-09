@@ -25,6 +25,91 @@ def usable_two_point_line(info, min_quality=.35):
     )
 
 
+class TwoPointRotationObserver:
+    """Confirm a large heading without promoting it to walking geometry."""
+
+    MIN_HEADING_DEG = 45.0
+    REQUIRED_FRAMES = 3
+    MAX_HEADING_SPREAD_DEG = 5.0
+    MAX_POINT_DRIFT_M = .015
+
+    def __init__(self):
+        self.samples = deque(maxlen=self.REQUIRED_FRAMES)
+        self.last_stamp = None
+        self.eligible = self.stable = False
+        self.heading = None
+        self.reason = "no_rotation_candidate"
+
+    def reset(self, reason="no_rotation_candidate"):
+        self.samples.clear()
+        self.eligible = self.stable = False
+        self.heading = None
+        self.reason = reason
+
+    def observe(self, info, *, stamp, ros_now, max_age, minimum_stamp,
+                stationary, min_quality):
+        self.eligible = self.stable = False
+        self.heading = None
+        number = MotionDecisionPlanner._number
+        if (not stationary or not isinstance(info, dict)
+                or type(stamp) is not int or type(ros_now) is not int
+                or stamp <= minimum_stamp
+                or not 0 <= ros_now - stamp <= int(max_age * 1e9)
+                or (self.last_stamp is not None and stamp < self.last_stamp)):
+            self.reset("rotation_capture_not_ready")
+            return
+        new_frame = stamp != self.last_stamp
+        self.last_stamp = stamp
+        if any(s <= minimum_stamp or ros_now - s > int(max_age * 1e9)
+               for s, _, _ in self.samples):
+            self.reset("rotation_capture_expired")
+        candidate = info.get("ground_two_point_rotation_candidate")
+        if (not usable_two_point_line(info, min_quality)
+                or info.get("ground_fit_segment") != "PRE_CORNER"
+                or info.get("corner_start_index") != 1
+                or info.get("corner_preview_raw_detected") is not True
+                or info.get("corner_preview_held") is not False
+                or (number(info, "heading_quality") or 0.) < min_quality
+                or not isinstance(candidate, dict)):
+            self.reset()
+            return
+        heading = number(candidate, "heading_deg")
+        points = candidate.get("points_m")
+        try:
+            if (heading is None or not self.MIN_HEADING_DEG < abs(heading) < 90.
+                    or len(points) != 2 or any(len(p) != 2 for p in points)
+                    or any(type(v) not in (float, int) or not math.isfinite(v)
+                           for p in points for v in p)
+                    or any(p[1] <= 0. for p in points)):
+                raise ValueError("invalid rotation points")
+            dx, dz = points[1][0] - points[0][0], points[1][1] - points[0][1]
+            if (math.hypot(dx, dz) < .04 or dz <= 0.
+                    or abs(math.degrees(math.atan2(dx, dz)) - heading) > .01):
+                raise ValueError("invalid rotation baseline")
+        except (TypeError, ValueError):
+            self.reset("rotation_geometry_invalid")
+            return
+        self.eligible = True
+        if new_frame:
+            self.samples.append((stamp, heading, tuple(tuple(p) for p in points)))
+        angles = [angle for _, angle, _ in self.samples]
+        self.stable = (
+            len(self.samples) == self.REQUIRED_FRAMES
+            and max(angles) - min(angles) <= self.MAX_HEADING_SPREAD_DEG
+            and all(math.dist(p, ref) <= self.MAX_POINT_DRIFT_M
+                    for _, _, pair in self.samples for p, ref in zip(pair, self.samples[0][2]))
+        )
+        self.heading = heading if self.stable else None
+        self.reason = ("rotation_heading_confirmed" if self.stable else
+                       "rotation_waiting_for_three_frames" if len(self.samples) < self.REQUIRED_FRAMES
+                       else "rotation_heading_unstable")
+
+    def diagnostics(self):
+        return {"eligible": self.eligible, "stable": self.stable,
+                "confirmed_frames": len(self.samples), "heading_deg": self.heading,
+                "reason": self.reason}
+
+
 class SparseLineRecovery:
     REQUIRED_FRAMES = 3
     MAX_HEADING_SPREAD_DEG = 5.0
@@ -208,9 +293,14 @@ class SparseLineRecovery:
         if decision.action == "POST_BALL_LINE_ALIGNED":
             return decision
         if self.stable and decision.valid:
+            if decision.source_command.get("image_line_alignment") is True:
+                return self._motion(decision, decision.action, decision.reason)
             if decision.action.startswith("STRAIGHT"):
                 turn_distance = decision.source_command.get("corner_turn_distance_m", .15)
-                if self._number(info, "corner_start_distance_m") > turn_distance:
+                heading = self._number(decision.source_command, "heading_error_deg")
+                if (self._number(info, "corner_start_distance_m") > turn_distance
+                        or (heading is not None and abs(heading)
+                            < MotionDecisionPlanner.LINE_OFFSET_TARGET_TOLERANCE_DEG)):
                     return self._motion(decision, "LINE_SPARSE_FORWARD", "two_point_short_forward")
             elif (decision.action.startswith("RECOVER_")
                   or (decision.action in {"LEFT", "RIGHT"}

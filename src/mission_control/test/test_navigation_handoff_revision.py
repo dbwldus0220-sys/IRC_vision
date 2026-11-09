@@ -19,7 +19,7 @@ from test_motion_decision_node import FakeDecisionNode, arm_special_command, sen
 
 @pytest.mark.parametrize('depth,action', [
     (.700001, 'STRAIGHT_0'), (.7, 'STRAIGHT_0'), (.550001, 'STRAIGHT_0'), (.55, 'STRAIGHT_0'),
-    (.540001, 'STRAIGHT_0'), (.54, 'GO'), (.43, 'GO'),
+    (.450001, 'STRAIGHT_0'), (.45, 'GO'), (.43, 'GO'),
     (.42, 'GO'), (.200001, 'GO'), (.2, 'GO'), (.19, 'GO'),
 ])
 def test_hurdle_approach_is_separate_from_final_atomic_tail(depth, action):

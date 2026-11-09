@@ -123,7 +123,7 @@ def test_wait_escape_cannot_override_other_failure_reasons(reason):
     assert not policy.constrain(wait_decision(reason), info, 11.1).valid
 
 
-def test_two_point_straight_is_short_and_requires_corner_clearance():
+def test_two_point_straight_below_recovery_minimum_remains_short_near_corner():
     policy, info = SparseLineRecovery(), sparse_info(heading=0., distance=.6)
     info.update(filtered_lateral_offset_norm=0., heading_error_deg=0., turn_angle_deg=0.)
     for t in (10., 10.1, 10.2):
@@ -134,7 +134,7 @@ def test_two_point_straight_is_short_and_requires_corner_clearance():
     assert result.action == "LINE_SPARSE_FORWARD"
     assert MotionCommandBridgeNode.motion_id_for_action(result.action) == "line_forward_2"
     assert MotionDecisionNode._needs_correction_dwell(result.action)
-    assert not policy.constrain(decision, {**promoted, "corner_start_distance_m": .15}, 10.2).valid
+    assert policy.constrain(decision, {**promoted, "corner_start_distance_m": .15}, 10.2).action == "LINE_SPARSE_FORWARD"
 
 
 def test_stationary_confirmation_and_motion_completion_require_new_captures(monkeypatch):
@@ -154,13 +154,13 @@ def test_stationary_confirmation_and_motion_completion_require_new_captures(monk
     frame()
     assert not any(m["valid"] for m in node.publisher.messages)
     frame()
-    assert node.last_selected_decision.action == "LINE_OFFSET_TURN_RIGHT_3"
+    assert node.last_selected_decision.action == "LINE_OFFSET_TURN_RIGHT_1"
     assert node.sparse_line_recovery.motions_used == 0
     for _ in range(6):
         clock[0] += .2
         frame()
     command = next(m for m in node.publisher.messages if m["valid"])
-    assert command["action"] == "LINE_OFFSET_TURN_RIGHT_3"
+    assert command["action"] == "LINE_OFFSET_TURN_RIGHT_1"
     assert node.sparse_line_recovery.motions_used == 0
     node.send_status(command["action"], command["command_id"], "RUNNING")
     node.send_status(command["action"], command["command_id"], "SUCCEEDED")

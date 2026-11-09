@@ -1,0 +1,96 @@
+{
+  "source_path": "/home/jet/Downloads/robot_motions(82).json",
+  "source_sha256": "dd733b481529bf688adfe00beab1c1aaf1a6baa8b7b3c2ccf1872ba9135ee1e2",
+  "imports": [
+    "찐공확인자세",
+    "r공잡기 400",
+    "r공잡기500",
+    "R골넣기1번구역",
+    "R골넣기2번구역",
+    "R골넣기3번구역",
+    "R골넣기4번구역"
+  ],
+  "pose_renames": {
+    "R골2": "R골2(catalog82)",
+    "R골3": "R골3(catalog82)"
+  },
+  "durations_ms": {
+    "찐공확인자세": {
+      "before": 450.0,
+      "after": 400.0
+    },
+    "r공잡기 400": {
+      "before": 5749.0,
+      "after": 5749.0
+    },
+    "r공잡기500": {
+      "before": 5749.0,
+      "after": 5749.0
+    },
+    "R골넣기1번구역": {
+      "before": 2260.0,
+      "after": 2260.0
+    },
+    "R골넣기2번구역": {
+      "before": 2200.0,
+      "after": 2200.0
+    },
+    "R골넣기3번구역": {
+      "before": 2185.0,
+      "after": 2185.0
+    },
+    "R골넣기4번구역": {
+      "before": 2235.0,
+      "after": 2235.0
+    }
+  },
+  "validation": {
+    "catalog": "155 motions; aliases resolve; every frame has IDs 0..22",
+    "python_before": {
+      "passed": 710,
+      "failed": 19
+    },
+    "python_after": {
+      "passed": 736,
+      "failed": 19
+    },
+    "new_regressions": [],
+    "unchanged_failure_ids": [
+      "FAILED src/mission_control/test/test_boundary_decision_reservation.py::test_second_pickup_fine_continues_on_first_fresh_frame_without_observation_pause[231-BALL_PICKUP_FINE_FORWARD]",
+      "FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-5-0.645]",
+      "FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-6-0.68]",
+      "FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-7-0.73]",
+      "FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-8-0.61]",
+      "FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-5-0.645]",
+      "FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-6-0.68]",
+      "FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-7-0.73]",
+      "FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-8-0.61]",
+      "FAILED src/mission_control/test/test_motion_command_bridge.py::test_failed_grasp_check_pose_keeps_grasp_unknown_and_continues_exit_composite",
+      "FAILED src/mission_control/test/test_motion_command_bridge.py::test_grasp_verification_uses_three_second_pause_after_pose",
+      "FAILED src/mission_control/test/test_motion_command_bridge.py::test_production_action_mapping_contains_only_approved_contract",
+      "FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_retry_does_not_repeat_completed_pose_preparation",
+      "FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_waits_for_running_fine_motion_and_uses_only_completed_history",
+      "FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_without_fine_only_approach_keeps_direct_scoring[actions0]",
+      "FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_without_fine_only_approach_keeps_direct_scoring[actions1]",
+      "FAILED src/mission_control/test/test_motion_command_bridge.py::test_supported_action_builds_executor_request[SHOT-goal_shot]",
+      "FAILED src/mission_control/test/test_post_pickup_motion_continuity.py::test_queued_backward_one_second_starts_after_fine_motion_completion",
+      "FAILED tools/test_upsert_motion_catalog.py::test_production_runtime_preserves_original_shoulders_and_other_fields"
+    ],
+    "new_source82_tests_passed": 26,
+    "cpp_queue_contract": "passed",
+    "offline_playback": "10 serial executions completed using actual SDK, memory hardware and 5 ms virtual ticks; arrival waits disabled as in production",
+    "unchanged_user_edits": [
+      "p공후 제자리좌회전 playback_speed=1.05",
+      "p골대후제자리좌회전 playback_speed=1.05"
+    ]
+  },
+  "video_fault": {
+    "video_seconds_approx": 231,
+    "action": "LINE_OFFSET_TURN_LEFT_1",
+    "motion_id": "post_ball_line_turn_left_1",
+    "error_code": "SDK_HARDWARE_NOT_READY",
+    "message": "cannot capture actual start pose",
+    "followup": "LINE_LOST_TURN_LEFT_1 rejected with same error; critical fault latched until restart",
+    "cause_limit": "Present-position reads failed; logs do not establish whether power, USB, cabling, or a motor caused the read failure."
+  }
+}

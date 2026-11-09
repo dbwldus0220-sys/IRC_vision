@@ -1,0 +1,66 @@
+{
+  "python3_8675_1794264618261.log": [
+    {
+      "line": 87,
+      "message": "[INFO] [1794264680.046771108] [motion_decision_node]: Pickup alignment decision: command_id=81, action=BALL_PICKUP_INITIAL_ALIGN_CONTINUE, reason=ball_pickup_heading_aligned_for_distance_approach, steering_deg=0.0, steering_source=camera_down_image_angle, offset_px=-16.0, bottom_px=212.0, close_alignment=True, depth_m=0.459, depth_age_sec=0.034, rgb_stamp_ns=1794264679874661133"
+    },
+    {
+      "line": 216,
+      "message": "[INFO] [1794264731.623893550] [motion_decision_node]: HURDLE positioning entry latched: depth_m=0.695, bottom_distance_px=203.0, head_down_requested=False"
+    },
+    {
+      "line": 219,
+      "message": "[INFO] [1794264732.730934232] [motion_decision_node]: HURDLE positioning started after current motion"
+    },
+    {
+      "line": 247,
+      "message": "[INFO] [1794264769.277728192] [motion_decision_node]: HURDLE final sequence latched: depth_m=0.446, center_steering_deg=1.4086287353384672, observed_during_action=STRAIGHT_0"
+    },
+    {
+      "line": 320,
+      "message": "[INFO] [1794264797.432228309] [motion_decision_node]: Pickup alignment decision: command_id=862, action=BALL_PICKUP_INITIAL_ALIGN_CONTINUE, reason=ball_pickup_heading_aligned_for_distance_approach, steering_deg=15.911, steering_source=camera_down_image_angle, offset_px=63.0, bottom_px=221.0, close_alignment=True, depth_m=0.431, depth_age_sec=0.061, rgb_stamp_ns=1794264797292787354"
+    },
+    {
+      "line": 465,
+      "message": "[INFO] [1794264841.134979405] [motion_decision_node]: HURDLE positioning entry latched: depth_m=0.693, bottom_distance_px=165.0, head_down_requested=False"
+    },
+    {
+      "line": 469,
+      "message": "[INFO] [1794264843.813512488] [motion_decision_node]: HURDLE positioning started after current motion"
+    },
+    {
+      "line": 497,
+      "message": "[INFO] [1794264881.607427868] [motion_decision_node]: HURDLE final sequence latched: depth_m=0.445, center_steering_deg=56.6893691754392, observed_during_action=STRAIGHT_0"
+    }
+  ],
+  "python3_8677_1794264618258.log": [
+    {
+      "line": 76,
+      "message": "[INFO] [1794264680.362348182] [motion_command_bridge_node]: Preparing motion transition: pickup_crab_left_to_fine_0 -> pickup_pre_backward_camera_down"
+    },
+    {
+      "line": 558,
+      "message": "[INFO] [1794264757.436068341] [motion_command_bridge_node]: Preparing motion transition: fine_to_turn_ready_0 -> post_ball_line_turn_left_5"
+    },
+    {
+      "line": 837,
+      "message": "[INFO] [1794264797.660448996] [motion_command_bridge_node]: Preparing motion transition: pickup_crab_right_to_fine_0 -> pickup_pre_backward_camera_down"
+    },
+    {
+      "line": 1129,
+      "message": "[INFO] [1794264852.735468922] [motion_command_bridge_node]: Command ignored: valid is not true, action=WAIT, reason=hurdle_not_detected, line_input_checks=None"
+    },
+    {
+      "line": 1230,
+      "message": "[INFO] [1794264856.959591968] [motion_command_bridge_node]: Preparing motion transition: hurdle_fine_prepare_0 -> hurdle_fine_forward_5"
+    },
+    {
+      "line": 1250,
+      "message": "[INFO] [1794264861.174140695] [motion_command_bridge_node]: Preparing motion transition: fine_to_turn_ready_0 -> post_ball_line_turn_left_1"
+    },
+    {
+      "line": 1413,
+      "message": "[INFO] [1794264873.389556419] [motion_command_bridge_node]: Preparing motion transition: fine_to_turn_ready_0 -> post_ball_line_turn_left_1"
+    }
+  ]
+}

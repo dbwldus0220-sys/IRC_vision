@@ -1,0 +1,144 @@
+.......FFFFFF..................FFFFFF.......FFF.......FF................ [  5%]
+FF...................................................................... [ 10%]
+........................................................................ [ 16%]
+........................................................................ [ 21%]
+........................................................................ [ 26%]
+................FF..............FFFF....................FFFF............ [ 32%]
+........FFFFFFFFFFFFFFFFFFFFFF.......................................... [ 37%]
+........................................................................ [ 42%]
+...............F...........FF........FF.F............................... [ 48%]
+........................................................................ [ 53%]
+...............................F........................................ [ 58%]
+......F...........................F..................................... [ 64%]
+........................................................................ [ 69%]
+........................................................................ [ 74%]
+........................................................................ [ 80%]
+........................................................................ [ 85%]
+........................................................................ [ 90%]
+..........................F............................................. [ 96%]
+..................................................                       [100%]
+=================================== FAILURES ===================================
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_pickup_grasp_selection.py:43: TypeError: unsupported operand type(s) for -: 'NoneType' and 'float'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_pickup_grasp_selection.py:43: TypeError: unsupported operand type(s) for -: 'NoneType' and 'float'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_pickup_grasp_selection.py:43: TypeError: unsupported operand type(s) for -: 'NoneType' and 'float'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_pickup_grasp_selection.py:43: TypeError: unsupported operand type(s) for -: 'NoneType' and 'float'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_pickup_grasp_selection.py:43: TypeError: unsupported operand type(s) for -: 'NoneType' and 'float'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_pickup_grasp_selection.py:43: TypeError: unsupported operand type(s) for -: 'NoneType' and 'float'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_continuous_approach.py:32: KeyError: 'WAIT_SCORE_CONFIRMATION'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_continuous_approach.py:32: KeyError: 'WAIT_SCORE_CONFIRMATION'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_continuous_approach.py:32: KeyError: 'WAIT_SCORE_CONFIRMATION'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_continuous_approach.py:32: KeyError: 'WAIT_SCORE_CONFIRMATION'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_continuous_approach.py:32: KeyError: 'WAIT_SCORE_CONFIRMATION'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_continuous_approach.py:32: KeyError: 'WAIT_SCORE_CONFIRMATION'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_continuous_approach.py:32: KeyError: 'WAIT_SCORE_CONFIRMATION'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_continuous_approach.py:122: AttributeError: 'LiveInputHarness' object has no attribute 'queued_general_command_id'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_continuous_approach.py:136: AssertionError: assert 'WAIT' == 'GOAL_CAMERA_90_FORWARD_2'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_continuous_approach.py:198: assert True is False
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_continuous_approach.py:218: AttributeError: 'LiveInputHarness' object has no attribute 'goal_forward_started_at'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_continuous_approach.py:32: KeyError: 'WAIT_SCORE_CONFIRMATION'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_continuous_approach.py:32: KeyError: 'WAIT_SCORE_CONFIRMATION'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_line_recovery_late_queue.py:73: AssertionError: assert 2 is None
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_line_recovery_late_queue.py:73: AssertionError: assert 2 is None
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_goal_region_queue_audit.py:34: AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_5' == 'GOAL_CAMERA90_FINE_FORWARD_4'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_goal_region_queue_audit.py:34: AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_5' == 'GOAL_CAMERA90_FINE_FORWARD_4'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_goal_region_queue_audit.py:34: AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_5' == 'GOAL_CAMERA90_FINE_FORWARD_4'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_goal_region_queue_audit.py:34: AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_5' == 'GOAL_CAMERA90_FINE_FORWARD_4'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_goal_region_queue_audit.py:34: AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_5' == 'GOAL_CAMERA90_FINE_FORWARD_4'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_goal_region_queue_audit.py:34: AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_5' == 'GOAL_CAMERA90_FINE_FORWARD_4'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_goal_region_queue_audit.py:34: AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_5' == 'GOAL_CAMERA90_FINE_FORWARD_4'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_goal_region_queue_audit.py:34: AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_5' == 'GOAL_CAMERA90_FINE_FORWARD_4'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError: list index out of range
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError: list index out of range
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError: list index out of range
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError: list index out of range
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError: list index out of range
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError: list index out of range
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError: list index out of range
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError: list index out of range
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError: list index out of range
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError: list index out of range
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError: list index out of range
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError: list index out of range
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError: list index out of range
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError: list index out of range
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError: list index out of range
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError: list index out of range
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError: list index out of range
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError: list index out of range
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError: list index out of range
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError: list index out of range
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError: list index out of range
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError: list index out of range
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_boundary_decision_reservation.py:243: AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_FINE_FORWARD'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_motion_command_bridge.py:390: AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_motion_command_bridge.py:390: AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_motion_command_bridge.py:424: AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_motion_command_bridge.py:436: AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_motion_command_bridge.py:689: AssertionError: assert {'ALIGN_LEFT'...rd_45_5', ...} == {'ALIGN_LEFT'...rd_45_5', ...}
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_motion_command_bridge.py:713: AssertionError: assert [{'action': '...are_90', ...}] == [{'action': '...l_shot', ...}]
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/mission_control/motion_decision_node.py:3529: AttributeError: 'FakeDecisionNode' object has no attribute 'timeouts'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/mission_control/motion_decision_node.py:3529: AttributeError: 'FakeDecisionNode' object has no attribute 'timeouts'
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_original_motion_speeds.py:47: AssertionError: assert 156 == 155
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_pickup_grasp_selection.py::test_post_retreat_selects_grasp_and_keeps_check_pose[0-pickup_400]
+FAILED src/mission_control/test/test_pickup_grasp_selection.py::test_post_retreat_selects_grasp_and_keeps_check_pose[300-pickup_400]
+FAILED src/mission_control/test/test_pickup_grasp_selection.py::test_post_retreat_selects_grasp_and_keeps_check_pose[319.99-pickup_400]
+FAILED src/mission_control/test/test_pickup_grasp_selection.py::test_post_retreat_selects_grasp_and_keeps_check_pose[320-pickup_400]
+FAILED src/mission_control/test/test_pickup_grasp_selection.py::test_post_retreat_selects_grasp_and_keeps_check_pose[320.01-pickup_500]
+FAILED src/mission_control/test/test_pickup_grasp_selection.py::test_post_retreat_selects_grasp_and_keeps_check_pose[500-pickup_500]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.7-0]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.7--10]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.7-10]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.57-0]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.57--10]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.57-10]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_queue_rejects_frames_captured_before_late_window
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_failure_clears_reserved_motion_and_requires_new_vision
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_forward_without_reservation_uses_recent_frame_immediately
+FAILED src/mission_control/test/test_continuous_approach.py::test_bridge_reserves_different_goal_lengths_without_post_motion_dwell[GOAL_CAMERA90_FINE_FORWARD_3-GOAL_CAMERA90_FINE_FORWARD_1-False]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_preparation_status_does_not_start_forward_capture
+FAILED src/mission_control/test/test_continuous_approach.py::test_short_goal_fine_reserves_with_ten_hz_images_and_150ms_latency
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_reservation_cannot_count_one_image_multiple_times
+FAILED src/mission_control/test/test_line_recovery_late_queue.py::test_late_queue_does_not_reuse_early_or_unusable_input[low_quality]
+FAILED src/mission_control/test/test_line_recovery_late_queue.py::test_late_queue_does_not_reuse_early_or_unusable_input[lost]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-8-0.61]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-5-0.645]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-6-0.68]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-7-0.73]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-8-0.61]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-5-0.645]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-6-0.68]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-7-0.73]
+FAILED src/mission_control/test/test_post_shot_forward_prequeue.py::test_both_goals_reserve_and_start_forward_without_post_turn_images[20.0-1]
+FAILED src/mission_control/test/test_post_shot_forward_prequeue.py::test_both_goals_reserve_and_start_forward_without_post_turn_images[20.0-2]
+FAILED src/mission_control/test/test_post_shot_forward_prequeue.py::test_both_goals_reserve_and_start_forward_without_post_turn_images[40.0-1]
+FAILED src/mission_control/test/test_post_shot_forward_prequeue.py::test_both_goals_reserve_and_start_forward_without_post_turn_images[40.0-2]
+FAILED src/mission_control/test/test_post_shot_forward_prequeue.py::test_both_goals_reserve_and_start_forward_without_post_turn_images[-20.0-1]
+FAILED src/mission_control/test/test_post_shot_forward_prequeue.py::test_both_goals_reserve_and_start_forward_without_post_turn_images[-20.0-2]
+FAILED src/mission_control/test/test_post_shot_forward_prequeue.py::test_unusable_or_unaligned_turn_frames_do_not_reserve[changes0]
+FAILED src/mission_control/test/test_post_shot_forward_prequeue.py::test_unusable_or_unaligned_turn_frames_do_not_reserve[changes1]
+FAILED src/mission_control/test/test_post_shot_forward_prequeue.py::test_unusable_or_unaligned_turn_frames_do_not_reserve[changes2]
+FAILED src/mission_control/test/test_post_shot_forward_prequeue.py::test_unusable_or_unaligned_turn_frames_do_not_reserve[changes3]
+FAILED src/mission_control/test/test_post_shot_forward_prequeue.py::test_only_distinct_recent_in_turn_frames_can_reserve[early]
+FAILED src/mission_control/test/test_post_shot_forward_prequeue.py::test_only_distinct_recent_in_turn_frames_can_reserve[duplicate]
+FAILED src/mission_control/test/test_post_shot_forward_prequeue.py::test_only_distinct_recent_in_turn_frames_can_reserve[before_turn]
+FAILED src/mission_control/test/test_post_shot_forward_prequeue.py::test_only_distinct_recent_in_turn_frames_can_reserve[stale]
+FAILED src/mission_control/test/test_post_shot_forward_prequeue.py::test_turn_failure_discards_reserved_forward[FAILED-1]
+FAILED src/mission_control/test/test_post_shot_forward_prequeue.py::test_turn_failure_discards_reserved_forward[FAILED-2]
+FAILED src/mission_control/test/test_post_shot_forward_prequeue.py::test_turn_failure_discards_reserved_forward[TIMEOUT-1]
+FAILED src/mission_control/test/test_post_shot_forward_prequeue.py::test_turn_failure_discards_reserved_forward[TIMEOUT-2]
+FAILED src/mission_control/test/test_post_shot_forward_prequeue.py::test_turn_failure_discards_reserved_forward[CANCELLED-1]
+FAILED src/mission_control/test/test_post_shot_forward_prequeue.py::test_turn_failure_discards_reserved_forward[CANCELLED-2]
+FAILED src/mission_control/test/test_post_shot_forward_prequeue.py::test_reservation_retains_executor_and_start_gates[executor_auto_ready-False]
+FAILED src/mission_control/test/test_post_shot_forward_prequeue.py::test_reservation_retains_executor_and_start_gates[decision_started-False]
+FAILED src/mission_control/test/test_boundary_decision_reservation.py::test_second_pickup_fine_continues_on_first_fresh_frame_without_observation_pause[231-BALL_PICKUP_FINE_FORWARD]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_without_fine_only_approach_keeps_direct_scoring[actions0]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_without_fine_only_approach_keeps_direct_scoring[actions1]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_waits_for_running_fine_motion_and_uses_only_completed_history
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_retry_does_not_repeat_completed_pose_preparation
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_production_action_mapping_contains_only_approved_contract
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_supported_action_builds_executor_request[SHOT-goal_shot]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_grasp_verification_uses_three_second_pause_after_pose
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_failed_grasp_check_pose_keeps_grasp_unknown_and_continues_exit_composite
+FAILED src/mission_control/test/test_original_motion_speeds.py::test_only_speeds_changed_and_original_catalog_is_untouched
+61 failed, 1285 passed in 18.61s
