@@ -2608,29 +2608,113 @@ class Yolo26Detector(Node):
                     2,
                     cv2.LINE_AA,
                 )
-
-        panel_width = min(390, max(250, width - 24))
-        panel_height = 334
-        panel_x = max(12, width - panel_width - 12)
-        panel_y = 44
-        panel_bottom = min(height - 8, panel_y + panel_height)
-        overlay = image.copy()
-        cv2.rectangle(
-            overlay,
-            (panel_x, panel_y),
-            (panel_x + panel_width, panel_bottom),
-            (20, 20, 20),
-            -1,
-        )
-        image[panel_y:panel_bottom, panel_x:panel_x + panel_width] = (
-            cv2.addWeighted(
-                overlay[panel_y:panel_bottom, panel_x:panel_x + panel_width],
-                0.72,
-                image[panel_y:panel_bottom, panel_x:panel_x + panel_width],
-                0.28,
-                0.0,
-            )
-        )
+            ring_lateral_px = self._number(info, "ring_center_lateral_m")
+            ring_depth_px = self._number(info, "ring_center_depth_m")
+            camera_fx = self._number(info, "camera_fx_px")
+            camera_cx = self._number(info, "camera_cx_px")
+            ring_aim_label = self._number(info, "waist_ring_aim_deg")
+            if (
+                ring_lateral_px is not None
+                and ring_depth_px is not None
+                and camera_fx is not None
+                and camera_cx is not None
+                and ring_depth_px > 0.0
+                and camera_fx > 0.0
+            ):
+                ring_column = int(round(
+                    camera_cx
+                    + camera_fx * ring_lateral_px / ring_depth_px
+                ))
+                if 0 <= ring_column < width:
+                    cv2.line(
+                        image,
+                        (ring_column, max(45, int(height * 0.20))),
+                        (ring_column, height - 1),
+                        (0, 165, 255),
+                        2,
+                        cv2.LINE_AA,
+                    )
+                    cv2.putText(
+                        image,
+                        "RING COLUMN | AIM "
+                        + self._metric_text(
+                            ring_aim_label, "deg", 1, signed=True,
+                        ),
+                        (min(ring_column + 8, max(8, width - 250)), 72),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.50,
+                        (0, 165, 255),
+                        2,
+                        cv2.LINE_AA,
+                    )
+            raw_points = info.get("backboard_sample_points_px", [])
+            if isinstance(raw_points, list) and len(raw_points) == 3:
+                sample_points: list[tuple[int, int]] = []
+                for raw_point in raw_points:
+                    if not isinstance(raw_point, list) or len(raw_point) != 2:
+                        sample_points = []
+                        break
+                    try:
+                        sample_points.append((
+                            int(np.clip(
+                                round(float(raw_point[0])), 0, width - 1,
+                            )),
+                            int(np.clip(
+                                round(float(raw_point[1])), 0, height - 1,
+                            )),
+                        ))
+                    except (TypeError, ValueError):
+                        sample_points = []
+                        break
+                if len(sample_points) == 3:
+                    cv2.line(
+                        image,
+                        sample_points[0],
+                        sample_points[2],
+                        (255, 255, 0),
+                        2,
+                        cv2.LINE_AA,
+                    )
+                    sample_depths = (
+                        self._number(info, "left_depth_m"),
+                        self._number(info, "center_depth_m"),
+                        self._number(info, "right_depth_m"),
+                    )
+                    for label, point, sample_depth in zip(
+                        ("L", "C", "R"),
+                        sample_points,
+                        sample_depths,
+                    ):
+                        cv2.circle(
+                            image, point, 6, (255, 255, 0), -1, cv2.LINE_AA,
+                        )
+                        cv2.putText(
+                            image,
+                            f"{label} {self._metric_text(sample_depth, 'm', 3)}",
+                            (point[0] + 7, max(20, point[1] - 8)),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.45,
+                            (255, 255, 0),
+                            1,
+                            cv2.LINE_AA,
+                        )
+                    board_angle = self._number(info, "backboard_angle_deg")
+                    cv2.putText(
+                        image,
+                        "BOARD YAW "
+                        + self._metric_text(
+                            board_angle, "deg", 1, signed=True,
+                        ),
+                        (
+                            sample_points[1][0] - 70,
+                            min(height - 8, sample_points[1][1] + 28),
+                        ),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.52,
+                        (255, 255, 0),
+                        2,
+                        cv2.LINE_AA,
+                    )
 
         if info is None:
             rows = [
@@ -2652,8 +2736,46 @@ class Yolo26Detector(Node):
             bearing = self._number(info, "bearing_deg")
             lateral = self._number(info, "lateral_offset_m")
             sample_count = self._number(info, "depth_sample_count")
+            line_sample_count = self._number(
+                info, "backboard_depth_sample_count"
+            )
+            left_depth = self._number(info, "left_depth_m")
+            center_depth = self._number(info, "center_depth_m")
+            right_depth = self._number(info, "right_depth_m")
+            board_angle = self._number(info, "backboard_angle_deg")
+            parallel_correction = self._number(
+                info, "parallel_correction_deg"
+            )
+            waist_depth = self._number(info, "waist_depth_m")
+            waist_aim = self._number(info, "waist_aim_deg")
+            waist_direction = str(
+                info.get("waist_turn_direction", "UNKNOWN")
+            )
+            ring_forward = self._number(
+                info, "backboard_to_ring_center_forward_m"
+            )
+            camera_waist_x = self._number(
+                info, "camera_to_waist_lateral_offset_m"
+            )
+            ring_lateral = self._number(info, "ring_center_lateral_m")
+            ring_depth = self._number(info, "ring_center_depth_m")
+            waist_ring_lateral = self._number(
+                info, "waist_ring_lateral_m"
+            )
+            waist_ring_depth = self._number(info, "waist_ring_depth_m")
+            waist_ring_aim = self._number(info, "waist_ring_aim_deg")
+            waist_ring_direction = str(
+                info.get("waist_ring_turn_direction", "UNKNOWN")
+            )
+            nominal_width = self._number(info, "backboard_line_width_m")
+            measured_width = self._number(
+                info, "backboard_measured_width_m"
+            )
             aim_source = str(info.get("aim_source", "goal")).upper()
             direction = str(info.get("horizontal_direction", "UNKNOWN"))
+            angle_direction = str(
+                info.get("backboard_angle_direction", "UNKNOWN")
+            )
             state = str(info.get("state", "UNKNOWN"))
             rows = [
                 "GOAL METRICS",
@@ -2671,18 +2793,90 @@ class Yolo26Detector(Node):
                 + self._metric_text(lateral, "m", 3, signed=True),
                 "Depth points: "
                 + self._metric_text(sample_count, "", 0),
+                "Line left Z : "
+                + self._metric_text(left_depth, "m", 4),
+                "Line centerZ: "
+                + self._metric_text(center_depth, "m", 4),
+                "Line right Z: "
+                + self._metric_text(right_depth, "m", 4),
+                "Line points : "
+                + self._metric_text(line_sample_count, "", 0),
+                "Board yaw   : "
+                + self._metric_text(board_angle, "deg", 1, signed=True),
+                f"Yaw side    : {angle_direction}",
+                "Robot correct: "
+                + self._metric_text(
+                    parallel_correction, "deg", 1, signed=True,
+                ),
+                "Waist depth : "
+                + self._metric_text(waist_depth, "m", 3),
+                "Waist aim   : "
+                + self._metric_text(waist_aim, "deg", 1, signed=True),
+                f"Waist turn  : {waist_direction}",
+                "Ring forward: "
+                + self._metric_text(ring_forward, "m", 3),
+                "Cam->waist X: "
+                + self._metric_text(
+                    camera_waist_x, "m", 3, signed=True,
+                ),
+                "Ring X / Z  : "
+                + self._metric_text(ring_lateral, "m", 3, signed=True)
+                + " / "
+                + self._metric_text(ring_depth, "m", 3),
+                "Waist X / Z : "
+                + self._metric_text(
+                    waist_ring_lateral, "m", 3, signed=True,
+                )
+                + " / "
+                + self._metric_text(waist_ring_depth, "m", 3),
+                "Ring aim    : "
+                + self._metric_text(
+                    waist_ring_aim, "deg", 1, signed=True,
+                ),
+                f"Ring turn   : {waist_ring_direction}",
+                "Width N/M   : "
+                + self._metric_text(nominal_width, "", 4)
+                + " / "
+                + self._metric_text(measured_width, "m", 4),
                 f"Shot now    : {'YES' if info.get('score_now') else 'NO'}",
             ]
 
+        panel_width = min(390, max(250, width - 24))
+        panel_x = max(12, width - panel_width - 12)
+        panel_y = 44
+        panel_height = 18 + len(rows) * 24
+        panel_bottom = min(height - 8, panel_y + panel_height)
+        overlay = image.copy()
+        cv2.rectangle(
+            overlay,
+            (panel_x, panel_y),
+            (panel_x + panel_width, panel_bottom),
+            (20, 20, 20),
+            -1,
+        )
+        image[panel_y:panel_bottom, panel_x:panel_x + panel_width] = (
+            cv2.addWeighted(
+                overlay[panel_y:panel_bottom, panel_x:panel_x + panel_width],
+                0.72,
+                image[panel_y:panel_bottom, panel_x:panel_x + panel_width],
+                0.28,
+                0.0,
+            )
+        )
+
+        row_spacing = min(
+            24.0,
+            max(13.0, (panel_bottom - panel_y - 8) / max(len(rows), 1)),
+        )
         for index, row in enumerate(rows):
             is_title = index == 0
             color = (0, 255, 0) if is_title else (245, 245, 245)
             cv2.putText(
                 image,
                 row,
-                (panel_x + 12, panel_y + 25 + index * 24),
+                (panel_x + 12, int(panel_y + 20 + index * row_spacing)),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.56 if is_title else 0.5,
+                (0.56 if is_title else 0.5) * min(1.0, row_spacing / 24.0),
                 color,
                 2 if is_title else 1,
                 cv2.LINE_AA,

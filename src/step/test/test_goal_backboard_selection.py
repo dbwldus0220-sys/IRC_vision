@@ -23,6 +23,14 @@ def make_analyzer(depth_m=0.4, required_hits=1, robot_center_offset_px=0.0):
     analyzer.approach_depth_m = 0.5
     analyzer.score_target_depth_m = 0.51
     analyzer.direction_deadband_norm = 0.04
+    analyzer.backboard_line_width_m = 0.155
+    analyzer.backboard_sample_y_ratio = 0.18
+    analyzer.backboard_edge_inset_ratio = 0.10
+    analyzer.backboard_parallel_tolerance_deg = 3.0
+    analyzer.camera_to_waist_depth_offset_m = 0.065
+    analyzer.camera_to_waist_lateral_offset_m = 0.035
+    analyzer.backboard_to_ring_center_forward_m = 0.10
+    analyzer.waist_aim_deadband_deg = 1.0
     analyzer.publish_empty_when_missing = True
     analyzer.fx = analyzer.fy = 600.0
     analyzer.cx = 640.0
@@ -31,6 +39,16 @@ def make_analyzer(depth_m=0.4, required_hits=1, robot_center_offset_px=0.0):
     analyzer.latest_image_height = 720
     analyzer._sample_goal_depth_m = lambda bbox: (
         depth_m, depth_m is not None, 5 if depth_m is not None else 0
+    )
+    analyzer._sample_backboard_line_depths = lambda bbox, *_size: (
+        depth_m,
+        depth_m,
+        depth_m,
+        3 if depth_m is not None else 0,
+        [
+            [int(round(bbox[0] + (bbox[2] - bbox[0]) * ratio)), 222]
+            for ratio in (0.10, 0.50, 0.90)
+        ],
     )
     analyzer._depth_age_sec = lambda: 0.0
     analyzer.confirmation_filter = TemporalConfirmationFilter(
