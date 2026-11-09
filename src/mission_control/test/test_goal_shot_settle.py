@@ -58,7 +58,7 @@ def test_correction_after_window_requires_preparation_and_new_window(resting_goa
     node, clock = resting_goal
     finish_preparation(node)
     clock[0] = 11.0
-    correction = node.publish_vision(goal={**score_ready_goal(), 'depth_m': .60, 'score_now': False})[-1]
+    correction = node.publish_vision(goal={**score_ready_goal(), 'depth_m': .82, 'score_now': False, 'camera_fx_px': 900.0})[-1]
     assert correction['action'] == 'GOAL_CAMERA90_FINE_FORWARD_3'
     assert node.goal_shot_observe_until is None
     node.send_status(correction['action'], correction['command_id'], 'RUNNING')

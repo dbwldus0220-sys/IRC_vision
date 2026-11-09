@@ -175,13 +175,13 @@ def test_ball_display_bottom_distance_is_zero_at_last_image_row():
 
 @pytest.mark.parametrize('distance,valid,age,expected', [
     (.600, True, .05, False), (.550001, True, .05, False),
-    (.550, True, .05, False), (.500001, True, .05, False),
+    (.550, True, .05, True), (.500001, True, .05, True),
     (.500, True, .05, True), (.480, True, .70, True),
     (.480, True, .701, False), (.480, False, .05, False),
     (None, True, .05, False), (float('nan'), True, .05, False),
     (.480, True, None, False), (.480, True, -.01, False),
 ])
-def test_head_down_uses_fresh_500mm_distance(distance, valid, age, expected):
+def test_head_down_uses_fresh_550mm_distance(distance, valid, age, expected):
     assert should_request_head_down(distance, valid, age) is expected
 
 

@@ -1,0 +1,31 @@
+........................................................................ [ 56%]
+...........................................F............                 [100%]
+=================================== FAILURES ===================================
+____ test_production_runtime_preserves_original_shoulders_and_other_fields _____
+
+    def test_production_runtime_preserves_original_shoulders_and_other_fields():
+        root = Path(__file__).resolve().parents[1]
+        path = root / "artifacts/robot_motions_runtime.json"
+        motions = json.loads(path.read_text())["motions"]
+        original = {m["name"]: m for m in json.loads(
+            (root / "artifacts/robot_motions_pc.json").read_text())["motions"]}
+        # Compare against the current PC catalog; motion families can be replaced.
+        from upsert_motion_catalog import runtime_motion_from_source
+        assert {m["name"] for m in motions} == original.keys()
+        for motion in motions:
+>           assert motion == runtime_motion_from_source(original[motion["name"]])
+E           AssertionError: assert {'completion'...s': 7045, ...} == {'completion'...s': 7045, ...}
+E             Omitting 8 identical items, use -vv to show
+E             Differing items:
+E             {'playback_speed': 1.0} != {'playback_speed': 0.95}
+E             Full diff:
+E               {
+E                'completion': {'position_tolerance_deg': 5.0,
+E                               'settle_duration_ms': 80,...
+E             
+E             ...Full output truncated (67 lines hidden), use '-vv' to show
+
+tools/test_upsert_motion_catalog.py:107: AssertionError
+=========================== short test summary info ============================
+FAILED tools/test_upsert_motion_catalog.py::test_production_runtime_preserves_original_shoulders_and_other_fields
+1 failed, 127 passed in 5.43s

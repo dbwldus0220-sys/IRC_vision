@@ -1,0 +1,26 @@
+{
+  "motion": "t제자리좌회전45도(6회)",
+  "source": "robot_motions(74).json",
+  "runtime_speed": 0.855,
+  "pc_speed": 0.9,
+  "cycle_ms": 295,
+  "expected_duration_sec": 2.0701754385964914,
+  "only_requested_motion_changed": true,
+  "alias_mapping_unchanged": true,
+  "import_idempotent": true,
+  "catalog_validation": "PC and runtime passed",
+  "python_tests": {
+    "passed": 224,
+    "failed": 1,
+    "existing_failure": "tools/test_upsert_motion_catalog.py::test_production_runtime_preserves_original_shoulders_and_other_fields; unrelated pre-existing runtime/PC speed differences"
+  },
+  "sdk_mock": {
+    "alignment_chains": 6,
+    "fine_pairs": 75,
+    "left_turn_pairs": 108,
+    "walking_preparation_pairs": 24,
+    "hurdle_completed": true,
+    "unsupported_shortcuts_rejected": true
+  },
+  "hardware_run": false
+}

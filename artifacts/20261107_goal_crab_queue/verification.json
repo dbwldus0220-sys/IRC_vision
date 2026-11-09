@@ -1,0 +1,54 @@
+{
+  "scope": [
+    "Reserve one identical Goal crab after three distinct fresh images captured from 60% onward, committing after 70%.",
+    "Hold 0.5 seconds before switching pickup crab direction; preserve existing Goal direction-switch hold without doubling."
+  ],
+  "tests": {
+    "before": {
+      "passed": 662,
+      "failed": 21
+    },
+    "after": {
+      "passed": 691,
+      "failed": 21
+    },
+    "new_failures": 0,
+    "new_and_updated_targeted_tests_passed": 65,
+    "preexisting_failures": [
+      "test.test_continuous_approach::test_goal_queue_rejects_frames_captured_before_late_window",
+      "test.test_continuous_approach::test_goal_reservation_cannot_count_one_image_multiple_times",
+      "test.test_continuous_approach::test_goal_walking_queues_only_one_then_promotes_without_pause[0.57--10]",
+      "test.test_continuous_approach::test_goal_walking_queues_only_one_then_promotes_without_pause[0.57-0]",
+      "test.test_continuous_approach::test_goal_walking_queues_only_one_then_promotes_without_pause[0.57-10]",
+      "test.test_continuous_approach::test_short_goal_fine_reserves_with_ten_hz_images_and_150ms_latency",
+      "test.test_goal_target_steering::test_recovery_to_close_crab_keeps_forward_posture_transition[left]",
+      "test.test_motion_command_bridge::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.499-STRAIGHT_0-r\\ubbf8\\uc1380\\ub3c4 \\uacf5\\uc7a1\\uae30\\uc6a9]",
+      "test.test_motion_command_bridge::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.5-STRAIGHT_0-r\\ubbf8\\uc1380\\ub3c4 \\uacf5\\uc7a1\\uae30\\uc6a9]",
+      "test.test_motion_command_bridge::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.500001-BALL_APPROACH_FINE_FORWARD_5-r\\ubbf8\\uc13845\\ub3c4]",
+      "test.test_motion_command_bridge::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.55-BALL_APPROACH_FINE_FORWARD_5-r\\ubbf8\\uc13845\\ub3c4]",
+      "test.test_motion_command_bridge::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.57-BALL_APPROACH_FINE_FORWARD_5-r\\ubbf8\\uc13845\\ub3c4]",
+      "test.test_motion_command_bridge::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.6-BALL_APPROACH_FINE_FORWARD_5-r\\ubbf8\\uc13845\\ub3c4]",
+      "test.test_motion_command_bridge::test_failed_grasp_check_pose_keeps_grasp_unknown_and_continues_exit_composite",
+      "test.test_motion_command_bridge::test_grasp_verification_uses_three_second_pause_after_pose",
+      "test.test_motion_command_bridge::test_production_action_mapping_contains_only_approved_contract",
+      "test.test_motion_command_bridge::test_shot_retry_does_not_repeat_completed_pose_preparation",
+      "test.test_motion_command_bridge::test_shot_waits_for_running_fine_motion_and_uses_only_completed_history",
+      "test.test_motion_command_bridge::test_shot_without_fine_only_approach_keeps_direct_scoring[actions0]",
+      "test.test_motion_command_bridge::test_shot_without_fine_only_approach_keeps_direct_scoring[actions1]",
+      "test.test_motion_command_bridge::test_supported_action_builds_executor_request[SHOT-goal_shot]"
+    ]
+  },
+  "preserved": [
+    "artifacts/robot_motions_pc.json",
+    "artifacts/robot_motions_runtime.json",
+    "src/irc_step_motion_executor/config/motion_aliases.yaml",
+    "external_sdk/gui_aligned/robot_motion_player.cpp",
+    "src/mission_control/mission_control/pickup_walk_reservation.py"
+  ],
+  "production_files_changed": [
+    "src/mission_control/mission_control/motion_decision_node.py",
+    "src/mission_control/mission_control/motion_command_bridge_node.py"
+  ],
+  "hardware_run": false,
+  "verification": "Real decision/bridge callbacks replayed with fresh/stale/duplicate images, queue promotion/rejection/full/failure and exact dwell boundaries."
+}

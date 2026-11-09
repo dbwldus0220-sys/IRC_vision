@@ -1,0 +1,55 @@
+{
+  "catalog_count": 161,
+  "alias_count": 166,
+  "catalog_validation": "PC and runtime passed: unique motion names, all aliases resolve, all frames contain motors 0..22",
+  "import_idempotent": true,
+  "file_sha256": {
+    "artifacts/robot_motions_runtime.json": "5945cf9127b3010be566d9db654681d9ebb3fab387f3fb2f85db203fbf40b2e6",
+    "artifacts/robot_motions_pc.json": "24af9d5b903f8ba985728c10ee7fc929b6b56f8086be942c789c439ca7d97385",
+    "src/irc_step_motion_executor/config/motion_aliases.yaml": "dbae25ec792b1d0ce84f5d57321d68c0f66f5b73484cef1018c3847eaed311e3"
+  },
+  "targeted_python_tests": {
+    "passed": 176,
+    "failed": 1,
+    "existing_failure": "tools/test_upsert_motion_catalog.py::test_production_runtime_preserves_original_shoulders_and_other_fields",
+    "baseline_evidence": "Before this update, 78 runtime motions already differed from runtime_motion_from_source(PC). Unrequested speeds were preserved."
+  },
+  "baseline_comparison": {
+    "before_passed": 676,
+    "before_failed": 20,
+    "after_passed": 676,
+    "after_failed": 20,
+    "new_failures": [],
+    "unchanged_failures": [
+      "FAILED src/mission_control/test/test_continuous_approach.py::test_goal_queue_rejects_frames_captured_before_late_window",
+      "FAILED src/mission_control/test/test_continuous_approach.py::test_goal_reservation_cannot_count_one_image_multiple_times",
+      "FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.57--10]",
+      "FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.57-0]",
+      "FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.57-10]",
+      "FAILED src/mission_control/test/test_continuous_approach.py::test_short_goal_fine_reserves_with_ten_hz_images_and_150ms_latency",
+      "FAILED src/mission_control/test/test_motion_command_bridge.py::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.499-STRAIGHT_0-r\\ubbf8\\uc1380\\ub3c4 \\uacf5\\uc7a1\\uae30\\uc6a9]",
+      "FAILED src/mission_control/test/test_motion_command_bridge.py::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.5-STRAIGHT_0-r\\ubbf8\\uc1380\\ub3c4 \\uacf5\\uc7a1\\uae30\\uc6a9]",
+      "FAILED src/mission_control/test/test_motion_command_bridge.py::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.500001-BALL_APPROACH_FINE_FORWARD_5-r\\ubbf8\\uc13845\\ub3c4]",
+      "FAILED src/mission_control/test/test_motion_command_bridge.py::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.55-BALL_APPROACH_FINE_FORWARD_5-r\\ubbf8\\uc13845\\ub3c4]",
+      "FAILED src/mission_control/test/test_motion_command_bridge.py::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.57-BALL_APPROACH_FINE_FORWARD_5-r\\ubbf8\\uc13845\\ub3c4]",
+      "FAILED src/mission_control/test/test_motion_command_bridge.py::test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.6-BALL_APPROACH_FINE_FORWARD_5-r\\ubbf8\\uc13845\\ub3c4]",
+      "FAILED src/mission_control/test/test_motion_command_bridge.py::test_failed_grasp_check_pose_keeps_grasp_unknown_and_continues_exit_composite",
+      "FAILED src/mission_control/test/test_motion_command_bridge.py::test_grasp_verification_uses_three_second_pause_after_pose",
+      "FAILED src/mission_control/test/test_motion_command_bridge.py::test_production_action_mapping_contains_only_approved_contract",
+      "FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_retry_does_not_repeat_completed_pose_preparation",
+      "FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_waits_for_running_fine_motion_and_uses_only_completed_history",
+      "FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_without_fine_only_approach_keeps_direct_scoring[actions0]",
+      "FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_without_fine_only_approach_keeps_direct_scoring[actions1]",
+      "FAILED src/mission_control/test/test_motion_command_bridge.py::test_supported_action_builds_executor_request[SHOT-goal_shot]"
+    ]
+  },
+  "sdk_fake_hardware": {
+    "alignment_chains": 6,
+    "fine_repeat_pairs": 75,
+    "new_hurdle_completed": true,
+    "unsupported_shortcuts_rejected": true
+  },
+  "executor_hurdle_alias_test": "SdkExecutorCore.AllowsNewRequestAfterTerminalStatus passed",
+  "hardware_executed": false,
+  "installation": "Runtime catalog and alias YAML are symlinks to workspace; mission_control is an editable install. Restart existing nodes to load updates."
+}

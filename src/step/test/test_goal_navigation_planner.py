@@ -11,6 +11,7 @@ def goal_info(**overrides):
     sample = {
         "detected": True,
         "confidence": 0.9,
+        "camera_fx_px": 900.0,
         "depth_valid": True,
         "depth_m": 0.50,
         "ground_distance_m": 0.5,

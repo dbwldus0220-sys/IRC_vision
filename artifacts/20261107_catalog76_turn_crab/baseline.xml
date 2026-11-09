@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="7" failures="0" skipped="0" tests="7" time="0.989" timestamp="2026-11-07T17:52:01.509662" hostname="jet"><testcase classname="" name="test.test_reservation_expansion" time="0.000"><error message="collection failure">ImportError while importing test module '/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_reservation_expansion.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.10/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+src/mission_control/test/test_reservation_expansion.py:6: in &lt;module&gt;
+    from std_msgs.msg import String
+E   ModuleNotFoundError: No module named 'std_msgs'</error></testcase><testcase classname="" name="test.test_pickup_crab_observation" time="0.000"><error message="collection failure">ImportError while importing test module '/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_pickup_crab_observation.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.10/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+src/mission_control/test/test_pickup_crab_observation.py:8: in &lt;module&gt;
+    from std_msgs.msg import String
+E   ModuleNotFoundError: No module named 'std_msgs'</error></testcase><testcase classname="" name="test.test_pickup_continuous_walk" time="0.000"><error message="collection failure">ImportError while importing test module '/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_pickup_continuous_walk.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.10/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+src/mission_control/test/test_pickup_continuous_walk.py:8: in &lt;module&gt;
+    from std_msgs.msg import String
+E   ModuleNotFoundError: No module named 'std_msgs'</error></testcase><testcase classname="" name="test.test_line_turn_prequeue" time="0.000"><error message="collection failure">ImportError while importing test module '/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_line_turn_prequeue.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.10/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+src/mission_control/test/test_line_turn_prequeue.py:8: in &lt;module&gt;
+    from std_msgs.msg import String
+E   ModuleNotFoundError: No module named 'std_msgs'</error></testcase><testcase classname="" name="test.test_ball_fine_alignment_queue" time="0.000"><error message="collection failure">ImportError while importing test module '/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_ball_fine_alignment_queue.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.10/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+src/mission_control/test/test_ball_fine_alignment_queue.py:10: in &lt;module&gt;
+    from mission_control.motion_decision_node import MotionDecisionNode as Node
+src/mission_control/mission_control/motion_decision_node.py:16: in &lt;module&gt;
+    import rclpy
+E   ModuleNotFoundError: No module named 'rclpy'</error></testcase><testcase classname="" name="test.test_motion_command_bridge" time="0.000"><error message="collection failure">ImportError while importing test module '/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_motion_command_bridge.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.10/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+src/mission_control/test/test_motion_command_bridge.py:9: in &lt;module&gt;
+    from mission_control.motion_command_bridge_node import MotionCommandBridgeNode
+src/mission_control/mission_control/motion_command_bridge_node.py:10: in &lt;module&gt;
+    import rclpy
+E   ModuleNotFoundError: No module named 'rclpy'</error></testcase><testcase classname="" name="test.test_catalog75_left_turn" time="0.000"><error message="collection failure">ImportError while importing test module '/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/mission_control/test/test_catalog75_left_turn.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.10/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+src/mission_control/test/test_catalog75_left_turn.py:11: in &lt;module&gt;
+    from mission_control.motion_decision_node import MotionDecisionNode as Node
+src/mission_control/mission_control/motion_decision_node.py:16: in &lt;module&gt;
+    import rclpy
+E   ModuleNotFoundError: No module named 'rclpy'</error></testcase></testsuite></testsuites>

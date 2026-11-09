@@ -1,0 +1,24 @@
+{
+  "source_sha256": "74aa51d231d34352f8dc796048340c790d67334e75530a5cc3993417ffab17a8",
+  "renames": {
+    "t공후 제자리좌회전": "p공후 제자리좌회전",
+    "t골대후 제자리좌회전": "p골대후제자리좌회전",
+    "p라인복귀좌회전공용": "p라인복귀좌회전공용"
+  },
+  "pose_renames": {
+    "오뒤무게중심앞": "오뒤무게중심앞(catalog79)",
+    "tt제좌왼들45": "tt제좌왼들45(catalog79)"
+  },
+  "changed_aliases": {
+    "pickup_second_backward_turn_left": {
+      "before": "t공후 제자리좌회전",
+      "after": "p공후 제자리좌회전"
+    },
+    "post_shot_default_turn_left": {
+      "before": "t골대후 제자리좌회전",
+      "after": "p골대후제자리좌회전"
+    }
+  },
+  "runtime_speed_policy": "Original playback_speed multiplied by 0.95 once.",
+  "route_policy": "First pickup/goal exits remain right; second pickup/goal exits remain left."
+}

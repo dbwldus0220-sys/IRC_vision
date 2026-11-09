@@ -41,7 +41,7 @@ def test_upsert_normalizes_new_replaced_and_unreferenced_motions(tmp_path, sourc
         {"angles": {"0": 42.0}}
     ]
     assert motions["new"]["completion"]["settle_timeout_ms"] == 3000
-    assert motions["new"]["playback_speed"] == 0.95
+    assert motions["new"]["playback_speed"] == 1.0
     assert json.loads(source.read_text()) == source_payload
     assert json.loads(next(backup_dir.glob("*.json")).read_text()) == original
 
@@ -87,8 +87,6 @@ def test_import_preserves_special_motions_and_other_joint_data(tmp_path):
     for supplied in source_payload["motions"] + [original["motions"][1]]:
         expected = copy.deepcopy(supplied)
         expected["completion"]["position_tolerance_deg"] = 5.0
-        if supplied['name'] != 'unreferenced':
-            expected['playback_speed'] = 1.045
         assert result[supplied["name"]] == expected
     assert json.loads(source.read_text()) == source_payload
     assert json.loads(next(backup_dir.glob("*.json")).read_text()) == original
@@ -111,13 +109,15 @@ def test_production_runtime_preserves_original_shoulders_and_other_fields():
             assert all(frame["angles"][joint] == source["angles"][joint] for joint in ("4", "5"))
 
 
-@pytest.mark.parametrize('speed,expected', [(1.0, .95), (1.05, .9975), (.9, .855), (.95, .9025)])
-def test_reimport_uses_source_speed_once_and_leaves_other_runtime_speeds(tmp_path, speed, expected):
+@pytest.mark.parametrize('name', ['selected', 't허들찐', 'p공후 제자리좌회전', 'p골대후제자리좌회전'])
+@pytest.mark.parametrize('speed,scaled', [(1.0, .95), (1.05, .9975), (.9, .855), (.95, .9025)])
+def test_reimport_uses_source_speed_once_and_leaves_other_runtime_speeds(tmp_path, name, speed, scaled):
+    expected = speed if name == 'selected' else scaled
     source, runtime, aliases = [tmp_path / name for name in ('source.json', 'runtime.json', 'aliases.yaml')]
-    original = {'motions': [{'name': 'selected', 'playback_speed': speed, 'frames': []}]}
+    original = {'motions': [{'name': name, 'playback_speed': speed, 'frames': []}]}
     source.write_text(json.dumps(original))
     runtime.write_text(json.dumps({'motions': [{'name': 'other', 'playback_speed': .7}]}))
-    aliases.write_text('motion_aliases:\n  selected_id: selected\n')
+    aliases.write_text(f'motion_aliases:\n  selected_id: {name}\n')
     command = [sys.executable, str(Path(__file__).with_name('upsert_motion_catalog.py')),
                '--source', str(source), '--runtime', str(runtime), '--aliases', str(aliases),
                '--backup-dir', str(tmp_path / 'backups')]
@@ -126,7 +126,7 @@ def test_reimport_uses_source_speed_once_and_leaves_other_runtime_speeds(tmp_pat
     subprocess.run(command, check=True, capture_output=True)
     assert runtime.read_bytes() == first
     actual = {m['name']: m for m in json.loads(first)['motions']}
-    assert actual['selected']['playback_speed'] == expected
+    assert actual[name]['playback_speed'] == expected
     assert actual['other']['playback_speed'] == .7
     assert json.loads(source.read_text()) == original
 

@@ -1,0 +1,5 @@
+Internal ctest changing into directory: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+Test project /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+      Start  1: test_callback_timing_trace
+ 1/40 Test  #1: test_callback_timing_trace .........................   Passed    0.20 sec
+      Start  2: test_legacy_cosine_execution

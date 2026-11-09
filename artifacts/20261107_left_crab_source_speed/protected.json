@@ -1,0 +1,6 @@
+{
+  "artifacts/robot_motions_pc.json": "c99c66336e7012c2a7e0d79a16b9b4bcb7acf899d8a2173ea9e77d529ed8140f",
+  "src/irc_step_motion_executor/config/motion_aliases.yaml": "7a9efb577c55209079cce3096566c9b4eb81442f5af5623b9db2cb1e504f6ad6",
+  "src/mission_control/mission_control/motion_command_bridge_node.py": "622a402a987b5020ef8ff4040c20fdf2908b205ba940880a75dc4c40336793f5",
+  "external_sdk/gui_aligned/robot_motion_player.cpp": "34e1c83bdb02e28c7f2d41bdb96a5159e465a0fb85fa222c74875db015c74bc6"
+}

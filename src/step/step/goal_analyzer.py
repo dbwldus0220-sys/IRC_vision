@@ -24,7 +24,7 @@ from std_msgs.msg import String
 
 from .goal_scoring import (
     GOAL_SCORE_MIN_DEPTH_M, GOAL_SCORE_TARGET_DEPTH_M, GOAL_SCORE_MAX_DEPTH_M,
-    goal_shot_pixel_limit, goal_shot_region,
+    goal_shot_pixels_aligned, goal_shot_region,
 )
 from .depth_frame_cache import DepthFrameCache
 from .depth_frame_cache import DepthFrameConsumer
@@ -533,8 +533,9 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         self,
         target: GoalCandidate,
     ) -> tuple[str, bool, bool, float | None, bool, str]:
-        centered = abs(target.offset_x_px) <= goal_shot_pixel_limit(
-            target.depth_m if target.depth_m is not None else GOAL_SCORE_TARGET_DEPTH_M
+        centered = goal_shot_pixels_aligned(
+            target.depth_m if target.depth_m is not None else GOAL_SCORE_TARGET_DEPTH_M,
+            target.offset_x_px,
         )
         if not target.depth_valid or target.depth_m is None:
             return (
@@ -587,6 +588,7 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
     def _publish(self, info: GoalInfo) -> None:
         message = String()
         payload = asdict(info)
+        payload["camera_fx_px"] = self.fx
         payload["rgb_stamp_ns"] = getattr(self, "_active_rgb_stamp_ns", None)
         payload["robot_center_offset_px"] = self.robot_center_offset_px
         payload["robot_center_x_px"] = (

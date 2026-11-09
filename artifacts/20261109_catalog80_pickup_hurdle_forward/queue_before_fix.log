@@ -1,0 +1,2 @@
+Rejected: p전진45(2회) -> p라인복귀좌회전45도
+test_ball_fine_queue: /home/jet/IRC/IRC-STEP/IRC_vision_latest/external_sdk/gui_aligned/test_ball_fine_queue.cpp:153: main(int, char**)::<lambda(const string&, const string&)>: Assertion `result == QueueResult::Queued' failed.

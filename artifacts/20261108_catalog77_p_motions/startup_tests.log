@@ -1,0 +1,22 @@
+Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+Note: Google Test filter = -StartupPoseCatalog.LoadsCatalog49ForwardStartWithEveryPolicyCombination
+[==========] Running 6 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 6 tests from StartupPoseCatalog
+[ RUN      ] StartupPoseCatalog.AcceptsRepeatedNameWithIdenticalAngles
+[       OK ] StartupPoseCatalog.AcceptsRepeatedNameWithIdenticalAngles (0 ms)
+[ RUN      ] StartupPoseCatalog.RejectsRepeatedNameWithDifferentAngles
+[       OK ] StartupPoseCatalog.RejectsRepeatedNameWithDifferentAngles (0 ms)
+[ RUN      ] StartupPoseCatalog.RejectsRepeatedNameWithMissingMotor
+[       OK ] StartupPoseCatalog.RejectsRepeatedNameWithMissingMotor (0 ms)
+[ RUN      ] StartupPoseCatalog.LoadsGeonStartupPoseWithDefaultPolicy
+[       OK ] StartupPoseCatalog.LoadsGeonStartupPoseWithDefaultPolicy (276 ms)
+[ RUN      ] StartupPoseCatalog.PolicyOffChangesOnlySelectedAxesToVerifiedPcPose
+[       OK ] StartupPoseCatalog.PolicyOffChangesOnlySelectedAxesToVerifiedPcPose (884 ms)
+[ RUN      ] StartupPoseCatalog.LoadsCatalog51StartupWithEveryPolicyCombination
+[       OK ] StartupPoseCatalog.LoadsCatalog51StartupWithEveryPolicyCombination (630 ms)
+[----------] 6 tests from StartupPoseCatalog (1791 ms total)
+
+[----------] Global test environment tear-down
+[==========] 6 tests from 1 test suite ran. (1791 ms total)
+[  PASSED  ] 6 tests.

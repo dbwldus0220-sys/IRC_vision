@@ -150,6 +150,16 @@ class TestBallHeadOverride(unittest.TestCase):
             self.hold(False)
         self.ball()
         self.hold(True)
+        self.assertFalse(self.heartbeats[-1]['ball_head_transition_complete'])
+        self.assertIsNone(self.heartbeats[-1]['ball_head_transition_complete_stamp_ns'])
+        transition_id = self.heartbeats[-1]['ball_head_transition_id']
+        before_complete = self.node.get_clock().now().nanoseconds
+        self.wait(lambda: self.heartbeats[-1]['ball_head_transition_complete'])
+        completed = self.heartbeats[-1]
+        self.assertEqual(completed['ball_head_transition_id'], transition_id)
+        self.assertGreater(completed['ball_head_transition_complete_stamp_ns'], before_complete)
+        self.assertLessEqual(completed['ball_head_transition_complete_stamp_ns'],
+                             self.node.get_clock().now().nanoseconds)
         for request_id, motion in ((3, "stationary_turn_left"),
                                    (4, "ball_camera_down_forward_2"),
                                    (5, "ball_camera_down_forward_4")):

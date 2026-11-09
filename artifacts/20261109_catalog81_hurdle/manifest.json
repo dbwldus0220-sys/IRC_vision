@@ -1,0 +1,18 @@
+{
+  "source": "/home/jet/Downloads/robot_motions(81).json",
+  "source_sha256": "536ecae577e020bedec17cb78706a1a298bfa6fa323d06940109c9d295e9696b",
+  "replaced": [
+    "t허들찐"
+  ],
+  "pose_renames": {
+    "s왼들": "s왼들(catalog80)",
+    "오뒤무게중심앞": "오뒤무게중심앞(catalog80)"
+  },
+  "runtime_speed": 0.95,
+  "runtime_tolerance_deg": 5.0,
+  "frames": 16,
+  "runtime_seconds_before": 7.633684210526316,
+  "runtime_seconds_after": 7.554736842105263,
+  "final_angles_and_torques_unchanged": true,
+  "other_motions_unchanged": true
+}

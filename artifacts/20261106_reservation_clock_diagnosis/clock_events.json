@@ -1,0 +1,32 @@
+[
+  {
+    "message": "Starting Network Time Synchronization...",
+    "realtime_us": 1793973198151283,
+    "monotonic_us": 12168868
+  },
+  {
+    "message": "System clock time unset or jumped backwards, restoring from recorded timestamp: Fri 2026-11-06 22:53:18 KST",
+    "realtime_us": 1793973198152180,
+    "monotonic_us": 12169765
+  },
+  {
+    "message": "Started Network Time Synchronization.",
+    "realtime_us": 1793973198152431,
+    "monotonic_us": 12170016
+  },
+  {
+    "message": "Timed out waiting for reply from 122.45.50.24:123 (1.pool.ntp.org).",
+    "realtime_us": 1793973238693534,
+    "monotonic_us": 52711120
+  },
+  {
+    "message": "Timed out waiting for reply from 211.222.238.30:123 (1.pool.ntp.org).",
+    "realtime_us": 1793973248943798,
+    "monotonic_us": 62961384
+  },
+  {
+    "message": "Initial synchronization to time server 211.108.117.211:123 (1.pool.ntp.org).",
+    "realtime_us": 1793973620359956,
+    "monotonic_us": 62968366
+  }
+]

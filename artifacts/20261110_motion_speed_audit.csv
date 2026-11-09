@@ -1,0 +1,156 @@
+﻿motion,pc_original_speed,runtime_speed,original_x_0_95,same_as_original,aliases
+찐공확인자세,1.0,1.0,False,True,pickup_grasp_check_pose
+찐후진실전-2(2회),0.9,0.9,False,True,ball_lost_camera_down_backward_2
+찐공잡기전후진-2(2회),0.8999999999999999,0.8999999999999999,False,True,pickup_pre_backward_camera_down
+찐후진실전(1회),0.9,0.9,False,True,pickup_lost_ball_backward_1; pickup_retreat_2; goal_camera_90_backward_1
+찐미세오뒤에서 오옆꽃게90도,0.95,0.9025,True,False,
+찐미세오뒤에서오옆꽃게0도,0.95,0.9025,True,False,
+t허들찐,1.0,0.95,True,False,hurdle
+t미세오옆꽃게(0도)-1회,1.0,1.0,False,True,pickup_crab_right_0
+tt미세왼옆0도,0.95,0.95,False,True,pickup_crab_left_0
+t미세오옆꽃게90도(1회),1.0,1.0,False,True,goal_camera_90_crab_right
+R오뒤에서 기본자세(카메라45도),0.95,0.9025,True,False,goal_forward_to_default
+R오뒤에서 기본자세(0도),0.95,0.9025,True,False,
+건왼뒤에서 기본자세(0도),1.0,0.95,True,False,
+건김오뒤3,1.0,0.95,True,False,
+R미세오뒤에서 기본자세45도,1.0,0.95,True,False,goal_fine_to_default
+R미세오뒤에서 오뒤45도,1.0,0.95,True,False,
+R미세오뒤에서 오뒤0도,1.0,0.95,True,False,
+R미세오뒤에서 기본자세90도,1.0,0.95,True,False,
+t라인복귀우실전,1.0,1.0,False,True,line_recovery_right_4
+t제자리우회전45도(5회),0.8999999999999999,0.8999999999999999,False,True,line_turn_right_5; line_search_right_5; post_ball_line_turn_right_5; ball_align_turn_right_5
+t제자리우회전45도(2회),0.9,0.9,False,True,line_turn_right_2; post_ball_line_turn_right_2; ball_align_turn_right_2
+t제자리우회전45도(4회),0.9,0.9,False,True,r_turn_right_4
+t제자리우회전45도(7회),0.9,0.9,False,True,line_turn_right_7; pickup_first_turn_right_7; post_ball_line_turn_right_7; ball_align_turn_right_7
+t제자리우회전45도(9회),0.9,0.9,False,True,line_turn_right_9; line_turn_right_large; stationary_turn_right; pickup_first_turn_right_9; post_shot_turn_right_9; post_ball_line_turn_right_9; ball_align_turn_right_9
+R오뒤카메라90도,1.0,1.0,False,True,post_ball_camera_90
+R왼뒤에서 기본자세0도,1.0,1.0,False,True,r_left_back_to_default_0
+R오뒤45도,1.0,1.0,False,True,r_back_pose_45
+t제자리우회전90도(2회),0.9,0.9,False,True,goal_camera_90_turn_right_2
+t제자리우회전90도(4회),0.9,0.9,False,True,r_turn_right_90_4
+t제자리우회전90도(5회),0.9,0.9,False,True,goal_camera_90_turn_right_5
+t제자리우회전90도(7회),0.9,0.9,False,True,goal_camera_90_turn_right_7
+t제자리우회전90도(9회),0.9,0.9,False,True,goal_camera_90_turn_right_9
+t제자리우회전0도(9회),0.9,0.9,False,True,pickup_camera_down_turn_right_9
+t제자리우회전0도(2회),0.9,0.9,False,True,pickup_camera_down_turn_right_2
+t제자리우회전0도(4회),0.9,0.9,False,True,r_turn_right_0_4
+t제자리우회전0도(5회),0.9,0.9,False,True,pickup_camera_down_turn_right_5
+t제자리우회전0도(7회),0.9,0.9,False,True,pickup_camera_down_turn_right_7
+r오뒤에서 오옆꽃게90도,1.0,1.0,False,True,goal_forward_to_crab_right_90; r_forward_to_crab_90; goal_forward_to_crab_left_90
+t공후 제자리우회전,1.0,1.0,False,True,pickup_first_backward_turn_right
+p공후 제자리좌회전,1.05,0.9975,True,False,pickup_second_backward_turn_left
+R미세(5회),1.05,0.9975,True,False,
+r공잡기 400,1.0,0.95,True,False,sdk_pickup; pickup; pickup_400
+r공잡기500,1.0,0.95,True,False,pickup_500
+r마세90도,1.05,1.05,False,True,
+r미세0도,1.05,0.9975,True,False,
+R오뒤에서미세오뒤45도,1.0,1.0,False,True,
+t골대후제자리우회전,1.0,1.0,False,True,post_shot_default_turn_right
+p골대후제자리좌회전,1.05,0.9975,True,False,post_shot_default_turn_left
+R골넣기,1.0,0.95,True,False,
+R라인복귀우회전90도,1.0,1.0,False,True,
+R미세90도,1.05,0.9975,True,False,
+R오뒤에서미세오뒤0도,1.0,1.0,False,True,
+R오뒤에서미세오뒤90도,1.0,1.0,False,True,
+t제자리우회전45도(3회),0.9,0.9,False,True,line_turn_right_3; post_ball_line_turn_right_3; ball_align_turn_right_3
+t제자리우회전45도(6회),0.9,0.9,False,True,line_turn_right_6; post_ball_line_turn_right_6; ball_align_turn_right_6
+t제자리우회전0도(3회),0.9,0.9,False,True,pickup_camera_down_turn_right_3
+t제자리우회전0도(6회),0.9,0.9,False,True,pickup_camera_down_turn_right_6
+t제자리우회전90도(3회),0.9,0.9,False,True,goal_camera_90_turn_right_3
+t제자리우회전90도(6회),0.9,0.9,False,True,goal_camera_90_turn_right_6
+r미세0도(허들10회),1.05,0.9975,True,False,
+r미세0도(상단탐색3회),1.05,0.9975,True,False,
+R미세90도(1회),1.05,0.9975,True,False,
+R미세90도(2회),1.05,0.9975,True,False,
+R미세90도(3회),1.05,0.9975,True,False,
+R미세90도(4회),1.05,0.9975,True,False,
+R미세오뒤에서 오뒤90도,1.0,0.95,True,False,
+t제자리우회전45도(1회),0.9,0.9,False,True,line_turn_right_1; post_ball_line_turn_right_1; ball_align_turn_right_1
+t제자리우회전0도(1회),0.9,0.9,False,True,pickup_camera_down_turn_right_1
+t제자리우회전90도(1회),0.9,0.9,False,True,goal_camera_90_turn_right_1
+R골넣기1번구역,1.0,1.0,False,True,goal_shot; goal_shot_region_1
+R골넣기2번구역,1.0,1.0,False,True,goal_shot_region_2
+R골넣기3번구역,1.0,1.0,False,True,goal_shot_region_3
+R골넣기4번구역,1.0,1.0,False,True,goal_shot_region_4
+r미세 골대전용,1.05,0.9975,True,False,
+r미세 골대전용(1회),1.05,0.9975,True,False,
+r미세 골대전용(2회),1.05,0.9975,True,False,
+r미세 골대전용(3회),1.05,0.9975,True,False,
+r미세 골대전용(4회),1.05,0.9975,True,False,
+r미세오뒤에서 오뒤90도,1.05,0.9975,True,False,
+p오뒤에서 미세오뒤(45도),1.0,1.0,False,True,pickup_fine_prepare; ball_align_prepare_fine_45
+p미세오뒤에서 오뒤0도,1.05,1.05,False,True,fine_to_turn_ready_0
+p미세오뒤에서 오뒤45도,1.05,1.05,False,True,fine_to_turn_ready_45; ball_align_prepare_turn_45
+p미세오뒤에서 오뒤90도,1.05,1.05,False,True,fine_to_turn_ready_90
+r미세오뒤에서 오옆0도,0.95,0.95,False,True,pickup_fine_to_crab_right_0; pickup_fine_to_crab_left_0
+r오뒤에서 오옆꽃게0도,1.0,1.0,False,True,pickup_forward_to_crab_0; pickup_forward_to_crab_left_0
+r미세오뒤에서 오옆 90도,0.95,0.95,False,True,goal_fine_to_crab_right_90; goal_fine_to_crab_left_90
+r오옆에서 오뒤90도,0.95,0.95,False,True,goal_crab_right_to_turn_90
+r왼옆에서 오뒤90도,0.95,0.95,False,True,goal_crab_left_to_turn_90
+r오옆에서 미세오뒤(0도),0.9999999999999996,0.9999999999999996,False,True,pickup_crab_right_to_fine_0
+r왼옆에서 미세오뒤(0도),0.9999999999999996,0.9999999999999996,False,True,pickup_crab_left_to_fine_0
+r오옆에서 오뒤0도,0.95,0.95,False,True,pickup_crab_right_to_turn_0
+r왼옆에서 오뒤0도,0.95,0.95,False,True,pickup_crab_left_to_turn_0
+p오뒤에서 미세오뒤(0도),1.0,1.0,False,True,hurdle_fine_prepare_0; pickup_fine_prepare_0
+p오뒤에서 미세오뒤90도,1.0,1.0,False,True,goal_fine_prepare_90
+r오옆에서 미세오뒤(90도),1.0,1.0,False,True,goal_crab_right_to_fine_90
+r왼옆에서 미세오뒤(90도),1.0,1.0,False,True,goal_crab_left_to_fine_90
+tt미세왼옆90도,0.95,0.95,False,True,goal_camera_90_crab_left
+tt미세왼옆0도(2회),0.95,0.95,False,True,pickup_crab_left_0_2
+t미세오옆꽃게(0도)-2회,1.0,1.0,False,True,pickup_crab_right_0_2
+t미세오옆꽃게90도(2회),1.0,1.0,False,True,goal_camera_90_crab_right_2
+t라인복귀우공용,1.0,1.0,False,True,line_recovery_ball_second_right_4
+t미세0도(1회)(골대74),1.05,0.9975,True,False,
+t미세0도(2회)(골대74),1.05,0.9975,True,False,
+t미세0도(3회)(골대74),1.05,0.9975,True,False,
+t미세0도(4회)(골대74),1.05,0.9975,True,False,
+p라인복귀좌회전공용,1.0,0.95,True,False,line_recovery_ball_first_left_4
+p전진45(6회),1.0,0.95,True,False,line_forward_6; post_ball_forward_6
+p라인복귀좌회전45도,1.0,1.0,False,True,line_recovery_left_4; line_recovery_left_6
+p미세0도(4회),1.05,0.9975,True,False,
+p제자리좌회전45(5회),0.9500000000000001,0.9500000000000001,False,True,post_ball_line_turn_left_5; ball_align_turn_left_5
+p전진45(4회),1.0,0.95,True,False,sdk_forward_4; line_forward_4; ball_camera_down_forward_4; post_ball_forward_4
+p전진90도(4회),1.0,0.95,True,False,goal_camera_90_forward_4
+p전진90도(6회),1.0,0.95,True,False,goal_camera_90_forward_6
+p전진실전0도(4회),1.0,0.95,True,False,r_forward_0_4
+p전진실전0도(6회),1.0,0.95,True,False,r_forward_0_6
+p라인복귀좌회전90도,1.0,1.0,False,True,
+p미세0도(1회),1.05,0.9975,True,False,
+p미세0도(2회),1.05,0.9975,True,False,
+p미세0도(3회),1.05,0.9975,True,False,ball_top_loss_fine_forward_45_3; pickup_top_loss_fine_forward_0_3
+p미세0도(5회),1.05,0.9975,True,False,ball_general_fine_forward_8; pickup_fine_forward_0; hurdle_fine_forward_5
+p미세45도(1회),1.05,0.9975,True,False,
+p미세45도(2회),1.05,0.9975,True,False,
+p미세45도(3회),1.05,0.9975,True,False,
+p미세45도(4회),1.05,0.9975,True,False,
+p미세45도(5회),1.05,0.9975,True,False,ball_approach_fine_forward_45_5; ball_align_fine_forward_45_5
+p미세90도(1회),1.05,0.9975,True,False,goal_camera_90_fine_forward_1
+p미세90도(2회),1.05,0.9975,True,False,goal_camera_90_fine_forward_2
+p미세90도(3회),1.05,0.9975,True,False,goal_camera_90_fine_forward_3
+p미세90도(4회),1.05,0.9975,True,False,goal_camera_90_fine_forward_4
+p미세90도(5회),1.05,0.9975,True,False,goal_camera_90_fine_forward_5
+p제자리좌회전45(1회),0.9500000000000001,0.9500000000000001,False,True,post_ball_line_turn_left_1; ball_align_turn_left_1
+p제자리좌회전45(2회),0.9500000000000001,0.9500000000000001,False,True,line_search_left_2; post_ball_line_turn_left_2; ball_align_turn_left_2
+p제자리좌회전45(3회),0.9500000000000001,0.9500000000000001,False,True,pickup_second_turn_left_3; post_ball_line_turn_left_3; ball_align_turn_left_3
+p제자리좌회전45(4회),0.9500000000000001,0.9500000000000001,False,True,post_ball_line_turn_left_4; ball_align_turn_left_4
+p제자리좌회전45(6회),0.9500000000000001,0.9500000000000001,False,True,stationary_turn_left; post_ball_line_turn_left_6; ball_align_turn_left_6
+p제자리좌회전0도(1회),0.9500000000000001,0.9500000000000001,False,True,pickup_camera_down_turn_left_1
+p제자리좌회전0도(2회),0.9500000000000001,0.9500000000000001,False,True,pickup_camera_down_turn_left_2
+p제자리좌회전0도(3회),0.9500000000000001,0.9500000000000001,False,True,pickup_camera_down_turn_left_3
+p제자리좌회전0도(4회),0.9500000000000001,0.9500000000000001,False,True,pickup_camera_down_turn_left_4
+p제자리좌회전0도(5회),0.9500000000000001,0.9500000000000001,False,True,pickup_camera_down_turn_left_5
+p제자리좌회전0도(6회),0.9500000000000001,0.9500000000000001,False,True,pickup_camera_down_turn_left_6
+p제자리좌회전90도(1회),0.9500000000000001,0.9500000000000001,False,True,goal_camera_90_turn_left_1
+p제자리좌회전90도(2회),0.9500000000000001,0.9500000000000001,False,True,goal_camera_90_turn_left_2
+p제자리좌회전90도(3회),0.9500000000000001,0.9500000000000001,False,True,goal_camera_90_turn_left_3
+p제자리좌회전90도(4회),0.9500000000000001,0.9500000000000001,False,True,goal_camera_90_turn_left_4
+p제자리좌회전90도(5회),0.9500000000000001,0.9500000000000001,False,True,goal_camera_90_turn_left_5
+p제자리좌회전90도(6회),0.9500000000000001,0.9500000000000001,False,True,goal_camera_90_turn_left_6
+p전진45(2회),1.0,0.95,True,False,line_forward_2; ball_camera_down_forward_2
+p전진45(8회),1.0,0.95,True,False,line_forward_8; forward; post_ball_forward_8
+p전진90도(2회),1.0,0.95,True,False,goal_camera_90_forward_2
+p미세0도(10회),1.05,0.9975,True,False,hurdle_fine_forward_10
+r골넣기 5번구역,1.0,0.95,True,False,goal_shot_region_5
+r골넣기 6번구역,1.0,0.95,True,False,goal_shot_region_6
+r골넣기7번구역,1.0,0.95,True,False,goal_shot_region_7
+r골넣기8번구역,1.0,0.95,True,False,goal_shot_region_8

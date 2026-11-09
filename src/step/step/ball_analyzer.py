@@ -26,10 +26,12 @@ from std_msgs.msg import String
 from .approach_distance import approach_level_from_motion
 from .approach_distance import ball_hurdle_approach_motion
 from .approach_distance import BALL_PICKUP_DISTANCE_M
+from .approach_distance import BALL_FINE_APPROACH_DISTANCE_M
 from .depth_frame_cache import DepthFrame
 from .depth_frame_cache import DepthFrameCache
 from .depth_frame_cache import DepthFrameConsumer
 from .temporal_confirmation import TemporalConfirmationFilter
+from .pipeline_timing import extend_trace
 from .yolo_line_analyzer import calibrated_robot_center_x
 from .yolo_line_analyzer import GROUND_PROJECTION_DEFAULTS
 from .yolo_line_analyzer import LinePoint
@@ -139,12 +141,12 @@ def should_request_head_down(
     depth_valid: bool,
     depth_age_sec: float | None,
 ) -> bool:
-    """Lower the camera at the fresh 500 mm pickup boundary, even while walking."""
+    """Lower the camera at 550 mm with fresh depth, even while walking."""
     return (
         depth_valid is True
         and isinstance(distance_m, (int, float)) and not isinstance(distance_m, bool)
         and math.isfinite(distance_m)
-        and 0.0 < distance_m <= BALL_PICKUP_DISTANCE_M
+        and 0.0 < distance_m <= 0.550
         and isinstance(depth_age_sec, (int, float)) and not isinstance(depth_age_sec, bool)
         and math.isfinite(depth_age_sec) and 0.0 <= depth_age_sec <= 0.70
     )
@@ -304,10 +306,9 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         # Ball pickup uses its own calibrated robot axis. Keep this separate
         # from the line analyzer's robot_center_offset_px parameter.
         self.declare_parameter("ball_robot_center_offset_px", 96.0)
-        # Confirm 12 spatially consistent hits within the latest 30 frames.
-        # At 15 processed FPS, uninterrupted detections take about 0.8 seconds.
+        # Confirm 10 spatially consistent hits within the latest 30 frames.
         self.declare_parameter("confirmation_window_size", 30)
-        self.declare_parameter("confirmation_required_hits", 12)
+        self.declare_parameter("confirmation_required_hits", 10)
         self.declare_parameter("confirmation_max_missed_frames", 10)
         self.declare_parameter("confirmation_max_center_shift_norm", 0.18)
         self.declare_parameter("confirmation_min_area_ratio", 0.40)
@@ -431,6 +432,7 @@ class BallAnalyzer(DepthFrameConsumer, Node):
             min_area_ratio=float(
                 self.get_parameter("confirmation_min_area_ratio").value
             ),
+            edge_area_grace=True,
         )
         self.pickup_confirmation_filter = TemporalConfirmationFilter(
             window_size=int(
@@ -1195,6 +1197,10 @@ class BallAnalyzer(DepthFrameConsumer, Node):
                 getattr(self, "ground_projection_parameters", GROUND_PROJECTION_DEFAULTS),
             ))
             payload["approach_candidate"] = approach_candidate
+        timing = extend_trace(getattr(self, "_active_diagnostic_timing", None), info.rgb_stamp_ns,
+                              ball_publish_mono_ns=time.monotonic_ns())
+        if timing is not None:
+            payload["diagnostic_timing"] = timing
         message.data = json.dumps(
             payload,
             ensure_ascii=True,
@@ -1305,6 +1311,8 @@ class BallAnalyzer(DepthFrameConsumer, Node):
         )
 
     def _detections_callback(self, message: String) -> None:
+        received_ns = time.monotonic_ns()
+        self._active_diagnostic_timing = None
         try:
             payload = json.loads(message.data)
             detections = payload.get("detections", [])
@@ -1322,6 +1330,8 @@ class BallAnalyzer(DepthFrameConsumer, Node):
             detections,
         )
         rgb_stamp_ns = self._payload_stamp_ns(payload)
+        self._active_diagnostic_timing = extend_trace(payload.get("diagnostic_timing"), rgb_stamp_ns,
+                                                     ball_receive_mono_ns=received_ns)
         if rgb_stamp_ns is None:
             depth_frame = self._get_depth_cache().latest()
             sync_delta_sec = None
@@ -1375,6 +1385,8 @@ class BallAnalyzer(DepthFrameConsumer, Node):
             bbox=target.bbox,
             image_width=image_width,
             image_height=image_height,
+            allow_edge_recovery=(target.depth_valid and target.distance_m is not None
+                                 and target.distance_m > BALL_FINE_APPROACH_DISTANCE_M),
         )
         self.confirmation_fields = confirmation.as_dict()
         if not confirmation.confirmed:

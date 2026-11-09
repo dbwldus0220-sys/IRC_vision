@@ -1,0 +1,39 @@
+{
+  "hypothesis": "NTP step while RealSense streams are running leaves SDK global-time mapping stale until innovation-gate recovery.",
+  "library_version_logged": "2.58.4",
+  "official_source": "https://raw.githubusercontent.com/realsenseai/librealsense/v2.58.4/src/global_timestamp_reader.cpp",
+  "installed_library_contains_rebase_message": true,
+  "installed_library_contains_innovation_rejection_message": true,
+  "sdk_source_constants": {
+    "max_innovation_ms": 100,
+    "max_consecutive_rejections": 60,
+    "poll_interval_ms": 100,
+    "full_buffer_poll_multiplier": 10,
+    "approx_rebase_delay_sec": 60
+  },
+  "ntp_event": {
+    "message": "Initial synchronization to time server 211.108.117.211:123 (1.pool.ntp.org).",
+    "realtime_us": 1793973620359956,
+    "monotonic_us": 62968366
+  },
+  "enter_event": {
+    "time_epoch_sec": 1793973640.9756444,
+    "log": "[INFO] [1793973640.975644339] [motion_decision_node]: ENTER received; waiting for startup readiness and fresh vision."
+  },
+  "ball_entry_event": {
+    "time_epoch_sec": 1793973680.4798813,
+    "log": "[INFO] [1793973680.479881339] [motion_decision_node]: BALL mode consumed at confirmation: index=1, used=1/2"
+  },
+  "ball_entry_after_ntp_sec": 60.11992526054382,
+  "previous_initial_queue_requests": [
+    "[INFO] [1793946733.764617625] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=2",
+    "[INFO] [1793946736.977931191] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=3",
+    "[INFO] [1793946740.163692668] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=4",
+    "[INFO] [1793946743.317547739] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_LEFT_TURN_LEFT_4, command_id=5",
+    "[INFO] [1793946745.948447111] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=6",
+    "[INFO] [1793946749.414304976] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT_2, command_id=7"
+  ],
+  "previous_capture_not_fresh_count": 0,
+  "current_capture_not_fresh_count": 4,
+  "limits": "Per-frame timestamps, SDK global-time state and rebase log were not recorded during failing interval. Recovery mechanism and 60.12s observed delay support causal inference, not a direct measurement of each rejected frame."
+}

@@ -41,6 +41,8 @@ class ConfirmationResult:
     required_hits: int
     window_size: int
     missed_frames: int
+    track_id: int | None = None
+    spatial_pending: bool = False
 
     def as_dict(self, prefix: str = "confirmation") -> dict[str, object]:
         """Return JSON-friendly diagnostic fields."""
@@ -49,7 +51,7 @@ class ConfirmationResult:
             if prefix == "confirmation"
             else f"{prefix}_raw_detected"
         )
-        return {
+        fields = {
             raw_key: self.raw_detected,
             f"{prefix}_confirmed": self.confirmed,
             f"{prefix}_matched_previous": self.matched_previous,
@@ -58,6 +60,10 @@ class ConfirmationResult:
             f"{prefix}_window_size": self.window_size,
             f"{prefix}_missed_frames": self.missed_frames,
         }
+        if self.track_id is not None:
+            fields[f"{prefix}_track_id"] = self.track_id
+            fields[f"{prefix}_spatial_pending"] = self.spatial_pending
+        return fields
 
 
 class TemporalConfirmationFilter:
@@ -70,6 +76,10 @@ class TemporalConfirmationFilter:
     allowing a reacquired target to recover without starting from zero.
     """
 
+    EDGE_MARGIN_PX = 2
+    EDGE_MAX_CENTER_SHIFT_NORM = 0.05
+    EDGE_MIN_OVERLAP_RATIO = 0.5
+
     def __init__(
         self,
         *,
@@ -79,6 +89,7 @@ class TemporalConfirmationFilter:
         max_center_shift_norm: float = 0.18,
         min_area_ratio: float = 0.40,
         spatial_matching: bool = True,
+        edge_area_grace: bool = False,
     ) -> None:
         self.window_size = max(1, int(window_size))
         self.required_hits = max(
@@ -89,6 +100,9 @@ class TemporalConfirmationFilter:
         self.max_center_shift_norm = max(0.0, float(max_center_shift_norm))
         self.min_area_ratio = min(1.0, max(0.0, float(min_area_ratio)))
         self.spatial_matching = bool(spatial_matching)
+        self.edge_area_grace = bool(edge_area_grace)
+        self._track_id = 0
+        self._edge_bbox = None
 
         self._hits: deque[bool] = deque(maxlen=self.window_size)
         self._last_bbox: tuple[float, float, float, float] | None = None
@@ -97,6 +111,8 @@ class TemporalConfirmationFilter:
 
     def reset(self) -> None:
         """Forget the current candidate and all temporal history."""
+        self._track_id += 1
+        self._edge_bbox = None
         self._hits.clear()
         self._last_bbox = None
         self._missed_frames = 0
@@ -109,19 +125,37 @@ class TemporalConfirmationFilter:
         bbox: list[int] | tuple[int, int, int, int] | None = None,
         image_width: int | None = None,
         image_height: int | None = None,
+        allow_edge_recovery: bool = True,
     ) -> ConfirmationResult:
         """Process one frame and return the current confirmation state."""
         current_bbox = self._normalize_bbox(bbox)
         matched = bool(detected)
+        edge_recovered = False
+        if self._edge_bbox is not None:
+            # Only the next observation may resolve the uncertain area change.
+            edge_recovered = bool(detected and current_bbox is not None
+                and allow_edge_recovery and (
+                    self._matches_previous(current_bbox, image_width, image_height)
+                    or (self._matches_previous(current_bbox, image_width, image_height,
+                                               previous_bbox=self._edge_bbox)
+                        and self._edge_area_change(current_bbox, image_width, image_height))))
+            if not edge_recovered:
+                self.reset()
+            self._edge_bbox = None
         if detected and self.spatial_matching:
-            matched = current_bbox is not None and self._matches_previous(
+            matched = edge_recovered or (current_bbox is not None and self._matches_previous(
                 current_bbox,
                 image_width,
                 image_height,
-            )
+            ))
             if not matched:
-                self.reset()
-                matched = current_bbox is not None
+                if (self.edge_area_grace and allow_edge_recovery and not self._track_confirmed
+                        and current_bbox is not None
+                        and self._edge_area_change(current_bbox, image_width, image_height)):
+                    self._edge_bbox = current_bbox
+                else:
+                    self.reset()
+                    matched = current_bbox is not None
 
         if detected and matched:
             self._hits.append(True)
@@ -147,6 +181,8 @@ class TemporalConfirmationFilter:
             required_hits=self.required_hits,
             window_size=self.window_size,
             missed_frames=self._missed_frames,
+            track_id=self._track_id if self.edge_area_grace else None,
+            spatial_pending=self._edge_bbox is not None,
         )
 
     @staticmethod
@@ -167,11 +203,14 @@ class TemporalConfirmationFilter:
         bbox: tuple[float, float, float, float],
         image_width: int | None,
         image_height: int | None,
+        *,
+        previous_bbox: tuple[float, float, float, float] | None = None,
     ) -> bool:
-        if self._last_bbox is None:
+        previous_bbox = self._last_bbox if previous_bbox is None else previous_bbox
+        if previous_bbox is None:
             return True
         left, top, right, bottom = bbox
-        old_left, old_top, old_right, old_bottom = self._last_bbox
+        old_left, old_top, old_right, old_bottom = previous_bbox
         center_x = (left + right) / 2.0
         center_y = (top + bottom) / 2.0
         old_center_x = (old_left + old_right) / 2.0
@@ -191,3 +230,25 @@ class TemporalConfirmationFilter:
             center_shift <= self.max_center_shift_norm
             and area_ratio >= self.min_area_ratio
         )
+
+    def _edge_area_change(self, bbox, width, height) -> bool:
+        """Allow one uncertain frame only for overlapping, nearby edge boxes."""
+        old = self._last_bbox
+        if old is None or not width or not height or min(width, height) <= 0:
+            return False
+        if any(not (0 <= b[0] < b[2] <= width and 0 <= b[1] < b[3] <= height)
+               for b in (old, bbox)):
+            return False
+        margin = self.EDGE_MARGIN_PX
+        if not any(b[0] <= margin or b[1] <= margin
+                   or b[2] >= width - margin or b[3] >= height - margin
+                   for b in (old, bbox)):
+            return False
+        areas = [(b[2] - b[0]) * (b[3] - b[1]) for b in (old, bbox)]
+        overlap = (max(0., min(old[2], bbox[2]) - max(old[0], bbox[0]))
+                   * max(0., min(old[3], bbox[3]) - max(old[1], bbox[1])))
+        shift = math.hypot((old[0] + old[2] - bbox[0] - bbox[2]) / 2,
+                           (old[1] + old[3] - bbox[1] - bbox[3]) / 2) / math.hypot(width, height)
+        return (min(areas) / max(areas) < self.min_area_ratio
+                and overlap / min(areas) >= self.EDGE_MIN_OVERLAP_RATIO
+                and shift <= min(self.max_center_shift_norm, self.EDGE_MAX_CENTER_SHIFT_NORM))

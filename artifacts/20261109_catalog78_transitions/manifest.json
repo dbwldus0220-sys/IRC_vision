@@ -1,0 +1,73 @@
+{
+  "source_sha256": "1cd399e439b8e81974a523a9fc57074d030b2a9b5e656f50baa50ebdee6797a6",
+  "renames": {
+    "rr미세오뒤에서 오뒤0도": "p미세오뒤에서 오뒤0도",
+    "t오뒤에서 미세오뒤(0도)": "p오뒤에서 미세오뒤(0도)",
+    "rr미세오뒤에서 오뒤45도": "p미세오뒤에서 오뒤45도",
+    "t오뒤에서 미세오뒤(45도)": "p오뒤에서 미세오뒤(45도)",
+    "rr미세오뒤에서 오뒤90도": "p미세오뒤에서 오뒤90도",
+    "t오뒤에서 미세오뒤90도": "p오뒤에서 미세오뒤90도"
+  },
+  "speed_only_motions": [
+    "p제자리좌회전45(5회)",
+    "p제자리좌회전45(1회)",
+    "p제자리좌회전45(2회)",
+    "p제자리좌회전45(3회)",
+    "p제자리좌회전45(4회)",
+    "p제자리좌회전45(6회)",
+    "p제자리좌회전0도(1회)",
+    "p제자리좌회전0도(2회)",
+    "p제자리좌회전0도(3회)",
+    "p제자리좌회전0도(4회)",
+    "p제자리좌회전0도(5회)",
+    "p제자리좌회전0도(6회)",
+    "p제자리좌회전90도(1회)",
+    "p제자리좌회전90도(2회)",
+    "p제자리좌회전90도(3회)",
+    "p제자리좌회전90도(4회)",
+    "p제자리좌회전90도(5회)",
+    "p제자리좌회전90도(6회)"
+  ],
+  "pose_renames": {
+    "오뒤무게중심앞": "오뒤무게중심앞(catalog78)"
+  },
+  "changed_aliases": {
+    "pickup_fine_prepare": {
+      "before": "t오뒤에서 미세오뒤(45도)",
+      "after": "p오뒤에서 미세오뒤(45도)"
+    },
+    "fine_to_turn_ready_45": {
+      "before": "rr미세오뒤에서 오뒤45도",
+      "after": "p미세오뒤에서 오뒤45도"
+    },
+    "fine_to_turn_ready_0": {
+      "before": "rr미세오뒤에서 오뒤0도",
+      "after": "p미세오뒤에서 오뒤0도"
+    },
+    "fine_to_turn_ready_90": {
+      "before": "rr미세오뒤에서 오뒤90도",
+      "after": "p미세오뒤에서 오뒤90도"
+    },
+    "hurdle_fine_prepare_0": {
+      "before": "t오뒤에서 미세오뒤(0도)",
+      "after": "p오뒤에서 미세오뒤(0도)"
+    },
+    "pickup_fine_prepare_0": {
+      "before": "t오뒤에서 미세오뒤(0도)",
+      "after": "p오뒤에서 미세오뒤(0도)"
+    },
+    "goal_fine_prepare_90": {
+      "before": "t오뒤에서 미세오뒤90도",
+      "after": "p오뒤에서 미세오뒤90도"
+    },
+    "ball_align_prepare_fine_45": {
+      "before": "t오뒤에서 미세오뒤(45도)",
+      "after": "p오뒤에서 미세오뒤(45도)"
+    },
+    "ball_align_prepare_turn_45": {
+      "before": "rr미세오뒤에서 오뒤45도",
+      "after": "p미세오뒤에서 오뒤45도"
+    }
+  },
+  "speed_policy": "Source78 playback_speed verbatim for all 24 requested entries."
+}

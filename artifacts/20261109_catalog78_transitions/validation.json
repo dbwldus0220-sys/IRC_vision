@@ -1,0 +1,87 @@
+{
+  "source": "robot_motions(78).json",
+  "updated_transition_motions": 6,
+  "updated_aliases": 9,
+  "speed_only_left_turn_motions": 18,
+  "speeds": {
+    "fine_to_standard": 1.05,
+    "standard_to_fine": 1.0,
+    "stationary_left": 0.9500000000000001,
+    "fine_walk_unchanged": 0.9975
+  },
+  "python_tests": {
+    "passed": 572,
+    "failed": 0
+  },
+  "sdk_ctest": {
+    "passed": 7,
+    "failed": 0
+  },
+  "executor_ctest": {
+    "passed": 4,
+    "failed": 0
+  },
+  "checks": [
+    "Exact source transition data except established runtime tolerance and collision-safe pose names",
+    "All unrelated motion data unchanged",
+    "All 18 left-turn frames unchanged except playback_speed",
+    "0/45/90 transition endpoints match existing p gait targets and torques",
+    "Capture and reservation timing matches new speed",
+    "Queued Ball support transitions, forward/recovery and count variants complete",
+    "Separate 0/45/90 preparation-fine-return-turn chains complete"
+  ],
+  "robot_executed": false,
+  "executor_rebuilt": true,
+  "scope": "Offline fake hardware and mission harnesses; physical stability and dynamic simulation not tested; earlier unrelated broad-suite failures remain outside this focused run.",
+  "changed_files": {
+    "src/mission_control/README.md": {
+      "before_sha256": "1b529d41db559537890d7d0e1175be1458c460183b717b5269830887325fe4ff",
+      "after_sha256": "38bdf0c970e8be0b282b7bc3d7bd9b44989487d92c15763f7f32cfa06930795a"
+    },
+    "src/mission_control/mission_control/ball_fine_approach.py": {
+      "before_sha256": "e99835906dd695b026aab56fdd5827ed1e3c63324178ad4174f06ec6a2442526",
+      "after_sha256": "080b86652021e5b038d8cb47529cc7458a6d5c6e84b6e0d3328a0565ed762bbb"
+    },
+    "src/mission_control/test/test_catalog75_requested_motions.py": {
+      "before_sha256": "90ad49aabddcad754adfbff5fd36d536bec504f9ec851923f51e8970d4f67e1f",
+      "after_sha256": "6fa5836b55cda6254fbc109f669baedef5b1b734fcd68771a050e1895f87001d"
+    },
+    "src/mission_control/test/test_line_turn_prequeue.py": {
+      "before_sha256": "192578cba3e5ae4e4101bcdf76dbc7372878c5a956c882b4f9560a35d814b454",
+      "after_sha256": "0f2d719709f806c29b6d20f22939fb7cdf9321ec28d037774d1c09318c190a96"
+    },
+    "src/mission_control/test/test_catalog77_mode_routes.py": {
+      "before_sha256": "97123c6ba2649bb674e93a9fef8ba61f5347160f1207603e0aa1e2b33fcb3b5c",
+      "after_sha256": "91c973bf5a73eafaa01aa8553416f690add0d27d2381762d4a7fd43b5e2435a3"
+    },
+    "src/mission_control/test/test_catalog77_p_motions.py": {
+      "before_sha256": "19c23987f70e1074f9612b8778fe5f650836b0e82938d65abe04ec344b057191",
+      "after_sha256": "3f8d41087bb1b6322af50353db2dafb435fd3b01e436476dcc05888d181dbe4e"
+    },
+    "src/irc_step_motion_executor/config/motion_aliases.yaml": {
+      "before_sha256": "53c99b20f79395e21e6feab51d3c851a763469f2b57de90df9ea4a98c33f6ef4",
+      "after_sha256": "582c136eb057bd699eeb53a4e3c7b4f70388a8cc86de84ef8ba545752409dcf1"
+    },
+    "src/irc_step_motion_executor/test/test_catalog_only_core.cpp": {
+      "before_sha256": "1da6a605e6764b3ccfb15ff2b4348fd4df0ccb5b5d45e149c686d1eb69795be4",
+      "after_sha256": "136890554058d757d5a0d67637c4950368b3e6e94f91079f61bcfb534bbc86be"
+    },
+    "external_sdk/gui_aligned/robot_motion_player.cpp": {
+      "before_sha256": "0976ee40f466b1a9e2f1f207559cfedb745ad592bcf8073f7effee90466f8300",
+      "after_sha256": "debe1aee4b4df0bf1f4c0e34d5ee54c7d5969a7eec328b0f85093ad16e4af939"
+    },
+    "external_sdk/gui_aligned/test_ball_fine_queue.cpp": {
+      "before_sha256": "603457919c8835a536eed5f6e717ad3d87781b73b7e4e21dc38eff51d0cb334d",
+      "after_sha256": "deeb0a2fcb8294950fec803a9503241f6731ae5509abddd503c922181f1ed6dc"
+    },
+    "artifacts/robot_motions_pc.json": {
+      "before_sha256": "ba22f3027437212c412528c2286603474c938a2d88690cd0187e40e0d9a60295",
+      "after_sha256": "79606878a4457d9c0bc2d054a03b0cbb149658852cd27ff11098135af2045869"
+    },
+    "artifacts/robot_motions_runtime.json": {
+      "before_sha256": "2cb49d64a8f868890c1aa1a4483bc2e0d6d53616b809c717dfa5b114e257787c",
+      "after_sha256": "586ef00bbe3f1d49cef1e3b28865529efac8c1b7174af0fbed6b274a761f4452"
+    }
+  },
+  "new_test": "src/mission_control/test/test_catalog78_transitions.py"
+}

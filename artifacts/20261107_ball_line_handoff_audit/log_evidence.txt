@@ -1,0 +1,361 @@
+/home/jet/.ros/log/python3_9846_1793437103335.log
+14: [INFO] [1793437160.687315534] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=2
+15: [INFO] [1793437161.705752839] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+16: [INFO] [1793437164.024667460] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_LEFT_TURN_LEFT_4, command_id=3
+17: [INFO] [1793437165.065485001] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+18: [INFO] [1793437167.196497197] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=4
+19: [INFO] [1793437167.306195185] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+21: [INFO] [1793437169.664808366] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_RIGHT_TURN_RIGHT_4, command_id=5
+22: [INFO] [1793437170.649643896] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+23: [INFO] [1793437172.543442679] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_RIGHT_TURN_RIGHT_4, command_id=6
+24: [INFO] [1793437172.845067492] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4
+25: [INFO] [1793437174.445605358] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=7
+26: [INFO] [1793437174.496682837] [motion_decision_node]: BALL entry Line alignment armed: adopted_command_id=7
+27: [INFO] [1793437174.497593799] [motion_decision_node]: BALL approach entry latched during motion: distance_m=1.091
+28: [INFO] [1793437175.020615931] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4
+36: [INFO] [1793437178.384899753] [motion_decision_node]: BALL entry Line alignment ended: command_id=7, status=SUCCEEDED
+37: [INFO] [1793437178.387887651] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+41: [INFO] [1793437179.932983511] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_TURN_LEFT_3
+43: [INFO] [1793437180.617241745] [motion_decision_node]: BALL entry Line alignment requested: command_id=10, action=RECOVER_LEFT_TURN_LEFT_4, queued=False, heading_deg=-23.234, heading_source=ball_ground, turn_count=None, turn_angle_deg=-30.0, line_rgb_stamp_ns=None, ball_rgb_stamp_ns=1793437180464448730, ball_distance_m=0.744
+45: [INFO] [1793437182.991864934] [motion_decision_node]: BALL entry Line alignment requested: command_id=11, action=RECOVER_LEFT_TURN_LEFT_4, queued=True, heading_deg=-22.952, heading_source=ball_ground, turn_count=None, turn_angle_deg=-30.0, line_rgb_stamp_ns=None, ball_rgb_stamp_ns=1793437182766030029, ball_distance_m=0.634
+46: [INFO] [1793437182.992920218] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_LEFT_TURN_LEFT_4, command_id=11
+47: [INFO] [1793437183.256717306] [motion_decision_node]: BALL entry Line alignment ended: command_id=10, status=SUCCEEDED
+48: [INFO] [1793437183.258597119] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+50: [INFO] [1793437185.495591010] [motion_decision_node]: BALL entry Line alignment ended: command_id=11, status=SUCCEEDED
+51: [INFO] [1793437185.496529204] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+132: [INFO] [1793437213.560341436] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=POST_BALL_LINE_TURN_RIGHT_5
+135: [INFO] [1793437216.335355034] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=266
+137: [INFO] [1793437216.809200501] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4
+139: [INFO] [1793437220.163184652] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+143: [INFO] [1793437223.861522789] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA_90_FORWARD_2
+144: [INFO] [1793437226.501167478] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_RECOVER_LEFT_4
+146: [INFO] [1793437229.813986652] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_FINE_FORWARD_3
+148: [INFO] [1793437231.109615917] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_FINE_FORWARD_3
+149: [INFO] [1793437232.420736711] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_FINE_FORWARD_3
+150: [INFO] [1793437235.108967469] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_CRAB_RIGHT
+151: [INFO] [1793437236.805614348] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_SHOT_PREPARE
+165: [INFO] [1793437255.396878960] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+169: [INFO] [1793437258.259629140] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=LINE_LOST_TURN_RIGHT_5
+173: [INFO] [1793437260.308294701] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=LINE_LOST_TURN_RIGHT_1
+177: [INFO] [1793437262.211255805] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=LINE_LOST_TURN_RIGHT_1
+182: [INFO] [1793437264.115525565] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=LINE_LOST_TURN_RIGHT_1
+185: [INFO] [1793437264.917040445] [motion_decision_node]: BALL entry Line alignment armed: adopted_command_id=None
+186: [INFO] [1793437264.917887629] [motion_decision_node]: BALL approach entry latched during motion: distance_m=1.054
+191: [INFO] [1793437267.903631741] [motion_decision_node]: BALL entry Line alignment requested: command_id=335, action=RECOVER_LEFT_TURN_LEFT_4, queued=True, heading_deg=-22.213, heading_source=ball_ground, turn_count=None, turn_angle_deg=-30.0, line_rgb_stamp_ns=None, ball_rgb_stamp_ns=1793437267626210205, ball_distance_m=0.769
+192: [INFO] [1793437267.904623664] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_LEFT_TURN_LEFT_4, command_id=335
+193: [INFO] [1793437268.499556531] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+195: [INFO] [1793437270.740426781] [motion_decision_node]: BALL entry Line alignment ended: command_id=335, status=SUCCEEDED
+196: [INFO] [1793437270.741449617] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+
+/home/jet/.ros/log/python3_3183_1793877395817.log
+14: [INFO] [1793878756.767795240] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+16: [INFO] [1793878759.327762584] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+18: [INFO] [1793878762.034761171] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=4
+19: [INFO] [1793878762.989129200] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+20: [INFO] [1793878765.207648081] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_LEFT_TURN_LEFT_4, command_id=5
+21: [INFO] [1793878766.155311701] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+23: [INFO] [1793878767.886014620] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=6
+24: [INFO] [1793878768.268823804] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+26: [INFO] [1793878770.600174739] [motion_decision_node]: BALL mode consumed at confirmation: index=1, used=1/2
+27: [INFO] [1793878770.615144062] [motion_decision_node]: BALL entry Line alignment armed: adopted_command_id=None
+28: [INFO] [1793878770.616337982] [motion_decision_node]: BALL approach entry latched during motion: distance_m=1.009
+29: [INFO] [1793878770.635978429] [motion_decision_node]: BALL entry Line alignment requested: command_id=7, action=STRAIGHT_2, queued=True, heading_deg=-8.240633642176888, heading_source=ground, turn_count=None, turn_angle_deg=None, line_rgb_stamp_ns=None, ball_rgb_stamp_ns=1793878770421995117, ball_distance_m=1.009
+30: [INFO] [1793878770.636999486] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT_2, command_id=7
+31: [INFO] [1793878771.434722112] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+35: [INFO] [1793878773.547071397] [motion_decision_node]: BALL entry Line alignment ended: command_id=7, status=SUCCEEDED
+36: [INFO] [1793878773.548930246] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT_2
+41: [INFO] [1793878775.370497607] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_TURN_LEFT_3
+43: [INFO] [1793878776.071654763] [motion_decision_node]: BALL entry Line alignment requested: command_id=14, action=RECOVER_LEFT_TURN_LEFT_4, queued=False, heading_deg=-17.675, heading_source=ball_ground, turn_count=None, turn_angle_deg=-30.0, line_rgb_stamp_ns=None, ball_rgb_stamp_ns=1793878775924906006, ball_distance_m=0.751
+45: [INFO] [1793878778.377756635] [motion_decision_node]: BALL entry Line alignment requested: command_id=15, action=STRAIGHT_2, queued=True, heading_deg=-9.444, heading_source=ball_ground, turn_count=None, turn_angle_deg=None, line_rgb_stamp_ns=None, ball_rgb_stamp_ns=1793878778226255859, ball_distance_m=0.602
+46: [INFO] [1793878778.378813669] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT_2, command_id=15
+47: [INFO] [1793878778.601439113] [motion_decision_node]: BALL entry Line alignment ended: command_id=14, status=SUCCEEDED
+48: [INFO] [1793878778.602883111] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+50: [INFO] [1793878780.711121719] [motion_decision_node]: BALL entry Line alignment ended: command_id=15, status=SUCCEEDED
+51: [INFO] [1793878780.712084664] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT_2
+140: [INFO] [1793878811.150452315] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=POST_BALL_LINE_TURN_RIGHT_5
+143: [INFO] [1793878814.371172085] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=297
+144: [INFO] [1793878815.392707805] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+147: [INFO] [1793878818.560997360] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+150: [INFO] [1793878821.331763195] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA_90_FORWARD_2
+152: [INFO] [1793878823.442494212] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA_90_FORWARD_2
+154: [INFO] [1793878825.560443342] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA_90_FORWARD_2
+155: [INFO] [1793878828.760225410] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_FINE_FORWARD_3
+156: [INFO] [1793878831.225642972] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_BACKWARD_1
+157: [INFO] [1793878833.475832507] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_BACKWARD_1
+158: [INFO] [1793878834.454228634] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_TURN_LEFT_1
+159: [INFO] [1793878836.597709915] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_SHOT_PREPARE
+169: [INFO] [1793878852.683088718] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+173: [INFO] [1793878855.449528022] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=LINE_LOST_TURN_RIGHT_5
+177: [INFO] [1793878857.367918580] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=LINE_LOST_TURN_RIGHT_1
+183: [INFO] [1793878859.272472300] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=LINE_LOST_TURN_RIGHT_1
+191: [INFO] [1793878862.964850797] [motion_decision_node]: BALL mode consumed at confirmation: index=2, used=2/2
+193: [INFO] [1793878862.970129777] [motion_decision_node]: BALL entry Line alignment armed: adopted_command_id=None
+194: [INFO] [1793878862.971106071] [motion_decision_node]: BALL approach entry latched during motion: distance_m=0.896
+195: [INFO] [1793878862.975335432] [motion_decision_node]: BALL entry Line alignment requested: command_id=362, action=RECOVER_LEFT_TURN_LEFT_4, queued=True, heading_deg=-29.94, heading_source=ground, turn_count=None, turn_angle_deg=-30.0, line_rgb_stamp_ns=None, ball_rgb_stamp_ns=1793878862775696289, ball_distance_m=0.896
+196: [INFO] [1793878862.976793857] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_LEFT_TURN_LEFT_4, command_id=362
+198: [INFO] [1793878863.465741472] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+199: [INFO] [1793878865.255071852] [motion_decision_node]: BALL entry Line alignment requested: command_id=363, action=STRAIGHT_2, queued=True, heading_deg=1.455, heading_source=ball_ground, turn_count=None, turn_angle_deg=None, line_rgb_stamp_ns=None, ball_rgb_stamp_ns=1793878865077581299, ball_distance_m=0.679
+200: [INFO] [1793878865.256284306] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT_2, command_id=363
+201: [INFO] [1793878865.561395912] [motion_decision_node]: BALL entry Line alignment ended: command_id=362, status=SUCCEEDED
+202: [INFO] [1793878865.563238388] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+204: [INFO] [1793878867.673119058] [motion_decision_node]: BALL entry Line alignment ended: command_id=363, status=SUCCEEDED
+205: [INFO] [1793878867.674506925] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT_2
+294: [INFO] [1793878897.432483323] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=POST_BALL_LINE_TURN_LEFT_3
+300: [INFO] [1793878899.355190068] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=LINE_OFFSET_TURN_LEFT_1
+302: [INFO] [1793878902.089536461] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=649
+303: [INFO] [1793878902.731201403] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+307: [INFO] [1793878905.900433943] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+310: [INFO] [1793878908.525481183] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA_90_FORWARD_2
+312: [INFO] [1793878910.635340169] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA_90_FORWARD_2
+314: [INFO] [1793878912.749713737] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA_90_FORWARD_2
+316: [INFO] [1793878915.947437363] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_FINE_FORWARD_3
+317: [INFO] [1793878917.147165487] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_FINE_FORWARD_3
+318: [INFO] [1793878917.527419405] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_SHOT_PREPARE
+338: [INFO] [1793878934.951633696] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT_1, command_id=705
+339: [INFO] [1793878935.279195326] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT_1
+340: [INFO] [1793878936.092992494] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_RIGHT_TURN_LEFT_4, command_id=706
+341: [INFO] [1793878936.331840761] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT_1
+342: [INFO] [1793878937.845865660] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=707
+343: [INFO] [1793878938.428132665] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_LEFT_4
+344: [INFO] [1793878940.719037708] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=708
+345: [INFO] [1793878941.595548054] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+346: [INFO] [1793878943.795888962] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=709
+347: [INFO] [1793878944.766322370] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+348: [INFO] [1793878947.070035008] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_RIGHT_TURN_LEFT_4, command_id=710
+349: [INFO] [1793878947.916309508] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+350: [INFO] [1793878949.752383690] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_LEFT_TURN_LEFT_4, command_id=711
+351: [INFO] [1793878950.027749578] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_LEFT_4
+352: [INFO] [1793878951.496859673] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=712
+353: [INFO] [1793878952.139437844] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+354: [INFO] [1793878954.640620008] [motion_decision_node]: Line next motion requested before completion: action=RIGHT, command_id=713
+355: [INFO] [1793878955.366852783] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+356: [INFO] [1793878957.523828101] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RIGHT
+361: [INFO] [1793878959.087358362] [motion_decision_node]: General motion lock released: status=REJECTED, action=LINE_LOST_TURN_LEFT_3
+
+/home/jet/.ros/log/python3_13999_1793885249788.log
+14: [INFO] [1793885270.926386925] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=2
+15: [INFO] [1793885271.859487186] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+16: [INFO] [1793885274.058477095] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=3
+17: [INFO] [1793885275.028706698] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+18: [INFO] [1793885277.244892337] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=4
+19: [INFO] [1793885278.195970697] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+20: [INFO] [1793885280.415666062] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_LEFT_TURN_LEFT_4, command_id=5
+21: [INFO] [1793885281.371501771] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+23: [INFO] [1793885283.189800245] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=6
+24: [INFO] [1793885283.474765759] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+29: [INFO] [1793885285.955984346] [motion_decision_node]: BALL mode consumed at confirmation: index=1, used=1/2
+31: [INFO] [1793885285.960014216] [motion_decision_node]: BALL entry Line alignment armed: adopted_command_id=None
+32: [INFO] [1793885285.961637716] [motion_decision_node]: BALL approach entry latched during motion: distance_m=0.829
+33: [INFO] [1793885285.978630148] [motion_decision_node]: BALL entry Line alignment requested: command_id=7, action=RECOVER_LEFT_TURN_RIGHT_4, queued=True, heading_deg=25.158, heading_source=ground, turn_count=None, turn_angle_deg=20.0, line_rgb_stamp_ns=None, ball_rgb_stamp_ns=1793885285805114502, ball_distance_m=0.829
+34: [INFO] [1793885285.981256780] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_LEFT_TURN_RIGHT_4, command_id=7
+36: [INFO] [1793885286.644297279] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+39: [INFO] [1793885288.755074935] [motion_decision_node]: BALL entry Line alignment ended: command_id=7, status=SUCCEEDED
+40: [INFO] [1793885288.756075698] [motion_decision_node]: Line completed without prequeue: action=RECOVER_LEFT_TURN_RIGHT_4, command_id=7, reason=insufficient_usable_frames, usable_frames=10/15, fresh_line=True
+41: [INFO] [1793885288.757745472] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_RIGHT_4
+158: [INFO] [1793885326.560101432] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=POST_BALL_LINE_TURN_RIGHT_5
+161: [INFO] [1793885329.784886351] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_RIGHT_TURN_RIGHT_4, command_id=363
+162: [INFO] [1793885330.777658081] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+165: [INFO] [1793885332.879556930] [motion_decision_node]: Line completed without prequeue: action=RECOVER_RIGHT_TURN_RIGHT_4, command_id=363, reason=candidate:line/WAIT/line_corner_waiting_for_fresh_distance, usable_frames=15/15, fresh_line=False
+166: [INFO] [1793885332.881494582] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4
+170: [INFO] [1793885336.512755645] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA_90_FORWARD_2
+172: [INFO] [1793885338.630176375] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA_90_FORWARD_2
+174: [INFO] [1793885340.738858721] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA_90_FORWARD_2
+176: [INFO] [1793885343.968035494] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_FINE_FORWARD_3
+177: [INFO] [1793885345.168672220] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_FINE_FORWARD_3
+178: [INFO] [1793885347.556224118] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_TURN_LEFT_1
+179: [INFO] [1793885349.472794385] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_SHOT_PREPARE
+194: [INFO] [1793885367.261794112] [motion_decision_node]: Line completed without prequeue: action=STRAIGHT, command_id=425, reason=no_fresh_usable_line, usable_frames=10/10, fresh_line=True
+195: [INFO] [1793885367.263409867] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+199: [INFO] [1793885369.246637404] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=LINE_LOST_TURN_LEFT_3
+203: [INFO] [1793885371.133458220] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=LINE_LOST_TURN_LEFT_1
+207: [INFO] [1793885373.133089459] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=LINE_LOST_TURN_LEFT_1
+210: [INFO] [1793885376.517827929] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=431
+211: [INFO] [1793885377.471855528] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+215: [INFO] [1793885378.371599473] [motion_decision_node]: BALL mode consumed at confirmation: index=2, used=2/2
+217: [INFO] [1793885378.378426438] [motion_decision_node]: BALL entry Line alignment armed: adopted_command_id=None
+218: [INFO] [1793885378.379425344] [motion_decision_node]: BALL approach entry latched during motion: distance_m=0.888
+219: [INFO] [1793885380.007824363] [motion_decision_node]: BALL entry Line alignment requested: command_id=432, action=STRAIGHT_2, queued=True, heading_deg=9.073, heading_source=ball_ground, turn_count=None, turn_angle_deg=None, line_rgb_stamp_ns=None, ball_rgb_stamp_ns=1793885379772449707, ball_distance_m=0.747
+220: [INFO] [1793885380.008815461] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT_2, command_id=432
+221: [INFO] [1793885380.622123961] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+223: [INFO] [1793885382.732782853] [motion_decision_node]: BALL entry Line alignment ended: command_id=432, status=SUCCEEDED
+224: [INFO] [1793885382.733874465] [motion_decision_node]: Line completed without prequeue: action=STRAIGHT_2, command_id=432, reason=insufficient_usable_frames, usable_frames=1/10, fresh_line=True
+225: [INFO] [1793885382.734894556] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT_2
+324: [INFO] [1793885416.716825072] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=LINE_HEADING_TURN_LEFT_3
+327: [INFO] [1793885421.051830534] [motion_decision_node]: Line completed without prequeue: action=STRAIGHT, command_id=758, reason=walking_prequeue_guard, usable_frames=10/10, fresh_line=False
+328: [INFO] [1793885421.053635381] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+331: [INFO] [1793885424.697791439] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_RECOVER_RIGHT_4
+332: [INFO] [1793885428.010623162] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA_90_FORWARD_2
+334: [INFO] [1793885430.795859590] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA_90_FORWARD_2
+336: [INFO] [1793885432.890615132] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA_90_FORWARD_2
+337: [INFO] [1793885435.001792927] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA_90_FORWARD_2
+338: [INFO] [1793885436.027267252] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_TURN_LEFT_1
+339: [INFO] [1793885438.397533926] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_SHOT_PREPARE
+340: [INFO] [1793885442.074716188] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_CRAB_RIGHT
+341: [INFO] [1793885443.770697220] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_SHOT_PREPARE
+355: [INFO] [1793885459.589334081] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=848
+356: [INFO] [1793885460.199851723] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_LEFT_4
+357: [INFO] [1793885462.417066746] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=849
+358: [INFO] [1793885463.368153256] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+360: [INFO] [1793885466.069632984] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=850
+361: [INFO] [1793885466.599976525] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+362: [INFO] [1793885469.824596147] [motion_decision_node]: Line completed without prequeue: action=STRAIGHT, command_id=850, reason=candidate:line/LINE_OFFSET_TURN_LEFT_1/line_offset_target_turn, usable_frames=10/10, fresh_line=True
+363: [INFO] [1793885469.831618824] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+376: [INFO] [1793885472.662121736] [motion_decision_node]: General motion lock released: status=REJECTED, action=LINE_LOST_TURN_LEFT_1
+
+/home/jet/.ros/log/python3_10176_1793946701820.log
+14: [INFO] [1793946733.764617625] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=2
+15: [INFO] [1793946734.782302463] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+16: [INFO] [1793946736.977931191] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=3
+17: [INFO] [1793946737.939142900] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+18: [INFO] [1793946740.163692668] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=4
+19: [INFO] [1793946741.107565960] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+20: [INFO] [1793946743.317547739] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_LEFT_TURN_LEFT_4, command_id=5
+22: [INFO] [1793946744.275689888] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+23: [INFO] [1793946745.948447111] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=6
+24: [INFO] [1793946746.388829401] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+25: [INFO] [1793946746.798404343] [motion_decision_node]: BALL mode consumed at confirmation: index=1, used=1/2
+26: [INFO] [1793946746.799348432] [motion_decision_node]: BALL entry Line alignment armed: adopted_command_id=None
+27: [INFO] [1793946746.800109764] [motion_decision_node]: BALL approach entry latched during motion: distance_m=1.045
+28: [INFO] [1793946749.413366391] [motion_decision_node]: BALL entry Line alignment requested: command_id=7, action=STRAIGHT_2, queued=True, heading_deg=-13.588, heading_source=ball_ground, turn_count=None, turn_angle_deg=None, line_rgb_stamp_ns=None, ball_rgb_stamp_ns=1793946749144335938, ball_distance_m=0.778
+29: [INFO] [1793946749.414304976] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT_2, command_id=7
+30: [INFO] [1793946749.557318753] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+31: [INFO] [1793946751.651966487] [motion_decision_node]: BALL entry Line alignment ended: command_id=7, status=SUCCEEDED
+32: [INFO] [1793946751.655209037] [motion_decision_node]: Line completed without prequeue: action=STRAIGHT_2, command_id=7, reason=no_fresh_usable_line, usable_frames=10/10, fresh_line=True
+33: [INFO] [1793946751.658161435] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT_2
+36: [INFO] [1793946752.402437895] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_TURN_LEFT_1
+133: [INFO] [1793946799.286573477] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_RIGHT_TURN_RIGHT_4, command_id=625
+134: [INFO] [1793946800.079373324] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+136: [INFO] [1793946801.868040407] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_RIGHT_TURN_RIGHT_4, command_id=626
+137: [INFO] [1793946802.191113115] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4
+145: [INFO] [1793946804.306536908] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4
+148: [INFO] [1793946806.416083780] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA_90_FORWARD_2
+150: [INFO] [1793946808.526908126] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_RECOVER_LEFT_4
+152: [INFO] [1793946810.641096914] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_RECOVER_LEFT_4
+153: [INFO] [1793946813.463124101] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_FINE_FORWARD_2
+154: [INFO] [1793946816.109694392] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_CRAB_RIGHT
+155: [INFO] [1793946818.599079726] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_BACKWARD_1
+156: [INFO] [1793946819.534369758] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_TURN_LEFT_1
+157: [INFO] [1793946822.862660441] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_CRAB_RIGHT
+158: [INFO] [1793946824.514951434] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_SHOT_PREPARE
+172: [INFO] [1793946840.818189548] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=702
+173: [INFO] [1793946841.861663439] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+174: [INFO] [1793946844.151013068] [motion_decision_node]: Line next motion requested before completion: action=LINE_LOST_TURN_LEFT_3, command_id=703
+175: [INFO] [1793946845.003559967] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+176: [INFO] [1793946846.199925076] [motion_decision_node]: Line next motion requested before completion: action=LINE_LOST_TURN_LEFT_1, command_id=704
+177: [INFO] [1793946846.447501383] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=LINE_LOST_TURN_LEFT_3
+178: [INFO] [1793946847.179976758] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=LINE_LOST_TURN_LEFT_1
+182: [INFO] [1793946848.971929373] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=LINE_LOST_TURN_LEFT_1
+191: [INFO] [1793946852.607046594] [motion_decision_node]: BALL mode consumed at confirmation: index=2, used=2/2
+193: [INFO] [1793946852.611509397] [motion_decision_node]: BALL entry Line alignment armed: adopted_command_id=None
+194: [INFO] [1793946852.612972955] [motion_decision_node]: BALL approach entry latched during motion: distance_m=0.949
+196: [INFO] [1793946853.236382266] [motion_decision_node]: BALL entry Line alignment requested: command_id=711, action=RECOVER_RIGHT_TURN_RIGHT_4, queued=True, heading_deg=19.28, heading_source=ball_ground, turn_count=None, turn_angle_deg=20.0, line_rgb_stamp_ns=None, ball_rgb_stamp_ns=1793946853018656982, ball_distance_m=0.879
+197: [INFO] [1793946853.241921097] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_RIGHT_TURN_RIGHT_4, command_id=711
+198: [INFO] [1793946853.582343339] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+199: [INFO] [1793946855.755409170] [motion_decision_node]: BALL entry Line alignment ended: command_id=711, status=SUCCEEDED
+200: [INFO] [1793946855.757795119] [motion_decision_node]: Line completed without prequeue: action=RECOVER_RIGHT_TURN_RIGHT_4, command_id=711, reason=insufficient_usable_frames, usable_frames=10/15, fresh_line=True
+201: [INFO] [1793946855.760122763] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_RIGHT_TURN_RIGHT_4
+202: [INFO] [1793946855.762789168] [motion_decision_node]: BALL entry Line alignment requested: command_id=712, action=STRAIGHT_2, queued=False, heading_deg=8.266, heading_source=ball_ground, turn_count=None, turn_angle_deg=None, line_rgb_stamp_ns=None, ball_rgb_stamp_ns=1793946855520452393, ball_distance_m=0.673
+205: [INFO] [1793946858.286496802] [motion_decision_node]: BALL entry Line alignment ended: command_id=712, status=SUCCEEDED
+206: [INFO] [1793946858.287460379] [motion_decision_node]: Line completed without prequeue: action=STRAIGHT_2, command_id=712, reason=insufficient_usable_frames, usable_frames=0/10, fresh_line=True
+207: [INFO] [1793946858.288334706] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT_2
+302: [INFO] [1793946889.461617305] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=POST_BALL_LINE_TURN_LEFT_3
+311: [INFO] [1793946892.027858451] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=POST_BALL_LINE_TURN_LEFT_1
+315: [INFO] [1793946893.894155993] [motion_decision_node]: Line next motion requested before completion: action=RIGHT, command_id=1024
+316: [INFO] [1793946894.005349336] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT_1
+318: [INFO] [1793946895.668479201] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=1025
+319: [INFO] [1793946896.127023704] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RIGHT
+327: [INFO] [1793946899.328348558] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+329: [INFO] [1793946901.493793736] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA_90_FORWARD_2
+
+/home/jet/.ros/log/python3_3269_1794031207380.log
+14: [INFO] [1794031272.564123267] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=2
+15: [INFO] [1794031273.555751588] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+16: [INFO] [1794031275.761805198] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=3
+17: [INFO] [1794031276.737218926] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+18: [INFO] [1794031279.139878030] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=4
+19: [INFO] [1794031279.889162944] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+21: [INFO] [1794031282.101302755] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_LEFT_TURN_LEFT_4, command_id=5
+22: [INFO] [1794031283.058076605] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+23: [INFO] [1794031284.821940716] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=6
+24: [INFO] [1794031285.158692732] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+25: [INFO] [1794031285.448306583] [motion_decision_node]: BALL mode consumed at confirmation: index=1, used=1/2
+26: [INFO] [1794031285.449507748] [motion_decision_node]: BALL entry Line alignment armed: adopted_command_id=None
+27: [INFO] [1794031285.451912508] [motion_decision_node]: BALL approach entry latched during motion: distance_m=1.014
+29: [INFO] [1794031288.135133881] [motion_decision_node]: BALL entry Line alignment requested: command_id=7, action=RECOVER_LEFT_TURN_LEFT_4, queued=True, heading_deg=-38.531, heading_source=ball_ground, turn_count=None, turn_angle_deg=-30.0, line_rgb_stamp_ns=None, ball_rgb_stamp_ns=1794031287895127686, ball_distance_m=0.7
+30: [INFO] [1794031288.136529032] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_LEFT_TURN_LEFT_4, command_id=7
+31: [INFO] [1794031288.349417573] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+33: [INFO] [1794031290.530869577] [motion_decision_node]: BALL entry Line alignment ended: command_id=7, status=SUCCEEDED
+34: [INFO] [1794031290.532420411] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+36: [INFO] [1794031291.273211739] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_TURN_LEFT_2
+
+/home/jet/.ros/log/python3_3612_1794031347164.log
+15: [INFO] [1794031386.925749239] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=2
+16: [INFO] [1794031387.933132341] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+17: [INFO] [1794031390.163008829] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=3
+18: [INFO] [1794031391.101465273] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+19: [INFO] [1794031393.334071075] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_LEFT_TURN_LEFT_4, command_id=4
+20: [INFO] [1794031394.269955115] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+21: [INFO] [1794031396.014429902] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=5
+22: [INFO] [1794031396.382824510] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+23: [INFO] [1794031398.609447478] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=6
+25: [INFO] [1794031399.548069874] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+31: [INFO] [1794031400.642878410] [motion_decision_node]: BALL mode consumed at confirmation: index=1, used=1/2
+33: [INFO] [1794031400.647610627] [motion_decision_node]: BALL entry Line alignment armed: adopted_command_id=None
+34: [INFO] [1794031400.649465016] [motion_decision_node]: BALL approach entry latched during motion: distance_m=0.925
+38: [INFO] [1794031402.717204127] [motion_decision_node]: Line completed without prequeue: action=STRAIGHT, command_id=6, reason=candidate:line/STOP/ball_entry_waiting_for_valid_far_ball, usable_frames=10/10, fresh_line=True
+39: [INFO] [1794031402.720442672] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+42: [INFO] [1794031403.047071735] [motion_decision_node]: BALL entry Line alignment requested: command_id=14, action=RECOVER_LEFT_TURN_LEFT_4, queued=False, heading_deg=-41.881, heading_source=ball_ground, turn_count=None, turn_angle_deg=-30.0, line_rgb_stamp_ns=None, ball_rgb_stamp_ns=1794031402817254395, ball_distance_m=0.654
+44: [INFO] [1794031405.614363735] [motion_decision_node]: BALL entry Line alignment ended: command_id=14, status=SUCCEEDED
+45: [INFO] [1794031405.616194118] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+48: [INFO] [1794031406.349604048] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=BALL_APPROACH_TURN_LEFT_2
+154: [INFO] [1794031439.452390841] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=POST_BALL_LINE_TURN_RIGHT_5
+157: [INFO] [1794031442.159302031] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=335
+158: [INFO] [1794031442.987269192] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+160: [INFO] [1794031446.010551242] [motion_decision_node]: Line next motion requested before completion: action=LINE_HEADING_TURN_RIGHT_5, command_id=336
+161: [INFO] [1794031446.200040706] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+
+/home/jet/.ros/log/python3_10206_1794044171300.log
+14: [INFO] [1794044243.001319391] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=2
+15: [INFO] [1794044243.978241381] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+16: [INFO] [1794044246.178632882] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=3
+17: [INFO] [1794044247.146987777] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+18: [INFO] [1794044249.335812504] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=4
+19: [INFO] [1794044250.314403662] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+21: [INFO] [1794044252.585325154] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=5
+22: [INFO] [1794044253.499210856] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+33: [INFO] [1794044256.664731518] [motion_decision_node]: Line completed without prequeue: action=STRAIGHT, command_id=5, reason=candidate:ball/WAIT/ball_confirmation_pending_hold, usable_frames=10/10, fresh_line=True
+34: [INFO] [1794044256.666939508] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+38: [INFO] [1794044256.993069274] [motion_decision_node]: BALL mode consumed at confirmation: index=1, used=1/2
+40: [INFO] [1794044256.994821612] [motion_decision_node]: BALL entry Line alignment armed: adopted_command_id=None
+41: [INFO] [1794044256.995563348] [motion_decision_node]: BALL approach entry latched while stationary: distance_m=0.860
+42: [INFO] [1794044256.997977484] [motion_decision_node]: BALL entry Line alignment requested: command_id=15, action=RECOVER_LEFT_TURN_LEFT_4, queued=False, heading_deg=-28.57, heading_source=ball_ground, turn_count=None, turn_angle_deg=-30.0, line_rgb_stamp_ns=None, ball_rgb_stamp_ns=1794044256703167236, ball_distance_m=0.86
+44: [INFO] [1794044259.274359829] [motion_decision_node]: BALL entry Line alignment requested: command_id=16, action=STRAIGHT_2, queued=True, heading_deg=-10.763, heading_source=ball_ground, turn_count=None, turn_angle_deg=None, line_rgb_stamp_ns=None, ball_rgb_stamp_ns=1794044259138189941, ball_distance_m=0.665
+45: [INFO] [1794044259.275758563] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT_2, command_id=16
+46: [INFO] [1794044259.576952781] [motion_decision_node]: BALL entry Line alignment ended: command_id=15, status=SUCCEEDED
+47: [INFO] [1794044259.579021506] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+49: [INFO] [1794044261.688410447] [motion_decision_node]: BALL entry Line alignment ended: command_id=16, status=SUCCEEDED
+50: [INFO] [1794044261.689873886] [motion_decision_node]: Line completed without prequeue: action=STRAIGHT_2, command_id=16, reason=insufficient_usable_frames, usable_frames=0/10, fresh_line=True
+51: [INFO] [1794044261.690934729] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT_2
+141: [INFO] [1794044288.903355315] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=275
+142: [INFO] [1794044289.112029139] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=LINE_HEADING_TURN_RIGHT_5
+145: [INFO] [1794044291.887128586] [motion_decision_node]: Line next motion requested before completion: action=LINE_OFFSET_TURN_LEFT_2, command_id=276
+146: [INFO] [1794044292.679127898] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+148: [INFO] [1794044293.863422668] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=LINE_OFFSET_TURN_LEFT_2
+151: [INFO] [1794044297.190577556] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA_90_FORWARD_2
+152: [INFO] [1794044300.501910555] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA_90_FORWARD_2
+154: [INFO] [1794044303.397915543] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA_90_FORWARD_2
+155: [INFO] [1794044305.511124256] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_RECOVER_RIGHT_4
+157: [INFO] [1794044309.163343966] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_FINE_FORWARD_4
+158: [INFO] [1794044309.573607958] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_FINE_FORWARD_1
+159: [INFO] [1794044312.405633800] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_CAMERA90_TURN_LEFT_2
+160: [INFO] [1794044313.846274586] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=GOAL_SHOT_PREPARE
+168: [INFO] [1794044324.760379006] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_LEFT_TURN_LEFT_4, command_id=384
+170: [INFO] [1794044327.456172138] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_LEFT_TURN_LEFT_4, command_id=385
+171: [INFO] [1794044327.808010866] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+173: [INFO] [1794044329.944384482] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_LEFT_TURN_LEFT_4, command_id=386
+174: [INFO] [1794044329.954981838] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+178: [INFO] [1794044331.776127304] [motion_decision_node]: General motion lock released: status=REJECTED, action=LINE_HEADING_TURN_RIGHT_6
+180: [INFO] [1794044341.302474504] [motion_decision_node]: BALL mode consumed at confirmation: index=2, used=2/2
+181: [INFO] [1794044341.303455346] [motion_decision_node]: BALL entry Line alignment armed: adopted_command_id=None
+182: [INFO] [1794044341.304198618] [motion_decision_node]: BALL approach entry latched while stationary: distance_m=1.336
+

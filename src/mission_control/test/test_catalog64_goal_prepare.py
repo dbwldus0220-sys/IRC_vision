@@ -148,7 +148,7 @@ def test_region_is_reselected_after_complete_preparation_and_one_second(goal_nod
 @pytest.mark.parametrize('invalid', [None, {'detected': False},
     {**score_ready_goal(), 'depth_valid': False},
     {**score_ready_goal(), 'score_now': False},
-    {**score_ready_goal(), 'depth_m': .65},
+    {**score_ready_goal(), 'depth_m': .77},
 ])
 def test_old_region_cannot_authorize_shot_after_preparation(goal_node, invalid):
     node, clock = goal_node

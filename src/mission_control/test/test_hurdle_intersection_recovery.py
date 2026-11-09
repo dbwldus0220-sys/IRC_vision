@@ -1,4 +1,4 @@
-"""Verify intersection recovery reaches the gait bridge only before fine entry."""
+"""Keep fine entry at 700mm and intersection correction until 540mm."""
 
 import pytest
 
@@ -9,7 +9,7 @@ from test_motion_command_bridge import FakeBridge, decoded_messages, navigation_
 
 
 @pytest.mark.parametrize('x,direction', [(500, 'LEFT'), (900, 'RIGHT')])
-@pytest.mark.parametrize('depth', [1.0, 0.8, 0.700001])
+@pytest.mark.parametrize('depth', [1.0, 0.8, 0.700001, .7, .6, .540001])
 def test_intersection_side_selects_actual_line_recovery_motion(x, direction, depth):
     decision = MotionDecisionPlanner().plan('AUTO', {
         'hurdle': hurdle(depth, camera_center_offset_x_px=600 if x < 710 else -600,
@@ -42,7 +42,9 @@ def test_intersection_tolerance_uses_calibrated_robot_center(x, action):
 
 
 @pytest.mark.parametrize('depth,action', [(.700001, 'RECOVER_LEFT_TURN_LEFT_4'),
-                                          (.7, 'STRAIGHT_0'), (.54, 'GO')])
+                                        (.7, 'RECOVER_LEFT_TURN_LEFT_4'),
+                                        (.540001, 'RECOVER_LEFT_TURN_LEFT_4'),
+                                        (.54, 'GO'), (.539999, 'GO')])
 def test_exact_fine_entry_boundary(depth, action):
     decision = MotionDecisionPlanner().plan('AUTO', {
         'hurdle': hurdle(depth), 'line': line_info(x=500),
@@ -54,8 +56,12 @@ def test_fine_entry_latches_through_depth_rebound_and_resets_after_hurdle():
     planner = MotionDecisionPlanner()
     planner.plan('AUTO', {'hurdle': hurdle(.7)}, .1)
     rebound = planner.plan('AUTO', {'hurdle': hurdle(.85), 'line': line_info(x=900)}, .1)
-    assert rebound.action == 'STRAIGHT_0'
-    assert rebound.source_command['close_rotation_blocked']
+    assert rebound.action == 'RECOVER_RIGHT_TURN_RIGHT_4'
+    assert not rebound.source_command['close_rotation_blocked']
+    assert planner.hurdle_planner.fine_approach_active
+    assert rebound.source_command['hurdle_stage'] == 'FINE_APPROACH'
+    centered = planner.plan('AUTO', {'hurdle': hurdle(.85), 'line': line_info()}, .1)
+    assert centered.action == 'STRAIGHT_0'
     planner.plan('HURDLE_DONE', {'hurdle': {'detected': False}}, .1)
     planner.plan('AUTO', {'hurdle': {'detected': False}}, .1)
     new_hurdle = planner.plan('AUTO', {'hurdle': hurdle(.8), 'line': line_info(x=900)}, .1)

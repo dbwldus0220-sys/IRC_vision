@@ -1,0 +1,16 @@
+nov6: /home/jet/.ros/log/python3_10176_1793946701820.log
+[INFO] [1793946745.948447111] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=6
+[INFO] [1793946746.388829401] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+[INFO] [1793946746.798404343] [motion_decision_node]: BALL mode consumed at confirmation: index=1, used=1/2
+[INFO] [1793946746.800109764] [motion_decision_node]: BALL approach entry latched during motion: distance_m=1.045
+[INFO] [1793946749.413366391] [motion_decision_node]: BALL entry Line alignment requested: command_id=7, action=STRAIGHT_2, queued=True, heading_deg=-13.588, heading_source=ball_ground, turn_count=None, turn_angle_deg=None, line_rgb_stamp_ns=None, ball_rgb_stamp_ns=1793946749144335938, ball_distance_m=0.778
+[INFO] [1793946749.557318753] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+
+nov7: /home/jet/.ros/log/python3_10206_1794044171300.log
+[INFO] [1794044255.587041630] [motion_decision_node]: BALL near/unknown candidate; waiting for confirmation after the current motion
+[INFO] [1794044256.664731518] [motion_decision_node]: Line completed without prequeue: action=STRAIGHT, command_id=5, reason=candidate:ball/WAIT/ball_confirmation_pending_hold, usable_frames=10/10, fresh_line=True
+[INFO] [1794044256.993069274] [motion_decision_node]: BALL mode consumed at confirmation: index=1, used=1/2
+[INFO] [1794044256.995563348] [motion_decision_node]: BALL approach entry latched while stationary: distance_m=0.860
+[INFO] [1794044256.997977484] [motion_decision_node]: BALL entry Line alignment requested: command_id=15, action=RECOVER_LEFT_TURN_LEFT_4, queued=False, heading_deg=-28.57, heading_source=ball_ground, turn_count=None, turn_angle_deg=-30.0, line_rgb_stamp_ns=None, ball_rgb_stamp_ns=1794044256703167236, ball_distance_m=0.86
+[INFO] [1794044256.998839669] [motion_decision_node]: Line motion boundary: wait_sec=0.333, next_action=RECOVER_LEFT_TURN_LEFT_4, reason=ball_entry_ground_recovery
+

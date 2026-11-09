@@ -1,0 +1,90 @@
+{
+  "source": "robot_motions(76).json",
+  "stationary_left_turns": {
+    "count": 18,
+    "pc_speed": 0.9,
+    "runtime_speed": 0.855,
+    "cycle_ms": 315,
+    "six_repeat_seconds": 2.210526315789474
+  },
+  "left_crabs": {
+    "names": [
+      "tt미세왼옆0도",
+      "tt미세왼옆0도(2회)",
+      "tt미세왼옆90도"
+    ],
+    "runtime_speed": 0.9025,
+    "cycle_ms": 540
+  },
+  "mapping": {
+    "updated_aliases": 7,
+    "removed_direction_change_aliases": 4,
+    "missing_targets": 0,
+    "catalog_motions": 152
+  },
+  "python": {
+    "passed": 753,
+    "preexisting_failed": 14,
+    "new_failures": 0,
+    "baseline_failure_names": [
+      "test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.499-STRAIGHT_0-r\\ubbf8\\uc1380\\ub3c4 \\uacf5\\uc7a1\\uae30\\uc6a9]",
+      "test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.5-STRAIGHT_0-r\\ubbf8\\uc1380\\ub3c4 \\uacf5\\uc7a1\\uae30\\uc6a9]",
+      "test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.500001-BALL_APPROACH_FINE_FORWARD_5-r\\ubbf8\\uc13845\\ub3c4]",
+      "test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.55-BALL_APPROACH_FINE_FORWARD_5-r\\ubbf8\\uc13845\\ub3c4]",
+      "test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.57-BALL_APPROACH_FINE_FORWARD_5-r\\ubbf8\\uc13845\\ub3c4]",
+      "test_ball_hurdle_distance_policy_reaches_runtime_catalog[ball-0.6-BALL_APPROACH_FINE_FORWARD_5-r\\ubbf8\\uc13845\\ub3c4]",
+      "test_failed_grasp_check_pose_keeps_grasp_unknown_and_continues_exit_composite",
+      "test_grasp_verification_uses_three_second_pause_after_pose",
+      "test_production_action_mapping_contains_only_approved_contract",
+      "test_shot_retry_does_not_repeat_completed_pose_preparation",
+      "test_shot_waits_for_running_fine_motion_and_uses_only_completed_history",
+      "test_shot_without_fine_only_approach_keeps_direct_scoring[actions0]",
+      "test_shot_without_fine_only_approach_keeps_direct_scoring[actions1]",
+      "test_supported_action_builds_executor_request[SHOT-goal_shot]"
+    ]
+  },
+  "cpp_alias_tests": {
+    "passed": 2
+  },
+  "cpp_startup_tests": {
+    "passed": 6,
+    "preexisting_failed": 1,
+    "reason": "Catalog49 historical pose 김오들(앞먼저닿음) missing in both before and after catalogs"
+  },
+  "sdk_virtual_hardware": {
+    "alignment_chains": 6,
+    "fine_queue_pairs": 75,
+    "left_turn_queue_pairs": 108,
+    "walking_preparation_pairs": 24,
+    "crab_queue_pairs": 13,
+    "serial_crab_chains": 4,
+    "all_passed": true,
+    "unsafe_shortcuts_still_rejected": true
+  },
+  "checks": {
+    "pc_runtime_catalog_validation": "passed",
+    "unrelated_motion_objects_preserved": true,
+    "idempotent_import": true,
+    "installed_paths_reference_updated_workspace": true,
+    "git_diff_check": "passed"
+  },
+  "changed_existing_files": [
+    "artifacts/robot_motions_pc.json",
+    "artifacts/robot_motions_runtime.json",
+    "external_sdk/gui_aligned/test_ball_fine_queue.cpp",
+    "src/irc_step_motion_executor/config/motion_aliases.yaml",
+    "src/irc_step_motion_executor/test/test_catalog_only_core.cpp",
+    "src/mission_control/README.md",
+    "src/mission_control/mission_control/ball_fine_approach.py",
+    "src/mission_control/mission_control/motion_command_bridge_node.py",
+    "src/mission_control/mission_control/pickup_walk_reservation.py",
+    "src/mission_control/test/test_catalog75_left_turn.py",
+    "src/mission_control/test/test_line_turn_prequeue.py"
+  ],
+  "hardware_run": false,
+  "limitations": [
+    "Virtual hardware validates dispatch and completion, not physical balance.",
+    "Crab direction changes use completed-motion dispatch; only identical pickup gaits are reserved by the existing planner.",
+    "Existing goal-crab observation pause and left-crab exit transitions are retained."
+  ]
+}

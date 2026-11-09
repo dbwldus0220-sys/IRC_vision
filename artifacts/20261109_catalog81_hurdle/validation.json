@@ -1,0 +1,16 @@
+{
+  "source_fidelity": "passed: joint angles, torque flags, frame timing and repeat count",
+  "only_requested_motion_changed": true,
+  "runtime_import_policy": "passed: original speed x 0.95, tolerance 5 degrees",
+  "pose_collision_check": "passed",
+  "runtime_duration_seconds": 7.554736842105263,
+  "timeout_with_settle_seconds": 10.554736842105264,
+  "timeout_limit_seconds": 12,
+  "python_checks": {
+    "passed": 16,
+    "failed": 1,
+    "failure": "Existing full-catalog speed-policy mismatch; identical set of 89 motions before and after, t허들찐 is compliant."
+  },
+  "mock_hardware_player_exit_code": 0,
+  "hardware_executed": false
+}

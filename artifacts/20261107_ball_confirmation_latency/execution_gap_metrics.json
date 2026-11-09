@@ -1,0 +1,41 @@
+{
+  "ball_first_approach": {
+    "request_epoch_ns": 1794044256997977484,
+    "completion_epoch_ns": 1794044259576952781,
+    "observed_request_to_completion_ms": 2578.975297,
+    "catalog_cycle_ms": 515,
+    "repeat_count": 4,
+    "speed": 0.95,
+    "nominal_catalog_duration_ms": 2168.421052631579,
+    "observed_minus_nominal_ms": 410.55424436842077,
+    "motion_unchanged_from_archived_snapshot": true,
+    "limitation": "Excess includes startup, bus/tick overhead and status transport; not an isolated measurement of startup or torque reads."
+  },
+  "same_run_known_post_pickup_boundaries": [
+    {
+      "transition": "pickup complete -> first line RUNNING",
+      "gap_ms": 382.601024
+    },
+    {
+      "transition": "first line complete -> second line RUNNING",
+      "gap_ms": 382.717922
+    },
+    {
+      "transition": "second line complete -> third line RUNNING",
+      "gap_ms": 383.58977
+    }
+  ],
+  "nov6_first_ball": {
+    "confirmed_epoch_ns": 1793946746798404343,
+    "next_ball_walk_request_epoch_ns": 1793946749413366391,
+    "line_complete_epoch_ns": 1793946749557318753,
+    "confirmed_during_motion": true,
+    "distance_at_entry_m": 1.045,
+    "confirmation_before_line_end_ms": 2758.91441,
+    "ball_walk_reserved_before_line_end_ms": 143.952362
+  },
+  "nov7_first_ball": {
+    "confirmed_during_motion": false,
+    "distance_at_entry_m": 0.86
+  }
+}

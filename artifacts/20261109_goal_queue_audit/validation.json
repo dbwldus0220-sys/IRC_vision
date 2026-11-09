@@ -1,0 +1,33 @@
+{
+  "date": "2026-11-09",
+  "scope": "Goal regions 5-8 reservation, shot preparation, completion, and current catalog compatibility",
+  "hardware_execution": false,
+  "production_logic_changed_in_this_audit": false,
+  "results": {
+    "python_tests_passed": 205,
+    "sdk_ctest_targets_passed": 7,
+    "executor_ctest_targets_passed": 3
+  },
+  "new_replays": {
+    "zone_entry_during_six_walking_actions_confirmed_or_unconfirmed": 48,
+    "accepted_queue_completion_and_both_post_shot_modes": 8,
+    "rejected_queue_followed_by_each_new_region_shot": 4
+  },
+  "verified": [
+    "Scoring-zone observations prevent new walking reservations without prematurely latching a shot",
+    "One accepted walking reservation completes before fresh scoring evaluation; no third movement is reserved while in a scoring zone",
+    "Queue rejection releases the pending slot while retaining the active movement",
+    "Existing crab tests cover active FAILED/CANCELLED/TIMEOUT queue cleanup and queue depth limit",
+    "Crab rest expiry requires a fresh image and then resumes",
+    "Shot preparation retains its one-second observation deadline and resumes via the boundary timer",
+    "New shot aliases execute and report completion into the first/second post-shot branches",
+    "Catalog80 updated motions fit dispatch timeouts and use scaled reservation durations",
+    "SDK queue contract uses the current runtime catalog"
+  ],
+  "test_maintenance": "Updated the driver test's stale forward alias expectation from R전진45도(8회) to the configured p전진45(8회); rebuilt and reran successfully",
+  "limits": [
+    "An already accepted movement is not cancelled when later images enter a scoring zone; it may carry the robot beyond that zone before re-evaluation",
+    "No physical robot or physics simulation was run; software replays cannot establish stability or scoring accuracy"
+  ],
+  "logs": ["replay_tests.log", "sdk_tests.log", "executor_tests.log", "executor_build.log"]
+}

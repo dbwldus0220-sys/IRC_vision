@@ -9,7 +9,8 @@ import pytest
 ROOT = Path(__file__).resolve().parents[3]
 UPDATE = ROOT / 'artifacts/20261028_line_late_queue_speed'
 BEFORE = json.loads((UPDATE / 'robot_motions_runtime.before.json').read_text())
-CURRENT = json.loads((ROOT / 'artifacts/robot_motions_runtime.json').read_text())
+# Later source-speed policies supersede this historical scaling operation.
+CURRENT = json.loads((ROOT / 'artifacts/20261108_catalog77_p_motions/before/artifacts/robot_motions_runtime.json').read_text())
 
 
 @pytest.mark.parametrize('before,after', list(zip(BEFORE['motions'], CURRENT['motions'])),

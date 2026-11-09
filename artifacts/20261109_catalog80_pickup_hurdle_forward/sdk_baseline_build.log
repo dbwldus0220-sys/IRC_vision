@@ -1,0 +1,16 @@
+[  8%] Built target motion_core
+[ 13%] Built target test_motion_pattern
+[ 18%] Built target test_motion_callback
+[ 24%] Built target motion_player_core
+[ 29%] Built target gui_trace_probe
+[ 35%] Built target continuous_trace_probe
+[ 40%] Built target test_continuous_interpolation
+Consolidate compiler generated dependencies of target test_ball_fine_queue
+[ 45%] Built target test_forward_timing
+[ 51%] Built target test_ball_fine_queue
+[ 62%] Built target gui_execution_probe
+[ 70%] Built target robot_control
+[ 75%] Built target recorded_execution_probe
+[ 81%] Built target test_gui_alignment
+[ 86%] Built target irc_robot
+[100%] Built target test_continuous_hardware

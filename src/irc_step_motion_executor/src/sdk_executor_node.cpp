@@ -249,6 +249,7 @@ public:
       [this](const std::string & payload) {
         CallbackTimingTrace::Scope timing(
           callback_timing_trace_, "status_publish", core_->has_active_request());
+        log_execution_failure(payload);
         handle_head_override_status(payload);
         std_msgs::msg::String message;
         message.data = payload;
@@ -330,6 +331,23 @@ public:
   }
 
 private:
+  void log_execution_failure(const std::string & payload)
+  {
+    json_object * object = json_tokener_parse(payload.c_str());
+    if (object == nullptr) {return;}
+    json_object * value = nullptr;
+    if (json_object_object_get_ex(object, "status", &value) &&
+      json_object_get_type(value) == json_type_string)
+    {
+      const std::string status = json_object_get_string(value);
+      if (status == "FAILED" || status == "REJECTED" || status == "TIMEOUT") {
+        // Preserve the first SDK error before a later retry changes its code.
+        RCLCPP_ERROR(get_logger(), "Execution failure: %s", payload.c_str());
+      }
+    }
+    json_object_put(object);
+  }
+
   void start_goal_head_override()
   {
     if (goal_head_override_latched_) {return;}
@@ -741,6 +759,19 @@ private:
     json_object_object_add(
       object, "ball_head_override_deg",
       json_object_new_double(ball_head_override_deg_));
+    const auto head_now_ms = steady_now_ms();
+    const auto head_duration_ms = static_cast<std::uint64_t>(ball_head_transition_ms_);
+    const bool ball_head_complete = ball_head_override_latched_ &&
+      head_now_ms >= ball_head_override_started_ms_ + head_duration_ms;
+    json_object_object_add(
+      object, "ball_head_transition_id", json_object_new_uint64(ball_head_override_started_ms_));
+    json_object_object_add(
+      object, "ball_head_transition_complete", json_object_new_boolean(ball_head_complete));
+    // Translate the interpolation boundary to the camera's ROS time domain.
+    json_object_object_add(
+      object, "ball_head_transition_complete_stamp_ns", ball_head_complete ?
+      json_object_new_int64(get_clock()->now().nanoseconds() - static_cast<std::int64_t>(
+        head_now_ms - ball_head_override_started_ms_ - head_duration_ms) * 1000000LL) : nullptr);
     json_object_object_add(
       object, "goal_head_override_active",
       json_object_new_boolean(goal_head_override_latched_));

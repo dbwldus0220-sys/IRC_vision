@@ -6,11 +6,17 @@ from dataclasses import replace
 from step.approach_distance import BALL_PICKUP_DISTANCE_M
 
 
-PICKUP_WALK_DURATIONS = {
-    'ball_general_fine_forward_8': .388 * 5 / (1.05 * .95),
-    'pickup_fine_forward_0': .388 * 5 / (1.05 * .95),
-    'pickup_crab_left_0': .500 / .9025,
+PICKUP_TWO_CYCLE_CRAB_OFFSET_PX = 200.0
+PICKUP_CRAB_DURATIONS = {
+    'pickup_crab_left_0': .540 / .95,
     'pickup_crab_right_0': .550 / 1.0,
+    'pickup_crab_left_0_2': 2 * .540 / .95,
+    'pickup_crab_right_0_2': 2 * .550 / 1.0,
+}
+PICKUP_WALK_DURATIONS = {
+    'ball_general_fine_forward_8': .394 * 5 / 1.05,
+    'pickup_fine_forward_0': .394 * 5 / 1.05,
+    **PICKUP_CRAB_DURATIONS,
 }
 
 PICKUP_WALK_ACTIONS = {
@@ -22,18 +28,23 @@ PICKUP_WALK_ACTIONS = {
 }
 
 
-def pickup_walk_motion(action, current):
+def pickup_walk_motion(action, current, command=None):
     """Retain the legacy first-step alias; both fine IDs resolve to the same gait."""
     selected = PICKUP_WALK_ACTIONS.get(action)
     if selected == 'pickup_fine_forward_0' and current == 'ball_general_fine_forward_8':
         return current
+    offset = (command or {}).get('offset_x_px')
+    if (selected in {'pickup_crab_left_0', 'pickup_crab_right_0'}
+            and type(offset) in {int, float} and abs(offset) > PICKUP_TWO_CYCLE_CRAB_OFFSET_PX):
+        return selected + '_2'
     return selected
 
 
 class PickupWalkReservation:
     """One reservation per running gait; turns and posture changes never queue."""
 
-    CAPTURE_RATIO = .70
+    CAPTURE_RATIO = .60
+    COMMIT_RATIO = .70
     REQUIRED_FRAMES = 3
 
     def __init__(self):
@@ -44,6 +55,7 @@ class PickupWalkReservation:
         self.motion_id = None
         self.stage = None
         self.capture_after_ns = None
+        self.commit_after_ns = None
         self.started_at = None
         self.last_stamp = None
         self.count = 0
@@ -68,6 +80,7 @@ class PickupWalkReservation:
         self.started_at = now
         if type(ros_now) is int:
             self.capture_after_ns = ros_now + int(PICKUP_WALK_DURATIONS[motion] * self.CAPTURE_RATIO * 1e9)
+            self.commit_after_ns = ros_now + int(PICKUP_WALK_DURATIONS[motion] * self.COMMIT_RATIO * 1e9)
 
     def observe(self, planner, info, now, ros_now, max_age, image_stamp=None):
         self.ready = None
@@ -105,13 +118,14 @@ class PickupWalkReservation:
         preview.pickup_last_completed_motion_id = self.motion_id
         decision = (preview.plan_ball_pickup_initial_alignment(info) if self.stage == 'initial'
                     else preview.plan_ball_pickup_fine_alignment(info))
-        if (not decision.valid or pickup_walk_motion(decision.action, self.motion_id) != self.motion_id
+        if (not decision.valid or pickup_walk_motion(decision.action, self.motion_id, decision.source_command) != self.motion_id
                 or self.motion_id in {'pickup_fine_forward_0', 'ball_general_fine_forward_8'}
                 and self.forward_complete):
             self.count = 0
             return
         self.count += 1
-        if self.count >= self.REQUIRED_FRAMES:
+        if (self.count >= self.REQUIRED_FRAMES and stamp >= self.commit_after_ns
+                and now >= self.started_at + PICKUP_WALK_DURATIONS[self.motion_id] * self.COMMIT_RATIO):
             self.ready = replace(decision, reason='pickup_same_gait_reserved_from_late_ball_frames',
                                  source_command={**decision.source_command,
                                                  'pickup_walk_prequeue': True,

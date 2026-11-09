@@ -1,0 +1,788 @@
+[
+  {
+    "version": "before",
+    "required_hits": 10,
+    "candidate_earlier_ms": 0.0,
+    "capture_age_ms": 289.902038,
+    "missing_tenth": false,
+    "confirmed_relative_ms": 134.257,
+    "command_relative_ms": 134.257,
+    "command_wait_ms": 134.257,
+    "queued_before_boundary": false,
+    "action": "RECOVER_LEFT_TURN_LEFT_4",
+    "motion_id": "line_recovery_ball_first_left_4",
+    "trace": [
+      {
+        "relative_ms": -1077.69,
+        "hit": 1,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -642.065,
+        "hit": 2,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -545.025,
+        "hit": 3,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -447.984,
+        "hit": 4,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -350.944,
+        "hit": 5,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -253.904,
+        "hit": 6,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -156.864,
+        "hit": 7,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -59.823,
+        "hit": 8,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": 37.217,
+        "hit": 9,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": 134.257,
+        "hit": 10,
+        "confirmed": true,
+        "raw": true
+      }
+    ]
+  },
+  {
+    "version": "after",
+    "required_hits": 10,
+    "candidate_earlier_ms": 0.0,
+    "capture_age_ms": 289.902038,
+    "missing_tenth": false,
+    "confirmed_relative_ms": 134.257,
+    "command_relative_ms": 134.257,
+    "command_wait_ms": 134.257,
+    "queued_before_boundary": false,
+    "action": "RECOVER_LEFT_TURN_LEFT_4",
+    "motion_id": "line_recovery_ball_first_left_4",
+    "trace": [
+      {
+        "relative_ms": -1077.69,
+        "hit": 1,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -642.065,
+        "hit": 2,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -545.025,
+        "hit": 3,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -447.984,
+        "hit": 4,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -350.944,
+        "hit": 5,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -253.904,
+        "hit": 6,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -156.864,
+        "hit": 7,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -59.823,
+        "hit": 8,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": 37.217,
+        "hit": 9,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": 134.257,
+        "hit": 10,
+        "confirmed": true,
+        "raw": true
+      }
+    ]
+  },
+  {
+    "version": "before",
+    "required_hits": 10,
+    "candidate_earlier_ms": 150.0,
+    "capture_age_ms": 289.902038,
+    "missing_tenth": false,
+    "confirmed_relative_ms": -15.743,
+    "command_relative_ms": 0.0,
+    "command_wait_ms": 0,
+    "queued_before_boundary": false,
+    "action": "RECOVER_LEFT_TURN_LEFT_4",
+    "motion_id": "line_recovery_ball_first_left_4",
+    "trace": [
+      {
+        "relative_ms": -1227.69,
+        "hit": 1,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -792.065,
+        "hit": 2,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -695.025,
+        "hit": 3,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -597.984,
+        "hit": 4,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -500.944,
+        "hit": 5,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -403.904,
+        "hit": 6,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -306.864,
+        "hit": 7,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -209.823,
+        "hit": 8,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -112.783,
+        "hit": 9,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -15.743,
+        "hit": 10,
+        "confirmed": true,
+        "raw": true
+      }
+    ]
+  },
+  {
+    "version": "after",
+    "required_hits": 10,
+    "candidate_earlier_ms": 150.0,
+    "capture_age_ms": 289.902038,
+    "missing_tenth": false,
+    "confirmed_relative_ms": -15.743,
+    "command_relative_ms": -15.743,
+    "command_wait_ms": 0,
+    "queued_before_boundary": true,
+    "action": "RECOVER_LEFT_TURN_LEFT_4",
+    "motion_id": "line_recovery_ball_first_left_4",
+    "trace": [
+      {
+        "relative_ms": -1227.69,
+        "hit": 1,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -792.065,
+        "hit": 2,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -695.025,
+        "hit": 3,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -597.984,
+        "hit": 4,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -500.944,
+        "hit": 5,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -403.904,
+        "hit": 6,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -306.864,
+        "hit": 7,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -209.823,
+        "hit": 8,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -112.783,
+        "hit": 9,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -15.743,
+        "hit": 10,
+        "confirmed": true,
+        "raw": true
+      }
+    ]
+  },
+  {
+    "version": "before",
+    "required_hits": 10,
+    "candidate_earlier_ms": 300.0,
+    "capture_age_ms": 289.902038,
+    "missing_tenth": false,
+    "confirmed_relative_ms": -165.743,
+    "command_relative_ms": 0.0,
+    "command_wait_ms": 0,
+    "queued_before_boundary": false,
+    "action": "RECOVER_LEFT_TURN_LEFT_4",
+    "motion_id": "line_recovery_ball_first_left_4",
+    "trace": [
+      {
+        "relative_ms": -1377.69,
+        "hit": 1,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -942.065,
+        "hit": 2,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -845.025,
+        "hit": 3,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -747.984,
+        "hit": 4,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -650.944,
+        "hit": 5,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -553.904,
+        "hit": 6,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -456.864,
+        "hit": 7,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -359.823,
+        "hit": 8,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -262.783,
+        "hit": 9,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -165.743,
+        "hit": 10,
+        "confirmed": true,
+        "raw": true
+      },
+      {
+        "relative_ms": -68.703,
+        "hit": 11,
+        "confirmed": true,
+        "raw": true
+      }
+    ]
+  },
+  {
+    "version": "after",
+    "required_hits": 10,
+    "candidate_earlier_ms": 300.0,
+    "capture_age_ms": 289.902038,
+    "missing_tenth": false,
+    "confirmed_relative_ms": -165.743,
+    "command_relative_ms": -165.743,
+    "command_wait_ms": 0,
+    "queued_before_boundary": true,
+    "action": "RECOVER_LEFT_TURN_LEFT_4",
+    "motion_id": "line_recovery_ball_first_left_4",
+    "trace": [
+      {
+        "relative_ms": -1377.69,
+        "hit": 1,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -942.065,
+        "hit": 2,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -845.025,
+        "hit": 3,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -747.984,
+        "hit": 4,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -650.944,
+        "hit": 5,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -553.904,
+        "hit": 6,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -456.864,
+        "hit": 7,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -359.823,
+        "hit": 8,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -262.783,
+        "hit": 9,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -165.743,
+        "hit": 10,
+        "confirmed": true,
+        "raw": true
+      }
+    ]
+  },
+  {
+    "version": "before",
+    "required_hits": 10,
+    "candidate_earlier_ms": 500.0,
+    "capture_age_ms": 289.902038,
+    "missing_tenth": false,
+    "confirmed_relative_ms": -365.743,
+    "command_relative_ms": -171.662,
+    "command_wait_ms": 0,
+    "queued_before_boundary": true,
+    "action": "RECOVER_LEFT_TURN_LEFT_4",
+    "motion_id": "line_recovery_ball_first_left_4",
+    "trace": [
+      {
+        "relative_ms": -1577.69,
+        "hit": 1,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -1142.065,
+        "hit": 2,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -1045.025,
+        "hit": 3,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -947.984,
+        "hit": 4,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -850.944,
+        "hit": 5,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -753.904,
+        "hit": 6,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -656.864,
+        "hit": 7,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -559.823,
+        "hit": 8,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -462.783,
+        "hit": 9,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -365.743,
+        "hit": 10,
+        "confirmed": true,
+        "raw": true
+      },
+      {
+        "relative_ms": -268.703,
+        "hit": 11,
+        "confirmed": true,
+        "raw": true
+      },
+      {
+        "relative_ms": -171.662,
+        "hit": 12,
+        "confirmed": true,
+        "raw": true
+      }
+    ]
+  },
+  {
+    "version": "after",
+    "required_hits": 10,
+    "candidate_earlier_ms": 500.0,
+    "capture_age_ms": 289.902038,
+    "missing_tenth": false,
+    "confirmed_relative_ms": -365.743,
+    "command_relative_ms": -365.743,
+    "command_wait_ms": 0,
+    "queued_before_boundary": true,
+    "action": "RECOVER_LEFT_TURN_LEFT_4",
+    "motion_id": "line_recovery_ball_first_left_4",
+    "trace": [
+      {
+        "relative_ms": -1577.69,
+        "hit": 1,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -1142.065,
+        "hit": 2,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -1045.025,
+        "hit": 3,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -947.984,
+        "hit": 4,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -850.944,
+        "hit": 5,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -753.904,
+        "hit": 6,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -656.864,
+        "hit": 7,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -559.823,
+        "hit": 8,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -462.783,
+        "hit": 9,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -365.743,
+        "hit": 10,
+        "confirmed": true,
+        "raw": true
+      }
+    ]
+  },
+  {
+    "version": "before",
+    "required_hits": 10,
+    "candidate_earlier_ms": 800.0,
+    "capture_age_ms": 289.902038,
+    "missing_tenth": false,
+    "confirmed_relative_ms": -665.743,
+    "command_relative_ms": -471.662,
+    "command_wait_ms": 0,
+    "queued_before_boundary": true,
+    "action": "RECOVER_LEFT_TURN_LEFT_4",
+    "motion_id": "line_recovery_ball_first_left_4",
+    "trace": [
+      {
+        "relative_ms": -1877.69,
+        "hit": 1,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -1442.065,
+        "hit": 2,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -1345.025,
+        "hit": 3,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -1247.984,
+        "hit": 4,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -1150.944,
+        "hit": 5,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -1053.904,
+        "hit": 6,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -956.864,
+        "hit": 7,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -859.823,
+        "hit": 8,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -762.783,
+        "hit": 9,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -665.743,
+        "hit": 10,
+        "confirmed": true,
+        "raw": true
+      },
+      {
+        "relative_ms": -568.703,
+        "hit": 11,
+        "confirmed": true,
+        "raw": true
+      },
+      {
+        "relative_ms": -471.662,
+        "hit": 12,
+        "confirmed": true,
+        "raw": true
+      }
+    ]
+  },
+  {
+    "version": "after",
+    "required_hits": 10,
+    "candidate_earlier_ms": 800.0,
+    "capture_age_ms": 289.902038,
+    "missing_tenth": false,
+    "confirmed_relative_ms": -665.743,
+    "command_relative_ms": -568.703,
+    "command_wait_ms": 0,
+    "queued_before_boundary": true,
+    "action": "RECOVER_LEFT_TURN_LEFT_4",
+    "motion_id": "line_recovery_ball_first_left_4",
+    "trace": [
+      {
+        "relative_ms": -1877.69,
+        "hit": 1,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -1442.065,
+        "hit": 2,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -1345.025,
+        "hit": 3,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -1247.984,
+        "hit": 4,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -1150.944,
+        "hit": 5,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -1053.904,
+        "hit": 6,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -956.864,
+        "hit": 7,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -859.823,
+        "hit": 8,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -762.783,
+        "hit": 9,
+        "confirmed": false,
+        "raw": true
+      },
+      {
+        "relative_ms": -665.743,
+        "hit": 10,
+        "confirmed": true,
+        "raw": true
+      },
+      {
+        "relative_ms": -568.703,
+        "hit": 11,
+        "confirmed": true,
+        "raw": true
+      }
+    ]
+  }
+]

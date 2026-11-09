@@ -282,17 +282,20 @@ int main(int argc, char** argv) {
     // Different entries may share a full commanded end pose. Keep this exception
     // restricted to forward/recovery, with torque, speed, and camera checks.
     for (const std::string recovery_name : {"t라인복귀좌실전", "t라인복귀좌공용", "t라인복귀우공용"})
+    for (bool scaled_forward : {false, true})
     for (int variant = 0; variant < 8; ++variant) {
+        const std::string forward = scaled_forward ? "p전진45(4회)" : "t전진실전";
         const std::string recovery = variant == 7 ? "t미세45도(5회)" : recovery_name;
         {
             std::ofstream fixture(path);
             fixture << "{\"motions\":[";
             for (int index = 0; index < 2; ++index) {
                 if (index) fixture << ',';
-                fixture << "{\"name\":\"" << (index ? recovery : "t전진실전")
+                fixture << "{\"name\":\"" << (index ? recovery : forward)
                     << "\",\"max_seq_ms\":400,\"repeat_count\":2,\"repeatable\":"
                     << (index && variant == 5 ? "false" : "true")
                     << ",\"playback_speed\":" << (index && variant == 4 ? .9
+                        : scaled_forward ? (index ? 1. : .95)
                         : index && recovery_name != "t라인복귀좌실전" ? .95 : 1.)
                     << ",\"start_pose\":\"" << (index ? "recovery_entry" : "forward_entry")
                     << "\",\"end_pose\":\"common_end\",\"frames\":[{\"name\":\"entry"
@@ -320,8 +323,8 @@ int main(int argc, char** argv) {
             TimingHardware hardware;
             RobotMotionPlayer player(path, hardware);
             assert(player.initialize());
-            assert(player.start(reverse ? recovery : "t전진실전") == StartResult::Accepted);
-            const auto next = reverse ? "t전진실전" : recovery;
+            assert(player.start(reverse ? recovery : forward) == StartResult::Accepted);
+            const auto next = reverse ? forward : recovery;
             assert(player.queueNext(next) == (variant == 0 ? QueueResult::Queued
                                                           : QueueResult::IncompatibleTransition));
             if (variant == 6) {

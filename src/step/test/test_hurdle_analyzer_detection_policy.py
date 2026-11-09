@@ -140,6 +140,20 @@ def test_hurdle_candidate_confidence_threshold_is_inclusive():
     assert rejected is None
 
 
+def test_hurdle_publisher_preserves_capture_stamp_even_when_missing():
+    import json
+
+    analyzer = load_hurdle_analyzer()()
+    published = []
+    analyzer.publisher = SimpleNamespace(publish=lambda msg: published.append(json.loads(msg.data)))
+    stamp = {"sec": 12, "nanosec": 345}
+    analyzer._detections_callback(SimpleNamespace(data=json.dumps({"stamp": stamp, "detections": []})))
+    assert published[-1]["stamp"] == stamp
+    assert published[-1]["detected"] is False
+    analyzer._detections_callback(SimpleNamespace(data=json.dumps({"detections": []})))
+    assert published[-1]["stamp"] is None
+
+
 def test_published_bottom_distance_uses_center_and_needs_no_depth():
     import json
 

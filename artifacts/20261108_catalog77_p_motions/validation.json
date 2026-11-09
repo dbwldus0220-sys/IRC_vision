@@ -1,0 +1,112 @@
+{
+  "source": "robot_motions(77).json",
+  "new_motions_including_derived": 46,
+  "remapped_aliases": 58,
+  "runtime_speed": {
+    "p_forward": 1.0,
+    "p_line_recovery_left": 1.0,
+    "p_stationary_left": 0.9025000000000001,
+    "p_fine": 0.9975
+  },
+  "sdk_ctest": {
+    "passed": 7,
+    "failed": 0,
+    "includes": "6 alignment chains, 75 fine pairs, 108 left-turn pairs, 24 preparation pairs, 93 walking/recovery pairs, 13 crab pairs, four crab chains, hurdle and rejected shortcuts"
+  },
+  "executor_ctest": {
+    "passed": 4,
+    "failed": 0
+  },
+  "startup_tests": {
+    "passed": 6,
+    "excluded_existing_failure": "LoadsCatalog49ForwardStartWithEveryPolicyCombination references a pose absent before this update"
+  },
+  "focused_mission_pytest": {
+    "passed": 389,
+    "failed": 1,
+    "existing_failure": "test_second_pickup_fine_continues_on_first_fresh_frame_without_observation_pause[231-BALL_PICKUP_FINE_FORWARD]",
+    "failure_also_in_before_snapshot": true
+  },
+  "before_full_mission_suite": {
+    "passed": 6145,
+    "failed": 841,
+    "errors": 1
+  },
+  "validation_scope": "Offline fake hardware and mission harnesses; no hardware run or dynamics simulation. Full suite has pre-existing failures; final post-update validation is focused.",
+  "executor_rebuilt": true,
+  "files": {
+    "src/mission_control/README.md": {
+      "before_sha256": "b0f35c54f49ed4645d7d8417c698bfab7e42f13e2da617c911caf97d8e6da345",
+      "after_sha256": "1b529d41db559537890d7d0e1175be1458c460183b717b5269830887325fe4ff"
+    },
+    "src/mission_control/mission_control/motion_decision_node.py": {
+      "before_sha256": "6654c98523df889e226409d84bf803b5b156d9989a24ab13ea7c6bc6f508ffbe",
+      "after_sha256": "688fb414afc4d35a40f591e146983f8d4eedc6317f53f52c79aa38dbc90cf32a"
+    },
+    "src/mission_control/mission_control/ball_fine_approach.py": {
+      "before_sha256": "44d2bec2652ea31fff477fd569a8f06f74d93acf021c4df72987682391ea90f6",
+      "after_sha256": "e99835906dd695b026aab56fdd5827ed1e3c63324178ad4174f06ec6a2442526"
+    },
+    "src/mission_control/mission_control/pickup_walk_reservation.py": {
+      "before_sha256": "e90da866166222734206f9982f6ff39d260cdf47542d0760e00cda7b59f50922",
+      "after_sha256": "91d7a96394d27d7b57cd0718a1d89cc4e20f8ee0788404b4a299a57d667a0683"
+    },
+    "src/mission_control/test/test_catalog75_requested_motions.py": {
+      "before_sha256": "04277f301a0cb6e4649b16c0ee0e19cebc90e10c9208d7746521527144106c7c",
+      "after_sha256": "90ad49aabddcad754adfbff5fd36d536bec504f9ec851923f51e8970d4f67e1f"
+    },
+    "src/mission_control/test/test_line_turn_prequeue.py": {
+      "before_sha256": "83138be184f9c6ddda0b9fc3a95d1c5842626191f28033bf957be21ab3b6ffb3",
+      "after_sha256": "192578cba3e5ae4e4101bcdf76dbc7372878c5a956c882b4f9560a35d814b454"
+    },
+    "src/mission_control/test/test_selective_motion_speed.py": {
+      "before_sha256": "579cf183497457ee0a389e36002f0e09c3f03f3170a0eac9df06e3eae709b9db",
+      "after_sha256": "a1b09534f752db6ef46e3ca30d7c12f294adb587029eff0a067b3061ad689c8b"
+    },
+    "src/mission_control/test/test_catalog74_goal_fine.py": {
+      "before_sha256": "4ad9540ccd7a30151dd670bf3749242ee86d47aa54c1db53cf607379a12edbe8",
+      "after_sha256": "1cd7d0da7d9f954a5f9715903884c85d1c09c706e7f3eec7640e0905215012fa"
+    },
+    "src/mission_control/test/test_motion_command_bridge.py": {
+      "before_sha256": "f61e67d4d8d9884d63ca2e3502a2b28f5ac60536b86c25b871b5f1bb3f7fabc4",
+      "after_sha256": "8679e96f0df28bdaf52b34e25baacbc97b125fb03068e680ab83ce1e257b4249"
+    },
+    "src/mission_control/test/test_catalog76_turn_crab.py": {
+      "before_sha256": "8256ac3b94beeb9eb4ce3f64f994123933b6195898b47da48807f7576920b053",
+      "after_sha256": "e1ec48b8fd9158062b67d27a74f52113412b86171cda0411366ce0d191844f53"
+    },
+    "src/mission_control/test/test_catalog75_left_turn.py": {
+      "before_sha256": "a5708117dc12592dc918211317357cac7e5361075ced6ad97f75af4ddbdc047d",
+      "after_sha256": "e0523ee6bfa6f5edaa6aa0545438bd1f908e0e6d795e1622ef2073c1a952be8a"
+    },
+    "src/irc_step_motion_executor/config/motion_aliases.yaml": {
+      "before_sha256": "7a9efb577c55209079cce3096566c9b4eb81442f5af5623b9db2cb1e504f6ad6",
+      "after_sha256": "53c99b20f79395e21e6feab51d3c851a763469f2b57de90df9ea4a98c33f6ef4"
+    },
+    "src/irc_step_motion_executor/test/test_catalog_only_core.cpp": {
+      "before_sha256": "7af19855ae52e1f046db6364b2e678b604bb45fc6dd6100094b9905d19cae7b4",
+      "after_sha256": "1da6a605e6764b3ccfb15ff2b4348fd4df0ccb5b5d45e149c686d1eb69795be4"
+    },
+    "src/irc_step_motion_executor/test/test_sdk_executor_core.cpp": {
+      "before_sha256": "6fd7dcdf9d20bed422bc870286d3466c2a0bb58a787cb66b34cfa52eadac5bc1",
+      "after_sha256": "2572b62670a9b0762124e7448d51a58a0269bd70e32ec42d26bf428bf45298f4"
+    },
+    "external_sdk/gui_aligned/robot_motion_player.cpp": {
+      "before_sha256": "34e1c83bdb02e28c7f2d41bdb96a5159e465a0fb85fa222c74875db015c74bc6",
+      "after_sha256": "0976ee40f466b1a9e2f1f207559cfedb745ad592bcf8073f7effee90466f8300"
+    },
+    "external_sdk/gui_aligned/test_ball_fine_queue.cpp": {
+      "before_sha256": "bb12a3fe24420982f9e6b964b94b0fef20a47237cba58dd2367683b36f71a92b",
+      "after_sha256": "603457919c8835a536eed5f6e717ad3d87781b73b7e4e21dc38eff51d0cb334d"
+    },
+    "artifacts/robot_motions_pc.json": {
+      "before_sha256": "c99c66336e7012c2a7e0d79a16b9b4bcb7acf899d8a2173ea9e77d529ed8140f",
+      "after_sha256": "ba22f3027437212c412528c2286603474c938a2d88690cd0187e40e0d9a60295"
+    },
+    "artifacts/robot_motions_runtime.json": {
+      "before_sha256": "2dda19a8c67c4faf37924d518baa22bc0083952b6d1a805ce9b0e338e66287a8",
+      "after_sha256": "2cb49d64a8f868890c1aa1a4483bc2e0d6d53616b809c717dfa5b114e257787c"
+    }
+  },
+  "new_test": "src/mission_control/test/test_catalog77_p_motions.py"
+}

@@ -66,7 +66,7 @@ class MissionPhaseManager:
     EXECUTION_MOTIONS = {
         "PICKUP_NOW": frozenset({"pickup", "pick_ball", "pickup_400", "pickup_500"}),
         "SHOT": frozenset({"goal_shot", "shoot", *{
-            f"goal_shot_region_{region}" for region in range(1, 5)
+            f"goal_shot_region_{region}" for region in range(1, 9)
         }}),
         "GO": frozenset({"hurdle", "forward"}),
     }

@@ -1,0 +1,51 @@
+{
+  "production_code_modified_by_diagnosis": false,
+  "deployed_decision_matches_working_copy": true,
+  "unchanged_functions_vs_pre_60pct_HEAD": {
+    "_fresh_observations": true,
+    "_recent_walking_input": true,
+    "_remember_line_corner": true,
+    "_apply_pending_line_corner": true,
+    "_latch_ball_approach_entry": true,
+    "_line_only_prequeue_allowed": true
+  },
+  "diagnostic_scenarios": {
+    "versions": [
+      "current",
+      "ac383da",
+      "08a75de",
+      "18e89fd"
+    ],
+    "cases_per_version": 18,
+    "passes_per_version": 18,
+    "input_capture_ages_sec": [
+      0.1,
+      0.6,
+      371.409,
+      -0.1
+    ],
+    "boundary_scheduler_enabled_variants": [
+      false,
+      true
+    ],
+    "meaning": "Tests verify reproduction of rejection/inconsistent behavior, not that this behavior is safe or fixed."
+  },
+  "same_related_test_suite": {
+    "versions": [
+      "current",
+      "ac383da",
+      "08a75de"
+    ],
+    "tests_per_version": 283,
+    "passed_per_version": 273,
+    "failed_per_version": 10,
+    "failed_node_ids_identical": true
+  },
+  "confirmed_runtime_evidence": [
+    "First four STRAIGHT commands end without prequeue with capture_not_fresh and 10/10 usable frames.",
+    "Corner WAIT is line_corner_waiting_for_fresh_distance; next decision wait_sec=11.434.",
+    "System realtime-minus-monotonic offset jumps forward about 371.409 seconds after camera startup."
+  ],
+  "inference_limit": "No recorded capture ages or ball vision_transport messages from the failing interval. NTP-induced camera/ROS timestamp mismatch is strongly supported but exact per-frame age and ball rejection cause cannot be recovered from these logs.",
+  "rerun_current": "source /opt/ros/humble/setup.bash; export PYTHONPATH=\"src/mission_control:src/step:src/mission_control/test:$PYTHONPATH\"; python3 -m pytest -q -p no:cacheprovider artifacts/20261106_reservation_clock_diagnosis/test_clock_diagnosis.py"
+}

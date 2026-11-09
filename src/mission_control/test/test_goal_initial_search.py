@@ -93,7 +93,7 @@ def test_goal_acquisition_ends_scan_and_preserves_normal_approach(clock, complet
     for _ in range(completed_scans):
         command = goal_frame(node, clock)[-1]
         finish_turn(node, clock, command)
-    commands = goal_frame(node, clock, approaching_goal())
+    commands = goal_frame(node, clock, {**approaching_goal(), 'camera_fx_px': 900.0})
     assert not node.goal_initial_search.active
     assert commands[-1]['valid']
     assert not commands[-1]['source_command'].get('goal_initial_search')

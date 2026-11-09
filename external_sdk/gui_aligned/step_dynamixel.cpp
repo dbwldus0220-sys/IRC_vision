@@ -474,6 +474,32 @@ int16_t Dxl::SetPresentMode(int16_t Mode)
 bool Dxl::VerifyTorqueEnabled(bool enabled)
 {
     if (!port_opened_) return false;
+    dynamixel::GroupSyncRead reader(portHandler, packetHandler, DxlReg_TorqueEnable, 1);
+    for (int id = 0; id < NUMBER_OF_DYNAMIXELS; ++id) {
+        if (MotorEnabled(id) && !reader.addParam(id)) {
+            std::cerr << "[Error] Cannot request torque verification, ID: " << id << std::endl;
+            return false;
+        }
+    }
+    bool complete = reader.txRxPacket() == COMM_SUCCESS;
+    if (complete) {
+        for (int id = 0; id < NUMBER_OF_DYNAMIXELS; ++id) {
+            if (!MotorEnabled(id)) continue;
+            uint8_t error = 0;
+            if (!reader.isAvailable(id, DxlReg_TorqueEnable, 1)
+                || !reader.getError(id, &error)) {
+                complete = false;
+                break;
+            }
+            if (error != 0 || reader.getData(id, DxlReg_TorqueEnable, 1) != (enabled ? 1u : 0u)) {
+                std::cerr << "[Error] Torque verification failed, ID: " << id << std::endl;
+                return false;
+            }
+        }
+    }
+    if (complete) return true;
+    // SyncRead 실패 시 기존 개별 읽기로 재확인하고 실패한 모터 ID를 남긴다.
+    std::cerr << "[Warning] Group torque verification incomplete; retrying individual reads" << std::endl;
     for (int id = 0; id < NUMBER_OF_DYNAMIXELS; ++id) {
         if (!MotorEnabled(id)) continue;
         uint8_t value = 0, error = 0;

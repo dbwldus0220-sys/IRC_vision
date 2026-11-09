@@ -31,6 +31,8 @@ setup(
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
+            "camera_supervisor="
+            "mission_control.camera_supervisor_node:main",
             "motion_decision_node="
             "mission_control.motion_decision_node:main",
             "motion_command_bridge_node="

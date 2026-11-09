@@ -1,0 +1,164 @@
+{
+  "source": "robot_motions(79).json",
+  "source_sha256": "74aa51d231d34352f8dc796048340c790d67334e75530a5cc3993417ffab17a8",
+  "updated_motions": 3,
+  "updated_aliases": 2,
+  "unrelated_motions_preserved": 148,
+  "durations_seconds": {
+    "p공후 제자리좌회전": {
+      "before": 2.754736842105263,
+      "after": 2.2436090225563907
+    },
+    "p골대후제자리좌회전": {
+      "before": 2.754736842105263,
+      "after": 2.2436090225563907
+    },
+    "p라인복귀좌회전공용": {
+      "before": 2.06,
+      "after": 2.168421052631579
+    }
+  },
+  "catalog_tests": {
+    "passed": 412,
+    "failed": 0
+  },
+  "sdk_tests": {
+    "passed": 7,
+    "failed": 0
+  },
+  "executor_focused_tests": {
+    "passed": 4,
+    "failed": 0
+  },
+  "regression_before": {
+    "passed": 1151,
+    "failed": 52
+  },
+  "regression_after": {
+    "passed": 1151,
+    "failed": 52
+  },
+  "new_regression_failures": [],
+  "unchanged_regression_failures": [
+    "src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.43-120-1]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.51-0-2]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.51-100-2]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.43-120-1]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.51-0-2]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.51-100-2]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_fine_forward_1-0.43-120-1]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_fine_forward_1-0.51-0-2]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_fine_forward_1-0.51-100-2]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.43-120-1]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.51-0-2]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.51-100-2]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_import_preserves_source_targets_and_applies_speed_once",
+    "src/mission_control/test/test_goal_shot_regions.py::test_motion_toward_nominal_target_until_zone_entry[0.51--101--6.0-GOAL_CAMERA90_CRAB_LEFT]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_motion_toward_nominal_target_until_zone_entry[0.51-101-6.0-GOAL_CAMERA90_CRAB_RIGHT]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_motion_toward_nominal_target_until_zone_entry[0.57-0-0.0-GOAL_CAMERA90_FINE_FORWARD_3]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.43--120-4]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.43-0-1]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.43-120-1]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.430001--120-4]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.430001-120-1]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.51--0.001-3]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.51--100-3]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.51--120-None]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.51-0-2]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.51-0.001-2]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.51-100-2]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.51-120-None]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.510001--100-3]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.510001--100.001-None]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.510001-100-2]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.510001-100.001-None]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.57--100-None]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.57-0-None]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.57-100-None]",
+    "src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.571-0-None]",
+    "src/mission_control/test/test_motion_command_bridge.py::test_failed_grasp_check_pose_keeps_grasp_unknown_and_continues_exit_composite",
+    "src/mission_control/test/test_motion_command_bridge.py::test_grasp_verification_uses_three_second_pause_after_pose",
+    "src/mission_control/test/test_motion_command_bridge.py::test_production_action_mapping_contains_only_approved_contract",
+    "src/mission_control/test/test_motion_command_bridge.py::test_shot_retry_does_not_repeat_completed_pose_preparation",
+    "src/mission_control/test/test_motion_command_bridge.py::test_shot_waits_for_running_fine_motion_and_uses_only_completed_history",
+    "src/mission_control/test/test_motion_command_bridge.py::test_shot_without_fine_only_approach_keeps_direct_scoring[actions0]",
+    "src/mission_control/test/test_motion_command_bridge.py::test_shot_without_fine_only_approach_keeps_direct_scoring[actions1]",
+    "src/mission_control/test/test_motion_command_bridge.py::test_supported_action_builds_executor_request[SHOT-goal_shot]",
+    "src/mission_control/test/test_pickup_exit_observation_dwell.py::test_missing_dwell_notice_keeps_existing_fresh_input_and_settle_policy",
+    "src/mission_control/test/test_pickup_exit_observation_dwell.py::test_next_turn_keeps_normal_pause",
+    "src/mission_control/test/test_pickup_exit_observation_dwell.py::test_single_good_heading_and_repeated_capture_do_not_authorize_turn",
+    "src/mission_control/test/test_pickup_exit_observation_dwell.py::test_unusable_input_waits_only_until_next_usable_observation[10.51]",
+    "src/mission_control/test/test_pickup_exit_observation_dwell.py::test_unusable_input_waits_only_until_next_usable_observation[10.73]",
+    "src/mission_control/test/test_pickup_exit_observation_dwell.py::test_unusable_input_waits_only_until_next_usable_observation[12.17]",
+    "src/mission_control/test/test_post_ball_goal_handoff.py::test_first_goal_navigation_preserves_support_transition_holds[GOAL_CAMERA90_BACKWARD_1-line_forward_6]",
+    "src/mission_control/test/test_post_ball_goal_handoff.py::test_first_goal_navigation_preserves_support_transition_holds[GOAL_CAMERA90_BACKWARD_1-post_ball_line_turn_right_3]"
+  ],
+  "import_utility_combined_run": {
+    "passed": 127,
+    "failed": 1,
+    "existing_failure": "tools/test_upsert_motion_catalog.py::test_production_runtime_preserves_original_shoulders_and_other_fields",
+    "reason": "Existing untouched motion speeds do not all equal PC speed multiplied by 0.95.",
+    "policy_mismatch_motion_counts": {
+      "before": 102,
+      "after": 101
+    },
+    "first_unchanged_mismatch": "찐공확인자세"
+  },
+  "checks": [
+    "PC and runtime catalogs have 151 unique motions and every alias resolves",
+    "All frame angle/torque motor IDs are 0..22",
+    "Original source frames, torque, timing and repeat counts preserved",
+    "Imported pose names have consistent angles and torques",
+    "Both goal exits preserve first-right/second-left direction and complete into line alignment",
+    "Both pickup exits preserve first-right/second-left direction",
+    "Forward/recovery/recovery/forward reservations use updated duration and complete",
+    "New exit composites run after grasp check and all four shot regions, then start forward",
+    "Unrelated 148 motions unchanged in each catalog"
+  ],
+  "scope": "Offline fake hardware and Python mission harnesses. Physical balance, yaw and dynamics simulation not tested. Existing unrelated regression failures remain.",
+  "robot_executed": false,
+  "executor_full_suite": "Stopped during expensive legacy GUI parity test; four relevant executor test targets passed separately.",
+  "changed_files": {
+    "artifacts/robot_motions_pc.json": {
+      "before_sha256": "79606878a4457d9c0bc2d054a03b0cbb149658852cd27ff11098135af2045869",
+      "after_sha256": "0a8afdb03bfc9c4ad4410096bcf1fb73e3611817d1e2e2292558fbb4bec0b4d8"
+    },
+    "artifacts/robot_motions_runtime.json": {
+      "before_sha256": "586ef00bbe3f1d49cef1e3b28865529efac8c1b7174af0fbed6b274a761f4452",
+      "after_sha256": "4cfd6175f1ca7d8d36041f1035d4d9fa30718a3c36c08efe2fe559b25e7fee5f"
+    },
+    "external_sdk/gui_aligned/test_ball_fine_queue.cpp": {
+      "before_sha256": "deeb0a2fcb8294950fec803a9503241f6731ae5509abddd503c922181f1ed6dc",
+      "after_sha256": "3e7a7ee9eacb60a619b8de3aad98f214a5a7512e924775ae4f64e65685e4140b"
+    },
+    "src/irc_step_motion_executor/config/motion_aliases.yaml": {
+      "before_sha256": "582c136eb057bd699eeb53a4e3c7b4f70388a8cc86de84ef8ba545752409dcf1",
+      "after_sha256": "c12d01600756a755d2a1116456f64cae634383abf5fe82bf7718a85530af625c"
+    },
+    "src/mission_control/README.md": {
+      "before_sha256": "38bdf0c970e8be0b282b7bc3d7bd9b44989487d92c15763f7f32cfa06930795a",
+      "after_sha256": "547321c4d37e302af63ddd740602e3262df70a04dbd45f0076b747412cd5a99d"
+    },
+    "src/mission_control/mission_control/motion_decision_node.py": {
+      "before_sha256": "688fb414afc4d35a40f591e146983f8d4eedc6317f53f52c79aa38dbc90cf32a",
+      "after_sha256": "2ae075711329239254f2502d0229c9cdf65c777deb3e31554b8eb9cc0a2bddc2"
+    },
+    "src/mission_control/test/test_catalog77_mode_routes.py": {
+      "before_sha256": "91c973bf5a73eafaa01aa8553416f690add0d27d2381762d4a7fd43b5e2435a3",
+      "after_sha256": "d95992076842ae4a1f325cef8c5d0ba343738937ef84ec28c5449d83d70145e0"
+    },
+    "src/mission_control/test/test_catalog78_transitions.py": {
+      "before_sha256": "bb1431eae10d99686ae666769b26d6411ea090b725d2c22279bfe96a36d84c90",
+      "after_sha256": "221ccf283e64b9a59950d987f8ac4e3fffd62dd87f49a0b1e153e2bb97b8c64b"
+    },
+    "src/mission_control/test/test_goal_shot_regions.py": {
+      "before_sha256": "d2ca2a1f7a8b9ceeb877fb3836a76a1786bffff89239e1828918e6ff9ad4a848",
+      "after_sha256": "9926f79e46742e576ed72a7888064a7c34a2b97caf71d35bf88aa59eb0f23aad"
+    },
+    "src/mission_control/test/test_motion_command_bridge.py": {
+      "before_sha256": "8679e96f0df28bdaf52b34e25baacbc97b125fb03068e680ab83ce1e257b4249",
+      "after_sha256": "841f412d0e6be93c947a258d8350c286282950d2a60ab4a98fd28a14d8566088"
+    }
+  },
+  "new_test": "src/mission_control/test/test_catalog79_exits.py"
+}

@@ -1,0 +1,40 @@
+[
+  {
+    "case": "no_ball_ground_line_right",
+    "action": "RECOVER_RIGHT_TURN_RIGHT_4",
+    "valid": true,
+    "reason": "ball_entry_line_recovery",
+    "heading_source": "ground",
+    "heading": 30.0
+  },
+  {
+    "case": "no_ball_ground_line_straight",
+    "action": "STRAIGHT_2",
+    "valid": true,
+    "reason": "ball_entry_line_forward",
+    "heading_source": "ground",
+    "heading": 0.0
+  },
+  {
+    "case": "no_ball_ground_no_line",
+    "action": "STRAIGHT_2",
+    "valid": true,
+    "reason": "ball_entry_forward_without_line",
+    "heading_source": "ground",
+    "heading": null
+  },
+  {
+    "case": "ball_ground_left_line_right",
+    "action": "RECOVER_LEFT_TURN_LEFT_4",
+    "valid": true,
+    "reason": "ball_entry_ground_recovery",
+    "heading_source": "ball_ground",
+    "heading": -30.0
+  },
+  {
+    "case": "ball_ground_lost_after_acquisition",
+    "action": "STOP",
+    "valid": false,
+    "reason": "ball_entry_waiting_for_valid_ground_ball"
+  }
+]

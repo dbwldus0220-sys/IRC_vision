@@ -1,0 +1,115 @@
+Internal ctest changing into directory: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+Test project /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+    Start  9: test_catalog_only_core
+1/8 Test  #9: test_catalog_only_core .............   Passed    0.20 sec
+    Start 10: test_motion_json_catalog
+2/8 Test #10: test_motion_json_catalog ...........   Passed    0.18 sec
+    Start 11: test_sdk_executor_core
+3/8 Test #11: test_sdk_executor_core .............   Passed    0.23 sec
+    Start 12: test_queue_control_tick
+4/8 Test #12: test_queue_control_tick ............   Passed    0.17 sec
+    Start 13: test_robot_motion_player_backend
+5/8 Test #13: test_robot_motion_player_backend ...   Passed    0.17 sec
+    Start 18: test_sdk_executor_driver
+6/8 Test #18: test_sdk_executor_driver ...........***Failed    0.19 sec
+-- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+ - /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_sdk_executor_driver --gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_driver.gtest.xml
+Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+[==========] Running 10 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 10 tests from SdkExecutorDriver
+[ RUN      ] SdkExecutorDriver.RequestPublishesImmediateRunningStatus
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_sdk_executor_driver.cpp:110: Failure
+Expected equality of these values:
+  fixture.backend.started_motion_names[0]
+    Which is: "p\xEC\xA0\x84\xEC\xA7\x84" "45(8\xED\x9A\x8C)"
+    As Text: "p전진45(8회)"
+  "R전진45도(8회)"
+    Which is: "R\xEC\xA0\x84\xEC\xA7\x84" "45\xEB\x8F\x84(8\xED\x9A\x8C)"
+    As Text: "R전진45도(8회)"
+[  FAILED  ] SdkExecutorDriver.RequestPublishesImmediateRunningStatus (3 ms)
+[ RUN      ] SdkExecutorDriver.InvalidAndUnsupportedRequestsPublishRejections
+[       OK ] SdkExecutorDriver.InvalidAndUnsupportedRequestsPublishRejections (2 ms)
+[ RUN      ] SdkExecutorDriver.NullableCorrelationFieldsRemainNull
+[       OK ] SdkExecutorDriver.NullableCorrelationFieldsRemainNull (3 ms)
+[ RUN      ] SdkExecutorDriver.CancelCallbackPublishesAndTerminalPollPublishes
+[       OK ] SdkExecutorDriver.CancelCallbackPublishesAndTerminalPollPublishes (2 ms)
+[ RUN      ] SdkExecutorDriver.StaleCancelDoesNotCancelActiveMotion
+[       OK ] SdkExecutorDriver.StaleCancelDoesNotCancelActiveMotion (2 ms)
+[ RUN      ] SdkExecutorDriver.PollWithoutActiveRequestPublishesNothing
+[       OK ] SdkExecutorDriver.PollWithoutActiveRequestPublishesNothing (3 ms)
+[ RUN      ] SdkExecutorDriver.TerminalPollPublishesSucceededStatus
+[       OK ] SdkExecutorDriver.TerminalPollPublishesSucceededStatus (2 ms)
+[ RUN      ] SdkExecutorDriver.SuppressesIdenticalRunningStatusAtControlRate
+[       OK ] SdkExecutorDriver.SuppressesIdenticalRunningStatusAtControlRate (3 ms)
+[ RUN      ] SdkExecutorDriver.BackendExceptionPublishesFailedWithoutEscaping
+[       OK ] SdkExecutorDriver.BackendExceptionPublishesFailedWithoutEscaping (3 ms)
+[ RUN      ] SdkExecutorDriver.ThirdMotionCameraStartsAtQueueBoundaryWithoutAnotherBackendPoll
+[       OK ] SdkExecutorDriver.ThirdMotionCameraStartsAtQueueBoundaryWithoutAnotherBackendPoll (2 ms)
+[----------] 10 tests from SdkExecutorDriver (25 ms total)
+
+[----------] Global test environment tear-down
+[==========] 10 tests from 1 test suite ran. (25 ms total)
+[  PASSED  ] 9 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] SdkExecutorDriver.RequestPublishesImmediateRunningStatus
+
+ 1 FAILED TEST
+-- run_test.py: return code 1
+-- run_test.py: inject classname prefix into gtest result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_driver.gtest.xml'
+-- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_sdk_executor_driver.gtest.xml'
+
+    Start 19: test_startup_pose_gate
+7/8 Test #19: test_startup_pose_gate .............   Passed    0.17 sec
+    Start 20: test_startup_pose_catalog
+8/8 Test #20: test_startup_pose_catalog ..........***Failed    2.06 sec
+-- run_test.py: invoking following command in '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor':
+ - /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_startup_pose_catalog --gtest_output=xml:/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_startup_pose_catalog.gtest.xml
+Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+[==========] Running 7 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 7 tests from StartupPoseCatalog
+[ RUN      ] StartupPoseCatalog.AcceptsRepeatedNameWithIdenticalAngles
+[       OK ] StartupPoseCatalog.AcceptsRepeatedNameWithIdenticalAngles (1 ms)
+[ RUN      ] StartupPoseCatalog.RejectsRepeatedNameWithDifferentAngles
+[       OK ] StartupPoseCatalog.RejectsRepeatedNameWithDifferentAngles (0 ms)
+[ RUN      ] StartupPoseCatalog.RejectsRepeatedNameWithMissingMotor
+[       OK ] StartupPoseCatalog.RejectsRepeatedNameWithMissingMotor (1 ms)
+[ RUN      ] StartupPoseCatalog.LoadsGeonStartupPoseWithDefaultPolicy
+[       OK ] StartupPoseCatalog.LoadsGeonStartupPoseWithDefaultPolicy (271 ms)
+[ RUN      ] StartupPoseCatalog.PolicyOffChangesOnlySelectedAxesToVerifiedPcPose
+[       OK ] StartupPoseCatalog.PolicyOffChangesOnlySelectedAxesToVerifiedPcPose (883 ms)
+[ RUN      ] StartupPoseCatalog.LoadsCatalog49ForwardStartWithEveryPolicyCombination
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/src/irc_step_motion_executor/test/test_startup_pose_catalog.cpp:128: Failure
+Value of: irc_step_motion_executor::load_startup_pose_with_policy( TEST_RUNTIME_CATALOG, TEST_PC_CATALOG, "김오들(앞먼저닿음)", head, shoulder, actual, error)
+  Actual: false
+Expected: true
+startup pose not found: 김오들(앞먼저닿음)
+[  FAILED  ] StartupPoseCatalog.LoadsCatalog49ForwardStartWithEveryPolicyCombination (88 ms)
+[ RUN      ] StartupPoseCatalog.LoadsCatalog51StartupWithEveryPolicyCombination
+[       OK ] StartupPoseCatalog.LoadsCatalog51StartupWithEveryPolicyCombination (627 ms)
+[----------] 7 tests from StartupPoseCatalog (1871 ms total)
+
+[----------] Global test environment tear-down
+[==========] 7 tests from 1 test suite ran. (1871 ms total)
+[  PASSED  ] 6 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] StartupPoseCatalog.LoadsCatalog49ForwardStartWithEveryPolicyCombination
+
+ 1 FAILED TEST
+-- run_test.py: return code 1
+-- run_test.py: inject classname prefix into gtest result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_startup_pose_catalog.gtest.xml'
+-- run_test.py: verify result file '/home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor/test_results/irc_step_motion_executor/test_startup_pose_catalog.gtest.xml'
+
+
+75% tests passed, 2 tests failed out of 8
+
+Label Time Summary:
+gtest    =   3.36 sec*proc (8 tests)
+
+Total Test time (real) =   3.37 sec
+
+The following tests FAILED:
+	 18 - test_sdk_executor_driver (Failed)
+	 20 - test_startup_pose_catalog (Failed)
+Errors while running CTest

@@ -1,0 +1,3070 @@
+........................................................................ [  5%]
+........................................................................ [ 11%]
+........................................................................ [ 17%]
+........................................................................ [ 23%]
+.....................FF........FF.F..................................... [ 29%]
+........................................................................ [ 35%]
+.........................F.............................................. [ 41%]
+F...........................F........................................... [ 47%]
+........................................................................ [ 53%]
+........................................................................ [ 59%]
+........................................................................ [ 65%]
+........FF.F..FFFFF....FF..FFFFFFFFFF.......FFF..F.F.FF.F.FF.F.FF.F.F... [ 71%]
+..........F..FFF..............F....F.....F.............................. [ 77%]
+........................................................................ [ 83%]
+........................................................................ [ 89%]
+........................................................................ [ 95%]
+.....................................FF............                      [100%]
+=================================== FAILURES ===================================
+_____ test_shot_without_fine_only_approach_keeps_direct_scoring[actions0] ______
+
+actions = []
+
+    @pytest.mark.parametrize("actions", [
+        [], ["BALL_FINE_FORWARD_8"],
+    ])
+    def test_shot_without_fine_only_approach_keeps_direct_scoring(actions):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(actions, 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            complete_active_motion(bridge)
+            if bridge.motion_in_progress:
+                complete_active_motion(bridge)
+        bridge.navigation_command_callback(navigation_message(action="SHOT", command_id=10))
+>       assert bridge.active_motion_id == "goal_shot"
+E       AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E         - goal_shot
+E         + goal_fine_prepare_90
+
+src/mission_control/test/test_motion_command_bridge.py:388: AssertionError
+_____ test_shot_without_fine_only_approach_keeps_direct_scoring[actions1] ______
+
+actions = ['BALL_FINE_FORWARD_8']
+
+    @pytest.mark.parametrize("actions", [
+        [], ["BALL_FINE_FORWARD_8"],
+    ])
+    def test_shot_without_fine_only_approach_keeps_direct_scoring(actions):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(actions, 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            complete_active_motion(bridge)
+            if bridge.motion_in_progress:
+                complete_active_motion(bridge)
+        bridge.navigation_command_callback(navigation_message(action="SHOT", command_id=10))
+>       assert bridge.active_motion_id == "goal_shot"
+E       AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E         - goal_shot
+E         + goal_fine_prepare_90
+
+src/mission_control/test/test_motion_command_bridge.py:388: AssertionError
+___ test_shot_waits_for_running_fine_motion_and_uses_only_completed_history ____
+
+    def test_shot_waits_for_running_fine_motion_and_uses_only_completed_history():
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action="GOAL_CAMERA90_FINE_FORWARD_1", command_id=1))
+        assert not bridge.goal_fine_forward_completed
+        bridge.navigation_command_callback(navigation_message(action="SHOT", command_id=2))
+        assert decoded_messages(bridge.motion_status_publisher)[-1]["error_code"] == "REJECTED_BUSY"
+        assert len(bridge.executor_request_publisher.messages) == 1
+        complete_active_motion(bridge, "FAILED", "SDK_POSITION_TIMEOUT")
+        assert not bridge.goal_fine_forward_completed
+        bridge.navigation_command_callback(navigation_message(action="SHOT", command_id=3))
+>       assert bridge.active_motion_id == "goal_shot"
+E       AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E         - goal_shot
+E         + goal_fine_prepare_90
+
+src/mission_control/test/test_motion_command_bridge.py:422: AssertionError
+__________ test_shot_retry_does_not_repeat_completed_pose_preparation __________
+
+    def test_shot_retry_does_not_repeat_completed_pose_preparation():
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action="GOAL_CAMERA90_TURN_RIGHT_1", command_id=1))
+        complete_active_motion(bridge)
+        bridge.navigation_command_callback(navigation_message(action="SHOT", command_id=2))
+        complete_active_motion(bridge)
+        bridge._check_atomic_dwell(bridge.active_dwell_until)
+        complete_active_motion(bridge, "FAILED", "SDK_POSITION_TIMEOUT")
+        bridge.navigation_command_callback(navigation_message(action="SHOT", command_id=3))
+>       assert bridge.active_motion_id == "goal_shot"
+E       AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E         - goal_shot
+E         + goal_fine_prepare_90
+
+src/mission_control/test/test_motion_command_bridge.py:434: AssertionError
+________ test_production_action_mapping_contains_only_approved_contract ________
+
+    def test_production_action_mapping_contains_only_approved_contract():
+>       assert MotionCommandBridgeNode.ACTION_TO_MOTION_ID == (
+            EXPECTED_PRODUCTION_ACTIONS
+        )
+E       AssertionError: assert {'ALIGN_LEFT'...rd_45_5', ...} == {'ALIGN_LEFT'...rd_45_5', ...}
+E         Omitting 142 identical items, use -vv to show
+E         Left contains 1 more item:
+E         {'GOAL_SHOT_PREPARE': 'goal_fine_prepare_90'}
+E         Full diff:
+E           {
+E            'ALIGN_LEFT': 'stationary_turn_left',
+E            'ALIGN_RIGHT': 'stationary_turn_right',...
+E         
+E         ...Full output truncated (143 lines hidden), use '-vv' to show
+
+src/mission_control/test/test_motion_command_bridge.py:687: AssertionError
+________ test_supported_action_builds_executor_request[SHOT-goal_shot] _________
+
+action = 'SHOT', motion_id = 'goal_shot'
+
+    @pytest.mark.parametrize(
+        ("action", "motion_id"),
+        sorted(EXPECTED_PRODUCTION_ACTIONS.items()),
+    )
+    def test_supported_action_builds_executor_request(action, motion_id):
+        bridge = FakeBridge()
+    
+        bridge.navigation_command_callback(navigation_message(action=action))
+        if action in MotionCommandBridgeNode.GOAL_CRAB_ACTIONS:
+            assert not bridge.executor_request_publisher.messages
+            bridge._check_atomic_dwell(bridge.active_dwell_until)
+        if action == "GO":
+            assert bridge.active_motion_id == "hurdle_fine_forward_10"
+            complete_active_motion(bridge)
+            bridge._check_atomic_dwell(bridge.active_dwell_until)
+            assert bridge.active_motion_id == "hurdle"
+            return
+    
+        requests = decoded_messages(bridge.executor_request_publisher)
+>       assert requests == [
+            {
+                "action": action,
+                "command_id": 8000,
+                "event_id": 8,
+                "request_id": 8000,
+                "motion_id": motion_id,
+                "timeout_ms": 12000,
+            }
+        ]
+E       AssertionError: assert [{'action': '...are_90', ...}] == [{'action': '...l_shot', ...}]
+E         At index 0 diff: {'action': 'SHOT', 'command_id': 8000, 'event_id': 8, 'request_id': 8000, 'motion_id': 'goal_fine_prepare_90', 'timeout_ms': 12000} != {'action': 'SHOT', 'command_id': 8000, 'event_id': 8, 'request_id': 8000, 'motion_id': 'goal_shot', 'timeout_ms': 12000}
+E         Full diff:
+E           [
+E            {'action': 'SHOT',
+E             'command_id': 8000,
+E             'event_id': 8,
+E         -   'motion_id': 'goal_shot',...
+E         
+E         ...Full output truncated (5 lines hidden), use '-vv' to show
+
+src/mission_control/test/test_motion_command_bridge.py:711: AssertionError
+__________ test_grasp_verification_uses_three_second_pause_after_pose __________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff819f2f20>
+
+    def test_grasp_verification_uses_three_second_pause_after_pose(monkeypatch):
+        from test_motion_decision_node import (
+            FakeDecisionNode, arm_special_command, send_grasp_detections,
+        )
+        from mission_control.motion_decision_node import MotionDecisionNode
+    
+        monkeypatch.setattr("mission_control.motion_command_bridge_node.time.monotonic", lambda: 10.0)
+        bridge = FakeBridge()
+        enter_pickup_fine_alignment(bridge)
+        node = FakeDecisionNode("BALL_APPROACH")
+        arm_special_command(node, "PICKUP_NOW", 8000, 8)
+        continue_pickup_after_fine_alignment(bridge)
+        complete_pickup_motion_and_dwell(bridge, "pickup_pre_backward_camera_down")
+        complete_pickup_motion_and_dwell(bridge, "pickup_400")
+        assert bridge.active_motion_id == "pickup_grasp_check_pose"
+        offset = len(bridge.motion_status_publisher.messages)
+    
+        def deliver_statuses():
+            nonlocal offset
+            for message in bridge.motion_status_publisher.messages[offset:]:
+                MotionDecisionNode._motion_status_callback(node, message)
+            offset = len(bridge.motion_status_publisher.messages)
+    
+        send_grasp_detections(node, 1, [{"class_name": "grab", "confidence": 0.9}])
+        bridge.executor_status_callback(executor_status(
+            status="RUNNING", motion_id="pickup_grasp_check_pose",
+        ))
+>       deliver_statuses()
+
+src/mission_control/test/test_motion_command_bridge.py:980: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/test/test_motion_command_bridge.py:973: in deliver_statuses
+    MotionDecisionNode._motion_status_callback(node, message)
+src/mission_control/mission_control/motion_decision_node.py:2553: in _motion_status_callback
+    MotionDecisionNode._handle_motion_status(self, message)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_motion_decision_node.FakeDecisionNode object at 0xffff819a2140>
+message = std_msgs.msg.String(data='{"status":"RUNNING","command_id":8000,"event_id":8,"request_id":8000,"motion_id":"pickup_gra...ror_code":"","message":"","action":"PICKUP_NOW","source_node":"motion_command_bridge_node","motion_in_progress":true}')
+
+    def _handle_motion_status(
+        self,
+        message: String,
+    ) -> None:
+        """Track execution state reported by the command bridge."""
+        status_receive_monotonic = time.monotonic()
+        MotionDecisionNode._check_vision_clock(self, status_receive_monotonic)
+        try:
+            payload = json.loads(message.data)
+    
+            if not isinstance(payload, dict):
+                raise ValueError(
+                    "JSON must be an object"
+                )
+    
+        except (
+            json.JSONDecodeError,
+            TypeError,
+            ValueError,
+        ) as exc:
+            self.get_logger().warning(
+                "Invalid /motion/status: "
+                f"{type(exc).__name__}: {exc}"
+            )
+            return
+    
+        status = str(
+            payload.get("status", "")
+        ).strip().upper()
+    
+        action = payload.get("action")
+        command_id = payload.get("command_id")
+        event_id = payload.get("event_id")
+        error_code = payload.get("error_code")
+        status_message = payload.get("message")
+        dynamics_command = payload.get(
+            "dynamics_command"
+        )
+    
+        if normalize_general_action(action) is not None:
+            if status == "QUEUED":
+                issued = getattr(self, "post_ball_line_command_ids", [])
+                if (self.mission_phase == "LINE_TRACK_AFTER_PICKUP"
+                        and getattr(self, "post_ball_line_started_count", 0) == 2
+                        and len(issued) == MotionDecisionNode.POST_BALL_LINE_DECISIONS
+                        and command_id == issued[-1]
+                        and command_id == getattr(self, "post_ball_goal_camera_request_id", None)
+                        and command_id == getattr(self, "queued_general_command_id", None)
+                        and action == getattr(self, "queued_general_action", None)
+                        and getattr(self, "queued_general_source", None) == "line"):
+                    # The last Line decision is committed; no new Line geometry is needed.
+                    if getattr(self, "post_ball_goal_camera_queued_id", None) != command_id:
+                        self.get_logger().info(
+                            f"Post-pickup Goal camera preparation accepted before third start: "
+                            f"command_id={command_id}, action={action}"
+                        )
+                    self.post_ball_goal_camera_queued_id = command_id
+                    MotionDecisionNode._prepare_post_ball_goal_camera(self, status_receive_monotonic)
+                return
+            if (
+                (status == "REJECTED" or (
+                    command_id == getattr(self, "post_ball_goal_camera_queued_id", None)
+                    and status in {"FAILED", "TIMEOUT", "CANCELED", "CANCELLED", "UNSUPPORTED"}
+                ))
+                and action == getattr(self, "queued_general_action", None)
+                and command_id == getattr(
+                    self,
+                    "queued_general_command_id",
+                    None,
+                )
+            ):
+                if command_id == getattr(self, "post_ball_goal_camera_queued_id", None):
+                    # The head may already be up. Do not replan Line with that view.
+                    self.post_ball_line_run_failed = True
+                    self.post_ball_goal_camera_queued_id = None
+                    self.post_ball_goal_camera_ready_at = None
+                    self.post_ball_goal_preview = None
+                    self.get_logger().warning(
+                        f"Post-pickup Line reservation failed after camera preparation: "
+                        f"command_id={command_id}, status={status}"
+                    )
+                issued = getattr(self, "post_ball_line_command_ids", [])
+                if issued and command_id == issued[-1]:
+                    issued.pop()
+                    if command_id == getattr(self, "post_ball_goal_camera_request_id", None):
+                        self.post_ball_goal_camera_request_id = None
+                if getattr(self, "queued_general_source", None) == "line":
+                    self.line_prequeue_block_reason = f"reservation_rejected:{error_code}"
+                entry = getattr(self, "ball_entry_line_alignment", None)
+                if entry is not None:
+                    entry.on_status(command_id, status)
+                self.queued_general_action = None
+                self.queued_general_command_id = None
+                self.queued_general_source = None
+                self.pending_line_decision = None
+                self.pending_hurdle_final_sequence = None
+                return
+            if (
+                status == "RUNNING"
+                and not self.general_motion_gate.locked
+                and action == self.queued_general_action
+                and command_id == self.queued_general_command_id
+            ):
+                if (self.mission_phase == "LINE_TRACK_AFTER_PICKUP"
+                        and self.queued_general_source == "goal"):
+                    MotionDecisionNode._advance_post_ball_line_run(
+                        self, status_receive_monotonic, reserved_goal=True,
+                    )
+                self.general_motion_gate.on_command_published(
+                    action,
+                    command_id,
+                )
+                self.active_general_source = self.queued_general_source
+                if (self.active_general_source == "line"
+                        and getattr(self.planner, "line_offset_alignment_active", False)):
+                    self.line_offset_motion_command_id = command_id
+                self.queued_general_action = None
+                self.queued_general_command_id = None
+                self.queued_general_source = None
+            transition = self.general_motion_gate.on_motion_status(
+                action,
+                status,
+                command_id,
+                error_code,
+            )
+            if transition.matched:
+                MotionDecisionNode._record_stationary_status(self, payload, status_receive_monotonic)
+                if status == "RUNNING":
+                    identifier = str(payload.get("motion_id", ""))
+                    if identifier.startswith("ball_align_"):
+                        self.ball_fine_support = ball_fine_support_after(identifier)
+                        self.ball_fine_started_at = status_receive_monotonic
+                        self.ball_fine_duration_sec = ball_fine_duration_sec(identifier)
+                        self.ball_fine_running_id = command_id
+                        self.ball_fine_capture = None
+                        entry = getattr(self, "ball_entry_line_alignment", None)
+                        if entry is not None and entry.pending:
+                            entry.finish()
+                    else:
+                        self.ball_fine_running_id = None
+                        self.ball_fine_support = "standard"
+                        self.ball_fine_faulted = False
+                    self.line_boundary_dispatch_pending = False
+                    if (self.mission_phase == "LINE_TRACK_AFTER_PICKUP"
+                            and self.active_general_source == "line"
+                            and MotionDecisionNode._post_pickup_line_motion_started(payload)
+                            and command_id != getattr(self, "post_ball_line_running_command_id", None)):
+                        self.post_ball_line_running_command_id = command_id
+                        self.post_ball_line_running_since = status_receive_monotonic
+                        issued = getattr(self, "post_ball_line_command_ids", [])
+                        if command_id in issued:
+                            self.post_ball_line_started_count = issued.index(command_id) + 1
+                            self.get_logger().info(
+                                f"Post-pickup Line motion started: {self.post_ball_line_started_count}/3, "
+                                f"command_id={command_id}, action={action}"
+                            )
+                    self.hurdle_stationary_since = None
+                    self.goal_stationary_since = None
+                    entry = getattr(self, "ball_entry_line_alignment", None)
+                    if entry is not None:
+                        entry.on_status(command_id, status)
+                    if (MotionDecisionNode._ball_entry_line_running(self)
+                            and action in MotionDecisionNode.LINE_MOTION_CAPTURE_CONFIG
+                            and getattr(self, "approach_walk_started_at", None) is None):
+                        self.approach_walk_started_at = status_receive_monotonic
+                        stamp = MotionDecisionNode._current_ros_time_ns(self)
+                        duration = MotionDecisionNode.LINE_MOTION_CAPTURE_CONFIG[action][0]
+                        duration = MotionDecisionNode.BALL_RECOVERY_DURATION_SEC.get(
+                            payload.get("motion_id"), duration,
+                        )
+                        self.approach_walk_duration_sec = duration
+                        self.approach_walk_capture_after_ns = (
+                            stamp + int(duration * MotionDecisionNode.LINE_MOTION_CAPTURE_START_RATIO * 1e9)
+                            if stamp is not None else None
+                        )
+                        self.approach_walk_last_stamp_ns = None
+                        self.approach_walk_candidate = None
+                        self.approach_walk_capture_count = 0
+                    if (self.active_general_source in {"ball", "hurdle"}
+                            and action in MotionDecisionNode.APPROACH_WALK_DURATION_SEC
+                            and getattr(self, "approach_walk_started_at", None) is None
+                            and str(payload.get("motion_id", "")).startswith(
+                                ("line_forward_", "line_recovery_", "ball_approach_fine_forward_"))):
+                        self.approach_walk_started_at = status_receive_monotonic
+                        stamp = MotionDecisionNode._current_ros_time_ns(self)
+                        duration = MotionDecisionNode.APPROACH_WALK_DURATION_SEC[action]
+                        duration = MotionDecisionNode.BALL_RECOVERY_DURATION_SEC.get(
+                            payload.get("motion_id"), duration,
+                        )
+                        self.approach_walk_duration_sec = duration
+                        self.approach_walk_capture_after_ns = (
+                            stamp + int(duration * MotionDecisionNode.LINE_MOTION_CAPTURE_START_RATIO * 1e9)
+                            if stamp is not None else None
+                        )
+                        self.approach_walk_last_stamp_ns = None
+                        self.approach_walk_candidate = None
+                        self.approach_walk_capture_count = 0
+                    if (self.active_general_source == "goal"
+                            and (MotionDecisionNode._is_continuous_goal_action(action)
+                                 or action in MotionDecisionNode.GOAL_CRAB_DURATION_SEC)
+                            and getattr(self, "goal_forward_started_at", None) is None
+                            and str(payload.get("motion_id", "")).startswith(
+                                ("goal_camera_90_forward_", "goal_camera_90_fine_forward_",
+                                 "line_recovery_", "goal_camera_90_crab_"))):
+                        self.goal_forward_started_at = status_receive_monotonic
+                        stamp = MotionDecisionNode._current_ros_time_ns(self)
+                        crab = action in MotionDecisionNode.GOAL_CRAB_DURATION_SEC
+                        duration = (MotionDecisionNode.GOAL_CRAB_DURATION_SEC[action] if crab
+                                    else MotionDecisionNode.GOAL_FORWARD_DURATION_SEC[action])
+                        self.goal_forward_capture_after_ns = (
+                            stamp + int((duration * .60 if crab else MotionDecisionNode._goal_capture_delay(duration)) * 1e9)
+                            if stamp is not None else None
+                        )
+                        self.goal_forward_capture_count = 0
+                        self.goal_forward_capture_action = None
+                        self.goal_forward_last_stamp_ns = None
+                self._latch_critical_executor_fault(
+                    error_code=error_code,
+                    message=status_message,
+                    action=action,
+                    command_id=command_id,
+                    event_id=event_id,
+                )
+                if (
+                    status == "RUNNING"
+                    and self.active_general_source == "line"
+                    and self.active_line_motion_started_at is None
+                    and (self.mission_phase != "LINE_TRACK_AFTER_PICKUP"
+                         or MotionDecisionNode._post_pickup_line_motion_started(payload))
+                    and (action not in MotionDecisionNode.POST_SHOT_ALIGN_CAPTURE_CONFIG
+                         or payload.get("motion_id") == "post_ball_line_turn_" + action.removeprefix("POST_SHOT_LINE_TURN_").lower())
+                    and (not MotionDecisionNode._is_queueable_line_turn(action)
+                         or str(payload.get("motion_id", "")).startswith(("post_ball_line_turn_", "line_search_")))
+                ):
+                    MotionDecisionNode._start_line_motion_capture(
+                        self,
+                        str(action),
+                        payload.get("motion_id"),
+                    )
+                if status == "RUNNING":
+                    MotionDecisionNode._start_pickup_entry_observation(self, payload, status_receive_monotonic)
+            if transition.released:
+                observer = getattr(self, "pickup_entry_observation", None)
+                self.pickup_entry_ready_sample = (observer.completed_sample(
+                    payload, status_receive_monotonic, MotionDecisionNode._current_ros_time_ns(self),
+                    self.timeouts["ball"],
+                ) if observer is not None and getattr(self, "queued_general_command_id", None) is None else None)
+                if observer is not None:
+                    observer.reset()
+                self.line_boundary_dispatch_pending = False
+                entry = getattr(self, "ball_entry_line_alignment", None)
+                if entry is not None:
+                    was_entry = entry.active and entry.command_id == command_id
+                    entry.on_status(command_id, status)
+                    if was_entry:
+                        self.get_logger().info(
+                            f"BALL entry Line alignment ended: command_id={command_id}, status={status}"
+                        )
+                search = getattr(self, "goal_initial_search", None)
+                if search is not None:
+                    search.completed(command_id, status)
+                if status != "SUCCEEDED":
+                    # The bridge/executor discard the reservation on failure.
+                    if (entry is not None and entry.pending
+                            and self.active_general_source == "line"
+                            and self.ball_approach_entry_pending):
+                        entry.state = "FAILED"
+                    if (entry is not None and entry.active
+                            and entry.command_id == getattr(self, "queued_general_command_id", None)):
+                        entry.on_status(entry.command_id, "CANCELLED")
+                    self.queued_general_action = None
+                    self.queued_general_command_id = None
+                    self.queued_general_source = None
+                if command_id == getattr(self, "line_ground_recovery_command_id", None):
+                    self.line_ground_recovery_command_id = None
+                    self.line_ground_recovery_failed = status != "SUCCEEDED"
+                    if status == "SUCCEEDED":
+                        self.line_offset_alignment_refresh_pending = True
+                self.goal_stationary_since = (
+                    self.motion_stationary_since if status == "SUCCEEDED" else None
+                )
+                completed_source = self.active_general_source
+                reserved_goal_crab = bool(
+                    status == "SUCCEEDED" and completed_source == "goal"
+                    and action in MotionDecisionNode.GOAL_CRAB_DURATION_SEC
+                    and getattr(self, "queued_general_command_id", None) is not None
+                    and self.queued_general_action == action
+                    and self.queued_general_source == "goal"
+                )
+                reserved_line_turn = bool(
+                    status == "SUCCEEDED" and completed_source == "line"
+                    and getattr(self, "queued_general_source", None) == "line"
+                    and getattr(self, "queued_general_command_id", None) is not None
+                    and (MotionDecisionNode._is_queueable_line_turn(action)
+                         or MotionDecisionNode._is_queueable_line_turn(self.queued_general_action))
+                )
+                post_ball_line_preview_ready = bool(
+                    completed_source == "line" and str(action).startswith("POST_BALL_LINE_TURN_")
+                    and MotionDecisionNode._recent_walking_input(self, "line", status_receive_monotonic)
+                    and MotionDecisionNode._line_frame_is_usable(self, self.latest_info.get("line") or {})
+                )
+                self.approach_walk_started_at = None
+                self.approach_walk_capture_after_ns = None
+                if command_id == getattr(self, "line_offset_motion_command_id", None):
+                    self.line_offset_motion_command_id = None
+                    self.planner.line_offset_alignment_failed = status != "SUCCEEDED"
+                    if status != "SUCCEEDED" or (not reserved_line_turn
+                                                 and not MotionDecisionNode._is_continuous_line_action(action)
+                                                 and self.mission_phase != "LINE_TRACK_AFTER_PICKUP"):
+                        self.line_offset_min_rgb_stamp_ns = MotionDecisionNode._current_ros_time_ns(self)
+                        self.latest_info["line"] = None
+                        self.latest_time["line"] = None
+                        self.pending_line_decision = None
+                        self.general_motion_gate.required_vision_generation = (
+                            self.general_motion_gate.vision_generation + 1
+                        )
+                limiter = getattr(self, "lost_search_turn_limiter", None)
+                if limiter is not None and status != "SUCCEEDED":
+                    limiter.record_failure(completed_source, str(action))
+                if completed_source == "line":
+                    if (status == "SUCCEEDED"
+                            and MotionDecisionNode._is_continuous_line_action(action)
+                            and getattr(self, "queued_general_command_id", None) is None):
+                        self.line_boundary_dispatch_pending = self.mission_phase in {
+                            "AUTO", "LINE_TRACK", "LINE_TRACK_AFTER_PICKUP",
+                        }
+                        self.get_logger().info(
+                            f"Line completed without prequeue: action={action}, command_id={command_id}, "
+                            f"reason={getattr(self, 'line_prequeue_block_reason', None)}, "
+                            f"usable_frames={len(self.active_line_motion_frames)}/"
+                            f"{self.active_line_motion_target_frames}, "
+                            f"fresh_line={MotionDecisionNode._recent_walking_input(self, 'line', status_receive_monotonic)}"
+                        )
+                    sparse = getattr(self, "sparse_line_recovery", None)
+                    if sparse is not None:
+                        sparse.completed(str(action), status, MotionDecisionNode._current_ros_time_ns(self))
+                    self.line_motion_completed_at = status_receive_monotonic
+                    continuous_success = (
+                        status == "SUCCEEDED"
+                        and (MotionDecisionNode._is_continuous_line_action(action)
+                             or self.mission_phase == "LINE_TRACK_AFTER_PICKUP"
+                             or post_ball_line_preview_ready or reserved_line_turn)
+                    )
+                    # Walking can use recent in-motion frames, as prequeue does.
+                    # Discrete turns and failures still require a new observation.
+                    self.line_input_required_after = (
+                        None if continuous_success else status_receive_monotonic
+                    )
+                    self.line_motion_min_rgb_stamp_ns = (
+                        None if continuous_success
+                        else MotionDecisionNode._current_ros_time_ns(self)
+                    )
+                    corner = getattr(self, "pending_line_corner", None)
+                    if corner is not None:
+                        corner["motion_completed_at"] = self.line_input_required_after
+                        corner["minimum_rgb_stamp_ns"] = self.line_motion_min_rgb_stamp_ns
+                    if status != "SUCCEEDED":
+                        self.pending_line_corner = None
+                        self.line_corner_rearm_required = True
+                    if command_id == getattr(self, "remembered_corner_command_id", None):
+                        self.remembered_corner_command_id = None
+                        if status == "SUCCEEDED":
+                            # The remembered near point preceded this corner turn.
+                            self.planner.last_line_seen_direction = None
+                            if limiter is not None:
+                                limiter.complete_corner()
+                existing_pause = (
+                    (completed_source == "hurdle" and action in {
+                        "ALIGN_LEFT", "ALIGN_RIGHT", "TURN_LEFT", "TURN_RIGHT",
+                    })
+                    or (completed_source == "ball"
+                        and str(action).startswith("BALL_APPROACH_TURN_"))
+                    or (completed_source == "goal"
+                        and str(action).startswith("GOAL_CAMERA90_TURN_"))
+                    or (completed_source == "line" and str(action).startswith(
+                        ("POST_BALL_LINE_TURN_", "POST_SHOT_")
+                    ))
+                )
+                if (
+                    status == "SUCCEEDED" and not existing_pause and not reserved_line_turn
+                    and not reserved_goal_crab
+                    and MotionDecisionNode._needs_correction_dwell(action)
+                    and self.mission_phase != "LINE_TRACK_AFTER_PICKUP"
+                ):
+                    self.correction_post_motion_dwell_until = (
+                        status_receive_monotonic
+                        + MotionDecisionNode.CORRECTION_POST_MOTION_DWELL_SEC
+                    )
+                    self.correction_post_motion_source = (
+                        "ball" if (command_id is not None
+                                   and command_id == getattr(self, "ball_ground_tracking_command_id", None))
+                        else completed_source
+                    )
+                    self.line_offset_alignment_refresh_pending = (
+                        self.correction_post_motion_source == "line"
+                        and str(action).startswith(
+                            ("LINE_OFFSET_TURN_", "LINE_HEADING_TURN_", "LINE_SPARSE_"))
+                    )
+                self.active_general_source = None
+                if (completed_source == "hurdle" and status == "SUCCEEDED"
+                        and MotionDecisionNode._is_continuous_hurdle_action(action)
+                        and self.mission_phase != "HURDLE_POSITIONING"
+                        and not getattr(self, "hurdle_positioning_entry_pending", False)
+                        and MotionDecisionNode._recent_walking_input(self, "hurdle", status_receive_monotonic)):
+                    gate = self.general_motion_gate
+                    gate.required_vision_generation = gate.vision_generation
+                if (
+                    completed_source == "hurdle"
+                    and self.mission_phase == "HURDLE_POSITIONING"
+                ) or (
+                    completed_source in {"line", "hurdle"}
+                    and getattr(self, "hurdle_positioning_entry_pending", False)
+                ):
+                    if status != "SUCCEEDED":
+                        self.pending_hurdle_final_sequence = None
+                        self.hurdle_positioning_entry_pending = False
+                        self.hurdle_post_motion_dwell_until = None
+                        self.hurdle_stationary_since = None
+                    hurdle_turn = (
+                        completed_source == "hurdle"
+                        and action in {"ALIGN_LEFT", "ALIGN_RIGHT", "TURN_LEFT", "TURN_RIGHT"}
+                    )
+                    if status == "SUCCEEDED":
+                        # Include the motion that first crossed the entry distance.
+                        self.hurdle_stationary_since = self.motion_stationary_since
+                        self.hurdle_post_motion_dwell_until = (
+                            status_receive_monotonic
+                            + MotionDecisionNode.HURDLE_POST_MOTION_DWELL_SEC
+                            if hurdle_turn else None
+                        )
+                        if not hurdle_turn:
+                            self.latest_info["hurdle"] = None
+                            self.latest_time["hurdle"] = None
+                            gate = self.general_motion_gate
+                            gate.required_vision_generation = gate.vision_generation + 1
+                if (
+                    completed_source == "line"
+                    and self.mission_phase == "LINE_TRACK_AFTER_PICKUP"
+                    and status != "SUCCEEDED"
+                ):
+                    self.post_ball_line_run_failed = True
+                    MotionDecisionNode._discard_line_motion_capture(self)
+                    self.pending_line_decision = None
+                    self.get_logger().warning(
+                        f"Post-pickup Line driving aborted: action={action}, status={status}"
+                    )
+                    return
+                if (
+                    completed_source == "line"
+                    and self.mission_phase == "LINE_TRACK"
+                    and action == getattr(self, "post_shot_line_search_action", None)
+                ):
+                    # Finish each search turn before checking stationary Vision again.
+                    MotionDecisionNode._discard_line_motion_capture(self)
+                    self.pending_line_decision = None
+                    MotionDecisionNode._invalidate_post_ball_line_input(self)
+                    self.post_shot_line_search_failed = status != "SUCCEEDED"
+                    if status == "SUCCEEDED":
+                        self.post_shot_dwell_until = (
+                            status_receive_monotonic
+                            + MotionDecisionNode.POST_SHOT_DWELL_SEC
+                        )
+                    return
+                post_shot_exit_preview = (MotionDecisionNode._post_shot_exit_preview(self, status_receive_monotonic)
+                                          if status == "SUCCEEDED" and action == "POST_SHOT_FORWARD" else None)
+                if (
+                    completed_source == "line"
+                    and self.phase_manager.handle_post_shot_motion(action, status)
+                ):
+                    reserved_forward = (
+                        status == "SUCCEEDED"
+                        and str(action).startswith("POST_SHOT_LINE_TURN_")
+                        and getattr(self, "queued_general_action", None) == "POST_SHOT_FORWARD"
+                    )
+                    reserved_line_exit = (status == "SUCCEEDED" and action == "POST_SHOT_FORWARD"
+                                          and getattr(self, "queued_general_source", None) == "line")
+                    MotionDecisionNode._discard_line_motion_capture(self)
+                    self.pending_line_decision = None
+                    if not reserved_forward and not reserved_line_exit and post_shot_exit_preview is None:
+                        MotionDecisionNode._invalidate_post_ball_line_input(self)
+                    elif action == "POST_SHOT_FORWARD":
+                        self.line_input_required_after = None
+                        self.line_motion_min_rgb_stamp_ns = None
+                        self.general_motion_gate.required_vision_generation = self.general_motion_gate.vision_generation
+                    if status == "SUCCEEDED":
+                        if self.mission_phase in {"AUTO", "LINE_TRACK"} or action in {
+                            "POST_SHOT_TURN_RIGHT_9", "POST_SHOT_TURN_LEFT_4",
+                        }:
+                            MotionDecisionNode._clear_ball_navigation_state(self)
+                            MotionDecisionNode._invalidate_pickup_ball_input(self)
+                            # Release the scored Goal before normal Line planning.
+                            self.planner._clear_goal_tracking()
+                            self.planner.goal_lock_active = False
+                            self.planner.goal_terminal_requested = False
+                            self.planner.goal_ignore_until_clear = True
+                            self.latest_info["goal"] = None
+                            self.latest_time["goal"] = None
+                            if action in {
+                                "POST_SHOT_TURN_RIGHT_9", "POST_SHOT_TURN_LEFT_4",
+                            }:
+                                # Only the exit turn invalidates the pre-shot direction.
+                                self.planner.last_line_seen_direction = None
+                                self.post_shot_line_search_action = None
+                                self.post_shot_line_search_failed = False
+                                self.planner.post_ball_line_search_direction = (
+                                    "RIGHT" if "_RIGHT_" in action else "LEFT"
+                                )
+                        if reserved_forward:
+                            self.phase_manager.complete_post_shot_line_align()
+                            self.post_shot_turn_settled = False
+                            self.post_shot_dwell_until = None
+                        elif "_TURN_" in action:
+                            self.post_shot_turn_settled = False
+                            self.post_shot_dwell_until = (
+                                status_receive_monotonic
+                                + MotionDecisionNode.POST_SHOT_DWELL_SEC
+                            )
+                        self.planner.line_planner.stop("post_shot_motion_complete")
+                    self.get_logger().info(
+                        f"Post-shot motion ended: action={action}, "
+                        f"status={status}, phase={self.mission_phase}"
+                    )
+                    if post_shot_exit_preview is not None and not reserved_line_exit:
+                        MotionDecisionNode._publish_decision(self, post_shot_exit_preview)
+                    return
+                if completed_source == "goal":
+                    if action == "GOAL_SHOT_PREPARE":
+                        self.goal_shot_observe_until = (
+                            status_receive_monotonic + MotionDecisionNode.SHOT_REGION_OBSERVATION_SEC
+                            if status == "SUCCEEDED" else None
+                        )
+                    self.goal_forward_started_at = None
+                    self.goal_forward_capture_after_ns = None
+                    self.goal_forward_capture_count = 0
+                    continuous = reserved_goal_crab or (
+                        status == "SUCCEEDED" and MotionDecisionNode._is_continuous_goal_action(action))
+                    goal_info = self.latest_info.get("goal")
+                    lost_goal = goal_info is not None and goal_info.get("detected") is not True
+                    if not continuous or lost_goal:
+                        MotionDecisionNode._invalidate_goal_input(self)
+                    goal_turn = str(action).startswith("GOAL_CAMERA90_TURN_")
+                    self.goal_post_motion_dwell_until = (
+                        status_receive_monotonic + MotionDecisionNode.GOAL_POST_MOTION_DWELL_SEC
+                        if status == "SUCCEEDED" and goal_turn else None
+                    )
+                    if continuous and not lost_goal:
+                        # Like normal Line walking, retain recent in-motion Vision.
+                        gate = self.general_motion_gate
+                        gate.required_vision_generation = gate.vision_generation
+                    elif status == "SUCCEEDED" and not goal_turn:
+                        gate = self.general_motion_gate
+                        gate.required_vision_generation = gate.vision_generation + 1
+                if completed_source == "ball":
+                    fine_alignment = str(payload.get("motion_id", "")).startswith("ball_align_")
+                    if fine_alignment and status != "SUCCEEDED":
+                        self.ball_fine_faulted = True
+                        self.ball_fine_support = None
+                    if action == "BALL_LOST_BACKWARD_2" and status == "SUCCEEDED":
+                        MotionDecisionNode._complete_ball_interior_backward(self)
+                    self.ball_motion_completed_at = status_receive_monotonic
+                    continuous_ball = (
+                        status == "SUCCEEDED"
+                        and (fine_alignment or MotionDecisionNode._is_continuous_ball_action(action))
+                        and MotionDecisionNode._recent_walking_input(self, "ball", status_receive_monotonic)
+                    )
+                    completed_approach_turn = str(action).startswith(
+                        "BALL_APPROACH_TURN_"
+                    )
+                    if status != "SUCCEEDED":
+                        self.ball_pickup_entry_pending = False
+                        self.ball_approach_alignment_pending = False
+                        self.ball_lost_during_motion_pending = False
+                        self.ball_last_visible_approach_info = None
+                        self.ball_last_visible_line_info = None
+                    pickup_entry_ready = bool(
+                        status == "SUCCEEDED"
+                        and self.ball_pickup_entry_pending
+                    )
+                    if status == "SUCCEEDED" and not pickup_entry_ready:
+                        # Turns reobserve after the dwell; ordinary approach
+                        # planning then checks the remaining heading error.
+                        self.ball_approach_alignment_pending = (
+                            not completed_approach_turn
+                        )
+                    dwell_sec = (
+                        max(
+                            0.0,
+                            float(self.BALL_POST_MOTION_DWELL_SEC),
+                        )
+                        if status == "SUCCEEDED" and completed_approach_turn and not fine_alignment
+                        else 0.0
+                    )
+                    self.ball_post_motion_dwell_until = (
+                        time.monotonic() + dwell_sec
+                        if dwell_sec > 0.0
+                        else None
+                    )
+                    if status == "SUCCEEDED" and dwell_sec <= 0.0:
+                        gate = self.general_motion_gate
+                        if continuous_ball and not pickup_entry_ready:
+                            gate.required_vision_generation = gate.vision_generation
+                        else:
+                            MotionDecisionNode._invalidate_pickup_ball_input(self)
+                            gate.required_vision_generation = gate.vision_generation + 1
+                    if pickup_entry_ready:
+                        self.ball_approach_alignment_pending = False
+                        MotionDecisionNode._invalidate_pickup_ball_input(self)
+                        self.get_logger().info(
+                            "BALL pickup entry pending; waiting for fresh vision"
+                        )
+                    if self.ball_post_motion_dwell_until is not None:
+                        self.get_logger().info(
+                            "BALL post-motion dwell started: "
+                            f"{dwell_sec:.1f}s after action={action}"
+                        )
+                    if status == "SUCCEEDED" and completed_approach_turn and not fine_alignment:
+                        self.ball_lost_during_motion_pending = False
+                        self.ball_last_visible_approach_info = None
+                        self.ball_last_visible_line_info = None
+                        self.get_logger().info(
+                            "BALL stationary correction complete; "
+                            "waiting for post-motion dwell and fresh vision "
+                            "before rechecking heading and distance"
+                        )
+                if completed_source == "line":
+                    post_ball_line_correction = str(action).startswith(
+                        "POST_BALL_LINE_TURN_"
+                    )
+                    normalized_error_code = (
+                        error_code.strip().upper()
+                        if isinstance(error_code, str)
+                        else ""
+                    )
+                    timed_out = bool(
+                        status == "TIMEOUT"
+                        or (
+                            status == "FAILED"
+                            and normalized_error_code == "TIMEOUT"
+                        )
+                    )
+                    if status == "SUCCEEDED":
+                        MotionDecisionNode._finish_line_motion_capture(self)
+                        if (self.mission_phase != "LINE_TRACK_AFTER_PICKUP"
+                                and str(action).startswith(("LINE_LOST_TURN_", "LINE_OFFSET_TURN_", "LINE_HEADING_TURN_", "LINE_SPARSE_"))):
+                            MotionDecisionNode._invalidate_post_ball_line_input(self)
+                        if post_ball_line_correction:
+                            if post_ball_line_preview_ready:
+                                # Reuse in-turn observations at the successful boundary.
+                                self.post_ball_line_dwell_until = None
+                                gate = self.general_motion_gate
+                                gate.required_vision_generation = gate.vision_generation
+                            else:
+                                self.post_ball_line_dwell_until = (
+                                    status_receive_monotonic + MotionDecisionNode.POST_BALL_LINE_DWELL_SEC
+                                )
+                                MotionDecisionNode._invalidate_post_ball_line_input(self)
+                        elif self.ball_approach_entry_pending:
+                            self.ball_approach_alignment_pending = True
+                            gate = self.general_motion_gate
+                            if (MotionDecisionNode._is_continuous_line_action(action)
+                                    and MotionDecisionNode._recent_walking_input(self, "ball", status_receive_monotonic)):
+                                gate.required_vision_generation = gate.vision_generation
+                            else:
+                                MotionDecisionNode._invalidate_pickup_ball_input(self)
+                                gate.required_vision_generation = gate.vision_generation + 1
+                                self.get_logger().info(
+                                    "BALL entry after Line motion; waiting for fresh vision"
+                                )
+                        elif not str(action).startswith(
+                            ("POST_BALL_LINE_TURN_", "LINE_LOST_TURN_")
+                        ):
+                            gate = self.general_motion_gate
+                            gate.required_vision_generation = (
+                                gate.vision_generation
+                            )
+                    elif timed_out and not post_ball_line_correction:
+                        MotionDecisionNode._discard_line_motion_capture(self)
+                        self.line_timeout_recovery_active = True
+                        self.line_timeout_recovery_frames = []
+                    else:
+                        MotionDecisionNode._discard_line_motion_capture(self)
+                    self.pending_line_decision = None
+                if (
+                    status != "SUCCEEDED"
+                    and self.active_special_command_id is None
+                    and self.phase_manager.active_ball_mode_index is not None
+                    and completed_source == "ball"
+                ):
+                    self.phase_manager.fail_ball_mode()
+                self.get_logger().info(
+                    "General motion lock released: "
+                    f"status={status}, action={action}"
+                )
+                entry_sample = getattr(self, "pickup_entry_ready_sample", None)
+                if (entry_sample is not None and self.ball_pickup_entry_pending
+                        and self.ball_post_motion_dwell_until is None):
+                    self.latest_info["ball"], self.latest_time["ball"] = entry_sample
+                    self.general_motion_gate.required_vision_generation = self.general_motion_gate.vision_generation
+                    MotionDecisionNode._publish_decision(self)
+                    return
+                if (status == "SUCCEEDED" and completed_source == "line"
+                        and self.mission_phase == "LINE_TRACK_AFTER_PICKUP"
+                        and MotionDecisionNode._post_ball_line_handoff_due(self, status_receive_monotonic)
+                        and getattr(self, "queued_general_command_id", None) is None):
+                    # The gait has finished. Dispatch from the already received
+                    # Goal observation now, without a timer tick or Line refresh.
+                    self.correction_post_motion_dwell_until = None
+                    self.correction_post_motion_source = None
+                    self.line_offset_alignment_refresh_pending = False
+                    MotionDecisionNode._publish_decision(self)
+                    return
+                if (
+                    status == "SUCCEEDED"
+                    and ((completed_source == "line" and (MotionDecisionNode._is_continuous_line_action(action)
+                                                          or self.mission_phase == "LINE_TRACK_AFTER_PICKUP"
+                                                          or post_ball_line_preview_ready))
+                         or (completed_source == "ball" and MotionDecisionNode._is_continuous_ball_action(action))
+                         or (completed_source == "hurdle" and MotionDecisionNode._is_continuous_hurdle_action(action)
+                             and self.mission_phase != "HURDLE_POSITIONING"
+                             and not getattr(self, "hurdle_positioning_entry_pending", False))
+                         or (completed_source == "goal" and MotionDecisionNode._is_continuous_goal_action(action)))
+                    and getattr(self, "queued_general_command_id", None) is None
+                    and MotionDecisionNode._recent_walking_input(
+                        self, "ball" if self.ball_approach_entry_pending else completed_source,
+                        status_receive_monotonic,
+                    )
+                ):
+                    # Use the latest observation at the boundary, including a
+                    # newly reached pickup range, without waiting for the timer.
+                    MotionDecisionNode._publish_decision(self)
+            return
+    
+        if action not in self.SPECIAL_ACTIONS:
+            return
+    
+        event_id_mismatch = (
+            self.active_special_event_id is not None
+            and event_id != self.active_special_event_id
+        )
+        if event_id_mismatch:
+            self.get_logger().warning(
+                "Special motion status ignored: "
+                "event_id mismatch "
+                f"(active={self.active_special_event_id}, "
+                f"received={event_id})"
+            )
+            return
+    
+        completed_action = self.active_special_action
+        completed_command_id = self.active_special_command_id
+        result = self.phase_manager.handle_motion_status(
+            action,
+            command_id,
+            status,
+            motion_id=payload.get("motion_id"),
+        )
+    
+        if not result.handled:
+            self.get_logger().warning(
+                "Special motion status ignored: "
+                f"reason={result.reason}, status={status}, "
+                f"action={action}, command_id={command_id}"
+            )
+            return
+    
+        MotionDecisionNode._record_stationary_status(self, payload, status_receive_monotonic)
+    
+        self._latch_critical_executor_fault(
+            error_code=error_code,
+            message=status_message,
+            action=action,
+            command_id=command_id,
+            event_id=event_id,
+        )
+    
+        self.goal_stationary_since = (
+            self.motion_stationary_since if result.terminal and status == "SUCCEEDED" else None
+        )
+        completed_pickup_sample = None
+        if action == "PICKUP_NOW":
+            checkpoint_observation = getattr(self, "pickup_checkpoint_observation", None)
+            if checkpoint_observation is None:
+                checkpoint_observation = self.pickup_checkpoint_observation = PickupCheckpointObservation()
+            ros_now = MotionDecisionNode._current_ros_time_ns(self)
+            if not self.pickup_positioning_ball_lost_pending:
+                completed_pickup_sample = checkpoint_observation.completed_sample(
+>                   payload, status_receive_monotonic, ros_now, self.timeouts["ball"],
+                )
+E               AttributeError: 'FakeDecisionNode' object has no attribute 'timeouts'
+
+src/mission_control/mission_control/motion_decision_node.py:3350: AttributeError
+_ test_failed_grasp_check_pose_keeps_grasp_unknown_and_continues_exit_composite _
+
+    def test_failed_grasp_check_pose_keeps_grasp_unknown_and_continues_exit_composite():
+        from test_motion_decision_node import FakeDecisionNode, arm_special_command
+        from mission_control.motion_decision_node import MotionDecisionNode
+    
+        bridge = FakeBridge()
+        enter_pickup_fine_alignment(bridge)
+        continue_pickup_after_fine_alignment(bridge)
+        for motion in ("pickup_pre_backward_camera_down", "pickup_400"):
+            complete_pickup_motion_and_dwell(bridge, motion)
+        node = FakeDecisionNode("BALL_APPROACH")
+        arm_special_command(node, "PICKUP_NOW", 8000, 8)
+        offset = len(bridge.motion_status_publisher.messages)
+        bridge.executor_status_callback(executor_status(
+            status="FAILED", motion_id="pickup_grasp_check_pose",
+            error_code="SDK_PRESENT_POSITION_READ_FAILED",
+        ))
+        bridge._check_atomic_dwell(bridge.active_dwell_until)
+        assert bridge.active_motion_id == "pickup_first_backward_turn_right"
+        for message in bridge.motion_status_publisher.messages[offset:]:
+            payload = json.loads(message.data)
+            assert "verification_window_complete" not in payload
+>           MotionDecisionNode._motion_status_callback(node, message)
+
+src/mission_control/test/test_motion_command_bridge.py:1739: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/mission_control/mission_control/motion_decision_node.py:2553: in _motion_status_callback
+    MotionDecisionNode._handle_motion_status(self, message)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_motion_decision_node.FakeDecisionNode object at 0xffff80d334f0>
+message = std_msgs.msg.String(data='{"status":"RUNNING","command_id":8000,"event_id":8,"request_id":8000,"motion_id":"__NON_BLOC...otion_id":"pickup_grasp_check_pose","status":"FAILED","error_code":"SDK_PRESENT_POSITION_READ_FAILED","message":""}]}')
+
+    def _handle_motion_status(
+        self,
+        message: String,
+    ) -> None:
+        """Track execution state reported by the command bridge."""
+        status_receive_monotonic = time.monotonic()
+        MotionDecisionNode._check_vision_clock(self, status_receive_monotonic)
+        try:
+            payload = json.loads(message.data)
+    
+            if not isinstance(payload, dict):
+                raise ValueError(
+                    "JSON must be an object"
+                )
+    
+        except (
+            json.JSONDecodeError,
+            TypeError,
+            ValueError,
+        ) as exc:
+            self.get_logger().warning(
+                "Invalid /motion/status: "
+                f"{type(exc).__name__}: {exc}"
+            )
+            return
+    
+        status = str(
+            payload.get("status", "")
+        ).strip().upper()
+    
+        action = payload.get("action")
+        command_id = payload.get("command_id")
+        event_id = payload.get("event_id")
+        error_code = payload.get("error_code")
+        status_message = payload.get("message")
+        dynamics_command = payload.get(
+            "dynamics_command"
+        )
+    
+        if normalize_general_action(action) is not None:
+            if status == "QUEUED":
+                issued = getattr(self, "post_ball_line_command_ids", [])
+                if (self.mission_phase == "LINE_TRACK_AFTER_PICKUP"
+                        and getattr(self, "post_ball_line_started_count", 0) == 2
+                        and len(issued) == MotionDecisionNode.POST_BALL_LINE_DECISIONS
+                        and command_id == issued[-1]
+                        and command_id == getattr(self, "post_ball_goal_camera_request_id", None)
+                        and command_id == getattr(self, "queued_general_command_id", None)
+                        and action == getattr(self, "queued_general_action", None)
+                        and getattr(self, "queued_general_source", None) == "line"):
+                    # The last Line decision is committed; no new Line geometry is needed.
+                    if getattr(self, "post_ball_goal_camera_queued_id", None) != command_id:
+                        self.get_logger().info(
+                            f"Post-pickup Goal camera preparation accepted before third start: "
+                            f"command_id={command_id}, action={action}"
+                        )
+                    self.post_ball_goal_camera_queued_id = command_id
+                    MotionDecisionNode._prepare_post_ball_goal_camera(self, status_receive_monotonic)
+                return
+            if (
+                (status == "REJECTED" or (
+                    command_id == getattr(self, "post_ball_goal_camera_queued_id", None)
+                    and status in {"FAILED", "TIMEOUT", "CANCELED", "CANCELLED", "UNSUPPORTED"}
+                ))
+                and action == getattr(self, "queued_general_action", None)
+                and command_id == getattr(
+                    self,
+                    "queued_general_command_id",
+                    None,
+                )
+            ):
+                if command_id == getattr(self, "post_ball_goal_camera_queued_id", None):
+                    # The head may already be up. Do not replan Line with that view.
+                    self.post_ball_line_run_failed = True
+                    self.post_ball_goal_camera_queued_id = None
+                    self.post_ball_goal_camera_ready_at = None
+                    self.post_ball_goal_preview = None
+                    self.get_logger().warning(
+                        f"Post-pickup Line reservation failed after camera preparation: "
+                        f"command_id={command_id}, status={status}"
+                    )
+                issued = getattr(self, "post_ball_line_command_ids", [])
+                if issued and command_id == issued[-1]:
+                    issued.pop()
+                    if command_id == getattr(self, "post_ball_goal_camera_request_id", None):
+                        self.post_ball_goal_camera_request_id = None
+                if getattr(self, "queued_general_source", None) == "line":
+                    self.line_prequeue_block_reason = f"reservation_rejected:{error_code}"
+                entry = getattr(self, "ball_entry_line_alignment", None)
+                if entry is not None:
+                    entry.on_status(command_id, status)
+                self.queued_general_action = None
+                self.queued_general_command_id = None
+                self.queued_general_source = None
+                self.pending_line_decision = None
+                self.pending_hurdle_final_sequence = None
+                return
+            if (
+                status == "RUNNING"
+                and not self.general_motion_gate.locked
+                and action == self.queued_general_action
+                and command_id == self.queued_general_command_id
+            ):
+                if (self.mission_phase == "LINE_TRACK_AFTER_PICKUP"
+                        and self.queued_general_source == "goal"):
+                    MotionDecisionNode._advance_post_ball_line_run(
+                        self, status_receive_monotonic, reserved_goal=True,
+                    )
+                self.general_motion_gate.on_command_published(
+                    action,
+                    command_id,
+                )
+                self.active_general_source = self.queued_general_source
+                if (self.active_general_source == "line"
+                        and getattr(self.planner, "line_offset_alignment_active", False)):
+                    self.line_offset_motion_command_id = command_id
+                self.queued_general_action = None
+                self.queued_general_command_id = None
+                self.queued_general_source = None
+            transition = self.general_motion_gate.on_motion_status(
+                action,
+                status,
+                command_id,
+                error_code,
+            )
+            if transition.matched:
+                MotionDecisionNode._record_stationary_status(self, payload, status_receive_monotonic)
+                if status == "RUNNING":
+                    identifier = str(payload.get("motion_id", ""))
+                    if identifier.startswith("ball_align_"):
+                        self.ball_fine_support = ball_fine_support_after(identifier)
+                        self.ball_fine_started_at = status_receive_monotonic
+                        self.ball_fine_duration_sec = ball_fine_duration_sec(identifier)
+                        self.ball_fine_running_id = command_id
+                        self.ball_fine_capture = None
+                        entry = getattr(self, "ball_entry_line_alignment", None)
+                        if entry is not None and entry.pending:
+                            entry.finish()
+                    else:
+                        self.ball_fine_running_id = None
+                        self.ball_fine_support = "standard"
+                        self.ball_fine_faulted = False
+                    self.line_boundary_dispatch_pending = False
+                    if (self.mission_phase == "LINE_TRACK_AFTER_PICKUP"
+                            and self.active_general_source == "line"
+                            and MotionDecisionNode._post_pickup_line_motion_started(payload)
+                            and command_id != getattr(self, "post_ball_line_running_command_id", None)):
+                        self.post_ball_line_running_command_id = command_id
+                        self.post_ball_line_running_since = status_receive_monotonic
+                        issued = getattr(self, "post_ball_line_command_ids", [])
+                        if command_id in issued:
+                            self.post_ball_line_started_count = issued.index(command_id) + 1
+                            self.get_logger().info(
+                                f"Post-pickup Line motion started: {self.post_ball_line_started_count}/3, "
+                                f"command_id={command_id}, action={action}"
+                            )
+                    self.hurdle_stationary_since = None
+                    self.goal_stationary_since = None
+                    entry = getattr(self, "ball_entry_line_alignment", None)
+                    if entry is not None:
+                        entry.on_status(command_id, status)
+                    if (MotionDecisionNode._ball_entry_line_running(self)
+                            and action in MotionDecisionNode.LINE_MOTION_CAPTURE_CONFIG
+                            and getattr(self, "approach_walk_started_at", None) is None):
+                        self.approach_walk_started_at = status_receive_monotonic
+                        stamp = MotionDecisionNode._current_ros_time_ns(self)
+                        duration = MotionDecisionNode.LINE_MOTION_CAPTURE_CONFIG[action][0]
+                        duration = MotionDecisionNode.BALL_RECOVERY_DURATION_SEC.get(
+                            payload.get("motion_id"), duration,
+                        )
+                        self.approach_walk_duration_sec = duration
+                        self.approach_walk_capture_after_ns = (
+                            stamp + int(duration * MotionDecisionNode.LINE_MOTION_CAPTURE_START_RATIO * 1e9)
+                            if stamp is not None else None
+                        )
+                        self.approach_walk_last_stamp_ns = None
+                        self.approach_walk_candidate = None
+                        self.approach_walk_capture_count = 0
+                    if (self.active_general_source in {"ball", "hurdle"}
+                            and action in MotionDecisionNode.APPROACH_WALK_DURATION_SEC
+                            and getattr(self, "approach_walk_started_at", None) is None
+                            and str(payload.get("motion_id", "")).startswith(
+                                ("line_forward_", "line_recovery_", "ball_approach_fine_forward_"))):
+                        self.approach_walk_started_at = status_receive_monotonic
+                        stamp = MotionDecisionNode._current_ros_time_ns(self)
+                        duration = MotionDecisionNode.APPROACH_WALK_DURATION_SEC[action]
+                        duration = MotionDecisionNode.BALL_RECOVERY_DURATION_SEC.get(
+                            payload.get("motion_id"), duration,
+                        )
+                        self.approach_walk_duration_sec = duration
+                        self.approach_walk_capture_after_ns = (
+                            stamp + int(duration * MotionDecisionNode.LINE_MOTION_CAPTURE_START_RATIO * 1e9)
+                            if stamp is not None else None
+                        )
+                        self.approach_walk_last_stamp_ns = None
+                        self.approach_walk_candidate = None
+                        self.approach_walk_capture_count = 0
+                    if (self.active_general_source == "goal"
+                            and (MotionDecisionNode._is_continuous_goal_action(action)
+                                 or action in MotionDecisionNode.GOAL_CRAB_DURATION_SEC)
+                            and getattr(self, "goal_forward_started_at", None) is None
+                            and str(payload.get("motion_id", "")).startswith(
+                                ("goal_camera_90_forward_", "goal_camera_90_fine_forward_",
+                                 "line_recovery_", "goal_camera_90_crab_"))):
+                        self.goal_forward_started_at = status_receive_monotonic
+                        stamp = MotionDecisionNode._current_ros_time_ns(self)
+                        crab = action in MotionDecisionNode.GOAL_CRAB_DURATION_SEC
+                        duration = (MotionDecisionNode.GOAL_CRAB_DURATION_SEC[action] if crab
+                                    else MotionDecisionNode.GOAL_FORWARD_DURATION_SEC[action])
+                        self.goal_forward_capture_after_ns = (
+                            stamp + int((duration * .60 if crab else MotionDecisionNode._goal_capture_delay(duration)) * 1e9)
+                            if stamp is not None else None
+                        )
+                        self.goal_forward_capture_count = 0
+                        self.goal_forward_capture_action = None
+                        self.goal_forward_last_stamp_ns = None
+                self._latch_critical_executor_fault(
+                    error_code=error_code,
+                    message=status_message,
+                    action=action,
+                    command_id=command_id,
+                    event_id=event_id,
+                )
+                if (
+                    status == "RUNNING"
+                    and self.active_general_source == "line"
+                    and self.active_line_motion_started_at is None
+                    and (self.mission_phase != "LINE_TRACK_AFTER_PICKUP"
+                         or MotionDecisionNode._post_pickup_line_motion_started(payload))
+                    and (action not in MotionDecisionNode.POST_SHOT_ALIGN_CAPTURE_CONFIG
+                         or payload.get("motion_id") == "post_ball_line_turn_" + action.removeprefix("POST_SHOT_LINE_TURN_").lower())
+                    and (not MotionDecisionNode._is_queueable_line_turn(action)
+                         or str(payload.get("motion_id", "")).startswith(("post_ball_line_turn_", "line_search_")))
+                ):
+                    MotionDecisionNode._start_line_motion_capture(
+                        self,
+                        str(action),
+                        payload.get("motion_id"),
+                    )
+                if status == "RUNNING":
+                    MotionDecisionNode._start_pickup_entry_observation(self, payload, status_receive_monotonic)
+            if transition.released:
+                observer = getattr(self, "pickup_entry_observation", None)
+                self.pickup_entry_ready_sample = (observer.completed_sample(
+                    payload, status_receive_monotonic, MotionDecisionNode._current_ros_time_ns(self),
+                    self.timeouts["ball"],
+                ) if observer is not None and getattr(self, "queued_general_command_id", None) is None else None)
+                if observer is not None:
+                    observer.reset()
+                self.line_boundary_dispatch_pending = False
+                entry = getattr(self, "ball_entry_line_alignment", None)
+                if entry is not None:
+                    was_entry = entry.active and entry.command_id == command_id
+                    entry.on_status(command_id, status)
+                    if was_entry:
+                        self.get_logger().info(
+                            f"BALL entry Line alignment ended: command_id={command_id}, status={status}"
+                        )
+                search = getattr(self, "goal_initial_search", None)
+                if search is not None:
+                    search.completed(command_id, status)
+                if status != "SUCCEEDED":
+                    # The bridge/executor discard the reservation on failure.
+                    if (entry is not None and entry.pending
+                            and self.active_general_source == "line"
+                            and self.ball_approach_entry_pending):
+                        entry.state = "FAILED"
+                    if (entry is not None and entry.active
+                            and entry.command_id == getattr(self, "queued_general_command_id", None)):
+                        entry.on_status(entry.command_id, "CANCELLED")
+                    self.queued_general_action = None
+                    self.queued_general_command_id = None
+                    self.queued_general_source = None
+                if command_id == getattr(self, "line_ground_recovery_command_id", None):
+                    self.line_ground_recovery_command_id = None
+                    self.line_ground_recovery_failed = status != "SUCCEEDED"
+                    if status == "SUCCEEDED":
+                        self.line_offset_alignment_refresh_pending = True
+                self.goal_stationary_since = (
+                    self.motion_stationary_since if status == "SUCCEEDED" else None
+                )
+                completed_source = self.active_general_source
+                reserved_goal_crab = bool(
+                    status == "SUCCEEDED" and completed_source == "goal"
+                    and action in MotionDecisionNode.GOAL_CRAB_DURATION_SEC
+                    and getattr(self, "queued_general_command_id", None) is not None
+                    and self.queued_general_action == action
+                    and self.queued_general_source == "goal"
+                )
+                reserved_line_turn = bool(
+                    status == "SUCCEEDED" and completed_source == "line"
+                    and getattr(self, "queued_general_source", None) == "line"
+                    and getattr(self, "queued_general_command_id", None) is not None
+                    and (MotionDecisionNode._is_queueable_line_turn(action)
+                         or MotionDecisionNode._is_queueable_line_turn(self.queued_general_action))
+                )
+                post_ball_line_preview_ready = bool(
+                    completed_source == "line" and str(action).startswith("POST_BALL_LINE_TURN_")
+                    and MotionDecisionNode._recent_walking_input(self, "line", status_receive_monotonic)
+                    and MotionDecisionNode._line_frame_is_usable(self, self.latest_info.get("line") or {})
+                )
+                self.approach_walk_started_at = None
+                self.approach_walk_capture_after_ns = None
+                if command_id == getattr(self, "line_offset_motion_command_id", None):
+                    self.line_offset_motion_command_id = None
+                    self.planner.line_offset_alignment_failed = status != "SUCCEEDED"
+                    if status != "SUCCEEDED" or (not reserved_line_turn
+                                                 and not MotionDecisionNode._is_continuous_line_action(action)
+                                                 and self.mission_phase != "LINE_TRACK_AFTER_PICKUP"):
+                        self.line_offset_min_rgb_stamp_ns = MotionDecisionNode._current_ros_time_ns(self)
+                        self.latest_info["line"] = None
+                        self.latest_time["line"] = None
+                        self.pending_line_decision = None
+                        self.general_motion_gate.required_vision_generation = (
+                            self.general_motion_gate.vision_generation + 1
+                        )
+                limiter = getattr(self, "lost_search_turn_limiter", None)
+                if limiter is not None and status != "SUCCEEDED":
+                    limiter.record_failure(completed_source, str(action))
+                if completed_source == "line":
+                    if (status == "SUCCEEDED"
+                            and MotionDecisionNode._is_continuous_line_action(action)
+                            and getattr(self, "queued_general_command_id", None) is None):
+                        self.line_boundary_dispatch_pending = self.mission_phase in {
+                            "AUTO", "LINE_TRACK", "LINE_TRACK_AFTER_PICKUP",
+                        }
+                        self.get_logger().info(
+                            f"Line completed without prequeue: action={action}, command_id={command_id}, "
+                            f"reason={getattr(self, 'line_prequeue_block_reason', None)}, "
+                            f"usable_frames={len(self.active_line_motion_frames)}/"
+                            f"{self.active_line_motion_target_frames}, "
+                            f"fresh_line={MotionDecisionNode._recent_walking_input(self, 'line', status_receive_monotonic)}"
+                        )
+                    sparse = getattr(self, "sparse_line_recovery", None)
+                    if sparse is not None:
+                        sparse.completed(str(action), status, MotionDecisionNode._current_ros_time_ns(self))
+                    self.line_motion_completed_at = status_receive_monotonic
+                    continuous_success = (
+                        status == "SUCCEEDED"
+                        and (MotionDecisionNode._is_continuous_line_action(action)
+                             or self.mission_phase == "LINE_TRACK_AFTER_PICKUP"
+                             or post_ball_line_preview_ready or reserved_line_turn)
+                    )
+                    # Walking can use recent in-motion frames, as prequeue does.
+                    # Discrete turns and failures still require a new observation.
+                    self.line_input_required_after = (
+                        None if continuous_success else status_receive_monotonic
+                    )
+                    self.line_motion_min_rgb_stamp_ns = (
+                        None if continuous_success
+                        else MotionDecisionNode._current_ros_time_ns(self)
+                    )
+                    corner = getattr(self, "pending_line_corner", None)
+                    if corner is not None:
+                        corner["motion_completed_at"] = self.line_input_required_after
+                        corner["minimum_rgb_stamp_ns"] = self.line_motion_min_rgb_stamp_ns
+                    if status != "SUCCEEDED":
+                        self.pending_line_corner = None
+                        self.line_corner_rearm_required = True
+                    if command_id == getattr(self, "remembered_corner_command_id", None):
+                        self.remembered_corner_command_id = None
+                        if status == "SUCCEEDED":
+                            # The remembered near point preceded this corner turn.
+                            self.planner.last_line_seen_direction = None
+                            if limiter is not None:
+                                limiter.complete_corner()
+                existing_pause = (
+                    (completed_source == "hurdle" and action in {
+                        "ALIGN_LEFT", "ALIGN_RIGHT", "TURN_LEFT", "TURN_RIGHT",
+                    })
+                    or (completed_source == "ball"
+                        and str(action).startswith("BALL_APPROACH_TURN_"))
+                    or (completed_source == "goal"
+                        and str(action).startswith("GOAL_CAMERA90_TURN_"))
+                    or (completed_source == "line" and str(action).startswith(
+                        ("POST_BALL_LINE_TURN_", "POST_SHOT_")
+                    ))
+                )
+                if (
+                    status == "SUCCEEDED" and not existing_pause and not reserved_line_turn
+                    and not reserved_goal_crab
+                    and MotionDecisionNode._needs_correction_dwell(action)
+                    and self.mission_phase != "LINE_TRACK_AFTER_PICKUP"
+                ):
+                    self.correction_post_motion_dwell_until = (
+                        status_receive_monotonic
+                        + MotionDecisionNode.CORRECTION_POST_MOTION_DWELL_SEC
+                    )
+                    self.correction_post_motion_source = (
+                        "ball" if (command_id is not None
+                                   and command_id == getattr(self, "ball_ground_tracking_command_id", None))
+                        else completed_source
+                    )
+                    self.line_offset_alignment_refresh_pending = (
+                        self.correction_post_motion_source == "line"
+                        and str(action).startswith(
+                            ("LINE_OFFSET_TURN_", "LINE_HEADING_TURN_", "LINE_SPARSE_"))
+                    )
+                self.active_general_source = None
+                if (completed_source == "hurdle" and status == "SUCCEEDED"
+                        and MotionDecisionNode._is_continuous_hurdle_action(action)
+                        and self.mission_phase != "HURDLE_POSITIONING"
+                        and not getattr(self, "hurdle_positioning_entry_pending", False)
+                        and MotionDecisionNode._recent_walking_input(self, "hurdle", status_receive_monotonic)):
+                    gate = self.general_motion_gate
+                    gate.required_vision_generation = gate.vision_generation
+                if (
+                    completed_source == "hurdle"
+                    and self.mission_phase == "HURDLE_POSITIONING"
+                ) or (
+                    completed_source in {"line", "hurdle"}
+                    and getattr(self, "hurdle_positioning_entry_pending", False)
+                ):
+                    if status != "SUCCEEDED":
+                        self.pending_hurdle_final_sequence = None
+                        self.hurdle_positioning_entry_pending = False
+                        self.hurdle_post_motion_dwell_until = None
+                        self.hurdle_stationary_since = None
+                    hurdle_turn = (
+                        completed_source == "hurdle"
+                        and action in {"ALIGN_LEFT", "ALIGN_RIGHT", "TURN_LEFT", "TURN_RIGHT"}
+                    )
+                    if status == "SUCCEEDED":
+                        # Include the motion that first crossed the entry distance.
+                        self.hurdle_stationary_since = self.motion_stationary_since
+                        self.hurdle_post_motion_dwell_until = (
+                            status_receive_monotonic
+                            + MotionDecisionNode.HURDLE_POST_MOTION_DWELL_SEC
+                            if hurdle_turn else None
+                        )
+                        if not hurdle_turn:
+                            self.latest_info["hurdle"] = None
+                            self.latest_time["hurdle"] = None
+                            gate = self.general_motion_gate
+                            gate.required_vision_generation = gate.vision_generation + 1
+                if (
+                    completed_source == "line"
+                    and self.mission_phase == "LINE_TRACK_AFTER_PICKUP"
+                    and status != "SUCCEEDED"
+                ):
+                    self.post_ball_line_run_failed = True
+                    MotionDecisionNode._discard_line_motion_capture(self)
+                    self.pending_line_decision = None
+                    self.get_logger().warning(
+                        f"Post-pickup Line driving aborted: action={action}, status={status}"
+                    )
+                    return
+                if (
+                    completed_source == "line"
+                    and self.mission_phase == "LINE_TRACK"
+                    and action == getattr(self, "post_shot_line_search_action", None)
+                ):
+                    # Finish each search turn before checking stationary Vision again.
+                    MotionDecisionNode._discard_line_motion_capture(self)
+                    self.pending_line_decision = None
+                    MotionDecisionNode._invalidate_post_ball_line_input(self)
+                    self.post_shot_line_search_failed = status != "SUCCEEDED"
+                    if status == "SUCCEEDED":
+                        self.post_shot_dwell_until = (
+                            status_receive_monotonic
+                            + MotionDecisionNode.POST_SHOT_DWELL_SEC
+                        )
+                    return
+                post_shot_exit_preview = (MotionDecisionNode._post_shot_exit_preview(self, status_receive_monotonic)
+                                          if status == "SUCCEEDED" and action == "POST_SHOT_FORWARD" else None)
+                if (
+                    completed_source == "line"
+                    and self.phase_manager.handle_post_shot_motion(action, status)
+                ):
+                    reserved_forward = (
+                        status == "SUCCEEDED"
+                        and str(action).startswith("POST_SHOT_LINE_TURN_")
+                        and getattr(self, "queued_general_action", None) == "POST_SHOT_FORWARD"
+                    )
+                    reserved_line_exit = (status == "SUCCEEDED" and action == "POST_SHOT_FORWARD"
+                                          and getattr(self, "queued_general_source", None) == "line")
+                    MotionDecisionNode._discard_line_motion_capture(self)
+                    self.pending_line_decision = None
+                    if not reserved_forward and not reserved_line_exit and post_shot_exit_preview is None:
+                        MotionDecisionNode._invalidate_post_ball_line_input(self)
+                    elif action == "POST_SHOT_FORWARD":
+                        self.line_input_required_after = None
+                        self.line_motion_min_rgb_stamp_ns = None
+                        self.general_motion_gate.required_vision_generation = self.general_motion_gate.vision_generation
+                    if status == "SUCCEEDED":
+                        if self.mission_phase in {"AUTO", "LINE_TRACK"} or action in {
+                            "POST_SHOT_TURN_RIGHT_9", "POST_SHOT_TURN_LEFT_4",
+                        }:
+                            MotionDecisionNode._clear_ball_navigation_state(self)
+                            MotionDecisionNode._invalidate_pickup_ball_input(self)
+                            # Release the scored Goal before normal Line planning.
+                            self.planner._clear_goal_tracking()
+                            self.planner.goal_lock_active = False
+                            self.planner.goal_terminal_requested = False
+                            self.planner.goal_ignore_until_clear = True
+                            self.latest_info["goal"] = None
+                            self.latest_time["goal"] = None
+                            if action in {
+                                "POST_SHOT_TURN_RIGHT_9", "POST_SHOT_TURN_LEFT_4",
+                            }:
+                                # Only the exit turn invalidates the pre-shot direction.
+                                self.planner.last_line_seen_direction = None
+                                self.post_shot_line_search_action = None
+                                self.post_shot_line_search_failed = False
+                                self.planner.post_ball_line_search_direction = (
+                                    "RIGHT" if "_RIGHT_" in action else "LEFT"
+                                )
+                        if reserved_forward:
+                            self.phase_manager.complete_post_shot_line_align()
+                            self.post_shot_turn_settled = False
+                            self.post_shot_dwell_until = None
+                        elif "_TURN_" in action:
+                            self.post_shot_turn_settled = False
+                            self.post_shot_dwell_until = (
+                                status_receive_monotonic
+                                + MotionDecisionNode.POST_SHOT_DWELL_SEC
+                            )
+                        self.planner.line_planner.stop("post_shot_motion_complete")
+                    self.get_logger().info(
+                        f"Post-shot motion ended: action={action}, "
+                        f"status={status}, phase={self.mission_phase}"
+                    )
+                    if post_shot_exit_preview is not None and not reserved_line_exit:
+                        MotionDecisionNode._publish_decision(self, post_shot_exit_preview)
+                    return
+                if completed_source == "goal":
+                    if action == "GOAL_SHOT_PREPARE":
+                        self.goal_shot_observe_until = (
+                            status_receive_monotonic + MotionDecisionNode.SHOT_REGION_OBSERVATION_SEC
+                            if status == "SUCCEEDED" else None
+                        )
+                    self.goal_forward_started_at = None
+                    self.goal_forward_capture_after_ns = None
+                    self.goal_forward_capture_count = 0
+                    continuous = reserved_goal_crab or (
+                        status == "SUCCEEDED" and MotionDecisionNode._is_continuous_goal_action(action))
+                    goal_info = self.latest_info.get("goal")
+                    lost_goal = goal_info is not None and goal_info.get("detected") is not True
+                    if not continuous or lost_goal:
+                        MotionDecisionNode._invalidate_goal_input(self)
+                    goal_turn = str(action).startswith("GOAL_CAMERA90_TURN_")
+                    self.goal_post_motion_dwell_until = (
+                        status_receive_monotonic + MotionDecisionNode.GOAL_POST_MOTION_DWELL_SEC
+                        if status == "SUCCEEDED" and goal_turn else None
+                    )
+                    if continuous and not lost_goal:
+                        # Like normal Line walking, retain recent in-motion Vision.
+                        gate = self.general_motion_gate
+                        gate.required_vision_generation = gate.vision_generation
+                    elif status == "SUCCEEDED" and not goal_turn:
+                        gate = self.general_motion_gate
+                        gate.required_vision_generation = gate.vision_generation + 1
+                if completed_source == "ball":
+                    fine_alignment = str(payload.get("motion_id", "")).startswith("ball_align_")
+                    if fine_alignment and status != "SUCCEEDED":
+                        self.ball_fine_faulted = True
+                        self.ball_fine_support = None
+                    if action == "BALL_LOST_BACKWARD_2" and status == "SUCCEEDED":
+                        MotionDecisionNode._complete_ball_interior_backward(self)
+                    self.ball_motion_completed_at = status_receive_monotonic
+                    continuous_ball = (
+                        status == "SUCCEEDED"
+                        and (fine_alignment or MotionDecisionNode._is_continuous_ball_action(action))
+                        and MotionDecisionNode._recent_walking_input(self, "ball", status_receive_monotonic)
+                    )
+                    completed_approach_turn = str(action).startswith(
+                        "BALL_APPROACH_TURN_"
+                    )
+                    if status != "SUCCEEDED":
+                        self.ball_pickup_entry_pending = False
+                        self.ball_approach_alignment_pending = False
+                        self.ball_lost_during_motion_pending = False
+                        self.ball_last_visible_approach_info = None
+                        self.ball_last_visible_line_info = None
+                    pickup_entry_ready = bool(
+                        status == "SUCCEEDED"
+                        and self.ball_pickup_entry_pending
+                    )
+                    if status == "SUCCEEDED" and not pickup_entry_ready:
+                        # Turns reobserve after the dwell; ordinary approach
+                        # planning then checks the remaining heading error.
+                        self.ball_approach_alignment_pending = (
+                            not completed_approach_turn
+                        )
+                    dwell_sec = (
+                        max(
+                            0.0,
+                            float(self.BALL_POST_MOTION_DWELL_SEC),
+                        )
+                        if status == "SUCCEEDED" and completed_approach_turn and not fine_alignment
+                        else 0.0
+                    )
+                    self.ball_post_motion_dwell_until = (
+                        time.monotonic() + dwell_sec
+                        if dwell_sec > 0.0
+                        else None
+                    )
+                    if status == "SUCCEEDED" and dwell_sec <= 0.0:
+                        gate = self.general_motion_gate
+                        if continuous_ball and not pickup_entry_ready:
+                            gate.required_vision_generation = gate.vision_generation
+                        else:
+                            MotionDecisionNode._invalidate_pickup_ball_input(self)
+                            gate.required_vision_generation = gate.vision_generation + 1
+                    if pickup_entry_ready:
+                        self.ball_approach_alignment_pending = False
+                        MotionDecisionNode._invalidate_pickup_ball_input(self)
+                        self.get_logger().info(
+                            "BALL pickup entry pending; waiting for fresh vision"
+                        )
+                    if self.ball_post_motion_dwell_until is not None:
+                        self.get_logger().info(
+                            "BALL post-motion dwell started: "
+                            f"{dwell_sec:.1f}s after action={action}"
+                        )
+                    if status == "SUCCEEDED" and completed_approach_turn and not fine_alignment:
+                        self.ball_lost_during_motion_pending = False
+                        self.ball_last_visible_approach_info = None
+                        self.ball_last_visible_line_info = None
+                        self.get_logger().info(
+                            "BALL stationary correction complete; "
+                            "waiting for post-motion dwell and fresh vision "
+                            "before rechecking heading and distance"
+                        )
+                if completed_source == "line":
+                    post_ball_line_correction = str(action).startswith(
+                        "POST_BALL_LINE_TURN_"
+                    )
+                    normalized_error_code = (
+                        error_code.strip().upper()
+                        if isinstance(error_code, str)
+                        else ""
+                    )
+                    timed_out = bool(
+                        status == "TIMEOUT"
+                        or (
+                            status == "FAILED"
+                            and normalized_error_code == "TIMEOUT"
+                        )
+                    )
+                    if status == "SUCCEEDED":
+                        MotionDecisionNode._finish_line_motion_capture(self)
+                        if (self.mission_phase != "LINE_TRACK_AFTER_PICKUP"
+                                and str(action).startswith(("LINE_LOST_TURN_", "LINE_OFFSET_TURN_", "LINE_HEADING_TURN_", "LINE_SPARSE_"))):
+                            MotionDecisionNode._invalidate_post_ball_line_input(self)
+                        if post_ball_line_correction:
+                            if post_ball_line_preview_ready:
+                                # Reuse in-turn observations at the successful boundary.
+                                self.post_ball_line_dwell_until = None
+                                gate = self.general_motion_gate
+                                gate.required_vision_generation = gate.vision_generation
+                            else:
+                                self.post_ball_line_dwell_until = (
+                                    status_receive_monotonic + MotionDecisionNode.POST_BALL_LINE_DWELL_SEC
+                                )
+                                MotionDecisionNode._invalidate_post_ball_line_input(self)
+                        elif self.ball_approach_entry_pending:
+                            self.ball_approach_alignment_pending = True
+                            gate = self.general_motion_gate
+                            if (MotionDecisionNode._is_continuous_line_action(action)
+                                    and MotionDecisionNode._recent_walking_input(self, "ball", status_receive_monotonic)):
+                                gate.required_vision_generation = gate.vision_generation
+                            else:
+                                MotionDecisionNode._invalidate_pickup_ball_input(self)
+                                gate.required_vision_generation = gate.vision_generation + 1
+                                self.get_logger().info(
+                                    "BALL entry after Line motion; waiting for fresh vision"
+                                )
+                        elif not str(action).startswith(
+                            ("POST_BALL_LINE_TURN_", "LINE_LOST_TURN_")
+                        ):
+                            gate = self.general_motion_gate
+                            gate.required_vision_generation = (
+                                gate.vision_generation
+                            )
+                    elif timed_out and not post_ball_line_correction:
+                        MotionDecisionNode._discard_line_motion_capture(self)
+                        self.line_timeout_recovery_active = True
+                        self.line_timeout_recovery_frames = []
+                    else:
+                        MotionDecisionNode._discard_line_motion_capture(self)
+                    self.pending_line_decision = None
+                if (
+                    status != "SUCCEEDED"
+                    and self.active_special_command_id is None
+                    and self.phase_manager.active_ball_mode_index is not None
+                    and completed_source == "ball"
+                ):
+                    self.phase_manager.fail_ball_mode()
+                self.get_logger().info(
+                    "General motion lock released: "
+                    f"status={status}, action={action}"
+                )
+                entry_sample = getattr(self, "pickup_entry_ready_sample", None)
+                if (entry_sample is not None and self.ball_pickup_entry_pending
+                        and self.ball_post_motion_dwell_until is None):
+                    self.latest_info["ball"], self.latest_time["ball"] = entry_sample
+                    self.general_motion_gate.required_vision_generation = self.general_motion_gate.vision_generation
+                    MotionDecisionNode._publish_decision(self)
+                    return
+                if (status == "SUCCEEDED" and completed_source == "line"
+                        and self.mission_phase == "LINE_TRACK_AFTER_PICKUP"
+                        and MotionDecisionNode._post_ball_line_handoff_due(self, status_receive_monotonic)
+                        and getattr(self, "queued_general_command_id", None) is None):
+                    # The gait has finished. Dispatch from the already received
+                    # Goal observation now, without a timer tick or Line refresh.
+                    self.correction_post_motion_dwell_until = None
+                    self.correction_post_motion_source = None
+                    self.line_offset_alignment_refresh_pending = False
+                    MotionDecisionNode._publish_decision(self)
+                    return
+                if (
+                    status == "SUCCEEDED"
+                    and ((completed_source == "line" and (MotionDecisionNode._is_continuous_line_action(action)
+                                                          or self.mission_phase == "LINE_TRACK_AFTER_PICKUP"
+                                                          or post_ball_line_preview_ready))
+                         or (completed_source == "ball" and MotionDecisionNode._is_continuous_ball_action(action))
+                         or (completed_source == "hurdle" and MotionDecisionNode._is_continuous_hurdle_action(action)
+                             and self.mission_phase != "HURDLE_POSITIONING"
+                             and not getattr(self, "hurdle_positioning_entry_pending", False))
+                         or (completed_source == "goal" and MotionDecisionNode._is_continuous_goal_action(action)))
+                    and getattr(self, "queued_general_command_id", None) is None
+                    and MotionDecisionNode._recent_walking_input(
+                        self, "ball" if self.ball_approach_entry_pending else completed_source,
+                        status_receive_monotonic,
+                    )
+                ):
+                    # Use the latest observation at the boundary, including a
+                    # newly reached pickup range, without waiting for the timer.
+                    MotionDecisionNode._publish_decision(self)
+            return
+    
+        if action not in self.SPECIAL_ACTIONS:
+            return
+    
+        event_id_mismatch = (
+            self.active_special_event_id is not None
+            and event_id != self.active_special_event_id
+        )
+        if event_id_mismatch:
+            self.get_logger().warning(
+                "Special motion status ignored: "
+                "event_id mismatch "
+                f"(active={self.active_special_event_id}, "
+                f"received={event_id})"
+            )
+            return
+    
+        completed_action = self.active_special_action
+        completed_command_id = self.active_special_command_id
+        result = self.phase_manager.handle_motion_status(
+            action,
+            command_id,
+            status,
+            motion_id=payload.get("motion_id"),
+        )
+    
+        if not result.handled:
+            self.get_logger().warning(
+                "Special motion status ignored: "
+                f"reason={result.reason}, status={status}, "
+                f"action={action}, command_id={command_id}"
+            )
+            return
+    
+        MotionDecisionNode._record_stationary_status(self, payload, status_receive_monotonic)
+    
+        self._latch_critical_executor_fault(
+            error_code=error_code,
+            message=status_message,
+            action=action,
+            command_id=command_id,
+            event_id=event_id,
+        )
+    
+        self.goal_stationary_since = (
+            self.motion_stationary_since if result.terminal and status == "SUCCEEDED" else None
+        )
+        completed_pickup_sample = None
+        if action == "PICKUP_NOW":
+            checkpoint_observation = getattr(self, "pickup_checkpoint_observation", None)
+            if checkpoint_observation is None:
+                checkpoint_observation = self.pickup_checkpoint_observation = PickupCheckpointObservation()
+            ros_now = MotionDecisionNode._current_ros_time_ns(self)
+            if not self.pickup_positioning_ball_lost_pending:
+                completed_pickup_sample = checkpoint_observation.completed_sample(
+>                   payload, status_receive_monotonic, ros_now, self.timeouts["ball"],
+                )
+E               AttributeError: 'FakeDecisionNode' object has no attribute 'timeouts'
+
+src/mission_control/mission_control/motion_decision_node.py:3350: AttributeError
+_______ test_zone_depth_bounds_include_lower_and_exclude_upper[0.43-0-1] _______
+
+depth = 0.43, offset = 0, region = 1
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert None == 1
+E        +  where None = goal_shot_region(0.43, 0)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+______ test_zone_depth_bounds_include_lower_and_exclude_upper[0.43-120-1] ______
+
+depth = 0.43, offset = 120, region = 1
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert None == 1
+E        +  where None = goal_shot_region(0.43, 120)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+_____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.43--120-4] ______
+
+depth = 0.43, offset = -120, region = 4
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert None == 4
+E        +  where None = goal_shot_region(0.43, -120)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+_______ test_zone_depth_bounds_include_lower_and_exclude_upper[0.51-0-2] _______
+
+depth = 0.51, offset = 0, region = 2
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 1 == 2
+E        +  where 1 = goal_shot_region(0.51, 0)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+_____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.51-0.001-2] _____
+
+depth = 0.51, offset = 0.001, region = 2
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 1 == 2
+E        +  where 1 = goal_shot_region(0.51, 0.001)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+______ test_zone_depth_bounds_include_lower_and_exclude_upper[0.51-100-2] ______
+
+depth = 0.51, offset = 100, region = 2
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 1 == 2
+E        +  where 1 = goal_shot_region(0.51, 100)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.51--0.001-3] _____
+
+depth = 0.51, offset = -0.001, region = 3
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 4 == 3
+E        +  where 4 = goal_shot_region(0.51, -0.001)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+_____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.51--100-3] ______
+
+depth = 0.51, offset = -100, region = 3
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 4 == 3
+E        +  where 4 = goal_shot_region(0.51, -100)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+_____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.57-0-None] ______
+
+depth = 0.57, offset = 0, region = None
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 2 == None
+E        +  where 2 = goal_shot_region(0.57, 0)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+_____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.571-0-None] _____
+
+depth = 0.571, offset = 0, region = None
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 2 == None
+E        +  where 2 = goal_shot_region(0.571, 0)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.51-120-None] _____
+
+depth = 0.51, offset = 120, region = None
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 1 == None
+E        +  where 1 = goal_shot_region(0.51, 120)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.51--120-None] ____
+
+depth = 0.51, offset = -120, region = None
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 4 == None
+E        +  where 4 = goal_shot_region(0.51, -120)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.510001-100-2] ____
+
+depth = 0.510001, offset = 100, region = 2
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 1 == 2
+E        +  where 1 = goal_shot_region(0.510001, 100)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+___ test_zone_depth_bounds_include_lower_and_exclude_upper[0.510001--100-3] ____
+
+depth = 0.510001, offset = -100, region = 3
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 4 == 3
+E        +  where 4 = goal_shot_region(0.510001, -100)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+_ test_zone_depth_bounds_include_lower_and_exclude_upper[0.510001-100.001-None] _
+
+depth = 0.510001, offset = 100.001, region = None
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 1 == None
+E        +  where 1 = goal_shot_region(0.510001, 100.001)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+_ test_zone_depth_bounds_include_lower_and_exclude_upper[0.510001--100.001-None] _
+
+depth = 0.510001, offset = -100.001, region = None
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 4 == None
+E        +  where 4 = goal_shot_region(0.510001, -100.001)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.430001-120-1] ____
+
+depth = 0.430001, offset = 120, region = 1
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert None == 1
+E        +  where None = goal_shot_region(0.430001, 120)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+___ test_zone_depth_bounds_include_lower_and_exclude_upper[0.430001--120-4] ____
+
+depth = 0.430001, offset = -120, region = 4
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert None == 4
+E        +  where None = goal_shot_region(0.430001, -120)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.57-100-None] _____
+
+depth = 0.57, offset = 100, region = None
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 2 == None
+E        +  where 2 = goal_shot_region(0.57, 100)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.57--100-None] ____
+
+depth = 0.57, offset = -100, region = None
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 3 == None
+E        +  where 3 = goal_shot_region(0.57, -100)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+_ test_motion_toward_nominal_target_until_zone_entry[0.51-101-6.0-GOAL_CAMERA90_CRAB_RIGHT] _
+
+depth = 0.51, offset = 101, bearing = 6.0, action = 'GOAL_CAMERA90_CRAB_RIGHT'
+
+    @pytest.mark.parametrize('depth,offset,bearing,action', [
+        (.410, 230, 14.2, 'GOAL_CAMERA90_BACKWARD_1'),
+        (.450, 230, 14.2, 'GOAL_CAMERA90_CRAB_RIGHT'),
+        (.450, -230, -7.9, 'GOAL_CAMERA90_CRAB_LEFT'),
+        (.510, 101, 6.0, 'GOAL_CAMERA90_CRAB_RIGHT'),
+        (.510, -101, -6.0, 'GOAL_CAMERA90_CRAB_LEFT'),
+        (.570, 0, 0.0, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+        (.510, 0, 0.0, 'SHOT'),
+    ])
+    def test_motion_toward_nominal_target_until_zone_entry(depth, offset, bearing, action):
+        decision = MotionDecisionPlanner().plan('GOAL_APPROACH', {'goal': goal_info(
+            depth_m=depth, offset_x_px=offset, offset_x_norm=offset / 640,
+            bearing_deg=bearing,
+        )}, .1)
+>       assert decision.action == action
+E       AssertionError: assert 'SHOT' == 'GOAL_CAMERA90_CRAB_RIGHT'
+E         - GOAL_CAMERA90_CRAB_RIGHT
+E         + SHOT
+
+src/mission_control/test/test_goal_shot_regions.py:61: AssertionError
+_ test_motion_toward_nominal_target_until_zone_entry[0.51--101--6.0-GOAL_CAMERA90_CRAB_LEFT] _
+
+depth = 0.51, offset = -101, bearing = -6.0, action = 'GOAL_CAMERA90_CRAB_LEFT'
+
+    @pytest.mark.parametrize('depth,offset,bearing,action', [
+        (.410, 230, 14.2, 'GOAL_CAMERA90_BACKWARD_1'),
+        (.450, 230, 14.2, 'GOAL_CAMERA90_CRAB_RIGHT'),
+        (.450, -230, -7.9, 'GOAL_CAMERA90_CRAB_LEFT'),
+        (.510, 101, 6.0, 'GOAL_CAMERA90_CRAB_RIGHT'),
+        (.510, -101, -6.0, 'GOAL_CAMERA90_CRAB_LEFT'),
+        (.570, 0, 0.0, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+        (.510, 0, 0.0, 'SHOT'),
+    ])
+    def test_motion_toward_nominal_target_until_zone_entry(depth, offset, bearing, action):
+        decision = MotionDecisionPlanner().plan('GOAL_APPROACH', {'goal': goal_info(
+            depth_m=depth, offset_x_px=offset, offset_x_norm=offset / 640,
+            bearing_deg=bearing,
+        )}, .1)
+>       assert decision.action == action
+E       AssertionError: assert 'SHOT' == 'GOAL_CAMERA90_CRAB_LEFT'
+E         - GOAL_CAMERA90_CRAB_LEFT
+E         + SHOT
+
+src/mission_control/test/test_goal_shot_regions.py:61: AssertionError
+_ test_motion_toward_nominal_target_until_zone_entry[0.57-0-0.0-GOAL_CAMERA90_FINE_FORWARD_3] _
+
+depth = 0.57, offset = 0, bearing = 0.0, action = 'GOAL_CAMERA90_FINE_FORWARD_3'
+
+    @pytest.mark.parametrize('depth,offset,bearing,action', [
+        (.410, 230, 14.2, 'GOAL_CAMERA90_BACKWARD_1'),
+        (.450, 230, 14.2, 'GOAL_CAMERA90_CRAB_RIGHT'),
+        (.450, -230, -7.9, 'GOAL_CAMERA90_CRAB_LEFT'),
+        (.510, 101, 6.0, 'GOAL_CAMERA90_CRAB_RIGHT'),
+        (.510, -101, -6.0, 'GOAL_CAMERA90_CRAB_LEFT'),
+        (.570, 0, 0.0, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+        (.510, 0, 0.0, 'SHOT'),
+    ])
+    def test_motion_toward_nominal_target_until_zone_entry(depth, offset, bearing, action):
+        decision = MotionDecisionPlanner().plan('GOAL_APPROACH', {'goal': goal_info(
+            depth_m=depth, offset_x_px=offset, offset_x_norm=offset / 640,
+            bearing_deg=bearing,
+        )}, .1)
+>       assert decision.action == action
+E       AssertionError: assert 'SHOT' == 'GOAL_CAMERA90_FINE_FORWARD_3'
+E         - GOAL_CAMERA90_FINE_FORWARD_3
+E         + SHOT
+
+src/mission_control/test/test_goal_shot_regions.py:61: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_fine_forward_1-0.43-120-1] _
+
+depth = 0.43, offset = 120, region = 1
+previous_motion = 'goal_camera_90_fine_forward_1'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+>           assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+E           AssertionError: assert 'GOAL_CAMERA90_BACKWARD_1' == 'WAIT_SCORE_CONFIRMATION'
+E             - WAIT_SCORE_CONFIRMATION
+E             + GOAL_CAMERA90_BACKWARD_1
+
+src/mission_control/test/test_goal_shot_regions.py:98: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_fine_forward_1-0.51-100-2] _
+
+depth = 0.51, offset = 100, region = 2
+previous_motion = 'goal_camera_90_fine_forward_1'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+            assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+>       assert decision.source_command['shot_region'] == region
+E       assert 1 == 2
+
+src/mission_control/test/test_goal_shot_regions.py:99: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_fine_forward_1-0.51-0-2] _
+
+depth = 0.51, offset = 0, region = 2
+previous_motion = 'goal_camera_90_fine_forward_1'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+            assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+>       assert decision.source_command['shot_region'] == region
+E       assert 1 == 2
+
+src/mission_control/test/test_goal_shot_regions.py:99: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.43-120-1] _
+
+depth = 0.43, offset = 120, region = 1
+previous_motion = 'goal_camera_90_crab_right'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+>           assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+E           AssertionError: assert 'GOAL_CAMERA90_BACKWARD_1' == 'WAIT_SCORE_CONFIRMATION'
+E             - WAIT_SCORE_CONFIRMATION
+E             + GOAL_CAMERA90_BACKWARD_1
+
+src/mission_control/test/test_goal_shot_regions.py:98: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.51-100-2] _
+
+depth = 0.51, offset = 100, region = 2
+previous_motion = 'goal_camera_90_crab_right'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+            assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+>       assert decision.source_command['shot_region'] == region
+E       assert 1 == 2
+
+src/mission_control/test/test_goal_shot_regions.py:99: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.51-0-2] _
+
+depth = 0.51, offset = 0, region = 2
+previous_motion = 'goal_camera_90_crab_right'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+            assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+>       assert decision.source_command['shot_region'] == region
+E       assert 1 == 2
+
+src/mission_control/test/test_goal_shot_regions.py:99: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.43-120-1] _
+
+depth = 0.43, offset = 120, region = 1
+previous_motion = 'goal_camera_90_crab_left'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+>           assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+E           AssertionError: assert 'GOAL_CAMERA90_BACKWARD_1' == 'WAIT_SCORE_CONFIRMATION'
+E             - WAIT_SCORE_CONFIRMATION
+E             + GOAL_CAMERA90_BACKWARD_1
+
+src/mission_control/test/test_goal_shot_regions.py:98: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.51-100-2] _
+
+depth = 0.51, offset = 100, region = 2
+previous_motion = 'goal_camera_90_crab_left'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+            assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+>       assert decision.source_command['shot_region'] == region
+E       assert 1 == 2
+
+src/mission_control/test/test_goal_shot_regions.py:99: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.51-0-2] _
+
+depth = 0.51, offset = 0, region = 2
+previous_motion = 'goal_camera_90_crab_left'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+            assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+>       assert decision.source_command['shot_region'] == region
+E       assert 1 == 2
+
+src/mission_control/test/test_goal_shot_regions.py:99: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.43-120-1] _
+
+depth = 0.43, offset = 120, region = 1
+previous_motion = 'goal_camera_90_turn_right_1'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+>           assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+E           AssertionError: assert 'GOAL_CAMERA90_BACKWARD_1' == 'WAIT_SCORE_CONFIRMATION'
+E             - WAIT_SCORE_CONFIRMATION
+E             + GOAL_CAMERA90_BACKWARD_1
+
+src/mission_control/test/test_goal_shot_regions.py:98: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.51-100-2] _
+
+depth = 0.51, offset = 100, region = 2
+previous_motion = 'goal_camera_90_turn_right_1'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+            assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+>       assert decision.source_command['shot_region'] == region
+E       assert 1 == 2
+
+src/mission_control/test/test_goal_shot_regions.py:99: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.51-0-2] _
+
+depth = 0.51, offset = 0, region = 2
+previous_motion = 'goal_camera_90_turn_right_1'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+            assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+>       assert decision.source_command['shot_region'] == region
+E       assert 1 == 2
+
+src/mission_control/test/test_goal_shot_regions.py:99: AssertionError
+_________ test_import_preserves_source_targets_and_applies_speed_once __________
+
+    def test_import_preserves_source_targets_and_applies_speed_once():
+        root = Path(__file__).resolve().parents[3]
+        def catalog(relative):
+            return {m['name']: m for m in json.loads((root / relative).read_text())['motions']}
+        source = catalog('artifacts/20261031_catalog64_goal_prepare/source64.json')
+        pc = catalog('artifacts/robot_motions_pc.json')
+        runtime = catalog('artifacts/robot_motions_runtime.json')
+        aliases = yaml.safe_load((root / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']
+        for region in range(1, 5):
+            name = f'R골넣기{region}번구역'
+            assert aliases[f'goal_shot_region_{region}'] == name
+>           assert pc[name] == source[name]
+E           AssertionError: assert {'completion'...s': 7045, ...} == {'completion'...s': 7045, ...}
+E             Omitting 8 identical items, use -vv to show
+E             Differing items:
+E             {'frames': [{'angles': {'0': 1.0, '1': 0.263671875, '10': 0.12109375, '11': 0.47265625, ...}, 'frame_id': '04db93766a0...234375, ...}, 'frame_id': '33793df19f394f76817dac9bfab34294', 'is_important': False, 'lift_early_arrival': True, ...}]} != {'frames': [{'angles': {'0': 1.0, '1': 0.263671875, '10': 0.12109375, '11': 0.47265625, ...}, 'frame_id': '04db93766a0...234375, ...}, 'frame_id': '33793df19f394f76817dac9bfab34294', 'is_important': False, 'lift_early_arrival': True, ...}]}
+E             Full diff:
+E               {
+E                'completion': {'p...
+E             
+E             ...Full output truncated (286 lines hidden), use '-vv' to show
+
+src/mission_control/test/test_goal_shot_regions.py:158: AssertionError
+_____ test_unusable_input_waits_only_until_next_usable_observation[10.51] ______
+
+clock = [10.51], late_time = 10.51
+
+    @pytest.mark.parametrize('late_time', [10.51, 10.73, 12.17])
+    def test_unusable_input_waits_only_until_next_usable_observation(clock, late_time):
+        node, motion_id = begin_exit(clock)
+        bad = {**line_info(), 'ground_projection_valid': False,
+               'ground_heading_error_deg': None, 'ground_fit_reason': 'too_few_inliers'}
+        clock[0] = 10.4
+        frame(node, clock, bad)
+        clock[0] = 10.5
+        status(node, motion_id=motion_id, status='SUCCEEDED')
+        assert not motions(node)
+        assert node.pickup_exit_dwell_complete
+        for moment in (late_time, late_time + .01):
+            clock[0] = moment
+            frame(node, clock)
+>           assert not motions(node)
+E           AssertionError: assert not [{'action': 'LINE_HEADING_TURN_LEFT_4', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}]
+E            +  where [{'action': 'LINE_HEADING_TURN_LEFT_4', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}] = motions(<test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff81a9a7d0>)
+
+src/mission_control/test/test_pickup_exit_observation_dwell.py:90: AssertionError
+_____ test_unusable_input_waits_only_until_next_usable_observation[10.73] ______
+
+clock = [10.73], late_time = 10.73
+
+    @pytest.mark.parametrize('late_time', [10.51, 10.73, 12.17])
+    def test_unusable_input_waits_only_until_next_usable_observation(clock, late_time):
+        node, motion_id = begin_exit(clock)
+        bad = {**line_info(), 'ground_projection_valid': False,
+               'ground_heading_error_deg': None, 'ground_fit_reason': 'too_few_inliers'}
+        clock[0] = 10.4
+        frame(node, clock, bad)
+        clock[0] = 10.5
+        status(node, motion_id=motion_id, status='SUCCEEDED')
+        assert not motions(node)
+        assert node.pickup_exit_dwell_complete
+        for moment in (late_time, late_time + .01):
+            clock[0] = moment
+            frame(node, clock)
+>           assert not motions(node)
+E           AssertionError: assert not [{'action': 'LINE_HEADING_TURN_LEFT_4', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}]
+E            +  where [{'action': 'LINE_HEADING_TURN_LEFT_4', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}] = motions(<test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff81aac8b0>)
+
+src/mission_control/test/test_pickup_exit_observation_dwell.py:90: AssertionError
+_____ test_unusable_input_waits_only_until_next_usable_observation[12.17] ______
+
+clock = [12.17], late_time = 12.17
+
+    @pytest.mark.parametrize('late_time', [10.51, 10.73, 12.17])
+    def test_unusable_input_waits_only_until_next_usable_observation(clock, late_time):
+        node, motion_id = begin_exit(clock)
+        bad = {**line_info(), 'ground_projection_valid': False,
+               'ground_heading_error_deg': None, 'ground_fit_reason': 'too_few_inliers'}
+        clock[0] = 10.4
+        frame(node, clock, bad)
+        clock[0] = 10.5
+        status(node, motion_id=motion_id, status='SUCCEEDED')
+        assert not motions(node)
+        assert node.pickup_exit_dwell_complete
+        for moment in (late_time, late_time + .01):
+            clock[0] = moment
+            frame(node, clock)
+>           assert not motions(node)
+E           AssertionError: assert not [{'action': 'LINE_HEADING_TURN_LEFT_4', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}]
+E            +  where [{'action': 'LINE_HEADING_TURN_LEFT_4', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}] = motions(<test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff81a99cf0>)
+
+src/mission_control/test/test_pickup_exit_observation_dwell.py:90: AssertionError
+______________________ test_next_turn_keeps_normal_pause _______________________
+
+clock = [11.51]
+
+    def test_next_turn_keeps_normal_pause(clock):
+        node, motion_id = begin_exit(clock)
+        stable_frames(node, clock, 10.4)
+        clock[0] = 10.5
+        status(node, motion_id=motion_id, status='SUCCEEDED')
+        first = motions(node)[0]
+        node.send_status(first['action'], first['command_id'], 'RUNNING')
+        clock[0] = 11.
+        node.send_status(first['action'], first['command_id'], 'SUCCEEDED')
+        clock[0] = 11.5
+        Node._publish_decision(node)
+        clock[0] = 11.51
+        frame(node, clock)
+        Node._publish_decision(node)
+>       assert len(motions(node)) == 1
+E       AssertionError: assert 2 == 1
+E        +  where 2 = len([{'action': 'LINE_HEADING_TURN_LEFT_4', 'active_special_action': None, 'active_special_command_id': None, 'active_spec..._TURN_LEFT_4', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}])
+E        +    where [{'action': 'LINE_HEADING_TURN_LEFT_4', 'active_special_action': None, 'active_special_command_id': None, 'active_spec..._TURN_LEFT_4', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}] = motions(<test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff81aac460>)
+
+src/mission_control/test/test_pickup_exit_observation_dwell.py:212: AssertionError
+____ test_missing_dwell_notice_keeps_existing_fresh_input_and_settle_policy ____
+
+clock = [10.6]
+
+    def test_missing_dwell_notice_keeps_existing_fresh_input_and_settle_policy(clock):
+        node = LiveInputHarness(phase='BALL_APPROACH')
+        node.LINE_TURN_PRE_MOTION_SETTLE_SEC = .5
+        assert node.phase_manager.start_special_action('PICKUP_NOW', 50)
+        node.phase_manager.ball_grasp_results[1] = 'GRABBED'
+        status(node, motion_id='pickup_first_backward_turn_right')
+        clock[0] = 10.4
+        frame(node, clock)
+        clock[0] = 10.5
+        status(node, motion_id='pickup_first_backward_turn_right', status='SUCCEEDED')
+        assert node.latest_info['line'] is None
+        clock[0] = 10.6
+        frame(node, clock)
+        Node._publish_decision(node)
+>       assert not motions(node)
+E       AssertionError: assert not [{'action': 'LINE_HEADING_TURN_LEFT_4', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}]
+E        +  where [{'action': 'LINE_HEADING_TURN_LEFT_4', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}] = motions(<test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff81667cd0>)
+
+src/mission_control/test/test_pickup_exit_observation_dwell.py:290: AssertionError
+_____ test_single_good_heading_and_repeated_capture_do_not_authorize_turn ______
+
+clock = [10.6]
+
+    def test_single_good_heading_and_repeated_capture_do_not_authorize_turn(clock):
+        node, motion_id = begin_exit(clock)
+        clock[0] = 10.5
+        status(node, motion_id=motion_id, status='SUCCEEDED')
+        for moment, heading in [(10.6, -65.), (10.7, 65.), (10.8, -65.)]:
+            clock[0] = moment
+            frame(node, clock, line_info(heading=heading))
+>           assert not motions(node)
+E           AssertionError: assert not [{'action': 'LINE_HEADING_TURN_LEFT_4', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}]
+E            +  where [{'action': 'LINE_HEADING_TURN_LEFT_4', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}] = motions(<test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff81b0bf10>)
+
+src/mission_control/test/test_pickup_exit_observation_dwell.py:359: AssertionError
+_ test_first_goal_navigation_preserves_support_transition_holds[GOAL_CAMERA90_BACKWARD_1-line_forward_6] _
+
+clock = [11.0], previous = 'line_forward_6', action = 'GOAL_CAMERA90_BACKWARD_1'
+
+    @pytest.mark.parametrize('previous', ['line_forward_6', 'post_ball_line_turn_right_3'])
+    @pytest.mark.parametrize('action', [
+        'GOAL_CAMERA_90_FORWARD_2', 'GOAL_CAMERA90_FINE_FORWARD_3',
+        'GOAL_CAMERA90_RECOVER_RIGHT_4', 'GOAL_CAMERA90_TURN_LEFT_3',
+        'GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_BACKWARD_1',
+    ])
+    def test_first_goal_navigation_preserves_support_transition_holds(clock, previous, action):
+        from test_motion_command_bridge import complete_active_motion
+        from test_transition_dwells import check_both_pauses
+    
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = previous
+        target = bridge.motion_id_for_action(action)
+        prepare = bridge._transition_prepare_motion(target)
+        bridge.navigation_command_callback(navigation_message(
+            action=action, command_id=1, phase='GOAL_APPROACH',
+            source_command={'post_ball_goal_handoff': True},
+        ))
+        if prepare is not None:
+            check_both_pauses(bridge, clock, prepare, target)
+        backward = action == 'GOAL_CAMERA90_BACKWARD_1'
+        if backward:
+            assert not bridge.executor_request_publisher.messages
+            assert bridge.transition_dwell_until == clock[0] + .5
+            clock[0] += .5
+            bridge._check_atomic_dwell()
+        assert bridge.executor_request_publisher.messages
+        for _ in range(6):
+            assert bridge.active_dwell_until is None
+            assert bridge.transition_dwell_until is None
+            if not bridge.motion_in_progress:
+                break
+            complete_active_motion(bridge)
+            if backward and bridge.transition_dwell_until is not None:
+                assert bridge.transition_dwell_until == clock[0] + .5
+                clock[0] += .5
+                bridge._check_atomic_dwell()
+        assert not bridge.motion_in_progress
+        statuses = [json.loads(m.data) for m in bridge.motion_status_publisher.messages]
+        assert any('DWELL' in str(s.get('motion_id')) for s in statuses) == (prepare is not None or backward)
+        # Every backward command, including the handoff, owns its pre-motion hold.
+        bridge.navigation_command_callback(navigation_message(
+            action='GOAL_CAMERA90_BACKWARD_1', command_id=2, phase='GOAL_APPROACH',
+        ))
+        expected_hold = 1.0 if action.startswith('GOAL_CAMERA90_FINE_FORWARD_') else .5
+>       assert bridge.transition_dwell_until == clock[0] + expected_hold
+E       assert None == (11.0 + 0.5)
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff8171ea40>.transition_dwell_until
+
+src/mission_control/test/test_post_ball_goal_handoff.py:89: AssertionError
+_ test_first_goal_navigation_preserves_support_transition_holds[GOAL_CAMERA90_BACKWARD_1-post_ball_line_turn_right_3] _
+
+clock = [11.0], previous = 'post_ball_line_turn_right_3'
+action = 'GOAL_CAMERA90_BACKWARD_1'
+
+    @pytest.mark.parametrize('previous', ['line_forward_6', 'post_ball_line_turn_right_3'])
+    @pytest.mark.parametrize('action', [
+        'GOAL_CAMERA_90_FORWARD_2', 'GOAL_CAMERA90_FINE_FORWARD_3',
+        'GOAL_CAMERA90_RECOVER_RIGHT_4', 'GOAL_CAMERA90_TURN_LEFT_3',
+        'GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_BACKWARD_1',
+    ])
+    def test_first_goal_navigation_preserves_support_transition_holds(clock, previous, action):
+        from test_motion_command_bridge import complete_active_motion
+        from test_transition_dwells import check_both_pauses
+    
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = previous
+        target = bridge.motion_id_for_action(action)
+        prepare = bridge._transition_prepare_motion(target)
+        bridge.navigation_command_callback(navigation_message(
+            action=action, command_id=1, phase='GOAL_APPROACH',
+            source_command={'post_ball_goal_handoff': True},
+        ))
+        if prepare is not None:
+            check_both_pauses(bridge, clock, prepare, target)
+        backward = action == 'GOAL_CAMERA90_BACKWARD_1'
+        if backward:
+            assert not bridge.executor_request_publisher.messages
+            assert bridge.transition_dwell_until == clock[0] + .5
+            clock[0] += .5
+            bridge._check_atomic_dwell()
+        assert bridge.executor_request_publisher.messages
+        for _ in range(6):
+            assert bridge.active_dwell_until is None
+            assert bridge.transition_dwell_until is None
+            if not bridge.motion_in_progress:
+                break
+            complete_active_motion(bridge)
+            if backward and bridge.transition_dwell_until is not None:
+                assert bridge.transition_dwell_until == clock[0] + .5
+                clock[0] += .5
+                bridge._check_atomic_dwell()
+        assert not bridge.motion_in_progress
+        statuses = [json.loads(m.data) for m in bridge.motion_status_publisher.messages]
+        assert any('DWELL' in str(s.get('motion_id')) for s in statuses) == (prepare is not None or backward)
+        # Every backward command, including the handoff, owns its pre-motion hold.
+        bridge.navigation_command_callback(navigation_message(
+            action='GOAL_CAMERA90_BACKWARD_1', command_id=2, phase='GOAL_APPROACH',
+        ))
+        expected_hold = 1.0 if action.startswith('GOAL_CAMERA90_FINE_FORWARD_') else .5
+>       assert bridge.transition_dwell_until == clock[0] + expected_hold
+E       assert None == (11.0 + 0.5)
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff8171fdf0>.transition_dwell_until
+
+src/mission_control/test/test_post_ball_goal_handoff.py:89: AssertionError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_without_fine_only_approach_keeps_direct_scoring[actions0]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_without_fine_only_approach_keeps_direct_scoring[actions1]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_waits_for_running_fine_motion_and_uses_only_completed_history
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_retry_does_not_repeat_completed_pose_preparation
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_production_action_mapping_contains_only_approved_contract
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_supported_action_builds_executor_request[SHOT-goal_shot]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_grasp_verification_uses_three_second_pause_after_pose
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_failed_grasp_check_pose_keeps_grasp_unknown_and_continues_exit_composite
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.43-0-1]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.43-120-1]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.43--120-4]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.51-0-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.51-0.001-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.51-100-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.51--0.001-3]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.51--100-3]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.57-0-None]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.571-0-None]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.51-120-None]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.51--120-None]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.510001-100-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.510001--100-3]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.510001-100.001-None]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.510001--100.001-None]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.430001-120-1]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.430001--120-4]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.57-100-None]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.57--100-None]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_motion_toward_nominal_target_until_zone_entry[0.51-101-6.0-GOAL_CAMERA90_CRAB_RIGHT]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_motion_toward_nominal_target_until_zone_entry[0.51--101--6.0-GOAL_CAMERA90_CRAB_LEFT]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_motion_toward_nominal_target_until_zone_entry[0.57-0-0.0-GOAL_CAMERA90_FINE_FORWARD_3]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_fine_forward_1-0.43-120-1]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_fine_forward_1-0.51-100-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_fine_forward_1-0.51-0-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.43-120-1]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.51-100-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.51-0-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.43-120-1]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.51-100-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.51-0-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.43-120-1]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.51-100-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.51-0-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_import_preserves_source_targets_and_applies_speed_once
+FAILED src/mission_control/test/test_pickup_exit_observation_dwell.py::test_unusable_input_waits_only_until_next_usable_observation[10.51]
+FAILED src/mission_control/test/test_pickup_exit_observation_dwell.py::test_unusable_input_waits_only_until_next_usable_observation[10.73]
+FAILED src/mission_control/test/test_pickup_exit_observation_dwell.py::test_unusable_input_waits_only_until_next_usable_observation[12.17]
+FAILED src/mission_control/test/test_pickup_exit_observation_dwell.py::test_next_turn_keeps_normal_pause
+FAILED src/mission_control/test/test_pickup_exit_observation_dwell.py::test_missing_dwell_notice_keeps_existing_fresh_input_and_settle_policy
+FAILED src/mission_control/test/test_pickup_exit_observation_dwell.py::test_single_good_heading_and_repeated_capture_do_not_authorize_turn
+FAILED src/mission_control/test/test_post_ball_goal_handoff.py::test_first_goal_navigation_preserves_support_transition_holds[GOAL_CAMERA90_BACKWARD_1-line_forward_6]
+FAILED src/mission_control/test/test_post_ball_goal_handoff.py::test_first_goal_navigation_preserves_support_transition_holds[GOAL_CAMERA90_BACKWARD_1-post_ball_line_turn_right_3]
+52 failed, 1151 passed in 7.71s

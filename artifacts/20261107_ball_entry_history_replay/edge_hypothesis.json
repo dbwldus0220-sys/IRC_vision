@@ -1,0 +1,276 @@
+[
+  {
+    "enabled": false,
+    "confirmed_input": 13,
+    "trace": [
+      {
+        "input": 1,
+        "raw_detected": true,
+        "confirmation_confirmed": false,
+        "confirmation_matched_previous": true,
+        "confirmation_hits": 1,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 0
+      },
+      {
+        "input": 2,
+        "raw_detected": true,
+        "confirmation_confirmed": false,
+        "confirmation_matched_previous": true,
+        "confirmation_hits": 2,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 0
+      },
+      {
+        "input": 3,
+        "raw_detected": true,
+        "confirmation_confirmed": false,
+        "confirmation_matched_previous": true,
+        "confirmation_hits": 3,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 0
+      },
+      {
+        "input": 4,
+        "raw_detected": true,
+        "confirmation_confirmed": false,
+        "confirmation_matched_previous": true,
+        "confirmation_hits": 1,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 0
+      },
+      {
+        "input": 5,
+        "raw_detected": true,
+        "confirmation_confirmed": false,
+        "confirmation_matched_previous": true,
+        "confirmation_hits": 2,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 0
+      },
+      {
+        "input": 6,
+        "raw_detected": true,
+        "confirmation_confirmed": false,
+        "confirmation_matched_previous": true,
+        "confirmation_hits": 3,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 0
+      },
+      {
+        "input": 7,
+        "raw_detected": true,
+        "confirmation_confirmed": false,
+        "confirmation_matched_previous": true,
+        "confirmation_hits": 4,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 0
+      },
+      {
+        "input": 8,
+        "raw_detected": true,
+        "confirmation_confirmed": false,
+        "confirmation_matched_previous": true,
+        "confirmation_hits": 5,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 0
+      },
+      {
+        "input": 9,
+        "raw_detected": true,
+        "confirmation_confirmed": false,
+        "confirmation_matched_previous": true,
+        "confirmation_hits": 6,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 0
+      },
+      {
+        "input": 10,
+        "raw_detected": true,
+        "confirmation_confirmed": false,
+        "confirmation_matched_previous": true,
+        "confirmation_hits": 7,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 0
+      },
+      {
+        "input": 11,
+        "raw_detected": true,
+        "confirmation_confirmed": false,
+        "confirmation_matched_previous": true,
+        "confirmation_hits": 8,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 0
+      },
+      {
+        "input": 12,
+        "raw_detected": true,
+        "confirmation_confirmed": false,
+        "confirmation_matched_previous": true,
+        "confirmation_hits": 9,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 0
+      },
+      {
+        "input": 13,
+        "raw_detected": true,
+        "confirmation_confirmed": true,
+        "confirmation_matched_previous": true,
+        "confirmation_hits": 10,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 0
+      }
+    ]
+  },
+  {
+    "enabled": true,
+    "confirmed_input": 11,
+    "trace": [
+      {
+        "input": 1,
+        "raw_detected": true,
+        "confirmation_confirmed": false,
+        "confirmation_matched_previous": true,
+        "confirmation_hits": 1,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 0,
+        "confirmation_track_id": 0,
+        "confirmation_spatial_pending": false
+      },
+      {
+        "input": 2,
+        "raw_detected": true,
+        "confirmation_confirmed": false,
+        "confirmation_matched_previous": true,
+        "confirmation_hits": 2,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 0,
+        "confirmation_track_id": 0,
+        "confirmation_spatial_pending": false
+      },
+      {
+        "input": 3,
+        "raw_detected": true,
+        "confirmation_confirmed": false,
+        "confirmation_matched_previous": true,
+        "confirmation_hits": 3,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 0,
+        "confirmation_track_id": 0,
+        "confirmation_spatial_pending": false
+      },
+      {
+        "input": 4,
+        "raw_detected": true,
+        "confirmation_confirmed": false,
+        "confirmation_matched_previous": false,
+        "confirmation_hits": 3,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 1,
+        "confirmation_track_id": 0,
+        "confirmation_spatial_pending": true
+      },
+      {
+        "input": 5,
+        "raw_detected": true,
+        "confirmation_confirmed": false,
+        "confirmation_matched_previous": true,
+        "confirmation_hits": 4,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 0,
+        "confirmation_track_id": 0,
+        "confirmation_spatial_pending": false
+      },
+      {
+        "input": 6,
+        "raw_detected": true,
+        "confirmation_confirmed": false,
+        "confirmation_matched_previous": true,
+        "confirmation_hits": 5,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 0,
+        "confirmation_track_id": 0,
+        "confirmation_spatial_pending": false
+      },
+      {
+        "input": 7,
+        "raw_detected": true,
+        "confirmation_confirmed": false,
+        "confirmation_matched_previous": true,
+        "confirmation_hits": 6,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 0,
+        "confirmation_track_id": 0,
+        "confirmation_spatial_pending": false
+      },
+      {
+        "input": 8,
+        "raw_detected": true,
+        "confirmation_confirmed": false,
+        "confirmation_matched_previous": true,
+        "confirmation_hits": 7,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 0,
+        "confirmation_track_id": 0,
+        "confirmation_spatial_pending": false
+      },
+      {
+        "input": 9,
+        "raw_detected": true,
+        "confirmation_confirmed": false,
+        "confirmation_matched_previous": true,
+        "confirmation_hits": 8,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 0,
+        "confirmation_track_id": 0,
+        "confirmation_spatial_pending": false
+      },
+      {
+        "input": 10,
+        "raw_detected": true,
+        "confirmation_confirmed": false,
+        "confirmation_matched_previous": true,
+        "confirmation_hits": 9,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 0,
+        "confirmation_track_id": 0,
+        "confirmation_spatial_pending": false
+      },
+      {
+        "input": 11,
+        "raw_detected": true,
+        "confirmation_confirmed": true,
+        "confirmation_matched_previous": true,
+        "confirmation_hits": 10,
+        "confirmation_required_hits": 10,
+        "confirmation_window_size": 30,
+        "confirmation_missed_frames": 0,
+        "confirmation_track_id": 0,
+        "confirmation_spatial_pending": false
+      }
+    ]
+  }
+]

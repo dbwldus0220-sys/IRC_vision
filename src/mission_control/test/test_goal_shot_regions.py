@@ -59,7 +59,7 @@ def test_motion_toward_nominal_target_until_zone_entry(depth, offset, bearing, a
         bearing_deg=bearing,
     )}, .1)
     assert decision.action == action
-    assert decision.source_command['depth_error_m'] == pytest.approx(depth - .510)
+    assert decision.source_command['depth_error_m'] == pytest.approx(depth - .630)
 
 
 def test_recorded_wait_geometry_recovers_then_shoots_in_entered_zone():
@@ -114,7 +114,7 @@ def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
     assert decoded_messages(bridge.motion_status_publisher)[-1]['status'] == 'SUCCEEDED'
 
 
-@pytest.mark.parametrize('region', [0, 5, True, 1.0, '2'])
+@pytest.mark.parametrize('region', [0, 9, True, 1.0, '2'])
 def test_invalid_region_cannot_execute_a_shot(region):
     bridge = FakeBridge()
     bridge.navigation_command_callback(navigation_message(
@@ -163,4 +163,4 @@ def test_import_preserves_source_targets_and_applies_speed_once():
         duration_ms = max(f['start_ms'] + f['time_ms'] for f in expected['frames']) / .95
         assert duration_ms + expected['completion']['settle_timeout_ms'] < FakeBridge.DEFAULT_TIMEOUT_MS
     assert aliases['post_shot_default_turn_right'] == 't골대후제자리우회전'
-    assert aliases['post_shot_default_turn_left'] == 't골대후 제자리좌회전'
+    assert aliases['post_shot_default_turn_left'] == 'p골대후제자리좌회전'

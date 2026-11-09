@@ -81,9 +81,14 @@ def test_first_goal_navigation_preserves_support_transition_holds(clock, previou
     assert not bridge.motion_in_progress
     statuses = [json.loads(m.data) for m in bridge.motion_status_publisher.messages]
     assert any('DWELL' in str(s.get('motion_id')) for s in statuses) == (prepare is not None or backward)
-    # Every backward command, including the handoff, owns its pre-motion hold.
+    # Reuse the completed backward post-rest as the next pre-motion rest.
+    before = len(bridge.executor_request_publisher.messages)
     bridge.navigation_command_callback(navigation_message(
         action='GOAL_CAMERA90_BACKWARD_1', command_id=2, phase='GOAL_APPROACH',
     ))
     expected_hold = 1.0 if action.startswith('GOAL_CAMERA90_FINE_FORWARD_') else .5
-    assert bridge.transition_dwell_until == clock[0] + expected_hold
+    if backward:
+        assert bridge.transition_dwell_until is None
+        assert len(bridge.executor_request_publisher.messages) == before + 1
+    else:
+        assert bridge.transition_dwell_until == clock[0] + expected_hold

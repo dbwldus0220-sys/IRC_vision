@@ -1,0 +1,7 @@
+{
+  "artifacts/robot_motions_pc.json": "ee3515803d52a3926878915bc0e4179e9861a0b10d5f1a5f4c314d21d9faa149",
+  "artifacts/robot_motions_runtime.json": "cff2c0858d58e4ebe82c9f592a52796cff784d3159eef7eb89c2da5d0face402",
+  "src/irc_step_motion_executor/config/motion_aliases.yaml": "90085f7485d064ad07b1ab2ddde9df889cb0c93d68b17db22683a601bd24476a",
+  "src/mission_control/mission_control/ball_fine_approach.py": "34ccd46831bcfe7bff71c574ddf73bc6939d9e521dcc55e5804727bc1ca39cb1",
+  "external_sdk/gui_aligned/robot_motion_player.cpp": "34e1c83bdb02e28c7f2d41bdb96a5159e465a0fb85fa222c74875db015c74bc6"
+}

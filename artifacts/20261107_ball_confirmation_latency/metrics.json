@@ -1,0 +1,202 @@
+{
+  "2026-11-07_18-36": {
+    "whole_run_inference_count": 2882,
+    "whole_run_effective_fps": 13.952092329737997,
+    "whole_run_weighted_inference_ms": 25.539375433726573,
+    "first_ball_entry_windows": [
+      {
+        "run": "2026-11-07_18-36",
+        "log": "python3_10200_1794044172359.log",
+        "line": 51,
+        "end_epoch_ns": 1794044252926555553,
+        "samples": 26,
+        "avg_ms": 26.934,
+        "p50_ms": 22.938,
+        "p95_ms": 42.398,
+        "max_ms": 45.162,
+        "effective_fps": 12.703,
+        "window_sec": 2.047,
+        "mean_inference_completion_interval_ms": 78.73076923076924
+      },
+      {
+        "run": "2026-11-07_18-36",
+        "log": "python3_10200_1794044172359.log",
+        "line": 52,
+        "end_epoch_ns": 1794044254944476563,
+        "samples": 23,
+        "avg_ms": 26.141,
+        "p50_ms": 22.405,
+        "p95_ms": 37.244,
+        "max_ms": 40.749,
+        "effective_fps": 11.398,
+        "window_sec": 2.018,
+        "mean_inference_completion_interval_ms": 87.7391304347826
+      },
+      {
+        "run": "2026-11-07_18-36",
+        "log": "python3_10200_1794044172359.log",
+        "line": 53,
+        "end_epoch_ns": 1794044256982398766,
+        "samples": 21,
+        "avg_ms": 27.137,
+        "p50_ms": 25.603,
+        "p95_ms": 40.699,
+        "max_ms": 42.564,
+        "effective_fps": 10.305,
+        "window_sec": 2.038,
+        "mean_inference_completion_interval_ms": 97.04761904761904
+      }
+    ],
+    "capture_age_ms_by_category": {
+      "ball_approach_capture_to_command_log": {
+        "count": 2,
+        "mean": 215.490068,
+        "p50": 136.169888,
+        "p95": 294.810248,
+        "min": 136.169888,
+        "max": 294.810248
+      },
+      "grasp_detection_capture_to_receive": {
+        "count": 37,
+        "mean": 143.7431601081081,
+        "p50": 140.429971,
+        "p95": 223.810761,
+        "min": 88.70642,
+        "max": 225.982951
+      },
+      "line_corner_capture_to_log": {
+        "count": 15,
+        "mean": 208.56439980000002,
+        "p50": 210.440847,
+        "p95": 286.899063,
+        "min": 128.187772,
+        "max": 286.899063
+      },
+      "pickup_capture_to_decision_log": {
+        "count": 2,
+        "mean": 168.5654615,
+        "p50": 152.183065,
+        "p95": 184.947858,
+        "min": 152.183065,
+        "max": 184.947858
+      }
+    }
+  },
+  "2026-11-06_15-31": {
+    "whole_run_inference_count": 3054,
+    "whole_run_effective_fps": 13.24687154351645,
+    "whole_run_weighted_inference_ms": 26.0316751800917,
+    "first_ball_entry_windows": [
+      {
+        "run": "2026-11-06_15-31",
+        "log": "python3_10172_1793946702920.log",
+        "line": 31,
+        "end_epoch_ns": 1793946742384001530,
+        "samples": 28,
+        "avg_ms": 24.182,
+        "p50_ms": 22.689,
+        "p95_ms": 29.767,
+        "max_ms": 29.891,
+        "effective_fps": 13.623,
+        "window_sec": 2.055,
+        "mean_inference_completion_interval_ms": 73.39285714285714
+      },
+      {
+        "run": "2026-11-06_15-31",
+        "log": "python3_10172_1793946702920.log",
+        "line": 32,
+        "end_epoch_ns": 1793946744446353785,
+        "samples": 28,
+        "avg_ms": 26.758,
+        "p50_ms": 22.725,
+        "p95_ms": 39.45,
+        "max_ms": 59.016,
+        "effective_fps": 13.577,
+        "window_sec": 2.062,
+        "mean_inference_completion_interval_ms": 73.64285714285714
+      },
+      {
+        "run": "2026-11-06_15-31",
+        "log": "python3_10172_1793946702920.log",
+        "line": 33,
+        "end_epoch_ns": 1793946746451454840,
+        "samples": 23,
+        "avg_ms": 25.606,
+        "p50_ms": 25.404,
+        "p95_ms": 32.936,
+        "max_ms": 33.641,
+        "effective_fps": 11.47,
+        "window_sec": 2.005,
+        "mean_inference_completion_interval_ms": 87.17391304347827
+      },
+      {
+        "run": "2026-11-06_15-31",
+        "log": "python3_10172_1793946702920.log",
+        "line": 34,
+        "end_epoch_ns": 1793946748535072463,
+        "samples": 28,
+        "avg_ms": 26.168,
+        "p50_ms": 25.156,
+        "p95_ms": 30.817,
+        "max_ms": 44.455,
+        "effective_fps": 13.438,
+        "window_sec": 2.084,
+        "mean_inference_completion_interval_ms": 74.42857142857143
+      }
+    ],
+    "capture_age_ms_by_category": {
+      "ball_approach_capture_to_command_log": {
+        "count": 3,
+        "mean": 243.03083733333332,
+        "p50": 242.336775,
+        "p95": 269.030453,
+        "min": 217.725284,
+        "max": 269.030453
+      },
+      "grasp_detection_capture_to_receive": {
+        "count": 76,
+        "mean": 136.92599036842108,
+        "p50": 127.083671,
+        "p95": 197.887128,
+        "min": 81.263248,
+        "max": 249.357083
+      },
+      "line_corner_capture_to_log": {
+        "count": 6,
+        "mean": 175.66093966666668,
+        "p50": 178.885853,
+        "p95": 201.169292,
+        "min": 148.868471,
+        "max": 201.169292
+      },
+      "pickup_capture_to_decision_log": {
+        "count": 7,
+        "mean": 189.08016042857145,
+        "p50": 188.265719,
+        "p95": 250.73926,
+        "min": 123.587615,
+        "max": 250.73926
+      }
+    }
+  },
+  "first_entry_events": {
+    "pending_epoch_ns": 1794044255587041630,
+    "line_complete_epoch_ns": 1794044256664731518,
+    "confirmed_epoch_ns": 1794044256993069274,
+    "confirmed_frame_capture_epoch_ns": 1794044256703167236,
+    "approach_command_epoch_ns": 1794044256997977484,
+    "candidate_hold_to_confirmation_ms": 1406.027644,
+    "line_end_to_confirmed_frame_capture_ms": 38.435718,
+    "confirmed_frame_capture_to_confirmation_ms": 289.902038,
+    "confirmation_to_command_log_ms": 4.90821,
+    "line_end_to_command_log_ms": 333.245966
+  },
+  "ten_vs_twelve_estimate_not_replay": {
+    "assumption": "Two consecutive successful detections removed, unchanged timing and track; window mean is not individual frame timing.",
+    "effective_fps": 10.305,
+    "estimated_gain_ms": 194.0805434255216,
+    "estimated_remaining_command_gap_ms": 139.1654225744784,
+    "exact_tenth_hit_capture_and_receipt_available": false,
+    "full_raw_detection_replay_available": false
+  }
+}

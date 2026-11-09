@@ -1,0 +1,16 @@
+........................................................................ [ 18%]
+........................................................................ [ 36%]
+........................................................................ [ 55%]
+........................................................................ [ 73%]
+........................................................................ [ 92%]
+............F.................                                           [100%]
+=================================== FAILURES ===================================
+_ test_second_pickup_fine_continues_on_first_fresh_frame_without_observation_pause[231-BALL_PICKUP_FINE_FORWARD] _
+src/mission_control/test/test_boundary_decision_reservation.py:243: in test_second_pickup_fine_continues_on_first_fresh_frame_without_observation_pause
+    assert executable(node)[-1]['action'] == expected
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_FINE_FORWARD'
+E     - BALL_PICKUP_FINE_FORWARD
+E     + BALL_PICKUP_FINE_ALIGN_CONTINUE
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_boundary_decision_reservation.py::test_second_pickup_fine_continues_on_first_fresh_frame_without_observation_pause[231-BALL_PICKUP_FINE_FORWARD]
+1 failed, 389 passed in 6.99s

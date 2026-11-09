@@ -42,6 +42,7 @@ from step.line_navigation_planner import (
     numbered_turn_motion_metadata,
 )
 from step.tensorrt_backend import TensorRTBackend
+from step.pipeline_timing import elapsed_ms, record_timing, ros_time_ns
 
 
 def _default_model_path() -> str:
@@ -3119,11 +3120,15 @@ class Yolo26Detector(Node):
             cv2.rectangle(annotated, (0, 32), (annotated.shape[1], 96), (0, 0, 0), -1)
             self._draw_action_banner(annotated, running_banner[0], running_banner[1])
         fault_banner = self._executor_fault_banner(decision_debug)
+        camera_banner = self._camera_recovery_banner(decision_debug)
         lost_banner = self._ball_lost_banner(decision_debug)
         if fault_banner is not None:
             # Replace any earlier action banner, including vision-only pickup.
             cv2.rectangle(annotated, (0, 32), (annotated.shape[1], 96), (0, 0, 0), -1)
             self._draw_action_banner(annotated, fault_banner, (0, 0, 180))
+        elif camera_banner is not None:
+            cv2.rectangle(annotated, (0, 32), (annotated.shape[1], 96), (0, 0, 0), -1)
+            self._draw_action_banner(annotated, camera_banner, (0, 100, 220))
         elif lost_banner is not None:
             if running_banner is not None:
                 lost_banner = f"BALL LOST | {running_banner[0]}"
@@ -3141,6 +3146,26 @@ class Yolo26Detector(Node):
                     self._draw_action_banner(annotated, line_stop, (0, 100, 220))
             self._draw_grasp_verification_status(annotated)
         return annotated
+
+    @staticmethod
+    def _camera_recovery_banner(decision_debug: dict[str, Any] | None) -> str | None:
+        recovery = (decision_debug or {}).get('camera_recovery')
+        if not isinstance(recovery, dict):
+            return None
+        reason = str(recovery.get('reason', 'WAIT_CAMERA_STATUS'))
+        if reason == 'READY':
+            return None
+        labels = {
+            'WAIT_SYSTEM_TIME': 'WAIT / SYSTEM CLOCK',
+            'WAIT_CLOCK_STABLE': 'WAIT / CLOCK STABILIZING',
+            'WAIT_FRAMES': 'WAIT / RGB + DEPTH TIME',
+            'WAIT_MOTION_IDLE': 'CAMERA RECOVERY / WAIT MOTION END',
+            'RESTARTING': 'CAMERA RECOVERY / RESTARTING',
+            'FAILED': 'CAMERA RECOVERY FAILED / HOLD',
+        }
+        if reason.startswith('WAIT_PHASE_'):
+            return 'CAMERA READY / REOBSERVE ' + reason.removeprefix('WAIT_PHASE_')
+        return labels.get(reason, 'CAMERA / ' + reason.replace('_', ' '))
 
     @staticmethod
     def _line_stop_banner(decision_debug: dict[str, Any] | None) -> str | None:
@@ -3307,6 +3332,11 @@ class Yolo26Detector(Node):
             "image_height": int(message.height),
             "detections": [asdict(detection) for detection in detections],
         }
+        timing = getattr(self, "_diagnostic_frame_timing", None)
+        if timing is not None:
+            payload["diagnostic_timing"] = {
+                **timing, "detector_publish_mono_ns": time.monotonic_ns(),
+            }
         output = String()
         output.data = json.dumps(
             payload, ensure_ascii=True, separators=(",", ":")
@@ -3359,6 +3389,7 @@ class Yolo26Detector(Node):
             now - self.last_inference_time < minimum_interval
         )
         if self.processing or waiting_for_interval:
+            self._timing_skipped_frames = getattr(self, "_timing_skipped_frames", 0) + 1
             return
 
         # Limit callback start times, rather than adding the FPS interval after
@@ -3367,19 +3398,29 @@ class Yolo26Detector(Node):
         self.last_inference_time = now
         self.processing = True
         started = time.perf_counter()
+        receive_ns = time.monotonic_ns()
+        self._diagnostic_frame_timing = {
+            "rgb_stamp_ns": int(message.header.stamp.sec) * 1_000_000_000 + int(message.header.stamp.nanosec),
+            "detector_receive_ros_ns": ros_time_ns(self),
+            "detector_receive_mono_ns": receive_ns,
+        }
+        preprocess_done_ns = inference_done_ns = postprocess_done_ns = published_ns = None
         try:
             image = self.bridge.imgmsg_to_cv2(message, desired_encoding="bgr8")
             blob, info = self._preprocess(image)
+            preprocess_done_ns = time.monotonic_ns()
             inference_started = time.perf_counter()
             output = self._run_inference(blob)
             inference_latency_ms = (
                 time.perf_counter() - inference_started
             ) * 1000.0
+            inference_done_ns = time.monotonic_ns()
             self._record_inference_timing(
                 inference_latency_ms,
                 time.monotonic(),
             )
             detections = self._postprocess(output, info, image.shape)
+            postprocess_done_ns = time.monotonic_ns()
             elapsed = max(time.perf_counter() - started, 1e-6)
             current_fps = 1.0 / elapsed
             self.smoothed_fps = (
@@ -3389,6 +3430,7 @@ class Yolo26Detector(Node):
             )
 
             self._publish_detections(message, detections)
+            published_ns = time.monotonic_ns()
             publish_annotated = self._annotated_image_has_subscriber()
             if publish_annotated or self.display:
                 display_rgb, display_detections, display_header = self._select_overlay_frame(
@@ -3434,6 +3476,20 @@ class Yolo26Detector(Node):
             self.get_logger().error(f"YOLO26 inference failed: {exc}")
         finally:
             self.processing = False
+            done_ns = time.monotonic_ns()
+            record_timing(self, "_detector_pipeline_timing", "DETECTOR_PIPELINE_TIMING", {
+                "capture_to_detector": elapsed_ms(self._diagnostic_frame_timing["rgb_stamp_ns"],
+                                                    self._diagnostic_frame_timing["detector_receive_ros_ns"]),
+                "convert_preprocess": elapsed_ms(receive_ns, preprocess_done_ns),
+                "inference": elapsed_ms(preprocess_done_ns, inference_done_ns),
+                "postprocess": elapsed_ms(inference_done_ns, postprocess_done_ns),
+                "publish": elapsed_ms(postprocess_done_ns, published_ns),
+                "overlay_display": elapsed_ms(published_ns, done_ns),
+                "callback": elapsed_ms(receive_ns, done_ns),
+            }, {"rgb_stamp_ns": self._diagnostic_frame_timing["rgb_stamp_ns"],
+                "skipped_total": getattr(self, "_timing_skipped_frames", 0),
+                "published": published_ns is not None}, done_ns)
+            self._diagnostic_frame_timing = None
 
     def destroy_node(self) -> bool:
         if self.tensorrt_backend is not None:

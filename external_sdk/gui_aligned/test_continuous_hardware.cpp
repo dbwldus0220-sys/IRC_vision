@@ -5,6 +5,58 @@
 #include <iostream>
 using namespace irc_step;
 
+static void testGroupedTorqueVerification() {
+    for (int scenario = 0; scenario < 13; ++scenario) {
+        dynamixel::reset();
+        Dxl dxl;
+        if (scenario == 10) dxl.SetExcludeMotor5(true);
+        if (scenario == 12) {
+            assert(!dxl.VerifyTorqueEnabled(true));
+            assert(dynamixel::events.empty());
+            continue;
+        }
+        assert(dxl.Initialize("fake", 4000000));
+        for (int id = 0; id < 23; ++id) dynamixel::registers[id][64] = 1;
+        if (scenario == 1) dynamixel::registers[20][64] = 0;
+        if (scenario == 2) dynamixel::offline = 22;
+        if (scenario == 3) dynamixel::torque_read_failure = 20;
+        if (scenario == 4) dynamixel::torque_packet_error = 22;
+        if (scenario == 5) dynamixel::torque_group_failure = true;
+        if (scenario == 6) dynamixel::torque_group_missing = 20;
+        if (scenario == 7) dynamixel::torque_group_error_unavailable = 22;
+        if (scenario == 8) dynamixel::torque_group_add_failure = 20;
+        if (scenario == 9) dynamixel::all_offline = true;
+        if (scenario == 10) {
+            dynamixel::offline = 5;
+        }
+        if (scenario == 11)
+            for (int id = 0; id < 23; ++id) dynamixel::registers[id][64] = 0;
+        const bool expected = scenario == 0 || (scenario >= 5 && scenario <= 7)
+            || scenario == 10 || scenario == 11;
+        assert(dxl.VerifyTorqueEnabled(scenario != 11) == expected);
+        int grouped = 0, individual = 0;
+        for (const auto& event : dynamixel::events) {
+            assert(event.address == 64 && event.size == 1);
+            assert(event.type == 'R' || event.type == 'r'); // Verification never writes torque.
+            if (event.type == 'R') {
+                ++grouped;
+                assert(event.data.size() == (scenario == 10 ? 22u : 23u));
+            } else ++individual;
+            if (scenario == 10) assert(!event.data.contains(5));
+        }
+        assert(grouped == (scenario == 8 ? 0 : 1));
+        const bool fallback = scenario == 2 || scenario == 3
+            || (scenario >= 5 && scenario <= 7) || scenario == 9;
+        assert((individual > 0) == fallback);
+        if (scenario == 0) {
+            // A new check must observe a motor that turned off after the previous check.
+            dynamixel::registers[20][64] = 0;
+            assert(!dxl.VerifyTorqueEnabled(true));
+        }
+    }
+    std::cout << "PASS grouped torque verification: normal, off, missing, packet error, fallback, exclusion\n";
+}
+
 static uint32_t lastSentGoal(int id) {
     for (auto event = dynamixel::events.rbegin(); event != dynamixel::events.rend(); ++event)
         if (event->type == 'W' && event->address == 116 && event->data.contains(id))
@@ -112,6 +164,7 @@ static void testCompetitionContinuation(const std::string& path) {
 
 int main(int argc,char** argv) {
     assert(argc==2);
+    testGroupedTorqueVerification();
     const std::string path=std::string(argv[1])+"/continuous_hardware.json";
     std::ofstream(path)<<R"({"motions":[{"name":"test","max_seq_ms":200,"repeat_count":2,"playback_speed":2,"frames":[
       {"name":"발들기","start_ms":0,"time_ms":100,"lift_early_arrival":true,"angles":{"1":20,"5":80}},

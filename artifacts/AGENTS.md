@@ -1,11 +1,12 @@
 # Runtime Motion Policy
 
-- On every motion replacement/import, set runtime `playback_speed` to the
-  supplied original speed multiplied by **0.95**, for every motion family.
-  This standing user instruction was reaffirmed on 2026-10-29.
+- On every motion replacement/import, preserve the supplied original
+  `playback_speed`, except for `t허들찐`, `p공후 제자리좌회전`, and
+  `p골대후제자리좌회전`: multiply only these three by **0.95**.
+  The user's 2026-11-10 instruction supersedes the previous all-motion scaling.
 - Keep `robot_motions_pc.json` and archived input files at the original speed.
-  Derive repeat/camera variants from that unscaled source, then apply 0.95 once.
-  Never multiply the existing runtime speed again or exempt fine/turn/crab motions.
+  Derive repeat/camera variants from that unscaled source, then apply the named
+  exceptions once. Never multiply an existing runtime speed again.
 - Use `tools/upsert_motion_catalog.py:runtime_motion_from_source` for imports.
   Reimporting the same source must produce identical data, not cumulative slowing.
   Its `_with_runtime_policy` helper only normalizes tolerance/pose identities and

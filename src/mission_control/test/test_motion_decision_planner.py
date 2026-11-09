@@ -2682,7 +2682,8 @@ def test_close_pickup_loss_backs_up_one_cycle_and_reacquires(fine, offset):
     centered = ball_info(distance_m=0.4, offset_x_px=0, bottom_distance_px=150)
     if fine:
         assert plan(centered).action == "BALL_PICKUP_FINE_ALIGN_CONTINUE"
-    assert plan({**centered, "bottom_distance_px": 40}).action == f"BALL_PICKUP_{stage}_BACKWARD"
+    assert plan({**centered, "bottom_distance_px": 40}).action == (
+        "BALL_PICKUP_FINE_ALIGN_CONTINUE" if fine else "BALL_PICKUP_INITIAL_ALIGN_CONTINUE")
     planner.clear_collected_ball_tracking()
     assert not planner.pickup_close_alignment_active
 

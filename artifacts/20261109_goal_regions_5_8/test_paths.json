@@ -1,0 +1,23 @@
+[
+  "src/step/test/test_goal_navigation_planner.py",
+  "src/step/test/test_goal_backboard_selection.py",
+  "src/step/test/test_goal_ground_distance.py",
+  "src/mission_control/test/test_goal_crab_queue.py",
+  "src/mission_control/test/test_goal_loss_timer.py",
+  "src/mission_control/test/test_goal_initial_search.py",
+  "src/mission_control/test/test_three_line_goal_handoff.py",
+  "src/mission_control/test/test_post_ball_goal_handoff.py",
+  "src/mission_control/test/test_goal_fine_approach.py",
+  "src/mission_control/test/test_catalog64_goal_prepare.py",
+  "src/mission_control/test/test_goal_backward_dwell.py",
+  "src/mission_control/test/test_catalog74_goal_fine.py",
+  "src/mission_control/test/test_goal_shot_regions.py",
+  "src/mission_control/test/test_goal_target_steering.py",
+  "src/mission_control/test/test_goal_camera_early_prepare.py",
+  "src/mission_control/test/test_post_shot_forward_prequeue.py",
+  "src/mission_control/test/test_goal_fine_turn_transition.py",
+  "src/mission_control/test/test_goal_pixel_alignment.py",
+  "src/mission_control/test/test_goal_shot_settle.py",
+  "src/mission_control/test/test_shot_start_posture.py",
+  "src/mission_control/test/test_catalog64_goal_prepare.py"
+]

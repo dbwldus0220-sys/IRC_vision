@@ -19,24 +19,29 @@ double guiSeconds(RobotMotionPlayer::Clock::time_point value) {
     return std::chrono::duration_cast<std::chrono::nanoseconds>(value.time_since_epoch()).count() / 1e9;
 }
 bool isBallRecoveryMotion(std::string_view name) {
-    return name == "t라인복귀좌공용" || name == "t라인복귀우공용";
+    return name == "p라인복귀좌회전공용" || name == "t라인복귀좌공용"
+        || name == "t라인복귀우공용";
 }
 bool isLineRecoveryMotion(std::string_view name) {
     return name == "R전진라인복귀좌" || name == "R라인복귀우회전"
         || name == "R라인복귀좌90도" || name == "R라인복귀우회전90도"
         || name == "t라인복귀좌실전" || name == "t라인복귀우실전"
         || name == "t라인복귀좌실전90도" || name == "t라인복귀우실전90도"
+        || name == "p라인복귀좌회전45도" || name == "p라인복귀좌회전90도"
         || isBallRecoveryMotion(name);
 }
 bool isLineWalkingMotion(std::string_view name) {
     return name.starts_with("R전진45도(") || name == "t전진실전"
-        || name.starts_with("t전진실전45도(") || isLineRecoveryMotion(name);
+        || name.starts_with("t전진실전45도(") || name.starts_with("p전진45(")
+        || isLineRecoveryMotion(name);
 }
 bool isGoalForwardMotion(std::string_view name) {
-    return name.starts_with("R전진90도(") || name.starts_with("t전진실전90도(");
+    return name.starts_with("R전진90도(") || name.starts_with("t전진실전90도(")
+        || name.starts_with("p전진90도(");
 }
 bool isCamera45Turn(std::string_view name) {
-    return name.starts_with("R제자리좌회전(") || name.starts_with("t제자리우회전45도(");
+    return name.starts_with("R제자리좌회전(") || name.starts_with("t제자리좌회전45도(")
+        || name.starts_with("p제자리좌회전45(") || name.starts_with("t제자리우회전45도(");
 }
 bool sameEntryFrame(const MotionFrame& a, const MotionFrame& b) {
     return a.name == b.name && a.start_ms == b.start_ms && a.time_ms == b.time_ms
@@ -235,22 +240,22 @@ bool RobotMotionPlayer::canSeamlesslyTransition(
     // added dwell. Compare full body targets/torques, never pose names alone.
     const bool fixed_head = head_override_enabled_ && joint_overrides_.contains(0);
     const bool current_standard = isLineWalkingMotion(current_name)
-        || isCamera45Turn(current_name) || current_name == "rr미세오뒤에서 오뒤45도";
+        || isCamera45Turn(current_name) || current_name == "p미세오뒤에서 오뒤45도";
     const bool next_standard = isLineWalkingMotion(next_name) || isCamera45Turn(next_name);
     if ((isCamera45Turn(current_name) || isCamera45Turn(next_name)
-            || current_name == "rr미세오뒤에서 오뒤45도")
+            || current_name == "p미세오뒤에서 오뒤45도")
         && current_standard && next_standard
         && sameWalkingEndPose(current, next, fixed_head)) return true;
-    const bool current_fine = current_name == "t미세45도(5회)"
-        || current_name == "t오뒤에서 미세오뒤(45도)";
-    if (current_name == "t오뒤에서 미세오뒤(45도)" && next_name == "t미세45도(5회)"
+    const bool current_fine = current_name == "p미세45도(5회)"
+        || current_name == "p오뒤에서 미세오뒤(45도)";
+    if (current_name == "p오뒤에서 미세오뒤(45도)" && next_name == "p미세45도(5회)"
         && sameWalkingEndPose(current, next, fixed_head)) return true;
-    const bool to_fine = current_standard && next_name == "t오뒤에서 미세오뒤(45도)";
-    const bool from_fine = current_fine && next_name == "rr미세오뒤에서 오뒤45도";
+    const bool to_fine = current_standard && next_name == "p오뒤에서 미세오뒤(45도)";
+    const bool from_fine = current_fine && next_name == "p미세오뒤에서 오뒤45도";
     if ((to_fine || from_fine) && next.repeatCount() == 1
-        && library_.contains("R전진45도(4회)") && library_.contains("t미세45도(5회)")) {
-        const auto& standing = library_.motion("R전진45도(4회)");
-        const auto& fine = library_.motion("t미세45도(5회)");
+        && library_.contains("p전진45(4회)") && library_.contains("p미세45도(5회)")) {
+        const auto& standing = library_.motion("p전진45(4회)");
+        const auto& fine = library_.motion("p미세45도(5회)");
         const bool complete_transition = std::all_of(next.frames().begin(), next.frames().end(),
             [](const MotionFrame& frame) {
                 return frame.angles.size() == kMotionMotorCount
@@ -272,15 +277,25 @@ bool RobotMotionPlayer::canSeamlesslyTransition(
     const bool walking_pair =
         (forward(current_name) || isLineRecoveryMotion(current_name))
         && (forward(next_name) || isLineRecoveryMotion(next_name));
-    // Catalog73 imports run at 0.95; existing walks retain their 1.0 speed.
-    // Only this pair may change speed at the verified full-body end pose.
+    // 공용 복귀와 catalog80 전진은 0.95, 나머지 복귀는 기존 1.0을 사용한다.
+    // 이 배속 차이만 허용하며, 아래의 전 관절 끝 자세/토크 검사를 유지한다.
     const bool ball_speed_transition =
         (isBallRecoveryMotion(current_name) && current.playbackSpeed() == 0.95
             && next.playbackSpeed() == 1.0)
         || (isBallRecoveryMotion(next_name) && next.playbackSpeed() == 0.95
             && current.playbackSpeed() == 1.0);
+    const auto scaled_forward_to_recovery = [](const MotionPattern& walk, std::string_view name,
+                                               const MotionPattern& recovery, std::string_view recovery_name) {
+        return (name.starts_with("p전진45(") || name.starts_with("p전진90도("))
+            && walk.playbackSpeed() == 0.95 && isLineRecoveryMotion(recovery_name)
+            && recovery.playbackSpeed() == 1.0;
+    };
+    const bool forward_speed_transition =
+        scaled_forward_to_recovery(current, current_name, next, next_name)
+        || scaled_forward_to_recovery(next, next_name, current, current_name);
     if (walking_pair && current.repeatable() && next.repeatable()
-        && (current.playbackSpeed() == next.playbackSpeed() || ball_speed_transition)
+        && (current.playbackSpeed() == next.playbackSpeed()
+            || ball_speed_transition || forward_speed_transition)
         && sameWalkingEndPose(current, next,
             head_override_enabled_ && joint_overrides_.contains(0))) return true;
     // 승인된 라인 보행은 모두 오른발 뒤에서 끝나며 같은 첫 이동 자세를 사용한다.
@@ -403,7 +418,8 @@ RobotMotionPlayer::Clock::time_point RobotMotionPlayer::forwardBoundaryStart(
     const MotionPattern& next, std::string_view next_name, Clock::time_point now) const noexcept {
     const auto forward = [](std::string_view name) {
         return isLineWalkingMotion(name) || isGoalForwardMotion(name)
-            || name.starts_with("R전진0도(") || name.starts_with("t전진실전0도(");
+            || name.starts_with("R전진0도(") || name.starts_with("t전진실전0도(")
+            || name.starts_with("p전진실전0도(");
     };
     if (!account_forward_boundary_feedback_ || !forward(current_motion_) || !forward(next_name)
         || next.frames().empty() || now < last_goal_written_at_) return now;

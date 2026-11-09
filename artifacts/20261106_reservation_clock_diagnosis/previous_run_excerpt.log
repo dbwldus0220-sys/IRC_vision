@@ -1,0 +1,35 @@
+[INFO] [1793946701.973356723] [motion_decision_node]: line info: /vision/line_info
+[INFO] [1793946701.978020113] [motion_decision_node]: ball info: /vision/ball_info
+[INFO] [1793946701.981430350] [motion_decision_node]: goal info: /vision/goal_info
+[INFO] [1793946701.985812773] [motion_decision_node]: hurdle info: /vision/hurdle_info
+[INFO] [1793946701.988960410] [motion_decision_node]: finish info: /vision/finish_info
+[INFO] [1793946701.998627937] [motion_decision_node]: Mission phase: AUTO
+[INFO] [1793946701.999499608] [motion_decision_node]: Unified command: /navigation/motion_command
+[INFO] [1793946702.000285902] [motion_decision_node]: Motion status: /motion/status
+[INFO] [1793946702.001116228] [motion_decision_node]: Grasp detections: /vision/detections
+[INFO] [1793946702.001880377] [motion_decision_node]: Executor heartbeat: /motion/executor/heartbeat
+[INFO] [1793946702.002630829] [motion_decision_node]: Decision debug: /navigation/decision_debug
+[INFO] [1793946702.003385442] [motion_decision_node]: Press ENTER in the launch terminal to start vision decisions after the startup pose is ready.
+[INFO] [1793946731.100064658] [motion_decision_node]: ENTER received; waiting for startup readiness and fresh vision.
+[INFO] [1793946733.764617625] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=2
+[INFO] [1793946734.782302463] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793946736.977931191] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=3
+[INFO] [1793946737.939142900] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793946740.163692668] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=4
+[INFO] [1793946741.107565960] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793946743.317547739] [motion_decision_node]: Line next motion requested before completion: action=RECOVER_LEFT_TURN_LEFT_4, command_id=5
+[INFO] [1793946743.519090443] [motion_decision_node]: Line corner remembered: {'corner_direction': 'RIGHT', 'corner_start_distance_m': 1.0403, 'last_confirmed_at': 1661.876982673, 'last_observation_id': 1793946743340204590, 'search_started': False, 'observed_during_action': 'STRAIGHT', 'observed_during_command_id': 4, 'motion_completed_at': None, 'minimum_rgb_stamp_ns': None}
+[INFO] [1793946744.275689888] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793946745.948447111] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT, command_id=6
+[INFO] [1793946746.388829401] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=RECOVER_LEFT_TURN_LEFT_4
+[INFO] [1793946746.798404343] [motion_decision_node]: BALL mode consumed at confirmation: index=1, used=1/2
+[INFO] [1793946746.799348432] [motion_decision_node]: BALL entry Line alignment armed: adopted_command_id=None
+[INFO] [1793946746.800109764] [motion_decision_node]: BALL approach entry latched during motion: distance_m=1.045
+[INFO] [1793946749.413366391] [motion_decision_node]: BALL entry Line alignment requested: command_id=7, action=STRAIGHT_2, queued=True, heading_deg=-13.588, heading_source=ball_ground, turn_count=None, turn_angle_deg=None, line_rgb_stamp_ns=None, ball_rgb_stamp_ns=1793946749144335938, ball_distance_m=0.778
+[INFO] [1793946749.414304976] [motion_decision_node]: Line next motion requested before completion: action=STRAIGHT_2, command_id=7
+[INFO] [1793946749.557318753] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793946751.651966487] [motion_decision_node]: BALL entry Line alignment ended: command_id=7, status=SUCCEEDED
+[INFO] [1793946751.655209037] [motion_decision_node]: Line completed without prequeue: action=STRAIGHT_2, command_id=7, reason=no_fresh_usable_line, usable_frames=10/10, fresh_line=True
+[INFO] [1793946751.658161435] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT_2
+[INFO] [1793946751.884259972] [motion_decision_node]: BALL pickup entry latched: distance_m=0.497
+[INFO] [1793946752.401590864] [motion_decision_node]: BALL pickup entry pending; waiting for fresh vision

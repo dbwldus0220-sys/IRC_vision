@@ -78,6 +78,8 @@ class FakeBridge:
     PICKUP_DWELL_SEC = MotionCommandBridgeNode.PICKUP_DWELL_SEC
     HURDLE_PRE_GO_DWELL_MARKER = MotionCommandBridgeNode.HURDLE_PRE_GO_DWELL_MARKER
     HURDLE_PRE_GO_DWELL_SEC = MotionCommandBridgeNode.HURDLE_PRE_GO_DWELL_SEC
+    HURDLE_POST_GO_DWELL_MARKER = MotionCommandBridgeNode.HURDLE_POST_GO_DWELL_MARKER
+    HURDLE_POST_GO_DWELL_SEC = MotionCommandBridgeNode.HURDLE_POST_GO_DWELL_SEC
     HURDLE_FINAL_FINE_MOTION_ID = MotionCommandBridgeNode.HURDLE_FINAL_FINE_MOTION_ID
     PICKUP_FINE_PREPARE_MOTION_ID = MotionCommandBridgeNode.PICKUP_FINE_PREPARE_MOTION_ID
     PICKUP_INITIAL_ALIGN_ACTIONS = (
@@ -860,7 +862,7 @@ def test_pickup_waits_locally_for_incompatible_active_motion_to_finish():
 
 @pytest.mark.parametrize("completed,exit_id,exit_name", [
     (0, "pickup_first_backward_turn_right", "t공후 제자리우회전"),
-    (1, "pickup_second_backward_turn_left", "t공후 제자리좌회전"),
+    (1, "pickup_second_backward_turn_left", "p공후 제자리좌회전"),
 ])
 def test_grasp_check_connects_directly_to_requested_exit_composite(completed, exit_id, exit_name):
     from pathlib import Path
@@ -2872,16 +2874,16 @@ def test_pickup_crab_uses_latest_motion_for_preparation(intervening, direction):
 
 
 @pytest.mark.parametrize("source,distance,action,motion_name", [
-    ("ball", 0.499, "STRAIGHT_0", "r미세0도 공잡기용"),
-    ("ball", 0.500, "STRAIGHT_0", "r미세0도 공잡기용"),
-    *[("ball", distance, "BALL_APPROACH_FINE_FORWARD_5", "r미세45도")
+    ("ball", 0.499, "STRAIGHT_0", "p미세0도(5회)"),
+    ("ball", 0.500, "STRAIGHT_0", "p미세0도(5회)"),
+    *[("ball", distance, "BALL_APPROACH_FINE_FORWARD_5", "p미세45도(5회)")
       for distance in (0.500001, 0.550, 0.570, 0.600)],
-    *[("ball", distance, "STRAIGHT", "R전진45도(4회)")
+    *[("ball", distance, "STRAIGHT", "p전진45(4회)")
       for distance in (0.600001, 0.700, 0.700001)],
     # Hurdle keeps its existing range policy, independently of Ball's new boundary.
-    *[("hurdle", distance, "STRAIGHT_0", "r미세 0도 허들용")
+    *[("hurdle", distance, "STRAIGHT_0", "p미세0도(5회)")
       for distance in (0.549, 0.550, 0.550001, 0.570, 0.700)],
-    ("hurdle", 0.700001, "STRAIGHT", "R전진45도(4회)"),
+    ("hurdle", 0.700001, "STRAIGHT", "p전진45(4회)"),
 ])
 def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
     source, distance, action, motion_name,
@@ -3113,6 +3115,10 @@ def test_every_normal_go_holds_half_second_before_hurdle(monkeypatch, source):
     assert bridge.motion_in_progress
     assert not any(s["status"] == "SUCCEEDED" for s in decoded_messages(bridge.motion_status_publisher))
     complete_active_motion(bridge)
+    assert bridge.active_motion_id == bridge.HURDLE_POST_GO_DWELL_MARKER
+    assert bridge.active_dwell_until == clock[0] + 1.0
+    assert bridge.motion_in_progress
+    bridge._check_atomic_dwell(bridge.active_dwell_until)
     assert not bridge.motion_in_progress
     assert decoded_messages(bridge.motion_status_publisher)[-1]["status"] == "SUCCEEDED"
 
@@ -3165,6 +3171,7 @@ def test_hurdle_sequence_runs_one_ten_repeat_motion_then_half_second_then_hurdle
     first_request = decoded_messages(bridge.executor_request_publisher)[-1]
     assert bridge.active_pickup_sequence == (
         "hurdle_fine_forward_10", bridge.HURDLE_PRE_GO_DWELL_MARKER, "hurdle",
+        bridge.HURDLE_POST_GO_DWELL_MARKER,
     )
     assert bridge.DWELL_MARKER not in bridge.active_pickup_sequence
     assert bridge.active_motion_id == "hurdle_fine_forward_10"
@@ -3196,6 +3203,9 @@ def test_hurdle_sequence_runs_one_ten_repeat_motion_then_half_second_then_hurdle
     assert bridge.active_motion_id == "hurdle"
     assert not any(s["status"] == "SUCCEEDED" for s in decoded_messages(bridge.motion_status_publisher))
     complete_active_motion(bridge)
+    assert bridge.active_motion_id == bridge.HURDLE_POST_GO_DWELL_MARKER
+    assert bridge.motion_in_progress
+    bridge._check_atomic_dwell(bridge.active_dwell_until)
     assert not bridge.motion_in_progress
     assert bridge.hurdle_sequence_fine_completed == 0
     assert decoded_messages(bridge.motion_status_publisher)[-1]["status"] == "SUCCEEDED"

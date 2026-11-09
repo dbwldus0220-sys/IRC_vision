@@ -1,6 +1,11 @@
-"""850 mm handoff and Goal walking transitions without fixed dwell timers."""
+"""Calibrated Goal fine approach, preserving existing posture settling."""
+
+import json
+import math
+from pathlib import Path
 
 import pytest
+import yaml
 
 from mission_control.motion_decision_node import MotionDecisionNode
 from mission_control.motion_decision_planner import MotionDecisionPlanner
@@ -12,7 +17,17 @@ from test_motion_command_bridge import FakeBridge, navigation_message
 from test_gait_transitions import finish_request, requests
 
 
-@pytest.mark.parametrize('depth,count', [(.590, 1), (.600, 1), (.849999, 4), (.850, 4)])
+def finish_transition_rest(bridge, clock):
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+    clock[0] = bridge.transition_dwell_until
+    bridge._check_transition_dwell(clock[0])
+
+
+@pytest.mark.parametrize('depth,count', [
+    (.760, 1), (.770, 1), (.772999, 1), (.773, 2),
+    (.791999, 2), (.792, 3), (.829999, 3), (.830, 4),
+    (.844999, 4), (.845, 5), (.849999, 5), (.850, 5),
+])
 @pytest.mark.parametrize('bearing,action', [
     (0, 'GOAL_CAMERA90_FINE_FORWARD_3'),
     (14.999, 'GOAL_CAMERA90_FINE_FORWARD_3'),
@@ -32,7 +47,8 @@ def test_fine_approach_turns_by_backboard_bearing_before_advancing(depth, count,
     if action.startswith('GOAL_CAMERA90_FINE_FORWARD_'):
         action = f'GOAL_CAMERA90_FINE_FORWARD_{count}'
     sample = target_sample(0, depth)
-    sample.update(bearing_deg=bearing, offset_x_px=200 if bearing > 0 else -200 if bearing < 0 else 0)
+    offset = 900 * math.tan(math.radians(bearing)) - 40
+    sample.update(bearing_deg=math.degrees(math.atan(offset / 900)), offset_x_px=offset)
     command = GoalNavigationPlanner().plan(sample)
     decision = MotionDecisionPlanner().plan('GOAL_APPROACH', {'goal': sample}, .1)
     assert command.action == decision.action == action
@@ -47,7 +63,7 @@ def test_fine_approach_turns_by_backboard_bearing_before_advancing(depth, count,
     {'bearing_deg': -15, 'offset_x_px': 200},
 ])
 def test_fine_approach_waits_for_valid_consistent_bearing(changes):
-    command = GoalNavigationPlanner().plan({**target_sample(0, .700), **changes})
+    command = GoalNavigationPlanner().plan({**target_sample(0, .850), **changes})
     assert command.action == 'WAIT'
     assert not command.valid
 
@@ -60,9 +76,10 @@ def test_fine_step_rechecks_turn_then_requires_fresh_view_before_advancing(
     clock, bearing, offset, expected_turn,
 ):
     node = LiveInputHarness(phase='GOAL_APPROACH')
-    first = start_goal(node, clock, .700)
+    first = start_goal(node, clock, .850)
     clock[0] += MotionDecisionNode.GOAL_FORWARD_DURATION_SEC[first['action']] * .75
-    misaligned = {**target_sample(0, .700), 'bearing_deg': bearing, 'offset_x_px': offset}
+    offset = 900 * math.tan(math.radians(bearing)) - 40
+    misaligned = {**target_sample(0, .850), 'bearing_deg': math.degrees(math.atan(offset / 900)), 'offset_x_px': offset}
     for _ in range(3):
         fresh(node, clock, 'goal', misaligned, plan=False)
         clock[0] += .01
@@ -78,14 +95,14 @@ def test_fine_step_rechecks_turn_then_requires_fresh_view_before_advancing(
     assert deadline == pytest.approx(clock[0] + .5)
     published = len(node.publisher.messages)
     clock[0] = deadline - .001
-    fresh(node, clock, 'goal', target_sample(0, .700))
+    fresh(node, clock, 'goal', target_sample(0, .850))
     assert len(node.publisher.messages) == published
     clock[0] = deadline
     MotionDecisionNode._publish_decision(node)
     assert node.latest_info['goal'] is None
     clock[0] += .01
-    fresh(node, clock, 'goal', target_sample(0, .700))
-    assert node.publisher.messages[-1]['action'] == 'GOAL_CAMERA90_FINE_FORWARD_4'
+    fresh(node, clock, 'goal', target_sample(0, .850))
+    assert node.publisher.messages[-1]['action'] == 'GOAL_CAMERA90_FINE_FORWARD_5'
 
 
 @pytest.mark.parametrize('angle,action', [
@@ -97,26 +114,28 @@ def test_just_above_850mm_still_uses_target_steering(angle, action):
 
 
 @pytest.mark.parametrize('previous,action,prepare', [
-    ('goal_camera_90_forward_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'pickup_fine_prepare'),
-    ('line_recovery_left_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'pickup_fine_prepare'),
-    ('line_recovery_right_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'pickup_fine_prepare'),
+    ('goal_camera_90_forward_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'goal_fine_prepare_90'),
+    ('line_recovery_left_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'goal_fine_prepare_90'),
+    ('line_recovery_right_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'goal_fine_prepare_90'),
     ('goal_camera_90_fine_forward_3', 'GOAL_CAMERA_90_FORWARD_2', 'fine_to_turn_ready_90'),
     ('goal_camera_90_fine_forward_3', 'GOAL_CAMERA90_RECOVER_LEFT_4', 'fine_to_turn_ready_90'),
     ('goal_camera_90_fine_forward_3', 'GOAL_CAMERA90_RECOVER_RIGHT_4', 'fine_to_turn_ready_90'),
 ])
-def test_goal_walks_keep_posture_transition_without_pre_or_post_pause(clock, previous, action, prepare):
+def test_goal_walks_preserve_existing_posture_transition(clock, previous, action, prepare):
     bridge = FakeBridge(advance_transition_dwells=False)
     bridge.last_physical_motion_id = previous
     bridge.navigation_command_callback(navigation_message(source='goal', action=action))
+    finish_transition_rest(bridge, clock)
     assert [r['motion_id'] for r in requests(bridge)] == [prepare]
     assert bridge.transition_dwell_until is None
     assert bridge.active_dwell_until is None
-    # Completing the real posture interpolation immediately sends the next walk.
+    # Keep the configured settling on both sides of the posture interpolation.
     finish_request(bridge)
+    finish_transition_rest(bridge, clock)
     assert [r['motion_id'] for r in requests(bridge)] == [prepare, bridge.motion_id_for_action(action)]
     assert bridge.transition_dwell_until is None
     assert bridge.active_dwell_until is None
-    assert clock[0] == 10.0
+    assert clock[0] == 11.0
     finish_request(bridge)
     assert not bridge.motion_in_progress
 
@@ -126,13 +145,14 @@ def test_failed_goal_posture_transition_never_starts_next_walk(clock, status):
     bridge = FakeBridge(advance_transition_dwells=False)
     bridge.last_physical_motion_id = 'goal_camera_90_forward_4'
     bridge.navigation_command_callback(navigation_message(source='goal', action='GOAL_CAMERA90_FINE_FORWARD_3'))
+    finish_transition_rest(bridge, clock)
     finish_request(bridge, status, 'TEST_FAILURE')
-    assert [r['motion_id'] for r in requests(bridge)] == ['pickup_fine_prepare']
+    assert [r['motion_id'] for r in requests(bridge)] == ['goal_fine_prepare_90']
     assert not bridge.motion_in_progress
 
 
 @pytest.mark.parametrize('initial_angle', [0, -30, 30])
-def test_850mm_handoff_reserves_fine_step_and_executes_without_extra_pause(clock, initial_angle):
+def test_850mm_handoff_reserves_five_steps_and_preserves_posture_settling(clock, initial_angle):
     node = LiveInputHarness(phase='GOAL_APPROACH')
     first = start_goal(node, clock, 1.0, initial_angle)
     clock[0] += MotionDecisionNode.GOAL_FORWARD_DURATION_SEC[first['action']] * .75
@@ -140,7 +160,7 @@ def test_850mm_handoff_reserves_fine_step_and_executes_without_extra_pause(clock
         fresh(node, clock, 'goal', target_sample(30, .850), plan=False)
         clock[0] += .01
     second = node.publisher.messages[-1]
-    assert second['action'] == 'GOAL_CAMERA90_FINE_FORWARD_4'
+    assert second['action'] == 'GOAL_CAMERA90_FINE_FORWARD_5'
     assert node.queued_general_command_id == second['command_id']
 
     bridge = FakeBridge(advance_transition_dwells=False)
@@ -148,18 +168,33 @@ def test_850mm_handoff_reserves_fine_step_and_executes_without_extra_pause(clock
     bridge.navigation_command_callback(navigation_message(action=second['action'], source='goal', command_id=2))
     assert len(requests(bridge)) == 1
     finish_request(bridge)
-    assert requests(bridge)[-1]['motion_id'] == 'pickup_fine_prepare'
+    finish_transition_rest(bridge, clock)
+    assert requests(bridge)[-1]['motion_id'] == 'goal_fine_prepare_90'
     assert bridge.transition_dwell_until is None
     finish_request(bridge)
-    assert requests(bridge)[-1]['motion_id'] == 'goal_camera_90_fine_forward_4'
+    finish_transition_rest(bridge, clock)
+    assert requests(bridge)[-1]['motion_id'] == 'goal_camera_90_fine_forward_5'
     assert bridge.transition_dwell_until is None
 
 
-def test_fine_step_to_fine_step_is_queued_without_a_dwell(clock):
+@pytest.mark.parametrize('counts', [(1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (1, 5), (5, 1)])
+def test_fine_step_to_fine_step_is_queued_without_a_dwell(clock, counts):
     bridge = FakeBridge(advance_transition_dwells=False)
-    for command_id in (1, 2):
+    for command_id, count in enumerate(counts, 1):
         bridge.navigation_command_callback(navigation_message(
-            action='GOAL_CAMERA90_FINE_FORWARD_3', source='goal', command_id=command_id))
+            action=f'GOAL_CAMERA90_FINE_FORWARD_{count}', source='goal', command_id=command_id))
     assert len(requests(bridge)) == 2
     assert bridge.queued_request_id == 2
     assert bridge.transition_dwell_until is None
+
+
+def test_five_step_alias_resolves_to_existing_motion_and_duration():
+    root = Path(__file__).resolve().parents[3]
+    aliases = yaml.safe_load((root / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']
+    catalog = {m['name']: m for m in json.loads((root / 'artifacts/robot_motions_runtime.json').read_text())['motions']}
+    action = 'GOAL_CAMERA90_FINE_FORWARD_5'
+    motion = catalog[aliases[FakeBridge().motion_id_for_action(action)]]
+    assert motion['repeat_count'] == 5
+    duration = max(f['start_ms'] + f['time_ms'] for f in motion['frames']) / 1000
+    duration *= motion['repeat_count'] / motion['playback_speed']
+    assert MotionDecisionNode.GOAL_FORWARD_DURATION_SEC[action] == pytest.approx(duration)

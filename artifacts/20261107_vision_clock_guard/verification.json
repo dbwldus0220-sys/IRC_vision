@@ -1,0 +1,27 @@
+{
+  "scope": "Camera startup synchronization, runtime clock-step recovery, common capture-age admission",
+  "verification": "5989 passed, 770 deselected; deselected cases also failed with the pre-change decision node",
+  "baseline_summary": "770 failed, 5947 passed, 2 warnings in 246.88s (0:04:06)",
+  "preserved_motion_files": {
+    "artifacts/robot_motions_pc.json": true,
+    "artifacts/robot_motions_runtime.json": true,
+    "src/irc_step_motion_executor/config/motion_aliases.yaml": true,
+    "src/mission_control/mission_control/ball_fine_approach.py": true,
+    "external_sdk/gui_aligned/robot_motion_player.cpp": true
+  },
+  "preserved_features": [
+    "60 percent observation start",
+    "existing reservation expansion",
+    "pickup observation reuse"
+  ],
+  "runtime_policy": {
+    "jump_threshold_sec": 0.1,
+    "recovery_frames_per_source": 3,
+    "minimum_stable_sec": 0.2,
+    "startup_sync_timeout_sec": 60
+  },
+  "limitations": [
+    "No camera or robot motion was executed.",
+    "Already submitted SDK reservations retain their identities and may execute; no queue-only cancellation API exists."
+  ]
+}

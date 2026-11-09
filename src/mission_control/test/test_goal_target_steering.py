@@ -12,9 +12,9 @@ from test_shot_start_posture import finish_sequence
 
 
 def target_sample(angle, depth=1.0):
-    lateral = (depth - .510) * math.tan(math.radians(angle))
+    lateral = (depth - .630) * math.tan(math.radians(angle)) - .630 * 40 / 900
     return dict(detected=True, confidence=.99, depth_valid=True, depth_m=depth,
-                lateral_offset_m=lateral, bearing_deg=math.degrees(math.atan2(lateral, depth)),
+                camera_fx_px=900.0, lateral_offset_m=lateral, bearing_deg=math.degrees(math.atan2(lateral, depth)),
                 offset_x_px=lateral / depth * 900, offset_x_norm=lateral / depth,
                 score_now=False)
 
@@ -37,7 +37,7 @@ def test_target_angle_boundaries_reach_sdk(angle, action, motion):
     decision = MotionDecisionPlanner().plan('GOAL_APPROACH', {'goal': info}, .1)
     assert standalone.action == decision.action == action
     assert decision.source_command['target_steering_angle_deg'] == pytest.approx(angle)
-    assert decision.source_command['target_forward_error_m'] == .490
+    assert decision.source_command['target_forward_error_m'] == .370
     assert action in GENERAL_ACTIONS
     bridge = FakeBridge()
     bridge.navigation_command_callback(navigation_message(
@@ -47,14 +47,14 @@ def test_target_angle_boundaries_reach_sdk(angle, action, motion):
 
 
 def test_remaining_distance_changes_steering_even_with_same_board_bearing():
-    # Raw board bearing is 10 degrees in both cases. The stopping-point bearing
+    # Raw board bearing is 8 degrees in both cases. The stopping-point bearing
     # grows near the goal and must change the selected motion.
     planner = GoalNavigationPlanner()
     actions = []
     for depth in (2.0, .900):
         sample = target_sample(0, depth)
-        sample.update(lateral_offset_m=depth * math.tan(math.radians(10)),
-                      bearing_deg=10, offset_x_px=159, offset_x_norm=.248)
+        sample.update(lateral_offset_m=depth * math.tan(math.radians(8)),
+                      bearing_deg=8, offset_x_px=900 * math.tan(math.radians(8)), offset_x_norm=.248)
         actions.append(planner.plan(sample).action)
     assert actions == ['GOAL_CAMERA_90_FORWARD_2', 'GOAL_CAMERA90_RECOVER_RIGHT_4']
 
@@ -80,5 +80,5 @@ def test_recovery_to_close_crab_keeps_forward_posture_transition(side):
         source='goal', action=f'GOAL_CAMERA90_CRAB_{side.upper()}'))
     finish_sequence(bridge)
     motions = [m['motion_id'] for m in decoded_messages(bridge.executor_request_publisher)]
-    assert motions == [bridge.GOAL_FORWARD_CRAB_PREPARE_MOTION_ID,
+    assert motions == [f'goal_forward_to_crab_{side}_90',
                        f'goal_camera_90_crab_{side}']

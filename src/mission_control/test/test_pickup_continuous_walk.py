@@ -35,6 +35,24 @@ def forward_status(node, bridge, request, status, **changes):
         Node._motion_status_callback(node, message)
 
 
+def finish_rest(bridge, clock):
+    deadline = bridge.transition_dwell_until
+    if deadline is None:
+        return
+    before = len(bridge.executor_request_publisher.messages)
+    clock[0] = deadline - .001
+    bridge._check_atomic_dwell()
+    assert len(bridge.executor_request_publisher.messages) == before
+    clock[0] = deadline
+    bridge._check_atomic_dwell()
+    assert len(bridge.executor_request_publisher.messages) == before + 1
+
+
+def reserved_request(bridge):
+    return {key: value for key, value in bridge.pickup_queued_request.items()
+            if key != 'reservation_action'}
+
+
 def start(node, bridge, clock, sample=None):
     sample = sample or ball()
     fresh(node, clock, 'ball', sample)
@@ -45,6 +63,7 @@ def start(node, bridge, clock, sample=None):
     fresh(node, clock, 'ball', sample)
     command = node.publisher.messages[-1]
     bridge.navigation_command_callback(String(data=json.dumps(command)))
+    finish_rest(bridge, clock)
     request = decoded_messages(bridge.executor_request_publisher)[-1]
     forward_status(node, bridge, request, 'RUNNING')
     return parent, request
@@ -74,7 +93,8 @@ def test_same_gait_reserves_one_step_and_keeps_parent_pickup_locked(clock, motio
     assert queued['source_command']['pickup_walk_prequeue']
     assert node.pickup_walk_reservation.pending
     bridge.navigation_command_callback(String(data=json.dumps(queued)))
-    second = decoded_messages(bridge.executor_request_publisher)[-1]
+    second = reserved_request(bridge)
+    assert len(bridge.executor_request_publisher.messages) == 1
     assert second['motion_id'] == motion
     assert second['command_id'] == parent['command_id']
     assert second['request_id'] != first['request_id']
@@ -85,6 +105,8 @@ def test_same_gait_reserves_one_step_and_keeps_parent_pickup_locked(clock, motio
         fresh(node, clock, 'ball', ball(offset_x_px=offset), plan=False)
     assert len(node.publisher.messages) == count
     forward_status(node, bridge, first, 'SUCCEEDED')
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+    finish_rest(bridge, clock)
     assert bridge.active_request_id == second['request_id']
     assert node.active_special_command_id == parent['command_id']
     assert not bridge.pickup_initial_align_waiting and not bridge.pickup_fine_align_waiting
@@ -100,7 +122,7 @@ def test_same_gait_reserves_one_step_and_keeps_parent_pickup_locked(clock, motio
 
 
 @pytest.mark.parametrize('change', [
-    {'bottom_distance_px': 270}, {'offset_x_px': 80}, {'distance_m': .501},
+    {'bottom_distance_px': 230}, {'offset_x_px': 80}, {'distance_m': .501},
     {'depth_valid': False}, {'depth_age_sec': .701}, {'confidence': .1},
     {'confirmation_confirmed': False}, {'detected': False, 'raw_detected': False},
 ])
@@ -127,13 +149,16 @@ def test_repeated_image_and_camera_preparation_cannot_reserve(clock):
 
 
 @pytest.mark.parametrize('status,error', [('FAILED', 'SDK_COMMUNICATION_ERROR'), ('TIMEOUT', 'TIMEOUT'), ('CANCELLED', '')])
-def test_active_failure_discards_reservation_and_does_not_skip_failed_motion(clock, status, error):
+@pytest.mark.parametrize('index', [1, 2])
+def test_active_failure_discards_reservation_and_does_not_skip_failed_motion(clock, status, error, index):
     node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
+    node.phase_manager.active_ball_mode_index = index
+    node.phase_manager.ball_modes_confirmed = index
     bridge.last_physical_motion_id = 'pickup_fine_forward_0'
     _, first = start(node, bridge, clock)
     late_frames(node, clock)
     bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
-    second = decoded_messages(bridge.executor_request_publisher)[-1]
+    second = reserved_request(bridge)
     forward_status(node, bridge, first, status, error_code=error)
     assert bridge.pickup_queued_request is None and not bridge.motion_in_progress
     assert not node.pickup_walk_reservation.pending
@@ -143,13 +168,16 @@ def test_active_failure_discards_reservation_and_does_not_skip_failed_motion(clo
     assert not bridge.motion_in_progress
 
 
-def test_sdk_queue_rejection_falls_back_to_fresh_checkpoint(clock):
+@pytest.mark.parametrize('index', [1, 2])
+def test_reserved_request_rejection_falls_back_to_fresh_checkpoint(clock, index):
     node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
+    node.phase_manager.active_ball_mode_index = index
+    node.phase_manager.ball_modes_confirmed = index
     bridge.last_physical_motion_id = 'pickup_fine_forward_0'
     _, first = start(node, bridge, clock)
     late_frames(node, clock)
     bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
-    second = decoded_messages(bridge.executor_request_publisher)[-1]
+    second = reserved_request(bridge)
     forward_status(node, bridge, second, 'REJECTED', error_code='INCOMPATIBLE_TRANSITION')
     assert bridge.motion_in_progress and bridge.active_request_id == first['request_id']
     forward_status(node, bridge, first, 'SUCCEEDED')
@@ -164,6 +192,7 @@ def test_repeated_fine_at_checkpoint_skips_redundant_prepare(clock):
     forward_status(node, bridge, first, 'SUCCEEDED')
     fresh(node, clock, 'ball', ball())
     bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
+    finish_rest(bridge, clock)
     assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_fine_forward_0'
     assert bridge.transition_dwell_until is None and bridge.active_dwell_until is None
     second = decoded_messages(bridge.executor_request_publisher)[-1]
@@ -189,8 +218,11 @@ def test_wrong_parent_or_gait_cannot_queue(clock, change):
     assert bridge.active_request_id == first['request_id']
 
 
-def test_only_one_queue_and_three_successive_chunks_keep_one_pickup(clock):
+@pytest.mark.parametrize('index', [1, 2])
+def test_only_one_queue_and_three_successive_chunks_keep_one_pickup(clock, index):
     node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
+    node.phase_manager.active_ball_mode_index = index
+    node.phase_manager.ball_modes_confirmed = index
     bridge.last_physical_motion_id = 'pickup_fine_forward_0'
     parent, current = start(node, bridge, clock)
     ids = {current['request_id']}
@@ -198,7 +230,7 @@ def test_only_one_queue_and_three_successive_chunks_keep_one_pickup(clock):
         late_frames(node, clock)
         command = node.publisher.messages[-1]
         bridge.navigation_command_callback(String(data=json.dumps(command)))
-        following = decoded_messages(bridge.executor_request_publisher)[-1]
+        following = reserved_request(bridge)
         assert following['request_id'] not in ids
         ids.add(following['request_id'])
         before = len(bridge.executor_request_publisher.messages)
@@ -210,10 +242,9 @@ def test_only_one_queue_and_three_successive_chunks_keep_one_pickup(clock):
         assert node.active_special_command_id == parent['command_id']
         assert node.pickups_completed == 0
         current = following
-    late_frames(node, clock, ball(bottom_distance_px=270))
+    late_frames(node, clock, ball(bottom_distance_px=230))
     assert not node.pickup_walk_reservation.pending
     forward_status(node, bridge, current, 'SUCCEEDED')
-    fresh(node, clock, 'ball', ball(bottom_distance_px=270))
     command = node.publisher.messages[-1]
     assert command['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
     bridge.navigation_command_callback(String(data=json.dumps(command)))

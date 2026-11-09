@@ -1,9 +1,47 @@
 """Unit tests for reusable vision confirmation filtering."""
 
+import ast
+from pathlib import Path
+
 from step.temporal_confirmation import TemporalConfirmationFilter
 
 
 FRAME = {"image_width": 1280, "image_height": 720}
+
+
+def test_ball_default_confirms_on_tenth_hit_without_changing_pickup_confirmation():
+    # Use the node's actual defaults without starting ROS or camera subscriptions.
+    source = Path(__file__).parents[1] / "step" / "ball_analyzer.py"
+    declarations = {}
+    for node in ast.walk(ast.parse(source.read_text())):
+        if (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                and node.func.attr == "declare_parameter" and len(node.args) == 2
+                and isinstance(node.args[0], ast.Constant)
+                and isinstance(node.args[1], ast.Constant)):
+            declarations[node.args[0].value] = node.args[1].value
+    ball = TemporalConfirmationFilter(**{
+        key: declarations[f"confirmation_{key}"]
+        for key in ("window_size", "required_hits", "max_missed_frames",
+                    "max_center_shift_norm", "min_area_ratio")
+    })
+    bbox = [500, 250, 600, 350]
+    for _ in range(9):
+        assert update(ball, True, bbox).confirmed is False
+    assert update(ball, True, bbox).confirmed is True
+    assert update(ball, False).confirmed is False
+    assert update(ball, True, bbox).confirmed is True
+    jumped = update(ball, True, [1000, 500, 1100, 600])
+    assert jumped.hit_count == 1 and jumped.confirmed is False
+
+    pickup = TemporalConfirmationFilter(
+        window_size=declarations["pickup_confirmation_window_size"],
+        required_hits=declarations["pickup_confirmation_required_hits"],
+        max_missed_frames=0, spatial_matching=False,
+    )
+    assert pickup.update(True).confirmed is False
+    assert pickup.update(True).confirmed is False
+    assert pickup.update(True).confirmed is True
+    assert pickup.update(False).confirmed is False
 
 
 def update(filter_, detected, bbox=None):

@@ -112,7 +112,13 @@ def test_direction_conflict_after_search_does_not_reverse_or_refund(clock):
     node = node_for()
     observe(node, clock, corner_info(corner_start_distance_m=.7))
     command = publish(node, clock, {'detected': False})
-    release_general(node, command)
+    node.send_status(command['action'], command['command_id'], 'RUNNING')
+    node.send_status(command['action'], command['command_id'], 'SUCCEEDED')
+    # Advance both simulated clocks; moving only monotonic is a clock fault.
+    deadline = node.correction_post_motion_dwell_until
+    if deadline is not None:
+        clock[0] = deadline
+        Node._publish_decision(node)
     for _ in range(4):
         result = publish(node, clock, corner_info('LEFT', corner_start_distance_m=.35))
         assert not result['valid'] and result['reason'] == 'line_corner_direction_conflict'

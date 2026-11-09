@@ -1,0 +1,111 @@
+{
+  "source_sha256": "30a26ec6c87022571259b768e13a14ad061974d8e6b286272e6c16b533e7d062",
+  "imports": [
+    "r공잡기 400",
+    "r공잡기500",
+    "t허들찐",
+    "p전진45(6회)",
+    "p전진45(4회)",
+    "p전진90도(4회)",
+    "p전진90도(6회)",
+    "p전진실전0도(4회)",
+    "p전진실전0도(6회)",
+    "p전진45(2회)",
+    "p전진45(8회)",
+    "p전진90도(2회)"
+  ],
+  "derived": {
+    "p전진45(2회)": [
+      "p전진45(4회)",
+      2
+    ],
+    "p전진45(8회)": [
+      "p전진45(4회)",
+      8
+    ],
+    "p전진90도(2회)": [
+      "p전진90도(4회)",
+      2
+    ]
+  },
+  "pose_renames": {
+    "s왼들": "s왼들(catalog80)",
+    "오뒤무게중심앞": "오뒤무게중심앞(catalog80)"
+  },
+  "renames": {},
+  "changed_aliases": {},
+  "affected_aliases": {
+    "sdk_pickup": "r공잡기 400",
+    "sdk_forward_4": "p전진45(4회)",
+    "line_forward_2": "p전진45(2회)",
+    "line_forward_4": "p전진45(4회)",
+    "line_forward_6": "p전진45(6회)",
+    "line_forward_8": "p전진45(8회)",
+    "forward": "p전진45(8회)",
+    "ball_camera_down_forward_2": "p전진45(2회)",
+    "ball_camera_down_forward_4": "p전진45(4회)",
+    "post_ball_forward_4": "p전진45(4회)",
+    "post_ball_forward_6": "p전진45(6회)",
+    "post_ball_forward_8": "p전진45(8회)",
+    "goal_camera_90_forward_2": "p전진90도(2회)",
+    "goal_camera_90_forward_4": "p전진90도(4회)",
+    "goal_camera_90_forward_6": "p전진90도(6회)",
+    "pickup": "r공잡기 400",
+    "pickup_400": "r공잡기 400",
+    "pickup_500": "r공잡기500",
+    "hurdle": "t허들찐",
+    "r_forward_0_4": "p전진실전0도(4회)",
+    "r_forward_0_6": "p전진실전0도(6회)"
+  },
+  "runtime_speed_policy": "Original speed multiplied by 0.95 once.",
+  "duration_seconds": {
+    "t허들찐": {
+      "before": 7.221,
+      "after": 7.633684210526316
+    },
+    "r공잡기 400": {
+      "before": 5.45,
+      "after": 6.051578947368422
+    },
+    "r공잡기500": {
+      "before": 5.45,
+      "after": 6.051578947368422
+    },
+    "p전진45(6회)": {
+      "before": 3.084,
+      "after": 3.2463157894736843
+    },
+    "p전진45(4회)": {
+      "before": 2.056,
+      "after": 2.16421052631579
+    },
+    "p전진90도(4회)": {
+      "before": 2.056,
+      "after": 2.16421052631579
+    },
+    "p전진90도(6회)": {
+      "before": 3.084,
+      "after": 3.2463157894736843
+    },
+    "p전진실전0도(4회)": {
+      "before": 2.056,
+      "after": 2.16421052631579
+    },
+    "p전진실전0도(6회)": {
+      "before": 3.084,
+      "after": 3.2463157894736843
+    },
+    "p전진45(2회)": {
+      "before": 1.028,
+      "after": 1.082105263157895
+    },
+    "p전진45(8회)": {
+      "before": 4.112,
+      "after": 4.32842105263158
+    },
+    "p전진90도(2회)": {
+      "before": 1.028,
+      "after": 1.082105263157895
+    }
+  }
+}

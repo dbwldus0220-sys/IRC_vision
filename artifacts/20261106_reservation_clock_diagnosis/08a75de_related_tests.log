@@ -1,0 +1,83 @@
+.............F.F.F.F.F.F.....F.......................................... [ 25%]
+.................................................................FFF.... [ 50%]
+........................................................................ [ 76%]
+...................................................................      [100%]
+=================================== FAILURES ===================================
+_ test_recent_capture_reserves_walk_despite_bad_latest_line[0.0-bad_line0-True] _
+src/mission_control/test/test_line_capture_fallback.py:40: in test_recent_capture_reserves_walk_despite_bad_latest_line
+    assert node.queued_general_command_id == queued['command_id']
+E   assert None == 1
+E    +  where None = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff877c6cb0>.queued_general_command_id
+_ test_recent_capture_reserves_walk_despite_bad_latest_line[0.0-bad_line1-True] _
+src/mission_control/test/test_line_capture_fallback.py:40: in test_recent_capture_reserves_walk_despite_bad_latest_line
+    assert node.queued_general_command_id == queued['command_id']
+E   assert None == 1
+E    +  where None = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff8762f6d0>.queued_general_command_id
+_ test_recent_capture_reserves_walk_despite_bad_latest_line[0.0-bad_line2-True] _
+src/mission_control/test/test_line_capture_fallback.py:40: in test_recent_capture_reserves_walk_despite_bad_latest_line
+    assert node.queued_general_command_id == queued['command_id']
+E   assert None == 1
+E    +  where None = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff8764b520>.queued_general_command_id
+_ test_recent_capture_reserves_walk_despite_bad_latest_line[30.0-bad_line0-True] _
+src/mission_control/test/test_line_capture_fallback.py:40: in test_recent_capture_reserves_walk_despite_bad_latest_line
+    assert node.queued_general_command_id == queued['command_id']
+E   assert None == 1
+E    +  where None = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff8762d1b0>.queued_general_command_id
+_ test_recent_capture_reserves_walk_despite_bad_latest_line[30.0-bad_line1-True] _
+src/mission_control/test/test_line_capture_fallback.py:40: in test_recent_capture_reserves_walk_despite_bad_latest_line
+    assert node.queued_general_command_id == queued['command_id']
+E   assert None == 1
+E    +  where None = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff8765f820>.queued_general_command_id
+_ test_recent_capture_reserves_walk_despite_bad_latest_line[30.0-bad_line2-True] _
+src/mission_control/test/test_line_capture_fallback.py:40: in test_recent_capture_reserves_walk_despite_bad_latest_line
+    assert node.queued_general_command_id == queued['command_id']
+E   assert None == 1
+E    +  where None = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff8764a350>.queued_general_command_id
+____ test_stationary_turn_is_decided_from_capture_but_not_queued_mid_stride ____
+src/mission_control/test/test_line_capture_fallback.py:79: in test_stationary_turn_is_decided_from_capture_but_not_queued_mid_stride
+    assert node.pending_line_decision.action == 'LINE_HEADING_TURN_RIGHT_6'
+E   AttributeError: 'NoneType' object has no attribute 'action'
+_ test_normal_line_and_ball_line_steps_reserve_walks_without_waits[0.0-0.0-STRAIGHT_2] _
+src/mission_control/test/test_ball_entry_line_alignment.py:86: in test_normal_line_and_ball_line_steps_reserve_walks_without_waits
+    assert node.active_line_motion_duration_sec == pytest.approx(.517 * 4 / .95)
+E   assert 2.056 == 2.176842105263158 ± 2.2e-06
+E    +  where 2.056 = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff877c7eb0>.active_line_motion_duration_sec
+E    +  and   2.176842105263158 ± 2.2e-06 = <function approx at 0xffff988dba30>(((0.517 * 4) / 0.95))
+E    +    where <function approx at 0xffff988dba30> = pytest.approx
+_ test_normal_line_and_ball_line_steps_reserve_walks_without_waits[-15.0--0.3-STRAIGHT_2] _
+src/mission_control/test/test_ball_entry_line_alignment.py:86: in test_normal_line_and_ball_line_steps_reserve_walks_without_waits
+    assert node.active_line_motion_duration_sec == pytest.approx(.517 * 4 / .95)
+E   assert 2.056 == 2.176842105263158 ± 2.2e-06
+E    +  where 2.056 = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff877c6440>.active_line_motion_duration_sec
+E    +  and   2.176842105263158 ± 2.2e-06 = <function approx at 0xffff988dba30>(((0.517 * 4) / 0.95))
+E    +    where <function approx at 0xffff988dba30> = pytest.approx
+_ test_normal_line_and_ball_line_steps_reserve_walks_without_waits[15.0-0.3-STRAIGHT_2] _
+src/mission_control/test/test_ball_entry_line_alignment.py:86: in test_normal_line_and_ball_line_steps_reserve_walks_without_waits
+    assert node.active_line_motion_duration_sec == pytest.approx(.517 * 4 / .95)
+E   assert 2.056 == 2.176842105263158 ± 2.2e-06
+E    +  where 2.056 = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff878bc5b0>.active_line_motion_duration_sec
+E    +  and   2.176842105263158 ± 2.2e-06 = <function approx at 0xffff988dba30>(((0.517 * 4) / 0.95))
+E    +    where <function approx at 0xffff988dba30> = pytest.approx
+=============================== warnings summary ===============================
+../../../../../usr/lib/python3/dist-packages/_pytest/cacheprovider.py:428
+  Warning: could not create cache path /.pytest_cache/v/cache/nodeids
+
+../../../../../usr/lib/python3/dist-packages/_pytest/cacheprovider.py:382
+  Warning: could not create cache path /.pytest_cache/v/cache/lastfailed
+
+../../../../../usr/lib/python3/dist-packages/_pytest/stepwise.py:49
+  Warning: could not create cache path /.pytest_cache/v/cache/stepwise
+
+-- Docs: https://docs.pytest.org/en/stable/warnings.html
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_line_capture_fallback.py::test_recent_capture_reserves_walk_despite_bad_latest_line[0.0-bad_line0-True]
+FAILED src/mission_control/test/test_line_capture_fallback.py::test_recent_capture_reserves_walk_despite_bad_latest_line[0.0-bad_line1-True]
+FAILED src/mission_control/test/test_line_capture_fallback.py::test_recent_capture_reserves_walk_despite_bad_latest_line[0.0-bad_line2-True]
+FAILED src/mission_control/test/test_line_capture_fallback.py::test_recent_capture_reserves_walk_despite_bad_latest_line[30.0-bad_line0-True]
+FAILED src/mission_control/test/test_line_capture_fallback.py::test_recent_capture_reserves_walk_despite_bad_latest_line[30.0-bad_line1-True]
+FAILED src/mission_control/test/test_line_capture_fallback.py::test_recent_capture_reserves_walk_despite_bad_latest_line[30.0-bad_line2-True]
+FAILED src/mission_control/test/test_line_capture_fallback.py::test_stationary_turn_is_decided_from_capture_but_not_queued_mid_stride
+FAILED src/mission_control/test/test_ball_entry_line_alignment.py::test_normal_line_and_ball_line_steps_reserve_walks_without_waits[0.0-0.0-STRAIGHT_2]
+FAILED src/mission_control/test/test_ball_entry_line_alignment.py::test_normal_line_and_ball_line_steps_reserve_walks_without_waits[-15.0--0.3-STRAIGHT_2]
+FAILED src/mission_control/test/test_ball_entry_line_alignment.py::test_normal_line_and_ball_line_steps_reserve_walks_without_waits[15.0-0.3-STRAIGHT_2]
+10 failed, 273 passed, 3 warnings in 2.50s

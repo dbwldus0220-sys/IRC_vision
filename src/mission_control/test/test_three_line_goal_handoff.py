@@ -30,9 +30,24 @@ def start(clock, index=1, heading=0.):
     first = node.publisher.messages[-1]
     assert first['source_command']['post_pickup_line_index'] == 1
     bridge.navigation_command_callback(String(data=json.dumps(first)))
+    finish_rest(bridge, clock)
     request = decoded_messages(bridge.executor_request_publisher)[-1]
     forward_status(node, bridge, request, 'RUNNING')
     return node, bridge, request
+
+
+def finish_rest(bridge, clock):
+    deadline = bridge.transition_dwell_until
+    if deadline is None:
+        return
+    before = len(bridge.executor_request_publisher.messages)
+    assert deadline == pytest.approx(clock[0] + .5)
+    clock[0] = deadline - .001
+    bridge._check_atomic_dwell()
+    assert len(bridge.executor_request_publisher.messages) == before
+    clock[0] = deadline
+    bridge._check_atomic_dwell()
+    assert len(bridge.executor_request_publisher.messages) == before + 1
 
 
 def reserve_line(node, clock, heading=0.):
@@ -47,7 +62,7 @@ def reserve_line(node, clock, heading=0.):
 @pytest.mark.parametrize('index', [1, 2])
 @pytest.mark.parametrize('goal_angle', [0, -50, 50])
 @pytest.mark.parametrize('headings', [(0., 0., 0.), (30., -30., 0.), (60., 0., -60.)])
-def test_three_commands_queue_without_dwell_and_goal_uses_third_motion_images(clock, index, headings, goal_angle):
+def test_three_commands_preserve_turn_rests_and_goal_uses_third_motion_images(clock, index, headings, goal_angle):
     node, bridge, current = start(clock, index, headings[0])
     for ordinal, heading in enumerate(headings[1:], 2):
         command = reserve_line(node, clock, heading)
@@ -58,6 +73,10 @@ def test_three_commands_queue_without_dwell_and_goal_uses_third_motion_images(cl
         queued = bridge.queued_request_id
         assert queued == command['command_id']
         forward_status(node, bridge, current, 'SUCCEEDED')
+        turn_boundary = bridge._is_stationary_turn(current['motion_id']) or bridge._is_stationary_turn(
+            bridge.motion_id_for_action(command['action']))
+        assert (bridge.transition_dwell_until is not None) is turn_boundary
+        finish_rest(bridge, clock)
         current = decoded_messages(bridge.executor_request_publisher)[-1]
         assert current['request_id'] == queued
         assert ('goal_head_prepare_id' in current) is (ordinal == 3)
@@ -79,6 +98,7 @@ def test_three_commands_queue_without_dwell_and_goal_uses_third_motion_images(cl
     assert command['source'] == 'goal' and command['source_command']['post_ball_goal_handoff']
     bridge.navigation_command_callback(String(data=json.dumps(command)))
     forward_status(node, bridge, current, 'SUCCEEDED')
+    finish_rest(bridge, clock)
     next_request = decoded_messages(bridge.executor_request_publisher)[-1]
     forward_status(node, bridge, next_request, 'RUNNING')
     assert node.mission_phase == 'GOAL_APPROACH'

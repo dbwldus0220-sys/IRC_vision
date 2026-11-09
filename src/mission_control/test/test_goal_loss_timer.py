@@ -47,7 +47,7 @@ def test_first_miss_does_not_inherit_a_large_planner_dt(monkeypatch):
     now = [10.]
     monkeypatch.setattr('mission_control.motion_decision_planner.time.monotonic', lambda: now[0])
     planner = MotionDecisionPlanner()
-    planner.plan('GOAL_APPROACH', {'goal': goal_info(depth_m=1., bearing_deg=3.8)}, .1)
+    planner.plan('GOAL_APPROACH', {'goal': goal_info(camera_fx_px=900., depth_m=1., bearing_deg=3.8)}, .1)
     now[0] = 13.
     stopped = planner.plan('GOAL_APPROACH', {'goal': missing(13)}, 3.)
     assert stopped.action == 'GOAL_LOST_STOP' and not stopped.valid
@@ -57,7 +57,7 @@ def test_first_miss_does_not_inherit_a_large_planner_dt(monkeypatch):
     search = planner.plan('GOAL_APPROACH', {'goal': missing(13.4)}, 3.)
     assert search.action == 'GOAL_CAMERA90_TURN_RIGHT_1'
     assert search.source_command['lost_elapsed_sec'] == .4
-    planner.plan('GOAL_APPROACH', {'goal': goal_info(depth_m=1.)}, .1)
+    planner.plan('GOAL_APPROACH', {'goal': goal_info(camera_fx_px=900., depth_m=1.)}, .1)
     now[0] = 13.5
     assert planner.plan('GOAL_APPROACH', {'goal': missing(13.5)}, 3.).action == 'GOAL_LOST_STOP'
 
@@ -68,7 +68,7 @@ def test_node_waits_for_post_motion_frames_and_continuous_loss(monkeypatch):
     monkeypatch.setattr(MotionDecisionNode, '_current_ros_time_ns', staticmethod(lambda node: round(now[0] * 1e9)))
     node = CornerHarness(phase='GOAL_APPROACH')
     mark_next_ball_grabbed(node)
-    forward = node.publish_vision(goal=goal_info(depth_m=1., bearing_deg=0., rgb_stamp_ns=10_000_000_000))[-1]
+    forward = node.publish_vision(goal=goal_info(camera_fx_px=900., depth_m=1., bearing_deg=0., rgb_stamp_ns=10_000_000_000))[-1]
     assert forward['action'] == 'GOAL_CAMERA_90_FORWARD_2'
     now[0] = 12.
     assert node.publish_vision(goal=missing(12)) == []
@@ -100,7 +100,7 @@ def test_expired_goal_input_restarts_loss_instead_of_search(monkeypatch):
     now = [10.]
     monkeypatch.setattr('mission_control.motion_decision_planner.time.monotonic', lambda: now[0])
     planner = MotionDecisionPlanner()
-    planner.plan('GOAL_APPROACH', {'goal': goal_info(depth_m=1.)}, .1)
+    planner.plan('GOAL_APPROACH', {'goal': goal_info(camera_fx_px=900., depth_m=1.)}, .1)
     planner.plan('GOAL_APPROACH', {'goal': missing(10)}, .1)
     now[0] = 12.
     assert not planner.plan('GOAL_APPROACH', {}, 2.).valid

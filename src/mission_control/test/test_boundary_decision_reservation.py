@@ -14,7 +14,6 @@ from test_wait_refresh_and_fine_settle import LiveInputHarness
 from test_goal_target_steering import target_sample
 from test_motion_command_bridge import FakeBridge
 from test_pickup_continuous_walk import ball, start, forward_status
-from test_second_pickup_fine_observation import finish_observation_pause
 
 
 class Timer:
@@ -229,7 +228,7 @@ def test_correlated_failure_cancels_deadline(clock, monkeypatch):
 @pytest.mark.parametrize('bottom,expected', [
     (230, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'), (231, 'BALL_PICKUP_FINE_FORWARD'),
 ])
-def test_second_pickup_fine_continues_on_first_post_pause_frame(clock, bottom, expected):
+def test_second_pickup_fine_continues_on_first_fresh_frame_without_observation_pause(clock, bottom, expected):
     node = BoundaryHarness(phase='BALL_APPROACH')
     node.phase_manager.active_ball_mode_index = 2
     node.phase_manager.ball_modes_confirmed = 2
@@ -238,12 +237,8 @@ def test_second_pickup_fine_continues_on_first_post_pause_frame(clock, bottom, e
     parent, request = start(node, bridge, clock)
     clock[0] += 2.
     forward_status(node, bridge, request, 'SUCCEEDED')
-    assert bridge.active_dwell_until == pytest.approx(clock[0] + .5)
+    assert bridge.active_dwell_until is None
     count = len(executable(node))
-    fresh(node, clock, 'ball', ball(bottom_distance_px=bottom), plan=False)
-    assert len(executable(node)) == count
-    finish_observation_pause(node, bridge, clock)
-    assert len(executable(node)) == count
     fresh(node, clock, 'ball', ball(bottom_distance_px=bottom), plan=False)
     assert executable(node)[-1]['action'] == expected
     assert len(executable(node)) == count + 1

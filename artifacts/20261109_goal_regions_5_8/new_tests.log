@@ -1,0 +1,52 @@
+...................................................F.......F............ [ 96%]
+...                                                                      [100%]
+=================================== FAILURES ===================================
+____ test_remaining_distance_changes_steering_even_with_same_board_bearing _____
+
+    def test_remaining_distance_changes_steering_even_with_same_board_bearing():
+        # Raw board bearing is 10 degrees in both cases. The stopping-point bearing
+        # grows near the goal and must change the selected motion.
+        planner = GoalNavigationPlanner()
+        actions = []
+        for depth in (2.0, .900):
+            sample = target_sample(0, depth)
+            sample.update(lateral_offset_m=depth * math.tan(math.radians(10)),
+                          bearing_deg=10, offset_x_px=159, offset_x_norm=.248)
+            actions.append(planner.plan(sample).action)
+>       assert actions == ['GOAL_CAMERA_90_FORWARD_2', 'GOAL_CAMERA90_RECOVER_RIGHT_4']
+E       AssertionError: assert ['GOAL_CAMERA...OVER_RIGHT_4'] == ['GOAL_CAMERA...OVER_RIGHT_4']
+E         At index 0 diff: 'GOAL_CAMERA90_RECOVER_RIGHT_4' != 'GOAL_CAMERA_90_FORWARD_2'
+E         Full diff:
+E         - ['GOAL_CAMERA_90_FORWARD_2', 'GOAL_CAMERA90_RECOVER_RIGHT_4']
+E         ?              -   ^  ^^ ^ ^
+E         + ['GOAL_CAMERA90_RECOVER_RIGHT_4', 'GOAL_CAMERA90_RECOVER_RIGHT_4']
+E         ?                 ^^^ ++ ^ ^^^^ ^
+
+src/mission_control/test/test_goal_target_steering.py:59: AssertionError
+______ test_recovery_to_close_crab_keeps_forward_posture_transition[left] ______
+
+side = 'left'
+
+    @pytest.mark.parametrize('side', ['left', 'right'])
+    def test_recovery_to_close_crab_keeps_forward_posture_transition(side):
+        bridge = FakeBridge()
+        bridge.last_physical_motion_id = f'line_recovery_{side}_4'
+        bridge.navigation_command_callback(navigation_message(
+            source='goal', action=f'GOAL_CAMERA90_CRAB_{side.upper()}'))
+        finish_sequence(bridge)
+        motions = [m['motion_id'] for m in decoded_messages(bridge.executor_request_publisher)]
+>       assert motions == [bridge.GOAL_FORWARD_CRAB_PREPARE_MOTION_ID,
+                           f'goal_camera_90_crab_{side}']
+E       AssertionError: assert ['goal_forwar...90_crab_left'] == ['goal_forwar...90_crab_left']
+E         At index 0 diff: 'goal_forward_to_crab_left_90' != 'goal_forward_to_crab_right_90'
+E         Full diff:
+E         - ['goal_forward_to_crab_right_90', 'goal_camera_90_crab_left']
+E         ?                        ^^^^
+E         + ['goal_forward_to_crab_left_90', 'goal_camera_90_crab_left']
+E         ?                        ^^^
+
+src/mission_control/test/test_goal_target_steering.py:83: AssertionError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_goal_target_steering.py::test_remaining_distance_changes_steering_even_with_same_board_bearing
+FAILED src/mission_control/test/test_goal_target_steering.py::test_recovery_to_close_crab_keeps_forward_posture_transition[left]
+2 failed, 73 passed in 1.75s

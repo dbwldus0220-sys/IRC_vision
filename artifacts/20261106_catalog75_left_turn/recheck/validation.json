@@ -1,0 +1,141 @@
+{
+  "turn_timing": [
+    {
+      "name": "t제자리좌회전45도(5회)",
+      "cycle_ms": 295,
+      "playback_speed": 0.855,
+      "scaled_cycle_ms": 345.0292397660819,
+      "total_sec": 1.7251461988304095
+    },
+    {
+      "name": "t제자리좌회전45도(2회)",
+      "cycle_ms": 295,
+      "playback_speed": 0.855,
+      "scaled_cycle_ms": 345.0292397660819,
+      "total_sec": 0.6900584795321638
+    },
+    {
+      "name": "t제자리좌회전45도(3회)",
+      "cycle_ms": 295,
+      "playback_speed": 0.855,
+      "scaled_cycle_ms": 345.0292397660819,
+      "total_sec": 1.0350877192982457
+    },
+    {
+      "name": "t제자리좌회전45도(4회)",
+      "cycle_ms": 295,
+      "playback_speed": 0.855,
+      "scaled_cycle_ms": 345.0292397660819,
+      "total_sec": 1.3801169590643276
+    },
+    {
+      "name": "t제자리좌회전0도(4회)",
+      "cycle_ms": 295,
+      "playback_speed": 0.855,
+      "scaled_cycle_ms": 345.0292397660819,
+      "total_sec": 1.3801169590643276
+    },
+    {
+      "name": "t제자리좌회전0도(2회)",
+      "cycle_ms": 295,
+      "playback_speed": 0.855,
+      "scaled_cycle_ms": 345.0292397660819,
+      "total_sec": 0.6900584795321638
+    },
+    {
+      "name": "t제자리좌회전0도(3회)",
+      "cycle_ms": 295,
+      "playback_speed": 0.855,
+      "scaled_cycle_ms": 345.0292397660819,
+      "total_sec": 1.0350877192982457
+    },
+    {
+      "name": "t제자리좌회전0도(5회)",
+      "cycle_ms": 295,
+      "playback_speed": 0.855,
+      "scaled_cycle_ms": 345.0292397660819,
+      "total_sec": 1.7251461988304095
+    },
+    {
+      "name": "t제자리좌회전90도(2회)",
+      "cycle_ms": 295,
+      "playback_speed": 0.855,
+      "scaled_cycle_ms": 345.0292397660819,
+      "total_sec": 0.6900584795321638
+    },
+    {
+      "name": "t제자리좌회전90도(3회)",
+      "cycle_ms": 295,
+      "playback_speed": 0.855,
+      "scaled_cycle_ms": 345.0292397660819,
+      "total_sec": 1.0350877192982457
+    },
+    {
+      "name": "t제자리좌회전90도(4회)",
+      "cycle_ms": 295,
+      "playback_speed": 0.855,
+      "scaled_cycle_ms": 345.0292397660819,
+      "total_sec": 1.3801169590643276
+    },
+    {
+      "name": "t제자리좌회전90도(5회)",
+      "cycle_ms": 295,
+      "playback_speed": 0.855,
+      "scaled_cycle_ms": 345.0292397660819,
+      "total_sec": 1.7251461988304095
+    },
+    {
+      "name": "t제자리좌회전45도(1회)",
+      "cycle_ms": 295,
+      "playback_speed": 0.855,
+      "scaled_cycle_ms": 345.0292397660819,
+      "total_sec": 0.3450292397660819
+    },
+    {
+      "name": "t제자리좌회전45도(6회)",
+      "cycle_ms": 320,
+      "playback_speed": 0.855,
+      "scaled_cycle_ms": 374.2690058479532,
+      "total_sec": 2.2456140350877196
+    },
+    {
+      "name": "t제자리좌회전0도(1회)",
+      "cycle_ms": 295,
+      "playback_speed": 0.855,
+      "scaled_cycle_ms": 345.0292397660819,
+      "total_sec": 0.3450292397660819
+    },
+    {
+      "name": "t제자리좌회전0도(6회)",
+      "cycle_ms": 295,
+      "playback_speed": 0.855,
+      "scaled_cycle_ms": 345.0292397660819,
+      "total_sec": 2.0701754385964914
+    },
+    {
+      "name": "t제자리좌회전90도(1회)",
+      "cycle_ms": 295,
+      "playback_speed": 0.855,
+      "scaled_cycle_ms": 345.0292397660819,
+      "total_sec": 0.3450292397660819
+    },
+    {
+      "name": "t제자리좌회전90도(6회)",
+      "cycle_ms": 295,
+      "playback_speed": 0.855,
+      "scaled_cycle_ms": 345.0292397660819,
+      "total_sec": 2.0701754385964914
+    }
+  ],
+  "sdk_mock_recheck_passed": true,
+  "cpp_alias_recheck_passed": true,
+  "checks": [
+    "Late capture for camera45/count6 waits for the new 320ms cycle timing",
+    "Deferred line request starts after successful completion and releases queued state",
+    "Failure/cancellation/timeout clears deferred requests",
+    "Ball fine turn/support-change queues and retry after queue rejection",
+    "All 18 turns and 27 remapped aliases retain camera/count identities"
+  ],
+  "control_logic_changed_in_recheck": false,
+  "hardware_run": false
+}

@@ -42,6 +42,9 @@ def start(clock, action='STRAIGHT', phase='LINE_TRACK'):
     assert command['action'] == action
     bridge = FakeBridge(advance_transition_dwells=False)
     bridge.navigation_command_callback(String(data=json.dumps(command)))
+    if bridge.transition_dwell_until is not None:
+        clock[0] = bridge.transition_dwell_until
+        bridge._check_atomic_dwell()
     request = decoded_messages(bridge.executor_request_publisher)[-1]
     forward_status(node, bridge, request, 'RUNNING')
     assert node.active_line_motion_started_at is not None
@@ -65,6 +68,8 @@ def late(node, clock, info, count=3):
     ('STRAIGHT', {'detected': False}, 'LINE_LOST_TURN_LEFT_3'),
     ('LINE_OFFSET_TURN_LEFT_2', line_info(), 'STRAIGHT'),
     ('LINE_OFFSET_TURN_LEFT_2', offset(), 'LINE_OFFSET_TURN_LEFT_2'),
+    ('LINE_OFFSET_TURN_LEFT_6', line_info(), 'STRAIGHT'),
+    ('LINE_OFFSET_TURN_LEFT_6', offset(), 'LINE_OFFSET_TURN_LEFT_2'),
     ('LINE_LOST_TURN_LEFT_3', line_info(), 'STRAIGHT'),
     ('LINE_LOST_TURN_LEFT_3', {'detected': False}, 'LINE_LOST_TURN_LEFT_1'),
 ])
@@ -85,6 +90,12 @@ def test_turn_reserves_once_and_starts_only_after_success(clock, phase, action, 
     assert node.publisher.messages[-1]['command_id'] == command['command_id']
     forward_status(node, bridge, request, 'SUCCEEDED')
     assert node.correction_post_motion_dwell_until is None
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+    clock[0] += .499
+    bridge._check_atomic_dwell()
+    assert len(bridge.executor_request_publisher.messages) == 1
+    clock[0] += .001
+    bridge._check_atomic_dwell()
     next_request = decoded_messages(bridge.executor_request_publisher)[-1]
     assert next_request['command_id'] == command['command_id']
     assert next_request['motion_id'] == bridge.motion_id_for_action(expected)
@@ -117,8 +128,9 @@ def test_invalid_frames_cannot_authorize_turn(clock, bad):
 
 
 @pytest.mark.parametrize('status', ['FAILED', 'CANCELLED', 'TIMEOUT'])
-def test_failure_discards_deferred_turn(clock, status):
-    node, bridge, request = start(clock)
+@pytest.mark.parametrize('action', ['STRAIGHT', 'LINE_OFFSET_TURN_LEFT_6'])
+def test_failure_discards_deferred_turn(clock, status, action):
+    node, bridge, request = start(clock, action)
     late(node, clock, offset())
     bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
     forward_status(node, bridge, request, status)
@@ -155,6 +167,20 @@ def test_capture_durations_match_motion_catalog():
         actual = max(f['start_ms'] + f['time_ms'] for f in motion['frames']) / 1000
         actual *= motion['repeat_count'] / motion['playback_speed']
         assert seconds == pytest.approx(actual), action
+
+
+def test_source78_six_cycle_turn_uses_updated_capture_window(clock):
+    node, _, _ = start(clock, 'LINE_OFFSET_TURN_LEFT_6')
+    started = node.active_line_motion_started_at
+    assert node.active_line_motion_duration_sec == pytest.approx(.355 * 6 / .95)
+    clock[0] = started + .355 * 6 / .95 * .60
+    for _ in range(3):
+        fresh(node, clock, 'line', line_info(), plan=False)
+    assert node.queued_general_command_id is None
+    late(node, clock, line_info(), 3)
+    assert node.queued_general_action == 'STRAIGHT'
+    # The three fresh samples authorize a reservation before this gait completes.
+    assert started + .355 * 6 / .95 * .70 <= clock[0] < started + .355 * 6 / .95
 
 
 @pytest.mark.parametrize('action', ['LINE_OFFSET_TURN_LEFT_1', 'LINE_LOST_TURN_LEFT_1'])

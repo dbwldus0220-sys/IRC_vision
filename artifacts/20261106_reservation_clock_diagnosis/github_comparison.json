@@ -1,0 +1,110 @@
+{
+  "remote_repository": "https://github.com/dbwldus0220-sys/IRC_vision",
+  "verified_remote_default_branch": "agent/sdk-gui-frame-gates-20260930",
+  "verified_remote_head": "ac383da1d6e15bbba9b5a2bca391a98536de3373",
+  "remote_files": [
+    {
+      "path": "src/step/step/yolo26_detector.py",
+      "remote_sha256": "ce7eeaa6b09db11d92d4ff50a33e3f27a73857aabe597186d5513ffb86dd7cd8",
+      "remote_matches_local_commit": true,
+      "remote_matches_current_file": true
+    },
+    {
+      "path": "src/step/step/yolo_line_analyzer.py",
+      "remote_sha256": "3b7e46fe0bd249d9d7c3a26c02781625fcf94cb4c14c655a7ca78d27edaa1b47",
+      "remote_matches_local_commit": true,
+      "remote_matches_current_file": true
+    },
+    {
+      "path": "src/step/step/ball_analyzer.py",
+      "remote_sha256": "bb26e212dc498a7345c8f1bd74d3628b77866bf8105352482b64fd08bf199d2d",
+      "remote_matches_local_commit": true,
+      "remote_matches_current_file": true
+    },
+    {
+      "path": "src/step/step/depth_frame_cache.py",
+      "remote_sha256": "20dc311a0e276ff250f7737a49e98465ed291dbddf387e802ef87653699923c3",
+      "remote_matches_local_commit": true,
+      "remote_matches_current_file": true
+    },
+    {
+      "path": "src/mission_control/mission_control/motion_decision_node.py",
+      "remote_sha256": "b0381f690eb099154c1ce92c77cfc884eef57f510479a5f34dd5416cc539f9ec",
+      "remote_matches_local_commit": true,
+      "remote_matches_current_file": false
+    },
+    {
+      "path": "src/mission_control/launch/full_system_robot.launch.py",
+      "remote_sha256": "c76c3c9afef26e5331bfc5f617957f7c0a667d8cd9b277d40d0cf497f0366270",
+      "remote_matches_local_commit": true,
+      "remote_matches_current_file": true
+    }
+  ],
+  "functions": {
+    "_detection_stamp_ns": {
+      "unchanged": true,
+      "remote_line": 1322,
+      "current_line": 1339
+    },
+    "_current_ros_time_ns": {
+      "unchanged": true,
+      "remote_line": 1341,
+      "current_line": 1358
+    },
+    "_fresh_observations": {
+      "unchanged": true,
+      "remote_line": 3499,
+      "current_line": 3586
+    },
+    "_recent_walking_input": {
+      "unchanged": true,
+      "remote_line": 4163,
+      "current_line": 4253
+    },
+    "_line_prequeue_observation": {
+      "unchanged": true,
+      "remote_line": 4176,
+      "current_line": 4266
+    },
+    "_prepare_pending_line_decision": {
+      "unchanged": true,
+      "remote_line": 4197,
+      "current_line": 4287
+    },
+    "_remember_line_corner": {
+      "unchanged": true,
+      "remote_line": 3726,
+      "current_line": 3813
+    },
+    "_apply_pending_line_corner": {
+      "unchanged": true,
+      "remote_line": 3817,
+      "current_line": 3904
+    },
+    "_latch_ball_approach_entry": {
+      "unchanged": true,
+      "remote_line": 1821,
+      "current_line": 1843
+    },
+    "_resume_boundary_decision": {
+      "unchanged": true,
+      "remote_line": 4991,
+      "current_line": 5145
+    },
+    "_schedule_boundary_decision": {
+      "unchanged": true,
+      "remote_line": 5023,
+      "current_line": 5177
+    }
+  },
+  "exact_guard_blocks": {
+    "ball_capture_reject": {
+      "identical": true,
+      "text": "                if source == \"ball\":\n                    stamp = payload.get(\"rgb_stamp_ns\")\n                    boundary = getattr(self, \"ball_min_rgb_stamp_ns\", None)\n                    ros_now = MotionDecisionNode._current_ros_time_ns(self)\n                    valid_stamp = (\n                        isinstance(stamp, int) and not isinstance(stamp, bool) and stamp > 0\n                    )\n                    if boundary is not None and (not valid_stamp or stamp <= boundary):\n                        packet[\"status\"] = \"before_ball_motion_boundary\"\n                        return\n                    if valid_stamp and ros_now is not None and not (\n                        0 <= ros_now - stamp <= int(self.timeouts[\"ball\"] * 1e9)\n                    ):\n                        packet[\"status\"] = \"ball_capture_time_rejected\"\n                        return\n"
+    },
+    "queue_capture_reject": {
+      "identical": true,
+      "text": "        queue_source = (MotionDecisionNode._walking_observation_source(precomputed_decision)\n                        if queue_while_locked else \"line\")\n        queue_info = observations.get(queue_source) or {}\n        stamp = MotionDecisionNode._detection_stamp_ns(queue_info)\n        if stamp is None:\n            stamp = queue_info.get(\"rgb_stamp_ns\")\n        ros_now = MotionDecisionNode._current_ros_time_ns(self)\n        if queue_while_locked and ros_now is not None and (\n            type(stamp) is not int or stamp <= 0\n            or not 0 <= ros_now - stamp <= int(self.timeouts[queue_source] * 1e9)\n        ):\n            if precomputed_decision.source == \"line\":\n                self.line_prequeue_block_reason = \"capture_not_fresh\"\n            return\n"
+    }
+  }
+}

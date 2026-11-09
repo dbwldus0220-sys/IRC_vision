@@ -239,7 +239,10 @@ def test_centered_current_line_does_not_repeat_previously_seen_side(clock):
 def test_valid_other_target_keeps_priority_over_line_recovery(clock):
     node = node_for('AUTO')
     from test_motion_decision_planner import goal_info
-    node.latest_info['goal'] = goal_info(depth_m=0.9, bearing_deg=0.0)
+    node.latest_info['goal'] = {
+        **goal_info(depth_m=0.9, bearing_deg=0.0),
+        'rgb_stamp_ns': round(clock[0] * 1e9),
+    }
     node.latest_time['goal'] = clock[0]
     frame(node, clock)
     assert node.last_selected_decision.source == 'goal'

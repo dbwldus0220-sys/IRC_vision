@@ -1,0 +1,26 @@
+[  8%] Built target motion_core
+[ 13%] Built target test_motion_pattern
+[ 18%] Built target test_motion_callback
+[ 21%] Building CXX object CMakeFiles/motion_player_core.dir/robot_motion_player.cpp.o
+[ 27%] Built target gui_trace_probe
+[ 32%] Built target continuous_trace_probe
+[ 37%] Built target test_continuous_interpolation
+[ 40%] Linking CXX static library libmotion_player_core.a
+[ 40%] Built target motion_player_core
+[ 43%] Linking CXX executable gui_execution_probe
+[ 56%] Built target robot_control
+[ 59%] Linking CXX executable recorded_execution_probe
+[ 62%] Built target gui_execution_probe
+[ 64%] Built target recorded_execution_probe
+[ 67%] Linking CXX executable test_gui_alignment
+[ 70%] Linking CXX executable test_continuous_hardware
+[ 72%] Built target test_gui_alignment
+[ 75%] Building CXX object CMakeFiles/test_forward_timing.dir/test_forward_timing.cpp.o
+[ 86%] Built target test_continuous_hardware
+[ 89%] Building CXX object CMakeFiles/test_ball_fine_queue.dir/test_ball_fine_queue.cpp.o
+[ 91%] Linking CXX executable test_ball_fine_queue
+[ 94%] Linking CXX executable test_forward_timing
+[ 94%] Built target test_ball_fine_queue
+[ 97%] Linking CXX executable irc_robot
+[ 97%] Built target test_forward_timing
+[100%] Built target irc_robot

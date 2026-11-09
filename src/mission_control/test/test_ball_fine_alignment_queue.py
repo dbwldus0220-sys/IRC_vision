@@ -40,21 +40,24 @@ def test_bad_observations_never_authorize_near_forward_or_turn(updates):
     assert not command['valid']
 
 
-@pytest.mark.parametrize('index,angle', [(1, -35.), (2, 35.)])
-def test_forward_turn_prepare_fine_prepare_turn_uses_one_sdk_reservation(clock, index, angle):
+# Ground-projected Ball angles must be strictly below 90 degrees.
+@pytest.mark.parametrize('index,angle', [(1, -35.), (2, 35.), (1, -89.), (2, -89.)])
+@pytest.mark.parametrize('turn_first', [True, False])
+def test_forward_turn_prepare_fine_prepare_turn_keeps_correction_dwells(clock, index, angle, turn_first):
     node, bridge = node_with_entry(), FakeBridge(advance_transition_dwells=False)
     node.phase_manager.active_ball_mode_index = index
     node.phase_manager.ball_modes_confirmed = index
     _, running = start_line(node, bridge, clock)
     fresh(node, clock, 'ball', ball(angle, 1.2), plan=False)
     # Each successor is selected during its predecessor, including the 600 mm crossing.
-    for next_angle, expected in [
-        (angle, 'BALL_APPROACH_TURN_'),
+    successors = [(angle, 'BALL_APPROACH_TURN_')] if turn_first else []
+    successors += [
         (0., 'BALL_APPROACH_PREPARE_FINE'),
         (0., 'BALL_APPROACH_FINE_FORWARD_5'),
         (-angle, 'BALL_APPROACH_PREPARE_TURN'),
         (-angle, 'BALL_APPROACH_TURN_'),
-    ]:
+    ]
+    for next_angle, expected in successors:
         scoped = running['motion_id'].startswith('ball_align_')
         start = node.ball_fine_started_at if scoped else node.active_line_motion_started_at
         duration = duration_sec(running['motion_id']) if scoped else node.active_line_motion_duration_sec
@@ -65,13 +68,32 @@ def test_forward_turn_prepare_fine_prepare_turn_uses_one_sdk_reservation(clock, 
         command = node.publisher.messages[-1]
         assert command['action'].startswith(expected), command
         assert command['command_id'] == node.queued_general_command_id
-        following = send(bridge, command)
-        assert following['motion_id'] == motion_id(command['action'])
-        assert not bridge.queued_request_deferred
+        previous_count = len(decoded_messages(bridge.executor_request_publisher))
+        send(bridge, command)
+        correction_boundary = (running['motion_id'].startswith(('ball_align_turn_', 'ball_align_fine_'))
+                               or command['action'].startswith(('BALL_APPROACH_TURN_', 'BALL_APPROACH_FINE_'))
+                               or command['action'] == 'BALL_APPROACH_PREPARE_FINE')
+        assert bridge.queued_request_deferred == correction_boundary
         assert clock[0] < start + duration
         assert bridge.transition_dwell_until is None and bridge.active_dwell_until is None
-        status(node, bridge, following, 'QUEUED')
+        if correction_boundary:
+            assert len(decoded_messages(bridge.executor_request_publisher)) == previous_count
+        else:
+            status(node, bridge, decoded_messages(bridge.executor_request_publisher)[-1], 'QUEUED')
+        clock[0] = start + duration
         status(node, bridge, running, 'SUCCEEDED')
+        if correction_boundary:
+            assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+            clock[0] += .499
+            bridge._check_atomic_dwell()
+            assert len(decoded_messages(bridge.executor_request_publisher)) == previous_count
+            clock[0] += .001
+            before = len(bridge.motion_status_publisher.messages)
+            bridge._check_atomic_dwell()
+            for message in bridge.motion_status_publisher.messages[before:]:
+                Node._motion_status_callback(node, message)
+        following = decoded_messages(bridge.executor_request_publisher)[-1]
+        assert following['motion_id'] == motion_id(command['action'])
         status(node, bridge, following, 'RUNNING')
         assert node.general_motion_gate.active_command_id == command['command_id']
         assert node.ball_post_motion_dwell_until is None
@@ -166,28 +188,33 @@ def test_distinct_recent_frames_required_before_reserving_turn(clock):
     assert node.queued_general_command_id is not None
 
 
-@pytest.mark.parametrize('index,angle', [(1, -35.), (2, 35.)])
-def test_reservation_rejection_keeps_current_motion_and_retries_fresh(clock, index, angle):
-    from std_msgs.msg import String
+@pytest.mark.parametrize('index', [1, 2])
+@pytest.mark.parametrize('failure', ['FAILED', 'CANCELLED', 'TIMEOUT', 'REJECTED'])
+def test_failed_forward_discards_deferred_support_change(clock, index, failure):
     from test_motion_command_bridge import executor_status
     node, bridge = node_with_entry(), FakeBridge(advance_transition_dwells=False)
     node.phase_manager.active_ball_mode_index = index
     node.phase_manager.ball_modes_confirmed = index
     _, running = start_line(node, bridge, clock)
-    fresh(node, clock, 'ball', ball(angle, 1.2), plan=False)
+    fresh(node, clock, 'ball', ball(0., 1.2), plan=False)
     clock[0] = node.active_line_motion_started_at + node.active_line_motion_duration_sec * .8
-    for _ in range(3): fresh(node, clock, 'ball', ball(angle), plan=False)
-    queued = send(bridge, node.publisher.messages[-1])
-    bridge.executor_status_callback(executor_status(**queued, status='REJECTED', error_code='INCOMPATIBLE_TRANSITION'))
-    Node._motion_status_callback(node, bridge.motion_status_publisher.messages[-1])
-    assert bridge.active_request_id == running['request_id']
-    assert node.general_motion_gate.active_command_id == running['command_id']
-    assert node.queued_general_command_id is None
-    assert not getattr(node, 'ball_fine_faulted', False)
-    fresh(node, clock, 'ball', ball(angle), plan=False)
-    retried = send(bridge, node.publisher.messages[-1])
-    assert retried['request_id'] != queued['request_id']
-    assert retried['motion_id'] == queued['motion_id']
+    for _ in range(3): fresh(node, clock, 'ball', ball(), plan=False)
+    command = node.publisher.messages[-1]
+    assert command['action'] == 'BALL_APPROACH_PREPARE_FINE'
+    send(bridge, command)
+    assert bridge.queued_request_deferred
+    assert bridge.queued_command_id == command['command_id']
+    assert len(bridge.executor_request_publisher.messages) == 1
+    status(node, bridge, running, failure)
+    assert not bridge.motion_in_progress
+    assert bridge.queued_request_id is None
+    assert bridge.transition_pending_request is None
+    assert bridge.transition_dwell_until is None
+    # A late success from the failed walk cannot revive the discarded reservation.
+    clock[0] += 1.
+    bridge.executor_status_callback(executor_status(**running, status='SUCCEEDED'))
+    bridge._check_atomic_dwell()
+    assert len(bridge.executor_request_publisher.messages) == 1
 
 
 @pytest.mark.parametrize('distance', [.49, .5, .600001, .9])

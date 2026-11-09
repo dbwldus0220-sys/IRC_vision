@@ -1,0 +1,2006 @@
+{
+  "verification": "Mode-specific dispatch, camera/count data, reservation and composite completion paths",
+  "new_route_tests": 261,
+  "combined_tests_passed": 537,
+  "combined_tests_failed": 0,
+  "production_code_changed_in_audit": false,
+  "source_p_motions": 42,
+  "runtime_p_motions": 46,
+  "all_source_p_motions_present": true,
+  "camera_counts": {
+    "forward": {
+      "0": [
+        4,
+        6
+      ],
+      "45": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "90": [
+        2,
+        4,
+        6
+      ]
+    },
+    "stationary_left": {
+      "0": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "45": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "90": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    "fine": {
+      "0": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        10
+      ],
+      "45": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "90": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    "left_recovery": {
+      "45": 4,
+      "90": 4,
+      "ball": 4
+    }
+  },
+  "mode_routes": [
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "STRAIGHT",
+      "resolved_motion": "p전진45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "STRAIGHT_1",
+      "resolved_motion": "p전진45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "STRAIGHT_2",
+      "resolved_motion": "p전진45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "STRAIGHT_3",
+      "resolved_motion": "p전진45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "STRAIGHT_4",
+      "resolved_motion": "p전진45(8회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_FORWARD",
+      "resolved_motion": "p전진45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "RECOVER_LEFT_TURN_LEFT_4",
+      "resolved_motion": "p라인복귀좌회전45도",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK",
+      "source": "line",
+      "ball_index": 1,
+      "action": "RECOVER_RIGHT_TURN_LEFT_4",
+      "resolved_motion": "p라인복귀좌회전45도",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "STRAIGHT",
+      "resolved_motion": "p전진45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "STRAIGHT_1",
+      "resolved_motion": "p전진45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "STRAIGHT_2",
+      "resolved_motion": "p전진45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "STRAIGHT_3",
+      "resolved_motion": "p전진45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "STRAIGHT_4",
+      "resolved_motion": "p전진45(8회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_FORWARD",
+      "resolved_motion": "p전진45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "RECOVER_LEFT_TURN_LEFT_4",
+      "resolved_motion": "p라인복귀좌회전45도",
+      "source_command": {}
+    },
+    {
+      "phase": "LINE_TRACK_AFTER_PICKUP",
+      "source": "line",
+      "ball_index": 1,
+      "action": "RECOVER_RIGHT_TURN_LEFT_4",
+      "resolved_motion": "p라인복귀좌회전45도",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "STRAIGHT",
+      "resolved_motion": "p전진45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "STRAIGHT_1",
+      "resolved_motion": "p전진45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "STRAIGHT_2",
+      "resolved_motion": "p전진45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "STRAIGHT_3",
+      "resolved_motion": "p전진45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "STRAIGHT_4",
+      "resolved_motion": "p전진45(8회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_FORWARD",
+      "resolved_motion": "p전진45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "RECOVER_LEFT_TURN_LEFT_4",
+      "resolved_motion": "p라인복귀좌회전45도",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_BALL_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "RECOVER_RIGHT_TURN_LEFT_4",
+      "resolved_motion": "p라인복귀좌회전45도",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "STRAIGHT",
+      "resolved_motion": "p전진45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "STRAIGHT_1",
+      "resolved_motion": "p전진45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "STRAIGHT_2",
+      "resolved_motion": "p전진45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "STRAIGHT_3",
+      "resolved_motion": "p전진45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "STRAIGHT_4",
+      "resolved_motion": "p전진45(8회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_FORWARD",
+      "resolved_motion": "p전진45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_OFFSET_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_HEADING_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "LINE_SPARSE_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_BALL_LINE_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "POST_SHOT_LINE_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "RECOVER_LEFT_TURN_LEFT_4",
+      "resolved_motion": "p라인복귀좌회전45도",
+      "source_command": {}
+    },
+    {
+      "phase": "POST_SHOT_LINE_ALIGN",
+      "source": "line",
+      "ball_index": 1,
+      "action": "RECOVER_RIGHT_TURN_LEFT_4",
+      "resolved_motion": "p라인복귀좌회전45도",
+      "source_command": {}
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 1,
+      "action": "STRAIGHT",
+      "resolved_motion": "p전진45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 1,
+      "action": "STRAIGHT_0",
+      "resolved_motion": "p미세0도(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 1,
+      "action": "BALL_LOST_FORWARD_2",
+      "resolved_motion": "p전진45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 1,
+      "action": "BALL_LOST_FORWARD_4",
+      "resolved_motion": "p전진45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 1,
+      "action": "BALL_LOST_FINE_FORWARD_3",
+      "resolved_motion": "p미세0도(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 1,
+      "action": "BALL_APPROACH_FINE_FORWARD_5",
+      "resolved_motion": "p미세45도(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 1,
+      "action": "BALL_APPROACH_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {
+        "ball_fine_alignment": false
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 1,
+      "action": "BALL_APPROACH_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {
+        "ball_fine_alignment": true
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 1,
+      "action": "BALL_APPROACH_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {
+        "ball_fine_alignment": false
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 1,
+      "action": "BALL_APPROACH_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {
+        "ball_fine_alignment": true
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 1,
+      "action": "BALL_APPROACH_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {
+        "ball_fine_alignment": false
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 1,
+      "action": "BALL_APPROACH_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {
+        "ball_fine_alignment": true
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 1,
+      "action": "BALL_APPROACH_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {
+        "ball_fine_alignment": false
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 1,
+      "action": "BALL_APPROACH_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {
+        "ball_fine_alignment": true
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 1,
+      "action": "BALL_APPROACH_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {
+        "ball_fine_alignment": false
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 1,
+      "action": "BALL_APPROACH_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {
+        "ball_fine_alignment": true
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 1,
+      "action": "BALL_APPROACH_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {
+        "ball_fine_alignment": false
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 1,
+      "action": "BALL_APPROACH_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {
+        "ball_fine_alignment": true
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 1,
+      "action": "BALL_APPROACH_FINE_FORWARD_5",
+      "resolved_motion": "p미세45도(5회)",
+      "source_command": {
+        "ball_fine_alignment": true
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 1,
+      "action": "BALL_APPROACH_RECOVER_LEFT_4",
+      "resolved_motion": "p라인복귀좌회전공용",
+      "source_command": {}
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 1,
+      "action": "BALL_APPROACH_RECOVER_RIGHT_4",
+      "resolved_motion": "t라인복귀우실전",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 1,
+      "action": "GOAL_CAMERA_90_FORWARD",
+      "resolved_motion": "p전진90도(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 1,
+      "action": "GOAL_CAMERA_90_FORWARD_1",
+      "resolved_motion": "p전진90도(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 1,
+      "action": "GOAL_CAMERA_90_FORWARD_2",
+      "resolved_motion": "p전진90도(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 1,
+      "action": "GOAL_CAMERA90_FINE_FORWARD_1",
+      "resolved_motion": "p미세90도(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 1,
+      "action": "GOAL_CAMERA90_FINE_FORWARD_2",
+      "resolved_motion": "p미세90도(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 1,
+      "action": "GOAL_CAMERA90_FINE_FORWARD_3",
+      "resolved_motion": "p미세90도(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 1,
+      "action": "GOAL_CAMERA90_FINE_FORWARD_4",
+      "resolved_motion": "p미세90도(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 1,
+      "action": "GOAL_CAMERA90_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전90도(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 1,
+      "action": "GOAL_CAMERA90_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전90도(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 1,
+      "action": "GOAL_CAMERA90_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전90도(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 1,
+      "action": "GOAL_CAMERA90_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전90도(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 1,
+      "action": "GOAL_CAMERA90_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전90도(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 1,
+      "action": "GOAL_CAMERA90_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전90도(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 1,
+      "action": "GOAL_CAMERA90_RECOVER_LEFT_4",
+      "resolved_motion": "p라인복귀좌회전45도",
+      "source_command": {}
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 2,
+      "action": "STRAIGHT",
+      "resolved_motion": "p전진45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 2,
+      "action": "STRAIGHT_0",
+      "resolved_motion": "p미세0도(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 2,
+      "action": "BALL_LOST_FORWARD_2",
+      "resolved_motion": "p전진45(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 2,
+      "action": "BALL_LOST_FORWARD_4",
+      "resolved_motion": "p전진45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 2,
+      "action": "BALL_LOST_FINE_FORWARD_3",
+      "resolved_motion": "p미세0도(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 2,
+      "action": "BALL_APPROACH_FINE_FORWARD_5",
+      "resolved_motion": "p미세45도(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 2,
+      "action": "BALL_APPROACH_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {
+        "ball_fine_alignment": false
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 2,
+      "action": "BALL_APPROACH_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {
+        "ball_fine_alignment": true
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 2,
+      "action": "BALL_APPROACH_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {
+        "ball_fine_alignment": false
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 2,
+      "action": "BALL_APPROACH_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {
+        "ball_fine_alignment": true
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 2,
+      "action": "BALL_APPROACH_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {
+        "ball_fine_alignment": false
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 2,
+      "action": "BALL_APPROACH_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {
+        "ball_fine_alignment": true
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 2,
+      "action": "BALL_APPROACH_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {
+        "ball_fine_alignment": false
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 2,
+      "action": "BALL_APPROACH_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {
+        "ball_fine_alignment": true
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 2,
+      "action": "BALL_APPROACH_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {
+        "ball_fine_alignment": false
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 2,
+      "action": "BALL_APPROACH_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {
+        "ball_fine_alignment": true
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 2,
+      "action": "BALL_APPROACH_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {
+        "ball_fine_alignment": false
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 2,
+      "action": "BALL_APPROACH_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {
+        "ball_fine_alignment": true
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 2,
+      "action": "BALL_APPROACH_FINE_FORWARD_5",
+      "resolved_motion": "p미세45도(5회)",
+      "source_command": {
+        "ball_fine_alignment": true
+      }
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 2,
+      "action": "BALL_APPROACH_RECOVER_LEFT_4",
+      "resolved_motion": "p라인복귀좌회전45도",
+      "source_command": {}
+    },
+    {
+      "phase": "BALL_APPROACH",
+      "source": "ball",
+      "ball_index": 2,
+      "action": "BALL_APPROACH_RECOVER_RIGHT_4",
+      "resolved_motion": "t라인복귀우공용",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 2,
+      "action": "GOAL_CAMERA_90_FORWARD",
+      "resolved_motion": "p전진90도(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 2,
+      "action": "GOAL_CAMERA_90_FORWARD_1",
+      "resolved_motion": "p전진90도(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 2,
+      "action": "GOAL_CAMERA_90_FORWARD_2",
+      "resolved_motion": "p전진90도(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 2,
+      "action": "GOAL_CAMERA90_FINE_FORWARD_1",
+      "resolved_motion": "p미세90도(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 2,
+      "action": "GOAL_CAMERA90_FINE_FORWARD_2",
+      "resolved_motion": "p미세90도(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 2,
+      "action": "GOAL_CAMERA90_FINE_FORWARD_3",
+      "resolved_motion": "p미세90도(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 2,
+      "action": "GOAL_CAMERA90_FINE_FORWARD_4",
+      "resolved_motion": "p미세90도(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 2,
+      "action": "GOAL_CAMERA90_TURN_LEFT_1",
+      "resolved_motion": "p제자리좌회전90도(1회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 2,
+      "action": "GOAL_CAMERA90_TURN_LEFT_2",
+      "resolved_motion": "p제자리좌회전90도(2회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 2,
+      "action": "GOAL_CAMERA90_TURN_LEFT_3",
+      "resolved_motion": "p제자리좌회전90도(3회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 2,
+      "action": "GOAL_CAMERA90_TURN_LEFT_4",
+      "resolved_motion": "p제자리좌회전90도(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 2,
+      "action": "GOAL_CAMERA90_TURN_LEFT_5",
+      "resolved_motion": "p제자리좌회전90도(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 2,
+      "action": "GOAL_CAMERA90_TURN_LEFT_6",
+      "resolved_motion": "p제자리좌회전90도(6회)",
+      "source_command": {}
+    },
+    {
+      "phase": "GOAL_APPROACH",
+      "source": "goal",
+      "ball_index": 2,
+      "action": "GOAL_CAMERA90_RECOVER_LEFT_4",
+      "resolved_motion": "p라인복귀좌회전45도",
+      "source_command": {}
+    },
+    {
+      "phase": "HURDLE_APPROACH",
+      "source": "hurdle",
+      "ball_index": 2,
+      "action": "STRAIGHT",
+      "resolved_motion": "p전진45(4회)",
+      "source_command": {}
+    },
+    {
+      "phase": "HURDLE_APPROACH",
+      "source": "hurdle",
+      "ball_index": 2,
+      "action": "STRAIGHT_0",
+      "resolved_motion": "p미세0도(5회)",
+      "source_command": {}
+    },
+    {
+      "phase": "HURDLE_APPROACH",
+      "source": "hurdle",
+      "ball_index": 2,
+      "action": "GO",
+      "resolved_motion": "p미세0도(10회)",
+      "source_command": {}
+    },
+    {
+      "phase": "HURDLE_APPROACH",
+      "source": "hurdle",
+      "ball_index": 2,
+      "action": "ALIGN_LEFT",
+      "resolved_motion": "p제자리좌회전45(1회)",
+      "source_command": {
+        "turn_count": 1
+      }
+    },
+    {
+      "phase": "HURDLE_APPROACH",
+      "source": "hurdle",
+      "ball_index": 2,
+      "action": "ALIGN_LEFT",
+      "resolved_motion": "p제자리좌회전45(2회)",
+      "source_command": {
+        "turn_count": 2
+      }
+    },
+    {
+      "phase": "HURDLE_APPROACH",
+      "source": "hurdle",
+      "ball_index": 2,
+      "action": "ALIGN_LEFT",
+      "resolved_motion": "p제자리좌회전45(3회)",
+      "source_command": {
+        "turn_count": 3
+      }
+    },
+    {
+      "phase": "HURDLE_APPROACH",
+      "source": "hurdle",
+      "ball_index": 2,
+      "action": "ALIGN_LEFT",
+      "resolved_motion": "p제자리좌회전45(4회)",
+      "source_command": {
+        "turn_count": 4
+      }
+    },
+    {
+      "phase": "HURDLE_APPROACH",
+      "source": "hurdle",
+      "ball_index": 2,
+      "action": "ALIGN_LEFT",
+      "resolved_motion": "p제자리좌회전45(5회)",
+      "source_command": {
+        "turn_count": 5
+      }
+    },
+    {
+      "phase": "HURDLE_APPROACH",
+      "source": "hurdle",
+      "ball_index": 2,
+      "action": "ALIGN_LEFT",
+      "resolved_motion": "p제자리좌회전45(6회)",
+      "source_command": {
+        "turn_count": 6
+      }
+    }
+  ],
+  "unchanged_composite_exceptions": {
+    "pickup_second_backward_turn_left": "t공후 제자리좌회전",
+    "post_shot_default_turn_left": "t골대후 제자리좌회전"
+  },
+  "exception_reason": "No corresponding p composite exists in source77; original combined retreat/turn and post-shot motions preserved.",
+  "shared_camera_routes": "Goal left recovery selects p camera45 body with executor goal head override; pickup forwards may select p camera45 body with ball head override. Body targets, torques and timing match camera-specific p variants.",
+  "installed_paths_verified": true,
+  "scope": "Offline bridge/harness tests only; does not establish physical stability or remove pre-existing failures from the earlier broad suite."
+}

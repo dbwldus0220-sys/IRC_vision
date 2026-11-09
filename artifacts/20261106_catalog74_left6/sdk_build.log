@@ -1,0 +1,7 @@
+[ 42%] Built target motion_core
+Consolidate compiler generated dependencies of target motion_player_core
+[ 71%] Built target motion_player_core
+Consolidate compiler generated dependencies of target test_ball_fine_queue
+[ 85%] Building CXX object CMakeFiles/test_ball_fine_queue.dir/test_ball_fine_queue.cpp.o
+[100%] Linking CXX executable test_ball_fine_queue
+[100%] Built target test_ball_fine_queue

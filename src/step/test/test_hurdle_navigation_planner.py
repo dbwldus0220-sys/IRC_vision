@@ -24,17 +24,16 @@ def hurdle_info(**overrides):
     return sample
 
 
-@pytest.mark.parametrize("angle,action", [
-    (-70.0, "STRAIGHT_0"), (-69.999, "STRAIGHT_0"),
-    (0.0, "STRAIGHT_0"), (69.999, "STRAIGHT_0"), (70.0, "STRAIGHT_0"),
-])
+@pytest.mark.parametrize("angle", [-70.0, -69.999, 0.0, 69.999, 70.0])
 @pytest.mark.parametrize("offset", [-0.5, 0.5])
-def test_fine_approach_ignores_center_parallel_angle_and_path_offset(angle, action, offset):
+def test_fine_approach_corrects_path_offset_until_540mm(angle, offset):
     decision = HurdleNavigationPlanner().plan(hurdle_info(
         depth_m=0.6, hurdle_angle_deg=60, bearing_deg=angle,
         path_reference_valid=True, path_offset_x_norm=offset,
     ), positioning=True)
-    assert decision.valid and decision.action == action
+    expected = 'RECOVER_LEFT_TURN_LEFT_4' if offset < 0 else 'RECOVER_RIGHT_TURN_RIGHT_4'
+    assert decision.valid and decision.action == expected
+    assert not decision.close_rotation_blocked
 
 
 def test_positioning_starts_fixed_sequence_without_old_jump_confirmation():

@@ -1,0 +1,36 @@
+[INFO] [1793973236.731249456] [motion_decision_node]: line info: /vision/line_info
+[INFO] [1793973236.737263408] [motion_decision_node]: ball info: /vision/ball_info
+[INFO] [1793973236.744732688] [motion_decision_node]: goal info: /vision/goal_info
+[INFO] [1793973236.750186640] [motion_decision_node]: hurdle info: /vision/hurdle_info
+[INFO] [1793973236.755396528] [motion_decision_node]: finish info: /vision/finish_info
+[INFO] [1793973236.774825296] [motion_decision_node]: Mission phase: AUTO
+[INFO] [1793973236.775808784] [motion_decision_node]: Unified command: /navigation/motion_command
+[INFO] [1793973236.776573168] [motion_decision_node]: Motion status: /motion/status
+[INFO] [1793973236.777315728] [motion_decision_node]: Grasp detections: /vision/detections
+[INFO] [1793973236.778023024] [motion_decision_node]: Executor heartbeat: /motion/executor/heartbeat
+[INFO] [1793973236.778775216] [motion_decision_node]: Decision debug: /navigation/decision_debug
+[INFO] [1793973236.779517552] [motion_decision_node]: Press ENTER in the launch terminal to start vision decisions after the startup pose is ready.
+[INFO] [1793973640.975644339] [motion_decision_node]: ENTER received; waiting for startup readiness and fresh vision.
+[INFO] [1793973644.656124563] [motion_decision_node]: Line completed without prequeue: action=STRAIGHT, command_id=1, reason=capture_not_fresh, usable_frames=10/10, fresh_line=False
+[INFO] [1793973644.659056083] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793973644.676073523] [motion_decision_node]: Line motion boundary: wait_sec=0.008, next_action=STRAIGHT, reason=straight_line_turn_suppressed
+[INFO] [1793973648.241935891] [motion_decision_node]: Line completed without prequeue: action=STRAIGHT, command_id=2, reason=capture_not_fresh, usable_frames=10/10, fresh_line=False
+[INFO] [1793973648.243738995] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793973648.245952147] [motion_decision_node]: Line motion boundary: wait_sec=0.003, next_action=STRAIGHT, reason=line_tracking
+[INFO] [1793973651.807989075] [motion_decision_node]: Line completed without prequeue: action=STRAIGHT, command_id=3, reason=capture_not_fresh, usable_frames=10/10, fresh_line=False
+[INFO] [1793973651.821015283] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793973651.823654643] [motion_decision_node]: Line motion boundary: wait_sec=0.015, next_action=STRAIGHT, reason=line_tracking
+[INFO] [1793973655.393187584] [motion_decision_node]: Line completed without prequeue: action=STRAIGHT, command_id=4, reason=capture_not_fresh, usable_frames=10/10, fresh_line=False
+[INFO] [1793973655.394751567] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793973655.404328328] [motion_decision_node]: Line motion boundary: wait_sec=0.003, next_action=STRAIGHT, reason=line_tracking
+[INFO] [1793973658.964944567] [motion_decision_node]: Line completed without prequeue: action=STRAIGHT, command_id=5, reason=candidate:line/WAIT/line_corner_waiting_for_fresh_distance, usable_frames=10/10, fresh_line=False
+[INFO] [1793973658.970225064] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=STRAIGHT
+[INFO] [1793973670.393583162] [motion_decision_node]: Pre-motion settle started: action=LINE_HEADING_TURN_RIGHT_5, source=line, duration=0.500
+[INFO] [1793973670.394981141] [motion_decision_node]: Line motion boundary: wait_sec=11.434, next_action=LINE_HEADING_TURN_RIGHT_5, reason=line_large_ground_heading
+[INFO] [1793973672.541504266] [motion_decision_node]: General motion lock released: status=SUCCEEDED, action=LINE_HEADING_TURN_RIGHT_5
+[INFO] [1793973680.470279760] [motion_decision_node]: Pre-motion settle started: action=LINE_LOST_TURN_LEFT_3, source=line, duration=0.500
+[INFO] [1793973680.473355145] [motion_decision_node]: Line motion boundary: wait_sec=7.928, next_action=LINE_LOST_TURN_LEFT_3, reason=line_lost_turn_toward_last_seen_side
+[INFO] [1793973680.479881339] [motion_decision_node]: BALL mode consumed at confirmation: index=1, used=1/2
+[INFO] [1793973680.480854329] [motion_decision_node]: BALL entry Line alignment armed: adopted_command_id=None
+[INFO] [1793973680.481623511] [motion_decision_node]: BALL approach entry latched during motion: distance_m=0.663
+[INFO] [1793973681.964705075] [motion_decision_node]: BALL entry after Line motion; waiting for fresh vision

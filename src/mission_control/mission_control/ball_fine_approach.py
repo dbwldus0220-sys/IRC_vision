@@ -6,6 +6,13 @@ FINE_FORWARD = 'BALL_APPROACH_FINE_FORWARD_5'
 PREPARATIONS = {PREPARE_FINE, PREPARE_TURN}
 
 
+def camera45_turn_duration_sec(direction, count):
+    """Source78 left turns use a 355ms cycle at the unscaled source speed."""
+    if direction == 'LEFT':
+        return .355 * count / .95
+    return .300 * count / .9
+
+
 def physical_motion_id(identifier):
     """Keep existing pickup/loss transition history in its original aliases."""
     return {
@@ -31,12 +38,12 @@ def duration_sec(identifier):
     if identifier == 'ball_align_prepare_fine_45':
         return .148
     if identifier == 'ball_align_prepare_turn_45':
-        return .175 / .95
+        return .175 / 1.05
     if identifier == 'ball_align_fine_forward_45_5':
-        return .388 * 5 / (1.05 * .95)
+        return .394 * 5 / 1.05
     if identifier.startswith('ball_align_turn_'):
         count = int(identifier.rsplit('_', 1)[1])
-        return (.295 if '_left_' in identifier else .300) * count / .9
+        return camera45_turn_duration_sec('LEFT' if '_left_' in identifier else 'RIGHT', count)
     return None
 
 

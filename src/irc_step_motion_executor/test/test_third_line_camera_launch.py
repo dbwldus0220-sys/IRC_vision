@@ -1,4 +1,4 @@
-"""Motor-free executor test: only accepted third RUNNING may raise the head."""
+"""Motor-free executor test for explicit preparation before the third Line start."""
 import json
 import time
 import unittest
@@ -23,7 +23,7 @@ def generate_test_description():
         package='irc_step_motion_executor', executable='sdk_motion_executor',
         name='third_line_camera_executor', output='screen',
         parameters=[{'backend_type': 'simulated', 'enable_robot_hardware': False,
-                     'poll_period_ms': 20, 'running_polls': 35, 'settling_polls': 1,
+                     'poll_period_ms': 20, 'running_polls': 60, 'settling_polls': 1,
                      'heartbeat_period_ms': 20}],
         remappings=[(topic, ROOT + topic) for topic in TOPICS])
     return launch.LaunchDescription([
@@ -34,11 +34,12 @@ def generate_test_description():
 
 
 class TestThirdLineCamera(unittest.TestCase):
-    def test_camera_starts_only_with_third_running(self):
+    def test_explicit_prepare_starts_early_and_third_running_does_not_restart_it(self):
         rclpy.init()
         node = rclpy.create_node('third_line_camera_client')
         statuses, heartbeats = [], []
         request = node.create_publisher(String, ROOT + TOPICS[0], 10)
+        prepare = node.create_publisher(String, ROOT + TOPICS[-1], 10)
         node.create_subscription(String, ROOT + TOPICS[2], lambda m: statuses.append(json.loads(m.data)), 10)
         node.create_subscription(String, ROOT + TOPICS[3], lambda m: heartbeats.append(json.loads(m.data)), 10)
 
@@ -61,7 +62,7 @@ class TestThirdLineCamera(unittest.TestCase):
             request.publish(String(data=json.dumps(payload)))
 
         try:
-            wait(lambda: request.get_subscription_count() and heartbeats)
+            wait(lambda: request.get_subscription_count() and prepare.get_subscription_count() and heartbeats)
             send(1)
             wait(lambda: has_status(1, 'RUNNING'))
             wait(lambda: has_status(1, 'SUCCEEDED'))
@@ -76,13 +77,25 @@ class TestThirdLineCamera(unittest.TestCase):
             wait(lambda: heartbeats[-1]['sequence'] > seq)
             self.assertFalse(has_status(3, 'RUNNING'))
             self.assertFalse(heartbeats[-1]['goal_head_override_active'])
+            # Replay the decision node's prepare message after bridge-local acceptance.
+            # No third executor request is running yet.
+            prepare.publish(String(data=json.dumps({
+                'request_id': 3, 'stamp_ns': node.get_clock().now().nanoseconds,
+                'phase': 'LINE_TRACK_AFTER_PICKUP', 'grasp': 'GRABBED',
+            })))
+            wait(lambda: heartbeats[-1]['goal_head_override_active'])
+            self.assertFalse(has_status(3, 'RUNNING'))
+            wait(lambda: heartbeats[-1]['goal_head_transition_complete'])
             wait(lambda: has_status(2, 'SUCCEEDED'))
+            heartbeat_boundary = len(heartbeats)
             send(3, camera=True)
             wait(lambda: has_status(3, 'RUNNING'))
             wait(lambda: heartbeats[-1]['goal_head_override_active'])
             self.assertEqual(heartbeats[-1]['goal_head_prepare_id'], 3)
             wait(lambda: heartbeats[-1]['goal_head_transition_complete'])
             wait(lambda: has_status(3, 'SUCCEEDED'))
+            self.assertTrue(all(h['goal_head_transition_complete']
+                                for h in heartbeats[heartbeat_boundary:]))
         finally:
             node.destroy_node()
             rclpy.shutdown()

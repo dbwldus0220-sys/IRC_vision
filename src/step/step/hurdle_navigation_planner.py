@@ -24,6 +24,7 @@ class HurdleNavigationConfig:
     go_target_depth_m: float = 0.10
     go_depth_tolerance_m: float = 0.10
     final_sequence_start_depth_m: float = 0.540
+    normal_turn_stop_depth_m: float = 0.540
     go_angle_tolerance_deg: float = 8.0
     path_center_tolerance_norm: float = 0.10
     close_turn_stop_bottom_distance_px: float = 100.0
@@ -257,6 +258,7 @@ class HurdleNavigationPlanner:
             or hurdle_info.get("hurdle_positioning_active") is True
         ):
             self.fine_approach_active = True
+        if positioning and depth <= self.config.normal_turn_stop_depth_m + 1e-9:
             self.close_rotation_blocked = True
         camera_bottom_gap = _number(
             hurdle_info,
@@ -298,13 +300,16 @@ class HurdleNavigationPlanner:
                 center_steering = _number(hurdle_info, "bearing_deg")
         path_reference_valid = hurdle_info.get("path_reference_valid") is True
         path_offset = _number(hurdle_info, "path_offset_x_norm")
+        normal_rotation_stopped = self.fine_approach_active and self.close_rotation_blocked
         if positioning and not self.fine_approach_active and (
             not path_reference_valid or path_offset is None
             or hurdle_info.get("path_reference_source") == "held"
         ):
             return self.wait("waiting_for_fresh_hurdle_line_intersection")
         path_centered = bool(
-            (positioning and self.fine_approach_active)
+            (positioning and normal_rotation_stopped)
+            or (positioning and self.fine_approach_active
+                and hurdle_info.get("path_reference_source") == "held")
             or not path_reference_valid or path_offset is None
             or abs(path_offset) <= self.config.path_center_tolerance_norm
         )
@@ -358,7 +363,7 @@ class HurdleNavigationPlanner:
         elif go_now:
             action = "GO"
             reason = "hurdle_parallel_at_close_depth"
-        elif positioning and self.fine_approach_active:
+        elif positioning and self.fine_approach_active and not positioning_turn_needed:
             action = "STRAIGHT_0"
             reason = "hurdle_fine_approach_without_rotation"
         elif positioning and positioning_turn_needed:

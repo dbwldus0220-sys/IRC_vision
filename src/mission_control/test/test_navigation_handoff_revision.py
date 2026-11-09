@@ -43,6 +43,7 @@ def test_hurdle_approach_is_separate_from_final_atomic_tail(depth, action):
     else:
         assert bridge.active_pickup_sequence == (
             'hurdle_fine_forward_10', bridge.HURDLE_PRE_GO_DWELL_MARKER, 'hurdle',
+            bridge.HURDLE_POST_GO_DWELL_MARKER,
         )
 
 

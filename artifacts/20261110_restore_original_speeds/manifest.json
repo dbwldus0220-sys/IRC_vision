@@ -1,0 +1,272 @@
+{
+  "original_catalog": "artifacts/robot_motions_pc.json",
+  "preserved_exceptions": {
+    "t허들찐": 0.95,
+    "p공후 제자리좌회전": 0.9975,
+    "p골대후제자리좌회전": 0.9975
+  },
+  "speed_changes": {
+    "찐미세오뒤에서 오옆꽃게90도": {
+      "before": 0.9025,
+      "after": 0.95
+    },
+    "찐미세오뒤에서오옆꽃게0도": {
+      "before": 0.9025,
+      "after": 0.95
+    },
+    "R오뒤에서 기본자세(카메라45도)": {
+      "before": 0.9025,
+      "after": 0.95
+    },
+    "R오뒤에서 기본자세(0도)": {
+      "before": 0.9025,
+      "after": 0.95
+    },
+    "건왼뒤에서 기본자세(0도)": {
+      "before": 0.95,
+      "after": 1.0
+    },
+    "건김오뒤3": {
+      "before": 0.95,
+      "after": 1.0
+    },
+    "R미세오뒤에서 기본자세45도": {
+      "before": 0.95,
+      "after": 1.0
+    },
+    "R미세오뒤에서 오뒤45도": {
+      "before": 0.95,
+      "after": 1.0
+    },
+    "R미세오뒤에서 오뒤0도": {
+      "before": 0.95,
+      "after": 1.0
+    },
+    "R미세오뒤에서 기본자세90도": {
+      "before": 0.95,
+      "after": 1.0
+    },
+    "R미세(5회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "r공잡기 400": {
+      "before": 0.95,
+      "after": 1.0
+    },
+    "r공잡기500": {
+      "before": 0.95,
+      "after": 1.0
+    },
+    "r미세0도": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "R골넣기": {
+      "before": 0.95,
+      "after": 1.0
+    },
+    "R미세90도": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "r미세0도(허들10회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "r미세0도(상단탐색3회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "R미세90도(1회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "R미세90도(2회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "R미세90도(3회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "R미세90도(4회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "R미세오뒤에서 오뒤90도": {
+      "before": 0.95,
+      "after": 1.0
+    },
+    "r미세 골대전용": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "r미세 골대전용(1회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "r미세 골대전용(2회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "r미세 골대전용(3회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "r미세 골대전용(4회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "r미세오뒤에서 오뒤90도": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "t미세0도(1회)(골대74)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "t미세0도(2회)(골대74)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "t미세0도(3회)(골대74)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "t미세0도(4회)(골대74)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "p라인복귀좌회전공용": {
+      "before": 0.95,
+      "after": 1.0
+    },
+    "p전진45(6회)": {
+      "before": 0.95,
+      "after": 1.0
+    },
+    "p미세0도(4회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "p전진45(4회)": {
+      "before": 0.95,
+      "after": 1.0
+    },
+    "p전진90도(4회)": {
+      "before": 0.95,
+      "after": 1.0
+    },
+    "p전진90도(6회)": {
+      "before": 0.95,
+      "after": 1.0
+    },
+    "p전진실전0도(4회)": {
+      "before": 0.95,
+      "after": 1.0
+    },
+    "p전진실전0도(6회)": {
+      "before": 0.95,
+      "after": 1.0
+    },
+    "p미세0도(1회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "p미세0도(2회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "p미세0도(3회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "p미세0도(5회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "p미세45도(1회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "p미세45도(2회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "p미세45도(3회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "p미세45도(4회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "p미세45도(5회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "p미세90도(1회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "p미세90도(2회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "p미세90도(3회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "p미세90도(4회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "p미세90도(5회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "p전진45(2회)": {
+      "before": 0.95,
+      "after": 1.0
+    },
+    "p전진45(8회)": {
+      "before": 0.95,
+      "after": 1.0
+    },
+    "p전진90도(2회)": {
+      "before": 0.95,
+      "after": 1.0
+    },
+    "p미세0도(10회)": {
+      "before": 0.9975,
+      "after": 1.05
+    },
+    "r골넣기 5번구역": {
+      "before": 0.95,
+      "after": 1.0
+    },
+    "r골넣기 6번구역": {
+      "before": 0.95,
+      "after": 1.0
+    },
+    "r골넣기7번구역": {
+      "before": 0.95,
+      "after": 1.0
+    },
+    "r골넣기8번구역": {
+      "before": 0.95,
+      "after": 1.0
+    }
+  },
+  "changed_count": 63,
+  "other_motion_fields_unchanged": true,
+  "validation": {
+    "focused_tests_passed": 321,
+    "related_tests_passed_after_recovery_expectation_update": 1427,
+    "preexisting_related_failures": 127,
+    "new_failures": 0,
+    "sdk_mock_queue_and_exit_chains": "passed before and after",
+    "hardware_executed": false
+  }
+}

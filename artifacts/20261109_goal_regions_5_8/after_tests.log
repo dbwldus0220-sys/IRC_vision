@@ -1,0 +1,2099 @@
+...........................F........FF...FF...............FFFF......FFF. [  9%]
+........................................................................ [ 18%]
+...........FF...F.F.F................................................... [ 28%]
+............................................................FF.......... [ 37%]
+.....................................................FFFFFFFFFFFFF.FF... [ 47%]
+.........FF.....................................F....................... [ 56%]
+.........FF.F..FFFFF....FF..FFFFFFFFFF.......FFF..F.F.FF.F.FF.F.FF.F.F.. [ 66%]
+...........F............................................................ [ 75%]
+............................FF.......................................... [ 85%]
+....................FF............FF.................................... [ 87%]
+..........................................
+=================================== FAILURES ===================================
+___________ test_invalid_or_unconfirmed_shot_is_blocked[overrides1] ____________
+
+overrides = {'depth_m': 0.571}
+
+    @pytest.mark.parametrize('overrides', [
+        {'depth_m': 0.389}, {'depth_m': 0.571}, {'offset_x_px': None},
+        {'offset_x_px': float('nan')}, {'score_now': None}, {'score_now': False},
+    ])
+    def test_invalid_or_unconfirmed_shot_is_blocked(overrides):
+>       assert GoalNavigationPlanner().plan(goal_info(**overrides)).action != 'SHOT'
+E       AssertionError: assert 'SHOT' != 'SHOT'
+E        +  where 'SHOT' = GoalActionCommand(valid=True, action='SHOT', reason='goal_centered_at_scoring_depth', sdk_motion_requested=True, confi... depth_in_score_range=True, score_now=True, shot_region=2, target_steering_angle_deg=None, target_lateral_error_m=None).action
+E        +    where GoalActionCommand(valid=True, action='SHOT', reason='goal_centered_at_scoring_depth', sdk_motion_requested=True, confi... depth_in_score_range=True, score_now=True, shot_region=2, target_steering_angle_deg=None, target_lateral_error_m=None) = <bound method GoalNavigationPlanner.plan of <step.goal_navigation_planner.GoalNavigationPlanner object at 0xffff7f2d9fc0>>({'bearing_deg': 0.0, 'camera_fx_px': 900.0, 'confidence': 0.9, 'depth_m': 0.571, ...})
+E        +      where <bound method GoalNavigationPlanner.plan of <step.goal_navigation_planner.GoalNavigationPlanner object at 0xffff7f2d9fc0>> = <step.goal_navigation_planner.GoalNavigationPlanner object at 0xffff7f2d9fc0>.plan
+E        +        where <step.goal_navigation_planner.GoalNavigationPlanner object at 0xffff7f2d9fc0> = GoalNavigationPlanner()
+E        +      and   {'bearing_deg': 0.0, 'camera_fx_px': 900.0, 'confidence': 0.9, 'depth_m': 0.571, ...} = goal_info(**{'depth_m': 0.571})
+
+src/step/test/test_goal_navigation_planner.py:149: AssertionError
+_ test_goal_approach_switches_to_fine_at_850mm[0.85-GOAL_CAMERA90_FINE_FORWARD_3] _
+
+depth = 0.85, action = 'GOAL_CAMERA90_FINE_FORWARD_3'
+
+    @pytest.mark.parametrize('depth,action', [
+        (2.0, 'GOAL_CAMERA_90_FORWARD_2'),
+        (1.281, 'GOAL_CAMERA_90_FORWARD_2'),
+        (1.280, 'GOAL_CAMERA_90_FORWARD_2'),
+        (0.851, 'GOAL_CAMERA_90_FORWARD_2'),
+        (0.850, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+        (0.571, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+        (0.500, 'WAIT_SCORE_CONFIRMATION'),
+        (0.470, 'WAIT_SCORE_CONFIRMATION'),
+        (0.471, 'WAIT_SCORE_CONFIRMATION'),
+        (0.430, 'WAIT_SCORE_CONFIRMATION'),
+        (0.570, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+        (0.410, 'GOAL_CAMERA90_BACKWARD_1'),
+        (0.390, 'GOAL_CAMERA90_BACKWARD_1'),
+        (0.389, 'GOAL_CAMERA90_BACKWARD_1'),
+    ])
+    def test_goal_approach_switches_to_fine_at_850mm(depth, action):
+        command = GoalNavigationPlanner().plan(goal_info(
+            depth_m=depth, distance_m=0.2, ground_distance_m=0.1, score_now=False,
+        ))
+>       assert command.action == action
+E       AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_4' == 'GOAL_CAMERA90_FINE_FORWARD_3'
+E         - GOAL_CAMERA90_FINE_FORWARD_3
+E         ?                            ^
+E         + GOAL_CAMERA90_FINE_FORWARD_4
+E         ?                            ^
+
+src/step/test/test_goal_navigation_planner.py:172: AssertionError
+_ test_goal_approach_switches_to_fine_at_850mm[0.571-GOAL_CAMERA90_FINE_FORWARD_3] _
+
+depth = 0.571, action = 'GOAL_CAMERA90_FINE_FORWARD_3'
+
+    @pytest.mark.parametrize('depth,action', [
+        (2.0, 'GOAL_CAMERA_90_FORWARD_2'),
+        (1.281, 'GOAL_CAMERA_90_FORWARD_2'),
+        (1.280, 'GOAL_CAMERA_90_FORWARD_2'),
+        (0.851, 'GOAL_CAMERA_90_FORWARD_2'),
+        (0.850, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+        (0.571, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+        (0.500, 'WAIT_SCORE_CONFIRMATION'),
+        (0.470, 'WAIT_SCORE_CONFIRMATION'),
+        (0.471, 'WAIT_SCORE_CONFIRMATION'),
+        (0.430, 'WAIT_SCORE_CONFIRMATION'),
+        (0.570, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+        (0.410, 'GOAL_CAMERA90_BACKWARD_1'),
+        (0.390, 'GOAL_CAMERA90_BACKWARD_1'),
+        (0.389, 'GOAL_CAMERA90_BACKWARD_1'),
+    ])
+    def test_goal_approach_switches_to_fine_at_850mm(depth, action):
+        command = GoalNavigationPlanner().plan(goal_info(
+            depth_m=depth, distance_m=0.2, ground_distance_m=0.1, score_now=False,
+        ))
+>       assert command.action == action
+E       AssertionError: assert 'WAIT_SCORE_CONFIRMATION' == 'GOAL_CAMERA90_FINE_FORWARD_3'
+E         - GOAL_CAMERA90_FINE_FORWARD_3
+E         + WAIT_SCORE_CONFIRMATION
+
+src/step/test/test_goal_navigation_planner.py:172: AssertionError
+__ test_goal_approach_switches_to_fine_at_850mm[0.43-WAIT_SCORE_CONFIRMATION] __
+
+depth = 0.43, action = 'WAIT_SCORE_CONFIRMATION'
+
+    @pytest.mark.parametrize('depth,action', [
+        (2.0, 'GOAL_CAMERA_90_FORWARD_2'),
+        (1.281, 'GOAL_CAMERA_90_FORWARD_2'),
+        (1.280, 'GOAL_CAMERA_90_FORWARD_2'),
+        (0.851, 'GOAL_CAMERA_90_FORWARD_2'),
+        (0.850, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+        (0.571, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+        (0.500, 'WAIT_SCORE_CONFIRMATION'),
+        (0.470, 'WAIT_SCORE_CONFIRMATION'),
+        (0.471, 'WAIT_SCORE_CONFIRMATION'),
+        (0.430, 'WAIT_SCORE_CONFIRMATION'),
+        (0.570, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+        (0.410, 'GOAL_CAMERA90_BACKWARD_1'),
+        (0.390, 'GOAL_CAMERA90_BACKWARD_1'),
+        (0.389, 'GOAL_CAMERA90_BACKWARD_1'),
+    ])
+    def test_goal_approach_switches_to_fine_at_850mm(depth, action):
+        command = GoalNavigationPlanner().plan(goal_info(
+            depth_m=depth, distance_m=0.2, ground_distance_m=0.1, score_now=False,
+        ))
+>       assert command.action == action
+E       AssertionError: assert 'GOAL_CAMERA90_BACKWARD_1' == 'WAIT_SCORE_CONFIRMATION'
+E         - WAIT_SCORE_CONFIRMATION
+E         + GOAL_CAMERA90_BACKWARD_1
+
+src/step/test/test_goal_navigation_planner.py:172: AssertionError
+_ test_goal_approach_switches_to_fine_at_850mm[0.57-GOAL_CAMERA90_FINE_FORWARD_3] _
+
+depth = 0.57, action = 'GOAL_CAMERA90_FINE_FORWARD_3'
+
+    @pytest.mark.parametrize('depth,action', [
+        (2.0, 'GOAL_CAMERA_90_FORWARD_2'),
+        (1.281, 'GOAL_CAMERA_90_FORWARD_2'),
+        (1.280, 'GOAL_CAMERA_90_FORWARD_2'),
+        (0.851, 'GOAL_CAMERA_90_FORWARD_2'),
+        (0.850, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+        (0.571, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+        (0.500, 'WAIT_SCORE_CONFIRMATION'),
+        (0.470, 'WAIT_SCORE_CONFIRMATION'),
+        (0.471, 'WAIT_SCORE_CONFIRMATION'),
+        (0.430, 'WAIT_SCORE_CONFIRMATION'),
+        (0.570, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+        (0.410, 'GOAL_CAMERA90_BACKWARD_1'),
+        (0.390, 'GOAL_CAMERA90_BACKWARD_1'),
+        (0.389, 'GOAL_CAMERA90_BACKWARD_1'),
+    ])
+    def test_goal_approach_switches_to_fine_at_850mm(depth, action):
+        command = GoalNavigationPlanner().plan(goal_info(
+            depth_m=depth, distance_m=0.2, ground_distance_m=0.1, score_now=False,
+        ))
+>       assert command.action == action
+E       AssertionError: assert 'WAIT_SCORE_CONFIRMATION' == 'GOAL_CAMERA90_FINE_FORWARD_3'
+E         - GOAL_CAMERA90_FINE_FORWARD_3
+E         + WAIT_SCORE_CONFIRMATION
+
+src/step/test/test_goal_navigation_planner.py:172: AssertionError
+_ test_far_approach_uses_measured_target_geometry[0.85-GOAL_CAMERA90_FINE_FORWARD_3--200] _
+
+depth = 0.85, action = 'GOAL_CAMERA90_FINE_FORWARD_3', offset_px = -200
+
+    @pytest.mark.parametrize('offset_px', [-200, 200])
+    @pytest.mark.parametrize('depth,action', [
+        (2.0, 'GOAL_CAMERA_90_FORWARD_2'),
+        (1.280, 'GOAL_CAMERA_90_FORWARD_2'),
+        (0.851, 'GOAL_CAMERA_90_FORWARD_2'),
+        (0.850, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+        (0.571, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+    ])
+    def test_far_approach_uses_measured_target_geometry(depth, action, offset_px):
+        command = GoalNavigationPlanner().plan(goal_info(
+            depth_m=depth, offset_x_px=offset_px, score_now=False,
+        ))
+>       assert command.action == action
+E       AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_4' == 'GOAL_CAMERA90_FINE_FORWARD_3'
+E         - GOAL_CAMERA90_FINE_FORWARD_3
+E         ?                            ^
+E         + GOAL_CAMERA90_FINE_FORWARD_4
+E         ?                            ^
+
+src/step/test/test_goal_navigation_planner.py:203: AssertionError
+_ test_far_approach_uses_measured_target_geometry[0.85-GOAL_CAMERA90_FINE_FORWARD_3-200] _
+
+depth = 0.85, action = 'GOAL_CAMERA90_FINE_FORWARD_3', offset_px = 200
+
+    @pytest.mark.parametrize('offset_px', [-200, 200])
+    @pytest.mark.parametrize('depth,action', [
+        (2.0, 'GOAL_CAMERA_90_FORWARD_2'),
+        (1.280, 'GOAL_CAMERA_90_FORWARD_2'),
+        (0.851, 'GOAL_CAMERA_90_FORWARD_2'),
+        (0.850, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+        (0.571, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+    ])
+    def test_far_approach_uses_measured_target_geometry(depth, action, offset_px):
+        command = GoalNavigationPlanner().plan(goal_info(
+            depth_m=depth, offset_x_px=offset_px, score_now=False,
+        ))
+>       assert command.action == action
+E       AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_4' == 'GOAL_CAMERA90_FINE_FORWARD_3'
+E         - GOAL_CAMERA90_FINE_FORWARD_3
+E         ?                            ^
+E         + GOAL_CAMERA90_FINE_FORWARD_4
+E         ?                            ^
+
+src/step/test/test_goal_navigation_planner.py:203: AssertionError
+_ test_far_approach_uses_measured_target_geometry[0.571-GOAL_CAMERA90_FINE_FORWARD_3--200] _
+
+depth = 0.571, action = 'GOAL_CAMERA90_FINE_FORWARD_3', offset_px = -200
+
+    @pytest.mark.parametrize('offset_px', [-200, 200])
+    @pytest.mark.parametrize('depth,action', [
+        (2.0, 'GOAL_CAMERA_90_FORWARD_2'),
+        (1.280, 'GOAL_CAMERA_90_FORWARD_2'),
+        (0.851, 'GOAL_CAMERA_90_FORWARD_2'),
+        (0.850, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+        (0.571, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+    ])
+    def test_far_approach_uses_measured_target_geometry(depth, action, offset_px):
+        command = GoalNavigationPlanner().plan(goal_info(
+            depth_m=depth, offset_x_px=offset_px, score_now=False,
+        ))
+>       assert command.action == action
+E       AssertionError: assert 'GOAL_CAMERA90_CRAB_LEFT' == 'GOAL_CAMERA90_FINE_FORWARD_3'
+E         - GOAL_CAMERA90_FINE_FORWARD_3
+E         + GOAL_CAMERA90_CRAB_LEFT
+
+src/step/test/test_goal_navigation_planner.py:203: AssertionError
+_ test_far_approach_uses_measured_target_geometry[0.571-GOAL_CAMERA90_FINE_FORWARD_3-200] _
+
+depth = 0.571, action = 'GOAL_CAMERA90_FINE_FORWARD_3', offset_px = 200
+
+    @pytest.mark.parametrize('offset_px', [-200, 200])
+    @pytest.mark.parametrize('depth,action', [
+        (2.0, 'GOAL_CAMERA_90_FORWARD_2'),
+        (1.280, 'GOAL_CAMERA_90_FORWARD_2'),
+        (0.851, 'GOAL_CAMERA_90_FORWARD_2'),
+        (0.850, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+        (0.571, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+    ])
+    def test_far_approach_uses_measured_target_geometry(depth, action, offset_px):
+        command = GoalNavigationPlanner().plan(goal_info(
+            depth_m=depth, offset_x_px=offset_px, score_now=False,
+        ))
+>       assert command.action == action
+E       AssertionError: assert 'GOAL_CAMERA90_CRAB_RIGHT' == 'GOAL_CAMERA90_FINE_FORWARD_3'
+E         - GOAL_CAMERA90_FINE_FORWARD_3
+E         + GOAL_CAMERA90_CRAB_RIGHT
+
+src/step/test/test_goal_navigation_planner.py:203: AssertionError
+_________ test_far_approach_overrides_stale_score_confirmation[0.571] __________
+
+depth = 0.571
+
+    @pytest.mark.parametrize('depth', [0.571, 0.580, 0.600])
+    def test_far_approach_overrides_stale_score_confirmation(depth):
+        command = GoalNavigationPlanner().plan(goal_info(depth_m=depth, score_now=True))
+>       assert command.action == 'GOAL_CAMERA90_FINE_FORWARD_3'
+E       AssertionError: assert 'SHOT' == 'GOAL_CAMERA90_FINE_FORWARD_3'
+E         - GOAL_CAMERA90_FINE_FORWARD_3
+E         + SHOT
+
+src/step/test/test_goal_navigation_planner.py:220: AssertionError
+__________ test_far_approach_overrides_stale_score_confirmation[0.58] __________
+
+depth = 0.58
+
+    @pytest.mark.parametrize('depth', [0.571, 0.580, 0.600])
+    def test_far_approach_overrides_stale_score_confirmation(depth):
+        command = GoalNavigationPlanner().plan(goal_info(depth_m=depth, score_now=True))
+>       assert command.action == 'GOAL_CAMERA90_FINE_FORWARD_3'
+E       AssertionError: assert 'SHOT' == 'GOAL_CAMERA90_FINE_FORWARD_3'
+E         - GOAL_CAMERA90_FINE_FORWARD_3
+E         + SHOT
+
+src/step/test/test_goal_navigation_planner.py:220: AssertionError
+__________ test_far_approach_overrides_stale_score_confirmation[0.6] ___________
+
+depth = 0.6
+
+    @pytest.mark.parametrize('depth', [0.571, 0.580, 0.600])
+    def test_far_approach_overrides_stale_score_confirmation(depth):
+        command = GoalNavigationPlanner().plan(goal_info(depth_m=depth, score_now=True))
+>       assert command.action == 'GOAL_CAMERA90_FINE_FORWARD_3'
+E       AssertionError: assert 'SHOT' == 'GOAL_CAMERA90_FINE_FORWARD_3'
+E         - GOAL_CAMERA90_FINE_FORWARD_3
+E         + SHOT
+
+src/step/test/test_goal_navigation_planner.py:220: AssertionError
+_________ test_analyzer_rejects_outside_new_scoring_rectangle[0.57-0] __________
+
+depth = 0.57, offset = 0
+
+    @pytest.mark.parametrize('depth,offset', [
+        (0.429, 0), (0.570, 0), (0.511, -101), (0.550, 101), (0.50, -121), (0.50, 121),
+    ])
+    def test_analyzer_rejects_outside_new_scoring_rectangle(depth, offset):
+        analyzer, published = make_analyzer(depth_m=depth, robot_center_offset_px=96.0)
+        for _ in range(5):
+            info = send(analyzer, published, [detection(center_x=736 + offset)])
+>           assert info['score_now'] is False
+E           assert True is False
+
+src/step/test/test_goal_backboard_selection.py:287: AssertionError
+_______ test_analyzer_rejects_outside_new_scoring_rectangle[0.511--101] ________
+
+depth = 0.511, offset = -101
+
+    @pytest.mark.parametrize('depth,offset', [
+        (0.429, 0), (0.570, 0), (0.511, -101), (0.550, 101), (0.50, -121), (0.50, 121),
+    ])
+    def test_analyzer_rejects_outside_new_scoring_rectangle(depth, offset):
+        analyzer, published = make_analyzer(depth_m=depth, robot_center_offset_px=96.0)
+        for _ in range(5):
+            info = send(analyzer, published, [detection(center_x=736 + offset)])
+>           assert info['score_now'] is False
+E           assert True is False
+
+src/step/test/test_goal_backboard_selection.py:287: AssertionError
+__ test_analyzer_confirms_each_zone_before_planner_requests_shot[0.43-120-1] ___
+
+depth = 0.43, offset = 120, region = 1
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2), (.550, 0, 2),
+    ])
+    def test_analyzer_confirms_each_zone_before_planner_requests_shot(depth, offset, region):
+        analyzer, published = make_analyzer(depth_m=depth)
+        for index in range(3):
+            info = send(analyzer, published, [detection(center_x=640 + offset)])
+            command = GoalNavigationPlanner().plan(info)
+>           assert command.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+E           AssertionError: assert 'GOAL_CAMERA90_BACKWARD_1' == 'WAIT_SCORE_CONFIRMATION'
+E             - WAIT_SCORE_CONFIRMATION
+E             + GOAL_CAMERA90_BACKWARD_1
+
+src/step/test/test_goal_backboard_selection.py:299: AssertionError
+__ test_analyzer_confirms_each_zone_before_planner_requests_shot[0.51-100-2] ___
+
+depth = 0.51, offset = 100, region = 2
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2), (.550, 0, 2),
+    ])
+    def test_analyzer_confirms_each_zone_before_planner_requests_shot(depth, offset, region):
+        analyzer, published = make_analyzer(depth_m=depth)
+        for index in range(3):
+            info = send(analyzer, published, [detection(center_x=640 + offset)])
+            command = GoalNavigationPlanner().plan(info)
+            assert command.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+>           assert command.shot_region == region
+E           AssertionError: assert 1 == 2
+E            +  where 1 = GoalActionCommand(valid=True, action='WAIT_SCORE_CONFIRMATION', reason='waiting_for_stable_score_condition', sdk_motio...depth_in_score_range=True, score_now=False, shot_region=1, target_steering_angle_deg=None, target_lateral_error_m=None).shot_region
+
+src/step/test/test_goal_backboard_selection.py:300: AssertionError
+___ test_analyzer_confirms_each_zone_before_planner_requests_shot[0.51-0-2] ____
+
+depth = 0.51, offset = 0, region = 2
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2), (.550, 0, 2),
+    ])
+    def test_analyzer_confirms_each_zone_before_planner_requests_shot(depth, offset, region):
+        analyzer, published = make_analyzer(depth_m=depth)
+        for index in range(3):
+            info = send(analyzer, published, [detection(center_x=640 + offset)])
+            command = GoalNavigationPlanner().plan(info)
+            assert command.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+>           assert command.shot_region == region
+E           AssertionError: assert 1 == 2
+E            +  where 1 = GoalActionCommand(valid=True, action='WAIT_SCORE_CONFIRMATION', reason='waiting_for_stable_score_condition', sdk_motio...depth_in_score_range=True, score_now=False, shot_region=1, target_steering_angle_deg=None, target_lateral_error_m=None).shot_region
+
+src/step/test/test_goal_backboard_selection.py:300: AssertionError
+_ test_first_goal_navigation_preserves_support_transition_holds[GOAL_CAMERA90_BACKWARD_1-line_forward_6] _
+
+clock = [11.0], previous = 'line_forward_6', action = 'GOAL_CAMERA90_BACKWARD_1'
+
+    @pytest.mark.parametrize('previous', ['line_forward_6', 'post_ball_line_turn_right_3'])
+    @pytest.mark.parametrize('action', [
+        'GOAL_CAMERA_90_FORWARD_2', 'GOAL_CAMERA90_FINE_FORWARD_3',
+        'GOAL_CAMERA90_RECOVER_RIGHT_4', 'GOAL_CAMERA90_TURN_LEFT_3',
+        'GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_BACKWARD_1',
+    ])
+    def test_first_goal_navigation_preserves_support_transition_holds(clock, previous, action):
+        from test_motion_command_bridge import complete_active_motion
+        from test_transition_dwells import check_both_pauses
+    
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = previous
+        target = bridge.motion_id_for_action(action)
+        prepare = bridge._transition_prepare_motion(target)
+        bridge.navigation_command_callback(navigation_message(
+            action=action, command_id=1, phase='GOAL_APPROACH',
+            source_command={'post_ball_goal_handoff': True},
+        ))
+        if prepare is not None:
+            check_both_pauses(bridge, clock, prepare, target)
+        backward = action == 'GOAL_CAMERA90_BACKWARD_1'
+        if backward:
+            assert not bridge.executor_request_publisher.messages
+            assert bridge.transition_dwell_until == clock[0] + .5
+            clock[0] += .5
+            bridge._check_atomic_dwell()
+        assert bridge.executor_request_publisher.messages
+        for _ in range(6):
+            assert bridge.active_dwell_until is None
+            assert bridge.transition_dwell_until is None
+            if not bridge.motion_in_progress:
+                break
+            complete_active_motion(bridge)
+            if backward and bridge.transition_dwell_until is not None:
+                assert bridge.transition_dwell_until == clock[0] + .5
+                clock[0] += .5
+                bridge._check_atomic_dwell()
+        assert not bridge.motion_in_progress
+        statuses = [json.loads(m.data) for m in bridge.motion_status_publisher.messages]
+        assert any('DWELL' in str(s.get('motion_id')) for s in statuses) == (prepare is not None or backward)
+        # Every backward command, including the handoff, owns its pre-motion hold.
+        bridge.navigation_command_callback(navigation_message(
+            action='GOAL_CAMERA90_BACKWARD_1', command_id=2, phase='GOAL_APPROACH',
+        ))
+        expected_hold = 1.0 if action.startswith('GOAL_CAMERA90_FINE_FORWARD_') else .5
+>       assert bridge.transition_dwell_until == clock[0] + expected_hold
+E       assert None == (11.0 + 0.5)
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff7f33bd60>.transition_dwell_until
+
+src/mission_control/test/test_post_ball_goal_handoff.py:89: AssertionError
+_ test_first_goal_navigation_preserves_support_transition_holds[GOAL_CAMERA90_BACKWARD_1-post_ball_line_turn_right_3] _
+
+clock = [11.0], previous = 'post_ball_line_turn_right_3'
+action = 'GOAL_CAMERA90_BACKWARD_1'
+
+    @pytest.mark.parametrize('previous', ['line_forward_6', 'post_ball_line_turn_right_3'])
+    @pytest.mark.parametrize('action', [
+        'GOAL_CAMERA_90_FORWARD_2', 'GOAL_CAMERA90_FINE_FORWARD_3',
+        'GOAL_CAMERA90_RECOVER_RIGHT_4', 'GOAL_CAMERA90_TURN_LEFT_3',
+        'GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_BACKWARD_1',
+    ])
+    def test_first_goal_navigation_preserves_support_transition_holds(clock, previous, action):
+        from test_motion_command_bridge import complete_active_motion
+        from test_transition_dwells import check_both_pauses
+    
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = previous
+        target = bridge.motion_id_for_action(action)
+        prepare = bridge._transition_prepare_motion(target)
+        bridge.navigation_command_callback(navigation_message(
+            action=action, command_id=1, phase='GOAL_APPROACH',
+            source_command={'post_ball_goal_handoff': True},
+        ))
+        if prepare is not None:
+            check_both_pauses(bridge, clock, prepare, target)
+        backward = action == 'GOAL_CAMERA90_BACKWARD_1'
+        if backward:
+            assert not bridge.executor_request_publisher.messages
+            assert bridge.transition_dwell_until == clock[0] + .5
+            clock[0] += .5
+            bridge._check_atomic_dwell()
+        assert bridge.executor_request_publisher.messages
+        for _ in range(6):
+            assert bridge.active_dwell_until is None
+            assert bridge.transition_dwell_until is None
+            if not bridge.motion_in_progress:
+                break
+            complete_active_motion(bridge)
+            if backward and bridge.transition_dwell_until is not None:
+                assert bridge.transition_dwell_until == clock[0] + .5
+                clock[0] += .5
+                bridge._check_atomic_dwell()
+        assert not bridge.motion_in_progress
+        statuses = [json.loads(m.data) for m in bridge.motion_status_publisher.messages]
+        assert any('DWELL' in str(s.get('motion_id')) for s in statuses) == (prepare is not None or backward)
+        # Every backward command, including the handoff, owns its pre-motion hold.
+        bridge.navigation_command_callback(navigation_message(
+            action='GOAL_CAMERA90_BACKWARD_1', command_id=2, phase='GOAL_APPROACH',
+        ))
+        expected_hold = 1.0 if action.startswith('GOAL_CAMERA90_FINE_FORWARD_') else .5
+>       assert bridge.transition_dwell_until == clock[0] + expected_hold
+E       assert None == (11.0 + 0.5)
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff7f33cbe0>.transition_dwell_until
+
+src/mission_control/test/test_post_ball_goal_handoff.py:89: AssertionError
+_ test_goal_walks_keep_posture_transition_without_pre_or_post_pause[goal_camera_90_forward_4-GOAL_CAMERA90_FINE_FORWARD_3-pickup_fine_prepare] _
+
+clock = [10.0], previous = 'goal_camera_90_forward_4'
+action = 'GOAL_CAMERA90_FINE_FORWARD_3', prepare = 'pickup_fine_prepare'
+
+    @pytest.mark.parametrize('previous,action,prepare', [
+        ('goal_camera_90_forward_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'pickup_fine_prepare'),
+        ('line_recovery_left_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'pickup_fine_prepare'),
+        ('line_recovery_right_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'pickup_fine_prepare'),
+        ('goal_camera_90_fine_forward_3', 'GOAL_CAMERA_90_FORWARD_2', 'fine_to_turn_ready_90'),
+        ('goal_camera_90_fine_forward_3', 'GOAL_CAMERA90_RECOVER_LEFT_4', 'fine_to_turn_ready_90'),
+        ('goal_camera_90_fine_forward_3', 'GOAL_CAMERA90_RECOVER_RIGHT_4', 'fine_to_turn_ready_90'),
+    ])
+    def test_goal_walks_keep_posture_transition_without_pre_or_post_pause(clock, previous, action, prepare):
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = previous
+        bridge.navigation_command_callback(navigation_message(source='goal', action=action))
+>       assert [r['motion_id'] for r in requests(bridge)] == [prepare]
+E       AssertionError: assert [] == ['pickup_fine_prepare']
+E         Right contains one more item: 'pickup_fine_prepare'
+E         Full diff:
+E         - ['pickup_fine_prepare']
+E         + []
+
+src/mission_control/test/test_goal_fine_approach.py:115: AssertionError
+_ test_goal_walks_keep_posture_transition_without_pre_or_post_pause[line_recovery_left_4-GOAL_CAMERA90_FINE_FORWARD_3-pickup_fine_prepare] _
+
+clock = [10.0], previous = 'line_recovery_left_4'
+action = 'GOAL_CAMERA90_FINE_FORWARD_3', prepare = 'pickup_fine_prepare'
+
+    @pytest.mark.parametrize('previous,action,prepare', [
+        ('goal_camera_90_forward_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'pickup_fine_prepare'),
+        ('line_recovery_left_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'pickup_fine_prepare'),
+        ('line_recovery_right_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'pickup_fine_prepare'),
+        ('goal_camera_90_fine_forward_3', 'GOAL_CAMERA_90_FORWARD_2', 'fine_to_turn_ready_90'),
+        ('goal_camera_90_fine_forward_3', 'GOAL_CAMERA90_RECOVER_LEFT_4', 'fine_to_turn_ready_90'),
+        ('goal_camera_90_fine_forward_3', 'GOAL_CAMERA90_RECOVER_RIGHT_4', 'fine_to_turn_ready_90'),
+    ])
+    def test_goal_walks_keep_posture_transition_without_pre_or_post_pause(clock, previous, action, prepare):
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = previous
+        bridge.navigation_command_callback(navigation_message(source='goal', action=action))
+>       assert [r['motion_id'] for r in requests(bridge)] == [prepare]
+E       AssertionError: assert [] == ['pickup_fine_prepare']
+E         Right contains one more item: 'pickup_fine_prepare'
+E         Full diff:
+E         - ['pickup_fine_prepare']
+E         + []
+
+src/mission_control/test/test_goal_fine_approach.py:115: AssertionError
+_ test_goal_walks_keep_posture_transition_without_pre_or_post_pause[line_recovery_right_4-GOAL_CAMERA90_FINE_FORWARD_3-pickup_fine_prepare] _
+
+clock = [10.0], previous = 'line_recovery_right_4'
+action = 'GOAL_CAMERA90_FINE_FORWARD_3', prepare = 'pickup_fine_prepare'
+
+    @pytest.mark.parametrize('previous,action,prepare', [
+        ('goal_camera_90_forward_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'pickup_fine_prepare'),
+        ('line_recovery_left_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'pickup_fine_prepare'),
+        ('line_recovery_right_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'pickup_fine_prepare'),
+        ('goal_camera_90_fine_forward_3', 'GOAL_CAMERA_90_FORWARD_2', 'fine_to_turn_ready_90'),
+        ('goal_camera_90_fine_forward_3', 'GOAL_CAMERA90_RECOVER_LEFT_4', 'fine_to_turn_ready_90'),
+        ('goal_camera_90_fine_forward_3', 'GOAL_CAMERA90_RECOVER_RIGHT_4', 'fine_to_turn_ready_90'),
+    ])
+    def test_goal_walks_keep_posture_transition_without_pre_or_post_pause(clock, previous, action, prepare):
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = previous
+        bridge.navigation_command_callback(navigation_message(source='goal', action=action))
+>       assert [r['motion_id'] for r in requests(bridge)] == [prepare]
+E       AssertionError: assert [] == ['pickup_fine_prepare']
+E         Right contains one more item: 'pickup_fine_prepare'
+E         Full diff:
+E         - ['pickup_fine_prepare']
+E         + []
+
+src/mission_control/test/test_goal_fine_approach.py:115: AssertionError
+_ test_goal_walks_keep_posture_transition_without_pre_or_post_pause[goal_camera_90_fine_forward_3-GOAL_CAMERA_90_FORWARD_2-fine_to_turn_ready_90] _
+
+clock = [10.0], previous = 'goal_camera_90_fine_forward_3'
+action = 'GOAL_CAMERA_90_FORWARD_2', prepare = 'fine_to_turn_ready_90'
+
+    @pytest.mark.parametrize('previous,action,prepare', [
+        ('goal_camera_90_forward_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'pickup_fine_prepare'),
+        ('line_recovery_left_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'pickup_fine_prepare'),
+        ('line_recovery_right_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'pickup_fine_prepare'),
+        ('goal_camera_90_fine_forward_3', 'GOAL_CAMERA_90_FORWARD_2', 'fine_to_turn_ready_90'),
+        ('goal_camera_90_fine_forward_3', 'GOAL_CAMERA90_RECOVER_LEFT_4', 'fine_to_turn_ready_90'),
+        ('goal_camera_90_fine_forward_3', 'GOAL_CAMERA90_RECOVER_RIGHT_4', 'fine_to_turn_ready_90'),
+    ])
+    def test_goal_walks_keep_posture_transition_without_pre_or_post_pause(clock, previous, action, prepare):
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = previous
+        bridge.navigation_command_callback(navigation_message(source='goal', action=action))
+>       assert [r['motion_id'] for r in requests(bridge)] == [prepare]
+E       AssertionError: assert [] == ['fine_to_turn_ready_90']
+E         Right contains one more item: 'fine_to_turn_ready_90'
+E         Full diff:
+E         - ['fine_to_turn_ready_90']
+E         + []
+
+src/mission_control/test/test_goal_fine_approach.py:115: AssertionError
+_ test_goal_walks_keep_posture_transition_without_pre_or_post_pause[goal_camera_90_fine_forward_3-GOAL_CAMERA90_RECOVER_LEFT_4-fine_to_turn_ready_90] _
+
+clock = [10.0], previous = 'goal_camera_90_fine_forward_3'
+action = 'GOAL_CAMERA90_RECOVER_LEFT_4', prepare = 'fine_to_turn_ready_90'
+
+    @pytest.mark.parametrize('previous,action,prepare', [
+        ('goal_camera_90_forward_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'pickup_fine_prepare'),
+        ('line_recovery_left_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'pickup_fine_prepare'),
+        ('line_recovery_right_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'pickup_fine_prepare'),
+        ('goal_camera_90_fine_forward_3', 'GOAL_CAMERA_90_FORWARD_2', 'fine_to_turn_ready_90'),
+        ('goal_camera_90_fine_forward_3', 'GOAL_CAMERA90_RECOVER_LEFT_4', 'fine_to_turn_ready_90'),
+        ('goal_camera_90_fine_forward_3', 'GOAL_CAMERA90_RECOVER_RIGHT_4', 'fine_to_turn_ready_90'),
+    ])
+    def test_goal_walks_keep_posture_transition_without_pre_or_post_pause(clock, previous, action, prepare):
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = previous
+        bridge.navigation_command_callback(navigation_message(source='goal', action=action))
+>       assert [r['motion_id'] for r in requests(bridge)] == [prepare]
+E       AssertionError: assert [] == ['fine_to_turn_ready_90']
+E         Right contains one more item: 'fine_to_turn_ready_90'
+E         Full diff:
+E         - ['fine_to_turn_ready_90']
+E         + []
+
+src/mission_control/test/test_goal_fine_approach.py:115: AssertionError
+_ test_goal_walks_keep_posture_transition_without_pre_or_post_pause[goal_camera_90_fine_forward_3-GOAL_CAMERA90_RECOVER_RIGHT_4-fine_to_turn_ready_90] _
+
+clock = [10.0], previous = 'goal_camera_90_fine_forward_3'
+action = 'GOAL_CAMERA90_RECOVER_RIGHT_4', prepare = 'fine_to_turn_ready_90'
+
+    @pytest.mark.parametrize('previous,action,prepare', [
+        ('goal_camera_90_forward_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'pickup_fine_prepare'),
+        ('line_recovery_left_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'pickup_fine_prepare'),
+        ('line_recovery_right_4', 'GOAL_CAMERA90_FINE_FORWARD_3', 'pickup_fine_prepare'),
+        ('goal_camera_90_fine_forward_3', 'GOAL_CAMERA_90_FORWARD_2', 'fine_to_turn_ready_90'),
+        ('goal_camera_90_fine_forward_3', 'GOAL_CAMERA90_RECOVER_LEFT_4', 'fine_to_turn_ready_90'),
+        ('goal_camera_90_fine_forward_3', 'GOAL_CAMERA90_RECOVER_RIGHT_4', 'fine_to_turn_ready_90'),
+    ])
+    def test_goal_walks_keep_posture_transition_without_pre_or_post_pause(clock, previous, action, prepare):
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = previous
+        bridge.navigation_command_callback(navigation_message(source='goal', action=action))
+>       assert [r['motion_id'] for r in requests(bridge)] == [prepare]
+E       AssertionError: assert [] == ['fine_to_turn_ready_90']
+E         Right contains one more item: 'fine_to_turn_ready_90'
+E         Full diff:
+E         - ['fine_to_turn_ready_90']
+E         + []
+
+src/mission_control/test/test_goal_fine_approach.py:115: AssertionError
+______ test_failed_goal_posture_transition_never_starts_next_walk[FAILED] ______
+
+clock = [10.0], status = 'FAILED'
+
+    @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT', 'REJECTED', 'CANCELLED'])
+    def test_failed_goal_posture_transition_never_starts_next_walk(clock, status):
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = 'goal_camera_90_forward_4'
+        bridge.navigation_command_callback(navigation_message(source='goal', action='GOAL_CAMERA90_FINE_FORWARD_3'))
+>       finish_request(bridge, status, 'TEST_FAILURE')
+
+src/mission_control/test/test_goal_fine_approach.py:133: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+bridge = <test_motion_command_bridge.FakeBridge object at 0xffff7f2aeda0>
+status = 'FAILED', error = 'TEST_FAILURE'
+
+    def finish_request(bridge, status="SUCCEEDED", error=""):
+>       request = requests(bridge)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_gait_transitions.py:39: IndexError
+_____ test_failed_goal_posture_transition_never_starts_next_walk[TIMEOUT] ______
+
+clock = [10.0], status = 'TIMEOUT'
+
+    @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT', 'REJECTED', 'CANCELLED'])
+    def test_failed_goal_posture_transition_never_starts_next_walk(clock, status):
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = 'goal_camera_90_forward_4'
+        bridge.navigation_command_callback(navigation_message(source='goal', action='GOAL_CAMERA90_FINE_FORWARD_3'))
+>       finish_request(bridge, status, 'TEST_FAILURE')
+
+src/mission_control/test/test_goal_fine_approach.py:133: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+bridge = <test_motion_command_bridge.FakeBridge object at 0xffff7f28f790>
+status = 'TIMEOUT', error = 'TEST_FAILURE'
+
+    def finish_request(bridge, status="SUCCEEDED", error=""):
+>       request = requests(bridge)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_gait_transitions.py:39: IndexError
+_____ test_failed_goal_posture_transition_never_starts_next_walk[REJECTED] _____
+
+clock = [10.0], status = 'REJECTED'
+
+    @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT', 'REJECTED', 'CANCELLED'])
+    def test_failed_goal_posture_transition_never_starts_next_walk(clock, status):
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = 'goal_camera_90_forward_4'
+        bridge.navigation_command_callback(navigation_message(source='goal', action='GOAL_CAMERA90_FINE_FORWARD_3'))
+>       finish_request(bridge, status, 'TEST_FAILURE')
+
+src/mission_control/test/test_goal_fine_approach.py:133: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+bridge = <test_motion_command_bridge.FakeBridge object at 0xffff7f5dd630>
+status = 'REJECTED', error = 'TEST_FAILURE'
+
+    def finish_request(bridge, status="SUCCEEDED", error=""):
+>       request = requests(bridge)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_gait_transitions.py:39: IndexError
+____ test_failed_goal_posture_transition_never_starts_next_walk[CANCELLED] _____
+
+clock = [10.0], status = 'CANCELLED'
+
+    @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT', 'REJECTED', 'CANCELLED'])
+    def test_failed_goal_posture_transition_never_starts_next_walk(clock, status):
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = 'goal_camera_90_forward_4'
+        bridge.navigation_command_callback(navigation_message(source='goal', action='GOAL_CAMERA90_FINE_FORWARD_3'))
+>       finish_request(bridge, status, 'TEST_FAILURE')
+
+src/mission_control/test/test_goal_fine_approach.py:133: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+bridge = <test_motion_command_bridge.FakeBridge object at 0xffff7f36b310>
+status = 'CANCELLED', error = 'TEST_FAILURE'
+
+    def finish_request(bridge, status="SUCCEEDED", error=""):
+>       request = requests(bridge)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_gait_transitions.py:39: IndexError
+__ test_850mm_handoff_reserves_fine_step_and_executes_without_extra_pause[0] ___
+
+clock = [11.69315789473684], initial_angle = 0
+
+    @pytest.mark.parametrize('initial_angle', [0, -30, 30])
+    def test_850mm_handoff_reserves_fine_step_and_executes_without_extra_pause(clock, initial_angle):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+        first = start_goal(node, clock, 1.0, initial_angle)
+        clock[0] += MotionDecisionNode.GOAL_FORWARD_DURATION_SEC[first['action']] * .75
+        for _ in range(3):
+            fresh(node, clock, 'goal', target_sample(30, .850), plan=False)
+            clock[0] += .01
+        second = node.publisher.messages[-1]
+        assert second['action'] == 'GOAL_CAMERA90_FINE_FORWARD_4'
+        assert node.queued_general_command_id == second['command_id']
+    
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.navigation_command_callback(navigation_message(action=first['action'], source='goal', command_id=1))
+        bridge.navigation_command_callback(navigation_message(action=second['action'], source='goal', command_id=2))
+        assert len(requests(bridge)) == 1
+        finish_request(bridge)
+>       assert requests(bridge)[-1]['motion_id'] == 'pickup_fine_prepare'
+E       AssertionError: assert 'goal_camera_90_forward_4' == 'pickup_fine_prepare'
+E         - pickup_fine_prepare
+E         + goal_camera_90_forward_4
+
+src/mission_control/test/test_goal_fine_approach.py:155: AssertionError
+_ test_850mm_handoff_reserves_fine_step_and_executes_without_extra_pause[-30] __
+
+clock = [11.611999999999998], initial_angle = -30
+
+    @pytest.mark.parametrize('initial_angle', [0, -30, 30])
+    def test_850mm_handoff_reserves_fine_step_and_executes_without_extra_pause(clock, initial_angle):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+        first = start_goal(node, clock, 1.0, initial_angle)
+        clock[0] += MotionDecisionNode.GOAL_FORWARD_DURATION_SEC[first['action']] * .75
+        for _ in range(3):
+            fresh(node, clock, 'goal', target_sample(30, .850), plan=False)
+            clock[0] += .01
+        second = node.publisher.messages[-1]
+        assert second['action'] == 'GOAL_CAMERA90_FINE_FORWARD_4'
+        assert node.queued_general_command_id == second['command_id']
+    
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.navigation_command_callback(navigation_message(action=first['action'], source='goal', command_id=1))
+        bridge.navigation_command_callback(navigation_message(action=second['action'], source='goal', command_id=2))
+        assert len(requests(bridge)) == 1
+        finish_request(bridge)
+>       assert requests(bridge)[-1]['motion_id'] == 'pickup_fine_prepare'
+E       AssertionError: assert 'line_recovery_left_4' == 'pickup_fine_prepare'
+E         - pickup_fine_prepare
+E         + line_recovery_left_4
+
+src/mission_control/test/test_goal_fine_approach.py:155: AssertionError
+__ test_850mm_handoff_reserves_fine_step_and_executes_without_extra_pause[30] __
+
+clock = [11.617999999999999], initial_angle = 30
+
+    @pytest.mark.parametrize('initial_angle', [0, -30, 30])
+    def test_850mm_handoff_reserves_fine_step_and_executes_without_extra_pause(clock, initial_angle):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+        first = start_goal(node, clock, 1.0, initial_angle)
+        clock[0] += MotionDecisionNode.GOAL_FORWARD_DURATION_SEC[first['action']] * .75
+        for _ in range(3):
+            fresh(node, clock, 'goal', target_sample(30, .850), plan=False)
+            clock[0] += .01
+        second = node.publisher.messages[-1]
+        assert second['action'] == 'GOAL_CAMERA90_FINE_FORWARD_4'
+        assert node.queued_general_command_id == second['command_id']
+    
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.navigation_command_callback(navigation_message(action=first['action'], source='goal', command_id=1))
+        bridge.navigation_command_callback(navigation_message(action=second['action'], source='goal', command_id=2))
+        assert len(requests(bridge)) == 1
+        finish_request(bridge)
+>       assert requests(bridge)[-1]['motion_id'] == 'pickup_fine_prepare'
+E       AssertionError: assert 'line_recovery_right_4' == 'pickup_fine_prepare'
+E         - pickup_fine_prepare
+E         + line_recovery_right_4
+
+src/mission_control/test/test_goal_fine_approach.py:155: AssertionError
+_ test_selective_source64_import_preserves_other_motions[robot_motions_pc.json] _
+
+filename = 'robot_motions_pc.json'
+
+    @pytest.mark.parametrize('filename', ['robot_motions_pc.json', 'robot_motions_runtime.json'])
+    def test_selective_source64_import_preserves_other_motions(filename):
+        names = json.loads((UPDATE / 'manifest.json').read_text())['motion_names']
+        source = catalog(UPDATE / 'source64.json')
+        before = catalog(UPDATE / 'before/artifacts' / filename)
+        actual = catalog(ROOT / 'artifacts' / filename)
+>       assert actual.keys() == before.keys() | set(names)
+E       AssertionError: assert dict_keys(['찐..., 'r골넣기8번구역']) == {'R골넣기', 'R골넣...후제자리우회전', ...}
+E         Full diff:
+E         + dict_keys(['찐공확인자세', '찐후진실전-2(2회)', '찐공잡기전후진-2(2회)', '찐후진실전(1회)', '찐미세오뒤에서 오옆꽃게90도', '찐미세오뒤에서오옆꽃게0도', 't허들찐', 't미세오옆꽃게(0도)-1회', 'tt미세왼옆0도', 't미세오옆꽃게90도(1회)', 'R오뒤에서 기본자세(카메라45도)', 'R오뒤에서 기본자세(0도)', '건왼뒤에서 기본자세(0도)', '건김오뒤3', 'R미세오뒤에서 기본자세45도', 'R미세오뒤에서 오뒤45도', 'R미세오뒤에서 오뒤0도', 'R미세오뒤에서 기본자세90도', 't라인복귀우실전', 't제자리우회전45도(5회)', 't제자리우회전45도(2회)', 't제자리우회전45도(4회)', 't제자리우회전45도(7회)', 't제자리우회전45도(9회)', 'R오뒤카메라90도', 'R왼뒤에서 기본자세0도', 'R오뒤45도', 't제자리우회전90도(2회)', 't제자리우회전90도(4회)', 't제자리우회전90도(5회)', 't제자리우회전90도(7회)', 't제자리우회전90도(9회)', 't제자리우회전0도(9회)', 't제자리우회전0도(2회)', 't제...
+E         
+E         ...Full output truncated (147 lines hidden), use '-vv' to show
+
+src/mission_control/test/test_catalog64_goal_prepare.py:37: AssertionError
+_ test_selective_source64_import_preserves_other_motions[robot_motions_runtime.json] _
+
+filename = 'robot_motions_runtime.json'
+
+    @pytest.mark.parametrize('filename', ['robot_motions_pc.json', 'robot_motions_runtime.json'])
+    def test_selective_source64_import_preserves_other_motions(filename):
+        names = json.loads((UPDATE / 'manifest.json').read_text())['motion_names']
+        source = catalog(UPDATE / 'source64.json')
+        before = catalog(UPDATE / 'before/artifacts' / filename)
+        actual = catalog(ROOT / 'artifacts' / filename)
+>       assert actual.keys() == before.keys() | set(names)
+E       AssertionError: assert dict_keys(['찐..., 'r골넣기8번구역']) == {'R골넣기', 'R골넣...후제자리우회전', ...}
+E         Full diff:
+E         + dict_keys(['찐공확인자세', '찐후진실전-2(2회)', '찐공잡기전후진-2(2회)', '찐후진실전(1회)', '찐미세오뒤에서 오옆꽃게90도', '찐미세오뒤에서오옆꽃게0도', 't허들찐', 't미세오옆꽃게(0도)-1회', 'tt미세왼옆0도', 't미세오옆꽃게90도(1회)', 'R오뒤에서 기본자세(카메라45도)', 'R오뒤에서 기본자세(0도)', '건왼뒤에서 기본자세(0도)', '건김오뒤3', 'R미세오뒤에서 기본자세45도', 'R미세오뒤에서 오뒤45도', 'R미세오뒤에서 오뒤0도', 'R미세오뒤에서 기본자세90도', 't라인복귀우실전', 't제자리우회전45도(5회)', 't제자리우회전45도(2회)', 't제자리우회전45도(4회)', 't제자리우회전45도(7회)', 't제자리우회전45도(9회)', 'R오뒤카메라90도', 'R왼뒤에서 기본자세0도', 'R오뒤45도', 't제자리우회전90도(2회)', 't제자리우회전90도(4회)', 't제자리우회전90도(5회)', 't제자리우회전90도(7회)', 't제자리우회전90도(9회)', 't제자리우회전0도(9회)', 't제자리우회전0도(2회)', 't제...
+E         
+E         ...Full output truncated (147 lines hidden), use '-vv' to show
+
+src/mission_control/test/test_catalog64_goal_prepare.py:37: AssertionError
+___________ test_two_cycle_crab_keeps_transition_routes[left-right] ____________
+
+side = 'left', other = 'right'
+
+    @pytest.mark.parametrize('side,other', [('left', 'right'), ('right', 'left')])
+    def test_two_cycle_crab_keeps_transition_routes(side, other):
+        bridge = FakeBridge()
+        bridge.last_physical_motion_id = f'pickup_crab_{side}_0_2'
+        assert bridge._transition_prepare_motion('pickup_fine_forward_0') == f'pickup_crab_{side}_to_fine_0'
+        assert bridge._transition_prepare_motion('pickup_camera_down_turn_left_1') == f'pickup_crab_{side}_to_turn_0'
+>       assert bridge._transition_prepare_motion(f'pickup_crab_{other}_0_2') == f'pickup_crab_{side}_to_{other}_0'
+E       AssertionError: assert None == 'pickup_crab_left_to_right_0'
+E        +  where None = <bound method MotionCommandBridgeNode._transition_prepare_motion of <test_motion_command_bridge.FakeBridge object at 0xffff7f2971c0>>('pickup_crab_right_0_2')
+E        +    where <bound method MotionCommandBridgeNode._transition_prepare_motion of <test_motion_command_bridge.FakeBridge object at 0xffff7f2971c0>> = <test_motion_command_bridge.FakeBridge object at 0xffff7f2971c0>._transition_prepare_motion
+
+src/mission_control/test/test_catalog64_goal_prepare.py:87: AssertionError
+___________ test_two_cycle_crab_keeps_transition_routes[right-left] ____________
+
+side = 'right', other = 'left'
+
+    @pytest.mark.parametrize('side,other', [('left', 'right'), ('right', 'left')])
+    def test_two_cycle_crab_keeps_transition_routes(side, other):
+        bridge = FakeBridge()
+        bridge.last_physical_motion_id = f'pickup_crab_{side}_0_2'
+        assert bridge._transition_prepare_motion('pickup_fine_forward_0') == f'pickup_crab_{side}_to_fine_0'
+        assert bridge._transition_prepare_motion('pickup_camera_down_turn_left_1') == f'pickup_crab_{side}_to_turn_0'
+>       assert bridge._transition_prepare_motion(f'pickup_crab_{other}_0_2') == f'pickup_crab_{side}_to_{other}_0'
+E       AssertionError: assert None == 'pickup_crab_right_to_left_0'
+E        +  where None = <bound method MotionCommandBridgeNode._transition_prepare_motion of <test_motion_command_bridge.FakeBridge object at 0xffff7f2da1a0>>('pickup_crab_left_0_2')
+E        +    where <bound method MotionCommandBridgeNode._transition_prepare_motion of <test_motion_command_bridge.FakeBridge object at 0xffff7f2da1a0>> = <test_motion_command_bridge.FakeBridge object at 0xffff7f2da1a0>._transition_prepare_motion
+
+src/mission_control/test/test_catalog64_goal_prepare.py:87: AssertionError
+_________ test_each_goal_retreat_waits_half_second_and_sends_only_once _________
+
+clock = [15.0]
+
+    def test_each_goal_retreat_waits_half_second_and_sends_only_once(clock):
+        bridge = FakeBridge(advance_transition_dwells=False)
+        for command_id in range(1, 4):
+            clock[0] += 2.0
+            request_backward(bridge, command_id)
+            deadline = clock[0] + .5
+>           assert bridge.transition_dwell_until == deadline
+E           assert None == 15.5
+E            +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff7f297100>.transition_dwell_until
+
+src/mission_control/test/test_goal_backward_dwell.py:30: AssertionError
+_______ test_zone_depth_bounds_include_lower_and_exclude_upper[0.43-0-1] _______
+
+depth = 0.43, offset = 0, region = 1
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert None == 1
+E        +  where None = goal_shot_region(0.43, 0)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+______ test_zone_depth_bounds_include_lower_and_exclude_upper[0.43-120-1] ______
+
+depth = 0.43, offset = 120, region = 1
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert None == 1
+E        +  where None = goal_shot_region(0.43, 120)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+_____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.43--120-4] ______
+
+depth = 0.43, offset = -120, region = 4
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert None == 4
+E        +  where None = goal_shot_region(0.43, -120)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+_______ test_zone_depth_bounds_include_lower_and_exclude_upper[0.51-0-2] _______
+
+depth = 0.51, offset = 0, region = 2
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 1 == 2
+E        +  where 1 = goal_shot_region(0.51, 0)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+_____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.51-0.001-2] _____
+
+depth = 0.51, offset = 0.001, region = 2
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 1 == 2
+E        +  where 1 = goal_shot_region(0.51, 0.001)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+______ test_zone_depth_bounds_include_lower_and_exclude_upper[0.51-100-2] ______
+
+depth = 0.51, offset = 100, region = 2
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 1 == 2
+E        +  where 1 = goal_shot_region(0.51, 100)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.51--0.001-3] _____
+
+depth = 0.51, offset = -0.001, region = 3
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 4 == 3
+E        +  where 4 = goal_shot_region(0.51, -0.001)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+_____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.51--100-3] ______
+
+depth = 0.51, offset = -100, region = 3
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 4 == 3
+E        +  where 4 = goal_shot_region(0.51, -100)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+_____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.57-0-None] ______
+
+depth = 0.57, offset = 0, region = None
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 2 == None
+E        +  where 2 = goal_shot_region(0.57, 0)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+_____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.571-0-None] _____
+
+depth = 0.571, offset = 0, region = None
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 2 == None
+E        +  where 2 = goal_shot_region(0.571, 0)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.51-120-None] _____
+
+depth = 0.51, offset = 120, region = None
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 1 == None
+E        +  where 1 = goal_shot_region(0.51, 120)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.51--120-None] ____
+
+depth = 0.51, offset = -120, region = None
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 4 == None
+E        +  where 4 = goal_shot_region(0.51, -120)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.510001-100-2] ____
+
+depth = 0.510001, offset = 100, region = 2
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 1 == 2
+E        +  where 1 = goal_shot_region(0.510001, 100)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+___ test_zone_depth_bounds_include_lower_and_exclude_upper[0.510001--100-3] ____
+
+depth = 0.510001, offset = -100, region = 3
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 4 == 3
+E        +  where 4 = goal_shot_region(0.510001, -100)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+_ test_zone_depth_bounds_include_lower_and_exclude_upper[0.510001-100.001-None] _
+
+depth = 0.510001, offset = 100.001, region = None
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 1 == None
+E        +  where 1 = goal_shot_region(0.510001, 100.001)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+_ test_zone_depth_bounds_include_lower_and_exclude_upper[0.510001--100.001-None] _
+
+depth = 0.510001, offset = -100.001, region = None
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 4 == None
+E        +  where 4 = goal_shot_region(0.510001, -100.001)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.430001-120-1] ____
+
+depth = 0.430001, offset = 120, region = 1
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert None == 1
+E        +  where None = goal_shot_region(0.430001, 120)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+___ test_zone_depth_bounds_include_lower_and_exclude_upper[0.430001--120-4] ____
+
+depth = 0.430001, offset = -120, region = 4
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert None == 4
+E        +  where None = goal_shot_region(0.430001, -120)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.57-100-None] _____
+
+depth = 0.57, offset = 100, region = None
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 2 == None
+E        +  where 2 = goal_shot_region(0.57, 100)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+____ test_zone_depth_bounds_include_lower_and_exclude_upper[0.57--100-None] ____
+
+depth = 0.57, offset = -100, region = None
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 0, 1), (.430, 120, 1), (.509, 120, 1),
+        (.430, -120, 4), (.509, -120, 4), (.509, -0.001, 4),
+        (.510, 0, 2), (.510, .001, 2), (.510, 100, 2),
+        (.510, -.001, 3), (.510, -100, 3),
+        (.550, 0, 2), (.569, 100, 2), (.569, -100, 3),
+        (.429999, 0, None), (.570, 0, None), (.571, 0, None),
+        (.500, 120.001, None), (.500, -120.001, None),
+        (.510, 120, None), (.510, -120, None),
+        (.510001, 100, 2), (.510001, -100, 3),
+        (.510001, 100.001, None), (.510001, -100.001, None),
+        (.430001, 120, 1), (.430001, -120, 4),
+        (.570, 100, None), (.570, -100, None),
+        (.550, 120, None), (.550, -120, None),
+        (float('nan'), 0, None), (.5, float('inf'), None),
+    ])
+    def test_zone_depth_bounds_include_lower_and_exclude_upper(depth, offset, region):
+>       assert goal_shot_region(depth, offset) == region
+E       assert 3 == None
+E        +  where 3 = goal_shot_region(0.57, -100)
+
+src/mission_control/test/test_goal_shot_regions.py:41: AssertionError
+_ test_motion_toward_nominal_target_until_zone_entry[0.51-101-6.0-GOAL_CAMERA90_CRAB_RIGHT] _
+
+depth = 0.51, offset = 101, bearing = 6.0, action = 'GOAL_CAMERA90_CRAB_RIGHT'
+
+    @pytest.mark.parametrize('depth,offset,bearing,action', [
+        (.410, 230, 14.2, 'GOAL_CAMERA90_BACKWARD_1'),
+        (.450, 230, 14.2, 'GOAL_CAMERA90_CRAB_RIGHT'),
+        (.450, -230, -7.9, 'GOAL_CAMERA90_CRAB_LEFT'),
+        (.510, 101, 6.0, 'GOAL_CAMERA90_CRAB_RIGHT'),
+        (.510, -101, -6.0, 'GOAL_CAMERA90_CRAB_LEFT'),
+        (.570, 0, 0.0, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+        (.510, 0, 0.0, 'SHOT'),
+    ])
+    def test_motion_toward_nominal_target_until_zone_entry(depth, offset, bearing, action):
+        decision = MotionDecisionPlanner().plan('GOAL_APPROACH', {'goal': goal_info(
+            depth_m=depth, offset_x_px=offset, offset_x_norm=offset / 640,
+            bearing_deg=bearing,
+        )}, .1)
+>       assert decision.action == action
+E       AssertionError: assert 'SHOT' == 'GOAL_CAMERA90_CRAB_RIGHT'
+E         - GOAL_CAMERA90_CRAB_RIGHT
+E         + SHOT
+
+src/mission_control/test/test_goal_shot_regions.py:61: AssertionError
+_ test_motion_toward_nominal_target_until_zone_entry[0.51--101--6.0-GOAL_CAMERA90_CRAB_LEFT] _
+
+depth = 0.51, offset = -101, bearing = -6.0, action = 'GOAL_CAMERA90_CRAB_LEFT'
+
+    @pytest.mark.parametrize('depth,offset,bearing,action', [
+        (.410, 230, 14.2, 'GOAL_CAMERA90_BACKWARD_1'),
+        (.450, 230, 14.2, 'GOAL_CAMERA90_CRAB_RIGHT'),
+        (.450, -230, -7.9, 'GOAL_CAMERA90_CRAB_LEFT'),
+        (.510, 101, 6.0, 'GOAL_CAMERA90_CRAB_RIGHT'),
+        (.510, -101, -6.0, 'GOAL_CAMERA90_CRAB_LEFT'),
+        (.570, 0, 0.0, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+        (.510, 0, 0.0, 'SHOT'),
+    ])
+    def test_motion_toward_nominal_target_until_zone_entry(depth, offset, bearing, action):
+        decision = MotionDecisionPlanner().plan('GOAL_APPROACH', {'goal': goal_info(
+            depth_m=depth, offset_x_px=offset, offset_x_norm=offset / 640,
+            bearing_deg=bearing,
+        )}, .1)
+>       assert decision.action == action
+E       AssertionError: assert 'SHOT' == 'GOAL_CAMERA90_CRAB_LEFT'
+E         - GOAL_CAMERA90_CRAB_LEFT
+E         + SHOT
+
+src/mission_control/test/test_goal_shot_regions.py:61: AssertionError
+_ test_motion_toward_nominal_target_until_zone_entry[0.57-0-0.0-GOAL_CAMERA90_FINE_FORWARD_3] _
+
+depth = 0.57, offset = 0, bearing = 0.0, action = 'GOAL_CAMERA90_FINE_FORWARD_3'
+
+    @pytest.mark.parametrize('depth,offset,bearing,action', [
+        (.410, 230, 14.2, 'GOAL_CAMERA90_BACKWARD_1'),
+        (.450, 230, 14.2, 'GOAL_CAMERA90_CRAB_RIGHT'),
+        (.450, -230, -7.9, 'GOAL_CAMERA90_CRAB_LEFT'),
+        (.510, 101, 6.0, 'GOAL_CAMERA90_CRAB_RIGHT'),
+        (.510, -101, -6.0, 'GOAL_CAMERA90_CRAB_LEFT'),
+        (.570, 0, 0.0, 'GOAL_CAMERA90_FINE_FORWARD_3'),
+        (.510, 0, 0.0, 'SHOT'),
+    ])
+    def test_motion_toward_nominal_target_until_zone_entry(depth, offset, bearing, action):
+        decision = MotionDecisionPlanner().plan('GOAL_APPROACH', {'goal': goal_info(
+            depth_m=depth, offset_x_px=offset, offset_x_norm=offset / 640,
+            bearing_deg=bearing,
+        )}, .1)
+>       assert decision.action == action
+E       AssertionError: assert 'SHOT' == 'GOAL_CAMERA90_FINE_FORWARD_3'
+E         - GOAL_CAMERA90_FINE_FORWARD_3
+E         + SHOT
+
+src/mission_control/test/test_goal_shot_regions.py:61: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_fine_forward_1-0.43-120-1] _
+
+depth = 0.43, offset = 120, region = 1
+previous_motion = 'goal_camera_90_fine_forward_1'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+>           assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+E           AssertionError: assert 'GOAL_CAMERA90_BACKWARD_1' == 'WAIT_SCORE_CONFIRMATION'
+E             - WAIT_SCORE_CONFIRMATION
+E             + GOAL_CAMERA90_BACKWARD_1
+
+src/mission_control/test/test_goal_shot_regions.py:98: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_fine_forward_1-0.51-100-2] _
+
+depth = 0.51, offset = 100, region = 2
+previous_motion = 'goal_camera_90_fine_forward_1'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+            assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+>       assert decision.source_command['shot_region'] == region
+E       assert 1 == 2
+
+src/mission_control/test/test_goal_shot_regions.py:99: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_fine_forward_1-0.51-0-2] _
+
+depth = 0.51, offset = 0, region = 2
+previous_motion = 'goal_camera_90_fine_forward_1'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+            assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+>       assert decision.source_command['shot_region'] == region
+E       assert 1 == 2
+
+src/mission_control/test/test_goal_shot_regions.py:99: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.43-120-1] _
+
+depth = 0.43, offset = 120, region = 1
+previous_motion = 'goal_camera_90_crab_right'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+>           assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+E           AssertionError: assert 'GOAL_CAMERA90_BACKWARD_1' == 'WAIT_SCORE_CONFIRMATION'
+E             - WAIT_SCORE_CONFIRMATION
+E             + GOAL_CAMERA90_BACKWARD_1
+
+src/mission_control/test/test_goal_shot_regions.py:98: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.51-100-2] _
+
+depth = 0.51, offset = 100, region = 2
+previous_motion = 'goal_camera_90_crab_right'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+            assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+>       assert decision.source_command['shot_region'] == region
+E       assert 1 == 2
+
+src/mission_control/test/test_goal_shot_regions.py:99: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.51-0-2] _
+
+depth = 0.51, offset = 0, region = 2
+previous_motion = 'goal_camera_90_crab_right'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+            assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+>       assert decision.source_command['shot_region'] == region
+E       assert 1 == 2
+
+src/mission_control/test/test_goal_shot_regions.py:99: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.43-120-1] _
+
+depth = 0.43, offset = 120, region = 1
+previous_motion = 'goal_camera_90_crab_left'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+>           assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+E           AssertionError: assert 'GOAL_CAMERA90_BACKWARD_1' == 'WAIT_SCORE_CONFIRMATION'
+E             - WAIT_SCORE_CONFIRMATION
+E             + GOAL_CAMERA90_BACKWARD_1
+
+src/mission_control/test/test_goal_shot_regions.py:98: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.51-100-2] _
+
+depth = 0.51, offset = 100, region = 2
+previous_motion = 'goal_camera_90_crab_left'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+            assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+>       assert decision.source_command['shot_region'] == region
+E       assert 1 == 2
+
+src/mission_control/test/test_goal_shot_regions.py:99: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.51-0-2] _
+
+depth = 0.51, offset = 0, region = 2
+previous_motion = 'goal_camera_90_crab_left'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+            assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+>       assert decision.source_command['shot_region'] == region
+E       assert 1 == 2
+
+src/mission_control/test/test_goal_shot_regions.py:99: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.43-120-1] _
+
+depth = 0.43, offset = 120, region = 1
+previous_motion = 'goal_camera_90_turn_right_1'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+>           assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+E           AssertionError: assert 'GOAL_CAMERA90_BACKWARD_1' == 'WAIT_SCORE_CONFIRMATION'
+E             - WAIT_SCORE_CONFIRMATION
+E             + GOAL_CAMERA90_BACKWARD_1
+
+src/mission_control/test/test_goal_shot_regions.py:98: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.51-100-2] _
+
+depth = 0.51, offset = 100, region = 2
+previous_motion = 'goal_camera_90_turn_right_1'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+            assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+>       assert decision.source_command['shot_region'] == region
+E       assert 1 == 2
+
+src/mission_control/test/test_goal_shot_regions.py:99: AssertionError
+_ test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.51-0-2] _
+
+depth = 0.51, offset = 0, region = 2
+previous_motion = 'goal_camera_90_turn_right_1'
+
+    @pytest.mark.parametrize('depth,offset,region', [
+        (.430, 120, 1), (.509, -120, 4), (.510, 100, 2),
+        (.569, -100, 3), (.510, 0, 2),
+    ])
+    @pytest.mark.parametrize('previous_motion', [
+        'goal_camera_90_fine_forward_1', 'goal_camera_90_crab_right',
+        'goal_camera_90_crab_left',
+        'goal_camera_90_turn_right_1',
+    ])
+    def test_confirmed_region_reaches_selected_motion_after_existing_preparation(
+        depth, offset, region, previous_motion,
+    ):
+        planner = MotionDecisionPlanner()
+        for index in range(3):
+            info = goal_info(depth_m=depth, offset_x_px=offset, score_now=(index == 2))
+            # A large bearing must not override an in-zone scoring candidate.
+            info['bearing_deg'] = 45.0
+            decision = planner.plan('GOAL_APPROACH', {'goal': info}, .1)
+            assert decision.action == ('SHOT' if index == 2 else 'WAIT_SCORE_CONFIRMATION')
+>       assert decision.source_command['shot_region'] == region
+E       assert 1 == 2
+
+src/mission_control/test/test_goal_shot_regions.py:99: AssertionError
+_________ test_import_preserves_source_targets_and_applies_speed_once __________
+
+    def test_import_preserves_source_targets_and_applies_speed_once():
+        root = Path(__file__).resolve().parents[3]
+        def catalog(relative):
+            return {m['name']: m for m in json.loads((root / relative).read_text())['motions']}
+        source = catalog('artifacts/20261031_catalog64_goal_prepare/source64.json')
+        pc = catalog('artifacts/robot_motions_pc.json')
+        runtime = catalog('artifacts/robot_motions_runtime.json')
+        aliases = yaml.safe_load((root / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']
+        for region in range(1, 5):
+            name = f'R골넣기{region}번구역'
+            assert aliases[f'goal_shot_region_{region}'] == name
+>           assert pc[name] == source[name]
+E           AssertionError: assert {'completion'...s': 7045, ...} == {'completion'...s': 7045, ...}
+E             Omitting 8 identical items, use -vv to show
+E             Differing items:
+E             {'frames': [{'angles': {'0': 1.0, '1': 0.263671875, '10': 0.12109375, '11': 0.47265625, ...}, 'frame_id': '04db93766a0...234375, ...}, 'frame_id': '33793df19f394f76817dac9bfab34294', 'is_important': False, 'lift_early_arrival': True, ...}]} != {'frames': [{'angles': {'0': 1.0, '1': 0.263671875, '10': 0.12109375, '11': 0.47265625, ...}, 'frame_id': '04db93766a0...234375, ...}, 'frame_id': '33793df19f394f76817dac9bfab34294', 'is_important': False, 'lift_early_arrival': True, ...}]}
+E             Full diff:
+E               {
+E                'completion': {'p...
+E             
+E             ...Full output truncated (286 lines hidden), use '-vv' to show
+
+src/mission_control/test/test_goal_shot_regions.py:158: AssertionError
+_ test_large_offset_repeats_only_after_half_second_and_new_capture[80-SHOT-RIGHT-1-1] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff7ecf4970>
+direction = 'RIGHT', sign = 1, count = 1, final_offset = 80
+next_action = 'SHOT'
+
+    @pytest.mark.parametrize("direction,sign,count", [("RIGHT", 1, 1), ("LEFT", -1, 1)])
+    @pytest.mark.parametrize("final_offset,next_action", [(140, "CRAB"), (80, "SHOT")])
+    def test_large_offset_repeats_only_after_half_second_and_new_capture(
+        monkeypatch, direction, sign, count, final_offset, next_action,
+    ):
+        now = [10.0]
+        monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: now[0])
+        monkeypatch.setattr(MotionDecisionNode, "_current_ros_time_ns",
+                            staticmethod(lambda _: round(now[0] * 1e9)))
+        node = CornerHarness(phase="GOAL_APPROACH")
+        node.SHOT_PRE_MOTION_SETTLE_SEC = MotionDecisionNode.SHOT_PRE_MOTION_SETTLE_SEC
+        mark_next_ball_grabbed(node)
+    
+        def sample(offset, captured_at=None):
+            return {
+                **score_ready_goal(), "offset_x_px": offset,
+                "offset_x_norm": offset / 640, "bearing_deg": sign * 22.9,
+                "rgb_stamp_ns": round((now[0] if captured_at is None else captured_at) * 1e9),
+            }
+    
+        expected_turn = f"GOAL_CAMERA90_TURN_{direction}_{count}"
+        for _ in range(3):
+            command = node.publish_vision(goal=sample(sign * 200))[-1]
+            assert command["action"] == expected_turn
+            now[0] += .1
+            assert node.publish_vision(goal=sample(sign * 200)) == []
+            now[0] += .9
+            release_general(node, command)
+            deadline = now[0] + .5
+            assert node.goal_post_motion_dwell_until == pytest.approx(deadline)
+            now[0] = deadline - .001
+            assert node.publish_vision(goal=sample(sign * 200)) == []
+            now[0] = deadline
+            assert node.publish_vision(goal=sample(sign * 200)) == []
+            assert node.latest_info["goal"] is None
+            now[0] += .01
+            # A delayed image captured during the pause cannot repeat the turn.
+            node.publish_vision(goal=sample(sign * 200, deadline - .01))
+            assert node.latest_info["goal"] is None
+            assert not node.general_motion_gate.locked
+            now[0] += .01
+    
+        commands = node.publish_vision(goal=sample(sign * final_offset))
+        expected = f"GOAL_CAMERA90_CRAB_{direction}" if next_action == "CRAB" else "SHOT"
+>       assert commands[-1]["action"] == expected
+E       AssertionError: assert 'GOAL_SHOT_PREPARE' == 'SHOT'
+E         - SHOT
+E         + GOAL_SHOT_PREPARE
+
+src/mission_control/test/test_goal_pixel_alignment.py:54: AssertionError
+_ test_large_offset_repeats_only_after_half_second_and_new_capture[80-SHOT-LEFT--1-1] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff7f2c3fa0>
+direction = 'LEFT', sign = -1, count = 1, final_offset = 80
+next_action = 'SHOT'
+
+    @pytest.mark.parametrize("direction,sign,count", [("RIGHT", 1, 1), ("LEFT", -1, 1)])
+    @pytest.mark.parametrize("final_offset,next_action", [(140, "CRAB"), (80, "SHOT")])
+    def test_large_offset_repeats_only_after_half_second_and_new_capture(
+        monkeypatch, direction, sign, count, final_offset, next_action,
+    ):
+        now = [10.0]
+        monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: now[0])
+        monkeypatch.setattr(MotionDecisionNode, "_current_ros_time_ns",
+                            staticmethod(lambda _: round(now[0] * 1e9)))
+        node = CornerHarness(phase="GOAL_APPROACH")
+        node.SHOT_PRE_MOTION_SETTLE_SEC = MotionDecisionNode.SHOT_PRE_MOTION_SETTLE_SEC
+        mark_next_ball_grabbed(node)
+    
+        def sample(offset, captured_at=None):
+            return {
+                **score_ready_goal(), "offset_x_px": offset,
+                "offset_x_norm": offset / 640, "bearing_deg": sign * 22.9,
+                "rgb_stamp_ns": round((now[0] if captured_at is None else captured_at) * 1e9),
+            }
+    
+        expected_turn = f"GOAL_CAMERA90_TURN_{direction}_{count}"
+        for _ in range(3):
+            command = node.publish_vision(goal=sample(sign * 200))[-1]
+            assert command["action"] == expected_turn
+            now[0] += .1
+            assert node.publish_vision(goal=sample(sign * 200)) == []
+            now[0] += .9
+            release_general(node, command)
+            deadline = now[0] + .5
+            assert node.goal_post_motion_dwell_until == pytest.approx(deadline)
+            now[0] = deadline - .001
+            assert node.publish_vision(goal=sample(sign * 200)) == []
+            now[0] = deadline
+            assert node.publish_vision(goal=sample(sign * 200)) == []
+            assert node.latest_info["goal"] is None
+            now[0] += .01
+            # A delayed image captured during the pause cannot repeat the turn.
+            node.publish_vision(goal=sample(sign * 200, deadline - .01))
+            assert node.latest_info["goal"] is None
+            assert not node.general_motion_gate.locked
+            now[0] += .01
+    
+        commands = node.publish_vision(goal=sample(sign * final_offset))
+        expected = f"GOAL_CAMERA90_CRAB_{direction}" if next_action == "CRAB" else "SHOT"
+>       assert commands[-1]["action"] == expected
+E       AssertionError: assert 'GOAL_SHOT_PREPARE' == 'SHOT'
+E         - SHOT
+E         + GOAL_SHOT_PREPARE
+
+src/mission_control/test/test_goal_pixel_alignment.py:54: AssertionError
+_ test_selective_source64_import_preserves_other_motions[robot_motions_pc.json] _
+
+filename = 'robot_motions_pc.json'
+
+    @pytest.mark.parametrize('filename', ['robot_motions_pc.json', 'robot_motions_runtime.json'])
+    def test_selective_source64_import_preserves_other_motions(filename):
+        names = json.loads((UPDATE / 'manifest.json').read_text())['motion_names']
+        source = catalog(UPDATE / 'source64.json')
+        before = catalog(UPDATE / 'before/artifacts' / filename)
+        actual = catalog(ROOT / 'artifacts' / filename)
+>       assert actual.keys() == before.keys() | set(names)
+E       AssertionError: assert dict_keys(['찐..., 'r골넣기8번구역']) == {'R골넣기', 'R골넣...후제자리우회전', ...}
+E         Full diff:
+E         + dict_keys(['찐공확인자세', '찐후진실전-2(2회)', '찐공잡기전후진-2(2회)', '찐후진실전(1회)', '찐미세오뒤에서 오옆꽃게90도', '찐미세오뒤에서오옆꽃게0도', 't허들찐', 't미세오옆꽃게(0도)-1회', 'tt미세왼옆0도', 't미세오옆꽃게90도(1회)', 'R오뒤에서 기본자세(카메라45도)', 'R오뒤에서 기본자세(0도)', '건왼뒤에서 기본자세(0도)', '건김오뒤3', 'R미세오뒤에서 기본자세45도', 'R미세오뒤에서 오뒤45도', 'R미세오뒤에서 오뒤0도', 'R미세오뒤에서 기본자세90도', 't라인복귀우실전', 't제자리우회전45도(5회)', 't제자리우회전45도(2회)', 't제자리우회전45도(4회)', 't제자리우회전45도(7회)', 't제자리우회전45도(9회)', 'R오뒤카메라90도', 'R왼뒤에서 기본자세0도', 'R오뒤45도', 't제자리우회전90도(2회)', 't제자리우회전90도(4회)', 't제자리우회전90도(5회)', 't제자리우회전90도(7회)', 't제자리우회전90도(9회)', 't제자리우회전0도(9회)', 't제자리우회전0도(2회)', 't제...
+E         
+E         ...Full output truncated (147 lines hidden), use '-vv' to show
+
+src/mission_control/test/test_catalog64_goal_prepare.py:37: AssertionError
+_ test_selective_source64_import_preserves_other_motions[robot_motions_runtime.json] _
+
+filename = 'robot_motions_runtime.json'
+
+    @pytest.mark.parametrize('filename', ['robot_motions_pc.json', 'robot_motions_runtime.json'])
+    def test_selective_source64_import_preserves_other_motions(filename):
+        names = json.loads((UPDATE / 'manifest.json').read_text())['motion_names']
+        source = catalog(UPDATE / 'source64.json')
+        before = catalog(UPDATE / 'before/artifacts' / filename)
+        actual = catalog(ROOT / 'artifacts' / filename)
+>       assert actual.keys() == before.keys() | set(names)
+E       AssertionError: assert dict_keys(['찐..., 'r골넣기8번구역']) == {'R골넣기', 'R골넣...후제자리우회전', ...}
+E         Full diff:
+E         + dict_keys(['찐공확인자세', '찐후진실전-2(2회)', '찐공잡기전후진-2(2회)', '찐후진실전(1회)', '찐미세오뒤에서 오옆꽃게90도', '찐미세오뒤에서오옆꽃게0도', 't허들찐', 't미세오옆꽃게(0도)-1회', 'tt미세왼옆0도', 't미세오옆꽃게90도(1회)', 'R오뒤에서 기본자세(카메라45도)', 'R오뒤에서 기본자세(0도)', '건왼뒤에서 기본자세(0도)', '건김오뒤3', 'R미세오뒤에서 기본자세45도', 'R미세오뒤에서 오뒤45도', 'R미세오뒤에서 오뒤0도', 'R미세오뒤에서 기본자세90도', 't라인복귀우실전', 't제자리우회전45도(5회)', 't제자리우회전45도(2회)', 't제자리우회전45도(4회)', 't제자리우회전45도(7회)', 't제자리우회전45도(9회)', 'R오뒤카메라90도', 'R왼뒤에서 기본자세0도', 'R오뒤45도', 't제자리우회전90도(2회)', 't제자리우회전90도(4회)', 't제자리우회전90도(5회)', 't제자리우회전90도(7회)', 't제자리우회전90도(9회)', 't제자리우회전0도(9회)', 't제자리우회전0도(2회)', 't제...
+E         
+E         ...Full output truncated (147 lines hidden), use '-vv' to show
+
+src/mission_control/test/test_catalog64_goal_prepare.py:37: AssertionError
+___________ test_two_cycle_crab_keeps_transition_routes[left-right] ____________
+
+side = 'left', other = 'right'
+
+    @pytest.mark.parametrize('side,other', [('left', 'right'), ('right', 'left')])
+    def test_two_cycle_crab_keeps_transition_routes(side, other):
+        bridge = FakeBridge()
+        bridge.last_physical_motion_id = f'pickup_crab_{side}_0_2'
+        assert bridge._transition_prepare_motion('pickup_fine_forward_0') == f'pickup_crab_{side}_to_fine_0'
+        assert bridge._transition_prepare_motion('pickup_camera_down_turn_left_1') == f'pickup_crab_{side}_to_turn_0'
+>       assert bridge._transition_prepare_motion(f'pickup_crab_{other}_0_2') == f'pickup_crab_{side}_to_{other}_0'
+E       AssertionError: assert None == 'pickup_crab_left_to_right_0'
+E        +  where None = <bound method MotionCommandBridgeNode._transition_prepare_motion of <test_motion_command_bridge.FakeBridge object at 0xffff7ecf2c20>>('pickup_crab_right_0_2')
+E        +    where <bound method MotionCommandBridgeNode._transition_prepare_motion of <test_motion_command_bridge.FakeBridge object at 0xffff7ecf2c20>> = <test_motion_command_bridge.FakeBridge object at 0xffff7ecf2c20>._transition_prepare_motion
+
+src/mission_control/test/test_catalog64_goal_prepare.py:87: AssertionError
+___________ test_two_cycle_crab_keeps_transition_routes[right-left] ____________
+
+side = 'right', other = 'left'
+
+    @pytest.mark.parametrize('side,other', [('left', 'right'), ('right', 'left')])
+    def test_two_cycle_crab_keeps_transition_routes(side, other):
+        bridge = FakeBridge()
+        bridge.last_physical_motion_id = f'pickup_crab_{side}_0_2'
+        assert bridge._transition_prepare_motion('pickup_fine_forward_0') == f'pickup_crab_{side}_to_fine_0'
+        assert bridge._transition_prepare_motion('pickup_camera_down_turn_left_1') == f'pickup_crab_{side}_to_turn_0'
+>       assert bridge._transition_prepare_motion(f'pickup_crab_{other}_0_2') == f'pickup_crab_{side}_to_{other}_0'
+E       AssertionError: assert None == 'pickup_crab_right_to_left_0'
+E        +  where None = <bound method MotionCommandBridgeNode._transition_prepare_motion of <test_motion_command_bridge.FakeBridge object at 0xffff7f2bed40>>('pickup_crab_left_0_2')
+E        +    where <bound method MotionCommandBridgeNode._transition_prepare_motion of <test_motion_command_bridge.FakeBridge object at 0xffff7f2bed40>> = <test_motion_command_bridge.FakeBridge object at 0xffff7f2bed40>._transition_prepare_motion
+
+src/mission_control/test/test_catalog64_goal_prepare.py:87: AssertionError
+=========================== short test summary info ============================
+FAILED src/step/test/test_goal_navigation_planner.py::test_invalid_or_unconfirmed_shot_is_blocked[overrides1]
+FAILED src/step/test/test_goal_navigation_planner.py::test_goal_approach_switches_to_fine_at_850mm[0.85-GOAL_CAMERA90_FINE_FORWARD_3]
+FAILED src/step/test/test_goal_navigation_planner.py::test_goal_approach_switches_to_fine_at_850mm[0.571-GOAL_CAMERA90_FINE_FORWARD_3]
+FAILED src/step/test/test_goal_navigation_planner.py::test_goal_approach_switches_to_fine_at_850mm[0.43-WAIT_SCORE_CONFIRMATION]
+FAILED src/step/test/test_goal_navigation_planner.py::test_goal_approach_switches_to_fine_at_850mm[0.57-GOAL_CAMERA90_FINE_FORWARD_3]
+FAILED src/step/test/test_goal_navigation_planner.py::test_far_approach_uses_measured_target_geometry[0.85-GOAL_CAMERA90_FINE_FORWARD_3--200]
+FAILED src/step/test/test_goal_navigation_planner.py::test_far_approach_uses_measured_target_geometry[0.85-GOAL_CAMERA90_FINE_FORWARD_3-200]
+FAILED src/step/test/test_goal_navigation_planner.py::test_far_approach_uses_measured_target_geometry[0.571-GOAL_CAMERA90_FINE_FORWARD_3--200]
+FAILED src/step/test/test_goal_navigation_planner.py::test_far_approach_uses_measured_target_geometry[0.571-GOAL_CAMERA90_FINE_FORWARD_3-200]
+FAILED src/step/test/test_goal_navigation_planner.py::test_far_approach_overrides_stale_score_confirmation[0.571]
+FAILED src/step/test/test_goal_navigation_planner.py::test_far_approach_overrides_stale_score_confirmation[0.58]
+FAILED src/step/test/test_goal_navigation_planner.py::test_far_approach_overrides_stale_score_confirmation[0.6]
+FAILED src/step/test/test_goal_backboard_selection.py::test_analyzer_rejects_outside_new_scoring_rectangle[0.57-0]
+FAILED src/step/test/test_goal_backboard_selection.py::test_analyzer_rejects_outside_new_scoring_rectangle[0.511--101]
+FAILED src/step/test/test_goal_backboard_selection.py::test_analyzer_confirms_each_zone_before_planner_requests_shot[0.43-120-1]
+FAILED src/step/test/test_goal_backboard_selection.py::test_analyzer_confirms_each_zone_before_planner_requests_shot[0.51-100-2]
+FAILED src/step/test/test_goal_backboard_selection.py::test_analyzer_confirms_each_zone_before_planner_requests_shot[0.51-0-2]
+FAILED src/mission_control/test/test_post_ball_goal_handoff.py::test_first_goal_navigation_preserves_support_transition_holds[GOAL_CAMERA90_BACKWARD_1-line_forward_6]
+FAILED src/mission_control/test/test_post_ball_goal_handoff.py::test_first_goal_navigation_preserves_support_transition_holds[GOAL_CAMERA90_BACKWARD_1-post_ball_line_turn_right_3]
+FAILED src/mission_control/test/test_goal_fine_approach.py::test_goal_walks_keep_posture_transition_without_pre_or_post_pause[goal_camera_90_forward_4-GOAL_CAMERA90_FINE_FORWARD_3-pickup_fine_prepare]
+FAILED src/mission_control/test/test_goal_fine_approach.py::test_goal_walks_keep_posture_transition_without_pre_or_post_pause[line_recovery_left_4-GOAL_CAMERA90_FINE_FORWARD_3-pickup_fine_prepare]
+FAILED src/mission_control/test/test_goal_fine_approach.py::test_goal_walks_keep_posture_transition_without_pre_or_post_pause[line_recovery_right_4-GOAL_CAMERA90_FINE_FORWARD_3-pickup_fine_prepare]
+FAILED src/mission_control/test/test_goal_fine_approach.py::test_goal_walks_keep_posture_transition_without_pre_or_post_pause[goal_camera_90_fine_forward_3-GOAL_CAMERA_90_FORWARD_2-fine_to_turn_ready_90]
+FAILED src/mission_control/test/test_goal_fine_approach.py::test_goal_walks_keep_posture_transition_without_pre_or_post_pause[goal_camera_90_fine_forward_3-GOAL_CAMERA90_RECOVER_LEFT_4-fine_to_turn_ready_90]
+FAILED src/mission_control/test/test_goal_fine_approach.py::test_goal_walks_keep_posture_transition_without_pre_or_post_pause[goal_camera_90_fine_forward_3-GOAL_CAMERA90_RECOVER_RIGHT_4-fine_to_turn_ready_90]
+FAILED src/mission_control/test/test_goal_fine_approach.py::test_failed_goal_posture_transition_never_starts_next_walk[FAILED]
+FAILED src/mission_control/test/test_goal_fine_approach.py::test_failed_goal_posture_transition_never_starts_next_walk[TIMEOUT]
+FAILED src/mission_control/test/test_goal_fine_approach.py::test_failed_goal_posture_transition_never_starts_next_walk[REJECTED]
+FAILED src/mission_control/test/test_goal_fine_approach.py::test_failed_goal_posture_transition_never_starts_next_walk[CANCELLED]
+FAILED src/mission_control/test/test_goal_fine_approach.py::test_850mm_handoff_reserves_fine_step_and_executes_without_extra_pause[0]
+FAILED src/mission_control/test/test_goal_fine_approach.py::test_850mm_handoff_reserves_fine_step_and_executes_without_extra_pause[-30]
+FAILED src/mission_control/test/test_goal_fine_approach.py::test_850mm_handoff_reserves_fine_step_and_executes_without_extra_pause[30]
+FAILED src/mission_control/test/test_catalog64_goal_prepare.py::test_selective_source64_import_preserves_other_motions[robot_motions_pc.json]
+FAILED src/mission_control/test/test_catalog64_goal_prepare.py::test_selective_source64_import_preserves_other_motions[robot_motions_runtime.json]
+FAILED src/mission_control/test/test_catalog64_goal_prepare.py::test_two_cycle_crab_keeps_transition_routes[left-right]
+FAILED src/mission_control/test/test_catalog64_goal_prepare.py::test_two_cycle_crab_keeps_transition_routes[right-left]
+FAILED src/mission_control/test/test_goal_backward_dwell.py::test_each_goal_retreat_waits_half_second_and_sends_only_once
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.43-0-1]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.43-120-1]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.43--120-4]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.51-0-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.51-0.001-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.51-100-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.51--0.001-3]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.51--100-3]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.57-0-None]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.571-0-None]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.51-120-None]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.51--120-None]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.510001-100-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.510001--100-3]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.510001-100.001-None]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.510001--100.001-None]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.430001-120-1]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.430001--120-4]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.57-100-None]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_zone_depth_bounds_include_lower_and_exclude_upper[0.57--100-None]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_motion_toward_nominal_target_until_zone_entry[0.51-101-6.0-GOAL_CAMERA90_CRAB_RIGHT]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_motion_toward_nominal_target_until_zone_entry[0.51--101--6.0-GOAL_CAMERA90_CRAB_LEFT]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_motion_toward_nominal_target_until_zone_entry[0.57-0-0.0-GOAL_CAMERA90_FINE_FORWARD_3]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_fine_forward_1-0.43-120-1]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_fine_forward_1-0.51-100-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_fine_forward_1-0.51-0-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.43-120-1]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.51-100-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_right-0.51-0-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.43-120-1]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.51-100-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_crab_left-0.51-0-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.43-120-1]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.51-100-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_confirmed_region_reaches_selected_motion_after_existing_preparation[goal_camera_90_turn_right_1-0.51-0-2]
+FAILED src/mission_control/test/test_goal_shot_regions.py::test_import_preserves_source_targets_and_applies_speed_once
+FAILED src/mission_control/test/test_goal_pixel_alignment.py::test_large_offset_repeats_only_after_half_second_and_new_capture[80-SHOT-RIGHT-1-1]
+FAILED src/mission_control/test/test_goal_pixel_alignment.py::test_large_offset_repeats_only_after_half_second_and_new_capture[80-SHOT-LEFT--1-1]
+FAILED src/mission_control/test/test_catalog64_goal_prepare.py::test_selective_source64_import_preserves_other_motions[robot_motions_pc.json]
+FAILED src/mission_control/test/test_catalog64_goal_prepare.py::test_selective_source64_import_preserves_other_motions[robot_motions_runtime.json]
+FAILED src/mission_control/test/test_catalog64_goal_prepare.py::test_two_cycle_crab_keeps_transition_routes[left-right]
+FAILED src/mission_control/test/test_catalog64_goal_prepare.py::test_two_cycle_crab_keeps_transition_routes[right-left]
+79 failed, 683 passed in 6.14s

@@ -98,7 +98,7 @@ class MockMissionInputNode(Node):
 
         message = String()
         message.data = json.dumps(
-            self._payload,
+            {**self._payload, "rgb_stamp_ns": self.get_clock().now().nanoseconds},
             ensure_ascii=True,
             separators=(",", ":"),
         )

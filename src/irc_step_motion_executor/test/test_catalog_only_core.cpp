@@ -42,32 +42,36 @@ TEST(MotionAliasCatalog, LoadsLatestSdkAndCanonicalAliases)
   irc_step_motion_executor::MotionAliasCatalog catalog;
   std::string error;
   ASSERT_TRUE(catalog.load(TEST_ALIAS_CONFIG, error)) << error;
-  EXPECT_EQ(catalog.size(), 145U);
+  EXPECT_EQ(catalog.size(), 166U);
   for (const auto & [alias, motion] : {
-      std::pair{"forward", "R전진45도(8회)"},
-      std::pair{"line_forward_8", "R전진45도(8회)"},
-      std::pair{"goal_camera_90_forward_2", "R전진90도(2회)"},
-      std::pair{"line_turn_right_large", "R제자리우회전(9회)"},
-      std::pair{"line_recovery_left_4", "R전진라인복귀좌"},
-      std::pair{"line_recovery_left_6", "R전진라인복귀좌"},
-      std::pair{"line_recovery_right_4", "R라인복귀우회전"},
-      std::pair{"pickup_crab_right_0", "유미세오옆꽃게0도"},
-      std::pair{"pickup_crab_left_0", "유미세왼옆꽃게0도"},
-      std::pair{"pickup_fine_prepare", "rr오뒤에서 미세오뒤(45도)"},
-      std::pair{"pickup_fine_prepare_0", "rr오뒤에서 미세오뒤(0도)"},
-      std::pair{"goal_fine_prepare_90", "rr오뒤에서 미세오뒤90도"},
+      std::pair{"forward", "p전진45(8회)"},
+      std::pair{"line_forward_8", "p전진45(8회)"},
+      std::pair{"goal_camera_90_forward_2", "p전진90도(2회)"},
+      std::pair{"goal_shot_region_5", "r골넣기 5번구역"},
+      std::pair{"goal_shot_region_6", "r골넣기 6번구역"},
+      std::pair{"goal_shot_region_7", "r골넣기7번구역"},
+      std::pair{"goal_shot_region_8", "r골넣기8번구역"},
+      std::pair{"line_turn_right_large", "t제자리우회전45도(9회)"},
+      std::pair{"line_recovery_left_4", "p라인복귀좌회전45도"},
+      std::pair{"line_recovery_left_6", "p라인복귀좌회전45도"},
+      std::pair{"line_recovery_right_4", "t라인복귀우실전"},
+      std::pair{"pickup_crab_right_0", "t미세오옆꽃게(0도)-1회"},
+      std::pair{"pickup_crab_left_0", "tt미세왼옆0도"},
+      std::pair{"pickup_fine_prepare", "p오뒤에서 미세오뒤(45도)"},
+      std::pair{"pickup_fine_prepare_0", "p오뒤에서 미세오뒤(0도)"},
+      std::pair{"goal_fine_prepare_90", "p오뒤에서 미세오뒤90도"},
       std::pair{"goal_crab_right_to_fine_90", "r오옆에서 미세오뒤(90도)"},
       std::pair{"goal_crab_left_to_fine_90", "r왼옆에서 미세오뒤(90도)"},
-      std::pair{"hurdle_fine_prepare_0", "rr오뒤에서 미세오뒤(0도)"},
-      std::pair{"pickup_fine_to_crab_left_0", "r미세오뒤에서 왼옆0도"},
+      std::pair{"hurdle_fine_prepare_0", "p오뒤에서 미세오뒤(0도)"},
+      std::pair{"pickup_fine_to_crab_left_0", "r미세오뒤에서 오옆0도"},
       std::pair{"goal_crab_right_to_turn_90", "r오옆에서 오뒤90도"},
-      std::pair{"fine_to_turn_ready_45", "rr미세오뒤에서 오뒤45도"},
-      std::pair{"goal_camera_90_crab_right", "유미세오옆꽃게90도"},
-      std::pair{"goal_camera_90_crab_left", "유미세왼옆꽃게90도"},
-      std::pair{"stationary_turn_left", "R제자리좌회전(6회)"},
-      std::pair{"stationary_turn_right", "R제자리우회전(9회)"},
-      std::pair{"pickup_camera_down_turn_left_6", "R제자리좌회전0도(6회)"},
-      std::pair{"pickup_camera_down_turn_right_9", "R제자리우회전0도(9회)"},
+      std::pair{"fine_to_turn_ready_45", "p미세오뒤에서 오뒤45도"},
+      std::pair{"goal_camera_90_crab_right", "t미세오옆꽃게90도(1회)"},
+      std::pair{"goal_camera_90_crab_left", "tt미세왼옆90도"},
+      std::pair{"stationary_turn_left", "p제자리좌회전45(6회)"},
+      std::pair{"stationary_turn_right", "t제자리우회전45도(9회)"},
+      std::pair{"pickup_camera_down_turn_left_6", "p제자리좌회전0도(6회)"},
+      std::pair{"pickup_camera_down_turn_right_9", "t제자리우회전0도(9회)"},
       std::pair{"pickup", "r공잡기 400"},
       std::pair{"pickup_400", "r공잡기 400"},
       std::pair{"pickup_500", "r공잡기500"}})
@@ -80,6 +84,52 @@ TEST(MotionAliasCatalog, LoadsLatestSdkAndCanonicalAliases)
   EXPECT_FALSE(catalog.resolve("fine_left").has_value());
   EXPECT_FALSE(catalog.resolve("align_left").has_value());
   EXPECT_FALSE(catalog.resolve("shoot").has_value());
+}
+
+TEST(MotionAliasCatalog, LoadsAllSource77LeftTurnCamerasAndCounts)
+{
+  irc_step_motion_executor::MotionAliasCatalog catalog;
+  std::string error;
+  ASSERT_TRUE(catalog.load(TEST_ALIAS_CONFIG, error)) << error;
+  for (const auto & [prefix, camera] : {
+      std::pair{"pickup_camera_down", "0"},
+      std::pair{"post_ball_line", "45"},
+      std::pair{"ball_align", "45"},
+      std::pair{"goal_camera_90", "90"}})
+  {
+    for (int count = 1; count <= 6; ++count) {
+      const auto suffix = std::to_string(count);
+      EXPECT_EQ(catalog.resolve(std::string(prefix) + "_turn_left_" + suffix),
+        std::optional<std::string>(std::string("p제자리좌회전") + camera + (std::string(camera) == "45" ? "(" : "도(") + suffix + "회)"));
+    }
+  }
+  EXPECT_EQ(catalog.resolve("stationary_turn_left"),
+    std::optional<std::string>("p제자리좌회전45(6회)"));
+  EXPECT_EQ(catalog.resolve("line_search_left_2"),
+    std::optional<std::string>("p제자리좌회전45(2회)"));
+}
+
+TEST(MotionAliasCatalog, Source76CrabsShareEntryAndRemoveDirectionTransitions)
+{
+  irc_step_motion_executor::MotionAliasCatalog catalog;
+  std::string error;
+  ASSERT_TRUE(catalog.load(TEST_ALIAS_CONFIG, error)) << error;
+  for (const auto & [alias, motion] : {
+      std::pair{"pickup_crab_left_0", "tt미세왼옆0도"},
+      std::pair{"pickup_crab_left_0_2", "tt미세왼옆0도(2회)"},
+      std::pair{"goal_camera_90_crab_left", "tt미세왼옆90도"},
+      std::pair{"pickup_fine_to_crab_left_0", "r미세오뒤에서 오옆0도"},
+      std::pair{"pickup_forward_to_crab_left_0", "r오뒤에서 오옆꽃게0도"},
+      std::pair{"goal_fine_to_crab_left_90", "r미세오뒤에서 오옆 90도"},
+      std::pair{"goal_forward_to_crab_left_90", "r오뒤에서 오옆꽃게90도"}})
+  {
+    EXPECT_EQ(catalog.resolve(alias), std::optional<std::string>(motion));
+  }
+  for (const auto * alias : {"pickup_crab_right_to_left_0", "pickup_crab_left_to_right_0",
+      "goal_crab_right_to_left_90", "goal_crab_left_to_right_90"})
+  {
+    EXPECT_FALSE(catalog.resolve(alias).has_value());
+  }
 }
 
 TEST(CatalogOnlyCore, PreservesCorrelationFieldsAndRejectsExecution)

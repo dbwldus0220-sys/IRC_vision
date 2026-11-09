@@ -20,6 +20,9 @@ import yaml
 
 POSITION_TOLERANCE_DEG = 5.0
 RUNTIME_SPEED_FACTOR = Decimal("0.95")
+SCALED_MOTION_NAMES = frozenset({
+    "t허들찐", "p공후 제자리좌회전", "p골대후제자리좌회전",
+})
 
 
 def runtime_motion_from_source(motion: dict) -> dict:
@@ -32,7 +35,8 @@ def runtime_motion_from_source(motion: dict) -> dict:
     if not speed.is_finite() or speed <= 0:
         raise ValueError("source playback_speed must be finite and positive")
     result = _with_runtime_policy(motion)
-    result["playback_speed"] = float(speed * RUNTIME_SPEED_FACTOR)
+    factor = RUNTIME_SPEED_FACTOR if motion.get("name") in SCALED_MOTION_NAMES else Decimal("1")
+    result["playback_speed"] = float(speed * factor)
     return result
 
 

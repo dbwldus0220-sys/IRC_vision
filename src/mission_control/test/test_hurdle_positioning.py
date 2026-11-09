@@ -272,12 +272,12 @@ def test_recognition_approach_ignores_line_heading(depth, heading):
 
 @pytest.mark.parametrize("depth", [0.8, 0.7, 0.4])
 @pytest.mark.parametrize("bottom", [101, 100])
-def test_positioning_never_rotates_even_if_depth_rebounds(depth, bottom):
+def test_positioning_without_intersection_keeps_fine_approach(depth, bottom):
     decision = MotionDecisionPlanner().plan("HURDLE_POSITIONING", {
         "hurdle": hurdle(depth, camera_center_offset_x_px=600, bottom_distance_px=bottom),
     }, 0.1)
     assert decision.action == ("GO" if depth <= 0.54 else "STRAIGHT_0")
-    assert decision.source_command["close_rotation_blocked"]
+    assert decision.source_command["close_rotation_blocked"] == (bottom <= 100 or depth <= .54)
 
 
 @pytest.mark.parametrize("angle", [-75.0, -70.0, -45.0, 0.0, 45.0, 70.0, 75.0])
@@ -336,6 +336,13 @@ def test_crossing_during_recovery_finishes_turn_before_fine(clock):
     release_general(node, turn)
     clock[0] += 0.1
     node.receive(hurdle(0.69))
+    result = node.publish()[-1]
+    assert result["action"] == "RECOVER_LEFT_TURN_LEFT_4"
+    assert result["phase"] == "HURDLE_POSITIONING"
+    release_general(node, result)
+    clock[0] += .1
+    node.receive_line()
+    node.receive(hurdle(.69))
     result = node.publish()[-1]
     assert result["action"] == "STRAIGHT_0"
     assert result["phase"] == "HURDLE_POSITIONING"
@@ -427,14 +434,13 @@ def test_unconfirmed_or_out_of_range_hurdle_does_not_take_line_control():
 
 @pytest.mark.parametrize("depth", [0.8, 0.7, 0.5])
 @pytest.mark.parametrize("x,direction", [(500, "LEFT"), (900, "RIGHT")])
-def test_only_coarse_approach_steers_toward_intersection(depth, x, direction):
+def test_intersection_steering_continues_until_540mm(depth, x, direction):
     decision = MotionDecisionPlanner().plan("AUTO", {
         "hurdle": hurdle(depth, camera_center_offset_x_px=600 if x < 710 else -600,
                           hurdle_angle_deg=None),
         "line": line_info(x=x),
     }, 0.1)
-    expected = (f"RECOVER_{direction}_TURN_{direction}_4" if depth > 0.7
-                else "STRAIGHT_0" if depth > 0.54 else "GO")
+    expected = f"RECOVER_{direction}_TURN_{direction}_4" if depth > .54 else "GO"
     assert decision.source == "hurdle" and decision.valid
     assert decision.action == expected
     assert decision.source_command["hurdle_stage"] == (

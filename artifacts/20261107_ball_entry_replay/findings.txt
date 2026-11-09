@@ -1,0 +1,58 @@
+공 진입 오프라인 재현 결과
+
+제어 코드 추가 변경 없음. 실제 ROS 노드/카메라/모터 실행 없음.
+새 테스트 입력만 만들어 현재 TemporalConfirmationFilter, MotionDecisionNode,
+MotionCommandBridgeNode와 RobotMotionPlayer의 실제 구현을 메모리 환경에서 실행했다.
+이 테스트는 물리 시뮬레이션이나 원본 검출의 정확한 재생이 아니다.
+
+시간축과 입력:
+라인 종료를 0ms로 놓았다. 기존 로그의 첫 후보 수신 -1077.690ms와
+12회 확정 처리 +328.338ms를 입력 기준으로 삼았다.
+중간 검출 원본이 없으므로 2~12번째 성공 검출 간격을 당시 평균 처리량 10.305 FPS로 구성했다.
+첫 후보와 두 번째 성공 검출 사이 간격은 이 두 기준을 맞추기 위해 길게 남긴 가정이다.
+영상 나이는 289.902ms, 공 거리는 .860m, 지상 방향 오차는 -28.57도를 사용했다.
+위치/검출 confidence/중간 거리 변화는 일정한 유효 입력으로 가정했다.
+라인 입력은 15Hz, 판단 타이머는 20Hz이며 프레임 촬영 stamp도 각각 설정했다.
+따라서 실제 10번째 검출 시각을 복원한 결과로 해석하면 안 된다.
+
+판단 결과 (라인 종료 대비):
+기본 조건 12회: +328.338ms에 공 접근 명령, 사전 예약 없음.
+기본 조건 10회: +134.257ms에 공 접근 명령, 사전 예약 없음.
+10번째 입력이 한 번 누락된 10회: +231.297ms에 공 접근 명령.
+전체 후보 입력이 150ms 빨라진 10회: -15.743ms에 확정, 종료 시각에 명령, 사전 예약 없음.
+전체 후보 입력이 300ms 빨라진 10회: -165.743ms에 확정, 종료 시각에 명령, 사전 예약 없음.
+전체 후보 입력이 500ms 빨라진 10회: -365.743ms에 확정, -171.662ms에 명령 사전 예약.
+영상 나이가 600ms인 경우: 유효한 접근 명령 없음 (오래된 영상 차단 유지).
+위 조건의 12회 비교까지 총 10가지 시나리오와 기대 동작 검증을 완료했다.
+
+확정됐는데도 사전 예약이 안 되는 이유:
+현재 _prepare_pending_ball_entry_walk는 모션 후반에 촬영한 신선한 공 관측을
+3개 모아 같은 다음 동작을 확인해야 예약한다. 현재 동작이 끝나기 전에
+공 확정만 겨우 끝나면 이 예약 조건까지 채우지 못할 수 있다.
+종료 후에는 유효한 확정 공을 받은 콜백에서 바로 접근 명령을 발행했다.
+이 경우 별도 1초 등의 고정 공 대기 시간은 발생하지 않았다.
+
+실행 코드 비교:
+현재 JSON의 t전진실전 -> t라인복귀좌공용 연결을 실제 RobotMotionPlayer에 넣었다.
+가짜 메모리 버스를 쓰고 시작 준비 지연을 0/20/100ms로 가정했다.
+각각 예약 없는 시작은 해당 지연만큼 모션 활성화가 늦어졌고,
+사전 예약한 연결은 경계에서 바로 다음 모션을 활성화했다.
+준비 함수 호출 횟수는 예약 없는 경우 총 2회, 예약 연결은 총 1회였다.
+이는 묶음 토크 읽기 실측이 아니라 준비 지연의 영향과 예약 경로를 검증한 것이다.
+모션 자체에 포함된 홀드/지지 자세 시간은 그대로 유지했다.
+따라서 활성화 지연 0ms를 물리적으로 발이 즉시 움직이는 것으로 해석하면 안 된다.
+
+결론:
+현재 10회 변경은 이번 상황을 본뜬 입력에서 판단 대기를 약 194ms 줄였다.
+그럼에도 약 134ms + 실제 시작 준비 시간은 남는다.
+공이 충분히 일찍 확정되고 후속 관측이 쌓이면 사전 예약으로 준비 비용을 피할 수 있다.
+실제 묶음 통신의 소요 시간은 입력 가정이므로 이 테스트로 단축 실측을 주장하지 않는다.
+
+재현:
+source /opt/ros/humble/setup.bash
+python3 artifacts/20261107_ball_entry_replay/replay.py
+
+g++ -std=c++20 -O1 -ffp-contract=off -Iexternal_sdk/gui_aligned artifacts/20261107_ball_entry_replay/execution_replay.cpp build/irc_step_motion_executor/robot_motion_sdk/libmotion_player_core.a build/irc_step_motion_executor/robot_motion_sdk/libmotion_core.a -pthread -o /tmp/step_ball_confirmation_review/execution_replay
+/tmp/step_ball_confirmation_review/execution_replay artifacts/robot_motions_runtime.json
+
+결과 파일: results.json/results.csv는 판단 결과, execution_results.csv는 실행 준비 지연 가정별 결과.

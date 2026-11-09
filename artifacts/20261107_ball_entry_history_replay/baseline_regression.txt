@@ -1,0 +1,376 @@
+FFF..................................................................... [ 22%]
+........................................................................ [ 44%]
+..................................................................FFFF.. [ 67%]
+..FF.................................................................... [ 89%]
+..................................                                       [100%]
+=================================== FAILURES ===================================
+_ test_normal_line_and_ball_line_steps_reserve_walks_without_waits[0.0-0.0-STRAIGHT_2] _
+
+clock = [12.492999999999997], heading = 0.0, offset = 0.0, action = 'STRAIGHT_2'
+
+    @pytest.mark.parametrize('heading,offset,action', [
+        (0., 0., 'STRAIGHT_2'), (-15., -.3, 'STRAIGHT_2'), (15., .3, 'STRAIGHT_2'),
+        (-30., .3, 'RECOVER_RIGHT_TURN_LEFT_4'), (30., -.3, 'RECOVER_LEFT_TURN_RIGHT_4'),
+    ])
+    def test_normal_line_and_ball_line_steps_reserve_walks_without_waits(clock, heading, offset, action):
+        node, bridge = node_with_entry(), FakeBridge()
+        _, request = start_line(node, bridge, clock)
+        assert request['motion_id'] == 'line_forward_6'
+        fresh(node, clock, 'ball', ball_info(depth_m=1.2, bearing_deg=30), plan=False)
+        assert node.mission_phase == 'BALL_APPROACH'
+        late_line(node, clock, line_info(heading, offset))
+        fresh(node, clock, 'ball', ball_info(depth_m=1.2), plan=False)
+        entry = node.publisher.messages[-1]
+        assert node.queued_general_command_id == entry['command_id']
+        assert node.general_motion_gate.active_command_id != entry['command_id']
+        assert entry['valid'] and entry['action'] == action
+        assert entry['source'] == 'ball' and entry['source_command']['ball_entry_line_alignment']
+        entry_request = send(bridge, entry)
+        assert entry_request['motion_id'] == ('line_forward_4' if action == 'STRAIGHT_2'
+                                            else 'line_recovery_ball_first_left_4' if 'TURN_LEFT' in action
+                                            else 'line_recovery_right_4')
+        assert not bridge.queued_request_deferred
+        status(node, bridge, request, 'SUCCEEDED')
+        status(node, bridge, entry_request, 'RUNNING')
+        if action == 'STRAIGHT_2':
+>           assert node.active_line_motion_duration_sec == pytest.approx(.517 * 4 / .95)
+E           assert 2.056 == 2.176842105263158 ± 2.2e-06
+E            +  where 2.056 = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff6f599b10>.active_line_motion_duration_sec
+E            +  and   2.176842105263158 ± 2.2e-06 = <function approx at 0xffff70766f80>(((0.517 * 4) / 0.95))
+E            +    where <function approx at 0xffff70766f80> = pytest.approx
+
+src/mission_control/test/test_ball_entry_line_alignment.py:86: AssertionError
+_ test_normal_line_and_ball_line_steps_reserve_walks_without_waits[-15.0--0.3-STRAIGHT_2] _
+
+clock = [12.492999999999997], heading = -15.0, offset = -0.3
+action = 'STRAIGHT_2'
+
+    @pytest.mark.parametrize('heading,offset,action', [
+        (0., 0., 'STRAIGHT_2'), (-15., -.3, 'STRAIGHT_2'), (15., .3, 'STRAIGHT_2'),
+        (-30., .3, 'RECOVER_RIGHT_TURN_LEFT_4'), (30., -.3, 'RECOVER_LEFT_TURN_RIGHT_4'),
+    ])
+    def test_normal_line_and_ball_line_steps_reserve_walks_without_waits(clock, heading, offset, action):
+        node, bridge = node_with_entry(), FakeBridge()
+        _, request = start_line(node, bridge, clock)
+        assert request['motion_id'] == 'line_forward_6'
+        fresh(node, clock, 'ball', ball_info(depth_m=1.2, bearing_deg=30), plan=False)
+        assert node.mission_phase == 'BALL_APPROACH'
+        late_line(node, clock, line_info(heading, offset))
+        fresh(node, clock, 'ball', ball_info(depth_m=1.2), plan=False)
+        entry = node.publisher.messages[-1]
+        assert node.queued_general_command_id == entry['command_id']
+        assert node.general_motion_gate.active_command_id != entry['command_id']
+        assert entry['valid'] and entry['action'] == action
+        assert entry['source'] == 'ball' and entry['source_command']['ball_entry_line_alignment']
+        entry_request = send(bridge, entry)
+        assert entry_request['motion_id'] == ('line_forward_4' if action == 'STRAIGHT_2'
+                                            else 'line_recovery_ball_first_left_4' if 'TURN_LEFT' in action
+                                            else 'line_recovery_right_4')
+        assert not bridge.queued_request_deferred
+        status(node, bridge, request, 'SUCCEEDED')
+        status(node, bridge, entry_request, 'RUNNING')
+        if action == 'STRAIGHT_2':
+>           assert node.active_line_motion_duration_sec == pytest.approx(.517 * 4 / .95)
+E           assert 2.056 == 2.176842105263158 ± 2.2e-06
+E            +  where 2.056 = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff6f43f310>.active_line_motion_duration_sec
+E            +  and   2.176842105263158 ± 2.2e-06 = <function approx at 0xffff70766f80>(((0.517 * 4) / 0.95))
+E            +    where <function approx at 0xffff70766f80> = pytest.approx
+
+src/mission_control/test/test_ball_entry_line_alignment.py:86: AssertionError
+_ test_normal_line_and_ball_line_steps_reserve_walks_without_waits[15.0-0.3-STRAIGHT_2] _
+
+clock = [12.492999999999997], heading = 15.0, offset = 0.3
+action = 'STRAIGHT_2'
+
+    @pytest.mark.parametrize('heading,offset,action', [
+        (0., 0., 'STRAIGHT_2'), (-15., -.3, 'STRAIGHT_2'), (15., .3, 'STRAIGHT_2'),
+        (-30., .3, 'RECOVER_RIGHT_TURN_LEFT_4'), (30., -.3, 'RECOVER_LEFT_TURN_RIGHT_4'),
+    ])
+    def test_normal_line_and_ball_line_steps_reserve_walks_without_waits(clock, heading, offset, action):
+        node, bridge = node_with_entry(), FakeBridge()
+        _, request = start_line(node, bridge, clock)
+        assert request['motion_id'] == 'line_forward_6'
+        fresh(node, clock, 'ball', ball_info(depth_m=1.2, bearing_deg=30), plan=False)
+        assert node.mission_phase == 'BALL_APPROACH'
+        late_line(node, clock, line_info(heading, offset))
+        fresh(node, clock, 'ball', ball_info(depth_m=1.2), plan=False)
+        entry = node.publisher.messages[-1]
+        assert node.queued_general_command_id == entry['command_id']
+        assert node.general_motion_gate.active_command_id != entry['command_id']
+        assert entry['valid'] and entry['action'] == action
+        assert entry['source'] == 'ball' and entry['source_command']['ball_entry_line_alignment']
+        entry_request = send(bridge, entry)
+        assert entry_request['motion_id'] == ('line_forward_4' if action == 'STRAIGHT_2'
+                                            else 'line_recovery_ball_first_left_4' if 'TURN_LEFT' in action
+                                            else 'line_recovery_right_4')
+        assert not bridge.queued_request_deferred
+        status(node, bridge, request, 'SUCCEEDED')
+        status(node, bridge, entry_request, 'RUNNING')
+        if action == 'STRAIGHT_2':
+>           assert node.active_line_motion_duration_sec == pytest.approx(.517 * 4 / .95)
+E           assert 2.056 == 2.176842105263158 ± 2.2e-06
+E            +  where 2.056 = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff6f4939d0>.active_line_motion_duration_sec
+E            +  and   2.176842105263158 ± 2.2e-06 = <function approx at 0xffff70766f80>(((0.517 * 4) / 0.95))
+E            +    where <function approx at 0xffff70766f80> = pytest.approx
+
+src/mission_control/test/test_ball_entry_line_alignment.py:86: AssertionError
+_ test_entry_runs_existing_two_direction_search_after_walk_then_stops[0.9-LEFT] _
+
+clock = [16.419999999999984], side = 'LEFT', distance = 0.9
+
+    @pytest.mark.parametrize('side', ['LEFT', 'RIGHT'])
+    @pytest.mark.parametrize('distance', [.9, .6])
+    def test_entry_runs_existing_two_direction_search_after_walk_then_stops(clock, side, distance):
+        node, bridge = node_with_entry(), FakeBridge()
+        fresh(node, clock, 'line', line_info(), plan=False)
+        fresh(node, clock, 'ball', ground_ball_info(
+            depth_m=distance, camera_center_offset_x_px=-500 if side == 'LEFT' else 500))
+        first = node.publisher.messages[-1]
+        request = send(bridge, first)
+        status(node, bridge, request, 'RUNNING')
+        for _ in range(8):
+            clock[0] += .1
+            fresh(node, clock, 'ball', MISSING)
+        assert node.general_motion_gate.active_command_id == first['command_id']
+        assert not any(m['valid'] and m['command_id'] != first['command_id']
+                       for m in node.publisher.messages)
+        status(node, bridge, request, 'SUCCEEDED')
+        previous_id = first['command_id']
+        for direction, count, stage in sequence(side):
+            command = None
+            for _ in range(40):
+                clock[0] += .1
+                fresh(node, clock, 'ball', MISSING)
+                valid = [m for m in node.publisher.messages
+                         if m['valid'] and m['command_id'] > previous_id]
+                if valid:
+                    command = valid[0]
+                    break
+            assert command is not None, node.last_selected_decision
+            assert command['action'] == f'BALL_APPROACH_TURN_{direction}_{count}'
+            assert command['source_command']['lost_search_stage'] == stage
+            assert not command['source_command'].get('ball_entry_line_alignment')
+            request = send(bridge, command)
+            status(node, bridge, request, 'RUNNING')
+            previous_id = command['command_id']
+            status(node, bridge, request, 'SUCCEEDED')
+        for _ in range(40):
+            clock[0] += .1
+            fresh(node, clock, 'ball', MISSING)
+        assert not any(m['valid'] and m['command_id'] > previous_id
+                       for m in node.publisher.messages)
+        assert node.lost_search_turn_limiter.counts['ball'] == 10
+        assert node.ball_entry_line_alignment.pending
+        # A new verified target resumes Line approach and rearms the Ball budget.
+        fresh(node, clock, 'line', line_info(), plan=False)
+        fresh(node, clock, 'ball', ball_info(depth_m=.8))
+>       assert node.publisher.messages[-1]['action'] == 'STRAIGHT_2'
+E       AssertionError: assert 'STOP' == 'STRAIGHT_2'
+E         - STRAIGHT_2
+E         + STOP
+
+src/mission_control/test/test_ball_entry_search_recovery.py:64: AssertionError
+_ test_entry_runs_existing_two_direction_search_after_walk_then_stops[0.9-RIGHT] _
+
+clock = [16.419999999999984], side = 'RIGHT', distance = 0.9
+
+    @pytest.mark.parametrize('side', ['LEFT', 'RIGHT'])
+    @pytest.mark.parametrize('distance', [.9, .6])
+    def test_entry_runs_existing_two_direction_search_after_walk_then_stops(clock, side, distance):
+        node, bridge = node_with_entry(), FakeBridge()
+        fresh(node, clock, 'line', line_info(), plan=False)
+        fresh(node, clock, 'ball', ground_ball_info(
+            depth_m=distance, camera_center_offset_x_px=-500 if side == 'LEFT' else 500))
+        first = node.publisher.messages[-1]
+        request = send(bridge, first)
+        status(node, bridge, request, 'RUNNING')
+        for _ in range(8):
+            clock[0] += .1
+            fresh(node, clock, 'ball', MISSING)
+        assert node.general_motion_gate.active_command_id == first['command_id']
+        assert not any(m['valid'] and m['command_id'] != first['command_id']
+                       for m in node.publisher.messages)
+        status(node, bridge, request, 'SUCCEEDED')
+        previous_id = first['command_id']
+        for direction, count, stage in sequence(side):
+            command = None
+            for _ in range(40):
+                clock[0] += .1
+                fresh(node, clock, 'ball', MISSING)
+                valid = [m for m in node.publisher.messages
+                         if m['valid'] and m['command_id'] > previous_id]
+                if valid:
+                    command = valid[0]
+                    break
+            assert command is not None, node.last_selected_decision
+            assert command['action'] == f'BALL_APPROACH_TURN_{direction}_{count}'
+            assert command['source_command']['lost_search_stage'] == stage
+            assert not command['source_command'].get('ball_entry_line_alignment')
+            request = send(bridge, command)
+            status(node, bridge, request, 'RUNNING')
+            previous_id = command['command_id']
+            status(node, bridge, request, 'SUCCEEDED')
+        for _ in range(40):
+            clock[0] += .1
+            fresh(node, clock, 'ball', MISSING)
+        assert not any(m['valid'] and m['command_id'] > previous_id
+                       for m in node.publisher.messages)
+        assert node.lost_search_turn_limiter.counts['ball'] == 10
+        assert node.ball_entry_line_alignment.pending
+        # A new verified target resumes Line approach and rearms the Ball budget.
+        fresh(node, clock, 'line', line_info(), plan=False)
+        fresh(node, clock, 'ball', ball_info(depth_m=.8))
+>       assert node.publisher.messages[-1]['action'] == 'STRAIGHT_2'
+E       AssertionError: assert 'STOP' == 'STRAIGHT_2'
+E         - STRAIGHT_2
+E         + STOP
+
+src/mission_control/test/test_ball_entry_search_recovery.py:64: AssertionError
+_ test_entry_runs_existing_two_direction_search_after_walk_then_stops[0.6-LEFT] _
+
+clock = [16.72999999999999], side = 'LEFT', distance = 0.6
+
+    @pytest.mark.parametrize('side', ['LEFT', 'RIGHT'])
+    @pytest.mark.parametrize('distance', [.9, .6])
+    def test_entry_runs_existing_two_direction_search_after_walk_then_stops(clock, side, distance):
+        node, bridge = node_with_entry(), FakeBridge()
+        fresh(node, clock, 'line', line_info(), plan=False)
+        fresh(node, clock, 'ball', ground_ball_info(
+            depth_m=distance, camera_center_offset_x_px=-500 if side == 'LEFT' else 500))
+        first = node.publisher.messages[-1]
+        request = send(bridge, first)
+        status(node, bridge, request, 'RUNNING')
+        for _ in range(8):
+            clock[0] += .1
+            fresh(node, clock, 'ball', MISSING)
+        assert node.general_motion_gate.active_command_id == first['command_id']
+        assert not any(m['valid'] and m['command_id'] != first['command_id']
+                       for m in node.publisher.messages)
+        status(node, bridge, request, 'SUCCEEDED')
+        previous_id = first['command_id']
+        for direction, count, stage in sequence(side):
+            command = None
+            for _ in range(40):
+                clock[0] += .1
+                fresh(node, clock, 'ball', MISSING)
+                valid = [m for m in node.publisher.messages
+                         if m['valid'] and m['command_id'] > previous_id]
+                if valid:
+                    command = valid[0]
+                    break
+            assert command is not None, node.last_selected_decision
+            assert command['action'] == f'BALL_APPROACH_TURN_{direction}_{count}'
+            assert command['source_command']['lost_search_stage'] == stage
+            assert not command['source_command'].get('ball_entry_line_alignment')
+            request = send(bridge, command)
+            status(node, bridge, request, 'RUNNING')
+            previous_id = command['command_id']
+            status(node, bridge, request, 'SUCCEEDED')
+        for _ in range(40):
+            clock[0] += .1
+            fresh(node, clock, 'ball', MISSING)
+        assert not any(m['valid'] and m['command_id'] > previous_id
+                       for m in node.publisher.messages)
+        assert node.lost_search_turn_limiter.counts['ball'] == 10
+>       assert node.ball_entry_line_alignment.pending
+E       AssertionError: assert False
+E        +  where False = BallEntryLineAlignment(enabled=True, state='DONE', command_id=None, queued_command_id=None, ground_tracking_active=False).pending
+E        +    where BallEntryLineAlignment(enabled=True, state='DONE', command_id=None, queued_command_id=None, ground_tracking_active=False) = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff6f503c10>.ball_entry_line_alignment
+
+src/mission_control/test/test_ball_entry_search_recovery.py:60: AssertionError
+_ test_entry_runs_existing_two_direction_search_after_walk_then_stops[0.6-RIGHT] _
+
+clock = [16.72999999999999], side = 'RIGHT', distance = 0.6
+
+    @pytest.mark.parametrize('side', ['LEFT', 'RIGHT'])
+    @pytest.mark.parametrize('distance', [.9, .6])
+    def test_entry_runs_existing_two_direction_search_after_walk_then_stops(clock, side, distance):
+        node, bridge = node_with_entry(), FakeBridge()
+        fresh(node, clock, 'line', line_info(), plan=False)
+        fresh(node, clock, 'ball', ground_ball_info(
+            depth_m=distance, camera_center_offset_x_px=-500 if side == 'LEFT' else 500))
+        first = node.publisher.messages[-1]
+        request = send(bridge, first)
+        status(node, bridge, request, 'RUNNING')
+        for _ in range(8):
+            clock[0] += .1
+            fresh(node, clock, 'ball', MISSING)
+        assert node.general_motion_gate.active_command_id == first['command_id']
+        assert not any(m['valid'] and m['command_id'] != first['command_id']
+                       for m in node.publisher.messages)
+        status(node, bridge, request, 'SUCCEEDED')
+        previous_id = first['command_id']
+        for direction, count, stage in sequence(side):
+            command = None
+            for _ in range(40):
+                clock[0] += .1
+                fresh(node, clock, 'ball', MISSING)
+                valid = [m for m in node.publisher.messages
+                         if m['valid'] and m['command_id'] > previous_id]
+                if valid:
+                    command = valid[0]
+                    break
+            assert command is not None, node.last_selected_decision
+            assert command['action'] == f'BALL_APPROACH_TURN_{direction}_{count}'
+            assert command['source_command']['lost_search_stage'] == stage
+            assert not command['source_command'].get('ball_entry_line_alignment')
+            request = send(bridge, command)
+            status(node, bridge, request, 'RUNNING')
+            previous_id = command['command_id']
+            status(node, bridge, request, 'SUCCEEDED')
+        for _ in range(40):
+            clock[0] += .1
+            fresh(node, clock, 'ball', MISSING)
+        assert not any(m['valid'] and m['command_id'] > previous_id
+                       for m in node.publisher.messages)
+        assert node.lost_search_turn_limiter.counts['ball'] == 10
+>       assert node.ball_entry_line_alignment.pending
+E       AssertionError: assert False
+E        +  where False = BallEntryLineAlignment(enabled=True, state='DONE', command_id=None, queued_command_id=None, ground_tracking_active=False).pending
+E        +    where BallEntryLineAlignment(enabled=True, state='DONE', command_id=None, queued_command_id=None, ground_tracking_active=False) = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff6f466530>.ball_entry_line_alignment
+
+src/mission_control/test/test_ball_entry_search_recovery.py:60: AssertionError
+_ test_shared_bins_and_entry_stationary_turns_follow_requested_table[LEFT-counts0] _
+
+side = 'LEFT', counts = (1, 2, 3, 4, 5, 6)
+
+    @pytest.mark.parametrize('side,counts', [('LEFT', (1, 2, 3, 4, 5, 6)),
+                                           ('RIGHT', (2, 3, 5, 6, 7, 9))])
+    def test_shared_bins_and_entry_stationary_turns_follow_requested_table(side, counts):
+        planner, entry = MotionDecisionPlanner(), BallEntryLineAlignment()
+        sign = -1 if side == 'LEFT' else 1
+>       assert planner._turn_repeat_count(14.999, side) == 0
+E       AssertionError: assert 1 == 0
+E        +  where 1 = <bound method MotionDecisionPlanner._turn_repeat_count of <class 'mission_control.motion_decision_planner.MotionDecisionPlanner'>>(14.999, 'LEFT')
+E        +    where <bound method MotionDecisionPlanner._turn_repeat_count of <class 'mission_control.motion_decision_planner.MotionDecisionPlanner'>> = <mission_control.motion_decision_planner.MotionDecisionPlanner object at 0xffff6f34f1f0>._turn_repeat_count
+
+src/mission_control/test/test_ball_entry_search_recovery.py:85: AssertionError
+_ test_shared_bins_and_entry_stationary_turns_follow_requested_table[RIGHT-counts1] _
+
+side = 'RIGHT', counts = (2, 3, 5, 6, 7, 9)
+
+    @pytest.mark.parametrize('side,counts', [('LEFT', (1, 2, 3, 4, 5, 6)),
+                                           ('RIGHT', (2, 3, 5, 6, 7, 9))])
+    def test_shared_bins_and_entry_stationary_turns_follow_requested_table(side, counts):
+        planner, entry = MotionDecisionPlanner(), BallEntryLineAlignment()
+        sign = -1 if side == 'LEFT' else 1
+        assert planner._turn_repeat_count(14.999, side) == 0
+        for lower, count in zip((15, 30, 45, 60, 75, 90), counts):
+            for angle in (lower, lower + 14.999):
+>               assert planner._turn_repeat_count(sign * angle, side) == count
+E               AssertionError: assert 1 == 2
+E                +  where 1 = <bound method MotionDecisionPlanner._turn_repeat_count of <class 'mission_control.motion_decision_planner.MotionDecisionPlanner'>>((1 * 15), 'RIGHT')
+E                +    where <bound method MotionDecisionPlanner._turn_repeat_count of <class 'mission_control.motion_decision_planner.MotionDecisionPlanner'>> = <mission_control.motion_decision_planner.MotionDecisionPlanner object at 0xffff6f4b49d0>._turn_repeat_count
+
+src/mission_control/test/test_ball_entry_search_recovery.py:88: AssertionError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_ball_entry_line_alignment.py::test_normal_line_and_ball_line_steps_reserve_walks_without_waits[0.0-0.0-STRAIGHT_2]
+FAILED src/mission_control/test/test_ball_entry_line_alignment.py::test_normal_line_and_ball_line_steps_reserve_walks_without_waits[-15.0--0.3-STRAIGHT_2]
+FAILED src/mission_control/test/test_ball_entry_line_alignment.py::test_normal_line_and_ball_line_steps_reserve_walks_without_waits[15.0-0.3-STRAIGHT_2]
+FAILED src/mission_control/test/test_ball_entry_search_recovery.py::test_entry_runs_existing_two_direction_search_after_walk_then_stops[0.9-LEFT]
+FAILED src/mission_control/test/test_ball_entry_search_recovery.py::test_entry_runs_existing_two_direction_search_after_walk_then_stops[0.9-RIGHT]
+FAILED src/mission_control/test/test_ball_entry_search_recovery.py::test_entry_runs_existing_two_direction_search_after_walk_then_stops[0.6-LEFT]
+FAILED src/mission_control/test/test_ball_entry_search_recovery.py::test_entry_runs_existing_two_direction_search_after_walk_then_stops[0.6-RIGHT]
+FAILED src/mission_control/test/test_ball_entry_search_recovery.py::test_shared_bins_and_entry_stationary_turns_follow_requested_table[LEFT-counts0]
+FAILED src/mission_control/test/test_ball_entry_search_recovery.py::test_shared_bins_and_entry_stationary_turns_follow_requested_table[RIGHT-counts1]
+9 failed, 313 passed in 2.40s

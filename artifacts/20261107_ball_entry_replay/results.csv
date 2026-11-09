@@ -1,0 +1,11 @@
+action,candidate_earlier_ms,capture_age_ms,command_relative_ms,command_wait_ms,confirmed_relative_ms,missing_tenth,motion_id,queued_before_boundary,required_hits
+RECOVER_LEFT_TURN_LEFT_4,0.0,289.902038,328.338,328.338,328.338,False,line_recovery_ball_first_left_4,False,12
+RECOVER_LEFT_TURN_LEFT_4,0.0,289.902038,134.257,134.257,134.257,False,line_recovery_ball_first_left_4,False,10
+RECOVER_LEFT_TURN_LEFT_4,150.0,289.902038,178.338,178.338,178.338,False,line_recovery_ball_first_left_4,False,12
+RECOVER_LEFT_TURN_LEFT_4,150.0,289.902038,0.0,0,-15.743,False,line_recovery_ball_first_left_4,False,10
+RECOVER_LEFT_TURN_LEFT_4,300.0,289.902038,28.338,28.338,28.338,False,line_recovery_ball_first_left_4,False,12
+RECOVER_LEFT_TURN_LEFT_4,300.0,289.902038,0.0,0,-165.743,False,line_recovery_ball_first_left_4,False,10
+RECOVER_LEFT_TURN_LEFT_4,500.0,289.902038,0.0,0,-171.662,False,line_recovery_ball_first_left_4,False,12
+RECOVER_LEFT_TURN_LEFT_4,500.0,289.902038,-171.662,0,-365.743,False,line_recovery_ball_first_left_4,True,10
+RECOVER_LEFT_TURN_LEFT_4,0.0,289.902038,231.297,231.297,231.297,True,line_recovery_ball_first_left_4,False,10
+,0.0,600.0,,,,False,,,10

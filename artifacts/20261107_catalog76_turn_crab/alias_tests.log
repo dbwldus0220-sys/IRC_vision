@@ -1,0 +1,14 @@
+Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+Note: Google Test filter = MotionAliasCatalog.LoadsAllSource75LeftTurnCamerasAndCounts:MotionAliasCatalog.Source76CrabsShareEntryAndRemoveDirectionTransitions
+[==========] Running 2 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 2 tests from MotionAliasCatalog
+[ RUN      ] MotionAliasCatalog.LoadsAllSource75LeftTurnCamerasAndCounts
+[       OK ] MotionAliasCatalog.LoadsAllSource75LeftTurnCamerasAndCounts (3 ms)
+[ RUN      ] MotionAliasCatalog.Source76CrabsShareEntryAndRemoveDirectionTransitions
+[       OK ] MotionAliasCatalog.Source76CrabsShareEntryAndRemoveDirectionTransitions (2 ms)
+[----------] 2 tests from MotionAliasCatalog (6 ms total)
+
+[----------] Global test environment tear-down
+[==========] 2 tests from 1 test suite ran. (6 ms total)
+[  PASSED  ] 2 tests.

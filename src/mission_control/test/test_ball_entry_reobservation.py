@@ -33,8 +33,13 @@ def observation(clock, *, confirmed=False, angle=0., distance=1.2):
 def prepare(clock, *, angle=0., distance=1.2):
     node, bridge = node_with_entry(), FakeBridge(advance_transition_dwells=False)
     _, running = start_line(node, bridge, clock)
-    clock[0] = node.active_line_motion_started_at + node.active_line_motion_duration_sec * .69
+    # Establish the anchor before reservation collection starts at 60 percent.
+    clock[0] = node.active_line_motion_started_at + node.active_line_motion_duration_sec * .59
     fresh(node, clock, 'ball', observation(clock, confirmed=True, angle=angle, distance=distance), plan=False)
+    # Isolate reobservation tests from the initial-confirmation reservation history.
+    node.ball_entry_walk_frames = []
+    node.approach_walk_capture_count = 0
+    node.approach_walk_candidate = None
     clock[0] = node.active_line_motion_started_at + node.active_line_motion_duration_sec * .72
     assert node.queued_general_command_id is None
     return node, bridge, running
@@ -185,7 +190,7 @@ def test_line_steered_entry_uses_current_candidates_without_waiting_for_confirme
 
 
 @pytest.mark.parametrize('preserve', [False, True])
-def test_gap_retention_is_opt_in_and_does_not_extend_anchor_lifetime(preserve):
+def test_only_verified_current_tracking_extends_reference_lifetime(preserve):
     observer, config = BallApproachObservation(), BallNavigationConfig()
     observer.observe(sample(10.), 10., config, preserve_gaps=preserve)
     for stamp in (10.05, 10.1):
@@ -196,8 +201,10 @@ def test_gap_retention_is_opt_in_and_does_not_extend_anchor_lifetime(preserve):
     observer.observe(sample(10.2, detected=False), 10.2, config, preserve_gaps=preserve)
     assert observer.is_current(10.2) is preserve
     observer.observe(sample(10.51, detected=False), 10.51, config, preserve_gaps=preserve)
-    assert not observer.is_current(10.51)
+    assert observer.is_current(10.51) is preserve
     assert observer.anchor_received_at == 10.
+    observer.observe(sample(11.02, detected=False), 11.02, config, preserve_gaps=preserve)
+    assert not observer.is_current(11.02)
 
 
 @pytest.mark.parametrize('result', ['FAILED', 'TIMEOUT', 'CANCELLED'])

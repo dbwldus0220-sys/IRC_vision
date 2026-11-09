@@ -19,6 +19,7 @@ from test_wait_refresh_and_fine_settle import LiveInputHarness
 
 ROOT = Path(__file__).resolve().parents[3]
 UPDATE = ROOT / 'artifacts/20261106_catalog74_goal_fine'
+SNAPSHOT = ROOT / 'artifacts/20261106_catalog75_fine_hurdle/before'
 MANIFEST = json.loads((UPDATE / 'manifest.json').read_text())
 ALIASES = yaml.safe_load((ROOT / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']
 
@@ -31,20 +32,20 @@ def catalog(path):
 
 
 @pytest.mark.parametrize('depth,count', [
-    (.590, 1), (.600, 1), (.619999, 1), (.620, 2), (.649999, 2),
-    (.650, 3), (.679999, 3), (.680, 4), (.700, 4), (.710, 4), (.850, 4),
+    (.760, 1), (.770, 1), (.789999, 1), (.790, 2), (.819999, 2),
+    (.820, 3), (.849999, 3), (.850, 4),
 ])
 def test_depth_selects_smallest_available_step_into_scoring_band(depth, count):
     command = GoalNavigationPlanner().plan(target_sample(0, depth))
     assert command.action == f'GOAL_CAMERA90_FINE_FORWARD_{count}'
-    if depth < .710:
-        assert depth - count * .030 < .590
-        assert round(depth - (count - 1) * .030, 9) >= .590
+    if depth < .850:
+        assert depth - count * .030 < .760
+        assert round(depth - (count - 1) * .030, 9) >= .760
     bridge = FakeBridge()
     bridge.navigation_command_callback(navigation_message(
         source='goal', action=command.action, source_command=command.to_dict()))
     motion_id = decoded_messages(bridge.executor_request_publisher)[-1]['motion_id']
-    assert ALIASES[motion_id] == f't미세0도({count}회)(골대74)'
+    assert ALIASES[motion_id] == f'p미세90도({count}회)'
 
 
 @pytest.mark.parametrize('depth,updates,action', [
@@ -52,7 +53,7 @@ def test_depth_selects_smallest_available_step_into_scoring_band(depth, count):
     (.589999, {'score_now': True}, 'SHOT'),
     (.449999, {}, 'GOAL_CAMERA90_BACKWARD_1'),
     (.850001, {}, 'GOAL_CAMERA_90_FORWARD_2'),
-    (.650, {'bearing_deg': 30, 'offset_x_px': 200}, 'GOAL_CAMERA90_TURN_RIGHT_3'),
+    (.650, {'bearing_deg': 30, 'offset_x_px': 200}, 'GOAL_CAMERA90_CRAB_RIGHT'),
     (.650, {'depth_valid': False}, 'WAIT'),
 ])
 def test_other_goal_decisions_keep_their_priority(depth, updates, action):
@@ -61,7 +62,8 @@ def test_other_goal_decisions_keep_their_priority(depth, updates, action):
 
 @pytest.mark.parametrize('kind', ['pc', 'runtime'])
 def test_import_preserves_source_and_unrelated_motions(kind):
-    after = catalog(ROOT / f'artifacts/robot_motions_{kind}.json')
+    # Source75 supersedes these frames; retain the source74 historical contract.
+    after = catalog(SNAPSHOT / f'artifacts/robot_motions_{kind}.json')
     before = catalog(UPDATE / f'before/artifacts/robot_motions_{kind}.json')
     source = catalog(UPDATE / 'source_robot_motions.json')
     assert set(after) - set(before) == set(MANIFEST['imported_motions'])
@@ -87,9 +89,10 @@ def test_import_preserves_source_and_unrelated_motions(kind):
 
 def test_only_goal_aliases_change_and_all_aliases_resolve():
     before = yaml.safe_load((UPDATE / 'before/src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']
-    changed = {k for k in ALIASES if ALIASES[k] != before[k]}
+    after74 = yaml.safe_load((SNAPSHOT / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']
+    changed = {k for k in after74 if after74[k] != before[k]}
     assert changed == {f'goal_camera_90_fine_forward_{i}' for i in range(1, 5)}
-    assert set(ALIASES) == set(before)
+    assert set(after74) == set(before)
     assert set(ALIASES.values()) <= catalog(ROOT / 'artifacts/robot_motions_runtime.json').keys()
 
 
@@ -107,11 +110,11 @@ def test_scaled_capture_times_match_runtime_catalog():
 
 def test_goal_reduces_reserved_repeat_count_with_latest_depth(clock):
     node = LiveInputHarness(phase='GOAL_APPROACH')
-    first = start_goal(node, clock, .700)
+    first = start_goal(node, clock, .850)
     assert first['action'] == 'GOAL_CAMERA90_FINE_FORWARD_4'
     clock[0] = node.goal_forward_started_at + Node.GOAL_FORWARD_DURATION_SEC[first['action']] * .75
     for _ in range(3):
-        fresh(node, clock, 'goal', target_sample(0, .600), plan=False)
+        fresh(node, clock, 'goal', target_sample(0, .770), plan=False)
     second = node.publisher.messages[-1]
     assert second['action'] == 'GOAL_CAMERA90_FINE_FORWARD_1'
     assert node.queued_general_command_id == second['command_id']
@@ -119,8 +122,8 @@ def test_goal_reduces_reserved_repeat_count_with_latest_depth(clock):
 
 def test_goal_in_scoring_band_never_reserves_another_fine_step(clock):
     node = LiveInputHarness(phase='GOAL_APPROACH')
-    first = start_goal(node, clock, .600)
+    first = start_goal(node, clock, .770)
     clock[0] = node.goal_forward_started_at + Node.GOAL_FORWARD_DURATION_SEC[first['action']] * .75
     for _ in range(3):
-        fresh(node, clock, 'goal', target_sample(0, .570), plan=False)
+        fresh(node, clock, 'goal', target_sample(0, .740), plan=False)
     assert getattr(node, 'queued_general_command_id', None) is None

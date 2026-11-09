@@ -1,0 +1,16 @@
+{
+  "corrected_motions": [
+    "tt미세왼옆0도",
+    "tt미세왼옆90도",
+    "tt미세왼옆0도(2회)"
+  ],
+  "previous_runtime_speed": 0.9025,
+  "corrected_runtime_speed": 0.95,
+  "stationary_left_turn_runtime_speed_unchanged": 0.855,
+  "left_crab_duration_seconds": 0.568421052631579,
+  "pickup_and_goal_reservation_timing_updated": true,
+  "only_three_motion_speed_fields_changed": true,
+  "python_tests_passed": 170,
+  "python_tests_failed": 0,
+  "hardware_run": false
+}

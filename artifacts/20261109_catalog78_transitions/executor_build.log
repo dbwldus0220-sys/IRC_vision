@@ -1,0 +1,45 @@
+[  6%] Built target robot_motion_runtime_config
+[ 16%] Built target motion_core
+[ 23%] Built target catalog_only_core
+[ 26%] Building CXX object robot_motion_sdk/CMakeFiles/motion_player_core.dir/robot_motion_player.cpp.o
+[ 33%] Built target sdk_executor_core
+[ 40%] Built target simulated_motion_backend
+[ 53%] Built target sdk_executor_driver
+[ 60%] Built target motion_backend_factory
+[ 63%] Linking CXX static library libmotion_player_core.a
+[ 63%] Built target motion_player_core
+[ 80%] Built target robot_control
+[ 86%] Built target robot_motion_player_backend
+[ 93%] Built target production_robot_motion_runtime_factory
+[ 96%] Linking CXX executable sdk_motion_executor
+[100%] Built target sdk_motion_executor
+[ 25%] Built target gtest_main
+[ 62%] Built target catalog_only_core
+[ 75%] Built target gtest
+Consolidate compiler generated dependencies of target test_catalog_only_core
+[ 87%] Building CXX object CMakeFiles/test_catalog_only_core.dir/test/test_catalog_only_core.cpp.o
+[100%] Linking CXX executable test_catalog_only_core
+[100%] Built target test_catalog_only_core
+[ 30%] Built target gtest
+[ 50%] Built target gtest_main
+[ 60%] Built target catalog_only_core
+[ 80%] Built target sdk_executor_core
+Consolidate compiler generated dependencies of target test_sdk_executor_core
+[100%] Built target test_sdk_executor_core
+[ 20%] Built target gtest_main
+[ 40%] Built target catalog_only_core
+[ 60%] Built target gtest
+[ 80%] Built target sdk_executor_core
+Consolidate compiler generated dependencies of target test_queue_control_tick
+[100%] Built target test_queue_control_tick
+[  9%] Built target catalog_only_core
+[ 18%] Built target gtest_main
+[ 27%] Built target gtest
+[ 40%] Built target motion_core
+[ 50%] Built target sdk_executor_core
+Consolidate compiler generated dependencies of target motion_player_core
+[ 59%] Built target motion_player_core
+[ 81%] Built target robot_control
+[ 90%] Built target robot_motion_player_backend
+[ 95%] Linking CXX executable test_robot_motion_player_backend
+[100%] Built target test_robot_motion_player_backend

@@ -59,7 +59,7 @@ GENERAL_ACTIONS = frozenset(
         "GOAL_CAMERA90_RECOVER_LEFT_4",
         "GOAL_CAMERA90_RECOVER_RIGHT_4",
         "GOAL_CAMERA90_BACKWARD_1",
-        *(f"GOAL_CAMERA90_FINE_FORWARD_{count}" for count in range(1, 5)),
+        *(f"GOAL_CAMERA90_FINE_FORWARD_{count}" for count in range(1, 6)),
         "GOAL_CAMERA90_CRAB_RIGHT",
         "GOAL_CAMERA90_CRAB_LEFT",
         "GOAL_SHOT_PREPARE",

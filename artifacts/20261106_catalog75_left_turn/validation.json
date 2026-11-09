@@ -1,0 +1,59 @@
+{
+  "imported_turns": 18,
+  "changed_aliases": {
+    "line_search_left_2": "t제자리좌회전45도(2회)",
+    "stationary_turn_left": "t제자리좌회전45도(6회)",
+    "pickup_second_turn_left_3": "t제자리좌회전45도(3회)",
+    "pickup_camera_down_turn_left_1": "t제자리좌회전0도(1회)",
+    "pickup_camera_down_turn_left_2": "t제자리좌회전0도(2회)",
+    "pickup_camera_down_turn_left_3": "t제자리좌회전0도(3회)",
+    "pickup_camera_down_turn_left_4": "t제자리좌회전0도(4회)",
+    "pickup_camera_down_turn_left_5": "t제자리좌회전0도(5회)",
+    "pickup_camera_down_turn_left_6": "t제자리좌회전0도(6회)",
+    "post_ball_line_turn_left_1": "t제자리좌회전45도(1회)",
+    "post_ball_line_turn_left_2": "t제자리좌회전45도(2회)",
+    "post_ball_line_turn_left_3": "t제자리좌회전45도(3회)",
+    "post_ball_line_turn_left_4": "t제자리좌회전45도(4회)",
+    "post_ball_line_turn_left_5": "t제자리좌회전45도(5회)",
+    "post_ball_line_turn_left_6": "t제자리좌회전45도(6회)",
+    "goal_camera_90_turn_left_1": "t제자리좌회전90도(1회)",
+    "goal_camera_90_turn_left_2": "t제자리좌회전90도(2회)",
+    "goal_camera_90_turn_left_3": "t제자리좌회전90도(3회)",
+    "goal_camera_90_turn_left_4": "t제자리좌회전90도(4회)",
+    "goal_camera_90_turn_left_5": "t제자리좌회전90도(5회)",
+    "goal_camera_90_turn_left_6": "t제자리좌회전90도(6회)",
+    "ball_align_turn_left_1": "t제자리좌회전45도(1회)",
+    "ball_align_turn_left_2": "t제자리좌회전45도(2회)",
+    "ball_align_turn_left_3": "t제자리좌회전45도(3회)",
+    "ball_align_turn_left_4": "t제자리좌회전45도(4회)",
+    "ball_align_turn_left_5": "t제자리좌회전45도(5회)",
+    "ball_align_turn_left_6": "t제자리좌회전45도(6회)"
+  },
+  "runtime_speed": 0.855,
+  "camera45_count6_cycle_ms": 320,
+  "camera45_count6_duration_sec": 2.245614035087719,
+  "python_tests": {
+    "before_passed": 161,
+    "after_passed": 171,
+    "failed": 0
+  },
+  "sdk_mock": {
+    "alignment_chains": 6,
+    "fine_pairs": 75,
+    "left_turn_pairs": 108,
+    "walking_preparation_pairs": 24,
+    "hurdle_completed": true,
+    "unsupported_shortcuts_rejected": true
+  },
+  "cpp_alias_test_passed": true,
+  "catalog_validation_passed": true,
+  "import_idempotent": true,
+  "production_executor_rebuilt": true,
+  "hardware_run": false,
+  "notes": "Runtime catalog, alias YAML and installed executor point to workspace/build outputs. Restart running nodes to load changes.",
+  "upsert_tests": {
+    "passed": 15,
+    "failed": 1,
+    "existing_failure": "test_production_runtime_preserves_original_shoulders_and_other_fields: unrelated pre-existing runtime/PC speed differences, also present before this update"
+  }
+}

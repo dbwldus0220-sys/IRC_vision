@@ -697,6 +697,7 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
     def _publish(self, info: HurdleInfo) -> None:
         message = String()
         payload = asdict(info)
+        payload["stamp"] = getattr(self, "_active_capture_stamp", None)
         payload["head_down_trigger_bottom_distance_px"] = self.head_down_trigger_bottom_distance_px
         payload.update(self.confirmation_fields)
         payload.update(self.go_confirmation_fields)
@@ -719,6 +720,8 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
             self.get_logger().warning(f"Invalid detections message: {exc}")
             return
 
+        # Forward the original RGB timestamp, including empty observations.
+        self._active_capture_stamp = payload.get("stamp")
         image_width, image_height = self._image_size(payload)
         candidates: list[HurdleCandidate] = []
         outside_tracking_range = False

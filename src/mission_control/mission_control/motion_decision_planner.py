@@ -134,7 +134,6 @@ class MotionDecisionPlanner:
     BALL_STATIONARY_TURN_MIN_BOTTOM_PX = 120.0
     PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX = 360.0
     PICKUP_CLOSE_CRAB_BOTTOM_DISTANCE_PX = 100.0
-    PICKUP_VISIBLE_BACKWARD_BOTTOM_DISTANCE_PX = 100.0
     PICKUP_FINE_LEFT_BOUND_PX = -30.0
     PICKUP_FINE_RIGHT_BOUND_PX = 55.0
     BALL_LOST_TOP_EDGE_RATIO = 0.10
@@ -194,6 +193,7 @@ class MotionDecisionPlanner:
         self.ball_interior_loss_backward_state = "IDLE"
         self.pickup_close_alignment_active = False
         self.pickup_fine_approach_complete = False
+        self.pickup_fine_progress_complete = False
         self.pickup_last_completed_motion_id: str | None = None
         self.pickup_last_visible_bottom_distance_px: float | None = None
         self.last_ball_turn_direction: str | None = None
@@ -1108,6 +1108,10 @@ class MotionDecisionPlanner:
         fine: bool,
     ) -> MotionDecision | None:
         """Use the camera-down posture and return to the same checkpoint."""
+        if (info is None or info.get("detected") is not True
+                or info.get("head_down_requested") is not True
+                or info.get("confirmation_confirmed") is False):
+            self.pickup_fine_progress_complete = False
         self._remember_pickup_close_ball(info)
         if (
             info is None
@@ -1510,9 +1514,8 @@ class MotionDecisionPlanner:
                 source_command=common,
             )
 
-        backward = self._pickup_visible_ball_backward(phase, common, fine=True)
-        if backward is not None:
-            return backward
+        if info.get('pickup_head_ready') is False:
+            return self._pickup_head_wait(phase, common)
 
         # Latch only a valid checkpoint observation, after the motion/dwell.
         # Crab/body sway must not restart forward approach for the same pickup.
@@ -1541,6 +1544,9 @@ class MotionDecisionPlanner:
         fine_required = (not pickup_fine_can_skip(self.pickup_last_completed_motion_id, bottom_distance_px)
                          if skip_limit is not None
                          else not self.pickup_fine_approach_complete)
+        if self.pickup_fine_progress_complete:
+            fine_required = False
+        common["pickup_fine_progress_complete"] = self.pickup_fine_progress_complete
         common.update(pickup_last_completed_motion_id=self.pickup_last_completed_motion_id,
                       pickup_fine_skip_limit_px=skip_limit)
         if fine_required or not crab_allowed:
@@ -1558,26 +1564,12 @@ class MotionDecisionPlanner:
                             "catalog_motion_available": True},
         )
 
-    def _pickup_visible_ball_backward(
-        self, phase: str, common: dict, *, fine: bool,
-    ) -> MotionDecision | None:
-        """Restore distance before alignment, one retreat per fresh checkpoint."""
-        if common["bottom_distance_px"] >= self.PICKUP_VISIBLE_BACKWARD_BOTTOM_DISTANCE_PX:
-            return None
-        stage = "FINE" if fine else "INITIAL"
+    @staticmethod
+    def _pickup_head_wait(phase: str, common: dict) -> MotionDecision:
         return MotionDecision(
-            phase=phase, source="ball", action=f"BALL_PICKUP_{stage}_BACKWARD",
-            valid=True, reason="visible_ball_too_close_backward_required",
-            sdk_motion_requested=True, requires_ack=False,
-            source_command={
-                **common,
-                "pickup_alignment_mode": "BACKWARD",
-                "pickup_visible_backward_bottom_distance_px": (
-                    self.PICKUP_VISIBLE_BACKWARD_BOTTOM_DISTANCE_PX
-                ),
-                "backward_count": 1,
-                "catalog_motion_available": True,
-            },
+            phase=phase, source='ball', action='WAIT', valid=False,
+            reason='pickup_waiting_for_head_down_frame', sdk_motion_requested=False,
+            requires_ack=False, source_command=common,
         )
 
     def _pickup_heading_correction(
@@ -1725,9 +1717,8 @@ class MotionDecisionPlanner:
                 source_command=common,
             )
 
-        backward = self._pickup_visible_ball_backward(phase, common, fine=False)
-        if backward is not None:
-            return backward
+        if info.get('pickup_head_ready') is False:
+            return self._pickup_head_wait(phase, common)
 
         correction = self._pickup_heading_correction(info, phase, common, fine=False)
         if correction is not None:
@@ -2133,6 +2124,7 @@ class MotionDecisionPlanner:
         """Discard recovery state for a ball that was picked up successfully."""
         self.pickup_close_alignment_active = False
         self.pickup_fine_approach_complete = False
+        self.pickup_fine_progress_complete = False
         self._clear_ball_tracking()
         # A latched pickup can bypass plan(), so release ownership on its ACK.
         self.ball_lock_active = False
@@ -2157,6 +2149,7 @@ class MotionDecisionPlanner:
         """Release BALL ownership after all configured pickups complete."""
         self.pickup_close_alignment_active = False
         self.pickup_fine_approach_complete = False
+        self.pickup_fine_progress_complete = False
         self._clear_ball_tracking()
         self.ball_lock_active = False
         self.ball_terminal_requested = False

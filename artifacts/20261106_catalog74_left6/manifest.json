@@ -1,0 +1,10 @@
+{
+  "motion": "t제자리좌회전45도(6회)",
+  "source_sha256": "f6c4bc41a1e8aeb498624594e5ae59718f9f3f55ae7cfc4960886bfac6349e0b",
+  "pose_renames": {
+    "t제좌왼들45도": "t제좌왼들45도(catalog74_left6)",
+    "오뒤무게중심앞": "오뒤무게중심앞(catalog75_left)"
+  },
+  "runtime_speed": 0.855,
+  "cycle_ms": 295
+}
