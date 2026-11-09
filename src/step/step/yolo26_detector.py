@@ -2636,7 +2636,7 @@ class Yolo26Detector(Node):
                     )
                     cv2.putText(
                         image,
-                        "RING COLUMN | AIM "
+                        "RING COLUMN | AIM(M) "
                         + self._metric_text(
                             ring_aim_label, "deg", 1, signed=True,
                         ),
@@ -2829,11 +2829,11 @@ class Yolo26Detector(Node):
                 )
                 + " / "
                 + self._metric_text(waist_ring_depth, "m", 3),
-                "Ring aim    : "
+                "Ring aim(M) : "
                 + self._metric_text(
                     waist_ring_aim, "deg", 1, signed=True,
                 ),
-                f"Ring turn   : {waist_ring_direction}",
+                f"Physical turn: {waist_ring_direction}",
                 "Width N/M   : "
                 + self._metric_text(nominal_width, "", 4)
                 + " / "

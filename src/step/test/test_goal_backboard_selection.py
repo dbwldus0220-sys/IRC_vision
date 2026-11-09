@@ -27,8 +27,8 @@ def make_analyzer(depth_m=0.4, required_hits=1, robot_center_offset_px=0.0):
     analyzer.backboard_sample_y_ratio = 0.18
     analyzer.backboard_edge_inset_ratio = 0.10
     analyzer.backboard_parallel_tolerance_deg = 3.0
-    analyzer.camera_to_waist_depth_offset_m = 0.065
-    analyzer.camera_to_waist_lateral_offset_m = 0.035
+    analyzer.camera_to_waist_depth_offset_m = 0.10
+    analyzer.camera_to_waist_lateral_offset_m = 0.030
     analyzer.backboard_to_ring_center_forward_m = 0.10
     analyzer.waist_aim_deadband_deg = 1.0
     analyzer.publish_empty_when_missing = True

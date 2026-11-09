@@ -19,8 +19,8 @@ def _geometry_analyzer() -> GoalAnalyzer:
     analyzer.backboard_sample_y_ratio = 0.18
     analyzer.backboard_edge_inset_ratio = 0.10
     analyzer.backboard_parallel_tolerance_deg = 3.0
-    analyzer.camera_to_waist_depth_offset_m = 0.065
-    analyzer.camera_to_waist_lateral_offset_m = 0.035
+    analyzer.camera_to_waist_depth_offset_m = 0.10
+    analyzer.camera_to_waist_lateral_offset_m = 0.030
     analyzer.backboard_to_ring_center_forward_m = 0.10
     analyzer.waist_aim_deadband_deg = 1.0
     analyzer.fx = 600.0
@@ -86,7 +86,7 @@ def test_angle_requires_all_three_depth_samples():
     assert result == (None, None, "UNKNOWN", None, None)
 
 
-def test_waist_aim_uses_65mm_forward_camera_offset():
+def test_waist_aim_uses_measured_camera_to_waist_offsets():
     analyzer = _geometry_analyzer()
 
     waist_depth, waist_aim, direction = analyzer._waist_center_aim(
@@ -94,9 +94,9 @@ def test_waist_aim_uses_65mm_forward_camera_offset():
         -0.197,
     )
 
-    assert waist_depth == pytest.approx(0.495)
+    assert waist_depth == pytest.approx(0.53)
     assert waist_aim == pytest.approx(
-        math.degrees(math.atan2(-0.197 - 0.035, 0.495))
+        math.degrees(math.atan2(-0.197 - 0.030, 0.53))
     )
     assert direction == "TURN_LEFT"
 
@@ -116,9 +116,11 @@ def test_ring_center_aim_uses_radius_and_board_yaw():
     assert ring_z == pytest.approx(
         0.5 - 0.10 * math.cos(math.radians(30.0))
     )
-    assert waist_x == pytest.approx(ring_x - 0.035)
-    assert waist_z == pytest.approx(ring_z + 0.065)
-    assert aim == pytest.approx(math.degrees(math.atan2(waist_x, waist_z)))
+    assert waist_x == pytest.approx(ring_x - 0.030)
+    assert waist_z == pytest.approx(ring_z + 0.10)
+    assert aim == pytest.approx(
+        -math.degrees(math.atan2(waist_x, waist_z))
+    )
     assert direction == "TURN_RIGHT"
 
 
@@ -131,9 +133,11 @@ def test_lateral_camera_mount_is_distance_dependent_not_fixed_angle():
         0.0,
     )
 
-    assert waist_x == pytest.approx(-0.035)
-    assert waist_z == pytest.approx(0.5 - 0.10 + 0.065)
-    assert aim == pytest.approx(math.degrees(math.atan2(-0.035, waist_z)))
+    assert waist_x == pytest.approx(-0.030)
+    assert waist_z == pytest.approx(0.5 - 0.10 + 0.10)
+    assert aim == pytest.approx(
+        -math.degrees(math.atan2(-0.030, waist_z))
+    )
     assert direction == "TURN_LEFT"
 
 
@@ -162,11 +166,11 @@ def test_goal_info_publishes_three_depths_and_relative_angle():
     assert info["backboard_angle_direction"] == "LEFT_FAR"
     assert info["backboard_angle_valid"] is True
     assert info["backboard_line_width_m"] == pytest.approx(0.155)
-    assert info["camera_to_waist_depth_offset_m"] == pytest.approx(0.065)
-    assert info["camera_to_waist_lateral_offset_m"] == pytest.approx(0.035)
-    assert info["waist_depth_m"] == pytest.approx(0.565)
+    assert info["camera_to_waist_depth_offset_m"] == pytest.approx(0.10)
+    assert info["camera_to_waist_lateral_offset_m"] == pytest.approx(0.030)
+    assert info["waist_depth_m"] == pytest.approx(0.6)
     assert info["waist_aim_deg"] == pytest.approx(
-        math.degrees(math.atan2(-0.035, 0.565)), abs=1e-3
+        math.degrees(math.atan2(-0.030, 0.6)), abs=1e-3
     )
     assert info["waist_turn_direction"] == "TURN_LEFT"
     assert info["backboard_to_ring_center_forward_m"] == pytest.approx(0.10)
@@ -177,10 +181,10 @@ def test_goal_info_publishes_three_depths_and_relative_angle():
         0.5 - 0.10 * math.cos(math.radians(-15.0)), abs=1e-4
     )
     assert info["waist_ring_depth_m"] == pytest.approx(
-        info["ring_center_depth_m"] + 0.065, abs=1e-4
+        info["ring_center_depth_m"] + 0.10, abs=1e-4
     )
     assert info["waist_ring_lateral_m"] == pytest.approx(
-        info["ring_center_lateral_m"] - 0.035, abs=1e-4
+        info["ring_center_lateral_m"] - 0.030, abs=1e-4
     )
-    assert info["waist_ring_aim_deg"] < 0.0
+    assert info["waist_ring_aim_deg"] > 0.0
     assert info["waist_ring_turn_direction"] == "TURN_LEFT"

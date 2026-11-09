@@ -176,9 +176,9 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         self.declare_parameter("backboard_sample_y_ratio", 0.18)
         self.declare_parameter("backboard_edge_inset_ratio", 0.10)
         self.declare_parameter("backboard_parallel_tolerance_deg", 3.0)
-        self.declare_parameter("camera_to_waist_depth_offset_m", 0.065)
+        self.declare_parameter("camera_to_waist_depth_offset_m", 0.10)
         # Positive means the waist center is to image-right of the camera.
-        self.declare_parameter("camera_to_waist_lateral_offset_m", 0.035)
+        self.declare_parameter("camera_to_waist_lateral_offset_m", 0.030)
         # Assumes the ring's rear edge is at the backboard plane, so its
         # 10 cm radius is also the board-plane-to-ring-center distance.
         self.declare_parameter("backboard_to_ring_center_forward_m", 0.10)
@@ -651,11 +651,13 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         float | None,
         str,
     ]:
-        """Return the horizontal ring-center geometry and waist yaw.
+        """Return ring geometry and a motor-signed waist yaw delta.
 
         Only horizontal-plane geometry is used; the ring's vertical drop
         below the sampled backboard line does not affect a waist yaw joint.
         Positive board yaw means the board's right side is farther away.
+        The returned aim uses the waist motor convention, which is the
+        opposite sign of the geometric yaw: motor_delta = -geometric_yaw.
         """
         if (
             board_depth_m is None
@@ -681,13 +683,14 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         if ring_depth <= 0.0 or waist_ring_depth <= 0.0:
             return None, None, None, None, None, "UNKNOWN"
 
-        aim = math.degrees(math.atan2(
+        geometric_aim = math.degrees(math.atan2(
             waist_ring_lateral,
             waist_ring_depth,
         ))
-        if abs(aim) <= self.waist_aim_deadband_deg:
+        motor_delta = -geometric_aim
+        if abs(geometric_aim) <= self.waist_aim_deadband_deg:
             direction = "CENTER"
-        elif aim > 0.0:
+        elif geometric_aim > 0.0:
             direction = "TURN_RIGHT"
         else:
             direction = "TURN_LEFT"
@@ -696,7 +699,7 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
             ring_depth,
             waist_ring_lateral,
             waist_ring_depth,
-            aim,
+            motor_delta,
             direction,
         )
 
