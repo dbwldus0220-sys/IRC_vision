@@ -32,6 +32,103 @@ from .temporal_confirmation import depth_is_within_range
 from .temporal_confirmation import TemporalConfirmationFilter
 
 
+def fit_hurdle_yaw_from_depth_samples(
+    samples: list[dict[str, Any]],
+    *,
+    fx: float | None,
+    fy: float | None,
+    cx: float | None,
+    cy: float | None,
+    pitch_down_deg: float,
+    yaw_right_deg: float = 0.0,
+    roll_clockwise_deg: float = 0.0,
+) -> dict[str, float | int | None]:
+    """Fit the visible hurdle span in robot X-Z for one camera pose.
+
+    This is diagnostic geometry only.  It intentionally does not replace the
+    deployed ``hurdle_angle_deg`` consumed by navigation.  Each aligned-depth
+    sample is deprojected independently, so neither the full hurdle length nor
+    the YOLO bbox width is assumed to be visible.
+    """
+    empty: dict[str, float | int | None] = {
+        "angle_deg": None,
+        "point_count": 0,
+        "span_m": None,
+        "rmse_m": None,
+    }
+    intrinsics = (fx, fy, cx, cy)
+    if (
+        any(value is None for value in intrinsics)
+        or float(fx) <= 0.0
+        or float(fy) <= 0.0
+        or not all(math.isfinite(float(value)) for value in (
+            pitch_down_deg, yaw_right_deg, roll_clockwise_deg,
+        ))
+    ):
+        return empty
+
+    pitch = math.radians(float(pitch_down_deg))
+    cos_pitch = math.cos(pitch)
+    sin_pitch = math.sin(pitch)
+    yaw = math.radians(float(yaw_right_deg))
+    cos_yaw = math.cos(yaw)
+    sin_yaw = math.sin(yaw)
+    roll = math.radians(float(roll_clockwise_deg))
+    cos_roll = math.cos(roll)
+    sin_roll = math.sin(roll)
+    points: list[list[float]] = []
+    for sample in samples:
+        try:
+            u = float(sample["x_px"])
+            v = float(sample["y_px"])
+            depth = float(sample["depth_m"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if not all(math.isfinite(value) for value in (u, v, depth)) or depth <= 0.0:
+            continue
+        camera_x = (u - float(cx)) * depth / float(fx)
+        camera_y_down = (v - float(cy)) * depth / float(fy)
+        # Undo the camera mounting rotation before projecting into the robot's
+        # horizontal X-Z plane. Translation is intentionally absent: moving a
+        # camera left/right changes position, not the direction of a 3-D line.
+        rolled_x = camera_x * cos_roll - camera_y_down * sin_roll
+        rolled_y = camera_x * sin_roll + camera_y_down * cos_roll
+        pitched_forward = depth * cos_pitch - rolled_y * sin_pitch
+        robot_x = rolled_x * cos_yaw + pitched_forward * sin_yaw
+        robot_forward = -rolled_x * sin_yaw + pitched_forward * cos_yaw
+        if math.isfinite(robot_x) and math.isfinite(robot_forward):
+            points.append([robot_x, robot_forward])
+
+    empty["point_count"] = len(points)
+    if len(points) < 2:
+        return empty
+    array = np.asarray(points, dtype=np.float64)
+    centered = array - np.mean(array, axis=0)
+    try:
+        _, _, vectors = np.linalg.svd(centered, full_matrices=False)
+    except np.linalg.LinAlgError:
+        return empty
+    direction = vectors[0]
+    if direction[0] < 0.0:
+        direction = -direction
+    projections = centered @ direction
+    span = float(np.max(projections) - np.min(projections))
+    if not math.isfinite(span) or span <= 1e-6:
+        return empty
+    perpendicular = np.asarray([-direction[1], direction[0]])
+    residuals = centered @ perpendicular
+    rmse = float(np.sqrt(np.mean(np.square(residuals))))
+    angle = math.degrees(math.atan2(float(direction[1]), float(direction[0])))
+    if not all(math.isfinite(value) for value in (angle, rmse)):
+        return empty
+    return {
+        "angle_deg": round(angle, 3),
+        "point_count": len(points),
+        "span_m": round(span, 4),
+        "rmse_m": round(rmse, 4),
+    }
+
+
 @dataclass(frozen=True)
 class HurdleCandidate:
     """One hurdle candidate with image and depth geometry."""
@@ -61,6 +158,20 @@ class HurdleCandidate:
     left_depth_m: float | None
     right_depth_m: float | None
     hurdle_angle_deg: float | None
+    hurdle_angle_45_deg: float | None
+    hurdle_angle_0_deg: float | None
+    hurdle_angle_45_fit_span_m: float | None
+    hurdle_angle_0_fit_span_m: float | None
+    hurdle_angle_45_fit_rmse_m: float | None
+    hurdle_angle_0_fit_rmse_m: float | None
+    hurdle_angle_fit_point_count: int
+    hurdle_angle_sample_source: str
+    hurdle_bar_image_angle_deg: float | None
+    hurdle_bar_mask_pixel_count: int
+    hurdle_bar_fit_rmse_px: float | None
+    hurdle_bar_elongation: float | None
+    hurdle_bar_clipped_edges: list[str]
+    depth_samples: list[dict[str, Any]]
     depth_valid: bool
     depth_sample_count: int
     score: float
@@ -118,6 +229,20 @@ class HurdleInfo:
     bottom_distance_px: int | None = None
     camera_center_offset_x_px: int | None = None
     head_down_requested: bool = False
+    hurdle_angle_45_deg: float | None = None
+    hurdle_angle_0_deg: float | None = None
+    hurdle_angle_45_fit_span_m: float | None = None
+    hurdle_angle_0_fit_span_m: float | None = None
+    hurdle_angle_45_fit_rmse_m: float | None = None
+    hurdle_angle_0_fit_rmse_m: float | None = None
+    hurdle_angle_fit_point_count: int = 0
+    hurdle_angle_sample_source: str = "unavailable"
+    hurdle_bar_image_angle_deg: float | None = None
+    hurdle_bar_mask_pixel_count: int = 0
+    hurdle_bar_fit_rmse_px: float | None = None
+    hurdle_bar_elongation: float | None = None
+    hurdle_bar_clipped_edges: list[str] | None = None
+    depth_samples: list[dict[str, Any]] | None = None
 
 
 class HurdleAnalyzer(DepthFrameConsumer, Node):
@@ -140,13 +265,28 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
         self.declare_parameter("min_confidence", 0.60)
         self.declare_parameter("depth_timeout_sec", 0.7)
         self.declare_parameter("depth_window_px", 9)
+        # These are optical pitch hypotheses, not the raw head-servo values.
+        # The deployed names call the -34 deg servo pose "camera 45" and the
+        # -64 deg servo pose "camera 0".  Keep both diagnostic estimates in
+        # every hurdle message so a later controller can choose explicitly.
+        self.declare_parameter("hurdle_camera_45_pitch_down_deg", 38.4)
+        self.declare_parameter("hurdle_camera_0_pitch_down_deg", 68.3)
+        self.declare_parameter("hurdle_camera_45_yaw_right_deg", -5.2)
+        self.declare_parameter("hurdle_camera_0_yaw_right_deg", -5.2)
+        self.declare_parameter("hurdle_camera_45_roll_clockwise_deg", 0.0)
+        self.declare_parameter("hurdle_camera_0_roll_clockwise_deg", 0.0)
+        self.declare_parameter("hurdle_camera_45_servo_deg", -34.0)
+        self.declare_parameter("hurdle_camera_0_servo_deg", -64.0)
         self.declare_parameter("max_valid_depth_m", 4.0)
         self.declare_parameter("detect_depth_m", 1.5)
         self.declare_parameter("go_target_depth_m", 0.10)
         self.declare_parameter("go_depth_tolerance_m", 0.10)
         self.declare_parameter("go_angle_tolerance_deg", 8.0)
         self.declare_parameter("direction_deadband_norm", 0.04)
-        self.declare_parameter("head_down_trigger_bottom_distance_px", HURDLE_HEAD_DOWN_BOTTOM_DISTANCE_PX)
+        self.declare_parameter(
+            "head_down_trigger_bottom_distance_px",
+            HURDLE_HEAD_DOWN_BOTTOM_DISTANCE_PX,
+        )
         self.declare_parameter("confirmation_window_size", 40)
         self.declare_parameter("confirmation_required_hits", 5)
         self.declare_parameter("confirmation_max_missed_frames", 4)
@@ -175,6 +315,30 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
         )
         if self.depth_window_px % 2 == 0:
             self.depth_window_px += 1
+        self.hurdle_camera_45_pitch_down_deg = self._float_parameter(
+            "hurdle_camera_45_pitch_down_deg"
+        )
+        self.hurdle_camera_0_pitch_down_deg = self._float_parameter(
+            "hurdle_camera_0_pitch_down_deg"
+        )
+        self.hurdle_camera_45_yaw_right_deg = self._float_parameter(
+            "hurdle_camera_45_yaw_right_deg"
+        )
+        self.hurdle_camera_0_yaw_right_deg = self._float_parameter(
+            "hurdle_camera_0_yaw_right_deg"
+        )
+        self.hurdle_camera_45_roll_clockwise_deg = self._float_parameter(
+            "hurdle_camera_45_roll_clockwise_deg"
+        )
+        self.hurdle_camera_0_roll_clockwise_deg = self._float_parameter(
+            "hurdle_camera_0_roll_clockwise_deg"
+        )
+        self.hurdle_camera_45_servo_deg = self._float_parameter(
+            "hurdle_camera_45_servo_deg"
+        )
+        self.hurdle_camera_0_servo_deg = self._float_parameter(
+            "hurdle_camera_0_servo_deg"
+        )
         self.max_valid_depth_m = self._float_parameter(
             "max_valid_depth_m"
         )
@@ -300,6 +464,27 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
     def _float_parameter(self, name: str) -> float:
         return float(self.get_parameter(name).value)
 
+    @staticmethod
+    def _optional_float(value: Any) -> float | None:
+        try:
+            number = float(value)
+        except (TypeError, ValueError):
+            return None
+        return round(number, 4) if math.isfinite(number) else None
+
+    @staticmethod
+    def _nonnegative_int(value: Any) -> int:
+        try:
+            return max(0, int(value))
+        except (TypeError, ValueError):
+            return 0
+
+    @staticmethod
+    def _string_list(value: Any) -> list[str]:
+        if not isinstance(value, list):
+            return []
+        return [str(item) for item in value if str(item)]
+
     def _camera_info_callback(self, message: CameraInfo) -> None:
         if len(message.k) < 6:
             return
@@ -352,7 +537,13 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
         bbox: list[int],
         source_width: int | None,
         source_height: int | None,
-    ) -> tuple[float | None, float | None, float | None, int]:
+    ) -> tuple[
+        float | None,
+        float | None,
+        float | None,
+        int,
+        list[dict[str, Any]],
+    ]:
         depth_age = self._depth_age_sec()
         if (
             self.latest_depth_image is None
@@ -361,37 +552,55 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
             or depth_age > self.depth_timeout_sec
             or self.latest_depth_image.ndim != 2
         ):
-            return None, None, None, 0
+            return None, None, None, 0, []
         depth_height, depth_width = self.latest_depth_image.shape[:2]
         source_width = int(source_width or depth_width)
         source_height = int(source_height or depth_height)
         scale_x = depth_width / max(source_width, 1)
         scale_y = depth_height / max(source_height, 1)
-        left, top, right, bottom = (
+        depth_left, depth_top, depth_right, depth_bottom = (
             int(round(bbox[0] * scale_x)),
             int(round(bbox[1] * scale_y)),
             int(round(bbox[2] * scale_x)),
             int(round(bbox[3] * scale_y)),
         )
-        left = max(0, min(depth_width - 1, left))
-        right = max(left + 1, min(depth_width, right))
-        top = max(0, min(depth_height - 1, top))
-        bottom = max(top + 1, min(depth_height, bottom))
-        width = right - left
-        sample_y = int(round(top + (bottom - top) * 0.55))
+        depth_left = max(0, min(depth_width - 1, depth_left))
+        depth_right = max(depth_left + 1, min(depth_width, depth_right))
+        depth_top = max(0, min(depth_height - 1, depth_top))
+        depth_bottom = max(depth_top + 1, min(depth_height, depth_bottom))
+        depth_bbox_width = depth_right - depth_left
+        depth_sample_y = int(round(
+            depth_top + (depth_bottom - depth_top) * 0.55
+        ))
+        source_left, source_top, source_right, source_bottom = bbox
+        source_bbox_width = source_right - source_left
+        source_sample_y = int(round(
+            source_top + (source_bottom - source_top) * 0.55
+        ))
         ratios = [0.15, 0.325, 0.50, 0.675, 0.85]
         medians: list[float | None] = []
-        for ratio in ratios:
+        samples: list[dict[str, Any]] = []
+        for index, ratio in enumerate(ratios, start=1):
+            depth_x = int(round(depth_left + depth_bbox_width * ratio))
             values = self._valid_patch_m(
-                int(round(left + width * ratio)),
-                sample_y,
+                depth_x,
+                depth_sample_y,
             )
-            medians.append(
-                float(np.median(values)) if values.size else None
-            )
+            median = float(np.median(values)) if values.size else None
+            medians.append(median)
+            samples.append({
+                "index": index,
+                "ratio": ratio,
+                "x_px": int(round(source_left + source_bbox_width * ratio)),
+                "y_px": source_sample_y,
+                "depth_x_px": depth_x,
+                "depth_y_px": depth_sample_y,
+                "depth_m": round(median, 4) if median is not None else None,
+                "valid_pixel_count": int(values.size),
+            })
         valid = [value for value in medians if value is not None]
         if not valid:
-            return None, None, None, 0
+            return None, None, None, 0, samples
         left_depth = next(
             (value for value in medians if value is not None),
             None,
@@ -400,7 +609,61 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
             (value for value in reversed(medians) if value is not None),
             None,
         )
-        return float(np.median(valid)), left_depth, right_depth, len(valid)
+        return (
+            float(np.median(valid)),
+            left_depth,
+            right_depth,
+            len(valid),
+            samples,
+        )
+
+    def _sample_depth_points(
+        self,
+        raw_points: Any,
+        source_width: int | None,
+        source_height: int | None,
+    ) -> list[dict[str, Any]]:
+        """Sample aligned depth at RGB hurdle-centerline coordinates."""
+        depth_age = self._depth_age_sec()
+        if (
+            not isinstance(raw_points, list)
+            or self.latest_depth_image is None
+            or self.latest_depth_time is None
+            or depth_age is None
+            or depth_age > self.depth_timeout_sec
+            or self.latest_depth_image.ndim != 2
+        ):
+            return []
+        depth_height, depth_width = self.latest_depth_image.shape[:2]
+        source_width = int(source_width or depth_width)
+        source_height = int(source_height or depth_height)
+        scale_x = depth_width / max(source_width, 1)
+        scale_y = depth_height / max(source_height, 1)
+        samples: list[dict[str, Any]] = []
+        for index, raw_point in enumerate(raw_points, start=1):
+            if not isinstance(raw_point, (list, tuple)) or len(raw_point) != 2:
+                continue
+            try:
+                source_x = float(raw_point[0])
+                source_y = float(raw_point[1])
+            except (TypeError, ValueError):
+                continue
+            if not all(math.isfinite(value) for value in (source_x, source_y)):
+                continue
+            depth_x = int(round(source_x * scale_x))
+            depth_y = int(round(source_y * scale_y))
+            values = self._valid_patch_m(depth_x, depth_y)
+            median = float(np.median(values)) if values.size else None
+            samples.append({
+                "index": index,
+                "x_px": int(round(source_x)),
+                "y_px": int(round(source_y)),
+                "depth_x_px": depth_x,
+                "depth_y_px": depth_y,
+                "depth_m": round(median, 4) if median is not None else None,
+                "valid_pixel_count": int(values.size),
+            })
+        return samples
 
     def _image_size(
         self,
@@ -451,8 +714,52 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
             offset_x_norm = offset_x_px / max(image_width / 2, 1.0)
             offset_y_norm = offset_y_px / max(image_height / 2, 1.0)
 
-        depth, left_depth, right_depth, sample_count = (
-            self._sample_depths(bbox, image_width, image_height)
+        sampled = self._sample_depths(bbox, image_width, image_height)
+        # Preserve compatibility with tests and external diagnostic subclasses
+        # that override the old private four-value sampler.
+        depth, left_depth, right_depth, sample_count = sampled[:4]
+        raw_bar_points = detection.get("hurdle_bar_points_px", [])
+        depth_samples = self._sample_depth_points(
+            raw_bar_points,
+            image_width,
+            image_height,
+        )
+        sample_source = (
+            "yellow_bar_centerline"
+            if len(depth_samples) >= 2
+            else "unavailable"
+        )
+        angle_45_fit = fit_hurdle_yaw_from_depth_samples(
+            depth_samples,
+            fx=self.fx,
+            fy=self.fy,
+            cx=self.cx,
+            cy=self.cy,
+            pitch_down_deg=getattr(
+                self, "hurdle_camera_45_pitch_down_deg", 38.4,
+            ),
+            yaw_right_deg=getattr(
+                self, "hurdle_camera_45_yaw_right_deg", -5.2,
+            ),
+            roll_clockwise_deg=getattr(
+                self, "hurdle_camera_45_roll_clockwise_deg", 0.0,
+            ),
+        )
+        angle_0_fit = fit_hurdle_yaw_from_depth_samples(
+            depth_samples,
+            fx=self.fx,
+            fy=self.fy,
+            cx=self.cx,
+            cy=self.cy,
+            pitch_down_deg=getattr(
+                self, "hurdle_camera_0_pitch_down_deg", 68.3,
+            ),
+            yaw_right_deg=getattr(
+                self, "hurdle_camera_0_yaw_right_deg", -5.2,
+            ),
+            roll_clockwise_deg=getattr(
+                self, "hurdle_camera_0_roll_clockwise_deg", 0.0,
+            ),
         )
         depth_valid = depth is not None
         bearing: float | None = None
@@ -575,6 +882,30 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
                 if hurdle_angle is not None
                 else None
             ),
+            hurdle_angle_45_deg=angle_45_fit["angle_deg"],
+            hurdle_angle_0_deg=angle_0_fit["angle_deg"],
+            hurdle_angle_45_fit_span_m=angle_45_fit["span_m"],
+            hurdle_angle_0_fit_span_m=angle_0_fit["span_m"],
+            hurdle_angle_45_fit_rmse_m=angle_45_fit["rmse_m"],
+            hurdle_angle_0_fit_rmse_m=angle_0_fit["rmse_m"],
+            hurdle_angle_fit_point_count=int(angle_45_fit["point_count"] or 0),
+            hurdle_angle_sample_source=sample_source,
+            hurdle_bar_image_angle_deg=self._optional_float(
+                detection.get("hurdle_bar_image_angle_deg"),
+            ),
+            hurdle_bar_mask_pixel_count=self._nonnegative_int(
+                detection.get("hurdle_bar_mask_pixel_count"),
+            ),
+            hurdle_bar_fit_rmse_px=self._optional_float(
+                detection.get("hurdle_bar_fit_rmse_px"),
+            ),
+            hurdle_bar_elongation=self._optional_float(
+                detection.get("hurdle_bar_elongation"),
+            ),
+            hurdle_bar_clipped_edges=self._string_list(
+                detection.get("hurdle_bar_clipped_edges"),
+            ),
+            depth_samples=depth_samples,
             depth_valid=depth_valid,
             depth_sample_count=sample_count,
             score=round(priority, 4),
@@ -699,6 +1030,19 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
         payload = asdict(info)
         payload["stamp"] = getattr(self, "_active_capture_stamp", None)
         payload["head_down_trigger_bottom_distance_px"] = self.head_down_trigger_bottom_distance_px
+        payload["legacy_hurdle_angle_sample_source"] = "bbox_row_55pct"
+        payload["hurdle_camera_45_pitch_down_deg"] = self.hurdle_camera_45_pitch_down_deg
+        payload["hurdle_camera_0_pitch_down_deg"] = self.hurdle_camera_0_pitch_down_deg
+        payload["hurdle_camera_45_yaw_right_deg"] = self.hurdle_camera_45_yaw_right_deg
+        payload["hurdle_camera_0_yaw_right_deg"] = self.hurdle_camera_0_yaw_right_deg
+        payload["hurdle_camera_45_roll_clockwise_deg"] = self.hurdle_camera_45_roll_clockwise_deg
+        payload["hurdle_camera_0_roll_clockwise_deg"] = self.hurdle_camera_0_roll_clockwise_deg
+        payload["hurdle_camera_45_servo_deg"] = self.hurdle_camera_45_servo_deg
+        payload["hurdle_camera_0_servo_deg"] = self.hurdle_camera_0_servo_deg
+        payload["camera_fx"] = round(self.fx, 4) if self.fx is not None else None
+        payload["camera_fy"] = round(self.fy, 4) if self.fy is not None else None
+        payload["camera_cx"] = round(self.cx, 4) if self.cx is not None else None
+        payload["camera_cy"] = round(self.cy, 4) if self.cy is not None else None
         payload.update(self.confirmation_fields)
         payload.update(self.go_confirmation_fields)
         message.data = json.dumps(
@@ -834,6 +1178,20 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
                 left_depth_m=target.left_depth_m,
                 right_depth_m=target.right_depth_m,
                 hurdle_angle_deg=target.hurdle_angle_deg,
+                hurdle_angle_45_deg=target.hurdle_angle_45_deg,
+                hurdle_angle_0_deg=target.hurdle_angle_0_deg,
+                hurdle_angle_45_fit_span_m=target.hurdle_angle_45_fit_span_m,
+                hurdle_angle_0_fit_span_m=target.hurdle_angle_0_fit_span_m,
+                hurdle_angle_45_fit_rmse_m=target.hurdle_angle_45_fit_rmse_m,
+                hurdle_angle_0_fit_rmse_m=target.hurdle_angle_0_fit_rmse_m,
+                hurdle_angle_fit_point_count=target.hurdle_angle_fit_point_count,
+                hurdle_angle_sample_source=target.hurdle_angle_sample_source,
+                hurdle_bar_image_angle_deg=target.hurdle_bar_image_angle_deg,
+                hurdle_bar_mask_pixel_count=target.hurdle_bar_mask_pixel_count,
+                hurdle_bar_fit_rmse_px=target.hurdle_bar_fit_rmse_px,
+                hurdle_bar_elongation=target.hurdle_bar_elongation,
+                hurdle_bar_clipped_edges=target.hurdle_bar_clipped_edges,
+                depth_samples=target.depth_samples,
                 depth_valid=target.depth_valid,
                 depth_sample_count=target.depth_sample_count,
                 is_parallel=parallel,
