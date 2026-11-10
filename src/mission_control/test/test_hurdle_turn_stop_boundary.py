@@ -24,7 +24,7 @@ def test_separate_fine_entry_and_normal_turn_stop(depth, x):
     expected = ('GO' if depth <= .45 else
                 'ALIGN_LEFT' if x < 710 else
                 'ALIGN_RIGHT' if x > 710 else
-                'STRAIGHT_0' if depth <= .7 else 'STRAIGHT')
+                'STRAIGHT_1' if depth <= .7 else 'STRAIGHT')
     assert decision.action == expected
 
 
@@ -32,7 +32,7 @@ def test_turn_stop_latch_survives_depth_rebound_and_resets():
     planner = MotionDecisionPlanner()
     planner.plan('AUTO', {'hurdle': hurdle(.45)}, .1)
     rebound = planner.plan('AUTO', {'hurdle': hurdle(.8), 'line': line_info(x=500, heading=-40)}, .1)
-    assert rebound.action == 'STRAIGHT_0'
+    assert rebound.action == 'STRAIGHT_1'
     assert rebound.source_command['close_rotation_blocked']
     planner.hurdle_planner.reset()
     assert not planner.hurdle_planner.fine_approach_active
@@ -42,7 +42,7 @@ def test_turn_stop_latch_survives_depth_rebound_and_resets():
 @pytest.mark.parametrize('x,direction', [(500, 'LEFT'), (900, 'RIGHT')])
 @pytest.mark.parametrize('head_down', [None, False, True])
 @pytest.mark.parametrize('checkpoint_during_turn', [False, True])
-def test_fine_turn_final_checkpoint_and_hurdle_release_at_actual_speeds(
+def test_forward2_turn_final_checkpoint_and_hurdle_release_at_actual_speeds(
     clock, x, direction, head_down, checkpoint_during_turn,
 ):
     root = Path(__file__).resolve().parents[3]
@@ -92,7 +92,7 @@ def test_fine_turn_final_checkpoint_and_hurdle_release_at_actual_speeds(
             duration = max(f['start_ms'] + f['time_ms'] for f in motion['frames']) / 1000 * motion['repeat_count'] / motion['playback_speed']
             clock[0] += duration / 2
             if during_fine is not None and (
-                request['motion_id'] == 'hurdle_fine_forward_5'
+                request['motion_id'] == 'line_forward_2'
                 or request['motion_id'].startswith('post_ball_line_turn_')
             ):
                 during_fine()
@@ -103,7 +103,7 @@ def test_fine_turn_final_checkpoint_and_hurdle_release_at_actual_speeds(
         pytest.fail('hurdle request did not release within its bounded sequence')
 
     for depth, target_x, expected in [
-        (.7, 710, 'STRAIGHT_0'),
+        (.7, 710, 'STRAIGHT_1'),
         (.6, x, f'ALIGN_{direction}'),
     ]:
         node.receive_line(x=target_x, heading=-40 if target_x < 710 else 40 if target_x > 710 else 0)
@@ -116,7 +116,7 @@ def test_fine_turn_final_checkpoint_and_hurdle_release_at_actual_speeds(
         if expected.startswith('ALIGN_'):
             requests = decoded_messages(bridge.executor_request_publisher)
             assert [r['motion_id'] for r in requests[-2:]] == [
-                'fine_to_turn_ready_45' if head_down is False else 'fine_to_turn_ready_0',
+                'line_forward_2',
                 f'post_ball_line_turn_{direction.lower()}_{2 if direction == "LEFT" else 3}',
             ]
 
@@ -124,7 +124,7 @@ def test_fine_turn_final_checkpoint_and_hurdle_release_at_actual_speeds(
                       heading=(-40 if x < 710 else 40) if checkpoint_during_turn else 0)
     node.receive(hurdle(.58))
     fine = node.publish()[-1]
-    assert fine['action'] == (f'ALIGN_{direction}' if checkpoint_during_turn else 'STRAIGHT_0')
+    assert fine['action'] == (f'ALIGN_{direction}' if checkpoint_during_turn else 'STRAIGHT_1')
     dispatch(fine)
 
     def cross_final_depth():

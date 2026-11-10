@@ -379,8 +379,8 @@ class HurdleNavigationPlanner:
             action = "GO"
             reason = "hurdle_parallel_at_close_depth"
         elif positioning and self.fine_approach_active and not positioning_turn_needed:
-            action = "STRAIGHT_0"
-            reason = "hurdle_fine_approach_without_rotation"
+            action = "STRAIGHT_1"
+            reason = "hurdle_forward_2_approach_without_rotation"
         elif positioning and positioning_turn_needed:
             direction = "LEFT" if alignment_angle < 0.0 else "RIGHT"
             if self.close_rotation_blocked:

@@ -1,0 +1,100 @@
+[  2%] Built target robot_motion_runtime_config
+[  3%] Building CXX object CMakeFiles/catalog_only_core.dir/src/catalog_only_core.cpp.o
+[  6%] Built target motion_core
+[ 11%] Built target gtest
+[ 11%] Built target gtest_main
+[ 16%] Built target test_motion_pattern
+[ 16%] Built target test_motion_callback
+[ 18%] Built target continuous_trace_probe
+[ 20%] Built target test_continuous_interpolation
+[ 22%] Built target test_motion_json_catalog
+[ 25%] Built target test_robot_motion_runtime_config
+[ 26%] Building CXX object robot_motion_sdk/CMakeFiles/motion_player_core.dir/robot_motion_player.cpp.o
+[ 28%] Built target test_robot_motion_parameter_types
+[ 31%] Built target test_callback_timing_trace
+[ 32%] Linking CXX static library libcatalog_only_core.a
+[ 32%] Built target catalog_only_core
+Consolidate compiler generated dependencies of target catalog_only_node
+[ 33%] Building CXX object CMakeFiles/sdk_executor_core.dir/src/sdk_executor_core.cpp.o
+[ 34%] Building CXX object CMakeFiles/catalog_only_node.dir/src/catalog_only_node.cpp.o
+[ 35%] Linking CXX static library libsdk_executor_core.a
+[ 35%] Built target sdk_executor_core
+Consolidate compiler generated dependencies of target test_catalog_only_core
+[ 36%] Building CXX object CMakeFiles/test_catalog_only_core.dir/test/test_catalog_only_core.cpp.o
+[ 37%] Linking CXX static library libmotion_player_core.a
+[ 37%] Built target motion_player_core
+[ 39%] Building CXX object CMakeFiles/test_sdk_executor_core.dir/test/test_sdk_executor_core.cpp.o
+[ 40%] Linking CXX executable test_catalog_only_core
+[ 40%] Built target test_catalog_only_core
+[ 41%] Building CXX object CMakeFiles/test_queue_control_tick.dir/test/test_queue_control_tick.cpp.o
+[ 42%] Linking CXX executable test_sdk_executor_core
+[ 42%] Built target test_sdk_executor_core
+[ 43%] Building CXX object robot_motion_sdk/CMakeFiles/robot_control.dir/robot_motion_player_dynamixel.cpp.o
+[ 44%] Linking CXX executable test_queue_control_tick
+[ 44%] Built target test_queue_control_tick
+[ 45%] Building CXX object CMakeFiles/simulated_motion_backend.dir/src/simulated_motion_backend.cpp.o
+[ 47%] Linking CXX static library libsimulated_motion_backend.a
+[ 47%] Built target simulated_motion_backend
+[ 48%] Building CXX object CMakeFiles/sdk_executor_driver.dir/src/sdk_executor_driver.cpp.o
+[ 49%] Building CXX object CMakeFiles/sdk_executor_driver.dir/src/startup_pose_gate.cpp.o
+[ 50%] Linking CXX static library libsdk_executor_driver.a
+[ 51%] Built target sdk_executor_driver
+Consolidate compiler generated dependencies of target test_forward_timing
+[ 52%] Building CXX object robot_motion_sdk/CMakeFiles/test_forward_timing.dir/test_forward_timing.cpp.o
+[ 54%] Linking CXX static library librobot_control.a
+[ 57%] Built target robot_control
+[ 58%] Building CXX object robot_motion_sdk/CMakeFiles/gui_execution_probe.dir/gui_execution_probe.cpp.o
+[ 59%] Linking CXX executable test_forward_timing
+[ 59%] Built target test_forward_timing
+[ 60%] Building CXX object robot_motion_sdk/CMakeFiles/test_gui_alignment.dir/test_gui_alignment.cpp.o
+[ 62%] Linking CXX executable gui_execution_probe
+[ 62%] Built target gui_execution_probe
+[ 63%] Building CXX object robot_motion_sdk/CMakeFiles/test_continuous_hardware.dir/test_continuous_hardware.cpp.o
+[ 64%] Linking CXX executable test_gui_alignment
+[ 64%] Built target test_gui_alignment
+[ 65%] Building CXX object CMakeFiles/test_simulated_motion_backend.dir/test/test_simulated_motion_backend.cpp.o
+[ 66%] Linking CXX executable catalog_only_node
+[ 66%] Built target catalog_only_node
+Consolidate compiler generated dependencies of target test_sdk_executor_driver
+[ 67%] Building CXX object CMakeFiles/test_sdk_executor_driver.dir/test/test_sdk_executor_driver.cpp.o
+[ 68%] Linking CXX executable test_simulated_motion_backend
+[ 68%] Built target test_simulated_motion_backend
+Consolidate compiler generated dependencies of target test_startup_pose_gate
+[ 70%] Building CXX object CMakeFiles/test_startup_pose_gate.dir/test/test_startup_pose_gate.cpp.o
+[ 71%] Linking CXX executable test_continuous_hardware
+[ 72%] Linking CXX executable test_sdk_executor_driver
+[ 72%] Built target test_sdk_executor_driver
+[ 77%] Built target test_continuous_hardware
+[ 77%] Linking CXX executable test_startup_pose_catalog
+[ 78%] Building CXX object CMakeFiles/irc_step_motion_sdk_compile_probe.dir/src/sdk_compile_probe.cpp.o
+[ 79%] Built target test_startup_pose_catalog
+[ 80%] Building CXX object CMakeFiles/robot_motion_player_backend.dir/src/robot_motion_player_backend.cpp.o
+[ 81%] Linking CXX executable test_startup_pose_gate
+[ 81%] Built target test_startup_pose_gate
+[ 82%] Building CXX object CMakeFiles/motion_backend_factory.dir/src/motion_backend_factory.cpp.o
+[ 83%] Linking CXX shared library libirc_step_motion_sdk_compile_probe.so
+[ 83%] Built target irc_step_motion_sdk_compile_probe
+[ 83%] Built target gui_comparison_probe
+[ 85%] Linking CXX static library libmotion_backend_factory.a
+[ 85%] Built target motion_backend_factory
+[ 86%] Building CXX object CMakeFiles/test_motion_backend_factory.dir/test/test_motion_backend_factory.cpp.o
+[ 87%] Linking CXX static library librobot_motion_player_backend.a
+[ 87%] Built target robot_motion_player_backend
+[ 89%] Building CXX object CMakeFiles/test_robot_motion_player_backend.dir/test/test_robot_motion_player_backend.cpp.o
+[ 89%] Building CXX object CMakeFiles/production_robot_motion_runtime_factory.dir/src/production_robot_motion_runtime_factory.cpp.o
+[ 90%] Linking CXX executable test_motion_backend_factory
+[ 90%] Built target test_motion_backend_factory
+[ 91%] Linking CXX executable test_robot_motion_player_backend
+[ 91%] Built target test_robot_motion_player_backend
+[ 93%] Linking CXX static library libproduction_robot_motion_runtime_factory.a
+[ 93%] Built target production_robot_motion_runtime_factory
+[ 94%] Building CXX object CMakeFiles/sdk_hardware_preflight_core.dir/src/sdk_hardware_preflight_core.cpp.o
+Consolidate compiler generated dependencies of target sdk_motion_executor
+[ 95%] Building CXX object CMakeFiles/sdk_motion_executor.dir/src/sdk_executor_node.cpp.o
+[ 96%] Linking CXX static library libsdk_hardware_preflight_core.a
+[ 96%] Built target sdk_hardware_preflight_core
+[ 97%] Building CXX object CMakeFiles/sdk_hardware_preflight.dir/src/sdk_hardware_preflight.cpp.o
+[ 98%] Linking CXX executable sdk_hardware_preflight
+[ 98%] Built target sdk_hardware_preflight
+[100%] Linking CXX executable sdk_motion_executor
+[100%] Built target sdk_motion_executor

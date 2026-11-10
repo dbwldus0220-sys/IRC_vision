@@ -269,7 +269,7 @@ def test_no_depth_outside_close_pixels_still_waits():
 @pytest.mark.parametrize("depth,action", [
     (0.001, "GO"), (0.2, "GO"), (0.43, "GO"),
     (0.449999, "GO"), (0.450, "GO"),
-    (0.450001, "STRAIGHT_0"), (0.55, "STRAIGHT_0"),
+    (0.450001, "STRAIGHT_1"), (0.55, "STRAIGHT_1"),
 ])
 def test_positioning_final_sequence_starts_at_450mm(depth, action):
     command = HurdleNavigationPlanner().plan(hurdle_info(

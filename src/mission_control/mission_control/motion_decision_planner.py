@@ -22,6 +22,7 @@ from step.line_navigation_planner import LineNavigationPlanner
 from step.line_navigation_planner import NavigationConfig
 from step.line_navigation_planner import (
     valid_ground_heading, line_heading, LINE_RECOVERY_MIN_ANGLE_DEG,
+    LINE_RECOVERY_TURN_ANGLES_DEG,
 )
 
 from .pickup_fine_skip import pickup_fine_can_skip, pickup_fine_skip_limit
@@ -142,6 +143,7 @@ class MotionDecisionPlanner:
     BALL_LOST_LEFT_TURN_COUNT = 2
     BALL_LOST_RIGHT_TURN_COUNT = 5
     POST_SHOT_LINE_HEADING_TOLERANCE_DEG = 15.0
+    POST_SHOT_LINE_RECOVERY_MAX_ANGLE_DEG = 35.0
     LINE_OFFSET_EXIT_RATIO = 0.8
     LINE_OFFSET_EXIT_DISTANCE_M = 0.10
     LINE_OFFSET_TARGET_TOLERANCE_DEG = LINE_RECOVERY_MIN_ANGLE_DEG
@@ -1299,7 +1301,7 @@ class MotionDecisionPlanner:
         *,
         phase: str = "POST_BALL_LINE_ALIGN",
     ) -> MotionDecision:
-        """Reacquire Line after pickup; retain legacy post-shot alignment."""
+        """Reacquire Line after pickup; align after shooting with recovery or yaw."""
         prefix = phase.removesuffix("_ALIGN")
         if (
             (info is None and phase == "POST_BALL_LINE_ALIGN")
@@ -1413,6 +1415,22 @@ class MotionDecisionPlanner:
                 sdk_motion_requested=False,
                 requires_ack=False,
                 source_command=common,
+            )
+
+        if abs(heading) <= self.POST_SHOT_LINE_RECOVERY_MAX_ANGLE_DEG:
+            # This checkpoint aligns heading; lateral position remains owned by
+            # normal Line navigation after POST_SHOT_FORWARD.
+            return MotionDecision(
+                phase=phase, source="line",
+                action=f"{prefix}_RECOVER_{direction}_4",
+                valid=True, reason="post_shot_line_heading_recovery",
+                sdk_motion_requested=False, requires_ack=False,
+                source_command={
+                    **common, "turn_direction": direction, "turn_count": 4,
+                    "turn_angle_deg": abs(LINE_RECOVERY_TURN_ANGLES_DEG[direction]),
+                    "post_shot_line_recovery": True,
+                    "catalog_motion_available": True,
+                },
             )
 
         count = self._turn_repeat_count(heading, direction)

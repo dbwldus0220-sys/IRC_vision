@@ -1,0 +1,9 @@
+{
+  "python_passed": 279,
+  "cpp_suites_passed": 4,
+  "catalog_motion_count": 156,
+  "other_motions_unchanged": 154,
+  "timing_unchanged": true,
+  "accepted_queue_cases_passed": 12,
+  "hardware_executed": false
+}

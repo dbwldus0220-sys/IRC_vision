@@ -116,7 +116,7 @@ public:
     [[nodiscard]] bool contains(std::string_view name) const;
     [[nodiscard]] MotionInfo motionInfo(std::string_view name) const;
 
-    StartResult start(std::string_view motion_name) noexcept;
+    StartResult start(std::string_view motion_name, double waist_delta_deg = 0.0) noexcept;
     QueueResult queueNext(std::string_view motion_name) noexcept;
     [[nodiscard]] bool hasQueuedMotion() const noexcept;
     [[nodiscard]] std::string_view queuedMotion() const noexcept;
@@ -207,6 +207,7 @@ private:
     JointAngles joint_overrides_;
     std::vector<int> command_ids_;
     std::vector<MotionFrame> playback_frames_;
+    double pending_waist_delta_deg_{0.0};
     std::unique_ptr<MotionPattern> startup_pattern_;
     std::int64_t cycle_start_ms_{0};
     double gui_started_sec_{0.0};

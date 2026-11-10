@@ -1,0 +1,73 @@
+........................................................................ [ 24%]
+........................................................................ [ 49%]
+.........................................................FFFFFF......... [ 74%]
+.........................FF............................................. [ 99%]
+..                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_fine_forward_0-270-None-1] _
+src/mission_control/test/test_pickup_fine_skip.py:133: in test_both_modes_skip_forward_but_keep_retreat_and_grasp
+    assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_400'
+E   AssertionError: assert 'pickup_500' == 'pickup_400'
+E     - pickup_400
+E     ?        ^
+E     + pickup_500
+E     ?        ^
+_ test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_fine_forward_0-270-None-2] _
+src/mission_control/test/test_pickup_fine_skip.py:133: in test_both_modes_skip_forward_but_keep_retreat_and_grasp
+    assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_400'
+E   AssertionError: assert 'pickup_500' == 'pickup_400'
+E     - pickup_400
+E     ?        ^
+E     + pickup_500
+E     ?        ^
+_ test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_left_0-200-pickup_crab_left_to_fine_0-1] _
+src/mission_control/test/test_pickup_fine_skip.py:133: in test_both_modes_skip_forward_but_keep_retreat_and_grasp
+    assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_400'
+E   AssertionError: assert 'pickup_500' == 'pickup_400'
+E     - pickup_400
+E     ?        ^
+E     + pickup_500
+E     ?        ^
+_ test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_left_0-200-pickup_crab_left_to_fine_0-2] _
+src/mission_control/test/test_pickup_fine_skip.py:133: in test_both_modes_skip_forward_but_keep_retreat_and_grasp
+    assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_400'
+E   AssertionError: assert 'pickup_500' == 'pickup_400'
+E     - pickup_400
+E     ?        ^
+E     + pickup_500
+E     ?        ^
+_ test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_right_0_2-200-pickup_crab_right_to_fine_0-1] _
+src/mission_control/test/test_pickup_fine_skip.py:133: in test_both_modes_skip_forward_but_keep_retreat_and_grasp
+    assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_400'
+E   AssertionError: assert 'pickup_500' == 'pickup_400'
+E     - pickup_400
+E     ?        ^
+E     + pickup_500
+E     ?        ^
+_ test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_right_0_2-200-pickup_crab_right_to_fine_0-2] _
+src/mission_control/test/test_pickup_fine_skip.py:133: in test_both_modes_skip_forward_but_keep_retreat_and_grasp
+    assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_400'
+E   AssertionError: assert 'pickup_500' == 'pickup_400'
+E     - pickup_400
+E     ?        ^
+E     + pickup_500
+E     ?        ^
+_ test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit[1] _
+src/mission_control/test/test_pickup_fine_skip.py:295: in test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit
+    assert queued['request_id'] != first['request_id']
+E   assert 1 != 1
+_ test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit[2] _
+src/mission_control/test/test_pickup_fine_skip.py:295: in test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit
+    assert queued['request_id'] != first['request_id']
+E   assert 1 != 1
+- generated xml file: /home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/20261110_goal_ring_alignment/final_python.xml -
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_fine_forward_0-270-None-1]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_fine_forward_0-270-None-2]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_left_0-200-pickup_crab_left_to_fine_0-1]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_left_0-200-pickup_crab_left_to_fine_0-2]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_right_0_2-200-pickup_crab_right_to_fine_0-1]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_right_0_2-200-pickup_crab_right_to_fine_0-2]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit[1]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit[2]
+8 failed, 282 passed in 2.93s

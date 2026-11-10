@@ -89,6 +89,8 @@ motion_aliases:
   # Catalog70 exit composites preserve the source repeat_count=1.
   post_shot_default_turn_right: "t골대후제자리우회전"
   post_shot_default_turn_left: "p골대후제자리좌회전"
+  post_shot_default_turn_right_5: "t골대후제자리우회전(5회)"
+  post_shot_default_turn_left_3: "p골대후제자리좌회전(3회)"
   post_ball_forward_8: "p전진45(8회)"
   post_ball_camera_90: "R오뒤카메라90도"
   goal_camera_90_forward_2: "p전진90도(2회)"

@@ -80,7 +80,7 @@ def test_new_shots_dispatch_and_keep_first_second_exit_route(region, depth, prev
     manager.handle_motion_status('SHOT', 100, 'SUCCEEDED', motion_id=f'goal_shot_region_{region}')
     assert manager.shots_executed == manager.shots_completed == previous_shots + 1
     assert manager.current_phase == 'POST_SHOT_TURN'
-    action = 'POST_SHOT_TURN_RIGHT_9' if previous_shots == 0 else 'POST_SHOT_TURN_LEFT_4'
+    action = 'POST_SHOT_TURN_RIGHT_5' if previous_shots == 0 else 'POST_SHOT_TURN_LEFT_3'
     assert manager.post_shot_turn_action() == action
     assert manager.handle_post_shot_motion(action, 'SUCCEEDED')
     assert manager.current_phase == 'POST_SHOT_LINE_ALIGN'

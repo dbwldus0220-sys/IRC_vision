@@ -12,7 +12,7 @@ from .line_navigation_planner import LINE_RECOVERY_MIN_ANGLE_DEG, LINE_RECOVERY_
 from .stationary_turns import stationary_turn_repeat_count
 from .goal_scoring import (
     GOAL_SCORE_MIN_DEPTH_M, GOAL_SCORE_TARGET_DEPTH_M, GOAL_SCORE_MAX_DEPTH_M,
-    GOAL_SCORE_TARGET_OFFSET_PX, GOAL_SCORE_LEGACY_MAX_DEPTH_M,
+    GOAL_SCORE_TARGET_OFFSET_PX,
     goal_shot_pixels_aligned, goal_shot_region,
 )
 
@@ -54,6 +54,7 @@ class GoalActionCommand:
     shot_region: int | None = None
     target_steering_angle_deg: float | None = None
     target_lateral_error_m: float | None = None
+    waist_ring_aim_deg: float | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Return a rounded JSON-compatible representation."""
@@ -76,6 +77,8 @@ class GoalActionCommand:
             "depth_in_score_range": self.depth_in_score_range,
             "score_now": self.score_now,
             "shot_region": self.shot_region,
+            "ring_center_depth_m": self.depth_m,
+            "waist_ring_aim_deg": self.waist_ring_aim_deg,
             "target_steering_angle_deg": _round_optional(self.target_steering_angle_deg, 3),
             "target_lateral_error_m": _round_optional(self.target_lateral_error_m, 6),
             "target_forward_error_m": _round_optional(self.depth_error_m, 3),
@@ -158,9 +161,9 @@ class GoalNavigationPlanner:
         confidence = _number(goal_info, "confidence")
         if confidence is None or confidence < self.config.min_confidence:
             return self.wait("low_goal_confidence")
-        depth = _number(goal_info, "depth_m")
+        depth = _number(goal_info, "ring_center_depth_m")
         if not bool(goal_info.get("depth_valid", False)) or depth is None or depth <= 0.0:
-            return self.wait("missing_valid_goal_depth")
+            return self.wait("missing_valid_goal_ring_depth")
         if depth > self.config.control_start_depth_m:
             return self.wait("goal_outside_control_range")
 
@@ -170,20 +173,20 @@ class GoalNavigationPlanner:
         offset_px = _number(goal_info, "offset_x_px")
         if offset_px is None:
             return self.wait("invalid_goal_alignment")
-        region = goal_shot_region(depth, offset_px)
+        region = goal_shot_region(depth)
+        ring_aim = _number(goal_info, "waist_ring_aim_deg")
+        if ring_aim is None or abs(ring_aim) >= 90.0:
+            return self.wait("missing_valid_goal_ring_aim")
         centered = goal_shot_pixels_aligned(depth, offset_px)
         pixel_error = offset_px - GOAL_SCORE_TARGET_OFFSET_PX
         fx = _camera_fx(goal_info, offset_px, bearing)
         alignment_bearing = (round(math.degrees(math.atan(pixel_error / fx)), 9)
                              if fx is not None else None)
-        # Keep the existing 1-4 region alignment behavior at close range.
-        if depth < GOAL_SCORE_LEGACY_MAX_DEPTH_M:
-            pixel_error = offset_px
-            alignment_bearing = bearing
         depth_error = depth - self.config.score_target_depth_m
         depth_in_range = (
             GOAL_SCORE_MIN_DEPTH_M <= depth < GOAL_SCORE_MAX_DEPTH_M
         )
+        # Inside a shot band, the waist handles lateral aim without body alignment.
         ready_geometry = region is not None
         analyzer_score_now = goal_info.get("score_now")
         score_now = bool(
@@ -195,31 +198,10 @@ class GoalNavigationPlanner:
 
         if score_now:
             action = "SHOT"
-            reason = "goal_centered_at_scoring_depth"
+            reason = "goal_ring_at_scoring_depth"
         elif depth < GOAL_SCORE_MIN_DEPTH_M:
             action = "GOAL_CAMERA90_BACKWARD_1"
             reason = "retreat_goal_to_scoring_depth"
-        elif depth_in_range and not centered:
-            direction = "RIGHT" if pixel_error > 0.0 else "LEFT"
-            if abs(pixel_error) > self.config.score_crab_max_offset_px:
-                # Re-evaluate pixels after each completed turn and stationary pause.
-                if bearing is None:
-                    return self.wait("missing_goal_bearing_for_camera90_alignment")
-                if bearing * offset_px < 0.0:
-                    return self.wait("goal_bearing_pixel_direction_mismatch")
-                if alignment_bearing is None:
-                    return self.wait("missing_goal_camera_calibration")
-                count = stationary_turn_repeat_count(alignment_bearing, direction)
-                if count == 0:
-                    # Pixels still require correction even below the yaw bin.
-                    action = f"GOAL_CAMERA90_CRAB_{direction}"
-                    reason = "align_goal_pixels_below_turn_minimum"
-                else:
-                    action = f"GOAL_CAMERA90_TURN_{direction}_{count}"
-                    reason = "align_goal_large_pixel_offset_camera90"
-            else:
-                action = f"GOAL_CAMERA90_CRAB_{direction}"
-                reason = "align_goal_lateral_camera90"
         elif ready_geometry:
             action = "WAIT_SCORE_CONFIRMATION"
             reason = "waiting_for_stable_score_condition"
@@ -246,7 +228,7 @@ class GoalNavigationPlanner:
                 reason = "approach_goal_by_depth"
         elif depth > GOAL_FINE_APPROACH_MAX_DEPTH_M:
             # The board is elevated: use its measured X/Z, not a floor-ray
-            # intersection. The goal should appear at -40px when Z reaches 630mm.
+            # intersection. Aim at the image center when ring Z reaches 660mm.
             lateral_error = _number(goal_info, "lateral_offset_m")
             if ("lateral_offset_m" not in goal_info
                     and bearing is not None and abs(bearing) < 90.0):
@@ -291,4 +273,5 @@ class GoalNavigationPlanner:
             shot_region=region,
             target_steering_angle_deg=target_steering,
             target_lateral_error_m=lateral_error,
+            waist_ring_aim_deg=ring_aim,
         )

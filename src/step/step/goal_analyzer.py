@@ -56,6 +56,27 @@ class GoalCandidate:
     distance_m: float | None
     ground_distance_m: float | None
     lateral_offset_m: float | None
+    left_depth_m: float | None
+    center_depth_m: float | None
+    right_depth_m: float | None
+    backboard_angle_deg: float | None
+    parallel_correction_deg: float | None
+    backboard_angle_direction: str
+    backboard_angle_valid: bool
+    backboard_angle_fit_error_m: float | None
+    backboard_measured_width_m: float | None
+    backboard_line_width_m: float
+    backboard_sample_points_px: list[list[int]]
+    backboard_depth_sample_count: int
+    waist_depth_m: float | None
+    waist_aim_deg: float | None
+    waist_turn_direction: str
+    ring_center_lateral_m: float | None
+    ring_center_depth_m: float | None
+    waist_ring_lateral_m: float | None
+    waist_ring_depth_m: float | None
+    waist_ring_aim_deg: float | None
+    waist_ring_turn_direction: str
     depth_valid: bool
     depth_sample_count: int
     score: float
@@ -87,6 +108,27 @@ class GoalInfo:
     distance_m: float | None
     ground_distance_m: float | None
     lateral_offset_m: float | None
+    left_depth_m: float | None
+    center_depth_m: float | None
+    right_depth_m: float | None
+    backboard_angle_deg: float | None
+    parallel_correction_deg: float | None
+    backboard_angle_direction: str
+    backboard_angle_valid: bool
+    backboard_angle_fit_error_m: float | None
+    backboard_measured_width_m: float | None
+    backboard_line_width_m: float
+    backboard_sample_points_px: list[list[int]]
+    backboard_depth_sample_count: int
+    waist_depth_m: float | None
+    waist_aim_deg: float | None
+    waist_turn_direction: str
+    ring_center_lateral_m: float | None
+    ring_center_depth_m: float | None
+    waist_ring_lateral_m: float | None
+    waist_ring_depth_m: float | None
+    waist_ring_aim_deg: float | None
+    waist_ring_turn_direction: str
     depth_valid: bool
     depth_sample_count: int
     is_centered: bool
@@ -130,6 +172,17 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         self.declare_parameter("min_confidence", 0.55)
         self.declare_parameter("depth_timeout_sec", 0.7)
         self.declare_parameter("depth_window_px", 11)
+        self.declare_parameter("backboard_line_width_m", 0.155)
+        self.declare_parameter("backboard_sample_y_ratio", 0.18)
+        self.declare_parameter("backboard_edge_inset_ratio", 0.10)
+        self.declare_parameter("backboard_parallel_tolerance_deg", 3.0)
+        self.declare_parameter("camera_to_waist_depth_offset_m", 0.10)
+        # Positive means the waist center is to image-right of the camera.
+        self.declare_parameter("camera_to_waist_lateral_offset_m", 0.030)
+        # Assumes the ring's rear edge is at the backboard plane, so its
+        # 10 cm radius is also the board-plane-to-ring-center distance.
+        self.declare_parameter("backboard_to_ring_center_forward_m", 0.10)
+        self.declare_parameter("waist_aim_deadband_deg", 1.0)
         self.declare_parameter("max_valid_depth_m", 6.0)
         self.declare_parameter("detect_depth_m", 2.0)
         self.declare_parameter("approach_depth_m", 1.0)
@@ -172,6 +225,53 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         )
         if self.depth_window_px % 2 == 0:
             self.depth_window_px += 1
+        self.backboard_line_width_m = max(
+            1e-6,
+            self._float_parameter("backboard_line_width_m"),
+        )
+        self.backboard_sample_y_ratio = float(np.clip(
+            self._float_parameter("backboard_sample_y_ratio"),
+            0.0,
+            1.0,
+        ))
+        self.backboard_edge_inset_ratio = float(np.clip(
+            self._float_parameter("backboard_edge_inset_ratio"),
+            0.0,
+            0.45,
+        ))
+        self.backboard_parallel_tolerance_deg = max(
+            0.0,
+            self._float_parameter("backboard_parallel_tolerance_deg"),
+        )
+        self.camera_to_waist_depth_offset_m = self._float_parameter(
+            "camera_to_waist_depth_offset_m"
+        )
+        if not math.isfinite(self.camera_to_waist_depth_offset_m):
+            raise ValueError(
+                "camera_to_waist_depth_offset_m must be finite"
+            )
+        self.camera_to_waist_lateral_offset_m = self._float_parameter(
+            "camera_to_waist_lateral_offset_m"
+        )
+        if not math.isfinite(self.camera_to_waist_lateral_offset_m):
+            raise ValueError(
+                "camera_to_waist_lateral_offset_m must be finite"
+            )
+        self.backboard_to_ring_center_forward_m = self._float_parameter(
+            "backboard_to_ring_center_forward_m"
+        )
+        if (
+            not math.isfinite(self.backboard_to_ring_center_forward_m)
+            or self.backboard_to_ring_center_forward_m < 0.0
+        ):
+            raise ValueError(
+                "backboard_to_ring_center_forward_m must be finite and "
+                "non-negative"
+            )
+        self.waist_aim_deadband_deg = max(
+            0.0,
+            self._float_parameter("waist_aim_deadband_deg"),
+        )
         self.max_valid_depth_m = self._float_parameter(
             "max_valid_depth_m"
         )
@@ -371,6 +471,238 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
             return None, False, 0
         return float(np.median(medians)), True, len(medians)
 
+    def _sample_backboard_line_depths(
+        self,
+        bbox: list[int],
+        source_width: int | None,
+        source_height: int | None,
+    ) -> tuple[
+        float | None,
+        float | None,
+        float | None,
+        int,
+        list[list[int]],
+    ]:
+        """Read left, center, and right depth on one backboard line."""
+        if (
+            self.latest_depth_image is None
+            or not self._depth_is_fresh()
+            or self.latest_depth_image.ndim != 2
+        ):
+            return None, None, None, 0, []
+
+        depth_height, depth_width = self.latest_depth_image.shape[:2]
+        source_width = int(source_width or depth_width)
+        source_height = int(source_height or depth_height)
+        if source_width <= 0 or source_height <= 0:
+            return None, None, None, 0, []
+
+        left, top, right, bottom = bbox
+        width = right - left
+        height = bottom - top
+        if width <= 0 or height <= 0:
+            return None, None, None, 0, []
+
+        inset = self.backboard_edge_inset_ratio
+        x_ratios = (inset, 0.50, 1.0 - inset)
+        source_y = int(round(top + height * self.backboard_sample_y_ratio))
+        source_points = [
+            [int(round(left + width * ratio)), source_y]
+            for ratio in x_ratios
+        ]
+        scale_x = depth_width / source_width
+        scale_y = depth_height / source_height
+        medians: list[float | None] = []
+        for source_x, point_y in source_points:
+            depth_x = int(np.clip(
+                round(source_x * scale_x), 0, depth_width - 1,
+            ))
+            depth_y = int(np.clip(
+                round(point_y * scale_y), 0, depth_height - 1,
+            ))
+            values = self._valid_patch_m(depth_x, depth_y)
+            medians.append(
+                float(np.median(values)) if values.size else None
+            )
+        return (
+            medians[0],
+            medians[1],
+            medians[2],
+            sum(value is not None for value in medians),
+            source_points,
+        )
+
+    def _estimate_backboard_angle(
+        self,
+        sample_points: list[list[int]],
+        depths_m: tuple[float | None, float | None, float | None],
+    ) -> tuple[
+        float | None,
+        float | None,
+        str,
+        float | None,
+        float | None,
+    ]:
+        """Fit three depths over the known line width and return yaw."""
+        if (
+            len(sample_points) != 3
+            or any(depth is None for depth in depths_m)
+        ):
+            return None, None, "UNKNOWN", None, None
+
+        depths = np.asarray(depths_m, dtype=np.float64)
+        if not np.all(np.isfinite(depths)):
+            return None, None, "UNKNOWN", None, None
+        # The inset maps the YOLO backboard bbox to the visible red line ends;
+        # the physical distance between the selected end points is still the
+        # measured full red-line width.
+        sampled_width = self.backboard_line_width_m
+        line_positions = np.asarray(
+            (-sampled_width / 2.0, 0.0, sampled_width / 2.0),
+            dtype=np.float64,
+        )
+        denominator = float(np.dot(line_positions, line_positions))
+        if denominator <= 1e-10:
+            return None, None, "UNKNOWN", None, None
+
+        centered_z = depths - float(np.mean(depths))
+        depth_per_line_meter = float(
+            np.dot(line_positions, centered_z) / denominator
+        )
+        # A point at coordinate s on a board yawed by theta has
+        # Z(s) = Z(center) + s * sin(theta).
+        if abs(depth_per_line_meter) > 1.0 + 1e-6:
+            return None, None, "UNKNOWN", None, None
+        angle = math.degrees(math.asin(float(np.clip(
+            depth_per_line_meter,
+            -1.0,
+            1.0,
+        ))))
+        fitted_z = (
+            float(np.mean(depths))
+            + depth_per_line_meter * line_positions
+        )
+        fit_error = float(np.sqrt(np.mean(np.square(depths - fitted_z))))
+        correction = -angle
+
+        if abs(angle) <= self.backboard_parallel_tolerance_deg:
+            direction = "PARALLEL"
+        elif angle > 0.0:
+            direction = "RIGHT_FAR"
+        else:
+            direction = "LEFT_FAR"
+
+        measured_width: float | None = None
+        if self.fx is not None and self.cx is not None and self.fx > 0.0:
+            image_x = np.asarray(
+                [point[0] for point in sample_points],
+                dtype=np.float64,
+            )
+            camera_x = (image_x - self.cx) * depths / self.fx
+            endpoint_span = math.hypot(
+                float(camera_x[2] - camera_x[0]),
+                float(depths[2] - depths[0]),
+            )
+            measured_width = endpoint_span
+        return angle, correction, direction, fit_error, measured_width
+
+    def _waist_center_aim(
+        self,
+        depth_m: float | None,
+        lateral_m: float | None,
+    ) -> tuple[float | None, float | None, str]:
+        """Return waist-pivot depth and yaw needed to face board center.
+
+        ``lateral_m`` is measured from the camera optical center.  A positive
+        camera-to-waist lateral offset means the waist lies image-right of
+        the camera, so it is subtracted to express the target from the waist.
+        """
+        if depth_m is None or lateral_m is None:
+            return None, None, "UNKNOWN"
+        waist_depth = depth_m + self.camera_to_waist_depth_offset_m
+        if (
+            not math.isfinite(waist_depth)
+            or not math.isfinite(lateral_m)
+            or waist_depth <= 0.0
+        ):
+            return None, None, "UNKNOWN"
+        waist_lateral = (
+            lateral_m - self.camera_to_waist_lateral_offset_m
+        )
+        aim = math.degrees(math.atan2(waist_lateral, waist_depth))
+        if abs(aim) <= self.waist_aim_deadband_deg:
+            direction = "CENTER"
+        elif aim > 0.0:
+            direction = "TURN_RIGHT"
+        else:
+            direction = "TURN_LEFT"
+        return waist_depth, aim, direction
+
+    def _waist_ring_aim(
+        self,
+        board_depth_m: float | None,
+        board_lateral_m: float | None,
+        board_angle_deg: float | None,
+    ) -> tuple[
+        float | None,
+        float | None,
+        float | None,
+        float | None,
+        float | None,
+        str,
+    ]:
+        """Return ring geometry and a motor-signed waist yaw delta.
+
+        Only horizontal-plane geometry is used; the ring's vertical drop
+        below the sampled backboard line does not affect a waist yaw joint.
+        Positive board yaw means the board's right side is farther away.
+        The returned aim uses the waist motor convention, which is the
+        opposite sign of the geometric yaw: motor_delta = -geometric_yaw.
+        """
+        if (
+            board_depth_m is None
+            or board_lateral_m is None
+            or board_angle_deg is None
+        ):
+            return None, None, None, None, None, "UNKNOWN"
+        values = (board_depth_m, board_lateral_m, board_angle_deg)
+        if not all(math.isfinite(value) for value in values):
+            return None, None, None, None, None, "UNKNOWN"
+
+        angle_rad = math.radians(board_angle_deg)
+        forward = self.backboard_to_ring_center_forward_m
+        # Toward-camera board normal: (sin(yaw), -cos(yaw)) in camera X/Z.
+        ring_lateral = board_lateral_m + forward * math.sin(angle_rad)
+        ring_depth = board_depth_m - forward * math.cos(angle_rad)
+        waist_ring_lateral = (
+            ring_lateral - self.camera_to_waist_lateral_offset_m
+        )
+        waist_ring_depth = (
+            ring_depth + self.camera_to_waist_depth_offset_m
+        )
+        if ring_depth <= 0.0 or waist_ring_depth <= 0.0:
+            return None, None, None, None, None, "UNKNOWN"
+
+        geometric_aim = math.degrees(math.atan2(
+            waist_ring_lateral,
+            waist_ring_depth,
+        ))
+        motor_delta = -geometric_aim
+        if abs(geometric_aim) <= self.waist_aim_deadband_deg:
+            direction = "CENTER"
+        elif geometric_aim > 0.0:
+            direction = "TURN_RIGHT"
+        else:
+            direction = "TURN_LEFT"
+        return (
+            ring_lateral,
+            ring_depth,
+            waist_ring_lateral,
+            waist_ring_depth,
+            motor_delta,
+            direction,
+        )
+
     def _image_size(
         self,
         payload: dict[str, Any],
@@ -467,11 +799,61 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         depth_m, depth_valid, sample_count = self._sample_goal_depth_m(
             aim_bbox
         )
+        (
+            left_depth,
+            center_depth,
+            right_depth,
+            line_sample_count,
+            sample_points,
+        ) = self._sample_backboard_line_depths(
+            aim_bbox,
+            image_width,
+            image_height,
+        )
+        (
+            backboard_angle,
+            parallel_correction,
+            angle_direction,
+            angle_fit_error,
+            measured_width,
+        ) = self._estimate_backboard_angle(
+            sample_points,
+            (left_depth, center_depth, right_depth),
+        )
         bearing, elevation, lateral, distance, ground_distance = self._project(
             center_x,
             center_y,
             depth_m,
             reference_x=robot_center_x,
+        )
+        _, _, camera_lateral, _, _ = self._project(
+            center_x,
+            center_y,
+            depth_m,
+        )
+        waist_depth, waist_aim, waist_direction = self._waist_center_aim(
+            depth_m,
+            camera_lateral,
+        )
+        ring_board_depth = (
+            center_depth if center_depth is not None else depth_m
+        )
+        _, _, ring_board_lateral, _, _ = self._project(
+            center_x,
+            center_y,
+            ring_board_depth,
+        )
+        (
+            ring_lateral,
+            ring_depth,
+            waist_ring_lateral,
+            waist_ring_depth,
+            waist_ring_aim,
+            waist_ring_direction,
+        ) = self._waist_ring_aim(
+            ring_board_depth,
+            ring_board_lateral,
+            backboard_angle,
         )
         if offset_x_norm < -self.direction_deadband_norm:
             direction = "LEFT"
@@ -524,6 +906,62 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
             lateral_offset_m=(
                 round(lateral, 3) if lateral is not None else None
             ),
+            left_depth_m=(
+                round(left_depth, 4) if left_depth is not None else None
+            ),
+            center_depth_m=(
+                round(center_depth, 4) if center_depth is not None else None
+            ),
+            right_depth_m=(
+                round(right_depth, 4) if right_depth is not None else None
+            ),
+            backboard_angle_deg=(
+                round(backboard_angle, 3)
+                if backboard_angle is not None else None
+            ),
+            parallel_correction_deg=(
+                round(parallel_correction, 3)
+                if parallel_correction is not None else None
+            ),
+            backboard_angle_direction=angle_direction,
+            backboard_angle_valid=backboard_angle is not None,
+            backboard_angle_fit_error_m=(
+                round(angle_fit_error, 4)
+                if angle_fit_error is not None else None
+            ),
+            backboard_measured_width_m=(
+                round(measured_width, 4)
+                if measured_width is not None else None
+            ),
+            backboard_line_width_m=round(self.backboard_line_width_m, 4),
+            backboard_sample_points_px=sample_points,
+            backboard_depth_sample_count=line_sample_count,
+            waist_depth_m=(
+                round(waist_depth, 4) if waist_depth is not None else None
+            ),
+            waist_aim_deg=(
+                round(waist_aim, 3) if waist_aim is not None else None
+            ),
+            waist_turn_direction=waist_direction,
+            ring_center_lateral_m=(
+                round(ring_lateral, 4) if ring_lateral is not None else None
+            ),
+            ring_center_depth_m=(
+                round(ring_depth, 4) if ring_depth is not None else None
+            ),
+            waist_ring_lateral_m=(
+                round(waist_ring_lateral, 4)
+                if waist_ring_lateral is not None else None
+            ),
+            waist_ring_depth_m=(
+                round(waist_ring_depth, 4)
+                if waist_ring_depth is not None else None
+            ),
+            waist_ring_aim_deg=(
+                round(waist_ring_aim, 3)
+                if waist_ring_aim is not None else None
+            ),
+            waist_ring_turn_direction=waist_ring_direction,
             depth_valid=depth_valid,
             depth_sample_count=sample_count,
             score=round(priority, 4),
@@ -534,10 +972,10 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         target: GoalCandidate,
     ) -> tuple[str, bool, bool, float | None, bool, str]:
         centered = goal_shot_pixels_aligned(
-            target.depth_m if target.depth_m is not None else GOAL_SCORE_TARGET_DEPTH_M,
+            target.ring_center_depth_m if target.ring_center_depth_m is not None else GOAL_SCORE_TARGET_DEPTH_M,
             target.offset_x_px,
         )
-        if not target.depth_valid or target.depth_m is None:
+        if not target.depth_valid or target.ring_center_depth_m is None:
             return (
                 "NO_DEPTH",
                 centered,
@@ -546,11 +984,14 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
                 False,
                 "goal_detected_without_valid_depth",
             )
-        error = target.depth_m - self.score_target_depth_m
+        error = target.ring_center_depth_m - self.score_target_depth_m
         depth_in_range = (
-            GOAL_SCORE_MIN_DEPTH_M <= target.depth_m < GOAL_SCORE_MAX_DEPTH_M
+            GOAL_SCORE_MIN_DEPTH_M <= target.ring_center_depth_m < GOAL_SCORE_MAX_DEPTH_M
         )
-        score_now = goal_shot_region(target.depth_m, target.offset_x_px) is not None
+        score_now = (goal_shot_region(target.ring_center_depth_m) is not None
+                     and target.waist_ring_aim_deg is not None
+                     and math.isfinite(target.waist_ring_aim_deg)
+                     and abs(target.waist_ring_aim_deg) < 90.0)
         if score_now:
             return (
                 "SCORE_READY",
@@ -558,7 +999,7 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
                 depth_in_range,
                 error,
                 True,
-                "goal_centered_at_scoring_depth",
+                "goal_ring_at_scoring_depth",
             )
         if not centered:
             return (
@@ -569,10 +1010,10 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
                 False,
                 "align_goal_horizontally",
             )
-        if target.depth_m >= GOAL_SCORE_MAX_DEPTH_M:
+        if target.ring_center_depth_m >= GOAL_SCORE_MAX_DEPTH_M:
             state = (
                 "APPROACH"
-                if target.depth_m <= self.approach_depth_m
+                if target.ring_center_depth_m <= self.approach_depth_m
                 else "FAR"
             )
             return state, centered, False, error, False, "goal_too_far"
@@ -591,11 +1032,21 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         payload["camera_fx_px"] = self.fx
         payload["rgb_stamp_ns"] = getattr(self, "_active_rgb_stamp_ns", None)
         payload["robot_center_offset_px"] = self.robot_center_offset_px
+        payload["camera_to_waist_depth_offset_m"] = (
+            self.camera_to_waist_depth_offset_m
+        )
+        payload["camera_to_waist_lateral_offset_m"] = (
+            self.camera_to_waist_lateral_offset_m
+        )
+        payload["backboard_to_ring_center_forward_m"] = (
+            self.backboard_to_ring_center_forward_m
+        )
         payload["robot_center_x_px"] = (
             calibrated_robot_center_x(info.image_width, self.robot_center_offset_px)
             if info.image_width is not None and info.image_width > 0
             else None
         )
+        payload["camera_cx_px"] = self.cx
         payload.update(self.confirmation_fields)
         payload.update(self.score_confirmation_fields)
         message.data = json.dumps(
@@ -630,6 +1081,27 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
             distance_m=None,
             ground_distance_m=None,
             lateral_offset_m=None,
+            left_depth_m=None,
+            center_depth_m=None,
+            right_depth_m=None,
+            backboard_angle_deg=None,
+            parallel_correction_deg=None,
+            backboard_angle_direction="UNKNOWN",
+            backboard_angle_valid=False,
+            backboard_angle_fit_error_m=None,
+            backboard_measured_width_m=None,
+            backboard_line_width_m=round(self.backboard_line_width_m, 4),
+            backboard_sample_points_px=[],
+            backboard_depth_sample_count=0,
+            waist_depth_m=None,
+            waist_aim_deg=None,
+            waist_turn_direction="UNKNOWN",
+            ring_center_lateral_m=None,
+            ring_center_depth_m=None,
+            waist_ring_lateral_m=None,
+            waist_ring_depth_m=None,
+            waist_ring_aim_deg=None,
+            waist_ring_turn_direction="UNKNOWN",
             depth_valid=False,
             depth_sample_count=0,
             is_centered=False,
@@ -814,6 +1286,37 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
                 distance_m=target.distance_m,
                 ground_distance_m=target.ground_distance_m,
                 lateral_offset_m=target.lateral_offset_m,
+                left_depth_m=target.left_depth_m,
+                center_depth_m=target.center_depth_m,
+                right_depth_m=target.right_depth_m,
+                backboard_angle_deg=target.backboard_angle_deg,
+                parallel_correction_deg=target.parallel_correction_deg,
+                backboard_angle_direction=target.backboard_angle_direction,
+                backboard_angle_valid=target.backboard_angle_valid,
+                backboard_angle_fit_error_m=(
+                    target.backboard_angle_fit_error_m
+                ),
+                backboard_measured_width_m=(
+                    target.backboard_measured_width_m
+                ),
+                backboard_line_width_m=target.backboard_line_width_m,
+                backboard_sample_points_px=(
+                    target.backboard_sample_points_px
+                ),
+                backboard_depth_sample_count=(
+                    target.backboard_depth_sample_count
+                ),
+                waist_depth_m=target.waist_depth_m,
+                waist_aim_deg=target.waist_aim_deg,
+                waist_turn_direction=target.waist_turn_direction,
+                ring_center_lateral_m=target.ring_center_lateral_m,
+                ring_center_depth_m=target.ring_center_depth_m,
+                waist_ring_lateral_m=target.waist_ring_lateral_m,
+                waist_ring_depth_m=target.waist_ring_depth_m,
+                waist_ring_aim_deg=target.waist_ring_aim_deg,
+                waist_ring_turn_direction=(
+                    target.waist_ring_turn_direction
+                ),
                 depth_valid=target.depth_valid,
                 depth_sample_count=target.depth_sample_count,
                 is_centered=centered,

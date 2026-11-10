@@ -1190,7 +1190,7 @@ def test_post_ball_unusable_line_waits_before_normal_tracking(overrides):
     assert not result.valid
 
 
-def test_post_ball_handoff_does_not_change_legacy_post_shot_alignment():
+def test_post_ball_handoff_still_differs_from_post_shot_alignment():
     planner = MotionDecisionPlanner()
     info = post_ball_return_line()
     assert planner.plan(
@@ -1198,7 +1198,7 @@ def test_post_ball_handoff_does_not_change_legacy_post_shot_alignment():
     ).action == "POST_BALL_LINE_ALIGNED"
     assert planner.plan(
         "POST_SHOT_LINE_ALIGN", observations(line=info), 0.1,
-    ).action == "POST_SHOT_LINE_TURN_RIGHT_1"
+    ).action == "POST_SHOT_LINE_RECOVER_RIGHT_4"
 
 
 @pytest.mark.parametrize(
@@ -1240,6 +1240,11 @@ def test_stationary_right_turn_calibration_in_line_and_goal_paths(
         if prefix == "POST_SHOT_LINE" and angle < 15.0:
             assert decision.action == "POST_SHOT_LINE_ALIGNED"
             continue
+        if prefix == "POST_SHOT_LINE" and angle <= 35.0:
+            assert decision.action == "POST_SHOT_LINE_RECOVER_RIGHT_4"
+            assert decision.source_command["turn_count"] == 4
+            assert decision.source_command["turn_angle_deg"] == 20.0
+            continue
         assert decision.action == f"{prefix}_TURN_RIGHT_{count}"
         if prefix == "GOAL_CAMERA90":
             assert int(decision.action.rsplit("_", 1)[1]) == count
@@ -1273,6 +1278,10 @@ def test_line_left_turn_uses_fifteen_degree_bins(angle, count, expected_angle):
         observations(line=line_info(ground_heading_error_deg=-angle)), 0.1,
     )
     assert decision.valid is True
+    if angle <= 35.0:
+        assert decision.action == "POST_SHOT_LINE_RECOVER_LEFT_4"
+        assert decision.source_command["turn_angle_deg"] == 30.0
+        return
     assert decision.action.endswith(f"TURN_LEFT_{count}")
     assert decision.source_command["turn_angle_deg"] == expected_angle
     assert decision.source_command["turn_repeat_deg"] is None
@@ -1469,7 +1478,7 @@ def test_goal_left_deadband_keeps_distance_based_forward(bearing):
 
 
 @pytest.mark.parametrize("angle,count", [(7.999, 0), (8.0, 1), (14.999, 1), (15.0, 1), (15.001, 1), (20.0, 1), (20.001, 1), (30.0, 2), (45.0, 3)])
-def test_ball_approach_bypasses_turns_and_post_shot_uses_left_eight_degree_minimum(angle, count):
+def test_ball_approach_bypasses_turns_and_post_shot_uses_fifteen_degree_minimum(angle, count):
     planner = MotionDecisionPlanner()
     ball = planner.plan_ball_approach_alignment(
         ball_info(steering_angle_deg=-angle, bearing_deg=-angle),
@@ -1480,8 +1489,9 @@ def test_ball_approach_bypasses_turns_and_post_shot_uses_left_eight_degree_minim
         observations(line=line_info(ground_heading_error_deg=-angle)), 0.1,
     )
     assert line.action == (
-        f"POST_SHOT_LINE_TURN_LEFT_{count}" if count
-        else "POST_SHOT_LINE_ALIGNED"
+        "POST_SHOT_LINE_ALIGNED" if angle < 15.0
+        else "POST_SHOT_LINE_RECOVER_LEFT_4" if angle <= 35.0
+        else f"POST_SHOT_LINE_TURN_LEFT_{count}"
     )
 
 
@@ -2989,6 +2999,14 @@ def test_alignment_uses_shared_turn_table_in_ball_line_and_goal_stages(
          "POST_SHOT_LINE", "POST_SHOT_LINE_ALIGNED"),
     ):
         assert decision.valid
+        if prefix == "POST_SHOT_LINE":
+            if angle < 15.0:
+                assert decision.action == aligned_action
+                continue
+            if angle <= 35.0:
+                assert decision.action == f"POST_SHOT_LINE_RECOVER_{direction}_4"
+                assert decision.source_command["turn_angle_deg"] == (20.0 if direction == "RIGHT" else 30.0)
+                continue
         if expected_count == 0:
             assert decision.action == aligned_action
         else:
@@ -3110,7 +3128,7 @@ def test_line_alignment_uses_ground_heading_over_opposite_image_heading(phase):
     assert decision.valid is True
     assert decision.action == (
         "POST_BALL_LINE_ALIGNED" if phase == "POST_BALL_LINE_ALIGN"
-        else "POST_SHOT_LINE_TURN_RIGHT_1"
+        else "POST_SHOT_LINE_RECOVER_RIGHT_4"
     )
     assert decision.source_command["heading_error_deg"] == 20.0
 

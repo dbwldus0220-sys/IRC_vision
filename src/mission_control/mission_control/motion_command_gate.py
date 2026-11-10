@@ -65,7 +65,11 @@ GENERAL_ACTIONS = frozenset(
         "GOAL_SHOT_PREPARE",
         "POST_SHOT_TURN_RIGHT_9",
         "POST_SHOT_TURN_LEFT_4",
+        "POST_SHOT_TURN_RIGHT_5",
+        "POST_SHOT_TURN_LEFT_3",
         "POST_SHOT_FORWARD",
+        "POST_SHOT_LINE_RECOVER_LEFT_4",
+        "POST_SHOT_LINE_RECOVER_RIGHT_4",
         *{
             f"POST_SHOT_LINE_TURN_{direction}_{count}"
             for direction, counts in (

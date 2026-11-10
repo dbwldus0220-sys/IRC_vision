@@ -1,4 +1,4 @@
-"""Reserve the post-shot forward during either goal's extra alignment turn."""
+"""Reserve post-shot forward during either goal's turn or recovery walking."""
 
 import json
 from pathlib import Path
@@ -23,10 +23,14 @@ def start_turn(clock, section, heading=20.):
     node.queued_general_action = None
     node.queued_general_source = None
     bridge = FakeBridge(advance_transition_dwells=False)
+    bridge.last_physical_motion_id = (
+        'post_shot_default_turn_right_5' if section == 1 else 'post_shot_default_turn_left_3'
+    )
+    bridge.stationary_since = clock[0] - .5
     receive(node, clock, 'line', line_info(heading=heading))
     Node._publish_decision(node)
     command = node.publisher.messages[-1]
-    assert command['action'].startswith('POST_SHOT_LINE_TURN_')
+    assert command['action'].startswith(('POST_SHOT_LINE_TURN_', 'POST_SHOT_LINE_RECOVER_'))
     bridge.navigation_command_callback(String(data=json.dumps(command)))
     request = decoded_messages(bridge.executor_request_publisher)[-1]
     forward_status(node, bridge, request, 'RUNNING')
@@ -34,16 +38,20 @@ def start_turn(clock, section, heading=20.):
     return node, bridge, request
 
 
-def turn_frames(node, clock, sample=None, fractions=(.35, .55, .85)):
+def turn_frames(node, clock, sample=None, fractions=None):
     started = node.active_line_motion_started_at
     duration = node.active_line_motion_duration_sec
+    if fractions is None:
+        # Three 10 Hz observations, all within the 0.5 s freshness limit,
+        # including for recovery gaits that are longer than a small yaw turn.
+        fractions = (.85 - .2 / duration, .85 - .1 / duration, .85)
     for fraction in fractions:
         clock[0] = started + duration * fraction
         receive(node, clock, 'line', sample or line_info())
 
 
 @pytest.mark.parametrize('section', [1, 2])
-@pytest.mark.parametrize('heading', [20., 40., -20.])
+@pytest.mark.parametrize('heading', [20., 31., 35., -20., -35., 35.001, -35.001])
 def test_both_goals_reserve_and_start_forward_without_post_turn_images(clock, section, heading):
     node, bridge, turn = start_turn(clock, section, heading)
     turn_frames(node, clock)
@@ -61,6 +69,10 @@ def test_both_goals_reserve_and_start_forward_without_post_turn_images(clock, se
     forward_status(node, bridge, turn, 'SUCCEEDED')
     assert node.mission_phase == 'POST_SHOT_FORWARD'
     assert node.post_shot_dwell_until is None
+    if turn['action'].startswith('POST_SHOT_LINE_TURN_'):
+        assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+        clock[0] = bridge.transition_dwell_until
+        bridge._check_atomic_dwell()
     forward = decoded_messages(bridge.executor_request_publisher)[-1]
     assert forward['command_id'] == reserved['command_id']
     assert forward['motion_id'] == 'line_forward_6'
@@ -103,7 +115,7 @@ def test_only_distinct_recent_in_turn_frames_can_reserve(clock, kind):
 
 
 @pytest.mark.parametrize('section', [1, 2])
-@pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT', 'CANCELLED'])
+@pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT', 'CANCELLED', 'REJECTED'])
 def test_turn_failure_discards_reserved_forward(clock, section, status):
     node, bridge, turn = start_turn(clock, section, -20.)
     turn_frames(node, clock)
@@ -127,9 +139,10 @@ def test_reservation_retains_executor_and_start_gates(clock, blocked, value, mon
     assert node.queued_general_command_id is None
 
 
-def test_actual_turn_running_starts_capture_after_preparation(clock):
+@pytest.mark.parametrize('heading', [-60., -31., 31., 60.])
+def test_actual_turn_running_starts_capture_after_preparation(clock, heading):
     node = LiveInputHarness(phase='POST_SHOT_LINE_ALIGN')
-    receive(node, clock, 'line', line_info(heading=20.))
+    receive(node, clock, 'line', line_info(heading=heading))
     Node._publish_decision(node)
     command = node.publisher.messages[-1]
     node.send_status(command['action'], command['command_id'], 'RUNNING', motion_id='fine_to_turn_ready_90')
@@ -150,7 +163,7 @@ def test_capture_timings_match_runtime_turn_catalog():
     aliases = yaml.safe_load((root / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']
     catalog = {m['name']: m for m in json.loads((root / 'artifacts/robot_motions_runtime.json').read_text())['motions']}
     for action, alias in FakeBridge.ACTION_TO_MOTION_ID.items():
-        if not action.startswith('POST_SHOT_LINE_TURN_'):
+        if not action.startswith(('POST_SHOT_LINE_TURN_', 'POST_SHOT_LINE_RECOVER_')):
             continue
         motion = catalog[aliases[alias]]
         duration = max(f['start_ms'] + f['time_ms'] for f in motion['frames']) / 1000

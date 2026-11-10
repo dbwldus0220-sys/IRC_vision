@@ -139,8 +139,11 @@ MotionInfo RobotMotionPlayer::motionInfo(std::string_view name) const {
     };
 }
 
-StartResult RobotMotionPlayer::start(std::string_view motion_name) noexcept {
+StartResult RobotMotionPlayer::start(std::string_view motion_name, double waist_delta_deg) noexcept {
     if (running()) return StartResult::RejectedBusy;
+    pending_waist_delta_deg_ = 0.0;
+    if (!std::isfinite(waist_delta_deg) || std::abs(waist_delta_deg) >= 90.0)
+        return StartResult::InvalidMotion;
     if (!hardwareReady()) {
         fail(MotionError::HardwareNotReady, "motion hardware is not ready");
         return StartResult::HardwareNotReady;
@@ -157,6 +160,11 @@ StartResult RobotMotionPlayer::start(std::string_view motion_name) noexcept {
             last_error_ = "motion has no frames: " + name;
             return StartResult::InvalidMotion;
         }
+        if (waist_delta_deg != 0.0 && (pattern.frames().size() < 2 ||
+            !std::all_of(pattern.frames().begin(), pattern.frames().end(),
+                [](const MotionFrame& frame) { return frame.angles.contains(11); })))
+            return StartResult::InvalidMotion;
+        pending_waist_delta_deg_ = waist_delta_deg;
         current_motion_ = name;
         ++trace_run_;
         trace_tick_ = 0;
@@ -344,11 +352,15 @@ void RobotMotionPlayer::resetMotionRuntime(
     playback_frames_ = pattern.frames();
     for (auto& frame : playback_frames_) {
         frame.angles = correctedFrameAngles(frame);
+        // Ring aim is a motor-signed delta. Keep the last return pose unchanged.
+        if (&frame != &playback_frames_.back() && pending_waist_delta_deg_ != 0.0)
+            frame.angles.at(11) += pending_waist_delta_deg_;
         for (auto it = frame.angles.begin(); it != frame.angles.end();) {
             if (!hardware_->motorEnabled(it->first)) it = frame.angles.erase(it);
             else ++it;
         }
     }
+    pending_waist_delta_deg_ = 0.0;
     if (continuous_interpolation_ && !startup_active_)
         continuous_trajectory_.reset(playback_frames_, start_angles_, pattern.playbackSpeed());
     command_ids_.reserve(kMotionMotorCount);

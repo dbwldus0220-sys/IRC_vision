@@ -23,7 +23,7 @@ def test_angle_alone_selects_direction_even_inside_old_pixel_deadband(depth, off
         'line_heading_valid': True, 'line_heading_deg': angle,
         'line_heading_reference_source': 'fresh',
     }, positioning=True)
-    expected = 'STRAIGHT_0' if action == 'STRAIGHT' and depth <= .7 else action
+    expected = 'STRAIGHT_1' if action == 'STRAIGHT' and depth <= .7 else action
     assert command.valid and command.action == expected
     assert command.center_steering_deg == angle
 
@@ -92,7 +92,7 @@ def test_proximity_guards_and_final_priority_remain_explicit(depth, bottom):
     elif bottom in (None, -1):
         assert command.action == 'WAIT' and not command.valid
     elif bottom <= 100:
-        assert command.action == ('STRAIGHT_0' if depth <= .7 else 'WAIT')
+        assert command.action == ('STRAIGHT_1' if depth <= .7 else 'WAIT')
     else:
         assert command.action == 'ALIGN_RIGHT'
 
@@ -105,7 +105,7 @@ def test_small_line_slope_does_not_turn_toward_large_intersection_or_parallel_an
                  'center_points_px': [[500, 250], [500, 180], [500, 100]]},
     }, .1)
     assert abs(decision.source_command['path_target_bearing_deg']) > 89
-    assert decision.valid and decision.action == 'STRAIGHT_0'
+    assert decision.valid and decision.action == 'STRAIGHT_1'
     assert decision.source_command['center_steering_deg'] == heading
     assert 'turn_count' not in decision.source_command
 

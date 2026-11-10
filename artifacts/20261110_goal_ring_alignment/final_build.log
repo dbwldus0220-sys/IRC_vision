@@ -1,0 +1,76 @@
+Consolidate compiler generated dependencies of target robot_motion_runtime_config
+[  4%] Built target robot_motion_runtime_config
+[  4%] Built target catalog_only_core
+[  7%] Built target motion_core
+[ 10%] Built target motion_player_core
+[ 12%] Built target gtest_main
+[ 14%] Built target gtest
+Consolidate compiler generated dependencies of target test_forward_timing
+Consolidate compiler generated dependencies of target catalog_only_node
+[ 16%] Built target sdk_executor_core
+[ 19%] Built target test_forward_timing
+[ 21%] Built target catalog_only_node
+Consolidate compiler generated dependencies of target test_motion_pattern
+Consolidate compiler generated dependencies of target test_motion_callback
+Consolidate compiler generated dependencies of target gui_execution_probe
+[ 23%] Built target test_motion_pattern
+[ 25%] Built target test_motion_callback
+[ 28%] Built target gui_execution_probe
+Consolidate compiler generated dependencies of target test_gui_alignment
+Consolidate compiler generated dependencies of target continuous_trace_probe
+[ 30%] Built target test_gui_alignment
+Consolidate compiler generated dependencies of target test_continuous_hardware
+[ 32%] Built target continuous_trace_probe
+[ 38%] Built target test_continuous_hardware
+Consolidate compiler generated dependencies of target test_catalog_only_core
+Consolidate compiler generated dependencies of target test_continuous_interpolation
+Consolidate compiler generated dependencies of target test_motion_json_catalog
+[ 41%] Built target test_catalog_only_core
+[ 42%] Built target test_continuous_interpolation
+[ 44%] Built target test_motion_json_catalog
+Consolidate compiler generated dependencies of target test_sdk_executor_core
+Consolidate compiler generated dependencies of target test_ring_shot_core
+[ 49%] Built target test_ring_shot_core
+[ 49%] Built target test_sdk_executor_core
+[ 51%] Built target test_queue_control_tick
+Consolidate compiler generated dependencies of target test_robot_motion_parameter_types
+Consolidate compiler generated dependencies of target test_robot_motion_runtime_config
+[ 56%] Built target test_robot_motion_runtime_config
+[ 56%] Built target test_robot_motion_parameter_types
+[ 61%] Built target robot_control
+Consolidate compiler generated dependencies of target simulated_motion_backend
+Consolidate compiler generated dependencies of target sdk_executor_driver
+Consolidate compiler generated dependencies of target test_callback_timing_trace
+[ 64%] Built target simulated_motion_backend
+[ 68%] Built target sdk_executor_driver
+[ 70%] Built target test_callback_timing_trace
+[ 70%] Built target gui_comparison_probe
+Consolidate compiler generated dependencies of target test_sdk_executor_driver
+Consolidate compiler generated dependencies of target test_simulated_motion_backend
+[ 73%] Built target test_sdk_executor_driver
+[ 75%] Built target test_simulated_motion_backend
+Consolidate compiler generated dependencies of target test_startup_pose_gate
+Consolidate compiler generated dependencies of target test_startup_pose_catalog
+[ 77%] Built target test_startup_pose_gate
+Consolidate compiler generated dependencies of target irc_step_motion_sdk_compile_probe
+[ 79%] Built target irc_step_motion_sdk_compile_probe
+[ 82%] Built target test_startup_pose_catalog
+Consolidate compiler generated dependencies of target motion_backend_factory
+[ 83%] Building CXX object CMakeFiles/robot_motion_player_backend.dir/src/robot_motion_player_backend.cpp.o
+[ 85%] Built target motion_backend_factory
+Consolidate compiler generated dependencies of target test_motion_backend_factory
+[ 87%] Built target test_motion_backend_factory
+[ 88%] Linking CXX static library librobot_motion_player_backend.a
+[ 88%] Built target robot_motion_player_backend
+Consolidate compiler generated dependencies of target production_robot_motion_runtime_factory
+[ 89%] Linking CXX executable test_robot_motion_player_backend
+[ 92%] Built target production_robot_motion_runtime_factory
+Consolidate compiler generated dependencies of target sdk_hardware_preflight_core
+Consolidate compiler generated dependencies of target sdk_motion_executor
+[ 94%] Built target sdk_hardware_preflight_core
+[ 95%] Linking CXX executable sdk_motion_executor
+Consolidate compiler generated dependencies of target sdk_hardware_preflight
+[ 96%] Linking CXX executable sdk_hardware_preflight
+[ 97%] Built target test_robot_motion_player_backend
+[ 98%] Built target sdk_hardware_preflight
+[100%] Built target sdk_motion_executor

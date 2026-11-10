@@ -1,0 +1,21 @@
+{
+  "python_passed": 282,
+  "python_failed": 8,
+  "existing_pickup_failures": [
+    "test_pickup_fine_skip::test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit[1]",
+    "test_pickup_fine_skip::test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit[2]",
+    "test_pickup_fine_skip::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_left_0-200-pickup_crab_left_to_fine_0-1]",
+    "test_pickup_fine_skip::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_left_0-200-pickup_crab_left_to_fine_0-2]",
+    "test_pickup_fine_skip::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_right_0_2-200-pickup_crab_right_to_fine_0-1]",
+    "test_pickup_fine_skip::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_right_0_2-200-pickup_crab_right_to_fine_0-2]",
+    "test_pickup_fine_skip::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_fine_forward_0-270-None-1]",
+    "test_pickup_fine_skip::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_fine_forward_0-270-None-2]"
+  ],
+  "new_failures": [],
+  "changed_failure_messages": [],
+  "goal_focused_passed": 157,
+  "cpp_suites_passed": 5,
+  "production_build_passed": true,
+  "hardware_executed": false,
+  "upstream_commit": "bde2230381ab20a4f9062d461fe94cce7c4738e4"
+}

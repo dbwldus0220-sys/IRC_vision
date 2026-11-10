@@ -47,7 +47,7 @@ def test_reacquisition_aligns_line_before_near_go(angle, direction, count):
     ready = planner.plan("AUTO", {
         "hurdle": visible(depth=.5, hurdle_angle_deg=40), "line": line_info(),
     }, .1)
-    assert ready.action == "STRAIGHT_0"
+    assert ready.action == "STRAIGHT_1"
     assert not planner.hurdle_planner.recovery_active
     final = planner.plan("AUTO", {
         "hurdle": visible(depth=.45, hurdle_angle_deg=0),
@@ -63,7 +63,7 @@ def test_line_tolerance_resumes_fine_approach(angle):
     decision = planner.plan(visible(hurdle_angle_deg=60, line_heading_valid=True,
                                     line_heading_deg=angle, line_heading_reference_source="fresh"),
                             positioning=True)
-    assert decision.action == "STRAIGHT_0"
+    assert decision.action == "STRAIGHT_1"
     assert not planner.recovery_active
 
 
@@ -114,7 +114,7 @@ def test_bottom_loss_repeats_one_cycle_retreat_until_visible(bottom):
         assert len(requests) == 1
         assert requests[0]["motion_id"] == "pickup_lost_ball_backward_1"
     ready = planner.plan("AUTO", {"hurdle": visible()}, .1)
-    assert ready.action == "STRAIGHT_0"
+    assert ready.action == "STRAIGHT_1"
 
 
 @pytest.mark.parametrize("info", [None, {}, {"detected": False, "raw_detected": True},
@@ -179,7 +179,7 @@ def test_bottom_retreat_waits_for_completion_pause_and_fresh_reacquisition(clock
     node.publish()
     node.receive(visible())
     resumed = node.publish()[-1]
-    assert resumed["action"] == "STRAIGHT_0"
+    assert resumed["action"] == "STRAIGHT_1"
 
 
 def test_screen_center_takes_precedence_over_calibrated_robot_offset():
@@ -210,7 +210,7 @@ def test_callback_remembers_side_during_motion_and_blocks_early_go(clock):
     node = HurdleHarness()
     node.receive(visible(0))
     fine = node.publish()[-1]
-    assert fine["action"] == "STRAIGHT_0"
+    assert fine["action"] == "STRAIGHT_1"
     node.receive(visible(-400))
     node.receive({"detected": False})
     assert node.publish() == []

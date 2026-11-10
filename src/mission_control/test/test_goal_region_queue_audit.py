@@ -82,8 +82,11 @@ def shoot_after_completion(node, clock, previous_motion, region, depth, shot_ind
     assert node.shots_completed == shot_index
     assert node.active_special_command_id is None
     assert node.mission_phase == 'POST_SHOT_TURN'
-    assert node.phase_manager.post_shot_turn_action() == (
-        'POST_SHOT_TURN_RIGHT_9' if shot_index == 1 else 'POST_SHOT_TURN_LEFT_4')
+    if region in {5, 6, 7, 8}:
+        expected = 'POST_SHOT_TURN_RIGHT_5' if shot_index == 1 else 'POST_SHOT_TURN_LEFT_3'
+    else:
+        expected = 'POST_SHOT_TURN_RIGHT_9' if shot_index == 1 else 'POST_SHOT_TURN_LEFT_4'
+    assert node.phase_manager.post_shot_turn_action() == expected
 
 
 @pytest.mark.parametrize('region,depth', REGIONS)

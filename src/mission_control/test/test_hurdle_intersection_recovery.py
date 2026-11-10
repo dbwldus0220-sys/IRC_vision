@@ -61,7 +61,7 @@ def test_fine_entry_latches_through_depth_rebound_and_resets_after_hurdle():
     assert planner.hurdle_planner.fine_approach_active
     assert rebound.source_command['hurdle_stage'] == 'FINE_APPROACH'
     centered = planner.plan('AUTO', {'hurdle': hurdle(.85), 'line': line_info()}, .1)
-    assert centered.action == 'STRAIGHT_0'
+    assert centered.action == 'STRAIGHT_1'
     planner.plan('HURDLE_DONE', {'hurdle': {'detected': False}}, .1)
     planner.plan('AUTO', {'hurdle': {'detected': False}}, .1)
     new_hurdle = planner.plan('AUTO', {'hurdle': hurdle(.8), 'line': line_info(x=900, heading=40)}, .1)
@@ -90,7 +90,7 @@ def test_standalone_positioning_latches_fine_and_rejects_held_coarse_reference()
     held = {**hurdle(.8), 'path_reference_valid': True,
             'path_offset_x_norm': -.3, 'path_reference_source': 'held'}
     assert not planner.plan(held, positioning=True).valid
-    assert planner.plan(hurdle(.7), positioning=True).action == 'STRAIGHT_0'
-    assert planner.plan(held, positioning=True).action == 'STRAIGHT_0'
+    assert planner.plan(hurdle(.7), positioning=True).action == 'STRAIGHT_1'
+    assert planner.plan(held, positioning=True).action == 'STRAIGHT_1'
     planner.reset()
     assert not planner.fine_approach_active and not planner.close_rotation_blocked

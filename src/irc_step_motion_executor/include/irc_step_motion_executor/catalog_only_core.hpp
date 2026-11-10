@@ -13,6 +13,7 @@ struct MotionRequest
 {
   std::int64_t request_id{0};
   std::string motion_id;
+  std::optional<double> waist_ring_aim_deg;
   std::optional<std::int64_t> command_id;
   std::optional<std::int64_t> event_id;
   std::optional<std::string> action;

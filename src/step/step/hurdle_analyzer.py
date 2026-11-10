@@ -148,7 +148,7 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
         self.declare_parameter("direction_deadband_norm", 0.04)
         self.declare_parameter("head_down_trigger_bottom_distance_px", HURDLE_HEAD_DOWN_BOTTOM_DISTANCE_PX)
         self.declare_parameter("confirmation_window_size", 40)
-        self.declare_parameter("confirmation_required_hits", 15)
+        self.declare_parameter("confirmation_required_hits", 5)
         self.declare_parameter("confirmation_max_missed_frames", 4)
         self.declare_parameter("confirmation_max_center_shift_norm", 0.20)
         self.declare_parameter("confirmation_min_area_ratio", 0.40)

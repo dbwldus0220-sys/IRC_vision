@@ -3,6 +3,7 @@
 #include <json-c/json.h>
 
 #include <cstdint>
+#include <cmath>
 #include <exception>
 #include <optional>
 #include <string>
@@ -143,6 +144,26 @@ std::optional<ParsedRequest> parse_request(
       json_object_get_int64(camera_id) > 0;
     if (valid) {parsed.request.goal_head_prepare_id = json_object_get_int64(camera_id);}
   }
+  const bool ring_shot = parsed.request.motion_id == "goal_shot_region_1" ||
+    parsed.request.motion_id == "goal_shot_region_2" ||
+    parsed.request.motion_id == "goal_shot_region_5" ||
+    parsed.request.motion_id == "goal_shot_region_6" ||
+    parsed.request.motion_id == "goal_shot_region_7" ||
+    parsed.request.motion_id == "goal_shot_region_8";
+  const bool disabled_shot = parsed.request.motion_id == "goal_shot_region_3" ||
+    parsed.request.motion_id == "goal_shot_region_4" || parsed.request.motion_id == "goal_shot" ||
+    parsed.request.motion_id == "sdk_shot";
+  json_object * aim = nullptr;
+  const bool has_aim = json_object_object_get_ex(object, "waist_ring_aim_deg", &aim);
+  valid = valid && !disabled_shot && (!ring_shot || action == "SHOT") &&
+    (ring_shot == has_aim);
+  if (has_aim) {
+    const auto type = json_object_get_type(aim);
+    const double angle = json_object_get_double(aim);
+    valid = valid && (type == json_type_double || type == json_type_int) &&
+      std::isfinite(angle) && std::abs(angle) < 90.0;
+    if (valid) {parsed.request.waist_ring_aim_deg = angle;}
+  }
   json_object_put(object);
 
   if (!valid) {
@@ -208,6 +229,10 @@ MotionStatus SdkExecutorCore::handle_request(
   }
 
   if (active_) {
+    if (parsed->request.waist_ring_aim_deg || active_->request.waist_ring_aim_deg) {
+      return status_for_request(parsed->request, "REJECTED", "BUSY",
+        "ring shot cannot queue or accept a following motion before completion");
+    }
     if (queued_) {
       return status_for_request(
         parsed->request, "REJECTED", "QUEUE_FULL",
@@ -243,6 +268,8 @@ MotionStatus SdkExecutorCore::handle_request(
 
   try {
     const BackendStartResult start_result =
+      parsed->request.waist_ring_aim_deg ?
+      backend_.start_ring_shot(*resolved_motion, *parsed->request.waist_ring_aim_deg) :
       backend_.start_motion(*resolved_motion);
     if (!start_result.accepted) {
       const std::string error_code = start_result.error_code.empty() ?

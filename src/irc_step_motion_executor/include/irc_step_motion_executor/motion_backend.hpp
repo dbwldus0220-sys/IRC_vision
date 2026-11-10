@@ -52,6 +52,10 @@ public:
 
   virtual BackendStartResult start_motion(
     const std::string & resolved_motion_name) = 0;
+  virtual BackendStartResult start_ring_shot(const std::string &, double)
+  {
+    return {false, "RING_AIM_UNSUPPORTED", "backend cannot apply ring waist angle"};
+  }
   virtual BackendCancelResult cancel_motion() = 0;
   virtual BackendStatus poll_status() = 0;
   virtual BackendQueueResult queue_motion(const std::string &)

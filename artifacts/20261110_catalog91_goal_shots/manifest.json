@@ -1,0 +1,33 @@
+{
+  "imports": [
+    "R골넣기1번구역",
+    "R골넣기2번구역"
+  ],
+  "source_sha256": "124a11e3ef778e5089956f5c33835df39bfc7e3da1bcffa0d3163e34d10f1c80",
+  "pose_renames": {
+    "R골넣기1번구역": {
+      "R골2": "R골2(catalog91)",
+      "R골3": "R골3(catalog91)"
+    }
+  },
+  "catalogs": {
+    "pc": {
+      "changed": [
+        "R골넣기1번구역",
+        "R골넣기2번구역"
+      ],
+      "unchanged_other_motions": 154
+    },
+    "runtime": {
+      "changed": [
+        "R골넣기1번구역",
+        "R골넣기2번구역"
+      ],
+      "unchanged_other_motions": 154
+    }
+  },
+  "durations_ms": {
+    "R골넣기1번구역": 2260,
+    "R골넣기2번구역": 2200
+  }
+}

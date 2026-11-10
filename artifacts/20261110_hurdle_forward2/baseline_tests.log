@@ -1,0 +1,77 @@
+................................F....................................... [ 11%]
+........................................................................ [ 22%]
+........................................................................ [ 34%]
+........................................................................ [ 45%]
+....................................................................F... [ 57%]
+.......................................F................................ [ 68%]
+........................................................................ [ 80%]
+........................................................................ [ 91%]
+......................................................                   [100%]
+=================================== FAILURES ===================================
+________ test_camera_latch_update_before_queued_turn_selects_zero_exit _________
+
+clock = [10.0]
+
+    def test_camera_latch_update_before_queued_turn_selects_zero_exit(clock):
+        bridge = FakeBridge(advance_transition_dwells=False)
+        camera_state(bridge, False)
+        bridge.navigation_command_callback(navigation_message(source='hurdle', action='STRAIGHT_0', command_id=1))
+>       fine = decoded_messages(bridge.executor_request_publisher)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_hurdle_camera_transitions.py:77: IndexError
+____ test_bottom_retreat_waits_for_completion_pause_and_fresh_reacquisition ____
+
+clock = [11.6]
+
+    def test_bottom_retreat_waits_for_completion_pause_and_fresh_reacquisition(clock):
+        node = HurdleHarness()
+        node.receive(visible())
+        fine = node.publish()[-1]
+        node.receive(visible(bottom_distance_px=50))
+        node.receive({"detected": False})
+        assert node.publish() == []
+        release_general(node, fine)
+        clock[0] += 1.1
+        node.publish()
+        node.receive({"detected": False})
+        backward = node.publish()[-1]
+        assert backward["action"] == "HURDLE_LOST_BACKWARD_1"
+        assert node.publish() == []
+        node.send_status(backward["action"], backward["command_id"], "RUNNING")
+        node.send_status(backward["action"], backward["command_id"], "SUCCEEDED")
+        clock[0] += .5
+        node.receive({"detected": False})
+>       assert node.publish() == []
+E       AssertionError: assert [{'action': '...': None, ...}] == []
+E         Left contains one more item: {'action': 'HURDLE_LOST_BACKWARD_1', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}
+E         Full diff:
+E           [
+E         -  ,
+E         +  {'action': 'HURDLE_LOST_BACKWARD_1',
+E         +   'active_special_action': None,
+E         +   'active_special_command_id': None,...
+E         
+E         ...Full output truncated (103 lines hidden), use '-vv' to show
+
+src/mission_control/test/test_hurdle_lost_recovery.py:167: AssertionError
+________ test_recognition_approach_blocks_new_line_prequeue[1.001-True] ________
+
+clock = [10.0], depth = 1.001, allowed = True
+
+    @pytest.mark.parametrize("depth,allowed", [(1.001, True), (1.0, False), (0.7, False), (0.551, False), (0.55, False)])
+    def test_recognition_approach_blocks_new_line_prequeue(clock, depth, allowed):
+        node = HurdleHarness()
+>       assert MotionDecisionNode._line_only_prequeue_allowed(
+            node, {"hurdle": hurdle(depth)},
+        ) is allowed
+E       AssertionError: assert False is True
+E        +  where False = <function MotionDecisionNode._line_only_prequeue_allowed at 0xffff6e662560>(<test_hurdle_positioning.HurdleHarness object at 0xffff6e26bd30>, {'hurdle': {'bbox': [400, 300, 1000, 500], 'bottom_distance_px': 200, 'camera_center_offset_x_px': 0, 'confidence': 0.9, ...}})
+E        +    where <function MotionDecisionNode._line_only_prequeue_allowed at 0xffff6e662560> = MotionDecisionNode._line_only_prequeue_allowed
+
+src/mission_control/test/test_hurdle_positioning.py:255: AssertionError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_hurdle_camera_transitions.py::test_camera_latch_update_before_queued_turn_selects_zero_exit
+FAILED src/mission_control/test/test_hurdle_lost_recovery.py::test_bottom_retreat_waits_for_completion_pause_and_fresh_reacquisition
+FAILED src/mission_control/test/test_hurdle_positioning.py::test_recognition_approach_blocks_new_line_prequeue[1.001-True]
+3 failed, 627 passed in 3.32s

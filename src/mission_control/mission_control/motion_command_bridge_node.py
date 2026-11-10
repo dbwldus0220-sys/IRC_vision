@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import math
 import time
 from typing import Any
 
@@ -252,9 +253,13 @@ class MotionCommandBridgeNode(Node):
         "POST_BALL_GOAL_TRANSITION": "post_ball_camera_90",
         # Keep legacy action IDs; each target now includes its pose transition.
         "POST_SHOT_TURN_RIGHT_9": "post_shot_default_turn_right",
+        "POST_SHOT_TURN_RIGHT_5": "post_shot_default_turn_right_5",
         # Keep the legacy action ID; the composite contains six left turns.
         "POST_SHOT_TURN_LEFT_4": "post_shot_default_turn_left",
+        "POST_SHOT_TURN_LEFT_3": "post_shot_default_turn_left_3",
         "POST_SHOT_FORWARD": "line_forward_6",
+        "POST_SHOT_LINE_RECOVER_LEFT_4": "line_recovery_left_4",
+        "POST_SHOT_LINE_RECOVER_RIGHT_4": "line_recovery_right_4",
         **{
             f"POST_SHOT_LINE_TURN_{direction}_{count}": (
                 f"post_ball_line_turn_{direction.lower()}_{count}"
@@ -1463,6 +1468,10 @@ class MotionCommandBridgeNode(Node):
             "motion_id": motion_id,
             "timeout_ms": timeout_ms,
         }
+        if action == "SHOT" and motion_id.startswith("goal_shot_region_"):
+            shot = getattr(self, "goal_ring_shot", None)
+            if shot is not None and shot[:2] == (command_id, event_id):
+                request_payload["waist_ring_aim_deg"] = shot[2]
         previous = (self.last_physical_motion_id or "").removesuffix("_2")
         target = motion_id.removesuffix("_2")
         # Goal crabs already pass through GOAL_CRAB_PRE_DWELL_MARKER.
@@ -1862,15 +1871,26 @@ class MotionCommandBridgeNode(Node):
             source_command = payload.get("source_command")
             region = (source_command.get("shot_region")
                       if isinstance(source_command, dict) else None)
-            if region is not None and (not self._is_integer(region) or region not in range(1, 9)):
+            ring_aim = (source_command.get("waist_ring_aim_deg")
+                        if isinstance(source_command, dict) else None)
+            if (not self._is_integer(region) or region not in {1, 2, 5, 6, 7, 8}
+                    or type(ring_aim) not in {int, float}
+                    or not math.isfinite(ring_aim) or abs(ring_aim) >= 90.0):
                 self._publish_local_rejection(
                     status="REJECTED", command_id=command_id, event_id=event_id,
-                    action=action, error_code="INVALID_SHOT_REGION",
-                    message="shot_region must be an integer from 1 to 8",
+                    action=action, error_code="INVALID_SHOT_GEOMETRY",
+                    message="shot requires an enabled region and a finite ring waist angle",
                 )
                 return
-            shot_motion = (f"goal_shot_region_{region}" if region is not None
-                           else self.motion_id_for_action(action))
+            if self.motion_in_progress:
+                self._publish_local_rejection(
+                    status="REJECTED", command_id=command_id, event_id=event_id,
+                    action=action, error_code="BUSY",
+                    message="ring-directed shot must start after the current motion",
+                )
+                return
+            self.goal_ring_shot = (command_id, event_id, ring_aim)
+            shot_motion = f"goal_shot_region_{region}"
             prepare_motion = MotionCommandBridgeNode._shot_prepare_motion(self)
             if prepare_motion is not None:
                 self.shot_prepare_retry_motion_id = prepare_motion
@@ -1990,7 +2010,8 @@ class MotionCommandBridgeNode(Node):
             self.motion_in_progress
             and not ball_fine_alignment
             and ((action == "POST_SHOT_FORWARD"
-                  and str(self.active_action).startswith("POST_SHOT_LINE_TURN_"))
+                  and str(self.active_action).startswith(
+                      ("POST_SHOT_LINE_TURN_", "POST_SHOT_LINE_RECOVER_")))
                  or (payload.get("source") == "line"
                      and str(self.active_action).startswith(("LINE_OFFSET_TURN_", "LINE_LOST_TURN_")))
                  or self._is_stationary_turn(self.active_motion_id or "")
@@ -2371,6 +2392,7 @@ class MotionCommandBridgeNode(Node):
 
     def _clear_active_request(self) -> None:
         """Release the bridge after a terminal executor status."""
+        self.goal_ring_shot = None
         self.pending_pickup_fine_motion_id = None
         self.pickup_queued_request = None
         self.motion_in_progress = False

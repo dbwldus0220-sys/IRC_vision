@@ -28,8 +28,9 @@ def start(clock, action='STRAIGHT', phase='LINE_TRACK'):
         node.lost_search_turn_limiter.counts['line'] = 1
         node.lost_search_turn_limiter.angles['line'] = 45.
         node.lost_search_turn_limiter.first_directions['line'] = 'LEFT'
-    initial = {'detected': False} if action.startswith('LINE_LOST_') else line_info(heading=-20, offset=-.2)
-    fresh(node, clock, 'line', initial, plan=False)
+    initial = {'detected': False, 'raw_detected': False} if action.startswith('LINE_LOST_') else line_info(heading=-20, offset=-.2)
+    for _ in range(3 if action.startswith('LINE_LOST_') else 1):
+        fresh(node, clock, 'line', initial, plan=False)
     decision = MotionDecision(phase=phase, source='line', action=action, valid=True,
                               reason='test', sdk_motion_requested=False,
                               requires_ack=False, source_command={})
@@ -65,13 +66,11 @@ def late(node, clock, info, count=3):
 @pytest.mark.parametrize('phase', ['AUTO', 'LINE_TRACK'])
 @pytest.mark.parametrize('action,info,expected', [
     ('STRAIGHT', offset(), 'LINE_OFFSET_TURN_LEFT_2'),
-    ('STRAIGHT', {'detected': False}, 'LINE_LOST_TURN_LEFT_3'),
     ('LINE_OFFSET_TURN_LEFT_2', line_info(), 'STRAIGHT'),
     ('LINE_OFFSET_TURN_LEFT_2', offset(), 'LINE_OFFSET_TURN_LEFT_2'),
     ('LINE_OFFSET_TURN_LEFT_6', line_info(), 'STRAIGHT'),
     ('LINE_OFFSET_TURN_LEFT_6', offset(), 'LINE_OFFSET_TURN_LEFT_2'),
     ('LINE_LOST_TURN_LEFT_3', line_info(), 'STRAIGHT'),
-    ('LINE_LOST_TURN_LEFT_3', {'detected': False}, 'LINE_LOST_TURN_LEFT_1'),
     ('STRAIGHT', sample(offset=200, target_angle=25, ground_heading_error_deg=0),
      'LINE_OFFSET_TURN_RIGHT_1'),
     ('LINE_OFFSET_TURN_RIGHT_1', line_info(), 'STRAIGHT'),

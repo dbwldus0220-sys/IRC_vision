@@ -1079,6 +1079,8 @@ class Yolo26Detector(Node):
             "post_ball_camera_90": "GOAL / CAMERA 90",
             "post_shot_default_turn_right": "LINE RETURN / TURN RIGHT",
             "post_shot_default_turn_left": "LINE RETURN / TURN LEFT",
+            "post_shot_default_turn_right_5": "LINE RETURN / TURN RIGHT 5",
+            "post_shot_default_turn_left_3": "LINE RETURN / TURN LEFT 3",
         }
         label = labels.get(motion_id)
         action = str(payload.get("action", ""))

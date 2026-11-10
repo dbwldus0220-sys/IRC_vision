@@ -327,9 +327,9 @@ def complete_post_shot_exit(harness, monkeypatch, correction_heading=0.0):
         assert harness.publish_vision(line=line_info(heading=correction_heading)) == []
         assert harness.observations["line"] is None
 
-        if correction_heading >= 15.0 or correction_heading < -15.0:
+        if abs(correction_heading) >= 15.0:
             correction = harness.publish_vision(line=line_info(heading=correction_heading))[-1]
-            assert correction["action"].startswith("POST_SHOT_LINE_TURN_")
+            assert correction["action"].startswith(("POST_SHOT_LINE_TURN_", "POST_SHOT_LINE_RECOVER_"))
             assert correction["source_command"]["heading_error_deg"] == correction_heading
             release_general(harness, correction)
             clock[0] = harness.post_shot_dwell_until
@@ -354,8 +354,8 @@ def test_post_shot_exit_turn_returns_to_normal_line(monkeypatch, section, headin
     complete_post_shot_exit(harness, monkeypatch, heading)
     assert harness.mission_phase == ("AUTO" if section == 1 else "LINE_TRACK")
     actions = [m["action"] for m in harness.publisher.messages]
-    corrections = [a for a in actions if a.startswith("POST_SHOT_LINE_TURN_")]
-    assert len(corrections) == (1 if heading >= 15.0 or heading < -15.0 else 0)
+    corrections = [a for a in actions if a.startswith(("POST_SHOT_LINE_TURN_", "POST_SHOT_LINE_RECOVER_"))]
+    assert len(corrections) == (1 if abs(heading) >= 15.0 else 0)
     assert actions[-1] == "POST_SHOT_FORWARD"
 
 
@@ -363,6 +363,8 @@ def test_post_shot_exit_turn_returns_to_normal_line(monkeypatch, section, headin
 @pytest.mark.parametrize("phase,action", [
     ("POST_SHOT_TURN", "POST_SHOT_TURN_RIGHT_9"),
     ("POST_SHOT_LINE_ALIGN", "POST_SHOT_LINE_TURN_RIGHT_3"),
+    ("POST_SHOT_LINE_ALIGN", "POST_SHOT_LINE_RECOVER_RIGHT_4"),
+    ("POST_SHOT_LINE_ALIGN", "POST_SHOT_LINE_RECOVER_LEFT_4"),
     ("POST_SHOT_FORWARD", "POST_SHOT_FORWARD"),
 ])
 def test_post_shot_failure_holds_without_replay_or_forward(phase, action, status):
@@ -394,14 +396,14 @@ def test_post_shot_forward_rechecks_heading_after_dwell(monkeypatch):
     missing = harness.publish_vision(line=None)[-1]
     assert missing["action"] == "WAIT"
     correction = harness.publish_vision(line=line_info(heading=34.0))[-1]
-    assert correction["action"] == "POST_SHOT_LINE_TURN_RIGHT_3"
+    assert correction["action"] == "POST_SHOT_LINE_RECOVER_RIGHT_4"
     assert harness.mission_phase == "POST_SHOT_LINE_ALIGN"
     release_general(harness, correction)
     assert harness.publish_vision(line=line_info()) == []
     assert harness.post_shot_dwell_until == 11.0
 
 
-def test_post_shot_exit_aligns_heading_before_normal_recover(monkeypatch):
+def test_post_shot_exit_uses_recovery_for_moderate_heading_even_with_large_offset(monkeypatch):
     clock = [10.0]
     monkeypatch.setattr(
         "mission_control.motion_decision_node.time.monotonic", lambda: clock[0],
@@ -418,7 +420,7 @@ def test_post_shot_exit_aligns_heading_before_normal_recover(monkeypatch):
     assert harness.observations["line"] is None
     result = harness.publish_vision(line=sample)[-1]
     expected = MotionDecisionPlanner().plan("POST_SHOT_LINE_ALIGN", {"line": sample}, 0.1)
-    assert result["action"] == expected.action == "POST_SHOT_LINE_TURN_RIGHT_3"
+    assert result["action"] == expected.action == "POST_SHOT_LINE_RECOVER_RIGHT_4"
     assert not any(m["action"] in {"STRAIGHT", "POST_SHOT_FORWARD"} for m in harness.publisher.messages)
 
 
@@ -2861,32 +2863,52 @@ def test_shot_rest_survives_detection_loss_but_requires_current_permission(monke
 @pytest.mark.parametrize('offset,action', [
     (-0.8, 'LINE_LOST_TURN_LEFT_3'), (0.8, 'LINE_LOST_TURN_RIGHT_5'),
 ])
-def test_line_search_rechecks_new_line_after_turn_success(offset, action):
+def test_line_search_rechecks_new_line_after_turn_success(offset, action, monkeypatch):
+    from test_continuous_approach import fresh
+    clock = [10.]
+    monkeypatch.setattr('mission_control.motion_decision_node.time.monotonic', lambda: clock[0])
+    monkeypatch.setattr(MotionDecisionNode, '_current_ros_time_ns', lambda _: round(clock[0] * 1e9))
     harness = MissionFlowHarness(phase='LINE_TRACK')
-    straight = harness.publish_vision(line=line_info(offset=offset))[-1]
+    fresh(harness, clock, 'line', line_info(offset=offset))
+    straight = harness.publisher.messages[-1]
     assert straight['action'] == 'STRAIGHT'
-    release_general(harness, straight)
-    search = harness.publish_vision(line={'detected': False})[-1]
+    complete_active(harness, straight['action'], straight['command_id'])
+    for _ in range(3):
+        fresh(harness, clock, 'line', {'detected': False, 'raw_detected': False})
+    search = harness.publisher.messages[-1]
     assert search['action'] == action
     assert harness.publish_vision(line={'detected': False}) == []
     # A frame arriving during rotation cannot trigger the following action.
     assert harness.publish_vision(line=line_info()) == []
-    release_general(harness, search)
+    complete_active(harness, search['action'], search['command_id'])
+    clock[0] += .501
+    MotionDecisionNode._publish_decision(harness)
     assert harness.latest_info['line'] is None
     before = len(harness.publisher.messages)
     MotionDecisionNode._publish_decision(harness)
     assert all(not message['valid'] for message in harness.publisher.messages[before:])
-    resumed = harness.publish_vision(line=line_info())[-1]
+    fresh(harness, clock, 'line', line_info())
+    resumed = harness.publisher.messages[-1]
     assert resumed['action'] == 'STRAIGHT'
 
 
-def test_line_search_repeats_only_after_new_negative_frame():
+def test_line_search_repeats_only_after_three_new_negative_frames(monkeypatch):
+    from test_continuous_approach import fresh
+    clock = [10.]
+    monkeypatch.setattr('mission_control.motion_decision_node.time.monotonic', lambda: clock[0])
+    monkeypatch.setattr(MotionDecisionNode, '_current_ros_time_ns', lambda _: round(clock[0] * 1e9))
     harness = MissionFlowHarness(phase='AUTO')
     harness.planner.observe_line_for_search(line_info(offset=-0.8))
-    search = harness.publish_vision(line={'detected': False})[-1]
-    release_general(harness, search)
+    for _ in range(3):
+        fresh(harness, clock, 'line', {'detected': False, 'raw_detected': False})
+    search = harness.publisher.messages[-1]
+    complete_active(harness, search['action'], search['command_id'])
+    clock[0] += .501
+    MotionDecisionNode._publish_decision(harness)
     assert harness.latest_info['line'] is None
-    search_again = harness.publish_vision(line={'detected': False})[-1]
+    for _ in range(3):
+        fresh(harness, clock, 'line', {'detected': False, 'raw_detected': False})
+    search_again = harness.publisher.messages[-1]
     assert search_again['action'] == 'LINE_LOST_TURN_LEFT_1'
     assert search_again['command_id'] != search['command_id']
 
@@ -3083,20 +3105,31 @@ def test_completed_line_recover_rechecks_when_line_observation_expires(monkeypat
 
 @pytest.mark.parametrize("direction,offset,count", [("LEFT", -0.8, 3), ("RIGHT", 0.8, 5)])
 def test_repeated_line_lost_turns_each_wait_half_second(monkeypatch, direction, offset, count):
+    from test_continuous_approach import fresh
     now = [10.0]
     monkeypatch.setattr("mission_control.motion_decision_node.time.monotonic", lambda: now[0])
+    monkeypatch.setattr(MotionDecisionNode, '_current_ros_time_ns', lambda _: round(now[0] * 1e9))
     harness = MissionFlowHarness(phase="LINE_TRACK")
     harness.LINE_TURN_PRE_MOTION_SETTLE_SEC = MotionDecisionNode.LINE_TURN_PRE_MOTION_SETTLE_SEC
     harness.planner.observe_line_for_search(line_info(offset=offset))
     for repeats in (count, 1):
-        assert harness.publish_vision(line={"detected": False}) == []
-        now[0] += 0.499
-        assert harness.publish_vision(line={"detected": False}) == []
-        now[0] += 0.002
-        turn = harness.publish_vision(line={"detected": False})[-1]
+        started = now[0]
+        if getattr(harness, 'motion_stationary_since', None) is None:
+            harness.motion_stationary_since = started
+        before = len([m for m in harness.publisher.messages if m['valid']])
+        for _ in range(3):
+            fresh(harness, now, 'line', {'detected': False, 'raw_detected': False})
+        now[0] = started + .499
+        MotionDecisionNode._publish_decision(harness)
+        assert len([m for m in harness.publisher.messages if m['valid']]) == before
+        now[0] = started + .501
+        MotionDecisionNode._publish_decision(harness)
+        if len([m for m in harness.publisher.messages if m['valid']]) == before:
+            fresh(harness, now, 'line', {'detected': False, 'raw_detected': False})
+        turn = harness.publisher.messages[-1]
         assert turn["action"] == f"LINE_LOST_TURN_{direction}_{repeats}"
         assert turn["source_command"]["turn_count"] == repeats
-        release_general(harness, turn)
+        complete_active(harness, turn['action'], turn['command_id'])
         assert harness.latest_info["line"] is None
         assert not harness.general_motion_gate.has_required_fresh_vision()
 
