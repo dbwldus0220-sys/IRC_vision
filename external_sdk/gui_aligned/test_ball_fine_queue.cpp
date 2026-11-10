@@ -167,6 +167,12 @@ int main(int argc, char** argv) {
         assert(player.completionSequence() == 2);
         assert(player.lastCompletedMotion() == second);
     };
+    // Near Ball approach now shares the regular two-cycle forward support.
+    for (const std::string turn : {"p제자리좌회전45(2회)", "t제자리우회전45도(3회)"}) {
+        check_pair("p전진45(2회)", turn);
+        check_pair(turn, "p전진45(2회)");
+    }
+    check_pair("p미세오뒤에서 오뒤45도", "p전진45(2회)");
     for (int camera : {0, 45, 90}) {
         const auto name = [camera](int count) {
             return "p제자리좌회전" + std::to_string(camera) + (camera == 45 ? "(" : "도(")
@@ -268,6 +274,7 @@ int main(int argc, char** argv) {
         assert(player.completionSequence() == sequence.size());
     }
     std::cout << "Six alignment chains, 75 fine pairs, 108 left-turn pairs, "
+                 "five near-Ball two-cycle transition pairs, "
                  "24 walking/preparation pairs, 93 forward/recovery pairs, "
                  "16 crab queue pairs, four crab chains, three camera transition chains, "
                  "five source79 exit chains, two source80 pickup chains, hurdle exit, "

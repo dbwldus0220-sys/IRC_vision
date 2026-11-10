@@ -1081,6 +1081,8 @@ class Yolo26Detector(Node):
             "post_shot_default_turn_left": "LINE RETURN / TURN LEFT",
             "post_shot_default_turn_right_5": "LINE RETURN / TURN RIGHT 5",
             "post_shot_default_turn_left_3": "LINE RETURN / TURN LEFT 3",
+            "post_shot_exit_right_5_forward_4": "POST SHOT / RIGHT 5 + FORWARD 4",
+            "post_shot_exit_left_3_forward_4": "POST SHOT / LEFT 3 + FORWARD 4",
         }
         label = labels.get(motion_id)
         action = str(payload.get("action", ""))
@@ -1665,6 +1667,7 @@ class Yolo26Detector(Node):
         }
         ball_labels = {
             "BALL_APPROACH_FINE_FORWARD_5": "BALL FINE FORWARD 5",
+            "BALL_APPROACH_FORWARD_2": "BALL / FORWARD 2",
             "PICKUP_NOW": "PICK UP BALL",
             "TURN_LEFT": "BALL TURN LEFT",
             "TURN_RIGHT": "BALL TURN RIGHT",

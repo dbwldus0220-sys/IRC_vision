@@ -17,7 +17,7 @@ from .goal_scoring import (
 )
 
 
-GOAL_FINE_APPROACH_MAX_DEPTH_M = 0.850
+GOAL_FINE_APPROACH_MAX_DEPTH_M = 0.750
 GOAL_FINE_APPROACH_TURN_MIN_DEG = 30.0
 # Measured total displacement for each complete 1..5-repeat motion.
 GOAL_FINE_DISTANCES_M = (0.013, 0.032, 0.070, 0.085, 0.110)
@@ -29,7 +29,7 @@ class GoalNavigationConfig:
     """Provisional goal alignment and scoring thresholds."""
 
     min_confidence: float = 0.55
-    control_start_depth_m: float = 2.0
+    control_start_depth_m: float = 1.9
     score_target_depth_m: float = GOAL_SCORE_TARGET_DEPTH_M
     score_crab_max_offset_px: float = 140.0
 
@@ -228,7 +228,7 @@ class GoalNavigationPlanner:
                 reason = "approach_goal_by_depth"
         elif depth > GOAL_FINE_APPROACH_MAX_DEPTH_M:
             # The board is elevated: use its measured X/Z, not a floor-ray
-            # intersection. Aim at the image center when ring Z reaches 660mm.
+            # intersection. Aim at the image center at the target ring depth.
             lateral_error = _number(goal_info, "lateral_offset_m")
             if ("lateral_offset_m" not in goal_info
                     and bearing is not None and abs(bearing) < 90.0):

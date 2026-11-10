@@ -1,4 +1,4 @@
-"""Exercise both goal exits, recovery boundaries and post-motion observations."""
+"""Exercise both goal exits, stationary alignment and post-motion observations."""
 
 import json
 
@@ -18,11 +18,11 @@ from test_wait_refresh_and_fine_settle import LiveInputHarness
 
 @pytest.mark.parametrize('heading,expected', [
     (-90., 'TURN_LEFT_6'), (-45., 'TURN_LEFT_3'), (-35.001, 'TURN_LEFT_2'),
-    (-35., 'RECOVER_LEFT_4'), (-31., 'RECOVER_LEFT_4'),
-    (-15., 'RECOVER_LEFT_4'), (-14.999, 'ALIGNED'),
+    (-35., 'TURN_LEFT_2'), (-31., 'TURN_LEFT_2'),
+    (-15., 'TURN_LEFT_1'), (-14.999, 'ALIGNED'),
     (0., 'ALIGNED'), (14.999, 'ALIGNED'),
-    (15., 'RECOVER_RIGHT_4'), (31., 'RECOVER_RIGHT_4'),
-    (35., 'RECOVER_RIGHT_4'), (35.001, 'TURN_RIGHT_3'), (45., 'TURN_RIGHT_5'),
+    (15., 'TURN_RIGHT_1'), (31., 'TURN_RIGHT_3'),
+    (35., 'TURN_RIGHT_3'), (35.001, 'TURN_RIGHT_3'), (45., 'TURN_RIGHT_5'),
     (90., 'TURN_RIGHT_9'),
 ])
 @pytest.mark.parametrize('offset', [-1.29, 0., 1.29])
@@ -32,16 +32,15 @@ def test_heading_boundaries_preserve_post_shot_offset_policy(heading, expected, 
     )
     assert result.valid
     assert result.action == 'POST_SHOT_LINE_' + expected
-    if 'RECOVER' in expected:
-        assert result.source_command['turn_count'] == 4
-        assert result.source_command['turn_angle_deg'] == (20. if heading > 0 else 30.)
+    if expected.startswith('TURN_'):
+        assert result.source_command['turn_count'] == int(expected.rsplit('_', 1)[1])
 
 
 @pytest.mark.parametrize('changes', [
     {'ground_heading_error_deg': None}, {'geometry_quality': .01},
     {'ground_heading_error_deg': float('nan')},
 ])
-def test_invalid_geometry_does_not_start_recovery(changes):
+def test_invalid_geometry_does_not_start_turn(changes):
     result = MotionDecisionPlanner().plan(
         'POST_SHOT_LINE_ALIGN', {'line': {**line_info(31.), **changes}}, .1,
     )
@@ -50,9 +49,9 @@ def test_invalid_geometry_does_not_start_recovery(changes):
 
 
 @pytest.mark.parametrize('section', [1, 2])
-@pytest.mark.parametrize('region', [5, 6, 7, 8])
+@pytest.mark.parametrize('region', [1, 2, 3, 4])
 @pytest.mark.parametrize('heading', [-31., 31.])
-def test_both_fixed_exits_can_enter_either_recovery(clock, section, region, heading):
+def test_both_fixed_exits_can_enter_either_stationary_turn(clock, section, region, heading):
     node = LiveInputHarness(phase='POST_SHOT_TURN')
     node.LINE_TURN_PRE_MOTION_SETTLE_SEC = Node.LINE_TURN_PRE_MOTION_SETTLE_SEC
     node.phase_manager.ball_sections_processed = section
@@ -62,7 +61,7 @@ def test_both_fixed_exits_can_enter_either_recovery(clock, section, region, head
     Node._publish_decision(node)
     exit_command = node.publisher.messages[-1]
     assert exit_command['action'] == (
-        'POST_SHOT_TURN_RIGHT_5' if section == 1 else 'POST_SHOT_TURN_LEFT_3'
+        'POST_SHOT_TURN_RIGHT_9' if section == 1 else 'POST_SHOT_TURN_LEFT_4'
     )
     bridge.navigation_command_callback(String(data=json.dumps(exit_command)))
     request = decoded_messages(bridge.executor_request_publisher)[-1]
@@ -78,21 +77,22 @@ def test_both_fixed_exits_can_enter_either_recovery(clock, section, region, head
     Node._publish_decision(node)
     command = node.publisher.messages[-1]
     direction = 'LEFT' if heading < 0 else 'RIGHT'
-    assert command['action'] == f'POST_SHOT_LINE_RECOVER_{direction}_4'
+    count = 2 if heading < 0 else 3
+    assert command['action'] == f'POST_SHOT_LINE_TURN_{direction}_{count}'
     bridge.navigation_command_callback(String(data=json.dumps(command)))
     request = decoded_messages(bridge.executor_request_publisher)[-1]
-    assert request['motion_id'] == f'line_recovery_{direction.lower()}_4'
+    assert request['motion_id'] == f'post_ball_line_turn_{direction.lower()}_{count}'
     forward_status(node, bridge, request, 'RUNNING')
     assert node.active_line_motion_started_at == clock[0]
 
 
 @pytest.mark.parametrize('section', [1, 2])
 @pytest.mark.parametrize('next_heading,expected', [
-    (31., 'RECOVER_RIGHT_4'), (-31., 'RECOVER_LEFT_4'),
+    (31., 'TURN_RIGHT_3'), (-31., 'TURN_LEFT_2'),
     (60., 'TURN_RIGHT_6'), (-60., 'TURN_LEFT_4'),
     (0., 'ALIGNED'),
 ])
-def test_recovery_without_forward_reservation_reobserves_and_continues(
+def test_turn_without_forward_reservation_reobserves_and_continues(
     clock, section, next_heading, expected,
 ):
     node, bridge, request = start_turn(clock, section, 31.)
@@ -124,7 +124,7 @@ def test_recovery_without_forward_reservation_reobserves_and_continues(
 
 
 @pytest.mark.parametrize('section', [1, 2])
-def test_missing_line_after_recovery_searches_in_the_course_exit_direction(clock, section):
+def test_missing_line_after_turn_searches_in_the_course_exit_direction(clock, section):
     node, bridge, request = start_turn(clock, section, 31.)
     node.planner.post_ball_line_search_direction = 'RIGHT' if section == 1 else 'LEFT'
     forward_status(node, bridge, request, 'SUCCEEDED')
@@ -139,7 +139,7 @@ def test_missing_line_after_recovery_searches_in_the_course_exit_direction(clock
 
 
 @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT', 'REJECTED', 'CANCELLED', 'UNSUPPORTED'])
-def test_failed_recovery_holds_without_replay(clock, status):
+def test_failed_turn_holds_without_replay(clock, status):
     node, _, request = start_turn(clock, 1, 31.)
     node.send_status(request['action'], request['command_id'], status)
     assert node.phase_manager.post_shot_failed

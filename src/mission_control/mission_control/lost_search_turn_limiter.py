@@ -215,6 +215,10 @@ class LostSearchTurnLimiter:
 
     def complete_corner(self) -> None:
         """Rearm only after the actual corner motion has succeeded."""
+        self.reset_line_search()
+
+    def reset_line_search(self) -> None:
+        """Start a new Line search without refunding other missions' budgets."""
         self.counts["line"] = 0
         self.angles["line"] = 0.0
         self.first_directions.pop("line", None)

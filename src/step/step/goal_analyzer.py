@@ -185,7 +185,7 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         self.declare_parameter("waist_aim_deadband_deg", 1.0)
         self.declare_parameter("max_valid_depth_m", 6.0)
         self.declare_parameter("detect_depth_m", 2.0)
-        self.declare_parameter("approach_depth_m", 1.0)
+        self.declare_parameter("approach_depth_m", 0.9)
         self.declare_parameter("score_target_depth_m", GOAL_SCORE_TARGET_DEPTH_M)
         self.declare_parameter("direction_deadband_norm", 0.04)
         self.declare_parameter("confirmation_window_size", 40)

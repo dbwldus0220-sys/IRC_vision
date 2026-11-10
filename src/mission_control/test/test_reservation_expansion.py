@@ -180,20 +180,15 @@ def test_approach_prepares_pickup_and_initial_alignment_without_new_image(clock,
 
 
 @pytest.mark.parametrize('index', [1, 2])
-def test_camera45_fine_approach_hands_off_to_pickup_without_new_image(clock, index):
-    from test_ball_fine_alignment_queue import start_fine_prepare
+def test_camera45_forward_two_hands_off_to_pickup_without_new_image(clock, index):
     node, bridge = node_with_entry(), FakeBridge(advance_transition_dwells=False)
     node.phase_manager.active_ball_mode_index = index
     node.phase_manager.ball_modes_confirmed = index
-    prepare = start_fine_prepare(node, bridge, clock)
-    clock[0] += .04
-    fresh(node, clock, 'ball', approach_ball(), plan=False)
+    fresh(node, clock, 'ball', approach_ball())
+    assert node.publisher.messages[-1]['action'] == 'BALL_APPROACH_FORWARD_2'
     deliver(node, bridge, node.publisher.messages[-1])
-    assert bridge.queued_request_deferred
-    forward_status(node, bridge, prepare, 'SUCCEEDED')
-    finish_rest(bridge, clock)
     fine = decoded_messages(bridge.executor_request_publisher)[-1]
-    assert fine['motion_id'] == 'ball_align_fine_forward_45_5'
+    assert fine['motion_id'] == 'ball_align_forward_2'
     forward_status(node, bridge, fine, 'RUNNING')
     observer = node.pickup_entry_observation
     frames(node, clock, observer.started_at, observer.duration,

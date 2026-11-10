@@ -14,7 +14,7 @@ from step.approach_distance import HURDLE_FINE_DISTANCE_M
 from step.approach_distance import ball_hurdle_approach_motion
 from step.ball_navigation_planner import BallNavigationConfig
 from step.ball_navigation_planner import BallNavigationPlanner
-from step.goal_scoring import GOAL_SCORE_MAX_DEPTH_M
+from step.goal_scoring import GOAL_RING_DEPTH_OFFSET_M, GOAL_SCORE_MAX_DEPTH_M
 from step.goal_navigation_planner import GoalNavigationConfig, GoalNavigationPlanner
 from step.hurdle_navigation_planner import HurdleNavigationPlanner
 from step.stationary_turns import STATIONARY_TURN_MIN_DEG, stationary_turn_repeat_count
@@ -22,7 +22,6 @@ from step.line_navigation_planner import LineNavigationPlanner
 from step.line_navigation_planner import NavigationConfig
 from step.line_navigation_planner import (
     valid_ground_heading, line_heading, LINE_RECOVERY_MIN_ANGLE_DEG,
-    LINE_RECOVERY_TURN_ANGLES_DEG,
 )
 
 from .pickup_fine_skip import pickup_fine_can_skip, pickup_fine_skip_limit
@@ -134,6 +133,8 @@ class MotionDecisionPlanner:
     PICKUP_INITIAL_CENTER_BOUND_PX = 70.0
     BALL_STATIONARY_TURN_MIN_BOTTOM_PX = 120.0
     PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX = 360.0
+    CAMERA_DOWN_FORWARD_TWO_MIN_BOTTOM_PX = 300.0
+    CAMERA_DOWN_FORWARD_TWO_MAX_BOTTOM_PX = 500.0
     PICKUP_CLOSE_CRAB_BOTTOM_DISTANCE_PX = 100.0
     PICKUP_FINE_LEFT_BOUND_PX = -30.0
     PICKUP_FINE_RIGHT_BOUND_PX = 55.0
@@ -143,7 +144,6 @@ class MotionDecisionPlanner:
     BALL_LOST_LEFT_TURN_COUNT = 2
     BALL_LOST_RIGHT_TURN_COUNT = 5
     POST_SHOT_LINE_HEADING_TOLERANCE_DEG = 15.0
-    POST_SHOT_LINE_RECOVERY_MAX_ANGLE_DEG = 35.0
     LINE_OFFSET_EXIT_RATIO = 0.8
     LINE_OFFSET_EXIT_DISTANCE_M = 0.10
     LINE_OFFSET_TARGET_TOLERANCE_DEG = LINE_RECOVERY_MIN_ANGLE_DEG
@@ -175,7 +175,10 @@ class MotionDecisionPlanner:
             )
         )
         self.goal_planner = GoalNavigationPlanner(
-            GoalNavigationConfig(control_start_depth_m=self.config.goal_control_range_m)
+            # Mission entry still uses board Z; the Goal planner uses ring Z.
+            GoalNavigationConfig(
+                control_start_depth_m=self.config.goal_control_range_m - GOAL_RING_DEPTH_OFFSET_M,
+            )
         )
         self.hurdle_planner = HurdleNavigationPlanner()
         self.line_offset_alignment_active = False
@@ -346,7 +349,7 @@ class MotionDecisionPlanner:
             self.hurdle_lock_active or normalized_phase == "HURDLE_POSITIONING"
         )
         if source == "hurdle" and info is not None:
-            # Heading comes from the current line observation, never a held target.
+            # Prefer current Line geometry; the hurdle planner validates its depth fallback.
             reference = build_hurdle_path_reference(info, observations.get("line"))
             info = {**info, **reference, "hurdle_positioning_active": hurdle_positioning}
         command = self._plan_source(source, info, dt_sec)
@@ -357,6 +360,9 @@ class MotionDecisionPlanner:
                 if command.get("reason") in {
                     "hurdle_lost_search_last_side", "hurdle_lost_below_image",
                 }
+                else "hurdle_depth_angle"
+                if (reference.get("line_heading_valid") is not True
+                    and command.get("center_steering_deg") is not None)
                 else "line_image_heading"
             )
         if source == "hurdle":
@@ -785,9 +791,10 @@ class MotionDecisionPlanner:
                 })
                 return result
         if source == "ball" and command.valid and command.motion in {
-            "STRAIGHT", "BALL_APPROACH_FINE_FORWARD_5",
+            "STRAIGHT", "BALL_APPROACH_FINE_FORWARD_5", "BALL_APPROACH_FORWARD_2",
         }:
-            if command.motion == "BALL_APPROACH_FINE_FORWARD_5":
+            if command.motion in {"BALL_APPROACH_FINE_FORWARD_5", "BALL_APPROACH_FORWARD_2"}:
+                # Keep the existing near-approach observation and reservation path.
                 result["ball_fine_alignment"] = True
             distance = command.distance_m
             angle = command.steering_error_deg
@@ -817,13 +824,19 @@ class MotionDecisionPlanner:
                     "alignment_reference": "ball",
                     "catalog_motion_available": True,
                 })
+            if (result["motion"] == "BALL_APPROACH_FINE_FORWARD_5"
+                    and self._camera_down_forward_two_allowed(info)):
+                result.update(motion="BALL_APPROACH_FORWARD_2",
+                              reason="ball_camera_down_bottom_band_forward_two")
         if source == "hurdle" and command.action in {"ALIGN_LEFT", "ALIGN_RIGHT"}:
             direction = "LEFT" if command.action == "ALIGN_LEFT" else "RIGHT"
             # Both sides use measured geometry; blind searches keep an explicit count.
             count = command.turn_count
             angle = (command.center_steering_deg
                      if command.reason in {"hurdle_line_heading_alignment",
-                                           "hurdle_reacquired_line_alignment"}
+                                           "hurdle_reacquired_line_alignment",
+                                           "hurdle_parallel_heading_fallback",
+                                           "hurdle_reacquired_hurdle_alignment"}
                      else command.hurdle_angle_deg)
             if angle is None:
                 angle = command.center_steering_deg
@@ -1301,7 +1314,7 @@ class MotionDecisionPlanner:
         *,
         phase: str = "POST_BALL_LINE_ALIGN",
     ) -> MotionDecision:
-        """Reacquire Line after pickup; align after shooting with recovery or yaw."""
+        """Reacquire Line after pickup; retain legacy post-shot alignment."""
         prefix = phase.removesuffix("_ALIGN")
         if (
             (info is None and phase == "POST_BALL_LINE_ALIGN")
@@ -1415,22 +1428,6 @@ class MotionDecisionPlanner:
                 sdk_motion_requested=False,
                 requires_ack=False,
                 source_command=common,
-            )
-
-        if abs(heading) <= self.POST_SHOT_LINE_RECOVERY_MAX_ANGLE_DEG:
-            # This checkpoint aligns heading; lateral position remains owned by
-            # normal Line navigation after POST_SHOT_FORWARD.
-            return MotionDecision(
-                phase=phase, source="line",
-                action=f"{prefix}_RECOVER_{direction}_4",
-                valid=True, reason="post_shot_line_heading_recovery",
-                sdk_motion_requested=False, requires_ack=False,
-                source_command={
-                    **common, "turn_direction": direction, "turn_count": 4,
-                    "turn_angle_deg": abs(LINE_RECOVERY_TURN_ANGLES_DEG[direction]),
-                    "post_shot_line_recovery": True,
-                    "catalog_motion_available": True,
-                },
             )
 
         count = self._turn_repeat_count(heading, direction)
@@ -1578,9 +1575,12 @@ class MotionDecisionPlanner:
         common.update(pickup_last_completed_motion_id=self.pickup_last_completed_motion_id,
                       pickup_fine_skip_limit_px=skip_limit)
         if fine_required or not crab_allowed:
+            forward_two = self._camera_down_forward_two_allowed(info)
             return MotionDecision(
-                phase=phase, source="ball", action="BALL_PICKUP_FINE_FORWARD",
-                valid=True, reason="ball_pickup_fine_approach_still_required",
+                phase=phase, source="ball",
+                action="BALL_PICKUP_FORWARD_2" if forward_two else "BALL_PICKUP_FINE_FORWARD",
+                valid=True, reason=("ball_camera_down_bottom_band_forward_two" if forward_two
+                                    else "ball_pickup_fine_approach_still_required"),
                 sdk_motion_requested=True, requires_ack=False,
                 source_command={**common, "catalog_motion_available": True},
             )
@@ -1591,6 +1591,13 @@ class MotionDecisionPlanner:
             source_command={**common, "lateral_direction": "CENTERED",
                             "catalog_motion_available": True},
         )
+
+    def _camera_down_forward_two_allowed(self, info: dict) -> bool:
+        # Use a post-transition frame, not the distance-based head-down request.
+        bottom = self._number(info, "bottom_distance_px")
+        return (info.get("pickup_head_ready") is True and bottom is not None
+                and self.CAMERA_DOWN_FORWARD_TWO_MIN_BOTTOM_PX <= bottom
+                <= self.CAMERA_DOWN_FORWARD_TWO_MAX_BOTTOM_PX)
 
     @staticmethod
     def _pickup_head_wait(phase: str, common: dict) -> MotionDecision:
@@ -1801,8 +1808,10 @@ class MotionDecisionPlanner:
         approach_motion = ball_hurdle_approach_motion(
             distance, fine_distance_m=fine_step_threshold_m,
         )
+        if approach_motion == "STRAIGHT_0" and self._camera_down_forward_two_allowed(info):
+            approach_motion = "STRAIGHT_1"
         approach_level = approach_level_from_motion(approach_motion)
-        if approach_motion not in {"STRAIGHT", "STRAIGHT_0"}:
+        if approach_motion not in {"STRAIGHT", "STRAIGHT_0", "STRAIGHT_1"}:
             return MotionDecision(
                 phase=phase,
                 source="ball",
@@ -1868,7 +1877,7 @@ class MotionDecisionPlanner:
         """Use the same target-point steering as the standalone Goal planner."""
         if info is None:
             return None
-        depth = self._number(info, "depth_m")
+        depth = self._number(info, "ring_center_depth_m")
         if depth is None or depth < GOAL_SCORE_MAX_DEPTH_M:
             return None
         command = self.goal_planner.plan(info).to_dict()

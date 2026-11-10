@@ -329,7 +329,7 @@ def complete_post_shot_exit(harness, monkeypatch, correction_heading=0.0):
 
         if abs(correction_heading) >= 15.0:
             correction = harness.publish_vision(line=line_info(heading=correction_heading))[-1]
-            assert correction["action"].startswith(("POST_SHOT_LINE_TURN_", "POST_SHOT_LINE_RECOVER_"))
+            assert correction["action"].startswith("POST_SHOT_LINE_TURN_")
             assert correction["source_command"]["heading_error_deg"] == correction_heading
             release_general(harness, correction)
             clock[0] = harness.post_shot_dwell_until
@@ -354,7 +354,7 @@ def test_post_shot_exit_turn_returns_to_normal_line(monkeypatch, section, headin
     complete_post_shot_exit(harness, monkeypatch, heading)
     assert harness.mission_phase == ("AUTO" if section == 1 else "LINE_TRACK")
     actions = [m["action"] for m in harness.publisher.messages]
-    corrections = [a for a in actions if a.startswith(("POST_SHOT_LINE_TURN_", "POST_SHOT_LINE_RECOVER_"))]
+    corrections = [a for a in actions if a.startswith("POST_SHOT_LINE_TURN_")]
     assert len(corrections) == (1 if abs(heading) >= 15.0 else 0)
     assert actions[-1] == "POST_SHOT_FORWARD"
 
@@ -363,8 +363,6 @@ def test_post_shot_exit_turn_returns_to_normal_line(monkeypatch, section, headin
 @pytest.mark.parametrize("phase,action", [
     ("POST_SHOT_TURN", "POST_SHOT_TURN_RIGHT_9"),
     ("POST_SHOT_LINE_ALIGN", "POST_SHOT_LINE_TURN_RIGHT_3"),
-    ("POST_SHOT_LINE_ALIGN", "POST_SHOT_LINE_RECOVER_RIGHT_4"),
-    ("POST_SHOT_LINE_ALIGN", "POST_SHOT_LINE_RECOVER_LEFT_4"),
     ("POST_SHOT_FORWARD", "POST_SHOT_FORWARD"),
 ])
 def test_post_shot_failure_holds_without_replay_or_forward(phase, action, status):
@@ -396,14 +394,14 @@ def test_post_shot_forward_rechecks_heading_after_dwell(monkeypatch):
     missing = harness.publish_vision(line=None)[-1]
     assert missing["action"] == "WAIT"
     correction = harness.publish_vision(line=line_info(heading=34.0))[-1]
-    assert correction["action"] == "POST_SHOT_LINE_RECOVER_RIGHT_4"
+    assert correction["action"] == "POST_SHOT_LINE_TURN_RIGHT_3"
     assert harness.mission_phase == "POST_SHOT_LINE_ALIGN"
     release_general(harness, correction)
     assert harness.publish_vision(line=line_info()) == []
     assert harness.post_shot_dwell_until == 11.0
 
 
-def test_post_shot_exit_uses_recovery_for_moderate_heading_even_with_large_offset(monkeypatch):
+def test_post_shot_exit_aligns_heading_before_normal_recover(monkeypatch):
     clock = [10.0]
     monkeypatch.setattr(
         "mission_control.motion_decision_node.time.monotonic", lambda: clock[0],
@@ -420,7 +418,7 @@ def test_post_shot_exit_uses_recovery_for_moderate_heading_even_with_large_offse
     assert harness.observations["line"] is None
     result = harness.publish_vision(line=sample)[-1]
     expected = MotionDecisionPlanner().plan("POST_SHOT_LINE_ALIGN", {"line": sample}, 0.1)
-    assert result["action"] == expected.action == "POST_SHOT_LINE_RECOVER_RIGHT_4"
+    assert result["action"] == expected.action == "POST_SHOT_LINE_TURN_RIGHT_3"
     assert not any(m["action"] in {"STRAIGHT", "POST_SHOT_FORWARD"} for m in harness.publisher.messages)
 
 

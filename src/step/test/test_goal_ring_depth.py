@@ -5,7 +5,7 @@ from step.goal_navigation_planner import GoalNavigationPlanner
 from test_goal_backboard_selection import make_analyzer, detection, send
 
 
-@pytest.mark.parametrize('ring_depth,region', [(.45, 1), (.53, 2), (.59, 8), (.63, 5), (.66, 6), (.70, 7)])
+@pytest.mark.parametrize('ring_depth,region', [(.35, 1), (.43, 2), (.49, 8), (.53, 5), (.56, 6), (.60, 7)])
 @pytest.mark.parametrize('offset', [-350, -121, -120, 0, 120, 121, 350])
 def test_analyzer_confirms_ring_distance_instead_of_board_distance(ring_depth, region, offset):
     analyzer, published = make_analyzer(depth_m=ring_depth + .10)
@@ -22,7 +22,7 @@ def test_analyzer_confirms_ring_distance_instead_of_board_distance(ring_depth, r
 
 @pytest.mark.parametrize('offset', [-350, -121, 121, 350])
 def test_outside_pixel_window_confirms_shot_without_body_alignment(offset):
-    analyzer, published = make_analyzer(depth_m=.76)
+    analyzer, published = make_analyzer(depth_m=.66)
     for frame in range(5):
         info = send(analyzer, published, [detection(center_x=640 + offset)])
         assert not info['is_centered']

@@ -13,10 +13,10 @@ from test_motion_command_bridge import FakeBridge, decoded_messages
 
 
 @pytest.mark.parametrize('distance,action', [
-    (.600001, 'STRAIGHT_2'), (.600, 'BALL_APPROACH_FINE_FORWARD_5'),
-    (.580, 'BALL_APPROACH_FINE_FORWARD_5'), (.550001, 'BALL_APPROACH_FINE_FORWARD_5'),
-    (.550, 'BALL_APPROACH_FINE_FORWARD_5'),
-    (.500001, 'BALL_APPROACH_FINE_FORWARD_5'), (.500, 'PICKUP_NOW'),
+    (.600001, 'STRAIGHT_2'), (.600, 'BALL_APPROACH_FORWARD_2'),
+    (.580, 'BALL_APPROACH_FORWARD_2'), (.550001, 'BALL_APPROACH_FORWARD_2'),
+    (.550, 'BALL_APPROACH_FORWARD_2'),
+    (.500001, 'BALL_APPROACH_FORWARD_2'), (.500, 'PICKUP_NOW'),
     (.499999, 'PICKUP_NOW'),
 ])
 def test_line_completion_uses_separate_fine_and_pickup_boundaries(clock, distance, action):
@@ -27,16 +27,11 @@ def test_line_completion_uses_separate_fine_and_pickup_boundaries(clock, distanc
     status(node, bridge, request, 'SUCCEEDED')
     command = node.publisher.messages[-1]
     assert command['valid'] and command['action'] == action
-    if action != 'BALL_APPROACH_FINE_FORWARD_5':
+    if action != 'BALL_APPROACH_FORWARD_2':
         return
     assert node.ball_entry_line_alignment.state == 'DONE'
-    prepare = send(bridge, command)
-    assert prepare['motion_id'] == 'pickup_fine_prepare'
-    assert bridge.transition_dwell_until is None
-    status(node, bridge, prepare, 'RUNNING')
-    status(node, bridge, prepare, 'SUCCEEDED')
-    fine = decoded_messages(bridge.executor_request_publisher)[-1]
-    assert fine['motion_id'] == 'ball_approach_fine_forward_45_5'
+    fine = send(bridge, command)
+    assert fine['motion_id'] == 'ball_align_forward_2'
     assert bridge.transition_dwell_until is None
     status(node, bridge, fine, 'RUNNING')
     fresh(node, clock, 'ball', ground_ball_info(depth_m=.500), plan=False)
@@ -61,14 +56,14 @@ def test_invalid_fine_distance_does_not_release_entry(clock, changes):
     assert not node.ball_pickup_entry_pending
 
 
-def test_fine_alias_uses_supplied_camera45_gait():
+def test_near_approach_alias_uses_regular_two_cycle_gait():
     root = Path(__file__).resolve().parents[3]
     aliases = yaml.safe_load((root / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())
-    assert aliases['motion_aliases']['ball_approach_fine_forward_45_5'] == 'r미세45도'
+    name = aliases['motion_aliases']['ball_align_forward_2']
+    assert name == 'p전진45(2회)'
     motions = json.loads((root / 'artifacts/robot_motions_runtime.json').read_text())['motions']
-    fine = next(m for m in motions if m['name'] == 'r미세45도')
-    assert fine['repeat_count'] == 5
-    assert all(frame['angles']['0'] == -34.0 for frame in fine['frames'])
+    forward = next(m for m in motions if m['name'] == name)
+    assert forward['repeat_count'] == 2
 
 
 def test_camera45_fine_preparation_keeps_both_one_second_pauses(clock):

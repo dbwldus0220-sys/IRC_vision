@@ -160,6 +160,7 @@ class MotionCommandBridgeNode(Node):
             },
             "BALL_PICKUP_FINE_ALIGN_CONTINUE",
             "BALL_PICKUP_FINE_FORWARD",
+            "BALL_PICKUP_FORWARD_2",
             "BALL_PICKUP_FINE_SEARCH_LEFT",
             "BALL_PICKUP_FINE_SEARCH_RIGHT",
             *{
@@ -183,6 +184,7 @@ class MotionCommandBridgeNode(Node):
             for count in counts
         },
         "BALL_PICKUP_FINE_FORWARD": "pickup_fine_forward_0",
+        "BALL_PICKUP_FORWARD_2": "ball_camera_down_forward_2",
         "BALL_PICKUP_FINE_SEARCH_LEFT": "pickup_camera_down_turn_left_2",
         "BALL_PICKUP_FINE_SEARCH_RIGHT": "pickup_camera_down_turn_right_5",
         **{
@@ -221,6 +223,7 @@ class MotionCommandBridgeNode(Node):
     PICKUP_CAMERA_DOWN_MOTION_IDS = {
         "STRAIGHT": "line_forward_4",
         "STRAIGHT_0": "ball_general_fine_forward_8",
+        "STRAIGHT_1": "ball_camera_down_forward_2",
         "STRAIGHT_2": "ball_camera_down_forward_4",
     }
     PICKUP_MOTION_TAIL = (
@@ -258,8 +261,8 @@ class MotionCommandBridgeNode(Node):
         "POST_SHOT_TURN_LEFT_4": "post_shot_default_turn_left",
         "POST_SHOT_TURN_LEFT_3": "post_shot_default_turn_left_3",
         "POST_SHOT_FORWARD": "line_forward_6",
-        "POST_SHOT_LINE_RECOVER_LEFT_4": "line_recovery_left_4",
-        "POST_SHOT_LINE_RECOVER_RIGHT_4": "line_recovery_right_4",
+        "POST_SHOT_EXIT_RIGHT_5_FORWARD_4": "post_shot_exit_right_5_forward_4",
+        "POST_SHOT_EXIT_LEFT_3_FORWARD_4": "post_shot_exit_left_3_forward_4",
         **{
             f"POST_SHOT_LINE_TURN_{direction}_{count}": (
                 f"post_ball_line_turn_{direction.lower()}_{count}"
@@ -271,6 +274,7 @@ class MotionCommandBridgeNode(Node):
         },
         "BALL_FINE_FORWARD_8": "ball_general_fine_forward_8",
         "BALL_APPROACH_FINE_FORWARD_5": "ball_approach_fine_forward_45_5",
+        "BALL_APPROACH_FORWARD_2": "ball_camera_down_forward_2",
         "BALL_LOST_FINE_FORWARD_3": "ball_top_loss_fine_forward_45_3",
         "BALL_LOST_FORWARD_2": "ball_camera_down_forward_2",
         "BALL_LOST_FORWARD_4": "ball_camera_down_forward_4",
@@ -1279,6 +1283,7 @@ class MotionCommandBridgeNode(Node):
         )
 
     def _is_forward_motion(self, motion_id: str) -> bool:
+        motion_id = physical_motion_id(motion_id)
         return motion_id in {"forward", "sdk_forward_4"} or motion_id.startswith((
             "line_forward_", "ball_camera_down_forward_", "post_ball_forward_",
             "goal_camera_90_forward_",
@@ -2010,8 +2015,7 @@ class MotionCommandBridgeNode(Node):
             self.motion_in_progress
             and not ball_fine_alignment
             and ((action == "POST_SHOT_FORWARD"
-                  and str(self.active_action).startswith(
-                      ("POST_SHOT_LINE_TURN_", "POST_SHOT_LINE_RECOVER_")))
+                  and str(self.active_action).startswith("POST_SHOT_LINE_TURN_"))
                  or (payload.get("source") == "line"
                      and str(self.active_action).startswith(("LINE_OFFSET_TURN_", "LINE_LOST_TURN_")))
                  or self._is_stationary_turn(self.active_motion_id or "")
@@ -2597,6 +2601,11 @@ class MotionCommandBridgeNode(Node):
         elif is_active and payload["motion_id"] == self.active_motion_id:
             if payload["status"] == "SUCCEEDED":
                 self.last_physical_motion_id = physical_motion_id(payload["motion_id"])
+                if payload["motion_id"] in {
+                    "post_shot_exit_right_5_forward_4", "post_shot_exit_left_3_forward_4",
+                }:
+                    # Subsequent posture transitions start from ordinary forward support.
+                    self.last_physical_motion_id = "line_forward_4"
             elif payload["status"] in self.TERMINAL_STATUSES:
                 self.last_physical_motion_id = None
         elif is_active and payload["motion_id"] in MotionCommandBridgeNode.TRANSITION_MOTION_IDS:

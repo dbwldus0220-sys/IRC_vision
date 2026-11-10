@@ -1,4 +1,4 @@
-"""Reserve post-shot forward during either goal's turn or recovery walking."""
+"""Reserve the post-shot forward during either goal's extra alignment turn."""
 
 import json
 from pathlib import Path
@@ -30,7 +30,7 @@ def start_turn(clock, section, heading=20.):
     receive(node, clock, 'line', line_info(heading=heading))
     Node._publish_decision(node)
     command = node.publisher.messages[-1]
-    assert command['action'].startswith(('POST_SHOT_LINE_TURN_', 'POST_SHOT_LINE_RECOVER_'))
+    assert command['action'].startswith('POST_SHOT_LINE_TURN_')
     bridge.navigation_command_callback(String(data=json.dumps(command)))
     request = decoded_messages(bridge.executor_request_publisher)[-1]
     forward_status(node, bridge, request, 'RUNNING')
@@ -43,7 +43,7 @@ def turn_frames(node, clock, sample=None, fractions=None):
     duration = node.active_line_motion_duration_sec
     if fractions is None:
         # Three 10 Hz observations, all within the 0.5 s freshness limit,
-        # including for recovery gaits that are longer than a small yaw turn.
+        # including for longer stationary turns.
         fractions = (.85 - .2 / duration, .85 - .1 / duration, .85)
     for fraction in fractions:
         clock[0] = started + duration * fraction
@@ -69,10 +69,9 @@ def test_both_goals_reserve_and_start_forward_without_post_turn_images(clock, se
     forward_status(node, bridge, turn, 'SUCCEEDED')
     assert node.mission_phase == 'POST_SHOT_FORWARD'
     assert node.post_shot_dwell_until is None
-    if turn['action'].startswith('POST_SHOT_LINE_TURN_'):
-        assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
-        clock[0] = bridge.transition_dwell_until
-        bridge._check_atomic_dwell()
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+    clock[0] = bridge.transition_dwell_until
+    bridge._check_atomic_dwell()
     forward = decoded_messages(bridge.executor_request_publisher)[-1]
     assert forward['command_id'] == reserved['command_id']
     assert forward['motion_id'] == 'line_forward_6'
@@ -163,7 +162,7 @@ def test_capture_timings_match_runtime_turn_catalog():
     aliases = yaml.safe_load((root / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']
     catalog = {m['name']: m for m in json.loads((root / 'artifacts/robot_motions_runtime.json').read_text())['motions']}
     for action, alias in FakeBridge.ACTION_TO_MOTION_ID.items():
-        if not action.startswith(('POST_SHOT_LINE_TURN_', 'POST_SHOT_LINE_RECOVER_')):
+        if not action.startswith('POST_SHOT_LINE_TURN_'):
             continue
         motion = catalog[aliases[alias]]
         duration = max(f['start_ms'] + f['time_ms'] for f in motion['frames']) / 1000

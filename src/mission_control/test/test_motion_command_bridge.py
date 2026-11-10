@@ -603,6 +603,7 @@ EXPECTED_PRODUCTION_ACTIONS = {
     },
     "BALL_FINE_FORWARD_8": "ball_general_fine_forward_8",
     "BALL_APPROACH_FINE_FORWARD_5": "ball_approach_fine_forward_45_5",
+    "BALL_APPROACH_FORWARD_2": "ball_camera_down_forward_2",
     "BALL_LOST_FINE_FORWARD_3": "ball_top_loss_fine_forward_45_3",
     "BALL_LOST_FORWARD_2": "ball_camera_down_forward_2",
     "BALL_LOST_FORWARD_4": "ball_camera_down_forward_4",
@@ -2876,7 +2877,7 @@ def test_pickup_crab_uses_latest_motion_for_preparation(intervening, direction):
 @pytest.mark.parametrize("source,distance,action,motion_name", [
     ("ball", 0.499, "STRAIGHT_0", "p미세0도(5회)"),
     ("ball", 0.500, "STRAIGHT_0", "p미세0도(5회)"),
-    *[("ball", distance, "BALL_APPROACH_FINE_FORWARD_5", "p미세45도(5회)")
+    *[("ball", distance, "BALL_APPROACH_FORWARD_2", "p전진45(2회)")
       for distance in (0.500001, 0.550, 0.570, 0.600)],
     *[("ball", distance, "STRAIGHT", "p전진45(4회)")
       for distance in (0.600001, 0.700, 0.700001)],

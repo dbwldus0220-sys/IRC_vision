@@ -1,8 +1,9 @@
-"""Explicit support changes for the camera-45 Ball alignment band."""
+"""Explicit support changes for near Ball alignment, including head-down walking."""
 
 PREPARE_FINE = 'BALL_APPROACH_PREPARE_FINE'
 PREPARE_TURN = 'BALL_APPROACH_PREPARE_TURN'
 FINE_FORWARD = 'BALL_APPROACH_FINE_FORWARD_5'
+FORWARD_TWO = 'BALL_APPROACH_FORWARD_2'
 PREPARATIONS = {PREPARE_FINE, PREPARE_TURN}
 
 
@@ -19,6 +20,7 @@ def physical_motion_id(identifier):
         'ball_align_prepare_fine_45': 'pickup_fine_prepare',
         'ball_align_prepare_turn_45': 'fine_to_turn_ready_45',
         'ball_align_fine_forward_45_5': 'ball_approach_fine_forward_45_5',
+        'ball_align_forward_2': 'ball_camera_down_forward_2',
     }.get(identifier, identifier.replace('ball_align_turn_', 'post_ball_line_turn_'))
 
 
@@ -29,6 +31,8 @@ def motion_id(action):
         return 'ball_align_prepare_turn_45'
     if action == FINE_FORWARD:
         return 'ball_align_fine_forward_45_5'
+    if action == FORWARD_TWO:
+        return 'ball_align_forward_2'
     if action.startswith('BALL_APPROACH_TURN_'):
         return 'ball_align_turn_' + action.removeprefix('BALL_APPROACH_TURN_').lower()
     return None
@@ -41,6 +45,8 @@ def duration_sec(identifier):
         return .175 / 1.05
     if identifier == 'ball_align_fine_forward_45_5':
         return .394 * 5 / 1.05
+    if identifier == 'ball_align_forward_2':
+        return .514 * 2
     if identifier.startswith('ball_align_turn_'):
         count = int(identifier.rsplit('_', 1)[1])
         return camera45_turn_duration_sec('LEFT' if '_left_' in identifier else 'RIGHT', count)
@@ -62,7 +68,7 @@ def with_preparation(command, support):
     prepare = None
     if target == FINE_FORWARD and support != 'fine':
         prepare = PREPARE_FINE
-    elif target.startswith('BALL_APPROACH_TURN_') and support == 'fine':
+    elif (target.startswith('BALL_APPROACH_TURN_') or target == FORWARD_TWO) and support == 'fine':
         prepare = PREPARE_TURN
     if prepare is None:
         return command

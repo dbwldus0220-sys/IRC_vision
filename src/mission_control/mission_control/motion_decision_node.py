@@ -169,6 +169,7 @@ class MotionDecisionNode(Node):
     GOAL_FORWARD_CAPTURE_WINDOW_SEC = 0.6
     APPROACH_WALK_DURATION_SEC = {
         "BALL_APPROACH_FINE_FORWARD_5": .394 * 5 / 1.05,
+        "BALL_APPROACH_FORWARD_2": .514 * 2,
         "STRAIGHT": .514 * 4,
         "RECOVER_LEFT_TURN_LEFT_4": 2.056,
         "RECOVER_RIGHT_TURN_RIGHT_4": 2.064,
@@ -184,16 +185,9 @@ class MotionDecisionNode(Node):
     POST_SHOT_DWELL_SEC = 0.5
     # Catalog turns: last frame end / playback speed, including the leading hold.
     POST_SHOT_ALIGN_CAPTURE_CONFIG = {
-        **{f"POST_SHOT_LINE_TURN_{direction}_{count}": (camera45_turn_duration_sec(direction, count), 3)
-           for direction in ("LEFT", "RIGHT") for count in range(1, 16)},
-        "POST_SHOT_LINE_RECOVER_LEFT_4": (LINE_MOTION_CAPTURE_CONFIG["LEFT"][0], 3),
-        "POST_SHOT_LINE_RECOVER_RIGHT_4": (LINE_MOTION_CAPTURE_CONFIG["RIGHT"][0], 3),
-    }
-    POST_SHOT_ALIGN_MOTION_IDS = {
-        **{f"POST_SHOT_LINE_TURN_{direction}_{count}": f"post_ball_line_turn_{direction.lower()}_{count}"
-           for direction in ("LEFT", "RIGHT") for count in range(1, 16)},
-        "POST_SHOT_LINE_RECOVER_LEFT_4": "line_recovery_left_4",
-        "POST_SHOT_LINE_RECOVER_RIGHT_4": "line_recovery_right_4",
+        f"POST_SHOT_LINE_TURN_{direction}_{count}": (camera45_turn_duration_sec(direction, count), 3)
+        for direction in ("LEFT", "RIGHT")
+        for count in range(1, 16)
     }
     CORRECTION_POST_MOTION_DWELL_SEC = 0.5
     BALL_RAW_CONFIRMATION_RELEASE_SEC = 0.5
@@ -246,6 +240,7 @@ class MotionDecisionNode(Node):
             },
             "BALL_PICKUP_FINE_ALIGN_CONTINUE",
             "BALL_PICKUP_FINE_FORWARD",
+            "BALL_PICKUP_FORWARD_2",
             "BALL_PICKUP_FINE_SEARCH_LEFT",
             "BALL_PICKUP_FINE_SEARCH_RIGHT",
             *{
@@ -2912,6 +2907,7 @@ class MotionDecisionNode(Node):
                     if (self.mission_phase == "LINE_TRACK_AFTER_PICKUP"
                             and self.active_general_source == "line"
                             and MotionDecisionNode._post_pickup_line_motion_started(payload)
+                            and MotionDecisionNode._post_pickup_counted_line_action(action)
                             and command_id != getattr(self, "post_ball_line_running_command_id", None)):
                         self.post_ball_line_running_command_id = command_id
                         self.post_ball_line_running_since = status_receive_monotonic
@@ -2998,7 +2994,7 @@ class MotionDecisionNode(Node):
                     and (self.mission_phase != "LINE_TRACK_AFTER_PICKUP"
                          or MotionDecisionNode._post_pickup_line_motion_started(payload))
                     and (action not in MotionDecisionNode.POST_SHOT_ALIGN_CAPTURE_CONFIG
-                         or payload.get("motion_id") == MotionDecisionNode.POST_SHOT_ALIGN_MOTION_IDS[action])
+                         or payload.get("motion_id") == "post_ball_line_turn_" + action.removeprefix("POST_SHOT_LINE_TURN_").lower())
                     and (not MotionDecisionNode._is_queueable_line_turn(action)
                          or str(payload.get("motion_id", "")).startswith(("post_ball_line_turn_", "line_search_")))
                 ):
@@ -3248,7 +3244,7 @@ class MotionDecisionNode(Node):
                 ):
                     reserved_forward = (
                         status == "SUCCEEDED"
-                        and action in MotionDecisionNode.POST_SHOT_ALIGN_CAPTURE_CONFIG
+                        and str(action).startswith("POST_SHOT_LINE_TURN_")
                         and getattr(self, "queued_general_action", None) == "POST_SHOT_FORWARD"
                     )
                     reserved_line_exit = (status == "SUCCEEDED" and action == "POST_SHOT_FORWARD"
@@ -3281,12 +3277,15 @@ class MotionDecisionNode(Node):
                                 self.planner.post_ball_line_search_direction = (
                                     "RIGHT" if "_RIGHT_" in action else "LEFT"
                                 )
-                        if reserved_forward:
+                        if action in MissionPhaseManager.POST_SHOT_CONTINUOUS_EXIT_ACTIONS:
+                            # The single motion already includes four forward cycles.
+                            self.post_shot_turn_settled = False
+                            self.post_shot_dwell_until = None
+                        elif reserved_forward:
                             self.phase_manager.complete_post_shot_line_align()
                             self.post_shot_turn_settled = False
                             self.post_shot_dwell_until = None
-                        elif (action in MotionDecisionNode.POST_SHOT_ALIGN_CAPTURE_CONFIG
-                              or action in MissionPhaseManager.POST_SHOT_EXIT_ACTIONS):
+                        elif "_TURN_" in action:
                             self.post_shot_turn_settled = False
                             self.post_shot_dwell_until = (
                                 status_receive_monotonic
@@ -3784,6 +3783,9 @@ class MotionDecisionNode(Node):
             if self.pickups_completed >= self.required_pickups:
                 self.planner.disable_completed_ball_missions()
             if self.mission_phase == "POST_BALL_LINE_ALIGN":
+                limiter = getattr(self, "lost_search_turn_limiter", None)
+                if limiter is not None:
+                    limiter.reset_line_search()
                 # Every pickup starts a new camera/observation correlation window.
                 self.post_ball_goal_camera_request_id = None
                 self.post_ball_goal_camera_queued_id = None
@@ -5094,6 +5096,12 @@ class MotionDecisionNode(Node):
         ))
 
     @staticmethod
+    def _post_pickup_counted_line_action(action: str | None) -> bool:
+        """Count translational Line gaits; yaw corrections may still run between them."""
+        return (MotionDecisionNode._is_continuous_line_action(action)
+                or action == "LINE_SPARSE_FORWARD")
+
+    @staticmethod
     def _post_pickup_line_action(action: str | None) -> bool:
         return MotionDecisionNode._is_continuous_line_action(action) or bool(
             action and (action == "LINE_SPARSE_FORWARD" or action.startswith((
@@ -5214,7 +5222,7 @@ class MotionDecisionNode(Node):
     @staticmethod
     def _is_continuous_ball_action(action: str | None) -> bool:
         # Visible-ball heading corrections are stationary and must reobserve.
-        return action in {"STRAIGHT", "BALL_APPROACH_FINE_FORWARD_5"}
+        return action in {"STRAIGHT", "BALL_APPROACH_FINE_FORWARD_5", "BALL_APPROACH_FORWARD_2"}
 
     def _ball_entry_line_active(self) -> bool:
         entry = getattr(self, "ball_entry_line_alignment", None)
@@ -5777,7 +5785,7 @@ class MotionDecisionNode(Node):
         MotionDecisionNode._publish_decision(self, decision, queue_while_locked=True)
 
     def _post_shot_forward_preview(self, now: float) -> MotionDecision | None:
-        """Reserve forward from three aligned motion images, the latest after 70%."""
+        """Reserve forward from three aligned in-turn images, the latest after 70%."""
         gate = self.general_motion_gate
         started = self.active_line_motion_started_at
         frames = self.active_line_motion_frames
@@ -6769,7 +6777,7 @@ class MotionDecisionNode(Node):
             self.terminal_latch = None
 
         if (self.mission_phase == "LINE_TRACK_AFTER_PICKUP" and decision.source == "line"
-                and decision.valid and MotionDecisionNode._post_pickup_line_action(decision.action)):
+                and decision.valid and MotionDecisionNode._post_pickup_counted_line_action(decision.action)):
             issued = getattr(self, "post_ball_line_command_ids", None)
             if issued is None:
                 issued = self.post_ball_line_command_ids = []
@@ -7400,8 +7408,7 @@ class MotionDecisionNode(Node):
         line_turn = decision.source == "line" and (
             decision.action in {"LEFT", "RIGHT"}
             or decision.action.startswith(("LINE_LOST_TURN_", "LINE_OFFSET_TURN_", "LINE_HEADING_TURN_", "LINE_SPARSE_"))
-            or decision.action.startswith(("POST_BALL_LINE_TURN_", "POST_SHOT_LINE_TURN_",
-                                           "POST_SHOT_LINE_RECOVER_"))
+            or decision.action.startswith(("POST_BALL_LINE_TURN_", "POST_SHOT_LINE_TURN_"))
         )
         # Fixed post-shot exit turns already have their own half-second pause.
         if (
@@ -7874,7 +7881,12 @@ class MotionDecisionNode(Node):
                 return MotionDecision(
                     phase=planning_phase, source="line",
                     action=self.phase_manager.post_shot_turn_action(),
-                    valid=True, reason="post_shot_fixed_exit_turn",
+                    valid=True, reason=(
+                        "post_shot_continuous_turn_and_forward"
+                        if self.phase_manager.post_shot_turn_action()
+                        in MissionPhaseManager.POST_SHOT_CONTINUOUS_EXIT_ACTIONS
+                        else "post_shot_fixed_exit_turn"
+                    ),
                     sdk_motion_requested=False, requires_ack=False,
                     source_command={},
                 )
@@ -8035,7 +8047,7 @@ class MotionDecisionNode(Node):
                 entry.pending and fine_info is not None
                 and fine_info.get("confirmation_confirmed") is not False
                 and BallNavigationPlanner(self.planner.ball_planner.config).plan(fine_info, dt_sec).motion
-                == "BALL_APPROACH_FINE_FORWARD_5"
+                in {"BALL_APPROACH_FINE_FORWARD_5", "BALL_APPROACH_FORWARD_2"}
             )
             if self.ball_pickup_entry_pending or fine_ready:
                 entry.finish()

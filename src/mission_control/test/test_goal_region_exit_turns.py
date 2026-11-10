@@ -37,23 +37,27 @@ def test_executed_region_routes_through_gate_bridge_and_line_reacquisition(monke
     direction = 'RIGHT' if section == 1 else 'LEFT'
     count = (5 if section == 1 else 3) if region >= 5 else (9 if section == 1 else 4)
     turn = node.publish_vision(line=line_info())[-1]
-    assert turn['valid'] and turn['action'] == f'POST_SHOT_TURN_{direction}_{count}'
+    expected = (f'POST_SHOT_EXIT_{direction}_{count}_FORWARD_4' if region >= 5
+                else f'POST_SHOT_TURN_{direction}_{count}')
+    assert turn['valid'] and turn['action'] == expected
     bridge = FakeBridge()
     bridge.navigation_command_callback(String(data=json.dumps(turn)))
     request = decoded_messages(bridge.executor_request_publisher)[-1]
     name = 't골대후제자리우회전' if section == 1 else 'p골대후제자리좌회전'
-    assert ALIASES[request['motion_id']] == (f'{name}({count}회)' if region >= 5 else name)
+    assert ALIASES[request['motion_id']] == (f'{name}({count}회)+전진4회' if region >= 5 else name)
     finish_sequence(bridge)
     assert decoded_messages(bridge.motion_status_publisher)[-1]['status'] == 'SUCCEEDED'
 
     node.planner.goal_lock_active = True
     node.planner.last_line_seen_direction = 'LEFT'
     release_general(node, turn)
-    assert node.mission_phase == 'POST_SHOT_LINE_ALIGN'
+    assert node.mission_phase == (
+        ('AUTO' if section == 1 else 'LINE_TRACK') if region >= 5 else 'POST_SHOT_LINE_ALIGN'
+    )
     assert not node.planner.goal_lock_active
     assert node.planner.last_line_seen_direction is None
     assert node.planner.post_ball_line_search_direction == direction
-    assert node.post_shot_dwell_until == pytest.approx(10.5)
+    assert node.post_shot_dwell_until == (None if region >= 5 else pytest.approx(10.5))
 
 
 @pytest.mark.parametrize('terminal_motion', [None, 'goal_shot_region_2', '__NON_BLOCKING_DWELL__'])
@@ -62,7 +66,7 @@ def test_next_shot_does_not_inherit_previous_region(terminal_motion):
     manager.start_special_action('SHOT', 1)
     manager.handle_motion_status('SHOT', 1, 'RUNNING', motion_id='goal_shot_region_5')
     manager.handle_motion_status('SHOT', 1, 'SUCCEEDED')
-    assert manager.post_shot_turn_action() == 'POST_SHOT_TURN_RIGHT_5'
+    assert manager.post_shot_turn_action() == 'POST_SHOT_EXIT_RIGHT_5_FORWARD_4'
     manager.set_phase('GOAL_APPROACH')
     manager.start_special_action('SHOT', 2)
     manager.handle_motion_status('SHOT', 1, 'RUNNING', motion_id='goal_shot_region_8')

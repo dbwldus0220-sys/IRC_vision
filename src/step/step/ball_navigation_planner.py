@@ -278,10 +278,10 @@ class BallNavigationPlanner:
         motion = self._general_approach_motion(
             distance,
         )
-        if motion == "BALL_APPROACH_FINE_FORWARD_5":
+        if motion == "BALL_APPROACH_FORWARD_2":
             depth_age = _number(ball_info, "depth_age_sec")
             if depth_age is None or not 0.0 <= depth_age <= self.config.max_pickup_depth_age_sec:
-                return self.stop("stale_ball_distance_for_fine_approach")
+                return self.stop("stale_ball_distance_for_near_approach")
         return self._moving_command(
             motion=motion,
             reason="ball_aligned_discrete_approach",
@@ -377,9 +377,9 @@ class BallNavigationPlanner:
         self,
         distance_m: float,
     ) -> str:
-        """Fine-walk at camera 45 before the separate camera-down pickup entry."""
+        """Walk two cycles at camera 45 before the camera-down pickup entry."""
         if BALL_PICKUP_DISTANCE_M < distance_m <= BALL_FINE_APPROACH_DISTANCE_M:
-            return "BALL_APPROACH_FINE_FORWARD_5"
+            return "BALL_APPROACH_FORWARD_2"
         return ball_hurdle_approach_motion(distance_m, fine_distance_m=BALL_PICKUP_DISTANCE_M)
 
     def _approach_speed(
