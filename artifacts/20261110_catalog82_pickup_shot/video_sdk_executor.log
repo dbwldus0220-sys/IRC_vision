@@ -1,0 +1,25 @@
+[INFO] [1794240407.661439408] [sdk_motion_executor]: Execution path: backend=robot_motion_player aliases=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor/share/irc_step_motion_executor/config/motion_aliases.yaml JSON=/home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor/share/irc_step_motion_executor/config/robot_motions_runtime.json port=/dev/ttyUSB0 baud=4000000 poll_ms=5
+[INFO] [1794240407.661760304] [sdk_motion_executor]: Compiled GUI alignment version: 20261028
+[INFO] [1794240407.666600528] [sdk_motion_executor]: Forward boundary feedback included in saved hold: yes
+[INFO] [1794240407.666746768] [sdk_motion_executor]: Interpolation: continuous quintic; motor 5: included
+[INFO] [1794240410.216854672] [sdk_motion_executor]: Motion position tolerance check: DISABLED
+[INFO] [1794240410.288071952] [sdk_motion_executor]: [STARTUP POSE] Current pose captured
+[INFO] [1794240410.288767408] [sdk_motion_executor]: [STARTUP POSE] Moving to 오뒤무게중심앞
+[INFO] [1794240414.328549424] [sdk_motion_executor]: [STARTUP POSE] Settling
+[INFO] [1794240414.424612912] [sdk_motion_executor]: [STARTUP POSE] Reached 오뒤무게중심앞
+[INFO] [1794240414.424806832] [sdk_motion_executor]: [STARTUP POSE] Holding for 2000 ms before AUTO
+[INFO] [1794240416.427751568] [sdk_motion_executor]: [STARTUP POSE] AUTO ready
+[INFO] [1794240452.790331977] [sdk_motion_executor]: Hurdle bottom dy 99.0 px: camera 0-degree hold latched (motor 0 -60.0 deg)
+[INFO] [1794240467.076953651] [sdk_motion_executor]: Hurdle camera 0-degree hold cleared
+[INFO] [1794240479.492231361] [sdk_motion_executor]: Ball camera-down requested: motor 0 override -64.0 deg latched
+[INFO] [1794240512.498076930] [sdk_motion_executor]: Goal camera preparation during Line: id=407
+[INFO] [1794240526.613210034] [sdk_motion_executor]: Camera 90-degree hold cleared: goal_shot_region_1
+[INFO] [1794240557.679721203] [sdk_motion_executor]: Ball camera-down requested: motor 0 override -64.0 deg latched
+[INFO] [1794240584.685574736] [sdk_motion_executor]: Goal camera preparation during Line: id=700
+[INFO] [1794240602.159976862] [sdk_motion_executor]: Camera 90-degree hold cleared: goal_shot_region_2
+[INFO] [1794240617.068199485] [sdk_motion_executor]: Hurdle bottom dy 57.0 px: camera 0-degree hold latched (motor 0 -60.0 deg)
+[INFO] [1794240632.138029563] [sdk_motion_executor]: Hurdle camera 0-degree hold cleared
+[INFO] [1794240641.851168100] [sdk_motion_executor]: Hurdle bottom dy 53.0 px: camera 0-degree hold latched (motor 0 -60.0 deg)
+[ERROR] [1794240651.645056141] [sdk_motion_executor]: Execution failure: {"status":"REJECTED","action":"LINE_OFFSET_TURN_LEFT_1","command_id":933,"event_id":null,"request_id":933,"motion_id":"post_ball_line_turn_left_1","error_code":"SDK_HARDWARE_NOT_READY","message":"cannot capture actual start pose"}
+[ERROR] [1794240653.100126218] [sdk_motion_executor]: Execution failure: {"status":"REJECTED","action":"LINE_LOST_TURN_LEFT_1","command_id":934,"event_id":null,"request_id":934,"motion_id":"post_ball_line_turn_left_1","error_code":"SDK_HARDWARE_NOT_READY","message":"cannot capture actual start pose"}
+[INFO] [1794240702.715630520] [rclcpp]: signal_handler(SIGINT/SIGTERM)

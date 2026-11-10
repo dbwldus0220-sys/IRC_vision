@@ -1,0 +1,16 @@
+Input: /home/jet/Downloads/robot_motions(85).json
+SHA256: 8121a0b777869b59e3ab60062467dd72eb9b3aed42bba3152a79028618d1e10f
+
+Targeted tests: 436 passed, 7 deselected (pre-existing failures).
+Related baseline: 1221 passed, 61 failed.
+Related regression plus added checks: 1285 passed, 61 failed.
+Failing test functions are unchanged. Threshold parameter values were updated.
+See baseline_tests.log, regression_tests.log and targeted_tests.log.
+
+SDK: cmake --build build/gui_execution_alignment --target test_ball_fine_queue -j2
+SDK: ctest --test-dir build/gui_execution_alignment -R ball_fine_queue_contract --output-on-failure
+Result: 1/1 passed, 11.41 seconds; fake hardware only.
+Includes forward/recovery queue pairs, goal head overrides, grasp/check/exit chains.
+
+git diff --check: passed.
+Physical robot was not run. Validate balance in dynamics simulation before hardware use.

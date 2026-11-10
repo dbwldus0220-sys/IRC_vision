@@ -27,7 +27,7 @@ class GoalNavigationController(Node):
         self.declare_parameter("publish_rate_hz", 10.0)
         self.declare_parameter("goal_timeout_sec", 0.50)
         self.declare_parameter("min_confidence", 0.55)
-        self.declare_parameter("control_start_depth_m", 2.0)
+        self.declare_parameter("control_start_depth_m", 1.9)
         self.declare_parameter("score_target_depth_m", GOAL_SCORE_TARGET_DEPTH_M)
         self.declare_parameter("score_crab_max_offset_px", 140.0)
 

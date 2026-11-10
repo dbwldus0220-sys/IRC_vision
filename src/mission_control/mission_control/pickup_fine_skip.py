@@ -14,7 +14,7 @@ def pickup_fine_skip_limit(motion_id: str | None) -> float | None:
         "pickup_crab_left_0", "pickup_crab_right_0",
         "pickup_crab_left_0_2", "pickup_crab_right_0_2",
     }:
-        return 300.0
+        return 200.0
     return None
 
 

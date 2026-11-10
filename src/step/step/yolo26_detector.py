@@ -120,6 +120,157 @@ class LetterboxInfo:
     pad_y: float
 
 
+def extract_hurdle_bar_centerline(
+    image: np.ndarray,
+    bbox: list[int],
+    *,
+    hue_min: int = 15,
+    hue_max: int = 45,
+    saturation_min: int = 80,
+    value_min: int = 70,
+    sample_count: int = 5,
+) -> dict[str, Any]:
+    """Extract diagnostic sample pixels along the visible yellow hurdle bar.
+
+    The YOLO box can contain mostly floor when a long hurdle is rotated.  This
+    RGB-only helper finds the longest yellow connected component, fits its
+    principal axis, and returns points along that visible axis.  It does not
+    alter detections or any navigation/control value.
+    """
+    empty: dict[str, Any] = {
+        "hurdle_bar_points_px": [],
+        "hurdle_bar_image_angle_deg": None,
+        "hurdle_bar_mask_pixel_count": 0,
+        "hurdle_bar_fit_rmse_px": None,
+        "hurdle_bar_elongation": None,
+        "hurdle_bar_clipped_edges": [],
+    }
+    if (
+        not isinstance(image, np.ndarray)
+        or image.ndim != 3
+        or image.shape[2] < 3
+        or len(bbox) != 4
+        or sample_count < 2
+    ):
+        return empty
+    image_height, image_width = image.shape[:2]
+    left, top, right, bottom = (int(value) for value in bbox)
+    left = max(0, min(image_width - 1, left))
+    right = max(left + 1, min(image_width, right))
+    top = max(0, min(image_height - 1, top))
+    bottom = max(top + 1, min(image_height, bottom))
+    crop = image[top:bottom, left:right]
+    if crop.size == 0:
+        return empty
+
+    hsv = cv2.cvtColor(crop, cv2.COLOR_BGR2HSV)
+    lower = np.asarray([
+        max(0, min(179, int(hue_min))),
+        max(0, min(255, int(saturation_min))),
+        max(0, min(255, int(value_min))),
+    ], dtype=np.uint8)
+    upper = np.asarray([
+        max(0, min(179, int(hue_max))),
+        255,
+        255,
+    ], dtype=np.uint8)
+    mask = cv2.inRange(hsv, lower, upper)
+    mask = cv2.morphologyEx(
+        mask,
+        cv2.MORPH_CLOSE,
+        cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5)),
+    )
+    component_count, labels, stats, _ = cv2.connectedComponentsWithStats(
+        mask, connectivity=8,
+    )
+    minimum_pixels = max(
+        25, int(round(crop.shape[0] * crop.shape[1] * 0.0005)),
+    )
+    best: tuple[float, np.ndarray, np.ndarray, np.ndarray, float, float] | None = None
+    for label in range(1, component_count):
+        pixel_count = int(stats[label, cv2.CC_STAT_AREA])
+        if pixel_count < minimum_pixels:
+            continue
+        ys, xs = np.nonzero(labels == label)
+        points = np.column_stack((xs, ys)).astype(np.float64)
+        center = np.mean(points, axis=0)
+        centered = points - center
+        covariance = centered.T @ centered / max(len(points), 1)
+        try:
+            eigenvalues, eigenvectors = np.linalg.eigh(covariance)
+        except np.linalg.LinAlgError:
+            continue
+        order = np.argsort(eigenvalues)[::-1]
+        major_variance = float(eigenvalues[order[0]])
+        minor_variance = max(float(eigenvalues[order[1]]), 1e-6)
+        if major_variance <= 1e-6:
+            continue
+        direction = eigenvectors[:, order[0]]
+        if direction[0] < 0.0:
+            direction = -direction
+        projections = centered @ direction
+        span = float(np.max(projections) - np.min(projections))
+        elongation = math.sqrt(major_variance / minor_variance)
+        # Favour the long bar over small yellow objects inside a loose YOLO box.
+        score = span * math.sqrt(pixel_count) * min(elongation, 20.0)
+        if best is None or score > best[0]:
+            perpendicular = np.asarray([-direction[1], direction[0]])
+            residuals = centered @ perpendicular
+            rmse = float(np.sqrt(np.mean(np.square(residuals))))
+            best = (
+                score, points, center, direction, elongation, rmse,
+            )
+    if best is None:
+        return empty
+
+    _, points, center, direction, elongation, rmse = best
+    centered = points - center
+    projections = centered @ direction
+    low = float(np.quantile(projections, 0.05))
+    high = float(np.quantile(projections, 0.95))
+    if not math.isfinite(low) or not math.isfinite(high) or high - low < 8.0:
+        return empty
+    sample_points: list[list[int]] = []
+    for ratio in np.linspace(0.08, 0.92, sample_count):
+        target_projection = low + float(ratio) * (high - low)
+        # Use the median of a local cross-section so the sample stays on the
+        # painted bar even when its border is chipped or partly occluded.
+        half_window = max(2.0, (high - low) * 0.025)
+        local = points[
+            np.abs(projections - target_projection) <= half_window
+        ]
+        if len(local) == 0:
+            local = points[[int(np.argmin(np.abs(projections - target_projection)))]]
+        sample = np.median(local, axis=0)
+        sample_points.append([
+            int(round(sample[0] + left)),
+            int(round(sample[1] + top)),
+        ])
+
+    global_points = points + np.asarray([left, top], dtype=np.float64)
+    border_margin = 3
+    clipped_edges: list[str] = []
+    if float(np.min(global_points[:, 0])) <= border_margin:
+        clipped_edges.append("LEFT")
+    if float(np.max(global_points[:, 0])) >= image_width - 1 - border_margin:
+        clipped_edges.append("RIGHT")
+    if float(np.min(global_points[:, 1])) <= border_margin:
+        clipped_edges.append("TOP")
+    if float(np.max(global_points[:, 1])) >= image_height - 1 - border_margin:
+        clipped_edges.append("BOTTOM")
+    image_angle = math.degrees(
+        math.atan2(-float(direction[1]), float(direction[0])),
+    )
+    return {
+        "hurdle_bar_points_px": sample_points,
+        "hurdle_bar_image_angle_deg": round(image_angle, 3),
+        "hurdle_bar_mask_pixel_count": int(len(points)),
+        "hurdle_bar_fit_rmse_px": round(rmse, 3),
+        "hurdle_bar_elongation": round(elongation, 3),
+        "hurdle_bar_clipped_edges": clipped_edges,
+    }
+
+
 class Yolo26Detector(Node):
     """Run a YOLO26 ONNX model on incoming ROS color images."""
 
@@ -171,6 +322,10 @@ class Yolo26Detector(Node):
         # raw detector threshold aligned with the analyzer/controller safety
         # threshold instead of publishing weak hurdle boxes.
         self.declare_parameter("hurdle_confidence_threshold", 0.60)
+        self.declare_parameter("hurdle_bar_hue_min", 15)
+        self.declare_parameter("hurdle_bar_hue_max", 45)
+        self.declare_parameter("hurdle_bar_saturation_min", 80)
+        self.declare_parameter("hurdle_bar_value_min", 70)
         self.declare_parameter("max_detections", 300)
         self.declare_parameter("max_fps", 15.0)
         self.declare_parameter("device", "auto")
@@ -191,6 +346,18 @@ class Yolo26Detector(Node):
         )
         self.hurdle_confidence_threshold = float(
             self.get_parameter("hurdle_confidence_threshold").value
+        )
+        self.hurdle_bar_hue_min = int(
+            self.get_parameter("hurdle_bar_hue_min").value
+        )
+        self.hurdle_bar_hue_max = int(
+            self.get_parameter("hurdle_bar_hue_max").value
+        )
+        self.hurdle_bar_saturation_min = int(
+            self.get_parameter("hurdle_bar_saturation_min").value
+        )
+        self.hurdle_bar_value_min = int(
+            self.get_parameter("hurdle_bar_value_min").value
         )
         self.max_detections = int(
             self.get_parameter("max_detections").value
@@ -1079,6 +1246,10 @@ class Yolo26Detector(Node):
             "post_ball_camera_90": "GOAL / CAMERA 90",
             "post_shot_default_turn_right": "LINE RETURN / TURN RIGHT",
             "post_shot_default_turn_left": "LINE RETURN / TURN LEFT",
+            "post_shot_default_turn_right_5": "LINE RETURN / TURN RIGHT 5",
+            "post_shot_default_turn_left_3": "LINE RETURN / TURN LEFT 3",
+            "post_shot_exit_right_5_forward_4": "POST SHOT / RIGHT 5 + FORWARD 4",
+            "post_shot_exit_left_3_forward_4": "POST SHOT / LEFT 3 + FORWARD 4",
         }
         label = labels.get(motion_id)
         action = str(payload.get("action", ""))
@@ -1663,6 +1834,7 @@ class Yolo26Detector(Node):
         }
         ball_labels = {
             "BALL_APPROACH_FINE_FORWARD_5": "BALL FINE FORWARD 5",
+            "BALL_APPROACH_FORWARD_2": "BALL / FORWARD 2",
             "PICKUP_NOW": "PICK UP BALL",
             "TURN_LEFT": "BALL TURN LEFT",
             "TURN_RIGHT": "BALL TURN RIGHT",
@@ -2923,6 +3095,69 @@ class Yolo26Detector(Node):
                 cv2.LINE_AA,
             )
 
+    @staticmethod
+    def _draw_hurdle_depth_samples(
+        image: np.ndarray,
+        info: dict[str, Any],
+    ) -> None:
+        """Expose every yellow-centerline depth sample used by diagnostics."""
+        raw_samples = info.get("depth_samples", [])
+        if not isinstance(raw_samples, list):
+            return
+        height, width = image.shape[:2]
+        line_points: list[tuple[int, int]] = []
+        for raw in raw_samples:
+            if not isinstance(raw, dict):
+                continue
+            try:
+                x = int(round(float(raw.get("x_px"))))
+                y = int(round(float(raw.get("y_px"))))
+            except (TypeError, ValueError):
+                continue
+            if 0 <= x < width and 0 <= y < height:
+                line_points.append((x, y))
+        if len(line_points) >= 2:
+            cv2.polylines(
+                image,
+                [np.asarray(line_points, dtype=np.int32)],
+                False,
+                (255, 0, 255),
+                2,
+                cv2.LINE_AA,
+            )
+        for fallback_index, raw in enumerate(raw_samples, start=1):
+            if not isinstance(raw, dict):
+                continue
+            try:
+                x = int(round(float(raw.get("x_px"))))
+                y = int(round(float(raw.get("y_px"))))
+                index = int(raw.get("index", fallback_index))
+            except (TypeError, ValueError):
+                continue
+            if not 0 <= x < width or not 0 <= y < height:
+                continue
+            depth = raw.get("depth_m")
+            try:
+                depth_value = float(depth) if depth is not None else None
+            except (TypeError, ValueError):
+                depth_value = None
+            valid = depth_value is not None and math.isfinite(depth_value)
+            color = (60, 255, 60) if valid else (40, 40, 255)
+            cv2.drawMarker(
+                image, (x, y), color, cv2.MARKER_CROSS, 20, 2, cv2.LINE_AA,
+            )
+            label = f"H{index}:{depth_value:.3f}m" if valid else f"H{index}:N/A"
+            cv2.putText(
+                image,
+                label,
+                (max(2, min(x + 7, width - 112)), max(18, y - 8)),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.42,
+                color,
+                1,
+                cv2.LINE_AA,
+            )
+
     def _draw_hurdle_metrics(self, image: np.ndarray) -> None:
         """Draw hurdle alignment, depth, width, and jump readiness."""
         if not self.show_hurdle_metrics:
@@ -2992,6 +3227,12 @@ class Yolo26Detector(Node):
             rows = ["HURDLE METRICS", f"Detection   : {state}"]
         else:
             state = str(info.get("state", "UNKNOWN"))
+            clipped = info.get("hurdle_bar_clipped_edges", [])
+            clipped_text = (
+                ",".join(str(edge) for edge in clipped)
+                if isinstance(clipped, list) and clipped
+                else "NONE"
+            )
             rows = [
                 "HURDLE METRICS",
                 f"Detection   : {state}",
@@ -3033,6 +3274,86 @@ class Yolo26Detector(Node):
                     1,
                     signed=True,
                 ),
+                "Angle @45  : " + self._metric_text(
+                    self._number(info, "hurdle_angle_45_deg"),
+                    "deg", 1, signed=True,
+                ),
+                "Angle @0   : " + self._metric_text(
+                    self._number(info, "hurdle_angle_0_deg"),
+                    "deg", 1, signed=True,
+                ),
+                "Sample src : " + str(
+                    info.get("hurdle_angle_sample_source", "unavailable")
+                ),
+                "RGB line   : " + self._metric_text(
+                    self._number(info, "hurdle_bar_image_angle_deg"),
+                    "deg", 1, signed=True,
+                ),
+                "RGB pixels : " + str(int(
+                    info.get("hurdle_bar_mask_pixel_count", 0)
+                )),
+                "RGB RMSE   : " + self._metric_text(
+                    self._number(info, "hurdle_bar_fit_rmse_px"), "px", 1,
+                ),
+                "Elongation : " + self._metric_text(
+                    self._number(info, "hurdle_bar_elongation"), "x", 1,
+                ),
+                "Clipped    : " + clipped_text,
+                "Fit points : " + str(int(info.get("hurdle_angle_fit_point_count", 0))),
+                "Fit span45 : " + self._metric_text(
+                    self._number(info, "hurdle_angle_45_fit_span_m"), "m", 3,
+                ),
+                "Fit span0  : " + self._metric_text(
+                    self._number(info, "hurdle_angle_0_fit_span_m"), "m", 3,
+                ),
+                "Fit RMSE45 : " + self._metric_text(
+                    self._number(info, "hurdle_angle_45_fit_rmse_m"), "m", 3,
+                ),
+                "Fit RMSE0  : " + self._metric_text(
+                    self._number(info, "hurdle_angle_0_fit_rmse_m"), "m", 3,
+                ),
+                "Pitch cfg  : "
+                + self._metric_text(
+                    self._number(info, "hurdle_camera_45_pitch_down_deg"), "deg", 1,
+                )
+                + " / "
+                + self._metric_text(
+                    self._number(info, "hurdle_camera_0_pitch_down_deg"), "deg", 1,
+                ),
+                "Yaw cfg    : "
+                + self._metric_text(
+                    self._number(info, "hurdle_camera_45_yaw_right_deg"), "deg", 1,
+                )
+                + " / "
+                + self._metric_text(
+                    self._number(info, "hurdle_camera_0_yaw_right_deg"), "deg", 1,
+                ),
+                "Roll cfg   : "
+                + self._metric_text(
+                    self._number(info, "hurdle_camera_45_roll_clockwise_deg"), "deg", 1,
+                )
+                + " / "
+                + self._metric_text(
+                    self._number(info, "hurdle_camera_0_roll_clockwise_deg"), "deg", 1,
+                ),
+                "Servo pose : "
+                + self._metric_text(
+                    self._number(info, "hurdle_camera_45_servo_deg"), "deg", 1, signed=True,
+                )
+                + " / "
+                + self._metric_text(
+                    self._number(info, "hurdle_camera_0_servo_deg"), "deg", 1, signed=True,
+                ),
+                "Intrinsics : fx=" + self._metric_text(
+                    self._number(info, "camera_fx"), "", 1,
+                ) + " fy=" + self._metric_text(
+                    self._number(info, "camera_fy"), "", 1,
+                ),
+                "Principal  : cx=" + self._metric_text(
+                    self._number(info, "camera_cx"), "", 1,
+                ) + " cy=" + self._metric_text(
+                    self._number(info, "camera_cy"), "", 1,
+                ),
                 f"Parallel    : {'YES' if info.get('is_parallel') else 'NO'}",
                 "Depth points: "
                 + str(int(info.get("depth_sample_count", 0))),
@@ -3040,7 +3361,11 @@ class Yolo26Detector(Node):
             ]
 
         stage = str(source_command.get("hurdle_stage", "TRACKING"))
-        rows[1:1] = [f"Control     : {control}", f"Phase       : {phase}", f"Stage       : {stage}"]
+        rows[1:1] = [
+            f"Control     : {control}",
+            f"Phase       : {phase}",
+            f"Stage       : {stage}",
+        ]
         row_spacing = min(24.0, (panel_bottom - panel_y - 12) / len(rows))
         for index, row in enumerate(rows):
             title = index == 0
@@ -3054,6 +3379,9 @@ class Yolo26Detector(Node):
                 2 if title else 1,
                 cv2.LINE_AA,
             )
+
+        if detected and info is not None:
+            self._draw_hurdle_depth_samples(image, info)
 
         if decision is not None:
             banner = self._action_banner(
@@ -3514,8 +3842,24 @@ class Yolo26Detector(Node):
         )
 
     def _publish_detections(
-        self, message: Image, detections: list[Detection]
+        self,
+        message: Image,
+        detections: list[Detection],
+        image: np.ndarray | None = None,
     ) -> None:
+        serialized_detections: list[dict[str, Any]] = []
+        for detection in detections:
+            serialized = asdict(detection)
+            if image is not None and detection.class_name == "hurdle":
+                serialized.update(extract_hurdle_bar_centerline(
+                    image,
+                    detection.bbox,
+                    hue_min=self.hurdle_bar_hue_min,
+                    hue_max=self.hurdle_bar_hue_max,
+                    saturation_min=self.hurdle_bar_saturation_min,
+                    value_min=self.hurdle_bar_value_min,
+                ))
+            serialized_detections.append(serialized)
         payload = {
             "stamp": {
                 "sec": int(message.header.stamp.sec),
@@ -3524,7 +3868,7 @@ class Yolo26Detector(Node):
             "frame_id": message.header.frame_id,
             "image_width": int(message.width),
             "image_height": int(message.height),
-            "detections": [asdict(detection) for detection in detections],
+            "detections": serialized_detections,
         }
         timing = getattr(self, "_diagnostic_frame_timing", None)
         if timing is not None:
@@ -3623,7 +3967,7 @@ class Yolo26Detector(Node):
                 else self.smoothed_fps * 0.9 + current_fps * 0.1
             )
 
-            self._publish_detections(message, detections)
+            self._publish_detections(message, detections, image)
             published_ns = time.monotonic_ns()
             publish_annotated = self._annotated_image_has_subscriber()
             if publish_annotated or self.display:

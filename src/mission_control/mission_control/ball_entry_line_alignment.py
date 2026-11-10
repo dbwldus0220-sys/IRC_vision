@@ -5,12 +5,14 @@ import math
 
 from step.approach_distance import BALL_FINE_APPROACH_DISTANCE_M
 from step.ball_navigation_planner import valid_ball_ground_steering
-from step.line_navigation_planner import line_heading
+from step.line_navigation_planner import (
+    line_heading, LINE_RECOVERY_MIN_ANGLE_DEG, LINE_RECOVERY_MAX_ANGLE_DEG,
+)
 
 from .motion_decision_planner import MotionDecision, MotionDecisionPlanner
 
-FORWARD_MAX_HEADING_DEG = 15.0
-STATIONARY_MIN_HEADING_DEG = 45.0
+FORWARD_MAX_HEADING_DEG = LINE_RECOVERY_MIN_ANGLE_DEG
+STATIONARY_MIN_HEADING_DEG = LINE_RECOVERY_MAX_ANGLE_DEG
 
 
 @dataclass
@@ -172,14 +174,14 @@ class BallEntryLineAlignment:
                        ball_entry_distance_m=distance,
                        ball_entry_stop_distance_m=BALL_FINE_APPROACH_DISTANCE_M,
                        heading_source=config.heading_source)
-        if abs(heading) <= FORWARD_MAX_HEADING_DEG:
+        if abs(heading) < FORWARD_MAX_HEADING_DEG:
             speed = line._calculate_linear_speed(heading, quality)
             command.update(linear_speed_mps=speed,
                            travel_distance_m=speed * config.command_duration_sec)
             return command
 
         direction = 'RIGHT' if heading > 0.0 else 'LEFT'
-        if abs(heading) < STATIONARY_MIN_HEADING_DEG:
+        if abs(heading) <= STATIONARY_MIN_HEADING_DEG:
             # Same direction rule as LineNavigationPlanner._classify_recovery:
             # offset chooses line side; heading sign chooses the recovery turn.
             side = 'RIGHT' if offset > 0.0 else 'LEFT' if offset < 0.0 else direction

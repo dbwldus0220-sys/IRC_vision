@@ -1,0 +1,10 @@
+Internal ctest changing into directory: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/gui_execution_alignment
+Test project /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/gui_execution_alignment
+    Start 6: forward_timing_contract
+1/2 Test #6: forward_timing_contract ..........   Passed    0.18 sec
+    Start 7: ball_fine_queue_contract
+2/2 Test #7: ball_fine_queue_contract .........   Passed   11.43 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =  11.61 sec

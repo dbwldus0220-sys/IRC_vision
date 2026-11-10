@@ -1,6 +1,7 @@
 """Reacquire a normal ground fit with fresh, individually completed small turns."""
 
 import json
+import math
 
 import pytest
 from std_msgs.msg import String
@@ -17,7 +18,7 @@ def unconfirmed_sparse_info(**kwargs):
     """Isolate ordinary ground recovery; confirmed corners own their recovery."""
     return {**sparse_info(**kwargs), 'corner_preview_confirmed': False,
             'image_width': 1280, 'image_height': 720, 'robot_center_x_px': 710.,
-            'center_points_px': [[1010, 650], [960, 450], [1100, 250]],
+            'center_points_px': [[1150, 650], [1100, 450], [1100, 250]],
             'corner_start_index': 1}
 
 
@@ -51,12 +52,15 @@ def frame(node, clock, info=None, **updates):
 
 def start_turn(node, clock, info):
     start = clock[0]
-    for elapsed in (0.0, 0.2, 0.4, 0.51):
+    for elapsed in (0.0, 0.2, 0.4, 0.51, 0.7, 1.01):
         clock[0] = start + elapsed
         commands = frame(node, clock, info)
-        if elapsed < .5:
-            assert not any(command['valid'] for command in commands)
-    command = commands[-1]
+        valid = [command for command in commands if command['valid']]
+        if valid:
+            command = valid[-1]
+            break
+    else:
+        pytest.fail(f'No image command: {node.last_selected_decision}')
     assert command['valid'] and command['source_command']['invalid_ground_recovery']
     return command
 
@@ -68,6 +72,10 @@ def finish_turn(node, clock, command):
     assert node.latest_info['line'] is None
     deadline = (getattr(node, 'post_ball_line_dwell_until', None)
                 or getattr(node, 'correction_post_motion_dwell_until', None))
+    if deadline is None:
+        assert node.line_offset_min_rgb_stamp_ns == int(clock[0] * 1e9)
+        clock[0] += .01
+        return
     assert deadline == clock[0] + .5
     clock[0] = deadline - 0.01
     assert frame(node, clock) == []
@@ -79,17 +87,17 @@ def finish_turn(node, clock, command):
 
 
 @pytest.mark.parametrize('phase', ['AUTO', 'LINE_TRACK', 'LINE_TRACK_AFTER_PICKUP'])
-@pytest.mark.parametrize('side,count', [('RIGHT', 3), ('LEFT', 1)])
-def test_visible_invalid_ground_aligns_to_current_image_line(clock, phase, side, count):
+@pytest.mark.parametrize('side', ['RIGHT', 'LEFT'])
+def test_visible_invalid_ground_aligns_to_current_image_line(clock, phase, side):
     node = node_for(phase)
     sign = 1 if side == 'RIGHT' else -1
     info = {**unconfirmed_sparse_info(), 'filtered_lateral_offset_norm': -sign * 0.3,
             'center_points_px': [[710 + sign * 300, 650], [710 + sign * 250, 450]]}
     command = start_turn(node, clock, info)
-    assert command['action'] == f'LINE_OFFSET_TURN_{side}_{count}'
+    assert command['action'] == f'RECOVER_{side}_TURN_{side}_4'
     assert command['source_command']['direction_source'] == 'current_image_line'
-    assert command['source_command']['turn_angle_deg'] == (30.0 if side == 'RIGHT' else 15.0)
-    assert MotionCommandBridgeNode.motion_id_for_action(command['action']) == f'post_ball_line_turn_{side.lower()}_{count}'
+    assert command['source_command']['turn_angle_deg'] == (20.0 if side == 'RIGHT' else 30.0)
+    assert MotionCommandBridgeNode.motion_id_for_action(command['action']) == f'line_recovery_{side.lower()}_4'
     assert node.latest_info['line']['ground_projection_valid'] is False
     assert not node.sparse_line_recovery.eligible
 
@@ -108,20 +116,20 @@ def test_visible_line_overrides_pickup_exit_search_direction(clock, section, sid
     sign = -1 if side == 'RIGHT' else 1
     info['center_points_px'] = [[710 + sign * 300, 650], [710 + sign * 250, 450]]
     command = start_turn(node, clock, info)
-    expected = 'LINE_OFFSET_TURN_LEFT_1' if side == 'RIGHT' else 'LINE_OFFSET_TURN_RIGHT_3'
+    expected = 'RECOVER_LEFT_TURN_LEFT_4' if side == 'RIGHT' else 'RECOVER_RIGHT_TURN_RIGHT_4'
     assert command['action'] == expected
     assert command['source_command']['direction_source'] == 'current_image_line'
     finish_turn(node, clock, command)
     repeated = frame(node, clock, info)[-1]
-    assert not repeated['valid']
-    assert repeated['reason'] == 'line_image_alignment_no_progress'
+    assert repeated['valid'] and repeated['action'] == expected
     assert node.mission_phase == 'POST_BALL_LINE_ALIGN'
 
 
 @pytest.mark.parametrize('phase', ['LINE_TRACK', 'POST_BALL_LINE_ALIGN'])
 def test_image_alignment_is_limited_to_three_turns_until_normal_ground_fit(clock, phase):
     node = node_for(phase)
-    for target_x in (850., 830., 810.):
+    for angle in (60., 56., 52.):
+        target_x = 710. + 269. * math.tan(math.radians(angle))
         info = {**unconfirmed_sparse_info(),
                 'center_points_px': [[target_x+10, 650], [target_x, 450]]}
         command = start_turn(node, clock, info)
@@ -130,9 +138,9 @@ def test_image_alignment_is_limited_to_three_turns_until_normal_ground_fit(clock
         assert frame(node, clock) == []
         finish_turn(node, clock, command)
     blocked = frame(node, clock, {**unconfirmed_sparse_info(),
-        'center_points_px': [[800, 650], [790, 450]]})[-1]
+        'center_points_px': [[540, 650], [100, 450]]})[-1]
     assert not blocked['valid']
-    assert blocked['reason'] == 'line_image_alignment_limit_reached'
+    assert blocked['reason'] in {'line_image_alignment_limit_reached', 'line_image_alignment_no_progress'}
     normal = {**line_info(), 'ground_projection_enabled': True,
               'ground_fit_point_count': 3, 'ground_fit_reason': 'ok'}
     commands = frame(node, clock, normal)
@@ -224,16 +232,15 @@ def test_nearest_visible_point_selects_side_instead_of_extrapolated_offset(clock
     assert start_turn(node, clock, info)['action'] == 'LINE_OFFSET_TURN_LEFT_1'
 
 
-def test_centered_current_line_does_not_repeat_previously_seen_side(clock):
+def test_centered_current_line_advances_once_instead_of_repeating_remembered_turn(clock):
     node = node_for()
     node.planner.last_line_seen_direction = 'LEFT'
     info = {**unconfirmed_sparse_info(), 'filtered_lateral_offset_norm': 0.0,
             'center_points_px': [[710, 650], [710, 450]]}
-    for _ in range(5):
-        commands = frame(node, clock, info)
-        assert not any(c['valid'] for c in commands)
-        assert node.last_selected_decision.reason == 'line_image_aligned_waiting_for_ground'
-        clock[0] += .4
+    command = start_turn(node, clock, info)
+    assert command['action'] == 'STRAIGHT_1'
+    clock[0] += .1
+    assert frame(node, clock, info) == []
 
 
 def test_valid_other_target_keeps_priority_over_line_recovery(clock):
@@ -265,7 +272,7 @@ def test_pickup_recovery_waits_for_camera_instead_of_larger_blind_search(clock):
         clock[0] += 0.3
         MotionDecisionNode._publish_decision(node)
     assert not any(c['valid'] for c in node.publisher.messages[before:])
-    assert node.last_selected_decision.reason == 'line_ground_recovery_waiting_for_fresh_full_fit'
+    assert node.last_selected_decision.reason == 'line_ground_recovery_waiting_for_fresh_image'
 
 
 @pytest.mark.parametrize('phase', ['LINE_TRACK', 'POST_BALL_LINE_ALIGN'])

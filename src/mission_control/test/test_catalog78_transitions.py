@@ -75,7 +75,8 @@ def test_transition_endpoints_match_fine_and_standard_support(camera):
 
 @pytest.mark.parametrize('name', MANIFEST['speed_only_motions'] + list(MANIFEST['renames'].values()))
 def test_requested_speed_is_source_verbatim(name):
-    assert RUNTIME[name]['playback_speed'] == SOURCE[name]['playback_speed']
+    snapshot = catalog(SNAPSHOT / 'artifacts/robot_motions_runtime.json')
+    assert snapshot[name]['playback_speed'] == SOURCE[name]['playback_speed']
 
 
 def seconds(alias):

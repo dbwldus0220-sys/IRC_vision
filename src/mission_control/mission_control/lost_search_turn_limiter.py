@@ -13,6 +13,7 @@ class LostSearchTurnLimiter:
     CORNER_SEARCH_MAX_ANGLE_DEG = 45.0
     CORNER_SEARCH_MAX_TURNS = 3
     IMAGE_ALIGNMENT_MIN_PROGRESS_DEG = 3.0
+    TWO_POINT_ALIGNMENT_MIN_PROGRESS_DEG = 5.0
 
     def __init__(
         self, max_turns: int = 3, max_angle_deg: float = 90.0, *,
@@ -34,6 +35,7 @@ class LostSearchTurnLimiter:
         self.image_alignment_count = 0
         self.image_alignment_angle = 0.0
         self.image_alignment_error = None
+        self.two_point_alignment_error = None
         self.image_alignment_direction = None
         self.image_alignment_reversals = 0
 
@@ -53,6 +55,7 @@ class LostSearchTurnLimiter:
         explicit_search = (
             "LOST_TURN" in action or "FINE_SEARCH_" in action
             or decision.source_command.get("image_line_alignment") is True
+            or decision.source_command.get("two_point_ground_alignment") is True
             or decision.reason in {
                 "post_ball_line_search", "post_shot_line_search",
                 "turn_toward_last_seen_goal_side", "turn_toward_last_seen_ball_side",
@@ -92,20 +95,31 @@ class LostSearchTurnLimiter:
         angle = self.search_angle(decision, observations.get(source))
         if angle is None:
             return decision
-        if source == "line" and decision.source_command.get("image_line_alignment") is True:
+        if source == "line" and (
+            decision.source_command.get("image_line_alignment") is True
+            or decision.source_command.get("two_point_ground_alignment") is True
+        ):
             # Visible alignment does not spend the blind-search allowance.
             max_turns = min(self.max_turns, self.CORNER_SEARCH_MAX_TURNS)
             max_angle = min(self.max_angle_deg, self.CORNER_SEARCH_MAX_ANGLE_DEG)
-            error = MotionDecisionPlanner._number(decision.source_command, "image_target_bearing_deg")
+            ground_rotation = decision.source_command.get("two_point_ground_alignment") is True
+            error = MotionDecisionPlanner._number(
+                decision.source_command,
+                "ground_rotation_error_deg" if ground_rotation else "image_target_bearing_deg",
+            )
+            previous_error = self.two_point_alignment_error if ground_rotation else self.image_alignment_error
+            min_progress = (self.TWO_POINT_ALIGNMENT_MIN_PROGRESS_DEG if ground_rotation
+                            else self.IMAGE_ALIGNMENT_MIN_PROGRESS_DEG)
+            prefix = "line_two_point_alignment" if ground_rotation else "line_image_alignment"
             direction = decision.source_command.get("turn_direction")
             reason = None
             if source in self.failed_sources:
                 reason = "lost_search_motion_failed"
             elif error is None:
-                reason = "line_image_alignment_missing_error"
-            elif (self.image_alignment_error is not None
-                  and abs(error) > self.image_alignment_error - self.IMAGE_ALIGNMENT_MIN_PROGRESS_DEG):
-                reason = "line_image_alignment_no_progress"
+                reason = f"{prefix}_missing_error"
+            elif (previous_error is not None
+                  and abs(error) > previous_error - min_progress):
+                reason = f"{prefix}_no_progress"
             elif (self.image_alignment_reversals >= 1
                   and direction != self.image_alignment_direction):
                 reason = "line_image_alignment_oscillating"
@@ -113,6 +127,7 @@ class LostSearchTurnLimiter:
                   or self.image_alignment_angle + angle > max_angle):
                 reason = "line_image_alignment_limit_reached"
             metadata = {**decision.source_command,
+                        "alignment_error_reference": "ground_direction" if ground_rotation else "image_target",
                         "image_alignment_turns_used": self.image_alignment_count,
                         "image_alignment_angle_used_deg": self.image_alignment_angle,
                         "image_alignment_max_turns": max_turns,
@@ -155,10 +170,18 @@ class LostSearchTurnLimiter:
             return
         info = observations.get(source)
         angle = self.search_angle(decision, info)
-        if source == "line" and decision.source_command.get("image_line_alignment") is True:
+        if source == "line" and (
+            decision.source_command.get("image_line_alignment") is True
+            or decision.source_command.get("two_point_ground_alignment") is True
+        ):
             self.image_alignment_count += 1
             self.image_alignment_angle += angle
-            self.image_alignment_error = abs(decision.source_command["image_target_bearing_deg"])
+            # Error improvement belongs to its geometric reference; physical
+            # turns, cumulative yaw and direction reversals share one allowance.
+            if decision.source_command.get("two_point_ground_alignment") is True:
+                self.two_point_alignment_error = abs(decision.source_command["ground_rotation_error_deg"])
+            else:
+                self.image_alignment_error = abs(decision.source_command["image_target_bearing_deg"])
             direction = decision.source_command.get("turn_direction")
             if self.image_alignment_direction is not None and direction != self.image_alignment_direction:
                 self.image_alignment_reversals += 1
@@ -192,6 +215,10 @@ class LostSearchTurnLimiter:
 
     def complete_corner(self) -> None:
         """Rearm only after the actual corner motion has succeeded."""
+        self.reset_line_search()
+
+    def reset_line_search(self) -> None:
+        """Start a new Line search without refunding other missions' budgets."""
         self.counts["line"] = 0
         self.angles["line"] = 0.0
         self.first_directions.pop("line", None)
@@ -203,6 +230,7 @@ class LostSearchTurnLimiter:
         self.image_alignment_count = 0
         self.image_alignment_angle = 0.0
         self.image_alignment_error = None
+        self.two_point_alignment_error = None
         self.image_alignment_direction = None
         self.image_alignment_reversals = 0
 

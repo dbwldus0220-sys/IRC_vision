@@ -17,6 +17,8 @@ public:
   virtual ~RobotMotionPlayerApi() = default;
 
   virtual irc_step::StartResult start(std::string_view motion_name) = 0;
+  virtual irc_step::StartResult start_ring_shot(std::string_view, double)
+  {return irc_step::StartResult::InvalidMotion;}
   virtual irc_step::QueueResult queue_next(std::string_view motion_name) = 0;
   virtual irc_step::CancelResult cancel() = 0;
   virtual irc_step::MotionStatus update() = 0;
@@ -37,6 +39,7 @@ public:
   explicit BorrowedRobotMotionPlayerApi(irc_step::RobotMotionPlayer & player);
 
   irc_step::StartResult start(std::string_view motion_name) override;
+  irc_step::StartResult start_ring_shot(std::string_view motion_name, double angle) override;
   irc_step::QueueResult queue_next(std::string_view motion_name) override;
   irc_step::CancelResult cancel() override;
   irc_step::MotionStatus update() override;
@@ -58,6 +61,7 @@ public:
 
   BackendStartResult start_motion(
     const std::string & resolved_motion_name) override;
+  BackendStartResult start_ring_shot(const std::string & name, double angle) override;
   BackendCancelResult cancel_motion() override;
   BackendStatus poll_status() override;
   BackendQueueResult queue_motion(

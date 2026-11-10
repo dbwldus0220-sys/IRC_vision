@@ -461,7 +461,7 @@ def continue_pickup_after_fine_alignment(bridge, command_id=8001):
     )
 
 
-def continue_pickup_after_backward(bridge, bottom_distance_px=400):
+def continue_pickup_after_backward(bridge, bottom_distance_px=320):
     """Supply the new post-retreat sample explicitly in sequence tests."""
     assert bridge.pickup_post_backward_align_waiting
     bridge.navigation_command_callback(navigation_message(
@@ -603,6 +603,7 @@ EXPECTED_PRODUCTION_ACTIONS = {
     },
     "BALL_FINE_FORWARD_8": "ball_general_fine_forward_8",
     "BALL_APPROACH_FINE_FORWARD_5": "ball_approach_fine_forward_45_5",
+    "BALL_APPROACH_FORWARD_2": "ball_camera_down_forward_2",
     "BALL_LOST_FINE_FORWARD_3": "ball_top_loss_fine_forward_45_3",
     "BALL_LOST_FORWARD_2": "ball_camera_down_forward_2",
     "BALL_LOST_FORWARD_4": "ball_camera_down_forward_4",
@@ -1330,7 +1331,7 @@ def test_pickup_missing_ball_aligns_after_camera_down_backward_motion():
         navigation_message(
             action="BALL_PICKUP_POST_BACKWARD_ALIGN_CONTINUE",
             command_id=8004,
-            source_command={"bottom_distance_px": 400},
+            source_command={"bottom_distance_px": 320},
             event_id=None,
             active_special_command_id=bridge.active_command_id,
             active_special_event_id=bridge.active_event_id,
@@ -2876,7 +2877,7 @@ def test_pickup_crab_uses_latest_motion_for_preparation(intervening, direction):
 @pytest.mark.parametrize("source,distance,action,motion_name", [
     ("ball", 0.499, "STRAIGHT_0", "p미세0도(5회)"),
     ("ball", 0.500, "STRAIGHT_0", "p미세0도(5회)"),
-    *[("ball", distance, "BALL_APPROACH_FINE_FORWARD_5", "p미세45도(5회)")
+    *[("ball", distance, "BALL_APPROACH_FORWARD_2", "p전진45(2회)")
       for distance in (0.500001, 0.550, 0.570, 0.600)],
     *[("ball", distance, "STRAIGHT", "p전진45(4회)")
       for distance in (0.600001, 0.700, 0.700001)],
@@ -3162,7 +3163,7 @@ def hurdle_fine_sequence_message(command_id=8100, depth=0.20):
     )
 
 
-@pytest.mark.parametrize("depth", [0.20, 0.43, 0.54])
+@pytest.mark.parametrize("depth", [0.20, 0.43, 0.45])
 def test_hurdle_sequence_runs_one_ten_repeat_motion_then_half_second_then_hurdle(monkeypatch, depth):
     clock = [10.0]
     monkeypatch.setattr("mission_control.motion_command_bridge_node.time.monotonic", lambda: clock[0])

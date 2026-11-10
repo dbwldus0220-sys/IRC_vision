@@ -111,7 +111,7 @@ def test_hurdle_detection_defaults_keep_go_policy_unchanged():
     assert analyzer.head_down_trigger_bottom_distance_px == 120
     assert analyzer.detect_depth_m == 1.5
     assert analyzer.confirmation_filter.window_size == 40
-    assert analyzer.confirmation_filter.required_hits == 15
+    assert analyzer.confirmation_filter.required_hits == 5
     assert analyzer.confirmation_filter.max_missed_frames == 4
 
     assert analyzer.go_target_depth_m == 0.10
@@ -168,7 +168,7 @@ def test_published_bottom_distance_uses_center_and_needs_no_depth():
             "bbox": [100, 350, 300, 408], "center": [200, 379],
         }],
     }))
-    for _ in range(15):
+    for _ in range(5):
         analyzer._detections_callback(message)
     info = published[-1]
     assert info.detected and not info.depth_valid
@@ -193,19 +193,19 @@ def test_far_confirmation_survives_approach_to_550mm():
             "bbox": [100, 300, 300, 360], "center": [200, 330],
         }],
     }))
-    for _ in range(14):
+    for _ in range(4):
         analyzer._detections_callback(message)
         assert not published[-1][0].detected
     analyzer._detections_callback(message)
     assert published[-1][0].detected
-    assert published[-1][1]["confirmation_hits"] == 15
+    assert published[-1][1]["confirmation_hits"] == 5
     for distance in (0.7, 0.551, 0.55):
         depth[0] = distance
         analyzer._detections_callback(message)
         info, confirmation = published[-1]
         assert info.detected and info.depth_m == distance
         assert confirmation["confirmation_confirmed"]
-        assert confirmation["confirmation_hits"] > 15
+        assert confirmation["confirmation_hits"] > 5
 
     missing = SimpleNamespace(data=json.dumps({"detections": []}))
     for _ in range(4):
@@ -238,7 +238,7 @@ def test_hurdle_bottom_trigger_uses_confirmed_rgb_center_without_depth():
         })))
         return published[-1]
 
-    for _ in range(14):
+    for _ in range(4):
         assert not observe(359).head_down_requested
     confirmed = observe(359)
     assert confirmed.detected and not confirmed.depth_valid

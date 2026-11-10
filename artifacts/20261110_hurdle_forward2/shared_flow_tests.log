@@ -1,0 +1,63 @@
+.............................................................F.......... [ 69%]
+..FF...........................                                          [100%]
+=================================== FAILURES ===================================
+______________ test_goal_fine_forward_starts_without_fixed_pause _______________
+
+clock = [10.01]
+
+    def test_goal_fine_forward_starts_without_fixed_pause(clock):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+        fine = goal_info(depth_m=.6, score_now=False, confirmation_confirmed=True)
+        observe(node, clock, 'goal', fine)
+>       assert node.last_selected_decision.action.startswith('GOAL_CAMERA90_FINE_FORWARD_')
+E       AssertionError: assert False
+E        +  where False = <built-in method startswith of str object at 0xffff8c428b70>('GOAL_CAMERA90_FINE_FORWARD_')
+E        +    where <built-in method startswith of str object at 0xffff8c428b70> = 'WAIT'.startswith
+E        +      where 'WAIT' = MotionDecision(phase='GOAL_APPROACH', source='goal', action='WAIT', valid=False, reason='missing_valid_goal_ring_depth...ror_m': None, 'approach_motion': None, 'approach_level': None, 'approach_target_distance_m': None, 'offset_x_px': 0.0}).action
+E        +        where MotionDecision(phase='GOAL_APPROACH', source='goal', action='WAIT', valid=False, reason='missing_valid_goal_ring_depth...ror_m': None, 'approach_motion': None, 'approach_level': None, 'approach_target_distance_m': None, 'offset_x_px': 0.0}) = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff7c25a080>.last_selected_decision
+
+src/mission_control/test/test_wait_refresh_and_fine_settle.py:86: AssertionError
+________ test_pickup_preparation_is_followed_by_full_second_before_fine ________
+
+clock = [10.0]
+
+    def test_pickup_preparation_is_followed_by_full_second_before_fine(clock):
+        bridge = FakeBridge()
+        enter_pickup_fine_alignment(bridge)
+        bridge.last_physical_motion_id = "pickup_crab_right_0"  # A real support-posture change.
+        bridge.navigation_command_callback(fine_alignment_message('BALL_PICKUP_FINE_FORWARD'))
+        bridge.executor_status_callback(executor_status(status='SUCCEEDED', motion_id='pickup_fine_prepare'))
+        count = len(bridge.executor_request_publisher.messages)
+>       assert bridge.active_dwell_until == pytest.approx(clock[0] + 1.)
+E       assert None == 11.0 ± 1.1e-05
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff7c33b5e0>.active_dwell_until
+E        +  and   11.0 ± 1.1e-05 = <function approx at 0xffff8d75b7f0>((10.0 + 1.0))
+E        +    where <function approx at 0xffff8d75b7f0> = pytest.approx
+
+src/mission_control/test/test_wait_refresh_and_fine_settle.py:160: AssertionError
+______ test_pickup_loss_pending_during_preparation_skips_fine_after_pause ______
+
+clock = [10.0]
+
+    def test_pickup_loss_pending_during_preparation_skips_fine_after_pause(clock):
+        from test_motion_command_bridge import pickup_positioning_loss_message
+        bridge = FakeBridge()
+        enter_pickup_fine_alignment(bridge)
+        bridge.last_physical_motion_id = "pickup_crab_right_0"  # A real support-posture change.
+        bridge.navigation_command_callback(fine_alignment_message('BALL_PICKUP_FINE_FORWARD'))
+        bridge.executor_status_callback(executor_status(status='SUCCEEDED', motion_id='pickup_fine_prepare'))
+        bridge.navigation_command_callback(pickup_positioning_loss_message(bridge, 'pickup_fine_prepare', command_id=9000))
+        assert bridge.pickup_positioning_loss_pending
+        count = len(bridge.executor_request_publisher.messages)
+        bridge._check_atomic_dwell(bridge.active_dwell_until)
+        assert len(bridge.executor_request_publisher.messages) == count
+>       assert bridge.pickup_fine_align_waiting
+E       assert False
+E        +  where False = <test_motion_command_bridge.FakeBridge object at 0xffff7c259cc0>.pickup_fine_align_waiting
+
+src/mission_control/test/test_wait_refresh_and_fine_settle.py:187: AssertionError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_wait_refresh_and_fine_settle.py::test_goal_fine_forward_starts_without_fixed_pause
+FAILED src/mission_control/test/test_wait_refresh_and_fine_settle.py::test_pickup_preparation_is_followed_by_full_second_before_fine
+FAILED src/mission_control/test/test_wait_refresh_and_fine_settle.py::test_pickup_loss_pending_during_preparation_skips_fine_after_pause
+3 failed, 100 passed in 1.36s

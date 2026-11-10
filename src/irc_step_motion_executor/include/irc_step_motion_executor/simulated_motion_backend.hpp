@@ -25,6 +25,8 @@ public:
 
   BackendStartResult start_motion(
     const std::string & resolved_motion_name) override;
+  BackendStartResult start_ring_shot(const std::string & name, double) override
+  {return start_motion(name);}
   BackendCancelResult cancel_motion() override;
   BackendStatus poll_status() override;
   bool set_joint_override(int motor_id, double target_deg) override;

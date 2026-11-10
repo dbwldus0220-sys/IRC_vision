@@ -1,0 +1,2776 @@
+#!/usr/bin/env python3
+"""Bridge navigation JSON commands to the C++ motion executor."""
+
+from __future__ import annotations
+
+import json
+import time
+from typing import Any
+
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import String
+
+from .pickup_walk_reservation import (
+    PICKUP_WALK_DURATIONS, pickup_walk_motion, PICKUP_TWO_CYCLE_CRAB_OFFSET_PX,
+)
+from .pickup_fine_skip import pickup_fine_can_skip
+from .ball_fine_approach import motion_id as ball_fine_motion_id, physical_motion_id
+
+from .safety_interlock import RECOVERABLE_MOTOR_ERROR_CODES
+from .pickup_grasp_selection import pickup_grasp_motion_id
+
+
+LEFT_RECOVERY_MOTION_IDS = {
+    count: f"line_recovery_left_{count}"
+    for count in (4,)
+}
+RIGHT_RECOVERY_MOTION_IDS = {
+    count: f"line_recovery_right_{count}"
+    for count in (4,)
+}
+
+
+class MotionCommandBridgeNode(Node):
+    """Translate supported navigation actions into SDK executor requests."""
+
+    DWELL_MARKER = "__NON_BLOCKING_DWELL__"
+    SHOT_PREPARE_DWELL_MARKER = "__SHOT_PREPARE_DWELL__"
+    SHOT_PREPARE_MOTION_ID = "goal_fine_to_default"
+    SHOT_FORWARD_PREPARE_MOTION_ID = "goal_forward_to_default"
+    SHOT_PREPARE_DWELL_SEC = 0.5
+    GOAL_SHOT_READY_MOTION_IDS = frozenset({
+        "goal_fine_prepare_90", "goal_crab_left_to_fine_90", "goal_crab_right_to_fine_90",
+    })
+    GOAL_CRAB_ACTIONS = frozenset(
+        {"GOAL_CAMERA90_CRAB_LEFT", "GOAL_CAMERA90_CRAB_RIGHT"}
+    )
+    GOAL_CRAB_PRE_DWELL_MARKER = "__GOAL_CRAB_PRE_DWELL__"
+    GOAL_CRAB_PRE_DWELL_SEC = 0.5
+    GOAL_FORWARD_CRAB_PREPARE_MOTION_ID = "goal_forward_to_crab_right_90"
+    GOAL_FINE_RIGHT_CRAB_PREPARE_MOTION_ID = "goal_fine_to_crab_right_90"
+    GOAL_FINE_LEFT_CRAB_PREPARE_MOTION_ID = "goal_fine_to_crab_left_90"
+    POST_BALL_CAMERA_DWELL_MARKER = "__POST_BALL_CAMERA_DWELL__"
+    POST_BALL_CAMERA_PAUSE_SEC = 0.0
+    PICKUP_INITIAL_ALIGN_DWELL_MARKER = (
+        "__BALL_PICKUP_INITIAL_ALIGN_DWELL__"
+    )
+    PICKUP_INITIAL_ALIGN_MARKER = "__BALL_PICKUP_INITIAL_ALIGN_CHECK__"
+    FINE_ALIGN_MARKER = "__BALL_PICKUP_FINE_ALIGN_CHECK__"
+    POST_BACKWARD_ALIGN_MARKER = (
+        "__BALL_PICKUP_POST_BACKWARD_ALIGN_CHECK__"
+    )
+    PICKUP_POSITIONING_LOSS_LATCH_ACTION = (
+        "BALL_PICKUP_POSITIONING_LOSS_LATCH"
+    )
+    PICKUP_FIXED_SEQUENCE_FIRST_MOTION = "pickup_pre_backward_camera_down"
+    PICKUP_GRASP_CHECK_MOTION_ID = "pickup_grasp_check_pose"
+    PICKUP_FINE_PREPARE_MOTION_ID = "pickup_fine_prepare"
+    PICKUP_FINE_PRE_DWELL_MARKER = "__PICKUP_FINE_PRE_DWELL__"
+    PICKUP_FINE_PRE_DWELL_SEC = 0.5
+    PICKUP_TWO_CYCLE_CRAB_OFFSET_PX = PICKUP_TWO_CYCLE_CRAB_OFFSET_PX
+    TRANSITION_DWELL_SEC = 0.5
+    BACKWARD_DWELL_SEC = 0.5
+    FINE_TO_BACKWARD_DWELL_SEC = 1.0
+    BACKWARD_MOTION_IDS = frozenset({
+        "pickup_pre_backward_camera_down", "pickup_lost_ball_backward_1",
+        "ball_lost_camera_down_backward_2", "pickup_retreat_2",
+        "goal_camera_90_backward_1",
+    })
+    PICKUP_FINE_PREPARE_MOTION_IDS = frozenset({
+        "pickup_fine_prepare", "pickup_fine_prepare_0",
+        "pickup_crab_right_to_fine_0", "pickup_crab_left_to_fine_0",
+    })
+    PICKUP_CRAB_PREPARE_MOTION_IDS = frozenset({
+        "pickup_fine_to_crab_right_0", "pickup_fine_to_crab_left_0",
+        "pickup_forward_to_crab_0", "pickup_forward_to_crab_left_0",
+    })
+    CRAB_MOTION_IDS = frozenset({
+        "pickup_crab_left_0", "pickup_crab_right_0",
+        "pickup_crab_left_0_2", "pickup_crab_right_0_2",
+        "goal_camera_90_crab_left", "goal_camera_90_crab_right",
+    })
+    TRANSITION_MOTION_IDS = frozenset({
+        *PICKUP_FINE_PREPARE_MOTION_IDS, *PICKUP_CRAB_PREPARE_MOTION_IDS,
+        "hurdle_fine_prepare_0",
+        "goal_fine_prepare_90", "goal_crab_right_to_fine_90", "goal_crab_left_to_fine_90",
+        "goal_fine_to_crab_right_90", "goal_fine_to_crab_left_90",
+        "goal_forward_to_crab_right_90", "goal_forward_to_crab_left_90",
+        "goal_crab_right_to_turn_90", "goal_crab_left_to_turn_90",
+        "pickup_crab_right_to_turn_0", "pickup_crab_left_to_turn_0",
+        "goal_forward_to_default", "goal_fine_to_default",
+        "fine_to_turn_ready_0", "fine_to_turn_ready_45", "fine_to_turn_ready_90",
+    })
+    PICKUP_FINE_RIGHT_CRAB_PREPARE_MOTION_ID = "pickup_fine_to_crab_right_0"
+    PICKUP_DWELL_SEC = 0.5
+    PICKUP_TURN_DWELL_SEC = 0.5
+    BALL_TURN_DWELL_SEC = 0.5
+    PICKUP_GRASP_DWELL_SEC = 3.0
+    # One skipped fault may recover at the next normal SDK start; a second
+    # consecutive failed motion must not consume the rest of the sequence.
+    PICKUP_MOTOR_FAILURE_LIMIT = 2
+    HURDLE_PRE_GO_DWELL_MARKER = "__HURDLE_PRE_GO_DWELL__"
+    HURDLE_PRE_GO_DWELL_SEC = 0.5
+    HURDLE_POST_GO_DWELL_MARKER = "__HURDLE_POST_GO_DWELL__"
+    HURDLE_POST_GO_DWELL_SEC = 1.0
+    HURDLE_FINAL_FINE_MOTION_ID = "hurdle_fine_forward_10"
+    PICKUP_INITIAL_ALIGN_ACTIONS = frozenset(
+        {
+            "BALL_PICKUP_INITIAL_ALIGN_CONTINUE",
+            "BALL_PICKUP_INITIAL_SEARCH_FORWARD",
+            "BALL_PICKUP_INITIAL_SEARCH_FORWARD_4",
+            "BALL_PICKUP_INITIAL_SEARCH_BACKWARD",
+            "BALL_PICKUP_INITIAL_BACKWARD",
+            "BALL_PICKUP_INITIAL_SEARCH_BACKWARD_2",
+            "BALL_PICKUP_INITIAL_CRAB_LEFT",
+            "BALL_PICKUP_INITIAL_CRAB_RIGHT",
+            *{
+                f"BALL_PICKUP_CAMERA_DOWN_TURN_{direction}_{count}"
+                for direction in ("LEFT", "RIGHT")
+                for count in (
+                    range(1, 7) if direction == "LEFT"
+                    else (1, 2, 3, 5, 6, 7, 9)
+                )
+            },
+        }
+    )
+    PICKUP_CAMERA_DOWN_TURN_MOTION_IDS = {
+        **{
+            f"BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_{count}": (
+                f"pickup_camera_down_turn_left_{count}"
+            )
+            for count in range(1, 7)
+        },
+        **{
+            f"BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_{count}": (
+                f"pickup_camera_down_turn_right_{count}"
+            )
+            for count in (1, 2, 3, 5, 6, 7, 9)
+        },
+    }
+    PICKUP_FINE_ALIGN_ACTIONS = frozenset(
+        {
+            *{
+                f"BALL_PICKUP_FINE_TURN_{direction}_{count}"
+                for direction, counts in (("LEFT", range(1, 7)), ("RIGHT", (1, 2, 3, 5, 6, 7, 9)))
+                for count in counts
+            },
+            "BALL_PICKUP_FINE_ALIGN_CONTINUE",
+            "BALL_PICKUP_FINE_FORWARD",
+            "BALL_PICKUP_FINE_SEARCH_LEFT",
+            "BALL_PICKUP_FINE_SEARCH_RIGHT",
+            *{
+                f"BALL_PICKUP_FINE_SEARCH_{direction}_{count}"
+                for direction, counts in (("LEFT", (1, 3)), ("RIGHT", (1, 2, 5)))
+                for count in counts
+            },
+            "BALL_PICKUP_FINE_SEARCH_FORWARD",
+            "BALL_PICKUP_FINE_SEARCH_FORWARD_4",
+            "BALL_PICKUP_FINE_SEARCH_BACKWARD",
+            "BALL_PICKUP_FINE_BACKWARD",
+            "BALL_PICKUP_FINE_SEARCH_BACKWARD_2",
+            "BALL_PICKUP_CRAB_RIGHT",
+            "BALL_PICKUP_CRAB_LEFT",
+        }
+    )
+    PICKUP_FINE_ALIGN_MOTION_IDS = {
+        **{
+            f"BALL_PICKUP_FINE_TURN_{direction}_{count}": f"pickup_camera_down_turn_{direction.lower()}_{count}"
+            for direction, counts in (("LEFT", range(1, 7)), ("RIGHT", (1, 2, 3, 5, 6, 7, 9)))
+            for count in counts
+        },
+        "BALL_PICKUP_FINE_FORWARD": "pickup_fine_forward_0",
+        "BALL_PICKUP_FINE_SEARCH_LEFT": "pickup_camera_down_turn_left_2",
+        "BALL_PICKUP_FINE_SEARCH_RIGHT": "pickup_camera_down_turn_right_5",
+        **{
+            f"BALL_PICKUP_FINE_SEARCH_{direction}_{count}": f"pickup_camera_down_turn_{direction.lower()}_{count}"
+            for direction, counts in (("LEFT", (1, 3)), ("RIGHT", (1, 2, 5)))
+            for count in counts
+        },
+        "BALL_PICKUP_FINE_SEARCH_FORWARD": "pickup_top_loss_fine_forward_0_3",
+        "BALL_PICKUP_FINE_SEARCH_FORWARD_4": "ball_camera_down_forward_4",
+        "BALL_PICKUP_FINE_SEARCH_BACKWARD": "pickup_lost_ball_backward_1",
+        "BALL_PICKUP_FINE_BACKWARD": "pickup_lost_ball_backward_1",
+        "BALL_PICKUP_FINE_SEARCH_BACKWARD_2": "ball_lost_camera_down_backward_2",
+        "BALL_PICKUP_CRAB_RIGHT": "pickup_crab_right_0",
+        "BALL_PICKUP_CRAB_LEFT": "pickup_crab_left_0",
+    }
+    PICKUP_POST_BACKWARD_ALIGN_ACTIONS = frozenset(
+        {
+            "BALL_PICKUP_POST_BACKWARD_ALIGN_CONTINUE",
+            "BALL_PICKUP_POST_BACKWARD_CRAB_RIGHT",
+            "BALL_PICKUP_POST_BACKWARD_CRAB_LEFT",
+            *{
+                f"BALL_PICKUP_POST_BACKWARD_TURN_{direction}_{count}"
+                for direction in ("LEFT", "RIGHT")
+                for count in (
+                    range(1, 7) if direction == "LEFT"
+                    else (1, 2, 3, 5, 6, 7, 9)
+                )
+            },
+        }
+    )
+    ATOMIC_SEQUENCE_ACTIONS = frozenset(
+        {"PICKUP_NOW", "POST_BALL_GOAL_TRANSITION", "SHOT", "GO",
+         "GOAL_CAMERA90_BACKWARD_1", *GOAL_CRAB_ACTIONS}
+    )
+
+    PICKUP_CAMERA_DOWN_MOTION_IDS = {
+        "STRAIGHT": "line_forward_4",
+        "STRAIGHT_0": "ball_general_fine_forward_8",
+        "STRAIGHT_2": "ball_camera_down_forward_4",
+    }
+    PICKUP_MOTION_TAIL = (
+        # Fresh fine-alignment confirmation already completes the approach.
+        "pickup_pre_backward_camera_down",
+        POST_BACKWARD_ALIGN_MARKER,
+        "pickup",
+        PICKUP_GRASP_CHECK_MOTION_ID,
+    )
+    PICKUP_NO_BALL_MOTION_TAIL = (
+        "pickup_fine_forward_0",
+        "pickup_pre_backward_camera_down",
+        POST_BACKWARD_ALIGN_MARKER,
+        "pickup",
+        PICKUP_GRASP_CHECK_MOTION_ID,
+    )
+    POST_BALL_GOAL_TRANSITION_SEQUENCE = (
+        "post_ball_camera_90",
+        POST_BALL_CAMERA_DWELL_MARKER,
+    )
+    ACTION_TO_MOTION_ID = {
+        "STRAIGHT": "line_forward_6",
+        "STRAIGHT_1": "line_forward_2",
+        "STRAIGHT_2": "line_forward_4",
+        "STRAIGHT_3": "line_forward_6",
+        "STRAIGHT_4": "line_forward_8",
+        "APPROACH": "forward",
+        "LEFT": "line_recovery_left_4",
+        "RIGHT": "line_recovery_right_4",
+        "POST_BALL_GOAL_TRANSITION": "post_ball_camera_90",
+        # Keep legacy action IDs; each target now includes its pose transition.
+        "POST_SHOT_TURN_RIGHT_9": "post_shot_default_turn_right",
+        # Keep the legacy action ID; the composite contains six left turns.
+        "POST_SHOT_TURN_LEFT_4": "post_shot_default_turn_left",
+        "POST_SHOT_FORWARD": "line_forward_6",
+        **{
+            f"POST_SHOT_LINE_TURN_{direction}_{count}": (
+                f"post_ball_line_turn_{direction.lower()}_{count}"
+            )
+            for direction, counts in (
+                ("RIGHT", (1, 2, 3, 5, 6, 7, 9)), ("LEFT", (1, 2, 3, 4, 5, 6)),
+            )
+            for count in counts
+        },
+        "BALL_FINE_FORWARD_8": "ball_general_fine_forward_8",
+        "BALL_APPROACH_FINE_FORWARD_5": "ball_approach_fine_forward_45_5",
+        "BALL_LOST_FINE_FORWARD_3": "ball_top_loss_fine_forward_45_3",
+        "BALL_LOST_FORWARD_2": "ball_camera_down_forward_2",
+        "BALL_LOST_FORWARD_4": "ball_camera_down_forward_4",
+        "BALL_LOST_BACKWARD_2": "ball_lost_camera_down_backward_2",
+        # Reuse the existing one-cycle retreat without entering the pickup sequence.
+        "HURDLE_LOST_BACKWARD_1": "pickup_lost_ball_backward_1",
+        "BALL_APPROACH_RECOVER_LEFT_4": "line_recovery_left_4",
+        "BALL_APPROACH_RECOVER_RIGHT_4": "line_recovery_right_4",
+        "LINE_LOST_TURN_LEFT": "line_search_left_2",
+        "LINE_LOST_TURN_RIGHT": "line_search_right_5",
+        "LINE_SPARSE_FORWARD": "line_forward_2",
+        **{f"LINE_SPARSE_TURN_LEFT_{count}": f"post_ball_line_turn_left_{count}"
+           for count in range(1, 7)},
+        **{f"LINE_SPARSE_TURN_RIGHT_{count}": f"post_ball_line_turn_right_{count}"
+           for count in (1, 2, 3, 5, 6, 7, 9)},
+        **{
+            f"LINE_OFFSET_TURN_{direction}_{count}": (
+                f"post_ball_line_turn_{direction.lower()}_{count}"
+            )
+            for direction, counts in (
+                ("LEFT", (1, 2, 3, 4, 5, 6)), ("RIGHT", (1, 2, 3, 5, 6, 7, 9)),
+            )
+            for count in counts
+        },
+        **{
+            f"LINE_HEADING_TURN_{direction}_{count}": (
+                f"post_ball_line_turn_{direction.lower()}_{count}"
+            )
+            for direction, counts in (
+                ("LEFT", (1, 2, 3, 4, 5, 6)), ("RIGHT", (1, 2, 3, 5, 6, 7, 9)),
+            )
+            for count in counts
+        },
+        **{
+            f"LINE_LOST_TURN_{direction}_{count}": f"post_ball_line_turn_{direction.lower()}_{count}"
+            for direction, counts in (("LEFT", (1, 3)), ("RIGHT", (1, 2, 5)))
+            for count in counts
+        },
+        "GOAL_CAMERA_90_FORWARD": "goal_camera_90_forward_6",
+        "GOAL_CAMERA_90_FORWARD_1": "goal_camera_90_forward_2",
+        "GOAL_CAMERA_90_FORWARD_2": "goal_camera_90_forward_4",
+        "GOAL_CAMERA90_RECOVER_LEFT_4": "line_recovery_left_4",
+        "GOAL_CAMERA90_RECOVER_RIGHT_4": "line_recovery_right_4",
+        "GOAL_CAMERA90_BACKWARD_1": "goal_camera_90_backward_1",
+        **{
+            f"GOAL_CAMERA90_FINE_FORWARD_{count}": f"goal_camera_90_fine_forward_{count}"
+            for count in range(1, 6)
+        },
+        "GOAL_CAMERA90_CRAB_RIGHT": "goal_camera_90_crab_right",
+        "GOAL_CAMERA90_CRAB_LEFT": "goal_camera_90_crab_left",
+        **{
+            f"POST_BALL_LINE_TURN_RIGHT_{count}": (
+                f"post_ball_line_turn_right_{count}"
+            )
+            for count in (1, 2, 3, 5, 6, 7, 9)
+        },
+        **{
+            f"POST_BALL_LINE_TURN_LEFT_{count}": (
+                f"post_ball_line_turn_left_{count}"
+            )
+            for count in (1, 2, 3, 4, 5, 6)
+        },
+        **{
+            f"BALL_APPROACH_TURN_RIGHT_{count}": (
+                f"post_ball_line_turn_right_{count}"
+            )
+            for count in (1, 2, 3, 5, 6, 7, 9)
+        },
+        **{
+            f"BALL_APPROACH_TURN_LEFT_{count}": (
+                f"post_ball_line_turn_left_{count}"
+            )
+            for count in (1, 2, 3, 4, 5, 6)
+        },
+        **{
+            f"GOAL_CAMERA90_TURN_RIGHT_{count}": (
+                f"goal_camera_90_turn_right_{count}"
+            )
+            for count in (1, 2, 3, 5, 6, 7, 9)
+        },
+        **{
+            f"GOAL_CAMERA90_TURN_LEFT_{count}": (
+                f"goal_camera_90_turn_left_{count}"
+            )
+            for count in range(1, 7)
+        },
+        "SHOT": "goal_shot",
+        "GOAL_SHOT_PREPARE": "goal_fine_prepare_90",
+        "GO": "hurdle",
+        **{
+            f"RECOVER_{line_side}_TURN_LEFT_{suffix}": motion_id
+            for line_side in ("LEFT", "RIGHT")
+            for suffix, motion_id in LEFT_RECOVERY_MOTION_IDS.items()
+        },
+        **{
+            f"RECOVER_{line_side}_TURN_RIGHT_{suffix}": motion_id
+            for line_side in ("LEFT", "RIGHT")
+            for suffix, motion_id in RIGHT_RECOVERY_MOTION_IDS.items()
+        },
+        "TURN_LEFT": "stationary_turn_left",
+        "TURN_RIGHT": "stationary_turn_right",
+        "ALIGN_LEFT": "stationary_turn_left",
+        "ALIGN_RIGHT": "stationary_turn_right",
+    }
+    TERMINAL_STATUSES = {
+        "SUCCEEDED",
+        "FAILED",
+        "TIMEOUT",
+        "CANCELLED",
+        "REJECTED",
+    }
+    BALL_FINE_FORWARD_MOTION_IDS = frozenset({
+        "ball_approach_fine_forward_45_5",
+        "ball_general_fine_forward_8", "pickup_fine_forward_0",
+        "ball_top_loss_fine_forward_45_3", "pickup_top_loss_fine_forward_0_3",
+    })
+    HURDLE_FINE_FORWARD_MOTION_IDS = frozenset({
+        "hurdle_fine_forward_5", HURDLE_FINAL_FINE_MOTION_ID,
+    })
+    GOAL_FINE_FORWARD_MOTION_IDS = frozenset({
+        *(f"goal_camera_90_fine_forward_{count}" for count in range(1, 6)),
+    })
+    FINE_FORWARD_MOTION_IDS = (
+        BALL_FINE_FORWARD_MOTION_IDS | HURDLE_FINE_FORWARD_MOTION_IDS | GOAL_FINE_FORWARD_MOTION_IDS
+    )
+    DEFAULT_TIMEOUT_MS = 12000
+
+    def __init__(self) -> None:
+        """Initialize bridge state, publishers, and subscriptions."""
+        super().__init__("motion_command_bridge")
+
+        self.last_sent_command_id: int | None = None
+        self.motion_in_progress = False
+        self.active_command_id: int | None = None
+        self.active_event_id: int | None = None
+        self.active_action: str | None = None
+        self.active_request_id: int | None = None
+        self.active_motion_id: str | None = None
+        self.active_timeout_ms: int | None = None
+        self.active_pickup_sequence: tuple[str, ...] = ()
+        self.active_sequence_index = 0
+        self.active_dwell_until: float | None = None
+        self.post_ball_camera_pause_until: float | None = None
+        self.goal_fine_forward_completed = False
+        self.hurdle_depth_fine_completed = False
+        self.hurdle_sequence_fine_completed = 0
+        self.hurdle_fine_sequence_pending = False
+        self.goal_crab_completed = False
+        self.last_completed_motion_id: str | None = None
+        self.last_physical_motion_id: str | None = None
+        self.stationary_since: float | None = None
+        self.physical_request_key: tuple[int, int | None, int, str] | None = None
+        self.shot_prepare_retry_motion_id: str | None = None
+        self.pending_turn_request: dict[str, Any] | None = None
+        self.turn_prepare_motion_id: str | None = None
+        self.transition_dwell_until: float | None = None
+        self.transition_pending_request: dict[str, Any] | None = None
+        self.transition_pending_status: dict[str, Any] | None = None
+        self.transition_motion_id: str | None = None
+        self.head_override_state: dict[str, Any] = {}
+        self.head_override_received_at: float | None = None
+        self.pickup_initial_align_dwell_until: float | None = None
+        self.pickup_initial_align_waiting = False
+        self.pickup_initial_align_correction_active = False
+        self.pickup_fine_align_waiting = False
+        self.pickup_fine_align_correction_active = False
+        self.pickup_post_backward_align_waiting = False
+        self.pickup_post_backward_align_correction_active = False
+        self.pickup_checkpoint_after_dwell: str | None = None
+        self.pickup_positioning_loss_pending = False
+        self.pickup_fixed_sequence_started = False
+        self.pickup_fine_positioning_complete = False
+        self.last_pickup_motion_id = None
+        self.pickup_consecutive_motor_failures = 0
+        self.pickup_motor_failures: list[dict[str, Any]] = []
+        self.pickup_last_stage_succeeded = True
+        self.pending_pickup_crab_motion_id = None
+        self.pending_pickup_fine_motion_id: str | None = None
+        self.pickup_queued_request: dict[str, Any] | None = None
+        self.pickup_positioning_dwell_motion_id: str | None = None
+        self.queued_command_id: int | None = None
+        self.queued_event_id: int | None = None
+        self.queued_action: str | None = None
+        self.queued_request_id: int | None = None
+        self.queued_motion_id: str | None = None
+        self.queued_timeout_ms: int | None = None
+        self.queued_request_deferred = False
+        self.queued_pickup_sequence: tuple[str, ...] = ()
+
+        self.navigation_subscription = self.create_subscription(
+            String,
+            "/navigation/motion_command",
+            self.navigation_command_callback,
+            10,
+        )
+        self.executor_status_subscription = self.create_subscription(
+            String,
+            "/motion/executor/status",
+            self.executor_status_callback,
+            10,
+        )
+        self.executor_heartbeat_subscription = self.create_subscription(
+            String, "/motion/executor/heartbeat", self.executor_heartbeat_callback, 10,
+        )
+        self.executor_request_publisher = self.create_publisher(
+            String,
+            "/motion/executor/request",
+            10,
+        )
+        self.motion_status_publisher = self.create_publisher(
+            String,
+            "/motion/status",
+            10,
+        )
+        self.dwell_timer = self.create_timer(
+            0.05,
+            self._check_atomic_dwell,
+        )
+
+        self.get_logger().info(
+            "Motion command bridge ready: /navigation/motion_command -> "
+            "/motion/executor/request, /motion/executor/status -> "
+            "/motion/status"
+        )
+
+    @staticmethod
+    def _is_integer(value: Any) -> bool:
+        """Return true only for JSON integers, excluding booleans."""
+        return isinstance(value, int) and not isinstance(value, bool)
+
+    @classmethod
+    def motion_id_for_action(cls, action: str) -> str | None:
+        """Return a catalog-backed motion ID for one navigation action."""
+        return cls.ACTION_TO_MOTION_ID.get(action)
+
+    @classmethod
+    def timeout_ms_from_payload(cls, payload: dict[str, Any]) -> int:
+        """Read a positive timeout or use the safe default."""
+        source_command = payload.get("source_command")
+        candidates = []
+        if isinstance(source_command, dict):
+            candidates.append(source_command.get("timeout_ms"))
+        candidates.append(payload.get("timeout_ms"))
+
+        for candidate in candidates:
+            if cls._is_integer(candidate) and candidate > 0:
+                return candidate
+        return cls.DEFAULT_TIMEOUT_MS
+
+    @classmethod
+    def _pickup_motion_sequence(
+        cls,
+        payload: dict[str, Any],
+    ) -> tuple[str, ...] | None:
+        """Build one catalog-backed sequence from planner and mission state."""
+        source_command = payload.get("source_command")
+        mission_progress = payload.get("mission_progress")
+        if not isinstance(source_command, dict) or not isinstance(
+            mission_progress, dict
+        ):
+            return None
+
+        completed = mission_progress.get("pickups_completed")
+        if "active_ball_mode_index" in mission_progress:
+            index = mission_progress["active_ball_mode_index"]
+            if isinstance(index, bool) or not isinstance(index, int) or index not in {1, 2}:
+                return None
+            completed = index - 1
+        if (
+            isinstance(completed, bool)
+            or not isinstance(completed, int)
+            or completed not in {0, 1}
+        ):
+            return None
+
+        if completed == 0:
+            final_stages = (
+                "pickup_first_backward_turn_right",
+                cls.DWELL_MARKER,
+            )
+        else:
+            final_stages = (
+                "pickup_second_backward_turn_left",
+                cls.DWELL_MARKER,
+            )
+        return (*cls.PICKUP_MOTION_TAIL, *final_stages)
+
+    def publish_motion_status(
+        self,
+        *,
+        status: str,
+        command_id: int | None,
+        event_id: int | None,
+        request_id: int | None,
+        motion_id: str | None,
+        action: str | None,
+        error_code: str = "",
+        message: str = "",
+        completed_motion_id: str | None = None,
+        verification_window_complete: bool | None = None,
+        motor_failures: list[dict[str, Any]] | None = None,
+    ) -> None:
+        """Publish normalized status while preserving executor fields."""
+        payload = {
+            "status": status,
+            "command_id": command_id,
+            "event_id": event_id,
+            "request_id": request_id,
+            "motion_id": motion_id,
+            "error_code": error_code,
+            "message": message,
+            "action": action,
+            "source_node": "motion_command_bridge_node",
+            "motion_in_progress": self.motion_in_progress,
+        }
+        stationary_since = getattr(self, "stationary_since", None)
+        if stationary_since is not None:
+            payload["stationary_elapsed_sec"] = max(0.0, time.monotonic() - stationary_since)
+        if (action == "PICKUP_NOW" and status == "RUNNING"
+                and motion_id in PICKUP_WALK_DURATIONS
+                and motion_id == self.active_motion_id
+                and self.pending_turn_request is None and self.transition_motion_id is None
+                and self.active_dwell_until is None
+                and not self.pickup_fixed_sequence_started
+                and (self.pickup_initial_align_correction_active or self.pickup_fine_align_correction_active)):
+            payload["pickup_alignment_stage"] = (
+                "initial" if self.pickup_initial_align_correction_active
+                and not self.pickup_fine_positioning_complete else "fine"
+            )
+        if completed_motion_id is not None:
+            payload["completed_motion_id"] = completed_motion_id
+        if verification_window_complete is not None:
+            payload["verification_window_complete"] = (
+                verification_window_complete
+            )
+        if (
+            motor_failures is None
+            and action == "PICKUP_NOW"
+            and command_id == self.active_command_id
+        ):
+            motor_failures = self.pickup_motor_failures
+        if motor_failures:
+            # Sequence progress and the executor's actual result are separate.
+            payload["motor_failures"] = motor_failures
+        output = String()
+        output.data = json.dumps(
+            payload,
+            ensure_ascii=True,
+            separators=(",", ":"),
+        )
+        self.motion_status_publisher.publish(output)
+
+    def _publish_local_rejection(
+        self,
+        *,
+        status: str,
+        command_id: int,
+        event_id: int | None,
+        action: str,
+        error_code: str,
+        message: str,
+    ) -> None:
+        """Report a command that is not forwarded to the executor."""
+        self.publish_motion_status(
+            status=status,
+            command_id=command_id,
+            event_id=event_id,
+            request_id=command_id,
+            motion_id=self.motion_id_for_action(action),
+            action=action,
+            error_code=error_code,
+            message=message,
+        )
+
+    def _record_goal_motion_success(self, motion_id: str) -> None:
+        """Track completed goal approach motions until scoring or a new pickup."""
+        self.last_completed_motion_id = motion_id
+        self.shot_prepare_retry_motion_id = None
+        if motion_id.startswith("goal_camera_90_fine_forward_"):
+            self.goal_fine_forward_completed = True
+        elif motion_id in {"goal_camera_90_crab_left", "goal_camera_90_crab_right"}:
+            self.goal_crab_completed = True
+        elif motion_id in {"goal_shot", "post_ball_camera_90", *{
+            f"goal_shot_region_{region}" for region in range(1, 9)
+        }}:
+            self.goal_fine_forward_completed = False
+            self.goal_crab_completed = False
+        elif motion_id == self.SHOT_PREPARE_MOTION_ID:
+            # A failed shot retry must not repeat a completed pose transition.
+            self.goal_fine_forward_completed = False
+
+    def _enter_pickup_fine_align_checkpoint(self) -> None:
+        """Pause the atomic pickup while retaining its command ownership."""
+        self.active_motion_id = self.FINE_ALIGN_MARKER
+        self.pickup_fine_align_waiting = True
+        self.pickup_fine_align_correction_active = False
+        self.publish_motion_status(
+            status="RUNNING",
+            command_id=self.active_command_id,
+            event_id=self.active_event_id,
+            request_id=self.active_request_id,
+            motion_id=self.FINE_ALIGN_MARKER,
+            action=self.active_action,
+            message="waiting for fresh BALL pickup fine alignment",
+            completed_motion_id=self.last_physical_motion_id,
+        )
+
+    def _enter_pickup_initial_align_checkpoint(self) -> None:
+        """Request a fresh Ball frame while retaining pickup ownership."""
+        self.active_motion_id = self.PICKUP_INITIAL_ALIGN_MARKER
+        self.pickup_initial_align_waiting = True
+        self.pickup_initial_align_correction_active = False
+        self.publish_motion_status(
+            status="RUNNING",
+            command_id=self.active_command_id,
+            event_id=self.active_event_id,
+            request_id=self.active_request_id,
+            motion_id=self.PICKUP_INITIAL_ALIGN_MARKER,
+            action=self.active_action,
+            completed_motion_id=self.last_physical_motion_id,
+            message="waiting for fresh BALL pickup heading alignment",
+        )
+
+    def _enter_pickup_post_backward_align_checkpoint(self) -> None:
+        """Align the camera-down robot after the no-Ball fallback."""
+        self.active_motion_id = self.POST_BACKWARD_ALIGN_MARKER
+        self.pickup_post_backward_align_waiting = True
+        self.pickup_post_backward_align_correction_active = False
+        self.publish_motion_status(
+            status="RUNNING",
+            command_id=self.active_command_id,
+            event_id=self.active_event_id,
+            request_id=self.active_request_id,
+            motion_id=self.POST_BACKWARD_ALIGN_MARKER,
+            action=self.active_action,
+            message="waiting for fresh BALL pixels to select grasp after retreat",
+        )
+
+    @classmethod
+    def _with_pickup_motion_dwells(
+        cls,
+        sequence: tuple[str, ...],
+    ) -> tuple[str, ...]:
+        """Insert one non-blocking dwell after every catalog motion."""
+        expanded: list[str] = []
+        for index, stage in enumerate(sequence):
+            expanded.append(stage)
+            next_stage = (
+                sequence[index + 1]
+                if index + 1 < len(sequence)
+                else None
+            )
+            if (
+                not stage.startswith("__")
+                and next_stage != cls.DWELL_MARKER
+            ):
+                expanded.append(cls.DWELL_MARKER)
+        return tuple(expanded)
+
+    def _start_pickup_checkpoint_dwell(self, checkpoint: str) -> None:
+        """Settle stationary turns; reuse walking observations without a new pause."""
+        self.pickup_initial_align_correction_active = False
+        self.pickup_fine_align_correction_active = False
+        self.pickup_post_backward_align_correction_active = False
+        self.pickup_positioning_dwell_motion_id = self.active_motion_id
+        self.active_motion_id = self.DWELL_MARKER
+        dwell_sec = (
+            MotionCommandBridgeNode.PICKUP_TURN_DWELL_SEC
+            if self.pickup_positioning_dwell_motion_id.startswith("pickup_camera_down_turn_")
+            else 0.0
+        )
+        self.active_dwell_until = time.monotonic() + dwell_sec
+        self.pickup_checkpoint_after_dwell = checkpoint
+        if dwell_sec <= 0.0:
+            self._check_atomic_dwell(self.active_dwell_until)
+            return
+        self.publish_motion_status(
+            status="RUNNING", command_id=self.active_command_id,
+            event_id=self.active_event_id, request_id=self.active_request_id,
+            motion_id=self.DWELL_MARKER, action=self.active_action,
+            message="pickup stationary-turn dwell active",
+        )
+        self.get_logger().info(
+            f"Pickup turn dwell started: "
+            f"{dwell_sec:.1f}s before {checkpoint}"
+        )
+
+    def _start_pickup_initial_align_dwell(self) -> None:
+        """Enter initial alignment without a stationary delay."""
+        self.active_motion_id = self.PICKUP_INITIAL_ALIGN_DWELL_MARKER
+        self.pickup_initial_align_dwell_until = (
+            time.monotonic()
+        )
+        self.pickup_initial_align_waiting = False
+        self.pickup_initial_align_correction_active = False
+        self.publish_motion_status(
+            status="RUNNING",
+            command_id=self.active_command_id,
+            event_id=self.active_event_id,
+            request_id=self.active_request_id,
+            motion_id=self.PICKUP_INITIAL_ALIGN_DWELL_MARKER,
+            action=self.active_action,
+            message="holding still before BALL pickup heading alignment",
+        )
+        self._check_atomic_dwell(self.pickup_initial_align_dwell_until)
+
+    def _handle_pickup_initial_align_command(
+        self,
+        *,
+        action: str,
+        command_id: int,
+        event_id: int | None,
+        payload: dict[str, Any],
+    ) -> None:
+        """Apply one fresh heading decision inside the pickup checkpoint."""
+        parent_command_id = payload.get("active_special_command_id")
+        parent_event_id = payload.get("active_special_event_id")
+        checkpoint_matches = bool(
+            self.motion_in_progress
+            and self.active_action == "PICKUP_NOW"
+            and self.pickup_initial_align_waiting
+            and parent_command_id == self.active_command_id
+            and parent_event_id == self.active_event_id
+        )
+        if not checkpoint_matches:
+            self._publish_local_rejection(
+                status="REJECTED",
+                command_id=command_id,
+                event_id=event_id,
+                action=action,
+                error_code="PICKUP_INITIAL_ALIGNMENT_NOT_ACTIVE",
+                message="pickup initial-alignment checkpoint is not active",
+            )
+            return
+
+        source_command = payload.get("source_command")
+
+        self.last_sent_command_id = command_id
+        self.pickup_initial_align_waiting = False
+        if action == "BALL_PICKUP_INITIAL_ALIGN_CONTINUE":
+            use_no_ball_pickup_path = bool(
+                isinstance(source_command, dict)
+                and source_command.get("use_no_ball_pickup_path") is True
+            )
+            approach_motion = (
+                source_command.get("pickup_approach_motion")
+                if isinstance(source_command, dict)
+                else None
+            )
+            first_motion = self.PICKUP_CAMERA_DOWN_MOTION_IDS.get(
+                approach_motion
+            )
+            if first_motion is None:
+                self.pickup_initial_align_waiting = True
+                self._publish_local_rejection(
+                    status="REJECTED",
+                    command_id=command_id,
+                    event_id=event_id,
+                    action=action,
+                    error_code="UNSUPPORTED_PICKUP_DISTANCE_APPROACH",
+                    message=(
+                        "fresh pickup depth did not select a supported motion"
+                    ),
+                )
+                return
+            if use_no_ball_pickup_path:
+                if (
+                    self.active_pickup_sequence[
+                        :len(self.PICKUP_MOTION_TAIL)
+                    ] != self.PICKUP_MOTION_TAIL
+                ):
+                    self.pickup_initial_align_waiting = True
+                    self._publish_local_rejection(
+                        status="REJECTED",
+                        command_id=command_id,
+                        event_id=event_id,
+                        action=action,
+                        error_code="INVALID_PICKUP_NO_BALL_SEQUENCE",
+                        message=(
+                            "pickup sequence does not contain the expected "
+                            "motion tail"
+                        ),
+                    )
+                    return
+                final_stages = self.active_pickup_sequence[
+                    len(self.PICKUP_MOTION_TAIL):
+                ]
+                next_sequence = (
+                    first_motion,
+                    *self.PICKUP_NO_BALL_MOTION_TAIL[1:],
+                    *final_stages,
+                )
+                self.active_pickup_sequence = self._with_pickup_motion_dwells(
+                    next_sequence
+                )
+                self.active_sequence_index = 0
+                self.active_motion_id = first_motion
+                self._publish_executor_request(
+                    action=self.active_action,
+                    command_id=self.active_command_id,
+                    event_id=self.active_event_id,
+                    request_id=self.active_request_id,
+                    motion_id=first_motion,
+                    timeout_ms=(
+                        self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS
+                    ),
+                )
+                return
+
+            bottom = source_command.get("bottom_distance_px")
+            skip_fine = (type(bottom) in {int, float}
+                         and pickup_fine_can_skip(self.last_physical_motion_id, bottom))
+            if (
+                approach_motion == "STRAIGHT_0"
+                and (self.pickup_fine_positioning_complete or skip_fine)
+            ):
+                # The fresh fine checkpoint still verifies the tighter alignment
+                # window before allowing the existing retreat/grasp sequence.
+                self.pickup_fine_positioning_complete = True
+                self._enter_pickup_fine_align_checkpoint()
+                return
+
+            self.pickup_fine_positioning_complete = bool(
+                approach_motion == "STRAIGHT_0"
+            )
+            self.pickup_initial_align_correction_active = True
+            self.active_motion_id = first_motion
+            # The distance-selected step is still approach, not pre-grasp alignment.
+            self._publish_executor_request(
+                action=self.active_action,
+                command_id=self.active_command_id,
+                event_id=self.active_event_id,
+                request_id=self.active_request_id,
+                motion_id=first_motion,
+                timeout_ms=self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS,
+                prepare_pickup_fine=False,
+            )
+            return
+
+        if action == "BALL_PICKUP_INITIAL_SEARCH_BACKWARD_2":
+            motion_id = "ball_lost_camera_down_backward_2"
+        elif action in {"BALL_PICKUP_INITIAL_SEARCH_BACKWARD", "BALL_PICKUP_INITIAL_BACKWARD"}:
+            motion_id = self.PICKUP_FINE_ALIGN_MOTION_IDS[
+                "BALL_PICKUP_FINE_SEARCH_BACKWARD"
+            ]
+        elif action == "BALL_PICKUP_INITIAL_SEARCH_FORWARD_4":
+            motion_id = "ball_camera_down_forward_4"
+        elif action == "BALL_PICKUP_INITIAL_SEARCH_FORWARD":
+            motion_id = "ball_top_loss_fine_forward_45_3"
+        elif action.startswith("BALL_PICKUP_INITIAL_CRAB_"):
+            fine_action = action.replace("INITIAL_", "", 1)
+            motion_id = self.PICKUP_FINE_ALIGN_MOTION_IDS[fine_action]
+            motion_id = MotionCommandBridgeNode._pickup_crab_repeat_motion(motion_id, payload)
+        else:
+            motion_id = self.PICKUP_CAMERA_DOWN_TURN_MOTION_IDS[action]
+        self.pickup_initial_align_correction_active = True
+        self.active_motion_id = motion_id
+        self._publish_executor_request(
+            action=self.active_action,
+            command_id=self.active_command_id,
+            event_id=self.active_event_id,
+            request_id=self.active_request_id,
+            motion_id=motion_id,
+            timeout_ms=self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS,
+        )
+
+    def _handle_pickup_walk_prequeue(self, payload: dict[str, Any]) -> None:
+        """Keep the parent pickup locked while reserving one identical gait."""
+        command = payload.get("source_command") or {}
+        motion_id = pickup_walk_motion(payload["action"], self.active_motion_id, command)
+        if (payload["command_id"] in {self.last_sent_command_id, self.active_request_id}
+                or payload.get("source") != "ball"
+                or not self.motion_in_progress or self.active_action != "PICKUP_NOW"
+                or payload.get("active_special_command_id") != self.active_command_id
+                or payload.get("active_special_event_id") != self.active_event_id
+                or command.get("pickup_running_request_id") != self.active_request_id
+                or motion_id is None or motion_id != self.active_motion_id
+                or command.get("pickup_queue_motion_id") != motion_id
+                or type(command.get("pickup_queue_frame_count")) is not int
+                or command["pickup_queue_frame_count"] < 3
+                or getattr(self, "pickup_queued_request", None) is not None
+                or self.queued_request_id is not None
+                or self.pickup_fixed_sequence_started or self.pickup_positioning_loss_pending
+                or self.active_dwell_until is not None or self.transition_dwell_until is not None
+                or self.pending_turn_request is not None
+                or self.pickup_initial_align_waiting or self.pickup_fine_align_waiting
+                or not (self.pickup_initial_align_correction_active or self.pickup_fine_align_correction_active)):
+            self._publish_local_rejection(
+                status="REJECTED", command_id=payload["command_id"], event_id=payload.get("event_id"),
+                action=payload["action"], error_code="PICKUP_QUEUE_NOT_AVAILABLE",
+                message="only one identical running pickup gait can be reserved",
+            )
+            return
+        request = dict(action="PICKUP_NOW", command_id=self.active_command_id,
+                       event_id=self.active_event_id, request_id=payload["command_id"],
+                       motion_id=motion_id, timeout_ms=self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS)
+        self.pickup_queued_request = {**request, "reservation_action": payload["action"]}
+        self.last_sent_command_id = payload["command_id"]
+        # Reserve locally: a seamless SDK queue would skip the correction rest.
+        self.get_logger().info(
+            f"Pickup correction reserved locally: request_id={request['request_id']}, "
+            f"motion_id={motion_id}; waiting for completion and 0.5-second rest"
+        )
+
+    def _handle_pickup_queue_status(self, payload: dict[str, Any]) -> bool:
+        """Consume queue bookkeeping without completing the parent pickup."""
+        queued = getattr(self, "pickup_queued_request", None)
+        if queued is None:
+            return False
+        if payload["request_id"] == queued["request_id"]:
+            if (payload["command_id"] != queued["command_id"]
+                    or payload["event_id"] != queued["event_id"]
+                    or payload["motion_id"] != queued["motion_id"]):
+                return True
+            if payload["status"] in self.TERMINAL_STATUSES:
+                self.pickup_queued_request = None
+                self._publish_local_rejection(
+                    status="REJECTED", command_id=queued["request_id"], event_id=None,
+                    action=queued["reservation_action"],
+                    error_code=payload["error_code"] or "PICKUP_QUEUE_REJECTED",
+                    message=payload["message"],
+                )
+            return True
+        if payload["request_id"] != self.active_request_id or payload["motion_id"] != self.active_motion_id:
+            return False
+        if payload["status"] == "SUCCEEDED":
+            self.last_physical_motion_id = self.active_motion_id
+            self.last_pickup_motion_id = self.active_motion_id
+            self.pickup_last_stage_succeeded = True
+            self.pickup_consecutive_motor_failures = 0
+            self.active_request_id = queued["request_id"]
+            self.pickup_queued_request = None
+            request = {key: value for key, value in queued.items() if key != "reservation_action"}
+            self._publish_executor_request(**request, prepare_pickup_fine=False)
+            return True
+        if payload["status"] in self.TERMINAL_STATUSES:
+            self.pickup_queued_request = None
+        return False
+
+    def _handle_pickup_fine_align_command(
+        self,
+        *,
+        action: str,
+        command_id: int,
+        event_id: int | None,
+        payload: dict[str, Any],
+    ) -> None:
+        """Apply one Vision decision inside the active pickup checkpoint."""
+        parent_command_id = payload.get("active_special_command_id")
+        parent_event_id = payload.get("active_special_event_id")
+        checkpoint_matches = bool(
+            self.motion_in_progress
+            and self.active_action == "PICKUP_NOW"
+            and self.pickup_fine_align_waiting
+            and parent_command_id == self.active_command_id
+            and parent_event_id == self.active_event_id
+        )
+        if not checkpoint_matches:
+            self._publish_local_rejection(
+                status="REJECTED",
+                command_id=command_id,
+                event_id=event_id,
+                action=action,
+                error_code="PICKUP_FINE_ALIGNMENT_NOT_ACTIVE",
+                message="pickup fine-alignment checkpoint is not active",
+            )
+            return
+
+        self.last_sent_command_id = command_id
+        self.pickup_fine_align_waiting = False
+        if action == "BALL_PICKUP_FINE_ALIGN_CONTINUE":
+            self.pickup_fixed_sequence_started = True
+            self.active_pickup_sequence = self._with_pickup_motion_dwells(
+                self.active_pickup_sequence
+            )
+            self.active_sequence_index = -1
+            if not self._start_next_pickup_motion():
+                self.pickup_fixed_sequence_started = False
+                self.pickup_fine_align_waiting = True
+                self._publish_local_rejection(
+                    status="REJECTED",
+                    command_id=command_id,
+                    event_id=event_id,
+                    action=action,
+                    error_code="PICKUP_FINE_ALIGNMENT_RESUME_FAILED",
+                    message="pickup sequence could not resume after alignment",
+                )
+            return
+
+        motion_id = self.PICKUP_FINE_ALIGN_MOTION_IDS[action]
+        motion_id = MotionCommandBridgeNode._pickup_crab_repeat_motion(motion_id, payload)
+        # Intentionally keep no crab retry counter. Each completed correction
+        # returns to the fresh pixel checkpoint until Vision reports centered.
+        self.pickup_fine_align_correction_active = True
+        self.active_motion_id = motion_id
+        self._publish_executor_request(
+            action=self.active_action,
+            command_id=self.active_command_id,
+            event_id=self.active_event_id,
+            request_id=self.active_request_id,
+            motion_id=motion_id,
+            timeout_ms=self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS,
+        )
+
+    def _enter_pickup_positioning_loss_reacquisition(
+        self,
+        checkpoint: str | None,
+    ) -> None:
+        """Resume pickup positioning at the existing camera-down checkpoint."""
+        if checkpoint == self.FINE_ALIGN_MARKER:
+            remaining_index = self.active_sequence_index
+            if remaining_index >= 0:
+                self.active_pickup_sequence = self.active_pickup_sequence[
+                    remaining_index:
+                ]
+        elif checkpoint != self.PICKUP_INITIAL_ALIGN_MARKER:
+            remaining_index = self.active_sequence_index + 1
+            self.active_pickup_sequence = self.active_pickup_sequence[
+                remaining_index:
+            ]
+        self.active_sequence_index = 0
+        self.pickup_positioning_loss_pending = False
+        self.pickup_fixed_sequence_started = False
+        if (
+            checkpoint == self.FINE_ALIGN_MARKER
+            or self.pickup_fine_positioning_complete
+        ):
+            self._enter_pickup_fine_align_checkpoint()
+        else:
+            self._enter_pickup_initial_align_checkpoint()
+
+    def _handle_pickup_positioning_loss_latch(
+        self,
+        *,
+        command_id: int,
+        event_id: int | None,
+        payload: dict[str, Any],
+    ) -> None:
+        """Latch Vision loss without interrupting the active pickup motion."""
+        parent_command_id = payload.get("active_special_command_id")
+        parent_event_id = payload.get("active_special_event_id")
+        source_command = payload.get("source_command")
+        source_motion_id = (
+            source_command.get("pickup_positioning_motion_id")
+            if isinstance(source_command, dict)
+            else None
+        )
+        actual_motion_running = bool(
+            self.active_dwell_until is None
+            and self.pickup_initial_align_dwell_until is None
+            and isinstance(self.active_motion_id, str)
+            and not self.active_motion_id.startswith("__")
+        )
+        request_matches = bool(
+            self.motion_in_progress
+            and self.active_action == "PICKUP_NOW"
+            and not self.pickup_fixed_sequence_started
+            and parent_command_id == self.active_command_id
+            and parent_event_id == self.active_event_id
+            and isinstance(source_command, dict)
+            and source_command.get("pickup_positioning_ball_lost") is True
+            and (
+                actual_motion_running
+                or self.pickup_fine_align_waiting
+                or (
+                    self.active_dwell_until is not None
+                    and source_motion_id
+                    == self.pickup_positioning_dwell_motion_id
+                )
+            )
+        )
+        if not request_matches:
+            self._publish_local_rejection(
+                status="REJECTED",
+                command_id=command_id,
+                event_id=event_id,
+                action=self.PICKUP_POSITIONING_LOSS_LATCH_ACTION,
+                error_code="PICKUP_POSITIONING_LOSS_LATCH_NOT_ACTIVE",
+                message="pickup positioning motion is not active",
+            )
+            return
+
+        self.last_sent_command_id = command_id
+        self.pickup_positioning_loss_pending = True
+        if self.pickup_fine_align_waiting:
+            self.pickup_fine_align_waiting = False
+            self._enter_pickup_positioning_loss_reacquisition(
+                self.FINE_ALIGN_MARKER
+            )
+
+    def _handle_pickup_post_backward_align_command(
+        self,
+        *,
+        action: str,
+        command_id: int,
+        event_id: int | None,
+        payload: dict[str, Any],
+    ) -> None:
+        """Select a grasp at the post-retreat checkpoint before resuming."""
+        parent_command_id = payload.get("active_special_command_id")
+        parent_event_id = payload.get("active_special_event_id")
+        checkpoint_matches = bool(
+            self.motion_in_progress
+            and self.active_action == "PICKUP_NOW"
+            and self.pickup_post_backward_align_waiting
+            and parent_command_id == self.active_command_id
+            and parent_event_id == self.active_event_id
+        )
+        if not checkpoint_matches:
+            self._publish_local_rejection(
+                status="REJECTED",
+                command_id=command_id,
+                event_id=event_id,
+                action=action,
+                error_code="PICKUP_POST_BACKWARD_ALIGNMENT_NOT_ACTIVE",
+                message="post-backward pickup alignment is not active",
+            )
+            return
+
+        if action == "BALL_PICKUP_POST_BACKWARD_ALIGN_CONTINUE":
+            source = payload.get("source_command")
+            grasp_motion = pickup_grasp_motion_id(
+                source.get("bottom_distance_px") if isinstance(source, dict) else None
+            )
+            next_index = self.active_sequence_index + 1
+            if (grasp_motion is None
+                    or next_index >= len(self.active_pickup_sequence)
+                    or self.active_pickup_sequence[next_index] != "pickup"):
+                self._publish_local_rejection(
+                    status="REJECTED", command_id=command_id, event_id=event_id,
+                    action=action, error_code="INVALID_PICKUP_GRASP_SELECTION",
+                    message="valid post-retreat pixels and pending grasp required",
+                )
+                return
+            sequence = list(self.active_pickup_sequence)
+            sequence[next_index] = grasp_motion
+            self.active_pickup_sequence = tuple(sequence)
+            self.last_sent_command_id = command_id
+            self.pickup_post_backward_align_waiting = False
+            if not self._start_next_pickup_motion():
+                sequence[next_index] = "pickup"
+                self.active_pickup_sequence = tuple(sequence)
+                self.pickup_post_backward_align_waiting = True
+                self._publish_local_rejection(
+                    status="REJECTED",
+                    command_id=command_id,
+                    event_id=event_id,
+                    action=action,
+                    error_code="PICKUP_POST_BACKWARD_ALIGNMENT_RESUME_FAILED",
+                    message="pickup sequence could not resume after alignment",
+                )
+            return
+
+        self.last_sent_command_id = command_id
+        self.pickup_post_backward_align_waiting = False
+        if action.startswith("BALL_PICKUP_POST_BACKWARD_TURN_"):
+            initial_action = action.replace(
+                "BALL_PICKUP_POST_BACKWARD_TURN_",
+                "BALL_PICKUP_CAMERA_DOWN_TURN_",
+                1,
+            )
+            motion_id = self.PICKUP_CAMERA_DOWN_TURN_MOTION_IDS[initial_action]
+        else:
+            fine_action = action.replace(
+                "BALL_PICKUP_POST_BACKWARD_CRAB_",
+                "BALL_PICKUP_CRAB_",
+                1,
+            )
+            motion_id = self.PICKUP_FINE_ALIGN_MOTION_IDS[fine_action]
+        self.pickup_post_backward_align_correction_active = True
+        motion_id = MotionCommandBridgeNode._pickup_crab_repeat_motion(motion_id, payload)
+        self.active_motion_id = motion_id
+        self._publish_executor_request(
+            action=self.active_action,
+            command_id=self.active_command_id,
+            event_id=self.active_event_id,
+            request_id=self.active_request_id,
+            motion_id=motion_id,
+            timeout_ms=self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS,
+        )
+
+    def executor_heartbeat_callback(self, msg: String) -> None:
+        """Read camera ownership for the pre-turn posture choice."""
+        try:
+            payload = json.loads(msg.data)
+        except (json.JSONDecodeError, TypeError):
+            return
+        if isinstance(payload, dict):
+            self.head_override_state = payload
+            self.head_override_received_at = time.monotonic()
+
+    def _is_stationary_turn(self, motion_id: str) -> bool:
+        """Exclude walking corrections and composite retreat/exit motions."""
+        return motion_id.startswith((
+            "stationary_turn_", "line_turn_", "line_search_",
+            "post_ball_line_turn_", "goal_camera_90_turn_",
+            "pickup_camera_down_turn_", "pickup_first_turn_", "pickup_second_turn_",
+        )) or motion_id == "post_shot_turn_right_9"
+
+    @staticmethod
+    def _is_ball_stationary_turn(action: str | None, motion_id: str) -> bool:
+        return bool(
+            str(action).startswith("BALL_APPROACH_TURN_")
+            and motion_id.startswith(("ball_align_turn_", "post_ball_line_turn_"))
+            or action == "PICKUP_NOW" and motion_id.startswith("pickup_camera_down_turn_")
+        )
+
+    def _is_forward_motion(self, motion_id: str) -> bool:
+        return motion_id in {"forward", "sdk_forward_4"} or motion_id.startswith((
+            "line_forward_", "ball_camera_down_forward_", "post_ball_forward_",
+            "goal_camera_90_forward_",
+        ))
+
+    def _hurdle_camera_down_state(self) -> bool | None:
+        """Use the executor's pixel-triggered latch, not the motion's name."""
+        if (self.head_override_received_at is None
+                or time.monotonic() - self.head_override_received_at > 1.0):
+            return None
+        active = self.head_override_state.get("hurdle_head_override_active")
+        return active if isinstance(active, bool) else None
+
+    def _turn_prepare_motion(self, motion_id: str) -> str | None:
+        if (self.last_physical_motion_id in MotionCommandBridgeNode.GOAL_SHOT_READY_MOTION_IDS
+                and (self._is_stationary_turn(motion_id) or self._is_forward_motion(motion_id)
+                     or motion_id.startswith("line_recovery_"))):
+            return "fine_to_turn_ready_90"
+        # Forward walking and stationary turns share the same right-back posture.
+        fine_to_recovery = bool(
+            ((self.last_physical_motion_id or "").startswith("goal_camera_90_fine_forward_")
+             or self.last_physical_motion_id in MotionCommandBridgeNode.HURDLE_FINE_FORWARD_MOTION_IDS)
+            and motion_id.startswith("line_recovery_")
+        )
+        if (self.last_physical_motion_id not in self.FINE_FORWARD_MOTION_IDS
+                or not (self._is_stationary_turn(motion_id)
+                        or self._is_forward_motion(motion_id) or fine_to_recovery)):
+            return None
+        # The revised table fixes Ball/Goal turn support by completed mission gait.
+        if self._is_stationary_turn(motion_id):
+            if self.last_physical_motion_id in MotionCommandBridgeNode.BALL_FINE_FORWARD_MOTION_IDS:
+                return "fine_to_turn_ready_0"
+            if self.last_physical_motion_id in MotionCommandBridgeNode.GOAL_FINE_FORWARD_MOTION_IDS:
+                return "fine_to_turn_ready_90"
+        if self.last_physical_motion_id in MotionCommandBridgeNode.HURDLE_FINE_FORWARD_MOTION_IDS:
+            camera_down = self._hurdle_camera_down_state()
+            # Unknown state retains the prior camera-zero exit selection.
+            return "fine_to_turn_ready_45" if camera_down is False else "fine_to_turn_ready_0"
+        state = self.head_override_state
+        if (self.head_override_received_at is None
+                or time.monotonic() - self.head_override_received_at > 1.0):
+            state = {}
+        if (state.get("goal_head_override_active") is True
+                or motion_id.startswith("goal_camera_90_") or fine_to_recovery
+                or (self.last_physical_motion_id or "").startswith("goal_camera_90_fine_forward_")):
+            return "fine_to_turn_ready_90"
+        if (state.get("ball_head_override_active") is True
+                or state.get("hurdle_head_override_active") is True
+                or motion_id.startswith("pickup_camera_down_turn_")
+                or self.last_physical_motion_id in {
+                    "ball_general_fine_forward_8", "ball_top_loss_fine_forward_45_3",
+                    "pickup_fine_forward_0", "hurdle_fine_forward_5", self.HURDLE_FINAL_FINE_MOTION_ID,
+                    "pickup_top_loss_fine_forward_0_3",
+                }):
+            return "fine_to_turn_ready_0"
+        return "fine_to_turn_ready_45"
+
+    @staticmethod
+    def _pickup_crab_repeat_motion(motion_id: str, payload: dict) -> str:
+        """Select one complete two-cycle gait only for large camera-down errors."""
+        if motion_id not in {"pickup_crab_left_0", "pickup_crab_right_0"}:
+            return motion_id
+        command = payload.get("source_command") or {}
+        offset = command.get("offset_x_px")
+        if (type(offset) in {int, float}
+                and abs(offset) > MotionCommandBridgeNode.PICKUP_TWO_CYCLE_CRAB_OFFSET_PX):
+            return motion_id + "_2"
+        return motion_id
+
+    def _transition_prepare_motion(self, motion_id: str) -> str | None:
+        """Choose a posture transition from the last successfully completed gait."""
+        previous = self.last_physical_motion_id or ""
+        if previous in MotionCommandBridgeNode.GOAL_SHOT_READY_MOTION_IDS:
+            # A correction after scoring preparation starts in the same fine posture.
+            previous = "goal_camera_90_fine_forward_1"
+        # Repeat count does not change the crab's final support posture.
+        if previous in {"pickup_crab_left_0_2", "pickup_crab_right_0_2"}:
+            previous = previous.removesuffix("_2")
+        if motion_id in {"pickup_crab_left_0_2", "pickup_crab_right_0_2"}:
+            motion_id = motion_id.removesuffix("_2")
+        for side, opposite in (("right", "left"), ("left", "right")):
+            if previous == f"pickup_crab_{side}_0":
+                if (motion_id in self.FINE_FORWARD_MOTION_IDS
+                        or motion_id == "pickup_pre_backward_camera_down"):
+                    return f"pickup_crab_{side}_to_fine_0"
+                if self._is_stationary_turn(motion_id):
+                    return f"pickup_crab_{side}_to_turn_0"
+                if motion_id == f"pickup_crab_{opposite}_0":
+                    # Source76 crabs share the same support posture in either direction.
+                    return None
+            if previous == f"goal_camera_90_crab_{side}":
+                if motion_id in MotionCommandBridgeNode.GOAL_FINE_FORWARD_MOTION_IDS:
+                    return f"goal_crab_{side}_to_fine_90"
+                if self._is_stationary_turn(motion_id):
+                    return f"goal_crab_{side}_to_turn_90"
+                if motion_id == f"goal_camera_90_crab_{opposite}":
+                    return None
+        prepare = self._turn_prepare_motion(motion_id)
+        if prepare is not None:
+            return prepare
+        if (motion_id in MotionCommandBridgeNode.GOAL_FINE_FORWARD_MOTION_IDS
+                and (self._is_forward_motion(previous) or self._is_stationary_turn(previous)
+                     or previous.startswith("line_recovery_")
+                     or previous == "goal_camera_90_backward_1")):
+            return "goal_fine_prepare_90"
+        if (motion_id in MotionCommandBridgeNode.BALL_FINE_FORWARD_MOTION_IDS
+                and (previous.startswith(("pickup_camera_down_turn_", "pickup_first_turn_",
+                                          "pickup_second_turn_", "post_ball_line_turn_"))
+                     or previous in {"pickup_lost_ball_backward_1", "ball_lost_camera_down_backward_2"})):
+            # Ball approach turns have their own aliases; ordinary line turns retain 45 degrees.
+            return "pickup_fine_prepare_0"
+        if (motion_id in self.FINE_FORWARD_MOTION_IDS
+                and (self._is_forward_motion(previous)
+                     or self._is_stationary_turn(previous)
+                     or previous.startswith("line_recovery_"))):
+            if (motion_id in MotionCommandBridgeNode.HURDLE_FINE_FORWARD_MOTION_IDS
+                    and self._hurdle_camera_down_state() is True):
+                return "hurdle_fine_prepare_0"
+            return self.PICKUP_FINE_PREPARE_MOTION_ID
+        if motion_id in {"pickup_crab_left_0", "pickup_crab_right_0"}:
+            side = "left" if motion_id == "pickup_crab_left_0" else "right"
+            if (previous in MotionCommandBridgeNode.BALL_FINE_FORWARD_MOTION_IDS
+                    or previous in MotionCommandBridgeNode.HURDLE_FINE_FORWARD_MOTION_IDS):
+                return f"pickup_fine_to_crab_{side}_0"
+            if (self._is_forward_motion(previous)
+                    or previous in {"pickup_lost_ball_backward_1", "ball_lost_camera_down_backward_2"}):
+                return "pickup_forward_to_crab_0" if side == "right" else "pickup_forward_to_crab_left_0"
+        if motion_id in {"goal_camera_90_crab_left", "goal_camera_90_crab_right"}:
+            side = "left" if motion_id == "goal_camera_90_crab_left" else "right"
+            if previous in MotionCommandBridgeNode.GOAL_FINE_FORWARD_MOTION_IDS:
+                return f"goal_fine_to_crab_{side}_90"
+            if (self._is_forward_motion(previous) or previous.startswith("line_recovery_")
+                    or self._is_stationary_turn(previous)
+                    or previous == "goal_camera_90_backward_1"):
+                return f"goal_forward_to_crab_{side}_90"
+        return None
+
+    def _shot_prepare_motion(self) -> str | None:
+        """Select the scoring start posture from the last completed physical motion."""
+        retry = getattr(self, "shot_prepare_retry_motion_id", None)
+        if retry is not None:
+            # A failed preparation clears physical-state tracking, not this obligation.
+            return retry
+        previous = self.last_physical_motion_id or ""
+        if previous in {"goal_camera_90_crab_right", "goal_camera_90_crab_left"}:
+            side = "right" if previous.endswith("right") else "left"
+            return f"goal_crab_{side}_to_fine_90"
+        if (previous in MotionCommandBridgeNode.GOAL_FINE_FORWARD_MOTION_IDS
+                or previous in MotionCommandBridgeNode.GOAL_SHOT_READY_MOTION_IDS):
+            return None
+        return "goal_fine_prepare_90"
+
+    def _publish_executor_request(
+        self,
+        *,
+        action: str,
+        command_id: int,
+        event_id: int | None,
+        request_id: int,
+        motion_id: str,
+        timeout_ms: int,
+        prepare_pickup_fine: bool = True,
+    ) -> None:
+        """Publish one validated request to the C++ executor."""
+        if action == "POST_BALL_GOAL_TRANSITION" and motion_id == "post_ball_camera_90":
+            self.post_ball_camera_pause_until = (
+                time.monotonic() + MotionCommandBridgeNode.POST_BALL_CAMERA_PAUSE_SEC
+            )
+        if action == "PICKUP_NOW" and motion_id in {
+            "pickup_crab_left_0", "pickup_crab_right_0",
+            "pickup_crab_left_0_2", "pickup_crab_right_0_2",
+        }:
+            prepare = self._transition_prepare_motion(motion_id)
+            if prepare is not None:
+                self.pending_pickup_crab_motion_id = motion_id
+                motion_id = prepare
+                self.active_motion_id = prepare
+        if (
+            prepare_pickup_fine
+            and action == "PICKUP_NOW"
+            and motion_id in {"pickup_fine_forward_0", "pickup_top_loss_fine_forward_0_3"}
+            and self.last_physical_motion_id not in self.FINE_FORWARD_MOTION_IDS
+        ):
+            # Keep the existing checkpoint/sequence pending until both motions finish.
+            self.pending_pickup_fine_motion_id = motion_id
+            motion_id = (self._transition_prepare_motion(motion_id)
+                         or self.PICKUP_FINE_PREPARE_MOTION_ID)
+            self.active_motion_id = motion_id
+        request_payload = {
+            "action": action,
+            "command_id": command_id,
+            "event_id": event_id,
+            "request_id": request_id,
+            "motion_id": motion_id,
+            "timeout_ms": timeout_ms,
+        }
+        previous = (self.last_physical_motion_id or "").removesuffix("_2")
+        target = motion_id.removesuffix("_2")
+        # Goal crabs already pass through GOAL_CRAB_PRE_DWELL_MARKER.
+        direction_change = {previous, target} == {"pickup_crab_left_0", "pickup_crab_right_0"}
+        if direction_change and (not self.motion_in_progress or request_id == self.active_request_id):
+            # A shared support pose needs only a pre-motion rest, no post-motion hold.
+            self.transition_pending_request = request_payload
+            self.transition_dwell_until = MotionCommandBridgeNode._pre_motion_dwell_deadline(self, .5)
+            self.publish_motion_status(
+                status="RUNNING", action=action, command_id=command_id,
+                event_id=event_id, request_id=request_id, motion_id="__CRAB_DIRECTION_DWELL__",
+                message="holding still for 0.5 seconds before changing crab direction",
+            )
+            self._check_transition_dwell()
+            return
+        prepare_motion = (
+            self._transition_prepare_motion(motion_id)
+            if (not motion_id.startswith("ball_align_")
+                and (not self.motion_in_progress or request_id == self.active_request_id))
+            else None
+        )
+        if prepare_motion is not None:
+            # Hold the target until its support-change preparation succeeds.
+            self.pending_turn_request = dict(request_payload)
+            self.turn_prepare_motion_id = prepare_motion
+            request_payload["motion_id"] = prepare_motion
+            self.get_logger().info(
+                f"Preparing motion transition: {prepare_motion} -> {motion_id}"
+            )
+        backward = request_payload["motion_id"] in MotionCommandBridgeNode.BACKWARD_MOTION_IDS
+        ball_turn = MotionCommandBridgeNode._is_ball_stationary_turn(action, request_payload["motion_id"])
+        # Deferred reservations pass here too. Count actual stationary time,
+        # including a preceding transition's hold, in every mission phase.
+        correction_boundary = (
+            (request_payload["motion_id"] == "ball_align_prepare_fine_45"
+             and self._is_forward_motion(self.last_physical_motion_id or ""))
+            or MotionCommandBridgeNode._requires_motion_dwell(self, request_payload["motion_id"])
+            or MotionCommandBridgeNode._requires_motion_dwell(self, self.last_physical_motion_id or "")
+        )
+        if ((not self.motion_in_progress or request_id == self.active_request_id)
+                and correction_boundary) and not (
+            backward or ball_turn
+            or request_payload["motion_id"] in MotionCommandBridgeNode.TRANSITION_MOTION_IDS
+        ):
+            self.transition_pending_request = request_payload
+            self.transition_dwell_until = MotionCommandBridgeNode._pre_motion_dwell_deadline(
+                self, MotionCommandBridgeNode.TRANSITION_DWELL_SEC)
+            self.publish_motion_status(
+                status="RUNNING", action=action, command_id=command_id,
+                event_id=event_id, request_id=request_id, motion_id="__CORRECTION_PRE_DWELL__",
+                message="holding still for 0.5 seconds at correction boundary",
+            )
+            self._check_transition_dwell()
+            return
+        if backward or ball_turn or request_payload["motion_id"] in MotionCommandBridgeNode.TRANSITION_MOTION_IDS:
+            dwell_sec = (
+                MotionCommandBridgeNode.BALL_TURN_DWELL_SEC if ball_turn
+                else MotionCommandBridgeNode.FINE_TO_BACKWARD_DWELL_SEC
+                if backward and self.last_physical_motion_id in self.FINE_FORWARD_MOTION_IDS
+                else MotionCommandBridgeNode.BACKWARD_DWELL_SEC if backward
+                else MotionCommandBridgeNode.TRANSITION_DWELL_SEC
+            )
+            self.transition_motion_id = request_payload["motion_id"]
+            self.transition_pending_request = request_payload
+            self.transition_dwell_until = MotionCommandBridgeNode._pre_motion_dwell_deadline(self, dwell_sec)
+            self.publish_motion_status(
+                status="RUNNING", action=action, command_id=command_id,
+                event_id=event_id, request_id=request_id,
+                motion_id=("__BALL_TURN_PRE_DWELL__" if ball_turn else
+                           "__BACKWARD_PRE_DWELL__" if backward else "__TRANSITION_PRE_DWELL__"),
+                message=f"holding still for {dwell_sec:g} seconds before "
+                        + ("ball stationary turn" if ball_turn else
+                           "backward motion" if backward else "posture transition"),
+            )
+            self._check_transition_dwell()
+            return
+        self._send_executor_payload(request_payload)
+        if action == "PICKUP_NOW" and motion_id in {
+            self.PICKUP_FINE_PREPARE_MOTION_ID, "pickup_fine_forward_0",
+        }:
+            self.get_logger().info(
+                f"Pickup fine motion requested: motion_id={motion_id}, "
+                f"command_id={command_id}, request_id={request_id}"
+            )
+
+    def _send_executor_payload(self, request_payload: dict[str, Any]) -> None:
+        """Send an already prepared payload without inserting another transition."""
+        # Queued requests conservatively clear credit too; only a matching
+        # completion can establish a new continuous stationary interval.
+        self.stationary_since = None
+        self.physical_request_key = (
+            request_payload["command_id"], request_payload.get("event_id"),
+            request_payload["request_id"], request_payload["motion_id"],
+        )
+        camera = getattr(self, "post_pickup_goal_camera_request", None)
+        if (camera is not None and request_payload.get("command_id") == camera[0]
+                and request_payload.get("motion_id") == camera[1]):
+            request_payload = {**request_payload, "goal_head_prepare_id": camera[0]}
+        request_message = String()
+        request_message.data = json.dumps(
+            request_payload,
+            ensure_ascii=True,
+            separators=(",", ":"),
+        )
+        self.executor_request_publisher.publish(request_message)
+
+    def _requires_motion_dwell(self, motion_id: str) -> bool:
+        motion_id = physical_motion_id(motion_id)
+        return (self._is_stationary_turn(motion_id)
+                or motion_id in self.FINE_FORWARD_MOTION_IDS
+                or motion_id in MotionCommandBridgeNode.CRAB_MOTION_IDS
+                or motion_id in MotionCommandBridgeNode.BACKWARD_MOTION_IDS)
+
+    def _pre_motion_dwell_deadline(self, duration: float) -> float:
+        """Count an already completed rest toward the next pre-motion hold."""
+        now = time.monotonic()
+        since = getattr(self, "stationary_since", None)
+        if since is None and getattr(self, "physical_request_key", None) is None:
+            # Initial/atomic pre-holds also establish rest credit. A following
+            # fine/crab request must not start another half-second clock.
+            self.stationary_since = since = now
+        return max(now, since + duration) if since is not None and since <= now else now + duration
+
+    def _check_transition_dwell(self, now: float | None = None) -> bool:
+        """Hold both sides of a posture transition or backward motion."""
+        deadline = self.transition_dwell_until
+        if deadline is None:
+            return False
+        if (time.monotonic() if now is None else now) < deadline:
+            return True
+        self.transition_dwell_until = None
+        if self.transition_pending_request is not None:
+            request = self.transition_pending_request
+            self.transition_pending_request = None
+            self._send_executor_payload(request)
+        elif self.transition_pending_status is not None:
+            status = self.transition_pending_status
+            self.transition_pending_status = None
+            self.transition_motion_id = None
+            # Resume the existing sequence/checkpoint logic only after settling.
+            message = String()
+            message.data = json.dumps(status)
+            self.executor_status_callback(message)
+        return True
+
+    def _transition_has_existing_post_dwell(self, motion_id: str) -> bool:
+        if (MotionCommandBridgeNode._is_ball_stationary_turn(self.active_action, motion_id)
+                and not motion_id.startswith("ball_align_turn_")):
+            # Normal approach turns settle in the decision node; pickup turns
+            # settle at their existing checkpoint. Do not add a second pause.
+            return True
+        if motion_id in MotionCommandBridgeNode.BACKWARD_MOTION_IDS:
+            return False
+        if self.active_motion_id != motion_id:
+            return False
+        if self.active_action == "GOAL_SHOT_PREPARE":
+            # Vision's one-second observation window also settles this posture.
+            return True
+        if (
+            self.active_action == "PICKUP_NOW"
+            and motion_id in MotionCommandBridgeNode.PICKUP_FINE_PREPARE_MOTION_IDS
+        ):
+            return True
+        next_index = self.active_sequence_index + 1
+        return bool(
+            next_index < len(self.active_pickup_sequence)
+            and ((self.active_action in self.GOAL_CRAB_ACTIONS
+                  and self.active_pickup_sequence[next_index]
+                  == MotionCommandBridgeNode.GOAL_CRAB_PRE_DWELL_MARKER)
+                 or (self.active_action == "SHOT"
+                     and self.active_pickup_sequence[next_index] == self.SHOT_PREPARE_DWELL_MARKER))
+        )
+
+    def navigation_command_callback(self, msg: String) -> None:
+        """Validate and translate one navigation command."""
+        try:
+            payload = json.loads(msg.data)
+        except (json.JSONDecodeError, TypeError) as exc:
+            self.get_logger().warning(
+                f"Invalid /navigation/motion_command JSON: {exc}"
+            )
+            return
+
+        if not isinstance(payload, dict):
+            self.get_logger().warning(
+                "Invalid /navigation/motion_command: "
+                "JSON root must be an object"
+            )
+            return
+
+        action = payload.get("action")
+        command_id = payload.get("command_id")
+        event_id = payload.get("event_id")
+        if payload.get("valid") is not True:
+            command = payload.get("source_command")
+            checks = command.get("line_input_checks") if isinstance(command, dict) else None
+            if checks and checks.get("failed_checks"):
+                self.get_logger().info(f"Line input rejected: {checks['failed_checks']}")
+            self.get_logger().info(
+                f"Command ignored: valid is not true, action={action}, "
+                f"reason={payload.get('reason')}, line_input_checks={checks}"
+            )
+            return
+        if not self._is_integer(command_id):
+            self.get_logger().warning(
+                "Command ignored: command_id is missing or not an integer"
+            )
+            return
+        if event_id is not None and not self._is_integer(event_id):
+            self.get_logger().warning(
+                "Command ignored: event_id is not an integer or null"
+            )
+            return
+        if not isinstance(action, str) or not action:
+            self.get_logger().warning(
+                "Command ignored: action is missing or invalid"
+            )
+            return
+
+        if action == self.PICKUP_POSITIONING_LOSS_LATCH_ACTION:
+            self._handle_pickup_positioning_loss_latch(
+                command_id=command_id,
+                event_id=event_id,
+                payload=payload,
+            )
+            return
+
+        if (isinstance(payload.get("source_command"), dict)
+                and payload["source_command"].get("pickup_walk_prequeue") is True):
+            self._handle_pickup_walk_prequeue(payload)
+            return
+
+        if action in self.PICKUP_FINE_ALIGN_ACTIONS:
+            self._handle_pickup_fine_align_command(
+                action=action,
+                command_id=command_id,
+                event_id=event_id,
+                payload=payload,
+            )
+            return
+        if action in self.PICKUP_POST_BACKWARD_ALIGN_ACTIONS:
+            self._handle_pickup_post_backward_align_command(
+                action=action,
+                command_id=command_id,
+                event_id=event_id,
+                payload=payload,
+            )
+            return
+        if action in self.PICKUP_INITIAL_ALIGN_ACTIONS:
+            self._handle_pickup_initial_align_command(
+                action=action,
+                command_id=command_id,
+                event_id=event_id,
+                payload=payload,
+            )
+            return
+
+        if command_id == self.last_sent_command_id:
+            self._publish_local_rejection(
+                status="REJECTED",
+                command_id=command_id,
+                event_id=event_id,
+                action=action,
+                error_code="DUPLICATE_COMMAND_ID",
+                message="command_id was already sent to the executor",
+            )
+            return
+        command = payload.get("source_command")
+        command = command if isinstance(command, dict) else {}
+        goal_crab_queue = bool(
+            command.get("goal_crab_prequeue") is True
+            and self.motion_in_progress and action in self.GOAL_CRAB_ACTIONS
+            and action == self.active_action
+            and self.active_motion_id == self.motion_id_for_action(action)
+            and command.get("goal_crab_running_command_id") == self.active_command_id
+            and type(command.get("goal_crab_queue_frame_count")) is int
+            and command["goal_crab_queue_frame_count"] >= 3
+            and self.active_dwell_until is None and self.transition_dwell_until is None
+            and self.pending_turn_request is None
+        )
+        if command.get("goal_crab_prequeue") is True and not goal_crab_queue:
+            self._publish_local_rejection(
+                status="REJECTED", command_id=command_id, event_id=event_id, action=action,
+                error_code="INVALID_GOAL_CRAB_RESERVATION",
+                message="only the running goal crab may reserve one identical next gait",
+            )
+            return
+        if (
+            self.motion_in_progress
+            and not goal_crab_queue
+            and (self.active_action in self.ATOMIC_SEQUENCE_ACTIONS
+                 or self.pending_turn_request is not None)
+        ):
+            self._publish_local_rejection(
+                status="REJECTED",
+                command_id=command_id,
+                event_id=event_id,
+                action=action,
+                error_code="ATOMIC_SEQUENCE_LOCKED",
+                message="an atomic motion sequence owns the motion executor",
+            )
+            return
+        goal_handoff = bool(
+            action.startswith("GOAL_") and payload.get("phase") == "GOAL_APPROACH"
+            and isinstance(payload.get("source_command"), dict)
+            and payload["source_command"].get("post_ball_goal_handoff") is True
+        )
+        if self.motion_in_progress and not goal_handoff and not goal_crab_queue and action in {
+            "SHOT", "GOAL_SHOT_PREPARE", "GO", "POST_BALL_GOAL_TRANSITION",
+            "GOAL_CAMERA90_BACKWARD_1", *self.GOAL_CRAB_ACTIONS,
+        }:
+            self._publish_local_rejection(
+                status="REJECTED",
+                command_id=command_id,
+                event_id=event_id,
+                action=action,
+                error_code="REJECTED_BUSY",
+                message=f"{action} requires the current motion to finish first",
+            )
+            return
+        if self.motion_in_progress and self.queued_request_id is not None:
+            self._publish_local_rejection(
+                status="REJECTED",
+                command_id=command_id,
+                event_id=event_id,
+                action=action,
+                error_code="QUEUE_FULL",
+                message="one next motion is already queued",
+            )
+            return
+
+        if goal_handoff:
+            self.goal_handoff_command_id = command_id
+        pickup_sequence: tuple[str, ...] = ()
+        if action == "PICKUP_NOW":
+            built_sequence = self._pickup_motion_sequence(payload)
+            if built_sequence is None:
+                self._publish_local_rejection(
+                    status="UNSUPPORTED",
+                    command_id=command_id,
+                    event_id=event_id,
+                    action=action,
+                    error_code="UNSUPPORTED_PICKUP_SEQUENCE",
+                    message=(
+                        "pickup sequence requires ball mission index 0 or 1"
+                    ),
+                )
+                return
+            pickup_sequence = built_sequence
+            motion_id = self.PICKUP_INITIAL_ALIGN_MARKER
+            self.goal_fine_forward_completed = False
+            self.goal_crab_completed = False
+            self.last_completed_motion_id = None
+        elif action == "GO":
+            # Approach steps are separate commands and do not count toward this tail.
+            # On a failed tail, retry only the stages not already completed.
+            self.hurdle_fine_sequence_pending = True
+            fine_steps = (
+                (self.HURDLE_FINAL_FINE_MOTION_ID,)
+                if self.hurdle_sequence_fine_completed == 0 else ()
+            )
+            pickup_sequence = fine_steps + (
+                self.HURDLE_PRE_GO_DWELL_MARKER, "hurdle",
+                self.HURDLE_POST_GO_DWELL_MARKER,
+            )
+            motion_id = pickup_sequence[0]
+        elif action == "POST_BALL_GOAL_TRANSITION":
+            pickup_sequence = self.POST_BALL_GOAL_TRANSITION_SEQUENCE
+            motion_id = pickup_sequence[0]
+        elif action in self.GOAL_CRAB_ACTIONS:
+            motion_id = self.motion_id_for_action(action)
+            prepare_motion = self._transition_prepare_motion(motion_id)
+            pickup_sequence = (
+                MotionCommandBridgeNode.GOAL_CRAB_PRE_DWELL_MARKER, motion_id,
+            )
+            if goal_handoff or goal_crab_queue:
+                pickup_sequence = (motion_id,)
+            if prepare_motion is not None:
+                pickup_sequence = (prepare_motion,) + pickup_sequence
+            motion_id = pickup_sequence[0]
+        elif action == "GOAL_CAMERA90_BACKWARD_1":
+            motion_id = self.motion_id_for_action(action)
+        elif action == "GOAL_SHOT_PREPARE":
+            motion_id = MotionCommandBridgeNode._shot_prepare_motion(self)
+            if motion_id is None:
+                # Already at fine-right-back: acknowledge without moving again.
+                self.last_sent_command_id = command_id
+                for status in ("RUNNING", "SUCCEEDED"):
+                    self.publish_motion_status(
+                        status=status, command_id=command_id, event_id=event_id,
+                        request_id=command_id, motion_id="goal_fine_prepare_90",
+                        action=action, message="goal scoring posture already prepared",
+                    )
+                return
+            self.shot_prepare_retry_motion_id = motion_id
+        elif action == "SHOT":
+            source_command = payload.get("source_command")
+            region = (source_command.get("shot_region")
+                      if isinstance(source_command, dict) else None)
+            if region is not None and (not self._is_integer(region) or region not in range(1, 9)):
+                self._publish_local_rejection(
+                    status="REJECTED", command_id=command_id, event_id=event_id,
+                    action=action, error_code="INVALID_SHOT_REGION",
+                    message="shot_region must be an integer from 1 to 8",
+                )
+                return
+            shot_motion = (f"goal_shot_region_{region}" if region is not None
+                           else self.motion_id_for_action(action))
+            prepare_motion = MotionCommandBridgeNode._shot_prepare_motion(self)
+            if prepare_motion is not None:
+                self.shot_prepare_retry_motion_id = prepare_motion
+                pickup_sequence = (
+                    prepare_motion,
+                    self.SHOT_PREPARE_DWELL_MARKER,
+                    shot_motion,
+                )
+                motion_id = pickup_sequence[0]
+            else:
+                motion_id = shot_motion
+        elif payload.get("source") == "hurdle" and action in {
+            "ALIGN_LEFT", "ALIGN_RIGHT",
+        }:
+            source_command = payload.get("source_command")
+            count = (
+                source_command.get("turn_count")
+                if isinstance(source_command, dict) else None
+            )
+            direction = "LEFT" if action == "ALIGN_LEFT" else "RIGHT"
+            # Reuse calibrated camera-45 turns, keeping the hurdle action ID.
+            motion_id = (
+                self.motion_id_for_action(f"POST_BALL_LINE_TURN_{direction}_{count}")
+                if self._is_integer(count) else None
+            )
+        elif (payload.get("source") == "ball"
+              and isinstance(payload.get("source_command"), dict)
+              and payload["source_command"].get("ball_entry_line_alignment") is True):
+            # Ball-owned entry alignment must retain the exact Line gait/count.
+            motion_id = self.motion_id_for_action(action)
+        elif payload.get("source") in ("ball", "hurdle") and action in {
+            "STRAIGHT", "STRAIGHT_0",
+        }:
+            # Each mission uses its own camera-0 fine gait.
+            motion_id = (
+                "line_forward_4" if action == "STRAIGHT"
+                else "hurdle_fine_forward_5" if payload.get("source") == "hurdle"
+                else "ball_general_fine_forward_8"
+            )
+        else:
+            motion_id = self.motion_id_for_action(action)
+        ball_fine_alignment = bool(
+            payload.get("source") == "ball" and payload.get("phase") == "BALL_APPROACH"
+            and isinstance(payload.get("source_command"), dict)
+            and payload["source_command"].get("ball_fine_alignment") is True
+            and ball_fine_motion_id(action) is not None
+        )
+        if ball_fine_alignment:
+            motion_id = ball_fine_motion_id(action)
+        # Only the active Ball approach owns these two catalog73 replacements.
+        progress = payload.get("mission_progress")
+        if (payload.get("phase") == "BALL_APPROACH"
+                and payload.get("source") == "ball"
+                and isinstance(progress, dict)):
+            ball_index = progress.get("active_ball_mode_index")
+            if self._is_integer(ball_index):
+                motion_id = {
+                    (1, "line_recovery_left_4"): "line_recovery_ball_first_left_4",
+                    (2, "line_recovery_right_4"): "line_recovery_ball_second_right_4",
+                }.get((ball_index, motion_id), motion_id)
+        if motion_id is None:
+            goal_left_unavailable = action.startswith(
+                "GOAL_CAMERA90_TURN_LEFT_"
+            )
+            self._publish_local_rejection(
+                status="UNSUPPORTED",
+                command_id=command_id,
+                event_id=event_id,
+                action=action,
+                error_code=(
+                    "GOAL_CAMERA90_LEFT_TURN_NOT_AVAILABLE"
+                    if goal_left_unavailable
+                    else "UNSUPPORTED_ACTION"
+                ),
+                message=(
+                    "camera-90 goal left-turn motion is not in the catalog"
+                    if goal_left_unavailable
+                    else "action has no configured motion alias"
+                ),
+            )
+            return
+
+        request_id = command_id
+        source_command = payload.get("source_command") or {}
+        if (payload.get("phase") == "LINE_TRACK_AFTER_PICKUP"
+                and source_command.get("post_pickup_line_index") == 3
+                and source_command.get("goal_head_prepare_id") == command_id):
+            self.post_pickup_goal_camera_request = (command_id, motion_id)
+        timeout_ms = self.timeout_ms_from_payload(payload)
+        # The SDK validates gait continuity before accepting a reservation.
+        seamless_walking_groups = (
+            {"forward", "sdk_forward_4", "line_recovery_left_4",
+             "line_recovery_left_6", "line_recovery_right_4",
+             "line_recovery_ball_first_left_4", "line_recovery_ball_second_right_4"}
+            | {f"{prefix}_{count}" for prefix in (
+                "line_forward", "ball_camera_down_forward", "post_ball_forward",
+            ) for count in (2, 4, 6, 8)},
+            {f"goal_camera_90_forward_{count}" for count in (2, 4, 6, 8)}
+            | {"line_recovery_left_4", "line_recovery_right_4"},
+            {f"goal_camera_90_fine_forward_{count}" for count in (1, 2, 3, 4, 5)},
+        )
+        compatible_walking_transition = any(
+            motion_id in group and self.active_motion_id in group
+            for group in seamless_walking_groups
+        )
+        if (goal_handoff
+                and self.active_motion_id in seamless_walking_groups[0]
+                and motion_id in seamless_walking_groups[1]):
+            compatible_walking_transition = True
+        walking_transition = bool(
+            motion_id.startswith(("line_forward_", "line_recovery_", "goal_camera_90_forward_", "goal_camera_90_fine_forward_"))
+            and (self.active_motion_id or "").startswith(("line_forward_", "line_recovery_", "goal_camera_90_forward_", "goal_camera_90_fine_forward_"))
+            and motion_id != self.active_motion_id
+            and not compatible_walking_transition
+        )
+        defer_until_active_finishes = bool(
+            self.motion_in_progress
+            and not ball_fine_alignment
+            and ((action == "POST_SHOT_FORWARD"
+                  and str(self.active_action).startswith("POST_SHOT_LINE_TURN_"))
+                 or (payload.get("source") == "line"
+                     and str(self.active_action).startswith(("LINE_OFFSET_TURN_", "LINE_LOST_TURN_")))
+                 or self._is_stationary_turn(self.active_motion_id or "")
+                 or (goal_handoff and action in self.GOAL_CRAB_ACTIONS)
+                 or walking_transition or action == "PICKUP_NOW" or self._is_stationary_turn(motion_id)
+                 or motion_id in MotionCommandBridgeNode.BACKWARD_MOTION_IDS
+                 or self.active_motion_id in MotionCommandBridgeNode.BACKWARD_MOTION_IDS
+                 or (motion_id in self.FINE_FORWARD_MOTION_IDS
+                     and (self._is_forward_motion(self.active_motion_id or "")
+                          or self._is_stationary_turn(self.active_motion_id or "")))
+                 or (self.active_motion_id in self.FINE_FORWARD_MOTION_IDS
+                     and self._is_forward_motion(motion_id))
+                 or (self.active_motion_id in MotionCommandBridgeNode.CRAB_MOTION_IDS
+                     and motion_id in self.FINE_FORWARD_MOTION_IDS))
+        )
+        # Ordinary walking remains continuous; corrections must stop even when
+        # their next command was reserved before physical completion.
+        if self.motion_in_progress and (
+            (motion_id == "ball_align_prepare_fine_45"
+             and self._is_forward_motion(self.active_motion_id or ""))
+            or MotionCommandBridgeNode._requires_motion_dwell(self, motion_id)
+            or MotionCommandBridgeNode._requires_motion_dwell(self, self.active_motion_id or "")
+        ):
+            defer_until_active_finishes = True
+        starts_with_initial_align_checkpoint = action == "PICKUP_NOW"
+        starts_with_hurdle_dwell = (
+            action == "GO" and motion_id == self.HURDLE_PRE_GO_DWELL_MARKER
+        )
+        starts_with_crab_dwell = (
+            motion_id == MotionCommandBridgeNode.GOAL_CRAB_PRE_DWELL_MARKER
+        )
+        if (
+            not defer_until_active_finishes
+            and not starts_with_initial_align_checkpoint
+            and not starts_with_hurdle_dwell
+            and not starts_with_crab_dwell
+        ):
+            self._publish_executor_request(
+                action=action,
+                command_id=command_id,
+                event_id=event_id,
+                request_id=request_id,
+                motion_id=motion_id,
+                timeout_ms=timeout_ms,
+            )
+
+        self.last_sent_command_id = command_id
+        if self.motion_in_progress:
+            self.queued_command_id = command_id
+            self.queued_event_id = event_id
+            self.queued_action = action
+            self.queued_request_id = request_id
+            self.queued_motion_id = motion_id
+            self.queued_timeout_ms = timeout_ms
+            self.queued_request_deferred = defer_until_active_finishes
+            self.queued_pickup_sequence = pickup_sequence
+            if (defer_until_active_finishes
+                    and payload.get("phase") == "LINE_TRACK_AFTER_PICKUP"
+                    and source_command.get("post_pickup_line_index") == 3
+                    and source_command.get("goal_head_prepare_id") == command_id):
+                # A stationary turn is held locally, so no executor QUEUED ack exists yet.
+                self.publish_motion_status(
+                    status="QUEUED", action=action, command_id=command_id,
+                    event_id=event_id, request_id=request_id, motion_id=motion_id,
+                    message="last Line motion accepted; deferred until active motion completes",
+                )
+        else:
+            self.motion_in_progress = True
+            self.active_command_id = command_id
+            self.active_event_id = event_id
+            self.active_action = action
+            self.active_request_id = request_id
+            self.active_motion_id = motion_id
+            self.active_timeout_ms = timeout_ms
+            self.active_pickup_sequence = pickup_sequence
+            self.active_sequence_index = 0
+            self.active_dwell_until = None
+            self.pickup_positioning_loss_pending = False
+            self.pickup_fixed_sequence_started = False
+            self.pickup_fine_positioning_complete = False
+            self.last_pickup_motion_id = None
+            self.pickup_consecutive_motor_failures = 0
+            self.pickup_motor_failures = []
+            self.pickup_last_stage_succeeded = True
+            self.pending_pickup_crab_motion_id = None
+            self.pickup_positioning_dwell_motion_id = None
+            if starts_with_initial_align_checkpoint:
+                self.active_sequence_index = -1
+                self._start_pickup_initial_align_dwell()
+            elif starts_with_hurdle_dwell or starts_with_crab_dwell:
+                self.active_sequence_index = -1
+                self._start_next_pickup_motion()
+
+    def _start_next_pickup_motion(self) -> bool:
+        """Advance an atomic pickup, goal, transition, shot, or hurdle sequence."""
+        if self.active_action not in self.ATOMIC_SEQUENCE_ACTIONS:
+            return False
+        if self.active_dwell_until is not None:
+            return True
+        next_index = self.active_sequence_index + 1
+        if (next_index < len(self.active_pickup_sequence)
+                and self.active_pickup_sequence[next_index] == self.DWELL_MARKER):
+            backward_completed = (
+                self.active_motion_id in MotionCommandBridgeNode.BACKWARD_MOTION_IDS
+            )
+            backward_next = (
+                self.active_motion_id != self.PICKUP_GRASP_CHECK_MOTION_ID
+                and next_index + 1 < len(self.active_pickup_sequence)
+                and self.active_pickup_sequence[next_index + 1]
+                in MotionCommandBridgeNode.BACKWARD_MOTION_IDS
+            )
+            # Share adjacent half-second rests with the backward guard, but keep
+            # the three-second grasp observation window intact.
+            if backward_completed or backward_next:
+                next_index += 1
+        if next_index >= len(self.active_pickup_sequence):
+            return False
+
+        next_motion_id = self.active_pickup_sequence[next_index]
+        self.active_sequence_index = next_index
+        if next_motion_id == MotionCommandBridgeNode.GOAL_CRAB_PRE_DWELL_MARKER:
+            self.active_motion_id = next_motion_id
+            previous = self.active_pickup_sequence[next_index - 1] if next_index > 0 else None
+            dwell_sec = (MotionCommandBridgeNode.TRANSITION_DWELL_SEC
+                         if previous in MotionCommandBridgeNode.TRANSITION_MOTION_IDS
+                         else MotionCommandBridgeNode.GOAL_CRAB_PRE_DWELL_SEC)
+            self.active_dwell_until = MotionCommandBridgeNode._pre_motion_dwell_deadline(self, dwell_sec)
+            self.publish_motion_status(
+                status="RUNNING",
+                command_id=self.active_command_id,
+                event_id=self.active_event_id,
+                request_id=self.active_request_id,
+                motion_id=next_motion_id,
+                action=self.active_action,
+                message=f"holding still for {dwell_sec} seconds before goal crab step",
+            )
+            self.get_logger().info(f"Goal crab pre-motion dwell started: {dwell_sec}s")
+            return True
+        if next_motion_id == MotionCommandBridgeNode.POST_BALL_CAMERA_DWELL_MARKER:
+            self.active_motion_id = next_motion_id
+            self.active_dwell_until = self.post_ball_camera_pause_until
+            self.publish_motion_status(
+                status="RUNNING",
+                command_id=self.active_command_id,
+                event_id=self.active_event_id,
+                request_id=self.active_request_id,
+                motion_id=next_motion_id,
+                action=self.active_action,
+                message="camera raised; completing goal transition",
+            )
+            if MotionCommandBridgeNode.POST_BALL_CAMERA_PAUSE_SEC <= 0.0:
+                self._check_atomic_dwell()
+            return True
+        if next_motion_id == self.HURDLE_PRE_GO_DWELL_MARKER:
+            self.active_motion_id = next_motion_id
+            self.active_dwell_until = MotionCommandBridgeNode._pre_motion_dwell_deadline(self, self.HURDLE_PRE_GO_DWELL_SEC)
+            self.publish_motion_status(
+                status="RUNNING",
+                command_id=self.active_command_id,
+                event_id=self.active_event_id,
+                request_id=self.active_request_id,
+                motion_id=next_motion_id,
+                action=self.active_action,
+                message="holding still for 0.5 seconds before hurdle",
+            )
+            return True
+        if next_motion_id == self.HURDLE_POST_GO_DWELL_MARKER:
+            self.active_motion_id = next_motion_id
+            # Keep GO locked for a full second after the physical hurdle succeeds.
+            self.active_dwell_until = time.monotonic() + self.HURDLE_POST_GO_DWELL_SEC
+            self.publish_motion_status(
+                status="RUNNING",
+                command_id=self.active_command_id,
+                event_id=self.active_event_id,
+                request_id=self.active_request_id,
+                motion_id=next_motion_id,
+                action=self.active_action,
+                message="holding still for 1 second after hurdle",
+            )
+            return True
+        if next_motion_id == self.SHOT_PREPARE_DWELL_MARKER:
+            self.active_motion_id = next_motion_id
+            self.active_dwell_until = time.monotonic() + self.SHOT_PREPARE_DWELL_SEC
+            self.publish_motion_status(
+                status="RUNNING",
+                command_id=self.active_command_id,
+                event_id=self.active_event_id,
+                request_id=self.active_request_id,
+                motion_id=next_motion_id,
+                action=self.active_action,
+                message="holding still for 0.5 seconds after goal pose preparation",
+            )
+            return True
+        if next_motion_id == self.FINE_ALIGN_MARKER:
+            self._enter_pickup_fine_align_checkpoint()
+            return True
+        if next_motion_id == self.POST_BACKWARD_ALIGN_MARKER:
+            self._enter_pickup_post_backward_align_checkpoint()
+            return True
+        if next_motion_id == self.DWELL_MARKER:
+            if self.active_action == "GO":
+                # Ignore repeated completion messages while the fine-step pause owns the sequence.
+                self.active_motion_id = self.DWELL_MARKER
+            if self.active_action == "PICKUP_NOW":
+                self.pickup_positioning_dwell_motion_id = (
+                    self.active_motion_id
+                )
+            grasp_check = (
+                self.active_action == "PICKUP_NOW"
+                and self.pickup_positioning_dwell_motion_id
+                == self.PICKUP_GRASP_CHECK_MOTION_ID
+            )
+            dwell_sec = (
+                MotionCommandBridgeNode.PICKUP_GRASP_DWELL_SEC
+                if grasp_check else self.PICKUP_DWELL_SEC
+            )
+            self.active_dwell_until = time.monotonic() + dwell_sec
+            if self.active_action == "PICKUP_NOW":
+                self.publish_motion_status(
+                    status="RUNNING",
+                    command_id=self.active_command_id,
+                    event_id=self.active_event_id,
+                    request_id=self.active_request_id,
+                    motion_id=self.DWELL_MARKER,
+                    action=self.active_action,
+                    message="pickup sequence non-blocking dwell active",
+                    completed_motion_id=(
+                        self.pickup_positioning_dwell_motion_id
+                        if self.pickup_last_stage_succeeded else None
+                    ),
+                    verification_window_complete=(
+                        False if grasp_check and self.pickup_last_stage_succeeded else None
+                    ),
+                )
+            self.get_logger().info(
+                f"Atomic sequence dwell started: {dwell_sec:.1f}s"
+            )
+            if dwell_sec <= 0.0:
+                self._check_atomic_dwell(self.active_dwell_until)
+            return True
+        if (
+            self.active_action == "PICKUP_NOW"
+            and next_motion_id == self.PICKUP_FIXED_SEQUENCE_FIRST_MOTION
+        ):
+            self.pickup_fixed_sequence_started = True
+        self.active_motion_id = next_motion_id
+        self._publish_executor_request(
+            action=self.active_action,
+            command_id=self.active_command_id,
+            event_id=self.active_event_id,
+            request_id=self.active_request_id,
+            motion_id=next_motion_id,
+            timeout_ms=self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS,
+        )
+        self.get_logger().info(
+            f"Atomic sequence advanced to {next_motion_id}"
+        )
+        return True
+
+    def _check_atomic_dwell(self, now: float | None = None) -> None:
+        """Advance a dwell stage without blocking ROS callbacks."""
+        if self._check_transition_dwell(now):
+            return
+        if (
+            self.active_dwell_until is None
+            and self.pickup_initial_align_dwell_until is None
+        ):
+            return
+        current_time = time.monotonic() if now is None else now
+        if self.pickup_initial_align_dwell_until is not None:
+            if current_time < self.pickup_initial_align_dwell_until:
+                return
+            self.pickup_initial_align_dwell_until = None
+            self._enter_pickup_initial_align_checkpoint()
+            return
+
+        assert self.active_dwell_until is not None
+        if current_time < self.active_dwell_until:
+            return
+
+        self.active_dwell_until = None
+        if self.active_motion_id == MotionCommandBridgeNode.PICKUP_FINE_PRE_DWELL_MARKER:
+            self.pickup_positioning_dwell_motion_id = None
+            fine_motion_id = self.pending_pickup_fine_motion_id or "pickup_fine_forward_0"
+            self.pending_pickup_fine_motion_id = None
+            if self.pickup_positioning_loss_pending:
+                checkpoint = (
+                    self.PICKUP_INITIAL_ALIGN_MARKER
+                    if self.pickup_initial_align_correction_active else self.FINE_ALIGN_MARKER
+                )
+                self._enter_pickup_positioning_loss_reacquisition(checkpoint)
+                return
+            self.active_motion_id = fine_motion_id
+            self._publish_executor_request(
+                action=self.active_action, command_id=self.active_command_id,
+                event_id=self.active_event_id, request_id=self.active_request_id,
+                motion_id=self.active_motion_id,
+                timeout_ms=self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS,
+                prepare_pickup_fine=False,
+            )
+            return
+        completed_motion_id = self.pickup_positioning_dwell_motion_id
+        if (
+            self.active_action == "PICKUP_NOW"
+            and completed_motion_id == self.PICKUP_GRASP_CHECK_MOTION_ID
+            and self.pickup_last_stage_succeeded
+        ):
+            self.publish_motion_status(
+                status="RUNNING",
+                command_id=self.active_command_id,
+                event_id=self.active_event_id,
+                request_id=self.active_request_id,
+                motion_id=self.DWELL_MARKER,
+                action=self.active_action,
+                message="grasp verification dwell completed",
+                completed_motion_id=completed_motion_id,
+                verification_window_complete=True,
+            )
+        self.pickup_positioning_dwell_motion_id = None
+        self.pickup_fine_align_waiting = False
+        self.pickup_fine_align_correction_active = False
+        self.pickup_post_backward_align_waiting = False
+        self.pickup_post_backward_align_correction_active = False
+        checkpoint = self.pickup_checkpoint_after_dwell
+        self.pickup_checkpoint_after_dwell = None
+        if self.pickup_positioning_loss_pending:
+            self._enter_pickup_positioning_loss_reacquisition(checkpoint)
+            return
+        if checkpoint == self.PICKUP_INITIAL_ALIGN_MARKER:
+            self._enter_pickup_initial_align_checkpoint()
+            return
+        if checkpoint == self.FINE_ALIGN_MARKER:
+            self._enter_pickup_fine_align_checkpoint()
+            return
+        if checkpoint == self.POST_BACKWARD_ALIGN_MARKER:
+            self._enter_pickup_post_backward_align_checkpoint()
+            return
+        if self._start_next_pickup_motion():
+            return
+
+        command_id = self.active_command_id
+        event_id = self.active_event_id
+        request_id = self.active_request_id
+        motion_id = self.active_motion_id
+        action = self.active_action
+        motor_failures = self.pickup_motor_failures
+        self._clear_active_request()
+        self._promote_queued_request()
+        self.publish_motion_status(
+            status="SUCCEEDED",
+            command_id=command_id,
+            event_id=event_id,
+            request_id=request_id,
+            motion_id=motion_id,
+            action=action,
+            message="atomic sequence completed after non-blocking dwell",
+            motor_failures=motor_failures,
+        )
+
+    def _valid_executor_status(self, payload: dict[str, Any]) -> bool:
+        """Validate fields emitted by the C++ executor."""
+        status = payload.get("status")
+        command_id = payload.get("command_id")
+        event_id = payload.get("event_id")
+        request_id = payload.get("request_id")
+        motion_id = payload.get("motion_id")
+        error_code = payload.get("error_code")
+        message = payload.get("message")
+        return (
+            status in {"QUEUED", "RUNNING", *self.TERMINAL_STATUSES}
+            and (command_id is None or self._is_integer(command_id))
+            and (event_id is None or self._is_integer(event_id))
+            and self._is_integer(request_id)
+            and isinstance(motion_id, str)
+            and isinstance(error_code, str)
+            and isinstance(message, str)
+        )
+
+    def _clear_active_request(self) -> None:
+        """Release the bridge after a terminal executor status."""
+        self.pending_pickup_fine_motion_id = None
+        self.pickup_queued_request = None
+        self.motion_in_progress = False
+        self.pending_turn_request = None
+        self.turn_prepare_motion_id = None
+        self.transition_dwell_until = None
+        self.transition_pending_request = None
+        self.transition_pending_status = None
+        self.transition_motion_id = None
+        self.active_command_id = None
+        self.active_event_id = None
+        self.active_action = None
+        self.active_request_id = None
+        self.active_motion_id = None
+        self.active_timeout_ms = None
+        self.active_pickup_sequence = ()
+        self.active_sequence_index = 0
+        self.active_dwell_until = None
+        self.post_ball_camera_pause_until = None
+        self.pickup_initial_align_dwell_until = None
+        self.pickup_initial_align_waiting = False
+        self.pickup_initial_align_correction_active = False
+        self.pickup_fine_align_waiting = False
+        self.pickup_fine_align_correction_active = False
+        self.pickup_post_backward_align_waiting = False
+        self.pickup_post_backward_align_correction_active = False
+        self.pickup_checkpoint_after_dwell = None
+        self.pickup_positioning_loss_pending = False
+        self.pickup_fixed_sequence_started = False
+        self.pickup_fine_positioning_complete = False
+        self.last_pickup_motion_id = None
+        self.pickup_consecutive_motor_failures = 0
+        self.pickup_motor_failures = []
+        self.pickup_last_stage_succeeded = True
+        self.pending_pickup_crab_motion_id = None
+        self.pickup_positioning_dwell_motion_id = None
+
+    def _clear_queued_request(self) -> None:
+        """Discard one queued request and any associated pickup sequence."""
+        self.queued_command_id = None
+        self.queued_event_id = None
+        self.queued_action = None
+        self.queued_request_id = None
+        self.queued_motion_id = None
+        self.queued_timeout_ms = None
+        self.queued_request_deferred = False
+        self.queued_pickup_sequence = ()
+
+    def _promote_queued_request(self) -> None:
+        self.active_command_id = self.queued_command_id
+        self.active_event_id = self.queued_event_id
+        self.active_action = self.queued_action
+        self.active_request_id = self.queued_request_id
+        self.active_motion_id = self.queued_motion_id
+        self.active_timeout_ms = self.queued_timeout_ms
+        self.active_pickup_sequence = self.queued_pickup_sequence
+        self.active_sequence_index = 0
+        self.active_dwell_until = None
+        self.post_ball_camera_pause_until = None
+        self.pickup_initial_align_dwell_until = None
+        self.pickup_positioning_loss_pending = False
+        self.pickup_fixed_sequence_started = False
+        self.pickup_fine_positioning_complete = False
+        self.last_pickup_motion_id = None
+        self.pickup_consecutive_motor_failures = 0
+        self.pickup_motor_failures = []
+        self.pickup_last_stage_succeeded = True
+        self.pending_pickup_crab_motion_id = None
+        self.pickup_positioning_dwell_motion_id = None
+        queued_request_deferred = self.queued_request_deferred
+        self._clear_queued_request()
+        self.motion_in_progress = self.active_request_id is not None
+        if queued_request_deferred and self.motion_in_progress:
+            if self.active_action == "PICKUP_NOW":
+                self._start_pickup_initial_align_dwell()
+            else:
+                self._publish_executor_request(
+                    action=self.active_action,
+                    command_id=self.active_command_id,
+                    event_id=self.active_event_id,
+                    request_id=self.active_request_id,
+                    motion_id=self.active_motion_id,
+                    timeout_ms=(
+                        self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS
+                    ),
+                )
+
+    def executor_status_callback(self, msg: String) -> None:
+        """Forward matching executor status and release terminal requests."""
+        try:
+            payload = json.loads(msg.data)
+        except (json.JSONDecodeError, TypeError) as exc:
+            self.get_logger().warning(
+                f"Invalid /motion/executor/status JSON: {exc}"
+            )
+            return
+        if (
+            not isinstance(payload, dict)
+            or not self._valid_executor_status(payload)
+        ):
+            self.get_logger().warning(
+                "Invalid /motion/executor/status fields"
+            )
+            return
+        if not self.motion_in_progress:
+            self.get_logger().info(
+                "Executor status ignored: bridge has no active request"
+            )
+            return
+        key = (payload["command_id"], payload.get("event_id"), payload["request_id"], payload["motion_id"])
+        if key == getattr(self, "physical_request_key", None):
+            if payload["status"] == "SUCCEEDED":
+                self.stationary_since = time.monotonic()
+                # Replayed completion after a dwell must not restart the clock.
+                self.physical_request_key = None
+            elif payload["status"] != "QUEUED":
+                self.stationary_since = None
+                if payload["status"] in self.TERMINAL_STATUSES:
+                    self.physical_request_key = None
+        pickup_queue_failed = bool(
+            getattr(self, "pickup_queued_request", None) is not None
+            and payload["request_id"] == self.active_request_id
+            and payload["status"] in self.TERMINAL_STATUSES
+            and payload["status"] != "SUCCEEDED"
+        )
+        if self._handle_pickup_queue_status(payload):
+            return
+        is_active = payload["request_id"] == self.active_request_id
+        is_queued = payload["request_id"] == self.queued_request_id
+        if not is_active and not is_queued:
+            self.get_logger().warning(
+                "Executor status ignored: request_id mismatch"
+            )
+            return
+
+        action = self.active_action if is_active else self.queued_action
+        if is_active and self.transition_motion_id is not None:
+            if payload["motion_id"] != self.transition_motion_id:
+                return
+            if self.transition_dwell_until is not None:
+                # Neither an unsent preparation nor duplicate completion advances a pause.
+                return
+            backward = payload["motion_id"] in MotionCommandBridgeNode.BACKWARD_MOTION_IDS
+            ball_turn = MotionCommandBridgeNode._is_ball_stationary_turn(action, payload["motion_id"])
+            if payload["status"] == "SUCCEEDED" or (backward and payload["status"] == "FAILED"):
+                if not self._transition_has_existing_post_dwell(payload["motion_id"]):
+                    self.transition_pending_status = dict(payload)
+                    self.transition_dwell_until = (
+                        time.monotonic() + (MotionCommandBridgeNode.BALL_TURN_DWELL_SEC if ball_turn
+                                            else MotionCommandBridgeNode.BACKWARD_DWELL_SEC
+                                            if backward else MotionCommandBridgeNode.TRANSITION_DWELL_SEC)
+                    )
+                    self.publish_motion_status(
+                        status="RUNNING", action=action, command_id=self.active_command_id,
+                        event_id=self.active_event_id, request_id=self.active_request_id,
+                        motion_id=("__BALL_TURN_POST_DWELL__" if ball_turn else
+                                   "__BACKWARD_POST_DWELL__" if backward else "__TRANSITION_POST_DWELL__"),
+                        message="holding still for 0.5 seconds after "
+                                + ("ball stationary turn" if ball_turn else
+                                   "backward motion" if backward else "posture transition"),
+                    )
+                    return
+                self.transition_motion_id = None
+            elif payload["status"] in self.TERMINAL_STATUSES:
+                self.transition_motion_id = None
+        if (
+            is_active and action == "PICKUP_NOW"
+            and self.active_dwell_until is not None
+        ):
+            # A duplicate terminal status is not another failed motion.
+            return
+        if is_active and self.pending_turn_request is not None:
+            if payload["motion_id"] != self.turn_prepare_motion_id:
+                return
+            pending = self.pending_turn_request
+            if payload["status"] == "SUCCEEDED":
+                self.last_physical_motion_id = self.turn_prepare_motion_id
+                if action == "PICKUP_NOW":
+                    self.pickup_consecutive_motor_failures = 0
+                self.pending_turn_request = None
+                self.turn_prepare_motion_id = None
+                self._publish_executor_request(**pending, prepare_pickup_fine=False)
+                return
+            # Goal capture must start when walking actually starts, after preparation.
+            if (payload["status"] != "RUNNING" or not pending["motion_id"].startswith(
+                    ("goal_camera_90_forward_", "goal_camera_90_fine_forward_"))):
+                payload["motion_id"] = pending["motion_id"]
+            if payload["status"] in self.TERMINAL_STATUSES:
+                self.last_physical_motion_id = None
+                self.pending_turn_request = None
+                self.turn_prepare_motion_id = None
+                # Never let pickup's recoverable-motor policy skip preparation.
+                payload["message"] = (
+                    "motion transition preparation failed: "
+                    + payload["error_code"] + " " + payload["message"]
+                )
+                payload["error_code"] = (
+                    "TURN_PREPARATION_FAILED"
+                    if self._is_stationary_turn(pending["motion_id"])
+                    else "MOTION_PREPARATION_FAILED"
+                )
+        elif is_active and payload["motion_id"] == self.active_motion_id:
+            if payload["status"] == "SUCCEEDED":
+                self.last_physical_motion_id = physical_motion_id(payload["motion_id"])
+            elif payload["status"] in self.TERMINAL_STATUSES:
+                self.last_physical_motion_id = None
+        elif is_active and payload["motion_id"] in MotionCommandBridgeNode.TRANSITION_MOTION_IDS:
+            # Duplicate preparation completions must not finish the target motion.
+            return
+        if (
+            is_active
+            and action in self.ATOMIC_SEQUENCE_ACTIONS
+            and payload["motion_id"] != self.active_motion_id
+        ):
+            self.get_logger().warning(
+                "Executor status ignored: atomic motion_id mismatch"
+            )
+            return
+        if is_active and action == "PICKUP_NOW":
+            if payload["status"] == "SUCCEEDED":
+                self.pickup_consecutive_motor_failures = 0
+                self.pickup_last_stage_succeeded = True
+            elif payload["status"] == "FAILED":
+                self.pickup_last_stage_succeeded = False
+                self.last_pickup_motion_id = None
+                self.pickup_consecutive_motor_failures += 1
+                self.pickup_motor_failures.append({
+                    "motion_id": payload["motion_id"],
+                    "status": "FAILED",
+                    "error_code": payload["error_code"],
+                    "message": payload["message"],
+                })
+        continue_after_motor_fault = False
+        if (
+            is_active
+            and action == "PICKUP_NOW"
+            and not pickup_queue_failed
+            and payload["motion_id"] != "post_ball_camera_90"
+            and payload["motion_id"] != "ball_lost_camera_down_backward_2"
+            and payload["motion_id"] not in MotionCommandBridgeNode.TRANSITION_MOTION_IDS
+            and not (
+                self.pickup_fixed_sequence_started
+                and payload["motion_id"] == "pickup_fine_forward_0"
+            )
+            and payload["status"] == "FAILED"
+            and payload["error_code"] in RECOVERABLE_MOTOR_ERROR_CODES
+        ):
+            continue_after_motor_fault = (
+                self.pickup_consecutive_motor_failures
+                < MotionCommandBridgeNode.PICKUP_MOTOR_FAILURE_LIMIT
+            )
+            if not continue_after_motor_fault:
+                payload["message"] = (
+                    "consecutive motor failures; pickup sequence stopped: "
+                    + payload["message"]
+                )
+            self.get_logger().warning(
+                f"Pickup motor fault: motion_id={payload['motion_id']}, "
+                f"error_code={payload['error_code']}, "
+                f"continue_sequence={continue_after_motor_fault}"
+            )
+        stage_can_advance = (
+            payload["status"] == "SUCCEEDED" or continue_after_motor_fault
+        )
+        if is_active and action == "GO" and payload["status"] == "SUCCEEDED":
+            if payload["motion_id"] == self.HURDLE_FINAL_FINE_MOTION_ID:
+                self.hurdle_depth_fine_completed = True
+                self.hurdle_sequence_fine_completed = 1
+            elif payload["motion_id"] == "hurdle":
+                self.hurdle_depth_fine_completed = False
+                self.hurdle_sequence_fine_completed = 0
+                self.hurdle_fine_sequence_pending = False
+        if (
+            is_active
+            and action == "PICKUP_NOW"
+            and payload["status"] == "SUCCEEDED"
+        ):
+            self.last_pickup_motion_id = payload["motion_id"]
+            if (
+                payload["motion_id"] in MotionCommandBridgeNode.PICKUP_CRAB_PREPARE_MOTION_IDS
+                and self.pending_pickup_crab_motion_id is not None
+            ):
+                self.active_motion_id = self.pending_pickup_crab_motion_id
+                self.pending_pickup_crab_motion_id = None
+                self._publish_executor_request(
+                    action=action,
+                    command_id=self.active_command_id,
+                    event_id=self.active_event_id,
+                    request_id=self.active_request_id,
+                    motion_id=self.active_motion_id,
+                    timeout_ms=self.active_timeout_ms or self.DEFAULT_TIMEOUT_MS,
+                )
+                return
+        if (
+            is_active
+            and action == "PICKUP_NOW"
+            and payload["motion_id"] in MotionCommandBridgeNode.PICKUP_FINE_PREPARE_MOTION_IDS
+            and self.active_motion_id == payload["motion_id"]
+            and payload["status"] == "SUCCEEDED"
+        ):
+            self.active_motion_id = MotionCommandBridgeNode.PICKUP_FINE_PRE_DWELL_MARKER
+            self.pickup_positioning_dwell_motion_id = payload["motion_id"]
+            self.active_dwell_until = (
+                time.monotonic() + MotionCommandBridgeNode.PICKUP_FINE_PRE_DWELL_SEC
+            )
+            self.publish_motion_status(
+                status="RUNNING", action=action,
+                command_id=self.active_command_id, event_id=self.active_event_id,
+                request_id=self.active_request_id, motion_id=self.active_motion_id,
+                message="holding still for 0.5 seconds before pickup fine forward",
+            )
+            return
+        if (
+            is_active
+            and payload["status"] == "SUCCEEDED"
+            and payload["motion_id"] == self.active_motion_id
+        ):
+            self._record_goal_motion_success(payload["motion_id"])
+        if (
+            is_active
+            and action == "PICKUP_NOW"
+            and self.pickup_initial_align_correction_active
+            and stage_can_advance
+        ):
+            self._start_pickup_checkpoint_dwell(
+                self.FINE_ALIGN_MARKER
+                if self.pickup_fine_positioning_complete
+                else self.PICKUP_INITIAL_ALIGN_MARKER
+            )
+            return
+        if (
+            is_active
+            and action == "PICKUP_NOW"
+            and self.pickup_fine_align_correction_active
+            and stage_can_advance
+        ):
+            self._start_pickup_checkpoint_dwell(
+                self.FINE_ALIGN_MARKER
+            )
+            return
+        if (
+            is_active
+            and action == "PICKUP_NOW"
+            and self.pickup_post_backward_align_correction_active
+            and stage_can_advance
+        ):
+            self._start_pickup_checkpoint_dwell(
+                self.POST_BACKWARD_ALIGN_MARKER
+            )
+            return
+        if (
+            is_active
+            and stage_can_advance
+            and self._start_next_pickup_motion()
+        ):
+            return
+        motor_failures = (
+            self.pickup_motor_failures
+            if is_active and action == "PICKUP_NOW" else None
+        )
+        if is_queued and payload["status"] in self.TERMINAL_STATUSES:
+            self._clear_queued_request()
+        elif is_active and payload["status"] in self.TERMINAL_STATUSES:
+            self._clear_active_request()
+            if payload["status"] == "SUCCEEDED":
+                self._promote_queued_request()
+            else:
+                self._clear_queued_request()
+
+        self.publish_motion_status(
+            status=payload["status"],
+            command_id=payload["command_id"],
+            event_id=payload["event_id"],
+            request_id=payload["request_id"],
+            motion_id=payload["motion_id"],
+            action=action,
+            error_code=payload["error_code"],
+            message=payload["message"],
+            motor_failures=motor_failures,
+        )
+
+
+def main(args: list[str] | None = None) -> None:
+    """Run the bridge node."""
+    rclpy.init(args=args)
+    node = MotionCommandBridgeNode()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        if rclpy.ok():
+            rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()

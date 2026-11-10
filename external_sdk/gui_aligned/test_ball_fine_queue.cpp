@@ -136,7 +136,7 @@ int main(int argc, char** argv) {
         assert(player.succeeded());
         assert(hardware.goals == catalog.motion("t허들찐").frames().back().angles);
     }
-    // Include all cameras/counts and the source80 forward/recovery speed boundary.
+    // Include all cameras/counts and the source88 forward/recovery speed boundary.
     const auto check_pair = [&](const std::string& first, const std::string& second,
                                 bool fixed_head = false) {
         BallQueueHardware hardware;
@@ -167,6 +167,12 @@ int main(int argc, char** argv) {
         assert(player.completionSequence() == 2);
         assert(player.lastCompletedMotion() == second);
     };
+    // Near Ball approach now shares the regular two-cycle forward support.
+    for (const std::string turn : {"p제자리좌회전45(2회)", "t제자리우회전45도(3회)"}) {
+        check_pair("p전진45(2회)", turn);
+        check_pair(turn, "p전진45(2회)");
+    }
+    check_pair("p미세오뒤에서 오뒤45도", "p전진45(2회)");
     for (int camera : {0, 45, 90}) {
         const auto name = [camera](int count) {
             return "p제자리좌회전" + std::to_string(camera) + (camera == 45 ? "(" : "도(")
@@ -183,12 +189,12 @@ int main(int argc, char** argv) {
             }
         }
     }
-    // Source77 names must retain forward/recovery reservations at every boundary.
+    // Source88 names must retain forward/recovery reservations at every boundary.
     const std::vector<std::vector<std::string>> walking_groups{
         {"p전진45(2회)", "p전진45(4회)", "p전진45(6회)", "p전진45(8회)",
          "p라인복귀좌회전45도", "p라인복귀좌회전공용", "t라인복귀우실전", "t라인복귀우공용"},
         {"p전진90도(2회)", "p전진90도(4회)", "p전진90도(6회)",
-         "p라인복귀좌회전90도", "R라인복귀우회전90도"},
+         "p라인복귀좌회전90도", "t라인복귀우실전90도"},
         {"p전진실전0도(4회)", "p전진실전0도(6회)"},
     };
     for (const auto& group : walking_groups)
@@ -209,7 +215,7 @@ int main(int argc, char** argv) {
     const std::vector<std::vector<std::string>> crab_groups{
         {"tt미세왼옆0도", "tt미세왼옆0도(2회)"},
         {"t미세오옆꽃게(0도)-1회", "t미세오옆꽃게(0도)-2회"},
-        {"tt미세왼옆90도"},
+        {"tt미세왼옆90도", "tt미세왼옆90도(2회)"},
         {"t미세오옆꽃게90도(1회)", "t미세오옆꽃게90도(2회)"},
     };
     for (const auto& group : crab_groups)
@@ -219,9 +225,9 @@ int main(int argc, char** argv) {
     // The bridge dispatches posture changes and direction changes after completion,
     // not through queueNext. Exercise these real SDK start/completion boundaries.
     for (const auto& sequence : std::vector<std::vector<std::string>>{
-        {"찐공잡기전후진-2(2회)", "r공잡기 400", "찐공확인자세",
+        {"찐공잡기전후진-2(2회)", "r공잡기 400", "n공확인자세",
          "t공후 제자리우회전", "p전진45(4회)"},
-        {"찐공잡기전후진-2(2회)", "r공잡기500", "찐공확인자세",
+        {"찐공잡기전후진-2(2회)", "r공잡기500", "n공확인자세",
          "p공후 제자리좌회전", "p전진45(4회)"},
         {"p미세0도(10회)", "t허들찐", "p전진45(6회)"},
         {"p미세0도(5회)", "p미세오뒤에서 오뒤0도", "p라인복귀좌회전45도",
@@ -230,7 +236,7 @@ int main(int argc, char** argv) {
         {"p미세0도(5회)", "p미세오뒤에서 오뒤45도", "t라인복귀우실전",
          "p오뒤에서 미세오뒤(45도)", "p미세0도(5회)", "p미세0도(10회)",
          "t허들찐", "p전진45(6회)"},
-        {"찐공확인자세", "p공후 제자리좌회전", "p전진45(4회)"},
+        {"n공확인자세", "p공후 제자리좌회전", "p전진45(4회)"},
         {"R골넣기1번구역", "p골대후제자리좌회전", "p전진45(4회)"},
         {"R골넣기2번구역", "p골대후제자리좌회전", "p전진45(4회)"},
         {"R골넣기3번구역", "p골대후제자리좌회전", "p전진45(4회)"},
@@ -245,8 +251,8 @@ int main(int argc, char** argv) {
          "tt미세왼옆0도(2회)", "r왼옆에서 미세오뒤(0도)"},
         {"r미세오뒤에서 오옆0도", "tt미세왼옆0도(2회)", "r왼옆에서 오뒤0도"},
         {"r오뒤에서 오옆꽃게90도", "tt미세왼옆90도", "t미세오옆꽃게90도(1회)",
-         "tt미세왼옆90도", "r왼옆에서 미세오뒤(90도)"},
-        {"r미세오뒤에서 오옆 90도", "tt미세왼옆90도", "r왼옆에서 오뒤90도"},
+         "tt미세왼옆90도(2회)", "r왼옆에서 미세오뒤(90도)"},
+        {"r미세오뒤에서 오옆 90도", "tt미세왼옆90도(2회)", "r왼옆에서 오뒤90도"},
     }) {
         BallQueueHardware hardware;
         int ms = 0;
@@ -268,8 +274,9 @@ int main(int argc, char** argv) {
         assert(player.completionSequence() == sequence.size());
     }
     std::cout << "Six alignment chains, 75 fine pairs, 108 left-turn pairs, "
+                 "five near-Ball two-cycle transition pairs, "
                  "24 walking/preparation pairs, 93 forward/recovery pairs, "
-                 "13 crab queue pairs, four crab chains, three camera transition chains, "
+                 "16 crab queue pairs, four crab chains, three camera transition chains, "
                  "five source79 exit chains, two source80 pickup chains, hurdle exit, "
                  "two hurdle fine/recovery chains, "
                  "12 goal head-override pairs and rejected shortcuts passed\n";

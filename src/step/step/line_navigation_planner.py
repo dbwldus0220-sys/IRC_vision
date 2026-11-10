@@ -11,6 +11,8 @@ from .approach_distance import approach_level_from_motion
 
 
 LINE_RECOVERY_TURN_ANGLES_DEG = {"LEFT": -30.0, "RIGHT": 20.0}
+LINE_RECOVERY_MIN_ANGLE_DEG = 15.0
+LINE_RECOVERY_MAX_ANGLE_DEG = 50.0
 
 RECOVERY_TURN_STEP_DEG = 15
 RECOVERY_TURN_MAX_LEVEL = 6
@@ -29,8 +31,8 @@ class NavigationConfig:
     min_linear_speed_mps: float = 0.015
     recovery_lateral_speed_mps: float = 0.025
     recovery_turn_speed_rad_s: float = 0.22
-    recovery_heading_turn_deg: float = 15.0
-    recovery_away_heading_turn_deg: float = 15.0
+    recovery_heading_turn_deg: float = LINE_RECOVERY_MIN_ANGLE_DEG
+    recovery_away_heading_turn_deg: float = LINE_RECOVERY_MIN_ANGLE_DEG
     curve_follow_max_offset_norm: float = 0.55
     recovery_straight_offset_norm: float = 0.45
     recovery_parallel_heading_deg: float = 2.0
@@ -51,7 +53,7 @@ class NavigationConfig:
     recovery_exit_offset_norm: float = 0.12
     command_duration_sec: float = 0.40
     heading_source: str = "ground"
-    in_place_ground_heading_deg: float = 45.0
+    in_place_ground_heading_deg: float = LINE_RECOVERY_MAX_ANGLE_DEG
     straight_max_heading_deg: float = 10.0
     straight_max_image_heading_deg: float = 25.0
 
@@ -366,8 +368,7 @@ class LineNavigationPlanner:
         if quality < self.config.min_line_quality:
             return self.stop("low_line_quality")
 
-        if (self.config.heading_source == "ground"
-                and abs(heading) > self.config.in_place_ground_heading_deg):
+        if abs(heading) > self.config.in_place_ground_heading_deg:
             direction = "RIGHT" if heading > 0.0 else "LEFT"
             # The mission planner resolves this request using calibrated catalog yaw.
             return replace(
@@ -481,9 +482,9 @@ class LineNavigationPlanner:
             requested_motion = "STRAIGHT"
         turn_approach_pending = bool(
             (requested_motion == "RIGHT"
-             and heading <= self.config.turn_min_heading_deg)
+             and heading < max(self.config.turn_min_heading_deg, self.config.recovery_heading_turn_deg))
             or (requested_motion == "LEFT"
-                and heading >= -self.config.turn_min_heading_deg)
+                and heading > -max(self.config.turn_min_heading_deg, self.config.recovery_heading_turn_deg))
         )
         if turn_approach_pending:
             requested_motion = "STRAIGHT"

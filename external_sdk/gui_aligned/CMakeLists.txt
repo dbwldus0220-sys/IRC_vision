@@ -109,3 +109,9 @@ target_link_libraries(test_ball_fine_queue PRIVATE motion_player_core)
 target_compile_options(test_ball_fine_queue PRIVATE -UNDEBUG)
 add_test(NAME ball_fine_queue_contract COMMAND test_ball_fine_queue
     ${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/robot_motions_runtime.json)
+
+add_executable(test_ring_shot test_ring_shot.cpp)
+target_link_libraries(test_ring_shot PRIVATE motion_player_core)
+target_compile_options(test_ring_shot PRIVATE -UNDEBUG)
+add_test(NAME ring_shot_contract COMMAND test_ring_shot
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../artifacts/robot_motions_runtime.json)

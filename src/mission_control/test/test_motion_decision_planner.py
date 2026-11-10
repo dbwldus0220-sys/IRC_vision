@@ -1469,7 +1469,7 @@ def test_goal_left_deadband_keeps_distance_based_forward(bearing):
 
 
 @pytest.mark.parametrize("angle,count", [(7.999, 0), (8.0, 1), (14.999, 1), (15.0, 1), (15.001, 1), (20.0, 1), (20.001, 1), (30.0, 2), (45.0, 3)])
-def test_ball_approach_bypasses_turns_and_post_shot_uses_left_eight_degree_minimum(angle, count):
+def test_ball_approach_bypasses_turns_and_post_shot_uses_fifteen_degree_minimum(angle, count):
     planner = MotionDecisionPlanner()
     ball = planner.plan_ball_approach_alignment(
         ball_info(steering_angle_deg=-angle, bearing_deg=-angle),
@@ -1480,7 +1480,7 @@ def test_ball_approach_bypasses_turns_and_post_shot_uses_left_eight_degree_minim
         observations(line=line_info(ground_heading_error_deg=-angle)), 0.1,
     )
     assert line.action == (
-        f"POST_SHOT_LINE_TURN_LEFT_{count}" if count
+        f"POST_SHOT_LINE_TURN_LEFT_{count}" if angle >= 15.0
         else "POST_SHOT_LINE_ALIGNED"
     )
 
@@ -2989,6 +2989,9 @@ def test_alignment_uses_shared_turn_table_in_ball_line_and_goal_stages(
          "POST_SHOT_LINE", "POST_SHOT_LINE_ALIGNED"),
     ):
         assert decision.valid
+        if prefix == "POST_SHOT_LINE" and angle < 15.0:
+            assert decision.action == aligned_action
+            continue
         if expected_count == 0:
             assert decision.action == aligned_action
         else:
@@ -3173,7 +3176,7 @@ def test_completed_hurdle_releases_close_turn_block_for_next_hurdle():
         line=line_info(robot_center_x_px=710,
                        center_points_px=[[500, 650], [500, 580], [500, 250]]),
     ), 0.1)
-    assert next_hurdle.action == "RECOVER_LEFT_TURN_LEFT_4"
+    assert next_hurdle.action == "ALIGN_LEFT"
 
 
 @pytest.mark.parametrize("phase", ["AUTO", "LINE_TRACK", "HURDLE_APPROACH", "HURDLE_SEARCH"])

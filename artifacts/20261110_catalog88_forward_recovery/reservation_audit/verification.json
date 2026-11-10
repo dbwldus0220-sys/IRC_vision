@@ -1,0 +1,41 @@
+{
+  "hardware_executed": false,
+  "production_code_changed": false,
+  "cadence_cases": 72,
+  "prequeued_before_end": 72,
+  "resumed_cases": 72,
+  "minimum_simulated_queue_lead_sec": 0.2081,
+  "maximum_executor_requests_per_cadence_case": 2,
+  "fps": [
+    10,
+    20,
+    25
+  ],
+  "delivery_delay_sec": [
+    0.05,
+    0.15,
+    0.25
+  ],
+  "rejected_reservation_recovery": [
+    {
+      "action": "STRAIGHT",
+      "rejection_cleared": true,
+      "resumed": "STRAIGHT"
+    },
+    {
+      "action": "RECOVER_LEFT_TURN_LEFT_4",
+      "rejection_cleared": true,
+      "resumed": "STRAIGHT"
+    },
+    {
+      "action": "RECOVER_RIGHT_TURN_RIGHT_4",
+      "rejection_cleared": true,
+      "resumed": "STRAIGHT"
+    }
+  ],
+  "contracts_summary": "16 failed, 195 passed in 3.58s",
+  "release_paths_summary": "20 failed, 29 passed in 1.12s",
+  "pre_existing_legacy_test_failures": 36,
+  "failures_absent_from_prechange_baseline": [],
+  "limits": "Synthetic periodic vision and executor status callbacks; does not measure motor load, real scheduling delay, camera dropout or physical gait stability."
+}

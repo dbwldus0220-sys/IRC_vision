@@ -1,0 +1,11 @@
+{
+  "python_passed": 265,
+  "accepted_queue_cases_passed": 12,
+  "cpp_suites_passed": 4,
+  "catalog_motion_count": 156,
+  "other_motions_unchanged": 150,
+  "aliases_unchanged": true,
+  "source_timing_and_speed_preserved": true,
+  "waist_hold": "throwing frames only; last 500 ms return pose remains original",
+  "hardware_executed": false
+}

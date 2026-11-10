@@ -1,0 +1,19 @@
+Internal ctest changing into directory: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+Test project /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+    Start 12: test_ring_shot_core
+1/5 Test #12: test_ring_shot_core ................   Passed    0.21 sec
+    Start 13: test_queue_control_tick
+2/5 Test #13: test_queue_control_tick ............   Passed    0.17 sec
+    Start 14: test_robot_motion_player_backend
+3/5 Test #14: test_robot_motion_player_backend ...   Passed    0.16 sec
+    Start 32: sdk_cmake_fake_sdk_build
+4/5 Test #32: sdk_cmake_fake_sdk_build ...........   Passed   57.06 sec
+    Start 42: ring_shot_contract
+5/5 Test #42: ring_shot_contract .................   Passed    2.61 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Label Time Summary:
+gtest    =   0.54 sec*proc (3 tests)
+
+Total Test time (real) =  60.22 sec

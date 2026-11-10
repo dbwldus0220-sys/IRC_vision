@@ -69,6 +69,7 @@ def test_local_line_tracking_ignores_corner_preview(direction, preview_field):
     assert sample == original
 
     # The restriction must end with the mission phase, not latch globally.
+    sample['ground_heading_error_deg'] = direction * 15.0
     for _ in range(3):
         command = planner.plan(sample, 0.1)
     assert command.motion == ("RIGHT" if direction > 0 else "LEFT")
@@ -128,7 +129,7 @@ def test_line_straight_action_does_not_use_distance_buckets(reported_depth):
 
 @pytest.mark.parametrize(
     ("heading", "expected"),
-    [(14.0, "RIGHT"), (-14.0, "LEFT")],
+    [(14.0, "STRAIGHT"), (-14.0, "STRAIGHT"), (15.0, "RIGHT"), (-15.0, "LEFT")],
 )
 def test_heading_sign_selects_turn_direction(heading, expected):
     planner = LineNavigationPlanner(NavigationConfig(heading_source="ground"))
@@ -283,7 +284,7 @@ def test_far_curve_turn_starts_after_near_heading_reaches_corner():
 
     command = planner.plan(
         line_info(
-            ground_heading_error_deg=6.0,
+        ground_heading_error_deg=15.0,
             filtered_lateral_offset_norm=0.1,
             turn_angle_deg=80.0,
         ),
@@ -498,7 +499,7 @@ def test_explicit_asymmetric_heading_deadband_remains_configurable(
         (90.0, 6),
     ],
 )
-def test_right_recovery_switches_to_stationary_above_45_degrees(
+def test_right_recovery_switches_to_stationary_above_50_degrees(
     heading,
     expected_level,
 ):
@@ -515,7 +516,7 @@ def test_right_recovery_switches_to_stationary_above_45_degrees(
     )
     payload = command.to_dict()
 
-    if heading > 45.0:
+    if heading > 50.0:
         assert command.motion == "LINE_HEADING_TURN_RIGHT"
         assert command.linear_speed_mps == command.lateral_speed_mps == 0.0
         assert payload["recovery_side"] is None
@@ -626,8 +627,10 @@ def test_reliable_opposite_preview_still_suppresses_plain_right():
 @pytest.mark.parametrize(
     ("offset", "heading", "curve_turn", "expected"),
     [
-        (0.273, 6.3, 48.8, "RIGHT"),
-        (-0.273, -6.3, -48.8, "LEFT"),
+        (0.273, 6.3, 48.8, "STRAIGHT"),
+        (-0.273, -6.3, -48.8, "STRAIGHT"),
+        (0.273, 15.0, 48.8, "RIGHT"),
+        (-0.273, -15.0, -48.8, "LEFT"),
     ],
 )
 def test_matching_curve_ignores_normal_turn_induced_offset(

@@ -79,7 +79,7 @@ def test_ball_at_68cm_uses_four_repeat_forward():
         (0.80, "STRAIGHT"),
         (1.50, "STRAIGHT"),
         (0.70, "STRAIGHT"),
-        (0.60, "BALL_APPROACH_FINE_FORWARD_5"),
+        (0.60, "BALL_APPROACH_FORWARD_2"),
         (0.50, "PICKUP_NOW"),
     ],
 )
@@ -213,7 +213,7 @@ def test_580mm_fine_walks_without_entering_camera_down_pickup():
         0.1,
     )
 
-    assert command.motion == "BALL_APPROACH_FINE_FORWARD_5"
+    assert command.motion == "BALL_APPROACH_FORWARD_2"
     assert command.pickup_now is False
 
 
@@ -302,7 +302,7 @@ def test_bottom_center_path_angle_has_priority_over_camera_bearing():
         0.1,
     )
 
-    assert command.motion == "BALL_APPROACH_FINE_FORWARD_5"
+    assert command.motion == "BALL_APPROACH_FORWARD_2"
     assert command.linear_speed_mps > 0.0
 
 
@@ -419,7 +419,7 @@ def test_ball_occurrence_does_not_change_straight_distance_bucket(
         0.1,
     )
 
-    assert command.motion == ("BALL_APPROACH_FINE_FORWARD_5" if ground_distance <= .6 else "STRAIGHT")
+    assert command.motion == ("BALL_APPROACH_FORWARD_2" if ground_distance <= .6 else "STRAIGHT")
     assert command.linear_speed_mps > 0.0
     assert command.reason == "ball_aligned_discrete_approach"
 
@@ -466,9 +466,9 @@ def test_unsafe_input_produces_stop(sample, reason):
 
 @pytest.mark.parametrize("distance,expected", [
     (0.499, "STRAIGHT_0"), (0.500, "STRAIGHT_0"),
-    (0.500001, "BALL_APPROACH_FINE_FORWARD_5"),
-    (0.550, "BALL_APPROACH_FINE_FORWARD_5"),
-    (0.6, "BALL_APPROACH_FINE_FORWARD_5"), (0.600001, "STRAIGHT"), (0.7, "STRAIGHT"),
+    (0.500001, "BALL_APPROACH_FORWARD_2"),
+    (0.550, "BALL_APPROACH_FORWARD_2"),
+    (0.6, "BALL_APPROACH_FORWARD_2"), (0.600001, "STRAIGHT"), (0.7, "STRAIGHT"),
 ])
 def test_general_ball_500mm_boundary_when_pickup_entry_is_lower(distance, expected):
     planner = BallNavigationPlanner(BallNavigationConfig(

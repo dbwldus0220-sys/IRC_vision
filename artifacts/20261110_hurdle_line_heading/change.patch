@@ -1,0 +1,842 @@
+--- before/src/mission_control/mission_control/hurdle_line_fusion.py
++++ after/src/mission_control/mission_control/hurdle_line_fusion.py
+@@ -55,6 +55,34 @@
+ 
+ 
+ def build_hurdle_path_reference(
++    hurdle_info: dict[str, Any] | None,
++    line_info: dict[str, Any] | None,
++) -> dict[str, Any]:
++    """Attach fresh image heading independently of the diagnostic intersection."""
++    reference = _build_hurdle_intersection_reference(hurdle_info, line_info)
++    heading = _number(line_info, "filtered_heading_error_deg")
++    if heading is None:
++        heading = _number(line_info, "heading_error_deg")
++    qualities = [
++        _number(line_info, key)
++        for key in ("heading_quality", "geometry_quality", "detection_quality")
++    ]
++    qualities = [quality for quality in qualities if quality is not None]
++    valid = bool(
++        line_info and line_info.get("detected") is True
++        and heading is not None and abs(heading) <= 90.0
++        and qualities and min(qualities) >= 0.35
++    )
++    # The ground homography is not calibrated for the lowered hurdle camera.
++    reference.update(
++        line_heading_valid=valid,
++        line_heading_deg=heading if valid else None,
++        line_heading_reference_source="fresh" if valid else "none",
++    )
++    return reference
++
++
++def _build_hurdle_intersection_reference(
+     hurdle_info: dict[str, Any] | None,
+     line_info: dict[str, Any] | None,
+ ) -> dict[str, Any]:
+--- before/src/mission_control/mission_control/motion_decision_planner.py
++++ after/src/mission_control/mission_control/motion_decision_planner.py
+@@ -344,8 +344,7 @@
+             self.hurdle_lock_active or normalized_phase == "HURDLE_POSITIONING"
+         )
+         if source == "hurdle" and info is not None:
+-            # Steering uses current intersection geometry, never a held target
+-            # left over from before a recovery turn.
++            # Heading comes from the current line observation, never a held target.
+             reference = build_hurdle_path_reference(info, observations.get("line"))
+             info = {**info, **reference, "hurdle_positioning_active": hurdle_positioning}
+         command = self._plan_source(source, info, dt_sec)
+@@ -356,8 +355,7 @@
+                 if command.get("reason") in {
+                     "hurdle_lost_search_last_side", "hurdle_lost_below_image",
+                 }
+-                else "hurdle_parallel_angle" if command.get("recovery_active")
+-                else "line_hurdle_intersection"
++                else "line_image_heading"
+             )
+         if source == "hurdle":
+             command["hurdle_stage"] = "FINE_APPROACH" if hurdle_positioning else "RECOGNITION_APPROACH"
+@@ -430,7 +428,14 @@
+                 and self.hurdle_path_reference_age_sec
+                 <= self.config.hurdle_path_reference_hold_sec
+             ):
+-                reference = dict(self.last_hurdle_path_reference)
++                # Holding intersection diagnostics must not hold a steering heading.
++                reference = {
++                    **self.last_hurdle_path_reference,
++                    **{key: reference[key] for key in (
++                        "line_heading_valid", "line_heading_deg",
++                        "line_heading_reference_source",
++                    )},
++                }
+                 reference["path_reference_source"] = "held"
+                 reference["path_reference_reason"] = (
+                     "temporarily_held_line_hurdle_intersection"
+@@ -815,7 +820,8 @@
+             # Both sides use measured geometry; blind searches keep an explicit count.
+             count = command.turn_count
+             angle = (command.center_steering_deg
+-                     if command.reason == "hurdle_intersection_heading_alignment"
++                     if command.reason in {"hurdle_line_heading_alignment",
++                                           "hurdle_reacquired_line_alignment"}
+                      else command.hurdle_angle_deg)
+             if angle is None:
+                 angle = command.center_steering_deg
+--- before/src/mission_control/test/test_hurdle_heading_only.py
++++ after/src/mission_control/test/test_hurdle_heading_only.py
+@@ -1,6 +1,4 @@
+ """Direction-only hurdle alignment and the 450mm atomic checkpoint."""
+-
+-import math
+ 
+ import pytest
+ 
+@@ -21,8 +19,9 @@
+ def test_angle_alone_selects_direction_even_inside_old_pixel_deadband(depth, offset, angle, action):
+     command = HurdleNavigationPlanner().plan({
+         **hurdle(depth), 'path_reference_valid': True,
+-        'path_offset_x_norm': offset, 'path_target_bearing_deg': angle,
+-        'path_reference_source': 'fresh',
++        'path_offset_x_norm': offset, 'path_target_bearing_deg': -89.,
++        'line_heading_valid': True, 'line_heading_deg': angle,
++        'line_heading_reference_source': 'fresh',
+     }, positioning=True)
+     expected = 'STRAIGHT_0' if action == 'STRAIGHT' and depth <= .7 else action
+     assert command.valid and command.action == expected
+@@ -31,17 +30,19 @@
+ 
+ @pytest.mark.parametrize('angle,count', [(-15., 1), (-30., 2), (-45., 3),
+                                        (15., 1), (30., 3), (45., 5)])
+-def test_actual_fusion_and_bridge_use_target_angle_not_hurdle_parallel_angle(angle, count):
+-    # A target near the image bottom can exceed 15 degrees inside the former 64px band.
+-    target_y = 600
+-    target_x = 710 + (719 - target_y) * math.tan(math.radians(angle))
+-    observations = {'hurdle': hurdle(.6, bbox=[400, 300, 1000, target_y],
++def test_actual_fusion_and_bridge_use_line_heading_not_intersection_or_parallel_angle(angle, count):
++    # The diagnostic intersection is on the opposite side of the requested heading.
++    observations = {'hurdle': hurdle(.6, bbox=[400, 300, 1000, 719],
+                                     hurdle_angle_deg=-80 if angle > 0 else 80),
+-                    'line': line_info(x=target_x)}
++                    'line': {**line_info(x=500 if angle > 0 else 900, heading=angle),
++                             'center_points_px': [[500 if angle > 0 else 900, y]
++                                                  for y in (250, 180, 100)]}}
+     planner = MotionDecisionPlanner()
+     decision = planner.plan('AUTO', observations, .1)
+     direction = 'LEFT' if angle < 0 else 'RIGHT'
+     assert decision.action == f'ALIGN_{direction}'
++    assert decision.source_command['path_reference_valid']
++    assert decision.source_command['path_target_bearing_deg'] * angle < 0
+     assert decision.source_command['turn_count'] == count
+     assert not decision.requires_ack
+     limiter = LostSearchTurnLimiter()
+@@ -69,10 +70,11 @@
+ 
+ 
+ @pytest.mark.parametrize('angle', [None, float('nan'), float('inf')])
+-def test_fresh_intersection_without_valid_direction_does_not_authorize_motion(angle):
++def test_fresh_heading_marked_valid_without_numeric_angle_does_not_authorize_motion(angle):
+     command = HurdleNavigationPlanner().plan({
+         **hurdle(.6), 'path_reference_valid': True, 'path_offset_x_norm': 0,
+-        'path_target_bearing_deg': angle,
++        'line_heading_valid': True, 'line_heading_deg': angle,
++        'line_heading_reference_source': 'fresh',
+     }, positioning=True)
+     assert not command.valid and command.action == 'WAIT'
+ 
+@@ -82,7 +84,8 @@
+ def test_proximity_guards_and_final_priority_remain_explicit(depth, bottom):
+     command = HurdleNavigationPlanner().plan({
+         **hurdle(depth, bottom_distance_px=bottom), 'path_reference_valid': True,
+-        'path_target_bearing_deg': 30., 'path_offset_x_norm': .01,
++        'line_heading_valid': True, 'line_heading_deg': 30.,
++        'line_heading_reference_source': 'fresh', 'path_offset_x_norm': .01,
+     }, positioning=True)
+     if depth <= .45:
+         assert command.action == 'GO'
+@@ -92,3 +95,29 @@
+         assert command.action == ('STRAIGHT_0' if depth <= .7 else 'WAIT')
+     else:
+         assert command.action == 'ALIGN_RIGHT'
++
++
++@pytest.mark.parametrize('heading', [1, 5, 13])
++def test_small_line_slope_does_not_turn_toward_large_intersection_or_parallel_angle(heading):
++    decision = MotionDecisionPlanner().plan('AUTO', {
++        'hurdle': hurdle(.6, bbox=[400, 300, 1000, 719], hurdle_angle_deg=20.2),
++        'line': {**line_info(x=500, heading=heading),
++                 'center_points_px': [[500, 250], [500, 180], [500, 100]]},
++    }, .1)
++    assert abs(decision.source_command['path_target_bearing_deg']) > 89
++    assert decision.valid and decision.action == 'STRAIGHT_0'
++    assert decision.source_command['center_steering_deg'] == heading
++    assert 'turn_count' not in decision.source_command
++
++
++def test_reacquired_hurdle_waits_for_line_then_releases_final_sequence():
++    planner = MotionDecisionPlanner()
++    planner.plan('AUTO', {'hurdle': hurdle(.6, camera_center_offset_x_px=400)}, .1)
++    planner.plan('AUTO', {'hurdle': {'detected': False}}, .1)
++    near = hurdle(.43, hurdle_angle_deg=40)
++    waiting = planner.plan('AUTO', {'hurdle': near}, .1)
++    assert waiting.reason == 'hurdle_recovery_waiting_for_line_heading'
++    assert not waiting.valid and not planner.hurdle_go_requested
++    ready = planner.plan('AUTO', {'hurdle': near, 'line': line_info(heading=5)}, .1)
++    assert ready.valid and ready.action == 'GO'
++    assert not planner.hurdle_planner.recovery_active
+--- before/src/mission_control/test/test_hurdle_intersection_recovery.py
++++ after/src/mission_control/test/test_hurdle_intersection_recovery.py
+@@ -1,4 +1,4 @@
+-"""Keep fine entry at 700mm and intersection correction until 450mm."""
++"""Keep fine entry at 700mm and line-heading correction until 450mm."""
+ 
+ import pytest
+ 
+@@ -10,16 +10,16 @@
+ 
+ @pytest.mark.parametrize('x,direction', [(500, 'LEFT'), (900, 'RIGHT')])
+ @pytest.mark.parametrize('depth', [1.0, 0.8, 0.700001, .7, .6, .450001])
+-def test_intersection_angle_selects_actual_stationary_motion(x, direction, depth):
++def test_line_heading_selects_actual_stationary_motion(x, direction, depth):
+     decision = MotionDecisionPlanner().plan('AUTO', {
+         'hurdle': hurdle(depth, camera_center_offset_x_px=600 if x < 710 else -600,
+                           hurdle_angle_deg=None),
+-        'line': line_info(x=x),
++        'line': line_info(x=x, heading=-40 if direction == "LEFT" else 40),
+     }, .1)
+     assert decision.action == f'ALIGN_{direction}'
+     assert decision.source == 'hurdle'
+     assert decision.source_command['path_reference_point_px'] == [x, 500]
+-    assert decision.source_command['alignment_reference'] == 'line_hurdle_intersection'
++    assert decision.source_command['alignment_reference'] == 'line_image_heading'
+     assert not decision.requires_ack
+     bridge = FakeBridge()
+     bridge.navigation_command_callback(navigation_message(
+@@ -30,13 +30,13 @@
+     ]
+ 
+ 
+-@pytest.mark.parametrize('x,action', [
+-    (645, 'ALIGN_LEFT'), (646, 'ALIGN_LEFT'), (660, 'STRAIGHT'),
+-    (710, 'STRAIGHT'), (760, 'STRAIGHT'), (774, 'ALIGN_RIGHT'), (775, 'ALIGN_RIGHT'),
++@pytest.mark.parametrize('angle,action', [
++    (-15, 'ALIGN_LEFT'), (-14.999, 'STRAIGHT'), (0, 'STRAIGHT'),
++    (14.999, 'STRAIGHT'), (15, 'ALIGN_RIGHT'),
+ ])
+-def test_angle_threshold_replaces_pixel_deadband(x, action):
++def test_line_heading_threshold_replaces_intersection_angle(angle, action):
+     decision = MotionDecisionPlanner().plan('AUTO', {
+-        'hurdle': hurdle(.8), 'line': line_info(x=x),
++        'hurdle': hurdle(.8), 'line': line_info(x=900, heading=angle),
+     }, .1)
+     assert decision.action == action
+ 
+@@ -47,7 +47,7 @@
+                                         (.45, 'GO'), (.449999, 'GO')])
+ def test_exact_fine_entry_boundary(depth, action):
+     decision = MotionDecisionPlanner().plan('AUTO', {
+-        'hurdle': hurdle(depth), 'line': line_info(x=500),
++        'hurdle': hurdle(depth), 'line': line_info(x=500, heading=-40),
+     }, .1)
+     assert decision.action == action
+ 
+@@ -55,7 +55,7 @@
+ def test_fine_entry_latches_through_depth_rebound_and_resets_after_hurdle():
+     planner = MotionDecisionPlanner()
+     planner.plan('AUTO', {'hurdle': hurdle(.7)}, .1)
+-    rebound = planner.plan('AUTO', {'hurdle': hurdle(.85), 'line': line_info(x=900)}, .1)
++    rebound = planner.plan('AUTO', {'hurdle': hurdle(.85), 'line': line_info(x=900, heading=40)}, .1)
+     assert rebound.action == 'ALIGN_RIGHT'
+     assert not rebound.source_command['close_rotation_blocked']
+     assert planner.hurdle_planner.fine_approach_active
+@@ -64,14 +64,15 @@
+     assert centered.action == 'STRAIGHT_0'
+     planner.plan('HURDLE_DONE', {'hurdle': {'detected': False}}, .1)
+     planner.plan('AUTO', {'hurdle': {'detected': False}}, .1)
+-    new_hurdle = planner.plan('AUTO', {'hurdle': hurdle(.8), 'line': line_info(x=900)}, .1)
++    new_hurdle = planner.plan('AUTO', {'hurdle': hurdle(.8), 'line': line_info(x=900, heading=40)}, .1)
+     assert new_hurdle.action == 'ALIGN_RIGHT'
+ 
+ 
+-@pytest.mark.parametrize('line', [None, {'detected': False}, line_info(x=1100)])
+-def test_invalid_intersection_waits_without_center_fallback(line):
++@pytest.mark.parametrize('line', [None, {'detected': False},
++                                       {**line_info(), 'filtered_heading_error_deg': None}])
++def test_missing_heading_waits_without_intersection_or_center_fallback(line):
+     planner = MotionDecisionPlanner()
+-    planner.plan('AUTO', {'hurdle': hurdle(.8), 'line': line_info(x=500)}, .1)
++    planner.plan('AUTO', {'hurdle': hurdle(.8), 'line': line_info(x=500, heading=-40)}, .1)
+     decision = planner.plan('AUTO', {'hurdle': hurdle(.8), 'line': line}, .1)
+     assert decision.action == 'WAIT' and not decision.valid
+ 
+@@ -79,7 +80,7 @@
+ @pytest.mark.parametrize('bottom', [100, None, -1])
+ def test_coarse_recovery_cannot_bypass_bottom_guard(bottom):
+     decision = MotionDecisionPlanner().plan('AUTO', {
+-        'hurdle': hurdle(.8, bottom_distance_px=bottom), 'line': line_info(x=500),
++        'hurdle': hurdle(.8, bottom_distance_px=bottom), 'line': line_info(x=500, heading=-40),
+     }, .1)
+     assert decision.action == 'WAIT' and not decision.valid
+ 
+--- before/src/mission_control/test/test_hurdle_line_fusion.py
++++ after/src/mission_control/test/test_hurdle_line_fusion.py
+@@ -3,6 +3,8 @@
+ import pytest
+ 
+ from mission_control.hurdle_line_fusion import build_hurdle_path_reference
++from mission_control.motion_decision_planner import MotionDecisionPlanner
++from test_hurdle_positioning import hurdle, line_info
+ 
+ 
+ def test_route_line_is_extended_to_hurdle_lower_edge():
+@@ -55,3 +57,56 @@
+     assert result["path_reference_valid"] is True
+     assert result["path_reference_point_px"] == [800, 500]
+     assert len(result["path_support_points_px"]) == 3
++
++
++@pytest.mark.parametrize("x", [200, 500, 900, 1100])
++def test_heading_is_independent_of_intersection_position_and_validity(x):
++    result = build_hurdle_path_reference(hurdle(.8), line_info(x=x, heading=25))
++    assert result["line_heading_valid"]
++    assert result["line_heading_deg"] == 25
++    assert result["path_reference_valid"] == (400 <= x <= 1000)
++    decision = MotionDecisionPlanner().plan("AUTO", {
++        "hurdle": hurdle(.8), "line": line_info(x=x, heading=25),
++    }, .1)
++    assert decision.action == "ALIGN_RIGHT"
++    assert decision.source_command["turn_count"] == 1
++
++
++def test_filtered_image_heading_is_preferred_over_raw_and_ground_heading():
++    line = {**line_info(heading=25), "heading_error_deg": -40,
++            "ground_heading_error_deg": -60, "ground_fit_valid": True}
++    result = build_hurdle_path_reference(hurdle(.6), line)
++    assert result["line_heading_deg"] == 25
++    line["filtered_heading_error_deg"] = None
++    assert build_hurdle_path_reference(hurdle(.6), line)["line_heading_deg"] == -40
++
++
++@pytest.mark.parametrize("updates", [
++    {"detected": False}, {"heading_quality": .34}, {"geometry_quality": .34},
++    {"filtered_heading_error_deg": None, "heading_error_deg": None},
++    {"filtered_heading_error_deg": float("nan"), "heading_error_deg": float("inf")},
++    {"filtered_heading_error_deg": 91},
++])
++def test_bad_heading_waits_in_coarse_approach_and_fresh_heading_releases_it(updates):
++    planner = MotionDecisionPlanner()
++    info = hurdle(.8)
++    decision = planner.plan("AUTO", {"hurdle": info, "line": {**line_info(), **updates}}, .1)
++    assert not decision.valid and decision.action == "WAIT"
++    resumed = planner.plan("AUTO", {"hurdle": info, "line": line_info(heading=-30)}, .1)
++    assert resumed.valid and resumed.action == "ALIGN_LEFT"
++    assert resumed.source_command["turn_count"] == 2
++
++
++def test_held_intersection_does_not_reuse_old_heading():
++    planner = MotionDecisionPlanner()
++    planner._hurdle_observation_with_path(hurdle(.8), line_info(heading=40), .1)
++    info, reference = planner._hurdle_observation_with_path(hurdle(.8), None, .1)
++    assert reference["path_reference_source"] == "held"
++    assert not reference["line_heading_valid"]
++    assert planner.hurdle_planner.plan(info, positioning=True).action == "WAIT"
++    info, reference = planner._hurdle_observation_with_path(
++        hurdle(.8), line_info(x=1100, heading=-30), .1,
++    )
++    assert reference["path_reference_source"] == "held"
++    assert reference["line_heading_reference_source"] == "fresh"
++    assert planner.hurdle_planner.plan(info, positioning=True).action == "ALIGN_LEFT"
+--- before/src/mission_control/test/test_hurdle_lost_recovery.py
++++ after/src/mission_control/test/test_hurdle_lost_recovery.py
+@@ -4,7 +4,7 @@
+ 
+ from mission_control.motion_decision_planner import MotionDecisionPlanner
+ from step.hurdle_navigation_planner import HurdleNavigationPlanner
+-from test_hurdle_positioning import HurdleHarness, clock, hurdle
++from test_hurdle_positioning import HurdleHarness, clock, hurdle, line_info
+ from test_mission_phase_flow import release_general
+ from test_motion_command_bridge import FakeBridge, decoded_messages, navigation_message
+ 
+@@ -31,21 +31,21 @@
+         assert requests[-1]["motion_id"] == f"post_ball_line_turn_{direction.lower()}_{count}"
+ 
+ 
+-@pytest.mark.parametrize("angle,direction,count", [(12, "LEFT", 1), (-15, "RIGHT", 1),
+-                                                 (-60, "RIGHT", 6), (-75, "RIGHT", 7),
+-                                                 (-90, "RIGHT", 9)])
+-def test_reacquisition_aligns_parallel_before_near_go(angle, direction, count):
++@pytest.mark.parametrize("angle,direction,count", [(-15, "LEFT", 1), (15, "RIGHT", 1),
++                                                 (60, "RIGHT", 6), (75, "RIGHT", 7),
++                                                 (90, "RIGHT", 9)])
++def test_reacquisition_aligns_line_before_near_go(angle, direction, count):
+     planner = MotionDecisionPlanner()
+     planner.plan("AUTO", {"hurdle": visible()}, .1)
+     planner.plan("AUTO", {"hurdle": {"detected": False}}, .1)
+     decision = planner.plan("AUTO", {
+-        "hurdle": visible(depth=.5, hurdle_angle_deg=angle),
++        "hurdle": visible(depth=.5, hurdle_angle_deg=0), "line": line_info(heading=angle),
+     }, .1)
+     assert decision.action == f"ALIGN_{direction}"
+     assert decision.source_command["turn_count"] == count
+     assert not decision.source_command["fine_sequence_requested"]
+     ready = planner.plan("AUTO", {
+-        "hurdle": visible(depth=.5, hurdle_angle_deg=0),
++        "hurdle": visible(depth=.5, hurdle_angle_deg=40), "line": line_info(),
+     }, .1)
+     assert ready.action == "STRAIGHT_0"
+     assert not planner.hurdle_planner.recovery_active
+@@ -55,25 +55,30 @@
+     assert final.action == "GO"
+ 
+ 
+-@pytest.mark.parametrize("angle", [-8, 0, 8])
+-def test_parallel_tolerance_resumes_fine_approach(angle):
++@pytest.mark.parametrize("angle", [-14.999, -8, 0, 8, 14.999])
++def test_line_tolerance_resumes_fine_approach(angle):
+     planner = HurdleNavigationPlanner()
+     planner.plan(visible(), positioning=True)
+     planner.plan({"detected": False}, positioning=True)
+-    decision = planner.plan(visible(hurdle_angle_deg=angle), positioning=True)
++    decision = planner.plan(visible(hurdle_angle_deg=60, line_heading_valid=True,
++                                    line_heading_deg=angle, line_heading_reference_source="fresh"),
++                            positioning=True)
+     assert decision.action == "STRAIGHT_0"
+     assert not planner.recovery_active
+ 
+ 
+ @pytest.mark.parametrize("updates", [
+-    {"hurdle_angle_deg": None}, {"depth_valid": False}, {"confidence": .1},
++    {"line_heading_deg": None}, {"depth_valid": False}, {"confidence": .1},
+     {"confirmation_confirmed": False}, {"bottom_distance_px": None},
+ ])
+ def test_invalid_reacquisition_cannot_resume_forward_or_go(updates):
+     planner = HurdleNavigationPlanner()
+     planner.plan(visible(), positioning=True)
+     planner.plan({"detected": False}, positioning=True)
+-    decision = planner.plan(visible(depth=.5, **updates), positioning=True)
++    sample = visible(depth=.5, line_heading_valid=True, line_heading_deg=0,
++                     line_heading_reference_source="fresh")
++    sample.update(updates)
++    decision = planner.plan(sample, positioning=True)
+     assert decision.action == "WAIT" and not decision.valid
+     assert planner.recovery_active
+ 
+@@ -211,12 +216,14 @@
+     assert node.publish() == []
+     assert node.planner.hurdle_planner.recovery_active
+     # A close reacquisition must not latch the atomic GO before alignment.
+-    node.receive(visible(-400, depth=.5, hurdle_angle_deg=20))
++    node.receive_line(heading=-20)
++    node.receive(visible(-400, depth=.5, hurdle_angle_deg=-60))
+     assert getattr(node, "pending_hurdle_final_sequence", None) is None
+     release_general(node, fine)
+     clock[0] += 1.1
+     node.publish()  # Discard images received before the post-motion pause.
+-    node.receive(visible(-400, depth=.5, hurdle_angle_deg=20))
++    node.receive_line(heading=-20)
++    node.receive(visible(-400, depth=.5, hurdle_angle_deg=-60))
+     turn = node.publish()[-1]
+     assert turn["action"] == "ALIGN_LEFT"
+     assert turn["source_command"]["turn_count"] == 1
+--- before/src/mission_control/test/test_hurdle_positioning.py
++++ after/src/mission_control/test/test_hurdle_positioning.py
+@@ -33,9 +33,9 @@
+ class HurdleHarness(MissionFlowHarness):
+     _fresh_observations = MotionDecisionNode._fresh_observations
+ 
+-    def receive_line(self, x=710):
++    def receive_line(self, x=710, heading=0.0):
+         MotionDecisionNode._info_callback(self, "line")(
+-            String(data=json.dumps(line_info(x=x)))
++            String(data=json.dumps(line_info(x=x, heading=heading)))
+         )
+ 
+     def receive(self, info):
+@@ -237,7 +237,7 @@
+     node.receive(hurdle(0.8, hurdle_angle_deg=-34.0))
+     waiting = node.publish()[-1]
+     assert not waiting["valid"] and waiting["action"] == "WAIT"
+-    assert waiting["reason"] == "waiting_for_fresh_hurdle_line_intersection"
++    assert waiting["reason"] == "waiting_for_fresh_hurdle_line_heading"
+     assert waiting["source"] == "hurdle"
+     assert not node.planner.hurdle_lock_active
+ 
+@@ -259,13 +259,14 @@
+ 
+ @pytest.mark.parametrize("depth", [1.0, 0.8, 0.700001])
+ @pytest.mark.parametrize("heading", [-34.0, 0.0, 34.0])
+-def test_recognition_approach_ignores_line_heading(depth, heading):
++def test_recognition_approach_uses_line_heading(depth, heading):
+     line = line_info(heading=heading)
+     planner = MotionDecisionPlanner()
+     actual = planner.plan("AUTO", {
+         "line": line, "hurdle": hurdle(depth, hurdle_angle_deg=-34.0),
+     }, 0.1)
+-    assert actual.source == "hurdle" and actual.action == "STRAIGHT"
++    expected = "ALIGN_LEFT" if heading < 0 else "ALIGN_RIGHT" if heading > 0 else "STRAIGHT"
++    assert actual.source == "hurdle" and actual.action == expected
+     assert actual.source_command["hurdle_stage"] == "RECOGNITION_APPROACH"
+     assert not planner.hurdle_lock_active
+ 
+@@ -288,18 +289,18 @@
+                           camera_center_offset_x_px=101 * math.tan(math.radians(angle))),
+     }, 0.1)
+     assert decision.valid and decision.action == "STRAIGHT_0"
+-    assert decision.source_command["center_steering_deg"] == pytest.approx(angle, abs=0.001)
++    assert decision.source_command["center_steering_deg"] is None
+     assert "turn_count" not in decision.source_command
+ 
+ 
+ @pytest.mark.parametrize("status", ["SUCCEEDED", "FAILED", "CANCELLED", "REJECTED"])
+-def test_stationary_turn_completion_reobserves_intersection(clock, status):
+-    node = HurdleHarness()
+-    node.receive_line(x=500)
++def test_stationary_turn_completion_reobserves_line_heading(clock, status):
++    node = HurdleHarness()
++    node.receive_line(x=500, heading=-40)
+     node.receive(hurdle(0.8))
+     assert node.publish() == []
+     clock[0] += .5
+-    node.receive_line(x=500)
++    node.receive_line(x=500, heading=-40)
+     node.receive(hurdle(.8))
+     turn = node.publish()[-1]
+     assert turn["action"] == "ALIGN_LEFT"
+@@ -331,11 +332,11 @@
+ 
+ def test_crossing_during_stationary_turn_finishes_turn_before_fine(clock):
+     node = HurdleHarness()
+-    node.receive_line(x=500)
++    node.receive_line(x=500, heading=-40)
+     node.receive(hurdle(0.8))
+     assert node.publish() == []
+     clock[0] += .5
+-    node.receive_line(x=500)
++    node.receive_line(x=500, heading=-40)
+     node.receive(hurdle(.8))
+     turn = node.publish()[-1]
+     assert turn["action"] == "ALIGN_LEFT"
+@@ -345,7 +346,7 @@
+     release_general(node, turn)
+     clock[0] += .5
+     node.publish()
+-    node.receive_line(x=500)
++    node.receive_line(x=500, heading=-40)
+     node.receive(hurdle(0.69))
+     result = node.publish()[-1]
+     assert result["action"] == "ALIGN_LEFT"
+@@ -361,13 +362,13 @@
+ 
+ 
+ 
+-def test_stationary_turn_requires_current_intersection(clock):
+-    node = HurdleHarness()
+-    node.receive_line(x=500)
++def test_stationary_turn_requires_current_line_heading(clock):
++    node = HurdleHarness()
++    node.receive_line(x=500, heading=-40)
+     node.receive(hurdle(0.8))
+     assert node.publish() == []
+     clock[0] += .5
+-    node.receive_line(x=500)
++    node.receive_line(x=500, heading=-40)
+     node.receive(hurdle(.8))
+     turn = node.publish()[-1]
+     release_general(node, turn)
+@@ -451,11 +452,11 @@
+ 
+ @pytest.mark.parametrize("depth", [0.8, 0.7, 0.5])
+ @pytest.mark.parametrize("x,direction", [(500, "LEFT"), (900, "RIGHT")])
+-def test_intersection_steering_continues_until_450mm(depth, x, direction):
++def test_line_heading_steering_continues_until_450mm(depth, x, direction):
+     decision = MotionDecisionPlanner().plan("AUTO", {
+         "hurdle": hurdle(depth, camera_center_offset_x_px=600 if x < 710 else -600,
+                           hurdle_angle_deg=None),
+-        "line": line_info(x=x),
++        "line": line_info(x=x, heading=-40 if direction == "LEFT" else 40),
+     }, 0.1)
+     expected = f"ALIGN_{direction}" if depth > .45 else "GO"
+     assert decision.source == "hurdle" and decision.valid
+@@ -511,7 +512,7 @@
+                         bottom_distance_px=195, hurdle_angle_deg=-3.5, go_now=False))
+     checkpoint = node.pending_hurdle_final_sequence
+     assert checkpoint['depth_m'] == .44
+-    assert checkpoint['center_steering_deg'] == pytest.approx(-55.714, abs=.01)
++    assert checkpoint['center_steering_deg'] is None
+     if lost_info is None:
+         clock[0] += 1.
+     else:
+--- before/src/mission_control/test/test_hurdle_turn_stop_boundary.py
++++ after/src/mission_control/test/test_hurdle_turn_stop_boundary.py
+@@ -17,7 +17,7 @@
+ @pytest.mark.parametrize('x', [500, 710, 900])
+ def test_separate_fine_entry_and_normal_turn_stop(depth, x):
+     planner = MotionDecisionPlanner()
+-    decision = planner.plan('AUTO', {'hurdle': hurdle(depth), 'line': line_info(x=x)}, .1)
++    decision = planner.plan('AUTO', {'hurdle': hurdle(depth), 'line': line_info(x=x, heading=-40 if x < 710 else 40 if x > 710 else 0)}, .1)
+     assert decision.valid
+     assert planner.hurdle_planner.fine_approach_active == (depth <= .7)
+     assert decision.source_command['close_rotation_blocked'] == (depth <= .45)
+@@ -31,7 +31,7 @@
+ def test_turn_stop_latch_survives_depth_rebound_and_resets():
+     planner = MotionDecisionPlanner()
+     planner.plan('AUTO', {'hurdle': hurdle(.45)}, .1)
+-    rebound = planner.plan('AUTO', {'hurdle': hurdle(.8), 'line': line_info(x=500)}, .1)
++    rebound = planner.plan('AUTO', {'hurdle': hurdle(.8), 'line': line_info(x=500, heading=-40)}, .1)
+     assert rebound.action == 'STRAIGHT_0'
+     assert rebound.source_command['close_rotation_blocked']
+     planner.hurdle_planner.reset()
+@@ -106,7 +106,7 @@
+         (.7, 710, 'STRAIGHT_0'),
+         (.6, x, f'ALIGN_{direction}'),
+     ]:
+-        node.receive_line(x=target_x)
++        node.receive_line(x=target_x, heading=-40 if target_x < 710 else 40 if target_x > 710 else 0)
+         node.receive(hurdle(depth))
+         command = node.publish()[-1]
+         assert command['action'] == expected and command['phase'] == 'HURDLE_POSITIONING'
+@@ -120,14 +120,15 @@
+                 f'post_ball_line_turn_{direction.lower()}_{2 if direction == "LEFT" else 3}',
+             ]
+ 
+-    node.receive_line(x=x if checkpoint_during_turn else 710)
++    node.receive_line(x=x if checkpoint_during_turn else 710,
++                      heading=(-40 if x < 710 else 40) if checkpoint_during_turn else 0)
+     node.receive(hurdle(.58))
+     fine = node.publish()[-1]
+     assert fine['action'] == (f'ALIGN_{direction}' if checkpoint_during_turn else 'STRAIGHT_0')
+     dispatch(fine)
+ 
+     def cross_final_depth():
+-        node.receive_line(x=x)
++        node.receive_line(x=x, heading=-40 if x < 710 else 40)
+         node.receive(hurdle(.45))
+         assert node.pending_hurdle_final_sequence is not None
+         assert node.publish() == []
+--- before/src/mission_control/test/test_line_recovery_range.py
++++ after/src/mission_control/test/test_line_recovery_range.py
+@@ -37,11 +37,12 @@
+ 
+ 
+ @pytest.mark.parametrize('angle', ANGLES)
+-def test_hurdle_intersection_uses_stationary_turns_from_15_degrees(angle):
++def test_hurdle_line_heading_uses_stationary_turns_from_15_degrees(angle):
+     info = dict(detected=True, confidence=.9, depth_valid=True, depth_m=.8,
+                 hurdle_angle_deg=60., bottom_distance_px=200.,
+                 path_reference_valid=True, path_reference_source='fresh',
+-                path_offset_x_norm=math.copysign(.3, angle), path_target_bearing_deg=angle)
++                path_offset_x_norm=math.copysign(.3, angle), path_target_bearing_deg=-89.,
++                line_heading_valid=True, line_heading_deg=angle, line_heading_reference_source="fresh")
+     command = HurdleNavigationPlanner().plan(info, positioning=True)
+     mission = MotionDecisionPlanner()._plan_source('hurdle', info, .1)
+     assert command.valid and mission['valid']
+--- before/src/step/step/hurdle_navigation_planner.py
++++ after/src/step/step/hurdle_navigation_planner.py
+@@ -216,7 +216,7 @@
+     def plan(
+         self, hurdle_info: dict[str, Any], *, positioning: bool = False,
+     ) -> HurdleActionCommand:
+-        """Use the line intersection, with discrete recovery after target loss."""
++        """Use line heading for positioning, with discrete recovery after loss."""
+         self.observe(hurdle_info)
+         if not bool(hurdle_info.get("detected", False)):
+             if hurdle_info.get("raw_detected") is True:
+@@ -266,19 +266,33 @@
+             "camera_bottom_gap_m",
+         )
+         hurdle_angle = _number(hurdle_info, "hurdle_angle_deg")
++        line_heading = None
++        if (hurdle_info.get("line_heading_valid") is True
++                and hurdle_info.get("line_heading_reference_source") == "fresh"):
++            line_heading = _number(hurdle_info, "line_heading_deg")
+         if self.recovery_active:
+             # Lateral-loss recovery is the exception to the normal fine-mode turn block.
+             if hurdle_info.get("confirmation_confirmed") is False:
+                 return self.wait("hurdle_confirmation_pending")
+-            if hurdle_angle is None:
+-                return self.wait("hurdle_recovery_waiting_for_parallel_angle")
++            recovery_angle = line_heading if positioning else hurdle_angle
++            if recovery_angle is None:
++                return self.wait("hurdle_recovery_waiting_for_line_heading" if positioning
++                                 else "hurdle_recovery_waiting_for_parallel_angle")
+             if not bottom_distance_valid:
+                 return self.wait("missing_valid_hurdle_bottom_distance")
+-            if abs(hurdle_angle) > self.config.go_angle_tolerance_deg:
+-                direction = "LEFT" if hurdle_angle > 0.0 else "RIGHT"
++            correction_needed = (
++                abs(recovery_angle) >= self.config.center_turn_min_angle_deg
++                if positioning else abs(recovery_angle) > self.config.go_angle_tolerance_deg
++            )
++            if correction_needed:
++                direction = ("LEFT" if recovery_angle < 0.0 else "RIGHT") if positioning else (
++                    "LEFT" if recovery_angle > 0.0 else "RIGHT"
++                )
+                 return replace(
+-                    self._recovery_turn(direction, "hurdle_reacquired_parallel_alignment"),
++                    self._recovery_turn(direction, "hurdle_reacquired_line_alignment" if positioning
++                                        else "hurdle_reacquired_parallel_alignment"),
+                     confidence=confidence, depth_m=depth, hurdle_angle_deg=hurdle_angle,
++                    center_steering_deg=line_heading if positioning else None,
+                     bottom_distance_px=bottom_distance_px,
+                 )
+             self.recovery_active = False
+@@ -288,36 +302,20 @@
+             hurdle_angle is not None
+             and abs(hurdle_angle) <= self.config.go_angle_tolerance_deg
+         )
+-        center_steering = None
+-        if positioning:
+-            center_dx = _number(hurdle_info, "camera_center_offset_x_px")
+-            if center_dx is None:
+-                center_dx = _number(hurdle_info, "offset_x_px")
+-            if center_dx is not None and bottom_distance_valid:
+-                center_steering = math.degrees(
+-                    math.atan2(center_dx, max(1.0, bottom_distance_px))
+-                )
+-            else:
+-                center_steering = _number(hurdle_info, "bearing_deg")
++        center_steering = line_heading if positioning else None
+         path_reference_valid = hurdle_info.get("path_reference_valid") is True
+         path_offset = _number(hurdle_info, "path_offset_x_norm")
+         normal_rotation_stopped = self.fine_approach_active and self.close_rotation_blocked
+-        if positioning and not self.fine_approach_active and (
+-            not path_reference_valid
+-            or hurdle_info.get("path_reference_source") == "held"
+-        ):
+-            return self.wait("waiting_for_fresh_hurdle_line_intersection")
+-        path_angle = None
+-        if (positioning and path_reference_valid and not normal_rotation_stopped
+-                and hurdle_info.get("path_reference_source") != "held"):
+-            path_angle = _number(hurdle_info, "path_target_bearing_deg")
+-            if path_angle is None:
+-                path_offset_px = _number(hurdle_info, "path_offset_x_px")
+-                if path_offset_px is None or not bottom_distance_valid:
+-                    return self.wait("missing_hurdle_line_intersection_angle")
+-                path_angle = math.degrees(math.atan2(path_offset_px, max(1.0, bottom_distance_px)))
+-            path_angle = round(path_angle, 9)
+-            center_steering = path_angle
++        if (positioning and not normal_rotation_stopped
++                and hurdle_info.get("line_heading_valid") is True
++                and hurdle_info.get("line_heading_reference_source") == "fresh"
++                and line_heading is None):
++            return self.wait("missing_valid_hurdle_line_heading")
++        if positioning and not self.fine_approach_active and line_heading is None:
++            return self.wait("waiting_for_fresh_hurdle_line_heading")
++        alignment_angle = None
++        if positioning and line_heading is not None and not normal_rotation_stopped:
++            alignment_angle = round(line_heading, 9)
+         path_centered = bool(
+             (positioning and normal_rotation_stopped)
+             or (positioning and self.fine_approach_active
+@@ -354,8 +352,8 @@
+         alignment_needed = not path_centered or not parallel
+         # Integrated hurdle control uses direction only, without a pixel-offset deadband.
+         positioning_turn_needed = bool(
+-            positioning and path_angle is not None
+-            and abs(path_angle) >= self.config.center_turn_min_angle_deg
++            positioning and alignment_angle is not None
++            and abs(alignment_angle) >= self.config.center_turn_min_angle_deg
+         )
+         fine_sequence_requested = bool(
+             positioning
+@@ -384,15 +382,15 @@
+             action = "STRAIGHT_0"
+             reason = "hurdle_fine_approach_without_rotation"
+         elif positioning and positioning_turn_needed:
+-            direction = "LEFT" if path_angle < 0.0 else "RIGHT"
++            direction = "LEFT" if alignment_angle < 0.0 else "RIGHT"
+             if self.close_rotation_blocked:
+-                return self.wait("hurdle_intersection_turn_blocked_near_bottom")
++                return self.wait("hurdle_line_turn_blocked_near_bottom")
+             action = f"ALIGN_{direction}"
+-            turn_count = stationary_turn_repeat_count(path_angle, direction)
+-            reason = "hurdle_intersection_heading_alignment"
++            turn_count = stationary_turn_repeat_count(alignment_angle, direction)
++            reason = "hurdle_line_heading_alignment"
+         elif positioning:
+             action = "STRAIGHT"
+-            reason = "hurdle_intersection_aligned_approach"
++            reason = "hurdle_line_heading_aligned_approach"
+         elif self.close_rotation_blocked and not ready_geometry:
+             action = ball_hurdle_approach_motion(
+                 depth, fine_distance_m=HURDLE_FINE_DISTANCE_M,
+--- before/src/step/test/test_hurdle_navigation_planner.py
++++ after/src/step/test/test_hurdle_navigation_planner.py
+@@ -26,11 +26,13 @@
+ 
+ @pytest.mark.parametrize("angle", [-70.0, -69.999, 0.0, 69.999, 70.0])
+ @pytest.mark.parametrize("offset", [-0.5, 0.5])
+-def test_fine_approach_corrects_path_offset_until_450mm(angle, offset):
++def test_fine_approach_corrects_line_heading_until_450mm(angle, offset):
+     decision = HurdleNavigationPlanner().plan(hurdle_info(
+         depth_m=0.6, hurdle_angle_deg=60, bearing_deg=angle,
+         path_reference_valid=True, path_offset_x_norm=offset,
+-        path_target_bearing_deg=30.0 if offset > 0 else -30.0,
++        path_target_bearing_deg=-89.0 if offset > 0 else 89.0,
++        line_heading_valid=True, line_heading_deg=30.0 if offset > 0 else -30.0,
++        line_heading_reference_source="fresh",
+     ), positioning=True)
+     expected = 'ALIGN_LEFT' if offset < 0 else 'ALIGN_RIGHT'
+     assert decision.valid and decision.action == expected
+--- /dev/null
++++ after/src/mission_control/test/test_hurdle_heading_queue.py
+@@ -0,0 +1,59 @@
++"""Verify line-heading changes across real hurdle reservation callbacks."""
++
++import json
++
++import pytest
++from std_msgs.msg import String
++
++from mission_control.motion_decision_node import MotionDecisionNode
++from test_continuous_approach import clock, fresh
++from test_hurdle_positioning import hurdle, line_info
++from test_motion_command_bridge import FakeBridge, decoded_messages, executor_status
++from test_wait_refresh_and_fine_settle import LiveInputHarness
++
++
++def feed(node, clock, heading, x=500):
++    fresh(node, clock, 'line', line_info(x=x, heading=heading), plan=False)
++    fresh(node, clock, 'hurdle', hurdle(.9, bbox=[400, 300, 1000, 719]), plan=False)
++
++
++@pytest.mark.parametrize('heading', [-30, 0, 30])
++@pytest.mark.parametrize('x', [500, 1100])
++def test_forward_reservation_uses_heading_even_with_opposite_or_missing_intersection(clock, heading, x):
++    node, bridge = LiveInputHarness(phase='HURDLE_APPROACH'), FakeBridge()
++    feed(node, clock, 0, x)
++    MotionDecisionNode._publish_decision(node)
++    first = node.publisher.messages[-1]
++    assert first['valid'] and first['action'] == 'STRAIGHT'
++    bridge.navigation_command_callback(String(data=json.dumps(first)))
++    request = decoded_messages(bridge.executor_request_publisher)[-1]
++    node.send_status('STRAIGHT', first['command_id'], 'RUNNING', 'line_forward_4')
++    clock[0] = node.approach_walk_started_at + node.approach_walk_duration_sec - .25
++    for _ in range(3):
++        feed(node, clock, heading, x)
++
++    if heading == 0:
++        queued = node.publisher.messages[-1]
++        assert queued['action'] == 'STRAIGHT'
++        assert queued['command_id'] != first['command_id']
++        assert node.queued_general_command_id == queued['command_id']
++        bridge.navigation_command_callback(String(data=json.dumps(queued)))
++        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
++        MotionDecisionNode._motion_status_callback(node, bridge.motion_status_publisher.messages[-1])
++        assert bridge.transition_dwell_until is None
++        next_request = decoded_messages(bridge.executor_request_publisher)[-1]
++        bridge.executor_status_callback(executor_status(**next_request, status='RUNNING'))
++        MotionDecisionNode._motion_status_callback(node, bridge.motion_status_publisher.messages[-1])
++        assert node.general_motion_gate.active_command_id == queued['command_id']
++        return
++
++    assert getattr(node, 'queued_general_command_id', None) is None
++    assert len([message for message in node.publisher.messages if message['valid']]) == 1
++    node.send_status('STRAIGHT', first['command_id'], 'SUCCEEDED', 'line_forward_4')
++    clock[0] += .5
++    feed(node, clock, heading, x)
++    MotionDecisionNode._publish_decision(node)
++    turn = node.publisher.messages[-1]
++    assert turn['valid'] and turn['action'] == ('ALIGN_LEFT' if heading < 0 else 'ALIGN_RIGHT')
++    assert turn['source_command']['turn_count'] == (2 if heading < 0 else 3)
++    assert getattr(node, 'queued_general_command_id', None) is None

@@ -39,8 +39,9 @@ LEFT_BOUNDARIES = [
 @pytest.mark.parametrize('direction,sign,boundaries', [
     ('LEFT', -1, LEFT_BOUNDARIES), ('RIGHT', 1, BOUNDARIES),
 ])
-@pytest.mark.parametrize('depth', [.43, 1.2])
-def test_goal_close_and_far_alignment_share_all_boundaries(direction, sign, boundaries, depth):
+@pytest.mark.parametrize('depth', [.50, .58])
+def test_goal_scoring_band_alignment_shares_all_boundaries(direction, sign, boundaries, depth):
+    # Exercise yaw alignment: closer goals retreat; distant goals use target-point steering.
     for angle, count in boundaries:
         decision = MotionDecisionPlanner().plan('GOAL_APPROACH', observations(goal=goal_info(
             depth_m=depth, offset_x_px=sign * 384, offset_x_norm=sign * .6,
@@ -124,7 +125,8 @@ def test_right_boundaries_reach_ball_pickup_goal_and_line_routes(angle, count):
         (planner.plan_ball_pickup_initial_alignment(pickup), 'BALL_PICKUP_CAMERA_DOWN'),
         (planner.plan_ball_pickup_fine_alignment(pickup), 'BALL_PICKUP_FINE'),
         (MotionDecisionPlanner().plan('GOAL_APPROACH', observations(goal=goal_info(
-            depth_m=1.2, bearing_deg=angle)), .1), 'GOAL_CAMERA90'),
+            depth_m=.50, offset_x_px=384, bearing_deg=angle,
+            score_now=False)), .1), 'GOAL_CAMERA90'),
         (MotionDecisionPlanner().plan('POST_SHOT_LINE_ALIGN', observations(line=line_info(
             ground_heading_error_deg=angle)), .1), 'POST_SHOT_LINE'),
     ]

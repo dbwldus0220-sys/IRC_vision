@@ -176,12 +176,14 @@ def test_goal_exit_composites_already_contain_nine_and_six_turn_cycles():
         assert sum(frame['name'] == frame_name for frame in motion['frames']) == expected
 
 
-def test_node_charges_only_published_turns_and_blocks_next_request():
+def test_node_charges_only_published_turns_and_blocks_next_request(monkeypatch):
     from mission_control.motion_decision_node import MotionDecisionNode
-    from test_motion_decision_node import ReadinessPublishNode
+    from test_motion_decision_node import ReadinessPublishNode, confirmed_line_loss_sample
+    import time
 
     node = ReadinessPublishNode(turn())
-    node.latest_info['line'] = {'detected': False}
+    node.latest_info['line'] = confirmed_line_loss_sample(node, [time.monotonic()], monkeypatch)
+    node._fresh_observations = lambda _now: (node.latest_info, {})
     node.lost_search_turn_limiter = LostSearchTurnLimiter(max_turns=1)
     node.publisher.subscription_count = 0
     MotionDecisionNode._publish_decision(node)

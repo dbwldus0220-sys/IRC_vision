@@ -28,8 +28,9 @@ def start(clock, action='STRAIGHT', phase='LINE_TRACK'):
         node.lost_search_turn_limiter.counts['line'] = 1
         node.lost_search_turn_limiter.angles['line'] = 45.
         node.lost_search_turn_limiter.first_directions['line'] = 'LEFT'
-    initial = {'detected': False} if action.startswith('LINE_LOST_') else line_info(heading=-20, offset=-.2)
-    fresh(node, clock, 'line', initial, plan=False)
+    initial = {'detected': False, 'raw_detected': False} if action.startswith('LINE_LOST_') else line_info(heading=-20, offset=-.2)
+    for _ in range(3 if action.startswith('LINE_LOST_') else 1):
+        fresh(node, clock, 'line', initial, plan=False)
     decision = MotionDecision(phase=phase, source='line', action=action, valid=True,
                               reason='test', sdk_motion_requested=False,
                               requires_ack=False, source_command={})
@@ -65,13 +66,18 @@ def late(node, clock, info, count=3):
 @pytest.mark.parametrize('phase', ['AUTO', 'LINE_TRACK'])
 @pytest.mark.parametrize('action,info,expected', [
     ('STRAIGHT', offset(), 'LINE_OFFSET_TURN_LEFT_2'),
-    ('STRAIGHT', {'detected': False}, 'LINE_LOST_TURN_LEFT_3'),
     ('LINE_OFFSET_TURN_LEFT_2', line_info(), 'STRAIGHT'),
     ('LINE_OFFSET_TURN_LEFT_2', offset(), 'LINE_OFFSET_TURN_LEFT_2'),
     ('LINE_OFFSET_TURN_LEFT_6', line_info(), 'STRAIGHT'),
     ('LINE_OFFSET_TURN_LEFT_6', offset(), 'LINE_OFFSET_TURN_LEFT_2'),
     ('LINE_LOST_TURN_LEFT_3', line_info(), 'STRAIGHT'),
-    ('LINE_LOST_TURN_LEFT_3', {'detected': False}, 'LINE_LOST_TURN_LEFT_1'),
+    ('STRAIGHT', sample(offset=200, target_angle=25, ground_heading_error_deg=0),
+     'LINE_OFFSET_TURN_RIGHT_1'),
+    ('LINE_OFFSET_TURN_RIGHT_1', line_info(), 'STRAIGHT'),
+    ('LINE_OFFSET_TURN_RIGHT_1', sample(offset=149.6, ground_heading_error_deg=-6.63,
+                                      ground_lateral_offset_m=.1472), 'STRAIGHT_1'),
+    ('STRAIGHT_1', sample(offset=200, target_angle=25, ground_heading_error_deg=0),
+     'LINE_OFFSET_TURN_RIGHT_1'),
 ])
 def test_turn_reserves_once_and_starts_only_after_success(clock, phase, action, info, expected):
     node, bridge, request = start(clock, action, phase)
@@ -106,8 +112,9 @@ def test_turn_reserves_once_and_starts_only_after_success(clock, phase, action, 
 
 
 @pytest.mark.parametrize('bad', ['early', 'old', 'future', 'missing_stamp', 'duplicate', 'low_quality'])
-def test_invalid_frames_cannot_authorize_turn(clock, bad):
-    node, _, _ = start(clock)
+@pytest.mark.parametrize('action', ['STRAIGHT', 'STRAIGHT_1'])
+def test_invalid_frames_cannot_authorize_turn(clock, bad, action):
+    node, _, _ = start(clock, action)
     clock[0] = node.active_line_motion_started_at + node.active_line_motion_duration_sec * (.4 if bad == 'early' else .75)
     stamp = round(clock[0] * 1e9)
     for _ in range(4):
@@ -128,7 +135,7 @@ def test_invalid_frames_cannot_authorize_turn(clock, bad):
 
 
 @pytest.mark.parametrize('status', ['FAILED', 'CANCELLED', 'TIMEOUT'])
-@pytest.mark.parametrize('action', ['STRAIGHT', 'LINE_OFFSET_TURN_LEFT_6'])
+@pytest.mark.parametrize('action', ['STRAIGHT', 'STRAIGHT_1', 'LINE_OFFSET_TURN_LEFT_6'])
 def test_failure_discards_deferred_turn(clock, status, action):
     node, bridge, request = start(clock, action)
     late(node, clock, offset())
@@ -169,21 +176,23 @@ def test_capture_durations_match_motion_catalog():
         assert seconds == pytest.approx(actual), action
 
 
-def test_source78_six_cycle_turn_uses_updated_capture_window(clock):
+def test_source83_six_cycle_turn_uses_updated_capture_window(clock):
     node, _, _ = start(clock, 'LINE_OFFSET_TURN_LEFT_6')
     started = node.active_line_motion_started_at
-    assert node.active_line_motion_duration_sec == pytest.approx(.355 * 6 / .95)
-    clock[0] = started + .355 * 6 / .95 * .60
+    assert node.active_line_motion_duration_sec == pytest.approx(.355 * 6 / 1.05)
+    clock[0] = started + .355 * 6 / 1.05 * .60
     for _ in range(3):
         fresh(node, clock, 'line', line_info(), plan=False)
     assert node.queued_general_command_id is None
     late(node, clock, line_info(), 3)
     assert node.queued_general_action == 'STRAIGHT'
     # The three fresh samples authorize a reservation before this gait completes.
-    assert started + .355 * 6 / .95 * .70 <= clock[0] < started + .355 * 6 / .95
+    assert started + .355 * 6 / 1.05 * .70 <= clock[0] < started + .355 * 6 / 1.05
 
 
-@pytest.mark.parametrize('action', ['LINE_OFFSET_TURN_LEFT_1', 'LINE_LOST_TURN_LEFT_1'])
+@pytest.mark.parametrize('action', [
+    'LINE_OFFSET_TURN_LEFT_1', 'LINE_LOST_TURN_LEFT_1', 'LINE_OFFSET_TURN_RIGHT_1',
+])
 def test_short_turn_can_use_recent_images_before_the_late_window(clock, action):
     node, _, _ = start(clock, action)
     started, duration = node.active_line_motion_started_at, node.active_line_motion_duration_sec

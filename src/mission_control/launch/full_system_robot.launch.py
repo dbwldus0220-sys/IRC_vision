@@ -55,6 +55,24 @@ def generate_launch_description() -> LaunchDescription:
     camera_height_m = LaunchConfiguration("camera_height_m")
     camera_pitch_down_deg = LaunchConfiguration("camera_pitch_down_deg")
     camera_forward_offset_m = LaunchConfiguration("camera_forward_offset_m")
+    hurdle_camera_45_pitch_down_deg = LaunchConfiguration(
+        "hurdle_camera_45_pitch_down_deg"
+    )
+    hurdle_camera_0_pitch_down_deg = LaunchConfiguration(
+        "hurdle_camera_0_pitch_down_deg"
+    )
+    hurdle_camera_45_yaw_right_deg = LaunchConfiguration(
+        "hurdle_camera_45_yaw_right_deg"
+    )
+    hurdle_camera_0_yaw_right_deg = LaunchConfiguration(
+        "hurdle_camera_0_yaw_right_deg"
+    )
+    hurdle_camera_45_roll_clockwise_deg = LaunchConfiguration(
+        "hurdle_camera_45_roll_clockwise_deg"
+    )
+    hurdle_camera_0_roll_clockwise_deg = LaunchConfiguration(
+        "hurdle_camera_0_roll_clockwise_deg"
+    )
     line_roi_x_min_ratio = LaunchConfiguration("line_roi_x_min_ratio")
     line_roi_x_max_ratio = LaunchConfiguration("line_roi_x_max_ratio")
     corner_min_turn_delta_deg = LaunchConfiguration("corner_min_turn_delta_deg")
@@ -217,6 +235,30 @@ def generate_launch_description() -> LaunchDescription:
                 "head_down_trigger_bottom_distance_px": ParameterValue(
                     head_down_trigger_bottom_distance_px,
                     value_type=int,
+                ),
+                "hurdle_camera_45_pitch_down_deg": ParameterValue(
+                    hurdle_camera_45_pitch_down_deg,
+                    value_type=float,
+                ),
+                "hurdle_camera_0_pitch_down_deg": ParameterValue(
+                    hurdle_camera_0_pitch_down_deg,
+                    value_type=float,
+                ),
+                "hurdle_camera_45_yaw_right_deg": ParameterValue(
+                    hurdle_camera_45_yaw_right_deg,
+                    value_type=float,
+                ),
+                "hurdle_camera_0_yaw_right_deg": ParameterValue(
+                    hurdle_camera_0_yaw_right_deg,
+                    value_type=float,
+                ),
+                "hurdle_camera_45_roll_clockwise_deg": ParameterValue(
+                    hurdle_camera_45_roll_clockwise_deg,
+                    value_type=float,
+                ),
+                "hurdle_camera_0_roll_clockwise_deg": ParameterValue(
+                    hurdle_camera_0_roll_clockwise_deg,
+                    value_type=float,
                 ),
             }
         ],
@@ -435,6 +477,24 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("camera_height_m", default_value="0.515"),
             DeclareLaunchArgument("camera_pitch_down_deg", default_value="45.0"),
             DeclareLaunchArgument("camera_forward_offset_m", default_value="0.0"),
+            DeclareLaunchArgument(
+                "hurdle_camera_45_pitch_down_deg", default_value="38.4",
+            ),
+            DeclareLaunchArgument(
+                "hurdle_camera_0_pitch_down_deg", default_value="68.3",
+            ),
+            DeclareLaunchArgument(
+                "hurdle_camera_45_yaw_right_deg", default_value="-5.2",
+            ),
+            DeclareLaunchArgument(
+                "hurdle_camera_0_yaw_right_deg", default_value="-5.2",
+            ),
+            DeclareLaunchArgument(
+                "hurdle_camera_45_roll_clockwise_deg", default_value="0.0",
+            ),
+            DeclareLaunchArgument(
+                "hurdle_camera_0_roll_clockwise_deg", default_value="0.0",
+            ),
             DeclareLaunchArgument("line_roi_x_min_ratio", default_value="0.0"),
             DeclareLaunchArgument("line_roi_x_max_ratio", default_value="1.0"),
             DeclareLaunchArgument(

@@ -28,6 +28,17 @@ bool set_position_tolerance_enabled(PlayerT & player, bool enabled)
   return enabled;
 }
 
+template<typename PlayerT>
+irc_step::StartResult start_with_ring_aim(
+  PlayerT & player, std::string_view name, double angle)
+{
+  if constexpr (requires {player.start(name, angle);}) {
+    return player.start(name, angle);
+  }
+  // Older SDKs must reject the shot rather than discard its waist angle.
+  return irc_step::StartResult::InvalidMotion;
+}
+
 BackendStartResult map_start_result(
   irc_step::StartResult result, const std::string & message)
 {
@@ -251,6 +262,25 @@ BackendStartResult RobotMotionPlayerBackend::start_motion(
       false, "SDK_EXCEPTION",
       "RobotMotionPlayer::start threw an unknown exception"};
   }
+}
+
+BackendStartResult RobotMotionPlayerBackend::start_ring_shot(
+  const std::string & name, double angle)
+{
+  try {
+    const auto result = player_api_.start_ring_shot(name, angle);
+    return map_start_result(result, player_api_.last_error());
+  } catch (const std::exception & exception) {
+    return {false, "SDK_EXCEPTION", exception.what()};
+  } catch (...) {
+    return {false, "SDK_EXCEPTION", "ring shot start failed"};
+  }
+}
+
+irc_step::StartResult BorrowedRobotMotionPlayerApi::start_ring_shot(
+  std::string_view name, double angle)
+{
+  return start_with_ring_aim(player_, name, angle);
 }
 
 BackendCancelResult RobotMotionPlayerBackend::cancel_motion()

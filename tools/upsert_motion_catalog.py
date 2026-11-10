@@ -21,7 +21,7 @@ import yaml
 POSITION_TOLERANCE_DEG = 5.0
 RUNTIME_SPEED_FACTOR = Decimal("0.95")
 SCALED_MOTION_NAMES = frozenset({
-    "t허들찐", "p공후 제자리좌회전", "p골대후제자리좌회전",
+    "t허들찐",
 })
 
 

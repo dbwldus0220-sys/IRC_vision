@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import math
 import time
 from typing import Any
 
@@ -12,7 +13,10 @@ from rclpy.node import Node
 from std_msgs.msg import String
 
 from .pickup_walk_reservation import (
-    PICKUP_WALK_DURATIONS, pickup_walk_motion, PICKUP_TWO_CYCLE_CRAB_OFFSET_PX,
+    PICKUP_WALK_DURATIONS, pickup_walk_motion,
+)
+from .crab_motion_selection import (
+    crab_repeat_motion, crab_support_motion_id, goal_crab_motion_id, GOAL_CRAB_DURATIONS,
 )
 from .pickup_fine_skip import pickup_fine_can_skip
 from .ball_fine_approach import motion_id as ball_fine_motion_id, physical_motion_id
@@ -68,7 +72,6 @@ class MotionCommandBridgeNode(Node):
     PICKUP_FINE_PREPARE_MOTION_ID = "pickup_fine_prepare"
     PICKUP_FINE_PRE_DWELL_MARKER = "__PICKUP_FINE_PRE_DWELL__"
     PICKUP_FINE_PRE_DWELL_SEC = 0.5
-    PICKUP_TWO_CYCLE_CRAB_OFFSET_PX = PICKUP_TWO_CYCLE_CRAB_OFFSET_PX
     TRANSITION_DWELL_SEC = 0.5
     BACKWARD_DWELL_SEC = 0.5
     FINE_TO_BACKWARD_DWELL_SEC = 1.0
@@ -88,7 +91,7 @@ class MotionCommandBridgeNode(Node):
     CRAB_MOTION_IDS = frozenset({
         "pickup_crab_left_0", "pickup_crab_right_0",
         "pickup_crab_left_0_2", "pickup_crab_right_0_2",
-        "goal_camera_90_crab_left", "goal_camera_90_crab_right",
+        *GOAL_CRAB_DURATIONS,
     })
     TRANSITION_MOTION_IDS = frozenset({
         *PICKUP_FINE_PREPARE_MOTION_IDS, *PICKUP_CRAB_PREPARE_MOTION_IDS,
@@ -157,6 +160,7 @@ class MotionCommandBridgeNode(Node):
             },
             "BALL_PICKUP_FINE_ALIGN_CONTINUE",
             "BALL_PICKUP_FINE_FORWARD",
+            "BALL_PICKUP_FORWARD_2",
             "BALL_PICKUP_FINE_SEARCH_LEFT",
             "BALL_PICKUP_FINE_SEARCH_RIGHT",
             *{
@@ -180,6 +184,7 @@ class MotionCommandBridgeNode(Node):
             for count in counts
         },
         "BALL_PICKUP_FINE_FORWARD": "pickup_fine_forward_0",
+        "BALL_PICKUP_FORWARD_2": "ball_camera_down_forward_2",
         "BALL_PICKUP_FINE_SEARCH_LEFT": "pickup_camera_down_turn_left_2",
         "BALL_PICKUP_FINE_SEARCH_RIGHT": "pickup_camera_down_turn_right_5",
         **{
@@ -218,6 +223,7 @@ class MotionCommandBridgeNode(Node):
     PICKUP_CAMERA_DOWN_MOTION_IDS = {
         "STRAIGHT": "line_forward_4",
         "STRAIGHT_0": "ball_general_fine_forward_8",
+        "STRAIGHT_1": "ball_camera_down_forward_2",
         "STRAIGHT_2": "ball_camera_down_forward_4",
     }
     PICKUP_MOTION_TAIL = (
@@ -250,9 +256,13 @@ class MotionCommandBridgeNode(Node):
         "POST_BALL_GOAL_TRANSITION": "post_ball_camera_90",
         # Keep legacy action IDs; each target now includes its pose transition.
         "POST_SHOT_TURN_RIGHT_9": "post_shot_default_turn_right",
+        "POST_SHOT_TURN_RIGHT_5": "post_shot_default_turn_right_5",
         # Keep the legacy action ID; the composite contains six left turns.
         "POST_SHOT_TURN_LEFT_4": "post_shot_default_turn_left",
+        "POST_SHOT_TURN_LEFT_3": "post_shot_default_turn_left_3",
         "POST_SHOT_FORWARD": "line_forward_6",
+        "POST_SHOT_EXIT_RIGHT_5_FORWARD_4": "post_shot_exit_right_5_forward_4",
+        "POST_SHOT_EXIT_LEFT_3_FORWARD_4": "post_shot_exit_left_3_forward_4",
         **{
             f"POST_SHOT_LINE_TURN_{direction}_{count}": (
                 f"post_ball_line_turn_{direction.lower()}_{count}"
@@ -264,6 +274,7 @@ class MotionCommandBridgeNode(Node):
         },
         "BALL_FINE_FORWARD_8": "ball_general_fine_forward_8",
         "BALL_APPROACH_FINE_FORWARD_5": "ball_approach_fine_forward_45_5",
+        "BALL_APPROACH_FORWARD_2": "ball_camera_down_forward_2",
         "BALL_LOST_FINE_FORWARD_3": "ball_top_loss_fine_forward_45_3",
         "BALL_LOST_FORWARD_2": "ball_camera_down_forward_2",
         "BALL_LOST_FORWARD_4": "ball_camera_down_forward_4",
@@ -644,7 +655,7 @@ class MotionCommandBridgeNode(Node):
         self.shot_prepare_retry_motion_id = None
         if motion_id.startswith("goal_camera_90_fine_forward_"):
             self.goal_fine_forward_completed = True
-        elif motion_id in {"goal_camera_90_crab_left", "goal_camera_90_crab_right"}:
+        elif motion_id in GOAL_CRAB_DURATIONS:
             self.goal_crab_completed = True
         elif motion_id in {"goal_shot", "post_ball_camera_90", *{
             f"goal_shot_region_{region}" for region in range(1, 9)
@@ -1272,6 +1283,7 @@ class MotionCommandBridgeNode(Node):
         )
 
     def _is_forward_motion(self, motion_id: str) -> bool:
+        motion_id = physical_motion_id(motion_id)
         return motion_id in {"forward", "sdk_forward_4"} or motion_id.startswith((
             "line_forward_", "ball_camera_down_forward_", "post_ball_forward_",
             "goal_camera_90_forward_",
@@ -1331,15 +1343,9 @@ class MotionCommandBridgeNode(Node):
 
     @staticmethod
     def _pickup_crab_repeat_motion(motion_id: str, payload: dict) -> str:
-        """Select one complete two-cycle gait only for large camera-down errors."""
-        if motion_id not in {"pickup_crab_left_0", "pickup_crab_right_0"}:
-            return motion_id
+        """Use the same signed thresholds for initial dispatch and reservations."""
         command = payload.get("source_command") or {}
-        offset = command.get("offset_x_px")
-        if (type(offset) in {int, float}
-                and abs(offset) > MotionCommandBridgeNode.PICKUP_TWO_CYCLE_CRAB_OFFSET_PX):
-            return motion_id + "_2"
-        return motion_id
+        return crab_repeat_motion(motion_id, command.get("offset_x_px"))
 
     def _transition_prepare_motion(self, motion_id: str) -> str | None:
         """Choose a posture transition from the last successfully completed gait."""
@@ -1348,10 +1354,8 @@ class MotionCommandBridgeNode(Node):
             # A correction after scoring preparation starts in the same fine posture.
             previous = "goal_camera_90_fine_forward_1"
         # Repeat count does not change the crab's final support posture.
-        if previous in {"pickup_crab_left_0_2", "pickup_crab_right_0_2"}:
-            previous = previous.removesuffix("_2")
-        if motion_id in {"pickup_crab_left_0_2", "pickup_crab_right_0_2"}:
-            motion_id = motion_id.removesuffix("_2")
+        previous = crab_support_motion_id(previous)
+        motion_id = crab_support_motion_id(motion_id)
         for side, opposite in (("right", "left"), ("left", "right")):
             if previous == f"pickup_crab_{side}_0":
                 if (motion_id in self.FINE_FORWARD_MOTION_IDS
@@ -1397,6 +1401,7 @@ class MotionCommandBridgeNode(Node):
                     or previous in MotionCommandBridgeNode.HURDLE_FINE_FORWARD_MOTION_IDS):
                 return f"pickup_fine_to_crab_{side}_0"
             if (self._is_forward_motion(previous)
+                    or previous.startswith("line_recovery_")
                     or previous in {"pickup_lost_ball_backward_1", "ball_lost_camera_down_backward_2"}):
                 return "pickup_forward_to_crab_0" if side == "right" else "pickup_forward_to_crab_left_0"
         if motion_id in {"goal_camera_90_crab_left", "goal_camera_90_crab_right"}:
@@ -1415,7 +1420,7 @@ class MotionCommandBridgeNode(Node):
         if retry is not None:
             # A failed preparation clears physical-state tracking, not this obligation.
             return retry
-        previous = self.last_physical_motion_id or ""
+        previous = crab_support_motion_id(self.last_physical_motion_id or "")
         if previous in {"goal_camera_90_crab_right", "goal_camera_90_crab_left"}:
             side = "right" if previous.endswith("right") else "left"
             return f"goal_crab_{side}_to_fine_90"
@@ -1468,6 +1473,10 @@ class MotionCommandBridgeNode(Node):
             "motion_id": motion_id,
             "timeout_ms": timeout_ms,
         }
+        if action == "SHOT" and motion_id.startswith("goal_shot_region_"):
+            shot = getattr(self, "goal_ring_shot", None)
+            if shot is not None and shot[:2] == (command_id, event_id):
+                request_payload["waist_ring_aim_deg"] = shot[2]
         previous = (self.last_physical_motion_id or "").removesuffix("_2")
         target = motion_id.removesuffix("_2")
         # Goal crabs already pass through GOAL_CRAB_PRE_DWELL_MARKER.
@@ -1741,7 +1750,7 @@ class MotionCommandBridgeNode(Node):
             command.get("goal_crab_prequeue") is True
             and self.motion_in_progress and action in self.GOAL_CRAB_ACTIONS
             and action == self.active_action
-            and self.active_motion_id == self.motion_id_for_action(action)
+            and self.active_motion_id == goal_crab_motion_id(action, command)
             and command.get("goal_crab_running_command_id") == self.active_command_id
             and type(command.get("goal_crab_queue_frame_count")) is int
             and command["goal_crab_queue_frame_count"] >= 3
@@ -1838,7 +1847,7 @@ class MotionCommandBridgeNode(Node):
             pickup_sequence = self.POST_BALL_GOAL_TRANSITION_SEQUENCE
             motion_id = pickup_sequence[0]
         elif action in self.GOAL_CRAB_ACTIONS:
-            motion_id = self.motion_id_for_action(action)
+            motion_id = goal_crab_motion_id(action, command)
             prepare_motion = self._transition_prepare_motion(motion_id)
             pickup_sequence = (
                 MotionCommandBridgeNode.GOAL_CRAB_PRE_DWELL_MARKER, motion_id,
@@ -1867,15 +1876,26 @@ class MotionCommandBridgeNode(Node):
             source_command = payload.get("source_command")
             region = (source_command.get("shot_region")
                       if isinstance(source_command, dict) else None)
-            if region is not None and (not self._is_integer(region) or region not in range(1, 9)):
+            ring_aim = (source_command.get("waist_ring_aim_deg")
+                        if isinstance(source_command, dict) else None)
+            if (not self._is_integer(region) or region not in {1, 2, 5, 6, 7, 8}
+                    or type(ring_aim) not in {int, float}
+                    or not math.isfinite(ring_aim) or abs(ring_aim) >= 90.0):
                 self._publish_local_rejection(
                     status="REJECTED", command_id=command_id, event_id=event_id,
-                    action=action, error_code="INVALID_SHOT_REGION",
-                    message="shot_region must be an integer from 1 to 8",
+                    action=action, error_code="INVALID_SHOT_GEOMETRY",
+                    message="shot requires an enabled region and a finite ring waist angle",
                 )
                 return
-            shot_motion = (f"goal_shot_region_{region}" if region is not None
-                           else self.motion_id_for_action(action))
+            if self.motion_in_progress:
+                self._publish_local_rejection(
+                    status="REJECTED", command_id=command_id, event_id=event_id,
+                    action=action, error_code="BUSY",
+                    message="ring-directed shot must start after the current motion",
+                )
+                return
+            self.goal_ring_shot = (command_id, event_id, ring_aim)
+            shot_motion = f"goal_shot_region_{region}"
             prepare_motion = MotionCommandBridgeNode._shot_prepare_motion(self)
             if prepare_motion is not None:
                 self.shot_prepare_retry_motion_id = prepare_motion
@@ -2376,6 +2396,7 @@ class MotionCommandBridgeNode(Node):
 
     def _clear_active_request(self) -> None:
         """Release the bridge after a terminal executor status."""
+        self.goal_ring_shot = None
         self.pending_pickup_fine_motion_id = None
         self.pickup_queued_request = None
         self.motion_in_progress = False
@@ -2580,6 +2601,11 @@ class MotionCommandBridgeNode(Node):
         elif is_active and payload["motion_id"] == self.active_motion_id:
             if payload["status"] == "SUCCEEDED":
                 self.last_physical_motion_id = physical_motion_id(payload["motion_id"])
+                if payload["motion_id"] in {
+                    "post_shot_exit_right_5_forward_4", "post_shot_exit_left_3_forward_4",
+                }:
+                    # Subsequent posture transitions start from ordinary forward support.
+                    self.last_physical_motion_id = "line_forward_4"
             elif payload["status"] in self.TERMINAL_STATUSES:
                 self.last_physical_motion_id = None
         elif is_active and payload["motion_id"] in MotionCommandBridgeNode.TRANSITION_MOTION_IDS:

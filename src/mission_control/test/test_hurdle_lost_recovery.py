@@ -4,7 +4,7 @@ import pytest
 
 from mission_control.motion_decision_planner import MotionDecisionPlanner
 from step.hurdle_navigation_planner import HurdleNavigationPlanner
-from test_hurdle_positioning import HurdleHarness, clock, hurdle
+from test_hurdle_positioning import HurdleHarness, clock, hurdle, line_info
 from test_mission_phase_flow import release_general
 from test_motion_command_bridge import FakeBridge, decoded_messages, navigation_message
 
@@ -31,45 +31,54 @@ def test_loss_repeats_small_stationary_turn_and_maps_to_catalog(offset, directio
         assert requests[-1]["motion_id"] == f"post_ball_line_turn_{direction.lower()}_{count}"
 
 
-@pytest.mark.parametrize("angle,direction,count", [(12, "LEFT", 1), (-15, "RIGHT", 1),
-                                                 (-60, "RIGHT", 6), (-75, "RIGHT", 7),
-                                                 (-90, "RIGHT", 9)])
-def test_reacquisition_aligns_parallel_before_near_go(angle, direction, count):
+@pytest.mark.parametrize("angle,direction,count", [(-15, "LEFT", 1), (15, "RIGHT", 1),
+                                                 (60, "RIGHT", 6), (75, "RIGHT", 7),
+                                                 (90, "RIGHT", 9)])
+def test_reacquisition_aligns_line_before_near_go(angle, direction, count):
     planner = MotionDecisionPlanner()
     planner.plan("AUTO", {"hurdle": visible()}, .1)
     planner.plan("AUTO", {"hurdle": {"detected": False}}, .1)
     decision = planner.plan("AUTO", {
-        "hurdle": visible(depth=.5, hurdle_angle_deg=angle),
+        "hurdle": visible(depth=.5, hurdle_angle_deg=0), "line": line_info(heading=angle),
     }, .1)
     assert decision.action == f"ALIGN_{direction}"
     assert decision.source_command["turn_count"] == count
     assert not decision.source_command["fine_sequence_requested"]
     ready = planner.plan("AUTO", {
-        "hurdle": visible(depth=.5, hurdle_angle_deg=0),
+        "hurdle": visible(depth=.5, hurdle_angle_deg=40), "line": line_info(),
     }, .1)
-    assert ready.action == "GO"
+    assert ready.action == "STRAIGHT_1"
     assert not planner.hurdle_planner.recovery_active
+    final = planner.plan("AUTO", {
+        "hurdle": visible(depth=.45, hurdle_angle_deg=0),
+    }, .1)
+    assert final.action == "GO"
 
 
-@pytest.mark.parametrize("angle", [-8, 0, 8])
-def test_parallel_tolerance_resumes_fine_approach(angle):
+@pytest.mark.parametrize("angle", [-14.999, -8, 0, 8, 14.999])
+def test_line_tolerance_resumes_fine_approach(angle):
     planner = HurdleNavigationPlanner()
     planner.plan(visible(), positioning=True)
     planner.plan({"detected": False}, positioning=True)
-    decision = planner.plan(visible(hurdle_angle_deg=angle), positioning=True)
-    assert decision.action == "STRAIGHT_0"
+    decision = planner.plan(visible(hurdle_angle_deg=60, line_heading_valid=True,
+                                    line_heading_deg=angle, line_heading_reference_source="fresh"),
+                            positioning=True)
+    assert decision.action == "STRAIGHT_1"
     assert not planner.recovery_active
 
 
 @pytest.mark.parametrize("updates", [
-    {"hurdle_angle_deg": None}, {"depth_valid": False}, {"confidence": .1},
+    {"line_heading_deg": None}, {"depth_valid": False}, {"confidence": .1},
     {"confirmation_confirmed": False}, {"bottom_distance_px": None},
 ])
 def test_invalid_reacquisition_cannot_resume_forward_or_go(updates):
     planner = HurdleNavigationPlanner()
     planner.plan(visible(), positioning=True)
     planner.plan({"detected": False}, positioning=True)
-    decision = planner.plan(visible(depth=.5, **updates), positioning=True)
+    sample = visible(depth=.5, line_heading_valid=True, line_heading_deg=0,
+                     line_heading_reference_source="fresh")
+    sample.update(updates)
+    decision = planner.plan(sample, positioning=True)
     assert decision.action == "WAIT" and not decision.valid
     assert planner.recovery_active
 
@@ -105,7 +114,7 @@ def test_bottom_loss_repeats_one_cycle_retreat_until_visible(bottom):
         assert len(requests) == 1
         assert requests[0]["motion_id"] == "pickup_lost_ball_backward_1"
     ready = planner.plan("AUTO", {"hurdle": visible()}, .1)
-    assert ready.action == "STRAIGHT_0"
+    assert ready.action == "STRAIGHT_1"
 
 
 @pytest.mark.parametrize("info", [None, {}, {"detected": False, "raw_detected": True},
@@ -170,7 +179,7 @@ def test_bottom_retreat_waits_for_completion_pause_and_fresh_reacquisition(clock
     node.publish()
     node.receive(visible())
     resumed = node.publish()[-1]
-    assert resumed["action"] == "STRAIGHT_0"
+    assert resumed["action"] == "STRAIGHT_1"
 
 
 def test_screen_center_takes_precedence_over_calibrated_robot_offset():
@@ -201,18 +210,20 @@ def test_callback_remembers_side_during_motion_and_blocks_early_go(clock):
     node = HurdleHarness()
     node.receive(visible(0))
     fine = node.publish()[-1]
-    assert fine["action"] == "STRAIGHT_0"
+    assert fine["action"] == "STRAIGHT_1"
     node.receive(visible(-400))
     node.receive({"detected": False})
     assert node.publish() == []
     assert node.planner.hurdle_planner.recovery_active
     # A close reacquisition must not latch the atomic GO before alignment.
-    node.receive(visible(-400, depth=.5, hurdle_angle_deg=20))
+    node.receive_line(heading=-20)
+    node.receive(visible(-400, depth=.5, hurdle_angle_deg=-60))
     assert getattr(node, "pending_hurdle_final_sequence", None) is None
     release_general(node, fine)
     clock[0] += 1.1
     node.publish()  # Discard images received before the post-motion pause.
-    node.receive(visible(-400, depth=.5, hurdle_angle_deg=20))
+    node.receive_line(heading=-20)
+    node.receive(visible(-400, depth=.5, hurdle_angle_deg=-60))
     turn = node.publish()[-1]
     assert turn["action"] == "ALIGN_LEFT"
     assert turn["source_command"]["turn_count"] == 1

@@ -1,0 +1,41 @@
+{
+  "changed_motions": [
+    {
+      "before_name": "p공확인자세",
+      "after_name": "n공확인자세",
+      "changed_keys": [
+        "name",
+        "start_pose",
+        "end_pose",
+        "frames"
+      ]
+    }
+  ],
+  "installed_alias_verified": "pickup_grasp_check_pose -> n공확인자세",
+  "original_source_sha256": "16d99af61fd639c6d949f4b3867c5edfdacdefecc672f11b023e666e55813f87",
+  "robot_hardware_executed": false,
+  "decision_logic_changed": false,
+  "frame_duration_ms": 400,
+  "speed": 1.0,
+  "runtime_tolerance_deg": 5.0,
+  "before_tests": [
+    "........................................................................ [ 60%]",
+    "................................................                         [100%]",
+    "120 passed in 10.99s"
+  ],
+  "after_tests": [
+    "........................................................................ [ 57%]",
+    ".....................................................                    [100%]",
+    "125 passed in 11.42s"
+  ],
+  "pose_lookup_tests": [
+    "........                                                                 [100%]",
+    "8 passed in 0.66s"
+  ],
+  "sdk_tests": [
+    "",
+    "100% tests passed, 0 tests failed out of 2",
+    "",
+    "Total Test time (real) =  11.61 sec"
+  ]
+}

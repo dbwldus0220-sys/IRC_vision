@@ -1,0 +1,137 @@
+--- before/motion_decision_node.py
++++ after/motion_decision_node.py
+@@ -128,6 +128,7 @@
+            for side in ("LEFT", "RIGHT") for suffix in (4, 6, 8, 10, 12, 15)},
+     }
+     LINE_MOTION_CAPTURE_START_RATIO = 0.70
++    LINE_LOSS_REQUIRED_FRAMES = 3
+     LINE_TURN_CAPTURE_CONFIG = {
+         **{f"LINE_{kind}_TURN_{side}_{count}": (camera45_turn_duration_sec(side, count), 3)
+            for kind, side, counts in (
+@@ -574,6 +575,9 @@
+         self.goal_initial_search = GoalInitialSearch()
+         self.goal_stationary_since: float | None = None
+         self.motion_stationary_since: float | None = None
++        self.line_loss_stamps: list[int] = []
++        self.line_loss_last_stamp: int | None = None
++        self.line_loss_min_stamp: int = 0
+         self.goal_shot_settle_pending = False
+         self.goal_shot_observe_until: float | None = None
+         self.goal_forward_started_at: float | None = None
+@@ -1233,6 +1237,8 @@
+                         source, stamp, ros_now, received_at, self.timeouts[source],
+                     )
+                 if not time_valid:
++                    if source == "line":
++                        self.line_loss_stamps = []
+                     packet["status"] = "clock_recovery" if recovering else "capture_time_rejected"
+                     keep_line = (source == "line" and not recovering
+                                  and MotionDecisionNode._recent_walking_input(self, source, received_at)
+@@ -1400,6 +1406,8 @@
+                 packet["status"] = "accepted"
+                 self.latest_info[source] = payload
+                 self.latest_time[source] = received_at
++                if source == "line":
++                    MotionDecisionNode._observe_line_loss(self, payload)
+                 if source == "ball":
+                     MotionDecisionNode._observe_ball_mode_confirmation(self, payload)
+                 if (source == "goal" and payload.get("detected") is True
+@@ -1677,6 +1685,9 @@
+             self.latest_time[source] = None
+         self.last_published_vision_stamp = {}
+         self.vision_transport = {}
++        self.line_loss_stamps = []
++        self.line_loss_last_stamp = None
++        self.line_loss_min_stamp = ros_now
+         MotionDecisionNode._discard_line_motion_capture(self)
+         for name in (
+             "pending_line_decision", "pending_line_corner", "pending_hurdle_final_sequence",
+@@ -4069,6 +4080,63 @@
+         if reset is not None:
+             reset()
+ 
++    def _observe_line_loss(self, info: dict) -> None:
++        """Count explicit misses from distinct captures only while stationary."""
++        stamp = MotionDecisionNode._detection_stamp_ns(info) or info.get("rgb_stamp_ns")
++        ros_now = MotionDecisionNode._current_ros_time_ns(self)
++        stationary = (
++            not self.general_motion_gate.locked
++            and self.active_special_command_id is None
++            and getattr(self, "executor_active", None) is False
++            and getattr(self, "queued_general_command_id", None) is None
++        )
++        previous = getattr(self, "line_loss_last_stamp", None)
++        if type(stamp) is int and (previous is None or stamp > previous):
++            self.line_loss_last_stamp = stamp
++        if (not stationary or info.get("detected") is not False
++                or info.get("raw_detected") is not False
++                or type(stamp) is not int or type(ros_now) is not int
++                or stamp <= getattr(self, "line_loss_min_stamp", 0)
++                or not 0 <= ros_now - stamp <= int(self.timeouts["line"] * 1e9)):
++            self.line_loss_stamps = []
++            return
++        if previous is not None and stamp <= previous:
++            return
++        stamps = [s for s in getattr(self, "line_loss_stamps", [])
++                  if 0 <= ros_now - s <= int(self.timeouts["line"] * 1e9)]
++        self.line_loss_stamps = (stamps + [stamp])[-MotionDecisionNode.LINE_LOSS_REQUIRED_FRAMES:]
++
++    def _confirm_line_loss_search(self, decision: MotionDecision, info: dict | None) -> MotionDecision:
++        """Keep temporary loss/reconfirmation out of stationary search queues."""
++        if decision.source != "line" or not decision.action.startswith("LINE_LOST_TURN_"):
++            return decision
++        info = info or {}
++        stamp = MotionDecisionNode._detection_stamp_ns(info) or info.get("rgb_stamp_ns")
++        ros_now = MotionDecisionNode._current_ros_time_ns(self)
++        stamps = getattr(self, "line_loss_stamps", [])
++        ready = (
++            info.get("detected") is False and info.get("raw_detected") is False
++            and not self.general_motion_gate.locked
++            and self.active_special_command_id is None
++            and getattr(self, "executor_active", None) is False
++            and getattr(self, "queued_general_command_id", None) is None
++            and len(stamps) == MotionDecisionNode.LINE_LOSS_REQUIRED_FRAMES
++            and stamp == stamps[-1] and type(ros_now) is int
++            and all(s > getattr(self, "line_loss_min_stamp", 0)
++                    and 0 <= ros_now - s <= int(self.timeouts["line"] * 1e9) for s in stamps)
++        )
++        metadata = {**decision.source_command,
++                    "line_loss_frames": len(stamps),
++                    "line_loss_required_frames": MotionDecisionNode.LINE_LOSS_REQUIRED_FRAMES}
++        if ready:
++            return replace(decision, source_command=metadata)
++        reason = ("line_reconfirmation_pending" if info.get("raw_detected") is True
++                  else "line_loss_waiting_for_fresh_misses")
++        return replace(decision, action="WAIT", valid=False, requires_ack=False,
++                       sdk_motion_requested=False, reason=reason,
++                       source_command={**metadata, "valid": False, "motion": "STOP",
++                                       "reason": reason, "blocked_search_action": decision.action})
++
+     def _fresh_observations(
+         self,
+         now: float,
+@@ -6532,6 +6600,11 @@
+             self.last_candidate_decision = decision
+             decision = limiter.filter(decision, observations)
+             self.last_selected_decision = decision
++
++        decision = MotionDecisionNode._confirm_line_loss_search(self, decision, observations.get("line"))
++        self.last_selected_decision = decision
++        if queue_while_locked and not decision.valid:
++            return
+ 
+         if (
+             decision.valid
+@@ -7246,6 +7319,12 @@
+         status = str(payload.get("status", "")).upper()
+         if status == "QUEUED":
+             return
++        # Completion must not reuse misses captured during the preceding motion.
++        self.line_loss_stamps = []
++        self.line_loss_last_stamp = None
++        ros_now = MotionDecisionNode._current_ros_time_ns(self)
++        if type(ros_now) is int:
++            self.line_loss_min_stamp = ros_now
+         elapsed = payload.get("stationary_elapsed_sec")
+         if (status in {"RUNNING", "SUCCEEDED"} and type(elapsed) in {int, float}
+                 and math.isfinite(elapsed) and elapsed >= 0):

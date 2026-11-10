@@ -10,10 +10,20 @@ from test_motion_command_bridge import (
 )
 from test_mission_phase_flow import MissionFlowHarness, pickup_ready_ball, publish_special
 from mission_control.motion_decision_node import MotionDecisionNode
+from mission_control.pickup_grasp_selection import pickup_grasp_motion_id
 
 
-@pytest.mark.parametrize('pixels,expected', [(0, 'pickup_400'), (400, 'pickup_400'),
-    (449.99, 'pickup_400'), (450, 'pickup_400'), (450.01, 'pickup_500'), (500, 'pickup_500')])
+@pytest.mark.parametrize('pixels,expected', [
+    (0, 'pickup_400'), (319.99, 'pickup_400'), (320, 'pickup_400'),
+    (320.01, 'pickup_500'), (400, 'pickup_500'), (450, 'pickup_500'),
+    (500, 'pickup_500'),
+])
+def test_grasp_selection_uses_320_pixel_boundary(pixels, expected):
+    assert pickup_grasp_motion_id(pixels) == expected
+
+
+@pytest.mark.parametrize('pixels,expected', [(0, 'pickup_400'), (300, 'pickup_400'),
+    (319.99, 'pickup_400'), (320, 'pickup_400'), (320.01, 'pickup_500'), (500, 'pickup_500')])
 def test_post_retreat_selects_grasp_and_keeps_check_pose(pixels, expected):
     bridge = FakeBridge()
     enter_pickup_fine_alignment(bridge)
@@ -78,7 +88,7 @@ def test_invalid_pixels_wait_in_planner_and_cannot_resume_bridge(pixels):
     assert decoded_messages(bridge.motion_status_publisher)[-1]['error_code'] == 'INVALID_PICKUP_GRASP_SELECTION'
 
 
-@pytest.mark.parametrize('pixels,expected', [(450, 'pickup_400'), (451, 'pickup_500')])
+@pytest.mark.parametrize('pixels,expected', [(320, 'pickup_400'), (321, 'pickup_500')])
 def test_node_discards_pre_retreat_frame_then_selects_from_fresh_pixels(pixels, expected):
     node = MissionFlowHarness(phase='BALL_APPROACH')
     command = publish_special(node, 'ball', pickup_ready_ball(), 'PICKUP_NOW')

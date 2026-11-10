@@ -1,0 +1,216 @@
+{
+  "events": [
+    {
+      "stamp": 1794256508.9583654,
+      "kst": "2026-11-10T05:35:08.958365+09:00",
+      "log": "python3_3502_1794256446194.log",
+      "line": 113,
+      "message": "[INFO] [1794256508.958365436] [motion_decision_node]: Pickup alignment decision: command_id=101, action=BALL_PICKUP_FINE_SEARCH_BACKWARD_2, reason=ball_lost_inside_image_backward_search, steering_deg=None, steering_source=None, offset_px=None, bottom_px=None, close_alignment=None, depth_m=None, depth_age_sec=None, rgb_stamp_ns=1794256508807410400"
+    },
+    {
+      "stamp": 1794256519.3823073,
+      "kst": "2026-11-10T05:35:19.382307+09:00",
+      "log": "python3_3502_1794256446194.log",
+      "line": 139,
+      "message": "[INFO] [1794256519.382307404] [motion_decision_node]: [GRASP_VERIFY_START] {\"attempt_id\":1,\"ball_index\":1,\"completed_motion\":\"pickup_grasp_check_pose\",\"confidence_threshold\":0.25,\"expected_window_sec\":3.0,\"frame_window_limit\":40,\"initial_result\":\"UNKNOWN\",\"minimum_accepted_stamp_ns\":1794256519110947998,\"motion_status_receive_monotonic\":206.429489461,\"required_grab_frames\":15,\"window_scope\":\"post_check_pose_dwell\",\"window_start_monotonic\":206.429812002,\"window_start_ros_ns\":1794256519381072868}"
+    },
+    {
+      "stamp": 1794256526.0913787,
+      "kst": "2026-11-10T05:35:26.091379+09:00",
+      "log": "python3_3502_1794256446194.log",
+      "line": 198,
+      "message": "[INFO] [1794256526.091378622] [motion_decision_node]: Mission phase advanced after special motion: status=SUCCEEDED, action=PICKUP_NOW, previous_phase=BALL_APPROACH, next_phase=POST_BALL_LINE_ALIGN"
+    },
+    {
+      "stamp": 1794256528.3533492,
+      "kst": "2026-11-10T05:35:28.353349+09:00",
+      "log": "python3_3502_1794256446194.log",
+      "line": 204,
+      "message": "[INFO] [1794256528.353349196] [motion_decision_node]: Post-pickup Line motion started: 1/3, command_id=298, action=LINE_HEADING_TURN_LEFT_5"
+    },
+    {
+      "stamp": 1794256530.789443,
+      "kst": "2026-11-10T05:35:30.789443+09:00",
+      "log": "python3_3502_1794256446194.log",
+      "line": 209,
+      "message": "[INFO] [1794256530.789442945] [motion_decision_node]: Post-pickup Line motion started: 2/3, command_id=299, action=LINE_OFFSET_TURN_RIGHT_1"
+    },
+    {
+      "stamp": 1794256531.6799486,
+      "kst": "2026-11-10T05:35:31.679949+09:00",
+      "log": "sdk_motion_executor_3506_1794256445548.log",
+      "line": 13,
+      "message": "[INFO] [1794256531.679948540] [sdk_motion_executor]: Goal camera starts with third Line motion: id=302"
+    },
+    {
+      "stamp": 1794256531.68369,
+      "kst": "2026-11-10T05:35:31.683690+09:00",
+      "log": "python3_3502_1794256446194.log",
+      "line": 212,
+      "message": "[INFO] [1794256531.683690082] [motion_decision_node]: Post-pickup Line motion started: 3/3, command_id=302, action=RECOVER_RIGHT_TURN_RIGHT_4"
+    },
+    {
+      "stamp": 1794256532.0817792,
+      "kst": "2026-11-10T05:35:32.081779+09:00",
+      "log": "python3_3502_1794256446194.log",
+      "line": 214,
+      "message": "[INFO] [1794256532.081779140] [motion_decision_node]: Post-pickup Goal camera ready; accepting new Goal frames"
+    },
+    {
+      "stamp": 1794256533.6997697,
+      "kst": "2026-11-10T05:35:33.699770+09:00",
+      "log": "python3_3502_1794256446194.log",
+      "line": 217,
+      "message": "[INFO] [1794256533.699769817] [motion_decision_node]: Post-pickup Line driving completed: grasp=GRABBED, next_phase=GOAL_APPROACH"
+    },
+    {
+      "stamp": 1794256555.562962,
+      "kst": "2026-11-10T05:35:55.562962+09:00",
+      "log": "python3_3502_1794256446194.log",
+      "line": 244,
+      "message": "[INFO] [1794256555.562962076] [motion_decision_node]: Mission phase advanced after special motion: status=SUCCEEDED, action=SHOT, previous_phase=GOAL_APPROACH, next_phase=POST_SHOT_TURN"
+    },
+    {
+      "stamp": 1794256571.4974542,
+      "kst": "2026-11-10T05:36:11.497454+09:00",
+      "log": "python3_3502_1794256446194.log",
+      "line": 279,
+      "message": "[INFO] [1794256571.497454137] [motion_decision_node]: HURDLE positioning entry latched: depth_m=0.668, bottom_distance_px=158.0, head_down_requested=False"
+    },
+    {
+      "stamp": 1794256576.1092558,
+      "kst": "2026-11-10T05:36:16.109256+09:00",
+      "log": "python3_3502_1794256446194.log",
+      "line": 284,
+      "message": "[INFO] [1794256576.109255731] [motion_decision_node]: HURDLE final sequence latched: depth_m=0.537, center_steering_deg=2.5385445983987927, observed_during_action=STRAIGHT_0"
+    },
+    {
+      "stamp": 1794256590.8930843,
+      "kst": "2026-11-10T05:36:30.893084+09:00",
+      "log": "python3_3502_1794256446194.log",
+      "line": 302,
+      "message": "[INFO] [1794256590.893084321] [motion_decision_node]: Mission phase advanced after special motion: status=SUCCEEDED, action=GO, previous_phase=HURDLE_POSITIONING, next_phase=LINE_TRACK"
+    },
+    {
+      "stamp": 1794256621.448649,
+      "kst": "2026-11-10T05:37:01.448649+09:00",
+      "log": "python3_3502_1794256446194.log",
+      "line": 411,
+      "message": "[INFO] [1794256621.448648952] [motion_decision_node]: [GRASP_VERIFY_START] {\"attempt_id\":2,\"ball_index\":2,\"completed_motion\":\"pickup_grasp_check_pose\",\"confidence_threshold\":0.25,\"expected_window_sec\":3.0,\"frame_window_limit\":40,\"initial_result\":\"UNKNOWN\",\"minimum_accepted_stamp_ns\":1794256621278454346,\"motion_status_receive_monotonic\":308.495933354,\"required_grab_frames\":15,\"window_scope\":\"post_check_pose_dwell\",\"window_start_monotonic\":308.496314833,\"window_start_ros_ns\":1794256621447575444}"
+    },
+    {
+      "stamp": 1794256627.2441728,
+      "kst": "2026-11-10T05:37:07.244173+09:00",
+      "log": "python3_3502_1794256446194.log",
+      "line": 464,
+      "message": "[INFO] [1794256627.244172887] [motion_decision_node]: Mission phase advanced after special motion: status=SUCCEEDED, action=PICKUP_NOW, previous_phase=BALL_APPROACH, next_phase=POST_BALL_LINE_ALIGN"
+    },
+    {
+      "stamp": 1794256627.3050332,
+      "kst": "2026-11-10T05:37:07.305033+09:00",
+      "log": "python3_3502_1794256446194.log",
+      "line": 469,
+      "message": "[INFO] [1794256627.305033299] [motion_decision_node]: Post-pickup Line motion started: 1/3, command_id=904, action=LINE_OFFSET_TURN_LEFT_2"
+    },
+    {
+      "stamp": 1794256628.5843477,
+      "kst": "2026-11-10T05:37:08.584348+09:00",
+      "log": "python3_3502_1794256446194.log",
+      "line": 473,
+      "message": "[INFO] [1794256628.584347751] [motion_decision_node]: Post-pickup Line motion started: 2/3, command_id=905, action=LINE_OFFSET_TURN_LEFT_1"
+    },
+    {
+      "stamp": 1794256629.5223112,
+      "kst": "2026-11-10T05:37:09.522311+09:00",
+      "log": "sdk_motion_executor_3506_1794256445548.log",
+      "line": 18,
+      "message": "[INFO] [1794256629.522311123] [sdk_motion_executor]: Goal camera starts with third Line motion: id=906"
+    },
+    {
+      "stamp": 1794256629.5262086,
+      "kst": "2026-11-10T05:37:09.526209+09:00",
+      "log": "python3_3502_1794256446194.log",
+      "line": 477,
+      "message": "[INFO] [1794256629.526208638] [motion_decision_node]: Post-pickup Line motion started: 3/3, command_id=906, action=STRAIGHT_2"
+    },
+    {
+      "stamp": 1794256630.0685308,
+      "kst": "2026-11-10T05:37:10.068531+09:00",
+      "log": "python3_3502_1794256446194.log",
+      "line": 478,
+      "message": "[INFO] [1794256630.068530718] [motion_decision_node]: Post-pickup Goal camera ready; accepting new Goal frames"
+    },
+    {
+      "stamp": 1794256631.540346,
+      "kst": "2026-11-10T05:37:11.540346+09:00",
+      "log": "python3_3502_1794256446194.log",
+      "line": 482,
+      "message": "[INFO] [1794256631.540345881] [motion_decision_node]: Post-pickup Line driving completed: grasp=GRABBED, next_phase=GOAL_APPROACH"
+    },
+    {
+      "stamp": 1794256657.3983383,
+      "kst": "2026-11-10T05:37:37.398338+09:00",
+      "log": "python3_3502_1794256446194.log",
+      "line": 510,
+      "message": "[INFO] [1794256657.398338433] [motion_decision_node]: Mission phase advanced after special motion: status=SUCCEEDED, action=SHOT, previous_phase=GOAL_APPROACH, next_phase=POST_SHOT_TURN"
+    },
+    {
+      "stamp": 1794256679.1687164,
+      "kst": "2026-11-10T05:37:59.168716+09:00",
+      "log": "python3_3502_1794256446194.log",
+      "line": 542,
+      "message": "[INFO] [1794256679.168716383] [motion_decision_node]: HURDLE positioning entry latched: depth_m=0.612, bottom_distance_px=117.0, head_down_requested=True"
+    },
+    {
+      "stamp": 1794256680.875606,
+      "kst": "2026-11-10T05:38:00.875606+09:00",
+      "log": "python3_3502_1794256446194.log",
+      "line": 546,
+      "message": "[INFO] [1794256680.875605980] [motion_decision_node]: HURDLE final sequence latched: depth_m=0.524, center_steering_deg=0.0, observed_during_action=STRAIGHT_0"
+    },
+    {
+      "stamp": 1794256696.6399493,
+      "kst": "2026-11-10T05:38:16.639949+09:00",
+      "log": "python3_3502_1794256446194.log",
+      "line": 565,
+      "message": "[INFO] [1794256696.639949355] [motion_decision_node]: Mission phase advanced after special motion: status=SUCCEEDED, action=GO, previous_phase=HURDLE_POSITIONING, next_phase=LINE_TRACK"
+    },
+    {
+      "stamp": 1794256715.3345158,
+      "kst": "2026-11-10T05:38:35.334516+09:00",
+      "log": "sdk_motion_executor_3506_1794256445548.log",
+      "line": 23,
+      "message": "[ERROR] [1794256715.334515897] [sdk_motion_executor]: Execution failure: {\"status\":\"REJECTED\",\"action\":\"LINE_LOST_TURN_LEFT_3\",\"command_id\":1280,\"event_id\":null,\"request_id\":1280,\"motion_id\":\"post_ball_line_turn_left_3\",\"error_code\":\"SDK_HARDWARE_NOT_READY\",\"message\":\"cannot capture actual start pose\"}"
+    },
+    {
+      "stamp": 1794256716.247421,
+      "kst": "2026-11-10T05:38:36.247421+09:00",
+      "log": "sdk_motion_executor_3506_1794256445548.log",
+      "line": 24,
+      "message": "[ERROR] [1794256716.247420983] [sdk_motion_executor]: Execution failure: {\"status\":\"REJECTED\",\"action\":\"STRAIGHT_1\",\"command_id\":1281,\"event_id\":null,\"request_id\":1281,\"motion_id\":\"line_forward_2\",\"error_code\":\"SDK_HARDWARE_NOT_READY\",\"message\":\"cannot capture actual start pose\"}"
+    }
+  ],
+  "goal_not_detected_waits": [
+    {
+      "first_stamp": 1794256533.7082891,
+      "last_stamp": 1794256538.2937305,
+      "messages": 98,
+      "duration_sec": 4.585,
+      "first_kst": "2026-11-10T05:35:33.708289+09:00",
+      "last_kst": "2026-11-10T05:35:38.293730+09:00"
+    },
+    {
+      "first_stamp": 1794256631.588978,
+      "last_stamp": 1794256637.1488838,
+      "messages": 122,
+      "duration_sec": 5.56,
+      "first_kst": "2026-11-10T05:37:11.588978+09:00",
+      "last_kst": "2026-11-10T05:37:17.148884+09:00"
+    }
+  ],
+  "limitations": [
+    "Screen recording contains RGB overlays, not raw aligned depth or goal_info messages.",
+    "RAW backboards and goal_not_detected establish rejection before confirmed Goal input; they do not distinguish invalid depth from depth above 2m.",
+    "SDK memory-hardware checks do not validate physical balance or motor communication."
+  ]
+}

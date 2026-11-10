@@ -297,6 +297,13 @@ if(BUILD_TESTING)
     target_compile_definitions(test_sdk_executor_core PRIVATE
       TEST_ALIAS_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/config/motion_aliases.yaml")
   endif()
+  ament_add_gtest(test_ring_shot_core test/test_ring_shot_core.cpp)
+  if(TARGET test_ring_shot_core)
+    target_include_directories(test_ring_shot_core PRIVATE test)
+    target_link_libraries(test_ring_shot_core sdk_executor_core)
+    target_compile_definitions(test_ring_shot_core PRIVATE
+      TEST_ALIAS_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/config/motion_aliases.yaml")
+  endif()
   ament_add_gtest(test_queue_control_tick test/test_queue_control_tick.cpp)
   if(TARGET test_queue_control_tick)
     target_include_directories(test_queue_control_tick PRIVATE test)

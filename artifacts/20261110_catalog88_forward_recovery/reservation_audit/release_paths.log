@@ -1,0 +1,382 @@
+.........................FFFFFFFFFFFFFFFFFFFF....                        [100%]
+=================================== FAILURES ===================================
+_________ test_right_crab_reserves_at_30hz_with_processing_delay[0-0] __________
+
+clock = [10.919999999999998], phase = 0, delay = 0
+
+    @pytest.mark.parametrize('phase', [0, .008, .016, .024, .032])
+    @pytest.mark.parametrize('delay', [0, .030, .050])
+    def test_right_crab_reserves_at_30hz_with_processing_delay(clock, phase, delay):
+        node, bridge, parent, first = running_right_crab(clock)
+        assert deliver_periodic_frames(node, clock, 30, phase, delay)
+        command = node.publisher.messages[-1]
+        assert command['source_command']['pickup_walk_prequeue']
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+        second = requests(bridge)[-1]
+        assert second['motion_id'] == 'pickup_crab_right_0'
+>       assert second['request_id'] != first['request_id']
+E       assert 1 != 1
+
+src/mission_control/test/test_catalog70_queue_flow.py:54: AssertionError
+_______ test_right_crab_reserves_at_30hz_with_processing_delay[0-0.008] ________
+
+clock = [10.927999999999997], phase = 0.008, delay = 0
+
+    @pytest.mark.parametrize('phase', [0, .008, .016, .024, .032])
+    @pytest.mark.parametrize('delay', [0, .030, .050])
+    def test_right_crab_reserves_at_30hz_with_processing_delay(clock, phase, delay):
+        node, bridge, parent, first = running_right_crab(clock)
+        assert deliver_periodic_frames(node, clock, 30, phase, delay)
+        command = node.publisher.messages[-1]
+        assert command['source_command']['pickup_walk_prequeue']
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+        second = requests(bridge)[-1]
+        assert second['motion_id'] == 'pickup_crab_right_0'
+>       assert second['request_id'] != first['request_id']
+E       assert 1 != 1
+
+src/mission_control/test/test_catalog70_queue_flow.py:54: AssertionError
+_______ test_right_crab_reserves_at_30hz_with_processing_delay[0-0.016] ________
+
+clock = [10.935999999999998], phase = 0.016, delay = 0
+
+    @pytest.mark.parametrize('phase', [0, .008, .016, .024, .032])
+    @pytest.mark.parametrize('delay', [0, .030, .050])
+    def test_right_crab_reserves_at_30hz_with_processing_delay(clock, phase, delay):
+        node, bridge, parent, first = running_right_crab(clock)
+        assert deliver_periodic_frames(node, clock, 30, phase, delay)
+        command = node.publisher.messages[-1]
+        assert command['source_command']['pickup_walk_prequeue']
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+        second = requests(bridge)[-1]
+        assert second['motion_id'] == 'pickup_crab_right_0'
+>       assert second['request_id'] != first['request_id']
+E       assert 1 != 1
+
+src/mission_control/test/test_catalog70_queue_flow.py:54: AssertionError
+_______ test_right_crab_reserves_at_30hz_with_processing_delay[0-0.024] ________
+
+clock = [10.943999999999997], phase = 0.024, delay = 0
+
+    @pytest.mark.parametrize('phase', [0, .008, .016, .024, .032])
+    @pytest.mark.parametrize('delay', [0, .030, .050])
+    def test_right_crab_reserves_at_30hz_with_processing_delay(clock, phase, delay):
+        node, bridge, parent, first = running_right_crab(clock)
+        assert deliver_periodic_frames(node, clock, 30, phase, delay)
+        command = node.publisher.messages[-1]
+        assert command['source_command']['pickup_walk_prequeue']
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+        second = requests(bridge)[-1]
+        assert second['motion_id'] == 'pickup_crab_right_0'
+>       assert second['request_id'] != first['request_id']
+E       assert 1 != 1
+
+src/mission_control/test/test_catalog70_queue_flow.py:54: AssertionError
+_______ test_right_crab_reserves_at_30hz_with_processing_delay[0-0.032] ________
+
+clock = [10.918666666666665], phase = 0.032, delay = 0
+
+    @pytest.mark.parametrize('phase', [0, .008, .016, .024, .032])
+    @pytest.mark.parametrize('delay', [0, .030, .050])
+    def test_right_crab_reserves_at_30hz_with_processing_delay(clock, phase, delay):
+        node, bridge, parent, first = running_right_crab(clock)
+        assert deliver_periodic_frames(node, clock, 30, phase, delay)
+        command = node.publisher.messages[-1]
+        assert command['source_command']['pickup_walk_prequeue']
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+        second = requests(bridge)[-1]
+        assert second['motion_id'] == 'pickup_crab_right_0'
+>       assert second['request_id'] != first['request_id']
+E       assert 1 != 1
+
+src/mission_control/test/test_catalog70_queue_flow.py:54: AssertionError
+________ test_right_crab_reserves_at_30hz_with_processing_delay[0.03-0] ________
+
+clock = [10.949999999999998], phase = 0, delay = 0.03
+
+    @pytest.mark.parametrize('phase', [0, .008, .016, .024, .032])
+    @pytest.mark.parametrize('delay', [0, .030, .050])
+    def test_right_crab_reserves_at_30hz_with_processing_delay(clock, phase, delay):
+        node, bridge, parent, first = running_right_crab(clock)
+        assert deliver_periodic_frames(node, clock, 30, phase, delay)
+        command = node.publisher.messages[-1]
+        assert command['source_command']['pickup_walk_prequeue']
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+        second = requests(bridge)[-1]
+        assert second['motion_id'] == 'pickup_crab_right_0'
+>       assert second['request_id'] != first['request_id']
+E       assert 1 != 1
+
+src/mission_control/test/test_catalog70_queue_flow.py:54: AssertionError
+______ test_right_crab_reserves_at_30hz_with_processing_delay[0.03-0.008] ______
+
+clock = [10.957999999999997], phase = 0.008, delay = 0.03
+
+    @pytest.mark.parametrize('phase', [0, .008, .016, .024, .032])
+    @pytest.mark.parametrize('delay', [0, .030, .050])
+    def test_right_crab_reserves_at_30hz_with_processing_delay(clock, phase, delay):
+        node, bridge, parent, first = running_right_crab(clock)
+        assert deliver_periodic_frames(node, clock, 30, phase, delay)
+        command = node.publisher.messages[-1]
+        assert command['source_command']['pickup_walk_prequeue']
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+        second = requests(bridge)[-1]
+        assert second['motion_id'] == 'pickup_crab_right_0'
+>       assert second['request_id'] != first['request_id']
+E       assert 1 != 1
+
+src/mission_control/test/test_catalog70_queue_flow.py:54: AssertionError
+______ test_right_crab_reserves_at_30hz_with_processing_delay[0.03-0.016] ______
+
+clock = [10.965999999999998], phase = 0.016, delay = 0.03
+
+    @pytest.mark.parametrize('phase', [0, .008, .016, .024, .032])
+    @pytest.mark.parametrize('delay', [0, .030, .050])
+    def test_right_crab_reserves_at_30hz_with_processing_delay(clock, phase, delay):
+        node, bridge, parent, first = running_right_crab(clock)
+        assert deliver_periodic_frames(node, clock, 30, phase, delay)
+        command = node.publisher.messages[-1]
+        assert command['source_command']['pickup_walk_prequeue']
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+        second = requests(bridge)[-1]
+        assert second['motion_id'] == 'pickup_crab_right_0'
+>       assert second['request_id'] != first['request_id']
+E       assert 1 != 1
+
+src/mission_control/test/test_catalog70_queue_flow.py:54: AssertionError
+______ test_right_crab_reserves_at_30hz_with_processing_delay[0.03-0.024] ______
+
+clock = [10.973999999999997], phase = 0.024, delay = 0.03
+
+    @pytest.mark.parametrize('phase', [0, .008, .016, .024, .032])
+    @pytest.mark.parametrize('delay', [0, .030, .050])
+    def test_right_crab_reserves_at_30hz_with_processing_delay(clock, phase, delay):
+        node, bridge, parent, first = running_right_crab(clock)
+        assert deliver_periodic_frames(node, clock, 30, phase, delay)
+        command = node.publisher.messages[-1]
+        assert command['source_command']['pickup_walk_prequeue']
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+        second = requests(bridge)[-1]
+        assert second['motion_id'] == 'pickup_crab_right_0'
+>       assert second['request_id'] != first['request_id']
+E       assert 1 != 1
+
+src/mission_control/test/test_catalog70_queue_flow.py:54: AssertionError
+______ test_right_crab_reserves_at_30hz_with_processing_delay[0.03-0.032] ______
+
+clock = [10.948666666666664], phase = 0.032, delay = 0.03
+
+    @pytest.mark.parametrize('phase', [0, .008, .016, .024, .032])
+    @pytest.mark.parametrize('delay', [0, .030, .050])
+    def test_right_crab_reserves_at_30hz_with_processing_delay(clock, phase, delay):
+        node, bridge, parent, first = running_right_crab(clock)
+        assert deliver_periodic_frames(node, clock, 30, phase, delay)
+        command = node.publisher.messages[-1]
+        assert command['source_command']['pickup_walk_prequeue']
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+        second = requests(bridge)[-1]
+        assert second['motion_id'] == 'pickup_crab_right_0'
+>       assert second['request_id'] != first['request_id']
+E       assert 1 != 1
+
+src/mission_control/test/test_catalog70_queue_flow.py:54: AssertionError
+________ test_right_crab_reserves_at_30hz_with_processing_delay[0.05-0] ________
+
+clock = [10.969999999999999], phase = 0, delay = 0.05
+
+    @pytest.mark.parametrize('phase', [0, .008, .016, .024, .032])
+    @pytest.mark.parametrize('delay', [0, .030, .050])
+    def test_right_crab_reserves_at_30hz_with_processing_delay(clock, phase, delay):
+        node, bridge, parent, first = running_right_crab(clock)
+        assert deliver_periodic_frames(node, clock, 30, phase, delay)
+        command = node.publisher.messages[-1]
+        assert command['source_command']['pickup_walk_prequeue']
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+        second = requests(bridge)[-1]
+        assert second['motion_id'] == 'pickup_crab_right_0'
+>       assert second['request_id'] != first['request_id']
+E       assert 1 != 1
+
+src/mission_control/test/test_catalog70_queue_flow.py:54: AssertionError
+______ test_right_crab_reserves_at_30hz_with_processing_delay[0.05-0.008] ______
+
+clock = [10.977999999999998], phase = 0.008, delay = 0.05
+
+    @pytest.mark.parametrize('phase', [0, .008, .016, .024, .032])
+    @pytest.mark.parametrize('delay', [0, .030, .050])
+    def test_right_crab_reserves_at_30hz_with_processing_delay(clock, phase, delay):
+        node, bridge, parent, first = running_right_crab(clock)
+        assert deliver_periodic_frames(node, clock, 30, phase, delay)
+        command = node.publisher.messages[-1]
+        assert command['source_command']['pickup_walk_prequeue']
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+        second = requests(bridge)[-1]
+        assert second['motion_id'] == 'pickup_crab_right_0'
+>       assert second['request_id'] != first['request_id']
+E       assert 1 != 1
+
+src/mission_control/test/test_catalog70_queue_flow.py:54: AssertionError
+______ test_right_crab_reserves_at_30hz_with_processing_delay[0.05-0.016] ______
+
+clock = [10.985999999999999], phase = 0.016, delay = 0.05
+
+    @pytest.mark.parametrize('phase', [0, .008, .016, .024, .032])
+    @pytest.mark.parametrize('delay', [0, .030, .050])
+    def test_right_crab_reserves_at_30hz_with_processing_delay(clock, phase, delay):
+        node, bridge, parent, first = running_right_crab(clock)
+        assert deliver_periodic_frames(node, clock, 30, phase, delay)
+        command = node.publisher.messages[-1]
+        assert command['source_command']['pickup_walk_prequeue']
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+        second = requests(bridge)[-1]
+        assert second['motion_id'] == 'pickup_crab_right_0'
+>       assert second['request_id'] != first['request_id']
+E       assert 1 != 1
+
+src/mission_control/test/test_catalog70_queue_flow.py:54: AssertionError
+______ test_right_crab_reserves_at_30hz_with_processing_delay[0.05-0.024] ______
+
+clock = [10.993999999999998], phase = 0.024, delay = 0.05
+
+    @pytest.mark.parametrize('phase', [0, .008, .016, .024, .032])
+    @pytest.mark.parametrize('delay', [0, .030, .050])
+    def test_right_crab_reserves_at_30hz_with_processing_delay(clock, phase, delay):
+        node, bridge, parent, first = running_right_crab(clock)
+        assert deliver_periodic_frames(node, clock, 30, phase, delay)
+        command = node.publisher.messages[-1]
+        assert command['source_command']['pickup_walk_prequeue']
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+        second = requests(bridge)[-1]
+        assert second['motion_id'] == 'pickup_crab_right_0'
+>       assert second['request_id'] != first['request_id']
+E       assert 1 != 1
+
+src/mission_control/test/test_catalog70_queue_flow.py:54: AssertionError
+______ test_right_crab_reserves_at_30hz_with_processing_delay[0.05-0.032] ______
+
+clock = [10.968666666666666], phase = 0.032, delay = 0.05
+
+    @pytest.mark.parametrize('phase', [0, .008, .016, .024, .032])
+    @pytest.mark.parametrize('delay', [0, .030, .050])
+    def test_right_crab_reserves_at_30hz_with_processing_delay(clock, phase, delay):
+        node, bridge, parent, first = running_right_crab(clock)
+        assert deliver_periodic_frames(node, clock, 30, phase, delay)
+        command = node.publisher.messages[-1]
+        assert command['source_command']['pickup_walk_prequeue']
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+        second = requests(bridge)[-1]
+        assert second['motion_id'] == 'pickup_crab_right_0'
+>       assert second['request_id'] != first['request_id']
+E       assert 1 != 1
+
+src/mission_control/test/test_catalog70_queue_flow.py:54: AssertionError
+___ test_right_crab_at_10hz_misses_prequeue_but_resumes_after_completion[0] ____
+
+clock = [11.08], phase = 0
+
+    @pytest.mark.parametrize('phase', [0, .025, .050, .075])
+    def test_right_crab_at_10hz_misses_prequeue_but_resumes_after_completion(clock, phase):
+        node, bridge, _, first = running_right_crab(clock)
+        assert not deliver_periodic_frames(node, clock, 10, phase, 0)
+        assert bridge.pickup_queued_request is None
+        forward_status(node, bridge, first, 'SUCCEEDED')
+        assert bridge.pickup_initial_align_waiting
+        assert node.pickup_walk_reservation.key is None
+        fresh(node, clock, 'ball', ball(offset_x_px=100))
+        bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
+>       assert len(requests(bridge)) == 2
+E       AssertionError: assert 1 == 2
+E        +  where 1 = len([{'action': 'PICKUP_NOW', 'command_id': 1, 'event_id': 1, 'motion_id': 'pickup_crab_right_0', ...}])
+E        +    where [{'action': 'PICKUP_NOW', 'command_id': 1, 'event_id': 1, 'motion_id': 'pickup_crab_right_0', ...}] = requests(<test_motion_command_bridge.FakeBridge object at 0xffff9458fac0>)
+
+src/mission_control/test/test_catalog70_queue_flow.py:77: AssertionError
+_ test_right_crab_at_10hz_misses_prequeue_but_resumes_after_completion[0.025] __
+
+clock = [11.08], phase = 0.025
+
+    @pytest.mark.parametrize('phase', [0, .025, .050, .075])
+    def test_right_crab_at_10hz_misses_prequeue_but_resumes_after_completion(clock, phase):
+        node, bridge, _, first = running_right_crab(clock)
+        assert not deliver_periodic_frames(node, clock, 10, phase, 0)
+        assert bridge.pickup_queued_request is None
+        forward_status(node, bridge, first, 'SUCCEEDED')
+        assert bridge.pickup_initial_align_waiting
+        assert node.pickup_walk_reservation.key is None
+        fresh(node, clock, 'ball', ball(offset_x_px=100))
+        bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
+>       assert len(requests(bridge)) == 2
+E       AssertionError: assert 1 == 2
+E        +  where 1 = len([{'action': 'PICKUP_NOW', 'command_id': 1, 'event_id': 1, 'motion_id': 'pickup_crab_right_0', ...}])
+E        +    where [{'action': 'PICKUP_NOW', 'command_id': 1, 'event_id': 1, 'motion_id': 'pickup_crab_right_0', ...}] = requests(<test_motion_command_bridge.FakeBridge object at 0xffff94559db0>)
+
+src/mission_control/test/test_catalog70_queue_flow.py:77: AssertionError
+__ test_right_crab_at_10hz_misses_prequeue_but_resumes_after_completion[0.05] __
+
+clock = [11.069999999999999], phase = 0.05
+
+    @pytest.mark.parametrize('phase', [0, .025, .050, .075])
+    def test_right_crab_at_10hz_misses_prequeue_but_resumes_after_completion(clock, phase):
+        node, bridge, _, first = running_right_crab(clock)
+>       assert not deliver_periodic_frames(node, clock, 10, phase, 0)
+E       assert not True
+E        +  where True = deliver_periodic_frames(<test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff9458ee90>, [11.069999999999999], 10, 0.05, 0)
+
+src/mission_control/test/test_catalog70_queue_flow.py:70: AssertionError
+_ test_right_crab_at_10hz_misses_prequeue_but_resumes_after_completion[0.075] __
+
+clock = [11.08], phase = 0.075
+
+    @pytest.mark.parametrize('phase', [0, .025, .050, .075])
+    def test_right_crab_at_10hz_misses_prequeue_but_resumes_after_completion(clock, phase):
+        node, bridge, _, first = running_right_crab(clock)
+        assert not deliver_periodic_frames(node, clock, 10, phase, 0)
+        assert bridge.pickup_queued_request is None
+        forward_status(node, bridge, first, 'SUCCEEDED')
+        assert bridge.pickup_initial_align_waiting
+        assert node.pickup_walk_reservation.key is None
+        fresh(node, clock, 'ball', ball(offset_x_px=100))
+        bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
+>       assert len(requests(bridge)) == 2
+E       AssertionError: assert 1 == 2
+E        +  where 1 = len([{'action': 'PICKUP_NOW', 'command_id': 1, 'event_id': 1, 'motion_id': 'pickup_crab_right_0', ...}])
+E        +    where [{'action': 'PICKUP_NOW', 'command_id': 1, 'event_id': 1, 'motion_id': 'pickup_crab_right_0', ...}] = requests(<test_motion_command_bridge.FakeBridge object at 0xffff94532080>)
+
+src/mission_control/test/test_catalog70_queue_flow.py:77: AssertionError
+______ test_right_crab_rejected_prequeue_releases_reservation_and_resumes ______
+
+clock = [10.919999999999998]
+
+    def test_right_crab_rejected_prequeue_releases_reservation_and_resumes(clock):
+        node, bridge, _, first = running_right_crab(clock)
+        assert deliver_periodic_frames(node, clock, 30, 0, 0)
+        bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
+        queued = requests(bridge)[-1]
+        forward_status(node, bridge, queued, 'REJECTED', error_code='INCOMPATIBLE_TRANSITION')
+        assert bridge.pickup_queued_request is None
+>       assert bridge.active_request_id == first['request_id']
+E       assert None == 1
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff9458d960>.active_request_id
+
+src/mission_control/test/test_catalog70_queue_flow.py:96: AssertionError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_catalog70_queue_flow.py::test_right_crab_reserves_at_30hz_with_processing_delay[0-0]
+FAILED src/mission_control/test/test_catalog70_queue_flow.py::test_right_crab_reserves_at_30hz_with_processing_delay[0-0.008]
+FAILED src/mission_control/test/test_catalog70_queue_flow.py::test_right_crab_reserves_at_30hz_with_processing_delay[0-0.016]
+FAILED src/mission_control/test/test_catalog70_queue_flow.py::test_right_crab_reserves_at_30hz_with_processing_delay[0-0.024]
+FAILED src/mission_control/test/test_catalog70_queue_flow.py::test_right_crab_reserves_at_30hz_with_processing_delay[0-0.032]
+FAILED src/mission_control/test/test_catalog70_queue_flow.py::test_right_crab_reserves_at_30hz_with_processing_delay[0.03-0]
+FAILED src/mission_control/test/test_catalog70_queue_flow.py::test_right_crab_reserves_at_30hz_with_processing_delay[0.03-0.008]
+FAILED src/mission_control/test/test_catalog70_queue_flow.py::test_right_crab_reserves_at_30hz_with_processing_delay[0.03-0.016]
+FAILED src/mission_control/test/test_catalog70_queue_flow.py::test_right_crab_reserves_at_30hz_with_processing_delay[0.03-0.024]
+FAILED src/mission_control/test/test_catalog70_queue_flow.py::test_right_crab_reserves_at_30hz_with_processing_delay[0.03-0.032]
+FAILED src/mission_control/test/test_catalog70_queue_flow.py::test_right_crab_reserves_at_30hz_with_processing_delay[0.05-0]
+FAILED src/mission_control/test/test_catalog70_queue_flow.py::test_right_crab_reserves_at_30hz_with_processing_delay[0.05-0.008]
+FAILED src/mission_control/test/test_catalog70_queue_flow.py::test_right_crab_reserves_at_30hz_with_processing_delay[0.05-0.016]
+FAILED src/mission_control/test/test_catalog70_queue_flow.py::test_right_crab_reserves_at_30hz_with_processing_delay[0.05-0.024]
+FAILED src/mission_control/test/test_catalog70_queue_flow.py::test_right_crab_reserves_at_30hz_with_processing_delay[0.05-0.032]
+FAILED src/mission_control/test/test_catalog70_queue_flow.py::test_right_crab_at_10hz_misses_prequeue_but_resumes_after_completion[0]
+FAILED src/mission_control/test/test_catalog70_queue_flow.py::test_right_crab_at_10hz_misses_prequeue_but_resumes_after_completion[0.025]
+FAILED src/mission_control/test/test_catalog70_queue_flow.py::test_right_crab_at_10hz_misses_prequeue_but_resumes_after_completion[0.05]
+FAILED src/mission_control/test/test_catalog70_queue_flow.py::test_right_crab_at_10hz_misses_prequeue_but_resumes_after_completion[0.075]
+FAILED src/mission_control/test/test_catalog70_queue_flow.py::test_right_crab_rejected_prequeue_releases_reservation_and_resumes
+20 failed, 29 passed in 1.12s

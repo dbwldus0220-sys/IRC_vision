@@ -9,6 +9,7 @@ from std_msgs.msg import String
 from mission_control.motion_decision_node import MotionDecisionNode
 from test_mission_phase_flow import MissionFlowHarness, line_info
 from test_line_corner_memory import CornerHarness, corner_info
+from test_line_offset_alignment import sample as offset_sample
 from test_motion_command_bridge import FakeBridge, decoded_messages, executor_status
 
 
@@ -30,9 +31,10 @@ def start_forward(phase):
     return node, first
 
 
-def capture(node, clock):
+def capture(node, clock, info=None):
+    info = line_info() if info is None else info
     clock[0] = node.active_line_motion_started_at + node.active_line_motion_duration_sec * .8
-    node.active_line_motion_frames = [{**line_info(), 'rgb_stamp_ns': round((clock[0] - .01 * index) * 1e9)}
+    node.active_line_motion_frames = [{**info, 'rgb_stamp_ns': round((clock[0] - .01 * index) * 1e9)}
                                       for index in reversed(range(10))]
     node.observations['line'] = node.active_line_motion_frames[-1]
     node.latest_time['line'] = clock[0]
@@ -72,18 +74,24 @@ def test_no_fourth_line_command_can_be_reserved(clock, issued, allowed):
     assert (getattr(node, 'queued_general_command_id', None) is not None) is allowed
 
 
-def test_counted_stage_drains_third_command_before_transition(clock):
+@pytest.mark.parametrize('info,expected', [
+    (line_info(), 'STRAIGHT'),
+    (offset_sample(offset=149.6, ground_heading_error_deg=-6.63,
+                   ground_lateral_offset_m=.1472), 'STRAIGHT_1'),
+])
+def test_counted_stage_drains_third_command_before_transition(clock, info, expected):
     node, current = start_forward('LINE_TRACK_AFTER_PICKUP')
     for ordinal in (2, 3):
-        capture(node, clock)
+        capture(node, clock, info)
         following = node.publisher.messages[-1]
+        assert following['action'] == expected
         assert following['source_command']['post_pickup_line_index'] == ordinal
         clock[0] += 20.  # Elapsed time does not change the decision budget.
         node.send_status(current['action'], current['command_id'], 'SUCCEEDED')
         assert node.mission_phase == 'LINE_TRACK_AFTER_PICKUP'
         node.send_status(following['action'], following['command_id'], 'RUNNING')
         current = following
-    capture(node, clock)
+    capture(node, clock, info)
     assert len(node.publisher.messages) == 3
     node.send_status(current['action'], current['command_id'], 'SUCCEEDED')
     assert node.mission_phase == 'GOAL_APPROACH'
@@ -102,17 +110,52 @@ def observe_walk_end(node, clock, info):
     assert clock[0] < started + duration
 
 
+def right_gap_line():
+    return offset_sample(offset=149.6, ground_heading_error_deg=-6.63,
+                         ground_lateral_offset_m=.1472)
+
+
+@pytest.mark.parametrize('phase', ['AUTO', 'LINE_TRACK'])
+def test_gap_forward_without_reservation_releases_lock_and_reobserves(clock, phase):
+    node = CornerHarness(phase=phase)
+    first = node.publish_vision(line={**right_gap_line(), 'rgb_stamp_ns': round(clock[0] * 1e9)})[-1]
+    assert first['action'] == 'STRAIGHT_1'
+    node.send_status(first['action'], first['command_id'], 'RUNNING')
+    clock[0] += node.active_line_motion_duration_sec
+    assert getattr(node, 'queued_general_command_id', None) is None
+    node.send_status(first['action'], first['command_id'], 'SUCCEEDED')
+    assert not node.general_motion_gate.locked
+    assert not node.planner.line_offset_alignment_failed
+    clock[0] += .01
+    before = len(node.publisher.messages)
+    node.publish_vision(line={**right_gap_line(), 'rgb_stamp_ns': round(clock[0] * 1e9)})
+    following = node.publisher.messages[before:][-1]
+    assert following['valid'] and following['action'] == 'STRAIGHT_1'
+    assert following['command_id'] != first['command_id']
+
+
 @pytest.mark.parametrize('initial,next_info,expected', [
     (line_info(), line_info(20., .4), 'RECOVER_RIGHT_TURN_RIGHT_4'),
     (line_info(20., .4), line_info(), 'STRAIGHT'),
     (line_info(-20., -.4), line_info(), 'STRAIGHT'),
+    (line_info(), line_info(50., .4), 'RECOVER_RIGHT_TURN_RIGHT_4'),
+    (line_info(), line_info(-50., -.4), 'RECOVER_LEFT_TURN_LEFT_4'),
+    (line_info(50., .4), line_info(), 'STRAIGHT'),
+    (line_info(-50., -.4), line_info(50., .4), 'RECOVER_RIGHT_TURN_RIGHT_4'),
     (line_info(20., .4), line_info(-20., -.4), 'RECOVER_LEFT_TURN_LEFT_4'),
-    (line_info(), corner_info('LEFT'), 'LEFT'),
-    (line_info(), corner_info('RIGHT'), 'RIGHT'),
+    (line_info(), corner_info('LEFT', ground_heading_error_deg=-15.), 'LEFT'),
+    (line_info(), corner_info('RIGHT', ground_heading_error_deg=15.), 'RIGHT'),
     (corner_info('LEFT'), line_info(), 'STRAIGHT'),
     (corner_info('RIGHT'), line_info(), 'STRAIGHT'),
+    (line_info(), right_gap_line(), 'STRAIGHT_1'),
+    (line_info(20., .4), right_gap_line(), 'STRAIGHT_1'),
+    (line_info(-20., -.4), right_gap_line(), 'STRAIGHT_1'),
+    (right_gap_line(), right_gap_line(), 'STRAIGHT_1'),
+    (right_gap_line(), line_info(), 'STRAIGHT'),
+    (right_gap_line(), line_info(20., .4), 'RECOVER_RIGHT_TURN_RIGHT_4'),
+    (right_gap_line(), line_info(-20., -.4), 'RECOVER_LEFT_TURN_LEFT_4'),
 ])
-@pytest.mark.parametrize('phase', ['AUTO', 'BALL_SEARCH', 'GOAL_SEARCH', 'HURDLE_APPROACH'])
+@pytest.mark.parametrize('phase', ['AUTO', 'LINE_TRACK', 'BALL_SEARCH', 'GOAL_SEARCH', 'HURDLE_APPROACH'])
 def test_walking_transition_is_sent_to_sdk_before_success_without_new_vision(
     clock, monkeypatch, initial, next_info, expected, phase,
 ):

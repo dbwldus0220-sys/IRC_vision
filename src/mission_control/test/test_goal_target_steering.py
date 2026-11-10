@@ -21,14 +21,18 @@ def target_sample(angle, depth=1.0):
 
 @pytest.mark.parametrize('angle,action,motion', [
     (0, 'GOAL_CAMERA_90_FORWARD_2', 'goal_camera_90_forward_4'),
-    (15, 'GOAL_CAMERA_90_FORWARD_2', 'goal_camera_90_forward_4'),
-    (-15, 'GOAL_CAMERA_90_FORWARD_2', 'goal_camera_90_forward_4'),
+    (15, 'GOAL_CAMERA90_RECOVER_RIGHT_4', 'line_recovery_right_4'),
+    (-15, 'GOAL_CAMERA90_RECOVER_LEFT_4', 'line_recovery_left_4'),
     (15.001, 'GOAL_CAMERA90_RECOVER_RIGHT_4', 'line_recovery_right_4'),
     (-15.001, 'GOAL_CAMERA90_RECOVER_LEFT_4', 'line_recovery_left_4'),
     (44.999, 'GOAL_CAMERA90_RECOVER_RIGHT_4', 'line_recovery_right_4'),
     (-44.999, 'GOAL_CAMERA90_RECOVER_LEFT_4', 'line_recovery_left_4'),
-    (45, 'GOAL_CAMERA90_TURN_RIGHT_5', 'goal_camera_90_turn_right_5'),
-    (-45, 'GOAL_CAMERA90_TURN_LEFT_3', 'goal_camera_90_turn_left_3'),
+    (45, 'GOAL_CAMERA90_RECOVER_RIGHT_4', 'line_recovery_right_4'),
+    (-45, 'GOAL_CAMERA90_RECOVER_LEFT_4', 'line_recovery_left_4'),
+    (50, 'GOAL_CAMERA90_RECOVER_RIGHT_4', 'line_recovery_right_4'),
+    (-50, 'GOAL_CAMERA90_RECOVER_LEFT_4', 'line_recovery_left_4'),
+    (50.001, 'GOAL_CAMERA90_TURN_RIGHT_5', 'goal_camera_90_turn_right_5'),
+    (-50.001, 'GOAL_CAMERA90_TURN_LEFT_3', 'goal_camera_90_turn_left_3'),
     (60, 'GOAL_CAMERA90_TURN_RIGHT_6', 'goal_camera_90_turn_right_6'),
 ])
 def test_target_angle_boundaries_reach_sdk(angle, action, motion):

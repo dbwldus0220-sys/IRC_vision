@@ -185,7 +185,7 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         self.declare_parameter("waist_aim_deadband_deg", 1.0)
         self.declare_parameter("max_valid_depth_m", 6.0)
         self.declare_parameter("detect_depth_m", 2.0)
-        self.declare_parameter("approach_depth_m", 1.0)
+        self.declare_parameter("approach_depth_m", 0.9)
         self.declare_parameter("score_target_depth_m", GOAL_SCORE_TARGET_DEPTH_M)
         self.declare_parameter("direction_deadband_norm", 0.04)
         self.declare_parameter("confirmation_window_size", 40)
@@ -972,10 +972,10 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         target: GoalCandidate,
     ) -> tuple[str, bool, bool, float | None, bool, str]:
         centered = goal_shot_pixels_aligned(
-            target.depth_m if target.depth_m is not None else GOAL_SCORE_TARGET_DEPTH_M,
+            target.ring_center_depth_m if target.ring_center_depth_m is not None else GOAL_SCORE_TARGET_DEPTH_M,
             target.offset_x_px,
         )
-        if not target.depth_valid or target.depth_m is None:
+        if not target.depth_valid or target.ring_center_depth_m is None:
             return (
                 "NO_DEPTH",
                 centered,
@@ -984,11 +984,14 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
                 False,
                 "goal_detected_without_valid_depth",
             )
-        error = target.depth_m - self.score_target_depth_m
+        error = target.ring_center_depth_m - self.score_target_depth_m
         depth_in_range = (
-            GOAL_SCORE_MIN_DEPTH_M <= target.depth_m < GOAL_SCORE_MAX_DEPTH_M
+            GOAL_SCORE_MIN_DEPTH_M <= target.ring_center_depth_m < GOAL_SCORE_MAX_DEPTH_M
         )
-        score_now = goal_shot_region(target.depth_m, target.offset_x_px) is not None
+        score_now = (goal_shot_region(target.ring_center_depth_m) is not None
+                     and target.waist_ring_aim_deg is not None
+                     and math.isfinite(target.waist_ring_aim_deg)
+                     and abs(target.waist_ring_aim_deg) < 90.0)
         if score_now:
             return (
                 "SCORE_READY",
@@ -996,7 +999,7 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
                 depth_in_range,
                 error,
                 True,
-                "goal_centered_at_scoring_depth",
+                "goal_ring_at_scoring_depth",
             )
         if not centered:
             return (
@@ -1007,10 +1010,10 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
                 False,
                 "align_goal_horizontally",
             )
-        if target.depth_m >= GOAL_SCORE_MAX_DEPTH_M:
+        if target.ring_center_depth_m >= GOAL_SCORE_MAX_DEPTH_M:
             state = (
                 "APPROACH"
-                if target.depth_m <= self.approach_depth_m
+                if target.ring_center_depth_m <= self.approach_depth_m
                 else "FAR"
             )
             return state, centered, False, error, False, "goal_too_far"

@@ -1,9 +1,13 @@
 # Runtime Motion Policy
 
-- On every motion replacement/import, preserve the supplied original
-  `playback_speed`, except for `t허들찐`, `p공후 제자리좌회전`, and
-  `p골대후제자리좌회전`: multiply only these three by **0.95**.
-  The user's 2026-11-10 instruction supersedes the previous all-motion scaling.
+- The user's latest 2026-11-10 source89 instruction uses the **original source
+  playback speed** for forward/recovery motions (1.0 in source89), superseding
+  source88's 1.05. Preserve the supplied speed on reimport; do not force a constant.
+  `n공확인자세` also keeps its source speed.
+- For all other motions, preserve the supplied original
+  `playback_speed`, except for `t허들찐`: multiply only this motion by **0.95**.
+  The user's latest 2026-11-10 source83 instruction also restores original
+  speed for `p공후 제자리좌회전` and `p골대후제자리좌회전`.
 - Keep `robot_motions_pc.json` and archived input files at the original speed.
   Derive repeat/camera variants from that unscaled source, then apply the named
   exceptions once. Never multiply an existing runtime speed again.

@@ -1,0 +1,396 @@
+........................................................................ [ 34%]
+........................................................................ [ 68%]
+...................FFFFFFFFFFFFFF.FF...............................      [100%]
+=================================== FAILURES ===================================
+_ test_recent_pre_60_history_commits_on_timer_without_another_capture[STRAIGHT] _
+
+clock = [11.919142857142857], action = 'STRAIGHT'
+
+    @pytest.mark.parametrize('action', ['STRAIGHT', 'RECOVER_RIGHT_TURN_LEFT_4'])
+    def test_recent_pre_60_history_commits_on_timer_without_another_capture(clock, action):
+>       node, _, _ = prepared(clock, action=action)
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [11.919142857142857]
+
+    def prepared(clock, *, action='STRAIGHT', distance=1.2, ratios=(.55, .60, .65)):
+        node, bridge, running = begin(clock, action)
+        for ratio in ratios:
+            emit(node, clock, ratio, distance=distance)
+>       assert node.approach_walk_capture_count == 3
+E       assert 0 == 3
+E        +  where 0 = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffffa11081c0>.approach_walk_capture_count
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:39: AssertionError
+_ test_recent_pre_60_history_commits_on_timer_without_another_capture[RECOVER_RIGHT_TURN_LEFT_4] _
+
+clock = [11.282761904761905], action = 'RECOVER_RIGHT_TURN_LEFT_4'
+
+    @pytest.mark.parametrize('action', ['STRAIGHT', 'RECOVER_RIGHT_TURN_LEFT_4'])
+    def test_recent_pre_60_history_commits_on_timer_without_another_capture(clock, action):
+>       node, _, _ = prepared(clock, action=action)
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [11.282761904761905]
+
+    def prepared(clock, *, action='STRAIGHT', distance=1.2, ratios=(.55, .60, .65)):
+        node, bridge, running = begin(clock, action)
+        for ratio in ratios:
+            emit(node, clock, ratio, distance=distance)
+>       assert node.approach_walk_capture_count == 3
+E       assert 0 == 3
+E        +  where 0 = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffffa1187220>.approach_walk_capture_count
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:39: AssertionError
+____ test_short_miss_reserves_once_and_keeps_raw_input_unchanged[STRAIGHT] _____
+
+clock = [11.919142857142857], action = 'STRAIGHT'
+
+    @pytest.mark.parametrize('action', ['STRAIGHT', 'RECOVER_RIGHT_TURN_LEFT_4'])
+    def test_short_miss_reserves_once_and_keeps_raw_input_unchanged(clock, action):
+>       node, bridge, running = prepared(clock, action=action)
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [11.919142857142857]
+
+    def prepared(clock, *, action='STRAIGHT', distance=1.2, ratios=(.55, .60, .65)):
+        node, bridge, running = begin(clock, action)
+        for ratio in ratios:
+            emit(node, clock, ratio, distance=distance)
+>       assert node.approach_walk_capture_count == 3
+E       assert 0 == 3
+E        +  where 0 = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffffa113c5e0>.approach_walk_capture_count
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:39: AssertionError
+_ test_short_miss_reserves_once_and_keeps_raw_input_unchanged[RECOVER_RIGHT_TURN_LEFT_4] _
+
+clock = [11.282761904761905], action = 'RECOVER_RIGHT_TURN_LEFT_4'
+
+    @pytest.mark.parametrize('action', ['STRAIGHT', 'RECOVER_RIGHT_TURN_LEFT_4'])
+    def test_short_miss_reserves_once_and_keeps_raw_input_unchanged(clock, action):
+>       node, bridge, running = prepared(clock, action=action)
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [11.282761904761905]
+
+    def prepared(clock, *, action='STRAIGHT', distance=1.2, ratios=(.55, .60, .65)):
+        node, bridge, running = begin(clock, action)
+        for ratio in ratios:
+            emit(node, clock, ratio, distance=distance)
+>       assert node.approach_walk_capture_count == 3
+E       assert 0 == 3
+E        +  where 0 = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffffa1185a20>.approach_walk_capture_count
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:39: AssertionError
+_____ test_missing_fallback_is_bounded[long_missing-missing_gap_exceeded] ______
+
+clock = [11.919142857142857], case = 'long_missing'
+reason = 'missing_gap_exceeded'
+
+    @pytest.mark.parametrize('case,reason', [
+        ('long_missing', 'missing_gap_exceeded'),
+        ('old_capture', 'last_ball_capture_expired'),
+        ('changed_track', 'ball_track_changed'),
+        ('unverified', 'last_ball_not_verified'),
+    ])
+    def test_missing_fallback_is_bounded(clock, case, reason):
+>       node, _, _ = prepared(clock, ratios=(.63, .64, .65))
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [11.919142857142857]
+
+    def prepared(clock, *, action='STRAIGHT', distance=1.2, ratios=(.55, .60, .65)):
+        node, bridge, running = begin(clock, action)
+        for ratio in ratios:
+            emit(node, clock, ratio, distance=distance)
+>       assert node.approach_walk_capture_count == 3
+E       assert 0 == 3
+E        +  where 0 = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffffa10eb550>.approach_walk_capture_count
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:39: AssertionError
+___ test_missing_fallback_is_bounded[old_capture-last_ball_capture_expired] ____
+
+clock = [11.919142857142857], case = 'old_capture'
+reason = 'last_ball_capture_expired'
+
+    @pytest.mark.parametrize('case,reason', [
+        ('long_missing', 'missing_gap_exceeded'),
+        ('old_capture', 'last_ball_capture_expired'),
+        ('changed_track', 'ball_track_changed'),
+        ('unverified', 'last_ball_not_verified'),
+    ])
+    def test_missing_fallback_is_bounded(clock, case, reason):
+>       node, _, _ = prepared(clock, ratios=(.63, .64, .65))
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [11.919142857142857]
+
+    def prepared(clock, *, action='STRAIGHT', distance=1.2, ratios=(.55, .60, .65)):
+        node, bridge, running = begin(clock, action)
+        for ratio in ratios:
+            emit(node, clock, ratio, distance=distance)
+>       assert node.approach_walk_capture_count == 3
+E       assert 0 == 3
+E        +  where 0 = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffffa1130d90>.approach_walk_capture_count
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:39: AssertionError
+______ test_missing_fallback_is_bounded[changed_track-ball_track_changed] ______
+
+clock = [11.919142857142857], case = 'changed_track'
+reason = 'ball_track_changed'
+
+    @pytest.mark.parametrize('case,reason', [
+        ('long_missing', 'missing_gap_exceeded'),
+        ('old_capture', 'last_ball_capture_expired'),
+        ('changed_track', 'ball_track_changed'),
+        ('unverified', 'last_ball_not_verified'),
+    ])
+    def test_missing_fallback_is_bounded(clock, case, reason):
+>       node, _, _ = prepared(clock, ratios=(.63, .64, .65))
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [11.919142857142857]
+
+    def prepared(clock, *, action='STRAIGHT', distance=1.2, ratios=(.55, .60, .65)):
+        node, bridge, running = begin(clock, action)
+        for ratio in ratios:
+            emit(node, clock, ratio, distance=distance)
+>       assert node.approach_walk_capture_count == 3
+E       assert 0 == 3
+E        +  where 0 = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffffa113f040>.approach_walk_capture_count
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:39: AssertionError
+_____ test_missing_fallback_is_bounded[unverified-last_ball_not_verified] ______
+
+clock = [11.919142857142857], case = 'unverified'
+reason = 'last_ball_not_verified'
+
+    @pytest.mark.parametrize('case,reason', [
+        ('long_missing', 'missing_gap_exceeded'),
+        ('old_capture', 'last_ball_capture_expired'),
+        ('changed_track', 'ball_track_changed'),
+        ('unverified', 'last_ball_not_verified'),
+    ])
+    def test_missing_fallback_is_bounded(clock, case, reason):
+>       node, _, _ = prepared(clock, ratios=(.63, .64, .65))
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [11.919142857142857]
+
+    def prepared(clock, *, action='STRAIGHT', distance=1.2, ratios=(.55, .60, .65)):
+        node, bridge, running = begin(clock, action)
+        for ratio in ratios:
+            emit(node, clock, ratio, distance=distance)
+>       assert node.approach_walk_capture_count == 3
+E       assert 0 == 3
+E        +  where 0 = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffffa10e8850>.approach_walk_capture_count
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:39: AssertionError
+____________ test_cached_candidate_obeys_publication_guards[safety] ____________
+
+clock = [11.919142857142857], guard = 'safety'
+
+    @pytest.mark.parametrize('guard', ['safety', 'executor', 'subscriber', 'pickup', 'special', 'clock'])
+    def test_cached_candidate_obeys_publication_guards(clock, guard):
+>       node, _, _ = prepared(clock)
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [11.919142857142857]
+
+    def prepared(clock, *, action='STRAIGHT', distance=1.2, ratios=(.55, .60, .65)):
+        node, bridge, running = begin(clock, action)
+        for ratio in ratios:
+            emit(node, clock, ratio, distance=distance)
+>       assert node.approach_walk_capture_count == 3
+E       assert 0 == 3
+E        +  where 0 = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffffa1187be0>.approach_walk_capture_count
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:39: AssertionError
+___________ test_cached_candidate_obeys_publication_guards[executor] ___________
+
+clock = [11.919142857142857], guard = 'executor'
+
+    @pytest.mark.parametrize('guard', ['safety', 'executor', 'subscriber', 'pickup', 'special', 'clock'])
+    def test_cached_candidate_obeys_publication_guards(clock, guard):
+>       node, _, _ = prepared(clock)
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [11.919142857142857]
+
+    def prepared(clock, *, action='STRAIGHT', distance=1.2, ratios=(.55, .60, .65)):
+        node, bridge, running = begin(clock, action)
+        for ratio in ratios:
+            emit(node, clock, ratio, distance=distance)
+>       assert node.approach_walk_capture_count == 3
+E       assert 0 == 3
+E        +  where 0 = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffffa1109600>.approach_walk_capture_count
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:39: AssertionError
+__________ test_cached_candidate_obeys_publication_guards[subscriber] __________
+
+clock = [11.919142857142857], guard = 'subscriber'
+
+    @pytest.mark.parametrize('guard', ['safety', 'executor', 'subscriber', 'pickup', 'special', 'clock'])
+    def test_cached_candidate_obeys_publication_guards(clock, guard):
+>       node, _, _ = prepared(clock)
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [11.919142857142857]
+
+    def prepared(clock, *, action='STRAIGHT', distance=1.2, ratios=(.55, .60, .65)):
+        node, bridge, running = begin(clock, action)
+        for ratio in ratios:
+            emit(node, clock, ratio, distance=distance)
+>       assert node.approach_walk_capture_count == 3
+E       assert 0 == 3
+E        +  where 0 = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffffa1186b90>.approach_walk_capture_count
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:39: AssertionError
+____________ test_cached_candidate_obeys_publication_guards[pickup] ____________
+
+clock = [11.919142857142857], guard = 'pickup'
+
+    @pytest.mark.parametrize('guard', ['safety', 'executor', 'subscriber', 'pickup', 'special', 'clock'])
+    def test_cached_candidate_obeys_publication_guards(clock, guard):
+>       node, _, _ = prepared(clock)
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [11.919142857142857]
+
+    def prepared(clock, *, action='STRAIGHT', distance=1.2, ratios=(.55, .60, .65)):
+        node, bridge, running = begin(clock, action)
+        for ratio in ratios:
+            emit(node, clock, ratio, distance=distance)
+>       assert node.approach_walk_capture_count == 3
+E       assert 0 == 3
+E        +  where 0 = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffffa10e8ee0>.approach_walk_capture_count
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:39: AssertionError
+___________ test_cached_candidate_obeys_publication_guards[special] ____________
+
+clock = [11.919142857142857], guard = 'special'
+
+    @pytest.mark.parametrize('guard', ['safety', 'executor', 'subscriber', 'pickup', 'special', 'clock'])
+    def test_cached_candidate_obeys_publication_guards(clock, guard):
+>       node, _, _ = prepared(clock)
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [11.919142857142857]
+
+    def prepared(clock, *, action='STRAIGHT', distance=1.2, ratios=(.55, .60, .65)):
+        node, bridge, running = begin(clock, action)
+        for ratio in ratios:
+            emit(node, clock, ratio, distance=distance)
+>       assert node.approach_walk_capture_count == 3
+E       assert 0 == 3
+E        +  where 0 = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffffa1133940>.approach_walk_capture_count
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:39: AssertionError
+____________ test_cached_candidate_obeys_publication_guards[clock] _____________
+
+clock = [11.919142857142857], guard = 'clock'
+
+    @pytest.mark.parametrize('guard', ['safety', 'executor', 'subscriber', 'pickup', 'special', 'clock'])
+    def test_cached_candidate_obeys_publication_guards(clock, guard):
+>       node, _, _ = prepared(clock)
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [11.919142857142857]
+
+    def prepared(clock, *, action='STRAIGHT', distance=1.2, ratios=(.55, .60, .65)):
+        node, bridge, running = begin(clock, action)
+        for ratio in ratios:
+            emit(node, clock, ratio, distance=distance)
+>       assert node.approach_walk_capture_count == 3
+E       assert 0 == 3
+E        +  where 0 = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffffa0df9390>.approach_walk_capture_count
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:39: AssertionError
+______________ test_new_direction_cannot_use_old_direction_votes _______________
+
+clock = [11.919142857142857]
+
+    def test_new_direction_cannot_use_old_direction_votes(clock):
+>       node, _, _ = prepared(clock)
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:143: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [11.919142857142857]
+
+    def prepared(clock, *, action='STRAIGHT', distance=1.2, ratios=(.55, .60, .65)):
+        node, bridge, running = begin(clock, action)
+        for ratio in ratios:
+            emit(node, clock, ratio, distance=distance)
+>       assert node.approach_walk_capture_count == 3
+E       assert 0 == 3
+E        +  where 0 = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffffa1344670>.approach_walk_capture_count
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:39: AssertionError
+_____________ test_failed_motion_cannot_dispatch_cached_candidate ______________
+
+clock = [11.919142857142857]
+
+    def test_failed_motion_cannot_dispatch_cached_candidate(clock):
+>       node, bridge, running = prepared(clock)
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:152: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [11.919142857142857]
+
+    def prepared(clock, *, action='STRAIGHT', distance=1.2, ratios=(.55, .60, .65)):
+        node, bridge, running = begin(clock, action)
+        for ratio in ratios:
+            emit(node, clock, ratio, distance=distance)
+>       assert node.approach_walk_capture_count == 3
+E       assert 0 == 3
+E        +  where 0 = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffffa0e17d90>.approach_walk_capture_count
+
+src/mission_control/test/test_ball_entry_recent_reservation.py:39: AssertionError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_ball_entry_recent_reservation.py::test_recent_pre_60_history_commits_on_timer_without_another_capture[STRAIGHT]
+FAILED src/mission_control/test/test_ball_entry_recent_reservation.py::test_recent_pre_60_history_commits_on_timer_without_another_capture[RECOVER_RIGHT_TURN_LEFT_4]
+FAILED src/mission_control/test/test_ball_entry_recent_reservation.py::test_short_miss_reserves_once_and_keeps_raw_input_unchanged[STRAIGHT]
+FAILED src/mission_control/test/test_ball_entry_recent_reservation.py::test_short_miss_reserves_once_and_keeps_raw_input_unchanged[RECOVER_RIGHT_TURN_LEFT_4]
+FAILED src/mission_control/test/test_ball_entry_recent_reservation.py::test_missing_fallback_is_bounded[long_missing-missing_gap_exceeded]
+FAILED src/mission_control/test/test_ball_entry_recent_reservation.py::test_missing_fallback_is_bounded[old_capture-last_ball_capture_expired]
+FAILED src/mission_control/test/test_ball_entry_recent_reservation.py::test_missing_fallback_is_bounded[changed_track-ball_track_changed]
+FAILED src/mission_control/test/test_ball_entry_recent_reservation.py::test_missing_fallback_is_bounded[unverified-last_ball_not_verified]
+FAILED src/mission_control/test/test_ball_entry_recent_reservation.py::test_cached_candidate_obeys_publication_guards[safety]
+FAILED src/mission_control/test/test_ball_entry_recent_reservation.py::test_cached_candidate_obeys_publication_guards[executor]
+FAILED src/mission_control/test/test_ball_entry_recent_reservation.py::test_cached_candidate_obeys_publication_guards[subscriber]
+FAILED src/mission_control/test/test_ball_entry_recent_reservation.py::test_cached_candidate_obeys_publication_guards[pickup]
+FAILED src/mission_control/test/test_ball_entry_recent_reservation.py::test_cached_candidate_obeys_publication_guards[special]
+FAILED src/mission_control/test/test_ball_entry_recent_reservation.py::test_cached_candidate_obeys_publication_guards[clock]
+FAILED src/mission_control/test/test_ball_entry_recent_reservation.py::test_new_direction_cannot_use_old_direction_votes
+FAILED src/mission_control/test/test_ball_entry_recent_reservation.py::test_failed_motion_cannot_dispatch_cached_candidate
+16 failed, 195 passed in 3.58s

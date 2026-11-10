@@ -63,13 +63,22 @@ class MissionPhaseManager:
         "SHOT": ("shots_executed", "required_shots"),
         "GO": ("hurdles_executed", "required_hurdles"),
     }
+    SHOT_REGIONS_BY_MOTION = {
+        f"goal_shot_region_{region}": region for region in range(1, 9)
+    }
     EXECUTION_MOTIONS = {
         "PICKUP_NOW": frozenset({"pickup", "pick_ball", "pickup_400", "pickup_500"}),
-        "SHOT": frozenset({"goal_shot", "shoot", *{
-            f"goal_shot_region_{region}" for region in range(1, 9)
-        }}),
+        "SHOT": frozenset({"goal_shot", "shoot", *SHOT_REGIONS_BY_MOTION}),
         "GO": frozenset({"hurdle", "forward"}),
     }
+    POST_SHOT_CONTINUOUS_EXIT_ACTIONS = frozenset({
+        "POST_SHOT_EXIT_RIGHT_5_FORWARD_4", "POST_SHOT_EXIT_LEFT_3_FORWARD_4",
+    })
+    POST_SHOT_EXIT_ACTIONS = frozenset({
+        "POST_SHOT_TURN_RIGHT_9", "POST_SHOT_TURN_LEFT_4",
+        "POST_SHOT_TURN_RIGHT_5", "POST_SHOT_TURN_LEFT_3",
+        *POST_SHOT_CONTINUOUS_EXIT_ACTIONS,
+    })
     SUPPORTED_STATUSES = frozenset(
         {
             "RUNNING",
@@ -142,6 +151,8 @@ class MissionPhaseManager:
         }
         self.active_pickup_attempt: int | None = None
         self.shots_completed = 0
+        self._active_shot_region: int | None = None
+        self.last_completed_shot_region: int | None = None
         self.hurdles_completed = 0
         self.ball_sections_processed = 0
         self.finish_enabled = self.required_ball_sections == 0
@@ -320,6 +331,8 @@ class MissionPhaseManager:
         self.active_special_command_id = command_id
         self.active_special_running = False
         self._active_special_origin_phase = self.current_phase
+        if normalized_action == "SHOT":
+            self._active_shot_region = None
         if normalized_action == "PICKUP_NOW":
             attempt = self.active_ball_mode_index
             self.active_pickup_attempt = (
@@ -332,7 +345,13 @@ class MissionPhaseManager:
         return True
 
     def post_shot_turn_action(self) -> str:
-        """Choose the fixed exit turn for the completed BALL section."""
+        """Choose the exit from the executed shot region and completed section."""
+        if self.last_completed_shot_region in {5, 6, 7, 8}:
+            return (
+                "POST_SHOT_EXIT_RIGHT_5_FORWARD_4"
+                if self.ball_sections_processed <= 1
+                else "POST_SHOT_EXIT_LEFT_3_FORWARD_4"
+            )
         return (
             "POST_SHOT_TURN_RIGHT_9"
             if self.ball_sections_processed <= 1
@@ -361,15 +380,16 @@ class MissionPhaseManager:
         if status != "SUCCEEDED":
             # A partial turn has unknown yaw; do not replay or walk onward.
             self.post_shot_failed = True
-        elif self.current_phase == "POST_SHOT_TURN":
-            self.current_phase = "POST_SHOT_LINE_ALIGN"
-        elif self.current_phase == "POST_SHOT_FORWARD":
+        elif (action in self.POST_SHOT_CONTINUOUS_EXIT_ACTIONS
+              or self.current_phase == "POST_SHOT_FORWARD"):
             self.current_phase = (
                 "LINE_TRACK"
                 if self.required_ball_sections > 0
                 and self.ball_sections_processed >= self.required_ball_sections
                 else "AUTO"
             )
+        elif self.current_phase == "POST_SHOT_TURN":
+            self.current_phase = "POST_SHOT_LINE_ALIGN"
         return True
 
     def record_active_pickup_grasp_result(self, result: str) -> bool:
@@ -434,7 +454,13 @@ class MissionPhaseManager:
                 False, False, False, "active_command_mismatch", previous_phase
             )
 
+        shot_region = (
+            self.SHOT_REGIONS_BY_MOTION.get(motion_id)
+            if normalized_action == "SHOT" and isinstance(motion_id, str) else None
+        )
         if normalized_status == "RUNNING":
+            if shot_region is not None:
+                self._active_shot_region = shot_region
             self.active_special_running = True
             # Legacy action-only status has no motion_id. Production status
             # must identify the actual mission motion, not alignment or dwell.
@@ -460,6 +486,11 @@ class MissionPhaseManager:
             )
 
         if normalized_status == "SUCCEEDED":
+            if normalized_action == "SHOT":
+                # Terminal status may identify a dwell instead of the shot.
+                if shot_region is not None:
+                    self._active_shot_region = shot_region
+                self.last_completed_shot_region = self._active_shot_region
             # Completion also proves execution if an intermediate RUNNING was lost.
             self._count_active_execution()
         self._apply_terminal(normalized_action, normalized_status)

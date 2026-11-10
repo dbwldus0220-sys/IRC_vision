@@ -1,0 +1,751 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="28" skipped="0" tests="182" time="1.831" timestamp="2026-11-10T07:46:05.846662" hostname="jet"><testcase classname="test.test_line_recovery_late_queue" name="test_late_frame_selects_recovery_or_forward_before_completion[False-AUTO--1]" time="0.013" /><testcase classname="test.test_line_recovery_late_queue" name="test_late_frame_selects_recovery_or_forward_before_completion[False-AUTO-1]" time="0.012" /><testcase classname="test.test_line_recovery_late_queue" name="test_late_frame_selects_recovery_or_forward_before_completion[False-LINE_TRACK--1]" time="0.011" /><testcase classname="test.test_line_recovery_late_queue" name="test_late_frame_selects_recovery_or_forward_before_completion[False-LINE_TRACK-1]" time="0.011" /><testcase classname="test.test_line_recovery_late_queue" name="test_late_frame_selects_recovery_or_forward_before_completion[False-LINE_TRACK_AFTER_PICKUP--1]" time="0.012" /><testcase classname="test.test_line_recovery_late_queue" name="test_late_frame_selects_recovery_or_forward_before_completion[False-LINE_TRACK_AFTER_PICKUP-1]" time="0.011" /><testcase classname="test.test_line_recovery_late_queue" name="test_late_frame_selects_recovery_or_forward_before_completion[True-AUTO--1]" time="0.011" /><testcase classname="test.test_line_recovery_late_queue" name="test_late_frame_selects_recovery_or_forward_before_completion[True-AUTO-1]" time="0.011" /><testcase classname="test.test_line_recovery_late_queue" name="test_late_frame_selects_recovery_or_forward_before_completion[True-LINE_TRACK--1]" time="0.010" /><testcase classname="test.test_line_recovery_late_queue" name="test_late_frame_selects_recovery_or_forward_before_completion[True-LINE_TRACK-1]" time="0.010" /><testcase classname="test.test_line_recovery_late_queue" name="test_late_frame_selects_recovery_or_forward_before_completion[True-LINE_TRACK_AFTER_PICKUP--1]" time="0.011" /><testcase classname="test.test_line_recovery_late_queue" name="test_late_frame_selects_recovery_or_forward_before_completion[True-LINE_TRACK_AFTER_PICKUP-1]" time="0.011" /><testcase classname="test.test_line_recovery_late_queue" name="test_late_queue_does_not_reuse_early_or_unusable_input[old_capture]" time="0.010" /><testcase classname="test.test_line_recovery_late_queue" name="test_late_queue_does_not_reuse_early_or_unusable_input[future_capture]" time="0.009" /><testcase classname="test.test_line_recovery_late_queue" name="test_late_queue_does_not_reuse_early_or_unusable_input[missing_capture]" time="0.009" /><testcase classname="test.test_line_recovery_late_queue" name="test_late_queue_does_not_reuse_early_or_unusable_input[low_quality]" time="0.011"><failure message="AssertionError: assert 2 is None&#10; +  where 2 = getattr(&lt;test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff7a7b9390&gt;, 'queued_general_command_id', None)">clock = [11.775999999999998], bad = 'low_quality'
+
+    @pytest.mark.parametrize('bad', ['old_capture', 'future_capture', 'missing_capture', 'low_quality', 'lost', 'competing_mission'])
+    def test_late_queue_does_not_reuse_early_or_unusable_input(clock, bad):
+        node = LiveInputHarness(phase='AUTO')
+        start_recovery(node, clock, -1)
+        start = node.active_line_motion_started_at
+        duration = node.active_line_motion_duration_sec
+        clock[0] = start + duration - Node.LINE_RECOVERY_PREQUEUE_LEAD_SEC
+        info = line_info(heading=-30., offset=-.3)
+        stamp = round((clock[0] + .01) * 1e9)
+        if bad == 'old_capture':
+            # Still inside the general 0.5s freshness limit, but before the late window.
+            stamp = round((start + duration * .69) * 1e9)
+        elif bad == 'future_capture':
+            stamp += 1_000_000_000
+        elif bad == 'missing_capture':
+            stamp = None
+        elif bad == 'low_quality':
+            info['heading_quality'] = .1
+        elif bad == 'lost':
+            info['detected'] = False
+        elif bad == 'competing_mission':
+            fresh(node, clock, 'finish', {'detected': True}, plan=False)
+        observe(node, clock, 'line', {**info, 'rgb_stamp_ns': stamp}, plan=False)
+&gt;       assert getattr(node, 'queued_general_command_id', None) is None
+E       AssertionError: assert 2 is None
+E        +  where 2 = getattr(&lt;test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff7a7b9390&gt;, 'queued_general_command_id', None)
+
+src/mission_control/test/test_line_recovery_late_queue.py:73: AssertionError</failure></testcase><testcase classname="test.test_line_recovery_late_queue" name="test_late_queue_does_not_reuse_early_or_unusable_input[lost]" time="0.011"><failure message="AssertionError: assert 2 is None&#10; +  where 2 = getattr(&lt;test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff7a62f820&gt;, 'queued_general_command_id', None)">clock = [11.775999999999998], bad = 'lost'
+
+    @pytest.mark.parametrize('bad', ['old_capture', 'future_capture', 'missing_capture', 'low_quality', 'lost', 'competing_mission'])
+    def test_late_queue_does_not_reuse_early_or_unusable_input(clock, bad):
+        node = LiveInputHarness(phase='AUTO')
+        start_recovery(node, clock, -1)
+        start = node.active_line_motion_started_at
+        duration = node.active_line_motion_duration_sec
+        clock[0] = start + duration - Node.LINE_RECOVERY_PREQUEUE_LEAD_SEC
+        info = line_info(heading=-30., offset=-.3)
+        stamp = round((clock[0] + .01) * 1e9)
+        if bad == 'old_capture':
+            # Still inside the general 0.5s freshness limit, but before the late window.
+            stamp = round((start + duration * .69) * 1e9)
+        elif bad == 'future_capture':
+            stamp += 1_000_000_000
+        elif bad == 'missing_capture':
+            stamp = None
+        elif bad == 'low_quality':
+            info['heading_quality'] = .1
+        elif bad == 'lost':
+            info['detected'] = False
+        elif bad == 'competing_mission':
+            fresh(node, clock, 'finish', {'detected': True}, plan=False)
+        observe(node, clock, 'line', {**info, 'rgb_stamp_ns': stamp}, plan=False)
+&gt;       assert getattr(node, 'queued_general_command_id', None) is None
+E       AssertionError: assert 2 is None
+E        +  where 2 = getattr(&lt;test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff7a62f820&gt;, 'queued_general_command_id', None)
+
+src/mission_control/test/test_line_recovery_late_queue.py:73: AssertionError</failure></testcase><testcase classname="test.test_line_recovery_late_queue" name="test_late_queue_does_not_reuse_early_or_unusable_input[competing_mission]" time="0.011" /><testcase classname="test.test_line_recovery_late_queue" name="test_recovery_to_forward_can_still_queue_in_original_window" time="0.011" /><testcase classname="test.test_post_shot_forward_prequeue" name="test_both_goals_reserve_and_start_forward_without_post_turn_images[20.0-1]" time="0.003"><failure message="IndexError: list index out of range">clock = [10.0], section = 1, heading = 20.0
+
+    @pytest.mark.parametrize('section', [1, 2])
+    @pytest.mark.parametrize('heading', [20., 40., -20.])
+    def test_both_goals_reserve_and_start_forward_without_post_turn_images(clock, section, heading):
+&gt;       node, bridge, turn = start_turn(clock, section, heading)
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [10.0], section = 1, heading = 20.0
+
+    def start_turn(clock, section, heading=20.):
+        node = LiveInputHarness(phase='POST_SHOT_LINE_ALIGN')
+        node.phase_manager.ball_sections_processed = section
+        node.queued_general_command_id = None
+        node.queued_general_action = None
+        node.queued_general_source = None
+        bridge = FakeBridge(advance_transition_dwells=False)
+        receive(node, clock, 'line', line_info(heading=heading))
+        Node._publish_decision(node)
+        command = node.publisher.messages[-1]
+        assert command['action'].startswith('POST_SHOT_LINE_TURN_')
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+&gt;       request = decoded_messages(bridge.executor_request_publisher)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError</failure></testcase><testcase classname="test.test_post_shot_forward_prequeue" name="test_both_goals_reserve_and_start_forward_without_post_turn_images[20.0-2]" time="0.003"><failure message="IndexError: list index out of range">clock = [10.0], section = 2, heading = 20.0
+
+    @pytest.mark.parametrize('section', [1, 2])
+    @pytest.mark.parametrize('heading', [20., 40., -20.])
+    def test_both_goals_reserve_and_start_forward_without_post_turn_images(clock, section, heading):
+&gt;       node, bridge, turn = start_turn(clock, section, heading)
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [10.0], section = 2, heading = 20.0
+
+    def start_turn(clock, section, heading=20.):
+        node = LiveInputHarness(phase='POST_SHOT_LINE_ALIGN')
+        node.phase_manager.ball_sections_processed = section
+        node.queued_general_command_id = None
+        node.queued_general_action = None
+        node.queued_general_source = None
+        bridge = FakeBridge(advance_transition_dwells=False)
+        receive(node, clock, 'line', line_info(heading=heading))
+        Node._publish_decision(node)
+        command = node.publisher.messages[-1]
+        assert command['action'].startswith('POST_SHOT_LINE_TURN_')
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+&gt;       request = decoded_messages(bridge.executor_request_publisher)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError</failure></testcase><testcase classname="test.test_post_shot_forward_prequeue" name="test_both_goals_reserve_and_start_forward_without_post_turn_images[40.0-1]" time="0.003"><failure message="IndexError: list index out of range">clock = [10.0], section = 1, heading = 40.0
+
+    @pytest.mark.parametrize('section', [1, 2])
+    @pytest.mark.parametrize('heading', [20., 40., -20.])
+    def test_both_goals_reserve_and_start_forward_without_post_turn_images(clock, section, heading):
+&gt;       node, bridge, turn = start_turn(clock, section, heading)
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [10.0], section = 1, heading = 40.0
+
+    def start_turn(clock, section, heading=20.):
+        node = LiveInputHarness(phase='POST_SHOT_LINE_ALIGN')
+        node.phase_manager.ball_sections_processed = section
+        node.queued_general_command_id = None
+        node.queued_general_action = None
+        node.queued_general_source = None
+        bridge = FakeBridge(advance_transition_dwells=False)
+        receive(node, clock, 'line', line_info(heading=heading))
+        Node._publish_decision(node)
+        command = node.publisher.messages[-1]
+        assert command['action'].startswith('POST_SHOT_LINE_TURN_')
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+&gt;       request = decoded_messages(bridge.executor_request_publisher)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError</failure></testcase><testcase classname="test.test_post_shot_forward_prequeue" name="test_both_goals_reserve_and_start_forward_without_post_turn_images[40.0-2]" time="0.003"><failure message="IndexError: list index out of range">clock = [10.0], section = 2, heading = 40.0
+
+    @pytest.mark.parametrize('section', [1, 2])
+    @pytest.mark.parametrize('heading', [20., 40., -20.])
+    def test_both_goals_reserve_and_start_forward_without_post_turn_images(clock, section, heading):
+&gt;       node, bridge, turn = start_turn(clock, section, heading)
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [10.0], section = 2, heading = 40.0
+
+    def start_turn(clock, section, heading=20.):
+        node = LiveInputHarness(phase='POST_SHOT_LINE_ALIGN')
+        node.phase_manager.ball_sections_processed = section
+        node.queued_general_command_id = None
+        node.queued_general_action = None
+        node.queued_general_source = None
+        bridge = FakeBridge(advance_transition_dwells=False)
+        receive(node, clock, 'line', line_info(heading=heading))
+        Node._publish_decision(node)
+        command = node.publisher.messages[-1]
+        assert command['action'].startswith('POST_SHOT_LINE_TURN_')
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+&gt;       request = decoded_messages(bridge.executor_request_publisher)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError</failure></testcase><testcase classname="test.test_post_shot_forward_prequeue" name="test_both_goals_reserve_and_start_forward_without_post_turn_images[-20.0-1]" time="0.003"><failure message="IndexError: list index out of range">clock = [10.0], section = 1, heading = -20.0
+
+    @pytest.mark.parametrize('section', [1, 2])
+    @pytest.mark.parametrize('heading', [20., 40., -20.])
+    def test_both_goals_reserve_and_start_forward_without_post_turn_images(clock, section, heading):
+&gt;       node, bridge, turn = start_turn(clock, section, heading)
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [10.0], section = 1, heading = -20.0
+
+    def start_turn(clock, section, heading=20.):
+        node = LiveInputHarness(phase='POST_SHOT_LINE_ALIGN')
+        node.phase_manager.ball_sections_processed = section
+        node.queued_general_command_id = None
+        node.queued_general_action = None
+        node.queued_general_source = None
+        bridge = FakeBridge(advance_transition_dwells=False)
+        receive(node, clock, 'line', line_info(heading=heading))
+        Node._publish_decision(node)
+        command = node.publisher.messages[-1]
+        assert command['action'].startswith('POST_SHOT_LINE_TURN_')
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+&gt;       request = decoded_messages(bridge.executor_request_publisher)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError</failure></testcase><testcase classname="test.test_post_shot_forward_prequeue" name="test_both_goals_reserve_and_start_forward_without_post_turn_images[-20.0-2]" time="0.003"><failure message="IndexError: list index out of range">clock = [10.0], section = 2, heading = -20.0
+
+    @pytest.mark.parametrize('section', [1, 2])
+    @pytest.mark.parametrize('heading', [20., 40., -20.])
+    def test_both_goals_reserve_and_start_forward_without_post_turn_images(clock, section, heading):
+&gt;       node, bridge, turn = start_turn(clock, section, heading)
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [10.0], section = 2, heading = -20.0
+
+    def start_turn(clock, section, heading=20.):
+        node = LiveInputHarness(phase='POST_SHOT_LINE_ALIGN')
+        node.phase_manager.ball_sections_processed = section
+        node.queued_general_command_id = None
+        node.queued_general_action = None
+        node.queued_general_source = None
+        bridge = FakeBridge(advance_transition_dwells=False)
+        receive(node, clock, 'line', line_info(heading=heading))
+        Node._publish_decision(node)
+        command = node.publisher.messages[-1]
+        assert command['action'].startswith('POST_SHOT_LINE_TURN_')
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+&gt;       request = decoded_messages(bridge.executor_request_publisher)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError</failure></testcase><testcase classname="test.test_post_shot_forward_prequeue" name="test_unusable_or_unaligned_turn_frames_do_not_reserve[changes0]" time="0.003"><failure message="IndexError: list index out of range">clock = [10.0], changes = {'detected': False}
+
+    @pytest.mark.parametrize('changes', [
+        {'detected': False}, {'geometry_quality': .01},
+        {'ground_heading_error_deg': None}, {'ground_heading_error_deg': 40.},
+    ])
+    def test_unusable_or_unaligned_turn_frames_do_not_reserve(clock, changes):
+&gt;       node, bridge, turn = start_turn(clock, 2)
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:81: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [10.0], section = 2, heading = 20.0
+
+    def start_turn(clock, section, heading=20.):
+        node = LiveInputHarness(phase='POST_SHOT_LINE_ALIGN')
+        node.phase_manager.ball_sections_processed = section
+        node.queued_general_command_id = None
+        node.queued_general_action = None
+        node.queued_general_source = None
+        bridge = FakeBridge(advance_transition_dwells=False)
+        receive(node, clock, 'line', line_info(heading=heading))
+        Node._publish_decision(node)
+        command = node.publisher.messages[-1]
+        assert command['action'].startswith('POST_SHOT_LINE_TURN_')
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+&gt;       request = decoded_messages(bridge.executor_request_publisher)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError</failure></testcase><testcase classname="test.test_post_shot_forward_prequeue" name="test_unusable_or_unaligned_turn_frames_do_not_reserve[changes1]" time="0.003"><failure message="IndexError: list index out of range">clock = [10.0], changes = {'geometry_quality': 0.01}
+
+    @pytest.mark.parametrize('changes', [
+        {'detected': False}, {'geometry_quality': .01},
+        {'ground_heading_error_deg': None}, {'ground_heading_error_deg': 40.},
+    ])
+    def test_unusable_or_unaligned_turn_frames_do_not_reserve(clock, changes):
+&gt;       node, bridge, turn = start_turn(clock, 2)
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:81: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [10.0], section = 2, heading = 20.0
+
+    def start_turn(clock, section, heading=20.):
+        node = LiveInputHarness(phase='POST_SHOT_LINE_ALIGN')
+        node.phase_manager.ball_sections_processed = section
+        node.queued_general_command_id = None
+        node.queued_general_action = None
+        node.queued_general_source = None
+        bridge = FakeBridge(advance_transition_dwells=False)
+        receive(node, clock, 'line', line_info(heading=heading))
+        Node._publish_decision(node)
+        command = node.publisher.messages[-1]
+        assert command['action'].startswith('POST_SHOT_LINE_TURN_')
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+&gt;       request = decoded_messages(bridge.executor_request_publisher)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError</failure></testcase><testcase classname="test.test_post_shot_forward_prequeue" name="test_unusable_or_unaligned_turn_frames_do_not_reserve[changes2]" time="0.003"><failure message="IndexError: list index out of range">clock = [10.0], changes = {'ground_heading_error_deg': None}
+
+    @pytest.mark.parametrize('changes', [
+        {'detected': False}, {'geometry_quality': .01},
+        {'ground_heading_error_deg': None}, {'ground_heading_error_deg': 40.},
+    ])
+    def test_unusable_or_unaligned_turn_frames_do_not_reserve(clock, changes):
+&gt;       node, bridge, turn = start_turn(clock, 2)
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:81: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [10.0], section = 2, heading = 20.0
+
+    def start_turn(clock, section, heading=20.):
+        node = LiveInputHarness(phase='POST_SHOT_LINE_ALIGN')
+        node.phase_manager.ball_sections_processed = section
+        node.queued_general_command_id = None
+        node.queued_general_action = None
+        node.queued_general_source = None
+        bridge = FakeBridge(advance_transition_dwells=False)
+        receive(node, clock, 'line', line_info(heading=heading))
+        Node._publish_decision(node)
+        command = node.publisher.messages[-1]
+        assert command['action'].startswith('POST_SHOT_LINE_TURN_')
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+&gt;       request = decoded_messages(bridge.executor_request_publisher)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError</failure></testcase><testcase classname="test.test_post_shot_forward_prequeue" name="test_unusable_or_unaligned_turn_frames_do_not_reserve[changes3]" time="0.003"><failure message="IndexError: list index out of range">clock = [10.0], changes = {'ground_heading_error_deg': 40.0}
+
+    @pytest.mark.parametrize('changes', [
+        {'detected': False}, {'geometry_quality': .01},
+        {'ground_heading_error_deg': None}, {'ground_heading_error_deg': 40.},
+    ])
+    def test_unusable_or_unaligned_turn_frames_do_not_reserve(clock, changes):
+&gt;       node, bridge, turn = start_turn(clock, 2)
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:81: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [10.0], section = 2, heading = 20.0
+
+    def start_turn(clock, section, heading=20.):
+        node = LiveInputHarness(phase='POST_SHOT_LINE_ALIGN')
+        node.phase_manager.ball_sections_processed = section
+        node.queued_general_command_id = None
+        node.queued_general_action = None
+        node.queued_general_source = None
+        bridge = FakeBridge(advance_transition_dwells=False)
+        receive(node, clock, 'line', line_info(heading=heading))
+        Node._publish_decision(node)
+        command = node.publisher.messages[-1]
+        assert command['action'].startswith('POST_SHOT_LINE_TURN_')
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+&gt;       request = decoded_messages(bridge.executor_request_publisher)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError</failure></testcase><testcase classname="test.test_post_shot_forward_prequeue" name="test_only_distinct_recent_in_turn_frames_can_reserve[early]" time="0.003"><failure message="IndexError: list index out of range">clock = [10.0], kind = 'early'
+
+    @pytest.mark.parametrize('kind', ['early', 'duplicate', 'before_turn', 'stale'])
+    def test_only_distinct_recent_in_turn_frames_can_reserve(clock, kind):
+&gt;       node, _, _ = start_turn(clock, 1)
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [10.0], section = 1, heading = 20.0
+
+    def start_turn(clock, section, heading=20.):
+        node = LiveInputHarness(phase='POST_SHOT_LINE_ALIGN')
+        node.phase_manager.ball_sections_processed = section
+        node.queued_general_command_id = None
+        node.queued_general_action = None
+        node.queued_general_source = None
+        bridge = FakeBridge(advance_transition_dwells=False)
+        receive(node, clock, 'line', line_info(heading=heading))
+        Node._publish_decision(node)
+        command = node.publisher.messages[-1]
+        assert command['action'].startswith('POST_SHOT_LINE_TURN_')
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+&gt;       request = decoded_messages(bridge.executor_request_publisher)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError</failure></testcase><testcase classname="test.test_post_shot_forward_prequeue" name="test_only_distinct_recent_in_turn_frames_can_reserve[duplicate]" time="0.004"><failure message="IndexError: list index out of range">clock = [10.0], kind = 'duplicate'
+
+    @pytest.mark.parametrize('kind', ['early', 'duplicate', 'before_turn', 'stale'])
+    def test_only_distinct_recent_in_turn_frames_can_reserve(clock, kind):
+&gt;       node, _, _ = start_turn(clock, 1)
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [10.0], section = 1, heading = 20.0
+
+    def start_turn(clock, section, heading=20.):
+        node = LiveInputHarness(phase='POST_SHOT_LINE_ALIGN')
+        node.phase_manager.ball_sections_processed = section
+        node.queued_general_command_id = None
+        node.queued_general_action = None
+        node.queued_general_source = None
+        bridge = FakeBridge(advance_transition_dwells=False)
+        receive(node, clock, 'line', line_info(heading=heading))
+        Node._publish_decision(node)
+        command = node.publisher.messages[-1]
+        assert command['action'].startswith('POST_SHOT_LINE_TURN_')
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+&gt;       request = decoded_messages(bridge.executor_request_publisher)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError</failure></testcase><testcase classname="test.test_post_shot_forward_prequeue" name="test_only_distinct_recent_in_turn_frames_can_reserve[before_turn]" time="0.003"><failure message="IndexError: list index out of range">clock = [10.0], kind = 'before_turn'
+
+    @pytest.mark.parametrize('kind', ['early', 'duplicate', 'before_turn', 'stale'])
+    def test_only_distinct_recent_in_turn_frames_can_reserve(clock, kind):
+&gt;       node, _, _ = start_turn(clock, 1)
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [10.0], section = 1, heading = 20.0
+
+    def start_turn(clock, section, heading=20.):
+        node = LiveInputHarness(phase='POST_SHOT_LINE_ALIGN')
+        node.phase_manager.ball_sections_processed = section
+        node.queued_general_command_id = None
+        node.queued_general_action = None
+        node.queued_general_source = None
+        bridge = FakeBridge(advance_transition_dwells=False)
+        receive(node, clock, 'line', line_info(heading=heading))
+        Node._publish_decision(node)
+        command = node.publisher.messages[-1]
+        assert command['action'].startswith('POST_SHOT_LINE_TURN_')
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+&gt;       request = decoded_messages(bridge.executor_request_publisher)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError</failure></testcase><testcase classname="test.test_post_shot_forward_prequeue" name="test_only_distinct_recent_in_turn_frames_can_reserve[stale]" time="0.004"><failure message="IndexError: list index out of range">clock = [10.0], kind = 'stale'
+
+    @pytest.mark.parametrize('kind', ['early', 'duplicate', 'before_turn', 'stale'])
+    def test_only_distinct_recent_in_turn_frames_can_reserve(clock, kind):
+&gt;       node, _, _ = start_turn(clock, 1)
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [10.0], section = 1, heading = 20.0
+
+    def start_turn(clock, section, heading=20.):
+        node = LiveInputHarness(phase='POST_SHOT_LINE_ALIGN')
+        node.phase_manager.ball_sections_processed = section
+        node.queued_general_command_id = None
+        node.queued_general_action = None
+        node.queued_general_source = None
+        bridge = FakeBridge(advance_transition_dwells=False)
+        receive(node, clock, 'line', line_info(heading=heading))
+        Node._publish_decision(node)
+        command = node.publisher.messages[-1]
+        assert command['action'].startswith('POST_SHOT_LINE_TURN_')
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+&gt;       request = decoded_messages(bridge.executor_request_publisher)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError</failure></testcase><testcase classname="test.test_post_shot_forward_prequeue" name="test_turn_failure_discards_reserved_forward[FAILED-1]" time="0.004"><failure message="IndexError: list index out of range">clock = [10.0], section = 1, status = 'FAILED'
+
+    @pytest.mark.parametrize('section', [1, 2])
+    @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT', 'CANCELLED'])
+    def test_turn_failure_discards_reserved_forward(clock, section, status):
+&gt;       node, bridge, turn = start_turn(clock, section, -20.)
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:108: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [10.0], section = 1, heading = -20.0
+
+    def start_turn(clock, section, heading=20.):
+        node = LiveInputHarness(phase='POST_SHOT_LINE_ALIGN')
+        node.phase_manager.ball_sections_processed = section
+        node.queued_general_command_id = None
+        node.queued_general_action = None
+        node.queued_general_source = None
+        bridge = FakeBridge(advance_transition_dwells=False)
+        receive(node, clock, 'line', line_info(heading=heading))
+        Node._publish_decision(node)
+        command = node.publisher.messages[-1]
+        assert command['action'].startswith('POST_SHOT_LINE_TURN_')
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+&gt;       request = decoded_messages(bridge.executor_request_publisher)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError</failure></testcase><testcase classname="test.test_post_shot_forward_prequeue" name="test_turn_failure_discards_reserved_forward[FAILED-2]" time="0.003"><failure message="IndexError: list index out of range">clock = [10.0], section = 2, status = 'FAILED'
+
+    @pytest.mark.parametrize('section', [1, 2])
+    @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT', 'CANCELLED'])
+    def test_turn_failure_discards_reserved_forward(clock, section, status):
+&gt;       node, bridge, turn = start_turn(clock, section, -20.)
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:108: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [10.0], section = 2, heading = -20.0
+
+    def start_turn(clock, section, heading=20.):
+        node = LiveInputHarness(phase='POST_SHOT_LINE_ALIGN')
+        node.phase_manager.ball_sections_processed = section
+        node.queued_general_command_id = None
+        node.queued_general_action = None
+        node.queued_general_source = None
+        bridge = FakeBridge(advance_transition_dwells=False)
+        receive(node, clock, 'line', line_info(heading=heading))
+        Node._publish_decision(node)
+        command = node.publisher.messages[-1]
+        assert command['action'].startswith('POST_SHOT_LINE_TURN_')
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+&gt;       request = decoded_messages(bridge.executor_request_publisher)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError</failure></testcase><testcase classname="test.test_post_shot_forward_prequeue" name="test_turn_failure_discards_reserved_forward[TIMEOUT-1]" time="0.003"><failure message="IndexError: list index out of range">clock = [10.0], section = 1, status = 'TIMEOUT'
+
+    @pytest.mark.parametrize('section', [1, 2])
+    @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT', 'CANCELLED'])
+    def test_turn_failure_discards_reserved_forward(clock, section, status):
+&gt;       node, bridge, turn = start_turn(clock, section, -20.)
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:108: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [10.0], section = 1, heading = -20.0
+
+    def start_turn(clock, section, heading=20.):
+        node = LiveInputHarness(phase='POST_SHOT_LINE_ALIGN')
+        node.phase_manager.ball_sections_processed = section
+        node.queued_general_command_id = None
+        node.queued_general_action = None
+        node.queued_general_source = None
+        bridge = FakeBridge(advance_transition_dwells=False)
+        receive(node, clock, 'line', line_info(heading=heading))
+        Node._publish_decision(node)
+        command = node.publisher.messages[-1]
+        assert command['action'].startswith('POST_SHOT_LINE_TURN_')
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+&gt;       request = decoded_messages(bridge.executor_request_publisher)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError</failure></testcase><testcase classname="test.test_post_shot_forward_prequeue" name="test_turn_failure_discards_reserved_forward[TIMEOUT-2]" time="0.003"><failure message="IndexError: list index out of range">clock = [10.0], section = 2, status = 'TIMEOUT'
+
+    @pytest.mark.parametrize('section', [1, 2])
+    @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT', 'CANCELLED'])
+    def test_turn_failure_discards_reserved_forward(clock, section, status):
+&gt;       node, bridge, turn = start_turn(clock, section, -20.)
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:108: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [10.0], section = 2, heading = -20.0
+
+    def start_turn(clock, section, heading=20.):
+        node = LiveInputHarness(phase='POST_SHOT_LINE_ALIGN')
+        node.phase_manager.ball_sections_processed = section
+        node.queued_general_command_id = None
+        node.queued_general_action = None
+        node.queued_general_source = None
+        bridge = FakeBridge(advance_transition_dwells=False)
+        receive(node, clock, 'line', line_info(heading=heading))
+        Node._publish_decision(node)
+        command = node.publisher.messages[-1]
+        assert command['action'].startswith('POST_SHOT_LINE_TURN_')
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+&gt;       request = decoded_messages(bridge.executor_request_publisher)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError</failure></testcase><testcase classname="test.test_post_shot_forward_prequeue" name="test_turn_failure_discards_reserved_forward[CANCELLED-1]" time="0.003"><failure message="IndexError: list index out of range">clock = [10.0], section = 1, status = 'CANCELLED'
+
+    @pytest.mark.parametrize('section', [1, 2])
+    @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT', 'CANCELLED'])
+    def test_turn_failure_discards_reserved_forward(clock, section, status):
+&gt;       node, bridge, turn = start_turn(clock, section, -20.)
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:108: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [10.0], section = 1, heading = -20.0
+
+    def start_turn(clock, section, heading=20.):
+        node = LiveInputHarness(phase='POST_SHOT_LINE_ALIGN')
+        node.phase_manager.ball_sections_processed = section
+        node.queued_general_command_id = None
+        node.queued_general_action = None
+        node.queued_general_source = None
+        bridge = FakeBridge(advance_transition_dwells=False)
+        receive(node, clock, 'line', line_info(heading=heading))
+        Node._publish_decision(node)
+        command = node.publisher.messages[-1]
+        assert command['action'].startswith('POST_SHOT_LINE_TURN_')
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+&gt;       request = decoded_messages(bridge.executor_request_publisher)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError</failure></testcase><testcase classname="test.test_post_shot_forward_prequeue" name="test_turn_failure_discards_reserved_forward[CANCELLED-2]" time="0.003"><failure message="IndexError: list index out of range">clock = [10.0], section = 2, status = 'CANCELLED'
+
+    @pytest.mark.parametrize('section', [1, 2])
+    @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT', 'CANCELLED'])
+    def test_turn_failure_discards_reserved_forward(clock, section, status):
+&gt;       node, bridge, turn = start_turn(clock, section, -20.)
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:108: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [10.0], section = 2, heading = -20.0
+
+    def start_turn(clock, section, heading=20.):
+        node = LiveInputHarness(phase='POST_SHOT_LINE_ALIGN')
+        node.phase_manager.ball_sections_processed = section
+        node.queued_general_command_id = None
+        node.queued_general_action = None
+        node.queued_general_source = None
+        bridge = FakeBridge(advance_transition_dwells=False)
+        receive(node, clock, 'line', line_info(heading=heading))
+        Node._publish_decision(node)
+        command = node.publisher.messages[-1]
+        assert command['action'].startswith('POST_SHOT_LINE_TURN_')
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+&gt;       request = decoded_messages(bridge.executor_request_publisher)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError</failure></testcase><testcase classname="test.test_post_shot_forward_prequeue" name="test_reservation_retains_executor_and_start_gates[executor_auto_ready-False]" time="0.003"><failure message="IndexError: list index out of range">clock = [10.0], blocked = 'executor_auto_ready', value = False
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0xffff7a6287c0&gt;
+
+    @pytest.mark.parametrize('blocked,value', [
+        ('executor_auto_ready', False), ('decision_started', False),
+    ])
+    def test_reservation_retains_executor_and_start_gates(clock, blocked, value, monkeypatch):
+&gt;       node, _, _ = start_turn(clock, 1)
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:123: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [10.0], section = 1, heading = 20.0
+
+    def start_turn(clock, section, heading=20.):
+        node = LiveInputHarness(phase='POST_SHOT_LINE_ALIGN')
+        node.phase_manager.ball_sections_processed = section
+        node.queued_general_command_id = None
+        node.queued_general_action = None
+        node.queued_general_source = None
+        bridge = FakeBridge(advance_transition_dwells=False)
+        receive(node, clock, 'line', line_info(heading=heading))
+        Node._publish_decision(node)
+        command = node.publisher.messages[-1]
+        assert command['action'].startswith('POST_SHOT_LINE_TURN_')
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+&gt;       request = decoded_messages(bridge.executor_request_publisher)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError</failure></testcase><testcase classname="test.test_post_shot_forward_prequeue" name="test_reservation_retains_executor_and_start_gates[decision_started-False]" time="0.004"><failure message="IndexError: list index out of range">clock = [10.0], blocked = 'decision_started', value = False
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0xffff7a66df90&gt;
+
+    @pytest.mark.parametrize('blocked,value', [
+        ('executor_auto_ready', False), ('decision_started', False),
+    ])
+    def test_reservation_retains_executor_and_start_gates(clock, blocked, value, monkeypatch):
+&gt;       node, _, _ = start_turn(clock, 1)
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:123: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = [10.0], section = 1, heading = 20.0
+
+    def start_turn(clock, section, heading=20.):
+        node = LiveInputHarness(phase='POST_SHOT_LINE_ALIGN')
+        node.phase_manager.ball_sections_processed = section
+        node.queued_general_command_id = None
+        node.queued_general_action = None
+        node.queued_general_source = None
+        bridge = FakeBridge(advance_transition_dwells=False)
+        receive(node, clock, 'line', line_info(heading=heading))
+        Node._publish_decision(node)
+        command = node.publisher.messages[-1]
+        assert command['action'].startswith('POST_SHOT_LINE_TURN_')
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+&gt;       request = decoded_messages(bridge.executor_request_publisher)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_post_shot_forward_prequeue.py:31: IndexError</failure></testcase><testcase classname="test.test_post_shot_forward_prequeue" name="test_actual_turn_running_starts_capture_after_preparation" time="0.003" /><testcase classname="test.test_post_shot_forward_prequeue" name="test_capture_timings_match_runtime_turn_catalog" time="0.048" /><testcase classname="test.test_object_walk_prequeue" name="test_object_walk_queues_once_and_bridge_promotes_without_dwell[ball-BALL_APPROACH-angles0]" time="0.007" /><testcase classname="test.test_object_walk_prequeue" name="test_object_walk_queues_once_and_bridge_promotes_without_dwell[hurdle-HURDLE_APPROACH-angles1]" time="0.007" /><testcase classname="test.test_object_walk_prequeue" name="test_object_walk_queues_once_and_bridge_promotes_without_dwell[hurdle-HURDLE_APPROACH-angles2]" time="0.006"><failure message="assert 1 != 1">clock = [11.905999999999999], source = 'hurdle', phase = 'HURDLE_APPROACH'
+angles = (0.0, 25.0)
+
+    @pytest.mark.parametrize('source,phase,angles', [
+        ('ball', 'BALL_APPROACH', (0., 0.)),
+        *[('hurdle', 'HURDLE_APPROACH', angles) for angles in
+          [(0., 0.), (0., 25.), (25., 0.), (25., -25.)]],
+    ])
+    def test_object_walk_queues_once_and_bridge_promotes_without_dwell(clock, source, phase, angles):
+        node, bridge = LiveInputHarness(phase=phase), FakeBridge()
+        first = start(node, clock, source, angles[0])
+        bridge.navigation_command_callback(String(data=json.dumps(first)))
+        request = decoded_messages(bridge.executor_request_publisher)[-1]
+        for _ in range(3):
+            feed(node, clock, source, angles[1])
+        assert getattr(node, 'queued_general_command_id', None) is None
+        clock[0] = node.approach_walk_started_at + MotionDecisionNode.APPROACH_WALK_DURATION_SEC[first['action']] - .25
+        for _ in range(4):
+            feed(node, clock, source, angles[1])
+        second = node.publisher.messages[-1]
+&gt;       assert second['command_id'] != first['command_id']
+E       assert 1 != 1
+
+src/mission_control/test/test_object_walk_prequeue.py:62: AssertionError</failure></testcase><testcase classname="test.test_object_walk_prequeue" name="test_object_walk_queues_once_and_bridge_promotes_without_dwell[hurdle-HURDLE_APPROACH-angles3]" time="0.003"><failure message="IndexError: list index out of range">clock = [10.02], source = 'hurdle', phase = 'HURDLE_APPROACH'
+angles = (25.0, 0.0)
+
+    @pytest.mark.parametrize('source,phase,angles', [
+        ('ball', 'BALL_APPROACH', (0., 0.)),
+        *[('hurdle', 'HURDLE_APPROACH', angles) for angles in
+          [(0., 0.), (0., 25.), (25., 0.), (25., -25.)]],
+    ])
+    def test_object_walk_queues_once_and_bridge_promotes_without_dwell(clock, source, phase, angles):
+        node, bridge = LiveInputHarness(phase=phase), FakeBridge()
+&gt;       first = start(node, clock, source, angles[0])
+
+src/mission_control/test/test_object_walk_prequeue.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = &lt;test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff7a66cd30&gt;
+clock = [10.02], source = 'hurdle', angle = 25.0
+
+    def start(node, clock, source, angle=0.):
+        feed(node, clock, source, angle)
+        MotionDecisionNode._publish_decision(node)
+&gt;       first = node.publisher.messages[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_object_walk_prequeue.py:36: IndexError</failure></testcase><testcase classname="test.test_object_walk_prequeue" name="test_object_walk_queues_once_and_bridge_promotes_without_dwell[hurdle-HURDLE_APPROACH-angles4]" time="0.003"><failure message="IndexError: list index out of range">clock = [10.02], source = 'hurdle', phase = 'HURDLE_APPROACH'
+angles = (25.0, -25.0)
+
+    @pytest.mark.parametrize('source,phase,angles', [
+        ('ball', 'BALL_APPROACH', (0., 0.)),
+        *[('hurdle', 'HURDLE_APPROACH', angles) for angles in
+          [(0., 0.), (0., 25.), (25., 0.), (25., -25.)]],
+    ])
+    def test_object_walk_queues_once_and_bridge_promotes_without_dwell(clock, source, phase, angles):
+        node, bridge = LiveInputHarness(phase=phase), FakeBridge()
+&gt;       first = start(node, clock, source, angles[0])
+
+src/mission_control/test/test_object_walk_prequeue.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = &lt;test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff7a6ba200&gt;
+clock = [10.02], source = 'hurdle', angle = 25.0
+
+    def start(node, clock, source, angle=0.):
+        feed(node, clock, source, angle)
+        MotionDecisionNode._publish_decision(node)
+&gt;       first = node.publisher.messages[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_object_walk_prequeue.py:36: IndexError</failure></testcase><testcase classname="test.test_object_walk_prequeue" name="test_object_queue_requires_fresh_confirmed_far_target[near-ball-BALL_APPROACH]" time="0.005" /><testcase classname="test.test_object_walk_prequeue" name="test_object_queue_requires_fresh_confirmed_far_target[near-hurdle-HURDLE_APPROACH]" time="0.004" /><testcase classname="test.test_object_walk_prequeue" name="test_object_queue_requires_fresh_confirmed_far_target[lost-ball-BALL_APPROACH]" time="0.004" /><testcase classname="test.test_object_walk_prequeue" name="test_object_queue_requires_fresh_confirmed_far_target[lost-hurdle-HURDLE_APPROACH]" time="0.004" /><testcase classname="test.test_object_walk_prequeue" name="test_object_queue_requires_fresh_confirmed_far_target[depth-ball-BALL_APPROACH]" time="0.004" /><testcase classname="test.test_object_walk_prequeue" name="test_object_queue_requires_fresh_confirmed_far_target[depth-hurdle-HURDLE_APPROACH]" time="0.004" /><testcase classname="test.test_object_walk_prequeue" name="test_object_queue_requires_fresh_confirmed_far_target[confidence-ball-BALL_APPROACH]" time="0.004" /><testcase classname="test.test_object_walk_prequeue" name="test_object_queue_requires_fresh_confirmed_far_target[confidence-hurdle-HURDLE_APPROACH]" time="0.004" /><testcase classname="test.test_object_walk_prequeue" name="test_object_queue_requires_fresh_confirmed_far_target[unconfirmed-ball-BALL_APPROACH]" time="0.004" /><testcase classname="test.test_object_walk_prequeue" name="test_object_queue_requires_fresh_confirmed_far_target[unconfirmed-hurdle-HURDLE_APPROACH]" time="0.004" /><testcase classname="test.test_object_walk_prequeue" name="test_object_queue_requires_fresh_confirmed_far_target[old-ball-BALL_APPROACH]" time="0.003" /><testcase classname="test.test_object_walk_prequeue" name="test_object_queue_requires_fresh_confirmed_far_target[old-hurdle-HURDLE_APPROACH]" time="0.004" /><testcase classname="test.test_object_walk_prequeue" name="test_object_queue_requires_fresh_confirmed_far_target[duplicate-ball-BALL_APPROACH]" time="0.004" /><testcase classname="test.test_object_walk_prequeue" name="test_object_queue_requires_fresh_confirmed_far_target[duplicate-hurdle-HURDLE_APPROACH]" time="0.005" /><testcase classname="test.test_object_walk_prequeue" name="test_object_queue_is_discarded_on_failure[FAILED-ball-BALL_APPROACH]" time="0.005" /><testcase classname="test.test_object_walk_prequeue" name="test_object_queue_is_discarded_on_failure[FAILED-hurdle-HURDLE_APPROACH]" time="0.006" /><testcase classname="test.test_object_walk_prequeue" name="test_object_queue_is_discarded_on_failure[CANCELLED-ball-BALL_APPROACH]" time="0.005" /><testcase classname="test.test_object_walk_prequeue" name="test_object_queue_is_discarded_on_failure[CANCELLED-hurdle-HURDLE_APPROACH]" time="0.005" /><testcase classname="test.test_object_walk_prequeue" name="test_object_queue_is_discarded_on_failure[TIMEOUT-ball-BALL_APPROACH]" time="0.004" /><testcase classname="test.test_object_walk_prequeue" name="test_object_queue_is_discarded_on_failure[TIMEOUT-hurdle-HURDLE_APPROACH]" time="0.005" /><testcase classname="test.test_object_walk_prequeue" name="test_without_reservation_completion_dispatches_recent_walk_immediately[ball-BALL_APPROACH]" time="0.004" /><testcase classname="test.test_object_walk_prequeue" name="test_without_reservation_completion_dispatches_recent_walk_immediately[hurdle-HURDLE_APPROACH]" time="0.004" /><testcase classname="test.test_object_walk_prequeue" name="test_recovery_to_recovery_waits_until_last_point_three_seconds[hurdle-HURDLE_APPROACH]" time="0.002"><failure message="IndexError: list index out of range">clock = [10.02], source = 'hurdle', phase = 'HURDLE_APPROACH'
+
+    @pytest.mark.parametrize('source,phase', [('hurdle', 'HURDLE_APPROACH')])
+    def test_recovery_to_recovery_waits_until_last_point_three_seconds(clock, source, phase):
+        node = LiveInputHarness(phase=phase)
+&gt;       first = start(node, clock, source, 25.)
+
+src/mission_control/test/test_object_walk_prequeue.py:141: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = &lt;test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff7a66f580&gt;
+clock = [10.02], source = 'hurdle', angle = 25.0
+
+    def start(node, clock, source, angle=0.):
+        feed(node, clock, source, angle)
+        MotionDecisionNode._publish_decision(node)
+&gt;       first = node.publisher.messages[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_object_walk_prequeue.py:36: IndexError</failure></testcase><testcase classname="test.test_object_walk_prequeue" name="test_goal_and_object_capture_timing_matches_runtime_motion_data" time="0.047" /><testcase classname="test.test_motion_command_gate" name="test_first_left_publishes_once_and_repeated_left_is_blocked" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_right_is_blocked_while_left_is_running" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_running_keeps_lock_with_same_action" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_success_requires_new_vision_before_republishing" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_context_forward_requires_fresh_vision_after_success[GOAL_CAMERA_90_FORWARD]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_context_forward_requires_fresh_vision_after_success[GOAL_CAMERA_90_FORWARD_1]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_context_forward_requires_fresh_vision_after_success[GOAL_CAMERA_90_FORWARD_2]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_context_forward_requires_fresh_vision_after_success[GOAL_CAMERA90_FINE_FORWARD_1]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_context_forward_requires_fresh_vision_after_success[GOAL_CAMERA90_FINE_FORWARD_2]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_context_forward_requires_fresh_vision_after_success[GOAL_CAMERA90_FINE_FORWARD_3]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_context_forward_requires_fresh_vision_after_success[GOAL_CAMERA90_FINE_FORWARD_4]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_context_forward_requires_fresh_vision_after_success[BALL_FINE_FORWARD_8]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_context_forward_requires_fresh_vision_after_success[POST_SHOT_LINE_TURN_LEFT_6]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_context_forward_requires_fresh_vision_after_success[LINE_LOST_TURN_LEFT]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_context_forward_requires_fresh_vision_after_success[LINE_LOST_TURN_RIGHT]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_closed_loop_alignment_actions_require_new_vision[POST_BALL_LINE_TURN_RIGHT_3]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_closed_loop_alignment_actions_require_new_vision[GOAL_CAMERA90_TURN_RIGHT_3]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_closed_loop_alignment_actions_require_new_vision[BALL_APPROACH_TURN_LEFT_1]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_terminal_general_motion_requires_fresh_vision_globally" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_unknown_rejection_does_not_retry_same_action_forever" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_transient_rejection_retries_only_after_new_vision[REJECTED_BUSY]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_transient_rejection_retries_only_after_new_vision[BUSY]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_transient_rejection_retries_only_after_new_vision[SDK_BUSY]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_transient_rejection_retries_only_after_new_vision[STARTUP_POSE_GATE_LOCKED]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_permanent_rejection_rearms_only_after_action_change" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_transient_retries_are_bounded_and_rearm_on_action_change[BUSY]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_transient_retries_are_bounded_and_rearm_on_action_change[SDK_BUSY]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_transient_retries_are_bounded_and_rearm_on_action_change[STARTUP_POSE_GATE_LOCKED]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_unknown_rejection_code_fails_closed[None]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_unknown_rejection_code_fails_closed[]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_unknown_rejection_code_fails_closed[UNRECOGNIZED]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_old_success_cannot_release_new_lock_without_running" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_mismatched_terminal_cannot_release_lock" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_different_command_id_cannot_mark_running_or_release_lock" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_same_command_id_releases_only_after_running" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_missing_status_command_id_does_not_release_current_request" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_identical_actions_correlate[LEFT-LEFT]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_identical_actions_correlate[RIGHT-RIGHT]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_identical_actions_correlate[STRAIGHT-STRAIGHT]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_non_general_action_is_not_managed_as_execution[WAIT]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_non_general_action_is_not_managed_as_execution[PICKUP_NOW]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_LEFT_TURN_LEFT_2]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_LEFT_TURN_LEFT_3]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_LEFT_TURN_LEFT_4]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_LEFT_TURN_LEFT_5]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_LEFT_TURN_LEFT_6]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_LEFT_TURN_LEFT_7]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_LEFT_TURN_LEFT_8]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_LEFT_TURN_LEFT_10]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_LEFT_TURN_LEFT_13]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_RIGHT_TURN_LEFT_2]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_RIGHT_TURN_LEFT_3]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_RIGHT_TURN_LEFT_4]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_RIGHT_TURN_LEFT_5]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_RIGHT_TURN_LEFT_6]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_RIGHT_TURN_LEFT_7]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_RIGHT_TURN_LEFT_8]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_RIGHT_TURN_LEFT_10]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_RIGHT_TURN_LEFT_13]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_LEFT_TURN_RIGHT_2]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_LEFT_TURN_RIGHT_3]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_LEFT_TURN_RIGHT_4]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_LEFT_TURN_RIGHT_5]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_LEFT_TURN_RIGHT_6]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_LEFT_TURN_RIGHT_7]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_LEFT_TURN_RIGHT_8]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_LEFT_TURN_RIGHT_10]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_LEFT_TURN_RIGHT_12]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_LEFT_TURN_RIGHT_15]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_RIGHT_TURN_RIGHT_2]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_RIGHT_TURN_RIGHT_3]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_RIGHT_TURN_RIGHT_4]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_RIGHT_TURN_RIGHT_5]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_RIGHT_TURN_RIGHT_6]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_RIGHT_TURN_RIGHT_7]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_RIGHT_TURN_RIGHT_8]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_RIGHT_TURN_RIGHT_10]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_RIGHT_TURN_RIGHT_12]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_recovery_turn_uses_general_motion_lock_and_fresh_vision[RECOVER_RIGHT_TURN_RIGHT_15]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_all_executable_or_bridge_rejected_actions_use_the_gate[STRAIGHT]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_all_executable_or_bridge_rejected_actions_use_the_gate[STRAIGHT_1]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_all_executable_or_bridge_rejected_actions_use_the_gate[STRAIGHT_2]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_all_executable_or_bridge_rejected_actions_use_the_gate[STRAIGHT_3]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_all_executable_or_bridge_rejected_actions_use_the_gate[STRAIGHT_4]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_all_executable_or_bridge_rejected_actions_use_the_gate[APPROACH]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_all_executable_or_bridge_rejected_actions_use_the_gate[SLOW_APPROACH]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_all_executable_or_bridge_rejected_actions_use_the_gate[FINE_FORWARD_STEP]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_all_executable_or_bridge_rejected_actions_use_the_gate[APPROACH_GOAL]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_all_executable_or_bridge_rejected_actions_use_the_gate[APPROACH_HURDLE]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_all_executable_or_bridge_rejected_actions_use_the_gate[TURN_LEFT]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_all_executable_or_bridge_rejected_actions_use_the_gate[TURN_RIGHT]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_all_executable_or_bridge_rejected_actions_use_the_gate[ALIGN_LEFT]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_all_executable_or_bridge_rejected_actions_use_the_gate[ALIGN_RIGHT]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_all_executable_or_bridge_rejected_actions_use_the_gate[RETREAT_GOAL]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_unsupported_status_releases_without_running_and_blocks_retry" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_failed_or_cancelled_action_is_not_retried_forever[FAILED]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_failed_or_cancelled_action_is_not_retried_forever[TIMEOUT]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_failed_or_cancelled_action_is_not_retried_forever[CANCELLED]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_missing_line_search_exception_preserves_lock_and_failure_block[POST_BALL_LINE_TURN_RIGHT_5]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_missing_line_search_exception_preserves_lock_and_failure_block[POST_BALL_LINE_TURN_LEFT_2]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_missing_line_search_exception_cannot_release_other_actions[STRAIGHT]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_missing_line_search_exception_cannot_release_other_actions[RECOVER_RIGHT_TURN_RIGHT_4]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_missing_line_search_exception_cannot_release_other_actions[LINE_LOST_TURN_RIGHT]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_missing_line_search_exception_cannot_release_other_actions[POST_SHOT_TURN_RIGHT_9]" time="0.001" /><testcase classname="test.test_motion_command_gate" name="test_fine_approach_waits_for_completion_and_a_new_observation" time="0.001" /><testcase classname="test.test_executor_heartbeat_watchdog" name="test_startup_grace_does_not_report_missing_executor_early" time="0.001" /><testcase classname="test.test_executor_heartbeat_watchdog" name="test_never_seen_executor_reports_noncritical_startup_delay_once" time="0.001" /><testcase classname="test.test_executor_heartbeat_watchdog" name="test_periodic_heartbeat_prevents_timeout" time="0.001" /><testcase classname="test.test_executor_heartbeat_watchdog" name="test_seen_executor_times_out_after_heartbeat_loss" time="0.001" /><testcase classname="test.test_executor_heartbeat_watchdog" name="test_late_first_heartbeat_enables_runtime_timeout_detection" time="0.001" /></testsuite></testsuites>

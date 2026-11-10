@@ -4,9 +4,9 @@ from copy import copy
 from dataclasses import replace
 
 from step.approach_distance import BALL_PICKUP_DISTANCE_M
+from .crab_motion_selection import crab_repeat_motion
 
 
-PICKUP_TWO_CYCLE_CRAB_OFFSET_PX = 200.0
 PICKUP_CRAB_DURATIONS = {
     'pickup_crab_left_0': .540 / .95,
     'pickup_crab_right_0': .550 / 1.0,
@@ -14,12 +14,14 @@ PICKUP_CRAB_DURATIONS = {
     'pickup_crab_right_0_2': 2 * .550 / 1.0,
 }
 PICKUP_WALK_DURATIONS = {
+    'ball_camera_down_forward_2': .514 * 2,
     'ball_general_fine_forward_8': .394 * 5 / 1.05,
     'pickup_fine_forward_0': .394 * 5 / 1.05,
     **PICKUP_CRAB_DURATIONS,
 }
 
 PICKUP_WALK_ACTIONS = {
+    'BALL_PICKUP_FORWARD_2': 'ball_camera_down_forward_2',
     'BALL_PICKUP_FINE_FORWARD': 'pickup_fine_forward_0',
     'BALL_PICKUP_CRAB_LEFT': 'pickup_crab_left_0',
     'BALL_PICKUP_CRAB_RIGHT': 'pickup_crab_right_0',
@@ -31,13 +33,13 @@ PICKUP_WALK_ACTIONS = {
 def pickup_walk_motion(action, current, command=None):
     """Retain the legacy first-step alias; both fine IDs resolve to the same gait."""
     selected = PICKUP_WALK_ACTIONS.get(action)
+    if (action == 'BALL_PICKUP_INITIAL_ALIGN_CONTINUE'
+            and (command or {}).get('pickup_approach_motion') == 'STRAIGHT_1'):
+        selected = 'ball_camera_down_forward_2'
     if selected == 'pickup_fine_forward_0' and current == 'ball_general_fine_forward_8':
         return current
     offset = (command or {}).get('offset_x_px')
-    if (selected in {'pickup_crab_left_0', 'pickup_crab_right_0'}
-            and type(offset) in {int, float} and abs(offset) > PICKUP_TWO_CYCLE_CRAB_OFFSET_PX):
-        return selected + '_2'
-    return selected
+    return crab_repeat_motion(selected, offset)
 
 
 class PickupWalkReservation:

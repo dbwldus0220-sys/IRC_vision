@@ -1,0 +1,205 @@
+....F................................FF........FF.F..................... [  9%]
+........................................................................ [ 19%]
+.........................................F.............................. [ 29%]
+................F...........................F........................... [ 39%]
+........................................................................ [ 49%]
+........................................................................ [ 59%]
+........................................................................ [ 69%]
+........................................................................ [ 79%]
+............................................F......................F.... [ 88%]
+..........FFFF....................FFFF.................................. [ 98%]
+.........                                                                [100%]
+=================================== FAILURES ===================================
+____ test_production_runtime_preserves_original_shoulders_and_other_fields _____
+tools/test_upsert_motion_catalog.py:105: in test_production_runtime_preserves_original_shoulders_and_other_fields
+    assert motion == runtime_motion_from_source(original[motion["name"]])
+E   AssertionError: assert {'completion'...s': 3505, ...} == {'completion'...s': 3505, ...}
+E     Omitting 8 identical items, use -vv to show
+E     Differing items:
+E     {'playback_speed': 1.05} != {'playback_speed': 0.9975}
+E     Full diff:
+E       {
+E        'completion': {'position_tolerance_deg': 5.0,
+E                       'settle_duration_ms': 80,...
+E     
+E     ...Full output truncated (651 lines hidden), use '-vv' to show
+_____ test_shot_without_fine_only_approach_keeps_direct_scoring[actions0] ______
+src/mission_control/test/test_motion_command_bridge.py:390: in test_shot_without_fine_only_approach_keeps_direct_scoring
+    assert bridge.active_motion_id == "goal_shot"
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E     - goal_shot
+E     + goal_fine_prepare_90
+_____ test_shot_without_fine_only_approach_keeps_direct_scoring[actions1] ______
+src/mission_control/test/test_motion_command_bridge.py:390: in test_shot_without_fine_only_approach_keeps_direct_scoring
+    assert bridge.active_motion_id == "goal_shot"
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E     - goal_shot
+E     + goal_fine_prepare_90
+___ test_shot_waits_for_running_fine_motion_and_uses_only_completed_history ____
+src/mission_control/test/test_motion_command_bridge.py:424: in test_shot_waits_for_running_fine_motion_and_uses_only_completed_history
+    assert bridge.active_motion_id == "goal_shot"
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E     - goal_shot
+E     + goal_fine_prepare_90
+__________ test_shot_retry_does_not_repeat_completed_pose_preparation __________
+src/mission_control/test/test_motion_command_bridge.py:436: in test_shot_retry_does_not_repeat_completed_pose_preparation
+    assert bridge.active_motion_id == "goal_shot"
+E   AssertionError: assert 'goal_fine_prepare_90' == 'goal_shot'
+E     - goal_shot
+E     + goal_fine_prepare_90
+________ test_production_action_mapping_contains_only_approved_contract ________
+src/mission_control/test/test_motion_command_bridge.py:689: in test_production_action_mapping_contains_only_approved_contract
+    assert MotionCommandBridgeNode.ACTION_TO_MOTION_ID == (
+E   AssertionError: assert {'ALIGN_LEFT'...rd_45_5', ...} == {'ALIGN_LEFT'...rd_45_5', ...}
+E     Omitting 142 identical items, use -vv to show
+E     Left contains 2 more items:
+E     {'GOAL_CAMERA90_FINE_FORWARD_5': 'goal_camera_90_fine_forward_5',
+E      'GOAL_SHOT_PREPARE': 'goal_fine_prepare_90'}
+E     Full diff:
+E       {
+E        'ALIGN_LEFT': 'stationary_turn_left',...
+E     
+E     ...Full output truncated (145 lines hidden), use '-vv' to show
+________ test_supported_action_builds_executor_request[SHOT-goal_shot] _________
+src/mission_control/test/test_motion_command_bridge.py:713: in test_supported_action_builds_executor_request
+    assert requests == [
+E   AssertionError: assert [{'action': '...are_90', ...}] == [{'action': '...l_shot', ...}]
+E     At index 0 diff: {'action': 'SHOT', 'command_id': 8000, 'event_id': 8, 'request_id': 8000, 'motion_id': 'goal_fine_prepare_90', 'timeout_ms': 12000} != {'action': 'SHOT', 'command_id': 8000, 'event_id': 8, 'request_id': 8000, 'motion_id': 'goal_shot', 'timeout_ms': 12000}
+E     Full diff:
+E       [
+E        {'action': 'SHOT',
+E         'command_id': 8000,
+E         'event_id': 8,
+E     -   'motion_id': 'goal_shot',...
+E     
+E     ...Full output truncated (5 lines hidden), use '-vv' to show
+__________ test_grasp_verification_uses_three_second_pause_after_pose __________
+src/mission_control/test/test_motion_command_bridge.py:982: in test_grasp_verification_uses_three_second_pause_after_pose
+    deliver_statuses()
+src/mission_control/test/test_motion_command_bridge.py:975: in deliver_statuses
+    MotionDecisionNode._motion_status_callback(node, message)
+src/mission_control/mission_control/motion_decision_node.py:2723: in _motion_status_callback
+    MotionDecisionNode._handle_motion_status(self, message)
+src/mission_control/mission_control/motion_decision_node.py:3521: in _handle_motion_status
+    payload, status_receive_monotonic, ros_now, self.timeouts["ball"],
+E   AttributeError: 'FakeDecisionNode' object has no attribute 'timeouts'
+_ test_failed_grasp_check_pose_keeps_grasp_unknown_and_continues_exit_composite _
+src/mission_control/test/test_motion_command_bridge.py:1741: in test_failed_grasp_check_pose_keeps_grasp_unknown_and_continues_exit_composite
+    MotionDecisionNode._motion_status_callback(node, message)
+src/mission_control/mission_control/motion_decision_node.py:2723: in _motion_status_callback
+    MotionDecisionNode._handle_motion_status(self, message)
+src/mission_control/mission_control/motion_decision_node.py:3521: in _handle_motion_status
+    payload, status_receive_monotonic, ros_now, self.timeouts["ball"],
+E   AttributeError: 'FakeDecisionNode' object has no attribute 'timeouts'
+_____ test_queued_backward_one_second_starts_after_fine_motion_completion ______
+src/mission_control/test/test_post_pickup_motion_continuity.py:160: in test_queued_backward_one_second_starts_after_fine_motion_completion
+    assert bridge.transition_dwell_until is None
+E   assert 10.5 is None
+E    +  where 10.5 = <test_motion_command_bridge.FakeBridge object at 0xffffac734220>.transition_dwell_until
+_ test_second_pickup_fine_continues_on_first_fresh_frame_without_observation_pause[231-BALL_PICKUP_FINE_FORWARD] _
+src/mission_control/test/test_boundary_decision_reservation.py:243: in test_second_pickup_fine_continues_on_first_fresh_frame_without_observation_pause
+    assert executable(node)[-1]['action'] == expected
+E   AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_FINE_FORWARD'
+E     - BALL_PICKUP_FINE_FORWARD
+E     + BALL_PICKUP_FINE_ALIGN_CONTINUE
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-8-0.61] _
+src/mission_control/test/test_goal_region_queue_audit.py:93: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:34: in start
+    assert first['action'] == action
+E   AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_5' == 'GOAL_CAMERA90_FINE_FORWARD_4'
+E     - GOAL_CAMERA90_FINE_FORWARD_4
+E     ?                            ^
+E     + GOAL_CAMERA90_FINE_FORWARD_5
+E     ?                            ^
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-5-0.645] _
+src/mission_control/test/test_goal_region_queue_audit.py:93: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:34: in start
+    assert first['action'] == action
+E   AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_5' == 'GOAL_CAMERA90_FINE_FORWARD_4'
+E     - GOAL_CAMERA90_FINE_FORWARD_4
+E     ?                            ^
+E     + GOAL_CAMERA90_FINE_FORWARD_5
+E     ?                            ^
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-6-0.68] _
+src/mission_control/test/test_goal_region_queue_audit.py:93: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:34: in start
+    assert first['action'] == action
+E   AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_5' == 'GOAL_CAMERA90_FINE_FORWARD_4'
+E     - GOAL_CAMERA90_FINE_FORWARD_4
+E     ?                            ^
+E     + GOAL_CAMERA90_FINE_FORWARD_5
+E     ?                            ^
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-7-0.73] _
+src/mission_control/test/test_goal_region_queue_audit.py:93: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:34: in start
+    assert first['action'] == action
+E   AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_5' == 'GOAL_CAMERA90_FINE_FORWARD_4'
+E     - GOAL_CAMERA90_FINE_FORWARD_4
+E     ?                            ^
+E     + GOAL_CAMERA90_FINE_FORWARD_5
+E     ?                            ^
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-8-0.61] _
+src/mission_control/test/test_goal_region_queue_audit.py:93: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:34: in start
+    assert first['action'] == action
+E   AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_5' == 'GOAL_CAMERA90_FINE_FORWARD_4'
+E     - GOAL_CAMERA90_FINE_FORWARD_4
+E     ?                            ^
+E     + GOAL_CAMERA90_FINE_FORWARD_5
+E     ?                            ^
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-5-0.645] _
+src/mission_control/test/test_goal_region_queue_audit.py:93: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:34: in start
+    assert first['action'] == action
+E   AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_5' == 'GOAL_CAMERA90_FINE_FORWARD_4'
+E     - GOAL_CAMERA90_FINE_FORWARD_4
+E     ?                            ^
+E     + GOAL_CAMERA90_FINE_FORWARD_5
+E     ?                            ^
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-6-0.68] _
+src/mission_control/test/test_goal_region_queue_audit.py:93: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:34: in start
+    assert first['action'] == action
+E   AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_5' == 'GOAL_CAMERA90_FINE_FORWARD_4'
+E     - GOAL_CAMERA90_FINE_FORWARD_4
+E     ?                            ^
+E     + GOAL_CAMERA90_FINE_FORWARD_5
+E     ?                            ^
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-7-0.73] _
+src/mission_control/test/test_goal_region_queue_audit.py:93: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:34: in start
+    assert first['action'] == action
+E   AssertionError: assert 'GOAL_CAMERA90_FINE_FORWARD_5' == 'GOAL_CAMERA90_FINE_FORWARD_4'
+E     - GOAL_CAMERA90_FINE_FORWARD_4
+E     ?                            ^
+E     + GOAL_CAMERA90_FINE_FORWARD_5
+E     ?                            ^
+=========================== short test summary info ============================
+FAILED tools/test_upsert_motion_catalog.py::test_production_runtime_preserves_original_shoulders_and_other_fields
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_without_fine_only_approach_keeps_direct_scoring[actions0]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_without_fine_only_approach_keeps_direct_scoring[actions1]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_waits_for_running_fine_motion_and_uses_only_completed_history
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_shot_retry_does_not_repeat_completed_pose_preparation
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_production_action_mapping_contains_only_approved_contract
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_supported_action_builds_executor_request[SHOT-goal_shot]
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_grasp_verification_uses_three_second_pause_after_pose
+FAILED src/mission_control/test/test_motion_command_bridge.py::test_failed_grasp_check_pose_keeps_grasp_unknown_and_continues_exit_composite
+FAILED src/mission_control/test/test_post_pickup_motion_continuity.py::test_queued_backward_one_second_starts_after_fine_motion_completion
+FAILED src/mission_control/test/test_boundary_decision_reservation.py::test_second_pickup_fine_continues_on_first_fresh_frame_without_observation_pause[231-BALL_PICKUP_FINE_FORWARD]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-8-0.61]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-5-0.645]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-6-0.68]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-7-0.73]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-8-0.61]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-5-0.645]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-6-0.68]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-7-0.73]
+19 failed, 710 passed in 12.09s

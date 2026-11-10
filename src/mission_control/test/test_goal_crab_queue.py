@@ -44,7 +44,7 @@ def start(clock, side):
 
 def images(node, clock, side, fractions=(.61, .66, .76), info=None):
     started = node.goal_forward_started_at
-    duration = Node.GOAL_CRAB_DURATION_SEC[node.general_motion_gate.active_action]
+    duration = node.goal_forward_duration_sec
     for fraction in fractions:
         clock[0] = started + duration * fraction
         fresh(node, clock, 'goal', sample(side) if info is None else info, plan=False)
@@ -124,7 +124,7 @@ def test_current_failure_discards_reserved_crab(clock, status):
 def test_reservation_requires_three_distinct_fresh_late_images(clock, bad):
     node, _, _ = start(clock, 'left')
     started = node.goal_forward_started_at
-    duration = Node.GOAL_CRAB_DURATION_SEC['GOAL_CAMERA90_CRAB_LEFT']
+    duration = node.goal_forward_duration_sec
     clock[0] = started + duration * .8
     stamp = round((started + duration * .75) * 1e9)
     if bad == 'early_capture':

@@ -46,8 +46,8 @@ def test_both_launch_defaults_use_230_and_accept_override(monkeypatch, tmp_path,
 @pytest.mark.parametrize('motion,limit', [
     ('pickup_fine_forward_0', 270), ('ball_general_fine_forward_8', 270),
     ('ball_approach_fine_forward_45_5', 270),
-    ('pickup_crab_left_0', 300), ('pickup_crab_right_0', 300),
-    ('pickup_crab_left_0_2', 300), ('pickup_crab_right_0_2', 300),
+    ('pickup_crab_left_0', 200), ('pickup_crab_right_0', 200),
+    ('pickup_crab_left_0_2', 200), ('pickup_crab_right_0_2', 200),
 ])
 @pytest.mark.parametrize('delta,action', [
     (-.001, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'),
@@ -62,7 +62,7 @@ def test_gait_limits_override_old_latched_distance(motion, limit, delta, action)
 
 
 @pytest.mark.parametrize('motion,bottom', [
-    ('pickup_fine_forward_0', 219), ('pickup_crab_right_0', 269),
+    ('pickup_fine_forward_0', 219), ('pickup_crab_right_0', 199),
 ])
 @pytest.mark.parametrize('changes', [
     {'detected': False, 'raw_detected': False}, {'confidence': .1},
@@ -98,8 +98,8 @@ def initial_checkpoint(node, bridge, clock, sample):
 @pytest.mark.parametrize('index', [1, 2])
 @pytest.mark.parametrize('motion,bottom,preparation', [
     ('pickup_fine_forward_0', 270, None),
-    ('pickup_crab_left_0', 300, 'pickup_crab_left_to_fine_0'),
-    ('pickup_crab_right_0_2', 300, 'pickup_crab_right_to_fine_0'),
+    ('pickup_crab_left_0', 200, 'pickup_crab_left_to_fine_0'),
+    ('pickup_crab_right_0_2', 200, 'pickup_crab_right_to_fine_0'),
 ])
 def test_both_modes_skip_forward_but_keep_retreat_and_grasp(clock, index, motion, bottom, preparation):
     node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
@@ -137,7 +137,7 @@ def test_both_modes_skip_forward_but_keep_retreat_and_grasp(clock, index, motion
 
 
 @pytest.mark.parametrize('motion,bottom', [
-    ('pickup_fine_forward_0', 270.001), ('pickup_crab_right_0', 300.001),
+    ('pickup_fine_forward_0', 270.001), ('pickup_crab_right_0', 200.001),
     ('line_forward_4', 200), (None, 200),
 ])
 def test_initial_step_remains_when_skip_condition_is_not_met(clock, motion, bottom):
@@ -151,8 +151,8 @@ def test_initial_step_remains_when_skip_condition_is_not_met(clock, motion, bott
 def test_skip_candidate_rechecks_alignment_before_retreat(clock):
     node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
     bridge.last_physical_motion_id = 'pickup_crab_right_0'
-    initial_checkpoint(node, bridge, clock, ball(bottom_distance_px=250))
-    fresh(node, clock, 'ball', ball(bottom_distance_px=250, offset_x_px=-100))
+    initial_checkpoint(node, bridge, clock, ball(bottom_distance_px=200))
+    fresh(node, clock, 'ball', ball(bottom_distance_px=200, offset_x_px=-100))
     assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_CRAB_LEFT'
     assert not bridge.pickup_fixed_sequence_started
 
@@ -160,7 +160,7 @@ def test_skip_candidate_rechecks_alignment_before_retreat(clock):
 def test_failed_crab_support_change_cannot_start_retreat_or_grasp(clock):
     node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
     bridge.last_physical_motion_id = 'pickup_crab_right_0'
-    sample = ball(bottom_distance_px=250)
+    sample = ball(bottom_distance_px=200)
     initial_checkpoint(node, bridge, clock, sample)
     fresh(node, clock, 'ball', sample)
     send_command(node, bridge)
@@ -172,7 +172,7 @@ def test_failed_crab_support_change_cannot_start_retreat_or_grasp(clock):
 
 
 @pytest.mark.parametrize('index', [1, 2])
-@pytest.mark.parametrize('offset,bottom', [(0, 270), (100, 300)])
+@pytest.mark.parametrize('offset,bottom', [(0, 270), (100, 200)])
 def test_completed_motion_status_drives_skip_in_both_modes(clock, index, offset, bottom):
     from test_pickup_continuous_walk import start, forward_status
     node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
@@ -232,7 +232,7 @@ def test_reservation_uses_current_gait_without_mutating_completed_history(bottom
     ('pickup_crab_left_0', -100), ('pickup_crab_right_0', 100),
     ('pickup_crab_left_0_2', -250), ('pickup_crab_right_0_2', 250),
 ])
-@pytest.mark.parametrize('bottom', [300, 300.001])
+@pytest.mark.parametrize('bottom', [200, 200.001, 230, 300])
 def test_crab_reservation_still_follows_lateral_error_at_new_distance_limit(motion, offset, bottom):
     from mission_control.pickup_walk_reservation import PickupWalkReservation, PICKUP_WALK_DURATIONS
     for error in (offset, 0):
@@ -251,7 +251,7 @@ def test_crab_reservation_still_follows_lateral_error_at_new_distance_limit(moti
 
 
 @pytest.mark.parametrize('index', [1, 2])
-@pytest.mark.parametrize('gait,bottom', [('fine', 270), ('crab', 300)])
+@pytest.mark.parametrize('gait,bottom', [('fine', 270), ('crab', 200)])
 def test_late_boundary_observation_finishes_at_checkpoint_without_extra_walk(clock, index, gait, bottom):
     from mission_control.pickup_walk_reservation import PICKUP_WALK_DURATIONS
     from test_pickup_continuous_walk import start, forward_status
@@ -304,3 +304,69 @@ def test_already_accepted_fine_reservation_finishes_before_applying_new_skip_lim
     forward_status(node, bridge, queued, 'SUCCEEDED')
     assert node.active_special_command_id == parent['command_id']
     assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+
+
+@pytest.mark.parametrize('index', [1, 2])
+@pytest.mark.parametrize('motion,offset', [
+    ('pickup_crab_left_0', -100), ('pickup_crab_right_0', 100),
+    ('pickup_crab_left_0_2', -250), ('pickup_crab_right_0_2', 250),
+])
+@pytest.mark.parametrize('bottom', [200, 200.001, 230, 300])
+def test_crab_success_crosses_200_boundary_without_queue_or_checkpoint_stall(
+        clock, index, motion, offset, bottom):
+    from mission_control.pickup_walk_reservation import PICKUP_WALK_DURATIONS
+    from test_pickup_continuous_walk import start, late_frames, forward_status, finish_rest
+
+    node = LiveInputHarness(phase='BALL_APPROACH')
+    bridge = FakeBridge(advance_transition_dwells=False)
+    node.phase_manager.active_ball_mode_index = index
+    node.phase_manager.ball_modes_confirmed = index
+    bridge.last_physical_motion_id = motion
+    parent, crab = start(node, bridge, clock, ball(offset_x_px=offset))
+    assert crab['motion_id'] == motion
+    late_frames(node, clock, ball(bottom_distance_px=bottom))
+    assert not node.pickup_walk_reservation.pending
+    assert bridge.pickup_queued_request is None
+    started = node.pickup_checkpoint_observation.started_at
+    clock[0] = started + PICKUP_WALK_DURATIONS[motion]
+    forward_status(node, bridge, crab, 'SUCCEEDED')
+    assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_INITIAL_ALIGN_CONTINUE'
+    assert node.planner.pickup_last_completed_motion_id == motion
+    assert not node.planner.pickup_fine_progress_complete
+    send_command(node, bridge)
+
+    side = 'left' if offset < 0 else 'right'
+    if bottom <= 200:
+        assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+        assert node.publisher.messages[-1]['source_command']['pickup_fine_skip_limit_px'] == 200
+        send_command(node, bridge)
+    else:
+        assert not bridge.pickup_fixed_sequence_started
+    finish_rest(bridge, clock)
+    preparation = decoded_messages(bridge.executor_request_publisher)[-1]
+    assert preparation['motion_id'] == f'pickup_crab_{side}_to_fine_0'
+    forward_status(node, bridge, preparation, 'RUNNING')
+    forward_status(node, bridge, preparation, 'SUCCEEDED')
+    finish_rest(bridge, clock)
+
+    if bottom > 200:
+        fine = decoded_messages(bridge.executor_request_publisher)[-1]
+        assert fine['motion_id'] == 'ball_general_fine_forward_8'
+        forward_status(node, bridge, fine, 'RUNNING')
+        # A fresh post-forward observation uses the unchanged 270px gait limit.
+        late_frames(node, clock, ball(bottom_distance_px=270))
+        assert not node.pickup_walk_reservation.pending
+        assert bridge.pickup_queued_request is None
+        started = node.pickup_checkpoint_observation.started_at
+        clock[0] = started + PICKUP_WALK_DURATIONS[fine['motion_id']]
+        forward_status(node, bridge, fine, 'SUCCEEDED')
+        assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+        assert node.publisher.messages[-1]['source_command']['pickup_fine_skip_limit_px'] == 270
+        send_command(node, bridge)
+        finish_rest(bridge, clock)
+
+    assert node.active_special_command_id == parent['command_id']
+    assert bridge.pickup_fixed_sequence_started
+    requests = decoded_messages(bridge.executor_request_publisher)
+    assert requests[-1]['motion_id'] == 'pickup_pre_backward_camera_down'
+    assert sum(r['motion_id'] == 'ball_general_fine_forward_8' for r in requests) == int(bottom > 200)

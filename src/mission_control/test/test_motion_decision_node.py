@@ -1187,6 +1187,19 @@ class ReadinessPublisher:
         return self.subscription_count
 
 
+def confirmed_line_loss_sample(node, clock, monkeypatch):
+    """Supply the new loss prerequisite to tests isolating publication/settling."""
+    monkeypatch.setattr(MotionDecisionNode, '_current_ros_time_ns', lambda _: round(clock[0] * 1e9))
+    node.executor_active = False
+    node.timeouts = {source: .8 for source in MotionDecisionNode.SOURCES}
+    for age in (.03, .02, .01):
+        info = {'detected': False, 'raw_detected': False,
+                'rgb_stamp_ns': round((clock[0] - age) * 1e9)}
+        MotionDecisionNode._observe_line_loss(node, info)
+    assert len(node.line_loss_stamps) == 3
+    return info
+
+
 class ReadinessPublishNode(FakeDecisionNode):
     """Run the real publication path with one deterministic decision."""
 
@@ -4580,7 +4593,9 @@ def test_all_line_stationary_turns_pause_half_second_before_publish(action, monk
     clock = [10.0]
     monkeypatch.setattr(time, "monotonic", lambda: clock[0])
     node = ReadinessPublishNode(general_decision(action))
-    node._fresh_observations = lambda _now: ({"line": {"detected": not action.startswith("LINE_LOST_TURN_")}}, {})
+    info = (confirmed_line_loss_sample(node, clock, monkeypatch)
+            if action.startswith("LINE_LOST_TURN_") else {"detected": True})
+    node._fresh_observations = lambda _now: ({"line": info}, {})
     node.LINE_TURN_PRE_MOTION_SETTLE_SEC = MotionDecisionNode.LINE_TURN_PRE_MOTION_SETTLE_SEC
     node.pre_motion_settle_sec = 0.0
     MotionDecisionNode._publish_decision(node)
@@ -4601,7 +4616,8 @@ def test_line_turn_pause_cancels_without_delaying_new_walk(replacement, monkeypa
     clock = [10.0]
     monkeypatch.setattr(time, "monotonic", lambda: clock[0])
     node = ReadinessPublishNode(general_decision("LINE_LOST_TURN_LEFT"))
-    node._fresh_observations = lambda _now: ({"line": {"detected": False}}, {})
+    info = confirmed_line_loss_sample(node, clock, monkeypatch)
+    node._fresh_observations = lambda _now: ({"line": info}, {})
     node.LINE_TURN_PRE_MOTION_SETTLE_SEC = MotionDecisionNode.LINE_TURN_PRE_MOTION_SETTLE_SEC
     MotionDecisionNode._publish_decision(node)
     assert not node.publisher.messages
