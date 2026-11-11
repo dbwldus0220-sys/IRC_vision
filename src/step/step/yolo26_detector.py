@@ -1257,8 +1257,8 @@ class Yolo26Detector(Node):
             "post_shot_default_turn_left": "LINE RETURN / TURN LEFT",
             "post_shot_default_turn_right_5": "LINE RETURN / TURN RIGHT 5",
             "post_shot_default_turn_left_3": "LINE RETURN / TURN LEFT 3",
-            "post_shot_exit_right_5_forward_4": "POST SHOT / RIGHT 6 + RECOVER RIGHT 4 x2",
-            "post_shot_exit_left_3_forward_4": "POST SHOT / LEFT 4 + RECOVER LEFT 4 x2",
+            "post_shot_exit_right_5_forward_4": "POST SHOT / RIGHT 6 + FORWARD 2 + RECOVER RIGHT 4",
+            "post_shot_exit_left_3_forward_4": "POST SHOT / LEFT 4 + FORWARD 2 + RECOVER LEFT 4",
             "post_shot_exit_right_9_recovery_right_4": "POST SHOT / TURN RIGHT + RECOVER RIGHT 4",
             "post_shot_exit_left_4_recovery_left_4": "POST SHOT / TURN LEFT + RECOVER LEFT 4",
         }
@@ -3225,7 +3225,7 @@ class Yolo26Detector(Node):
                 ),
                 "Head request: " + ("YES" if info.get("head_down_requested") else "NO")
                 + " (<= " + self._metric_text(
-                    self._number(info, "head_down_trigger_bottom_distance_px"), "px", 0,
+                    self._number(info, "head_down_trigger_depth_m"), "m", 3,
                 ) + ")",
                 "Turn error  : " + self._metric_text(
                     self._number(source_command, "center_steering_deg"), "deg", 1, signed=True,

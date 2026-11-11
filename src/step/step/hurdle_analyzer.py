@@ -1030,6 +1030,8 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
         payload = asdict(info)
         payload["stamp"] = getattr(self, "_active_capture_stamp", None)
         payload["head_down_trigger_bottom_distance_px"] = self.head_down_trigger_bottom_distance_px
+        # The legacy pixel field is diagnostic only; depth owns the camera transition.
+        payload["head_down_trigger_depth_m"] = HURDLE_FINE_DISTANCE_M
         payload["legacy_hurdle_angle_sample_source"] = "bbox_row_55pct"
         payload["hurdle_camera_45_pitch_down_deg"] = self.hurdle_camera_45_pitch_down_deg
         payload["hurdle_camera_0_pitch_down_deg"] = self.hurdle_camera_0_pitch_down_deg
@@ -1152,8 +1154,8 @@ class HurdleAnalyzer(DepthFrameConsumer, Node):
                     if image_width is not None and image_width > 0 else None
                 ),
                 head_down_requested=(
-                    bottom_distance_px is not None
-                    and bottom_distance_px <= self.head_down_trigger_bottom_distance_px
+                    target.depth_valid and target.depth_m is not None
+                    and 0.0 < target.depth_m <= HURDLE_FINE_DISTANCE_M
                 ),
                 bbox=target.bbox,
                 width_px=target.width_px,

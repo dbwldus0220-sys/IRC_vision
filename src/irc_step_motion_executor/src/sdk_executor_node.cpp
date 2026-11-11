@@ -29,7 +29,7 @@ constexpr std::int64_t kDefaultPollPeriodMs = 5;
 constexpr std::int64_t kDefaultRunningPolls = 2;
 constexpr std::int64_t kDefaultSettlingPolls = 1;
 constexpr std::int64_t kDefaultHeartbeatPeriodMs = 500;
-constexpr double kHurdleHeadDownBottomDistancePx = 120.0;
+constexpr double kHurdleHeadDownDepthM = 0.580;
 constexpr double kHurdleHeadDownDeg = -64.0;
 
 std::uint64_t steady_now_ms()
@@ -473,7 +473,6 @@ private:
     json_object * detected = nullptr;
     json_object * confirmed = nullptr;
     json_object * requested = nullptr;
-    json_object * bottom_value = nullptr;
     const bool valid =
       json_object_object_get_ex(object, "detected", &detected) &&
       json_object_get_type(detected) == json_type_boolean &&
@@ -483,11 +482,7 @@ private:
       json_object_get_boolean(confirmed) &&
       json_object_object_get_ex(object, "head_down_requested", &requested) &&
       json_object_get_type(requested) == json_type_boolean &&
-      json_object_get_boolean(requested) &&
-      json_object_object_get_ex(object, "bottom_distance_px", &bottom_value) &&
-      (json_object_get_type(bottom_value) == json_type_double ||
-      json_object_get_type(bottom_value) == json_type_int);
-    const double bottom = valid ? json_object_get_double(bottom_value) : -1.0;
+      json_object_get_boolean(requested);
     json_object * depth_valid_value = nullptr;
     json_object * depth_value = nullptr;
     const bool depth_valid =
@@ -510,8 +505,8 @@ private:
     {
       return;
     }
-    if (!valid || !std::isfinite(bottom) || bottom < 0.0 ||
-      bottom > kHurdleHeadDownBottomDistancePx)
+    if (!valid || !depth_valid || !std::isfinite(depth) || depth <= 0.0 ||
+      depth > kHurdleHeadDownDepthM)
     {
       return;
     }
@@ -522,8 +517,8 @@ private:
     hurdle_head_current_deg_ = hurdle_head_start_deg_;
     hurdle_head_override_started_ms_ = steady_now_ms();
     RCLCPP_INFO(
-      get_logger(), "Hurdle bottom dy %.1f px: camera 0-degree hold latched (motor 0 %.1f deg)",
-      bottom, kHurdleHeadDownDeg);
+      get_logger(), "Hurdle depth %.3f m: camera 0-degree hold latched (motor 0 %.1f deg)",
+      depth, kHurdleHeadDownDeg);
   }
 
   void update_hurdle_head_override(std::uint64_t now_ms)

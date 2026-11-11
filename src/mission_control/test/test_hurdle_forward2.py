@@ -87,7 +87,7 @@ def test_forward2_reserves_once_and_chains_without_settle_or_input_reset(clock, 
 
 def test_insufficient_late_frames_use_latest_valid_input_at_completion(clock):
     node, bridge, request, started = start(clock)
-    for fraction in (.72, .82, .92):
+    for fraction in (.82, .92):
         clock[0] = started + duration('line_forward_2') * fraction
         observe(node, clock, .53, .35)
         assert getattr(node, 'queued_general_command_id', None) is None
@@ -176,13 +176,13 @@ def test_late_invalid_turn_camera_or_final_checkpoint_does_not_reserve_forward(c
     assert len(bridge.executor_request_publisher.messages) == 1
 
 
-@pytest.mark.parametrize('bad', ['duplicate', 'before_capture_window', 'before_commit'])
-def test_three_distinct_late_frames_and_capture_after_commit_are_required(clock, bad):
+@pytest.mark.parametrize('bad', ['duplicate', 'before_capture_window'])
+def test_three_distinct_frames_from_current_motion_are_required(clock, bad):
     node, _, _, started = start(clock)
     for fraction in (.8, .85, .9):
         clock[0] = started + duration('line_forward_2') * fraction
         stamp = started + duration('line_forward_2') * (
-            .75 if bad == 'duplicate' else .4 if bad == 'before_capture_window' else fraction - .25)
+            .75 if bad == 'duplicate' else -.01)
         observe(node, clock, delay=clock[0] - stamp)
     assert getattr(node, 'queued_general_command_id', None) is None
 
@@ -386,7 +386,7 @@ def test_failed_forward_discards_final_reservation_and_never_jumps_on_old_input(
 
 
 def test_forward2_catalog_matches_existing_normal_walk():
-    assert ALIASES['line_forward_2'] == 'n전진45도(2회)'
+    assert ALIASES['line_forward_2'] == 'p전진45도(2회)'
     motion = MOTIONS[ALIASES['line_forward_2']]
     assert motion['repeat_count'] == 2
     assert motion['playback_speed'] == 1.

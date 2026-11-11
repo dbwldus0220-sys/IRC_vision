@@ -93,7 +93,7 @@ class TestHurdleHeadOverride(unittest.TestCase):
     def observation(self, **overrides):
         self.publish(TOPICS[5], {
             "detected": True, "confirmation_confirmed": True,
-            "depth_valid": True, "depth_m": 0.66,
+            "depth_valid": True, "depth_m": 0.58,
             "bottom_distance_px": 120, "head_down_requested": True, **overrides,
         })
 
@@ -112,7 +112,7 @@ class TestHurdleHeadOverride(unittest.TestCase):
                 "stamp": {"sec": 10, "nanosec": 100_000_000},
                 "detected": True, "confirmation_confirmed": True, "confidence": .95,
                 "head_down_requested": True, "depth_valid": True,
-                "depth_m": .6, "depth_age_sec": .03, "bottom_distance_px": 110,
+                "depth_m": .57, "depth_age_sec": .03, "bottom_distance_px": 110,
                 "hurdle_angle_0_deg": angle, "hurdle_angle_45_deg": -angle,
                 "hurdle_angle_fit_point_count": 5,
                 "hurdle_angle_sample_source": "yellow_bar_centerline",
@@ -138,7 +138,7 @@ class TestHurdleHeadOverride(unittest.TestCase):
             for s in self.statuses
         ))
 
-    def test_bottom_boundary_hold_release_and_other_camera_ownership(self):
+    def test_depth_boundary_hold_release_and_other_camera_ownership(self):
         self.wait(lambda: all(p.get_subscription_count() for p in self.publishers.values()))
         self.observation()
         self.hold(False)
@@ -156,13 +156,13 @@ class TestHurdleHeadOverride(unittest.TestCase):
         for invalid in (
             {"depth_m": 1.001}, {"depth_valid": False}, {"depth_m": None},
             {"depth_m": True}, {"depth_m": float("nan")}, {"depth_m": 0},
-            {"bottom_distance_px": 120.001}, {"confirmation_confirmed": False},
+            {"depth_m": .580001}, {"confirmation_confirmed": False},
         ):
             self.observation(**invalid)
             self.hold(False)
         self.request(1, "line_forward_4")
         self.status(1, "RUNNING")
-        self.observation(depth_m=1.0)
+        self.observation(depth_m=.580, bottom_distance_px=400)
         self.hold(True)
         self.navigation("line")
         self.hold(True)
@@ -172,10 +172,9 @@ class TestHurdleHeadOverride(unittest.TestCase):
         self.navigation("hurdle", valid=False, phase="HURDLE_POSITIONING")
         self.hold(False)
         for invalid in (
-            {"bottom_distance_px": 120.001}, {"bottom_distance_px": None},
-            {"bottom_distance_px": -1}, {"bottom_distance_px": True},
-            {"bottom_distance_px": "120"}, {"bottom_distance_px": float("nan")},
-            {"bottom_distance_px": float("inf")},
+            {"depth_m": .580001}, {"depth_m": None}, {"depth_m": -1},
+            {"depth_m": True}, {"depth_m": "0.58"}, {"depth_m": float("nan")},
+            {"depth_m": float("inf")}, {"depth_valid": False},
             {"head_down_requested": False}, {"head_down_requested": "true"},
             {"detected": False}, {"detected": "true"},
             {"confirmation_confirmed": False},
@@ -185,6 +184,8 @@ class TestHurdleHeadOverride(unittest.TestCase):
             self.hold(False)
 
         self.observation(depth_valid=False, depth_m=None)
+        self.hold(False)
+        self.observation(depth_m=.58, bottom_distance_px=None)
         self.hold(True)
         self.assertGreater(self.heartbeats[-1]["hurdle_head_override_current_deg"], -64.0)
         self.wait(lambda: self.heartbeats[-1]["hurdle_head_override_current_deg"] == -64.0)

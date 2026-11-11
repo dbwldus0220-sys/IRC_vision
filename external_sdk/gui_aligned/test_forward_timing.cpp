@@ -109,9 +109,10 @@ int main(int argc, char** argv) {
     for (bool queued : {false, true}) for (bool enabled : {false, true})
     for (bool continuous : {false, true}) for (int delay : {0, 16, 140})
     for (const std::string name : {
-        "n전진45도(6회)", "n전진0도(4회)", "n전진90도(4회)",
-        "n라인복귀좌회전45도", "n라인복귀우회전45도",
-        "n라인복귀좌회전공용", "n라인복귀우회전공용",
+        "p전진45도(2회)", "p전진0도(2회)",
+        "p전진45(6회)", "p전진실전0도(4회)", "p전진90도(4회)",
+        "p라인복귀좌회전45도", "t라인복귀우실전",
+        "p라인복귀좌회전공용", "t라인복귀우공용",
         "turn", "R전진45도(6회)", "R전진라인복귀좌", "R라인복귀우회전",
         "t전진실전", "t전진실전45도(4회)", "t전진실전45도(6회)",
         "t전진실전0도(4회)", "t전진실전0도(6회)",
@@ -340,14 +341,14 @@ int main(int argc, char** argv) {
     if (argc == 3) {
         const auto catalog = MotionLibrary::loadGuiJson(argv[2]);
         const std::vector<std::string> forwards = {
-            "n전진45도(2회)", "n전진45도(4회)", "n전진45도(6회)", "n전진45도(8회)",
-            "n전진90도(1회)", "n전진90도(2회)", "n전진90도(3회)", "n전진90도(4회)", "n전진90도(6회)",
-            "n전진0도(2회)", "n전진0도(4회)", "n전진0도(6회)",
+            "p전진45도(2회)", "p전진45(4회)", "p전진45(6회)", "p전진45(8회)",
+            "p전진90도(1회)", "p전진90도(2회)", "p전진90도(3회)", "p전진90도(4회)", "p전진90도(6회)",
+            "p전진0도(2회)", "p전진실전0도(4회)", "p전진실전0도(6회)",
         };
         const std::vector<std::string> recoveries = {
-            "n라인복귀좌회전45도", "n라인복귀우회전45도",
-            "n라인복귀좌회전공용", "n라인복귀우회전공용",
-            "n라인복귀좌회전90도", "n라인복귀우회전90도",
+            "p라인복귀좌회전45도", "t라인복귀우실전",
+            "p라인복귀좌회전공용", "t라인복귀우공용",
+            "p라인복귀좌회전90도", "t라인복귀우실전90도",
         };
         auto walks = forwards;
         walks.insert(walks.end(), recoveries.begin(), recoveries.end());
@@ -375,8 +376,8 @@ int main(int argc, char** argv) {
             const auto& end = catalog.motion(first).frames().back().angles;
             // Camera-zero variants chain within their own gait family; crossing
             // into Line/Goal is not an authorized seamless transition.
-            const bool crosses_zero_camera = first.starts_with("n전진0도(")
-                != second.starts_with("n전진0도(");
+            const bool crosses_zero_camera = (first.starts_with("p전진실전0도(") || first.starts_with("p전진0도("))
+                != (second.starts_with("p전진실전0도(") || second.starts_with("p전진0도("));
             if (crosses_zero_camera || (!fixed_head
                     && end.at(0) != catalog.motion(second).frames().back().angles.at(0))) {
                 assert(player.queueNext(second) == QueueResult::IncompatibleTransition);

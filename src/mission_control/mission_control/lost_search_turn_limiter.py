@@ -43,6 +43,9 @@ class LostSearchTurnLimiter:
     def search_angle(decision: MotionDecision, info: dict | None) -> float | None:
         """Use catalog yaw bins; exclude the mandatory post-shot exit turn."""
         action = decision.action
+        if decision.source == "hurdle" and decision.source_command.get("hurdle_search_until_visible") is True:
+            # This explicit near-hurdle search is one acknowledged turn per new frame.
+            return None
         if not decision.valid or action.startswith("POST_SHOT_TURN_"):
             return None
         stationary = (

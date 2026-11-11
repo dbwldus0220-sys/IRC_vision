@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Append section-specific line recovery after a half-second hold at the goal exit."""
+"""Build goal exits with a half-second hold, optional forward, and line recovery."""
 
 import copy
 import json
@@ -15,11 +15,16 @@ EXIT_RECOVERIES = (
     ('p골대후제자리좌회전(3회)', 'n라인복귀우회전45도'),
 )
 GOAL_EXIT_RECOVERIES = (
-    ('t골대후제자리우회전', 'n라인복귀우회전45도', 1),
-    ('p골대후제자리좌회전', 'n라인복귀좌회전45도', 1),
-    ('t골대후제자리우회전(6회)', 'n라인복귀우회전45도', 2),
-    ('p골대후제자리좌회전(4회)', 'n라인복귀좌회전45도', 2),
+    ('t골대후제자리우회전', 't라인복귀우실전', 1),
+    ('p골대후제자리좌회전', 'p라인복귀좌회전45도', 1),
+    ('t골대후제자리우회전(6회)', 't라인복귀우실전', 1),
+    ('p골대후제자리좌회전(4회)', 'p라인복귀좌회전45도', 1),
 )
+# Catalog names, like public command IDs, are retained for existing callers.
+FORWARD_EXIT_NAMES = {
+    't골대후제자리우회전(6회)': 't골대후제자리우회전(6회)' + '+라인복귀좌회전45도(4회)' * 2,
+    'p골대후제자리좌회전(4회)': 'p골대후제자리좌회전(4회)' + '+라인복귀우회전45도(4회)' * 2,
+}
 TURN_RECOVERY_DWELL_MS = 500
 
 
@@ -37,31 +42,46 @@ def build_turn_variant(turn: dict, count: int) -> dict:
     return result
 
 
-def build_exit(turn: dict, recovery: dict, recovery_blocks: int = 1) -> dict:
+def build_exit(turn: dict, recovery: dict, recovery_blocks: int = 1,
+               *, forward: dict | None = None) -> dict:
     """Keep turn timing and encode recovery timing at the composite's speed."""
     assert turn['repeat_count'] == 1 and recovery['repeat_count'] == 4
     assert recovery_blocks in (1, 2)
     # Both gaits use this support pose; never introduce a new joint target.
     for field in ('angles', 'torques'):
         assert turn['frames'][-1][field] == recovery['frames'][-1][field]
+        if forward is not None:
+            assert forward['frames'][-1][field] == recovery['frames'][-1][field]
+    if forward is not None:
+        assert forward['repeat_count'] == 2 and recovery_blocks == 1
     result = copy.deepcopy(turn)
-    result['name'] = turn['name'] + ('+' + recovery['name'][1:] + '(4회)') * recovery_blocks
+    # Keep composite command names stable when the source recovery is renamed.
+    recovery_label = ('라인복귀우회전45도' if recovery['name'] == 't라인복귀우실전'
+                      else recovery['name'][1:])
+    result['name'] = turn['name'] + ('+' + recovery_label + '(4회)') * recovery_blocks
+    if forward is not None:
+        result['name'] = FORWARD_EXIT_NAMES[turn['name']]
     turn_end = max(f['start_ms'] + f['time_ms'] for f in turn['frames'])
     # Frame times are scaled during playback, so encode a real 500 ms hold.
     recovery_start = turn_end + round(TURN_RECOVERY_DWELL_MS * turn['playback_speed'])
-    cycle_end = max(f['start_ms'] + f['time_ms'] for f in recovery['frames'])
-    lead_in = recovery['frames'][0]['start_ms']
-    scale = turn['playback_speed'] / recovery['playback_speed']
-    for cycle in range(recovery['repeat_count'] * recovery_blocks):
-        for source in recovery['frames']:
-            frame = copy.deepcopy(source)
-            # Replace the first recovery lead-in with the explicit boundary hold.
-            start = recovery_start + round((cycle * cycle_end + source['start_ms'] - lead_in) * scale)
-            end = recovery_start + round((cycle * cycle_end + source['start_ms']
-                                    + source['time_ms'] - lead_in) * scale)
-            frame['start_ms'], frame['time_ms'] = start, end - start
-            result['frames'].append(frame)
-        result['frames'][-1]['playback_cycle_end'] = True
+    stages = ([(forward, 1)] if forward is not None else []) + [(recovery, recovery_blocks)]
+    for stage_index, (gait, blocks) in enumerate(stages):
+        cycle_end = max(f['start_ms'] + f['time_ms'] for f in gait['frames'])
+        lead_in = gait['frames'][0]['start_ms']
+        scale = turn['playback_speed'] / gait['playback_speed']
+        if stage_index:
+            # Forward and recovery share support; keep the recovery's normal lead-in.
+            recovery_start = (result['frames'][-1]['start_ms']
+                              + result['frames'][-1]['time_ms'] + round(lead_in * scale))
+        for cycle in range(gait['repeat_count'] * blocks):
+            for source in gait['frames']:
+                frame = copy.deepcopy(source)
+                start = recovery_start + round((cycle * cycle_end + source['start_ms'] - lead_in) * scale)
+                end = recovery_start + round((cycle * cycle_end + source['start_ms']
+                                        + source['time_ms'] - lead_in) * scale)
+                frame['start_ms'], frame['time_ms'] = start, end - start
+                result['frames'].append(frame)
+            result['frames'][-1]['playback_cycle_end'] = True
     result['max_seq_ms'] = result['frames'][-1]['start_ms'] + result['frames'][-1]['time_ms']
     result['end_pose'] = recovery['end_pose']
     return result
@@ -76,7 +96,8 @@ def main():
         ('t골대후제자리우회전', 6), ('p골대후제자리좌회전', 4),
     )]
     source.update({motion['name']: motion for motion in turns})
-    variants = turns + [build_exit(source[turn], source[recovery], blocks)
+    variants = turns + [build_exit(source[turn], source[recovery], blocks,
+                                  forward=source['p전진45도(2회)'] if turn in FORWARD_EXIT_NAMES else None)
                         for turn, recovery, blocks in GOAL_EXIT_RECOVERIES]
     obsolete = {
         't골대후제자리우회전(5회)+전진4회',
@@ -85,6 +106,8 @@ def main():
         'p골대후제자리좌회전(3회)+라인복귀우회전45도(4회)',
         't골대후제자리우회전(5회)' + '+라인복귀우회전45도(4회)' * 2,
         'p골대후제자리좌회전(3회)' + '+라인복귀좌회전45도(4회)' * 2,
+        't골대후제자리우회전(6회)' + '+라인복귀우회전45도(4회)' * 2,
+        'p골대후제자리좌회전(4회)' + '+라인복귀좌회전45도(4회)' * 2,
     }
     for kind, catalog in catalogs.items():
         replacements = {m['name']: m if kind == 'pc' else runtime_motion_from_source(m)

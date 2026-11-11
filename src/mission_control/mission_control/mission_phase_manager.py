@@ -65,7 +65,7 @@ class MissionPhaseManager:
         "GO": ("hurdles_executed", "required_hurdles"),
     }
     SHOT_REGIONS_BY_MOTION = {
-        f"goal_shot_region_{region}": region for region in range(1, 9)
+        f"goal_shot_region_{region}": region for region in (1, 2, 3, 4, 5, 6, 8)
     }
     EXECUTION_MOTIONS = {
         "PICKUP_NOW": frozenset({"pickup", "pick_ball", "pickup_400", "pickup_500"}),

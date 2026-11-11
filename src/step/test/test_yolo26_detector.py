@@ -506,8 +506,8 @@ def test_ball_top_loss_banner_shows_forward_search_before_side():
     ('post_ball_line_turn_left_2', 'LINE ALIGN / IN-PLACE TURN LEFT 2'),
     ('goal_camera_90_fine_forward_1', 'GOAL / FINE FORWARD 1'),
     ('post_ball_forward_8', 'POST BALL FORWARD 8'),
-    ('post_shot_exit_right_5_forward_4', 'POST SHOT / RIGHT 6 + RECOVER RIGHT 4 x2'),
-    ('post_shot_exit_left_3_forward_4', 'POST SHOT / LEFT 4 + RECOVER LEFT 4 x2'),
+    ('post_shot_exit_right_5_forward_4', 'POST SHOT / RIGHT 6 + FORWARD 2 + RECOVER RIGHT 4'),
+    ('post_shot_exit_left_3_forward_4', 'POST SHOT / LEFT 4 + FORWARD 2 + RECOVER LEFT 4'),
 ])
 def test_running_submotion_banner_survives_navigation_command_timeout(monkeypatch, motion_id, expected):
     import json
@@ -585,7 +585,7 @@ def test_shared_fine_motion_label_keeps_command_owner(monkeypatch, status_first,
 
 
 @pytest.mark.parametrize('depth,shown', [
-    (0.55, False), (0.551, False), (0.67, False), (0.7, False),
+    (0.55, False), (0.58, False), (0.580001, True), (0.67, True), (0.7, True),
     (0.700001, True), (1.0, True),
     (1.001, False), (None, False), (float('nan'), False),
 ])
@@ -663,15 +663,15 @@ def test_hurdle_metrics_show_during_line_approach_without_changing_owner(source,
     assert detector.latest_running_motion["source"] == source
 
 
-def test_hurdle_metrics_expose_actual_phase_and_rgb_head_trigger(monkeypatch):
+def test_hurdle_metrics_expose_actual_phase_and_depth_head_trigger(monkeypatch):
     import cv2
     detector = object.__new__(Yolo26Detector)
     detector.show_hurdle_metrics = True
     detector._fresh_hurdle_info = lambda: {
         "detected": True, "center_x": 450, "center_y": 599,
         "camera_center_offset_x_px": -190, "bottom_distance_px": 120,
-        "head_down_requested": True, "head_down_trigger_bottom_distance_px": 120,
-        "confirmation_confirmed": True, "depth_valid": False,
+        "head_down_requested": True, "head_down_trigger_depth_m": .580,
+        "confirmation_confirmed": True, "depth_valid": True, "depth_m": .58,
     }
     detector._fresh_motion_command = lambda: None
     detector._fresh_line_info = lambda: None
@@ -688,7 +688,7 @@ def test_hurdle_metrics_expose_actual_phase_and_rgb_head_trigger(monkeypatch):
     assert any("Control" in text and "LINE" in text for text, _ in rows)
     assert any("Phase" in text and "AUTO" in text for text, _ in rows)
     assert any("Bottom dy" in text and "120px" in text for text, _ in rows)
-    assert any("Head request" in text and "YES" in text for text, _ in rows)
+    assert any("Head request" in text and "YES" in text and "0.580m" in text for text, _ in rows)
     assert all(y > 96 for text, y in rows)
 
 

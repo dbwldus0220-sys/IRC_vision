@@ -1,5 +1,12 @@
 # Runtime Motion Policy
 
+- The latest 2026-11-11 name-mapping request supersedes the stable `n` catalog
+  names below: use source100 `p전진*`, `p라인복귀좌회전*`, and `t라인복귀우*`
+  names. Only motion names and alias targets change; preserve frame/pose data.
+  `p전진45(8회)` still derives from six-cycle source with repeat_count=8, and
+  `p전진0도(2회)` retains repeat_count=2 despite the source value of 3.
+  Keep public command IDs and goal-exit composite names unchanged.
+
 - The 2026-11-11 source100 update supplies `p전진*`, `p라인복귀좌회전*`,
   and `t라인복귀우*` data under the existing `n전진*`/`n라인복귀*` catalog
   names so command aliases stay stable. Keep source speed 1.0. Derive eight

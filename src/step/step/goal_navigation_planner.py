@@ -17,6 +17,7 @@ from .goal_scoring import (
 )
 
 
+GOAL_APPROACH_TARGET_BOARD_DEPTH_M = 0.630
 GOAL_FINE_APPROACH_MAX_DEPTH_M = 0.750
 GOAL_FINE_APPROACH_TURN_MIN_DEG = 30.0
 # Measured total displacement for each complete 1..5-repeat motion.
@@ -228,18 +229,22 @@ class GoalNavigationPlanner:
                 reason = "approach_goal_by_depth"
         elif depth > GOAL_FINE_APPROACH_MAX_DEPTH_M:
             # The board is elevated: use its measured X/Z, not a floor-ray
-            # intersection. Aim at the image center at the target ring depth.
+            # intersection. Only far approach targets board Z; shots still use ring Z.
+            board_depth = _number(goal_info, "depth_m")
+            if board_depth is None or board_depth <= 0.0:
+                return self.wait("missing_valid_goal_board_depth")
+            depth_error = board_depth - GOAL_APPROACH_TARGET_BOARD_DEPTH_M
             lateral_error = _number(goal_info, "lateral_offset_m")
             if ("lateral_offset_m" not in goal_info
                     and bearing is not None and abs(bearing) < 90.0):
-                lateral_error = depth * math.tan(math.radians(bearing))
+                lateral_error = board_depth * math.tan(math.radians(bearing))
             if lateral_error is None or depth_error <= 0.0:
                 return self.wait("missing_valid_goal_target_geometry")
             if lateral_error * offset_px < 0.0:
                 return self.wait("goal_target_pixel_direction_mismatch")
             if fx is None:
                 return self.wait("missing_goal_camera_calibration")
-            lateral_error -= self.config.score_target_depth_m * GOAL_SCORE_TARGET_OFFSET_PX / fx
+            lateral_error -= GOAL_APPROACH_TARGET_BOARD_DEPTH_M * GOAL_SCORE_TARGET_OFFSET_PX / fx
             # Suppress floating-point roundoff at inclusive angular boundaries.
             target_steering = round(math.degrees(math.atan2(lateral_error, depth_error)), 9)
             direction = "RIGHT" if target_steering > 0.0 else "LEFT"

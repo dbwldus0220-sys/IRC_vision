@@ -17,6 +17,7 @@ from mission_control.pickup_walk_reservation import PICKUP_WALK_DURATIONS
 ROOT = Path(__file__).resolve().parents[3]
 UPDATE = ROOT / 'artifacts/20261111_catalog98_forward_recovery'
 MANIFEST = json.loads((UPDATE / 'manifest.json').read_text())
+RENAMES = json.loads((ROOT / 'artifacts/20261111_catalog100_name_mapping/manifest.json').read_text())['renames']
 sys.path.insert(0, str(ROOT / 'tools'))
 from upsert_motion_catalog import runtime_motion_from_source
 
@@ -76,15 +77,17 @@ def test_every_route_resolves_and_startup_pose_remains_unambiguous():
     })
     from test_goal_exit_recovery_catalog import EXPECTED_ALIASES
     expected.update(EXPECTED_ALIASES)
-    assert ALIASES == expected
-    for pose in {'오뒤무게중심앞'} | {f['name'] for n in MANIFEST['imports'] for f in RUNTIME[n]['frames']}:
+    # The deployed ring policy already removed the unsupported region-7 alias.
+    expected.pop('goal_shot_region_7', None)
+    assert ALIASES == {alias: RENAMES.get(name, name) for alias, name in expected.items()}
+    for pose in {'오뒤무게중심앞'} | {f['name'] for n in MANIFEST['imports'] for f in RUNTIME[RENAMES.get(n, n)]['frames']}:
         frames = [f for m in RUNTIME.values() for f in m['frames'] if f['name'] == pose]
         assert frames and all((f['angles'], f['torques']) == (frames[0]['angles'], frames[0]['torques']) for f in frames), pose
 
 
 @pytest.mark.parametrize('name', MANIFEST['imports'])
 def test_repeat_counts_speed_and_timeout_budget(name):
-    m = RUNTIME[name]
+    m = RUNTIME[RENAMES.get(name, name)]
     if name.startswith('n전진'):
         assert m['repeat_count'] == int(name.split('(')[1].split('회')[0])
     assert m['playback_speed'] == 1.0

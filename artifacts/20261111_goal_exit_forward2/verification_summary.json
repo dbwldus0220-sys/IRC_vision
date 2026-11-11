@@ -1,0 +1,38 @@
+{
+  "goal_exit": {
+    "first": "right 6 -> hold 0.5s -> forward 2 -> recovery right 4",
+    "second": "left 4 -> hold 0.5s -> forward 2 -> recovery left 4",
+    "durations_sec": [
+      6.132,
+      5.30095238095238
+    ],
+    "public_ids_and_catalog_names_preserved": true,
+    "generator_idempotent": true
+  },
+  "verification": {
+    "focused_passed": 360,
+    "focused_failed": 10,
+    "baseline_passed": 340,
+    "baseline_failed": 30,
+    "new_failures": [],
+    "additional_passed": 68,
+    "ctest_suites_passed": 2,
+    "hardware_executed": false
+  },
+  "video_diagnosis": {
+    "video": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 14시 19분 29초.webm",
+    "confirmed_frame_depth_m": [
+      0.64,
+      0.62,
+      0.58
+    ],
+    "head_down_threshold_m": 0.55,
+    "candidate_counts_visible": [
+      "1/10",
+      "3/10"
+    ],
+    "last_loss_log_epoch": 1794374427.6167552,
+    "first_later_head_down_log_epoch": 1794374445.823052,
+    "observation": "Ball approaches lower image edge during recovery. Confirmation resets before disappearance; executor requires detected=true for head lowering. Exact reason for spatial-track reset cannot be established from sampled video and summary logs."
+  }
+}

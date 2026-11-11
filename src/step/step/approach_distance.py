@@ -38,7 +38,7 @@ BALL_HURDLE_FINE_DISTANCE_M = 0.550
 BALL_PICKUP_DISTANCE_M = 0.500
 # Legacy name for the near-approach band, now using regular two-cycle walking.
 BALL_FINE_APPROACH_DISTANCE_M = 0.600
-HURDLE_FINE_DISTANCE_M = 0.700
+HURDLE_FINE_DISTANCE_M = 0.580
 
 
 def ball_hurdle_approach_motion(

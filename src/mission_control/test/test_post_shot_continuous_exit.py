@@ -62,8 +62,8 @@ def test_early_frames_finish_in_exit_alignment_without_extra_forward_or_reservat
     assert not node.general_motion_gate.locked
     assert node.post_shot_dwell_until is None
     assert node.latest_info['line'] is None
-    assert bridge.last_physical_motion_id == ('line_recovery_right_4' if section == 1
-                                              else 'line_recovery_left_4')
+    recovery_direction = 'right' if section == 1 else 'left'
+    assert bridge.last_physical_motion_id == f'line_recovery_{recovery_direction}_4'
     assert not bridge.motion_in_progress
     assert bridge._transition_prepare_motion('goal_camera_90_fine_forward_1') == 'goal_fine_prepare_90'
     forward_status(node, bridge, request, 'SUCCEEDED')
@@ -98,10 +98,10 @@ def test_failed_composite_never_replays_or_starts_normal_line(clock, section, st
 
 @pytest.mark.parametrize('kind', ['pc', 'runtime'])
 @pytest.mark.parametrize('name,alias,recovery_name,blocks', [
-    ('t골대후제자리우회전', 'post_shot_exit_right_9_recovery_right_4', 'n라인복귀우회전45도', 1),
-    ('p골대후제자리좌회전', 'post_shot_exit_left_4_recovery_left_4', 'n라인복귀좌회전45도', 1),
-    ('t골대후제자리우회전(6회)', 'post_shot_exit_right_5_forward_4', 'n라인복귀우회전45도', 2),
-    ('p골대후제자리좌회전(4회)', 'post_shot_exit_left_3_forward_4', 'n라인복귀좌회전45도', 2),
+    ('t골대후제자리우회전', 'post_shot_exit_right_9_recovery_right_4', 't라인복귀우실전', 1),
+    ('p골대후제자리좌회전', 'post_shot_exit_left_4_recovery_left_4', 'p라인복귀좌회전45도', 1),
+    ('t골대후제자리우회전(6회)', 'post_shot_exit_right_5_forward_4', 't라인복귀우실전', 1),
+    ('p골대후제자리좌회전(4회)', 'post_shot_exit_left_3_forward_4', 'p라인복귀좌회전45도', 1),
 ])
 def test_catalog_preserves_turn_and_recovery_with_half_second_join_hold(kind, name, alias, recovery_name, blocks):
     motions = json.loads((ROOT / f'artifacts/robot_motions_{kind}.json').read_text())['motions']
@@ -109,15 +109,34 @@ def test_catalog_preserves_turn_and_recovery_with_half_second_join_hold(kind, na
     assert len(catalog) == len(motions)
     aliases = yaml.safe_load((ROOT / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']
     combined, turn, recovery = catalog[aliases[alias]], catalog[name], catalog[recovery_name]
+    forward = catalog['p전진45도(2회)'] if alias.endswith('_forward_4') else None
     prefix_size = len(turn['frames'])
     assert combined['frames'][:prefix_size] == turn['frames']
     assert combined['playback_speed'] == turn['playback_speed']
     assert combined['repeat_count'] == 1
-    assert len(combined['frames']) == prefix_size + 4 * blocks * len(recovery['frames'])
+    forward_frames = 2 * len(forward['frames']) if forward else 0
+    assert len(combined['frames']) == prefix_size + forward_frames + 4 * blocks * len(recovery['frames'])
     turn_end = turn['frames'][-1]['start_ms'] + turn['frames'][-1]['time_ms']
     assert ((combined['frames'][prefix_size]['start_ms'] - turn_end)
             / combined['playback_speed']) == pytest.approx(500.)
-    for index, actual in enumerate(combined['frames'][prefix_size:]):
+    if forward:
+        for index, actual in enumerate(combined['frames'][prefix_size:prefix_size + forward_frames]):
+            original = forward['frames'][index % len(forward['frames'])]
+            for field in ('angles', 'torques', 'name', 'lift_early_arrival'):
+                assert actual[field] == original[field]
+            assert abs(actual['time_ms'] / combined['playback_speed']
+                       - original['time_ms'] / forward['playback_speed']) <= 1.
+            cycle, frame_index = divmod(index, len(forward['frames']))
+            cycle_ms = max(f['start_ms'] + f['time_ms'] for f in forward['frames'])
+            assert (actual['start_ms'] - combined['frames'][prefix_size]['start_ms']) / combined['playback_speed'] == pytest.approx(
+                (cycle * cycle_ms + original['start_ms'] - forward['frames'][0]['start_ms']) / forward['playback_speed'], abs=1.)
+            assert actual.get('playback_cycle_end', False) == (frame_index == len(forward['frames']) - 1)
+        join = prefix_size + forward_frames
+        assert (combined['frames'][join]['start_ms'] - combined['frames'][join - 1]['start_ms']
+                - combined['frames'][join - 1]['time_ms']) / combined['playback_speed'] == pytest.approx(
+                    recovery['frames'][0]['start_ms'] / recovery['playback_speed'], abs=1.)
+    recovery_offset = prefix_size + forward_frames
+    for index, actual in enumerate(combined['frames'][recovery_offset:]):
         original = recovery['frames'][index % len(recovery['frames'])]
         for field in ('angles', 'torques', 'name', 'lift_early_arrival'):
             assert actual[field] == original[field]
@@ -128,12 +147,16 @@ def test_catalog_preserves_turn_and_recovery_with_half_second_join_hold(kind, na
         cycle_ms = max(f['start_ms'] + f['time_ms'] for f in recovery['frames'])
         expected_start_ms = (cycle * cycle_ms + original['start_ms']
                              - recovery['frames'][0]['start_ms']) / recovery['playback_speed']
-        assert (actual['start_ms'] - combined['frames'][prefix_size]['start_ms']) / combined['playback_speed'] == pytest.approx(expected_start_ms, abs=1.)
+        assert (actual['start_ms'] - combined['frames'][recovery_offset]['start_ms']) / combined['playback_speed'] == pytest.approx(expected_start_ms, abs=1.)
         assert actual.get('playback_cycle_end', False) == (frame_index == len(recovery['frames']) - 1)
     assert combined['end_pose'] == recovery['end_pose']
     expected_recovery_ms = (4 * blocks * (recovery['frames'][-1]['start_ms'] + recovery['frames'][-1]['time_ms'])
                             - recovery['frames'][0]['start_ms']) / recovery['playback_speed']
-    assert (combined['max_seq_ms'] - turn_end) / combined['playback_speed'] == pytest.approx(expected_recovery_ms + 500., abs=1.)
+    expected_forward_ms = (2 * max(f['start_ms'] + f['time_ms'] for f in forward['frames'])
+                           - forward['frames'][0]['start_ms']) / forward['playback_speed'] if forward else 0.
+    recovery_lead_ms = recovery['frames'][0]['start_ms'] / recovery['playback_speed'] if forward else 0.
+    assert (combined['max_seq_ms'] - turn_end) / combined['playback_speed'] == pytest.approx(
+        expected_recovery_ms + expected_forward_ms + recovery_lead_ms + 500., abs=1.)
     assert combined['max_seq_ms'] / combined['playback_speed'] + combined['completion']['settle_timeout_ms'] < FakeBridge.DEFAULT_TIMEOUT_MS
     if kind == 'runtime':
         assert combined['completion']['position_tolerance_deg'] == 5.
@@ -218,19 +241,20 @@ def test_failed_exit_alignment_never_resumes_line(clock, status):
 @pytest.mark.parametrize('section', [1, 2])
 @pytest.mark.parametrize('region', [1, 2, 5, 6, 7, 8])
 @pytest.mark.parametrize('heading', [-44.56, 44.56])
-def test_exit_stationary_alignment_waits_half_second_from_composite_end(clock, section, region, heading):
+def test_exit_stationary_alignment_waits_direction_specific_rest_from_composite_end(clock, section, region, heading):
     node, bridge, request = start_exit(clock, section, region)
     clock[0] += 5.
     forward_status(node, bridge, request, 'SUCCEEDED')
     ended = clock[0]
     initial_commands = len(node.publisher.messages)
-    for elapsed in (.01, .25, .499):
+    dwell = .3 if heading > 0 else .5
+    for elapsed in (.01, .25, dwell - .001):
         clock[0] = ended + elapsed
         receive(node, clock, 'line', line_info(heading))
         Node._publish_decision(node)
         assert not any(m['valid'] for m in node.publisher.messages[initial_commands:])
         assert len(bridge.executor_request_publisher.messages) == 1
-    clock[0] = ended + .501
+    clock[0] = ended + dwell + .001
     receive(node, clock, 'line', line_info(heading))
     Node._publish_decision(node)
     command = node.publisher.messages[-1]

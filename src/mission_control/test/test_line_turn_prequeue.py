@@ -102,7 +102,9 @@ def test_turn_waits_for_completion_and_reobserves(clock, phase, action, info, ex
     assert command['action'] == expected
     assert not command['source_command'].get('line_turn_prequeue')
     if Node._needs_correction_dwell(action) or Node._needs_correction_dwell(expected):
-        assert clock[0] - completed >= .5
+        rests = [.3 if 'TURN_RIGHT' in a else .5
+                 for a in (action, expected) if Node._needs_correction_dwell(a)]
+        assert clock[0] - completed >= max(rests)
     bridge.navigation_command_callback(String(data=json.dumps(command)))
     if bridge.transition_dwell_until is not None:
         clock[0] = bridge.transition_dwell_until

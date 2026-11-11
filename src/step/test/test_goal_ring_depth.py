@@ -5,7 +5,7 @@ from step.goal_navigation_planner import GoalNavigationPlanner
 from test_goal_backboard_selection import make_analyzer, detection, send
 
 
-@pytest.mark.parametrize('ring_depth,region', [(.35, 1), (.43, 2), (.49, 8), (.53, 5), (.56, 6), (.60, 7)])
+@pytest.mark.parametrize('ring_depth,region', [(.35, 1), (.43, 2), (.49, 8), (.53, 5), (.56, 6)])
 @pytest.mark.parametrize('offset', [-350, -121, -120, 0, 120, 121, 350])
 def test_analyzer_confirms_ring_distance_instead_of_board_distance(ring_depth, region, offset):
     analyzer, published = make_analyzer(depth_m=ring_depth + .10)
@@ -41,3 +41,15 @@ def test_missing_plane_depth_does_not_fall_back_to_board_for_shot():
         assert info['ring_center_depth_m'] is None
         assert not info['score_now']
         assert GoalNavigationPlanner().plan(info).action == 'WAIT'
+
+
+@pytest.mark.parametrize('ring_depth', [.600, .630, .6599])
+def test_removed_region_seven_keeps_approaching_after_confirmation(ring_depth):
+    analyzer, published = make_analyzer(depth_m=ring_depth + .10)
+    for _ in range(5):
+        info = send(analyzer, published, [detection()])
+        assert not info['score_now']
+        assert not info['depth_in_score_range']
+        command = GoalNavigationPlanner().plan(info)
+        assert command.shot_region is None
+        assert command.action.startswith('GOAL_CAMERA90_FINE_FORWARD_')

@@ -1,0 +1,22 @@
+Internal ctest changing into directory: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/gui_execution_alignment
+Test project /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/gui_execution_alignment
+    Start 1: motion_pattern_test
+1/8 Test #1: motion_pattern_test .................   Passed    0.01 sec
+    Start 2: motion_callback_test
+2/8 Test #2: motion_callback_test ................   Passed    0.09 sec
+    Start 3: gui_alignment_contract
+3/8 Test #3: gui_alignment_contract ..............   Passed    0.01 sec
+    Start 4: continuous_hardware_contract
+4/8 Test #4: continuous_hardware_contract ........   Passed    0.05 sec
+    Start 5: continuous_interpolation_contract
+5/8 Test #5: continuous_interpolation_contract ...   Passed    0.01 sec
+    Start 6: forward_timing_contract
+6/8 Test #6: forward_timing_contract .............   Passed    0.24 sec
+    Start 7: ball_fine_queue_contract
+7/8 Test #7: ball_fine_queue_contract ............   Passed   15.10 sec
+    Start 8: ring_shot_contract
+8/8 Test #8: ring_shot_contract ..................   Passed    0.96 sec
+
+100% tests passed, 0 tests failed out of 8
+
+Total Test time (real) =  16.46 sec

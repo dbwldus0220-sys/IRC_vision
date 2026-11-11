@@ -36,6 +36,7 @@ bool isLineRecoveryMotion(std::string_view name) {
 bool isLineWalkingMotion(std::string_view name) {
     return name.starts_with("R전진45도(") || name == "t전진실전"
         || name.starts_with("t전진실전45도(") || name.starts_with("p전진45(")
+        || name.starts_with("p전진45도(")
         || name.starts_with("n전진45도(")
         || isLineRecoveryMotion(name);
 }
@@ -437,7 +438,8 @@ RobotMotionPlayer::Clock::time_point RobotMotionPlayer::forwardBoundaryStart(
     const auto forward = [](std::string_view name) {
         return isLineWalkingMotion(name) || isGoalForwardMotion(name)
             || name.starts_with("R전진0도(") || name.starts_with("t전진실전0도(")
-            || name.starts_with("p전진실전0도(") || name.starts_with("n전진0도(");
+            || name.starts_with("p전진실전0도(") || name.starts_with("p전진0도(")
+            || name.starts_with("n전진0도(");
     };
     if (!account_forward_boundary_feedback_ || !forward(current_motion_) || !forward(next_name)
         || next.frames().empty() || now < last_goal_written_at_) return now;

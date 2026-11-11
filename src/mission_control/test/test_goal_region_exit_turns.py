@@ -17,7 +17,7 @@ ALIASES = yaml.safe_load((ROOT / 'src/irc_step_motion_executor/config/motion_ali
 
 
 @pytest.mark.parametrize('section', [1, 2])
-@pytest.mark.parametrize('region', range(1, 9))
+@pytest.mark.parametrize('region', (1, 2, 3, 4, 5, 6, 8))
 def test_executed_region_routes_through_gate_bridge_and_line_reacquisition(monkeypatch, section, region):
     monkeypatch.setattr('mission_control.motion_decision_node.time.monotonic', lambda: 10.)
     node = MissionFlowHarness(phase='GOAL_APPROACH')
@@ -46,9 +46,10 @@ def test_executed_region_routes_through_gate_bridge_and_line_reacquisition(monke
     request = decoded_messages(bridge.executor_request_publisher)[-1]
     name = 't골대후제자리우회전' if section == 1 else 'p골대후제자리좌회전'
     recovery = '우' if section == 1 else '좌'
+    far_recovery = '좌' if section == 1 else '우'
     turn_count = 6 if section == 1 else 4
     assert ALIASES[request['motion_id']] == (
-        f'{name}({turn_count}회)' + f'+라인복귀{recovery}회전45도(4회)' * 2 if region >= 5
+        f'{name}({turn_count}회)' + f'+라인복귀{far_recovery}회전45도(4회)' * 2 if region >= 5
         else name + f'+라인복귀{recovery}회전45도(4회)' if region in {1, 2} else name
     )
     finish_sequence(bridge)
@@ -63,7 +64,7 @@ def test_executed_region_routes_through_gate_bridge_and_line_reacquisition(monke
     assert not node.planner.goal_lock_active
     assert node.planner.last_line_seen_direction is None
     assert node.planner.post_ball_line_search_direction == direction
-    assert node.post_shot_dwell_until == (None if region in {1, 2, 5, 6, 7, 8} else pytest.approx(10.5))
+    assert node.post_shot_dwell_until == (None if region in {1, 2, 5, 6, 7, 8} else pytest.approx(10.3 if section == 1 else 10.5))
 
 
 @pytest.mark.parametrize('terminal_motion', [None, 'goal_shot_region_2', '__NON_BLOCKING_DWELL__'])

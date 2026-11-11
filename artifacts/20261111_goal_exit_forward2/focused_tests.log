@@ -1,0 +1,95 @@
+........................................................................ [ 19%]
+...........................................FF........................... [ 38%]
+........................................................................ [ 58%]
+.................FFFFFFFF............................................... [ 77%]
+........................................................................ [ 97%]
+..........                                                               [100%]
+=================================== FAILURES ===================================
+_____ test_variants_keep_preparation_complete_turns_and_final_support[pc] ______
+src/mission_control/test/test_goal_region_exit_turns.py:108: in test_variants_keep_preparation_complete_turns_and_final_support
+    assert all(motions[motion['name']] == motion for motion in before
+src/mission_control/test/test_goal_region_exit_turns.py:108: in <genexpr>
+    assert all(motions[motion['name']] == motion for motion in before
+E   KeyError: 'n라인복귀우회전45도'
+___ test_variants_keep_preparation_complete_turns_and_final_support[runtime] ___
+src/mission_control/test/test_goal_region_exit_turns.py:108: in test_variants_keep_preparation_complete_turns_and_final_support
+    assert all(motions[motion['name']] == motion for motion in before
+src/mission_control/test/test_goal_region_exit_turns.py:108: in <genexpr>
+    assert all(motions[motion['name']] == motion for motion in before
+E   KeyError: 'n라인복귀우회전45도'
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-1-1] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-1-2] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-2-1] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-2-2] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-5-1] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-5-2] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-8-1] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-8-2] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_goal_region_exit_turns.py::test_variants_keep_preparation_complete_turns_and_final_support[pc]
+FAILED src/mission_control/test/test_goal_region_exit_turns.py::test_variants_keep_preparation_complete_turns_and_final_support[runtime]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-1-1]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-1-2]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-2-1]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-2-2]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-5-1]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-5-2]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-8-1]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-8-2]
+10 failed, 360 passed in 4.19s

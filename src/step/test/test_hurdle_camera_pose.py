@@ -38,7 +38,7 @@ def test_selects_both_postures_and_waits_for_new_capture_after_interpolation():
     tracker = HurdleCameraPose()
     tracker.heartbeat(heartbeat(), 10., 10_000_000_000)
     up = plan(tracker, observation(), 10.1)
-    assert up.action == "ALIGN_LEFT" and up.turn_count == 2
+    assert up.action == "RECOVER_LEFT_TURN_LEFT_4" and up.turn_count is None
     assert up.alignment_reference == "hurdle_angle_45"
 
     assert plan(tracker, observation(head_down_requested=True), 10.1).action == "WAIT"
@@ -48,7 +48,7 @@ def test_selects_both_postures_and_waits_for_new_capture_after_interpolation():
     tracker.heartbeat(heartbeat(3, hurdle_head_override_active=True,
                                 hurdle_head_override_current_deg=-64), 10.6, 10_600_000_000)
     assert plan(tracker, observation(10.59), 10.7).action == "WAIT"
-    down = plan(tracker, observation(10.7, head_down_requested=True), 10.7)
+    down = plan(tracker, observation(10.7, depth_m=.57, head_down_requested=True), 10.7)
     assert down.action == "ALIGN_RIGHT" and down.turn_count == 3
     assert down.hurdle_angle_deg == -30
     assert down.alignment_reference == "hurdle_angle_0"
@@ -78,7 +78,7 @@ def test_missing_stale_duplicate_heartbeat_and_restart_require_fresh_camera_evid
     assert plan(tracker, observation(11.1), 11.1).action == "WAIT"
     tracker.heartbeat(heartbeat(0), 11.2, 11_200_000_000)
     assert plan(tracker, observation(11.1), 11.3).action == "WAIT"
-    assert plan(tracker, observation(11.3), 11.3).action == "ALIGN_LEFT"
+    assert plan(tracker, observation(11.3), 11.3).action == "RECOVER_LEFT_TURN_LEFT_4"
 
 
 @pytest.mark.parametrize("pose", ["45", "0"])
@@ -89,9 +89,9 @@ def test_invalid_selected_angle_never_falls_back_to_other_pose_or_legacy(pose, b
     assert HurdleNavigationPlanner().plan(info, positioning=True).action == "WAIT"
 
 
-def test_transition_does_not_change_existing_final_distance_checkpoint():
+def test_close_depth_cannot_bypass_camera_transition():
     command = plan(HurdleCameraPose(), observation(depth_m=.45), 10.1)
-    assert command.action == "GO" and command.fine_sequence_requested
+    assert command.action == "WAIT" and not command.fine_sequence_requested
 
 
 def test_walking_heartbeats_keep_same_posture_images_usable_without_reobservation():
@@ -102,5 +102,5 @@ def test_walking_heartbeats_keep_same_posture_images_usable_without_reobservatio
         tracker.heartbeat(heartbeat(sequence, active=True), now, round(now * 1e9))
         assert tracker.ready_stamp_ns == 10_000_000_000
         command = plan(tracker, info, now)
-        assert command.action == 'STRAIGHT_1'
+        assert command.action == 'STRAIGHT_3'
         assert command.alignment_reference == 'hurdle_angle_45'

@@ -1,0 +1,14 @@
+{
+  "before_failures": 275,
+  "after_initial_failures": 275,
+  "new_failures": [],
+  "resolved_failures": [],
+  "normalization": "Map old motion names to new names in parameterized test IDs before comparison.",
+  "final_focused_python": "98 passed",
+  "sdk_ctest": "8/8 passed",
+  "executor_focused_ctest": "13/13 passed",
+  "production_pair_replay": "test_forward_timing with runtime catalog: exit 0; 18 walking motions x 18 next motions x 2 camera modes, plus fine-motion variants",
+  "existing_cpp_failure": "StartupPoseCatalog.LoadsCatalog49ForwardStartWithEveryPolicyCombination expects a pose absent from both before and after catalogs.",
+  "full_executor_suite": "Stopped long-running historical GUI parity suite; completed focused executor tests instead.",
+  "hardware_executed": false
+}

@@ -16,6 +16,8 @@ WALKS = ['line_forward_2', 'line_forward_4', 'line_forward_6', 'line_forward_8',
          'ball_camera_down_forward_2', 'ball_camera_down_forward_4',
          'line_recovery_left_4', 'line_recovery_right_4',
          'line_recovery_ball_first_left_4', 'line_recovery_ball_second_right_4']
+CRABS = ['pickup_crab_left_0', 'pickup_crab_right_0',
+         'pickup_crab_left_0_2', 'pickup_crab_right_0_2']
 
 
 @pytest.mark.parametrize('previous', WALKS)
@@ -65,13 +67,15 @@ def prepare_skip(clock, previous, index):
     clock[0] += .001
     bridge._check_atomic_dwell()
     request = decoded_messages(bridge.executor_request_publisher)[-1]
-    assert request['motion_id'] == 'pickup_forward_to_backward_prepare'
+    expected = (('pickup_crab_left_to_fine_0' if 'left' in previous else 'pickup_crab_right_to_fine_0')
+                if previous in CRABS else 'pickup_forward_to_backward_prepare')
+    assert request['motion_id'] == expected
     return node, bridge, request
 
 
-@pytest.mark.parametrize('previous', WALKS)
+@pytest.mark.parametrize('previous', WALKS + CRABS)
 @pytest.mark.parametrize('index', [1, 2])
-def test_skip_preparation_half_second_then_retreat_and_grasp(clock, previous, index):
+def test_skip_preparation_one_second_then_retreat_and_grasp(clock, previous, index):
     node, bridge, request = prepare_skip(clock, previous, index)
     clock[0] += .754
     bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
@@ -85,9 +89,16 @@ def test_skip_preparation_half_second_then_retreat_and_grasp(clock, previous, in
     assert len(bridge.executor_request_publisher.messages) == 1
     clock[0] = deadline
     bridge._check_atomic_dwell()
+    assert len(bridge.executor_request_publisher.messages) == 1
+    assert bridge.transition_dwell_until == pytest.approx(deadline + .5)
+    clock[0] = deadline + .499
+    bridge._check_atomic_dwell()
+    assert len(bridge.executor_request_publisher.messages) == 1
+    clock[0] = deadline + .5
+    bridge._check_atomic_dwell()
     requests = decoded_messages(bridge.executor_request_publisher)
     assert [r['motion_id'] for r in requests] == [
-        'pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down']
+        request['motion_id'], 'pickup_pre_backward_camera_down']
     assert bridge.transition_dwell_until is None
     # Complete the fixed tail, crossing the fresh post-retreat grasp checkpoint.
     for _ in range(25):
@@ -105,7 +116,7 @@ def test_skip_preparation_half_second_then_retreat_and_grasp(clock, previous, in
     assert not bridge.motion_in_progress
     ids = [r['motion_id'] for r in decoded_messages(bridge.executor_request_publisher)]
     assert 'pickup_fine_forward_0' not in ids and 'ball_general_fine_forward_8' not in ids
-    assert ids.count('pickup_forward_to_backward_prepare') == 1
+    assert ids.count(request['motion_id']) == 1
     assert 'pickup_500' in ids
     assert ids[-1] == ('pickup_first_backward_turn_right' if index == 1 else 'pickup_second_backward_turn_left')
 
@@ -182,3 +193,17 @@ def test_normal_walk_reaches_skip_checkpoint_after_accepted_queue(clock, index, 
     assert ids.count('ball_camera_down_forward_2') == (2 if reserve_next else 1)
     assert ids[-1] == 'pickup_forward_to_backward_prepare'
     assert 'ball_general_fine_forward_8' not in ids and 'pickup_fine_forward_0' not in ids
+    preparation = decoded_messages(bridge.executor_request_publisher)[-1]
+    clock[0] += .754
+    completed_at = clock[0]
+    forward_status(node, bridge, preparation, 'SUCCEEDED')
+    clock[0] = completed_at + .5
+    bridge._check_atomic_dwell()
+    # The preceding half-second hold is credited; only half a second remains.
+    assert bridge.transition_dwell_until == pytest.approx(completed_at + 1.)
+    assert decoded_messages(bridge.executor_request_publisher)[-1] == preparation
+    finish_rest(bridge, clock)
+    assert clock[0] == pytest.approx(completed_at + 1.)
+    assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_pre_backward_camera_down'
+    assert bridge.pickup_queued_request is None
+    assert node.active_special_command_id == parent['command_id']

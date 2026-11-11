@@ -1,0 +1,275 @@
+........FF........................................FF..........FF........ [ 19%]
+..FF..........FF...........................FF........FF..........FF..... [ 38%]
+.....FF................................................................. [ 58%]
+.................FFFFFFFF............................................... [ 77%]
+..................................................FF..........FF........ [ 97%]
+..........                                                               [100%]
+=================================== FAILURES ===================================
+_ test_early_frames_finish_in_exit_alignment_without_extra_forward_or_reservation[7-1] _
+src/mission_control/test/test_post_shot_continuous_exit.py:49: in test_early_frames_finish_in_exit_alignment_without_extra_forward_or_reservation
+    node, bridge, request = start_exit(clock, section, region)
+src/mission_control/test/test_post_shot_continuous_exit.py:37: in start_exit
+    assert command['action'] == f'POST_SHOT_EXIT_{expected}'
+E   AssertionError: assert 'POST_SHOT_TURN_RIGHT_9' == 'POST_SHOT_EX...T_5_FORWARD_4'
+E     - POST_SHOT_EXIT_RIGHT_5_FORWARD_4
+E     + POST_SHOT_TURN_RIGHT_9
+_ test_early_frames_finish_in_exit_alignment_without_extra_forward_or_reservation[7-2] _
+src/mission_control/test/test_post_shot_continuous_exit.py:49: in test_early_frames_finish_in_exit_alignment_without_extra_forward_or_reservation
+    node, bridge, request = start_exit(clock, section, region)
+src/mission_control/test/test_post_shot_continuous_exit.py:37: in start_exit
+    assert command['action'] == f'POST_SHOT_EXIT_{expected}'
+E   AssertionError: assert 'POST_SHOT_TURN_LEFT_4' == 'POST_SHOT_EX...T_3_FORWARD_4'
+E     - POST_SHOT_EXIT_LEFT_3_FORWARD_4
+E     + POST_SHOT_TURN_LEFT_4
+_ test_exit_stationary_alignment_waits_direction_specific_rest_from_composite_end[-44.56-7-1] _
+src/mission_control/test/test_post_shot_continuous_exit.py:224: in test_exit_stationary_alignment_waits_direction_specific_rest_from_composite_end
+    node, bridge, request = start_exit(clock, section, region)
+src/mission_control/test/test_post_shot_continuous_exit.py:37: in start_exit
+    assert command['action'] == f'POST_SHOT_EXIT_{expected}'
+E   AssertionError: assert 'POST_SHOT_TURN_RIGHT_9' == 'POST_SHOT_EX...T_5_FORWARD_4'
+E     - POST_SHOT_EXIT_RIGHT_5_FORWARD_4
+E     + POST_SHOT_TURN_RIGHT_9
+_ test_exit_stationary_alignment_waits_direction_specific_rest_from_composite_end[-44.56-7-2] _
+src/mission_control/test/test_post_shot_continuous_exit.py:224: in test_exit_stationary_alignment_waits_direction_specific_rest_from_composite_end
+    node, bridge, request = start_exit(clock, section, region)
+src/mission_control/test/test_post_shot_continuous_exit.py:37: in start_exit
+    assert command['action'] == f'POST_SHOT_EXIT_{expected}'
+E   AssertionError: assert 'POST_SHOT_TURN_LEFT_4' == 'POST_SHOT_EX...T_3_FORWARD_4'
+E     - POST_SHOT_EXIT_LEFT_3_FORWARD_4
+E     + POST_SHOT_TURN_LEFT_4
+_ test_exit_stationary_alignment_waits_direction_specific_rest_from_composite_end[44.56-7-1] _
+src/mission_control/test/test_post_shot_continuous_exit.py:224: in test_exit_stationary_alignment_waits_direction_specific_rest_from_composite_end
+    node, bridge, request = start_exit(clock, section, region)
+src/mission_control/test/test_post_shot_continuous_exit.py:37: in start_exit
+    assert command['action'] == f'POST_SHOT_EXIT_{expected}'
+E   AssertionError: assert 'POST_SHOT_TURN_RIGHT_9' == 'POST_SHOT_EX...T_5_FORWARD_4'
+E     - POST_SHOT_EXIT_RIGHT_5_FORWARD_4
+E     + POST_SHOT_TURN_RIGHT_9
+_ test_exit_stationary_alignment_waits_direction_specific_rest_from_composite_end[44.56-7-2] _
+src/mission_control/test/test_post_shot_continuous_exit.py:224: in test_exit_stationary_alignment_waits_direction_specific_rest_from_composite_end
+    node, bridge, request = start_exit(clock, section, region)
+src/mission_control/test/test_post_shot_continuous_exit.py:37: in start_exit
+    assert command['action'] == f'POST_SHOT_EXIT_{expected}'
+E   AssertionError: assert 'POST_SHOT_TURN_LEFT_4' == 'POST_SHOT_EX...T_3_FORWARD_4'
+E     - POST_SHOT_EXIT_LEFT_3_FORWARD_4
+E     + POST_SHOT_TURN_LEFT_4
+_ test_exit_recovery_walk_starts_on_first_fresh_frame_without_dwell[-31.0-7-1] _
+src/mission_control/test/test_post_shot_continuous_exit.py:251: in test_exit_recovery_walk_starts_on_first_fresh_frame_without_dwell
+    node, bridge, request = start_exit(clock, section, region)
+src/mission_control/test/test_post_shot_continuous_exit.py:37: in start_exit
+    assert command['action'] == f'POST_SHOT_EXIT_{expected}'
+E   AssertionError: assert 'POST_SHOT_TURN_RIGHT_9' == 'POST_SHOT_EX...T_5_FORWARD_4'
+E     - POST_SHOT_EXIT_RIGHT_5_FORWARD_4
+E     + POST_SHOT_TURN_RIGHT_9
+_ test_exit_recovery_walk_starts_on_first_fresh_frame_without_dwell[-31.0-7-2] _
+src/mission_control/test/test_post_shot_continuous_exit.py:251: in test_exit_recovery_walk_starts_on_first_fresh_frame_without_dwell
+    node, bridge, request = start_exit(clock, section, region)
+src/mission_control/test/test_post_shot_continuous_exit.py:37: in start_exit
+    assert command['action'] == f'POST_SHOT_EXIT_{expected}'
+E   AssertionError: assert 'POST_SHOT_TURN_LEFT_4' == 'POST_SHOT_EX...T_3_FORWARD_4'
+E     - POST_SHOT_EXIT_LEFT_3_FORWARD_4
+E     + POST_SHOT_TURN_LEFT_4
+_ test_exit_recovery_walk_starts_on_first_fresh_frame_without_dwell[31.0-7-1] __
+src/mission_control/test/test_post_shot_continuous_exit.py:251: in test_exit_recovery_walk_starts_on_first_fresh_frame_without_dwell
+    node, bridge, request = start_exit(clock, section, region)
+src/mission_control/test/test_post_shot_continuous_exit.py:37: in start_exit
+    assert command['action'] == f'POST_SHOT_EXIT_{expected}'
+E   AssertionError: assert 'POST_SHOT_TURN_RIGHT_9' == 'POST_SHOT_EX...T_5_FORWARD_4'
+E     - POST_SHOT_EXIT_RIGHT_5_FORWARD_4
+E     + POST_SHOT_TURN_RIGHT_9
+_ test_exit_recovery_walk_starts_on_first_fresh_frame_without_dwell[31.0-7-2] __
+src/mission_control/test/test_post_shot_continuous_exit.py:251: in test_exit_recovery_walk_starts_on_first_fresh_frame_without_dwell
+    node, bridge, request = start_exit(clock, section, region)
+src/mission_control/test/test_post_shot_continuous_exit.py:37: in start_exit
+    assert command['action'] == f'POST_SHOT_EXIT_{expected}'
+E   AssertionError: assert 'POST_SHOT_TURN_LEFT_4' == 'POST_SHOT_EX...T_3_FORWARD_4'
+E     - POST_SHOT_EXIT_LEFT_3_FORWARD_4
+E     + POST_SHOT_TURN_LEFT_4
+_____ test_variants_keep_preparation_complete_turns_and_final_support[pc] ______
+src/mission_control/test/test_goal_region_exit_turns.py:108: in test_variants_keep_preparation_complete_turns_and_final_support
+    assert all(motions[motion['name']] == motion for motion in before
+src/mission_control/test/test_goal_region_exit_turns.py:108: in <genexpr>
+    assert all(motions[motion['name']] == motion for motion in before
+E   KeyError: 'n라인복귀우회전45도'
+___ test_variants_keep_preparation_complete_turns_and_final_support[runtime] ___
+src/mission_control/test/test_goal_region_exit_turns.py:108: in test_variants_keep_preparation_complete_turns_and_final_support
+    assert all(motions[motion['name']] == motion for motion in before
+src/mission_control/test/test_goal_region_exit_turns.py:108: in <genexpr>
+    assert all(motions[motion['name']] == motion for motion in before
+E   KeyError: 'n라인복귀우회전45도'
+_ test_both_exits_reserve_one_line_motion_and_start_only_after_success[0.0-0.0-STRAIGHT-7-1] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:36: in test_both_exits_reserve_one_line_motion_and_start_only_after_success
+    node, bridge, exiting = start_exit(clock, section, region)
+src/mission_control/test/test_post_shot_continuous_exit.py:37: in start_exit
+    assert command['action'] == f'POST_SHOT_EXIT_{expected}'
+E   AssertionError: assert 'POST_SHOT_TURN_RIGHT_9' == 'POST_SHOT_EX...T_5_FORWARD_4'
+E     - POST_SHOT_EXIT_RIGHT_5_FORWARD_4
+E     + POST_SHOT_TURN_RIGHT_9
+_ test_both_exits_reserve_one_line_motion_and_start_only_after_success[0.0-0.0-STRAIGHT-7-2] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:36: in test_both_exits_reserve_one_line_motion_and_start_only_after_success
+    node, bridge, exiting = start_exit(clock, section, region)
+src/mission_control/test/test_post_shot_continuous_exit.py:37: in start_exit
+    assert command['action'] == f'POST_SHOT_EXIT_{expected}'
+E   AssertionError: assert 'POST_SHOT_TURN_LEFT_4' == 'POST_SHOT_EX...T_3_FORWARD_4'
+E     - POST_SHOT_EXIT_LEFT_3_FORWARD_4
+E     + POST_SHOT_TURN_LEFT_4
+_ test_both_exits_reserve_one_line_motion_and_start_only_after_success[30.0-0.3-RECOVER_RIGHT_TURN_RIGHT_4-7-1] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:36: in test_both_exits_reserve_one_line_motion_and_start_only_after_success
+    node, bridge, exiting = start_exit(clock, section, region)
+src/mission_control/test/test_post_shot_continuous_exit.py:37: in start_exit
+    assert command['action'] == f'POST_SHOT_EXIT_{expected}'
+E   AssertionError: assert 'POST_SHOT_TURN_RIGHT_9' == 'POST_SHOT_EX...T_5_FORWARD_4'
+E     - POST_SHOT_EXIT_RIGHT_5_FORWARD_4
+E     + POST_SHOT_TURN_RIGHT_9
+_ test_both_exits_reserve_one_line_motion_and_start_only_after_success[30.0-0.3-RECOVER_RIGHT_TURN_RIGHT_4-7-2] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:36: in test_both_exits_reserve_one_line_motion_and_start_only_after_success
+    node, bridge, exiting = start_exit(clock, section, region)
+src/mission_control/test/test_post_shot_continuous_exit.py:37: in start_exit
+    assert command['action'] == f'POST_SHOT_EXIT_{expected}'
+E   AssertionError: assert 'POST_SHOT_TURN_LEFT_4' == 'POST_SHOT_EX...T_3_FORWARD_4'
+E     - POST_SHOT_EXIT_LEFT_3_FORWARD_4
+E     + POST_SHOT_TURN_LEFT_4
+_ test_both_exits_reserve_one_line_motion_and_start_only_after_success[-30.0--0.3-RECOVER_LEFT_TURN_LEFT_4-7-1] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:36: in test_both_exits_reserve_one_line_motion_and_start_only_after_success
+    node, bridge, exiting = start_exit(clock, section, region)
+src/mission_control/test/test_post_shot_continuous_exit.py:37: in start_exit
+    assert command['action'] == f'POST_SHOT_EXIT_{expected}'
+E   AssertionError: assert 'POST_SHOT_TURN_RIGHT_9' == 'POST_SHOT_EX...T_5_FORWARD_4'
+E     - POST_SHOT_EXIT_RIGHT_5_FORWARD_4
+E     + POST_SHOT_TURN_RIGHT_9
+_ test_both_exits_reserve_one_line_motion_and_start_only_after_success[-30.0--0.3-RECOVER_LEFT_TURN_LEFT_4-7-2] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:36: in test_both_exits_reserve_one_line_motion_and_start_only_after_success
+    node, bridge, exiting = start_exit(clock, section, region)
+src/mission_control/test/test_post_shot_continuous_exit.py:37: in start_exit
+    assert command['action'] == f'POST_SHOT_EXIT_{expected}'
+E   AssertionError: assert 'POST_SHOT_TURN_LEFT_4' == 'POST_SHOT_EX...T_3_FORWARD_4'
+E     - POST_SHOT_EXIT_LEFT_3_FORWARD_4
+E     + POST_SHOT_TURN_LEFT_4
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-1-1] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-1-2] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-2-1] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-2-2] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-5-1] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-5-2] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-8-1] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-8-2] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:108: in test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion
+    assert node.publisher.messages[-1]['action'] == ('STRAIGHT_1' if bad == 'hurdle' else 'STRAIGHT')
+E   AssertionError: assert 'STRAIGHT_3' == 'STRAIGHT_1'
+E     - STRAIGHT_1
+E     ?          ^
+E     + STRAIGHT_3
+E     ?          ^
+_ test_completion_revalidates_tail_without_waiting_for_another_image[not_submitted-7-1] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:228: in test_completion_revalidates_tail_without_waiting_for_another_image
+    node, bridge, exiting = start_exit(clock, section, region)
+src/mission_control/test/test_post_shot_continuous_exit.py:37: in start_exit
+    assert command['action'] == f'POST_SHOT_EXIT_{expected}'
+E   AssertionError: assert 'POST_SHOT_TURN_RIGHT_9' == 'POST_SHOT_EX...T_5_FORWARD_4'
+E     - POST_SHOT_EXIT_RIGHT_5_FORWARD_4
+E     + POST_SHOT_TURN_RIGHT_9
+_ test_completion_revalidates_tail_without_waiting_for_another_image[not_submitted-7-2] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:228: in test_completion_revalidates_tail_without_waiting_for_another_image
+    node, bridge, exiting = start_exit(clock, section, region)
+src/mission_control/test/test_post_shot_continuous_exit.py:37: in start_exit
+    assert command['action'] == f'POST_SHOT_EXIT_{expected}'
+E   AssertionError: assert 'POST_SHOT_TURN_LEFT_4' == 'POST_SHOT_EX...T_3_FORWARD_4'
+E     - POST_SHOT_EXIT_LEFT_3_FORWARD_4
+E     + POST_SHOT_TURN_LEFT_4
+_ test_completion_revalidates_tail_without_waiting_for_another_image[rejected-7-1] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:228: in test_completion_revalidates_tail_without_waiting_for_another_image
+    node, bridge, exiting = start_exit(clock, section, region)
+src/mission_control/test/test_post_shot_continuous_exit.py:37: in start_exit
+    assert command['action'] == f'POST_SHOT_EXIT_{expected}'
+E   AssertionError: assert 'POST_SHOT_TURN_RIGHT_9' == 'POST_SHOT_EX...T_5_FORWARD_4'
+E     - POST_SHOT_EXIT_RIGHT_5_FORWARD_4
+E     + POST_SHOT_TURN_RIGHT_9
+_ test_completion_revalidates_tail_without_waiting_for_another_image[rejected-7-2] _
+src/mission_control/test/test_post_shot_exit_prequeue.py:228: in test_completion_revalidates_tail_without_waiting_for_another_image
+    node, bridge, exiting = start_exit(clock, section, region)
+src/mission_control/test/test_post_shot_continuous_exit.py:37: in start_exit
+    assert command['action'] == f'POST_SHOT_EXIT_{expected}'
+E   AssertionError: assert 'POST_SHOT_TURN_LEFT_4' == 'POST_SHOT_EX...T_3_FORWARD_4'
+E     - POST_SHOT_EXIT_LEFT_3_FORWARD_4
+E     + POST_SHOT_TURN_LEFT_4
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_post_shot_continuous_exit.py::test_early_frames_finish_in_exit_alignment_without_extra_forward_or_reservation[7-1]
+FAILED src/mission_control/test/test_post_shot_continuous_exit.py::test_early_frames_finish_in_exit_alignment_without_extra_forward_or_reservation[7-2]
+FAILED src/mission_control/test/test_post_shot_continuous_exit.py::test_exit_stationary_alignment_waits_direction_specific_rest_from_composite_end[-44.56-7-1]
+FAILED src/mission_control/test/test_post_shot_continuous_exit.py::test_exit_stationary_alignment_waits_direction_specific_rest_from_composite_end[-44.56-7-2]
+FAILED src/mission_control/test/test_post_shot_continuous_exit.py::test_exit_stationary_alignment_waits_direction_specific_rest_from_composite_end[44.56-7-1]
+FAILED src/mission_control/test/test_post_shot_continuous_exit.py::test_exit_stationary_alignment_waits_direction_specific_rest_from_composite_end[44.56-7-2]
+FAILED src/mission_control/test/test_post_shot_continuous_exit.py::test_exit_recovery_walk_starts_on_first_fresh_frame_without_dwell[-31.0-7-1]
+FAILED src/mission_control/test/test_post_shot_continuous_exit.py::test_exit_recovery_walk_starts_on_first_fresh_frame_without_dwell[-31.0-7-2]
+FAILED src/mission_control/test/test_post_shot_continuous_exit.py::test_exit_recovery_walk_starts_on_first_fresh_frame_without_dwell[31.0-7-1]
+FAILED src/mission_control/test/test_post_shot_continuous_exit.py::test_exit_recovery_walk_starts_on_first_fresh_frame_without_dwell[31.0-7-2]
+FAILED src/mission_control/test/test_goal_region_exit_turns.py::test_variants_keep_preparation_complete_turns_and_final_support[pc]
+FAILED src/mission_control/test/test_goal_region_exit_turns.py::test_variants_keep_preparation_complete_turns_and_final_support[runtime]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_both_exits_reserve_one_line_motion_and_start_only_after_success[0.0-0.0-STRAIGHT-7-1]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_both_exits_reserve_one_line_motion_and_start_only_after_success[0.0-0.0-STRAIGHT-7-2]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_both_exits_reserve_one_line_motion_and_start_only_after_success[30.0-0.3-RECOVER_RIGHT_TURN_RIGHT_4-7-1]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_both_exits_reserve_one_line_motion_and_start_only_after_success[30.0-0.3-RECOVER_RIGHT_TURN_RIGHT_4-7-2]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_both_exits_reserve_one_line_motion_and_start_only_after_success[-30.0--0.3-RECOVER_LEFT_TURN_LEFT_4-7-1]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_both_exits_reserve_one_line_motion_and_start_only_after_success[-30.0--0.3-RECOVER_LEFT_TURN_LEFT_4-7-2]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-1-1]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-1-2]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-2-1]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-2-2]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-5-1]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-5-2]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-8-1]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_invalid_or_unaligned_evidence_waits_for_new_line_after_completion[hurdle-8-2]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_completion_revalidates_tail_without_waiting_for_another_image[not_submitted-7-1]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_completion_revalidates_tail_without_waiting_for_another_image[not_submitted-7-2]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_completion_revalidates_tail_without_waiting_for_another_image[rejected-7-1]
+FAILED src/mission_control/test/test_post_shot_exit_prequeue.py::test_completion_revalidates_tail_without_waiting_for_another_image[rejected-7-2]
+30 failed, 340 passed in 7.01s

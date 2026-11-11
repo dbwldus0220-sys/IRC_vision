@@ -67,6 +67,7 @@ def test_both_fixed_exits_can_enter_either_stationary_turn(clock, section, regio
     request = decoded_messages(bridge.executor_request_publisher)[-1]
     forward_status(node, bridge, request, 'RUNNING')
     clock[0] += 3.
+    completed_at = clock[0]
     forward_status(node, bridge, request, 'SUCCEEDED')
     assert node.mission_phase == 'POST_SHOT_LINE_ALIGN'
     assert node.latest_info['line'] is None
@@ -75,6 +76,12 @@ def test_both_fixed_exits_can_enter_either_stationary_turn(clock, section, regio
     clock[0] += .01
     receive(node, clock, 'line', line_info(heading, -1.29))
     Node._publish_decision(node)
+    if section == 1 and heading < 0:
+        # The right exit rests for .3 s; a following left turn still needs .5 s.
+        assert node.pre_motion_settle_deadline == pytest.approx(completed_at + .5)
+        clock[0] = completed_at + .5
+        receive(node, clock, 'line', line_info(heading, -1.29))
+        Node._publish_decision(node)
     command = node.publisher.messages[-1]
     direction = 'LEFT' if heading < 0 else 'RIGHT'
     count = 2 if heading < 0 else 3
@@ -104,7 +111,8 @@ def test_turn_without_forward_reservation_reobserves_and_continues(
     assert not node.general_motion_gate.locked
     assert node.latest_info['line'] is None
     count = len(node.publisher.messages)
-    clock[0] += .49
+    completed_at = clock[0]
+    clock[0] += .299
     receive(node, clock, 'line', line_info(next_heading))
     Node._publish_decision(node)
     assert len(node.publisher.messages) == count
@@ -114,6 +122,11 @@ def test_turn_without_forward_reservation_reobserves_and_continues(
     clock[0] += .01
     receive(node, clock, 'line', line_info(next_heading))
     Node._publish_decision(node)
+    if next_heading < 0:
+        assert node.pre_motion_settle_deadline == pytest.approx(completed_at + .5)
+        clock[0] = completed_at + .5
+        receive(node, clock, 'line', line_info(next_heading))
+        Node._publish_decision(node)
     command = node.publisher.messages[-1]
     assert command['action'] == ('POST_SHOT_FORWARD' if expected == 'ALIGNED'
                                  else 'POST_SHOT_LINE_' + expected)

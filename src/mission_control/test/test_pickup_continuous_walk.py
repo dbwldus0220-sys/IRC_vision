@@ -253,7 +253,7 @@ def test_only_one_queue_and_three_successive_chunks_keep_one_pickup(clock, index
     assert bridge.active_motion_id == 'pickup_pre_backward_camera_down'
 
 
-def test_stationary_turn_checkpoint_keeps_one_second_and_fresh_frame(clock):
+def test_right_turn_checkpoint_keeps_point_three_seconds_and_fresh_frame(clock):
     node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
     bridge.last_physical_motion_id = 'pickup_camera_down_turn_right_3'
     _, request = start(node, bridge, clock, ball(bottom_distance_px=400, steering_angle_deg=30.,
@@ -261,7 +261,7 @@ def test_stationary_turn_checkpoint_keeps_one_second_and_fresh_frame(clock):
     assert request['motion_id'] == 'pickup_camera_down_turn_right_3'
     assert node.pickup_walk_reservation.key is None
     forward_status(node, bridge, request, 'SUCCEEDED')
-    assert bridge.active_dwell_until == clock[0] + Bridge.PICKUP_TURN_DWELL_SEC
+    assert bridge.active_dwell_until == pytest.approx(clock[0] + .3)
     assert not bridge.pickup_initial_align_waiting
 
 

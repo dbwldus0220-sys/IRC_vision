@@ -19,6 +19,7 @@ from .crab_motion_selection import (
     crab_repeat_motion, crab_support_motion_id, goal_crab_motion_id, GOAL_CRAB_DURATIONS,
 )
 from .pickup_fine_skip import pickup_fine_can_skip, is_pickup_forward_or_recovery
+from .stationary_turn_timing import right_turn_dwell_sec
 from .ball_fine_approach import motion_id as ball_fine_motion_id, physical_motion_id
 
 from .safety_interlock import RECOVERABLE_MOTOR_ERROR_CODES
@@ -77,6 +78,12 @@ class MotionCommandBridgeNode(Node):
     PICKUP_FORWARD_TO_BACKWARD_PREPARE = "pickup_forward_to_backward_prepare"
     BACKWARD_DWELL_SEC = 0.5
     FINE_TO_BACKWARD_DWELL_SEC = 1.0
+    # Credit the preparation's post-hold toward this total, never add both waits.
+    PICKUP_SKIP_TO_BACKWARD_DWELL_SEC = 1.0
+    PICKUP_SKIP_BACKWARD_PREPARE_MOTION_IDS = frozenset({
+        PICKUP_FORWARD_TO_BACKWARD_PREPARE,
+        "pickup_crab_left_to_fine_0", "pickup_crab_right_to_fine_0",
+    })
     BACKWARD_MOTION_IDS = frozenset({
         "pickup_pre_backward_camera_down", "pickup_lost_ball_backward_1",
         "ball_lost_camera_down_backward_2", "pickup_retreat_2",
@@ -120,6 +127,7 @@ class MotionCommandBridgeNode(Node):
     HURDLE_POST_GO_DWELL_MARKER = "__HURDLE_POST_GO_DWELL__"
     HURDLE_POST_GO_DWELL_SEC = 1.0
     HURDLE_FINAL_FINE_MOTION_ID = "hurdle_fine_forward_10"
+    HURDLE_FINAL_FORWARD_MOTION_ID = "r_forward_0_4"
     PICKUP_INITIAL_ALIGN_ACTIONS = frozenset(
         {
             "BALL_PICKUP_INITIAL_ALIGN_CONTINUE",
@@ -287,6 +295,7 @@ class MotionCommandBridgeNode(Node):
         "BALL_LOST_BACKWARD_2": "ball_lost_camera_down_backward_2",
         # Reuse the existing one-cycle retreat without entering the pickup sequence.
         "HURDLE_LOST_BACKWARD_1": "pickup_lost_ball_backward_1",
+        "HURDLE_LOST_BACKWARD_2": "ball_lost_camera_down_backward_2",
         "BALL_APPROACH_RECOVER_LEFT_4": "line_recovery_left_4",
         "BALL_APPROACH_RECOVER_RIGHT_4": "line_recovery_right_4",
         "LINE_LOST_TURN_LEFT": "line_search_left_2",
@@ -664,7 +673,7 @@ class MotionCommandBridgeNode(Node):
         elif motion_id in GOAL_CRAB_DURATIONS:
             self.goal_crab_completed = True
         elif motion_id in {"goal_shot", "post_ball_camera_90", *{
-            f"goal_shot_region_{region}" for region in range(1, 9)
+            f"goal_shot_region_{region}" for region in (1, 2, 3, 4, 5, 6, 8)
         }}:
             self.goal_fine_forward_completed = False
             self.goal_crab_completed = False
@@ -748,7 +757,8 @@ class MotionCommandBridgeNode(Node):
         self.pickup_positioning_dwell_motion_id = self.active_motion_id
         self.active_motion_id = self.DWELL_MARKER
         dwell_sec = (
-            MotionCommandBridgeNode.PICKUP_TURN_DWELL_SEC
+            right_turn_dwell_sec(self.pickup_positioning_dwell_motion_id,
+                                MotionCommandBridgeNode.PICKUP_TURN_DWELL_SEC)
             if self.pickup_positioning_dwell_motion_id.startswith("pickup_camera_down_turn_")
             else 0.0
         )
@@ -1299,13 +1309,13 @@ class MotionCommandBridgeNode(Node):
 
     def _is_forward_motion(self, motion_id: str) -> bool:
         motion_id = physical_motion_id(motion_id)
-        return motion_id in {"forward", "sdk_forward_4"} or motion_id.startswith((
+        return motion_id in {"forward", "sdk_forward_4", MotionCommandBridgeNode.HURDLE_FINAL_FORWARD_MOTION_ID} or motion_id.startswith((
             "line_forward_", "ball_camera_down_forward_", "post_ball_forward_",
             "goal_camera_90_forward_",
         ))
 
     def _hurdle_camera_down_state(self) -> bool | None:
-        """Use the executor's pixel-triggered latch, not the motion's name."""
+        """Use the executor's depth-triggered latch, not the motion's name."""
         if (self.head_override_received_at is None
                 or time.monotonic() - self.head_override_received_at > 1.0):
             return None
@@ -1531,16 +1541,25 @@ class MotionCommandBridgeNode(Node):
             or MotionCommandBridgeNode._requires_motion_dwell(self, request_payload["motion_id"])
             or MotionCommandBridgeNode._requires_motion_dwell(self, self.last_physical_motion_id or "")
         )
+        if action == "GO" and motion_id == "hurdle" and self.last_physical_motion_id == self.HURDLE_FINAL_FINE_MOTION_ID:
+            # The requested tail continues directly from its completed fine gait.
+            correction_boundary = False
         if ((not self.motion_in_progress or request_id == self.active_request_id)
                 and correction_boundary) and not (
             backward or ball_turn
             or request_payload["motion_id"] in MotionCommandBridgeNode.TRANSITION_MOTION_IDS
         ):
             self.transition_pending_request = request_payload
+            # Share the same rest while respecting both adjacent motions.
+            dwell_sec = max(
+                right_turn_dwell_sec(identifier, MotionCommandBridgeNode.TRANSITION_DWELL_SEC)
+                if MotionCommandBridgeNode._requires_motion_dwell(self, identifier) else 0.0
+                for identifier in (request_payload["motion_id"], self.last_physical_motion_id or "")
+            )
             self.transition_dwell_until = MotionCommandBridgeNode._pre_motion_dwell_deadline(
                 self, MotionCommandBridgeNode.TRANSITION_PRE_DWELL_SEC
                 if request_payload["motion_id"] in {"ball_align_prepare_fine_45", "ball_align_prepare_turn_45"}
-                else MotionCommandBridgeNode.TRANSITION_DWELL_SEC)
+                else dwell_sec)
             self.publish_motion_status(
                 status="RUNNING", action=action, command_id=command_id,
                 event_id=event_id, request_id=request_id, motion_id="__CORRECTION_PRE_DWELL__",
@@ -1550,12 +1569,19 @@ class MotionCommandBridgeNode(Node):
             return
         if backward or ball_turn or request_payload["motion_id"] in MotionCommandBridgeNode.TRANSITION_MOTION_IDS:
             dwell_sec = (
-                MotionCommandBridgeNode.BALL_TURN_DWELL_SEC if ball_turn
+                right_turn_dwell_sec(request_payload["motion_id"], MotionCommandBridgeNode.BALL_TURN_DWELL_SEC) if ball_turn
                 else MotionCommandBridgeNode.FINE_TO_BACKWARD_DWELL_SEC
                 if backward and self.last_physical_motion_id in self.FINE_FORWARD_MOTION_IDS
+                else MotionCommandBridgeNode.PICKUP_SKIP_TO_BACKWARD_DWELL_SEC
+                if (action == "PICKUP_NOW" and request_payload["motion_id"] == "pickup_pre_backward_camera_down"
+                    and self.last_physical_motion_id
+                    in MotionCommandBridgeNode.PICKUP_SKIP_BACKWARD_PREPARE_MOTION_IDS)
                 else MotionCommandBridgeNode.BACKWARD_DWELL_SEC if backward
                 else MotionCommandBridgeNode.TRANSITION_PRE_DWELL_SEC
             )
+            if ball_turn and MotionCommandBridgeNode._requires_motion_dwell(self, self.last_physical_motion_id or ""):
+                dwell_sec = max(dwell_sec, right_turn_dwell_sec(
+                    self.last_physical_motion_id, MotionCommandBridgeNode.TRANSITION_DWELL_SEC))
             self.transition_motion_id = request_payload["motion_id"]
             self.transition_pending_request = request_payload
             self.transition_dwell_until = MotionCommandBridgeNode._pre_motion_dwell_deadline(self, dwell_sec)
@@ -1851,12 +1877,13 @@ class MotionCommandBridgeNode(Node):
             # Approach steps are separate commands and do not count toward this tail.
             # On a failed tail, retry only the stages not already completed.
             self.hurdle_fine_sequence_pending = True
-            fine_steps = (
-                (self.HURDLE_FINAL_FINE_MOTION_ID,)
+            steps = (
+                (MotionCommandBridgeNode.HURDLE_FINAL_FORWARD_MOTION_ID,)
                 if self.hurdle_sequence_fine_completed == 0 else ()
-            )
-            pickup_sequence = fine_steps + (
-                self.HURDLE_PRE_GO_DWELL_MARKER, "hurdle",
+            ) + ((self.HURDLE_FINAL_FINE_MOTION_ID,)
+                 if self.hurdle_sequence_fine_completed < 2 else ())
+            pickup_sequence = steps + (
+                "hurdle",
                 self.HURDLE_POST_GO_DWELL_MARKER,
             )
             motion_id = pickup_sequence[0]
@@ -1895,7 +1922,7 @@ class MotionCommandBridgeNode(Node):
                       if isinstance(source_command, dict) else None)
             ring_aim = (source_command.get("waist_ring_aim_deg")
                         if isinstance(source_command, dict) else None)
-            if (not self._is_integer(region) or region not in {1, 2, 5, 6, 7, 8}
+            if (not self._is_integer(region) or region not in {1, 2, 5, 6, 8}
                     or type(ring_aim) not in {int, float}
                     or not math.isfinite(ring_aim) or abs(ring_aim) >= 90.0):
                 self._publish_local_rejection(
@@ -1933,9 +1960,11 @@ class MotionCommandBridgeNode(Node):
                 if isinstance(source_command, dict) else None
             )
             direction = "LEFT" if action == "ALIGN_LEFT" else "RIGHT"
-            # Reuse calibrated camera-45 turns, keeping the hurdle action ID.
+            near = isinstance(source_command, dict) and source_command.get("hurdle_near_control") is True
+            # Near entry owns the lowered camera; far turns keep camera-45 support.
             motion_id = (
-                self.motion_id_for_action(f"POST_BALL_LINE_TURN_{direction}_{count}")
+                (f"pickup_camera_down_turn_{direction.lower()}_{count}" if near else
+                 self.motion_id_for_action(f"POST_BALL_LINE_TURN_{direction}_{count}"))
                 if self._is_integer(count) else None
             )
         elif (payload.get("source") == "ball"
@@ -2253,7 +2282,9 @@ class MotionCommandBridgeNode(Node):
             )
             dwell_sec = (
                 MotionCommandBridgeNode.PICKUP_GRASP_DWELL_SEC
-                if grasp_check else self.PICKUP_DWELL_SEC
+                if grasp_check else right_turn_dwell_sec(
+                    self.pickup_positioning_dwell_motion_id if self.active_action == "PICKUP_NOW"
+                    else self.active_motion_id, self.PICKUP_DWELL_SEC)
             )
             self.active_dwell_until = time.monotonic() + dwell_sec
             if self.active_action == "PICKUP_NOW":
@@ -2567,17 +2598,17 @@ class MotionCommandBridgeNode(Node):
             if payload["status"] == "SUCCEEDED" or (backward and payload["status"] == "FAILED"):
                 if not self._transition_has_existing_post_dwell(payload["motion_id"]):
                     self.transition_pending_status = dict(payload)
-                    self.transition_dwell_until = (
-                        time.monotonic() + (MotionCommandBridgeNode.BALL_TURN_DWELL_SEC if ball_turn
-                                            else MotionCommandBridgeNode.BACKWARD_DWELL_SEC
-                                            if backward else MotionCommandBridgeNode.TRANSITION_DWELL_SEC)
-                    )
+                    dwell_sec = right_turn_dwell_sec(payload["motion_id"],
+                        MotionCommandBridgeNode.BALL_TURN_DWELL_SEC if ball_turn
+                        else MotionCommandBridgeNode.BACKWARD_DWELL_SEC if backward
+                        else MotionCommandBridgeNode.TRANSITION_DWELL_SEC)
+                    self.transition_dwell_until = time.monotonic() + dwell_sec
                     self.publish_motion_status(
                         status="RUNNING", action=action, command_id=self.active_command_id,
                         event_id=self.active_event_id, request_id=self.active_request_id,
                         motion_id=("__BALL_TURN_POST_DWELL__" if ball_turn else
                                    "__BACKWARD_POST_DWELL__" if backward else "__TRANSITION_POST_DWELL__"),
-                        message="holding still for 0.5 seconds after "
+                        message=f"holding still for {dwell_sec:g} seconds after "
                                 + ("ball stationary turn" if ball_turn else
                                    "backward motion" if backward else "posture transition"),
                     )
@@ -2693,9 +2724,11 @@ class MotionCommandBridgeNode(Node):
             payload["status"] == "SUCCEEDED" or continue_after_motor_fault
         )
         if is_active and action == "GO" and payload["status"] == "SUCCEEDED":
-            if payload["motion_id"] == self.HURDLE_FINAL_FINE_MOTION_ID:
-                self.hurdle_depth_fine_completed = True
+            if payload["motion_id"] == MotionCommandBridgeNode.HURDLE_FINAL_FORWARD_MOTION_ID:
                 self.hurdle_sequence_fine_completed = 1
+            elif payload["motion_id"] == self.HURDLE_FINAL_FINE_MOTION_ID:
+                self.hurdle_depth_fine_completed = True
+                self.hurdle_sequence_fine_completed = 2
             elif payload["motion_id"] == "hurdle":
                 self.hurdle_depth_fine_completed = False
                 self.hurdle_sequence_fine_completed = 0

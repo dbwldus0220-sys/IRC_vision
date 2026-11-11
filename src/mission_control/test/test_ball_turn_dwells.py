@@ -25,8 +25,9 @@ def test_turn_pre_dwell_counts_only_completed_stationary_time(clock, direction, 
     bridge.executor_status_callback(executor_status(**walk, status='SUCCEEDED'))
     clock[0] += rest
     bridge.navigation_command_callback(fine_command(f'BALL_APPROACH_TURN_{direction}_{count}', 2))
-    deadline = max(10.5, clock[0])
-    if rest < .5:
+    dwell = .3 if direction == 'RIGHT' else .5
+    deadline = max(10. + dwell, clock[0])
+    if rest < dwell:
         assert bridge.transition_dwell_until == pytest.approx(deadline)
         clock[0] = deadline - .001
         bridge._check_atomic_dwell()
@@ -39,11 +40,12 @@ def test_turn_pre_dwell_counts_only_completed_stationary_time(clock, direction, 
 
 
 @pytest.mark.parametrize('following', ['BALL_APPROACH_PREPARE_FINE', 'BALL_APPROACH_TURN_RIGHT_3'])
-def test_reserved_successor_waits_after_turn_without_double_rest(clock, following):
+@pytest.mark.parametrize('direction,dwell', [('LEFT', .5), ('RIGHT', .3)])
+def test_reserved_successor_waits_after_turn_without_double_rest(clock, following, direction, dwell):
     bridge = FakeBridge(advance_transition_dwells=False)
-    bridge.navigation_command_callback(fine_command('BALL_APPROACH_TURN_LEFT_2', 1))
+    bridge.navigation_command_callback(fine_command(f'BALL_APPROACH_TURN_{direction}_2', 1))
     assert not bridge.executor_request_publisher.messages
-    clock[0] = 10.5
+    clock[0] = 10. + dwell
     bridge._check_atomic_dwell()
     turn = decoded_messages(bridge.executor_request_publisher)[-1]
     bridge.executor_status_callback(executor_status(**turn, status='RUNNING'))
@@ -53,15 +55,15 @@ def test_reserved_successor_waits_after_turn_without_double_rest(clock, followin
     assert len(bridge.executor_request_publisher.messages) == 1
     clock[0] = 11.2
     bridge.executor_status_callback(executor_status(**turn, status='SUCCEEDED'))
-    assert bridge.transition_dwell_until == pytest.approx(11.7)
+    assert bridge.transition_dwell_until == pytest.approx(11.2 + dwell)
     # Duplicate completion must neither shorten nor restart the rest.
     clock[0] = 11.4
     bridge.executor_status_callback(executor_status(**turn, status='SUCCEEDED'))
-    assert bridge.transition_dwell_until == pytest.approx(11.7)
-    clock[0] = 11.699
+    assert bridge.transition_dwell_until == pytest.approx(11.2 + dwell)
+    clock[0] = 11.2 + dwell - .001
     bridge._check_atomic_dwell()
     assert len(bridge.executor_request_publisher.messages) == 1
-    clock[0] = 11.7
+    clock[0] = 11.2 + dwell
     bridge._check_atomic_dwell()
     assert len(bridge.executor_request_publisher.messages) == 2
     assert bridge.transition_dwell_until is None
@@ -101,6 +103,7 @@ def test_failed_turn_never_runs_its_reserved_successor(clock, result):
 
 @pytest.mark.parametrize('direction', ['LEFT', 'RIGHT'])
 def test_pickup_turn_adds_pre_rest_and_keeps_one_checkpoint_post_rest(clock, direction):
+    dwell = .3 if direction == 'RIGHT' else .5
     bridge = FakeBridge(advance_transition_dwells=False)
     bridge.navigation_command_callback(navigation_message(action='PICKUP_NOW'))
     bridge.navigation_command_callback(navigation_message(
@@ -108,21 +111,21 @@ def test_pickup_turn_adds_pre_rest_and_keeps_one_checkpoint_post_rest(clock, dir
         event_id=None, active_special_command_id=8000, active_special_event_id=8,
     ))
     assert not bridge.executor_request_publisher.messages
-    assert bridge.transition_dwell_until == pytest.approx(10.5)
-    clock[0] = 10.499
+    assert bridge.transition_dwell_until == pytest.approx(10. + dwell)
+    clock[0] = 10. + dwell - .001
     bridge._check_atomic_dwell()
     assert not bridge.executor_request_publisher.messages
-    clock[0] = 10.5
+    clock[0] = 10. + dwell
     bridge._check_atomic_dwell()
     turn = decoded_messages(bridge.executor_request_publisher)[-1]
     clock[0] = 11.2
     bridge.executor_status_callback(executor_status(**turn, status='SUCCEEDED'))
     assert bridge.transition_dwell_until is None
-    assert bridge.active_dwell_until == pytest.approx(11.7)
-    clock[0] = 11.699
+    assert bridge.active_dwell_until == pytest.approx(11.2 + dwell)
+    clock[0] = 11.2 + dwell - .001
     bridge._check_atomic_dwell()
     assert not bridge.pickup_initial_align_waiting
-    clock[0] = 11.7
+    clock[0] = 11.2 + dwell
     bridge._check_atomic_dwell()
     assert bridge.pickup_initial_align_waiting
 
@@ -149,13 +152,14 @@ def test_ball_fine_alignment_alias_preserves_half_second_rest(clock):
 
 @pytest.mark.parametrize('direction', ['LEFT', 'RIGHT'])
 def test_normal_approach_turn_adds_pre_rest_and_leaves_post_rest_to_node(clock, direction):
+    dwell = .3 if direction == 'RIGHT' else .5
     bridge = FakeBridge(advance_transition_dwells=False)
     bridge.navigation_command_callback(navigation_message(
         action=f'BALL_APPROACH_TURN_{direction}_2', source='ball', phase='BALL_APPROACH',
     ))
     assert not bridge.executor_request_publisher.messages
-    assert bridge.transition_dwell_until == pytest.approx(10.5)
-    clock[0] = 10.5
+    assert bridge.transition_dwell_until == pytest.approx(10. + dwell)
+    clock[0] = 10. + dwell
     bridge._check_atomic_dwell()
     turn = decoded_messages(bridge.executor_request_publisher)[-1]
     assert turn['motion_id'] == f'post_ball_line_turn_{direction.lower()}_2'

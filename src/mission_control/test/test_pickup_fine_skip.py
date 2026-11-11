@@ -373,6 +373,12 @@ def test_crab_success_crosses_220_boundary_without_queue_or_checkpoint_stall(
     assert preparation['motion_id'] == f'pickup_crab_{side}_to_fine_0'
     forward_status(node, bridge, preparation, 'RUNNING')
     forward_status(node, bridge, preparation, 'SUCCEEDED')
+    if bottom <= 220:
+        completed_at = clock[0]
+        clock[0] = completed_at + .5
+        bridge._check_atomic_dwell()
+        assert decoded_messages(bridge.executor_request_publisher)[-1] == preparation
+        assert bridge.transition_dwell_until == pytest.approx(completed_at + 1.)
     finish_rest(bridge, clock)
 
     if bottom > 220:

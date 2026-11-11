@@ -29,8 +29,8 @@ std::string request(const std::string & motion, const std::string & angle = "") 
          (angle.empty() ? "" : ",\"waist_ring_aim_deg\":" + angle) + "}";
 }
 
-TEST(RingShotCore, SixRegionsReceiveExactSignedAngle) {
-  for (int region : {1, 2, 8, 5, 6, 7}) {
+TEST(RingShotCore, FiveRegionsReceiveExactSignedAngle) {
+  for (int region : {1, 2, 8, 5, 6}) {
     RingBackend backend;
     irc_step_motion_executor::SdkExecutorCore core(catalog(), backend);
     ASSERT_EQ(core.handle_request(request("goal_shot_region_" + std::to_string(region), "-12.345"), 0).status, "RUNNING");
@@ -44,6 +44,7 @@ TEST(RingShotCore, SixRegionsReceiveExactSignedAngle) {
 TEST(RingShotCore, RejectsDisabledMissingInvalidAndForeignAngle) {
   for (const auto & payload : {
       request("goal_shot_region_3", "0"), request("goal_shot_region_4", "0"),
+      request("goal_shot_region_7", "0"), request("goal_shot_region_7"),
       request("goal_shot"), request("goal_shot_region_6"),
       request("goal_shot_region_6", "true"), request("goal_shot_region_6", "null"),
       request("goal_shot_region_6", "NaN"), request("goal_shot_region_6", "90"),

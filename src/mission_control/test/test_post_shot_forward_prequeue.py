@@ -69,7 +69,7 @@ def test_both_goals_reserve_and_start_forward_without_post_turn_images(clock, se
     forward_status(node, bridge, turn, 'SUCCEEDED')
     assert node.mission_phase == 'POST_SHOT_FORWARD'
     assert node.post_shot_dwell_until is None
-    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
+    assert bridge.transition_dwell_until == pytest.approx(clock[0] + (.3 if 'RIGHT' in turn['action'] else .5))
     clock[0] = bridge.transition_dwell_until
     bridge._check_atomic_dwell()
     forward = decoded_messages(bridge.executor_request_publisher)[-1]
@@ -93,7 +93,7 @@ def test_unusable_or_unaligned_turn_frames_do_not_reserve(clock, changes):
     turn_frames(node, clock, {**line_info(), **changes})
     assert node.queued_general_command_id is None
     forward_status(node, bridge, turn, 'SUCCEEDED')
-    assert node.post_shot_dwell_until == pytest.approx(clock[0] + .5)
+    assert node.post_shot_dwell_until == pytest.approx(clock[0] + (.3 if 'RIGHT' in turn['action'] else .5))
     assert len(bridge.executor_request_publisher.messages) == 1
 
 

@@ -220,7 +220,7 @@ def test_far_confirmation_survives_approach_to_550mm():
     assert published[-1][1]["confirmation_hits"] == 1
 
 
-def test_hurdle_bottom_trigger_uses_confirmed_rgb_center_without_depth():
+def test_hurdle_depth_trigger_requires_confirmed_valid_580mm_depth():
     import json
 
     analyzer = load_hurdle_analyzer()()
@@ -244,8 +244,12 @@ def test_hurdle_bottom_trigger_uses_confirmed_rgb_center_without_depth():
     assert confirmed.detected and not confirmed.depth_valid
     assert confirmed.camera_center_offset_x_px == -120
     assert confirmed.bottom_distance_px == 120
-    assert confirmed.head_down_requested
-    assert not observe(358).head_down_requested
+    assert not confirmed.head_down_requested
+    analyzer._sample_depths = lambda *_args: (.581, .581, .581, 9)
+    assert not observe(360).head_down_requested
+    analyzer._sample_depths = lambda *_args: (.580, .580, .580, 9)
+    assert observe(358).head_down_requested
+    analyzer._sample_depths = lambda *_args: (.4, .4, .4, 9)
     assert observe(360).head_down_requested
     analyzer._detections_callback(SimpleNamespace(data=json.dumps({"detections": []})))
     assert not published[-1].head_down_requested

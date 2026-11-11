@@ -61,9 +61,13 @@ def test_backward_post_hold_covers_next_backward_pre_hold(clock):
     assert bridge.transition_dwell_until is None
 
 
-def test_crab_to_backward_keeps_rest_after_actual_posture_transition(clock):
+@pytest.mark.parametrize('previous', [
+    'pickup_crab_left_0', 'pickup_crab_right_0',
+    'pickup_crab_left_0_2', 'pickup_crab_right_0_2',
+])
+def test_crab_to_backward_keeps_one_second_rest_after_actual_posture_transition(clock, previous):
     bridge = FakeBridge(advance_transition_dwells=False)
-    bridge.last_physical_motion_id = 'pickup_crab_left_0'
+    bridge.last_physical_motion_id = previous
     bridge.stationary_since = 9.
     bridge.motion_in_progress = True
     bridge.active_action = 'PICKUP_NOW'
@@ -72,15 +76,27 @@ def test_crab_to_backward_keeps_rest_after_actual_posture_transition(clock):
     bridge.active_motion_id = 'pickup_pre_backward_camera_down'
     bridge._publish_executor_request(action='PICKUP_NOW', command_id=10, event_id=8,
                                     request_id=10, motion_id=bridge.active_motion_id, timeout_ms=12000)
-    assert requests(bridge)[-1]['motion_id'] == 'pickup_crab_left_to_fine_0'
+    prepare = 'pickup_crab_left_to_fine_0' if 'left' in previous else 'pickup_crab_right_to_fine_0'
+    assert requests(bridge)[-1]['motion_id'] == prepare
     assert bridge.stationary_since is None
     clock[0] = 12.
-    complete(bridge)
+    terminal = complete(bridge)
     assert bridge.transition_dwell_until == 12.5
     clock[0] = 12.499
     bridge._check_atomic_dwell()
     assert len(requests(bridge)) == 1
     clock[0] = 12.5
+    bridge._check_atomic_dwell()
+    assert len(requests(bridge)) == 1
+    assert bridge.transition_dwell_until == 13.
+    # Duplicate preparation completion must neither restart nor bypass the hold.
+    clock[0] = 12.8
+    bridge.executor_status_callback(terminal)
+    assert bridge.transition_dwell_until == 13.
+    clock[0] = 12.999
+    bridge._check_atomic_dwell()
+    assert len(requests(bridge)) == 1
+    clock[0] = 13.
     bridge._check_atomic_dwell()
     assert requests(bridge)[-1]['motion_id'] == 'pickup_pre_backward_camera_down'
     assert len(requests(bridge)) == 2
@@ -148,7 +164,7 @@ def test_running_next_motion_discards_node_rest_credit(clock):
     assert node.motion_stationary_since is None
 
 
-def test_post_shot_turn_to_turn_publishes_after_one_half_second(clock):
+def test_post_shot_right_turn_to_turn_publishes_after_point_three_seconds(clock):
     node = MissionFlowHarness(phase='POST_SHOT_TURN')
     node.LINE_TURN_PRE_MOTION_SETTLE_SEC = .5
     node.phase_manager.ball_sections_processed = 1
@@ -156,12 +172,12 @@ def test_post_shot_turn_to_turn_publishes_after_one_half_second(clock):
     node.send_status(turn['action'], turn['command_id'], 'RUNNING')
     clock[0] = 12.
     node.send_status(turn['action'], turn['command_id'], 'SUCCEEDED')
-    assert node.post_shot_dwell_until == 12.5
-    clock[0] = 12.499
+    assert node.post_shot_dwell_until == 12.3
+    clock[0] = 12.299
     assert not node.publish_vision(line=line_info(heading=30.))
-    clock[0] = 12.5
+    clock[0] = 12.3
     node.publish_vision(line=line_info(heading=30.))
-    clock[0] = 12.51
+    clock[0] = 12.31
     sent = node.publish_vision(line=line_info(heading=30.))
     assert sent[-1]['action'].startswith('POST_SHOT_LINE_TURN_')
     assert sent[-1]['valid']

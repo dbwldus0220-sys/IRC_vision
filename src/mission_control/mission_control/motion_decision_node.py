@@ -58,6 +58,7 @@ from .motion_command_gate import normalize_general_action
 from .motion_decision_planner import MotionDecision
 from .motion_decision_planner import MotionDecisionConfig
 from .motion_decision_planner import MotionDecisionPlanner
+from .stationary_turn_timing import right_turn_dwell_sec
 from .safety_interlock import SafetyInterlock
 from .vision_time_guard import VisionTimeGuard, capture_is_fresh
 from .camera_time_health import CameraRecoveryGate
@@ -178,12 +179,13 @@ class MotionDecisionNode(Node):
     }
     APPROACH_WALK_CAPTURE_FRAMES = 3
     # A two-cycle gait lasts 1.028 s; collect early enough for camera latency.
-    HURDLE_WALK_CAPTURE_START_RATIO = 0.50
+    HURDLE_WALK_CAPTURE_START_RATIO = 0.0
     HURDLE_WALK_COMMIT_RATIO = 0.70
     BALL_ENTRY_MISSING_GRACE_SEC = 0.20
     LINE_TIMEOUT_RECOVERY_FRAMES = 10
     BALL_POST_MOTION_DWELL_SEC = 0.5  # Approach turns only.
     HURDLE_POST_MOTION_DWELL_SEC = 0.5
+    HURDLE_NEAR_OBSERVE_SEC = 1.0
     GOAL_POST_MOTION_DWELL_SEC = 0.5  # Stationary turns only.
     POST_BALL_LINE_DWELL_SEC = 0.5
     POST_BALL_LINE_DECISIONS = 3
@@ -196,9 +198,9 @@ class MotionDecisionNode(Node):
     }
     # Full catalog duration; the final 30 percent is within the recovery tail.
     POST_SHOT_EXIT_CAPTURE_CONFIG = {
-        # Legacy IDs: right six / left four turns, then two four-cycle recoveries.
-        "POST_SHOT_EXIT_RIGHT_5_FORWARD_4": (7.168, 3),
-        "POST_SHOT_EXIT_LEFT_3_FORWARD_4": (6.650 / 1.05, 3),
+        # Legacy IDs: right six / left four turns, forward two, then recovery four.
+        "POST_SHOT_EXIT_RIGHT_5_FORWARD_4": (6.132, 3),
+        "POST_SHOT_EXIT_LEFT_3_FORWARD_4": (5.566 / 1.05, 3),
         "POST_SHOT_EXIT_RIGHT_9_RECOVERY_RIGHT_4": (5.437, 3),
         "POST_SHOT_EXIT_LEFT_4_RECOVERY_LEFT_4": (4.842 / 1.05, 3),
     }
@@ -581,10 +583,13 @@ class MotionDecisionNode(Node):
         self.ball_pickup_entry_pending = False
         self.ball_post_motion_dwell_until: float | None = None
         self.hurdle_positioning_entry_pending = False
+        self.hurdle_near_min_rgb_stamp_ns = None
         self.pending_hurdle_final_sequence: dict[str, Any] | None = None
         self.hurdle_post_motion_dwell_until: float | None = None
         self.hurdle_stationary_since: float | None = None
         self.hurdle_forward_capture_pose: str | None = None
+        self.hurdle_forward_frames: list[tuple[int, float]] = []
+        self.hurdle_prequeue_block_reason = "waiting_for_frames"
         self.goal_min_rgb_stamp_ns: int | None = None
         self.goal_last_rgb_stamp_ns: int | None = None
         self.goal_post_motion_dwell_until: float | None = None
@@ -1259,6 +1264,10 @@ class MotionDecisionNode(Node):
                 if not time_valid:
                     if source == "line":
                         self.line_loss_stamps = []
+                    elif source == "hurdle" and self.active_general_source == "hurdle":
+                        self.hurdle_forward_frames = []
+                        self.approach_walk_capture_count = 0
+                        self.hurdle_prequeue_block_reason = "invalid_capture_time"
                     packet["status"] = "clock_recovery" if recovering else "capture_time_rejected"
                     keep_line = (source == "line" and not recovering
                                  and MotionDecisionNode._recent_walking_input(self, source, received_at)
@@ -1423,6 +1432,12 @@ class MotionDecisionNode(Node):
                     # The fixed Line homography is not calibrated for the raised camera.
                     packet["status"] = "goal_camera_raised_line_frozen"
                     return
+                if source == "hurdle":
+                    boundary = getattr(self, "hurdle_near_min_rgb_stamp_ns", None)
+                    stamp = MotionDecisionNode._detection_stamp_ns(payload) or payload.get("rgb_stamp_ns")
+                    if boundary is not None and (type(stamp) is not int or stamp <= boundary):
+                        packet["status"] = "before_hurdle_observation_boundary"
+                        return
                 packet["status"] = "accepted"
                 self.latest_info[source] = payload
                 self.latest_time[source] = received_at
@@ -1438,7 +1453,6 @@ class MotionDecisionNode(Node):
                     if self.active_special_command_id is None:
                         self.planner.hurdle_planner.observe(payload)
                     MotionDecisionNode._latch_hurdle_positioning_entry(self, payload)
-                    MotionDecisionNode._latch_hurdle_final_sequence(self, payload)
                 if (
                     source == "ball"
                     and not MotionDecisionNode._ball_navigation_blocked(self)
@@ -1738,7 +1752,7 @@ class MotionDecisionNode(Node):
             frames.clear()
         for name in ("line_motion_min_rgb_stamp_ns", "line_offset_min_rgb_stamp_ns",
                      "ball_min_rgb_stamp_ns", "goal_min_rgb_stamp_ns",
-                     "grasp_verification_min_stamp_ns"):
+                     "grasp_verification_min_stamp_ns", "hurdle_near_min_rgb_stamp_ns"):
             if getattr(self, name, None) is not None:
                 setattr(self, name, ros_now)
         for name in ("pickup_entry_observation", "pickup_checkpoint_observation",
@@ -2494,60 +2508,18 @@ class MotionDecisionNode(Node):
         depth = MotionDecisionPlanner._number(payload, "depth_m")
         bottom = MotionDecisionPlanner._number(payload, "bottom_distance_px")
         self.hurdle_positioning_entry_pending = True
+        observations, _ = self._fresh_observations(time.monotonic())
+        self.planner.hurdle_planner.begin_near(
+            self.planner._hurdle_line_side(observations.get("line")))
+        self.pending_hurdle_final_sequence = None
         if not self.general_motion_gate.locked:
             self.hurdle_stationary_since = time.monotonic()
+            self.hurdle_post_motion_dwell_until = (
+                self.hurdle_stationary_since + MotionDecisionNode.HURDLE_NEAR_OBSERVE_SEC)
+            self.hurdle_near_min_rgb_stamp_ns = MotionDecisionNode._current_ros_time_ns(self)
         self.get_logger().info(
             f"HURDLE positioning entry latched: depth_m={depth}, "
             f"bottom_distance_px={bottom}, head_down_requested={payload.get('head_down_requested', False)}"
-        )
-
-    def _latch_hurdle_final_sequence(self, payload: dict[str, Any]) -> None:
-        """Keep a confirmed final checkpoint across motion completion and occlusion."""
-        if (
-            getattr(self, "pending_hurdle_final_sequence", None) is not None
-            or self.planner.hurdle_planner.recovery_active
-            or self.active_special_command_id is not None
-            or not self.executor_auto_ready
-            or self.phase_manager.hurdles_completed >= self.phase_manager.required_hurdles
-            or self.phase_manager.execution_limit_reached("GO")
-            or getattr(self.planner, "hurdle_ignore_until_clear", False)
-            or not self.planner._hurdle_positioning_ready(payload)
-            or not (
-                self.mission_phase == "HURDLE_POSITIONING"
-                or getattr(self, "hurdle_positioning_entry_pending", False)
-            )
-        ):
-            return
-        if (
-            self.general_motion_gate.locked
-            and self.active_general_source not in {"line", "hurdle"}
-        ):
-            return
-        depth = MotionDecisionPlanner._number(payload, "depth_m")
-        config = self.planner.hurdle_planner.config
-        if depth > config.final_sequence_start_depth_m + 1e-9:
-            return
-        # Inspect without changing the active planner while another motion runs.
-        checkpoint_planner = HurdleNavigationPlanner(config)
-        checkpoint_planner.close_rotation_blocked = (
-            self.planner.hurdle_planner.close_rotation_blocked
-        )
-        checkpoint = checkpoint_planner.plan(payload, positioning=True)
-        if not checkpoint.valid or not checkpoint.fine_sequence_requested:
-            return
-        self.pending_hurdle_final_sequence = {
-            **checkpoint.to_dict(),
-            "hurdle_stage": "FINE_APPROACH",
-            "hurdle_positioning_active": True,
-            "hurdle_final_sequence_latched": True,
-            "observed_during_action": self.general_motion_gate.active_action,
-            "observed_during_command_id": self.general_motion_gate.active_command_id,
-        }
-        self.pending_line_decision = None
-        self.get_logger().info(
-            f"HURDLE final sequence latched: depth_m={depth}, "
-            f"center_steering_deg={checkpoint.center_steering_deg}, "
-            f"observed_during_action={self.general_motion_gate.active_action}"
         )
 
     def _latch_ball_pickup_entry(self, payload: dict[str, Any]) -> None:
@@ -2736,6 +2708,8 @@ class MotionDecisionNode(Node):
         self.pending_hurdle_final_sequence = None
         self.hurdle_post_motion_dwell_until = None
         self.hurdle_stationary_since = None
+        self.hurdle_near_min_rgb_stamp_ns = None
+        self.planner.hurdle_planner.reset()
         self.goal_stationary_since = None
         self.motion_stationary_since = None
         self.goal_shot_observe_until = None
@@ -2768,11 +2742,24 @@ class MotionDecisionNode(Node):
             or (command_id == getattr(self, "queued_general_command_id", None)
                 and action == getattr(self, "queued_general_action", None))
         )
+        hurdle_reservation_rejected = (
+            owned and str(payload.get("status", "")).strip().upper() == "REJECTED"
+            and command_id == getattr(self, "queued_general_command_id", None)
+            and getattr(self, "queued_general_source", None) == "hurdle"
+            and self.mission_phase == "HURDLE_POSITIONING" and action == "STRAIGHT_1"
+        )
         before = getattr(self, "command_id", None)
         MotionDecisionNode._handle_motion_status(self, message)
         if not owned:
             return
-        if str(payload.get("status", "")).strip().upper() in {
+        if hurdle_reservation_rejected:
+            # Only the next request failed. Keep the current gait's boundary
+            # continuation armed, including when REJECTED arrives after SUCCEEDED.
+            self.boundary_decision_pending = True
+            if not self.general_motion_gate.locked:
+                self.last_published_vision_stamp.pop("hurdle", None)
+            MotionDecisionNode._resume_boundary_decision(self)
+        elif str(payload.get("status", "")).strip().upper() in {
             "FAILED", "TIMEOUT", "REJECTED", "CANCELED", "CANCELLED", "UNSUPPORTED",
         }:
             self.boundary_decision_pending = False
@@ -2822,6 +2809,14 @@ class MotionDecisionNode(Node):
         MotionDecisionNode._record_ball_entry_reservation_status(self, payload, status_receive_monotonic)
         if normalize_general_action(action) is not None:
             if status == "QUEUED":
+                if (command_id is not None
+                        and command_id == getattr(self, "queued_general_command_id", None)
+                        and action == getattr(self, "queued_general_action", None)
+                        and getattr(self, "queued_general_source", None) == "hurdle"):
+                    self.hurdle_prequeue_block_reason = "accepted"
+                    self.get_logger().info(
+                        f"HURDLE reservation accepted: command_id={command_id}, action={action}"
+                    )
                 issued = getattr(self, "post_ball_line_command_ids", [])
                 if (self.mission_phase == "LINE_TRACK_AFTER_PICKUP"
                         and getattr(self, "post_ball_line_started_count", 0) == 2
@@ -2869,6 +2864,11 @@ class MotionDecisionNode(Node):
                         self.post_ball_goal_camera_request_id = None
                 if getattr(self, "queued_general_source", None) == "line":
                     self.line_prequeue_block_reason = f"reservation_rejected:{error_code}"
+                elif getattr(self, "queued_general_source", None) == "hurdle":
+                    self.hurdle_prequeue_block_reason = f"reservation_rejected:{error_code}"
+                    self.get_logger().info(
+                        f"HURDLE reservation rejected: command_id={command_id}, error={error_code}"
+                    )
                 entry = getattr(self, "ball_entry_line_alignment", None)
                 if entry is not None:
                     entry.on_status(command_id, status)
@@ -2980,6 +2980,10 @@ class MotionDecisionNode(Node):
                             and self.mission_phase == "HURDLE_POSITIONING" and action == "STRAIGHT_1"
                             else MotionDecisionNode.LINE_MOTION_CAPTURE_START_RATIO
                         )
+                        if self.active_general_source == "hurdle":
+                            self.hurdle_forward_frames = []
+                            self.hurdle_forward_capture_pose = None
+                            self.hurdle_prequeue_block_reason = "waiting_for_frames"
                         self.approach_walk_capture_after_ns = (
                             stamp + int(duration * capture_ratio * 1e9)
                             if stamp is not None else None
@@ -3082,6 +3086,18 @@ class MotionDecisionNode(Node):
                     self.motion_stationary_since if status == "SUCCEEDED" else None
                 )
                 completed_source = self.active_general_source
+                # Validate the walking tail before completion installs a new
+                # Line capture boundary or discards the in-motion frames.
+                post_shot_exit_preview = (
+                    MotionDecisionNode._post_shot_exit_preview(
+                        self, status_receive_monotonic, completed=True,
+                    )
+                    if status == "SUCCEEDED" and completed_source == "line"
+                    and (action == "POST_SHOT_FORWARD"
+                         or action in MotionDecisionNode.POST_SHOT_EXIT_CAPTURE_CONFIG)
+                    and getattr(self, "queued_general_command_id", None) is None
+                    else None
+                )
                 if (completed_source == "goal" and (
                         MotionDecisionNode._is_continuous_goal_action(action)
                         or action in MotionDecisionNode.GOAL_CRAB_DURATION_SEC)):
@@ -3107,6 +3123,14 @@ class MotionDecisionNode(Node):
                     and self.queued_general_source == "hurdle"
                     and self.queued_general_action == "STRAIGHT_1"
                 )
+                if completed_hurdle_forward:
+                    self.get_logger().info(
+                        f"HURDLE forward completed: command_id={command_id}, "
+                        f"queued={reserved_hurdle_forward}, "
+                        f"reason={getattr(self, 'hurdle_prequeue_block_reason', 'waiting_for_frames')}, "
+                        f"frames={getattr(self, 'approach_walk_capture_count', 0)}, "
+                        f"fresh_input={MotionDecisionNode._recent_walking_input(self, 'hurdle', status_receive_monotonic)}"
+                    )
                 reserved_line_turn = bool(
                     status == "SUCCEEDED" and completed_source == "line"
                     and getattr(self, "queued_general_source", None) == "line"
@@ -3205,7 +3229,7 @@ class MotionDecisionNode(Node):
                 ):
                     self.correction_post_motion_dwell_until = (
                         status_receive_monotonic
-                        + MotionDecisionNode.CORRECTION_POST_MOTION_DWELL_SEC
+                        + right_turn_dwell_sec(action, MotionDecisionNode.CORRECTION_POST_MOTION_DWELL_SEC)
                     )
                     self.correction_post_motion_source = (
                         "ball" if (command_id is not None
@@ -3237,27 +3261,17 @@ class MotionDecisionNode(Node):
                         self.hurdle_positioning_entry_pending = False
                         self.hurdle_post_motion_dwell_until = None
                         self.hurdle_stationary_since = None
-                    hurdle_turn = (
-                        completed_source == "hurdle"
-                        and action in {"ALIGN_LEFT", "ALIGN_RIGHT", "TURN_LEFT", "TURN_RIGHT"}
-                    )
                     if status == "SUCCEEDED":
-                        # Include the motion that first crossed the entry distance.
-                        self.hurdle_stationary_since = (
-                            None if reserved_hurdle_forward else self.motion_stationary_since
-                        )
+                        # Observe throughout one stationary second; do not add a turn dwell.
+                        self.hurdle_stationary_since = status_receive_monotonic
                         self.hurdle_post_motion_dwell_until = (
-                            status_receive_monotonic
-                            + MotionDecisionNode.HURDLE_POST_MOTION_DWELL_SEC
-                            if hurdle_turn else None
-                        )
-                        # A normal gait can reuse current camera-matched input even
-                        # when transport latency prevented an SDK reservation.
-                        if not hurdle_turn and not completed_hurdle_forward:
-                            self.latest_info["hurdle"] = None
-                            self.latest_time["hurdle"] = None
-                            gate = self.general_motion_gate
-                            gate.required_vision_generation = gate.vision_generation + 1
+                            status_receive_monotonic + MotionDecisionNode.HURDLE_NEAR_OBSERVE_SEC)
+                        self.hurdle_near_min_rgb_stamp_ns = MotionDecisionNode._current_ros_time_ns(self)
+                        self.correction_post_motion_dwell_until = None
+                        self.latest_info["hurdle"] = None
+                        self.latest_time["hurdle"] = None
+                        gate = self.general_motion_gate
+                        gate.required_vision_generation = gate.vision_generation + 1
                 if (
                     completed_source == "line"
                     and self.mission_phase == "LINE_TRACK_AFTER_PICKUP"
@@ -3283,11 +3297,9 @@ class MotionDecisionNode(Node):
                     if status == "SUCCEEDED":
                         self.post_shot_dwell_until = (
                             status_receive_monotonic
-                            + MotionDecisionNode.POST_SHOT_DWELL_SEC
+                            + right_turn_dwell_sec(action, MotionDecisionNode.POST_SHOT_DWELL_SEC)
                         )
                     return
-                post_shot_exit_preview = (MotionDecisionNode._post_shot_exit_preview(self, status_receive_monotonic)
-                                          if status == "SUCCEEDED" and action == "POST_SHOT_FORWARD" else None)
                 if (
                     completed_source == "line"
                     and self.phase_manager.handle_post_shot_motion(action, status)
@@ -3308,7 +3320,7 @@ class MotionDecisionNode(Node):
                     self.pending_line_decision = None
                     if not reserved_forward and not reserved_line_exit and post_shot_exit_preview is None:
                         MotionDecisionNode._invalidate_post_ball_line_input(self)
-                    elif action == "POST_SHOT_FORWARD" or reserved_line_exit:
+                    elif action == "POST_SHOT_FORWARD" or reserved_line_exit or post_shot_exit_preview is not None:
                         self.line_input_required_after = None
                         self.line_motion_min_rgb_stamp_ns = None
                         self.general_motion_gate.required_vision_generation = self.general_motion_gate.vision_generation
@@ -3335,7 +3347,7 @@ class MotionDecisionNode(Node):
                                 )
                         if action in MissionPhaseManager.POST_SHOT_CONTINUOUS_EXIT_ACTIONS:
                             # The single motion already includes its recovery tail.
-                            if reserved_line_exit:
+                            if reserved_line_exit or post_shot_exit_preview is not None:
                                 self.phase_manager.complete_post_shot_exit_align()
                             self.post_shot_turn_settled = False
                             self.post_shot_dwell_until = None
@@ -3347,7 +3359,7 @@ class MotionDecisionNode(Node):
                             self.post_shot_turn_settled = False
                             self.post_shot_dwell_until = (
                                 status_receive_monotonic
-                                + MotionDecisionNode.POST_SHOT_DWELL_SEC
+                                + right_turn_dwell_sec(action, MotionDecisionNode.POST_SHOT_DWELL_SEC)
                             )
                         self.planner.line_planner.stop("post_shot_motion_complete")
                     self.get_logger().info(
@@ -3355,7 +3367,16 @@ class MotionDecisionNode(Node):
                         f"status={status}, phase={self.mission_phase}"
                     )
                     if post_shot_exit_preview is not None and not reserved_line_exit:
-                        MotionDecisionNode._publish_decision(self, post_shot_exit_preview)
+                        # A rejected reservation used this frame but never ran.
+                        # Completion owns this single revalidated dispatch.
+                        self.last_published_vision_stamp.pop("line", None)
+                        self.get_logger().info(
+                            f"Post-shot exit reused validated Line frames: action={action}, "
+                            f"candidate={post_shot_exit_preview.action}"
+                        )
+                        # Replan through ordinary mission/readiness gates using
+                        # the retained observation; do not replay a saved command.
+                        MotionDecisionNode._publish_decision(self)
                     return
                 if completed_source == "goal":
                     if action == "GOAL_SHOT_PREPARE":
@@ -3376,7 +3397,7 @@ class MotionDecisionNode(Node):
                         MotionDecisionNode._invalidate_goal_input(self)
                     goal_turn = str(action).startswith("GOAL_CAMERA90_TURN_")
                     self.goal_post_motion_dwell_until = (
-                        status_receive_monotonic + MotionDecisionNode.GOAL_POST_MOTION_DWELL_SEC
+                        status_receive_monotonic + right_turn_dwell_sec(action, MotionDecisionNode.GOAL_POST_MOTION_DWELL_SEC)
                         if status == "SUCCEEDED" and goal_turn else None
                     )
                     if continuous and not lost_goal:
@@ -3421,7 +3442,7 @@ class MotionDecisionNode(Node):
                     dwell_sec = (
                         max(
                             0.0,
-                            float(self.BALL_POST_MOTION_DWELL_SEC),
+                            right_turn_dwell_sec(action, float(self.BALL_POST_MOTION_DWELL_SEC)),
                         )
                         if status == "SUCCEEDED" and completed_approach_turn and not fine_alignment
                         else 0.0
@@ -3487,7 +3508,7 @@ class MotionDecisionNode(Node):
                                 gate.required_vision_generation = gate.vision_generation
                             else:
                                 self.post_ball_line_dwell_until = (
-                                    status_receive_monotonic + MotionDecisionNode.POST_BALL_LINE_DWELL_SEC
+                                    status_receive_monotonic + right_turn_dwell_sec(action, MotionDecisionNode.POST_BALL_LINE_DWELL_SEC)
                                 )
                                 MotionDecisionNode._invalidate_post_ball_line_input(self)
                         elif self.ball_approach_entry_pending:
@@ -3563,6 +3584,10 @@ class MotionDecisionNode(Node):
                 ):
                     # Use the latest observation at the boundary, including a
                     # newly reached pickup range, without waiting for the timer.
+                    if completed_hurdle_forward:
+                        # A rejected reservation consumed this stamp but never ran.
+                        # Replan once through all ordinary safety gates at completion.
+                        self.last_published_vision_stamp.pop("hurdle", None)
                     MotionDecisionNode._publish_decision(self)
             return
 
@@ -3881,6 +3906,7 @@ class MotionDecisionNode(Node):
                     gate.required_vision_generation = gate.vision_generation + 1
 
         if completed_action == "GO" and status == "SUCCEEDED":
+            self.hurdle_near_min_rgb_stamp_ns = None
             self.hurdle_positioning_entry_pending = False
             self.hurdle_post_motion_dwell_until = None
             self.hurdle_stationary_since = None
@@ -5074,6 +5100,25 @@ class MotionDecisionNode(Node):
         return (MotionDecisionNode._current_ros_time_ns(self) is not None
                 and MotionDecisionNode._capture_time_valid(self, source, info))
 
+    def _hurdle_entry_input_reusable(self, now: float) -> bool:
+        """Reuse a straight gait's entry observation only for validated forward motion."""
+        if not MotionDecisionNode._recent_walking_input(self, "hurdle", now):
+            return False
+        info = self.latest_info["hurdle"]
+        if not self.planner._hurdle_positioning_ready(info):
+            return False
+        camera_pose = getattr(self, "hurdle_camera_pose", None)
+        if camera_pose is None:
+            return False
+        info = camera_pose.annotate(info, now)
+        if (info.get("hurdle_camera_ready") is not True
+                or info.get("hurdle_camera_pose") not in {"45", "0"}):
+            return False
+        # Checking the candidate must not advance the live planner's recovery state.
+        preview = copy(self.planner.hurdle_planner)
+        command = preview.plan(info, positioning=True)
+        return command.valid and command.action == "STRAIGHT_1"
+
     def _line_prequeue_observation(self, latest_line: dict | None, now: float) -> dict | None:
         """Reuse a recent usable capture from this gait when the latest line is bad."""
         if latest_line is not None and MotionDecisionNode._line_frame_is_usable(self, latest_line):
@@ -5233,6 +5278,8 @@ class MotionDecisionNode(Node):
             return None
         entry_running = MotionDecisionNode._ball_entry_line_running(self)
         source = "ball" if entry_running else self.active_general_source
+        if source == "hurdle":
+            return None
         started = getattr(self, "approach_walk_started_at", None)
         action = self.general_motion_gate.active_action
         duration = (MotionDecisionNode.LINE_MOTION_CAPTURE_CONFIG.get(action, (None,))[0]
@@ -5280,35 +5327,8 @@ class MotionDecisionNode(Node):
         return command
 
     def _hurdle_forward_preview(self, observations: dict, now: float) -> dict | None:
-        """Reserve one identical near-hurdle gait from current in-motion geometry."""
-        started = getattr(self, "approach_walk_started_at", None)
-        duration = getattr(self, "approach_walk_duration_sec", None)
-        capture_after = getattr(self, "approach_walk_capture_after_ns", None)
-        info = observations.get("hurdle") or {}
-        stamp = MotionDecisionNode._detection_stamp_ns(info) or info.get("rgb_stamp_ns")
-        if (self.mission_phase != "HURDLE_POSITIONING" or self.active_general_source != "hurdle"
-                or not self.general_motion_gate.locked or self.general_motion_gate.active_action != "STRAIGHT_1"
-                or started is None or duration is None or capture_after is None
-                or now < started + duration * MotionDecisionNode.HURDLE_WALK_CAPTURE_START_RATIO
-                or self.active_special_command_id is not None
-                or getattr(self, "pending_hurdle_final_sequence", None) is not None
-                or getattr(self, "hurdle_positioning_entry_pending", False)
-                or self.planner.hurdle_planner.recovery_active
-                or not MotionDecisionNode._recent_walking_input(self, "hurdle", now)
-                or type(stamp) is not int or stamp < capture_after
-                or info.get("confirmation_confirmed") is not True
-                or info.get("hurdle_camera_ready") is not True
-                or info.get("hurdle_camera_pose") not in {"45", "0"}):
-            return None
-        # Preview must not latch state or replace the real planner's lost-target history.
-        preview = copy(self.planner.hurdle_planner)
-        command = preview.plan(info, positioning=True).to_dict()
-        if not command["valid"] or command["action"] != "STRAIGHT_1":
-            return None
-        return {**command, "hurdle_positioning_active": True,
-                "hurdle_stage": "FINE_APPROACH", "hurdle_forward_prequeue": True,
-                "hurdle_camera_pose": info.get("hurdle_camera_pose"),
-                "hurdle_camera_ready": True}
+        """Near hurdle alignment is discrete and never reserves another walking step."""
+        return None
 
     def _ball_fine_preview(self, observations: dict, now: float) -> dict | None:
         """Select only from fresh frames captured late in the current motion."""
@@ -5473,6 +5493,8 @@ class MotionDecisionNode(Node):
         if command is None:
             self.approach_walk_candidate = None
             self.approach_walk_capture_count = 0
+            if self.active_general_source == "hurdle":
+                self.hurdle_forward_frames = []
             return
         source = "ball" if MotionDecisionNode._ball_entry_line_running(self) else self.active_general_source
         info = observations[source]
@@ -5480,7 +5502,9 @@ class MotionDecisionNode(Node):
         if stamp is None:
             stamp = info.get("rgb_stamp_ns")
         last_stamp = getattr(self, "approach_walk_last_stamp_ns", None)
-        if last_stamp is not None and stamp <= last_stamp:
+        new_frame = last_stamp is None or stamp > last_stamp
+        if (not new_frame and (stamp != last_stamp
+                              or command.get("hurdle_forward_prequeue") is not True)):
             return
         self.approach_walk_last_stamp_ns = stamp
         action = command["motion" if source == "ball" else "action"]
@@ -5488,12 +5512,21 @@ class MotionDecisionNode(Node):
             pose = command.get("hurdle_camera_pose")
             if pose != getattr(self, "hurdle_forward_capture_pose", None):
                 self.approach_walk_capture_count = 0
+                self.hurdle_forward_frames = []
             self.hurdle_forward_capture_pose = pose
+            if new_frame:
+                frames = getattr(self, "hurdle_forward_frames", [])
+                self.hurdle_forward_frames = (frames + [(stamp, info["depth_m"])])[
+                    -MotionDecisionNode.APPROACH_WALK_CAPTURE_FRAMES:
+                ]
         if action != getattr(self, "approach_walk_candidate", None):
             self.approach_walk_candidate = action
             self.approach_walk_capture_count = 0
-        self.approach_walk_capture_count += 1
+        if new_frame:
+            self.approach_walk_capture_count += 1
         if self.approach_walk_capture_count < MotionDecisionNode.APPROACH_WALK_CAPTURE_FRAMES:
+            if source == "hurdle":
+                self.hurdle_prequeue_block_reason = "insufficient_frames"
             return
         decision = MotionDecision(
             phase=self.mission_phase, source=source, action=action, valid=True,
@@ -5501,6 +5534,10 @@ class MotionDecisionNode(Node):
             requires_ack=False, source_command=command,
         )
         MotionDecisionNode._publish_decision(self, decision, queue_while_locked=True)
+
+        if (source == "hurdle" and getattr(self, "queued_general_command_id", None) is None
+                and getattr(self, "hurdle_prequeue_block_reason", None) == "ready"):
+            self.hurdle_prequeue_block_reason = "publication_guard"
 
     @staticmethod
     def _walking_observation_source(decision: MotionDecision) -> str:
@@ -5947,7 +5984,7 @@ class MotionDecisionNode(Node):
             source_command={**aligned.source_command, "post_shot_forward_prequeue": True},
         )
 
-    def _post_shot_exit_preview(self, now):
+    def _post_shot_exit_preview(self, now, *, completed=False):
         """Prepare Line driving from the exit's walking tail, preserving alignment."""
         started = self.active_line_motion_started_at
         duration = self.active_line_motion_duration_sec
@@ -5966,16 +6003,29 @@ class MotionDecisionNode(Node):
             return None
         # Recovery still changes yaw late in the composite; use the ordinary
         # recovery-chain commit window instead of committing at 70 percent.
-        if composite and now < started + duration - MotionDecisionNode.LINE_RECOVERY_PREQUEUE_LEAD_SEC:
+        if (composite and not completed
+                and now < started + duration - MotionDecisionNode.LINE_RECOVERY_PREQUEUE_LEAD_SEC):
             return None
         if (getattr(self, "hurdle_positioning_entry_pending", False)
                 or self.active_special_command_id is not None):
             return None
         observations, _ = self._fresh_observations(now)
-        for source in ("hurdle", "finish"):
-            info = observations.get(source) or {}
-            if info.get("detected") is True or info.get("raw_detected") is True:
-                return None
+        finish = observations.get("finish") or {}
+        if finish.get("detected") is True or finish.get("raw_detected") is True:
+            return None
+        hurdle = observations.get("hurdle")
+        hurdle_enabled = (
+            self.phase_manager.hurdles_completed < self.phase_manager.required_hurdles
+            and not self.phase_manager.execution_limit_reached("GO")
+            and not self.planner.hurdle_mission_disabled
+            and not self.planner.hurdle_ignore_until_clear
+        )
+        if hurdle_enabled and (
+            self.planner.hurdle_lock_active
+            or self.planner._hurdle_approach_ready(hurdle)
+            or self.planner._hurdle_positioning_ready(hurdle)
+        ):
+            return None
         latest = observations.get("line") or {}
         latest_stamp = MotionDecisionNode._detection_stamp_ns(latest) or latest.get("rgb_stamp_ns")
         preview = copy(self.planner)
@@ -6001,6 +6051,8 @@ class MotionDecisionNode(Node):
             action, previous_stamp = decision.action, stamp
         if (previous_stamp != latest_stamp
                 or ros_now - previous_stamp > int((now - started - duration * .7) * 1e9)):
+            return None
+        if not MotionDecisionNode._is_continuous_line_action(decision.action):
             return None
         return replace(decision, source_command={**decision.source_command, "post_shot_exit_prequeue": True})
 
@@ -6105,17 +6157,8 @@ class MotionDecisionNode(Node):
             if not decision.valid or decision.requires_ack:
                 return False
             command = MotionDecisionNode._approach_walk_preview(self, observations, now)
-            if command and command.get("hurdle_forward_prequeue") is True:
-                duration = self.approach_walk_duration_sec
-                info = observations.get("hurdle") or {}
-                stamp = MotionDecisionNode._detection_stamp_ns(info) or info.get("rgb_stamp_ns")
-                commit_stamp = self.approach_walk_capture_after_ns + round(duration * (
-                    MotionDecisionNode.HURDLE_WALK_COMMIT_RATIO
-                    - MotionDecisionNode.HURDLE_WALK_CAPTURE_START_RATIO) * 1e9)
-                if (now < self.approach_walk_started_at + duration * MotionDecisionNode.HURDLE_WALK_COMMIT_RATIO
-                        or stamp < commit_stamp
-                        or getattr(self, "approach_walk_capture_count", 0) < MotionDecisionNode.APPROACH_WALK_CAPTURE_FRAMES):
-                    return False
+            if decision.source == "hurdle" and command and command.get("hurdle_forward_prequeue") is True:
+                return False
             key = "motion" if decision.source == "ball" else "action"
             return bool((decision.source == self.active_general_source
                          or decision.source == "ball" and MotionDecisionNode._ball_entry_line_running(self)) and command
@@ -6168,7 +6211,7 @@ class MotionDecisionNode(Node):
         """Hold after discrete corrections; Line and Goal forward walking can chain."""
         # The bridge reports backward success only after its post-motion hold.
         if (action is None or action in {
-                    "BALL_LOST_BACKWARD_2", "HURDLE_LOST_BACKWARD_1", "GOAL_CAMERA90_BACKWARD_1",
+                    "BALL_LOST_BACKWARD_2", "HURDLE_LOST_BACKWARD_1", "HURDLE_LOST_BACKWARD_2", "GOAL_CAMERA90_BACKWARD_1",
                 }
                 or MotionDecisionNode._is_continuous_line_action(action)
                 or MotionDecisionNode._is_continuous_ball_action(action)
@@ -6361,7 +6404,9 @@ class MotionDecisionNode(Node):
             "goal_shot_observe_until", "pre_motion_settle_deadline",
         )]
         if getattr(self, "hurdle_stationary_since", None) is not None:
-            deadlines.append(self.hurdle_stationary_since + MotionDecisionNode.HURDLE_POST_MOTION_DWELL_SEC)
+            candidate = getattr(self, "last_selected_decision", None)
+            deadlines.append(self.hurdle_stationary_since + right_turn_dwell_sec(
+                getattr(candidate, "action", None), MotionDecisionNode.HURDLE_POST_MOTION_DWELL_SEC))
         if getattr(self, "goal_shot_settle_pending", False):
             since = getattr(self, "goal_stationary_since", None)
             if since is not None:
@@ -6431,6 +6476,11 @@ class MotionDecisionNode(Node):
         MotionDecisionNode._prepare_post_ball_goal_camera(self, time.monotonic())
 
         if self.general_motion_gate.locked and not queue_while_locked:
+            if (self.active_general_source == "hurdle"
+                    and self.mission_phase == "HURDLE_POSITIONING"
+                    and self.general_motion_gate.active_action == "STRAIGHT_1"):
+                # The commit window can open between camera callbacks.
+                MotionDecisionNode._prepare_pending_approach_walk(self, now)
             if (MotionDecisionNode._ball_entry_line_active(self)
                     and getattr(self, "queued_general_command_id", None) is None
                     and getattr(self, "ball_entry_walk_frames", [])):
@@ -6490,12 +6540,7 @@ class MotionDecisionNode(Node):
                 self._reset_pre_motion_settle()
                 return
             self.hurdle_post_motion_dwell_until = None
-            self.latest_info["hurdle"] = None
-            self.latest_time["hurdle"] = None
-            gate = self.general_motion_gate
-            gate.required_vision_generation = gate.vision_generation + 1
             self._reset_pre_motion_settle()
-            return
         if self.mission_phase == "LINE_TRACK_AFTER_PICKUP":
             if getattr(self, "post_ball_line_run_failed", False):
                 self._reset_pre_motion_settle()
@@ -6749,7 +6794,7 @@ class MotionDecisionNode(Node):
                     f"{MotionDecisionNode.POST_SHOT_DWELL_SEC} seconds before forward"
                 )
                 return
-            # The last turn already had its half-second pause. Use the fresh
+            # The last turn already had its required pause. Use the fresh
             # aligned sample now instead of adding a second pause.
             self.post_shot_turn_settled = False
             decision = self._select_mission_decision(observations, dt_sec)
@@ -7117,8 +7162,10 @@ class MotionDecisionNode(Node):
             self.hurdle_stationary_since = None
             self.goal_stationary_since = None
             self.goal_shot_settle_pending = False
-        if decision.valid and decision.source == "hurdle" and decision.action == "GO":
-            self.pending_hurdle_final_sequence = None
+        if decision.valid and decision.source == "hurdle":
+            self.planner.hurdle_planner.record_published(decision.action, decision.reason)
+            if decision.action == "GO":
+                self.pending_hurdle_final_sequence = None
         if decision.source_command.get("ball_entry_ground_tracking") is not True:
             limiter.record_published(decision, observations)
         if entry_line_decision:
@@ -7200,6 +7247,12 @@ class MotionDecisionNode(Node):
         self._reset_pre_motion_settle()
 
         if is_general_motion:
+            if decision.source == "hurdle" and queue_while_locked:
+                self.hurdle_prequeue_block_reason = "requested"
+                self.get_logger().info(
+                    f"HURDLE next motion requested before completion: action={decision.action}, "
+                    f"command_id={self.command_id}, frames={self.approach_walk_capture_count}"
+                )
             if decision.source == "line":
                 completed_at = getattr(self, "line_motion_completed_at", None)
                 if queue_while_locked:
@@ -7530,6 +7583,18 @@ class MotionDecisionNode(Node):
         now: float,
     ) -> bool:
         """Recheck fresh decisions while settling before turns or fine steps."""
+        if decision.source == "hurdle" and decision.source_command.get("hurdle_near_control") is True:
+            stationary = getattr(self, "hurdle_stationary_since", None)
+            self._reset_pre_motion_settle()
+            if stationary is None:
+                # Manual phase entry also needs a full stationary observation.
+                self.hurdle_stationary_since = now
+                self.hurdle_post_motion_dwell_until = now + MotionDecisionNode.HURDLE_NEAR_OBSERVE_SEC
+                self.hurdle_near_min_rgb_stamp_ns = MotionDecisionNode._current_ros_time_ns(self)
+                self.latest_info["hurdle"] = None
+                self.latest_time["hurdle"] = None
+                return False
+            return now - stationary >= MotionDecisionNode.HURDLE_NEAR_OBSERVE_SEC
         if decision.source == "ball" and decision.source_command.get("ball_fine_alignment") is True:
             self._reset_pre_motion_settle()
             return True
@@ -7576,7 +7641,7 @@ class MotionDecisionNode(Node):
             or decision.action.startswith(("LINE_LOST_TURN_", "LINE_OFFSET_TURN_", "LINE_HEADING_TURN_", "LINE_SPARSE_"))
             or decision.action.startswith(("POST_BALL_LINE_TURN_", "POST_SHOT_LINE_TURN_"))
         )
-        # Fixed post-shot exit turns already have their own half-second pause.
+        # Fixed post-shot exit turns already have their own completion pause.
         if (
             not decision.valid
             or (
@@ -7627,6 +7692,7 @@ class MotionDecisionNode(Node):
             )
         elif hurdle_turn:
             settle_sec = MotionDecisionNode.HURDLE_POST_MOTION_DWELL_SEC
+        settle_sec = right_turn_dwell_sec(decision.action, settle_sec)
         if settle_sec <= 0.0:
             self._reset_pre_motion_settle()
             return True
@@ -8030,25 +8096,7 @@ class MotionDecisionNode(Node):
             planning_phase == "HURDLE_POSITIONING"
             and self.active_special_command_id is None
         ):
-            checkpoint = getattr(self, "pending_hurdle_final_sequence", None)
-            if checkpoint is not None:
-                self.planner.hurdle_go_requested = True
-                return MotionDecision(
-                    phase=planning_phase, source="hurdle", action="GO", valid=True,
-                    reason="hurdle_final_sequence_latched",
-                    sdk_motion_requested=True, requires_ack=True,
-                    source_command=dict(checkpoint),
-                )
-            decision = self.planner.plan(planning_phase, observations, dt_sec)
-            info = observations.get("hurdle") or {}
-            if (decision.valid and decision.action == "STRAIGHT_1"
-                    and (info.get("hurdle_camera_ready") is not True
-                         or info.get("hurdle_camera_pose") not in {"45", "0"})):
-                # Near the bar, angle correction may be disabled, but a moving
-                # camera must not authorize another forward gait from old depth.
-                return replace(decision, action="WAIT", valid=False,
-                               reason="waiting_for_hurdle_camera_ready_frame")
-            return decision
+            return self.planner.plan(planning_phase, observations, dt_sec)
 
         if planning_phase == "LINE_TRACK_AFTER_PICKUP":
             if getattr(self, "post_ball_line_run_failed", False):

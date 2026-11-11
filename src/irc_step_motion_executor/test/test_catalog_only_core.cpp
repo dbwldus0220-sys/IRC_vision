@@ -42,23 +42,22 @@ TEST(MotionAliasCatalog, LoadsLatestSdkAndCanonicalAliases)
   irc_step_motion_executor::MotionAliasCatalog catalog;
   std::string error;
   ASSERT_TRUE(catalog.load(TEST_ALIAS_CONFIG, error)) << error;
-  EXPECT_EQ(catalog.size(), 176U);
+  EXPECT_EQ(catalog.size(), 175U);
   for (const auto & [alias, motion] : {
       std::pair{"post_shot_exit_right_9_recovery_right_4", "t골대후제자리우회전+라인복귀우회전45도(4회)"},
       std::pair{"post_shot_exit_left_4_recovery_left_4", "p골대후제자리좌회전+라인복귀좌회전45도(4회)"},
-      std::pair{"post_shot_exit_right_5_forward_4", "t골대후제자리우회전(6회)+라인복귀우회전45도(4회)+라인복귀우회전45도(4회)"},
-      std::pair{"post_shot_exit_left_3_forward_4", "p골대후제자리좌회전(4회)+라인복귀좌회전45도(4회)+라인복귀좌회전45도(4회)"},
-      std::pair{"forward", "n전진45도(8회)"},
-      std::pair{"line_forward_8", "n전진45도(8회)"},
-      std::pair{"goal_camera_90_forward_2", "n전진90도(2회)"},
+      std::pair{"post_shot_exit_right_5_forward_4", "t골대후제자리우회전(6회)+라인복귀좌회전45도(4회)+라인복귀좌회전45도(4회)"},
+      std::pair{"post_shot_exit_left_3_forward_4", "p골대후제자리좌회전(4회)+라인복귀우회전45도(4회)+라인복귀우회전45도(4회)"},
+      std::pair{"forward", "p전진45(8회)"},
+      std::pair{"line_forward_8", "p전진45(8회)"},
+      std::pair{"goal_camera_90_forward_2", "p전진90도(2회)"},
       std::pair{"goal_shot_region_5", "r골넣기 5번구역"},
       std::pair{"goal_shot_region_6", "r골넣기 6번구역"},
-      std::pair{"goal_shot_region_7", "r골넣기7번구역"},
       std::pair{"goal_shot_region_8", "r골넣기8번구역"},
       std::pair{"line_turn_right_large", "t제자리우회전45도(9회)"},
-      std::pair{"line_recovery_left_4", "n라인복귀좌회전45도"},
-      std::pair{"line_recovery_left_6", "n라인복귀좌회전45도"},
-      std::pair{"line_recovery_right_4", "n라인복귀우회전45도"},
+      std::pair{"line_recovery_left_4", "p라인복귀좌회전45도"},
+      std::pair{"line_recovery_left_6", "p라인복귀좌회전45도"},
+      std::pair{"line_recovery_right_4", "t라인복귀우실전"},
       std::pair{"pickup_crab_right_0", "t미세오옆꽃게(0도)-1회"},
       std::pair{"pickup_crab_left_0", "tt미세왼옆0도"},
       std::pair{"pickup_fine_prepare", "p오뒤에서 미세오뒤(45도)"},

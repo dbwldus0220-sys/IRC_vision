@@ -24,7 +24,7 @@ def sample(depth=.560, offset=0, angle=-12.345, **changes):
 @pytest.mark.parametrize('depth,region', [
     (.350, 1), (.429999, 1), (.430, 2), (.489999, 2),
     (.490, 8), (.529999, 8), (.530, 5), (.559999, 5),
-    (.560, 6), (.599999, 6), (.600, 7), (.659999, 7),
+    (.560, 6), (.599999, 6),
 ])
 @pytest.mark.parametrize('offset', [-120, -1, 0, 1, 120])
 def test_ring_depth_selects_same_region_regardless_of_pixel_sign(depth, region, offset):
@@ -35,7 +35,7 @@ def test_ring_depth_selects_same_region_regardless_of_pixel_sign(depth, region, 
     assert GOAL_SCORE_TARGET_DEPTH_M == .560
 
 
-@pytest.mark.parametrize('depth', [.349999, .660, float('nan'), float('inf')])
+@pytest.mark.parametrize('depth', [.349999, .600, .63, .659999, .660, float('nan'), float('inf')])
 def test_no_region_outside_ring_depth_bands(depth):
     assert goal_shot_region(depth) is None
     assert GoalNavigationPlanner().plan(sample(depth)).action != 'SHOT'
@@ -57,7 +57,7 @@ def test_missing_ring_measurement_never_falls_back_to_board(field, invalid):
     assert not command.valid and command.action == 'WAIT'
 
 
-@pytest.mark.parametrize('depth,region', [(.38, 1), (.45, 2), (.51, 8), (.545, 5), (.58, 6), (.63, 7)])
+@pytest.mark.parametrize('depth,region', [(.38, 1), (.45, 2), (.51, 8), (.545, 5), (.58, 6)])
 @pytest.mark.parametrize('angle', [-23.456, 0, 17.891])
 def test_bridge_transmits_unmodified_angle_to_selected_motion(depth, region, angle):
     command = GoalNavigationPlanner().plan(sample(depth, angle=angle))
@@ -71,7 +71,7 @@ def test_bridge_transmits_unmodified_angle_to_selected_motion(depth, region, ang
 
 
 @pytest.mark.parametrize('changes', [
-    {'shot_region': 3}, {'shot_region': 4}, {'shot_region': None},
+    {'shot_region': 3}, {'shot_region': 4}, {'shot_region': 7}, {'shot_region': None},
     {'waist_ring_aim_deg': None}, {'waist_ring_aim_deg': True},
     {'waist_ring_aim_deg': float('nan')}, {'waist_ring_aim_deg': 90},
 ])
@@ -141,8 +141,8 @@ def test_node_reselects_ring_region_and_angle_after_preparation(goal_node, offse
     assert request['waist_ring_aim_deg'] == -13.789
 
 
-@pytest.mark.parametrize('depth,region', [(.38, 1), (.45, 2), (.51, 8), (.545, 5), (.58, 6), (.63, 7)])
-@pytest.mark.parametrize('entry_depth,action', [(1.0, 'GOAL_CAMERA_90_FORWARD_2'), (.7, 'GOAL_CAMERA90_FINE_FORWARD_3')])
+@pytest.mark.parametrize('depth,region', [(.38, 1), (.45, 2), (.51, 8), (.545, 5), (.58, 6)])
+@pytest.mark.parametrize('entry_depth,action', [(1.0, 'GOAL_CAMERA_90_FORWARD_2'), (.7, 'GOAL_CAMERA90_FINE_FORWARD_5')])
 @pytest.mark.parametrize('shot_index', [1, 2])
 @pytest.mark.parametrize('offset', [-350, 350])
 def test_ring_region_entry_stops_walk_reservation_and_finishes_shot(
@@ -163,7 +163,7 @@ def test_ring_region_entry_stops_walk_reservation_and_finishes_shot(
     audit.shoot_after_completion(node, clock, motion, region, depth, shot_index)
 
 
-@pytest.mark.parametrize('depth,region', [(.38, 1), (.45, 2), (.51, 8), (.545, 5), (.58, 6), (.63, 7)])
+@pytest.mark.parametrize('depth,region', [(.38, 1), (.45, 2), (.51, 8), (.545, 5), (.58, 6)])
 @pytest.mark.parametrize('shot_index', [1, 2])
 def test_accepted_walk_reservation_finishes_once_before_ring_shot(
         clock, monkeypatch, depth, region, shot_index):

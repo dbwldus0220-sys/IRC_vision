@@ -148,9 +148,9 @@ std::optional<ParsedRequest> parse_request(
     parsed.request.motion_id == "goal_shot_region_2" ||
     parsed.request.motion_id == "goal_shot_region_5" ||
     parsed.request.motion_id == "goal_shot_region_6" ||
-    parsed.request.motion_id == "goal_shot_region_7" ||
     parsed.request.motion_id == "goal_shot_region_8";
   const bool disabled_shot = parsed.request.motion_id == "goal_shot_region_3" ||
+    parsed.request.motion_id == "goal_shot_region_7" ||
     parsed.request.motion_id == "goal_shot_region_4" || parsed.request.motion_id == "goal_shot" ||
     parsed.request.motion_id == "sdk_shot";
   json_object * aim = nullptr;

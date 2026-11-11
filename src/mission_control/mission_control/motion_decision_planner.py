@@ -352,8 +352,9 @@ class MotionDecisionPlanner:
             self.hurdle_lock_active or normalized_phase == "HURDLE_POSITIONING"
         )
         if source == "hurdle" and info is not None:
-            # Keep line/intersection diagnostics; hurdle yaw alone controls alignment.
+            # Hurdle yaw controls walking; Line side is used only for first-entry loss.
             reference = build_hurdle_path_reference(info, observations.get("line"))
+            reference["line_robot_side"] = self._hurdle_line_side(observations.get("line"))
             info = {**info, **reference, "hurdle_positioning_active": hurdle_positioning}
         command = self._plan_source(source, info, dt_sec)
         if source == "hurdle" and info is not None:
@@ -661,6 +662,18 @@ class MotionDecisionPlanner:
             and 0.0 < depth <= min(self.config.hurdle_control_range_m, self.hurdle_planner.config.control_start_depth_m)
         )
 
+    @staticmethod
+    def _hurdle_line_side(info: dict[str, Any] | None) -> str | None:
+        """Read the route's side in the robot-centered image coordinates."""
+        if not info or info.get("detected") is not True:
+            return None
+        offset = MotionDecisionPlanner._number(info, "lateral_offset_px")
+        if offset is None:
+            offset = MotionDecisionPlanner._number(info, "lateral_offset_norm")
+        if offset is None or offset == 0:
+            return None
+        return "RIGHT" if offset > 0 else "LEFT"
+
     def _hurdle_positioning_ready(self, info: dict[str, Any] | None) -> bool:
         if info is None or any(
             info.get(key) is not True
@@ -834,7 +847,7 @@ class MotionDecisionPlanner:
             angle = command.center_steering_deg
             if angle is None:
                 angle = command.hurdle_angle_deg
-            if angle is not None:
+            if count is None and angle is not None:
                 count = self._turn_repeat_count(angle, direction)
             elif count is None:
                 return self.hurdle_planner.wait("hurdle_missing_stationary_turn_angle").to_dict()
