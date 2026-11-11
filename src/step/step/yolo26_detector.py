@@ -1620,9 +1620,13 @@ class Yolo26Detector(Node):
         self, image: np.ndarray
     ) -> tuple[np.ndarray, LetterboxInfo]:
         padded, info = self._letterbox(image)
-        rgb = cv2.cvtColor(padded, cv2.COLOR_BGR2RGB)
-        blob = rgb.transpose(2, 0, 1)[None].astype(np.float32) / 255.0
-        return np.ascontiguousarray(blob), info
+        # Materialize RGB/CHW directly in the inference buffer. Division stays
+        # float32 / 255.0, preserving the original model input bit for bit.
+        blob = np.ascontiguousarray(
+            padded[:, :, ::-1].transpose(2, 0, 1)[None], dtype=np.float32,
+        )
+        blob /= 255.0
+        return blob, info
 
     def _postprocess(
         self,
@@ -2241,16 +2245,8 @@ class Yolo26Detector(Node):
         panel_y = 44
         row_spacing = min(23.0, max(1.0, (height - panel_y - 22) / len(rows)))
         panel_bottom = min(height - 8, int(panel_y + 14 + len(rows) * row_spacing))
-        overlay = image.copy()
-        cv2.rectangle(
-            overlay, (panel_x, panel_y),
-            (panel_x + panel_width, panel_bottom), (20, 20, 20), -1,
-        )
-        panel_slice = np.s_[
-            panel_y:panel_bottom, panel_x:panel_x + panel_width,
-        ]
-        image[panel_slice] = cv2.addWeighted(
-            overlay[panel_slice], 0.72, image[panel_slice], 0.28, 0.0,
+        self._draw_metrics_panel_background(
+            image, panel_x, panel_y, panel_width, panel_bottom,
         )
 
         for index, row in enumerate(rows):
@@ -2326,6 +2322,17 @@ class Yolo26Detector(Node):
             if enabled and info and bool(info.get("detected", False)):
                 return mode
         return "line" if self.show_line_metrics else "ball"
+
+    @staticmethod
+    def _draw_metrics_panel_background(
+        image: np.ndarray, x: int, y: int, width: int, bottom: int,
+    ) -> None:
+        """Blend only the panel region, avoiding an unused full-frame copy."""
+        panel = image[y:bottom, x:x + width]
+        if panel.size:
+            cv2.addWeighted(
+                np.full_like(panel, 20), 0.72, panel, 0.28, 0.0, dst=panel,
+            )
 
     def _draw_line_metrics(self, image: np.ndarray) -> None:
         """Draw line geometry and the command chosen by the unified planner."""
@@ -2446,19 +2453,8 @@ class Yolo26Detector(Node):
         row_spacing = min(24.0, max(1.0, (height - panel_y - 22) / len(rows)))
         panel_height = int(14 + len(rows) * row_spacing)
         panel_bottom = min(height - 8, panel_y + panel_height)
-        overlay = image.copy()
-        cv2.rectangle(
-            overlay,
-            (panel_x, panel_y),
-            (panel_x + panel_width, panel_bottom),
-            (20, 20, 20),
-            -1,
-        )
-        panel_slice = np.s_[
-            panel_y:panel_bottom, panel_x:panel_x + panel_width,
-        ]
-        image[panel_slice] = cv2.addWeighted(
-            overlay[panel_slice], 0.72, image[panel_slice], 0.28, 0.0,
+        self._draw_metrics_panel_background(
+            image, panel_x, panel_y, panel_width, panel_bottom,
         )
 
         for index, row in enumerate(rows):
@@ -3032,22 +3028,8 @@ class Yolo26Detector(Node):
         panel_y = 44
         panel_height = 18 + len(rows) * 24
         panel_bottom = min(height - 8, panel_y + panel_height)
-        overlay = image.copy()
-        cv2.rectangle(
-            overlay,
-            (panel_x, panel_y),
-            (panel_x + panel_width, panel_bottom),
-            (20, 20, 20),
-            -1,
-        )
-        image[panel_y:panel_bottom, panel_x:panel_x + panel_width] = (
-            cv2.addWeighted(
-                overlay[panel_y:panel_bottom, panel_x:panel_x + panel_width],
-                0.72,
-                image[panel_y:panel_bottom, panel_x:panel_x + panel_width],
-                0.28,
-                0.0,
-            )
+        self._draw_metrics_panel_background(
+            image, panel_x, panel_y, panel_width, panel_bottom,
         )
 
         row_spacing = min(
@@ -3214,24 +3196,8 @@ class Yolo26Detector(Node):
         panel_x = max(12, width - panel_width - 12)
         panel_y = 104
         panel_bottom = min(height - 8, panel_y + panel_height)
-        overlay = image.copy()
-        cv2.rectangle(
-            overlay,
-            (panel_x, panel_y),
-            (panel_x + panel_width, panel_bottom),
-            (20, 20, 20),
-            -1,
-        )
-        panel_slice = np.s_[
-            panel_y:panel_bottom,
-            panel_x:panel_x + panel_width,
-        ]
-        image[panel_slice] = cv2.addWeighted(
-            overlay[panel_slice],
-            0.72,
-            image[panel_slice],
-            0.28,
-            0.0,
+        self._draw_metrics_panel_background(
+            image, panel_x, panel_y, panel_width, panel_bottom,
         )
 
         if info is None:

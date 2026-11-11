@@ -142,6 +142,15 @@ GROUND_PROJECTION_DEFAULTS = {
 }
 
 
+def _unit_score(value: float) -> float:
+    """Clamp one scalar without NumPy dispatch; preserve NaN as np.clip does."""
+    if value <= 0.0:
+        return 0.0
+    if value >= 1.0:
+        return 1.0
+    return float(value)
+
+
 def project_line_points_to_ground(
     points: list[LinePoint],
     image_width: int,
@@ -2140,16 +2149,8 @@ class YoloLineAnalyzer(DepthFrameConsumer, Node):
             self.max_path_dx_px,
         )
 
-        vertical_score = float(
-            np.clip(
-                dy
-                / max(
-                    self.min_path_vertical_progress_px,
-                    1e-6,
-                ),
-                0.0,
-                1.0,
-            )
+        vertical_score = _unit_score(
+            dy / max(self.min_path_vertical_progress_px, 1e-6)
         )
 
         ratio_score = self._limit_score(
@@ -2198,13 +2199,7 @@ class YoloLineAnalyzer(DepthFrameConsumer, Node):
             )
 
         return (
-            float(
-                np.clip(
-                    continuity_score,
-                    0.0,
-                    1.0,
-                )
-            ),
+            _unit_score(continuity_score),
             angle,
         )
 
@@ -2719,20 +2714,16 @@ class YoloLineAnalyzer(DepthFrameConsumer, Node):
                 break
 
             working = filtered
+        else:
+            # An exhausted iteration budget can leave a newly reduced set.
+            # On either early break, the last fit already describes working.
+            slope, intercept, residuals = self._fit_once(working)
 
         if (
             len(working)
             < self.min_points_for_fit
         ):
             return None
-
-        (
-            slope,
-            intercept,
-            residuals,
-        ) = self._fit_once(
-            working
-        )
 
         rmse = float(
             np.sqrt(

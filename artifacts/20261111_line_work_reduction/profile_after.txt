@@ -1,0 +1,33 @@
+         946695 function calls in 1.195 seconds
+
+   Ordered by: cumulative time
+   List reduced from 246 to 24 due to restriction <24>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      180    0.009    0.000    1.201    0.007 yolo_line_analyzer.py:1650(_detections_callback)
+      180    0.052    0.000    0.441    0.002 yolo_line_analyzer.py:2206(_filter_path_continuity)
+      180    0.012    0.000    0.372    0.002 yolo_line_analyzer.py:3729(_analyze_line)
+    33300    0.196    0.000    0.365    0.000 yolo_line_analyzer.py:2101(_calculate_continuity_score)
+      180    0.039    0.000    0.208    0.001 yolo_line_analyzer.py:201(analyze_ground_line)
+      540    0.023    0.000    0.196    0.000 yolo_line_analyzer.py:2629(_robust_fit)
+      600    0.029    0.000    0.117    0.000 yolo_line_analyzer.py:2770(_fit_once)
+      239    0.032    0.000    0.096    0.000 yolo_line_analyzer.py:154(project_line_points_to_ground)
+      878    0.002    0.000    0.088    0.000 function_base.py:3845(median)
+      878    0.005    0.000    0.086    0.000 function_base.py:3763(_ureduce)
+     2853    0.010    0.000    0.081    0.000 fromnumeric.py:3385(mean)
+      878    0.015    0.000    0.080    0.000 function_base.py:3931(_median)
+     2853    0.024    0.000    0.071    0.000 _methods.py:101(_mean)
+    33300    0.043    0.000    0.071    0.000 yolo_line_analyzer.py:2076(_path_segment_angle)
+     8641    0.058    0.000    0.058    0.000 {method 'reduce' of 'numpy.ufunc' objects}
+   112679    0.050    0.000    0.058    0.000 {built-in method builtins.max}
+      600    0.038    0.000    0.055    0.000 linalg.py:2191(lstsq)
+     4253    0.015    0.000    0.050    0.000 fromnumeric.py:71(_wrapreduction)
+      180    0.027    0.000    0.044    0.000 yolo_line_analyzer.py:1849(_extract_line_points)
+      180    0.003    0.000    0.042    0.000 yolo_line_analyzer.py:3345(_update_temporal_filter)
+      180    0.005    0.000    0.039    0.000 yolo_line_analyzer.py:332(analyze_corner_exit)
+      180    0.004    0.000    0.038    0.000 yolo_line_analyzer.py:1471(_analyze_corner_preview)
+   130320    0.037    0.000    0.037    0.000 yolo_line_analyzer.py:2047(_limit_score)
+     2134    0.005    0.000    0.033    0.000 fromnumeric.py:2421(all)
+
+
+published 180

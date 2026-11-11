@@ -40,10 +40,13 @@ def test_ground_metrics_preserve_existing_rows_and_fit_panel(
         "step.yolo26_detector.cv2.putText",
         lambda image, text, origin, *args: texts.append((text, origin)),
     )
-    monkeypatch.setattr(
-        "step.yolo26_detector.cv2.rectangle",
-        lambda image, first, last, *args: rectangles.append((first, last)),
-    )
+    draw_background = detector._draw_metrics_panel_background
+
+    def capture_background(image, x, y, width, bottom):
+        rectangles.append(((x, y), (x + width, bottom)))
+        draw_background(image, x, y, width, bottom)
+
+    monkeypatch.setattr(detector, "_draw_metrics_panel_background", capture_background)
     detector._draw_line_metrics(np.zeros((height, width, 3), dtype=np.uint8))
     rows = dict(text.split(":", 1) for text, _ in texts if ":" in text)
     assert rows["Image head  "].strip() == "+7.0deg"

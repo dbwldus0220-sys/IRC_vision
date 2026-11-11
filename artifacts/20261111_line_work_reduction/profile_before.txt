@@ -1,0 +1,33 @@
+         1513775 function calls in 2.283 seconds
+
+   Ordered by: cumulative time
+   List reduced from 245 to 24 due to restriction <24>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      180    0.012    0.000    2.289    0.013 yolo_line_analyzer.py:1641(_detections_callback)
+      180    0.076    0.000    1.312    0.007 yolo_line_analyzer.py:2211(_filter_path_continuity)
+    33300    0.294    0.000    1.208    0.000 yolo_line_analyzer.py:2092(_calculate_continuity_score)
+    67380    0.080    0.000    0.726    0.000 fromnumeric.py:2100(clip)
+    67380    0.112    0.000    0.646    0.000 fromnumeric.py:53(_wrapfunc)
+      180    0.016    0.000    0.532    0.003 yolo_line_analyzer.py:3738(_analyze_line)
+    67380    0.184    0.000    0.522    0.000 fromnumeric.py:40(_wrapit)
+      540    0.029    0.000    0.326    0.001 yolo_line_analyzer.py:2634(_robust_fit)
+    67380    0.049    0.000    0.272    0.000 {method 'clip' of 'numpy.ndarray' objects}
+      180    0.045    0.000    0.240    0.001 yolo_line_analyzer.py:192(analyze_ground_line)
+     1120    0.058    0.000    0.232    0.000 yolo_line_analyzer.py:2779(_fit_once)
+    67380    0.223    0.000    0.223    0.000 _methods.py:90(_clip)
+      239    0.038    0.000    0.113    0.000 yolo_line_analyzer.py:145(project_line_points_to_ground)
+     1120    0.078    0.000    0.109    0.000 linalg.py:2191(lstsq)
+      878    0.003    0.000    0.096    0.000 function_base.py:3845(median)
+      878    0.005    0.000    0.093    0.000 function_base.py:3763(_ureduce)
+     2853    0.012    0.000    0.087    0.000 fromnumeric.py:3385(mean)
+      878    0.016    0.000    0.087    0.000 function_base.py:3931(_median)
+    33300    0.048    0.000    0.087    0.000 yolo_line_analyzer.py:2067(_path_segment_angle)
+     2853    0.024    0.000    0.075    0.000 _methods.py:101(_mean)
+   118299    0.063    0.000    0.073    0.000 {built-in method builtins.max}
+    75973    0.067    0.000    0.067    0.000 {built-in method numpy.asarray}
+     8641    0.062    0.000    0.062    0.000 {method 'reduce' of 'numpy.ufunc' objects}
+     4253    0.016    0.000    0.053    0.000 fromnumeric.py:71(_wrapreduction)
+
+
+published 180
