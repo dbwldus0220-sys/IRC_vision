@@ -14,10 +14,10 @@ def observe(loss, t, *, stamp=None, **fields):
 
 def test_both_duration_and_five_frames_are_required():
     loss = BallLossConfirmation()
-    for t in (10.0, 10.1, 10.2, 10.3, 10.49):
+    for t in (10.0, 10.1, 10.2, 10.3, 10.5, 10.799999):
         observe(loss, t)
         assert not loss.confirmed
-    observe(loss, 10.5)
+    observe(loss, 10.8)
     assert loss.confirmed
 
     loss = BallLossConfirmation()
@@ -33,13 +33,13 @@ def test_both_duration_and_five_frames_are_required():
 ])
 def test_visible_ball_resets_even_confirmed_loss(visible):
     loss = BallLossConfirmation()
-    for t in (10.0, 10.125, 10.25, 10.375, 10.5):
+    for t in (10.0, 10.2, 10.4, 10.6, 10.8):
         observe(loss, t)
     assert loss.confirmed
-    observe(loss, 10.6, **visible)
+    observe(loss, 10.9, **visible)
     assert not loss.confirmed
     assert loss.missing_frames == 0
-    observe(loss, 10.7)
+    observe(loss, 11.0)
     assert not loss.confirmed
     assert loss.missing_frames == 1
 

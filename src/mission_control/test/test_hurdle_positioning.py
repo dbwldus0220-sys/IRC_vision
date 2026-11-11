@@ -23,6 +23,10 @@ def hurdle(depth=0.20, **updates):
     info = {
         "detected": True, "confirmation_confirmed": True, "confidence": 0.9,
         "depth_valid": True, "depth_m": depth, "hurdle_angle_deg": 0.0,
+        "hurdle_angle_45_deg": 0.0, "hurdle_angle_0_deg": 0.0,
+        "hurdle_camera_pose": "45", "hurdle_camera_ready": True,
+        "depth_age_sec": .05, "hurdle_angle_fit_point_count": 5,
+        "hurdle_angle_sample_source": "yellow_bar_centerline",
         "bottom_distance_px": 200, "camera_center_offset_x_px": 0, "go_now": False,
         "bbox": [400, 300, 1000, 500], "image_width": 1280, "image_height": 720,
     }
@@ -94,7 +98,7 @@ def test_crossing_during_motion_waits_for_completion_and_fresh_frame(clock):
     node.receive_line()
     node.receive(hurdle(0.8))
     approach = node.publish()[-1]
-    assert approach["action"] == "STRAIGHT"
+    assert approach["action"] == "STRAIGHT_1"
     node.receive(hurdle())
     assert node.hurdle_positioning_entry_pending
     assert node.publish() == []
@@ -201,7 +205,7 @@ def test_far_approach_and_close_sequence_trigger():
     far = planner.plan("HURDLE_APPROACH", {
         "hurdle": hurdle(0.8), "line": line_info(),
     }, 0.1)
-    assert far.action == "STRAIGHT"
+    assert far.action == "STRAIGHT_1"
     assert far.source == "hurdle"
     assert not far.source_command.get("hurdle_positioning_active", False)
     aligned = planner.plan("HURDLE_POSITIONING", {"hurdle": hurdle(0.6)}, 0.1)
@@ -219,7 +223,7 @@ def test_recognition_approach_has_no_fine_sequence_dwell(clock, angle):
     node.receive(hurdle(0.9))
     approach = node.publish()[-1]
     assert approach["source"] == "hurdle"
-    assert approach["action"] == "STRAIGHT"
+    assert approach["action"] == "STRAIGHT_1"
     node.receive(hurdle(0.8, hurdle_angle_deg=angle))
     assert node.publish() == []
     release_general(node, approach)
@@ -229,15 +233,15 @@ def test_recognition_approach_has_no_fine_sequence_dwell(clock, angle):
     node.receive(hurdle(0.8, hurdle_angle_deg=angle))
     forward = node.publish()[-1]
     assert forward["source"] == "hurdle"
-    assert forward["action"] == "STRAIGHT"
+    assert forward["action"] == "STRAIGHT_1"
 
 
-def test_recognition_approach_waits_without_line(clock):
+def test_recognition_approach_waits_without_calibrated_angle(clock):
     node = HurdleHarness()
-    node.receive(hurdle(0.8, hurdle_angle_deg=-34.0))
+    node.receive(hurdle(0.8, hurdle_angle_45_deg=None))
     waiting = node.publish()[-1]
     assert not waiting["valid"] and waiting["action"] == "WAIT"
-    assert waiting["reason"] == "waiting_for_fresh_hurdle_line_heading"
+    assert waiting["reason"] == "waiting_for_fresh_hurdle_calibrated_angle"
     assert waiting["source"] == "hurdle"
     assert not node.planner.hurdle_lock_active
 
@@ -259,13 +263,13 @@ def test_recognition_approach_blocks_new_line_prequeue(clock, depth, allowed):
 
 @pytest.mark.parametrize("depth", [1.0, 0.8, 0.700001])
 @pytest.mark.parametrize("heading", [-34.0, 0.0, 34.0])
-def test_recognition_approach_uses_line_heading(depth, heading):
+def test_recognition_approach_uses_hurdle_yaw(depth, heading):
     line = line_info(heading=heading)
     planner = MotionDecisionPlanner()
     actual = planner.plan("AUTO", {
-        "line": line, "hurdle": hurdle(depth, hurdle_angle_deg=-34.0),
+        "line": line, "hurdle": hurdle(depth, hurdle_angle_45_deg=-heading),
     }, 0.1)
-    expected = "ALIGN_LEFT" if heading < 0 else "ALIGN_RIGHT" if heading > 0 else "STRAIGHT"
+    expected = "ALIGN_LEFT" if heading < 0 else "ALIGN_RIGHT" if heading > 0 else "STRAIGHT_1"
     assert actual.source == "hurdle" and actual.action == expected
     assert actual.source_command["hurdle_stage"] == "RECOGNITION_APPROACH"
     assert not planner.hurdle_lock_active
@@ -289,19 +293,19 @@ def test_fine_approach_ignores_center_angle(angle, phase):
                           camera_center_offset_x_px=101 * math.tan(math.radians(angle))),
     }, 0.1)
     assert decision.valid and decision.action == "STRAIGHT_1"
-    assert decision.source_command["center_steering_deg"] is None
+    assert decision.source_command["center_steering_deg"] == 0.0
     assert "turn_count" not in decision.source_command
 
 
 @pytest.mark.parametrize("status", ["SUCCEEDED", "FAILED", "CANCELLED", "REJECTED"])
-def test_stationary_turn_completion_reobserves_line_heading(clock, status):
+def test_stationary_turn_completion_reobserves_hurdle_yaw(clock, status):
     node = HurdleHarness()
     node.receive_line(x=500, heading=-40)
-    node.receive(hurdle(0.8))
+    node.receive(hurdle(0.8, hurdle_angle_45_deg=40))
     assert node.publish() == []
     clock[0] += .5
     node.receive_line(x=500, heading=-40)
-    node.receive(hurdle(.8))
+    node.receive(hurdle(.8, hurdle_angle_45_deg=40))
     turn = node.publish()[-1]
     assert turn["action"] == "ALIGN_LEFT"
     node.send_status(turn["action"], turn["command_id"], "RUNNING")
@@ -310,11 +314,11 @@ def test_stationary_turn_completion_reobserves_line_heading(clock, status):
     node.publish()  # Release the post-turn dwell before the fresh observation.
     node.receive_line()
     node.receive(hurdle(0.8))
-    assert node.publish()[-1]["action"] == "STRAIGHT"
+    assert node.publish()[-1]["action"] == "STRAIGHT_1"
 
 
 
-def test_positioning_forward_rechecks_fresh_hurdle_without_dwell(clock):
+def test_positioning_forward_preserves_input_without_fixed_dwell(clock):
     node = HurdleHarness(phase="HURDLE_POSITIONING")
     node.receive(hurdle(0.8))
     forward = node.publish()[-1]
@@ -322,9 +326,8 @@ def test_positioning_forward_rechecks_fresh_hurdle_without_dwell(clock):
     release_general(node, forward)
     assert node.hurdle_post_motion_dwell_until is None
     assert node.hurdle_stationary_since == clock[0]
-    assert node.latest_info["hurdle"] is None
-    assert not node.general_motion_gate.has_required_fresh_vision()
-    assert all(not command["sdk_motion_requested"] for command in node.publish())
+    assert node.latest_info["hurdle"] is not None
+    assert getattr(node, "correction_post_motion_dwell_until", None) is None
     clock[0] += 0.01
     node.receive(hurdle(0.6))
     assert node.publish()[-1]["action"] == "STRAIGHT_1"
@@ -333,11 +336,11 @@ def test_positioning_forward_rechecks_fresh_hurdle_without_dwell(clock):
 def test_crossing_during_stationary_turn_finishes_turn_before_fine(clock):
     node = HurdleHarness()
     node.receive_line(x=500, heading=-40)
-    node.receive(hurdle(0.8))
+    node.receive(hurdle(0.8, hurdle_angle_45_deg=40))
     assert node.publish() == []
     clock[0] += .5
     node.receive_line(x=500, heading=-40)
-    node.receive(hurdle(.8))
+    node.receive(hurdle(.8, hurdle_angle_45_deg=40))
     turn = node.publish()[-1]
     assert turn["action"] == "ALIGN_LEFT"
     node.receive(hurdle(0.69))
@@ -347,7 +350,7 @@ def test_crossing_during_stationary_turn_finishes_turn_before_fine(clock):
     clock[0] += .5
     node.publish()
     node.receive_line(x=500, heading=-40)
-    node.receive(hurdle(0.69))
+    node.receive(hurdle(0.69, hurdle_angle_45_deg=40))
     result = node.publish()[-1]
     assert result["action"] == "ALIGN_LEFT"
     assert result["phase"] == "HURDLE_POSITIONING"
@@ -362,19 +365,19 @@ def test_crossing_during_stationary_turn_finishes_turn_before_fine(clock):
 
 
 
-def test_stationary_turn_requires_current_line_heading(clock):
+def test_stationary_turn_requires_current_hurdle_yaw(clock):
     node = HurdleHarness()
     node.receive_line(x=500, heading=-40)
-    node.receive(hurdle(0.8))
+    node.receive(hurdle(0.8, hurdle_angle_45_deg=40))
     assert node.publish() == []
     clock[0] += .5
     node.receive_line(x=500, heading=-40)
-    node.receive(hurdle(.8))
+    node.receive(hurdle(.8, hurdle_angle_45_deg=40))
     turn = node.publish()[-1]
     release_general(node, turn)
     clock[0] += 2.0
     node.publish()
-    node.receive(hurdle(0.8))
+    node.receive(hurdle(0.8, hurdle_angle_45_deg=None))
     result = node.publish()[-1]
     assert result["action"] == "WAIT" and not result["valid"]
 
@@ -435,7 +438,7 @@ def test_recognition_depth_never_enters_fine_sequence(clock, depth):
     node.receive_line()
     node.receive(hurdle(depth, bottom_distance_px=120, head_down_requested=True))
     command = node.publish()[-1]
-    assert command["source"] == "hurdle" and command["action"] == "STRAIGHT"
+    assert command["source"] == "hurdle" and command["action"] == "STRAIGHT_1"
     assert command["phase"] == "AUTO"
     assert command["source_command"]["hurdle_stage"] == "RECOGNITION_APPROACH"
     assert not getattr(node, "hurdle_positioning_entry_pending", False)
@@ -452,10 +455,10 @@ def test_unconfirmed_or_out_of_range_hurdle_does_not_take_line_control():
 
 @pytest.mark.parametrize("depth", [0.8, 0.7, 0.5])
 @pytest.mark.parametrize("x,direction", [(500, "LEFT"), (900, "RIGHT")])
-def test_line_heading_steering_continues_until_450mm(depth, x, direction):
+def test_hurdle_yaw_alignment_continues_until_450mm(depth, x, direction):
     decision = MotionDecisionPlanner().plan("AUTO", {
         "hurdle": hurdle(depth, camera_center_offset_x_px=600 if x < 710 else -600,
-                          hurdle_angle_deg=None),
+                          hurdle_angle_deg=None, hurdle_angle_45_deg=40 if direction == "LEFT" else -40),
         "line": line_info(x=x, heading=-40 if direction == "LEFT" else 40),
     }, 0.1)
     expected = f"ALIGN_{direction}" if depth > .45 else "GO"
@@ -512,7 +515,7 @@ def test_440mm_checkpoint_survives_loss_until_current_motion_and_settle_finish(c
                         bottom_distance_px=195, hurdle_angle_deg=-3.5, go_now=False))
     checkpoint = node.pending_hurdle_final_sequence
     assert checkpoint['depth_m'] == .44
-    assert checkpoint['center_steering_deg'] is None
+    assert checkpoint['center_steering_deg'] == 0.0
     if lost_info is None:
         clock[0] += 1.
     else:
@@ -633,16 +636,18 @@ def test_final_sequence_is_consumed_once_and_not_replayed_after_terminal(clock, 
     assert not any(c['action'] == 'GO' and c['valid'] for c in node.publish())
 
 
-def test_440mm_seen_during_positioning_fine_step_survives_input_invalidation(clock):
+def test_440mm_seen_during_positioning_forward_survives_detection_loss(clock):
     node = HurdleHarness()
+    node.FINE_FORWARD_PRE_MOTION_SETTLE_SEC = .5
     node.receive(hurdle(.6))
     forward = node.publish()[-1]
     assert forward['action'] == 'STRAIGHT_1'
     node.receive(hurdle(.44))
     node.receive({'detected': False})
     release_general(node, forward)
-    assert node.latest_info['hurdle'] is None
-    clock[0] += MotionDecisionNode.CORRECTION_POST_MOTION_DWELL_SEC
+    assert node.latest_info['hurdle']['detected'] is False
+    assert node.publish() == []
+    clock[0] += .5
     result = node.publish()[-1]
     assert result['action'] == 'GO' and result['source_command']['depth_m'] == .44
 
@@ -676,12 +681,12 @@ def test_final_checkpoint_waits_for_already_queued_motion_or_cancels_on_rejectio
     None,
 ])
 @pytest.mark.parametrize("reacquired_depth,expected_action", [(.60, "STRAIGHT_1"), (.53, "STRAIGHT_1"), (.44, "GO")])
-def test_hurdle_settle_survives_invalid_input_but_requires_valid_next_decision(
+def test_hurdle_turn_settle_survives_invalid_input_but_requires_valid_next_decision(
     clock, interrupted_info, reacquired_depth, expected_action,
 ):
     node = HurdleHarness()
     node.FINE_FORWARD_PRE_MOTION_SETTLE_SEC = 1.0
-    node.receive(hurdle(.65))
+    node.receive(hurdle(.65, hurdle_angle_45_deg=30))
     assert node.publish() == []
     stopped_at = clock[0]
     clock[0] += .4
@@ -702,24 +707,24 @@ def test_hurdle_settle_survives_invalid_input_but_requires_valid_next_decision(
     assert node.hurdle_stationary_since is None
 
 
-def test_hurdle_reacquisition_waits_only_remaining_stationary_time(clock):
+def test_hurdle_turn_reacquisition_waits_only_remaining_stationary_time(clock):
     node = HurdleHarness()
     node.FINE_FORWARD_PRE_MOTION_SETTLE_SEC = 1.0
-    node.receive(hurdle(.65))
+    node.receive(hurdle(.65, hurdle_angle_45_deg=30))
     assert node.publish() == []
-    clock[0] += .3
+    clock[0] += .1
     node.receive({"detected": False})
     node.publish()
-    clock[0] += .5
-    node.receive(hurdle(.60))
+    clock[0] += .2
+    node.receive(hurdle(.60, hurdle_angle_45_deg=30))
     assert node.publish() == []
     clock[0] += .21
-    node.receive(hurdle(.60))
-    assert node.publish()[-1]["action"] == "STRAIGHT_1"
+    node.receive(hurdle(.60, hurdle_angle_45_deg=30))
+    assert node.publish()[-1]["action"] == "ALIGN_LEFT"
 
 
 @pytest.mark.parametrize("source", ["line", "hurdle"])
-def test_hurdle_entry_during_motion_counts_settle_from_success(clock, source):
+def test_hurdle_entry_waits_for_current_motion_then_forward_uses_fresh_input(clock, source):
     node = HurdleHarness()
     node.FINE_FORWARD_PRE_MOTION_SETTLE_SEC = 1.0
     node.receive_line()
@@ -735,35 +740,26 @@ def test_hurdle_entry_during_motion_counts_settle_from_success(clock, source):
     stopped_at = clock[0]
     assert node.hurdle_stationary_since == stopped_at
     assert node.latest_info["hurdle"] is None
-    clock[0] += .8
-    node.receive(hurdle(.60))
-    assert node.publish() == []
-    clock[0] += .21
+    clock[0] += .01
     node.receive(hurdle(.60))
     fine = node.publish()[-1]
     assert fine["action"] == "STRAIGHT_1"
     assert node.hurdle_stationary_since is None
 
-    # Each fine step starts a new stationary interval at completion.
+    # A new frame can resume ordinary walking immediately after completion.
     node.send_status(fine["action"], fine["command_id"], "RUNNING")
     clock[0] += 4.0
     release_general(node, fine)
     stopped_at = clock[0]
     assert node.hurdle_stationary_since == stopped_at
     node.receive(hurdle(.58))
-    assert node.publish() == []
-    clock[0] += .4
-    node.receive({"detected": False})
-    node.publish()
-    clock[0] += .61
-    node.receive(hurdle(.58))
     assert node.publish()[-1]["action"] == "STRAIGHT_1"
 
 
-def test_hurdle_settle_does_not_count_executor_startup_hold(clock):
+def test_hurdle_go_settle_does_not_count_executor_startup_hold(clock):
     node = HurdleHarness()
     node.FINE_FORWARD_PRE_MOTION_SETTLE_SEC = 1.0
-    node.receive(hurdle(.65))
+    node.receive(hurdle(.44))
     assert node.publish() == []
     for sequence, ready in [(1, False), (2, True)]:
         clock[0] += 5.0
@@ -771,11 +767,11 @@ def test_hurdle_settle_does_not_count_executor_startup_hold(clock):
             "sequence": sequence, "active": not ready, "auto_ready": ready,
         })))
         assert node.hurdle_stationary_since is None
-    node.receive(hurdle(.60))
+    node.receive(hurdle(.44))
     assert node.publish() == []
     clock[0] += .9
-    node.receive(hurdle(.60))
+    node.receive(hurdle(.44))
     assert node.publish() == []
     clock[0] += .11
-    node.receive(hurdle(.60))
-    assert node.publish()[-1]["action"] == "STRAIGHT_1"
+    node.receive(hurdle(.44))
+    assert node.publish()[-1]["action"] == "GO"

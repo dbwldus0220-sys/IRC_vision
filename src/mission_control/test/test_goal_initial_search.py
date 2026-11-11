@@ -1,4 +1,4 @@
-"""Camera-up goal acquisition uses exactly two completed, fresh-image scans."""
+"""Untracked-goal acquisition uses single turns and fresh images across both sides."""
 
 import json
 
@@ -33,9 +33,10 @@ def goal_frame(node, clock, info=None, **updates):
     return node.publisher.messages[before:]
 
 
-def camera_ready(clock, side='RIGHT', status='SUCCEEDED'):
+def camera_ready(clock, side='RIGHT', status='SUCCEEDED', goal_index=1):
     node = LiveInputHarness(phase='LINE_TRACK_AFTER_PICKUP')
-    node.phase_manager.pickups_completed = 1
+    node.phase_manager.ball_sections_processed = goal_index - 1
+    node.phase_manager.pickups_completed = goal_index
     node.phase_manager.ball_grasp_results[1] = 'GRABBED'
     if side is not None:
         receive(node, clock, 'line', {**line_info(), 'image_width': 1280,
@@ -65,13 +66,12 @@ def finish_turn(node, clock, command, status='SUCCEEDED'):
         assert node.latest_info['goal'] is None
 
 
-@pytest.mark.parametrize('side,actions', [
-    ('RIGHT', ['GOAL_CAMERA90_TURN_RIGHT_5', 'GOAL_CAMERA90_TURN_LEFT_6']),
-    ('LEFT', ['GOAL_CAMERA90_TURN_LEFT_6', 'GOAL_CAMERA90_TURN_RIGHT_9']),
-    (None, ['GOAL_CAMERA90_TURN_RIGHT_5', 'GOAL_CAMERA90_TURN_LEFT_6']),
-])
-def test_exact_two_scans_then_wait_without_loop(clock, side, actions):
-    node = camera_ready(clock, side)
+@pytest.mark.parametrize('side', ['LEFT', 'RIGHT', None])
+@pytest.mark.parametrize('goal_index', [1, 2])
+def test_one_step_sweep_covers_both_sides_then_waits(clock, side, goal_index):
+    first, reverse = ('LEFT', 'RIGHT') if goal_index == 1 else ('RIGHT', 'LEFT')
+    actions = [f'GOAL_CAMERA90_TURN_{first}_1'] * 6 + [f'GOAL_CAMERA90_TURN_{reverse}_1'] * 12
+    node = camera_ready(clock, side, goal_index=goal_index)
     assert node.mission_phase == 'GOAL_APPROACH'
     for index, action in enumerate(actions):
         command = goal_frame(node, clock)[-1]
@@ -93,7 +93,7 @@ def test_goal_acquisition_ends_scan_and_preserves_normal_approach(clock, complet
     for _ in range(completed_scans):
         command = goal_frame(node, clock)[-1]
         finish_turn(node, clock, command)
-    commands = goal_frame(node, clock, {**approaching_goal(), 'camera_fx_px': 900.0})
+    commands = goal_frame(node, clock, {**approaching_goal(), 'camera_fx_px': 900.0, 'ring_center_depth_m': 1.0, 'waist_ring_aim_deg': 0.0})
     assert not node.goal_initial_search.active
     assert commands[-1]['valid']
     assert not commands[-1]['source_command'].get('goal_initial_search')
@@ -150,7 +150,7 @@ def test_line_side_ignores_stale_and_low_quality_observations(clock):
     assert node.goal_initial_search.last_line_side == 'LEFT'
 
 
-def test_new_camera_transition_rearms_two_scans():
+def test_new_camera_transition_rearms_incremental_sweep():
     search = GoalInitialSearch()
     search.last_line_side = 'LEFT'
     search.arm()
@@ -158,4 +158,29 @@ def test_new_camera_transition_rearms_two_scans():
     search.failed = True
     search.arm()
     assert search.step == 0 and not search.failed
-    assert search.sequence == (('LEFT', 6), ('RIGHT', 9))
+    assert search.sequence == (('LEFT', 1),) * 6 + (('RIGHT', 1),) * 12
+
+
+@pytest.mark.parametrize('goal_index', [1, 2])
+def test_untracked_loss_after_direct_handoff_starts_single_step_search(clock, goal_index):
+    node = LiveInputHarness(phase='GOAL_APPROACH')
+    node.phase_manager.ball_sections_processed = goal_index - 1
+    node.goal_initial_search = GoalInitialSearch()
+    node.planner._clear_goal_tracking()
+    command = goal_frame(node, clock)[-1]
+    direction = 'LEFT' if goal_index == 1 else 'RIGHT'
+    assert command['action'] == f'GOAL_CAMERA90_TURN_{direction}_1'
+    assert command['source_command']['turn_count'] == 1
+    assert 'lost_search_stage' not in command['source_command']
+
+
+def test_remembered_goal_loss_does_not_start_course_default_sweep(clock):
+    node = LiveInputHarness(phase='GOAL_APPROACH')
+    node.phase_manager.ball_sections_processed = 1
+    node.goal_initial_search = GoalInitialSearch()
+    node.planner.goal_tracking_active = True
+    node.planner.last_goal_turn_direction = 'LEFT'
+    command = goal_frame(node, clock)[-1]
+    assert not node.goal_initial_search.active
+    assert not command['source_command'].get('goal_initial_search')
+    assert node.planner.last_goal_turn_direction == 'LEFT'

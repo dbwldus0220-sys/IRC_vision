@@ -75,19 +75,14 @@ def test_unverified_or_conflicting_exit_does_not_force_turn(clock, change):
 
 
 @pytest.mark.parametrize('angle', [-90., 90.])
-def test_large_ground_exit_reserves_turn_but_keeps_existing_half_second_hold(clock, angle):
-    node, bridge, first = start(clock)
-    late(node, clock, exit_info(angle), count=3)
-    command = node.publisher.messages[-1]
-    assert command['reason'] == 'line_corner_exit_alignment'
-    assert command['source_command']['line_turn_prequeue']
-    bridge.navigation_command_callback(String(data=json.dumps(command)))
-    assert bridge.queued_request_deferred
-    forward_status(node, bridge, first, 'SUCCEEDED')
-    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
-    clock[0] = bridge.transition_dwell_until
-    bridge._check_atomic_dwell()
-    assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == bridge.motion_id_for_action(command['action'])
+def test_large_ground_exit_waits_for_completion_and_reobservation(clock, angle):
+    from test_line_turn_prequeue import test_turn_waits_for_completion_and_reobserves
+
+    node = LiveInputHarness(phase='LINE_TRACK')
+    fresh(node, clock, 'line', exit_info(angle))
+    expected = node.last_candidate_decision.action
+    test_turn_waits_for_completion_and_reobserves(
+        clock, 'LINE_TRACK', 'STRAIGHT', exit_info(angle), expected)
 
 
 @pytest.mark.parametrize('angle', [-90., 90.])
@@ -115,13 +110,13 @@ def test_missing_ground_uses_only_one_small_image_turn_and_requires_new_capture(
 @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT', 'CANCELLED'])
 def test_failed_walk_discards_reserved_corner(clock, status):
     node, bridge, first = start(clock)
-    late(node, clock, exit_info(90.), count=3)
+    late(node, clock, exit_info(30.), count=12)
     bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
     assert bridge.queued_request_id is not None
     forward_status(node, bridge, first, status)
     assert node.queued_general_command_id is None
     assert bridge.queued_request_id is None
-    assert len(bridge.executor_request_publisher.messages) == 1
+    assert len(bridge.executor_request_publisher.messages) == 2
 
 
 @pytest.mark.parametrize('distance', [-.11, .11, None])

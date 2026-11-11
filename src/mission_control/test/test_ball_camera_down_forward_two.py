@@ -67,8 +67,8 @@ def test_head_down_request_alone_does_not_authorize_regular_forward(head_ready, 
 def test_alignment_still_precedes_forward(fine):
     planner = MotionDecisionPlanner()
     plan = planner.plan_ball_pickup_fine_alignment if fine else planner.plan_ball_pickup_initial_alignment
-    assert 'TURN_RIGHT_' in plan(down_ball(bottom_distance_px=400, steering_angle_deg=35, offset_x_norm=.3)).action
-    assert 'CRAB_RIGHT' in plan(down_ball(bottom_distance_px=340, offset_x_px=100)).action
+    assert 'TURN_RIGHT_' in plan(down_ball(bottom_distance_px=400, steering_angle_deg=35, offset_x_norm=.3, offset_x_px=192)).action
+    assert 'CRAB_RIGHT' in plan(down_ball(bottom_distance_px=180, offset_x_px=100)).action
 
 
 @pytest.mark.parametrize('index', [1, 2])
@@ -102,7 +102,7 @@ def test_regular_two_reserves_once_and_returns_to_initial_checkpoint(clock, inde
 @pytest.mark.parametrize('changes', [
     {'bottom_distance_px': 299}, {'bottom_distance_px': 501},
     {'pickup_head_ready': False}, {'depth_valid': False}, {'depth_age_sec': .701},
-    {'offset_x_px': 100}, {'bottom_distance_px': 400, 'steering_angle_deg': 35, 'offset_x_norm': .3},
+    {'offset_x_px': 100}, {'bottom_distance_px': 400, 'steering_angle_deg': 35, 'offset_x_norm': .3, 'offset_x_px': 192},
 ])
 def test_changed_observation_does_not_reserve_old_regular_forward(clock, changes):
     node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()

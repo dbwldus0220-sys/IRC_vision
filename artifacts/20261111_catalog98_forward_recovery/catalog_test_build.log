@@ -1,0 +1,7 @@
+[ 50%] Built target gtest
+[ 50%] Built target gtest_main
+[ 75%] Built target catalog_only_core
+Consolidate compiler generated dependencies of target test_catalog_only_core
+[ 87%] Building CXX object CMakeFiles/test_catalog_only_core.dir/test/test_catalog_only_core.cpp.o
+[100%] Linking CXX executable test_catalog_only_core
+[100%] Built target test_catalog_only_core

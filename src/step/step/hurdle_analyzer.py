@@ -45,10 +45,10 @@ def fit_hurdle_yaw_from_depth_samples(
 ) -> dict[str, float | int | None]:
     """Fit the visible hurdle span in robot X-Z for one camera pose.
 
-    This is diagnostic geometry only.  It intentionally does not replace the
-    deployed ``hurdle_angle_deg`` consumed by navigation.  Each aligned-depth
-    sample is deprojected independently, so neither the full hurdle length nor
-    the YOLO bbox width is assumed to be visible.
+    Navigation selects the matching angle@45 or angle@0 hypothesis using the
+    executor's camera posture. Each aligned-depth sample is deprojected
+    independently, so neither the full hurdle length nor the YOLO bbox width
+    is assumed to be visible. The legacy bbox-row angle remains diagnostic.
     """
     empty: dict[str, float | int | None] = {
         "angle_deg": None,

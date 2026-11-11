@@ -48,8 +48,8 @@ def finish_pickup(ball_index, *, status='SUCCEEDED', grasp='GRABBED'):
 @pytest.mark.parametrize('ball_index', [1, 2])
 @pytest.mark.parametrize('heading,action', [
     (0., 'STRAIGHT'),
-    (-56., 'LINE_HEADING_TURN_LEFT_3'),
-    (56., 'LINE_HEADING_TURN_RIGHT_5'),
+    (-56., 'POST_BALL_LINE_TURN_LEFT_3'),
+    (56., 'POST_BALL_LINE_TURN_RIGHT_5'),
 ])
 def test_both_pickups_resume_line_then_request_their_own_goal_camera(clock, ball_index, heading, action):
     node = finish_pickup(ball_index)
@@ -78,6 +78,19 @@ def test_both_pickups_resume_line_then_request_their_own_goal_camera(clock, ball
             break
     command = node.publisher.messages[-1]
     assert command['valid'] and command['action'] == action
+    if heading:
+        assert node.mission_phase == 'POST_BALL_LINE_ALIGN'
+        node.send_status(action, command['command_id'], 'RUNNING')
+        clock[0] += 3.
+        node.send_status(action, command['command_id'], 'SUCCEEDED')
+        clock[0] += .6
+        Node._publish_decision(node)
+        clock[0] += .01
+        receive(node, clock, 'line', line_info())
+        Node._publish_decision(node)
+        command = node.publisher.messages[-1]
+        action = command['action']
+        assert action == 'STRAIGHT'
     assert node.mission_phase == 'LINE_TRACK_AFTER_PICKUP'
     node.send_status(action, command['command_id'], 'RUNNING')
     assert node.post_ball_line_started_count == 1
@@ -107,7 +120,7 @@ def test_both_pickups_resume_line_then_request_their_own_goal_camera(clock, ball
     })))
     for _ in range(3):
         clock[0] += .1
-        receive(node, clock, 'goal', goal())
+        receive(node, clock, 'goal', goal(ring_center_depth_m=1.0, waist_ring_aim_deg=0.0))
     receive(node, clock, 'line', line_info())
     assert node.vision_transport['line']['status'] == 'goal_camera_raised_line_frozen'
     node.send_status(action, command['command_id'], 'SUCCEEDED')

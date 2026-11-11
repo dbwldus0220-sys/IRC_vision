@@ -1,0 +1,811 @@
+{
+  "log_files": {
+    "detector": "python3_5119_1794349742320.log",
+    "analyzers": "python3_5121_1794349741893.log",
+    "decision": "python3_5123_1794349741250.log",
+    "bridge": "python3_5125_1794349741201.log",
+    "camera": "realsense2_camera_node_5117_1794349740527.log",
+    "executor": "sdk_motion_executor_5127_1794349740541.log"
+  },
+  "windows": {
+    "before_stop_10s": {
+      "duration_sec": 10,
+      "lines": 22,
+      "bytes": 9799,
+      "lines_per_second": 2.2,
+      "kib_per_second": 0.96,
+      "per_node": {
+        "detector": 10,
+        "decision": 12
+      },
+      "top_messages": [
+        [
+          "detector: YOLO_INFERENCE_TIMING",
+          5
+        ],
+        [
+          "detector: DETECTOR_PIPELINE_TIMING",
+          5
+        ],
+        [
+          "decision: BALL_PIPELINE_TIMING",
+          5
+        ],
+        [
+          "decision: Line next motion requested before completion",
+          3
+        ],
+        [
+          "decision: General motion lock released",
+          3
+        ],
+        [
+          "decision: Line corner remembered",
+          1
+        ]
+      ]
+    },
+    "stop_context_4s": {
+      "duration_sec": 4,
+      "lines": 37,
+      "bytes": 12531,
+      "lines_per_second": 9.25,
+      "kib_per_second": 3.06,
+      "per_node": {
+        "detector": 4,
+        "decision": 21,
+        "bridge": 12
+      },
+      "top_messages": [
+        [
+          "bridge: Command ignored",
+          12
+        ],
+        [
+          "decision: Line corner remembered",
+          6
+        ],
+        [
+          "decision: BALL_PIPELINE_TIMING",
+          4
+        ],
+        [
+          "decision: BALL entry prequeue",
+          3
+        ],
+        [
+          "detector: YOLO_INFERENCE_TIMING",
+          2
+        ],
+        [
+          "detector: DETECTOR_PIPELINE_TIMING",
+          2
+        ]
+      ]
+    },
+    "stop_wait_0758s": {
+      "duration_sec": 0.7578270435333252,
+      "lines": 17,
+      "bytes": 4345,
+      "lines_per_second": 22.43,
+      "kib_per_second": 5.6,
+      "per_node": {
+        "decision": 5,
+        "bridge": 12
+      },
+      "top_messages": [
+        [
+          "bridge: Command ignored",
+          12
+        ],
+        [
+          "decision: General motion lock released",
+          1
+        ],
+        [
+          "decision: BALL entry prequeue",
+          1
+        ],
+        [
+          "decision: Line corner remembered",
+          1
+        ],
+        [
+          "decision: BALL_PIPELINE_TIMING",
+          1
+        ],
+        [
+          "decision: BALL entry Line alignment requested",
+          1
+        ]
+      ]
+    },
+    "after_stop_10s": {
+      "duration_sec": 10,
+      "lines": 105,
+      "bytes": 28849,
+      "lines_per_second": 10.5,
+      "kib_per_second": 2.82,
+      "per_node": {
+        "detector": 10,
+        "decision": 54,
+        "bridge": 40,
+        "executor": 1
+      },
+      "top_messages": [
+        [
+          "bridge: Command ignored",
+          38
+        ],
+        [
+          "decision: Special motion lock enabled",
+          14
+        ],
+        [
+          "decision: BALL entry prequeue",
+          6
+        ],
+        [
+          "detector: YOLO_INFERENCE_TIMING",
+          5
+        ],
+        [
+          "detector: DETECTOR_PIPELINE_TIMING",
+          5
+        ],
+        [
+          "decision: BALL_PIPELINE_TIMING",
+          5
+        ]
+      ]
+    }
+  },
+  "nearby_timing": [
+    {
+      "wall_time": 1794349806.6438525,
+      "tag": "YOLO_INFERENCE_TIMING",
+      "message": "[YOLO_INFERENCE_TIMING] samples=25 avg_ms=26.358 p50_ms=22.542 p95_ms=39.326 max_ms=42.019 effective_fps=12.057 window_sec=2.073"
+    },
+    {
+      "wall_time": 1794349806.893304,
+      "tag": "DETECTOR_PIPELINE_TIMING",
+      "rgb_stamp_ns": 1794349806737017822,
+      "skipped_total": 1,
+      "published": true,
+      "samples": 24,
+      "window_ms": 2000.288,
+      "latest_ms": {
+        "capture_to_detector": 87.591,
+        "convert_preprocess": 20.172,
+        "inference": 22.299,
+        "postprocess": 1.196,
+        "publish": 0.934,
+        "overlay_display": 21.291,
+        "callback": 65.892
+      },
+      "summary_ms": {
+        "capture_to_detector": {
+          "n": 24,
+          "avg": 125.048,
+          "max": 205.179
+        },
+        "convert_preprocess": {
+          "n": 24,
+          "avg": 14.151,
+          "max": 38.8
+        },
+        "inference": {
+          "n": 24,
+          "avg": 27.012,
+          "max": 42.028
+        },
+        "postprocess": {
+          "n": 24,
+          "avg": 1.554,
+          "max": 3.026
+        },
+        "publish": {
+          "n": 24,
+          "avg": 1.275,
+          "max": 3.597
+        },
+        "overlay_display": {
+          "n": 24,
+          "avg": 25.652,
+          "max": 57.703
+        },
+        "callback": {
+          "n": 24,
+          "avg": 69.644,
+          "max": 118.014
+        }
+      }
+    },
+    {
+      "wall_time": 1794349808.7016568,
+      "tag": "YOLO_INFERENCE_TIMING",
+      "message": "[YOLO_INFERENCE_TIMING] samples=25 avg_ms=28.445 p50_ms=26.019 p95_ms=47.006 max_ms=47.191 effective_fps=12.149 window_sec=2.058"
+    },
+    {
+      "wall_time": 1794349808.9374683,
+      "tag": "DETECTOR_PIPELINE_TIMING",
+      "rgb_stamp_ns": 1794349808703661133,
+      "skipped_total": 1,
+      "published": true,
+      "samples": 25,
+      "window_ms": 2045.613,
+      "latest_ms": {
+        "capture_to_detector": 179.277,
+        "convert_preprocess": 15.158,
+        "inference": 12.909,
+        "postprocess": 1.536,
+        "publish": 1.17,
+        "overlay_display": 22.4,
+        "callback": 53.173
+      },
+      "summary_ms": {
+        "capture_to_detector": {
+          "n": 25,
+          "avg": 124.597,
+          "max": 207.704
+        },
+        "convert_preprocess": {
+          "n": 25,
+          "avg": 13.348,
+          "max": 29.241
+        },
+        "inference": {
+          "n": 25,
+          "avg": 28.4,
+          "max": 47.204
+        },
+        "postprocess": {
+          "n": 25,
+          "avg": 1.419,
+          "max": 2.757
+        },
+        "publish": {
+          "n": 25,
+          "avg": 1.005,
+          "max": 1.408
+        },
+        "overlay_display": {
+          "n": 25,
+          "avg": 21.212,
+          "max": 32.203
+        },
+        "callback": {
+          "n": 25,
+          "avg": 65.385,
+          "max": 111.025
+        }
+      }
+    },
+    {
+      "wall_time": 1794349810.703154,
+      "tag": "YOLO_INFERENCE_TIMING",
+      "message": "[YOLO_INFERENCE_TIMING] samples=20 avg_ms=33.522 p50_ms=32.168 p95_ms=45.600 max_ms=51.381 effective_fps=9.993 window_sec=2.001"
+    },
+    {
+      "wall_time": 1794349810.9459362,
+      "tag": "DETECTOR_PIPELINE_TIMING",
+      "rgb_stamp_ns": 1794349810803618408,
+      "skipped_total": 1,
+      "published": true,
+      "samples": 20,
+      "window_ms": 2007.318,
+      "latest_ms": {
+        "capture_to_detector": 84.075,
+        "convert_preprocess": 13.568,
+        "inference": 22.368,
+        "postprocess": 1.484,
+        "publish": 1.164,
+        "overlay_display": 17.141,
+        "callback": 55.725
+      },
+      "summary_ms": {
+        "capture_to_detector": {
+          "n": 20,
+          "avg": 150.367,
+          "max": 262.277
+        },
+        "convert_preprocess": {
+          "n": 20,
+          "avg": 14.121,
+          "max": 23.411
+        },
+        "inference": {
+          "n": 20,
+          "avg": 33.436,
+          "max": 51.391
+        },
+        "postprocess": {
+          "n": 20,
+          "avg": 2.201,
+          "max": 8.358
+        },
+        "publish": {
+          "n": 20,
+          "avg": 1.765,
+          "max": 7.195
+        },
+        "overlay_display": {
+          "n": 20,
+          "avg": 27.11,
+          "max": 59.805
+        },
+        "callback": {
+          "n": 20,
+          "avg": 78.633,
+          "max": 107.208
+        }
+      }
+    },
+    {
+      "wall_time": 1794349812.7491717,
+      "tag": "YOLO_INFERENCE_TIMING",
+      "message": "[YOLO_INFERENCE_TIMING] samples=22 avg_ms=26.249 p50_ms=23.883 p95_ms=41.217 max_ms=45.150 effective_fps=10.784 window_sec=2.040"
+    },
+    {
+      "wall_time": 1794349813.046578,
+      "tag": "DETECTOR_PIPELINE_TIMING",
+      "rgb_stamp_ns": 1794349812836802002,
+      "skipped_total": 1,
+      "published": true,
+      "samples": 21,
+      "window_ms": 2101.71,
+      "latest_ms": {
+        "capture_to_detector": 142.379,
+        "convert_preprocess": 6.806,
+        "inference": 24.693,
+        "postprocess": 1.241,
+        "publish": 1.29,
+        "overlay_display": 31.93,
+        "callback": 65.961
+      },
+      "summary_ms": {
+        "capture_to_detector": {
+          "n": 21,
+          "avg": 123.327,
+          "max": 253.656
+        },
+        "convert_preprocess": {
+          "n": 21,
+          "avg": 14.45,
+          "max": 34.47
+        },
+        "inference": {
+          "n": 21,
+          "avg": 26.651,
+          "max": 45.161
+        },
+        "postprocess": {
+          "n": 21,
+          "avg": 2.95,
+          "max": 10.948
+        },
+        "publish": {
+          "n": 21,
+          "avg": 1.465,
+          "max": 5.138
+        },
+        "overlay_display": {
+          "n": 21,
+          "avg": 31.796,
+          "max": 70.102
+        },
+        "callback": {
+          "n": 21,
+          "avg": 77.312,
+          "max": 144.382
+        }
+      }
+    },
+    {
+      "wall_time": 1794349807.5572934,
+      "tag": "BALL_PIPELINE_TIMING",
+      "rgb_stamp_ns": 1794349807436949463,
+      "track_id": 75,
+      "hits": 6,
+      "confirmed": false,
+      "raw_detected": false,
+      "input_status": "accepted",
+      "confirmation_event": false,
+      "samples": 24,
+      "window_ms": 2058.695,
+      "latest_ms": {
+        "capture_to_detector": 79.842,
+        "detector_work": 29.088,
+        "detector_to_ball": 7.975,
+        "ball_work": 0.65,
+        "ball_to_decision": 1.055,
+        "capture_to_decision": 118.589,
+        "decision_callback": 0.54
+      },
+      "summary_ms": {
+        "capture_to_detector": {
+          "n": 24,
+          "avg": 129.148,
+          "max": 205.179
+        },
+        "detector_work": {
+          "n": 24,
+          "avg": 43.313,
+          "max": 62.667
+        },
+        "detector_to_ball": {
+          "n": 24,
+          "avg": 13.737,
+          "max": 22.223
+        },
+        "ball_work": {
+          "n": 24,
+          "avg": 2.758,
+          "max": 11.376
+        },
+        "ball_to_decision": {
+          "n": 24,
+          "avg": 2.023,
+          "max": 6.593
+        },
+        "capture_to_decision": {
+          "n": 24,
+          "avg": 190.945,
+          "max": 266.459
+        },
+        "decision_callback": {
+          "n": 24,
+          "avg": 0.536,
+          "max": 0.784
+        }
+      }
+    },
+    {
+      "wall_time": 1794349808.0706093,
+      "tag": "BALL_PIPELINE_TIMING",
+      "rgb_stamp_ns": 1794349807903600342,
+      "track_id": 75,
+      "hits": 10,
+      "confirmed": true,
+      "raw_detected": true,
+      "input_status": "accepted",
+      "confirmation_event": true,
+      "samples": 5,
+      "window_ms": 513.525,
+      "latest_ms": {
+        "capture_to_detector": 100.558,
+        "detector_work": 41.646,
+        "detector_to_ball": 14.213,
+        "ball_work": 6.998,
+        "ball_to_decision": 0.831,
+        "capture_to_decision": 164.214,
+        "decision_callback": 1.784
+      },
+      "summary_ms": {
+        "capture_to_detector": {
+          "n": 5,
+          "avg": 84.528,
+          "max": 100.558
+        },
+        "detector_work": {
+          "n": 5,
+          "avg": 47.058,
+          "max": 78.32
+        },
+        "detector_to_ball": {
+          "n": 5,
+          "avg": 13.604,
+          "max": 17.688
+        },
+        "ball_work": {
+          "n": 5,
+          "avg": 3.28,
+          "max": 6.998
+        },
+        "ball_to_decision": {
+          "n": 5,
+          "avg": 1.88,
+          "max": 4.943
+        },
+        "capture_to_decision": {
+          "n": 5,
+          "avg": 150.321,
+          "max": 195.222
+        },
+        "decision_callback": {
+          "n": 5,
+          "avg": 0.815,
+          "max": 1.784
+        }
+      }
+    },
+    {
+      "wall_time": 1794349809.7644565,
+      "tag": "BALL_PIPELINE_TIMING",
+      "rgb_stamp_ns": 1794349809503644775,
+      "track_id": 76,
+      "hits": 10,
+      "confirmed": true,
+      "raw_detected": true,
+      "input_status": "accepted",
+      "confirmation_event": true,
+      "samples": 19,
+      "window_ms": 1693.657,
+      "latest_ms": {
+        "capture_to_detector": 186.274,
+        "detector_work": 56.711,
+        "detector_to_ball": 12.506,
+        "ball_work": 1.39,
+        "ball_to_decision": 0.835,
+        "capture_to_decision": 257.681,
+        "decision_callback": 1.934
+      },
+      "summary_ms": {
+        "capture_to_detector": {
+          "n": 19,
+          "avg": 159.649,
+          "max": 207.704
+        },
+        "detector_work": {
+          "n": 19,
+          "avg": 46.994,
+          "max": 74.022
+        },
+        "detector_to_ball": {
+          "n": 19,
+          "avg": 13.09,
+          "max": 20.993
+        },
+        "ball_work": {
+          "n": 19,
+          "avg": 3.215,
+          "max": 16.569
+        },
+        "ball_to_decision": {
+          "n": 19,
+          "avg": 3.244,
+          "max": 16.501
+        },
+        "capture_to_decision": {
+          "n": 19,
+          "avg": 226.176,
+          "max": 286.205
+        },
+        "decision_callback": {
+          "n": 19,
+          "avg": 4.053,
+          "max": 21.447
+        }
+      }
+    },
+    {
+      "wall_time": 1794349811.7892108,
+      "tag": "BALL_PIPELINE_TIMING",
+      "rgb_stamp_ns": 1794349811636987305,
+      "track_id": 77,
+      "hits": 9,
+      "confirmed": false,
+      "raw_detected": false,
+      "input_status": "accepted",
+      "confirmation_event": false,
+      "samples": 23,
+      "window_ms": 2024.784,
+      "latest_ms": {
+        "capture_to_detector": 105.686,
+        "detector_work": 33.558,
+        "detector_to_ball": 9.603,
+        "ball_work": 0.722,
+        "ball_to_decision": 0.711,
+        "capture_to_decision": 150.247,
+        "decision_callback": 0.806
+      },
+      "summary_ms": {
+        "capture_to_detector": {
+          "n": 23,
+          "avg": 123.316,
+          "max": 262.277
+        },
+        "detector_work": {
+          "n": 23,
+          "avg": 45.295,
+          "max": 62.802
+        },
+        "detector_to_ball": {
+          "n": 23,
+          "avg": 12.567,
+          "max": 24.529
+        },
+        "ball_work": {
+          "n": 23,
+          "avg": 3.647,
+          "max": 15.747
+        },
+        "ball_to_decision": {
+          "n": 23,
+          "avg": 1.706,
+          "max": 4.252
+        },
+        "capture_to_decision": {
+          "n": 23,
+          "avg": 186.491,
+          "max": 343.696
+        },
+        "decision_callback": {
+          "n": 23,
+          "avg": 2.188,
+          "max": 15.637
+        }
+      }
+    },
+    {
+      "wall_time": 1794349811.9081745,
+      "tag": "BALL_PIPELINE_TIMING",
+      "rgb_stamp_ns": 1794349811736994141,
+      "track_id": 77,
+      "hits": 10,
+      "confirmed": true,
+      "raw_detected": true,
+      "input_status": "accepted",
+      "confirmation_event": true,
+      "samples": 1,
+      "window_ms": 118.973,
+      "latest_ms": {
+        "capture_to_detector": 106.885,
+        "detector_work": 50.483,
+        "detector_to_ball": 7.887,
+        "ball_work": 2.868,
+        "ball_to_decision": 0.866,
+        "capture_to_decision": 168.961,
+        "decision_callback": 1.059
+      },
+      "summary_ms": {
+        "capture_to_detector": {
+          "n": 1,
+          "avg": 106.885,
+          "max": 106.885
+        },
+        "detector_work": {
+          "n": 1,
+          "avg": 50.483,
+          "max": 50.483
+        },
+        "detector_to_ball": {
+          "n": 1,
+          "avg": 7.887,
+          "max": 7.887
+        },
+        "ball_work": {
+          "n": 1,
+          "avg": 2.868,
+          "max": 2.868
+        },
+        "ball_to_decision": {
+          "n": 1,
+          "avg": 0.866,
+          "max": 0.866
+        },
+        "capture_to_decision": {
+          "n": 1,
+          "avg": 168.961,
+          "max": 168.961
+        },
+        "decision_callback": {
+          "n": 1,
+          "avg": 1.059,
+          "max": 1.059
+        }
+      }
+    },
+    {
+      "wall_time": 1794349813.9457622,
+      "tag": "BALL_PIPELINE_TIMING",
+      "rgb_stamp_ns": 1794349813770165283,
+      "track_id": 77,
+      "hits": 17,
+      "confirmed": true,
+      "raw_detected": true,
+      "input_status": "accepted",
+      "confirmation_event": false,
+      "samples": 21,
+      "window_ms": 2031.981,
+      "latest_ms": {
+        "capture_to_detector": 111.389,
+        "detector_work": 43.735,
+        "detector_to_ball": 8.302,
+        "ball_work": 1.895,
+        "ball_to_decision": 1.222,
+        "capture_to_decision": 166.477,
+        "decision_callback": 2.357
+      },
+      "summary_ms": {
+        "capture_to_detector": {
+          "n": 21,
+          "avg": 166.469,
+          "max": 332.503
+        },
+        "detector_work": {
+          "n": 21,
+          "avg": 45.198,
+          "max": 71.857
+        },
+        "detector_to_ball": {
+          "n": 21,
+          "avg": 12.262,
+          "max": 22.175
+        },
+        "ball_work": {
+          "n": 21,
+          "avg": 2.766,
+          "max": 7.928
+        },
+        "ball_to_decision": {
+          "n": 21,
+          "avg": 2.227,
+          "max": 9.039
+        },
+        "capture_to_decision": {
+          "n": 21,
+          "avg": 228.61,
+          "max": 405.037
+        },
+        "decision_callback": {
+          "n": 21,
+          "avg": 1.292,
+          "max": 3.579
+        }
+      }
+    }
+  ],
+  "warnings_errors_during_stop": [],
+  "recording_time_comparison": {
+    "before_recording_filename_time": {
+      "summary_emission_epoch_range": [
+        1794349747,
+        1794349754
+      ],
+      "effective_fps": 21.62,
+      "mean_ms": {
+        "capture_to_detector": 65.966,
+        "convert_preprocess": 7.029,
+        "inference": 21.934,
+        "overlay_display": 8.938,
+        "callback": 39.792
+      }
+    },
+    "after_recording_filename_time": {
+      "summary_emission_epoch_range": [
+        1794349755,
+        1794349765
+      ],
+      "effective_fps": 14.104,
+      "mean_ms": {
+        "capture_to_detector": 65.78,
+        "convert_preprocess": 11.929,
+        "inference": 25.186,
+        "overlay_display": 15.812,
+        "callback": 55.055
+      }
+    },
+    "around_ball_stop": {
+      "summary_emission_epoch_range": [
+        1794349807,
+        1794349811
+      ],
+      "effective_fps": 11.103,
+      "mean_ms": {
+        "capture_to_detector": 136.05,
+        "convert_preprocess": 13.692,
+        "inference": 30.638,
+        "overlay_display": 23.833,
+        "callback": 71.273
+      }
+    }
+  },
+  "limitations": [
+    "Recording start inferred from filename 07:29:14; temporal association is not an on/off experiment.",
+    "No historical CPU/GPU load, thermal, disk IO or per-log-call durations were recorded.",
+    "Some timing summaries exclude their own final logging cost.",
+    "Image age includes camera/driver/transport/scheduling; these components cannot be separated from these logs.",
+    "The 66.7 ms RGB-depth mismatch is visible in a nearby video frame, not a raw packet for every STOP command."
+  ]
+}

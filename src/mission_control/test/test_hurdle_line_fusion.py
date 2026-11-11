@@ -60,7 +60,7 @@ def test_consistent_points_rejected_across_occlusion_can_be_recovered():
 
 
 @pytest.mark.parametrize("x", [200, 500, 900, 1100])
-def test_heading_is_independent_of_intersection_position_and_validity(x):
+def test_diagnostic_line_heading_does_not_override_calibrated_hurdle_yaw(x):
     result = build_hurdle_path_reference(hurdle(.8), line_info(x=x, heading=25))
     assert result["line_heading_valid"]
     assert result["line_heading_deg"] == 25
@@ -68,8 +68,8 @@ def test_heading_is_independent_of_intersection_position_and_validity(x):
     decision = MotionDecisionPlanner().plan("AUTO", {
         "hurdle": hurdle(.8), "line": line_info(x=x, heading=25),
     }, .1)
-    assert decision.action == "ALIGN_RIGHT"
-    assert decision.source_command["turn_count"] == 1
+    assert decision.action == "STRAIGHT_1"
+    assert "turn_count" not in decision.source_command
 
 
 def test_filtered_image_heading_is_preferred_over_raw_and_ground_heading():
@@ -87,14 +87,14 @@ def test_filtered_image_heading_is_preferred_over_raw_and_ground_heading():
     {"filtered_heading_error_deg": float("nan"), "heading_error_deg": float("inf")},
     {"filtered_heading_error_deg": 91},
 ])
-def test_bad_heading_waits_in_coarse_approach_and_fresh_heading_releases_it(updates):
+def test_bad_line_heading_does_not_block_valid_hurdle_angle(updates):
     planner = MotionDecisionPlanner()
     info = hurdle(.8)
     decision = planner.plan("AUTO", {"hurdle": info, "line": {**line_info(), **updates}}, .1)
-    assert not decision.valid and decision.action == "WAIT"
+    assert decision.valid and decision.action == "STRAIGHT_1"
     resumed = planner.plan("AUTO", {"hurdle": info, "line": line_info(heading=-30)}, .1)
-    assert resumed.valid and resumed.action == "ALIGN_LEFT"
-    assert resumed.source_command["turn_count"] == 2
+    assert resumed.valid and resumed.action == "STRAIGHT_1"
+    assert "turn_count" not in resumed.source_command
 
 
 def test_held_intersection_does_not_reuse_old_heading():
@@ -103,10 +103,10 @@ def test_held_intersection_does_not_reuse_old_heading():
     info, reference = planner._hurdle_observation_with_path(hurdle(.8), None, .1)
     assert reference["path_reference_source"] == "held"
     assert not reference["line_heading_valid"]
-    assert planner.hurdle_planner.plan(info, positioning=True).action == "WAIT"
+    assert planner.hurdle_planner.plan(info, positioning=True).action == "STRAIGHT_1"
     info, reference = planner._hurdle_observation_with_path(
         hurdle(.8), line_info(x=1100, heading=-30), .1,
     )
     assert reference["path_reference_source"] == "held"
     assert reference["line_heading_reference_source"] == "fresh"
-    assert planner.hurdle_planner.plan(info, positioning=True).action == "ALIGN_LEFT"
+    assert planner.hurdle_planner.plan(info, positioning=True).action == "STRAIGHT_1"

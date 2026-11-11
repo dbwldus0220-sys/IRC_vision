@@ -30,7 +30,7 @@ constexpr std::int64_t kDefaultRunningPolls = 2;
 constexpr std::int64_t kDefaultSettlingPolls = 1;
 constexpr std::int64_t kDefaultHeartbeatPeriodMs = 500;
 constexpr double kHurdleHeadDownBottomDistancePx = 120.0;
-constexpr double kHurdleHeadDownDeg = -60.0;
+constexpr double kHurdleHeadDownDeg = -64.0;
 
 std::uint64_t steady_now_ms()
 {

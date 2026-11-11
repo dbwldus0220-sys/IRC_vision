@@ -95,11 +95,11 @@ def test_actual_speed_drives_all_camera45_reservation_windows(count):
 
 
 @pytest.mark.parametrize('count', range(1, 7))
-def test_every_left_turn_can_reserve_forward_and_release_its_lock(clock, count):
-    from test_line_turn_prequeue import test_turn_reserves_once_and_starts_only_after_success
+def test_every_left_turn_reobserves_and_releases_its_lock(clock, count):
+    from test_line_turn_prequeue import test_turn_waits_for_completion_and_reobserves
     from test_mission_phase_flow import line_info
 
-    test_turn_reserves_once_and_starts_only_after_success(
+    test_turn_waits_for_completion_and_reobserves(
         clock, 'LINE_TRACK', f'LINE_OFFSET_TURN_LEFT_{count}', line_info(), 'STRAIGHT')
 
 

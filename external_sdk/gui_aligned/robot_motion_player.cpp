@@ -20,7 +20,8 @@ double guiSeconds(RobotMotionPlayer::Clock::time_point value) {
 }
 bool isBallRecoveryMotion(std::string_view name) {
     return name == "p라인복귀좌회전공용" || name == "t라인복귀좌공용"
-        || name == "t라인복귀우공용";
+        || name == "t라인복귀우공용"
+        || name == "n라인복귀좌회전공용" || name == "n라인복귀우회전공용";
 }
 bool isLineRecoveryMotion(std::string_view name) {
     return name == "R전진라인복귀좌" || name == "R라인복귀우회전"
@@ -28,16 +29,19 @@ bool isLineRecoveryMotion(std::string_view name) {
         || name == "t라인복귀좌실전" || name == "t라인복귀우실전"
         || name == "t라인복귀좌실전90도" || name == "t라인복귀우실전90도"
         || name == "p라인복귀좌회전45도" || name == "p라인복귀좌회전90도"
+        || name == "n라인복귀좌회전45도" || name == "n라인복귀우회전45도"
+        || name == "n라인복귀좌회전90도" || name == "n라인복귀우회전90도"
         || isBallRecoveryMotion(name);
 }
 bool isLineWalkingMotion(std::string_view name) {
     return name.starts_with("R전진45도(") || name == "t전진실전"
         || name.starts_with("t전진실전45도(") || name.starts_with("p전진45(")
+        || name.starts_with("n전진45도(")
         || isLineRecoveryMotion(name);
 }
 bool isGoalForwardMotion(std::string_view name) {
     return name.starts_with("R전진90도(") || name.starts_with("t전진실전90도(")
-        || name.starts_with("p전진90도(");
+        || name.starts_with("p전진90도(") || name.starts_with("n전진90도(");
 }
 bool isCamera45Turn(std::string_view name) {
     return name.starts_with("R제자리좌회전(") || name.starts_with("t제자리좌회전45도(")
@@ -260,9 +264,11 @@ bool RobotMotionPlayer::canSeamlesslyTransition(
         && sameWalkingEndPose(current, next, fixed_head)) return true;
     const bool to_fine = current_standard && next_name == "p오뒤에서 미세오뒤(45도)";
     const bool from_fine = current_fine && next_name == "p미세오뒤에서 오뒤45도";
+    const auto standing_name = library_.contains("n전진45도(4회)")
+        ? "n전진45도(4회)" : "p전진45(4회)";
     if ((to_fine || from_fine) && next.repeatCount() == 1
-        && library_.contains("p전진45(4회)") && library_.contains("p미세45도(5회)")) {
-        const auto& standing = library_.motion("p전진45(4회)");
+        && library_.contains(standing_name) && library_.contains("p미세45도(5회)")) {
+        const auto& standing = library_.motion(standing_name);
         const auto& fine = library_.motion("p미세45도(5회)");
         const bool complete_transition = std::all_of(next.frames().begin(), next.frames().end(),
             [](const MotionFrame& frame) {
@@ -431,7 +437,7 @@ RobotMotionPlayer::Clock::time_point RobotMotionPlayer::forwardBoundaryStart(
     const auto forward = [](std::string_view name) {
         return isLineWalkingMotion(name) || isGoalForwardMotion(name)
             || name.starts_with("R전진0도(") || name.starts_with("t전진실전0도(")
-            || name.starts_with("p전진실전0도(");
+            || name.starts_with("p전진실전0도(") || name.starts_with("n전진0도(");
     };
     if (!account_forward_boundary_feedback_ || !forward(current_motion_) || !forward(next_name)
         || next.frames().empty() || now < last_goal_written_at_) return now;

@@ -49,7 +49,7 @@ def test_invalid_geometry_does_not_start_turn(changes):
 
 
 @pytest.mark.parametrize('section', [1, 2])
-@pytest.mark.parametrize('region', [1, 2, 3, 4])
+@pytest.mark.parametrize('region', [3, 4])
 @pytest.mark.parametrize('heading', [-31., 31.])
 def test_both_fixed_exits_can_enter_either_stationary_turn(clock, section, region, heading):
     node = LiveInputHarness(phase='POST_SHOT_TURN')

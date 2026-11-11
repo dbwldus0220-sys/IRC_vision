@@ -1,0 +1,22 @@
+.....................................F.................................. [ 39%]
+........................................................................ [ 78%]
+........................................                                 [100%]
+=================================== FAILURES ===================================
+________ test_recognition_approach_blocks_new_line_prequeue[1.001-True] ________
+
+clock = [10.0], depth = 1.001, allowed = True
+
+    @pytest.mark.parametrize("depth,allowed", [(1.001, True), (1.0, False), (0.7, False), (0.551, False), (0.55, False)])
+    def test_recognition_approach_blocks_new_line_prequeue(clock, depth, allowed):
+        node = HurdleHarness()
+>       assert MotionDecisionNode._line_only_prequeue_allowed(
+            node, {"hurdle": hurdle(depth)},
+        ) is allowed
+E       AssertionError: assert False is True
+E        +  where False = <function MotionDecisionNode._line_only_prequeue_allowed at 0xffff7f27c670>(<test_hurdle_positioning.HurdleHarness object at 0xffff7f036200>, {'hurdle': {'bbox': [400, 300, 1000, 500], 'bottom_distance_px': 200, 'camera_center_offset_x_px': 0, 'confidence': 0.9, ...}})
+E        +    where <function MotionDecisionNode._line_only_prequeue_allowed at 0xffff7f27c670> = MotionDecisionNode._line_only_prequeue_allowed
+
+src/mission_control/test/test_hurdle_positioning.py:259: AssertionError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_hurdle_positioning.py::test_recognition_approach_blocks_new_line_prequeue[1.001-True]
+1 failed, 183 passed in 2.16s

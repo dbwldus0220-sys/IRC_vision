@@ -1,0 +1,383 @@
+--- before/artifacts/AGENTS.md
++++ artifacts/AGENTS.md
+@@ -1,5 +1,11 @@
+ # Runtime Motion Policy
+ 
++- The 2026-11-11 source100 update supplies `p전진*`, `p라인복귀좌회전*`,
++  and `t라인복귀우*` data under the existing `n전진*`/`n라인복귀*` catalog
++  names so command aliases stay stable. Keep source speed 1.0. Derive eight
++  forward cycles from the six-cycle source; the source's `p전진0도(2회)`
++  has repeat_count=3, so preserve the deployed two-cycle command as 2.
++  `n공에서 전진하고 후진준비자세` keeps all six supplied frames, once.
+ - The 2026-11-11 source99 update uses `n전진*` and `n라인복귀좌/우회전*`
+   at their supplied speed 1.0. Keep command repeat counts: the source's
+   `n전진45도(6회)` is mislabeled with repeat_count=4; deployed 6/8 variants
+--- before/src/irc_step_motion_executor/config/motion_aliases.yaml
++++ src/irc_step_motion_executor/config/motion_aliases.yaml
+@@ -57,6 +57,7 @@
+   pickup_crab_left_0_2: "tt미세왼옆0도(2회)"
+   pickup_crab_right_0_2: "t미세오옆꽃게(0도)-2회"
+   pickup_pre_backward_camera_down: "찐공잡기전후진-2(2회)"
++  pickup_forward_to_backward_prepare: "n공에서 전진하고 후진준비자세"
+   # Close-ball recovery uses the supplied one-cycle retreat.
+   pickup_lost_ball_backward_1: "찐후진실전(1회)"
+   ball_lost_camera_down_backward_2: "찐후진실전-2(2회)"
+--- before/src/mission_control/mission_control/ball_fine_approach.py
++++ src/mission_control/mission_control/ball_fine_approach.py
+@@ -46,7 +46,7 @@
+     if identifier == 'ball_align_fine_forward_45_5':
+         return .394 * 5 / 1.05
+     if identifier == 'ball_align_forward_2':
+-        return .504 * 2
++        return .514 * 2
+     if identifier.startswith('ball_align_turn_'):
+         count = int(identifier.rsplit('_', 1)[1])
+         return camera45_turn_duration_sec('LEFT' if '_left_' in identifier else 'RIGHT', count)
+--- before/src/mission_control/mission_control/ball_loss_confirmation.py
++++ src/mission_control/mission_control/ball_loss_confirmation.py
+@@ -6,7 +6,7 @@
+ 
+ @dataclass
+ class BallLossConfirmation:
+-    min_duration_sec: float = 0.5
++    min_duration_sec: float = 0.8
+     min_frames: int = 5
+     last_stamp_ns: int | None = None
+     last_received_at: float | None = None
+--- before/src/mission_control/mission_control/motion_command_bridge_node.py
++++ src/mission_control/mission_control/motion_command_bridge_node.py
+@@ -18,7 +18,7 @@
+ from .crab_motion_selection import (
+     crab_repeat_motion, crab_support_motion_id, goal_crab_motion_id, GOAL_CRAB_DURATIONS,
+ )
+-from .pickup_fine_skip import pickup_fine_can_skip
++from .pickup_fine_skip import pickup_fine_can_skip, is_pickup_forward_or_recovery
+ from .ball_fine_approach import motion_id as ball_fine_motion_id, physical_motion_id
+ 
+ from .safety_interlock import RECOVERABLE_MOTOR_ERROR_CODES
+@@ -73,6 +73,8 @@
+     PICKUP_FINE_PRE_DWELL_MARKER = "__PICKUP_FINE_PRE_DWELL__"
+     PICKUP_FINE_PRE_DWELL_SEC = 0.5
+     TRANSITION_DWELL_SEC = 0.5
++    TRANSITION_PRE_DWELL_SEC = 0.2
++    PICKUP_FORWARD_TO_BACKWARD_PREPARE = "pickup_forward_to_backward_prepare"
+     BACKWARD_DWELL_SEC = 0.5
+     FINE_TO_BACKWARD_DWELL_SEC = 1.0
+     BACKWARD_MOTION_IDS = frozenset({
+@@ -94,6 +96,7 @@
+         *GOAL_CRAB_DURATIONS,
+     })
+     TRANSITION_MOTION_IDS = frozenset({
++        PICKUP_FORWARD_TO_BACKWARD_PREPARE,
+         *PICKUP_FINE_PREPARE_MOTION_IDS, *PICKUP_CRAB_PREPARE_MOTION_IDS,
+         "hurdle_fine_prepare_0",
+         "goal_fine_prepare_90", "goal_crab_right_to_fine_90", "goal_crab_left_to_fine_90",
+@@ -1048,6 +1051,15 @@
+         self.pickup_fine_align_waiting = False
+         if action == "BALL_PICKUP_FINE_ALIGN_CONTINUE":
+             self.pickup_fixed_sequence_started = True
++            source_command = payload.get("source_command") or {}
++            bottom = source_command.get("bottom_distance_px")
++            if (is_pickup_forward_or_recovery(self.last_physical_motion_id)
++                    and type(bottom) in {int, float}
++                    and pickup_fine_can_skip(self.last_physical_motion_id, bottom)):
++                self.active_pickup_sequence = (
++                    MotionCommandBridgeNode.PICKUP_FORWARD_TO_BACKWARD_PREPARE,
++                    *self.active_pickup_sequence,
++                )
+             self.active_pickup_sequence = self._with_pickup_motion_dwells(
+                 self.active_pickup_sequence
+             )
+@@ -1524,11 +1536,13 @@
+         ):
+             self.transition_pending_request = request_payload
+             self.transition_dwell_until = MotionCommandBridgeNode._pre_motion_dwell_deadline(
+-                self, MotionCommandBridgeNode.TRANSITION_DWELL_SEC)
++                self, MotionCommandBridgeNode.TRANSITION_PRE_DWELL_SEC
++                if request_payload["motion_id"] in {"ball_align_prepare_fine_45", "ball_align_prepare_turn_45"}
++                else MotionCommandBridgeNode.TRANSITION_DWELL_SEC)
+             self.publish_motion_status(
+                 status="RUNNING", action=action, command_id=command_id,
+                 event_id=event_id, request_id=request_id, motion_id="__CORRECTION_PRE_DWELL__",
+-                message="holding still for 0.5 seconds at correction boundary",
++                message="holding still at correction/support-change boundary",
+             )
+             self._check_transition_dwell()
+             return
+@@ -1538,7 +1552,7 @@
+                 else MotionCommandBridgeNode.FINE_TO_BACKWARD_DWELL_SEC
+                 if backward and self.last_physical_motion_id in self.FINE_FORWARD_MOTION_IDS
+                 else MotionCommandBridgeNode.BACKWARD_DWELL_SEC if backward
+-                else MotionCommandBridgeNode.TRANSITION_DWELL_SEC
++                else MotionCommandBridgeNode.TRANSITION_PRE_DWELL_SEC
+             )
+             self.transition_motion_id = request_payload["motion_id"]
+             self.transition_pending_request = request_payload
+--- before/src/mission_control/mission_control/motion_decision_node.py
++++ src/mission_control/mission_control/motion_decision_node.py
+@@ -115,17 +115,17 @@
+     DEFAULT_EXECUTOR_HEARTBEAT_STARTUP_GRACE_SEC = 5.0
+     EXECUTOR_WATCHDOG_PERIOD_SEC = 0.1
+     LINE_MOTION_CAPTURE_CONFIG = {
+-        # Catalog99 forward: 504ms per cycle at source speed 1.0, including holds.
+-        "STRAIGHT": (.504 * 6, 10),
+-        "STRAIGHT_1": (.504 * 2, 5),
+-        "STRAIGHT_2": (.504 * 4, 10),
+-        "STRAIGHT_3": (.504 * 6, 10),
+-        "STRAIGHT_4": (.504 * 8, 15),
+-        "LEFT": (2.016, 15),
+-        "RIGHT": (2.016, 15),
+-        **{f"RECOVER_{side}_TURN_LEFT_{suffix}": (2.016, 15)
++        # Catalog100 forward: 514ms per cycle at source speed 1.0, including holds.
++        "STRAIGHT": (.514 * 6, 10),
++        "STRAIGHT_1": (.514 * 2, 5),
++        "STRAIGHT_2": (.514 * 4, 10),
++        "STRAIGHT_3": (.514 * 6, 10),
++        "STRAIGHT_4": (.514 * 8, 15),
++        "LEFT": (2.060, 15),
++        "RIGHT": (2.064, 15),
++        **{f"RECOVER_{side}_TURN_LEFT_{suffix}": (2.060, 15)
+            for side in ("LEFT", "RIGHT") for suffix in (2, 4, 6, 8, 10, 13)},
+-        **{f"RECOVER_{side}_TURN_RIGHT_{suffix}": (2.016, 15)
++        **{f"RECOVER_{side}_TURN_RIGHT_{suffix}": (2.064, 15)
+            for side in ("LEFT", "RIGHT") for suffix in (4, 6, 8, 10, 12, 15)},
+     }
+     LINE_MOTION_CAPTURE_START_RATIO = 0.70
+@@ -144,19 +144,19 @@
+         "LINE_LOST_TURN_RIGHT": (.300 * 5 / .9, 3),
+     }
+     BALL_RECOVERY_DURATION_SEC = {
+-        "line_recovery_ball_first_left_4": .504 * 4,
+-        "line_recovery_ball_second_right_4": .504 * 4,
++        "line_recovery_ball_first_left_4": .514 * 4,
++        "line_recovery_ball_second_right_4": .516 * 4,
+     }
+     # Reserve another recovery near the end, leaving transport/tick headroom.
+     # The SDK accepts a compatible queue until the running motion completes.
+     LINE_RECOVERY_PREQUEUE_LEAD_SEC = 0.30
+     # Full stored cycle duration, including its leading hold.
+     GOAL_FORWARD_DURATION_SEC = {
+-        "GOAL_CAMERA_90_FORWARD": .504 * 6,
+-        "GOAL_CAMERA_90_FORWARD_1": .504 * 2,
+-        "GOAL_CAMERA_90_FORWARD_2": .504 * 4,
+-        "GOAL_CAMERA90_RECOVER_LEFT_4": 2.016,
+-        "GOAL_CAMERA90_RECOVER_RIGHT_4": 2.016,
++        "GOAL_CAMERA_90_FORWARD": .514 * 6,
++        "GOAL_CAMERA_90_FORWARD_1": .514 * 2,
++        "GOAL_CAMERA_90_FORWARD_2": .514 * 4,
++        "GOAL_CAMERA90_RECOVER_LEFT_4": 2.060,
++        "GOAL_CAMERA90_RECOVER_RIGHT_4": 2.064,
+         **{f"GOAL_CAMERA90_FINE_FORWARD_{count}": .394 * count / 1.05
+            for count in range(1, 6)},
+     }
+@@ -170,14 +170,14 @@
+     GOAL_FORWARD_CAPTURE_WINDOW_SEC = 0.6
+     APPROACH_WALK_DURATION_SEC = {
+         "BALL_APPROACH_FINE_FORWARD_5": .394 * 5 / 1.05,
+-        "BALL_APPROACH_FORWARD_2": .504 * 2,
+-        "STRAIGHT": .504 * 4,
+-        "STRAIGHT_1": .504 * 2,
+-        "RECOVER_LEFT_TURN_LEFT_4": 2.016,
+-        "RECOVER_RIGHT_TURN_RIGHT_4": 2.016,
++        "BALL_APPROACH_FORWARD_2": .514 * 2,
++        "STRAIGHT": .514 * 4,
++        "STRAIGHT_1": .514 * 2,
++        "RECOVER_LEFT_TURN_LEFT_4": 2.060,
++        "RECOVER_RIGHT_TURN_RIGHT_4": 2.064,
+     }
+     APPROACH_WALK_CAPTURE_FRAMES = 3
+-    # A two-cycle gait lasts 1.008 s; collect early enough for camera latency.
++    # A two-cycle gait lasts 1.028 s; collect early enough for camera latency.
+     HURDLE_WALK_CAPTURE_START_RATIO = 0.50
+     HURDLE_WALK_COMMIT_RATIO = 0.70
+     BALL_ENTRY_MISSING_GRACE_SEC = 0.20
+@@ -196,9 +196,9 @@
+     }
+     # Full catalog duration; the final 30 percent is within the recovery tail.
+     POST_SHOT_EXIT_CAPTURE_CONFIG = {
+-        # Legacy IDs now include four line-recovery cycles with the same duration.
+-        "POST_SHOT_EXIT_RIGHT_5_FORWARD_4": (4.728, 3),
+-        "POST_SHOT_EXIT_LEFT_3_FORWARD_4": (4.091 / 1.05, 3),
++        # Legacy IDs include the turn, 500ms hold, and four recovery cycles.
++        "POST_SHOT_EXIT_RIGHT_5_FORWARD_4": (4.767, 3),
++        "POST_SHOT_EXIT_LEFT_3_FORWARD_4": (4.136 / 1.05, 3),
+     }
+     CORRECTION_POST_MOTION_DWELL_SEC = 0.5
+     BALL_RAW_CONFIRMATION_RELEASE_SEC = 0.5
+@@ -4962,7 +4962,7 @@
+                 config = (config[0], 3)
+             elif MotionDecisionNode._post_pickup_line_action(action):
+                 if action == "LINE_SPARSE_FORWARD":
+-                    config = (.504 * 2, 3)
++                    config = (.514 * 2, 3)
+                 else:
+                     suffix = action.rsplit("_", 1)[-1]
+                     count = int(suffix) if suffix.isdigit() else (2 if suffix == "LEFT" else 5)
+@@ -4970,7 +4970,7 @@
+         if config is None and self.mission_phase == "POST_SHOT_LINE_ALIGN":
+             config = MotionDecisionNode.POST_SHOT_ALIGN_CAPTURE_CONFIG.get(action)
+         if action == "POST_SHOT_FORWARD":
+-            config = (.504 * 6, 3)
++            config = (.514 * 6, 3)
+         elif action in MotionDecisionNode.POST_SHOT_EXIT_CAPTURE_CONFIG:
+             config = MotionDecisionNode.POST_SHOT_EXIT_CAPTURE_CONFIG[action]
+         self.pending_line_decision = None
+--- before/src/mission_control/mission_control/pickup_fine_skip.py
++++ src/mission_control/mission_control/pickup_fine_skip.py
+@@ -6,8 +6,20 @@
+     "pickup_top_loss_fine_forward_0_3",
+ })
+ 
++FORWARD_RECOVERY_SKIP_LIMIT_PX = 90.0
++
++
++def is_pickup_forward_or_recovery(motion_id: str | None) -> bool:
++    return bool(motion_id and (
++        motion_id in {"forward", "sdk_forward_4", "ball_align_forward_2"}
++        or motion_id.startswith(("line_forward_", "ball_camera_down_forward_",
++                                 "post_ball_forward_", "line_recovery_"))
++    ))
++
+ 
+ def pickup_fine_skip_limit(motion_id: str | None) -> float | None:
++    if is_pickup_forward_or_recovery(motion_id):
++        return FORWARD_RECOVERY_SKIP_LIMIT_PX
+     if motion_id in FINE_FORWARD_MOTIONS:
+         return 270.0
+     if motion_id in {
+--- before/src/mission_control/mission_control/pickup_walk_reservation.py
++++ src/mission_control/mission_control/pickup_walk_reservation.py
+@@ -14,7 +14,7 @@
+     'pickup_crab_right_0_2': 2 * .550 / 1.0,
+ }
+ PICKUP_WALK_DURATIONS = {
+-    'ball_camera_down_forward_2': .504 * 2,
++    'ball_camera_down_forward_2': .514 * 2,
+     'ball_general_fine_forward_8': .394 * 5 / 1.05,
+     'pickup_fine_forward_0': .394 * 5 / 1.05,
+     **PICKUP_CRAB_DURATIONS,
+--- before/src/mission_control/test/test_ball_loss_confirmation.py
++++ src/mission_control/test/test_ball_loss_confirmation.py
+@@ -14,10 +14,10 @@
+ 
+ def test_both_duration_and_five_frames_are_required():
+     loss = BallLossConfirmation()
+-    for t in (10.0, 10.1, 10.2, 10.3, 10.49):
++    for t in (10.0, 10.1, 10.2, 10.3, 10.5, 10.799999):
+         observe(loss, t)
+         assert not loss.confirmed
+-    observe(loss, 10.5)
++    observe(loss, 10.8)
+     assert loss.confirmed
+ 
+     loss = BallLossConfirmation()
+@@ -33,13 +33,13 @@
+ ])
+ def test_visible_ball_resets_even_confirmed_loss(visible):
+     loss = BallLossConfirmation()
+-    for t in (10.0, 10.125, 10.25, 10.375, 10.5):
++    for t in (10.0, 10.2, 10.4, 10.6, 10.8):
+         observe(loss, t)
+     assert loss.confirmed
+-    observe(loss, 10.6, **visible)
++    observe(loss, 10.9, **visible)
+     assert not loss.confirmed
+     assert loss.missing_frames == 0
+-    observe(loss, 10.7)
++    observe(loss, 11.0)
+     assert not loss.confirmed
+     assert loss.missing_frames == 1
+ 
+--- before/src/mission_control/test/test_ball_support_transition_dwells.py
++++ src/mission_control/test/test_ball_support_transition_dwells.py
+@@ -26,7 +26,7 @@
+     bridge.stationary_since = clock[0]
+     clock[0] += rest
+     bridge.navigation_command_callback(command(prepare, 1))
+-    remaining = max(0., .5 - rest)
++    remaining = max(0., .2 - rest)
+     if remaining:
+         assert not bridge.executor_request_publisher.messages
+         assert bridge.transition_dwell_until == pytest.approx(clock[0] + remaining)
+--- before/src/mission_control/test/test_catalog98_forward_recovery.py
++++ src/mission_control/test/test_catalog98_forward_recovery.py
+@@ -70,6 +70,7 @@
+     expected = {alias: MANIFEST['renames'].get(name, name) for alias, name in before.items()}
+     # Later goal-exit policy replaces only the two composite tails.
+     expected.update({
++        'pickup_forward_to_backward_prepare': 'n공에서 전진하고 후진준비자세',
+         'post_shot_exit_right_5_forward_4': 't골대후제자리우회전(5회)+라인복귀좌회전45도(4회)',
+         'post_shot_exit_left_3_forward_4': 'p골대후제자리좌회전(3회)+라인복귀우회전45도(4회)',
+     })
+--- before/src/mission_control/test/test_catalog99_forward_recovery.py
++++ src/mission_control/test/test_catalog99_forward_recovery.py
+@@ -10,6 +10,7 @@
+ 
+ ROOT = Path(__file__).resolve().parents[3]
+ UPDATE = ROOT / 'artifacts/20261111_catalog99_forward_recovery'
++DEPLOYED = ROOT / 'artifacts/20261111_catalog100_pickup90/before'
+ sys.path.insert(0, str(ROOT / 'tools'))
+ from upsert_motion_catalog import runtime_motion_from_source
+ from build_post_shot_forward_exits import build_exit, EXIT_RECOVERIES
+@@ -29,7 +30,7 @@
+     assert hashlib.sha256(source_path.read_bytes()).hexdigest() == manifest['source_sha256']
+     source = catalog(source_path)
+     before = catalog(UPDATE / f'before/artifacts/robot_motions_{kind}.json')
+-    actual = catalog(ROOT / f'artifacts/robot_motions_{kind}.json')
++    actual = catalog(DEPLOYED / f'artifacts/robot_motions_{kind}.json')
+     assert actual.keys() == before.keys()
+     for name in manifest['imports']:
+         src, count = manifest['derived'].get(name, (name, source.get(name, {}).get('repeat_count')))
+@@ -43,7 +44,7 @@
+         if kind == 'runtime':
+             expected = runtime_motion_from_source(expected)
+         assert actual[name] == expected, name
+-    pc = catalog(ROOT / 'artifacts/robot_motions_pc.json')
++    pc = catalog(DEPLOYED / 'artifacts/robot_motions_pc.json')
+     for turn, recovery in EXIT_RECOVERIES:
+         expected = build_exit(pc[turn], pc[recovery])
+         if kind == 'runtime':
+@@ -56,4 +57,4 @@
+     for name in actual.keys() - changed:
+         assert actual[name] == before[name], name
+     aliases = Path('src/irc_step_motion_executor/config/motion_aliases.yaml')
+-    assert (ROOT / aliases).read_bytes() == (UPDATE / 'before' / aliases).read_bytes()
++    assert (DEPLOYED / aliases).read_bytes() == (UPDATE / 'before' / aliases).read_bytes()
+--- before/src/mission_control/test/test_hurdle_forward2.py
++++ src/mission_control/test/test_hurdle_forward2.py
+@@ -388,4 +388,4 @@
+     motion = MOTIONS[ALIASES['line_forward_2']]
+     assert motion['repeat_count'] == 2
+     assert motion['playback_speed'] == 1.
+-    assert duration('line_forward_2') == pytest.approx(1.008)
++    assert duration('line_forward_2') == pytest.approx(1.028)
+--- before/src/mission_control/test/test_pickup_continuous_walk.py
++++ src/mission_control/test/test_pickup_continuous_walk.py
+@@ -276,8 +276,8 @@
+                                         request_id=1, motion_id=motion, timeout_ms=20000,
+                                         prepare_pickup_fine=False)
+         assert not bridge.executor_request_publisher.messages, motion
+-        assert bridge.transition_dwell_until == clock[0] + Bridge.TRANSITION_DWELL_SEC
+-        clock[0] += Bridge.TRANSITION_DWELL_SEC
++        assert bridge.transition_dwell_until == clock[0] + Bridge.TRANSITION_PRE_DWELL_SEC
++        clock[0] += Bridge.TRANSITION_PRE_DWELL_SEC
+         bridge._check_transition_dwell()
+         request = decoded_messages(bridge.executor_request_publisher)[-1]
+         bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+--- before/src/mission_control/test/test_transition_dwells.py
++++ src/mission_control/test/test_transition_dwells.py
+@@ -20,11 +20,11 @@
+     start = len(requests(bridge))
+     beginning = clock[0]
+     assert bridge.motion_in_progress
+-    assert bridge.transition_dwell_until == beginning + .5
+-    clock[0] = beginning + .499
++    assert bridge.transition_dwell_until == beginning + .2
++    clock[0] = beginning + .199
+     bridge._check_atomic_dwell()
+     assert len(requests(bridge)) == start
+-    clock[0] = beginning + .5
++    clock[0] = beginning + .2
+     bridge._check_atomic_dwell()
+     assert [r["motion_id"] for r in requests(bridge)[start:]] == [prepare]
+     prep_request = requests(bridge)[-1]

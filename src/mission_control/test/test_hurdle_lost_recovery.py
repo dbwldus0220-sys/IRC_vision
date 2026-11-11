@@ -33,13 +33,13 @@ def test_loss_repeats_small_stationary_turn_and_maps_to_catalog(offset, directio
 
 @pytest.mark.parametrize("angle,direction,count", [(-15, "LEFT", 1), (15, "RIGHT", 1),
                                                  (60, "RIGHT", 6), (75, "RIGHT", 7),
-                                                 (90, "RIGHT", 9)])
-def test_reacquisition_aligns_line_before_near_go(angle, direction, count):
+                                                 (89.999, "RIGHT", 7)])
+def test_reacquisition_aligns_hurdle_yaw_before_near_go(angle, direction, count):
     planner = MotionDecisionPlanner()
     planner.plan("AUTO", {"hurdle": visible()}, .1)
     planner.plan("AUTO", {"hurdle": {"detected": False}}, .1)
     decision = planner.plan("AUTO", {
-        "hurdle": visible(depth=.5, hurdle_angle_deg=0), "line": line_info(heading=angle),
+        "hurdle": visible(depth=.5, hurdle_angle_45_deg=-angle), "line": line_info(heading=angle),
     }, .1)
     assert decision.action == f"ALIGN_{direction}"
     assert decision.source_command["turn_count"] == count
@@ -56,11 +56,11 @@ def test_reacquisition_aligns_line_before_near_go(angle, direction, count):
 
 
 @pytest.mark.parametrize("angle", [-14.999, -8, 0, 8, 14.999])
-def test_line_tolerance_resumes_fine_approach(angle):
+def test_hurdle_yaw_tolerance_resumes_fine_approach(angle):
     planner = HurdleNavigationPlanner()
     planner.plan(visible(), positioning=True)
     planner.plan({"detected": False}, positioning=True)
-    decision = planner.plan(visible(hurdle_angle_deg=60, line_heading_valid=True,
+    decision = planner.plan(visible(hurdle_angle_deg=60, hurdle_angle_45_deg=-angle, line_heading_valid=True,
                                     line_heading_deg=angle, line_heading_reference_source="fresh"),
                             positioning=True)
     assert decision.action == "STRAIGHT_1"
@@ -68,7 +68,7 @@ def test_line_tolerance_resumes_fine_approach(angle):
 
 
 @pytest.mark.parametrize("updates", [
-    {"line_heading_deg": None}, {"depth_valid": False}, {"confidence": .1},
+    {"hurdle_angle_45_deg": None}, {"depth_valid": False}, {"confidence": .1},
     {"confirmation_confirmed": False}, {"bottom_distance_px": None},
 ])
 def test_invalid_reacquisition_cannot_resume_forward_or_go(updates):
@@ -217,13 +217,13 @@ def test_callback_remembers_side_during_motion_and_blocks_early_go(clock):
     assert node.planner.hurdle_planner.recovery_active
     # A close reacquisition must not latch the atomic GO before alignment.
     node.receive_line(heading=-20)
-    node.receive(visible(-400, depth=.5, hurdle_angle_deg=-60))
+    node.receive(visible(-400, depth=.5, hurdle_angle_deg=-60, hurdle_angle_45_deg=20))
     assert getattr(node, "pending_hurdle_final_sequence", None) is None
     release_general(node, fine)
     clock[0] += 1.1
     node.publish()  # Discard images received before the post-motion pause.
     node.receive_line(heading=-20)
-    node.receive(visible(-400, depth=.5, hurdle_angle_deg=-60))
+    node.receive(visible(-400, depth=.5, hurdle_angle_deg=-60, hurdle_angle_45_deg=20))
     turn = node.publish()[-1]
     assert turn["action"] == "ALIGN_LEFT"
     assert turn["source_command"]["turn_count"] == 1

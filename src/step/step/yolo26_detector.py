@@ -1248,8 +1248,10 @@ class Yolo26Detector(Node):
             "post_shot_default_turn_left": "LINE RETURN / TURN LEFT",
             "post_shot_default_turn_right_5": "LINE RETURN / TURN RIGHT 5",
             "post_shot_default_turn_left_3": "LINE RETURN / TURN LEFT 3",
-            "post_shot_exit_right_5_forward_4": "POST SHOT / RIGHT 5 + FORWARD 4",
-            "post_shot_exit_left_3_forward_4": "POST SHOT / LEFT 3 + FORWARD 4",
+            "post_shot_exit_right_5_forward_4": "POST SHOT / RIGHT 6 + RECOVER RIGHT 4 x2",
+            "post_shot_exit_left_3_forward_4": "POST SHOT / LEFT 4 + RECOVER LEFT 4 x2",
+            "post_shot_exit_right_9_recovery_right_4": "POST SHOT / TURN RIGHT + RECOVER RIGHT 4",
+            "post_shot_exit_left_4_recovery_left_4": "POST SHOT / TURN LEFT + RECOVER LEFT 4",
         }
         label = labels.get(motion_id)
         action = str(payload.get("action", ""))
@@ -1261,7 +1263,10 @@ class Yolo26Detector(Node):
             label = action
         source = str(payload.get("source", "")).lower()
         if source == "hurdle" or payload.get("action") == "GO":
-            if motion_id in {"line_recovery_left_4", "line_recovery_right_4"}:
+            if motion_id.startswith("post_ball_line_turn_"):
+                suffix = motion_id[len("post_ball_line_turn_"):].upper().replace("_", " ")
+                label = f"HURDLE / IN-PLACE TURN {suffix}"
+            elif motion_id in {"line_recovery_left_4", "line_recovery_right_4"}:
                 direction = "LEFT" if motion_id == "line_recovery_left_4" else "RIGHT"
                 label = f"HURDLE / LINE RETURN {direction} 4"
             elif motion_id == "line_forward_4":
@@ -3247,9 +3252,10 @@ class Yolo26Detector(Node):
                 + " (<= " + self._metric_text(
                     self._number(info, "head_down_trigger_bottom_distance_px"), "px", 0,
                 ) + ")",
-                "Center angle: " + self._metric_text(
+                "Turn error  : " + self._metric_text(
                     self._number(source_command, "center_steering_deg"), "deg", 1, signed=True,
                 ),
+                "Angle source: " + str(source_command.get("alignment_reference", "none")),
                 "Depth Z     : "
                 + self._metric_text(self._number(info, "depth_m"), "m"),
                 "Left depth  : "

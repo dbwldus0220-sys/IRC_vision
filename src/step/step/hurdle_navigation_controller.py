@@ -13,6 +13,7 @@ from std_msgs.msg import String
 
 from .hurdle_navigation_planner import HurdleNavigationConfig
 from .hurdle_navigation_planner import HurdleNavigationPlanner
+from .hurdle_camera_pose import HurdleCameraPose
 
 
 class HurdleNavigationController(Node):
@@ -22,6 +23,7 @@ class HurdleNavigationController(Node):
         super().__init__("hurdle_navigation_controller")
 
         self.declare_parameter("hurdle_info_topic", "/vision/hurdle_info")
+        self.declare_parameter("executor_heartbeat_topic", "/motion/executor/heartbeat")
         self.declare_parameter(
             "command_topic",
             "/navigation/hurdle_command",
@@ -46,6 +48,7 @@ class HurdleNavigationController(Node):
             ),
         )
         self.planner = HurdleNavigationPlanner(config)
+        self.camera_pose = HurdleCameraPose()
         self.hurdle_timeout_sec = self._float_parameter(
             "hurdle_timeout_sec"
         )
@@ -61,6 +64,10 @@ class HurdleNavigationController(Node):
             hurdle_topic,
             self._hurdle_callback,
             10,
+        )
+        self.heartbeat_subscription = self.create_subscription(
+            String, str(self.get_parameter("executor_heartbeat_topic").value),
+            self._heartbeat_callback, 10,
         )
         publish_rate = max(self._float_parameter("publish_rate_hz"), 1.0)
         self.timer = self.create_timer(
@@ -91,6 +98,16 @@ class HurdleNavigationController(Node):
                 f"Invalid hurdle_info: {type(exc).__name__}: {exc}"
             )
 
+    def _heartbeat_callback(self, message: String) -> None:
+        try:
+            payload = json.loads(message.data)
+            if isinstance(payload, dict):
+                self.camera_pose.heartbeat(
+                    payload, time.monotonic(), self.get_clock().now().nanoseconds,
+                )
+        except (json.JSONDecodeError, TypeError):
+            self.get_logger().warning("Invalid executor heartbeat")
+
     def _publish_command(self) -> None:
         """Publish a fresh hurdle action, or WAIT after input timeout."""
         now = time.monotonic()
@@ -105,7 +122,7 @@ class HurdleNavigationController(Node):
             if hurdle_age_sec > self.hurdle_timeout_sec:
                 command = self.planner.wait("stale_hurdle_info")
             else:
-                command = self.planner.plan(self.latest_hurdle_info)
+                command = self.planner.plan(self.camera_pose.annotate(self.latest_hurdle_info, now))
 
         self.command_id += 1
         payload = command.to_dict()

@@ -139,9 +139,13 @@ def test_region_shots_count_once_and_keep_post_shot_route(region, previous_shots
     manager.handle_motion_status('SHOT', 100, 'SUCCEEDED', motion_id=f'goal_shot_region_{region}')
     assert manager.shots_completed == previous_shots + 1
     assert manager.current_phase == 'POST_SHOT_TURN'
-    assert manager.post_shot_turn_action() == f'POST_SHOT_TURN_{turn}'
+    direction = turn.split('_')[0]
+    assert manager.post_shot_turn_action() == (
+        f'POST_SHOT_EXIT_{turn}_RECOVERY_{direction}_4' if region in {1, 2}
+        else f'POST_SHOT_TURN_{turn}')
     assert manager.handle_post_shot_motion(manager.post_shot_turn_action(), 'SUCCEEDED')
-    assert manager.current_phase == 'POST_SHOT_LINE_ALIGN'
+    assert manager.current_phase == ('POST_SHOT_EXIT_ALIGN' if region in {1, 2}
+                                     else 'POST_SHOT_LINE_ALIGN')
 
 
 def test_import_preserves_source_targets_and_applies_speed_once():

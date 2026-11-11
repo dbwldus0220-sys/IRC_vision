@@ -1,0 +1,62 @@
+{
+  "threshold_px": {
+    "before": 360,
+    "after": 200
+  },
+  "production_change": "Shared pickup turn/crab boundary only; no new scheduler or bridge logic.",
+  "focused_tests": {
+    "passed": 76,
+    "failed": 0
+  },
+  "related_tests": {
+    "passed": 423,
+    "failed": 23
+  },
+  "baseline_related_tests": {
+    "passed": 312,
+    "failed": 61
+  },
+  "remaining_failed_test_functions_already_failed_at_baseline": true,
+  "remaining_failures": [
+    "FAILED src/mission_control/test/test_pickup_alignment_priority.py::test_heading_then_lateral_then_approach[-1-False]",
+    "FAILED src/mission_control/test/test_pickup_alignment_priority.py::test_heading_then_lateral_then_approach[-1-True]",
+    "FAILED src/mission_control/test/test_pickup_alignment_priority.py::test_heading_then_lateral_then_approach[1-False]",
+    "FAILED src/mission_control/test/test_pickup_alignment_priority.py::test_heading_then_lateral_then_approach[1-True]",
+    "FAILED src/mission_control/test/test_pickup_alignment_priority.py::test_recorded_ball_is_corrected_before_another_fine_forward",
+    "FAILED src/mission_control/test/test_pickup_crab_observation.py::test_cached_observation_does_not_replace_same_gait_reservation",
+    "FAILED src/mission_control/test/test_pickup_crab_observation.py::test_latest_invalid_or_different_decision_discards_ready_sample[change6]",
+    "FAILED src/mission_control/test/test_pickup_crab_observation.py::test_rejected_same_gait_queue_uses_fresh_checkpoint_and_can_resume",
+    "FAILED src/mission_control/test/test_reservation_expansion.py::test_two_cycle_to_one_cycle_uses_checkpoint_not_wrong_two_cycle_queue[-250]",
+    "FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_launch_defaults_use_230_and_accept_override[False]",
+    "FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_launch_defaults_use_230_and_accept_override[True]",
+    "FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_fine_forward_0-200-None-1]",
+    "FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_fine_forward_0-200-None-2]",
+    "FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_left_0-200-pickup_crab_left_to_fine_0-1]",
+    "FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_left_0-200-pickup_crab_left_to_fine_0-2]",
+    "FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_right_0_2-200-pickup_crab_right_to_fine_0-1]",
+    "FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_right_0_2-200-pickup_crab_right_to_fine_0-2]",
+    "FAILED src/mission_control/test/test_pickup_fine_skip.py::test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit[1]",
+    "FAILED src/mission_control/test/test_pickup_fine_skip.py::test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit[2]",
+    "FAILED src/mission_control/test/test_pickup_fine_progress.py::test_first_fixed_fine_counts_and_immediately_selects_retreat_then_grasp[1]",
+    "FAILED src/mission_control/test/test_pickup_fine_progress.py::test_first_fixed_fine_counts_and_immediately_selects_retreat_then_grasp[2]",
+    "FAILED src/mission_control/test/test_pickup_fine_progress.py::test_accepted_queue_retains_ownership_and_can_finish_next_step[1]",
+    "FAILED src/mission_control/test/test_pickup_fine_progress.py::test_accepted_queue_retains_ownership_and_can_finish_next_step[2]"
+  ],
+  "validated": [
+    "initial/fine and left/right boundary",
+    "recorded 287px turn then fresh 200px crab",
+    "no yaw prequeue",
+    "unpublished candidate invalidation",
+    "single crab queue ownership, success, failure, timeout, cancellation and rejection",
+    "201..230px no-prequeue fallback with valid cached or fresh observations",
+    "retreat progression at 200px",
+    "installed package resolves threshold 200.0",
+    "Python compile and git diff --check"
+  ],
+  "limits": [
+    "No physical robot execution or dynamics simulation.",
+    "Committed gait reservation retains existing behavior; it is not cancelled by a later boundary crossing.",
+    "Existing test suite is not fully passing.",
+    "Already running Python nodes need restart to load the change."
+  ]
+}

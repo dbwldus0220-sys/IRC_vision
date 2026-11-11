@@ -1,0 +1,204 @@
+........................................................................ [ 13%]
+................F....................................................... [ 26%]
+........................................................................ [ 39%]
+...................................................................F.... [ 52%]
+...F.F......................F....F............FF........................ [ 65%]
+........................................................................ [ 78%]
+........................................................................ [ 92%]
+...........................................                              [100%]
+=================================== FAILURES ===================================
+________ test_recognition_approach_blocks_new_line_prequeue[1.001-True] ________
+
+clock = [10.0], depth = 1.001, allowed = True
+
+    @pytest.mark.parametrize("depth,allowed", [(1.001, True), (1.0, False), (0.7, False), (0.551, False), (0.55, False)])
+    def test_recognition_approach_blocks_new_line_prequeue(clock, depth, allowed):
+        node = HurdleHarness()
+>       assert MotionDecisionNode._line_only_prequeue_allowed(
+            node, {"hurdle": hurdle(depth)},
+        ) is allowed
+E       AssertionError: assert False is True
+E        +  where False = <function MotionDecisionNode._line_only_prequeue_allowed at 0xffff9bcc77f0>(<test_hurdle_positioning.HurdleHarness object at 0xffff9b624be0>, {'hurdle': {'bbox': [400, 300, 1000, 500], 'bottom_distance_px': 200, 'camera_center_offset_x_px': 0, 'confidence': 0.9, ...}})
+E        +    where <function MotionDecisionNode._line_only_prequeue_allowed at 0xffff9bcc77f0> = MotionDecisionNode._line_only_prequeue_allowed
+
+src/mission_control/test/test_hurdle_positioning.py:259: AssertionError
+____ test_bottom_retreat_waits_for_completion_pause_and_fresh_reacquisition ____
+
+clock = [11.6]
+
+    def test_bottom_retreat_waits_for_completion_pause_and_fresh_reacquisition(clock):
+        node = HurdleHarness()
+        node.receive(visible())
+        fine = node.publish()[-1]
+        node.receive(visible(bottom_distance_px=50))
+        node.receive({"detected": False})
+        assert node.publish() == []
+        release_general(node, fine)
+        clock[0] += 1.1
+        node.publish()
+        node.receive({"detected": False})
+        backward = node.publish()[-1]
+        assert backward["action"] == "HURDLE_LOST_BACKWARD_1"
+        assert node.publish() == []
+        node.send_status(backward["action"], backward["command_id"], "RUNNING")
+        node.send_status(backward["action"], backward["command_id"], "SUCCEEDED")
+        clock[0] += .5
+        node.receive({"detected": False})
+>       assert node.publish() == []
+E       AssertionError: assert [{'action': '...': None, ...}] == []
+E         Left contains one more item: {'action': 'HURDLE_LOST_BACKWARD_1', 'active_special_action': None, 'active_special_command_id': None, 'active_special_event_id': None, ...}
+E         Full diff:
+E           [
+E         -  ,
+E         +  {'action': 'HURDLE_LOST_BACKWARD_1',
+E         +   'active_special_action': None,
+E         +   'active_special_command_id': None,...
+E         
+E         ...Full output truncated (105 lines hidden), use '-vv' to show
+
+src/mission_control/test/test_hurdle_lost_recovery.py:167: AssertionError
+_ test_object_walk_queues_once_and_bridge_promotes_without_dwell[hurdle-HURDLE_APPROACH-angles2] _
+
+clock = [10.857999999999997], source = 'hurdle', phase = 'HURDLE_APPROACH'
+angles = (0.0, 25.0)
+
+    @pytest.mark.parametrize('source,phase,angles', [
+        ('ball', 'BALL_APPROACH', (0., 0.)),
+        *[('hurdle', 'HURDLE_APPROACH', angles) for angles in
+          [(0., 0.), (0., 25.), (25., 0.), (25., -25.)]],
+    ])
+    def test_object_walk_queues_once_and_bridge_promotes_without_dwell(clock, source, phase, angles):
+        node, bridge = LiveInputHarness(phase=phase), FakeBridge()
+        first = start(node, clock, source, angles[0])
+        bridge.navigation_command_callback(String(data=json.dumps(first)))
+        request = decoded_messages(bridge.executor_request_publisher)[-1]
+        for _ in range(3):
+            feed(node, clock, source, angles[1])
+        assert getattr(node, 'queued_general_command_id', None) is None
+        clock[0] = node.approach_walk_started_at + MotionDecisionNode.APPROACH_WALK_DURATION_SEC[first['action']] - .25
+        for _ in range(4):
+            feed(node, clock, source, angles[1])
+        second = node.publisher.messages[-1]
+        assert second['command_id'] != first['command_id']
+>       assert second['action'] == (('STRAIGHT_1' if source == 'hurdle' else 'STRAIGHT') if angles[1] == 0 else
+            f"{'BALL_APPROACH_' if source == 'ball' else ''}RECOVER_{'RIGHT' if angles[1] > 0 else 'LEFT'}"
+            + (f"_TURN_{'RIGHT' if angles[1] > 0 else 'LEFT'}" if source == 'hurdle' else '') + '_4')
+E       AssertionError: assert 'STRAIGHT_1' == 'RECOVER_RIGHT_TURN_RIGHT_4'
+E         - RECOVER_RIGHT_TURN_RIGHT_4
+E         + STRAIGHT_1
+
+src/mission_control/test/test_object_walk_prequeue.py:63: AssertionError
+_ test_object_walk_queues_once_and_bridge_promotes_without_dwell[hurdle-HURDLE_APPROACH-angles4] _
+
+clock = [10.857999999999997], source = 'hurdle', phase = 'HURDLE_APPROACH'
+angles = (25.0, -25.0)
+
+    @pytest.mark.parametrize('source,phase,angles', [
+        ('ball', 'BALL_APPROACH', (0., 0.)),
+        *[('hurdle', 'HURDLE_APPROACH', angles) for angles in
+          [(0., 0.), (0., 25.), (25., 0.), (25., -25.)]],
+    ])
+    def test_object_walk_queues_once_and_bridge_promotes_without_dwell(clock, source, phase, angles):
+        node, bridge = LiveInputHarness(phase=phase), FakeBridge()
+        first = start(node, clock, source, angles[0])
+        bridge.navigation_command_callback(String(data=json.dumps(first)))
+        request = decoded_messages(bridge.executor_request_publisher)[-1]
+        for _ in range(3):
+            feed(node, clock, source, angles[1])
+        assert getattr(node, 'queued_general_command_id', None) is None
+        clock[0] = node.approach_walk_started_at + MotionDecisionNode.APPROACH_WALK_DURATION_SEC[first['action']] - .25
+        for _ in range(4):
+            feed(node, clock, source, angles[1])
+        second = node.publisher.messages[-1]
+        assert second['command_id'] != first['command_id']
+>       assert second['action'] == (('STRAIGHT_1' if source == 'hurdle' else 'STRAIGHT') if angles[1] == 0 else
+            f"{'BALL_APPROACH_' if source == 'ball' else ''}RECOVER_{'RIGHT' if angles[1] > 0 else 'LEFT'}"
+            + (f"_TURN_{'RIGHT' if angles[1] > 0 else 'LEFT'}" if source == 'hurdle' else '') + '_4')
+E       AssertionError: assert 'STRAIGHT_1' == 'RECOVER_LEFT_TURN_LEFT_4'
+E         - RECOVER_LEFT_TURN_LEFT_4
+E         + STRAIGHT_1
+
+src/mission_control/test/test_object_walk_prequeue.py:63: AssertionError
+_ test_recovery_to_recovery_waits_until_last_point_three_seconds[hurdle-HURDLE_APPROACH] _
+
+clock = [10.805759999999998], source = 'hurdle', phase = 'HURDLE_APPROACH'
+
+    @pytest.mark.parametrize('source,phase', [('hurdle', 'HURDLE_APPROACH')])
+    def test_recovery_to_recovery_waits_until_last_point_three_seconds(clock, source, phase):
+        node = LiveInputHarness(phase=phase)
+        first = start(node, clock, source, 25.)
+        started = node.approach_walk_started_at
+        duration = MotionDecisionNode.APPROACH_WALK_DURATION_SEC[first['action']]
+        clock[0] = started + duration * .72
+        for _ in range(3):
+            feed(node, clock, source, -25.)
+>       assert getattr(node, 'queued_general_command_id', None) is None
+E       AssertionError: assert 2 is None
+E        +  where 2 = getattr(<test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff9b493c40>, 'queued_general_command_id', None)
+
+src/mission_control/test/test_object_walk_prequeue.py:147: AssertionError
+______________ test_goal_fine_forward_starts_without_fixed_pause _______________
+
+clock = [10.01]
+
+    def test_goal_fine_forward_starts_without_fixed_pause(clock):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+        fine = goal_info(depth_m=.6, score_now=False, confirmation_confirmed=True)
+        observe(node, clock, 'goal', fine)
+>       assert node.last_selected_decision.action.startswith('GOAL_CAMERA90_FINE_FORWARD_')
+E       AssertionError: assert False
+E        +  where False = <built-in method startswith of str object at 0xffffabc61470>('GOAL_CAMERA90_FINE_FORWARD_')
+E        +    where <built-in method startswith of str object at 0xffffabc61470> = 'WAIT'.startswith
+E        +      where 'WAIT' = MotionDecision(phase='GOAL_APPROACH', source='goal', action='WAIT', valid=False, reason='missing_valid_goal_ring_depth...ror_m': None, 'approach_motion': None, 'approach_level': None, 'approach_target_distance_m': None, 'offset_x_px': 0.0}).action
+E        +        where MotionDecision(phase='GOAL_APPROACH', source='goal', action='WAIT', valid=False, reason='missing_valid_goal_ring_depth...ror_m': None, 'approach_motion': None, 'approach_level': None, 'approach_target_distance_m': None, 'offset_x_px': 0.0}) = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff9b424ca0>.last_selected_decision
+
+src/mission_control/test/test_wait_refresh_and_fine_settle.py:86: AssertionError
+________ test_pickup_preparation_is_followed_by_full_second_before_fine ________
+
+clock = [10.0]
+
+    def test_pickup_preparation_is_followed_by_full_second_before_fine(clock):
+        bridge = FakeBridge()
+        enter_pickup_fine_alignment(bridge)
+        bridge.last_physical_motion_id = "pickup_crab_right_0"  # A real support-posture change.
+        bridge.navigation_command_callback(fine_alignment_message('BALL_PICKUP_FINE_FORWARD'))
+        bridge.executor_status_callback(executor_status(status='SUCCEEDED', motion_id='pickup_fine_prepare'))
+        count = len(bridge.executor_request_publisher.messages)
+>       assert bridge.active_dwell_until == pytest.approx(clock[0] + 1.)
+E       assert None == 11.0 ± 1.1e-05
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff9b456ce0>.active_dwell_until
+E        +  and   11.0 ± 1.1e-05 = <function approx at 0xffffad087640>((10.0 + 1.0))
+E        +    where <function approx at 0xffffad087640> = pytest.approx
+
+src/mission_control/test/test_wait_refresh_and_fine_settle.py:160: AssertionError
+______ test_pickup_loss_pending_during_preparation_skips_fine_after_pause ______
+
+clock = [10.0]
+
+    def test_pickup_loss_pending_during_preparation_skips_fine_after_pause(clock):
+        from test_motion_command_bridge import pickup_positioning_loss_message
+        bridge = FakeBridge()
+        enter_pickup_fine_alignment(bridge)
+        bridge.last_physical_motion_id = "pickup_crab_right_0"  # A real support-posture change.
+        bridge.navigation_command_callback(fine_alignment_message('BALL_PICKUP_FINE_FORWARD'))
+        bridge.executor_status_callback(executor_status(status='SUCCEEDED', motion_id='pickup_fine_prepare'))
+        bridge.navigation_command_callback(pickup_positioning_loss_message(bridge, 'pickup_fine_prepare', command_id=9000))
+        assert bridge.pickup_positioning_loss_pending
+        count = len(bridge.executor_request_publisher.messages)
+        bridge._check_atomic_dwell(bridge.active_dwell_until)
+        assert len(bridge.executor_request_publisher.messages) == count
+>       assert bridge.pickup_fine_align_waiting
+E       assert False
+E        +  where False = <test_motion_command_bridge.FakeBridge object at 0xffff9b3ee110>.pickup_fine_align_waiting
+
+src/mission_control/test/test_wait_refresh_and_fine_settle.py:187: AssertionError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_hurdle_positioning.py::test_recognition_approach_blocks_new_line_prequeue[1.001-True]
+FAILED src/mission_control/test/test_hurdle_lost_recovery.py::test_bottom_retreat_waits_for_completion_pause_and_fresh_reacquisition
+FAILED src/mission_control/test/test_object_walk_prequeue.py::test_object_walk_queues_once_and_bridge_promotes_without_dwell[hurdle-HURDLE_APPROACH-angles2]
+FAILED src/mission_control/test/test_object_walk_prequeue.py::test_object_walk_queues_once_and_bridge_promotes_without_dwell[hurdle-HURDLE_APPROACH-angles4]
+FAILED src/mission_control/test/test_object_walk_prequeue.py::test_recovery_to_recovery_waits_until_last_point_three_seconds[hurdle-HURDLE_APPROACH]
+FAILED src/mission_control/test/test_wait_refresh_and_fine_settle.py::test_goal_fine_forward_starts_without_fixed_pause
+FAILED src/mission_control/test/test_wait_refresh_and_fine_settle.py::test_pickup_preparation_is_followed_by_full_second_before_fine
+FAILED src/mission_control/test/test_wait_refresh_and_fine_settle.py::test_pickup_loss_pending_during_preparation_skips_fine_after_pause
+8 failed, 539 passed in 4.73s

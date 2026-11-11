@@ -1,0 +1,57 @@
+{
+  "runtime_change": {
+    "file": "src/step/step/hurdle_navigation_planner.py",
+    "field": "final_sequence_start_depth_m",
+    "old_m": 0.45,
+    "new_m": 0.5,
+    "exactly_one_runtime_line_changed": true
+  },
+  "unchanged": [
+    "Ball loss 5 frames AND 0.5sec",
+    "normal_turn_stop_depth_m=0.45",
+    "camera-ready and capture age guards",
+    "motion catalog, repeat counts and speeds",
+    "existing dwell times",
+    "queue/dispatch policy",
+    "vision code"
+  ],
+  "validation": {
+    "before": "125 passed",
+    "after": "156 passed, including 14 diagnostic cases",
+    "hardware_commands_sent": false,
+    "covered": [
+      "0.500 GO versus 0.500001 forward",
+      "invalid depth and unconfirmed detection",
+      "near-forward continuous reservation",
+      "GO after accepted queued walk; no third reservation",
+      "queue rejection preserves checkpoint",
+      "active motion failures clear checkpoint",
+      "GO checkpoint survives occlusion",
+      "full fine10/hurdle sequence returns to LINE_TRACK",
+      "actual raw analyzer packet vs camera-annotated planner input"
+    ]
+  },
+  "remaining_limitation": {
+    "conditions": "0.45 < depth_m <= 0.50, bottom_distance_px > 100, close_rotation_blocked false",
+    "cause": "_info_callback invokes _latch_hurdle_final_sequence with raw payload; hurdle_camera_pose/ready is only added later in _fresh_observations. Checkpoint probe cannot select calibrated angle.",
+    "effect": "A ready current observation can choose GO at the motion boundary, but the GO checkpoint is not remembered during the running walk; occlusion or expiry before the boundary can lose that opportunity.",
+    "video_case": "depth .50/.47 and bottom97 raw packets latch GO, survive occlusion and finish current walk then GO.",
+    "changed": false,
+    "potential_fix_not_applied": "Use the same fresh, capture-time-matched camera annotation for checkpoint inspection; retain all validity guards."
+  },
+  "latency": {
+    "confirmed": [
+      "Hurdle input rejected at 06:07:35.301 with age0.619385s and 06:07:38.223 with age0.506133s (limit0.5s).",
+      "Around06:07:36 detector capture-to-callback avg192.183ms/max402.972ms; inference avg27.382ms; publish stage avg104.581ms; overlay avg35.755ms; detector callback avg180.704ms.",
+      "Publish stage peak310.621ms at06:07:32.397. It includes yellow-bar extraction, serialization and ROS publication.",
+      "Effective FPS logged5.170 around06:07:36, despite screen FPS around25; screen FPS excludes publication/extraction and overlay.",
+      "Shared camera-to-decision Ball timing avg372.186ms/max615.553ms around06:07:35.785; decision callback avg0.604ms. This is not a dedicated Hurdle analyzer timing."
+    ],
+    "inference": "CPU-side full-pixel yellow component/axis extraction inside _publish_detections is the main suspected contributor to its growth; per-function timing was not logged. Upstream delivery/scheduling adds substantial delay; no hardware utilization trace proves CPU throttling, recorder contention or GPU saturation.",
+    "qos": "Detector input already KEEP_LAST depth1/BEST_EFFORT; not evidence of an unbounded detector subscription queue.",
+    "unchanged": true
+  },
+  "ball_loss_assessment": "Conservative against short missed detections; 5 samples need4 intervals (~0.8s at5FPS) in addition to existing pipeline latency, while 0.5sec dominates at30FPS. False positives being rare is not evidence that temporary false negatives are rare. Rejected expired frames do not count as confirmed misses. No threshold change.",
+  "physical_effect": "Fixed fine-forward10 + hurdle sequence may start up to5cm earlier in measured depth. Physical clearance/stability not established by mock tests; validate in simulation before supervised robot testing.",
+  "deployment": "Source changed only; no process restart or robot execution."
+}

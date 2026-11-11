@@ -18,22 +18,23 @@ from test_motion_command_bridge import FakeBridge, navigation_message, decoded_m
 ])
 def test_angle_alone_selects_direction_even_inside_old_pixel_deadband(depth, offset, angle, action):
     command = HurdleNavigationPlanner().plan({
-        **hurdle(depth), 'path_reference_valid': True,
+        **hurdle(depth, hurdle_angle_45_deg=-angle), 'path_reference_valid': True,
         'path_offset_x_norm': offset, 'path_target_bearing_deg': -89.,
         'line_heading_valid': True, 'line_heading_deg': angle,
         'line_heading_reference_source': 'fresh',
     }, positioning=True)
-    expected = 'STRAIGHT_1' if action == 'STRAIGHT' and depth <= .7 else action
+    expected = 'STRAIGHT_1' if action == 'STRAIGHT' else action
     assert command.valid and command.action == expected
     assert command.center_steering_deg == angle
 
 
 @pytest.mark.parametrize('angle,count', [(-15., 1), (-30., 2), (-45., 3),
                                        (15., 1), (30., 3), (45., 5)])
-def test_actual_fusion_and_bridge_use_line_heading_not_intersection_or_parallel_angle(angle, count):
+def test_fusion_and_bridge_use_calibrated_hurdle_yaw(angle, count):
     # The diagnostic intersection is on the opposite side of the requested heading.
     observations = {'hurdle': hurdle(.6, bbox=[400, 300, 1000, 719],
-                                    hurdle_angle_deg=-80 if angle > 0 else 80),
+                                    hurdle_angle_deg=-80 if angle > 0 else 80,
+                                    hurdle_angle_45_deg=-angle),
                     'line': {**line_info(x=500 if angle > 0 else 900, heading=angle),
                              'center_points_px': [[500 if angle > 0 else 900, y]
                                                   for y in (250, 180, 100)]}}
@@ -70,10 +71,10 @@ def test_old_checkpoint_cannot_reserve_final_tail(clock, depth, latched):
 
 
 @pytest.mark.parametrize('angle', [None, float('nan'), float('inf')])
-def test_fresh_heading_marked_valid_without_numeric_angle_does_not_authorize_motion(angle):
+def test_missing_calibrated_angle_does_not_authorize_motion_with_valid_line(angle):
     command = HurdleNavigationPlanner().plan({
-        **hurdle(.6), 'path_reference_valid': True, 'path_offset_x_norm': 0,
-        'line_heading_valid': True, 'line_heading_deg': angle,
+        **hurdle(.6, hurdle_angle_45_deg=angle), 'path_reference_valid': True, 'path_offset_x_norm': 0,
+        'line_heading_valid': True, 'line_heading_deg': 30,
         'line_heading_reference_source': 'fresh',
     }, positioning=True)
     assert not command.valid and command.action == 'WAIT'
@@ -83,7 +84,7 @@ def test_fresh_heading_marked_valid_without_numeric_angle_does_not_authorize_mot
 @pytest.mark.parametrize('depth', [.8, .6, .45])
 def test_proximity_guards_and_final_priority_remain_explicit(depth, bottom):
     command = HurdleNavigationPlanner().plan({
-        **hurdle(depth, bottom_distance_px=bottom), 'path_reference_valid': True,
+        **hurdle(depth, bottom_distance_px=bottom, hurdle_angle_45_deg=-30), 'path_reference_valid': True,
         'line_heading_valid': True, 'line_heading_deg': 30.,
         'line_heading_reference_source': 'fresh', 'path_offset_x_norm': .01,
     }, positioning=True)
@@ -98,9 +99,9 @@ def test_proximity_guards_and_final_priority_remain_explicit(depth, bottom):
 
 
 @pytest.mark.parametrize('heading', [1, 5, 13])
-def test_small_line_slope_does_not_turn_toward_large_intersection_or_parallel_angle(heading):
+def test_small_hurdle_yaw_ignores_large_intersection_and_legacy_angle(heading):
     decision = MotionDecisionPlanner().plan('AUTO', {
-        'hurdle': hurdle(.6, bbox=[400, 300, 1000, 719], hurdle_angle_deg=20.2),
+        'hurdle': hurdle(.6, bbox=[400, 300, 1000, 719], hurdle_angle_deg=20.2, hurdle_angle_45_deg=-heading),
         'line': {**line_info(x=500, heading=heading),
                  'center_points_px': [[500, 250], [500, 180], [500, 100]]},
     }, .1)
@@ -110,14 +111,14 @@ def test_small_line_slope_does_not_turn_toward_large_intersection_or_parallel_an
     assert 'turn_count' not in decision.source_command
 
 
-def test_reacquired_hurdle_waits_for_line_then_releases_final_sequence():
+def test_reacquired_hurdle_waits_for_calibrated_yaw_then_releases_final_sequence():
     planner = MotionDecisionPlanner()
     planner.plan('AUTO', {'hurdle': hurdle(.6, camera_center_offset_x_px=400)}, .1)
     planner.plan('AUTO', {'hurdle': {'detected': False}}, .1)
-    near = hurdle(.43, hurdle_angle_deg=40)
+    near = hurdle(.43, hurdle_angle_deg=40, hurdle_angle_45_deg=None)
     waiting = planner.plan('AUTO', {'hurdle': near}, .1)
-    assert waiting.reason == 'hurdle_recovery_waiting_for_line_heading'
+    assert waiting.reason == 'hurdle_recovery_waiting_for_calibrated_angle'
     assert not waiting.valid and not planner.hurdle_go_requested
-    ready = planner.plan('AUTO', {'hurdle': near, 'line': line_info(heading=5)}, .1)
+    ready = planner.plan('AUTO', {'hurdle': {**near, 'hurdle_angle_45_deg': -5}}, .1)
     assert ready.valid and ready.action == 'GO'
     assert not planner.hurdle_planner.recovery_active

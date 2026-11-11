@@ -1,0 +1,139 @@
+{
+  "note": "Synthetic input reproducing code branches, not a recorded ROS message replay. Distance/bottom examples match displayed video values; exact raw inputs were not recorded.",
+  "ball_loss_confirmation": [
+    {
+      "elapsed_sec": 0.0,
+      "frames": 1,
+      "confirmed": false
+    },
+    {
+      "elapsed_sec": 0.1,
+      "frames": 2,
+      "confirmed": false
+    },
+    {
+      "elapsed_sec": 0.2,
+      "frames": 3,
+      "confirmed": false
+    },
+    {
+      "elapsed_sec": 0.30000000000000004,
+      "frames": 4,
+      "confirmed": false
+    },
+    {
+      "elapsed_sec": 0.4,
+      "frames": 5,
+      "confirmed": false
+    },
+    {
+      "elapsed_sec": 0.5,
+      "frames": 6,
+      "confirmed": true
+    },
+    {
+      "elapsed_sec": 0.6000000000000001,
+      "frames": 7,
+      "confirmed": true
+    }
+  ],
+  "raw_detection_resets_missing": true,
+  "ball_lost_action": {
+    "phase": "BALL_APPROACH_LOST_ALIGN",
+    "source": "ball",
+    "action": "BALL_LOST_FINE_FORWARD_3",
+    "valid": true,
+    "reason": "ball_lost_at_top_edge_forward_search",
+    "sdk_motion_requested": true,
+    "requires_ack": false,
+    "source_command": {
+      "lost_ball_top_forward": true,
+      "lost_ball_alignment_from_memory": true,
+      "alignment_reference": "ball_top_edge",
+      "last_ball_top_edge_ratio": 0.027777777777777776,
+      "top_edge_ratio_threshold": 0.1,
+      "catalog_motion_available": true
+    }
+  },
+  "hurdle_before_loss": {
+    "valid": true,
+    "action": "STRAIGHT_1",
+    "reason": "hurdle_forward_2_approach_without_rotation",
+    "sdk_motion_requested": false,
+    "confidence": 0.95,
+    "depth_m": 0.47,
+    "distance_m": 0.47,
+    "ground_gap_m": 0.47,
+    "camera_bottom_gap_m": null,
+    "ground_gap_error_m": 0.37,
+    "hurdle_angle_deg": -1.3,
+    "center_steering_deg": 1.3,
+    "alignment_reference": "hurdle_angle_0",
+    "is_parallel": true,
+    "ground_gap_in_go_range": false,
+    "go_now": false,
+    "bottom_distance_px": 50.0,
+    "close_rotation_blocked": true,
+    "depth_fallback_requested": false,
+    "fine_sequence_requested": false,
+    "recovery_active": false,
+    "last_seen_side": "BOTTOM",
+    "approach_motion": "STRAIGHT_1",
+    "approach_level": 1,
+    "approach_target_distance_m": 0.47
+  },
+  "hurdle_missing": {
+    "valid": true,
+    "action": "HURDLE_LOST_BACKWARD_1",
+    "reason": "hurdle_lost_below_image",
+    "sdk_motion_requested": false,
+    "confidence": 0.0,
+    "depth_m": null,
+    "distance_m": null,
+    "ground_gap_m": null,
+    "camera_bottom_gap_m": null,
+    "ground_gap_error_m": null,
+    "hurdle_angle_deg": null,
+    "center_steering_deg": null,
+    "alignment_reference": "none",
+    "is_parallel": false,
+    "ground_gap_in_go_range": false,
+    "go_now": false,
+    "bottom_distance_px": null,
+    "close_rotation_blocked": true,
+    "depth_fallback_requested": false,
+    "fine_sequence_requested": false,
+    "recovery_active": false,
+    "last_seen_side": "BOTTOM",
+    "approach_motion": null,
+    "approach_level": null,
+    "approach_target_distance_m": null
+  },
+  "hurdle_reacquired": {
+    "valid": true,
+    "action": "GO",
+    "reason": "hurdle_final_sequence_at_go_depth",
+    "sdk_motion_requested": true,
+    "confidence": 0.95,
+    "depth_m": 0.428,
+    "distance_m": 0.428,
+    "ground_gap_m": 0.428,
+    "camera_bottom_gap_m": null,
+    "ground_gap_error_m": 0.328,
+    "hurdle_angle_deg": -1.3,
+    "center_steering_deg": 1.3,
+    "alignment_reference": "hurdle_angle_0",
+    "is_parallel": true,
+    "ground_gap_in_go_range": true,
+    "go_now": true,
+    "bottom_distance_px": 50.0,
+    "close_rotation_blocked": true,
+    "depth_fallback_requested": false,
+    "fine_sequence_requested": true,
+    "recovery_active": false,
+    "last_seen_side": "BOTTOM",
+    "approach_motion": null,
+    "approach_level": null,
+    "approach_target_distance_m": 0.428
+  }
+}

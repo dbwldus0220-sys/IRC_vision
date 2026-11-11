@@ -1,0 +1,90 @@
+--- before/src/step/step/hurdle_navigation_planner.py
++++ src/step/step/hurdle_navigation_planner.py
+@@ -25,7 +25,7 @@
+     control_start_depth_m: float = 1.0
+     go_target_depth_m: float = 0.10
+     go_depth_tolerance_m: float = 0.10
+-    final_sequence_start_depth_m: float = 0.450
++    final_sequence_start_depth_m: float = 0.500
+     normal_turn_stop_depth_m: float = 0.450
+     go_angle_tolerance_deg: float = 8.0
+     path_center_tolerance_norm: float = 0.10
+--- before/src/step/test/test_hurdle_navigation_planner.py
++++ src/step/test/test_hurdle_navigation_planner.py
+@@ -273,9 +273,10 @@
+ @pytest.mark.parametrize("depth,action", [
+     (0.001, "GO"), (0.2, "GO"), (0.43, "GO"),
+     (0.449999, "GO"), (0.450, "GO"),
+-    (0.450001, "STRAIGHT_1"), (0.55, "STRAIGHT_1"),
+-])
+-def test_positioning_final_sequence_starts_at_450mm(depth, action):
++    (0.450001, "GO"), (0.47, "GO"), (0.499999, "GO"), (0.500, "GO"),
++    (0.500001, "STRAIGHT_1"), (0.55, "STRAIGHT_1"),
++])
++def test_positioning_final_sequence_starts_at_500mm(depth, action):
+     command = HurdleNavigationPlanner().plan(hurdle_info(
+         depth_m=depth, go_now=False,
+     ), positioning=True)
+@@ -291,9 +292,9 @@
+     {"depth_m": -0.1}, {"depth_m": float("nan")},
+     {"depth_m": float("inf")},
+ ])
+-def test_positioning_450mm_requires_valid_current_observation(updates):
+-    command = HurdleNavigationPlanner().plan(hurdle_info(
+-        **{"depth_m": 0.45, **updates},
++def test_positioning_500mm_requires_valid_current_observation(updates):
++    command = HurdleNavigationPlanner().plan(hurdle_info(
++        **{"depth_m": 0.50, **updates},
+     ), positioning=True)
+     assert command.action == "WAIT"
+     assert not command.valid and not command.sdk_motion_requested
+--- before/src/mission_control/test/test_hurdle_forward2.py
++++ src/mission_control/test/test_hurdle_forward2.py
+@@ -101,7 +101,7 @@
+     assert [r['motion_id'] for r in decoded_messages(bridge.executor_request_publisher)] == ['line_forward_2'] * 2
+ 
+ 
+-@pytest.mark.parametrize('depth', [.60, .50])
++@pytest.mark.parametrize('depth', [.60, .500001])
+ def test_camera_down_frame_resumes_without_half_second_or_periodic_tick(clock, depth):
+     from step.hurdle_camera_pose import HurdleCameraPose
+     from test_boundary_decision_reservation import BoundaryHarness
+@@ -208,11 +208,12 @@
+     assert node.pending_hurdle_final_sequence is None
+ 
+ 
+-def test_rejected_next_walk_keeps_final_checkpoint_and_waits_for_current_walk(clock):
++@pytest.mark.parametrize('depth', [.50, .47, .44])
++def test_rejected_next_walk_keeps_final_checkpoint_and_waits_for_current_walk(clock, depth):
+     node, bridge, first, started = start(clock)
+     second = reserve_walk(node, bridge, clock, started)
+     clock[0] += .05
+-    observe(node, clock, .44)
++    observe(node, clock, depth)
+     forward_status(node, bridge, second, 'REJECTED', error_code='INCOMPATIBLE_TRANSITION')
+     assert node.queued_general_command_id is None
+     assert node.pending_hurdle_final_sequence is not None
+@@ -221,11 +222,12 @@
+     assert node.publish()[-1]['action'] == 'GO'
+ 
+ 
+-def test_final_crossing_after_commit_waits_for_accepted_walk_and_cannot_queue_a_third(clock):
++@pytest.mark.parametrize('depth', [.50, .47, .44])
++def test_final_crossing_after_commit_waits_for_accepted_walk_and_cannot_queue_a_third(clock, depth):
+     node, bridge, first, started = start(clock)
+     second = reserve_walk(node, bridge, clock, started)
+     clock[0] += .05
+-    observe(node, clock, .44)
++    observe(node, clock, depth)
+     clock[0] = started + duration('line_forward_2')
+     forward_status(node, bridge, first, 'SUCCEEDED')
+     assert node.publish() == []  # Wait for the reserved RUNNING status, not GO.
+@@ -310,7 +312,7 @@
+     assert node.queued_general_command_id is not None
+ 
+ 
+-@pytest.mark.parametrize('depth', [.450, .449, .40])
++@pytest.mark.parametrize('depth', [.500, .499, .47, .450, .449, .40])
+ @pytest.mark.parametrize('delay', [0., .20, .35])
+ def test_crossing_reserves_final_sequence_once_even_when_hurdle_disappears(clock, depth, delay):
+     node, bridge, request, started = start(clock)

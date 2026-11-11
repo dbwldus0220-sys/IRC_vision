@@ -1,0 +1,351 @@
+"""Replay walking boundaries with live Vision and correlated executor statuses."""
+
+import pytest
+
+from mission_control.motion_decision_node import MotionDecisionNode
+from test_line_offset_alignment import sample
+from test_motion_decision_planner import goal_info
+from test_mission_phase_flow import line_info
+from test_goal_target_steering import target_sample
+from test_line_corner_memory import corner_info
+from test_wait_refresh_and_fine_settle import LiveInputHarness, observe
+from test_motion_command_bridge import (
+    FakeBridge, decoded_messages, executor_status, navigation_message,
+)
+
+
+@pytest.fixture
+def clock(monkeypatch):
+    now = [10.]
+    monkeypatch.setattr('mission_control.motion_decision_node.time.monotonic', lambda: now[0])
+    monkeypatch.setattr(MotionDecisionNode, '_current_ros_time_ns', lambda _: round(now[0] * 1e9))
+    return now
+
+
+def fresh(node, clock, source, info, *, plan=True):
+    observe(node, clock, source, {**info, 'rgb_stamp_ns': round((clock[0] + .01) * 1e9)}, plan=plan)
+
+
+def start_goal(node, clock, depth, angle=0):
+    fresh(node, clock, 'goal', target_sample(angle, depth))
+    command = node.publisher.messages[-1]
+    motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+    node.send_status(command['action'], command['command_id'], 'RUNNING', motion)
+    return command
+
+
+@pytest.mark.parametrize('phase', ['LINE_TRACK', 'LINE_TRACK_AFTER_PICKUP'])
+def test_offset_forward_queues_and_promotes_without_clearing_vision(clock, phase):
+    node = LiveInputHarness(phase=phase)
+    aligned = sample(target_angle=0., ground_heading_error_deg=-30.)
+    fresh(node, clock, 'line', aligned)
+    first = node.publisher.messages[-1]
+    assert first['action'] == 'STRAIGHT_1'
+    node.send_status(first['action'], first['command_id'], 'RUNNING')
+    clock[0] = (node.active_line_motion_started_at
+                + node.active_line_motion_duration_sec * MotionDecisionNode.LINE_MOTION_CAPTURE_START_RATIO)
+    for _ in range(6):
+        fresh(node, clock, 'line', aligned, plan=False)
+    second = node.publisher.messages[-1]
+    assert second['command_id'] != first['command_id']
+    assert node.queued_general_command_id == second['command_id']
+    assert second['action'] == 'STRAIGHT_1'
+    node.send_status(first['action'], first['command_id'], 'SUCCEEDED')
+    assert node.latest_info['line'] is not None
+    node.send_status(second['action'], second['command_id'], 'RUNNING')
+    assert node.general_motion_gate.active_command_id == second['command_id']
+    assert node.line_offset_motion_command_id == second['command_id']
+    node.send_status(second['action'], second['command_id'], 'FAILED')
+    assert node.planner.line_offset_alignment_failed
+
+
+@pytest.mark.parametrize('depth,angle', [
+    (depth, angle) for depth in (1.5, 1., .7, .570)
+    for angle in ((0, -30, 30) if depth > .850 else (0, -10, 10))
+])
+def test_goal_walking_queues_only_one_then_promotes_without_pause(clock, depth, angle):
+    node = LiveInputHarness(phase='GOAL_APPROACH')
+    first = start_goal(node, clock, depth, angle)
+    # Early images do not reserve a second chunk.
+    for _ in range(3):
+        fresh(node, clock, 'goal', target_sample(angle, depth), plan=False)
+    assert getattr(node, 'queued_general_command_id', None) is None
+    clock[0] = node.goal_forward_started_at + MotionDecisionNode.GOAL_FORWARD_DURATION_SEC[first['action']] * .75
+    for _ in range(6):
+        fresh(node, clock, 'goal', target_sample(angle, depth), plan=False)
+    assert len([m for m in node.publisher.messages if m['valid']]) == 2
+    second = node.publisher.messages[-1]
+    assert second['action'] == first['action']
+    assert node.queued_general_command_id == second['command_id']
+    node.send_status(first['action'], first['command_id'], 'SUCCEEDED')
+    assert node.latest_info['goal'] is not None
+    assert node.goal_post_motion_dwell_until is None
+    assert getattr(node, 'correction_post_motion_dwell_until', None) is None
+    node.send_status(second['action'], second['command_id'], 'RUNNING', FakeBridge.ACTION_TO_MOTION_ID[second['action']])
+    assert node.general_motion_gate.active_command_id == second['command_id']
+    assert node.goal_forward_started_at == clock[0]
+
+
+@pytest.mark.parametrize('changes', [
+    {'detected': False}, {'depth_valid': False}, {'confidence': .1},
+    {'confirmation_confirmed': False}, {'bearing_deg': 45.},
+    {'depth_m': .43, 'score_now': True}, {'depth_m': .35},
+])
+def test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat(clock, changes):
+    node = LiveInputHarness(phase='GOAL_APPROACH')
+    start_goal(node, clock, 1.5)
+    clock[0] += 2.4
+    for _ in range(4):
+        fresh(node, clock, 'goal', goal_info(**{
+            'depth_m': 1.5, 'score_now': False, **changes,
+        }), plan=False)
+    assert getattr(node, 'queued_general_command_id', None) is None
+    assert not node.planner.goal_terminal_requested
+
+
+def test_goal_queue_rejects_frames_captured_before_late_window(clock):
+    node = LiveInputHarness(phase='GOAL_APPROACH')
+    start_goal(node, clock, .570)
+    clock[0] += .3
+    for i in range(4):
+        observe(node, clock, 'goal', goal_info(depth_m=.570, score_now=False,
+                rgb_stamp_ns=10_050_000_000 + i * 10_000_000), plan=False)
+    assert getattr(node, 'queued_general_command_id', None) is None
+
+
+def test_goal_failure_clears_reserved_motion_and_requires_new_vision(clock):
+    node = LiveInputHarness(phase='GOAL_APPROACH')
+    first = start_goal(node, clock, 1.5)
+    clock[0] += 2.4
+    for _ in range(3):
+        fresh(node, clock, 'goal', goal_info(depth_m=1.5, score_now=False), plan=False)
+    assert node.queued_general_command_id is not None
+    node.send_status(first['action'], first['command_id'], 'FAILED')
+    assert node.queued_general_command_id is None
+    assert node.latest_info['goal'] is None
+    assert not node.general_motion_gate.has_required_fresh_vision()
+
+
+def test_goal_forward_without_reservation_uses_recent_frame_immediately(clock):
+    node = LiveInputHarness(phase='GOAL_APPROACH')
+    first = start_goal(node, clock, 1.5)
+    clock[0] += .1
+    fresh(node, clock, 'goal', goal_info(depth_m=1., score_now=False), plan=False)
+    node.send_status(first['action'], first['command_id'], 'SUCCEEDED')
+    MotionDecisionNode._publish_decision(node)
+    assert node.publisher.messages[-1]['action'] == 'GOAL_CAMERA_90_FORWARD_2'
+
+
+def test_goal_forward_does_not_reuse_expired_vision(clock):
+    node = LiveInputHarness(phase='GOAL_APPROACH')
+    first = start_goal(node, clock, 1.5)
+    clock[0] += 4.
+    node.send_status(first['action'], first['command_id'], 'SUCCEEDED')
+    MotionDecisionNode._publish_decision(node)
+    assert not node.publisher.messages[-1]['valid']
+
+
+@pytest.mark.parametrize('initial_angle,next_angle,expected', [
+    (0, 30, 'GOAL_CAMERA90_RECOVER_RIGHT_4'),
+    (0, -30, 'GOAL_CAMERA90_RECOVER_LEFT_4'),
+    (30, 0, 'GOAL_CAMERA_90_FORWARD_2'),
+    (-30, 30, 'GOAL_CAMERA90_RECOVER_RIGHT_4'),
+])
+def test_goal_forward_and_recovery_queue_each_other(clock, initial_angle, next_angle, expected):
+    node = LiveInputHarness(phase='GOAL_APPROACH')
+    first = start_goal(node, clock, 1.0, initial_angle)
+    clock[0] += MotionDecisionNode.GOAL_FORWARD_DURATION_SEC[first['action']] * .75
+    for _ in range(3):
+        fresh(node, clock, 'goal', target_sample(next_angle), plan=False)
+        clock[0] += .01
+    second = node.publisher.messages[-1]
+    assert second['action'] == expected
+    assert node.queued_general_command_id == second['command_id']
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(navigation_message(action=first['action'], source='goal'))
+    bridge.navigation_command_callback(navigation_message(action=expected, source='goal', command_id=8001))
+    assert bridge.queued_request_id == 8001
+    # Preserve the bridge's existing boundary check between camera-90 forward
+    # and Line recovery, whose stored entry frames are different.
+    bridge.executor_status_callback(executor_status(
+        status='SUCCEEDED', motion_id=bridge.ACTION_TO_MOTION_ID[first['action']]))
+    assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == bridge.ACTION_TO_MOTION_ID[expected]
+
+
+def test_goal_prequeue_requires_three_consecutive_matching_actions(clock):
+    node = LiveInputHarness(phase='GOAL_APPROACH')
+    first = start_goal(node, clock, 1.0)
+    clock[0] += MotionDecisionNode.GOAL_FORWARD_DURATION_SEC[first['action']] * .75
+    for angle in (30, -30, 0, 30, -30, 30):
+        fresh(node, clock, 'goal', target_sample(angle), plan=False)
+        clock[0] += .01
+    assert getattr(node, 'queued_general_command_id', None) is None
+    for _ in range(2):
+        fresh(node, clock, 'goal', target_sample(30), plan=False)
+        clock[0] += .01
+    assert node.publisher.messages[-1]['action'] == 'GOAL_CAMERA90_RECOVER_RIGHT_4'
+    assert node.queued_general_command_id is not None
+
+
+@pytest.mark.parametrize('first,second,deferred', [
+    ('GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_2', False),
+    ('GOAL_CAMERA90_FINE_FORWARD_3', 'GOAL_CAMERA90_FINE_FORWARD_1', False),
+])
+def test_bridge_reserves_different_goal_lengths_without_post_motion_dwell(first, second, deferred):
+    bridge = FakeBridge()
+    bridge.navigation_command_callback(navigation_message(action=first, source='goal'))
+    bridge.navigation_command_callback(navigation_message(action=second, source='goal', command_id=8001))
+    assert bridge.queued_request_deferred is deferred
+    assert len(bridge.executor_request_publisher.messages) == (1 if deferred else 2)
+    bridge.executor_status_callback(executor_status(status='SUCCEEDED', motion_id=bridge.ACTION_TO_MOTION_ID[first]))
+    requests = decoded_messages(bridge.executor_request_publisher)
+    assert requests[-1]['motion_id'] == bridge.ACTION_TO_MOTION_ID[second]
+    assert bridge.active_command_id == 8001
+    assert bridge.transition_dwell_until is None
+
+
+def test_goal_preparation_status_does_not_start_forward_capture(clock):
+    node = LiveInputHarness(phase='GOAL_APPROACH')
+    fresh(node, clock, 'goal', goal_info(depth_m=.7, score_now=False))
+    command = node.publisher.messages[-1]
+    node.send_status(command['action'], command['command_id'], 'RUNNING', 'goal_fine_prepare_90')
+    clock[0] += 2.
+    for _ in range(4):
+        fresh(node, clock, 'goal', goal_info(depth_m=.7, score_now=False), plan=False)
+    assert getattr(node, 'goal_forward_started_at', None) is None
+    assert getattr(node, 'queued_general_command_id', None) is None
+    node.send_status(command['action'], command['command_id'], 'RUNNING', 'goal_camera_90_fine_forward_3')
+    assert node.goal_forward_started_at == clock[0]
+
+
+def test_bridge_reports_actual_goal_preparation_before_walking():
+    bridge = FakeBridge()
+    bridge.last_physical_motion_id = 'goal_camera_90_forward_4'
+    bridge.navigation_command_callback(navigation_message(
+        action='GOAL_CAMERA90_FINE_FORWARD_3', source='goal'))
+    bridge.executor_status_callback(executor_status(motion_id='goal_fine_prepare_90'))
+    status = decoded_messages(bridge.motion_status_publisher)[-1]
+    assert status['action'] == 'GOAL_CAMERA90_FINE_FORWARD_3'
+    assert status['status'] == 'RUNNING'
+    assert status['motion_id'] == 'goal_fine_prepare_90'
+
+
+@pytest.mark.parametrize('blocker', ['turn', 'invalid', 'count_exhausted'])
+def test_offset_forward_reservation_respects_geometry_and_count_limit(clock, blocker):
+    node = LiveInputHarness(phase='LINE_TRACK_AFTER_PICKUP')
+    aligned = sample(target_angle=0., ground_heading_error_deg=-30.)
+    fresh(node, clock, 'line', aligned)
+    first = node.publisher.messages[-1]
+    node.send_status(first['action'], first['command_id'], 'RUNNING')
+    clock[0] += .7
+    if blocker == 'count_exhausted':
+        node.post_ball_line_command_ids = [1, 2, 3]
+        next_line = aligned
+    elif blocker == 'turn':
+        next_line = sample(target_angle=25., ground_heading_error_deg=-10.)
+    else:
+        next_line = {**aligned, 'ground_projection_valid': False}
+    for _ in range(6):
+        fresh(node, clock, 'line', next_line, plan=False)
+    if blocker == 'turn':
+        assert node.queued_general_action.startswith('LINE_OFFSET_TURN_')
+    else:
+        assert getattr(node, 'queued_general_command_id', None) is None
+
+
+@pytest.mark.parametrize('phase', ['AUTO', 'LINE_TRACK', 'LINE_TRACK_AFTER_PICKUP'])
+@pytest.mark.parametrize('recovery', [False, True])
+def test_walking_boundary_keeps_recent_corner_frame_without_another_capture(clock, phase, recovery):
+    from dataclasses import replace
+    node = LiveInputHarness(phase=phase)
+    node.planner.line_planner.config = replace(
+        node.planner.line_planner.config, direction_confirmation_frames=1)
+    initial = line_info(heading=-20., offset=-.3) if recovery else line_info()
+    fresh(node, clock, 'line', initial)
+    first = node.publisher.messages[-1]
+    assert first['action'] == ('RECOVER_LEFT_TURN_LEFT_4' if recovery else 'STRAIGHT')
+    node.send_status(first['action'], first['command_id'], 'RUNNING')
+    clock[0] += 3.
+    recent = corner_info(corner_start_distance_m=.5)
+    fresh(node, clock, 'line', recent, plan=False)
+    assert getattr(node, 'queued_general_command_id', None) is None
+    clock[0] += .2
+    node.send_status(first['action'], first['command_id'], 'SUCCEEDED')
+    assert node.latest_info['line'] is not None
+    assert node.pending_line_corner['minimum_rgb_stamp_ns'] is None
+    MotionDecisionNode._publish_decision(node)
+    command = node.publisher.messages[-1]
+    assert command['command_id'] != first['command_id']
+    assert command['valid'] and command['action'] == 'STRAIGHT_1'
+    assert command['reason'] == 'line_corner_turn_too_far'
+
+
+@pytest.mark.parametrize('age', [.6, -1.])
+def test_walking_boundary_still_rejects_expired_or_future_corner_capture(clock, age):
+    node = LiveInputHarness(phase='LINE_TRACK')
+    fresh(node, clock, 'line', line_info())
+    first = node.publisher.messages[-1]
+    node.send_status(first['action'], first['command_id'], 'RUNNING')
+    clock[0] += 3.
+    observe(node, clock, 'line', corner_info(
+        corner_start_distance_m=.5,
+        rgb_stamp_ns=round((clock[0] - age) * 1e9),
+    ), plan=False)
+    node.send_status(first['action'], first['command_id'], 'SUCCEEDED')
+    MotionDecisionNode._publish_decision(node)
+    assert not node.publisher.messages[-1]['valid']
+
+
+@pytest.mark.parametrize('start_recovery', [False, True])
+@pytest.mark.parametrize('decision_available', [False, True])
+def test_post_pickup_prequeue_includes_walking_recovery_in_both_directions(clock, start_recovery, decision_available):
+    node = LiveInputHarness(phase='LINE_TRACK_AFTER_PICKUP')
+    recovery = line_info(heading=-20., offset=-.3)
+    fresh(node, clock, 'line', recovery if start_recovery else line_info())
+    first = node.publisher.messages[-1]
+    node.send_status(first['action'], first['command_id'], 'RUNNING')
+    clock[0] = node.active_line_motion_started_at + node.active_line_motion_duration_sec * .75
+    if not decision_available:
+        node.post_ball_line_command_ids = [1, 2, 3]
+    for _ in range(16):
+        fresh(node, clock, 'line', line_info() if start_recovery else recovery, plan=False)
+    queued = getattr(node, 'queued_general_command_id', None)
+    assert (queued is not None) is decision_available
+    if decision_available:
+        assert node.publisher.messages[-1]['action'] == (
+            'STRAIGHT' if start_recovery else 'RECOVER_LEFT_TURN_LEFT_4'
+        )
+
+
+def test_short_goal_fine_reserves_with_ten_hz_images_and_150ms_latency(clock):
+    import json
+    from std_msgs.msg import String
+    node = LiveInputHarness(phase='GOAL_APPROACH')
+    first = start_goal(node, clock, .57)
+    started = node.goal_forward_started_at
+    duration = MotionDecisionNode.GOAL_FORWARD_DURATION_SEC[first['action']]
+    assert first['action'] == 'GOAL_CAMERA90_FINE_FORWARD_3'
+    for frame in range(1, 10):
+        captured = started + frame * .1
+        clock[0] = captured + .15
+        if clock[0] >= started + duration:
+            break
+        MotionDecisionNode._info_callback(node, 'goal')(String(data=json.dumps({
+            **target_sample(0, .57), 'rgb_stamp_ns': round(captured * 1e9),
+        })))
+        if getattr(node, 'queued_general_command_id', None) is not None:
+            break
+    assert node.queued_general_command_id is not None
+    assert clock[0] < started + duration - .1
+    assert node.publisher.messages[-1]['action'] == first['action']
+
+
+def test_goal_reservation_cannot_count_one_image_multiple_times(clock):
+    node = LiveInputHarness(phase='GOAL_APPROACH')
+    start_goal(node, clock, .57)
+    clock[0] += .75
+    fresh(node, clock, 'goal', target_sample(0, .57), plan=False)
+    for _ in range(5):
+        MotionDecisionNode._prepare_pending_goal_decision(node, clock[0])
+    assert node.goal_forward_capture_count == 1
+    assert getattr(node, 'queued_general_command_id', None) is None

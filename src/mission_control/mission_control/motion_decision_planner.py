@@ -131,12 +131,15 @@ class MotionDecisionPlanner:
     STATIONARY_TURN_MIN_DEG = STATIONARY_TURN_MIN_DEG
     STATIONARY_MAX_TURN_COUNTS = {"LEFT": 6, "RIGHT": 9}
     PICKUP_INITIAL_CENTER_BOUND_PX = 70.0
+    POST_EXIT_LINE_HEADING_DEG = 40.0
     BALL_STATIONARY_TURN_MIN_BOTTOM_PX = 120.0
-    PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX = 360.0
+    PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX = 180.0
+    PICKUP_TURN_MIN_ABS_OFFSET_PX = 100.0
+    PICKUP_FINE_COMPLETE_MAX_BOTTOM_DISTANCE_PX = 220.0
     CAMERA_DOWN_FORWARD_TWO_MIN_BOTTOM_PX = 300.0
     CAMERA_DOWN_FORWARD_TWO_MAX_BOTTOM_PX = 500.0
     PICKUP_CLOSE_CRAB_BOTTOM_DISTANCE_PX = 100.0
-    PICKUP_FINE_LEFT_BOUND_PX = -30.0
+    PICKUP_FINE_LEFT_BOUND_PX = -50.0
     PICKUP_FINE_RIGHT_BOUND_PX = 55.0
     BALL_LOST_TOP_EDGE_RATIO = 0.10
     POST_BALL_LINE_LEFT_COUNTS = frozenset(LEFT_TURN_ANGLES_DEG)
@@ -145,7 +148,7 @@ class MotionDecisionPlanner:
     BALL_LOST_RIGHT_TURN_COUNT = 5
     POST_SHOT_LINE_HEADING_TOLERANCE_DEG = 15.0
     LINE_OFFSET_EXIT_RATIO = 0.8
-    LINE_OFFSET_EXIT_DISTANCE_M = 0.10
+    LINE_OFFSET_EXIT_DISTANCE_M = 0.15
     LINE_OFFSET_TARGET_TOLERANCE_DEG = LINE_RECOVERY_MIN_ANGLE_DEG
 
     def __init__(
@@ -292,7 +295,7 @@ class MotionDecisionPlanner:
                 requires_ack=False,
                 source_command={},
             )
-        if normalized_phase in {"POST_BALL_LINE_ALIGN", "POST_SHOT_LINE_ALIGN"}:
+        if normalized_phase in {"POST_BALL_LINE_ALIGN", "POST_SHOT_LINE_ALIGN", "POST_SHOT_EXIT_ALIGN"}:
             self.observe_line_for_search(observations.get("line"))
             return self._plan_post_ball_line_align(
                 observations.get("line"), phase=normalized_phase,
@@ -349,22 +352,18 @@ class MotionDecisionPlanner:
             self.hurdle_lock_active or normalized_phase == "HURDLE_POSITIONING"
         )
         if source == "hurdle" and info is not None:
-            # Prefer current Line geometry; the hurdle planner validates its depth fallback.
+            # Keep line/intersection diagnostics; hurdle yaw alone controls alignment.
             reference = build_hurdle_path_reference(info, observations.get("line"))
             info = {**info, **reference, "hurdle_positioning_active": hurdle_positioning}
         command = self._plan_source(source, info, dt_sec)
         if source == "hurdle" and info is not None:
             command.update(reference)
-            command["alignment_reference"] = (
-                "last_seen_screen_side"
-                if command.get("reason") in {
-                    "hurdle_lost_search_last_side", "hurdle_lost_below_image",
-                }
-                else "hurdle_depth_angle"
-                if (reference.get("line_heading_valid") is not True
-                    and command.get("center_steering_deg") is not None)
-                else "line_image_heading"
-            )
+            if command.get("reason") in {
+                "hurdle_lost_search_last_side", "hurdle_lost_below_image",
+            }:
+                command["alignment_reference"] = "last_seen_screen_side"
+            command["hurdle_camera_pose"] = info.get("hurdle_camera_pose")
+            command["hurdle_camera_ready"] = info.get("hurdle_camera_ready") is True
         if source == "hurdle":
             command["hurdle_stage"] = "FINE_APPROACH" if hurdle_positioning else "RECOGNITION_APPROACH"
         if hurdle_positioning:
@@ -832,14 +831,9 @@ class MotionDecisionPlanner:
             direction = "LEFT" if command.action == "ALIGN_LEFT" else "RIGHT"
             # Both sides use measured geometry; blind searches keep an explicit count.
             count = command.turn_count
-            angle = (command.center_steering_deg
-                     if command.reason in {"hurdle_line_heading_alignment",
-                                           "hurdle_reacquired_line_alignment",
-                                           "hurdle_parallel_heading_fallback",
-                                           "hurdle_reacquired_hurdle_alignment"}
-                     else command.hurdle_angle_deg)
+            angle = command.center_steering_deg
             if angle is None:
-                angle = command.center_steering_deg
+                angle = command.hurdle_angle_deg
             if angle is not None:
                 count = self._turn_repeat_count(angle, direction)
             elif count is None:
@@ -1205,7 +1199,7 @@ class MotionDecisionPlanner:
         motion completion. Pickup corrections retain the camera-down checkpoint.
         """
         direction = self.last_ball_turn_direction
-        # The 360px yaw restriction applies to visible alignment, not confirmed loss.
+        # The crab-range yaw restriction applies to visible alignment, not confirmed loss.
         if not (
             info is not None and info.get("detected") is False
             and info.get("raw_detected") is not True
@@ -1314,8 +1308,9 @@ class MotionDecisionPlanner:
         *,
         phase: str = "POST_BALL_LINE_ALIGN",
     ) -> MotionDecision:
-        """Reacquire Line after pickup; retain legacy post-shot alignment."""
-        prefix = phase.removesuffix("_ALIGN")
+        """Correct exit yaw before Line driving; retain region 1-4 alignment."""
+        exit_alignment = phase in {"POST_BALL_LINE_ALIGN", "POST_SHOT_EXIT_ALIGN"}
+        prefix = "POST_SHOT_LINE" if phase == "POST_SHOT_EXIT_ALIGN" else phase.removesuffix("_ALIGN")
         if (
             (info is None and phase == "POST_BALL_LINE_ALIGN")
             or (info is not None and info.get("detected") is False)
@@ -1392,8 +1387,8 @@ class MotionDecisionPlanner:
 
         direction = "RIGHT" if heading > 0.0 else "LEFT"
         heading_tolerance = (
-            self.line_planner.config.straight_max_heading_deg
-            if phase == "POST_BALL_LINE_ALIGN"
+            self.POST_EXIT_LINE_HEADING_DEG
+            if exit_alignment
             else self.POST_SHOT_LINE_HEADING_TOLERANCE_DEG
         )
         if phase == "POST_SHOT_LINE_ALIGN":
@@ -1408,13 +1403,14 @@ class MotionDecisionPlanner:
             "alignment_reference": "line_heading",
             "steering_error_deg": heading,
         }
-        if phase == "POST_BALL_LINE_ALIGN":
-            # Reacquisition ends this phase. Ordinary navigation owns position,
-            # heading and corners; aligning only the local tangent can turn away
-            # from a visible bend and restart the search indefinitely.
+        if exit_alignment and abs(heading) <= heading_tolerance:
+            # Correct large exit yaw here; ordinary Line keeps its own 50-degree
+            # threshold once this short post-pickup alignment has completed.
             return MotionDecision(
-                phase=phase, source="line", action="POST_BALL_LINE_ALIGNED",
-                valid=True, reason="post_ball_line_reacquired",
+                phase=phase, source="line", action=("POST_BALL_LINE_ALIGNED"
+                    if phase == "POST_BALL_LINE_ALIGN" else "POST_SHOT_EXIT_ALIGNED"),
+                valid=True, reason=("post_ball_line_reacquired"
+                    if phase == "POST_BALL_LINE_ALIGN" else "post_shot_exit_heading_aligned"),
                 sdk_motion_requested=False, requires_ack=False,
                 source_command=common,
             )
@@ -1554,8 +1550,9 @@ class MotionDecisionPlanner:
             return correction
 
         crab_allowed = bottom_distance_px <= self.PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX
-        if crab_allowed and not (self.PICKUP_FINE_LEFT_BOUND_PX <= robot_center_offset_px
-                                 <= self.PICKUP_FINE_RIGHT_BOUND_PX):
+        centered = (self.PICKUP_FINE_LEFT_BOUND_PX <= robot_center_offset_px
+                    <= self.PICKUP_FINE_RIGHT_BOUND_PX)
+        if crab_allowed and not centered:
             direction = "RIGHT" if robot_center_offset_px > 0.0 else "LEFT"
             return MotionDecision(
                 phase=phase, source="ball", action=f"BALL_PICKUP_CRAB_{direction}",
@@ -1574,7 +1571,17 @@ class MotionDecisionPlanner:
         common["pickup_fine_progress_complete"] = self.pickup_fine_progress_complete
         common.update(pickup_last_completed_motion_id=self.pickup_last_completed_motion_id,
                       pickup_fine_skip_limit_px=skip_limit)
-        if fine_required or not crab_allowed:
+        # Keep the pre-grasp distance/centering guard independent of yaw/crab selection.
+        common["pickup_fine_complete_max_bottom_distance_px"] = self.PICKUP_FINE_COMPLETE_MAX_BOTTOM_DISTANCE_PX
+        if (fine_required or not centered
+                or bottom_distance_px > self.PICKUP_FINE_COMPLETE_MAX_BOTTOM_DISTANCE_PX):
+            if (depth_valid is not True or distance is None or distance <= 0.0
+                    or depth_age is None or not 0.0 <= depth_age <= self.ball_planner.config.max_pickup_depth_age_sec):
+                return MotionDecision(
+                    phase=phase, source="ball", action="WAIT", valid=False,
+                    reason="ball_pickup_waiting_for_fresh_distance",
+                    sdk_motion_requested=False, requires_ack=False, source_command=common,
+                )
             forward_two = self._camera_down_forward_two_allowed(info)
             return MotionDecision(
                 phase=phase, source="ball",
@@ -1610,18 +1617,23 @@ class MotionDecisionPlanner:
     def _pickup_heading_correction(
         self, info: dict, phase: str, common: dict, *, fine: bool,
     ) -> MotionDecision | None:
-        """Use yaw above 360px and lateral alignment at or below 360px."""
+        """Allow yaw only beyond the crab range and lateral deadband."""
         angle, source = self.ball_planner.select_steering(info)
         direction = "RIGHT" if angle is not None and angle > 0.0 else "LEFT"
         tolerance = self.STATIONARY_TURN_MIN_DEG[direction]
         common.update(steering_error_deg=angle, steering_source=source,
                       heading_tolerance_deg=tolerance)
         bottom = self._number(info, "bottom_distance_px")
+        offset = self._number(info, "offset_x_px")
+        crab_allowed = bottom is not None and bottom <= self.PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX
+        turn_allowed = (bottom is not None and bottom > self.PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX
+                        and offset is not None and abs(offset) > self.PICKUP_TURN_MIN_ABS_OFFSET_PX)
         common.update(
             pickup_crab_max_bottom_distance_px=self.PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX,
-            pickup_alignment_mode="CRAB" if bottom is not None and bottom <= self.PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX else "TURN",
+            pickup_turn_min_abs_offset_px=self.PICKUP_TURN_MIN_ABS_OFFSET_PX,
+            pickup_alignment_mode="CRAB" if crab_allowed else "TURN" if turn_allowed else "APPROACH",
         )
-        if bottom is not None and bottom <= self.PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX:
+        if crab_allowed:
             return None
         if angle is None:
             return MotionDecision(
@@ -1629,6 +1641,8 @@ class MotionDecisionPlanner:
                 reason="ball_pickup_waiting_for_heading",
                 sdk_motion_requested=False, requires_ack=False, source_command=common,
             )
+        if not turn_allowed:
+            return None
         if abs(angle) < tolerance:
             return None
         if not self._ball_stationary_turn_allowed(info):

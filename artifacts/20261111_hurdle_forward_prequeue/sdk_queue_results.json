@@ -1,0 +1,39 @@
+[
+  {
+    "command": [
+      "build/irc_step_motion_executor/robot_motion_sdk/gui_execution_probe",
+      "artifacts/robot_motions_runtime.json",
+      "n전진45도(2회)",
+      "5",
+      "0",
+      "0",
+      "--queue",
+      "n전진45도(2회)"
+    ],
+    "interpolation": "cosine",
+    "completion_ms": [
+      1990.0,
+      2980.0
+    ],
+    "interval_ms": 990.0
+  },
+  {
+    "command": [
+      "build/irc_step_motion_executor/robot_motion_sdk/gui_execution_probe",
+      "artifacts/robot_motions_runtime.json",
+      "n전진45도(2회)",
+      "5",
+      "0",
+      "0",
+      "--queue",
+      "n전진45도(2회)",
+      "--continuous"
+    ],
+    "interpolation": "continuous",
+    "completion_ms": [
+      1990.0,
+      2980.0
+    ],
+    "interval_ms": 990.0
+  }
+]

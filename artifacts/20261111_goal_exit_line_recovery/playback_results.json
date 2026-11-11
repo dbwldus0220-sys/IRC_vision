@@ -1,0 +1,30 @@
+[
+  {
+    "motion": "t골대후제자리우회전(5회)+라인복귀좌회전45도(4회)",
+    "interpolation": "cosine",
+    "hold_samples": 101,
+    "observed_hold_ms": 505.0,
+    "completion_events": 1
+  },
+  {
+    "motion": "t골대후제자리우회전(5회)+라인복귀좌회전45도(4회)",
+    "interpolation": "continuous",
+    "hold_samples": 101,
+    "observed_hold_ms": 505.0,
+    "completion_events": 1
+  },
+  {
+    "motion": "p골대후제자리좌회전(3회)+라인복귀우회전45도(4회)",
+    "interpolation": "cosine",
+    "hold_samples": 100,
+    "observed_hold_ms": 500.0,
+    "completion_events": 1
+  },
+  {
+    "motion": "p골대후제자리좌회전(3회)+라인복귀우회전45도(4회)",
+    "interpolation": "continuous",
+    "hold_samples": 100,
+    "observed_hold_ms": 500.0,
+    "completion_events": 1
+  }
+]

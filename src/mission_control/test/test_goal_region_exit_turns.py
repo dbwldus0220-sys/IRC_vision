@@ -38,13 +38,19 @@ def test_executed_region_routes_through_gate_bridge_and_line_reacquisition(monke
     count = (5 if section == 1 else 3) if region >= 5 else (9 if section == 1 else 4)
     turn = node.publish_vision(line=line_info())[-1]
     expected = (f'POST_SHOT_EXIT_{direction}_{count}_FORWARD_4' if region >= 5
+                else f'POST_SHOT_EXIT_{direction}_{count}_RECOVERY_{direction}_4' if region in {1, 2}
                 else f'POST_SHOT_TURN_{direction}_{count}')
     assert turn['valid'] and turn['action'] == expected
     bridge = FakeBridge()
     bridge.navigation_command_callback(String(data=json.dumps(turn)))
     request = decoded_messages(bridge.executor_request_publisher)[-1]
     name = 't골대후제자리우회전' if section == 1 else 'p골대후제자리좌회전'
-    assert ALIASES[request['motion_id']] == (f'{name}({count}회)+전진4회' if region >= 5 else name)
+    recovery = '우' if section == 1 else '좌'
+    turn_count = 6 if section == 1 else 4
+    assert ALIASES[request['motion_id']] == (
+        f'{name}({turn_count}회)' + f'+라인복귀{recovery}회전45도(4회)' * 2 if region >= 5
+        else name + f'+라인복귀{recovery}회전45도(4회)' if region in {1, 2} else name
+    )
     finish_sequence(bridge)
     assert decoded_messages(bridge.motion_status_publisher)[-1]['status'] == 'SUCCEEDED'
 
@@ -52,12 +58,12 @@ def test_executed_region_routes_through_gate_bridge_and_line_reacquisition(monke
     node.planner.last_line_seen_direction = 'LEFT'
     release_general(node, turn)
     assert node.mission_phase == (
-        ('AUTO' if section == 1 else 'LINE_TRACK') if region >= 5 else 'POST_SHOT_LINE_ALIGN'
+        'POST_SHOT_EXIT_ALIGN' if region in {1, 2, 5, 6, 7, 8} else 'POST_SHOT_LINE_ALIGN'
     )
     assert not node.planner.goal_lock_active
     assert node.planner.last_line_seen_direction is None
     assert node.planner.post_ball_line_search_direction == direction
-    assert node.post_shot_dwell_until == (None if region >= 5 else pytest.approx(10.5))
+    assert node.post_shot_dwell_until == (None if region in {1, 2, 5, 6, 7, 8} else pytest.approx(10.5))
 
 
 @pytest.mark.parametrize('terminal_motion', [None, 'goal_shot_region_2', '__NON_BLOCKING_DWELL__'])
@@ -73,7 +79,9 @@ def test_next_shot_does_not_inherit_previous_region(terminal_motion):
     manager.handle_motion_status('SHOT', 2, 'RUNNING', motion_id='goal_fine_prepare_90')
     manager.handle_motion_status('SHOT', 2, 'SUCCEEDED', motion_id=terminal_motion)
     assert manager.last_completed_shot_region == (2 if terminal_motion == 'goal_shot_region_2' else None)
-    assert manager.post_shot_turn_action() == 'POST_SHOT_TURN_LEFT_4'
+    assert manager.post_shot_turn_action() == (
+        'POST_SHOT_EXIT_LEFT_4_RECOVERY_LEFT_4' if terminal_motion == 'goal_shot_region_2'
+        else 'POST_SHOT_TURN_LEFT_4')
 
 
 @pytest.mark.parametrize('section', [1, 2])
@@ -95,10 +103,13 @@ def test_variants_keep_preparation_complete_turns_and_final_support(kind):
     catalog = json.loads((ROOT / path).read_text())['motions']
     motions = {motion['name']: motion for motion in catalog}
     assert len(motions) == len(catalog)
-    before = json.loads((ROOT / 'artifacts/20261110_goal_exit_hurdle5/before' / path).read_text())['motions']
-    assert all(motions[motion['name']] == motion for motion in before)
+    before = json.loads((ROOT / 'artifacts/20261111_goal_exit_recovery_update/before' / path).read_text())['motions']
+    assert all(motions[motion['name']] == motion for motion in before
+               if '+라인복귀' not in motion['name'])
     for base, count, pose in [('t골대후제자리우회전', 5, '제우오들25'),
-                              ('p골대후제자리좌회전', 3, 'tt제좌왼들45')]:
+                              ('t골대후제자리우회전', 6, '제우오들25'),
+                              ('p골대후제자리좌회전', 3, 'tt제좌왼들45'),
+                              ('p골대후제자리좌회전', 4, 'tt제좌왼들45')]:
         original, variant = motions[base], motions[f'{base}({count}회)']
         assert variant['frames'] == original['frames'][:2 + 2 * count]
         assert sum(frame['name'] == pose for frame in variant['frames']) == count

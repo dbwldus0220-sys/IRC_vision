@@ -1,0 +1,51 @@
+[  5%] Built target gtest_main
+[  7%] Built target motion_core
+[  7%] Built target robot_motion_runtime_config
+[ 10%] Built target catalog_only_core
+Consolidate compiler generated dependencies of target motion_player_core
+[ 12%] Built target test_motion_pattern
+[ 14%] Built target motion_player_core
+[ 16%] Built target gtest
+[ 19%] Built target test_motion_callback
+[ 21%] Built target continuous_trace_probe
+[ 23%] Built target test_continuous_interpolation
+[ 25%] Built target sdk_executor_core
+[ 31%] Built target robot_control
+[ 33%] Built target catalog_only_node
+[ 35%] Built target test_callback_timing_trace
+Consolidate compiler generated dependencies of target test_forward_timing
+[ 38%] Built target gui_execution_probe
+[ 40%] Built target test_gui_alignment
+[ 41%] Building CXX object robot_motion_sdk/CMakeFiles/test_forward_timing.dir/test_forward_timing.cpp.o
+[ 47%] Built target test_continuous_hardware
+[ 48%] Building CXX object CMakeFiles/test_catalog_only_core.dir/test/test_catalog_only_core.cpp.o
+[ 50%] Built target test_motion_json_catalog
+[ 51%] Building CXX object CMakeFiles/test_sdk_executor_core.dir/test/test_sdk_executor_core.cpp.o
+[ 53%] Built target test_ring_shot_core
+[ 56%] Built target test_queue_control_tick
+[ 58%] Built target test_robot_motion_runtime_config
+[ 60%] Built target test_robot_motion_parameter_types
+[ 62%] Built target irc_step_motion_sdk_compile_probe
+[ 65%] Built target robot_motion_player_backend
+[ 67%] Built target simulated_motion_backend
+[ 69%] Built target production_robot_motion_runtime_factory
+[ 71%] Built target motion_backend_factory
+[ 76%] Built target sdk_executor_driver
+[ 78%] Built target test_robot_motion_player_backend
+[ 80%] Built target test_simulated_motion_backend
+[ 83%] Built target test_motion_backend_factory
+[ 84%] Building CXX object CMakeFiles/test_sdk_executor_driver.dir/test/test_sdk_executor_driver.cpp.o
+[ 85%] Linking CXX executable test_catalog_only_core
+[ 86%] Linking CXX executable test_forward_timing
+[ 86%] Built target test_catalog_only_core
+[ 88%] Built target test_startup_pose_gate
+[ 91%] Built target test_startup_pose_catalog
+[ 93%] Built target sdk_hardware_preflight_core
+[ 95%] Built target sdk_motion_executor
+[ 95%] Built target test_forward_timing
+[ 97%] Linking CXX executable test_sdk_executor_core
+[ 98%] Built target sdk_hardware_preflight
+[ 98%] Built target gui_comparison_probe
+[100%] Linking CXX executable test_sdk_executor_driver
+[100%] Built target test_sdk_executor_core
+[100%] Built target test_sdk_executor_driver

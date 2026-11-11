@@ -1,0 +1,29 @@
+Internal ctest changing into directory: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+Test project /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+      Start  9: test_catalog_only_core
+ 1/10 Test  #9: test_catalog_only_core .............   Passed    0.19 sec
+      Start 10: test_motion_json_catalog
+ 2/10 Test #10: test_motion_json_catalog ...........   Passed    0.18 sec
+      Start 11: test_sdk_executor_core
+ 3/10 Test #11: test_sdk_executor_core .............   Passed    0.24 sec
+      Start 13: test_queue_control_tick
+ 4/10 Test #13: test_queue_control_tick ............   Passed    0.17 sec
+      Start 14: test_robot_motion_player_backend
+ 5/10 Test #14: test_robot_motion_player_backend ...   Passed    0.16 sec
+      Start 16: test_robot_motion_runtime_config
+ 6/10 Test #16: test_robot_motion_runtime_config ...   Passed    0.16 sec
+      Start 18: test_motion_backend_factory
+ 7/10 Test #18: test_motion_backend_factory ........   Passed    0.16 sec
+      Start 19: test_sdk_executor_driver
+ 8/10 Test #19: test_sdk_executor_driver ...........   Passed    0.19 sec
+      Start 20: test_startup_pose_gate
+ 9/10 Test #20: test_startup_pose_gate .............   Passed    0.18 sec
+      Start 34: test_validate_motion_catalog
+10/10 Test #34: test_validate_motion_catalog .......   Passed    0.15 sec
+
+100% tests passed, 0 tests failed out of 10
+
+Label Time Summary:
+gtest    =   1.63 sec*proc (9 tests)
+
+Total Test time (real) =   1.79 sec

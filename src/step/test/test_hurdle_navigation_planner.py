@@ -17,7 +17,11 @@ def hurdle_info(**overrides):
         "ground_gap_m": 0.1,
         "camera_bottom_gap_m": 0.02,
         "depth_valid": True,
-        "hurdle_angle_deg": 0.0,
+        "hurdle_angle_45_deg": 0.0,
+        "hurdle_camera_pose": "45", "hurdle_camera_ready": True,
+        "confirmation_confirmed": True, "depth_age_sec": .05,
+        "hurdle_angle_fit_point_count": 5,
+        "hurdle_angle_sample_source": "yellow_bar_centerline",
         "bottom_distance_px": 200,
     }
     sample.update(overrides)
@@ -26,9 +30,9 @@ def hurdle_info(**overrides):
 
 @pytest.mark.parametrize("angle", [-70.0, -69.999, 0.0, 69.999, 70.0])
 @pytest.mark.parametrize("offset", [-0.5, 0.5])
-def test_fine_approach_corrects_line_heading_until_450mm(angle, offset):
+def test_fine_approach_corrects_hurdle_yaw_until_450mm(angle, offset):
     decision = HurdleNavigationPlanner().plan(hurdle_info(
-        depth_m=0.6, hurdle_angle_deg=60, bearing_deg=angle,
+        depth_m=0.6, hurdle_angle_45_deg=-30 if offset > 0 else 30, bearing_deg=angle,
         path_reference_valid=True, path_offset_x_norm=offset,
         path_target_bearing_deg=-89.0 if offset > 0 else 89.0,
         line_heading_valid=True, line_heading_deg=30.0 if offset > 0 else -30.0,
@@ -41,7 +45,7 @@ def test_fine_approach_corrects_line_heading_until_450mm(angle, offset):
 
 def test_positioning_starts_fixed_sequence_without_old_jump_confirmation():
     decision = HurdleNavigationPlanner().plan(hurdle_info(
-        depth_m=0.20, hurdle_angle_deg=30.0, go_now=False,
+        depth_m=0.20, hurdle_angle_45_deg=30.0, go_now=False,
     ), positioning=True)
     assert decision.action == "GO"
     assert decision.go_now and decision.sdk_motion_requested
@@ -84,7 +88,7 @@ def test_go_depth_tolerance_includes_boundary(depth):
 def test_hurdle_angle_selects_parallel_alignment_direction(angle, expected):
     planner = HurdleNavigationPlanner()
 
-    command = planner.plan(hurdle_info(hurdle_angle_deg=angle))
+    command = planner.plan(hurdle_info(hurdle_angle_45_deg=angle))
 
     assert command.action == expected
     assert command.sdk_motion_requested is False
@@ -166,8 +170,8 @@ def test_missing_legacy_ground_gap_does_not_block_raw_depth_control():
 
 
 @pytest.mark.parametrize("alignment,far_action", [
-    ({"hurdle_angle_deg": 12.0}, "ALIGN_LEFT"),
-    ({"hurdle_angle_deg": -12.0}, "ALIGN_RIGHT"),
+    ({"hurdle_angle_45_deg": 12.0}, "ALIGN_LEFT"),
+    ({"hurdle_angle_45_deg": -12.0}, "ALIGN_RIGHT"),
     ({"path_reference_valid": True, "path_offset_x_norm": 0.2}, "TURN_RIGHT"),
     ({"path_reference_valid": True, "path_offset_x_norm": -0.2}, "TURN_LEFT"),
 ])
@@ -192,7 +196,7 @@ def test_close_pixel_boundary_replaces_both_turn_types_with_fine_approach(
 ])
 def test_near_misaligned_hurdle_uses_depth_without_requesting_go(depth, expected):
     command = HurdleNavigationPlanner().plan(hurdle_info(
-        depth_m=depth, bottom_distance_px=100, hurdle_angle_deg=12.0,
+        depth_m=depth, bottom_distance_px=100, hurdle_angle_45_deg=12.0,
         go_now=True,
     ))
     assert command.action == expected
@@ -210,13 +214,13 @@ def test_close_turn_block_survives_missing_depth_detection_and_pixel_increase():
     assert planner.close_rotation_blocked
     assert planner.plan({"detected": False}).action == "HURDLE_LOST_BACKWARD_1"
     command = planner.plan(hurdle_info(
-        bottom_distance_px=150, depth_m=0.4, hurdle_angle_deg=20.0,
+        bottom_distance_px=150, depth_m=0.4, hurdle_angle_45_deg=20.0,
     ))
     assert command.action == "STRAIGHT_0"
     assert command.close_rotation_blocked
     planner.reset()
     command = planner.plan(hurdle_info(
-        bottom_distance_px=150, depth_m=0.4, hurdle_angle_deg=20.0,
+        bottom_distance_px=150, depth_m=0.4, hurdle_angle_45_deg=20.0,
     ))
     assert command.action == "ALIGN_LEFT"
 
@@ -224,7 +228,7 @@ def test_close_turn_block_survives_missing_depth_detection_and_pixel_increase():
 @pytest.mark.parametrize("bottom", [None, -1, float('nan'), True])
 def test_missing_or_invalid_pixel_gap_cannot_authorize_a_turn(bottom):
     command = HurdleNavigationPlanner().plan(hurdle_info(
-        bottom_distance_px=bottom, hurdle_angle_deg=20.0,
+        bottom_distance_px=bottom, hurdle_angle_45_deg=20.0,
     ))
     assert command.action == "WAIT"
     assert not command.valid
@@ -245,7 +249,7 @@ def test_near_hurdle_at_go_geometry_waits_for_confirmation():
 def test_close_invalid_depth_cannot_start_final_sequence(depth_valid, depth):
     command = HurdleNavigationPlanner().plan(hurdle_info(
         depth_valid=depth_valid, depth_m=depth, bottom_distance_px=100,
-        hurdle_angle_deg=None,
+        hurdle_angle_45_deg=None,
     ))
     assert command.action == "WAIT" and not command.sdk_motion_requested
     assert command.to_dict()["depth_fallback_requested"] is False
@@ -253,7 +257,7 @@ def test_close_invalid_depth_cannot_start_final_sequence(depth_valid, depth):
 
 def test_close_valid_depth_with_missing_angle_still_requests_fine45():
     command = HurdleNavigationPlanner().plan(hurdle_info(
-        bottom_distance_px=100, hurdle_angle_deg=None, depth_m=0.4,
+        bottom_distance_px=100, hurdle_angle_45_deg=None, depth_m=0.4,
     ))
     assert command.action == "STRAIGHT_0" and command.valid
     assert not command.depth_fallback_requested
@@ -269,7 +273,9 @@ def test_no_depth_outside_close_pixels_still_waits():
 @pytest.mark.parametrize("depth,action", [
     (0.001, "GO"), (0.2, "GO"), (0.43, "GO"),
     (0.449999, "GO"), (0.450, "GO"),
-    (0.450001, "STRAIGHT_1"), (0.55, "STRAIGHT_1"),
+    (0.450001, "STRAIGHT_1"), (0.47, "STRAIGHT_1"),
+    (0.482, "STRAIGHT_1"), (0.499999, "STRAIGHT_1"), (0.500, "STRAIGHT_1"),
+    (0.500001, "STRAIGHT_1"), (0.55, "STRAIGHT_1"),
 ])
 def test_positioning_final_sequence_starts_at_450mm(depth, action):
     command = HurdleNavigationPlanner().plan(hurdle_info(

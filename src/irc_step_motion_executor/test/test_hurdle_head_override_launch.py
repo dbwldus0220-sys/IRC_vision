@@ -14,6 +14,8 @@ import launch_testing.util
 from launch_ros.actions import Node
 import rclpy
 from std_msgs.msg import String
+from step.hurdle_camera_pose import HurdleCameraPose
+from step.hurdle_navigation_planner import HurdleNavigationPlanner
 
 
 ROOT = "/hurdle_head_override_test"
@@ -99,7 +101,28 @@ class TestHurdleHeadOverride(unittest.TestCase):
         sequence = self.heartbeats[-1]["sequence"] if self.heartbeats else -1
         self.wait(lambda: self.heartbeats and self.heartbeats[-1]["sequence"] > sequence + 2)
         self.assertIs(self.heartbeats[-1]["hurdle_head_override_active"], enabled)
-        self.assertEqual(self.heartbeats[-1]["hurdle_head_override_deg"], -60.0)
+        self.assertEqual(self.heartbeats[-1]["hurdle_head_override_deg"], -64.0)
+
+    def check_settled_angle_selection(self):
+        # Feed actual executor feedback into the same posture/angle path as Vision.
+        tracker = HurdleCameraPose()
+        tracker.heartbeat(self.heartbeats[-1], 10.0, 10_000_000_000)
+        for angle, expected in ((30.0, "ALIGN_LEFT"), (-30.0, "ALIGN_RIGHT")):
+            info = {
+                "stamp": {"sec": 10, "nanosec": 100_000_000},
+                "detected": True, "confirmation_confirmed": True, "confidence": .95,
+                "head_down_requested": True, "depth_valid": True,
+                "depth_m": .6, "depth_age_sec": .03, "bottom_distance_px": 110,
+                "hurdle_angle_0_deg": angle, "hurdle_angle_45_deg": -angle,
+                "hurdle_angle_fit_point_count": 5,
+                "hurdle_angle_sample_source": "yellow_bar_centerline",
+            }
+            command = HurdleNavigationPlanner().plan(
+                tracker.annotate(info, 10.1), positioning=True,
+            )
+            self.assertEqual(command.action, expected)
+            self.assertEqual(command.alignment_reference, "hurdle_angle_0")
+            self.assertEqual(command.hurdle_angle_deg, angle)
 
     def request(self, request_id, motion_id):
         self.publish(TOPICS[0], {
@@ -163,8 +186,9 @@ class TestHurdleHeadOverride(unittest.TestCase):
 
         self.observation(depth_valid=False, depth_m=None)
         self.hold(True)
-        self.assertGreater(self.heartbeats[-1]["hurdle_head_override_current_deg"], -60.0)
-        self.wait(lambda: self.heartbeats[-1]["hurdle_head_override_current_deg"] == -60.0)
+        self.assertGreater(self.heartbeats[-1]["hurdle_head_override_current_deg"], -64.0)
+        self.wait(lambda: self.heartbeats[-1]["hurdle_head_override_current_deg"] == -64.0)
+        self.check_settled_angle_selection()
         self.status(1, "SUCCEEDED")
         self.navigation("none", valid=False)
         self.observation(detected=False, depth_valid=False, depth_m=None)

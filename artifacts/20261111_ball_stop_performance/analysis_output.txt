@@ -1,0 +1,168 @@
+{
+  "before_stop_10s": {
+    "duration_sec": 10,
+    "lines": 22,
+    "bytes": 9799,
+    "lines_per_second": 2.2,
+    "kib_per_second": 0.96,
+    "per_node": {
+      "detector": 10,
+      "decision": 12
+    },
+    "top_messages": [
+      [
+        "detector: YOLO_INFERENCE_TIMING",
+        5
+      ],
+      [
+        "detector: DETECTOR_PIPELINE_TIMING",
+        5
+      ],
+      [
+        "decision: BALL_PIPELINE_TIMING",
+        5
+      ],
+      [
+        "decision: Line next motion requested before completion",
+        3
+      ],
+      [
+        "decision: General motion lock released",
+        3
+      ],
+      [
+        "decision: Line corner remembered",
+        1
+      ]
+    ]
+  },
+  "stop_context_4s": {
+    "duration_sec": 4,
+    "lines": 37,
+    "bytes": 12531,
+    "lines_per_second": 9.25,
+    "kib_per_second": 3.06,
+    "per_node": {
+      "detector": 4,
+      "decision": 21,
+      "bridge": 12
+    },
+    "top_messages": [
+      [
+        "bridge: Command ignored",
+        12
+      ],
+      [
+        "decision: Line corner remembered",
+        6
+      ],
+      [
+        "decision: BALL_PIPELINE_TIMING",
+        4
+      ],
+      [
+        "decision: BALL entry prequeue",
+        3
+      ],
+      [
+        "detector: YOLO_INFERENCE_TIMING",
+        2
+      ],
+      [
+        "detector: DETECTOR_PIPELINE_TIMING",
+        2
+      ]
+    ]
+  },
+  "stop_wait_0758s": {
+    "duration_sec": 0.7578270435333252,
+    "lines": 17,
+    "bytes": 4345,
+    "lines_per_second": 22.43,
+    "kib_per_second": 5.6,
+    "per_node": {
+      "decision": 5,
+      "bridge": 12
+    },
+    "top_messages": [
+      [
+        "bridge: Command ignored",
+        12
+      ],
+      [
+        "decision: General motion lock released",
+        1
+      ],
+      [
+        "decision: BALL entry prequeue",
+        1
+      ],
+      [
+        "decision: Line corner remembered",
+        1
+      ],
+      [
+        "decision: BALL_PIPELINE_TIMING",
+        1
+      ],
+      [
+        "decision: BALL entry Line alignment requested",
+        1
+      ]
+    ]
+  },
+  "after_stop_10s": {
+    "duration_sec": 10,
+    "lines": 105,
+    "bytes": 28849,
+    "lines_per_second": 10.5,
+    "kib_per_second": 2.82,
+    "per_node": {
+      "detector": 10,
+      "decision": 54,
+      "bridge": 40,
+      "executor": 1
+    },
+    "top_messages": [
+      [
+        "bridge: Command ignored",
+        38
+      ],
+      [
+        "decision: Special motion lock enabled",
+        14
+      ],
+      [
+        "decision: BALL entry prequeue",
+        6
+      ],
+      [
+        "detector: YOLO_INFERENCE_TIMING",
+        5
+      ],
+      [
+        "detector: DETECTOR_PIPELINE_TIMING",
+        5
+      ],
+      [
+        "decision: BALL_PIPELINE_TIMING",
+        5
+      ]
+    ]
+  }
+}
+warnings/errors: []
+[YOLO_INFERENCE_TIMING] samples=25 avg_ms=26.358 p50_ms=22.542 p95_ms=39.326 max_ms=42.019 effective_fps=12.057 window_sec=2.073
+6.893 DETECTOR_PIPELINE_TIMING {'capture_to_detector': (125.048, 205.179), 'convert_preprocess': (14.151, 38.8), 'inference': (27.012, 42.028), 'postprocess': (1.554, 3.026), 'publish': (1.275, 3.597), 'overlay_display': (25.652, 57.703), 'callback': (69.644, 118.014)}
+[YOLO_INFERENCE_TIMING] samples=25 avg_ms=28.445 p50_ms=26.019 p95_ms=47.006 max_ms=47.191 effective_fps=12.149 window_sec=2.058
+8.937 DETECTOR_PIPELINE_TIMING {'capture_to_detector': (124.597, 207.704), 'convert_preprocess': (13.348, 29.241), 'inference': (28.4, 47.204), 'postprocess': (1.419, 2.757), 'publish': (1.005, 1.408), 'overlay_display': (21.212, 32.203), 'callback': (65.385, 111.025)}
+[YOLO_INFERENCE_TIMING] samples=20 avg_ms=33.522 p50_ms=32.168 p95_ms=45.600 max_ms=51.381 effective_fps=9.993 window_sec=2.001
+10.946 DETECTOR_PIPELINE_TIMING {'capture_to_detector': (150.367, 262.277), 'convert_preprocess': (14.121, 23.411), 'inference': (33.436, 51.391), 'postprocess': (2.201, 8.358), 'publish': (1.765, 7.195), 'overlay_display': (27.11, 59.805), 'callback': (78.633, 107.208)}
+[YOLO_INFERENCE_TIMING] samples=22 avg_ms=26.249 p50_ms=23.883 p95_ms=41.217 max_ms=45.150 effective_fps=10.784 window_sec=2.040
+13.047 DETECTOR_PIPELINE_TIMING {'capture_to_detector': (123.327, 253.656), 'convert_preprocess': (14.45, 34.47), 'inference': (26.651, 45.161), 'postprocess': (2.95, 10.948), 'publish': (1.465, 5.138), 'overlay_display': (31.796, 70.102), 'callback': (77.312, 144.382)}
+7.557 BALL_PIPELINE_TIMING {'capture_to_detector': (129.148, 205.179), 'detector_work': (43.313, 62.667), 'detector_to_ball': (13.737, 22.223), 'ball_work': (2.758, 11.376), 'ball_to_decision': (2.023, 6.593), 'capture_to_decision': (190.945, 266.459), 'decision_callback': (0.536, 0.784)}
+8.071 BALL_PIPELINE_TIMING {'capture_to_detector': (84.528, 100.558), 'detector_work': (47.058, 78.32), 'detector_to_ball': (13.604, 17.688), 'ball_work': (3.28, 6.998), 'ball_to_decision': (1.88, 4.943), 'capture_to_decision': (150.321, 195.222), 'decision_callback': (0.815, 1.784)}
+9.764 BALL_PIPELINE_TIMING {'capture_to_detector': (159.649, 207.704), 'detector_work': (46.994, 74.022), 'detector_to_ball': (13.09, 20.993), 'ball_work': (3.215, 16.569), 'ball_to_decision': (3.244, 16.501), 'capture_to_decision': (226.176, 286.205), 'decision_callback': (4.053, 21.447)}
+11.789 BALL_PIPELINE_TIMING {'capture_to_detector': (123.316, 262.277), 'detector_work': (45.295, 62.802), 'detector_to_ball': (12.567, 24.529), 'ball_work': (3.647, 15.747), 'ball_to_decision': (1.706, 4.252), 'capture_to_decision': (186.491, 343.696), 'decision_callback': (2.188, 15.637)}
+11.908 BALL_PIPELINE_TIMING {'capture_to_detector': (106.885, 106.885), 'detector_work': (50.483, 50.483), 'detector_to_ball': (7.887, 7.887), 'ball_work': (2.868, 2.868), 'ball_to_decision': (0.866, 0.866), 'capture_to_decision': (168.961, 168.961), 'decision_callback': (1.059, 1.059)}
+13.946 BALL_PIPELINE_TIMING {'capture_to_detector': (166.469, 332.503), 'detector_work': (45.198, 71.857), 'detector_to_ball': (12.262, 22.175), 'ball_work': (2.766, 7.928), 'ball_to_decision': (2.227, 9.039), 'capture_to_decision': (228.61, 405.037), 'decision_callback': (1.292, 3.579)}

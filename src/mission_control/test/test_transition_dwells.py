@@ -20,11 +20,11 @@ def check_both_pauses(bridge, clock, prepare, target):
     start = len(requests(bridge))
     beginning = clock[0]
     assert bridge.motion_in_progress
-    assert bridge.transition_dwell_until == beginning + .5
-    clock[0] = beginning + .499
+    assert bridge.transition_dwell_until == beginning + .2
+    clock[0] = beginning + .199
     bridge._check_atomic_dwell()
     assert len(requests(bridge)) == start
-    clock[0] = beginning + .5
+    clock[0] = beginning + .2
     bridge._check_atomic_dwell()
     assert [r["motion_id"] for r in requests(bridge)[start:]] == [prepare]
     prep_request = requests(bridge)[-1]

@@ -506,6 +506,8 @@ def test_ball_top_loss_banner_shows_forward_search_before_side():
     ('post_ball_line_turn_left_2', 'LINE ALIGN / IN-PLACE TURN LEFT 2'),
     ('goal_camera_90_fine_forward_1', 'GOAL / FINE FORWARD 1'),
     ('post_ball_forward_8', 'POST BALL FORWARD 8'),
+    ('post_shot_exit_right_5_forward_4', 'POST SHOT / RIGHT 6 + RECOVER RIGHT 4 x2'),
+    ('post_shot_exit_left_3_forward_4', 'POST SHOT / LEFT 4 + RECOVER LEFT 4 x2'),
 ])
 def test_running_submotion_banner_survives_navigation_command_timeout(monkeypatch, motion_id, expected):
     import json
@@ -769,3 +771,16 @@ def test_ball_lost_banner_follows_selected_command(action, reason, expected):
         'ball_tracking': {'lost': True, 'last_direction': 'RIGHT'},
         'decision': {'selected_action': action, 'reason': reason},
     }) == f'BALL LOST | {expected}'
+
+
+@pytest.mark.parametrize("direction,count", [("left", 2), ("right", 3)])
+def test_hurdle_stationary_turn_banner_identifies_hurdle_control(direction, count):
+    detector = object.__new__(Yolo26Detector)
+    detector.latest_running_motion = {
+        "source": "hurdle", "action": f"ALIGN_{direction.upper()}",
+        "motion_id": f"post_ball_line_turn_{direction}_{count}",
+    }
+    detector.latest_running_motion_time = time.monotonic()
+    assert detector._running_motion_banner()[0] == (
+        f"HURDLE / IN-PLACE TURN {direction.upper()} {count}"
+    )

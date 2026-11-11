@@ -1,0 +1,1 @@
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/20260923_close_ball_backward_recovery.md

@@ -50,7 +50,7 @@ def test_parallel_far_line_checks_target_even_when_heading_selects_forward(sign)
     info = sample(offset=sign * 181.7, target_angle=sign * 30.,
                   ground_heading_error_deg=-sign * 1.43,
                   filtered_lateral_offset_norm=sign * .262,
-                  ground_lateral_offset_m=sign * .1294,
+                  ground_lateral_offset_m=sign * .1594,
                   ground_lookahead_distance_m=.211,
                   ground_line_points_m=[[sign * .13, z] for z in (.15, .25, .4)])
     baseline = planner(-1.).plan("LINE_TRACK", {"line": info}, .1)
@@ -62,17 +62,17 @@ def test_parallel_far_line_checks_target_even_when_heading_selects_forward(sign)
 
 
 @pytest.mark.parametrize("offset", [99.9, 100., 182.])
-@pytest.mark.parametrize("distance", [.10, .1001])
+@pytest.mark.parametrize("distance", [.10, .1316, .1499, .15, .1501])
 def test_forward_guard_requires_both_pixel_and_ground_distance(offset, distance):
     info = sample(offset=offset, ground_heading_error_deg=0.,
                   ground_lateral_offset_m=distance)
     decision = planner().plan("LINE_TRACK", {"line": info}, .1)
-    guarded = offset >= 100. and distance > .10
+    guarded = offset >= 100. and distance > .15
     assert decision.source_command["line_offset_alignment_active"] is guarded
     assert decision.valid
-    assert decision.action == ("STRAIGHT_1" if guarded else "STRAIGHT")
+    assert decision.action == ("LINE_OFFSET_TURN_RIGHT_1" if guarded else "STRAIGHT")
     if guarded:
-        assert decision.reason == "line_offset_target_forward"
+        assert decision.reason == "line_offset_target_turn"
 
 
 @pytest.mark.parametrize('base_motion', ['STRAIGHT', 'RECOVER_RIGHT_TURN_RIGHT_4'])
@@ -86,7 +86,7 @@ def test_forward_guard_requires_both_pixel_and_ground_distance(offset, distance)
 def test_offset_forward_and_turn_ranges_have_no_gap(monkeypatch, base_motion, angle, expected):
     controller = planner()
     monkeypatch.setattr(controller, '_line_offset_ground_target',
-                        lambda info: (.15, .5, angle, .1472))
+                        lambda info: (.17, .5, angle, .1672))
     result = controller._line_offset_alignment(
         {'lateral_offset_px': 149.6}, {'valid': True, 'motion': base_motion})
     assert result['valid']
@@ -95,27 +95,84 @@ def test_offset_forward_and_turn_ranges_have_no_gap(monkeypatch, base_motion, an
     assert result['target_heading_tolerance_deg'] == 15.0
 
 
-def test_recorded_right_target_dispatches_two_cycle_forward_and_releases_bridge():
+def test_recorded_near_right_target_preserves_forward_and_releases_bridge():
     info = sample(offset=149.6, ground_heading_error_deg=-6.63,
                   ground_lateral_offset_m=.1472)
     decision = planner().plan('LINE_TRACK', {'line': info}, .1)
-    assert decision.valid and decision.action == 'STRAIGHT_1'
-    assert decision.source_command['target_bearing_deg'] == pytest.approx(10.2121584)
+    assert decision.valid and decision.action == 'STRAIGHT'
+    assert not decision.source_command['line_offset_alignment_active']
     bridge = FakeBridge()
     bridge.navigation_command_callback(navigation_message(
         action=decision.action, source='line', source_command=decision.source_command))
     request = decoded_messages(bridge.executor_request_publisher)[-1]
-    assert request['motion_id'] == 'line_forward_2'
+    assert request['motion_id'] == 'line_forward_6'
     complete_active_motion(bridge)
     assert not bridge.motion_in_progress
 
 
 def test_far_parallel_line_uses_short_forward_if_target_already_ahead():
-    info = sample(ground_heading_error_deg=0., ground_lateral_offset_m=.11,
-                  ground_lookahead_distance_m=1., ground_line_points_m=[[.11, z] for z in (.8, 1., 1.2)])
+    info = sample(ground_heading_error_deg=0., ground_lateral_offset_m=.16,
+                  ground_lookahead_distance_m=1., ground_line_points_m=[[.16, z] for z in (.8, 1., 1.2)])
     decision = planner().plan("LINE_TRACK", {"line": info}, .1)
     assert decision.action == "STRAIGHT_1"
     assert decision.reason == "line_offset_target_forward"
+
+
+@pytest.mark.parametrize('sign', [-1, 1])
+@pytest.mark.parametrize('distance', [.1499, .15, .1501])
+@pytest.mark.parametrize('heading', [0., 20.])
+def test_ground_distance_boundary_preserves_normal_forward_or_recovery(sign, distance, heading):
+    info = sample(offset=sign * 270., ground_heading_error_deg=sign * heading,
+                  ground_lateral_offset_m=sign * distance,
+                  filtered_lateral_offset_norm=sign * .4)
+    decision = planner().plan('LINE_TRACK', {'line': info}, .1)
+    baseline = planner(-1.).plan('LINE_TRACK', {'line': info}, .1)
+    assert decision.valid
+    assert decision.source_command['line_offset_alignment_active'] is (distance > .15)
+    if distance <= .15:
+        assert decision.action == baseline.action
+        assert decision.action == ('STRAIGHT' if heading == 0. else
+                                   f'RECOVER_{"RIGHT" if sign > 0 else "LEFT"}_TURN_{"RIGHT" if sign > 0 else "LEFT"}_4')
+
+
+@pytest.mark.parametrize('sign', [-1, 1])
+@pytest.mark.parametrize('heading', [0., 20.])
+def test_fifteen_cm_candidate_reserves_once_and_promotes_without_extra_dwell(monkeypatch, sign, heading):
+    from test_continuous_approach import fresh
+    clock = [10.]
+    monkeypatch.setattr('mission_control.motion_decision_node.time.monotonic', lambda: clock[0])
+    monkeypatch.setattr(MotionDecisionNode, '_current_ros_time_ns', lambda _: round(clock[0] * 1e9))
+    node = LiveInputHarness(phase='LINE_TRACK')
+    bridge = FakeBridge(advance_transition_dwells=False)
+    fresh(node, clock, 'line', line_info())
+    first = node.publisher.messages[-1]
+    bridge.navigation_command_callback(navigation_message(**first))
+    node.send_status(first['action'], first['command_id'], 'RUNNING')
+    start = node.active_line_motion_started_at
+    duration = node.active_line_motion_duration_sec
+    clock[0] = start + duration * .70
+    info = sample(offset=sign * 270., ground_heading_error_deg=sign * heading,
+                  ground_lateral_offset_m=sign * .15,
+                  filtered_lateral_offset_norm=sign * .4)
+    for _ in range(12):
+        fresh(node, clock, 'line', info, plan=False)
+    queued = node.publisher.messages[-1]
+    assert clock[0] < start + duration
+    assert node.queued_general_command_id == queued['command_id'] != first['command_id']
+    assert queued['action'] == ('STRAIGHT' if heading == 0. else
+                                f'RECOVER_{"RIGHT" if sign > 0 else "LEFT"}_TURN_{"RIGHT" if sign > 0 else "LEFT"}_4')
+    bridge.navigation_command_callback(navigation_message(**queued))
+    assert not bridge.queued_request_deferred
+    assert bridge.transition_dwell_until is None
+    fresh(node, clock, 'line', info, plan=False)
+    assert node.queued_general_command_id == queued['command_id']
+    complete_active_motion(bridge)
+    node.send_status(first['action'], first['command_id'], 'SUCCEEDED')
+    node.send_status(queued['action'], queued['command_id'], 'RUNNING')
+    assert bridge.active_command_id == queued['command_id']
+    assert node.general_motion_gate.active_command_id == queued['command_id']
+    assert getattr(node, 'correction_post_motion_dwell_until', None) is None
+    assert bridge.transition_dwell_until is None
 
 
 @pytest.mark.parametrize("flag", ["corner_preview_confirmed", "corner_preview_raw_detected"])
@@ -157,7 +214,7 @@ def test_far_recovery_guard_keeps_inclusive_pixel_threshold(sign, offset):
         assert decision.action.startswith("RECOVER_")
     else:
         assert decision.action == ("LINE_OFFSET_TURN_RIGHT_1" if sign > 0 else "LINE_OFFSET_TURN_LEFT_1")
-        assert abs(decision.source_command["ground_lateral_offset_m"]) > .10
+        assert abs(decision.source_command["ground_lateral_offset_m"]) > .15
 
 
 @pytest.mark.parametrize("target", [-7.999, 0., 10.])

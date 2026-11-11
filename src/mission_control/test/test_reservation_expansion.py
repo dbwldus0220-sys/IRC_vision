@@ -40,9 +40,9 @@ def test_two_cycle_crab_repeats_rest_and_preserve_parent(clock, index, offset):
     reservation = node.pickup_walk_reservation
     started = reservation.started_at
     duration = PICKUP_WALK_DURATIONS[crab['motion_id']]
-    frames(node, clock, started, duration, ball(offset_x_px=offset, bottom_distance_px=250), (.61, .65, .69))
+    frames(node, clock, started, duration, ball(offset_x_px=offset, bottom_distance_px=180), (.61, .65, .69))
     assert reservation.count == 3 and not reservation.pending
-    frames(node, clock, started, duration, ball(offset_x_px=offset, bottom_distance_px=250), (.76,))
+    frames(node, clock, started, duration, ball(offset_x_px=offset, bottom_distance_px=180), (.76,))
     command = node.publisher.messages[-1]
     assert command['source_command']['pickup_walk_prequeue']
     assert command['source_command']['pickup_queue_motion_id'] == crab['motion_id']
@@ -61,7 +61,7 @@ def test_two_cycle_to_one_cycle_uses_checkpoint_not_wrong_two_cycle_queue(clock,
     node, bridge, _, crab = start_fine_crab(clock, offset=offset)
     observer = node.pickup_checkpoint_observation
     frames(node, clock, observer.started_at, observer.duration,
-           ball(offset_x_px=offset / 2, bottom_distance_px=250))
+           ball(offset_x_px=offset / 2, bottom_distance_px=180))
     assert not node.pickup_walk_reservation.pending
     forward_status(node, bridge, crab, 'SUCCEEDED')
     command = node.publisher.messages[-1]
@@ -75,19 +75,19 @@ def test_changed_latest_sample_cancels_early_same_gait_candidate(clock):
     node, bridge, _, crab = start_fine_crab(clock)
     observer = node.pickup_checkpoint_observation
     started, duration = observer.started_at, observer.duration
-    frames(node, clock, started, duration, ball(offset_x_px=-100, bottom_distance_px=250), (.61, .65, .69))
+    frames(node, clock, started, duration, ball(offset_x_px=-100, bottom_distance_px=180), (.61, .65, .69))
     assert not node.pickup_walk_reservation.pending
-    frames(node, clock, started, duration, ball(bottom_distance_px=250), (.76,))
+    frames(node, clock, started, duration, ball(bottom_distance_px=180), (.76,))
     assert not node.pickup_walk_reservation.pending
     forward_status(node, bridge, crab, 'SUCCEEDED')
     assert node.pickup_fine_align_waiting  # One changed sample cannot authorize a new action.
-    fresh(node, clock, 'ball', ball(bottom_distance_px=250))
+    fresh(node, clock, 'ball', ball(bottom_distance_px=180))
     assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
 
 
 @pytest.mark.parametrize('bottom,offset,action', [
-    (250, -100, 'BALL_PICKUP_CRAB_LEFT'), (250, 100, 'BALL_PICKUP_CRAB_RIGHT'),
-    (230, 0, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'),
+    (180, -100, 'BALL_PICKUP_CRAB_LEFT'), (180, 100, 'BALL_PICKUP_CRAB_RIGHT'),
+    (200, 0, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'),
 ])
 def test_first_fine_prepares_changed_action_before_completion(clock, bottom, offset, action):
     node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge(advance_transition_dwells=False)
@@ -142,7 +142,7 @@ def test_post_shot_conditional_turn_retains_half_second_settle(clock):
     node, bridge, forward = start_post_shot_forward(clock, 1)
     node.LINE_TURN_PRE_MOTION_SETTLE_SEC = .5
     sample = sample(target_angle=30., ground_heading_error_deg=-1.43,
-                    filtered_lateral_offset_norm=.262, ground_lateral_offset_m=.1294,
+                    filtered_lateral_offset_norm=.262, ground_lateral_offset_m=.1594,
                     ground_lookahead_distance_m=.211, ground_line_points_m=[[.13,z] for z in (.15,.25,.4)])
     frames(node, clock, node.active_line_motion_started_at, node.active_line_motion_duration_sec,
            sample, (.8, .84, .9), source='line')

@@ -7,17 +7,17 @@ from test_hurdle_positioning import HurdleHarness, clock, enter_positioning, hur
 
 
 @pytest.mark.parametrize('depth,heading,action,count', [
-    (.86, -27.3, 'ALIGN_LEFT', 1),
-    (.78, -14.4, 'STRAIGHT', None),
+    (.86, -27.3, 'STRAIGHT_1', None),
+    (.78, -14.4, 'STRAIGHT_1', None),
 ])
-def test_screenshot_heading_selects_hurdle_action(depth, heading, action, count):
+def test_old_screenshot_line_heading_no_longer_controls_hurdle_yaw(depth, heading, action, count):
     decision = MotionDecisionPlanner().plan('LINE_TRACK', {
         'hurdle': hurdle(depth), 'line': line_info(heading=heading),
     }, .1)
     assert decision.source == 'hurdle'
     assert decision.action == action
     assert decision.source_command.get('turn_count') == count
-    assert decision.source_command['center_steering_deg'] == heading
+    assert decision.source_command['center_steering_deg'] == 0
 
 
 def test_completed_hurdle_clears_search_side_but_new_line_can_restore_it(clock):

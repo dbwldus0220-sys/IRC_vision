@@ -1,0 +1,236 @@
+--- before/src/mission_control/test/test_goal_exit_recovery_catalog.py
++++ after/src/mission_control/test/test_goal_exit_recovery_catalog.py
+@@ -8,22 +8,23 @@
+ import yaml
+ 
+ ROOT = Path(__file__).resolve().parents[3]
+-BEFORE = ROOT / 'artifacts/20261111_goal_exit_recovery_update/before'
++BEFORE = ROOT / 'artifacts/20261111_goal_exit_turn6_4/before'
+ sys.path.insert(0, str(ROOT / 'tools'))
+-from build_post_shot_forward_exits import build_exit, GOAL_EXIT_RECOVERIES
++from build_post_shot_forward_exits import build_exit, build_turn_variant, GOAL_EXIT_RECOVERIES
+ from upsert_motion_catalog import runtime_motion_from_source
+ 
+ 
+ EXPECTED_ALIASES = {
+     'post_shot_exit_right_9_recovery_right_4': 't골대후제자리우회전+라인복귀우회전45도(4회)',
+     'post_shot_exit_left_4_recovery_left_4': 'p골대후제자리좌회전+라인복귀좌회전45도(4회)',
+-    'post_shot_exit_right_5_forward_4': 't골대후제자리우회전(5회)' + '+라인복귀우회전45도(4회)' * 2,
+-    'post_shot_exit_left_3_forward_4': 'p골대후제자리좌회전(3회)' + '+라인복귀좌회전45도(4회)' * 2,
++    'post_shot_exit_right_5_forward_4': 't골대후제자리우회전(6회)' + '+라인복귀우회전45도(4회)' * 2,
++    'post_shot_exit_left_3_forward_4': 'p골대후제자리좌회전(4회)' + '+라인복귀좌회전45도(4회)' * 2,
+ }
+ OLD_COMPOSITES = {
+-    't골대후제자리우회전(5회)+라인복귀좌회전45도(4회)',
+-    'p골대후제자리좌회전(3회)+라인복귀우회전45도(4회)',
++    't골대후제자리우회전(5회)' + '+라인복귀우회전45도(4회)' * 2,
++    'p골대후제자리좌회전(3회)' + '+라인복귀좌회전45도(4회)' * 2,
+ }
++NEW_TURNS = {'t골대후제자리우회전(6회)', 'p골대후제자리좌회전(4회)'}
+ 
+ 
+ def catalog(path):
+@@ -34,13 +35,18 @@
+ 
+ 
+ @pytest.mark.parametrize('kind', ['pc', 'runtime'])
+-def test_only_four_composites_replace_two_previous_exits(kind):
++def test_only_two_exit_composites_change_with_two_new_turn_variants(kind):
+     relative = Path(f'artifacts/robot_motions_{kind}.json')
+     before, after = catalog(BEFORE / relative), catalog(ROOT / relative)
+-    assert after.keys() == before.keys() - OLD_COMPOSITES | set(EXPECTED_ALIASES.values())
++    assert after.keys() == before.keys() - OLD_COMPOSITES | set(EXPECTED_ALIASES.values()) | NEW_TURNS
+     for name in before.keys() - OLD_COMPOSITES:
+         assert after[name] == before[name], name
+     source = catalog(ROOT / 'artifacts/robot_motions_pc.json')
++    for name, count in [('t골대후제자리우회전', 6), ('p골대후제자리좌회전', 4)]:
++        expected = build_turn_variant(source[name], count)
++        if kind == 'runtime':
++            expected = runtime_motion_from_source(expected)
++        assert after[expected['name']] == expected
+     for turn, recovery, blocks in GOAL_EXIT_RECOVERIES:
+         expected = build_exit(source[turn], source[recovery], blocks)
+         if kind == 'runtime':
+--- before/src/irc_step_motion_executor/config/motion_aliases.yaml
++++ after/src/irc_step_motion_executor/config/motion_aliases.yaml
+@@ -92,9 +92,9 @@
+   post_shot_default_turn_left: "p골대후제자리좌회전"
+   post_shot_default_turn_right_5: "t골대후제자리우회전(5회)"
+   post_shot_default_turn_left_3: "p골대후제자리좌회전(3회)"
+-  # Regions 5-8 retain legacy IDs, with two recovery blocks (eight cycles).
+-  post_shot_exit_right_5_forward_4: "t골대후제자리우회전(5회)+라인복귀우회전45도(4회)+라인복귀우회전45도(4회)"
+-  post_shot_exit_left_3_forward_4: "p골대후제자리좌회전(3회)+라인복귀좌회전45도(4회)+라인복귀좌회전45도(4회)"
++  # Regions 5-8 retain legacy IDs: right 6 / left 4, then eight recovery cycles.
++  post_shot_exit_right_5_forward_4: "t골대후제자리우회전(6회)+라인복귀우회전45도(4회)+라인복귀우회전45도(4회)"
++  post_shot_exit_left_3_forward_4: "p골대후제자리좌회전(4회)+라인복귀좌회전45도(4회)+라인복귀좌회전45도(4회)"
+   # Regions 1-2 preserve the original full turn and append one recovery block.
+   post_shot_exit_right_9_recovery_right_4: "t골대후제자리우회전+라인복귀우회전45도(4회)"
+   post_shot_exit_left_4_recovery_left_4: "p골대후제자리좌회전+라인복귀좌회전45도(4회)"
+--- before/src/irc_step_motion_executor/test/test_catalog_only_core.cpp
++++ after/src/irc_step_motion_executor/test/test_catalog_only_core.cpp
+@@ -46,8 +46,8 @@
+   for (const auto & [alias, motion] : {
+       std::pair{"post_shot_exit_right_9_recovery_right_4", "t골대후제자리우회전+라인복귀우회전45도(4회)"},
+       std::pair{"post_shot_exit_left_4_recovery_left_4", "p골대후제자리좌회전+라인복귀좌회전45도(4회)"},
+-      std::pair{"post_shot_exit_right_5_forward_4", "t골대후제자리우회전(5회)+라인복귀우회전45도(4회)+라인복귀우회전45도(4회)"},
+-      std::pair{"post_shot_exit_left_3_forward_4", "p골대후제자리좌회전(3회)+라인복귀좌회전45도(4회)+라인복귀좌회전45도(4회)"},
++      std::pair{"post_shot_exit_right_5_forward_4", "t골대후제자리우회전(6회)+라인복귀우회전45도(4회)+라인복귀우회전45도(4회)"},
++      std::pair{"post_shot_exit_left_3_forward_4", "p골대후제자리좌회전(4회)+라인복귀좌회전45도(4회)+라인복귀좌회전45도(4회)"},
+       std::pair{"forward", "n전진45도(8회)"},
+       std::pair{"line_forward_8", "n전진45도(8회)"},
+       std::pair{"goal_camera_90_forward_2", "n전진90도(2회)"},
+--- before/src/mission_control/README.md
++++ after/src/mission_control/README.md
+@@ -3941,3 +3941,25 @@
+ Python 검사 666개와 삭제된 옛 시작 자세를 기대하는 C++ 검사 1개는 실패가
+ 남아 있어 전체 저장소 테스트가 통과한 상태는 아니다. 세부 결과와 실행 로그는
+ `artifacts/20261111_goal_exit_recovery_update/verification_summary.json`에 정리했다.
++
++### 2026-11-11: 5~8번 구역 슛 후 퇴장 회전을 우 6회·좌 4회로 변경
++
++첫 번째 골대의 5~8번 구역 슛 후 묶음은 제자리 우회전 6회 → 0.5초 정지 →
++우측 라인 복귀 4회 → 우측 라인 복귀 4회다. 두 번째 골대는 제자리 좌회전
++4회 → 0.5초 정지 → 좌측 라인 복귀 4회 → 좌측 라인 복귀 4회다.
++완료 후 기존 `POST_SHOT_EXIT_ALIGN`으로 넘어간다.
++
++`tools/build_post_shot_forward_exits.py`는 원본 골대 퇴장 회전에서 준비 프레임
++2개와 회전·지지 프레임 쌍 6개/4개를 가져온다. 원본 관절 목표·토크·배속을
++유지하고, runtime 완료 허용 오차는 기존 5도를 적용한다. 1~4번 구역의
++퇴장 경로와 단독 5회/3회 회전 별칭은 그대로다.
++
++기존 통신 ID `POST_SHOT_EXIT_RIGHT_5_FORWARD_4`,
++`POST_SHOT_EXIT_LEFT_3_FORWARD_4`는 유지하며 카탈로그 연결과 화면 표시를
++6회/4회로 맞췄다. 예약 계산용 재생시간도 실제 카탈로그에 맞춰 각각
++7.168초, 6.650/1.05초(약 6.333초)로 갱신했다. 마지막 라인 복귀 구간의
++관측·예약 조건과 실패 시 예약 취소는 유지한다.
++
++변경 전 파일과 검증 결과는 `artifacts/20261111_goal_exit_turn6_4/`에 보관한다.
++실행 중 노드는 재시작 후 반영된다. 회전량이 증가하므로 실물 적용 전
++시뮬레이션에서 퇴장 방향과 라인 복귀 경로를 확인한다.
+--- before/src/mission_control/mission_control/motion_decision_node.py
++++ after/src/mission_control/mission_control/motion_decision_node.py
+@@ -196,9 +196,9 @@
+     }
+     # Full catalog duration; the final 30 percent is within the recovery tail.
+     POST_SHOT_EXIT_CAPTURE_CONFIG = {
+-        # Legacy FORWARD_4 IDs now include two four-cycle recoveries.
+-        "POST_SHOT_EXIT_RIGHT_5_FORWARD_4": (6.835, 3),
+-        "POST_SHOT_EXIT_LEFT_3_FORWARD_4": (6.295 / 1.05, 3),
++        # Legacy IDs: right six / left four turns, then two four-cycle recoveries.
++        "POST_SHOT_EXIT_RIGHT_5_FORWARD_4": (7.168, 3),
++        "POST_SHOT_EXIT_LEFT_3_FORWARD_4": (6.650 / 1.05, 3),
+         "POST_SHOT_EXIT_RIGHT_9_RECOVERY_RIGHT_4": (5.437, 3),
+         "POST_SHOT_EXIT_LEFT_4_RECOVERY_LEFT_4": (4.842 / 1.05, 3),
+     }
+--- before/src/mission_control/test/test_goal_region_exit_turns.py
++++ after/src/mission_control/test/test_goal_region_exit_turns.py
+@@ -46,8 +46,9 @@
+     request = decoded_messages(bridge.executor_request_publisher)[-1]
+     name = 't골대후제자리우회전' if section == 1 else 'p골대후제자리좌회전'
+     recovery = '우' if section == 1 else '좌'
++    turn_count = 6 if section == 1 else 4
+     assert ALIASES[request['motion_id']] == (
+-        f'{name}({count}회)' + f'+라인복귀{recovery}회전45도(4회)' * 2 if region >= 5
++        f'{name}({turn_count}회)' + f'+라인복귀{recovery}회전45도(4회)' * 2 if region >= 5
+         else name + f'+라인복귀{recovery}회전45도(4회)' if region in {1, 2} else name
+     )
+     finish_sequence(bridge)
+@@ -106,7 +107,9 @@
+     assert all(motions[motion['name']] == motion for motion in before
+                if '+라인복귀' not in motion['name'])
+     for base, count, pose in [('t골대후제자리우회전', 5, '제우오들25'),
+-                              ('p골대후제자리좌회전', 3, 'tt제좌왼들45')]:
++                              ('t골대후제자리우회전', 6, '제우오들25'),
++                              ('p골대후제자리좌회전', 3, 'tt제좌왼들45'),
++                              ('p골대후제자리좌회전', 4, 'tt제좌왼들45')]:
+         original, variant = motions[base], motions[f'{base}({count}회)']
+         assert variant['frames'] == original['frames'][:2 + 2 * count]
+         assert sum(frame['name'] == pose for frame in variant['frames']) == count
+--- before/src/mission_control/test/test_post_shot_continuous_exit.py
++++ after/src/mission_control/test/test_post_shot_continuous_exit.py
+@@ -100,8 +100,8 @@
+ @pytest.mark.parametrize('name,alias,recovery_name,blocks', [
+     ('t골대후제자리우회전', 'post_shot_exit_right_9_recovery_right_4', 'n라인복귀우회전45도', 1),
+     ('p골대후제자리좌회전', 'post_shot_exit_left_4_recovery_left_4', 'n라인복귀좌회전45도', 1),
+-    ('t골대후제자리우회전(5회)', 'post_shot_exit_right_5_forward_4', 'n라인복귀우회전45도', 2),
+-    ('p골대후제자리좌회전(3회)', 'post_shot_exit_left_3_forward_4', 'n라인복귀좌회전45도', 2),
++    ('t골대후제자리우회전(6회)', 'post_shot_exit_right_5_forward_4', 'n라인복귀우회전45도', 2),
++    ('p골대후제자리좌회전(4회)', 'post_shot_exit_left_3_forward_4', 'n라인복귀좌회전45도', 2),
+ ])
+ def test_catalog_preserves_turn_and_recovery_with_half_second_join_hold(kind, name, alias, recovery_name, blocks):
+     motions = json.loads((ROOT / f'artifacts/robot_motions_{kind}.json').read_text())['motions']
+--- before/src/step/step/yolo26_detector.py
++++ after/src/step/step/yolo26_detector.py
+@@ -1248,8 +1248,8 @@
+             "post_shot_default_turn_left": "LINE RETURN / TURN LEFT",
+             "post_shot_default_turn_right_5": "LINE RETURN / TURN RIGHT 5",
+             "post_shot_default_turn_left_3": "LINE RETURN / TURN LEFT 3",
+-            "post_shot_exit_right_5_forward_4": "POST SHOT / RIGHT 5 + RECOVER RIGHT 4 x2",
+-            "post_shot_exit_left_3_forward_4": "POST SHOT / LEFT 3 + RECOVER LEFT 4 x2",
++            "post_shot_exit_right_5_forward_4": "POST SHOT / RIGHT 6 + RECOVER RIGHT 4 x2",
++            "post_shot_exit_left_3_forward_4": "POST SHOT / LEFT 4 + RECOVER LEFT 4 x2",
+             "post_shot_exit_right_9_recovery_right_4": "POST SHOT / TURN RIGHT + RECOVER RIGHT 4",
+             "post_shot_exit_left_4_recovery_left_4": "POST SHOT / TURN LEFT + RECOVER LEFT 4",
+         }
+--- before/src/step/test/test_yolo26_detector.py
++++ after/src/step/test/test_yolo26_detector.py
+@@ -506,6 +506,8 @@
+     ('post_ball_line_turn_left_2', 'LINE ALIGN / IN-PLACE TURN LEFT 2'),
+     ('goal_camera_90_fine_forward_1', 'GOAL / FINE FORWARD 1'),
+     ('post_ball_forward_8', 'POST BALL FORWARD 8'),
++    ('post_shot_exit_right_5_forward_4', 'POST SHOT / RIGHT 6 + RECOVER RIGHT 4 x2'),
++    ('post_shot_exit_left_3_forward_4', 'POST SHOT / LEFT 4 + RECOVER LEFT 4 x2'),
+ ])
+ def test_running_submotion_banner_survives_navigation_command_timeout(monkeypatch, motion_id, expected):
+     import json
+--- before/tools/build_post_shot_forward_exits.py
++++ after/tools/build_post_shot_forward_exits.py
+@@ -17,10 +17,24 @@
+ GOAL_EXIT_RECOVERIES = (
+     ('t골대후제자리우회전', 'n라인복귀우회전45도', 1),
+     ('p골대후제자리좌회전', 'n라인복귀좌회전45도', 1),
+-    ('t골대후제자리우회전(5회)', 'n라인복귀우회전45도', 2),
+-    ('p골대후제자리좌회전(3회)', 'n라인복귀좌회전45도', 2),
++    ('t골대후제자리우회전(6회)', 'n라인복귀우회전45도', 2),
++    ('p골대후제자리좌회전(4회)', 'n라인복귀좌회전45도', 2),
+ )
+ TURN_RECOVERY_DWELL_MS = 500
++
++
++def build_turn_variant(turn: dict, count: int) -> dict:
++    """Keep the two preparation frames and complete source turn/support pairs."""
++    frame_count = 2 + 2 * count
++    assert count > 0 and turn['repeat_count'] == 1
++    assert frame_count <= len(turn['frames'])
++    result = copy.deepcopy(turn)
++    result['name'] = f"{turn['name']}({count}회)"
++    result['frames'] = result['frames'][:frame_count]
++    for field in ('angles', 'torques'):
++        assert result['frames'][-1][field] == turn['frames'][-1][field]
++    result['max_seq_ms'] = max(f['start_ms'] + f['time_ms'] for f in result['frames'])
++    return result
+ 
+ 
+ def build_exit(turn: dict, recovery: dict, recovery_blocks: int = 1) -> dict:
+@@ -58,13 +72,19 @@
+              for kind in ('pc', 'runtime')}
+     catalogs = {kind: json.loads(path.read_text()) for kind, path in paths.items()}
+     source = {motion['name']: motion for motion in catalogs['pc']['motions']}
+-    variants = [build_exit(source[turn], source[recovery], blocks)
+-                for turn, recovery, blocks in GOAL_EXIT_RECOVERIES]
++    turns = [build_turn_variant(source[name], count) for name, count in (
++        ('t골대후제자리우회전', 6), ('p골대후제자리좌회전', 4),
++    )]
++    source.update({motion['name']: motion for motion in turns})
++    variants = turns + [build_exit(source[turn], source[recovery], blocks)
++                        for turn, recovery, blocks in GOAL_EXIT_RECOVERIES]
+     obsolete = {
+         't골대후제자리우회전(5회)+전진4회',
+         'p골대후제자리좌회전(3회)+전진4회',
+         't골대후제자리우회전(5회)+라인복귀좌회전45도(4회)',
+         'p골대후제자리좌회전(3회)+라인복귀우회전45도(4회)',
++        't골대후제자리우회전(5회)' + '+라인복귀우회전45도(4회)' * 2,
++        'p골대후제자리좌회전(3회)' + '+라인복귀좌회전45도(4회)' * 2,
+     }
+     for kind, catalog in catalogs.items():
+         replacements = {m['name']: m if kind == 'pc' else runtime_motion_from_source(m)

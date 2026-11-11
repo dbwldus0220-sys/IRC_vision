@@ -1,0 +1,11 @@
+........................................................................ [ 26%]
+......F.......F.................................F............FF......... [ 52%]
+........................................................................ [ 79%]
+........................................................                 [100%]
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_hurdle_lost_recovery.py::test_bottom_retreat_waits_for_completion_pause_and_fresh_reacquisition
+FAILED src/mission_control/test/test_walking_boundary_dispatch.py::test_ball_walking_dispatches_latest_direction_in_completion_callback[25.0-BALL_APPROACH_TURN_RIGHT_2-0.0]
+FAILED src/mission_control/test/test_wait_refresh_and_fine_settle.py::test_goal_fine_forward_starts_without_fixed_pause
+FAILED src/mission_control/test/test_wait_refresh_and_fine_settle.py::test_pickup_preparation_is_followed_by_full_second_before_fine
+FAILED src/mission_control/test/test_wait_refresh_and_fine_settle.py::test_pickup_loss_pending_during_preparation_skips_fine_after_pause
+5 failed, 267 passed in 2.51s

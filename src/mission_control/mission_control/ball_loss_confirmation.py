@@ -6,7 +6,7 @@ from typing import Any
 
 @dataclass
 class BallLossConfirmation:
-    min_duration_sec: float = 0.5
+    min_duration_sec: float = 0.8
     min_frames: int = 5
     last_stamp_ns: int | None = None
     last_received_at: float | None = None

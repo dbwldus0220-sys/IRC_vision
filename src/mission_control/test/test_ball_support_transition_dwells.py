@@ -26,7 +26,7 @@ def test_camera45_preparation_rests_follow_adjacent_gaits(clock, previous, prepa
     bridge.stationary_since = clock[0]
     clock[0] += rest
     bridge.navigation_command_callback(command(prepare, 1))
-    remaining = max(0., .5 - rest)
+    remaining = max(0., .2 - rest)
     if remaining:
         assert not bridge.executor_request_publisher.messages
         assert bridge.transition_dwell_until == pytest.approx(clock[0] + remaining)

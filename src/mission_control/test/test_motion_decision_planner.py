@@ -1157,7 +1157,7 @@ def post_ball_return_line(**overrides):
     })
 
 
-@pytest.mark.parametrize("heading", [-88.0, -35.0, -10.001, -10.0, 0.0, 10.0, 10.001, 24.591, 34.281, 88.0])
+@pytest.mark.parametrize("heading", [-40.0, -35.0, -10.001, -10.0, 0.0, 10.0, 10.001, 24.591, 34.281, 40.0])
 @pytest.mark.parametrize("offset", [-0.93, -0.451, 0.0, 0.451, 0.93])
 def test_post_ball_reacquisition_hands_heading_and_offset_to_normal_tracking(heading, offset):
     result = MotionDecisionPlanner().plan(
@@ -3223,3 +3223,14 @@ def test_goal_scoring_alignment_uses_pixels_for_shot_crab_and_bearing_for_turns(
     assert decision.action == action
     assert decision.valid is (action != "WAIT")
     assert decision.requires_ack is (action == "SHOT")
+
+
+@pytest.mark.parametrize('heading,direction', [(40.001, 'RIGHT'), (44.56, 'RIGHT'), (-40.001, 'LEFT'), (-88., 'LEFT')])
+def test_pickup_exit_uses_40_degrees_without_changing_normal_line(heading, direction):
+    planner = MotionDecisionPlanner()
+    sample = post_ball_return_line(ground_heading_error_deg=heading)
+    result = planner.plan('POST_BALL_LINE_ALIGN', observations(line=sample), .1)
+    assert result.valid
+    assert result.action.startswith(f'POST_BALL_LINE_TURN_{direction}_')
+    assert result.source_command['heading_tolerance_deg'] == 40.
+    assert planner.line_planner.config.in_place_ground_heading_deg == 50.

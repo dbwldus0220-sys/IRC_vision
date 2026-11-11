@@ -1,0 +1,545 @@
+........................................................................ [ 16%]
+........................................................................ [ 32%]
+........................................................................ [ 48%]
+........................................................................ [ 64%]
+...................................FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF [ 80%]
+FFFFFFFFFFFFFFFFFFFFFFFFFFFF........FFFFFFFF....F....................... [ 96%]
+..................                                                       [100%]
+=================================== FAILURES ===================================
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA_90_FORWARD_2-info0-8-0.61] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA_90_FORWARD_2-info0-5-0.645] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA_90_FORWARD_2-info0-6-0.68] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA_90_FORWARD_2-info0-7-0.73] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_RECOVER_LEFT_4-info1-8-0.61] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_RECOVER_LEFT_4-info1-5-0.645] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_RECOVER_LEFT_4-info1-6-0.68] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_RECOVER_LEFT_4-info1-7-0.73] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_RECOVER_RIGHT_4-info2-8-0.61] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_RECOVER_RIGHT_4-info2-5-0.645] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_RECOVER_RIGHT_4-info2-6-0.68] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_RECOVER_RIGHT_4-info2-7-0.73] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-8-0.61] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-5-0.645] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-6-0.68] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-7-0.73] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_CRAB_LEFT-info4-8-0.61] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_CRAB_LEFT-info4-5-0.645] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_CRAB_LEFT-info4-6-0.68] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_CRAB_LEFT-info4-7-0.73] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_CRAB_RIGHT-info5-8-0.61] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_CRAB_RIGHT-info5-5-0.645] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_CRAB_RIGHT-info5-6-0.68] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_CRAB_RIGHT-info5-7-0.73] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA_90_FORWARD_2-info0-8-0.61] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA_90_FORWARD_2-info0-5-0.645] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA_90_FORWARD_2-info0-6-0.68] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA_90_FORWARD_2-info0-7-0.73] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_RECOVER_LEFT_4-info1-8-0.61] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_RECOVER_LEFT_4-info1-5-0.645] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_RECOVER_LEFT_4-info1-6-0.68] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_RECOVER_LEFT_4-info1-7-0.73] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_RECOVER_RIGHT_4-info2-8-0.61] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_RECOVER_RIGHT_4-info2-5-0.645] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_RECOVER_RIGHT_4-info2-6-0.68] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_RECOVER_RIGHT_4-info2-7-0.73] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-8-0.61] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-5-0.645] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-6-0.68] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-7-0.73] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_CRAB_LEFT-info4-8-0.61] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_CRAB_LEFT-info4-5-0.645] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_CRAB_LEFT-info4-6-0.68] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_CRAB_LEFT-info4-7-0.73] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_CRAB_RIGHT-info5-8-0.61] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_CRAB_RIGHT-info5-5-0.645] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_CRAB_RIGHT-info5-6-0.68] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_ test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_CRAB_RIGHT-info5-7-0.73] _
+src/mission_control/test/test_goal_region_queue_audit.py:100: in test_zone_entry_blocks_further_walk_reservation_and_reaches_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+____ test_committed_queue_finishes_once_then_reaches_correct_shot[1-8-0.61] ____
+src/mission_control/test/test_goal_region_queue_audit.py:115: in test_committed_queue_finishes_once_then_reaches_correct_shot
+    node, first, motion, started, duration = start(clock, action, info, shot_index)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+___ test_committed_queue_finishes_once_then_reaches_correct_shot[1-5-0.645] ____
+src/mission_control/test/test_goal_region_queue_audit.py:115: in test_committed_queue_finishes_once_then_reaches_correct_shot
+    node, first, motion, started, duration = start(clock, action, info, shot_index)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+____ test_committed_queue_finishes_once_then_reaches_correct_shot[1-6-0.68] ____
+src/mission_control/test/test_goal_region_queue_audit.py:115: in test_committed_queue_finishes_once_then_reaches_correct_shot
+    node, first, motion, started, duration = start(clock, action, info, shot_index)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+____ test_committed_queue_finishes_once_then_reaches_correct_shot[1-7-0.73] ____
+src/mission_control/test/test_goal_region_queue_audit.py:115: in test_committed_queue_finishes_once_then_reaches_correct_shot
+    node, first, motion, started, duration = start(clock, action, info, shot_index)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+____ test_committed_queue_finishes_once_then_reaches_correct_shot[2-8-0.61] ____
+src/mission_control/test/test_goal_region_queue_audit.py:115: in test_committed_queue_finishes_once_then_reaches_correct_shot
+    node, first, motion, started, duration = start(clock, action, info, shot_index)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+___ test_committed_queue_finishes_once_then_reaches_correct_shot[2-5-0.645] ____
+src/mission_control/test/test_goal_region_queue_audit.py:115: in test_committed_queue_finishes_once_then_reaches_correct_shot
+    node, first, motion, started, duration = start(clock, action, info, shot_index)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+____ test_committed_queue_finishes_once_then_reaches_correct_shot[2-6-0.68] ____
+src/mission_control/test/test_goal_region_queue_audit.py:115: in test_committed_queue_finishes_once_then_reaches_correct_shot
+    node, first, motion, started, duration = start(clock, action, info, shot_index)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+____ test_committed_queue_finishes_once_then_reaches_correct_shot[2-7-0.73] ____
+src/mission_control/test/test_goal_region_queue_audit.py:115: in test_committed_queue_finishes_once_then_reaches_correct_shot
+    node, first, motion, started, duration = start(clock, action, info, shot_index)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_______ test_rejected_reservation_does_not_block_new_region_shot[8-0.61] _______
+src/mission_control/test/test_goal_region_queue_audit.py:142: in test_rejected_reservation_does_not_block_new_region_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+______ test_rejected_reservation_does_not_block_new_region_shot[5-0.645] _______
+src/mission_control/test/test_goal_region_queue_audit.py:142: in test_rejected_reservation_does_not_block_new_region_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_______ test_rejected_reservation_does_not_block_new_region_shot[6-0.68] _______
+src/mission_control/test/test_goal_region_queue_audit.py:142: in test_rejected_reservation_does_not_block_new_region_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_______ test_rejected_reservation_does_not_block_new_region_shot[7-0.73] _______
+src/mission_control/test/test_goal_region_queue_audit.py:142: in test_rejected_reservation_does_not_block_new_region_shot
+    node, first, motion, started, duration = start(clock, action, info)
+src/mission_control/test/test_goal_region_queue_audit.py:33: in start
+    first = executable(node)[-1]
+E   IndexError: list index out of range
+_________ test_all_new_region_edges_and_confirmation[0.59-0.63--80-8] __________
+src/mission_control/test/test_goal_extended_regions.py:41: in test_all_new_region_edges_and_confirmation
+    assert goal_shot_region(depth, offset) == region
+E   assert 6 == 8
+E    +  where 6 = goal_shot_region(0.59, -80)
+_________ test_all_new_region_edges_and_confirmation[0.63-0.66--80-5] __________
+src/mission_control/test/test_goal_extended_regions.py:41: in test_all_new_region_edges_and_confirmation
+    assert goal_shot_region(depth, offset) == region
+E   assert 7 == 5
+E    +  where 7 = goal_shot_region(0.63, -80)
+__________ test_all_new_region_edges_and_confirmation[0.66-0.7--80-6] __________
+src/mission_control/test/test_goal_extended_regions.py:41: in test_all_new_region_edges_and_confirmation
+    assert goal_shot_region(depth, offset) == region
+E   assert None == 6
+E    +  where None = goal_shot_region(0.66, -80)
+__________ test_all_new_region_edges_and_confirmation[0.7-0.76--70-7] __________
+src/mission_control/test/test_goal_extended_regions.py:41: in test_all_new_region_edges_and_confirmation
+    assert goal_shot_region(depth, offset) == region
+E   assert None == 7
+E    +  where None = goal_shot_region(0.7, -70)
+______ test_existing_regions_are_identical_to_before_for_every_millimeter ______
+src/mission_control/test/test_goal_extended_regions.py:58: in test_existing_regions_are_identical_to_before_for_every_millimeter
+    assert goal_shot_region(mm / 1000, px) == previous(mm / 1000, px)
+E   assert 1 == None
+E    +  where 1 = goal_shot_region((400 / 1000), -121)
+E    +  and   None = <function goal_shot_region at 0xffff6fcce560>((400 / 1000), -121)
+_______ test_region_reselected_after_same_one_second_observation[0.61-8] _______
+src/mission_control/test/test_goal_extended_regions.py:97: in test_region_reselected_after_same_one_second_observation
+    prepare(node, clock)
+src/mission_control/test/test_catalog64_goal_prepare.py:124: in prepare
+    assert command['action'] == 'GOAL_SHOT_PREPARE'
+E   AssertionError: assert 'WAIT' == 'GOAL_SHOT_PREPARE'
+E     - GOAL_SHOT_PREPARE
+E     + WAIT
+______ test_region_reselected_after_same_one_second_observation[0.645-5] _______
+src/mission_control/test/test_goal_extended_regions.py:97: in test_region_reselected_after_same_one_second_observation
+    prepare(node, clock)
+src/mission_control/test/test_catalog64_goal_prepare.py:124: in prepare
+    assert command['action'] == 'GOAL_SHOT_PREPARE'
+E   AssertionError: assert 'WAIT' == 'GOAL_SHOT_PREPARE'
+E     - GOAL_SHOT_PREPARE
+E     + WAIT
+_______ test_region_reselected_after_same_one_second_observation[0.68-6] _______
+src/mission_control/test/test_goal_extended_regions.py:97: in test_region_reselected_after_same_one_second_observation
+    prepare(node, clock)
+src/mission_control/test/test_catalog64_goal_prepare.py:124: in prepare
+    assert command['action'] == 'GOAL_SHOT_PREPARE'
+E   AssertionError: assert 'WAIT' == 'GOAL_SHOT_PREPARE'
+E     - GOAL_SHOT_PREPARE
+E     + WAIT
+_______ test_region_reselected_after_same_one_second_observation[0.73-7] _______
+src/mission_control/test/test_goal_extended_regions.py:97: in test_region_reselected_after_same_one_second_observation
+    prepare(node, clock)
+src/mission_control/test/test_catalog64_goal_prepare.py:124: in prepare
+    assert command['action'] == 'GOAL_SHOT_PREPARE'
+E   AssertionError: assert 'WAIT' == 'GOAL_SHOT_PREPARE'
+E     - GOAL_SHOT_PREPARE
+E     + WAIT
+_ test_out_of_region_after_observation_does_not_use_previous_region[0.76--40] __
+src/mission_control/test/test_goal_extended_regions.py:111: in test_out_of_region_after_observation_does_not_use_previous_region
+    prepare(node, clock)
+src/mission_control/test/test_catalog64_goal_prepare.py:124: in prepare
+    assert command['action'] == 'GOAL_SHOT_PREPARE'
+E   AssertionError: assert 'WAIT' == 'GOAL_SHOT_PREPARE'
+E     - GOAL_SHOT_PREPARE
+E     + WAIT
+_ test_out_of_region_after_observation_does_not_use_previous_region[0.61-0.001] _
+src/mission_control/test/test_goal_extended_regions.py:111: in test_out_of_region_after_observation_does_not_use_previous_region
+    prepare(node, clock)
+src/mission_control/test/test_catalog64_goal_prepare.py:124: in prepare
+    assert command['action'] == 'GOAL_SHOT_PREPARE'
+E   AssertionError: assert 'WAIT' == 'GOAL_SHOT_PREPARE'
+E     - GOAL_SHOT_PREPARE
+E     + WAIT
+_ test_out_of_region_after_observation_does_not_use_previous_region[0.73--70.001] _
+src/mission_control/test/test_goal_extended_regions.py:111: in test_out_of_region_after_observation_does_not_use_previous_region
+    prepare(node, clock)
+src/mission_control/test/test_catalog64_goal_prepare.py:124: in prepare
+    assert command['action'] == 'GOAL_SHOT_PREPARE'
+E   AssertionError: assert 'WAIT' == 'GOAL_SHOT_PREPARE'
+E     - GOAL_SHOT_PREPARE
+E     + WAIT
+__ test_target_projection_uses_630mm_and_minus40px_in_calibrated_coordinates ___
+src/mission_control/test/test_goal_extended_regions.py:118: in test_target_projection_uses_630mm_and_minus40px_in_calibrated_coordinates
+    assert planner.config.score_target_depth_m == .630
+E   assert 0.56 == 0.63
+E    +  where 0.56 = GoalNavigationConfig(min_confidence=0.55, control_start_depth_m=1.9, score_target_depth_m=0.56, score_crab_max_offset_px=140.0).score_target_depth_m
+E    +    where GoalNavigationConfig(min_confidence=0.55, control_start_depth_m=1.9, score_target_depth_m=0.56, score_crab_max_offset_px=140.0) = <step.goal_navigation_planner.GoalNavigationPlanner object at 0xffff6fa729b0>.config
+______________ test_only_four_goal_motions_and_aliases_are_added _______________
+src/mission_control/test/test_goal_extended_regions.py:148: in test_only_four_goal_motions_and_aliases_are_added
+    assert after.keys() - before.keys() == set(NAMES.values())
+E   AssertionError: assert {'n공에서 전진하고 후...귀좌회전45도', ...} == {'r골넣기 5번구역',...', 'r골넣기8번구역'}
+E     Extra items in the left set:
+E     't골대후제자리우회전+라인복귀우회전45도(4회)'
+E     'p골대후제자리좌회전+라인복귀좌회전45도(4회)'
+E     'n전진90도(3회)'
+E     't골대후제자리우회전(5회)'
+E     'n공확인자세'
+E     'n라인복귀우회전45도'...
+E     
+E     ...Full output truncated (60 lines hidden), use '-vv' to show
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA_90_FORWARD_2-info0-8-0.61]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA_90_FORWARD_2-info0-5-0.645]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA_90_FORWARD_2-info0-6-0.68]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA_90_FORWARD_2-info0-7-0.73]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_RECOVER_LEFT_4-info1-8-0.61]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_RECOVER_LEFT_4-info1-5-0.645]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_RECOVER_LEFT_4-info1-6-0.68]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_RECOVER_LEFT_4-info1-7-0.73]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_RECOVER_RIGHT_4-info2-8-0.61]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_RECOVER_RIGHT_4-info2-5-0.645]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_RECOVER_RIGHT_4-info2-6-0.68]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_RECOVER_RIGHT_4-info2-7-0.73]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-8-0.61]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-5-0.645]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-6-0.68]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_FINE_FORWARD_4-info3-7-0.73]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_CRAB_LEFT-info4-8-0.61]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_CRAB_LEFT-info4-5-0.645]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_CRAB_LEFT-info4-6-0.68]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_CRAB_LEFT-info4-7-0.73]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_CRAB_RIGHT-info5-8-0.61]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_CRAB_RIGHT-info5-5-0.645]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_CRAB_RIGHT-info5-6-0.68]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[False-GOAL_CAMERA90_CRAB_RIGHT-info5-7-0.73]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA_90_FORWARD_2-info0-8-0.61]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA_90_FORWARD_2-info0-5-0.645]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA_90_FORWARD_2-info0-6-0.68]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA_90_FORWARD_2-info0-7-0.73]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_RECOVER_LEFT_4-info1-8-0.61]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_RECOVER_LEFT_4-info1-5-0.645]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_RECOVER_LEFT_4-info1-6-0.68]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_RECOVER_LEFT_4-info1-7-0.73]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_RECOVER_RIGHT_4-info2-8-0.61]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_RECOVER_RIGHT_4-info2-5-0.645]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_RECOVER_RIGHT_4-info2-6-0.68]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_RECOVER_RIGHT_4-info2-7-0.73]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-8-0.61]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-5-0.645]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-6-0.68]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_FINE_FORWARD_4-info3-7-0.73]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_CRAB_LEFT-info4-8-0.61]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_CRAB_LEFT-info4-5-0.645]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_CRAB_LEFT-info4-6-0.68]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_CRAB_LEFT-info4-7-0.73]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_CRAB_RIGHT-info5-8-0.61]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_CRAB_RIGHT-info5-5-0.645]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_CRAB_RIGHT-info5-6-0.68]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_zone_entry_blocks_further_walk_reservation_and_reaches_shot[True-GOAL_CAMERA90_CRAB_RIGHT-info5-7-0.73]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_committed_queue_finishes_once_then_reaches_correct_shot[1-8-0.61]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_committed_queue_finishes_once_then_reaches_correct_shot[1-5-0.645]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_committed_queue_finishes_once_then_reaches_correct_shot[1-6-0.68]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_committed_queue_finishes_once_then_reaches_correct_shot[1-7-0.73]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_committed_queue_finishes_once_then_reaches_correct_shot[2-8-0.61]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_committed_queue_finishes_once_then_reaches_correct_shot[2-5-0.645]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_committed_queue_finishes_once_then_reaches_correct_shot[2-6-0.68]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_committed_queue_finishes_once_then_reaches_correct_shot[2-7-0.73]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_rejected_reservation_does_not_block_new_region_shot[8-0.61]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_rejected_reservation_does_not_block_new_region_shot[5-0.645]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_rejected_reservation_does_not_block_new_region_shot[6-0.68]
+FAILED src/mission_control/test/test_goal_region_queue_audit.py::test_rejected_reservation_does_not_block_new_region_shot[7-0.73]
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_all_new_region_edges_and_confirmation[0.59-0.63--80-8]
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_all_new_region_edges_and_confirmation[0.63-0.66--80-5]
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_all_new_region_edges_and_confirmation[0.66-0.7--80-6]
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_all_new_region_edges_and_confirmation[0.7-0.76--70-7]
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_existing_regions_are_identical_to_before_for_every_millimeter
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_region_reselected_after_same_one_second_observation[0.61-8]
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_region_reselected_after_same_one_second_observation[0.645-5]
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_region_reselected_after_same_one_second_observation[0.68-6]
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_region_reselected_after_same_one_second_observation[0.73-7]
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_out_of_region_after_observation_does_not_use_previous_region[0.76--40]
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_out_of_region_after_observation_does_not_use_previous_region[0.61-0.001]
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_out_of_region_after_observation_does_not_use_previous_region[0.73--70.001]
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_target_projection_uses_630mm_and_minus40px_in_calibrated_coordinates
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_only_four_goal_motions_and_aliases_are_added
+74 failed, 376 passed in 14.23s

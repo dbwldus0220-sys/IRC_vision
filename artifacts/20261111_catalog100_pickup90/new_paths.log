@@ -1,0 +1,929 @@
+.................................................FFFFFFFFFFFFFFFFFFFF... [ 98%]
+.                                                                        [100%]
+=================================== FAILURES ===================================
+__ test_skip_preparation_half_second_then_retreat_and_grasp[1-line_forward_2] __
+
+clock = [19.983999999999998], previous = 'line_forward_2', index = 1
+
+    @pytest.mark.parametrize('previous', WALKS)
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_skip_preparation_half_second_then_retreat_and_grasp(clock, previous, index):
+        node, bridge, request = prepare_skip(clock, previous, index)
+        clock[0] += .754
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        deadline = clock[0] + .5
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] += .2
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] = deadline - .001
+        bridge._check_atomic_dwell()
+        assert len(bridge.executor_request_publisher.messages) == 1
+        clock[0] = deadline
+        bridge._check_atomic_dwell()
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == [
+            'pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down']
+        assert bridge.transition_dwell_until is None
+        # Complete the fixed tail, crossing the fresh post-retreat grasp checkpoint.
+        for _ in range(25):
+            if not bridge.motion_in_progress:
+                break
+            if bridge.pickup_post_backward_align_waiting:
+                continue_pickup_after_backward(bridge, bottom_distance_px=400)
+            elif bridge.transition_dwell_until is not None or bridge.active_dwell_until is not None:
+                clock[0] = bridge.transition_dwell_until or bridge.active_dwell_until
+                bridge._check_atomic_dwell()
+            else:
+                current = decoded_messages(bridge.executor_request_publisher)[-1]
+                clock[0] += 1.
+                bridge.executor_status_callback(executor_status(**current, status='SUCCEEDED'))
+        assert not bridge.motion_in_progress
+        ids = [r['motion_id'] for r in decoded_messages(bridge.executor_request_publisher)]
+        assert 'pickup_fine_forward_0' not in ids and 'ball_general_fine_forward_8' not in ids
+        assert ids.count('pickup_forward_to_backward_prepare') == 1
+>       assert 'pickup_400' in ids
+E       AssertionError: assert 'pickup_400' in ['pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down', 'pickup_500', 'pickup_grasp_check_pose', 'pickup_first_backward_turn_right']
+
+src/mission_control/test/test_pickup_forward90.py:108: AssertionError
+__ test_skip_preparation_half_second_then_retreat_and_grasp[1-line_forward_4] __
+
+clock = [19.983999999999998], previous = 'line_forward_4', index = 1
+
+    @pytest.mark.parametrize('previous', WALKS)
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_skip_preparation_half_second_then_retreat_and_grasp(clock, previous, index):
+        node, bridge, request = prepare_skip(clock, previous, index)
+        clock[0] += .754
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        deadline = clock[0] + .5
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] += .2
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] = deadline - .001
+        bridge._check_atomic_dwell()
+        assert len(bridge.executor_request_publisher.messages) == 1
+        clock[0] = deadline
+        bridge._check_atomic_dwell()
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == [
+            'pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down']
+        assert bridge.transition_dwell_until is None
+        # Complete the fixed tail, crossing the fresh post-retreat grasp checkpoint.
+        for _ in range(25):
+            if not bridge.motion_in_progress:
+                break
+            if bridge.pickup_post_backward_align_waiting:
+                continue_pickup_after_backward(bridge, bottom_distance_px=400)
+            elif bridge.transition_dwell_until is not None or bridge.active_dwell_until is not None:
+                clock[0] = bridge.transition_dwell_until or bridge.active_dwell_until
+                bridge._check_atomic_dwell()
+            else:
+                current = decoded_messages(bridge.executor_request_publisher)[-1]
+                clock[0] += 1.
+                bridge.executor_status_callback(executor_status(**current, status='SUCCEEDED'))
+        assert not bridge.motion_in_progress
+        ids = [r['motion_id'] for r in decoded_messages(bridge.executor_request_publisher)]
+        assert 'pickup_fine_forward_0' not in ids and 'ball_general_fine_forward_8' not in ids
+        assert ids.count('pickup_forward_to_backward_prepare') == 1
+>       assert 'pickup_400' in ids
+E       AssertionError: assert 'pickup_400' in ['pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down', 'pickup_500', 'pickup_grasp_check_pose', 'pickup_first_backward_turn_right']
+
+src/mission_control/test/test_pickup_forward90.py:108: AssertionError
+__ test_skip_preparation_half_second_then_retreat_and_grasp[1-line_forward_6] __
+
+clock = [19.983999999999998], previous = 'line_forward_6', index = 1
+
+    @pytest.mark.parametrize('previous', WALKS)
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_skip_preparation_half_second_then_retreat_and_grasp(clock, previous, index):
+        node, bridge, request = prepare_skip(clock, previous, index)
+        clock[0] += .754
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        deadline = clock[0] + .5
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] += .2
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] = deadline - .001
+        bridge._check_atomic_dwell()
+        assert len(bridge.executor_request_publisher.messages) == 1
+        clock[0] = deadline
+        bridge._check_atomic_dwell()
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == [
+            'pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down']
+        assert bridge.transition_dwell_until is None
+        # Complete the fixed tail, crossing the fresh post-retreat grasp checkpoint.
+        for _ in range(25):
+            if not bridge.motion_in_progress:
+                break
+            if bridge.pickup_post_backward_align_waiting:
+                continue_pickup_after_backward(bridge, bottom_distance_px=400)
+            elif bridge.transition_dwell_until is not None or bridge.active_dwell_until is not None:
+                clock[0] = bridge.transition_dwell_until or bridge.active_dwell_until
+                bridge._check_atomic_dwell()
+            else:
+                current = decoded_messages(bridge.executor_request_publisher)[-1]
+                clock[0] += 1.
+                bridge.executor_status_callback(executor_status(**current, status='SUCCEEDED'))
+        assert not bridge.motion_in_progress
+        ids = [r['motion_id'] for r in decoded_messages(bridge.executor_request_publisher)]
+        assert 'pickup_fine_forward_0' not in ids and 'ball_general_fine_forward_8' not in ids
+        assert ids.count('pickup_forward_to_backward_prepare') == 1
+>       assert 'pickup_400' in ids
+E       AssertionError: assert 'pickup_400' in ['pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down', 'pickup_500', 'pickup_grasp_check_pose', 'pickup_first_backward_turn_right']
+
+src/mission_control/test/test_pickup_forward90.py:108: AssertionError
+__ test_skip_preparation_half_second_then_retreat_and_grasp[1-line_forward_8] __
+
+clock = [19.983999999999998], previous = 'line_forward_8', index = 1
+
+    @pytest.mark.parametrize('previous', WALKS)
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_skip_preparation_half_second_then_retreat_and_grasp(clock, previous, index):
+        node, bridge, request = prepare_skip(clock, previous, index)
+        clock[0] += .754
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        deadline = clock[0] + .5
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] += .2
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] = deadline - .001
+        bridge._check_atomic_dwell()
+        assert len(bridge.executor_request_publisher.messages) == 1
+        clock[0] = deadline
+        bridge._check_atomic_dwell()
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == [
+            'pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down']
+        assert bridge.transition_dwell_until is None
+        # Complete the fixed tail, crossing the fresh post-retreat grasp checkpoint.
+        for _ in range(25):
+            if not bridge.motion_in_progress:
+                break
+            if bridge.pickup_post_backward_align_waiting:
+                continue_pickup_after_backward(bridge, bottom_distance_px=400)
+            elif bridge.transition_dwell_until is not None or bridge.active_dwell_until is not None:
+                clock[0] = bridge.transition_dwell_until or bridge.active_dwell_until
+                bridge._check_atomic_dwell()
+            else:
+                current = decoded_messages(bridge.executor_request_publisher)[-1]
+                clock[0] += 1.
+                bridge.executor_status_callback(executor_status(**current, status='SUCCEEDED'))
+        assert not bridge.motion_in_progress
+        ids = [r['motion_id'] for r in decoded_messages(bridge.executor_request_publisher)]
+        assert 'pickup_fine_forward_0' not in ids and 'ball_general_fine_forward_8' not in ids
+        assert ids.count('pickup_forward_to_backward_prepare') == 1
+>       assert 'pickup_400' in ids
+E       AssertionError: assert 'pickup_400' in ['pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down', 'pickup_500', 'pickup_grasp_check_pose', 'pickup_first_backward_turn_right']
+
+src/mission_control/test/test_pickup_forward90.py:108: AssertionError
+_ test_skip_preparation_half_second_then_retreat_and_grasp[1-ball_camera_down_forward_2] _
+
+clock = [19.983999999999998], previous = 'ball_camera_down_forward_2', index = 1
+
+    @pytest.mark.parametrize('previous', WALKS)
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_skip_preparation_half_second_then_retreat_and_grasp(clock, previous, index):
+        node, bridge, request = prepare_skip(clock, previous, index)
+        clock[0] += .754
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        deadline = clock[0] + .5
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] += .2
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] = deadline - .001
+        bridge._check_atomic_dwell()
+        assert len(bridge.executor_request_publisher.messages) == 1
+        clock[0] = deadline
+        bridge._check_atomic_dwell()
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == [
+            'pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down']
+        assert bridge.transition_dwell_until is None
+        # Complete the fixed tail, crossing the fresh post-retreat grasp checkpoint.
+        for _ in range(25):
+            if not bridge.motion_in_progress:
+                break
+            if bridge.pickup_post_backward_align_waiting:
+                continue_pickup_after_backward(bridge, bottom_distance_px=400)
+            elif bridge.transition_dwell_until is not None or bridge.active_dwell_until is not None:
+                clock[0] = bridge.transition_dwell_until or bridge.active_dwell_until
+                bridge._check_atomic_dwell()
+            else:
+                current = decoded_messages(bridge.executor_request_publisher)[-1]
+                clock[0] += 1.
+                bridge.executor_status_callback(executor_status(**current, status='SUCCEEDED'))
+        assert not bridge.motion_in_progress
+        ids = [r['motion_id'] for r in decoded_messages(bridge.executor_request_publisher)]
+        assert 'pickup_fine_forward_0' not in ids and 'ball_general_fine_forward_8' not in ids
+        assert ids.count('pickup_forward_to_backward_prepare') == 1
+>       assert 'pickup_400' in ids
+E       AssertionError: assert 'pickup_400' in ['pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down', 'pickup_500', 'pickup_grasp_check_pose', 'pickup_first_backward_turn_right']
+
+src/mission_control/test/test_pickup_forward90.py:108: AssertionError
+_ test_skip_preparation_half_second_then_retreat_and_grasp[1-ball_camera_down_forward_4] _
+
+clock = [19.983999999999998], previous = 'ball_camera_down_forward_4', index = 1
+
+    @pytest.mark.parametrize('previous', WALKS)
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_skip_preparation_half_second_then_retreat_and_grasp(clock, previous, index):
+        node, bridge, request = prepare_skip(clock, previous, index)
+        clock[0] += .754
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        deadline = clock[0] + .5
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] += .2
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] = deadline - .001
+        bridge._check_atomic_dwell()
+        assert len(bridge.executor_request_publisher.messages) == 1
+        clock[0] = deadline
+        bridge._check_atomic_dwell()
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == [
+            'pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down']
+        assert bridge.transition_dwell_until is None
+        # Complete the fixed tail, crossing the fresh post-retreat grasp checkpoint.
+        for _ in range(25):
+            if not bridge.motion_in_progress:
+                break
+            if bridge.pickup_post_backward_align_waiting:
+                continue_pickup_after_backward(bridge, bottom_distance_px=400)
+            elif bridge.transition_dwell_until is not None or bridge.active_dwell_until is not None:
+                clock[0] = bridge.transition_dwell_until or bridge.active_dwell_until
+                bridge._check_atomic_dwell()
+            else:
+                current = decoded_messages(bridge.executor_request_publisher)[-1]
+                clock[0] += 1.
+                bridge.executor_status_callback(executor_status(**current, status='SUCCEEDED'))
+        assert not bridge.motion_in_progress
+        ids = [r['motion_id'] for r in decoded_messages(bridge.executor_request_publisher)]
+        assert 'pickup_fine_forward_0' not in ids and 'ball_general_fine_forward_8' not in ids
+        assert ids.count('pickup_forward_to_backward_prepare') == 1
+>       assert 'pickup_400' in ids
+E       AssertionError: assert 'pickup_400' in ['pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down', 'pickup_500', 'pickup_grasp_check_pose', 'pickup_first_backward_turn_right']
+
+src/mission_control/test/test_pickup_forward90.py:108: AssertionError
+_ test_skip_preparation_half_second_then_retreat_and_grasp[1-line_recovery_left_4] _
+
+clock = [19.983999999999998], previous = 'line_recovery_left_4', index = 1
+
+    @pytest.mark.parametrize('previous', WALKS)
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_skip_preparation_half_second_then_retreat_and_grasp(clock, previous, index):
+        node, bridge, request = prepare_skip(clock, previous, index)
+        clock[0] += .754
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        deadline = clock[0] + .5
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] += .2
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] = deadline - .001
+        bridge._check_atomic_dwell()
+        assert len(bridge.executor_request_publisher.messages) == 1
+        clock[0] = deadline
+        bridge._check_atomic_dwell()
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == [
+            'pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down']
+        assert bridge.transition_dwell_until is None
+        # Complete the fixed tail, crossing the fresh post-retreat grasp checkpoint.
+        for _ in range(25):
+            if not bridge.motion_in_progress:
+                break
+            if bridge.pickup_post_backward_align_waiting:
+                continue_pickup_after_backward(bridge, bottom_distance_px=400)
+            elif bridge.transition_dwell_until is not None or bridge.active_dwell_until is not None:
+                clock[0] = bridge.transition_dwell_until or bridge.active_dwell_until
+                bridge._check_atomic_dwell()
+            else:
+                current = decoded_messages(bridge.executor_request_publisher)[-1]
+                clock[0] += 1.
+                bridge.executor_status_callback(executor_status(**current, status='SUCCEEDED'))
+        assert not bridge.motion_in_progress
+        ids = [r['motion_id'] for r in decoded_messages(bridge.executor_request_publisher)]
+        assert 'pickup_fine_forward_0' not in ids and 'ball_general_fine_forward_8' not in ids
+        assert ids.count('pickup_forward_to_backward_prepare') == 1
+>       assert 'pickup_400' in ids
+E       AssertionError: assert 'pickup_400' in ['pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down', 'pickup_500', 'pickup_grasp_check_pose', 'pickup_first_backward_turn_right']
+
+src/mission_control/test/test_pickup_forward90.py:108: AssertionError
+_ test_skip_preparation_half_second_then_retreat_and_grasp[1-line_recovery_right_4] _
+
+clock = [19.983999999999998], previous = 'line_recovery_right_4', index = 1
+
+    @pytest.mark.parametrize('previous', WALKS)
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_skip_preparation_half_second_then_retreat_and_grasp(clock, previous, index):
+        node, bridge, request = prepare_skip(clock, previous, index)
+        clock[0] += .754
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        deadline = clock[0] + .5
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] += .2
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] = deadline - .001
+        bridge._check_atomic_dwell()
+        assert len(bridge.executor_request_publisher.messages) == 1
+        clock[0] = deadline
+        bridge._check_atomic_dwell()
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == [
+            'pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down']
+        assert bridge.transition_dwell_until is None
+        # Complete the fixed tail, crossing the fresh post-retreat grasp checkpoint.
+        for _ in range(25):
+            if not bridge.motion_in_progress:
+                break
+            if bridge.pickup_post_backward_align_waiting:
+                continue_pickup_after_backward(bridge, bottom_distance_px=400)
+            elif bridge.transition_dwell_until is not None or bridge.active_dwell_until is not None:
+                clock[0] = bridge.transition_dwell_until or bridge.active_dwell_until
+                bridge._check_atomic_dwell()
+            else:
+                current = decoded_messages(bridge.executor_request_publisher)[-1]
+                clock[0] += 1.
+                bridge.executor_status_callback(executor_status(**current, status='SUCCEEDED'))
+        assert not bridge.motion_in_progress
+        ids = [r['motion_id'] for r in decoded_messages(bridge.executor_request_publisher)]
+        assert 'pickup_fine_forward_0' not in ids and 'ball_general_fine_forward_8' not in ids
+        assert ids.count('pickup_forward_to_backward_prepare') == 1
+>       assert 'pickup_400' in ids
+E       AssertionError: assert 'pickup_400' in ['pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down', 'pickup_500', 'pickup_grasp_check_pose', 'pickup_first_backward_turn_right']
+
+src/mission_control/test/test_pickup_forward90.py:108: AssertionError
+_ test_skip_preparation_half_second_then_retreat_and_grasp[1-line_recovery_ball_first_left_4] _
+
+clock = [19.983999999999998], previous = 'line_recovery_ball_first_left_4'
+index = 1
+
+    @pytest.mark.parametrize('previous', WALKS)
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_skip_preparation_half_second_then_retreat_and_grasp(clock, previous, index):
+        node, bridge, request = prepare_skip(clock, previous, index)
+        clock[0] += .754
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        deadline = clock[0] + .5
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] += .2
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] = deadline - .001
+        bridge._check_atomic_dwell()
+        assert len(bridge.executor_request_publisher.messages) == 1
+        clock[0] = deadline
+        bridge._check_atomic_dwell()
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == [
+            'pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down']
+        assert bridge.transition_dwell_until is None
+        # Complete the fixed tail, crossing the fresh post-retreat grasp checkpoint.
+        for _ in range(25):
+            if not bridge.motion_in_progress:
+                break
+            if bridge.pickup_post_backward_align_waiting:
+                continue_pickup_after_backward(bridge, bottom_distance_px=400)
+            elif bridge.transition_dwell_until is not None or bridge.active_dwell_until is not None:
+                clock[0] = bridge.transition_dwell_until or bridge.active_dwell_until
+                bridge._check_atomic_dwell()
+            else:
+                current = decoded_messages(bridge.executor_request_publisher)[-1]
+                clock[0] += 1.
+                bridge.executor_status_callback(executor_status(**current, status='SUCCEEDED'))
+        assert not bridge.motion_in_progress
+        ids = [r['motion_id'] for r in decoded_messages(bridge.executor_request_publisher)]
+        assert 'pickup_fine_forward_0' not in ids and 'ball_general_fine_forward_8' not in ids
+        assert ids.count('pickup_forward_to_backward_prepare') == 1
+>       assert 'pickup_400' in ids
+E       AssertionError: assert 'pickup_400' in ['pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down', 'pickup_500', 'pickup_grasp_check_pose', 'pickup_first_backward_turn_right']
+
+src/mission_control/test/test_pickup_forward90.py:108: AssertionError
+_ test_skip_preparation_half_second_then_retreat_and_grasp[1-line_recovery_ball_second_right_4] _
+
+clock = [19.983999999999998], previous = 'line_recovery_ball_second_right_4'
+index = 1
+
+    @pytest.mark.parametrize('previous', WALKS)
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_skip_preparation_half_second_then_retreat_and_grasp(clock, previous, index):
+        node, bridge, request = prepare_skip(clock, previous, index)
+        clock[0] += .754
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        deadline = clock[0] + .5
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] += .2
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] = deadline - .001
+        bridge._check_atomic_dwell()
+        assert len(bridge.executor_request_publisher.messages) == 1
+        clock[0] = deadline
+        bridge._check_atomic_dwell()
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == [
+            'pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down']
+        assert bridge.transition_dwell_until is None
+        # Complete the fixed tail, crossing the fresh post-retreat grasp checkpoint.
+        for _ in range(25):
+            if not bridge.motion_in_progress:
+                break
+            if bridge.pickup_post_backward_align_waiting:
+                continue_pickup_after_backward(bridge, bottom_distance_px=400)
+            elif bridge.transition_dwell_until is not None or bridge.active_dwell_until is not None:
+                clock[0] = bridge.transition_dwell_until or bridge.active_dwell_until
+                bridge._check_atomic_dwell()
+            else:
+                current = decoded_messages(bridge.executor_request_publisher)[-1]
+                clock[0] += 1.
+                bridge.executor_status_callback(executor_status(**current, status='SUCCEEDED'))
+        assert not bridge.motion_in_progress
+        ids = [r['motion_id'] for r in decoded_messages(bridge.executor_request_publisher)]
+        assert 'pickup_fine_forward_0' not in ids and 'ball_general_fine_forward_8' not in ids
+        assert ids.count('pickup_forward_to_backward_prepare') == 1
+>       assert 'pickup_400' in ids
+E       AssertionError: assert 'pickup_400' in ['pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down', 'pickup_500', 'pickup_grasp_check_pose', 'pickup_first_backward_turn_right']
+
+src/mission_control/test/test_pickup_forward90.py:108: AssertionError
+__ test_skip_preparation_half_second_then_retreat_and_grasp[2-line_forward_2] __
+
+clock = [19.983999999999998], previous = 'line_forward_2', index = 2
+
+    @pytest.mark.parametrize('previous', WALKS)
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_skip_preparation_half_second_then_retreat_and_grasp(clock, previous, index):
+        node, bridge, request = prepare_skip(clock, previous, index)
+        clock[0] += .754
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        deadline = clock[0] + .5
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] += .2
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] = deadline - .001
+        bridge._check_atomic_dwell()
+        assert len(bridge.executor_request_publisher.messages) == 1
+        clock[0] = deadline
+        bridge._check_atomic_dwell()
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == [
+            'pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down']
+        assert bridge.transition_dwell_until is None
+        # Complete the fixed tail, crossing the fresh post-retreat grasp checkpoint.
+        for _ in range(25):
+            if not bridge.motion_in_progress:
+                break
+            if bridge.pickup_post_backward_align_waiting:
+                continue_pickup_after_backward(bridge, bottom_distance_px=400)
+            elif bridge.transition_dwell_until is not None or bridge.active_dwell_until is not None:
+                clock[0] = bridge.transition_dwell_until or bridge.active_dwell_until
+                bridge._check_atomic_dwell()
+            else:
+                current = decoded_messages(bridge.executor_request_publisher)[-1]
+                clock[0] += 1.
+                bridge.executor_status_callback(executor_status(**current, status='SUCCEEDED'))
+        assert not bridge.motion_in_progress
+        ids = [r['motion_id'] for r in decoded_messages(bridge.executor_request_publisher)]
+        assert 'pickup_fine_forward_0' not in ids and 'ball_general_fine_forward_8' not in ids
+        assert ids.count('pickup_forward_to_backward_prepare') == 1
+>       assert 'pickup_400' in ids
+E       AssertionError: assert 'pickup_400' in ['pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down', 'pickup_500', 'pickup_grasp_check_pose', 'pickup_second_backward_turn_left']
+
+src/mission_control/test/test_pickup_forward90.py:108: AssertionError
+__ test_skip_preparation_half_second_then_retreat_and_grasp[2-line_forward_4] __
+
+clock = [19.983999999999998], previous = 'line_forward_4', index = 2
+
+    @pytest.mark.parametrize('previous', WALKS)
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_skip_preparation_half_second_then_retreat_and_grasp(clock, previous, index):
+        node, bridge, request = prepare_skip(clock, previous, index)
+        clock[0] += .754
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        deadline = clock[0] + .5
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] += .2
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] = deadline - .001
+        bridge._check_atomic_dwell()
+        assert len(bridge.executor_request_publisher.messages) == 1
+        clock[0] = deadline
+        bridge._check_atomic_dwell()
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == [
+            'pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down']
+        assert bridge.transition_dwell_until is None
+        # Complete the fixed tail, crossing the fresh post-retreat grasp checkpoint.
+        for _ in range(25):
+            if not bridge.motion_in_progress:
+                break
+            if bridge.pickup_post_backward_align_waiting:
+                continue_pickup_after_backward(bridge, bottom_distance_px=400)
+            elif bridge.transition_dwell_until is not None or bridge.active_dwell_until is not None:
+                clock[0] = bridge.transition_dwell_until or bridge.active_dwell_until
+                bridge._check_atomic_dwell()
+            else:
+                current = decoded_messages(bridge.executor_request_publisher)[-1]
+                clock[0] += 1.
+                bridge.executor_status_callback(executor_status(**current, status='SUCCEEDED'))
+        assert not bridge.motion_in_progress
+        ids = [r['motion_id'] for r in decoded_messages(bridge.executor_request_publisher)]
+        assert 'pickup_fine_forward_0' not in ids and 'ball_general_fine_forward_8' not in ids
+        assert ids.count('pickup_forward_to_backward_prepare') == 1
+>       assert 'pickup_400' in ids
+E       AssertionError: assert 'pickup_400' in ['pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down', 'pickup_500', 'pickup_grasp_check_pose', 'pickup_second_backward_turn_left']
+
+src/mission_control/test/test_pickup_forward90.py:108: AssertionError
+__ test_skip_preparation_half_second_then_retreat_and_grasp[2-line_forward_6] __
+
+clock = [19.983999999999998], previous = 'line_forward_6', index = 2
+
+    @pytest.mark.parametrize('previous', WALKS)
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_skip_preparation_half_second_then_retreat_and_grasp(clock, previous, index):
+        node, bridge, request = prepare_skip(clock, previous, index)
+        clock[0] += .754
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        deadline = clock[0] + .5
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] += .2
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] = deadline - .001
+        bridge._check_atomic_dwell()
+        assert len(bridge.executor_request_publisher.messages) == 1
+        clock[0] = deadline
+        bridge._check_atomic_dwell()
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == [
+            'pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down']
+        assert bridge.transition_dwell_until is None
+        # Complete the fixed tail, crossing the fresh post-retreat grasp checkpoint.
+        for _ in range(25):
+            if not bridge.motion_in_progress:
+                break
+            if bridge.pickup_post_backward_align_waiting:
+                continue_pickup_after_backward(bridge, bottom_distance_px=400)
+            elif bridge.transition_dwell_until is not None or bridge.active_dwell_until is not None:
+                clock[0] = bridge.transition_dwell_until or bridge.active_dwell_until
+                bridge._check_atomic_dwell()
+            else:
+                current = decoded_messages(bridge.executor_request_publisher)[-1]
+                clock[0] += 1.
+                bridge.executor_status_callback(executor_status(**current, status='SUCCEEDED'))
+        assert not bridge.motion_in_progress
+        ids = [r['motion_id'] for r in decoded_messages(bridge.executor_request_publisher)]
+        assert 'pickup_fine_forward_0' not in ids and 'ball_general_fine_forward_8' not in ids
+        assert ids.count('pickup_forward_to_backward_prepare') == 1
+>       assert 'pickup_400' in ids
+E       AssertionError: assert 'pickup_400' in ['pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down', 'pickup_500', 'pickup_grasp_check_pose', 'pickup_second_backward_turn_left']
+
+src/mission_control/test/test_pickup_forward90.py:108: AssertionError
+__ test_skip_preparation_half_second_then_retreat_and_grasp[2-line_forward_8] __
+
+clock = [19.983999999999998], previous = 'line_forward_8', index = 2
+
+    @pytest.mark.parametrize('previous', WALKS)
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_skip_preparation_half_second_then_retreat_and_grasp(clock, previous, index):
+        node, bridge, request = prepare_skip(clock, previous, index)
+        clock[0] += .754
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        deadline = clock[0] + .5
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] += .2
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] = deadline - .001
+        bridge._check_atomic_dwell()
+        assert len(bridge.executor_request_publisher.messages) == 1
+        clock[0] = deadline
+        bridge._check_atomic_dwell()
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == [
+            'pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down']
+        assert bridge.transition_dwell_until is None
+        # Complete the fixed tail, crossing the fresh post-retreat grasp checkpoint.
+        for _ in range(25):
+            if not bridge.motion_in_progress:
+                break
+            if bridge.pickup_post_backward_align_waiting:
+                continue_pickup_after_backward(bridge, bottom_distance_px=400)
+            elif bridge.transition_dwell_until is not None or bridge.active_dwell_until is not None:
+                clock[0] = bridge.transition_dwell_until or bridge.active_dwell_until
+                bridge._check_atomic_dwell()
+            else:
+                current = decoded_messages(bridge.executor_request_publisher)[-1]
+                clock[0] += 1.
+                bridge.executor_status_callback(executor_status(**current, status='SUCCEEDED'))
+        assert not bridge.motion_in_progress
+        ids = [r['motion_id'] for r in decoded_messages(bridge.executor_request_publisher)]
+        assert 'pickup_fine_forward_0' not in ids and 'ball_general_fine_forward_8' not in ids
+        assert ids.count('pickup_forward_to_backward_prepare') == 1
+>       assert 'pickup_400' in ids
+E       AssertionError: assert 'pickup_400' in ['pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down', 'pickup_500', 'pickup_grasp_check_pose', 'pickup_second_backward_turn_left']
+
+src/mission_control/test/test_pickup_forward90.py:108: AssertionError
+_ test_skip_preparation_half_second_then_retreat_and_grasp[2-ball_camera_down_forward_2] _
+
+clock = [19.983999999999998], previous = 'ball_camera_down_forward_2', index = 2
+
+    @pytest.mark.parametrize('previous', WALKS)
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_skip_preparation_half_second_then_retreat_and_grasp(clock, previous, index):
+        node, bridge, request = prepare_skip(clock, previous, index)
+        clock[0] += .754
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        deadline = clock[0] + .5
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] += .2
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] = deadline - .001
+        bridge._check_atomic_dwell()
+        assert len(bridge.executor_request_publisher.messages) == 1
+        clock[0] = deadline
+        bridge._check_atomic_dwell()
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == [
+            'pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down']
+        assert bridge.transition_dwell_until is None
+        # Complete the fixed tail, crossing the fresh post-retreat grasp checkpoint.
+        for _ in range(25):
+            if not bridge.motion_in_progress:
+                break
+            if bridge.pickup_post_backward_align_waiting:
+                continue_pickup_after_backward(bridge, bottom_distance_px=400)
+            elif bridge.transition_dwell_until is not None or bridge.active_dwell_until is not None:
+                clock[0] = bridge.transition_dwell_until or bridge.active_dwell_until
+                bridge._check_atomic_dwell()
+            else:
+                current = decoded_messages(bridge.executor_request_publisher)[-1]
+                clock[0] += 1.
+                bridge.executor_status_callback(executor_status(**current, status='SUCCEEDED'))
+        assert not bridge.motion_in_progress
+        ids = [r['motion_id'] for r in decoded_messages(bridge.executor_request_publisher)]
+        assert 'pickup_fine_forward_0' not in ids and 'ball_general_fine_forward_8' not in ids
+        assert ids.count('pickup_forward_to_backward_prepare') == 1
+>       assert 'pickup_400' in ids
+E       AssertionError: assert 'pickup_400' in ['pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down', 'pickup_500', 'pickup_grasp_check_pose', 'pickup_second_backward_turn_left']
+
+src/mission_control/test/test_pickup_forward90.py:108: AssertionError
+_ test_skip_preparation_half_second_then_retreat_and_grasp[2-ball_camera_down_forward_4] _
+
+clock = [19.983999999999998], previous = 'ball_camera_down_forward_4', index = 2
+
+    @pytest.mark.parametrize('previous', WALKS)
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_skip_preparation_half_second_then_retreat_and_grasp(clock, previous, index):
+        node, bridge, request = prepare_skip(clock, previous, index)
+        clock[0] += .754
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        deadline = clock[0] + .5
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] += .2
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] = deadline - .001
+        bridge._check_atomic_dwell()
+        assert len(bridge.executor_request_publisher.messages) == 1
+        clock[0] = deadline
+        bridge._check_atomic_dwell()
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == [
+            'pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down']
+        assert bridge.transition_dwell_until is None
+        # Complete the fixed tail, crossing the fresh post-retreat grasp checkpoint.
+        for _ in range(25):
+            if not bridge.motion_in_progress:
+                break
+            if bridge.pickup_post_backward_align_waiting:
+                continue_pickup_after_backward(bridge, bottom_distance_px=400)
+            elif bridge.transition_dwell_until is not None or bridge.active_dwell_until is not None:
+                clock[0] = bridge.transition_dwell_until or bridge.active_dwell_until
+                bridge._check_atomic_dwell()
+            else:
+                current = decoded_messages(bridge.executor_request_publisher)[-1]
+                clock[0] += 1.
+                bridge.executor_status_callback(executor_status(**current, status='SUCCEEDED'))
+        assert not bridge.motion_in_progress
+        ids = [r['motion_id'] for r in decoded_messages(bridge.executor_request_publisher)]
+        assert 'pickup_fine_forward_0' not in ids and 'ball_general_fine_forward_8' not in ids
+        assert ids.count('pickup_forward_to_backward_prepare') == 1
+>       assert 'pickup_400' in ids
+E       AssertionError: assert 'pickup_400' in ['pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down', 'pickup_500', 'pickup_grasp_check_pose', 'pickup_second_backward_turn_left']
+
+src/mission_control/test/test_pickup_forward90.py:108: AssertionError
+_ test_skip_preparation_half_second_then_retreat_and_grasp[2-line_recovery_left_4] _
+
+clock = [19.983999999999998], previous = 'line_recovery_left_4', index = 2
+
+    @pytest.mark.parametrize('previous', WALKS)
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_skip_preparation_half_second_then_retreat_and_grasp(clock, previous, index):
+        node, bridge, request = prepare_skip(clock, previous, index)
+        clock[0] += .754
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        deadline = clock[0] + .5
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] += .2
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] = deadline - .001
+        bridge._check_atomic_dwell()
+        assert len(bridge.executor_request_publisher.messages) == 1
+        clock[0] = deadline
+        bridge._check_atomic_dwell()
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == [
+            'pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down']
+        assert bridge.transition_dwell_until is None
+        # Complete the fixed tail, crossing the fresh post-retreat grasp checkpoint.
+        for _ in range(25):
+            if not bridge.motion_in_progress:
+                break
+            if bridge.pickup_post_backward_align_waiting:
+                continue_pickup_after_backward(bridge, bottom_distance_px=400)
+            elif bridge.transition_dwell_until is not None or bridge.active_dwell_until is not None:
+                clock[0] = bridge.transition_dwell_until or bridge.active_dwell_until
+                bridge._check_atomic_dwell()
+            else:
+                current = decoded_messages(bridge.executor_request_publisher)[-1]
+                clock[0] += 1.
+                bridge.executor_status_callback(executor_status(**current, status='SUCCEEDED'))
+        assert not bridge.motion_in_progress
+        ids = [r['motion_id'] for r in decoded_messages(bridge.executor_request_publisher)]
+        assert 'pickup_fine_forward_0' not in ids and 'ball_general_fine_forward_8' not in ids
+        assert ids.count('pickup_forward_to_backward_prepare') == 1
+>       assert 'pickup_400' in ids
+E       AssertionError: assert 'pickup_400' in ['pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down', 'pickup_500', 'pickup_grasp_check_pose', 'pickup_second_backward_turn_left']
+
+src/mission_control/test/test_pickup_forward90.py:108: AssertionError
+_ test_skip_preparation_half_second_then_retreat_and_grasp[2-line_recovery_right_4] _
+
+clock = [19.983999999999998], previous = 'line_recovery_right_4', index = 2
+
+    @pytest.mark.parametrize('previous', WALKS)
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_skip_preparation_half_second_then_retreat_and_grasp(clock, previous, index):
+        node, bridge, request = prepare_skip(clock, previous, index)
+        clock[0] += .754
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        deadline = clock[0] + .5
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] += .2
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] = deadline - .001
+        bridge._check_atomic_dwell()
+        assert len(bridge.executor_request_publisher.messages) == 1
+        clock[0] = deadline
+        bridge._check_atomic_dwell()
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == [
+            'pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down']
+        assert bridge.transition_dwell_until is None
+        # Complete the fixed tail, crossing the fresh post-retreat grasp checkpoint.
+        for _ in range(25):
+            if not bridge.motion_in_progress:
+                break
+            if bridge.pickup_post_backward_align_waiting:
+                continue_pickup_after_backward(bridge, bottom_distance_px=400)
+            elif bridge.transition_dwell_until is not None or bridge.active_dwell_until is not None:
+                clock[0] = bridge.transition_dwell_until or bridge.active_dwell_until
+                bridge._check_atomic_dwell()
+            else:
+                current = decoded_messages(bridge.executor_request_publisher)[-1]
+                clock[0] += 1.
+                bridge.executor_status_callback(executor_status(**current, status='SUCCEEDED'))
+        assert not bridge.motion_in_progress
+        ids = [r['motion_id'] for r in decoded_messages(bridge.executor_request_publisher)]
+        assert 'pickup_fine_forward_0' not in ids and 'ball_general_fine_forward_8' not in ids
+        assert ids.count('pickup_forward_to_backward_prepare') == 1
+>       assert 'pickup_400' in ids
+E       AssertionError: assert 'pickup_400' in ['pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down', 'pickup_500', 'pickup_grasp_check_pose', 'pickup_second_backward_turn_left']
+
+src/mission_control/test/test_pickup_forward90.py:108: AssertionError
+_ test_skip_preparation_half_second_then_retreat_and_grasp[2-line_recovery_ball_first_left_4] _
+
+clock = [19.983999999999998], previous = 'line_recovery_ball_first_left_4'
+index = 2
+
+    @pytest.mark.parametrize('previous', WALKS)
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_skip_preparation_half_second_then_retreat_and_grasp(clock, previous, index):
+        node, bridge, request = prepare_skip(clock, previous, index)
+        clock[0] += .754
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        deadline = clock[0] + .5
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] += .2
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] = deadline - .001
+        bridge._check_atomic_dwell()
+        assert len(bridge.executor_request_publisher.messages) == 1
+        clock[0] = deadline
+        bridge._check_atomic_dwell()
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == [
+            'pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down']
+        assert bridge.transition_dwell_until is None
+        # Complete the fixed tail, crossing the fresh post-retreat grasp checkpoint.
+        for _ in range(25):
+            if not bridge.motion_in_progress:
+                break
+            if bridge.pickup_post_backward_align_waiting:
+                continue_pickup_after_backward(bridge, bottom_distance_px=400)
+            elif bridge.transition_dwell_until is not None or bridge.active_dwell_until is not None:
+                clock[0] = bridge.transition_dwell_until or bridge.active_dwell_until
+                bridge._check_atomic_dwell()
+            else:
+                current = decoded_messages(bridge.executor_request_publisher)[-1]
+                clock[0] += 1.
+                bridge.executor_status_callback(executor_status(**current, status='SUCCEEDED'))
+        assert not bridge.motion_in_progress
+        ids = [r['motion_id'] for r in decoded_messages(bridge.executor_request_publisher)]
+        assert 'pickup_fine_forward_0' not in ids and 'ball_general_fine_forward_8' not in ids
+        assert ids.count('pickup_forward_to_backward_prepare') == 1
+>       assert 'pickup_400' in ids
+E       AssertionError: assert 'pickup_400' in ['pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down', 'pickup_500', 'pickup_grasp_check_pose', 'pickup_second_backward_turn_left']
+
+src/mission_control/test/test_pickup_forward90.py:108: AssertionError
+_ test_skip_preparation_half_second_then_retreat_and_grasp[2-line_recovery_ball_second_right_4] _
+
+clock = [19.983999999999998], previous = 'line_recovery_ball_second_right_4'
+index = 2
+
+    @pytest.mark.parametrize('previous', WALKS)
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_skip_preparation_half_second_then_retreat_and_grasp(clock, previous, index):
+        node, bridge, request = prepare_skip(clock, previous, index)
+        clock[0] += .754
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        deadline = clock[0] + .5
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] += .2
+        bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))
+        assert bridge.transition_dwell_until == pytest.approx(deadline)
+        clock[0] = deadline - .001
+        bridge._check_atomic_dwell()
+        assert len(bridge.executor_request_publisher.messages) == 1
+        clock[0] = deadline
+        bridge._check_atomic_dwell()
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == [
+            'pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down']
+        assert bridge.transition_dwell_until is None
+        # Complete the fixed tail, crossing the fresh post-retreat grasp checkpoint.
+        for _ in range(25):
+            if not bridge.motion_in_progress:
+                break
+            if bridge.pickup_post_backward_align_waiting:
+                continue_pickup_after_backward(bridge, bottom_distance_px=400)
+            elif bridge.transition_dwell_until is not None or bridge.active_dwell_until is not None:
+                clock[0] = bridge.transition_dwell_until or bridge.active_dwell_until
+                bridge._check_atomic_dwell()
+            else:
+                current = decoded_messages(bridge.executor_request_publisher)[-1]
+                clock[0] += 1.
+                bridge.executor_status_callback(executor_status(**current, status='SUCCEEDED'))
+        assert not bridge.motion_in_progress
+        ids = [r['motion_id'] for r in decoded_messages(bridge.executor_request_publisher)]
+        assert 'pickup_fine_forward_0' not in ids and 'ball_general_fine_forward_8' not in ids
+        assert ids.count('pickup_forward_to_backward_prepare') == 1
+>       assert 'pickup_400' in ids
+E       AssertionError: assert 'pickup_400' in ['pickup_forward_to_backward_prepare', 'pickup_pre_backward_camera_down', 'pickup_500', 'pickup_grasp_check_pose', 'pickup_second_backward_turn_left']
+
+src/mission_control/test/test_pickup_forward90.py:108: AssertionError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_pickup_forward90.py::test_skip_preparation_half_second_then_retreat_and_grasp[1-line_forward_2]
+FAILED src/mission_control/test/test_pickup_forward90.py::test_skip_preparation_half_second_then_retreat_and_grasp[1-line_forward_4]
+FAILED src/mission_control/test/test_pickup_forward90.py::test_skip_preparation_half_second_then_retreat_and_grasp[1-line_forward_6]
+FAILED src/mission_control/test/test_pickup_forward90.py::test_skip_preparation_half_second_then_retreat_and_grasp[1-line_forward_8]
+FAILED src/mission_control/test/test_pickup_forward90.py::test_skip_preparation_half_second_then_retreat_and_grasp[1-ball_camera_down_forward_2]
+FAILED src/mission_control/test/test_pickup_forward90.py::test_skip_preparation_half_second_then_retreat_and_grasp[1-ball_camera_down_forward_4]
+FAILED src/mission_control/test/test_pickup_forward90.py::test_skip_preparation_half_second_then_retreat_and_grasp[1-line_recovery_left_4]
+FAILED src/mission_control/test/test_pickup_forward90.py::test_skip_preparation_half_second_then_retreat_and_grasp[1-line_recovery_right_4]
+FAILED src/mission_control/test/test_pickup_forward90.py::test_skip_preparation_half_second_then_retreat_and_grasp[1-line_recovery_ball_first_left_4]
+FAILED src/mission_control/test/test_pickup_forward90.py::test_skip_preparation_half_second_then_retreat_and_grasp[1-line_recovery_ball_second_right_4]
+FAILED src/mission_control/test/test_pickup_forward90.py::test_skip_preparation_half_second_then_retreat_and_grasp[2-line_forward_2]
+FAILED src/mission_control/test/test_pickup_forward90.py::test_skip_preparation_half_second_then_retreat_and_grasp[2-line_forward_4]
+FAILED src/mission_control/test/test_pickup_forward90.py::test_skip_preparation_half_second_then_retreat_and_grasp[2-line_forward_6]
+FAILED src/mission_control/test/test_pickup_forward90.py::test_skip_preparation_half_second_then_retreat_and_grasp[2-line_forward_8]
+FAILED src/mission_control/test/test_pickup_forward90.py::test_skip_preparation_half_second_then_retreat_and_grasp[2-ball_camera_down_forward_2]
+FAILED src/mission_control/test/test_pickup_forward90.py::test_skip_preparation_half_second_then_retreat_and_grasp[2-ball_camera_down_forward_4]
+FAILED src/mission_control/test/test_pickup_forward90.py::test_skip_preparation_half_second_then_retreat_and_grasp[2-line_recovery_left_4]
+FAILED src/mission_control/test/test_pickup_forward90.py::test_skip_preparation_half_second_then_retreat_and_grasp[2-line_recovery_right_4]
+FAILED src/mission_control/test/test_pickup_forward90.py::test_skip_preparation_half_second_then_retreat_and_grasp[2-line_recovery_ball_first_left_4]
+FAILED src/mission_control/test/test_pickup_forward90.py::test_skip_preparation_half_second_then_retreat_and_grasp[2-line_recovery_ball_second_right_4]
+20 failed, 53 passed in 1.29s

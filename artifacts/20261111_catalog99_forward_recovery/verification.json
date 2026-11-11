@@ -1,0 +1,121 @@
+{
+  "source_sha256": "798e3aa077e5837fab039ca05939141a71fe78efb64b0548a06fbfc448cfd23c",
+  "focused": {
+    "passed": 167,
+    "failed": 0
+  },
+  "related": {
+    "before_passed": 530,
+    "after_passed": 539,
+    "unchanged_failures": [
+      "src/mission_control/test/test_hurdle_positioning.py::test_recognition_approach_blocks_new_line_prequeue[1.001-True]",
+      "src/mission_control/test/test_hurdle_lost_recovery.py::test_bottom_retreat_waits_for_completion_pause_and_fresh_reacquisition",
+      "src/mission_control/test/test_object_walk_prequeue.py::test_object_walk_queues_once_and_bridge_promotes_without_dwell[hurdle-HURDLE_APPROACH-angles2]",
+      "src/mission_control/test/test_object_walk_prequeue.py::test_object_walk_queues_once_and_bridge_promotes_without_dwell[hurdle-HURDLE_APPROACH-angles4]",
+      "src/mission_control/test/test_object_walk_prequeue.py::test_recovery_to_recovery_waits_until_last_point_three_seconds[hurdle-HURDLE_APPROACH]",
+      "src/mission_control/test/test_wait_refresh_and_fine_settle.py::test_goal_fine_forward_starts_without_fixed_pause",
+      "src/mission_control/test/test_wait_refresh_and_fine_settle.py::test_pickup_preparation_is_followed_by_full_second_before_fine",
+      "src/mission_control/test/test_wait_refresh_and_fine_settle.py::test_pickup_loss_pending_during_preparation_skips_fine_after_pause"
+    ]
+  },
+  "additional_regression": {
+    "passed": 328,
+    "failures_also_reproduced_with_before_code": [
+      "src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[1.5-0]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[1.5--30]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[1.5-30]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[1.0-0]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[1.0--30]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[1.0-30]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.7-0]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.7--10]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.7-10]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.57-0]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.57--10]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.57-10]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes0]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes1]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes2]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes3]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes4]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes5]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes6]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_queue_rejects_frames_captured_before_late_window",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_failure_clears_reserved_motion_and_requires_new_vision",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_forward_without_reservation_uses_recent_frame_immediately",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_forward_does_not_reuse_expired_vision",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_forward_and_recovery_queue_each_other[0-30-GOAL_CAMERA90_RECOVER_RIGHT_4]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_forward_and_recovery_queue_each_other[0--30-GOAL_CAMERA90_RECOVER_LEFT_4]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_forward_and_recovery_queue_each_other[30-0-GOAL_CAMERA_90_FORWARD_2]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_forward_and_recovery_queue_each_other[-30-30-GOAL_CAMERA90_RECOVER_RIGHT_4]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_prequeue_requires_three_consecutive_matching_actions",
+      "src/mission_control/test/test_continuous_approach.py::test_bridge_reserves_different_goal_lengths_without_post_motion_dwell[GOAL_CAMERA90_FINE_FORWARD_3-GOAL_CAMERA90_FINE_FORWARD_1-False]",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_preparation_status_does_not_start_forward_capture",
+      "src/mission_control/test/test_continuous_approach.py::test_short_goal_fine_reserves_with_ten_hz_images_and_150ms_latency",
+      "src/mission_control/test/test_continuous_approach.py::test_goal_reservation_cannot_count_one_image_multiple_times",
+      "src/mission_control/test/test_boundary_decision_reservation.py::test_goal_turn_rechecks_direction_after_pause_without_polling",
+      "src/mission_control/test/test_boundary_decision_reservation.py::test_second_pickup_fine_continues_on_first_fresh_frame_without_observation_pause[230-BALL_PICKUP_FINE_ALIGN_CONTINUE]"
+    ],
+    "note": "Before-code replay uses updated catalog. Its one additional failure is the expected old duration estimate mismatch in test_reservation_durations_match_current_runtime."
+  },
+  "idempotent_reimport": true,
+  "catalogs": {
+    "pc": "568637bfe590f056a434f510fc5c8cab892cf319a5148d64ceaddd6d5180ae42",
+    "runtime": "f3d9f679edc32afeae406a1f42a6d3c75edd13e1ede0d775c81d03a30d367012"
+  },
+  "hardware_operated": false,
+  "sdk_timing": {
+    "exit_code": 0,
+    "updated_motion_pair_and_head_cases": 648,
+    "other_fine_motion_cases": 64,
+    "policy": "Compatible queues complete with two completion events and one hardware preparation. Cross-camera without ownership and zero-camera cross-family requests remain rejected."
+  },
+  "sdk_forward_queue": [
+    {
+      "continuous": false,
+      "completion_times_ms": [
+        2010.0,
+        3020.0
+      ],
+      "nominal_gait_ms": 1008
+    },
+    {
+      "continuous": true,
+      "completion_times_ms": [
+        2010.0,
+        3020.0
+      ],
+      "nominal_gait_ms": 1008
+    }
+  ],
+  "sdk_goal_exits": [
+    {
+      "motion": "t골대후제자리우회전(5회)+라인복귀좌회전45도(4회)",
+      "interpolation": "cosine",
+      "hold_samples": 101,
+      "observed_hold_ms": 505.0,
+      "completion_events": 1
+    },
+    {
+      "motion": "t골대후제자리우회전(5회)+라인복귀좌회전45도(4회)",
+      "interpolation": "continuous",
+      "hold_samples": 101,
+      "observed_hold_ms": 505.0,
+      "completion_events": 1
+    },
+    {
+      "motion": "p골대후제자리좌회전(3회)+라인복귀우회전45도(4회)",
+      "interpolation": "cosine",
+      "hold_samples": 100,
+      "observed_hold_ms": 500.0,
+      "completion_events": 1
+    },
+    {
+      "motion": "p골대후제자리좌회전(3회)+라인복귀우회전45도(4회)",
+      "interpolation": "continuous",
+      "hold_samples": 100,
+      "observed_hold_ms": 500.0,
+      "completion_events": 1
+    }
+  ]
+}

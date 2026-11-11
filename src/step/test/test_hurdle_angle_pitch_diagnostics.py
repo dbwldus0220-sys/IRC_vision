@@ -42,7 +42,7 @@ def projected_bar_samples(yaw_deg: float, pitch_down_deg: float) -> list[dict]:
     return samples
 
 
-@pytest.mark.parametrize("pitch", [0.0, 45.0])
+@pytest.mark.parametrize("pitch", [0.0, 38.4, 45.0, 68.3])
 @pytest.mark.parametrize("yaw", [-30.0, 0.0, 30.0])
 def test_matching_pitch_recovers_robot_frame_hurdle_yaw(pitch, yaw):
     """A matching optical pitch recovers the known robot-frame yaw."""
@@ -82,8 +82,8 @@ def test_camera_yaw_mount_correction_is_visible_in_diagnostic_angle():
     assert corrected["angle_deg"] == pytest.approx(25.0, abs=1e-3)
 
 
-def test_new_centerline_angle_does_not_replace_legacy_control_angle():
-    """New pose estimates stay diagnostic while Parallel err remains legacy."""
+def test_analyzer_keeps_both_pose_estimates_separate_from_legacy_bbox_angle():
+    """Navigation selects a pose estimate; the legacy field stays reproducible."""
     analyzer = object.__new__(HurdleAnalyzer)
     analyzer.min_confidence = 0.60
     analyzer.direction_deadband_norm = 0.04

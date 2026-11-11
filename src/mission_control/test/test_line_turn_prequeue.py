@@ -1,4 +1,4 @@
-"""Queue offset/search turns using fresh late images and defer physical dispatch."""
+"""Keep ordinary turns behind a stop/reobserve boundary; walking can still queue."""
 
 import json
 from pathlib import Path
@@ -75,37 +75,41 @@ def late(node, clock, info, count=3):
      'LINE_OFFSET_TURN_RIGHT_1'),
     ('LINE_OFFSET_TURN_RIGHT_1', line_info(), 'STRAIGHT'),
     ('LINE_OFFSET_TURN_RIGHT_1', sample(offset=149.6, ground_heading_error_deg=-6.63,
-                                      ground_lateral_offset_m=.1472), 'STRAIGHT_1'),
+                                      ground_lateral_offset_m=.1572), 'STRAIGHT_1'),
     ('STRAIGHT_1', sample(offset=200, target_angle=25, ground_heading_error_deg=0),
      'LINE_OFFSET_TURN_RIGHT_1'),
 ])
-def test_turn_reserves_once_and_starts_only_after_success(clock, phase, action, info, expected):
+def test_turn_waits_for_completion_and_reobserves(clock, phase, action, info, expected):
     node, bridge, request = start(clock, action, phase)
+    node.LINE_TURN_PRE_MOTION_SETTLE_SEC = Node.LINE_TURN_PRE_MOTION_SETTLE_SEC
     before = len(node.publisher.messages)
-    late(node, clock, info, 2)
+    late(node, clock, info, 12)
     assert len(node.publisher.messages) == before
-    late(node, clock, info, 1)
-    command = node.publisher.messages[-1]
-    assert command['action'] == expected
-    assert command['source_command']['line_turn_prequeue']
-    assert node.queued_general_command_id == command['command_id']
-    bridge.navigation_command_callback(String(data=json.dumps(command)))
-    assert bridge.queued_request_deferred
-    assert len(bridge.executor_request_publisher.messages) == 1
-    late(node, clock, info, 3)
-    assert node.publisher.messages[-1]['command_id'] == command['command_id']
+    assert node.queued_general_command_id is None
+    clock[0] = max(clock[0], node.active_line_motion_started_at + node.active_line_motion_duration_sec)
     forward_status(node, bridge, request, 'SUCCEEDED')
-    assert node.correction_post_motion_dwell_until is None
-    assert bridge.transition_dwell_until == pytest.approx(clock[0] + .5)
-    clock[0] += .499
-    bridge._check_atomic_dwell()
-    assert len(bridge.executor_request_publisher.messages) == 1
-    clock[0] += .001
-    bridge._check_atomic_dwell()
+    assert not node.general_motion_gate.locked
+    assert bridge.queued_request_id is None
+    completed = clock[0]
+    for _ in range(20):
+        clock[0] += .04
+        fresh(node, clock, 'line', info)
+        commands = [m for m in node.publisher.messages if m['valid'] and m['command_id'] != request['command_id']]
+        if commands:
+            break
+    assert commands, 'The completion/settle boundary must release on fresh input.'
+    command = commands[-1]
+    assert command['action'] == expected
+    assert not command['source_command'].get('line_turn_prequeue')
+    if Node._needs_correction_dwell(action) or Node._needs_correction_dwell(expected):
+        assert clock[0] - completed >= .5
+    bridge.navigation_command_callback(String(data=json.dumps(command)))
+    if bridge.transition_dwell_until is not None:
+        clock[0] = bridge.transition_dwell_until
+        bridge._check_atomic_dwell()
     next_request = decoded_messages(bridge.executor_request_publisher)[-1]
     assert next_request['command_id'] == command['command_id']
     assert next_request['motion_id'] == bridge.motion_id_for_action(expected)
-    assert bridge.transition_dwell_until is None
     forward_status(node, bridge, next_request, 'RUNNING')
     assert node.general_motion_gate.active_command_id == command['command_id']
     assert node.queued_general_command_id is None
@@ -136,7 +140,7 @@ def test_invalid_frames_cannot_authorize_turn(clock, bad, action):
 
 @pytest.mark.parametrize('status', ['FAILED', 'CANCELLED', 'TIMEOUT'])
 @pytest.mark.parametrize('action', ['STRAIGHT', 'STRAIGHT_1', 'LINE_OFFSET_TURN_LEFT_6'])
-def test_failure_discards_deferred_turn(clock, status, action):
+def test_failure_leaves_no_in_motion_turn_reservation(clock, status, action):
     node, bridge, request = start(clock, action)
     late(node, clock, offset())
     bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
@@ -185,15 +189,15 @@ def test_source83_six_cycle_turn_uses_updated_capture_window(clock):
         fresh(node, clock, 'line', line_info(), plan=False)
     assert node.queued_general_command_id is None
     late(node, clock, line_info(), 3)
-    assert node.queued_general_action == 'STRAIGHT'
-    # The three fresh samples authorize a reservation before this gait completes.
+    assert node.queued_general_command_id is None
+    # A fresh in-motion sample cannot bypass post-turn reobservation.
     assert started + .355 * 6 / 1.05 * .70 <= clock[0] < started + .355 * 6 / 1.05
 
 
 @pytest.mark.parametrize('action', [
     'LINE_OFFSET_TURN_LEFT_1', 'LINE_LOST_TURN_LEFT_1', 'LINE_OFFSET_TURN_RIGHT_1',
 ])
-def test_short_turn_can_use_recent_images_before_the_late_window(clock, action):
+def test_short_turn_still_requires_completion_with_recent_images(clock, action):
     node, _, _ = start(clock, action)
     started, duration = node.active_line_motion_started_at, node.active_line_motion_duration_sec
     for fraction in (.35, .55, .85):
@@ -201,11 +205,11 @@ def test_short_turn_can_use_recent_images_before_the_late_window(clock, action):
         fresh(node, clock, 'line', line_info(), plan=False)
         if fraction < .7:
             assert node.queued_general_command_id is None
-    assert node.queued_general_action == 'STRAIGHT'
+    assert node.queued_general_command_id is None
 
 
 @pytest.mark.parametrize('blocked', ['safety', 'executor', 'ball', 'special', 'search_limit'])
-def test_turn_queue_keeps_execution_and_mission_guards(clock, blocked):
+def test_turn_is_not_prequeued_when_mission_or_execution_is_blocked(clock, blocked):
     node, _, _ = start(clock)
     info = offset()
     if blocked == 'safety':
@@ -224,7 +228,7 @@ def test_turn_queue_keeps_execution_and_mission_guards(clock, blocked):
     assert node.queued_general_command_id is None
 
 
-def test_changing_turn_candidate_requires_new_matching_frames(clock):
+def test_changing_in_motion_turn_candidate_never_commits_a_reservation(clock):
     node, _, _ = start(clock)
     late(node, clock, offset(), 2)
     late(node, clock, {'detected': False}, 2)
@@ -232,4 +236,29 @@ def test_changing_turn_candidate_requires_new_matching_frames(clock):
     late(node, clock, offset(), 2)
     assert node.queued_general_command_id is None
     late(node, clock, offset(), 1)
-    assert node.queued_general_action == 'LINE_OFFSET_TURN_LEFT_2'
+    assert node.queued_general_command_id is None
+
+
+@pytest.mark.parametrize('phase', ['AUTO', 'LINE_TRACK'])
+def test_fresh_recovery_replaces_in_motion_turn_without_stale_reservation(clock, phase):
+    node, bridge, request = start(clock, phase=phase)
+    node.LINE_TURN_PRE_MOTION_SETTLE_SEC = Node.LINE_TURN_PRE_MOTION_SETTLE_SEC
+    # Reproduce the recording's threshold so its sample authorizes a turn.
+    node.planner.LINE_OFFSET_EXIT_DISTANCE_M = .10
+    late(node, clock, sample(offset=270.65, target_angle=20.16,
+                            ground_heading_error_deg=5.86,
+                            ground_lateral_offset_m=.1316), 12)
+    assert node.queued_general_command_id is None
+    clock[0] = max(clock[0], node.active_line_motion_started_at + node.active_line_motion_duration_sec)
+    forward_status(node, bridge, request, 'SUCCEEDED')
+    fresh(node, clock, 'line', sample(offset=270.65, target_angle=20.16,
+                                      ground_heading_error_deg=5.86,
+                                      ground_lateral_offset_m=.1316))
+    assert node.pre_motion_settle_started_at is not None
+    fresh(node, clock, 'line', line_info(heading=20, offset=.3))
+    command = node.publisher.messages[-1]
+    assert command['valid'] and command['action'] == 'RECOVER_RIGHT_TURN_RIGHT_4'
+    bridge.navigation_command_callback(String(data=json.dumps(command)))
+    assert bridge.transition_dwell_until is None
+    assert decoded_messages(bridge.executor_request_publisher)[-1]['action'] == command['action']
+    assert not any(m['valid'] and m['action'].startswith('LINE_OFFSET_TURN_') for m in node.publisher.messages)

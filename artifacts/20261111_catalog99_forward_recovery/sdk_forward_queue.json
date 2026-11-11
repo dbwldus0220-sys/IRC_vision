@@ -1,0 +1,18 @@
+[
+  {
+    "continuous": false,
+    "completion_times_ms": [
+      2010.0,
+      3020.0
+    ],
+    "nominal_gait_ms": 1008
+  },
+  {
+    "continuous": true,
+    "completion_times_ms": [
+      2010.0,
+      3020.0
+    ],
+    "nominal_gait_ms": 1008
+  }
+]

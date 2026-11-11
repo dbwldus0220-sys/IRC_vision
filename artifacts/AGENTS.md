@@ -1,5 +1,15 @@
 # Runtime Motion Policy
 
+- The 2026-11-11 source100 update supplies `p전진*`, `p라인복귀좌회전*`,
+  and `t라인복귀우*` data under the existing `n전진*`/`n라인복귀*` catalog
+  names so command aliases stay stable. Keep source speed 1.0. Derive eight
+  forward cycles from the six-cycle source; the source's `p전진0도(2회)`
+  has repeat_count=3, so preserve the deployed two-cycle command as 2.
+  `n공에서 전진하고 후진준비자세` keeps all six supplied frames, once.
+- The 2026-11-11 source99 update uses `n전진*` and `n라인복귀좌/우회전*`
+  at their supplied speed 1.0. Keep command repeat counts: the source's
+  `n전진45도(6회)` is mislabeled with repeat_count=4; deployed 6/8 variants
+  derive from the identical four-cycle source with explicit repeat counts.
 - The user's latest 2026-11-10 source89 instruction uses the **original source
   playback speed** for forward/recovery motions (1.0 in source89), superseding
   source88's 1.05. Preserve the supplied speed on reimport; do not force a constant.

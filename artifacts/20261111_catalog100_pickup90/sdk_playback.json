@@ -1,0 +1,50 @@
+[
+  {
+    "motion": "n공에서 전진하고 후진준비자세",
+    "mode": "cosine",
+    "completion": [
+      "C\t1755\t1"
+    ],
+    "exit_code": 0
+  },
+  {
+    "motion": "n공에서 전진하고 후진준비자세",
+    "mode": "continuous",
+    "completion": [
+      "C\t1755\t1"
+    ],
+    "exit_code": 0
+  },
+  {
+    "motion": "t골대후제자리우회전(5회)+라인복귀좌회전45도(4회)",
+    "mode": "cosine",
+    "completion": [
+      "C\t5775\t1"
+    ],
+    "exit_code": 0
+  },
+  {
+    "motion": "t골대후제자리우회전(5회)+라인복귀좌회전45도(4회)",
+    "mode": "continuous",
+    "completion": [
+      "C\t5775\t1"
+    ],
+    "exit_code": 0
+  },
+  {
+    "motion": "p골대후제자리좌회전(3회)+라인복귀우회전45도(4회)",
+    "mode": "cosine",
+    "completion": [
+      "C\t4955\t1"
+    ],
+    "exit_code": 0
+  },
+  {
+    "motion": "p골대후제자리좌회전(3회)+라인복귀우회전45도(4회)",
+    "mode": "continuous",
+    "completion": [
+      "C\t4955\t1"
+    ],
+    "exit_code": 0
+  }
+]

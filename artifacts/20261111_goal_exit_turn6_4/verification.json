@@ -1,0 +1,39 @@
+{
+  "scope": "Goal regions 5-8 composite exits: first right6, second left4",
+  "durations_sec": {
+    "first": 7.168,
+    "second": 6.333333333333333
+  },
+  "unchanged": [
+    "0.5 second turn/recovery dwell",
+    "two four-cycle same-direction line recoveries",
+    "original joint targets, torques, source speed",
+    "other regions and standalone turn aliases",
+    "pickup skip210px and hurdle450mm"
+  ],
+  "tests": {
+    "python_focused": "74 failed, 376 passed in 14.23s",
+    "python_baseline": "162 failed, 396 passed in 52.10s",
+    "new_failures": [],
+    "overlay": "17 passed, 122 deselected in 1.55s",
+    "cpp_alias": "[  PASSED  ] 12 tests."
+  },
+  "catalog_validator": "168 motions; aliases resolve; motor IDs 0..22",
+  "byte_identical_regeneration": true,
+  "installed_alias_and_python_values_verified": true,
+  "hardware_commands_sent": false,
+  "changed_files": [
+    "src/mission_control/test/test_goal_exit_recovery_catalog.py",
+    "artifacts/robot_motions_pc.json",
+    "artifacts/robot_motions_runtime.json",
+    "src/irc_step_motion_executor/config/motion_aliases.yaml",
+    "src/irc_step_motion_executor/test/test_catalog_only_core.cpp",
+    "src/mission_control/README.md",
+    "src/mission_control/mission_control/motion_decision_node.py",
+    "src/mission_control/test/test_goal_region_exit_turns.py",
+    "src/mission_control/test/test_post_shot_continuous_exit.py",
+    "src/step/step/yolo26_detector.py",
+    "src/step/test/test_yolo26_detector.py",
+    "tools/build_post_shot_forward_exits.py"
+  ]
+}

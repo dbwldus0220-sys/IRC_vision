@@ -1,0 +1,52 @@
+{
+  "source_file": "/home/jet/Downloads/robot_motions(98).json",
+  "source_sha256": "8168032b98718ecd7a98e016053b58f48d2b48d2183b1701269e249f34d39215",
+  "source_unchanged": true,
+  "motions": 163,
+  "imported_walking_motions": 18,
+  "rebuilt_composites": 2,
+  "changed_aliases": 22,
+  "source_45_six_repeat_mismatch": "Source says 6 in name but contains repeat_count=4. Deployed 6/8 variants derive from identical four-repeat frames, preserving command counts.",
+  "python_baseline": {
+    "passed": 1026,
+    "failed": 129
+  },
+  "python_regression": {
+    "passed": 1074,
+    "failed": 129
+  },
+  "focused_import_timing_policy": {
+    "passed": 89,
+    "failed": 0
+  },
+  "regression_comparison": {
+    "baseline_failures": 129,
+    "after_failures": 129,
+    "new_failures": {},
+    "resolved": [],
+    "note": "Normalize module root and intended renamed motion parameters."
+  },
+  "sdk_test_groups": {
+    "passed": 8,
+    "failed": 0
+  },
+  "executor_test_groups": {
+    "passed": 10,
+    "failed": 0
+  },
+  "sdk_production_queue_replay_exit_code": 0,
+  "changed_motion_playbacks": {
+    "passed": 20,
+    "failed": 0
+  },
+  "cadence": {
+    "cases": 72,
+    "prequeued": 72,
+    "resumed": 72,
+    "minimum_queue_lead_sec": 0.226
+  },
+  "rejected_queue_recovery": "Forward and both recovery directions released reservation and resumed.",
+  "installed_runtime": "Executor rebuilt; installed binary, aliases and catalog link to workspace. Installed Python reports updated 0.988 second forward-two duration.",
+  "hardware_executed": false,
+  "limits": "Mock motor hardware and synthetic vision/status callbacks only; existing 129 Python test failures remain. Physical balance, actual travel and real hardware timing are not verified."
+}

@@ -2877,14 +2877,14 @@ def test_pickup_crab_uses_latest_motion_for_preparation(intervening, direction):
 @pytest.mark.parametrize("source,distance,action,motion_name", [
     ("ball", 0.499, "STRAIGHT_0", "p미세0도(5회)"),
     ("ball", 0.500, "STRAIGHT_0", "p미세0도(5회)"),
-    *[("ball", distance, "BALL_APPROACH_FORWARD_2", "p전진45(2회)")
+    *[("ball", distance, "BALL_APPROACH_FORWARD_2", "n전진45도(2회)")
       for distance in (0.500001, 0.550, 0.570, 0.600)],
-    *[("ball", distance, "STRAIGHT", "p전진45(4회)")
+    *[("ball", distance, "STRAIGHT", "n전진45도(4회)")
       for distance in (0.600001, 0.700, 0.700001)],
     # Hurdle keeps its existing range policy, independently of Ball's new boundary.
     *[("hurdle", distance, "STRAIGHT_0", "p미세0도(5회)")
       for distance in (0.549, 0.550, 0.550001, 0.570, 0.700)],
-    ("hurdle", 0.700001, "STRAIGHT", "p전진45(4회)"),
+    ("hurdle", 0.700001, "STRAIGHT", "n전진45도(4회)"),
 ])
 def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
     source, distance, action, motion_name,
@@ -2905,6 +2905,10 @@ def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
         "go_now": False, "pickup_ready": False, "pickup_now": False,
     }
     sample.update(bbox=[400, 300, 1000, 500], image_width=1280, image_height=720)
+    if source == "hurdle":
+        sample.update(hurdle_camera_pose="45", hurdle_camera_ready=True,
+                      hurdle_angle_45_deg=0.0, hurdle_angle_fit_point_count=5,
+                      hurdle_angle_sample_source="yellow_bar_centerline")
     route = {**line_info(), "robot_center_x_px": 710,
              "center_points_px": [[710, 650], [710, 580], [710, 250]]}
     decision = planner.plan("AUTO", {source: sample, "line": route}, 0.1)

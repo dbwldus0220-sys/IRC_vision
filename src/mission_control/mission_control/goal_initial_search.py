@@ -1,4 +1,4 @@
-"""Two completion-driven scans after raising the camera without seeing a goal."""
+"""Search an untracked goal one completed turn at a time, within +/-90 degrees."""
 
 from dataclasses import replace
 
@@ -38,9 +38,13 @@ class GoalInitialSearch:
         if offset is not None and offset != 0:
             self.last_line_side = "RIGHT" if offset > 0 else "LEFT"
 
-    def arm(self):
-        self.sequence = (("LEFT", 6), ("RIGHT", 9)) if self.last_line_side == "LEFT" else (
-            ("RIGHT", 5), ("LEFT", 6))
+    def arm(self, goal_index=1):
+        first = "LEFT" if goal_index <= 1 else "RIGHT"
+        opposite = "RIGHT" if first == "LEFT" else "LEFT"
+        # Use the one-repeat calibration, not the multi-repeat motion bins.
+        first_steps = round(90.0 / MotionDecisionPlanner._turn_angle_deg(1, first))
+        reverse_steps = round(180.0 / MotionDecisionPlanner._turn_angle_deg(1, opposite))
+        self.sequence = ((first, 1),) * first_steps + ((opposite, 1),) * reverse_steps
         self.active = True
         self.step = 0
         self.command_id = None

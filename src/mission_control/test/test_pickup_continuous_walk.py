@@ -22,7 +22,9 @@ from test_motion_decision_planner import ball_info
 def ball(**changes):
     return ball_info(**{
         'depth_m': .49, 'distance_m': .49, 'depth_age_sec': .05,
-        'confirmation_confirmed': True, 'bottom_distance_px': 340,
+        'confirmation_confirmed': True,
+        # Nonzero lateral samples exercise the near-ball crab range.
+        'bottom_distance_px': 180 if changes.get('offset_x_px', 0) else 340,
         'offset_x_px': 0, 'steering_angle_deg': 0., 'head_down_requested': True,
         **changes,
     })
@@ -242,7 +244,7 @@ def test_only_one_queue_and_three_successive_chunks_keep_one_pickup(clock, index
         assert node.active_special_command_id == parent['command_id']
         assert node.pickups_completed == 0
         current = following
-    late_frames(node, clock, ball(bottom_distance_px=230))
+    late_frames(node, clock, ball(bottom_distance_px=200))
     assert not node.pickup_walk_reservation.pending
     forward_status(node, bridge, current, 'SUCCEEDED')
     command = node.publisher.messages[-1]
@@ -274,8 +276,8 @@ def test_all_existing_support_transition_ids_keep_their_pause(clock):
                                         request_id=1, motion_id=motion, timeout_ms=20000,
                                         prepare_pickup_fine=False)
         assert not bridge.executor_request_publisher.messages, motion
-        assert bridge.transition_dwell_until == clock[0] + Bridge.TRANSITION_DWELL_SEC
-        clock[0] += Bridge.TRANSITION_DWELL_SEC
+        assert bridge.transition_dwell_until == clock[0] + Bridge.TRANSITION_PRE_DWELL_SEC
+        clock[0] += Bridge.TRANSITION_PRE_DWELL_SEC
         bridge._check_transition_dwell()
         request = decoded_messages(bridge.executor_request_publisher)[-1]
         bridge.executor_status_callback(executor_status(**request, status='SUCCEEDED'))

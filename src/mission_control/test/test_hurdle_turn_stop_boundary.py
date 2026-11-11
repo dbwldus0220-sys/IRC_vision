@@ -17,14 +17,14 @@ from test_motion_command_bridge import FakeBridge, decoded_messages, executor_st
 @pytest.mark.parametrize('x', [500, 710, 900])
 def test_separate_fine_entry_and_normal_turn_stop(depth, x):
     planner = MotionDecisionPlanner()
-    decision = planner.plan('AUTO', {'hurdle': hurdle(depth), 'line': line_info(x=x, heading=-40 if x < 710 else 40 if x > 710 else 0)}, .1)
+    decision = planner.plan('AUTO', {'hurdle': hurdle(depth, hurdle_angle_45_deg=40 if x < 710 else -40 if x > 710 else 0), 'line': line_info(x=x, heading=-40 if x < 710 else 40 if x > 710 else 0)}, .1)
     assert decision.valid
     assert planner.hurdle_planner.fine_approach_active == (depth <= .7)
     assert decision.source_command['close_rotation_blocked'] == (depth <= .45)
     expected = ('GO' if depth <= .45 else
                 'ALIGN_LEFT' if x < 710 else
                 'ALIGN_RIGHT' if x > 710 else
-                'STRAIGHT_1' if depth <= .7 else 'STRAIGHT')
+                'STRAIGHT_1')
     assert decision.action == expected
 
 
@@ -107,7 +107,12 @@ def test_forward2_turn_final_checkpoint_and_hurdle_release_at_actual_speeds(
         (.6, x, f'ALIGN_{direction}'),
     ]:
         node.receive_line(x=target_x, heading=-40 if target_x < 710 else 40 if target_x > 710 else 0)
-        node.receive(hurdle(depth))
+        node.receive(hurdle(depth, hurdle_angle_45_deg=40 if target_x < 710 else -40 if target_x > 710 else 0))
+        if expected.startswith('ALIGN_'):
+            # Forward no longer supplies a blanket rest; the turn still requires it.
+            assert node.publish() == []
+            clock[0] += .5
+            node.receive(hurdle(depth, hurdle_angle_45_deg=40 if direction == 'LEFT' else -40))
         command = node.publish()[-1]
         assert command['action'] == expected and command['phase'] == 'HURDLE_POSITIONING'
         dispatch(command)
@@ -122,7 +127,7 @@ def test_forward2_turn_final_checkpoint_and_hurdle_release_at_actual_speeds(
 
     node.receive_line(x=x if checkpoint_during_turn else 710,
                       heading=(-40 if x < 710 else 40) if checkpoint_during_turn else 0)
-    node.receive(hurdle(.58))
+    node.receive(hurdle(.58, hurdle_angle_45_deg=(40 if x < 710 else -40) if checkpoint_during_turn else 0))
     fine = node.publish()[-1]
     assert fine['action'] == (f'ALIGN_{direction}' if checkpoint_during_turn else 'STRAIGHT_1')
     dispatch(fine)

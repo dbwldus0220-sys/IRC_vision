@@ -1,0 +1,613 @@
+--- before/src/mission_control/README.md
++++ after/src/mission_control/README.md
+@@ -1646,20 +1646,30 @@
+ 기존 좌/우 회전표로 횟수를 고르고, 허용 오차 안이면 전진한다.
+ 일반 접근의 회전은 신선한 유효 깊이와 하단 여유 120px 초과를 요구한다.
+ 현재 픽업 진입 거리인 500mm 이내로 픽업 시퀀스에 진입하면 초기/미세 정렬 모두 최신
+-`bottom_distance_px`가 **200px 초과일 때 제자리 회전만**, **200px 이하일 때 꽃게만**
+-사용한다(2026-11-11: 기존 360px에서 변경). 200px 이하에서는 각도 오차가 커도 회전하지 않는다.
++`bottom_distance_px > 180px`와 `abs(offset_x_px) > 100px`를 **모두 만족할 때만**
++제자리 회전을 허용한다(2026-11-11: 200px 단독 경계에서 변경).
++`offset_x_px`는 화면의 Robot dx다. 180px 이하에서는 각도 오차가 커도 회전하지 않고,
++180px 초과에서 Robot dx가 -100~+100px 안이면 회전을 생략하고 전진 조건을 확인한다.
++회전 방향과 횟수는 기존 조향각 및 좌/우 회전표를 유지하므로,
++픽셀 조건을 만족해도 조향각이 최소 회전 기준보다 작으면 회전하지 않는다.
+ 초기 꽃게 좌우 허용 범위는 -70~+70px, 미세 정렬은 -30~+55px를 유지한다.
+-200px 초과에서 각도가 허용 범위 안이면 꽃게 없이 기존 거리별 전진을 수행한다.
++꽃게는 180px 이하에서만 허용한다. 정확히 180px이면 꽃게 쪽 판단이며,
++Robot dx가 정확히 ±100px이면 제자리 회전을 허용하지 않는다.
+ 현재 픽업 회전의 유효 깊이 조건 `0 < depth_m <= 0.600`, age 0~0.70초는 유지한다.
+ 픽셀값이 무효이면 두 정렬 모두 대기한다. 후진 후 체크포인트는 회전/꽃게 정렬 없이
+ 320px 기준으로 `pickup_400` / `pickup_500`만 선택한다.
+ 관절 완료 허용 오차 5°와 잡기 후 퇴장 시퀀스는 변경하지 않는다.
+ 
+-200px 경계는 초기/미세 정렬, 근접 상태 갱신, 예약 미리보기에서 공유한다.
++180px/100px 조건은 초기/미세 정렬 및 예약 미리보기에서 같은 플래너로 판단한다.
++미세 전진 종료 기준은 회전/꽃게 경계에서 분리하여 **200px 이하, Robot dx -30~+55px**를 유지한다.
++180px 초과~200px에서도 중심이 맞으면 기존 완료 기록 조건을 확인해 잡기 전 후진 단계로 넘어간다.
++중심이 벗어났지만 회전 대상이 아니면 추가 전진하여 꽃게 허용 구간으로 접근한다.
+ 미세 정렬은 중심이 맞아도 200px 초과이면 추가 전진을 선택하므로,
+ 기존 230px 도달 기록이나 미세 전진 완료 기록만으로 잡기 전 후진 단계로 넘어가지 않는다.
+ 200px 초과~230px 구간에서는 기존 전진 예약 억제 조건 때문에 미세 전진을 예약하지 않지만,
+ 동작 완료 체크포인트에서 새 관측을 받아 추가 전진할 수 있다.
++전진 직전에는 유효한 양의 거리와 신선한 깊이(0~0.70초)를 요구한다.
++180px 초과 구간에서는 회전 픽셀 조건을 만족하지 않아도 조향각이 무효이면 대기한다.
+ 꽃게 예약은 같은 보행만 허용하며 회전으로 판단이 바뀌면 미발행 예약 후보를 취소한다.
+ 이미 발행된 한 번의 예약은 기존처럼 현재 동작 성공과 지지 전환 대기 후 실행한다.
+ 이 변경은 가까운 공에서도 회전하는 범위를 늘리므로, 실기 전 모의 입력/시뮬레이션으로 확인한다.
+@@ -1721,7 +1731,7 @@
+ 오래됐거나 유실 미확정이면 회전하지 않는다. 화면은 실제 선택 명령에 따라
+ `BALL LOST | SEARCH LEFT/RIGHT`, `WAIT`, `SEARCH LIMIT`를 구분한다.
+ 공이 보이는 동안 픽업의 회전/꽃게 구분은 과거 근접 상태를 고정하지 않고
+-현재의 200px 경계로 갱신한다(2026-11-11 변경).
++현재의 180px 경계로 갱신한다(2026-11-11 변경).
+ 확정 유실의 방향 탐색은 별도 조건을 사용하며, 이 픽셀 경계로 제한하지 않는다.
+ 100px 이내 유실 시 후진 재탐색 기준과 잡기 후 고정 퇴장·라인 복귀 회전은 유지한다.
+ 마지막 공 검출 상자의 위쪽 끝이 화면 상단 10% 이내에 있고 이후
+--- before/src/mission_control/mission_control/motion_decision_planner.py
++++ after/src/mission_control/mission_control/motion_decision_planner.py
+@@ -133,7 +133,9 @@
+     PICKUP_INITIAL_CENTER_BOUND_PX = 70.0
+     POST_EXIT_LINE_HEADING_DEG = 40.0
+     BALL_STATIONARY_TURN_MIN_BOTTOM_PX = 120.0
+-    PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX = 200.0
++    PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX = 180.0
++    PICKUP_TURN_MIN_ABS_OFFSET_PX = 100.0
++    PICKUP_FINE_COMPLETE_MAX_BOTTOM_DISTANCE_PX = 200.0
+     CAMERA_DOWN_FORWARD_TWO_MIN_BOTTOM_PX = 300.0
+     CAMERA_DOWN_FORWARD_TWO_MAX_BOTTOM_PX = 500.0
+     PICKUP_CLOSE_CRAB_BOTTOM_DISTANCE_PX = 100.0
+@@ -1548,8 +1550,9 @@
+             return correction
+ 
+         crab_allowed = bottom_distance_px <= self.PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX
+-        if crab_allowed and not (self.PICKUP_FINE_LEFT_BOUND_PX <= robot_center_offset_px
+-                                 <= self.PICKUP_FINE_RIGHT_BOUND_PX):
++        centered = (self.PICKUP_FINE_LEFT_BOUND_PX <= robot_center_offset_px
++                    <= self.PICKUP_FINE_RIGHT_BOUND_PX)
++        if crab_allowed and not centered:
+             direction = "RIGHT" if robot_center_offset_px > 0.0 else "LEFT"
+             return MotionDecision(
+                 phase=phase, source="ball", action=f"BALL_PICKUP_CRAB_{direction}",
+@@ -1568,7 +1571,17 @@
+         common["pickup_fine_progress_complete"] = self.pickup_fine_progress_complete
+         common.update(pickup_last_completed_motion_id=self.pickup_last_completed_motion_id,
+                       pickup_fine_skip_limit_px=skip_limit)
+-        if fine_required or not crab_allowed:
++        # Keep the pre-grasp distance/centering guard independent of yaw/crab selection.
++        common["pickup_fine_complete_max_bottom_distance_px"] = self.PICKUP_FINE_COMPLETE_MAX_BOTTOM_DISTANCE_PX
++        if (fine_required or not centered
++                or bottom_distance_px > self.PICKUP_FINE_COMPLETE_MAX_BOTTOM_DISTANCE_PX):
++            if (depth_valid is not True or distance is None or distance <= 0.0
++                    or depth_age is None or not 0.0 <= depth_age <= self.ball_planner.config.max_pickup_depth_age_sec):
++                return MotionDecision(
++                    phase=phase, source="ball", action="WAIT", valid=False,
++                    reason="ball_pickup_waiting_for_fresh_distance",
++                    sdk_motion_requested=False, requires_ack=False, source_command=common,
++                )
+             forward_two = self._camera_down_forward_two_allowed(info)
+             return MotionDecision(
+                 phase=phase, source="ball",
+@@ -1604,18 +1617,23 @@
+     def _pickup_heading_correction(
+         self, info: dict, phase: str, common: dict, *, fine: bool,
+     ) -> MotionDecision | None:
+-        """Use yaw above the crab range and lateral alignment within it."""
++        """Allow yaw only beyond the crab range and lateral deadband."""
+         angle, source = self.ball_planner.select_steering(info)
+         direction = "RIGHT" if angle is not None and angle > 0.0 else "LEFT"
+         tolerance = self.STATIONARY_TURN_MIN_DEG[direction]
+         common.update(steering_error_deg=angle, steering_source=source,
+                       heading_tolerance_deg=tolerance)
+         bottom = self._number(info, "bottom_distance_px")
++        offset = self._number(info, "offset_x_px")
++        crab_allowed = bottom is not None and bottom <= self.PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX
++        turn_allowed = (bottom is not None and bottom > self.PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX
++                        and offset is not None and abs(offset) > self.PICKUP_TURN_MIN_ABS_OFFSET_PX)
+         common.update(
+             pickup_crab_max_bottom_distance_px=self.PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX,
+-            pickup_alignment_mode="CRAB" if bottom is not None and bottom <= self.PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX else "TURN",
+-        )
+-        if bottom is not None and bottom <= self.PICKUP_CRAB_MAX_BOTTOM_DISTANCE_PX:
++            pickup_turn_min_abs_offset_px=self.PICKUP_TURN_MIN_ABS_OFFSET_PX,
++            pickup_alignment_mode="CRAB" if crab_allowed else "TURN" if turn_allowed else "APPROACH",
++        )
++        if crab_allowed:
+             return None
+         if angle is None:
+             return MotionDecision(
+@@ -1623,6 +1641,8 @@
+                 reason="ball_pickup_waiting_for_heading",
+                 sdk_motion_requested=False, requires_ack=False, source_command=common,
+             )
++        if not turn_allowed:
++            return None
+         if abs(angle) < tolerance:
+             return None
+         if not self._ball_stationary_turn_allowed(info):
+--- before/src/mission_control/test/test_ball_camera_down_forward_two.py
++++ after/src/mission_control/test/test_ball_camera_down_forward_two.py
+@@ -67,8 +67,8 @@
+ def test_alignment_still_precedes_forward(fine):
+     planner = MotionDecisionPlanner()
+     plan = planner.plan_ball_pickup_fine_alignment if fine else planner.plan_ball_pickup_initial_alignment
+-    assert 'TURN_RIGHT_' in plan(down_ball(bottom_distance_px=400, steering_angle_deg=35, offset_x_norm=.3)).action
+-    assert 'CRAB_RIGHT' in plan(down_ball(bottom_distance_px=200, offset_x_px=100)).action
++    assert 'TURN_RIGHT_' in plan(down_ball(bottom_distance_px=400, steering_angle_deg=35, offset_x_norm=.3, offset_x_px=192)).action
++    assert 'CRAB_RIGHT' in plan(down_ball(bottom_distance_px=180, offset_x_px=100)).action
+ 
+ 
+ @pytest.mark.parametrize('index', [1, 2])
+@@ -102,7 +102,7 @@
+ @pytest.mark.parametrize('changes', [
+     {'bottom_distance_px': 299}, {'bottom_distance_px': 501},
+     {'pickup_head_ready': False}, {'depth_valid': False}, {'depth_age_sec': .701},
+-    {'offset_x_px': 100}, {'bottom_distance_px': 400, 'steering_angle_deg': 35, 'offset_x_norm': .3},
++    {'offset_x_px': 100}, {'bottom_distance_px': 400, 'steering_angle_deg': 35, 'offset_x_norm': .3, 'offset_x_px': 192},
+ ])
+ def test_changed_observation_does_not_reserve_old_regular_forward(clock, changes):
+     node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
+--- before/src/mission_control/test/test_pickup_bottom200.py
++++ after/src/mission_control/test/test_pickup_bottom200.py
+@@ -1,6 +1,7 @@
+-"""Replay the 200px pickup boundary without driving robot hardware."""
++"""Replay 180px/100px alignment and the independent 200px completion boundary without driving robot hardware."""
+ 
+ import json
++import math
+ 
+ import pytest
+ from std_msgs.msg import String
+@@ -21,7 +22,7 @@
+ 
+ @pytest.mark.parametrize('stage', ['initial', 'fine'])
+ @pytest.mark.parametrize('side', [-1, 1])
+-@pytest.mark.parametrize('bottom', [199.999, 200., 200.001, 287., 360.])
++@pytest.mark.parametrize('bottom', [179.999, 180., 180.001, 185., 287., 360.])
+ def test_latest_bottom_selects_crab_or_turn(stage, side, bottom):
+     sample = ball(bottom_distance_px=bottom, offset_x_px=side * 190,
+                   steering_angle_deg=side * 33.505, offset_x_norm=side * .3, depth_m=.458,
+@@ -29,11 +30,115 @@
+     decision = aligned_decision(MotionDecisionPlanner(), stage, sample)
+     direction = 'LEFT' if side < 0 else 'RIGHT'
+     prefix = ('BALL_PICKUP_INITIAL_CRAB' if stage == 'initial' else 'BALL_PICKUP_CRAB')
+-    if bottom > 200:
++    if bottom > 180:
+         prefix = 'BALL_PICKUP_CAMERA_DOWN_TURN' if stage == 'initial' else 'BALL_PICKUP_FINE_TURN'
+     assert decision.valid and decision.action.startswith(f'{prefix}_{direction}')
+-    assert decision.source_command['pickup_crab_max_bottom_distance_px'] == 200
++    assert decision.source_command['pickup_crab_max_bottom_distance_px'] == 180
+     assert decision.source_command['steering_source'] == 'camera_down_image_angle'
++
++
++@pytest.mark.parametrize('stage', ['initial', 'fine'])
++@pytest.mark.parametrize('side', [-1, 1])
++@pytest.mark.parametrize('bottom', [180., 180.001, 185., 287.])
++@pytest.mark.parametrize('offset', [99.999, 100., 100.001])
++def test_turn_requires_both_strict_pixel_boundaries(stage, side, bottom, offset):
++    dx = side * offset
++    sample = ball(bottom_distance_px=bottom, offset_x_px=dx, offset_x_norm=dx / 640,
++                  steering_angle_deg=math.degrees(math.atan2(dx, bottom)), pickup_head_ready=True)
++    decision = aligned_decision(MotionDecisionPlanner(), stage, sample)
++    assert decision.valid
++    if bottom <= 180:
++        assert 'CRAB_' in decision.action
++        assert decision.source_command['pickup_alignment_mode'] == 'CRAB'
++    elif offset > 100:
++        assert 'TURN_' in decision.action
++        assert decision.source_command['pickup_alignment_mode'] == 'TURN'
++    else:
++        expected = 'BALL_PICKUP_INITIAL_ALIGN_CONTINUE' if stage == 'initial' else 'BALL_PICKUP_FINE_FORWARD'
++        assert decision.action == expected
++        assert decision.source_command['pickup_alignment_mode'] == 'APPROACH'
++
++
++@pytest.mark.parametrize('stage', ['initial', 'fine'])
++def test_recorded_near_ball_now_turns_left(stage):
++    sample = ball(bottom_distance_px=185, offset_x_px=-187, offset_x_norm=-187 / 640,
++                  steering_angle_deg=-45.3, depth_m=.46, distance_m=.46,
++                  pickup_head_ready=True)
++    decision = aligned_decision(MotionDecisionPlanner(), stage, sample)
++    assert decision.valid and decision.action.endswith('TURN_LEFT_3')
++
++
++@pytest.mark.parametrize('bottom', [180., 180.001, 185., 200., 200.001])
++@pytest.mark.parametrize('offset', [-100., -31., -30., 0., 55., 56., 100.])
++@pytest.mark.parametrize('motion', [None, 'pickup_fine_forward_0', 'pickup_crab_left_0'])
++def test_fine_completion_keeps_200px_and_centering_independent_of_crab_range(bottom, offset, motion):
++    planner = MotionDecisionPlanner()
++    planner.pickup_last_completed_motion_id = motion
++    # Even an accumulated completion credit must not bypass either final guard.
++    planner.pickup_fine_progress_complete = True
++    decision = planner.plan_ball_pickup_fine_alignment(ball(
++        bottom_distance_px=bottom, offset_x_px=offset, offset_x_norm=offset / 640,
++        steering_angle_deg=0.))
++    centered = -30 <= offset <= 55
++    if bottom <= 180 and not centered:
++        assert 'CRAB_' in decision.action
++    elif bottom <= 200 and centered:
++        assert decision.action == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
++    else:
++        assert decision.action == 'BALL_PICKUP_FINE_FORWARD'
++
++
++@pytest.mark.parametrize('stage', ['initial', 'fine'])
++@pytest.mark.parametrize('side', [-1, 1])
++def test_existing_angle_threshold_still_applies_after_pixel_gates(stage, side):
++    sample = ball(bottom_distance_px=250, offset_x_px=side * 101, offset_x_norm=side * .2,
++                  steering_angle_deg=side * (7.999 if side < 0 else 14.999))
++    decision = aligned_decision(MotionDecisionPlanner(), stage, sample)
++    assert decision.valid and 'TURN_' not in decision.action
++
++
++@pytest.mark.parametrize('stage', ['initial', 'fine'])
++@pytest.mark.parametrize('offset', [-100., 0., 100.])
++@pytest.mark.parametrize('invalid', [
++    {'depth_valid': False}, {'depth_age_sec': .701}, {'depth_age_sec': None},
++    {'distance_m': None}, {'distance_m': 0.},
++    {'ground_projection_enabled': True, 'ground_projection_valid': False,
++     'head_down_requested': False},
++])
++def test_skipping_yaw_does_not_bypass_forward_input_validity(stage, offset, invalid):
++    planner = MotionDecisionPlanner()
++    sample = ball(bottom_distance_px=250, offset_x_px=offset, offset_x_norm=offset / 640,
++                  steering_angle_deg=30., pickup_head_ready=True)
++    decision = aligned_decision(planner, stage, {**sample, **invalid})
++    assert decision.action == 'WAIT' and not decision.valid
++    recovered = aligned_decision(planner, stage, sample)
++    assert recovered.valid and 'TURN_' not in recovered.action
++    assert recovered.action == ('BALL_PICKUP_INITIAL_ALIGN_CONTINUE' if stage == 'initial'
++                                else 'BALL_PICKUP_FINE_FORWARD')
++
++
++@pytest.mark.parametrize('stage,motion,bottom', [
++    ('initial', 'ball_camera_down_forward_2', 340),
++    ('fine', 'pickup_fine_forward_0', 287),
++])
++@pytest.mark.parametrize('side', [-1, 1])
++def test_unpublished_forward_reservation_clears_when_dx_crosses_100(stage, motion, bottom, side):
++    planner, reservation = MotionDecisionPlanner(), PickupWalkReservation()
++    reservation.on_status(dict(status='RUNNING', command_id=1, request_id=2,
++                               motion_id=motion, pickup_alignment_stage=stage), 10., 10_000_000_000)
++    now = 10. + PICKUP_WALK_DURATIONS[motion] * .75
++    sample = ball(bottom_distance_px=bottom, offset_x_px=side * 100, offset_x_norm=side * .2,
++                  steering_angle_deg=side * 35., pickup_head_ready=True)
++    for _ in range(3):
++        now += .01
++        stamp = round(now * 1e9)
++        reservation.observe(planner, {**sample, 'rgb_stamp_ns': stamp}, now, stamp, .5)
++    assert reservation.decision(now, .5) is not None
++    now += .01
++    sample.update(offset_x_px=side * 100.001, rgb_stamp_ns=round(now * 1e9))
++    assert 'TURN_' in aligned_decision(planner, stage, sample).action
++    reservation.observe(planner, sample, now, round(now * 1e9), .5)
++    assert reservation.decision(now, .5) is None and reservation.count == 0
+ 
+ 
+ @pytest.mark.parametrize('stage', ['initial', 'fine'])
+@@ -54,9 +159,9 @@
+ @pytest.mark.parametrize('stage', ['initial', 'fine'])
+ def test_close_memory_does_not_block_return_to_turn_range(stage):
+     planner = MotionDecisionPlanner()
+-    sample = ball(bottom_distance_px=200, steering_angle_deg=-33.505, offset_x_px=-190, offset_x_norm=-.3)
++    sample = ball(bottom_distance_px=180, steering_angle_deg=-33.505, offset_x_px=-190, offset_x_norm=-.3)
+     assert 'CRAB_LEFT' in aligned_decision(planner, stage, sample).action
+-    decision = aligned_decision(planner, stage, {**sample, 'bottom_distance_px': 200.001})
++    decision = aligned_decision(planner, stage, {**sample, 'bottom_distance_px': 180.001})
+     assert 'TURN_LEFT' in decision.action
+     assert not decision.source_command['pickup_close_alignment_active']
+ 
+@@ -71,27 +176,28 @@
+     now = 10. + PICKUP_WALK_DURATIONS[motion] * .75
+     for _ in range(3):
+         now += .01
+-        reservation.observe(planner, ball(bottom_distance_px=200, offset_x_px=side * 100,
++        reservation.observe(planner, ball(bottom_distance_px=180, offset_x_px=side * 100,
+                                          steering_angle_deg=side * 33., offset_x_norm=side * .2, rgb_stamp_ns=round(now * 1e9)),
+                             now, round(now * 1e9), .5)
+     assert reservation.decision(now, .5) is not None
+     now += .01
+-    reservation.observe(planner, ball(bottom_distance_px=200.001, offset_x_px=side * 100,
++    reservation.observe(planner, ball(bottom_distance_px=180.001, offset_x_px=side * 110,
+                                      steering_angle_deg=side * 33., offset_x_norm=side * .2, rgb_stamp_ns=round(now * 1e9)),
+                         now, round(now * 1e9), .5)
+     assert reservation.decision(now, .5) is None and reservation.count == 0
+ 
+ 
+ @pytest.mark.parametrize('index', [1, 2])
+-@pytest.mark.parametrize('bottom', [200.001, 215., 230.])
++@pytest.mark.parametrize('bottom,offset', [(180.001, 100), (185., -100), (200., 100),
++                                          (200.001, 0), (215., 0), (230., 0)])
+ @pytest.mark.parametrize('expire_sample', [False, True])
+-def test_no_prequeue_at_old_completion_band_resumes_at_checkpoint(clock, index, bottom, expire_sample):
++def test_no_prequeue_at_old_completion_band_resumes_at_checkpoint(clock, index, bottom, offset, expire_sample):
+     node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge(advance_transition_dwells=False)
+     node.phase_manager.active_ball_mode_index = index
+     node.phase_manager.ball_modes_confirmed = index
+     parent, first = start(node, bridge, clock, ball(bottom_distance_px=250))
+     assert first['motion_id'] == 'ball_general_fine_forward_8'
+-    late_frames(node, clock, ball(bottom_distance_px=bottom))
++    late_frames(node, clock, ball(bottom_distance_px=bottom, offset_x_px=offset))
+     assert not node.pickup_walk_reservation.pending
+     assert bridge.pickup_queued_request is None
+     if expire_sample:
+@@ -101,7 +207,7 @@
+         advance_dwell(node, bridge, clock)
+     if expire_sample:
+         assert node.pickup_fine_align_waiting
+-        fresh(node, clock, 'ball', ball(bottom_distance_px=bottom))
++        fresh(node, clock, 'ball', ball(bottom_distance_px=bottom, offset_x_px=offset))
+     command = node.publisher.messages[-1]
+     assert command['action'] == 'BALL_PICKUP_FINE_FORWARD' and command['valid'], json.dumps(command)
+     bridge.navigation_command_callback(String(data=json.dumps(command)))
+@@ -130,7 +236,7 @@
+     node.phase_manager.ball_modes_confirmed = index
+     motion = f'pickup_crab_{"left" if side < 0 else "right"}_0'
+     bridge.last_physical_motion_id = motion
+-    sample = ball(bottom_distance_px=200, offset_x_px=side * 100)
++    sample = ball(bottom_distance_px=180, offset_x_px=side * 100)
+     parent, first = start(node, bridge, clock, sample)
+     assert first['motion_id'] == motion
+     late_frames(node, clock, sample)
+@@ -158,12 +264,13 @@
+ 
+ @pytest.mark.parametrize('index', [1, 2])
+ @pytest.mark.parametrize('side', [-1, 1])
+-def test_recorded_287px_turn_finishes_before_fresh_200px_crab(clock, index, side):
++@pytest.mark.parametrize('bottom', [185, 287])
++def test_turn_finishes_before_fresh_180px_crab(clock, index, side, bottom):
+     node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge(advance_transition_dwells=False)
+     node.phase_manager.active_ball_mode_index = index
+     node.phase_manager.ball_modes_confirmed = index
+     parent, turn = start(node, bridge, clock, ball(
+-        bottom_distance_px=287, depth_m=.458, distance_m=.458,
++        bottom_distance_px=bottom, depth_m=.458, distance_m=.458,
+         steering_angle_deg=side * 33.505, offset_x_norm=side * .3, offset_x_px=side * 190))
+     direction = 'left' if side < 0 else 'right'
+     assert turn['motion_id'].startswith(f'pickup_camera_down_turn_{direction}_')
+@@ -172,7 +279,7 @@
+     assert bridge.active_dwell_until == pytest.approx(clock[0] + Bridge.PICKUP_TURN_DWELL_SEC)
+     advance_dwell(node, bridge, clock)
+     assert node.pickup_initial_align_waiting
+-    fresh(node, clock, 'ball', ball(bottom_distance_px=200, offset_x_px=side * 100))
++    fresh(node, clock, 'ball', ball(bottom_distance_px=180, offset_x_px=side * 100))
+     command = node.publisher.messages[-1]
+     assert command['action'] == f'BALL_PICKUP_INITIAL_CRAB_{direction.upper()}'
+     bridge.navigation_command_callback(String(data=json.dumps(command)))
+@@ -195,7 +302,7 @@
+ @pytest.mark.parametrize('side', [-1, 1])
+ def test_rejected_near_crab_reservation_returns_to_fresh_checkpoint(clock, side):
+     node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge(advance_transition_dwells=False)
+-    sample = ball(bottom_distance_px=200, offset_x_px=side * 100)
++    sample = ball(bottom_distance_px=180, offset_x_px=side * 100)
+     bridge.last_physical_motion_id = f'pickup_crab_{"left" if side < 0 else "right"}_0'
+     _, first = start(node, bridge, clock, sample)
+     late_frames(node, clock, sample)
+--- before/src/mission_control/test/test_pickup_continuous_walk.py
++++ after/src/mission_control/test/test_pickup_continuous_walk.py
+@@ -24,7 +24,7 @@
+         'depth_m': .49, 'distance_m': .49, 'depth_age_sec': .05,
+         'confirmation_confirmed': True,
+         # Nonzero lateral samples exercise the near-ball crab range.
+-        'bottom_distance_px': 200 if changes.get('offset_x_px', 0) else 340,
++        'bottom_distance_px': 180 if changes.get('offset_x_px', 0) else 340,
+         'offset_x_px': 0, 'steering_angle_deg': 0., 'head_down_requested': True,
+         **changes,
+     })
+--- before/src/mission_control/test/test_pickup_crab_observation.py
++++ after/src/mission_control/test/test_pickup_crab_observation.py
+@@ -37,7 +37,7 @@
+     forward_status(node, bridge, first, 'SUCCEEDED')
+     if bridge.active_dwell_until is not None:
+         advance_dwell(node, bridge, clock)
+-    fresh(node, clock, 'ball', ball(offset_x_px=offset, bottom_distance_px=200))
++    fresh(node, clock, 'ball', ball(offset_x_px=offset, bottom_distance_px=180))
+     correction = node.publisher.messages[-1]
+     assert correction['action'] in {'BALL_PICKUP_CRAB_LEFT', 'BALL_PICKUP_CRAB_RIGHT'}
+     bridge.navigation_command_callback(String(data=json.dumps(correction)))
+@@ -60,7 +60,7 @@
+     observer = node.pickup_checkpoint_observation
+     clock[0] = observer.started_at + PICKUP_CRAB_DURATIONS[observer.key[-1]] * .75
+     for _ in range(count):
+-        fresh(node, clock, 'ball', ball(bottom_distance_px=200), plan=False)
++        fresh(node, clock, 'ball', ball(bottom_distance_px=180), plan=False)
+ 
+ 
+ @pytest.mark.parametrize('index', [1, 2])
+@@ -109,7 +109,7 @@
+         clock[0] += node.timeouts['ball'] + .01
+     elif case in {'lost', 'changed'}:
+         changes = {'detected': False, 'raw_detected': False} if case == 'lost' else {'offset_x_px': -100}
+-        fresh(node, clock, 'ball', ball(bottom_distance_px=200, **changes), plan=False)
++        fresh(node, clock, 'ball', ball(bottom_distance_px=180, **changes), plan=False)
+     elif case in {'future', 'duplicate'}:
+         info = dict(node.pickup_checkpoint_observation.sample)
+         if case == 'future':
+@@ -121,7 +121,7 @@
+     assert node.latest_info['ball'] is None
+     assert node.pickup_fine_align_waiting and bridge.pickup_fine_align_waiting
+     assert node.pickup_checkpoint_observation.key is None
+-    fresh(node, clock, 'ball', ball(bottom_distance_px=200))
++    fresh(node, clock, 'ball', ball(bottom_distance_px=180))
+     assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+     assert not node.pickup_fine_align_waiting
+ 
+@@ -158,7 +158,7 @@
+         # Existing recoverable-fault policy returns to a fresh checkpoint.
+         assert bridge.pickup_fine_align_waiting
+         assert node.latest_info['ball'] is None
+-        fresh(node, clock, 'ball', ball(bottom_distance_px=200))
++        fresh(node, clock, 'ball', ball(bottom_distance_px=180))
+         assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+     else:
+         assert not bridge.motion_in_progress
+@@ -179,7 +179,7 @@
+     node, bridge, _, crab = start_fine_crab(clock)
+     late_centered_frames(node, clock)
+     for _ in range(3):
+-        fresh(node, clock, 'ball', ball(offset_x_px=-100, bottom_distance_px=200), plan=False)
++        fresh(node, clock, 'ball', ball(offset_x_px=-100, bottom_distance_px=180), plan=False)
+     command = node.publisher.messages[-1]
+     assert command['source_command']['pickup_walk_prequeue']
+     assert node.pickup_checkpoint_observation.key is None
+@@ -206,14 +206,14 @@
+     assert node.pickup_checkpoint_observation.sample is None
+     forward_status(node, bridge, crab, 'SUCCEEDED')
+     assert node.pickup_fine_align_waiting and node.latest_info['ball'] is None
+-    fresh(node, clock, 'ball', ball(bottom_distance_px=200))
++    fresh(node, clock, 'ball', ball(bottom_distance_px=180))
+     assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+ 
+ 
+ def test_early_frames_and_duplicate_running_do_not_create_or_restart_preview(clock):
+     node, bridge, _, crab = start_fine_crab(clock)
+     for _ in range(3):
+-        fresh(node, clock, 'ball', ball(bottom_distance_px=200), plan=False)
++        fresh(node, clock, 'ball', ball(bottom_distance_px=180), plan=False)
+     assert node.pickup_checkpoint_observation.sample is None
+     late_centered_frames(node, clock)
+     started_at = node.pickup_checkpoint_observation.started_at
+@@ -230,7 +230,7 @@
+     node, bridge, _, crab = start_fine_crab(clock)
+     late_centered_frames(node, clock)
+     for _ in range(3):
+-        fresh(node, clock, 'ball', ball(offset_x_px=-100, bottom_distance_px=200), plan=False)
++        fresh(node, clock, 'ball', ball(offset_x_px=-100, bottom_distance_px=180), plan=False)
+     bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
+     queued = decoded_messages(bridge.executor_request_publisher)[-1]
+     forward_status(node, bridge, queued, 'REJECTED', error_code='INCOMPATIBLE_TRANSITION')
+@@ -238,7 +238,7 @@
+     assert bridge.pickup_queued_request is None
+     assert not node.pickup_walk_reservation.pending
+     assert node.pickup_fine_align_waiting
+-    fresh(node, clock, 'ball', ball(bottom_distance_px=200))
++    fresh(node, clock, 'ball', ball(bottom_distance_px=180))
+     assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+ 
+ 
+@@ -253,7 +253,7 @@
+     node.executor_auto_ready = True
+     Node._publish_decision(node)
+     assert node.publisher.messages[-1]['action'] != 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+-    fresh(node, clock, 'ball', ball(bottom_distance_px=200))
++    fresh(node, clock, 'ball', ball(bottom_distance_px=180))
+     assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+ 
+ 
+@@ -279,7 +279,7 @@
+     assert node.pickup_checkpoint_observation.stage == 'initial'
+     clock[0] += PICKUP_CRAB_DURATIONS[crab['motion_id']] * .75
+     for _ in range(3):
+-        fresh(node, clock, 'ball', ball(bottom_distance_px=200), plan=False)
++        fresh(node, clock, 'ball', ball(bottom_distance_px=180), plan=False)
+     forward_status(node, bridge, crab, 'SUCCEEDED')
+     assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_INITIAL_ALIGN_CONTINUE'
+     before = len(bridge.motion_status_publisher.messages)
+--- before/src/mission_control/test/test_pickup_fine_progress.py
++++ after/src/mission_control/test/test_pickup_fine_progress.py
+@@ -137,7 +137,7 @@
+ 
+ 
+ @pytest.mark.parametrize('offset,bottom,action', [
+-    (100, 200, 'BALL_PICKUP_CRAB_RIGHT'), (-100, 200, 'BALL_PICKUP_CRAB_LEFT'),
++    (100, 180, 'BALL_PICKUP_CRAB_RIGHT'), (-100, 180, 'BALL_PICKUP_CRAB_LEFT'),
+     (100, 252, 'BALL_PICKUP_FINE_FORWARD'), (-100, 252, 'BALL_PICKUP_FINE_FORWARD'),
+     (0, 80, 'WAIT'), (0, 380, 'BALL_PICKUP_FINE_FORWARD'),
+ ])
+--- before/src/mission_control/test/test_pickup_fine_skip.py
++++ after/src/mission_control/test/test_pickup_fine_skip.py
+@@ -152,7 +152,7 @@
+     node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
+     bridge.last_physical_motion_id = 'pickup_crab_right_0'
+     initial_checkpoint(node, bridge, clock, ball(bottom_distance_px=200))
+-    fresh(node, clock, 'ball', ball(bottom_distance_px=200, offset_x_px=-100))
++    fresh(node, clock, 'ball', ball(bottom_distance_px=180, offset_x_px=-100))
+     assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_CRAB_LEFT'
+     assert not bridge.pickup_fixed_sequence_started
+ 
+@@ -232,7 +232,7 @@
+     ('pickup_crab_left_0', -100), ('pickup_crab_right_0', 100),
+     ('pickup_crab_left_0_2', -250), ('pickup_crab_right_0_2', 250),
+ ])
+-@pytest.mark.parametrize('bottom', [200, 200.001, 230, 300])
++@pytest.mark.parametrize('bottom', [180, 180.001, 200, 230, 300])
+ def test_crab_reservation_still_follows_lateral_error_at_new_distance_limit(motion, offset, bottom):
+     from mission_control.pickup_walk_reservation import PickupWalkReservation, PICKUP_WALK_DURATIONS
+     for error in (offset, 0):
+@@ -246,7 +246,7 @@
+             stamp = round((start + i * .01) * 1e9)
+             reservation.observe(planner, ball(bottom_distance_px=bottom, offset_x_px=error,
+                                                rgb_stamp_ns=stamp), stamp / 1e9, stamp, .5)
+-        assert (reservation.ready is not None) is (error != 0 and bottom <= 200)
++        assert (reservation.ready is not None) is (error != 0 and bottom <= 180)
+         assert planner.pickup_last_completed_motion_id == 'pickup_fine_forward_0'
+ 
+ 
+--- before/src/mission_control/test/test_pickup_turn_crab_diagnosis.py
++++ after/src/mission_control/test/test_pickup_turn_crab_diagnosis.py
+@@ -26,7 +26,7 @@
+     assert decision.valid and decision.action.startswith(prefix)
+ 
+ 
+-def test_previous_close_capture_does_not_suppress_turn_above_200px():
++def test_previous_close_capture_does_not_suppress_turn_above_180px():
+     planner = MotionDecisionPlanner()
+     planner._remember_pickup_close_ball(ground_ball(0., bottom=100))
+     decision = planner.plan_ball_pickup_initial_alignment(ground_ball(17.79))
+@@ -38,8 +38,8 @@
+     assert fresh.action.startswith('BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_')
+ 
+ 
+-@pytest.mark.parametrize('bottom,prefix', [(200, 'BALL_PICKUP_INITIAL_CRAB_RIGHT'),
+-                                          (200.001, 'BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_')])
++@pytest.mark.parametrize('bottom,prefix', [(180, 'BALL_PICKUP_INITIAL_CRAB_RIGHT'),
++                                          (180.001, 'BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_')])
+ def test_near_foot_pixels_prevent_stationary_turn_even_without_close_latch(bottom, prefix):
+     decision = MotionDecisionPlanner().plan_ball_pickup_initial_alignment(ground_ball(25., bottom=bottom))
+     assert decision.action.startswith(prefix)
+--- before/src/mission_control/test/test_reservation_expansion.py
++++ after/src/mission_control/test/test_reservation_expansion.py
+@@ -40,9 +40,9 @@
+     reservation = node.pickup_walk_reservation
+     started = reservation.started_at
+     duration = PICKUP_WALK_DURATIONS[crab['motion_id']]
+-    frames(node, clock, started, duration, ball(offset_x_px=offset, bottom_distance_px=200), (.61, .65, .69))
++    frames(node, clock, started, duration, ball(offset_x_px=offset, bottom_distance_px=180), (.61, .65, .69))
+     assert reservation.count == 3 and not reservation.pending
+-    frames(node, clock, started, duration, ball(offset_x_px=offset, bottom_distance_px=200), (.76,))
++    frames(node, clock, started, duration, ball(offset_x_px=offset, bottom_distance_px=180), (.76,))
+     command = node.publisher.messages[-1]
+     assert command['source_command']['pickup_walk_prequeue']
+     assert command['source_command']['pickup_queue_motion_id'] == crab['motion_id']
+@@ -61,7 +61,7 @@
+     node, bridge, _, crab = start_fine_crab(clock, offset=offset)
+     observer = node.pickup_checkpoint_observation
+     frames(node, clock, observer.started_at, observer.duration,
+-           ball(offset_x_px=offset / 2, bottom_distance_px=200))
++           ball(offset_x_px=offset / 2, bottom_distance_px=180))
+     assert not node.pickup_walk_reservation.pending
+     forward_status(node, bridge, crab, 'SUCCEEDED')
+     command = node.publisher.messages[-1]
+@@ -75,18 +75,18 @@
+     node, bridge, _, crab = start_fine_crab(clock)
+     observer = node.pickup_checkpoint_observation
+     started, duration = observer.started_at, observer.duration
+-    frames(node, clock, started, duration, ball(offset_x_px=-100, bottom_distance_px=200), (.61, .65, .69))
++    frames(node, clock, started, duration, ball(offset_x_px=-100, bottom_distance_px=180), (.61, .65, .69))
+     assert not node.pickup_walk_reservation.pending
+-    frames(node, clock, started, duration, ball(bottom_distance_px=200), (.76,))
++    frames(node, clock, started, duration, ball(bottom_distance_px=180), (.76,))
+     assert not node.pickup_walk_reservation.pending
+     forward_status(node, bridge, crab, 'SUCCEEDED')
+     assert node.pickup_fine_align_waiting  # One changed sample cannot authorize a new action.
+-    fresh(node, clock, 'ball', ball(bottom_distance_px=200))
++    fresh(node, clock, 'ball', ball(bottom_distance_px=180))
+     assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+ 
+ 
+ @pytest.mark.parametrize('bottom,offset,action', [
+-    (200, -100, 'BALL_PICKUP_CRAB_LEFT'), (200, 100, 'BALL_PICKUP_CRAB_RIGHT'),
++    (180, -100, 'BALL_PICKUP_CRAB_LEFT'), (180, 100, 'BALL_PICKUP_CRAB_RIGHT'),
+     (200, 0, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'),
+ ])
+ def test_first_fine_prepares_changed_action_before_completion(clock, bottom, offset, action):

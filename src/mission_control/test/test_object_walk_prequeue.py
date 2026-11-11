@@ -60,7 +60,7 @@ def test_object_walk_queues_once_and_bridge_promotes_without_dwell(clock, source
         feed(node, clock, source, angles[1])
     second = node.publisher.messages[-1]
     assert second['command_id'] != first['command_id']
-    assert second['action'] == ('STRAIGHT' if angles[1] == 0 else
+    assert second['action'] == (('STRAIGHT_1' if source == 'hurdle' else 'STRAIGHT') if angles[1] == 0 else
         f"{'BALL_APPROACH_' if source == 'ball' else ''}RECOVER_{'RIGHT' if angles[1] > 0 else 'LEFT'}"
         + (f"_TURN_{'RIGHT' if angles[1] > 0 else 'LEFT'}" if source == 'hurdle' else '') + '_4')
     assert len([m for m in node.publisher.messages if m['valid']]) == 2
@@ -131,7 +131,7 @@ def test_without_reservation_completion_dispatches_recent_walk_immediately(clock
     assert getattr(node, 'queued_general_command_id', None) is None
     node.send_status(first['action'], first['command_id'], 'SUCCEEDED')
     second = node.publisher.messages[-1]
-    assert second['valid'] and second['action'] == 'STRAIGHT'
+    assert second['valid'] and second['action'] == ('STRAIGHT_1' if source == 'hurdle' else 'STRAIGHT')
     assert second['command_id'] != first['command_id']
 
 

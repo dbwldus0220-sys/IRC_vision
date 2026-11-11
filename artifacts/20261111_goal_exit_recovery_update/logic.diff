@@ -1,0 +1,198 @@
+--- before/src/mission_control/mission_control/mission_phase_manager.py
++++ src/mission_control/mission_control/mission_phase_manager.py
+@@ -74,6 +74,7 @@
+     }
+     POST_SHOT_CONTINUOUS_EXIT_ACTIONS = frozenset({
+         "POST_SHOT_EXIT_RIGHT_5_FORWARD_4", "POST_SHOT_EXIT_LEFT_3_FORWARD_4",
++        "POST_SHOT_EXIT_RIGHT_9_RECOVERY_RIGHT_4", "POST_SHOT_EXIT_LEFT_4_RECOVERY_LEFT_4",
+     })
+     POST_SHOT_EXIT_ACTIONS = frozenset({
+         "POST_SHOT_TURN_RIGHT_9", "POST_SHOT_TURN_LEFT_4",
+@@ -347,6 +348,12 @@
+ 
+     def post_shot_turn_action(self) -> str:
+         """Choose the exit from the executed shot region and completed section."""
++        if self.last_completed_shot_region in {1, 2}:
++            return (
++                "POST_SHOT_EXIT_RIGHT_9_RECOVERY_RIGHT_4"
++                if self.ball_sections_processed <= 1
++                else "POST_SHOT_EXIT_LEFT_4_RECOVERY_LEFT_4"
++            )
+         if self.last_completed_shot_region in {5, 6, 7, 8}:
+             return (
+                 "POST_SHOT_EXIT_RIGHT_5_FORWARD_4"
+@@ -367,7 +374,7 @@
+         return True
+ 
+     def complete_post_shot_exit_align(self) -> bool:
+-        """The region 5-8 composite already included course-side line recovery."""
++        """The composite already included the requested line recovery."""
+         if self.current_phase != "POST_SHOT_EXIT_ALIGN" or self.post_shot_failed:
+             return False
+         self.current_phase = (
+--- before/src/mission_control/mission_control/motion_command_gate.py
++++ src/mission_control/mission_control/motion_command_gate.py
+@@ -70,6 +70,8 @@
+         "POST_SHOT_TURN_LEFT_3",
+         "POST_SHOT_EXIT_RIGHT_5_FORWARD_4",
+         "POST_SHOT_EXIT_LEFT_3_FORWARD_4",
++        "POST_SHOT_EXIT_RIGHT_9_RECOVERY_RIGHT_4",
++        "POST_SHOT_EXIT_LEFT_4_RECOVERY_LEFT_4",
+         "POST_SHOT_FORWARD",
+         *{
+             f"POST_SHOT_LINE_TURN_{direction}_{count}"
+--- before/src/mission_control/mission_control/motion_command_bridge_node.py
++++ src/mission_control/mission_control/motion_command_bridge_node.py
+@@ -264,9 +264,11 @@
+         "POST_SHOT_TURN_LEFT_4": "post_shot_default_turn_left",
+         "POST_SHOT_TURN_LEFT_3": "post_shot_default_turn_left_3",
+         "POST_SHOT_FORWARD": "line_forward_6",
+-        # Legacy IDs now end in left/right line recovery, respectively.
++        # Legacy IDs now end in two right/left recovery blocks, respectively.
+         "POST_SHOT_EXIT_RIGHT_5_FORWARD_4": "post_shot_exit_right_5_forward_4",
+         "POST_SHOT_EXIT_LEFT_3_FORWARD_4": "post_shot_exit_left_3_forward_4",
++        "POST_SHOT_EXIT_RIGHT_9_RECOVERY_RIGHT_4": "post_shot_exit_right_9_recovery_right_4",
++        "POST_SHOT_EXIT_LEFT_4_RECOVERY_LEFT_4": "post_shot_exit_left_4_recovery_left_4",
+         **{
+             f"POST_SHOT_LINE_TURN_{direction}_{count}": (
+                 f"post_ball_line_turn_{direction.lower()}_{count}"
+@@ -2035,6 +2037,7 @@
+                  # the reservation locally until their successful completion.
+                  or self.active_action in {
+                      "POST_SHOT_EXIT_RIGHT_5_FORWARD_4", "POST_SHOT_EXIT_LEFT_3_FORWARD_4",
++                     "POST_SHOT_EXIT_RIGHT_9_RECOVERY_RIGHT_4", "POST_SHOT_EXIT_LEFT_4_RECOVERY_LEFT_4",
+                  }
+                  or (payload.get("source") == "line"
+                      and str(self.active_action).startswith(("LINE_OFFSET_TURN_", "LINE_LOST_TURN_")))
+@@ -2621,10 +2624,14 @@
+         elif is_active and payload["motion_id"] == self.active_motion_id:
+             if payload["status"] == "SUCCEEDED":
+                 self.last_physical_motion_id = physical_motion_id(payload["motion_id"])
+-                if payload["motion_id"] == "post_shot_exit_right_5_forward_4":
++                if payload["motion_id"] in {
++                    "post_shot_exit_right_5_forward_4", "post_shot_exit_right_9_recovery_right_4",
++                }:
++                    self.last_physical_motion_id = "line_recovery_right_4"
++                elif payload["motion_id"] in {
++                    "post_shot_exit_left_3_forward_4", "post_shot_exit_left_4_recovery_left_4",
++                }:
+                     self.last_physical_motion_id = "line_recovery_left_4"
+-                elif payload["motion_id"] == "post_shot_exit_left_3_forward_4":
+-                    self.last_physical_motion_id = "line_recovery_right_4"
+             elif payload["status"] in self.TERMINAL_STATUSES:
+                 self.last_physical_motion_id = None
+         elif is_active and payload["motion_id"] in MotionCommandBridgeNode.TRANSITION_MOTION_IDS:
+--- before/src/mission_control/mission_control/motion_decision_node.py
++++ src/mission_control/mission_control/motion_decision_node.py
+@@ -196,9 +196,11 @@
+     }
+     # Full catalog duration; the final 30 percent is within the recovery tail.
+     POST_SHOT_EXIT_CAPTURE_CONFIG = {
+-        # Legacy IDs include the turn, 500ms hold, and four recovery cycles.
+-        "POST_SHOT_EXIT_RIGHT_5_FORWARD_4": (4.767, 3),
+-        "POST_SHOT_EXIT_LEFT_3_FORWARD_4": (4.136 / 1.05, 3),
++        # Legacy FORWARD_4 IDs now include two four-cycle recoveries.
++        "POST_SHOT_EXIT_RIGHT_5_FORWARD_4": (6.835, 3),
++        "POST_SHOT_EXIT_LEFT_3_FORWARD_4": (6.295 / 1.05, 3),
++        "POST_SHOT_EXIT_RIGHT_9_RECOVERY_RIGHT_4": (5.437, 3),
++        "POST_SHOT_EXIT_LEFT_4_RECOVERY_LEFT_4": (4.842 / 1.05, 3),
+     }
+     CORRECTION_POST_MOTION_DWELL_SEC = 0.5
+     BALL_RAW_CONFIRMATION_RELEASE_SEC = 0.5
+@@ -3328,10 +3330,11 @@
+                                 self.post_shot_line_search_action = None
+                                 self.post_shot_line_search_failed = False
+                                 self.planner.post_ball_line_search_direction = (
+-                                    "RIGHT" if "_RIGHT_" in action else "LEFT"
++                                    "RIGHT" if action.startswith(("POST_SHOT_TURN_RIGHT_", "POST_SHOT_EXIT_RIGHT_"))
++                                    else "LEFT"
+                                 )
+                         if action in MissionPhaseManager.POST_SHOT_CONTINUOUS_EXIT_ACTIONS:
+-                            # The single motion already includes four forward cycles.
++                            # The single motion already includes its recovery tail.
+                             if reserved_line_exit:
+                                 self.phase_manager.complete_post_shot_exit_align()
+                             self.post_shot_turn_settled = False
+--- before/src/irc_step_motion_executor/config/motion_aliases.yaml
++++ src/irc_step_motion_executor/config/motion_aliases.yaml
+@@ -92,9 +92,12 @@
+   post_shot_default_turn_left: "p골대후제자리좌회전"
+   post_shot_default_turn_right_5: "t골대후제자리우회전(5회)"
+   post_shot_default_turn_left_3: "p골대후제자리좌회전(3회)"
+-  # Keep legacy command IDs; each composite now ends with course-side line recovery.
+-  post_shot_exit_right_5_forward_4: "t골대후제자리우회전(5회)+라인복귀좌회전45도(4회)"
+-  post_shot_exit_left_3_forward_4: "p골대후제자리좌회전(3회)+라인복귀우회전45도(4회)"
++  # Regions 5-8 retain legacy IDs, with two recovery blocks (eight cycles).
++  post_shot_exit_right_5_forward_4: "t골대후제자리우회전(5회)+라인복귀우회전45도(4회)+라인복귀우회전45도(4회)"
++  post_shot_exit_left_3_forward_4: "p골대후제자리좌회전(3회)+라인복귀좌회전45도(4회)+라인복귀좌회전45도(4회)"
++  # Regions 1-2 preserve the original full turn and append one recovery block.
++  post_shot_exit_right_9_recovery_right_4: "t골대후제자리우회전+라인복귀우회전45도(4회)"
++  post_shot_exit_left_4_recovery_left_4: "p골대후제자리좌회전+라인복귀좌회전45도(4회)"
+   post_ball_forward_8: "n전진45도(8회)"
+   post_ball_camera_90: "R오뒤카메라90도"
+   goal_camera_90_forward_2: "n전진90도(2회)"
+--- before/tools/build_post_shot_forward_exits.py
++++ tools/build_post_shot_forward_exits.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Append course-side line recovery after a half-second hold at the goal exit."""
++"""Append section-specific line recovery after a half-second hold at the goal exit."""
+ 
+ import copy
+ import json
+@@ -10,27 +10,35 @@
+ 
+ ROOT = Path(__file__).resolve().parents[1]
+ EXIT_RECOVERIES = (
++    # Retained for archived source99/source100 import scripts.
+     ('t골대후제자리우회전(5회)', 'n라인복귀좌회전45도'),
+     ('p골대후제자리좌회전(3회)', 'n라인복귀우회전45도'),
++)
++GOAL_EXIT_RECOVERIES = (
++    ('t골대후제자리우회전', 'n라인복귀우회전45도', 1),
++    ('p골대후제자리좌회전', 'n라인복귀좌회전45도', 1),
++    ('t골대후제자리우회전(5회)', 'n라인복귀우회전45도', 2),
++    ('p골대후제자리좌회전(3회)', 'n라인복귀좌회전45도', 2),
+ )
+ TURN_RECOVERY_DWELL_MS = 500
+ 
+ 
+-def build_exit(turn: dict, recovery: dict) -> dict:
++def build_exit(turn: dict, recovery: dict, recovery_blocks: int = 1) -> dict:
+     """Keep turn timing and encode recovery timing at the composite's speed."""
+     assert turn['repeat_count'] == 1 and recovery['repeat_count'] == 4
++    assert recovery_blocks in (1, 2)
+     # Both gaits use this support pose; never introduce a new joint target.
+     for field in ('angles', 'torques'):
+         assert turn['frames'][-1][field] == recovery['frames'][-1][field]
+     result = copy.deepcopy(turn)
+-    result['name'] = turn['name'] + '+' + recovery['name'][1:] + '(4회)'
++    result['name'] = turn['name'] + ('+' + recovery['name'][1:] + '(4회)') * recovery_blocks
+     turn_end = max(f['start_ms'] + f['time_ms'] for f in turn['frames'])
+     # Frame times are scaled during playback, so encode a real 500 ms hold.
+     recovery_start = turn_end + round(TURN_RECOVERY_DWELL_MS * turn['playback_speed'])
+     cycle_end = max(f['start_ms'] + f['time_ms'] for f in recovery['frames'])
+     lead_in = recovery['frames'][0]['start_ms']
+     scale = turn['playback_speed'] / recovery['playback_speed']
+-    for cycle in range(recovery['repeat_count']):
++    for cycle in range(recovery['repeat_count'] * recovery_blocks):
+         for source in recovery['frames']:
+             frame = copy.deepcopy(source)
+             # Replace the first recovery lead-in with the explicit boundary hold.
+@@ -50,8 +58,14 @@
+              for kind in ('pc', 'runtime')}
+     catalogs = {kind: json.loads(path.read_text()) for kind, path in paths.items()}
+     source = {motion['name']: motion for motion in catalogs['pc']['motions']}
+-    variants = [build_exit(source[turn], source[recovery]) for turn, recovery in EXIT_RECOVERIES]
+-    obsolete = {turn + '+전진4회' for turn, _ in EXIT_RECOVERIES}
++    variants = [build_exit(source[turn], source[recovery], blocks)
++                for turn, recovery, blocks in GOAL_EXIT_RECOVERIES]
++    obsolete = {
++        't골대후제자리우회전(5회)+전진4회',
++        'p골대후제자리좌회전(3회)+전진4회',
++        't골대후제자리우회전(5회)+라인복귀좌회전45도(4회)',
++        'p골대후제자리좌회전(3회)+라인복귀우회전45도(4회)',
++    }
+     for kind, catalog in catalogs.items():
+         replacements = {m['name']: m if kind == 'pc' else runtime_motion_from_source(m)
+                         for m in variants}

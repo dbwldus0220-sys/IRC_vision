@@ -77,7 +77,7 @@ def test_no_fourth_line_command_can_be_reserved(clock, issued, allowed):
 @pytest.mark.parametrize('info,expected', [
     (line_info(), 'STRAIGHT'),
     (offset_sample(offset=149.6, ground_heading_error_deg=-6.63,
-                   ground_lateral_offset_m=.1472), 'STRAIGHT_1'),
+                   ground_lateral_offset_m=.1572), 'STRAIGHT_1'),
 ])
 def test_counted_stage_drains_third_command_before_transition(clock, info, expected):
     node, current = start_forward('LINE_TRACK_AFTER_PICKUP')
@@ -112,7 +112,7 @@ def observe_walk_end(node, clock, info):
 
 def right_gap_line():
     return offset_sample(offset=149.6, ground_heading_error_deg=-6.63,
-                         ground_lateral_offset_m=.1472)
+                         ground_lateral_offset_m=.1572)
 
 
 @pytest.mark.parametrize('phase', ['AUTO', 'LINE_TRACK'])

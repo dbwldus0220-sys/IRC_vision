@@ -40,6 +40,7 @@ class MissionPhaseManager:
             "POST_BALL_GOAL_TRANSITION",
             "POST_SHOT_TURN",
             "POST_SHOT_LINE_ALIGN",
+            "POST_SHOT_EXIT_ALIGN",
             "POST_SHOT_FORWARD",
             "HURDLE_APPROACH",
             "HURDLE_POSITIONING",
@@ -73,6 +74,7 @@ class MissionPhaseManager:
     }
     POST_SHOT_CONTINUOUS_EXIT_ACTIONS = frozenset({
         "POST_SHOT_EXIT_RIGHT_5_FORWARD_4", "POST_SHOT_EXIT_LEFT_3_FORWARD_4",
+        "POST_SHOT_EXIT_RIGHT_9_RECOVERY_RIGHT_4", "POST_SHOT_EXIT_LEFT_4_RECOVERY_LEFT_4",
     })
     POST_SHOT_EXIT_ACTIONS = frozenset({
         "POST_SHOT_TURN_RIGHT_9", "POST_SHOT_TURN_LEFT_4",
@@ -346,6 +348,12 @@ class MissionPhaseManager:
 
     def post_shot_turn_action(self) -> str:
         """Choose the exit from the executed shot region and completed section."""
+        if self.last_completed_shot_region in {1, 2}:
+            return (
+                "POST_SHOT_EXIT_RIGHT_9_RECOVERY_RIGHT_4"
+                if self.ball_sections_processed <= 1
+                else "POST_SHOT_EXIT_LEFT_4_RECOVERY_LEFT_4"
+            )
         if self.last_completed_shot_region in {5, 6, 7, 8}:
             return (
                 "POST_SHOT_EXIT_RIGHT_5_FORWARD_4"
@@ -365,12 +373,22 @@ class MissionPhaseManager:
         self.current_phase = "POST_SHOT_FORWARD"
         return True
 
+    def complete_post_shot_exit_align(self) -> bool:
+        """The composite already included the requested line recovery."""
+        if self.current_phase != "POST_SHOT_EXIT_ALIGN" or self.post_shot_failed:
+            return False
+        self.current_phase = (
+            "LINE_TRACK" if self.required_ball_sections > 0
+            and self.ball_sections_processed >= self.required_ball_sections else "AUTO"
+        )
+        return True
+
     def handle_post_shot_motion(self, action: str, status: str) -> bool:
         """Apply a general terminal status already correlated by the gate."""
         matched = (
             (self.current_phase == "POST_SHOT_TURN"
              and action == self.post_shot_turn_action())
-            or (self.current_phase == "POST_SHOT_LINE_ALIGN"
+            or (self.current_phase in {"POST_SHOT_LINE_ALIGN", "POST_SHOT_EXIT_ALIGN"}
                 and action.startswith("POST_SHOT_LINE_TURN_"))
             or (self.current_phase == "POST_SHOT_FORWARD"
                 and action == "POST_SHOT_FORWARD")
@@ -380,8 +398,9 @@ class MissionPhaseManager:
         if status != "SUCCEEDED":
             # A partial turn has unknown yaw; do not replay or walk onward.
             self.post_shot_failed = True
-        elif (action in self.POST_SHOT_CONTINUOUS_EXIT_ACTIONS
-              or self.current_phase == "POST_SHOT_FORWARD"):
+        elif action in self.POST_SHOT_CONTINUOUS_EXIT_ACTIONS:
+            self.current_phase = "POST_SHOT_EXIT_ALIGN"
+        elif self.current_phase == "POST_SHOT_FORWARD":
             self.current_phase = (
                 "LINE_TRACK"
                 if self.required_ball_sections > 0

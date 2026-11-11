@@ -137,7 +137,8 @@ def test_first_fixed_fine_counts_and_immediately_selects_retreat_then_grasp(cloc
 
 
 @pytest.mark.parametrize('offset,bottom,action', [
-    (100, 252, 'BALL_PICKUP_CRAB_RIGHT'), (-100, 252, 'BALL_PICKUP_CRAB_LEFT'),
+    (100, 180, 'BALL_PICKUP_CRAB_RIGHT'), (-100, 180, 'BALL_PICKUP_CRAB_LEFT'),
+    (100, 252, 'BALL_PICKUP_FINE_FORWARD'), (-100, 252, 'BALL_PICKUP_FINE_FORWARD'),
     (0, 80, 'WAIT'), (0, 380, 'BALL_PICKUP_FINE_FORWARD'),
 ])
 def test_credit_preserves_alignment_and_distance_guards(clock, offset, bottom, action):

@@ -1,0 +1,90 @@
+[
+  {
+    "motion": "n공확인자세",
+    "returncode": 0,
+    "completion": [
+      "C\t1400\t1"
+    ],
+    "last_tick": [
+      "T\t1400\t400\t1\t0"
+    ],
+    "stderr": ""
+  },
+  {
+    "motion": "t공후 제자리우회전",
+    "returncode": 0,
+    "completion": [
+      "C\t3965\t1"
+    ],
+    "last_tick": [
+      "T\t3965\t2953\t1\t0"
+    ],
+    "stderr": ""
+  },
+  {
+    "motion": "t골대후제자리우회전",
+    "returncode": 0,
+    "completion": [
+      "C\t3965\t1"
+    ],
+    "last_tick": [
+      "T\t3965\t2953\t1\t0"
+    ],
+    "stderr": ""
+  },
+  {
+    "motion": "r골넣기 5번구역",
+    "returncode": 0,
+    "completion": [
+      "C\t3115\t1"
+    ],
+    "last_tick": [
+      "T\t3115\t2113\t1\t0"
+    ],
+    "stderr": ""
+  },
+  {
+    "motion": "r골넣기 6번구역",
+    "returncode": 0,
+    "completion": [
+      "C\t3235\t1"
+    ],
+    "last_tick": [
+      "T\t3235\t2233\t1\t0"
+    ],
+    "stderr": ""
+  },
+  {
+    "motion": "r골넣기7번구역",
+    "returncode": 0,
+    "completion": [
+      "C\t3235\t1"
+    ],
+    "last_tick": [
+      "T\t3235\t2233\t1\t0"
+    ],
+    "stderr": ""
+  },
+  {
+    "motion": "t골대후제자리우회전(5회)",
+    "returncode": 0,
+    "completion": [
+      "C\t3295\t1"
+    ],
+    "last_tick": [
+      "T\t3295\t2287\t1\t0"
+    ],
+    "stderr": ""
+  },
+  {
+    "motion": "t골대후제자리우회전(5회)+전진4회",
+    "returncode": 0,
+    "completion": [
+      "C\t5275\t1"
+    ],
+    "last_tick": [
+      "T\t5275\t4263\t1\t0"
+    ],
+    "stderr": ""
+  }
+]

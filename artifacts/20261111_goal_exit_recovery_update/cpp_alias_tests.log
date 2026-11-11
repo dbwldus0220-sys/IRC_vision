@@ -1,0 +1,39 @@
+Running main() from /opt/ros/humble/src/gtest_vendor/src/gtest_main.cc
+[==========] Running 12 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 3 tests from MotionAliasCatalog
+[ RUN      ] MotionAliasCatalog.LoadsLatestSdkAndCanonicalAliases
+[       OK ] MotionAliasCatalog.LoadsLatestSdkAndCanonicalAliases (4 ms)
+[ RUN      ] MotionAliasCatalog.LoadsAllSource77LeftTurnCamerasAndCounts
+[       OK ] MotionAliasCatalog.LoadsAllSource77LeftTurnCamerasAndCounts (4 ms)
+[ RUN      ] MotionAliasCatalog.Source76CrabsShareEntryAndRemoveDirectionTransitions
+[       OK ] MotionAliasCatalog.Source76CrabsShareEntryAndRemoveDirectionTransitions (3 ms)
+[----------] 3 tests from MotionAliasCatalog (11 ms total)
+
+[----------] 8 tests from CatalogOnlyCore
+[ RUN      ] CatalogOnlyCore.PreservesCorrelationFieldsAndRejectsExecution
+[       OK ] CatalogOnlyCore.PreservesCorrelationFieldsAndRejectsExecution (3 ms)
+[ RUN      ] CatalogOnlyCore.RejectsInvalidJsonSafely
+[       OK ] CatalogOnlyCore.RejectsInvalidJsonSafely (3 ms)
+[ RUN      ] CatalogOnlyCore.DistinguishesRequiredNullEventIdFromMissingEventId
+[       OK ] CatalogOnlyCore.DistinguishesRequiredNullEventIdFromMissingEventId (2 ms)
+[ RUN      ] CatalogOnlyCore.RequiresEveryRequestContractField
+[       OK ] CatalogOnlyCore.RequiresEveryRequestContractField (2 ms)
+[ RUN      ] CatalogOnlyCore.RejectsUnknownAliasWithoutFallback
+[       OK ] CatalogOnlyCore.RejectsUnknownAliasWithoutFallback (3 ms)
+[ RUN      ] CatalogOnlyCore.SerializedStatusContainsContractFields
+[       OK ] CatalogOnlyCore.SerializedStatusContainsContractFields (2 ms)
+[ RUN      ] CatalogOnlyCore.SerializedStatusPreservesNullCorrelationTypes
+[       OK ] CatalogOnlyCore.SerializedStatusPreservesNullCorrelationTypes (3 ms)
+[ RUN      ] CatalogOnlyCore.CancelNeverTouchesHardware
+[       OK ] CatalogOnlyCore.CancelNeverTouchesHardware (2 ms)
+[----------] 8 tests from CatalogOnlyCore (21 ms total)
+
+[----------] 1 test from CatalogOnlyContract
+[ RUN      ] CatalogOnlyContract.SharedVectorsPreserveFieldsWithoutFallback
+[       OK ] CatalogOnlyContract.SharedVectorsPreserveFieldsWithoutFallback (3 ms)
+[----------] 1 test from CatalogOnlyContract (4 ms total)
+
+[----------] Global test environment tear-down
+[==========] 12 tests from 3 test suites ran. (36 ms total)
+[  PASSED  ] 12 tests.

@@ -1,0 +1,30 @@
+[  7%] Built target motion_core
+Consolidate compiler generated dependencies of target motion_player_core
+[ 17%] Built target test_motion_callback
+[ 17%] Built target test_motion_pattern
+[ 23%] Built target gui_trace_probe
+[ 28%] Built target motion_player_core
+Consolidate compiler generated dependencies of target gui_execution_probe
+[ 38%] Built target continuous_trace_probe
+[ 38%] Built target test_continuous_interpolation
+Consolidate compiler generated dependencies of target robot_control
+[ 43%] Built target gui_execution_probe
+[ 56%] Built target robot_control
+Consolidate compiler generated dependencies of target test_gui_alignment
+Consolidate compiler generated dependencies of target recorded_execution_probe
+Consolidate compiler generated dependencies of target test_continuous_hardware
+[ 66%] Built target recorded_execution_probe
+[ 66%] Built target test_gui_alignment
+Consolidate compiler generated dependencies of target test_forward_timing
+[ 79%] Built target test_continuous_hardware
+Consolidate compiler generated dependencies of target test_ring_shot
+[ 82%] Building CXX object CMakeFiles/test_forward_timing.dir/test_forward_timing.cpp.o
+Consolidate compiler generated dependencies of target test_ball_fine_queue
+Consolidate compiler generated dependencies of target irc_robot
+[ 87%] Built target test_ring_shot
+[ 89%] Building CXX object CMakeFiles/test_ball_fine_queue.dir/test_ball_fine_queue.cpp.o
+[ 94%] Built target irc_robot
+[ 97%] Linking CXX executable test_forward_timing
+[ 97%] Built target test_forward_timing
+[100%] Linking CXX executable test_ball_fine_queue
+[100%] Built target test_ball_fine_queue

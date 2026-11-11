@@ -1,0 +1,1956 @@
+......FFFFF.F.FFF....F.............................FFFFFFFFFFFFFFFFF.... [ 19%]
+.FFFFFFFF.FF.FFFFFFFF.....F.F.............................FF............ [ 38%]
+...........................FFFFFF..................................FF... [ 57%]
+.............................................FF..........FF............. [ 77%]
+........................................................................ [ 96%]
+.............                                                            [100%]
+=================================== FAILURES ===================================
+______________ test_heading_then_lateral_then_approach[-1-False] _______________
+
+fine = False, sign = -1
+
+    @pytest.mark.parametrize('fine', [False, True])
+    @pytest.mark.parametrize('sign', [-1, 1])
+    def test_heading_then_lateral_then_approach(fine, sign):
+        planner = MotionDecisionPlanner()
+        plan = planner.plan_ball_pickup_fine_alignment if fine else planner.plan_ball_pickup_initial_alignment
+        direction = 'LEFT' if sign < 0 else 'RIGHT'
+        count = 1 if sign < 0 else 2
+        turn_prefix = 'BALL_PICKUP_FINE_TURN' if fine else 'BALL_PICKUP_CAMERA_DOWN_TURN'
+        crab_prefix = 'BALL_PICKUP_CRAB' if fine else 'BALL_PICKUP_INITIAL_CRAB'
+>       assert plan(pickup_ball(sign * 20, sign * 185)).action == f'{turn_prefix}_{direction}_{count}'
+E       AssertionError: assert 'BALL_PICKUP_...IAL_CRAB_LEFT' == 'BALL_PICKUP_...N_TURN_LEFT_1'
+E         - BALL_PICKUP_CAMERA_DOWN_TURN_LEFT_1
+E         + BALL_PICKUP_INITIAL_CRAB_LEFT
+
+src/mission_control/test/test_pickup_alignment_priority.py:32: AssertionError
+_______________ test_heading_then_lateral_then_approach[-1-True] _______________
+
+fine = True, sign = -1
+
+    @pytest.mark.parametrize('fine', [False, True])
+    @pytest.mark.parametrize('sign', [-1, 1])
+    def test_heading_then_lateral_then_approach(fine, sign):
+        planner = MotionDecisionPlanner()
+        plan = planner.plan_ball_pickup_fine_alignment if fine else planner.plan_ball_pickup_initial_alignment
+        direction = 'LEFT' if sign < 0 else 'RIGHT'
+        count = 1 if sign < 0 else 2
+        turn_prefix = 'BALL_PICKUP_FINE_TURN' if fine else 'BALL_PICKUP_CAMERA_DOWN_TURN'
+        crab_prefix = 'BALL_PICKUP_CRAB' if fine else 'BALL_PICKUP_INITIAL_CRAB'
+>       assert plan(pickup_ball(sign * 20, sign * 185)).action == f'{turn_prefix}_{direction}_{count}'
+E       AssertionError: assert 'BALL_PICKUP_CRAB_LEFT' == 'BALL_PICKUP_FINE_TURN_LEFT_1'
+E         - BALL_PICKUP_FINE_TURN_LEFT_1
+E         + BALL_PICKUP_CRAB_LEFT
+
+src/mission_control/test/test_pickup_alignment_priority.py:32: AssertionError
+_______________ test_heading_then_lateral_then_approach[1-False] _______________
+
+fine = False, sign = 1
+
+    @pytest.mark.parametrize('fine', [False, True])
+    @pytest.mark.parametrize('sign', [-1, 1])
+    def test_heading_then_lateral_then_approach(fine, sign):
+        planner = MotionDecisionPlanner()
+        plan = planner.plan_ball_pickup_fine_alignment if fine else planner.plan_ball_pickup_initial_alignment
+        direction = 'LEFT' if sign < 0 else 'RIGHT'
+        count = 1 if sign < 0 else 2
+        turn_prefix = 'BALL_PICKUP_FINE_TURN' if fine else 'BALL_PICKUP_CAMERA_DOWN_TURN'
+        crab_prefix = 'BALL_PICKUP_CRAB' if fine else 'BALL_PICKUP_INITIAL_CRAB'
+>       assert plan(pickup_ball(sign * 20, sign * 185)).action == f'{turn_prefix}_{direction}_{count}'
+E       AssertionError: assert 'BALL_PICKUP_...AL_CRAB_RIGHT' == 'BALL_PICKUP_..._TURN_RIGHT_2'
+E         - BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_2
+E         + BALL_PICKUP_INITIAL_CRAB_RIGHT
+
+src/mission_control/test/test_pickup_alignment_priority.py:32: AssertionError
+_______________ test_heading_then_lateral_then_approach[1-True] ________________
+
+fine = True, sign = 1
+
+    @pytest.mark.parametrize('fine', [False, True])
+    @pytest.mark.parametrize('sign', [-1, 1])
+    def test_heading_then_lateral_then_approach(fine, sign):
+        planner = MotionDecisionPlanner()
+        plan = planner.plan_ball_pickup_fine_alignment if fine else planner.plan_ball_pickup_initial_alignment
+        direction = 'LEFT' if sign < 0 else 'RIGHT'
+        count = 1 if sign < 0 else 2
+        turn_prefix = 'BALL_PICKUP_FINE_TURN' if fine else 'BALL_PICKUP_CAMERA_DOWN_TURN'
+        crab_prefix = 'BALL_PICKUP_CRAB' if fine else 'BALL_PICKUP_INITIAL_CRAB'
+>       assert plan(pickup_ball(sign * 20, sign * 185)).action == f'{turn_prefix}_{direction}_{count}'
+E       AssertionError: assert 'BALL_PICKUP_CRAB_RIGHT' == 'BALL_PICKUP_..._TURN_RIGHT_2'
+E         - BALL_PICKUP_FINE_TURN_RIGHT_2
+E         + BALL_PICKUP_CRAB_RIGHT
+
+src/mission_control/test/test_pickup_alignment_priority.py:32: AssertionError
+_________ test_recorded_ball_is_corrected_before_another_fine_forward __________
+
+    def test_recorded_ball_is_corrected_before_another_fine_forward():
+        planner = MotionDecisionPlanner()
+        # At the decision checkpoint: 321 px from the bottom, far to screen-left.
+        result = planner.plan_ball_pickup_fine_alignment(pickup_ball(-14.05, -185, 321))
+        assert result.action == 'BALL_PICKUP_CRAB_LEFT'
+        # At the user's screenshot: close enough, but yaw and lateral error remain.
+        result = planner.plan_ball_pickup_fine_alignment(pickup_ball(-16.26, -210, 260))
+>       assert result.action == 'BALL_PICKUP_FINE_TURN_LEFT_1'
+E       AssertionError: assert 'BALL_PICKUP_CRAB_LEFT' == 'BALL_PICKUP_FINE_TURN_LEFT_1'
+E         - BALL_PICKUP_FINE_TURN_LEFT_1
+E         + BALL_PICKUP_CRAB_LEFT
+
+src/mission_control/test/test_pickup_alignment_priority.py:45: AssertionError
+_ test_unusable_heading_or_turn_distance_never_permits_forward[changes0-True] __
+
+fine = True, changes = {'depth_valid': False}
+
+    @pytest.mark.parametrize('fine', [False, True])
+    @pytest.mark.parametrize('changes', [
+        {'depth_valid': False}, {'depth_age_sec': 1.}, {'ground_projection_valid': False},
+    ])
+    def test_unusable_heading_or_turn_distance_never_permits_forward(fine, changes):
+        planner = MotionDecisionPlanner()
+        plan = planner.plan_ball_pickup_fine_alignment if fine else planner.plan_ball_pickup_initial_alignment
+        result = plan(pickup_ball(20., 0, **changes))
+>       assert not result.valid and result.action == 'WAIT'
+E       AssertionError: assert (not True)
+E        +  where True = MotionDecision(phase='BALL_PICKUP_FINE_ALIGN', source='ball', action='BALL_PICKUP_FINE_FORWARD', valid=True, reason='b...: False, 'pickup_last_completed_motion_id': None, 'pickup_fine_skip_limit_px': None, 'catalog_motion_available': True}).valid
+
+src/mission_control/test/test_pickup_alignment_priority.py:59: AssertionError
+_ test_unusable_heading_or_turn_distance_never_permits_forward[changes1-True] __
+
+fine = True, changes = {'depth_age_sec': 1.0}
+
+    @pytest.mark.parametrize('fine', [False, True])
+    @pytest.mark.parametrize('changes', [
+        {'depth_valid': False}, {'depth_age_sec': 1.}, {'ground_projection_valid': False},
+    ])
+    def test_unusable_heading_or_turn_distance_never_permits_forward(fine, changes):
+        planner = MotionDecisionPlanner()
+        plan = planner.plan_ball_pickup_fine_alignment if fine else planner.plan_ball_pickup_initial_alignment
+        result = plan(pickup_ball(20., 0, **changes))
+>       assert not result.valid and result.action == 'WAIT'
+E       AssertionError: assert (not True)
+E        +  where True = MotionDecision(phase='BALL_PICKUP_FINE_ALIGN', source='ball', action='BALL_PICKUP_FINE_FORWARD', valid=True, reason='b...: False, 'pickup_last_completed_motion_id': None, 'pickup_fine_skip_limit_px': None, 'catalog_motion_available': True}).valid
+
+src/mission_control/test/test_pickup_alignment_priority.py:59: AssertionError
+_ test_unusable_heading_or_turn_distance_never_permits_forward[changes2-False] _
+
+fine = False, changes = {'ground_projection_valid': False}
+
+    @pytest.mark.parametrize('fine', [False, True])
+    @pytest.mark.parametrize('changes', [
+        {'depth_valid': False}, {'depth_age_sec': 1.}, {'ground_projection_valid': False},
+    ])
+    def test_unusable_heading_or_turn_distance_never_permits_forward(fine, changes):
+        planner = MotionDecisionPlanner()
+        plan = planner.plan_ball_pickup_fine_alignment if fine else planner.plan_ball_pickup_initial_alignment
+        result = plan(pickup_ball(20., 0, **changes))
+>       assert not result.valid and result.action == 'WAIT'
+E       AssertionError: assert (not True)
+E        +  where True = MotionDecision(phase='BALL_PICKUP_INITIAL_ALIGN', source='ball', action='BALL_PICKUP_INITIAL_ALIGN_CONTINUE', valid=Tr...lignment_mode': 'CRAB', 'pickup_approach_motion': 'STRAIGHT_0', 'approach_level': 0, 'catalog_motion_available': True}).valid
+
+src/mission_control/test/test_pickup_alignment_priority.py:59: AssertionError
+_ test_unusable_heading_or_turn_distance_never_permits_forward[changes2-True] __
+
+fine = True, changes = {'ground_projection_valid': False}
+
+    @pytest.mark.parametrize('fine', [False, True])
+    @pytest.mark.parametrize('changes', [
+        {'depth_valid': False}, {'depth_age_sec': 1.}, {'ground_projection_valid': False},
+    ])
+    def test_unusable_heading_or_turn_distance_never_permits_forward(fine, changes):
+        planner = MotionDecisionPlanner()
+        plan = planner.plan_ball_pickup_fine_alignment if fine else planner.plan_ball_pickup_initial_alignment
+        result = plan(pickup_ball(20., 0, **changes))
+>       assert not result.valid and result.action == 'WAIT'
+E       AssertionError: assert (not True)
+E        +  where True = MotionDecision(phase='BALL_PICKUP_FINE_ALIGN', source='ball', action='BALL_PICKUP_FINE_FORWARD', valid=True, reason='b...: False, 'pickup_last_completed_motion_id': None, 'pickup_fine_skip_limit_px': None, 'catalog_motion_available': True}).valid
+
+src/mission_control/test/test_pickup_alignment_priority.py:59: AssertionError
+__ test_node_publishes_fine_turn_inside_pickup_lock_and_waits_for_completion ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff918d1f30>
+
+    def test_node_publishes_fine_turn_inside_pickup_lock_and_waits_for_completion(monkeypatch):
+        clock = [10.]
+        monkeypatch.setattr('mission_control.motion_decision_node.time.monotonic', lambda: clock[0])
+        node = LiveInputHarness(phase='BALL_APPROACH')
+        assert node.phase_manager.start_special_action('PICKUP_NOW', 1)
+        node.pickup_fine_align_waiting = True
+        observe(node, clock, 'ball', pickup_ball(-20., -185))
+        command = node.publisher.messages[-1]
+>       assert command['action'] == 'BALL_PICKUP_FINE_TURN_LEFT_1'
+E       AssertionError: assert 'BALL_PICKUP_CRAB_LEFT' == 'BALL_PICKUP_FINE_TURN_LEFT_1'
+E         - BALL_PICKUP_FINE_TURN_LEFT_1
+E         + BALL_PICKUP_CRAB_LEFT
+
+src/mission_control/test/test_pickup_alignment_priority.py:98: AssertionError
+_ test_late_crab_frames_continue_only_after_success_and_keep_support_dwell[-200-1] _
+
+clock = [15.056842105263158], index = 1, offset = -200
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('offset', [-200, -100, 100, 200])
+    def test_late_crab_frames_continue_only_after_success_and_keep_support_dwell(clock, index, offset):
+        node, bridge, parent, crab = start_fine_crab(clock, index, offset)
+        before = len(node.publisher.messages)
+        late_centered_frames(node, clock)
+        sample = node.pickup_checkpoint_observation.sample
+        assert sample is not None
+        received_at = node.pickup_checkpoint_observation.received_at
+        assert len(node.publisher.messages) == before
+        assert not node.pickup_walk_reservation.pending and bridge.pickup_queued_request is None
+        clock[0] = node.pickup_checkpoint_observation.started_at + PICKUP_CRAB_DURATIONS[crab['motion_id']]
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        command = node.publisher.messages[-1]
+>       assert command['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE' and command['valid']
+E       AssertionError: assert ('BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD)
+
+src/mission_control/test/test_pickup_crab_observation.py:80: AssertionError
+_ test_late_crab_frames_continue_only_after_success_and_keep_support_dwell[-200-2] _
+
+clock = [15.056842105263158], index = 2, offset = -200
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('offset', [-200, -100, 100, 200])
+    def test_late_crab_frames_continue_only_after_success_and_keep_support_dwell(clock, index, offset):
+        node, bridge, parent, crab = start_fine_crab(clock, index, offset)
+        before = len(node.publisher.messages)
+        late_centered_frames(node, clock)
+        sample = node.pickup_checkpoint_observation.sample
+        assert sample is not None
+        received_at = node.pickup_checkpoint_observation.received_at
+        assert len(node.publisher.messages) == before
+        assert not node.pickup_walk_reservation.pending and bridge.pickup_queued_request is None
+        clock[0] = node.pickup_checkpoint_observation.started_at + PICKUP_CRAB_DURATIONS[crab['motion_id']]
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        command = node.publisher.messages[-1]
+>       assert command['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE' and command['valid']
+E       AssertionError: assert ('BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD)
+
+src/mission_control/test/test_pickup_crab_observation.py:80: AssertionError
+_ test_late_crab_frames_continue_only_after_success_and_keep_support_dwell[-100-1] _
+
+clock = [14.48842105263158], index = 1, offset = -100
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('offset', [-200, -100, 100, 200])
+    def test_late_crab_frames_continue_only_after_success_and_keep_support_dwell(clock, index, offset):
+        node, bridge, parent, crab = start_fine_crab(clock, index, offset)
+        before = len(node.publisher.messages)
+        late_centered_frames(node, clock)
+        sample = node.pickup_checkpoint_observation.sample
+        assert sample is not None
+        received_at = node.pickup_checkpoint_observation.received_at
+        assert len(node.publisher.messages) == before
+        assert not node.pickup_walk_reservation.pending and bridge.pickup_queued_request is None
+        clock[0] = node.pickup_checkpoint_observation.started_at + PICKUP_CRAB_DURATIONS[crab['motion_id']]
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        command = node.publisher.messages[-1]
+>       assert command['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE' and command['valid']
+E       AssertionError: assert ('BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD)
+
+src/mission_control/test/test_pickup_crab_observation.py:80: AssertionError
+_ test_late_crab_frames_continue_only_after_success_and_keep_support_dwell[-100-2] _
+
+clock = [14.48842105263158], index = 2, offset = -100
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('offset', [-200, -100, 100, 200])
+    def test_late_crab_frames_continue_only_after_success_and_keep_support_dwell(clock, index, offset):
+        node, bridge, parent, crab = start_fine_crab(clock, index, offset)
+        before = len(node.publisher.messages)
+        late_centered_frames(node, clock)
+        sample = node.pickup_checkpoint_observation.sample
+        assert sample is not None
+        received_at = node.pickup_checkpoint_observation.received_at
+        assert len(node.publisher.messages) == before
+        assert not node.pickup_walk_reservation.pending and bridge.pickup_queued_request is None
+        clock[0] = node.pickup_checkpoint_observation.started_at + PICKUP_CRAB_DURATIONS[crab['motion_id']]
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        command = node.publisher.messages[-1]
+>       assert command['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE' and command['valid']
+E       AssertionError: assert ('BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD)
+
+src/mission_control/test/test_pickup_crab_observation.py:80: AssertionError
+_ test_late_crab_frames_continue_only_after_success_and_keep_support_dwell[100-1] _
+
+clock = [14.47], index = 1, offset = 100
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('offset', [-200, -100, 100, 200])
+    def test_late_crab_frames_continue_only_after_success_and_keep_support_dwell(clock, index, offset):
+        node, bridge, parent, crab = start_fine_crab(clock, index, offset)
+        before = len(node.publisher.messages)
+        late_centered_frames(node, clock)
+        sample = node.pickup_checkpoint_observation.sample
+        assert sample is not None
+        received_at = node.pickup_checkpoint_observation.received_at
+        assert len(node.publisher.messages) == before
+        assert not node.pickup_walk_reservation.pending and bridge.pickup_queued_request is None
+        clock[0] = node.pickup_checkpoint_observation.started_at + PICKUP_CRAB_DURATIONS[crab['motion_id']]
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        command = node.publisher.messages[-1]
+>       assert command['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE' and command['valid']
+E       AssertionError: assert ('BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD)
+
+src/mission_control/test/test_pickup_crab_observation.py:80: AssertionError
+_ test_late_crab_frames_continue_only_after_success_and_keep_support_dwell[100-2] _
+
+clock = [14.47], index = 2, offset = 100
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('offset', [-200, -100, 100, 200])
+    def test_late_crab_frames_continue_only_after_success_and_keep_support_dwell(clock, index, offset):
+        node, bridge, parent, crab = start_fine_crab(clock, index, offset)
+        before = len(node.publisher.messages)
+        late_centered_frames(node, clock)
+        sample = node.pickup_checkpoint_observation.sample
+        assert sample is not None
+        received_at = node.pickup_checkpoint_observation.received_at
+        assert len(node.publisher.messages) == before
+        assert not node.pickup_walk_reservation.pending and bridge.pickup_queued_request is None
+        clock[0] = node.pickup_checkpoint_observation.started_at + PICKUP_CRAB_DURATIONS[crab['motion_id']]
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        command = node.publisher.messages[-1]
+>       assert command['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE' and command['valid']
+E       AssertionError: assert ('BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD)
+
+src/mission_control/test/test_pickup_crab_observation.py:80: AssertionError
+_ test_late_crab_frames_continue_only_after_success_and_keep_support_dwell[200-1] _
+
+clock = [14.47], index = 1, offset = 200
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('offset', [-200, -100, 100, 200])
+    def test_late_crab_frames_continue_only_after_success_and_keep_support_dwell(clock, index, offset):
+        node, bridge, parent, crab = start_fine_crab(clock, index, offset)
+        before = len(node.publisher.messages)
+        late_centered_frames(node, clock)
+        sample = node.pickup_checkpoint_observation.sample
+        assert sample is not None
+        received_at = node.pickup_checkpoint_observation.received_at
+        assert len(node.publisher.messages) == before
+        assert not node.pickup_walk_reservation.pending and bridge.pickup_queued_request is None
+        clock[0] = node.pickup_checkpoint_observation.started_at + PICKUP_CRAB_DURATIONS[crab['motion_id']]
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        command = node.publisher.messages[-1]
+>       assert command['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE' and command['valid']
+E       AssertionError: assert ('BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD)
+
+src/mission_control/test/test_pickup_crab_observation.py:80: AssertionError
+_ test_late_crab_frames_continue_only_after_success_and_keep_support_dwell[200-2] _
+
+clock = [14.47], index = 2, offset = 200
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('offset', [-200, -100, 100, 200])
+    def test_late_crab_frames_continue_only_after_success_and_keep_support_dwell(clock, index, offset):
+        node, bridge, parent, crab = start_fine_crab(clock, index, offset)
+        before = len(node.publisher.messages)
+        late_centered_frames(node, clock)
+        sample = node.pickup_checkpoint_observation.sample
+        assert sample is not None
+        received_at = node.pickup_checkpoint_observation.received_at
+        assert len(node.publisher.messages) == before
+        assert not node.pickup_walk_reservation.pending and bridge.pickup_queued_request is None
+        clock[0] = node.pickup_checkpoint_observation.started_at + PICKUP_CRAB_DURATIONS[crab['motion_id']]
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        command = node.publisher.messages[-1]
+>       assert command['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE' and command['valid']
+E       AssertionError: assert ('BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD)
+
+src/mission_control/test/test_pickup_crab_observation.py:80: AssertionError
+_ test_invalid_cached_observations_fall_back_and_fresh_frame_releases_checkpoint[too_few] _
+
+clock = [14.376315789473683], case = 'too_few'
+
+    @pytest.mark.parametrize('case', ['too_few', 'expired', 'lost', 'changed', 'future', 'duplicate'])
+    def test_invalid_cached_observations_fall_back_and_fresh_frame_releases_checkpoint(clock, case):
+        node, bridge, _, crab = start_fine_crab(clock)
+        late_centered_frames(node, clock, 2 if case == 'too_few' else 3)
+        if case == 'expired':
+            clock[0] += node.timeouts['ball'] + .01
+        elif case in {'lost', 'changed'}:
+            changes = {'detected': False, 'raw_detected': False} if case == 'lost' else {'offset_x_px': -100}
+            fresh(node, clock, 'ball', ball(bottom_distance_px=250, **changes), plan=False)
+        elif case in {'future', 'duplicate'}:
+            info = dict(node.pickup_checkpoint_observation.sample)
+            if case == 'future':
+                info['rgb_stamp_ns'] += 10_000_000_000
+            Node._info_callback(node, 'ball')(String(data=json.dumps(info)))
+        count = len(node.publisher.messages)
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert len(node.publisher.messages) == count
+        assert node.latest_info['ball'] is None
+        assert node.pickup_fine_align_waiting and bridge.pickup_fine_align_waiting
+        assert node.pickup_checkpoint_observation.key is None
+        fresh(node, clock, 'ball', ball(bottom_distance_px=250))
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD
+
+src/mission_control/test/test_pickup_crab_observation.py:125: AssertionError
+_ test_invalid_cached_observations_fall_back_and_fresh_frame_releases_checkpoint[expired] _
+
+clock = [14.896315789473682], case = 'expired'
+
+    @pytest.mark.parametrize('case', ['too_few', 'expired', 'lost', 'changed', 'future', 'duplicate'])
+    def test_invalid_cached_observations_fall_back_and_fresh_frame_releases_checkpoint(clock, case):
+        node, bridge, _, crab = start_fine_crab(clock)
+        late_centered_frames(node, clock, 2 if case == 'too_few' else 3)
+        if case == 'expired':
+            clock[0] += node.timeouts['ball'] + .01
+        elif case in {'lost', 'changed'}:
+            changes = {'detected': False, 'raw_detected': False} if case == 'lost' else {'offset_x_px': -100}
+            fresh(node, clock, 'ball', ball(bottom_distance_px=250, **changes), plan=False)
+        elif case in {'future', 'duplicate'}:
+            info = dict(node.pickup_checkpoint_observation.sample)
+            if case == 'future':
+                info['rgb_stamp_ns'] += 10_000_000_000
+            Node._info_callback(node, 'ball')(String(data=json.dumps(info)))
+        count = len(node.publisher.messages)
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert len(node.publisher.messages) == count
+        assert node.latest_info['ball'] is None
+        assert node.pickup_fine_align_waiting and bridge.pickup_fine_align_waiting
+        assert node.pickup_checkpoint_observation.key is None
+        fresh(node, clock, 'ball', ball(bottom_distance_px=250))
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD
+
+src/mission_control/test/test_pickup_crab_observation.py:125: AssertionError
+_ test_invalid_cached_observations_fall_back_and_fresh_frame_releases_checkpoint[lost] _
+
+clock = [14.396315789473682], case = 'lost'
+
+    @pytest.mark.parametrize('case', ['too_few', 'expired', 'lost', 'changed', 'future', 'duplicate'])
+    def test_invalid_cached_observations_fall_back_and_fresh_frame_releases_checkpoint(clock, case):
+        node, bridge, _, crab = start_fine_crab(clock)
+        late_centered_frames(node, clock, 2 if case == 'too_few' else 3)
+        if case == 'expired':
+            clock[0] += node.timeouts['ball'] + .01
+        elif case in {'lost', 'changed'}:
+            changes = {'detected': False, 'raw_detected': False} if case == 'lost' else {'offset_x_px': -100}
+            fresh(node, clock, 'ball', ball(bottom_distance_px=250, **changes), plan=False)
+        elif case in {'future', 'duplicate'}:
+            info = dict(node.pickup_checkpoint_observation.sample)
+            if case == 'future':
+                info['rgb_stamp_ns'] += 10_000_000_000
+            Node._info_callback(node, 'ball')(String(data=json.dumps(info)))
+        count = len(node.publisher.messages)
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert len(node.publisher.messages) == count
+        assert node.latest_info['ball'] is None
+        assert node.pickup_fine_align_waiting and bridge.pickup_fine_align_waiting
+        assert node.pickup_checkpoint_observation.key is None
+        fresh(node, clock, 'ball', ball(bottom_distance_px=250))
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD
+
+src/mission_control/test/test_pickup_crab_observation.py:125: AssertionError
+_ test_invalid_cached_observations_fall_back_and_fresh_frame_releases_checkpoint[changed] _
+
+clock = [14.396315789473682], case = 'changed'
+
+    @pytest.mark.parametrize('case', ['too_few', 'expired', 'lost', 'changed', 'future', 'duplicate'])
+    def test_invalid_cached_observations_fall_back_and_fresh_frame_releases_checkpoint(clock, case):
+        node, bridge, _, crab = start_fine_crab(clock)
+        late_centered_frames(node, clock, 2 if case == 'too_few' else 3)
+        if case == 'expired':
+            clock[0] += node.timeouts['ball'] + .01
+        elif case in {'lost', 'changed'}:
+            changes = {'detected': False, 'raw_detected': False} if case == 'lost' else {'offset_x_px': -100}
+            fresh(node, clock, 'ball', ball(bottom_distance_px=250, **changes), plan=False)
+        elif case in {'future', 'duplicate'}:
+            info = dict(node.pickup_checkpoint_observation.sample)
+            if case == 'future':
+                info['rgb_stamp_ns'] += 10_000_000_000
+            Node._info_callback(node, 'ball')(String(data=json.dumps(info)))
+        count = len(node.publisher.messages)
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert len(node.publisher.messages) == count
+        assert node.latest_info['ball'] is None
+        assert node.pickup_fine_align_waiting and bridge.pickup_fine_align_waiting
+        assert node.pickup_checkpoint_observation.key is None
+        fresh(node, clock, 'ball', ball(bottom_distance_px=250))
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD
+
+src/mission_control/test/test_pickup_crab_observation.py:125: AssertionError
+_ test_invalid_cached_observations_fall_back_and_fresh_frame_releases_checkpoint[future] _
+
+clock = [14.386315789473683], case = 'future'
+
+    @pytest.mark.parametrize('case', ['too_few', 'expired', 'lost', 'changed', 'future', 'duplicate'])
+    def test_invalid_cached_observations_fall_back_and_fresh_frame_releases_checkpoint(clock, case):
+        node, bridge, _, crab = start_fine_crab(clock)
+        late_centered_frames(node, clock, 2 if case == 'too_few' else 3)
+        if case == 'expired':
+            clock[0] += node.timeouts['ball'] + .01
+        elif case in {'lost', 'changed'}:
+            changes = {'detected': False, 'raw_detected': False} if case == 'lost' else {'offset_x_px': -100}
+            fresh(node, clock, 'ball', ball(bottom_distance_px=250, **changes), plan=False)
+        elif case in {'future', 'duplicate'}:
+            info = dict(node.pickup_checkpoint_observation.sample)
+            if case == 'future':
+                info['rgb_stamp_ns'] += 10_000_000_000
+            Node._info_callback(node, 'ball')(String(data=json.dumps(info)))
+        count = len(node.publisher.messages)
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert len(node.publisher.messages) == count
+        assert node.latest_info['ball'] is None
+        assert node.pickup_fine_align_waiting and bridge.pickup_fine_align_waiting
+        assert node.pickup_checkpoint_observation.key is None
+        fresh(node, clock, 'ball', ball(bottom_distance_px=250))
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD
+
+src/mission_control/test/test_pickup_crab_observation.py:125: AssertionError
+_ test_invalid_cached_observations_fall_back_and_fresh_frame_releases_checkpoint[duplicate] _
+
+clock = [14.386315789473683], case = 'duplicate'
+
+    @pytest.mark.parametrize('case', ['too_few', 'expired', 'lost', 'changed', 'future', 'duplicate'])
+    def test_invalid_cached_observations_fall_back_and_fresh_frame_releases_checkpoint(clock, case):
+        node, bridge, _, crab = start_fine_crab(clock)
+        late_centered_frames(node, clock, 2 if case == 'too_few' else 3)
+        if case == 'expired':
+            clock[0] += node.timeouts['ball'] + .01
+        elif case in {'lost', 'changed'}:
+            changes = {'detected': False, 'raw_detected': False} if case == 'lost' else {'offset_x_px': -100}
+            fresh(node, clock, 'ball', ball(bottom_distance_px=250, **changes), plan=False)
+        elif case in {'future', 'duplicate'}:
+            info = dict(node.pickup_checkpoint_observation.sample)
+            if case == 'future':
+                info['rgb_stamp_ns'] += 10_000_000_000
+            Node._info_callback(node, 'ball')(String(data=json.dumps(info)))
+        count = len(node.publisher.messages)
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert len(node.publisher.messages) == count
+        assert node.latest_info['ball'] is None
+        assert node.pickup_fine_align_waiting and bridge.pickup_fine_align_waiting
+        assert node.pickup_checkpoint_observation.key is None
+        fresh(node, clock, 'ball', ball(bottom_distance_px=250))
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD
+
+src/mission_control/test/test_pickup_crab_observation.py:125: AssertionError
+________ test_unmatched_success_cannot_release_cached_crab[command_id] _________
+
+clock = [14.376315789473683], field = 'command_id'
+
+    @pytest.mark.parametrize('field', ['command_id', 'event_id', 'request_id'])
+    def test_unmatched_success_cannot_release_cached_crab(clock, field):
+        node, bridge, _, crab = start_fine_crab(clock)
+        late_centered_frames(node, clock)
+        count = len(node.publisher.messages)
+        if field == 'request_id':
+            forward_status(node, bridge, {**crab, field: crab[field] + 100}, 'SUCCEEDED')
+        else:
+            # Decision ownership is checked on the bridge's checkpoint status.
+            status = decoded_messages(bridge.motion_status_publisher)[-1]
+            Node._motion_status_callback(node, String(data=json.dumps({
+                **status, field: crab[field] + 100, 'motion_id': Node.PICKUP_FINE_ALIGN_MARKER,
+                'completed_motion_id': crab['motion_id'],
+            })))
+        assert len(node.publisher.messages) == count
+        assert bridge.active_motion_id == crab['motion_id']
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD
+
+src/mission_control/test/test_pickup_crab_observation.py:146: AssertionError
+_________ test_unmatched_success_cannot_release_cached_crab[event_id] __________
+
+clock = [14.376315789473683], field = 'event_id'
+
+    @pytest.mark.parametrize('field', ['command_id', 'event_id', 'request_id'])
+    def test_unmatched_success_cannot_release_cached_crab(clock, field):
+        node, bridge, _, crab = start_fine_crab(clock)
+        late_centered_frames(node, clock)
+        count = len(node.publisher.messages)
+        if field == 'request_id':
+            forward_status(node, bridge, {**crab, field: crab[field] + 100}, 'SUCCEEDED')
+        else:
+            # Decision ownership is checked on the bridge's checkpoint status.
+            status = decoded_messages(bridge.motion_status_publisher)[-1]
+            Node._motion_status_callback(node, String(data=json.dumps({
+                **status, field: crab[field] + 100, 'motion_id': Node.PICKUP_FINE_ALIGN_MARKER,
+                'completed_motion_id': crab['motion_id'],
+            })))
+        assert len(node.publisher.messages) == count
+        assert bridge.active_motion_id == crab['motion_id']
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD
+
+src/mission_control/test/test_pickup_crab_observation.py:146: AssertionError
+________ test_unmatched_success_cannot_release_cached_crab[request_id] _________
+
+clock = [14.376315789473683], field = 'request_id'
+
+    @pytest.mark.parametrize('field', ['command_id', 'event_id', 'request_id'])
+    def test_unmatched_success_cannot_release_cached_crab(clock, field):
+        node, bridge, _, crab = start_fine_crab(clock)
+        late_centered_frames(node, clock)
+        count = len(node.publisher.messages)
+        if field == 'request_id':
+            forward_status(node, bridge, {**crab, field: crab[field] + 100}, 'SUCCEEDED')
+        else:
+            # Decision ownership is checked on the bridge's checkpoint status.
+            status = decoded_messages(bridge.motion_status_publisher)[-1]
+            Node._motion_status_callback(node, String(data=json.dumps({
+                **status, field: crab[field] + 100, 'motion_id': Node.PICKUP_FINE_ALIGN_MARKER,
+                'completed_motion_id': crab['motion_id'],
+            })))
+        assert len(node.publisher.messages) == count
+        assert bridge.active_motion_id == crab['motion_id']
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD
+
+src/mission_control/test/test_pickup_crab_observation.py:146: AssertionError
+________ test_cached_observation_does_not_replace_same_gait_reservation ________
+
+clock = [14.406315789473682]
+
+    def test_cached_observation_does_not_replace_same_gait_reservation(clock):
+        node, bridge, _, crab = start_fine_crab(clock)
+        late_centered_frames(node, clock)
+        for _ in range(3):
+            fresh(node, clock, 'ball', ball(offset_x_px=-100, bottom_distance_px=250), plan=False)
+        command = node.publisher.messages[-1]
+        assert command['source_command']['pickup_walk_prequeue']
+        assert node.pickup_checkpoint_observation.key is None
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+        queued = decoded_messages(bridge.executor_request_publisher)[-1]
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+>       assert bridge.active_request_id == queued['request_id']
+E       assert 4 == 1
+E        +  where 4 = <test_motion_command_bridge.FakeBridge object at 0xffff917c4250>.active_request_id
+
+src/mission_control/test/test_pickup_crab_observation.py:189: AssertionError
+___ test_latest_invalid_or_different_decision_discards_ready_sample[change0] ___
+
+clock = [14.396315789473682], change = {'depth_valid': False}
+
+    @pytest.mark.parametrize('change', [
+        {'depth_valid': False}, {'depth_age_sec': .701}, {'distance_m': .501},
+        {'confidence': .1}, {'confirmation_confirmed': False},
+        {'bottom_distance_px': 300.001}, {'bottom_distance_px': 99},
+    ])
+    def test_latest_invalid_or_different_decision_discards_ready_sample(clock, change):
+        node, bridge, _, crab = start_fine_crab(clock)
+        late_centered_frames(node, clock)
+        fresh(node, clock, 'ball', ball(**{'bottom_distance_px': 250, **change}), plan=False)
+        assert node.pickup_checkpoint_observation.sample is None
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert node.pickup_fine_align_waiting and node.latest_info['ball'] is None
+        fresh(node, clock, 'ball', ball(bottom_distance_px=250))
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD
+
+src/mission_control/test/test_pickup_crab_observation.py:210: AssertionError
+___ test_latest_invalid_or_different_decision_discards_ready_sample[change1] ___
+
+clock = [14.396315789473682], change = {'depth_age_sec': 0.701}
+
+    @pytest.mark.parametrize('change', [
+        {'depth_valid': False}, {'depth_age_sec': .701}, {'distance_m': .501},
+        {'confidence': .1}, {'confirmation_confirmed': False},
+        {'bottom_distance_px': 300.001}, {'bottom_distance_px': 99},
+    ])
+    def test_latest_invalid_or_different_decision_discards_ready_sample(clock, change):
+        node, bridge, _, crab = start_fine_crab(clock)
+        late_centered_frames(node, clock)
+        fresh(node, clock, 'ball', ball(**{'bottom_distance_px': 250, **change}), plan=False)
+        assert node.pickup_checkpoint_observation.sample is None
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert node.pickup_fine_align_waiting and node.latest_info['ball'] is None
+        fresh(node, clock, 'ball', ball(bottom_distance_px=250))
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD
+
+src/mission_control/test/test_pickup_crab_observation.py:210: AssertionError
+___ test_latest_invalid_or_different_decision_discards_ready_sample[change2] ___
+
+clock = [14.396315789473682], change = {'distance_m': 0.501}
+
+    @pytest.mark.parametrize('change', [
+        {'depth_valid': False}, {'depth_age_sec': .701}, {'distance_m': .501},
+        {'confidence': .1}, {'confirmation_confirmed': False},
+        {'bottom_distance_px': 300.001}, {'bottom_distance_px': 99},
+    ])
+    def test_latest_invalid_or_different_decision_discards_ready_sample(clock, change):
+        node, bridge, _, crab = start_fine_crab(clock)
+        late_centered_frames(node, clock)
+        fresh(node, clock, 'ball', ball(**{'bottom_distance_px': 250, **change}), plan=False)
+        assert node.pickup_checkpoint_observation.sample is None
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert node.pickup_fine_align_waiting and node.latest_info['ball'] is None
+        fresh(node, clock, 'ball', ball(bottom_distance_px=250))
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD
+
+src/mission_control/test/test_pickup_crab_observation.py:210: AssertionError
+___ test_latest_invalid_or_different_decision_discards_ready_sample[change3] ___
+
+clock = [14.396315789473682], change = {'confidence': 0.1}
+
+    @pytest.mark.parametrize('change', [
+        {'depth_valid': False}, {'depth_age_sec': .701}, {'distance_m': .501},
+        {'confidence': .1}, {'confirmation_confirmed': False},
+        {'bottom_distance_px': 300.001}, {'bottom_distance_px': 99},
+    ])
+    def test_latest_invalid_or_different_decision_discards_ready_sample(clock, change):
+        node, bridge, _, crab = start_fine_crab(clock)
+        late_centered_frames(node, clock)
+        fresh(node, clock, 'ball', ball(**{'bottom_distance_px': 250, **change}), plan=False)
+        assert node.pickup_checkpoint_observation.sample is None
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert node.pickup_fine_align_waiting and node.latest_info['ball'] is None
+        fresh(node, clock, 'ball', ball(bottom_distance_px=250))
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD
+
+src/mission_control/test/test_pickup_crab_observation.py:210: AssertionError
+___ test_latest_invalid_or_different_decision_discards_ready_sample[change4] ___
+
+clock = [14.396315789473682], change = {'confirmation_confirmed': False}
+
+    @pytest.mark.parametrize('change', [
+        {'depth_valid': False}, {'depth_age_sec': .701}, {'distance_m': .501},
+        {'confidence': .1}, {'confirmation_confirmed': False},
+        {'bottom_distance_px': 300.001}, {'bottom_distance_px': 99},
+    ])
+    def test_latest_invalid_or_different_decision_discards_ready_sample(clock, change):
+        node, bridge, _, crab = start_fine_crab(clock)
+        late_centered_frames(node, clock)
+        fresh(node, clock, 'ball', ball(**{'bottom_distance_px': 250, **change}), plan=False)
+        assert node.pickup_checkpoint_observation.sample is None
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert node.pickup_fine_align_waiting and node.latest_info['ball'] is None
+        fresh(node, clock, 'ball', ball(bottom_distance_px=250))
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD
+
+src/mission_control/test/test_pickup_crab_observation.py:210: AssertionError
+___ test_latest_invalid_or_different_decision_discards_ready_sample[change5] ___
+
+clock = [14.386315789473683], change = {'bottom_distance_px': 300.001}
+
+    @pytest.mark.parametrize('change', [
+        {'depth_valid': False}, {'depth_age_sec': .701}, {'distance_m': .501},
+        {'confidence': .1}, {'confirmation_confirmed': False},
+        {'bottom_distance_px': 300.001}, {'bottom_distance_px': 99},
+    ])
+    def test_latest_invalid_or_different_decision_discards_ready_sample(clock, change):
+        node, bridge, _, crab = start_fine_crab(clock)
+        late_centered_frames(node, clock)
+        fresh(node, clock, 'ball', ball(**{'bottom_distance_px': 250, **change}), plan=False)
+>       assert node.pickup_checkpoint_observation.sample is None
+E       AssertionError: assert {'bearing_deg': 0.0, 'bottom_distance_px': 300.001, 'camera_center_offset_x_px': 0, 'confidence': 0.9, ...} is None
+E        +  where {'bearing_deg': 0.0, 'bottom_distance_px': 300.001, 'camera_center_offset_x_px': 0, 'confidence': 0.9, ...} = <mission_control.pickup_checkpoint_observation.PickupCheckpointObservation object at 0xffff9148a860>.sample
+E        +    where <mission_control.pickup_checkpoint_observation.PickupCheckpointObservation object at 0xffff9148a860> = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff9148aef0>.pickup_checkpoint_observation
+
+src/mission_control/test/test_pickup_crab_observation.py:206: AssertionError
+___ test_latest_invalid_or_different_decision_discards_ready_sample[change6] ___
+
+clock = [14.396315789473682], change = {'bottom_distance_px': 99}
+
+    @pytest.mark.parametrize('change', [
+        {'depth_valid': False}, {'depth_age_sec': .701}, {'distance_m': .501},
+        {'confidence': .1}, {'confirmation_confirmed': False},
+        {'bottom_distance_px': 300.001}, {'bottom_distance_px': 99},
+    ])
+    def test_latest_invalid_or_different_decision_discards_ready_sample(clock, change):
+        node, bridge, _, crab = start_fine_crab(clock)
+        late_centered_frames(node, clock)
+        fresh(node, clock, 'ball', ball(**{'bottom_distance_px': 250, **change}), plan=False)
+        assert node.pickup_checkpoint_observation.sample is None
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert node.pickup_fine_align_waiting and node.latest_info['ball'] is None
+        fresh(node, clock, 'ball', ball(bottom_distance_px=250))
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD
+
+src/mission_control/test/test_pickup_crab_observation.py:210: AssertionError
+______ test_rejected_same_gait_queue_uses_fresh_checkpoint_and_can_resume ______
+
+clock = [14.406315789473682]
+
+    def test_rejected_same_gait_queue_uses_fresh_checkpoint_and_can_resume(clock):
+        node, bridge, _, crab = start_fine_crab(clock)
+        late_centered_frames(node, clock)
+        for _ in range(3):
+            fresh(node, clock, 'ball', ball(offset_x_px=-100, bottom_distance_px=250), plan=False)
+        bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
+        queued = decoded_messages(bridge.executor_request_publisher)[-1]
+        forward_status(node, bridge, queued, 'REJECTED', error_code='INCOMPATIBLE_TRANSITION')
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert bridge.pickup_queued_request is None
+        assert not node.pickup_walk_reservation.pending
+>       assert node.pickup_fine_align_waiting
+E       assert False
+E        +  where False = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff91488be0>.pickup_fine_align_waiting
+
+src/mission_control/test/test_pickup_crab_observation.py:240: AssertionError
+_ test_executor_not_ready_does_not_dispatch_cached_sample_and_expired_sample_is_not_reused _
+
+clock = [14.896315789473682]
+
+    def test_executor_not_ready_does_not_dispatch_cached_sample_and_expired_sample_is_not_reused(clock):
+        node, bridge, _, crab = start_fine_crab(clock)
+        late_centered_frames(node, clock)
+        before = len(node.publisher.messages)
+        node.executor_auto_ready = False
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert len(node.publisher.messages) == before
+        clock[0] += node.timeouts['ball'] + .01
+        node.executor_auto_ready = True
+        Node._publish_decision(node)
+        assert node.publisher.messages[-1]['action'] != 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+        fresh(node, clock, 'ball', ball(bottom_distance_px=250))
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD
+
+src/mission_control/test/test_pickup_crab_observation.py:257: AssertionError
+_____ test_initial_crab_reuses_observation_across_both_checkpoints[-250-1] _____
+
+clock = [11.402631578947368], index = 1, offset = -250
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('offset', [-250, -100, 100, 250])
+    def test_initial_crab_reuses_observation_across_both_checkpoints(clock, index, offset):
+        node = LiveInputHarness(phase='BALL_APPROACH')
+        node.phase_manager.active_ball_mode_index = index
+        node.phase_manager.ball_modes_confirmed = index
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = 'pickup_crab_left_0' if offset < 0 else 'pickup_crab_right_0'
+        _, crab = start(node, bridge, clock, ball(offset_x_px=offset))
+        assert node.pickup_checkpoint_observation.stage == 'initial'
+        clock[0] += PICKUP_CRAB_DURATIONS[crab['motion_id']] * .75
+        for _ in range(3):
+            fresh(node, clock, 'ball', ball(bottom_distance_px=250), plan=False)
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_INITIAL_ALIGN_CONTINUE'
+        before = len(bridge.motion_status_publisher.messages)
+        bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
+        for message in bridge.motion_status_publisher.messages[before:]:
+            Node._motion_status_callback(node, message)
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         ?             -  ^
+E         + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+E         ?               ^^^^^
+
+src/mission_control/test/test_pickup_crab_observation.py:289: AssertionError
+_____ test_initial_crab_reuses_observation_across_both_checkpoints[-250-2] _____
+
+clock = [11.402631578947368], index = 2, offset = -250
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('offset', [-250, -100, 100, 250])
+    def test_initial_crab_reuses_observation_across_both_checkpoints(clock, index, offset):
+        node = LiveInputHarness(phase='BALL_APPROACH')
+        node.phase_manager.active_ball_mode_index = index
+        node.phase_manager.ball_modes_confirmed = index
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = 'pickup_crab_left_0' if offset < 0 else 'pickup_crab_right_0'
+        _, crab = start(node, bridge, clock, ball(offset_x_px=offset))
+        assert node.pickup_checkpoint_observation.stage == 'initial'
+        clock[0] += PICKUP_CRAB_DURATIONS[crab['motion_id']] * .75
+        for _ in range(3):
+            fresh(node, clock, 'ball', ball(bottom_distance_px=250), plan=False)
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_INITIAL_ALIGN_CONTINUE'
+        before = len(bridge.motion_status_publisher.messages)
+        bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
+        for message in bridge.motion_status_publisher.messages[before:]:
+            Node._motion_status_callback(node, message)
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         ?             -  ^
+E         + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+E         ?               ^^^^^
+
+src/mission_control/test/test_pickup_crab_observation.py:289: AssertionError
+_____ test_initial_crab_reuses_observation_across_both_checkpoints[-100-1] _____
+
+clock = [10.976315789473682], index = 1, offset = -100
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('offset', [-250, -100, 100, 250])
+    def test_initial_crab_reuses_observation_across_both_checkpoints(clock, index, offset):
+        node = LiveInputHarness(phase='BALL_APPROACH')
+        node.phase_manager.active_ball_mode_index = index
+        node.phase_manager.ball_modes_confirmed = index
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = 'pickup_crab_left_0' if offset < 0 else 'pickup_crab_right_0'
+        _, crab = start(node, bridge, clock, ball(offset_x_px=offset))
+        assert node.pickup_checkpoint_observation.stage == 'initial'
+        clock[0] += PICKUP_CRAB_DURATIONS[crab['motion_id']] * .75
+        for _ in range(3):
+            fresh(node, clock, 'ball', ball(bottom_distance_px=250), plan=False)
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_INITIAL_ALIGN_CONTINUE'
+        before = len(bridge.motion_status_publisher.messages)
+        bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
+        for message in bridge.motion_status_publisher.messages[before:]:
+            Node._motion_status_callback(node, message)
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         ?             -  ^
+E         + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+E         ?               ^^^^^
+
+src/mission_control/test/test_pickup_crab_observation.py:289: AssertionError
+_____ test_initial_crab_reuses_observation_across_both_checkpoints[-100-2] _____
+
+clock = [10.976315789473682], index = 2, offset = -100
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('offset', [-250, -100, 100, 250])
+    def test_initial_crab_reuses_observation_across_both_checkpoints(clock, index, offset):
+        node = LiveInputHarness(phase='BALL_APPROACH')
+        node.phase_manager.active_ball_mode_index = index
+        node.phase_manager.ball_modes_confirmed = index
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = 'pickup_crab_left_0' if offset < 0 else 'pickup_crab_right_0'
+        _, crab = start(node, bridge, clock, ball(offset_x_px=offset))
+        assert node.pickup_checkpoint_observation.stage == 'initial'
+        clock[0] += PICKUP_CRAB_DURATIONS[crab['motion_id']] * .75
+        for _ in range(3):
+            fresh(node, clock, 'ball', ball(bottom_distance_px=250), plan=False)
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_INITIAL_ALIGN_CONTINUE'
+        before = len(bridge.motion_status_publisher.messages)
+        bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
+        for message in bridge.motion_status_publisher.messages[before:]:
+            Node._motion_status_callback(node, message)
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         ?             -  ^
+E         + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+E         ?               ^^^^^
+
+src/mission_control/test/test_pickup_crab_observation.py:289: AssertionError
+_____ test_initial_crab_reuses_observation_across_both_checkpoints[100-1] ______
+
+clock = [10.962499999999999], index = 1, offset = 100
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('offset', [-250, -100, 100, 250])
+    def test_initial_crab_reuses_observation_across_both_checkpoints(clock, index, offset):
+        node = LiveInputHarness(phase='BALL_APPROACH')
+        node.phase_manager.active_ball_mode_index = index
+        node.phase_manager.ball_modes_confirmed = index
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = 'pickup_crab_left_0' if offset < 0 else 'pickup_crab_right_0'
+        _, crab = start(node, bridge, clock, ball(offset_x_px=offset))
+        assert node.pickup_checkpoint_observation.stage == 'initial'
+        clock[0] += PICKUP_CRAB_DURATIONS[crab['motion_id']] * .75
+        for _ in range(3):
+            fresh(node, clock, 'ball', ball(bottom_distance_px=250), plan=False)
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_INITIAL_ALIGN_CONTINUE'
+        before = len(bridge.motion_status_publisher.messages)
+        bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
+        for message in bridge.motion_status_publisher.messages[before:]:
+            Node._motion_status_callback(node, message)
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         ?             -  ^
+E         + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+E         ?               ^^^^^
+
+src/mission_control/test/test_pickup_crab_observation.py:289: AssertionError
+_____ test_initial_crab_reuses_observation_across_both_checkpoints[100-2] ______
+
+clock = [10.962499999999999], index = 2, offset = 100
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('offset', [-250, -100, 100, 250])
+    def test_initial_crab_reuses_observation_across_both_checkpoints(clock, index, offset):
+        node = LiveInputHarness(phase='BALL_APPROACH')
+        node.phase_manager.active_ball_mode_index = index
+        node.phase_manager.ball_modes_confirmed = index
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = 'pickup_crab_left_0' if offset < 0 else 'pickup_crab_right_0'
+        _, crab = start(node, bridge, clock, ball(offset_x_px=offset))
+        assert node.pickup_checkpoint_observation.stage == 'initial'
+        clock[0] += PICKUP_CRAB_DURATIONS[crab['motion_id']] * .75
+        for _ in range(3):
+            fresh(node, clock, 'ball', ball(bottom_distance_px=250), plan=False)
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_INITIAL_ALIGN_CONTINUE'
+        before = len(bridge.motion_status_publisher.messages)
+        bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
+        for message in bridge.motion_status_publisher.messages[before:]:
+            Node._motion_status_callback(node, message)
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         ?             -  ^
+E         + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+E         ?               ^^^^^
+
+src/mission_control/test/test_pickup_crab_observation.py:289: AssertionError
+_____ test_initial_crab_reuses_observation_across_both_checkpoints[250-1] ______
+
+clock = [11.374999999999998], index = 1, offset = 250
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('offset', [-250, -100, 100, 250])
+    def test_initial_crab_reuses_observation_across_both_checkpoints(clock, index, offset):
+        node = LiveInputHarness(phase='BALL_APPROACH')
+        node.phase_manager.active_ball_mode_index = index
+        node.phase_manager.ball_modes_confirmed = index
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = 'pickup_crab_left_0' if offset < 0 else 'pickup_crab_right_0'
+        _, crab = start(node, bridge, clock, ball(offset_x_px=offset))
+        assert node.pickup_checkpoint_observation.stage == 'initial'
+        clock[0] += PICKUP_CRAB_DURATIONS[crab['motion_id']] * .75
+        for _ in range(3):
+            fresh(node, clock, 'ball', ball(bottom_distance_px=250), plan=False)
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_INITIAL_ALIGN_CONTINUE'
+        before = len(bridge.motion_status_publisher.messages)
+        bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
+        for message in bridge.motion_status_publisher.messages[before:]:
+            Node._motion_status_callback(node, message)
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         ?             -  ^
+E         + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+E         ?               ^^^^^
+
+src/mission_control/test/test_pickup_crab_observation.py:289: AssertionError
+_____ test_initial_crab_reuses_observation_across_both_checkpoints[250-2] ______
+
+clock = [11.374999999999998], index = 2, offset = 250
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('offset', [-250, -100, 100, 250])
+    def test_initial_crab_reuses_observation_across_both_checkpoints(clock, index, offset):
+        node = LiveInputHarness(phase='BALL_APPROACH')
+        node.phase_manager.active_ball_mode_index = index
+        node.phase_manager.ball_modes_confirmed = index
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = 'pickup_crab_left_0' if offset < 0 else 'pickup_crab_right_0'
+        _, crab = start(node, bridge, clock, ball(offset_x_px=offset))
+        assert node.pickup_checkpoint_observation.stage == 'initial'
+        clock[0] += PICKUP_CRAB_DURATIONS[crab['motion_id']] * .75
+        for _ in range(3):
+            fresh(node, clock, 'ball', ball(bottom_distance_px=250), plan=False)
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_INITIAL_ALIGN_CONTINUE'
+        before = len(bridge.motion_status_publisher.messages)
+        bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
+        for message in bridge.motion_status_publisher.messages[before:]:
+            Node._motion_status_callback(node, message)
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         ?             -  ^
+E         + BALL_PICKUP_INITIAL_ALIGN_CONTINUE
+E         ?               ^^^^^
+
+src/mission_control/test/test_pickup_crab_observation.py:289: AssertionError
+_ test_two_cycle_to_one_cycle_uses_checkpoint_not_wrong_two_cycle_queue[-250] __
+
+clock = [14.784], offset = -250
+
+    @pytest.mark.parametrize('offset', [-250, 250])
+    def test_two_cycle_to_one_cycle_uses_checkpoint_not_wrong_two_cycle_queue(clock, offset):
+        node, bridge, _, crab = start_fine_crab(clock, offset=offset)
+        observer = node.pickup_checkpoint_observation
+        frames(node, clock, observer.started_at, observer.duration,
+               ball(offset_x_px=offset / 2, bottom_distance_px=250))
+>       assert not node.pickup_walk_reservation.pending
+E       assert not True
+E        +  where True = <mission_control.pickup_walk_reservation.PickupWalkReservation object at 0xffff91744790>.pending
+E        +    where <mission_control.pickup_walk_reservation.PickupWalkReservation object at 0xffff91744790> = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff91744c40>.pickup_walk_reservation
+
+src/mission_control/test/test_reservation_expansion.py:65: AssertionError
+_________ test_changed_latest_sample_cancels_early_same_gait_candidate _________
+
+clock = [14.362]
+
+    def test_changed_latest_sample_cancels_early_same_gait_candidate(clock):
+        node, bridge, _, crab = start_fine_crab(clock)
+        observer = node.pickup_checkpoint_observation
+        started, duration = observer.started_at, observer.duration
+        frames(node, clock, started, duration, ball(offset_x_px=-100, bottom_distance_px=250), (.61, .65, .69))
+        assert not node.pickup_walk_reservation.pending
+        frames(node, clock, started, duration, ball(bottom_distance_px=250), (.76,))
+        assert not node.pickup_walk_reservation.pending
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert node.pickup_fine_align_waiting  # One changed sample cannot authorize a new action.
+        fresh(node, clock, 'ball', ball(bottom_distance_px=250))
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD
+
+src/mission_control/test/test_reservation_expansion.py:85: AssertionError
+_________ test_both_launch_defaults_use_230_and_accept_override[False] _________
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+>           content, package_prefix = get_resource('packages', package_name)
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+resource_type = 'packages', resource_name = 'step'
+
+    def get_resource(resource_type, resource_name):
+        """
+        Get the content of a specific resource and its prefix path.
+    
+        :param resource_type: the type of the resource
+        :type resource_type: str
+        :param resource_names: the name of the resource
+        :type resource_name: str
+        :returns: a tuple of the content (bytes) of the resource and its prefix path
+        :raises: :exc:`EnvironmentError`
+        :raises: :exc:`OSError`
+        :raises: :exc:`LookupError`
+        :raises: :exc:`InvalidResourceTypeNameError`
+        :raises: :exc:`InvalidResourceNameError`
+        """
+        assert resource_type, 'The resource type must not be empty'
+        assert resource_name, 'The resource name must not be empty'
+        if _name_is_invalid(resource_type):
+            raise InvalidResourceTypeNameError(
+                "Resource type '%s' is invalid" % resource_type)
+        if _name_is_invalid(resource_name):
+            raise InvalidResourceNameError(
+                "Resource name '%s' is invalid" % resource_name)
+        for path in get_search_paths():
+            resource_path = os.path.join(path, RESOURCE_INDEX_SUBFOLDER, resource_type, resource_name)
+            if os.path.isfile(resource_path):
+                try:
+                    with open(resource_path, 'r') as h:
+                        content = h.read()
+                except OSError as e:
+                    raise OSError(
+                        "Could not open the resource '%s' of type '%s':\n%s"
+                        % (resource_name, resource_type, e))
+                return content, path
+>       raise LookupError(
+            "Could not find the resource '%s' of type '%s'" % (resource_name, resource_type))
+E       LookupError: Could not find the resource 'step' of type 'packages'
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/resources.py:86: LookupError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff9172aef0>
+tmp_path = PosixPath('/tmp/pytest-of-jet/pytest-3/test_both_launch_defaults_use_0')
+robot = False
+
+    @pytest.mark.parametrize('robot', [False, True])
+    def test_both_launch_defaults_use_230_and_accept_override(monkeypatch, tmp_path, robot):
+        from launch import LaunchContext
+        from launch.actions import DeclareLaunchArgument
+        from test_full_system_launch import launch_description
+        from test_full_system_robot_launch import launch_description as robot_description
+        description = (robot_description if robot else launch_description)(monkeypatch, tmp_path)
+        for value in (None, '240'):
+            context = LaunchContext()
+            if value is not None:
+                context.launch_configurations['pickup_fine_align_bottom_distance_px'] = value
+            for entity in description.entities:
+                if isinstance(entity, DeclareLaunchArgument):
+>                   entity.execute(context)
+
+src/mission_control/test/test_pickup_fine_skip.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/ros/humble/lib/python3.10/site-packages/launch/actions/declare_launch_argument.py:215: in execute
+    perform_substitutions(context, self.default_value)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:85: in perform
+    path_components = [
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:86: in <listcomp>
+    perform_substitutions(context, component_substitutions)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:80: in perform
+    result = self.find(package)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:113: in find
+    return get_package_share_directory(package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:80: in get_package_share_directory
+    path = os.path.join(get_package_prefix(package_name), 'share', package_name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+            content, package_prefix = get_resource('packages', package_name)
+        except LookupError:
+>           raise PackageNotFoundError(
+                "package '{}' not found, searching: {}".format(package_name, get_search_paths()))
+E           ament_index_python.packages.PackageNotFoundError: "package 'step' not found, searching: ['/opt/ros/humble']"
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:60: PackageNotFoundError
+_________ test_both_launch_defaults_use_230_and_accept_override[True] __________
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+>           content, package_prefix = get_resource('packages', package_name)
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+resource_type = 'packages', resource_name = 'step'
+
+    def get_resource(resource_type, resource_name):
+        """
+        Get the content of a specific resource and its prefix path.
+    
+        :param resource_type: the type of the resource
+        :type resource_type: str
+        :param resource_names: the name of the resource
+        :type resource_name: str
+        :returns: a tuple of the content (bytes) of the resource and its prefix path
+        :raises: :exc:`EnvironmentError`
+        :raises: :exc:`OSError`
+        :raises: :exc:`LookupError`
+        :raises: :exc:`InvalidResourceTypeNameError`
+        :raises: :exc:`InvalidResourceNameError`
+        """
+        assert resource_type, 'The resource type must not be empty'
+        assert resource_name, 'The resource name must not be empty'
+        if _name_is_invalid(resource_type):
+            raise InvalidResourceTypeNameError(
+                "Resource type '%s' is invalid" % resource_type)
+        if _name_is_invalid(resource_name):
+            raise InvalidResourceNameError(
+                "Resource name '%s' is invalid" % resource_name)
+        for path in get_search_paths():
+            resource_path = os.path.join(path, RESOURCE_INDEX_SUBFOLDER, resource_type, resource_name)
+            if os.path.isfile(resource_path):
+                try:
+                    with open(resource_path, 'r') as h:
+                        content = h.read()
+                except OSError as e:
+                    raise OSError(
+                        "Could not open the resource '%s' of type '%s':\n%s"
+                        % (resource_name, resource_type, e))
+                return content, path
+>       raise LookupError(
+            "Could not find the resource '%s' of type '%s'" % (resource_name, resource_type))
+E       LookupError: Could not find the resource 'step' of type 'packages'
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/resources.py:86: LookupError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff917b3610>
+tmp_path = PosixPath('/tmp/pytest-of-jet/pytest-3/test_both_launch_defaults_use_1')
+robot = True
+
+    @pytest.mark.parametrize('robot', [False, True])
+    def test_both_launch_defaults_use_230_and_accept_override(monkeypatch, tmp_path, robot):
+        from launch import LaunchContext
+        from launch.actions import DeclareLaunchArgument
+        from test_full_system_launch import launch_description
+        from test_full_system_robot_launch import launch_description as robot_description
+        description = (robot_description if robot else launch_description)(monkeypatch, tmp_path)
+        for value in (None, '240'):
+            context = LaunchContext()
+            if value is not None:
+                context.launch_configurations['pickup_fine_align_bottom_distance_px'] = value
+            for entity in description.entities:
+                if isinstance(entity, DeclareLaunchArgument):
+>                   entity.execute(context)
+
+src/mission_control/test/test_pickup_fine_skip.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/ros/humble/lib/python3.10/site-packages/launch/actions/declare_launch_argument.py:215: in execute
+    perform_substitutions(context, self.default_value)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:85: in perform
+    path_components = [
+/opt/ros/humble/lib/python3.10/site-packages/launch/substitutions/path_join_substitution.py:86: in <listcomp>
+    perform_substitutions(context, component_substitutions)
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in perform_substitutions
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/utilities/perform_substitutions_impl.py:26: in <listcomp>
+    return ''.join([context.perform_substitution(sub) for sub in subs])
+/opt/ros/humble/lib/python3.10/site-packages/launch/launch_context.py:240: in perform_substitution
+    return substitution.perform(self)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:80: in perform
+    result = self.find(package)
+/opt/ros/humble/lib/python3.10/site-packages/launch_ros/substitutions/find_package.py:113: in find
+    return get_package_share_directory(package_name)
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:80: in get_package_share_directory
+    path = os.path.join(get_package_prefix(package_name), 'share', package_name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+package_name = 'step'
+
+    def get_package_prefix(package_name):
+        """
+        Return the installation prefix directory of the given package.
+    
+        For example, if you install the package 'foo' into
+        '/home/user/ros2_ws/install' and you called this function with 'foo' as the
+        argument, then it will return that directory.
+    
+        :param str package_name: name of the package to locate
+        :returns: installation prefix of the package
+        :raises: :exc:`PackageNotFoundError` if the package is not found
+        :raises: :exc:`ValueError` if the package name is invalid
+        """
+        # This regex checks for a valid package name as defined by REP-127 including the recommended
+        #  exemptions. See https://ros.org/reps/rep-0127.html#name
+        if re.fullmatch('[a-zA-Z0-9][a-zA-Z0-9_-]+', package_name, re.ASCII) is None:
+            raise ValueError(
+                "'{}' is not a valid package name".format(package_name))
+        try:
+            content, package_prefix = get_resource('packages', package_name)
+        except LookupError:
+>           raise PackageNotFoundError(
+                "package '{}' not found, searching: {}".format(package_name, get_search_paths()))
+E           ament_index_python.packages.PackageNotFoundError: "package 'step' not found, searching: ['/opt/ros/humble']"
+
+/opt/ros/humble/lib/python3.10/site-packages/ament_index_python/packages.py:60: PackageNotFoundError
+_ test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_fine_forward_0-270-None-1] _
+
+clock = [10.03], index = 1, motion = 'pickup_fine_forward_0', bottom = 270
+preparation = None
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('motion,bottom,preparation', [
+        ('pickup_fine_forward_0', 270, None),
+        ('pickup_crab_left_0', 200, 'pickup_crab_left_to_fine_0'),
+        ('pickup_crab_right_0_2', 200, 'pickup_crab_right_to_fine_0'),
+    ])
+    def test_both_modes_skip_forward_but_keep_retreat_and_grasp(clock, index, motion, bottom, preparation):
+        node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
+        node.phase_manager.active_ball_mode_index = index
+        node.phase_manager.ball_modes_confirmed = index
+        bridge.last_physical_motion_id = motion
+        sample = ball(bottom_distance_px=bottom)
+        initial_checkpoint(node, bridge, clock, sample)
+        assert bridge.pickup_fine_align_waiting
+        assert not bridge.executor_request_publisher.messages
+        # Checkpoint requires a new observation; the previous aligned frame is cleared.
+        assert node.latest_info['ball'] is None
+        fresh(node, clock, 'ball', sample)
+        assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+        send_command(node, bridge)
+        if preparation:
+            assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == preparation
+            bridge.executor_status_callback(executor_status(
+                status='SUCCEEDED', motion_id=preparation,
+                command_id=bridge.active_command_id, event_id=bridge.active_event_id,
+                request_id=bridge.active_request_id,
+            ))
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == (
+            ([preparation] if preparation else []) + ['pickup_pre_backward_camera_down'])
+        assert bridge.pickup_fixed_sequence_started
+        complete_active_motion(bridge)
+        bridge._check_atomic_dwell(float('inf'))
+        assert bridge.pickup_post_backward_align_waiting
+        continue_pickup_after_backward(bridge, bottom_distance_px=400)
+>       assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_400'
+E       AssertionError: assert 'pickup_500' == 'pickup_400'
+E         - pickup_400
+E         ?        ^
+E         + pickup_500
+E         ?        ^
+
+src/mission_control/test/test_pickup_fine_skip.py:133: AssertionError
+_ test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_fine_forward_0-270-None-2] _
+
+clock = [10.03], index = 2, motion = 'pickup_fine_forward_0', bottom = 270
+preparation = None
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('motion,bottom,preparation', [
+        ('pickup_fine_forward_0', 270, None),
+        ('pickup_crab_left_0', 200, 'pickup_crab_left_to_fine_0'),
+        ('pickup_crab_right_0_2', 200, 'pickup_crab_right_to_fine_0'),
+    ])
+    def test_both_modes_skip_forward_but_keep_retreat_and_grasp(clock, index, motion, bottom, preparation):
+        node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
+        node.phase_manager.active_ball_mode_index = index
+        node.phase_manager.ball_modes_confirmed = index
+        bridge.last_physical_motion_id = motion
+        sample = ball(bottom_distance_px=bottom)
+        initial_checkpoint(node, bridge, clock, sample)
+        assert bridge.pickup_fine_align_waiting
+        assert not bridge.executor_request_publisher.messages
+        # Checkpoint requires a new observation; the previous aligned frame is cleared.
+        assert node.latest_info['ball'] is None
+        fresh(node, clock, 'ball', sample)
+        assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+        send_command(node, bridge)
+        if preparation:
+            assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == preparation
+            bridge.executor_status_callback(executor_status(
+                status='SUCCEEDED', motion_id=preparation,
+                command_id=bridge.active_command_id, event_id=bridge.active_event_id,
+                request_id=bridge.active_request_id,
+            ))
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == (
+            ([preparation] if preparation else []) + ['pickup_pre_backward_camera_down'])
+        assert bridge.pickup_fixed_sequence_started
+        complete_active_motion(bridge)
+        bridge._check_atomic_dwell(float('inf'))
+        assert bridge.pickup_post_backward_align_waiting
+        continue_pickup_after_backward(bridge, bottom_distance_px=400)
+>       assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_400'
+E       AssertionError: assert 'pickup_500' == 'pickup_400'
+E         - pickup_400
+E         ?        ^
+E         + pickup_500
+E         ?        ^
+
+src/mission_control/test/test_pickup_fine_skip.py:133: AssertionError
+_ test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_left_0-200-pickup_crab_left_to_fine_0-1] _
+
+clock = [10.03], index = 1, motion = 'pickup_crab_left_0', bottom = 200
+preparation = 'pickup_crab_left_to_fine_0'
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('motion,bottom,preparation', [
+        ('pickup_fine_forward_0', 270, None),
+        ('pickup_crab_left_0', 200, 'pickup_crab_left_to_fine_0'),
+        ('pickup_crab_right_0_2', 200, 'pickup_crab_right_to_fine_0'),
+    ])
+    def test_both_modes_skip_forward_but_keep_retreat_and_grasp(clock, index, motion, bottom, preparation):
+        node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
+        node.phase_manager.active_ball_mode_index = index
+        node.phase_manager.ball_modes_confirmed = index
+        bridge.last_physical_motion_id = motion
+        sample = ball(bottom_distance_px=bottom)
+        initial_checkpoint(node, bridge, clock, sample)
+        assert bridge.pickup_fine_align_waiting
+        assert not bridge.executor_request_publisher.messages
+        # Checkpoint requires a new observation; the previous aligned frame is cleared.
+        assert node.latest_info['ball'] is None
+        fresh(node, clock, 'ball', sample)
+        assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+        send_command(node, bridge)
+        if preparation:
+            assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == preparation
+            bridge.executor_status_callback(executor_status(
+                status='SUCCEEDED', motion_id=preparation,
+                command_id=bridge.active_command_id, event_id=bridge.active_event_id,
+                request_id=bridge.active_request_id,
+            ))
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == (
+            ([preparation] if preparation else []) + ['pickup_pre_backward_camera_down'])
+        assert bridge.pickup_fixed_sequence_started
+        complete_active_motion(bridge)
+        bridge._check_atomic_dwell(float('inf'))
+        assert bridge.pickup_post_backward_align_waiting
+        continue_pickup_after_backward(bridge, bottom_distance_px=400)
+>       assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_400'
+E       AssertionError: assert 'pickup_500' == 'pickup_400'
+E         - pickup_400
+E         ?        ^
+E         + pickup_500
+E         ?        ^
+
+src/mission_control/test/test_pickup_fine_skip.py:133: AssertionError
+_ test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_left_0-200-pickup_crab_left_to_fine_0-2] _
+
+clock = [10.03], index = 2, motion = 'pickup_crab_left_0', bottom = 200
+preparation = 'pickup_crab_left_to_fine_0'
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('motion,bottom,preparation', [
+        ('pickup_fine_forward_0', 270, None),
+        ('pickup_crab_left_0', 200, 'pickup_crab_left_to_fine_0'),
+        ('pickup_crab_right_0_2', 200, 'pickup_crab_right_to_fine_0'),
+    ])
+    def test_both_modes_skip_forward_but_keep_retreat_and_grasp(clock, index, motion, bottom, preparation):
+        node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
+        node.phase_manager.active_ball_mode_index = index
+        node.phase_manager.ball_modes_confirmed = index
+        bridge.last_physical_motion_id = motion
+        sample = ball(bottom_distance_px=bottom)
+        initial_checkpoint(node, bridge, clock, sample)
+        assert bridge.pickup_fine_align_waiting
+        assert not bridge.executor_request_publisher.messages
+        # Checkpoint requires a new observation; the previous aligned frame is cleared.
+        assert node.latest_info['ball'] is None
+        fresh(node, clock, 'ball', sample)
+        assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+        send_command(node, bridge)
+        if preparation:
+            assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == preparation
+            bridge.executor_status_callback(executor_status(
+                status='SUCCEEDED', motion_id=preparation,
+                command_id=bridge.active_command_id, event_id=bridge.active_event_id,
+                request_id=bridge.active_request_id,
+            ))
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == (
+            ([preparation] if preparation else []) + ['pickup_pre_backward_camera_down'])
+        assert bridge.pickup_fixed_sequence_started
+        complete_active_motion(bridge)
+        bridge._check_atomic_dwell(float('inf'))
+        assert bridge.pickup_post_backward_align_waiting
+        continue_pickup_after_backward(bridge, bottom_distance_px=400)
+>       assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_400'
+E       AssertionError: assert 'pickup_500' == 'pickup_400'
+E         - pickup_400
+E         ?        ^
+E         + pickup_500
+E         ?        ^
+
+src/mission_control/test/test_pickup_fine_skip.py:133: AssertionError
+_ test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_right_0_2-200-pickup_crab_right_to_fine_0-1] _
+
+clock = [10.03], index = 1, motion = 'pickup_crab_right_0_2', bottom = 200
+preparation = 'pickup_crab_right_to_fine_0'
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('motion,bottom,preparation', [
+        ('pickup_fine_forward_0', 270, None),
+        ('pickup_crab_left_0', 200, 'pickup_crab_left_to_fine_0'),
+        ('pickup_crab_right_0_2', 200, 'pickup_crab_right_to_fine_0'),
+    ])
+    def test_both_modes_skip_forward_but_keep_retreat_and_grasp(clock, index, motion, bottom, preparation):
+        node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
+        node.phase_manager.active_ball_mode_index = index
+        node.phase_manager.ball_modes_confirmed = index
+        bridge.last_physical_motion_id = motion
+        sample = ball(bottom_distance_px=bottom)
+        initial_checkpoint(node, bridge, clock, sample)
+        assert bridge.pickup_fine_align_waiting
+        assert not bridge.executor_request_publisher.messages
+        # Checkpoint requires a new observation; the previous aligned frame is cleared.
+        assert node.latest_info['ball'] is None
+        fresh(node, clock, 'ball', sample)
+        assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+        send_command(node, bridge)
+        if preparation:
+            assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == preparation
+            bridge.executor_status_callback(executor_status(
+                status='SUCCEEDED', motion_id=preparation,
+                command_id=bridge.active_command_id, event_id=bridge.active_event_id,
+                request_id=bridge.active_request_id,
+            ))
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == (
+            ([preparation] if preparation else []) + ['pickup_pre_backward_camera_down'])
+        assert bridge.pickup_fixed_sequence_started
+        complete_active_motion(bridge)
+        bridge._check_atomic_dwell(float('inf'))
+        assert bridge.pickup_post_backward_align_waiting
+        continue_pickup_after_backward(bridge, bottom_distance_px=400)
+>       assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_400'
+E       AssertionError: assert 'pickup_500' == 'pickup_400'
+E         - pickup_400
+E         ?        ^
+E         + pickup_500
+E         ?        ^
+
+src/mission_control/test/test_pickup_fine_skip.py:133: AssertionError
+_ test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_right_0_2-200-pickup_crab_right_to_fine_0-2] _
+
+clock = [10.03], index = 2, motion = 'pickup_crab_right_0_2', bottom = 200
+preparation = 'pickup_crab_right_to_fine_0'
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('motion,bottom,preparation', [
+        ('pickup_fine_forward_0', 270, None),
+        ('pickup_crab_left_0', 200, 'pickup_crab_left_to_fine_0'),
+        ('pickup_crab_right_0_2', 200, 'pickup_crab_right_to_fine_0'),
+    ])
+    def test_both_modes_skip_forward_but_keep_retreat_and_grasp(clock, index, motion, bottom, preparation):
+        node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
+        node.phase_manager.active_ball_mode_index = index
+        node.phase_manager.ball_modes_confirmed = index
+        bridge.last_physical_motion_id = motion
+        sample = ball(bottom_distance_px=bottom)
+        initial_checkpoint(node, bridge, clock, sample)
+        assert bridge.pickup_fine_align_waiting
+        assert not bridge.executor_request_publisher.messages
+        # Checkpoint requires a new observation; the previous aligned frame is cleared.
+        assert node.latest_info['ball'] is None
+        fresh(node, clock, 'ball', sample)
+        assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+        send_command(node, bridge)
+        if preparation:
+            assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == preparation
+            bridge.executor_status_callback(executor_status(
+                status='SUCCEEDED', motion_id=preparation,
+                command_id=bridge.active_command_id, event_id=bridge.active_event_id,
+                request_id=bridge.active_request_id,
+            ))
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == (
+            ([preparation] if preparation else []) + ['pickup_pre_backward_camera_down'])
+        assert bridge.pickup_fixed_sequence_started
+        complete_active_motion(bridge)
+        bridge._check_atomic_dwell(float('inf'))
+        assert bridge.pickup_post_backward_align_waiting
+        continue_pickup_after_backward(bridge, bottom_distance_px=400)
+>       assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_400'
+E       AssertionError: assert 'pickup_500' == 'pickup_400'
+E         - pickup_400
+E         ?        ^
+E         + pickup_500
+E         ?        ^
+
+src/mission_control/test/test_pickup_fine_skip.py:133: AssertionError
+_ test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit[1] _
+
+clock = [11.457142857142856], index = 1
+
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit(clock, index):
+        from test_pickup_continuous_walk import start, late_frames, forward_status
+        node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
+        node.phase_manager.active_ball_mode_index = index
+        node.phase_manager.ball_modes_confirmed = index
+        bridge.last_physical_motion_id = 'pickup_fine_forward_0'
+        parent, first = start(node, bridge, clock)
+        late_frames(node, clock, ball(bottom_distance_px=300))
+        send_command(node, bridge)
+        queued = decoded_messages(bridge.executor_request_publisher)[-1]
+>       assert queued['request_id'] != first['request_id']
+E       assert 1 != 1
+
+src/mission_control/test/test_pickup_fine_skip.py:295: AssertionError
+_ test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit[2] _
+
+clock = [11.457142857142856], index = 2
+
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit(clock, index):
+        from test_pickup_continuous_walk import start, late_frames, forward_status
+        node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge()
+        node.phase_manager.active_ball_mode_index = index
+        node.phase_manager.ball_modes_confirmed = index
+        bridge.last_physical_motion_id = 'pickup_fine_forward_0'
+        parent, first = start(node, bridge, clock)
+        late_frames(node, clock, ball(bottom_distance_px=300))
+        send_command(node, bridge)
+        queued = decoded_messages(bridge.executor_request_publisher)[-1]
+>       assert queued['request_id'] != first['request_id']
+E       assert 1 != 1
+
+src/mission_control/test/test_pickup_fine_skip.py:295: AssertionError
+__ test_first_fixed_fine_counts_and_immediately_selects_retreat_then_grasp[1] __
+
+clock = [13.396190476190476], index = 1
+
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_first_fixed_fine_counts_and_immediately_selects_retreat_then_grasp(clock, index):
+        node, bridge, parent, request = running_pickup(clock, index)
+        started = moving_observations(node, clock)
+        assert node.pickup_checkpoint_observation.fine_progress.complete
+        assert not node.planner.pickup_fine_progress_complete  # Requires physical success.
+        assert not node.pickup_walk_reservation.pending
+        assert bridge.pickup_queued_request is None
+        before = len(node.publisher.messages)
+        clock[0] = started + DURATION
+        forward_status(node, bridge, request, 'SUCCEEDED')
+        assert len(node.publisher.messages) == before + 1  # No new image/timer required.
+        command = node.publisher.messages[-1]
+        assert command['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+        assert command['source_command']['pickup_fine_progress_complete']
+        assert command['source_command']['bottom_distance_px'] == 252
+        assert bridge.active_dwell_until is None
+        assert node.active_special_command_id == parent['command_id']
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+        # Existing one-second support settling remains; no observation pause is added.
+        assert bridge.transition_dwell_until == pytest.approx(clock[0] + 1.)
+        clock[0] = bridge.transition_dwell_until
+        bridge._check_transition_dwell(clock[0])
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == [request['motion_id'], 'pickup_pre_backward_camera_down']
+        assert not bridge.pickup_fine_align_waiting and bridge.pickup_fixed_sequence_started
+        complete_active_motion(bridge)
+        bridge._check_atomic_dwell(float('inf'))
+        assert bridge.pickup_post_backward_align_waiting
+        continue_pickup_after_backward(bridge, bottom_distance_px=400)
+>       assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_400'
+E       AssertionError: assert 'pickup_pre_b...d_camera_down' == 'pickup_400'
+E         - pickup_400
+E         + pickup_pre_backward_camera_down
+
+src/mission_control/test/test_pickup_fine_progress.py:136: AssertionError
+__ test_first_fixed_fine_counts_and_immediately_selects_retreat_then_grasp[2] __
+
+clock = [13.396190476190476], index = 2
+
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_first_fixed_fine_counts_and_immediately_selects_retreat_then_grasp(clock, index):
+        node, bridge, parent, request = running_pickup(clock, index)
+        started = moving_observations(node, clock)
+        assert node.pickup_checkpoint_observation.fine_progress.complete
+        assert not node.planner.pickup_fine_progress_complete  # Requires physical success.
+        assert not node.pickup_walk_reservation.pending
+        assert bridge.pickup_queued_request is None
+        before = len(node.publisher.messages)
+        clock[0] = started + DURATION
+        forward_status(node, bridge, request, 'SUCCEEDED')
+        assert len(node.publisher.messages) == before + 1  # No new image/timer required.
+        command = node.publisher.messages[-1]
+        assert command['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+        assert command['source_command']['pickup_fine_progress_complete']
+        assert command['source_command']['bottom_distance_px'] == 252
+        assert bridge.active_dwell_until is None
+        assert node.active_special_command_id == parent['command_id']
+        bridge.navigation_command_callback(String(data=json.dumps(command)))
+        # Existing one-second support settling remains; no observation pause is added.
+        assert bridge.transition_dwell_until == pytest.approx(clock[0] + 1.)
+        clock[0] = bridge.transition_dwell_until
+        bridge._check_transition_dwell(clock[0])
+        requests = decoded_messages(bridge.executor_request_publisher)
+        assert [r['motion_id'] for r in requests] == [request['motion_id'], 'pickup_pre_backward_camera_down']
+        assert not bridge.pickup_fine_align_waiting and bridge.pickup_fixed_sequence_started
+        complete_active_motion(bridge)
+        bridge._check_atomic_dwell(float('inf'))
+        assert bridge.pickup_post_backward_align_waiting
+        continue_pickup_after_backward(bridge, bottom_distance_px=400)
+>       assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'pickup_400'
+E       AssertionError: assert 'pickup_pre_b...d_camera_down' == 'pickup_400'
+E         - pickup_400
+E         + pickup_pre_backward_camera_down
+
+src/mission_control/test/test_pickup_fine_progress.py:136: AssertionError
+______ test_accepted_queue_retains_ownership_and_can_finish_next_step[1] _______
+
+clock = [11.997142857142855], index = 1
+
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_accepted_queue_retains_ownership_and_can_finish_next_step(clock, index):
+        node, bridge, parent, request = running_pickup(clock, index)
+        late_frames(node, clock)
+        queued_command = node.publisher.messages[-1]
+        assert queued_command['source_command']['pickup_walk_prequeue']
+        bridge.navigation_command_callback(String(data=json.dumps(queued_command)))
+        queued_request = decoded_messages(bridge.executor_request_publisher)[-1]
+        forward_status(node, bridge, queued_request, 'QUEUED')
+        for _ in range(4):
+            fresh(node, clock, 'ball', ball(bottom_distance_px=220), plan=False)
+        assert node.pickup_walk_reservation.pending
+        assert not node.planner.pickup_fine_progress_complete
+        forward_status(node, bridge, request, 'SUCCEEDED')
+>       assert bridge.active_request_id == queued_request['request_id']
+E       assert 3 == 1
+E        +  where 3 = <test_motion_command_bridge.FakeBridge object at 0xffff914a6fb0>.active_request_id
+
+src/mission_control/test/test_pickup_fine_progress.py:190: AssertionError
+______ test_accepted_queue_retains_ownership_and_can_finish_next_step[2] _______
+
+clock = [11.997142857142855], index = 2
+
+    @pytest.mark.parametrize('index', [1, 2])
+    def test_accepted_queue_retains_ownership_and_can_finish_next_step(clock, index):
+        node, bridge, parent, request = running_pickup(clock, index)
+        late_frames(node, clock)
+        queued_command = node.publisher.messages[-1]
+        assert queued_command['source_command']['pickup_walk_prequeue']
+        bridge.navigation_command_callback(String(data=json.dumps(queued_command)))
+        queued_request = decoded_messages(bridge.executor_request_publisher)[-1]
+        forward_status(node, bridge, queued_request, 'QUEUED')
+        for _ in range(4):
+            fresh(node, clock, 'ball', ball(bottom_distance_px=220), plan=False)
+        assert node.pickup_walk_reservation.pending
+        assert not node.planner.pickup_fine_progress_complete
+        forward_status(node, bridge, request, 'SUCCEEDED')
+>       assert bridge.active_request_id == queued_request['request_id']
+E       assert 3 == 1
+E        +  where 3 = <test_motion_command_bridge.FakeBridge object at 0xffff913a89d0>.active_request_id
+
+src/mission_control/test/test_pickup_fine_progress.py:190: AssertionError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_pickup_alignment_priority.py::test_heading_then_lateral_then_approach[-1-False]
+FAILED src/mission_control/test/test_pickup_alignment_priority.py::test_heading_then_lateral_then_approach[-1-True]
+FAILED src/mission_control/test/test_pickup_alignment_priority.py::test_heading_then_lateral_then_approach[1-False]
+FAILED src/mission_control/test/test_pickup_alignment_priority.py::test_heading_then_lateral_then_approach[1-True]
+FAILED src/mission_control/test/test_pickup_alignment_priority.py::test_recorded_ball_is_corrected_before_another_fine_forward
+FAILED src/mission_control/test/test_pickup_alignment_priority.py::test_unusable_heading_or_turn_distance_never_permits_forward[changes0-True]
+FAILED src/mission_control/test/test_pickup_alignment_priority.py::test_unusable_heading_or_turn_distance_never_permits_forward[changes1-True]
+FAILED src/mission_control/test/test_pickup_alignment_priority.py::test_unusable_heading_or_turn_distance_never_permits_forward[changes2-False]
+FAILED src/mission_control/test/test_pickup_alignment_priority.py::test_unusable_heading_or_turn_distance_never_permits_forward[changes2-True]
+FAILED src/mission_control/test/test_pickup_alignment_priority.py::test_node_publishes_fine_turn_inside_pickup_lock_and_waits_for_completion
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_late_crab_frames_continue_only_after_success_and_keep_support_dwell[-200-1]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_late_crab_frames_continue_only_after_success_and_keep_support_dwell[-200-2]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_late_crab_frames_continue_only_after_success_and_keep_support_dwell[-100-1]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_late_crab_frames_continue_only_after_success_and_keep_support_dwell[-100-2]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_late_crab_frames_continue_only_after_success_and_keep_support_dwell[100-1]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_late_crab_frames_continue_only_after_success_and_keep_support_dwell[100-2]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_late_crab_frames_continue_only_after_success_and_keep_support_dwell[200-1]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_late_crab_frames_continue_only_after_success_and_keep_support_dwell[200-2]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_invalid_cached_observations_fall_back_and_fresh_frame_releases_checkpoint[too_few]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_invalid_cached_observations_fall_back_and_fresh_frame_releases_checkpoint[expired]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_invalid_cached_observations_fall_back_and_fresh_frame_releases_checkpoint[lost]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_invalid_cached_observations_fall_back_and_fresh_frame_releases_checkpoint[changed]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_invalid_cached_observations_fall_back_and_fresh_frame_releases_checkpoint[future]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_invalid_cached_observations_fall_back_and_fresh_frame_releases_checkpoint[duplicate]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_unmatched_success_cannot_release_cached_crab[command_id]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_unmatched_success_cannot_release_cached_crab[event_id]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_unmatched_success_cannot_release_cached_crab[request_id]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_cached_observation_does_not_replace_same_gait_reservation
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_latest_invalid_or_different_decision_discards_ready_sample[change0]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_latest_invalid_or_different_decision_discards_ready_sample[change1]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_latest_invalid_or_different_decision_discards_ready_sample[change2]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_latest_invalid_or_different_decision_discards_ready_sample[change3]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_latest_invalid_or_different_decision_discards_ready_sample[change4]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_latest_invalid_or_different_decision_discards_ready_sample[change5]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_latest_invalid_or_different_decision_discards_ready_sample[change6]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_rejected_same_gait_queue_uses_fresh_checkpoint_and_can_resume
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_executor_not_ready_does_not_dispatch_cached_sample_and_expired_sample_is_not_reused
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_initial_crab_reuses_observation_across_both_checkpoints[-250-1]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_initial_crab_reuses_observation_across_both_checkpoints[-250-2]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_initial_crab_reuses_observation_across_both_checkpoints[-100-1]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_initial_crab_reuses_observation_across_both_checkpoints[-100-2]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_initial_crab_reuses_observation_across_both_checkpoints[100-1]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_initial_crab_reuses_observation_across_both_checkpoints[100-2]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_initial_crab_reuses_observation_across_both_checkpoints[250-1]
+FAILED src/mission_control/test/test_pickup_crab_observation.py::test_initial_crab_reuses_observation_across_both_checkpoints[250-2]
+FAILED src/mission_control/test/test_reservation_expansion.py::test_two_cycle_to_one_cycle_uses_checkpoint_not_wrong_two_cycle_queue[-250]
+FAILED src/mission_control/test/test_reservation_expansion.py::test_changed_latest_sample_cancels_early_same_gait_candidate
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_launch_defaults_use_230_and_accept_override[False]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_launch_defaults_use_230_and_accept_override[True]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_fine_forward_0-270-None-1]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_fine_forward_0-270-None-2]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_left_0-200-pickup_crab_left_to_fine_0-1]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_left_0-200-pickup_crab_left_to_fine_0-2]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_right_0_2-200-pickup_crab_right_to_fine_0-1]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_both_modes_skip_forward_but_keep_retreat_and_grasp[pickup_crab_right_0_2-200-pickup_crab_right_to_fine_0-2]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit[1]
+FAILED src/mission_control/test/test_pickup_fine_skip.py::test_already_accepted_fine_reservation_finishes_before_applying_new_skip_limit[2]
+FAILED src/mission_control/test/test_pickup_fine_progress.py::test_first_fixed_fine_counts_and_immediately_selects_retreat_then_grasp[1]
+FAILED src/mission_control/test/test_pickup_fine_progress.py::test_first_fixed_fine_counts_and_immediately_selects_retreat_then_grasp[2]
+FAILED src/mission_control/test/test_pickup_fine_progress.py::test_accepted_queue_retains_ownership_and_can_finish_next_step[1]
+FAILED src/mission_control/test/test_pickup_fine_progress.py::test_accepted_queue_retains_ownership_and_can_finish_next_step[2]
+61 failed, 312 passed in 4.59s

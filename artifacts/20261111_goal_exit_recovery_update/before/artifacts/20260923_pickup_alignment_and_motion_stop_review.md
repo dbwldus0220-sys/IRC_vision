@@ -1,0 +1,1 @@
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/artifacts/20260923_pickup_alignment_and_motion_stop_review.md

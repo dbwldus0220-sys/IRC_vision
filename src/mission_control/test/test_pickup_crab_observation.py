@@ -37,7 +37,7 @@ def start_fine_crab(clock, index=1, offset=-100):
     forward_status(node, bridge, first, 'SUCCEEDED')
     if bridge.active_dwell_until is not None:
         advance_dwell(node, bridge, clock)
-    fresh(node, clock, 'ball', ball(offset_x_px=offset, bottom_distance_px=250))
+    fresh(node, clock, 'ball', ball(offset_x_px=offset, bottom_distance_px=180))
     correction = node.publisher.messages[-1]
     assert correction['action'] in {'BALL_PICKUP_CRAB_LEFT', 'BALL_PICKUP_CRAB_RIGHT'}
     bridge.navigation_command_callback(String(data=json.dumps(correction)))
@@ -60,7 +60,7 @@ def late_centered_frames(node, clock, count=3):
     observer = node.pickup_checkpoint_observation
     clock[0] = observer.started_at + PICKUP_CRAB_DURATIONS[observer.key[-1]] * .75
     for _ in range(count):
-        fresh(node, clock, 'ball', ball(bottom_distance_px=250), plan=False)
+        fresh(node, clock, 'ball', ball(bottom_distance_px=180), plan=False)
 
 
 @pytest.mark.parametrize('index', [1, 2])
@@ -109,7 +109,7 @@ def test_invalid_cached_observations_fall_back_and_fresh_frame_releases_checkpoi
         clock[0] += node.timeouts['ball'] + .01
     elif case in {'lost', 'changed'}:
         changes = {'detected': False, 'raw_detected': False} if case == 'lost' else {'offset_x_px': -100}
-        fresh(node, clock, 'ball', ball(bottom_distance_px=250, **changes), plan=False)
+        fresh(node, clock, 'ball', ball(bottom_distance_px=180, **changes), plan=False)
     elif case in {'future', 'duplicate'}:
         info = dict(node.pickup_checkpoint_observation.sample)
         if case == 'future':
@@ -121,7 +121,7 @@ def test_invalid_cached_observations_fall_back_and_fresh_frame_releases_checkpoi
     assert node.latest_info['ball'] is None
     assert node.pickup_fine_align_waiting and bridge.pickup_fine_align_waiting
     assert node.pickup_checkpoint_observation.key is None
-    fresh(node, clock, 'ball', ball(bottom_distance_px=250))
+    fresh(node, clock, 'ball', ball(bottom_distance_px=180))
     assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
     assert not node.pickup_fine_align_waiting
 
@@ -158,7 +158,7 @@ def test_failure_discards_cached_crab(clock, status, error):
         # Existing recoverable-fault policy returns to a fresh checkpoint.
         assert bridge.pickup_fine_align_waiting
         assert node.latest_info['ball'] is None
-        fresh(node, clock, 'ball', ball(bottom_distance_px=230))
+        fresh(node, clock, 'ball', ball(bottom_distance_px=180))
         assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
     else:
         assert not bridge.motion_in_progress
@@ -179,7 +179,7 @@ def test_cached_observation_does_not_replace_same_gait_reservation(clock):
     node, bridge, _, crab = start_fine_crab(clock)
     late_centered_frames(node, clock)
     for _ in range(3):
-        fresh(node, clock, 'ball', ball(offset_x_px=-100, bottom_distance_px=250), plan=False)
+        fresh(node, clock, 'ball', ball(offset_x_px=-100, bottom_distance_px=180), plan=False)
     command = node.publisher.messages[-1]
     assert command['source_command']['pickup_walk_prequeue']
     assert node.pickup_checkpoint_observation.key is None
@@ -206,14 +206,14 @@ def test_latest_invalid_or_different_decision_discards_ready_sample(clock, chang
     assert node.pickup_checkpoint_observation.sample is None
     forward_status(node, bridge, crab, 'SUCCEEDED')
     assert node.pickup_fine_align_waiting and node.latest_info['ball'] is None
-    fresh(node, clock, 'ball', ball(bottom_distance_px=250))
+    fresh(node, clock, 'ball', ball(bottom_distance_px=180))
     assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
 
 
 def test_early_frames_and_duplicate_running_do_not_create_or_restart_preview(clock):
     node, bridge, _, crab = start_fine_crab(clock)
     for _ in range(3):
-        fresh(node, clock, 'ball', ball(bottom_distance_px=250), plan=False)
+        fresh(node, clock, 'ball', ball(bottom_distance_px=180), plan=False)
     assert node.pickup_checkpoint_observation.sample is None
     late_centered_frames(node, clock)
     started_at = node.pickup_checkpoint_observation.started_at
@@ -230,7 +230,7 @@ def test_rejected_same_gait_queue_uses_fresh_checkpoint_and_can_resume(clock):
     node, bridge, _, crab = start_fine_crab(clock)
     late_centered_frames(node, clock)
     for _ in range(3):
-        fresh(node, clock, 'ball', ball(offset_x_px=-100, bottom_distance_px=250), plan=False)
+        fresh(node, clock, 'ball', ball(offset_x_px=-100, bottom_distance_px=180), plan=False)
     bridge.navigation_command_callback(String(data=json.dumps(node.publisher.messages[-1])))
     queued = decoded_messages(bridge.executor_request_publisher)[-1]
     forward_status(node, bridge, queued, 'REJECTED', error_code='INCOMPATIBLE_TRANSITION')
@@ -238,7 +238,7 @@ def test_rejected_same_gait_queue_uses_fresh_checkpoint_and_can_resume(clock):
     assert bridge.pickup_queued_request is None
     assert not node.pickup_walk_reservation.pending
     assert node.pickup_fine_align_waiting
-    fresh(node, clock, 'ball', ball(bottom_distance_px=250))
+    fresh(node, clock, 'ball', ball(bottom_distance_px=180))
     assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
 
 
@@ -253,7 +253,7 @@ def test_executor_not_ready_does_not_dispatch_cached_sample_and_expired_sample_i
     node.executor_auto_ready = True
     Node._publish_decision(node)
     assert node.publisher.messages[-1]['action'] != 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
-    fresh(node, clock, 'ball', ball(bottom_distance_px=250))
+    fresh(node, clock, 'ball', ball(bottom_distance_px=180))
     assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
 
 
@@ -279,7 +279,7 @@ def test_initial_crab_reuses_observation_across_both_checkpoints(clock, index, o
     assert node.pickup_checkpoint_observation.stage == 'initial'
     clock[0] += PICKUP_CRAB_DURATIONS[crab['motion_id']] * .75
     for _ in range(3):
-        fresh(node, clock, 'ball', ball(bottom_distance_px=250), plan=False)
+        fresh(node, clock, 'ball', ball(bottom_distance_px=180), plan=False)
     forward_status(node, bridge, crab, 'SUCCEEDED')
     assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_INITIAL_ALIGN_CONTINUE'
     before = len(bridge.motion_status_publisher.messages)

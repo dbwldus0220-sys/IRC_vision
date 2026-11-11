@@ -85,6 +85,9 @@ def shoot_after_completion(node, clock, previous_motion, region, depth, shot_ind
     if region in {5, 6, 7, 8}:
         expected = ('POST_SHOT_EXIT_RIGHT_5_FORWARD_4' if shot_index == 1
                     else 'POST_SHOT_EXIT_LEFT_3_FORWARD_4')
+    elif region in {1, 2}:
+        expected = ('POST_SHOT_EXIT_RIGHT_9_RECOVERY_RIGHT_4' if shot_index == 1
+                    else 'POST_SHOT_EXIT_LEFT_4_RECOVERY_LEFT_4')
     else:
         expected = 'POST_SHOT_TURN_RIGHT_9' if shot_index == 1 else 'POST_SHOT_TURN_LEFT_4'
     assert node.phase_manager.post_shot_turn_action() == expected

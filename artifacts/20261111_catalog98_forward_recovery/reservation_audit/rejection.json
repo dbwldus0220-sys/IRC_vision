@@ -1,0 +1,17 @@
+[
+  {
+    "action": "STRAIGHT",
+    "rejection_cleared": true,
+    "resumed": "STRAIGHT"
+  },
+  {
+    "action": "RECOVER_LEFT_TURN_LEFT_4",
+    "rejection_cleared": true,
+    "resumed": "STRAIGHT"
+  },
+  {
+    "action": "RECOVER_RIGHT_TURN_RIGHT_4",
+    "rejection_cleared": true,
+    "resumed": "STRAIGHT"
+  }
+]

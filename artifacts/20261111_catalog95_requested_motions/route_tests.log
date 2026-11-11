@@ -1,0 +1,1764 @@
+.......FFFFFF....................FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF [ 26%]
+FFFFFFFFFFFFFF........FFFFFFFF....F.................F...F......F.F...... [ 53%]
+........................................................................ [ 80%]
+.....................................................                    [100%]
+=================================== FAILURES ===================================
+______ test_post_retreat_selects_grasp_and_keeps_check_pose[0-pickup_400] ______
+
+pixels = 0, expected = 'pickup_400'
+
+    @pytest.mark.parametrize('pixels,expected', [(0, 'pickup_400'), (300, 'pickup_400'),
+        (319.99, 'pickup_400'), (320, 'pickup_400'), (320.01, 'pickup_500'), (500, 'pickup_500')])
+    def test_post_retreat_selects_grasp_and_keeps_check_pose(pixels, expected):
+        bridge = FakeBridge()
+        enter_pickup_fine_alignment(bridge)
+        continue_pickup_after_fine_alignment(bridge)
+        count = len(bridge.executor_request_publisher.messages)
+        payload = dict(action='BALL_PICKUP_POST_BACKWARD_ALIGN_CONTINUE',
+                       command_id=9000, event_id=None,
+                       active_special_command_id=bridge.active_command_id,
+                       active_special_event_id=bridge.active_event_id,
+                       source_command={'bottom_distance_px': pixels})
+        # Selection cannot jump ahead of the retreat or its settle time.
+        bridge.navigation_command_callback(navigation_message(**payload))
+        assert len(bridge.executor_request_publisher.messages) == count
+        bridge.executor_status_callback(executor_status(
+            status='SUCCEEDED', motion_id='pickup_pre_backward_camera_down'))
+        deadline = bridge.active_dwell_until
+>       bridge._check_atomic_dwell(deadline - .001)
+E       TypeError: unsupported operand type(s) for -: 'NoneType' and 'float'
+
+src/mission_control/test/test_pickup_grasp_selection.py:43: TypeError
+_____ test_post_retreat_selects_grasp_and_keeps_check_pose[300-pickup_400] _____
+
+pixels = 300, expected = 'pickup_400'
+
+    @pytest.mark.parametrize('pixels,expected', [(0, 'pickup_400'), (300, 'pickup_400'),
+        (319.99, 'pickup_400'), (320, 'pickup_400'), (320.01, 'pickup_500'), (500, 'pickup_500')])
+    def test_post_retreat_selects_grasp_and_keeps_check_pose(pixels, expected):
+        bridge = FakeBridge()
+        enter_pickup_fine_alignment(bridge)
+        continue_pickup_after_fine_alignment(bridge)
+        count = len(bridge.executor_request_publisher.messages)
+        payload = dict(action='BALL_PICKUP_POST_BACKWARD_ALIGN_CONTINUE',
+                       command_id=9000, event_id=None,
+                       active_special_command_id=bridge.active_command_id,
+                       active_special_event_id=bridge.active_event_id,
+                       source_command={'bottom_distance_px': pixels})
+        # Selection cannot jump ahead of the retreat or its settle time.
+        bridge.navigation_command_callback(navigation_message(**payload))
+        assert len(bridge.executor_request_publisher.messages) == count
+        bridge.executor_status_callback(executor_status(
+            status='SUCCEEDED', motion_id='pickup_pre_backward_camera_down'))
+        deadline = bridge.active_dwell_until
+>       bridge._check_atomic_dwell(deadline - .001)
+E       TypeError: unsupported operand type(s) for -: 'NoneType' and 'float'
+
+src/mission_control/test/test_pickup_grasp_selection.py:43: TypeError
+___ test_post_retreat_selects_grasp_and_keeps_check_pose[319.99-pickup_400] ____
+
+pixels = 319.99, expected = 'pickup_400'
+
+    @pytest.mark.parametrize('pixels,expected', [(0, 'pickup_400'), (300, 'pickup_400'),
+        (319.99, 'pickup_400'), (320, 'pickup_400'), (320.01, 'pickup_500'), (500, 'pickup_500')])
+    def test_post_retreat_selects_grasp_and_keeps_check_pose(pixels, expected):
+        bridge = FakeBridge()
+        enter_pickup_fine_alignment(bridge)
+        continue_pickup_after_fine_alignment(bridge)
+        count = len(bridge.executor_request_publisher.messages)
+        payload = dict(action='BALL_PICKUP_POST_BACKWARD_ALIGN_CONTINUE',
+                       command_id=9000, event_id=None,
+                       active_special_command_id=bridge.active_command_id,
+                       active_special_event_id=bridge.active_event_id,
+                       source_command={'bottom_distance_px': pixels})
+        # Selection cannot jump ahead of the retreat or its settle time.
+        bridge.navigation_command_callback(navigation_message(**payload))
+        assert len(bridge.executor_request_publisher.messages) == count
+        bridge.executor_status_callback(executor_status(
+            status='SUCCEEDED', motion_id='pickup_pre_backward_camera_down'))
+        deadline = bridge.active_dwell_until
+>       bridge._check_atomic_dwell(deadline - .001)
+E       TypeError: unsupported operand type(s) for -: 'NoneType' and 'float'
+
+src/mission_control/test/test_pickup_grasp_selection.py:43: TypeError
+_____ test_post_retreat_selects_grasp_and_keeps_check_pose[320-pickup_400] _____
+
+pixels = 320, expected = 'pickup_400'
+
+    @pytest.mark.parametrize('pixels,expected', [(0, 'pickup_400'), (300, 'pickup_400'),
+        (319.99, 'pickup_400'), (320, 'pickup_400'), (320.01, 'pickup_500'), (500, 'pickup_500')])
+    def test_post_retreat_selects_grasp_and_keeps_check_pose(pixels, expected):
+        bridge = FakeBridge()
+        enter_pickup_fine_alignment(bridge)
+        continue_pickup_after_fine_alignment(bridge)
+        count = len(bridge.executor_request_publisher.messages)
+        payload = dict(action='BALL_PICKUP_POST_BACKWARD_ALIGN_CONTINUE',
+                       command_id=9000, event_id=None,
+                       active_special_command_id=bridge.active_command_id,
+                       active_special_event_id=bridge.active_event_id,
+                       source_command={'bottom_distance_px': pixels})
+        # Selection cannot jump ahead of the retreat or its settle time.
+        bridge.navigation_command_callback(navigation_message(**payload))
+        assert len(bridge.executor_request_publisher.messages) == count
+        bridge.executor_status_callback(executor_status(
+            status='SUCCEEDED', motion_id='pickup_pre_backward_camera_down'))
+        deadline = bridge.active_dwell_until
+>       bridge._check_atomic_dwell(deadline - .001)
+E       TypeError: unsupported operand type(s) for -: 'NoneType' and 'float'
+
+src/mission_control/test/test_pickup_grasp_selection.py:43: TypeError
+___ test_post_retreat_selects_grasp_and_keeps_check_pose[320.01-pickup_500] ____
+
+pixels = 320.01, expected = 'pickup_500'
+
+    @pytest.mark.parametrize('pixels,expected', [(0, 'pickup_400'), (300, 'pickup_400'),
+        (319.99, 'pickup_400'), (320, 'pickup_400'), (320.01, 'pickup_500'), (500, 'pickup_500')])
+    def test_post_retreat_selects_grasp_and_keeps_check_pose(pixels, expected):
+        bridge = FakeBridge()
+        enter_pickup_fine_alignment(bridge)
+        continue_pickup_after_fine_alignment(bridge)
+        count = len(bridge.executor_request_publisher.messages)
+        payload = dict(action='BALL_PICKUP_POST_BACKWARD_ALIGN_CONTINUE',
+                       command_id=9000, event_id=None,
+                       active_special_command_id=bridge.active_command_id,
+                       active_special_event_id=bridge.active_event_id,
+                       source_command={'bottom_distance_px': pixels})
+        # Selection cannot jump ahead of the retreat or its settle time.
+        bridge.navigation_command_callback(navigation_message(**payload))
+        assert len(bridge.executor_request_publisher.messages) == count
+        bridge.executor_status_callback(executor_status(
+            status='SUCCEEDED', motion_id='pickup_pre_backward_camera_down'))
+        deadline = bridge.active_dwell_until
+>       bridge._check_atomic_dwell(deadline - .001)
+E       TypeError: unsupported operand type(s) for -: 'NoneType' and 'float'
+
+src/mission_control/test/test_pickup_grasp_selection.py:43: TypeError
+_____ test_post_retreat_selects_grasp_and_keeps_check_pose[500-pickup_500] _____
+
+pixels = 500, expected = 'pickup_500'
+
+    @pytest.mark.parametrize('pixels,expected', [(0, 'pickup_400'), (300, 'pickup_400'),
+        (319.99, 'pickup_400'), (320, 'pickup_400'), (320.01, 'pickup_500'), (500, 'pickup_500')])
+    def test_post_retreat_selects_grasp_and_keeps_check_pose(pixels, expected):
+        bridge = FakeBridge()
+        enter_pickup_fine_alignment(bridge)
+        continue_pickup_after_fine_alignment(bridge)
+        count = len(bridge.executor_request_publisher.messages)
+        payload = dict(action='BALL_PICKUP_POST_BACKWARD_ALIGN_CONTINUE',
+                       command_id=9000, event_id=None,
+                       active_special_command_id=bridge.active_command_id,
+                       active_special_event_id=bridge.active_event_id,
+                       source_command={'bottom_distance_px': pixels})
+        # Selection cannot jump ahead of the retreat or its settle time.
+        bridge.navigation_command_callback(navigation_message(**payload))
+        assert len(bridge.executor_request_publisher.messages) == count
+        bridge.executor_status_callback(executor_status(
+            status='SUCCEEDED', motion_id='pickup_pre_backward_camera_down'))
+        deadline = bridge.active_dwell_until
+>       bridge._check_atomic_dwell(deadline - .001)
+E       TypeError: unsupported operand type(s) for -: 'NoneType' and 'float'
+
+src/mission_control/test/test_pickup_grasp_selection.py:43: TypeError
+_ test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA_90_FORWARD-None] _
+
+previous = None, last_action = 'GOAL_CAMERA_90_FORWARD'
+
+    @pytest.mark.parametrize('previous', [None, 'GOAL_CAMERA90_TURN_LEFT_1', 'GOAL_CAMERA90_TURN_RIGHT_1'])
+    @pytest.mark.parametrize('last_action', [
+        'GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_1', 'GOAL_CAMERA_90_FORWARD_2',
+        *[f'GOAL_CAMERA90_FINE_FORWARD_{n}' for n in range(1, 5)],
+    ])
+    def test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture(previous, last_action):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(filter(None, (previous, last_action)), 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        requests_before = len(bridge.executor_request_publisher.messages)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        expected = 'goal_shot' if 'FINE_FORWARD' in last_action else 'goal_fine_prepare_90'
+>       assert bridge.active_motion_id == expected
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff8239b3a0>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:39: AssertionError
+_ test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_TURN_LEFT_1] _
+
+previous = 'GOAL_CAMERA90_TURN_LEFT_1', last_action = 'GOAL_CAMERA_90_FORWARD'
+
+    @pytest.mark.parametrize('previous', [None, 'GOAL_CAMERA90_TURN_LEFT_1', 'GOAL_CAMERA90_TURN_RIGHT_1'])
+    @pytest.mark.parametrize('last_action', [
+        'GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_1', 'GOAL_CAMERA_90_FORWARD_2',
+        *[f'GOAL_CAMERA90_FINE_FORWARD_{n}' for n in range(1, 5)],
+    ])
+    def test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture(previous, last_action):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(filter(None, (previous, last_action)), 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        requests_before = len(bridge.executor_request_publisher.messages)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        expected = 'goal_shot' if 'FINE_FORWARD' in last_action else 'goal_fine_prepare_90'
+>       assert bridge.active_motion_id == expected
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff8225bbe0>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:39: AssertionError
+_ test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_TURN_RIGHT_1] _
+
+previous = 'GOAL_CAMERA90_TURN_RIGHT_1', last_action = 'GOAL_CAMERA_90_FORWARD'
+
+    @pytest.mark.parametrize('previous', [None, 'GOAL_CAMERA90_TURN_LEFT_1', 'GOAL_CAMERA90_TURN_RIGHT_1'])
+    @pytest.mark.parametrize('last_action', [
+        'GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_1', 'GOAL_CAMERA_90_FORWARD_2',
+        *[f'GOAL_CAMERA90_FINE_FORWARD_{n}' for n in range(1, 5)],
+    ])
+    def test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture(previous, last_action):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(filter(None, (previous, last_action)), 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        requests_before = len(bridge.executor_request_publisher.messages)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        expected = 'goal_shot' if 'FINE_FORWARD' in last_action else 'goal_fine_prepare_90'
+>       assert bridge.active_motion_id == expected
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff82399ed0>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:39: AssertionError
+_ test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA_90_FORWARD_1-None] _
+
+previous = None, last_action = 'GOAL_CAMERA_90_FORWARD_1'
+
+    @pytest.mark.parametrize('previous', [None, 'GOAL_CAMERA90_TURN_LEFT_1', 'GOAL_CAMERA90_TURN_RIGHT_1'])
+    @pytest.mark.parametrize('last_action', [
+        'GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_1', 'GOAL_CAMERA_90_FORWARD_2',
+        *[f'GOAL_CAMERA90_FINE_FORWARD_{n}' for n in range(1, 5)],
+    ])
+    def test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture(previous, last_action):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(filter(None, (previous, last_action)), 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        requests_before = len(bridge.executor_request_publisher.messages)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        expected = 'goal_shot' if 'FINE_FORWARD' in last_action else 'goal_fine_prepare_90'
+>       assert bridge.active_motion_id == expected
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff82259cc0>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:39: AssertionError
+_ test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA_90_FORWARD_1-GOAL_CAMERA90_TURN_LEFT_1] _
+
+previous = 'GOAL_CAMERA90_TURN_LEFT_1', last_action = 'GOAL_CAMERA_90_FORWARD_1'
+
+    @pytest.mark.parametrize('previous', [None, 'GOAL_CAMERA90_TURN_LEFT_1', 'GOAL_CAMERA90_TURN_RIGHT_1'])
+    @pytest.mark.parametrize('last_action', [
+        'GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_1', 'GOAL_CAMERA_90_FORWARD_2',
+        *[f'GOAL_CAMERA90_FINE_FORWARD_{n}' for n in range(1, 5)],
+    ])
+    def test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture(previous, last_action):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(filter(None, (previous, last_action)), 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        requests_before = len(bridge.executor_request_publisher.messages)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        expected = 'goal_shot' if 'FINE_FORWARD' in last_action else 'goal_fine_prepare_90'
+>       assert bridge.active_motion_id == expected
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff823fd450>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:39: AssertionError
+_ test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA_90_FORWARD_1-GOAL_CAMERA90_TURN_RIGHT_1] _
+
+previous = 'GOAL_CAMERA90_TURN_RIGHT_1'
+last_action = 'GOAL_CAMERA_90_FORWARD_1'
+
+    @pytest.mark.parametrize('previous', [None, 'GOAL_CAMERA90_TURN_LEFT_1', 'GOAL_CAMERA90_TURN_RIGHT_1'])
+    @pytest.mark.parametrize('last_action', [
+        'GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_1', 'GOAL_CAMERA_90_FORWARD_2',
+        *[f'GOAL_CAMERA90_FINE_FORWARD_{n}' for n in range(1, 5)],
+    ])
+    def test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture(previous, last_action):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(filter(None, (previous, last_action)), 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        requests_before = len(bridge.executor_request_publisher.messages)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        expected = 'goal_shot' if 'FINE_FORWARD' in last_action else 'goal_fine_prepare_90'
+>       assert bridge.active_motion_id == expected
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff82421c60>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:39: AssertionError
+_ test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA_90_FORWARD_2-None] _
+
+previous = None, last_action = 'GOAL_CAMERA_90_FORWARD_2'
+
+    @pytest.mark.parametrize('previous', [None, 'GOAL_CAMERA90_TURN_LEFT_1', 'GOAL_CAMERA90_TURN_RIGHT_1'])
+    @pytest.mark.parametrize('last_action', [
+        'GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_1', 'GOAL_CAMERA_90_FORWARD_2',
+        *[f'GOAL_CAMERA90_FINE_FORWARD_{n}' for n in range(1, 5)],
+    ])
+    def test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture(previous, last_action):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(filter(None, (previous, last_action)), 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        requests_before = len(bridge.executor_request_publisher.messages)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        expected = 'goal_shot' if 'FINE_FORWARD' in last_action else 'goal_fine_prepare_90'
+>       assert bridge.active_motion_id == expected
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff823fcfd0>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:39: AssertionError
+_ test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA_90_FORWARD_2-GOAL_CAMERA90_TURN_LEFT_1] _
+
+previous = 'GOAL_CAMERA90_TURN_LEFT_1', last_action = 'GOAL_CAMERA_90_FORWARD_2'
+
+    @pytest.mark.parametrize('previous', [None, 'GOAL_CAMERA90_TURN_LEFT_1', 'GOAL_CAMERA90_TURN_RIGHT_1'])
+    @pytest.mark.parametrize('last_action', [
+        'GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_1', 'GOAL_CAMERA_90_FORWARD_2',
+        *[f'GOAL_CAMERA90_FINE_FORWARD_{n}' for n in range(1, 5)],
+    ])
+    def test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture(previous, last_action):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(filter(None, (previous, last_action)), 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        requests_before = len(bridge.executor_request_publisher.messages)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        expected = 'goal_shot' if 'FINE_FORWARD' in last_action else 'goal_fine_prepare_90'
+>       assert bridge.active_motion_id == expected
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff8239a9b0>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:39: AssertionError
+_ test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA_90_FORWARD_2-GOAL_CAMERA90_TURN_RIGHT_1] _
+
+previous = 'GOAL_CAMERA90_TURN_RIGHT_1'
+last_action = 'GOAL_CAMERA_90_FORWARD_2'
+
+    @pytest.mark.parametrize('previous', [None, 'GOAL_CAMERA90_TURN_LEFT_1', 'GOAL_CAMERA90_TURN_RIGHT_1'])
+    @pytest.mark.parametrize('last_action', [
+        'GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_1', 'GOAL_CAMERA_90_FORWARD_2',
+        *[f'GOAL_CAMERA90_FINE_FORWARD_{n}' for n in range(1, 5)],
+    ])
+    def test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture(previous, last_action):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(filter(None, (previous, last_action)), 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        requests_before = len(bridge.executor_request_publisher.messages)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        expected = 'goal_shot' if 'FINE_FORWARD' in last_action else 'goal_fine_prepare_90'
+>       assert bridge.active_motion_id == expected
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff823fc520>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:39: AssertionError
+_ test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_1-None] _
+
+previous = None, last_action = 'GOAL_CAMERA90_FINE_FORWARD_1'
+
+    @pytest.mark.parametrize('previous', [None, 'GOAL_CAMERA90_TURN_LEFT_1', 'GOAL_CAMERA90_TURN_RIGHT_1'])
+    @pytest.mark.parametrize('last_action', [
+        'GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_1', 'GOAL_CAMERA_90_FORWARD_2',
+        *[f'GOAL_CAMERA90_FINE_FORWARD_{n}' for n in range(1, 5)],
+    ])
+    def test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture(previous, last_action):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(filter(None, (previous, last_action)), 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        requests_before = len(bridge.executor_request_publisher.messages)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        expected = 'goal_shot' if 'FINE_FORWARD' in last_action else 'goal_fine_prepare_90'
+>       assert bridge.active_motion_id == expected
+E       AssertionError: assert None == 'goal_shot'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff824222f0>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:39: AssertionError
+_ test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_TURN_LEFT_1] _
+
+previous = 'GOAL_CAMERA90_TURN_LEFT_1'
+last_action = 'GOAL_CAMERA90_FINE_FORWARD_1'
+
+    @pytest.mark.parametrize('previous', [None, 'GOAL_CAMERA90_TURN_LEFT_1', 'GOAL_CAMERA90_TURN_RIGHT_1'])
+    @pytest.mark.parametrize('last_action', [
+        'GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_1', 'GOAL_CAMERA_90_FORWARD_2',
+        *[f'GOAL_CAMERA90_FINE_FORWARD_{n}' for n in range(1, 5)],
+    ])
+    def test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture(previous, last_action):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(filter(None, (previous, last_action)), 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        requests_before = len(bridge.executor_request_publisher.messages)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        expected = 'goal_shot' if 'FINE_FORWARD' in last_action else 'goal_fine_prepare_90'
+>       assert bridge.active_motion_id == expected
+E       AssertionError: assert None == 'goal_shot'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff823fe440>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:39: AssertionError
+_ test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_TURN_RIGHT_1] _
+
+previous = 'GOAL_CAMERA90_TURN_RIGHT_1'
+last_action = 'GOAL_CAMERA90_FINE_FORWARD_1'
+
+    @pytest.mark.parametrize('previous', [None, 'GOAL_CAMERA90_TURN_LEFT_1', 'GOAL_CAMERA90_TURN_RIGHT_1'])
+    @pytest.mark.parametrize('last_action', [
+        'GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_1', 'GOAL_CAMERA_90_FORWARD_2',
+        *[f'GOAL_CAMERA90_FINE_FORWARD_{n}' for n in range(1, 5)],
+    ])
+    def test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture(previous, last_action):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(filter(None, (previous, last_action)), 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        requests_before = len(bridge.executor_request_publisher.messages)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        expected = 'goal_shot' if 'FINE_FORWARD' in last_action else 'goal_fine_prepare_90'
+>       assert bridge.active_motion_id == expected
+E       AssertionError: assert None == 'goal_shot'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff82421660>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:39: AssertionError
+_ test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_2-None] _
+
+previous = None, last_action = 'GOAL_CAMERA90_FINE_FORWARD_2'
+
+    @pytest.mark.parametrize('previous', [None, 'GOAL_CAMERA90_TURN_LEFT_1', 'GOAL_CAMERA90_TURN_RIGHT_1'])
+    @pytest.mark.parametrize('last_action', [
+        'GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_1', 'GOAL_CAMERA_90_FORWARD_2',
+        *[f'GOAL_CAMERA90_FINE_FORWARD_{n}' for n in range(1, 5)],
+    ])
+    def test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture(previous, last_action):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(filter(None, (previous, last_action)), 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        requests_before = len(bridge.executor_request_publisher.messages)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        expected = 'goal_shot' if 'FINE_FORWARD' in last_action else 'goal_fine_prepare_90'
+>       assert bridge.active_motion_id == expected
+E       AssertionError: assert None == 'goal_shot'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff823ffdc0>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:39: AssertionError
+_ test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_2-GOAL_CAMERA90_TURN_LEFT_1] _
+
+previous = 'GOAL_CAMERA90_TURN_LEFT_1'
+last_action = 'GOAL_CAMERA90_FINE_FORWARD_2'
+
+    @pytest.mark.parametrize('previous', [None, 'GOAL_CAMERA90_TURN_LEFT_1', 'GOAL_CAMERA90_TURN_RIGHT_1'])
+    @pytest.mark.parametrize('last_action', [
+        'GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_1', 'GOAL_CAMERA_90_FORWARD_2',
+        *[f'GOAL_CAMERA90_FINE_FORWARD_{n}' for n in range(1, 5)],
+    ])
+    def test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture(previous, last_action):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(filter(None, (previous, last_action)), 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        requests_before = len(bridge.executor_request_publisher.messages)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        expected = 'goal_shot' if 'FINE_FORWARD' in last_action else 'goal_fine_prepare_90'
+>       assert bridge.active_motion_id == expected
+E       AssertionError: assert None == 'goal_shot'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff8239bd00>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:39: AssertionError
+_ test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_2-GOAL_CAMERA90_TURN_RIGHT_1] _
+
+previous = 'GOAL_CAMERA90_TURN_RIGHT_1'
+last_action = 'GOAL_CAMERA90_FINE_FORWARD_2'
+
+    @pytest.mark.parametrize('previous', [None, 'GOAL_CAMERA90_TURN_LEFT_1', 'GOAL_CAMERA90_TURN_RIGHT_1'])
+    @pytest.mark.parametrize('last_action', [
+        'GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_1', 'GOAL_CAMERA_90_FORWARD_2',
+        *[f'GOAL_CAMERA90_FINE_FORWARD_{n}' for n in range(1, 5)],
+    ])
+    def test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture(previous, last_action):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(filter(None, (previous, last_action)), 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        requests_before = len(bridge.executor_request_publisher.messages)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        expected = 'goal_shot' if 'FINE_FORWARD' in last_action else 'goal_fine_prepare_90'
+>       assert bridge.active_motion_id == expected
+E       AssertionError: assert None == 'goal_shot'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff823fdb40>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:39: AssertionError
+_ test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_3-None] _
+
+previous = None, last_action = 'GOAL_CAMERA90_FINE_FORWARD_3'
+
+    @pytest.mark.parametrize('previous', [None, 'GOAL_CAMERA90_TURN_LEFT_1', 'GOAL_CAMERA90_TURN_RIGHT_1'])
+    @pytest.mark.parametrize('last_action', [
+        'GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_1', 'GOAL_CAMERA_90_FORWARD_2',
+        *[f'GOAL_CAMERA90_FINE_FORWARD_{n}' for n in range(1, 5)],
+    ])
+    def test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture(previous, last_action):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(filter(None, (previous, last_action)), 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        requests_before = len(bridge.executor_request_publisher.messages)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        expected = 'goal_shot' if 'FINE_FORWARD' in last_action else 'goal_fine_prepare_90'
+>       assert bridge.active_motion_id == expected
+E       AssertionError: assert None == 'goal_shot'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff82423640>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:39: AssertionError
+_ test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_3-GOAL_CAMERA90_TURN_LEFT_1] _
+
+previous = 'GOAL_CAMERA90_TURN_LEFT_1'
+last_action = 'GOAL_CAMERA90_FINE_FORWARD_3'
+
+    @pytest.mark.parametrize('previous', [None, 'GOAL_CAMERA90_TURN_LEFT_1', 'GOAL_CAMERA90_TURN_RIGHT_1'])
+    @pytest.mark.parametrize('last_action', [
+        'GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_1', 'GOAL_CAMERA_90_FORWARD_2',
+        *[f'GOAL_CAMERA90_FINE_FORWARD_{n}' for n in range(1, 5)],
+    ])
+    def test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture(previous, last_action):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(filter(None, (previous, last_action)), 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        requests_before = len(bridge.executor_request_publisher.messages)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        expected = 'goal_shot' if 'FINE_FORWARD' in last_action else 'goal_fine_prepare_90'
+>       assert bridge.active_motion_id == expected
+E       AssertionError: assert None == 'goal_shot'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff823ff3d0>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:39: AssertionError
+_ test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_3-GOAL_CAMERA90_TURN_RIGHT_1] _
+
+previous = 'GOAL_CAMERA90_TURN_RIGHT_1'
+last_action = 'GOAL_CAMERA90_FINE_FORWARD_3'
+
+    @pytest.mark.parametrize('previous', [None, 'GOAL_CAMERA90_TURN_LEFT_1', 'GOAL_CAMERA90_TURN_RIGHT_1'])
+    @pytest.mark.parametrize('last_action', [
+        'GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_1', 'GOAL_CAMERA_90_FORWARD_2',
+        *[f'GOAL_CAMERA90_FINE_FORWARD_{n}' for n in range(1, 5)],
+    ])
+    def test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture(previous, last_action):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(filter(None, (previous, last_action)), 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        requests_before = len(bridge.executor_request_publisher.messages)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        expected = 'goal_shot' if 'FINE_FORWARD' in last_action else 'goal_fine_prepare_90'
+>       assert bridge.active_motion_id == expected
+E       AssertionError: assert None == 'goal_shot'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff82423ca0>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:39: AssertionError
+_ test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_4-None] _
+
+previous = None, last_action = 'GOAL_CAMERA90_FINE_FORWARD_4'
+
+    @pytest.mark.parametrize('previous', [None, 'GOAL_CAMERA90_TURN_LEFT_1', 'GOAL_CAMERA90_TURN_RIGHT_1'])
+    @pytest.mark.parametrize('last_action', [
+        'GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_1', 'GOAL_CAMERA_90_FORWARD_2',
+        *[f'GOAL_CAMERA90_FINE_FORWARD_{n}' for n in range(1, 5)],
+    ])
+    def test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture(previous, last_action):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(filter(None, (previous, last_action)), 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        requests_before = len(bridge.executor_request_publisher.messages)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        expected = 'goal_shot' if 'FINE_FORWARD' in last_action else 'goal_fine_prepare_90'
+>       assert bridge.active_motion_id == expected
+E       AssertionError: assert None == 'goal_shot'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff823fcc70>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:39: AssertionError
+_ test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_4-GOAL_CAMERA90_TURN_LEFT_1] _
+
+previous = 'GOAL_CAMERA90_TURN_LEFT_1'
+last_action = 'GOAL_CAMERA90_FINE_FORWARD_4'
+
+    @pytest.mark.parametrize('previous', [None, 'GOAL_CAMERA90_TURN_LEFT_1', 'GOAL_CAMERA90_TURN_RIGHT_1'])
+    @pytest.mark.parametrize('last_action', [
+        'GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_1', 'GOAL_CAMERA_90_FORWARD_2',
+        *[f'GOAL_CAMERA90_FINE_FORWARD_{n}' for n in range(1, 5)],
+    ])
+    def test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture(previous, last_action):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(filter(None, (previous, last_action)), 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        requests_before = len(bridge.executor_request_publisher.messages)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        expected = 'goal_shot' if 'FINE_FORWARD' in last_action else 'goal_fine_prepare_90'
+>       assert bridge.active_motion_id == expected
+E       AssertionError: assert None == 'goal_shot'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff82399cf0>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:39: AssertionError
+_ test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_4-GOAL_CAMERA90_TURN_RIGHT_1] _
+
+previous = 'GOAL_CAMERA90_TURN_RIGHT_1'
+last_action = 'GOAL_CAMERA90_FINE_FORWARD_4'
+
+    @pytest.mark.parametrize('previous', [None, 'GOAL_CAMERA90_TURN_LEFT_1', 'GOAL_CAMERA90_TURN_RIGHT_1'])
+    @pytest.mark.parametrize('last_action', [
+        'GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_1', 'GOAL_CAMERA_90_FORWARD_2',
+        *[f'GOAL_CAMERA90_FINE_FORWARD_{n}' for n in range(1, 5)],
+    ])
+    def test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture(previous, last_action):
+        bridge = FakeBridge()
+        for command_id, action in enumerate(filter(None, (previous, last_action)), 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        requests_before = len(bridge.executor_request_publisher.messages)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        expected = 'goal_shot' if 'FINE_FORWARD' in last_action else 'goal_fine_prepare_90'
+>       assert bridge.active_motion_id == expected
+E       AssertionError: assert None == 'goal_shot'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff823fc9a0>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:39: AssertionError
+_ test_last_motion_selects_preparation_and_half_second_pause[actions0-goal_fine_prepare_90] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff82423ee0>
+actions = ['GOAL_CAMERA90_TURN_LEFT_1'], prepare = 'goal_fine_prepare_90'
+
+    @pytest.mark.parametrize('actions,prepare', [
+        (['GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        *[([f'GOAL_CAMERA90_TURN_RIGHT_{n}'], 'goal_fine_prepare_90') for n in (1, 2, 3, 5, 6, 7, 9)],
+        *[([f'GOAL_CAMERA90_TURN_LEFT_{n}'], 'goal_fine_prepare_90') for n in range(2, 7)],
+        (['POST_BALL_GOAL_TRANSITION'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_FINE_FORWARD_1', 'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_FINE_FORWARD_1',
+          'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+    ])
+    def test_last_motion_selects_preparation_and_half_second_pause(monkeypatch, actions, prepare):
+        clock = [10.]
+        monkeypatch.setattr('mission_control.motion_command_bridge_node.time.monotonic', lambda: clock[0])
+        bridge = FakeBridge()
+        for command_id, action in enumerate(actions, 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+>       assert bridge.active_motion_id == prepare
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff82423be0>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:65: AssertionError
+_ test_last_motion_selects_preparation_and_half_second_pause[actions1-goal_fine_prepare_90] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff823fdfc0>
+actions = ['GOAL_CAMERA90_TURN_RIGHT_1'], prepare = 'goal_fine_prepare_90'
+
+    @pytest.mark.parametrize('actions,prepare', [
+        (['GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        *[([f'GOAL_CAMERA90_TURN_RIGHT_{n}'], 'goal_fine_prepare_90') for n in (1, 2, 3, 5, 6, 7, 9)],
+        *[([f'GOAL_CAMERA90_TURN_LEFT_{n}'], 'goal_fine_prepare_90') for n in range(2, 7)],
+        (['POST_BALL_GOAL_TRANSITION'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_FINE_FORWARD_1', 'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_FINE_FORWARD_1',
+          'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+    ])
+    def test_last_motion_selects_preparation_and_half_second_pause(monkeypatch, actions, prepare):
+        clock = [10.]
+        monkeypatch.setattr('mission_control.motion_command_bridge_node.time.monotonic', lambda: clock[0])
+        bridge = FakeBridge()
+        for command_id, action in enumerate(actions, 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+>       assert bridge.active_motion_id == prepare
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff823fc910>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:65: AssertionError
+_ test_last_motion_selects_preparation_and_half_second_pause[actions2-goal_fine_prepare_90] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff8253c370>
+actions = ['GOAL_CAMERA90_TURN_RIGHT_2'], prepare = 'goal_fine_prepare_90'
+
+    @pytest.mark.parametrize('actions,prepare', [
+        (['GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        *[([f'GOAL_CAMERA90_TURN_RIGHT_{n}'], 'goal_fine_prepare_90') for n in (1, 2, 3, 5, 6, 7, 9)],
+        *[([f'GOAL_CAMERA90_TURN_LEFT_{n}'], 'goal_fine_prepare_90') for n in range(2, 7)],
+        (['POST_BALL_GOAL_TRANSITION'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_FINE_FORWARD_1', 'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_FINE_FORWARD_1',
+          'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+    ])
+    def test_last_motion_selects_preparation_and_half_second_pause(monkeypatch, actions, prepare):
+        clock = [10.]
+        monkeypatch.setattr('mission_control.motion_command_bridge_node.time.monotonic', lambda: clock[0])
+        bridge = FakeBridge()
+        for command_id, action in enumerate(actions, 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+>       assert bridge.active_motion_id == prepare
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff92556290>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:65: AssertionError
+_ test_last_motion_selects_preparation_and_half_second_pause[actions3-goal_fine_prepare_90] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff822b81c0>
+actions = ['GOAL_CAMERA90_TURN_RIGHT_3'], prepare = 'goal_fine_prepare_90'
+
+    @pytest.mark.parametrize('actions,prepare', [
+        (['GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        *[([f'GOAL_CAMERA90_TURN_RIGHT_{n}'], 'goal_fine_prepare_90') for n in (1, 2, 3, 5, 6, 7, 9)],
+        *[([f'GOAL_CAMERA90_TURN_LEFT_{n}'], 'goal_fine_prepare_90') for n in range(2, 7)],
+        (['POST_BALL_GOAL_TRANSITION'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_FINE_FORWARD_1', 'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_FINE_FORWARD_1',
+          'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+    ])
+    def test_last_motion_selects_preparation_and_half_second_pause(monkeypatch, actions, prepare):
+        clock = [10.]
+        monkeypatch.setattr('mission_control.motion_command_bridge_node.time.monotonic', lambda: clock[0])
+        bridge = FakeBridge()
+        for command_id, action in enumerate(actions, 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+>       assert bridge.active_motion_id == prepare
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff822b8460>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:65: AssertionError
+_ test_last_motion_selects_preparation_and_half_second_pause[actions4-goal_fine_prepare_90] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff822873a0>
+actions = ['GOAL_CAMERA90_TURN_RIGHT_5'], prepare = 'goal_fine_prepare_90'
+
+    @pytest.mark.parametrize('actions,prepare', [
+        (['GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        *[([f'GOAL_CAMERA90_TURN_RIGHT_{n}'], 'goal_fine_prepare_90') for n in (1, 2, 3, 5, 6, 7, 9)],
+        *[([f'GOAL_CAMERA90_TURN_LEFT_{n}'], 'goal_fine_prepare_90') for n in range(2, 7)],
+        (['POST_BALL_GOAL_TRANSITION'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_FINE_FORWARD_1', 'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_FINE_FORWARD_1',
+          'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+    ])
+    def test_last_motion_selects_preparation_and_half_second_pause(monkeypatch, actions, prepare):
+        clock = [10.]
+        monkeypatch.setattr('mission_control.motion_command_bridge_node.time.monotonic', lambda: clock[0])
+        bridge = FakeBridge()
+        for command_id, action in enumerate(actions, 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+>       assert bridge.active_motion_id == prepare
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff82285c60>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:65: AssertionError
+_ test_last_motion_selects_preparation_and_half_second_pause[actions5-goal_fine_prepare_90] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff822baa40>
+actions = ['GOAL_CAMERA90_TURN_RIGHT_6'], prepare = 'goal_fine_prepare_90'
+
+    @pytest.mark.parametrize('actions,prepare', [
+        (['GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        *[([f'GOAL_CAMERA90_TURN_RIGHT_{n}'], 'goal_fine_prepare_90') for n in (1, 2, 3, 5, 6, 7, 9)],
+        *[([f'GOAL_CAMERA90_TURN_LEFT_{n}'], 'goal_fine_prepare_90') for n in range(2, 7)],
+        (['POST_BALL_GOAL_TRANSITION'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_FINE_FORWARD_1', 'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_FINE_FORWARD_1',
+          'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+    ])
+    def test_last_motion_selects_preparation_and_half_second_pause(monkeypatch, actions, prepare):
+        clock = [10.]
+        monkeypatch.setattr('mission_control.motion_command_bridge_node.time.monotonic', lambda: clock[0])
+        bridge = FakeBridge()
+        for command_id, action in enumerate(actions, 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+>       assert bridge.active_motion_id == prepare
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff822b8d90>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:65: AssertionError
+_ test_last_motion_selects_preparation_and_half_second_pause[actions6-goal_fine_prepare_90] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff824210f0>
+actions = ['GOAL_CAMERA90_TURN_RIGHT_7'], prepare = 'goal_fine_prepare_90'
+
+    @pytest.mark.parametrize('actions,prepare', [
+        (['GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        *[([f'GOAL_CAMERA90_TURN_RIGHT_{n}'], 'goal_fine_prepare_90') for n in (1, 2, 3, 5, 6, 7, 9)],
+        *[([f'GOAL_CAMERA90_TURN_LEFT_{n}'], 'goal_fine_prepare_90') for n in range(2, 7)],
+        (['POST_BALL_GOAL_TRANSITION'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_FINE_FORWARD_1', 'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_FINE_FORWARD_1',
+          'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+    ])
+    def test_last_motion_selects_preparation_and_half_second_pause(monkeypatch, actions, prepare):
+        clock = [10.]
+        monkeypatch.setattr('mission_control.motion_command_bridge_node.time.monotonic', lambda: clock[0])
+        bridge = FakeBridge()
+        for command_id, action in enumerate(actions, 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+>       assert bridge.active_motion_id == prepare
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff82421540>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:65: AssertionError
+_ test_last_motion_selects_preparation_and_half_second_pause[actions7-goal_fine_prepare_90] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff822bb340>
+actions = ['GOAL_CAMERA90_TURN_RIGHT_9'], prepare = 'goal_fine_prepare_90'
+
+    @pytest.mark.parametrize('actions,prepare', [
+        (['GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        *[([f'GOAL_CAMERA90_TURN_RIGHT_{n}'], 'goal_fine_prepare_90') for n in (1, 2, 3, 5, 6, 7, 9)],
+        *[([f'GOAL_CAMERA90_TURN_LEFT_{n}'], 'goal_fine_prepare_90') for n in range(2, 7)],
+        (['POST_BALL_GOAL_TRANSITION'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_FINE_FORWARD_1', 'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_FINE_FORWARD_1',
+          'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+    ])
+    def test_last_motion_selects_preparation_and_half_second_pause(monkeypatch, actions, prepare):
+        clock = [10.]
+        monkeypatch.setattr('mission_control.motion_command_bridge_node.time.monotonic', lambda: clock[0])
+        bridge = FakeBridge()
+        for command_id, action in enumerate(actions, 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+>       assert bridge.active_motion_id == prepare
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff822b9570>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:65: AssertionError
+_ test_last_motion_selects_preparation_and_half_second_pause[actions8-goal_fine_prepare_90] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff8239b430>
+actions = ['GOAL_CAMERA90_TURN_LEFT_2'], prepare = 'goal_fine_prepare_90'
+
+    @pytest.mark.parametrize('actions,prepare', [
+        (['GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        *[([f'GOAL_CAMERA90_TURN_RIGHT_{n}'], 'goal_fine_prepare_90') for n in (1, 2, 3, 5, 6, 7, 9)],
+        *[([f'GOAL_CAMERA90_TURN_LEFT_{n}'], 'goal_fine_prepare_90') for n in range(2, 7)],
+        (['POST_BALL_GOAL_TRANSITION'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_FINE_FORWARD_1', 'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_FINE_FORWARD_1',
+          'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+    ])
+    def test_last_motion_selects_preparation_and_half_second_pause(monkeypatch, actions, prepare):
+        clock = [10.]
+        monkeypatch.setattr('mission_control.motion_command_bridge_node.time.monotonic', lambda: clock[0])
+        bridge = FakeBridge()
+        for command_id, action in enumerate(actions, 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+>       assert bridge.active_motion_id == prepare
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff8239b580>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:65: AssertionError
+_ test_last_motion_selects_preparation_and_half_second_pause[actions9-goal_fine_prepare_90] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff822b88e0>
+actions = ['GOAL_CAMERA90_TURN_LEFT_3'], prepare = 'goal_fine_prepare_90'
+
+    @pytest.mark.parametrize('actions,prepare', [
+        (['GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        *[([f'GOAL_CAMERA90_TURN_RIGHT_{n}'], 'goal_fine_prepare_90') for n in (1, 2, 3, 5, 6, 7, 9)],
+        *[([f'GOAL_CAMERA90_TURN_LEFT_{n}'], 'goal_fine_prepare_90') for n in range(2, 7)],
+        (['POST_BALL_GOAL_TRANSITION'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_FINE_FORWARD_1', 'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_FINE_FORWARD_1',
+          'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+    ])
+    def test_last_motion_selects_preparation_and_half_second_pause(monkeypatch, actions, prepare):
+        clock = [10.]
+        monkeypatch.setattr('mission_control.motion_command_bridge_node.time.monotonic', lambda: clock[0])
+        bridge = FakeBridge()
+        for command_id, action in enumerate(actions, 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+>       assert bridge.active_motion_id == prepare
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff822b8be0>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:65: AssertionError
+_ test_last_motion_selects_preparation_and_half_second_pause[actions10-goal_fine_prepare_90] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff82285f00>
+actions = ['GOAL_CAMERA90_TURN_LEFT_4'], prepare = 'goal_fine_prepare_90'
+
+    @pytest.mark.parametrize('actions,prepare', [
+        (['GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        *[([f'GOAL_CAMERA90_TURN_RIGHT_{n}'], 'goal_fine_prepare_90') for n in (1, 2, 3, 5, 6, 7, 9)],
+        *[([f'GOAL_CAMERA90_TURN_LEFT_{n}'], 'goal_fine_prepare_90') for n in range(2, 7)],
+        (['POST_BALL_GOAL_TRANSITION'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_FINE_FORWARD_1', 'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_FINE_FORWARD_1',
+          'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+    ])
+    def test_last_motion_selects_preparation_and_half_second_pause(monkeypatch, actions, prepare):
+        clock = [10.]
+        monkeypatch.setattr('mission_control.motion_command_bridge_node.time.monotonic', lambda: clock[0])
+        bridge = FakeBridge()
+        for command_id, action in enumerate(actions, 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+>       assert bridge.active_motion_id == prepare
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff82284d60>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:65: AssertionError
+_ test_last_motion_selects_preparation_and_half_second_pause[actions11-goal_fine_prepare_90] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff822bb430>
+actions = ['GOAL_CAMERA90_TURN_LEFT_5'], prepare = 'goal_fine_prepare_90'
+
+    @pytest.mark.parametrize('actions,prepare', [
+        (['GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        *[([f'GOAL_CAMERA90_TURN_RIGHT_{n}'], 'goal_fine_prepare_90') for n in (1, 2, 3, 5, 6, 7, 9)],
+        *[([f'GOAL_CAMERA90_TURN_LEFT_{n}'], 'goal_fine_prepare_90') for n in range(2, 7)],
+        (['POST_BALL_GOAL_TRANSITION'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_FINE_FORWARD_1', 'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_FINE_FORWARD_1',
+          'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+    ])
+    def test_last_motion_selects_preparation_and_half_second_pause(monkeypatch, actions, prepare):
+        clock = [10.]
+        monkeypatch.setattr('mission_control.motion_command_bridge_node.time.monotonic', lambda: clock[0])
+        bridge = FakeBridge()
+        for command_id, action in enumerate(actions, 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+>       assert bridge.active_motion_id == prepare
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff822bbd00>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:65: AssertionError
+_ test_last_motion_selects_preparation_and_half_second_pause[actions12-goal_fine_prepare_90] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff82285a20>
+actions = ['GOAL_CAMERA90_TURN_LEFT_6'], prepare = 'goal_fine_prepare_90'
+
+    @pytest.mark.parametrize('actions,prepare', [
+        (['GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        *[([f'GOAL_CAMERA90_TURN_RIGHT_{n}'], 'goal_fine_prepare_90') for n in (1, 2, 3, 5, 6, 7, 9)],
+        *[([f'GOAL_CAMERA90_TURN_LEFT_{n}'], 'goal_fine_prepare_90') for n in range(2, 7)],
+        (['POST_BALL_GOAL_TRANSITION'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_FINE_FORWARD_1', 'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_FINE_FORWARD_1',
+          'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+    ])
+    def test_last_motion_selects_preparation_and_half_second_pause(monkeypatch, actions, prepare):
+        clock = [10.]
+        monkeypatch.setattr('mission_control.motion_command_bridge_node.time.monotonic', lambda: clock[0])
+        bridge = FakeBridge()
+        for command_id, action in enumerate(actions, 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+>       assert bridge.active_motion_id == prepare
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff82284cd0>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:65: AssertionError
+_ test_last_motion_selects_preparation_and_half_second_pause[actions13-goal_fine_prepare_90] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff823ff730>
+actions = ['POST_BALL_GOAL_TRANSITION'], prepare = 'goal_fine_prepare_90'
+
+    @pytest.mark.parametrize('actions,prepare', [
+        (['GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        *[([f'GOAL_CAMERA90_TURN_RIGHT_{n}'], 'goal_fine_prepare_90') for n in (1, 2, 3, 5, 6, 7, 9)],
+        *[([f'GOAL_CAMERA90_TURN_LEFT_{n}'], 'goal_fine_prepare_90') for n in range(2, 7)],
+        (['POST_BALL_GOAL_TRANSITION'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_FINE_FORWARD_1', 'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_FINE_FORWARD_1',
+          'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+    ])
+    def test_last_motion_selects_preparation_and_half_second_pause(monkeypatch, actions, prepare):
+        clock = [10.]
+        monkeypatch.setattr('mission_control.motion_command_bridge_node.time.monotonic', lambda: clock[0])
+        bridge = FakeBridge()
+        for command_id, action in enumerate(actions, 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+>       assert bridge.active_motion_id == prepare
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff823fcfd0>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:65: AssertionError
+_ test_last_motion_selects_preparation_and_half_second_pause[actions14-goal_fine_prepare_90] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff822a78b0>
+actions = ['GOAL_CAMERA90_FINE_FORWARD_1', 'GOAL_CAMERA90_TURN_LEFT_1']
+prepare = 'goal_fine_prepare_90'
+
+    @pytest.mark.parametrize('actions,prepare', [
+        (['GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        *[([f'GOAL_CAMERA90_TURN_RIGHT_{n}'], 'goal_fine_prepare_90') for n in (1, 2, 3, 5, 6, 7, 9)],
+        *[([f'GOAL_CAMERA90_TURN_LEFT_{n}'], 'goal_fine_prepare_90') for n in range(2, 7)],
+        (['POST_BALL_GOAL_TRANSITION'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_FINE_FORWARD_1', 'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_FINE_FORWARD_1',
+          'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+    ])
+    def test_last_motion_selects_preparation_and_half_second_pause(monkeypatch, actions, prepare):
+        clock = [10.]
+        monkeypatch.setattr('mission_control.motion_command_bridge_node.time.monotonic', lambda: clock[0])
+        bridge = FakeBridge()
+        for command_id, action in enumerate(actions, 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+>       assert bridge.active_motion_id == prepare
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff822a7310>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:65: AssertionError
+_ test_last_motion_selects_preparation_and_half_second_pause[actions15-goal_fine_prepare_90] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff822b80a0>
+actions = ['GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA90_TURN_RIGHT_1']
+prepare = 'goal_fine_prepare_90'
+
+    @pytest.mark.parametrize('actions,prepare', [
+        (['GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        *[([f'GOAL_CAMERA90_TURN_RIGHT_{n}'], 'goal_fine_prepare_90') for n in (1, 2, 3, 5, 6, 7, 9)],
+        *[([f'GOAL_CAMERA90_TURN_LEFT_{n}'], 'goal_fine_prepare_90') for n in range(2, 7)],
+        (['POST_BALL_GOAL_TRANSITION'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_FINE_FORWARD_1', 'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_FINE_FORWARD_1',
+          'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+    ])
+    def test_last_motion_selects_preparation_and_half_second_pause(monkeypatch, actions, prepare):
+        clock = [10.]
+        monkeypatch.setattr('mission_control.motion_command_bridge_node.time.monotonic', lambda: clock[0])
+        bridge = FakeBridge()
+        for command_id, action in enumerate(actions, 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+>       assert bridge.active_motion_id == prepare
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff822ba1d0>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:65: AssertionError
+_ test_last_motion_selects_preparation_and_half_second_pause[actions16-goal_fine_prepare_90] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff823fdb10>
+actions = ['GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_TURN_RIGHT_1']
+prepare = 'goal_fine_prepare_90'
+
+    @pytest.mark.parametrize('actions,prepare', [
+        (['GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        *[([f'GOAL_CAMERA90_TURN_RIGHT_{n}'], 'goal_fine_prepare_90') for n in (1, 2, 3, 5, 6, 7, 9)],
+        *[([f'GOAL_CAMERA90_TURN_LEFT_{n}'], 'goal_fine_prepare_90') for n in range(2, 7)],
+        (['POST_BALL_GOAL_TRANSITION'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_FINE_FORWARD_1', 'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_FINE_FORWARD_1',
+          'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+    ])
+    def test_last_motion_selects_preparation_and_half_second_pause(monkeypatch, actions, prepare):
+        clock = [10.]
+        monkeypatch.setattr('mission_control.motion_command_bridge_node.time.monotonic', lambda: clock[0])
+        bridge = FakeBridge()
+        for command_id, action in enumerate(actions, 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+>       assert bridge.active_motion_id == prepare
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff823fd0f0>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:65: AssertionError
+_ test_last_motion_selects_preparation_and_half_second_pause[actions17-goal_fine_prepare_90] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff822b9150>
+actions = ['GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_FINE_FORWARD_1', 'GOAL_CAMERA90_TURN_LEFT_1']
+prepare = 'goal_fine_prepare_90'
+
+    @pytest.mark.parametrize('actions,prepare', [
+        (['GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        *[([f'GOAL_CAMERA90_TURN_RIGHT_{n}'], 'goal_fine_prepare_90') for n in (1, 2, 3, 5, 6, 7, 9)],
+        *[([f'GOAL_CAMERA90_TURN_LEFT_{n}'], 'goal_fine_prepare_90') for n in range(2, 7)],
+        (['POST_BALL_GOAL_TRANSITION'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_FINE_FORWARD_1', 'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_LEFT', 'GOAL_CAMERA90_TURN_RIGHT_1'], 'goal_fine_prepare_90'),
+        (['GOAL_CAMERA90_CRAB_RIGHT', 'GOAL_CAMERA90_FINE_FORWARD_1',
+          'GOAL_CAMERA90_TURN_LEFT_1'], 'goal_fine_prepare_90'),
+    ])
+    def test_last_motion_selects_preparation_and_half_second_pause(monkeypatch, actions, prepare):
+        clock = [10.]
+        monkeypatch.setattr('mission_control.motion_command_bridge_node.time.monotonic', lambda: clock[0])
+        bridge = FakeBridge()
+        for command_id, action in enumerate(actions, 1):
+            bridge.navigation_command_callback(navigation_message(action=action, command_id=command_id))
+            finish_sequence(bridge)
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+>       assert bridge.active_motion_id == prepare
+E       AssertionError: assert None == 'goal_fine_prepare_90'
+E        +  where None = <test_motion_command_bridge.FakeBridge object at 0xffff822b9cc0>.active_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:65: AssertionError
+______ test_forward_posture_preparation_failure_never_sends_shot[FAILED] _______
+
+status = 'FAILED'
+
+    @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT', 'CANCELLED', 'REJECTED'])
+    def test_forward_posture_preparation_failure_never_sends_shot(status):
+        bridge = FakeBridge()
+        bridge.last_physical_motion_id = 'goal_camera_90_turn_left_1'
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        complete_active_motion(bridge, status)
+        bridge._check_atomic_dwell(float('inf'))
+        assert not bridge.motion_in_progress
+>       assert [m['motion_id'] for m in decoded_messages(bridge.executor_request_publisher)] == [
+            'goal_fine_prepare_90']
+E       AssertionError: assert [] == ['goal_fine_prepare_90']
+E         Right contains one more item: 'goal_fine_prepare_90'
+E         Full diff:
+E         - ['goal_fine_prepare_90']
+E         + []
+
+src/mission_control/test/test_shot_start_posture.py:92: AssertionError
+______ test_forward_posture_preparation_failure_never_sends_shot[TIMEOUT] ______
+
+status = 'TIMEOUT'
+
+    @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT', 'CANCELLED', 'REJECTED'])
+    def test_forward_posture_preparation_failure_never_sends_shot(status):
+        bridge = FakeBridge()
+        bridge.last_physical_motion_id = 'goal_camera_90_turn_left_1'
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        complete_active_motion(bridge, status)
+        bridge._check_atomic_dwell(float('inf'))
+        assert not bridge.motion_in_progress
+>       assert [m['motion_id'] for m in decoded_messages(bridge.executor_request_publisher)] == [
+            'goal_fine_prepare_90']
+E       AssertionError: assert [] == ['goal_fine_prepare_90']
+E         Right contains one more item: 'goal_fine_prepare_90'
+E         Full diff:
+E         - ['goal_fine_prepare_90']
+E         + []
+
+src/mission_control/test/test_shot_start_posture.py:92: AssertionError
+_____ test_forward_posture_preparation_failure_never_sends_shot[CANCELLED] _____
+
+status = 'CANCELLED'
+
+    @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT', 'CANCELLED', 'REJECTED'])
+    def test_forward_posture_preparation_failure_never_sends_shot(status):
+        bridge = FakeBridge()
+        bridge.last_physical_motion_id = 'goal_camera_90_turn_left_1'
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        complete_active_motion(bridge, status)
+        bridge._check_atomic_dwell(float('inf'))
+        assert not bridge.motion_in_progress
+>       assert [m['motion_id'] for m in decoded_messages(bridge.executor_request_publisher)] == [
+            'goal_fine_prepare_90']
+E       AssertionError: assert [] == ['goal_fine_prepare_90']
+E         Right contains one more item: 'goal_fine_prepare_90'
+E         Full diff:
+E         - ['goal_fine_prepare_90']
+E         + []
+
+src/mission_control/test/test_shot_start_posture.py:92: AssertionError
+_____ test_forward_posture_preparation_failure_never_sends_shot[REJECTED] ______
+
+status = 'REJECTED'
+
+    @pytest.mark.parametrize('status', ['FAILED', 'TIMEOUT', 'CANCELLED', 'REJECTED'])
+    def test_forward_posture_preparation_failure_never_sends_shot(status):
+        bridge = FakeBridge()
+        bridge.last_physical_motion_id = 'goal_camera_90_turn_left_1'
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=50))
+        complete_active_motion(bridge, status)
+        bridge._check_atomic_dwell(float('inf'))
+        assert not bridge.motion_in_progress
+>       assert [m['motion_id'] for m in decoded_messages(bridge.executor_request_publisher)] == [
+            'goal_fine_prepare_90']
+E       AssertionError: assert [] == ['goal_fine_prepare_90']
+E         Right contains one more item: 'goal_fine_prepare_90'
+E         Full diff:
+E         - ['goal_fine_prepare_90']
+E         + []
+
+src/mission_control/test/test_shot_start_posture.py:92: AssertionError
+_ test_retry_after_failed_preparation_cannot_skip_it[goal_camera_90_turn_left_1-goal_fine_prepare_90] _
+
+previous = 'goal_camera_90_turn_left_1', prepare = 'goal_fine_prepare_90'
+
+    @pytest.mark.parametrize('previous,prepare', [
+        ('goal_camera_90_turn_left_1', 'goal_fine_prepare_90'),
+        ('goal_camera_90_turn_right_1', 'goal_fine_prepare_90'),
+        ('goal_camera_90_crab_left', 'goal_crab_left_to_fine_90'),
+        ('goal_camera_90_crab_right', 'goal_crab_right_to_fine_90'),
+    ])
+    def test_retry_after_failed_preparation_cannot_skip_it(previous, prepare):
+        bridge = FakeBridge()
+        bridge.last_physical_motion_id = previous
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=1))
+        complete_active_motion(bridge, 'FAILED', 'SDK_POSITION_TIMEOUT')
+>       assert bridge.last_physical_motion_id is None
+E       AssertionError: assert 'goal_camera_90_turn_left_1' is None
+E        +  where 'goal_camera_90_turn_left_1' = <test_motion_command_bridge.FakeBridge object at 0xffff823fee60>.last_physical_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:107: AssertionError
+_ test_retry_after_failed_preparation_cannot_skip_it[goal_camera_90_turn_right_1-goal_fine_prepare_90] _
+
+previous = 'goal_camera_90_turn_right_1', prepare = 'goal_fine_prepare_90'
+
+    @pytest.mark.parametrize('previous,prepare', [
+        ('goal_camera_90_turn_left_1', 'goal_fine_prepare_90'),
+        ('goal_camera_90_turn_right_1', 'goal_fine_prepare_90'),
+        ('goal_camera_90_crab_left', 'goal_crab_left_to_fine_90'),
+        ('goal_camera_90_crab_right', 'goal_crab_right_to_fine_90'),
+    ])
+    def test_retry_after_failed_preparation_cannot_skip_it(previous, prepare):
+        bridge = FakeBridge()
+        bridge.last_physical_motion_id = previous
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=1))
+        complete_active_motion(bridge, 'FAILED', 'SDK_POSITION_TIMEOUT')
+>       assert bridge.last_physical_motion_id is None
+E       AssertionError: assert 'goal_camera_90_turn_right_1' is None
+E        +  where 'goal_camera_90_turn_right_1' = <test_motion_command_bridge.FakeBridge object at 0xffff822bb520>.last_physical_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:107: AssertionError
+_ test_retry_after_failed_preparation_cannot_skip_it[goal_camera_90_crab_left-goal_crab_left_to_fine_90] _
+
+previous = 'goal_camera_90_crab_left', prepare = 'goal_crab_left_to_fine_90'
+
+    @pytest.mark.parametrize('previous,prepare', [
+        ('goal_camera_90_turn_left_1', 'goal_fine_prepare_90'),
+        ('goal_camera_90_turn_right_1', 'goal_fine_prepare_90'),
+        ('goal_camera_90_crab_left', 'goal_crab_left_to_fine_90'),
+        ('goal_camera_90_crab_right', 'goal_crab_right_to_fine_90'),
+    ])
+    def test_retry_after_failed_preparation_cannot_skip_it(previous, prepare):
+        bridge = FakeBridge()
+        bridge.last_physical_motion_id = previous
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=1))
+        complete_active_motion(bridge, 'FAILED', 'SDK_POSITION_TIMEOUT')
+>       assert bridge.last_physical_motion_id is None
+E       AssertionError: assert 'goal_camera_90_crab_left' is None
+E        +  where 'goal_camera_90_crab_left' = <test_motion_command_bridge.FakeBridge object at 0xffff823fd8a0>.last_physical_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:107: AssertionError
+_ test_retry_after_failed_preparation_cannot_skip_it[goal_camera_90_crab_right-goal_crab_right_to_fine_90] _
+
+previous = 'goal_camera_90_crab_right', prepare = 'goal_crab_right_to_fine_90'
+
+    @pytest.mark.parametrize('previous,prepare', [
+        ('goal_camera_90_turn_left_1', 'goal_fine_prepare_90'),
+        ('goal_camera_90_turn_right_1', 'goal_fine_prepare_90'),
+        ('goal_camera_90_crab_left', 'goal_crab_left_to_fine_90'),
+        ('goal_camera_90_crab_right', 'goal_crab_right_to_fine_90'),
+    ])
+    def test_retry_after_failed_preparation_cannot_skip_it(previous, prepare):
+        bridge = FakeBridge()
+        bridge.last_physical_motion_id = previous
+        bridge.navigation_command_callback(navigation_message(action='SHOT', command_id=1))
+        complete_active_motion(bridge, 'FAILED', 'SDK_POSITION_TIMEOUT')
+>       assert bridge.last_physical_motion_id is None
+E       AssertionError: assert 'goal_camera_90_crab_right' is None
+E        +  where 'goal_camera_90_crab_right' = <test_motion_command_bridge.FakeBridge object at 0xffff822b9870>.last_physical_motion_id
+
+src/mission_control/test/test_shot_start_posture.py:107: AssertionError
+________ test_shot_aliases_resolve_to_existing_default_posture_motions _________
+
+    def test_shot_aliases_resolve_to_existing_default_posture_motions():
+        root = Path(__file__).resolve().parents[3]
+        aliases = yaml.safe_load((root / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']
+        motions = {m['name']: m for m in json.loads((root / 'artifacts/robot_motions_runtime.json').read_text())['motions']}
+        assert aliases['goal_forward_to_default'] == 'R오뒤에서 기본자세(카메라45도)'
+        assert aliases['goal_fine_to_default'] == 'R미세오뒤에서 기본자세45도'
+        for alias in ('goal_forward_to_default', 'goal_fine_to_default'):
+            assert '기본자세' in motions[aliases[alias]]['end_pose']
+        source = json.loads((root / 'artifacts/20261029_catalog60_full/source60.json').read_text())
+        name = aliases['goal_forward_to_default']
+        original = next(m for m in source['motions'] if m['name'] == name)
+        pc = json.loads((root / 'artifacts/robot_motions_pc.json').read_text())
+        assert next(m for m in pc['motions'] if m['name'] == name) == original
+        expected = copy.deepcopy(original)
+        expected['playback_speed'] = .9025
+        expected['completion']['position_tolerance_deg'] = 5.0
+>       assert motions[name] == expected
+E       AssertionError: assert {'completion'...s': 7045, ...} == {'completion'...s': 7045, ...}
+E         Omitting 8 identical items, use -vv to show
+E         Differing items:
+E         {'playback_speed': 0.95} != {'playback_speed': 0.9025}
+E         Full diff:
+E           {
+E            'completion': {'position_tolerance_deg': 5.0,
+E                           'settle_duration_ms': 80,...
+E         
+E         ...Full output truncated (118 lines hidden), use '-vv' to show
+
+src/mission_control/test/test_shot_start_posture.py:129: AssertionError
+_________ test_all_new_region_edges_and_confirmation[0.59-0.63--80-8] __________
+
+lower = 0.59, upper = 0.63, left = -80, region = 8
+
+    @pytest.mark.parametrize('lower,upper,left,region', BANDS)
+    def test_all_new_region_edges_and_confirmation(lower, upper, left, region):
+        for depth in (lower, (lower + upper) / 2, upper - .000001):
+            for offset in (left, -40, 0):
+>               assert goal_shot_region(depth, offset) == region
+E               assert 6 == 8
+E                +  where 6 = goal_shot_region(0.59, -80)
+
+src/mission_control/test/test_goal_extended_regions.py:41: AssertionError
+_________ test_all_new_region_edges_and_confirmation[0.63-0.66--80-5] __________
+
+lower = 0.63, upper = 0.66, left = -80, region = 5
+
+    @pytest.mark.parametrize('lower,upper,left,region', BANDS)
+    def test_all_new_region_edges_and_confirmation(lower, upper, left, region):
+        for depth in (lower, (lower + upper) / 2, upper - .000001):
+            for offset in (left, -40, 0):
+>               assert goal_shot_region(depth, offset) == region
+E               assert 7 == 5
+E                +  where 7 = goal_shot_region(0.63, -80)
+
+src/mission_control/test/test_goal_extended_regions.py:41: AssertionError
+__________ test_all_new_region_edges_and_confirmation[0.66-0.7--80-6] __________
+
+lower = 0.66, upper = 0.7, left = -80, region = 6
+
+    @pytest.mark.parametrize('lower,upper,left,region', BANDS)
+    def test_all_new_region_edges_and_confirmation(lower, upper, left, region):
+        for depth in (lower, (lower + upper) / 2, upper - .000001):
+            for offset in (left, -40, 0):
+>               assert goal_shot_region(depth, offset) == region
+E               assert None == 6
+E                +  where None = goal_shot_region(0.66, -80)
+
+src/mission_control/test/test_goal_extended_regions.py:41: AssertionError
+__________ test_all_new_region_edges_and_confirmation[0.7-0.76--70-7] __________
+
+lower = 0.7, upper = 0.76, left = -70, region = 7
+
+    @pytest.mark.parametrize('lower,upper,left,region', BANDS)
+    def test_all_new_region_edges_and_confirmation(lower, upper, left, region):
+        for depth in (lower, (lower + upper) / 2, upper - .000001):
+            for offset in (left, -40, 0):
+>               assert goal_shot_region(depth, offset) == region
+E               assert None == 7
+E                +  where None = goal_shot_region(0.7, -70)
+
+src/mission_control/test/test_goal_extended_regions.py:41: AssertionError
+______ test_existing_regions_are_identical_to_before_for_every_millimeter ______
+
+    def test_existing_regions_are_identical_to_before_for_every_millimeter():
+        previous = runpy.run_path(str(UPDATE / 'before/src/step/step/goal_scoring.py'))['goal_shot_region']
+        for mm in range(400, 590):
+            for px in (-121, -120, -100.001, -100, -.001, 0, .001, 100, 100.001, 120, 121):
+>               assert goal_shot_region(mm / 1000, px) == previous(mm / 1000, px)
+E               assert 1 == None
+E                +  where 1 = goal_shot_region((400 / 1000), -121)
+E                +  and   None = <function goal_shot_region at 0xffff822b1480>((400 / 1000), -121)
+
+src/mission_control/test/test_goal_extended_regions.py:58: AssertionError
+_______ test_region_reselected_after_same_one_second_observation[0.61-8] _______
+
+goal_node = (<test_mission_phase_flow.MissionFlowHarness object at 0xffff82410f70>, [10.0])
+depth = 0.61, region = 8
+
+    @pytest.mark.parametrize('depth,region', [(.61, 8), (.645, 5), (.68, 6), (.73, 7)])
+    def test_region_reselected_after_same_one_second_observation(goal_node, depth, region):
+        node, clock = goal_node
+>       prepare(node, clock)
+
+src/mission_control/test/test_goal_extended_regions.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_mission_phase_flow.MissionFlowHarness object at 0xffff82410f70>
+clock = [10.0]
+
+    def prepare(node, clock):
+        command = node.publish_vision(goal={**score_ready_goal(), 'depth_m': .48, 'offset_x_px': 30})[-1]
+>       assert command['action'] == 'GOAL_SHOT_PREPARE'
+E       AssertionError: assert 'WAIT' == 'GOAL_SHOT_PREPARE'
+E         - GOAL_SHOT_PREPARE
+E         + WAIT
+
+src/mission_control/test/test_catalog64_goal_prepare.py:124: AssertionError
+______ test_region_reselected_after_same_one_second_observation[0.645-5] _______
+
+goal_node = (<test_mission_phase_flow.MissionFlowHarness object at 0xffff82286e30>, [10.0])
+depth = 0.645, region = 5
+
+    @pytest.mark.parametrize('depth,region', [(.61, 8), (.645, 5), (.68, 6), (.73, 7)])
+    def test_region_reselected_after_same_one_second_observation(goal_node, depth, region):
+        node, clock = goal_node
+>       prepare(node, clock)
+
+src/mission_control/test/test_goal_extended_regions.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_mission_phase_flow.MissionFlowHarness object at 0xffff82286e30>
+clock = [10.0]
+
+    def prepare(node, clock):
+        command = node.publish_vision(goal={**score_ready_goal(), 'depth_m': .48, 'offset_x_px': 30})[-1]
+>       assert command['action'] == 'GOAL_SHOT_PREPARE'
+E       AssertionError: assert 'WAIT' == 'GOAL_SHOT_PREPARE'
+E         - GOAL_SHOT_PREPARE
+E         + WAIT
+
+src/mission_control/test/test_catalog64_goal_prepare.py:124: AssertionError
+_______ test_region_reselected_after_same_one_second_observation[0.68-6] _______
+
+goal_node = (<test_mission_phase_flow.MissionFlowHarness object at 0xffff81cc5780>, [10.0])
+depth = 0.68, region = 6
+
+    @pytest.mark.parametrize('depth,region', [(.61, 8), (.645, 5), (.68, 6), (.73, 7)])
+    def test_region_reselected_after_same_one_second_observation(goal_node, depth, region):
+        node, clock = goal_node
+>       prepare(node, clock)
+
+src/mission_control/test/test_goal_extended_regions.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_mission_phase_flow.MissionFlowHarness object at 0xffff81cc5780>
+clock = [10.0]
+
+    def prepare(node, clock):
+        command = node.publish_vision(goal={**score_ready_goal(), 'depth_m': .48, 'offset_x_px': 30})[-1]
+>       assert command['action'] == 'GOAL_SHOT_PREPARE'
+E       AssertionError: assert 'WAIT' == 'GOAL_SHOT_PREPARE'
+E         - GOAL_SHOT_PREPARE
+E         + WAIT
+
+src/mission_control/test/test_catalog64_goal_prepare.py:124: AssertionError
+_______ test_region_reselected_after_same_one_second_observation[0.73-7] _______
+
+goal_node = (<test_mission_phase_flow.MissionFlowHarness object at 0xffff82422800>, [10.0])
+depth = 0.73, region = 7
+
+    @pytest.mark.parametrize('depth,region', [(.61, 8), (.645, 5), (.68, 6), (.73, 7)])
+    def test_region_reselected_after_same_one_second_observation(goal_node, depth, region):
+        node, clock = goal_node
+>       prepare(node, clock)
+
+src/mission_control/test/test_goal_extended_regions.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_mission_phase_flow.MissionFlowHarness object at 0xffff82422800>
+clock = [10.0]
+
+    def prepare(node, clock):
+        command = node.publish_vision(goal={**score_ready_goal(), 'depth_m': .48, 'offset_x_px': 30})[-1]
+>       assert command['action'] == 'GOAL_SHOT_PREPARE'
+E       AssertionError: assert 'WAIT' == 'GOAL_SHOT_PREPARE'
+E         - GOAL_SHOT_PREPARE
+E         + WAIT
+
+src/mission_control/test/test_catalog64_goal_prepare.py:124: AssertionError
+_ test_out_of_region_after_observation_does_not_use_previous_region[0.76--40] __
+
+goal_node = (<test_mission_phase_flow.MissionFlowHarness object at 0xffff82399a50>, [10.0])
+depth = 0.76, offset = -40
+
+    @pytest.mark.parametrize('depth,offset', [(.760, -40), (.61, .001), (.73, -70.001)])
+    def test_out_of_region_after_observation_does_not_use_previous_region(goal_node, depth, offset):
+        node, clock = goal_node
+>       prepare(node, clock)
+
+src/mission_control/test/test_goal_extended_regions.py:111: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_mission_phase_flow.MissionFlowHarness object at 0xffff82399a50>
+clock = [10.0]
+
+    def prepare(node, clock):
+        command = node.publish_vision(goal={**score_ready_goal(), 'depth_m': .48, 'offset_x_px': 30})[-1]
+>       assert command['action'] == 'GOAL_SHOT_PREPARE'
+E       AssertionError: assert 'WAIT' == 'GOAL_SHOT_PREPARE'
+E         - GOAL_SHOT_PREPARE
+E         + WAIT
+
+src/mission_control/test/test_catalog64_goal_prepare.py:124: AssertionError
+_ test_out_of_region_after_observation_does_not_use_previous_region[0.61-0.001] _
+
+goal_node = (<test_mission_phase_flow.MissionFlowHarness object at 0xffff82309420>, [10.0])
+depth = 0.61, offset = 0.001
+
+    @pytest.mark.parametrize('depth,offset', [(.760, -40), (.61, .001), (.73, -70.001)])
+    def test_out_of_region_after_observation_does_not_use_previous_region(goal_node, depth, offset):
+        node, clock = goal_node
+>       prepare(node, clock)
+
+src/mission_control/test/test_goal_extended_regions.py:111: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_mission_phase_flow.MissionFlowHarness object at 0xffff82309420>
+clock = [10.0]
+
+    def prepare(node, clock):
+        command = node.publish_vision(goal={**score_ready_goal(), 'depth_m': .48, 'offset_x_px': 30})[-1]
+>       assert command['action'] == 'GOAL_SHOT_PREPARE'
+E       AssertionError: assert 'WAIT' == 'GOAL_SHOT_PREPARE'
+E         - GOAL_SHOT_PREPARE
+E         + WAIT
+
+src/mission_control/test/test_catalog64_goal_prepare.py:124: AssertionError
+_ test_out_of_region_after_observation_does_not_use_previous_region[0.73--70.001] _
+
+goal_node = (<test_mission_phase_flow.MissionFlowHarness object at 0xffff82400820>, [10.0])
+depth = 0.73, offset = -70.001
+
+    @pytest.mark.parametrize('depth,offset', [(.760, -40), (.61, .001), (.73, -70.001)])
+    def test_out_of_region_after_observation_does_not_use_previous_region(goal_node, depth, offset):
+        node, clock = goal_node
+>       prepare(node, clock)
+
+src/mission_control/test/test_goal_extended_regions.py:111: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_mission_phase_flow.MissionFlowHarness object at 0xffff82400820>
+clock = [10.0]
+
+    def prepare(node, clock):
+        command = node.publish_vision(goal={**score_ready_goal(), 'depth_m': .48, 'offset_x_px': 30})[-1]
+>       assert command['action'] == 'GOAL_SHOT_PREPARE'
+E       AssertionError: assert 'WAIT' == 'GOAL_SHOT_PREPARE'
+E         - GOAL_SHOT_PREPARE
+E         + WAIT
+
+src/mission_control/test/test_catalog64_goal_prepare.py:124: AssertionError
+__ test_target_projection_uses_630mm_and_minus40px_in_calibrated_coordinates ___
+
+    def test_target_projection_uses_630mm_and_minus40px_in_calibrated_coordinates():
+        planner = GoalNavigationPlanner()
+>       assert planner.config.score_target_depth_m == .630
+E       assert 0.56 == 0.63
+E        +  where 0.56 = GoalNavigationConfig(min_confidence=0.55, control_start_depth_m=1.9, score_target_depth_m=0.56, score_crab_max_offset_px=140.0).score_target_depth_m
+E        +    where GoalNavigationConfig(min_confidence=0.55, control_start_depth_m=1.9, score_target_depth_m=0.56, score_crab_max_offset_px=140.0) = <step.goal_navigation_planner.GoalNavigationPlanner object at 0xffff822875b0>.config
+
+src/mission_control/test/test_goal_extended_regions.py:118: AssertionError
+______________ test_only_four_goal_motions_and_aliases_are_added _______________
+
+    def test_only_four_goal_motions_and_aliases_are_added():
+        source = {m['name']: m for m in json.loads((UPDATE / 'source_robot_motions.json').read_text())['motions']}
+        for kind in ('pc', 'runtime'):
+            path = Path(f'artifacts/robot_motions_{kind}.json')
+            before = {m['name']: m for m in json.loads((UPDATE / 'before' / path).read_text())['motions']}
+            after = {m['name']: m for m in json.loads((ROOT / path).read_text())['motions']}
+>           assert after.keys() - before.keys() == set(NAMES.values())
+E           AssertionError: assert {'n공확인자세', 'p...골넣기7번구역', ...} == {'r골넣기 5번구역',...', 'r골넣기8번구역'}
+E             Extra items in the left set:
+E             't골대후제자리우회전(5회)'
+E             'tt미세왼옆90도(2회)'
+E             't골대후제자리우회전(5회)+전진4회'
+E             'p골대후제자리좌회전(3회)'
+E             'n공확인자세'
+E             't라인복귀우실전90도'...
+E             
+E             ...Full output truncated (16 lines hidden), use '-vv' to show
+
+src/mission_control/test/test_goal_extended_regions.py:148: AssertionError
+________ test_goal_turn_rechecks_direction_after_pause_without_polling _________
+
+clock = [10.01]
+
+    def test_goal_turn_rechecks_direction_after_pause_without_polling(clock):
+        node = BoundaryHarness(phase='GOAL_APPROACH')
+        fresh(node, clock, 'goal', target_sample(60))
+>       turn = executable(node)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_boundary_decision_reservation.py:181: IndexError
+_ test_second_pickup_fine_continues_on_first_fresh_frame_without_observation_pause[231-BALL_PICKUP_FINE_FORWARD] _
+
+clock = [12.53], bottom = 231, expected = 'BALL_PICKUP_FINE_FORWARD'
+
+    @pytest.mark.parametrize('bottom,expected', [
+        (230, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'), (231, 'BALL_PICKUP_FINE_FORWARD'),
+    ])
+    def test_second_pickup_fine_continues_on_first_fresh_frame_without_observation_pause(clock, bottom, expected):
+        node = BoundaryHarness(phase='BALL_APPROACH')
+        node.phase_manager.active_ball_mode_index = 2
+        node.phase_manager.ball_modes_confirmed = 2
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = 'pickup_fine_forward_0'
+        parent, request = start(node, bridge, clock)
+        clock[0] += 2.
+        forward_status(node, bridge, request, 'SUCCEEDED')
+        assert bridge.active_dwell_until is None
+        count = len(executable(node))
+        fresh(node, clock, 'ball', ball(bottom_distance_px=bottom), plan=False)
+>       assert executable(node)[-1]['action'] == expected
+E       AssertionError: assert 'BALL_PICKUP_...LIGN_CONTINUE' == 'BALL_PICKUP_FINE_FORWARD'
+E         - BALL_PICKUP_FINE_FORWARD
+E         + BALL_PICKUP_FINE_ALIGN_CONTINUE
+
+src/mission_control/test/test_boundary_decision_reservation.py:243: AssertionError
+_ test_two_cycle_to_one_cycle_uses_checkpoint_not_wrong_two_cycle_queue[-250] __
+
+clock = [14.784], offset = -250
+
+    @pytest.mark.parametrize('offset', [-250, 250])
+    def test_two_cycle_to_one_cycle_uses_checkpoint_not_wrong_two_cycle_queue(clock, offset):
+        node, bridge, _, crab = start_fine_crab(clock, offset=offset)
+        observer = node.pickup_checkpoint_observation
+        frames(node, clock, observer.started_at, observer.duration,
+               ball(offset_x_px=offset / 2, bottom_distance_px=250))
+>       assert not node.pickup_walk_reservation.pending
+E       assert not True
+E        +  where True = <mission_control.pickup_walk_reservation.PickupWalkReservation object at 0xffff823ff610>.pending
+E        +    where <mission_control.pickup_walk_reservation.PickupWalkReservation object at 0xffff823ff610> = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff822861a0>.pickup_walk_reservation
+
+src/mission_control/test/test_reservation_expansion.py:65: AssertionError
+_________ test_changed_latest_sample_cancels_early_same_gait_candidate _________
+
+clock = [14.362]
+
+    def test_changed_latest_sample_cancels_early_same_gait_candidate(clock):
+        node, bridge, _, crab = start_fine_crab(clock)
+        observer = node.pickup_checkpoint_observation
+        started, duration = observer.started_at, observer.duration
+        frames(node, clock, started, duration, ball(offset_x_px=-100, bottom_distance_px=250), (.61, .65, .69))
+        assert not node.pickup_walk_reservation.pending
+        frames(node, clock, started, duration, ball(bottom_distance_px=250), (.76,))
+        assert not node.pickup_walk_reservation.pending
+        forward_status(node, bridge, crab, 'SUCCEEDED')
+        assert node.pickup_fine_align_waiting  # One changed sample cannot authorize a new action.
+        fresh(node, clock, 'ball', ball(bottom_distance_px=250))
+>       assert node.publisher.messages[-1]['action'] == 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+E       AssertionError: assert 'BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD
+
+src/mission_control/test/test_reservation_expansion.py:85: AssertionError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_pickup_grasp_selection.py::test_post_retreat_selects_grasp_and_keeps_check_pose[0-pickup_400]
+FAILED src/mission_control/test/test_pickup_grasp_selection.py::test_post_retreat_selects_grasp_and_keeps_check_pose[300-pickup_400]
+FAILED src/mission_control/test/test_pickup_grasp_selection.py::test_post_retreat_selects_grasp_and_keeps_check_pose[319.99-pickup_400]
+FAILED src/mission_control/test/test_pickup_grasp_selection.py::test_post_retreat_selects_grasp_and_keeps_check_pose[320-pickup_400]
+FAILED src/mission_control/test/test_pickup_grasp_selection.py::test_post_retreat_selects_grasp_and_keeps_check_pose[320.01-pickup_500]
+FAILED src/mission_control/test/test_pickup_grasp_selection.py::test_post_retreat_selects_grasp_and_keeps_check_pose[500-pickup_500]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA_90_FORWARD-None]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_TURN_LEFT_1]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA_90_FORWARD-GOAL_CAMERA90_TURN_RIGHT_1]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA_90_FORWARD_1-None]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA_90_FORWARD_1-GOAL_CAMERA90_TURN_LEFT_1]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA_90_FORWARD_1-GOAL_CAMERA90_TURN_RIGHT_1]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA_90_FORWARD_2-None]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA_90_FORWARD_2-GOAL_CAMERA90_TURN_LEFT_1]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA_90_FORWARD_2-GOAL_CAMERA90_TURN_RIGHT_1]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_1-None]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_TURN_LEFT_1]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_1-GOAL_CAMERA90_TURN_RIGHT_1]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_2-None]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_2-GOAL_CAMERA90_TURN_LEFT_1]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_2-GOAL_CAMERA90_TURN_RIGHT_1]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_3-None]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_3-GOAL_CAMERA90_TURN_LEFT_1]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_3-GOAL_CAMERA90_TURN_RIGHT_1]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_4-None]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_4-GOAL_CAMERA90_TURN_LEFT_1]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_direct_shot_compatibility_prepares_forward_but_preserves_fine_posture[GOAL_CAMERA90_FINE_FORWARD_4-GOAL_CAMERA90_TURN_RIGHT_1]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions0-goal_fine_prepare_90]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions1-goal_fine_prepare_90]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions2-goal_fine_prepare_90]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions3-goal_fine_prepare_90]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions4-goal_fine_prepare_90]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions5-goal_fine_prepare_90]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions6-goal_fine_prepare_90]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions7-goal_fine_prepare_90]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions8-goal_fine_prepare_90]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions9-goal_fine_prepare_90]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions10-goal_fine_prepare_90]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions11-goal_fine_prepare_90]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions12-goal_fine_prepare_90]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions13-goal_fine_prepare_90]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions14-goal_fine_prepare_90]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions15-goal_fine_prepare_90]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions16-goal_fine_prepare_90]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_last_motion_selects_preparation_and_half_second_pause[actions17-goal_fine_prepare_90]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_forward_posture_preparation_failure_never_sends_shot[FAILED]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_forward_posture_preparation_failure_never_sends_shot[TIMEOUT]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_forward_posture_preparation_failure_never_sends_shot[CANCELLED]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_forward_posture_preparation_failure_never_sends_shot[REJECTED]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_retry_after_failed_preparation_cannot_skip_it[goal_camera_90_turn_left_1-goal_fine_prepare_90]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_retry_after_failed_preparation_cannot_skip_it[goal_camera_90_turn_right_1-goal_fine_prepare_90]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_retry_after_failed_preparation_cannot_skip_it[goal_camera_90_crab_left-goal_crab_left_to_fine_90]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_retry_after_failed_preparation_cannot_skip_it[goal_camera_90_crab_right-goal_crab_right_to_fine_90]
+FAILED src/mission_control/test/test_shot_start_posture.py::test_shot_aliases_resolve_to_existing_default_posture_motions
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_all_new_region_edges_and_confirmation[0.59-0.63--80-8]
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_all_new_region_edges_and_confirmation[0.63-0.66--80-5]
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_all_new_region_edges_and_confirmation[0.66-0.7--80-6]
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_all_new_region_edges_and_confirmation[0.7-0.76--70-7]
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_existing_regions_are_identical_to_before_for_every_millimeter
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_region_reselected_after_same_one_second_observation[0.61-8]
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_region_reselected_after_same_one_second_observation[0.645-5]
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_region_reselected_after_same_one_second_observation[0.68-6]
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_region_reselected_after_same_one_second_observation[0.73-7]
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_out_of_region_after_observation_does_not_use_previous_region[0.76--40]
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_out_of_region_after_observation_does_not_use_previous_region[0.61-0.001]
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_out_of_region_after_observation_does_not_use_previous_region[0.73--70.001]
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_target_projection_uses_630mm_and_minus40px_in_calibrated_coordinates
+FAILED src/mission_control/test/test_goal_extended_regions.py::test_only_four_goal_motions_and_aliases_are_added
+FAILED src/mission_control/test/test_boundary_decision_reservation.py::test_goal_turn_rechecks_direction_after_pause_without_polling
+FAILED src/mission_control/test/test_boundary_decision_reservation.py::test_second_pickup_fine_continues_on_first_fresh_frame_without_observation_pause[231-BALL_PICKUP_FINE_FORWARD]
+FAILED src/mission_control/test/test_reservation_expansion.py::test_two_cycle_to_one_cycle_uses_checkpoint_not_wrong_two_cycle_queue[-250]
+FAILED src/mission_control/test/test_reservation_expansion.py::test_changed_latest_sample_cancels_early_same_gait_candidate
+72 failed, 197 passed in 3.02s

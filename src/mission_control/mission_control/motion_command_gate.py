@@ -70,6 +70,8 @@ GENERAL_ACTIONS = frozenset(
         "POST_SHOT_TURN_LEFT_3",
         "POST_SHOT_EXIT_RIGHT_5_FORWARD_4",
         "POST_SHOT_EXIT_LEFT_3_FORWARD_4",
+        "POST_SHOT_EXIT_RIGHT_9_RECOVERY_RIGHT_4",
+        "POST_SHOT_EXIT_LEFT_4_RECOVERY_LEFT_4",
         "POST_SHOT_FORWARD",
         *{
             f"POST_SHOT_LINE_TURN_{direction}_{count}"

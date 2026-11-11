@@ -1,0 +1,47 @@
+{
+  "catalog_validation": {
+    "pc": "passed",
+    "runtime": "passed",
+    "motion_count": 160
+  },
+  "installed_runtime_resolves_to_workspace": true,
+  "playback": {
+    "hardware": "virtual only",
+    "motions_completed": 8,
+    "failures": 0,
+    "tick_ms": 5
+  },
+  "baseline_comparison": {
+    "before": {
+      "passed": 714,
+      "failed": 73
+    },
+    "after": {
+      "passed": 719,
+      "failed": 73
+    },
+    "new_failures": [],
+    "same_failures": true
+  },
+  "additional_route_suite": {
+    "passed": 197,
+    "failed": 72,
+    "note": "Not run before import; not used to claim no regressions. Includes outdated preparation/dwell/region expectations."
+  },
+  "executor_tests": {
+    "test_motion_json_catalog": "passed",
+    "test_queue_control_tick": "passed",
+    "test_catalog_only_core": "11 passed, 1 failed: expected 166 aliases, actual 173; alias file unchanged",
+    "test_common_playback": "not registered in this build; used gui_execution_probe for all eight affected motions instead"
+  },
+  "timing_review": "Fixed pickup/shot/exit motions advance on completion status; no fixed 2968/2302/4278 ms prequeue estimates in production mission code. Preserved source max_seq_ms; playback uses actual frame end.",
+  "limitations": [
+    "No physical robot execution or dynamics/balance validation.",
+    "Existing regression suite failures remain; complete mission correctness is not certified."
+  ],
+  "focused_suite": {
+    "passed": 196,
+    "failed": 7,
+    "notes": "Six pickup tests subtract time from a None dwell deadline; one grasp test also fails in baseline. See focused_tests.log."
+  }
+}

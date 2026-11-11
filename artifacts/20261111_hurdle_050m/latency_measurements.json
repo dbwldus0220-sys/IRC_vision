@@ -1,0 +1,1020 @@
+[
+  {
+    "kind": "DETECTOR_PIPELINE_TIMING",
+    "log": "/home/jet/.ros/log/python3_7931_1794344669794.log",
+    "line": 183,
+    "time_kst": "2026-11-11T06:07:26.076655+09:00",
+    "effective_samples_per_sec": 13.026,
+    "rgb_stamp_ns": 1794344845808035156,
+    "skipped_total": 3,
+    "published": true,
+    "samples": 27,
+    "window_ms": 2072.707,
+    "latest_ms": {
+      "capture_to_detector": 167.231,
+      "convert_preprocess": 22.343,
+      "inference": 35.277,
+      "postprocess": 1.234,
+      "publish": 1.267,
+      "overlay_display": 39.822,
+      "callback": 99.942
+    },
+    "summary_ms": {
+      "capture_to_detector": {
+        "n": 27,
+        "avg": 142.052,
+        "max": 338.057
+      },
+      "convert_preprocess": {
+        "n": 27,
+        "avg": 13.095,
+        "max": 23.239
+      },
+      "inference": {
+        "n": 27,
+        "avg": 26.667,
+        "max": 36.795
+      },
+      "postprocess": {
+        "n": 27,
+        "avg": 1.47,
+        "max": 3.613
+      },
+      "publish": {
+        "n": 27,
+        "avg": 1.769,
+        "max": 5.297
+      },
+      "overlay_display": {
+        "n": 27,
+        "avg": 22.719,
+        "max": 56.815
+      },
+      "callback": {
+        "n": 27,
+        "avg": 65.719,
+        "max": 102.536
+      }
+    }
+  },
+  {
+    "kind": "DETECTOR_PIPELINE_TIMING",
+    "log": "/home/jet/.ros/log/python3_7931_1794344669794.log",
+    "line": 185,
+    "time_kst": "2026-11-11T06:07:28.137143+09:00",
+    "effective_samples_per_sec": 10.191,
+    "rgb_stamp_ns": 1794344847776219482,
+    "skipped_total": 3,
+    "published": true,
+    "samples": 21,
+    "window_ms": 2060.607,
+    "latest_ms": {
+      "capture_to_detector": 221.113,
+      "convert_preprocess": 8.014,
+      "inference": 29.013,
+      "postprocess": 5.629,
+      "publish": 28.223,
+      "overlay_display": 67.659,
+      "callback": 138.537
+    },
+    "summary_ms": {
+      "capture_to_detector": {
+        "n": 21,
+        "avg": 133.12,
+        "max": 221.113
+      },
+      "convert_preprocess": {
+        "n": 21,
+        "avg": 9.901,
+        "max": 22.016
+      },
+      "inference": {
+        "n": 21,
+        "avg": 27.938,
+        "max": 44.661
+      },
+      "postprocess": {
+        "n": 21,
+        "avg": 3.775,
+        "max": 17.68
+      },
+      "publish": {
+        "n": 21,
+        "avg": 11.342,
+        "max": 116.844
+      },
+      "overlay_display": {
+        "n": 21,
+        "avg": 27.957,
+        "max": 67.659
+      },
+      "callback": {
+        "n": 21,
+        "avg": 80.913,
+        "max": 190.572
+      }
+    }
+  },
+  {
+    "kind": "DETECTOR_PIPELINE_TIMING",
+    "log": "/home/jet/.ros/log/python3_7931_1794344669794.log",
+    "line": 187,
+    "time_kst": "2026-11-11T06:07:30.355969+09:00",
+    "effective_samples_per_sec": 6.76,
+    "rgb_stamp_ns": 1794344850011040771,
+    "skipped_total": 3,
+    "published": true,
+    "samples": 15,
+    "window_ms": 2218.823,
+    "latest_ms": {
+      "capture_to_detector": 211.534,
+      "convert_preprocess": 7.229,
+      "inference": 22.476,
+      "postprocess": 10.343,
+      "publish": 56.924,
+      "overlay_display": 35.394,
+      "callback": 132.365
+    },
+    "summary_ms": {
+      "capture_to_detector": {
+        "n": 15,
+        "avg": 181.264,
+        "max": 329.152
+      },
+      "convert_preprocess": {
+        "n": 15,
+        "avg": 15.516,
+        "max": 33.202
+      },
+      "inference": {
+        "n": 15,
+        "avg": 23.823,
+        "max": 33.468
+      },
+      "postprocess": {
+        "n": 15,
+        "avg": 2.191,
+        "max": 10.343
+      },
+      "publish": {
+        "n": 15,
+        "avg": 54.722,
+        "max": 111.927
+      },
+      "overlay_display": {
+        "n": 15,
+        "avg": 32.289,
+        "max": 59.962
+      },
+      "callback": {
+        "n": 15,
+        "avg": 128.541,
+        "max": 197.302
+      }
+    }
+  },
+  {
+    "kind": "DETECTOR_PIPELINE_TIMING",
+    "log": "/home/jet/.ros/log/python3_7931_1794344669794.log",
+    "line": 188,
+    "time_kst": "2026-11-11T06:07:32.397861+09:00",
+    "effective_samples_per_sec": 5.877,
+    "rgb_stamp_ns": 1794344851678862793,
+    "skipped_total": 3,
+    "published": true,
+    "samples": 12,
+    "window_ms": 2041.721,
+    "latest_ms": {
+      "capture_to_detector": 303.699,
+      "convert_preprocess": 27.194,
+      "inference": 22.447,
+      "postprocess": 1.327,
+      "publish": 310.621,
+      "overlay_display": 52.203,
+      "callback": 413.792
+    },
+    "summary_ms": {
+      "capture_to_detector": {
+        "n": 12,
+        "avg": 225.703,
+        "max": 327.138
+      },
+      "convert_preprocess": {
+        "n": 12,
+        "avg": 11.298,
+        "max": 27.194
+      },
+      "inference": {
+        "n": 12,
+        "avg": 25.805,
+        "max": 35.899
+      },
+      "postprocess": {
+        "n": 12,
+        "avg": 1.758,
+        "max": 3.683
+      },
+      "publish": {
+        "n": 12,
+        "avg": 86.892,
+        "max": 310.621
+      },
+      "overlay_display": {
+        "n": 12,
+        "avg": 33.298,
+        "max": 52.203
+      },
+      "callback": {
+        "n": 12,
+        "avg": 159.05,
+        "max": 413.792
+      }
+    }
+  },
+  {
+    "kind": "DETECTOR_PIPELINE_TIMING",
+    "log": "/home/jet/.ros/log/python3_7931_1794344669794.log",
+    "line": 190,
+    "time_kst": "2026-11-11T06:07:34.593348+09:00",
+    "effective_samples_per_sec": 5.466,
+    "rgb_stamp_ns": 1794344854113905518,
+    "skipped_total": 3,
+    "published": true,
+    "samples": 12,
+    "window_ms": 2195.556,
+    "latest_ms": {
+      "capture_to_detector": 262.258,
+      "convert_preprocess": 29.512,
+      "inference": 41.016,
+      "postprocess": 1.133,
+      "publish": 102.078,
+      "overlay_display": 42.115,
+      "callback": 215.854
+    },
+    "summary_ms": {
+      "capture_to_detector": {
+        "n": 12,
+        "avg": 196.26,
+        "max": 304.709
+      },
+      "convert_preprocess": {
+        "n": 12,
+        "avg": 13.294,
+        "max": 29.512
+      },
+      "inference": {
+        "n": 12,
+        "avg": 33.122,
+        "max": 43.827
+      },
+      "postprocess": {
+        "n": 12,
+        "avg": 3.917,
+        "max": 23.034
+      },
+      "publish": {
+        "n": 12,
+        "avg": 84.63,
+        "max": 160.394
+      },
+      "overlay_display": {
+        "n": 12,
+        "avg": 37.189,
+        "max": 71.24
+      },
+      "callback": {
+        "n": 12,
+        "avg": 172.153,
+        "max": 232.346
+      }
+    }
+  },
+  {
+    "kind": "DETECTOR_PIPELINE_TIMING",
+    "log": "/home/jet/.ros/log/python3_7931_1794344669794.log",
+    "line": 192,
+    "time_kst": "2026-11-11T06:07:36.686599+09:00",
+    "effective_samples_per_sec": 5.255,
+    "rgb_stamp_ns": 1794344856348828125,
+    "skipped_total": 3,
+    "published": true,
+    "samples": 11,
+    "window_ms": 2093.265,
+    "latest_ms": {
+      "capture_to_detector": 118.427,
+      "convert_preprocess": 6.261,
+      "inference": 26.326,
+      "postprocess": 1.177,
+      "publish": 140.753,
+      "overlay_display": 43.409,
+      "callback": 217.925
+    },
+    "summary_ms": {
+      "capture_to_detector": {
+        "n": 11,
+        "avg": 192.183,
+        "max": 402.972
+      },
+      "convert_preprocess": {
+        "n": 11,
+        "avg": 11.011,
+        "max": 28.679
+      },
+      "inference": {
+        "n": 11,
+        "avg": 27.382,
+        "max": 44.868
+      },
+      "postprocess": {
+        "n": 11,
+        "avg": 1.975,
+        "max": 7.857
+      },
+      "publish": {
+        "n": 11,
+        "avg": 104.581,
+        "max": 152.776
+      },
+      "overlay_display": {
+        "n": 11,
+        "avg": 35.755,
+        "max": 74.491
+      },
+      "callback": {
+        "n": 11,
+        "avg": 180.704,
+        "max": 234.656
+      }
+    }
+  },
+  {
+    "kind": "DETECTOR_PIPELINE_TIMING",
+    "log": "/home/jet/.ros/log/python3_7931_1794344669794.log",
+    "line": 194,
+    "time_kst": "2026-11-11T06:07:38.733754+09:00",
+    "effective_samples_per_sec": 5.374,
+    "rgb_stamp_ns": 1794344858483692871,
+    "skipped_total": 3,
+    "published": true,
+    "samples": 11,
+    "window_ms": 2047.058,
+    "latest_ms": {
+      "capture_to_detector": 90.263,
+      "convert_preprocess": 19.561,
+      "inference": 25.091,
+      "postprocess": 0.901,
+      "publish": 71.051,
+      "overlay_display": 41.67,
+      "callback": 158.274
+    },
+    "summary_ms": {
+      "capture_to_detector": {
+        "n": 11,
+        "avg": 158.763,
+        "max": 334.462
+      },
+      "convert_preprocess": {
+        "n": 11,
+        "avg": 12.075,
+        "max": 23.437
+      },
+      "inference": {
+        "n": 11,
+        "avg": 29.265,
+        "max": 54.943
+      },
+      "postprocess": {
+        "n": 11,
+        "avg": 1.133,
+        "max": 2.531
+      },
+      "publish": {
+        "n": 11,
+        "avg": 98.036,
+        "max": 149.161
+      },
+      "overlay_display": {
+        "n": 11,
+        "avg": 36.203,
+        "max": 57.2
+      },
+      "callback": {
+        "n": 11,
+        "avg": 176.711,
+        "max": 220.901
+      }
+    }
+  },
+  {
+    "kind": "DETECTOR_PIPELINE_TIMING",
+    "log": "/home/jet/.ros/log/python3_7931_1794344669794.log",
+    "line": 196,
+    "time_kst": "2026-11-11T06:07:40.795762+09:00",
+    "effective_samples_per_sec": 7.786,
+    "rgb_stamp_ns": 1794344860518494629,
+    "skipped_total": 3,
+    "published": true,
+    "samples": 16,
+    "window_ms": 2054.91,
+    "latest_ms": {
+      "capture_to_detector": 207.524,
+      "convert_preprocess": 9.372,
+      "inference": 23.2,
+      "postprocess": 0.699,
+      "publish": 0.611,
+      "overlay_display": 27.275,
+      "callback": 61.156
+    },
+    "summary_ms": {
+      "capture_to_detector": {
+        "n": 16,
+        "avg": 168.954,
+        "max": 301.425
+      },
+      "convert_preprocess": {
+        "n": 16,
+        "avg": 10.267,
+        "max": 23.288
+      },
+      "inference": {
+        "n": 16,
+        "avg": 27.095,
+        "max": 40.426
+      },
+      "postprocess": {
+        "n": 16,
+        "avg": 1.114,
+        "max": 2.906
+      },
+      "publish": {
+        "n": 16,
+        "avg": 53.273,
+        "max": 133.28
+      },
+      "overlay_display": {
+        "n": 16,
+        "avg": 28.535,
+        "max": 49.394
+      },
+      "callback": {
+        "n": 16,
+        "avg": 120.285,
+        "max": 207.199
+      }
+    }
+  },
+  {
+    "kind": "DETECTOR_PIPELINE_TIMING",
+    "log": "/home/jet/.ros/log/python3_7931_1794344669794.log",
+    "line": 198,
+    "time_kst": "2026-11-11T06:07:42.974556+09:00",
+    "effective_samples_per_sec": 10.979,
+    "rgb_stamp_ns": 1794344862519934814,
+    "skipped_total": 3,
+    "published": true,
+    "samples": 24,
+    "window_ms": 2186.021,
+    "latest_ms": {
+      "capture_to_detector": 260.524,
+      "convert_preprocess": 23.836,
+      "inference": 22.234,
+      "postprocess": 0.74,
+      "publish": 119.832,
+      "overlay_display": 26.062,
+      "callback": 192.704
+    },
+    "summary_ms": {
+      "capture_to_detector": {
+        "n": 24,
+        "avg": 154.793,
+        "max": 260.524
+      },
+      "convert_preprocess": {
+        "n": 24,
+        "avg": 12.043,
+        "max": 24.199
+      },
+      "inference": {
+        "n": 24,
+        "avg": 25.301,
+        "max": 39.27
+      },
+      "postprocess": {
+        "n": 24,
+        "avg": 1.109,
+        "max": 9.434
+      },
+      "publish": {
+        "n": 24,
+        "avg": 17.654,
+        "max": 119.832
+      },
+      "overlay_display": {
+        "n": 24,
+        "avg": 18.274,
+        "max": 61.671
+      },
+      "callback": {
+        "n": 24,
+        "avg": 74.382,
+        "max": 192.704
+      }
+    }
+  },
+  {
+    "kind": "BALL_PIPELINE_TIMING",
+    "log": "/home/jet/.ros/log/python3_7935_1794344668909.log",
+    "line": 353,
+    "time_kst": "2026-11-11T06:07:27.481413+09:00",
+    "effective_samples_per_sec": 11.232,
+    "rgb_stamp_ns": 1794344847342538574,
+    "track_id": 197,
+    "hits": 0,
+    "confirmed": false,
+    "raw_detected": false,
+    "input_status": "accepted",
+    "confirmation_event": false,
+    "samples": 23,
+    "window_ms": 2047.805,
+    "latest_ms": {
+      "capture_to_detector": 92.697,
+      "detector_work": 33.478,
+      "detector_to_ball": 6.554,
+      "ball_work": 0.615,
+      "ball_to_decision": 3.845,
+      "capture_to_decision": 137.171,
+      "decision_callback": 0.535
+    },
+    "summary_ms": {
+      "capture_to_detector": {
+        "n": 23,
+        "avg": 149.232,
+        "max": 338.057
+      },
+      "detector_work": {
+        "n": 23,
+        "avg": 45.433,
+        "max": 71.786
+      },
+      "detector_to_ball": {
+        "n": 23,
+        "avg": 12.158,
+        "max": 21.47
+      },
+      "ball_work": {
+        "n": 23,
+        "avg": 0.914,
+        "max": 4.389
+      },
+      "ball_to_decision": {
+        "n": 23,
+        "avg": 1.799,
+        "max": 5.483
+      },
+      "capture_to_decision": {
+        "n": 23,
+        "avg": 209.495,
+        "max": 392.546
+      },
+      "decision_callback": {
+        "n": 23,
+        "avg": 0.573,
+        "max": 1.095
+      }
+    }
+  },
+  {
+    "kind": "BALL_PIPELINE_TIMING",
+    "log": "/home/jet/.ros/log/python3_7935_1794344668909.log",
+    "line": 355,
+    "time_kst": "2026-11-11T06:07:29.593000+09:00",
+    "effective_samples_per_sec": 7.104,
+    "rgb_stamp_ns": 1794344849210504395,
+    "track_id": 198,
+    "hits": 0,
+    "confirmed": false,
+    "raw_detected": false,
+    "input_status": "accepted",
+    "confirmation_event": false,
+    "samples": 15,
+    "window_ms": 2111.514,
+    "latest_ms": {
+      "capture_to_detector": 286.409,
+      "detector_work": 77.571,
+      "detector_to_ball": 12.277,
+      "ball_work": 0.647,
+      "ball_to_decision": 3.726,
+      "capture_to_decision": 380.617,
+      "decision_callback": 0.637
+    },
+    "summary_ms": {
+      "capture_to_detector": {
+        "n": 15,
+        "avg": 171.372,
+        "max": 286.409
+      },
+      "detector_work": {
+        "n": 15,
+        "avg": 88.376,
+        "max": 154.126
+      },
+      "detector_to_ball": {
+        "n": 15,
+        "avg": 14.683,
+        "max": 23.146
+      },
+      "ball_work": {
+        "n": 15,
+        "avg": 1.615,
+        "max": 12.686
+      },
+      "ball_to_decision": {
+        "n": 15,
+        "avg": 1.732,
+        "max": 4.036
+      },
+      "capture_to_decision": {
+        "n": 15,
+        "avg": 277.744,
+        "max": 380.617
+      },
+      "decision_callback": {
+        "n": 15,
+        "avg": 0.552,
+        "max": 0.697
+      }
+    }
+  },
+  {
+    "kind": "BALL_PIPELINE_TIMING",
+    "log": "/home/jet/.ros/log/python3_7935_1794344668909.log",
+    "line": 358,
+    "time_kst": "2026-11-11T06:07:31.606266+09:00",
+    "effective_samples_per_sec": 6.459,
+    "rgb_stamp_ns": 1794344851345293945,
+    "track_id": 199,
+    "hits": 0,
+    "confirmed": false,
+    "raw_detected": false,
+    "input_status": "accepted",
+    "confirmation_event": false,
+    "samples": 13,
+    "window_ms": 2012.662,
+    "latest_ms": {
+      "capture_to_detector": 203.818,
+      "detector_work": 38.909,
+      "detector_to_ball": 12.398,
+      "ball_work": 0.731,
+      "ball_to_decision": 2.306,
+      "capture_to_decision": 258.152,
+      "decision_callback": 0.982
+    },
+    "summary_ms": {
+      "capture_to_detector": {
+        "n": 13,
+        "avg": 203.912,
+        "max": 329.152
+      },
+      "detector_work": {
+        "n": 13,
+        "avg": 100.393,
+        "max": 147.542
+      },
+      "detector_to_ball": {
+        "n": 13,
+        "avg": 13.665,
+        "max": 18.798
+      },
+      "ball_work": {
+        "n": 13,
+        "avg": 0.699,
+        "max": 0.928
+      },
+      "ball_to_decision": {
+        "n": 13,
+        "avg": 3.122,
+        "max": 10.161
+      },
+      "capture_to_decision": {
+        "n": 13,
+        "avg": 321.682,
+        "max": 458.652
+      },
+      "decision_callback": {
+        "n": 13,
+        "avg": 0.573,
+        "max": 0.982
+      }
+    }
+  },
+  {
+    "kind": "BALL_PIPELINE_TIMING",
+    "log": "/home/jet/.ros/log/python3_7935_1794344668909.log",
+    "line": 364,
+    "time_kst": "2026-11-11T06:07:33.683193+09:00",
+    "effective_samples_per_sec": 5.776,
+    "rgb_stamp_ns": 1794344853380065430,
+    "track_id": 200,
+    "hits": 0,
+    "confirmed": false,
+    "raw_detected": false,
+    "input_status": "accepted",
+    "confirmation_event": false,
+    "samples": 12,
+    "window_ms": 2077.459,
+    "latest_ms": {
+      "capture_to_detector": 197.367,
+      "detector_work": 94.609,
+      "detector_to_ball": 7.699,
+      "ball_work": 0.828,
+      "ball_to_decision": 0.816,
+      "capture_to_decision": 301.298,
+      "decision_callback": 0.511
+    },
+    "summary_ms": {
+      "capture_to_detector": {
+        "n": 12,
+        "avg": 203.101,
+        "max": 303.699
+      },
+      "detector_work": {
+        "n": 12,
+        "avg": 129.83,
+        "max": 361.071
+      },
+      "detector_to_ball": {
+        "n": 12,
+        "avg": 11.104,
+        "max": 23.249
+      },
+      "ball_work": {
+        "n": 12,
+        "avg": 0.679,
+        "max": 0.828
+      },
+      "ball_to_decision": {
+        "n": 12,
+        "avg": 1.609,
+        "max": 7.92
+      },
+      "capture_to_decision": {
+        "n": 12,
+        "avg": 346.297,
+        "max": 676.596
+      },
+      "decision_callback": {
+        "n": 12,
+        "avg": 0.598,
+        "max": 1.519
+      }
+    }
+  },
+  {
+    "kind": "BALL_PIPELINE_TIMING",
+    "log": "/home/jet/.ros/log/python3_7935_1794344668909.log",
+    "line": 370,
+    "time_kst": "2026-11-11T06:07:35.784762+09:00",
+    "effective_samples_per_sec": 5.234,
+    "rgb_stamp_ns": 1794344855514895752,
+    "track_id": 201,
+    "hits": 0,
+    "confirmed": false,
+    "raw_detected": false,
+    "input_status": "accepted",
+    "confirmation_event": false,
+    "samples": 11,
+    "window_ms": 2101.757,
+    "latest_ms": {
+      "capture_to_detector": 138.931,
+      "detector_work": 108.005,
+      "detector_to_ball": 12.88,
+      "ball_work": 0.698,
+      "ball_to_decision": 7.676,
+      "capture_to_decision": 268.171,
+      "decision_callback": 0.57
+    },
+    "summary_ms": {
+      "capture_to_detector": {
+        "n": 11,
+        "avg": 215.233,
+        "max": 402.972
+      },
+      "detector_work": {
+        "n": 11,
+        "avg": 139.694,
+        "max": 202.034
+      },
+      "detector_to_ball": {
+        "n": 11,
+        "avg": 14.355,
+        "max": 25.093
+      },
+      "ball_work": {
+        "n": 11,
+        "avg": 0.675,
+        "max": 0.777
+      },
+      "ball_to_decision": {
+        "n": 11,
+        "avg": 2.272,
+        "max": 7.676
+      },
+      "capture_to_decision": {
+        "n": 11,
+        "avg": 372.186,
+        "max": 615.553
+      },
+      "decision_callback": {
+        "n": 11,
+        "avg": 0.604,
+        "max": 1.53
+      }
+    }
+  },
+  {
+    "kind": "BALL_PIPELINE_TIMING",
+    "log": "/home/jet/.ros/log/python3_7935_1794344668909.log",
+    "line": 375,
+    "time_kst": "2026-11-11T06:07:37.812339+09:00",
+    "effective_samples_per_sec": 4.932,
+    "rgb_stamp_ns": 1794344857482976074,
+    "track_id": 202,
+    "hits": 0,
+    "confirmed": false,
+    "raw_detected": false,
+    "input_status": "accepted",
+    "confirmation_event": false,
+    "samples": 10,
+    "window_ms": 2027.555,
+    "latest_ms": {
+      "capture_to_detector": 181.834,
+      "detector_work": 128.954,
+      "detector_to_ball": 15.044,
+      "ball_work": 0.558,
+      "ball_to_decision": 1.395,
+      "capture_to_decision": 327.755,
+      "decision_callback": 0.449
+    },
+    "summary_ms": {
+      "capture_to_detector": {
+        "n": 10,
+        "avg": 149.687,
+        "max": 307.762
+      },
+      "detector_work": {
+        "n": 10,
+        "avg": 150.392,
+        "max": 179.344
+      },
+      "detector_to_ball": {
+        "n": 10,
+        "avg": 16.198,
+        "max": 30.279
+      },
+      "ball_work": {
+        "n": 10,
+        "avg": 0.637,
+        "max": 0.829
+      },
+      "ball_to_decision": {
+        "n": 10,
+        "avg": 2.852,
+        "max": 7.812
+      },
+      "capture_to_decision": {
+        "n": 10,
+        "avg": 319.728,
+        "max": 465.837
+      },
+      "decision_callback": {
+        "n": 10,
+        "avg": 0.638,
+        "max": 2.073
+      }
+    }
+  },
+  {
+    "kind": "BALL_PIPELINE_TIMING",
+    "log": "/home/jet/.ros/log/python3_7935_1794344668909.log",
+    "line": 380,
+    "time_kst": "2026-11-11T06:07:39.848855+09:00",
+    "effective_samples_per_sec": 5.907,
+    "rgb_stamp_ns": 1794344859551132813,
+    "track_id": 203,
+    "hits": 0,
+    "confirmed": false,
+    "raw_detected": false,
+    "input_status": "accepted",
+    "confirmation_event": false,
+    "samples": 12,
+    "window_ms": 2031.641,
+    "latest_ms": {
+      "capture_to_detector": 153.258,
+      "detector_work": 115.695,
+      "detector_to_ball": 20.148,
+      "ball_work": 0.562,
+      "ball_to_decision": 1.585,
+      "capture_to_decision": 291.223,
+      "decision_callback": 0.465
+    },
+    "summary_ms": {
+      "capture_to_detector": {
+        "n": 12,
+        "avg": 172.302,
+        "max": 334.462
+      },
+      "detector_work": {
+        "n": 12,
+        "avg": 121.918,
+        "max": 164.191
+      },
+      "detector_to_ball": {
+        "n": 12,
+        "avg": 14.428,
+        "max": 33.425
+      },
+      "ball_work": {
+        "n": 12,
+        "avg": 0.574,
+        "max": 0.768
+      },
+      "ball_to_decision": {
+        "n": 12,
+        "avg": 1.847,
+        "max": 6.031
+      },
+      "capture_to_decision": {
+        "n": 12,
+        "avg": 311.041,
+        "max": 501.133
+      },
+      "decision_callback": {
+        "n": 12,
+        "avg": 0.635,
+        "max": 2.622
+      }
+    }
+  },
+  {
+    "kind": "BALL_PIPELINE_TIMING",
+    "log": "/home/jet/.ros/log/python3_7935_1794344668909.log",
+    "line": 383,
+    "time_kst": "2026-11-11T06:07:41.874867+09:00",
+    "effective_samples_per_sec": 12.31,
+    "rgb_stamp_ns": 1794344861652643066,
+    "track_id": 205,
+    "hits": 0,
+    "confirmed": false,
+    "raw_detected": false,
+    "input_status": "accepted",
+    "confirmation_event": false,
+    "samples": 25,
+    "window_ms": 2030.876,
+    "latest_ms": {
+      "capture_to_detector": 165.495,
+      "detector_work": 47.202,
+      "detector_to_ball": 5.739,
+      "ball_work": 0.507,
+      "ball_to_decision": 1.727,
+      "capture_to_decision": 220.642,
+      "decision_callback": 0.412
+    },
+    "summary_ms": {
+      "capture_to_detector": {
+        "n": 25,
+        "avg": 157.452,
+        "max": 301.425
+      },
+      "detector_work": {
+        "n": 25,
+        "avg": 49.571,
+        "max": 137.108
+      },
+      "detector_to_ball": {
+        "n": 25,
+        "avg": 10.091,
+        "max": 29.28
+      },
+      "ball_work": {
+        "n": 25,
+        "avg": 0.614,
+        "max": 1.117
+      },
+      "ball_to_decision": {
+        "n": 25,
+        "avg": 2.014,
+        "max": 5.754
+      },
+      "capture_to_decision": {
+        "n": 25,
+        "avg": 219.704,
+        "max": 439.532
+      },
+      "decision_callback": {
+        "n": 25,
+        "avg": 0.494,
+        "max": 1.011
+      }
+    }
+  }
+]

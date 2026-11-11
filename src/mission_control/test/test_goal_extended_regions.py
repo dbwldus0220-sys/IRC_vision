@@ -61,7 +61,9 @@ def test_existing_regions_are_identical_to_before_for_every_millimeter():
 @pytest.mark.parametrize('region,depth', [(8, .61), (5, .645), (6, .68), (7, .73)])
 @pytest.mark.parametrize('previous_shots', [0, 1])
 def test_new_shots_dispatch_and_keep_first_second_exit_route(region, depth, previous_shots):
-    command = GoalNavigationPlanner().plan(sample(depth))
+    command = GoalNavigationPlanner().plan({
+        **sample(depth), 'ring_center_depth_m': depth - .1, 'waist_ring_aim_deg': 0.,
+    })
     bridge = FakeBridge()
     bridge.last_physical_motion_id = 'goal_camera_90_fine_forward_1'
     bridge.goal_fine_forward_completed = True
@@ -84,6 +86,8 @@ def test_new_shots_dispatch_and_keep_first_second_exit_route(region, depth, prev
               else 'POST_SHOT_EXIT_LEFT_3_FORWARD_4')
     assert manager.post_shot_turn_action() == action
     assert manager.handle_post_shot_motion(action, 'SUCCEEDED')
+    assert manager.current_phase == 'POST_SHOT_EXIT_ALIGN'
+    assert manager.complete_post_shot_exit_align()
     assert manager.current_phase == ('AUTO' if previous_shots == 0 else 'LINE_TRACK')
 
 

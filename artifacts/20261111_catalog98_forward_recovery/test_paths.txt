@@ -1,0 +1,15 @@
+src/mission_control/test/test_line_continuous_missions.py
+src/mission_control/test/test_line_turn_prequeue.py
+src/mission_control/test/test_object_walk_prequeue.py
+src/mission_control/test/test_reservation_expansion.py
+src/mission_control/test/test_pickup_continuous_walk.py
+src/mission_control/test/test_ball_camera_down_forward_two.py
+src/mission_control/test/test_ball_fine_alignment_queue.py
+src/mission_control/test/test_post_shot_exit_prequeue.py
+src/mission_control/test/test_post_shot_continuous_exit.py
+src/mission_control/test/test_motion_command_bridge.py
+src/mission_control/test/test_hurdle_heading_queue.py
+src/mission_control/test/test_hurdle_forward2.py
+src/mission_control/test/test_line_recovery_late_queue.py
+src/mission_control/test/test_ball_entry_queue_retry.py
+src/mission_control/test/test_goal_region_queue_audit.py

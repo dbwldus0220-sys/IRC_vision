@@ -1,0 +1,47 @@
+{
+  "source_sha256": "86be6c139217b62573d41b340d3d11e6813077309466b264ceffba1bea99af3f",
+  "imports": [
+    "r골넣기 5번구역",
+    "r골넣기 6번구역",
+    "r골넣기7번구역"
+  ],
+  "changes": {
+    "r골넣기 5번구역": [
+      {
+        "frame_index": 1,
+        "frame_name": "r골2 5번구역",
+        "motor_id": "3",
+        "before_deg": -168.0,
+        "after_deg": -170.0
+      }
+    ],
+    "r골넣기 6번구역": [
+      {
+        "frame_index": 1,
+        "frame_name": "r골2 6번구역",
+        "motor_id": "3",
+        "before_deg": -170.0,
+        "after_deg": -172.0
+      }
+    ],
+    "r골넣기7번구역": [
+      {
+        "frame_index": 1,
+        "frame_name": "r골2 7번구역",
+        "motor_id": "3",
+        "before_deg": -170.0,
+        "after_deg": -173.0
+      }
+    ]
+  },
+  "catalogs": {
+    "pc": {
+      "motion_count": 160,
+      "after_sha256": "e0e93a4779f7041f59921b5415cb3a1bb31b4caba0cdd1447a3631d284782516"
+    },
+    "runtime": {
+      "motion_count": 160,
+      "after_sha256": "1bb65c3f27c8310bd88a443c672ecbdb5a4040bd77edc8f67c0682fdd29a7501"
+    }
+  }
+}

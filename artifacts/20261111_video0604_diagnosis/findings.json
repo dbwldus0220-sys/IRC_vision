@@ -1,0 +1,109 @@
+{
+  "video": "/home/jet/Videos/Screencasts/Screencast from 2026년 11월 11일 06시 04분 51초.webm",
+  "production_code_changed": false,
+  "findings": [
+    {
+      "scene": "1: Ball WAIT and subsequent Ball LOST",
+      "events": [
+        [
+          "06:05:58.970",
+          "Ball mode confirmed; 06:05:59.083 approach latched at 1.496m"
+        ],
+        [
+          "06:06:00.613–00.625",
+          "WAIT: ball_loss_confirmation_pending"
+        ],
+        [
+          "06:06:00.844",
+          "Ball ground heading -29.044deg at 1.246m requested RECOVER_LEFT_TURN_LEFT_4"
+        ],
+        [
+          "06:06:02.870",
+          "track118 hits16 confirmed=false raw_detected=false"
+        ],
+        [
+          "06:06:02.989–03.123",
+          "Recovery succeeded, then WAIT: ball_loss_confirmation_pending"
+        ],
+        [
+          "06:06:03.170–03.492",
+          "BALL_LOST_FINE_FORWARD_3 selected and preparation/forward sequence started"
+        ],
+        [
+          "06:06:04.397",
+          "Ball reacquired: track120 hits10 confirmed=true"
+        ],
+        [
+          "06:06:05.179",
+          "Loss confirmed again during approach; remembers last Ball side"
+        ],
+        [
+          "06:06:05.547",
+          "First BALL_LOST_FINE_FORWARD_3 succeeded"
+        ]
+      ],
+      "rule": "Missing requires detected=false and raw_detected!=true for at least 5 distinct frames AND at least 0.5s in capture/receive time. Previously acquired Ball with last bbox top/image_height <=0.10 chooses fine forward3. Raw visibility resets loss confirmation and can rearm top-edge search.",
+      "display_limit": "Bounding boxes, Ball analysis, and latest planner command are separate asynchronous inputs. A visible RAW box can coexist with an older WAIT command. RAW alone does not authorize loss recovery."
+    },
+    {
+      "scene": "~2:47 Hurdle WAIT",
+      "events": [
+        [
+          "06:07:36.054",
+          "Positioning entry latched: depth0.698m bottom256px"
+        ],
+        [
+          "06:07:36.874",
+          "Executor requested head down -64deg at bottom106px"
+        ],
+        [
+          "06:07:37.333",
+          "Line motion succeeded; enter positioning and invalidate preceding input"
+        ],
+        [
+          "06:07:37.337–37.725",
+          "WAIT alternating waiting_for_hurdle_info and waiting_for_hurdle_camera_ready_frame"
+        ],
+        [
+          "06:07:38.224",
+          "One Hurdle frame rejected with capture age0.506133s"
+        ],
+        [
+          "06:07:38.905,40.011,41.106",
+          "Three STRAIGHT_1 completions"
+        ]
+      ],
+      "rule": "Near forward requires a frame captured after settled camera feedback. Default head interpolation is400ms. Entry observation clearing and asynchronous image processing add time until usable input arrives.",
+      "limit": "No recorded per-frame heartbeat/camera-ready fields; cannot distinguish exact ready=false subcondition retrospectively."
+    },
+    {
+      "scene": "3: Hurdle bottom loss / backward",
+      "events": [
+        [
+          "video169–170s",
+          "Visible Depth Z about0.48 then0.47m; bottom97 then50px; bar samples about0.42–0.46m"
+        ],
+        [
+          "video171s",
+          "Detection SEARCH and BACKWARD PRE DWELL"
+        ],
+        [
+          "06:07:42.743",
+          "HURDLE_LOST_BACKWARD_1 succeeded"
+        ],
+        [
+          "06:07:42.968",
+          "First final-sequence latch in this Hurdle section at depth0.428m"
+        ],
+        [
+          "06:07:56.240",
+          "GO succeeded; phase advanced to LINE_TRACK"
+        ]
+      ],
+      "rule": "Before final checkpoint, last bottom<=100px stores BOTTOM. A fresh negative detection with no RAW target then requests backward1. This branch does not check a stored close depth or require multi-frame Hurdle loss confirmation. Final GO latch needs confirmed valid depth_m<=0.45m.",
+      "depth_mismatch": "depth_m comes from 5 horizontal bbox patches at55% box height; displayed H1–H5 are independently sampled on yellow bar centerline for yaw. Some H points below0.45m therefore do not latch GO when depth_m remains0.47m.",
+      "limits": "Displayed values are sampled video frames, not an exact replay of every accepted ROS input. Physical jump readiness cannot be established from the screen alone."
+    }
+  ],
+  "follow_up_design": "Validate a consistent bar-based distance estimate for the final checkpoint; separate near bottom-occlusion handling from general lost-object backward search. Evaluate observation persistence and timing before changing motion policy."
+}

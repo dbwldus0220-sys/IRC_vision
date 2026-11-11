@@ -1,0 +1,878 @@
+...........................................FFFFFFFFFFFFFFFFFFFFFFFFFFFF. [ 19%]
+FF................FF.................F..F............................... [ 39%]
+........................................................................ [ 59%]
+........................................................................ [ 79%]
+.........................F.............................................. [ 99%]
+..                                                                       [100%]
+=================================== FAILURES ===================================
+_____ test_goal_walking_queues_only_one_then_promotes_without_pause[1.5-0] _____
+
+clock = [10.01], depth = 1.5, angle = 0
+
+    @pytest.mark.parametrize('depth,angle', [
+        (depth, angle) for depth in (1.5, 1., .7, .570)
+        for angle in ((0, -30, 30) if depth > .850 else (0, -10, 10))
+    ])
+    def test_goal_walking_queues_only_one_then_promotes_without_pause(clock, depth, angle):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       first = start_goal(node, clock, depth, angle)
+
+src/mission_control/test/test_continuous_approach.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff92f146d0>
+clock = [10.01], depth = 1.5, angle = 0
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+____ test_goal_walking_queues_only_one_then_promotes_without_pause[1.5--30] ____
+
+clock = [10.01], depth = 1.5, angle = -30
+
+    @pytest.mark.parametrize('depth,angle', [
+        (depth, angle) for depth in (1.5, 1., .7, .570)
+        for angle in ((0, -30, 30) if depth > .850 else (0, -10, 10))
+    ])
+    def test_goal_walking_queues_only_one_then_promotes_without_pause(clock, depth, angle):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       first = start_goal(node, clock, depth, angle)
+
+src/mission_control/test/test_continuous_approach.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff931bba30>
+clock = [10.01], depth = 1.5, angle = -30
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+____ test_goal_walking_queues_only_one_then_promotes_without_pause[1.5-30] _____
+
+clock = [10.01], depth = 1.5, angle = 30
+
+    @pytest.mark.parametrize('depth,angle', [
+        (depth, angle) for depth in (1.5, 1., .7, .570)
+        for angle in ((0, -30, 30) if depth > .850 else (0, -10, 10))
+    ])
+    def test_goal_walking_queues_only_one_then_promotes_without_pause(clock, depth, angle):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       first = start_goal(node, clock, depth, angle)
+
+src/mission_control/test/test_continuous_approach.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff92f14e20>
+clock = [10.01], depth = 1.5, angle = 30
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+_____ test_goal_walking_queues_only_one_then_promotes_without_pause[1.0-0] _____
+
+clock = [10.01], depth = 1.0, angle = 0
+
+    @pytest.mark.parametrize('depth,angle', [
+        (depth, angle) for depth in (1.5, 1., .7, .570)
+        for angle in ((0, -30, 30) if depth > .850 else (0, -10, 10))
+    ])
+    def test_goal_walking_queues_only_one_then_promotes_without_pause(clock, depth, angle):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       first = start_goal(node, clock, depth, angle)
+
+src/mission_control/test/test_continuous_approach.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff92f817e0>
+clock = [10.01], depth = 1.0, angle = 0
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+____ test_goal_walking_queues_only_one_then_promotes_without_pause[1.0--30] ____
+
+clock = [10.01], depth = 1.0, angle = -30
+
+    @pytest.mark.parametrize('depth,angle', [
+        (depth, angle) for depth in (1.5, 1., .7, .570)
+        for angle in ((0, -30, 30) if depth > .850 else (0, -10, 10))
+    ])
+    def test_goal_walking_queues_only_one_then_promotes_without_pause(clock, depth, angle):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       first = start_goal(node, clock, depth, angle)
+
+src/mission_control/test/test_continuous_approach.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff92f80be0>
+clock = [10.01], depth = 1.0, angle = -30
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+____ test_goal_walking_queues_only_one_then_promotes_without_pause[1.0-30] _____
+
+clock = [10.01], depth = 1.0, angle = 30
+
+    @pytest.mark.parametrize('depth,angle', [
+        (depth, angle) for depth in (1.5, 1., .7, .570)
+        for angle in ((0, -30, 30) if depth > .850 else (0, -10, 10))
+    ])
+    def test_goal_walking_queues_only_one_then_promotes_without_pause(clock, depth, angle):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       first = start_goal(node, clock, depth, angle)
+
+src/mission_control/test/test_continuous_approach.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff931ba7d0>
+clock = [10.01], depth = 1.0, angle = 30
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+_____ test_goal_walking_queues_only_one_then_promotes_without_pause[0.7-0] _____
+
+clock = [10.01], depth = 0.7, angle = 0
+
+    @pytest.mark.parametrize('depth,angle', [
+        (depth, angle) for depth in (1.5, 1., .7, .570)
+        for angle in ((0, -30, 30) if depth > .850 else (0, -10, 10))
+    ])
+    def test_goal_walking_queues_only_one_then_promotes_without_pause(clock, depth, angle):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       first = start_goal(node, clock, depth, angle)
+
+src/mission_control/test/test_continuous_approach.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff9350f820>
+clock = [10.01], depth = 0.7, angle = 0
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+____ test_goal_walking_queues_only_one_then_promotes_without_pause[0.7--10] ____
+
+clock = [10.01], depth = 0.7, angle = -10
+
+    @pytest.mark.parametrize('depth,angle', [
+        (depth, angle) for depth in (1.5, 1., .7, .570)
+        for angle in ((0, -30, 30) if depth > .850 else (0, -10, 10))
+    ])
+    def test_goal_walking_queues_only_one_then_promotes_without_pause(clock, depth, angle):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       first = start_goal(node, clock, depth, angle)
+
+src/mission_control/test/test_continuous_approach.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff92f80f70>
+clock = [10.01], depth = 0.7, angle = -10
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+____ test_goal_walking_queues_only_one_then_promotes_without_pause[0.7-10] _____
+
+clock = [10.01], depth = 0.7, angle = 10
+
+    @pytest.mark.parametrize('depth,angle', [
+        (depth, angle) for depth in (1.5, 1., .7, .570)
+        for angle in ((0, -30, 30) if depth > .850 else (0, -10, 10))
+    ])
+    def test_goal_walking_queues_only_one_then_promotes_without_pause(clock, depth, angle):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       first = start_goal(node, clock, depth, angle)
+
+src/mission_control/test/test_continuous_approach.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff93a44130>
+clock = [10.01], depth = 0.7, angle = 10
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+____ test_goal_walking_queues_only_one_then_promotes_without_pause[0.57-0] _____
+
+clock = [10.01], depth = 0.57, angle = 0
+
+    @pytest.mark.parametrize('depth,angle', [
+        (depth, angle) for depth in (1.5, 1., .7, .570)
+        for angle in ((0, -30, 30) if depth > .850 else (0, -10, 10))
+    ])
+    def test_goal_walking_queues_only_one_then_promotes_without_pause(clock, depth, angle):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       first = start_goal(node, clock, depth, angle)
+
+src/mission_control/test/test_continuous_approach.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff93a45510>
+clock = [10.01], depth = 0.57, angle = 0
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+___ test_goal_walking_queues_only_one_then_promotes_without_pause[0.57--10] ____
+
+clock = [10.01], depth = 0.57, angle = -10
+
+    @pytest.mark.parametrize('depth,angle', [
+        (depth, angle) for depth in (1.5, 1., .7, .570)
+        for angle in ((0, -30, 30) if depth > .850 else (0, -10, 10))
+    ])
+    def test_goal_walking_queues_only_one_then_promotes_without_pause(clock, depth, angle):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       first = start_goal(node, clock, depth, angle)
+
+src/mission_control/test/test_continuous_approach.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff931bbdc0>
+clock = [10.01], depth = 0.57, angle = -10
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+____ test_goal_walking_queues_only_one_then_promotes_without_pause[0.57-10] ____
+
+clock = [10.01], depth = 0.57, angle = 10
+
+    @pytest.mark.parametrize('depth,angle', [
+        (depth, angle) for depth in (1.5, 1., .7, .570)
+        for angle in ((0, -30, 30) if depth > .850 else (0, -10, 10))
+    ])
+    def test_goal_walking_queues_only_one_then_promotes_without_pause(clock, depth, angle):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       first = start_goal(node, clock, depth, angle)
+
+src/mission_control/test/test_continuous_approach.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff92f17010>
+clock = [10.01], depth = 0.57, angle = 10
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+__ test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes0] __
+
+clock = [10.01], changes = {'detected': False}
+
+    @pytest.mark.parametrize('changes', [
+        {'detected': False}, {'depth_valid': False}, {'confidence': .1},
+        {'confirmation_confirmed': False}, {'bearing_deg': 45.},
+        {'depth_m': .43, 'score_now': True}, {'depth_m': .35},
+    ])
+    def test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat(clock, changes):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       start_goal(node, clock, 1.5)
+
+src/mission_control/test/test_continuous_approach.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff92f862c0>
+clock = [10.01], depth = 1.5, angle = 0
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+__ test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes1] __
+
+clock = [10.01], changes = {'depth_valid': False}
+
+    @pytest.mark.parametrize('changes', [
+        {'detected': False}, {'depth_valid': False}, {'confidence': .1},
+        {'confirmation_confirmed': False}, {'bearing_deg': 45.},
+        {'depth_m': .43, 'score_now': True}, {'depth_m': .35},
+    ])
+    def test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat(clock, changes):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       start_goal(node, clock, 1.5)
+
+src/mission_control/test/test_continuous_approach.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff9350c2b0>
+clock = [10.01], depth = 1.5, angle = 0
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+__ test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes2] __
+
+clock = [10.01], changes = {'confidence': 0.1}
+
+    @pytest.mark.parametrize('changes', [
+        {'detected': False}, {'depth_valid': False}, {'confidence': .1},
+        {'confirmation_confirmed': False}, {'bearing_deg': 45.},
+        {'depth_m': .43, 'score_now': True}, {'depth_m': .35},
+    ])
+    def test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat(clock, changes):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       start_goal(node, clock, 1.5)
+
+src/mission_control/test/test_continuous_approach.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff92f83670>
+clock = [10.01], depth = 1.5, angle = 0
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+__ test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes3] __
+
+clock = [10.01], changes = {'confirmation_confirmed': False}
+
+    @pytest.mark.parametrize('changes', [
+        {'detected': False}, {'depth_valid': False}, {'confidence': .1},
+        {'confirmation_confirmed': False}, {'bearing_deg': 45.},
+        {'depth_m': .43, 'score_now': True}, {'depth_m': .35},
+    ])
+    def test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat(clock, changes):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       start_goal(node, clock, 1.5)
+
+src/mission_control/test/test_continuous_approach.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff92f14970>
+clock = [10.01], depth = 1.5, angle = 0
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+__ test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes4] __
+
+clock = [10.01], changes = {'bearing_deg': 45.0}
+
+    @pytest.mark.parametrize('changes', [
+        {'detected': False}, {'depth_valid': False}, {'confidence': .1},
+        {'confirmation_confirmed': False}, {'bearing_deg': 45.},
+        {'depth_m': .43, 'score_now': True}, {'depth_m': .35},
+    ])
+    def test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat(clock, changes):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       start_goal(node, clock, 1.5)
+
+src/mission_control/test/test_continuous_approach.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff93a512a0>
+clock = [10.01], depth = 1.5, angle = 0
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+__ test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes5] __
+
+clock = [10.01], changes = {'depth_m': 0.43, 'score_now': True}
+
+    @pytest.mark.parametrize('changes', [
+        {'detected': False}, {'depth_valid': False}, {'confidence': .1},
+        {'confirmation_confirmed': False}, {'bearing_deg': 45.},
+        {'depth_m': .43, 'score_now': True}, {'depth_m': .35},
+    ])
+    def test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat(clock, changes):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       start_goal(node, clock, 1.5)
+
+src/mission_control/test/test_continuous_approach.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff92f84580>
+clock = [10.01], depth = 1.5, angle = 0
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+__ test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes6] __
+
+clock = [10.01], changes = {'depth_m': 0.35}
+
+    @pytest.mark.parametrize('changes', [
+        {'detected': False}, {'depth_valid': False}, {'confidence': .1},
+        {'confirmation_confirmed': False}, {'bearing_deg': 45.},
+        {'depth_m': .43, 'score_now': True}, {'depth_m': .35},
+    ])
+    def test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat(clock, changes):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       start_goal(node, clock, 1.5)
+
+src/mission_control/test/test_continuous_approach.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff92f803d0>
+clock = [10.01], depth = 1.5, angle = 0
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+__________ test_goal_queue_rejects_frames_captured_before_late_window __________
+
+clock = [10.01]
+
+    def test_goal_queue_rejects_frames_captured_before_late_window(clock):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       start_goal(node, clock, .570)
+
+src/mission_control/test/test_continuous_approach.py:108: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff93a52e00>
+clock = [10.01], depth = 0.57, angle = 0
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+_______ test_goal_failure_clears_reserved_motion_and_requires_new_vision _______
+
+clock = [10.01]
+
+    def test_goal_failure_clears_reserved_motion_and_requires_new_vision(clock):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       first = start_goal(node, clock, 1.5)
+
+src/mission_control/test/test_continuous_approach.py:118: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff931bbf40>
+clock = [10.01], depth = 1.5, angle = 0
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+_____ test_goal_forward_without_reservation_uses_recent_frame_immediately ______
+
+clock = [10.01]
+
+    def test_goal_forward_without_reservation_uses_recent_frame_immediately(clock):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       first = start_goal(node, clock, 1.5)
+
+src/mission_control/test/test_continuous_approach.py:131: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff92f83910>
+clock = [10.01], depth = 1.5, angle = 0
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+_______________ test_goal_forward_does_not_reuse_expired_vision ________________
+
+clock = [10.01]
+
+    def test_goal_forward_does_not_reuse_expired_vision(clock):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       first = start_goal(node, clock, 1.5)
+
+src/mission_control/test/test_continuous_approach.py:141: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff92f83af0>
+clock = [10.01], depth = 1.5, angle = 0
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+_ test_goal_forward_and_recovery_queue_each_other[0-30-GOAL_CAMERA90_RECOVER_RIGHT_4] _
+
+clock = [10.01], initial_angle = 0, next_angle = 30
+expected = 'GOAL_CAMERA90_RECOVER_RIGHT_4'
+
+    @pytest.mark.parametrize('initial_angle,next_angle,expected', [
+        (0, 30, 'GOAL_CAMERA90_RECOVER_RIGHT_4'),
+        (0, -30, 'GOAL_CAMERA90_RECOVER_LEFT_4'),
+        (30, 0, 'GOAL_CAMERA_90_FORWARD_2'),
+        (-30, 30, 'GOAL_CAMERA90_RECOVER_RIGHT_4'),
+    ])
+    def test_goal_forward_and_recovery_queue_each_other(clock, initial_angle, next_angle, expected):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       first = start_goal(node, clock, 1.0, initial_angle)
+
+src/mission_control/test/test_continuous_approach.py:156: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff9350c160>
+clock = [10.01], depth = 1.0, angle = 0
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+_ test_goal_forward_and_recovery_queue_each_other[0--30-GOAL_CAMERA90_RECOVER_LEFT_4] _
+
+clock = [10.01], initial_angle = 0, next_angle = -30
+expected = 'GOAL_CAMERA90_RECOVER_LEFT_4'
+
+    @pytest.mark.parametrize('initial_angle,next_angle,expected', [
+        (0, 30, 'GOAL_CAMERA90_RECOVER_RIGHT_4'),
+        (0, -30, 'GOAL_CAMERA90_RECOVER_LEFT_4'),
+        (30, 0, 'GOAL_CAMERA_90_FORWARD_2'),
+        (-30, 30, 'GOAL_CAMERA90_RECOVER_RIGHT_4'),
+    ])
+    def test_goal_forward_and_recovery_queue_each_other(clock, initial_angle, next_angle, expected):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       first = start_goal(node, clock, 1.0, initial_angle)
+
+src/mission_control/test/test_continuous_approach.py:156: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff93a46920>
+clock = [10.01], depth = 1.0, angle = 0
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+_ test_goal_forward_and_recovery_queue_each_other[30-0-GOAL_CAMERA_90_FORWARD_2] _
+
+clock = [10.01], initial_angle = 30, next_angle = 0
+expected = 'GOAL_CAMERA_90_FORWARD_2'
+
+    @pytest.mark.parametrize('initial_angle,next_angle,expected', [
+        (0, 30, 'GOAL_CAMERA90_RECOVER_RIGHT_4'),
+        (0, -30, 'GOAL_CAMERA90_RECOVER_LEFT_4'),
+        (30, 0, 'GOAL_CAMERA_90_FORWARD_2'),
+        (-30, 30, 'GOAL_CAMERA90_RECOVER_RIGHT_4'),
+    ])
+    def test_goal_forward_and_recovery_queue_each_other(clock, initial_angle, next_angle, expected):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       first = start_goal(node, clock, 1.0, initial_angle)
+
+src/mission_control/test/test_continuous_approach.py:156: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff9350fd30>
+clock = [10.01], depth = 1.0, angle = 30
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+_ test_goal_forward_and_recovery_queue_each_other[-30-30-GOAL_CAMERA90_RECOVER_RIGHT_4] _
+
+clock = [10.01], initial_angle = -30, next_angle = 30
+expected = 'GOAL_CAMERA90_RECOVER_RIGHT_4'
+
+    @pytest.mark.parametrize('initial_angle,next_angle,expected', [
+        (0, 30, 'GOAL_CAMERA90_RECOVER_RIGHT_4'),
+        (0, -30, 'GOAL_CAMERA90_RECOVER_LEFT_4'),
+        (30, 0, 'GOAL_CAMERA_90_FORWARD_2'),
+        (-30, 30, 'GOAL_CAMERA90_RECOVER_RIGHT_4'),
+    ])
+    def test_goal_forward_and_recovery_queue_each_other(clock, initial_angle, next_angle, expected):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       first = start_goal(node, clock, 1.0, initial_angle)
+
+src/mission_control/test/test_continuous_approach.py:156: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff92f85240>
+clock = [10.01], depth = 1.0, angle = -30
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+________ test_goal_prequeue_requires_three_consecutive_matching_actions ________
+
+clock = [10.01]
+
+    def test_goal_prequeue_requires_three_consecutive_matching_actions(clock):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       first = start_goal(node, clock, 1.0)
+
+src/mission_control/test/test_continuous_approach.py:177: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff92f17130>
+clock = [10.01], depth = 1.0, angle = 0
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+_ test_bridge_reserves_different_goal_lengths_without_post_motion_dwell[GOAL_CAMERA90_FINE_FORWARD_3-GOAL_CAMERA90_FINE_FORWARD_1-False] _
+
+first = 'GOAL_CAMERA90_FINE_FORWARD_3', second = 'GOAL_CAMERA90_FINE_FORWARD_1'
+deferred = False
+
+    @pytest.mark.parametrize('first,second,deferred', [
+        ('GOAL_CAMERA_90_FORWARD', 'GOAL_CAMERA_90_FORWARD_2', False),
+        ('GOAL_CAMERA90_FINE_FORWARD_3', 'GOAL_CAMERA90_FINE_FORWARD_1', False),
+    ])
+    def test_bridge_reserves_different_goal_lengths_without_post_motion_dwell(first, second, deferred):
+        bridge = FakeBridge()
+        bridge.navigation_command_callback(navigation_message(action=first, source='goal'))
+        bridge.navigation_command_callback(navigation_message(action=second, source='goal', command_id=8001))
+>       assert bridge.queued_request_deferred is deferred
+E       assert True is False
+E        +  where True = <test_motion_command_bridge.FakeBridge object at 0xffff92f82f80>.queued_request_deferred
+
+src/mission_control/test/test_continuous_approach.py:198: AssertionError
+_________ test_goal_preparation_status_does_not_start_forward_capture __________
+
+clock = [12.049999999999999]
+
+    def test_goal_preparation_status_does_not_start_forward_capture(clock):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+        fresh(node, clock, 'goal', goal_info(depth_m=.7, score_now=False))
+        command = node.publisher.messages[-1]
+        node.send_status(command['action'], command['command_id'], 'RUNNING', 'goal_fine_prepare_90')
+        clock[0] += 2.
+        for _ in range(4):
+            fresh(node, clock, 'goal', goal_info(depth_m=.7, score_now=False), plan=False)
+        assert getattr(node, 'goal_forward_started_at', None) is None
+        assert getattr(node, 'queued_general_command_id', None) is None
+        node.send_status(command['action'], command['command_id'], 'RUNNING', 'goal_camera_90_fine_forward_3')
+>       assert node.goal_forward_started_at == clock[0]
+E       AttributeError: 'LiveInputHarness' object has no attribute 'goal_forward_started_at'
+
+src/mission_control/test/test_continuous_approach.py:218: AttributeError
+______ test_short_goal_fine_reserves_with_ten_hz_images_and_150ms_latency ______
+
+clock = [10.01]
+
+    def test_short_goal_fine_reserves_with_ten_hz_images_and_150ms_latency(clock):
+        import json
+        from std_msgs.msg import String
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       first = start_goal(node, clock, .57)
+
+src/mission_control/test/test_continuous_approach.py:324: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff92f165c0>
+clock = [10.01], depth = 0.57, angle = 0
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+_________ test_goal_reservation_cannot_count_one_image_multiple_times __________
+
+clock = [10.01]
+
+    def test_goal_reservation_cannot_count_one_image_multiple_times(clock):
+        node = LiveInputHarness(phase='GOAL_APPROACH')
+>       start_goal(node, clock, .57)
+
+src/mission_control/test/test_continuous_approach.py:345: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = <test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff9350eec0>
+clock = [10.01], depth = 0.57, angle = 0
+
+    def start_goal(node, clock, depth, angle=0):
+        fresh(node, clock, 'goal', target_sample(angle, depth))
+        command = node.publisher.messages[-1]
+>       motion = FakeBridge.ACTION_TO_MOTION_ID[command['action']]
+E       KeyError: 'WAIT'
+
+src/mission_control/test/test_continuous_approach.py:32: KeyError
+________ test_goal_turn_rechecks_direction_after_pause_without_polling _________
+
+clock = [10.01]
+
+    def test_goal_turn_rechecks_direction_after_pause_without_polling(clock):
+        node = BoundaryHarness(phase='GOAL_APPROACH')
+        fresh(node, clock, 'goal', target_sample(60))
+>       turn = executable(node)[-1]
+E       IndexError: list index out of range
+
+src/mission_control/test/test_boundary_decision_reservation.py:181: IndexError
+_ test_second_pickup_fine_continues_on_first_fresh_frame_without_observation_pause[230-BALL_PICKUP_FINE_ALIGN_CONTINUE] _
+
+clock = [12.53], bottom = 230, expected = 'BALL_PICKUP_FINE_ALIGN_CONTINUE'
+
+    @pytest.mark.parametrize('bottom,expected', [
+        (230, 'BALL_PICKUP_FINE_ALIGN_CONTINUE'), (231, 'BALL_PICKUP_FINE_FORWARD'),
+    ])
+    def test_second_pickup_fine_continues_on_first_fresh_frame_without_observation_pause(clock, bottom, expected):
+        node = BoundaryHarness(phase='BALL_APPROACH')
+        node.phase_manager.active_ball_mode_index = 2
+        node.phase_manager.ball_modes_confirmed = 2
+        bridge = FakeBridge(advance_transition_dwells=False)
+        bridge.last_physical_motion_id = 'pickup_fine_forward_0'
+        parent, request = start(node, bridge, clock)
+        clock[0] += 2.
+        forward_status(node, bridge, request, 'SUCCEEDED')
+        assert bridge.active_dwell_until is None
+        count = len(executable(node))
+        fresh(node, clock, 'ball', ball(bottom_distance_px=bottom), plan=False)
+>       assert executable(node)[-1]['action'] == expected
+E       AssertionError: assert 'BALL_PICKUP_FINE_FORWARD' == 'BALL_PICKUP_...LIGN_CONTINUE'
+E         - BALL_PICKUP_FINE_ALIGN_CONTINUE
+E         + BALL_PICKUP_FINE_FORWARD
+
+src/mission_control/test/test_boundary_decision_reservation.py:243: AssertionError
+_______________ test_reservation_durations_match_current_runtime _______________
+
+    def test_reservation_durations_match_current_runtime():
+        root = Path(__file__).resolve().parents[3]
+        aliases = yaml.safe_load((root / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']
+        assert aliases['ball_general_fine_forward_8'] == aliases['pickup_fine_forward_0']
+        motions = {m['name']: m for m in json.loads((root / 'artifacts/robot_motions_runtime.json').read_text())['motions']}
+        for motion_id, duration in PICKUP_WALK_DURATIONS.items():
+            motion = motions[aliases[motion_id]]
+            assert motion['repeatable']
+>           assert duration == pytest.approx(max(f['start_ms'] + f['time_ms'] for f in motion['frames'])
+                                             / 1000 * motion['repeat_count'] / motion['playback_speed'])
+E           assert 0.988 == 1.008 ± 1.0e-06
+E            +  where 1.008 ± 1.0e-06 = <function approx at 0xffffa47d77f0>((((504 / 1000) * 2) / 1.0))
+E            +    where <function approx at 0xffffa47d77f0> = pytest.approx
+E            +    and   504 = max(<generator object test_reservation_durations_match_current_runtime.<locals>.<genexpr> at 0xffff92d39310>)
+
+src/mission_control/test/test_pickup_continuous_walk.py:295: AssertionError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[1.5-0]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[1.5--30]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[1.5-30]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[1.0-0]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[1.0--30]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[1.0-30]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.7-0]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.7--10]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.7-10]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.57-0]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.57--10]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_walking_queues_only_one_then_promotes_without_pause[0.57-10]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes0]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes1]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes2]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes3]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes4]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes5]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_does_not_reserve_forward_for_loss_turn_shot_or_retreat[changes6]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_queue_rejects_frames_captured_before_late_window
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_failure_clears_reserved_motion_and_requires_new_vision
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_forward_without_reservation_uses_recent_frame_immediately
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_forward_does_not_reuse_expired_vision
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_forward_and_recovery_queue_each_other[0-30-GOAL_CAMERA90_RECOVER_RIGHT_4]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_forward_and_recovery_queue_each_other[0--30-GOAL_CAMERA90_RECOVER_LEFT_4]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_forward_and_recovery_queue_each_other[30-0-GOAL_CAMERA_90_FORWARD_2]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_forward_and_recovery_queue_each_other[-30-30-GOAL_CAMERA90_RECOVER_RIGHT_4]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_prequeue_requires_three_consecutive_matching_actions
+FAILED src/mission_control/test/test_continuous_approach.py::test_bridge_reserves_different_goal_lengths_without_post_motion_dwell[GOAL_CAMERA90_FINE_FORWARD_3-GOAL_CAMERA90_FINE_FORWARD_1-False]
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_preparation_status_does_not_start_forward_capture
+FAILED src/mission_control/test/test_continuous_approach.py::test_short_goal_fine_reserves_with_ten_hz_images_and_150ms_latency
+FAILED src/mission_control/test/test_continuous_approach.py::test_goal_reservation_cannot_count_one_image_multiple_times
+FAILED src/mission_control/test/test_boundary_decision_reservation.py::test_goal_turn_rechecks_direction_after_pause_without_polling
+FAILED src/mission_control/test/test_boundary_decision_reservation.py::test_second_pickup_fine_continues_on_first_fresh_frame_without_observation_pause[230-BALL_PICKUP_FINE_ALIGN_CONTINUE]
+FAILED src/mission_control/test/test_pickup_continuous_walk.py::test_reservation_durations_match_current_runtime
+35 failed, 327 passed in 13.19s

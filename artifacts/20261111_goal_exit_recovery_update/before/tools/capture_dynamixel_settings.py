@@ -1,0 +1,1 @@
+/home/jet/IRC/IRC-STEP/IRC_vision_latest/tools/capture_dynamixel_settings.py

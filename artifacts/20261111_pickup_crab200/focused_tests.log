@@ -1,0 +1,93 @@
+................................................................FFFF.... [ 94%]
+....                                                                     [100%]
+=================================== FAILURES ===================================
+_______ test_recorded_287px_turn_finishes_before_fresh_200px_crab[-1-1] ________
+
+clock = [10.52], index = 1, side = -1
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('side', [-1, 1])
+    def test_recorded_287px_turn_finishes_before_fresh_200px_crab(clock, index, side):
+        node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge(advance_transition_dwells=False)
+        node.phase_manager.active_ball_mode_index = index
+        node.phase_manager.ball_modes_confirmed = index
+        parent, turn = start(node, bridge, clock, ball(
+            bottom_distance_px=287, depth_m=.458, distance_m=.458,
+            steering_angle_deg=side * 33.505, offset_x_norm=side * .3, offset_x_px=side * 190))
+        direction = 'left' if side < 0 else 'right'
+        assert turn['motion_id'].startswith(f'pickup_camera_down_turn_{direction}_')
+        assert node.pickup_walk_reservation.key is None
+        forward_status(node, bridge, turn, 'SUCCEEDED')
+>       assert bridge.active_dwell_until == pytest.approx(clock[0] + bridge.PICKUP_TURN_DWELL_SEC)
+E       AttributeError: 'FakeBridge' object has no attribute 'PICKUP_TURN_DWELL_SEC'
+
+src/mission_control/test/test_pickup_bottom200.py:171: AttributeError
+_______ test_recorded_287px_turn_finishes_before_fresh_200px_crab[-1-2] ________
+
+clock = [10.52], index = 2, side = -1
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('side', [-1, 1])
+    def test_recorded_287px_turn_finishes_before_fresh_200px_crab(clock, index, side):
+        node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge(advance_transition_dwells=False)
+        node.phase_manager.active_ball_mode_index = index
+        node.phase_manager.ball_modes_confirmed = index
+        parent, turn = start(node, bridge, clock, ball(
+            bottom_distance_px=287, depth_m=.458, distance_m=.458,
+            steering_angle_deg=side * 33.505, offset_x_norm=side * .3, offset_x_px=side * 190))
+        direction = 'left' if side < 0 else 'right'
+        assert turn['motion_id'].startswith(f'pickup_camera_down_turn_{direction}_')
+        assert node.pickup_walk_reservation.key is None
+        forward_status(node, bridge, turn, 'SUCCEEDED')
+>       assert bridge.active_dwell_until == pytest.approx(clock[0] + bridge.PICKUP_TURN_DWELL_SEC)
+E       AttributeError: 'FakeBridge' object has no attribute 'PICKUP_TURN_DWELL_SEC'
+
+src/mission_control/test/test_pickup_bottom200.py:171: AttributeError
+________ test_recorded_287px_turn_finishes_before_fresh_200px_crab[1-1] ________
+
+clock = [10.52], index = 1, side = 1
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('side', [-1, 1])
+    def test_recorded_287px_turn_finishes_before_fresh_200px_crab(clock, index, side):
+        node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge(advance_transition_dwells=False)
+        node.phase_manager.active_ball_mode_index = index
+        node.phase_manager.ball_modes_confirmed = index
+        parent, turn = start(node, bridge, clock, ball(
+            bottom_distance_px=287, depth_m=.458, distance_m=.458,
+            steering_angle_deg=side * 33.505, offset_x_norm=side * .3, offset_x_px=side * 190))
+        direction = 'left' if side < 0 else 'right'
+        assert turn['motion_id'].startswith(f'pickup_camera_down_turn_{direction}_')
+        assert node.pickup_walk_reservation.key is None
+        forward_status(node, bridge, turn, 'SUCCEEDED')
+>       assert bridge.active_dwell_until == pytest.approx(clock[0] + bridge.PICKUP_TURN_DWELL_SEC)
+E       AttributeError: 'FakeBridge' object has no attribute 'PICKUP_TURN_DWELL_SEC'
+
+src/mission_control/test/test_pickup_bottom200.py:171: AttributeError
+________ test_recorded_287px_turn_finishes_before_fresh_200px_crab[1-2] ________
+
+clock = [10.52], index = 2, side = 1
+
+    @pytest.mark.parametrize('index', [1, 2])
+    @pytest.mark.parametrize('side', [-1, 1])
+    def test_recorded_287px_turn_finishes_before_fresh_200px_crab(clock, index, side):
+        node, bridge = LiveInputHarness(phase='BALL_APPROACH'), FakeBridge(advance_transition_dwells=False)
+        node.phase_manager.active_ball_mode_index = index
+        node.phase_manager.ball_modes_confirmed = index
+        parent, turn = start(node, bridge, clock, ball(
+            bottom_distance_px=287, depth_m=.458, distance_m=.458,
+            steering_angle_deg=side * 33.505, offset_x_norm=side * .3, offset_x_px=side * 190))
+        direction = 'left' if side < 0 else 'right'
+        assert turn['motion_id'].startswith(f'pickup_camera_down_turn_{direction}_')
+        assert node.pickup_walk_reservation.key is None
+        forward_status(node, bridge, turn, 'SUCCEEDED')
+>       assert bridge.active_dwell_until == pytest.approx(clock[0] + bridge.PICKUP_TURN_DWELL_SEC)
+E       AttributeError: 'FakeBridge' object has no attribute 'PICKUP_TURN_DWELL_SEC'
+
+src/mission_control/test/test_pickup_bottom200.py:171: AttributeError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_pickup_bottom200.py::test_recorded_287px_turn_finishes_before_fresh_200px_crab[-1-1]
+FAILED src/mission_control/test/test_pickup_bottom200.py::test_recorded_287px_turn_finishes_before_fresh_200px_crab[-1-2]
+FAILED src/mission_control/test/test_pickup_bottom200.py::test_recorded_287px_turn_finishes_before_fresh_200px_crab[1-1]
+FAILED src/mission_control/test/test_pickup_bottom200.py::test_recorded_287px_turn_finishes_before_fresh_200px_crab[1-2]
+4 failed, 72 passed in 1.15s

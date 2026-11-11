@@ -1,0 +1,106 @@
+.........................F.F......................F..................... [ 31%]
+.................F...................................................... [ 63%]
+........................................................................ [ 94%]
+............                                                             [100%]
+=================================== FAILURES ===================================
+_ test_object_walk_queues_once_and_bridge_promotes_without_dwell[hurdle-HURDLE_APPROACH-angles2] _
+
+clock = [10.837999999999997], source = 'hurdle', phase = 'HURDLE_APPROACH'
+angles = (0.0, 25.0)
+
+    @pytest.mark.parametrize('source,phase,angles', [
+        ('ball', 'BALL_APPROACH', (0., 0.)),
+        *[('hurdle', 'HURDLE_APPROACH', angles) for angles in
+          [(0., 0.), (0., 25.), (25., 0.), (25., -25.)]],
+    ])
+    def test_object_walk_queues_once_and_bridge_promotes_without_dwell(clock, source, phase, angles):
+        node, bridge = LiveInputHarness(phase=phase), FakeBridge()
+        first = start(node, clock, source, angles[0])
+        bridge.navigation_command_callback(String(data=json.dumps(first)))
+        request = decoded_messages(bridge.executor_request_publisher)[-1]
+        for _ in range(3):
+            feed(node, clock, source, angles[1])
+        assert getattr(node, 'queued_general_command_id', None) is None
+        clock[0] = node.approach_walk_started_at + MotionDecisionNode.APPROACH_WALK_DURATION_SEC[first['action']] - .25
+        for _ in range(4):
+            feed(node, clock, source, angles[1])
+        second = node.publisher.messages[-1]
+        assert second['command_id'] != first['command_id']
+>       assert second['action'] == (('STRAIGHT_1' if source == 'hurdle' else 'STRAIGHT') if angles[1] == 0 else
+            f"{'BALL_APPROACH_' if source == 'ball' else ''}RECOVER_{'RIGHT' if angles[1] > 0 else 'LEFT'}"
+            + (f"_TURN_{'RIGHT' if angles[1] > 0 else 'LEFT'}" if source == 'hurdle' else '') + '_4')
+E       AssertionError: assert 'STRAIGHT_1' == 'RECOVER_RIGHT_TURN_RIGHT_4'
+E         - RECOVER_RIGHT_TURN_RIGHT_4
+E         + STRAIGHT_1
+
+src/mission_control/test/test_object_walk_prequeue.py:63: AssertionError
+_ test_object_walk_queues_once_and_bridge_promotes_without_dwell[hurdle-HURDLE_APPROACH-angles4] _
+
+clock = [10.837999999999997], source = 'hurdle', phase = 'HURDLE_APPROACH'
+angles = (25.0, -25.0)
+
+    @pytest.mark.parametrize('source,phase,angles', [
+        ('ball', 'BALL_APPROACH', (0., 0.)),
+        *[('hurdle', 'HURDLE_APPROACH', angles) for angles in
+          [(0., 0.), (0., 25.), (25., 0.), (25., -25.)]],
+    ])
+    def test_object_walk_queues_once_and_bridge_promotes_without_dwell(clock, source, phase, angles):
+        node, bridge = LiveInputHarness(phase=phase), FakeBridge()
+        first = start(node, clock, source, angles[0])
+        bridge.navigation_command_callback(String(data=json.dumps(first)))
+        request = decoded_messages(bridge.executor_request_publisher)[-1]
+        for _ in range(3):
+            feed(node, clock, source, angles[1])
+        assert getattr(node, 'queued_general_command_id', None) is None
+        clock[0] = node.approach_walk_started_at + MotionDecisionNode.APPROACH_WALK_DURATION_SEC[first['action']] - .25
+        for _ in range(4):
+            feed(node, clock, source, angles[1])
+        second = node.publisher.messages[-1]
+        assert second['command_id'] != first['command_id']
+>       assert second['action'] == (('STRAIGHT_1' if source == 'hurdle' else 'STRAIGHT') if angles[1] == 0 else
+            f"{'BALL_APPROACH_' if source == 'ball' else ''}RECOVER_{'RIGHT' if angles[1] > 0 else 'LEFT'}"
+            + (f"_TURN_{'RIGHT' if angles[1] > 0 else 'LEFT'}" if source == 'hurdle' else '') + '_4')
+E       AssertionError: assert 'STRAIGHT_1' == 'RECOVER_LEFT_TURN_LEFT_4'
+E         - RECOVER_LEFT_TURN_LEFT_4
+E         + STRAIGHT_1
+
+src/mission_control/test/test_object_walk_prequeue.py:63: AssertionError
+_ test_recovery_to_recovery_waits_until_last_point_three_seconds[hurdle-HURDLE_APPROACH] _
+
+clock = [10.791359999999997], source = 'hurdle', phase = 'HURDLE_APPROACH'
+
+    @pytest.mark.parametrize('source,phase', [('hurdle', 'HURDLE_APPROACH')])
+    def test_recovery_to_recovery_waits_until_last_point_three_seconds(clock, source, phase):
+        node = LiveInputHarness(phase=phase)
+        first = start(node, clock, source, 25.)
+        started = node.approach_walk_started_at
+        duration = MotionDecisionNode.APPROACH_WALK_DURATION_SEC[first['action']]
+        clock[0] = started + duration * .72
+        for _ in range(3):
+            feed(node, clock, source, -25.)
+>       assert getattr(node, 'queued_general_command_id', None) is None
+E       AssertionError: assert 2 is None
+E        +  where 2 = getattr(<test_wait_refresh_and_fine_settle.LiveInputHarness object at 0xffff9b78ea40>, 'queued_general_command_id', None)
+
+src/mission_control/test/test_object_walk_prequeue.py:147: AssertionError
+________ test_recognition_approach_blocks_new_line_prequeue[1.001-True] ________
+
+clock = [10.0], depth = 1.001, allowed = True
+
+    @pytest.mark.parametrize("depth,allowed", [(1.001, True), (1.0, False), (0.7, False), (0.551, False), (0.55, False)])
+    def test_recognition_approach_blocks_new_line_prequeue(clock, depth, allowed):
+        node = HurdleHarness()
+>       assert MotionDecisionNode._line_only_prequeue_allowed(
+            node, {"hurdle": hurdle(depth)},
+        ) is allowed
+E       AssertionError: assert False is True
+E        +  where False = <function MotionDecisionNode._line_only_prequeue_allowed at 0xffff9bb9ecb0>(<test_hurdle_positioning.HurdleHarness object at 0xffff9b7edfc0>, {'hurdle': {'bbox': [400, 300, 1000, 500], 'bottom_distance_px': 200, 'camera_center_offset_x_px': 0, 'confidence': 0.9, ...}})
+E        +    where <function MotionDecisionNode._line_only_prequeue_allowed at 0xffff9bb9ecb0> = MotionDecisionNode._line_only_prequeue_allowed
+
+src/mission_control/test/test_hurdle_positioning.py:259: AssertionError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_object_walk_prequeue.py::test_object_walk_queues_once_and_bridge_promotes_without_dwell[hurdle-HURDLE_APPROACH-angles2]
+FAILED src/mission_control/test/test_object_walk_prequeue.py::test_object_walk_queues_once_and_bridge_promotes_without_dwell[hurdle-HURDLE_APPROACH-angles4]
+FAILED src/mission_control/test/test_object_walk_prequeue.py::test_recovery_to_recovery_waits_until_last_point_three_seconds[hurdle-HURDLE_APPROACH]
+FAILED src/mission_control/test/test_hurdle_positioning.py::test_recognition_approach_blocks_new_line_prequeue[1.001-True]
+4 failed, 224 passed in 1.86s

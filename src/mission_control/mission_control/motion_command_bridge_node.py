@@ -18,7 +18,7 @@ from .pickup_walk_reservation import (
 from .crab_motion_selection import (
     crab_repeat_motion, crab_support_motion_id, goal_crab_motion_id, GOAL_CRAB_DURATIONS,
 )
-from .pickup_fine_skip import pickup_fine_can_skip
+from .pickup_fine_skip import pickup_fine_can_skip, is_pickup_forward_or_recovery
 from .ball_fine_approach import motion_id as ball_fine_motion_id, physical_motion_id
 
 from .safety_interlock import RECOVERABLE_MOTOR_ERROR_CODES
@@ -73,6 +73,8 @@ class MotionCommandBridgeNode(Node):
     PICKUP_FINE_PRE_DWELL_MARKER = "__PICKUP_FINE_PRE_DWELL__"
     PICKUP_FINE_PRE_DWELL_SEC = 0.5
     TRANSITION_DWELL_SEC = 0.5
+    TRANSITION_PRE_DWELL_SEC = 0.2
+    PICKUP_FORWARD_TO_BACKWARD_PREPARE = "pickup_forward_to_backward_prepare"
     BACKWARD_DWELL_SEC = 0.5
     FINE_TO_BACKWARD_DWELL_SEC = 1.0
     BACKWARD_MOTION_IDS = frozenset({
@@ -94,6 +96,7 @@ class MotionCommandBridgeNode(Node):
         *GOAL_CRAB_DURATIONS,
     })
     TRANSITION_MOTION_IDS = frozenset({
+        PICKUP_FORWARD_TO_BACKWARD_PREPARE,
         *PICKUP_FINE_PREPARE_MOTION_IDS, *PICKUP_CRAB_PREPARE_MOTION_IDS,
         "hurdle_fine_prepare_0",
         "goal_fine_prepare_90", "goal_crab_right_to_fine_90", "goal_crab_left_to_fine_90",
@@ -261,8 +264,11 @@ class MotionCommandBridgeNode(Node):
         "POST_SHOT_TURN_LEFT_4": "post_shot_default_turn_left",
         "POST_SHOT_TURN_LEFT_3": "post_shot_default_turn_left_3",
         "POST_SHOT_FORWARD": "line_forward_6",
+        # Legacy IDs now end in two right/left recovery blocks, respectively.
         "POST_SHOT_EXIT_RIGHT_5_FORWARD_4": "post_shot_exit_right_5_forward_4",
         "POST_SHOT_EXIT_LEFT_3_FORWARD_4": "post_shot_exit_left_3_forward_4",
+        "POST_SHOT_EXIT_RIGHT_9_RECOVERY_RIGHT_4": "post_shot_exit_right_9_recovery_right_4",
+        "POST_SHOT_EXIT_LEFT_4_RECOVERY_LEFT_4": "post_shot_exit_left_4_recovery_left_4",
         **{
             f"POST_SHOT_LINE_TURN_{direction}_{count}": (
                 f"post_ball_line_turn_{direction.lower()}_{count}"
@@ -1047,6 +1053,15 @@ class MotionCommandBridgeNode(Node):
         self.pickup_fine_align_waiting = False
         if action == "BALL_PICKUP_FINE_ALIGN_CONTINUE":
             self.pickup_fixed_sequence_started = True
+            source_command = payload.get("source_command") or {}
+            bottom = source_command.get("bottom_distance_px")
+            if (is_pickup_forward_or_recovery(self.last_physical_motion_id)
+                    and type(bottom) in {int, float}
+                    and pickup_fine_can_skip(self.last_physical_motion_id, bottom)):
+                self.active_pickup_sequence = (
+                    MotionCommandBridgeNode.PICKUP_FORWARD_TO_BACKWARD_PREPARE,
+                    *self.active_pickup_sequence,
+                )
             self.active_pickup_sequence = self._with_pickup_motion_dwells(
                 self.active_pickup_sequence
             )
@@ -1523,11 +1538,13 @@ class MotionCommandBridgeNode(Node):
         ):
             self.transition_pending_request = request_payload
             self.transition_dwell_until = MotionCommandBridgeNode._pre_motion_dwell_deadline(
-                self, MotionCommandBridgeNode.TRANSITION_DWELL_SEC)
+                self, MotionCommandBridgeNode.TRANSITION_PRE_DWELL_SEC
+                if request_payload["motion_id"] in {"ball_align_prepare_fine_45", "ball_align_prepare_turn_45"}
+                else MotionCommandBridgeNode.TRANSITION_DWELL_SEC)
             self.publish_motion_status(
                 status="RUNNING", action=action, command_id=command_id,
                 event_id=event_id, request_id=request_id, motion_id="__CORRECTION_PRE_DWELL__",
-                message="holding still for 0.5 seconds at correction boundary",
+                message="holding still at correction/support-change boundary",
             )
             self._check_transition_dwell()
             return
@@ -1537,7 +1554,7 @@ class MotionCommandBridgeNode(Node):
                 else MotionCommandBridgeNode.FINE_TO_BACKWARD_DWELL_SEC
                 if backward and self.last_physical_motion_id in self.FINE_FORWARD_MOTION_IDS
                 else MotionCommandBridgeNode.BACKWARD_DWELL_SEC if backward
-                else MotionCommandBridgeNode.TRANSITION_DWELL_SEC
+                else MotionCommandBridgeNode.TRANSITION_PRE_DWELL_SEC
             )
             self.transition_motion_id = request_payload["motion_id"]
             self.transition_pending_request = request_payload
@@ -2016,6 +2033,12 @@ class MotionCommandBridgeNode(Node):
             and not ball_fine_alignment
             and ((action == "POST_SHOT_FORWARD"
                   and str(self.active_action).startswith("POST_SHOT_LINE_TURN_"))
+                 # Composite exits are not an SDK seamless-walking group. Hold
+                 # the reservation locally until their successful completion.
+                 or self.active_action in {
+                     "POST_SHOT_EXIT_RIGHT_5_FORWARD_4", "POST_SHOT_EXIT_LEFT_3_FORWARD_4",
+                     "POST_SHOT_EXIT_RIGHT_9_RECOVERY_RIGHT_4", "POST_SHOT_EXIT_LEFT_4_RECOVERY_LEFT_4",
+                 }
                  or (payload.get("source") == "line"
                      and str(self.active_action).startswith(("LINE_OFFSET_TURN_", "LINE_LOST_TURN_")))
                  or self._is_stationary_turn(self.active_motion_id or "")
@@ -2602,10 +2625,13 @@ class MotionCommandBridgeNode(Node):
             if payload["status"] == "SUCCEEDED":
                 self.last_physical_motion_id = physical_motion_id(payload["motion_id"])
                 if payload["motion_id"] in {
-                    "post_shot_exit_right_5_forward_4", "post_shot_exit_left_3_forward_4",
+                    "post_shot_exit_right_5_forward_4", "post_shot_exit_right_9_recovery_right_4",
                 }:
-                    # Subsequent posture transitions start from ordinary forward support.
-                    self.last_physical_motion_id = "line_forward_4"
+                    self.last_physical_motion_id = "line_recovery_right_4"
+                elif payload["motion_id"] in {
+                    "post_shot_exit_left_3_forward_4", "post_shot_exit_left_4_recovery_left_4",
+                }:
+                    self.last_physical_motion_id = "line_recovery_left_4"
             elif payload["status"] in self.TERMINAL_STATUSES:
                 self.last_physical_motion_id = None
         elif is_active and payload["motion_id"] in MotionCommandBridgeNode.TRANSITION_MOTION_IDS:

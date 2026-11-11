@@ -26,7 +26,7 @@ def test_pickup_uses_ground_heading_before_lateral_pixels(angle, prefix):
     assert decision.valid and decision.action.startswith(prefix)
 
 
-def test_previous_close_capture_does_not_suppress_turn_above_360px():
+def test_previous_close_capture_does_not_suppress_turn_above_180px():
     planner = MotionDecisionPlanner()
     planner._remember_pickup_close_ball(ground_ball(0., bottom=100))
     decision = planner.plan_ball_pickup_initial_alignment(ground_ball(17.79))
@@ -38,8 +38,8 @@ def test_previous_close_capture_does_not_suppress_turn_above_360px():
     assert fresh.action.startswith('BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_')
 
 
-@pytest.mark.parametrize('bottom,prefix', [(360, 'BALL_PICKUP_INITIAL_CRAB_RIGHT'),
-                                          (361, 'BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_')])
+@pytest.mark.parametrize('bottom,prefix', [(180, 'BALL_PICKUP_INITIAL_CRAB_RIGHT'),
+                                          (180.001, 'BALL_PICKUP_CAMERA_DOWN_TURN_RIGHT_')])
 def test_near_foot_pixels_prevent_stationary_turn_even_without_close_latch(bottom, prefix):
     decision = MotionDecisionPlanner().plan_ball_pickup_initial_alignment(ground_ball(25., bottom=bottom))
     assert decision.action.startswith(prefix)
