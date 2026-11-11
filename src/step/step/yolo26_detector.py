@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import ast
 from collections import deque
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 import hashlib
 import json
 import math
@@ -130,12 +130,12 @@ def extract_hurdle_bar_centerline(
     value_min: int = 70,
     sample_count: int = 5,
 ) -> dict[str, Any]:
-    """Extract diagnostic sample pixels along the visible yellow hurdle bar.
+    """Extract sample pixels along the visible yellow hurdle bar for yaw fitting.
 
     The YOLO box can contain mostly floor when a long hurdle is rotated.  This
     RGB-only helper finds the longest yellow connected component, fits its
-    principal axis, and returns points along that visible axis.  It does not
-    alter detections or any navigation/control value.
+    principal axis, and returns points along that visible axis. The hurdle
+    analyzer uses their depth samples for camera-pose-corrected control angles.
     """
     empty: dict[str, Any] = {
         "hurdle_bar_points_px": [],
@@ -186,12 +186,23 @@ def extract_hurdle_bar_centerline(
     minimum_pixels = max(
         25, int(round(crop.shape[0] * crop.shape[1] * 0.0005)),
     )
-    best: tuple[float, np.ndarray, np.ndarray, np.ndarray, float, float] | None = None
+    best: tuple[
+        float, np.ndarray, np.ndarray, np.ndarray, np.ndarray, float,
+    ] | None = None
     for label in range(1, component_count):
         pixel_count = int(stats[label, cv2.CC_STAT_AREA])
         if pixel_count < minimum_pixels:
             continue
-        ys, xs = np.nonzero(labels == label)
+        component_left, component_top, component_width, component_height = (
+            int(value) for value in stats[label, :4]
+        )
+        # A component cannot contain pixels outside its reported bounds.
+        ys, xs = np.nonzero(labels[
+            component_top:component_top + component_height,
+            component_left:component_left + component_width,
+        ] == label)
+        xs += component_left
+        ys += component_top
         points = np.column_stack((xs, ys)).astype(np.float64)
         center = np.mean(points, axis=0)
         centered = points - center
@@ -214,18 +225,17 @@ def extract_hurdle_bar_centerline(
         # Favour the long bar over small yellow objects inside a loose YOLO box.
         score = span * math.sqrt(pixel_count) * min(elongation, 20.0)
         if best is None or score > best[0]:
-            perpendicular = np.asarray([-direction[1], direction[0]])
-            residuals = centered @ perpendicular
-            rmse = float(np.sqrt(np.mean(np.square(residuals))))
             best = (
-                score, points, center, direction, elongation, rmse,
+                score, points, centered, direction, projections, elongation,
             )
     if best is None:
         return empty
 
-    _, points, center, direction, elongation, rmse = best
-    centered = points - center
-    projections = centered @ direction
+    _, points, centered, direction, projections, elongation = best
+    # Only the selected component's residual is published; reuse its projection.
+    perpendicular = np.asarray([-direction[1], direction[0]])
+    residuals = centered @ perpendicular
+    rmse = float(np.sqrt(np.mean(np.square(residuals))))
     low = float(np.quantile(projections, 0.05))
     high = float(np.quantile(projections, 0.95))
     if not math.isfinite(low) or not math.isfinite(high) or high - low < 8.0:
@@ -247,16 +257,15 @@ def extract_hurdle_bar_centerline(
             int(round(sample[1] + top)),
         ])
 
-    global_points = points + np.asarray([left, top], dtype=np.float64)
     border_margin = 3
     clipped_edges: list[str] = []
-    if float(np.min(global_points[:, 0])) <= border_margin:
+    if float(np.min(points[:, 0])) + left <= border_margin:
         clipped_edges.append("LEFT")
-    if float(np.max(global_points[:, 0])) >= image_width - 1 - border_margin:
+    if float(np.max(points[:, 0])) + left >= image_width - 1 - border_margin:
         clipped_edges.append("RIGHT")
-    if float(np.min(global_points[:, 1])) <= border_margin:
+    if float(np.min(points[:, 1])) + top <= border_margin:
         clipped_edges.append("TOP")
-    if float(np.max(global_points[:, 1])) >= image_height - 1 - border_margin:
+    if float(np.max(points[:, 1])) + top >= image_height - 1 - border_margin:
         clipped_edges.append("BOTTOM")
     image_angle = math.degrees(
         math.atan2(-float(direction[1]), float(direction[0])),
@@ -3855,7 +3864,14 @@ class Yolo26Detector(Node):
     ) -> None:
         serialized_detections: list[dict[str, Any]] = []
         for detection in detections:
-            serialized = asdict(detection)
+            # JSON encoding is synchronous and does not mutate these lists.
+            serialized = {
+                "class_id": detection.class_id,
+                "class_name": detection.class_name,
+                "confidence": detection.confidence,
+                "bbox": detection.bbox,
+                "center": detection.center,
+            }
             if image is not None and detection.class_name == "hurdle":
                 serialized.update(extract_hurdle_bar_centerline(
                     image,

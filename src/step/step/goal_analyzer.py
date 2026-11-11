@@ -826,10 +826,16 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
             depth_m,
             reference_x=robot_center_x,
         )
-        _, _, camera_lateral, _, _ = self._project(
-            center_x,
-            center_y,
-            depth_m,
+        # Waist/ring geometry only needs camera-relative X. Keep _project's
+        # intrinsics gate, without recalculating its unused bearing/elevation.
+        camera_x_ratio = (
+            (center_x - self.cx) / self.fx
+            if (self.fx is not None and self.fy is not None
+                and self.cx is not None and self.cy is not None) else None
+        )
+        camera_lateral = (
+            camera_x_ratio * depth_m
+            if camera_x_ratio is not None and depth_m is not None else None
         )
         waist_depth, waist_aim, waist_direction = self._waist_center_aim(
             depth_m,
@@ -838,10 +844,9 @@ class GoalAnalyzer(DepthFrameConsumer, Node):
         ring_board_depth = (
             center_depth if center_depth is not None else depth_m
         )
-        _, _, ring_board_lateral, _, _ = self._project(
-            center_x,
-            center_y,
-            ring_board_depth,
+        ring_board_lateral = (
+            camera_x_ratio * ring_board_depth
+            if camera_x_ratio is not None and ring_board_depth is not None else None
         )
         (
             ring_lateral,
