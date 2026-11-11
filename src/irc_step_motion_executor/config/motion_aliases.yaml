@@ -8,16 +8,16 @@
 # Visible-target alignment: left 8/30/45/60/75/90+ degrees -> 1/2/3/4/5/6 repeats.
 # Right turns below 15 degrees are skipped; each lower bound is inclusive.
 # Left turns below 8 degrees are skipped; 90 degrees and above use six repeats.
-# Source100 p forward names; derived 8-cycle command retains its count.
+# Source103 m forward names; derived 8-cycle command retains its count.
 motion_aliases:
   # Legacy manual pickup IDs select 400; automatic pickup chooses after retreat.
   sdk_pickup: "r공잡기 400"
-  sdk_forward_4: "p전진45(4회)"
-  line_forward_2: "p전진45도(2회)"
-  line_forward_4: "p전진45(4회)"
-  line_forward_6: "p전진45(6회)"
-  line_forward_8: "p전진45(8회)"
-  forward: "p전진45(8회)"
+  sdk_forward_4: "m전진45(4회)"
+  line_forward_2: "m전진45(2회)"
+  line_forward_4: "m전진45(4회)"
+  line_forward_6: "m전진45(6회)"
+  line_forward_8: "m전진45(8회)"
+  forward: "m전진45(8회)"
   line_turn_right_1: "t제자리우회전45도(1회)"
   line_turn_right_2: "t제자리우회전45도(2회)"
   line_turn_right_3: "t제자리우회전45도(3회)"
@@ -26,13 +26,13 @@ motion_aliases:
   line_turn_right_7: "t제자리우회전45도(7회)"
   line_turn_right_9: "t제자리우회전45도(9회)"
   line_turn_right_large: "t제자리우회전45도(9회)"
-  # Source100 p/t recovery names; selected by TURN direction, not line side.
-  line_recovery_left_4: "p라인복귀좌회전45도"
+  # Source103 m recovery names; selected by TURN direction, not line side.
+  line_recovery_left_4: "m라인복귀좌회전45도"
   # Legacy six-cycle ID now resolves to the approved four-cycle recovery.
-  line_recovery_left_6: "p라인복귀좌회전45도"
-  line_recovery_right_4: "t라인복귀우실전"
-  line_recovery_ball_first_left_4: "p라인복귀좌회전공용"
-  line_recovery_ball_second_right_4: "t라인복귀우공용"
+  line_recovery_left_6: "m라인복귀좌회전45도"
+  line_recovery_right_4: "m라인복귀우회전45도"
+  line_recovery_ball_first_left_4: "m라인복귀좌회전공용"
+  line_recovery_ball_second_right_4: "m라인복귀우회전공용"
   line_search_left_2: "p제자리좌회전45(2회)"
   line_search_right_5: "t제자리우회전45도(5회)"
   stationary_turn_left: "p제자리좌회전45(6회)"
@@ -43,8 +43,8 @@ motion_aliases:
   ball_top_loss_fine_forward_45_3: "p미세0도(3회)"
   pickup_top_loss_fine_forward_0_3: "p미세0도(3회)"
   # Keep legacy IDs; pickup forward uses the supplied camera-45 gait.
-  ball_camera_down_forward_2: "p전진45도(2회)"
-  ball_camera_down_forward_4: "p전진45(4회)"
+  ball_camera_down_forward_2: "m전진45(2회)"
+  ball_camera_down_forward_4: "m전진45(4회)"
   pickup_fine_forward_0: "p미세0도(5회)"
   hurdle_fine_forward_5: "p미세0도(5회)"
   hurdle_fine_forward_10: "p미세0도(10회)"
@@ -84,25 +84,26 @@ motion_aliases:
   pickup_camera_down_turn_right_6: "t제자리우회전0도(6회)"
   pickup_camera_down_turn_right_7: "t제자리우회전0도(7회)"
   pickup_camera_down_turn_right_9: "t제자리우회전0도(9회)"
-  post_ball_forward_4: "p전진45(4회)"
-  post_ball_forward_6: "p전진45(6회)"
+  post_ball_forward_4: "m전진45(4회)"
+  post_ball_forward_6: "m전진45(6회)"
   post_shot_turn_right_9: "t제자리우회전45도(9회)"
   # Catalog70 exit composites preserve the source repeat_count=1.
   post_shot_default_turn_right: "t골대후제자리우회전"
   post_shot_default_turn_left: "p골대후제자리좌회전"
   post_shot_default_turn_right_5: "t골대후제자리우회전(5회)"
   post_shot_default_turn_left_3: "p골대후제자리좌회전(3회)"
-  # Regions 5-8 retain legacy IDs: right 6 / left 4, then eight opposite recovery cycles.
+  # Regions 5-8 retain legacy IDs: right 6 / left 4, forward two, then same-direction recovery four.
   post_shot_exit_right_5_forward_4: "t골대후제자리우회전(6회)+라인복귀좌회전45도(4회)+라인복귀좌회전45도(4회)"
   post_shot_exit_left_3_forward_4: "p골대후제자리좌회전(4회)+라인복귀우회전45도(4회)+라인복귀우회전45도(4회)"
   # Regions 1-2 preserve the original full turn and append one recovery block.
   post_shot_exit_right_9_recovery_right_4: "t골대후제자리우회전+라인복귀우회전45도(4회)"
+  # Legacy ID/name: the full left turn now ends with RIGHT recovery four.
   post_shot_exit_left_4_recovery_left_4: "p골대후제자리좌회전+라인복귀좌회전45도(4회)"
-  post_ball_forward_8: "p전진45(8회)"
+  post_ball_forward_8: "m전진45(8회)"
   post_ball_camera_90: "R오뒤카메라90도"
-  goal_camera_90_forward_2: "p전진90도(2회)"
-  goal_camera_90_forward_4: "p전진90도(4회)"
-  goal_camera_90_forward_6: "p전진90도(6회)"
+  goal_camera_90_forward_2: "m전진90도(2회)"
+  goal_camera_90_forward_4: "m전진90도(4회)"
+  goal_camera_90_forward_6: "m전진90도(6회)"
   goal_camera_90_backward_1: "찐후진실전(1회)"
   goal_camera_90_fine_forward_1: "p미세90도(1회)"
   goal_camera_90_fine_forward_2: "p미세90도(2회)"
@@ -162,8 +163,8 @@ motion_aliases:
   fine_to_turn_ready_90: "p미세오뒤에서 오뒤90도"
 
   # Catalog52 R variants available for explicit/manual requests.
-  r_forward_0_4: "p전진실전0도(4회)"
-  r_forward_0_6: "p전진실전0도(6회)"
+  r_forward_0_4: "m전진0도(4회)"
+  r_forward_0_6: "m전진0도(6회)"
   r_turn_right_4: "t제자리우회전45도(4회)"
   r_turn_right_90_4: "t제자리우회전90도(4회)"
   r_turn_right_0_4: "t제자리우회전0도(4회)"
@@ -198,7 +199,7 @@ motion_aliases:
   ball_align_prepare_fine_45: "p오뒤에서 미세오뒤(45도)"
   ball_align_prepare_turn_45: "p미세오뒤에서 오뒤45도"
   ball_align_fine_forward_45_5: "p미세45도(5회)"
-  ball_align_forward_2: "p전진45도(2회)"
+  ball_align_forward_2: "m전진45(2회)"
   ball_align_turn_left_1: "p제자리좌회전45(1회)"
   ball_align_turn_left_2: "p제자리좌회전45(2회)"
   ball_align_turn_left_3: "p제자리좌회전45(3회)"

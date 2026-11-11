@@ -357,6 +357,28 @@ class MotionDecisionPlanner:
             reference["line_robot_side"] = self._hurdle_line_side(observations.get("line"))
             info = {**info, **reference, "hurdle_positioning_active": hurdle_positioning}
         command = self._plan_source(source, info, dt_sec)
+        if source == "hurdle":
+            # The node admits fresh post-motion observations before dispatch.
+            missing_after_near_entry = (
+                normalized_phase == "HURDLE_POSITIONING"
+                and self.hurdle_planner.fine_approach_active
+                and info is not None
+                and info.get("hurdle_camera_ready") is True
+                and info.get("hurdle_camera_pose") == "0"
+                and info.get("detected") is False
+                and info.get("raw_detected") is False
+            )
+            if missing_after_near_entry:
+                command = {
+                    **self.hurdle_planner.wait("hurdle_near_missing_backward_2").to_dict(),
+                    "action": "HURDLE_LOST_BACKWARD_2",
+                    "valid": True,
+                    "recovery_active": True,
+                    "hurdle_near_control": True,
+                }
+            elif command.get("action") == "HURDLE_LOST_BACKWARD_2":
+                # The old first-bottom-loss path must obey the same entry gates.
+                command = self.hurdle_planner.wait("waiting_for_near_hurdle_observation").to_dict()
         if source == "hurdle" and info is not None:
             command.update(reference)
             if command.get("reason") in {
@@ -735,7 +757,11 @@ class MotionDecisionPlanner:
                 self.line_planner.stop("waiting_for_line_info")
                 if info is None
                 else self.line_planner.plan(
-                    info, dt_sec, allow_corner_turns=allow_line_corner_turns,
+                    info, dt_sec,
+                    # Shape-aware packets leave corner ownership to the node;
+                    # the local planner tracks only the incoming segment.
+                    allow_corner_turns=(allow_line_corner_turns
+                                        and "visible_line_points_px" not in info),
                 )
             )
         elif source == "ball":

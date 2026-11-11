@@ -200,7 +200,7 @@ def test_composite_capture_timings_match_catalog_and_recovery_tail():
         turn = catalog[motion['name'].split('+')[0]]
         turn_end = max(f['start_ms'] + f['time_ms'] for f in turn['frames']) / 1000 / motion['playback_speed']
         first_walk_start = motion['frames'][len(turn['frames'])]['start_ms'] / 1000 / motion['playback_speed']
-        forward_frames = 2 * len(catalog['p전진45도(2회)']['frames']) if action.endswith('_FORWARD_4') else 0
+        forward_frames = 2 * len(catalog['m전진45(2회)']['frames']) if action.endswith('_FORWARD_4') else 0
         recovery_start = motion['frames'][len(turn['frames']) + forward_frames]['start_ms'] / 1000 / motion['playback_speed']
         end = max(f['start_ms'] + f['time_ms'] for f in motion['frames']) / 1000
         assert duration == pytest.approx(end * motion['repeat_count'] / motion['playback_speed'])

@@ -1,0 +1,37 @@
+{
+  "motions_total": 168,
+  "motions_updated": 23,
+  "alias_count": 175,
+  "alias_target_changes": 22,
+  "missing_alias_targets": 0,
+  "duplicate_motion_names": 0,
+  "new_shared_pose_conflicts": 0,
+  "reimport_byte_identical": true,
+  "python_focused_passed": 494,
+  "broad_initial_passed": 1047,
+  "broad_preexisting_failures": 288,
+  "new_failure_fixed": "Old test expected source speed 1.0; new source is 1.05. Corrected expectation passed.",
+  "cpp_passed": [
+    "test_catalog_only_core",
+    "test_sdk_executor_core",
+    "test_sdk_executor_driver",
+    "ball_fine_queue_contract",
+    "forward_timing_contract",
+    "ring_shot_contract"
+  ],
+  "hardware_executed": false,
+  "build": "sdk_motion_executor rebuilt; install binary, aliases, and catalog are workspace symlinks",
+  "production_queue_matrix": {
+    "cases": 680,
+    "walking_motions": 18,
+    "head_override_states": 2,
+    "extra_fine_gait_pairs": 16,
+    "result": "passed",
+    "checks": [
+      "compatible queues complete both motions",
+      "incompatible camera/family transitions are rejected",
+      "support pose is retained during the next leading hold"
+    ]
+  },
+  "installed_python_resolves_to_workspace": true
+}

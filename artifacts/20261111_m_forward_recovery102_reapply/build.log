@@ -1,0 +1,49 @@
+[ 42%] Built target motion_core
+[ 71%] Built target motion_player_core
+Consolidate compiler generated dependencies of target test_ball_fine_queue
+[ 85%] Building CXX object robot_motion_sdk/CMakeFiles/test_ball_fine_queue.dir/test_ball_fine_queue.cpp.o
+[100%] Linking CXX executable test_ball_fine_queue
+[100%] Built target test_ball_fine_queue
+[ 42%] Built target motion_core
+[ 71%] Built target motion_player_core
+Consolidate compiler generated dependencies of target test_forward_timing
+[ 85%] Building CXX object robot_motion_sdk/CMakeFiles/test_forward_timing.dir/test_forward_timing.cpp.o
+[100%] Linking CXX executable test_forward_timing
+[100%] Built target test_forward_timing
+[ 62%] Built target gtest
+[ 62%] Built target gtest_main
+[ 75%] Built target catalog_only_core
+Consolidate compiler generated dependencies of target test_catalog_only_core
+[ 87%] Building CXX object CMakeFiles/test_catalog_only_core.dir/test/test_catalog_only_core.cpp.o
+[100%] Linking CXX executable test_catalog_only_core
+[100%] Built target test_catalog_only_core
+[ 30%] Built target gtest_main
+[ 40%] Built target gtest
+[ 60%] Built target catalog_only_core
+[ 80%] Built target sdk_executor_core
+Consolidate compiler generated dependencies of target test_sdk_executor_core
+[ 90%] Building CXX object CMakeFiles/test_sdk_executor_core.dir/test/test_sdk_executor_core.cpp.o
+[100%] Linking CXX executable test_sdk_executor_core
+[100%] Built target test_sdk_executor_core
+[ 18%] Built target catalog_only_core
+[ 25%] Built target gtest_main
+[ 37%] Built target robot_motion_runtime_config
+[ 50%] Built target gtest
+[ 62%] Built target sdk_executor_core
+[ 87%] Built target sdk_executor_driver
+Consolidate compiler generated dependencies of target test_sdk_executor_driver
+[ 93%] Building CXX object CMakeFiles/test_sdk_executor_driver.dir/test/test_sdk_executor_driver.cpp.o
+[100%] Linking CXX executable test_sdk_executor_driver
+[100%] Built target test_sdk_executor_driver
+[ 16%] Built target catalog_only_core
+[ 16%] Built target robot_motion_runtime_config
+[ 23%] Built target motion_core
+[ 33%] Built target sdk_executor_core
+[ 36%] Built target motion_player_core
+[ 43%] Built target simulated_motion_backend
+[ 56%] Built target sdk_executor_driver
+[ 63%] Built target motion_backend_factory
+[ 80%] Built target robot_control
+[ 86%] Built target robot_motion_player_backend
+[ 93%] Built target production_robot_motion_runtime_factory
+[100%] Built target sdk_motion_executor

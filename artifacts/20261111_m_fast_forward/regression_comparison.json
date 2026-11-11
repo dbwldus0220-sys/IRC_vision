@@ -1,0 +1,13 @@
+{
+  "current_failures": 289,
+  "baseline_failures": 288,
+  "new_failures": [
+    "FAILED src/mission_control/test/test_hurdle_forward2.py::test_forward2_catalog_matches_existing_normal_walk"
+  ],
+  "resolved": [],
+  "new_failures_after_fix": [],
+  "fixed_test": "test_hurdle_forward2.py::test_forward2_catalog_matches_existing_normal_walk",
+  "fix": "Expected source speed 1.05 and duration 1.028/1.05; rerun passed.",
+  "focused_python_passed": 494,
+  "baseline_note": "Retested each initially failing test function, including all its parameter cases, against pre-change snapshots."
+}

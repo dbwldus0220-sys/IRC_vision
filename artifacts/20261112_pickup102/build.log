@@ -1,0 +1,23 @@
+[ 42%] Built target motion_core
+[ 71%] Built target motion_player_core
+Consolidate compiler generated dependencies of target test_ball_fine_queue
+[100%] Built target test_ball_fine_queue
+[ 37%] Built target gtest_main
+[ 75%] Built target gtest
+[ 75%] Built target catalog_only_core
+Consolidate compiler generated dependencies of target test_catalog_only_core
+[100%] Built target test_catalog_only_core
+[ 40%] Built target gtest
+[ 40%] Built target gtest_main
+[ 60%] Built target catalog_only_core
+[ 80%] Built target sdk_executor_core
+Consolidate compiler generated dependencies of target test_sdk_executor_core
+[100%] Built target test_sdk_executor_core
+[ 25%] Built target gtest
+[ 25%] Built target catalog_only_core
+[ 43%] Built target robot_motion_runtime_config
+[ 50%] Built target gtest_main
+[ 62%] Built target sdk_executor_core
+[ 87%] Built target sdk_executor_driver
+Consolidate compiler generated dependencies of target test_sdk_executor_driver
+[100%] Built target test_sdk_executor_driver

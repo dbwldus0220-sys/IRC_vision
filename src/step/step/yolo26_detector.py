@@ -1260,7 +1260,7 @@ class Yolo26Detector(Node):
             "post_shot_exit_right_5_forward_4": "POST SHOT / RIGHT 6 + FORWARD 2 + RECOVER RIGHT 4",
             "post_shot_exit_left_3_forward_4": "POST SHOT / LEFT 4 + FORWARD 2 + RECOVER LEFT 4",
             "post_shot_exit_right_9_recovery_right_4": "POST SHOT / TURN RIGHT + RECOVER RIGHT 4",
-            "post_shot_exit_left_4_recovery_left_4": "POST SHOT / TURN LEFT + RECOVER LEFT 4",
+            "post_shot_exit_left_4_recovery_left_4": "POST SHOT / TURN LEFT + RECOVER RIGHT 4",
         }
         label = labels.get(motion_id)
         action = str(payload.get("action", ""))
@@ -2419,6 +2419,18 @@ class Yolo26Detector(Node):
                     ]
                 )
 
+        visible = (info or {}).get("visible_line_points_px")
+        if isinstance(visible, list):
+            rows.append(f"Visible pts : {len(visible)}")
+        control = (decision or {}).get("source_command", {})
+        if control.get("corner_state"):
+            rows.append("Corner mode : " + str(control["corner_state"]))
+        fraction = self._number(info, "corner_visible_outgoing_fraction") if info else None
+        if fraction is not None:
+            rows.append(f"Exit share  : {fraction:.0%}")
+        if control.get("sparse_view"):
+            rows.append("Line confirm: " + str(control["sparse_view"].get("confirmed_frames", 0)) + "/3")
+
         ground_valid = bool(info and info.get("ground_projection_valid", False))
         ground_rows = []
         for label, key, unit, digits in (
@@ -2476,6 +2488,9 @@ class Yolo26Detector(Node):
             if decision is not None
             else {}
         )
+        if (planner_source == "LINE" and isinstance(source_command, dict)
+                and source_command.get("sparse_view") and planner_action == "WAIT"):
+            banner = ("WAIT / LINE CONFIRM", (0, 165, 255))
         if (
             planner_source == "LINE"
             and isinstance(source_command, dict)

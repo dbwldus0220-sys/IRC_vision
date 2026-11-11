@@ -1,0 +1,41 @@
+{
+  "source_sha256": "cced9b691d78bafee4ed2d6868a2926339083fb221da64d354f697c7cff118d9",
+  "requested_motions": [
+    "r공잡기 400",
+    "r공잡기500"
+  ],
+  "source_matches_existing_pc": true,
+  "normalized_source_matches_existing_runtime": true,
+  "catalog_and_alias_files_unchanged": true,
+  "duration_seconds": 5.749,
+  "default_request_timeout_ms": 12000,
+  "python_tests": {
+    "passed": 198,
+    "log": "python_tests_final.log"
+  },
+  "cpp_suites": {
+    "passed": 4,
+    "log": "cpp_tests.log"
+  },
+  "mock_playback": {
+    "passed": 2,
+    "log": "playback.log",
+    "checks": [
+      "SDK duration 5749ms",
+      "accepted start",
+      "completion before 12000ms",
+      "single completion",
+      "exact final joint angles"
+    ]
+  },
+  "pickup_sequences": "Both retreat -> pickup -> check pose -> exit turn -> forward chains passed in ball_fine_queue_contract",
+  "test_fix": "Bypass automatic transition-dwell completion in FakeBridge and inspect transition_dwell_until, including no grasp dispatch before the deadline. Production control logic unchanged.",
+  "initial_test_result": {
+    "passed": 192,
+    "failed": 6,
+    "reason": "Existing timing test read active_dwell_until after FakeBridge already completed the transition pause.",
+    "log": "python_tests.log"
+  },
+  "hardware_run": false,
+  "limitation": "No changed pickup motion values exist in the supplied file; a newly exported source is needed to apply other values."
+}

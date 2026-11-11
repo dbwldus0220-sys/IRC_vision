@@ -1,0 +1,56 @@
+..F..................................................................... [ 12%]
+........................................................................ [ 24%]
+........................................................................ [ 36%]
+........................................................................ [ 48%]
+........................................................................ [ 60%]
+........................................................................ [ 72%]
+........................................................................ [ 85%]
+........................................................................ [ 97%]
+................                                                         [100%]
+=================================== FAILURES ===================================
+____ test_embedded_gaits_preserve_turns_preparation_and_effective_speed[pc] ____
+
+kind = 'pc'
+
+    @pytest.mark.parametrize('kind', ['pc', 'runtime'])
+    def test_embedded_gaits_preserve_turns_preparation_and_effective_speed(kind):
+        pc = catalog(ROOT / 'artifacts/robot_motions_pc.json')
+        after = catalog(ROOT / f'artifacts/robot_motions_{kind}.json')
+        before = catalog(UPDATE / 'before' / f'artifacts/robot_motions_{kind}.json')
+        for turn, recovery, blocks in GOAL_EXIT_RECOVERIES:
+            expected = build_exit(pc[turn], pc[recovery], blocks,
+                                  forward=pc['m전진45(2회)'] if turn in FORWARD_EXIT_NAMES else None)
+            if kind == 'runtime':
+                expected = runtime_motion_from_source(expected)
+            assert after[expected['name']] == expected
+            assert expected['frames'][:len(pc[turn]['frames'])] == pc[turn]['frames']
+    
+        name = 'n공에서 전진하고 후진준비자세'
+        prepare, old, gait = after[name], before[name], after['m전진0도(2회)']
+        assert prepare['repeat_count'] == old['repeat_count'] == 1
+        assert prepare['playback_speed'] == old['playback_speed'] == 1.0
+        assert prepare['start_pose'] == gait['start_pose'] == prepare['frames'][0]['name']
+        assert prepare['end_pose'] == old['end_pose'] == prepare['frames'][-1]['name']
+        for actual, source in zip(prepare['frames'][:4], gait['frames'], strict=True):
+            for field in ('angles', 'torques', 'name', 'stop_at_end'):
+                assert actual.get(field) == source.get(field)
+            for time in ('start_ms', 'time_ms'):
+                assert abs(actual[time] - source[time] / 1.0) <= 1.0
+        shift = prepare['frames'][3]['start_ms'] + prepare['frames'][3]['time_ms'] - 514
+        for actual, original in zip(prepare['frames'][4:], old['frames'][4:], strict=True):
+            expected = copy.deepcopy(original)
+            expected['start_ms'] += shift
+            assert actual == expected
+        assert prepare['max_seq_ms'] == 754
+        for name, seconds in MANIFEST['duration_seconds'].items():
+            motion = after[name]
+>           assert max(f['start_ms'] + f['time_ms'] for f in motion['frames']) * motion['repeat_count'] / motion['playback_speed'] / 1000 == pytest.approx(seconds)
+E           assert (((7312 * 1) / 1.0) / 1000) == 7.696842105263158 ± 7.7e-06
+E            +  where 7312 = max(<generator object test_embedded_gaits_preserve_turns_preparation_and_effective_speed.<locals>.<genexpr> at 0xffff85fd0970>)
+E            +  and   7.696842105263158 ± 7.7e-06 = <function approx at 0xffff97d8b5b0>(7.696842105263158)
+E            +    where <function approx at 0xffff97d8b5b0> = pytest.approx
+
+src/mission_control/test/test_catalog103_m_hurdle.py:95: AssertionError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_catalog103_m_hurdle.py::test_embedded_gaits_preserve_turns_preparation_and_effective_speed[pc]
+1 failed, 591 passed in 18.09s

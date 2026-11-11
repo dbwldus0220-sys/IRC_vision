@@ -43,7 +43,7 @@ def generate_test_description():
         executor, launch_testing.actions.ReadyToTest(),
         launch_testing.util.KeepAliveProc(),
         launch.actions.TimerAction(
-            period=15.0,
+            period=20.0,
             actions=[launch.actions.EmitEvent(event=launch.events.Shutdown(
                 reason="hurdle camera test timeout guard",
             ))],
@@ -140,6 +140,26 @@ class TestHurdleHeadOverride(unittest.TestCase):
 
     def test_depth_boundary_hold_release_and_other_camera_ownership(self):
         self.wait(lambda: all(p.get_subscription_count() for p in self.publishers.values()))
+        # WAIT recovery lowers the camera even with no detected hurdle.
+        self.publish(TOPICS[4], {
+            "source": "hurdle", "valid": False, "phase": "HURDLE_POSITIONING",
+            "action": "HURDLE_LOST_BACKWARD_2",
+        })
+        self.observation(detected=False, depth_valid=False, depth_m=None)
+        self.hold(False)
+        recovery = {
+            "source": "hurdle", "valid": True, "phase": "HURDLE_POSITIONING",
+            "action": "HURDLE_LOST_BACKWARD_2",
+        }
+        self.publish(TOPICS[4], recovery)
+        self.wait(lambda: self.heartbeats[-1]["hurdle_head_override_active"])
+        self.hold(True)
+        self.wait(lambda: self.heartbeats[-1]["hurdle_head_override_current_deg"] == -64.0)
+        self.publish(TOPICS[4], recovery)
+        self.hold(True)
+        self.assertEqual(self.heartbeats[-1]["hurdle_head_override_current_deg"], -64.0)
+        self.navigation("ball")
+        self.hold(False)
         self.observation()
         self.hold(False)
         self.navigation("ball")

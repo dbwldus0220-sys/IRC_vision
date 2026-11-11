@@ -9,6 +9,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[3]
 UPDATE = ROOT / 'artifacts/20261111_catalog100_name_mapping'
+DEPLOYED = ROOT / 'artifacts/20261111_m_fast_forward/before'
 RENAMES = json.loads((UPDATE / 'manifest.json').read_text())['renames']
 
 
@@ -16,7 +17,7 @@ RENAMES = json.loads((UPDATE / 'manifest.json').read_text())['renames']
 def test_rename_changes_only_motion_names(kind):
     relative = f'artifacts/robot_motions_{kind}.json'
     before = json.loads((UPDATE / 'before' / relative).read_text())
-    actual = json.loads((ROOT / relative).read_text())
+    actual = json.loads((DEPLOYED / relative).read_text())
     expected = copy.deepcopy(before)
     for motion in expected['motions']:
         motion['name'] = RENAMES.get(motion['name'], motion['name'])
@@ -38,7 +39,7 @@ def test_rename_changes_only_motion_names(kind):
 def test_every_command_keeps_its_original_data_after_rename():
     relative = 'src/irc_step_motion_executor/config/motion_aliases.yaml'
     before = yaml.safe_load((UPDATE / 'before' / relative).read_text())['motion_aliases']
-    actual = yaml.safe_load((ROOT / relative).read_text())['motion_aliases']
+    actual = yaml.safe_load((DEPLOYED / relative).read_text())['motion_aliases']
     assert actual == {alias: RENAMES.get(name, name) for alias, name in before.items()}
-    motions = json.loads((ROOT / 'artifacts/robot_motions_runtime.json').read_text())['motions']
+    motions = json.loads((DEPLOYED / 'artifacts/robot_motions_runtime.json').read_text())['motions']
     assert set(actual.values()) <= {m['name'] for m in motions}

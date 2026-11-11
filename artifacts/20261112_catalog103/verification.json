@@ -1,0 +1,56 @@
+{
+  "python_tests": {
+    "unique_tests_passed_after_fix": 592,
+    "initial_passed": 591,
+    "initial_failed": 1,
+    "initial_log": "python_tests.log",
+    "source_contract_recheck_passed": 7,
+    "final_log": "final_source_tests.log",
+    "test_fix": "The new test initially compared PC hurdle duration to scaled runtime duration; corrected to keep PC source speed and verified all seven new source contracts."
+  },
+  "cpp_suites": {
+    "passed": 5,
+    "log": "cpp_tests.log"
+  },
+  "production_queue_matrix": {
+    "cases": 680,
+    "exit_code": 0,
+    "log": "queue_matrix.log",
+    "scope": "18 forward/recovery motions squared plus 16 fine gait pairs, with and without fixed camera; expected incompatible transitions remain rejected"
+  },
+  "updated_motion_playback": {
+    "passed": 24,
+    "log": "playback.log",
+    "checks": [
+      "accepted start",
+      "successful completion",
+      "completion count one",
+      "exact final joint targets"
+    ]
+  },
+  "catalog_motion_count": 168,
+  "aliases": 175,
+  "alias_targets_changed": 22,
+  "catalog_validation": "PC/runtime aliases resolve; all frame motor IDs exactly 0..22",
+  "idempotent_import": true,
+  "new_shared_pose_conflicts": 0,
+  "installed_timing_verified": true,
+  "hurdle": {
+    "source_speed": 1.0,
+    "runtime_speed": 0.95,
+    "duration_seconds": 7.696842105263158,
+    "settle_timeout_ms": 3000,
+    "default_request_timeout_ms": 12000,
+    "duration_plus_settle_fits_timeout": true,
+    "source_motor20_frame10": -68.412109375
+  },
+  "walking_source_speed": 1.0,
+  "camera_override": "m라인복귀우회전90 motor 0 stays 1 degree instead of source alternating -64 / 1",
+  "sha256": {
+    "artifacts/robot_motions_pc.json": "ff6378361d0330041de1425fa5233fb162f439629290121483c6ed3c5ee1c435",
+    "artifacts/robot_motions_runtime.json": "f232b2687a0740bfe332f6a3f78e21ed615691a5f5580c30737d622bc5d6060f",
+    "src/irc_step_motion_executor/config/motion_aliases.yaml": "14e0bedd64d7a659f5c74946ea2806e7b16a415a9c8767c33767b29fea439244"
+  },
+  "hardware_run": false,
+  "scope_note": "Focused software tests and mock hardware playback, not a full repository test run or physical balance validation."
+}

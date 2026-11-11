@@ -30,7 +30,7 @@ struct BallQueueHardware : IMotionHardware {
 int main(int argc, char** argv) {
     assert(argc == 2);
     const auto catalog = MotionLibrary::loadGuiJson(argv[1]);
-    for (const std::string entry : {"p전진45(4회)", "p라인복귀좌회전공용", "t라인복귀우공용"}) {
+    for (const std::string entry : {"m전진45(4회)", "m라인복귀좌회전공용", "m라인복귀우회전공용"}) {
         for (bool right_first : {false, true}) {
             const std::string first_turn = right_first ? "t제자리우회전45도(2회)" : "p제자리좌회전45(2회)";
             const std::string second_turn = right_first ? "p제자리좌회전45(3회)" : "t제자리우회전45도(3회)";
@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
     for (const auto& pair : std::vector<std::pair<std::string, std::string>>{
              {"p미세45도(5회)", "p제자리좌회전45(2회)"},
              {"p제자리좌회전45(2회)", "p미세45도(5회)"},
-             {"p전진45(4회)", "p미세45도(5회)"}}) {
+             {"m전진45(4회)", "p미세45도(5회)"}}) {
         BallQueueHardware hardware;
         RobotMotionPlayer player(argv[1], hardware);
         assert(player.initialize());
@@ -169,10 +169,10 @@ int main(int argc, char** argv) {
     };
     // Near Ball approach now shares the regular two-cycle forward support.
     for (const std::string turn : {"p제자리좌회전45(2회)", "t제자리우회전45도(3회)"}) {
-        check_pair("p전진45도(2회)", turn);
-        check_pair(turn, "p전진45도(2회)");
+        check_pair("m전진45(2회)", turn);
+        check_pair(turn, "m전진45(2회)");
     }
-    check_pair("p미세오뒤에서 오뒤45도", "p전진45도(2회)");
+    check_pair("p미세오뒤에서 오뒤45도", "m전진45(2회)");
     for (int camera : {0, 45, 90}) {
         const auto name = [camera](int count) {
             return "p제자리좌회전" + std::to_string(camera) + (camera == 45 ? "(" : "도(")
@@ -182,27 +182,27 @@ int main(int argc, char** argv) {
             for (int second = 1; second <= 6; ++second)
                 check_pair(name(first), name(second));
             if (camera == 45) {
-                check_pair("p전진45(4회)", name(first));
-                check_pair(name(first), "p전진45(4회)");
+                check_pair("m전진45(4회)", name(first));
+                check_pair(name(first), "m전진45(4회)");
                 check_pair(name(first), "p오뒤에서 미세오뒤(45도)");
                 check_pair("p미세오뒤에서 오뒤45도", name(first));
             }
         }
     }
-    // Source98 names must retain forward/recovery reservations at every boundary.
+    // Source101 recovery names must retain forward/recovery reservations at every boundary.
     const std::vector<std::vector<std::string>> walking_groups{
-        {"p전진45도(2회)", "p전진45(4회)", "p전진45(6회)", "p전진45(8회)",
-         "p라인복귀좌회전45도", "p라인복귀좌회전공용", "t라인복귀우실전", "t라인복귀우공용"},
-        {"p전진90도(2회)", "p전진90도(4회)", "p전진90도(6회)",
-         "p라인복귀좌회전90도", "t라인복귀우실전90도"},
-        {"p전진실전0도(4회)", "p전진실전0도(6회)"},
+        {"m전진45(2회)", "m전진45(4회)", "m전진45(6회)", "m전진45(8회)",
+         "m라인복귀좌회전45도", "m라인복귀좌회전공용", "m라인복귀우회전45도", "m라인복귀우회전공용"},
+        {"m전진90도(2회)", "m전진90도(4회)", "m전진90도(6회)",
+         "m라인복귀좌회전90도", "m라인복귀우회전90"},
+        {"m전진0도(4회)", "m전진0도(6회)"},
     };
     for (const auto& group : walking_groups)
         for (const auto& first : group)
             for (const auto& second : group) check_pair(first, second);
     // Goal navigation uses camera-45 recovery data with an executor head override.
-    for (const std::string forward : {"p전진90도(2회)", "p전진90도(4회)", "p전진90도(6회)"})
-        for (const std::string recovery : {"p라인복귀좌회전45도", "t라인복귀우실전"}) {
+    for (const std::string forward : {"m전진90도(2회)", "m전진90도(4회)", "m전진90도(6회)"})
+        for (const std::string recovery : {"m라인복귀좌회전45도", "m라인복귀우회전45도"}) {
             check_pair(forward, recovery, true);
             check_pair(recovery, forward, true);
             BallQueueHardware hardware;
@@ -226,21 +226,26 @@ int main(int argc, char** argv) {
     // not through queueNext. Exercise these real SDK start/completion boundaries.
     for (const auto& sequence : std::vector<std::vector<std::string>>{
         {"찐공잡기전후진-2(2회)", "r공잡기 400", "n공확인자세",
-         "t공후 제자리우회전", "p전진45(4회)"},
+         "t공후 제자리우회전", "m전진45(4회)"},
+        {"R골넣기1번구역", "t골대후제자리우회전", "m전진45(4회)"},
+        {"R골넣기1번구역", "t골대후제자리우회전+라인복귀우회전45도(4회)",
+         "m전진45(4회)"},
+        {"r골넣기 5번구역", "t골대후제자리우회전(6회)+라인복귀좌회전45도(4회)+라인복귀좌회전45도(4회)",
+         "m전진45(4회)"},
         {"찐공잡기전후진-2(2회)", "r공잡기500", "n공확인자세",
-         "p공후 제자리좌회전", "p전진45(4회)"},
-        {"p미세0도(10회)", "t허들찐", "p전진45(6회)"},
-        {"p미세0도(5회)", "p미세오뒤에서 오뒤0도", "p라인복귀좌회전45도",
+         "p공후 제자리좌회전", "m전진45(4회)"},
+        {"p미세0도(10회)", "t허들찐", "m전진45(6회)"},
+        {"p미세0도(5회)", "p미세오뒤에서 오뒤0도", "m라인복귀좌회전45도",
          "p오뒤에서 미세오뒤(0도)", "p미세0도(5회)", "p미세0도(10회)",
-         "t허들찐", "p전진45(6회)"},
-        {"p미세0도(5회)", "p미세오뒤에서 오뒤45도", "t라인복귀우실전",
+         "t허들찐", "m전진45(6회)"},
+        {"p미세0도(5회)", "p미세오뒤에서 오뒤45도", "m라인복귀우회전45도",
          "p오뒤에서 미세오뒤(45도)", "p미세0도(5회)", "p미세0도(10회)",
-         "t허들찐", "p전진45(6회)"},
-        {"n공확인자세", "p공후 제자리좌회전", "p전진45(4회)"},
-        {"R골넣기1번구역", "p골대후제자리좌회전", "p전진45(4회)"},
-        {"R골넣기2번구역", "p골대후제자리좌회전", "p전진45(4회)"},
-        {"R골넣기3번구역", "p골대후제자리좌회전", "p전진45(4회)"},
-        {"R골넣기4번구역", "p골대후제자리좌회전", "p전진45(4회)"},
+         "t허들찐", "m전진45(6회)"},
+        {"n공확인자세", "p공후 제자리좌회전", "m전진45(4회)"},
+        {"R골넣기1번구역", "p골대후제자리좌회전", "m전진45(4회)"},
+        {"R골넣기2번구역", "p골대후제자리좌회전", "m전진45(4회)"},
+        {"R골넣기3번구역", "p골대후제자리좌회전", "m전진45(4회)"},
+        {"R골넣기4번구역", "p골대후제자리좌회전", "m전진45(4회)"},
         {"p오뒤에서 미세오뒤(0도)", "p미세0도(5회)",
          "p미세오뒤에서 오뒤0도", "p제자리좌회전0도(1회)"},
         {"p오뒤에서 미세오뒤(45도)", "p미세45도(5회)",

@@ -1,0 +1,37 @@
+{
+  "backup_repository": "https://github.com/geonwoo0407/IRC_STEP",
+  "backup_branch": "backup/before-corner-priority-20261111",
+  "backup_commit": "7bcffb4",
+  "working_branch": "feat/corner-priority-20261111",
+  "new_behavior_tests": {
+    "passed": 49,
+    "failed": 0
+  },
+  "baseline_regression": {
+    "passed": 1616,
+    "failed": 149
+  },
+  "final_regression": {
+    "passed": 1665,
+    "failed": 149,
+    "additional_failed_test_ids": []
+  },
+  "build": {
+    "packages": [
+      "step",
+      "mission_control"
+    ],
+    "result": "passed",
+    "install_base": "/tmp/step_corner_build/install"
+  },
+  "hardware_commands_sent": false,
+  "running_nodes_restarted": false,
+  "initial_settings": {
+    "corner_min_turn_delta_deg": 20,
+    "dominant_outgoing_length_fraction": 0.6,
+    "corner_entry_distance_m": 0.15,
+    "sparse_wait_sec": 0.5,
+    "sparse_confirmation_frames": 3
+  },
+  "concurrent_workspace_changes": "Ball bottom-loss code was added by another workspace task during final verification; not edited as part of this task. The 49 new behavior tests were rerun successfully against the combined workspace."
+}

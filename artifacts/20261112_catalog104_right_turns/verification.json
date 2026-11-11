@@ -1,0 +1,21 @@
+{
+  "baseline_total": 1033,
+  "updated_total": 1039,
+  "baseline_failed": 124,
+  "updated_failed": 122,
+  "new_failures": [],
+  "resolved_failures": [
+    "src.mission_control.test.test_goal_region_exit_turns::test_variants_keep_preparation_complete_turns_and_final_support[pc]",
+    "src.mission_control.test.test_goal_region_exit_turns::test_variants_keep_preparation_complete_turns_and_final_support[runtime]"
+  ],
+  "catalog_validation": {
+    "pc": 168,
+    "runtime": 168,
+    "missing_alias_targets": 0
+  },
+  "sdk_checks": {
+    "ball_fine_queue_contract": "passed",
+    "test_catalog_only_core": "passed"
+  },
+  "hardware_executed": false
+}

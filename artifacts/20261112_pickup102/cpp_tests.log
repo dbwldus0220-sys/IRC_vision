@@ -1,0 +1,17 @@
+Internal ctest changing into directory: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+Test project /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+    Start  9: test_catalog_only_core
+1/4 Test  #9: test_catalog_only_core ...........   Passed    0.26 sec
+    Start 11: test_sdk_executor_core
+2/4 Test #11: test_sdk_executor_core ...........   Passed    0.28 sec
+    Start 19: test_sdk_executor_driver
+3/4 Test #19: test_sdk_executor_driver .........   Passed    0.21 sec
+    Start 41: ball_fine_queue_contract
+4/4 Test #41: ball_fine_queue_contract .........   Passed  101.43 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Label Time Summary:
+gtest    =   0.75 sec*proc (3 tests)
+
+Total Test time (real) = 102.19 sec

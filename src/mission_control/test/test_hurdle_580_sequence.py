@@ -283,7 +283,7 @@ def test_node_completes_mission_only_after_full_tail_and_post_wait(clock):
 
 
 @pytest.mark.parametrize('side,offset,first_count', [('LEFT', -70, 2), ('RIGHT', 70, 3)])
-def test_node_top_loss_uses_entry_line_and_waits_between_search_turns(clock, side, offset, first_count):
+def test_node_top_loss_retreats_and_reobserves_regardless_of_entry_line(clock, side, offset, first_count):
     from test_mission_phase_flow import line_info
     node = HurdleHarness()
     first = start_far(node, clock)
@@ -304,9 +304,9 @@ def test_node_top_loss_uses_entry_line_and_waits_between_search_turns(clock, sid
         node.publish()
         assert len(executable(node)) == before + 1
         command = executable(node)[-1]
-        assert command['action'] == f'ALIGN_{side}'
-        assert command['source_command']['turn_count'] == count
-        motion = f'pickup_camera_down_turn_{side.lower()}_{count}'
+        assert command['action'] == 'HURDLE_LOST_BACKWARD_2'
+        assert 'turn_count' not in command['source_command']
+        motion = 'ball_lost_camera_down_backward_2'
         node.send_status(command['action'], command['command_id'], 'RUNNING', motion)
         clock[0] += .5
         observe(node, clock, missing)
@@ -337,6 +337,10 @@ def test_node_first_bottom_loss_uses_two_cycle_backward_alias(clock):
     command = executable(node)[-1]
     assert command['action'] == 'HURDLE_LOST_BACKWARD_2'
     bridge = FakeBridge()
+    bridge.executor_heartbeat_callback(String(data=json.dumps({
+        'hurdle_head_override_active': True,
+        'hurdle_head_override_current_deg': -64.,
+    })))
     bridge.navigation_command_callback(String(data=json.dumps(command)))
     assert decoded_messages(bridge.executor_request_publisher)[-1]['motion_id'] == 'ball_lost_camera_down_backward_2'
 

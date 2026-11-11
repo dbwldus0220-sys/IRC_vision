@@ -1,0 +1,167 @@
+{
+  "scope": "2026-11-12 KST: 현재 소스, 이전 진단 기록, 2026-11-11 이후 WAIT가 기록된 실행 29개. 과거 채팅 원문은 제공되지 않았음.",
+  "production_code_changed": false,
+  "hardware_started": false,
+  "source_sha256": {
+    "src/step/step/goal_analyzer.py": "7ac998f466496292657a99608a3a07ae42bb365d771c94aaaa716cfed2a629d2",
+    "src/step/step/hurdle_analyzer.py": "1304511f44d39af2f1eb6a1d40762b61541761560227b8aec711aa85ca6f64c0",
+    "src/step/step/ball_analyzer.py": "8d9729dafdf1337887c99210b9a350526f931fbd32916e46a7353a904a89277c",
+    "src/step/step/temporal_confirmation.py": "b419c09bc8d03d54c1f7cb3e973b2d681739619b4028d0f2e6ec4f7ae9e20552",
+    "src/step/step/hurdle_navigation_planner.py": "9a5e7a004ec0b05aed59dd38499f9b07f9ba7ae3b6efcff693906b5395fa2419",
+    "src/mission_control/mission_control/motion_decision_node.py": "806527936f0065630c6821eaf99e416b17df28f30b7daf8225ab5019d289e233",
+    "src/mission_control/mission_control/ball_loss_confirmation.py": "a893aa6a40aa3a84b10c1cbe41cc7db09b4c01566c792e512dd90e4ae31e774d",
+    "src/mission_control/mission_control/goal_initial_search.py": "536be20c4c96a4a69851398cb96cd9a8292faedc5d90f822d378582e5be2621c"
+  },
+  "verified_build_matches_source": [
+    "motion_decision_node.py",
+    "ball_loss_confirmation.py",
+    "goal_analyzer.py",
+    "hurdle_analyzer.py",
+    "hurdle_navigation_planner.py",
+    "temporal_confirmation.py",
+    "yolo26_detector.py"
+  ],
+  "latest_run": {
+    "start_kst": "2026-11-12T00:13:13.188+09:00",
+    "pipeline_ms": {
+      "ball_to_decision": {
+        "n": 6695,
+        "weighted_mean_ms": 1.673,
+        "maximum_ms": 19.104
+      },
+      "ball_work": {
+        "n": 6695,
+        "weighted_mean_ms": 1.445,
+        "maximum_ms": 20.535
+      },
+      "capture_to_decision": {
+        "n": 6695,
+        "weighted_mean_ms": 110.89,
+        "maximum_ms": 354.24
+      },
+      "capture_to_detector": {
+        "n": 6695,
+        "weighted_mean_ms": 66.851,
+        "maximum_ms": 264.803
+      },
+      "decision_callback": {
+        "n": 6695,
+        "weighted_mean_ms": 0.641,
+        "maximum_ms": 12.482
+      },
+      "detector_to_ball": {
+        "n": 6695,
+        "weighted_mean_ms": 7.387,
+        "maximum_ms": 37.611
+      },
+      "detector_work": {
+        "n": 6695,
+        "weighted_mean_ms": 33.563,
+        "maximum_ms": 132.529
+      }
+    },
+    "fps_windows": {
+      "min": 1.495,
+      "median": 21.393500000000003,
+      "max": 26.962
+    },
+    "no_prequeue_reasons": {
+      "walking_prequeue_guard": 1,
+      "insufficient_usable_frames": 2,
+      "candidate:line/LINE_OFFSET_TURN_RIGHT_3/line_offset_target_turn": 1,
+      "candidate:line/LINE_OFFSET_TURN_RIGHT_1/line_offset_target_turn": 1
+    }
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "status": "measured",
+      "cause": "모듈 간 전달은 최신 실행 공 경로에서 평균 약 9.06ms. 촬영→판단 110.89ms 중 주성분은 촬영→검출콜백 66.851ms와 검출작업 33.563ms. 이것만으로 8초 WAIT를 설명하지 못함.",
+      "limit": "공 경로 계측이며 골대/허들 각 구간의 지연을 직접 측정한 값은 아님. 촬영→검출에는 카메라/드라이버/전송/스케줄링이 함께 포함됨."
+    },
+    {
+      "id": "F2",
+      "status": "reproduced",
+      "cause": "골대 후보를 유효한 2m 이내 깊이로 먼저 거른 뒤 시간확정을 수행한다. RGB가 계속 보여도 깊이가 무효면 raw_detected=false, no_goal_detection으로 발행한다. 3회 연속 무효 시 이력 초기화, 다시 10회 확정이 필요하다.",
+      "evidence": "test_reproductions.py의 첫 3개 검사. 9회 유효+3회 깊이 무효를 반복한 240프레임에서 확정 0회.",
+      "limit": "과거 각 WAIT에서 실제 깊이 누락/거리초과/검출누락의 비율은 원시 데이터 부재로 구분 불가."
+    },
+    {
+      "id": "F3",
+      "status": "code_and_synthetic_reproduction",
+      "cause": "공은 RGB 시각과 가장 가까운 깊이 프레임을 고른다. 골대/허들은 최신 depth를 읽으며 RGB-depth 차이를 검사하지 않는다. 100ms 전 RGB 표적 위치에 현재 배경 깊이를 잘못 대응시키는 합성 예제를 재현했다.",
+      "limit": "실물 특정 프레임의 불일치가 실제 정지 원인이었는지는 RGB/depth 동시 기록이 없어 확정하지 않음."
+    },
+    {
+      "id": "F4",
+      "status": "logged_and_reproduced",
+      "cause": "근접 허들에서 last_seen_side와 search_direction 조건이 맞지 않으면 hurdle_loss_direction_unavailable을 계속 반환한다. 내부 관측은 이전 TOP/BOTTOM 기억을 지운다. TOP이 아닌 경우 entry_line_side만으로는 탐색이 시작되지 않는다.",
+      "evidence": "최신 bridge 로그 00:16:39.438~00:16:47.528 KST, 동일 사유 8.090초. 모의 입력 300회 반복에서도 해제되지 않음.",
+      "limit": "로그가 허들 원시 입력/내부 상태 전체를 담지 않아 해당 실행에서 어느 필드가 먼저 사라졌는지 확정 불가. 재검출로 실제 실행은 재개됨."
+    },
+    {
+      "id": "F5",
+      "status": "reproduced",
+      "cause": "모든 시간확정 필터는 현재 검출이 한 프레임 없으면 즉시 confirmed=false를 출력한다. 공간 불일치도 이력을 초기화한다. 동일 중심에서 상자 면적비 0.36인 예제로 Ball/Goal/Hurdle 모두 1회 후보로 재시작함.",
+      "limit": "이 출력이 모든 제어 단계에서 즉시 물리 정지를 의미하지는 않음. 각 단계의 유지/예약/유실확인 조건이 추가 적용됨. 흔들림·가림·노출·대상전환 중 실제 원인 비율은 미계측."
+    },
+    {
+      "id": "F6",
+      "status": "reproduced",
+      "cause": "현재 Ball 유실은 5개 이상 새 프레임 및 촬영/수신 기준 모두 0.8초 이상 누적해야 한다. RAW 한 프레임은 누적을 초기화한다. 미확정 RAW가 간헐적으로 들어오면 추적 확정도 유실 확정도 못 하는 구간이 지속될 수 있다. 골대 초기 탐색도 RAW 후보가 계속 있으면 시간 제한 없이 확정을 기다린다.",
+      "evidence": "10Hz에서 7프레임마다 RAW가 들어오는 합성 10초 동안 Ball 유실 확정 0회; Goal 초기 탐색 300회 WAIT.",
+      "limit": "Ball의 다른 후보 유지 경로까지 전부 무한 대기한다는 뜻은 아님. 이 검사들은 개별 관문을 재현함."
+    },
+    {
+      "id": "F7",
+      "status": "logged_and_code",
+      "cause": "고정 관측/자세 대기가 존재한다. 현재 허들 근접 관측 1초, 골대 슛 준비 후 구역 관측 1초, 여러 자세 전환 0.5초(일부 우회전 0.3초), 허들 전후 0.5/1초. 완료 후 이전 관측을 비우는 경로도 있다. 예약 프레임/호환동작 조건 실패 시 완료 뒤 다시 판단한다.",
+      "evidence": "최신 실행 no-prequeue 5회 중 usable_frames 부족 2회, walking_prequeue_guard 1회, 제자리 보정 후보 2회.",
+      "limit": "일반 라인의 10~15개 프레임은 동작 중 rolling 수집이며 마지막 30%에 모두 모아야 하는 구조가 아님. 70%는 판단/예약 시점이다."
+    },
+    {
+      "id": "F8",
+      "status": "logged",
+      "cause": "최신 00:17:27.504 KST에 SDK_HARDWARE_NOT_READY: cannot capture actual start pose. 판단기는 치명 오류를 latch하여 이후 발행을 차단함.",
+      "limit": "모터 버스/전원/연결 중 원인은 이 로그만으로 구분 불가. 자동 fault 해제나 재시작은 수행하지 않음."
+    },
+    {
+      "id": "F9",
+      "status": "diagnostic_limitation",
+      "cause": "WAIT 메시지 수는 정지 시간이 아니다. mission_locked_waiting_for_motion_status는 실행 중 중복 명령을 막는 정상 대기일 수 있다. Line motion boundary wait_sec는 마지막 line 완료부터 계산하므로 사이의 공잡기/슛/허들 수행 시간도 포함될 수 있다. 화면 RAW와 최신 명령도 동일 촬영 시각을 보장하지 않는다."
+    }
+  ],
+  "prioritized_changes_not_applied": [
+    {
+      "priority": 1,
+      "change": "Goal/Hurdle에 RGB 시각 기준 immutable depth snapshot과 허용 시간차를 적용하고, 깊이 무효 사유/선택 depth stamp를 기록한다.",
+      "behavior_risk": "기존에 수용하던 비동기 깊이가 거부될 수 있어 잠시 WAIT가 늘 수 있다. 가까운 거리/GO/SHOT/PICKUP 유효 깊이 조건은 유지해야 한다."
+    },
+    {
+      "priority": 2,
+      "change": "골대 RGB 검출/추적 확정과 거리 유효성을 분리한다. 실제 미검출, 깊이 누락, 범위 초과, 재확정을 구별한다.",
+      "behavior_risk": "raw_detected 의미 변경은 초기 탐색 정지/재개와 연결되므로 후보 대기 탈출 정책도 함께 검증해야 한다. 깊이 없는 전진/슛은 허용하지 않는다."
+    },
+    {
+      "priority": 3,
+      "change": "근접 허들의 방향불명 상태와 미확정 RAW 반복에 제한된 재관측/복구 또는 명시적인 복구불가 상태 전이를 설계한다.",
+      "behavior_risk": "시간 만료만으로 전진/점프시키면 충돌 위험. 이전 방향의 유효 기간·카메라 자세·실행 중 모션 소유권을 보존해야 한다."
+    },
+    {
+      "priority": 4,
+      "change": "실제 사용 가능한 프레임 도착률/지연으로 예약 성공률을 평가하고, 고정 안전 대기와 인식 대기를 분리 계측한다.",
+      "behavior_risk": "완료/지지자세 확인과 최종 행동의 안전 조건을 제거하지 않는다. 일반 보행과 제자리 보정의 조건을 구별한다."
+    },
+    {
+      "priority": 5,
+      "change": "RGB/depth/IMU/목 자세/원시 분석결과/명령 및 실제 executor 상태를 같은 시각으로 재생하여 수정 전후 WAIT 구간을 비교한다.",
+      "acceptance": "무효 깊이의 GO/SHOT/PICKUP 없음; 중복 실행 없음; 정상화된 새 영상으로 재개; 방향불명/RAW 반복 상태는 명시적인 제한된 처리; 고정 대기를 제외한 멈춤 길이 비교."
+    }
+  ],
+  "verification": {
+    "new_characterization_tests": "9 passed; 문제 재현 성공이지 수정 검증 성공이 아님",
+    "focused_suite": "67 passed, 10 failed; 이번 작업에서 production 소스 변경 없음",
+    "failures": "goal_initial_search 6개는 우회전 정지 0.5초 기대와 현행 0.3초 불일치. 나머지 Goal 깊이/Hurdle 입력/픽업 준비 시퀀스 4개는 기존 테스트와 현재 동작 불일치. 전체 회귀 통과로 주장할 수 없음.",
+    "physical_validation": "실물/동역학 시뮬레이션 미실행; 제어 변경은 시뮬레이션에서 먼저 확인해야 함."
+  }
+}

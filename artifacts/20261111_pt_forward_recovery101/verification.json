@@ -1,0 +1,45 @@
+{
+  "python_tests": {
+    "passed": 519,
+    "log": "python_tests.log"
+  },
+  "cpp_suites": {
+    "passed": 5,
+    "log": "cpp_tests.log"
+  },
+  "production_queue_matrix": {
+    "cases": 680,
+    "exit_code": 0,
+    "log": "queue_matrix.log",
+    "scope": "18 forward/recovery motions squared plus 16 fine gait pairs, with and without fixed camera; incompatible transitions remain rejected"
+  },
+  "updated_motion_playback": {
+    "passed": 23,
+    "log": "playback.log",
+    "checks": [
+      "accepted start",
+      "successful completion",
+      "completion count one",
+      "exact final joint targets"
+    ]
+  },
+  "catalog_motion_count": 168,
+  "catalog_validation": "PC and runtime: aliases resolve and frame motor IDs exactly 0..22",
+  "aliases": 175,
+  "alias_targets_changed": 22,
+  "idempotent_import": true,
+  "new_shared_pose_conflicts": 0,
+  "matches_previous_source101_catalogs": true,
+  "installed_timing_verified": true,
+  "sha256": {
+    "artifacts/robot_motions_pc.json": "0e234d05101a5644329ab49a9deb83fce1822c5017468d6d7f8c8fee11e51cc1",
+    "artifacts/robot_motions_runtime.json": "a7681061aaf41b909e6602c52c6d18c65b4af5121484337715d528050e2aed51",
+    "src/irc_step_motion_executor/config/motion_aliases.yaml": "280c4b46497e6f40eaead890bef4c679caa92fa10d64e4af2ec444f879d3dc08"
+  },
+  "repeat_count_exceptions": {
+    "p전진0도(2회)": "source 3 -> existing command 2",
+    "p전진45(8회)": "source six-cycle gait -> existing command 8"
+  },
+  "hardware_run": false,
+  "scope_note": "Focused motion import and reservation checks, not a full repository test run or physical stability validation."
+}

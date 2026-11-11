@@ -1,0 +1,10 @@
+Internal ctest changing into directory: /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+Test project /home/jet/IRC/IRC-STEP/IRC_vision_latest/build/irc_step_motion_executor
+    Start 40: forward_timing_contract
+1/2 Test #40: forward_timing_contract ..........   Passed    1.44 sec
+    Start 42: ring_shot_contract
+2/2 Test #42: ring_shot_contract ...............   Passed    3.65 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   5.09 sec

@@ -431,6 +431,10 @@ private:
     const bool phase_present = json_object_object_get_ex(object, "phase", &phase_value);
     const std::string phase = phase_present && json_object_get_type(phase_value) == json_type_string ?
       json_object_get_string(phase_value) : "";
+    json_object * action_value = nullptr;
+    const std::string action = json_object_object_get_ex(object, "action", &action_value) &&
+      json_object_get_type(action_value) == json_type_string ?
+      json_object_get_string(action_value) : "";
     json_object_put(object);
     if (source == "ball") {
       if (!ball_control_active_) {
@@ -445,6 +449,18 @@ private:
       hurdle_control_active_ = true;
       hurdle_line_monitor_active_ = false;
       hurdle_ignore_until_clear_ = false;
+      if (valid && action == "HURDLE_LOST_BACKWARD_2" &&
+        !hurdle_head_override_latched_ && startup_pose_gate_->navigation_allowed())
+      {
+        // Recovery must lower the camera without requiring a visible hurdle.
+        hurdle_head_start_deg_ = goal_head_override_latched_ ? goal_head_override_deg_ :
+          (ball_head_override_latched_ ? ball_head_override_deg_ : ball_head_camera_up_deg_);
+        clear_ball_head_override();
+        hurdle_head_override_latched_ = true;
+        hurdle_head_current_deg_ = hurdle_head_start_deg_;
+        hurdle_head_override_started_ms_ = steady_now_ms();
+        RCLCPP_INFO(get_logger(), "Hurdle WAIT recovery: camera 0-degree hold requested");
+      }
     } else if (valid && source == "line" &&
       (phase == "AUTO" || phase == "LINE_TRACK" || phase == "HURDLE_APPROACH"))
     {

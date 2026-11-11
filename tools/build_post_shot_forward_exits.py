@@ -15,10 +15,10 @@ EXIT_RECOVERIES = (
     ('p골대후제자리좌회전(3회)', 'n라인복귀우회전45도'),
 )
 GOAL_EXIT_RECOVERIES = (
-    ('t골대후제자리우회전', 't라인복귀우실전', 1),
-    ('p골대후제자리좌회전', 'p라인복귀좌회전45도', 1),
-    ('t골대후제자리우회전(6회)', 't라인복귀우실전', 1),
-    ('p골대후제자리좌회전(4회)', 'p라인복귀좌회전45도', 1),
+    ('t골대후제자리우회전', 'm라인복귀우회전45도', 1),
+    ('p골대후제자리좌회전', 'm라인복귀우회전45도', 1),
+    ('t골대후제자리우회전(6회)', 'm라인복귀우회전45도', 1),
+    ('p골대후제자리좌회전(4회)', 'm라인복귀좌회전45도', 1),
 )
 # Catalog names, like public command IDs, are retained for existing callers.
 FORWARD_EXIT_NAMES = {
@@ -59,6 +59,9 @@ def build_exit(turn: dict, recovery: dict, recovery_blocks: int = 1,
     recovery_label = ('라인복귀우회전45도' if recovery['name'] == 't라인복귀우실전'
                       else recovery['name'][1:])
     result['name'] = turn['name'] + ('+' + recovery_label + '(4회)') * recovery_blocks
+    # Regions 1-2 now recover right after the full left turn; keep the deployed name.
+    if turn['name'] == 'p골대후제자리좌회전' and recovery['name'] == 'm라인복귀우회전45도':
+        result['name'] = 'p골대후제자리좌회전+라인복귀좌회전45도(4회)'
     if forward is not None:
         result['name'] = FORWARD_EXIT_NAMES[turn['name']]
     turn_end = max(f['start_ms'] + f['time_ms'] for f in turn['frames'])
@@ -97,7 +100,7 @@ def main():
     )]
     source.update({motion['name']: motion for motion in turns})
     variants = turns + [build_exit(source[turn], source[recovery], blocks,
-                                  forward=source['p전진45도(2회)'] if turn in FORWARD_EXIT_NAMES else None)
+                                  forward=source['m전진45(2회)'] if turn in FORWARD_EXIT_NAMES else None)
                         for turn, recovery, blocks in GOAL_EXIT_RECOVERIES]
     obsolete = {
         't골대후제자리우회전(5회)+전진4회',

@@ -109,10 +109,10 @@ int main(int argc, char** argv) {
     for (bool queued : {false, true}) for (bool enabled : {false, true})
     for (bool continuous : {false, true}) for (int delay : {0, 16, 140})
     for (const std::string name : {
-        "p전진45도(2회)", "p전진0도(2회)",
-        "p전진45(6회)", "p전진실전0도(4회)", "p전진90도(4회)",
-        "p라인복귀좌회전45도", "t라인복귀우실전",
-        "p라인복귀좌회전공용", "t라인복귀우공용",
+        "m전진45(2회)", "m전진0도(2회)",
+        "m전진45(6회)", "m전진0도(4회)", "m전진90도(4회)",
+        "m라인복귀좌회전45도", "m라인복귀우회전45도",
+        "m라인복귀좌회전공용", "m라인복귀우회전공용",
         "turn", "R전진45도(6회)", "R전진라인복귀좌", "R라인복귀우회전",
         "t전진실전", "t전진실전45도(4회)", "t전진실전45도(6회)",
         "t전진실전0도(4회)", "t전진실전0도(6회)",
@@ -285,10 +285,15 @@ int main(int argc, char** argv) {
     }
     // Different entries may share a full commanded end pose. Keep this exception
     // restricted to forward/recovery, with torque, speed, and camera checks.
-    for (const std::string recovery_name : {"t라인복귀좌실전", "t라인복귀좌공용", "t라인복귀우공용"})
-    for (bool scaled_forward : {false, true})
+    for (const std::string recovery_name : {"t라인복귀좌실전", "t라인복귀좌공용", "t라인복귀우공용",
+                                          "m라인복귀우회전45도", "m라인복귀좌회전공용"})
+    for (int gait_kind : {0, 1, 2})
     for (int variant = 0; variant < 8; ++variant) {
-        const std::string forward = scaled_forward ? "p전진45(4회)" : "t전진실전";
+        const bool j_forward = gait_kind == 2;
+        const bool scaled_forward = gait_kind == 1;
+        if (recovery_name.starts_with("m라인복귀") != j_forward) continue;
+        const std::string forward = j_forward ? "j전진45(4회)"
+            : scaled_forward ? "p전진45(4회)" : "t전진실전";
         const std::string recovery = variant == 7 ? "t미세45도(5회)" : recovery_name;
         {
             std::ofstream fixture(path);
@@ -299,6 +304,7 @@ int main(int argc, char** argv) {
                     << "\",\"max_seq_ms\":400,\"repeat_count\":2,\"repeatable\":"
                     << (index && variant == 5 ? "false" : "true")
                     << ",\"playback_speed\":" << (index && variant == 4 ? .9
+                        : j_forward ? (index ? 1.05 : 1.)
                         : scaled_forward ? (index ? 1. : .95)
                         : index && recovery_name != "t라인복귀좌실전" ? .95 : 1.)
                     << ",\"start_pose\":\"" << (index ? "recovery_entry" : "forward_entry")
@@ -341,26 +347,23 @@ int main(int argc, char** argv) {
     if (argc == 3) {
         const auto catalog = MotionLibrary::loadGuiJson(argv[2]);
         const std::vector<std::string> forwards = {
-            "p전진45도(2회)", "p전진45(4회)", "p전진45(6회)", "p전진45(8회)",
-            "p전진90도(1회)", "p전진90도(2회)", "p전진90도(3회)", "p전진90도(4회)", "p전진90도(6회)",
-            "p전진0도(2회)", "p전진실전0도(4회)", "p전진실전0도(6회)",
+            "m전진45(2회)", "m전진45(4회)", "m전진45(6회)", "m전진45(8회)",
+            "m전진90도(1회)", "m전진90도(2회)", "m전진90도(3회)", "m전진90도(4회)", "m전진90도(6회)",
+            "m전진0도(2회)", "m전진0도(4회)", "m전진0도(6회)",
         };
         const std::vector<std::string> recoveries = {
-            "p라인복귀좌회전45도", "t라인복귀우실전",
-            "p라인복귀좌회전공용", "t라인복귀우공용",
-            "p라인복귀좌회전90도", "t라인복귀우실전90도",
+            "m라인복귀좌회전45도", "m라인복귀우회전45도",
+            "m라인복귀좌회전공용", "m라인복귀우회전공용",
+            "m라인복귀좌회전90도", "m라인복귀우회전90",
         };
         auto walks = forwards;
         walks.insert(walks.end(), recoveries.begin(), recoveries.end());
         std::vector<std::pair<std::string, std::string>> connections;
         for (const auto& first : walks) for (const auto& second : walks)
             connections.emplace_back(first, second);
-        for (int first = 1; first <= 4; ++first) for (int second = 1; second <= 4; ++second) {
-            connections.emplace_back("r미세 골대전용(" + std::to_string(first) + "회)",
-                                     "r미세 골대전용(" + std::to_string(second) + "회)");
-            connections.emplace_back("t미세0도(" + std::to_string(first) + "회)(골대74)",
-                                     "t미세0도(" + std::to_string(second) + "회)(골대74)");
-        }
+        for (int first = 1; first <= 4; ++first) for (int second = 1; second <= 4; ++second)
+            connections.emplace_back("p미세90도(" + std::to_string(first) + "회)",
+                                     "p미세90도(" + std::to_string(second) + "회)");
         for (const auto& [first, second] : connections)
         for (bool fixed_head : {false, true}) {
             TimingHardware hardware;
@@ -376,8 +379,8 @@ int main(int argc, char** argv) {
             const auto& end = catalog.motion(first).frames().back().angles;
             // Camera-zero variants chain within their own gait family; crossing
             // into Line/Goal is not an authorized seamless transition.
-            const bool crosses_zero_camera = (first.starts_with("p전진실전0도(") || first.starts_with("p전진0도("))
-                != (second.starts_with("p전진실전0도(") || second.starts_with("p전진0도("));
+            const bool crosses_zero_camera = first.starts_with("m전진0도(")
+                != second.starts_with("m전진0도(");
             if (crosses_zero_camera || (!fixed_head
                     && end.at(0) != catalog.motion(second).frames().back().angles.at(0))) {
                 assert(player.queueNext(second) == QueueResult::IncompatibleTransition);

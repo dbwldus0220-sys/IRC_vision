@@ -329,6 +329,38 @@ def analyze_ground_line(
     return result
 
 
+def visible_line_geometry(points, image_width, image_height, parameters, corner_start_index):
+    """Keep sparse detections separate from fits and measure visible corner coverage."""
+    result = {
+        "visible_line_points_px": [[p.x, p.y] for p in points],
+        "visible_line_confidences": [p.confidence for p in points],
+        "corner_visible_outgoing_fraction": None,
+        "corner_visible_fraction_source": None,
+    }
+    if (type(corner_start_index) is not int
+            or not 1 <= corner_start_index < len(points) - 1):
+        return result
+    coordinates = np.asarray([[p.x, p.y] for p in points], dtype=float)
+    source = "image"
+    config = {**GROUND_PROJECTION_DEFAULTS, **parameters}
+    if config["ground_projection_enabled"]:
+        try:
+            ground = project_line_points_to_ground(points, image_width, image_height, config)
+            # Dropped points would change which segment contains the corner.
+            if len(ground) == len(points):
+                coordinates, source = ground, "ground"
+        except (TypeError, ValueError, OverflowError, np.linalg.LinAlgError):
+            pass
+    lengths = np.linalg.norm(np.diff(coordinates, axis=0), axis=1)
+    total = float(np.sum(lengths))
+    if math.isfinite(total) and total > 0:
+        result.update(
+            corner_visible_outgoing_fraction=float(np.sum(lengths[corner_start_index:]) / total),
+            corner_visible_fraction_source=source,
+        )
+    return result
+
+
 def analyze_corner_exit(
     points: list[LinePoint], image_width: int, image_height: int,
     parameters: dict[str, Any], *, corner_start_index: int | None,
@@ -776,7 +808,7 @@ class YoloLineAnalyzer(DepthFrameConsumer, Node):
         self.declare_parameter("corner_min_points", 3)
         self.declare_parameter("corner_min_segment_length_px", 20.0)
         self.declare_parameter("corner_straight_max_turn_delta_deg", 15.0)
-        self.declare_parameter("corner_min_turn_delta_deg", 30.0)
+        self.declare_parameter("corner_min_turn_delta_deg", 20.0)
         self.declare_parameter("corner_onset_deviation_deg", 15.0)
         self.declare_parameter("corner_min_consistent_segments", 1)
         self.declare_parameter("corner_min_consistency", 0.75)
@@ -1755,6 +1787,14 @@ class YoloLineAnalyzer(DepthFrameConsumer, Node):
                     **continuity_debug,
                 }
             )
+
+            result.update(visible_line_geometry(
+                points, self.image_width, self.image_height,
+                self.ground_projection_parameters,
+                result.get("corner_start_index")
+                if result.get("corner_preview_raw_detected") is True
+                and result.get("corner_preview_held") is not True else None,
+            ))
 
             # Keep the image-space filters and planner inputs unchanged.
             result.update(analyze_ground_line(

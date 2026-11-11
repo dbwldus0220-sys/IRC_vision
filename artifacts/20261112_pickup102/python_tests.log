@@ -1,0 +1,168 @@
+.......FFFFFF........................................................... [ 36%]
+........................................................................ [ 72%]
+......................................................                   [100%]
+=================================== FAILURES ===================================
+______ test_post_retreat_selects_grasp_and_keeps_check_pose[0-pickup_400] ______
+
+pixels = 0, expected = 'pickup_400'
+
+    @pytest.mark.parametrize('pixels,expected', [(0, 'pickup_400'), (300, 'pickup_400'),
+        (319.99, 'pickup_400'), (320, 'pickup_400'), (320.01, 'pickup_500'), (500, 'pickup_500')])
+    def test_post_retreat_selects_grasp_and_keeps_check_pose(pixels, expected):
+        bridge = FakeBridge()
+        enter_pickup_fine_alignment(bridge)
+        continue_pickup_after_fine_alignment(bridge)
+        count = len(bridge.executor_request_publisher.messages)
+        payload = dict(action='BALL_PICKUP_POST_BACKWARD_ALIGN_CONTINUE',
+                       command_id=9000, event_id=None,
+                       active_special_command_id=bridge.active_command_id,
+                       active_special_event_id=bridge.active_event_id,
+                       source_command={'bottom_distance_px': pixels})
+        # Selection cannot jump ahead of the retreat or its settle time.
+        bridge.navigation_command_callback(navigation_message(**payload))
+        assert len(bridge.executor_request_publisher.messages) == count
+        bridge.executor_status_callback(executor_status(
+            status='SUCCEEDED', motion_id='pickup_pre_backward_camera_down'))
+        deadline = bridge.active_dwell_until
+>       bridge._check_atomic_dwell(deadline - .001)
+E       TypeError: unsupported operand type(s) for -: 'NoneType' and 'float'
+
+src/mission_control/test/test_pickup_grasp_selection.py:43: TypeError
+_____ test_post_retreat_selects_grasp_and_keeps_check_pose[300-pickup_400] _____
+
+pixels = 300, expected = 'pickup_400'
+
+    @pytest.mark.parametrize('pixels,expected', [(0, 'pickup_400'), (300, 'pickup_400'),
+        (319.99, 'pickup_400'), (320, 'pickup_400'), (320.01, 'pickup_500'), (500, 'pickup_500')])
+    def test_post_retreat_selects_grasp_and_keeps_check_pose(pixels, expected):
+        bridge = FakeBridge()
+        enter_pickup_fine_alignment(bridge)
+        continue_pickup_after_fine_alignment(bridge)
+        count = len(bridge.executor_request_publisher.messages)
+        payload = dict(action='BALL_PICKUP_POST_BACKWARD_ALIGN_CONTINUE',
+                       command_id=9000, event_id=None,
+                       active_special_command_id=bridge.active_command_id,
+                       active_special_event_id=bridge.active_event_id,
+                       source_command={'bottom_distance_px': pixels})
+        # Selection cannot jump ahead of the retreat or its settle time.
+        bridge.navigation_command_callback(navigation_message(**payload))
+        assert len(bridge.executor_request_publisher.messages) == count
+        bridge.executor_status_callback(executor_status(
+            status='SUCCEEDED', motion_id='pickup_pre_backward_camera_down'))
+        deadline = bridge.active_dwell_until
+>       bridge._check_atomic_dwell(deadline - .001)
+E       TypeError: unsupported operand type(s) for -: 'NoneType' and 'float'
+
+src/mission_control/test/test_pickup_grasp_selection.py:43: TypeError
+___ test_post_retreat_selects_grasp_and_keeps_check_pose[319.99-pickup_400] ____
+
+pixels = 319.99, expected = 'pickup_400'
+
+    @pytest.mark.parametrize('pixels,expected', [(0, 'pickup_400'), (300, 'pickup_400'),
+        (319.99, 'pickup_400'), (320, 'pickup_400'), (320.01, 'pickup_500'), (500, 'pickup_500')])
+    def test_post_retreat_selects_grasp_and_keeps_check_pose(pixels, expected):
+        bridge = FakeBridge()
+        enter_pickup_fine_alignment(bridge)
+        continue_pickup_after_fine_alignment(bridge)
+        count = len(bridge.executor_request_publisher.messages)
+        payload = dict(action='BALL_PICKUP_POST_BACKWARD_ALIGN_CONTINUE',
+                       command_id=9000, event_id=None,
+                       active_special_command_id=bridge.active_command_id,
+                       active_special_event_id=bridge.active_event_id,
+                       source_command={'bottom_distance_px': pixels})
+        # Selection cannot jump ahead of the retreat or its settle time.
+        bridge.navigation_command_callback(navigation_message(**payload))
+        assert len(bridge.executor_request_publisher.messages) == count
+        bridge.executor_status_callback(executor_status(
+            status='SUCCEEDED', motion_id='pickup_pre_backward_camera_down'))
+        deadline = bridge.active_dwell_until
+>       bridge._check_atomic_dwell(deadline - .001)
+E       TypeError: unsupported operand type(s) for -: 'NoneType' and 'float'
+
+src/mission_control/test/test_pickup_grasp_selection.py:43: TypeError
+_____ test_post_retreat_selects_grasp_and_keeps_check_pose[320-pickup_400] _____
+
+pixels = 320, expected = 'pickup_400'
+
+    @pytest.mark.parametrize('pixels,expected', [(0, 'pickup_400'), (300, 'pickup_400'),
+        (319.99, 'pickup_400'), (320, 'pickup_400'), (320.01, 'pickup_500'), (500, 'pickup_500')])
+    def test_post_retreat_selects_grasp_and_keeps_check_pose(pixels, expected):
+        bridge = FakeBridge()
+        enter_pickup_fine_alignment(bridge)
+        continue_pickup_after_fine_alignment(bridge)
+        count = len(bridge.executor_request_publisher.messages)
+        payload = dict(action='BALL_PICKUP_POST_BACKWARD_ALIGN_CONTINUE',
+                       command_id=9000, event_id=None,
+                       active_special_command_id=bridge.active_command_id,
+                       active_special_event_id=bridge.active_event_id,
+                       source_command={'bottom_distance_px': pixels})
+        # Selection cannot jump ahead of the retreat or its settle time.
+        bridge.navigation_command_callback(navigation_message(**payload))
+        assert len(bridge.executor_request_publisher.messages) == count
+        bridge.executor_status_callback(executor_status(
+            status='SUCCEEDED', motion_id='pickup_pre_backward_camera_down'))
+        deadline = bridge.active_dwell_until
+>       bridge._check_atomic_dwell(deadline - .001)
+E       TypeError: unsupported operand type(s) for -: 'NoneType' and 'float'
+
+src/mission_control/test/test_pickup_grasp_selection.py:43: TypeError
+___ test_post_retreat_selects_grasp_and_keeps_check_pose[320.01-pickup_500] ____
+
+pixels = 320.01, expected = 'pickup_500'
+
+    @pytest.mark.parametrize('pixels,expected', [(0, 'pickup_400'), (300, 'pickup_400'),
+        (319.99, 'pickup_400'), (320, 'pickup_400'), (320.01, 'pickup_500'), (500, 'pickup_500')])
+    def test_post_retreat_selects_grasp_and_keeps_check_pose(pixels, expected):
+        bridge = FakeBridge()
+        enter_pickup_fine_alignment(bridge)
+        continue_pickup_after_fine_alignment(bridge)
+        count = len(bridge.executor_request_publisher.messages)
+        payload = dict(action='BALL_PICKUP_POST_BACKWARD_ALIGN_CONTINUE',
+                       command_id=9000, event_id=None,
+                       active_special_command_id=bridge.active_command_id,
+                       active_special_event_id=bridge.active_event_id,
+                       source_command={'bottom_distance_px': pixels})
+        # Selection cannot jump ahead of the retreat or its settle time.
+        bridge.navigation_command_callback(navigation_message(**payload))
+        assert len(bridge.executor_request_publisher.messages) == count
+        bridge.executor_status_callback(executor_status(
+            status='SUCCEEDED', motion_id='pickup_pre_backward_camera_down'))
+        deadline = bridge.active_dwell_until
+>       bridge._check_atomic_dwell(deadline - .001)
+E       TypeError: unsupported operand type(s) for -: 'NoneType' and 'float'
+
+src/mission_control/test/test_pickup_grasp_selection.py:43: TypeError
+_____ test_post_retreat_selects_grasp_and_keeps_check_pose[500-pickup_500] _____
+
+pixels = 500, expected = 'pickup_500'
+
+    @pytest.mark.parametrize('pixels,expected', [(0, 'pickup_400'), (300, 'pickup_400'),
+        (319.99, 'pickup_400'), (320, 'pickup_400'), (320.01, 'pickup_500'), (500, 'pickup_500')])
+    def test_post_retreat_selects_grasp_and_keeps_check_pose(pixels, expected):
+        bridge = FakeBridge()
+        enter_pickup_fine_alignment(bridge)
+        continue_pickup_after_fine_alignment(bridge)
+        count = len(bridge.executor_request_publisher.messages)
+        payload = dict(action='BALL_PICKUP_POST_BACKWARD_ALIGN_CONTINUE',
+                       command_id=9000, event_id=None,
+                       active_special_command_id=bridge.active_command_id,
+                       active_special_event_id=bridge.active_event_id,
+                       source_command={'bottom_distance_px': pixels})
+        # Selection cannot jump ahead of the retreat or its settle time.
+        bridge.navigation_command_callback(navigation_message(**payload))
+        assert len(bridge.executor_request_publisher.messages) == count
+        bridge.executor_status_callback(executor_status(
+            status='SUCCEEDED', motion_id='pickup_pre_backward_camera_down'))
+        deadline = bridge.active_dwell_until
+>       bridge._check_atomic_dwell(deadline - .001)
+E       TypeError: unsupported operand type(s) for -: 'NoneType' and 'float'
+
+src/mission_control/test/test_pickup_grasp_selection.py:43: TypeError
+=========================== short test summary info ============================
+FAILED src/mission_control/test/test_pickup_grasp_selection.py::test_post_retreat_selects_grasp_and_keeps_check_pose[0-pickup_400]
+FAILED src/mission_control/test/test_pickup_grasp_selection.py::test_post_retreat_selects_grasp_and_keeps_check_pose[300-pickup_400]
+FAILED src/mission_control/test/test_pickup_grasp_selection.py::test_post_retreat_selects_grasp_and_keeps_check_pose[319.99-pickup_400]
+FAILED src/mission_control/test/test_pickup_grasp_selection.py::test_post_retreat_selects_grasp_and_keeps_check_pose[320-pickup_400]
+FAILED src/mission_control/test/test_pickup_grasp_selection.py::test_post_retreat_selects_grasp_and_keeps_check_pose[320.01-pickup_500]
+FAILED src/mission_control/test/test_pickup_grasp_selection.py::test_post_retreat_selects_grasp_and_keeps_check_pose[500-pickup_500]
+6 failed, 192 passed in 10.62s

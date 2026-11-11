@@ -1,0 +1,44 @@
+{
+  "python_tests": {
+    "passed": 524,
+    "log": "python_tests.log"
+  },
+  "cpp_suites": {
+    "passed": 5,
+    "log": "cpp_tests.log"
+  },
+  "production_queue_matrix": {
+    "cases": 680,
+    "exit_code": 0,
+    "log": "queue_matrix.log",
+    "scope": "18 forward/recovery motions squared plus 16 fine gait pairs, with and without fixed camera; expected incompatible transitions remain rejected"
+  },
+  "updated_motion_playback": {
+    "passed": 23,
+    "log": "playback.log",
+    "checks": [
+      "accepted start",
+      "successful completion",
+      "completion count one",
+      "exact final joint targets"
+    ]
+  },
+  "catalog_validation": [
+    "OK: 168 motions; aliases resolve; all frame motor IDs are exactly 0..22",
+    "OK: 168 motions; aliases resolve; all frame motor IDs are exactly 0..22"
+  ],
+  "aliases": 175,
+  "alias_targets_changed": 22,
+  "idempotent_import": true,
+  "new_shared_pose_conflicts": 0,
+  "sha256": {
+    "artifacts/robot_motions_pc.json": "58d2abc03ad2fe73fcdfb885d38bbc9e4fc64fd7f059581608d482ab37aec782",
+    "artifacts/robot_motions_runtime.json": "ea0a085dd0cf9a08067f969848cbd18c35b49fcb47bf717ede5dfaf526d8f30b",
+    "src/irc_step_motion_executor/config/motion_aliases.yaml": "a695870ea2e6cb5ce3275163c3521063e0ed34cdff494c7762924809b74f9c35"
+  },
+  "camera_correction": "m라인복귀우회전90: motor 0 fixed at existing 1 degree instead of source [-64, 1, -64, 1]",
+  "hardware_run": false,
+  "scope_note": "Focused motion import and reservation checks; not a full repository test run or physical stability validation.",
+  "identical_to_previous_source102_deployment": true,
+  "installed_timing_verified": true
+}

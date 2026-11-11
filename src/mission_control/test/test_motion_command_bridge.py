@@ -2877,14 +2877,14 @@ def test_pickup_crab_uses_latest_motion_for_preparation(intervening, direction):
 @pytest.mark.parametrize("source,distance,action,motion_name", [
     ("ball", 0.499, "STRAIGHT_0", "p미세0도(5회)"),
     ("ball", 0.500, "STRAIGHT_0", "p미세0도(5회)"),
-    *[("ball", distance, "BALL_APPROACH_FORWARD_2", "p전진45도(2회)")
+    *[("ball", distance, "BALL_APPROACH_FORWARD_2", "m전진45(2회)")
       for distance in (0.500001, 0.550, 0.570, 0.600)],
-    *[("ball", distance, "STRAIGHT", "p전진45(4회)")
+    *[("ball", distance, "STRAIGHT", "m전진45(4회)")
       for distance in (0.600001, 0.700, 0.700001)],
     # Hurdle keeps its existing range policy, independently of Ball's new boundary.
     *[("hurdle", distance, "STRAIGHT_0", "p미세0도(5회)")
       for distance in (0.549, 0.550, 0.550001, 0.570, 0.700)],
-    ("hurdle", 0.700001, "STRAIGHT", "p전진45(4회)"),
+    ("hurdle", 0.700001, "STRAIGHT", "m전진45(4회)"),
 ])
 def test_ball_hurdle_distance_policy_reaches_runtime_catalog(
     source, distance, action, motion_name,

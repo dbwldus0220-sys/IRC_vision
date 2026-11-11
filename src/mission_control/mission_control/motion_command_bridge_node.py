@@ -293,6 +293,7 @@ class MotionCommandBridgeNode(Node):
         "BALL_LOST_FORWARD_2": "ball_camera_down_forward_2",
         "BALL_LOST_FORWARD_4": "ball_camera_down_forward_4",
         "BALL_LOST_BACKWARD_2": "ball_lost_camera_down_backward_2",
+        "BALL_LOST_HEAD_UP_BACKWARD_1": "pickup_lost_ball_backward_1",
         # Reuse the existing one-cycle retreat without entering the pickup sequence.
         "HURDLE_LOST_BACKWARD_1": "pickup_lost_ball_backward_1",
         "HURDLE_LOST_BACKWARD_2": "ball_lost_camera_down_backward_2",
@@ -1650,6 +1651,15 @@ class MotionCommandBridgeNode(Node):
             return False
         if (time.monotonic() if now is None else now) < deadline:
             return True
+        request = self.transition_pending_request
+        if (request is not None and request.get("action") == "HURDLE_LOST_BACKWARD_2"
+                and request.get("motion_id") == "ball_lost_camera_down_backward_2"):
+            # Lower the camera first, even if the robot already had enough rest.
+            current = self.head_override_state.get("hurdle_head_override_current_deg")
+            if (self._hurdle_camera_down_state() is not True
+                    or type(current) not in (int, float) or not math.isfinite(current)
+                    or abs(current - (-64.0)) > 0.1):
+                return True
         self.transition_dwell_until = None
         if self.transition_pending_request is not None:
             request = self.transition_pending_request
@@ -2657,10 +2667,11 @@ class MotionCommandBridgeNode(Node):
                 self.last_physical_motion_id = physical_motion_id(payload["motion_id"])
                 if payload["motion_id"] in {
                     "post_shot_exit_right_5_forward_4", "post_shot_exit_right_9_recovery_right_4",
+                    "post_shot_exit_left_4_recovery_left_4",  # Legacy ID; tail recovers right.
                 }:
                     self.last_physical_motion_id = "line_recovery_right_4"
                 elif payload["motion_id"] in {
-                    "post_shot_exit_left_3_forward_4", "post_shot_exit_left_4_recovery_left_4",
+                    "post_shot_exit_left_3_forward_4",
                 }:
                     self.last_physical_motion_id = "line_recovery_left_4"
             elif payload["status"] in self.TERMINAL_STATUSES:

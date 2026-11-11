@@ -1,0 +1,42 @@
+{
+  "source": "robot_motions(101).json",
+  "recovery_motions_updated": 6,
+  "goal_exit_composites_updated": 4,
+  "alias_targets_changed": 5,
+  "total_aliases": 175,
+  "total_motions": 168,
+  "source_recovery_speed": 1.0,
+  "recovery_repeats": 4,
+  "python_tests_passed": 504,
+  "updated_motion_replays_passed": 10,
+  "missing_alias_targets": 0,
+  "duplicate_motion_names": 0,
+  "new_shared_pose_conflicts": 0,
+  "reimport_byte_identical": true,
+  "hardware_executed": false,
+  "preserved": [
+    "source102 j forward data",
+    "fine gaits",
+    "public command IDs",
+    "existing repeat counts",
+    "composite names and turn/forward counts",
+    "SDK pose/torque/camera checks"
+  ],
+  "installed_duration_seconds": {
+    "left": 2.06,
+    "right": 2.064,
+    "ball_left": 2.056,
+    "ball_right": 2.064
+  },
+  "cpp_ctest_suites_passed": 5,
+  "production_queue_matrix": {
+    "cases": 680,
+    "head_override_states": 2,
+    "result": "passed",
+    "checks": [
+      "compatible queue completion",
+      "incompatible camera/family transition rejection",
+      "support pose retained during next leading hold"
+    ]
+  }
+}

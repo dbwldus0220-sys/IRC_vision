@@ -1,0 +1,38 @@
+{
+  "source": "robot_motions(102).json",
+  "forward_source": "j전진45(6회)",
+  "source_speed": 1.0,
+  "forward_variants": 12,
+  "updated_motions_including_embedded_forward": 15,
+  "alias_targets_changed": 17,
+  "total_aliases": 175,
+  "total_motions": 168,
+  "python_tests_passed": 499,
+  "cpp_ctest_suites_passed": 5,
+  "updated_motion_replays_passed": 15,
+  "missing_alias_targets": 0,
+  "duplicate_motion_names": 0,
+  "new_shared_pose_conflicts": 0,
+  "reimport_byte_identical": true,
+  "installed_python_forward_two_seconds": 1.028,
+  "hardware_executed": false,
+  "preserved": [
+    "command IDs",
+    "repeat counts",
+    "camera motor 0 targets",
+    "m recovery data and 1.05 speed",
+    "fine gaits",
+    "final support pose/torque checks"
+  ],
+  "build": "sdk_motion_executor rebuilt; installed executable/config/Python resolve to workspace",
+  "production_queue_matrix": {
+    "cases": 680,
+    "result": "passed",
+    "head_override_states": 2,
+    "checks": [
+      "compatible pair completion",
+      "camera/family mismatch rejection",
+      "support pose preserved during next leading hold"
+    ]
+  }
+}

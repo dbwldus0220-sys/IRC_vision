@@ -386,8 +386,8 @@ def test_failed_forward_discards_final_reservation_and_never_jumps_on_old_input(
 
 
 def test_forward2_catalog_matches_existing_normal_walk():
-    assert ALIASES['line_forward_2'] == 'p전진45도(2회)'
+    assert ALIASES['line_forward_2'] == 'm전진45(2회)'
     motion = MOTIONS[ALIASES['line_forward_2']]
     assert motion['repeat_count'] == 2
-    assert motion['playback_speed'] == 1.
+    assert motion['playback_speed'] == 1.0
     assert duration('line_forward_2') == pytest.approx(1.028)

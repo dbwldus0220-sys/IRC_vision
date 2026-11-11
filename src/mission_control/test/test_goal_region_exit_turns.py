@@ -104,9 +104,8 @@ def test_variants_keep_preparation_complete_turns_and_final_support(kind):
     catalog = json.loads((ROOT / path).read_text())['motions']
     motions = {motion['name']: motion for motion in catalog}
     assert len(motions) == len(catalog)
-    before = json.loads((ROOT / 'artifacts/20261111_goal_exit_recovery_update/before' / path).read_text())['motions']
-    assert all(motions[motion['name']] == motion for motion in before
-               if '+라인복귀' not in motion['name'])
+    before = json.loads((ROOT / 'artifacts/20261112_catalog104_right_turns/before' / path).read_text())['motions']
+    assert all(motions[motion['name']] == motion for motion in before)
     for base, count, pose in [('t골대후제자리우회전', 5, '제우오들25'),
                               ('t골대후제자리우회전', 6, '제우오들25'),
                               ('p골대후제자리좌회전', 3, 'tt제좌왼들45'),

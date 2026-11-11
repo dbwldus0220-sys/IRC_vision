@@ -1,5 +1,90 @@
 # Runtime Motion Policy
 
+- The latest 2026-11-12 request reverts the source104 right-turn replacement.
+  Restore `t공후 제자리우회전`, `t골대후제자리우회전`, their five/six-cycle
+  variants, and both right goal exits exactly from
+  `20261112_catalog104_right_turns/before/artifacts/robot_motions_{pc,runtime}.json`.
+  Restore t alias targets with public command IDs unchanged, source speed 1.0,
+  and exit capture durations 5.429 / 6.124 seconds. Right turns again use
+  two-frame cycles after two preparation frames. Require all end joint targets
+  and torque flags to match at composite joins, including camera motor 0.
+  Keep source103 forward/recovery/hurdle data and unrelated behavior unchanged.
+
+- The latest source103 request supersedes source101 for forward/recovery and
+  updates `t허들찐`. Use source103 `m전진*` and six `m라인복귀*` variants
+  at their supplied speed 1.0 (not the older m speed 1.05). Preserve command
+  counts/cameras, derive eight cycles from six, and keep the camera-only 1 degree
+  correction in `m라인복귀우회전90`. Rebuild embedded forward/recovery stages.
+  Keep `t허들찐` PC speed 1.0 and runtime speed 0.95 via the existing helper.
+  Preserve source103 hurdle timing and joint targets, including motor 20 change.
+  Retain hurdle `s왼들(catalog80)` / `오뒤무게중심앞(catalog80)` pose identities.
+  Snapshot: `20261112_catalog103/source_robot_motions.json`.
+
+- The latest 2026-11-12 source101 request supersedes the m reapplication below.
+  Apply the source101 p forward and p/t recovery policy at original speed 1.0,
+  preserving command counts and camera variants. Keep the two-cycle correction
+  and eight-cycle derivation. Rebuild all four goal exits and forward preparation;
+  update all reservation/capture estimates, including six-cycle approach forward.
+  Keep pickup 400/500 and unrelated motions unchanged.
+  Latest snapshot: `20261112_pt_forward_recovery101/source_robot_motions.json`.
+
+- The latest source102 reapplication supersedes the combined source101 import.
+  Apply the source102 m forward/recovery policy below again: speed 1.05,
+  stable command counts/cameras, four rebuilt goal exits, and updated forward
+  preparation. Preserve the camera-only fix for `m라인복귀우회전90`.
+  Latest snapshot: `20261111_m_forward_recovery102_reapply/source_robot_motions.json`.
+
+- The latest combined source101 request supersedes the source102 m import below.
+  Use `p전진*`, `t라인복귀우실전` / `t라인복귀우실전90도`,
+  `p라인복귀좌회전45도` / `p라인복귀좌회전90도`, `t라인복귀우공용`,
+  and `p라인복귀좌회전공용` at original speed 1.0. Preserve existing
+  camera variants and command repeat counts: source `p전진0도(2회)` has
+  repeat_count=3 and must remain 2; derive eight cycles from `p전진45(6회)`.
+  Import the source six-frame preparation motion and rebuild all four goal
+  exits. Update reservation/capture durations for the actual source timings.
+  Snapshot: `20261111_pt_forward_recovery101/source_robot_motions.json`.
+
+- The latest source102 m forward/recovery request supersedes the earlier p/t/j
+  imports below. Use `m전진*` and six `m라인복귀*` variants at source speed 1.05.
+  Preserve existing repeat counts and camera variants; derive `m전진45(8회)`
+  from the six-cycle source. Correct only camera motor 0 in
+  `m라인복귀우회전90` to the existing 1.0 degrees in all frames (the source
+  alternates -64 and 1). Preserve source body targets, torque, and timing.
+  Rebuild all four goal-exit tails and embedded forward stages. In
+  `n공에서 전진하고 후진준비자세`, encode the new forward at effective speed
+  1.05 while preserving the preparation tail targets, duration, and gap.
+  Refresh reservations and capture durations; retain public command IDs.
+  Snapshot: `20261111_m_forward_recovery102/source_robot_motions.json`.
+
+- The latest forward-only source101 request supersedes source102 j forward data.
+  Use source101 `p전진*` names and original speed 1.0, with existing command
+  repeat counts and camera variants. Derive `p전진45(8회)` from the six-cycle
+  source; correct source `p전진0도(2회)` repeat_count=3 to the deployed count 2.
+  Update embedded forward frames in both goal exits and the six-frame
+  `n공에서 전진하고 후진준비자세`. Keep source101 recovery data unchanged.
+  Snapshot: `20261111_forward101/source_robot_motions.json`.
+
+- The latest recovery-only source101 request supersedes m recovery data below.
+  Use original `t라인복귀우실전`, `t라인복귀우실전90도`, `t라인복귀우공용`,
+  `p라인복귀좌회전45도`, `p라인복귀좌회전90도`, and `p라인복귀좌회전공용`
+  at source speed 1.0 with four repeats. Rebuild all four goal-exit recovery tails
+  and refresh duration estimates. Preserve source102 j forward data.
+  Snapshot: `20261111_recovery101/source_robot_motions.json`.
+
+- The latest source102 request uses `j전진45(6회)` as the body/timing
+  source for all ordinary forward variants. Preserve existing repeat counts
+  and per-frame camera motor 0 angles; name them `j전진*`, at source speed 1.0.
+  Also update embedded forward frames in goal exits and
+  `n공에서 전진하고 후진준비자세`. Keep m recovery data/speed 1.05 and
+  fine gaits unchanged. Snapshot: `20261111_j_forward102/source_robot_motions.json`.
+
+- The latest 2026-11-11 fast-forward request supersedes the source100 names
+  and data below: use `m전진*` and `m라인복귀*` from
+  `20261111_m_fast_forward/source_robot_motions.json`, at source speed 1.05.
+  Import `r골넣기8번구역` from the same file. Derive `m전진45(8회)`
+  from `m전진45(6회)` with repeat_count=8. Preserve public command IDs
+  and goal-exit composite names; rebuild their gait frames and timing.
+
 - The latest 2026-11-11 name-mapping request supersedes the stable `n` catalog
   names below: use source100 `p전진*`, `p라인복귀좌회전*`, and `t라인복귀우*`
   names. Only motion names and alias targets change; preserve frame/pose data.

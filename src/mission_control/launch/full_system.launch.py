@@ -504,7 +504,7 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("line_roi_x_min_ratio", default_value="0.0"),
             DeclareLaunchArgument("line_roi_x_max_ratio", default_value="1.0"),
             DeclareLaunchArgument(
-                "corner_min_turn_delta_deg", default_value="30.0"
+                "corner_min_turn_delta_deg", default_value="20.0"
             ),
             DeclareLaunchArgument(
                 "corner_straight_max_turn_delta_deg", default_value="15.0"

@@ -1,0 +1,17 @@
+{
+  "reservation_tests": 748,
+  "passed": 653,
+  "existing_failures": 95,
+  "new_failures": [],
+  "focused_passed": 175,
+  "sdk_checks": {
+    "ball_fine_queue_contract": "passed",
+    "test_catalog_only_core": "passed"
+  },
+  "catalogs": {
+    "pc_motions": 168,
+    "runtime_motions": 168,
+    "missing_alias_targets": 0
+  },
+  "hardware_executed": false
+}

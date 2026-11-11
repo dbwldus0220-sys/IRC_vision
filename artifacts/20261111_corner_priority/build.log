@@ -1,0 +1,12 @@
+Starting >>> step
+Finished <<< step [3.34s]
+Starting >>> mission_control
+[4.221s] WARNING:colcon.colcon_core.shell:The following packages are in the workspace but haven't been built:
+- irc_step_motion_executor
+They are being used from the following locations instead:
+- /home/jet/IRC/IRC-STEP/IRC_vision_latest/install/irc_step_motion_executor
+To suppress this warning ignore these packages in the workspace:
+--packages-ignore irc_step_motion_executor
+Finished <<< mission_control [3.14s]
+
+Summary: 2 packages finished [7.14s]

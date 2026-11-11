@@ -10,6 +10,7 @@ from test_motion_command_bridge import (
 )
 from test_mission_phase_flow import MissionFlowHarness, pickup_ready_ball, publish_special
 from mission_control.motion_decision_node import MotionDecisionNode
+from mission_control.motion_command_bridge_node import MotionCommandBridgeNode
 from mission_control.pickup_grasp_selection import pickup_grasp_motion_id
 
 
@@ -37,10 +38,14 @@ def test_post_retreat_selects_grasp_and_keeps_check_pose(pixels, expected):
     # Selection cannot jump ahead of the retreat or its settle time.
     bridge.navigation_command_callback(navigation_message(**payload))
     assert len(bridge.executor_request_publisher.messages) == count
-    bridge.executor_status_callback(executor_status(
+    # Bypass FakeBridge's automatic transition pause completion for this timing check.
+    MotionCommandBridgeNode.executor_status_callback(bridge, executor_status(
         status='SUCCEEDED', motion_id='pickup_pre_backward_camera_down'))
-    deadline = bridge.active_dwell_until
+    deadline = bridge.transition_dwell_until
+    assert deadline is not None
     bridge._check_atomic_dwell(deadline - .001)
+    assert not bridge.pickup_post_backward_align_waiting
+    bridge.navigation_command_callback(navigation_message(**payload))
     assert len(bridge.executor_request_publisher.messages) == count
     bridge._check_atomic_dwell(deadline)
     assert bridge.pickup_post_backward_align_waiting

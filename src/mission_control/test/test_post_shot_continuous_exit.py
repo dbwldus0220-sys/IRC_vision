@@ -62,7 +62,7 @@ def test_early_frames_finish_in_exit_alignment_without_extra_forward_or_reservat
     assert not node.general_motion_gate.locked
     assert node.post_shot_dwell_until is None
     assert node.latest_info['line'] is None
-    recovery_direction = 'right' if section == 1 else 'left'
+    recovery_direction = 'right' if section == 1 or region in {1, 2} else 'left'
     assert bridge.last_physical_motion_id == f'line_recovery_{recovery_direction}_4'
     assert not bridge.motion_in_progress
     assert bridge._transition_prepare_motion('goal_camera_90_fine_forward_1') == 'goal_fine_prepare_90'
@@ -98,10 +98,10 @@ def test_failed_composite_never_replays_or_starts_normal_line(clock, section, st
 
 @pytest.mark.parametrize('kind', ['pc', 'runtime'])
 @pytest.mark.parametrize('name,alias,recovery_name,blocks', [
-    ('t골대후제자리우회전', 'post_shot_exit_right_9_recovery_right_4', 't라인복귀우실전', 1),
-    ('p골대후제자리좌회전', 'post_shot_exit_left_4_recovery_left_4', 'p라인복귀좌회전45도', 1),
-    ('t골대후제자리우회전(6회)', 'post_shot_exit_right_5_forward_4', 't라인복귀우실전', 1),
-    ('p골대후제자리좌회전(4회)', 'post_shot_exit_left_3_forward_4', 'p라인복귀좌회전45도', 1),
+    ('t골대후제자리우회전', 'post_shot_exit_right_9_recovery_right_4', 'm라인복귀우회전45도', 1),
+    ('p골대후제자리좌회전', 'post_shot_exit_left_4_recovery_left_4', 'm라인복귀우회전45도', 1),
+    ('t골대후제자리우회전(6회)', 'post_shot_exit_right_5_forward_4', 'm라인복귀우회전45도', 1),
+    ('p골대후제자리좌회전(4회)', 'post_shot_exit_left_3_forward_4', 'm라인복귀좌회전45도', 1),
 ])
 def test_catalog_preserves_turn_and_recovery_with_half_second_join_hold(kind, name, alias, recovery_name, blocks):
     motions = json.loads((ROOT / f'artifacts/robot_motions_{kind}.json').read_text())['motions']
@@ -109,7 +109,7 @@ def test_catalog_preserves_turn_and_recovery_with_half_second_join_hold(kind, na
     assert len(catalog) == len(motions)
     aliases = yaml.safe_load((ROOT / 'src/irc_step_motion_executor/config/motion_aliases.yaml').read_text())['motion_aliases']
     combined, turn, recovery = catalog[aliases[alias]], catalog[name], catalog[recovery_name]
-    forward = catalog['p전진45도(2회)'] if alias.endswith('_forward_4') else None
+    forward = catalog['m전진45(2회)'] if alias.endswith('_forward_4') else None
     prefix_size = len(turn['frames'])
     assert combined['frames'][:prefix_size] == turn['frames']
     assert combined['playback_speed'] == turn['playback_speed']

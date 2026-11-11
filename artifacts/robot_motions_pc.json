@@ -1472,7 +1472,7 @@
         {
           "frame_id": "8536018ed61446c5bd4ded1981d33c7f",
           "name": "허들실6-2",
-          "time_ms": 200,
+          "time_ms": 150,
           "angles": {
             "0": -0.263671875,
             "1": -0.439453125,
@@ -1585,7 +1585,7 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "36a6222f852b4684b32bb366a0ff3fd5",
-          "start_ms": 2668
+          "start_ms": 2618
         },
         {
           "frame_id": "1599b62e06d6434e9eef88ef5c3d8973",
@@ -1644,7 +1644,7 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "1599b62e06d6434e9eef88ef5c3d8973",
-          "start_ms": 4368
+          "start_ms": 4318
         },
         {
           "frame_id": "5c4e878f28854810a60822de47c8468a",
@@ -1671,7 +1671,7 @@
             "17": -65.7421875,
             "18": 38.14453125,
             "19": 100.0,
-            "20": -67.412109375,
+            "20": -68.412109375,
             "21": -6.328125,
             "22": -20.634765625
           },
@@ -1703,12 +1703,12 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "5c4e878f28854810a60822de47c8468a",
-          "start_ms": 5707
+          "start_ms": 5657
         },
         {
           "frame_id": "8ea02020aec14fee9c1fad1bd7d7ed8b",
           "name": "허들실10-2",
-          "time_ms": 80,
+          "time_ms": 40,
           "angles": {
             "0": -0.966796875,
             "1": -0.263671875,
@@ -1762,7 +1762,7 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "8ea02020aec14fee9c1fad1bd7d7ed8b",
-          "start_ms": 5907
+          "start_ms": 5857
         },
         {
           "frame_id": "618a40c517034c449512b5444bb0e928",
@@ -1821,13 +1821,13 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "618a40c517034c449512b5444bb0e928",
-          "start_ms": 5987,
+          "start_ms": 5897,
           "_drag_original_start_ms": 6277
         },
         {
           "frame_id": "1a1b47b16eac47629be2c129a4bf6d9d",
           "name": "Frame 1207",
-          "time_ms": 55,
+          "time_ms": 80,
           "angles": {
             "0": -0.966796875,
             "1": -0.263671875,
@@ -1881,7 +1881,7 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "1a1b47b16eac47629be2c129a4bf6d9d",
-          "start_ms": 6112
+          "start_ms": 6022
         },
         {
           "frame_id": "a3e7eb145090444e9d1aa01db929eee7",
@@ -1940,7 +1940,7 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "a3e7eb145090444e9d1aa01db929eee7",
-          "start_ms": 6167
+          "start_ms": 6102
         },
         {
           "frame_id": "b5f6920e380a43728e88ab86a5f45658",
@@ -1999,7 +1999,7 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "b5f6920e380a43728e88ab86a5f45658",
-          "start_ms": 7017
+          "start_ms": 7152
         },
         {
           "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
@@ -2058,7 +2058,7 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "start_ms": 7077
+          "start_ms": 7212
         }
       ]
     },
@@ -3833,12 +3833,12 @@
       ]
     },
     {
-      "name": "t라인복귀우실전",
+      "name": "m라인복귀우회전45도",
       "max_seq_ms": 1212,
       "repeat_count": 4,
       "playback_speed": 1.0,
       "repeatable": true,
-      "start_pose": "t라인복귀우오들",
+      "start_pose": "m라인복귀우오들45",
       "end_pose": "오뒤무게중심앞(catalog80)",
       "completion": {
         "position_tolerance_deg": 2.0,
@@ -3847,8 +3847,8 @@
       },
       "frames": [
         {
-          "frame_id": "ec954b87772241b3ba2bfadb6d7e0778",
-          "name": "t라인복귀우오들",
+          "frame_id": "1cd6159efc884b7f8124c25ebb878f66",
+          "name": "m라인복귀우오들45",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -3863,16 +3863,16 @@
             "9": 2.4609375,
             "10": -2.33984375,
             "11": -3.0,
-            "12": 0.0,
+            "12": 1.0,
             "15": -3.0,
-            "16": 5.0,
+            "16": 4.0,
             "13": -80.0,
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 60.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -2.2421875,
             "22": -12.0
           },
           "torques": {
@@ -3902,7 +3902,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ec954b87772241b3ba2bfadb6d7e0778",
+          "source_frame_id": "1cd6159efc884b7f8124c25ebb878f66",
           "start_ms": 80
         },
         {
@@ -3965,8 +3965,8 @@
           "start_ms": 142
         },
         {
-          "frame_id": "fc9abd18496b4660be30961eeddb4d62",
-          "name": "t라인복귀우왼들",
+          "frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "name": "m라인복귀우왼들45",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -3979,7 +3979,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 1.4609375,
-            "10": -2.0,
+            "10": 0.0,
             "11": -3.0,
             "12": 5.33984375,
             "15": -5.0,
@@ -3989,9 +3989,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -64.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": 2.0
           },
           "torques": {
             "0": true,
@@ -4020,8 +4020,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "fc9abd18496b4660be30961eeddb4d62",
-          "start_ms": 339
+          "source_frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "start_ms": 337
         },
         {
           "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
@@ -4080,7 +4080,7 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "start_ms": 401
+          "start_ms": 399
         }
       ]
     },
@@ -12437,12 +12437,12 @@
       ]
     },
     {
-      "name": "t라인복귀우실전90도",
+      "name": "m라인복귀우회전90",
       "max_seq_ms": 1212,
       "repeat_count": 4,
       "playback_speed": 1.0,
       "repeatable": true,
-      "start_pose": "t라인복귀우오들90도",
+      "start_pose": "m라인복귀우오들90",
       "end_pose": "t오뒤찐(90도)",
       "completion": {
         "position_tolerance_deg": 2.0,
@@ -12451,8 +12451,8 @@
       },
       "frames": [
         {
-          "frame_id": "bad66f0c3ed843a4b5704b815408216e",
-          "name": "t라인복귀우오들90도",
+          "frame_id": "da86374aaaeb48158cf9fd30d5008612",
+          "name": "m라인복귀우오들90",
           "time_ms": 62,
           "angles": {
             "0": 1.0,
@@ -12467,16 +12467,16 @@
             "9": 2.4609375,
             "10": -2.33984375,
             "11": -3.0,
-            "12": 0.0,
+            "12": 1.0,
             "15": -3.0,
-            "16": 5.0,
+            "16": 4.0,
             "13": -80.0,
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 60.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -2.2421875,
             "22": -12.0
           },
           "torques": {
@@ -12506,7 +12506,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "bad66f0c3ed843a4b5704b815408216e",
+          "source_frame_id": "da86374aaaeb48158cf9fd30d5008612",
           "start_ms": 80
         },
         {
@@ -12569,8 +12569,8 @@
           "start_ms": 142
         },
         {
-          "frame_id": "bfa63621ca444a6394b70a87fc2ea2ae",
-          "name": "t라인복귀우왼들90도",
+          "frame_id": "06b2ca38a28640209c70c338bef9c72b",
+          "name": "m라인복귀우왼들90",
           "time_ms": 62,
           "angles": {
             "0": 1.0,
@@ -12583,7 +12583,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 1.4609375,
-            "10": -2.0,
+            "10": 0.0,
             "11": -3.0,
             "12": 5.33984375,
             "15": -5.0,
@@ -12593,9 +12593,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -64.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": 2.0
           },
           "torques": {
             "0": true,
@@ -12624,8 +12624,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "bfa63621ca444a6394b70a87fc2ea2ae",
-          "start_ms": 339
+          "source_frame_id": "06b2ca38a28640209c70c338bef9c72b",
+          "start_ms": 337
         },
         {
           "frame_id": "ba06f2a7e13a4bb3b52cb6eb6ec4e681",
@@ -12684,7 +12684,7 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "ba06f2a7e13a4bb3b52cb6eb6ec4e681",
-          "start_ms": 401
+          "start_ms": 399
         }
       ]
     },
@@ -21761,12 +21761,12 @@
       ]
     },
     {
-      "name": "t라인복귀우공용",
+      "name": "m라인복귀우회전공용",
       "max_seq_ms": 1212,
       "repeat_count": 4,
       "playback_speed": 1.0,
       "repeatable": true,
-      "start_pose": "t라인복귀우오들",
+      "start_pose": "m라인복귀우오들45",
       "end_pose": "오뒤무게중심앞(catalog80)",
       "completion": {
         "position_tolerance_deg": 2.0,
@@ -21775,8 +21775,8 @@
       },
       "frames": [
         {
-          "frame_id": "ec954b87772241b3ba2bfadb6d7e0778",
-          "name": "t라인복귀우오들",
+          "frame_id": "1cd6159efc884b7f8124c25ebb878f66",
+          "name": "m라인복귀우오들45",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -21791,16 +21791,16 @@
             "9": 2.4609375,
             "10": -2.33984375,
             "11": -3.0,
-            "12": 0.0,
+            "12": 1.0,
             "15": -3.0,
-            "16": 5.0,
+            "16": 4.0,
             "13": -80.0,
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 60.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -2.2421875,
             "22": -12.0
           },
           "torques": {
@@ -21830,7 +21830,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ec954b87772241b3ba2bfadb6d7e0778",
+          "source_frame_id": "1cd6159efc884b7f8124c25ebb878f66",
           "start_ms": 80
         },
         {
@@ -21893,8 +21893,8 @@
           "start_ms": 142
         },
         {
-          "frame_id": "fc9abd18496b4660be30961eeddb4d62",
-          "name": "t라인복귀우왼들",
+          "frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "name": "m라인복귀우왼들45",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -21907,7 +21907,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 1.4609375,
-            "10": -2.0,
+            "10": 0.0,
             "11": -3.0,
             "12": 5.33984375,
             "15": -5.0,
@@ -21917,9 +21917,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -64.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": 2.0
           },
           "torques": {
             "0": true,
@@ -21948,8 +21948,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "fc9abd18496b4660be30961eeddb4d62",
-          "start_ms": 339
+          "source_frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "start_ms": 337
         },
         {
           "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
@@ -22008,7 +22008,7 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "start_ms": 401
+          "start_ms": 399
         }
       ]
     },
@@ -23021,12 +23021,12 @@
       ]
     },
     {
-      "name": "p라인복귀좌회전공용",
+      "name": "m라인복귀좌회전공용",
       "max_seq_ms": 1212,
       "repeat_count": 4,
       "playback_speed": 1.0,
       "repeatable": true,
-      "start_pose": "p라복좌오들",
+      "start_pose": "m라인복귀좌오들45",
       "end_pose": "오뒤무게중심앞(catalog80)",
       "completion": {
         "position_tolerance_deg": 2.0,
@@ -23035,8 +23035,8 @@
       },
       "frames": [
         {
-          "frame_id": "759c5cf6b4314914b171e5990028bbc8",
-          "name": "p라복좌오들",
+          "frame_id": "57d540c0d20748df8eb2014e77b03807",
+          "name": "m라인복귀좌오들45",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -23049,7 +23049,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -4.33984375,
+            "10": -3.33984375,
             "11": -3.0,
             "12": 6.0,
             "15": -3.0,
@@ -23058,9 +23058,9 @@
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 60.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -0.2421875,
             "22": -12.0
           },
           "torques": {
@@ -23090,7 +23090,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "759c5cf6b4314914b171e5990028bbc8",
+          "source_frame_id": "57d540c0d20748df8eb2014e77b03807",
           "start_ms": 80
         },
         {
@@ -23153,512 +23153,8 @@
           "start_ms": 142
         },
         {
-          "frame_id": "74804714099a4e77958693a9fb0a8f87",
-          "name": "p라복좌왼들",
-          "time_ms": 62,
-          "angles": {
-            "0": -34.0,
-            "1": -0.3515625,
-            "2": -8.4375,
-            "3": 7.55859375,
-            "4": 11.25,
-            "5": -13.271484375,
-            "6": 74.35546875,
-            "7": -76.2890625,
-            "8": -10.546875,
-            "9": 1.4609375,
-            "10": 4.0,
-            "11": -3.0,
-            "12": -1.66015625,
-            "15": -5.0,
-            "16": 5.0,
-            "13": -55.0,
-            "14": 80.0,
-            "17": -29.70703125,
-            "18": 56.337890625,
-            "19": 64.0,
-            "20": -58.0,
-            "21": 12.0,
-            "22": -1.7578125
-          },
-          "torques": {
-            "0": true,
-            "1": true,
-            "2": true,
-            "3": true,
-            "4": true,
-            "5": true,
-            "6": true,
-            "7": true,
-            "8": true,
-            "9": true,
-            "10": true,
-            "11": true,
-            "12": true,
-            "15": true,
-            "16": true,
-            "13": true,
-            "14": true,
-            "17": true,
-            "18": true,
-            "19": true,
-            "20": true,
-            "21": true,
-            "22": true
-          },
-          "is_important": false,
-          "lift_early_arrival": true,
-          "source_frame_id": "74804714099a4e77958693a9fb0a8f87",
-          "start_ms": 337
-        },
-        {
-          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "name": "오뒤무게중심앞(catalog80)",
-          "time_ms": 115,
-          "angles": {
-            "0": -33.662109375,
-            "1": 0.263671875,
-            "2": -9.931640625,
-            "3": 10.0,
-            "4": 18.0,
-            "5": -18.0,
-            "6": 66.796875,
-            "7": -68.115234375,
-            "8": -11.07421875,
-            "9": 3.076171875,
-            "10": 2.109375,
-            "11": -2.8125,
-            "12": 2.373046875,
-            "15": 3.427734375,
-            "16": -1.494140625,
-            "13": -44.912109375,
-            "14": 58.974609375,
-            "17": -26.806640625,
-            "18": 27.421875,
-            "19": 67.8515625,
-            "20": -57.744140625,
-            "21": 3.33984375,
-            "22": -5.2734375
-          },
-          "torques": {
-            "0": true,
-            "1": true,
-            "2": true,
-            "3": true,
-            "4": true,
-            "5": true,
-            "6": true,
-            "7": true,
-            "8": true,
-            "9": true,
-            "10": true,
-            "11": true,
-            "12": true,
-            "15": true,
-            "16": true,
-            "13": true,
-            "14": true,
-            "17": true,
-            "18": true,
-            "19": true,
-            "20": true,
-            "21": true,
-            "22": true
-          },
-          "is_important": false,
-          "lift_early_arrival": true,
-          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "start_ms": 399
-        }
-      ]
-    },
-    {
-      "name": "p전진45(6회)",
-      "max_seq_ms": 1212,
-      "repeat_count": 6,
-      "playback_speed": 1.0,
-      "repeatable": true,
-      "start_pose": "s오들",
-      "end_pose": "오뒤무게중심앞(catalog80)",
-      "completion": {
-        "position_tolerance_deg": 2.0,
-        "settle_duration_ms": 80,
-        "settle_timeout_ms": 3000
-      },
-      "frames": [
-        {
-          "frame_id": "ef0a33a2b2934b35a60fda4dfd144a2d",
-          "name": "s오들",
-          "time_ms": 62,
-          "angles": {
-            "0": -34.0,
-            "1": -0.3515625,
-            "2": -8.4375,
-            "3": 7.55859375,
-            "4": 11.25,
-            "5": -13.271484375,
-            "6": 74.35546875,
-            "7": -76.2890625,
-            "8": -10.546875,
-            "9": 2.4609375,
-            "10": -2.33984375,
-            "11": -3.0,
-            "12": 2.0,
-            "15": -3.0,
-            "16": 5.0,
-            "13": -80.0,
-            "14": 56.0,
-            "17": -56.337890625,
-            "18": 32.0,
-            "19": 55.0,
-            "20": -68.0,
-            "21": 1.7578125,
-            "22": -12.0
-          },
-          "torques": {
-            "0": true,
-            "1": true,
-            "2": true,
-            "3": true,
-            "4": true,
-            "5": true,
-            "6": true,
-            "7": true,
-            "8": true,
-            "9": true,
-            "10": true,
-            "11": true,
-            "12": true,
-            "15": true,
-            "16": true,
-            "13": true,
-            "14": true,
-            "17": true,
-            "18": true,
-            "19": true,
-            "20": true,
-            "21": true,
-            "22": true
-          },
-          "is_important": false,
-          "lift_early_arrival": true,
-          "source_frame_id": "ef0a33a2b2934b35a60fda4dfd144a2d",
-          "start_ms": 80
-        },
-        {
-          "frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
-          "name": "t왼뒤407(45도)",
-          "time_ms": 115,
-          "angles": {
-            "0": -34.0,
-            "1": -0.439453125,
-            "2": -9.228515625,
-            "3": 8.61328125,
-            "4": 10.37109375,
-            "5": -10.1953125,
-            "6": 69.609375,
-            "7": -70.927734375,
-            "8": -11.07421875,
-            "9": 2.63671875,
-            "10": -4.0,
-            "11": 2.0,
-            "12": -2.0,
-            "15": 3.0,
-            "16": -2.0,
-            "13": -59.0,
-            "14": 47.0,
-            "17": -34.453125,
-            "18": 31.904296875,
-            "19": 60.64453125,
-            "20": -74.0,
-            "21": 3.0,
-            "22": -4.5703125
-          },
-          "torques": {
-            "0": true,
-            "1": true,
-            "2": true,
-            "3": true,
-            "4": true,
-            "5": true,
-            "6": true,
-            "7": true,
-            "8": true,
-            "9": true,
-            "10": true,
-            "11": true,
-            "12": true,
-            "15": true,
-            "16": true,
-            "13": true,
-            "14": true,
-            "17": true,
-            "18": true,
-            "19": true,
-            "20": true,
-            "21": true,
-            "22": true
-          },
-          "is_important": false,
-          "lift_early_arrival": true,
-          "source_frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
-          "start_ms": 142
-        },
-        {
-          "frame_id": "b5f6920e380a43728e88ab86a5f45658",
-          "name": "s왼들",
-          "time_ms": 62,
-          "angles": {
-            "0": -34.0,
-            "1": -0.3515625,
-            "2": -8.4375,
-            "3": 7.55859375,
-            "4": 11.25,
-            "5": -13.271484375,
-            "6": 74.35546875,
-            "7": -76.2890625,
-            "8": -10.546875,
-            "9": 1.4609375,
-            "10": 1.0,
-            "11": -3.0,
-            "12": 1.33984375,
-            "15": -5.0,
-            "16": 4.0,
-            "13": -55.0,
-            "14": 80.0,
-            "17": -29.70703125,
-            "18": 56.337890625,
-            "19": 64.0,
-            "20": -58.0,
-            "21": 12.0,
-            "22": -1.7578125
-          },
-          "torques": {
-            "0": true,
-            "1": true,
-            "2": true,
-            "3": true,
-            "4": true,
-            "5": true,
-            "6": true,
-            "7": true,
-            "8": true,
-            "9": true,
-            "10": true,
-            "11": true,
-            "12": true,
-            "15": true,
-            "16": true,
-            "13": true,
-            "14": true,
-            "17": true,
-            "18": true,
-            "19": true,
-            "20": true,
-            "21": true,
-            "22": true
-          },
-          "is_important": false,
-          "lift_early_arrival": true,
-          "source_frame_id": "b5f6920e380a43728e88ab86a5f45658",
-          "start_ms": 337
-        },
-        {
-          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "name": "오뒤무게중심앞(catalog80)",
-          "time_ms": 115,
-          "angles": {
-            "0": -33.662109375,
-            "1": 0.263671875,
-            "2": -9.931640625,
-            "3": 10.0,
-            "4": 18.0,
-            "5": -18.0,
-            "6": 66.796875,
-            "7": -68.115234375,
-            "8": -11.07421875,
-            "9": 3.076171875,
-            "10": 2.109375,
-            "11": -2.8125,
-            "12": 2.373046875,
-            "15": 3.427734375,
-            "16": -1.494140625,
-            "13": -44.912109375,
-            "14": 58.974609375,
-            "17": -26.806640625,
-            "18": 27.421875,
-            "19": 67.8515625,
-            "20": -57.744140625,
-            "21": 3.33984375,
-            "22": -5.2734375
-          },
-          "torques": {
-            "0": true,
-            "1": true,
-            "2": true,
-            "3": true,
-            "4": true,
-            "5": true,
-            "6": true,
-            "7": true,
-            "8": true,
-            "9": true,
-            "10": true,
-            "11": true,
-            "12": true,
-            "15": true,
-            "16": true,
-            "13": true,
-            "14": true,
-            "17": true,
-            "18": true,
-            "19": true,
-            "20": true,
-            "21": true,
-            "22": true
-          },
-          "is_important": false,
-          "lift_early_arrival": true,
-          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "start_ms": 399
-        }
-      ]
-    },
-    {
-      "name": "p라인복귀좌회전45도",
-      "max_seq_ms": 1212,
-      "repeat_count": 4,
-      "playback_speed": 1.0,
-      "repeatable": true,
-      "start_pose": "t라인복귀좌오들공",
-      "end_pose": "오뒤무게중심앞(catalog80)",
-      "completion": {
-        "position_tolerance_deg": 2.0,
-        "settle_duration_ms": 80,
-        "settle_timeout_ms": 3000
-      },
-      "frames": [
-        {
-          "frame_id": "f2a7013447cd42f4b5daecd5854a0dd7",
-          "name": "t라인복귀좌오들공",
-          "time_ms": 62,
-          "angles": {
-            "0": -34.0,
-            "1": -0.3515625,
-            "2": -8.4375,
-            "3": 7.55859375,
-            "4": 11.25,
-            "5": -13.271484375,
-            "6": 74.35546875,
-            "7": -76.2890625,
-            "8": -10.546875,
-            "9": 2.4609375,
-            "10": -4.33984375,
-            "11": -3.0,
-            "12": 6.0,
-            "15": -3.0,
-            "16": 5.0,
-            "13": -80.0,
-            "14": 56.0,
-            "17": -56.337890625,
-            "18": 32.0,
-            "19": 55.0,
-            "20": -68.0,
-            "21": 1.7578125,
-            "22": -12.0
-          },
-          "torques": {
-            "0": true,
-            "1": true,
-            "2": true,
-            "3": true,
-            "4": true,
-            "5": true,
-            "6": true,
-            "7": true,
-            "8": true,
-            "9": true,
-            "10": true,
-            "11": true,
-            "12": true,
-            "15": true,
-            "16": true,
-            "13": true,
-            "14": true,
-            "17": true,
-            "18": true,
-            "19": true,
-            "20": true,
-            "21": true,
-            "22": true
-          },
-          "is_important": false,
-          "lift_early_arrival": true,
-          "source_frame_id": "f2a7013447cd42f4b5daecd5854a0dd7",
-          "start_ms": 80
-        },
-        {
-          "frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
-          "name": "t왼뒤407(45도)",
-          "time_ms": 115,
-          "angles": {
-            "0": -34.0,
-            "1": -0.439453125,
-            "2": -9.228515625,
-            "3": 8.61328125,
-            "4": 10.37109375,
-            "5": -10.1953125,
-            "6": 69.609375,
-            "7": -70.927734375,
-            "8": -11.07421875,
-            "9": 2.63671875,
-            "10": -4.0,
-            "11": 2.0,
-            "12": -2.0,
-            "15": 3.0,
-            "16": -2.0,
-            "13": -59.0,
-            "14": 47.0,
-            "17": -34.453125,
-            "18": 31.904296875,
-            "19": 60.64453125,
-            "20": -74.0,
-            "21": 3.0,
-            "22": -4.5703125
-          },
-          "torques": {
-            "0": true,
-            "1": true,
-            "2": true,
-            "3": true,
-            "4": true,
-            "5": true,
-            "6": true,
-            "7": true,
-            "8": true,
-            "9": true,
-            "10": true,
-            "11": true,
-            "12": true,
-            "15": true,
-            "16": true,
-            "13": true,
-            "14": true,
-            "17": true,
-            "18": true,
-            "19": true,
-            "20": true,
-            "21": true,
-            "22": true
-          },
-          "is_important": false,
-          "lift_early_arrival": true,
-          "source_frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
-          "start_ms": 142
-        },
-        {
-          "frame_id": "ac02c0a070444144afd158110daad8f3",
-          "name": "t라인복귀좌왼들공",
+          "frame_id": "50a0ced479634f6cb2f43f635661ab0c",
+          "name": "m라인복귀좌왼들45",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -23681,9 +23177,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -61.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": -0.7578125
           },
           "torques": {
             "0": true,
@@ -23712,8 +23208,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ac02c0a070444144afd158110daad8f3",
-          "start_ms": 338
+          "source_frame_id": "50a0ced479634f6cb2f43f635661ab0c",
+          "start_ms": 337
         },
         {
           "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
@@ -23772,7 +23268,511 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "start_ms": 400
+          "start_ms": 399
+        }
+      ]
+    },
+    {
+      "name": "m전진45(6회)",
+      "max_seq_ms": 1212,
+      "repeat_count": 6,
+      "playback_speed": 1.0,
+      "repeatable": true,
+      "start_pose": "m오들45도",
+      "end_pose": "오뒤무게중심앞(catalog80)",
+      "completion": {
+        "position_tolerance_deg": 2.0,
+        "settle_duration_ms": 80,
+        "settle_timeout_ms": 3000
+      },
+      "frames": [
+        {
+          "frame_id": "85b94229c42d4ef889dd1f9ed412a14d",
+          "name": "m오들45도",
+          "time_ms": 62,
+          "angles": {
+            "0": -34.0,
+            "1": -0.3515625,
+            "2": -8.4375,
+            "3": 7.55859375,
+            "4": 11.25,
+            "5": -13.271484375,
+            "6": 74.35546875,
+            "7": -76.2890625,
+            "8": -10.546875,
+            "9": 2.4609375,
+            "10": -1.33984375,
+            "11": -3.0,
+            "12": 2.0,
+            "15": -3.0,
+            "16": 5.0,
+            "13": -80.0,
+            "14": 56.0,
+            "17": -56.337890625,
+            "18": 32.0,
+            "19": 58.0,
+            "20": -68.0,
+            "21": -0.2421875,
+            "22": -12.0
+          },
+          "torques": {
+            "0": true,
+            "1": true,
+            "2": true,
+            "3": true,
+            "4": true,
+            "5": true,
+            "6": true,
+            "7": true,
+            "8": true,
+            "9": true,
+            "10": true,
+            "11": true,
+            "12": true,
+            "15": true,
+            "16": true,
+            "13": true,
+            "14": true,
+            "17": true,
+            "18": true,
+            "19": true,
+            "20": true,
+            "21": true,
+            "22": true
+          },
+          "is_important": false,
+          "lift_early_arrival": true,
+          "source_frame_id": "85b94229c42d4ef889dd1f9ed412a14d",
+          "start_ms": 80
+        },
+        {
+          "frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
+          "name": "t왼뒤407(45도)",
+          "time_ms": 115,
+          "angles": {
+            "0": -34.0,
+            "1": -0.439453125,
+            "2": -9.228515625,
+            "3": 8.61328125,
+            "4": 10.37109375,
+            "5": -10.1953125,
+            "6": 69.609375,
+            "7": -70.927734375,
+            "8": -11.07421875,
+            "9": 2.63671875,
+            "10": -4.0,
+            "11": 2.0,
+            "12": -2.0,
+            "15": 3.0,
+            "16": -2.0,
+            "13": -59.0,
+            "14": 47.0,
+            "17": -34.453125,
+            "18": 31.904296875,
+            "19": 60.64453125,
+            "20": -74.0,
+            "21": 3.0,
+            "22": -4.5703125
+          },
+          "torques": {
+            "0": true,
+            "1": true,
+            "2": true,
+            "3": true,
+            "4": true,
+            "5": true,
+            "6": true,
+            "7": true,
+            "8": true,
+            "9": true,
+            "10": true,
+            "11": true,
+            "12": true,
+            "15": true,
+            "16": true,
+            "13": true,
+            "14": true,
+            "17": true,
+            "18": true,
+            "19": true,
+            "20": true,
+            "21": true,
+            "22": true
+          },
+          "is_important": false,
+          "lift_early_arrival": true,
+          "source_frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
+          "start_ms": 142
+        },
+        {
+          "frame_id": "d4ad5fac0ab74e58b6f984fc26b498e4",
+          "name": "m왼들45도",
+          "time_ms": 62,
+          "angles": {
+            "0": -34.0,
+            "1": -0.3515625,
+            "2": -8.4375,
+            "3": 7.55859375,
+            "4": 11.25,
+            "5": -13.271484375,
+            "6": 74.35546875,
+            "7": -76.2890625,
+            "8": -10.546875,
+            "9": 1.4609375,
+            "10": 1.0,
+            "11": -3.0,
+            "12": 1.33984375,
+            "15": -5.0,
+            "16": 4.0,
+            "13": -55.0,
+            "14": 80.0,
+            "17": -29.70703125,
+            "18": 56.337890625,
+            "19": 64.0,
+            "20": -60.0,
+            "21": 12.0,
+            "22": -0.7578125
+          },
+          "torques": {
+            "0": true,
+            "1": true,
+            "2": true,
+            "3": true,
+            "4": true,
+            "5": true,
+            "6": true,
+            "7": true,
+            "8": true,
+            "9": true,
+            "10": true,
+            "11": true,
+            "12": true,
+            "15": true,
+            "16": true,
+            "13": true,
+            "14": true,
+            "17": true,
+            "18": true,
+            "19": true,
+            "20": true,
+            "21": true,
+            "22": true
+          },
+          "is_important": false,
+          "lift_early_arrival": true,
+          "source_frame_id": "d4ad5fac0ab74e58b6f984fc26b498e4",
+          "start_ms": 337
+        },
+        {
+          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "name": "오뒤무게중심앞(catalog80)",
+          "time_ms": 115,
+          "angles": {
+            "0": -33.662109375,
+            "1": 0.263671875,
+            "2": -9.931640625,
+            "3": 10.0,
+            "4": 18.0,
+            "5": -18.0,
+            "6": 66.796875,
+            "7": -68.115234375,
+            "8": -11.07421875,
+            "9": 3.076171875,
+            "10": 2.109375,
+            "11": -2.8125,
+            "12": 2.373046875,
+            "15": 3.427734375,
+            "16": -1.494140625,
+            "13": -44.912109375,
+            "14": 58.974609375,
+            "17": -26.806640625,
+            "18": 27.421875,
+            "19": 67.8515625,
+            "20": -57.744140625,
+            "21": 3.33984375,
+            "22": -5.2734375
+          },
+          "torques": {
+            "0": true,
+            "1": true,
+            "2": true,
+            "3": true,
+            "4": true,
+            "5": true,
+            "6": true,
+            "7": true,
+            "8": true,
+            "9": true,
+            "10": true,
+            "11": true,
+            "12": true,
+            "15": true,
+            "16": true,
+            "13": true,
+            "14": true,
+            "17": true,
+            "18": true,
+            "19": true,
+            "20": true,
+            "21": true,
+            "22": true
+          },
+          "is_important": false,
+          "lift_early_arrival": true,
+          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "start_ms": 399
+        }
+      ]
+    },
+    {
+      "name": "m라인복귀좌회전45도",
+      "max_seq_ms": 1212,
+      "repeat_count": 4,
+      "playback_speed": 1.0,
+      "repeatable": true,
+      "start_pose": "m라인복귀좌오들45",
+      "end_pose": "오뒤무게중심앞(catalog80)",
+      "completion": {
+        "position_tolerance_deg": 2.0,
+        "settle_duration_ms": 80,
+        "settle_timeout_ms": 3000
+      },
+      "frames": [
+        {
+          "frame_id": "57d540c0d20748df8eb2014e77b03807",
+          "name": "m라인복귀좌오들45",
+          "time_ms": 62,
+          "angles": {
+            "0": -34.0,
+            "1": -0.3515625,
+            "2": -8.4375,
+            "3": 7.55859375,
+            "4": 11.25,
+            "5": -13.271484375,
+            "6": 74.35546875,
+            "7": -76.2890625,
+            "8": -10.546875,
+            "9": 2.4609375,
+            "10": -3.33984375,
+            "11": -3.0,
+            "12": 6.0,
+            "15": -3.0,
+            "16": 5.0,
+            "13": -80.0,
+            "14": 56.0,
+            "17": -56.337890625,
+            "18": 32.0,
+            "19": 60.0,
+            "20": -68.0,
+            "21": -0.2421875,
+            "22": -12.0
+          },
+          "torques": {
+            "0": true,
+            "1": true,
+            "2": true,
+            "3": true,
+            "4": true,
+            "5": true,
+            "6": true,
+            "7": true,
+            "8": true,
+            "9": true,
+            "10": true,
+            "11": true,
+            "12": true,
+            "15": true,
+            "16": true,
+            "13": true,
+            "14": true,
+            "17": true,
+            "18": true,
+            "19": true,
+            "20": true,
+            "21": true,
+            "22": true
+          },
+          "is_important": false,
+          "lift_early_arrival": true,
+          "source_frame_id": "57d540c0d20748df8eb2014e77b03807",
+          "start_ms": 80
+        },
+        {
+          "frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
+          "name": "t왼뒤407(45도)",
+          "time_ms": 115,
+          "angles": {
+            "0": -34.0,
+            "1": -0.439453125,
+            "2": -9.228515625,
+            "3": 8.61328125,
+            "4": 10.37109375,
+            "5": -10.1953125,
+            "6": 69.609375,
+            "7": -70.927734375,
+            "8": -11.07421875,
+            "9": 2.63671875,
+            "10": -4.0,
+            "11": 2.0,
+            "12": -2.0,
+            "15": 3.0,
+            "16": -2.0,
+            "13": -59.0,
+            "14": 47.0,
+            "17": -34.453125,
+            "18": 31.904296875,
+            "19": 60.64453125,
+            "20": -74.0,
+            "21": 3.0,
+            "22": -4.5703125
+          },
+          "torques": {
+            "0": true,
+            "1": true,
+            "2": true,
+            "3": true,
+            "4": true,
+            "5": true,
+            "6": true,
+            "7": true,
+            "8": true,
+            "9": true,
+            "10": true,
+            "11": true,
+            "12": true,
+            "15": true,
+            "16": true,
+            "13": true,
+            "14": true,
+            "17": true,
+            "18": true,
+            "19": true,
+            "20": true,
+            "21": true,
+            "22": true
+          },
+          "is_important": false,
+          "lift_early_arrival": true,
+          "source_frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
+          "start_ms": 142
+        },
+        {
+          "frame_id": "50a0ced479634f6cb2f43f635661ab0c",
+          "name": "m라인복귀좌왼들45",
+          "time_ms": 62,
+          "angles": {
+            "0": -34.0,
+            "1": -0.3515625,
+            "2": -8.4375,
+            "3": 7.55859375,
+            "4": 11.25,
+            "5": -13.271484375,
+            "6": 74.35546875,
+            "7": -76.2890625,
+            "8": -10.546875,
+            "9": 1.4609375,
+            "10": 3.0,
+            "11": -3.0,
+            "12": -3.66015625,
+            "15": -5.0,
+            "16": 4.0,
+            "13": -55.0,
+            "14": 80.0,
+            "17": -29.70703125,
+            "18": 56.337890625,
+            "19": 64.0,
+            "20": -61.0,
+            "21": 12.0,
+            "22": -0.7578125
+          },
+          "torques": {
+            "0": true,
+            "1": true,
+            "2": true,
+            "3": true,
+            "4": true,
+            "5": true,
+            "6": true,
+            "7": true,
+            "8": true,
+            "9": true,
+            "10": true,
+            "11": true,
+            "12": true,
+            "15": true,
+            "16": true,
+            "13": true,
+            "14": true,
+            "17": true,
+            "18": true,
+            "19": true,
+            "20": true,
+            "21": true,
+            "22": true
+          },
+          "is_important": false,
+          "lift_early_arrival": true,
+          "source_frame_id": "50a0ced479634f6cb2f43f635661ab0c",
+          "start_ms": 337
+        },
+        {
+          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "name": "오뒤무게중심앞(catalog80)",
+          "time_ms": 115,
+          "angles": {
+            "0": -33.662109375,
+            "1": 0.263671875,
+            "2": -9.931640625,
+            "3": 10.0,
+            "4": 18.0,
+            "5": -18.0,
+            "6": 66.796875,
+            "7": -68.115234375,
+            "8": -11.07421875,
+            "9": 3.076171875,
+            "10": 2.109375,
+            "11": -2.8125,
+            "12": 2.373046875,
+            "15": 3.427734375,
+            "16": -1.494140625,
+            "13": -44.912109375,
+            "14": 58.974609375,
+            "17": -26.806640625,
+            "18": 27.421875,
+            "19": 67.8515625,
+            "20": -57.744140625,
+            "21": 3.33984375,
+            "22": -5.2734375
+          },
+          "torques": {
+            "0": true,
+            "1": true,
+            "2": true,
+            "3": true,
+            "4": true,
+            "5": true,
+            "6": true,
+            "7": true,
+            "8": true,
+            "9": true,
+            "10": true,
+            "11": true,
+            "12": true,
+            "15": true,
+            "16": true,
+            "13": true,
+            "14": true,
+            "17": true,
+            "18": true,
+            "19": true,
+            "20": true,
+            "21": true,
+            "22": true
+          },
+          "is_important": false,
+          "lift_early_arrival": true,
+          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "start_ms": 399
         }
       ]
     },
@@ -24163,12 +24163,12 @@
       ]
     },
     {
-      "name": "p전진45(4회)",
+      "name": "m전진45(4회)",
       "max_seq_ms": 1212,
       "repeat_count": 4,
       "playback_speed": 1.0,
       "repeatable": true,
-      "start_pose": "s오들",
+      "start_pose": "m오들45도",
       "end_pose": "오뒤무게중심앞(catalog80)",
       "completion": {
         "position_tolerance_deg": 2.0,
@@ -24177,8 +24177,8 @@
       },
       "frames": [
         {
-          "frame_id": "ef0a33a2b2934b35a60fda4dfd144a2d",
-          "name": "s오들",
+          "frame_id": "85b94229c42d4ef889dd1f9ed412a14d",
+          "name": "m오들45도",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -24191,7 +24191,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -2.33984375,
+            "10": -1.33984375,
             "11": -3.0,
             "12": 2.0,
             "15": -3.0,
@@ -24200,9 +24200,9 @@
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 58.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -0.2421875,
             "22": -12.0
           },
           "torques": {
@@ -24232,7 +24232,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ef0a33a2b2934b35a60fda4dfd144a2d",
+          "source_frame_id": "85b94229c42d4ef889dd1f9ed412a14d",
           "start_ms": 80
         },
         {
@@ -24295,8 +24295,8 @@
           "start_ms": 142
         },
         {
-          "frame_id": "b5f6920e380a43728e88ab86a5f45658",
-          "name": "s왼들",
+          "frame_id": "d4ad5fac0ab74e58b6f984fc26b498e4",
+          "name": "m왼들45도",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -24319,9 +24319,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -60.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": -0.7578125
           },
           "torques": {
             "0": true,
@@ -24350,7 +24350,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "b5f6920e380a43728e88ab86a5f45658",
+          "source_frame_id": "d4ad5fac0ab74e58b6f984fc26b498e4",
           "start_ms": 337
         },
         {
@@ -24415,12 +24415,12 @@
       ]
     },
     {
-      "name": "p전진90도(4회)",
+      "name": "m전진90도(4회)",
       "max_seq_ms": 1212,
       "repeat_count": 4,
       "playback_speed": 1.0,
       "repeatable": true,
-      "start_pose": "s오들90",
+      "start_pose": "m오들90도",
       "end_pose": "t오뒤찐(90도)",
       "completion": {
         "position_tolerance_deg": 2.0,
@@ -24429,8 +24429,8 @@
       },
       "frames": [
         {
-          "frame_id": "c3477c1d1631434d9dcb0946e8dc7d9a",
-          "name": "s오들90",
+          "frame_id": "857976b74bd04990b881ded046f63324",
+          "name": "m오들90도",
           "time_ms": 62,
           "angles": {
             "0": 1.0,
@@ -24443,7 +24443,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -2.33984375,
+            "10": -1.33984375,
             "11": -3.0,
             "12": 2.0,
             "15": -3.0,
@@ -24452,9 +24452,9 @@
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 58.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -0.2421875,
             "22": -12.0
           },
           "torques": {
@@ -24484,7 +24484,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "c3477c1d1631434d9dcb0946e8dc7d9a",
+          "source_frame_id": "857976b74bd04990b881ded046f63324",
           "start_ms": 80
         },
         {
@@ -24547,8 +24547,8 @@
           "start_ms": 142
         },
         {
-          "frame_id": "817cab15b6a645cfa926ef08da03f241",
-          "name": "s왼들90",
+          "frame_id": "55a903ad0c80427786b785b0e0ee1621",
+          "name": "m왼들90도",
           "time_ms": 62,
           "angles": {
             "0": 1.0,
@@ -24571,9 +24571,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -60.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": -0.7578125
           },
           "torques": {
             "0": true,
@@ -24602,7 +24602,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "817cab15b6a645cfa926ef08da03f241",
+          "source_frame_id": "55a903ad0c80427786b785b0e0ee1621",
           "start_ms": 337
         },
         {
@@ -24667,12 +24667,12 @@
       ]
     },
     {
-      "name": "p전진90도(6회)",
+      "name": "m전진90도(6회)",
       "max_seq_ms": 1212,
       "repeat_count": 6,
       "playback_speed": 1.0,
       "repeatable": true,
-      "start_pose": "s오들90",
+      "start_pose": "m오들90도",
       "end_pose": "t오뒤찐(90도)",
       "completion": {
         "position_tolerance_deg": 2.0,
@@ -24681,8 +24681,8 @@
       },
       "frames": [
         {
-          "frame_id": "c3477c1d1631434d9dcb0946e8dc7d9a",
-          "name": "s오들90",
+          "frame_id": "857976b74bd04990b881ded046f63324",
+          "name": "m오들90도",
           "time_ms": 62,
           "angles": {
             "0": 1.0,
@@ -24695,7 +24695,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -2.33984375,
+            "10": -1.33984375,
             "11": -3.0,
             "12": 2.0,
             "15": -3.0,
@@ -24704,9 +24704,9 @@
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 58.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -0.2421875,
             "22": -12.0
           },
           "torques": {
@@ -24736,7 +24736,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "c3477c1d1631434d9dcb0946e8dc7d9a",
+          "source_frame_id": "857976b74bd04990b881ded046f63324",
           "start_ms": 80
         },
         {
@@ -24799,8 +24799,8 @@
           "start_ms": 142
         },
         {
-          "frame_id": "817cab15b6a645cfa926ef08da03f241",
-          "name": "s왼들90",
+          "frame_id": "55a903ad0c80427786b785b0e0ee1621",
+          "name": "m왼들90도",
           "time_ms": 62,
           "angles": {
             "0": 1.0,
@@ -24823,9 +24823,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -60.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": -0.7578125
           },
           "torques": {
             "0": true,
@@ -24854,7 +24854,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "817cab15b6a645cfa926ef08da03f241",
+          "source_frame_id": "55a903ad0c80427786b785b0e0ee1621",
           "start_ms": 337
         },
         {
@@ -24919,12 +24919,12 @@
       ]
     },
     {
-      "name": "p전진실전0도(4회)",
+      "name": "m전진0도(4회)",
       "max_seq_ms": 1212,
       "repeat_count": 4,
       "playback_speed": 1.0,
       "repeatable": true,
-      "start_pose": "s오들0도",
+      "start_pose": "m오들0도",
       "end_pose": "t오뒤찐(0도)",
       "completion": {
         "position_tolerance_deg": 2.0,
@@ -24933,8 +24933,8 @@
       },
       "frames": [
         {
-          "frame_id": "96043ab21ab64046a0f55f97c16f8a30",
-          "name": "s오들0도",
+          "frame_id": "26b94e5636b34378b4096c81c8b49120",
+          "name": "m오들0도",
           "time_ms": 62,
           "angles": {
             "0": -64.0,
@@ -24947,7 +24947,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -2.33984375,
+            "10": -1.33984375,
             "11": -3.0,
             "12": 2.0,
             "15": -3.0,
@@ -24956,9 +24956,9 @@
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 58.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -0.2421875,
             "22": -12.0
           },
           "torques": {
@@ -24988,7 +24988,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "96043ab21ab64046a0f55f97c16f8a30",
+          "source_frame_id": "26b94e5636b34378b4096c81c8b49120",
           "start_ms": 80
         },
         {
@@ -25051,8 +25051,8 @@
           "start_ms": 142
         },
         {
-          "frame_id": "2e3844c6dfc44d02b0f2ca8a0fca9ece",
-          "name": "s왼들0도",
+          "frame_id": "5a7e76956fc94c80ae09bfb6423cc9da",
+          "name": "m왼들0도",
           "time_ms": 62,
           "angles": {
             "0": -64.0,
@@ -25075,9 +25075,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -60.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": -0.7578125
           },
           "torques": {
             "0": true,
@@ -25106,7 +25106,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "2e3844c6dfc44d02b0f2ca8a0fca9ece",
+          "source_frame_id": "5a7e76956fc94c80ae09bfb6423cc9da",
           "start_ms": 337
         },
         {
@@ -25171,12 +25171,12 @@
       ]
     },
     {
-      "name": "p전진실전0도(6회)",
+      "name": "m전진0도(6회)",
       "max_seq_ms": 1212,
       "repeat_count": 6,
       "playback_speed": 1.0,
       "repeatable": true,
-      "start_pose": "s오들0도",
+      "start_pose": "m오들0도",
       "end_pose": "t오뒤찐(0도)",
       "completion": {
         "position_tolerance_deg": 2.0,
@@ -25185,8 +25185,8 @@
       },
       "frames": [
         {
-          "frame_id": "96043ab21ab64046a0f55f97c16f8a30",
-          "name": "s오들0도",
+          "frame_id": "26b94e5636b34378b4096c81c8b49120",
+          "name": "m오들0도",
           "time_ms": 62,
           "angles": {
             "0": -64.0,
@@ -25199,7 +25199,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -2.33984375,
+            "10": -1.33984375,
             "11": -3.0,
             "12": 2.0,
             "15": -3.0,
@@ -25208,9 +25208,9 @@
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 58.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -0.2421875,
             "22": -12.0
           },
           "torques": {
@@ -25240,7 +25240,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "96043ab21ab64046a0f55f97c16f8a30",
+          "source_frame_id": "26b94e5636b34378b4096c81c8b49120",
           "start_ms": 80
         },
         {
@@ -25303,8 +25303,8 @@
           "start_ms": 142
         },
         {
-          "frame_id": "2e3844c6dfc44d02b0f2ca8a0fca9ece",
-          "name": "s왼들0도",
+          "frame_id": "5a7e76956fc94c80ae09bfb6423cc9da",
+          "name": "m왼들0도",
           "time_ms": 62,
           "angles": {
             "0": -64.0,
@@ -25327,9 +25327,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -60.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": -0.7578125
           },
           "torques": {
             "0": true,
@@ -25358,7 +25358,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "2e3844c6dfc44d02b0f2ca8a0fca9ece",
+          "source_frame_id": "5a7e76956fc94c80ae09bfb6423cc9da",
           "start_ms": 337
         },
         {
@@ -25423,12 +25423,12 @@
       ]
     },
     {
-      "name": "p라인복귀좌회전90도",
+      "name": "m라인복귀좌회전90도",
       "max_seq_ms": 1212,
       "repeat_count": 4,
       "playback_speed": 1.0,
       "repeatable": true,
-      "start_pose": "p라복좌오들90도",
+      "start_pose": "m라인복귀좌오들90",
       "end_pose": "t오뒤찐(90도)",
       "completion": {
         "position_tolerance_deg": 2.0,
@@ -25437,8 +25437,8 @@
       },
       "frames": [
         {
-          "frame_id": "f072b82c3fca4bba87470130a083ccb8",
-          "name": "p라복좌오들90도",
+          "frame_id": "859c671a95fd4db48f057bf98f9ed159",
+          "name": "m라인복귀좌오들90",
           "time_ms": 62,
           "angles": {
             "0": 1.0,
@@ -25451,7 +25451,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -4.33984375,
+            "10": -3.33984375,
             "11": -3.0,
             "12": 6.0,
             "15": -3.0,
@@ -25460,9 +25460,9 @@
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 60.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": 0.0,
             "22": -12.0
           },
           "torques": {
@@ -25492,7 +25492,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "f072b82c3fca4bba87470130a083ccb8",
+          "source_frame_id": "859c671a95fd4db48f057bf98f9ed159",
           "start_ms": 80
         },
         {
@@ -25555,8 +25555,8 @@
           "start_ms": 142
         },
         {
-          "frame_id": "16b021f0265b42f9ac8e07c4920f631e",
-          "name": "p라복좌왼들90도",
+          "frame_id": "17caa61e7e7f4498b84c28231b255bb0",
+          "name": "m라인복귀좌왼들90",
           "time_ms": 62,
           "angles": {
             "0": 1.0,
@@ -25569,19 +25569,19 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 1.4609375,
-            "10": 4.0,
+            "10": 3.0,
             "11": -3.0,
-            "12": -1.66015625,
+            "12": -3.66015625,
             "15": -5.0,
-            "16": 5.0,
+            "16": 4.0,
             "13": -55.0,
             "14": 80.0,
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -61.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": -0.7578125
           },
           "torques": {
             "0": true,
@@ -25610,7 +25610,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "16b021f0265b42f9ac8e07c4920f631e",
+          "source_frame_id": "17caa61e7e7f4498b84c28231b255bb0",
           "start_ms": 337
         },
         {
@@ -31481,12 +31481,12 @@
       ]
     },
     {
-      "name": "p전진45도(2회)",
+      "name": "m전진45(2회)",
       "max_seq_ms": 1212,
       "repeat_count": 2,
       "playback_speed": 1.0,
       "repeatable": true,
-      "start_pose": "s오들",
+      "start_pose": "m오들45도",
       "end_pose": "오뒤무게중심앞(catalog80)",
       "completion": {
         "position_tolerance_deg": 2.0,
@@ -31495,8 +31495,8 @@
       },
       "frames": [
         {
-          "frame_id": "ef0a33a2b2934b35a60fda4dfd144a2d",
-          "name": "s오들",
+          "frame_id": "85b94229c42d4ef889dd1f9ed412a14d",
+          "name": "m오들45도",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -31509,7 +31509,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -2.33984375,
+            "10": -1.33984375,
             "11": -3.0,
             "12": 2.0,
             "15": -3.0,
@@ -31518,9 +31518,9 @@
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 58.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -0.2421875,
             "22": -12.0
           },
           "torques": {
@@ -31550,7 +31550,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ef0a33a2b2934b35a60fda4dfd144a2d",
+          "source_frame_id": "85b94229c42d4ef889dd1f9ed412a14d",
           "start_ms": 80
         },
         {
@@ -31613,8 +31613,8 @@
           "start_ms": 142
         },
         {
-          "frame_id": "b5f6920e380a43728e88ab86a5f45658",
-          "name": "s왼들",
+          "frame_id": "d4ad5fac0ab74e58b6f984fc26b498e4",
+          "name": "m왼들45도",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -31637,9 +31637,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -60.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": -0.7578125
           },
           "torques": {
             "0": true,
@@ -31668,7 +31668,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "b5f6920e380a43728e88ab86a5f45658",
+          "source_frame_id": "d4ad5fac0ab74e58b6f984fc26b498e4",
           "start_ms": 337
         },
         {
@@ -31733,12 +31733,12 @@
       ]
     },
     {
-      "name": "p전진45(8회)",
+      "name": "m전진45(8회)",
       "max_seq_ms": 1212,
       "repeat_count": 8,
       "playback_speed": 1.0,
       "repeatable": true,
-      "start_pose": "s오들",
+      "start_pose": "m오들45도",
       "end_pose": "오뒤무게중심앞(catalog80)",
       "completion": {
         "position_tolerance_deg": 2.0,
@@ -31747,8 +31747,8 @@
       },
       "frames": [
         {
-          "frame_id": "ef0a33a2b2934b35a60fda4dfd144a2d",
-          "name": "s오들",
+          "frame_id": "85b94229c42d4ef889dd1f9ed412a14d",
+          "name": "m오들45도",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -31761,7 +31761,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -2.33984375,
+            "10": -1.33984375,
             "11": -3.0,
             "12": 2.0,
             "15": -3.0,
@@ -31770,9 +31770,9 @@
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 58.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -0.2421875,
             "22": -12.0
           },
           "torques": {
@@ -31802,7 +31802,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ef0a33a2b2934b35a60fda4dfd144a2d",
+          "source_frame_id": "85b94229c42d4ef889dd1f9ed412a14d",
           "start_ms": 80
         },
         {
@@ -31865,8 +31865,8 @@
           "start_ms": 142
         },
         {
-          "frame_id": "b5f6920e380a43728e88ab86a5f45658",
-          "name": "s왼들",
+          "frame_id": "d4ad5fac0ab74e58b6f984fc26b498e4",
+          "name": "m왼들45도",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -31889,9 +31889,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -60.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": -0.7578125
           },
           "torques": {
             "0": true,
@@ -31920,7 +31920,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "b5f6920e380a43728e88ab86a5f45658",
+          "source_frame_id": "d4ad5fac0ab74e58b6f984fc26b498e4",
           "start_ms": 337
         },
         {
@@ -31985,12 +31985,12 @@
       ]
     },
     {
-      "name": "p전진90도(2회)",
+      "name": "m전진90도(2회)",
       "max_seq_ms": 1212,
       "repeat_count": 2,
       "playback_speed": 1.0,
       "repeatable": true,
-      "start_pose": "s오들90",
+      "start_pose": "m오들90도",
       "end_pose": "t오뒤찐(90도)",
       "completion": {
         "position_tolerance_deg": 2.0,
@@ -31999,8 +31999,8 @@
       },
       "frames": [
         {
-          "frame_id": "c3477c1d1631434d9dcb0946e8dc7d9a",
-          "name": "s오들90",
+          "frame_id": "857976b74bd04990b881ded046f63324",
+          "name": "m오들90도",
           "time_ms": 62,
           "angles": {
             "0": 1.0,
@@ -32013,7 +32013,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -2.33984375,
+            "10": -1.33984375,
             "11": -3.0,
             "12": 2.0,
             "15": -3.0,
@@ -32022,9 +32022,9 @@
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 58.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -0.2421875,
             "22": -12.0
           },
           "torques": {
@@ -32054,7 +32054,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "c3477c1d1631434d9dcb0946e8dc7d9a",
+          "source_frame_id": "857976b74bd04990b881ded046f63324",
           "start_ms": 80
         },
         {
@@ -32117,8 +32117,8 @@
           "start_ms": 142
         },
         {
-          "frame_id": "817cab15b6a645cfa926ef08da03f241",
-          "name": "s왼들90",
+          "frame_id": "55a903ad0c80427786b785b0e0ee1621",
+          "name": "m왼들90도",
           "time_ms": 62,
           "angles": {
             "0": 1.0,
@@ -32141,9 +32141,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -60.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": -0.7578125
           },
           "torques": {
             "0": true,
@@ -32172,7 +32172,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "817cab15b6a645cfa926ef08da03f241",
+          "source_frame_id": "55a903ad0c80427786b785b0e0ee1621",
           "start_ms": 337
         },
         {
@@ -33504,7 +33504,7 @@
             "0": 1.0,
             "1": 0.263671875,
             "2": -9.4921875,
-            "3": -166.0,
+            "3": -168.0,
             "4": 17.0,
             "5": 7.8359375,
             "6": 67.5,
@@ -35208,12 +35208,12 @@
       ]
     },
     {
-      "name": "p전진0도(2회)",
+      "name": "m전진0도(2회)",
       "max_seq_ms": 1212,
       "repeat_count": 2,
       "playback_speed": 1.0,
       "repeatable": true,
-      "start_pose": "s오들0도",
+      "start_pose": "m오들0도",
       "end_pose": "t오뒤찐(0도)",
       "completion": {
         "position_tolerance_deg": 2.0,
@@ -35222,8 +35222,8 @@
       },
       "frames": [
         {
-          "frame_id": "96043ab21ab64046a0f55f97c16f8a30",
-          "name": "s오들0도",
+          "frame_id": "26b94e5636b34378b4096c81c8b49120",
+          "name": "m오들0도",
           "time_ms": 62,
           "angles": {
             "0": -64.0,
@@ -35236,7 +35236,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -2.33984375,
+            "10": -1.33984375,
             "11": -3.0,
             "12": 2.0,
             "15": -3.0,
@@ -35245,9 +35245,9 @@
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 58.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -0.2421875,
             "22": -12.0
           },
           "torques": {
@@ -35277,7 +35277,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "96043ab21ab64046a0f55f97c16f8a30",
+          "source_frame_id": "26b94e5636b34378b4096c81c8b49120",
           "start_ms": 80
         },
         {
@@ -35340,8 +35340,8 @@
           "start_ms": 142
         },
         {
-          "frame_id": "2e3844c6dfc44d02b0f2ca8a0fca9ece",
-          "name": "s왼들0도",
+          "frame_id": "5a7e76956fc94c80ae09bfb6423cc9da",
+          "name": "m왼들0도",
           "time_ms": 62,
           "angles": {
             "0": -64.0,
@@ -35364,9 +35364,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -60.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": -0.7578125
           },
           "torques": {
             "0": true,
@@ -35395,7 +35395,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "2e3844c6dfc44d02b0f2ca8a0fca9ece",
+          "source_frame_id": "5a7e76956fc94c80ae09bfb6423cc9da",
           "start_ms": 337
         },
         {
@@ -35460,12 +35460,12 @@
       ]
     },
     {
-      "name": "p전진90도(1회)",
+      "name": "m전진90도(1회)",
       "max_seq_ms": 1212,
       "repeat_count": 1,
       "playback_speed": 1.0,
       "repeatable": true,
-      "start_pose": "s오들90",
+      "start_pose": "m오들90도",
       "end_pose": "t오뒤찐(90도)",
       "completion": {
         "position_tolerance_deg": 2.0,
@@ -35474,8 +35474,8 @@
       },
       "frames": [
         {
-          "frame_id": "c3477c1d1631434d9dcb0946e8dc7d9a",
-          "name": "s오들90",
+          "frame_id": "857976b74bd04990b881ded046f63324",
+          "name": "m오들90도",
           "time_ms": 62,
           "angles": {
             "0": 1.0,
@@ -35488,7 +35488,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -2.33984375,
+            "10": -1.33984375,
             "11": -3.0,
             "12": 2.0,
             "15": -3.0,
@@ -35497,9 +35497,9 @@
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 58.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -0.2421875,
             "22": -12.0
           },
           "torques": {
@@ -35529,7 +35529,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "c3477c1d1631434d9dcb0946e8dc7d9a",
+          "source_frame_id": "857976b74bd04990b881ded046f63324",
           "start_ms": 80
         },
         {
@@ -35592,8 +35592,8 @@
           "start_ms": 142
         },
         {
-          "frame_id": "817cab15b6a645cfa926ef08da03f241",
-          "name": "s왼들90",
+          "frame_id": "55a903ad0c80427786b785b0e0ee1621",
+          "name": "m왼들90도",
           "time_ms": 62,
           "angles": {
             "0": 1.0,
@@ -35616,9 +35616,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -60.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": -0.7578125
           },
           "torques": {
             "0": true,
@@ -35647,7 +35647,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "817cab15b6a645cfa926ef08da03f241",
+          "source_frame_id": "55a903ad0c80427786b785b0e0ee1621",
           "start_ms": 337
         },
         {
@@ -35712,12 +35712,12 @@
       ]
     },
     {
-      "name": "p전진90도(3회)",
+      "name": "m전진90도(3회)",
       "max_seq_ms": 1212,
       "repeat_count": 3,
       "playback_speed": 1.0,
       "repeatable": true,
-      "start_pose": "s오들90",
+      "start_pose": "m오들90도",
       "end_pose": "t오뒤찐(90도)",
       "completion": {
         "position_tolerance_deg": 2.0,
@@ -35726,8 +35726,8 @@
       },
       "frames": [
         {
-          "frame_id": "c3477c1d1631434d9dcb0946e8dc7d9a",
-          "name": "s오들90",
+          "frame_id": "857976b74bd04990b881ded046f63324",
+          "name": "m오들90도",
           "time_ms": 62,
           "angles": {
             "0": 1.0,
@@ -35740,7 +35740,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -2.33984375,
+            "10": -1.33984375,
             "11": -3.0,
             "12": 2.0,
             "15": -3.0,
@@ -35749,9 +35749,9 @@
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 58.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -0.2421875,
             "22": -12.0
           },
           "torques": {
@@ -35781,7 +35781,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "c3477c1d1631434d9dcb0946e8dc7d9a",
+          "source_frame_id": "857976b74bd04990b881ded046f63324",
           "start_ms": 80
         },
         {
@@ -35844,8 +35844,8 @@
           "start_ms": 142
         },
         {
-          "frame_id": "817cab15b6a645cfa926ef08da03f241",
-          "name": "s왼들90",
+          "frame_id": "55a903ad0c80427786b785b0e0ee1621",
+          "name": "m왼들90도",
           "time_ms": 62,
           "angles": {
             "0": 1.0,
@@ -35868,9 +35868,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -60.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": -0.7578125
           },
           "torques": {
             "0": true,
@@ -35899,7 +35899,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "817cab15b6a645cfa926ef08da03f241",
+          "source_frame_id": "55a903ad0c80427786b785b0e0ee1621",
           "start_ms": 337
         },
         {
@@ -35965,11 +35965,11 @@
     },
     {
       "name": "n공에서 전진하고 후진준비자세",
-      "max_seq_ms": 1212,
+      "max_seq_ms": 754,
       "repeat_count": 1,
       "playback_speed": 1.0,
       "repeatable": true,
-      "start_pose": "s오들0도",
+      "start_pose": "m오들0도",
       "end_pose": "p미세오뒤1",
       "completion": {
         "position_tolerance_deg": 2.0,
@@ -35978,8 +35978,8 @@
       },
       "frames": [
         {
-          "frame_id": "96043ab21ab64046a0f55f97c16f8a30",
-          "name": "s오들0도",
+          "frame_id": "26b94e5636b34378b4096c81c8b49120",
+          "name": "m오들0도",
           "time_ms": 62,
           "angles": {
             "0": -64.0,
@@ -35992,7 +35992,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -2.33984375,
+            "10": -1.33984375,
             "11": -3.0,
             "12": 2.0,
             "15": -3.0,
@@ -36001,9 +36001,9 @@
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 58.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -0.2421875,
             "22": -12.0
           },
           "torques": {
@@ -36033,7 +36033,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "96043ab21ab64046a0f55f97c16f8a30",
+          "source_frame_id": "26b94e5636b34378b4096c81c8b49120",
           "start_ms": 80
         },
         {
@@ -36096,8 +36096,8 @@
           "start_ms": 142
         },
         {
-          "frame_id": "2e3844c6dfc44d02b0f2ca8a0fca9ece",
-          "name": "s왼들0도",
+          "frame_id": "5a7e76956fc94c80ae09bfb6423cc9da",
+          "name": "m왼들0도",
           "time_ms": 62,
           "angles": {
             "0": -64.0,
@@ -36120,9 +36120,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -60.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": -0.7578125
           },
           "torques": {
             "0": true,
@@ -36151,7 +36151,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "2e3844c6dfc44d02b0f2ca8a0fca9ece",
+          "source_frame_id": "5a7e76956fc94c80ae09bfb6423cc9da",
           "start_ms": 337
         },
         {
@@ -37793,7 +37793,7 @@
     },
     {
       "name": "t골대후제자리우회전+라인복귀우회전45도(4회)",
-      "max_seq_ms": 5437,
+      "max_seq_ms": 5429,
       "repeat_count": 1,
       "playback_speed": 1.0,
       "repeatable": true,
@@ -38759,8 +38759,8 @@
           "playback_cycle_end": true
         },
         {
-          "frame_id": "ec954b87772241b3ba2bfadb6d7e0778",
-          "name": "t라인복귀우오들",
+          "frame_id": "1cd6159efc884b7f8124c25ebb878f66",
+          "name": "m라인복귀우오들45",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -38775,16 +38775,16 @@
             "9": 2.4609375,
             "10": -2.33984375,
             "11": -3.0,
-            "12": 0.0,
+            "12": 1.0,
             "15": -3.0,
-            "16": 5.0,
+            "16": 4.0,
             "13": -80.0,
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 60.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -2.2421875,
             "22": -12.0
           },
           "torques": {
@@ -38814,7 +38814,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ec954b87772241b3ba2bfadb6d7e0778",
+          "source_frame_id": "1cd6159efc884b7f8124c25ebb878f66",
           "start_ms": 3453
         },
         {
@@ -38877,8 +38877,8 @@
           "start_ms": 3515
         },
         {
-          "frame_id": "fc9abd18496b4660be30961eeddb4d62",
-          "name": "t라인복귀우왼들",
+          "frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "name": "m라인복귀우왼들45",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -38891,7 +38891,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 1.4609375,
-            "10": -2.0,
+            "10": 0.0,
             "11": -3.0,
             "12": 5.33984375,
             "15": -5.0,
@@ -38901,9 +38901,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -64.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": 2.0
           },
           "torques": {
             "0": true,
@@ -38932,8 +38932,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "fc9abd18496b4660be30961eeddb4d62",
-          "start_ms": 3712
+          "source_frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "start_ms": 3710
         },
         {
           "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
@@ -38992,12 +38992,12 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "start_ms": 3774,
+          "start_ms": 3772,
           "playback_cycle_end": true
         },
         {
-          "frame_id": "ec954b87772241b3ba2bfadb6d7e0778",
-          "name": "t라인복귀우오들",
+          "frame_id": "1cd6159efc884b7f8124c25ebb878f66",
+          "name": "m라인복귀우오들45",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -39012,16 +39012,16 @@
             "9": 2.4609375,
             "10": -2.33984375,
             "11": -3.0,
-            "12": 0.0,
+            "12": 1.0,
             "15": -3.0,
-            "16": 5.0,
+            "16": 4.0,
             "13": -80.0,
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 60.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -2.2421875,
             "22": -12.0
           },
           "torques": {
@@ -39051,8 +39051,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ec954b87772241b3ba2bfadb6d7e0778",
-          "start_ms": 3969
+          "source_frame_id": "1cd6159efc884b7f8124c25ebb878f66",
+          "start_ms": 3967
         },
         {
           "frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
@@ -39111,11 +39111,11 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
-          "start_ms": 4031
+          "start_ms": 4029
         },
         {
-          "frame_id": "fc9abd18496b4660be30961eeddb4d62",
-          "name": "t라인복귀우왼들",
+          "frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "name": "m라인복귀우왼들45",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -39128,7 +39128,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 1.4609375,
-            "10": -2.0,
+            "10": 0.0,
             "11": -3.0,
             "12": 5.33984375,
             "15": -5.0,
@@ -39138,9 +39138,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -64.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": 2.0
           },
           "torques": {
             "0": true,
@@ -39169,8 +39169,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "fc9abd18496b4660be30961eeddb4d62",
-          "start_ms": 4228
+          "source_frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "start_ms": 4224
         },
         {
           "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
@@ -39229,12 +39229,12 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "start_ms": 4290,
+          "start_ms": 4286,
           "playback_cycle_end": true
         },
         {
-          "frame_id": "ec954b87772241b3ba2bfadb6d7e0778",
-          "name": "t라인복귀우오들",
+          "frame_id": "1cd6159efc884b7f8124c25ebb878f66",
+          "name": "m라인복귀우오들45",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -39249,16 +39249,16 @@
             "9": 2.4609375,
             "10": -2.33984375,
             "11": -3.0,
-            "12": 0.0,
+            "12": 1.0,
             "15": -3.0,
-            "16": 5.0,
+            "16": 4.0,
             "13": -80.0,
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 60.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -2.2421875,
             "22": -12.0
           },
           "torques": {
@@ -39288,8 +39288,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ec954b87772241b3ba2bfadb6d7e0778",
-          "start_ms": 4485
+          "source_frame_id": "1cd6159efc884b7f8124c25ebb878f66",
+          "start_ms": 4481
         },
         {
           "frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
@@ -39348,11 +39348,11 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
-          "start_ms": 4547
+          "start_ms": 4543
         },
         {
-          "frame_id": "fc9abd18496b4660be30961eeddb4d62",
-          "name": "t라인복귀우왼들",
+          "frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "name": "m라인복귀우왼들45",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -39365,7 +39365,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 1.4609375,
-            "10": -2.0,
+            "10": 0.0,
             "11": -3.0,
             "12": 5.33984375,
             "15": -5.0,
@@ -39375,9 +39375,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -64.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": 2.0
           },
           "torques": {
             "0": true,
@@ -39406,8 +39406,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "fc9abd18496b4660be30961eeddb4d62",
-          "start_ms": 4744
+          "source_frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "start_ms": 4738
         },
         {
           "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
@@ -39466,12 +39466,12 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "start_ms": 4806,
+          "start_ms": 4800,
           "playback_cycle_end": true
         },
         {
-          "frame_id": "ec954b87772241b3ba2bfadb6d7e0778",
-          "name": "t라인복귀우오들",
+          "frame_id": "1cd6159efc884b7f8124c25ebb878f66",
+          "name": "m라인복귀우오들45",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -39486,16 +39486,16 @@
             "9": 2.4609375,
             "10": -2.33984375,
             "11": -3.0,
-            "12": 0.0,
+            "12": 1.0,
             "15": -3.0,
-            "16": 5.0,
+            "16": 4.0,
             "13": -80.0,
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 60.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -2.2421875,
             "22": -12.0
           },
           "torques": {
@@ -39525,8 +39525,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ec954b87772241b3ba2bfadb6d7e0778",
-          "start_ms": 5001
+          "source_frame_id": "1cd6159efc884b7f8124c25ebb878f66",
+          "start_ms": 4995
         },
         {
           "frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
@@ -39585,11 +39585,11 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
-          "start_ms": 5063
+          "start_ms": 5057
         },
         {
-          "frame_id": "fc9abd18496b4660be30961eeddb4d62",
-          "name": "t라인복귀우왼들",
+          "frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "name": "m라인복귀우왼들45",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -39602,7 +39602,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 1.4609375,
-            "10": -2.0,
+            "10": 0.0,
             "11": -3.0,
             "12": 5.33984375,
             "15": -5.0,
@@ -39612,9 +39612,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -64.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": 2.0
           },
           "torques": {
             "0": true,
@@ -39643,8 +39643,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "fc9abd18496b4660be30961eeddb4d62",
-          "start_ms": 5260
+          "source_frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "start_ms": 5252
         },
         {
           "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
@@ -39703,14 +39703,14 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "start_ms": 5322,
+          "start_ms": 5314,
           "playback_cycle_end": true
         }
       ]
     },
     {
       "name": "p골대후제자리좌회전+라인복귀좌회전45도(4회)",
-      "max_seq_ms": 4842,
+      "max_seq_ms": 4838,
       "repeat_count": 1,
       "playback_speed": 1.05,
       "repeatable": true,
@@ -40433,8 +40433,8 @@
           "start_ms": 2098
         },
         {
-          "frame_id": "f2a7013447cd42f4b5daecd5854a0dd7",
-          "name": "t라인복귀좌오들공",
+          "frame_id": "1cd6159efc884b7f8124c25ebb878f66",
+          "name": "m라인복귀우오들45",
           "time_ms": 65,
           "angles": {
             "0": -34.0,
@@ -40447,18 +40447,18 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -4.33984375,
+            "10": -2.33984375,
             "11": -3.0,
-            "12": 6.0,
+            "12": 1.0,
             "15": -3.0,
-            "16": 5.0,
+            "16": 4.0,
             "13": -80.0,
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 60.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -2.2421875,
             "22": -12.0
           },
           "torques": {
@@ -40488,7 +40488,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "f2a7013447cd42f4b5daecd5854a0dd7",
+          "source_frame_id": "1cd6159efc884b7f8124c25ebb878f66",
           "start_ms": 2763
         },
         {
@@ -40551,8 +40551,8 @@
           "start_ms": 2828
         },
         {
-          "frame_id": "ac02c0a070444144afd158110daad8f3",
-          "name": "t라인복귀좌왼들공",
+          "frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "name": "m라인복귀우왼들45",
           "time_ms": 65,
           "angles": {
             "0": -34.0,
@@ -40565,9 +40565,9 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 1.4609375,
-            "10": 3.0,
+            "10": 0.0,
             "11": -3.0,
-            "12": -3.66015625,
+            "12": 5.33984375,
             "15": -5.0,
             "16": 4.0,
             "13": -55.0,
@@ -40575,9 +40575,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -64.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": 2.0
           },
           "torques": {
             "0": true,
@@ -40606,8 +40606,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ac02c0a070444144afd158110daad8f3",
-          "start_ms": 3034
+          "source_frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "start_ms": 3033
         },
         {
           "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
@@ -40666,12 +40666,12 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "start_ms": 3099,
+          "start_ms": 3098,
           "playback_cycle_end": true
         },
         {
-          "frame_id": "f2a7013447cd42f4b5daecd5854a0dd7",
-          "name": "t라인복귀좌오들공",
+          "frame_id": "1cd6159efc884b7f8124c25ebb878f66",
+          "name": "m라인복귀우오들45",
           "time_ms": 65,
           "angles": {
             "0": -34.0,
@@ -40684,18 +40684,18 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -4.33984375,
+            "10": -2.33984375,
             "11": -3.0,
-            "12": 6.0,
+            "12": 1.0,
             "15": -3.0,
-            "16": 5.0,
+            "16": 4.0,
             "13": -80.0,
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 60.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -2.2421875,
             "22": -12.0
           },
           "torques": {
@@ -40725,8 +40725,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "f2a7013447cd42f4b5daecd5854a0dd7",
-          "start_ms": 3304
+          "source_frame_id": "1cd6159efc884b7f8124c25ebb878f66",
+          "start_ms": 3303
         },
         {
           "frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
@@ -40785,11 +40785,11 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
-          "start_ms": 3369
+          "start_ms": 3368
         },
         {
-          "frame_id": "ac02c0a070444144afd158110daad8f3",
-          "name": "t라인복귀좌왼들공",
+          "frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "name": "m라인복귀우왼들45",
           "time_ms": 65,
           "angles": {
             "0": -34.0,
@@ -40802,9 +40802,9 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 1.4609375,
-            "10": 3.0,
+            "10": 0.0,
             "11": -3.0,
-            "12": -3.66015625,
+            "12": 5.33984375,
             "15": -5.0,
             "16": 4.0,
             "13": -55.0,
@@ -40812,9 +40812,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -64.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": 2.0
           },
           "torques": {
             "0": true,
@@ -40843,245 +40843,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ac02c0a070444144afd158110daad8f3",
-          "start_ms": 3575
-        },
-        {
-          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "name": "오뒤무게중심앞(catalog80)",
-          "time_ms": 121,
-          "angles": {
-            "0": -33.662109375,
-            "1": 0.263671875,
-            "2": -9.931640625,
-            "3": 10.0,
-            "4": 18.0,
-            "5": -18.0,
-            "6": 66.796875,
-            "7": -68.115234375,
-            "8": -11.07421875,
-            "9": 3.076171875,
-            "10": 2.109375,
-            "11": -2.8125,
-            "12": 2.373046875,
-            "15": 3.427734375,
-            "16": -1.494140625,
-            "13": -44.912109375,
-            "14": 58.974609375,
-            "17": -26.806640625,
-            "18": 27.421875,
-            "19": 67.8515625,
-            "20": -57.744140625,
-            "21": 3.33984375,
-            "22": -5.2734375
-          },
-          "torques": {
-            "0": true,
-            "1": true,
-            "2": true,
-            "3": true,
-            "4": true,
-            "5": true,
-            "6": true,
-            "7": true,
-            "8": true,
-            "9": true,
-            "10": true,
-            "11": true,
-            "12": true,
-            "15": true,
-            "16": true,
-            "13": true,
-            "14": true,
-            "17": true,
-            "18": true,
-            "19": true,
-            "20": true,
-            "21": true,
-            "22": true
-          },
-          "is_important": false,
-          "lift_early_arrival": true,
-          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "start_ms": 3640,
-          "playback_cycle_end": true
-        },
-        {
-          "frame_id": "f2a7013447cd42f4b5daecd5854a0dd7",
-          "name": "t라인복귀좌오들공",
-          "time_ms": 65,
-          "angles": {
-            "0": -34.0,
-            "1": -0.3515625,
-            "2": -8.4375,
-            "3": 7.55859375,
-            "4": 11.25,
-            "5": -13.271484375,
-            "6": 74.35546875,
-            "7": -76.2890625,
-            "8": -10.546875,
-            "9": 2.4609375,
-            "10": -4.33984375,
-            "11": -3.0,
-            "12": 6.0,
-            "15": -3.0,
-            "16": 5.0,
-            "13": -80.0,
-            "14": 56.0,
-            "17": -56.337890625,
-            "18": 32.0,
-            "19": 55.0,
-            "20": -68.0,
-            "21": 1.7578125,
-            "22": -12.0
-          },
-          "torques": {
-            "0": true,
-            "1": true,
-            "2": true,
-            "3": true,
-            "4": true,
-            "5": true,
-            "6": true,
-            "7": true,
-            "8": true,
-            "9": true,
-            "10": true,
-            "11": true,
-            "12": true,
-            "15": true,
-            "16": true,
-            "13": true,
-            "14": true,
-            "17": true,
-            "18": true,
-            "19": true,
-            "20": true,
-            "21": true,
-            "22": true
-          },
-          "is_important": false,
-          "lift_early_arrival": true,
-          "source_frame_id": "f2a7013447cd42f4b5daecd5854a0dd7",
-          "start_ms": 3845
-        },
-        {
-          "frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
-          "name": "t왼뒤407(45도)",
-          "time_ms": 120,
-          "angles": {
-            "0": -34.0,
-            "1": -0.439453125,
-            "2": -9.228515625,
-            "3": 8.61328125,
-            "4": 10.37109375,
-            "5": -10.1953125,
-            "6": 69.609375,
-            "7": -70.927734375,
-            "8": -11.07421875,
-            "9": 2.63671875,
-            "10": -4.0,
-            "11": 2.0,
-            "12": -2.0,
-            "15": 3.0,
-            "16": -2.0,
-            "13": -59.0,
-            "14": 47.0,
-            "17": -34.453125,
-            "18": 31.904296875,
-            "19": 60.64453125,
-            "20": -74.0,
-            "21": 3.0,
-            "22": -4.5703125
-          },
-          "torques": {
-            "0": true,
-            "1": true,
-            "2": true,
-            "3": true,
-            "4": true,
-            "5": true,
-            "6": true,
-            "7": true,
-            "8": true,
-            "9": true,
-            "10": true,
-            "11": true,
-            "12": true,
-            "15": true,
-            "16": true,
-            "13": true,
-            "14": true,
-            "17": true,
-            "18": true,
-            "19": true,
-            "20": true,
-            "21": true,
-            "22": true
-          },
-          "is_important": false,
-          "lift_early_arrival": true,
-          "source_frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
-          "start_ms": 3910
-        },
-        {
-          "frame_id": "ac02c0a070444144afd158110daad8f3",
-          "name": "t라인복귀좌왼들공",
-          "time_ms": 66,
-          "angles": {
-            "0": -34.0,
-            "1": -0.3515625,
-            "2": -8.4375,
-            "3": 7.55859375,
-            "4": 11.25,
-            "5": -13.271484375,
-            "6": 74.35546875,
-            "7": -76.2890625,
-            "8": -10.546875,
-            "9": 1.4609375,
-            "10": 3.0,
-            "11": -3.0,
-            "12": -3.66015625,
-            "15": -5.0,
-            "16": 4.0,
-            "13": -55.0,
-            "14": 80.0,
-            "17": -29.70703125,
-            "18": 56.337890625,
-            "19": 64.0,
-            "20": -58.0,
-            "21": 12.0,
-            "22": -1.7578125
-          },
-          "torques": {
-            "0": true,
-            "1": true,
-            "2": true,
-            "3": true,
-            "4": true,
-            "5": true,
-            "6": true,
-            "7": true,
-            "8": true,
-            "9": true,
-            "10": true,
-            "11": true,
-            "12": true,
-            "15": true,
-            "16": true,
-            "13": true,
-            "14": true,
-            "17": true,
-            "18": true,
-            "19": true,
-            "20": true,
-            "21": true,
-            "22": true
-          },
-          "is_important": false,
-          "lift_early_arrival": true,
-          "source_frame_id": "ac02c0a070444144afd158110daad8f3",
-          "start_ms": 4115
+          "source_frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "start_ms": 3573
         },
         {
           "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
@@ -41140,12 +40903,12 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "start_ms": 4181,
+          "start_ms": 3638,
           "playback_cycle_end": true
         },
         {
-          "frame_id": "f2a7013447cd42f4b5daecd5854a0dd7",
-          "name": "t라인복귀좌오들공",
+          "frame_id": "1cd6159efc884b7f8124c25ebb878f66",
+          "name": "m라인복귀우오들45",
           "time_ms": 65,
           "angles": {
             "0": -34.0,
@@ -41158,18 +40921,18 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -4.33984375,
+            "10": -2.33984375,
             "11": -3.0,
-            "12": 6.0,
+            "12": 1.0,
             "15": -3.0,
-            "16": 5.0,
+            "16": 4.0,
             "13": -80.0,
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 60.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -2.2421875,
             "22": -12.0
           },
           "torques": {
@@ -41199,8 +40962,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "f2a7013447cd42f4b5daecd5854a0dd7",
-          "start_ms": 4385
+          "source_frame_id": "1cd6159efc884b7f8124c25ebb878f66",
+          "start_ms": 3842
         },
         {
           "frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
@@ -41259,11 +41022,11 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
-          "start_ms": 4450
+          "start_ms": 3907
         },
         {
-          "frame_id": "ac02c0a070444144afd158110daad8f3",
-          "name": "t라인복귀좌왼들공",
+          "frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "name": "m라인복귀우왼들45",
           "time_ms": 65,
           "angles": {
             "0": -34.0,
@@ -41276,9 +41039,9 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 1.4609375,
-            "10": 3.0,
+            "10": 0.0,
             "11": -3.0,
-            "12": -3.66015625,
+            "12": 5.33984375,
             "15": -5.0,
             "16": 4.0,
             "13": -55.0,
@@ -41286,9 +41049,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -64.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": 2.0
           },
           "torques": {
             "0": true,
@@ -41317,8 +41080,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ac02c0a070444144afd158110daad8f3",
-          "start_ms": 4656
+          "source_frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "start_ms": 4112
         },
         {
           "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
@@ -41377,14 +41140,251 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "start_ms": 4721,
+          "start_ms": 4177,
+          "playback_cycle_end": true
+        },
+        {
+          "frame_id": "1cd6159efc884b7f8124c25ebb878f66",
+          "name": "m라인복귀우오들45",
+          "time_ms": 65,
+          "angles": {
+            "0": -34.0,
+            "1": -0.3515625,
+            "2": -8.4375,
+            "3": 7.55859375,
+            "4": 11.25,
+            "5": -13.271484375,
+            "6": 74.35546875,
+            "7": -76.2890625,
+            "8": -10.546875,
+            "9": 2.4609375,
+            "10": -2.33984375,
+            "11": -3.0,
+            "12": 1.0,
+            "15": -3.0,
+            "16": 4.0,
+            "13": -80.0,
+            "14": 56.0,
+            "17": -56.337890625,
+            "18": 32.0,
+            "19": 60.0,
+            "20": -68.0,
+            "21": -2.2421875,
+            "22": -12.0
+          },
+          "torques": {
+            "0": true,
+            "1": true,
+            "2": true,
+            "3": true,
+            "4": true,
+            "5": true,
+            "6": true,
+            "7": true,
+            "8": true,
+            "9": true,
+            "10": true,
+            "11": true,
+            "12": true,
+            "15": true,
+            "16": true,
+            "13": true,
+            "14": true,
+            "17": true,
+            "18": true,
+            "19": true,
+            "20": true,
+            "21": true,
+            "22": true
+          },
+          "is_important": false,
+          "lift_early_arrival": true,
+          "source_frame_id": "1cd6159efc884b7f8124c25ebb878f66",
+          "start_ms": 4382
+        },
+        {
+          "frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
+          "name": "t왼뒤407(45도)",
+          "time_ms": 121,
+          "angles": {
+            "0": -34.0,
+            "1": -0.439453125,
+            "2": -9.228515625,
+            "3": 8.61328125,
+            "4": 10.37109375,
+            "5": -10.1953125,
+            "6": 69.609375,
+            "7": -70.927734375,
+            "8": -11.07421875,
+            "9": 2.63671875,
+            "10": -4.0,
+            "11": 2.0,
+            "12": -2.0,
+            "15": 3.0,
+            "16": -2.0,
+            "13": -59.0,
+            "14": 47.0,
+            "17": -34.453125,
+            "18": 31.904296875,
+            "19": 60.64453125,
+            "20": -74.0,
+            "21": 3.0,
+            "22": -4.5703125
+          },
+          "torques": {
+            "0": true,
+            "1": true,
+            "2": true,
+            "3": true,
+            "4": true,
+            "5": true,
+            "6": true,
+            "7": true,
+            "8": true,
+            "9": true,
+            "10": true,
+            "11": true,
+            "12": true,
+            "15": true,
+            "16": true,
+            "13": true,
+            "14": true,
+            "17": true,
+            "18": true,
+            "19": true,
+            "20": true,
+            "21": true,
+            "22": true
+          },
+          "is_important": false,
+          "lift_early_arrival": true,
+          "source_frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
+          "start_ms": 4447
+        },
+        {
+          "frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "name": "m라인복귀우왼들45",
+          "time_ms": 65,
+          "angles": {
+            "0": -34.0,
+            "1": -0.3515625,
+            "2": -8.4375,
+            "3": 7.55859375,
+            "4": 11.25,
+            "5": -13.271484375,
+            "6": 74.35546875,
+            "7": -76.2890625,
+            "8": -10.546875,
+            "9": 1.4609375,
+            "10": 0.0,
+            "11": -3.0,
+            "12": 5.33984375,
+            "15": -5.0,
+            "16": 4.0,
+            "13": -55.0,
+            "14": 80.0,
+            "17": -29.70703125,
+            "18": 56.337890625,
+            "19": 64.0,
+            "20": -64.0,
+            "21": 12.0,
+            "22": 2.0
+          },
+          "torques": {
+            "0": true,
+            "1": true,
+            "2": true,
+            "3": true,
+            "4": true,
+            "5": true,
+            "6": true,
+            "7": true,
+            "8": true,
+            "9": true,
+            "10": true,
+            "11": true,
+            "12": true,
+            "15": true,
+            "16": true,
+            "13": true,
+            "14": true,
+            "17": true,
+            "18": true,
+            "19": true,
+            "20": true,
+            "21": true,
+            "22": true
+          },
+          "is_important": false,
+          "lift_early_arrival": true,
+          "source_frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "start_ms": 4652
+        },
+        {
+          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "name": "오뒤무게중심앞(catalog80)",
+          "time_ms": 121,
+          "angles": {
+            "0": -33.662109375,
+            "1": 0.263671875,
+            "2": -9.931640625,
+            "3": 10.0,
+            "4": 18.0,
+            "5": -18.0,
+            "6": 66.796875,
+            "7": -68.115234375,
+            "8": -11.07421875,
+            "9": 3.076171875,
+            "10": 2.109375,
+            "11": -2.8125,
+            "12": 2.373046875,
+            "15": 3.427734375,
+            "16": -1.494140625,
+            "13": -44.912109375,
+            "14": 58.974609375,
+            "17": -26.806640625,
+            "18": 27.421875,
+            "19": 67.8515625,
+            "20": -57.744140625,
+            "21": 3.33984375,
+            "22": -5.2734375
+          },
+          "torques": {
+            "0": true,
+            "1": true,
+            "2": true,
+            "3": true,
+            "4": true,
+            "5": true,
+            "6": true,
+            "7": true,
+            "8": true,
+            "9": true,
+            "10": true,
+            "11": true,
+            "12": true,
+            "15": true,
+            "16": true,
+            "13": true,
+            "14": true,
+            "17": true,
+            "18": true,
+            "19": true,
+            "20": true,
+            "21": true,
+            "22": true
+          },
+          "is_important": false,
+          "lift_early_arrival": true,
+          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "start_ms": 4717,
           "playback_cycle_end": true
         }
       ]
     },
     {
       "name": "t골대후제자리우회전(6회)+라인복귀좌회전45도(4회)+라인복귀좌회전45도(4회)",
-      "max_seq_ms": 6132,
+      "max_seq_ms": 6124,
       "repeat_count": 1,
       "playback_speed": 1.0,
       "repeatable": true,
@@ -42231,8 +42231,8 @@
           "playback_cycle_end": true
         },
         {
-          "frame_id": "ef0a33a2b2934b35a60fda4dfd144a2d",
-          "name": "s오들",
+          "frame_id": "85b94229c42d4ef889dd1f9ed412a14d",
+          "name": "m오들45도",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -42245,7 +42245,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -2.33984375,
+            "10": -1.33984375,
             "11": -3.0,
             "12": 2.0,
             "15": -3.0,
@@ -42254,9 +42254,9 @@
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 58.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -0.2421875,
             "22": -12.0
           },
           "torques": {
@@ -42286,7 +42286,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ef0a33a2b2934b35a60fda4dfd144a2d",
+          "source_frame_id": "85b94229c42d4ef889dd1f9ed412a14d",
           "start_ms": 3120
         },
         {
@@ -42349,8 +42349,8 @@
           "start_ms": 3182
         },
         {
-          "frame_id": "b5f6920e380a43728e88ab86a5f45658",
-          "name": "s왼들",
+          "frame_id": "d4ad5fac0ab74e58b6f984fc26b498e4",
+          "name": "m왼들45도",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -42373,9 +42373,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -60.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": -0.7578125
           },
           "torques": {
             "0": true,
@@ -42404,7 +42404,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "b5f6920e380a43728e88ab86a5f45658",
+          "source_frame_id": "d4ad5fac0ab74e58b6f984fc26b498e4",
           "start_ms": 3377
         },
         {
@@ -42468,8 +42468,8 @@
           "playback_cycle_end": true
         },
         {
-          "frame_id": "ef0a33a2b2934b35a60fda4dfd144a2d",
-          "name": "s오들",
+          "frame_id": "85b94229c42d4ef889dd1f9ed412a14d",
+          "name": "m오들45도",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -42482,7 +42482,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -2.33984375,
+            "10": -1.33984375,
             "11": -3.0,
             "12": 2.0,
             "15": -3.0,
@@ -42491,9 +42491,9 @@
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 58.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -0.2421875,
             "22": -12.0
           },
           "torques": {
@@ -42523,7 +42523,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ef0a33a2b2934b35a60fda4dfd144a2d",
+          "source_frame_id": "85b94229c42d4ef889dd1f9ed412a14d",
           "start_ms": 3634
         },
         {
@@ -42586,8 +42586,8 @@
           "start_ms": 3696
         },
         {
-          "frame_id": "b5f6920e380a43728e88ab86a5f45658",
-          "name": "s왼들",
+          "frame_id": "d4ad5fac0ab74e58b6f984fc26b498e4",
+          "name": "m왼들45도",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -42610,9 +42610,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -60.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": -0.7578125
           },
           "torques": {
             "0": true,
@@ -42641,7 +42641,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "b5f6920e380a43728e88ab86a5f45658",
+          "source_frame_id": "d4ad5fac0ab74e58b6f984fc26b498e4",
           "start_ms": 3891
         },
         {
@@ -42705,8 +42705,8 @@
           "playback_cycle_end": true
         },
         {
-          "frame_id": "ec954b87772241b3ba2bfadb6d7e0778",
-          "name": "t라인복귀우오들",
+          "frame_id": "1cd6159efc884b7f8124c25ebb878f66",
+          "name": "m라인복귀우오들45",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -42721,16 +42721,16 @@
             "9": 2.4609375,
             "10": -2.33984375,
             "11": -3.0,
-            "12": 0.0,
+            "12": 1.0,
             "15": -3.0,
-            "16": 5.0,
+            "16": 4.0,
             "13": -80.0,
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 60.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -2.2421875,
             "22": -12.0
           },
           "torques": {
@@ -42760,7 +42760,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ec954b87772241b3ba2bfadb6d7e0778",
+          "source_frame_id": "1cd6159efc884b7f8124c25ebb878f66",
           "start_ms": 4148
         },
         {
@@ -42823,8 +42823,8 @@
           "start_ms": 4210
         },
         {
-          "frame_id": "fc9abd18496b4660be30961eeddb4d62",
-          "name": "t라인복귀우왼들",
+          "frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "name": "m라인복귀우왼들45",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -42837,7 +42837,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 1.4609375,
-            "10": -2.0,
+            "10": 0.0,
             "11": -3.0,
             "12": 5.33984375,
             "15": -5.0,
@@ -42847,9 +42847,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -64.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": 2.0
           },
           "torques": {
             "0": true,
@@ -42878,8 +42878,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "fc9abd18496b4660be30961eeddb4d62",
-          "start_ms": 4407
+          "source_frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "start_ms": 4405
         },
         {
           "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
@@ -42938,12 +42938,12 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "start_ms": 4469,
+          "start_ms": 4467,
           "playback_cycle_end": true
         },
         {
-          "frame_id": "ec954b87772241b3ba2bfadb6d7e0778",
-          "name": "t라인복귀우오들",
+          "frame_id": "1cd6159efc884b7f8124c25ebb878f66",
+          "name": "m라인복귀우오들45",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -42958,16 +42958,16 @@
             "9": 2.4609375,
             "10": -2.33984375,
             "11": -3.0,
-            "12": 0.0,
+            "12": 1.0,
             "15": -3.0,
-            "16": 5.0,
+            "16": 4.0,
             "13": -80.0,
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 60.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -2.2421875,
             "22": -12.0
           },
           "torques": {
@@ -42997,8 +42997,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ec954b87772241b3ba2bfadb6d7e0778",
-          "start_ms": 4664
+          "source_frame_id": "1cd6159efc884b7f8124c25ebb878f66",
+          "start_ms": 4662
         },
         {
           "frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
@@ -43057,11 +43057,11 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
-          "start_ms": 4726
+          "start_ms": 4724
         },
         {
-          "frame_id": "fc9abd18496b4660be30961eeddb4d62",
-          "name": "t라인복귀우왼들",
+          "frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "name": "m라인복귀우왼들45",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -43074,7 +43074,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 1.4609375,
-            "10": -2.0,
+            "10": 0.0,
             "11": -3.0,
             "12": 5.33984375,
             "15": -5.0,
@@ -43084,9 +43084,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -64.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": 2.0
           },
           "torques": {
             "0": true,
@@ -43115,8 +43115,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "fc9abd18496b4660be30961eeddb4d62",
-          "start_ms": 4923
+          "source_frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "start_ms": 4919
         },
         {
           "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
@@ -43175,12 +43175,12 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "start_ms": 4985,
+          "start_ms": 4981,
           "playback_cycle_end": true
         },
         {
-          "frame_id": "ec954b87772241b3ba2bfadb6d7e0778",
-          "name": "t라인복귀우오들",
+          "frame_id": "1cd6159efc884b7f8124c25ebb878f66",
+          "name": "m라인복귀우오들45",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -43195,16 +43195,16 @@
             "9": 2.4609375,
             "10": -2.33984375,
             "11": -3.0,
-            "12": 0.0,
+            "12": 1.0,
             "15": -3.0,
-            "16": 5.0,
+            "16": 4.0,
             "13": -80.0,
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 60.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -2.2421875,
             "22": -12.0
           },
           "torques": {
@@ -43234,8 +43234,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ec954b87772241b3ba2bfadb6d7e0778",
-          "start_ms": 5180
+          "source_frame_id": "1cd6159efc884b7f8124c25ebb878f66",
+          "start_ms": 5176
         },
         {
           "frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
@@ -43294,11 +43294,11 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
-          "start_ms": 5242
+          "start_ms": 5238
         },
         {
-          "frame_id": "fc9abd18496b4660be30961eeddb4d62",
-          "name": "t라인복귀우왼들",
+          "frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "name": "m라인복귀우왼들45",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -43311,7 +43311,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 1.4609375,
-            "10": -2.0,
+            "10": 0.0,
             "11": -3.0,
             "12": 5.33984375,
             "15": -5.0,
@@ -43321,9 +43321,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -64.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": 2.0
           },
           "torques": {
             "0": true,
@@ -43352,8 +43352,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "fc9abd18496b4660be30961eeddb4d62",
-          "start_ms": 5439
+          "source_frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "start_ms": 5433
         },
         {
           "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
@@ -43412,12 +43412,12 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "start_ms": 5501,
+          "start_ms": 5495,
           "playback_cycle_end": true
         },
         {
-          "frame_id": "ec954b87772241b3ba2bfadb6d7e0778",
-          "name": "t라인복귀우오들",
+          "frame_id": "1cd6159efc884b7f8124c25ebb878f66",
+          "name": "m라인복귀우오들45",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -43432,16 +43432,16 @@
             "9": 2.4609375,
             "10": -2.33984375,
             "11": -3.0,
-            "12": 0.0,
+            "12": 1.0,
             "15": -3.0,
-            "16": 5.0,
+            "16": 4.0,
             "13": -80.0,
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 60.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -2.2421875,
             "22": -12.0
           },
           "torques": {
@@ -43471,8 +43471,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ec954b87772241b3ba2bfadb6d7e0778",
-          "start_ms": 5696
+          "source_frame_id": "1cd6159efc884b7f8124c25ebb878f66",
+          "start_ms": 5690
         },
         {
           "frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
@@ -43531,11 +43531,11 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
-          "start_ms": 5758
+          "start_ms": 5752
         },
         {
-          "frame_id": "fc9abd18496b4660be30961eeddb4d62",
-          "name": "t라인복귀우왼들",
+          "frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "name": "m라인복귀우왼들45",
           "time_ms": 62,
           "angles": {
             "0": -34.0,
@@ -43548,7 +43548,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 1.4609375,
-            "10": -2.0,
+            "10": 0.0,
             "11": -3.0,
             "12": 5.33984375,
             "15": -5.0,
@@ -43558,9 +43558,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -64.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": 2.0
           },
           "torques": {
             "0": true,
@@ -43589,8 +43589,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "fc9abd18496b4660be30961eeddb4d62",
-          "start_ms": 5955
+          "source_frame_id": "8cbe9fe4a44648568c1e82d57aa08b98",
+          "start_ms": 5947
         },
         {
           "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
@@ -43649,14 +43649,14 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "start_ms": 6017,
+          "start_ms": 6009,
           "playback_cycle_end": true
         }
       ]
     },
     {
       "name": "p골대후제자리좌회전(4회)+라인복귀우회전45도(4회)+라인복귀우회전45도(4회)",
-      "max_seq_ms": 5566,
+      "max_seq_ms": 5562,
       "repeat_count": 1,
       "playback_speed": 1.05,
       "repeatable": true,
@@ -44261,8 +44261,8 @@
           "start_ms": 1743
         },
         {
-          "frame_id": "ef0a33a2b2934b35a60fda4dfd144a2d",
-          "name": "s오들",
+          "frame_id": "85b94229c42d4ef889dd1f9ed412a14d",
+          "name": "m오들45도",
           "time_ms": 65,
           "angles": {
             "0": -34.0,
@@ -44275,7 +44275,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -2.33984375,
+            "10": -1.33984375,
             "11": -3.0,
             "12": 2.0,
             "15": -3.0,
@@ -44284,9 +44284,9 @@
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 58.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -0.2421875,
             "22": -12.0
           },
           "torques": {
@@ -44316,7 +44316,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ef0a33a2b2934b35a60fda4dfd144a2d",
+          "source_frame_id": "85b94229c42d4ef889dd1f9ed412a14d",
           "start_ms": 2408
         },
         {
@@ -44379,8 +44379,8 @@
           "start_ms": 2473
         },
         {
-          "frame_id": "b5f6920e380a43728e88ab86a5f45658",
-          "name": "s왼들",
+          "frame_id": "d4ad5fac0ab74e58b6f984fc26b498e4",
+          "name": "m왼들45도",
           "time_ms": 65,
           "angles": {
             "0": -34.0,
@@ -44403,9 +44403,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -60.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": -0.7578125
           },
           "torques": {
             "0": true,
@@ -44434,7 +44434,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "b5f6920e380a43728e88ab86a5f45658",
+          "source_frame_id": "d4ad5fac0ab74e58b6f984fc26b498e4",
           "start_ms": 2678
         },
         {
@@ -44498,8 +44498,8 @@
           "playback_cycle_end": true
         },
         {
-          "frame_id": "ef0a33a2b2934b35a60fda4dfd144a2d",
-          "name": "s오들",
+          "frame_id": "85b94229c42d4ef889dd1f9ed412a14d",
+          "name": "m오들45도",
           "time_ms": 65,
           "angles": {
             "0": -34.0,
@@ -44512,7 +44512,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -2.33984375,
+            "10": -1.33984375,
             "11": -3.0,
             "12": 2.0,
             "15": -3.0,
@@ -44521,9 +44521,9 @@
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 58.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -0.2421875,
             "22": -12.0
           },
           "torques": {
@@ -44553,7 +44553,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ef0a33a2b2934b35a60fda4dfd144a2d",
+          "source_frame_id": "85b94229c42d4ef889dd1f9ed412a14d",
           "start_ms": 2948
         },
         {
@@ -44616,8 +44616,8 @@
           "start_ms": 3013
         },
         {
-          "frame_id": "b5f6920e380a43728e88ab86a5f45658",
-          "name": "s왼들",
+          "frame_id": "d4ad5fac0ab74e58b6f984fc26b498e4",
+          "name": "m왼들45도",
           "time_ms": 65,
           "angles": {
             "0": -34.0,
@@ -44640,9 +44640,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -60.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": -0.7578125
           },
           "torques": {
             "0": true,
@@ -44671,7 +44671,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "b5f6920e380a43728e88ab86a5f45658",
+          "source_frame_id": "d4ad5fac0ab74e58b6f984fc26b498e4",
           "start_ms": 3218
         },
         {
@@ -44735,8 +44735,8 @@
           "playback_cycle_end": true
         },
         {
-          "frame_id": "f2a7013447cd42f4b5daecd5854a0dd7",
-          "name": "t라인복귀좌오들공",
+          "frame_id": "57d540c0d20748df8eb2014e77b03807",
+          "name": "m라인복귀좌오들45",
           "time_ms": 65,
           "angles": {
             "0": -34.0,
@@ -44749,7 +44749,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -4.33984375,
+            "10": -3.33984375,
             "11": -3.0,
             "12": 6.0,
             "15": -3.0,
@@ -44758,9 +44758,9 @@
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 60.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -0.2421875,
             "22": -12.0
           },
           "torques": {
@@ -44790,7 +44790,7 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "f2a7013447cd42f4b5daecd5854a0dd7",
+          "source_frame_id": "57d540c0d20748df8eb2014e77b03807",
           "start_ms": 3487
         },
         {
@@ -44853,8 +44853,8 @@
           "start_ms": 3552
         },
         {
-          "frame_id": "ac02c0a070444144afd158110daad8f3",
-          "name": "t라인복귀좌왼들공",
+          "frame_id": "50a0ced479634f6cb2f43f635661ab0c",
+          "name": "m라인복귀좌왼들45",
           "time_ms": 65,
           "angles": {
             "0": -34.0,
@@ -44877,9 +44877,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -61.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": -0.7578125
           },
           "torques": {
             "0": true,
@@ -44908,8 +44908,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ac02c0a070444144afd158110daad8f3",
-          "start_ms": 3758
+          "source_frame_id": "50a0ced479634f6cb2f43f635661ab0c",
+          "start_ms": 3757
         },
         {
           "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
@@ -44968,12 +44968,12 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "start_ms": 3823,
+          "start_ms": 3822,
           "playback_cycle_end": true
         },
         {
-          "frame_id": "f2a7013447cd42f4b5daecd5854a0dd7",
-          "name": "t라인복귀좌오들공",
+          "frame_id": "57d540c0d20748df8eb2014e77b03807",
+          "name": "m라인복귀좌오들45",
           "time_ms": 65,
           "angles": {
             "0": -34.0,
@@ -44986,7 +44986,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -4.33984375,
+            "10": -3.33984375,
             "11": -3.0,
             "12": 6.0,
             "15": -3.0,
@@ -44995,9 +44995,9 @@
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 60.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -0.2421875,
             "22": -12.0
           },
           "torques": {
@@ -45027,8 +45027,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "f2a7013447cd42f4b5daecd5854a0dd7",
-          "start_ms": 4028
+          "source_frame_id": "57d540c0d20748df8eb2014e77b03807",
+          "start_ms": 4027
         },
         {
           "frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
@@ -45087,11 +45087,11 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
-          "start_ms": 4093
+          "start_ms": 4092
         },
         {
-          "frame_id": "ac02c0a070444144afd158110daad8f3",
-          "name": "t라인복귀좌왼들공",
+          "frame_id": "50a0ced479634f6cb2f43f635661ab0c",
+          "name": "m라인복귀좌왼들45",
           "time_ms": 65,
           "angles": {
             "0": -34.0,
@@ -45114,9 +45114,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -61.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": -0.7578125
           },
           "torques": {
             "0": true,
@@ -45145,245 +45145,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ac02c0a070444144afd158110daad8f3",
-          "start_ms": 4299
-        },
-        {
-          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "name": "오뒤무게중심앞(catalog80)",
-          "time_ms": 121,
-          "angles": {
-            "0": -33.662109375,
-            "1": 0.263671875,
-            "2": -9.931640625,
-            "3": 10.0,
-            "4": 18.0,
-            "5": -18.0,
-            "6": 66.796875,
-            "7": -68.115234375,
-            "8": -11.07421875,
-            "9": 3.076171875,
-            "10": 2.109375,
-            "11": -2.8125,
-            "12": 2.373046875,
-            "15": 3.427734375,
-            "16": -1.494140625,
-            "13": -44.912109375,
-            "14": 58.974609375,
-            "17": -26.806640625,
-            "18": 27.421875,
-            "19": 67.8515625,
-            "20": -57.744140625,
-            "21": 3.33984375,
-            "22": -5.2734375
-          },
-          "torques": {
-            "0": true,
-            "1": true,
-            "2": true,
-            "3": true,
-            "4": true,
-            "5": true,
-            "6": true,
-            "7": true,
-            "8": true,
-            "9": true,
-            "10": true,
-            "11": true,
-            "12": true,
-            "15": true,
-            "16": true,
-            "13": true,
-            "14": true,
-            "17": true,
-            "18": true,
-            "19": true,
-            "20": true,
-            "21": true,
-            "22": true
-          },
-          "is_important": false,
-          "lift_early_arrival": true,
-          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "start_ms": 4364,
-          "playback_cycle_end": true
-        },
-        {
-          "frame_id": "f2a7013447cd42f4b5daecd5854a0dd7",
-          "name": "t라인복귀좌오들공",
-          "time_ms": 65,
-          "angles": {
-            "0": -34.0,
-            "1": -0.3515625,
-            "2": -8.4375,
-            "3": 7.55859375,
-            "4": 11.25,
-            "5": -13.271484375,
-            "6": 74.35546875,
-            "7": -76.2890625,
-            "8": -10.546875,
-            "9": 2.4609375,
-            "10": -4.33984375,
-            "11": -3.0,
-            "12": 6.0,
-            "15": -3.0,
-            "16": 5.0,
-            "13": -80.0,
-            "14": 56.0,
-            "17": -56.337890625,
-            "18": 32.0,
-            "19": 55.0,
-            "20": -68.0,
-            "21": 1.7578125,
-            "22": -12.0
-          },
-          "torques": {
-            "0": true,
-            "1": true,
-            "2": true,
-            "3": true,
-            "4": true,
-            "5": true,
-            "6": true,
-            "7": true,
-            "8": true,
-            "9": true,
-            "10": true,
-            "11": true,
-            "12": true,
-            "15": true,
-            "16": true,
-            "13": true,
-            "14": true,
-            "17": true,
-            "18": true,
-            "19": true,
-            "20": true,
-            "21": true,
-            "22": true
-          },
-          "is_important": false,
-          "lift_early_arrival": true,
-          "source_frame_id": "f2a7013447cd42f4b5daecd5854a0dd7",
-          "start_ms": 4569
-        },
-        {
-          "frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
-          "name": "t왼뒤407(45도)",
-          "time_ms": 120,
-          "angles": {
-            "0": -34.0,
-            "1": -0.439453125,
-            "2": -9.228515625,
-            "3": 8.61328125,
-            "4": 10.37109375,
-            "5": -10.1953125,
-            "6": 69.609375,
-            "7": -70.927734375,
-            "8": -11.07421875,
-            "9": 2.63671875,
-            "10": -4.0,
-            "11": 2.0,
-            "12": -2.0,
-            "15": 3.0,
-            "16": -2.0,
-            "13": -59.0,
-            "14": 47.0,
-            "17": -34.453125,
-            "18": 31.904296875,
-            "19": 60.64453125,
-            "20": -74.0,
-            "21": 3.0,
-            "22": -4.5703125
-          },
-          "torques": {
-            "0": true,
-            "1": true,
-            "2": true,
-            "3": true,
-            "4": true,
-            "5": true,
-            "6": true,
-            "7": true,
-            "8": true,
-            "9": true,
-            "10": true,
-            "11": true,
-            "12": true,
-            "15": true,
-            "16": true,
-            "13": true,
-            "14": true,
-            "17": true,
-            "18": true,
-            "19": true,
-            "20": true,
-            "21": true,
-            "22": true
-          },
-          "is_important": false,
-          "lift_early_arrival": true,
-          "source_frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
-          "start_ms": 4634
-        },
-        {
-          "frame_id": "ac02c0a070444144afd158110daad8f3",
-          "name": "t라인복귀좌왼들공",
-          "time_ms": 66,
-          "angles": {
-            "0": -34.0,
-            "1": -0.3515625,
-            "2": -8.4375,
-            "3": 7.55859375,
-            "4": 11.25,
-            "5": -13.271484375,
-            "6": 74.35546875,
-            "7": -76.2890625,
-            "8": -10.546875,
-            "9": 1.4609375,
-            "10": 3.0,
-            "11": -3.0,
-            "12": -3.66015625,
-            "15": -5.0,
-            "16": 4.0,
-            "13": -55.0,
-            "14": 80.0,
-            "17": -29.70703125,
-            "18": 56.337890625,
-            "19": 64.0,
-            "20": -58.0,
-            "21": 12.0,
-            "22": -1.7578125
-          },
-          "torques": {
-            "0": true,
-            "1": true,
-            "2": true,
-            "3": true,
-            "4": true,
-            "5": true,
-            "6": true,
-            "7": true,
-            "8": true,
-            "9": true,
-            "10": true,
-            "11": true,
-            "12": true,
-            "15": true,
-            "16": true,
-            "13": true,
-            "14": true,
-            "17": true,
-            "18": true,
-            "19": true,
-            "20": true,
-            "21": true,
-            "22": true
-          },
-          "is_important": false,
-          "lift_early_arrival": true,
-          "source_frame_id": "ac02c0a070444144afd158110daad8f3",
-          "start_ms": 4839
+          "source_frame_id": "50a0ced479634f6cb2f43f635661ab0c",
+          "start_ms": 4297
         },
         {
           "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
@@ -45442,12 +45205,12 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "start_ms": 4905,
+          "start_ms": 4362,
           "playback_cycle_end": true
         },
         {
-          "frame_id": "f2a7013447cd42f4b5daecd5854a0dd7",
-          "name": "t라인복귀좌오들공",
+          "frame_id": "57d540c0d20748df8eb2014e77b03807",
+          "name": "m라인복귀좌오들45",
           "time_ms": 65,
           "angles": {
             "0": -34.0,
@@ -45460,7 +45223,7 @@
             "7": -76.2890625,
             "8": -10.546875,
             "9": 2.4609375,
-            "10": -4.33984375,
+            "10": -3.33984375,
             "11": -3.0,
             "12": 6.0,
             "15": -3.0,
@@ -45469,9 +45232,9 @@
             "14": 56.0,
             "17": -56.337890625,
             "18": 32.0,
-            "19": 55.0,
+            "19": 60.0,
             "20": -68.0,
-            "21": 1.7578125,
+            "21": -0.2421875,
             "22": -12.0
           },
           "torques": {
@@ -45501,8 +45264,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "f2a7013447cd42f4b5daecd5854a0dd7",
-          "start_ms": 5109
+          "source_frame_id": "57d540c0d20748df8eb2014e77b03807",
+          "start_ms": 4566
         },
         {
           "frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
@@ -45561,11 +45324,11 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
-          "start_ms": 5174
+          "start_ms": 4631
         },
         {
-          "frame_id": "ac02c0a070444144afd158110daad8f3",
-          "name": "t라인복귀좌왼들공",
+          "frame_id": "50a0ced479634f6cb2f43f635661ab0c",
+          "name": "m라인복귀좌왼들45",
           "time_ms": 65,
           "angles": {
             "0": -34.0,
@@ -45588,9 +45351,9 @@
             "17": -29.70703125,
             "18": 56.337890625,
             "19": 64.0,
-            "20": -58.0,
+            "20": -61.0,
             "21": 12.0,
-            "22": -1.7578125
+            "22": -0.7578125
           },
           "torques": {
             "0": true,
@@ -45619,8 +45382,8 @@
           },
           "is_important": false,
           "lift_early_arrival": true,
-          "source_frame_id": "ac02c0a070444144afd158110daad8f3",
-          "start_ms": 5380
+          "source_frame_id": "50a0ced479634f6cb2f43f635661ab0c",
+          "start_ms": 4836
         },
         {
           "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
@@ -45679,7 +45442,244 @@
           "is_important": false,
           "lift_early_arrival": true,
           "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
-          "start_ms": 5445,
+          "start_ms": 4901,
+          "playback_cycle_end": true
+        },
+        {
+          "frame_id": "57d540c0d20748df8eb2014e77b03807",
+          "name": "m라인복귀좌오들45",
+          "time_ms": 65,
+          "angles": {
+            "0": -34.0,
+            "1": -0.3515625,
+            "2": -8.4375,
+            "3": 7.55859375,
+            "4": 11.25,
+            "5": -13.271484375,
+            "6": 74.35546875,
+            "7": -76.2890625,
+            "8": -10.546875,
+            "9": 2.4609375,
+            "10": -3.33984375,
+            "11": -3.0,
+            "12": 6.0,
+            "15": -3.0,
+            "16": 5.0,
+            "13": -80.0,
+            "14": 56.0,
+            "17": -56.337890625,
+            "18": 32.0,
+            "19": 60.0,
+            "20": -68.0,
+            "21": -0.2421875,
+            "22": -12.0
+          },
+          "torques": {
+            "0": true,
+            "1": true,
+            "2": true,
+            "3": true,
+            "4": true,
+            "5": true,
+            "6": true,
+            "7": true,
+            "8": true,
+            "9": true,
+            "10": true,
+            "11": true,
+            "12": true,
+            "15": true,
+            "16": true,
+            "13": true,
+            "14": true,
+            "17": true,
+            "18": true,
+            "19": true,
+            "20": true,
+            "21": true,
+            "22": true
+          },
+          "is_important": false,
+          "lift_early_arrival": true,
+          "source_frame_id": "57d540c0d20748df8eb2014e77b03807",
+          "start_ms": 5106
+        },
+        {
+          "frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
+          "name": "t왼뒤407(45도)",
+          "time_ms": 121,
+          "angles": {
+            "0": -34.0,
+            "1": -0.439453125,
+            "2": -9.228515625,
+            "3": 8.61328125,
+            "4": 10.37109375,
+            "5": -10.1953125,
+            "6": 69.609375,
+            "7": -70.927734375,
+            "8": -11.07421875,
+            "9": 2.63671875,
+            "10": -4.0,
+            "11": 2.0,
+            "12": -2.0,
+            "15": 3.0,
+            "16": -2.0,
+            "13": -59.0,
+            "14": 47.0,
+            "17": -34.453125,
+            "18": 31.904296875,
+            "19": 60.64453125,
+            "20": -74.0,
+            "21": 3.0,
+            "22": -4.5703125
+          },
+          "torques": {
+            "0": true,
+            "1": true,
+            "2": true,
+            "3": true,
+            "4": true,
+            "5": true,
+            "6": true,
+            "7": true,
+            "8": true,
+            "9": true,
+            "10": true,
+            "11": true,
+            "12": true,
+            "15": true,
+            "16": true,
+            "13": true,
+            "14": true,
+            "17": true,
+            "18": true,
+            "19": true,
+            "20": true,
+            "21": true,
+            "22": true
+          },
+          "is_important": false,
+          "lift_early_arrival": true,
+          "source_frame_id": "9dd46dbff1e44d04a6a1a1c18bdb8b7a",
+          "start_ms": 5171
+        },
+        {
+          "frame_id": "50a0ced479634f6cb2f43f635661ab0c",
+          "name": "m라인복귀좌왼들45",
+          "time_ms": 65,
+          "angles": {
+            "0": -34.0,
+            "1": -0.3515625,
+            "2": -8.4375,
+            "3": 7.55859375,
+            "4": 11.25,
+            "5": -13.271484375,
+            "6": 74.35546875,
+            "7": -76.2890625,
+            "8": -10.546875,
+            "9": 1.4609375,
+            "10": 3.0,
+            "11": -3.0,
+            "12": -3.66015625,
+            "15": -5.0,
+            "16": 4.0,
+            "13": -55.0,
+            "14": 80.0,
+            "17": -29.70703125,
+            "18": 56.337890625,
+            "19": 64.0,
+            "20": -61.0,
+            "21": 12.0,
+            "22": -0.7578125
+          },
+          "torques": {
+            "0": true,
+            "1": true,
+            "2": true,
+            "3": true,
+            "4": true,
+            "5": true,
+            "6": true,
+            "7": true,
+            "8": true,
+            "9": true,
+            "10": true,
+            "11": true,
+            "12": true,
+            "15": true,
+            "16": true,
+            "13": true,
+            "14": true,
+            "17": true,
+            "18": true,
+            "19": true,
+            "20": true,
+            "21": true,
+            "22": true
+          },
+          "is_important": false,
+          "lift_early_arrival": true,
+          "source_frame_id": "50a0ced479634f6cb2f43f635661ab0c",
+          "start_ms": 5376
+        },
+        {
+          "frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "name": "오뒤무게중심앞(catalog80)",
+          "time_ms": 121,
+          "angles": {
+            "0": -33.662109375,
+            "1": 0.263671875,
+            "2": -9.931640625,
+            "3": 10.0,
+            "4": 18.0,
+            "5": -18.0,
+            "6": 66.796875,
+            "7": -68.115234375,
+            "8": -11.07421875,
+            "9": 3.076171875,
+            "10": 2.109375,
+            "11": -2.8125,
+            "12": 2.373046875,
+            "15": 3.427734375,
+            "16": -1.494140625,
+            "13": -44.912109375,
+            "14": 58.974609375,
+            "17": -26.806640625,
+            "18": 27.421875,
+            "19": 67.8515625,
+            "20": -57.744140625,
+            "21": 3.33984375,
+            "22": -5.2734375
+          },
+          "torques": {
+            "0": true,
+            "1": true,
+            "2": true,
+            "3": true,
+            "4": true,
+            "5": true,
+            "6": true,
+            "7": true,
+            "8": true,
+            "9": true,
+            "10": true,
+            "11": true,
+            "12": true,
+            "15": true,
+            "16": true,
+            "13": true,
+            "14": true,
+            "17": true,
+            "18": true,
+            "19": true,
+            "20": true,
+            "21": true,
+            "22": true
+          },
+          "is_important": false,
+          "lift_early_arrival": true,
+          "source_frame_id": "5321c30f92e9498f9ad72fc7cb099b39",
+          "start_ms": 5441,
           "playback_cycle_end": true
         }
       ]

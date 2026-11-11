@@ -1,0 +1,11 @@
+{
+  "baseline_total": 1033,
+  "updated_total": 1039,
+  "baseline_failed": 124,
+  "updated_failed": 122,
+  "new_failures": [],
+  "resolved_failures": [
+    "src.mission_control.test.test_goal_region_exit_turns::test_variants_keep_preparation_complete_turns_and_final_support[pc]",
+    "src.mission_control.test.test_goal_region_exit_turns::test_variants_keep_preparation_complete_turns_and_final_support[runtime]"
+  ]
+}
